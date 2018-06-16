@@ -2,6 +2,7 @@ version.py
 # Cython generated file
 # NOTE: manually add new .ccp in the core module
 *.cpp
+*.c
 
 # Build related
 build
