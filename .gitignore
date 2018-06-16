@@ -1,6 +1,6 @@
 version.py
 # Cython generated file
-# NOTE: manually add new .ccp in the core module
+# NOTE: manually add new .c or .ccp in the core module
 *.cpp
 *.c
 
