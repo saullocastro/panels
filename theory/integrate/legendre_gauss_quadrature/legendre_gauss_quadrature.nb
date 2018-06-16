@@ -1,0 +1,193 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 9.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       157,          7]
+NotebookDataLength[      6223,        184]
+NotebookOptionsPosition[      5979,        171]
+NotebookOutlinePosition[      6323,        186]
+CellTagsIndexPosition[      6280,        183]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{
+   RowBox[{"SetDirectory", "[", 
+    RowBox[{"NotebookDirectory", "[", "]"}], "]"}], ";"}], 
+  "\[IndentingNewLine]", 
+  RowBox[{"(*", "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"Taken", " ", 
+     RowBox[{"from", ":", " ", "https", ":"}]}], "//", 
+    RowBox[{
+     RowBox[{
+      RowBox[{
+       RowBox[{"pomax", ".", "github", ".", "io"}], "/", "bezierinfo"}], "/", 
+      "legendre"}], "-", 
+     RowBox[{"gauss", ".", "html"}]}]}], "\[IndentingNewLine]", 
+   "*)"}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"symboliclegendre", "[", 
+    RowBox[{"n_", ",", "x_"}], "]"}], ":=", 
+   RowBox[{"Solve", "[", 
+    RowBox[{
+     RowBox[{"LegendreP", "[", 
+      RowBox[{"n", ",", "x"}], "]"}], "\[Equal]", "0"}], "]"}]}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"legendreprime", "[", 
+    RowBox[{"n_", ",", "a_"}], "]"}], ":=", 
+   RowBox[{
+    RowBox[{"D", "[", 
+     RowBox[{
+      RowBox[{"LegendreP", "[", 
+       RowBox[{"n", ",", "x"}], "]"}], ",", "x"}], "]"}], "/.", 
+    RowBox[{"x", "\[Rule]", "a"}]}]}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{
+    RowBox[{"weights", "[", 
+     RowBox[{"n_", ",", "x_"}], "]"}], ":=", 
+    RowBox[{"2", "/", 
+     RowBox[{"(", 
+      RowBox[{
+       RowBox[{"(", 
+        RowBox[{"1", "-", 
+         RowBox[{"x", "^", "2"}]}], ")"}], " ", 
+       RowBox[{
+        RowBox[{"legendreprime", "[", 
+         RowBox[{"n", ",", "x"}], "]"}], "^", "2"}]}], ")"}]}]}], ";"}], "\n",
+   "\[IndentingNewLine]", 
+  RowBox[{"(*", 
+   RowBox[{
+   "how", " ", "many", " ", "terms", " ", "should", " ", "be", " ", 
+    "generated"}], "*)"}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"h", "=", "64"}], ";"}], "\n", "\[IndentingNewLine]", 
+  RowBox[{"(*", 
+   RowBox[{"what", " ", "numerical", " ", "precision", " ", "is", " ", 
+    RowBox[{"desired", "?"}]}], "*)"}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"precision", "=", "54"}], ";"}], "\[IndentingNewLine]"}], "\n", 
+ RowBox[{
+  RowBox[{"str", "=", 
+   RowBox[{
+   "OpenWrite", "[", "\"\<out_legendre_gauss_quadrature_points.txt\>\"", 
+    "]"}]}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"Do", "[", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"Write", "[", "str", "]"}], ";", 
+     RowBox[{"Write", "[", 
+      RowBox[{"str", ",", 
+       RowBox[{"\"\<n = \>\"", "<>", 
+        RowBox[{"ToString", "[", "n", "]"}]}]}], "]"}], ";", 
+     "\[IndentingNewLine]", 
+     RowBox[{"nlist", "=", 
+      RowBox[{"symboliclegendre", "[", 
+       RowBox[{"n", ",", "x"}], "]"}]}], ";", "\[IndentingNewLine]", 
+     RowBox[{"xnlist", "=", 
+      RowBox[{"x", "/.", "nlist"}]}], ";", "\[IndentingNewLine]", 
+     RowBox[{"Do", "[", 
+      RowBox[{
+       RowBox[{"Write", "[", 
+        RowBox[{"str", ",", 
+         RowBox[{"FortranForm", "[", 
+          RowBox[{"Re", "[", 
+           RowBox[{"N", "[", 
+            RowBox[{
+             RowBox[{"Part", "[", 
+              RowBox[{"xnlist", ",", "i"}], "]"}], ",", "precision"}], "]"}], 
+           "]"}], "]"}]}], "]"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"i", ",", 
+         RowBox[{"Length", "[", "xnlist", "]"}]}], "}"}]}], "]"}], ";"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"n", ",", "2", ",", "h"}], "}"}]}], "]"}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"Close", "[", "str", "]"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"str", "=", 
+   RowBox[{
+   "OpenWrite", "[", "\"\<out_legendre_gauss_quadrature_weights.txt\>\"", 
+    "]"}]}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"Do", "[", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"Write", "[", "str", "]"}], ";", 
+     RowBox[{"Write", "[", 
+      RowBox[{"str", ",", 
+       RowBox[{"\"\<n = \>\"", "<>", 
+        RowBox[{"ToString", "[", "n", "]"}]}]}], "]"}], ";", 
+     "\[IndentingNewLine]", 
+     RowBox[{"slist", ":=", 
+      RowBox[{"symboliclegendre", "[", 
+       RowBox[{"n", ",", "x"}], "]"}]}], ";", "\[IndentingNewLine]", 
+     RowBox[{"xslist", "=", 
+      RowBox[{"x", "/.", "slist"}]}], ";", "\[IndentingNewLine]", 
+     RowBox[{"Do", "[", 
+      RowBox[{
+       RowBox[{"Write", "[", 
+        RowBox[{"str", ",", 
+         RowBox[{"FortranForm", "[", 
+          RowBox[{"Re", "[", 
+           RowBox[{"N", "[", 
+            RowBox[{
+             RowBox[{"weights", "[", 
+              RowBox[{"n", ",", 
+               RowBox[{"Part", "[", 
+                RowBox[{"xslist", ",", "i"}], "]"}]}], "]"}], ",", 
+             "precision"}], "]"}], "]"}], "]"}]}], "]"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"i", ",", 
+         RowBox[{"Length", "[", "xslist", "]"}]}], "}"}]}], "]"}], ";"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"n", ",", "2", ",", "h"}], "}"}]}], "]"}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"Close", "[", "str", "]"}], ";"}]}], "Input",
+ CellChangeTimes->{{3.6622254249642725`*^9, 3.6622254544894238`*^9}, {
+  3.6622257838858275`*^9, 3.6622257951430607`*^9}, {3.662230916509838*^9, 
+  3.662230975972781*^9}, {3.6622310254439573`*^9, 3.6622310297084613`*^9}, {
+  3.6622312493586025`*^9, 3.6622312567102427`*^9}, {3.662231397232332*^9, 
+  3.662231507945204*^9}, {3.6622315458012857`*^9, 3.662231667465903*^9}, {
+  3.662231703592557*^9, 3.662231734866238*^9}, {3.6622318016893215`*^9, 
+  3.662231804758174*^9}, {3.6622318754862733`*^9, 3.6622318808210597`*^9}, {
+  3.662231964613829*^9, 3.662232070503687*^9}, {3.662232154283801*^9, 
+  3.662232191662487*^9}, {3.662232228587617*^9, 3.6622322340484533`*^9}}]
+},
+WindowSize->{707, 600},
+WindowMargins->{{Automatic, 22}, {Automatic, -7}},
+FrontEndVersion->"9.0 for Microsoft Windows (64-bit) (January 25, 2013)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[557, 20, 5418, 149, 592, "Input"]
+}
+]
+*)
+
+(* End of internal cache information *)

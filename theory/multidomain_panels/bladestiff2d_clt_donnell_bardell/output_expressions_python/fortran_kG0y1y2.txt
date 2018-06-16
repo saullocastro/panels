@@ -1,0 +1,6 @@
+# kG0y1y2_11
+# kG0y1y2_11_num=1
+c += 1
+kG0y1y2r[c] = row+2
+kG0y1y2c[c] = col+2
+kG0y1y2v[c] += Nxx*b*fAwxi*fBwxi*gAw*gBw/a + Nxy*(fAw*fBwxi*gAweta*gBw + fAwxi*fBw*gAw*gBweta) + Nyy*a*fAw*fBw*gAweta*gBweta/b

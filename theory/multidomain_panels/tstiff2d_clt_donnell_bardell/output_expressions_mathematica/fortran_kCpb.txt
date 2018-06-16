@@ -1,0 +1,4 @@
+List(List(-(a*b*c1*fAu*gAu*kt*pBu*qBu)/4.,0,0),
+  List(0,-(a*b*c1*fAv*gAv*kt*pBv*qBv)/4.,0),
+  List(-(b*c1*dpb*fAwxi*gAw*kt*pBu*qBu)/2.,
+   -(a*c1*dpb*fAw*gAweta*kt*pBv*qBv)/2.,-(a*b*c1*fAw*gAw*kt*pBw*qBw)/4.))

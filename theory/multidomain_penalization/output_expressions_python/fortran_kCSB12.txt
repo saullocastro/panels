@@ -1,0 +1,22 @@
+# kCSB12_11
+# kCSB12_11_num=5
+c += 1
+kCSB12r[c] = row+0
+kCSB12c[c] = col+0
+kCSB12v[c] += -0.25*a1*b1*c1*f1Au*f2Bu*g1Au*g2Bu*kt
+c += 1
+kCSB12r[c] = row+1
+kCSB12c[c] = col+1
+kCSB12v[c] += -0.25*a1*b1*c1*f1Av*f2Bv*g1Av*g2Bv*kt
+c += 1
+kCSB12r[c] = row+2
+kCSB12c[c] = col+0
+kCSB12v[c] += -0.5*b1*c1*dsb*f1Awxi*f2Bu*g1Aw*g2Bu*kt
+c += 1
+kCSB12r[c] = row+2
+kCSB12c[c] = col+1
+kCSB12v[c] += -0.5*a1*c1*dsb*f1Aw*f2Bv*g1Aweta*g2Bv*kt
+c += 1
+kCSB12r[c] = row+2
+kCSB12c[c] = col+2
+kCSB12v[c] += -0.25*a1*b1*c1*f1Aw*f2Bw*g1Aw*g2Bw*kt

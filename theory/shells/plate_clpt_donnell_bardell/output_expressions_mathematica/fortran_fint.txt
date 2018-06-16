@@ -1,0 +1,6 @@
+List((a*b*((2*fAuxi*gAu*Nxx)/a + (2*fAu*gAueta*Nxy)/b))/4.,
+  (a*b*((2*fAvxi*gAv*Nxy)/a + (2*fAv*gAveta*Nyy)/b))/4.,
+  (a*b*((-4*fAwxixi*gAw*Mxx)/a**2 - (8*fAwxi*gAweta*Mxy)/(a*b) - 
+       (4*fAw*gAwetaeta*Myy)/b**2 + (4*fAw*gAweta*Nyy*weta)/b**2 + 
+       (4*fAwxi*gAw*Nxx*wxi)/a**2 + 
+       (4*Nxy*(fAwxi*gAw*weta + fAw*gAweta*wxi))/(a*b)))/4.)

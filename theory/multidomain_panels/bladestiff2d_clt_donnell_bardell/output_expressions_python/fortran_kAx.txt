@@ -1,0 +1,6 @@
+# kAx_11
+# kAx_11_num=1
+c += 1
+kAxr[c] = row+2
+kAxc[c] = col+2
+kAxv[c] += -0.25*a*b*(fAw*fBw*gAw*gBw*gamma + 2*beta*fAwxi*fBw*gAw*gBw/a)

@@ -1,0 +1,6 @@
+# kG0f_11
+# kG0f_11_num=1
+c += 1
+kG0fr[c] = row+2
+kG0fc[c] = col+2
+kG0fv[c] += 2*Fx*fAwxi*fBwxi*gAw*gBw/a

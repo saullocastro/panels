@@ -1,0 +1,2 @@
+List(List(0,0,0),List(0,0,0),List(0,0,
+   -(a*b*((2*beta*fAwxi*fBw*gAw*gBw)/a + fAw*fBw*gamma*gAw*gBw))/4.))

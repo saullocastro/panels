@@ -1,0 +1,6 @@
+# kG_11
+# kG_11_num=1
+c += 1
+kGr[c] = row+2
+kGc[c] = col+2
+kGv[c] += Nxx*b*fAwxi*fBwxi*gAw*gBw/a + Nxy*(fAw*fBwxi*gAweta*gBw + fAwxi*fBw*gAw*gBweta) + Nyy*a*fAw*fBw*gAweta*gBweta/b

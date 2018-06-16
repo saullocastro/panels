@@ -1,0 +1,6 @@
+# kAy_11
+# kAy_11_num=1
+c += 1
+kAyr[c] = row+2
+kAyc[c] = col+2
+kAyv[c] += -0.5*a*beta*fAw*fBw*gAweta*gBw

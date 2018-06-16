@@ -1,0 +1,14 @@
+# fint_11
+# fint_11_num=3
+c += 1
+fintr[c] = row+0
+fintc[c] = col+0
+fintv[c] += 0.25*a*b*(2*Nxx*fAuxi*gAu/a + 2*Nxy*fAu*gAueta/b)
+c += 1
+fintr[c] = row+0
+fintc[c] = col+1
+fintv[c] += 0.25*a*b*(2*Nxy*fAvxi*gAv/a + 2*Nyy*fAv*gAveta/b)
+c += 1
+fintr[c] = row+0
+fintc[c] = col+2
+fintv[c] += 0.25*a*b*(-4*Mxx*fAwxixi*gAw/(a*a) - 8*Mxy*fAwxi*gAweta/(a*b) - 4*Myy*fAw*gAwetaeta/(b*b) + 4*Nxx*fAwxi*gAw*wxi/(a*a) + 4*Nxy*(fAw*gAweta*wxi + fAwxi*gAw*weta)/(a*b) + 4*Nyy*fAw*gAweta*weta/(b*b))

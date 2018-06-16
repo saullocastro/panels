@@ -1,0 +1,194 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 9.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       157,          7]
+NotebookDataLength[      6276,        185]
+NotebookOptionsPosition[      5769,        164]
+NotebookOutlinePosition[      6112,        179]
+CellTagsIndexPosition[      6069,        176]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[BoxData[{
+ RowBox[{"Print", "[", "\"\<Panel\>\"", "]"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"u", "=", 
+   RowBox[{"u0", "+", 
+    RowBox[{"z", "*", "phi"}]}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"Collect", "[", 
+   RowBox[{
+    RowBox[{"Integrate", "[", 
+     RowBox[{
+      RowBox[{"pho", "*", "u", "*", "u"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"z", ",", 
+        RowBox[{
+         RowBox[{"-", "h"}], "/", "2"}], ",", 
+        RowBox[{"h", "/", "2"}]}], "}"}]}], "]"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"h", ",", "u0", ",", "phi"}], "}"}], ",", "FullSimplify"}], 
+   "]"}], "\[IndentingNewLine]", 
+  "\[IndentingNewLine]"}], "\[IndentingNewLine]", 
+ RowBox[{"Print", "[", "\"\<Stiffener Base\>\"", "]"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"Collect", "[", 
+   RowBox[{
+    RowBox[{"Integrate", "[", 
+     RowBox[{
+      RowBox[{"pho", "*", "u", "*", "u"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"z", ",", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"-", "h"}], "/", "2"}], "-", "hb"}], ",", 
+        RowBox[{
+         RowBox[{"-", "h"}], "/", "2"}]}], "}"}]}], "]"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"u0", ",", "phi"}], "}"}], ",", "FullSimplify"}], "]"}], 
+  "\[IndentingNewLine]", "\[IndentingNewLine]"}], "\[IndentingNewLine]", 
+ RowBox[{"Print", "[", "\"\<Stiffener Flange\>\"", 
+  "]"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"Collect", "[", 
+   RowBox[{
+    RowBox[{"Integrate", "[", 
+     RowBox[{
+      RowBox[{"pho", "*", "u", "*", "u"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"z", ",", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"-", "h"}], "/", "2"}], "-", "hb", "-", "bf"}], ",", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"-", "h"}], "/", "2"}], "-", "hb"}]}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"y", ",", 
+        RowBox[{
+         RowBox[{"-", "hf"}], "/", "2"}], ",", 
+        RowBox[{"hf", "/", "2"}]}], "}"}]}], "]"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"u0", ",", "phi"}], "}"}], ",", "FullSimplify"}], "]"}], 
+  "\[IndentingNewLine]", "\[IndentingNewLine]", 
+  "\[IndentingNewLine]"}], "\[IndentingNewLine]"}], "Input",
+ CellChangeTimes->{{3.652312113651209*^9, 3.652312164663289*^9}, {
+   3.6523121951518526`*^9, 3.6523123838191266`*^9}, {3.6523125391488276`*^9, 
+   3.652312543918201*^9}, {3.6523127927594194`*^9, 3.6523127936730657`*^9}, {
+   3.652337420299201*^9, 3.6523374725689335`*^9}, 3.6523379969787374`*^9, {
+   3.6523380316197042`*^9, 3.6523380484650154`*^9}, {3.654065749211462*^9, 
+   3.6540657497818756`*^9}, {3.654065886723509*^9, 3.6540658892292795`*^9}, {
+   3.654065920907671*^9, 3.6540660529359465`*^9}, {3.6540660949986973`*^9, 
+   3.6540661673648324`*^9}, {3.6540662791218863`*^9, 3.654066290465905*^9}, {
+   3.654066514046012*^9, 3.6540665357745485`*^9}, {3.6540665713206654`*^9, 
+   3.654066575703789*^9}, {3.6540666508237996`*^9, 3.6540666510309334`*^9}, {
+   3.6540670557931294`*^9, 3.654067055973257*^9}, {3.6540670922680016`*^9, 
+   3.65406709250215*^9}, {3.6540678949946313`*^9, 3.6540678973462915`*^9}}],
+
+Cell[BoxData["\<\"Panel\"\>"], "Print",
+ CellChangeTimes->{3.654067910733755*^9, 3.654071839015831*^9}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   FractionBox["1", "12"], " ", 
+   SuperscriptBox["h", "3"], " ", 
+   SuperscriptBox["phi", "2"], " ", "pho"}], "+", 
+  RowBox[{"h", " ", "pho", " ", 
+   SuperscriptBox["u0", "2"]}]}]], "Output",
+ CellChangeTimes->{3.654067910756785*^9, 3.6540718391199045`*^9}],
+
+Cell[BoxData["\<\"Stiffener Base\"\>"], "Print",
+ CellChangeTimes->{3.654067910733755*^9, 3.654071839120907*^9}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   FractionBox["1", "12"], " ", "hb", " ", 
+   RowBox[{"(", 
+    RowBox[{
+     RowBox[{"3", " ", 
+      SuperscriptBox["h", "2"]}], "+", 
+     RowBox[{"6", " ", "h", " ", "hb"}], "+", 
+     RowBox[{"4", " ", 
+      SuperscriptBox["hb", "2"]}]}], ")"}], " ", 
+   SuperscriptBox["phi", "2"], " ", "pho"}], "-", 
+  RowBox[{"hb", " ", 
+   RowBox[{"(", 
+    RowBox[{"h", "+", "hb"}], ")"}], " ", "phi", " ", "pho", " ", "u0"}], "+", 
+  RowBox[{"hb", " ", "pho", " ", 
+   SuperscriptBox["u0", "2"]}]}]], "Output",
+ CellChangeTimes->{3.654067910756785*^9, 3.6540718392720137`*^9}],
+
+Cell[BoxData["\<\"Stiffener Flange\"\>"], "Print",
+ CellChangeTimes->{3.654067910733755*^9, 3.654071839273015*^9}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   FractionBox["1", "12"], " ", "bf", " ", 
+   RowBox[{"(", 
+    RowBox[{
+     RowBox[{"4", " ", 
+      SuperscriptBox["bf", "2"]}], "+", 
+     RowBox[{"6", " ", "bf", " ", 
+      RowBox[{"(", 
+       RowBox[{"h", "+", 
+        RowBox[{"2", " ", "hb"}]}], ")"}]}], "+", 
+     RowBox[{"3", " ", 
+      SuperscriptBox[
+       RowBox[{"(", 
+        RowBox[{"h", "+", 
+         RowBox[{"2", " ", "hb"}]}], ")"}], "2"]}]}], ")"}], " ", "hf", " ", 
+   SuperscriptBox["phi", "2"], " ", "pho"}], "-", 
+  RowBox[{"bf", " ", 
+   RowBox[{"(", 
+    RowBox[{"bf", "+", "h", "+", 
+     RowBox[{"2", " ", "hb"}]}], ")"}], " ", "hf", " ", "phi", " ", "pho", 
+   " ", "u0"}], "+", 
+  RowBox[{"bf", " ", "hf", " ", "pho", " ", 
+   SuperscriptBox["u0", "2"]}]}]], "Output",
+ CellChangeTimes->{3.654067910756785*^9, 3.654071839471155*^9}]
+}, Open  ]]
+},
+WindowSize->{1532, 727},
+WindowMargins->{{Automatic, 3}, {Automatic, 0}},
+FrontEndVersion->"9.0 for Microsoft Windows (64-bit) (January 25, 2013)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[579, 22, 3069, 74, 312, "Input"],
+Cell[3651, 98, 103, 1, 23, "Print"],
+Cell[3757, 101, 297, 8, 46, "Output"],
+Cell[4057, 111, 112, 1, 23, "Print"],
+Cell[4172, 114, 608, 17, 46, "Output"],
+Cell[4783, 133, 114, 1, 23, "Print"],
+Cell[4900, 136, 853, 25, 46, "Output"]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)

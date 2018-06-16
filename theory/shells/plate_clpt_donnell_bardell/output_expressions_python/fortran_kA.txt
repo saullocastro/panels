@@ -1,0 +1,6 @@
+# kA_11
+# kA_11_num=1
+c += 1
+kAr[c] = row+2
+kAc[c] = col+2
+kAv[c] += -0.5*b*beta*fAwxi*fBw*gAw*gBw

@@ -1,0 +1,8 @@
+List(List((2*bf*E1*fAuxi*fBuxi*gAu*gBu)/a,0,
+   (a*bf*((8*df*E1*fAuxi*fBwxixi*gAu*gBw)/a**3 - 
+        (8*fAuxi*fBwxi*gAu*gBweta*S1)/(a**2*b)))/2.),List(0,0,0),
+  List(bf*fBuxi*gBu*((4*df*E1*fAwxixi*gAw)/a**2 - (4*fAwxi*gAweta*S1)/(a*b)),
+   0,(a*bf*((-4*fBwxi*gBweta*((-4*fAwxi*gAweta*Jxx)/(a*b) + 
+             (4*df*fAwxixi*gAw*S1)/a**2))/(a*b) - 
+        (4*fBwxixi*gBw*((-4*(df**2*E1 + F1)*fAwxixi*gAw)/a**2 + 
+             (4*df*fAwxi*gAweta*S1)/(a*b)))/a**2))/2.))

@@ -1,0 +1,14 @@
+# kCff_11
+# kCff_11_num=3
+c += 1
+kCffr[c] = row+0
+kCffc[c] = col+0
+kCffv[c] += 0.5*a*kt*rAu*rBu*sAu*sBu
+c += 1
+kCffr[c] = row+1
+kCffc[c] = col+1
+kCffv[c] += 0.5*a*kt*rAv*rBv*sAv*sBv
+c += 1
+kCffr[c] = row+2
+kCffc[c] = col+2
+kCffv[c] += 0.5*a*(kt*rAw*rBw*sAw*sBw + 4*kr*rAw*rBw*sAweta*sBweta/(bf*bf))

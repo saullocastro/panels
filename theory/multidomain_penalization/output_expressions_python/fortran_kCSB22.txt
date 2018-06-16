@@ -1,0 +1,14 @@
+# kCSB22_11
+# kCSB22_11_num=3
+c += 1
+kCSB22r[c] = row+0
+kCSB22c[c] = col+0
+kCSB22v[c] += 0.25*a1*b1*c1*f2Au*f2Bu*g2Au*g2Bu*kt
+c += 1
+kCSB22r[c] = row+1
+kCSB22c[c] = col+1
+kCSB22v[c] += 0.25*a1*b1*c1*f2Av*f2Bv*g2Av*g2Bv*kt
+c += 1
+kCSB22r[c] = row+2
+kCSB22c[c] = col+2
+kCSB22v[c] += 0.25*a1*b1*c1*f2Aw*f2Bw*g2Aw*g2Bw*kt

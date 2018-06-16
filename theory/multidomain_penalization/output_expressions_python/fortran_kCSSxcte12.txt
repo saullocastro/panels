@@ -1,0 +1,14 @@
+# kCSSxcte12_11
+# kCSSxcte12_11_num=3
+c += 1
+kCSSxcte12r[c] = row+0
+kCSSxcte12c[c] = col+0
+kCSSxcte12v[c] += -0.5*b1*f1Au*f2Bu*g1Au*g2Bu*kt
+c += 1
+kCSSxcte12r[c] = row+1
+kCSSxcte12c[c] = col+1
+kCSSxcte12v[c] += -0.5*b1*f1Av*f2Bv*g1Av*g2Bv*kt
+c += 1
+kCSSxcte12r[c] = row+2
+kCSSxcte12c[c] = col+2
+kCSSxcte12v[c] += -0.5*b1*kt*(f1Aw*f2Bw*g1Aw*g2Bw + 4*f1Awxi*f2Bwxi*g1Aw*g2Bw*kr/(a1*a2*kt))

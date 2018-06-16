@@ -1,0 +1,22 @@
+# kCbbpb_11
+# kCbbpb_11_num=5
+c += 1
+kCbbpbr[c] = row+0
+kCbbpbc[c] = col+0
+kCbbpbv[c] += 0.25*a*b*c1*kt*(4*pAu*pBu*qAueta*qBueta/(bb*bb) + 4*pAuxi*pBuxi*qAu*qBu/(a*a))
+c += 1
+kCbbpbr[c] = row+0
+kCbbpbc[c] = col+1
+kCbbpbv[c] += b*c1*kt*pAu*pBvxi*qAueta*qBv/bb
+c += 1
+kCbbpbr[c] = row+1
+kCbbpbc[c] = col+0
+kCbbpbv[c] += b*c1*kt*pAvxi*pBu*qAv*qBueta/bb
+c += 1
+kCbbpbr[c] = row+1
+kCbbpbc[c] = col+1
+kCbbpbv[c] += 0.25*a*b*c1*kt*(4*pAv*pBv*qAveta*qBveta/(bb*bb) + 4*pAvxi*pBvxi*qAv*qBv/(a*a))
+c += 1
+kCbbpbr[c] = row+2
+kCbbpbc[c] = col+2
+kCbbpbv[c] += 0.25*a*b*c1*kt*(16*kr*pAw*pBw*qAwetaeta*qBwetaeta/((bb*bb*bb*bb)*kt) + 16*kr*pAwxi*pBwxi*qAweta*qBweta/((a*a)*(bb*bb)*kt) + 16*kr*pAwxixi*pBwxixi*qAw*qBw/((a*a*a*a)*kt))

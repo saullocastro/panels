@@ -1,0 +1,1 @@
+List(List(0,0,0),List(0,0,0),List(0,0,-(a*beta*fAw*fBw*gAweta*gBw)/2.))

@@ -1,0 +1,14 @@
+# kCss_11
+# kCss_11_num=3
+c += 1
+kCssr[c] = row+0
+kCssc[c] = col+0
+kCssv[c] += 0.5*a*fAu*fBu*gAu*gBu*kt
+c += 1
+kCssr[c] = row+1
+kCssc[c] = col+1
+kCssv[c] += 0.5*a*fAv*fBv*gAv*gBv*kt
+c += 1
+kCssr[c] = row+2
+kCssc[c] = col+2
+kCssv[c] += 0.5*a*(fAw*fBw*gAw*gBw*kt + 4*fAw*fBw*gAweta*gBweta*kr/(b*b))

@@ -1,0 +1,3 @@
+List(List(0,0,0),List(0,0,0),List(0,0,
+   (bf*Nxx*rAwxi*rBwxi*sAw*sBw)/a + (a*Nyy*rAw*rBw*sAweta*sBweta)/bf + 
+    Nxy*(rAw*rBwxi*sAweta*sBw + rAwxi*rBw*sAw*sBweta)))

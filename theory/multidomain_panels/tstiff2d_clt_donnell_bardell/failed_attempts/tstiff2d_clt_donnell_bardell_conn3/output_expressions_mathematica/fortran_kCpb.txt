@@ -1,0 +1,8 @@
+List(List(-(a*b*c1*kt*((4*fAuxi*gAu*pBuxi*qBu)/a**2 + 
+         (4*fAu*gAueta*pBu*qBueta)/(b*bb)))/4.,-(c1*fAu*gAueta*kt*pBvxi*qBv),
+   0),List(-((b*c1*fAvxi*gAv*kt*pBu*qBueta)/bb),
+   -(a*b*c1*kt*((4*fAvxi*gAv*pBvxi*qBv)/a**2 + 
+         (4*fAv*gAveta*pBv*qBveta)/(b*bb)))/4.,0),
+  List(0,0,-(a*b*c1*kt*((16*fAwxixi*gAw*kr*pBwxixi*qBw)/(a**4*kt) + 
+         (16*fAwxi*gAweta*kr*pBwxi*qBweta)/(a**2*b*bb*kt) + 
+         (16*fAw*gAwetaeta*kr*pBw*qBwetaeta)/(b**2*bb**2*kt)))/4.))

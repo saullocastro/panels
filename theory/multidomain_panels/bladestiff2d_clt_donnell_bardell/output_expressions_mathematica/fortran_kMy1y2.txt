@@ -1,0 +1,5 @@
+List(List((a*b*fAu*fBu*gAu*gBu*h*mu)/4.,0,(b*d*fAu*fBwxi*gAu*gBw*h*mu)/2.),
+  List(0,(a*b*fAv*fBv*gAv*gBv*h*mu)/4.,(a*d*fAv*fBw*gAv*gBweta*h*mu)/2.),
+  List((b*d*fAwxi*fBu*gAw*gBu*h*mu)/2.,(a*d*fAw*fBv*gAweta*gBv*h*mu)/2.,
+   (a*b*h*(fAw*fBw*gAw*gBw + (4*fAwxi*fBwxi*gAw*gBw*(d**2 + h**2/12.))/
+         a**2 + (4*fAw*fBw*gAweta*gBweta*(d**2 + h**2/12.))/b**2)*mu)/4.))

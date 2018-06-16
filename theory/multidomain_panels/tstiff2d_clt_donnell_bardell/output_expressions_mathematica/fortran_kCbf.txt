@@ -1,0 +1,3 @@
+List(List(-(a*kt*pAu*qAu*rBu*sBu)/2.,0,0),
+  List(0,0,-(a*kt*pAv*qAv*rBw*sBw)/2.),
+  List(0,(a*kt*pAw*qAw*rBv*sBv)/2.,(-2*a*kr*pAw*qAweta*rBw*sBweta)/(bb*bf)))

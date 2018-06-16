@@ -1,0 +1,31 @@
+List(List((A11*b*fAuxi*fBuxi*gAu*gBu)/a + (a*A66*fAu*fBu*gAueta*gBueta)/b + 
+    A16*(fAu*fBuxi*gAueta*gBu + fAuxi*fBu*gAu*gBueta),
+   (A16*b*fAuxi*fBvxi*gAu*gBv)/a + A66*fAu*fBvxi*gAueta*gBv + 
+    A12*fAuxi*fBv*gAu*gBveta + (a*A26*fAu*fBv*gAueta*gBveta)/b,
+   (-2*b*B11*fAuxi*fBwxixi*gAu*gBw)/a**2 - 
+    (4*B66*fAu*fBwxi*gAueta*gBweta)/b - 
+    (2*B16*(fAu*fBwxixi*gAueta*gBw + 2*fAuxi*fBwxi*gAu*gBweta))/a - 
+    (2*B12*fAuxi*fBw*gAu*gBwetaeta)/b - 
+    (2*a*B26*fAu*fBw*gAueta*gBwetaeta)/b**2),
+  List((A16*b*fAvxi*fBuxi*gAv*gBu)/a + A12*fAv*fBuxi*gAveta*gBu + 
+    A66*fAvxi*fBu*gAv*gBueta + (a*A26*fAv*fBu*gAveta*gBueta)/b,
+   (A66*b*fAvxi*fBvxi*gAv*gBv)/a + (a*A22*fAv*fBv*gAveta*gBveta)/b + 
+    A26*(fAv*fBvxi*gAveta*gBv + fAvxi*fBv*gAv*gBveta),
+   (-2*b*B16*fAvxi*fBwxixi*gAv*gBw)/a**2 - 
+    (2*B12*fAv*fBwxixi*gAveta*gBw)/a - (4*B66*fAvxi*fBwxi*gAv*gBweta)/a - 
+    (2*a*B22*fAv*fBw*gAveta*gBwetaeta)/b**2 - 
+    (2*B26*(2*fAv*fBwxi*gAveta*gBweta + fAvxi*fBw*gAv*gBwetaeta))/b),
+  List((-2*b*B11*fAwxixi*fBuxi*gAw*gBu)/a**2 - 
+    (2*B12*fAw*fBuxi*gAwetaeta*gBu)/b - (4*B66*fAwxi*fBu*gAweta*gBueta)/b - 
+    (2*a*B26*fAw*fBu*gAwetaeta*gBueta)/b**2 - 
+    (2*B16*(2*fAwxi*fBuxi*gAweta*gBu + fAwxixi*fBu*gAw*gBueta))/a,
+   (-2*b*B16*fAwxixi*fBvxi*gAw*gBv)/a**2 - 
+    (4*B66*fAwxi*fBvxi*gAweta*gBv)/a - (2*B12*fAwxixi*fBv*gAw*gBveta)/a - 
+    (2*a*B22*fAw*fBv*gAwetaeta*gBveta)/b**2 - 
+    (2*B26*(fAw*fBvxi*gAwetaeta*gBv + 2*fAwxi*fBv*gAweta*gBveta))/b,
+   (4*b*D11*fAwxixi*fBwxixi*gAw*gBw)/a**3 + 
+    (16*D66*fAwxi*fBwxi*gAweta*gBweta)/(a*b) + 
+    (8*D16*(fAwxi*fBwxixi*gAweta*gBw + fAwxixi*fBwxi*gAw*gBweta))/a**2 + 
+    (4*a*D22*fAw*fBw*gAwetaeta*gBwetaeta)/b**3 + 
+    (4*D12*(fAw*fBwxixi*gAwetaeta*gBw + fAwxixi*fBw*gAw*gBwetaeta))/(a*b) + 
+    (8*D26*(fAw*fBwxi*gAwetaeta*gBweta + fAwxi*fBw*gAweta*gBwetaeta))/b**2))

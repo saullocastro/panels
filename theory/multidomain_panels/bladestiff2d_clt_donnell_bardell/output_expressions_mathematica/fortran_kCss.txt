@@ -1,0 +1,2 @@
+List(List((a*fAu*fBu*gAu*gBu*kt)/2.,0,0),List(0,(a*fAv*fBv*gAv*gBv*kt)/2.,0),
+  List(0,0,(a*((4*fAw*fBw*gAweta*gBweta*kr)/b**2 + fAw*fBw*gAw*gBw*kt))/2.))

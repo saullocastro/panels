@@ -1,0 +1,1 @@
+List(List(0,0,0),List(0,0,0),List(0,0,(2*fAwxi*fBwxi*Fx*gAw*gBw)/a))

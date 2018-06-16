@@ -1,0 +1,6 @@
+# kG0f_11
+# kG0f_11_num=1
+c += 1
+kG0fr[c] = row+2
+kG0fc[c] = col+2
+kG0fv[c] += Nxx*bf*rAwxi*rBwxi*sAw*sBw/a + Nxy*(rAw*rBwxi*sAweta*sBw + rAwxi*rBw*sAw*sBweta) + Nyy*a*rAw*rBw*sAweta*sBweta/bf

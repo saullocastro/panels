@@ -1,0 +1,18 @@
+# kCBFycte12_11
+# kCBFycte12_11_num=4
+c += 1
+kCBFycte12r[c] = row+0
+kCBFycte12c[c] = col+0
+kCBFycte12v[c] += -0.5*a1*f1Au*f2Bu*g1Au*g2Bu*kt
+c += 1
+kCBFycte12r[c] = row+1
+kCBFycte12c[c] = col+2
+kCBFycte12v[c] += -0.5*a1*f1Av*f2Bw*g1Av*g2Bw*kt
+c += 1
+kCBFycte12r[c] = row+2
+kCBFycte12c[c] = col+1
+kCBFycte12v[c] += 0.5*a1*f1Aw*f2Bv*g1Aw*g2Bv*kt
+c += 1
+kCBFycte12r[c] = row+2
+kCBFycte12c[c] = col+2
+kCBFycte12v[c] += -2*a1*f1Aw*f2Bw*g1Aweta*g2Bweta*kr/(b1*b2)

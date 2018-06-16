@@ -1,0 +1,14 @@
+# kCpp_11
+# kCpp_11_num=3
+c += 1
+kCppr[c] = row+0
+kCppc[c] = col+0
+kCppv[c] += 0.25*a*b*fAu*fBu*gAu*gBu*kt
+c += 1
+kCppr[c] = row+1
+kCppc[c] = col+1
+kCppv[c] += 0.25*a*b*fAv*fBv*gAv*gBv*kt
+c += 1
+kCppr[c] = row+2
+kCppc[c] = col+2
+kCppv[c] += 0.25*a*b*kt*(fAw*fBw*gAw*gBw + 4*fAw*fBw*gAweta*gBweta*kr/((b*b)*kt) + 4*fAwxi*fBwxi*gAw*gBw*kr/((a*a)*kt))

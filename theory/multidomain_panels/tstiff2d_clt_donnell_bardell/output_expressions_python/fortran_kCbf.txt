@@ -1,0 +1,18 @@
+# kCbf_11
+# kCbf_11_num=4
+c += 1
+kCbfr[c] = row+0
+kCbfc[c] = col+0
+kCbfv[c] += -0.5*a*kt*pAu*qAu*rBu*sBu
+c += 1
+kCbfr[c] = row+1
+kCbfc[c] = col+2
+kCbfv[c] += -0.5*a*kt*pAv*qAv*rBw*sBw
+c += 1
+kCbfr[c] = row+2
+kCbfc[c] = col+1
+kCbfv[c] += 0.5*a*kt*pAw*qAw*rBv*sBv
+c += 1
+kCbfr[c] = row+2
+kCbfc[c] = col+2
+kCbfv[c] += -2*a*kr*pAw*qAweta*rBw*sBweta/(bb*bf)

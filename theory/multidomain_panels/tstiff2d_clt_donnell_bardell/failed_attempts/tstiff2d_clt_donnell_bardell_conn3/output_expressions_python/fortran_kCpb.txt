@@ -1,0 +1,22 @@
+# kCpb_11
+# kCpb_11_num=5
+c += 1
+kCpbr[c] = row+0
+kCpbc[c] = col+0
+kCpbv[c] += -0.25*a*b*c1*kt*(4*fAu*gAueta*pBu*qBueta/(b*bb) + 4*fAuxi*gAu*pBuxi*qBu/(a*a))
+c += 1
+kCpbr[c] = row+0
+kCpbc[c] = col+1
+kCpbv[c] += -c1*fAu*gAueta*kt*pBvxi*qBv
+c += 1
+kCpbr[c] = row+1
+kCpbc[c] = col+0
+kCpbv[c] += -b*c1*fAvxi*gAv*kt*pBu*qBueta/bb
+c += 1
+kCpbr[c] = row+1
+kCpbc[c] = col+1
+kCpbv[c] += -0.25*a*b*c1*kt*(4*fAv*gAveta*pBv*qBveta/(b*bb) + 4*fAvxi*gAv*pBvxi*qBv/(a*a))
+c += 1
+kCpbr[c] = row+2
+kCpbc[c] = col+2
+kCpbv[c] += -0.25*a*b*c1*kt*(16*fAw*gAwetaeta*kr*pBw*qBwetaeta/((b*b)*(bb*bb)*kt) + 16*fAwxi*gAweta*kr*pBwxi*qBweta/((a*a)*b*bb*kt) + 16*fAwxixi*gAw*kr*pBwxixi*qBw/((a*a*a*a)*kt))

@@ -1,0 +1,14 @@
+# kCSSycte11_11
+# kCSSycte11_11_num=3
+c += 1
+kCSSycte11r[c] = row+0
+kCSSycte11c[c] = col+0
+kCSSycte11v[c] += 0.5*a1*f1Au*f1Bu*g1Au*g1Bu*kt
+c += 1
+kCSSycte11r[c] = row+1
+kCSSycte11c[c] = col+1
+kCSSycte11v[c] += 0.5*a1*f1Av*f1Bv*g1Av*g1Bv*kt
+c += 1
+kCSSycte11r[c] = row+2
+kCSSycte11c[c] = col+2
+kCSSycte11v[c] += 0.5*a1*kt*(f1Aw*f1Bw*g1Aw*g1Bw + 4*f1Aw*f1Bw*g1Aweta*g1Bweta*kr/((b1*b1)*kt))
