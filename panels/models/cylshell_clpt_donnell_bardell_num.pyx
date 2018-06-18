@@ -57,7 +57,7 @@ def fkC_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
     cdef double xi, eta, weight
     cdef double wxi, weta
 
-    cdef np.ndarray[cDOUBLE, ndim=1] xis, etas, weightsxi, weightseta
+    cdef np.ndarray[cDOUBLE, ndim=1] xis, etas, weights_xi, weights_eta
 
     # F as 4-D matrix, must be [nx, ny, 6, 6], when there is one ABD[6, 6] for
     # each of the nx * ny integration points
@@ -98,12 +98,12 @@ def fkC_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
     fdim = 9*m*m*n*n
 
     xis = np.zeros(nx, dtype=DOUBLE)
-    weightsxi = np.zeros(nx, dtype=DOUBLE)
+    weights_xi = np.zeros(nx, dtype=DOUBLE)
     etas = np.zeros(ny, dtype=DOUBLE)
-    weightseta = np.zeros(ny, dtype=DOUBLE)
+    weights_eta = np.zeros(ny, dtype=DOUBLE)
 
-    leggauss_quad(nx, &xis[0], &weightsxi[0])
-    leggauss_quad(ny, &etas[0], &weightseta[0])
+    leggauss_quad(nx, &xis[0], &weights_xi[0])
+    leggauss_quad(ny, &etas[0], &weights_eta[0])
 
     kCr = np.zeros((fdim,), dtype=INT)
     kCc = np.zeros((fdim,), dtype=INT)
@@ -114,7 +114,7 @@ def fkC_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
             for pty in range(ny):
                 xi = xis[ptx]
                 eta = etas[pty]
-                weight = weightsxi[ptx]*weightseta[pty]
+                weight = weights_xi[ptx]*weights_eta[pty]
 
                 wxi = 0
                 weta = 0
@@ -283,7 +283,7 @@ def fkG_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
     cdef double B11, B12, B16, B22, B26, B66
     cdef double wxi, weta, Nxx, Nyy, Nxy
 
-    cdef np.ndarray[cDOUBLE, ndim=1] xis, etas, weightsxi, weightseta
+    cdef np.ndarray[cDOUBLE, ndim=1] xis, etas, weights_xi, weights_eta
 
     # F as 4-D matrix, must be [nx, ny, 6, 6], when there is one ABD[6, 6] for
     # each of the nx * ny integration points
@@ -292,15 +292,14 @@ def fkG_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
 
     cdef int one_F_each_point = 0
 
-    Finput = np.asarray(Finput, dtype=DOUBLE)
+    Finput = np.ascontiguousarray(Finput, dtype=DOUBLE)
     if Finput.shape == (nx, ny, 6, 6):
-        Fnxny = np.ascontiguousarray(Finput)
+        Fnxny = Finput
         one_F_each_point = 1
     elif Finput.shape == (6, 6):
         # creating dummy 4-D array that is not used
         Fnxny = np.empty(shape=(0, 0, 0, 0), dtype=DOUBLE)
         # using a constant F for all the integration domain
-        Finput = np.ascontiguousarray(Finput)
         for i in range(6):
             for j in range(6):
                 F[i*6 + j] = Finput[i, j]
@@ -324,12 +323,12 @@ def fkG_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
     fdim = 1*m*m*n*n
 
     xis = np.zeros(nx, dtype=DOUBLE)
-    weightsxi = np.zeros(nx, dtype=DOUBLE)
+    weights_xi = np.zeros(nx, dtype=DOUBLE)
     etas = np.zeros(ny, dtype=DOUBLE)
-    weightseta = np.zeros(ny, dtype=DOUBLE)
+    weights_eta = np.zeros(ny, dtype=DOUBLE)
 
-    leggauss_quad(nx, &xis[0], &weightsxi[0])
-    leggauss_quad(ny, &etas[0], &weightseta[0])
+    leggauss_quad(nx, &xis[0], &weights_xi[0])
+    leggauss_quad(ny, &etas[0], &weights_eta[0])
 
     kGr = np.zeros((fdim,), dtype=INT)
     kGc = np.zeros((fdim,), dtype=INT)
@@ -340,7 +339,7 @@ def fkG_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
             for pty in range(ny):
                 xi = xis[ptx]
                 eta = etas[pty]
-                weight = weightsxi[ptx]*weightseta[pty]
+                weight = weights_xi[ptx]*weights_eta[pty]
 
                 # Reading laminate constitutive data
                 if one_F_each_point == 1:
@@ -407,16 +406,12 @@ def fkG_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
 
                         col = col0 + num*(j*m + i)
 
-                        exx += cs[col+0]*(2/a)*fAuxi*gAu
-                        eyy += cs[col+1]*fAv*(2/b)*gAveta + 1/r*cs[col+2]*fAw*gAw
-                        gxy += cs[col+0]*fAu*(2/b)*gAueta + cs[col+1]*(2/a)*fAvxi*gAv
+                        exx += cs[col+0]*(2/a)*fAuxi*gAu + 0.5*cs[col+2]*(2/a)*fAwxi*gAw*(2/a)*wxi
+                        eyy += cs[col+1]*(2/b)*fAv*gAveta + 1/r*cs[col+2]*fAw*gAw + 0.5*cs[col+2]*(2/b)*fAw*gAweta*(2/b)*weta
+                        gxy += cs[col+0]*(2/b)*fAu*gAueta + cs[col+1]*(2/a)*fAvxi*gAv + cs[col+2]*(2/b)*weta*(2/a)*fAwxi*gAw + cs[col+2]*(2/a)*wxi*(2/b)*fAw*gAweta
                         kxx += -cs[col+2]*(2/a*2/a)*fAwxixi*gAw
                         kyy += -cs[col+2]*(2/b*2/b)*fAw*gAwetaeta
                         kxy += -2*cs[col+2]*(2/a)*fAwxi*(2/b)*gAweta
-
-                exx += 0.5*(2/a)*(2/a)*wxi*wxi
-                eyy += 0.5*(2/b)*(2/b)*weta*weta
-                gxy += (2/a*2/b)*wxi*weta
 
                 # Calculating membrane stress components
                 Nxx = A11*exx + A12*eyy + A16*gxy + B11*kxx + B12*kyy + B16*kxy
@@ -445,6 +440,7 @@ def fkG_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
                                 row = row0 + num*(j*m + i)
                                 col = col0 + num*(l*m + k)
 
+                                #NOTE symmetry assumption True if no follower forces are used
                                 if row > col:
                                     continue
 
@@ -452,7 +448,7 @@ def fkG_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
                                 if ptx == 0 and pty == 0:
                                     kGr[c] = row+2
                                     kGc[c] = col+2
-                                kGv[c] = kGv[c] + weight*(Nxx*b*fAwxi*fBwxi*gAw*gBw/a + Nxy*(fAw*fBwxi*gAweta*gBw + fAwxi*fBw*gAw*gBweta) + Nyy*a*fAw*fBw*gAweta*gBweta/b)
+                                kGv[c] += weight*(Nxx*b*fAwxi*fBwxi*gAw*gBw/a + Nxy*(fAw*fBwxi*gAweta*gBw + fAwxi*fBw*gAw*gBweta) + Nyy*a*fAw*fBw*gAweta*gBweta/b)
 
     kG = coo_matrix((kGv, (kGr, kGc)), shape=(size, size))
 
@@ -481,11 +477,9 @@ def calc_fint(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
     cdef double wxi, weta
 
     cdef double fAu, fAuxi, fAv, fAvxi, fAw, fAwxi, fAwxixi
-    cdef double fBu, fBuxi, fBv, fBvxi, fBw, fBwxi, fBwxixi
     cdef double gAu, gAueta, gAv, gAveta, gAw, gAweta, gAwetaeta
-    cdef double gBu, gBueta, gBv, gBveta, gBw, gBweta, gBwetaeta
 
-    cdef np.ndarray[cDOUBLE, ndim=1] xis, etas, weightsxi, weightseta, fint
+    cdef np.ndarray[cDOUBLE, ndim=1] xis, etas, weights_xi, weights_eta, fint
 
     # F as 4-D matrix, must be [nx, ny, 6, 6], when there is one ABD[6, 6] for
     # each of the nx * ny integration points
@@ -494,15 +488,14 @@ def calc_fint(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
 
     cdef int one_F_each_point = 0
 
-    Finput = np.asarray(Finput, dtype=DOUBLE)
+    Finput = np.ascontiguousarray(Finput, dtype=DOUBLE)
     if Finput.shape == (nx, ny, 6, 6):
-        Fnxny = np.ascontiguousarray(Finput)
+        Fnxny = Finput
         one_F_each_point = 1
     elif Finput.shape == (6, 6):
         # creating dummy 4-D array that is not used
         Fnxny = np.empty(shape=(0, 0, 0, 0), dtype=DOUBLE)
         # using a constant F for all the integration domain
-        Finput = np.ascontiguousarray(Finput)
         for i in range(6):
             for j in range(6):
                 F[i*6 + j] = Finput[i, j]
@@ -524,12 +517,12 @@ def calc_fint(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
     w1ty = shell.w1ty; w1ry = shell.w1ry; w2ty = shell.w2ty; w2ry = shell.w2ry
 
     xis = np.zeros(nx, dtype=DOUBLE)
-    weightsxi = np.zeros(nx, dtype=DOUBLE)
+    weights_xi = np.zeros(nx, dtype=DOUBLE)
     etas = np.zeros(ny, dtype=DOUBLE)
-    weightseta = np.zeros(ny, dtype=DOUBLE)
+    weights_eta = np.zeros(ny, dtype=DOUBLE)
 
-    leggauss_quad(nx, &xis[0], &weightsxi[0])
-    leggauss_quad(ny, &etas[0], &weightseta[0])
+    leggauss_quad(nx, &xis[0], &weights_xi[0])
+    leggauss_quad(ny, &etas[0], &weights_eta[0])
 
     fint = np.zeros(size, dtype=DOUBLE)
 
@@ -538,7 +531,7 @@ def calc_fint(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
             for pty in range(ny):
                 xi = xis[ptx]
                 eta = etas[pty]
-                weight = weightsxi[ptx]*weightseta[pty]
+                weight = weights_xi[ptx]*weights_eta[pty]
 
                 if one_F_each_point == 1:
                     for i in range(6):
@@ -613,16 +606,12 @@ def calc_fint(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
 
                         col = col0 + num*(j*m + i)
 
-                        exx += cs[col+0]*(2/a)*fAuxi*gAu
-                        eyy += cs[col+1]*(2/b)*fAv*gAveta + 1./r*cs[col+2]*fAw*gAw
-                        gxy += cs[col+0]*(2/b)*fAu*gAueta + cs[col+1]*(2/a)*fAvxi*gAv
+                        exx += cs[col+0]*(2/a)*fAuxi*gAu + 0.5*cs[col+2]*(2/a)*fAwxi*gAw*(2/a)*wxi
+                        eyy += cs[col+1]*(2/b)*fAv*gAveta + 1./r*cs[col+2]*fAw*gAw + 0.5*cs[col+2]*(2/b)*fAw*gAweta*(2/b)*weta
+                        gxy += cs[col+0]*(2/b)*fAu*gAueta + cs[col+1]*(2/a)*fAvxi*gAv + cs[col+2]*(2/b)*weta*(2/a)*fAwxi*gAw + cs[col+2]*(2/a)*wxi*(2/b)*fAw*gAweta
                         kxx += -cs[col+2]*(2/a*2/a)*fAwxixi*gAw
                         kyy += -cs[col+2]*(2/b*2/b)*fAw*gAwetaeta
                         kxy += -2*cs[col+2]*(2/a*2/b)*fAwxi*gAweta
-
-                exx += 0.5*(2/a)*(2/a)*wxi*wxi
-                eyy += 0.5*(2/b)*(2/b)*weta*weta
-                gxy += (2/a)*(2/b)*wxi*weta
 
                 # current stress state
                 Nxx = A11*exx + A12*eyy + A16*gxy + B11*kxx + B12*kyy + B16*kxy

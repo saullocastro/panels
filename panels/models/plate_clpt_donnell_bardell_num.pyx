@@ -28,7 +28,6 @@ DOUBLE = np.float64
 ctypedef np.int64_t cINT
 INT = np.int64
 
-
 cdef int num = 3
 
 
@@ -410,7 +409,7 @@ def fkG_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
                         gxy += cs[col+0]*(2/b)*fAu*gAueta + cs[col+1]*(2/a)*fAvxi*gAv + cs[col+2]*(2/b)*weta*(2/a)*fAwxi*gAw + cs[col+2]*(2/a)*wxi*(2/b)*fAw*gAweta
                         kxx += -cs[col+2]*(2/a*2/a)*fAwxixi*gAw
                         kyy += -cs[col+2]*(2/b*2/b)*fAw*gAwetaeta
-                        kxy += -2*cs[col+2]*(2/a*2/b)*fAwxi*gAweta
+                        kxy += -2*cs[col+2]*(2/a)*fAwxi*(2/b)*gAweta
 
                 # Calculating membrane stress components
                 Nxx = A11*exx + A12*eyy + A16*gxy + B11*kxx + B12*kyy + B16*kxy

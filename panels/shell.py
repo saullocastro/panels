@@ -108,10 +108,9 @@ class Shell(object):
         self.forces = []
         self.forces_inc = []
 
-        # boundary conditions
-
-        # displacement at 4 edges is zero
-        # free to rotate at 4 edges (simply supported by default)
+        #NOTE default boundary conditions:
+        # - displacement at 4 edges is zero
+        # - free to rotate at 4 edges (simply supported by default)
         self.u1tx = 0.
         self.u1rx = 0.
         self.u2tx = 0.
@@ -231,7 +230,10 @@ class Shell(object):
         Returns
         -------
         size : int
-            The size of the stiffness matrices.
+            The size of the stiffness matrices. Can be the size of a global
+            internal force vector of an assembly. When using a string, for
+            example, if '+1' is given it will add 1 to the Shell`s size
+            obtained by the :method:`.Shell.get_size`
 
         """
         num = modelDB.db[self.model]['num']
@@ -314,8 +316,10 @@ class Shell(object):
 
         Parameters
         ----------
-        size : int
-            The size of the calculated sparse matrices.
+        size : int or str, optional
+            The size of the calculated sparse matrices. When using a string,
+            for example, if '+1' is given it will add 1 to the Shell`s size
+            obtained by the :method:`.Shell.get_size`
         row0, col0: int or None, optional
             Offset to populate the output sparse matrix (necessary when
             assemblying shells).
@@ -346,6 +350,8 @@ class Shell(object):
         self._rebuild()
         if size is None:
             size = self.get_size()
+        elif isinstance(size, str):
+            size = int(size) + self.get_size()
 
         msg('Calculating kC... ', level=2, silent=silent)
         if c is not None:
@@ -408,6 +414,8 @@ class Shell(object):
         self._rebuild()
         if size is None:
             size = self.get_size()
+        elif isinstance(size, str):
+            size = int(size) + self.get_size()
         check_c(c, size)
 
         msg('Calculating kG... ', level=2, silent=silent)
@@ -462,6 +470,8 @@ class Shell(object):
 
         if size is None:
             size = self.get_size()
+        elif isinstance(size, str):
+            size = int(size) + self.get_size()
 
         #TODO allow a distribution of mu instead of constant value, at least allow a mu for each ply
         if self.mu is None:
@@ -493,6 +503,8 @@ class Shell(object):
 
         if size is None:
             size = self.get_size()
+        elif isinstance(size, str):
+            size = int(size) + self.get_size()
 
         self.r = self.r if self.r is not None else 0.
 
@@ -1066,6 +1078,15 @@ class Shell(object):
             Since this function is called during the non-linear analysis,
             ``inc`` will multiply the terms `\{{F_{ext}}_\lambda\}`.
 
+        size : int or str, optional
+            The size of the force vector. Can be the size of a global internal
+            force vector of an assembly. When using a string, for example, if
+            '+1' is given it will add 1 to the Shell`s size obtained by the
+            :method:`.Shell.get_size`
+
+        col0 : int, optional
+            Offset in a global forcce vector of an assembly.
+
         silent : bool, optional
             A boolean to tell whether the log messages should be printed.
 
@@ -1088,6 +1109,8 @@ class Shell(object):
 
         if size is None:
             size = self.get_size()
+        elif isinstance(size, str):
+            size = int(size) + self.get_size()
         col1 = col0 + self.get_size()
         g = np.zeros((dofs, self.get_size()), dtype=np.float64)
         fext = np.zeros(size, dtype=np.float64)
@@ -1125,9 +1148,11 @@ class Shell(object):
         c : np.ndarray
             The Ritz constants vector to be used for the internal forces
             calculation.
-        size : int, optional
+        size : int or str, optional
             The size of the internal force vector. Can be the size of a global
-            internal force vector of an assembly.
+            internal force vector of an assembly. When using a string,
+            for example, if '+1' is given it will add 1 to the Shell`s size
+            obtained by the :method:`.Shell.get_size`
         col0 : int, optional
             Offset in a global internal forcce vector of an assembly.
         silent : bool, optional
@@ -1162,6 +1187,8 @@ class Shell(object):
 
         if size is None:
             size = self.get_size()
+        elif isinstance(size, str):
+            size = int(size) + self.get_size()
 
         alphadeg = self.alphadeg if self.alphadeg is not None else 0.
         self.alpharad = deg2rad(alphadeg)
