@@ -1,9 +1,9 @@
 r"""
 =====================================================
-Panel Connections (:mod:`compmech.panel.connections`)
+Panel Connections (:mod:`panels.panel.connections`)
 =====================================================
 
-.. currentmodule:: compmech.panel.connections
+.. currentmodule:: panels.panel.connections
 
 Connection between panel domains. Each panel domain has its own set of Bardell
 approximation functions. Below it is shown the connections currently supported.
@@ -83,7 +83,7 @@ translation (``kt``) and rotatio (``kr``). The aim is to have penalty constants
 that are just high enough to produce the desired compatibility, but not too
 high such that numerical stability issues start to appear.
 
-.. autofunction:: compmech.panel.connections.calc_kt_kr
+.. autofunction:: panels.panel.connections.calc_kt_kr
 
 """
 from . kCBFycte import *

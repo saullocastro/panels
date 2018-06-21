@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       157,          7]
-NotebookDataLength[     50345,       1032]
-NotebookOptionsPosition[     49962,       1016]
-NotebookOutlinePosition[     50443,       1034]
-CellTagsIndexPosition[     50400,       1031]
+NotebookDataLength[     50449,       1034]
+NotebookOptionsPosition[     50066,       1018]
+NotebookOutlinePosition[     50547,       1036]
+CellTagsIndexPosition[     50504,       1033]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -396,7 +396,7 @@ Cell[BoxData[
       RowBox[{
        RowBox[{"{", 
         RowBox[{"Nxx", ",", " ", "Nxy"}], "}"}], ",", "\[IndentingNewLine]", 
-       "        ", 
+       "         ", 
        RowBox[{"{", 
         RowBox[{"Nxy", ",", " ", "Nyy"}], "}"}]}], "}"}]}], ";"}], 
    "\[IndentingNewLine]", "\[IndentingNewLine]", 
@@ -1012,7 +1012,9 @@ Cell[BoxData[
    3.7380000959327426`*^9}, {3.738000937494126*^9, 3.7380009448387766`*^9}, {
    3.738026681944559*^9, 3.738026696371955*^9}, {3.7380352594477324`*^9, 
    3.738035314836524*^9}, 3.738059067133583*^9, {3.738059102288516*^9, 
-   3.738059131077483*^9}, {3.7380644308589973`*^9, 3.7380644343526497`*^9}}]
+   3.738059131077483*^9}, {3.7380644308589973`*^9, 3.7380644343526497`*^9}, {
+   3.738462571831472*^9, 3.7384625971377573`*^9}, {3.7384641410485215`*^9, 
+   3.73846414399364*^9}}]
 },
 WindowSize->{766, 792},
 WindowMargins->{{Automatic, -7}, {Automatic, 8}},
@@ -1033,7 +1035,7 @@ CellTagsIndex->{}
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[557, 20, 49401, 994, 2542, "Input"]
+Cell[557, 20, 49505, 996, 2542, "Input"]
 }
 ]
 *)

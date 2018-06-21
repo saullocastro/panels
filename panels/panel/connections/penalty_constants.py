@@ -1,6 +1,6 @@
 from __future__ import division, absolute_import
 
-import compmech.composite.laminate as laminate
+import composites.laminate as laminate
 
 def calc_kt_kr(p1, p2, connection_type):
     """Calculate translation and rotation penalty constants

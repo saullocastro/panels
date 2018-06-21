@@ -3,8 +3,8 @@ from __future__ import division, absolute_import
 import numpy as np
 from scipy.sparse import csr_matrix
 
-from compmech.panel import Panel
-from compmech.panel.assembly import PanelAssembly
+from .. shell import Shell
+from . panel import PanelAssembly
 from compmech.sparse import make_symmetric
 from compmech.analysis import lb, static
 from compmech.analysis import Analysis

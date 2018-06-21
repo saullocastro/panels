@@ -12,8 +12,8 @@ from structsolve.sparseutils import make_symmetric, finalize_symmetric_matrix
 
 from .. logger import msg, warn
 from .. shell import check_c
-import .. modelDB as modelDB
-import . connections as connections
+from .. import modelDB
+from . import connections
 
 
 def default_field(panel, gridx, gridy):
