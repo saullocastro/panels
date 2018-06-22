@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       157,          7]
-NotebookDataLength[     50449,       1034]
-NotebookOptionsPosition[     50066,       1018]
-NotebookOutlinePosition[     50547,       1036]
-CellTagsIndexPosition[     50504,       1033]
+NotebookDataLength[     51357,       1061]
+NotebookOptionsPosition[     50973,       1045]
+NotebookOutlinePosition[     51454,       1063]
+CellTagsIndexPosition[     51411,       1060]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -485,7 +485,7 @@ Cell[BoxData[
        RowBox[{"Transpose", "[", "gA5", "]"}], ".", "maux", ".", "gB5"}]}]}], 
     ";"}], "\[IndentingNewLine]", "\[IndentingNewLine]", 
    RowBox[{
-    RowBox[{"kA", "=", 
+    RowBox[{"kAx", "=", 
      RowBox[{
       RowBox[{"-", 
        RowBox[{"(", 
@@ -498,6 +498,22 @@ Cell[BoxData[
         RowBox[{
          RowBox[{"Transpose", "[", 
           RowBox[{"{", "wAxi", "}"}], "]"}], ".", 
+         RowBox[{"{", "wB", "}"}]}]}], ")"}]}]}], ";"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"kAx", "=", 
+     RowBox[{
+      RowBox[{"-", 
+       RowBox[{"(", 
+        RowBox[{"a", "*", 
+         RowBox[{"b", "/", "4"}]}], ")"}]}], "*", 
+      RowBox[{"(", 
+       RowBox[{"beta", "*", 
+        RowBox[{"(", 
+         RowBox[{"2", "/", "b"}], ")"}], 
+        RowBox[{
+         RowBox[{"Transpose", "[", 
+          RowBox[{"{", "wAeta", "}"}], "]"}], ".", 
          RowBox[{"{", "wB", "}"}]}]}], ")"}]}]}], ";"}], 
    "\[IndentingNewLine]", "\[IndentingNewLine]", 
    RowBox[{
@@ -598,12 +614,23 @@ Cell[BoxData[
     RowBox[{"Close", "[", "s", "]"}], ";"}], "\[IndentingNewLine]", 
    RowBox[{
     RowBox[{"s", " ", "=", " ", 
-     RowBox[{"OpenWrite", "[", "\"\<fortran_kA.txt\>\"", "]"}]}], ";"}], 
+     RowBox[{"OpenWrite", "[", "\"\<fortran_kAx.txt\>\"", "]"}]}], ";"}], 
    "\[IndentingNewLine]", 
    RowBox[{
     RowBox[{"Write", "[", 
      RowBox[{"s", ",", 
-      RowBox[{"FortranForm", "[", "kA", "]"}]}], "]"}], ";"}], 
+      RowBox[{"FortranForm", "[", "kAx", "]"}]}], "]"}], ";"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"Close", "[", "s", "]"}], ";"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"s", " ", "=", " ", 
+     RowBox[{"OpenWrite", "[", "\"\<fortran_kAy.txt\>\"", "]"}]}], ";"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"Write", "[", 
+     RowBox[{"s", ",", 
+      RowBox[{"FortranForm", "[", "kAy", "]"}]}], "]"}], ";"}], 
    "\[IndentingNewLine]", 
    RowBox[{
     RowBox[{"Close", "[", "s", "]"}], ";"}], "\[IndentingNewLine]", 
@@ -1014,7 +1041,7 @@ Cell[BoxData[
    3.738035314836524*^9}, 3.738059067133583*^9, {3.738059102288516*^9, 
    3.738059131077483*^9}, {3.7380644308589973`*^9, 3.7380644343526497`*^9}, {
    3.738462571831472*^9, 3.7384625971377573`*^9}, {3.7384641410485215`*^9, 
-   3.73846414399364*^9}}]
+   3.73846414399364*^9}, {3.7386490840992413`*^9, 3.738649162182334*^9}}]
 },
 WindowSize->{766, 792},
 WindowMargins->{{Automatic, -7}, {Automatic, 8}},
@@ -1035,7 +1062,7 @@ CellTagsIndex->{}
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[557, 20, 49505, 996, 2542, "Input"]
+Cell[557, 20, 50412, 1023, 2687, "Input"]
 }
 ]
 *)

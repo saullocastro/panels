@@ -10,18 +10,16 @@ from scipy.sparse import coo_matrix
 import numpy as np
 cimport numpy as np
 
-from compmech.panel import Panel
 
-
-cdef extern from 'bardell.h':
+cdef extern from 'bardell.hpp':
     double integral_ff(int i, int j,
             double x1t, double x1r, double x2t, double x2r,
             double y1t, double y1r, double y2t, double y2r) nogil
 
-cdef extern from 'bardell_functions.h':
+cdef extern from 'bardell_functions.hpp':
     double calc_f(int i, double xi, double xi1t, double xi1r,
                   double xi2t, double xi2r) nogil
-    double calc_fxi(int i, double xi, double xi1t, double xi1r,
+    double calc_fx(int i, double xi, double xi1t, double xi1r,
                     double xi2t, double xi2r) nogil
 
 ctypedef np.double_t cDOUBLE
@@ -83,7 +81,7 @@ def fkCSSycte11(double kt, double kr, object p1, double ycte1,
                     g1Au = calc_f(j1, etacte1, u1ty1, u1ry1, u2ty1, u2ry1)
                     g1Av = calc_f(j1, etacte1, v1ty1, v1ry1, v2ty1, v2ry1)
                     g1Aw = calc_f(j1, etacte1, w1ty1, w1ry1, w2ty1, w2ry1)
-                    g1Aweta = calc_fxi(j1, etacte1, w1ty1, w1ry1, w2ty1, w2ry1)
+                    g1Aweta = calc_fx(j1, etacte1, w1ty1, w1ry1, w2ty1, w2ry1)
 
                     for l1 in range(n1):
                         row = row0 + num*(j1*m1 + i1)
@@ -96,7 +94,7 @@ def fkCSSycte11(double kt, double kr, object p1, double ycte1,
                         g1Bu = calc_f(l1, etacte1, u1ty1, u1ry1, u2ty1, u2ry1)
                         g1Bv = calc_f(l1, etacte1, v1ty1, v1ry1, v2ty1, v2ry1)
                         g1Bw = calc_f(l1, etacte1, w1ty1, w1ry1, w2ty1, w2ry1)
-                        g1Bweta = calc_fxi(l1, etacte1, w1ty1, w1ry1, w2ty1, w2ry1)
+                        g1Bweta = calc_fx(l1, etacte1, w1ty1, w1ry1, w2ty1, w2ry1)
 
                         c += 1
                         kCSSycte11r[c] = row+0
@@ -180,7 +178,7 @@ def fkCSSycte12(double kt, double kr, object p1, object p2,
                     g1Au = calc_f(j1, etacte1, u1ty1, u1ry1, u2ty1, u2ry1)
                     g1Av = calc_f(j1, etacte1, v1ty1, v1ry1, v2ty1, v2ry1)
                     g1Aw = calc_f(j1, etacte1, w1ty1, w1ry1, w2ty1, w2ry1)
-                    g1Aweta = calc_fxi(j1, etacte1, w1ty1, w1ry1, w2ty1, w2ry1)
+                    g1Aweta = calc_fx(j1, etacte1, w1ty1, w1ry1, w2ty1, w2ry1)
 
                     for l2 in range(n2):
                         row = row0 + num*(j1*m1 + i1)
@@ -193,7 +191,7 @@ def fkCSSycte12(double kt, double kr, object p1, object p2,
                         g2Bu = calc_f(l2, etacte2, u1ty2, u1ry2, u2ty2, u2ry2)
                         g2Bv = calc_f(l2, etacte2, v1ty2, v1ry2, v2ty2, v2ry2)
                         g2Bw = calc_f(l2, etacte2, w1ty2, w1ry2, w2ty2, w2ry2)
-                        g2Bweta = calc_fxi(l2, etacte2, w1ty2, w1ry2, w2ty2, w2ry2)
+                        g2Bweta = calc_fx(l2, etacte2, w1ty2, w1ry2, w2ty2, w2ry2)
 
                         c += 1
                         kCSSycte12r[c] = row+0
@@ -265,7 +263,7 @@ def fkCSSycte22(double kt, double kr, object p1, object p2,
                     g2Au = calc_f(j2, etacte2, u1ty2, u1ry2, u2ty2, u2ry2)
                     g2Av = calc_f(j2, etacte2, v1ty2, v1ry2, v2ty2, v2ry2)
                     g2Aw = calc_f(j2, etacte2, w1ty2, w1ry2, w2ty2, w2ry2)
-                    g2Aweta = calc_fxi(j2, etacte2, w1ty2, w1ry2, w2ty2, w2ry2)
+                    g2Aweta = calc_fx(j2, etacte2, w1ty2, w1ry2, w2ty2, w2ry2)
 
                     for l2 in range(n2):
                         row = row0 + num*(j2*m2 + i2)
@@ -278,7 +276,7 @@ def fkCSSycte22(double kt, double kr, object p1, object p2,
                         g2Bu = calc_f(l2, etacte2, u1ty2, u1ry2, u2ty2, u2ry2)
                         g2Bv = calc_f(l2, etacte2, v1ty2, v1ry2, v2ty2, v2ry2)
                         g2Bw = calc_f(l2, etacte2, w1ty2, w1ry2, w2ty2, w2ry2)
-                        g2Bweta = calc_fxi(l2, etacte2, w1ty2, w1ry2, w2ty2, w2ry2)
+                        g2Bweta = calc_fx(l2, etacte2, w1ty2, w1ry2, w2ty2, w2ry2)
 
                         c += 1
                         kCSSycte22r[c] = row+0

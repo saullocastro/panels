@@ -15,6 +15,7 @@ from structsolve.sparseutils import remove_null_cols, make_skew_symmetric, final
 
 from .logger import msg, warn
 from . import modelDB
+from . shell_fext import shell_fext
 
 
 def load(name):
@@ -106,8 +107,10 @@ class Shell(object):
         self.ny = n
 
         # loads
-        self.forces = []
-        self.forces_inc = []
+        self.point_loads = [] #NOTE see add_point_load
+        self.point_loads_inc = [] #NOTE see add_point_load
+        self.distr_loads = [] #NOTE see add_distr_load_fixed_x and _fixed_y
+        self.distr_loads_inc = [] # NOTE see add_distr_load_fixed_x and _fixed_y
         # uniform membrane stress state
         self.Nxx = 0.
         self.Nyy = 0.
@@ -152,7 +155,7 @@ class Shell(object):
         self.laminaprops = None
         self.rhos = None
 
-        # aeroelastic parameters
+        # aeroelastic parameters for panel flutter
         self.flow = 'x'
         self.beta = None
         self.gamma = None
@@ -393,7 +396,7 @@ class Shell(object):
         if c is None:
             # Empty c if the interest is only on the heterogeneous
             # laminate properties
-            c = np.zeros(self.size, dtype=np.float64)
+            c = np.zeros(size, dtype=np.float64)
         c = np.ascontiguousarray(c, dtype=np.float64)
 
         kC = matrices_num.fkC_num(c, Fnxny, self,
@@ -552,7 +555,7 @@ class Shell(object):
         if 'coneshell' in self.model:
             raise NotImplementedError('Conical shells not supported')
 
-        matrices = modelDB.db[self.model]['matrices']
+        matrices = modelDB.db[self.model]['matrices_num']
 
         if size is None:
             size = self.get_size()
@@ -578,10 +581,13 @@ class Shell(object):
             beta = self.beta
             gamma = self.gamma if self.gamma is not None else 0.
 
+        self.beta = beta
+        self.gamma = gamma
+
         if self.flow.lower() == 'x':
-            kA = matrices.fkAx(beta, gamma, self, size, row0, col0)
+            kA = matrices.fkAx_num(self, size, row0, col0, self.nx, self.ny)
         elif self.flow.lower() == 'y':
-            kA = matrices.fkAy(beta, self, size, row0, col0)
+            kA = matrices.fkAy_num(self, size, row0, col0, self.nx, self.ny)
         else:
             raise ValueError('Invalid flow value, must be x or y')
 
@@ -599,13 +605,15 @@ class Shell(object):
         return kA
 
 
-    def calc_cA(self, aeromu, silent=False, finalize=True):
+    def calc_cA(self, aeromu, silent=False, size=None, finalize=True):
         """Calculate the aerodynamic damping matrix using the piston theory
         """
         msg('Calculating cA... ', level=2, silent=silent)
 
-        matrices = modelDB.db[self.model]['matrices']
-        cA = matrices.fcA(aeromu, self, self.size, 0, 0)
+        if size is None:
+            size = self.get_size()
+        matrices = modelDB.db[self.model]['matrices_num']
+        cA = matrices.fcA(aeromu, self, size, 0, 0)
         cA = cA*(0+1j)
 
         if finalize:
@@ -791,20 +799,17 @@ class Shell(object):
 
         mat = self.matrices
         kC = mat['kC']
-        kG = mat['kG']
-        kA = mat['kA']
-        cA = mat['cA']
         kM = mat['kM']
 
         if atype == 1:
             K = kC
 
         elif atype == 2:
-            self.calc_kG(silent=silent)
+            kG = self.calc_kG(silent=silent)
             K = kC + kG
 
         elif atype == 3:
-            self.calc_kA(silent=silent)
+            kA = self.calc_kA(silent=silent)
             K = kC + kA
             if damping:
                 self.calc_cA(silent=silent)
@@ -813,15 +818,18 @@ class Shell(object):
                 K = kC + kA
 
         elif atype == 4:
-            self.calc_kG(silent=silent)
-            self.calc_kA(silent=silent)
+            kG = self.calc_kG(silent=silent)
+            kA = self.calc_kA(silent=silent)
             if damping:
-                self.calc_cA(silent=silent)
+                cA = self.calc_cA(silent=silent)
                 K = kC + kA + kG + cA
             else:
                 K = kC + kA + kG
 
         M = kM
+
+        print('DEBUG K', K.sum())
+        print('DEBUG M', M.sum())
 
         msg('Eigenvalue solver... ', level=2, silent=silent)
         k = min(self.num_eigvalues, M.shape[0]-2)
@@ -1072,8 +1080,8 @@ class Shell(object):
         return self.plot_mesh, self.fields
 
 
-    def add_force(self, x, y, fx, fy, fz, cte=True):
-        r"""Add a punctual force with three components
+    def add_point_load(self, x, y, fx, fy, fz, cte=True):
+        r"""Add a point load with three components
 
         Parameters
         ----------
@@ -1093,9 +1101,55 @@ class Shell(object):
 
         """
         if cte:
-            self.forces.append([x, y, fx, fy, fz])
+            self.point_loads.append([x, y, fx, fy, fz])
         else:
-            self.forces_inc.append([x, y, fx, fy, fz])
+            self.point_loads_inc.append([x, y, fx, fy, fz])
+
+
+    def add_distr_load_fixed_x(self, x, funcx=None, funcy=None, funcz=None, cte=True):
+        r"""Add a distributed force g(y) at a fixed x position
+
+        Parameters
+        ----------
+        x : float
+            The fixed `x` position.
+        funcx, funcy, funcz : function, optional
+            The functions of the distributed force components, will be used
+            from `y=0` to `y=b`. At least one of the three must be defined
+        cte : bool, optional
+            Constant forces are not incremented during the non-linear
+            analysis.
+
+        """
+        if not any((funcx, funcy, funcz)):
+            raise ValueError('At least one function must be different than None')
+        if cte:
+            self.distr_loads.append([x, None, funcx, funcy, funcz])
+        else:
+            self.distr_loads_inc.append([x, None, funcx, funcy, funcz])
+
+
+    def add_distr_load_fixed_y(self, y, funcx=None, funcy=None, funcz=None, cte=True):
+        r"""Add a distributed force g(x) at a fixed y position
+
+        Parameters
+        ----------
+        y : float
+            The fixed `y` position.
+        funcx, funcy, funcz : function, optional
+            The functions of the distributed force components, will be used
+            from `x=0` to `x=a`. At least one of the three must be defined
+        cte : bool, optional
+            Constant forces are not incremented during the non-linear
+            analysis.
+
+        """
+        if not any((funcx, funcy, funcz)):
+            raise ValueError('At least one function must be different than None')
+        if cte:
+            self.distr_loads.append([None, y, funcx, funcy, funcz])
+        else:
+            self.distr_loads_inc.append([None, y, funcx, funcy, funcz])
 
 
     def calc_fext(self, inc=1., size=None, col0=0, silent=False):
@@ -1136,44 +1190,7 @@ class Shell(object):
         """
         self._rebuild()
         msg('Calculating external forces...', level=2, silent=silent)
-
-        model = self.model
-        if not model in modelDB.db.keys():
-            raise ValueError(
-                    '{} is not a valid model option'.format(model))
-        db = modelDB.db
-        dofs = db[model]['dofs']
-        fg = db[model]['field'].fg
-
-        if size is None:
-            size = self.get_size()
-        elif isinstance(size, str):
-            size = int(size) + self.get_size()
-        col1 = col0 + self.get_size()
-        g = np.zeros((dofs, self.get_size()), dtype=np.float64)
-        fext = np.zeros(size, dtype=np.float64)
-
-        # non-incrementable punctual forces
-        for i, force in enumerate(self.forces):
-            x, y, fx, fy, fz = force
-            fg(g, x, y, self)
-            if dofs == 3:
-                fpt = np.array([[fx, fy, fz]])
-            elif dofs == 5:
-                fpt = np.array([[fx, fy, fz, 0, 0]])
-            fext[col0:col1] += fpt.dot(g).ravel()
-
-        # incrementable punctual forces
-        for i, force in enumerate(self.forces_inc):
-            x, y, fx, fy, fz = force
-            fg(g, x, y, self)
-            if dofs == 3: #CLT
-                fpt = np.array([[fx, fy, fz]])*inc
-            elif dofs == 5: #FSDT
-                fpt = np.array([[fx, fy, fz, 0, 0]])*inc
-            fext[col0:col1] += fpt.dot(g).ravel()
-
-        return fext
+        return shell_fext(self, inc=inc, size=size, col0=col0)
 
 
     def calc_fint(self, c, size=None, col0=0, silent=False, nx=None,

@@ -163,6 +163,12 @@ extensions = [
             './panels/panel/connections\kCSSycte.pyx',
             ],
         include_dirs=include_dirs, extra_compile_args=compile_args, extra_link_args=link_args, language='c++'),
+    Extension('panels.legendre_gauss_quadrature',
+        sources=[
+            './panels/core/src/legendre_gauss_quadrature.cpp',
+            './panels/legendre_gauss_quadrature.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args, extra_link_args=link_args, language='c++'),
     ]
 
 

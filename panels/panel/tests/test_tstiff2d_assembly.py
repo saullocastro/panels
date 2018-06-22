@@ -1,10 +1,6 @@
 import numpy as np
 
-from compmech.panel.assembly import (
-        tstiff2d_1stiff_freq,
-        tstiff2d_1stiff_compression,
-        tstiff2d_1stiff_flutter,
-        )
+from panels.panel import tstiff2d_1stiff_freq, tstiff2d_1stiff_compression, tstiff2d_1stiff_flutter
 
 
 def test_tstiff2d_1stiff_freq():
@@ -20,7 +16,7 @@ def test_tstiff2d_1stiff_freq():
         a=3.,
         ys=ys,
         defect_a=0.1,
-        mu=1.3e3,
+        rho=1.3e3,
         plyt=0.125e-3,
         laminaprop=(142.5e9, 8.7e9, 0.28, 5.1e9, 5.1e9, 5.1e9),
         stack_skin=[0, 45, -45, 90, -45, 45, 0],
@@ -46,7 +42,7 @@ def test_tstiff2d_1stiff_compression():
         a=3.,
         ys=ys,
         defect_a=0.6,
-        mu=1.3e3,
+        rho=1.3e3,
         plyt=0.125e-3,
         laminaprop=(142.5e9, 8.7e9, 0.28, 5.1e9, 5.1e9, 5.1e9),
         stack_skin=[0, 45, -45, 90, -45, 45, 0],
@@ -61,6 +57,7 @@ def test_tstiff2d_1stiff_compression():
         Nxx_flange=-1.,
         )
     assert np.isclose(eigvals[0], 142.65057725, rtol=0.001)
+    assy.plot(eigvecs[:, 0], 'skin', filename='tmp_t2stiff_compression_01.png')
 
     assy, c, eigvals, eigvecs = tstiff2d_1stiff_compression(
         b=b,
@@ -69,7 +66,7 @@ def test_tstiff2d_1stiff_compression():
         a=3.,
         ys=ys,
         defect_a=0.6,
-        mu=1.3e3,
+        rho=1.3e3,
         plyt=0.125e-3,
         laminaprop=(142.5e9, 8.7e9, 0.28, 5.1e9, 5.1e9, 5.1e9),
         stack_skin=[0, 45, -45, 90, -45, 45, 0],
@@ -83,7 +80,8 @@ def test_tstiff2d_1stiff_compression():
         Nxx_base=-1.,
         Nxx_flange=-1.,
         )
-    assert np.isclose(eigvals[0], 114.85854770879844, rtol=0.001)
+    assy.plot(eigvecs[:, 0], 'skin', filename='tmp_t2stiff_compression_02.png')
+    assert np.isclose(eigvals[0], 142.80859509520772, rtol=0.001)
 
 
 def test_tstiff2d_1stiff_flutter():
@@ -99,7 +97,7 @@ def test_tstiff2d_1stiff_flutter():
         a=3.,
         ys=ys,
         defect_a=0.1,
-        mu=1.3e3,
+        rho=1.3e3,
         plyt=0.125e-3,
         laminaprop=(142.5e9, 8.7e9, 0.28, 5.1e9, 5.1e9, 5.1e9),
         stack_skin=[0, 45, -45, 90, -45, 45, 0],
@@ -114,9 +112,7 @@ def test_tstiff2d_1stiff_flutter():
         speed_sound=343.,
         run_static_case=True,
         )
-    assert np.isclose(eigvals[0], 1423.254820+0.j, rtol=0.001)
+    assert np.isclose(eigvals[0], 1423.293240394152+0.j, rtol=0.001)
 
 if __name__ == '__main__':
-    test_tstiff2d_1stiff_freq()
-    test_tstiff2d_1stiff_compression()
     test_tstiff2d_1stiff_flutter()

@@ -488,7 +488,7 @@ EXPORTIT double integral_ff(int i, int j,
         return 0.;
     }
 }
-EXPORTIT double integral_ffxi(int i, int j,
+EXPORTIT double integral_ffx(int i, int j,
            double x1t, double x1r, double x2t, double x2r,
            double y1t, double y1r, double y2t, double y2r) {
     switch(i) {
@@ -906,7 +906,7 @@ EXPORTIT double integral_ffxi(int i, int j,
         return 0.;
     }
 }
-EXPORTIT double integral_ffxixi(int i, int j,
+EXPORTIT double integral_ffxx(int i, int j,
            double x1t, double x1r, double x2t, double x2r,
            double y1t, double y1r, double y2t, double y2r) {
     switch(i) {
@@ -1268,7 +1268,7 @@ EXPORTIT double integral_ffxixi(int i, int j,
         return 0.;
     }
 }
-EXPORTIT double integral_fxifxi(int i, int j,
+EXPORTIT double integral_fxfx(int i, int j,
            double x1t, double x1r, double x2t, double x2r,
            double y1t, double y1r, double y2t, double y2r) {
     switch(i) {
@@ -1630,7 +1630,7 @@ EXPORTIT double integral_fxifxi(int i, int j,
         return 0.;
     }
 }
-EXPORTIT double integral_fxifxixi(int i, int j,
+EXPORTIT double integral_fxfxx(int i, int j,
            double x1t, double x1r, double x2t, double x2r,
            double y1t, double y1r, double y2t, double y2r) {
     switch(i) {
@@ -1928,7 +1928,7 @@ EXPORTIT double integral_fxifxixi(int i, int j,
         return 0.;
     }
 }
-EXPORTIT double integral_fxixifxixi(int i, int j,
+EXPORTIT double integral_fxxfxx(int i, int j,
            double x1t, double x1r, double x2t, double x2r,
            double y1t, double y1r, double y2t, double y2r) {
     switch(i) {

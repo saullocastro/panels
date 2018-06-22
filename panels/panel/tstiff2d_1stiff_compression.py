@@ -1,13 +1,13 @@
 from __future__ import division, absolute_import
 
 import numpy as np
+from structsolve import lb, static
 
-from compmech.panel import Panel
-from compmech.panel.assembly import PanelAssembly
-from compmech.analysis import lb, static
+from .. shell import Shell
+from . panel import Panel
 
 
-def tstiff2d_1stiff_compression(a, b, ys, bb, bf, defect_a, mu, plyt,
+def tstiff2d_1stiff_compression(a, b, ys, bb, bf, defect_a, rho, plyt,
         laminaprop, stack_skin, stack_base, stack_flange,
         Nxx_skin, Nxx_base, Nxx_flange, run_static_case=True,
         r=None, m=8, n=8, mb=None, nb=None, mf=None, nf=None,
@@ -68,7 +68,7 @@ def tstiff2d_1stiff_compression(a, b, ys, bb, bf, defect_a, mu, plyt,
         Stiffener's flange width.
     defect_a : float
         Debonding defect/assembly length ratio.
-    mu : float
+    rho : float
         Material density.
     plyt : float
         Ply thickness.
@@ -131,28 +131,28 @@ def tstiff2d_1stiff_compression(a, b, ys, bb, bf, defect_a, mu, plyt,
     nxf = mf if nxf is None else nxf
     nyf = nf if nyf is None else nyf
 
-    # skin panels
-    p01 = Panel(group='skin', Nxx=Nxx_skin, x0=alow+defect, y0=ys+bb/2., a=aup, b=bleft, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, mu=mu, nx=nx, ny=ny)
-    p02 = Panel(group='skin', Nxx=Nxx_skin, x0=alow+defect, y0=ys-bb/2., a=aup, b=bb, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, mu=mu, nx=nx, ny=ny)
-    p03 = Panel(group='skin', Nxx=Nxx_skin, x0=alow+defect, y0=0,        a=aup, b=bright, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, mu=mu, nx=nx, ny=ny)
+    # skin
+    p01 = Shell(group='skin', Nxx=Nxx_skin, x0=alow+defect, y0=ys+bb/2., a=aup, b=bleft, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho, nx=nx, ny=ny)
+    p02 = Shell(group='skin', Nxx=Nxx_skin, x0=alow+defect, y0=ys-bb/2., a=aup, b=bb, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho, nx=nx, ny=ny)
+    p03 = Shell(group='skin', Nxx=Nxx_skin, x0=alow+defect, y0=0, a=aup, b=bright, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho, nx=nx, ny=ny)
     # defect
-    p04 = Panel(group='skin', Nxx=Nxx_skin, x0=alow, y0=ys+bb/2., a=defect, b=bleft, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, mu=mu, nx=nx, ny=ny)
-    p05 = Panel(group='skin', Nxx=Nxx_skin, x0=alow, y0=ys-bb/2., a=defect, b=bb, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, mu=mu, nx=nx, ny=ny)
-    p06 = Panel(group='skin', Nxx=Nxx_skin, x0=alow, y0=0,        a=defect, b=bright, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, mu=mu, nx=nx, ny=ny)
+    p04 = Shell(group='skin', Nxx=Nxx_skin, x0=alow, y0=ys+bb/2., a=defect, b=bleft, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho, nx=nx, ny=ny)
+    p05 = Shell(group='skin', Nxx=Nxx_skin, x0=alow, y0=ys-bb/2., a=defect, b=bb, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho, nx=nx, ny=ny)
+    p06 = Shell(group='skin', Nxx=Nxx_skin, x0=alow, y0=0, a=defect, b=bright, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho, nx=nx, ny=ny)
     #
-    p07 = Panel(group='skin', Nxx=Nxx_skin, x0=0, y0=ys+bb/2., a=alow, b=bleft, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, mu=mu, nx=nx, ny=ny)
-    p08 = Panel(group='skin', Nxx=Nxx_skin, x0=0, y0=ys-bb/2., a=alow, b=bb, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, mu=mu, nx=nx, ny=ny)
-    p09 = Panel(group='skin', Nxx=Nxx_skin, x0=0, y0=0,        a=alow, b=bright, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, mu=mu, nx=nx, ny=ny)
+    p07 = Shell(group='skin', Nxx=Nxx_skin, x0=0, y0=ys+bb/2., a=alow, b=bleft, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho, nx=nx, ny=ny)
+    p08 = Shell(group='skin', Nxx=Nxx_skin, x0=0, y0=ys-bb/2., a=alow, b=bb, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho, nx=nx, ny=ny)
+    p09 = Shell(group='skin', Nxx=Nxx_skin, x0=0, y0=0, a=alow, b=bright, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho, nx=nx, ny=ny)
 
     # stiffeners
-    p10 = Panel(group='base', Nxx=Nxx_base, x0=alow+defect, y0=ys-bb/2., a=aup, b=bb, r=r, m=mb, n=nb, plyt=plyt, stack=stack_base, laminaprop=laminaprop, mu=mu, nx=nxb, ny=nyb)
-    p11 = Panel(group='flange', Nxx=Nxx_flange, x0=alow+defect, y0=0,        a=aup, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, mu=mu, nx=nxf, ny=nyf)
+    p10 = Shell(group='base', Nxx=Nxx_base, x0=alow+defect, y0=ys-bb/2., a=aup, b=bb, r=r, m=mb, n=nb, plyt=plyt, stack=stack_base, laminaprop=laminaprop, rho=rho, nx=nxb, ny=nyb)
+    p11 = Shell(group='flange', Nxx=Nxx_flange, x0=alow+defect, y0=0, a=aup, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, rho=rho, nx=nxf, ny=nyf)
     # defect
-    p12 = Panel(group='base', Nxx=Nxx_base, x0=alow, y0=ys-bb/2., a=defect, b=bb, r=r, m=mb, n=nb, plyt=plyt, stack=stack_base, laminaprop=laminaprop, mu=mu, nx=nxb, ny=nyb)
-    p13 = Panel(group='flange', Nxx=Nxx_flange, x0=alow, y0=0,        a=defect, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, mu=mu, nx=nxf, ny=nyf)
+    p12 = Shell(group='base', Nxx=Nxx_base, x0=alow, y0=ys-bb/2., a=defect, b=bb, r=r, m=mb, n=nb, plyt=plyt, stack=stack_base, laminaprop=laminaprop, rho=rho, nx=nxb, ny=nyb)
+    p13 = Shell(group='flange', Nxx=Nxx_flange, x0=alow, y0=0, a=defect, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, rho=rho, nx=nxf, ny=nyf)
     #
-    p14 = Panel(group='base', Nxx=Nxx_base, x0=0, y0=ys-bb/2., a=alow, b=bb, r=r, m=mb, n=nb, plyt=plyt, stack=stack_base, laminaprop=laminaprop, mu=mu, nx=nxb, ny=nyb)
-    p15 = Panel(group='flange', Nxx=Nxx_flange, x0=0, y0=0,        a=alow, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, mu=mu, nx=nxf, ny=nyf)
+    p14 = Shell(group='base', Nxx=Nxx_base, x0=0, y0=ys-bb/2., a=alow, b=bb, r=r, m=mb, n=nb, plyt=plyt, stack=stack_base, laminaprop=laminaprop, rho=rho, nx=nxb, ny=nyb)
+    p15 = Shell(group='flange', Nxx=Nxx_flange, x0=0, y0=0, a=alow, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, rho=rho, nx=nxf, ny=nyf)
 
     # boundary conditions
     p01.u1tx = 1 ; p01.u1rx = 1 ; p01.u2tx = 0 ; p01.u2rx = 1
@@ -312,12 +312,12 @@ def tstiff2d_1stiff_compression(a, b, ys, bb, bf, defect_a, mu, plyt,
         dict(p1=p13, p2=p15, func='SSxcte', xcte1=0, xcte2=p15.a),
         ]
 
-    panels = [p01, p02, p03, p04, p05, p06, p07, p08, p09,
+    shells = [p01, p02, p03, p04, p05, p06, p07, p08, p09,
             p10, p11, p12, p13, p14, p15]
 
-    assy = PanelAssembly(panels)
+    assy = Panel(shells)
 
-    size = sum([3*p.m*p.n for p in panels])
+    size = sum([3*p.m*p.n for p in shells])
 
     valid_conn = []
     for connecti in conn:
@@ -325,28 +325,21 @@ def tstiff2d_1stiff_compression(a, b, ys, bb, bf, defect_a, mu, plyt,
             continue
         valid_conn.append(connecti)
 
-    k0 = assy.calc_k0(valid_conn)
+    kC = assy.calc_kC(conn=valid_conn)
     c = None
     if run_static_case:
-        fext = np.zeros(size)
+        fext = 0
         for p in [p07, p08, p09, p14, p15]:
-            Nforces = 100
-            fx = p.Nxx*p.b/(Nforces-1.)
-            for i in range(Nforces):
-                y = i*p.b/(Nforces-1.)
-                if i == 0 or i == (Nforces - 1):
-                    p.add_force(0, y, fx/2., 0, 0)
-                else:
-                    p.add_force(0, y, fx, 0, 0)
-            fext[p.col_start: p.col_end] = p.calc_fext(silent=True)
-
-        incs, cs = static(k0, -fext, silent=True)
+            p.add_distr_load_fixed_x(0, lambda x: p.Nxx, None, None)
+            p.Nxx = 0 # to prevent being taken into account twice
+            fext += p.calc_fext(silent=True, col0=p.col_start, size=size)
+        incs, cs = static(kC, -fext, silent=True)
         c = cs[0]
 
-    kG = assy.calc_kG0(c=c)
+    kG = assy.calc_kG(c=c)
 
     eigvals = eigvecs = None
-    eigvals, eigvecs = lb(k0, kG, tol=0, sparse_solver=True, silent=True,
+    eigvals, eigvecs = lb(kC, kG, tol=0, sparse_solver=True, silent=True,
              num_eigvalues=25, num_eigvalues_print=5)
 
     if run_static_case:

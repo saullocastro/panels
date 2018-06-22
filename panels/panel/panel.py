@@ -8,10 +8,9 @@ import numpy as np
 from numpy import linspace
 from scipy.sparse import csr_matrix
 import matplotlib.cm as cm
-from structsolve.sparseutils import make_symmetric, finalize_symmetric_matrix
+from structsolve.sparseutils import finalize_symmetric_matrix
 
 from .. logger import msg, warn
-from .. shell import check_c
 from .. import modelDB
 from . import connections
 
@@ -28,8 +27,8 @@ def default_field(panel, gridx, gridy):
     return xs, ys, shape
 
 
-class PanelAssembly(object):
-    r"""Class for Panel Assemblies
+class Panel(object):
+    r"""Class for Shell Assemblies
 
     This class has some useful methods that will help plotting output for
     different panel groups within the assembly and so forth.
@@ -39,21 +38,21 @@ class PanelAssembly(object):
 
     Parameters
     ----------
-    panels : iterable
-        A list, tuple etc of :class:`.Panel` objects.
+    shells : iterable
+        A list, tuple etc of :class:`.Shell` objects.
     conn : dict
         A connectivity dictionary.
 
     """
-    def __init__(self, panels):
+    def __init__(self, shells):
         self.conn = None
-        self.k0_conn = None
-        self.panels = panels
+        self.kC_conn = None
+        self.shells = shells
         self.size = None
         self.out_num_cores = 4
         row0 = 0
         col0 = 0
-        for p in panels:
+        for p in shells:
             p.row_start = row0
             p.col_start = col0
             row0 += 3*p.m*p.n
@@ -63,7 +62,7 @@ class PanelAssembly(object):
 
 
     def get_size(self):
-        self.size = sum([3*p.m*p.n for p in self.panels])
+        self.size = sum([3*p.m*p.n for p in self.shells])
         return self.size
 
 
@@ -81,7 +80,7 @@ class PanelAssembly(object):
         c : np.ndarray
             The Ritz constants that will be used to compute the field contour.
         group : str
-            A group to plot. Each panel in ``panels`` should contain an
+            A group to plot. Each panel in ``shells`` should contain an
             attribute ``group``, which is used to identify which entities
             should be plotted together.
         vec : str, optional
@@ -100,7 +99,7 @@ class PanelAssembly(object):
             Resolution of the saved file in dots per inch.
         filename : str, optional
             The file name for the generated image file. If no value is given,
-            the `name` parameter of the ``Panel`` object will be used.
+            the `name` parameter of the ``Shell`` object will be used.
         ax : AxesSubplot, optional
             When ``ax`` is given, the contour plot will be created inside it.
         figsize : tuple, optional
@@ -221,7 +220,7 @@ class PanelAssembly(object):
             colormap_obj = cm.jet
 
         count = -1
-        for i, panel in enumerate(self.panels):
+        for i, panel in enumerate(self.shells):
             if panel.group != group:
                 continue
             count += 1
@@ -293,14 +292,14 @@ class PanelAssembly(object):
 
         For a given full set of Ritz constants ``c``, the displacement
         field is calculated and stored in the parameters
-        ``u``, ``v``, ``w``, ``phix``, ``phiy`` of the ``Panel`` object.
+        ``u``, ``v``, ``w``, ``phix``, ``phiy`` of the ``Shell`` object.
 
         Parameters
         ----------
         c : float
             The full set of Ritz constants
         group : str
-            A group to plot. Each panel in ``panels`` should contain an
+            A group to plot. Each panel in ``shells`` should contain an
             attribute ``group``, which is used to identify which entities
             should be plotted together.
         gridx : int, optional
@@ -319,11 +318,11 @@ class PanelAssembly(object):
         Notes
         -----
         The returned values ``u```, ``v``, ``w``, ``phix``, ``phiy`` are
-        stored as parameters with the same name in the ``Panel`` object.
+        stored as parameters with the same name in the ``Shell`` object.
 
         """
         res = dict(x=[], y=[], u=[], v=[], w=[], phix=[], phiy=[])
-        for panel in self.panels:
+        for panel in self.shells:
             if panel.group != group:
                 continue
             c_panel = c[panel.col_start: panel.col_end]
@@ -353,7 +352,7 @@ class PanelAssembly(object):
         c : float
             The full set of Ritz constants
         group : str
-            A group to plot. Each panel in ``panels`` should contain an
+            A group to plot. Each panel in ``shells`` should contain an
             attribute ``group``, which is used to identify which entities
             should be plotted together.
         gridx : int, optional
@@ -373,7 +372,7 @@ class PanelAssembly(object):
 
         """
         res = dict(x=[], y=[], exx=[], eyy=[], gxy=[], kxx=[], kyy=[], kxy=[])
-        for panel in self.panels:
+        for panel in self.shells:
             if panel.group != group:
                 continue
             c_panel = c[panel.col_start: panel.col_end]
@@ -405,7 +404,7 @@ class PanelAssembly(object):
         c : float
             The full set of Ritz constants
         group : str
-            A group to plot. Each panel in ``panels`` should contain an
+            A group to plot. Each panel in ``shells`` should contain an
             attribute ``group``, which is used to identify which entities
             should be plotted together.
         gridx : int, optional
@@ -425,7 +424,7 @@ class PanelAssembly(object):
 
         """
         res = dict(x=[], y=[], Nxx=[], Nyy=[], Nxy=[], Mxx=[], Myy=[], Mxy=[])
-        for panel in self.panels:
+        for panel in self.shells:
             if panel.group != group:
                 continue
             c_panel = c[panel.col_start: panel.col_end]
@@ -461,75 +460,75 @@ class PanelAssembly(object):
         return res
 
 
-    def get_k0_conn(self, conn=None, finalize=True):
+    def get_kC_conn(self, conn=None, finalize=True):
         if conn is None:
             if self.conn is None:
                 raise RuntimeError('No connectivity dictionary defined!')
             conn = self.conn
 
-        if self.k0_conn is not None:
-            return self.k0_conn
+        if self.kC_conn is not None:
+            return self.kC_conn
 
         size = self.get_size()
 
-        k0_conn = 0.
+        kC_conn = 0.
         for connecti in conn:
             p1 = connecti['p1']
             p2 = connecti['p2']
             if connecti['func'] == 'SSycte':
                 kt, kr = connections.calc_kt_kr(p1, p2, 'ycte')
-                k0_conn += connections.kCSSycte.fkCSSycte11(
+                kC_conn += connections.kCSSycte.fkCSSycte11(
                         kt, kr, p1, connecti['ycte1'],
                         size, p1.row_start, col0=p1.col_start)
-                k0_conn += connections.kCSSycte.fkCSSycte12(
+                kC_conn += connections.kCSSycte.fkCSSycte12(
                         kt, kr, p1, p2, connecti['ycte1'], connecti['ycte2'],
                         size, p1.row_start, col0=p2.col_start)
-                k0_conn += connections.kCSSycte.fkCSSycte22(
+                kC_conn += connections.kCSSycte.fkCSSycte22(
                         kt, kr, p1, p2, connecti['ycte2'],
                         size, p2.row_start, col0=p2.col_start)
             elif connecti['func'] == 'SSxcte':
                 kt, kr = connections.calc_kt_kr(p1, p2, 'xcte')
-                k0_conn += connections.kCSSxcte.fkCSSxcte11(
+                kC_conn += connections.kCSSxcte.fkCSSxcte11(
                         kt, kr, p1, connecti['xcte1'],
                         size, p1.row_start, col0=p1.col_start)
-                k0_conn += connections.kCSSxcte.fkCSSxcte12(
+                kC_conn += connections.kCSSxcte.fkCSSxcte12(
                         kt, kr, p1, p2, connecti['xcte1'], connecti['xcte2'],
                         size, p1.row_start, col0=p2.col_start)
-                k0_conn += connections.kCSSxcte.fkCSSxcte22(
+                kC_conn += connections.kCSSxcte.fkCSSxcte22(
                         kt, kr, p1, p2, connecti['xcte2'],
                         size, p2.row_start, col0=p2.col_start)
             elif connecti['func'] == 'SB':
                 kt, kr = connections.calc_kt_kr(p1, p2, 'bot-top')
                 dsb = sum(p1.plyts)/2. + sum(p2.plyts)/2.
-                k0_conn += connections.kCSB.fkCSB11(kt, dsb, p1,
+                kC_conn += connections.kCSB.fkCSB11(kt, dsb, p1,
                         size, p1.row_start, col0=p1.col_start)
-                k0_conn += connections.kCSB.fkCSB12(kt, dsb, p1, p2,
+                kC_conn += connections.kCSB.fkCSB12(kt, dsb, p1, p2,
                         size, p1.row_start, col0=p2.col_start)
-                k0_conn += connections.kCSB.fkCSB22(kt, p1, p2,
+                kC_conn += connections.kCSB.fkCSB22(kt, p1, p2,
                         size, p2.row_start, col0=p2.col_start)
             elif connecti['func'] == 'BFycte':
                 kt, kr = connections.calc_kt_kr(p1, p2, 'ycte')
-                k0_conn += connections.kCBFycte.fkCBFycte11(
+                kC_conn += connections.kCBFycte.fkCBFycte11(
                         kt, kr, p1, connecti['ycte1'],
                         size, p1.row_start, col0=p1.col_start)
-                k0_conn += connections.kCBFycte.fkCBFycte12(
+                kC_conn += connections.kCBFycte.fkCBFycte12(
                         kt, kr, p1, p2, connecti['ycte1'], connecti['ycte2'],
                         size, p1.row_start, col0=p2.col_start)
-                k0_conn += connections.kCBFycte.fkCBFycte22(
+                kC_conn += connections.kCBFycte.fkCBFycte22(
                         kt, kr, p1, p2, connecti['ycte2'],
                         size, p2.row_start, col0=p2.col_start)
             else:
                 raise
 
         if finalize:
-            k0_conn = finalize_symmetric_matrix(k0_conn)
-        self.k0_conn = k0_conn
+            kC_conn = finalize_symmetric_matrix(kC_conn)
+        self.kC_conn = kC_conn
         #NOTE memory cleanup
         gc.collect()
-        return k0_conn
+        return kC_conn
 
 
-    def calc_k0(self, conn=None, c=None, silent=False, finalize=True, inc=1.):
+    def calc_kC(self, conn=None, c=None, silent=False, finalize=True, inc=1.):
         """Calculate the constitutive stiffness matrix of the assembly
 
         Parameters
@@ -550,31 +549,28 @@ class PanelAssembly(object):
             Dummy argument needed for non-linear analyses.
 
         """
+        msg('Calculating kC for assembly...', level=2, silent=silent)
         size = self.get_size()
-        if c is None:
-            msg('Calculating k0 for assembly...', level=2, silent=silent)
-        else:
-            check_c(c, size)
-            msg('Calculating kL for assembly...', level=2, silent=silent)
 
-        k0 = 0.
-        for p in self.panels:
+        kC = 0.
+        #TODO use multiprocessing.Pool here
+        for p in self.shells:
             if p.row_start is None or p.col_start is None:
-                raise ValueError('Panel attributes "row_start" and "col_start" must be defined!')
-            k0 += p.calc_k0(c=c, row0=p.row_start, col0=p.col_start, size=size,
+                raise ValueError('Shell attributes "row_start" and "col_start" must be defined!')
+            kC += p.calc_kC(c=c, row0=p.row_start, col0=p.col_start, size=size,
                     silent=True, finalize=False)
 
         if finalize:
-            k0 = finalize_symmetric_matrix(k0)
-        k0_conn = self.get_k0_conn(conn=conn)
-        k0 += self.k0_conn
+            kC = finalize_symmetric_matrix(kC)
+        kC_conn = self.get_kC_conn(conn=conn)
+        kC += self.kC_conn
 
-        self.k0 = k0
+        self.kC = kC
         msg('finished!', level=2, silent=silent)
-        return k0
+        return kC
 
 
-    def calc_kG0(self, c=None, silent=False, finalize=True):
+    def calc_kG(self, c=None, silent=False, finalize=True):
         """Calculate the geometric stiffness matrix of the assembly
 
         Parameters
@@ -590,30 +586,28 @@ class PanelAssembly(object):
             symmetric, should be ``False`` when assemblying.
 
         """
+        msg('Calculating kG for assembly...', level=2, silent=silent)
         size = self.get_size()
-        if c is None:
-            msg('Calculating kG0 for assembly...', level=2, silent=silent)
-        else:
-            check_c(c, size)
-            msg('Calculating kG for assembly...', level=2, silent=silent)
-        kG0 = 0.
-        for p in self.panels:
+        kG = 0.
+        #TODO use multiprocessing.Pool here
+        for p in self.shells:
             if p.row_start is None or p.col_start is None:
-                raise ValueError('Panel attributes "row_start" and "col_start" must be defined!')
-            kG0 += p.calc_kG0(c=c, row0=p.row_start, col0=p.col_start, size=size,
+                raise ValueError('Shell attributes "row_start" and "col_start" must be defined!')
+            kG += p.calc_kG(c=c, row0=p.row_start, col0=p.col_start, size=size,
                     silent=True, finalize=False)
         if finalize:
-            kG0 = finalize_symmetric_matrix(kG0)
-        self.kG0 = kG0
+            kG = finalize_symmetric_matrix(kG)
+        self.kG = kG
         msg('finished!', level=2, silent=silent)
-        return kG0
+        return kG
 
 
     def calc_kM(self, silent=False, finalize=True):
         msg('Calculating kM for assembly...', level=2, silent=silent)
         size = self.get_size()
         kM = 0
-        for p in self.panels:
+        #TODO use multiprocessing.Pool here
+        for p in self.shells:
             if p.row_start is None or p.col_start is None:
                 raise ValueError('Panel attributes "row_start" and "col_start" must be defined!')
             kM += p.calc_kM(row0=p.row_start, col0=p.col_start, size=size, silent=True, finalize=False)
@@ -624,37 +618,17 @@ class PanelAssembly(object):
         return kM
 
 
-    def calc_kT(self, c=None, silent=False, finalize=True, inc=None):
-        msg('Calculating kT for assembly...', level=2, silent=silent)
-        size = self.get_size()
-        kT = 0
-        #TODO use multiprocessing.Pool here
-        for p in self.panels:
-            if p.row_start is None or p.col_start is None:
-                raise ValueError('Panel attributes "row_start" and "col_start" must be defined!')
-            kT += p.calc_k0(c=c, size=size, row0=p.row_start, col0=p.col_start,
-                    silent=True, finalize=False, inc=inc, NLgeom=True)
-            kT += p.calc_kG0(c=c, size=size, row0=p.row_start,
-                    col0=p.col_start, silent=True, finalize=False, NLgeom=True)
-        if finalize:
-            kT = finalize_symmetric_matrix(kT)
-        k0_conn = self.get_k0_conn()
-        kT += k0_conn
-        self.kT = kT
-        msg('finished!', level=2, silent=silent)
-        return kT
-
-
     def calc_fint(self, c, silent=False, inc=1.):
         msg('Calculating internal forces for assembly...', level=2, silent=silent)
         size = self.get_size()
         fint = 0
-        for p in self.panels:
+        #TODO use multiprocessing.Pool here
+        for p in self.shells:
             if p.col_start is None:
                 raise ValueError('Panel attributes "col_start" must be defined!')
             fint += p.calc_fint(c=c, size=size, col0=p.col_start, silent=True)
-        k0_conn = self.get_k0_conn()
-        fint += k0_conn*c
+        kC_conn = self.get_kC_conn()
+        fint += kC_conn*c
         self.fint = fint
         msg('finished!', level=2, silent=silent)
         return fint
@@ -664,7 +638,8 @@ class PanelAssembly(object):
         msg('Calculating external forces for assembly...', level=2, silent=silent)
         size = self.get_size()
         fext = 0
-        for p in self.panels:
+        #TODO use multiprocessing.Pool here
+        for p in self.shells:
             if p.col_start is None:
                 raise ValueError('Panel attributes "col_start" must be defined!')
             fext += p.calc_fext(inc=inc, size=size, col0=p.col_start, silent=True)

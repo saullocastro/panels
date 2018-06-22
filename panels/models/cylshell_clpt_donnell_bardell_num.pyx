@@ -615,6 +615,93 @@ def fkM_num(object shell, double offset, object hrho_input, int size, int row0, 
     return kM
 
 
+def fkAx_num(object shell, int size, int row0, int col0, int nx, int ny):
+    cdef double a, b, beta, gamma
+    cdef int m, n
+    cdef double w1tx, w1rx, w2tx, w2rx
+    cdef double w1ty, w1ry, w2ty, w2ry
+
+    cdef int i, j, k, l, c, row, col, ptx, pty
+
+    cdef np.ndarray[cINT, ndim=1] kAr, kAc
+    cdef np.ndarray[cDOUBLE, ndim=1] kAv
+
+    cdef double fAw, fAwxi, fBw, gAw, gBw
+    cdef double xi, eta, weight
+
+    cdef np.ndarray[cDOUBLE, ndim=1] xis, etas, weights_xi, weights_eta
+
+    if not 'Shell' in shell.__class__.__name__:
+        raise ValueError('a Shell object must be given as input')
+    a = shell.a
+    b = shell.b
+    m = shell.m
+    n = shell.n
+    beta = shell.beta
+    gamma = shell.gamma
+    w1tx = shell.w1tx; w1rx = shell.w1rx; w2tx = shell.w2tx; w2rx = shell.w2rx
+    w1ty = shell.w1ty; w1ry = shell.w1ry; w2ty = shell.w2ty; w2ry = shell.w2ry
+
+    fdim = 1*m*m*n*n
+
+    xis = np.zeros(nx, dtype=DOUBLE)
+    weights_xi = np.zeros(nx, dtype=DOUBLE)
+    etas = np.zeros(ny, dtype=DOUBLE)
+    weights_eta = np.zeros(ny, dtype=DOUBLE)
+
+    leggauss_quad(nx, &xis[0], &weights_xi[0])
+    leggauss_quad(ny, &etas[0], &weights_eta[0])
+
+    kAr = np.zeros((fdim,), dtype=INT)
+    kAc = np.zeros((fdim,), dtype=INT)
+    kAv = np.zeros((fdim,), dtype=DOUBLE)
+
+    with nogil:
+        for ptx in range(nx):
+            for pty in range(ny):
+                xi = xis[ptx]
+                eta = etas[pty]
+                weight = weights_xi[ptx] * weights_eta[pty]
+
+                # kA
+                c = -1
+                for i in range(m):
+                    fAw = calc_f(i, xi, w1tx, w1rx, w2tx, w2rx)
+                    fAwxi = calc_fx(i, xi, w1tx, w1rx, w2tx, w2rx)
+
+                    for k in range(m):
+                        fBw = calc_f(k, xi, w1tx, w1rx, w2tx, w2rx)
+
+                        for j in range(n):
+                            gAw = calc_f(j, eta, w1ty, w1ry, w2ty, w2ry)
+
+                            for l in range(n):
+
+                                row = row0 + num*(j*m + i)
+                                col = col0 + num*(l*m + k)
+
+                                #NOTE symmetry assumption True if no follower forces are used
+                                if row > col:
+                                    continue
+
+                                gBw = calc_f(l, eta, w1ty, w1ry, w2ty, w2ry)
+
+                                c += 1
+                                if ptx == 0 and pty == 0:
+                                    kAr[c] = row+2
+                                    kAc[c] = col+2
+                                kAv[c] += weight*( 0.25*a*b*(fAw*fBw*gAw*gBw*gamma - 2*beta*fAwxi*fBw*gAw*gBw/a) )
+
+    kA = coo_matrix((kAv, (kAr, kAc)), shape=(size, size))
+
+    return kA
+
+
+def fkAy_num(object shell, int size, int row0, int col0, int nx, int ny):
+    from . plate_clpt_donnell_bardell_num import fkAy_num as plate_fkAy_num
+    return plate_fkAy_num(shell, size, row0, col0, nx, ny)
+
+
 def calc_fint(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
         int size, int col0, int nx, int ny):
     cdef double a, b, r

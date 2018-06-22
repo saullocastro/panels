@@ -11,15 +11,15 @@ import numpy as np
 cimport numpy as np
 
 
-cdef extern from 'bardell.h':
+cdef extern from 'bardell.hpp':
     double integral_ff(int i, int j,
             double x1t, double x1r, double x2t, double x2r,
             double y1t, double y1r, double y2t, double y2r) nogil
 
-cdef extern from 'bardell_functions.h':
+cdef extern from 'bardell_functions.hpp':
     double calc_f(int i, double xi, double xi1t, double xi1r,
                   double xi2t, double xi2r) nogil
-    double calc_fxi(int i, double xi, double xi1t, double xi1r,
+    double calc_fx(int i, double xi, double xi1t, double xi1r,
                     double xi2t, double xi2r) nogil
 
 ctypedef np.double_t cDOUBLE
@@ -81,7 +81,7 @@ def fkCSSxcte11(double kt, double kr, object p1,
                     f1Au = calc_f(i1, xicte1, u1tx1, u1rx1, u2tx1, u2rx1)
                     f1Av = calc_f(i1, xicte1, v1tx1, v1rx1, v2tx1, v2rx1)
                     f1Aw = calc_f(i1, xicte1, w1tx1, w1rx1, w2tx1, w2rx1)
-                    f1Awxi = calc_fxi(i1, xicte1, w1tx1, w1rx1, w2tx1, w2rx1)
+                    f1Awxi = calc_fx(i1, xicte1, w1tx1, w1rx1, w2tx1, w2rx1)
 
                     for k1 in range(m1):
                         row = row0 + num*(j1*m1 + i1)
@@ -94,7 +94,7 @@ def fkCSSxcte11(double kt, double kr, object p1,
                         f1Bu = calc_f(k1, xicte1, u1tx1, u1rx1, u2tx1, u2rx1)
                         f1Bv = calc_f(k1, xicte1, v1tx1, v1rx1, v2tx1, v2rx1)
                         f1Bw = calc_f(k1, xicte1, w1tx1, w1rx1, w2tx1, w2rx1)
-                        f1Bwxi = calc_fxi(k1, xicte1, w1tx1, w1rx1, w2tx1, w2rx1)
+                        f1Bwxi = calc_fx(k1, xicte1, w1tx1, w1rx1, w2tx1, w2rx1)
 
                         c += 1
                         kCSSxcte11r[c] = row+0
@@ -177,7 +177,7 @@ def fkCSSxcte12(double kt, double kr, object p1, object p2,
                     f1Au = calc_f(i1, xicte1, u1tx1, u1rx1, u2tx1, u2rx1)
                     f1Av = calc_f(i1, xicte1, v1tx1, v1rx1, v2tx1, v2rx1)
                     f1Aw = calc_f(i1, xicte1, w1tx1, w1rx1, w2tx1, w2rx1)
-                    f1Awxi = calc_fxi(i1, xicte1, w1tx1, w1rx1, w2tx1, w2rx1)
+                    f1Awxi = calc_fx(i1, xicte1, w1tx1, w1rx1, w2tx1, w2rx1)
 
                     for k2 in range(m2):
                         row = row0 + num*(j1*m1 + i1)
@@ -190,7 +190,7 @@ def fkCSSxcte12(double kt, double kr, object p1, object p2,
                         f2Bu = calc_f(k2, xicte2, u1tx2, u1rx2, u2tx2, u2rx2)
                         f2Bv = calc_f(k2, xicte2, v1tx2, v1rx2, v2tx2, v2rx2)
                         f2Bw = calc_f(k2, xicte2, w1tx2, w1rx2, w2tx2, w2rx2)
-                        f2Bwxi = calc_fxi(k2, xicte2, w1tx2, w1rx2, w2tx2, w2rx2)
+                        f2Bwxi = calc_fx(k2, xicte2, w1tx2, w1rx2, w2tx2, w2rx2)
 
                         c += 1
                         kCSSxcte12r[c] = row+0
@@ -262,7 +262,7 @@ def fkCSSxcte22(double kt, double kr, object p1, object p2,
                     f2Au = calc_f(i2, xicte2, u1tx2, u1rx2, u2tx2, u2rx2)
                     f2Av = calc_f(i2, xicte2, v1tx2, v1rx2, v2tx2, v2rx2)
                     f2Aw = calc_f(i2, xicte2, w1tx2, w1rx2, w2tx2, w2rx2)
-                    f2Awxi = calc_fxi(i2, xicte2, w1tx2, w1rx2, w2tx2, w2rx2)
+                    f2Awxi = calc_fx(i2, xicte2, w1tx2, w1rx2, w2tx2, w2rx2)
 
                     for k2 in range(m2):
                         row = row0 + num*(j2*m2 + i2)
@@ -275,7 +275,7 @@ def fkCSSxcte22(double kt, double kr, object p1, object p2,
                         f2Bu = calc_f(k2, xicte2, u1tx2, u1rx2, u2tx2, u2rx2)
                         f2Bv = calc_f(k2, xicte2, v1tx2, v1rx2, v2tx2, v2rx2)
                         f2Bw = calc_f(k2, xicte2, w1tx2, w1rx2, w2tx2, w2rx2)
-                        f2Bwxi = calc_fxi(k2, xicte2, w1tx2, w1rx2, w2tx2, w2rx2)
+                        f2Bwxi = calc_fx(k2, xicte2, w1tx2, w1rx2, w2tx2, w2rx2)
 
                         c += 1
                         kCSSxcte22r[c] = row+0

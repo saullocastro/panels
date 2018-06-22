@@ -11,21 +11,21 @@ import numpy as np
 cimport numpy as np
 
 
-cdef extern from 'bardell.h':
+cdef extern from 'bardell.hpp':
     double integral_ff(int i, int j,
             double x1t, double x1r, double x2t, double x2r,
             double y1t, double y1r, double y2t, double y2r) nogil
-    double integral_ffxi(int i, int j,
+    double integral_ffx(int i, int j,
             double x1t, double x1r, double x2t, double x2r,
             double y1t, double y1r, double y2t, double y2r) nogil
-    double integral_fxifxi(int i, int j,
+    double integral_fxfx(int i, int j,
             double x1t, double x1r, double x2t, double x2r,
             double y1t, double y1r, double y2t, double y2r) nogil
 
-cdef extern from 'bardell_functions.h':
+cdef extern from 'bardell_functions.hpp':
     double calc_f(int i, double xi, double xi1t, double xi1r,
                   double xi2t, double xi2r) nogil
-    double calc_fxi(int i, double xi, double xi1t, double xi1r,
+    double calc_fx(int i, double xi, double xi1t, double xi1r,
                     double xi2t, double xi2r) nogil
 
 ctypedef np.double_t cDOUBLE
@@ -77,13 +77,13 @@ def fkCSB11(double kt, double dsb, object p1,
         for i1 in range(m1):
             for k1 in range(m1):
                 f1Auf1Bu = integral_ff(i1, k1, u1tx1, u1rx1, u2tx1, u2rx1, u1tx1, u1rx1, u2tx1, u2rx1)
-                f1Auf1Bwxi = integral_ffxi(i1, k1, u1tx1, u1rx1, u2tx1, u2rx1, w1tx1, w1rx1, w2tx1, w2rx1)
+                f1Auf1Bwxi = integral_ffx(i1, k1, u1tx1, u1rx1, u2tx1, u2rx1, w1tx1, w1rx1, w2tx1, w2rx1)
                 f1Avf1Bv = integral_ff(i1, k1, v1tx1, v1rx1, v2tx1, v2rx1, v1tx1, v1rx1, v2tx1, v2rx1)
                 f1Avf1Bw = integral_ff(i1, k1, v1tx1, v1rx1, v2tx1, v2rx1, w1tx1, w1rx1, w2tx1, w2rx1)
                 f1Awf1Bv = integral_ff(i1, k1, w1tx1, w1rx1, w2tx1, w2rx1, v1tx1, v1rx1, v2tx1, v2rx1)
                 f1Awf1Bw = integral_ff(i1, k1, w1tx1, w1rx1, w2tx1, w2rx1, w1tx1, w1rx1, w2tx1, w2rx1)
-                f1Awxif1Bu = integral_ffxi(k1, i1, u1tx1, u1rx1, u2tx1, u2rx1, w1tx1, w1rx1, w2tx1, w2rx1)
-                f1Awxif1Bwxi = integral_fxifxi(i1, k1, w1tx1, w1rx1, w2tx1, w2rx1, w1tx1, w1rx1, w2tx1, w2rx1)
+                f1Awxif1Bu = integral_ffx(k1, i1, u1tx1, u1rx1, u2tx1, u2rx1, w1tx1, w1rx1, w2tx1, w2rx1)
+                f1Awxif1Bwxi = integral_fxfx(i1, k1, w1tx1, w1rx1, w2tx1, w2rx1, w1tx1, w1rx1, w2tx1, w2rx1)
 
                 for j1 in range(n1):
                     for l1 in range(n1):
@@ -97,11 +97,11 @@ def fkCSB11(double kt, double dsb, object p1,
                         g1Aug1Bu = integral_ff(j1, l1, u1ty1, u1ry1, u2ty1, u2ry1, u1ty1, u1ry1, u2ty1, u2ry1)
                         g1Aug1Bw = integral_ff(j1, l1, u1ty1, u1ry1, u2ty1, u2ry1, w1ty1, w1ry1, w2ty1, w2ry1)
                         g1Avg1Bv = integral_ff(j1, l1, v1ty1, v1ry1, v2ty1, v2ry1, v1ty1, v1ry1, v2ty1, v2ry1)
-                        g1Avg1Bweta = integral_ffxi(j1, l1, v1ty1, v1ry1, v2ty1, v2ry1, w1ty1, w1ry1, w2ty1, w2ry1)
+                        g1Avg1Bweta = integral_ffx(j1, l1, v1ty1, v1ry1, v2ty1, v2ry1, w1ty1, w1ry1, w2ty1, w2ry1)
                         g1Awg1Bu = integral_ff(j1, l1, w1ty1, w1ry1, w2ty1, w2ry1, u1ty1, u1ry1, u2ty1, u2ry1)
                         g1Awg1Bw = integral_ff(j1, l1, w1ty1, w1ry1, w2ty1, w2ry1, w1ty1, w1ry1, w2ty1, w2ry1)
-                        g1Awetag1Bv = integral_ffxi(l1, j1, v1ty1, v1ry1, v2ty1, v2ry1, w1ty1, w1ry1, w2ty1, w2ry1)
-                        g1Awetag1Bweta = integral_fxifxi(j1, l1, w1ty1, w1ry1, w2ty1, w2ry1, w1ty1, w1ry1, w2ty1, w2ry1)
+                        g1Awetag1Bv = integral_ffx(l1, j1, v1ty1, v1ry1, v2ty1, v2ry1, w1ty1, w1ry1, w2ty1, w2ry1)
+                        g1Awetag1Bweta = integral_fxfx(j1, l1, w1ty1, w1ry1, w2ty1, w2ry1, w1ty1, w1ry1, w2ty1, w2ry1)
 
                         c += 1
                         kCSB11r[c] = row+0
@@ -189,7 +189,7 @@ def fkCSB12(double kt, double dsb, object p1, object p2,
                 f1Auf2Bu = integral_ff(i1, k2, u1tx1, u1rx1, u2tx1, u2rx1, u1tx2, u1rx2, u2tx2, u2rx2)
                 f1Avf2Bv = integral_ff(i1, k2, v1tx1, v1rx1, v2tx1, v2rx1, v1tx2, v1rx2, v2tx2, v2rx2)
                 f1Awf2Bw = integral_ff(i1, k2, w1tx1, w1rx1, w2tx1, w2rx1, w1tx2, w1rx2, w2tx2, w2rx2)
-                f1Awxif2Bu = integral_ffxi(k2, i1, u1tx2, u1rx2, u2tx2, u2rx2, w1tx1, w1rx1, w2tx1, w2rx1)
+                f1Awxif2Bu = integral_ffx(k2, i1, u1tx2, u1rx2, u2tx2, u2rx2, w1tx1, w1rx1, w2tx1, w2rx1)
                 f1Awf2Bv = integral_ff(i1, k2, w1tx1, w1rx1, w2tx1, w2rx1, v1tx2, v1rx2, v2tx2, v2rx2)
 
                 for j1 in range(n1):
@@ -204,7 +204,7 @@ def fkCSB12(double kt, double dsb, object p1, object p2,
                         g1Aug2Bu = integral_ff(j1, l2, u1ty1, u1ry1, u2ty1, u2ry1, u1ty2, u1ry2, u2ty2, u2ry2)
                         g1Avg2Bv = integral_ff(j1, l2, v1ty1, v1ry1, v2ty1, v2ry1, v1ty2, v1ry2, v2ty2, v2ry2)
                         g1Awg2Bw = integral_ff(j1, l2, w1ty1, w1ry1, w2ty1, w2ry1, w1ty2, w1ry2, w2ty2, w2ry2)
-                        g1Awetag2Bv = integral_ffxi(l2, j1, v1ty2, v1ry2, v2ty2, v2ry2, w1ty1, w1ry1, w2ty1, w2ry1)
+                        g1Awetag2Bv = integral_ffx(l2, j1, v1ty2, v1ry2, v2ty2, v2ry2, w1ty1, w1ry1, w2ty1, w2ry1)
                         g1Awg2Bu = integral_ff(j1, l2, w1ty1, w1ry1, w2ty1, w2ry1, u1ty2, u1ry2, u2ty2, u2ry2)
 
                         c += 1

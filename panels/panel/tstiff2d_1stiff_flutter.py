@@ -2,17 +2,17 @@ from __future__ import division, absolute_import
 
 import numpy as np
 from scipy.sparse import csr_matrix
+from structsolve import freq, static
+from structsolve.sparseutils import make_skew_symmetric
 
-from compmech.panel import Panel
-from compmech.panel.assembly import PanelAssembly
-from compmech.sparse import make_skew_symmetric
-from compmech.analysis import freq, static
+from .. shell import Shell
+from . panel import Panel
 
 
-def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, mu, plyt,
+def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
         laminaprop, stack_skin, stack_base, stack_flange,
         air_speed=None, rho_air=None, Mach=None, speed_sound=None, flow='x',
-        Nxx_skin=None, Nxx_base=None, Nxx_flange=None, run_static_case=True,
+        Nxx_skin=0, Nxx_base=0, Nxx_flange=0, run_static_case=True,
         r=None, m=8, n=8, mb=None, nb=None, mf=None, nf=None):
     r"""Flutter of T-Stiffened Panel with possible defect at middle
 
@@ -71,7 +71,7 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, mu, plyt,
         Stiffener's flange width.
     defect_a : float
         Debonding defect/assembly length ratio.
-    mu : float
+    rho : float
         Material density.
     plyt : float
         Ply thickness.
@@ -118,7 +118,7 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, mu, plyt,
 
     The following example is one of the test cases:
 
-    .. literalinclude:: ../../../../../compmech/panel/assembly/tests/test_tstiff2d_assembly.py
+    .. literalinclude:: ../../../../../panels/panel/tests/test_tstiff2d_assembly.py
         :pyobject: test_tstiff2d_1stiff_flutter
 
     """
@@ -133,28 +133,28 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, mu, plyt,
     nb = n if nb is None else nb
     mf = m if mf is None else mf
     nf = n if nf is None else nf
-    # skin panels
-    p01 = Panel(group='skin', Nxx=Nxx_skin, x0=alow+defect, y0=ys+bb/2., a=aup, b=bleft, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, mu=mu, rho_air=rho_air, speed_sound=speed_sound, Mach=Mach, V=air_speed, flow=flow)
-    p02 = Panel(group='skin', Nxx=Nxx_skin, x0=alow+defect, y0=ys-bb/2., a=aup, b=bb, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, mu=mu, rho_air=rho_air, speed_sound=speed_sound, Mach=Mach, V=air_speed, flow=flow)
-    p03 = Panel(group='skin', Nxx=Nxx_skin, x0=alow+defect, y0=0, a=aup, b=bright, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, mu=mu, rho_air=rho_air, speed_sound=speed_sound, Mach=Mach, V=air_speed, flow=flow)
+    # skin
+    p01 = Shell(group='skin', Nxx=Nxx_skin, x0=alow+defect, y0=ys+bb/2., a=aup, b=bleft, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho, rho_air=rho_air, speed_sound=speed_sound, Mach=Mach, V=air_speed, flow=flow)
+    p02 = Shell(group='skin', Nxx=Nxx_skin, x0=alow+defect, y0=ys-bb/2., a=aup, b=bb, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho, rho_air=rho_air, speed_sound=speed_sound, Mach=Mach, V=air_speed, flow=flow)
+    p03 = Shell(group='skin', Nxx=Nxx_skin, x0=alow+defect, y0=0, a=aup, b=bright, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho, rho_air=rho_air, speed_sound=speed_sound, Mach=Mach, V=air_speed, flow=flow)
     # defect
-    p04 = Panel(group='skin', Nxx=Nxx_skin, x0=alow, y0=ys+bb/2., a=defect, b=bleft, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, mu=mu, rho_air=rho_air, speed_sound=speed_sound, Mach=Mach, V=air_speed, flow=flow)
-    p05 = Panel(group='skin', Nxx=Nxx_skin, x0=alow, y0=ys-bb/2., a=defect, b=bb, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, mu=mu, rho_air=rho_air, speed_sound=speed_sound, Mach=Mach, V=air_speed, flow=flow)
-    p06 = Panel(group='skin', Nxx=Nxx_skin, x0=alow, y0=0, a=defect, b=bright, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, mu=mu, rho_air=rho_air, speed_sound=speed_sound, Mach=Mach, V=air_speed, flow=flow)
+    p04 = Shell(group='skin', Nxx=Nxx_skin, x0=alow, y0=ys+bb/2., a=defect, b=bleft, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho, rho_air=rho_air, speed_sound=speed_sound, Mach=Mach, V=air_speed, flow=flow)
+    p05 = Shell(group='skin', Nxx=Nxx_skin, x0=alow, y0=ys-bb/2., a=defect, b=bb, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho, rho_air=rho_air, speed_sound=speed_sound, Mach=Mach, V=air_speed, flow=flow)
+    p06 = Shell(group='skin', Nxx=Nxx_skin, x0=alow, y0=0, a=defect, b=bright, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho, rho_air=rho_air, speed_sound=speed_sound, Mach=Mach, V=air_speed, flow=flow)
     #
-    p07 = Panel(group='skin', Nxx=Nxx_skin, x0=0, y0=ys+bb/2., a=alow, b=bleft, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, mu=mu, rho_air=rho_air, speed_sound=speed_sound, Mach=Mach, V=air_speed, flow=flow)
-    p08 = Panel(group='skin', Nxx=Nxx_skin, x0=0, y0=ys-bb/2., a=alow, b=bb, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, mu=mu, rho_air=rho_air, speed_sound=speed_sound, Mach=Mach, V=air_speed, flow=flow)
-    p09 = Panel(group='skin', Nxx=Nxx_skin, x0=0, y0=0, a=alow, b=bright, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, mu=mu, rho_air=rho_air, speed_sound=speed_sound, Mach=Mach, V=air_speed, flow=flow)
+    p07 = Shell(group='skin', Nxx=Nxx_skin, x0=0, y0=ys+bb/2., a=alow, b=bleft, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho, rho_air=rho_air, speed_sound=speed_sound, Mach=Mach, V=air_speed, flow=flow)
+    p08 = Shell(group='skin', Nxx=Nxx_skin, x0=0, y0=ys-bb/2., a=alow, b=bb, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho, rho_air=rho_air, speed_sound=speed_sound, Mach=Mach, V=air_speed, flow=flow)
+    p09 = Shell(group='skin', Nxx=Nxx_skin, x0=0, y0=0, a=alow, b=bright, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho, rho_air=rho_air, speed_sound=speed_sound, Mach=Mach, V=air_speed, flow=flow)
 
     # stiffeners
-    p10 = Panel(group='base', Nxx=Nxx_base, x0=alow+defect, y0=ys-bb/2., a=aup, b=bb, r=r, m=mb, n=nb, plyt=plyt, stack=stack_base, laminaprop=laminaprop, mu=mu)
-    p11 = Panel(group='flange', Nxx=Nxx_flange, x0=alow+defect, y0=0,        a=aup, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, mu=mu)
+    p10 = Shell(group='base', Nxx=Nxx_base, x0=alow+defect, y0=ys-bb/2., a=aup, b=bb, r=r, m=mb, n=nb, plyt=plyt, stack=stack_base, laminaprop=laminaprop, rho=rho)
+    p11 = Shell(group='flange', Nxx=Nxx_flange, x0=alow+defect, y0=0,        a=aup, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, rho=rho)
     # defect
-    p12 = Panel(group='base', Nxx=Nxx_base, x0=alow, y0=ys-bb/2., a=defect, b=bb, r=r, m=mb, n=nb, plyt=plyt, stack=stack_base, laminaprop=laminaprop, mu=mu)
-    p13 = Panel(group='flange', Nxx=Nxx_flange, x0=alow, y0=0,        a=defect, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, mu=mu)
+    p12 = Shell(group='base', Nxx=Nxx_base, x0=alow, y0=ys-bb/2., a=defect, b=bb, r=r, m=mb, n=nb, plyt=plyt, stack=stack_base, laminaprop=laminaprop, rho=rho)
+    p13 = Shell(group='flange', Nxx=Nxx_flange, x0=alow, y0=0,        a=defect, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, rho=rho)
     #
-    p14 = Panel(group='base', Nxx=Nxx_base, x0=0, y0=ys-bb/2., a=alow, b=bb, r=r, m=mb, n=nb, plyt=plyt, stack=stack_base, laminaprop=laminaprop, mu=mu)
-    p15 = Panel(group='flange', Nxx=Nxx_flange, x0=0, y0=0,        a=alow, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, mu=mu)
+    p14 = Shell(group='base', Nxx=Nxx_base, x0=0, y0=ys-bb/2., a=alow, b=bb, r=r, m=mb, n=nb, plyt=plyt, stack=stack_base, laminaprop=laminaprop, rho=rho)
+    p15 = Shell(group='flange', Nxx=Nxx_flange, x0=0, y0=0,        a=alow, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, rho=rho)
 
     # boundary conditions
     p01.u1tx = 1 ; p01.u1rx = 1 ; p01.u2tx = 0 ; p01.u2rx = 1
@@ -302,11 +302,11 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, mu, plyt,
         dict(p1=p13, p2=p15, func='SSxcte', xcte1=0, xcte2=p15.a),
         ]
 
-    panels = [p01, p02, p03, p04, p05, p06, p07, p08, p09,
+    shells = [p01, p02, p03, p04, p05, p06, p07, p08, p09,
             p10, p11, p12, p13, p14, p15]
     skin = [p01, p02, p03, p04, p05, p06, p07, p08, p09]
 
-    assy = PanelAssembly(panels)
+    assy = Panel(shells)
 
     size = assy.get_size()
 
@@ -316,32 +316,24 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, mu, plyt,
             continue
         valid_conn.append(connecti)
 
-    k0 = assy.calc_k0(valid_conn)
+    kC = assy.calc_kC(conn=valid_conn)
     c = None
     if (run_static_case and not
             (Nxx_skin is None and Nxx_base is None and Nxx_flange is None)):
-        fext = np.zeros(size)
+        fext = 0.
         for p in [p07, p08, p09, p14, p15]:
-            Nforces = 100
-            fx = p.Nxx*p.b/(Nforces-1.)
-            for i in range(Nforces):
-                y = i*p.b/(Nforces-1.)
-                if i == 0 or i == (Nforces - 1):
-                    p.add_force(0, y, fx/2., 0, 0)
-                else:
-                    p.add_force(0, y, fx, 0, 0)
-            fext[p.col_start: p.col_end] = p.calc_fext(silent=True)
-
-        incs, cs = static(k0, -fext, silent=True)
+            p.add_distr_load_fixed_x(0, lambda x: p.Nxx, None, None)
+            fext += p.calc_fext(silent=True, col0=p.col_start, size=size)
+        incs, cs = static(kC, -fext, silent=True)
         c = cs[0]
 
     kM = assy.calc_kM()
-    kG = assy.calc_kG0(c=c)
+    kG = assy.calc_kG(c=c)
 
     kA = 0
     for p in skin:
         # TODO the current approach has somewhat hiden settings
-        #     check this strategy:
+        #     check another strategy in the future:
         #     - define module aerodynamics
         #     - function calc_kA inside a module piston_theory
         #     - pass piston_theory parameters and compute kA
@@ -351,7 +343,7 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, mu, plyt,
     assert np.any(np.isinf(kA.data)) == False
     kA = csr_matrix(make_skew_symmetric(kA))
 
-    eigvals, eigvecs = freq((k0 + kG + kA), kM, tol=0, sparse_solver=True, silent=True,
+    eigvals, eigvecs = freq((kC + kG + kA), kM, tol=0, sparse_solver=True, silent=True,
              sort=True, reduced_dof=False,
              num_eigvalues=25, num_eigvalues_print=5)
 

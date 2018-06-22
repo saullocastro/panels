@@ -1,19 +1,20 @@
 from __future__ import division, absolute_import
 
-from compmech.panel import Panel
-from compmech.panel.assembly import PanelAssembly
-from compmech.analysis import freq
+from structsolve import freq
+
+from .. shell import Shell
+from . panel import Panel
 
 
-def tstiff2d_1stiff_freq(a, b, ys, bb, bf, defect_a, mu, plyt, laminaprop,
+def tstiff2d_1stiff_freq(a, b, ys, bb, bf, defect_a, rho, plyt, laminaprop,
         stack_skin, stack_base, stack_flange,
         r=None, m=8, n=8, mb=None, nb=None, mf=None, nf=None):
-    r"""Frequency T-Stiffened Panel with possible defect at middle
+    r"""Frequency T-Stiffened Shell with possible defect at middle
 
     For more details about each parameter and the aerodynamic formulation see
     Ref. [castro2016FlutterPanel]_ .
 
-    For more details about the theory involved on the assembly of panels, see
+    For more details about the theory involved on the assembly of shells, see
     [castro2017AssemblyModels]_.
 
     The panel assembly looks like::
@@ -65,7 +66,7 @@ def tstiff2d_1stiff_freq(a, b, ys, bb, bf, defect_a, mu, plyt, laminaprop,
         Stiffener's flange width.
     defect_a : float
         Debonding defect/assembly length ratio.
-    mu : float
+    rho : float
         Material density.
     plyt : float
         Ply thickness.
@@ -108,28 +109,28 @@ def tstiff2d_1stiff_freq(a, b, ys, bb, bf, defect_a, mu, plyt, laminaprop,
     nb = n if nb is None else nb
     mf = m if mf is None else mf
     nf = n if nf is None else nf
-    # skin panels
-    p01 = Panel(group='skin', x0=alow+defect, y0=ys+bb/2., a=aup, b=bleft, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, mu=mu)
-    p02 = Panel(group='skin', x0=alow+defect, y0=ys-bb/2., a=aup, b=bb, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, mu=mu)
-    p03 = Panel(group='skin', x0=alow+defect, y0=0,        a=aup, b=bright, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, mu=mu)
+    # skin
+    p01 = Shell(group='skin', x0=alow+defect, y0=ys+bb/2., a=aup, b=bleft, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho)
+    p02 = Shell(group='skin', x0=alow+defect, y0=ys-bb/2., a=aup, b=bb, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho)
+    p03 = Shell(group='skin', x0=alow+defect, y0=0,        a=aup, b=bright, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho)
     # defect
-    p04 = Panel(group='skin', x0=alow, y0=ys+bb/2., a=defect, b=bleft, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, mu=mu)
-    p05 = Panel(group='skin', x0=alow, y0=ys-bb/2., a=defect, b=bb, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, mu=mu)
-    p06 = Panel(group='skin', x0=alow, y0=0,        a=defect, b=bright, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, mu=mu)
+    p04 = Shell(group='skin', x0=alow, y0=ys+bb/2., a=defect, b=bleft, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho)
+    p05 = Shell(group='skin', x0=alow, y0=ys-bb/2., a=defect, b=bb, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho)
+    p06 = Shell(group='skin', x0=alow, y0=0,        a=defect, b=bright, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho)
     #
-    p07 = Panel(group='skin', x0=0, y0=ys+bb/2., a=alow, b=bleft, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, mu=mu)
-    p08 = Panel(group='skin', x0=0, y0=ys-bb/2., a=alow, b=bb, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, mu=mu)
-    p09 = Panel(group='skin', x0=0, y0=0,        a=alow, b=bright, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, mu=mu)
+    p07 = Shell(group='skin', x0=0, y0=ys+bb/2., a=alow, b=bleft, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho)
+    p08 = Shell(group='skin', x0=0, y0=ys-bb/2., a=alow, b=bb, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho)
+    p09 = Shell(group='skin', x0=0, y0=0,        a=alow, b=bright, r=r, m=m, n=n, plyt=plyt, stack=stack_skin, laminaprop=laminaprop, rho=rho)
 
     # stiffeners
-    p10 = Panel(group='base', x0=alow+defect, y0=ys-bb/2., a=aup, b=bb, r=r, m=mb, n=nb, plyt=plyt, stack=stack_base, laminaprop=laminaprop, mu=mu)
-    p11 = Panel(group='flange', x0=alow+defect, y0=0,        a=aup, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, mu=mu)
+    p10 = Shell(group='base', x0=alow+defect, y0=ys-bb/2., a=aup, b=bb, r=r, m=mb, n=nb, plyt=plyt, stack=stack_base, laminaprop=laminaprop, rho=rho)
+    p11 = Shell(group='flange', x0=alow+defect, y0=0,        a=aup, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, rho=rho)
     # defect
-    p12 = Panel(group='base', x0=alow, y0=ys-bb/2., a=defect, b=bb, r=r, m=mb, n=nb, plyt=plyt, stack=stack_base, laminaprop=laminaprop, mu=mu)
-    p13 = Panel(group='flange', x0=alow, y0=0,        a=defect, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, mu=mu)
+    p12 = Shell(group='base', x0=alow, y0=ys-bb/2., a=defect, b=bb, r=r, m=mb, n=nb, plyt=plyt, stack=stack_base, laminaprop=laminaprop, rho=rho)
+    p13 = Shell(group='flange', x0=alow, y0=0,        a=defect, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, rho=rho)
     #
-    p14 = Panel(group='base', x0=0, y0=ys-bb/2., a=alow, b=bb, r=r, m=mb, n=nb, plyt=plyt, stack=stack_base, laminaprop=laminaprop, mu=mu)
-    p15 = Panel(group='flange', x0=0, y0=0,        a=alow, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, mu=mu)
+    p14 = Shell(group='base', x0=0, y0=ys-bb/2., a=alow, b=bb, r=r, m=mb, n=nb, plyt=plyt, stack=stack_base, laminaprop=laminaprop, rho=rho)
+    p15 = Shell(group='flange', x0=0, y0=0,        a=alow, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, rho=rho)
 
     # boundary conditions
     p01.u1tx = 1 ; p01.u1rx = 1 ; p01.u2tx = 0 ; p01.u2rx = 1
@@ -277,13 +278,13 @@ def tstiff2d_1stiff_freq(a, b, ys, bb, bf, defect_a, mu, plyt, laminaprop,
         dict(p1=p13, p2=p15, func='SSxcte', xcte1=0, xcte2=p15.a),
         ]
 
-    panels = [p01, p02, p03, p04, p05, p06, p07, p08, p09,
+    shells = [p01, p02, p03, p04, p05, p06, p07, p08, p09,
             p10, p11, p12, p13, p14, p15]
     skin = [p01, p02, p03, p04, p05, p06, p07, p08, p09]
     base = [p10, p12, p14]
     flange = [p11, p13, p15]
 
-    assy = PanelAssembly(panels)
+    assy = Panel(shells)
 
     size = assy.get_size()
 
@@ -293,10 +294,10 @@ def tstiff2d_1stiff_freq(a, b, ys, bb, bf, defect_a, mu, plyt, laminaprop,
             continue
         valid_conn.append(connecti)
 
-    k0 = assy.calc_k0(conn=valid_conn)
+    kC = assy.calc_kC(conn=valid_conn)
     kM = assy.calc_kM()
 
-    eigvals, eigvecs = freq(k0, kM, tol=0, sparse_solver=True, silent=True,
+    eigvals, eigvecs = freq(kC, kM, tol=0, sparse_solver=True, silent=True,
              sort=True, reduced_dof=False,
              num_eigvalues=25, num_eigvalues_print=5)
 

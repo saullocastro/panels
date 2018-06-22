@@ -51,8 +51,8 @@ def calc_kt_kr(p1, p2, connection_type):
     A22_p2 = p2.lam.A[1, 1]
     D22_p1 = p1.lam.D[1, 1]
     D22_p2 = p2.lam.D[1, 1]
-    hp1 = p1.lam.t
-    hp2 = p2.lam.t
+    hp1 = p1.lam.h
+    hp2 = p2.lam.h
     if connection_type.lower() == 'xcte':
         kt = 4*A11_p1*A11_p2/((A11_p1 + A11_p2)*(hp1 + hp2))
         kr = 4*D11_p1*D11_p2/((D11_p1 + D11_p2)*(hp1 + hp2))

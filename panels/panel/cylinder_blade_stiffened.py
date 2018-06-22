@@ -2,16 +2,16 @@ from __future__ import division, absolute_import
 
 import numpy as np
 from scipy.sparse import csr_matrix
+from structsolve.sparseutils import make_symmetric
+from structsolve import lb, static
+from structsolve.analysis import Analysis
 
-from compmech.panel import Panel
-from compmech.panel.assembly import PanelAssembly
-from compmech.sparse import make_symmetric
-from compmech.analysis import lb, static
-from compmech.analysis import Analysis
+from .. shell import Shell
+from . panel import Panel
 
 
 def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
-        width_blades, plyt, laminaprop, npanels, m=8, n=8):
+        width_blades, plyt, laminaprop, nshells, m=8, n=8):
     r"""Cylinder Assembly
 
     The panel assembly looks like::
@@ -54,15 +54,15 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
     stack : array-like
         Stacking sequence for the cylinder.
     stack_blades : list of array-like
-        The stacking sequence for each blade (with length = npanels).
+        The stacking sequence for each blade (with length = nshells).
     width_blades : array-like
-        The width for each blade (with length = npanels).
+        The width for each blade (with length = nshells).
     plyt : float
         Ply thickness (assumed unique for the whole structure).
     laminaprop : list or tuple
         Orthotropic lamina properties: `E_1, E_2, \nu_{12}, G_{12}, G_{13}, G_{23}`.
-    npanels : int
-        The number of panels the cylinder perimiter.
+    nshells : int
+        The number of shells the cylinder perimiter.
     m, n : int, optional
         Number of approximation terms for each panel.
 
@@ -73,19 +73,19 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
         list of dictionaries.
 
     """
-    if npanels < 2:
-        raise ValueError('At least two panels are needed')
-    if len(stack_blades) != npanels:
-        raise ValueError('stack_blades must have length = npanels')
-    if len(width_blades) != npanels:
-        raise ValueError('width_blades must have length = npanels')
+    if nshells < 2:
+        raise ValueError('At least two shells are needed')
+    if len(stack_blades) != nshells:
+        raise ValueError('stack_blades must have length = nshells')
+    if len(width_blades) != nshells:
+        raise ValueError('width_blades must have length = nshells')
     skin = []
     blades = []
     perimiter = 2*np.pi*r
-    b_skin = perimiter / npanels
-    for i in range(npanels):
+    b_skin = perimiter / nshells
+    for i in range(nshells):
         y0 = i*b_skin
-        panel = Panel(group='skin', x0=0, y0=y0, a=height, b=b_skin,
+        panel = Shell(group='skin', x0=0, y0=y0, a=height, b=b_skin,
             r=r, m=m, n=n, plyt=plyt, stack=stack, laminaprop=laminaprop,
             u1tx=0, u1rx=1, u2tx=0, u2rx=1,
             v1tx=0, v1rx=1, v2tx=0, v2rx=1,
@@ -97,7 +97,7 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
     for i, panel in enumerate(skin):
         y0 = i*b_skin
         blade_name = 'blade_%02d' % i
-        blade = Panel(group=blade_name, x0=0, y0=y0, a=height,
+        blade = Shell(group=blade_name, x0=0, y0=y0, a=height,
                     b=width_blades[i], m=m, n=n, plyt=plyt,
                     stack=stack_blades[i], laminaprop=laminaprop,
                     u1tx=0, u1rx=1, u2tx=0, u2rx=1,
@@ -123,14 +123,14 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
     for panel, blade in zip(skin, blades):
         conns.append(dict(p1=panel, p2=blade, func='BFycte', ycte1=0, ycte2=0))
 
-    assy = PanelAssembly(skin + blades)
+    assy = Panel(skin + blades)
 
     return assy, conns
 
 
 def cylinder_blade_stiffened_compression_lb_Nxx_cte(height, r, stack, stack_blades,
         width_blades, plyt, laminaprop,
-        npanels, Nxxs_skin, Nxxs_blade, m=8, n=8, num_eigvalues=20):
+        nshells, Nxxs_skin, Nxxs_blade, m=8, n=8, num_eigvalues=20):
     """Linear buckling analysis with a constant Nxx for each panel
 
     See :func:`.create_cylinder_blade_stiffened` for most parameters.
@@ -160,30 +160,30 @@ def cylinder_blade_stiffened_compression_lb_Nxx_cte(height, r, stack, stack_blad
     """
     assy, conns = create_cylinder_blade_stiffened(height=height, r=r,
             stack=stack, stack_blades=stack_blades, width_blades=width_blades,
-            plyt=plyt, laminaprop=laminaprop, npanels=npanels, m=m, n=n)
-    if len(Nxxs_skin) != npanels:
-        raise ValueError('The length of "Nxxs_skin" must be the same as "npanels"')
-    if len(Nxxs_blade) != npanels:
-        raise ValueError('The length of "Nxxs_blade" must be the same as "npanels"')
+            plyt=plyt, laminaprop=laminaprop, nshells=nshells, m=m, n=n)
+    if len(Nxxs_skin) != nshells:
+        raise ValueError('The length of "Nxxs_skin" must be the same as "nshells"')
+    if len(Nxxs_blade) != nshells:
+        raise ValueError('The length of "Nxxs_blade" must be the same as "nshells"')
     i_skin = -1
     i_blade = -1
-    for p in assy.panels:
-        if 'skin' in p.group:
+    for s in assy.shells:
+        if 'skin' in s.group:
             i_skin += 1
-            p.Nxx = Nxxs_skin[i_skin]
-        elif 'blade' in p.group:
+            s.Nxx = Nxxs_skin[i_skin]
+        elif 'blade' in s.group:
             i_blade += 1
-            p.Nxx = Nxxs_blade[i_blade]
+            s.Nxx = Nxxs_blade[i_blade]
 
-    k0 = assy.calc_k0(conns, silent=True)
-    kG = assy.calc_kG0(silent=True)
-    eigvals, eigvecs = lb(k0, kG, tol=0, sparse_solver=True, silent=True,
+    kC = assy.calc_kC(conn=conns, silent=True)
+    kG = assy.calc_kG(silent=True)
+    eigvals, eigvecs = lb(kC, kG, tol=0, sparse_solver=True, silent=True,
              num_eigvalues=num_eigvalues, num_eigvalues_print=5)
     return assy, eigvals, eigvecs
 
 
 def cylinder_blade_stiffened_compression_lb_Nxx_from_static(height, r, stack,
-        stack_blades, width_blades, plyt, laminaprop, npanels, Nxxs_skin,
+        stack_blades, width_blades, plyt, laminaprop, nshells, Nxxs_skin,
         Nxxs_blade, m=8, n=8,
         num_eigvalues=20):
     """Linear buckling analysis with a Nxx calculated using static analysis
@@ -215,43 +215,31 @@ def cylinder_blade_stiffened_compression_lb_Nxx_from_static(height, r, stack,
     """
     assy, conns = create_cylinder_blade_stiffened(height=height, r=r,
             stack=stack, stack_blades=stack_blades, width_blades=width_blades,
-            plyt=plyt, laminaprop=laminaprop, npanels=npanels, m=m, n=n)
-    if len(Nxxs_skin) != npanels:
-        raise ValueError('The length of "Nxxs_skin" must be the same as "npanels"')
-    if len(Nxxs_blade) != npanels:
-        raise ValueError('The length of "Nxxs_blade" must be the same as "npanels"')
+            plyt=plyt, laminaprop=laminaprop, nshells=nshells, m=m, n=n)
+    if len(Nxxs_skin) != nshells:
+        raise ValueError('The length of "Nxxs_skin" must be the same as "nshells"')
+    if len(Nxxs_blade) != nshells:
+        raise ValueError('The length of "Nxxs_blade" must be the same as "nshells"')
     i_skin = -1
     i_blade = -1
-    for p in assy.panels:
-        p.u2tx = 1
-        if 'skin' in p.group:
+    for s in assy.shells:
+        s.u2tx = 1
+        if 'skin' in s.group:
             i_skin += 1
-            p.Nxx = Nxxs_skin[i_skin]
-        elif 'blade' in p.group:
+            s.add_distr_load_fixed_x(s.a, lambda x: Nxxs_skin[i_skin], None, None)
+        elif 'blade' in s.group:
             i_blade += 1
-            p.Nxx = Nxxs_blade[i_blade]
-
-    #TODO improve application of distributed loads
-    for p in assy.panels:
-        Nforces = 1000
-        fx = p.Nxx*p.b/(Nforces-1.)
-        for i in range(Nforces):
-            y = i*p.b/(Nforces-1.)
-            if i == 0 or i == (Nforces-1):
-                fx_applied = fx/2.
-            else:
-                fx_applied = fx
-            p.add_force(p.a, y, fx_applied, 0, 0)
+            s.add_distr_load_fixed_x(s.a, lambda x: Nxxs_blade[i_blade], None, None)
 
     fext = assy.calc_fext(silent=True)
 
-    k0 = assy.calc_k0(conns, silent=True)
-    incs, cs = static(k0, fext, silent=True)
+    kC = assy.calc_kC(conn=conns, silent=True)
+    incs, cs = static(kC, fext, silent=True)
     c = cs[0]
-    kG = assy.calc_kG0(c=c, silent=True)
+    kG = assy.calc_kG(c=c, silent=True)
 
     eigvals = eigvecs = None
-    eigvals, eigvecs = lb(k0, kG, tol=0, sparse_solver=True, silent=True,
+    eigvals, eigvecs = lb(kC, kG, tol=0, sparse_solver=True, silent=True,
              num_eigvalues=num_eigvalues, num_eigvalues_print=5)
 
     return assy, c, eigvals, eigvecs
