@@ -34,7 +34,7 @@ Operating System :: Unix
 
 MAJOR = 0
 MINOR = 1
-MICRO = 0
+MICRO = 1
 ISRELEASED = True
 VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 
@@ -196,7 +196,7 @@ extensions = [
 
 
 FULLVERSION, GIT_REVISION = get_version_info()
-build_requires = []
+required_libraries = ['numpy', 'scipy', 'matplotlib', 'composites', 'structsolve']
 write_version_py()
 ext_modules = cythonize(extensions)
 for e in ext_modules:
@@ -213,8 +213,8 @@ setup(
     license='Copyrighted',
     classifiers=[_f for _f in CLASSIFIERS.split('\n') if _f],
     platforms=['Windows', 'Linux'],
-    setup_requires=build_requires,
-    install_requires=build_requires,
+    setup_requires=required_libraries,
+    install_requires=required_libraries,
     ext_modules = ext_modules,
     entry_points={
         'console_scripts': [
