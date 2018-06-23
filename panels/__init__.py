@@ -14,4 +14,5 @@ available in this package.
 """
 from __future__ import absolute_import
 
+from .version import __version__
 from .shell import Shell
