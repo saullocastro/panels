@@ -70,13 +70,37 @@ class Shell(object):
         the normal (`z`) axis.
 
     """
+    __slots__ = [ 'a', 'x1', 'x2', 'b', 'y1', 'y2', 'r', 'alphadeg', 'alpharad',
+        'stack', 'plyt', 'laminaprop', 'rho', 'offset',
+        'group', 'x0', 'y0', 'row_start', 'col_start', 'row_end', 'col_end',
+        'name', 'model',
+        'fsdt_shear_correction',
+        'm', 'n', 'nx', 'ny', 'size',
+        'point_loads', 'point_loads_inc', 'distr_loads', 'distr_loads_inc',
+        'Nxx', 'Nyy', 'Nxy', 'Nxx_cte', 'Nyy_cte', 'Nxy_cte',
+        'u1tx', 'u1rx', 'u2tx', 'u2rx', 'v1tx', 'v1rx', 'v2tx', 'v2rx',
+        'w1tx', 'w1rx', 'w2tx', 'w2rx', 'u1ty', 'u1ry', 'u2ty', 'u2ry',
+        'v1ty', 'v1ry', 'v2ty', 'v2ry', 'w1ty', 'w1ry', 'w2ty', 'w2ry',
+        'plyts', 'laminaprops', 'rhos',
+        'flow', 'beta', 'gamma', 'aeromu', 'rho_air', 'speed_sound', 'Mach', 'V',
+        'F', 'force_orthotropic_laminate',
+        'num_eigvalues', 'num_eigvalues_print',
+        'out_num_cores', 'analysis', 'increments', 'results',
+        'lam', 'matrices', 'fields', 'plot_mesh',
+        ]
+
     def __init__(self, a=None, b=None, r=None, alphadeg=None,
             stack=None, plyt=None, laminaprop=None, rho=None,
             m=11, n=11, offset=0., **kwargs):
         self.a = a
+        self.x1 = -1
+        self.x2 = -1
         self.b = b
+        self.y1 = -1
+        self.y2 = -1
         self.r = r
         self.alphadeg = alphadeg
+        self.alpharad = None
         self.stack = stack
         self.plyt = plyt
         self.laminaprop = laminaprop
@@ -101,6 +125,7 @@ class Shell(object):
         # approximation series
         self.m = m
         self.n = n
+        self.size = None
 
         # numerical integration
         self.nx = m
@@ -150,7 +175,6 @@ class Shell(object):
         self.w2ry = 1.
 
         # material
-        self.ply_mus = None
         self.plyts = None
         self.laminaprops = None
         self.rhos = None
@@ -241,6 +265,7 @@ class Shell(object):
                                       offset=self.offset)
             self.lam = lam
             self.F = self._get_lam_F()
+        self.size = self.get_size()
 
 
     def get_size(self):
@@ -276,8 +301,8 @@ class Shell(object):
         yshape = ys.shape
         if xshape != yshape:
             raise ValueError('Arrays xs and ys must have the same shape')
-        self.Xs = xs
-        self.Ys = ys
+        self.plot_mesh['Xs'] = xs
+        self.plot_mesh['Ys'] = ys
         xs = np.ascontiguousarray(xs.ravel(), dtype=np.float64)
         ys = np.ascontiguousarray(ys.ravel(), dtype=np.float64)
 
@@ -794,12 +819,8 @@ class Shell(object):
         """
         msg('Running frequency analysis...', silent=silent)
 
-        self.calc_kC(silent=silent)
-        self.calc_kM(silent=silent)
-
-        mat = self.matrices
-        kC = mat['kC']
-        kM = mat['kM']
+        kC = self.calc_kC(silent=silent)
+        M = self.calc_kM(silent=silent)
 
         if atype == 1:
             K = kC
@@ -825,11 +846,6 @@ class Shell(object):
                 K = kC + kA + kG + cA
             else:
                 K = kC + kA + kG
-
-        M = kM
-
-        print('DEBUG K', K.sum())
-        print('DEBUG M', M.sum())
 
         msg('Eigenvalue solver... ', level=2, silent=silent)
         k = min(self.num_eigvalues, M.shape[0]-2)
@@ -912,9 +928,6 @@ class Shell(object):
                 eigvals = eigvals[higher_zero]
                 eigvecs = eigvecs[:, higher_zero]
 
-        self.eigvals = eigvals
-        self.eigvecs = eigvecs
-
         msg('finished!', level=2, silent=silent)
 
         msg('first {0} eigenvalues:'.format(self.num_eigvalues_print), level=1,
@@ -923,6 +936,9 @@ class Shell(object):
             msg('{0} rad/s'.format(eigval), level=2, silent=silent)
         self.analysis.last_analysis = 'freq'
 
+        self.results['eigvals'] = eigvals
+        self.results['eigvecs'] = eigvecs
+
         return eigvals, eigvecs
 
 
@@ -930,8 +946,8 @@ class Shell(object):
         r"""Calculate the displacement field
 
         For a given full set of Ritz constants ``c``, the displacement
-        field is calculated and stored in the parameters
-        ``u``, ``v``, ``w``, ``phix``, ``phiy`` of the ``Shell`` object.
+        field is calculated and stored in the ``fields`` parameter of the
+        :class:`.Shell`` object.
 
         Parameters
         ----------
@@ -953,13 +969,8 @@ class Shell(object):
         Returns
         -------
         out : tuple
-            A tuple of ``np.ndarrays`` containing
-            ``(u, v, w, phix, phiy)``.
+            Containing ``plot_mesh`` and ``fields``
 
-        Notes
-        -----
-        The returned values ``u```, ``v``, ``w``, ``phix``, ``phiy`` are
-        stored as parameters with the same name in the ``Shell`` object.
 
         """
         c = np.ascontiguousarray(c, dtype=np.float64)

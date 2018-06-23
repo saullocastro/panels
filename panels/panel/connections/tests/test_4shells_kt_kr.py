@@ -1,14 +1,13 @@
 import numpy as np
 from scipy.sparse import csr_matrix
+from structsolve.sparseutils import make_symmetric
+from structsolve import freq
+from composites import laminate
 
-import compmech.panel.connections as connections
-from compmech.panel import Panel
-from compmech.panel.assembly import PanelAssembly
-from compmech.composite import laminate
-from compmech.sparse import make_symmetric
-from compmech.analysis import freq
+import panels.panel.connections as connections
+from panels.shell import Shell
 
-def test_4panels_kt_kr():
+def test_4shells_kt_kr():
     """Compare result of 4 assembled panels with single-domain results
 
     The panel assembly looks like::
@@ -35,7 +34,7 @@ def test_4panels_kt_kr():
     stack=[0, 45, -45, 90, -45, 45, 0]
     lam = laminate.read_stack(stack=stack, plyt=plyt, laminaprop=laminaprop)
 
-    mu=1.3e3
+    rho=1.3e3
 
     r = 10.
     m = 8
@@ -55,10 +54,10 @@ def test_4panels_kt_kr():
     D11 = lam.ABD[3, 3]
     D22 = lam.ABD[4, 4]
 
-    p01 = Panel(group='panels', x0=a3, y0=b2, a=a1, b=b1, r=r, m=m, n=n, plyt=plyt, stack=stack, laminaprop=laminaprop, mu=mu)
-    p02 = Panel(group='panels', x0=a3, y0=0, a=a2, b=b2, r=r, m=m, n=n, plyt=plyt, stack=stack, laminaprop=laminaprop, mu=mu)
-    p03 = Panel(group='panels', x0=0, y0=b2, a=a3, b=b3, r=r, m=m, n=n, plyt=plyt, stack=stack, laminaprop=laminaprop, mu=mu)
-    p04 = Panel(group='panels', x0=0, y0=0, a=a4, b=b4, r=r, m=m, n=n, plyt=plyt, stack=stack, laminaprop=laminaprop, mu=mu)
+    p01 = Shell(group='panels', x0=a3, y0=b2, a=a1, b=b1, r=r, m=m, n=n, plyt=plyt, stack=stack, laminaprop=laminaprop, rho=rho)
+    p02 = Shell(group='panels', x0=a3, y0=0, a=a2, b=b2, r=r, m=m, n=n, plyt=plyt, stack=stack, laminaprop=laminaprop, rho=rho)
+    p03 = Shell(group='panels', x0=0, y0=b2, a=a3, b=b3, r=r, m=m, n=n, plyt=plyt, stack=stack, laminaprop=laminaprop, rho=rho)
+    p04 = Shell(group='panels', x0=0, y0=0, a=a4, b=b4, r=r, m=m, n=n, plyt=plyt, stack=stack, laminaprop=laminaprop, rho=rho)
 
     kt13, kr13 = connections.calc_kt_kr(p01, p03, 'xcte')
     kt24, kr24 = connections.calc_kt_kr(p02, p04, 'xcte')
@@ -105,13 +104,13 @@ def test_4panels_kt_kr():
 
     size = sum([3*p.m*p.n for p in panels])
 
-    k0 = 0
+    kC = 0
     kM = 0
 
     row0 = 0
     col0 = 0
     for p in panels:
-        k0 += p.calc_k0(row0=row0, col0=col0, size=size, silent=True, finalize=False)
+        kC += p.calc_kC(row0=row0, col0=col0, size=size, silent=True, finalize=False)
         kM += p.calc_kM(row0=row0, col0=col0, size=size, silent=True, finalize=False)
         p.row_start = row0
         p.col_start = col0
@@ -126,45 +125,45 @@ def test_4panels_kt_kr():
         p1 = conn['p1']
         p2 = conn['p2']
         if conn['func'] == 'SSycte':
-            k0 += connections.kCSSycte.fkCSSycte11(
+            kC += connections.kCSSycte.fkCSSycte11(
                     conn['kt'], conn['kr'], p1, conn['ycte1'],
                     size, p1.row_start, col0=p1.col_start)
-            k0 += connections.kCSSycte.fkCSSycte12(
+            kC += connections.kCSSycte.fkCSSycte12(
                     conn['kt'], conn['kr'], p1, p2, conn['ycte1'], conn['ycte2'],
                     size, p1.row_start, col0=p2.col_start)
-            k0 += connections.kCSSycte.fkCSSycte22(
+            kC += connections.kCSSycte.fkCSSycte22(
                     conn['kt'], conn['kr'], p1, p2, conn['ycte2'],
                     size, p2.row_start, col0=p2.col_start)
         elif conn['func'] == 'SSxcte':
-            k0 += connections.kCSSxcte.fkCSSxcte11(
+            kC += connections.kCSSxcte.fkCSSxcte11(
                     conn['kt'], conn['kr'], p1, conn['xcte1'],
                     size, p1.row_start, col0=p1.col_start)
-            k0 += connections.kCSSxcte.fkCSSxcte12(
+            kC += connections.kCSSxcte.fkCSSxcte12(
                     conn['kt'], conn['kr'], p1, p2, conn['xcte1'], conn['xcte2'],
                     size, p1.row_start, col0=p2.col_start)
-            k0 += connections.kCSSxcte.fkCSSxcte22(
+            kC += connections.kCSSxcte.fkCSSxcte22(
                     conn['kt'], conn['kr'], p1, p2, conn['xcte2'],
                     size, p2.row_start, col0=p2.col_start)
 
-    assert np.any(np.isnan(k0.data)) == False
-    assert np.any(np.isinf(k0.data)) == False
-    k0 = csr_matrix(make_symmetric(k0))
+    assert np.any(np.isnan(kC.data)) == False
+    assert np.any(np.isinf(kC.data)) == False
+    kC = csr_matrix(make_symmetric(kC))
     assert np.any(np.isnan(kM.data)) == False
     assert np.any(np.isinf(kM.data)) == False
     kM = csr_matrix(make_symmetric(kM))
 
-    eigvals, eigvecs = freq(k0, kM, tol=0, sparse_solver=True, silent=True,
+    eigvals, eigvecs = freq(kC, kM, tol=0, sparse_solver=True, silent=True,
              sort=True, reduced_dof=False,
              num_eigvalues=25, num_eigvalues_print=5)
 
     # Results for single panel
     m = 15
     n = 15
-    singlepanel = Panel(a=(a1+a3), b=(b1+b2), r=r, m=m, n=n, plyt=plyt, stack=stack, laminaprop=laminaprop, mu=mu)
+    singlepanel = Shell(a=(a1+a3), b=(b1+b2), r=r, m=m, n=n, plyt=plyt, stack=stack, laminaprop=laminaprop, rho=rho)
     singlepanel.freq(silent=True)
 
-    assert np.isclose(eigvals[0], singlepanel.eigvals[0], atol=0.01, rtol=0.01)
+    assert np.isclose(eigvals[0], singlepanel.results['eigvals'][0], atol=0.01, rtol=0.01)
 
 
 if __name__ == '__main__':
-    test_4panels_kt_kr()
+    test_4shells_kt_kr()

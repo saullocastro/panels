@@ -47,6 +47,8 @@ module_names = [
           'cylshell_clpt_donnell_bardell_num',
           'coneshell_clpt_donnell_bardell_num',
           'plate_clpt_donnell_bardell_num',
+          'bladestiff1d_clpt_donnell_bardell',
+          'bladestiff2d_clpt_donnell_bardell',
           ]
 
 for module_name in module_names:

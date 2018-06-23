@@ -1,1 +1,2 @@
-List(List(0,0,0),List(0,0,0),List(0,0,-(a*beta*fAw*fBw*gAweta*gBw)/2.))
+List(List(0,0,0),List(0,0,0),List(0,0,
+   -(beta*fAw*fBw*gAweta*gBw*intx*inty)/(2.*b)))

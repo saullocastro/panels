@@ -1,1 +1,1 @@
-List(List(0,0,0),List(0,0,0),List(0,0,-(a*aeromu*b*fAw*fBw*gAw*gBw)/4.))
+List(List(0,0,0),List(0,0,0),List(0,0,-(aeromu*fAw*fBw*gAw*gBw*intx*inty)/4.))

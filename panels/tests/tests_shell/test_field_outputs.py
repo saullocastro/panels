@@ -30,11 +30,11 @@ def test_panel_field_outputs():
 
         P = 1000.
         npts = 100
-        s.forces_inc = []
+        s.point_loads_inc = []
         for y in np.linspace(0, s.b, npts):
-            s.forces_inc.append([0., y, P/(npts-1.), 0, 0])
-        s.forces_inc[0][2] /= 2.
-        s.forces_inc[-1][2] /= 2.
+            s.point_loads_inc.append([0., y, P/(npts-1.), 0, 0])
+        s.point_loads_inc[0][2] /= 2.
+        s.point_loads_inc[-1][2] /= 2.
 
         s.static()
         c = s.analysis.cs[0]

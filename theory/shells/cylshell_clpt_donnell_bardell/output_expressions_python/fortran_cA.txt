@@ -3,4 +3,4 @@
 c += 1
 cAr[c] = row+2
 cAc[c] = col+2
-cAv[c] += -0.25*a*aeromu*b*fAw*fBw*gAw*gBw
+cAv[c] += -0.25*aeromu*fAw*fBw*gAw*gBw*intx*inty

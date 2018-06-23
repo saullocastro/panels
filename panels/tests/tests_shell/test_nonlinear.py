@@ -61,12 +61,12 @@ def test_nonlinear():
         P = 25
         Nxx = P/s.b
         npts = 10000
-        s.forces_inc = []
+        s.point_loads_inc = []
         for y in np.linspace(0, s.b, npts):
-            s.forces_inc.append([0., y, P/(npts-1.), 0, 0])
-        s.forces_inc[0][2] /= 2.
-        s.forces_inc[-1][2] /= 2.
-        s.forces.append([s.a/2., s.b/2., 0, 0, 0.001])
+            s.point_loads_inc.append([0., y, P/(npts-1.), 0, 0])
+        s.point_loads_inc[0][2] /= 2.
+        s.point_loads_inc[-1][2] /= 2.
+        s.point_loads.append([s.a/2., s.b/2., 0, 0, 0.001])
 
         s.analysis.maxArcLength = 8
         s.analysis.NL_method = 'arc_length_riks'
