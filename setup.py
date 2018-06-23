@@ -16,11 +16,17 @@ import numpy as np
 DOCLINES = __doc__.split("\n")
 
 CLASSIFIERS = """\
-Intended Audience :: Stress Analysis Engineers
-License :: 3-Clause BSD Approved
+Intended Audience :: Education
+Intended Audience :: Science/Research
+Intended Audience :: End Users/Desktop
+License :: OSI Approved :: BSD License
+Operating System :: POSIX :: BSD
 Programming Language :: Python
-Topic :: Software Development
+Programming Language :: C++
 Topic :: Scientific/Engineering
+Topic :: Education
+Topic :: Software Development
+Topic :: Software Development :: Libraries :: Python Modules
 Operating System :: Microsoft :: Windows
 Operating System :: Unix
 
@@ -29,7 +35,7 @@ Operating System :: Unix
 MAJOR = 0
 MINOR = 1
 MICRO = 0
-ISRELEASED = False
+ISRELEASED = True
 VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 
 
@@ -93,7 +99,7 @@ def get_version_info():
     return FULLVERSION, GIT_REVISION
 
 if os.name == 'nt':
-    compile_args = ['/openmp']
+    compile_args = ['/openmp', '/O2']
     link_args = []
 else:
     compile_args = ['-fopenmp', '-static', '-static-libgcc', '-static-libstdc++']
@@ -104,46 +110,88 @@ include_dirs = [
             np.get_include(),
             ]
 extensions = [
+# field calculation
     Extension('panels.models.clpt_bardell_field',
         sources=[
             './panels/core/src/bardell_functions.cpp',
             './panels/core/src/legendre_gauss_quadrature.cpp',
             './panels/models/clpt_bardell_field.pyx',
             ],
-        include_dirs=include_dirs,
-        extra_compile_args=compile_args,
-        extra_link_args=link_args,
-        language='c++'),
+        include_dirs=include_dirs, extra_compile_args=compile_args, extra_link_args=link_args, language='c++'),
+# shell models
     #Extension('panels.models.coneshell_clpt_donnell_bardell_num',
         #sources=[
             #'./panels/core/src/bardell_functions.cpp',
             #'./panels/core/src/legendre_gauss_quadrature.cpp',
             #'./panels/models/coneshell_clpt_donnell_bardell_num.pyx',
             #],
-        #include_dirs=include_dirs,
-        #extra_compile_args=compile_args,
-        #extra_link_args=link_args,
-        #language='c++'),
+        #include_dirs=include_dirs, extra_compile_args=compile_args, extra_link_args=link_args, language='c++'),
     Extension('panels.models.cylshell_clpt_donnell_bardell_num',
         sources=[
             './panels/core/src/bardell_functions.cpp',
             './panels/core/src/legendre_gauss_quadrature.cpp',
             './panels/models/cylshell_clpt_donnell_bardell_num.pyx',
             ],
-        include_dirs=include_dirs,
-        extra_compile_args=compile_args,
-        extra_link_args=link_args,
-        language='c++'),
+        include_dirs=include_dirs, extra_compile_args=compile_args, extra_link_args=link_args, language='c++'),
     Extension('panels.models.plate_clpt_donnell_bardell_num',
         sources=[
             './panels/core/src/bardell_functions.cpp',
             './panels/core/src/legendre_gauss_quadrature.cpp',
             './panels/models/plate_clpt_donnell_bardell_num.pyx',
             ],
-        include_dirs=include_dirs,
-        extra_compile_args=compile_args,
-        extra_link_args=link_args,
-        language='c++'),
+        include_dirs=include_dirs, extra_compile_args=compile_args, extra_link_args=link_args, language='c++'),
+# stiffener models
+    Extension('panels.models.bladestiff1d_clpt_donnell_bardell',
+        sources=[
+            './panels/core/src/bardell.cpp',
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/bladestiff1d_clpt_donnell_bardell.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args, extra_link_args=link_args, language='c++'),
+    Extension('panels.models.bladestiff2d_clpt_donnell_bardell',
+        sources=[
+            './panels/core/src/bardell.cpp',
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/bladestiff2d_clpt_donnell_bardell.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args, extra_link_args=link_args, language='c++'),
+# connections
+    Extension('panels.panel.connections.kCBFycte',
+        sources=[
+            './panels/core/src/bardell.cpp',
+            './panels/core/src/bardell_functions.cpp',
+            './panels/panel/connections\kCBFycte.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args, extra_link_args=link_args, language='c++'),
+    Extension('panels.panel.connections.kCSB',
+        sources=[
+            './panels/core/src/bardell.cpp',
+            './panels/core/src/bardell_functions.cpp',
+            './panels/panel/connections\kCSB.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args, extra_link_args=link_args, language='c++'),
+    Extension('panels.panel.connections.kCSSxcte',
+        sources=[
+            './panels/core/src/bardell.cpp',
+            './panels/core/src/bardell_functions.cpp',
+            './panels/panel/connections\kCSSxcte.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args, extra_link_args=link_args, language='c++'),
+    Extension('panels.panel.connections.kCSSycte',
+        sources=[
+            './panels/core/src/bardell.cpp',
+            './panels/core/src/bardell_functions.cpp',
+            './panels/panel/connections\kCSSycte.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args, extra_link_args=link_args, language='c++'),
+# numerical integration
+    Extension('panels.legendre_gauss_quadrature',
+        sources=[
+            './panels/core/src/legendre_gauss_quadrature.cpp',
+            './panels/legendre_gauss_quadrature.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args, extra_link_args=link_args, language='c++'),
+
     ]
 
 

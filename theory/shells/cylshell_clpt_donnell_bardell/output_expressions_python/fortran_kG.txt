@@ -3,4 +3,4 @@
 c += 1
 kGr[c] = row+2
 kGc[c] = col+2
-kGv[c] += Nxx*b*fAwxi*fBwxi*gAw*gBw/a + Nxy*(fAw*fBwxi*gAweta*gBw + fAwxi*fBw*gAw*gBweta) + Nyy*a*fAw*fBw*gAweta*gBweta/b
+kGv[c] += Nxx*fAwxi*fBwxi*gAw*gBw*intx*inty/(a*a) + Nxy*intx*inty*(fAw*fBwxi*gAweta*gBw + fAwxi*fBw*gAw*gBweta)/(a*b) + Nyy*fAw*fBw*gAweta*gBweta*intx*inty/(b*b)

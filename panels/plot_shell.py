@@ -204,7 +204,7 @@ def plot_shell(shell, c, invert_y=False, vec='w', deform_u=False,
 
     for k, v in fields_bkp.items():
         if v is not None:
-            shell.fields[k] = v
+            self.fields[k] = v
 
     msg('finished!')
 

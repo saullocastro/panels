@@ -15,6 +15,7 @@ from structsolve.sparseutils import remove_null_cols, make_skew_symmetric, final
 
 from .logger import msg, warn
 from . import modelDB
+from . shell_fext import shell_fext
 
 
 def load(name):
@@ -59,7 +60,7 @@ class Shell(object):
         Ply thickness.
     laminaprop : list or tuple, optional
         Orthotropic lamina properties: `E_1, E_2, \nu_{12}, G_{12}, G_{13}, G_{23}`.
-    mu : float, optional
+    rho : float, optional
         Material density.
     m, n : int, optional
         Number of terms for the approximation functions along `x` and `y`,
@@ -69,16 +70,41 @@ class Shell(object):
         the normal (`z`) axis.
 
     """
+    __slots__ = [ 'a', 'x1', 'x2', 'b', 'y1', 'y2', 'r', 'alphadeg', 'alpharad',
+        'stack', 'plyt', 'laminaprop', 'rho', 'offset',
+        'group', 'x0', 'y0', 'row_start', 'col_start', 'row_end', 'col_end',
+        'name', 'model',
+        'fsdt_shear_correction',
+        'm', 'n', 'nx', 'ny', 'size',
+        'point_loads', 'point_loads_inc', 'distr_loads', 'distr_loads_inc',
+        'Nxx', 'Nyy', 'Nxy', 'Nxx_cte', 'Nyy_cte', 'Nxy_cte',
+        'u1tx', 'u1rx', 'u2tx', 'u2rx', 'v1tx', 'v1rx', 'v2tx', 'v2rx',
+        'w1tx', 'w1rx', 'w2tx', 'w2rx', 'u1ty', 'u1ry', 'u2ty', 'u2ry',
+        'v1ty', 'v1ry', 'v2ty', 'v2ry', 'w1ty', 'w1ry', 'w2ty', 'w2ry',
+        'plyts', 'laminaprops', 'rhos',
+        'flow', 'beta', 'gamma', 'aeromu', 'rho_air', 'speed_sound', 'Mach', 'V',
+        'F', 'force_orthotropic_laminate',
+        'num_eigvalues', 'num_eigvalues_print',
+        'out_num_cores', 'analysis', 'increments', 'results',
+        'lam', 'matrices', 'fields', 'plot_mesh',
+        ]
+
     def __init__(self, a=None, b=None, r=None, alphadeg=None,
-            stack=None, plyt=None, laminaprop=None, mu=None, m=11, n=11,
-            offset=0., **kwargs):
+            stack=None, plyt=None, laminaprop=None, rho=None,
+            m=11, n=11, offset=0., **kwargs):
         self.a = a
+        self.x1 = -1
+        self.x2 = -1
         self.b = b
+        self.y1 = -1
+        self.y2 = -1
         self.r = r
         self.alphadeg = alphadeg
+        self.alpharad = None
         self.stack = stack
         self.plyt = plyt
         self.laminaprop = laminaprop
+        self.rho = rho
         self.offset = offset
 
         # assembly
@@ -99,14 +125,25 @@ class Shell(object):
         # approximation series
         self.m = m
         self.n = n
+        self.size = None
 
         # numerical integration
         self.nx = m
         self.ny = n
 
         # loads
-        self.forces = []
-        self.forces_inc = []
+        self.point_loads = [] #NOTE see add_point_load
+        self.point_loads_inc = [] #NOTE see add_point_load
+        self.distr_loads = [] #NOTE see add_distr_load_fixed_x and _fixed_y
+        self.distr_loads_inc = [] # NOTE see add_distr_load_fixed_x and _fixed_y
+        # uniform membrane stress state
+        self.Nxx = 0.
+        self.Nyy = 0.
+        self.Nxy = 0.
+        # uniform constant membrane stress state (not multiplied by lambda)
+        self.Nxx_cte = 0.
+        self.Nyy_cte = 0.
+        self.Nxy_cte = 0.
 
         #NOTE default boundary conditions:
         # - displacement at 4 edges is zero
@@ -138,11 +175,11 @@ class Shell(object):
         self.w2ry = 1.
 
         # material
-        self.mu = mu
         self.plyts = None
         self.laminaprops = None
+        self.rhos = None
 
-        # aeroelastic parameters
+        # aeroelastic parameters for panel flutter
         self.flow = 'x'
         self.beta = None
         self.gamma = None
@@ -213,10 +250,22 @@ class Shell(object):
                 raise ValueError('laminaprop must be defined')
             self.laminaprops = [self.laminaprop for i in self.stack]
 
+        if not self.rhos:
+            self.rhos = [self.rho for i in self.stack]
+
         if not self.plyts:
             if self.plyt is None:
                 raise ValueError('plyt must be defined')
             self.plyts = [self.plyt for i in self.stack]
+
+        if self.stack is not None:
+            lam = laminate.read_stack(self.stack, plyts=self.plyts,
+                                      laminaprops=self.laminaprops,
+                                      rhos=self.rhos,
+                                      offset=self.offset)
+            self.lam = lam
+            self.F = self._get_lam_F()
+        self.size = self.get_size()
 
 
     def get_size(self):
@@ -252,8 +301,8 @@ class Shell(object):
         yshape = ys.shape
         if xshape != yshape:
             raise ValueError('Arrays xs and ys must have the same shape')
-        self.Xs = xs
-        self.Ys = ys
+        self.plot_mesh['Xs'] = xs
+        self.plot_mesh['Ys'] = ys
         xs = np.ascontiguousarray(xs.ravel(), dtype=np.float64)
         ys = np.ascontiguousarray(ys.ravel(), dtype=np.float64)
 
@@ -361,13 +410,6 @@ class Shell(object):
         self.alpharad = deg2rad(alphadeg)
         self.r = self.r if self.r is not None else 0.
 
-        if self.stack is not None:
-            lam = laminate.read_stack(self.stack, plyts=self.plyts,
-                                      laminaprops=self.laminaprops,
-                                      offset=self.offset)
-            self.lam = lam
-            self.F = self._get_lam_F()
-
         matrices_num = modelDB.db[self.model]['matrices_num']
         nx = self.nx if nx is None else nx
         ny = self.ny if ny is None else ny
@@ -379,16 +421,24 @@ class Shell(object):
         if c is None:
             # Empty c if the interest is only on the heterogeneous
             # laminate properties
-            c = np.zeros(self.size, dtype=np.float64)
+            c = np.zeros(size, dtype=np.float64)
         c = np.ascontiguousarray(c, dtype=np.float64)
 
         kC = matrices_num.fkC_num(c, Fnxny, self,
                  size, row0, col0, nx, ny, NLgeom=int(NLgeom))
 
-        if c_cte is not None:
-            check_c(c_cte, size)
+        if c_cte is not None or any((self.Nxx_cte, self.Nyy_cte, self.Nxy_cte)):
+            if any((self.Nxx_cte, self.Nyy_cte, self.Nxy_cte)):
+                msg('NOTE: constant stress state taken into account by (Nxx_cte, Nyy_cte, Nxy_cte)', level=3, silent=silent)
+            if c_cte is not None:
+                msg('NOTE: constant stress state taken into account by c_cte', level=3, silent=silent)
+                check_c(c_cte, size)
+            else:
+                c_cte = 0 * c # creating a dummy c_cte
+            NLgeom = int(NLgeom)
             kC += matrices_num.fkG_num(c_cte, Fnxny, self,
-                    size, row0, col0, nx, ny, NLgeom=int(NLgeom))
+                    size, row0, col0, nx, ny, NLgeom,
+                    self.Nxx_cte, self.Nyy_cte, self.Nxy_cte)
 
         if finalize:
             kC = finalize_symmetric_matrix(kC)
@@ -411,27 +461,36 @@ class Shell(object):
         See :meth:`.Shell.calc_kC` for details on each parameter.
 
         """
+        msg('Calculating kG... ', level=2, silent=silent)
         self._rebuild()
         if size is None:
             size = self.get_size()
         elif isinstance(size, str):
             size = int(size) + self.get_size()
-        check_c(c, size)
+        if c is not None:
+            check_c(c, size)
+            c = np.ascontiguousarray(c, dtype=np.float64)
+            if any((self.Nxx, self.Nyy, self.Nxy)):
+                msg('NOTE: stress state taken into account using ALSO (Nxx, Nyy, Nxy)', level=3, silent=silent)
+        else:
+            c = np.zeros(size, dtype=np.float64)
+            if any((self.Nxx, self.Nyy, self.Nxy)):
+                msg('NOTE: stress state taken into account using ONLY (Nxx, Nyy, Nxy)', level=3, silent=silent)
 
-        msg('Calculating kG... ', level=2, silent=silent)
         matrices = modelDB.db[self.model]['matrices_num']
 
         alphadeg = self.alphadeg if self.alphadeg is not None else 0.
         self.alpharad = deg2rad(alphadeg)
         self.r = self.r if self.r is not None else 0.
 
-        c = np.ascontiguousarray(c, dtype=np.float64)
         nx = self.nx if nx is None else nx
         ny = self.ny if ny is None else ny
         if Fnxny is None:
             Fnxny = self._get_lam_F()
+        NLgeom = int(NLgeom)
         kG = matrices.fkG_num(c, Fnxny, self,
-                   size, row0, col0, nx, ny, NLgeom=int(NLgeom))
+                   size, row0, col0, nx, ny, NLgeom,
+                   self.Nxx, self.Nyy, self.Nxy)
 
         if finalize:
             kG = finalize_symmetric_matrix(kG)
@@ -457,12 +516,27 @@ class Shell(object):
         return kT
 
 
-    def calc_kM(self, size=None, row0=0, col0=0, silent=False, finalize=True):
+    def calc_kM(self, size=None, row0=0, col0=0, h_nxny=None, rho_nxny=None,
+            nx=None, ny=None, silent=False, finalize=True):
         """Calculate the mass matrix
+
+        Parameters
+        ----------
+
+        h_nxny : (nx, ny) array-like or None, optional
+            The constitutive relations for the laminate at each integration
+            point.
+        rho_nxny : (nx, ny) array-like or None, optional
+            The material density for the laminate at each integration
+            point. If multiple materials exist for the different plies,
+            calculate ``rho`` using a weighted average.
+
         """
         msg('Calculating kM... ', level=2, silent=silent)
+        nx = self.nx if nx is None else nx
+        ny = self.ny if ny is None else ny
 
-        matrices = modelDB.db[self.model]['matrices']
+        matrices = modelDB.db[self.model]['matrices_num']
 
         alphadeg = self.alphadeg if self.alphadeg is not None else 0.
         self.alpharad = deg2rad(alphadeg)
@@ -473,11 +547,18 @@ class Shell(object):
         elif isinstance(size, str):
             size = int(size) + self.get_size()
 
-        #TODO allow a distribution of mu instead of constant value, at least allow a mu for each ply
-        if self.mu is None:
-            raise ValueError('Attribute "mu" (density) must be defined')
+        # calculate one h and rho for each integration point OR one for the
+        # whole domain
 
-        kM = matrices.fkM(self.offset, self, size, row0, col0)
+        if h_nxny is None:
+            h_nxny = np.zeros((nx, ny), dtype=np.float64)
+            h_nxny[:, :] = self.lam.h
+        if rho_nxny is None:
+            rho_nxny = np.zeros((nx, ny), dtype=np.float64)
+            rho_nxny[:, :] = self.lam.rho
+
+        hrho_input = np.concatenate((h_nxny[..., None], rho_nxny[..., None]), axis=2)
+        kM = matrices.fkM_num(self, self.offset, hrho_input, size, row0, col0, nx, ny)
 
         if finalize:
             kM = finalize_symmetric_matrix(kM)
@@ -499,7 +580,7 @@ class Shell(object):
         if 'coneshell' in self.model:
             raise NotImplementedError('Conical shells not supported')
 
-        matrices = modelDB.db[self.model]['matrices']
+        matrices = modelDB.db[self.model]['matrices_num']
 
         if size is None:
             size = self.get_size()
@@ -525,10 +606,13 @@ class Shell(object):
             beta = self.beta
             gamma = self.gamma if self.gamma is not None else 0.
 
+        self.beta = beta
+        self.gamma = gamma
+
         if self.flow.lower() == 'x':
-            kA = matrices.fkAx(beta, gamma, self, size, row0, col0)
+            kA = matrices.fkAx_num(self, size, row0, col0, self.nx, self.ny)
         elif self.flow.lower() == 'y':
-            kA = matrices.fkAy(beta, self, size, row0, col0)
+            kA = matrices.fkAy_num(self, size, row0, col0, self.nx, self.ny)
         else:
             raise ValueError('Invalid flow value, must be x or y')
 
@@ -546,13 +630,15 @@ class Shell(object):
         return kA
 
 
-    def calc_cA(self, aeromu, silent=False, finalize=True):
+    def calc_cA(self, aeromu, silent=False, size=None, finalize=True):
         """Calculate the aerodynamic damping matrix using the piston theory
         """
         msg('Calculating cA... ', level=2, silent=silent)
 
-        matrices = modelDB.db[self.model]['matrices']
-        cA = matrices.fcA(aeromu, self, self.size, 0, 0)
+        if size is None:
+            size = self.get_size()
+        matrices = modelDB.db[self.model]['matrices_num']
+        cA = matrices.fcA(aeromu, self, size, 0, 0)
         cA = cA*(0+1j)
 
         if finalize:
@@ -681,8 +767,8 @@ class Shell(object):
         return eigvals, eigvecs
 
 
-    def freq(self, atype=4, tol=0, sparse_solver=True, silent=False,
-             sort=True, damping=False, reduced_dof=False):
+    def freq(self, atype=1, tol=0, sparse_solver=True, silent=False,
+             sort=True, damping=False):
         """Natural frequency analysis
 
         .. note:: This will be deprecated soon, use
@@ -704,10 +790,10 @@ class Shell(object):
         atype : int, optional
             Tells which analysis type should be performed:
 
-            - ``1`` : considers kC, kA and kG0 (and cA depending on 'damping')
-            - ``2`` : considers kC and kA (and cA depending on 'damping')
-            - ``3`` : considers kC and kG0
-            - ``4`` : considers kC only
+            - ``1`` : considers kC only
+            - ``2`` : considers kC and kG
+            - ``3`` : considers kC and kA (and cA depending on 'damping')
+            - ``4`` : considers kC, kA and kG (and cA depending on 'damping')
 
         tol : float, optional
             A tolerance value passed to ``scipy.sparse.linalg.eigs``.
@@ -724,10 +810,6 @@ class Shell(object):
             Sort the output eigenvalues and eigenmodes.
         damping : bool, optinal
             If aerodynamic damping should be taken into account.
-        reduced_dof : bool, optional
-            Considers only the contributions of `v` and `w` to the stiffness
-            matrix and accelerates the run. Only effective when
-            ``sparse_solver=False``.
 
         Notes
         -----
@@ -737,27 +819,18 @@ class Shell(object):
         """
         msg('Running frequency analysis...', silent=silent)
 
-        self.calc_kC(silent=silent)
-        self.calc_kM(silent=silent)
-
-        mat = self.matrices
-        kC = mat['kC']
-        kG = mat['kG']
-        kA = mat['kA']
-        cA = mat['cA']
-        kM = mat['kM']
+        kC = self.calc_kC(silent=silent)
+        M = self.calc_kM(silent=silent)
 
         if atype == 1:
-            self.calc_kG(silent=silent)
-            self.calc_kA(silent=silent)
-            if damping:
-                self.calc_cA(silent=silent)
-                K = kC + kA + kG + cA
-            else:
-                K = kC + kA + kG
+            K = kC
 
         elif atype == 2:
-            self.calc_kA(silent=silent)
+            kG = self.calc_kG(silent=silent)
+            K = kC + kG
+
+        elif atype == 3:
+            kA = self.calc_kA(silent=silent)
             K = kC + kA
             if damping:
                 self.calc_cA(silent=silent)
@@ -765,14 +838,14 @@ class Shell(object):
             else:
                 K = kC + kA
 
-        elif atype == 3:
-            self.calc_kG(silent=silent)
-            K = kC + kG
-
         elif atype == 4:
-            K = kC
-
-        M = kM
+            kG = self.calc_kG(silent=silent)
+            kA = self.calc_kA(silent=silent)
+            if damping:
+                cA = self.calc_cA(silent=silent)
+                K = kC + kA + kG + cA
+            else:
+                K = kC + kA + kG
 
         msg('Eigenvalue solver... ', level=2, silent=silent)
         k = min(self.num_eigvalues, M.shape[0]-2)
@@ -803,18 +876,11 @@ class Shell(object):
             M = M[:, check][check, :]
             K = K[:, check][check, :]
 
-            if reduced_dof:
-                i = np.arange(M.shape[0])
-                take = np.column_stack((i[1::3], i[2::3])).flatten()
-                M = M[:, take][take, :]
-                K = K[:, take][take, :]
             if not damping:
                 M = -M
             else:
                 cA = self.cA.toarray()
                 cA = cA[:, check][check, :]
-                if reduced_dof:
-                    cA = cA[:, take][take, :]
                 I = np.identity(M.shape[0])
                 Z = np.zeros_like(M)
                 M = np.row_stack((np.column_stack((I, Z)),
@@ -862,15 +928,6 @@ class Shell(object):
                 eigvals = eigvals[higher_zero]
                 eigvecs = eigvecs[:, higher_zero]
 
-        if not sparse_solver and reduced_dof:
-            new_eigvecs = np.zeros((3*eigvecs.shape[0]//2, eigvecs.shape[1]),
-                    dtype=eigvecs.dtype)
-            new_eigvecs[take, :] = eigvecs
-            eigvecs = new_eigvecs
-
-        self.eigvals = eigvals
-        self.eigvecs = eigvecs
-
         msg('finished!', level=2, silent=silent)
 
         msg('first {0} eigenvalues:'.format(self.num_eigvalues_print), level=1,
@@ -879,13 +936,18 @@ class Shell(object):
             msg('{0} rad/s'.format(eigval), level=2, silent=silent)
         self.analysis.last_analysis = 'freq'
 
+        self.results['eigvals'] = eigvals
+        self.results['eigvecs'] = eigvecs
+
+        return eigvals, eigvecs
+
 
     def uvw(self, c, xs=None, ys=None, gridx=300, gridy=300):
         r"""Calculate the displacement field
 
         For a given full set of Ritz constants ``c``, the displacement
-        field is calculated and stored in the parameters
-        ``u``, ``v``, ``w``, ``phix``, ``phiy`` of the ``Shell`` object.
+        field is calculated and stored in the ``fields`` parameter of the
+        :class:`.Shell`` object.
 
         Parameters
         ----------
@@ -907,13 +969,8 @@ class Shell(object):
         Returns
         -------
         out : tuple
-            A tuple of ``np.ndarrays`` containing
-            ``(u, v, w, phix, phiy)``.
+            Containing ``plot_mesh`` and ``fields``
 
-        Notes
-        -----
-        The returned values ``u```, ``v``, ``w``, ``phix``, ``phiy`` are
-        stored as parameters with the same name in the ``Shell`` object.
 
         """
         c = np.ascontiguousarray(c, dtype=np.float64)
@@ -1034,8 +1091,8 @@ class Shell(object):
         return self.plot_mesh, self.fields
 
 
-    def add_force(self, x, y, fx, fy, fz, cte=True):
-        r"""Add a punctual force with three components
+    def add_point_load(self, x, y, fx, fy, fz, cte=True):
+        r"""Add a point load with three components
 
         Parameters
         ----------
@@ -1055,9 +1112,55 @@ class Shell(object):
 
         """
         if cte:
-            self.forces.append([x, y, fx, fy, fz])
+            self.point_loads.append([x, y, fx, fy, fz])
         else:
-            self.forces_inc.append([x, y, fx, fy, fz])
+            self.point_loads_inc.append([x, y, fx, fy, fz])
+
+
+    def add_distr_load_fixed_x(self, x, funcx=None, funcy=None, funcz=None, cte=True):
+        r"""Add a distributed force g(y) at a fixed x position
+
+        Parameters
+        ----------
+        x : float
+            The fixed `x` position.
+        funcx, funcy, funcz : function, optional
+            The functions of the distributed force components, will be used
+            from `y=0` to `y=b`. At least one of the three must be defined
+        cte : bool, optional
+            Constant forces are not incremented during the non-linear
+            analysis.
+
+        """
+        if not any((funcx, funcy, funcz)):
+            raise ValueError('At least one function must be different than None')
+        if cte:
+            self.distr_loads.append([x, None, funcx, funcy, funcz])
+        else:
+            self.distr_loads_inc.append([x, None, funcx, funcy, funcz])
+
+
+    def add_distr_load_fixed_y(self, y, funcx=None, funcy=None, funcz=None, cte=True):
+        r"""Add a distributed force g(x) at a fixed y position
+
+        Parameters
+        ----------
+        y : float
+            The fixed `y` position.
+        funcx, funcy, funcz : function, optional
+            The functions of the distributed force components, will be used
+            from `x=0` to `x=a`. At least one of the three must be defined
+        cte : bool, optional
+            Constant forces are not incremented during the non-linear
+            analysis.
+
+        """
+        if not any((funcx, funcy, funcz)):
+            raise ValueError('At least one function must be different than None')
+        if cte:
+            self.distr_loads.append([None, y, funcx, funcy, funcz])
+        else:
+            self.distr_loads_inc.append([None, y, funcx, funcy, funcz])
 
 
     def calc_fext(self, inc=1., size=None, col0=0, silent=False):
@@ -1098,44 +1201,7 @@ class Shell(object):
         """
         self._rebuild()
         msg('Calculating external forces...', level=2, silent=silent)
-
-        model = self.model
-        if not model in modelDB.db.keys():
-            raise ValueError(
-                    '{} is not a valid model option'.format(model))
-        db = modelDB.db
-        dofs = db[model]['dofs']
-        fg = db[model]['field'].fg
-
-        if size is None:
-            size = self.get_size()
-        elif isinstance(size, str):
-            size = int(size) + self.get_size()
-        col1 = col0 + self.get_size()
-        g = np.zeros((dofs, self.get_size()), dtype=np.float64)
-        fext = np.zeros(size, dtype=np.float64)
-
-        # non-incrementable punctual forces
-        for i, force in enumerate(self.forces):
-            x, y, fx, fy, fz = force
-            fg(g, x, y, self)
-            if dofs == 3:
-                fpt = np.array([[fx, fy, fz]])
-            elif dofs == 5:
-                fpt = np.array([[fx, fy, fz, 0, 0]])
-            fext[col0:col1] += fpt.dot(g).ravel()
-
-        # incrementable punctual forces
-        for i, force in enumerate(self.forces_inc):
-            x, y, fx, fy, fz = force
-            fg(g, x, y, self)
-            if dofs == 3: #CLT
-                fpt = np.array([[fx, fy, fz]])*inc
-            elif dofs == 5: #FSDT
-                fpt = np.array([[fx, fy, fz, 0, 0]])*inc
-            fext[col0:col1] += fpt.dot(g).ravel()
-
-        return fext
+        return shell_fext(self, inc=inc, size=size, col0=col0)
 
 
     def calc_fint(self, c, size=None, col0=0, silent=False, nx=None,
