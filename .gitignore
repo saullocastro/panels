@@ -17,6 +17,8 @@ temp*
 tmp*.*
 temp*.*
 .cache
+__cache__
+__config__.py
 
 # Python compiled files
 *.pyc
