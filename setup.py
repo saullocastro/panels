@@ -16,11 +16,17 @@ import numpy as np
 DOCLINES = __doc__.split("\n")
 
 CLASSIFIERS = """\
-Intended Audience :: Stress Analysis Engineers
-License :: 3-Clause BSD Approved
+Intended Audience :: Education
+Intended Audience :: Science/Research
+Intended Audience :: End Users/Desktop
+License :: OSI Approved :: BSD License
+Operating System :: POSIX :: BSD
 Programming Language :: Python
-Topic :: Software Development
+Programming Language :: C++
 Topic :: Scientific/Engineering
+Topic :: Education
+Topic :: Software Development
+Topic :: Software Development :: Libraries :: Python Modules
 Operating System :: Microsoft :: Windows
 Operating System :: Unix
 
