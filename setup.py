@@ -33,9 +33,9 @@ Operating System :: Unix
 """
 
 MAJOR = 0
-MINOR = 1
-MICRO = 4
-ISRELEASED = True
+MINOR = 2
+MICRO = 0
+ISRELEASED = False
 VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 
 
@@ -131,6 +131,13 @@ extensions = [
             './panels/core/src/bardell_functions.cpp',
             './panels/core/src/legendre_gauss_quadrature.cpp',
             './panels/models/cylshell_clpt_donnell_bardell_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args, extra_link_args=link_args, language='c++'),
+    Extension('panels.models.cylshell_clpt_donnell_bardell_koiter',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/core/src/legendre_gauss_quadrature.cpp',
+            './panels/models/cylshell_clpt_donnell_bardell_koiter.pyx',
             ],
         include_dirs=include_dirs, extra_compile_args=compile_args, extra_link_args=link_args, language='c++'),
     Extension('panels.models.plate_clpt_donnell_bardell_num',
