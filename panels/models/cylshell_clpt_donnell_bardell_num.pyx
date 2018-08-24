@@ -28,7 +28,7 @@ DOUBLE = np.float64
 ctypedef np.int64_t cINT
 INT = np.int64
 
-cdef int num = 3
+cdef int DOF = 3
 
 
 def fkC_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
@@ -162,7 +162,7 @@ def fkC_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
                             fAw = calc_f(i, xi, w1tx, w1rx, w2tx, w2rx)
                             fAwxi = calc_fx(i, xi, w1tx, w1rx, w2tx, w2rx)
 
-                            col = col0 + num*(j*m + i)
+                            col = col0 + DOF*(j*m + i)
 
                             wxi += cs[col+2]*fAwxi*gAw
                             weta += cs[col+2]*fAw*gAweta
@@ -225,8 +225,8 @@ def fkC_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
 
                             for l in range(n):
 
-                                row = row0 + num*(j*m + i)
-                                col = col0 + num*(l*m + k)
+                                row = row0 + DOF*(j*m + i)
+                                col = col0 + DOF*(l*m + k)
 
                                 #NOTE symmetry assumption True if no follower forces are used
                                 if row > col:
@@ -442,7 +442,7 @@ def fkG_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
                             fAw = calc_f(i, xi, w1tx, w1rx, w2tx, w2rx)
                             fAwxi = calc_fx(i, xi, w1tx, w1rx, w2tx, w2rx)
 
-                            col = col0 + num*(j*m + i)
+                            col = col0 + DOF*(j*m + i)
 
                             wxi += cs[col+2]*fAwxi*gAw
                             weta += cs[col+2]*fAw*gAweta
@@ -473,7 +473,7 @@ def fkG_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
                         fAwxi = calc_fx(i, xi, w1tx, w1rx, w2tx, w2rx)
                         fAwxixi = calc_fxx(i, xi, w1tx, w1rx, w2tx, w2rx)
 
-                        col = col0 + num*(j*m + i)
+                        col = col0 + DOF*(j*m + i)
 
                         exx += cs[col+0]*(2/a)*fAuxi*gAu + 0.5*cs[col+2]*(2/a)*fAwxi*gAw*(2/a)*wxi
                         eyy += cs[col+1]*(2/b)*fAv*gAveta + 1/r*cs[col+2]*fAw*gAw + 0.5*cs[col+2]*(2/b)*fAw*gAweta*(2/b)*weta
@@ -488,7 +488,6 @@ def fkG_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
                 Nxy = Nxy0 + A16*exx + A26*eyy + A66*gxy + B16*kxx + B26*kyy + B66*kxy
 
                 # computing kG
-
                 c = -1
                 for j in range(n):
                     gAw = calc_f(j, eta, w1ty, w1ry, w2ty, w2ry)
@@ -506,8 +505,8 @@ def fkG_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
                                 fBw = calc_f(k, xi, w1tx, w1rx, w2tx, w2rx)
                                 fBwxi = calc_fx(k, xi, w1tx, w1rx, w2tx, w2rx)
 
-                                row = row0 + num*(j*m + i)
-                                col = col0 + num*(l*m + k)
+                                row = row0 + DOF*(j*m + i)
+                                col = col0 + DOF*(l*m + k)
 
                                 #NOTE symmetry assumption True if no follower forces are used
                                 if row > col:
@@ -517,7 +516,10 @@ def fkG_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
                                 if ptx == 0 and pty == 0:
                                     kGr[c] = row+2
                                     kGc[c] = col+2
-                                kGv[c] += weight*( Nxx*fAwxi*fBwxi*gAw*gBw*intx*inty/(a*a) + Nxy*intx*inty*(fAw*fBwxi*gAweta*gBw + fAwxi*fBw*gAw*gBweta)/(a*b) + Nyy*fAw*fBw*gAweta*gBweta*intx*inty/(b*b) )
+                                kGv[c] += weight*(intx*inty/4)*(
+                                          Nxx*(2/a)*fAwxi*gAw*(2/a)*fBwxi*gBw
+                                        + Nxy*((2/b)*fAw*gAweta*(2/a)*fBwxi*gBw + (2/a)*fAwxi*gAw*(2/b)*fBw*gBweta)
+                                        + Nyy*(2/b)*fAw*gAweta*(2/b)*fBw*gBweta )
 
     kG = coo_matrix((kGv, (kGr, kGc)), shape=(size, size))
 
@@ -626,8 +628,8 @@ def fkAx_num(object shell, int size, int row0, int col0, int nx, int ny):
 
                             for l in range(n):
 
-                                row = row0 + num*(j*m + i)
-                                col = col0 + num*(l*m + k)
+                                row = row0 + DOF*(j*m + i)
+                                col = col0 + DOF*(l*m + k)
 
                                 #NOTE symmetry assumption True if no follower forces are used
                                 if row > col:
@@ -801,7 +803,7 @@ def calc_fint(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
                         fAw = calc_f(i, xi, w1tx, w1rx, w2tx, w2rx)
                         fAwxi = calc_fx(i, xi, w1tx, w1rx, w2tx, w2rx)
 
-                        col = col0 + num*(j*m + i)
+                        col = col0 + DOF*(j*m + i)
 
                         wxi += cs[col+2]*fAwxi*gAw
                         weta += cs[col+2]*fAw*gAweta
@@ -834,7 +836,7 @@ def calc_fint(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
                         fAwxi = calc_fx(i, xi, w1tx, w1rx, w2tx, w2rx)
                         fAwxixi = calc_fxx(i, xi, w1tx, w1rx, w2tx, w2rx)
 
-                        col = col0 + num*(j*m + i)
+                        col = col0 + DOF*(j*m + i)
 
                         exx += cs[col+0]*(2/a)*fAuxi*gAu + 0.5*cs[col+2]*(2/a)*fAwxi*gAw*(2/a)*wxi
                         eyy += cs[col+1]*(2/b)*fAv*gAveta + 1./r*cs[col+2]*fAw*gAw + 0.5*cs[col+2]*(2/b)*fAw*gAweta*(2/b)*weta
@@ -868,7 +870,7 @@ def calc_fint(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
                         fAwxi = calc_fx(i, xi, w1tx, w1rx, w2tx, w2rx)
                         fAwxixi = calc_fxx(i, xi, w1tx, w1rx, w2tx, w2rx)
 
-                        col = col0 + num*(j*m + i)
+                        col = col0 + DOF*(j*m + i)
 
                         fint[col+0] += weight*( 0.25*intx*inty*(2*Nxx*fAuxi*gAu/a + 2*Nxy*fAu*gAueta/b) )
                         fint[col+1] += weight*( 0.25*intx*inty*(2*Nxy*fAvxi*gAv/a + 2*Nyy*fAv*gAveta/b) )
