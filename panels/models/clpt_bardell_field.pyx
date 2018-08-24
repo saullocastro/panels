@@ -20,8 +20,8 @@ cdef extern from 'bardell_functions.hpp':
 DOUBLE = np.float64
 ctypedef np.double_t cDOUBLE
 
-cdef int nmax = 30
-cdef int num = 3
+cdef int NMAX = 30
+cdef int NUM = 3
 
 
 def fuvw(np.ndarray[cDOUBLE, ndim=1] c, object s,
@@ -100,7 +100,7 @@ def fuvw(np.ndarray[cDOUBLE, ndim=1] c, object s,
 
 def fstrain(np.ndarray[cDOUBLE, ndim=1] c, object s,
         np.ndarray[cDOUBLE, ndim=1] xs, np.ndarray[cDOUBLE, ndim=1] ys,
-        int num_cores=4, int NLterms=0):
+        int num_cores=4, int NLgeom=0):
     cdef double a, b, r, alpharad
     cdef int m, n
     cdef double u1tx, u1rx, u2tx, u2rx
@@ -162,7 +162,7 @@ def fstrain(np.ndarray[cDOUBLE, ndim=1] c, object s,
               w1tx, w1rx, w2tx, w2rx,
               u1ty, u1ry, u2ty, u2ry,
               v1ty, v1ry, v2ty, v2ry,
-              w1ty, w1ry, w2ty, w2ry, NLterms)
+              w1ty, w1ry, w2ty, w2ry, NLgeom)
 
     return (exxs.ravel()[:size], eyys.ravel()[:size], gxys.ravel()[:size],
             kxxs.ravel()[:size], kyys.ravel()[:size], kxys.ravel()[:size])
@@ -185,12 +185,12 @@ cdef void cfuvw(double *c, int m, int n, double a, double b, double *xs,
     cdef double *gv
     cdef double *gw
 
-    fu = <double *>malloc(nmax * sizeof(double *))
-    gu = <double *>malloc(nmax * sizeof(double *))
-    fv = <double *>malloc(nmax * sizeof(double *))
-    gv = <double *>malloc(nmax * sizeof(double *))
-    fw = <double *>malloc(nmax * sizeof(double *))
-    gw = <double *>malloc(nmax * sizeof(double *))
+    fu = <double *>malloc(NMAX * sizeof(double *))
+    gu = <double *>malloc(NMAX * sizeof(double *))
+    fv = <double *>malloc(NMAX * sizeof(double *))
+    gv = <double *>malloc(NMAX * sizeof(double *))
+    fw = <double *>malloc(NMAX * sizeof(double *))
+    gw = <double *>malloc(NMAX * sizeof(double *))
 
     for pti in range(size):
         x = xs[pti]
@@ -212,7 +212,7 @@ cdef void cfuvw(double *c, int m, int n, double a, double b, double *xs,
 
         for j in range(n):
             for i in range(m):
-                col = num*(j*m + i)
+                col = NUM*(j*m + i)
                 u += c[col+0]*fu[i]*gu[j]
                 v += c[col+1]*fv[i]*gv[j]
                 w += c[col+2]*fw[i]*gw[j]
@@ -238,8 +238,8 @@ cdef void cfwx(double *c, int m, int n, double a, double b, double *xs,
     cdef double *fwxi
     cdef double *gw
 
-    fwxi = <double *>malloc(nmax * sizeof(double *))
-    gw = <double *>malloc(nmax * sizeof(double *))
+    fwxi = <double *>malloc(NMAX * sizeof(double *))
+    gw = <double *>malloc(NMAX * sizeof(double *))
 
     for pti in range(size):
         x = xs[pti]
@@ -255,7 +255,7 @@ cdef void cfwx(double *c, int m, int n, double a, double b, double *xs,
 
         for j in range(n):
             for i in range(m):
-                col = num*(j*m + i)
+                col = NUM*(j*m + i)
                 wx += (2/a)*c[col+2]*fwxi[i]*gw[j]
 
         wxs[pti] = wx
@@ -273,8 +273,8 @@ cdef void cfwy(double *c, int m, int n, double a, double b, double *xs,
     cdef double *fw
     cdef double *gweta
 
-    fw = <double *>malloc(nmax * sizeof(double *))
-    gweta = <double *>malloc(nmax * sizeof(double *))
+    fw = <double *>malloc(NMAX * sizeof(double *))
+    gweta = <double *>malloc(NMAX * sizeof(double *))
 
     for pti in range(size):
         x = xs[pti]
@@ -290,7 +290,7 @@ cdef void cfwy(double *c, int m, int n, double a, double b, double *xs,
 
         for j in range(n):
             for i in range(m):
-                col = num*(j*m + i)
+                col = NUM*(j*m + i)
                 wy += (2/b)*c[col+2]*fw[i]*gweta[j]
 
         wys[pti] = wy
@@ -300,35 +300,6 @@ cdef void cfwy(double *c, int m, int n, double a, double b, double *xs,
 
 
 def fg(double[:,::1] g, double x, double y, object s):
-    if s.__class__.__name__ != 'Shell':
-        raise ValueError('A Shell object must be passed')
-    a = s.a
-    b = s.b
-    m = s.m
-    n = s.n
-    u1tx = s.u1tx ; u1rx = s.u1rx ; u2tx = s.u2tx ; u2rx = s.u2rx
-    v1tx = s.v1tx ; v1rx = s.v1rx ; v2tx = s.v2tx ; v2rx = s.v2rx
-    w1tx = s.w1tx ; w1rx = s.w1rx ; w2tx = s.w2tx ; w2rx = s.w2rx
-    u1ty = s.u1ty ; u1ry = s.u1ry ; u2ty = s.u2ty ; u2ry = s.u2ry
-    v1ty = s.v1ty ; v1ry = s.v1ry ; v2ty = s.v2ty ; v2ry = s.v2ry
-    w1ty = s.w1ty ; w1ry = s.w1ry ; w2ty = s.w2ty ; w2ry = s.w2ry
-    cfg(g, m, n, x, y, a, b,
-        u1tx, u1rx, u2tx, u2rx,
-        v1tx, v1rx, v2tx, v2rx,
-        w1tx, w1rx, w2tx, w2rx,
-        u1ty, u1ry, u2ty, u2ry,
-        v1ty, v1ry, v2ty, v2ry,
-        w1ty, w1ry, w2ty, w2ry)
-
-
-cdef void cfg(double[:,::1] g, int m, int n,
-              double x, double y, double a, double b,
-              double u1tx, double u1rx, double u2tx, double u2rx,
-              double v1tx, double v1rx, double v2tx, double v2rx,
-              double w1tx, double w1rx, double w2tx, double w2rx,
-              double u1ty, double u1ry, double u2ty, double u2ry,
-              double v1ty, double v1ry, double v2ty, double v2ry,
-              double w1ty, double w1ry, double w2ty, double w2ry) nogil:
     cdef int i, j, col
     cdef double xi, eta
     cdef double *fu
@@ -338,26 +309,29 @@ cdef void cfg(double[:,::1] g, int m, int n,
     cdef double *gv
     cdef double *gw
 
-    fu = <double *>malloc(nmax * sizeof(double *))
-    gu = <double *>malloc(nmax * sizeof(double *))
-    fv = <double *>malloc(nmax * sizeof(double *))
-    gv = <double *>malloc(nmax * sizeof(double *))
-    fw = <double *>malloc(nmax * sizeof(double *))
-    gw = <double *>malloc(nmax * sizeof(double *))
+    if s.__class__.__name__ != 'Shell':
+        raise ValueError('A Shell object must be passed')
 
-    xi = 2*x/a - 1.
-    eta = 2*y/b - 1.
+    fu = <double *>malloc(NMAX * sizeof(double *))
+    gu = <double *>malloc(NMAX * sizeof(double *))
+    fv = <double *>malloc(NMAX * sizeof(double *))
+    gv = <double *>malloc(NMAX * sizeof(double *))
+    fw = <double *>malloc(NMAX * sizeof(double *))
+    gw = <double *>malloc(NMAX * sizeof(double *))
 
-    calc_vec_f(fu, xi, u1tx, u1rx, u2tx, u2rx)
-    calc_vec_f(gu, eta, u1ty, u1ry, u2ty, u2ry)
-    calc_vec_f(fv, xi, v1tx, v1rx, v2tx, v2rx)
-    calc_vec_f(gv, eta, v1ty, v1ry, v2ty, v2ry)
-    calc_vec_f(fw, xi, w1tx, w1rx, w2tx, w2rx)
-    calc_vec_f(gw, eta, w1ty, w1ry, w2ty, w2ry)
+    xi = 2*x/s.a - 1.
+    eta = 2*y/s.b - 1.
 
-    for j in range(n):
-        for i in range(m):
-            col = num*(j*m + i)
+    calc_vec_f(fu, xi, s.u1tx, s.u1rx, s.u2tx, s.u2rx)
+    calc_vec_f(gu, eta, s.u1ty, s.u1ry, s.u2ty, s.u2ry)
+    calc_vec_f(fv, xi, s.v1tx, s.v1rx, s.v2tx, s.v2rx)
+    calc_vec_f(gv, eta, s.v1ty, s.v1ry, s.v2ty, s.v2ry)
+    calc_vec_f(fw, xi, s.w1tx, s.w1rx, s.w2tx, s.w2rx)
+    calc_vec_f(gw, eta, s.w1ty, s.w1ry, s.w2ty, s.w2ry)
+
+    for j in range(s.n):
+        for i in range(s.m):
+            col = NUM*(j*s.m + i)
             g[0, col+0] = fu[i]*gu[j]
             g[1, col+1] = fv[i]*gv[j]
             g[2, col+2] = fw[i]*gw[j]
@@ -380,7 +354,7 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
         double w1tx, double w1rx, double w2tx, double w2rx,
         double u1ty, double u1ry, double u2ty, double u2ry,
         double v1ty, double v1ry, double v2ty, double v2ry,
-        double w1ty, double w1ry, double w2ty, double w2ry, int NLterms) nogil:
+        double w1ty, double w1ry, double w2ty, double w2ry, int NLgeom) nogil:
     cdef int i, j, col, pti
     cdef double x, y, xi, eta
     cdef double exx, eyy, gxy, kxx, kyy, kxy
@@ -402,20 +376,22 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
     cdef double *gweta
     cdef double *gwetaeta
 
-    fu = <double *>malloc(nmax * sizeof(double *))
-    fuxi = <double *>malloc(nmax * sizeof(double *))
-    gu = <double *>malloc(nmax * sizeof(double *))
-    gueta = <double *>malloc(nmax * sizeof(double *))
-    fv = <double *>malloc(nmax * sizeof(double *))
-    fvxi = <double *>malloc(nmax * sizeof(double *))
-    gv = <double *>malloc(nmax * sizeof(double *))
-    gveta = <double *>malloc(nmax * sizeof(double *))
-    fw = <double *>malloc(nmax * sizeof(double *))
-    fwxi = <double *>malloc(nmax * sizeof(double *))
-    fwxixi = <double *>malloc(nmax * sizeof(double *))
-    gw = <double *>malloc(nmax * sizeof(double *))
-    gweta = <double *>malloc(nmax * sizeof(double *))
-    gwetaeta = <double *>malloc(nmax * sizeof(double *))
+    cdef double wxi, weta
+
+    fu = <double *>malloc(NMAX * sizeof(double *))
+    fuxi = <double *>malloc(NMAX * sizeof(double *))
+    gu = <double *>malloc(NMAX * sizeof(double *))
+    gueta = <double *>malloc(NMAX * sizeof(double *))
+    fv = <double *>malloc(NMAX * sizeof(double *))
+    fvxi = <double *>malloc(NMAX * sizeof(double *))
+    gv = <double *>malloc(NMAX * sizeof(double *))
+    gveta = <double *>malloc(NMAX * sizeof(double *))
+    fw = <double *>malloc(NMAX * sizeof(double *))
+    fwxi = <double *>malloc(NMAX * sizeof(double *))
+    fwxixi = <double *>malloc(NMAX * sizeof(double *))
+    gw = <double *>malloc(NMAX * sizeof(double *))
+    gweta = <double *>malloc(NMAX * sizeof(double *))
+    gwetaeta = <double *>malloc(NMAX * sizeof(double *))
 
     if r == 0:
         flagcyl = 0
@@ -444,6 +420,15 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
         calc_vec_fx(gweta, eta, w1ty, w1ry, w2ty, w2ry)
         calc_vec_fxx(gwetaeta, eta, w1ty, w1ry, w2ty, w2ry)
 
+        wxi = 0
+        weta = 0
+
+        for j in range(n):
+            for i in range(m):
+                col = NUM*(j*m + i)
+                wxi += c[col+2]*fwxi[i]*gw[j]
+                weta += c[col+2]*fw[i]*gweta[j]
+
         exx = 0
         eyy = 0
         gxy = 0
@@ -453,13 +438,15 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
 
         for j in range(n):
             for i in range(m):
-                col = num*(j*m + i)
-                exx += c[col+0]*fuxi[i]*gu[j]*(2/a) + NLterms*2/(a*a)*(c[col+2]*fwxi[i]*gw[j])**2
+                col = NUM*(j*m + i)
+                exx += c[col+0]*fuxi[i]*gu[j]*(2/a) + NLgeom*2/(a*a)*c[col+2]*fwxi[i]*gw[j]*wxi
                 if flagcyl == 1:
-                    eyy += c[col+1]*fv[i]*gveta[j]*(2/b) + 1/r*c[col+2]*fw[i]*gw[j] + NLterms*2/(b*b)*(c[col+2]*fw[i]*gweta[j])**2
+                    eyy += c[col+1]*fv[i]*gveta[j]*(2/b) + 1/r*c[col+2]*fw[i]*gw[j] + NLgeom*2/(b*b)*c[col+2]*fw[i]*gweta[j]*weta
                 else:
-                    eyy += c[col+1]*fv[i]*gveta[j]*(2/b) + NLterms*2/(b*b)*(c[col+2]*fw[i]*gweta[j])**2
-                gxy += c[col+0]*fu[i]*gueta[j]*(2/b) + c[col+1]*fvxi[i]*gv[j]*(2/a) + NLterms*4/(a*b)*c[col+2]*fwxi[i]*gw[j]*c[col+2]*fw[i]*gweta[j]
+                    eyy += c[col+1]*fv[i]*gveta[j]*(2/b) + NLgeom*2/(b*b)*c[col+2]*fw[i]*gweta[j]*weta
+                gxy += c[col+0]*fu[i]*gueta[j]*(2/b) + c[col+1]*fvxi[i]*gv[j]*(2/a) + NLgeom*4/(a*b)*(
+                                        c[col+2]*fwxi[i]*gw[j]*weta +
+                                        wxi*c[col+2]*fw[i]*gweta[j] )
                 kxx += -c[col+2]*fwxixi[i]*gw[j]*4/(a*a)
                 kyy += -c[col+2]*fw[i]*gwetaeta[j]*4/(b*b)
                 kxy += -2*c[col+2]*fwxi[i]*gweta[j]*4/(a*b)
