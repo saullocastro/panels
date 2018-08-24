@@ -93,11 +93,11 @@ class Shell(object):
             stack=None, plyt=None, laminaprop=None, rho=None,
             m=11, n=11, offset=0., **kwargs):
         self.a = a
-        self.x1 = -1
-        self.x2 = -1
+        self.x1 = -1 # used to integrate part of the shell domain, -1 will use 0
+        self.x2 = -1 # used to integrate part of the shell domain, -1 will se a
         self.b = b
-        self.y1 = -1
-        self.y2 = -1
+        self.y1 = -1 # used to integrate part of the shell domain, -1 will use 0
+        self.y2 = -1 # used to integrate part of the shell domain, -1 will use b
         self.r = r
         self.alphadeg = alphadeg
         self.alpharad = None
@@ -134,8 +134,8 @@ class Shell(object):
         # loads
         self.point_loads = [] #NOTE see add_point_load
         self.point_loads_inc = [] #NOTE see add_point_load
-        self.distr_loads = [] #NOTE see add_distr_load_fixed_x and _fixed_y
-        self.distr_loads_inc = [] # NOTE see add_distr_load_fixed_x and _fixed_y
+        self.distr_loads = [] #NOTE see add_distr_load_fixed_x and add_distr_load_fixed_y
+        self.distr_loads_inc = [] # NOTE see add_distr_load_fixed_x and add_distr_load_fixed_y
         # uniform membrane stress state
         self.Nxx = 0.
         self.Nyy = 0.
@@ -228,6 +228,8 @@ class Shell(object):
 
 
     def _rebuild(self):
+        self.nx = max(self.nx, self.m)
+        self.ny = max(self.ny, self.n)
         if self.model is None:
             if self.r is None and self.alphadeg is None:
                 self.model = 'plate_clpt_donnell_bardell'
@@ -990,7 +992,7 @@ class Shell(object):
         return self.plot_mesh, self.fields
 
 
-    def strain(self, c, xs=None, ys=None, gridx=300, gridy=300, NLterms=True):
+    def strain(self, c, xs=None, ys=None, gridx=300, gridy=300, NLgeom=True):
         r"""Calculate the strain field
 
         Parameters
@@ -1009,7 +1011,7 @@ class Shell(object):
         gridy : int, optional
             When ``xs`` and ``ys`` are not supplied, ``gridx`` and ``gridy``
             are used.
-        NLterms : bool
+        NLgeom : bool
             Flag to indicate whether non-linear strain components should be considered.
 
         Returns
@@ -1022,7 +1024,7 @@ class Shell(object):
         c = np.ascontiguousarray(c, dtype=np.float64)
         xs, ys, xshape, yshape = self._default_field(xs, ys, gridx, gridy)
         fstrain = modelDB.db[self.model]['field'].fstrain
-        exx, eyy, gxy, kxx, kyy, kxy = fstrain(c, self, xs, ys, self.out_num_cores, int(NLterms))
+        exx, eyy, gxy, kxx, kyy, kxy = fstrain(c, self, xs, ys, self.out_num_cores, int(NLgeom))
 
         self.plot_mesh['Xs'] = xs.reshape(xshape)
         self.plot_mesh['Ys'] = ys.reshape(yshape)
@@ -1036,7 +1038,7 @@ class Shell(object):
         return self.plot_mesh, self.fields
 
 
-    def stress(self, c, F=None, xs=None, ys=None, gridx=300, gridy=300, NLterms=True):
+    def stress(self, c, F=None, xs=None, ys=None, gridx=300, gridy=300, NLgeom=True):
         r"""Calculate the stress field
 
         Parameters
@@ -1058,7 +1060,7 @@ class Shell(object):
         gridy : int, optional
             When ``xs`` and ``ys`` are not supplied, ``gridx`` and ``gridy``
             are used.
-        NLterms : bool
+        NLgeom : bool
             Flag to indicate whether non-linear strain components should be considered.
 
         Returns
@@ -1068,7 +1070,7 @@ class Shell(object):
             ``(x, y, Nxx, Nyy, Nxy, Mxx, Myy, Mxy)``
 
         """
-        plot_mesh, fields = self.strain(c, xs, ys, gridx, gridy)
+        plot_mesh, fields = self.strain(c, xs, ys, gridx, gridy, NLgeom)
         exx = fields['exx']
         eyy = fields['eyy']
         gxy = fields['gxy']
@@ -1079,6 +1081,7 @@ class Shell(object):
             F = self.F
         if F is None:
             raise ValueError('Laminate ABD matrix not defined for shell')
+        #TODO implement for variable stiffness!
 
         self.plot_mesh = plot_mesh
         self.fields['Nxx'] = exx*F[0, 0] + eyy*F[0, 1] + gxy*F[0, 2] + kxx*F[0, 3] + kyy*F[0, 4] + kxy*F[0, 5]
