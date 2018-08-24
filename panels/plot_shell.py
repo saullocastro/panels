@@ -17,7 +17,7 @@ def plot_shell(shell, c, invert_y=False, vec='w', deform_u=False,
         cbar_format=None, cbar_title='', cbar_fontsize=10, colormap='jet',
         aspect='equal', clean=True, dpi=400, texts=[], xs=None, ys=None,
         gridx=300, gridy=300, num_levels=400, vecmin=None, vecmax=None,
-        plot_offset_x=0., plot_offset_y=0.):
+        plot_offset_x=0., plot_offset_y=0., NLgeom=True):
     r"""Contour plot for a Ritz constants vector.
 
     Parameters
@@ -109,7 +109,7 @@ def plot_shell(shell, c, invert_y=False, vec='w', deform_u=False,
     elif vec in strains:
         shell.strain(c, xs=xs, ys=ys, gridx=gridx, gridy=gridy)
     elif vec in stresses:
-        shell.stress(c, xs=xs, ys=ys, gridx=gridx, gridy=gridy, NLterms=True)
+        shell.stress(c, xs=xs, ys=ys, gridx=gridx, gridy=gridy, NLgeom=NLgeom)
     else:
         raise ValueError(
                 '{0} is not a valid vec parameter value!'.format(vec))
