@@ -129,84 +129,10 @@ kC = intx*inty/4*BA.T*F*BB
 # Internal force vector
 fint = intx*inty/4*BA.T*M([[Nxx, Nyy, Nxy, Mxx, Myy, Mxy]]).T
 
-# Koiter's phi2 and phi2_o as 2nd order tensors
-NeAB = (Nxx * 4/(a*a)*swAxi.T*swBxi
-        + Nyy * 4/(b*b)*swAeta.T*swBeta
-        + Nxy * 4/(a*b)*(swAxi.T*swBeta + swAeta.T*swBxi))
-N_oeAB = (Nxx_o * 4/(a*a)*swAxi.T*swBxi
-        + Nyy_o * 4/(b*b)*swAeta.T*swBeta
-        + Nxy_o * 4/(a*b)*(swAxi.T*swBeta + swAeta.T*swBxi))
-eA = BA[:3, :]
-kA = BA[3:, :]
-NB = (F*BB)[:3, :]
-MB = (F*BB)[3:, :]
-
-eA_o = BA_o[:3, :]
-NB_o = (F*BB_o)[:3, :]
-MB_o = (F*BB_o)[3:, :]
-
-phi2 = intx*inty/4*(NeAB + NB*eA + MB*kA)
-phi2_o = intx*inty/4*(N_oeAB + eA*NB_o + eA_o*NB + kA*MB_o)
-
-A = F[:3, :3]
-B = F[:3, 3:]
-D = F[3:, 3:]
-
+# Higher order tensors required by displacement based Ritz-Koiter
 eAB1 = (2/a)**2*swAxi.T*swBxi
 eAB2 = (2/b)**2*swAeta.T*swBeta
 eAB3 = (2/a)*(2/b)*(swAxi.T*swBeta + swAeta.T*swBxi)
-
-
-#FIXME attempt to already compute phi3*c1*c1, which would result in a vector
-if False:
-    # Koiter's phi3 is a 3rd order tensor, here I attempt to calculate
-    # phi3*ca*cb to reduce two dimensions, making a vector at the end
-    eA = M([[(2/a)*uAxi, 0, (2/a)**2*wAxi*wxi],
-            [0, (2/b)*vAeta,  1/r*wA + (2/b)**2*wAeta*weta],
-            [(2/b)*uAeta, (2/a)*vAxi, (2/a)*(2/b)*(weta*wAxi + wxi*wAeta)]])
-    kA = M([[0, 0, -(2/a)*(2/a)*wAxixi],
-            [0, 0, -(2/b)*(2/b)*wAetaeta],
-            [0, 0, -(2/a)*(2/b)*2*wAxieta]])
-    eB = M([[(2/a)*uBxi, 0, (2/a)**2*wBxi*wxi],
-            [0, (2/b)*vBeta,  1/r*wB + (2/b)**2*wBeta*weta],
-            [(2/b)*uBeta, (2/a)*vBxi, (2/a)*(2/b)*(weta*wBxi + wxi*wBeta)]])
-    kB = M([[0, 0, -(2/a)*(2/a)*wBxixi],
-            [0, 0, -(2/b)*(2/b)*wBetaeta],
-            [0, 0, -(2/a)*(2/b)*2*wBxieta]])
-    eC = M([[(2/a)*uCxi, 0, (2/a)**2*wCxi*wxi],
-            [0, (2/b)*vCeta,  1/r*wC + (2/b)**2*wCeta*weta],
-            [(2/b)*uCeta, (2/a)*vCxi, (2/a)*(2/b)*(weta*wCxi + wxi*wCeta)]])
-    kC = M([[0, 0, -(2/a)*(2/a)*wCxixi],
-            [0, 0, -(2/b)*(2/b)*wCetaeta],
-            [0, 0, -(2/a)*(2/b)*2*wCxieta]])
-    eAB = M([[0, 0, (2/a)**2*wAxi*wBxi],
-             [0, 0, (2/b)**2*wAeta*wBeta],
-             [0, 0, (2/a)*(2/b)*(wAxi*wBeta + wAeta*wBxi)]])
-    eAC = M([(2/a)**2*wAxi*swCxi,
-             (2/b)**2*wAeta*swCeta,
-             (2/a)*(2/b)*(wAxi*swCeta + wAeta*swCxi)])
-    eBC = M([(2/a)**2*wBxi*swCxi,
-             (2/b)**2*wBeta*swCeta,
-             (2/a)*(2/b)*(swCeta*wBxi + swCxi*wBeta)])
-    NB = A*eB + B*kB
-    NBC = A*eBC
-    MBC = B*eBC
-
-    NC = A*eC + B*kC
-    NCeAB = ZEROS
-    NBCeA = ZEROS
-    NBeAC = ZEROS
-    MBCkA = ZEROS
-    for i in range(3):
-        tmp =  (NC[i, :].T*eAB[i, :])
-        NCeAB[i] = (NC[i, :].T*eAB[i, :])
-        #NBCeA[i] = NBC[i, :]*eA[i, :]
-        #NBeAC[i] = NB[i, :]*eAC[i, :]
-        #MBCkA[i] = MBC[i, :]*kA[i, :]
-    phi3 = intx*inty/4 * ( NCeAB + NBCeA + NBeAC + MBCkA )
-
-
-
 
 # Linear constitutive stiffness matrix
 
@@ -251,9 +177,9 @@ vars = (A11, A12, A16, A22, A26, A66,
         B11, B12, B16, B22, B26, B66,
         D11, D12, D16, D22, D26, D66)
 
-#piece_wise_simplify(kC, vars)
-#piece_wise_simplify(kC0, vars)
-#piece_wise_simplify(kG, (Nxx, Nyy, Nxy))
+piece_wise_simplify(kC, vars)
+piece_wise_simplify(kC0, vars)
+piece_wise_simplify(kG, (Nxx, Nyy, Nxy))
 
 from panels.dev.matrixtools import mprint_as_sparse
 
@@ -263,16 +189,13 @@ try: os.makedirs(outdir)
 except: pass
 
 matrices = [
-    #[kC, 'kC'],
-    #[kC0, 'kC0'],
-    #[kG, 'kG'],
+    [kC, 'kC'],
+    [kC0, 'kC0'],
+    [kG, 'kG'],
     [kM, 'kM'],
     [kAx, 'kAx'],
     [kAy, 'kAy'],
     [cA, 'cA'],
-    [phi2, 'phi2'],
-    [phi2, 'phi2'],
-    #[phi3, 'phi3'], #FIXME
     [BA, 'eAkA'],
     [eAB1, 'eAB1'],
     [eAB2, 'eAB2'],
