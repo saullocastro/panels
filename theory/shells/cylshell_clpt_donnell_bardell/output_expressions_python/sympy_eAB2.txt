@@ -1,0 +1,6 @@
+# eAB2_11
+# eAB2_11_num=1
+c += 1
+eAB2r[c] = row+2
+eAB2c[c] = col+2
+eAB2v[c] += 4*fAw*fBw*gAweta*gBweta/(b*b)
