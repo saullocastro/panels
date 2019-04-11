@@ -149,15 +149,16 @@ def plot_shell(shell, c, invert_y=False, vec='w', deform_u=False,
         field_v = shell.fields['v']
         y -= deform_u_sf*field_u
         x += deform_u_sf*field_v
-    contour = ax.contourf(x, y, field, levels=levels)
+
+    colormap_obj = getattr(cm, colormap, None)
+    if colormap_obj is None:
+        warn('Invalid colormap, using "jet"', level=1)
+        colormap_obj = cm.jet
+
+    contour = ax.contourf(x, y, field, levels=levels, cmap=colormap_obj)
 
     if colorbar:
         from mpl_toolkits.axes_grid1 import make_axes_locatable
-
-        colormap_obj = getattr(cm, colormap, None)
-        if colormap_obj is None:
-            warn('Invalid colormap, using "jet"', level=1)
-            colormap_obj = cm.jet
 
         fsize = cbar_fontsize
         divider = make_axes_locatable(ax)
