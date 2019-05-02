@@ -16,6 +16,7 @@ import numpy as np
 DOCLINES = __doc__.split("\n")
 
 CLASSIFIERS = """\
+Development Status :: 4 - Beta
 Intended Audience :: Education
 Intended Audience :: Science/Research
 Intended Audience :: End Users/Desktop
@@ -168,8 +169,8 @@ setup(
     version=FULLVERSION,
     description=DOCLINES[0],
     long_description='\n'.join(DOCLINES[2:]),
-    url='https://github.com/compmech/panels',
-    download_url='https://github.com/compmech/panels',
+    url='https://github.com/saullocastro/panels',
+    download_url='https://github.com/saullocastro/panels',
     license='Copyrighted',
     classifiers=[_f for _f in CLASSIFIERS.split('\n') if _f],
     platforms=['Windows', 'Linux'],
