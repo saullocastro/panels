@@ -30,8 +30,14 @@ def test_partial_domain_integration():
 
     size = s.get_size()
     kCfull = fkC_num(np.zeros(size, float), s.lam.ABD, s, size, 0, 0, s.nx, s.ny, 0)
-    kC_1 = fkC_num(np.zeros(size, float), s.lam.ABD, s, size, 0, 0, s.nx, s.ny, 0, 0, s.a/2)
-    kC_2 = fkC_num(np.zeros(size, float), s.lam.ABD, s, size, 0, 0, s.nx, s.ny, 0, s.a/2, s.a)
+    s.x1 = 0
+    s.x2 = s.a/2
+    kC_1 = fkC_num(np.zeros(size, float), s.lam.ABD, s, size, 0, 0, s.nx, s.ny, 0)
+    s.x1 = s.a/2
+    s.x2 = s.a
+    kC_2 = fkC_num(np.zeros(size, float), s.lam.ABD, s, size, 0, 0, s.nx, s.ny, 0)
+    print(kCfull)
+    print(kC_1 + kC_2)
     assert np.allclose(kCfull.toarray(), (kC_1 + kC_2).toarray())
 
 
