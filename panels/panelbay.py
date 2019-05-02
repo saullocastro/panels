@@ -40,7 +40,6 @@ import composites.laminate as laminate
 from . logger import msg, warn
 from . shell import Shell
 from . import modelDB as shellmDB
-from . stiffener import BladeStiff1D, BladeStiff2D
 
 
 def load(name):
@@ -273,6 +272,7 @@ class PanelBay(object):
         Additional parameters can be passed using the ``kwargs``.
 
         """
+        from . stiffener import BladeStiff1D
         if rho is None:
             rho = self.rho
 
@@ -390,6 +390,7 @@ class PanelBay(object):
         Additional parameters can be passed using the ``kwargs``.
 
         """
+        from . stiffener import BladeStiff2D
         if rho is None:
             rho = self.rho
 
@@ -879,6 +880,7 @@ class PanelBay(object):
         :class:`.PanelBay` object.
 
         """
+        from . stiffener import BladeStiff1D, BladeStiff2D
         c = np.ascontiguousarray(c, dtype=np.float64)
 
         stiff = self.stiffeners[si]
