@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from panels import Shell
-from panels.models.test_plate_partial_domain_integration import fkC_num
+from panels.models.plate_clpt_donnell_bardell_num import fkC_num
 
 
 def test_partial_domain_integration():
