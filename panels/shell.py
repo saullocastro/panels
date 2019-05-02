@@ -342,7 +342,7 @@ class Shell(object):
         return F
 
 
-    def calc_kC(self, size=None, row0=0, col0=0, silent=False, finalize=True,
+    def calc_kC(self, size=None, row0=0, col0=0, silent=True, finalize=True,
             c=None, c_cte=None, nx=None, ny=None, Fnxny=None,
             NLgeom=False):
         """Calculate the constitutive stiffness matrix
@@ -448,7 +448,7 @@ class Shell(object):
         return kC
 
 
-    def calc_kG(self, size=None, row0=0, col0=0, silent=False, finalize=True,
+    def calc_kG(self, size=None, row0=0, col0=0, silent=True, finalize=True,
             c=None, nx=None, ny=None, Fnxny=None, NLgeom=False):
         """Calculate the geometric stiffness matrix
 
@@ -498,7 +498,7 @@ class Shell(object):
         return kG
 
 
-    def calc_kT(self, size=None, row0=0, col0=0, silent=False, finalize=True,
+    def calc_kT(self, size=None, row0=0, col0=0, silent=True, finalize=True,
             c=None, nx=None, ny=None, Fnxny=None):
         kC = self.calc_kC(size=size, row0=row0, col0=col0, silent=silent, finalize=finalize,
             c=c, nx=nx, ny=ny, Fnxny=Fnxny, NLgeom=True)
@@ -511,7 +511,7 @@ class Shell(object):
 
 
     def calc_kM(self, size=None, row0=0, col0=0, h_nxny=None, rho_nxny=None,
-            nx=None, ny=None, silent=False, finalize=True):
+            nx=None, ny=None, silent=True, finalize=True):
         """Calculate the mass matrix
 
         Parameters
@@ -566,7 +566,7 @@ class Shell(object):
         return kM
 
 
-    def calc_kA(self, size=None, row0=0, col0=0, silent=False, finalize=True):
+    def calc_kA(self, size=None, row0=0, col0=0, silent=True, finalize=True):
         """Calculate the aerodynamic matrix using the linear piston theory
         """
         msg('Calculating kA... ', level=2, silent=silent)
@@ -624,7 +624,7 @@ class Shell(object):
         return kA
 
 
-    def calc_cA(self, aeromu, silent=False, size=None, finalize=True):
+    def calc_cA(self, aeromu, silent=True, size=None, finalize=True):
         """Calculate the aerodynamic damping matrix using the piston theory
         """
         msg('Calculating cA... ', level=2, silent=silent)
@@ -914,7 +914,7 @@ class Shell(object):
         return kPC
 
 
-    def calc_fext(self, inc=1., size=None, col0=0, silent=False):
+    def calc_fext(self, inc=1., size=None, col0=0, silent=True):
         """Calculate the external force vector `\{F_{ext}\}`
 
         Recall that:
@@ -955,7 +955,7 @@ class Shell(object):
         return shell_fext(self, inc=inc, size=size, col0=col0)
 
 
-    def calc_fint(self, c, size=None, col0=0, silent=False, nx=None,
+    def calc_fint(self, c, size=None, col0=0, silent=True, nx=None,
             ny=None, Fnxny=None):
         """Calculate the internal force vector `\{F_{int}\}`
 
