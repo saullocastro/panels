@@ -89,12 +89,12 @@ class BladeStiff1D(object):
                     stack=self.bstack, plyts=self.bplyts,
                     rho=self.rho, m=bay.m, n=bay.n,
                     laminaprops=self.blaminaprops, offset=(-h/2.-hb/2.),
-                    u1tx=bay.u1tx, u1rx=bay.u1rx, u2tx=bay.u2tx, u2rx=bay.u2rx,
-                    v1tx=bay.v1tx, v1rx=bay.v1rx, v2tx=bay.v2tx, v2rx=bay.v2rx,
-                    w1tx=bay.w1tx, w1rx=bay.w1rx, w2tx=bay.w2tx, w2rx=bay.w2rx,
-                    u1ty=bay.u1ty, u1ry=bay.u1ry, u2ty=bay.u2ty, u2ry=bay.u2ry,
-                    v1ty=bay.v1ty, v1ry=bay.v1ry, v2ty=bay.v2ty, v2ry=bay.v2ry,
-                    w1ty=bay.w1ty, w1ry=bay.w1ry, w2ty=bay.w2ty, w2ry=bay.w2ry,
+                    x1u=bay.x1u, x2u=bay.x2u,
+                    x1v=bay.x1v, x2v=bay.x2v,
+                    x1w=bay.x1w, x1wr=bay.x1wr, x2w=bay.x2w, x2wr=bay.x2wr,
+                    y1u=bay.y1u, y2u=bay.y2u,
+                    y1v=bay.y1v, y2v=bay.y2v,
+                    y1w=bay.y1w, y1wr=bay.y1wr, y2w=bay.y2w, y2wr=bay.y2wr,
                     y1=y1, y2=y2)
             self.Asb = self.bb*hb
 
@@ -136,13 +136,7 @@ class BladeStiff1D(object):
         if self.flam is not None:
             mod = modelDB.db[self.model]['matrices']
             bay = self.bay
-            kC += mod.fkCf(self.ys, bay.a, bay.b, self.bf, self.dbf, self.E1, self.F1,
-                           self.S1, self.Jxx, bay.m, bay.n,
-                           bay.u1tx, bay.u1rx, bay.u2tx, bay.u2rx,
-                           bay.w1tx, bay.w1rx, bay.w2tx, bay.w2rx,
-                           bay.u1ty, bay.u1ry, bay.u2ty, bay.u2ry,
-                           bay.w1ty, bay.w1ry, bay.w2ty, bay.w2ry,
-                           size=size, row0=row0, col0=col0)
+            kC += mod.fkCf(bay, self size=size, row0=row0, col0=col0)
 
         if finalize:
             kC = finalize_symmetric_matrix(kC)
@@ -177,9 +171,8 @@ class BladeStiff1D(object):
             Fx = self.Fx if self.Fx is not None else 0.
             mod = modelDB.db[self.model]['matrices']
             bay = self.bay
-            kG += mod.fkGf(self.ys, Fx, bay.a, bay.b, self.bf, bay.m, bay.n,
-                            bay.w1tx, bay.w1rx, bay.w2tx, bay.w2rx,
-                            bay.w1ty, bay.w1ry, bay.w2ty, bay.w2ry,
+            kG += mod.fkGf(bay, self,
+                    #self.ys, Fx, bay.a, bay.b, self.bf, bay.m, bay.n,
                             size, row0, col0)
 
         if finalize:
@@ -210,14 +203,10 @@ class BladeStiff1D(object):
         if self.flam is not None:
             bay = self.bay
             h = 0.5*sum(self.shell1.plyts) + 0.5*sum(self.shell2.plyts)
-            kM += mod.fkMf(self.ys, self.rho, h, self.hb, self.hf, bay.a, bay.b,
-                           self.bf, self.dbf, bay.m, bay.n,
-                           bay.u1tx, bay.u1rx, bay.u2tx, bay.u2rx,
-                           bay.v1tx, bay.v1rx, bay.v2tx, bay.v2rx,
-                           bay.w1tx, bay.w1rx, bay.w2tx, bay.w2rx,
-                           bay.u1ty, bay.u1ry, bay.u2ty, bay.u2ry,
-                           bay.v1ty, bay.v1ry, bay.v2ty, bay.v2ry,
-                           bay.w1ty, bay.w1ry, bay.w2ty, bay.w2ry,
+
+            kM += mod.fkMf(bay, self,
+                    #self.ys, self.rho, h, self.hb, self.hf, bay.a, bay.b,
+                           #self.bf, self.dbf, bay.m, bay.n,
                            size=size, row0=row0, col0=col0)
 
         if finalize:

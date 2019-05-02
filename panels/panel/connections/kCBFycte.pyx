@@ -11,15 +11,13 @@ import numpy as np
 cimport numpy as np
 
 
-cdef extern from 'bardell.hpp':
-    double integral_ff(int i, int j,
-            double x1t, double x1r, double x2t, double x2r,
-            double y1t, double y1r, double y2t, double y2r) nogil
+cdef extern from 'bardell_functions_uv.hpp':
+    double fuv(int i, double xi, double xi1t, double xi2t) nogil
 
-cdef extern from 'bardell_functions.hpp':
-    double calc_f(int i, double xi, double xi1t, double xi1r,
+cdef extern from 'bardell_functions_w.hpp':
+    double fw(int i, double xi, double xi1t, double xi1r,
                   double xi2t, double xi2r) nogil
-    double calc_fx(int i, double xi, double xi1t, double xi1r,
+    double fw_x(int i, double xi, double xi1t, double xi1r,
                     double xi2t, double xi2r) nogil
 
 ctypedef np.double_t cDOUBLE
@@ -35,12 +33,12 @@ def fkCBFycte11(double kt, double kr, object p1, double ycte1,
     cdef int i1, j1, k1, l1, c, row, col
     cdef int m1, n1
     cdef double a1, b1
-    cdef double u1tx1, u1rx1, u2tx1, u2rx1
-    cdef double v1tx1, v1rx1, v2tx1, v2rx1
-    cdef double w1tx1, w1rx1, w2tx1, w2rx1
-    cdef double u1ty1, u1ry1, u2ty1, u2ry1
-    cdef double v1ty1, v1ry1, v2ty1, v2ry1
-    cdef double w1ty1, w1ry1, w2ty1, w2ry1
+    cdef double x1u1, x2u1
+    cdef double x1v1, x2v1
+    cdef double x1w1, x1wr1, x2w1, x2wr1
+    cdef double y1u1, y2u1
+    cdef double y1v1, y2v1
+    cdef double y1w1, y1wr1, y2w1, y2wr1
 
     cdef np.ndarray[cINT, ndim=1] kCBFycte11r, kCBFycte11c
     cdef np.ndarray[cDOUBLE, ndim=1] kCBFycte11v
@@ -53,12 +51,12 @@ def fkCBFycte11(double kt, double kr, object p1, double ycte1,
     b1 = p1.b
     m1 = p1.m
     n1 = p1.n
-    u1tx1 = p1.u1tx ; u1rx1 = p1.u1rx ; u2tx1 = p1.u2tx ; u2rx1 = p1.u2rx
-    v1tx1 = p1.v1tx ; v1rx1 = p1.v1rx ; v2tx1 = p1.v2tx ; v2rx1 = p1.v2rx
-    w1tx1 = p1.w1tx ; w1rx1 = p1.w1rx ; w2tx1 = p1.w2tx ; w2rx1 = p1.w2rx
-    u1ty1 = p1.u1ty ; u1ry1 = p1.u1ry ; u2ty1 = p1.u2ty ; u2ry1 = p1.u2ry
-    v1ty1 = p1.v1ty ; v1ry1 = p1.v1ry ; v2ty1 = p1.v2ty ; v2ry1 = p1.v2ry
-    w1ty1 = p1.w1ty ; w1ry1 = p1.w1ry ; w2ty1 = p1.w2ty ; w2ry1 = p1.w2ry
+    x1u1 = p1.x1u ; x2u1 = p1.x2u
+    x1v1 = p1.x1v ; x2v1 = p1.x2v
+    x1w1 = p1.x1w ; x1wr1 = p1.x1wr ; x2w1 = p1.x2w ; x2wr1 = p1.x2wr
+    y1u1 = p1.y1u ; y2u1 = p1.y2u
+    y1v1 = p1.y1v ; y2v1 = p1.y2v
+    y1w1 = p1.y1w ; y1wr1 = p1.y1wr ; y2w1 = p1.y2w ; y2wr1 = p1.y2wr
 
     etacte1 = 2*ycte1/b1 - 1.
 
@@ -72,15 +70,16 @@ def fkCBFycte11(double kt, double kr, object p1, double ycte1,
         c = -1
         for i1 in range(m1):
             for k1 in range(m1):
-                f1Auf1Bu = integral_ff(i1, k1, u1tx1, u1rx1, u2tx1, u2rx1, u1tx1, u1rx1, u2tx1, u2rx1)
-                f1Avf1Bv = integral_ff(i1, k1, v1tx1, v1rx1, v2tx1, v2rx1, v1tx1, v1rx1, v2tx1, v2rx1)
-                f1Awf1Bw = integral_ff(i1, k1, w1tx1, w1rx1, w2tx1, w2rx1, w1tx1, w1rx1, w2tx1, w2rx1)
+                #FIXME not working do integration numerically
+                f1Auf1Bu = 0 #integral_ff(i1, k1, x1u1, u1rx1, x2u1, u2rx1, x1u1, u1rx1, x2u1, u2rx1)
+                f1Avf1Bv = 0 #integral_ff(i1, k1, x1v1, v1rx1, x2v1, v2rx1, x1v1, v1rx1, x2v1, v2rx1)
+                f1Awf1Bw = 0 #integral_ff(i1, k1, x1w1, x1wr1, x2w1, x2wr1, x1w1, x1wr1, x2w1, x2wr1)
 
                 for j1 in range(n1):
-                    g1Au = calc_f(j1, etacte1, u1ty1, u1ry1, u2ty1, u2ry1)
-                    g1Av = calc_f(j1, etacte1, v1ty1, v1ry1, v2ty1, v2ry1)
-                    g1Aw = calc_f(j1, etacte1, w1ty1, w1ry1, w2ty1, w2ry1)
-                    g1Aweta = calc_fx(j1, etacte1, w1ty1, w1ry1, w2ty1, w2ry1)
+                    g1Au = fuv(j1, etacte1, y1u1, y2u1)
+                    g1Av = fuv(j1, etacte1, y1v1, y2v1)
+                    g1Aw = fw(j1, etacte1, y1w1, y1wr1, y2w1, y2wr1)
+                    g1Aweta = fw_x(j1, etacte1, y1w1, y1wr1, y2w1, y2wr1)
 
                     for l1 in range(n1):
                         row = row0 + num*(j1*m1 + i1)
@@ -90,10 +89,10 @@ def fkCBFycte11(double kt, double kr, object p1, double ycte1,
                         if row > col:
                             continue
 
-                        g1Bu = calc_f(l1, etacte1, u1ty1, u1ry1, u2ty1, u2ry1)
-                        g1Bv = calc_f(l1, etacte1, v1ty1, v1ry1, v2ty1, v2ry1)
-                        g1Bw = calc_f(l1, etacte1, w1ty1, w1ry1, w2ty1, w2ry1)
-                        g1Bweta = calc_fx(l1, etacte1, w1ty1, w1ry1, w2ty1, w2ry1)
+                        g1Bu = fuv(l1, etacte1, y1u1, y2u1)
+                        g1Bv = fuv(l1, etacte1, y1v1, y2v1)
+                        g1Bw = fw(l1, etacte1, y1w1, y1wr1, y2w1, y2wr1)
+                        g1Bweta = fw_x(l1, etacte1, y1w1, y1wr1, y2w1, y2wr1)
 
                         c += 1
                         kCBFycte11r[c] = row+0
@@ -119,12 +118,12 @@ def fkCBFycte12(double kt, double kr, object p1, object p2,
     cdef int i1, j1, k2, l2, c, row, col
     cdef int m1, n1, m2, n2
     cdef double a1, b1, b2
-    cdef double u1tx1, u1rx1, u2tx1, u2rx1, u1tx2, u1rx2, u2tx2, u2rx2
-    cdef double v1tx1, v1rx1, v2tx1, v2rx1, v1tx2, v1rx2, v2tx2, v2rx2
-    cdef double w1tx1, w1rx1, w2tx1, w2rx1, w1tx2, w1rx2, w2tx2, w2rx2
-    cdef double u1ty1, u1ry1, u2ty1, u2ry1, u1ty2, u1ry2, u2ty2, u2ry2
-    cdef double v1ty1, v1ry1, v2ty1, v2ry1, v1ty2, v1ry2, v2ty2, v2ry2
-    cdef double w1ty1, w1ry1, w2ty1, w2ry1, w1ty2, w1ry2, w2ty2, w2ry2
+    cdef double x1u1, x2u1, x1u2, x2u2
+    cdef double x1v1, x2v1, x1v2, x2v2
+    cdef double x1w1, x1wr1, x2w1, x2wr1, x1w2, x1wr2, x2w2, x2wr2
+    cdef double y1u1, y2u1, y1u2, y2u2
+    cdef double y1v1, y2v1, y1v2, y2v2
+    cdef double y1w1, y1wr1, y2w1, y2wr1, y1w2, y1wr2, y2w2, y2wr2
 
     cdef np.ndarray[cINT, ndim=1] kCBFycte12r, kCBFycte12c
     cdef np.ndarray[cDOUBLE, ndim=1] kCBFycte12v
@@ -140,19 +139,19 @@ def fkCBFycte12(double kt, double kr, object p1, object p2,
     n1 = p1.n
     m2 = p2.m
     n2 = p2.n
-    u1tx1 = p1.u1tx ; u1rx1 = p1.u1rx ; u2tx1 = p1.u2tx ; u2rx1 = p1.u2rx
-    v1tx1 = p1.v1tx ; v1rx1 = p1.v1rx ; v2tx1 = p1.v2tx ; v2rx1 = p1.v2rx
-    w1tx1 = p1.w1tx ; w1rx1 = p1.w1rx ; w2tx1 = p1.w2tx ; w2rx1 = p1.w2rx
-    u1ty1 = p1.u1ty ; u1ry1 = p1.u1ry ; u2ty1 = p1.u2ty ; u2ry1 = p1.u2ry
-    v1ty1 = p1.v1ty ; v1ry1 = p1.v1ry ; v2ty1 = p1.v2ty ; v2ry1 = p1.v2ry
-    w1ty1 = p1.w1ty ; w1ry1 = p1.w1ry ; w2ty1 = p1.w2ty ; w2ry1 = p1.w2ry
+    x1u1 = p1.x1u ; x2u1 = p1.x2u
+    x1v1 = p1.x1v ; x2v1 = p1.x2v
+    x1w1 = p1.x1w ; x1wr1 = p1.x1wr ; x2w1 = p1.x2w ; x2wr1 = p1.x2wr
+    y1u1 = p1.y1u ; y2u1 = p1.y2u
+    y1v1 = p1.y1v ; y2v1 = p1.y2v
+    y1w1 = p1.y1w ; y1wr1 = p1.y1wr ; y2w1 = p1.y2w ; y2wr1 = p1.y2wr
 
-    u1tx2 = p2.u1tx ; u1rx2 = p2.u1rx ; u2tx2 = p2.u2tx ; u2rx2 = p2.u2rx
-    v1tx2 = p2.v1tx ; v1rx2 = p2.v1rx ; v2tx2 = p2.v2tx ; v2rx2 = p2.v2rx
-    w1tx2 = p2.w1tx ; w1rx2 = p2.w1rx ; w2tx2 = p2.w2tx ; w2rx2 = p2.w2rx
-    u1ty2 = p2.u1ty ; u1ry2 = p2.u1ry ; u2ty2 = p2.u2ty ; u2ry2 = p2.u2ry
-    v1ty2 = p2.v1ty ; v1ry2 = p2.v1ry ; v2ty2 = p2.v2ty ; v2ry2 = p2.v2ry
-    w1ty2 = p2.w1ty ; w1ry2 = p2.w1ry ; w2ty2 = p2.w2ty ; w2ry2 = p2.w2ry
+    x1u2 = p2.x1u ; x2u2 = p2.x2u
+    x1v2 = p2.x1v ; x2v2 = p2.x2v
+    x1w2 = p2.x1w ; x1wr2 = p2.x1wr ; x2w2 = p2.x2w ; x2wr2 = p2.x2wr
+    y1u2 = p2.y1u ; y2u2 = p2.y2u
+    y1v2 = p2.y1v ; y2v2 = p2.y2v
+    y1w2 = p2.y1w ; y1wr2 = p2.y1wr ; y2w2 = p2.y2w ; y2wr2 = p2.y2wr
 
     etacte1 = 2*ycte1/b1 - 1.
     etacte2 = 2*ycte2/b2 - 1.
@@ -167,16 +166,17 @@ def fkCBFycte12(double kt, double kr, object p1, object p2,
         c = -1
         for i1 in range(m1):
             for k2 in range(m2):
-                f1Auf2Bu = integral_ff(i1, k2, u1tx1, u1rx1, u2tx1, u2rx1, u1tx2, u1rx2, u2tx2, u2rx2)
-                f1Avf2Bw = integral_ff(i1, k2, v1tx1, v1rx1, v2tx1, v2rx1, w1tx2, w1rx2, w2tx2, w2rx2)
-                f1Awf2Bv = integral_ff(i1, k2, w1tx1, w1rx1, w2tx1, w2rx1, v1tx2, v1rx2, v2tx2, v2rx2)
-                f1Awf2Bw = integral_ff(i1, k2, w1tx1, w1rx1, w2tx1, w2rx1, w1tx2, w1rx2, w2tx2, w2rx2)
+                #FIXME not working do integration numerically
+                f1Auf2Bu = 0 #integral_ff(i1, k2, x1u1, u1rx1, x2u1, u2rx1, x1u2, u1rx2, x2u2, u2rx2)
+                f1Avf2Bw = 0 #integral_ff(i1, k2, x1v1, v1rx1, x2v1, v2rx1, x1w2, x1wr2, x2w2, x2wr2)
+                f1Awf2Bv = 0 #integral_ff(i1, k2, x1w1, x1wr1, x2w1, x2wr1, x1v2, v1rx2, x2v2, v2rx2)
+                f1Awf2Bw = 0 #integral_ff(i1, k2, x1w1, x1wr1, x2w1, x2wr1, x1w2, x1wr2, x2w2, x2wr2)
 
                 for j1 in range(n1):
-                    g1Au = calc_f(j1, etacte1, u1ty1, u1ry1, u2ty1, u2ry1)
-                    g1Av = calc_f(j1, etacte1, v1ty1, v1ry1, v2ty1, v2ry1)
-                    g1Aw = calc_f(j1, etacte1, w1ty1, w1ry1, w2ty1, w2ry1)
-                    g1Aweta = calc_fx(j1, etacte1, w1ty1, w1ry1, w2ty1, w2ry1)
+                    g1Au = fuv(j1, etacte1, y1u1, y2u1)
+                    g1Av = fuv(j1, etacte1, y1v1, y2v1)
+                    g1Aw = fw(j1, etacte1, y1w1, y1wr1, y2w1, y2wr1)
+                    g1Aweta = fw_x(j1, etacte1, y1w1, y1wr1, y2w1, y2wr1)
 
                     for l2 in range(n2):
                         row = row0 + num*(j1*m1 + i1)
@@ -186,10 +186,10 @@ def fkCBFycte12(double kt, double kr, object p1, object p2,
                         #if row > col:
                             #continue
 
-                        g2Bu = calc_f(l2, etacte2, u1ty2, u1ry2, u2ty2, u2ry2)
-                        g2Bv = calc_f(l2, etacte2, v1ty2, v1ry2, v2ty2, v2ry2)
-                        g2Bw = calc_f(l2, etacte2, w1ty2, w1ry2, w2ty2, w2ry2)
-                        g2Bweta = calc_fx(l2, etacte2, w1ty2, w1ry2, w2ty2, w2ry2)
+                        g2Bu = fuv(l2, etacte2, y1u2, y2u2)
+                        g2Bv = fuv(l2, etacte2, y1v2, y2v2)
+                        g2Bw = fw(l2, etacte2, y1w2, y1wr2, y2w2, y2wr2)
+                        g2Bweta = fw_x(l2, etacte2, y1w2, y1wr2, y2w2, y2wr2)
 
                         c += 1
                         kCBFycte12r[c] = row+0
@@ -219,12 +219,12 @@ def fkCBFycte22(double kt, double kr, object p1, object p2,
     cdef int i2, k2, j2, l2, c, row, col
     cdef int m2, n2
     cdef double a1, b2
-    cdef double u1tx2, u1rx2, u2tx2, u2rx2
-    cdef double v1tx2, v1rx2, v2tx2, v2rx2
-    cdef double w1tx2, w1rx2, w2tx2, w2rx2
-    cdef double u1ty2, u1ry2, u2ty2, u2ry2
-    cdef double v1ty2, v1ry2, v2ty2, v2ry2
-    cdef double w1ty2, w1ry2, w2ty2, w2ry2
+    cdef double x1u2, x2u2
+    cdef double x1v2, x2v2
+    cdef double x1w2, x1wr2, x2w2, x2wr2
+    cdef double y1u2, y2u2
+    cdef double y1v2, y2v2
+    cdef double y1w2, y1wr2, y2w2, y2wr2
 
     cdef np.ndarray[cINT, ndim=1] kCBFycte22r, kCBFycte22c
     cdef np.ndarray[cDOUBLE, ndim=1] kCBFycte22v
@@ -236,12 +236,12 @@ def fkCBFycte22(double kt, double kr, object p1, object p2,
     b2 = p2.b
     m2 = p2.m
     n2 = p2.n
-    u1tx2 = p2.u1tx ; u1rx2 = p2.u1rx ; u2tx2 = p2.u2tx ; u2rx2 = p2.u2rx
-    v1tx2 = p2.v1tx ; v1rx2 = p2.v1rx ; v2tx2 = p2.v2tx ; v2rx2 = p2.v2rx
-    w1tx2 = p2.w1tx ; w1rx2 = p2.w1rx ; w2tx2 = p2.w2tx ; w2rx2 = p2.w2rx
-    u1ty2 = p2.u1ty ; u1ry2 = p2.u1ry ; u2ty2 = p2.u2ty ; u2ry2 = p2.u2ry
-    v1ty2 = p2.v1ty ; v1ry2 = p2.v1ry ; v2ty2 = p2.v2ty ; v2ry2 = p2.v2ry
-    w1ty2 = p2.w1ty ; w1ry2 = p2.w1ry ; w2ty2 = p2.w2ty ; w2ry2 = p2.w2ry
+    x1u2 = p2.x1u ; x2u2 = p2.x2u
+    x1v2 = p2.x1v ; x2v2 = p2.x2v
+    x1w2 = p2.x1w ; x1wr2 = p2.x1wr ; x2w2 = p2.x2w ; x2wr2 = p2.x2wr
+    y1u2 = p2.y1u ; y2u2 = p2.y2u
+    y1v2 = p2.y1v ; y2v2 = p2.y2v
+    y1w2 = p2.y1w ; y1wr2 = p2.y1wr ; y2w2 = p2.y2w ; y2wr2 = p2.y2wr
 
     etacte2 = 2*ycte2/b2 - 1.
 
@@ -255,15 +255,16 @@ def fkCBFycte22(double kt, double kr, object p1, object p2,
         c = -1
         for i2 in range(m2):
             for k2 in range(m2):
-                f2Auf2Bu = integral_ff(i2, k2, u1tx2, u1rx2, u2tx2, u2rx2, u1tx2, u1rx2, u2tx2, u2rx2)
-                f2Avf2Bv = integral_ff(i2, k2, v1tx2, v1rx2, v2tx2, v2rx2, v1tx2, v1rx2, v2tx2, v2rx2)
-                f2Awf2Bw = integral_ff(i2, k2, w1tx2, w1rx2, w2tx2, w2rx2, w1tx2, w1rx2, w2tx2, w2rx2)
+                #FIXME not working do integration numerically
+                f2Auf2Bu = 0 #integral_ff(i2, k2, x1u2, u1rx2, x2u2, u2rx2, x1u2, u1rx2, x2u2, u2rx2)
+                f2Avf2Bv = 0 #integral_ff(i2, k2, x1v2, v1rx2, x2v2, v2rx2, x1v2, v1rx2, x2v2, v2rx2)
+                f2Awf2Bw = 0 #integral_ff(i2, k2, x1w2, x1wr2, x2w2, x2wr2, x1w2, x1wr2, x2w2, x2wr2)
 
                 for j2 in range(n2):
-                    g2Au = calc_f(j2, etacte2, u1ty2, u1ry2, u2ty2, u2ry2)
-                    g2Av = calc_f(j2, etacte2, v1ty2, v1ry2, v2ty2, v2ry2)
-                    g2Aw = calc_f(j2, etacte2, w1ty2, w1ry2, w2ty2, w2ry2)
-                    g2Aweta = calc_fx(j2, etacte2, w1ty2, w1ry2, w2ty2, w2ry2)
+                    g2Au = fuv(j2, etacte2, y1u2, y2u2)
+                    g2Av = fuv(j2, etacte2, y1v2, y2v2)
+                    g2Aw = fw(j2, etacte2, y1w2, y1wr2, y2w2, y2wr2)
+                    g2Aweta = fw_x(j2, etacte2, y1w2, y1wr2, y2w2, y2wr2)
 
                     for l2 in range(n2):
                         row = row0 + num*(j2*m2 + i2)
@@ -273,10 +274,10 @@ def fkCBFycte22(double kt, double kr, object p1, object p2,
                         if row > col:
                             continue
 
-                        g2Bu = calc_f(l2, etacte2, u1ty2, u1ry2, u2ty2, u2ry2)
-                        g2Bv = calc_f(l2, etacte2, v1ty2, v1ry2, v2ty2, v2ry2)
-                        g2Bw = calc_f(l2, etacte2, w1ty2, w1ry2, w2ty2, w2ry2)
-                        g2Bweta = calc_fx(l2, etacte2, w1ty2, w1ry2, w2ty2, w2ry2)
+                        g2Bu = fuv(l2, etacte2, y1u2, y2u2)
+                        g2Bv = fuv(l2, etacte2, y1v2, y2v2)
+                        g2Bw = fw(l2, etacte2, y1w2, y1wr2, y2w2, y2wr2)
+                        g2Bweta = fw_x(l2, etacte2, y1w2, y1wr2, y2w2, y2wr2)
 
                         c += 1
                         kCBFycte22r[c] = row+0

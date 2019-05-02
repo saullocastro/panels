@@ -57,12 +57,12 @@ class BladeStiff2D(object):
             self.base = Shell(a=bay.a, b=bay.b, r=bay.r, alphadeg=bay.alphadeg,
                     stack=bstack, plyts=bplyts, laminaprops=blaminaprops,
                     rho=rho, m=bay.m, n=bay.n, offset=(-h/2.-hb/2.),
-                    u1tx=bay.u1tx, u1rx=bay.u1rx, u2tx=bay.u2tx, u2rx=bay.u2rx,
-                    v1tx=bay.v1tx, v1rx=bay.v1rx, v2tx=bay.v2tx, v2rx=bay.v2rx,
-                    w1tx=bay.w1tx, w1rx=bay.w1rx, w2tx=bay.w2tx, w2rx=bay.w2rx,
-                    u1ty=bay.u1ty, u1ry=bay.u1ry, u2ty=bay.u2ty, u2ry=bay.u2ry,
-                    v1ty=bay.v1ty, v1ry=bay.v1ry, v2ty=bay.v2ty, v2ry=bay.v2ry,
-                    w1ty=bay.w1ty, w1ry=bay.w1ry, w2ty=bay.w2ty, w2ry=bay.w2ry,
+                    x1u=bay.x1u, x2u=bay.x2u,
+                    x1v=bay.x1v, x2v=bay.x2v,
+                    x1w=bay.x1w, x1wr=bay.x1wr, x2w=bay.x2w, x2wr=bay.x2wr,
+                    y1u=bay.y1u, y2u=bay.y2u,
+                    y1v=bay.y1v, y2v=bay.y2v,
+                    y1w=bay.y1w, y1wr=bay.y1wr, y2w=bay.y2w, y2wr=bay.y2wr,
                     y1=y1, y2=y2)
 
         self.flange = None
@@ -70,11 +70,11 @@ class BladeStiff2D(object):
             self.flange = Shell(m=mf, n=nf, a=bay.a, b=bf, rho=rho,
                     stack=fstack, plyts=fplyts, laminaprops=flaminaprops,
                     model='plate_clpt_donnell_bardell',
-                    u1tx=0., u1rx=0., u2tx=0., u2rx=0.,
-                    v1tx=0., v1rx=0., v2tx=0., v2rx=0.,
+                    u1tx=0., u2tx=0.,
+                    v1tx=0., v2tx=0.,
                     w1tx=0., w1rx=1., w2tx=0., w2rx=1.,
-                    u1ty=1., u1ry=0., u2ty=1., u2ry=0.,
-                    v1ty=1., v1ry=0., v2ty=1., v2ry=0.,
+                    u1ty=1., u2ty=1.,
+                    v1ty=1., v2ty=1.,
                     w1ty=1., w1ry=1., w2ty=1., w2ry=1.)
 
         self._rebuild()
@@ -129,36 +129,15 @@ class BladeStiff2D(object):
                 ktbf, krbf = calc_kt_kr(self.base, self.flange, 'ycte')
 
             mod = db['bladestiff2d_clpt_donnell_bardell']['connections']
-            kC += mod.fkCss(ktbf, krbf, self.ys, a, b, m, n,
-                            bay.u1tx, bay.u1rx, bay.u2tx, bay.u2rx,
-                            bay.v1tx, bay.v1rx, bay.v2tx, bay.v2rx,
-                            bay.w1tx, bay.w1rx, bay.w2tx, bay.w2rx,
-                            bay.u1ty, bay.u1ry, bay.u2ty, bay.u2ry,
-                            bay.v1ty, bay.v1ry, bay.v2ty, bay.v2ry,
-                            bay.w1ty, bay.w1ry, bay.w2ty, bay.w2ry,
+            kC += mod.fkCss(bay, self,
+                    #ktbf, krbf, self.ys, a, b, m, n,
                             size, 0, 0)
             bf = self.flange.b
-            kC += mod.fkCsf(ktbf, krbf, self.ys, a, b, bf, m, n, self.flange.m, self.flange.n,
-                            bay.u1tx, bay.u1rx, bay.u2tx, bay.u2rx,
-                            bay.v1tx, bay.v1rx, bay.v2tx, bay.v2rx,
-                            bay.w1tx, bay.w1rx, bay.w2tx, bay.w2rx,
-                            bay.u1ty, bay.u1ry, bay.u2ty, bay.u2ry,
-                            bay.v1ty, bay.v1ry, bay.v2ty, bay.v2ry,
-                            bay.w1ty, bay.w1ry, bay.w2ty, bay.w2ry,
-                            self.flange.u1tx, self.flange.u1rx, self.flange.u2tx, self.flange.u2rx,
-                            self.flange.v1tx, self.flange.v1rx, self.flange.v2tx, self.flange.v2rx,
-                            self.flange.w1tx, self.flange.w1rx, self.flange.w2tx, self.flange.w2rx,
-                            self.flange.u1ty, self.flange.u1ry, self.flange.u2ty, self.flange.u2ry,
-                            self.flange.v1ty, self.flange.v1ry, self.flange.v2ty, self.flange.v2ry,
-                            self.flange.w1ty, self.flange.w1ry, self.flange.w2ty, self.flange.w2ry,
+            kC += mod.fkCsf(bay, self,
+                    #ktbf, krbf, self.ys, a, b, bf, m, n, self.flange.m, self.flange.n,
                             size, 0, col0)
-            kC += mod.fkCff(ktbf, krbf, a, bf, self.flange.m, self.flange.n,
-                            self.flange.u1tx, self.flange.u1rx, self.flange.u2tx, self.flange.u2rx,
-                            self.flange.v1tx, self.flange.v1rx, self.flange.v2tx, self.flange.v2rx,
-                            self.flange.w1tx, self.flange.w1rx, self.flange.w2tx, self.flange.w2rx,
-                            self.flange.u1ty, self.flange.u1ry, self.flange.u2ty, self.flange.u2ry,
-                            self.flange.v1ty, self.flange.v1ry, self.flange.v2ty, self.flange.v2ry,
-                            self.flange.w1ty, self.flange.w1ry, self.flange.w2ty, self.flange.w2ry,
+            kC += mod.fkCff(bay, self,
+                    #ktbf, krbf, a, bf, self.flange.m, self.flange.n,
                             size, row0, col0)
 
         if finalize:

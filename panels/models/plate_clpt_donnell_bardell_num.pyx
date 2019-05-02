@@ -11,13 +11,17 @@ import numpy as np
 cimport numpy as np
 
 
-cdef extern from 'bardell_functions.hpp':
-    double calc_f(int i, double xi, double xi1t, double xi1r,
-                  double xi2t, double xi2r) nogil
-    double calc_fx(int i, double xi, double xi1t, double xi1r,
-                    double xi2t, double xi2r) nogil
-    double calc_fxx(int i, double xi, double xi1t, double xi1r,
-                    double xi2t, double xi2r) nogil
+cdef extern from 'bardell_functions_uv.hpp':
+    double fuv(int i, double xi, double xi1t, double xi2t) nogil
+    double fuv_x(int i, double xi, double xi1t, double xi2t) nogil
+
+cdef extern from 'bardell_functions_w.hpp':
+    double fw(int i, double xi, double xi1t, double xi1r,
+              double xi2t, double xi2r) nogil
+    double fw_x(int i, double xi, double xi1t, double xi1r,
+                double xi2t, double xi2r) nogil
+    double fw_xx(int i, double xi, double xi1t, double xi1r,
+                 double xi2t, double xi2r) nogil
 
 cdef extern from 'legendre_gauss_quadrature.hpp':
     void leggauss_quad(int n, double *points, double* weights) nogil
@@ -28,7 +32,7 @@ DOUBLE = np.float64
 ctypedef np.int64_t cINT
 INT = np.int64
 
-cdef int num = 3
+cdef int DOF = 3
 
 
 def fkC_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
@@ -36,12 +40,12 @@ def fkC_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
     cdef double x1, x2, y1, y2, xinf, xsup, yinf, ysup
     cdef double a, b, intx, inty
     cdef int m, n
-    cdef double u1tx, u1rx, u2tx, u2rx
-    cdef double v1tx, v1rx, v2tx, v2rx
-    cdef double w1tx, w1rx, w2tx, w2rx
-    cdef double u1ty, u1ry, u2ty, u2ry
-    cdef double v1ty, v1ry, v2ty, v2ry
-    cdef double w1ty, w1ry, w2ty, w2ry
+    cdef double x1u, x2u
+    cdef double x1v, x2v
+    cdef double x1w, x1wr, x2w, x2wr
+    cdef double y1u, y2u
+    cdef double y1v, y2v
+    cdef double y1w, y1wr, y2w, y2wr
 
     cdef int i, j, k, l, c, row, col, ptx, pty
     cdef double A11, A12, A16, A22, A26, A66
@@ -93,12 +97,12 @@ def fkC_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
     x2 = shell.x2
     y1 = shell.y1
     y2 = shell.y2
-    u1tx = shell.u1tx; u1rx = shell.u1rx; u2tx = shell.u2tx; u2rx = shell.u2rx
-    v1tx = shell.v1tx; v1rx = shell.v1rx; v2tx = shell.v2tx; v2rx = shell.v2rx
-    w1tx = shell.w1tx; w1rx = shell.w1rx; w2tx = shell.w2tx; w2rx = shell.w2rx
-    u1ty = shell.u1ty; u1ry = shell.u1ry; u2ty = shell.u2ty; u2ry = shell.u2ry
-    v1ty = shell.v1ty; v1ry = shell.v1ry; v2ty = shell.v2ty; v2ry = shell.v2ry
-    w1ty = shell.w1ty; w1ry = shell.w1ry; w2ty = shell.w2ty; w2ry = shell.w2ry
+    x1u = shell.x1u; x2u = shell.x2u
+    x1v = shell.x1v; x2v = shell.x2v
+    x1w = shell.x1w; x1wr = shell.x1wr; x2w = shell.x2w; x2wr = shell.x2wr
+    y1u = shell.y1u; y2u = shell.y2u
+    y1v = shell.y1v; y2v = shell.y2v
+    y1w = shell.y1w; y1wr = shell.y1wr; y2w = shell.y2w; y2wr = shell.y2wr
 
     fdim = 9*m*m*n*n
 
@@ -154,14 +158,14 @@ def fkC_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
                 if NLgeom == 1:
                     for j in range(n):
                         #TODO put these in a lookup vector
-                        gAw = calc_f(j, eta, w1ty, w1ry, w2ty, w2ry)
-                        gAweta = calc_fx(j, eta, w1ty, w1ry, w2ty, w2ry)
+                        gAw = fw(j, eta, y1w, y1wr, y2w, y2wr)
+                        gAweta = fw_x(j, eta, y1w, y1wr, y2w, y2wr)
                         for i in range(m):
                             #TODO put these in a lookup vector
-                            fAw = calc_f(i, xi, w1tx, w1rx, w2tx, w2rx)
-                            fAwxi = calc_fx(i, xi, w1tx, w1rx, w2tx, w2rx)
+                            fAw = fw(i, xi, x1w, x1wr, x2w, x2wr)
+                            fAwxi = fw_x(i, xi, x1w, x1wr, x2w, x2wr)
 
-                            col = col0 + num*(j*m + i)
+                            col = col0 + DOF*(j*m + i)
 
                             wxi += cs[col+2]*fAwxi*gAw
                             weta += cs[col+2]*fAw*gAweta
@@ -196,48 +200,48 @@ def fkC_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
                 # kC
                 c = -1
                 for i in range(m):
-                    fAu = calc_f(i, xi, u1tx, u1rx, u2tx, u2rx)
-                    fAuxi = calc_fx(i, xi, u1tx, u1rx, u2tx, u2rx)
-                    fAv = calc_f(i, xi, v1tx, v1rx, v2tx, v2rx)
-                    fAvxi = calc_fx(i, xi, v1tx, v1rx, v2tx, v2rx)
-                    fAw = calc_f(i, xi, w1tx, w1rx, w2tx, w2rx)
-                    fAwxi = calc_fx(i, xi, w1tx, w1rx, w2tx, w2rx)
-                    fAwxixi = calc_fxx(i, xi, w1tx, w1rx, w2tx, w2rx)
+                    fAu = fuv(i, xi, x1u, x2u)
+                    fAuxi = fuv_x(i, xi, x1u, x2u)
+                    fAv = fuv(i, xi, x1v, x2v)
+                    fAvxi = fuv_x(i, xi, x1v, x2v)
+                    fAw = fw(i, xi, x1w, x1wr, x2w, x2wr)
+                    fAwxi = fw_x(i, xi, x1w, x1wr, x2w, x2wr)
+                    fAwxixi = fw_xx(i, xi, x1w, x1wr, x2w, x2wr)
 
                     for k in range(m):
-                        fBu = calc_f(k, xi, u1tx, u1rx, u2tx, u2rx)
-                        fBuxi = calc_fx(k, xi, u1tx, u1rx, u2tx, u2rx)
-                        fBv = calc_f(k, xi, v1tx, v1rx, v2tx, v2rx)
-                        fBvxi = calc_fx(k, xi, v1tx, v1rx, v2tx, v2rx)
-                        fBw = calc_f(k, xi, w1tx, w1rx, w2tx, w2rx)
-                        fBwxi = calc_fx(k, xi, w1tx, w1rx, w2tx, w2rx)
-                        fBwxixi = calc_fxx(k, xi, w1tx, w1rx, w2tx, w2rx)
+                        fBu = fuv(k, xi, x1u, x2u)
+                        fBuxi = fuv_x(k, xi, x1u, x2u)
+                        fBv = fuv(k, xi, x1v, x2v)
+                        fBvxi = fuv_x(k, xi, x1v, x2v)
+                        fBw = fw(k, xi, x1w, x1wr, x2w, x2wr)
+                        fBwxi = fw_x(k, xi, x1w, x1wr, x2w, x2wr)
+                        fBwxixi = fw_xx(k, xi, x1w, x1wr, x2w, x2wr)
 
                         for j in range(n):
-                            gAu = calc_f(j, eta, u1ty, u1ry, u2ty, u2ry)
-                            gAueta = calc_fx(j, eta, u1ty, u1ry, u2ty, u2ry)
-                            gAv = calc_f(j, eta, v1ty, v1ry, v2ty, v2ry)
-                            gAveta = calc_fx(j, eta, v1ty, v1ry, v2ty, v2ry)
-                            gAw = calc_f(j, eta, w1ty, w1ry, w2ty, w2ry)
-                            gAweta = calc_fx(j, eta, w1ty, w1ry, w2ty, w2ry)
-                            gAwetaeta = calc_fxx(j, eta, w1ty, w1ry, w2ty, w2ry)
+                            gAu = fuv(j, eta, y1u, y2u)
+                            gAueta = fuv_x(j, eta, y1u, y2u)
+                            gAv = fuv(j, eta, y1v, y2v)
+                            gAveta = fuv_x(j, eta, y1v, y2v)
+                            gAw = fw(j, eta, y1w, y1wr, y2w, y2wr)
+                            gAweta = fw_x(j, eta, y1w, y1wr, y2w, y2wr)
+                            gAwetaeta = fw_xx(j, eta, y1w, y1wr, y2w, y2wr)
 
                             for l in range(n):
 
-                                row = row0 + num*(j*m + i)
-                                col = col0 + num*(l*m + k)
+                                row = row0 + DOF*(j*m + i)
+                                col = col0 + DOF*(l*m + k)
 
                                 #NOTE symmetry assumption True if no follower forces are used
                                 if row > col:
                                     continue
 
-                                gBu = calc_f(l, eta, u1ty, u1ry, u2ty, u2ry)
-                                gBueta = calc_fx(l, eta, u1ty, u1ry, u2ty, u2ry)
-                                gBv = calc_f(l, eta, v1ty, v1ry, v2ty, v2ry)
-                                gBveta = calc_fx(l, eta, v1ty, v1ry, v2ty, v2ry)
-                                gBw = calc_f(l, eta, w1ty, w1ry, w2ty, w2ry)
-                                gBweta = calc_fx(l, eta, w1ty, w1ry, w2ty, w2ry)
-                                gBwetaeta = calc_fxx(l, eta, w1ty, w1ry, w2ty, w2ry)
+                                gBu = fuv(l, eta, y1u, y2u)
+                                gBueta = fuv_x(l, eta, y1u, y2u)
+                                gBv = fuv(l, eta, y1v, y2v)
+                                gBveta = fuv_x(l, eta, y1v, y2v)
+                                gBw = fw(l, eta, y1w, y1wr, y2w, y2wr)
+                                gBweta = fw_x(l, eta, y1w, y1wr, y2w, y2wr)
+                                gBwetaeta = fw_xx(l, eta, y1w, y1wr, y2w, y2wr)
 
                                 c += 1
                                 if ptx == 0 and pty == 0:
@@ -253,7 +257,7 @@ def fkC_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+0
                                     kCc[c] = col+2
-                                kCv[c] += weight*( 2*A11*fAuxi*fBwxi*gAu*gBw*intx*inty*wxi/(a*a*a) + 2*A12*fAuxi*fBw*gAu*gBweta*intx*inty*weta/(a*(b*b)) + 2*A16*intx*inty*(fAu*fBwxi*gAueta*gBw*wxi + fAuxi*gAu*(fBw*gBweta*wxi + fBwxi*gBw*weta))/((a*a)*b) + 2*A26*fAu*fBw*gAueta*gBweta*intx*inty*weta/(b*b*b) + 2*A66*fAu*gAueta*intx*inty*(fBw*gBweta*wxi + fBwxi*gBw*weta)/(a*(b*b)) - 2*B11*fAuxi*fBwxixi*gAu*gBw*intx*inty/(a*a*a) - 2*B12*fAuxi*fBw*gAu*gBwetaeta*intx*inty/(a*(b*b)) - 2*B16*intx*inty*(fAu*fBwxixi*gAueta*gBw + 2*fAuxi*fBwxi*gAu*gBweta)/((a*a)*b) - 2*B26*fAu*fBw*gAueta*gBwetaeta*intx*inty/(b*b*b) - 4*B66*fAu*fBwxi*gAueta*gBweta*intx*inty/(a*(b*b)) )
+                                kCv[c] += weight*( 2*A11*fAuxi*fBwxi*gAu*gBw*intx*inty*wxi/(a*a*a) + 0.5*A12*fAuxi*fBw*gAu*intx*inty*(4*gBweta*weta/(b*b))/a + 2*A16*intx*inty*(fAu*fBwxi*gAueta*gBw*wxi + fAuxi*gAu*(fBw*gBweta*wxi + fBwxi*gBw*weta))/((a*a)*b) + 2*A66*fAu*gAueta*intx*inty*(fBw*gBweta*wxi + fBwxi*gBw*weta)/(a*(b*b)) - 2*B11*fAuxi*fBwxixi*gAu*gBw*intx*inty/(a*a*a) - 2*B12*fAuxi*fBw*gAu*gBwetaeta*intx*inty/(a*(b*b)) - 2*B16*intx*inty*(fAu*fBwxixi*gAueta*gBw + 2*fAuxi*fBwxi*gAu*gBweta)/((a*a)*b) - 2*B26*fAu*fBw*gAueta*gBwetaeta*intx*inty/(b*b*b) - 4*B66*fAu*fBwxi*gAueta*gBweta*intx*inty/(a*(b*b)) )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+1
@@ -268,22 +272,22 @@ def fkC_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+1
                                     kCc[c] = col+2
-                                kCv[c] += weight*( 2*A12*fAv*fBwxi*gAveta*gBw*intx*inty*wxi/((a*a)*b) + 2*A16*fAvxi*fBwxi*gAv*gBw*intx*inty*wxi/(a*a*a) + 2*A22*fAv*fBw*gAveta*gBweta*intx*inty*weta/(b*b*b) + 2*A26*intx*inty*(fAv*gAveta*(fBw*gBweta*wxi + fBwxi*gBw*weta) + fAvxi*fBw*gAv*gBweta*weta)/(a*(b*b)) + 2*A66*fAvxi*gAv*intx*inty*(fBw*gBweta*wxi + fBwxi*gBw*weta)/((a*a)*b) - 2*B12*fAv*fBwxixi*gAveta*gBw*intx*inty/((a*a)*b) - 2*B16*fAvxi*fBwxixi*gAv*gBw*intx*inty/(a*a*a) - 2*B22*fAv*fBw*gAveta*gBwetaeta*intx*inty/(b*b*b) - 2*B26*intx*inty*(2*fAv*fBwxi*gAveta*gBweta + fAvxi*fBw*gAv*gBwetaeta)/(a*(b*b)) - 4*B66*fAvxi*fBwxi*gAv*gBweta*intx*inty/((a*a)*b) )
+                                kCv[c] += weight*( 2*A12*fAv*fBwxi*gAveta*gBw*intx*inty*wxi/((a*a)*b) + 2*A16*fAvxi*fBwxi*gAv*gBw*intx*inty*wxi/(a*a*a) + 2*A66*fAvxi*gAv*intx*inty*(fBw*gBweta*wxi + fBwxi*gBw*weta)/((a*a)*b) - 2*B12*fAv*fBwxixi*gAveta*gBw*intx*inty/((a*a)*b) - 2*B16*fAvxi*fBwxixi*gAv*gBw*intx*inty/(a*a*a) - 2*B22*fAv*fBw*gAveta*gBwetaeta*intx*inty/(b*b*b) - 2*B26*intx*inty*(2*fAv*fBwxi*gAveta*gBweta + fAvxi*fBw*gAv*gBwetaeta)/(a*(b*b)) - 4*B66*fAvxi*fBwxi*gAv*gBweta*intx*inty/((a*a)*b) )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+2
                                     kCc[c] = col+0
-                                kCv[c] += weight*( 2*A11*fAwxi*fBuxi*gAw*gBu*intx*inty*wxi/(a*a*a) + 2*A12*fAw*fBuxi*gAweta*gBu*intx*inty*weta/(a*(b*b)) + 2*A16*intx*inty*(fAw*fBuxi*gAweta*gBu*wxi + fAwxi*gAw*(fBu*gBueta*wxi + fBuxi*gBu*weta))/((a*a)*b) + 2*A26*fAw*fBu*gAweta*gBueta*intx*inty*weta/(b*b*b) + 2*A66*fBu*gBueta*intx*inty*(fAw*gAweta*wxi + fAwxi*gAw*weta)/(a*(b*b)) - 2*B11*fAwxixi*fBuxi*gAw*gBu*intx*inty/(a*a*a) - 2*B12*fAw*fBuxi*gAwetaeta*gBu*intx*inty/(a*(b*b)) - 2*B16*intx*inty*(2*fAwxi*fBuxi*gAweta*gBu + fAwxixi*fBu*gAw*gBueta)/((a*a)*b) - 2*B26*fAw*fBu*gAwetaeta*gBueta*intx*inty/(b*b*b) - 4*B66*fAwxi*fBu*gAweta*gBueta*intx*inty/(a*(b*b)) )
+                                kCv[c] += weight*( 2*A11*fAwxi*fBuxi*gAw*gBu*intx*inty*wxi/(a*a*a) + 0.5*A12*fAw*fBuxi*gBu*intx*inty*(4*gAweta*weta/(b*b))/a + 2*A16*intx*inty*(fAw*fBuxi*gAweta*gBu*wxi + fAwxi*gAw*(fBu*gBueta*wxi + fBuxi*gBu*weta))/((a*a)*b) + 2*A66*fBu*gBueta*intx*inty*(fAw*gAweta*wxi + fAwxi*gAw*weta)/(a*(b*b)) - 2*B11*fAwxixi*fBuxi*gAw*gBu*intx*inty/(a*a*a) - 2*B12*fAw*fBuxi*gAwetaeta*gBu*intx*inty/(a*(b*b)) - 2*B16*intx*inty*(2*fAwxi*fBuxi*gAweta*gBu + fAwxixi*fBu*gAw*gBueta)/((a*a)*b) - 2*B26*fAw*fBu*gAwetaeta*gBueta*intx*inty/(b*b*b) - 4*B66*fAwxi*fBu*gAweta*gBueta*intx*inty/(a*(b*b)) )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+2
                                     kCc[c] = col+1
-                                kCv[c] += weight*( 2*A12*fAwxi*fBv*gAw*gBveta*intx*inty*wxi/((a*a)*b) + 2*A16*fAwxi*fBvxi*gAw*gBv*intx*inty*wxi/(a*a*a) + 2*A22*fAw*fBv*gAweta*gBveta*intx*inty*weta/(b*b*b) + 2*A26*intx*inty*(fAw*gAweta*(fBv*gBveta*wxi + fBvxi*gBv*weta) + fAwxi*fBv*gAw*gBveta*weta)/(a*(b*b)) + 2*A66*fBvxi*gBv*intx*inty*(fAw*gAweta*wxi + fAwxi*gAw*weta)/((a*a)*b) - 2*B12*fAwxixi*fBv*gAw*gBveta*intx*inty/((a*a)*b) - 2*B16*fAwxixi*fBvxi*gAw*gBv*intx*inty/(a*a*a) - 2*B22*fAw*fBv*gAwetaeta*gBveta*intx*inty/(b*b*b) - 2*B26*intx*inty*(fAw*fBvxi*gAwetaeta*gBv + 2*fAwxi*fBv*gAweta*gBveta)/(a*(b*b)) - 4*B66*fAwxi*fBvxi*gAweta*gBv*intx*inty/((a*a)*b) )
+                                kCv[c] += weight*( 2*A12*fAwxi*fBv*gAw*gBveta*intx*inty*wxi/((a*a)*b) + 2*A16*fAwxi*fBvxi*gAw*gBv*intx*inty*wxi/(a*a*a) + 2*A66*fBvxi*gBv*intx*inty*(fAw*gAweta*wxi + fAwxi*gAw*weta)/((a*a)*b) - 2*B12*fAwxixi*fBv*gAw*gBveta*intx*inty/((a*a)*b) - 2*B16*fAwxixi*fBvxi*gAw*gBv*intx*inty/(a*a*a) - 2*B22*fAw*fBv*gAwetaeta*gBveta*intx*inty/(b*b*b) - 2*B26*intx*inty*(fAw*fBvxi*gAwetaeta*gBv + 2*fAwxi*fBv*gAweta*gBveta)/(a*(b*b)) - 4*B66*fAwxi*fBvxi*gAweta*gBv*intx*inty/((a*a)*b) )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+2
                                     kCc[c] = col+2
-                                kCv[c] += weight*( 4*A11*fAwxi*fBwxi*gAw*gBw*intx*inty*(wxi*wxi)/(a*a*a*a) + 4*A12*intx*inty*weta*wxi*(fAw*fBwxi*gAweta*gBw + fAwxi*fBw*gAw*gBweta)/((a*a)*(b*b)) + 4*A16*intx*inty*wxi*(fAw*fBwxi*gAweta*gBw*wxi + fAwxi*gAw*(fBw*gBweta*wxi + 2*fBwxi*gBw*weta))/((a*a*a)*b) + 4*A22*fAw*fBw*gAweta*gBweta*intx*inty*(weta*weta)/(b*b*b*b) + 4*A26*intx*inty*weta*(fAw*gAweta*(2*fBw*gBweta*wxi + fBwxi*gBw*weta) + fAwxi*fBw*gAw*gBweta*weta)/(a*(b*b*b)) + 4*A66*intx*inty*(fAw*gAweta*wxi + fAwxi*gAw*weta)*(fBw*gBweta*wxi + fBwxi*gBw*weta)/((a*a)*(b*b)) - 4*B11*gAw*gBw*intx*inty*wxi*(fAwxi*fBwxixi + fAwxixi*fBwxi)/(a*a*a*a) - 4*B12*intx*inty*(fAw*gBw*(fBwxi*gAwetaeta*wxi + fBwxixi*gAweta*weta) + fBw*gAw*(fAwxi*gBwetaeta*wxi + fAwxixi*gBweta*weta))/((a*a)*(b*b)) - 4*B16*intx*inty*(fAw*fBwxixi*gAweta*gBw*wxi + fAwxi*(2*fBwxi*gAw*gBweta*wxi + 2*fBwxi*gAweta*gBw*wxi + fBwxixi*gAw*gBw*weta) + fAwxixi*gAw*(fBw*gBweta*wxi + fBwxi*gBw*weta))/((a*a*a)*b) - 4*B22*fAw*fBw*intx*inty*weta*(gAweta*gBwetaeta + gAwetaeta*gBweta)/(b*b*b*b) - 4*B26*intx*inty*(fAw*(fBw*wxi*(gAweta*gBwetaeta + gAwetaeta*gBweta) + fBwxi*weta*(2*gAweta*gBweta + gAwetaeta*gBw)) + fAwxi*fBw*weta*(gAw*gBwetaeta + 2*gAweta*gBweta))/(a*(b*b*b)) - 8*B66*intx*inty*(fAw*fBwxi*gAweta*gBweta*wxi + fAwxi*(fBw*gAweta*gBweta*wxi + fBwxi*weta*(gAw*gBweta + gAweta*gBw)))/((a*a)*(b*b)) + 4*D11*fAwxixi*fBwxixi*gAw*gBw*intx*inty/(a*a*a*a) + 4*D12*intx*inty*(fAw*fBwxixi*gAwetaeta*gBw + fAwxixi*fBw*gAw*gBwetaeta)/((a*a)*(b*b)) + 8*D16*intx*inty*(fAwxi*fBwxixi*gAweta*gBw + fAwxixi*fBwxi*gAw*gBweta)/((a*a*a)*b) + 4*D22*fAw*fBw*gAwetaeta*gBwetaeta*intx*inty/(b*b*b*b) + 8*D26*intx*inty*(fAw*fBwxi*gAwetaeta*gBweta + fAwxi*fBw*gAweta*gBwetaeta)/(a*(b*b*b)) + 16*D66*fAwxi*fBwxi*gAweta*gBweta*intx*inty/((a*a)*(b*b)) )
+                                kCv[c] += weight*( 4*A11*fAwxi*fBwxi*gAw*gBw*intx*inty*(wxi*wxi)/(a*a*a*a) + 4*A16*intx*inty*wxi*(fAw*fBwxi*gAweta*gBw*wxi + fAwxi*gAw*(fBw*gBweta*wxi + 2*fBwxi*gBw*weta))/((a*a*a)*b) + 4*A66*intx*inty*(fAw*gAweta*wxi + fAwxi*gAw*weta)*(fBw*gBweta*wxi + fBwxi*gBw*weta)/((a*a)*(b*b)) - 4*B11*gAw*gBw*intx*inty*wxi*(fAwxi*fBwxixi + fAwxixi*fBwxi)/(a*a*a*a) - 4*B16*intx*inty*(fAw*fBwxixi*gAweta*gBw*wxi + fAwxi*(2*fBwxi*gAw*gBweta*wxi + 2*fBwxi*gAweta*gBw*wxi + fBwxixi*gAw*gBw*weta) + fAwxixi*gAw*(fBw*gBweta*wxi + fBwxi*gBw*weta))/((a*a*a)*b) - 8*B66*intx*inty*(fAw*fBwxi*gAweta*gBweta*wxi + fAwxi*(fBw*gAweta*gBweta*wxi + fBwxi*weta*(gAw*gBweta + gAweta*gBw)))/((a*a)*(b*b)) + 4*D11*fAwxixi*fBwxixi*gAw*gBw*intx*inty/(a*a*a*a) + 4*D12*intx*inty*(fAw*fBwxixi*gAwetaeta*gBw + fAwxixi*fBw*gAw*gBwetaeta)/((a*a)*(b*b)) + 8*D16*intx*inty*(fAwxi*fBwxixi*gAweta*gBw + fAwxixi*fBwxi*gAw*gBweta)/((a*a*a)*b) + 4*D22*fAw*fBw*gAwetaeta*gBwetaeta*intx*inty/(b*b*b*b) + 8*D26*intx*inty*(fAw*fBwxi*gAwetaeta*gBweta + fAwxi*fBw*gAweta*gBwetaeta)/(a*(b*b*b)) + 16*D66*fAwxi*fBwxi*gAweta*gBweta*intx*inty/((a*a)*(b*b)) )
 
     kC = coo_matrix((kCv, (kCr, kCc)), shape=(size, size))
 
@@ -296,12 +300,12 @@ def fkG_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
     cdef double x1, x2, y1, y2, xinf, xsup, yinf, ysup
     cdef double a, b, intx, inty
     cdef int m, n
-    cdef double u1tx, u1rx, u2tx, u2rx
-    cdef double v1tx, v1rx, v2tx, v2rx
-    cdef double w1tx, w1rx, w2tx, w2rx
-    cdef double u1ty, u1ry, u2ty, u2ry
-    cdef double v1ty, v1ry, v2ty, v2ry
-    cdef double w1ty, w1ry, w2ty, w2ry
+    cdef double x1u, x2u
+    cdef double x1v, x2v
+    cdef double x1w, x1wr, x2w, x2wr
+    cdef double y1u, y2u
+    cdef double y1v, y2v
+    cdef double y1w, y1wr, y2w, y2wr
 
     cdef int i, k, j, l, c, row, col, ptx, pty
     cdef double xi, eta, x, y, weight
@@ -352,12 +356,12 @@ def fkG_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
     x2 = shell.x2
     y1 = shell.y1
     y2 = shell.y2
-    u1tx = shell.u1tx; u1rx = shell.u1rx; u2tx = shell.u2tx; u2rx = shell.u2rx
-    v1tx = shell.v1tx; v1rx = shell.v1rx; v2tx = shell.v2tx; v2rx = shell.v2rx
-    w1tx = shell.w1tx; w1rx = shell.w1rx; w2tx = shell.w2tx; w2rx = shell.w2rx
-    u1ty = shell.u1ty; u1ry = shell.u1ry; u2ty = shell.u2ty; u2ry = shell.u2ry
-    v1ty = shell.v1ty; v1ry = shell.v1ry; v2ty = shell.v2ty; v2ry = shell.v2ry
-    w1ty = shell.w1ty; w1ry = shell.w1ry; w2ty = shell.w2ty; w2ry = shell.w2ry
+    x1u = shell.x1u; x2u = shell.x2u
+    x1v = shell.x1v; x2v = shell.x2v
+    x1w = shell.x1w; x1wr = shell.x1wr; x2w = shell.x2w; x2wr = shell.x2wr
+    y1u = shell.y1u; y2u = shell.y2u
+    y1v = shell.y1v; y2v = shell.y2v
+    y1w = shell.y1w; y1wr = shell.y1wr; y2w = shell.y2w; y2wr = shell.y2wr
 
     fdim = 1*m*m*n*n
 
@@ -434,13 +438,13 @@ def fkG_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
                 if NLgeom == 1:
                     for j in range(n):
                         #TODO put these in a lookup vector
-                        gAw = calc_f(j, eta, w1ty, w1ry, w2ty, w2ry)
-                        gAweta = calc_fx(j, eta, w1ty, w1ry, w2ty, w2ry)
+                        gAw = fw(j, eta, y1w, y1wr, y2w, y2wr)
+                        gAweta = fw_x(j, eta, y1w, y1wr, y2w, y2wr)
                         for i in range(m):
-                            fAw = calc_f(i, xi, w1tx, w1rx, w2tx, w2rx)
-                            fAwxi = calc_fx(i, xi, w1tx, w1rx, w2tx, w2rx)
+                            fAw = fw(i, xi, x1w, x1wr, x2w, x2wr)
+                            fAwxi = fw_x(i, xi, x1w, x1wr, x2w, x2wr)
 
-                            col = col0 + num*(j*m + i)
+                            col = col0 + DOF*(j*m + i)
 
                             wxi += cs[col+2]*fAwxi*gAw
                             weta += cs[col+2]*fAw*gAweta
@@ -454,24 +458,24 @@ def fkG_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
                 kxy = 0.
                 for j in range(n):
                     #TODO put these in a lookup vector
-                    gAu = calc_f(j, eta, u1ty, u1ry, u2ty, u2ry)
-                    gAv = calc_f(j, eta, v1ty, v1ry, v2ty, v2ry)
-                    gAw = calc_f(j, eta, w1ty, w1ry, w2ty, w2ry)
-                    gAueta = calc_fx(j, eta, u1ty, u1ry, u2ty, u2ry)
-                    gAveta = calc_fx(j, eta, v1ty, v1ry, v2ty, v2ry)
-                    gAweta = calc_fx(j, eta, w1ty, w1ry, w2ty, w2ry)
-                    gAwetaeta = calc_fxx(j, eta, w1ty, w1ry, w2ty, w2ry)
+                    gAu = fuv(j, eta, y1u, y2u)
+                    gAv = fuv(j, eta, y1v, y2v)
+                    gAw = fw(j, eta, y1w, y1wr, y2w, y2wr)
+                    gAueta = fuv_x(j, eta, y1u, y2u)
+                    gAveta = fuv_x(j, eta, y1v, y2v)
+                    gAweta = fw_x(j, eta, y1w, y1wr, y2w, y2wr)
+                    gAwetaeta = fw_xx(j, eta, y1w, y1wr, y2w, y2wr)
 
                     for i in range(m):
-                        fAu = calc_f(i, xi, u1tx, u1rx, u2tx, u2rx)
-                        fAv = calc_f(i, xi, v1tx, v1rx, v2tx, v2rx)
-                        fAw = calc_f(i, xi, w1tx, w1rx, w2tx, w2rx)
-                        fAuxi = calc_fx(i, xi, u1tx, u1rx, u2tx, u2rx)
-                        fAvxi = calc_fx(i, xi, v1tx, v1rx, v2tx, v2rx)
-                        fAwxi = calc_fx(i, xi, w1tx, w1rx, w2tx, w2rx)
-                        fAwxixi = calc_fxx(i, xi, w1tx, w1rx, w2tx, w2rx)
+                        fAu = fuv(i, xi, x1u, x2u)
+                        fAv = fuv(i, xi, x1v, x2v)
+                        fAw = fw(i, xi, x1w, x1wr, x2w, x2wr)
+                        fAuxi = fuv_x(i, xi, x1u, x2u)
+                        fAvxi = fuv_x(i, xi, x1v, x2v)
+                        fAwxi = fw_x(i, xi, x1w, x1wr, x2w, x2wr)
+                        fAwxixi = fw_xx(i, xi, x1w, x1wr, x2w, x2wr)
 
-                        col = col0 + num*(j*m + i)
+                        col = col0 + DOF*(j*m + i)
 
                         exx += cs[col+0]*(2/a)*fAuxi*gAu + 0.5*cs[col+2]*(2/a)*fAwxi*gAw*(2/a)*wxi
                         eyy += cs[col+1]*(2/b)*fAv*gAveta + 0.5*cs[col+2]*(2/b)*fAw*gAweta*(2/b)*weta
@@ -486,26 +490,25 @@ def fkG_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
                 Nxy = Nxy0 + A16*exx + A26*eyy + A66*gxy + B16*kxx + B26*kyy + B66*kxy
 
                 # computing kG
-
                 c = -1
                 for j in range(n):
-                    gAw = calc_f(j, eta, w1ty, w1ry, w2ty, w2ry)
-                    gAweta = calc_fx(j, eta, w1ty, w1ry, w2ty, w2ry)
+                    gAw = fw(j, eta, y1w, y1wr, y2w, y2wr)
+                    gAweta = fw_x(j, eta, y1w, y1wr, y2w, y2wr)
 
                     for l in range(n):
-                        gBw = calc_f(l, eta, w1ty, w1ry, w2ty, w2ry)
-                        gBweta = calc_fx(l, eta, w1ty, w1ry, w2ty, w2ry)
+                        gBw = fw(l, eta, y1w, y1wr, y2w, y2wr)
+                        gBweta = fw_x(l, eta, y1w, y1wr, y2w, y2wr)
 
                         for i in range(m):
-                            fAw = calc_f(i, xi, w1tx, w1rx, w2tx, w2rx)
-                            fAwxi = calc_fx(i, xi, w1tx, w1rx, w2tx, w2rx)
+                            fAw = fw(i, xi, x1w, x1wr, x2w, x2wr)
+                            fAwxi = fw_x(i, xi, x1w, x1wr, x2w, x2wr)
 
                             for k in range(m):
-                                fBw = calc_f(k, xi, w1tx, w1rx, w2tx, w2rx)
-                                fBwxi = calc_fx(k, xi, w1tx, w1rx, w2tx, w2rx)
+                                fBw = fw(k, xi, x1w, x1wr, x2w, x2wr)
+                                fBwxi = fw_x(k, xi, x1w, x1wr, x2w, x2wr)
 
-                                row = row0 + num*(j*m + i)
-                                col = col0 + num*(l*m + k)
+                                row = row0 + DOF*(j*m + i)
+                                col = col0 + DOF*(l*m + k)
 
                                 #NOTE symmetry assumption True if no follower forces are used
                                 if row > col:
@@ -515,7 +518,10 @@ def fkG_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
                                 if ptx == 0 and pty == 0:
                                     kGr[c] = row+2
                                     kGc[c] = col+2
-                                kGv[c] += weight*( Nxx*fAwxi*fBwxi*gAw*gBw*intx*inty/(a*a) + Nxy*intx*inty*(fAw*fBwxi*gAweta*gBw + fAwxi*fBw*gAw*gBweta)/(a*b) + Nyy*fAw*fBw*gAweta*gBweta*intx*inty/(b*b) )
+                                kGv[c] += weight*(intx*inty/4)*(
+                                          Nxx*(2/a)*fAwxi*gAw*(2/a)*fBwxi*gBw
+                                        + Nxy*((2/b)*fAw*gAweta*(2/a)*fBwxi*gBw + (2/a)*fAwxi*gAw*(2/b)*fBw*gBweta)
+                                        + Nyy*(2/b)*fAw*gAweta*(2/b)*fBw*gBweta )
 
     kG = coo_matrix((kGv, (kGr, kGc)), shape=(size, size))
 
@@ -524,210 +530,23 @@ def fkG_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
 
 def fkM_num(object shell, double offset, object hrho_input, int size,
         int row0, int col0, int nx, int ny):
-    cdef double x1, x2, y1, y2, xinf, xsup, yinf, ysup
-    cdef double a, b, intx, inty
-    cdef int m, n
-    cdef double u1tx, u1rx, u2tx, u2rx
-    cdef double v1tx, v1rx, v2tx, v2rx
-    cdef double w1tx, w1rx, w2tx, w2rx
-    cdef double u1ty, u1ry, u2ty, u2ry
-    cdef double v1ty, v1ry, v2ty, v2ry
-    cdef double w1ty, w1ry, w2ty, w2ry
-
-    cdef int i, j, k, l, c, row, col, ptx, pty
-
-    cdef np.ndarray[cINT, ndim=1] kMr, kMc
-    cdef np.ndarray[cDOUBLE, ndim=1] kMv
-
-    cdef double fAu, fAv, fAw, fAwxi
-    cdef double fBu, fBv, fBw, fBwxi
-    cdef double gAu, gAv, gAw, gAweta
-    cdef double gBu, gBv, gBw, gBweta
-    cdef double xi, eta, weight
-    cdef double xi1, xi2, eta1, eta2
-
-    cdef np.ndarray[cDOUBLE, ndim=1] xis, etas, weights_xi, weights_eta
-
-    # F as 4-D matrix, must be [nx, ny, 2], when there is one ABD[6, 6] for
-    # each of the nx * ny integration points
-    cdef double h, rho, d
-    cdef np.ndarray[cDOUBLE, ndim=3] hrho_nxny
-
-    cdef int one_hrho_each_point = 0
-
-    d = offset
-
-    hrho_input = np.asarray(hrho_input, dtype=DOUBLE)
-    if hrho_input.shape == (nx, ny, 2):
-        hrho_nxny = np.ascontiguousarray(hrho_input)
-        one_hrho_each_point = 1
-    elif hrho_input.shape == (2,):
-        # creating dummy 4-D array that is not used
-        hrho_nxny = np.empty(shape=(0, 0, 0), dtype=DOUBLE)
-        # using a constant F for all the integration domain
-        hrho_input = np.ascontiguousarray(hrho_input)
-        h, rho = hrho_input
-    else:
-        raise ValueError('Invalid shape for Finput!')
-
-    if not 'Shell' in shell.__class__.__name__:
-        raise ValueError('a Shell object must be given as input')
-    a = shell.a
-    b = shell.b
-    m = shell.m
-    n = shell.n
-    x1 = shell.x1
-    x2 = shell.x2
-    y1 = shell.y1
-    y2 = shell.y2
-    u1tx = shell.u1tx; u1rx = shell.u1rx; u2tx = shell.u2tx; u2rx = shell.u2rx
-    v1tx = shell.v1tx; v1rx = shell.v1rx; v2tx = shell.v2tx; v2rx = shell.v2rx
-    w1tx = shell.w1tx; w1rx = shell.w1rx; w2tx = shell.w2tx; w2rx = shell.w2rx
-    u1ty = shell.u1ty; u1ry = shell.u1ry; u2ty = shell.u2ty; u2ry = shell.u2ry
-    v1ty = shell.v1ty; v1ry = shell.v1ry; v2ty = shell.v2ty; v2ry = shell.v2ry
-    w1ty = shell.w1ty; w1ry = shell.w1ry; w2ty = shell.w2ty; w2ry = shell.w2ry
-
-    fdim = 7*m*m*n*n
-
-    xis = np.zeros(nx, dtype=DOUBLE)
-    weights_xi = np.zeros(nx, dtype=DOUBLE)
-    etas = np.zeros(ny, dtype=DOUBLE)
-    weights_eta = np.zeros(ny, dtype=DOUBLE)
-
-    leggauss_quad(nx, &xis[0], &weights_xi[0])
-    leggauss_quad(ny, &etas[0], &weights_eta[0])
-
-    kMr = np.zeros((fdim,), dtype=INT)
-    kMc = np.zeros((fdim,), dtype=INT)
-    kMv = np.zeros((fdim,), dtype=DOUBLE)
-
-    xi1 = -1
-    xi2 = +1
-    if x1 != -1 and x2 != -1:
-        xinf = 0
-        xsup = shell.a
-        xi1 = (x1 - xinf)/(xsup - xinf)*2 - 1
-        xi2 = (x2 - xinf)/(xsup - xinf)*2 - 1
-    else:
-        x1 = 0
-        x2 = shell.a
-
-    eta1 = -1
-    eta2 = +1
-    if y1 != -1 and y2 != -1:
-        yinf = 0
-        ysup = shell.b
-        eta1 = (y1 - yinf)/(ysup - yinf)*2 - 1
-        eta2 = (y2 - yinf)/(ysup - yinf)*2 - 1
-    else:
-        y1 = 0
-        y2 = shell.b
-
-    intx = x2 - x1
-    inty = y2 - y1
-
-    with nogil:
-        for ptx in range(nx):
-            for pty in range(ny):
-                xi = xis[ptx]
-                eta = etas[pty]
-                xi = (xi - (-1))/2 * (xi2 - xi1) + xi1
-                eta = (eta - (-1))/2 * (eta2 - eta1) + eta1
-
-                weight = weights_xi[ptx] * weights_eta[pty]
-
-                if one_hrho_each_point == 1:
-                    h = hrho_nxny[ptx, pty, 0]
-                    rho = hrho_nxny[ptx, pty, 1]
-
-                # kM
-                c = -1
-                for i in range(m):
-                    fAu = calc_f(i, xi, u1tx, u1rx, u2tx, u2rx)
-                    fAv = calc_f(i, xi, v1tx, v1rx, v2tx, v2rx)
-                    fAw = calc_f(i, xi, w1tx, w1rx, w2tx, w2rx)
-                    fAwxi = calc_fx(i, xi, w1tx, w1rx, w2tx, w2rx)
-
-                    for k in range(m):
-                        fBu = calc_f(k, xi, u1tx, u1rx, u2tx, u2rx)
-                        fBv = calc_f(k, xi, v1tx, v1rx, v2tx, v2rx)
-                        fBw = calc_f(k, xi, w1tx, w1rx, w2tx, w2rx)
-                        fBwxi = calc_fx(k, xi, w1tx, w1rx, w2tx, w2rx)
-
-                        for j in range(n):
-                            gAu = calc_f(j, eta, u1ty, u1ry, u2ty, u2ry)
-                            gAv = calc_f(j, eta, v1ty, v1ry, v2ty, v2ry)
-                            gAw = calc_f(j, eta, w1ty, w1ry, w2ty, w2ry)
-                            gAweta = calc_fx(j, eta, w1ty, w1ry, w2ty, w2ry)
-
-                            for l in range(n):
-
-                                row = row0 + num*(j*m + i)
-                                col = col0 + num*(l*m + k)
-
-                                #NOTE symmetry assumption True if no follower forces are used
-                                if row > col:
-                                    continue
-
-                                gBu = calc_f(l, eta, u1ty, u1ry, u2ty, u2ry)
-                                gBv = calc_f(l, eta, v1ty, v1ry, v2ty, v2ry)
-                                gBw = calc_f(l, eta, w1ty, w1ry, w2ty, w2ry)
-                                gBweta = calc_fx(l, eta, w1ty, w1ry, w2ty, w2ry)
-
-                                c += 1
-                                if ptx == 0 and pty == 0:
-                                    kMr[c] = row+0
-                                    kMc[c] = col+0
-                                kMv[c] += weight*( 0.25*fAu*fBu*gAu*gBu*h*intx*inty*rho )
-                                c += 1
-                                if ptx == 0 and pty == 0:
-                                    kMr[c] = row+0
-                                    kMc[c] = col+2
-                                kMv[c] += weight*( 0.5*d*fAu*fBwxi*gAu*gBw*h*intx*inty*rho/a )
-                                c += 1
-                                if ptx == 0 and pty == 0:
-                                    kMr[c] = row+1
-                                    kMc[c] = col+1
-                                kMv[c] += weight*( 0.25*fAv*fBv*gAv*gBv*h*intx*inty*rho )
-                                c += 1
-                                if ptx == 0 and pty == 0:
-                                    kMr[c] = row+1
-                                    kMc[c] = col+2
-                                kMv[c] += weight*( 0.5*d*fAv*fBw*gAv*gBweta*h*intx*inty*rho/b )
-                                c += 1
-                                if ptx == 0 and pty == 0:
-                                    kMr[c] = row+2
-                                    kMc[c] = col+0
-                                kMv[c] += weight*( 0.5*d*fAwxi*fBu*gAw*gBu*h*intx*inty*rho/a )
-                                c += 1
-                                if ptx == 0 and pty == 0:
-                                    kMr[c] = row+2
-                                    kMc[c] = col+1
-                                kMv[c] += weight*( 0.5*d*fAw*fBv*gAweta*gBv*h*intx*inty*rho/b )
-                                c += 1
-                                if ptx == 0 and pty == 0:
-                                    kMr[c] = row+2
-                                    kMc[c] = col+2
-                                kMv[c] += weight*( 0.25*h*intx*inty*rho*(fAw*fBw*gAw*gBw + 4*fAw*fBw*gAweta*gBweta*((d*d) + 0.0833333333333333*(h*h))/(b*b) + 4*fAwxi*fBwxi*gAw*gBw*((d*d) + 0.0833333333333333*(h*h))/(a*a)) )
-
-    kM = coo_matrix((kMv, (kMr, kMc)), shape=(size, size))
-
-    return kM
+    from .plate_clpt_donnell_bardell_num import fkM_num as plate_fkM_num
+    return plate_fkM_num(shell, offset, hrho_input, size, row0, col0, nx, ny)
 
 
 def fkAx_num(object shell, int size, int row0, int col0, int nx, int ny):
     cdef double x1, x2, y1, y2, xinf, xsup, yinf, ysup
-    cdef double a, b, beta, intx, inty
+    cdef double a, b, beta, gamma, intx, inty
     cdef int m, n
-    cdef double w1tx, w1rx, w2tx, w2rx
-    cdef double w1ty, w1ry, w2ty, w2ry
+    cdef double x1w, x1wr, x2w, x2wr
+    cdef double y1w, y1wr, y2w, y2wr
 
     cdef int i, j, k, l, c, row, col, ptx, pty
 
     cdef np.ndarray[cINT, ndim=1] kAr, kAc
     cdef np.ndarray[cDOUBLE, ndim=1] kAv
 
-    cdef double fAwxi, fBw, gAw, gBw
+    cdef double fAw, fAwxi, fBw, gAw, gBw
     cdef double xi, eta, weight
     cdef double xi1, xi2, eta1, eta2
 
@@ -744,8 +563,9 @@ def fkAx_num(object shell, int size, int row0, int col0, int nx, int ny):
     y1 = shell.y1
     y2 = shell.y2
     beta = shell.beta
-    w1tx = shell.w1tx; w1rx = shell.w1rx; w2tx = shell.w2tx; w2rx = shell.w2rx
-    w1ty = shell.w1ty; w1ry = shell.w1ry; w2ty = shell.w2ty; w2ry = shell.w2ry
+    gamma = shell.gamma
+    x1w = shell.x1w; x1wr = shell.x1wr; x2w = shell.x2w; x2wr = shell.x2wr
+    y1w = shell.y1w; y1wr = shell.y1wr; y2w = shell.y2w; y2wr = shell.y2wr
 
     fdim = 1*m*m*n*n
 
@@ -799,30 +619,31 @@ def fkAx_num(object shell, int size, int row0, int col0, int nx, int ny):
                 # kAx
                 c = -1
                 for i in range(m):
-                    fAwxi = calc_fx(i, xi, w1tx, w1rx, w2tx, w2rx)
+                    fAw = fw(i, xi, x1w, x1wr, x2w, x2wr)
+                    fAwxi = fw_x(i, xi, x1w, x1wr, x2w, x2wr)
 
                     for k in range(m):
-                        fBw = calc_f(k, xi, w1tx, w1rx, w2tx, w2rx)
+                        fBw = fw(k, xi, x1w, x1wr, x2w, x2wr)
 
                         for j in range(n):
-                            gAw = calc_f(j, eta, w1ty, w1ry, w2ty, w2ry)
+                            gAw = fw(j, eta, y1w, y1wr, y2w, y2wr)
 
                             for l in range(n):
 
-                                row = row0 + num*(j*m + i)
-                                col = col0 + num*(l*m + k)
+                                row = row0 + DOF*(j*m + i)
+                                col = col0 + DOF*(l*m + k)
 
                                 #NOTE symmetry assumption True if no follower forces are used
                                 if row > col:
                                     continue
 
-                                gBw = calc_f(l, eta, w1ty, w1ry, w2ty, w2ry)
+                                gBw = fw(l, eta, y1w, y1wr, y2w, y2wr)
 
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kAr[c] = row+2
                                     kAc[c] = col+2
-                                kAv[c] += weight*( -0.5*beta*fAwxi*fBw*gAw*gBw*intx*inty/a )
+                                kAv[c] += weight*( 0.25*intx*inty*(fAw*fBw*gAw*gBw*gamma - 2*beta*fAwxi*fBw*gAw*gBw/a) )
 
     kAx = coo_matrix((kAv, (kAr, kAc)), shape=(size, size))
 
@@ -830,117 +651,8 @@ def fkAx_num(object shell, int size, int row0, int col0, int nx, int ny):
 
 
 def fkAy_num(object shell, int size, int row0, int col0, int nx, int ny):
-    cdef double x1, x2, y1, y2, xinf, xsup, yinf, ysup
-    cdef double a, b, beta, intx, inty
-    cdef int m, n
-    cdef double w1tx, w1rx, w2tx, w2rx
-    cdef double w1ty, w1ry, w2ty, w2ry
-
-    cdef int i, j, k, l, c, row, col, ptx, pty
-
-    cdef np.ndarray[cINT, ndim=1] kAr, kAc
-    cdef np.ndarray[cDOUBLE, ndim=1] kAv
-
-    cdef double fAw, fBw, gAweta, gBw
-    cdef double xi, eta, weight
-    cdef double xi1, xi2, eta1, eta2
-
-    cdef np.ndarray[cDOUBLE, ndim=1] xis, etas, weights_xi, weights_eta
-
-    if not 'Shell' in shell.__class__.__name__:
-        raise ValueError('a Shell object must be given as input')
-    a = shell.a
-    b = shell.b
-    m = shell.m
-    n = shell.n
-    x1 = shell.x1
-    x2 = shell.x2
-    y1 = shell.y1
-    y2 = shell.y2
-    beta = shell.beta
-    w1tx = shell.w1tx; w1rx = shell.w1rx; w2tx = shell.w2tx; w2rx = shell.w2rx
-    w1ty = shell.w1ty; w1ry = shell.w1ry; w2ty = shell.w2ty; w2ry = shell.w2ry
-
-    fdim = 1*m*m*n*n
-
-    xis = np.zeros(nx, dtype=DOUBLE)
-    weights_xi = np.zeros(nx, dtype=DOUBLE)
-    etas = np.zeros(ny, dtype=DOUBLE)
-    weights_eta = np.zeros(ny, dtype=DOUBLE)
-
-    leggauss_quad(nx, &xis[0], &weights_xi[0])
-    leggauss_quad(ny, &etas[0], &weights_eta[0])
-
-    kAr = np.zeros((fdim,), dtype=INT)
-    kAc = np.zeros((fdim,), dtype=INT)
-    kAv = np.zeros((fdim,), dtype=DOUBLE)
-
-    xi1 = -1
-    xi2 = +1
-    if x1 != -1 and x2 != -1:
-        xinf = 0
-        xsup = shell.a
-        xi1 = (x1 - xinf)/(xsup - xinf)*2 - 1
-        xi2 = (x2 - xinf)/(xsup - xinf)*2 - 1
-    else:
-        x1 = 0
-        x2 = shell.a
-
-    eta1 = -1
-    eta2 = +1
-    if y1 != -1 and y2 != -1:
-        yinf = 0
-        ysup = shell.b
-        eta1 = (y1 - yinf)/(ysup - yinf)*2 - 1
-        eta2 = (y2 - yinf)/(ysup - yinf)*2 - 1
-    else:
-        y1 = 0
-        y2 = shell.b
-
-    intx = x2 - x1
-    inty = y2 - y1
-
-    with nogil:
-        for ptx in range(nx):
-            for pty in range(ny):
-                xi = xis[ptx]
-                eta = etas[pty]
-                xi = (xi - (-1))/2 * (xi2 - xi1) + xi1
-                eta = (eta - (-1))/2 * (eta2 - eta1) + eta1
-
-                weight = weights_xi[ptx] * weights_eta[pty]
-
-                # kAy
-                c = -1
-                for i in range(m):
-                    fAw = calc_f(i, xi, w1tx, w1rx, w2tx, w2rx)
-
-                    for k in range(m):
-                        fBw = calc_f(k, xi, w1tx, w1rx, w2tx, w2rx)
-
-                        for j in range(n):
-                            gAweta = calc_fx(j, eta, w1ty, w1ry, w2ty, w2ry)
-
-                            for l in range(n):
-
-                                row = row0 + num*(j*m + i)
-                                col = col0 + num*(l*m + k)
-
-                                #NOTE symmetry assumption True if no follower forces are used
-                                if row > col:
-                                    continue
-
-                                gBw = calc_f(l, eta, w1ty, w1ry, w2ty, w2ry)
-
-                                c += 1
-                                if ptx == 0 and pty == 0:
-                                    kAr[c] = row+2
-                                    kAc[c] = col+2
-                                kAv[c] += weight*( -0.5*beta*fAw*fBw*gAweta*gBw*intx*inty/b )
-
-    kAy = coo_matrix((kAv, (kAr, kAc)), shape=(size, size))
-
-    return kAy
+    from . plate_clpt_donnell_bardell_num import fkAy_num as plate_fkAy_num
+    return plate_fkAy_num(shell, size, row0, col0, nx, ny)
 
 
 def calc_fint(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
@@ -948,12 +660,12 @@ def calc_fint(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
     cdef double x1, x2, y1, y2, xinf, xsup, yinf, ysup
     cdef double a, b, intx, inty
     cdef int m, n
-    cdef double u1tx, u1rx, u2tx, u2rx
-    cdef double v1tx, v1rx, v2tx, v2rx
-    cdef double w1tx, w1rx, w2tx, w2rx
-    cdef double u1ty, u1ry, u2ty, u2ry
-    cdef double v1ty, v1ry, v2ty, v2ry
-    cdef double w1ty, w1ry, w2ty, w2ry
+    cdef double x1u, x2u
+    cdef double x1v, x2v
+    cdef double x1w, x1wr, x2w, x2wr
+    cdef double y1u, y2u
+    cdef double y1v, y2v
+    cdef double y1w, y1wr, y2w, y2wr
 
     cdef int i, j, c, col, ptx, pty
     cdef double A11, A12, A16, A22, A26, A66
@@ -1002,12 +714,12 @@ def calc_fint(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
     x2 = shell.x2
     y1 = shell.y1
     y2 = shell.y2
-    u1tx = shell.u1tx; u1rx = shell.u1rx; u2tx = shell.u2tx; u2rx = shell.u2rx
-    v1tx = shell.v1tx; v1rx = shell.v1rx; v2tx = shell.v2tx; v2rx = shell.v2rx
-    w1tx = shell.w1tx; w1rx = shell.w1rx; w2tx = shell.w2tx; w2rx = shell.w2rx
-    u1ty = shell.u1ty; u1ry = shell.u1ry; u2ty = shell.u2ty; u2ry = shell.u2ry
-    v1ty = shell.v1ty; v1ry = shell.v1ry; v2ty = shell.v2ty; v2ry = shell.v2ry
-    w1ty = shell.w1ty; w1ry = shell.w1ry; w2ty = shell.w2ty; w2ry = shell.w2ry
+    x1u = shell.x1u; x2u = shell.x2u
+    x1v = shell.x1v; x2v = shell.x2v
+    x1w = shell.x1w; x1wr = shell.x1wr; x2w = shell.x2w; x2wr = shell.x2wr
+    y1u = shell.y1u; y2u = shell.y2u
+    y1v = shell.y1v; y2v = shell.y2v
+    y1w = shell.y1w; y1wr = shell.y1wr; y2w = shell.y2w; y2wr = shell.y2wr
 
     xis = np.zeros(nx, dtype=DOUBLE)
     weights_xi = np.zeros(nx, dtype=DOUBLE)
@@ -1085,14 +797,14 @@ def calc_fint(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
                 weta = 0
                 for j in range(n):
                     #TODO save in buffer
-                    gAw = calc_f(j, eta, w1ty, w1ry, w2ty, w2ry)
-                    gAweta = calc_fx(j, eta, w1ty, w1ry, w2ty, w2ry)
+                    gAw = fw(j, eta, y1w, y1wr, y2w, y2wr)
+                    gAweta = fw_x(j, eta, y1w, y1wr, y2w, y2wr)
                     for i in range(m):
                         #TODO save in buffer
-                        fAw = calc_f(i, xi, w1tx, w1rx, w2tx, w2rx)
-                        fAwxi = calc_fx(i, xi, w1tx, w1rx, w2tx, w2rx)
+                        fAw = fw(i, xi, x1w, x1wr, x2w, x2wr)
+                        fAwxi = fw_x(i, xi, x1w, x1wr, x2w, x2wr)
 
-                        col = col0 + num*(j*m + i)
+                        col = col0 + DOF*(j*m + i)
 
                         wxi += cs[col+2]*fAwxi*gAw
                         weta += cs[col+2]*fAw*gAweta
@@ -1107,25 +819,25 @@ def calc_fint(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
 
                 for j in range(n):
                     #TODO save in buffer
-                    gAu = calc_f(j, eta, u1ty, u1ry, u2ty, u2ry)
-                    gAueta = calc_fx(j, eta, u1ty, u1ry, u2ty, u2ry)
-                    gAv = calc_f(j, eta, v1ty, v1ry, v2ty, v2ry)
-                    gAveta = calc_fx(j, eta, v1ty, v1ry, v2ty, v2ry)
-                    gAw = calc_f(j, eta, w1ty, w1ry, w2ty, w2ry)
-                    gAweta = calc_fx(j, eta, w1ty, w1ry, w2ty, w2ry)
-                    gAwetaeta = calc_fxx(j, eta, w1ty, w1ry, w2ty, w2ry)
+                    gAu = fuv(j, eta, y1u, y2u)
+                    gAueta = fuv_x(j, eta, y1u, y2u)
+                    gAv = fuv(j, eta, y1v, y2v)
+                    gAveta = fuv_x(j, eta, y1v, y2v)
+                    gAw = fw(j, eta, y1w, y1wr, y2w, y2wr)
+                    gAweta = fw_x(j, eta, y1w, y1wr, y2w, y2wr)
+                    gAwetaeta = fw_xx(j, eta, y1w, y1wr, y2w, y2wr)
 
                     for i in range(m):
                         #TODO save in buffer
-                        fAu = calc_f(i, xi, u1tx, u1rx, u2tx, u2rx)
-                        fAuxi = calc_fx(i, xi, u1tx, u1rx, u2tx, u2rx)
-                        fAv = calc_f(i, xi, v1tx, v1rx, v2tx, v2rx)
-                        fAvxi = calc_fx(i, xi, v1tx, v1rx, v2tx, v2rx)
-                        fAw = calc_f(i, xi, w1tx, w1rx, w2tx, w2rx)
-                        fAwxi = calc_fx(i, xi, w1tx, w1rx, w2tx, w2rx)
-                        fAwxixi = calc_fxx(i, xi, w1tx, w1rx, w2tx, w2rx)
+                        fAu = fuv(i, xi, x1u, x2u)
+                        fAuxi = fuv_x(i, xi, x1u, x2u)
+                        fAv = fuv(i, xi, x1v, x2v)
+                        fAvxi = fuv_x(i, xi, x1v, x2v)
+                        fAw = fw(i, xi, x1w, x1wr, x2w, x2wr)
+                        fAwxi = fw_x(i, xi, x1w, x1wr, x2w, x2wr)
+                        fAwxixi = fw_xx(i, xi, x1w, x1wr, x2w, x2wr)
 
-                        col = col0 + num*(j*m + i)
+                        col = col0 + DOF*(j*m + i)
 
                         exx += cs[col+0]*(2/a)*fAuxi*gAu + 0.5*cs[col+2]*(2/a)*fAwxi*gAw*(2/a)*wxi
                         eyy += cs[col+1]*(2/b)*fAv*gAveta + 0.5*cs[col+2]*(2/b)*fAw*gAweta*(2/b)*weta
@@ -1143,26 +855,27 @@ def calc_fint(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
                 Mxy = B16*exx + B26*eyy + B66*gxy + D16*kxx + D26*kyy + D66*kxy
 
                 for j in range(n):
-                    gAu = calc_f(j, eta, u1ty, u1ry, u2ty, u2ry)
-                    gAueta = calc_fx(j, eta, u1ty, u1ry, u2ty, u2ry)
-                    gAv = calc_f(j, eta, v1ty, v1ry, v2ty, v2ry)
-                    gAveta = calc_fx(j, eta, v1ty, v1ry, v2ty, v2ry)
-                    gAw = calc_f(j, eta, w1ty, w1ry, w2ty, w2ry)
-                    gAweta = calc_fx(j, eta, w1ty, w1ry, w2ty, w2ry)
-                    gAwetaeta = calc_fxx(j, eta, w1ty, w1ry, w2ty, w2ry)
+                    gAu = fuv(j, eta, y1u, y2u)
+                    gAueta = fuv_x(j, eta, y1u, y2u)
+                    gAv = fuv(j, eta, y1v, y2v)
+                    gAveta = fuv_x(j, eta, y1v, y2v)
+                    gAw = fw(j, eta, y1w, y1wr, y2w, y2wr)
+                    gAweta = fw_x(j, eta, y1w, y1wr, y2w, y2wr)
+                    gAwetaeta = fw_xx(j, eta, y1w, y1wr, y2w, y2wr)
                     for i in range(m):
-                        fAu = calc_f(i, xi, u1tx, u1rx, u2tx, u2rx)
-                        fAuxi = calc_fx(i, xi, u1tx, u1rx, u2tx, u2rx)
-                        fAv = calc_f(i, xi, v1tx, v1rx, v2tx, v2rx)
-                        fAvxi = calc_fx(i, xi, v1tx, v1rx, v2tx, v2rx)
-                        fAw = calc_f(i, xi, w1tx, w1rx, w2tx, w2rx)
-                        fAwxi = calc_fx(i, xi, w1tx, w1rx, w2tx, w2rx)
-                        fAwxixi = calc_fxx(i, xi, w1tx, w1rx, w2tx, w2rx)
+                        fAu = fuv(i, xi, x1u, x2u)
+                        fAuxi = fuv_x(i, xi, x1u, x2u)
+                        fAv = fuv(i, xi, x1v, x2v)
+                        fAvxi = fuv_x(i, xi, x1v, x2v)
+                        fAw = fw(i, xi, x1w, x1wr, x2w, x2wr)
+                        fAwxi = fw_x(i, xi, x1w, x1wr, x2w, x2wr)
+                        fAwxixi = fw_xx(i, xi, x1w, x1wr, x2w, x2wr)
 
-                        col = col0 + num*(j*m + i)
+                        col = col0 + DOF*(j*m + i)
 
                         fint[col+0] += weight*( 0.25*intx*inty*(2*Nxx*fAuxi*gAu/a + 2*Nxy*fAu*gAueta/b) )
                         fint[col+1] += weight*( 0.25*intx*inty*(2*Nxy*fAvxi*gAv/a + 2*Nyy*fAv*gAveta/b) )
-                        fint[col+2] += weight*( 0.25*intx*inty*(-4*Mxx*fAwxixi*gAw/(a*a) - 8*Mxy*fAwxi*gAweta/(a*b) - 4*Myy*fAw*gAwetaeta/(b*b) + 4*Nxx*fAwxi*gAw*wxi/(a*a) + 4*Nxy*(fAw*gAweta*wxi + fAwxi*gAw*weta)/(a*b) + 4*Nyy*fAw*gAweta*weta/(b*b)) )
+                        fint[col+2] += weight*( 0.25*intx*inty*(-4*Mxx*fAwxixi*gAw/(a*a) - 8*Mxy*fAwxi*gAweta/(a*b) - 4*Myy*fAw*gAwetaeta/(b*b) + 4*Nxx*fAwxi*gAw*wxi/(a*a) + 4*Nxy*(fAw*gAweta*wxi + fAwxi*gAw*weta)/(a*b) + Nyy*(4*fAw*gAweta*weta/(b*b))) )
 
     return fint
+

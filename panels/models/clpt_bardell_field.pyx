@@ -9,12 +9,17 @@ import numpy as np
 from libc.stdlib cimport malloc, free
 from cython.parallel import prange
 
-cdef extern from 'bardell_functions.hpp':
-    double calc_vec_f(double *f, double xi, double xi1t, double xi1r,
+
+cdef extern from 'bardell_functions_uv.hpp':
+    double vec_fuv(double *f, double xi, double xi1t, double xi2t) nogil
+    double vec_fuv_x(double *f, double xi, double xi1t, double xi2t) nogil
+
+cdef extern from 'bardell_functions_w.hpp':
+    double vec_fw(double *f, double xi, double xi1t, double xi1r,
                   double xi2t, double xi2r) nogil
-    double calc_vec_fx(double *f, double xi, double xi1t, double xi1r,
+    double vec_fw_x(double *f, double xi, double xi1t, double xi1r,
                   double xi2t, double xi2r) nogil
-    double calc_vec_fxx(double *f, double xi, double xi1t, double xi1r,
+    double vec_fw_xx(double *f, double xi, double xi1t, double xi1r,
                   double xi2t, double xi2r) nogil
 
 DOUBLE = np.float64
@@ -29,22 +34,22 @@ def fuvw(np.ndarray[cDOUBLE, ndim=1] c, object s,
         int num_cores=4):
     cdef double a, b
     cdef int m, n
-    cdef double u1tx, u1rx, u2tx, u2rx
-    cdef double v1tx, v1rx, v2tx, v2rx
-    cdef double w1tx, w1rx, w2tx, w2rx
-    cdef double u1ty, u1ry, u2ty, u2ry
-    cdef double v1ty, v1ry, v2ty, v2ry
-    cdef double w1ty, w1ry, w2ty, w2ry
+    cdef double x1u, x2u
+    cdef double x1v, x2v
+    cdef double x1w, x1wr, x2w, x2wr
+    cdef double y1u, y2u
+    cdef double y1v, y2v
+    cdef double y1w, y1wr, y2w, y2wr
     a = s.a
     b = s.b
     m = s.m
     n = s.n
-    u1tx = s.u1tx ; u1rx = s.u1rx ; u2tx = s.u2tx ; u2rx = s.u2rx
-    v1tx = s.v1tx ; v1rx = s.v1rx ; v2tx = s.v2tx ; v2rx = s.v2rx
-    w1tx = s.w1tx ; w1rx = s.w1rx ; w2tx = s.w2tx ; w2rx = s.w2rx
-    u1ty = s.u1ty ; u1ry = s.u1ry ; u2ty = s.u2ty ; u2ry = s.u2ry
-    v1ty = s.v1ty ; v1ry = s.v1ry ; v2ty = s.v2ty ; v2ry = s.v2ry
-    w1ty = s.w1ty ; w1ry = s.w1ry ; w2ty = s.w2ty ; w2ry = s.w2ry
+    x1u = s.x1u; x2u = s.x2u
+    x1v = s.x1v; x2v = s.x2v
+    x1w = s.x1w; x1wr = s.x1wr; x2w = s.x2w ; x2wr = s.x2wr
+    y1u = s.y1u; y2u = s.y2u
+    y1v = s.y1v; y2v = s.y2v
+    y1w = s.y1w; y1wr = s.y1wr; y2w = s.y2w ; y2wr = s.y2wr
 
     cdef int size_core, pti
     cdef np.ndarray[cDOUBLE, ndim=2] us, vs, ws, phixs, phiys
@@ -75,22 +80,22 @@ def fuvw(np.ndarray[cDOUBLE, ndim=1] c, object s,
                     schedule='static'):
         cfuvw(&c[0], m, n, a, b, &xs_core[pti,0],
               &ys_core[pti,0], size_core, &us[pti,0], &vs[pti,0], &ws[pti,0],
-              u1tx, u1rx, u2tx, u2rx,
-              v1tx, v1rx, v2tx, v2rx,
-              w1tx, w1rx, w2tx, w2rx,
-              u1ty, u1ry, u2ty, u2ry,
-              v1ty, v1ry, v2ty, v2ry,
-              w1ty, w1ry, w2ty, w2ry)
+              x1u, x2u,
+              x1v, x2v,
+              x1w, x1wr, x2w, x2wr,
+              y1u, y2u,
+              y1v, y2v,
+              y1w, y1wr, y2w, y2wr)
 
         cfwx(&c[0], m, n, a, b, &xs_core[pti,0], &ys_core[pti,0],
              size_core, &phixs[pti,0],
-             w1tx, w1rx, w2tx, w2rx,
-             w1ty, w1ry, w2ty, w2ry)
+             x1w, x1wr, x2w, x2wr,
+             y1w, y1wr, y2w, y2wr)
 
         cfwy(&c[0], m, n, a, b, &xs_core[pti,0], &ys_core[pti,0],
              size_core, &phiys[pti,0],
-             w1tx, w1rx, w2tx, w2rx,
-             w1ty, w1ry, w2ty, w2ry)
+             x1w, x1wr, x2w, x2wr,
+             y1w, y1wr, y2w, y2wr)
 
     phixs *= -1.
     phiys *= -1.
@@ -103,24 +108,24 @@ def fstrain(np.ndarray[cDOUBLE, ndim=1] c, object s,
         int num_cores=4, int NLgeom=0):
     cdef double a, b, r, alpharad
     cdef int m, n
-    cdef double u1tx, u1rx, u2tx, u2rx
-    cdef double v1tx, v1rx, v2tx, v2rx
-    cdef double w1tx, w1rx, w2tx, w2rx
-    cdef double u1ty, u1ry, u2ty, u2ry
-    cdef double v1ty, v1ry, v2ty, v2ry
-    cdef double w1ty, w1ry, w2ty, w2ry
+    cdef double x1u, x2u
+    cdef double x1v, x2v
+    cdef double x1w, x1wr, x2w, x2wr
+    cdef double y1u, y2u
+    cdef double y1v, y2v
+    cdef double y1w, y1wr, y2w, y2wr
     a = s.a
     b = s.b
     r = s.r
     alpharad = s.alpharad
     m = s.m
     n = s.n
-    u1tx = s.u1tx ; u1rx = s.u1rx ; u2tx = s.u2tx ; u2rx = s.u2rx
-    v1tx = s.v1tx ; v1rx = s.v1rx ; v2tx = s.v2tx ; v2rx = s.v2rx
-    w1tx = s.w1tx ; w1rx = s.w1rx ; w2tx = s.w2tx ; w2rx = s.w2rx
-    u1ty = s.u1ty ; u1ry = s.u1ry ; u2ty = s.u2ty ; u2ry = s.u2ry
-    v1ty = s.v1ty ; v1ry = s.v1ry ; v2ty = s.v2ty ; v2ry = s.v2ry
-    w1ty = s.w1ty ; w1ry = s.w1ry ; w2ty = s.w2ty ; w2ry = s.w2ry
+    x1u = s.x1u; x2u = s.x2u
+    x1v = s.x1v; x2v = s.x2v
+    x1w = s.x1w; x1wr = s.x1wr; x2w = s.x2w ; x2wr = s.x2wr
+    y1u = s.y1u; y2u = s.y2u
+    y1v = s.y1v; y2v = s.y2v
+    y1w = s.y1w; y1wr = s.y1wr; y2w = s.y2w ; y2wr = s.y2wr
 
     cdef int size_core, pti
     cdef np.ndarray[cDOUBLE, ndim=2] exxs, eyys, gxys, kxxs, kyys, kxys
@@ -157,12 +162,12 @@ def fstrain(np.ndarray[cDOUBLE, ndim=1] c, object s,
               &xs_core[pti,0], &ys_core[pti,0], size_core,
               &exxs[pti,0], &eyys[pti,0], &gxys[pti,0],
               &kxxs[pti,0], &kyys[pti,0], &kxys[pti,0],
-              u1tx, u1rx, u2tx, u2rx,
-              v1tx, v1rx, v2tx, v2rx,
-              w1tx, w1rx, w2tx, w2rx,
-              u1ty, u1ry, u2ty, u2ry,
-              v1ty, v1ry, v2ty, v2ry,
-              w1ty, w1ry, w2ty, w2ry, NLgeom)
+              x1u, x2u,
+              x1v, x2v,
+              x1w, x1wr, x2w, x2wr,
+              y1u, y2u,
+              y1v, y2v,
+              y1w, y1wr, y2w, y2wr, NLgeom)
 
     return (exxs.ravel()[:size], eyys.ravel()[:size], gxys.ravel()[:size],
             kxxs.ravel()[:size], kyys.ravel()[:size], kxys.ravel()[:size])
@@ -170,12 +175,12 @@ def fstrain(np.ndarray[cDOUBLE, ndim=1] c, object s,
 
 cdef void cfuvw(double *c, int m, int n, double a, double b, double *xs,
         double *ys, int size, double *us, double *vs, double *ws,
-        double u1tx, double u1rx, double u2tx, double u2rx,
-        double v1tx, double v1rx, double v2tx, double v2rx,
-        double w1tx, double w1rx, double w2tx, double w2rx,
-        double u1ty, double u1ry, double u2ty, double u2ry,
-        double v1ty, double v1ry, double v2ty, double v2ry,
-        double w1ty, double w1ry, double w2ty, double w2ry) nogil:
+        double x1u, double x2u,
+        double x1v, double x2v,
+        double x1w, double x1wr, double x2w, double x2wr,
+        double y1u, double y2u,
+        double y1v, double y2v,
+        double y1w, double y1wr, double y2w, double y2wr) nogil:
     cdef int i, j, col, pti
     cdef double x, y, u, v, w, xi, eta
     cdef double *fu
@@ -199,12 +204,12 @@ cdef void cfuvw(double *c, int m, int n, double a, double b, double *xs,
         xi = 2*x/a - 1.
         eta = 2*y/b - 1.
 
-        calc_vec_f(fu, xi, u1tx, u1rx, u2tx, u2rx)
-        calc_vec_f(gu, eta, u1ty, u1ry, u2ty, u2ry)
-        calc_vec_f(fv, xi, v1tx, v1rx, v2tx, v2rx)
-        calc_vec_f(gv, eta, v1ty, v1ry, v2ty, v2ry)
-        calc_vec_f(fw, xi, w1tx, w1rx, w2tx, w2rx)
-        calc_vec_f(gw, eta, w1ty, w1ry, w2ty, w2ry)
+        vec_fuv(fu, xi, x1u, x2u)
+        vec_fuv(gu, eta, y1u, y2u)
+        vec_fuv(fv, xi, x1v, x2v)
+        vec_fuv(gv, eta, y1v, y2v)
+        vec_fw(fw, xi, x1w, x1wr, x2w, x2wr)
+        vec_fw(gw, eta, y1w, y1wr, y2w, y2wr)
 
         u = 0
         v = 0
@@ -231,8 +236,8 @@ cdef void cfuvw(double *c, int m, int n, double a, double b, double *xs,
 
 cdef void cfwx(double *c, int m, int n, double a, double b, double *xs,
         double *ys, int size, double *wxs,
-        double w1tx, double w1rx, double w2tx, double w2rx,
-        double w1ty, double w1ry, double w2ty, double w2ry) nogil:
+        double x1w, double x1wr, double x2w, double x2wr,
+        double y1w, double y1wr, double y2w, double y2wr) nogil:
     cdef int i, j, col, pti
     cdef double x, y, wx, xi, eta
     cdef double *fwxi
@@ -248,8 +253,8 @@ cdef void cfwx(double *c, int m, int n, double a, double b, double *xs,
         xi = 2*x/a - 1.
         eta = 2*y/b - 1.
 
-        calc_vec_fx(fwxi, xi, w1tx, w1rx, w2tx, w2rx)
-        calc_vec_f(gw, eta, w1ty, w1ry, w2ty, w2ry)
+        vec_fw_x(fwxi, xi, x1w, x1wr, x2w, x2wr)
+        vec_fw(gw, eta, y1w, y1wr, y2w, y2wr)
 
         wx = 0
 
@@ -266,8 +271,8 @@ cdef void cfwx(double *c, int m, int n, double a, double b, double *xs,
 
 cdef void cfwy(double *c, int m, int n, double a, double b, double *xs,
         double *ys, int size, double *wys,
-        double w1tx, double w1rx, double w2tx, double w2rx,
-        double w1ty, double w1ry, double w2ty, double w2ry) nogil:
+        double x1w, double x1wr, double x2w, double x2wr,
+        double y1w, double y1wr, double y2w, double y2wr) nogil:
     cdef int i, j, col, pti
     cdef double x, y, wy, xi, eta
     cdef double *fw
@@ -283,8 +288,8 @@ cdef void cfwy(double *c, int m, int n, double a, double b, double *xs,
         xi = 2*x/a - 1.
         eta = 2*y/b - 1.
 
-        calc_vec_f(fw, xi, w1tx, w1rx, w2tx, w2rx)
-        calc_vec_fx(gweta, eta, w1ty, w1ry, w2ty, w2ry)
+        vec_fw(fw, xi, x1w, x1wr, x2w, x2wr)
+        vec_fw_x(gweta, eta, y1w, y1wr, y2w, y2wr)
 
         wy = 0
 
@@ -305,9 +310,11 @@ def fg(double[:,::1] g, double x, double y, object s):
     cdef double *fu
     cdef double *fv
     cdef double *fw
+    cdef double *fw_xi
     cdef double *gu
     cdef double *gv
     cdef double *gw
+    cdef double *gw_eta
 
     if s.__class__.__name__ != 'Shell':
         raise ValueError('A Shell object must be passed')
@@ -317,17 +324,21 @@ def fg(double[:,::1] g, double x, double y, object s):
     fv = <double *>malloc(NMAX * sizeof(double *))
     gv = <double *>malloc(NMAX * sizeof(double *))
     fw = <double *>malloc(NMAX * sizeof(double *))
+    fw_xi = <double *>malloc(NMAX * sizeof(double *))
     gw = <double *>malloc(NMAX * sizeof(double *))
+    gw_eta = <double *>malloc(NMAX * sizeof(double *))
 
     xi = 2*x/s.a - 1.
     eta = 2*y/s.b - 1.
 
-    calc_vec_f(fu, xi, s.u1tx, s.u1rx, s.u2tx, s.u2rx)
-    calc_vec_f(gu, eta, s.u1ty, s.u1ry, s.u2ty, s.u2ry)
-    calc_vec_f(fv, xi, s.v1tx, s.v1rx, s.v2tx, s.v2rx)
-    calc_vec_f(gv, eta, s.v1ty, s.v1ry, s.v2ty, s.v2ry)
-    calc_vec_f(fw, xi, s.w1tx, s.w1rx, s.w2tx, s.w2rx)
-    calc_vec_f(gw, eta, s.w1ty, s.w1ry, s.w2ty, s.w2ry)
+    vec_fuv(fu, xi, s.x1u, s.x2u)
+    vec_fuv(gu, eta, s.y1u, s.y2u)
+    vec_fuv(fv, xi, s.x1v, s.x2v)
+    vec_fuv(gv, eta, s.y1v, s.y2v)
+    vec_fw(fw, xi, s.x1w, s.x1wr, s.x2w, s.x2wr)
+    vec_fw_x(fw_xi, xi, s.x1w, s.x1wr, s.x2w, s.x2wr)
+    vec_fw(gw, eta, s.y1w, s.y1wr, s.y2w, s.y2wr)
+    vec_fw_x(gw_eta, eta, s.y1w, s.y1wr, s.y2w, s.y2wr)
 
     for j in range(s.n):
         for i in range(s.m):
@@ -335,13 +346,17 @@ def fg(double[:,::1] g, double x, double y, object s):
             g[0, col+0] = fu[i]*gu[j]
             g[1, col+1] = fv[i]*gv[j]
             g[2, col+2] = fw[i]*gw[j]
+            g[3, col+2] = -(2/s.a)*fw_xi[i]*gw[j]
+            g[4, col+2] = -(2/s.b)*fw[i]*gw_eta[j]
 
     free(fu)
     free(gu)
     free(fv)
     free(gv)
     free(fw)
+    free(fw_xi)
     free(gw)
+    free(gw_eta)
 
 
 cdef void cfstrain(double *c, int m, int n, double a, double b,
@@ -349,12 +364,12 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
         double *xs, double *ys, int size,
         double *exxs, double *eyys, double *gxys,
         double *kxxs, double *kyys, double *kxys,
-        double u1tx, double u1rx, double u2tx, double u2rx,
-        double v1tx, double v1rx, double v2tx, double v2rx,
-        double w1tx, double w1rx, double w2tx, double w2rx,
-        double u1ty, double u1ry, double u2ty, double u2ry,
-        double v1ty, double v1ry, double v2ty, double v2ry,
-        double w1ty, double w1ry, double w2ty, double w2ry, int NLgeom) nogil:
+        double x1u, double x2u,
+        double x1v, double x2v,
+        double x1w, double x1wr, double x2w, double x2wr,
+        double y1u, double y2u,
+        double y1v, double y2v,
+        double y1w, double y1wr, double y2w, double y2wr, int NLgeom) nogil:
     cdef int i, j, col, pti
     cdef double x, y, xi, eta
     cdef double exx, eyy, gxy, kxx, kyy, kxy
@@ -405,20 +420,20 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
         xi = 2*x/a - 1.
         eta = 2*y/b - 1.
 
-        calc_vec_f(fu, xi, u1tx, u1rx, u2tx, u2rx)
-        calc_vec_fx(fuxi, xi, u1tx, u1rx, u2tx, u2rx)
-        calc_vec_f(gu, eta, u1ty, u1ry, u2ty, u2ry)
-        calc_vec_fx(gueta, eta, u1ty, u1ry, u2ty, u2ry)
-        calc_vec_f(fv, xi, v1tx, v1rx, v2tx, v2rx)
-        calc_vec_fx(fvxi, xi, v1tx, v1rx, v2tx, v2rx)
-        calc_vec_f(gv, eta, v1ty, v1ry, v2ty, v2ry)
-        calc_vec_fx(gveta, eta, v1ty, v1ry, v2ty, v2ry)
-        calc_vec_f(fw, xi, w1tx, w1rx, w2tx, w2rx)
-        calc_vec_fx(fwxi, xi, w1tx, w1rx, w2tx, w2rx)
-        calc_vec_fxx(fwxixi, xi, w1tx, w1rx, w2tx, w2rx)
-        calc_vec_f(gw, eta, w1ty, w1ry, w2ty, w2ry)
-        calc_vec_fx(gweta, eta, w1ty, w1ry, w2ty, w2ry)
-        calc_vec_fxx(gwetaeta, eta, w1ty, w1ry, w2ty, w2ry)
+        vec_fuv(fu, xi, x1u, x2u)
+        vec_fuv_x(fuxi, xi, x1u, x2u)
+        vec_fuv(gu, eta, y1u, y2u)
+        vec_fuv_x(gueta, eta, y1u, y2u)
+        vec_fuv(fv, xi, x1v, x2v)
+        vec_fuv_x(fvxi, xi, x1v, x2v)
+        vec_fuv(gv, eta, y1v, y2v)
+        vec_fuv_x(gveta, eta, y1v, y2v)
+        vec_fw(fw, xi, x1w, x1wr, x2w, x2wr)
+        vec_fw_x(fwxi, xi, x1w, x1wr, x2w, x2wr)
+        vec_fw_xx(fwxixi, xi, x1w, x1wr, x2w, x2wr)
+        vec_fw(gw, eta, y1w, y1wr, y2w, y2wr)
+        vec_fw_x(gweta, eta, y1w, y1wr, y2w, y2wr)
+        vec_fw_xx(gwetaeta, eta, y1w, y1wr, y2w, y2wr)
 
         wxi = 0
         weta = 0
@@ -472,3 +487,4 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
     free(gw)
     free(gweta)
     free(gwetaeta)
+

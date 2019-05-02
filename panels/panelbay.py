@@ -104,31 +104,23 @@ class PanelBay(object):
         self.alphadeg = None
 
         # boundary conditions
-        self.u1tx = 0.
-        self.u1rx = 0.
-        self.u2tx = 0.
-        self.u2rx = 0.
-        self.v1tx = 0.
-        self.v1rx = 0.
-        self.v2tx = 0.
-        self.v2rx = 0.
-        self.w1tx = 0.
-        self.w1rx = 1.
-        self.w2tx = 0.
-        self.w2rx = 1.
+        self.x1u = 0.
+        self.x2u = 0.
+        self.x1v = 0.
+        self.x2v = 0.
+        self.x1w = 0.
+        self.x1wr = 1.
+        self.x2w = 0.
+        self.x2wr = 1.
 
-        self.u1ty = 0.
-        self.u1ry = 0.
-        self.u2ty = 0.
-        self.u2ry = 0.
-        self.v1ty = 0.
-        self.v1ry = 0.
-        self.v2ty = 0.
-        self.v2ry = 0.
-        self.w1ty = 0.
-        self.w1ry = 1.
-        self.w2ty = 0.
-        self.w2ry = 1.
+        self.y1u = 0.
+        self.y2u = 0.
+        self.y1v = 0.
+        self.y2v = 0.
+        self.y1w = 0.
+        self.y1wr = 1.
+        self.y2w = 0.
+        self.y2wr = 1.
 
         # aerodynamic properties for the Piston theory
         self.beta = None
@@ -501,12 +493,12 @@ class PanelBay(object):
         """
         s = Shell(a=self.a, b=self.b, m=self.m, n=self.n, r=self.r,
                   alphadeg=self.alphadeg, y1=y1, y2=y2,
-                  u1tx=self.u1tx, u1rx=self.u1rx, u2tx=self.u2tx, u2rx=self.u2rx,
-                  v1tx=self.v1tx, v1rx=self.v1rx, v2tx=self.v2tx, v2rx=self.v2rx,
-                  w1tx=self.w1tx, w1rx=self.w1rx, w2tx=self.w2tx, w2rx=self.w2rx,
-                  u1ty=self.u1ty, u1ry=self.u1ry, u2ty=self.u2ty, u2ry=self.u2ry,
-                  v1ty=self.v1ty, v1ry=self.v1ry, v2ty=self.v2ty, v2ry=self.v2ry,
-                  w1ty=self.w1ty, w1ry=self.w1ry, w2ty=self.w2ty, w2ry=self.w2ry)
+                  x1u=self.x1u, x2u=self.x2u,
+                  x1v=self.x1v, x2v=self.x2v,
+                  x1w=self.x1w, x1wr=self.x1wr, x2w=self.x2w, x2wr=self.x2wr,
+                  y1u=self.y1u, y2u=self.y2u,
+                  y1v=self.y1v, y2v=self.y2v,
+                  y1w=self.y1w, y1wr=self.y1wr, y2w=self.y2w, y2wr=self.y2wr)
         s.model = model if model is not None else self.model
         s.stack = stack if stack is not None else self.stack
         s.plyt = plyt if plyt is not None else self.plyt
