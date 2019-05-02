@@ -78,9 +78,9 @@ class Shell(object):
         'm', 'n', 'nx', 'ny', 'size',
         'point_loads', 'point_loads_inc', 'distr_loads', 'distr_loads_inc',
         'Nxx', 'Nyy', 'Nxy', 'Nxx_cte', 'Nyy_cte', 'Nxy_cte',
-        'u1tx', 'u1rx', 'u2tx', 'u2rx', 'v1tx', 'v1rx', 'v2tx', 'v2rx',
-        'w1tx', 'w1rx', 'w2tx', 'w2rx', 'u1ty', 'u1ry', 'u2ty', 'u2ry',
-        'v1ty', 'v1ry', 'v2ty', 'v2ry', 'w1ty', 'w1ry', 'w2ty', 'w2ry',
+        'x1u', 'x2u', 'x1v', 'x2v',
+        'x1w', 'x1wr', 'x2w', 'x2wr', 'y1u', 'y2u',
+        'y1v', 'y2v', 'y1w', 'y1wr', 'y2w', 'y2wr',
         'plyts', 'laminaprops', 'rhos',
         'flow', 'beta', 'gamma', 'aeromu', 'rho_air', 'speed_sound', 'Mach', 'V',
         'F', 'force_orthotropic_laminate',
@@ -148,31 +148,23 @@ class Shell(object):
         #NOTE default boundary conditions:
         # - displacement at 4 edges is zero
         # - free to rotate at 4 edges (simply supported by default)
-        self.u1tx = 0.
-        self.u1rx = 0.
-        self.u2tx = 0.
-        self.u2rx = 0.
-        self.v1tx = 0.
-        self.v1rx = 0.
-        self.v2tx = 0.
-        self.v2rx = 0.
-        self.w1tx = 0.
-        self.w1rx = 1.
-        self.w2tx = 0.
-        self.w2rx = 1.
+        self.x1u = 0.
+        self.x2u = 0.
+        self.x1v = 0.
+        self.x2v = 0.
+        self.x1w = 0.
+        self.x1wr = 1.
+        self.x2w = 0.
+        self.x2wr = 1.
 
-        self.u1ty = 0.
-        self.u1ry = 0.
-        self.u2ty = 0.
-        self.u2ry = 0.
-        self.v1ty = 0.
-        self.v1ry = 0.
-        self.v2ty = 0.
-        self.v2ry = 0.
-        self.w1ty = 0.
-        self.w1ry = 1.
-        self.w2ty = 0.
-        self.w2ry = 1.
+        self.y1u = 0.
+        self.y2u = 0.
+        self.y1v = 0.
+        self.y2v = 0.
+        self.y1w = 0.
+        self.y1wr = 1.
+        self.y2w = 0.
+        self.y2wr = 1.
 
         # material
         self.plyts = None
@@ -653,297 +645,6 @@ class Shell(object):
         msg('finished!', level=2, silent=silent)
 
 
-    def lb(self, tol=0, sparse_solver=True, calc_kA=False, silent=False,
-           nx=10, ny=10, c=None, ckC=None, Fnxny=None):
-        """Linear buckling analysis
-
-        .. note:: This will be deprecated soon, use
-                  :func:`.compmech.analysis.lb`.
-
-        The following parameters will affect the linear buckling analysis:
-
-        =======================    =====================================
-        parameter                  description
-        =======================    =====================================
-        ``num_eigvalues``        Number of eigenvalues to be extracted
-        ``num_eigvalues_print``    Number of eigenvalues to print after
-                                   the analysis is completed
-        =======================    =====================================
-
-        Parameters
-        ----------
-        tol : float, optional
-            A float tolerance passsed to the eigenvalue solver.
-        sparse_solver : bool, optional
-            Tells if solver :func:`scipy.linalg.eigh` or
-            :func:`scipy.sparse.linalg.eigsh` should be used.
-        calc_kA : bool, optional
-            If the Aerodynamic matrix should be considered.
-        silent : bool, optional
-            A boolean to tell whether the log messages should be printed.
-        c : array-like, optional
-            A set of Ritz constants that will be use to compute kG.
-        ckC : array-like, optional
-            A set of Ritz constants that will be use to compute kC.
-        nx and ny : int or None, optional
-            Number of integration points along `x` and `y`, respectively, for
-            the Legendre-Gauss quadrature rule applied in the numerical
-            integration.
-        Fnxny : 4-D array-like or None, optional
-            The constitutive relations for the laminate at each integration
-            point. Must be a 4-D array of shape ``(nx, ny, 6, 6)`` when using
-            classical laminated plate theory models.
-
-        Notes
-        -----
-        The extracted eigenvalues are stored in the ``results['eigvals']``
-        parameter of the ``Shell`` object and the `i^{th}` eigenvector in the
-        ``results['eigvecs'][:, i-1]`` parameter.
-
-        """
-        msg('Running linear buckling analysis...', silent=silent)
-
-        msg('Eigenvalue solver... ', level=2, silent=silent)
-
-        nx = self.nx if nx is None else nx
-        ny = self.ny if ny is None else ny
-        self.calc_kG(silent=silent, c=c, nx=nx, ny=ny, Fnxny=Fnxny)
-        self.calc_kC(silent=silent, c=ckC, nx=nx, ny=ny, Fnxny=Fnxny)
-
-        if calc_kA:
-            raise NotImplementedError('kA requires non-Hermitian eigen solver')
-            self.calc_kA(silent=silent)
-            kA = self.matrices['kA']
-        else:
-            kA = self.matrices['kC']*0
-
-        M = self.matrices['kC'] + kA
-        A = self.matrices['kG']
-
-        if sparse_solver:
-            mode = 'cayley'
-            try:
-                msg('eigsh() solver...', level=3, silent=silent)
-                eigvals, eigvecs = eigsh(A=A, k=self.num_eigvalues,
-                        which='SM', M=M, tol=tol, sigma=1., mode=mode)
-                msg('finished!', level=3, silent=silent)
-            except Exception as e:
-                warn(str(e), level=4, silent=silent)
-                msg('aborted!', level=3, silent=silent)
-                sizebkp = A.shape[0]
-                M, A, used_cols = remove_null_cols(M, A, silent=silent)
-                msg('eigsh() solver...', level=3, silent=silent)
-                eigvals, peigvecs = eigsh(A=A, k=self.num_eigvalues,
-                        which='SM', M=M, tol=tol, sigma=1., mode=mode)
-                msg('finished!', level=3, silent=silent)
-                eigvecs = np.zeros((sizebkp, self.num_eigvalues),
-                                   dtype=np.float64)
-                eigvecs[used_cols, :] = peigvecs
-
-        else:
-            from scipy.linalg import eigh
-
-            size = A.shape[0]
-            M, A, used_cols = remove_null_cols(M, A, silent=silent)
-            M = M.toarray()
-            A = A.toarray()
-            msg('eigh() solver...', level=3, silent=silent)
-            eigvals, peigvecs = eigh(a=A, b=M)
-            msg('finished!', level=3, silent=silent)
-            eigvecs = np.zeros((size, self.num_eigvalues), dtype=np.float64)
-            eigvecs[used_cols, :] = peigvecs[:, :self.num_eigvalues]
-
-        eigvals = -1./eigvals
-
-        self.results['eigvals'] = eigvals
-        self.results['eigvecs'] = eigvecs
-
-        msg('finished!', level=2, silent=silent)
-
-        msg('first {0} eigenvalues:'.format(self.num_eigvalues_print), level=1,
-            silent=silent)
-        for eigval in eigvals[:self.num_eigvalues_print]:
-            msg('{0}'.format(eigval), level=2, silent=silent)
-        self.analysis.last_analysis = 'lb'
-
-        return eigvals, eigvecs
-
-
-    def freq(self, atype=1, tol=0, sparse_solver=True, silent=False,
-             sort=True, damping=False):
-        """Natural frequency analysis
-
-        .. note:: This will be deprecated soon, use
-                  :func:`.compmech.analysis.freq`.
-
-        The following parameters of the will affect the linear buckling
-        analysis:
-
-        =======================    =====================================
-        parameter                  description
-        =======================    =====================================
-        ``num_eigvalues``        Number of eigenvalues to be extracted
-        ``num_eigvalues_print``    Number of eigenvalues to print after
-                                   the analysis is completed
-        =======================    =====================================
-
-        Parameters
-        ----------
-        atype : int, optional
-            Tells which analysis type should be performed:
-
-            - ``1`` : considers kC only
-            - ``2`` : considers kC and kG
-            - ``3`` : considers kC and kA (and cA depending on 'damping')
-            - ``4`` : considers kC, kA and kG (and cA depending on 'damping')
-
-        tol : float, optional
-            A tolerance value passed to ``scipy.sparse.linalg.eigs``.
-        sparse_solver : bool, optional
-            Tells if solver :func:`scipy.linalg.eig` or
-            :func:`scipy.sparse.linalg.eigs` should be used.
-
-            .. note:: It is recommended ``sparse_solver=False``, because it
-                      was verified that the sparse solver becomes unstable
-                      for some cases, though the sparse solver is faster.
-        silent : bool, optional
-            A boolean to tell whether the log messages should be printed.
-        sort : bool, optional
-            Sort the output eigenvalues and eigenmodes.
-        damping : bool, optinal
-            If aerodynamic damping should be taken into account.
-
-        Notes
-        -----
-        The extracted eigenvalues are stored in the ``eigvals`` parameter and
-        the `i^{th}` eigenvector in the ``eigvecs[:, i-1]`` parameter.
-
-        """
-        msg('Running frequency analysis...', silent=silent)
-
-        kC = self.calc_kC(silent=silent)
-        M = self.calc_kM(silent=silent)
-
-        if atype == 1:
-            K = kC
-
-        elif atype == 2:
-            kG = self.calc_kG(silent=silent)
-            K = kC + kG
-
-        elif atype == 3:
-            kA = self.calc_kA(silent=silent)
-            K = kC + kA
-            if damping:
-                self.calc_cA(silent=silent)
-                K = kC + kA + cA
-            else:
-                K = kC + kA
-
-        elif atype == 4:
-            kG = self.calc_kG(silent=silent)
-            kA = self.calc_kA(silent=silent)
-            if damping:
-                cA = self.calc_cA(silent=silent)
-                K = kC + kA + kG + cA
-            else:
-                K = kC + kA + kG
-
-        msg('Eigenvalue solver... ', level=2, silent=silent)
-        k = min(self.num_eigvalues, M.shape[0]-2)
-        if sparse_solver:
-            if damping:
-                raise NotImplementedError('Damping with sparse_solver not implemented!')
-
-            msg('eigs() solver...', level=3, silent=silent)
-            sizebkp = M.shape[0]
-            K, M, used_cols = remove_null_cols(K, M, silent=silent,
-                    level=3)
-            eigvals, peigvecs = eigs(A=K, k=k, which='LM', M=M, tol=tol,
-                                     sigma=-1.)
-            eigvecs = np.zeros((sizebkp, self.num_eigvalues),
-                               dtype=peigvecs.dtype)
-            eigvecs[used_cols, :] = peigvecs
-
-            eigvals = np.sqrt(eigvals) # omega^2 to omega, in rad/s
-
-        else:
-            msg('eig() solver...', level=3, silent=silent)
-            M = M.toarray()
-            K = K.toarray()
-            sizebkp = M.shape[0]
-            col_sum = M.sum(axis=0)
-            check = col_sum != 0
-            used_cols = np.arange(M.shape[0])[check]
-            M = M[:, check][check, :]
-            K = K[:, check][check, :]
-
-            if not damping:
-                M = -M
-            else:
-                cA = self.cA.toarray()
-                cA = cA[:, check][check, :]
-                I = np.identity(M.shape[0])
-                Z = np.zeros_like(M)
-                M = np.row_stack((np.column_stack((I, Z)),
-                                  np.column_stack((Z, -M))))
-                K = np.row_stack((np.column_stack((Z, -I)),
-                                  np.column_stack((K, cA))))
-
-            eigvals, peigvecs = eig(a=M, b=K)
-
-            eigvecs = np.zeros((sizebkp, K.shape[0]),
-                               dtype=peigvecs.dtype)
-            eigvecs[check, :] = peigvecs
-
-            if not damping:
-                eigvals = np.sqrt(-1./eigvals) # -1/omega^2 to omega, in rad/s
-                eigvals = eigvals
-            else:
-                eigvals = -1./eigvals # -1/omega to omega, in rad/s
-                shape = eigvals.shape
-                eigvals = eigvals[:shape[0]//2]
-                eigvecs = eigvecs[:eigvecs.shape[0]//2, :shape[0]//2]
-
-        msg('finished!', level=3, silent=silent)
-
-        if sort:
-            if damping:
-                higher_zero = eigvals.real > 1e-6
-
-                eigvals = eigvals[higher_zero]
-                eigvecs = eigvecs[:, higher_zero]
-
-                sort_ind = np.lexsort((np.round(eigvals.imag, 1),
-                                       np.round(eigvals.real, 0)))
-                eigvals = eigvals[sort_ind]
-                eigvecs = eigvecs[:, sort_ind]
-
-            else:
-                sort_ind = np.lexsort((np.round(eigvals.imag, 1),
-                                       np.round(eigvals.real, 1)))
-                eigvals = eigvals[sort_ind]
-                eigvecs = eigvecs[:, sort_ind]
-
-                higher_zero = eigvals.real > 1e-6
-
-                eigvals = eigvals[higher_zero]
-                eigvecs = eigvecs[:, higher_zero]
-
-        msg('finished!', level=2, silent=silent)
-
-        msg('first {0} eigenvalues:'.format(self.num_eigvalues_print), level=1,
-            silent=silent)
-        for eigval in eigvals[:self.num_eigvalues_print]:
-            msg('{0} rad/s'.format(eigval), level=2, silent=silent)
-        self.analysis.last_analysis = 'freq'
-
-        self.results['eigvals'] = eigvals
-        self.results['eigvecs'] = eigvecs
-
-        return eigvals, eigvecs
-
-
     def uvw(self, c, xs=None, ys=None, gridx=300, gridy=300):
         r"""Calculate the displacement field
 
@@ -1166,6 +867,53 @@ class Shell(object):
             self.distr_loads_inc.append([None, y, funcx, funcy, funcz])
 
 
+    def calc_stiffness_point_constraint(self, x, y, u=True, v=True, w=True, phix=False,
+            phiy=False, kuvw=1.e6, kphi=1.e5):
+        r"""Add a point constraint
+
+        This can used to create different types of support and boundary
+        conditions.
+
+        Parameters
+        ----------
+        x, y : float
+            Coordinates of the point contraint
+        u, v, w : bool, optional
+            Translational degrees of freedom to be constrained
+        phix, phiy : bool, optional
+            Rotational degrees of freedom to be constrained
+        kuvw : float, optional
+            Penalty constant used for the translational constraints
+        kphi :
+            Penalty constant used for the rotational constraints
+
+        Returns
+        -------
+        kPC : csr_matrix
+           Stiffness matrix concenrning this point constraint. It must be added
+           to the constitutive stiffness matrix in order to be taken into
+           account in the calculations.
+
+        """
+        fg = modelDB.db[self.model]['field'].fg
+        size = self.get_size()
+        g = np.zeros((5, size), dtype=np.float64)
+        fg(g, x, y, self)
+        gu, gv, gw, gphix, gphiy = g
+        kPC = csr_matrix((size, size), dtype=np.float64)
+        if u:
+            kPC += kuvw*np.outer(gu, gu)
+        if v:
+            kPC += kuvw*np.outer(gv, gv)
+        if w:
+            kPC += kuvw*np.outer(gw, gw)
+        if phix:
+            kPC += kphi*np.outer(gphix, gphix)
+        if phiy:
+            kPC += kphi*np.outer(gphiy, gphiy)
+        return kPC
+
+
     def calc_fext(self, inc=1., size=None, col0=0, silent=False):
         """Calculate the external force vector `\{F_{ext}\}`
 
@@ -1274,58 +1022,6 @@ class Shell(object):
         msg('finished!', level=2, silent=silent)
 
         return fint
-
-
-    def static(self, NLgeom=False, silent=False):
-        """Static analysis for cones and cylinders
-
-        .. note:: This will be deprecated soon, use
-                  :func:`.compmech.analysis.static`.
-
-        The analysis can be linear or geometrically non-linear. See
-        :class:`.Analysis` for further details about the parameters
-        controlling the non-linear analysis.
-
-        Parameters
-        ----------
-        NLgeom : bool
-            Flag to indicate whether a linear or a non-linear analysis is to
-            be performed.
-        silent : bool, optional
-            A boolean to tell whether the log messages should be printed.
-
-        Returns
-        -------
-        cs : list
-            A list containing the Ritz constants for each load increment of
-            the static analysis. The list will have only one entry in case
-            of a linear analysis.
-
-        Notes
-        -----
-        The returned ``cs`` is stored in ``self.analysis.cs``. The actual
-        increments used in the non-linear analysis are stored in the
-        ``self.analysis.increments`` parameter.
-
-        """
-        self._rebuild()
-        self.analysis.line_search = False
-        self.analysis.kT_initial_state = False
-        self.analysis.compute_every_n = 6
-
-        if NLgeom and not modelDB.db[self.model]['non-linear static']:
-            msg('________________________________________________',
-                silent=silent)
-            msg('', silent=silent)
-            warn('Model {} cannot be used in non-linear static analysis!'.
-                 format(self.model), silent=silent)
-            msg('________________________________________________',
-                silent=silent)
-            raise
-        self.analysis.static(NLgeom=NLgeom, silent=silent)
-        self.increments = self.analysis.increments
-
-        return self.analysis.cs
 
 
     def save(self):

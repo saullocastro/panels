@@ -150,9 +150,13 @@ def plot_shell(shell, c, invert_y=False, vec='w', deform_u=False,
         y -= deform_u_sf*field_u
         x += deform_u_sf*field_v
 
-    colormap_obj = getattr(cm, colormap, None)
-    if colormap_obj is None:
-        warn('Invalid colormap, using "jet"', level=1)
+    if isinstance(colormap, str):
+        colormap_obj = getattr(cm, colormap, None)
+        if colormap_obj is None:
+            warn('Invalid colormap, using "jet"', level=1)
+            colormap_obj = cm.jet
+    else:
+        warn('Invalid colormap (must be a string), using "jet"', level=1)
         colormap_obj = cm.jet
 
     contour = ax.contourf(x, y, field, levels=levels, cmap=colormap_obj)

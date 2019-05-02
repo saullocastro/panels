@@ -11,15 +11,13 @@ import numpy as np
 cimport numpy as np
 
 
-cdef extern from 'bardell.hpp':
-    double integral_ff(int i, int j,
-            double x1t, double x1r, double x2t, double x2r,
-            double y1t, double y1r, double y2t, double y2r) nogil
+cdef extern from 'bardell_functions_uv.hpp':
+    double fuv(int i, double xi, double xi1t, double xi2t) nogil
 
-cdef extern from 'bardell_functions.hpp':
-    double calc_f(int i, double xi, double xi1t, double xi1r,
+cdef extern from 'bardell_functions_w.hpp':
+    double fw(int i, double xi, double xi1t, double xi1r,
                   double xi2t, double xi2r) nogil
-    double calc_fx(int i, double xi, double xi1t, double xi1r,
+    double fw_x(int i, double xi, double xi1t, double xi1r,
                     double xi2t, double xi2r) nogil
 
 ctypedef np.double_t cDOUBLE
@@ -73,15 +71,16 @@ def fkCSSxcte11(double kt, double kr, object p1,
         c = -1
         for j1 in range(n1):
             for l1 in range(n1):
-                g1Aug1Bu = integral_ff(j1, l1, u1ty1, u1ry1, u2ty1, u2ry1, u1ty1, u1ry1, u2ty1, u2ry1)
-                g1Avg1Bv = integral_ff(j1, l1, v1ty1, v1ry1, v2ty1, v2ry1, v1ty1, v1ry1, v2ty1, v2ry1)
-                g1Awg1Bw = integral_ff(j1, l1, w1ty1, w1ry1, w2ty1, w2ry1, w1ty1, w1ry1, w2ty1, w2ry1)
+                #FIXME do numerically
+                g1Aug1Bu = 0 #integral_ff(j1, l1, u1ty1, u1ry1, u2ty1, u2ry1, u1ty1, u1ry1, u2ty1, u2ry1)
+                g1Avg1Bv = 0 #integral_ff(j1, l1, v1ty1, v1ry1, v2ty1, v2ry1, v1ty1, v1ry1, v2ty1, v2ry1)
+                g1Awg1Bw = 0 #integral_ff(j1, l1, w1ty1, w1ry1, w2ty1, w2ry1, w1ty1, w1ry1, w2ty1, w2ry1)
 
                 for i1 in range(m1):
-                    f1Au = calc_f(i1, xicte1, u1tx1, u1rx1, u2tx1, u2rx1)
-                    f1Av = calc_f(i1, xicte1, v1tx1, v1rx1, v2tx1, v2rx1)
-                    f1Aw = calc_f(i1, xicte1, w1tx1, w1rx1, w2tx1, w2rx1)
-                    f1Awxi = calc_fx(i1, xicte1, w1tx1, w1rx1, w2tx1, w2rx1)
+                    f1Au = fuv(i1, xicte1, u1tx1, u1rx1, u2tx1, u2rx1)
+                    f1Av = fuv(i1, xicte1, v1tx1, v1rx1, v2tx1, v2rx1)
+                    f1Aw = fw(i1, xicte1, w1tx1, w1rx1, w2tx1, w2rx1)
+                    f1Awxi = fw_x(i1, xicte1, w1tx1, w1rx1, w2tx1, w2rx1)
 
                     for k1 in range(m1):
                         row = row0 + num*(j1*m1 + i1)
@@ -91,10 +90,10 @@ def fkCSSxcte11(double kt, double kr, object p1,
                         if row > col:
                             continue
 
-                        f1Bu = calc_f(k1, xicte1, u1tx1, u1rx1, u2tx1, u2rx1)
-                        f1Bv = calc_f(k1, xicte1, v1tx1, v1rx1, v2tx1, v2rx1)
-                        f1Bw = calc_f(k1, xicte1, w1tx1, w1rx1, w2tx1, w2rx1)
-                        f1Bwxi = calc_fx(k1, xicte1, w1tx1, w1rx1, w2tx1, w2rx1)
+                        f1Bu = fuv(k1, xicte1, u1tx1, u1rx1, u2tx1, u2rx1)
+                        f1Bv = fuv(k1, xicte1, v1tx1, v1rx1, v2tx1, v2rx1)
+                        f1Bw = fw(k1, xicte1, w1tx1, w1rx1, w2tx1, w2rx1)
+                        f1Bwxi = fw_x(k1, xicte1, w1tx1, w1rx1, w2tx1, w2rx1)
 
                         c += 1
                         kCSSxcte11r[c] = row+0
@@ -169,15 +168,16 @@ def fkCSSxcte12(double kt, double kr, object p1, object p2,
         c = -1
         for j1 in range(n1):
             for l2 in range(n2):
-                g1Aug2Bu = integral_ff(j1, l2, u1ty1, u1ry1, u2ty1, u2ry1, u1ty2, u1ry2, u2ty2, u2ry2)
-                g1Avg2Bv = integral_ff(j1, l2, v1ty1, v1ry1, v2ty1, v2ry1, v1ty2, v1ry2, v2ty2, v2ry2)
-                g1Awg2Bw = integral_ff(j1, l2, w1ty1, w1ry1, w2ty1, w2ry1, w1ty2, w1ry2, w2ty2, w2ry2)
+                #FIXME do numerically
+                g1Aug2Bu = 0 #integral_ff(j1, l2, u1ty1, u1ry1, u2ty1, u2ry1, u1ty2, u1ry2, u2ty2, u2ry2)
+                g1Avg2Bv = 0 #integral_ff(j1, l2, v1ty1, v1ry1, v2ty1, v2ry1, v1ty2, v1ry2, v2ty2, v2ry2)
+                g1Awg2Bw = 0 #integral_ff(j1, l2, w1ty1, w1ry1, w2ty1, w2ry1, w1ty2, w1ry2, w2ty2, w2ry2)
 
                 for i1 in range(m1):
-                    f1Au = calc_f(i1, xicte1, u1tx1, u1rx1, u2tx1, u2rx1)
-                    f1Av = calc_f(i1, xicte1, v1tx1, v1rx1, v2tx1, v2rx1)
-                    f1Aw = calc_f(i1, xicte1, w1tx1, w1rx1, w2tx1, w2rx1)
-                    f1Awxi = calc_fx(i1, xicte1, w1tx1, w1rx1, w2tx1, w2rx1)
+                    f1Au = fuv(i1, xicte1, u1tx1, u1rx1, u2tx1, u2rx1)
+                    f1Av = fuv(i1, xicte1, v1tx1, v1rx1, v2tx1, v2rx1)
+                    f1Aw = fw(i1, xicte1, w1tx1, w1rx1, w2tx1, w2rx1)
+                    f1Awxi = fw_x(i1, xicte1, w1tx1, w1rx1, w2tx1, w2rx1)
 
                     for k2 in range(m2):
                         row = row0 + num*(j1*m1 + i1)
@@ -187,10 +187,10 @@ def fkCSSxcte12(double kt, double kr, object p1, object p2,
                         #if row > col:
                             #continue
 
-                        f2Bu = calc_f(k2, xicte2, u1tx2, u1rx2, u2tx2, u2rx2)
-                        f2Bv = calc_f(k2, xicte2, v1tx2, v1rx2, v2tx2, v2rx2)
-                        f2Bw = calc_f(k2, xicte2, w1tx2, w1rx2, w2tx2, w2rx2)
-                        f2Bwxi = calc_fx(k2, xicte2, w1tx2, w1rx2, w2tx2, w2rx2)
+                        f2Bu = fuv(k2, xicte2, u1tx2, u1rx2, u2tx2, u2rx2)
+                        f2Bv = fuv(k2, xicte2, v1tx2, v1rx2, v2tx2, v2rx2)
+                        f2Bw = fw(k2, xicte2, w1tx2, w1rx2, w2tx2, w2rx2)
+                        f2Bwxi = fw_x(k2, xicte2, w1tx2, w1rx2, w2tx2, w2rx2)
 
                         c += 1
                         kCSSxcte12r[c] = row+0
@@ -254,15 +254,16 @@ def fkCSSxcte22(double kt, double kr, object p1, object p2,
         c = -1
         for j2 in range(n2):
             for l2 in range(n2):
-                g2Aug2Bu = integral_ff(j2, l2, u1ty2, u1ry2, u2ty2, u2ry2, u1ty2, u1ry2, u2ty2, u2ry2)
-                g2Avg2Bv = integral_ff(j2, l2, v1ty2, v1ry2, v2ty2, v2ry2, v1ty2, v1ry2, v2ty2, v2ry2)
-                g2Awg2Bw = integral_ff(j2, l2, w1ty2, w1ry2, w2ty2, w2ry2, w1ty2, w1ry2, w2ty2, w2ry2)
+                #FIXME do numerically
+                g2Aug2Bu = 0 #integral_ff(j2, l2, u1ty2, u1ry2, u2ty2, u2ry2, u1ty2, u1ry2, u2ty2, u2ry2)
+                g2Avg2Bv = 0 #integral_ff(j2, l2, v1ty2, v1ry2, v2ty2, v2ry2, v1ty2, v1ry2, v2ty2, v2ry2)
+                g2Awg2Bw = 0 #integral_ff(j2, l2, w1ty2, w1ry2, w2ty2, w2ry2, w1ty2, w1ry2, w2ty2, w2ry2)
 
                 for i2 in range(m2):
-                    f2Au = calc_f(i2, xicte2, u1tx2, u1rx2, u2tx2, u2rx2)
-                    f2Av = calc_f(i2, xicte2, v1tx2, v1rx2, v2tx2, v2rx2)
-                    f2Aw = calc_f(i2, xicte2, w1tx2, w1rx2, w2tx2, w2rx2)
-                    f2Awxi = calc_fx(i2, xicte2, w1tx2, w1rx2, w2tx2, w2rx2)
+                    f2Au = fuv(i2, xicte2, u1tx2, u1rx2, u2tx2, u2rx2)
+                    f2Av = fuv(i2, xicte2, v1tx2, v1rx2, v2tx2, v2rx2)
+                    f2Aw = fw(i2, xicte2, w1tx2, w1rx2, w2tx2, w2rx2)
+                    f2Awxi = fw_x(i2, xicte2, w1tx2, w1rx2, w2tx2, w2rx2)
 
                     for k2 in range(m2):
                         row = row0 + num*(j2*m2 + i2)
@@ -272,10 +273,10 @@ def fkCSSxcte22(double kt, double kr, object p1, object p2,
                         if row > col:
                             continue
 
-                        f2Bu = calc_f(k2, xicte2, u1tx2, u1rx2, u2tx2, u2rx2)
-                        f2Bv = calc_f(k2, xicte2, v1tx2, v1rx2, v2tx2, v2rx2)
-                        f2Bw = calc_f(k2, xicte2, w1tx2, w1rx2, w2tx2, w2rx2)
-                        f2Bwxi = calc_fx(k2, xicte2, w1tx2, w1rx2, w2tx2, w2rx2)
+                        f2Bu = fuv(k2, xicte2, u1tx2, u1rx2, u2tx2, u2rx2)
+                        f2Bv = fuv(k2, xicte2, v1tx2, v1rx2, v2tx2, v2rx2)
+                        f2Bw = fw(k2, xicte2, w1tx2, w1rx2, w2tx2, w2rx2)
+                        f2Bwxi = fw_x(k2, xicte2, w1tx2, w1rx2, w2tx2, w2rx2)
 
                         c += 1
                         kCSSxcte22r[c] = row+0

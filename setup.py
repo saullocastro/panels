@@ -148,35 +148,35 @@ extensions = [
             ],
         include_dirs=include_dirs, extra_compile_args=compile_args, extra_link_args=link_args, language='c++'),
 # stiffener models
-    Extension('panels.models.bladestiff1d_clpt_donnell_bardell',
-        sources=[
-            './panels/core/src/bardell.cpp',
-            './panels/core/src/bardell_functions.cpp',
-            './panels/models/bladestiff1d_clpt_donnell_bardell.pyx',
-            ],
-        include_dirs=include_dirs, extra_compile_args=compile_args, extra_link_args=link_args, language='c++'),
-    Extension('panels.models.bladestiff2d_clpt_donnell_bardell',
-        sources=[
-            './panels/core/src/bardell.cpp',
-            './panels/core/src/bardell_functions.cpp',
-            './panels/models/bladestiff2d_clpt_donnell_bardell.pyx',
-            ],
-        include_dirs=include_dirs, extra_compile_args=compile_args, extra_link_args=link_args, language='c++'),
+    #Extension('panels.models.bladestiff1d_clpt_donnell_bardell',
+        #sources=[
+            #'./panels/core/src/bardell.cpp',
+            #'./panels/core/src/bardell_functions.cpp',
+            #'./panels/models/bladestiff1d_clpt_donnell_bardell.pyx',
+            #],
+        #include_dirs=include_dirs, extra_compile_args=compile_args, extra_link_args=link_args, language='c++'),
+    #Extension('panels.models.bladestiff2d_clpt_donnell_bardell',
+        #sources=[
+            #'./panels/core/src/bardell.cpp',
+            #'./panels/core/src/bardell_functions.cpp',
+            #'./panels/models/bladestiff2d_clpt_donnell_bardell.pyx',
+            #],
+        #include_dirs=include_dirs, extra_compile_args=compile_args, extra_link_args=link_args, language='c++'),
 # connections
-    Extension('panels.panel.connections.kCBFycte',
-        sources=[
-            './panels/core/src/bardell.cpp',
-            './panels/core/src/bardell_functions.cpp',
-            './panels/panel/connections\kCBFycte.pyx',
-            ],
-        include_dirs=include_dirs, extra_compile_args=compile_args, extra_link_args=link_args, language='c++'),
-    Extension('panels.panel.connections.kCSB',
-        sources=[
-            './panels/core/src/bardell.cpp',
-            './panels/core/src/bardell_functions.cpp',
-            './panels/panel/connections\kCSB.pyx',
-            ],
-        include_dirs=include_dirs, extra_compile_args=compile_args, extra_link_args=link_args, language='c++'),
+    #Extension('panels.panel.connections.kCBFycte',
+        #sources=[
+            #'./panels/core/src/bardell.cpp',
+            #'./panels/core/src/bardell_functions.cpp',
+            #'./panels/panel/connections\kCBFycte.pyx',
+            #],
+        #include_dirs=include_dirs, extra_compile_args=compile_args, extra_link_args=link_args, language='c++'),
+    #Extension('panels.panel.connections.kCSB',
+        #sources=[
+            #'./panels/core/src/bardell.cpp',
+            #'./panels/core/src/bardell_functions.cpp',
+            #'./panels/panel/connections\kCSB.pyx',
+            #],
+        #include_dirs=include_dirs, extra_compile_args=compile_args, extra_link_args=link_args, language='c++'),
     Extension('panels.panel.connections.kCSSxcte',
         sources=[
             './panels/core/src/bardell.cpp',

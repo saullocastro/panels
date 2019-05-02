@@ -7,10 +7,8 @@ nmax = 30
 
 xi = var('xi')
 
-u = map(sympify, ['1./2. - 3./4.*xi + 1./4.*xi**3',
-                  '1./8. - 1./8.*xi - 1./8.*xi**2 + 1./8.*xi**3',
-                  '1./2. + 3./4.*xi - 1./4.*xi**3',
-                  '-1./8. - 1./8.*xi + 1./8.*xi**2 + 1./8.*xi**3'])
+u = list(map(sympify, ['-(xi+1)/2 + 1',
+                       '(xi+1)/2']))
 
 for r in range(5, nmax+1):
     utmp = []
@@ -19,7 +17,7 @@ for r in range(5, nmax+1):
         utmp.append((-1)**n*factorial2(2*r - 2*n - 7)/den * xi**(r-2*n-1)/1.)
     u.append(sum(utmp))
 
-with open('../../../compmech/lib/src/bardell_functions.c', 'w') as f:
+with open('../../../panels/core/src/bardell_functions_uv.cpp', 'w') as f:
     f.write("// Bardell's hierarchical functions\n\n")
     f.write('// Number of terms: {0}\n\n'.format(len(u)))
     f.write('#include <stdlib.h>\n')
@@ -29,9 +27,8 @@ with open('../../../compmech/lib/src/bardell_functions.c', 'w') as f:
     f.write('#else\n')
     f.write('  #define EXPORTIT\n')
     f.write('#endif\n\n')
-    f.write('EXPORTIT void calc_vec_f(double *f, double xi,\n' +
-            '           double xi1t, double xi1r, double xi2t, double xi2r) {\n')
-    consts = {0:'xi1t', 1:'xi1r', 2:'xi2t', 3:'xi2r'}
+    f.write('EXPORTIT void vec_fuv(double *f, double xi, double xi1t, double xi2t) {\n')
+    consts = {0:'xi1t', 1:'xi2t'}
     for i in range(len(u)):
         const = consts.get(i)
         if const is None:
@@ -41,8 +38,7 @@ with open('../../../compmech/lib/src/bardell_functions.c', 'w') as f:
     f.write('}\n')
 
     f.write('\n\n')
-    f.write('EXPORTIT void calc_vec_fxi(double *fxi, double xi,\n' +
-            '           double xi1t, double xi1r, double xi2t, double xi2r) {\n')
+    f.write('EXPORTIT void vec_fuv_x(double *fxi, double xi, double xi1t, double xi2t) {\n')
     for i in range(len(u)):
         const = consts.get(i)
         if const is None:
@@ -52,8 +48,7 @@ with open('../../../compmech/lib/src/bardell_functions.c', 'w') as f:
     f.write('}\n')
 
     f.write('\n\n')
-    f.write('EXPORTIT void calc_vec_fxixi(double *fxixi, double xi,\n' +
-            '           double xi1t, double xi1r, double xi2t, double xi2r) {\n')
+    f.write('EXPORTIT void vec_fuv_xx(double *fxixi, double xi, double xi1t, double xi2t) {\n')
     for i in range(len(u)):
         const = consts.get(i)
         if const is None:
@@ -63,8 +58,7 @@ with open('../../../compmech/lib/src/bardell_functions.c', 'w') as f:
     f.write('}\n')
 
     f.write('\n\n')
-    f.write('EXPORTIT double calc_f(int i, double xi,\n' +
-            '           double xi1t, double xi1r, double xi2t, double xi2r) {\n')
+    f.write('EXPORTIT double fuv(int i, double xi, double xi1t, double xi2t) {\n')
     f.write('    switch(i) {\n')
     for i in range(len(u)):
         const = consts.get(i)
@@ -79,8 +73,7 @@ with open('../../../compmech/lib/src/bardell_functions.c', 'w') as f:
     f.write('}\n')
 
     f.write('\n\n')
-    f.write('EXPORTIT double calc_fxi(int i, double xi,\n' +
-            '           double xi1t, double xi1r, double xi2t, double xi2r) {\n')
+    f.write('EXPORTIT double fuv_x(int i, double xi, double xi1t, double xi2t) {\n')
     f.write('    switch(i) {\n')
     for i in range(len(u)):
         const = consts.get(i)
@@ -95,8 +88,7 @@ with open('../../../compmech/lib/src/bardell_functions.c', 'w') as f:
     f.write('}\n')
 
     f.write('\n\n')
-    f.write('EXPORTIT double calc_fxixi(int i, double xi,\n' +
-            '           double xi1t, double xi1r, double xi2t, double xi2r) {\n')
+    f.write('EXPORTIT double fuv_xx(int i, double xi, double xi1t, double xi2t) {\n')
     f.write('    switch(i) {\n')
     for i in range(len(u)):
         const = consts.get(i)
@@ -110,31 +102,31 @@ with open('../../../compmech/lib/src/bardell_functions.c', 'w') as f:
     f.write('    }\n')
     f.write('}\n')
 
-with open('../../../compmech/include/bardell_functions.h', 'w') as g:
+with open('../../../panels/core/include/bardell_functions_uv.hpp', 'w') as g:
     g.write('#if defined(_WIN32) || defined(__WIN32__)\n')
     g.write('  #define IMPORTIT __declspec(dllimport)\n')
     g.write('#else\n')
     g.write('  #define IMPORTIT\n')
     g.write('#endif\n\n')
-    g.write('#ifndef BARDELL_FUNCTIONS_H\n')
-    g.write('#define BARDELL_FUNCTIONS_H\n')
+    g.write('#ifndef BARDELL_FUNCTIONS_UV_H\n')
+    g.write('#define BARDELL_FUNCTIONS_UV_H\n')
     g.write('\n')
-    g.write('IMPORTIT void calc_vec_f(double *f, double xi,\n' +
-            '        double xi1t, double xi1r,double xi2t, double xi2r);\n')
+    g.write('IMPORTIT void vec_fuv(double *f, double xi,\n' +
+            '        double xi1t, double xi2t);\n')
     g.write('\n')
-    g.write('IMPORTIT void calc_vec_fxi(double *fxi, double xi,\n' +
-            '        double xi1t, double xi1r,double xi2t, double xi2r);\n')
+    g.write('IMPORTIT void vec_fuv_x(double *fxi, double xi,\n' +
+            '        double xi1t, double xi2t);\n')
     g.write('\n')
-    g.write('IMPORTIT void calc_vec_fxixi(double *fxixi, double xi,\n' +
-            '        double xi1t, double xi1r,double xi2t, double xi2r);\n')
+    g.write('IMPORTIT void vec_fuv_xx(double *fxixi, double xi,\n' +
+            '        double xi1t, double xi2t);\n')
     g.write('\n')
-    g.write('IMPORTIT double calc_f(int i, double xi,\n' +
-            '        double xi1t, double xi1r, double xi2t, double xi2r);\n')
+    g.write('IMPORTIT double fuv(int i, double xi,\n' +
+            '        double xi1t, double xi2t);\n')
     g.write('\n')
-    g.write('IMPORTIT double calc_fxi(int i, double xi,\n' +
-            '        double xi1t, double xi1r, double xi2t, double xi2r);\n')
+    g.write('IMPORTIT double fuv_x(int i, double xi,\n' +
+            '        double xi1t, double xi2t);\n')
     g.write('\n')
-    g.write('IMPORTIT double calc_fxixi(int i, double xi,\n' +
-            '        double xi1t, double xi1r, double xi2t, double xi2r);\n')
+    g.write('IMPORTIT double fuv_xx(int i, double xi,\n' +
+            '        double xi1t, double xi2t);\n')
     g.write('\n')
-    g.write('#endif /** BARDELL_FUNCTIONS_H */')
+    g.write('#endif /** BARDELL_FUNCTIONS_UV_H */')
