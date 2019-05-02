@@ -84,8 +84,7 @@ def fkCf(object bay, object s, int size, int row0, int col0):
                 fAuxifBwxixi = 0 #integral_fxfxx(i, k, x1u, x2u, x1w, x1wr, x2w, x2wr)
                 fAuxifBwxi = 0 #integral_fxfx(i, k, x1u, x2u, x1w, x1wr, x2w, x2wr)
                 fAwxixifBuxi = 0 #integral_fxfxx(k, i, x1u, x2u, x1w, x1wr, x2w, x2wr)
-                fAwxifBuxi = 0 #integral_fxfx(i, k, x1w, x1wr, x2w, x2wr,
-                x1u, x2u)
+                fAwxifBuxi = 0 #integral_fxfx(i, k, x1w, x1wr, x2w, x2wr, x1u, x2u)
                 fAwxifBwxi = 0 #integral_fxfx(i, k, x1w, x1wr, x2w, x2wr, x1w, x1wr, x2w, x2wr)
                 fAwxifBwxixi = 0 #integral_fxfxx(i, k, x1w, x1wr, x2w, x2wr, x1w, x1wr, x2w, x2wr)
                 fAwxixifBwxi = 0 #integral_fxfxx(k, i, x1w, x1wr, x2w, x2wr, x1w, x1wr, x2w, x2wr)
@@ -181,10 +180,10 @@ def fkGf(double ys, double Fx, double a, double b, double bf, int m, int n,
     return kGf
 
 
-def fkMf(double ys, double mu, double h, double hb, double hf, double a,
-         double b, double bf, double df,
-         int m, int n,
-         object bay
+def fkMf(object bay, object s,
+        #double ys, double mu, double h, double hb, double hf, double a,
+         #double b, double bf, double df,
+         #int m, int n,
          int size, int row0, int col0):
     cdef double fAufBu, fAufBwxi, fAvfBv, fAvfBw, fAwxifBu, fAwfBv, fAwfBw
     cdef double fAwxifBwxi
