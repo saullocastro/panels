@@ -5,13 +5,9 @@ python:
   - "3.5"
   - "3.6"
 
-env:
+before_install:
   # List package dependencies for conda
   - CONDA_DEPS="pytest coverage coveralls pytest-cov numpy scipy"
-  # Package name for test invocation
-  - PACKAGENAME="panels'
-
-before_install:
   - sudo apt-get update
   # Here we download miniconda and install the dependencies
   - export MINICONDA=$HOME/miniconda
