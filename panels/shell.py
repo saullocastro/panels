@@ -127,8 +127,8 @@ class Shell(object):
         self.size = None
 
         # numerical integration
-        self.nx = m
-        self.ny = n
+        self.nx = 2*m
+        self.ny = 2*n
 
         # loads
         self.point_loads = [] #NOTE see add_point_load
