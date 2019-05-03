@@ -10,6 +10,7 @@ dist
 .coverage
 .pytest_cache
 *.egg-info
+.eggs
 # Temp files
 .ipynb_checkpoints
 tmp*
@@ -19,6 +20,7 @@ temp*.*
 .cache
 __cache__
 __config__.py
+test.png
 
 # Python compiled files
 *.pyc
