@@ -8,7 +8,6 @@ def shell_fext(shell, inc, size, col0):
     if not model in modelDB.db.keys():
         raise ValueError('{} is not a valid model option'.format(model))
     db = modelDB.db
-    dofs = db[model]['dofs']
     fg = db[model]['field'].fg
 
     if size is None:
@@ -16,7 +15,7 @@ def shell_fext(shell, inc, size, col0):
     elif isinstance(size, str):
         size = int(size) + shell.get_size()
     col1 = col0 + shell.get_size()
-    g = np.zeros((dofs, shell.get_size()), dtype=np.float64)
+    g = np.zeros((5, shell.get_size()), dtype=np.float64)
     fext = np.zeros(size, dtype=np.float64)
 
     # point loads
@@ -29,10 +28,7 @@ def shell_fext(shell, inc, size, col0):
     # - calculating
     for x, y, fx, fy, fz, inc_i in point_loads:
         fg(g, x, y, shell)
-        if dofs == 3: #CLT
-            fpt = np.array([[fx, fy, fz]])*inc_i
-        elif dofs == 5: #FSDT
-            fpt = np.array([[fx, fy, fz, 0, 0]])*inc_i
+        fpt = np.array([[fx, fy, fz, 0, 0]])*inc_i
         fext[col0:col1] += fpt.dot(g).ravel()
 
     # distributed loads
@@ -59,10 +55,7 @@ def shell_fext(shell, inc, size, col0):
             # integrating g(x,ycte)*s(x,ycte)*dx = sum(weight_i * ( (a/2) * g(xcte, ycte) * s(xcte, ycte) ))
             for xi, weight in zip(points, weights):
                 xcte = (xi + 1)*shell.a/2
-                if dofs == 3: #CLT
-                    fpt = np.array([[funcx(xcte), funcy(xcte), funcz(xcte)]]) * inc_i
-                elif dofs == 5: #FSDT
-                    fpt = np.array([[funcx(xcte), funcy(xcte), funcz(xcte), 0, 0]]) * inc_i
+                fpt = np.array([[funcx(xcte), funcy(xcte), funcz(xcte), 0, 0]]) * inc_i
                 fg(g, xcte, y, shell)
                 fext[col0:col1] += weight * (shell.a/2) * fpt.dot(g).ravel()
         else:
@@ -73,10 +66,7 @@ def shell_fext(shell, inc, size, col0):
             # integrating g(x,ycte)*s(x,ycte)*dx = sum(weight_i * ( (a/2) * g(xcte, ycte) * s(xcte, ycte) ))
             for eta, weight in zip(points, weights):
                 ycte = (eta + 1)*shell.b/2
-                if dofs == 3: #CLT
-                    fpt = np.array([[funcx(ycte), funcy(ycte), funcz(ycte)]]) * inc_i
-                elif dofs == 5: #FSDT
-                    fpt = np.array([[funcx(ycte), funcy(ycte), funcz(ycte), 0, 0]]) * inc_i
+                fpt = np.array([[funcx(ycte), funcy(ycte), funcz(ycte), 0, 0]]) * inc_i
                 fg(g, x, ycte, shell)
                 fext[col0:col1] += weight * (shell.b/2) * fpt.dot(g).ravel()
 

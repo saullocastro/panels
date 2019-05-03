@@ -10,7 +10,6 @@ from scipy.sparse.linalg import eigs, eigsh
 from scipy.linalg import eig
 from numpy import linspace, deg2rad
 import composites.laminate as laminate
-from structsolve.analysis import Analysis
 from structsolve.sparseutils import remove_null_cols, make_skew_symmetric, finalize_symmetric_matrix
 
 from .logger import msg, warn
@@ -85,7 +84,7 @@ class Shell(object):
         'flow', 'beta', 'gamma', 'aeromu', 'rho_air', 'speed_sound', 'Mach', 'V',
         'F', 'force_orthotropic_laminate',
         'num_eigvalues', 'num_eigvalues_print',
-        'out_num_cores', 'analysis', 'increments', 'results',
+        'out_num_cores', 'increments', 'results',
         'lam', 'matrices', 'fields', 'plot_mesh',
         ]
 
@@ -192,9 +191,6 @@ class Shell(object):
         # output queries
         self.out_num_cores = cpu_count()
 
-        # analysis
-        self.analysis = Analysis(self.calc_fext, self.calc_fint, self.calc_kC, self.calc_kG)
-
         # outputs
         self.increments = None
         self.results = dict(eigvecs=None, eigvals=None)
@@ -279,8 +275,8 @@ class Shell(object):
             obtained by the :method:`.Shell.get_size`
 
         """
-        num = modelDB.db[self.model]['num']
-        self.size = num*self.m*self.n
+        dofs = modelDB.db[self.model]['dofs']
+        self.size = dofs*self.m*self.n
         return self.size
 
 
