@@ -7,7 +7,7 @@ python:
 
 before_install:
   # List package dependencies for conda
-  - CONDA_DEPS="cython pytest coverage coveralls pytest-cov numpy scipy"
+  - CONDA_DEPS="cython matplotlib pytest coverage coveralls pytest-cov numpy scipy"
   - sudo apt-get update
   # Here we download miniconda and install the dependencies
   - export MINICONDA=$HOME/miniconda
