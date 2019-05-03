@@ -42,12 +42,7 @@ SUFIX used to indicate additional information
 """
 from __future__ import absolute_import
 
-module_names = [
-          'clpt_bardell_field',
-          'cylshell_clpt_donnell_bardell_num',
-          'coneshell_clpt_donnell_bardell_num',
-          'plate_clpt_donnell_bardell_num',
-          ]
-
-for module_name in module_names:
-    exec('from . import {0}'.format(module_name))
+from . import clpt_bardell_field
+from . import coneshell_clpt_donnell_bardell_num
+from . import cylshell_clpt_donnell_bardell_num
+from . import plate_clpt_donnell_bardell_num
