@@ -4,7 +4,7 @@ Travis-CI status:
 
 Coverage status:
 
-
+[![Coverage Status](https://coveralls.io/repos/github/saullocastro/panels/badge.svg?branch=master)](https://coveralls.io/github/saullocastro/panels?branch=master)
 
 
 Semi-analytical methods for plates, shells and stiffened panels
