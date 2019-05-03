@@ -19,7 +19,6 @@ db = {
                     'matrices_num': coneshell_clpt_donnell_bardell_num,
                     'dofs': 3,
                     'e_num': 6,
-                    'num': 3,
                     },
     'cylshell_clpt_donnell_bardell': {
                     'linear static': True,
@@ -29,7 +28,6 @@ db = {
                     'matrices_num': cylshell_clpt_donnell_bardell_num,
                     'dofs': 3,
                     'e_num': 6,
-                    'num': 3,
                     },
     'plate_clpt_donnell_bardell': {
                     'linear static': True,
@@ -39,6 +37,5 @@ db = {
                     'matrices_num': plate_clpt_donnell_bardell_num,
                     'dofs': 3,
                     'e_num': 6,
-                    'num': 3,
                     },
     }

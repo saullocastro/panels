@@ -26,7 +26,7 @@ DOUBLE = np.float64
 ctypedef np.double_t cDOUBLE
 
 cdef int NMAX = 30
-cdef int NUM = 3
+cdef int DOF = 3
 
 
 def fuvw(np.ndarray[cDOUBLE, ndim=1] c, object s,
@@ -217,7 +217,7 @@ cdef void cfuvw(double *c, int m, int n, double a, double b, double *xs,
 
         for j in range(n):
             for i in range(m):
-                col = NUM*(j*m + i)
+                col = DOF*(j*m + i)
                 u += c[col+0]*fu[i]*gu[j]
                 v += c[col+1]*fv[i]*gv[j]
                 w += c[col+2]*fw[i]*gw[j]
@@ -260,7 +260,7 @@ cdef void cfwx(double *c, int m, int n, double a, double b, double *xs,
 
         for j in range(n):
             for i in range(m):
-                col = NUM*(j*m + i)
+                col = DOF*(j*m + i)
                 wx += (2/a)*c[col+2]*fwxi[i]*gw[j]
 
         wxs[pti] = wx
@@ -295,7 +295,7 @@ cdef void cfwy(double *c, int m, int n, double a, double b, double *xs,
 
         for j in range(n):
             for i in range(m):
-                col = NUM*(j*m + i)
+                col = DOF*(j*m + i)
                 wy += (2/b)*c[col+2]*fw[i]*gweta[j]
 
         wys[pti] = wy
@@ -342,7 +342,7 @@ def fg(double[:,::1] g, double x, double y, object s):
 
     for j in range(s.n):
         for i in range(s.m):
-            col = NUM*(j*s.m + i)
+            col = DOF*(j*s.m + i)
             g[0, col+0] = fu[i]*gu[j]
             g[1, col+1] = fv[i]*gv[j]
             g[2, col+2] = fw[i]*gw[j]
@@ -440,7 +440,7 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
 
         for j in range(n):
             for i in range(m):
-                col = NUM*(j*m + i)
+                col = DOF*(j*m + i)
                 wxi += c[col+2]*fwxi[i]*gw[j]
                 weta += c[col+2]*fw[i]*gweta[j]
 
@@ -453,7 +453,7 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
 
         for j in range(n):
             for i in range(m):
-                col = NUM*(j*m + i)
+                col = DOF*(j*m + i)
                 exx += c[col+0]*fuxi[i]*gu[j]*(2/a) + NLgeom*2/(a*a)*c[col+2]*fwxi[i]*gw[j]*wxi
                 if flagcyl == 1:
                     eyy += c[col+1]*fv[i]*gveta[j]*(2/b) + 1/r*c[col+2]*fw[i]*gw[j] + NLgeom*2/(b*b)*c[col+2]*fw[i]*gweta[j]*weta
