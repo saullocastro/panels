@@ -1,6 +1,10 @@
-|  Version	| Download | Travis CI | Test Coverage |
-| :-------:	| :--- 	   | :---      | :---          |
-|   Master	|          | [![Linux Status](https://img.shields.io/travis/compmech/panels/master.svg)](https://travis-ci.org/compmech/panels) | [![Coverage Status](https://coveralls.io/repos/github/compmech/panels/badge.svg?branch=master)](https://coveralls.io/github/compmech/panels?branch=master) |
+Travis-CI status:
+
+[![Build Status](https://travis-ci.com/saullocastro/panels.svg?branch=master)](https://travis-ci.com/saullocastro/panels)
+
+Coverage status:
+
+
 
 
 Semi-analytical methods for plates, shells and stiffened panels
