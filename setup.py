@@ -1,7 +1,6 @@
 #!/nfs/cae/Ferramentas/EXEC/PYTHON/intelpython2/bin/python
 
-"""Semi-analytical models for plates, shells, stiffened panels, single- and
-multi-domain
+"""Semi-analytical models for plates, shells, stiffened panels
 """
 import sys
 import os
