@@ -2,7 +2,6 @@
 
 """Semi-analytical models for plates, shells, stiffened panels, single- and
 multi-domain
-
 """
 import sys
 import os
@@ -167,8 +166,8 @@ setup(
     maintainer='Saullo G. P. Castro',
     maintainer_email='castrosaullo@gmail.com',
     version=FULLVERSION,
-    description=DOCLINES[0],
-    long_description='\n'.join(DOCLINES[2:]),
+    description='\n'.join(DOCLINES),
+    long_description='\n'.join(DOCLINES),
     url='https://github.com/saullocastro/panels',
     download_url='https://github.com/saullocastro/panels',
     license='Copyrighted',
