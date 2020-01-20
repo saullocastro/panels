@@ -24,13 +24,13 @@ before_install:
   - conda info -a
   - conda create -q -n testenv python=$TRAVIS_PYTHON_VERSION $CONDA_DEPS
   - source activate testenv
-  - python setup.py build_ext --inplace
+  - pip install -r requirements.txt
 
 install:
-  - python setup.py install
+  - python setup.py build_ext --inplace --force --define CYTHON_TRACE
 
 script:
-  - coverage run --source panels -m py.test
+  - coverage run -m py.test panels
   - coverage report
 
 after_success:

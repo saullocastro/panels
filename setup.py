@@ -158,9 +158,7 @@ extensions = [
 FULLVERSION, GIT_REVISION = get_version_info()
 required_libraries = ['numpy', 'scipy', 'matplotlib', 'composites', 'structsolve']
 write_version_py()
-ext_modules = cythonize(extensions)
-for e in ext_modules:
-    e.cython_directives = {'embedsignature': True}
+ext_modules = cythonize(extensions, compiler_directives={'linetrace': True})
 setup(
     name='panels',
     maintainer='Saullo G. P. Castro',
