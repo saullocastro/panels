@@ -163,5 +163,5 @@ def mprint_as_array(m, mname, sufix, use_cse=False,
     string = '\n'.join(ls)
     if print_file:
         with open(filename, 'w') as f:
-            f.write(sting)
+            f.write(string)
     return string
