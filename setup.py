@@ -15,25 +15,26 @@ DOCLINES = __doc__.split("\n")
 
 CLASSIFIERS = """\
 Development Status :: 4 - Beta
-Intended Audience :: Education
 Intended Audience :: Science/Research
+Intended Audience :: Developers
+Intended Audience :: Education
 Intended Audience :: End Users/Desktop
-License :: OSI Approved :: BSD License
 Operating System :: POSIX :: BSD
+Operating System :: Microsoft :: Windows
+Operating System :: Unix
 Programming Language :: Python
 Programming Language :: C++
 Topic :: Scientific/Engineering
 Topic :: Education
 Topic :: Software Development
 Topic :: Software Development :: Libraries :: Python Modules
-Operating System :: Microsoft :: Windows
-Operating System :: Unix
+License :: OSI Approved :: BSD License
 
 """
 
 MAJOR = 0
 MINOR = 2
-MICRO = 0
+MICRO = 1
 ISRELEASED = True
 VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 
