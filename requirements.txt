@@ -4,5 +4,3 @@ cython
 matplotlib
 composites
 structsolve
-coveralls
-pytest
