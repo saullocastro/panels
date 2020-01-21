@@ -33,6 +33,7 @@ before_install:
 
 install:
   - python setup.py build_ext --inplace --force --define CYTHON_TRACE
+  - export PYTHONPATH=$TRAVIS_BUILD_DIR:$PYTHONPATH
 
 script:
   - py.test panels -v --cov coveralls --cov-report term-missing
