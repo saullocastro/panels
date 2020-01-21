@@ -29,13 +29,13 @@ before_install:
   - conda create -q -n testenv python=$TRAVIS_PYTHON_VERSION $CONDA_DEPS
   - source activate testenv
   - pip install -r requirements.txt
+  - pip install -r test_requirements.txt
 
 install:
   - python setup.py build_ext --inplace --force --define CYTHON_TRACE
 
 script:
-  - coverage run -m py.test panels
-  - coverage report
+  - py.test panels -v --cov coveralls --cov-report term-missing
 
 after_success:
   - coveralls
