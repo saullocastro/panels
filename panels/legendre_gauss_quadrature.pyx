@@ -4,8 +4,6 @@
 #cython: nonecheck=False
 #cython: profile=False
 #cython: infer_types=False
-from __future__ import division
-
 import numpy as np
 cimport numpy as np
 
