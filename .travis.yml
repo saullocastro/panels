@@ -29,7 +29,7 @@ before_install:
   - conda create -q -n testenv python=$TRAVIS_PYTHON_VERSION $CONDA_DEPS
   - source activate testenv
   - pip install -r requirements.txt
-  - pip install -r test_requirements.txt
+  - pip install -r requirements_test.txt
 
 install:
   - python setup.py build_ext --inplace --force --define CYTHON_TRACE
