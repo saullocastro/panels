@@ -28,7 +28,6 @@ jobs:
     - name: Run tests and coveralls
       run: |
         pytest ./panels --cov=panels --cov-report html
-        coveralls
     - name: Coveralls GitHub Action
       uses: coverallsapp/github-action@v1.0.1
       with:
