@@ -23,8 +23,7 @@ jobs:
         pip install -r requirements_test.txt
     - name: Install module
       run: |
-        python setup.py build_ext --inplace --force --define CYTHON_TRACE
-        export PYTHONPATH=.
+        python setup.py install --force --define CYTHON_TRACE
     - name: Run tests and coveralls
       run: |
         pytest ./panels --cov=panels --cov-report html
