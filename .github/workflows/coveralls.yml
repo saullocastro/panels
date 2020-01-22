@@ -1,6 +1,6 @@
 name: coveralls
 
-on: [push]
+on: []
 
 jobs:
   build:
