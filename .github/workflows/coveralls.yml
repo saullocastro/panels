@@ -27,7 +27,8 @@ jobs:
         python setup.py install
     - name: Run tests and coveralls
       run: |
-        pytest ./panels --cov=panels --cov-report html
+        coverage run -m py.test panels
+        coverage report
     - name: Coveralls GitHub Action
       uses: coverallsapp/github-action@v1.0.1
       with:
