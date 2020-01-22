@@ -1,6 +1,6 @@
 name: coveralls
 
-on: []
+on: [] #all disabled
 
 jobs:
   build:
