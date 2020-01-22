@@ -36,7 +36,8 @@ install:
 
 script:
   - export PYTHONPATH=$TRAVIS_BUILD_DIR:$PYTHONPATH
-  - py.test panels -v --cov coveralls --cov-report term-missing
+  - coverage run -m py.test panels
+  - coverage report
 
 after_success:
   - coveralls
