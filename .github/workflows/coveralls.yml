@@ -25,12 +25,10 @@ jobs:
       run: |
         python setup.py build_ext --inplace --force --define CYTHON_TRACE
     - name: Run tests and coveralls
+      env:
+        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
       run: |
         export PYTHONPATH=.
         coverage run -m py.test panels
         coverage report
-    - name: Coveralls GitHub Action
-      uses: coverallsapp/github-action@v1.0.1
-      with:
-        github-token: ${{ secrets.COVERALLS_TOKEN }}
-    
+        coveralls
