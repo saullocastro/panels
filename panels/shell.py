@@ -9,7 +9,7 @@ from scipy.sparse import csr_matrix
 from scipy.sparse.linalg import eigs, eigsh
 from scipy.linalg import eig
 from numpy import linspace, deg2rad
-import composites.laminate as laminate
+from composites import laminated_plate
 from structsolve.sparseutils import remove_null_cols, make_skew_symmetric, finalize_symmetric_matrix
 
 from .logger import msg, warn
@@ -249,7 +249,7 @@ class Shell(object):
             self.plyts = [self.plyt for i in self.stack]
 
         if self.stack is not None:
-            lam = laminate.read_stack(self.stack, plyts=self.plyts,
+            lam = laminated_plate(stack=self.stack, plyts=self.plyts,
                                       laminaprops=self.laminaprops,
                                       rhos=self.rhos,
                                       offset=self.offset)
