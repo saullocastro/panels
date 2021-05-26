@@ -22,7 +22,10 @@ Intended Audience :: End Users/Desktop
 Operating System :: POSIX :: BSD
 Operating System :: Microsoft :: Windows
 Operating System :: Unix
-Programming Language :: Python
+Programming Language :: Python :: 3.6
+Programming Language :: Python :: 3.7
+Programming Language :: Python :: 3.8
+Programming Language :: Python :: 3.9
 Programming Language :: C++
 Topic :: Scientific/Engineering
 Topic :: Education
@@ -34,7 +37,7 @@ License :: OSI Approved :: BSD License
 
 MAJOR = 0
 MINOR = 2
-MICRO = 2
+MICRO = 3
 ISRELEASED = True
 VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 
