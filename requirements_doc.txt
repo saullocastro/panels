@@ -1,0 +1,8 @@
+numpy
+scipy
+cython
+matplotlib
+composites
+structsolve
+sphinx
+numpydoc

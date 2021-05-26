@@ -11,6 +11,9 @@ available in this package.
 .. automodule:: panels.shell
     :members:
 
+.. automodule:: panels.plot_shell
+    :members:
+
 """
 from __future__ import absolute_import
 
