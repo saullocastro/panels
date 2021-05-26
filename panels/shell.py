@@ -89,7 +89,7 @@ class Shell(object):
         ]
 
     def __init__(self, a=None, b=None, r=None, alphadeg=None,
-            stack=None, plyt=None, laminaprop=None, rho=None,
+            stack=None, plyt=None, laminaprop=None, rho=0,
             m=11, n=11, offset=0., **kwargs):
         self.a = a
         self.x1 = -1 # used to integrate part of the shell domain, -1 will use 0
