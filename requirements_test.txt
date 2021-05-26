@@ -1,3 +1,9 @@
+numpy
+scipy
+cython
+matplotlib
+composites
+structsolve
 coveralls
 pytest
 pytest-cov

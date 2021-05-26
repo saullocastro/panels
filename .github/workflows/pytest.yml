@@ -5,11 +5,12 @@ on: [push]
 jobs:
   build:
 
-    runs-on: ubuntu-latest
     strategy:
       max-parallel: 4
       matrix:
+        runs-on: [windows-latest, ubuntu-latest]
         python-version: [3.6, 3.7, 3.8, 3.9]
+    runs-on: ${{ matrix.runs-on }}
 
     steps:
     - uses: actions/checkout@v1
@@ -19,7 +20,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        pip install -r requirements.txt
+        python -m pip install --upgrade pip
         pip install -r requirements_test.txt
     - name: Install module
       run: |
@@ -28,9 +29,9 @@ jobs:
       run: |
         pip install flake8
         # stop the build if there are Python syntax errors or undefined names
-        flake8 ./panels --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 ./panels --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
         pytest ./panels
