@@ -9,6 +9,7 @@ Github Actions status:
 Coverage status:
 
 [![Coverage Status](https://coveralls.io/repos/github/saullocastro/panels/badge.svg?branch=master)](https://coveralls.io/github/saullocastro/panels?branch=master)
+[![Codecov Status](https://codecov.io/gh/saullocastro/panels/branch/master/graph/badge.svg?token=KD9D8G8D2P)](https://codecov.io/gh/saullocastro/panels)
 
 
 Semi-analytical methods for plates, shells and stiffened panels
@@ -32,7 +33,7 @@ To get the latest version::
 
 License
 -------
-Distrubuted in the 2-Clause BSD license (https://raw.github.com/compmech/panels/master/LICENSE).
+Distrubuted in the 2-Clause BSD license (https://raw.github.com/saullocastro/panels/master/LICENSE).
 
 Contact: castrosaullo@gmail.com
 
