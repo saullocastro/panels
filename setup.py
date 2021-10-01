@@ -46,7 +46,7 @@ License :: OSI Approved :: BSD License
 
 MAJOR = 0
 MINOR = 2
-MICRO = 11
+MICRO = 12
 ISRELEASED = True
 VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 
@@ -177,23 +177,17 @@ write_version_py()
 ext_modules = cythonize(extensions, compiler_directives={'linetrace': True})
 setup(
     name='panels',
-    maintainer='Saullo G. P. Castro',
-    maintainer_email='S.G.P.Castro@tudelft.nl',
     version=FULLVERSION,
+    author='Saullo G. P. Castro',
+    author_email='S.G.P.Castro@tudelft.nl',
     description='\n'.join(DOCLINES),
-    long_description = read('README.md'),
-    long_description_content_type = 'text/markdown',
+    long_description=read('README.md'),
+    long_description_content_type='text/markdown',
     url='https://github.com/saullocastro/panels',
     download_url='https://github.com/saullocastro/panels',
-    license='Copyrighted',
+    license='BSD',
     classifiers=[_f for _f in CLASSIFIERS.split('\n') if _f],
-    platforms=['Windows', 'Linux'],
-    setup_requires=required_libraries,
     install_requires=required_libraries,
     ext_modules = ext_modules,
-    entry_points={
-        'console_scripts': [
-            ],
-        },
     packages=find_packages(),
 )
