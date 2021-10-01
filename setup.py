@@ -4,6 +4,7 @@
 """
 import sys
 import os
+import inspect
 import subprocess
 from setuptools import setup, find_packages
 from distutils.extension import Extension
@@ -12,6 +13,14 @@ from Cython.Build import cythonize
 import numpy as np
 
 DOCLINES = __doc__.split("\n")
+
+# Utility function to read the README file.
+# Used for the long_description.  It's nice, because now 1) we have a top level
+# README file and 2) it's easier to type in the README file than to put a raw
+# string in below ...
+def read(fname):
+    setupdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+    return open(os.path.join(setupdir, fname)).read()
 
 CLASSIFIERS = """\
 Development Status :: 4 - Beta
@@ -37,7 +46,7 @@ License :: OSI Approved :: BSD License
 
 MAJOR = 0
 MINOR = 2
-MICRO = 4
+MICRO = 10
 ISRELEASED = True
 VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 
@@ -165,10 +174,11 @@ ext_modules = cythonize(extensions, compiler_directives={'linetrace': True})
 setup(
     name='panels',
     maintainer='Saullo G. P. Castro',
-    maintainer_email='castrosaullo@gmail.com',
+    maintainer_email='S.G.P.Castro@tudelft.nl',
     version=FULLVERSION,
     description='\n'.join(DOCLINES),
-    long_description='\n'.join(DOCLINES),
+    long_description = read('README.md'),
+    long_description_content_type = 'text/markdown',
     url='https://github.com/saullocastro/panels',
     download_url='https://github.com/saullocastro/panels',
     license='Copyrighted',
