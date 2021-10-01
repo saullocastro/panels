@@ -33,7 +33,8 @@ To get the latest version::
 
 License
 -------
-Distrubuted in the 2-Clause BSD license (https://raw.github.com/saullocastro/panels/master/LICENSE).
+Distrubuted under the 3-Clause BSD license
+(https://raw.github.com/saullocastro/panels/master/LICENSE).
 
-Contact: castrosaullo@gmail.com
+Contact: S.G.P.Castro@tudelft.nl.
 
