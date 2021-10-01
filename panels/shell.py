@@ -545,7 +545,9 @@ class Shell(object):
             h_nxny[:, :] = self.lam.h
         if rho_nxny is None:
             rho_nxny = np.zeros((nx, ny), dtype=np.float64)
-            rho_nxny[:, :] = self.lam.rho
+            #TODO change the whole code to handle the more general intrho,
+            #     allowing different materials along the laminated plate
+            rho_nxny[:, :] = self.lam.intrho/self.lam.h
 
         hrho_input = np.concatenate((h_nxny[..., None], rho_nxny[..., None]), axis=2)
         kM = matrices.fkM_num(self, self.offset, hrho_input, size, row0, col0, nx, ny)
