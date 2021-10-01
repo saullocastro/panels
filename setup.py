@@ -46,7 +46,7 @@ License :: OSI Approved :: BSD License
 
 MAJOR = 0
 MINOR = 2
-MICRO = 10
+MICRO = 11
 ISRELEASED = True
 VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 

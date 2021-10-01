@@ -13,9 +13,10 @@ Coverage status:
 
 
 Semi-analytical methods for plates, shells and stiffened panels
-================================================================
+===============================================================
 
 Capabilities:
+
 - linear buckling
 - postbuckling
 - Koiter asymptotic initial postbuckling analysis
