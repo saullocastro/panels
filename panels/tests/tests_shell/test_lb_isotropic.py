@@ -26,7 +26,7 @@ def test_lb_isotropic():
     s.Nxy = -1
 
     s.plyt = thickness
-    s.laminaprop = (E, E, nu)
+    s.laminaprop = (E, nu)
     s.model = 'cylshell_clpt_donnell_bardell'
     # radius
 
