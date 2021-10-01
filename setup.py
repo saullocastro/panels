@@ -6,8 +6,7 @@ import sys
 import os
 import inspect
 import subprocess
-from setuptools import setup, find_packages
-from distutils.extension import Extension
+from setuptools import setup, find_packages, Extension
 from Cython.Build import cythonize
 
 import numpy as np
@@ -46,7 +45,7 @@ License :: OSI Approved :: BSD License
 
 MAJOR = 0
 MINOR = 2
-MICRO = 13
+MICRO = 14
 ISRELEASED = True
 VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 
