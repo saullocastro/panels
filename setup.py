@@ -46,7 +46,7 @@ License :: OSI Approved :: BSD License
 
 MAJOR = 0
 MINOR = 2
-MICRO = 12
+MICRO = 13
 ISRELEASED = True
 VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 
@@ -116,10 +116,6 @@ if os.name == 'nt':
 else:
     compile_args = ['-fopenmp', '-static', '-static-libgcc', '-static-libstdc++']
     link_args = ['-fopenmp', '-static-libgcc', '-static-libstdc++']
-
-if 'CYTHON_TRACE_NOGIL' in os.environ.keys():
-    compile_args = ['-O0']
-    link_args = []
 
 include_dirs = [
             r'./panels/core/include',
