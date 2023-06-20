@@ -341,7 +341,7 @@ class Shell(object):
     def calc_kC(self, size=None, row0=0, col0=0, silent=True, finalize=True,
             c=None, c_cte=None, nx=None, ny=None, Fnxny=None,
             NLgeom=False):
-        """Calculate the constitutive stiffness matrix
+        r"""Calculate the constitutive stiffness matrix
 
         If ``c`` is not given it calculates the linear constitutive stiffness
         matrix, otherwise the large displacement linear constitutive stiffness
@@ -446,7 +446,7 @@ class Shell(object):
 
     def calc_kG(self, size=None, row0=0, col0=0, silent=True, finalize=True,
             c=None, nx=None, ny=None, Fnxny=None, NLgeom=False):
-        """Calculate the geometric stiffness matrix
+        r"""Calculate the geometric stiffness matrix
 
         See :meth:`.Shell.calc_kC` for details on each parameter.
 
@@ -508,7 +508,7 @@ class Shell(object):
 
     def calc_kM(self, size=None, row0=0, col0=0, h_nxny=None, rho_nxny=None,
             nx=None, ny=None, silent=True, finalize=True):
-        """Calculate the mass matrix
+        r"""Calculate the mass matrix
 
         Parameters
         ----------
@@ -565,7 +565,7 @@ class Shell(object):
 
 
     def calc_kA(self, size=None, row0=0, col0=0, silent=True, finalize=True):
-        """Calculate the aerodynamic matrix using the linear piston theory
+        r"""Calculate the aerodynamic matrix using the linear piston theory
         """
         msg('Calculating kA... ', level=2, silent=silent)
 
@@ -623,7 +623,7 @@ class Shell(object):
 
 
     def calc_cA(self, aeromu, silent=True, size=None, finalize=True):
-        """Calculate the aerodynamic damping matrix using the piston theory
+        r"""Calculate the aerodynamic damping matrix using the piston theory
         """
         msg('Calculating cA... ', level=2, silent=silent)
 
@@ -913,7 +913,7 @@ class Shell(object):
 
 
     def calc_fext(self, inc=1., size=None, col0=0, silent=True):
-        """Calculate the external force vector `\{F_{ext}\}`
+        r"""Calculate the external force vector `\{F_{ext}\}`
 
         Recall that:
 
@@ -955,7 +955,7 @@ class Shell(object):
 
     def calc_fint(self, c, size=None, col0=0, silent=True, nx=None,
             ny=None, Fnxny=None):
-        """Calculate the internal force vector `\{F_{int}\}`
+        r"""Calculate the internal force vector `\{F_{int}\}`
 
 
         Parameters
@@ -1023,7 +1023,7 @@ class Shell(object):
 
 
     def save(self):
-        """Save the ``Shell`` object using ``pickle``
+        r"""Save the ``Shell`` object using ``pickle``
 
         Notes
         -----
