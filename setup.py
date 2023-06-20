@@ -112,8 +112,8 @@ if platform.system() == 'Windows':
     compile_args = ['/openmp']
     link_args = []
 elif platform.system() == 'Linux':
-    compile_args = ['-fopenmp', '-static', '-static-libgcc', '-static-libstdc++']
-    link_args = ['-fopenmp', '-static-libgcc', '-static-libstdc++']
+    compile_args = ['-fopenmp']
+    link_args = ['-fopenmp']
 else: # MAC-OS
     compile_args = []
     link_args = []
