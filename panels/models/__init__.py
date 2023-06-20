@@ -40,8 +40,6 @@ SUFIX used to indicate additional information
 
 
 """
-from __future__ import absolute_import
-
 from . import clpt_bardell_field
 from . import coneshell_clpt_donnell_bardell_num
 from . import cylshell_clpt_donnell_bardell_num

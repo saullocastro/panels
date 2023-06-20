@@ -4,11 +4,8 @@
 #cython: nonecheck=False
 #cython: profile=False
 #cython: infer_types=False
-from __future__ import division
-
 from scipy.sparse import coo_matrix
 import numpy as np
-cimport numpy as np
 
 
 cdef extern from 'bardell_functions_uv.hpp':
@@ -27,15 +24,13 @@ cdef extern from 'legendre_gauss_quadrature.hpp':
     void leggauss_quad(int n, double *points, double* weights) nogil
 
 
-ctypedef np.double_t cDOUBLE
 DOUBLE = np.float64
-ctypedef np.int64_t cINT
 INT = np.int64
 
 cdef int DOF = 3
 
 
-def fkC_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
+def fkC_num(double [::1] cs, object Finput, object shell,
         int size, int row0, int col0, int nx, int ny, int NLgeom=0):
     cdef double x1, x2, y1, y2, xinf, xsup, yinf, ysup
     cdef double a, b, r, intx, inty
@@ -52,8 +47,8 @@ def fkC_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
     cdef double B11, B12, B16, B22, B26, B66
     cdef double D11, D12, D16, D22, D26, D66
 
-    cdef np.ndarray[cINT, ndim=1] kCr, kCc
-    cdef np.ndarray[cDOUBLE, ndim=1] kCv
+    cdef long [::1] kCr, kCc
+    cdef double [::1] kCv
 
     cdef double fAu, fAuxi, fAv, fAvxi, fAw, fAwxi, fAwxixi
     cdef double fBu, fBuxi, fBv, fBvxi, fBw, fBwxi, fBwxixi
@@ -63,12 +58,12 @@ def fkC_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
     cdef double xi1, xi2, eta1, eta2
     cdef double wxi, weta
 
-    cdef np.ndarray[cDOUBLE, ndim=1] xis, etas, weights_xi, weights_eta
+    cdef double [::1] xis, etas, weights_xi, weights_eta
 
     # F as 4-D matrix, must be [nx, ny, 6, 6], when there is one ABD[6, 6] for
     # each of the nx * ny integration points
     cdef double F[6 * 6]
-    cdef np.ndarray[cDOUBLE, ndim=4] Fnxny
+    cdef double [:, :, :, ::1] Fnxny
 
     cdef int one_F_each_point = 0
 
@@ -295,7 +290,7 @@ def fkC_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
     return kC
 
 
-def fkG_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
+def fkG_num(double [::1] cs, object Finput, object shell,
             int size, int row0, int col0, int nx, int ny, int NLgeom=0,
             double Nxx0=0, double Nyy0=0, double Nxy0=0):
     cdef double x1, x2, y1, y2, xinf, xsup, yinf, ysup
@@ -312,8 +307,8 @@ def fkG_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
     cdef double xi, eta, x, y, weight
     cdef double xi1, xi2, eta1, eta2
 
-    cdef np.ndarray[cINT, ndim=1] kGr, kGc
-    cdef np.ndarray[cDOUBLE, ndim=1] kGv
+    cdef long [::1] kGr, kGc
+    cdef double [::1] kGv
 
     cdef double fAu, fAv, fAw, fAuxi, fAvxi, fAwxi, fAwxixi
     cdef double gAu, gAv, gAw, gAueta, gAveta, gAweta, gAwetaeta
@@ -324,12 +319,12 @@ def fkG_num(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
     cdef double B11, B12, B16, B22, B26, B66
     cdef double wxi, weta, Nxx, Nyy, Nxy
 
-    cdef np.ndarray[cDOUBLE, ndim=1] xis, etas, weights_xi, weights_eta
+    cdef double [::1] xis, etas, weights_xi, weights_eta
 
     # F as 4-D matrix, must be [nx, ny, 6, 6], when there is one ABD[6, 6] for
     # each of the nx * ny integration points
     cdef double F[6 * 6]
-    cdef np.ndarray[cDOUBLE, ndim=4] Fnxny
+    cdef double [:, :, :, ::1] Fnxny
 
     cdef int one_F_each_point = 0
 
@@ -545,14 +540,14 @@ def fkAx_num(object shell, int size, int row0, int col0, int nx, int ny):
 
     cdef int i, j, k, l, c, row, col, ptx, pty
 
-    cdef np.ndarray[cINT, ndim=1] kAr, kAc
-    cdef np.ndarray[cDOUBLE, ndim=1] kAv
+    cdef long [::1] kAr, kAc
+    cdef double [::1] kAv
 
     cdef double fAw, fAwxi, fBw, gAw, gBw
     cdef double xi, eta, weight
     cdef double xi1, xi2, eta1, eta2
 
-    cdef np.ndarray[cDOUBLE, ndim=1] xis, etas, weights_xi, weights_eta
+    cdef double [::1] xis, etas, weights_xi, weights_eta
 
     if not 'Shell' in shell.__class__.__name__:
         raise ValueError('a Shell object must be given as input')
@@ -657,7 +652,7 @@ def fkAy_num(object shell, int size, int row0, int col0, int nx, int ny):
     return plate_fkAy_num(shell, size, row0, col0, nx, ny)
 
 
-def calc_fint(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
+def calc_fint(double [::1] cs, object Finput, object shell,
         int size, int col0, int nx, int ny):
     cdef double x1, x2, y1, y2, xinf, xsup, yinf, ysup
     cdef double a, b, r, intx, inty
@@ -683,12 +678,12 @@ def calc_fint(np.ndarray[cDOUBLE, ndim=1] cs, object Finput, object shell,
     cdef double fAu, fAuxi, fAv, fAvxi, fAw, fAwxi, fAwxixi
     cdef double gAu, gAueta, gAv, gAveta, gAw, gAweta, gAwetaeta
 
-    cdef np.ndarray[cDOUBLE, ndim=1] xis, etas, weights_xi, weights_eta, fint
+    cdef double [::1] xis, etas, weights_xi, weights_eta, fint
 
     # F as 4-D matrix, must be [nx, ny, 6, 6], when there is one ABD[6, 6] for
     # each of the nx * ny integration points
     cdef double F[6 * 6]
-    cdef np.ndarray[cDOUBLE, ndim=4] Fnxny
+    cdef double [:, :, :, ::1] Fnxny
 
     cdef int one_F_each_point = 0
 

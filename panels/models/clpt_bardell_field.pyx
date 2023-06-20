@@ -4,7 +4,6 @@
 #cython: nonecheck=False
 #cython: profile=False
 #cython: infer_types=False
-cimport numpy as np
 import numpy as np
 from libc.stdlib cimport malloc, free
 from cython.parallel import prange
@@ -23,14 +22,12 @@ cdef extern from 'bardell_functions_w.hpp':
                   double xi2t, double xi2r) nogil
 
 DOUBLE = np.float64
-ctypedef np.double_t cDOUBLE
 
 cdef int NMAX = 30
 cdef int DOF = 3
 
 
-def fuvw(np.ndarray[cDOUBLE, ndim=1] c, object s,
-        np.ndarray[cDOUBLE, ndim=1] xs, np.ndarray[cDOUBLE, ndim=1] ys,
+def fuvw(double [::1] c, object s, double [::1] xs, double [::1] ys,
         int num_cores=4):
     cdef double a, b
     cdef int m, n
@@ -51,9 +48,9 @@ def fuvw(np.ndarray[cDOUBLE, ndim=1] c, object s,
     y1v = s.y1v; y2v = s.y2v
     y1w = s.y1w; y1wr = s.y1wr; y2w = s.y2w ; y2wr = s.y2wr
 
-    cdef int size_core, pti
-    cdef np.ndarray[cDOUBLE, ndim=2] us, vs, ws, phixs, phiys
-    cdef np.ndarray[cDOUBLE, ndim=2] xs_core, ys_core
+    cdef int size_core, pti, i, j
+    cdef double [:, ::1] us, vs, ws, phixs, phiys
+    cdef double [:, ::1] xs_core, ys_core
 
     size = xs.shape[0]
     add_size = num_cores - (size % num_cores)
@@ -65,8 +62,8 @@ def fuvw(np.ndarray[cDOUBLE, ndim=1] c, object s,
         xs_core = np.ascontiguousarray(np.hstack((xs, np.zeros(add_size))).reshape(num_cores, -1), dtype=DOUBLE)
         ys_core = np.ascontiguousarray(np.hstack((ys, np.zeros(add_size))).reshape(num_cores, -1), dtype=DOUBLE)
     else:
-        xs_core = np.ascontiguousarray(xs.reshape(num_cores, -1), dtype=DOUBLE)
-        ys_core = np.ascontiguousarray(ys.reshape(num_cores, -1), dtype=DOUBLE)
+        xs_core = np.ascontiguousarray(np.reshape(xs, (num_cores, -1)), dtype=DOUBLE)
+        ys_core = np.ascontiguousarray(np.reshape(ys, (num_cores, -1)), dtype=DOUBLE)
 
     size_core = xs_core.shape[1]
 
@@ -97,15 +94,16 @@ def fuvw(np.ndarray[cDOUBLE, ndim=1] c, object s,
              x1w, x1wr, x2w, x2wr,
              y1w, y1wr, y2w, y2wr)
 
-    phixs *= -1.
-    phiys *= -1.
-    return (us.ravel()[:size], vs.ravel()[:size], ws.ravel()[:size],
-            phixs.ravel()[:size], phiys.ravel()[:size])
+    for i in range(num_cores):
+        for j in range(size_core):
+            phixs[i, j] *= -1.
+            phiys[i, j] *= -1.
+    return (np.ravel(us)[:size], np.ravel(vs)[:size], np.ravel(ws)[:size],
+            np.ravel(phixs)[:size], np.ravel(phiys)[:size])
 
 
-def fstrain(np.ndarray[cDOUBLE, ndim=1] c, object s,
-        np.ndarray[cDOUBLE, ndim=1] xs, np.ndarray[cDOUBLE, ndim=1] ys,
-        int num_cores=4, int NLgeom=0):
+def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys, int
+            num_cores=4, int NLgeom=0):
     cdef double a, b, r, alpharad
     cdef int m, n
     cdef double x1u, x2u
@@ -128,8 +126,8 @@ def fstrain(np.ndarray[cDOUBLE, ndim=1] c, object s,
     y1w = s.y1w; y1wr = s.y1wr; y2w = s.y2w ; y2wr = s.y2wr
 
     cdef int size_core, pti
-    cdef np.ndarray[cDOUBLE, ndim=2] exxs, eyys, gxys, kxxs, kyys, kxys
-    cdef np.ndarray[cDOUBLE, ndim=2] xs_core, ys_core
+    cdef double [:, ::1] exxs, eyys, gxys, kxxs, kyys, kxys
+    cdef double [:, ::1] xs_core, ys_core
 
     size = xs.shape[0]
     add_size = num_cores - (size % num_cores)
@@ -141,8 +139,8 @@ def fstrain(np.ndarray[cDOUBLE, ndim=1] c, object s,
         xs_core = np.ascontiguousarray(np.hstack((xs, np.zeros(add_size))).reshape(num_cores, -1), dtype=DOUBLE)
         ys_core = np.ascontiguousarray(np.hstack((ys, np.zeros(add_size))).reshape(num_cores, -1), dtype=DOUBLE)
     else:
-        xs_core = np.ascontiguousarray(xs.reshape(num_cores, -1), dtype=DOUBLE)
-        ys_core = np.ascontiguousarray(ys.reshape(num_cores, -1), dtype=DOUBLE)
+        xs_core = np.ascontiguousarray(np.reshape(xs, (num_cores, -1)), dtype=DOUBLE)
+        ys_core = np.ascontiguousarray(np.reshape(ys, (num_cores, -1)), dtype=DOUBLE)
 
     size_core = xs_core.shape[1]
 
@@ -169,8 +167,8 @@ def fstrain(np.ndarray[cDOUBLE, ndim=1] c, object s,
               y1v, y2v,
               y1w, y1wr, y2w, y2wr, NLgeom)
 
-    return (exxs.ravel()[:size], eyys.ravel()[:size], gxys.ravel()[:size],
-            kxxs.ravel()[:size], kyys.ravel()[:size], kxys.ravel()[:size])
+    return (np.ravel(exxs)[:size], np.ravel(eyys)[:size], np.ravel(gxys)[:size],
+            np.ravel(kxxs)[:size], np.ravel(kyys)[:size], np.ravel(kxys)[:size])
 
 
 cdef void cfuvw(double *c, int m, int n, double a, double b, double *xs,
@@ -304,7 +302,7 @@ cdef void cfwy(double *c, int m, int n, double a, double b, double *xs,
     free(gweta)
 
 
-def fg(double[:,::1] g, double x, double y, object s):
+def fg(double[:, ::1] g, double x, double y, object s):
     cdef int i, j, col
     cdef double xi, eta
     cdef double *fu
