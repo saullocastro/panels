@@ -47,7 +47,9 @@ jobs:
     - name: Test with pytest
       if: env.USE_COVERAGE == 'false'
       run: |
+        cd ..
         python3 -m pytest panels
+        cd panels
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v2
       with:
