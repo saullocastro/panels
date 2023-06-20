@@ -170,7 +170,7 @@ extensions = [
 
 
 FULLVERSION, GIT_REVISION = get_version_info()
-required_libraries = [
+install_requires = [
     'numpy',
     'scipy',
     'matplotlib',
