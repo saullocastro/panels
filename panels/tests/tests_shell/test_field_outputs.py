@@ -1,7 +1,10 @@
+import sys
+sys.path.append('../../..')
 import numpy as np
 
 from structsolve import static
 from panels import Shell
+
 
 def test_panel_field_outputs(plot=False):
     m = 7
