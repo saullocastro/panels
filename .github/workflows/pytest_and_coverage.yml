@@ -31,8 +31,7 @@ jobs:
     - name: Install module
       if: env.USE_COVERAGE == 'false'
       run: |
-        #python3 -m pip install .
-        python3 setup.py install
+        python3 -m pip install .
     - name: Lint with flake8
       run: |
         python3 -m pip install flake8
