@@ -9,7 +9,6 @@ from setuptools.extension import Extension
 
 from Cython.Build import cythonize
 
-import numpy as np
 
 DOCLINES = __doc__.split("\n")
 
