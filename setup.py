@@ -46,7 +46,7 @@ License :: OSI Approved :: BSD License
 MAJOR = 0
 MINOR = 3
 MICRO = 0
-ISRELEASED = False
+ISRELEASED = True
 VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 
 
@@ -191,7 +191,7 @@ setup(
     license = 'BSD',
     url = 'https://github.com/saullocastro/panels',
     classifiers = [_f for _f in CLASSIFIERS.split('\n') if _f],
-    install_requires = required_libraries,
+    install_requires = install_requires,
     ext_modules = ext_modules,
     packages=find_packages(),
 )
