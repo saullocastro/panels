@@ -31,6 +31,7 @@ jobs:
     - name: Install module
       if: env.USE_COVERAGE == 'false'
       run: |
+        python3 -m pip install cython
         python3 -m pip install .
     - name: Lint with flake8
       run: |
