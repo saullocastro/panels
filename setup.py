@@ -175,6 +175,7 @@ install_requires = [
     'matplotlib',
     'composites',
     'structsolve',
+    'cython',
 ]
 write_version_py()
 ext_modules = cythonize(extensions, compiler_directives={'linetrace': True})
