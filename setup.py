@@ -5,7 +5,7 @@ import os
 import inspect
 import subprocess
 from setuptools import setup, find_packages
-from distutils.extension import Extension
+from setuptools.extension import Extension
 
 from Cython.Build import cythonize
 
