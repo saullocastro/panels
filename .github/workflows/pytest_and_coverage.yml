@@ -21,8 +21,8 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        #python3 -m pip install --upgrade pip
-        #python3 -m pip install --upgrade setuptools
+        python3 -m pip install --upgrade pip
+        python3 -m pip install --upgrade setuptools
         python3 -m pip install -r ci_requirements.txt
     - name: Install module for coverage
       if: env.USE_COVERAGE == 'true'
