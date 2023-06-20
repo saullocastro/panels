@@ -131,7 +131,8 @@ extensions = [
             './panels/core/src/legendre_gauss_quadrature.cpp',
             './panels/models/clpt_bardell_field.pyx',
             ],
-        include_dirs=include_dirs, extra_compile_args=compile_args, extra_link_args=link_args, language='c++'),
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, language='c++'),
 # shell models
     Extension('panels.models.plate_clpt_donnell_bardell_num',
         sources=[
@@ -140,7 +141,8 @@ extensions = [
             './panels/core/src/legendre_gauss_quadrature.cpp',
             './panels/models/plate_clpt_donnell_bardell_num.pyx',
             ],
-        include_dirs=include_dirs, extra_compile_args=compile_args, extra_link_args=link_args, language='c++'),
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, language='c++'),
     Extension('panels.models.cylshell_clpt_donnell_bardell_num',
         sources=[
             './panels/core/src/bardell_functions_uv.cpp',
@@ -148,7 +150,8 @@ extensions = [
             './panels/core/src/legendre_gauss_quadrature.cpp',
             './panels/models/cylshell_clpt_donnell_bardell_num.pyx',
             ],
-        include_dirs=include_dirs, extra_compile_args=compile_args, extra_link_args=link_args, language='c++'),
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, language='c++'),
     Extension('panels.models.coneshell_clpt_donnell_bardell_num',
         sources=[
             './panels/core/src/bardell_functions_uv.cpp',
@@ -156,14 +159,16 @@ extensions = [
             './panels/core/src/legendre_gauss_quadrature.cpp',
             './panels/models/coneshell_clpt_donnell_bardell_num.pyx',
             ],
-        include_dirs=include_dirs, extra_compile_args=compile_args, extra_link_args=link_args, language='c++'),
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, language='c++'),
 # numerical integration
     Extension('panels.legendre_gauss_quadrature',
         sources=[
             './panels/core/src/legendre_gauss_quadrature.cpp',
             './panels/legendre_gauss_quadrature.pyx',
             ],
-        include_dirs=include_dirs, extra_compile_args=compile_args, extra_link_args=link_args, language='c++'),
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, language='c++'),
 
     ]
 
@@ -177,8 +182,25 @@ install_requires = [
     'structsolve',
     'cython',
 ]
+
 write_version_py()
-ext_modules = cythonize(extensions, compiler_directives={'linetrace': True})
+
+ext_modules = cythonize(extensions,
+                        compiler_directives={'linetrace': True},
+                        language_level=3,
+                        )
+
+data_files = [('', [
+        'README.md',
+        'LICENSE',
+        ])]
+
+package_data = {
+        'panels': ['*.py', '*.pxd', '*.pyx'],
+        'panels/models': ['*.py', '*.pxd', '*.pyx'],
+        'panels/tests/tests_shell': ['*.py'],
+        }
+
 setup(
     name = 'panels',
     version = FULLVERSION,
@@ -187,11 +209,12 @@ setup(
     description = '\n'.join(DOCLINES),
     long_description = read('README.md'),
     long_description_content_type = 'text/markdown',
-    download_url = 'https://github.com/saullocastro/panels',
-    license = 'BSD',
+    license = '3-Clause BSD',
     url = 'https://github.com/saullocastro/panels',
+    package_data = package_data,
+    data_files = data_files,
     classifiers = [_f for _f in CLASSIFIERS.split('\n') if _f],
     install_requires = install_requires,
     ext_modules = ext_modules,
-    packages=find_packages(),
+    packages = find_packages(),
 )
