@@ -1,14 +1,13 @@
 import sys
-sys.path.append(r'C:\repositories\structsolve')
-from copy import deepcopy
+sys.path.append('../../..')
 
 import numpy as np
+from structsolve import solve
 
-from structsolve import Analysis
 from panels import Shell
 
 
-def test_nonlinear(plot=False):
+def test_nonlinear():
     m = 6
     n = 6
     for model in [
@@ -17,14 +16,10 @@ def test_nonlinear(plot=False):
                   ]:
         print('Testing model: %s' % model)
         s = Shell()
-        an = Analysis(calc_fext=s.calc_fext,
-                      calc_fint=s.calc_fint,
-                      calc_kC=s.calc_kC,
-                      calc_kG=s.calc_kG)
 
         s.model = model
-        s.x1u = 1
-        s.x2u = 0
+        s.x1u = 0
+        s.x2u = 1
 
         s.x1v = 1
         s.x2v = 1
@@ -37,13 +32,13 @@ def test_nonlinear(plot=False):
         s.y1u = 1
         s.y2u = 1
 
-        s.y1v = 0
+        s.y1v = 1
         s.y2v = 1
 
         s.y1w = 0
         s.y1wr = 1
         s.y2w = 0
-        s.y1wr = 1
+        s.y2wr = 1
 
         s.a = 4.
         s.b = 1.
@@ -54,45 +49,67 @@ def test_nonlinear(plot=False):
         E22 = E11/20
         G12 = G13 = G23 = 0.5*E22
         s.laminaprop = (E11, E22, 0.25, G12, G12, G12)
-        s.nx = m
-        s.ny = n
         s.m = m
         s.n = n
+        s.nx = 2*m - 1 # NOTE integration points over x
+        s.ny = 2*n - 1 # NOTE integration points over y
 
-        P = 500
-        Nxx = P/s.b
+        load = 700
+        Nxx = load/s.b
         # distributed axial load
-        s.add_distr_load_fixed_x(0, funcx=None, funcy=lambda y: Nxx,
-                funcz=None, cte=False)
+        s.add_distr_load_fixed_x(s.a, funcx=lambda y: -Nxx, funcy=None, funcz=None, cte=False)
         # perturbation load
-        s.point_loads.append([s.a/2., s.b/2., 0, 0, 0.001])
+        s.add_point_load(s.a/2., s.b/2., 0, 0, 0.001, cte=True)
 
-        an.NL_method = 'NR'
-        an.modified_NR = True
-        an.static(NLgeom=True, silent=True)
-        analysis_newton_raphson = deepcopy(an)
-        print('    Newton-Raphson', an.increments[-1])
-        assert np.isclose(an.increments[-1], 0.545674321, rtol=0.01)
+        # solving using Modified Newton-Raphson method
+        def scaling(vec, D):
+            """
+                A. Peano and R. Riccioni, Automated discretisatton error
+                control in finite element analysis. In Finite Elements m
+                the Commercial Enviror&ent (Editei by J. 26.  Robinson),
+                pp. 368-387. Robinson & Assoc., Verwood.  England (1978)
+            """
+            non_nulls = ~np.isclose(D, 0)
+            vec = vec[non_nulls]
+            D = D[non_nulls]
+            return np.sqrt((vec*np.abs(1/D))@vec)
 
-        an.maxArcLength = 8
-        an.NL_method = 'arc_length_riks'
-        an.modified_NR = True
-        an.static(NLgeom=True, silent=True)
-        analysis_arc_length = deepcopy(an)
-        print('    Arc-Length', an.increments[-1])
-        assert np.isclose(an.increments[-1], 0.27193678, rtol=0.01)
+        #initial
+        fext = s.calc_fext()
+        c0 = solve(s.calc_kC(), fext, silent=True)
+        plot_mesh, fields = s.uvw(c=c0)
+        print('  linear wmax', fields['w'].max())
+        assert np.isclose(fields['w'].max(), 0.0026277, rtol=0.01)
 
-        if plot:
-            import matplotlib
-            matplotlib.use('TkAgg')
-            import matplotlib.pyplot as plt
-            wmaxs = [s.uvw(c)[1]['w'].max() for c in analysis_newton_raphson.cs]
-            plt.plot(wmaxs, analysis_newton_raphson.increments, label='NR')
-            wmaxs = [s.uvw(c)[1]['w'].max() for c in analysis_arc_length.cs]
-            plt.plot(wmaxs, analysis_arc_length.increments, '--',
-                    label='Arc-Length')
-            plt.legend()
-            plt.show()
+        count = 0
+        N = s.get_size()
+        fint = s.calc_fint(c=c0)
+        Ri = fint - fext
+        dc = np.zeros(N)
+        ci = c0.copy()
+        epsilon = 1.e-3
+        KT = s.calc_kT(c=c0)
+        D = s.calc_kC().diagonal() # at beginning of load increment
+        while True:
+            #print('  count', count)
+            dc = solve(KT, -Ri, silent=True)
+            c = ci + dc
+            fint = np.asarray(s.calc_fint(c=c))
+            crisfield_test = scaling(Ri, D)/max(scaling(fext, D), scaling(fint, D))
+            #print('    crisfield_test', crisfield_test)
+            if crisfield_test < epsilon:
+                #print('    converged')
+                break
+            count += 1
+            KT = s.calc_kT(c=c)
+            ci = c.copy()
+            if count > 1000:
+                raise RuntimeError('Not converged!')
+
+        plot_mesh, fields = s.uvw(c=c)
+        print('  nonlinear wmax', fields['w'].max())
+        assert np.isclose(fields['w'].max(), 0.10794, rtol=0.01)
+
 
 if __name__ == '__main__':
-    test_nonlinear(plot=True)
+    test_nonlinear()
