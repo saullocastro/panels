@@ -29,7 +29,7 @@ cdef extern from 'legendre_gauss_quadrature.hpp':
 
 
 DOUBLE = np.float64
-INT = np.int64
+INT = long
 
 cdef int num = 3
 
