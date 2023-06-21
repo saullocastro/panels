@@ -84,6 +84,7 @@ def fkC_num(double [::1] cs, object Finput, object shell,
 
     if not 'Shell' in shell.__class__.__name__:
         raise ValueError('a Shell object must be given as input')
+
     a = shell.a
     b = shell.b
     m = shell.m
@@ -956,7 +957,7 @@ def calc_fint(double [::1] cs, object Finput, object shell,
     cdef double y1v, y2v
     cdef double y1w, y1wr, y2w, y2wr
 
-    cdef int i, j, c, col, ptx, pty
+    cdef int i, j, col, ptx, pty
     cdef double A11, A12, A16, A22, A26, A66
     cdef double B11, B12, B16, B22, B26, B66
     cdef double D11, D12, D16, D22, D26, D66
@@ -995,6 +996,7 @@ def calc_fint(double [::1] cs, object Finput, object shell,
 
     if not 'Shell' in shell.__class__.__name__:
         raise ValueError('a Shell object must be given as input')
+
     a = shell.a
     b = shell.b
     m = shell.m
@@ -1151,6 +1153,7 @@ def calc_fint(double [::1] cs, object Finput, object shell,
                     gAw = fw(j, eta, y1w, y1wr, y2w, y2wr)
                     gAweta = fw_x(j, eta, y1w, y1wr, y2w, y2wr)
                     gAwetaeta = fw_xx(j, eta, y1w, y1wr, y2w, y2wr)
+
                     for i in range(m):
                         fAu = fuv(i, xi, x1u, x2u)
                         fAuxi = fuv_x(i, xi, x1u, x2u)
