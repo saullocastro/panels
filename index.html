@@ -1,22 +1,22 @@
-
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Documentation for the panels module &#8212; panels 0.2.15 documentation</title>
+    <title>Semi-analytical methods for plates and shells &#8212; panels 0.3.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/classic.css" />
     
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Bardell’s Hierarchical Functions" href="bardell.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
@@ -27,8 +27,11 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="#">panels 0.2.15 documentation</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">Documentation for the <span class="math">panels</span> module</a></li> 
+        <li class="right" >
+          <a href="bardell.html" title="Bardell’s Hierarchical Functions"
+             accesskey="N">next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">panels 0.3.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Semi-analytical methods for plates and shells</a></li> 
       </ul>
     </div>  
 
@@ -38,26 +41,26 @@
           <div class="body" role="main">
             
   <section id="module-panels">
-<span id="documentation-for-the-panels-module"></span><h1>Documentation for the <span class="math">panels</span> module<a class="headerlink" href="#module-panels" title="Permalink to this headline">¶</a></h1>
+<span id="semi-analytical-methods-for-plates-and-shells"></span><h1>Semi-analytical methods for plates and shells<a class="headerlink" href="#module-panels" title="Permalink to this heading">¶</a></h1>
 <section id="semi-analytical-models-for-plates-shells-and-panels-panels">
-<h2>Semi-analytical models for plates, shells and panels (<a class="reference internal" href="#module-panels" title="panels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">panels</span></code></a>)<a class="headerlink" href="#semi-analytical-models-for-plates-shells-and-panels-panels" title="Permalink to this headline">¶</a></h2>
+<h2>Semi-analytical models for plates, shells and panels (<a class="reference internal" href="#module-panels" title="panels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">panels</span></code></a>)<a class="headerlink" href="#semi-analytical-models-for-plates-shells-and-panels-panels" title="Permalink to this heading">¶</a></h2>
 <p>Models for plates, shells, stiffened panels, single or multi-domain are
 available in this package.</p>
 <span class="target" id="module-panels.shell"></span><dl class="py class">
 <dt class="sig sig-object py" id="panels.shell.Shell">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">panels.shell.</span></span><span class="sig-name descname"><span class="pre">Shell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alphadeg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stack</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plyt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">laminaprop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">11</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">11</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.shell.Shell" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">panels.shell.</span></span><span class="sig-name descname"><span class="pre">Shell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alphadeg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stack</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plyt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">laminaprop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">11</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">11</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.shell.Shell" title="Permalink to this definition">¶</a></dt>
 <dd><p>General shell class that can be used for plates or shells</p>
 <p>It works for both plates, cylindrical and conical shells. The right
 model is selected according to parameters <code class="docutils literal notranslate"><span class="pre">r</span></code> (radius) and <code class="docutils literal notranslate"><span class="pre">alphadeg</span></code>
 (semi-vertex angle).</p>
 <p>The approximation functions for the displacement fields are built using
-<span class="xref std std-ref">Bardell’s functions</span>.</p>
+<a class="reference internal" href="bardell.html#theory-func-bardell"><span class="std std-ref">Bardell’s functions</span></a>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>a</strong><span class="classifier">float, optional</span></dt><dd><p>Length (along the <span class="math">x</span> coordinate).</p>
+<dt><strong>a</strong><span class="classifier">float, optional</span></dt><dd><p>Length (along the <span class="math notranslate nohighlight">\(x\)</span> coordinate).</p>
 </dd>
-<dt><strong>b</strong><span class="classifier">float, optional</span></dt><dd><p>Width (along the <span class="math">y</span> coordinate).</p>
+<dt><strong>b</strong><span class="classifier">float, optional</span></dt><dd><p>Width (along the <span class="math notranslate nohighlight">\(y\)</span> coordinate).</p>
 </dd>
 <dt><strong>r</strong><span class="classifier">float, optional</span></dt><dd><p>Radius for cylindrical shell.</p>
 </dd>
@@ -67,19 +70,19 @@ model is selected according to parameters <code class="docutils literal notransl
 </dd>
 <dt><strong>plyt</strong><span class="classifier">float, optional</span></dt><dd><p>Ply thickness.</p>
 </dd>
-<dt><strong>laminaprop</strong><span class="classifier">list or tuple, optional</span></dt><dd><p>Orthotropic lamina properties: <span class="math">E_1, E_2, \nu_{12}, G_{12}, G_{13}, G_{23}</span>.</p>
+<dt><strong>laminaprop</strong><span class="classifier">list or tuple, optional</span></dt><dd><p>Orthotropic lamina properties: <span class="math notranslate nohighlight">\(E_1, E_2, \nu_{12}, G_{12}, G_{13}, G_{23}\)</span>.</p>
 </dd>
 <dt><strong>rho</strong><span class="classifier">float, optional</span></dt><dd><p>Material density.</p>
 </dd>
-<dt><strong>m, n</strong><span class="classifier">int, optional</span></dt><dd><p>Number of terms for the approximation functions along <span class="math">x</span> and <span class="math">y</span>,
+<dt><strong>m, n</strong><span class="classifier">int, optional</span></dt><dd><p>Number of terms for the approximation functions along <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span>,
 respectively.</p>
 </dd>
 <dt><strong>offset</strong><span class="classifier">float, optional</span></dt><dd><p>Laminate offset about shell mid-surface. The offset is measured along
-the normal (<span class="math">z</span>) axis.</p>
+the normal (<span class="math notranslate nohighlight">\(z\)</span>) axis.</p>
 </dd>
 </dl>
 </dd>
-<dt class="field-even">Attributes</dt>
+<dt class="field-even">Attributes<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
 <dt><strong>F</strong></dt><dd></dd>
 <dt><strong>Mach</strong></dt><dd></dd>
@@ -162,11 +165,7 @@ the normal (<span class="math">z</span>) axis.</p>
 </dd>
 </dl>
 <p class="rubric">Methods</p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
+<table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#panels.shell.Shell.add_distr_load_fixed_x" title="panels.shell.Shell.add_distr_load_fixed_x"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_distr_load_fixed_x</span></code></a>(x[, funcx, funcy, ...])</p></td>
 <td><p>Add a distributed force g(y) at a fixed x position</p></td>
@@ -181,10 +180,10 @@ the normal (<span class="math">z</span>) axis.</p>
 <td><p>Calculate the aerodynamic damping matrix using the piston theory</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#panels.shell.Shell.calc_fext" title="panels.shell.Shell.calc_fext"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_fext</span></code></a>([inc, size, col0, silent])</p></td>
-<td><p>Calculate the external force vector <span class="math">\{F_{ext}\}</span></p></td>
+<td><p>Calculate the external force vector <span class="math notranslate nohighlight">\(\{F_{ext}\}\)</span></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#panels.shell.Shell.calc_fint" title="panels.shell.Shell.calc_fint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_fint</span></code></a>(c[, size, col0, silent, nx, ny, Fnxny])</p></td>
-<td><p>Calculate the internal force vector <span class="math">\{F_{int}\}</span></p></td>
+<td><p>Calculate the internal force vector <span class="math notranslate nohighlight">\(\{F_{int}\}\)</span></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#panels.shell.Shell.calc_kA" title="panels.shell.Shell.calc_kA"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_kA</span></code></a>([size, row0, col0, silent, finalize])</p></td>
 <td><p>Calculate the aerodynamic matrix using the linear piston theory</p></td>
@@ -219,10 +218,6 @@ the normal (<span class="math">z</span>) axis.</p>
 </tbody>
 </table>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 52%" />
-<col style="width: 48%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><strong>calc_kT</strong></p></td>
 <td></td>
@@ -234,12 +229,12 @@ the normal (<span class="math">z</span>) axis.</p>
 <span class="sig-name descname"><span class="pre">add_distr_load_fixed_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">funcx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">funcy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">funcz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.shell.Shell.add_distr_load_fixed_x" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a distributed force g(y) at a fixed x position</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>x</strong><span class="classifier">float</span></dt><dd><p>The fixed <span class="math">x</span> position.</p>
+<dt><strong>x</strong><span class="classifier">float</span></dt><dd><p>The fixed <span class="math notranslate nohighlight">\(x\)</span> position.</p>
 </dd>
 <dt><strong>funcx, funcy, funcz</strong><span class="classifier">function, optional</span></dt><dd><p>The functions of the distributed force components, will be used
-from <span class="math">y=0</span> to <span class="math">y=b</span>. At least one of the three must be defined</p>
+from <span class="math notranslate nohighlight">\(y=0\)</span> to <span class="math notranslate nohighlight">\(y=b\)</span>. At least one of the three must be defined</p>
 </dd>
 <dt><strong>cte</strong><span class="classifier">bool, optional</span></dt><dd><p>Constant forces are not incremented during the non-linear
 analysis.</p>
@@ -254,12 +249,12 @@ analysis.</p>
 <span class="sig-name descname"><span class="pre">add_distr_load_fixed_y</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">funcx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">funcy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">funcz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.shell.Shell.add_distr_load_fixed_y" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a distributed force g(x) at a fixed y position</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>y</strong><span class="classifier">float</span></dt><dd><p>The fixed <span class="math">y</span> position.</p>
+<dt><strong>y</strong><span class="classifier">float</span></dt><dd><p>The fixed <span class="math notranslate nohighlight">\(y\)</span> position.</p>
 </dd>
 <dt><strong>funcx, funcy, funcz</strong><span class="classifier">function, optional</span></dt><dd><p>The functions of the distributed force components, will be used
-from <span class="math">x=0</span> to <span class="math">x=a</span>. At least one of the three must be defined</p>
+from <span class="math notranslate nohighlight">\(x=0\)</span> to <span class="math notranslate nohighlight">\(x=a\)</span>. At least one of the three must be defined</p>
 </dd>
 <dt><strong>cte</strong><span class="classifier">bool, optional</span></dt><dd><p>Constant forces are not incremented during the non-linear
 analysis.</p>
@@ -274,17 +269,17 @@ analysis.</p>
 <span class="sig-name descname"><span class="pre">add_point_load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.shell.Shell.add_point_load" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a point load with three components</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>x</strong><span class="classifier">float</span></dt><dd><p>The <span class="math">x</span> position.</p>
+<dt><strong>x</strong><span class="classifier">float</span></dt><dd><p>The <span class="math notranslate nohighlight">\(x\)</span> position.</p>
 </dd>
-<dt><strong>y</strong><span class="classifier">float</span></dt><dd><p>The <span class="math">y</span> position in radians.</p>
+<dt><strong>y</strong><span class="classifier">float</span></dt><dd><p>The <span class="math notranslate nohighlight">\(y\)</span> position in radians.</p>
 </dd>
-<dt><strong>fx</strong><span class="classifier">float</span></dt><dd><p>The <span class="math">x</span> component of the force vector.</p>
+<dt><strong>fx</strong><span class="classifier">float</span></dt><dd><p>The <span class="math notranslate nohighlight">\(x\)</span> component of the force vector.</p>
 </dd>
-<dt><strong>fy</strong><span class="classifier">float</span></dt><dd><p>The <span class="math">y</span> component of the force vector.</p>
+<dt><strong>fy</strong><span class="classifier">float</span></dt><dd><p>The <span class="math notranslate nohighlight">\(y\)</span> component of the force vector.</p>
 </dd>
-<dt><strong>fz</strong><span class="classifier">float</span></dt><dd><p>The <span class="math">z</span> component of the force vector.</p>
+<dt><strong>fz</strong><span class="classifier">float</span></dt><dd><p>The <span class="math notranslate nohighlight">\(z\)</span> component of the force vector.</p>
 </dd>
 <dt><strong>cte</strong><span class="classifier">bool, optional</span></dt><dd><p>Constant forces are not incremented during the non-linear
 analysis.</p>
@@ -303,17 +298,17 @@ analysis.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="panels.shell.Shell.calc_fext">
 <span class="sig-name descname"><span class="pre">calc_fext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.shell.Shell.calc_fext" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate the external force vector <span class="math">\{F_{ext}\}</span></p>
+<dd><p>Calculate the external force vector <span class="math notranslate nohighlight">\(\{F_{ext}\}\)</span></p>
 <p>Recall that:</p>
-<div class="math">
-<p><span class="math">\{F_{ext}\}=\{{F_{ext}}_0\} + \{{F_{ext}}_\lambda\}</span></p>
-</div><p>such that the terms in <span class="math">\{{F_{ext}}_0\}</span> are constant and the terms in
-<span class="math">\{{F_{ext}}_\lambda\}</span> will be scaled by the parameter <code class="docutils literal notranslate"><span class="pre">inc</span></code>.</p>
+<div class="math notranslate nohighlight">
+\[\{F_{ext}\}=\{{F_{ext}}_0\} + \{{F_{ext}}_\lambda\}\]</div>
+<p>such that the terms in <span class="math notranslate nohighlight">\(\{{F_{ext}}_0\}\)</span> are constant and the terms in
+<span class="math notranslate nohighlight">\(\{{F_{ext}}_\lambda\}\)</span> will be scaled by the parameter <code class="docutils literal notranslate"><span class="pre">inc</span></code>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>inc</strong><span class="classifier">float, optional</span></dt><dd><p>Since this function is called during the non-linear analysis,
-<code class="docutils literal notranslate"><span class="pre">inc</span></code> will multiply the terms <span class="math">\{{F_{ext}}_\lambda\}</span>.</p>
+<code class="docutils literal notranslate"><span class="pre">inc</span></code> will multiply the terms <span class="math notranslate nohighlight">\(\{{F_{ext}}_\lambda\}\)</span>.</p>
 </dd>
 <dt><strong>size</strong><span class="classifier">int or str, optional</span></dt><dd><p>The size of the force vector. Can be the size of a global internal
 force vector of an assembly. When using a string, for example, if
@@ -326,7 +321,7 @@ force vector of an assembly. When using a string, for example, if
 </dd>
 </dl>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
 <dt><strong>fext</strong><span class="classifier">np.ndarray</span></dt><dd><p>The external force vector</p>
 </dd>
@@ -338,9 +333,9 @@ force vector of an assembly. When using a string, for example, if
 <dl class="py method">
 <dt class="sig sig-object py" id="panels.shell.Shell.calc_fint">
 <span class="sig-name descname"><span class="pre">calc_fint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ny</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Fnxny</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.shell.Shell.calc_fint" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate the internal force vector <span class="math">\{F_{int}\}</span></p>
+<dd><p>Calculate the internal force vector <span class="math notranslate nohighlight">\(\{F_{int}\}\)</span></p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>c</strong><span class="classifier">np.ndarray</span></dt><dd><p>The Ritz constants vector to be used for the internal forces
 calculation.</p>
@@ -354,16 +349,16 @@ obtained by the <a href="#id3"><span class="problematic" id="id4">:method:`.Shel
 </dd>
 <dt><strong>silent</strong><span class="classifier">bool, optional</span></dt><dd><p>A boolean to tell whether the log messages should be printed.</p>
 </dd>
-<dt><strong>nx</strong><span class="classifier">int, optional</span></dt><dd><p>Number of integration points along <span class="math">x</span>.</p>
+<dt><strong>nx</strong><span class="classifier">int, optional</span></dt><dd><p>Number of integration points along <span class="math notranslate nohighlight">\(x\)</span>.</p>
 </dd>
-<dt><strong>ny</strong><span class="classifier">int, optional</span></dt><dd><p>Number of integration points along <span class="math">y</span>.</p>
+<dt><strong>ny</strong><span class="classifier">int, optional</span></dt><dd><p>Number of integration points along <span class="math notranslate nohighlight">\(y\)</span>.</p>
 </dd>
 <dt><strong>Fnxny</strong><span class="classifier">np.ndarray, optional</span></dt><dd><p>Laminate stiffness for each integration point, if not supplied it
 will assume constant properties over the shell domain.</p>
 </dd>
 </dl>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
 <dt><strong>fint</strong><span class="classifier">np.ndarray</span></dt><dd><p>The internal force vector</p>
 </dd>
@@ -391,7 +386,7 @@ calculated may have the <code class="docutils literal notranslate"><span class="
 current constitutive matrix being calculated starts at position
 <code class="docutils literal notranslate"><span class="pre">row0</span></code> and <code class="docutils literal notranslate"><span class="pre">col0</span></code>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>size</strong><span class="classifier">int or str, optional</span></dt><dd><p>The size of the calculated sparse matrices. When using a string,
 for example, if ‘+1’ is given it will add 1 to the Shell`s size
@@ -411,7 +406,7 @@ non-linear terms based on the actual displacement field.</p>
 <dt><strong>c_cte</strong><span class="classifier">array-like or None, optional</span></dt><dd><p>This must be the result of a static analysis, used to compute
 initial stress state not affected by the load multiplier.</p>
 </dd>
-<dt><strong>nx, ny</strong><span class="classifier">int or None, optional</span></dt><dd><p>Number of integration points along <span class="math">x</span> and <span class="math">y</span>, respectively, for
+<dt><strong>nx, ny</strong><span class="classifier">int or None, optional</span></dt><dd><p>Number of integration points along <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span>, respectively, for
 the Legendre-Gauss quadrature rule applied in the numerical
 integration. Only used when <code class="docutils literal notranslate"><span class="pre">c</span></code> is given.</p>
 </dd>
@@ -439,7 +434,7 @@ considered.</p>
 <span class="sig-name descname"><span class="pre">calc_kM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h_nxny</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho_nxny</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ny</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">finalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.shell.Shell.calc_kM" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the mass matrix</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>h_nxny</strong><span class="classifier">(nx, ny) array-like or None, optional</span></dt><dd><p>The constitutive relations for the laminate at each integration
 point.</p>
@@ -460,7 +455,7 @@ calculate <code class="docutils literal notranslate"><span class="pre">rho</span
 <p>This can used to create different types of support and boundary
 conditions.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>x, y</strong><span class="classifier">float</span></dt><dd><p>Coordinates of the point contraint</p>
 </dd>
@@ -470,11 +465,11 @@ conditions.</p>
 </dd>
 <dt><strong>kuvw</strong><span class="classifier">float, optional</span></dt><dd><p>Penalty constant used for the translational constraints</p>
 </dd>
-<dt><strong>kphi :</strong></dt><dd><p>Penalty constant used for the rotational constraints</p>
+<dt><strong>kphi</strong></dt><dd><p>Penalty constant used for the rotational constraints</p>
 </dd>
 </dl>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
 <dt><strong>kPC</strong><span class="classifier">csr_matrix</span></dt><dd><p>Stiffness matrix concenrning this point constraint. It must be added
 to the constitutive stiffness matrix in order to be taken into
@@ -491,10 +486,10 @@ account in the calculations.</p>
 <dd><p>Calculate the size of the stiffness matrices</p>
 <p>The size of the stiffness matrices can be interpreted as the number of
 rows or columns, recalling that this will be the size of the Ritz
-constants’ vector <span class="math">\{c\}</span>, the internal force vector <span class="math">\{F_{int}\}</span> and
-the external force vector <span class="math">\{F_{ext}\}</span>.</p>
+constants’ vector <span class="math notranslate nohighlight">\(\{c\}\)</span>, the internal force vector <span class="math notranslate nohighlight">\(\{F_{int}\}\)</span> and
+the external force vector <span class="math notranslate nohighlight">\(\{F_{ext}\}\)</span>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>size</strong><span class="classifier">int</span></dt><dd><p>The size of the stiffness matrices. Can be the size of a global
 internal force vector of an assembly. When using a string, for
@@ -520,14 +515,14 @@ followed by a <code class="docutils literal notranslate"><span class="pre">'.She
 <span class="sig-name descname"><span class="pre">strain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gridx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gridy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NLgeom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.shell.Shell.strain" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the strain field</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>c</strong><span class="classifier">np.ndarray</span></dt><dd><p>The Ritz constants vector to be used for the strain field
 calculation.</p>
 </dd>
-<dt><strong>xs</strong><span class="classifier">np.ndarray, optional</span></dt><dd><p>The <span class="math">x</span> coordinates where to calculate the strains.</p>
+<dt><strong>xs</strong><span class="classifier">np.ndarray, optional</span></dt><dd><p>The <span class="math notranslate nohighlight">\(x\)</span> coordinates where to calculate the strains.</p>
 </dd>
-<dt><strong>ys</strong><span class="classifier">np.ndarray, optional</span></dt><dd><p>The <span class="math">y</span> coordinates where to calculate the strains, must
+<dt><strong>ys</strong><span class="classifier">np.ndarray, optional</span></dt><dd><p>The <span class="math notranslate nohighlight">\(y\)</span> coordinates where to calculate the strains, must
 have the same shape as <code class="docutils literal notranslate"><span class="pre">xs</span></code>.</p>
 </dd>
 <dt><strong>gridx</strong><span class="classifier">int, optional</span></dt><dd><p>When <code class="docutils literal notranslate"><span class="pre">xs</span></code> and <code class="docutils literal notranslate"><span class="pre">ys</span></code> are not supplied, <code class="docutils literal notranslate"><span class="pre">gridx</span></code> and <code class="docutils literal notranslate"><span class="pre">gridy</span></code>
@@ -540,7 +535,7 @@ are used.</p>
 </dd>
 </dl>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
 <dt><strong>res</strong><span class="classifier">dict</span></dt><dd><p>A dictionary of <code class="docutils literal notranslate"><span class="pre">np.ndarrays</span></code> with the keys:
 <code class="docutils literal notranslate"><span class="pre">(x,</span> <span class="pre">y,</span> <span class="pre">exx,</span> <span class="pre">eyy,</span> <span class="pre">gxy,</span> <span class="pre">kxx,</span> <span class="pre">kyy,</span> <span class="pre">kxy)</span></code></p>
@@ -555,7 +550,7 @@ are used.</p>
 <span class="sig-name descname"><span class="pre">stress</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">F</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gridx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gridy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NLgeom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.shell.Shell.stress" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the stress field</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>c</strong><span class="classifier">np.ndarray</span></dt><dd><p>The Ritz constants vector to be used for the strain field
 calculation.</p>
@@ -563,9 +558,9 @@ calculation.</p>
 <dt><strong>F</strong><span class="classifier">np.ndarray, optional</span></dt><dd><p>The laminate stiffness matrix. Can be a 6 x 6 (ABD) matrix for
 homogeneous laminates over the whole domain.</p>
 </dd>
-<dt><strong>xs</strong><span class="classifier">np.ndarray, optional</span></dt><dd><p>The <span class="math">x</span> coordinates where to calculate the strains.</p>
+<dt><strong>xs</strong><span class="classifier">np.ndarray, optional</span></dt><dd><p>The <span class="math notranslate nohighlight">\(x\)</span> coordinates where to calculate the strains.</p>
 </dd>
-<dt><strong>ys</strong><span class="classifier">np.ndarray, optional</span></dt><dd><p>The <span class="math">y</span> coordinates where to calculate the strains, must
+<dt><strong>ys</strong><span class="classifier">np.ndarray, optional</span></dt><dd><p>The <span class="math notranslate nohighlight">\(y\)</span> coordinates where to calculate the strains, must
 have the same shape as <code class="docutils literal notranslate"><span class="pre">xs</span></code>.</p>
 </dd>
 <dt><strong>gridx</strong><span class="classifier">int, optional</span></dt><dd><p>When <code class="docutils literal notranslate"><span class="pre">xs</span></code> and <code class="docutils literal notranslate"><span class="pre">ys</span></code> are not supplied, <code class="docutils literal notranslate"><span class="pre">gridx</span></code> and <code class="docutils literal notranslate"><span class="pre">gridy</span></code>
@@ -578,7 +573,7 @@ are used.</p>
 </dd>
 </dl>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
 <dt><strong>res</strong><span class="classifier">dict</span></dt><dd><p>A dictionary of <code class="docutils literal notranslate"><span class="pre">np.ndarrays</span></code> with the keys:
 <code class="docutils literal notranslate"><span class="pre">(x,</span> <span class="pre">y,</span> <span class="pre">Nxx,</span> <span class="pre">Nyy,</span> <span class="pre">Nxy,</span> <span class="pre">Mxx,</span> <span class="pre">Myy,</span> <span class="pre">Mxy)</span></code></p>
@@ -596,25 +591,25 @@ are used.</p>
 field is calculated and stored in the <code class="docutils literal notranslate"><span class="pre">fields</span></code> parameter of the
 <code class="xref py py-class docutils literal notranslate"><span class="pre">Shell`</span></code> object.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>c</strong><span class="classifier">float</span></dt><dd><p>The full set of Ritz constants</p>
 </dd>
-<dt><strong>xs</strong><span class="classifier">np.ndarray</span></dt><dd><p>The <span class="math">x</span> positions where to calculate the displacement field.
+<dt><strong>xs</strong><span class="classifier">np.ndarray</span></dt><dd><p>The <span class="math notranslate nohighlight">\(x\)</span> positions where to calculate the displacement field.
 Default is <code class="docutils literal notranslate"><span class="pre">None</span></code> and the method <code class="docutils literal notranslate"><span class="pre">_default_field</span></code> is used.</p>
 </dd>
 <dt><strong>ys</strong><span class="classifier">np.ndarray</span></dt><dd><p>The <code class="docutils literal notranslate"><span class="pre">y</span></code> positions where to calculate the displacement field.
 Default is <code class="docutils literal notranslate"><span class="pre">None</span></code> and the method <code class="docutils literal notranslate"><span class="pre">_default_field</span></code> is used.</p>
 </dd>
-<dt><strong>gridx</strong><span class="classifier">int</span></dt><dd><p>Number of points along the <span class="math">x</span> axis where to calculate the
+<dt><strong>gridx</strong><span class="classifier">int</span></dt><dd><p>Number of points along the <span class="math notranslate nohighlight">\(x\)</span> axis where to calculate the
 displacement field.</p>
 </dd>
-<dt><strong>gridy</strong><span class="classifier">int</span></dt><dd><p>Number of points along the <span class="math">y</span> where to calculate the
+<dt><strong>gridy</strong><span class="classifier">int</span></dt><dd><p>Number of points along the <span class="math notranslate nohighlight">\(y\)</span> where to calculate the
 displacement field.</p>
 </dd>
 </dl>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
 <dt><strong>out</strong><span class="classifier">tuple</span></dt><dd><p>Containing <code class="docutils literal notranslate"><span class="pre">plot_mesh</span></code> and <code class="docutils literal notranslate"><span class="pre">fields</span></code></p>
 </dd>
@@ -630,7 +625,7 @@ displacement field.</p>
 <span class="sig-prename descclassname"><span class="pre">panels.plot_shell.</span></span><span class="sig-name descname"><span class="pre">plot_shell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">invert_y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'w'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deform_u</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deform_u_sf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(3.5,</span> <span class="pre">2.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colorbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_nticks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'jet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aspect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'equal'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clean</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">400</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">texts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gridx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gridy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">400</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vecmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vecmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_offset_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_offset_y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NLgeom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.plot_shell.plot_shell" title="Permalink to this definition">¶</a></dt>
 <dd><p>Contour plot for a Ritz constants vector.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>c</strong><span class="classifier">array_like</span></dt><dd><p>The Ritz constants that will be used to compute the field contour.</p>
 </dd>
@@ -647,14 +642,14 @@ displacement field.</p>
 </dd>
 <dt><strong>deform_u_sf</strong><span class="classifier">float, optional</span></dt><dd><p>The scaling factor used to deform the contour.</p>
 </dd>
-<dt><strong>invert_y</strong><span class="classifier">bool, optional</span></dt><dd><p>Inverts the <span class="math">y</span> axis of the plot.</p>
+<dt><strong>invert_y</strong><span class="classifier">bool, optional</span></dt><dd><p>Inverts the <span class="math notranslate nohighlight">\(y\)</span> axis of the plot.</p>
 </dd>
 <dt><strong>save</strong><span class="classifier">bool, optional</span></dt><dd><p>Flag telling whether the contour should be saved to an image file.</p>
 </dd>
 <dt><strong>dpi</strong><span class="classifier">int, optional</span></dt><dd><p>Resolution of the saved file in dots per inch.</p>
 </dd>
 <dt><strong>filename</strong><span class="classifier">str, optional</span></dt><dd><p>The file name for the generated image file. If no value is given,
-the <span class="math">name</span> parameter of the <code class="docutils literal notranslate"><span class="pre">Shell</span></code> object will be used.</p>
+the <span class="math notranslate nohighlight">\(name\)</span> parameter of the <code class="docutils literal notranslate"><span class="pre">Shell</span></code> object will be used.</p>
 </dd>
 <dt><strong>ax</strong><span class="classifier">AxesSubplot, optional</span></dt><dd><p>When <code class="docutils literal notranslate"><span class="pre">ax</span></code> is given, the contour plot will be created inside it.</p>
 </dd>
@@ -679,16 +674,16 @@ method.</p>
 </dd>
 <dt><strong>clean</strong><span class="classifier">bool, optional</span></dt><dd><p>Clean axes ticks, grids, spines etc.</p>
 </dd>
-<dt><strong>xs</strong><span class="classifier">array_like, optional</span></dt><dd><p>The <span class="math">x</span> positions where to calculate the displacement field.
+<dt><strong>xs</strong><span class="classifier">array_like, optional</span></dt><dd><p>The <span class="math notranslate nohighlight">\(x\)</span> positions where to calculate the displacement field.
 Default is <code class="docutils literal notranslate"><span class="pre">None</span></code> and the method <code class="docutils literal notranslate"><span class="pre">_default_field</span></code> is used.</p>
 </dd>
 <dt><strong>ys</strong><span class="classifier">array_like, optional</span></dt><dd><p>The <code class="docutils literal notranslate"><span class="pre">y</span></code> positions where to calculate the displacement field.
 Default is <code class="docutils literal notranslate"><span class="pre">None</span></code> and the method <code class="docutils literal notranslate"><span class="pre">_default_field</span></code> is used.</p>
 </dd>
-<dt><strong>gridx</strong><span class="classifier">int, optional</span></dt><dd><p>Number of points along the <span class="math">x</span> axis where to calculate the
+<dt><strong>gridx</strong><span class="classifier">int, optional</span></dt><dd><p>Number of points along the <span class="math notranslate nohighlight">\(x\)</span> axis where to calculate the
 displacement field.</p>
 </dd>
-<dt><strong>gridy</strong><span class="classifier">int, optional</span></dt><dd><p>Number of points along the <span class="math">y</span> where to calculate the
+<dt><strong>gridy</strong><span class="classifier">int, optional</span></dt><dd><p>Number of points along the <span class="math notranslate nohighlight">\(y\)</span> where to calculate the
 displacement field.</p>
 </dd>
 <dt><strong>num_levels</strong><span class="classifier">int, optional</span></dt><dd><p>Number of contour levels (higher values make the contour smoother).</p>
@@ -701,7 +696,7 @@ field.</p>
 </dd>
 </dl>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
 <dt><strong>ax</strong><span class="classifier">matplotlib.axes.Axes</span></dt><dd><p>The Matplotlib object that can be used to modify the current plot
 if needed.</p>
@@ -712,9 +707,27 @@ if needed.</p>
 </dd></dl>
 
 </section>
+<p>Capabilities:</p>
+<ul class="simple">
+<li><p>linear buckling</p></li>
+<li><p>nonlinear postbuckling analysis</p></li>
+<li><p>static</p></li>
+<li><p>vibration</p></li>
+<li><p>panel flutter</p></li>
+</ul>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="bardell.html">Bardell’s Hierarchical Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ref.html">References</a></li>
+</ul>
+</div>
+<section id="code-repository">
+<h2>Code repository<a class="headerlink" href="#code-repository" title="Permalink to this heading">¶</a></h2>
+<p><a class="reference external" href="https://github.com/saullocastro/panels">https://github.com/saullocastro/panels</a></p>
+</section>
 <section id="license">
-<h2>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Copyright</span> <span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="mi">2012</span><span class="o">-</span><span class="mi">2021</span><span class="p">,</span> <span class="n">Saullo</span> <span class="n">G</span><span class="o">.</span> <span class="n">P</span><span class="o">.</span> <span class="n">Castro</span> <span class="p">(</span><span class="n">S</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">P</span><span class="o">.</span><span class="n">Castro</span><span class="nd">@tudelft</span><span class="o">.</span><span class="n">nl</span><span class="p">)</span><span class="o">.</span>
+<h2>License<a class="headerlink" href="#license" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Copyright</span> <span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="mi">2012</span><span class="o">-</span><span class="mi">2023</span><span class="p">,</span> <span class="n">Saullo</span> <span class="n">G</span><span class="o">.</span> <span class="n">P</span><span class="o">.</span> <span class="n">Castro</span> <span class="p">(</span><span class="n">S</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">P</span><span class="o">.</span><span class="n">Castro</span><span class="nd">@tudelft</span><span class="o">.</span><span class="n">nl</span><span class="p">)</span><span class="o">.</span>
 <span class="n">All</span> <span class="n">rights</span> <span class="n">reserved</span><span class="o">.</span>
 
 <span class="n">Redistribution</span> <span class="ow">and</span> <span class="n">use</span> <span class="ow">in</span> <span class="n">source</span> <span class="ow">and</span> <span class="n">binary</span> <span class="n">forms</span><span class="p">,</span> <span class="k">with</span> <span class="ow">or</span> <span class="n">without</span> <span class="n">modification</span><span class="p">,</span> <span class="n">are</span> <span class="n">permitted</span> <span class="n">provided</span> <span class="n">that</span> <span class="n">the</span> <span class="n">following</span> <span class="n">conditions</span> <span class="n">are</span> <span class="n">met</span><span class="p">:</span>
@@ -730,7 +743,7 @@ if needed.</p>
 </div>
 </section>
 <section id="indices-and-tables">
-<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
+<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
 <li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
@@ -746,16 +759,46 @@ if needed.</p>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="#">Table of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Documentation for the <span class="math">panels</span> module</a><ul>
-<li><a class="reference internal" href="#semi-analytical-models-for-plates-shells-and-panels-panels">Semi-analytical models for plates, shells and panels (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels</span></code>)</a></li>
+  <div>
+    <h3><a href="#">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Semi-analytical methods for plates and shells</a><ul>
+<li><a class="reference internal" href="#semi-analytical-models-for-plates-shells-and-panels-panels">Semi-analytical models for plates, shells and panels (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels</span></code>)</a><ul>
+<li><a class="reference internal" href="#panels.shell.Shell"><code class="docutils literal notranslate"><span class="pre">Shell</span></code></a><ul>
+<li><a class="reference internal" href="#panels.shell.Shell.add_distr_load_fixed_x"><code class="docutils literal notranslate"><span class="pre">Shell.add_distr_load_fixed_x()</span></code></a></li>
+<li><a class="reference internal" href="#panels.shell.Shell.add_distr_load_fixed_y"><code class="docutils literal notranslate"><span class="pre">Shell.add_distr_load_fixed_y()</span></code></a></li>
+<li><a class="reference internal" href="#panels.shell.Shell.add_point_load"><code class="docutils literal notranslate"><span class="pre">Shell.add_point_load()</span></code></a></li>
+<li><a class="reference internal" href="#panels.shell.Shell.calc_cA"><code class="docutils literal notranslate"><span class="pre">Shell.calc_cA()</span></code></a></li>
+<li><a class="reference internal" href="#panels.shell.Shell.calc_fext"><code class="docutils literal notranslate"><span class="pre">Shell.calc_fext()</span></code></a></li>
+<li><a class="reference internal" href="#panels.shell.Shell.calc_fint"><code class="docutils literal notranslate"><span class="pre">Shell.calc_fint()</span></code></a></li>
+<li><a class="reference internal" href="#panels.shell.Shell.calc_kA"><code class="docutils literal notranslate"><span class="pre">Shell.calc_kA()</span></code></a></li>
+<li><a class="reference internal" href="#panels.shell.Shell.calc_kC"><code class="docutils literal notranslate"><span class="pre">Shell.calc_kC()</span></code></a></li>
+<li><a class="reference internal" href="#panels.shell.Shell.calc_kG"><code class="docutils literal notranslate"><span class="pre">Shell.calc_kG()</span></code></a></li>
+<li><a class="reference internal" href="#panels.shell.Shell.calc_kM"><code class="docutils literal notranslate"><span class="pre">Shell.calc_kM()</span></code></a></li>
+<li><a class="reference internal" href="#panels.shell.Shell.calc_stiffness_point_constraint"><code class="docutils literal notranslate"><span class="pre">Shell.calc_stiffness_point_constraint()</span></code></a></li>
+<li><a class="reference internal" href="#panels.shell.Shell.get_size"><code class="docutils literal notranslate"><span class="pre">Shell.get_size()</span></code></a></li>
+<li><a class="reference internal" href="#panels.shell.Shell.save"><code class="docutils literal notranslate"><span class="pre">Shell.save()</span></code></a></li>
+<li><a class="reference internal" href="#panels.shell.Shell.strain"><code class="docutils literal notranslate"><span class="pre">Shell.strain()</span></code></a></li>
+<li><a class="reference internal" href="#panels.shell.Shell.stress"><code class="docutils literal notranslate"><span class="pre">Shell.stress()</span></code></a></li>
+<li><a class="reference internal" href="#panels.shell.Shell.uvw"><code class="docutils literal notranslate"><span class="pre">Shell.uvw()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#panels.plot_shell.plot_shell"><code class="docutils literal notranslate"><span class="pre">plot_shell()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#code-repository">Code repository</a></li>
 <li><a class="reference internal" href="#license">License</a></li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
 </li>
 </ul>
 
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="bardell.html"
+                          title="next chapter">Bardell’s Hierarchical Functions</a></p>
+  </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -772,7 +815,7 @@ if needed.</p>
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -786,13 +829,16 @@ if needed.</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="#">panels 0.2.15 documentation</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">Documentation for the <span class="math">panels</span> module</a></li> 
+        <li class="right" >
+          <a href="bardell.html" title="Bardell’s Hierarchical Functions"
+             >next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">panels 0.3.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Semi-analytical methods for plates and shells</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2012-2021, Saullo G. P. Castro.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.2.0.
+        &#169; Copyright 2012-2023, Saullo G. P. Castro.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.0.1.
     </div>
   </body>
 </html>
