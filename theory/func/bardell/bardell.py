@@ -11,6 +11,7 @@ u = map(sympify, ['1/2 - 3/4*xi + 1/4*xi**3',
                   '1/8 - 1/8*xi - 1/8*xi**2 + 1/8*xi**3',
                   '1/2 + 3/4*xi - 1/4*xi**3',
                   '-1/8 - 1/8*xi + 1/8*xi**2 + 1/8*xi**3'])
+u = list(u)
 
 for r in range(5, nmax+1):
     utmp = []
@@ -27,5 +28,5 @@ u[3] = r2*u[3]
 with open('bardell.txt', 'w') as f:
     f.write("Bardell's hierarchical functions\n\n")
     f.write('Number of terms: {0}\n\n'.format(len(u)))
-    f.write(',\n'.join(map(str, u)).replace('**', '^') + '\n\n')
+    f.write('\n'.join(map(str, u)).replace('**', '^') + '\n\n')
 
