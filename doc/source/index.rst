@@ -1,8 +1,27 @@
-Documentation for the `panels` module
-======================================
+Semi-analytical methods for plates and shells
+==============================================
 
 .. automodule:: panels
     :members:
+
+Capabilities:
+
+- linear buckling
+- nonlinear postbuckling analysis
+- static
+- vibration
+- panel flutter
+
+.. toctree::
+    :maxdepth: 1
+
+    bardell.rst
+    ref.rst
+
+Code repository
+---------------
+
+https://github.com/saullocastro/panels
 
 
 License

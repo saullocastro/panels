@@ -91,10 +91,10 @@ class Shell(object):
             m=11, n=11, offset=0., **kwargs):
         self.a = a
         self.x1 = -1 # used to integrate part of the shell domain, -1 will use 0
-        self.x2 = -1 # used to integrate part of the shell domain, -1 will se a
+        self.x2 = +1 # used to integrate part of the shell domain, +1 will use a
         self.b = b
         self.y1 = -1 # used to integrate part of the shell domain, -1 will use 0
-        self.y2 = -1 # used to integrate part of the shell domain, -1 will use b
+        self.y2 = +1 # used to integrate part of the shell domain, +1 will use b
         self.r = r
         self.alphadeg = alphadeg
         self.alpharad = None

@@ -11,16 +11,12 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 # import os
-import sys
-sys.path.append(r'c:\repositories\panels')
-# sys.path.insert(0, os.path.abspath('.'))
-
 
 # -- Project information -----------------------------------------------------
 
 project = 'panels'
 author = 'Saullo G. P. Castro'
-copyright = '2012-2021, ' + author
+copyright = '2012-2023, ' + author
 
 # The full version, including alpha/beta/rc tags
 from panels.version import __version__
@@ -36,7 +32,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'numpydoc',
-    'sphinx.ext.imgmath',
+    'sphinx.ext.mathjax',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
