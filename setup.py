@@ -44,7 +44,7 @@ License :: OSI Approved :: BSD License
 
 MAJOR = 0
 MINOR = 3
-MICRO = 0
+MICRO = 1
 ISRELEASED = True
 VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 
@@ -196,9 +196,12 @@ data_files = [('', [
         ])]
 
 package_data = {
-        'panels': ['*.py', '*.pxd', '*.pyx'],
-        'panels/models': ['*.py', '*.pxd', '*.pyx'],
-        'panels/tests/tests_shell': ['*.py'],
+        'panels': ['*.py', '*.pxd', '*.pyx',
+                   'core/include/*.hpp',
+                   'core/src/*.cpp',
+                   'models/*.pyx', 'models/*.pxd'
+                   'tests/tests_shell/*.py'
+                   ],
         }
 
 setup(
