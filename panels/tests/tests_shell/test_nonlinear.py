@@ -32,7 +32,7 @@ def test_nonlinear():
         s.y1u = 1
         s.y2u = 1
 
-        s.y1v = 1
+        s.y1v = 0
         s.y2v = 1
 
         s.y1w = 0
@@ -79,7 +79,7 @@ def test_nonlinear():
         c0 = solve(s.calc_kC(), fext, silent=True)
         plot_mesh, fields = s.uvw(c=c0)
         print('  linear wmax', fields['w'].max())
-        assert np.isclose(fields['w'].max(), 0.0026277, rtol=0.01)
+        assert np.isclose(fields['w'].max(), 0.002623, rtol=0.01)
 
         count = 0
         N = s.get_size()
@@ -87,7 +87,7 @@ def test_nonlinear():
         Ri = fint - fext
         dc = np.zeros(N)
         ci = c0.copy()
-        epsilon = 1.e-3
+        epsilon = 1.e-4
         KT = s.calc_kT(c=c0)
         D = s.calc_kC().diagonal() # at beginning of load increment
         while True:
@@ -95,6 +95,7 @@ def test_nonlinear():
             dc = solve(KT, -Ri, silent=True)
             c = ci + dc
             fint = np.asarray(s.calc_fint(c=c))
+            Ri = fint - fext
             crisfield_test = scaling(Ri, D)/max(scaling(fext, D), scaling(fint, D))
             #print('    crisfield_test', crisfield_test)
             if crisfield_test < epsilon:
@@ -108,7 +109,7 @@ def test_nonlinear():
 
         plot_mesh, fields = s.uvw(c=c)
         print('  nonlinear wmax', fields['w'].max())
-        assert np.isclose(fields['w'].max(), 0.10794, rtol=0.01)
+        assert np.isclose(fields['w'].max(), 0.001672, rtol=0.01)
 
 
 if __name__ == '__main__':
