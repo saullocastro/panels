@@ -33,4 +33,3 @@ Distrubuted under the 3-Clause BSD license
 (https://raw.github.com/saullocastro/panels/master/LICENSE).
 
 Contact: S.G.P.Castro@tudelft.nl.
-
