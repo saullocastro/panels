@@ -28,3 +28,4 @@ test.png
 *.pyo
 *.pyd
 
+.DS_Store
