@@ -35,7 +35,7 @@ def shell_fext(shell, inc, size, col0):
     # - grouping distr_loads and distr_loads_inc
     distr_loads = []
     for load in shell.distr_loads:
-        distr_loads.append(load + [1.])
+        distr_loads.append(load + [1.]) #NOTE adding inc = 1.
     for load in shell.distr_loads_inc:
         distr_loads.append(load + [inc])
 
@@ -44,30 +44,32 @@ def shell_fext(shell, inc, size, col0):
             raise ValueError('x and y cannot be None when defining distributed loads')
         if x is not None and y is not None:
             raise ValueError('One of x or y must be None when defining distributed loads')
-        funcx = funcx if funcx is not None else lambda x: 0
-        funcy = funcy if funcy is not None else lambda x: 0
-        funcz = funcz if funcz is not None else lambda x: 0
+        funcx = funcx if funcx is not None else lambda _: 0
+        funcy = funcy if funcy is not None else lambda _: 0
+        funcz = funcz if funcz is not None else lambda _: 0
         if x is None:
+            ycte = y
             # getting integration points and weights
             points = np.zeros(shell.m, dtype=np.float64)
             weights = np.zeros(shell.m, dtype=np.float64)
             get_points_weights(shell.m, points, weights)
-            # integrating g(x,ycte)*s(x,ycte)*dx = sum(weight_i * ( (a/2) * g(xcte, ycte) * s(xcte, ycte) ))
+            # integrating g(x,ycte)*s(x,ycte)*dx = sum(weight_i * ( (a/2) * g(xvar, ycte) * s(xvar, ycte) ))
             for xi, weight in zip(points, weights):
-                xcte = (xi + 1)*shell.a/2
-                fpt = np.array([[funcx(xcte), funcy(xcte), funcz(xcte), 0, 0]]) * inc_i
-                fg(g, xcte, y, shell)
+                xvar = (xi + 1)*shell.a/2
+                fpt = np.array([[funcx(xvar), funcy(xvar), funcz(xvar), 0, 0]]) * inc_i
+                fg(g, xvar, ycte, shell)
                 fext[col0:col1] += weight * (shell.a/2) * fpt.dot(g).ravel()
         else:
+            xcte = x
             # getting integration points and weights
             points = np.zeros(shell.n, dtype=np.float64)
             weights = np.zeros(shell.n, dtype=np.float64)
             get_points_weights(shell.n, points, weights)
-            # integrating g(x,ycte)*s(x,ycte)*dx = sum(weight_i * ( (a/2) * g(xcte, ycte) * s(xcte, ycte) ))
+            # integrating g(xcte,y)*s(xcte,y)*dy = sum(weight_i * ( (b/2) * g(xcte, yvar) * s(xcte, yvar) ))
             for eta, weight in zip(points, weights):
-                ycte = (eta + 1)*shell.b/2
-                fpt = np.array([[funcx(ycte), funcy(ycte), funcz(ycte), 0, 0]]) * inc_i
-                fg(g, x, ycte, shell)
+                yvar = (eta + 1)*shell.b/2
+                fpt = np.array([[funcx(yvar), funcy(yvar), funcz(yvar), 0, 0]]) * inc_i
+                fg(g, xcte, yvar, shell)
                 fext[col0:col1] += weight * (shell.b/2) * fpt.dot(g).ravel()
 
     return fext
