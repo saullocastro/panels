@@ -15,7 +15,6 @@ If one of these is not present in the module name, consider not applicable.
 TYPE refers to:
 
 - cylshell - Cylindrical shells
-- coneshell - Conical shells
 - plate - Flat plates
 
 THEORY refers to:
@@ -41,6 +40,5 @@ SUFIX used to indicate additional information
 
 """
 from . import clpt_bardell_field
-from . import coneshell_clpt_donnell_bardell_num
-from . import cylshell_clpt_donnell_bardell_num
-from . import plate_clpt_donnell_bardell_num
+from . import cylshell_clpt_donnell_bardell, cylshell_clpt_donnell_bardell_num
+from . import plate_clpt_donnell_bardell, plate_clpt_donnell_bardell_num
