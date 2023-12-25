@@ -317,15 +317,17 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
 
     k0 = assy.calc_kC(valid_conn)
     c = None
-    if (run_static_case
-            and not (Nxx_skin is None and Nxx_base is None and Nxx_flange is None)):
-        fext = np.zeros(size)
-        for p in [p07, p08, p09, p14, p15]:
-            p.add_distr_load_fixed_x(0, lambda y: p.Nxx, None, None)
-            fext[p.col_start: p.col_end] = p.calc_fext(silent=True)
+    if run_static_case:
+        if not (Nxx_skin is None and Nxx_base is None and Nxx_flange is None):
+            fext = np.zeros(size)
+            for p in [p07, p08, p09, p14, p15]:
+                p.add_distr_load_fixed_x(0, lambda y: p.Nxx, None, None)
+                fext[p.col_start: p.col_end] = p.calc_fext(silent=True)
 
-        incs, cs = static(k0, -fext, silent=True)
-        c = cs[0]
+            incs, cs = static(k0, -fext, silent=True)
+            c = cs[0]
+        for p in panels:
+            p.Nxx = 0.
 
     kM = assy.calc_kM()
     kG = assy.calc_kG(c=c)

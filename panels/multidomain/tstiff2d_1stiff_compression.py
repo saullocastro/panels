@@ -334,10 +334,11 @@ def tstiff2d_1stiff_compression(a, b, ys, bb, bf, defect_a, rho, plyt,
 
         incs, cs = static(k0, -fext, silent=True)
         c = cs[0]
+        for p in panels:
+            p.Nxx = 0.
 
     kG = assy.calc_kG(c=c)
 
-    eigvals = eigvecs = None
     eigvals, eigvecs = lb(k0, kG, tol=0, sparse_solver=True, silent=True,
              num_eigvalues=25, num_eigvalues_print=5)
 
