@@ -335,7 +335,7 @@ def fkG0(double Nxx, double Nyy, double Nxy, object shell,
     return kG0
 
 
-def fkM(double d, object shell, int size, int row0, int col0):
+def fkM(object shell, double d, int size, int row0, int col0):
     cdef double a, b, rho, h
     cdef int m, n
     cdef double x1u, x1ur, x2u, x2ur
