@@ -12,7 +12,7 @@ INT = long
 cdef int DOF = 3
 
 
-cdef extern from 'bardell.h':
+cdef extern from 'bardell.hpp':
     double integral_ff(int i, int j, double x1t, double x1r, double x2t, double x2r,
                        double y1t, double y1r, double y2t, double y2r) nogil
     double integral_ffp(int i, int j, double x1t, double x1r, double x2t, double x2r,
@@ -26,7 +26,7 @@ cdef extern from 'bardell.h':
     double integral_fppfpp(int i, int j, double x1t, double x1r, double x2t, double x2r,
                        double y1t, double y1r, double y2t, double y2r) nogil
 
-cdef extern from 'bardell_functions.h':
+cdef extern from 'bardell_functions.hpp':
     double f(int i, double xi, double xi1t, double xi1r, double xi2t, double xi2r) nogil
     double fp(int i, double xi, double xi1t, double xi1r, double xi2t, double xi2r) nogil
 
@@ -162,7 +162,7 @@ def fkG0f(double ys, double Fx, double a, double b, double bf, int m, int n,
     return kG0f
 
 
-def fkMf(double ys, double mu, double h, double hb, double hf, double a,
+def fkMf(double ys, double rho, double h, double hb, double hf, double a,
          double b, double bf, double df,
          int m, int n,
          double x1u, double x1ur, double x2u, double x2ur,
@@ -229,31 +229,31 @@ def fkMf(double ys, double mu, double h, double hb, double hf, double a,
                         c += 1
                         kMfr[c] = row+0
                         kMfc[c] = col+0
-                        kMfv[c] += 0.5*a*bf*fAufBu*gAu*gBu*hf*mu
+                        kMfv[c] += 0.5*a*bf*fAufBu*gAu*gBu*hf*rho
                         c += 1
                         kMfr[c] = row+0
                         kMfc[c] = col+2
-                        kMfv[c] += 2*bf*df*fAufBwxi*gAu*gBw*hf*mu
+                        kMfv[c] += 2*bf*df*fAufBwxi*gAu*gBw*hf*rho
                         c += 1
                         kMfr[c] = row+1
                         kMfc[c] = col+1
-                        kMfv[c] += 0.5*a*bf*fAvfBv*gAv*gBv*hf*mu
+                        kMfv[c] += 0.5*a*bf*fAvfBv*gAv*gBv*hf*rho
                         c += 1
                         kMfr[c] = row+1
                         kMfc[c] = col+2
-                        kMfv[c] += 2*a*bf*df*fAvfBw*gAv*gBweta*hf*mu/b
+                        kMfv[c] += 2*a*bf*df*fAvfBw*gAv*gBweta*hf*rho/b
                         c += 1
                         kMfr[c] = row+2
                         kMfc[c] = col+0
-                        kMfv[c] += 2*bf*df*fAwxifBu*gAw*gBu*hf*mu
+                        kMfv[c] += 2*bf*df*fAwxifBu*gAw*gBu*hf*rho
                         c += 1
                         kMfr[c] = row+2
                         kMfc[c] = col+1
-                        kMfv[c] += 2*a*bf*df*fAwfBv*gAweta*gBv*hf*mu/b
+                        kMfv[c] += 2*a*bf*df*fAwfBv*gAweta*gBv*hf*rho/b
                         c += 1
                         kMfr[c] = row+2
                         kMfc[c] = col+2
-                        kMfv[c] += 0.166666666666667*bf*hf*mu*((a*a)*fAwfBw*(3*(b*b)*gAw*gBw + gAweta*gBweta*(4*(bf*bf) + 6*bf*(h + 2*hb) + 3*(h + 2*hb)**2)) + (b*b)*fAwxifBwxi*gAw*gBw*(4*(bf*bf) + 6*bf*(h + 2*hb) + 3*(h + 2*hb)**2))/(a*(b*b))
+                        kMfv[c] += 0.166666666666667*bf*hf*rho*((a*a)*fAwfBw*(3*(b*b)*gAw*gBw + gAweta*gBweta*(4*(bf*bf) + 6*bf*(h + 2*hb) + 3*(h + 2*hb)**2)) + (b*b)*fAwxifBwxi*gAw*gBw*(4*(bf*bf) + 6*bf*(h + 2*hb) + 3*(h + 2*hb)**2))/(a*(b*b))
 
     kMf = coo_matrix((kMfv, (kMfr, kMfc)), shape=(size, size))
 
