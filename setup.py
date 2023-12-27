@@ -180,6 +180,24 @@ extensions = [
             ],
         include_dirs=include_dirs, extra_compile_args=compile_args,
               extra_link_args=link_args, language='c++'),
+# stiffener models
+    Extension('panels.stiffener.models.bladestiff1d_clt_donnell_bardell',
+        sources=[
+            './panels/core/src/bardell.cpp',
+            './panels/core/src/bardell_functions.cpp',
+            './panels/stiffener/models/bladestiff1d_clt_donnell_bardell.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, language='c++'),
+    Extension('panels.stiffener.models.bladestiff2d_clt_donnell_bardell',
+        sources=[
+            './panels/core/src/bardell.cpp',
+            './panels/core/src/bardell_functions.cpp',
+            './panels/stiffener/models/bladestiff2d_clt_donnell_bardell.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, language='c++'),
+
 # multi-domain connections
     Extension('panels.multidomain.connections.kCBFxcte',
         sources=[
