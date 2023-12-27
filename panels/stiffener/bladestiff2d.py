@@ -28,12 +28,12 @@ class BladeStiff2D(object):
     Each stiffener has a constant `y_s` coordinate.
 
     """
-    def __init__(self, bay, mu, panel1, panel2, ys, bb, bf, bstack, bplyts,
+    def __init__(self, bay, rho, panel1, panel2, ys, bb, bf, bstack, bplyts,
             blaminaprops, fstack, fplyts, flaminaprops, mf=14, nf=11):
         self.bay = bay
         self.panel1 = panel1
         self.panel2 = panel2
-        self.mu = mu
+        self.rho = rho
         self.ys = ys
         self.bb = bb
         self.forces_flange = []
@@ -54,7 +54,7 @@ class BladeStiff2D(object):
             hb = sum(self.bplyts)
             self.base = Shell(a=bay.a, b=bay.b, r=bay.r, alphadeg=bay.alphadeg,
                     stack=bstack, plyts=bplyts, laminaprops=blaminaprops,
-                    mu=mu, m=bay.m, n=bay.n, offset=(-h/2.-hb/2.),
+                    rho=rho, m=bay.m, n=bay.n, offset=(-h/2.-hb/2.),
                     x1u=bay.x1u, x1ur=bay.x1ur, x2u=bay.x2u, x2ur=bay.x2ur,
                     x1v=bay.x1v, x1vr=bay.x1vr, x2v=bay.x2v, x2vr=bay.x2vr,
                     x1w=bay.x1w, x1wr=bay.x1wr, x2w=bay.x2w, x2wr=bay.x2wr,
@@ -65,7 +65,7 @@ class BladeStiff2D(object):
 
         self.flange = None
         if fstack is not None:
-            self.flange = Shell(m=mf, n=nf, a=bay.a, b=bf, mu=mu,
+            self.flange = Shell(m=mf, n=nf, a=bay.a, b=bf, rho=rho,
                     stack=fstack, plyts=fplyts, laminaprops=flaminaprops,
                     model='plate_clt_donnell_bardell',
                     x1u=0., x1ur=0., x2u=0., x2ur=0.,
