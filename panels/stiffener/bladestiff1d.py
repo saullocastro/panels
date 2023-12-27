@@ -26,13 +26,13 @@ class BladeStiff1D(object):
     Each stiffener has a constant `y` coordinate.
 
     """
-    def __init__(self, bay, mu, panel1, panel2, ys, bb, bf, bstack, bplyts,
+    def __init__(self, bay, rho, panel1, panel2, ys, bb, bf, bstack, bplyts,
             blaminaprops, fstack, fplyts, flaminaprops):
         self.bay = bay
         self.panel1 = panel1
         self.panel2 = panel2
         self.model = 'bladestiff1d_clt_donnell_bardell'
-        self.mu = mu
+        self.rho = rho
         self.ys = ys
         self.bb = bb
         self.hb = 0.
@@ -81,7 +81,7 @@ class BladeStiff1D(object):
             y2 = self.ys + self.bb/2.
             self.base = Shell(a=bay.a, b=bay.b, r=bay.r, alphadeg=bay.alphadeg,
                     stack=self.bstack, plyts=self.bplyts,
-                    mu=self.mu, m=bay.m, n=bay.n,
+                    rho=self.rho, m=bay.m, n=bay.n,
                     laminaprops=self.blaminaprops, offset=(-h/2.-hb/2.),
                     x1u=bay.x1u, x1ur=bay.x1ur, x2u=bay.x2u, x2ur=bay.x2ur,
                     x1v=bay.x1v, x1vr=bay.x1vr, x2v=bay.x2v, x2vr=bay.x2vr,
@@ -201,7 +201,7 @@ class BladeStiff1D(object):
         if self.flam is not None:
             bay = self.bay
             h = 0.5*sum(self.panel1.plyts) + 0.5*sum(self.panel2.plyts)
-            kM += mod.fkMf(self.ys, self.mu, h, self.hb, self.hf, bay.a, bay.b,
+            kM += mod.fkMf(self.ys, self.rho, h, self.hb, self.hf, bay.a, bay.b,
                            self.bf, self.dbf, bay.m, bay.n,
                            bay.x1u, bay.x1ur, bay.x2u, bay.x2ur,
                            bay.x1v, bay.x1vr, bay.x2v, bay.x2vr,
