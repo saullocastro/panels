@@ -9,7 +9,7 @@ from structsolve.sparseutils import finalize_symmetric_matrix, make_skew_symmetr
 
 from panels.logger import msg
 from panels import Shell, modelDB as panelmDB
-from compmech.stiffener import (BladeStiff1D, BladeStiff2D, TStiff2D)
+from panels.stiffener import (BladeStiff1D, BladeStiff2D, TStiff2D)
 
 
 DOUBLE = np.float64
@@ -56,7 +56,7 @@ class StiffPanelBay(object):
         self.laminaprops = []
         self.plyt = None
         self.plyts = []
-        self.mu = None
+        self.rho = None
 
         # approximation series
         self.m = 11
@@ -75,7 +75,6 @@ class StiffPanelBay(object):
         self.a = None
         self.b = None
         self.r = None
-        self.alphadeg = None
 
         # boundary conditions
         self.x1u = 0.
@@ -228,7 +227,7 @@ class StiffPanelBay(object):
         return self.size
 
 
-    def add_bladestiff1d(self, ys, mu=None, bb=None, bstack=None,
+    def add_bladestiff1d(self, ys, rho=None, bb=None, bstack=None,
             bplyts=None, bplyt=None, blaminaprops=None, blaminaprop=None,
             bf=None, fstack=None, fplyts=None, fplyt=None, flaminaprops=None,
             flaminaprop=None, **kwargs):
@@ -238,7 +237,7 @@ class StiffPanelBay(object):
         ----------
         ys : float
             Stiffener position.
-        mu : float, optional
+        rho : float, optional
             Stiffener's material density. If not given the bay density will be
             used.
         bb : float, optional
@@ -275,8 +274,8 @@ class StiffPanelBay(object):
         Additional parameters can be passed using the ``kwargs``.
 
         """
-        if mu is None:
-            mu = self.mu
+        if rho is None:
+            rho = self.rho
 
         if bstack is None and fstack is None:
             raise ValueError('bstack or fstack must be defined!')
@@ -327,7 +326,7 @@ class StiffPanelBay(object):
         if panel1 is None or panel2 is None:
             raise RuntimeError('panel1 and panel2 could not be found!')
 
-        s = BladeStiff1D(bay=self, mu=mu, panel1=panel1, panel2=panel2, ys=ys,
+        s = BladeStiff1D(bay=self, rho=rho, panel1=panel1, panel2=panel2, ys=ys,
                 bb=bb, bf=bf, bstack=bstack, bplyts=bplyts,
                 blaminaprops=blaminaprops, fstack=fstack, fplyts=fplyts,
                 flaminaprops=flaminaprops)
@@ -341,7 +340,7 @@ class StiffPanelBay(object):
         return s
 
 
-    def add_bladestiff2d(self, ys, mu=None, bb=None, bstack=None,
+    def add_bladestiff2d(self, ys, rho=None, bb=None, bstack=None,
             bplyts=None, bplyt=None, blaminaprops=None, blaminaprop=None,
             bf=None, fstack=None, fplyts=None, fplyt=None, flaminaprops=None,
             flaminaprop=None, mf=14, nf=11, **kwargs):
@@ -351,7 +350,7 @@ class StiffPanelBay(object):
         ----------
         ys : float
             Stiffener position.
-        mu : float, optional
+        rho : float, optional
             Stiffener's material density. If not given the bay density will be
             used.
         bb : float, optional
@@ -392,8 +391,8 @@ class StiffPanelBay(object):
         Additional parameters can be passed using the ``kwargs``.
 
         """
-        if mu is None:
-            mu = self.mu
+        if rho is None:
+            rho = self.rho
 
         if bstack is None and fstack is None:
             raise ValueError('bstack or fstack must be defined!')
@@ -444,7 +443,7 @@ class StiffPanelBay(object):
         if panel1 is None or panel2 is None:
             raise RuntimeError('panel1 and panel2 could not be found!')
 
-        s = BladeStiff2D(bay=self, mu=mu, panel1=panel1, panel2=panel2, ys=ys,
+        s = BladeStiff2D(bay=self, rho=rho, panel1=panel1, panel2=panel2, ys=ys,
                 bb=bb, bf=bf, bstack=bstack, bplyts=bplyts,
                 blaminaprops=blaminaprops, fstack=fstack, fplyts=fplyts,
                 flaminaprops=flaminaprops, mf=mf, nf=nf)
@@ -458,7 +457,7 @@ class StiffPanelBay(object):
         return s
 
 
-    def add_tstiff2d(self, ys, mu=None, bb=None, bstack=None,
+    def add_tstiff2d(self, ys, rho=None, bb=None, bstack=None,
             bplyts=None, bplyt=None, blaminaprops=None, blaminaprop=None,
             bf=None, fstack=None, fplyts=None, fplyt=None, flaminaprops=None,
             flaminaprop=None, mb=12, nb=13, mf=11, nf=12, Nxxf=0., **kwargs):
@@ -468,7 +467,7 @@ class StiffPanelBay(object):
         ----------
         ys : float
             Stiffener position.
-        mu : float, optional
+        rho : float, optional
             Stiffener's material density. If not given the bay density will be
             used.
         bb : float, optional
@@ -513,8 +512,8 @@ class StiffPanelBay(object):
         Additional parameters can be passed using the ``kwargs``.
 
         """
-        if mu is None:
-            mu = self.mu
+        if rho is None:
+            rho = self.rho
 
         if bstack is None or fstack is None:
             raise ValueError('bstack and fstack must be defined!')
@@ -563,7 +562,7 @@ class StiffPanelBay(object):
         if panel1 is None or panel2 is None:
             raise RuntimeError('panel1 and panel2 could not be found!')
 
-        s = TStiff2D(bay=self, mu=mu, panel1=panel1, panel2=panel2, ys=ys,
+        s = TStiff2D(bay=self, rho=rho, panel1=panel1, panel2=panel2, ys=ys,
                 bb=bb, bf=bf, bstack=bstack, bplyts=bplyts,
                 blaminaprops=blaminaprops, fstack=fstack, fplyts=fplyts,
                 flaminaprops=flaminaprops, mb=mb, nb=nb, mf=mf, nf=nf)
@@ -579,7 +578,7 @@ class StiffPanelBay(object):
 
 
     def add_panel(self, y1, y2, stack=None, plyts=None, plyt=None,
-            laminaprops=None, laminaprop=None, model=None, mu=None, **kwargs):
+            laminaprops=None, laminaprop=None, model=None, rho=None, **kwargs):
         r"""Add a new panel to the current panel bay
 
         Parameters
@@ -605,7 +604,7 @@ class StiffPanelBay(object):
             Not recommended to pass this parameter, but the user can use a
             different model for each panel. It is recommended to defined
             ``model`` for the bay object.
-        mu : float, optional
+        rho : float, optional
             Shell material density. If not given the bay density will be used.
 
         Notes
@@ -614,7 +613,7 @@ class StiffPanelBay(object):
 
         """
         p = Shell(a=self.a, b=self.b, m=self.m, n=self.n, r=self.r,
-                  alphadeg=self.alphadeg, y1=y1, y2=y2,
+                  y1=y1, y2=y2,
                   x1u=self.x1u, x1ur=self.x1ur, x2u=self.x2u, x2ur=self.x2ur,
                   x1v=self.x1v, x1vr=self.x1vr, x2v=self.x2v, x2vr=self.x2vr,
                   x1w=self.x1w, x1wr=self.x1wr, x2w=self.x2w, x2wr=self.x2wr,
@@ -627,7 +626,7 @@ class StiffPanelBay(object):
         p.plyts = plyts if plyts is not None else self.plyts
         p.laminaprop = laminaprop if laminaprop is not None else self.laminaprop
         p.laminaprops = laminaprops if laminaprops is not None else self.laminaprops
-        p.mu = mu if mu is not None else self.mu
+        p.rho = rho if rho is not None else self.rho
 
         for k, v in kwargs.items():
             setattr(p, k, v)
