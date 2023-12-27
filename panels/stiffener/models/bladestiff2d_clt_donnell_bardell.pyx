@@ -13,11 +13,11 @@ cdef int DOF = 3
 cdef int DOF1 = 3
 
 
-cdef extern from 'bardell.h':
+cdef extern from 'bardell.hpp':
     double integral_ff(int i, int j, double x1t, double x1r, double x2t, double x2r,
                        double y1t, double y1r, double y2t, double y2r) nogil
 
-cdef extern from 'bardell_functions.h':
+cdef extern from 'bardell_functions.hpp':
     double f(int i, double xi, double xi1t, double xi1r, double xi2t, double xi2r) nogil
     double fp(int i, double xi, double xi1t, double xi1r, double xi2t, double xi2r) nogil
 
