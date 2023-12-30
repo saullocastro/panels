@@ -42,9 +42,9 @@ class BladeStiff2D(object):
         self.bplyts = bplyts
         self.blaminaprops = blaminaprops
 
-        self.k0 = None
+        self.kC = None
         self.kM = None
-        self.kG0 = None
+        self.kG = None
 
         self.base = None
         if bstack is not None:
@@ -52,7 +52,7 @@ class BladeStiff2D(object):
             y2 = self.ys + bb/2.
             h = 0.5*sum(self.panel1.plyts) + 0.5*sum(self.panel2.plyts)
             hb = sum(self.bplyts)
-            self.base = Shell(a=bay.a, b=bay.b, r=bay.r, alphadeg=bay.alphadeg,
+            self.base = Shell(a=bay.a, b=bay.b, r=bay.r,
                     stack=bstack, plyts=bplyts, laminaprops=blaminaprops,
                     rho=rho, m=bay.m, n=bay.n, offset=(-h/2.-hb/2.),
                     x1u=bay.x1u, x1ur=bay.x1ur, x2u=bay.x2u, x2ur=bay.x2ur,
@@ -67,7 +67,7 @@ class BladeStiff2D(object):
         if fstack is not None:
             self.flange = Shell(m=mf, n=nf, a=bay.a, b=bf, rho=rho,
                     stack=fstack, plyts=fplyts, laminaprops=flaminaprops,
-                    model='plate_clt_donnell_bardell',
+                    model='plate_clpt_donnell_bardell',
                     x1u=0., x1ur=0., x2u=0., x2ur=0.,
                     x1v=0., x1vr=0., x2v=0., x2vr=0.,
                     x1w=0., x1wr=1., x2w=0., x2wr=1.,
@@ -83,11 +83,10 @@ class BladeStiff2D(object):
         assert self.panel1.m == self.panel2.m
         assert self.panel1.n == self.panel2.n
         assert self.panel1.r == self.panel2.r
-        assert self.panel1.alphadeg == self.panel2.alphadeg
         if self.flange is not None:
             self.flange.lam = laminated_plate(self.flange.stack, plyts=self.flange.plyts,
                                             laminaprops=self.flange.laminaprops)
-            self.flange.lam.calc_equivalent_modulus()
+            self.flange.lam.calc_equivalent_properties()
 
         if self.base is not None:
             h = 0.5*sum(self.panel1.plyts) + 0.5*sum(self.panel2.plyts)
@@ -96,13 +95,14 @@ class BladeStiff2D(object):
             self.base.lam = laminated_plate(self.bstack, plyts=self.bplyts,
                                             laminaprops=self.blaminaprops,
                                             offset=(-h/2.-hb/2.))
+            self.base.lam.calc_equivalent_properties()
 
 
-    def calc_k0(self, size=None, row0=0, col0=0, silent=False, finalize=True):
+    def calc_kC(self, size=None, row0=0, col0=0, silent=False, finalize=True):
         """Calculate the linear constitutive stiffness matrix
         """
         self._rebuild()
-        msg('Calculating k0... ', level=2, silent=silent)
+        msg('Calculating kC... ', level=2, silent=silent)
 
         bay = self.bay
         a = bay.a
@@ -110,12 +110,12 @@ class BladeStiff2D(object):
         m = bay.m
         n = bay.n
 
-        k0 = 0.
+        kC = 0.
         if self.base is not None:
-            k0 += self.base.calc_k0(size=size, row0=0, col0=0, silent=True,
+            kC += self.base.calc_kC(size=size, row0=0, col0=0, silent=True,
                     finalize=False)
         if self.flange is not None:
-            k0 += self.flange.calc_k0(size=size, row0=row0, col0=col0,
+            kC += self.flange.calc_kC(size=size, row0=row0, col0=col0,
                     silent=True, finalize=False)
 
             # connectivity between stiffener'base and stiffener's flange
@@ -125,7 +125,7 @@ class BladeStiff2D(object):
                 ktbf, krbf = calc_kt_kr(self.base, self.flange, 'ycte')
 
             mod = db['bladestiff2d_clt_donnell_bardell']['connections']
-            k0 += mod.fkCss(ktbf, krbf, self.ys, a, b, m, n,
+            kC += mod.fkCss(ktbf, krbf, self.ys, a, b, m, n,
                             bay.x1u, bay.x1ur, bay.x2u, bay.x2ur,
                             bay.x1v, bay.x1vr, bay.x2v, bay.x2vr,
                             bay.x1w, bay.x1wr, bay.x2w, bay.x2wr,
@@ -134,7 +134,7 @@ class BladeStiff2D(object):
                             bay.y1w, bay.y1wr, bay.y2w, bay.y2wr,
                             size, 0, 0)
             bf = self.flange.b
-            k0 += mod.fkCsf(ktbf, krbf, self.ys, a, b, bf, m, n, self.flange.m, self.flange.n,
+            kC += mod.fkCsf(ktbf, krbf, self.ys, a, b, bf, m, n, self.flange.m, self.flange.n,
                             bay.x1u, bay.x1ur, bay.x2u, bay.x2ur,
                             bay.x1v, bay.x1vr, bay.x2v, bay.x2vr,
                             bay.x1w, bay.x1wr, bay.x2w, bay.x2wr,
@@ -148,7 +148,7 @@ class BladeStiff2D(object):
                             self.flange.y1v, self.flange.y1vr, self.flange.y2v, self.flange.y2vr,
                             self.flange.y1w, self.flange.y1wr, self.flange.y2w, self.flange.y2wr,
                             size, 0, col0)
-            k0 += mod.fkCff(ktbf, krbf, a, bf, self.flange.m, self.flange.n,
+            kC += mod.fkCff(ktbf, krbf, a, bf, self.flange.m, self.flange.n,
                             self.flange.x1u, self.flange.x1ur, self.flange.x2u, self.flange.x2ur,
                             self.flange.x1v, self.flange.x1vr, self.flange.x2v, self.flange.x2vr,
                             self.flange.x1w, self.flange.x1wr, self.flange.x2w, self.flange.x2wr,
@@ -158,8 +158,8 @@ class BladeStiff2D(object):
                             size, row0, col0)
 
         if finalize:
-            k0 = finalize_symmetric_matrix(k0)
-        self.k0 = k0
+            kC = finalize_symmetric_matrix(kC)
+        self.kC = kC
 
         #NOTE forcing Python garbage collector to clean the memory
         #     it DOES make a difference! There is a memory leak not
@@ -174,19 +174,19 @@ class BladeStiff2D(object):
         """Calculate the linear geometric stiffness matrix
         """
         self._rebuild()
-        msg('Calculating kG0... ', level=2, silent=silent)
+        msg('Calculating kG... ', level=2, silent=silent)
 
-        kG0 = 0.
+        kG = 0.
         if self.base is not None:
-            #TODO include kG0 for pad-up and Nxx load that arrives there
+            #TODO include kG for pad-up and Nxx load that arrives there
             pass
         if self.flange is not None:
-            kG0 += self.flange.calc_kG0(size=size, row0=row0, col0=col0,
+            kG += self.flange.calc_kG0(size=size, row0=row0, col0=col0,
                     silent=True, finalize=False, NLgeom=NLgeom)
 
         if finalize:
-            kG0 = finalize_symmetric_matrix(kG0)
-        self.kG0 = kG0
+            kG = finalize_symmetric_matrix(kG)
+        self.kG = kG
 
         #NOTE forcing Python garbage collector to clean the memory
         #     it DOES make a difference! There is a memory leak not
