@@ -64,13 +64,12 @@ class BladeStiff1D(object):
         assert self.panel1.m == self.panel2.m
         assert self.panel1.n == self.panel2.n
         assert self.panel1.r == self.panel2.r
-        assert self.panel1.alphadeg == self.panel2.alphadeg
 
         if self.fstack is not None:
             self.hf = sum(self.fplyts)
             self.Asf = self.bf*self.hf
             self.flam = laminated_plate(self.fstack, plyts=self.fplyts, laminaprops=self.flaminaprops)
-            self.flam.calc_equivalent_modulus()
+            self.flam.calc_equivalent_properties()
 
         h = 0.5*sum(self.panel1.plyts) + 0.5*sum(self.panel2.plyts)
         hb = 0.
@@ -79,7 +78,7 @@ class BladeStiff1D(object):
             hb = sum(self.bplyts)
             y1 = self.ys - self.bb/2.
             y2 = self.ys + self.bb/2.
-            self.base = Shell(a=bay.a, b=bay.b, r=bay.r, alphadeg=bay.alphadeg,
+            self.base = Shell(a=bay.a, b=bay.b, r=bay.r,
                     stack=self.bstack, plyts=self.bplyts,
                     rho=self.rho, m=bay.m, n=bay.n,
                     laminaprops=self.blaminaprops, offset=(-h/2.-hb/2.),
@@ -105,32 +104,30 @@ class BladeStiff1D(object):
             self.E1 = 0
             #E3 = 0
             self.S1 = 0
-            yply = self.flam.plies[0].t/2.
+            yply = self.flam.plies[0].h/2.
             for i, ply in enumerate(self.flam.plies):
                 if i > 0:
-                    yply += self.flam.plies[i-1].t/2. + self.flam.plies[i].t/2.
-                q = ply.QL
-                self.E1 += ply.t*(q[0,0] - q[0,1]**2/q[1,1])
-                #E3 += ply.t*(q[2,2] - q[1,2]**2/q[1,1])
-                self.S1 += -yply*ply.t*(q[0,2] - q[0,1]*q[1,2]/q[1,1])
+                    yply += self.flam.plies[i-1].h/2. + self.flam.plies[i].h/2.
+                self.E1 += ply.h*(ply.q11L - ply.q12L**2/ply.q22L)
+                self.S1 += -yply*ply.h*(ply.q16L - ply.q12L*ply.q16L/ply.q22L)
 
             self.F1 = self.bf**2/12.*self.E1
 
 
-    def calc_k0(self, size=None, row0=0, col0=0, silent=False, finalize=True):
+    def calc_kC(self, size=None, row0=0, col0=0, silent=False, finalize=True):
         """Calculate the linear constitutive stiffness matrix
         """
         self._rebuild()
-        msg('Calculating k0... ', level=2, silent=silent)
+        msg('Calculating kC... ', level=2, silent=silent)
 
-        k0 = 0.
+        kC = 0.
         if self.base is not None:
-            k0 += self.base.calc_k0(size=size, row0=row0, col0=col0,
+            kC += self.base.calc_kC(size=size, row0=row0, col0=col0,
                     silent=True, finalize=False)
         if self.flam is not None:
             mod = modelDB.db[self.model]['matrices']
             bay = self.bay
-            k0 += mod.fk0f(self.ys, bay.a, bay.b, self.bf, self.dbf, self.E1, self.F1,
+            kC += mod.fkCf(self.ys, bay.a, bay.b, self.bf, self.dbf, self.E1, self.F1,
                            self.S1, self.Jxx, bay.m, bay.n,
                            bay.x1u, bay.x1ur, bay.x2u, bay.x2ur,
                            bay.x1w, bay.x1wr, bay.x2w, bay.x2wr,
@@ -139,8 +136,8 @@ class BladeStiff1D(object):
                            size=size, row0=row0, col0=col0)
 
         if finalize:
-            k0 = finalize_symmetric_matrix(k0)
-        self.k0 = k0
+            kC = finalize_symmetric_matrix(kC)
+        self.kC = kC
 
         #NOTE forcing Python garbage collector to clean the memory
         #     it DOES make a difference! There is a memory leak not
@@ -156,28 +153,28 @@ class BladeStiff1D(object):
         """
         #TODO
         if c is not None:
-            raise NotImplementedError('numerical kG0 not implemented')
+            raise NotImplementedError('numerical kG not implemented')
 
         self._rebuild()
-        msg('Calculating kG0... ', level=2, silent=silent)
+        msg('Calculating kG... ', level=2, silent=silent)
 
-        kG0 = 0.
+        kG = 0.
         if self.base is not None:
-            # TODO include kG0 for padup
+            # TODO include kG for padup
             #      now it is assumed that all the load goes to the flange
             pass
         if self.flam is not None:
             Fx = self.Fx if self.Fx is not None else 0.
             mod = modelDB.db[self.model]['matrices']
             bay = self.bay
-            kG0 += mod.fkG0f(self.ys, Fx, bay.a, bay.b, self.bf, bay.m, bay.n,
+            kG += mod.fkG0f(self.ys, Fx, bay.a, bay.b, self.bf, bay.m, bay.n,
                              bay.x1w, bay.x1wr, bay.x2w, bay.x2wr,
                              bay.y1w, bay.y1wr, bay.y2w, bay.y2wr,
                              size, row0, col0)
 
         if finalize:
-            kG0 = finalize_symmetric_matrix(kG0)
-        self.kG0 = kG0
+            kG = finalize_symmetric_matrix(kG)
+        self.kG = kG
 
         #NOTE forcing Python garbage collector to clean the memory
         #     it DOES make a difference! There is a memory leak not
