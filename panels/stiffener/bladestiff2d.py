@@ -169,7 +169,7 @@ class BladeStiff2D(object):
         msg('finished!', level=2, silent=silent)
 
 
-    def calc_kG0(self, size=None, row0=0, col0=0, silent=False, finalize=True,
+    def calc_kG(self, size=None, row0=0, col0=0, silent=False, finalize=True,
             c=None, NLgeom=False):
         """Calculate the linear geometric stiffness matrix
         """
@@ -181,7 +181,7 @@ class BladeStiff2D(object):
             #TODO include kG for pad-up and Nxx load that arrives there
             pass
         if self.flange is not None:
-            kG += self.flange.calc_kG0(size=size, row0=row0, col0=col0,
+            kG += self.flange.calc_kG(size=size, row0=row0, col0=col0,
                     silent=True, finalize=False, NLgeom=NLgeom)
 
         if finalize:

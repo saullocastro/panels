@@ -147,7 +147,7 @@ class BladeStiff1D(object):
         msg('finished!', level=2, silent=silent)
 
 
-    def calc_kG0(self, size=None, row0=0, col0=0, silent=False, finalize=True,
+    def calc_kG(self, size=None, row0=0, col0=0, silent=False, finalize=True,
             c=None):
         """Calculate the linear geometric stiffness matrix
         """
@@ -167,7 +167,7 @@ class BladeStiff1D(object):
             Fx = self.Fx if self.Fx is not None else 0.
             mod = modelDB.db[self.model]['matrices']
             bay = self.bay
-            kG += mod.fkG0f(self.ys, Fx, bay.a, bay.b, self.bf, bay.m, bay.n,
+            kG += mod.fkGf(self.ys, Fx, bay.a, bay.b, self.bf, bay.m, bay.n,
                              bay.x1w, bay.x1wr, bay.x2w, bay.x2wr,
                              bay.y1w, bay.y1wr, bay.y2w, bay.y2wr,
                              size, row0, col0)

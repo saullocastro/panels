@@ -31,7 +31,7 @@ cdef extern from 'bardell_functions.hpp':
     double fp(int i, double xi, double xi1t, double xi1r, double xi2t, double xi2r) nogil
 
 
-def fk0f(double ys, double a, double b, double bf, double df, double E1, double F1,
+def fkCf(double ys, double a, double b, double bf, double df, double E1, double F1,
          double S1, double Jxx, int m, int n,
          double x1u, double x1ur, double x2u, double x2ur,
          double x1w, double x1wr, double x2w, double x2wr,
@@ -112,15 +112,15 @@ def fk0f(double ys, double a, double b, double bf, double df, double E1, double 
     return k0f
 
 
-def fkG0f(double ys, double Fx, double a, double b, double bf, int m, int n,
+def fkGf(double ys, double Fx, double a, double b, double bf, int m, int n,
           double x1w, double x1wr, double x2w, double x2wr,
           double y1w, double y1wr, double y2w, double y2wr,
           int size, int row0, int col0):
     cdef int i, k, j, l, c, row, col
     cdef double eta
 
-    cdef long [:] kG0fr, kG0fc
-    cdef double [:] kG0fv
+    cdef long [:] kGfr, kGfc
+    cdef double [:] kGfv
 
     cdef double fAwxifBwxi, gAw, gBw
 
@@ -128,12 +128,12 @@ def fkG0f(double ys, double Fx, double a, double b, double bf, int m, int n,
 
     fdim = 1*m*n*m*n
 
-    kG0fr = np.zeros((fdim,), dtype=INT)
-    kG0fc = np.zeros((fdim,), dtype=INT)
-    kG0fv = np.zeros((fdim,), dtype=DOUBLE)
+    kGfr = np.zeros((fdim,), dtype=INT)
+    kGfc = np.zeros((fdim,), dtype=INT)
+    kGfv = np.zeros((fdim,), dtype=DOUBLE)
 
     with nogil:
-        # kG0f
+        # kGf
         c = -1
         for i in range(m):
             for k in range(m):
@@ -153,13 +153,13 @@ def fkG0f(double ys, double Fx, double a, double b, double bf, int m, int n,
                         gBw = f(l, eta, y1w, y1wr, y2w, y2wr)
 
                         c += 1
-                        kG0fr[c] = row+2
-                        kG0fc[c] = col+2
-                        kG0fv[c] += 2*Fx*fAwxifBwxi*gAw*gBw/a
+                        kGfr[c] = row+2
+                        kGfc[c] = col+2
+                        kGfv[c] += 2*Fx*fAwxifBwxi*gAw*gBw/a
 
-    kG0f = coo_matrix((kG0fv, (kG0fr, kG0fc)), shape=(size, size))
+    kGf = coo_matrix((kGfv, (kGfr, kGfc)), shape=(size, size))
 
-    return kG0f
+    return kGf
 
 
 def fkMf(double ys, double rho, double h, double hb, double hf, double a,
