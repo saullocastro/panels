@@ -47,7 +47,7 @@ def fkCSB11(double kt, double dsb, object p1, int size, int row0, int col0):
     row0 : int
         Row position of constitutive matrix being calculated.
     col0 : int
-        Collumn position of constitutive matrix being calculated.
+        Column position of constitutive matrix being calculated.
 
     Returns
     -------
@@ -182,7 +182,7 @@ def fkCSB12(double kt, double dsb, object p1, object p2, int size, int row0, int
     row0 : int
         Row position of constitutive matrix being calculated.
     col0 : int
-        Collumn position of constitutive matrix being calculated.
+        Column position of constitutive matrix being calculated.
 
     Returns
     -------
@@ -306,7 +306,7 @@ def fkCSB22(double kt, object p1, object p2, int size, int row0, int col0):
     row0 : int
         Row position of constitutive matrix being calculated.
     col0 : int
-        Collumn position of constitutive matrix being calculated.
+        Column position of constitutive matrix being calculated.
 
     Returns
     -------
