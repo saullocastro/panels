@@ -895,11 +895,11 @@ class Shell(object):
             self.distr_loads.append([None, y, funcx, funcy, funcz])
         else:
             self.distr_loads_inc.append([None, y, funcx, funcy, funcz])
-            
-            
+
+
     def add_point_pd(self, x, y, ku, up, kv, vp, kw, wp, cte=True):
         r"""Add a point prescribed displacement with three components
-    
+
         Parameters
         ----------
         x : float
@@ -913,35 +913,104 @@ class Shell(object):
         cte : bool, optional
             Constant prescribed displacements are not incremented
             during the non-linear analysis.
-    
+
         """
         if cte:
             self.point_pds.append([x, y, ku*up, kv*vp, kw*wp])
         else:
             self.point_pds_inc.append([x, y, ku*up, kv*vp, kw*wp])
 
-    
-    def add_distr_pd_fixed_x(self, x, funcx=None, funcy=None, funcz=None, cte=True):
-        r"""Add a distributed force g(y) at a fixed x position
+
+    def add_distr_pd_fixed_x(self, x, ku=None, kv=None, kw=None,
+                             funcu=None, funcv=None, funcw=None, cte=True):
+        r"""Add a distributed prescribed displacement g(y) at a fixed x position
 
         Parameters
         ----------
         x : float
             The fixed `x` position.
-        funcx, funcy, funcz : function, optional
+        ku, kv, kw : float, optional
+            The `x,y,z` components of the penalty stiffness of the prescribed
+            displacement.  At least one of the three must be defined, and
+            corresponding to the funcu, funcv, funcw specified.
+        funcu, funcv, funcw : function, optional
             The functions of the distributed prescribed displacements, will be used
-            from `y=0` to `y=b`. At least one of the three must be defined
+            from `y=0` to `y=b`. At least one of the three must be defined, and
+            corresponding to the ku, kv, kw specified.
         cte : bool, optional
             Constant prescribed displacements are not incremented during the non-linear
             analysis.
 
         """
-        if not any((funcx, funcy, funcz)):
+        if not any((ku, kv, kw)):
+            raise ValueError('At least one penalty constant must be different than None')
+        if not any((funcu, funcv, funcw)):
             raise ValueError('At least one function must be different than None')
+        new_funcu = None
+        new_funcv = None
+        new_funcw = None
+        if (ku is not None) or (funcu is not None):
+            if ku is None or funcu is None:
+                raise ValueError('Both ku and funcu must be specified')
+            new_funcu = lambda y: ku*funcu(y)
+        if (kv is not None) or (funcv is not None):
+            if kv is None or funcv is None:
+                raise ValueError('Both kv and funcv must be specified')
+            new_funcv = lambda y: kv*funcv(y)
+        if (kw is not None) or (funcw is not None):
+            if kw is None or funcw is None:
+                raise ValueError('Both kw and funcw must be specified')
+            new_funcw = lambda y: kw*funcw(y)
         if cte:
-            self.distr_pds.append([x, None, funcx, funcy, funcz])
+            self.distr_pds.append([x, None, new_funcu, new_funcv, new_funcw])
         else:
-            self.distr_pds_inc.append([x, None, funcx, funcy, funcz])
+            self.distr_pds_inc.append([x, None, new_funcu, new_funcv, new_funcw])
+
+
+    def add_distr_pd_fixed_y(self, y, ku=None, kv=None, kw=None,
+                             funcu=None, funcv=None, funcw=None, cte=True):
+        r"""Add a distributed prescribed displacement g(x) at a fixed y position
+
+        Parameters
+        ----------
+        y : float
+            The fixed `y` position.
+        ku, kv, kw : float, optional
+            The `x,y,z` components of the penalty stiffness of the prescribed
+            displacement.  At least one of the three must be defined, and
+            corresponding to the funcu, funcv, funcw specified.
+        funcu, funcv, funcw : function, optional
+            The functions of the distributed prescribed displacements, will be used
+            from `y=0` to `y=b`. At least one of the three must be defined, and
+            corresponding to the ku, kv, kw specified.
+        cte : bool, optional
+            Constant prescribed displacements are not incremented during the non-linear
+            analysis.
+
+        """
+        if not any((ku, kv, kw)):
+            raise ValueError('At least one penalty constant must be different than None')
+        if not any((funcu, funcv, funcw)):
+            raise ValueError('At least one function must be different than None')
+        new_funcu = None
+        new_funcv = None
+        new_funcw = None
+        if (ku is not None) or (funcu is not None):
+            if ku is None or funcu is None:
+                raise ValueError('Both ku and funcu must be specified')
+            new_funcu = lambda x: ku*funcu(x)
+        if (kv is not None) or (funcv is not None):
+            if kv is None or funcv is None:
+                raise ValueError('Both kv and funcv must be specified')
+            new_funcv = lambda x: kv*funcv(x)
+        if (kw is not None) or (funcw is not None):
+            if kw is None or funcw is None:
+                raise ValueError('Both kw and funcw must be specified')
+            new_funcw = lambda x: kw*funcw(x)
+        if cte:
+            self.distr_pds.append([None, y, new_funcu, new_funcv, new_funcw])
+        else:
+            self.distr_pds_inc.append([None, y, new_funcu, new_funcv, new_funcw])
 
 
     def calc_stiffness_point_constraint(self, x, y, u=True, v=True, w=True, phix=False,
