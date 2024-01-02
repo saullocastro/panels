@@ -9,7 +9,8 @@ sys.path.append(r'C:\Users\natha\Documents\GitHub\panels')
 import numpy as np
 from sympy import Matrix as M, Symbol, init_printing, var
 
-var('a, b, h, d, intx, inty, wxi, weta')
+var('a, b, h, d, wxi, weta')
+var('ku, kv, kw')
 
 var('fAu, gAu, fAv, gAv, fAw, gAw, fAuxi, fAvxi, fAwxi, gAueta, gAveta, gAweta, fAwxixi, gAwetaeta')
 var('fBu, gBu, fBv, gBv, fBw, gBw, fBuxi, fBvxi, fBwxi, gBueta, gBveta, gBweta, fBwxixi, gBwetaeta')
@@ -52,9 +53,9 @@ swBxieta = M([[0, 0, fBwxi*gBweta]])
 swBetaeta = M([[0, 0, fBw*gBwetaeta]])
 
 # Constitutive stiffness matrix
-kCpd = swA.T*swB                    # no integral in the expression 
-kCld_xcte = b/2*swA.T*swB          # b/2 comes from converting from y to eta from the original formulation
-kCld_ycte = a/2*swA.T*swB          # a/2 comes from converting from x to xi
+kCpd = (ku*suA.T*suB + kv*svA.T*svB + kw*swA.T*swB)           # no integral in the expression
+kCld_xcte = b/2*(ku*suA.T*suB + kv*svA.T*svB + kw*swA.T*swB)  # b/2 comes from converting from y to eta from the original formulation
+kCld_ycte = a/2*(ku*suA.T*suB + kv*svA.T*svB + kw*swA.T*swB)  # a/2 comes from converting from x to xi
 
 # Printing results
 
