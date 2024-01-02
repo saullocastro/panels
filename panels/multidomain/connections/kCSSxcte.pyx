@@ -47,7 +47,7 @@ def fkCSSxcte11(double kt, double kr, object p1, double xcte1, int size, int row
     row0 : int
         Row position of constitutive matrix being calculated.
     col0 : int
-        Collumn position of constitutive matrix being calculated.
+        Column position of constitutive matrix being calculated.
 
     Returns
     -------
@@ -166,7 +166,7 @@ def fkCSSxcte12(double kt, double kr, object p1, object p2,
     row0 : int
         Row position of constitutive matrix being calculated.
     col0 : int
-        Collumn position of constitutive matrix being calculated.
+        Column position of constitutive matrix being calculated.
 
     Returns
     -------
@@ -293,7 +293,7 @@ def fkCSSxcte22(double kt, double kr, object p1, object p2,
     row0 : int
         Row position of constitutive matrix being calculated.
     col0 : int
-        Collumn position of constitutive matrix being calculated.
+        Column position of constitutive matrix being calculated.
 
     Returns
     -------

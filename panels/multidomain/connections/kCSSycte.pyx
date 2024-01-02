@@ -50,7 +50,7 @@ def fkCSSycte11(double kt, double kr, object p1, double ycte1,
     row0 : int
         Row position of constitutive matrix being calculated.
     col0 : int
-        Collumn position of constitutive matrix being calculated.
+        Column position of constitutive matrix being calculated.
 
     Returns
     -------
@@ -170,7 +170,7 @@ def fkCSSycte12(double kt, double kr, object p1, object p2,
     row0 : int
         Row position of constitutive matrix being calculated.
     col0 : int
-        Collumn position of constitutive matrix being calculated.
+        Column position of constitutive matrix being calculated.
 
     Returns
     -------
@@ -298,7 +298,7 @@ def fkCSSycte22(double kt, double kr, object p1, object p2,
     row0 : int
         Row position of constitutive matrix being calculated.
     col0 : int
-        Collumn position of constitutive matrix being calculated.
+        Column position of constitutive matrix being calculated.
 
     Returns
     -------
