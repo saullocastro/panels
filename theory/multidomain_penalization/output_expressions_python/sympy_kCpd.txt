@@ -1,0 +1,6 @@
+# kCpd_11
+# kCpd_11_num=1
+c += 1
+kCpdr[c] = row+2
+kCpdc[c] = col+2
+kCpdv[c] += fAw*fBw*gAw*gBw
