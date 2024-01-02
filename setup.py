@@ -238,6 +238,14 @@ extensions = [
             ],
         include_dirs=include_dirs, extra_compile_args=compile_args,
               extra_link_args=link_args, language='c++'),
+# multi-domain connections
+    Extension('panels.multidomain.connections.kCprescrdisl',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/multidomain/connections/kCprescrdispl.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, language='c++'),
 
     ]
 

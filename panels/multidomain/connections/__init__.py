@@ -91,4 +91,5 @@ from . kCSB import *
 from . kCSSxcte import *
 from . kCSSycte import *
 from . kCBFxcte import *
+from . kCprescrdispl import *
 from . penalties import calc_kt_kr

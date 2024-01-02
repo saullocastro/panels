@@ -1,3 +1,8 @@
+# Symbolically calculates the matrix elements from a given expression
+# In this case, the matrix expressions for prescribed displacements
+#       Point
+#       Line along x and y constant
+
 import sys
 sys.path.append(r'C:\Users\natha\Documents\GitHub\panels')
 
@@ -12,11 +17,12 @@ var('fBu, gBu, fBv, gBv, fBw, gBw, fBuxi, fBvxi, fBwxi, gBueta, gBveta, gBweta, 
 var('uA, vA, wA, uAxi, vAxi, wAxi, uAeta, vAeta, wAeta, wAxixi, wAxieta, wAetaeta')
 var('uB, vB, wB, uBxi, vBxi, wBxi, uBeta, vBeta, wBeta, wBxixi, wBxieta, wBetaeta')
 
-
+# SF already in terms of xi and eta
 suA = M([[fAu*gAu, 0, 0]])
 svA = M([[0, fAv*gAv, 0]])
 swA = M([[0, 0, fAw*gAw]])
 
+# suAxi is deri of suA wrt xi
 suAxi = M([[fAuxi*gAu, 0, 0]])
 svAxi = M([[0, fAvxi*gAv, 0]])
 swAxi = M([[0, 0, fAwxi*gAw]])
@@ -46,7 +52,9 @@ swBxieta = M([[0, 0, fBwxi*gBweta]])
 swBetaeta = M([[0, 0, fBw*gBwetaeta]])
 
 # Constitutive stiffness matrix
-kCpd = intx*inty/4*swA.T*swB
+kCpd = swA.T*swB                    # no integral in the expression 
+kCld_xcte = b/2*swA.T*swB          # b/2 comes from converting from y to eta from the original formulation
+kCld_ycte = a/2*swA.T*swB          # a/2 comes from converting from x to xi
 
 # Printing results
 
@@ -69,6 +77,8 @@ except: pass
 
 matrices = [
     [kCpd, 'kCpd'],
+    [kCld_xcte, 'kCld_xcte'],
+    [kCld_ycte, 'kCld_ycte'],
 ]
 
 for m in matrices:
