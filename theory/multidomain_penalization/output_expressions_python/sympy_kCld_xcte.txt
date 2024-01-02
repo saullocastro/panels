@@ -1,0 +1,6 @@
+# kCld_xcte_11
+# kCld_xcte_11_num=1
+c += 1
+kCld_xcter[c] = row+2
+kCld_xctec[c] = col+2
+kCld_xctev[c] += b*fAw*fBw*gAw*gBw/2

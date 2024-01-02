@@ -1,0 +1,6 @@
+# kCld_ycte_11
+# kCld_ycte_11_num=1
+c += 1
+kCld_ycter[c] = row+2
+kCld_yctec[c] = col+2
+kCld_yctev[c] += a*fAw*fBw*gAw*gBw/2

@@ -73,6 +73,7 @@ class Shell(object):
         'fsdt_shear_correction',
         'm', 'n', 'nx', 'ny', 'size',
         'point_loads', 'point_loads_inc', 'distr_loads', 'distr_loads_inc',
+        'point_pds', 'point_pds_inc', 'distr_pds', 'distr_pds_inc',
         'Nxx', 'Nyy', 'Nxy', 'Nxx_cte', 'Nyy_cte', 'Nxy_cte',
         'x1u', 'x1ur', 'x2u', 'x2ur',
         'x1v', 'x1vr', 'x2v', 'x2vr',
@@ -134,6 +135,11 @@ class Shell(object):
         self.point_loads_inc = [] #NOTE see add_point_load
         self.distr_loads = [] #NOTE see add_distr_load_fixed_x and add_distr_load_fixed_y
         self.distr_loads_inc = [] # NOTE see add_distr_load_fixed_x and add_distr_load_fixed_y
+        # prescribed displacements
+        self.point_pds = [] #NOTE see add_point_pd
+        self.point_pds_inc = [] #NOTE see add_point_pd
+        self.distr_pds = [] #NOTE see add_distr_pd_fixed_x and add_distr_pd_fixed_y
+        self.distr_pds_inc = [] # NOTE see add_distr_pd_fixed_x and add_distr_pd_fixed_y
         # uniform membrane stress state
         self.Nxx = 0.
         self.Nyy = 0.
@@ -889,6 +895,53 @@ class Shell(object):
             self.distr_loads.append([None, y, funcx, funcy, funcz])
         else:
             self.distr_loads_inc.append([None, y, funcx, funcy, funcz])
+            
+            
+    def add_point_pd(self, x, y, ku, up, kv, vp, kw, wp, cte=True):
+        r"""Add a point prescribed displacement with three components
+    
+        Parameters
+        ----------
+        x : float
+            The `x` position.
+        y : float
+            The `y` position in radians.
+        ku, kv, kw : float
+            The `x,y,z` component of the penalty stiffness of the prescribed displacement.
+        up, vp, wp : float
+            The `x,y,z` components of the prescribed displacement.
+        cte : bool, optional
+            Constant prescribed displacements are not incremented
+            during the non-linear analysis.
+    
+        """
+        if cte:
+            self.point_pds.append([x, y, ku*up, kv*vp, kw*wp])
+        else:
+            self.point_pds_inc.append([x, y, ku*up, kv*vp, kw*wp])
+
+    
+    def add_distr_pd_fixed_x(self, x, funcx=None, funcy=None, funcz=None, cte=True):
+        r"""Add a distributed force g(y) at a fixed x position
+
+        Parameters
+        ----------
+        x : float
+            The fixed `x` position.
+        funcx, funcy, funcz : function, optional
+            The functions of the distributed prescribed displacements, will be used
+            from `y=0` to `y=b`. At least one of the three must be defined
+        cte : bool, optional
+            Constant prescribed displacements are not incremented during the non-linear
+            analysis.
+
+        """
+        if not any((funcx, funcy, funcz)):
+            raise ValueError('At least one function must be different than None')
+        if cte:
+            self.distr_pds.append([x, None, funcx, funcy, funcz])
+        else:
+            self.distr_pds_inc.append([x, None, funcx, funcy, funcz])
 
 
     def calc_stiffness_point_constraint(self, x, y, u=True, v=True, w=True, phix=False,

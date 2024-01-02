@@ -3,4 +3,4 @@
 c += 1
 kCpdr[c] = row+2
 kCpdc[c] = col+2
-kCpdv[c] += fAw*fBw*gAw*gBw*intx*inty/4
+kCpdv[c] += fAw*fBw*gAw*gBw
