@@ -1,6 +1,33 @@
 from composites import laminated_plate
 
 
+def calc_ku_kv_kw_point_pd(p):
+    A11 = p.lam.A[0, 0]
+    A22 = p.lam.A[1, 1]
+    ku = A11 / p.lam.h / p.a / p.b
+    kv = A22 / p.lam.h / p.a / p.b
+    kw = A11 / p.lam.h / p.b / p.b
+    return ku, kv, kw
+
+
+def calc_ku_kv_kw_line_pd_xcte(p):
+    A11 = p.lam.A[0, 0]
+    A22 = p.lam.A[1, 1]
+    ku = A11 / p.lam.h / p.b
+    kv = A22 / p.lam.h / p.b
+    kw = A11 / p.lam.h / p.b
+    return ku, kv, kw
+
+
+def calc_ku_kv_kw_line_pd_ycte(p):
+    A11 = p.lam.A[0, 0]
+    A22 = p.lam.A[1, 1]
+    ku = A11 / p.lam.h / p.a
+    kv = A22 / p.lam.h / p.a
+    kw = A11 / p.lam.h / p.a
+    return ku, kv, kw
+
+
 def calc_kt_kr(p1, p2, connection_type):
     """Calculate translation and rotation penalty constants
 
