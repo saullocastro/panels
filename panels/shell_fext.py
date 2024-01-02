@@ -71,5 +71,18 @@ def shell_fext(shell, inc, size, col0):
                 fpt = np.array([[funcx(yvar), funcy(yvar), funcz(yvar), 0, 0]]) * inc_i
                 fg(g, xcte, yvar, shell)
                 fext[col0:col1] += weight * (shell.b/2) * fpt.dot(g).ravel()
+                
+    # point prescribed displacements
+    # - grouping point_pds and point_pds_inc
+    point_pds = []
+    for pd in shell.point_pds:
+        point_pds.append(load + [1.]) #NOTE adding inc = 1.
+    for load in shell.point_pds_inc:
+        point_pds.append(load + [inc])
+    # - calculating
+    for x, y, fx, fy, fz, inc_i in point_pds:
+        fg(g, x, y, shell)
+        fpt = np.array([[fx, fy, fz, 0, 0]])*inc_i
+        fext[col0:col1] += fpt.dot(g).ravel()
 
     return fext
