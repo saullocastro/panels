@@ -6,7 +6,7 @@ from structsolve import static
 from panels import Shell
 
 
-def test_panel_field_outputs(plot=False):
+def test_panel_field_outputs():
     m = 7
     n = 6
     for model in ['plate_clpt_donnell_bardell',
@@ -46,4 +46,4 @@ def test_panel_field_outputs(plot=False):
 
 
 if __name__ == '__main__':
-    test_panel_field_outputs(plot=True)
+    test_panel_field_outputs()
