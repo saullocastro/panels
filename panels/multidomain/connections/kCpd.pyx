@@ -1,5 +1,3 @@
-# Calculates the matrices (numerical value) based on the expressions of each element generated from the symbolic code
-
 #cython: boundscheck=False
 #cython: wraparound=False
 #cython: cdivision=True
