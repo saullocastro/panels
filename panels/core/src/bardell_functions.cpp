@@ -115,7 +115,7 @@ EXPORTIT void vec_fpp(double *fpp, double xi,
     fpp[29] = xi*(14505829.1081198*pow(xi, 26) - 96066905.9801899*pow(xi, 24) + 282549723.471147*pow(xi, 22) - 486293061.484355*pow(xi, 20) + 543199696.338907*pow(xi, 18) - 412831769.217569*pow(xi, 16) + 217616746.5643*pow(xi, 14) - 79615882.8893781*pow(xi, 12) + 19903970.7223445*pow(xi, 10) - 3287442.61179864*pow(xi, 8) + 338136.954356432*pow(xi, 6) - 19561.6419875622*pow(xi, 4) + 525.850591063499*pow(xi, 2) - 4.18448746204376);
 }
 
-
+// Generates a single shape function, based on the bardell function number
 EXPORTIT double f(int i, double xi,
            double xi1t, double xi1r, double xi2t, double xi2r) {
     switch(i) {
@@ -184,7 +184,7 @@ EXPORTIT double f(int i, double xi,
     }
 }
 
-
+// p = prime
 EXPORTIT double fp(int i, double xi,
            double xi1t, double xi1r, double xi2t, double xi2r) {
     switch(i) {
