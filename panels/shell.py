@@ -66,6 +66,7 @@ class Shell(object):
         the normal (`z`) axis.
 
     """
+    # Declare all the variables/attributes here to preallocate mem, speed it up. Var not declared here cant be used
     __slots__ = [ 'a', 'x1', 'x2', 'b', 'y1', 'y2', 'r',
         'stack', 'plyt', 'laminaprop', 'rho', 'offset',
         'group', 'x0', 'y0', 'row_start', 'col_start', 'row_end', 'col_end',
@@ -140,6 +141,7 @@ class Shell(object):
         self.point_pds_inc = [] #NOTE see add_point_pd
         self.distr_pds = [] #NOTE see add_distr_pd_fixed_x and add_distr_pd_fixed_y
         self.distr_pds_inc = [] # NOTE see add_distr_pd_fixed_x and add_distr_pd_fixed_y
+            # Stored as [x pos, y pos of applied displ, force x, y, z due to that displ]
         # uniform membrane stress state
         self.Nxx = 0.
         self.Nyy = 0.
@@ -917,13 +919,14 @@ class Shell(object):
         """
         if cte:
             self.point_pds.append([x, y, ku*up, kv*vp, kw*wp])
+            # Adds the location and force
         else:
             self.point_pds_inc.append([x, y, ku*up, kv*vp, kw*wp])
 
 
     def add_distr_pd_fixed_x(self, x, ku=None, kv=None, kw=None,
                              funcu=None, funcv=None, funcw=None, cte=True):
-        r"""Add a distributed prescribed displacement g(y) at a fixed x position
+        r"""Add a distributed prescribed displacement g(y) ??? at a fixed x position
 
         Parameters
         ----------
@@ -933,7 +936,8 @@ class Shell(object):
             The `x,y,z` components of the penalty stiffness of the prescribed
             displacement.  At least one of the three must be defined, and
             corresponding to the funcu, funcv, funcw specified.
-        funcu, funcv, funcw : function, optional
+        funcu, funcv, funcw : type: function, optional
+            Specify in normal coordinates (x,y) not natural
             The functions of the distributed prescribed displacements, will be used
             from `y=0` to `y=b`. At least one of the three must be defined, and
             corresponding to the ku, kv, kw specified.
@@ -946,13 +950,14 @@ class Shell(object):
             raise ValueError('At least one penalty constant must be different than None')
         if not any((funcu, funcv, funcw)):
             raise ValueError('At least one function must be different than None')
+        # Force funtns = k * displ ftn
         new_funcu = None
         new_funcv = None
         new_funcw = None
-        if (ku is not None) or (funcu is not None):
-            if ku is None or funcu is None:
+        if (ku is not None) or (funcu is not None): # nothing is specified, but might be that u is not needed. It maybe v,w
+            if ku is None or funcu is None: # if atmost 1 is specified for u means u is to be specified, but is currently incomplete
                 raise ValueError('Both ku and funcu must be specified')
-            new_funcu = lambda y: ku*funcu(y)
+            new_funcu = lambda y: ku*funcu(y) # y is param in ftn 
         if (kv is not None) or (funcv is not None):
             if kv is None or funcv is None:
                 raise ValueError('Both kv and funcv must be specified')
@@ -979,7 +984,7 @@ class Shell(object):
             The `x,y,z` components of the penalty stiffness of the prescribed
             displacement.  At least one of the three must be defined, and
             corresponding to the funcu, funcv, funcw specified.
-        funcu, funcv, funcw : function, optional
+        funcu, funcv, funcw : type: function, optional
             The functions of the distributed prescribed displacements, will be used
             from `y=0` to `y=b`. At least one of the three must be defined, and
             corresponding to the ku, kv, kw specified.

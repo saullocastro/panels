@@ -52,7 +52,7 @@ def fkCpd(double ku, double kv, double kw, object p, double xp, double yp,
 
     """
     cdef int i, k, j, l, c, row, col
-    cdef int m, n
+    cdef int m, n # no of terms in x,y
     cdef double a, b, xip, etap
     
     # BCs
@@ -82,7 +82,7 @@ def fkCpd(double ku, double kv, double kw, object p, double xp, double yp,
     y1v = p.y1v ; y1vr = p.y1vr ; y2v = p.y2v ; y2vr = p.y2vr
     y1w = p.y1w ; y1wr = p.y1wr ; y2w = p.y2w ; y2wr = p.y2wr
 
-    fdim = 3*m*n*m*n # 1 bec the matrix has only 1 sparse term. Might be better to make it a var and then change it
+    fdim = 3*m*n*m*n # 3 bec the matrix (from the sym expressions) has only 1 sparse term. Might be better to make it a var and then change it
 
     kCpdr = np.zeros((fdim,), dtype=INT)
     kCpdc = np.zeros((fdim,), dtype=INT)
@@ -93,8 +93,9 @@ def fkCpd(double ku, double kv, double kw, object p, double xp, double yp,
 
 
     # i,j controls f and g for A (so starting from the left term)
-    # l,m ...  for B (... right)
-    # i, j are for the rows (see the line where the row is being updated) - WHY THOUHG?? CHECK 
+    # k,l ...  for B (... right)
+    
+    # i, j are for the rows (see the line where the row is being updated) - check var_descr.py CHECK 
     # k, l are for the cols
     
     with nogil:
@@ -106,6 +107,8 @@ def fkCpd(double ku, double kv, double kw, object p, double xp, double yp,
             gAu = f(j, etap, y1u, y1ur, y2u, y2ur) # the point location should be in natural coords
             gAv = f(j, etap, y1v, y1vr, y2v, y2vr)
             gAw = f(j, etap, y1w, y1wr, y2w, y2wr)
+            # Generates a single shape function, based on the bardell function number j 
+                # So its actually gAw_j
     
             for l in range(n):
                 gBu = f(l, etap, y1u, y1ur, y2u, y2ur)
@@ -118,7 +121,7 @@ def fkCpd(double ku, double kv, double kw, object p, double xp, double yp,
                     fAw = f(i, xip, x1w, x1wr, x2w, x2wr)
             
                     for k in range(m):
-                        row = row0 + DOF*(j*m + i)
+                        row = row0 + DOF*(j*m + i) # row0 = starting row of this submatrix in the global matrix
                         col = col0 + DOF*(l*m + k)
 
                         #NOTE symmetry
@@ -264,6 +267,7 @@ def fkCld_xcte(double ku, double kv, double kw, object p, double xp,
                         kCld_xctev[c] += kw*b*fAw*fBw*gAwgBw/2.
 
     kCld_xcte = coo_matrix((kCld_xctev, (kCld_xcter, kCld_xctec)), shape=(size, size))
+    # Creates a sparse matrix by putting ..v and the corresponding row and col given by ..r ..c
 
     return kCld_xcte
 
@@ -293,7 +297,7 @@ def fkCld_ycte(double ku, double kv, double kw, object p, double yp,
     -------
     kCld_ycte : scipy.sparse.coo_matrix
         A sparse matrix with the penalty stiffness for prescribed line
-        displacement with constant x (so integral over y).
+        displacement with constant y (so integral over x).
 
     """
     cdef int i, k, j, l, c, row, col
@@ -350,7 +354,7 @@ def fkCld_ycte(double ku, double kv, double kw, object p, double yp,
 
         for i in range(m):
             for k in range(m):
-                # j and l are for y coord i.e. g - since thats being integrated, loop it outside
+                # i and k are for x coord i.e. f - since thats being integrated, loop it outside
                 fAufBu = integral_ff(i, k, x1u, x1ur, x2u, x2ur, x1u, x1ur, x2u, x2ur)
                 fAvfBv = integral_ff(i, k, x1v, x1vr, x2v, x2vr, x1v, x1vr, x2v, x2vr)
                 fAwfBw = integral_ff(i, k, x1w, x1wr, x2w, x2wr, x1w, x1wr, x2w, x2wr)

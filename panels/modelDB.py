@@ -7,7 +7,7 @@ Used to configure the main parameters for each implemented model.
 """
 from .models import *
 
-
+# Nested dict of type of shell (with its info) - Has possible model options
 db = {
     'cylshell_clpt_donnell_bardell': {
                     'linear static': True,
