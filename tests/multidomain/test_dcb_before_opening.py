@@ -9,18 +9,37 @@ from panels.multidomain.connections import fkCpd
 from panels.plot_shell import plot_shell
 from panels.multidomain import MultiDomain
 
+# Open images
+from matplotlib import image as img
+from matplotlib import pyplot as plt
+
+import os
+os.chdir('C:/Users/natha/Documents/GitHub/panels/tests/multidomain')
+
+def img_popup(filename):
+    
+    # To open pop up images - Ignore the syntax warning :)
+    # %matplotlib qt 
+    # For inline images
+    %matplotlib inline
+    
+    plt.title(filename)
+    image = img.imread(filename)
+    plt.imshow(image)
+    plt.show()
+
 def test_dcb_bending_pd():
 
     # Properties
-    E1 = 127560e6 # Pa
-    E2 = 13030.e6 # Pa
-    G12 = 6410.e6 # Pa
+    E1 = 127560 # Pa
+    E2 = 13030. # Pa
+    G12 = 6410. # Pa
     nu12 = 0.3
     ply_thickness = 0.127e-3 # m
 
     # Plate dimensions
-    a = 1.1811
-    b = 0.74674
+    a = 1181.1e-3 # m
+    b = 746.74e-3 # m
     
     a1 = 0.5*a
 
@@ -140,7 +159,16 @@ def test_dcb_bending_pd():
     #vecmax = data['vecmax']
     vecmin = vecmax = None
     assy.plot(c=c0, group='top', vec='w', filename='test_dcb_before_opening_top.png', colorbar=True, vecmin=vecmin, vecmax=vecmax)
-
+    
+    # Open images
+    if True:
+        # plt.figure
+        img_popup('test_dcb_before_opening_bot.png')
+        # plt.show()
+        # plt.figure()
+        img_popup('test_dcb_before_opening_top.png')
+        # plt.show()
+        
 
 if __name__ == "__main__":
     test_dcb_bending_pd()
