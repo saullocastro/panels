@@ -13,15 +13,15 @@ from panels.multidomain import MultiDomain
 from matplotlib import image as img
 from matplotlib import pyplot as plt
 
-import os
-os.chdir('C:/Users/natha/Documents/GitHub/panels/tests/multidomain')
+# import os
+# os.chdir('C:/Users/natha/Documents/GitHub/panels/tests/multidomain')
 
 def img_popup(filename):
     
     # To open pop up images - Ignore the syntax warning :)
     # %matplotlib qt 
     # For inline images
-    %matplotlib inline
+    # %matplotlib inline
     
     plt.title(filename)
     image = img.imread(filename)
@@ -52,12 +52,17 @@ def test_dcb_bending_pd():
 
     laminaprop = (E1, E2, nu12, G12, G12, G12)
      
-    # skin panels
+    # Top DCB panels
     top1 = Shell(group='top', x0=0, y0=0, a=a1, b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
     top2 = Shell(group='top', x0=a1, y0=0, a=a-a1, b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
-    # skin panels
+    # Bottom DCB panels
     bot1 = Shell(group='bot', x0=0, y0=0, a=a1, b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
     bot2 = Shell(group='bot', x0=a1, y0=0, a=a-a1, b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
+    
+    # print(top1.row_start, top1.col_start)
+    # print(top2.row_start, top2.col_start)
+    # print(bot1.row_start, bot1.col_start)
+    # print(bot2.row_start, bot2.col_start)
     
     # boundary conditions
     
@@ -116,13 +121,14 @@ def test_dcb_bending_pd():
         bot1.y1v = 1 ; bot1.y1vr = 1 ; bot1.y2v = 1 ; bot1.y2vr = 1
         bot1.y1w = 1 ; bot1.y1wr = 1 ; bot1.y2w = 1 ; bot1.y2wr = 1
         
-        bot2.x1u = 1 ; bot2.x1ur = 1 ; bot2.x2u = 0 ; bot2.x2ur = 0
+        bot2.x1u = 1 ; bot2.x1ur = 1 ; bot2.x2u = 0 ; bot2.x2ur = 0 # only right extreme of plate 2 with line ll to x is fixed
         bot2.x1v = 1 ; bot2.x1vr = 1 ; bot2.x2v = 0 ; bot2.x2vr = 0 
         bot2.x1w = 1 ; bot2.x1wr = 1 ; bot2.x2w = 0 ; bot2.x2wr = 0 
         bot2.y1u = 1 ; bot2.y1ur = 1 ; bot2.y2u = 1 ; bot2.y2ur = 1
         bot2.y1v = 1 ; bot2.y1vr = 1 ; bot2.y2v = 1 ; bot2.y2vr = 1
         bot2.y1w = 1 ; bot2.y1wr = 1 ; bot2.y2w = 1 ; bot2.y2wr = 1
 
+    # Connections - needs to be list of dict
     conn = [
      # skin-skin
      dict(p1=top1, p2=top2, func='SSxcte', xcte1=top1.a, xcte2=0),
@@ -130,9 +136,11 @@ def test_dcb_bending_pd():
      dict(p1=bot1, p2=top1, func='SB'), 
     ]
     
-    panels = [bot1, bot2, top1, top2]
+    panels = [top1, top2, bot1, bot2]
 
-    assy = MultiDomain(panels)
+    assy = MultiDomain(panels) # assy is now an object of the MultiDomain class
+
+
 
     k0 = assy.calc_kC(conn)
     
@@ -153,15 +161,18 @@ def test_dcb_bending_pd():
         
     fext = top2.calc_fext(size=size, col0=top2.col_start)
     c0 = solve(k0, fext)
-    ax, data = assy.plot(c=c0, group='bot', vec='w', filename='test_dcb_before_opening_bot.png', colorbar=True)
     
-    #vecmin = data['vecmin']
-    #vecmax = data['vecmax']
-    vecmin = vecmax = None
-    assy.plot(c=c0, group='top', vec='w', filename='test_dcb_before_opening_top.png', colorbar=True, vecmin=vecmin, vecmax=vecmax)
+    # Plotting results
+    if True:
+        ax, data = assy.plot(c=c0, group='bot', vec='w', filename='test_dcb_before_opening_bot.png', colorbar=True)
+        
+        #vecmin = data['vecmin']
+        #vecmax = data['vecmax']
+        vecmin = vecmax = None
+        assy.plot(c=c0, group='top', vec='w', filename='test_dcb_before_opening_top.png', colorbar=True, vecmin=vecmin, vecmax=vecmax)
     
     # Open images
-    if True:
+    if False:
         # plt.figure
         img_popup('test_dcb_before_opening_bot.png')
         # plt.show()
