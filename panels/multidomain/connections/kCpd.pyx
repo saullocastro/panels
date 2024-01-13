@@ -47,6 +47,7 @@ def fkCpd(double ku, double kv, double kw, object p, double xp, double yp,
     -------
     kCpd : scipy.sparse.coo_matrix
         A sparse matrix with the penalty stiffness for prescribed point displacement.
+        f here = function i.e. ftn for kCpd
 
     """
     cdef int i, k, j, l, c, row, col

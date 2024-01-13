@@ -53,6 +53,10 @@ class MultiDomain(object):
             dict(p1=panel_1, p2=panel_2, func='SSxcte', xcte1=0, xcte2=panel_2.a),
             dict(p1=panel_2, p2=panel_3, func='SSycte', ycte1=0, ycte2=panel_3.b)
             ] # A list of dictionary that indicates two connections: (panel_1-panel_2) and (panel_2-panel_3)
+    
+    xcte1 = location (x const) in panel 1 which connects to panel 2
+    xcte2 = ........................... 2 ....................... 2
+    
     >>> assembly_1 = MultiDomain(panels, conn)
 
     Notes
@@ -62,14 +66,15 @@ class MultiDomain(object):
     builds the compatibility relations between the panels.
 
     The connections functions available are:
-        - 'SSycte' : defines a skin-skin connection and calls the following functions ``fkCSSycte11``, ``fkCSSycte12``, ``fkCSSycte22``
-        - 'SSxcte' : defines a skin-skin connection and calls the following functions ``fkCSSxcte11``, ``fkCSSxcte12``, ``fkCSSxcte22``
+        - 'SSycte' : defines a skin-skin connection for const x and calls the following functions ``fkCSSycte11``, ``fkCSSycte12``, ``fkCSSycte22``
+        - 'SSxcte' : defines a skin-skin connection for const y and calls the following functions ``fkCSSxcte11``, ``fkCSSxcte12``, ``fkCSSxcte22``
         - 'SB' : defines a skin-base connection and calls the following functions ``fkCBFycte11``, ``fkCBFycte12``, ``fkCBFycte22``
         - 'BFycte': defines a base-flange connection and calls the following functions ``fkCBFycte11``, ``fkCBFycte12``, ``fkCBFycte22``
 
     Explanations about the connetion functions are found in ``connections`` module.
     """
     def __init__(self, panels, conn=None):
+        # Initialize the assmbly obj with these values
         self.conn = conn
         self.kC_conn = None
         self.panels = panels
@@ -78,16 +83,20 @@ class MultiDomain(object):
         row0 = 0
         col0 = 0
         for p in panels:
-            assert isinstance(p, Shell)
-            p.row_start = row0
+            assert isinstance(p, Shell) # Check if its Shell obj
+            # This actually modifies the shell obj (i.e. passed panels)
+            p.row_start = row0 # 1st panel starts at 0,0. Rest start at end of last matrix  --- Assembly of Kp_i from the paper
             p.col_start = col0
-            row0 += 3*p.m*p.n
+            row0 += 3*p.m*p.n # 3 bec 3 dof i.e. u,v,w - For FSDT, change to 5
             col0 += 3*p.m*p.n
-            p.row_end = row0
+            p.row_end = row0 # This is now the start for the next panel to be assembled
             p.col_end = col0
 
 
     def get_size(self):
+        '''
+        Size of K of a single panel
+        '''
         self.size = sum([3*p.m*p.n for p in self.panels])
         return self.size
 
@@ -580,6 +589,7 @@ class MultiDomain(object):
 
     def calc_kC(self, conn=None, c=None, silent=False, finalize=True, inc=1.):
         """Calculate the constitutive stiffness matrix of the assembly
+        --- this is kP (made by diagonally assemblying kP_i from the MD paper)
 
         Parameters
         ----------
@@ -601,15 +611,16 @@ class MultiDomain(object):
         """
         size = self.get_size()
         msg('Calculating kC for assembly...', level=2, silent=silent)
-        if c is not None:
+        if c is not None: # If c passed, check if its correct (dim and dtype)
             check_c(c, size)
 
         kC = 0.
         for p in self.panels:
             if p.row_start is None or p.col_start is None:
                 raise ValueError('Shell attributes "row_start" and "col_start" must be defined!')
+            # Calc Kc per panel (from the Shell class)
             kC += p.calc_kC(c=c, row0=p.row_start, col0=p.col_start, size=size,
-                    silent=silent, finalize=False)
+                    silent=silent, finalize=False) 
 
         if finalize:
             kC = finalize_symmetric_matrix(kC)

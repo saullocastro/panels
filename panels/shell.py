@@ -107,8 +107,8 @@ class Shell(object):
         self.offset = offset
 
         # assembly
-        self.group = None
-        self.x0 = None
+        self.group = None # Group name (useful when plotting multiple panels together)
+        self.x0 = None # starting position of the panel in the global CS
         self.y0 = None
         self.row_start = None
         self.col_start = None
@@ -152,8 +152,15 @@ class Shell(object):
         self.Nxy_cte = 0.
 
         #NOTE default boundary conditions:
+            # Controls disp/rotation at boundaries i.e. flags
+            # 0 = no disp or rotation
+            # 1 = disp or rotation permitted
+            
+            # x1 and x2 are limits of x -- represent BCs with lines x = const
+            # y1 and y2 ............. y -- .................. lines y = const
         # - displacement at 4 edges is zero
         # - free to rotate at 4 edges (simply supported by default)
+        
         self.x1u = 0.
         self.x1ur = 1.
         self.x2u = 0.
@@ -354,6 +361,7 @@ class Shell(object):
     def calc_kC(self, size=None, row0=0, col0=0, silent=True, finalize=True,
             c=None, c_cte=None, nx=None, ny=None, ABDnxny=None, NLgeom=False):
         r"""Calculate the constitutive stiffness matrix
+        ---------- Notation as per MD paper: kP_i ----------- 
 
         If ``c`` is not given it calculates the linear constitutive stiffness
         matrix, otherwise the large displacement linear constitutive stiffness
