@@ -139,7 +139,7 @@ def test_dcb_bending_pd():
     panels = [top1, top2, bot1, bot2]
 
     assy = MultiDomain(panels) # assy is now an object of the MultiDomain class
-
+    # Here the panels (shell objs) are modified -- their starting positions in the global matrix is assigned etc
 
 
     k0 = assy.calc_kC(conn)

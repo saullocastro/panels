@@ -7,9 +7,9 @@ Summary of all the variables used
 '''
 u,v,w = c * f(xi) * g(eta)
 c = amplitude or coeff
-f,g are functions
+f,g are functions of x and y resp
 
-i,j = row-wise positions within matrix 
+i,j = row-wise positions for a single col within matrix 
     j = outer (larger increments)
     i = inner (smaller increments - handles u v w)
             j = 1                  j = 2          j = 3 ...... j = n (n terms since j controls y)
@@ -22,13 +22,13 @@ i,j = row-wise positions within matrix
 i controls f; j controls g 
     So this gives distribution of fu_i * gu_j where each term in the matrix is 1 term in the SF multiplication
         
-k,l = col-wise positions within matrix
+k,l = col-wise positions for a single row within matrix
     l = outer (larger increments)
     k = inner (smaller increments - handles u v w)
     Similarly k controls f, l controls g
     So this gives distribution of fv_k * gv_l where each term in the matrix is 1 term in the SF multiplication
 
-When both (fu_i * gu_j)*(fv_k * gv_l) multiplies (???) then 4 vars controls each term
+When both (fu_i * gu_j)*(fv_k * gv_l) multiplies (eq 31 from MD paper) then 4 vars controls each term
 
 m,n = no of terms in x and y
 nx, ny = Number of integration points along `x` and `y`, respectively, for the Legendre-Gauss quadrature rule 

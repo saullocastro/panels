@@ -25,6 +25,7 @@ def load(name):
 
 
 def check_c(c, size):
+    # Conducts a check on c
     if not isinstance(c, np.ndarray):
         raise TypeError('"c" must be a NumPy ndarray object')
     if c.ndim != 1:
@@ -99,7 +100,7 @@ class Shell(object):
         self.b = b
         self.y1 = -1 # used to integrate part of the shell domain, -1 will use 0
         self.y2 = +1 # used to integrate part of the shell domain, +1 will use b
-        self.r = r
+        self.r = r # rad of curvature of panel (for curved panels)
         self.stack = stack
         self.plyt = plyt
         self.laminaprop = laminaprop
@@ -122,12 +123,12 @@ class Shell(object):
         self.model = None
         self.fsdt_shear_correction = 5/6. # in case of First-order Shear Deformation Theory
 
-        # approximation series
+        # approximation series - no of terms in SFs
         self.m = m
         self.n = n
         self.size = None
 
-        # numerical integration
+        # numerical integration - no of points
         self.nx = 2*m
         self.ny = 2*n
 
@@ -424,9 +425,11 @@ class Shell(object):
             analytical_kC = False
             analytical_kG = False
 
-        matrices = modelDB.db[self.model]['matrices']
+        matrices = modelDB.db[self.model]['matrices']  # selects what matrix functions to use
+            # self.model = model of the current shell obj
         matrices_num = modelDB.db[self.model]['matrices_num']
 
+        # Num integration points
         nx = self.nx if nx is None else nx
         ny = self.ny if ny is None else ny
         self.r = self.r if self.r is not None else 0.
@@ -436,12 +439,14 @@ class Shell(object):
             # laminate properties
             c = np.zeros(size, dtype=DOUBLE)
         c = np.ascontiguousarray(c, dtype=DOUBLE)
+        # returns a contiguous array, how matrices in C are stored. 1 after the other like matlab
 
         #NOTE the consistency checks for ABDnxny are done within the .pyx
         #     files
         ABDnxny = self.ABD if ABDnxny is None else ABDnxny
 
-
+        # Calc Kc as per panels/panels/models then the pyx files given by ''matrices'' defined earlier
+        # This calc K0 - linear consitutive stiff mat (SA formulation paper - eq 11)
         if analytical_kC:
             kC = matrices.fk0(self, size, row0, col0)
         else:
@@ -455,6 +460,7 @@ class Shell(object):
                 msg('NOTE: constant stress state taken into account by c_cte', level=3, silent=silent)
                 check_c(c_cte, size)
                 analytical_kG = False
+            # This calc KG0 - Geo stiff mat at initial membrane stress state (SA formulation paper - eq 12) and adds it to K0 calc earlier
             if analytical_kG:
                 kC += matrices.fkG0(self.Nxx_cte, self.Nyy_cte, self.Nxy_cte, self, size, row0, col0)
             else:
@@ -478,8 +484,9 @@ class Shell(object):
 
     def calc_kG(self, size=None, row0=0, col0=0, silent=True, finalize=True,
             c=None, nx=None, ny=None, ABDnxny=None, NLgeom=False):
-        r"""Calculate the geometric stiffness matrix
-
+        r"""Calculate the (inital stress or) geometric stiffness matrix
+        ---------- Notation as per MD paper: kGp_i ----------- 
+        
         See :meth:`.Shell.calc_kC` for details on each parameter.
 
         """
