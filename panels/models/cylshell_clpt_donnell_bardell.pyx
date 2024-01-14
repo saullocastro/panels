@@ -29,6 +29,7 @@ cdef extern from 'bardell.hpp':
 
 
 def fk0(object shell, int size, int row0, int col0):
+    # Defs as per SA buckling paper -- eq 11
     cdef double a, b, r
     cdef double [:, ::1] F
     cdef int m, n
@@ -119,7 +120,7 @@ def fk0(object shell, int size, int row0, int col0):
 
                 fAufBu = integral_ff(i, k, x1u, x1ur, x2u, x2ur, x1u, x1ur, x2u, x2ur)
                 fAufBuxi = integral_ffp(i, k, x1u, x1ur, x2u, x2ur, x1u, x1ur, x2u, x2ur)
-                fAuxifBu = integral_ffp(k, i, x1u, x1ur, x2u, x2ur, x1u, x1ur, x2u, x2ur)
+                fAuxifBu = integral_ffp(k, i, x1u, x1ur, x2u, x2ur, x1u, x1ur, x2u, x2ur)  # ????? WHY k,i ???????
                 fAuxifBuxi = integral_fpfp(i, k, x1u, x1ur, x2u, x2ur, x1u, x1ur, x2u, x2ur)
                 fAufBv = integral_ff(i, k, x1u, x1ur, x2u, x2ur, x1v, x1vr, x2v, x2vr)
                 fAufBvxi = integral_ffp(i, k, x1u, x1ur, x2u, x2ur, x1v, x1vr, x2v, x2vr)
@@ -271,6 +272,7 @@ def fk0(object shell, int size, int row0, int col0):
 
 def fkG0(double Nxx, double Nyy, double Nxy, object shell,
          int size, int row0, int col0):
+    # Defs as per SA buckling paper -- eq 12
     cdef double a, b
     cdef int m, n
     cdef double x1w, x1wr, x2w, x2wr
