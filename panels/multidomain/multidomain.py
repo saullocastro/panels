@@ -497,6 +497,11 @@ class MultiDomain(object):
 
 
     def get_kC_conn(self, conn=None, finalize=True):
+        '''
+            Calc the stiffness matrix due to the connectivities
+            
+            conn = dict with all connections and their parameters
+        '''
         if conn is None:
             if self.conn is None:
                 raise RuntimeError('No connectivity dictionary defined!')
@@ -508,21 +513,27 @@ class MultiDomain(object):
         size = self.get_size()
 
         kC_conn = 0.
+        
+        # Looping through each connection
         for connecti in conn:
             p1 = connecti['p1']
             p2 = connecti['p2']
-            connection_function = connecti['func']
+            connection_function = connecti['func'] # Type of connection
             if connection_function == 'SSycte':
-                kt, kr = connections.calc_kt_kr(p1, p2, 'ycte')
+                # ftn in panels/multidomain/connections/penalties.py
+                kt, kr = connections.calc_kt_kr(p1, p2, 'ycte') 
+                # adds the penalty stiffness to ycte of panel p1 position
                 kC_conn += connections.kCSSycte.fkCSSycte11(
                         kt, kr, p1, connecti['ycte1'],
                         size, p1.row_start, col0=p1.col_start)
+                # adds the penalty stiffness to ycte of panel 1 and panel 2 coupling position
                 kC_conn += connections.kCSSycte.fkCSSycte12(
                         kt, kr, p1, p2, connecti['ycte1'], connecti['ycte2'],
                         size, p1.row_start, col0=p2.col_start)
+                # adds the penalty stiffness to ycte of panel p2 position
                 kC_conn += connections.kCSSycte.fkCSSycte22(
                         kt, kr, p1, p2, connecti['ycte2'],
-                        size, p2.row_start, col0=p2.col_start)
+                        size, p2.row_start, col0=p2.col_start) 
             elif connection_function == 'SSxcte':
                 kt, kr = connections.calc_kt_kr(p1, p2, 'xcte')
                 kC_conn += connections.kCSSxcte.fkCSSxcte11(
@@ -622,10 +633,12 @@ class MultiDomain(object):
             kC += p.calc_kC(c=c, row0=p.row_start, col0=p.col_start, size=size,
                     silent=silent, finalize=False) 
 
+        # Make the matrix symm at the end
         if finalize:
             kC = finalize_symmetric_matrix(kC)
 
         # NOTE move this to another class method? it's a bid hidden
+        # Adding kC_conn to KC panel
         kC_conn = self.get_kC_conn(conn=conn)
         kC += self.kC_conn
 
