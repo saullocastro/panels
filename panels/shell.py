@@ -286,6 +286,8 @@ class Shell(object):
         rows or columns, recalling that this will be the size of the Ritz
         constants' vector `\{c\}`, the internal force vector `\{F_{int}\}` and
         the external force vector `\{F_{ext}\}`.
+        
+        ONLY RETURNS THE NUMBER OF ROWS ''OR'' COLS
 
         Returns
         -------
@@ -416,11 +418,15 @@ class Shell(object):
 
         analytical_kC = True
         analytical_kG = True
+        # This means a linear analysis is already performed (check panels\tests\tests_shell\test_nonlinear.py)
+        # So, the next step is NL. So no analytical
         if c is not None:
             check_c(c, size)
             analytical_kC = False
+        # ??????????
         if ABDnxny is not None:
             analytical_kC = False
+        # For NL Geos, KC (and not KC0) needs to be used so only do it numerically
         if NLgeom:
             analytical_kC = False
             analytical_kG = False
@@ -447,8 +453,10 @@ class Shell(object):
 
         # Calc Kc as per panels/panels/models then the pyx files given by ''matrices'' defined earlier
         # This calc K0 - linear consitutive stiff mat (SA formulation paper - eq 11)
+            # This will happen by default unless a something is specified that NL Geo is needed
         if analytical_kC:
             kC = matrices.fk0(self, size, row0, col0)
+        # This is what happens for NL Geo
         else:
             kC = matrices_num.fkC_num(c, ABDnxny, self,
                      size, row0, col0, nx, ny, NLgeom=int(NLgeom))
@@ -461,6 +469,8 @@ class Shell(object):
                 check_c(c_cte, size)
                 analytical_kG = False
             # This calc KG0 - Geo stiff mat at initial membrane stress state (SA formulation paper - eq 12) and adds it to K0 calc earlier
+            
+            # WHY IS KG0 ADDED TO KC ???????????????????????????
             if analytical_kG:
                 kC += matrices.fkG0(self.Nxx_cte, self.Nyy_cte, self.Nxy_cte, self, size, row0, col0)
             else:
@@ -916,6 +926,8 @@ class Shell(object):
 
     def add_point_pd(self, x, y, ku, up, kv, vp, kw, wp, cte=True):
         r"""Add a point prescribed displacement with three components
+        
+        o/p = [location and equivalent force]
 
         Parameters
         ----------

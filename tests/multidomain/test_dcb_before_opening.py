@@ -21,7 +21,7 @@ def img_popup(filename):
     # To open pop up images - Ignore the syntax warning :)
     # %matplotlib qt 
     # For inline images
-    # %matplotlib inline
+    %matplotlib inline
     
     plt.title(filename)
     image = img.imread(filename)
@@ -31,15 +31,17 @@ def img_popup(filename):
 def test_dcb_bending_pd():
 
     # Properties
-    E1 = 127560 # Pa
-    E2 = 13030. # Pa
-    G12 = 6410. # Pa
+    E1 = 127560 # MPa
+    E2 = 13030. # MPa
+    G12 = 6410. # MPa
     nu12 = 0.3
-    ply_thickness = 0.127e-3 # m
+    ply_thickness = 0.127#e-3 # m
 
     # Plate dimensions
-    a = 1181.1e-3 # m
-    b = 746.74e-3 # m
+    a = 1181.1#e-3 # m
+    b = 746.74#e-3 # m
+    
+    wp = 5#e-3 # m
     
     a1 = 0.5*a
 
@@ -136,7 +138,8 @@ def test_dcb_bending_pd():
      dict(p1=bot1, p2=top1, func='SB'), 
     ]
     
-    panels = [top1, top2, bot1, bot2]
+    panels = [bot1, bot2, top1, top2]
+    # panels = [top1, top2, bot1, bot2]
 
     assy = MultiDomain(panels) # assy is now an object of the MultiDomain class
     # Here the panels (shell objs) are modified -- their starting positions in the global matrix is assigned etc
@@ -147,13 +150,22 @@ def test_dcb_bending_pd():
     size = k0.shape[0]
 
     if True:
-        ku, kv, kw = calc_ku_kv_kw_point_pd(top2)
-        print(ku, kv, kw)
+        # print('start computing penalties')
+        
+        if True:
+            ku, kv, kw = calc_ku_kv_kw_point_pd(top2)
+        else:
+            A11 = top2.lam.A[0, 0]
+            A22 = top2.lam.A[1, 1]
+            ku = A11 #/ top2.lam.h / top2.a / top2.b
+            kv = A22 #/ top2.lam.h / top2.a / top2.b
+            kw = A11 #/ top2.lam.h / top2.b / top2.b
+        print('penalties - main function', ku, kv, kw)
         kCp = fkCpd(0., 0., kw, top2, top2.a, top2.b/2, size, top2.row_start, top2.col_start)
         print(top2.row_start, top2.col_start)
         kCp = finalize_symmetric_matrix(kCp)
         k0 = k0 + kCp
-        wp = 0.001
+        
         top2.add_point_pd(top2.a, top2.b/2, 0., 0., 0., 0., kw, wp)
         
     else:
@@ -161,9 +173,10 @@ def test_dcb_bending_pd():
         
     fext = top2.calc_fext(size=size, col0=top2.col_start)
     c0 = solve(k0, fext)
+    # print(c0)
     
     # Plotting results
-    if True:
+    if False:
         ax, data = assy.plot(c=c0, group='bot', vec='w', filename='test_dcb_before_opening_bot.png', colorbar=True)
         
         #vecmin = data['vecmin']
@@ -179,6 +192,8 @@ def test_dcb_bending_pd():
         # plt.figure()
         img_popup('test_dcb_before_opening_top.png')
         # plt.show()
+        
+    # return c0
         
 
 if __name__ == "__main__":

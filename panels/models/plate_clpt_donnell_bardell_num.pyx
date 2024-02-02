@@ -232,6 +232,8 @@ def fkC_num(double [::1] cs, object Finput, object shell,
                                 gBweta = fp(l, eta, y1w, y1wr, y2w, y2wr)
                                 gBwetaeta = fpp(l, eta, y1w, y1wr, y2w, y2wr)
 
+                         ### THIS IS CALCULATES K_C NOT K_C_0
+
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+0
