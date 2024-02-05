@@ -113,6 +113,7 @@ def fk0(object shell, int size, int row0, int col0):
 
         # k0
         c = -1
+        # i and k bec it controls f (which is being calc here)
         for i in range(m):
             for k in range(m):
 
