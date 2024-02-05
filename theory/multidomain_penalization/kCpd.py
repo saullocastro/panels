@@ -52,7 +52,9 @@ swBxixi = M([[0, 0, fBwxixi*gBw]])
 swBxieta = M([[0, 0, fBwxi*gBweta]])
 swBetaeta = M([[0, 0, fBw*gBwetaeta]])
 
-# Constitutive stiffness matrix
+# Constitutive (penalty) stiffness matrix
+    # All 3 disps stem from the same term so just club them into 1 stiffeness term
+    # But its actually 3x3 matrix with just the middle terms populated
 kCpd = (ku*suA.T*suB + kv*svA.T*svB + kw*swA.T*swB)           # no integral in the expression
 kCld_xcte = b/2*(ku*suA.T*suB + kv*svA.T*svB + kw*swA.T*swB)  # b/2 comes from converting from y to eta from the original formulation
 kCld_ycte = a/2*(ku*suA.T*suB + kv*svA.T*svB + kw*swA.T*swB)  # a/2 comes from converting from x to xi

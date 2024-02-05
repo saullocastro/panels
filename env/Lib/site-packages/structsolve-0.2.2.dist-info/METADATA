@@ -1,0 +1,57 @@
+Metadata-Version: 2.1
+Name: structsolve
+Version: 0.2.2
+Summary: Structural analysis solvers
+Home-page: https://github.com/compmech/structsolve
+Author: Saullo G. P. Castro
+Author-email: castrosaullo@gmail.com
+License: 3-Clause BSD
+Keywords: structural analysis stress vibration linear buckling newton raphson arc length
+Platform: UNKNOWN
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Science/Research
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Education
+Classifier: Topic :: Scientific/Engineering :: Mathematics
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Operating System :: Unix
+Requires-Dist: numpy
+Requires-Dist: scipy
+Requires-Dist: coveralls
+Requires-Dist: setuptools-git-version
+
+|  Version	| Download | Travis CI | Test Coverage |
+| :-------:	| :--- 	   | :---      | :---          |
+|   Master	|          | [![Linux Status](https://img.shields.io/travis/compmech/structsolve/master.svg)](https://travis-ci.org/compmech/structsolve) | [![Coverage Status](https://coveralls.io/repos/github/compmech/structsolve/badge.svg?branch=master)](https://coveralls.io/github/compmech/structsolve?branch=master) |
+
+
+Structural Analysis Solvers
+===========================
+
+- Linear statics: [K]{u} = {f}
+- Eigensolver for Linear buckling: ([K] + lambda[KG]){u} = 0
+- Eigensolver for dynamics: ([K] + lambda^2[M]){u} = 0
+- Nonlinear statics using Newton-Raphson 
+- Nonlinear statics using the Arc-Length method
+
+
+ROADMAP
+=======
+
+Currently these solvers are pretty much compatible with my other repository
+"panels", such that future work should focus on generalizing this module to
+work with other applications.
+
+
+License
+-------
+Distrubuted in the 2-Clause BSD license (https://raw.github.com/compmech/structsolve/master/LICENSE).
+
+Contact: castrosaullo@gmail.com
+
+
+

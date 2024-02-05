@@ -79,7 +79,7 @@ Calculating Penalty Constants
 
 Function :func:'.calc_kt_kr' is based on Ref [castro2017AssemblyModels]_ and
 uses a strain compatibility criterion to calculate penalty constants for
-translation (``kt``) and rotatio (``kr``). The aim is to have penalty constants
+translation (``kt``) and rotation (``kr``). The aim is to have penalty constants
 that are just high enough to produce the desired compatibility, but not too
 high such that numerical stability issues start to appear.
 

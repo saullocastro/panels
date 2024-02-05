@@ -1,38 +1,42 @@
 from composites import laminated_plate
 
+# Penalties for prescribed displs
+
 
 def calc_ku_kv_kw_point_pd(p):
     A11 = p.lam.A[0, 0]
     A22 = p.lam.A[1, 1]
-    ku = A11 / p.lam.h / p.a / p.b
-    kv = A22 / p.lam.h / p.a / p.b
-    kw = A11 / p.lam.h / p.b / p.b
+    ku = A11 
+    kv = A22 
+    kw = A11 
+    print('penalties in function', ku, kv, kw)
     return ku, kv, kw
 
 
 def calc_ku_kv_kw_line_pd_xcte(p):
     A11 = p.lam.A[0, 0]
     A22 = p.lam.A[1, 1]
-    ku = A11 / p.lam.h / p.b
-    kv = A22 / p.lam.h / p.b
-    kw = A11 / p.lam.h / p.b
+    ku = A11 / p.b 
+    kv = A22 / p.b 
+    kw = A11 / p.b 
     return ku, kv, kw
 
 
 def calc_ku_kv_kw_line_pd_ycte(p):
     A11 = p.lam.A[0, 0]
     A22 = p.lam.A[1, 1]
-    ku = A11 / p.lam.h / p.a
-    kv = A22 / p.lam.h / p.a
-    kw = A11 / p.lam.h / p.a
+    ku = A11 / p.a
+    kv = A22 / p.a 
+    kw = A11 / p.a 
     return ku, kv, kw
 
 
+# Penalties for connections 
 def calc_kt_kr(p1, p2, connection_type):
     """Calculate translation and rotation penalty constants
 
     For details on how to derive these equations, see
-    [castro2017AssemblyModels]_.
+    [castro2017AssemblyModels]_ (MD paper eqn 34-40)
 
     Parameters
     ----------
