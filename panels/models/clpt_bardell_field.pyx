@@ -295,6 +295,9 @@ cdef void cfwy(double *c, int m, int n, double a, double b, double *xs,
 
 
 def fg(double[:, ::1] g, double x, double y, object s):
+    # Accessing the contiguous memory layout for C 
+    # ::1 at the 2nd position means that the elements in this 2nd dimension will be 1 element apart in memory.
+    
     if s.__class__.__name__ != 'Shell':
         raise ValueError('A Shell object must be passed')
     a = s.a
@@ -330,6 +333,10 @@ cdef void cfg(double[:,::1] g, int m, int n,
     cdef double *gw_eta
 
     fu = <double *>malloc(NMAX * sizeof(double *))
+    # NMAX defined earlier
+    # <double *> = explicitly casting the result of malloc to a pointer to double. 
+    #  result of malloc = initially a generic pointer (void*). By casting it to a double*, you inform
+    # the compiler that you intend to treat the allocated memory as if it stores a double 
     gu = <double *>malloc(NMAX * sizeof(double *))
     fv = <double *>malloc(NMAX * sizeof(double *))
     gv = <double *>malloc(NMAX * sizeof(double *))
@@ -341,6 +348,7 @@ cdef void cfg(double[:,::1] g, int m, int n,
     xi = 2*x/a - 1.
     eta = 2*y/b - 1.
 
+    # Returns the bardel functions
     vec_f(fu, xi, x1u, x1ur, x2u, x2ur)
     vec_f(gu, eta, y1u, y1ur, y2u, y2ur)
     vec_f(fv, xi, x1v, x1vr, x2v, x2vr)

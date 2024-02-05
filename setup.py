@@ -45,7 +45,7 @@ License :: OSI Approved :: BSD License
 MAJOR = 0
 MINOR = 4
 MICRO = 1
-ISRELEASED = False
+ISRELEASED = True
 VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 
 
@@ -120,6 +120,7 @@ else: # MAC-OS
 
 include_dirs = [
     r'./panels/core/include',
+    r'C:\Users\natha\Documents\GitHub\panels\panels\core\include',
             ]
 
 extensions = [
@@ -241,6 +242,7 @@ extensions = [
 # multi-domain connections
     Extension('panels.multidomain.connections.kCpd',
         sources=[
+            './panels/core/src/bardell.cpp',
             './panels/core/src/bardell_functions.cpp',
             './panels/multidomain/connections/kCpd.pyx',
             ],

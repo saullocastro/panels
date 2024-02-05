@@ -63,7 +63,13 @@ BA = M([(2/a)*suAxi + (2/a)**2*swAxi*wxi,
        -(2/a)*(2/a)*swAxixi,
        -(2/b)*(2/b)*swAetaeta,
        -(2/a)*(2/b)*2*swAxieta])
-B0A = BA.subs({wxi.name:0, weta.name:0})
+# Actually: [B0p + BLp ; Bkp]
+
+# For linear constitutive matrix, deris of w are put to 0 --- WHY ??????????
+        # Only takes B_L and skips B_NL bec now there is no NL part of the strain
+B0A = BA.subs({wxi.name:0, weta.name:0}) 
+# {} creates a dict -- subs wxi and weta by 0
+# .name accesses the name of the var 
 
 GB = M([(2/a)*swBxi, (2/b)*swBeta])
 BB = M([(2/a)*suBxi + (2/a)**2*swBxi*wxi,
@@ -96,8 +102,8 @@ kG = intx*inty/4*GA.T*Nmat*GB
 maux = M([[   1,   0,   0,  -d,  0],
           [   0,   1,   0,   0, -d],
           [   0,   0,   1,   0,  0],
-          [ -d,   0, 0, (h^2/12 + d^2), 0],
-          [    0, -d, 0, 0, (h^2/12 + d^2)]])
+          [ -d,   0, 0, (h**2/12 + d**2), 0],
+          [    0, -d, 0, 0, (h**2/12 + d**2)]])
 
 gA5 = M([suA, svA, swA, -(2/a)*swAxi, -(2/b)*swAeta])
 gB5 = M([suB, svB, swB, -(2/a)*swBxi, -(2/b)*swBeta])

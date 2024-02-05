@@ -21,6 +21,8 @@ def test_nonlinear():
         s = Shell()
 
         s.model = model
+        s.y1w = s.y2w = s.y1wr = s.y2wr = 1
+        s.x2w = s.x2wr = 1
 
         s.a = 3.
         s.b = 1.
@@ -36,11 +38,11 @@ def test_nonlinear():
 
         k0 = s.calc_kC()
         ku, kv, kw = calc_ku_kv_kw_point_pd(s)
-        kCp = fkCpd(0., 0., kw, s, s.a/2, s.b/2, s.get_size(), 0, 0)
+        kCp = fkCpd(0., 0., kw, s, s.a, s.b/2, s.get_size(), 0, 0)
         kCp = finalize_symmetric_matrix(kCp)
         k0 = k0 + kCp
         wp = 0.001
-        s.add_point_pd(s.a/2, s.b/2, 0., 0., 0., 0., kw, wp)
+        s.add_point_pd(s.a, s.b/2, 0., 0., 0., 0., kw, wp)
         fext = s.calc_fext()
         c0 = solve(k0, fext)
         plot_shell(s, c0, vec='w', filename='test_point_load_pd.png', colorbar=True)

@@ -25,6 +25,7 @@ def load(name):
 
 
 def check_c(c, size):
+    # Conducts a check on c
     if not isinstance(c, np.ndarray):
         raise TypeError('"c" must be a NumPy ndarray object')
     if c.ndim != 1:
@@ -66,6 +67,7 @@ class Shell(object):
         the normal (`z`) axis.
 
     """
+    # Declare all the variables/attributes here to preallocate mem, speed it up. Var not declared here cant be used
     __slots__ = [ 'a', 'x1', 'x2', 'b', 'y1', 'y2', 'r',
         'stack', 'plyt', 'laminaprop', 'rho', 'offset',
         'group', 'x0', 'y0', 'row_start', 'col_start', 'row_end', 'col_end',
@@ -98,7 +100,7 @@ class Shell(object):
         self.b = b
         self.y1 = -1 # used to integrate part of the shell domain, -1 will use 0
         self.y2 = +1 # used to integrate part of the shell domain, +1 will use b
-        self.r = r
+        self.r = r # rad of curvature of panel (for curved panels)
         self.stack = stack
         self.plyt = plyt
         self.laminaprop = laminaprop
@@ -106,8 +108,8 @@ class Shell(object):
         self.offset = offset
 
         # assembly
-        self.group = None
-        self.x0 = None
+        self.group = None # Group name (useful when plotting multiple panels together)
+        self.x0 = None # starting position of the panel in the global CS
         self.y0 = None
         self.row_start = None
         self.col_start = None
@@ -121,12 +123,12 @@ class Shell(object):
         self.model = None
         self.fsdt_shear_correction = 5/6. # in case of First-order Shear Deformation Theory
 
-        # approximation series
+        # approximation series - no of terms in SFs
         self.m = m
         self.n = n
         self.size = None
 
-        # numerical integration
+        # numerical integration - no of points
         self.nx = 2*m
         self.ny = 2*n
 
@@ -140,6 +142,7 @@ class Shell(object):
         self.point_pds_inc = [] #NOTE see add_point_pd
         self.distr_pds = [] #NOTE see add_distr_pd_fixed_x and add_distr_pd_fixed_y
         self.distr_pds_inc = [] # NOTE see add_distr_pd_fixed_x and add_distr_pd_fixed_y
+            # Stored as [x pos, y pos of applied displ, force x, y, z due to that displ]
         # uniform membrane stress state
         self.Nxx = 0.
         self.Nyy = 0.
@@ -150,8 +153,15 @@ class Shell(object):
         self.Nxy_cte = 0.
 
         #NOTE default boundary conditions:
+            # Controls disp/rotation at boundaries i.e. flags
+            # 0 = no disp or rotation
+            # 1 = disp or rotation permitted
+            
+            # x1 and x2 are limits of x -- represent BCs with lines x = const
+            # y1 and y2 ............. y -- .................. lines y = const
         # - displacement at 4 edges is zero
         # - free to rotate at 4 edges (simply supported by default)
+        
         self.x1u = 0.
         self.x1ur = 1.
         self.x2u = 0.
@@ -276,6 +286,8 @@ class Shell(object):
         rows or columns, recalling that this will be the size of the Ritz
         constants' vector `\{c\}`, the internal force vector `\{F_{int}\}` and
         the external force vector `\{F_{ext}\}`.
+        
+        ONLY RETURNS THE NUMBER OF ROWS ''OR'' COLS
 
         Returns
         -------
@@ -352,6 +364,7 @@ class Shell(object):
     def calc_kC(self, size=None, row0=0, col0=0, silent=True, finalize=True,
             c=None, c_cte=None, nx=None, ny=None, ABDnxny=None, NLgeom=False):
         r"""Calculate the constitutive stiffness matrix
+        ---------- Notation as per MD paper: kP_i ----------- 
 
         If ``c`` is not given it calculates the linear constitutive stiffness
         matrix, otherwise the large displacement linear constitutive stiffness
@@ -405,18 +418,24 @@ class Shell(object):
 
         analytical_kC = True
         analytical_kG = True
+        # This means a linear analysis is already performed (check panels\tests\tests_shell\test_nonlinear.py)
+        # So, the next step is NL. So no analytical
         if c is not None:
             check_c(c, size)
             analytical_kC = False
+        # ??????????
         if ABDnxny is not None:
             analytical_kC = False
+        # For NL Geos, KC (and not KC0) needs to be used so only do it numerically
         if NLgeom:
             analytical_kC = False
             analytical_kG = False
 
-        matrices = modelDB.db[self.model]['matrices']
+        matrices = modelDB.db[self.model]['matrices']  # selects what matrix functions to use
+            # self.model = model of the current shell obj
         matrices_num = modelDB.db[self.model]['matrices_num']
 
+        # Num integration points
         nx = self.nx if nx is None else nx
         ny = self.ny if ny is None else ny
         self.r = self.r if self.r is not None else 0.
@@ -426,14 +445,18 @@ class Shell(object):
             # laminate properties
             c = np.zeros(size, dtype=DOUBLE)
         c = np.ascontiguousarray(c, dtype=DOUBLE)
+        # returns a contiguous array, how matrices in C are stored. 1 after the other like matlab
 
         #NOTE the consistency checks for ABDnxny are done within the .pyx
         #     files
         ABDnxny = self.ABD if ABDnxny is None else ABDnxny
 
-
+        # Calc Kc as per panels/panels/models then the pyx files given by ''matrices'' defined earlier
+        # This calc K0 - linear consitutive stiff mat (SA formulation paper - eq 11)
+            # This will happen by default unless a something is specified that NL Geo is needed
         if analytical_kC:
             kC = matrices.fk0(self, size, row0, col0)
+        # This is what happens for NL Geo
         else:
             kC = matrices_num.fkC_num(c, ABDnxny, self,
                      size, row0, col0, nx, ny, NLgeom=int(NLgeom))
@@ -445,6 +468,9 @@ class Shell(object):
                 msg('NOTE: constant stress state taken into account by c_cte', level=3, silent=silent)
                 check_c(c_cte, size)
                 analytical_kG = False
+            # This calc KG0 - Geo stiff mat at initial membrane stress state (SA formulation paper - eq 12) and adds it to K0 calc earlier
+            
+            # WHY IS KG0 ADDED TO KC ???????????????????????????
             if analytical_kG:
                 kC += matrices.fkG0(self.Nxx_cte, self.Nyy_cte, self.Nxy_cte, self, size, row0, col0)
             else:
@@ -468,8 +494,9 @@ class Shell(object):
 
     def calc_kG(self, size=None, row0=0, col0=0, silent=True, finalize=True,
             c=None, nx=None, ny=None, ABDnxny=None, NLgeom=False):
-        r"""Calculate the geometric stiffness matrix
-
+        r"""Calculate the (inital stress or) geometric stiffness matrix
+        ---------- Notation as per MD paper: kGp_i ----------- 
+        
         See :meth:`.Shell.calc_kC` for details on each parameter.
 
         """
@@ -899,6 +926,8 @@ class Shell(object):
 
     def add_point_pd(self, x, y, ku, up, kv, vp, kw, wp, cte=True):
         r"""Add a point prescribed displacement with three components
+        
+        o/p = [location and equivalent force]
 
         Parameters
         ----------
@@ -917,13 +946,14 @@ class Shell(object):
         """
         if cte:
             self.point_pds.append([x, y, ku*up, kv*vp, kw*wp])
+            # Adds the location and force
         else:
             self.point_pds_inc.append([x, y, ku*up, kv*vp, kw*wp])
 
 
     def add_distr_pd_fixed_x(self, x, ku=None, kv=None, kw=None,
                              funcu=None, funcv=None, funcw=None, cte=True):
-        r"""Add a distributed prescribed displacement g(y) at a fixed x position
+        r"""Add a distributed prescribed displacement g(y) ??? at a fixed x position
 
         Parameters
         ----------
@@ -933,7 +963,8 @@ class Shell(object):
             The `x,y,z` components of the penalty stiffness of the prescribed
             displacement.  At least one of the three must be defined, and
             corresponding to the funcu, funcv, funcw specified.
-        funcu, funcv, funcw : function, optional
+        funcu, funcv, funcw : type: function, optional
+            Specify in normal coordinates (x,y) not natural
             The functions of the distributed prescribed displacements, will be used
             from `y=0` to `y=b`. At least one of the three must be defined, and
             corresponding to the ku, kv, kw specified.
@@ -946,13 +977,14 @@ class Shell(object):
             raise ValueError('At least one penalty constant must be different than None')
         if not any((funcu, funcv, funcw)):
             raise ValueError('At least one function must be different than None')
+        # Force funtns = k * displ ftn
         new_funcu = None
         new_funcv = None
         new_funcw = None
-        if (ku is not None) or (funcu is not None):
-            if ku is None or funcu is None:
+        if (ku is not None) or (funcu is not None): # nothing is specified, but might be that u is not needed. It maybe v,w
+            if ku is None or funcu is None: # if atmost 1 is specified for u means u is to be specified, but is currently incomplete
                 raise ValueError('Both ku and funcu must be specified')
-            new_funcu = lambda y: ku*funcu(y)
+            new_funcu = lambda y: ku*funcu(y) # y is param in ftn 
         if (kv is not None) or (funcv is not None):
             if kv is None or funcv is None:
                 raise ValueError('Both kv and funcv must be specified')
@@ -979,7 +1011,7 @@ class Shell(object):
             The `x,y,z` components of the penalty stiffness of the prescribed
             displacement.  At least one of the three must be defined, and
             corresponding to the funcu, funcv, funcw specified.
-        funcu, funcv, funcw : function, optional
+        funcu, funcv, funcw : type: function, optional
             The functions of the distributed prescribed displacements, will be used
             from `y=0` to `y=b`. At least one of the three must be defined, and
             corresponding to the ku, kv, kw specified.
