@@ -981,7 +981,7 @@ class Shell(object):
         new_funcu = None
         new_funcv = None
         new_funcw = None
-        if (ku is not None) or (funcu is not None): # nothing is specified, but might be that u is not needed. It maybe v,w
+        if (ku is not None) or (funcu is not None): # ku or funcu is specified
             if ku is None or funcu is None: # if atmost 1 is specified for u means u is to be specified, but is currently incomplete
                 raise ValueError('Both ku and funcu must be specified')
             new_funcu = lambda y: ku*funcu(y) # y is param in ftn 
