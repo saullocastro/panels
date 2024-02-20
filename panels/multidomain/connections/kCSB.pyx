@@ -35,6 +35,7 @@ def fkCSB11(double kt, double dsb, object p1, int size, int row0, int col0):
     kt : float
         Translation penalty stiffness.
     dsb : float
+        dsb = sum(pA.plyts)/2. + sum(pB.plyts)/2.
     p1 : Panel
         Panel() object
     ycte1 : float

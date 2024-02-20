@@ -83,6 +83,7 @@ def fkCSSxcte11(double kt, double kr, object p1, double xcte1, int size, int row
     y1v1 = p1.y1v ; y1vr1 = p1.y1vr ; y2v1 = p1.y2v ; y2vr1 = p1.y2vr
     y1w1 = p1.y1w ; y1wr1 = p1.y1wr ; y2w1 = p1.y2w ; y2wr1 = p1.y2wr
 
+    # Converting to natural CS
     xicte1 = 2*xcte1/a1 - 1.
 
     fdim = 3*m1*n1*m1*n1

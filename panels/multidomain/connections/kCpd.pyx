@@ -31,6 +31,7 @@ def fkCpd(double ku, double kv, double kw, object p, double xp, double yp,
     ----------
     ku, kv, kw : float
         Translation penalty stiffnesses.
+        Use this to specify which disp is being provided. The corresponding stiffness is non zero - rest are zero
     p : Panel
         Panel() object
     xp, yp : float
@@ -231,6 +232,8 @@ def fkCld_xcte(double ku, double kv, double kw, object p, double xp,
         for j in range(n):    
             for l in range(n):
                 # j and l are for y coord i.e. g - since thats being integrated, loop it outside
+                
+                # this already integrates it so extra integration needed
                 gAugBu = integral_ff(j, l, y1u, y1ur, y2u, y2ur, y1u, y1ur, y2u, y2ur)
                 gAvgBv = integral_ff(j, l, y1v, y1vr, y2v, y2vr, y1v, y1vr, y2v, y2vr)
                 gAwgBw = integral_ff(j, l, y1w, y1wr, y2w, y2wr, y1w, y1wr, y2w, y2wr)
