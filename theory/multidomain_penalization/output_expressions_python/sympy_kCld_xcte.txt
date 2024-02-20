@@ -1,0 +1,14 @@
+# kCld_xcte_11
+# kCld_xcte_11_num=3
+c += 1
+kCld_xcter[c] = row+0
+kCld_xctec[c] = col+0
+kCld_xctev[c] += b*fAu*fBu*gAu*gBu*ku/2
+c += 1
+kCld_xcter[c] = row+1
+kCld_xctec[c] = col+1
+kCld_xctev[c] += b*fAv*fBv*gAv*gBv*kv/2
+c += 1
+kCld_xcter[c] = row+2
+kCld_xctec[c] = col+2
+kCld_xctev[c] += b*fAw*fBw*gAw*gBw*kw/2

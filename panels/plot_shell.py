@@ -173,7 +173,7 @@ def plot_shell(shell, c, invert_y=False, vec='w', deform_u=False,
         if cbar_title:
             cax.text(0.5, 1.05, cbar_title, horizontalalignment='center',
                      verticalalignment='bottom', fontsize=fsize)
-        cbar.outline.remove()
+        #cbar.outline.remove()
         cbar.ax.tick_params(labelsize=fsize, pad=0., tick2On=False)
 
     if invert_y == True:

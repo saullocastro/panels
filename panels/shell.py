@@ -14,6 +14,8 @@ from .logger import msg, warn
 from . import modelDB
 from . shell_fext import shell_fext
 
+DOUBLE = np.float64
+
 
 def load(name):
     if '.Shell' in name:
@@ -23,6 +25,7 @@ def load(name):
 
 
 def check_c(c, size):
+    # Conducts a check on c
     if not isinstance(c, np.ndarray):
         raise TypeError('"c" must be a NumPy ndarray object')
     if c.ndim != 1:
@@ -34,9 +37,8 @@ def check_c(c, size):
 class Shell(object):
     r"""General shell class that can be used for plates or shells
 
-    It works for both plates, cylindrical and conical shells. The right
-    model is selected according to parameters ``r`` (radius) and ``alphadeg``
-    (semi-vertex angle).
+    It works for both plates and cylindrical shells. The right model is selected
+    according to parameter ``r`` (radius).
 
     The approximation functions for the displacement fields are built using
     :ref:`Bardell's functions <theory_func_bardell>`.
@@ -49,8 +51,6 @@ class Shell(object):
         Width (along the `y` coordinate).
     r : float, optional
         Radius for cylindrical shell.
-    alphadeg : float, optional
-        Semi-vertex angle for conical shell.
     stack : list or tuple, optional
         A sequence representing the angles for each ply.
     plyt : float, optional
@@ -67,26 +67,31 @@ class Shell(object):
         the normal (`z`) axis.
 
     """
-    __slots__ = [ 'a', 'x1', 'x2', 'b', 'y1', 'y2', 'r', 'alphadeg', 'alpharad',
+    # Declare all the variables/attributes here to preallocate mem, speed it up. Var not declared here cant be used
+    __slots__ = [ 'a', 'x1', 'x2', 'b', 'y1', 'y2', 'r',
         'stack', 'plyt', 'laminaprop', 'rho', 'offset',
         'group', 'x0', 'y0', 'row_start', 'col_start', 'row_end', 'col_end',
-        'name', 'model',
+        'name', 'bay', 'model',
         'fsdt_shear_correction',
         'm', 'n', 'nx', 'ny', 'size',
         'point_loads', 'point_loads_inc', 'distr_loads', 'distr_loads_inc',
+        'point_pds', 'point_pds_inc', 'distr_pds', 'distr_pds_inc',
         'Nxx', 'Nyy', 'Nxy', 'Nxx_cte', 'Nyy_cte', 'Nxy_cte',
-        'x1u', 'x2u', 'x1v', 'x2v',
-        'x1w', 'x1wr', 'x2w', 'x2wr', 'y1u', 'y2u',
-        'y1v', 'y2v', 'y1w', 'y1wr', 'y2w', 'y2wr',
+        'x1u', 'x1ur', 'x2u', 'x2ur',
+        'x1v', 'x1vr', 'x2v', 'x2vr',
+        'x1w', 'x1wr', 'x2w', 'x2wr',
+        'y1u', 'y1ur', 'y2u', 'y2ur',
+        'y1v', 'y1vr', 'y2v', 'y2vr',
+        'y1w', 'y1wr', 'y2w', 'y2wr',
         'plyts', 'laminaprops', 'rhos',
         'flow', 'beta', 'gamma', 'aeromu', 'rho_air', 'speed_sound', 'Mach', 'V',
-        'F', 'force_orthotropic_laminate',
+        'ABD', 'force_orthotropic_laminate',
         'num_eigvalues', 'num_eigvalues_print',
         'out_num_cores', 'increments', 'results',
         'lam', 'matrices', 'fields', 'plot_mesh',
         ]
 
-    def __init__(self, a=None, b=None, r=None, alphadeg=None,
+    def __init__(self, a=None, b=None, r=None,
             stack=None, plyt=None, laminaprop=None, rho=0,
             m=11, n=11, offset=0., **kwargs):
         self.a = a
@@ -95,9 +100,7 @@ class Shell(object):
         self.b = b
         self.y1 = -1 # used to integrate part of the shell domain, -1 will use 0
         self.y2 = +1 # used to integrate part of the shell domain, +1 will use b
-        self.r = r
-        self.alphadeg = alphadeg
-        self.alpharad = None
+        self.r = r # rad of curvature of panel (for curved panels)
         self.stack = stack
         self.plyt = plyt
         self.laminaprop = laminaprop
@@ -105,8 +108,8 @@ class Shell(object):
         self.offset = offset
 
         # assembly
-        self.group = None
-        self.x0 = None
+        self.group = None # Group name (useful when plotting multiple panels together)
+        self.x0 = None # starting position of the panel in the global CS
         self.y0 = None
         self.row_start = None
         self.col_start = None
@@ -114,17 +117,18 @@ class Shell(object):
         self.col_end = None
 
         self.name = 'shell'
+        self.bay = None
 
         # model
         self.model = None
         self.fsdt_shear_correction = 5/6. # in case of First-order Shear Deformation Theory
 
-        # approximation series
+        # approximation series - no of terms in SFs
         self.m = m
         self.n = n
         self.size = None
 
-        # numerical integration
+        # numerical integration - no of points
         self.nx = 2*m
         self.ny = 2*n
 
@@ -133,6 +137,12 @@ class Shell(object):
         self.point_loads_inc = [] #NOTE see add_point_load
         self.distr_loads = [] #NOTE see add_distr_load_fixed_x and add_distr_load_fixed_y
         self.distr_loads_inc = [] # NOTE see add_distr_load_fixed_x and add_distr_load_fixed_y
+        # prescribed displacements
+        self.point_pds = [] #NOTE see add_point_pd
+        self.point_pds_inc = [] #NOTE see add_point_pd
+        self.distr_pds = [] #NOTE see add_distr_pd_fixed_x and add_distr_pd_fixed_y
+        self.distr_pds_inc = [] # NOTE see add_distr_pd_fixed_x and add_distr_pd_fixed_y
+            # Stored as [x pos, y pos of applied displ, force x, y, z due to that displ]
         # uniform membrane stress state
         self.Nxx = 0.
         self.Nyy = 0.
@@ -143,21 +153,36 @@ class Shell(object):
         self.Nxy_cte = 0.
 
         #NOTE default boundary conditions:
+            # Controls disp/rotation at boundaries i.e. flags
+            # 0 = no disp or rotation
+            # 1 = disp or rotation permitted
+            
+            # x1 and x2 are limits of x -- represent BCs with lines x = const
+            # y1 and y2 ............. y -- .................. lines y = const
         # - displacement at 4 edges is zero
         # - free to rotate at 4 edges (simply supported by default)
+        
         self.x1u = 0.
+        self.x1ur = 1.
         self.x2u = 0.
+        self.x2ur = 1.
         self.x1v = 0.
+        self.x1vr = 1.
         self.x2v = 0.
+        self.x2vr = 1.
         self.x1w = 0.
         self.x1wr = 1.
         self.x2w = 0.
         self.x2wr = 1.
 
         self.y1u = 0.
+        self.y1ur = 1.
         self.y2u = 0.
+        self.y2ur = 1.
         self.y1v = 0.
+        self.y1vr = 1.
         self.y2v = 0.
+        self.y2vr = 1.
         self.y1w = 0.
         self.y1wr = 1.
         self.y2w = 0.
@@ -179,7 +204,7 @@ class Shell(object):
         self.V = None
 
         # constitutive law
-        self.F = None
+        self.ABD = None
         self.force_orthotropic_laminate = False
 
         # eigenvalue analysis
@@ -217,12 +242,10 @@ class Shell(object):
         self.nx = max(self.nx, self.m)
         self.ny = max(self.ny, self.n)
         if self.model is None:
-            if self.r is None and self.alphadeg is None:
+            if self.r is None:
                 self.model = 'plate_clpt_donnell_bardell'
-            elif self.r is not None and self.alphadeg is None:
+            elif self.r is not None:
                 self.model = 'cylshell_clpt_donnell_bardell'
-            elif self.r is not None and self.alphadeg is not None:
-                self.model = 'coneshell_clpt_donnell_bardell'
 
         valid_models = sorted(modelDB.db.keys())
 
@@ -252,7 +275,7 @@ class Shell(object):
                                       rhos=self.rhos,
                                       offset=self.offset)
             self.lam = lam
-            self.F = self._get_lam_F()
+            self.ABD = self._get_lam_ABD()
         self.size = self.get_size()
 
 
@@ -263,6 +286,8 @@ class Shell(object):
         rows or columns, recalling that this will be the size of the Ritz
         constants' vector `\{c\}`, the internal force vector `\{F_{int}\}` and
         the external force vector `\{F_{ext}\}`.
+        
+        ONLY RETURNS THE NUMBER OF ROWS ''OR'' COLS
 
         Returns
         -------
@@ -283,70 +308,70 @@ class Shell(object):
             xs = linspace(0, self.a, gridx)
             ys = linspace(0, self.b, gridy)
             xs, ys = np.meshgrid(xs, ys, copy=True)
-        xs = np.atleast_1d(np.array(xs, dtype=np.float64))
-        ys = np.atleast_1d(np.array(ys, dtype=np.float64))
+        xs = np.atleast_1d(np.array(xs, dtype=DOUBLE))
+        ys = np.atleast_1d(np.array(ys, dtype=DOUBLE))
         xshape = xs.shape
         yshape = ys.shape
         if xshape != yshape:
             raise ValueError('Arrays xs and ys must have the same shape')
         self.plot_mesh['Xs'] = xs
         self.plot_mesh['Ys'] = ys
-        xs = np.ascontiguousarray(xs.ravel(), dtype=np.float64)
-        ys = np.ascontiguousarray(ys.ravel(), dtype=np.float64)
+        xs = np.ascontiguousarray(xs.ravel(), dtype=DOUBLE)
+        ys = np.ascontiguousarray(ys.ravel(), dtype=DOUBLE)
 
         return xs, ys, xshape, yshape
 
 
-    def _get_lam_F(self):
+    def _get_lam_ABD(self, silent=False):
         if self.lam is None:
             raise RuntimeError('lam object is None!')
         if 'clpt' in self.model:
-            F = self.lam.ABD
+            ABD = self.lam.ABD
         elif 'fsdt' in self.model:
-            F = self.lam.ABDE
-            F[6:, 6:] *= self.fsdt_shear_correction
+            ABD = self.lam.ABDE
+            ABD[6:, 6:] *= self.fsdt_shear_correction
 
         if self.force_orthotropic_laminate:
-            msg('')
-            msg('Forcing orthotropic laminate...', level=2)
-            F[0, 2] = 0. # A16
-            F[1, 2] = 0. # A26
-            F[2, 0] = 0. # A61
-            F[2, 1] = 0. # A62
+            msg('', silent=silent)
+            msg('Forcing orthotropic laminate...', level=2, silent=silent)
+            ABD[0, 2] = 0. # A16
+            ABD[1, 2] = 0. # A26
+            ABD[2, 0] = 0. # A61
+            ABD[2, 1] = 0. # A62
 
-            F[0, 5] = 0. # B16
-            F[5, 0] = 0. # B61
-            F[1, 5] = 0. # B26
-            F[5, 1] = 0. # B62
+            ABD[0, 5] = 0. # B16
+            ABD[5, 0] = 0. # B61
+            ABD[1, 5] = 0. # B26
+            ABD[5, 1] = 0. # B62
 
-            F[3, 2] = 0. # B16
-            F[2, 3] = 0. # B61
-            F[4, 2] = 0. # B26
-            F[2, 4] = 0. # B62
+            ABD[3, 2] = 0. # B16
+            ABD[2, 3] = 0. # B61
+            ABD[4, 2] = 0. # B26
+            ABD[2, 4] = 0. # B62
 
-            F[3, 5] = 0. # D16
-            F[4, 5] = 0. # D26
-            F[5, 3] = 0. # D61
-            F[5, 4] = 0. # D62
+            ABD[3, 5] = 0. # D16
+            ABD[4, 5] = 0. # D26
+            ABD[5, 3] = 0. # D61
+            ABD[5, 4] = 0. # D62
 
-            if F.shape[0] == 8:
-                F[6, 7] = 0. # A45
-                F[7, 6] = 0. # A54
+            if ABD.shape[0] == 8:
+                ABD[6, 7] = 0. # A45
+                ABD[7, 6] = 0. # A54
 
-        return F
+        return ABD
 
 
     def calc_kC(self, size=None, row0=0, col0=0, silent=True, finalize=True,
-            c=None, c_cte=None, nx=None, ny=None, Fnxny=None,
-            NLgeom=False):
+            c=None, c_cte=None, nx=None, ny=None, ABDnxny=None, NLgeom=False):
         r"""Calculate the constitutive stiffness matrix
+        ---------- Notation as per MD paper: kP_i ----------- 
 
         If ``c`` is not given it calculates the linear constitutive stiffness
         matrix, otherwise the large displacement linear constitutive stiffness
         matrix is calculated. When using ``c`` the size of ``c`` must be the
-        same as ``size``.
+        same as the attribute ``size``.
 
-        In assemblies of semi-analytical models the sparse matrices that are
+        In multi-domain semi-analytical models the sparse matrices that are
         calculated may have the ``size`` of the assembled global model, and the
         current constitutive matrix being calculated starts at position
         ``row0`` and ``col0``.
@@ -375,7 +400,7 @@ class Shell(object):
             Number of integration points along `x` and `y`, respectively, for
             the Legendre-Gauss quadrature rule applied in the numerical
             integration. Only used when ``c`` is given.
-        Fnxny : 4-D array-like or None, optional
+        ABDnxny : 4-D array-like or None, optional
             The constitutive relations for the laminate at each integration
             point. Must be a 4-D array of shape ``(nx, ny, 6, 6)`` when using
             classical laminated plate theory models.
@@ -389,31 +414,52 @@ class Shell(object):
             size = self.get_size()
         elif isinstance(size, str):
             size = int(size) + self.get_size()
-
         msg('Calculating kC... ', level=2, silent=silent)
+
+        analytical_kC = True
+        analytical_kG = True
+        # This means a linear analysis is already performed (check panels\tests\tests_shell\test_nonlinear.py)
+        # So, the next step is NL. So no analytical
         if c is not None:
             check_c(c, size)
+            analytical_kC = False
+        # ??????????
+        if ABDnxny is not None:
+            analytical_kC = False
+        # For NL Geos, KC (and not KC0) needs to be used so only do it numerically
+        if NLgeom:
+            analytical_kC = False
+            analytical_kG = False
 
-        alphadeg = self.alphadeg if self.alphadeg is not None else 0.
-        self.alpharad = deg2rad(alphadeg)
-        self.r = self.r if self.r is not None else 0.
-
+        matrices = modelDB.db[self.model]['matrices']  # selects what matrix functions to use
+            # self.model = model of the current shell obj
         matrices_num = modelDB.db[self.model]['matrices_num']
+
+        # Num integration points
         nx = self.nx if nx is None else nx
         ny = self.ny if ny is None else ny
+        self.r = self.r if self.r is not None else 0.
 
-        #NOTE the consistence checks for Fnxny are done within the .pyx
-        #     files
-        Fnxny = self.F if Fnxny is None else Fnxny
-
-        if c is None:
+        if c is None and ABDnxny is None:
             # Empty c if the interest is only on the heterogeneous
             # laminate properties
-            c = np.zeros(size, dtype=np.float64)
-        c = np.ascontiguousarray(c, dtype=np.float64)
+            c = np.zeros(size, dtype=DOUBLE)
+        c = np.ascontiguousarray(c, dtype=DOUBLE)
+        # returns a contiguous array, how matrices in C are stored. 1 after the other like matlab
 
-        kC = matrices_num.fkC_num(c, Fnxny, self,
-                 size, row0, col0, nx, ny, NLgeom=int(NLgeom))
+        #NOTE the consistency checks for ABDnxny are done within the .pyx
+        #     files
+        ABDnxny = self.ABD if ABDnxny is None else ABDnxny
+
+        # Calc Kc as per panels/panels/models then the pyx files given by ''matrices'' defined earlier
+        # This calc K0 - linear consitutive stiff mat (SA formulation paper - eq 11)
+            # This will happen by default unless a something is specified that NL Geo is needed
+        if analytical_kC:
+            kC = matrices.fk0(self, size, row0, col0)
+        # This is what happens for NL Geo
+        else:
+            kC = matrices_num.fkC_num(c, ABDnxny, self,
+                     size, row0, col0, nx, ny, NLgeom=int(NLgeom))
 
         if c_cte is not None or any((self.Nxx_cte, self.Nyy_cte, self.Nxy_cte)):
             if any((self.Nxx_cte, self.Nyy_cte, self.Nxy_cte)):
@@ -421,12 +467,16 @@ class Shell(object):
             if c_cte is not None:
                 msg('NOTE: constant stress state taken into account by c_cte', level=3, silent=silent)
                 check_c(c_cte, size)
+                analytical_kG = False
+            # This calc KG0 - Geo stiff mat at initial membrane stress state (SA formulation paper - eq 12) and adds it to K0 calc earlier
+            
+            # WHY IS KG0 ADDED TO KC ???????????????????????????
+            if analytical_kG:
+                kC += matrices.fkG0(self.Nxx_cte, self.Nyy_cte, self.Nxy_cte, self, size, row0, col0)
             else:
-                c_cte = 0 * c # creating a dummy c_cte
-            NLgeom = int(NLgeom)
-            kC += matrices_num.fkG_num(c_cte, Fnxny, self,
-                    size, row0, col0, nx, ny, NLgeom,
-                    self.Nxx_cte, self.Nyy_cte, self.Nxy_cte)
+                kC += matrices_num.fkG_num(c_cte, ABDnxny, self,
+                        size, row0, col0, nx, ny, NLgeom,
+                        self.Nxx_cte, self.Nyy_cte, self.Nxy_cte)
 
         if finalize:
             kC = finalize_symmetric_matrix(kC)
@@ -443,9 +493,10 @@ class Shell(object):
 
 
     def calc_kG(self, size=None, row0=0, col0=0, silent=True, finalize=True,
-            c=None, nx=None, ny=None, Fnxny=None, NLgeom=False):
-        r"""Calculate the geometric stiffness matrix
-
+            c=None, nx=None, ny=None, ABDnxny=None, NLgeom=False):
+        r"""Calculate the (inital stress or) geometric stiffness matrix
+        ---------- Notation as per MD paper: kGp_i ----------- 
+        
         See :meth:`.Shell.calc_kC` for details on each parameter.
 
         """
@@ -455,30 +506,35 @@ class Shell(object):
             size = self.get_size()
         elif isinstance(size, str):
             size = int(size) + self.get_size()
+        analytical_kG = True
         if c is not None:
             check_c(c, size)
-            c = np.ascontiguousarray(c, dtype=np.float64)
+            c = np.ascontiguousarray(c, dtype=DOUBLE)
             if any((self.Nxx, self.Nyy, self.Nxy)):
                 msg('NOTE: stress state taken into account using ALSO (Nxx, Nyy, Nxy)', level=3, silent=silent)
+            analytical_kG = False
         else:
-            c = np.zeros(size, dtype=np.float64)
+            c = np.zeros(size, dtype=DOUBLE)
             if any((self.Nxx, self.Nyy, self.Nxy)):
                 msg('NOTE: stress state taken into account using ONLY (Nxx, Nyy, Nxy)', level=3, silent=silent)
+        if NLgeom:
+            analytical_kG = False
 
-        matrices = modelDB.db[self.model]['matrices_num']
+        matrices = modelDB.db[self.model]['matrices']
+        matrices_num = modelDB.db[self.model]['matrices_num']
 
-        alphadeg = self.alphadeg if self.alphadeg is not None else 0.
-        self.alpharad = deg2rad(alphadeg)
         self.r = self.r if self.r is not None else 0.
 
         nx = self.nx if nx is None else nx
         ny = self.ny if ny is None else ny
-        if Fnxny is None:
-            Fnxny = self._get_lam_F()
-        NLgeom = int(NLgeom)
-        kG = matrices.fkG_num(c, Fnxny, self,
-                   size, row0, col0, nx, ny, NLgeom,
-                   self.Nxx, self.Nyy, self.Nxy)
+
+        if analytical_kG:
+            kG = matrices.fkG0(self.Nxx, self.Nyy, self.Nxy, self, size, row0, col0)
+        else:
+            if ABDnxny is None:
+                ABDnxny = self._get_lam_ABD()
+            kG = matrices_num.fkG_num(c, ABDnxny, self, size, row0, col0,
+                                      nx, ny, int(NLgeom), self.Nxx, self.Nyy, self.Nxy)
 
         if finalize:
             kG = finalize_symmetric_matrix(kG)
@@ -493,11 +549,11 @@ class Shell(object):
 
 
     def calc_kT(self, size=None, row0=0, col0=0, silent=True, finalize=True,
-            c=None, nx=None, ny=None, Fnxny=None):
+            c=None, nx=None, ny=None, ABDnxny=None):
         kC = self.calc_kC(size=size, row0=row0, col0=col0, silent=silent, finalize=finalize,
-            c=c, nx=nx, ny=ny, Fnxny=Fnxny, NLgeom=True)
+            c=c, nx=nx, ny=ny, ABDnxny=ABDnxny, NLgeom=True)
         kG = self.calc_kG(size=size, row0=row0, col0=col0, silent=silent, finalize=finalize,
-            c=c, nx=nx, ny=ny, Fnxny=Fnxny, NLgeom=True)
+            c=c, nx=nx, ny=ny, ABDnxny=ABDnxny, NLgeom=True)
         kT = kC + kG
         self.matrices['kT'] = kT
 
@@ -521,13 +577,13 @@ class Shell(object):
 
         """
         msg('Calculating kM... ', level=2, silent=silent)
+        analytical_kM = True
         nx = self.nx if nx is None else nx
         ny = self.ny if ny is None else ny
 
-        matrices = modelDB.db[self.model]['matrices_num']
+        matrices = modelDB.db[self.model]['matrices']
+        matrices_num = modelDB.db[self.model]['matrices_num']
 
-        alphadeg = self.alphadeg if self.alphadeg is not None else 0.
-        self.alpharad = deg2rad(alphadeg)
         self.r = self.r if self.r is not None else 0.
 
         if size is None:
@@ -539,16 +595,23 @@ class Shell(object):
         # whole domain
 
         if h_nxny is None:
-            h_nxny = np.zeros((nx, ny), dtype=np.float64)
+            h_nxny = np.zeros((nx, ny), dtype=DOUBLE)
             h_nxny[:, :] = self.lam.h
+        else:
+            analytical_kM = False
         if rho_nxny is None:
-            rho_nxny = np.zeros((nx, ny), dtype=np.float64)
+            rho_nxny = np.zeros((nx, ny), dtype=DOUBLE)
             #TODO change the whole code to handle the more general intrho,
             #     allowing different materials along the laminated plate
             rho_nxny[:, :] = self.lam.intrho/self.lam.h
+        else:
+            analytical_kM = False
 
-        hrho_input = np.concatenate((h_nxny[..., None], rho_nxny[..., None]), axis=2)
-        kM = matrices.fkM_num(self, self.offset, hrho_input, size, row0, col0, nx, ny)
+        if analytical_kM:
+            kM = matrices.fkM(self, self.offset, size, row0, col0)
+        else:
+            hrho_input = np.concatenate((h_nxny[..., None], rho_nxny[..., None]), axis=2)
+            kM = matrices_num.fkM_num(self, self.offset, hrho_input, size, row0, col0, nx, ny)
 
         if finalize:
             kM = finalize_symmetric_matrix(kM)
@@ -567,10 +630,8 @@ class Shell(object):
         """
         msg('Calculating kA... ', level=2, silent=silent)
 
-        if 'coneshell' in self.model:
-            raise NotImplementedError('Conical shells not supported')
 
-        matrices = modelDB.db[self.model]['matrices_num']
+        matrices_num = modelDB.db[self.model]['matrices_num']
 
         if size is None:
             size = self.get_size()
@@ -600,9 +661,9 @@ class Shell(object):
         self.gamma = gamma
 
         if self.flow.lower() == 'x':
-            kA = matrices.fkAx_num(self, size, row0, col0, self.nx, self.ny)
+            kA = matrices_num.fkAx_num(self, size, row0, col0, self.nx, self.ny)
         elif self.flow.lower() == 'y':
-            kA = matrices.fkAy_num(self, size, row0, col0, self.nx, self.ny)
+            kA = matrices_num.fkAy_num(self, size, row0, col0, self.nx, self.ny)
         else:
             raise ValueError('Invalid flow value, must be x or y')
 
@@ -627,8 +688,8 @@ class Shell(object):
 
         if size is None:
             size = self.get_size()
-        matrices = modelDB.db[self.model]['matrices_num']
-        cA = matrices.fcA(aeromu, self, size, 0, 0)
+        matrices_num = modelDB.db[self.model]['matrices_num']
+        cA = matrices_num.fcA(aeromu, self, size, 0, 0)
         cA = cA*(0+1j)
 
         if finalize:
@@ -672,7 +733,7 @@ class Shell(object):
 
 
         """
-        c = np.ascontiguousarray(c, dtype=np.float64)
+        c = np.ascontiguousarray(c, dtype=DOUBLE)
 
         xs, ys, xshape, yshape = self._default_field(xs, ys, gridx, gridy)
         fuvw = modelDB.db[self.model]['field'].fuvw
@@ -718,7 +779,7 @@ class Shell(object):
             ``(x, y, exx, eyy, gxy, kxx, kyy, kxy)``
 
         """
-        c = np.ascontiguousarray(c, dtype=np.float64)
+        c = np.ascontiguousarray(c, dtype=DOUBLE)
         xs, ys, xshape, yshape = self._default_field(xs, ys, gridx, gridy)
         fstrain = modelDB.db[self.model]['field'].fstrain
         exx, eyy, gxy, kxx, kyy, kxy = fstrain(c, self, xs, ys, self.out_num_cores, int(NLgeom))
@@ -735,7 +796,7 @@ class Shell(object):
         return self.plot_mesh, self.fields
 
 
-    def stress(self, c, F=None, xs=None, ys=None, gridx=300, gridy=300, NLgeom=True):
+    def stress(self, c, ABD=None, xs=None, ys=None, gridx=300, gridy=300, NLgeom=True):
         r"""Calculate the stress field
 
         Parameters
@@ -743,7 +804,7 @@ class Shell(object):
         c : np.ndarray
             The Ritz constants vector to be used for the strain field
             calculation.
-        F : np.ndarray, optional
+        ABD : np.ndarray, optional
             The laminate stiffness matrix. Can be a 6 x 6 (ABD) matrix for
             homogeneous laminates over the whole domain.
         xs : np.ndarray, optional
@@ -774,19 +835,19 @@ class Shell(object):
         kxx = fields['kxx']
         kyy = fields['kyy']
         kxy = fields['kxy']
-        if F is None:
-            F = self.F
-        if F is None:
+        if ABD is None:
+            ABD = self.ABD
+        if ABD is None:
             raise ValueError('Laminate ABD matrix not defined for shell')
         #TODO implement for variable stiffness!
 
         self.plot_mesh = plot_mesh
-        self.fields['Nxx'] = exx*F[0, 0] + eyy*F[0, 1] + gxy*F[0, 2] + kxx*F[0, 3] + kyy*F[0, 4] + kxy*F[0, 5]
-        self.fields['Nyy'] = exx*F[1, 0] + eyy*F[1, 1] + gxy*F[1, 2] + kxx*F[1, 3] + kyy*F[1, 4] + kxy*F[1, 5]
-        self.fields['Nxy'] = exx*F[2, 0] + eyy*F[2, 1] + gxy*F[2, 2] + kxx*F[2, 3] + kyy*F[2, 4] + kxy*F[2, 5]
-        self.fields['Mxx'] = exx*F[3, 0] + eyy*F[3, 1] + gxy*F[3, 2] + kxx*F[3, 3] + kyy*F[3, 4] + kxy*F[3, 5]
-        self.fields['Myy'] = exx*F[4, 0] + eyy*F[4, 1] + gxy*F[4, 2] + kxx*F[4, 3] + kyy*F[4, 4] + kxy*F[4, 5]
-        self.fields['Mxy'] = exx*F[5, 0] + eyy*F[5, 1] + gxy*F[5, 2] + kxx*F[5, 3] + kyy*F[5, 4] + kxy*F[5, 5]
+        self.fields['Nxx'] = exx*ABD[0, 0] + eyy*ABD[0, 1] + gxy*ABD[0, 2] + kxx*ABD[0, 3] + kyy*ABD[0, 4] + kxy*ABD[0, 5]
+        self.fields['Nyy'] = exx*ABD[1, 0] + eyy*ABD[1, 1] + gxy*ABD[1, 2] + kxx*ABD[1, 3] + kyy*ABD[1, 4] + kxy*ABD[1, 5]
+        self.fields['Nxy'] = exx*ABD[2, 0] + eyy*ABD[2, 1] + gxy*ABD[2, 2] + kxx*ABD[2, 3] + kyy*ABD[2, 4] + kxy*ABD[2, 5]
+        self.fields['Mxx'] = exx*ABD[3, 0] + eyy*ABD[3, 1] + gxy*ABD[3, 2] + kxx*ABD[3, 3] + kyy*ABD[3, 4] + kxy*ABD[3, 5]
+        self.fields['Myy'] = exx*ABD[4, 0] + eyy*ABD[4, 1] + gxy*ABD[4, 2] + kxx*ABD[4, 3] + kyy*ABD[4, 4] + kxy*ABD[4, 5]
+        self.fields['Mxy'] = exx*ABD[5, 0] + eyy*ABD[5, 1] + gxy*ABD[5, 2] + kxx*ABD[5, 3] + kyy*ABD[5, 4] + kxy*ABD[5, 5]
 
         return self.plot_mesh, self.fields
 
@@ -863,6 +924,127 @@ class Shell(object):
             self.distr_loads_inc.append([None, y, funcx, funcy, funcz])
 
 
+    def add_point_pd(self, x, y, ku, up, kv, vp, kw, wp, cte=True):
+        r"""Add a point prescribed displacement with three components
+        
+        o/p = [location and equivalent force]
+
+        Parameters
+        ----------
+        x : float
+            The `x` position.
+        y : float
+            The `y` position in radians.
+        ku, kv, kw : float
+            The `x,y,z` component of the penalty stiffness of the prescribed displacement.
+        up, vp, wp : float
+            The `x,y,z` components of the prescribed displacement.
+        cte : bool, optional
+            Constant prescribed displacements are not incremented
+            during the non-linear analysis.
+
+        """
+        if cte:
+            self.point_pds.append([x, y, ku*up, kv*vp, kw*wp])
+            # Adds the location and force
+        else:
+            self.point_pds_inc.append([x, y, ku*up, kv*vp, kw*wp])
+
+
+    def add_distr_pd_fixed_x(self, x, ku=None, kv=None, kw=None,
+                             funcu=None, funcv=None, funcw=None, cte=True):
+        r"""Add a distributed prescribed displacement g(y) ??? at a fixed x position
+
+        Parameters
+        ----------
+        x : float
+            The fixed `x` position.
+        ku, kv, kw : float, optional
+            The `x,y,z` components of the penalty stiffness of the prescribed
+            displacement.  At least one of the three must be defined, and
+            corresponding to the funcu, funcv, funcw specified.
+        funcu, funcv, funcw : type: function, optional
+            Specify in normal coordinates (x,y) not natural
+            The functions of the distributed prescribed displacements, will be used
+            from `y=0` to `y=b`. At least one of the three must be defined, and
+            corresponding to the ku, kv, kw specified.
+        cte : bool, optional
+            Constant prescribed displacements are not incremented during the non-linear
+            analysis.
+
+        """
+        if not any((ku, kv, kw)):
+            raise ValueError('At least one penalty constant must be different than None')
+        if not any((funcu, funcv, funcw)):
+            raise ValueError('At least one function must be different than None')
+        # Force funtns = k * displ ftn
+        new_funcu = None
+        new_funcv = None
+        new_funcw = None
+        if (ku is not None) or (funcu is not None): # ku or funcu is specified
+            if ku is None or funcu is None: # if atmost 1 is specified for u means u is to be specified, but is currently incomplete
+                raise ValueError('Both ku and funcu must be specified')
+            new_funcu = lambda y: ku*funcu(y) # y is param in ftn 
+        if (kv is not None) or (funcv is not None):
+            if kv is None or funcv is None:
+                raise ValueError('Both kv and funcv must be specified')
+            new_funcv = lambda y: kv*funcv(y)
+        if (kw is not None) or (funcw is not None):
+            if kw is None or funcw is None:
+                raise ValueError('Both kw and funcw must be specified')
+            new_funcw = lambda y: kw*funcw(y)
+        if cte:
+            self.distr_pds.append([x, None, new_funcu, new_funcv, new_funcw])
+        else:
+            self.distr_pds_inc.append([x, None, new_funcu, new_funcv, new_funcw])
+
+
+    def add_distr_pd_fixed_y(self, y, ku=None, kv=None, kw=None,
+                             funcu=None, funcv=None, funcw=None, cte=True):
+        r"""Add a distributed prescribed displacement g(x) at a fixed y position
+
+        Parameters
+        ----------
+        y : float
+            The fixed `y` position.
+        ku, kv, kw : float, optional
+            The `x,y,z` components of the penalty stiffness of the prescribed
+            displacement.  At least one of the three must be defined, and
+            corresponding to the funcu, funcv, funcw specified.
+        funcu, funcv, funcw : type: function, optional
+            The functions of the distributed prescribed displacements, will be used
+            from `y=0` to `y=b`. At least one of the three must be defined, and
+            corresponding to the ku, kv, kw specified.
+        cte : bool, optional
+            Constant prescribed displacements are not incremented during the non-linear
+            analysis.
+
+        """
+        if not any((ku, kv, kw)):
+            raise ValueError('At least one penalty constant must be different than None')
+        if not any((funcu, funcv, funcw)):
+            raise ValueError('At least one function must be different than None')
+        new_funcu = None
+        new_funcv = None
+        new_funcw = None
+        if (ku is not None) or (funcu is not None):
+            if ku is None or funcu is None:
+                raise ValueError('Both ku and funcu must be specified')
+            new_funcu = lambda x: ku*funcu(x)
+        if (kv is not None) or (funcv is not None):
+            if kv is None or funcv is None:
+                raise ValueError('Both kv and funcv must be specified')
+            new_funcv = lambda x: kv*funcv(x)
+        if (kw is not None) or (funcw is not None):
+            if kw is None or funcw is None:
+                raise ValueError('Both kw and funcw must be specified')
+            new_funcw = lambda x: kw*funcw(x)
+        if cte:
+            self.distr_pds.append([None, y, new_funcu, new_funcv, new_funcw])
+        else:
+            self.distr_pds_inc.append([None, y, new_funcu, new_funcv, new_funcw])
+
+
     def calc_stiffness_point_constraint(self, x, y, u=True, v=True, w=True, phix=False,
             phiy=False, kuvw=1.e6, kphi=1.e5):
         r"""Add a point constraint
@@ -893,10 +1075,10 @@ class Shell(object):
         """
         fg = modelDB.db[self.model]['field'].fg
         size = self.get_size()
-        g = np.zeros((5, size), dtype=np.float64)
+        g = np.zeros((5, size), dtype=DOUBLE)
         fg(g, x, y, self)
         gu, gv, gw, gphix, gphiy = g
-        kPC = csr_matrix((size, size), dtype=np.float64)
+        kPC = csr_matrix((size, size), dtype=DOUBLE)
         if u:
             kPC += kuvw*np.outer(gu, gu)
         if v:
@@ -952,7 +1134,7 @@ class Shell(object):
 
 
     def calc_fint(self, c, size=None, col0=0, silent=True, nx=None,
-            ny=None, Fnxny=None):
+            ny=None, ABDnxny=None):
         r"""Calculate the internal force vector `\{F_{int}\}`
 
 
@@ -974,7 +1156,7 @@ class Shell(object):
             Number of integration points along `x`.
         ny : int, optional
             Number of integration points along `y`.
-        Fnxny : np.ndarray, optional
+        ABDnxny : np.ndarray, optional
             Laminate stiffness for each integration point, if not supplied it
             will assume constant properties over the shell domain.
 
@@ -1003,15 +1185,13 @@ class Shell(object):
         elif isinstance(size, str):
             size = int(size) + self.get_size()
 
-        alphadeg = self.alphadeg if self.alphadeg is not None else 0.
-        self.alpharad = deg2rad(alphadeg)
         self.r = self.r if self.r is not None else 0.
         nx = self.nx if nx is None else nx
         ny = self.ny if ny is None else ny
-        Fnxny = self.F if Fnxny is None else Fnxny
+        ABDnxny = self.ABD if ABDnxny is None else ABDnxny
 
-        c = np.ascontiguousarray(c, dtype=np.float64)
-        fint = calc_fint(c, Fnxny, self, size, col0, nx, ny)
+        c = np.ascontiguousarray(c, dtype=DOUBLE)
+        fint = calc_fint(c, ABDnxny, self, size, col0, nx, ny)
 
         gc.collect()
 

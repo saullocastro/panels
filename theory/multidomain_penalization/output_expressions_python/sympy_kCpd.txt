@@ -1,0 +1,14 @@
+# kCpd_11
+# kCpd_11_num=3
+c += 1
+kCpdr[c] = row+0
+kCpdc[c] = col+0
+kCpdv[c] += fAu*fBu*gAu*gBu*ku
+c += 1
+kCpdr[c] = row+1
+kCpdc[c] = col+1
+kCpdv[c] += fAv*fBv*gAv*gBv*kv
+c += 1
+kCpdr[c] = row+2
+kCpdc[c] = col+2
+kCpdv[c] += fAw*fBw*gAw*gBw*kw

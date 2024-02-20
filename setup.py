@@ -43,7 +43,7 @@ License :: OSI Approved :: BSD License
 """
 
 MAJOR = 0
-MINOR = 3
+MINOR = 4
 MICRO = 1
 ISRELEASED = True
 VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
@@ -120,44 +120,16 @@ else: # MAC-OS
 
 include_dirs = [
     r'./panels/core/include',
+    r'C:\Users\natha\Documents\GitHub\panels\panels\core\include',
             ]
 
 extensions = [
-# field calculation
-    Extension('panels.models.clpt_bardell_field',
+# Bardell functions
+    Extension('panels.bardell',
         sources=[
-            './panels/core/src/bardell_functions_uv.cpp',
-            './panels/core/src/bardell_functions_w.cpp',
-            './panels/core/src/legendre_gauss_quadrature.cpp',
-            './panels/models/clpt_bardell_field.pyx',
-            ],
-        include_dirs=include_dirs, extra_compile_args=compile_args,
-              extra_link_args=link_args, language='c++'),
-# shell models
-    Extension('panels.models.plate_clpt_donnell_bardell_num',
-        sources=[
-            './panels/core/src/bardell_functions_uv.cpp',
-            './panels/core/src/bardell_functions_w.cpp',
-            './panels/core/src/legendre_gauss_quadrature.cpp',
-            './panels/models/plate_clpt_donnell_bardell_num.pyx',
-            ],
-        include_dirs=include_dirs, extra_compile_args=compile_args,
-              extra_link_args=link_args, language='c++'),
-    Extension('panels.models.cylshell_clpt_donnell_bardell_num',
-        sources=[
-            './panels/core/src/bardell_functions_uv.cpp',
-            './panels/core/src/bardell_functions_w.cpp',
-            './panels/core/src/legendre_gauss_quadrature.cpp',
-            './panels/models/cylshell_clpt_donnell_bardell_num.pyx',
-            ],
-        include_dirs=include_dirs, extra_compile_args=compile_args,
-              extra_link_args=link_args, language='c++'),
-    Extension('panels.models.coneshell_clpt_donnell_bardell_num',
-        sources=[
-            './panels/core/src/bardell_functions_uv.cpp',
-            './panels/core/src/bardell_functions_w.cpp',
-            './panels/core/src/legendre_gauss_quadrature.cpp',
-            './panels/models/coneshell_clpt_donnell_bardell_num.pyx',
+            './panels/core/src/bardell.cpp',
+            './panels/core/src/bardell_functions.cpp',
+            './panels/bardell.pyx',
             ],
         include_dirs=include_dirs, extra_compile_args=compile_args,
               extra_link_args=link_args, language='c++'),
@@ -166,6 +138,113 @@ extensions = [
         sources=[
             './panels/core/src/legendre_gauss_quadrature.cpp',
             './panels/legendre_gauss_quadrature.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, language='c++'),
+# field calculation
+    Extension('panels.models.clpt_bardell_field',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/core/src/legendre_gauss_quadrature.cpp',
+            './panels/models/clpt_bardell_field.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, language='c++'),
+# shell models
+    Extension('panels.models.plate_clpt_donnell_bardell',
+        sources=[
+            './panels/core/src/bardell.cpp',
+            './panels/models/plate_clpt_donnell_bardell.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, language='c++'),
+    Extension('panels.models.plate_clpt_donnell_bardell_num',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/core/src/legendre_gauss_quadrature.cpp',
+            './panels/models/plate_clpt_donnell_bardell_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, language='c++'),
+    Extension('panels.models.cylshell_clpt_donnell_bardell',
+        sources=[
+            './panels/core/src/bardell.cpp',
+            './panels/models/cylshell_clpt_donnell_bardell.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, language='c++'),
+    Extension('panels.models.cylshell_clpt_donnell_bardell_num',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/core/src/legendre_gauss_quadrature.cpp',
+            './panels/models/cylshell_clpt_donnell_bardell_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, language='c++'),
+# stiffener models
+    Extension('panels.stiffener.models.bladestiff1d_clt_donnell_bardell',
+        sources=[
+            './panels/core/src/bardell.cpp',
+            './panels/core/src/bardell_functions.cpp',
+            './panels/stiffener/models/bladestiff1d_clt_donnell_bardell.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, language='c++'),
+    Extension('panels.stiffener.models.bladestiff2d_clt_donnell_bardell',
+        sources=[
+            './panels/core/src/bardell.cpp',
+            './panels/core/src/bardell_functions.cpp',
+            './panels/stiffener/models/bladestiff2d_clt_donnell_bardell.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, language='c++'),
+
+# multi-domain connections
+    Extension('panels.multidomain.connections.kCBFxcte',
+        sources=[
+            './panels/core/src/bardell.cpp',
+            './panels/core/src/bardell_functions.cpp',
+            './panels/multidomain/connections/kCBFxcte.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, language='c++'),
+    Extension('panels.multidomain.connections.kCBFycte',
+        sources=[
+            './panels/core/src/bardell.cpp',
+            './panels/core/src/bardell_functions.cpp',
+            './panels/multidomain/connections/kCBFycte.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, language='c++'),
+    Extension('panels.multidomain.connections.kCSB',
+        sources=[
+            './panels/core/src/bardell.cpp',
+            './panels/multidomain/connections/kCSB.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, language='c++'),
+    Extension('panels.multidomain.connections.kCSSxcte',
+        sources=[
+            './panels/core/src/bardell.cpp',
+            './panels/core/src/bardell_functions.cpp',
+            './panels/multidomain/connections/kCSSxcte.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, language='c++'),
+    Extension('panels.multidomain.connections.kCSSycte',
+        sources=[
+            './panels/core/src/bardell.cpp',
+            './panels/core/src/bardell_functions.cpp',
+            './panels/multidomain/connections/kCSSycte.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, language='c++'),
+# multi-domain connections
+    Extension('panels.multidomain.connections.kCpd',
+        sources=[
+            './panels/core/src/bardell.cpp',
+            './panels/core/src/bardell_functions.cpp',
+            './panels/multidomain/connections/kCpd.pyx',
             ],
         include_dirs=include_dirs, extra_compile_args=compile_args,
               extra_link_args=link_args, language='c++'),

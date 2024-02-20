@@ -8,17 +8,10 @@ from scipy.sparse import coo_matrix
 import numpy as np
 
 
-cdef extern from 'bardell_functions_uv.hpp':
-    double fuv(int i, double xi, double xi1t, double xi2t) nogil
-    double fuv_x(int i, double xi, double xi1t, double xi2t) nogil
-
-cdef extern from 'bardell_functions_w.hpp':
-    double fw(int i, double xi, double xi1t, double xi1r,
-              double xi2t, double xi2r) nogil
-    double fw_x(int i, double xi, double xi1t, double xi1r,
-                double xi2t, double xi2r) nogil
-    double fw_xx(int i, double xi, double xi1t, double xi1r,
-                 double xi2t, double xi2r) nogil
+cdef extern from 'bardell_functions.hpp':
+    double f(int i, double xi, double xi1t, double xi1r, double xi2t, double xi2r) nogil
+    double fp(int i, double xi, double xi1t, double xi1r, double xi2t, double xi2r) nogil
+    double fpp(int i, double xi, double xi1t, double xi1r, double xi2t, double xi2r) nogil
 
 cdef extern from 'legendre_gauss_quadrature.hpp':
     void leggauss_quad(int n, double *points, double* weights) nogil
@@ -35,11 +28,11 @@ def fkC_num(double [::1] cs, object Finput, object shell,
     cdef double x1, x2, y1, y2, xinf, xsup, yinf, ysup
     cdef double a, b, intx, inty
     cdef int m, n
-    cdef double x1u, x2u
-    cdef double x1v, x2v
+    cdef double x1u, x1ur, x2u, x2ur
+    cdef double x1v, x1vr, x2v, x2vr
     cdef double x1w, x1wr, x2w, x2wr
-    cdef double y1u, y2u
-    cdef double y1v, y2v
+    cdef double y1u, y1ur, y2u, y2ur
+    cdef double y1v, y1vr, y2v, y2vr
     cdef double y1w, y1wr, y2w, y2wr
 
     cdef int i, j, k, l, c, row, col, ptx, pty
@@ -93,11 +86,11 @@ def fkC_num(double [::1] cs, object Finput, object shell,
     x2 = shell.x2
     y1 = shell.y1
     y2 = shell.y2
-    x1u = shell.x1u; x2u = shell.x2u
-    x1v = shell.x1v; x2v = shell.x2v
+    x1u = shell.x1u; x1ur = shell.x1ur; x2u = shell.x2u; x2ur = shell.x2ur
+    x1v = shell.x1v; x1vr = shell.x1vr; x2v = shell.x2v; x2vr = shell.x2vr
     x1w = shell.x1w; x1wr = shell.x1wr; x2w = shell.x2w; x2wr = shell.x2wr
-    y1u = shell.y1u; y2u = shell.y2u
-    y1v = shell.y1v; y2v = shell.y2v
+    y1u = shell.y1u; y1ur = shell.y1ur; y2u = shell.y2u; y2ur = shell.y2ur
+    y1v = shell.y1v; y1vr = shell.y1vr; y2v = shell.y2v; y2vr = shell.y2vr
     y1w = shell.y1w; y1wr = shell.y1wr; y2w = shell.y2w; y2wr = shell.y2wr
 
     fdim = 9*m*m*n*n
@@ -154,12 +147,12 @@ def fkC_num(double [::1] cs, object Finput, object shell,
                 if NLgeom == 1:
                     for j in range(n):
                         #TODO put these in a lookup vector
-                        gAw = fw(j, eta, y1w, y1wr, y2w, y2wr)
-                        gAweta = fw_x(j, eta, y1w, y1wr, y2w, y2wr)
+                        gAw = f(j, eta, y1w, y1wr, y2w, y2wr)
+                        gAweta = fp(j, eta, y1w, y1wr, y2w, y2wr)
                         for i in range(m):
                             #TODO put these in a lookup vector
-                            fAw = fw(i, xi, x1w, x1wr, x2w, x2wr)
-                            fAwxi = fw_x(i, xi, x1w, x1wr, x2w, x2wr)
+                            fAw = f(i, xi, x1w, x1wr, x2w, x2wr)
+                            fAwxi = fp(i, xi, x1w, x1wr, x2w, x2wr)
 
                             col = col0 + DOF*(j*m + i)
 
@@ -196,31 +189,31 @@ def fkC_num(double [::1] cs, object Finput, object shell,
                 # kC
                 c = -1
                 for i in range(m):
-                    fAu = fuv(i, xi, x1u, x2u)
-                    fAuxi = fuv_x(i, xi, x1u, x2u)
-                    fAv = fuv(i, xi, x1v, x2v)
-                    fAvxi = fuv_x(i, xi, x1v, x2v)
-                    fAw = fw(i, xi, x1w, x1wr, x2w, x2wr)
-                    fAwxi = fw_x(i, xi, x1w, x1wr, x2w, x2wr)
-                    fAwxixi = fw_xx(i, xi, x1w, x1wr, x2w, x2wr)
+                    fAu = f(i, xi, x1u, x1ur, x2u, x2ur)
+                    fAuxi = fp(i, xi, x1u, x1ur, x2u, x2ur)
+                    fAv = f(i, xi, x1v, x1vr, x2v, x2vr)
+                    fAvxi = fp(i, xi, x1v, x1vr, x2v, x2vr)
+                    fAw = f(i, xi, x1w, x1wr, x2w, x2wr)
+                    fAwxi = fp(i, xi, x1w, x1wr, x2w, x2wr)
+                    fAwxixi = fpp(i, xi, x1w, x1wr, x2w, x2wr)
 
                     for k in range(m):
-                        fBu = fuv(k, xi, x1u, x2u)
-                        fBuxi = fuv_x(k, xi, x1u, x2u)
-                        fBv = fuv(k, xi, x1v, x2v)
-                        fBvxi = fuv_x(k, xi, x1v, x2v)
-                        fBw = fw(k, xi, x1w, x1wr, x2w, x2wr)
-                        fBwxi = fw_x(k, xi, x1w, x1wr, x2w, x2wr)
-                        fBwxixi = fw_xx(k, xi, x1w, x1wr, x2w, x2wr)
+                        fBu = f(k, xi, x1u, x1ur, x2u, x2ur)
+                        fBuxi = fp(k, xi, x1u, x1ur, x2u, x2ur)
+                        fBv = f(k, xi, x1v, x1vr, x2v, x2vr)
+                        fBvxi = fp(k, xi, x1v, x1vr, x2v, x2vr)
+                        fBw = f(k, xi, x1w, x1wr, x2w, x2wr)
+                        fBwxi = fp(k, xi, x1w, x1wr, x2w, x2wr)
+                        fBwxixi = fpp(k, xi, x1w, x1wr, x2w, x2wr)
 
                         for j in range(n):
-                            gAu = fuv(j, eta, y1u, y2u)
-                            gAueta = fuv_x(j, eta, y1u, y2u)
-                            gAv = fuv(j, eta, y1v, y2v)
-                            gAveta = fuv_x(j, eta, y1v, y2v)
-                            gAw = fw(j, eta, y1w, y1wr, y2w, y2wr)
-                            gAweta = fw_x(j, eta, y1w, y1wr, y2w, y2wr)
-                            gAwetaeta = fw_xx(j, eta, y1w, y1wr, y2w, y2wr)
+                            gAu = f(j, eta, y1u, y1ur, y2u, y2ur)
+                            gAueta = fp(j, eta, y1u, y1ur, y2u, y2ur)
+                            gAv = f(j, eta, y1v, y1vr, y2v, y2vr)
+                            gAveta = fp(j, eta, y1v, y1vr, y2v, y2vr)
+                            gAw = f(j, eta, y1w, y1wr, y2w, y2wr)
+                            gAweta = fp(j, eta, y1w, y1wr, y2w, y2wr)
+                            gAwetaeta = fpp(j, eta, y1w, y1wr, y2w, y2wr)
 
                             for l in range(n):
 
@@ -231,13 +224,15 @@ def fkC_num(double [::1] cs, object Finput, object shell,
                                 if row > col:
                                     continue
 
-                                gBu = fuv(l, eta, y1u, y2u)
-                                gBueta = fuv_x(l, eta, y1u, y2u)
-                                gBv = fuv(l, eta, y1v, y2v)
-                                gBveta = fuv_x(l, eta, y1v, y2v)
-                                gBw = fw(l, eta, y1w, y1wr, y2w, y2wr)
-                                gBweta = fw_x(l, eta, y1w, y1wr, y2w, y2wr)
-                                gBwetaeta = fw_xx(l, eta, y1w, y1wr, y2w, y2wr)
+                                gBu = f(l, eta, y1u, y1ur, y2u, y2ur)
+                                gBueta = fp(l, eta, y1u, y1ur, y2u, y2ur)
+                                gBv = f(l, eta, y1v, y1vr, y2v, y2vr)
+                                gBveta = fp(l, eta, y1v, y1vr, y2v, y2vr)
+                                gBw = f(l, eta, y1w, y1wr, y2w, y2wr)
+                                gBweta = fp(l, eta, y1w, y1wr, y2w, y2wr)
+                                gBwetaeta = fpp(l, eta, y1w, y1wr, y2w, y2wr)
+
+                         ### THIS IS CALCULATES K_C NOT K_C_0
 
                                 c += 1
                                 if ptx == 0 and pty == 0:
@@ -296,11 +291,11 @@ def fkG_num(double [::1] cs, object Finput, object shell,
     cdef double x1, x2, y1, y2, xinf, xsup, yinf, ysup
     cdef double a, b, intx, inty
     cdef int m, n
-    cdef double x1u, x2u
-    cdef double x1v, x2v
+    cdef double x1u, x1ur, x2u, x2ur
+    cdef double x1v, x1vr, x2v, x2vr
     cdef double x1w, x1wr, x2w, x2wr
-    cdef double y1u, y2u
-    cdef double y1v, y2v
+    cdef double y1u, y1ur, y2u, y2ur
+    cdef double y1v, y1vr, y2v, y2vr
     cdef double y1w, y1wr, y2w, y2wr
 
     cdef int i, k, j, l, c, row, col, ptx, pty
@@ -352,11 +347,11 @@ def fkG_num(double [::1] cs, object Finput, object shell,
     x2 = shell.x2
     y1 = shell.y1
     y2 = shell.y2
-    x1u = shell.x1u; x2u = shell.x2u
-    x1v = shell.x1v; x2v = shell.x2v
+    x1u = shell.x1u; x1ur = shell.x1ur; x2u = shell.x2u; x2ur = shell.x2ur
+    x1v = shell.x1v; x1vr = shell.x1vr; x2v = shell.x2v; x2vr = shell.x2vr
     x1w = shell.x1w; x1wr = shell.x1wr; x2w = shell.x2w; x2wr = shell.x2wr
-    y1u = shell.y1u; y2u = shell.y2u
-    y1v = shell.y1v; y2v = shell.y2v
+    y1u = shell.y1u; y1ur = shell.y1ur; y2u = shell.y2u; y2ur = shell.y2ur
+    y1v = shell.y1v; y1vr = shell.y1vr; y2v = shell.y2v; y2vr = shell.y2vr
     y1w = shell.y1w; y1wr = shell.y1wr; y2w = shell.y2w; y2wr = shell.y2wr
 
     fdim = 1*m*m*n*n
@@ -434,11 +429,11 @@ def fkG_num(double [::1] cs, object Finput, object shell,
                 if NLgeom == 1:
                     for j in range(n):
                         #TODO put these in a lookup vector
-                        gAw = fw(j, eta, y1w, y1wr, y2w, y2wr)
-                        gAweta = fw_x(j, eta, y1w, y1wr, y2w, y2wr)
+                        gAw = f(j, eta, y1w, y1wr, y2w, y2wr)
+                        gAweta = fp(j, eta, y1w, y1wr, y2w, y2wr)
                         for i in range(m):
-                            fAw = fw(i, xi, x1w, x1wr, x2w, x2wr)
-                            fAwxi = fw_x(i, xi, x1w, x1wr, x2w, x2wr)
+                            fAw = f(i, xi, x1w, x1wr, x2w, x2wr)
+                            fAwxi = fp(i, xi, x1w, x1wr, x2w, x2wr)
 
                             col = col0 + DOF*(j*m + i)
 
@@ -454,22 +449,22 @@ def fkG_num(double [::1] cs, object Finput, object shell,
                 kxy = 0.
                 for j in range(n):
                     #TODO put these in a lookup vector
-                    gAu = fuv(j, eta, y1u, y2u)
-                    gAv = fuv(j, eta, y1v, y2v)
-                    gAw = fw(j, eta, y1w, y1wr, y2w, y2wr)
-                    gAueta = fuv_x(j, eta, y1u, y2u)
-                    gAveta = fuv_x(j, eta, y1v, y2v)
-                    gAweta = fw_x(j, eta, y1w, y1wr, y2w, y2wr)
-                    gAwetaeta = fw_xx(j, eta, y1w, y1wr, y2w, y2wr)
+                    gAu = f(j, eta, y1u, y1ur, y2u, y2ur)
+                    gAv = f(j, eta, y1v, y1vr, y2v, y2vr)
+                    gAw = f(j, eta, y1w, y1wr, y2w, y2wr)
+                    gAueta = fp(j, eta, y1u, y1ur, y2u, y2ur)
+                    gAveta = fp(j, eta, y1v, y1vr, y2v, y2vr)
+                    gAweta = fp(j, eta, y1w, y1wr, y2w, y2wr)
+                    gAwetaeta = fpp(j, eta, y1w, y1wr, y2w, y2wr)
 
                     for i in range(m):
-                        fAu = fuv(i, xi, x1u, x2u)
-                        fAv = fuv(i, xi, x1v, x2v)
-                        fAw = fw(i, xi, x1w, x1wr, x2w, x2wr)
-                        fAuxi = fuv_x(i, xi, x1u, x2u)
-                        fAvxi = fuv_x(i, xi, x1v, x2v)
-                        fAwxi = fw_x(i, xi, x1w, x1wr, x2w, x2wr)
-                        fAwxixi = fw_xx(i, xi, x1w, x1wr, x2w, x2wr)
+                        fAu = f(i, xi, x1u, x1ur, x2u, x2ur)
+                        fAv = f(i, xi, x1v, x1vr, x2v, x2vr)
+                        fAw = f(i, xi, x1w, x1wr, x2w, x2wr)
+                        fAuxi = fp(i, xi, x1u, x1ur, x2u, x2ur)
+                        fAvxi = fp(i, xi, x1v, x1vr, x2v, x2vr)
+                        fAwxi = fp(i, xi, x1w, x1wr, x2w, x2wr)
+                        fAwxixi = fpp(i, xi, x1w, x1wr, x2w, x2wr)
 
                         col = col0 + DOF*(j*m + i)
 
@@ -488,20 +483,20 @@ def fkG_num(double [::1] cs, object Finput, object shell,
                 # computing kG
                 c = -1
                 for j in range(n):
-                    gAw = fw(j, eta, y1w, y1wr, y2w, y2wr)
-                    gAweta = fw_x(j, eta, y1w, y1wr, y2w, y2wr)
+                    gAw = f(j, eta, y1w, y1wr, y2w, y2wr)
+                    gAweta = fp(j, eta, y1w, y1wr, y2w, y2wr)
 
                     for l in range(n):
-                        gBw = fw(l, eta, y1w, y1wr, y2w, y2wr)
-                        gBweta = fw_x(l, eta, y1w, y1wr, y2w, y2wr)
+                        gBw = f(l, eta, y1w, y1wr, y2w, y2wr)
+                        gBweta = fp(l, eta, y1w, y1wr, y2w, y2wr)
 
                         for i in range(m):
-                            fAw = fw(i, xi, x1w, x1wr, x2w, x2wr)
-                            fAwxi = fw_x(i, xi, x1w, x1wr, x2w, x2wr)
+                            fAw = f(i, xi, x1w, x1wr, x2w, x2wr)
+                            fAwxi = fp(i, xi, x1w, x1wr, x2w, x2wr)
 
                             for k in range(m):
-                                fBw = fw(k, xi, x1w, x1wr, x2w, x2wr)
-                                fBwxi = fw_x(k, xi, x1w, x1wr, x2w, x2wr)
+                                fBw = f(k, xi, x1w, x1wr, x2w, x2wr)
+                                fBwxi = fp(k, xi, x1w, x1wr, x2w, x2wr)
 
                                 row = row0 + DOF*(j*m + i)
                                 col = col0 + DOF*(l*m + k)
@@ -526,11 +521,11 @@ def fkM_num(object shell, double offset, object hrho_input, int size,
     cdef double x1, x2, y1, y2, xinf, xsup, yinf, ysup
     cdef double a, b, intx, inty
     cdef int m, n
-    cdef double x1u, x2u
-    cdef double x1v, x2v
+    cdef double x1u, x1ur, x2u, x2ur
+    cdef double x1v, x1vr, x2v, x2vr
     cdef double x1w, x1wr, x2w, x2wr
-    cdef double y1u, y2u
-    cdef double y1v, y2v
+    cdef double y1u, y1ur, y2u, y2ur
+    cdef double y1v, y1vr, y2v, y2vr
     cdef double y1w, y1wr, y2w, y2wr
 
     cdef int i, j, k, l, c, row, col, ptx, pty
@@ -579,11 +574,11 @@ def fkM_num(object shell, double offset, object hrho_input, int size,
     x2 = shell.x2
     y1 = shell.y1
     y2 = shell.y2
-    x1u = shell.x1u; x2u = shell.x2u
-    x1v = shell.x1v; x2v = shell.x2v
+    x1u = shell.x1u; x1ur = shell.x1ur; x2u = shell.x2u; x2ur = shell.x2ur
+    x1v = shell.x1v; x1vr = shell.x1vr; x2v = shell.x2v; x2vr = shell.x2vr
     x1w = shell.x1w; x1wr = shell.x1wr; x2w = shell.x2w; x2wr = shell.x2wr
-    y1u = shell.y1u; y2u = shell.y2u
-    y1v = shell.y1v; y2v = shell.y2v
+    y1u = shell.y1u; y1ur = shell.y1ur; y2u = shell.y2u; y2ur = shell.y2ur
+    y1v = shell.y1v; y1vr = shell.y1vr; y2v = shell.y2v; y2vr = shell.y2vr
     y1w = shell.y1w; y1wr = shell.y1wr; y2w = shell.y2w; y2wr = shell.y2wr
 
     fdim = 7*m*m*n*n
@@ -642,22 +637,22 @@ def fkM_num(object shell, double offset, object hrho_input, int size,
                 # kM
                 c = -1
                 for i in range(m):
-                    fAu = fuv(i, xi, x1u, x2u)
-                    fAv = fuv(i, xi, x1v, x2v)
-                    fAw = fw(i, xi, x1w, x1wr, x2w, x2wr)
-                    fAwxi = fw_x(i, xi, x1w, x1wr, x2w, x2wr)
+                    fAu = f(i, xi, x1u, x1ur, x2u, x2ur)
+                    fAv = f(i, xi, x1v, x1vr, x2v, x2vr)
+                    fAw = f(i, xi, x1w, x1wr, x2w, x2wr)
+                    fAwxi = fp(i, xi, x1w, x1wr, x2w, x2wr)
 
                     for k in range(m):
-                        fBu = fuv(k, xi, x1u, x2u)
-                        fBv = fuv(k, xi, x1v, x2v)
-                        fBw = fw(k, xi, x1w, x1wr, x2w, x2wr)
-                        fBwxi = fw_x(k, xi, x1w, x1wr, x2w, x2wr)
+                        fBu = f(k, xi, x1u, x1ur, x2u, x2ur)
+                        fBv = f(k, xi, x1v, x1vr, x2v, x2vr)
+                        fBw = f(k, xi, x1w, x1wr, x2w, x2wr)
+                        fBwxi = fp(k, xi, x1w, x1wr, x2w, x2wr)
 
                         for j in range(n):
-                            gAu = fuv(j, eta, y1u, y2u)
-                            gAv = fuv(j, eta, y1v, y2v)
-                            gAw = fw(j, eta, y1w, y1wr, y2w, y2wr)
-                            gAweta = fw_x(j, eta, y1w, y1wr, y2w, y2wr)
+                            gAu = f(j, eta, y1u, y1ur, y2u, y2ur)
+                            gAv = f(j, eta, y1v, y1vr, y2v, y2vr)
+                            gAw = f(j, eta, y1w, y1wr, y2w, y2wr)
+                            gAweta = fp(j, eta, y1w, y1wr, y2w, y2wr)
 
                             for l in range(n):
 
@@ -668,10 +663,10 @@ def fkM_num(object shell, double offset, object hrho_input, int size,
                                 if row > col:
                                     continue
 
-                                gBu = fuv(l, eta, y1u, y2u)
-                                gBv = fuv(l, eta, y1v, y2v)
-                                gBw = fw(l, eta, y1w, y1wr, y2w, y2wr)
-                                gBweta = fw_x(l, eta, y1w, y1wr, y2w, y2wr)
+                                gBu = f(l, eta, y1u, y1ur, y2u, y2ur)
+                                gBv = f(l, eta, y1v, y1vr, y2v, y2vr)
+                                gBw = f(l, eta, y1w, y1wr, y2w, y2wr)
+                                gBweta = fp(l, eta, y1w, y1wr, y2w, y2wr)
 
                                 c += 1
                                 if ptx == 0 and pty == 0:
@@ -800,14 +795,14 @@ def fkAx_num(object shell, int size, int row0, int col0, int nx, int ny):
                 # kAx
                 c = -1
                 for i in range(m):
-                    fAw = fw(i, xi, x1w, x1wr, x2w, x2wr)
-                    fAwxi = fw_x(i, xi, x1w, x1wr, x2w, x2wr)
+                    fAw = f(i, xi, x1w, x1wr, x2w, x2wr)
+                    fAwxi = fp(i, xi, x1w, x1wr, x2w, x2wr)
 
                     for k in range(m):
-                        fBw = fw(k, xi, x1w, x1wr, x2w, x2wr)
+                        fBw = f(k, xi, x1w, x1wr, x2w, x2wr)
 
                         for j in range(n):
-                            gAw = fw(j, eta, y1w, y1wr, y2w, y2wr)
+                            gAw = f(j, eta, y1w, y1wr, y2w, y2wr)
 
                             for l in range(n):
 
@@ -818,7 +813,7 @@ def fkAx_num(object shell, int size, int row0, int col0, int nx, int ny):
                                 if row > col:
                                     continue
 
-                                gBw = fw(l, eta, y1w, y1wr, y2w, y2wr)
+                                gBw = f(l, eta, y1w, y1wr, y2w, y2wr)
 
                                 c += 1
                                 if ptx == 0 and pty == 0:
@@ -915,13 +910,13 @@ def fkAy_num(object shell, int size, int row0, int col0, int nx, int ny):
                 # kAy
                 c = -1
                 for i in range(m):
-                    fAw = fw(i, xi, x1w, x1wr, x2w, x2wr)
+                    fAw = f(i, xi, x1w, x1wr, x2w, x2wr)
 
                     for k in range(m):
-                        fBw = fw(k, xi, x1w, x1wr, x2w, x2wr)
+                        fBw = f(k, xi, x1w, x1wr, x2w, x2wr)
 
                         for j in range(n):
-                            gAweta = fw_x(j, eta, y1w, y1wr, y2w, y2wr)
+                            gAweta = fp(j, eta, y1w, y1wr, y2w, y2wr)
 
                             for l in range(n):
 
@@ -932,7 +927,7 @@ def fkAy_num(object shell, int size, int row0, int col0, int nx, int ny):
                                 if row > col:
                                     continue
 
-                                gBw = fw(l, eta, y1w, y1wr, y2w, y2wr)
+                                gBw = f(l, eta, y1w, y1wr, y2w, y2wr)
 
                                 c += 1
                                 if ptx == 0 and pty == 0:
@@ -950,11 +945,11 @@ def calc_fint(double [::1] cs, object Finput, object shell,
     cdef double x1, x2, y1, y2, xinf, xsup, yinf, ysup
     cdef double a, b, intx, inty
     cdef int m, n
-    cdef double x1u, x2u
-    cdef double x1v, x2v
+    cdef double x1u, x1ur, x2u, x2ur
+    cdef double x1v, x1vr, x2v, x2vr
     cdef double x1w, x1wr, x2w, x2wr
-    cdef double y1u, y2u
-    cdef double y1v, y2v
+    cdef double y1u, y1ur, y2u, y2ur
+    cdef double y1v, y1vr, y2v, y2vr
     cdef double y1w, y1wr, y2w, y2wr
 
     cdef int i, j, col, ptx, pty
@@ -1005,11 +1000,11 @@ def calc_fint(double [::1] cs, object Finput, object shell,
     x2 = shell.x2
     y1 = shell.y1
     y2 = shell.y2
-    x1u = shell.x1u; x2u = shell.x2u
-    x1v = shell.x1v; x2v = shell.x2v
+    x1u = shell.x1u; x1ur = shell.x1ur; x2u = shell.x2u; x2ur = shell.x2ur
+    x1v = shell.x1v; x1vr = shell.x1vr; x2v = shell.x2v; x2vr = shell.x2vr
     x1w = shell.x1w; x1wr = shell.x1wr; x2w = shell.x2w; x2wr = shell.x2wr
-    y1u = shell.y1u; y2u = shell.y2u
-    y1v = shell.y1v; y2v = shell.y2v
+    y1u = shell.y1u; y1ur = shell.y1ur; y2u = shell.y2u; y2ur = shell.y2ur
+    y1v = shell.y1v; y1vr = shell.y1vr; y2v = shell.y2v; y2vr = shell.y2vr
     y1w = shell.y1w; y1wr = shell.y1wr; y2w = shell.y2w; y2wr = shell.y2wr
 
     xis = np.zeros(nx, dtype=DOUBLE)
@@ -1088,12 +1083,12 @@ def calc_fint(double [::1] cs, object Finput, object shell,
                 weta = 0
                 for j in range(n):
                     #TODO save in buffer
-                    gAw = fw(j, eta, y1w, y1wr, y2w, y2wr)
-                    gAweta = fw_x(j, eta, y1w, y1wr, y2w, y2wr)
+                    gAw = f(j, eta, y1w, y1wr, y2w, y2wr)
+                    gAweta = fp(j, eta, y1w, y1wr, y2w, y2wr)
                     for i in range(m):
                         #TODO save in buffer
-                        fAw = fw(i, xi, x1w, x1wr, x2w, x2wr)
-                        fAwxi = fw_x(i, xi, x1w, x1wr, x2w, x2wr)
+                        fAw = f(i, xi, x1w, x1wr, x2w, x2wr)
+                        fAwxi = fp(i, xi, x1w, x1wr, x2w, x2wr)
 
                         col = col0 + DOF*(j*m + i)
 
@@ -1110,23 +1105,23 @@ def calc_fint(double [::1] cs, object Finput, object shell,
 
                 for j in range(n):
                     #TODO save in buffer
-                    gAu = fuv(j, eta, y1u, y2u)
-                    gAueta = fuv_x(j, eta, y1u, y2u)
-                    gAv = fuv(j, eta, y1v, y2v)
-                    gAveta = fuv_x(j, eta, y1v, y2v)
-                    gAw = fw(j, eta, y1w, y1wr, y2w, y2wr)
-                    gAweta = fw_x(j, eta, y1w, y1wr, y2w, y2wr)
-                    gAwetaeta = fw_xx(j, eta, y1w, y1wr, y2w, y2wr)
+                    gAu = f(j, eta, y1u, y1ur, y2u, y2ur)
+                    gAueta = fp(j, eta, y1u, y1ur, y2u, y2ur)
+                    gAv = f(j, eta, y1v, y1vr, y2v, y2vr)
+                    gAveta = fp(j, eta, y1v, y1vr, y2v, y2vr)
+                    gAw = f(j, eta, y1w, y1wr, y2w, y2wr)
+                    gAweta = fp(j, eta, y1w, y1wr, y2w, y2wr)
+                    gAwetaeta = fpp(j, eta, y1w, y1wr, y2w, y2wr)
 
                     for i in range(m):
                         #TODO save in buffer
-                        fAu = fuv(i, xi, x1u, x2u)
-                        fAuxi = fuv_x(i, xi, x1u, x2u)
-                        fAv = fuv(i, xi, x1v, x2v)
-                        fAvxi = fuv_x(i, xi, x1v, x2v)
-                        fAw = fw(i, xi, x1w, x1wr, x2w, x2wr)
-                        fAwxi = fw_x(i, xi, x1w, x1wr, x2w, x2wr)
-                        fAwxixi = fw_xx(i, xi, x1w, x1wr, x2w, x2wr)
+                        fAu = f(i, xi, x1u, x1ur, x2u, x2ur)
+                        fAuxi = fp(i, xi, x1u, x1ur, x2u, x2ur)
+                        fAv = f(i, xi, x1v, x1vr, x2v, x2vr)
+                        fAvxi = fp(i, xi, x1v, x1vr, x2v, x2vr)
+                        fAw = f(i, xi, x1w, x1wr, x2w, x2wr)
+                        fAwxi = fp(i, xi, x1w, x1wr, x2w, x2wr)
+                        fAwxixi = fpp(i, xi, x1w, x1wr, x2w, x2wr)
 
                         col = col0 + DOF*(j*m + i)
 
@@ -1146,22 +1141,22 @@ def calc_fint(double [::1] cs, object Finput, object shell,
                 Mxy = B16*exx + B26*eyy + B66*gxy + D16*kxx + D26*kyy + D66*kxy
 
                 for j in range(n):
-                    gAu = fuv(j, eta, y1u, y2u)
-                    gAueta = fuv_x(j, eta, y1u, y2u)
-                    gAv = fuv(j, eta, y1v, y2v)
-                    gAveta = fuv_x(j, eta, y1v, y2v)
-                    gAw = fw(j, eta, y1w, y1wr, y2w, y2wr)
-                    gAweta = fw_x(j, eta, y1w, y1wr, y2w, y2wr)
-                    gAwetaeta = fw_xx(j, eta, y1w, y1wr, y2w, y2wr)
+                    gAu = f(j, eta, y1u, y1ur, y2u, y2ur)
+                    gAueta = fp(j, eta, y1u, y1ur, y2u, y2ur)
+                    gAv = f(j, eta, y1v, y1vr, y2v, y2vr)
+                    gAveta = fp(j, eta, y1v, y1vr, y2v, y2vr)
+                    gAw = f(j, eta, y1w, y1wr, y2w, y2wr)
+                    gAweta = fp(j, eta, y1w, y1wr, y2w, y2wr)
+                    gAwetaeta = fpp(j, eta, y1w, y1wr, y2w, y2wr)
 
                     for i in range(m):
-                        fAu = fuv(i, xi, x1u, x2u)
-                        fAuxi = fuv_x(i, xi, x1u, x2u)
-                        fAv = fuv(i, xi, x1v, x2v)
-                        fAvxi = fuv_x(i, xi, x1v, x2v)
-                        fAw = fw(i, xi, x1w, x1wr, x2w, x2wr)
-                        fAwxi = fw_x(i, xi, x1w, x1wr, x2w, x2wr)
-                        fAwxixi = fw_xx(i, xi, x1w, x1wr, x2w, x2wr)
+                        fAu = f(i, xi, x1u, x1ur, x2u, x2ur)
+                        fAuxi = fp(i, xi, x1u, x1ur, x2u, x2ur)
+                        fAv = f(i, xi, x1v, x1vr, x2v, x2vr)
+                        fAvxi = fp(i, xi, x1v, x1vr, x2v, x2vr)
+                        fAw = f(i, xi, x1w, x1wr, x2w, x2wr)
+                        fAwxi = fp(i, xi, x1w, x1wr, x2w, x2wr)
+                        fAwxixi = fpp(i, xi, x1w, x1wr, x2w, x2wr)
 
                         col = col0 + DOF*(j*m + i)
 

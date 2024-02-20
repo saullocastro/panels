@@ -8,17 +8,13 @@ import numpy as np
 from libc.stdlib cimport malloc, free
 from cython.parallel import prange
 
-
-cdef extern from 'bardell_functions_uv.hpp':
-    double vec_fuv(double *f, double xi, double xi1t, double xi2t) nogil
-    double vec_fuv_x(double *f, double xi, double xi1t, double xi2t) nogil
-
-cdef extern from 'bardell_functions_w.hpp':
-    double vec_fw(double *f, double xi, double xi1t, double xi1r,
+# \panels\panels\core\src
+cdef extern from 'bardell_functions.hpp':
+    double vec_f(double *f, double xi, double xi1t, double xi1r,
                   double xi2t, double xi2r) nogil
-    double vec_fw_x(double *f, double xi, double xi1t, double xi1r,
+    double vec_fp(double *f, double xi, double xi1t, double xi1r,
                   double xi2t, double xi2r) nogil
-    double vec_fw_xx(double *f, double xi, double xi1t, double xi1r,
+    double vec_fpp(double *f, double xi, double xi1t, double xi1r,
                   double xi2t, double xi2r) nogil
 
 DOUBLE = np.float64
@@ -29,23 +25,26 @@ cdef int DOF = 3
 
 def fuvw(double [::1] c, object s, double [::1] xs, double [::1] ys,
         int num_cores=4):
+    '''
+        Calculates the displacement field at all points in the provided grid
+    '''
     cdef double a, b
     cdef int m, n
-    cdef double x1u, x2u
-    cdef double x1v, x2v
+    cdef double x1u, x1ur, x2u, x2ur
+    cdef double x1v, x1vr, x2v, x2vr
     cdef double x1w, x1wr, x2w, x2wr
-    cdef double y1u, y2u
-    cdef double y1v, y2v
+    cdef double y1u, y1ur, y2u, y2ur
+    cdef double y1v, y1vr, y2v, y2vr
     cdef double y1w, y1wr, y2w, y2wr
     a = s.a
     b = s.b
     m = s.m
     n = s.n
-    x1u = s.x1u; x2u = s.x2u
-    x1v = s.x1v; x2v = s.x2v
-    x1w = s.x1w; x1wr = s.x1wr; x2w = s.x2w ; x2wr = s.x2wr
-    y1u = s.y1u; y2u = s.y2u
-    y1v = s.y1v; y2v = s.y2v
+    x1u = s.x1u; x1ur = s.x1ur; x2u = s.x2u; x2ur = s.x2ur
+    x1v = s.x1v; x1vr = s.x1vr; x2v = s.x2v; x2vr = s.x2vr
+    x1w = s.x1w; x1wr = s.x1wr; x2w = s.x2w; x2wr = s.x2wr
+    y1u = s.y1u; y1ur = s.y1ur; y2u = s.y2u; y2ur = s.y2ur
+    y1v = s.y1v; y1vr = s.y1vr; y2v = s.y2v; y2vr = s.y2vr
     y1w = s.y1w; y1wr = s.y1wr; y2w = s.y2w ; y2wr = s.y2wr
 
     cdef int size_core, pti, i, j
@@ -77,11 +76,11 @@ def fuvw(double [::1] c, object s, double [::1] xs, double [::1] ys,
                     schedule='static'):
         cfuvw(&c[0], m, n, a, b, &xs_core[pti,0],
               &ys_core[pti,0], size_core, &us[pti,0], &vs[pti,0], &ws[pti,0],
-              x1u, x2u,
-              x1v, x2v,
+              x1u, x1ur, x2u, x2ur,
+              x1v, x1vr, x2v, x2vr,
               x1w, x1wr, x2w, x2wr,
-              y1u, y2u,
-              y1v, y2v,
+              y1u, y1ur, y2u, y2ur,
+              y1v, y1vr, y2v, y2vr,
               y1w, y1wr, y2w, y2wr)
 
         cfwx(&c[0], m, n, a, b, &xs_core[pti,0], &ys_core[pti,0],
@@ -104,26 +103,37 @@ def fuvw(double [::1] c, object s, double [::1] xs, double [::1] ys,
 
 def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys, int
             num_cores=4, int NLgeom=0):
-    cdef double a, b, r, alpharad
+    #  [::1] means a contigious array
+    
+    '''
+    Calculates the strain field at all points in the provided grid 
+    
+        c : ritz coeffients of the whole system i.e. size = n_rows of K_global
+        
+        s : Shell obj
+        
+        xs and ys : contigious arrays of the grid divisions in the x and y direction
+    '''
+    
+    cdef double a, b, r
     cdef int m, n
-    cdef double x1u, x2u
-    cdef double x1v, x2v
+    cdef double x1u, x1ur, x2u, x2ur
+    cdef double x1v, x1vr, x2v, x2vr
     cdef double x1w, x1wr, x2w, x2wr
-    cdef double y1u, y2u
-    cdef double y1v, y2v
+    cdef double y1u, y1ur, y2u, y2ur
+    cdef double y1v, y1vr, y2v, y2vr
     cdef double y1w, y1wr, y2w, y2wr
     a = s.a
     b = s.b
     r = s.r
-    alpharad = s.alpharad
     m = s.m
     n = s.n
-    x1u = s.x1u; x2u = s.x2u
-    x1v = s.x1v; x2v = s.x2v
-    x1w = s.x1w; x1wr = s.x1wr; x2w = s.x2w ; x2wr = s.x2wr
-    y1u = s.y1u; y2u = s.y2u
-    y1v = s.y1v; y2v = s.y2v
-    y1w = s.y1w; y1wr = s.y1wr; y2w = s.y2w ; y2wr = s.y2wr
+    x1u = s.x1u; x1ur = s.x1ur; x2u = s.x2u; x2ur = s.x2ur
+    x1v = s.x1v; x1vr = s.x1vr; x2v = s.x2v; x2vr = s.x2vr
+    x1w = s.x1w; x1wr = s.x1wr; x2w = s.x2w; x2wr = s.x2wr
+    y1u = s.y1u; y1ur = s.y1ur; y2u = s.y2u; y2ur = s.y2ur
+    y1v = s.y1v; y1vr = s.y1vr; y2v = s.y2v; y2vr = s.y2vr
+    y1w = s.y1w; y1wr = s.y1wr; y2w = s.y2w; y2wr = s.y2wr
 
     cdef int size_core, pti
     cdef double [:, ::1] exxs, eyys, gxys, kxxs, kyys, kxys
@@ -135,6 +145,7 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys, int
         add_size = 0
     new_size = size + add_size
 
+# ???????????????????????????
     if (size % num_cores) != 0:
         xs_core = np.ascontiguousarray(np.hstack((xs, np.zeros(add_size))).reshape(num_cores, -1), dtype=DOUBLE)
         ys_core = np.ascontiguousarray(np.hstack((ys, np.zeros(add_size))).reshape(num_cores, -1), dtype=DOUBLE)
@@ -151,33 +162,30 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys, int
     kyys = np.zeros((num_cores, size_core), dtype=DOUBLE)
     kxys = np.zeros((num_cores, size_core), dtype=DOUBLE)
 
-    if alpharad != 0:
-        raise NotImplementedError('Conical shells not suported')
-
     for pti in prange(num_cores, nogil=True, chunksize=1, num_threads=num_cores,
                     schedule='static'):
-        cfstrain(&c[0], m, n, a, b, r, alpharad,
+        cfstrain(&c[0], m, n, a, b, r,
               &xs_core[pti,0], &ys_core[pti,0], size_core,
               &exxs[pti,0], &eyys[pti,0], &gxys[pti,0],
               &kxxs[pti,0], &kyys[pti,0], &kxys[pti,0],
-              x1u, x2u,
-              x1v, x2v,
+              x1u, x1ur, x2u, x2ur,
+              x1v, x1vr, x2v, x2vr,
               x1w, x1wr, x2w, x2wr,
-              y1u, y2u,
-              y1v, y2v,
+              y1u, y1ur, y2u, y2ur,
+              y1v, y1vr, y2v, y2vr,
               y1w, y1wr, y2w, y2wr, NLgeom)
 
     return (np.ravel(exxs)[:size], np.ravel(eyys)[:size], np.ravel(gxys)[:size],
             np.ravel(kxxs)[:size], np.ravel(kyys)[:size], np.ravel(kxys)[:size])
-
+# slices the first 'size' elems from the flattened array
 
 cdef void cfuvw(double *c, int m, int n, double a, double b, double *xs,
         double *ys, int size, double *us, double *vs, double *ws,
-        double x1u, double x2u,
-        double x1v, double x2v,
+        double x1u, double x1ur, double x2u, double x2ur,
+        double x1v, double x1vr, double x2v, double x2vr,
         double x1w, double x1wr, double x2w, double x2wr,
-        double y1u, double y2u,
-        double y1v, double y2v,
+        double y1u, double y1ur, double y2u, double y2ur,
+        double y1v, double y1vr, double y2v, double y2vr,
         double y1w, double y1wr, double y2w, double y2wr) nogil:
     cdef int i, j, col, pti
     cdef double x, y, u, v, w, xi, eta
@@ -202,12 +210,12 @@ cdef void cfuvw(double *c, int m, int n, double a, double b, double *xs,
         xi = 2*x/a - 1.
         eta = 2*y/b - 1.
 
-        vec_fuv(fu, xi, x1u, x2u)
-        vec_fuv(gu, eta, y1u, y2u)
-        vec_fuv(fv, xi, x1v, x2v)
-        vec_fuv(gv, eta, y1v, y2v)
-        vec_fw(fw, xi, x1w, x1wr, x2w, x2wr)
-        vec_fw(gw, eta, y1w, y1wr, y2w, y2wr)
+        vec_f(fu, xi, x1u, x1ur, x2u, x2ur)
+        vec_f(gu, eta, y1u, y1ur, y2u, y2ur)
+        vec_f(fv, xi, x1v, x1vr, x2v, x2vr)
+        vec_f(gv, eta, y1v, y1vr, y2v, y2vr)
+        vec_f(fw, xi, x1w, x1wr, x2w, x2wr)
+        vec_f(gw, eta, y1w, y1wr, y2w, y2wr)
 
         u = 0
         v = 0
@@ -251,8 +259,8 @@ cdef void cfwx(double *c, int m, int n, double a, double b, double *xs,
         xi = 2*x/a - 1.
         eta = 2*y/b - 1.
 
-        vec_fw_x(fwxi, xi, x1w, x1wr, x2w, x2wr)
-        vec_fw(gw, eta, y1w, y1wr, y2w, y2wr)
+        vec_fp(fwxi, xi, x1w, x1wr, x2w, x2wr)
+        vec_f(gw, eta, y1w, y1wr, y2w, y2wr)
 
         wx = 0
 
@@ -286,8 +294,8 @@ cdef void cfwy(double *c, int m, int n, double a, double b, double *xs,
         xi = 2*x/a - 1.
         eta = 2*y/b - 1.
 
-        vec_fw(fw, xi, x1w, x1wr, x2w, x2wr)
-        vec_fw_x(gweta, eta, y1w, y1wr, y2w, y2wr)
+        vec_f(fw, xi, x1w, x1wr, x2w, x2wr)
+        vec_fp(gweta, eta, y1w, y1wr, y2w, y2wr)
 
         wy = 0
 
@@ -303,6 +311,32 @@ cdef void cfwy(double *c, int m, int n, double a, double b, double *xs,
 
 
 def fg(double[:, ::1] g, double x, double y, object s):
+    # Accessing the contiguous memory layout for C 
+    # ::1 at the 2nd position means that the elements in this 2nd dimension will be 1 element apart in memory.
+    
+    if s.__class__.__name__ != 'Shell':
+        raise ValueError('A Shell object must be passed')
+    a = s.a
+    b = s.b
+    m = s.m
+    n = s.n
+    cfg(g, m, n, x, y, a, b,
+        s.x1u, s.x1ur, s.x2u, s.x2ur,
+        s.x1v, s.x1vr, s.x2v, s.x2vr,
+        s.x1w, s.x1wr, s.x2w, s.x2wr,
+        s.y1u, s.y1ur, s.y2u, s.y2ur,
+        s.y1v, s.y1vr, s.y2v, s.y2vr,
+        s.y1w, s.y1wr, s.y2w, s.y2wr)
+
+
+cdef void cfg(double[:,::1] g, int m, int n,
+              double x, double y, double a, double b,
+              double x1u, double x1ur, double x2u, double x2ur,
+              double x1v, double x1vr, double x2v, double x2vr,
+              double x1w, double x1wr, double x2w, double x2wr,
+              double y1u, double y1ur, double y2u, double y2ur,
+              double y1v, double y1vr, double y2v, double y2vr,
+              double y1w, double y1wr, double y2w, double y2wr) nogil:
     cdef int i, j, col
     cdef double xi, eta
     cdef double *fu
@@ -314,10 +348,11 @@ def fg(double[:, ::1] g, double x, double y, object s):
     cdef double *gw
     cdef double *gw_eta
 
-    if s.__class__.__name__ != 'Shell':
-        raise ValueError('A Shell object must be passed')
-
     fu = <double *>malloc(NMAX * sizeof(double *))
+    # NMAX defined earlier
+    # <double *> = explicitly casting the result of malloc to a pointer to double. 
+    #  result of malloc = initially a generic pointer (void*). By casting it to a double*, you inform
+    # the compiler that you intend to treat the allocated memory as if it stores a double 
     gu = <double *>malloc(NMAX * sizeof(double *))
     fv = <double *>malloc(NMAX * sizeof(double *))
     gv = <double *>malloc(NMAX * sizeof(double *))
@@ -326,26 +361,27 @@ def fg(double[:, ::1] g, double x, double y, object s):
     gw = <double *>malloc(NMAX * sizeof(double *))
     gw_eta = <double *>malloc(NMAX * sizeof(double *))
 
-    xi = 2*x/s.a - 1.
-    eta = 2*y/s.b - 1.
+    xi = 2*x/a - 1.
+    eta = 2*y/b - 1.
 
-    vec_fuv(fu, xi, s.x1u, s.x2u)
-    vec_fuv(gu, eta, s.y1u, s.y2u)
-    vec_fuv(fv, xi, s.x1v, s.x2v)
-    vec_fuv(gv, eta, s.y1v, s.y2v)
-    vec_fw(fw, xi, s.x1w, s.x1wr, s.x2w, s.x2wr)
-    vec_fw_x(fw_xi, xi, s.x1w, s.x1wr, s.x2w, s.x2wr)
-    vec_fw(gw, eta, s.y1w, s.y1wr, s.y2w, s.y2wr)
-    vec_fw_x(gw_eta, eta, s.y1w, s.y1wr, s.y2w, s.y2wr)
+    # Returns the bardel functions
+    vec_f(fu, xi, x1u, x1ur, x2u, x2ur)
+    vec_f(gu, eta, y1u, y1ur, y2u, y2ur)
+    vec_f(fv, xi, x1v, x1vr, x2v, x2vr)
+    vec_f(gv, eta, y1v, y1vr, y2v, y2vr)
+    vec_f(fw, xi, x1w, x1wr, x2w, x2wr)
+    vec_fp(fw_xi, xi, x1w, x1wr, x2w, x2wr)
+    vec_f(gw, eta, y1w, y1wr, y2w, y2wr)
+    vec_fp(gw_eta, eta, y1w, y1wr, y2w, y2wr)
 
-    for j in range(s.n):
-        for i in range(s.m):
-            col = DOF*(j*s.m + i)
+    for j in range(n):
+        for i in range(m):
+            col = DOF*(j*m + i)
             g[0, col+0] = fu[i]*gu[j]
             g[1, col+1] = fv[i]*gv[j]
             g[2, col+2] = fw[i]*gw[j]
-            g[3, col+2] = -(2/s.a)*fw_xi[i]*gw[j]
-            g[4, col+2] = -(2/s.b)*fw[i]*gw_eta[j]
+            g[3, col+2] = -(2/a)*fw_xi[i]*gw[j]
+            g[4, col+2] = -(2/b)*fw[i]*gw_eta[j]
 
     free(fu)
     free(gu)
@@ -356,17 +392,20 @@ def fg(double[:, ::1] g, double x, double y, object s):
     free(gw)
     free(gw_eta)
 
-
+# *c passed as pointer - modifies it wo needing to pass it back
+'''
+    Calculates the strain at every point in the provided grid
+'''
 cdef void cfstrain(double *c, int m, int n, double a, double b,
-        double r, double alpharad,
+        double r,
         double *xs, double *ys, int size,
         double *exxs, double *eyys, double *gxys,
         double *kxxs, double *kyys, double *kxys,
-        double x1u, double x2u,
-        double x1v, double x2v,
+        double x1u, double x1ur, double x2u, double x2ur,
+        double x1v, double x1vr, double x2v, double x2vr,
         double x1w, double x1wr, double x2w, double x2wr,
-        double y1u, double y2u,
-        double y1v, double y2v,
+        double y1u, double y1ur, double y2u, double y2ur,
+        double y1v, double y1vr, double y2v, double y2vr,
         double y1w, double y1wr, double y2w, double y2wr, int NLgeom) nogil:
     cdef int i, j, col, pti
     cdef double x, y, xi, eta
@@ -411,6 +450,7 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
     else:
         flagcyl = 1
 
+    # Goes through the passed x and y (which are already all the points on the grid)
     for pti in range(size):
         x = xs[pti]
         y = ys[pti]
@@ -418,29 +458,34 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
         xi = 2*x/a - 1.
         eta = 2*y/b - 1.
 
-        vec_fuv(fu, xi, x1u, x2u)
-        vec_fuv_x(fuxi, xi, x1u, x2u)
-        vec_fuv(gu, eta, y1u, y2u)
-        vec_fuv_x(gueta, eta, y1u, y2u)
-        vec_fuv(fv, xi, x1v, x2v)
-        vec_fuv_x(fvxi, xi, x1v, x2v)
-        vec_fuv(gv, eta, y1v, y2v)
-        vec_fuv_x(gveta, eta, y1v, y2v)
-        vec_fw(fw, xi, x1w, x1wr, x2w, x2wr)
-        vec_fw_x(fwxi, xi, x1w, x1wr, x2w, x2wr)
-        vec_fw_xx(fwxixi, xi, x1w, x1wr, x2w, x2wr)
-        vec_fw(gw, eta, y1w, y1wr, y2w, y2wr)
-        vec_fw_x(gweta, eta, y1w, y1wr, y2w, y2wr)
-        vec_fw_xx(gwetaeta, eta, y1w, y1wr, y2w, y2wr)
+        # u functions at x and y (loop gets it through all points)
+        vec_f(fu, xi, x1u, x1ur, x2u, x2ur)
+        vec_fp(fuxi, xi, x1u, x1ur, x2u, x2ur)
+        vec_f(gu, eta, y1u, y1ur, y2u, y2ur)
+        vec_fp(gueta, eta, y1u, y1ur, y2u, y2ur)
+        # v functions 
+        vec_f(fv, xi, x1v, x1vr, x2v, x2vr)
+        vec_fp(fvxi, xi, x1v, x1vr, x2v, x2vr)
+        vec_f(gv, eta, y1v, y1vr, y2v, y2vr)
+        vec_fp(gveta, eta, y1v, y1vr, y2v, y2vr)
+        # w functions 
+        vec_f(fw, xi, x1w, x1wr, x2w, x2wr)
+        vec_fp(fwxi, xi, x1w, x1wr, x2w, x2wr)
+        vec_fpp(fwxixi, xi, x1w, x1wr, x2w, x2wr)
+        vec_f(gw, eta, y1w, y1wr, y2w, y2wr)
+        vec_fp(gweta, eta, y1w, y1wr, y2w, y2wr)
+        vec_fpp(gwetaeta, eta, y1w, y1wr, y2w, y2wr)
 
         wxi = 0
         weta = 0
 
+        # Sum through all m*n terms
         for j in range(n):
             for i in range(m):
                 col = DOF*(j*m + i)
                 wxi += c[col+2]*fwxi[i]*gw[j]
                 weta += c[col+2]*fw[i]*gweta[j]
+                # +2 to get w (+0 is u, +1 is v)
 
         exx = 0
         eyy = 0
@@ -452,7 +497,7 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
         for j in range(n):
             for i in range(m):
                 col = DOF*(j*m + i)
-                exx += c[col+0]*fuxi[i]*gu[j]*(2/a) + NLgeom*2/(a*a)*c[col+2]*fwxi[i]*gw[j]*wxi
+                exx += c[col+0]*fuxi[i]*gu[j]*(2/a) + NLgeom*2/(a*a)*c[col+2]*fwxi[i]*gw[j]*wxi # same as wxi^2
                 if flagcyl == 1:
                     eyy += c[col+1]*fv[i]*gveta[j]*(2/b) + 1/r*c[col+2]*fw[i]*gw[j] + NLgeom*2/(b*b)*c[col+2]*fw[i]*gweta[j]*weta
                 else:
@@ -464,6 +509,7 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
                 kyy += -c[col+2]*fw[i]*gwetaeta[j]*4/(b*b)
                 kxy += -2*c[col+2]*fwxi[i]*gweta[j]*4/(a*b)
 
+        # Strains and curvatures at each point in the grid 
         exxs[pti] = exx
         eyys[pti] = eyy
         gxys[pti] = gxy
@@ -471,6 +517,7 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
         kyys[pti] = kyy
         kxys[pti] = kxy
 
+    # Frees up the allocated mem
     free(fu)
     free(fuxi)
     free(gu)

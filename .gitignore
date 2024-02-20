@@ -21,10 +21,11 @@ temp*.*
 .cache
 __cache__
 __config__.py
-test.png
+test*.png
 
 # Python compiled files
 *.pyc
 *.pyo
 *.pyd
 
+.DS_Store
