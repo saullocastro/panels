@@ -1,15 +1,14 @@
 from composites import laminated_plate
 
 # Penalties for prescribed displs
-
-
+# Used to enforce connections
 def calc_ku_kv_kw_point_pd(p):
     A11 = p.lam.A[0, 0]
     A22 = p.lam.A[1, 1]
     ku = A11 
     kv = A22 
     kw = A11 
-    print('penalties in function', ku, kv, kw)
+    # print('penalties in function', ku, kv, kw)
     return ku, kv, kw
 
 
@@ -30,6 +29,28 @@ def calc_ku_kv_kw_line_pd_ycte(p):
     kw = A11 / p.a 
     return ku, kv, kw
 
+
+# Out of plane penalty stiffness
+# Used for 
+def calc_kw_tsl(pA, pB, tsl_type):
+    
+    '''
+        pA = top panel
+        
+        pB= bottom panel
+        
+        tsl_type = type of TSL to be used
+            Possible options: 'linear' (no softening)
+    '''
+    if pA.a != pB.a or pA.b != pB.b:
+        raise ValueError('Dimensions of both the panels in contact should be same')
+    
+    if tsl_type == 'linear':
+        tsl_input = 1e4 # N/mm (from a inverse char paper - faulty !!!!)
+        # print(tsl_input, pA.a, pA.b)
+        kw_tsl = tsl_input/(pA.a * pA.b)  # N/mm^3 (same as kt for SB connection)
+    
+    return kw_tsl
 
 # Penalties for connections 
 def calc_kt_kr(p1, p2, connection_type):
