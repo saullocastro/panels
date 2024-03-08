@@ -29,3 +29,5 @@ test*.png
 *.pyd
 
 .DS_Store
+.vs
+env
