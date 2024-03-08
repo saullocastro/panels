@@ -5,6 +5,7 @@ import numpy as np
 from numpy import linspace, reshape
 from scipy.sparse import csr_matrix
 
+from panels.legendre_gauss_quadrature import get_points_weights
 from structsolve.sparseutils import finalize_symmetric_matrix
 
 from panels import Shell
@@ -106,11 +107,12 @@ class MultiDomain(object):
     def plot(self, c, group, invert_y=False, vec='w', filename='', ax=None,
             figsize=(3.5, 2.), save=True, title='', identify=False,
             show_boundaries=False, boundary_line='--k', boundary_linewidth=1.,
-            colorbar=False, cbar_nticks=2, cbar_format=None, cbar_title='',
-            cbar_fontsize=10, colormap='jet', aspect='equal', clean=True,
+            colorbar=False, cbar_nticks=10, cbar_format=None, cbar_title='',
+            cbar_fontsize=7, colormap='jet', aspect='equal', clean=True,
             dpi=400, texts=[], xs=None, ys=None, gridx=50, gridy=50,
-            num_levels=400, vecmin=None, vecmax=None, calc_data_only=False, 
-            use_gauss_points = False, x_gauss = None, y_gauss = None):
+            num_levels=400, vecmin=None, vecmax=None,
+            no_x_gauss = None, no_y_gauss = None, 
+            res = None, silent=True, display_zero = False):
         r"""Contour plot for a Ritz constants vector.
 
         Parameters
@@ -192,12 +194,18 @@ class MultiDomain(object):
             Maximum value for the contour scale.
         calc_data_only : bool, optional
             If only calculated data should be returned.
-        use_gauss_points : bool, optional 
-            Uses the gauss integration points (x_gauss and y_gauss) to evaluate the fields
-        x_gauss, y_gauss: Array
-                Gauss sampling points along x and y respectively where the displacement field is to be calculated
-            Either one of xg and yg needs to be specified or both
-            When specified, stress_gauss_points and strain_gauss points are called instead
+        no_x_gauss, no_y_gauss : int
+            Number of gauss sampling points along x and y respectively where the displacement field is to be calculated
+            Either one of no_x_gauss and no_y_gauss needs to be specified or both
+            When specified, uvw_gauss_points, stress_gauss_points and strain_gauss points are called instead
+        calc_res_field_only : bool, optional
+            Only calcuates the result fields and returns it back
+        res : whatever data the stress, strain and uvw functions output, optional
+            Contains the results of a previous run. If results already exist, then they're not computed again
+        silent : bool, optional
+            True = doesnt print any messages
+        display_zero : bool, optional
+            Decides whether 0 should be displayed as a tick in the colour bar or not
 
         Returns
         -------
@@ -208,45 +216,21 @@ class MultiDomain(object):
             Data calculated during the plotting procedure.
 
         """
-        msg('Plotting contour...')
+        msg('Plotting contour...', silent=True)
 
         import matplotlib.cm as cm
         import matplotlib
         if platform.system().lower() == 'linux':
             matplotlib.use('Agg')
         import matplotlib.pyplot as plt
-
-        msg('Computing field variables...', level=1)
-        displs = ['u', 'v', 'w', 'phix', 'phiy']
-        strains = ['exx', 'eyy', 'gxy', 'kxx', 'kyy', 'kxy', 'gyz', 'gxz']
-        stresses = ['Nxx', 'Nyy', 'Nxy', 'Mxx', 'Myy', 'Mxy', 'Qy', 'Qx']
         
-        # Using fixed grid to post process the results
-        if use_gauss_points == False:
-            if vec in displs:
-                res = self.uvw(c, group, gridx=gridx, gridy=gridy)
-            elif vec in strains:
-                res = self.strain(c, group, gridx=gridx, gridy=gridy)
-            elif vec in stresses:
-                res = self.stress(c, group, gridx=gridx, gridy=gridy)
-            else:
-                raise ValueError(
-                        '{0} is not a valid vec parameter value!'.format(vec))
-                
-        # Using gauss integration points to post process the resuls
-        if use_gauss_points == True:
-            if vec in displs:
-                res = self.uvw_gauss_points(c, group, x_gauss=x_gauss, y_gauss=y_gauss)
-            elif vec in strains:
-                res = self.strain_gauss_points(c, group, x_gauss=x_gauss, y_gauss=y_gauss)
-            elif vec in stresses:
-                res = self.stress_gauss_points(c, group, x_gauss=x_gauss, y_gauss=y_gauss)
-            else:
-                raise ValueError(
-                        '{0} is not a valid vec parameter value!'.format(vec))
+        # If no results (res) is passed, then compute them
+        if res is None:
+            res = self.calc_results(c, group, vec = vec, gridx = gridx, gridy = gridy,  
+                             no_x_gauss = no_x_gauss, no_y_gauss = no_y_gauss)
             
         field = np.array(res[vec])
-        msg('Finished!', level=1)
+        msg('Finished!', level=1, silent=silent)
 
         if vecmin is None:
             vecmin = field.min()
@@ -254,9 +238,6 @@ class MultiDomain(object):
             vecmax = field.max()
 
         data = dict(vecmin=vecmin, vecmax=vecmax)
-
-        if calc_data_only:
-            return None, data
 
         levels = linspace(vecmin, vecmax, num_levels)
 
@@ -285,36 +266,48 @@ class MultiDomain(object):
             if panel.group != group:
                 continue
             count += 1
+            # x y flipped bec it needs to be plotted
             xplot = res['y'][count] + panel.y0
             yplot = res['x'][count] + panel.x0
             field = res[vec][count]
+            # print(np.shape(xplot), np.shape(yplot), np.shape(field))
             contour = ax.contourf(xplot, yplot, field, levels=levels,
                     cmap=colormap_obj)
             if identify:
                 ax.text(xplot.mean(), yplot.mean(), 'P {0:02d}'.format(i+1),
                         transform=ax.transData, ha='center')
             if show_boundaries:
-                x1, x2 = xplot.min(), xplot.max()
-                y1, y2 = yplot.min(), yplot.max()
-                ax.plot((x1, x2), (y1, y1), boundary_line, lw=boundary_linewidth)
-                ax.plot((x1, x2), (y2, y2), boundary_line, lw=boundary_linewidth)
-                ax.plot((x1, x1), (y1, y2), boundary_line, lw=boundary_linewidth)
-                ax.plot((x2, x2), (y1, y2), boundary_line, lw=boundary_linewidth)
+                # Also takes care of gauss point field
+                x1_plot = panel.y0
+                x2_plot = panel.y0 + panel.b
+                y1_plot = panel.x0
+                y2_plot = panel.x0 + panel.a
+                # x1, x2 = xplot.min(), xplot.max()
+                # y1, y2 = yplot.min(), yplot.max()
+                # Plots both points as a line
+                ax.plot((x1_plot, x2_plot), (y1_plot, y1_plot), boundary_line, lw=boundary_linewidth)
+                ax.plot((x1_plot, x2_plot), (y2_plot, y2_plot), boundary_line, lw=boundary_linewidth)
+                ax.plot((x1_plot, x1_plot), (y1_plot, y2_plot), boundary_line, lw=boundary_linewidth)
+                ax.plot((x2_plot, x2_plot), (y1_plot, y2_plot), boundary_line, lw=boundary_linewidth)
 
         if colorbar:
             from mpl_toolkits.axes_grid1 import make_axes_locatable
 
             fsize = cbar_fontsize
             divider = make_axes_locatable(ax)
-            cax = divider.append_axes('right', size='5%', pad=0.05)
+            cax = divider.append_axes('right', size='50%', pad=0.05)
+                # Change colorbar size by changing size='')
             cbarticks = linspace(vecmin, vecmax, cbar_nticks)
+            # Adding 0 to the ticks
+            if display_zero :
+                cbarticks = np.sort(np.append(cbarticks, np.array([0.])))
             cbar = plt.colorbar(contour, ticks=cbarticks, format=cbar_format,
                                 cax=cax)
             if cbar_title:
                 cax.text(0.5, 1.05, cbar_title, horizontalalignment='center',
                          verticalalignment='bottom', fontsize=fsize)
             # cbar.outline.remove()
-            cbar.ax.tick_params(labelsize=fsize, pad=0., tick2On=False)
+            cbar.ax.tick_params(labelsize=fsize, pad=0.) #, tick2On=False) # Hides the tick marks
 
         if title != '':
             ax.set_title(str(title))
@@ -343,12 +336,81 @@ class MultiDomain(object):
                         bbox_inches='tight', pad_inches=0.05, dpi=dpi)
             plt.close()
 
-        msg('finished!')
+        msg('finished!', silent=silent)
 
         return ax, data
 
+    def calc_results(self, c, group, vec='w', gridx=50, gridy=50,  
+                     no_x_gauss = None, no_y_gauss = None, 
+                     cte_panel_force=None, x_cte_force=None, y_cte_force=None):
+        
+        r"""Contour plot for a Ritz constants vector.
 
-    def uvw(self, c, group, gridx=50, gridy=50):
+        Parameters
+        ----------
+        c : np.ndarray
+            The Ritz constants that will be used to compute the field contour.
+        group : str
+            A group to plot. Each panel in ``panels`` should contain an
+            attribute ``group``, which is used to identify which entities
+            should be plotted together.
+        vec : str, optional
+            Variable that needs to be calculated    
+            Can be one of the components:
+
+            - Displacement: ``'u'``, ``'v'``, ``'w'``, ``'phix'``, ``'phiy'``
+            - Strain: ``'exx'``, ``'eyy'``, ``'gxy'``, ``'kxx'``, ``'kyy'``,
+              ``'kxy'``, ``'gyz'``, ``'gxz'``
+            - Stress: ``'Nxx'``, ``'Nyy'``, ``'Nxy'``, ``'Mxx'``, ``'Myy'``,
+              ``'Mxy'``, ``'Qy'``, ``'Qx'``
+        gridx : int, optional
+            Number of points along the `x` axis where to calculate the
+            displacement field.
+        gridy : int, optional
+            Number of points along the `y` where to calculate the
+            displacement field.
+        use_gauss_points : bool, optional 
+            Uses the gauss integration points (x_gauss and y_gauss) to evaluate the fields
+        no_x_gauss, no_y_gauss : Array
+            Number of gauss sampling points along x and y respectively where the displacement field is to be calculated
+            Either one of no_x_gauss and no_y_gauss needs to be specified or both
+            When specified, stress_gauss_points and strain_gauss points are called instead
+        """
+        
+        displs = ['u', 'v', 'w', 'phix', 'phiy']
+        strains = ['exx', 'eyy', 'gxy', 'kxx', 'kyy', 'kxy', 'gyz', 'gxz']
+        stresses = ['Nxx', 'Nyy', 'Nxy', 'Mxx', 'Myy', 'Mxy', 'Qy', 'Qx']
+        forces = ['Fxx', 'Fyy', 'Fxy']
+        
+        msg('Computing field variables...', level=1, silent=True)
+        
+        if no_x_gauss is not None:
+            if no_x_gauss > 64:
+                raise ValueError('Gauss points more than 64 not coded')
+                
+        if no_y_gauss is not None:
+            if no_y_gauss > 64:
+                raise ValueError('Gauss points more than 64 not coded')
+
+        # res = dict of all keywords in that specific input dict
+        # size of each variable = no_panel_in_group x grid_pts_Y x grid_pts_X
+        if vec in displs:
+            res = self.uvw(c, group, gridx=gridx, gridy=gridy, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss)
+        elif vec in strains:
+            res = self.strain(c, group, gridx=gridx, gridy=gridy, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss)
+        elif vec in stresses:
+            res = self.stress(c, group, gridx=gridx, gridy=gridy, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss)
+        elif vec in forces:
+            res = self.force(c, group, cte_panel_force=cte_panel_force, x_cte_force=x_cte_force,
+                            y_cte_force=y_cte_force, gridx=gridx, gridy=gridy,
+                            no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss)
+        else:
+            raise ValueError(
+                    '{0} is not a valid vec parameter value!'.format(vec))
+                
+        return res
+
+    def uvw(self, c, group, gridx=50, gridy=50, no_x_gauss=None, no_y_gauss=None):
         r"""Calculate the displacement field
 
         For a given full set of Ritz constants ``c``, the displacement
@@ -369,6 +431,10 @@ class MultiDomain(object):
         gridy : int, optional
             Number of points along the `y` where to calculate the
             displacement field.
+        no_x_gauss, no_y_gauss : int
+            Number of gauss sampling points along x and y respectively where the displacement field is to be calculated
+            Either one of no_x_gauss and no_y_gauss needs to be specified or both
+            Both can be different
 
         Returns
         -------
@@ -390,10 +456,43 @@ class MultiDomain(object):
             c_panel = np.ascontiguousarray(c_panel, dtype=DOUBLE)
             model = panel.model
             fuvw = modelDB.db[model]['field'].fuvw
-            x, y, shape = default_field(panel, gridx, gridy)
+                
+            if no_x_gauss is not None:
+                # Getting the gauss points and weights for x 
+                    # Gauss points are between 1 and -1
+                x = np.zeros(no_x_gauss, dtype=np.float64)
+                x_weights = np.zeros(no_x_gauss, dtype=np.float64)
+                get_points_weights(no_x_gauss, x, x_weights)
+                # Converting to physical coord as per panel dimensions 
+                # Done bec the clpt_bardell_field.pyx ftn converts it to natural coord
+                x = (panel.a/2)*(x + 1)
+            else:
+                x = linspace(0, panel.a, gridx)
+            if no_y_gauss is not None:
+                # Getting the gauss points and weights for y
+                y = np.zeros(no_y_gauss, dtype=np.float64)
+                y_weights = np.zeros(no_y_gauss, dtype=np.float64)
+                get_points_weights(no_y_gauss, y, y_weights)
+                # Converting to physical coord as per panel dimensions
+                # Done bec the clpt_bardell_field.pyx ftn converts it to natural coord
+                y = (panel.b/2)*(y + 1)
+            else:
+                y = linspace(0, panel.b, gridy) 
+                
+            xs, ys = np.meshgrid(x, y, copy=False)
+            # Size = size_y x size_x
+            # Scalar inputs are converted to 1D arrays, whilst higher-dimensional inputs are preserved
+            xs = np.atleast_1d(np.array(xs, dtype=DOUBLE))
+            ys = np.atleast_1d(np.array(ys, dtype=DOUBLE))
+            shape = xs.shape # gets the shape of xs which is of the grid
+            x = xs.ravel()
+            y = ys.ravel()
+            
             x = np.ascontiguousarray(x)
             y = np.ascontiguousarray(y)
+            
             u, v, w, phix, phiy = fuvw(c_panel, panel, x, y, self.out_num_cores)
+            
             res['x'].append(reshape(x, shape))
             res['y'].append(reshape(y, shape))
             res['u'].append(reshape(u, shape))
@@ -405,7 +504,7 @@ class MultiDomain(object):
         return res
 
 
-    def strain(self, c, group, gridx=50, gridy=50, NLterms=True):
+    def strain(self, c, group, gridx=50, gridy=50, NLterms=True, no_x_gauss=None, no_y_gauss=None):
         r"""Calculate the strain field
         Strains and curvatures at each point ???? all x and y or just diagonal terms ????
 
@@ -417,6 +516,9 @@ class MultiDomain(object):
             A group to plot. Each panel in ``panels`` should contain an
             attribute ``group``, which is used to identify which entities
             should be plotted together.
+        
+        EACH PANEL HAS gridx x gridy POINTS !!!
+        
         gridx : int, optional
             Number of points along the `x` axis where to calculate the
             displacement field.
@@ -425,12 +527,17 @@ class MultiDomain(object):
             displacement field.
         NLterms : bool
             Flag to indicate whether non-linear strain components should be considered.
+        no_x_gauss, no_y_gauss : int
+            Number of gauss sampling points along x and y respectively where the displacement field is to be calculated
+            Either one of no_x_gauss and no_y_gauss needs to be specified or both
+            Both can be different
 
         Returns
         -------
         out : dict
             A dictionary of ``np.ndarrays`` with the keys:
             ``(x, y, exx, eyy, gxy, kxx, kyy, kxy)``.
+            Each has the shape: (no_panels_in_group) x gridx x gridy
 
         """
         
@@ -449,7 +556,36 @@ class MultiDomain(object):
             # Here x and y are the complete unravelled grid in the x and y coord resp
             # So both have the size = gridx*gridy
             # x and y now have the x and y coord of all the grid points i.e. size = no_grid_x * no_grid_y
-            x, y, shape = default_field(panel, gridx, gridy)
+            if no_x_gauss is not None:
+                # Getting the gauss points and weights for x 
+                    # Gauss points are between 1 and -1
+                x = np.zeros(no_x_gauss, dtype=np.float64)
+                x_weights = np.zeros(no_x_gauss, dtype=np.float64)
+                get_points_weights(no_x_gauss, x, x_weights)
+                # Converting to physical coord as per panel dimensions 
+                # Done bec the clpt_bardell_field.pyx ftn converts it to natural coord
+                x = (panel.a/2)*(x + 1)
+            else:
+                x = linspace(0, panel.a, gridx)
+            if no_y_gauss is not None:
+                # Getting the gauss points and weights for y
+                y = np.zeros(no_y_gauss, dtype=np.float64)
+                y_weights = np.zeros(no_y_gauss, dtype=np.float64)
+                get_points_weights(no_y_gauss, y, y_weights)
+                # Converting to physical coord as per panel dimensions
+                # Done bec the clpt_bardell_field.pyx ftn converts it to natural coord
+                y = (panel.b/2)*(y + 1)
+            else:
+                y = linspace(0, panel.b, gridy) 
+            
+            xs, ys = np.meshgrid(x, y, copy=False)
+            # Scalar inputs are converted to 1D arrays, whilst higher-dimensional inputs are preserved
+            xs = np.atleast_1d(np.array(xs, dtype=DOUBLE))
+            ys = np.atleast_1d(np.array(ys, dtype=DOUBLE))
+            shape = xs.shape # gets the shape of xs which is of the grid
+            x = xs.ravel()
+            y = ys.ravel()
+            
             x = np.ascontiguousarray(x)
             y = np.ascontiguousarray(y)
             
@@ -467,8 +603,9 @@ class MultiDomain(object):
         return res
 
 
-    def stress(self, c, group, gridx=50, gridy=50, NLterms=True):
-        r"""Calculate the stress field
+    def stress(self, c, group, gridx=50, gridy=50, NLterms=True, no_x_gauss=None, no_y_gauss=None,
+               cte_panel_force=None, x_cte_force=None, y_cte_force=None):
+        r"""Calculate the stress (Nx) field
 
         Parameters
         ----------
@@ -486,6 +623,10 @@ class MultiDomain(object):
             displacement field.
         NLterms : bool
             Flag to indicate whether non-linear strain components should be considered.
+        no_x_gauss, no_y_gauss : int
+            Number of gauss sampling points along x and y respectively where the displacement field is to be calculated
+            Either one of no_x_gauss and no_y_gauss needs to be specified or both
+            Both can be different
 
         Returns
         -------
@@ -495,16 +636,60 @@ class MultiDomain(object):
 
         """
         res = dict(x=[], y=[], Nxx=[], Nyy=[], Nxy=[], Mxx=[], Myy=[], Mxy=[])
-        for panel in self.panels:
-            if panel.group != group:
-                continue
+        
+        # Used generally when the stress field for the entire group is needed
+        if cte_panel_force is None:
+            loop_panels = self.panels
+        # Used when the stress field for just a single panel is needed
+        if cte_panel_force is not None:
+            loop_panels = [cte_panel_force]
+        
+        for panel in loop_panels:
+            if cte_panel_force is None:
+                if panel.group != group:
+                    continue
             c_panel = c[panel.col_start: panel.col_end]
             c_panel = np.ascontiguousarray(c_panel, dtype=DOUBLE)
             model = panel.model
             fstrain = modelDB.db[model]['field'].fstrain
-            x, y, shape = default_field(panel, gridx, gridy)
+            
+            if no_x_gauss is not None:
+                # Getting the gauss points and weights for x
+                x = np.zeros(no_x_gauss, dtype=np.float64)
+                x_weights = np.zeros(no_x_gauss, dtype=np.float64)
+                get_points_weights(no_x_gauss, x, x_weights)
+                # Converting to physical coord as per panel dimensions
+                x = (panel.a/2)*(x + 1)
+            else:
+                x = linspace(0, panel.a, gridx)
+            if no_y_gauss is not None:
+                # Getting the gauss points and weights for y
+                y = np.zeros(no_y_gauss, dtype=np.float64)
+                y_weights = np.zeros(no_y_gauss, dtype=np.float64)
+                get_points_weights(no_y_gauss, y, y_weights)
+                # Converting to physical coord as per panel dimensions
+                y = (panel.b/2)*(y + 1)
+            else:
+                y = linspace(0, panel.b, gridy)
+                
+            # Adding extra points where the force is requested    
+            if x_cte_force is not None:
+                x = np.sort(np.append(x, np.array([x_cte_force])))
+                    # not sorting it so that the last i
+            if y_cte_force is not None:
+                y = np.sort(np.append(y, np.array([y_cte_force])))
+                
+            xs, ys = np.meshgrid(x, y, copy=False)
+            # Scalar inputs are converted to 1D arrays, whilst higher-dimensional inputs are preserved
+            xs = np.atleast_1d(np.array(xs, dtype=DOUBLE))
+            ys = np.atleast_1d(np.array(ys, dtype=DOUBLE))
+            shape = xs.shape # gets the shape of xs which is of the grid
+            x = xs.ravel()
+            y = ys.ravel()
+            
             x = np.ascontiguousarray(x)
             y = np.ascontiguousarray(y)
+            
             exx, eyy, gxy, kxx, kyy, kxy = fstrain(c_panel, panel, x, y,
                     self.out_num_cores, NLgeom=int(NLterms))
             exx = reshape(exx, shape)
@@ -520,6 +705,9 @@ class MultiDomain(object):
             for i in range(6):
                 Ns[..., i] = (exx*F[i, 0] + eyy*F[i, 1] + gxy*F[i, 2]
                             + kxx*F[i, 3] + kyy*F[i, 4] + kxy*F[i, 5])
+            
+            # For x: Each row goes from 0 to panel.a
+            # For y: Each col goes from 0 to panel.b
             res['x'].append(reshape(x, shape))
             res['y'].append(reshape(y, shape))
             res['Nxx'].append(Ns[..., 0])
@@ -530,228 +718,102 @@ class MultiDomain(object):
             res['Mxy'].append(Ns[..., 5])
         return res
 
-
-    def uvw_gauss_points(self, c, group, x_gauss, y_gauss):
-        r"""Calculate the displacement field
-
-        For a given full set of Ritz constants ``c``, the displacement
-        field is calculated and stored in the parameters
-        ``u``, ``v``, ``w``, ``phix``, ``phiy`` of the ``Shell`` object.
+    def force(self, c, group, cte_panel_force=None, x_cte_force=None, y_cte_force=None,
+              gridx=50, gridy=50, NLterms=True, no_x_gauss=None, no_y_gauss=None):
+        
+        """Calculate the force along a line (xcte or ycte)
 
         Parameters
         ----------
         c : float
             The full set of Ritz constants
         group : str
+            Dummy variable in this function - just used to avoid changing the stress 
+                function when results for a single panel need to be evaluated
             A group to plot. Each panel in ``panels`` should contain an
-            attribute ``group``, which is used to identify which entities
-            should be plotted together.
-        x_gauss, y_gauss : Array
-            Gauss sampling points along x and y respectively where the displacement field is to be calculated
-            Either one of xg and yg needs to be specified or both
-
-        Returns
-        -------
-        out : tuple
-            A tuple of ``np.ndarrays`` containing
-            ``(xs, ys, u, v, w, phix, phiy)``.
-
-        Notes
-        -----
-        The returned values ``u```, ``v``, ``w``, ``phix``, ``phiy`` are
-        stored as parameters with the same name in the ``Shell`` object.
-
-        """
-        res = dict(x=[], y=[], u=[], v=[], w=[], phix=[], phiy=[])
-        for panel in self.panels:
-            if panel.group != group:
-                continue
-            c_panel = c[panel.col_start: panel.col_end]
-            c_panel = np.ascontiguousarray(c_panel, dtype=DOUBLE)
-            model = panel.model
-            fuvw = modelDB.db[model]['field'].fuvw
-            
-            if x_gauss is None and y_gauss is None:
-                raise ValueError('Sampling points in atleast x or y should be specified')
-            if x_gauss is None:
-                no_grid_x = 50
-                x_gauss = linspace(0, panel.a, no_grid_x)
-            if y_gauss is None:
-                no_grid_y = 50
-                y_gauss = linspace(0, panel.b, no_grid_y)
-            
-            xs, ys = np.meshgrid(x_gauss, y_gauss, copy=False)
-            # Scalar inputs are converted to 1D arrays, whilst higher-dimensional inputs are preserved
-            xs = np.atleast_1d(np.array(xs, dtype=DOUBLE))
-            ys = np.atleast_1d(np.array(ys, dtype=DOUBLE))
-            shape = xs.shape
-            x = xs.ravel()
-            y = ys.ravel()
-            
-            x = np.ascontiguousarray(x)
-            y = np.ascontiguousarray(y)
-            
-            u, v, w, phix, phiy = fuvw(c_panel, panel, x, y, self.out_num_cores)
-            res['x'].append(reshape(x, shape))
-            res['y'].append(reshape(y, shape))
-            res['u'].append(reshape(u, shape))
-            res['v'].append(reshape(v, shape))
-            res['w'].append(reshape(w, shape))
-            res['phix'].append(reshape(phix, shape))
-            res['phiy'].append(reshape(phiy, shape))
-
-        return res
-
-
-    def strain_gauss_points(self, c, group, x_gauss, y_gauss, NLterms=True):
-        r"""Calculate the strain field for the set of input gauss integration points
-        Strains and curvatures at each point all x and y
-
-        Parameters
-        ----------
-        c : float
-            The full set of Ritz constants
-        group : str
-            A group to plot. Each panel in ``panels`` should contain an
-            attribute ``group``, which is used to identify which entities
-            should be plotted together.
-        x_gauss, y_gauss : Array
-            Gauss sampling points along x and y respectively where the displacement field is to be calculated
-            Either one of xg and yg needs to be specified or both
+                attribute ``group``, which is used to identify which entities
+                should be plotted together.
+        cte_panel_force : shell obj
+            Panel at which the force needs to be calculated
+        x_cte_force or y_cte_force : x or y coordinates of line at which force is to be calc
+            Coordinates are relative to specific panel
+        gridx : int, optional
+            Number of points along the `x` axis where to calculate the
+            displacement field.
+        gridy : int, optional
+            Number of points along the `y` where to calculate the
+            displacement field.
         NLterms : bool
             Flag to indicate whether non-linear strain components should be considered.
-
-        Returns
-        -------
-        out : dict
-            A dictionary of ``np.ndarrays`` with the keys:
-            ``(x, y, exx, eyy, gxy, kxx, kyy, kxy)``.
-
-        """
-        
-        
-        # res = results
-        res = dict(x=[], y=[], exx=[], eyy=[], gxy=[], kxx=[], kyy=[], kxy=[])
-        for panel in self.panels:
-            # If that panel's (in the MD assembly) group is not whose strain u want, skip it
-            if panel.group != group:
-                continue
-            c_panel = c[panel.col_start: panel.col_end]
-            c_panel = np.ascontiguousarray(c_panel, dtype=DOUBLE)
-            model = panel.model
-            # In panels\panels\models - for plates, clpt_bardell_field
-            fstrain = modelDB.db[model]['field'].fstrain
-            
-            if x_gauss is None and y_gauss is None:
-                raise ValueError('Sampling points in atleast x or y should be specified')
-            if x_gauss is None:
-                no_grid_x = 50
-                x_gauss = linspace(0, panel.a, no_grid_x)
-            if y_gauss is None:
-                no_grid_y = 50
-                y_gauss = linspace(0, panel.b, no_grid_y)
-            
-            xs, ys = np.meshgrid(x_gauss, y_gauss, copy=False)
-            # Scalar inputs are converted to 1D arrays, whilst higher-dimensional inputs are preserved
-            xs = np.atleast_1d(np.array(xs, dtype=DOUBLE))
-            ys = np.atleast_1d(np.array(ys, dtype=DOUBLE))
-            shape = xs.shape
-            x = xs.ravel()
-            y = ys.ravel()
-            
-            x = np.ascontiguousarray(x)
-            y = np.ascontiguousarray(y)
-            
-            exx, eyy, gxy, kxx, kyy, kxy = fstrain(c_panel, panel, x, y,
-                    self.out_num_cores, NLgeom=int(NLterms))
-            res['x'].append(reshape(x, shape))
-            res['y'].append(reshape(y, shape))
-            res['exx'].append(reshape(exx, shape))
-            res['eyy'].append(reshape(eyy, shape))
-            res['gxy'].append(reshape(gxy, shape))
-            res['kxx'].append(reshape(kxx, shape))
-            res['kyy'].append(reshape(kyy, shape))
-            res['kxy'].append(reshape(kxy, shape))
-
-        return res
-
-
-    def stress_gauss_points(self, c, group, x_gauss, y_gauss, NLterms=True):
-        r"""Calculate the stress field for the set of input gauss integration points
-
-        Parameters
-        ----------
-        c : float
-            The full set of Ritz constants
-        group : str
-            A group to plot. Each panel in ``panels`` should contain an
-            attribute ``group``, which is used to identify which entities
-            should be plotted together.
-        x_gauss, y_gauss : Array
-            Gauss sampling points along x and y respectively where the displacement field is to be calculated
-        Either one of xg and yg needs to be specified or both     
-            
-        NLterms : bool
-            Flag to indicate whether non-linear strain components should be considered.
+        no_x_gauss, no_y_gauss : int
+            Number of gauss sampling points along x and y respectively where the displacement field is to be calculated
+            Either one of no_x_gauss and no_y_gauss needs to be specified or both
+            Both can be different
 
         Returns
         -------
         out : dict
             A dict containing many ``np.ndarrays``, with the keys:
-            ``(x, y, Nxx, Nyy, Nxy, Mxx, Myy, Mxy)``.
-
+            ``(Fxx, Fyy, Fxy)``. 
         """
-        res = dict(x=[], y=[], Nxx=[], Nyy=[], Nxy=[], Mxx=[], Myy=[], Mxy=[])
-        for panel in self.panels:
-            if panel.group != group:
-                continue
-            c_panel = c[panel.col_start: panel.col_end]
-            c_panel = np.ascontiguousarray(c_panel, dtype=DOUBLE)
-            model = panel.model
-            fstrain = modelDB.db[model]['field'].fstrain
+    
+        
+        # Empty dict - keys added later on
+        res = dict()
+        
+        if cte_panel_force is None:
+            raise ValueError('Panel missing')
+        if x_cte_force is None and y_cte_force is None:
+            raise ValueError('x_cte or y_cte needs to be specified')
+        if x_cte_force is not None and y_cte_force is not None:
+            raise ValueError('Integration can only be performed along a single line - specify either x_cte or y_cte')
+        if x_cte_force is not None and no_y_gauss is None:
+            raise ValueError('Both x_cte_force and no_y_gauss need to be specified')
+        if y_cte_force is not None and no_x_gauss is None:
+            raise ValueError('Both y_cte_force and no_x_gauss need to be specified')
+        if no_x_gauss > 64 or no_y_gauss > 64:
+            raise ValueError('Gauss points more than 64 not coded')
             
-            if x_gauss is None and y_gauss is None:
-                raise ValueError('Sampling points in atleast x or y should be specified')
-            if x_gauss is None:
-                no_grid_x = 50
-                x_gauss = linspace(0, panel.a, no_grid_x)
-            if y_gauss is None:
-                no_grid_y = 50
-                y_gauss = linspace(0, panel.b, no_grid_y)
+        res_stress = self.stress(c=c, group=group, 
+                                 cte_panel_force = cte_panel_force, x_cte_force = x_cte_force, y_cte_force = y_cte_force,
+                                 gridx=gridx, gridy=gridy, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss)
+        
+        for vec in ['Nxx', 'Nyy', 'Nxy']:
+            if x_cte_force is not None:
+                [_, col] = np.where(np.isclose(res_stress['x'][0], x_cte_force))
+                    # Find which col corresponds to values at x_cte_forces
+                if col.max() != col.min():
+                    # Check that you've picked the right col no - if its right, all x's should have the same col no
+                    raise ValueError('Error - Check force values')
+                # Extracting stress field for that particular column
+                stress_field = res_stress[vec][0][:, col.min()] # So that only 1 col is taken
+                if np.shape(stress_field)[0] != no_y_gauss:
+                    raise ValueError('Size mismatch')
+                # Getting the gauss points and weights
+                y_temp = np.zeros(no_y_gauss, dtype=np.float64)
+                weights = np.zeros(no_y_gauss, dtype=np.float64)
+                get_points_weights(no_y_gauss, y_temp, weights)
+                
+            if y_cte_force is not None:
+                [row, _] = np.where(np.isclose(res_stress['y'][0], y_cte_force))
+                    # Find which row corresponds to values at x_cte_forces
+                if row.max() != row.min():
+                    # Check that you've picked the right row no
+                    raise ValueError('Error - Check force values')
+                # Extracting stress field for that particular column
+                stress_field = res_stress[vec][0][row.min(), :]
+                if np.shape(stress_field)[0] != no_x_gauss:
+                    raise ValueError('Size mismatch')
+                # Getting the gauss points and weights
+                x_temp = np.zeros(no_x_gauss, dtype=np.float64)
+                weights = np.zeros(no_x_gauss, dtype=np.float64)
+                get_points_weights(no_x_gauss, x_temp, weights)
             
-            xs, ys = np.meshgrid(x_gauss, y_gauss, copy=False)
-            # Scalar inputs are converted to 1D arrays, whilst higher-dimensional inputs are preserved
-            xs = np.atleast_1d(np.array(xs, dtype=DOUBLE))
-            ys = np.atleast_1d(np.array(ys, dtype=DOUBLE))
-            shape = xs.shape
-            x = xs.ravel()
-            y = ys.ravel()
-            
-            x = np.ascontiguousarray(x)
-            y = np.ascontiguousarray(y)
-            exx, eyy, gxy, kxx, kyy, kxy = fstrain(c_panel, panel, x, y,
-                    self.out_num_cores, NLgeom=int(NLterms))
-            exx = reshape(exx, shape)
-            eyy = reshape(eyy, shape)
-            gxy = reshape(gxy, shape)
-            kxx = reshape(kxx, shape)
-            kyy = reshape(kyy, shape)
-            kxy = reshape(kxy, shape)
-            Ns = np.zeros((exx.shape + (6,)))
-            F = panel.ABD
-            if F is None:
-                raise ValueError('Laminate ABD matrix not defined for panel')
-            for i in range(6):
-                Ns[..., i] = (exx*F[i, 0] + eyy*F[i, 1] + gxy*F[i, 2]
-                            + kxx*F[i, 3] + kyy*F[i, 4] + kxy*F[i, 5])
-            res['x'].append(reshape(x, shape))
-            res['y'].append(reshape(y, shape))
-            res['Nxx'].append(Ns[..., 0])
-            res['Nyy'].append(Ns[..., 1])
-            res['Nxy'].append(Ns[..., 2])
-            res['Mxx'].append(Ns[..., 3])
-            res['Myy'].append(Ns[..., 4])
-            res['Mxy'].append(Ns[..., 5])
+            # Integration
+            force_intgn = np.dot(weights, stress_field)
+            # Adding keys by modifying keys of res_stress (F added, N removed)
+            res[f'F{vec[1:]}'] = force_intgn
+    
         return res
 
     def get_kC_conn(self, conn=None, finalize=True):
@@ -779,13 +841,16 @@ class MultiDomain(object):
             # connecti = ith connection pair
             p1_temp = connecti['p1']
             p2_temp = connecti['p2']
+            # print(connecti['func'])
+            # print('Row starts before: ', p1_temp.row_start, p2_temp.row_start)
+            # print('Col starts before: ', p1_temp.col_start, p2_temp.col_start)
             if p1_temp.col_start < p2_temp.col_start:
                 pA = p1_temp
                 pB = p2_temp
             elif p1_temp.col_start > p2_temp.col_start:
                 pA = p2_temp
                 pB = p1_temp
-                if connecti['func'] == 'SB':
+                if connecti['func'] == 'SB' or connecti['func'] == 'SB_TSL':
                     pass
                 else:
                     if 'xcte1' in connecti.keys() and 'xcte2' in connecti.keys():
@@ -798,6 +863,8 @@ class MultiDomain(object):
                         connecti['ycte1'] = connecti['ycte2']
                         connecti['ycte2'] = temp_ycte
             
+            # print('Row starts: ', pA.row_start, pB.row_start)
+            # print('Col starts: ', pA.col_start, pB.col_start)
             connection_function = connecti['func'] # Type of connection
             
             if connection_function == 'SSycte':
@@ -822,6 +889,10 @@ class MultiDomain(object):
             
             elif connection_function == 'SSxcte':
                 kt, kr = connections.calc_kt_kr(pA, pB, 'xcte')
+                # print('kt, kr XCTE', kt, kr)
+                kt = 4000*kt
+                kr = 400*kr
+                # print(f'        Modified kt, kr XCTE : {kt:.1e} {kr:.1e}')
                 kC_conn += connections.kCSSxcte.fkCSSxcte11(
                         kt, kr, pA, connecti['xcte1'],
                         size, row0=pA.row_start, col0=pA.col_start)
@@ -830,17 +901,6 @@ class MultiDomain(object):
                         size, row0=pA.row_start, col0=pB.col_start)
                 kC_conn += connections.kCSSxcte.fkCSSxcte22(
                         kt, kr, pA, pB, connecti['xcte2'],
-                        size, row0=pB.row_start, col0=pB.col_start)
-            
-            elif connection_function == 'SB':
-                kt, kr = connections.calc_kt_kr(pA, pB, 'bot-top')
-                print(kt, kr)
-                dsb = sum(pA.plyts)/2. + sum(pB.plyts)/2.
-                kC_conn += connections.kCSB.fkCSB11(kt, dsb, pA,
-                        size, row0=pA.row_start, col0=pA.col_start)
-                kC_conn += connections.kCSB.fkCSB12(kt, dsb, pA, pB,
-                        size, row0=pA.row_start, col0=pB.col_start)
-                kC_conn += connections.kCSB.fkCSB22(kt, pA, pB,
                         size, row0=pB.row_start, col0=pB.col_start)
             
             elif connection_function == 'BFycte':
@@ -866,25 +926,25 @@ class MultiDomain(object):
                 kC_conn += connections.kCBFxcte.fkCBFxcte22(
                         kt, kr, pA, pB, connecti['xcte2'],
                         size, row0=pB.row_start, col0=pB.col_start)
-            
-            # WHAT IS THIS ?????????????????????????????????????????
-            elif connection_function == 'kCLTxycte':
-                kt, kr = connections.calc_kt_kr(pA, pB, 'xcte-ycte')
-                kC_conn += connections.kCLTxycte.fkCBFxcte11(
-                        kt, kr, pA, connecti['xcte1'],
+                        
+            elif connection_function == 'SB':
+                kt, kr = connections.calc_kt_kr(pA, pB, 'bot-top')
+                # print('kt SB connection : ', kt)
+                kt = 80000*kt
+                # print(f'        Modified kt SB :       {kt:.1e}')
+                dsb = sum(pA.plyts)/2. + sum(pB.plyts)/2.
+                kC_conn += connections.kCSB.fkCSB11(kt, dsb, pA,
                         size, row0=pA.row_start, col0=pA.col_start)
-                kC_conn += connections.kCLTxycte.fkCBFxycte12(
-                        kt, kr, pA, pB, connecti['xcte1'], connecti['ycte2'],
+                kC_conn += connections.kCSB.fkCSB12(kt, dsb, pA, pB,
                         size, row0=pA.row_start, col0=pB.col_start)
-                kC_conn += connections.kCLTxycte.fkCBFycte22(
-                        kt, kr, pA, pB, connecti['ycte2'],
+                kC_conn += connections.kCSB.fkCSB22(kt, pA, pB,
                         size, row0=pB.row_start, col0=pB.col_start)
             
             # Traction Seperation Law introduced at the interface
             elif connection_function == 'SB_TSL':
                 tsl_type = connecti['tsl_type']
                 kt = connections.calc_kw_tsl(pA, pB, tsl_type)
-                print(kt)
+                print('kw TSL : ', kt)
                 
                 dsb = sum(pA.plyts)/2. + sum(pB.plyts)/2.
                 kC_conn += connections.kCSB.fkCSB11(kt, dsb, pA,
@@ -893,8 +953,7 @@ class MultiDomain(object):
                         size, row0=pA.row_start, col0=pB.col_start)
                 kC_conn += connections.kCSB.fkCSB22(kt, pA, pB,
                         size, row0=pB.row_start, col0=pB.col_start)
-                
-            
+                  
             else:
                 raise ValueError(f'{connection_function} not recognized.')
 
@@ -906,7 +965,7 @@ class MultiDomain(object):
         return kC_conn
 
 
-    def calc_kC(self, conn=None, c=None, silent=False, finalize=True, inc=1.):
+    def calc_kC(self, conn=None, c=None, silent=True, finalize=True, inc=1.):
         """Calculate the constitutive stiffness matrix of the assembly
         --- this is kP (made by diagonally assemblying kP_i from the MD paper)
 
@@ -948,6 +1007,9 @@ class MultiDomain(object):
         # NOTE move this to another class method? it's a bid hidden
         # Adding kC_conn to KC panel
         kC_conn = self.get_kC_conn(conn=conn)
+        
+        # print(f'max kC_conn : {np.max(kC_conn):.2e}      kC_wo_conn : {np.max(kC):.2e}')
+        
         kC += self.kC_conn
 
         self.kC = kC
