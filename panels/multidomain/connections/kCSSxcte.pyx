@@ -23,9 +23,11 @@ cdef extern from 'bardell_functions.hpp':
                   double xi2t, double xi2r) nogil
     double fp(int i, double xi, double xi1t, double xi1r,
                     double xi2t, double xi2r) nogil
+    double fpp(int i, double xi,
+               double xi1t, double xi1r, double xi2t, double xi2r) nogil
 
 
-def fkCSSxcte11(double kt, double kr, object p1, double xcte1, int size, int row0, int col0):
+def fkCSSxcte11(double kt, double kr, double kk, object p1, double xcte1, int size, int row0, int col0):
     r"""
     Penalty approach calculation to skin-skin xcte panel 1 position.
 
@@ -69,7 +71,7 @@ def fkCSSxcte11(double kt, double kr, object p1, double xcte1, int size, int row
     cdef double [:] kCSSxcte11v
 
     cdef double xicte1
-    cdef double f1Au, f1Bu, f1Av, f1Bv, f1Aw, f1Bw, f1Awxi, f1Bwxi
+    cdef double f1Au, f1Bu, f1Av, f1Bv, f1Aw, f1Bw, f1Awxi, f1Bwxi, f1Awxixi, f1Bwxixi
     cdef double g1Aug1Bu, g1Avg1Bv, g1Awg1Bw
 
     a1 = p1.a
@@ -105,6 +107,7 @@ def fkCSSxcte11(double kt, double kr, object p1, double xcte1, int size, int row
                     f1Av = f(i1, xicte1, x1v1, x1vr1, x2v1, x2vr1)
                     f1Aw = f(i1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
                     f1Awxi = fp(i1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
+                    f1Awxixi = fpp(i1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
 
                     for k1 in range(m1):
                         row = row0 + DOF*(j1*m1 + i1)
@@ -118,26 +121,27 @@ def fkCSSxcte11(double kt, double kr, object p1, double xcte1, int size, int row
                         f1Bv = f(k1, xicte1, x1v1, x1vr1, x2v1, x2vr1)
                         f1Bw = f(k1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
                         f1Bwxi = fp(k1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
+                        f1Bwxixi = fpp(k1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
 
                         c += 1
                         kCSSxcte11r[c] = row+0
                         kCSSxcte11c[c] = col+0
-                        kCSSxcte11v[c] += 0.5*b1*f1Au*f1Bu*g1Aug1Bu*kt
+                        kCSSxcte11v[c] += b1*f1Au*f1Bu*g1Aug1Bu*kt/2
                         c += 1
                         kCSSxcte11r[c] = row+1
                         kCSSxcte11c[c] = col+1
-                        kCSSxcte11v[c] += 0.5*b1*f1Av*f1Bv*g1Avg1Bv*kt
+                        kCSSxcte11v[c] += b1*f1Av*f1Bv*g1Avg1Bv*kt/2
                         c += 1
                         kCSSxcte11r[c] = row+2
                         kCSSxcte11c[c] = col+2
-                        kCSSxcte11v[c] += 0.5*b1*kt*(f1Aw*f1Bw*g1Awg1Bw + 4*f1Awxi*f1Bwxi*g1Awg1Bw*kr/((a1*a1)*kt))
+                        kCSSxcte11v[c] += b1*g1Awg1Bw*((a1*a1)*((a1*a1)*f1Aw*f1Bw*kt + 4*f1Awxi*f1Bwxi*kr) + 16*f1Awxixi*f1Bwxixi*kk)/(2*(a1*a1*a1*a1))
 
     kCSSxcte11 = coo_matrix((kCSSxcte11v, (kCSSxcte11r, kCSSxcte11c)), shape=(size, size))
 
     return kCSSxcte11
 
 
-def fkCSSxcte12(double kt, double kr, object p1, object p2,
+def fkCSSxcte12(double kt, double kr, double kk, object p1, object p2,
                 double xcte1, double xcte2,
                 int size, int row0, int col0):
     r"""
@@ -190,7 +194,7 @@ def fkCSSxcte12(double kt, double kr, object p1, object p2,
 
     cdef double xicte1, xicte2
     cdef double g1Aug2Bu, g1Avg2Bv, g1Awg2Bw
-    cdef double f1Au, f2Bu, f1Av, f2Bv, f1Aw, f2Bw, f1Awxi, f2Bwxi
+    cdef double f1Au, f2Bu, f1Av, f2Bv, f1Aw, f2Bw, f1Awxi, f2Bwxi, f1Awxixi, f2Bwxixi
 
     a1 = p1.a
     b1 = p1.b
@@ -236,6 +240,7 @@ def fkCSSxcte12(double kt, double kr, object p1, object p2,
                     f1Av = f(i1, xicte1, x1v1, x1vr1, x2v1, x2vr1)
                     f1Aw = f(i1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
                     f1Awxi = fp(i1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
+                    f1Awxixi = fpp(i1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
 
                     for k2 in range(m2):
                         row = row0 + DOF*(j1*m1 + i1)
@@ -249,26 +254,27 @@ def fkCSSxcte12(double kt, double kr, object p1, object p2,
                         f2Bv = f(k2, xicte2, x1v2, x1vr2, x2v2, x2vr2)
                         f2Bw = f(k2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
                         f2Bwxi = fp(k2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
+                        f2Bwxixi = fpp(k2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
 
                         c += 1
                         kCSSxcte12r[c] = row+0
                         kCSSxcte12c[c] = col+0
-                        kCSSxcte12v[c] += -0.5*b1*f1Au*f2Bu*g1Aug2Bu*kt
+                        kCSSxcte12v[c] += -b1*f1Au*f2Bu*g1Aug2Bu*kt/2
                         c += 1
                         kCSSxcte12r[c] = row+1
                         kCSSxcte12c[c] = col+1
-                        kCSSxcte12v[c] += -0.5*b1*f1Av*f2Bv*g1Avg2Bv*kt
+                        kCSSxcte12v[c] += -b1*f1Av*f2Bv*g1Avg2Bv*kt/2
                         c += 1
                         kCSSxcte12r[c] = row+2
                         kCSSxcte12c[c] = col+2
-                        kCSSxcte12v[c] += -0.5*b1*kt*(f1Aw*f2Bw*g1Awg2Bw + 4*f1Awxi*f2Bwxi*g1Awg2Bw*kr/(a1*a2*kt))
+                        kCSSxcte12v[c] += b1*g1Awg2Bw*(-a1*a2*(a1*a2*f1Aw*f2Bw*kt + 4*f1Awxi*f2Bwxi*kr) - 16*f1Awxixi*f2Bwxixi*kk)/(2*(a1*a1)*(a2*a2))
 
     kCSSxcte12 = coo_matrix((kCSSxcte12v, (kCSSxcte12r, kCSSxcte12c)), shape=(size, size))
 
     return kCSSxcte12
 
 
-def fkCSSxcte22(double kt, double kr, object p1, object p2,
+def fkCSSxcte22(double kt, double kr, double kk, object p1, object p2,
                 double xcte2,
                 int size, int row0, int col0):
     r"""
@@ -316,7 +322,7 @@ def fkCSSxcte22(double kt, double kr, object p1, object p2,
     cdef double [:] kCSSxcte22v
 
     cdef double xicte2
-    cdef double f2Au, f2Bu, f2Av, f2Bv, f2Aw, f2Bw, f2Awxi, f2Bwxi
+    cdef double f2Au, f2Bu, f2Av, f2Bv, f2Aw, f2Bw, f2Awxi, f2Bwxi, f2Awxixi, f2Bwxixi
     cdef double g2Aug2Bu, g2Avg2Bv, g2Awg2Bw
 
     b1 = p1.b
@@ -352,6 +358,7 @@ def fkCSSxcte22(double kt, double kr, object p1, object p2,
                     f2Av = f(i2, xicte2, x1v2, x1vr2, x2v2, x2vr2)
                     f2Aw = f(i2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
                     f2Awxi = fp(i2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
+                    f2Awxixi = fpp(i2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
 
                     for k2 in range(m2):
                         row = row0 + DOF*(j2*m2 + i2)
@@ -365,19 +372,20 @@ def fkCSSxcte22(double kt, double kr, object p1, object p2,
                         f2Bv = f(k2, xicte2, x1v2, x1vr2, x2v2, x2vr2)
                         f2Bw = f(k2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
                         f2Bwxi = fp(k2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
-
+                        f2Bwxixi = fpp(k2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
+                        
                         c += 1
                         kCSSxcte22r[c] = row+0
                         kCSSxcte22c[c] = col+0
-                        kCSSxcte22v[c] += 0.5*b1*f2Au*f2Bu*g2Aug2Bu*kt
+                        kCSSxcte22v[c] += b1*f2Au*f2Bu*g2Aug2Bu*kt/2
                         c += 1
                         kCSSxcte22r[c] = row+1
                         kCSSxcte22c[c] = col+1
-                        kCSSxcte22v[c] += 0.5*b1*f2Av*f2Bv*g2Avg2Bv*kt
+                        kCSSxcte22v[c] += b1*f2Av*f2Bv*g2Avg2Bv*kt/2
                         c += 1
                         kCSSxcte22r[c] = row+2
                         kCSSxcte22c[c] = col+2
-                        kCSSxcte22v[c] += 0.5*b1*kt*(f2Aw*f2Bw*g2Awg2Bw + 4*f2Awxi*f2Bwxi*g2Awg2Bw*kr/((a2*a2)*kt))
+                        kCSSxcte22v[c] += b1*g2Awg2Bw*((a2*a2)*((a2*a2)*f2Aw*f2Bw*kt + 4*f2Awxi*f2Bwxi*kr) + 16*f2Awxixi*f2Bwxixi*kk)/(2*(a2*a2*a2*a2))
 
     kCSSxcte22 = coo_matrix((kCSSxcte22v, (kCSSxcte22r, kCSSxcte22c)), shape=(size, size))
 

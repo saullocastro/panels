@@ -841,9 +841,6 @@ class MultiDomain(object):
             # connecti = ith connection pair
             p1_temp = connecti['p1']
             p2_temp = connecti['p2']
-            # print(connecti['func'])
-            # print('Row starts before: ', p1_temp.row_start, p2_temp.row_start)
-            # print('Col starts before: ', p1_temp.col_start, p2_temp.col_start)
             if p1_temp.col_start < p2_temp.col_start:
                 pA = p1_temp
                 pB = p2_temp
@@ -863,8 +860,6 @@ class MultiDomain(object):
                         connecti['ycte1'] = connecti['ycte2']
                         connecti['ycte2'] = temp_ycte
             
-            # print('Row starts: ', pA.row_start, pB.row_start)
-            # print('Col starts: ', pA.col_start, pB.col_start)
             connection_function = connecti['func'] # Type of connection
             
             if connection_function == 'SSycte':
@@ -890,17 +885,19 @@ class MultiDomain(object):
             elif connection_function == 'SSxcte':
                 kt, kr = connections.calc_kt_kr(pA, pB, 'xcte')
                 # print('kt, kr XCTE', kt, kr)
-                kt = 4000*kt
-                kr = 400*kr
+                kt = 1*kt
+                kr = 2.5*kr
+                kk = 100000*kt
                 # print(f'        Modified kt, kr XCTE : {kt:.1e} {kr:.1e}')
+                
                 kC_conn += connections.kCSSxcte.fkCSSxcte11(
-                        kt, kr, pA, connecti['xcte1'],
+                        kt, kr, kk, pA, connecti['xcte1'],
                         size, row0=pA.row_start, col0=pA.col_start)
                 kC_conn += connections.kCSSxcte.fkCSSxcte12(
-                        kt, kr, pA, pB, connecti['xcte1'], connecti['xcte2'],
+                        kt, kr, kk, pA, pB, connecti['xcte1'], connecti['xcte2'],
                         size, row0=pA.row_start, col0=pB.col_start)
                 kC_conn += connections.kCSSxcte.fkCSSxcte22(
-                        kt, kr, pA, pB, connecti['xcte2'],
+                        kt, kr, kk, pA, pB, connecti['xcte2'],
                         size, row0=pB.row_start, col0=pB.col_start)
             
             elif connection_function == 'BFycte':
@@ -930,7 +927,7 @@ class MultiDomain(object):
             elif connection_function == 'SB':
                 kt, kr = connections.calc_kt_kr(pA, pB, 'bot-top')
                 # print('kt SB connection : ', kt)
-                kt = 80000*kt
+                kt = 1*kt
                 # print(f'        Modified kt SB :       {kt:.1e}')
                 dsb = sum(pA.plyts)/2. + sum(pB.plyts)/2.
                 kC_conn += connections.kCSB.fkCSB11(kt, dsb, pA,
@@ -944,7 +941,7 @@ class MultiDomain(object):
             elif connection_function == 'SB_TSL':
                 tsl_type = connecti['tsl_type']
                 kt = connections.calc_kw_tsl(pA, pB, tsl_type)
-                print('kw TSL : ', kt)
+                print(f'kw TSL : {kt:.1e}')
                 
                 dsb = sum(pA.plyts)/2. + sum(pB.plyts)/2.
                 kC_conn += connections.kCSB.fkCSB11(kt, dsb, pA,

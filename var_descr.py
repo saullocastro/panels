@@ -22,12 +22,12 @@ i,j = row-wise positions for a single col within matrix
       (u,v,w)
       
 i controls f(x); j controls g(y) 
+Similarly k controls f, l controls g
     So this gives distribution of fu_i * gu_j where each term in the matrix is 1 term in the SF multiplication
         
 k,l = col-wise positions for a single row within matrix
     l = outer (larger increments)
     k = inner (smaller increments - handles u v w)
-    Similarly k controls f, l controls g
     So this gives distribution of fv_k * gv_l where each term in the matrix is 1 term in the SF multiplication
 
 When both (fu_i * gu_j)*(fv_k * gv_l) multiplies (eq 31 from MD paper) then 4 vars controls each term

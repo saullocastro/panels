@@ -42,13 +42,14 @@ def calc_kw_tsl(pA, pB, tsl_type):
         tsl_type = type of TSL to be used
             Possible options: 'linear' (no softening)
     '''
+    
     if pA.a != pB.a or pA.b != pB.b:
         raise ValueError('Dimensions of both the panels in contact should be same')
     
     if tsl_type == 'linear':
-        tsl_input = 1e4 # N/mm (from a inverse char paper - faulty !!!!)
+        tsl_input = 1e4 # N/mm^3 (from Fig 8a - https://doi.org/10.1016/j.compositesa.2022.107101 - faulty !!!!)
         # print(tsl_input, pA.a, pA.b)
-        kw_tsl = tsl_input/(pA.a * pA.b)  # N/mm^3 (same as kt for SB connection)
+        kw_tsl = tsl_input  # N/mm^3 (same as kt for SB connection)
     
     return kw_tsl
 
