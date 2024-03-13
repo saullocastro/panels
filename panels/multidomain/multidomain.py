@@ -385,12 +385,12 @@ class MultiDomain(object):
         msg('Computing field variables...', level=1, silent=True)
         
         if no_x_gauss is not None:
-            if no_x_gauss > 64:
-                raise ValueError('Gauss points more than 64 not coded')
+            if no_x_gauss > 128:
+                raise ValueError('Gauss points more than 128 not coded')
                 
         if no_y_gauss is not None:
-            if no_y_gauss > 64:
-                raise ValueError('Gauss points more than 64 not coded')
+            if no_y_gauss > 128:
+                raise ValueError('Gauss points more than 128 not coded')
 
         # res = dict of all keywords in that specific input dict
         # size of each variable = no_panel_in_group x grid_pts_Y x grid_pts_X
@@ -885,20 +885,20 @@ class MultiDomain(object):
             elif connection_function == 'SSxcte':
                 kt, kr = connections.calc_kt_kr(pA, pB, 'xcte')
                 # print('kt, kr XCTE', kt, kr)
-                kt = 1*kt
+                # kt = 1*kt
                 kr = 2.5*kr
-                kk = 100000*kt
-                # print(f'        Modified kt, kr XCTE : {kt:.1e} {kr:.1e}')
-                
+                kk = 1*kt
+                # print(f'        Modified kt, kr, kk XCTE : {kt:.1e} {kr:.1e} {kk:.1e}')
+    
                 kC_conn += connections.kCSSxcte.fkCSSxcte11(
-                        kt, kr, kk, pA, connecti['xcte1'],
-                        size, row0=pA.row_start, col0=pA.col_start)
+                        kt=kt, kr=kr, kk=kk, p1=pA, xcte1=connecti['xcte1'],
+                        size=size, row0=pA.row_start, col0=pA.col_start)
                 kC_conn += connections.kCSSxcte.fkCSSxcte12(
-                        kt, kr, kk, pA, pB, connecti['xcte1'], connecti['xcte2'],
-                        size, row0=pA.row_start, col0=pB.col_start)
+                        kt=kt, kr=kr, kk=kk, p1=pA, p2=pB, xcte1=connecti['xcte1'], xcte2=connecti['xcte2'],
+                        size=size, row0=pA.row_start, col0=pB.col_start)
                 kC_conn += connections.kCSSxcte.fkCSSxcte22(
-                        kt, kr, kk, pA, pB, connecti['xcte2'],
-                        size, row0=pB.row_start, col0=pB.col_start)
+                        kt=kt, kr=kr, kk=kk, p1=pA, p2=pB, xcte2=connecti['xcte2'],
+                        size=size, row0=pB.row_start, col0=pB.col_start)
             
             elif connection_function == 'BFycte':
                 kt, kr = connections.calc_kt_kr(pA, pB, 'ycte')
@@ -1007,7 +1007,8 @@ class MultiDomain(object):
         
         # print(f'max kC_conn : {np.max(kC_conn):.2e}      kC_wo_conn : {np.max(kC):.2e}')
         
-        kC += self.kC_conn
+        kC += kC_conn
+        # kC += self.kC_conn
 
         self.kC = kC
         msg('finished!', level=2, silent=silent)
@@ -1064,7 +1065,7 @@ class MultiDomain(object):
         return kM
 
 
-    def calc_kT(self, c=None, silent=False, finalize=True, inc=None):
+    def calc_kT(self, c=None, silent=True, finalize=True, inc=None):
         msg('Calculating kT for assembly...', level=2, silent=silent)
         size = self.get_size()
         kT = 0
@@ -1073,7 +1074,7 @@ class MultiDomain(object):
             if p.row_start is None or p.col_start is None:
                 raise ValueError('Shell attributes "row_start" and "col_start" must be defined!')
             kT += p.calc_kC(c=c, size=size, row0=p.row_start, col0=p.col_start,
-                    silent=silent, finalize=False, inc=inc, NLgeom=True)
+                    silent=silent, finalize=False, NLgeom=True) # inc=inc,  - REMOVED bec not in shell
             kT += p.calc_kG(c=c, size=size, row0=p.row_start,
                     col0=p.col_start, silent=silent, finalize=False, NLgeom=True)
         if finalize:
@@ -1085,10 +1086,11 @@ class MultiDomain(object):
         return kT
 
 
-    def calc_fint(self, c, silent=False, inc=1.):
+    def calc_fint(self, c, silent=True, inc=1.):
         msg('Calculating internal forces for assembly...', level=2, silent=silent)
         size = self.get_size()
-        fint = 0
+        # fint = 0
+        fint = np.zeros_like(c)
         for p in self.panels:
             if p.col_start is None:
                 raise ValueError('Shell attributes "col_start" must be defined!')
@@ -1100,7 +1102,7 @@ class MultiDomain(object):
         return fint
 
 
-    def calc_fext(self, inc=1., silent=False):
+    def calc_fext(self, inc=1., silent=True):
         msg('Calculating external forces for assembly...', level=2, silent=silent)
         size = self.get_size()
         fext = 0

@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       157,          7]
-NotebookDataLength[      6223,        184]
-NotebookOptionsPosition[      5979,        171]
-NotebookOutlinePosition[      6323,        186]
-CellTagsIndexPosition[      6280,        183]
+NotebookDataLength[      6444,        188]
+NotebookOptionsPosition[      6088,        174]
+NotebookOutlinePosition[      6489,        190]
+CellTagsIndexPosition[      6446,        187]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -66,15 +66,15 @@ Cell[BoxData[{
          RowBox[{"x", "^", "2"}]}], ")"}], " ", 
        RowBox[{
         RowBox[{"legendreprime", "[", 
-         RowBox[{"n", ",", "x"}], "]"}], "^", "2"}]}], ")"}]}]}], ";"}], "\n",
-   "\[IndentingNewLine]", 
+         RowBox[{"n", ",", "x"}], "]"}], "^", "2"}]}], ")"}]}]}], ";"}], 
+  "\[IndentingNewLine]", "\n", 
   RowBox[{"(*", 
    RowBox[{
    "how", " ", "many", " ", "terms", " ", "should", " ", "be", " ", 
     "generated"}], "*)"}]}], "\[IndentingNewLine]", 
  RowBox[{
   RowBox[{
-   RowBox[{"h", "=", "64"}], ";"}], "\n", "\[IndentingNewLine]", 
+   RowBox[{"h", "=", "128"}], ";"}], "\[IndentingNewLine]", "\n", 
   RowBox[{"(*", 
    RowBox[{"what", " ", "numerical", " ", "precision", " ", "is", " ", 
     RowBox[{"desired", "?"}]}], "*)"}]}], "\[IndentingNewLine]", 
@@ -167,12 +167,16 @@ Cell[BoxData[{
   3.662231703592557*^9, 3.662231734866238*^9}, {3.6622318016893215`*^9, 
   3.662231804758174*^9}, {3.6622318754862733`*^9, 3.6622318808210597`*^9}, {
   3.662231964613829*^9, 3.662232070503687*^9}, {3.662232154283801*^9, 
-  3.662232191662487*^9}, {3.662232228587617*^9, 3.6622322340484533`*^9}}]
+  3.662232191662487*^9}, {3.662232228587617*^9, 3.6622322340484533`*^9}, {
+  3.919149402856492*^9, 
+  3.91914940818816*^9}},ExpressionUUID->"f25d7b0a-c7a1-486e-83fe-\
+11949b1d0076"]
 },
-WindowSize->{707, 600},
-WindowMargins->{{Automatic, 22}, {Automatic, -7}},
-FrontEndVersion->"9.0 for Microsoft Windows (64-bit) (January 25, 2013)",
-StyleDefinitions->"Default.nb"
+WindowSize->{1440, 747.75},
+WindowMargins->{{-6, Automatic}, {Automatic, -6}},
+FrontEndVersion->"13.3 for Microsoft Windows (64-bit) (June 3, 2023)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"8e03f6ec-f294-487c-9a02-98a1058dc578"
 ]
 (* End of Notebook Content *)
 
@@ -185,9 +189,8 @@ CellTagsIndex->{}
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[557, 20, 5418, 149, 592, "Input"]
+Cell[557, 20, 5527, 152, 504, "Input",ExpressionUUID->"f25d7b0a-c7a1-486e-83fe-11949b1d0076"]
 }
 ]
 *)
 
-(* End of internal cache information *)

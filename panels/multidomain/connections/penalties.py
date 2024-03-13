@@ -30,29 +30,6 @@ def calc_ku_kv_kw_line_pd_ycte(p):
     return ku, kv, kw
 
 
-# Out of plane penalty stiffness
-# Used for 
-def calc_kw_tsl(pA, pB, tsl_type):
-    
-    '''
-        pA = top panel
-        
-        pB= bottom panel
-        
-        tsl_type = type of TSL to be used
-            Possible options: 'linear' (no softening)
-    '''
-    
-    if pA.a != pB.a or pA.b != pB.b:
-        raise ValueError('Dimensions of both the panels in contact should be same')
-    
-    if tsl_type == 'linear':
-        tsl_input = 1e4 # N/mm^3 (from Fig 8a - https://doi.org/10.1016/j.compositesa.2022.107101 - faulty !!!!)
-        # print(tsl_input, pA.a, pA.b)
-        kw_tsl = tsl_input  # N/mm^3 (same as kt for SB connection)
-    
-    return kw_tsl
-
 # Penalties for connections 
 def calc_kt_kr(p1, p2, connection_type):
     """Calculate translation and rotation penalty constants
@@ -135,3 +112,32 @@ def calc_kt_kr(p1, p2, connection_type):
         kr = 4*D22_p1*D11_p2 / ((D22_p1+D11_p2)*(hp1+hp2))
         return kt, kr
 
+
+def calc_kw_tsl(pA, pB, tsl_type, w_sep=None):
+    
+    '''
+        Calculates out of plane stiffness of the damaged region (where the traction separation law exists)
+        
+        pA = top panel
+        
+        pB= bottom panel
+        
+        tsl_type = type of TSL to be used
+            Possible options:   'linear' (no softening)
+                                'bilinear' (w linear softening)
+                            
+    '''
+    
+    if pA.a != pB.a or pA.b != pB.b:
+        raise ValueError('Dimensions of both the panels in contact should be same')
+    
+    if tsl_type == 'linear':
+        tsl_input = 1e4 # N/mm^3 (from Fig 8a - https://doi.org/10.1016/j.compositesa.2022.107101 - faulty !!!!)
+        # print(tsl_input, pA.a, pA.b)
+        kw_tsl = tsl_input  # N/mm^3 (same as kt for SB connection)
+        
+    if tsl_type == 'bilinear':
+        if w_sep is None:
+            raise ValueError('Out of plane separation field is required')
+    
+    return kw_tsl

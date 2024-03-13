@@ -983,12 +983,9 @@ def test_dcb_vs_fem(no_pan, no_terms, plies):
     if no_pan == 3:
         panels = [bot1, bot2, bot3, top1, top2, top3]
 
-    assy = MultiDomain(panels) # assy is now an object of the MultiDomain class
+    assy = MultiDomain(panels=panels, conn=conn) # assy is now an object of the MultiDomain class
     # Here the panels (shell objs) are modified -- their starting positions in the global matrix is assigned etc
 
-    k0 = assy.calc_kC(conn)
-    
-    size = k0.shape[0]
 
     # Panel at which the disp is applied
     if no_pan == 2:
@@ -1002,6 +999,12 @@ def test_dcb_vs_fem(no_pan, no_terms, plies):
         # kw = 1000*kw
         # print(f'         kw disp :             {kw:.1e}')
         # kw = 1e4*top1.a*top1.b
+        
+    
+    k0 = assy.calc_kC(conn)
+    
+    size = k0.shape[0]
+    
     # Prescribed Displacements
     if True:
         # print('called first')
@@ -1024,7 +1027,9 @@ def test_dcb_vs_fem(no_pan, no_terms, plies):
             disp_panel.add_distr_pd_fixed_y(disp_panel.b, None, None, kw,
                                       funcu=None, funcv=None, funcw = lambda x: 1) #*x/top2.a, cte=True)
     kCp = finalize_symmetric_matrix(kCp)
-    fext = disp_panel.calc_fext(size=size, col0=disp_panel.col_start)
+    # fext = disp_panel.calc_fext(size=size, col0=disp_panel.col_start)
+    fext = assy.calc_fext()
+    
     
     # print(f'max kCp {np.max(kCp):.1e}')
     # print(f'max k0 {np.max(k0):.1e}')
@@ -1034,8 +1039,13 @@ def test_dcb_vs_fem(no_pan, no_terms, plies):
 
     # fext = disp_panel.calc_fext(size=size, col0=disp_panel.col_start)
     c0 = solve(k0, fext, silent=True, **dict())
+    # fint = np.asarray(assy.calc_fint(c=c0))
+    # print(f'fint {np.linalg.norm(fint)}')
+    print(f'c0 {np.linalg.norm(c0)}')
+    # print(np.shape(fext), np.shape(c0))
+    # fint = assy.calc_fint(c=c0)
     
-    generate_plots = True
+    generate_plots = False
     
     # Plotting results
     if True:
@@ -1095,8 +1105,8 @@ def test_dcb_vs_fem(no_pan, no_terms, plies):
 if __name__ == "__main__":
     # test_dcb_bending_pd_tsl()
     # print('10 terms -- 3 panels')
-    # test_dcb_vs_fem(2, 15, 5)
-    # print('------------------------------------')
-    test_dcb_vs_fem(3, 15, 5)
+    test_dcb_vs_fem(2, 15, 1)
+    print('------------------------------------')
+    test_dcb_vs_fem(3, 15, 1)
     # test_dcb_vs_fem(3, 10, 1)
     # print('------------------------------------')

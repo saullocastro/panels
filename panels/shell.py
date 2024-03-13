@@ -126,6 +126,8 @@ class Shell(object):
         # approximation series - no of terms in SFs
         self.m = m
         self.n = n
+        if m > 30 or n > 30:
+            raise ValueError('Bardell functions of the order 31 and above are not coded')
         self.size = None
 
         # numerical integration - no of points
@@ -222,6 +224,10 @@ class Shell(object):
             setattr(self, k, v)
 
         self._clear_matrices()
+        
+        # Build it if all the parameters are given
+        if a is not None and b is not None:
+            self._rebuild()
 
 
     def _clear_matrices(self):
@@ -1044,6 +1050,16 @@ class Shell(object):
         else:
             self.distr_pds_inc.append([None, y, new_funcu, new_funcv, new_funcw])
 
+    def clear_disps(self):
+        
+        '''
+            Used to clear exisiting displacements for the panels
+                Useful for non-linear runs where displacements are added for each increment
+        '''
+        self.point_pds = []
+        self.point_pds_inc = [] 
+        self.distr_pds = []
+        self.distr_pds_inc = []
 
     def calc_stiffness_point_constraint(self, x, y, u=True, v=True, w=True, phix=False,
             phiy=False, kuvw=1.e6, kphi=1.e5):

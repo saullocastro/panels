@@ -92,12 +92,18 @@ def test_nonlinear():
         ci = c0.copy()
         epsilon = 1.e-4
         KT = s.calc_kT(c=c0)
+        # print('KT',np.linalg.det(KT.toarray()))
         D = s.calc_kC().diagonal() # at beginning of load increment
         while True:
-            #print('  count', count)
+            print()
+            print('  count', count)
             dc = solve(KT, -Ri, silent=True)
+            print(f'dc {np.linalg.norm(dc)}')
             c = ci + dc
+            print(f'c {np.linalg.norm(c)}')
             fint = np.asarray(s.calc_fint(c=c))
+            print(f'fext {np.linalg.norm(fext)}')
+            print(f'fint {np.linalg.norm(fint)}')
             Ri = fint - fext
             crisfield_test = scaling(Ri, D)/max(scaling(fext, D), scaling(fint, D))
             #print('    crisfield_test', crisfield_test)
