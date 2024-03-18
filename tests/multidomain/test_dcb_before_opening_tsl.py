@@ -1041,19 +1041,25 @@ def test_dcb_vs_fem(no_pan, no_terms, plies):
     c0 = solve(k0, fext, silent=True, **dict())
     # fint = np.asarray(assy.calc_fint(c=c0))
     # print(f'fint {np.linalg.norm(fint)}')
-    print(f'c0 {np.linalg.norm(c0)}')
+    # print(f'c0 {np.linalg.norm(c0)}')
     # print(np.shape(fext), np.shape(c0))
     # fint = assy.calc_fint(c=c0)
     
-    generate_plots = False
+    generate_plots = True
     
     # Plotting results
     if True:
-        for vec in ['w', 'Mxx']:#, 'Myy', 'Mxy']:#, 'Nxx', 'Nyy']:
-            res_bot = assy.calc_results(c=c0, group='bot', vec=vec, no_x_gauss=None, no_y_gauss=None)
-            res_top = assy.calc_results(c=c0, group='top', vec=vec, no_x_gauss=None, no_y_gauss=None)
+        for vec in ['w']:#, 'Mxx']:#, 'Myy', 'Mxy']:#, 'Nxx', 'Nyy']:
+            res_bot = assy.calc_results(c=c0, group='bot', vec=vec, no_x_gauss=3, no_y_gauss=5)
+            res_top = assy.calc_results(c=c0, group='top', vec=vec, no_x_gauss=3, no_y_gauss=5)
             vecmin = min(np.min(np.array(res_top[vec])), np.min(np.array(res_bot[vec])))
             vecmax = max(np.max(np.array(res_top[vec])), np.max(np.array(res_bot[vec])))
+            print()
+            print(res_top['x'][0])
+            print()
+            print(res_bot['y'][0])
+            print()
+            print(res_top['w'][0])
             if vec != 'w':
                 print(f'{vec} :: {vecmin:.3f}  {vecmax:.3f}')
             # if vec == 'w':
@@ -1075,10 +1081,12 @@ def test_dcb_vs_fem(no_pan, no_terms, plies):
                 # if vec == 'w':
                 if True:
                     assy.plot(c=c0, group='bot', vec=vec, filename='test_dcb_before_opening_bot_tsl.png', show_boundaries=True,
-                                                colorbar=True, res = res_bot, vecmax=vecmax, vecmin=vecmin, display_zero=True)
+                                                colorbar=True, res = res_bot, vecmax=vecmax, vecmin=vecmin, display_zero=True, 
+                                                flip_plot=False)
                     
                     assy.plot(c=c0, group='top', vec=vec, filename='test_dcb_before_opening_top_tsl.png', show_boundaries=True,
-                                              colorbar=True, res = res_top, vecmax=vecmax, vecmin=vecmin, display_zero=True)
+                                              colorbar=True, res = res_top, vecmax=vecmax, vecmin=vecmin, display_zero=True,
+                                              flip_plot=False)
             
             # Open images
             if generate_plots:
@@ -1105,8 +1113,8 @@ def test_dcb_vs_fem(no_pan, no_terms, plies):
 if __name__ == "__main__":
     # test_dcb_bending_pd_tsl()
     # print('10 terms -- 3 panels')
-    test_dcb_vs_fem(2, 15, 1)
-    print('------------------------------------')
-    test_dcb_vs_fem(3, 15, 1)
+    # test_dcb_vs_fem(2, 15, 1)
+    # print('------------------------------------')
+    test_dcb_vs_fem(3, 4, 1)
     # test_dcb_vs_fem(3, 10, 1)
     # print('------------------------------------')

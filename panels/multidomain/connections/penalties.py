@@ -1,4 +1,5 @@
 from composites import laminated_plate
+import numpy as np
 
 # Penalties for prescribed displs
 # Used to enforce connections
@@ -113,18 +114,32 @@ def calc_kt_kr(p1, p2, connection_type):
         return kt, kr
 
 
-def calc_kw_tsl(pA, pB, tsl_type, w_sep=None):
+def calc_kw_tsl(pA, pB, tsl_type, del_d=None):
     
     '''
         Calculates out of plane stiffness of the damaged region (where the traction separation law exists)
         
-        pA = top panel
-        
-        pB= bottom panel
-        
-        tsl_type = type of TSL to be used
-            Possible options:   'linear' (no softening)
-                                'bilinear' (w linear softening)
+        INPUT ARGUEMENTS:
+            pA = top panel
+            
+            pB= bottom panel
+            
+            tsl_type = type of TSL to be used
+                Possible options:   'linear' (no softening)
+                                    'bilinear' (w linear softening)
+                                    
+            del_d = 2D np.array() - corresponds to x y for disp
+                Needs to be of a SIGNLE PANEL
+            
+            --- ENSURE THAT ITS CORRECT !!!!!!!!!!!!!!!!!!!!
+            
+            Out of plane separation between panels (d = damage)
+                    Should contain map of del_d across the whole domain of interest
+                
+        RETURN VALUES:
+            kw_tsl = out of plane stiffness 
+                if tsl_type == 'bilinear':
+                    returns map of stiffnesses at each point in the input grid
                             
     '''
     
@@ -137,7 +152,37 @@ def calc_kw_tsl(pA, pB, tsl_type, w_sep=None):
         kw_tsl = tsl_input  # N/mm^3 (same as kt for SB connection)
         
     if tsl_type == 'bilinear':
-        if w_sep is None:
+        if del_d is None:
             raise ValueError('Out of plane separation field is required')
+        
+        # Cohesive Law Parameters
+        del_o = 0.02*2/5      # [mm]      - Separation at damage onset (damage variable = 0)
+        del_f = 0.1           # [mm]      - Separation at complete failure (damage variable = 1)
+        tau_o = 80          # [MPa]     - Traction at damage onset
+        k_i = tau_o/del_o     # [N/mm^3]  - Initial out of plane stiffness
+        
+        # Stiffness when there is damage
+        k_dmg = k_i * del_o * np.divide((del_f - del_d) , (del_f - del_o)*del_d)
+        
+        # Filter maps/mask to enable the original stiffness to be added at the same time
+        f_i = del_d < del_o         # Filter mask for initial stiffness (before damage)
+        f_dmg = del_d >= del_o      #                 degraded stiffness (after damage is created)
+            # Can also be used as a damage map - True = damage exists
+        f_f = del_d <= del_f        #                 failure - ensures k = 0 after failure               
+        
+        # Prevention of interpenetration between panels 
+            # Modification in TSL - negative separation has very high positive k
+            #    /\             ^ traction
+            #   /  \            -> separation 
+            #  |
+            #  |
+            #  |
+        f_ipen = del_d < 0          # Filter mask for interpenetration stiffness
+        k_ipen = (1e5)*k_i          # High interpenetration stiffness
+        
+        # Overall k that takes into account inital k as well
+        kw_tsl = np.multiply(f_f, f_i*k_i + np.multiply(f_dmg,k_dmg)) + f_ipen*k_ipen
+        
+        
     
     return kw_tsl

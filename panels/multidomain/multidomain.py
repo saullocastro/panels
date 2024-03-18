@@ -112,7 +112,7 @@ class MultiDomain(object):
             dpi=400, texts=[], xs=None, ys=None, gridx=50, gridy=50,
             num_levels=400, vecmin=None, vecmax=None,
             no_x_gauss = None, no_y_gauss = None, 
-            res = None, silent=True, display_zero = False):
+            res = None, silent=True, display_zero = False, flip_plot=False):
         r"""Contour plot for a Ritz constants vector.
 
         Parameters
@@ -206,6 +206,8 @@ class MultiDomain(object):
             True = doesnt print any messages
         display_zero : bool, optional
             Decides whether 0 should be displayed as a tick in the colour bar or not
+        flip_plot : bool, optional
+            Flips plot so that x axis is now horizontal
 
         Returns
         -------
@@ -267,21 +269,33 @@ class MultiDomain(object):
                 continue
             count += 1
             # x y flipped bec it needs to be plotted
-            xplot = res['y'][count] + panel.y0
-            yplot = res['x'][count] + panel.x0
+            if flip_plot == False:
+                xplot = res['y'][count] + panel.y0
+                yplot = res['x'][count] + panel.x0
+            if flip_plot == True:
+                print('WARNING: flipping of plots still under development !!!!')
+                xplot = res['x'][count] + panel.x0
+                yplot = res['y'][count] + panel.y0
             field = res[vec][count]
+            
             # print(np.shape(xplot), np.shape(yplot), np.shape(field))
             contour = ax.contourf(xplot, yplot, field, levels=levels,
                     cmap=colormap_obj)
-            if identify:
-                ax.text(xplot.mean(), yplot.mean(), 'P {0:02d}'.format(i+1),
-                        transform=ax.transData, ha='center')
+            # if identify:
+            #     ax.text(xplot.mean(), yplot.mean(), 'P {0:02d}'.format(i+1),
+            #             transform=ax.transData, ha='center')
             if show_boundaries:
                 # Also takes care of gauss point field
-                x1_plot = panel.y0
-                x2_plot = panel.y0 + panel.b
-                y1_plot = panel.x0
-                y2_plot = panel.x0 + panel.a
+                if flip_plot == False:
+                    x1_plot = panel.y0
+                    x2_plot = panel.y0 + panel.b
+                    y1_plot = panel.x0
+                    y2_plot = panel.x0 + panel.a
+                if flip_plot == True:
+                    x1_plot = panel.x0
+                    x2_plot = panel.x0 + panel.a
+                    y1_plot = panel.y0
+                    y2_plot = panel.y0 + panel.b
                 # x1, x2 = xplot.min(), xplot.max()
                 # y1, y2 = yplot.min(), yplot.max()
                 # Plots both points as a line
@@ -940,7 +954,12 @@ class MultiDomain(object):
             # Traction Seperation Law introduced at the interface
             elif connection_function == 'SB_TSL':
                 tsl_type = connecti['tsl_type']
-                kt = connections.calc_kw_tsl(pA, pB, tsl_type)
+                
+                res_pan_top = 
+                res_pan_bot = 
+                del_d = self.calc_separation(res_pan_top, res_pan_bot)
+                
+                kt = connections.calc_kw_tsl(pA, pB, tsl_type, del_d)
                 print(f'kw TSL : {kt:.1e}')
                 
                 dsb = sum(pA.plyts)/2. + sum(pB.plyts)/2.
@@ -1073,6 +1092,7 @@ class MultiDomain(object):
         for p in self.panels:
             if p.row_start is None or p.col_start is None:
                 raise ValueError('Shell attributes "row_start" and "col_start" must be defined!')
+            # Both kC and kG are not symmetric now
             kT += p.calc_kC(c=c, size=size, row0=p.row_start, col0=p.col_start,
                     silent=silent, finalize=False, NLgeom=True) # inc=inc,  - REMOVED bec not in shell
             kT += p.calc_kG(c=c, size=size, row0=p.row_start,
@@ -1115,3 +1135,20 @@ class MultiDomain(object):
         msg('finished!', level=2, silent=silent)
         return fext
 
+    def calc_separation(self, res_pan_top, res_pan_bot):
+        
+        '''
+            Calculates the separation between two panels
+            
+            INPUT ARGUMENTS:
+                res_pan_A,B 
+                
+                !!!!!! PANEL TOP NEEDS TO BE THE ONE ON THE TOP !!!!!!!
+        '''
+        
+        if res_pan_top['x'] != res_pan_bot['x'] or res_pan_top['y'] != res_pan_bot['y']:
+            raise ValueError('Grid used to evaluate the displ of both panels dont match')
+            
+        del_d = res_pan_top['w'] - res_pan_bot['w']
+        
+        return del_d
