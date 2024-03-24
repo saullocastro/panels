@@ -1,10 +1,10 @@
-// Legendre-Gauss Quadrature Points and Weights
-
 #if defined(_WIN32) || defined(__WIN32__)
   #define EXPORTIT __declspec(dllexport)
 #else
   #define EXPORTIT
 #endif
+
+// Legendre-Gauss Quadrature Points and Weights
 
 EXPORTIT void leggauss_quad(int n, double *points, double *weights) {
     switch(n) {

@@ -30,6 +30,19 @@ def calc_ku_kv_kw_line_pd_ycte(p):
     kw = A11 / p.a 
     return ku, kv, kw
 
+def build_panel_lam(panel):
+    panel._rebuild()
+    if panel.lam is not None:
+        return
+    if panel.stack is None:
+        raise ValueError('Panel defined without stacking sequence')
+    if panel.plyts is None:
+        raise ValueError('Panel defined without ply thicknesses')
+    if panel.laminaprops is None:
+        raise ValueError('Panel defined without laminae properties')
+    panel.lam = laminated_plate(panel.stack, plyts=panel.plyts,
+            laminaprops=panel.laminaprops)
+    return
 
 # Penalties for connections 
 def calc_kt_kr(p1, p2, connection_type):
@@ -65,19 +78,6 @@ def calc_kt_kr(p1, p2, connection_type):
     on laminate properties of the panels being connected, instead of using fixed high values, a common practice in the literature.
     [castro2017AssemblyModels]
     """
-    def build_panel_lam(panel):
-        panel._rebuild()
-        if panel.lam is not None:
-            return
-        if panel.stack is None:
-            raise ValueError('Panel defined without stacking sequence')
-        if panel.plyts is None:
-            raise ValueError('Panel defined without ply thicknesses')
-        if panel.laminaprops is None:
-            raise ValueError('Panel defined without laminae properties')
-        panel.lam = laminated_plate(panel.stack, plyts=panel.plyts,
-                laminaprops=panel.laminaprops)
-        return
 
     build_panel_lam(p1)
     build_panel_lam(p2)
@@ -151,18 +151,25 @@ def calc_kw_tsl(pA, pB, tsl_type, del_d=None):
         # print(tsl_input, pA.a, pA.b)
         kw_tsl = tsl_input  # N/mm^3 (same as kt for SB connection)
         
+        return kw_tsl
+        
     if tsl_type == 'bilinear':
         if del_d is None:
             raise ValueError('Out of plane separation field is required')
         
         # Cohesive Law Parameters
-        del_o = 0.02*2/5      # [mm]      - Separation at damage onset (damage variable = 0)
+        del_o = 0.002*2/5     # [mm]      - Separation at damage onset (damage variable = 0)
         del_f = 0.1           # [mm]      - Separation at complete failure (damage variable = 1)
         tau_o = 80          # [MPa]     - Traction at damage onset
         k_i = tau_o/del_o     # [N/mm^3]  - Initial out of plane stiffness
         
+        k_dmg = np.zeros_like(del_d)
         # Stiffness when there is damage
-        k_dmg = k_i * del_o * np.divide((del_f - del_d) , (del_f - del_o)*del_d)
+        # Ignoring div by zero error when del_d is 0 for calc of damage. Its overwritten below so its fine :)
+        with np.errstate(divide='ignore'):   
+            k_dmg = k_i * del_o * np.divide((del_f - del_d) , (del_f - del_o)*del_d)
+            # Overwriting stiffnesses where separation is zero
+        k_dmg[del_d == 0] = k_i
         
         # Filter maps/mask to enable the original stiffness to be added at the same time
         f_i = del_d < del_o         # Filter mask for initial stiffness (before damage)
@@ -178,11 +185,29 @@ def calc_kw_tsl(pA, pB, tsl_type, del_d=None):
             #  |
             #  |
         f_ipen = del_d < 0          # Filter mask for interpenetration stiffness
-        k_ipen = (1e5)*k_i          # High interpenetration stiffness
+        # High interpenetration stiffness
+        if False:                    # Using same stiffness as kCSB - thats used to tie the plates together                   
+            build_panel_lam(pA)
+            build_panel_lam(pB)
+            A11_pA = pA.lam.A[0, 0]
+            A11_pB = pB.lam.A[0, 0]
+            hpA = pA.lam.h
+            hpB = pB.lam.h    
+            k_ipen = 4*A11_pA*A11_pB/((A11_pA + A11_pB)*(hpA + hpB)) / min(pA.a, pA.b)
+        else:
+            k_ipen = (1e10)*k_i      # Arbitary higher value than initial stiffness
         
         # Overall k that takes into account inital k as well
         kw_tsl = np.multiply(f_f, f_i*k_i + np.multiply(f_dmg,k_dmg)) + f_ipen*k_ipen
+            # Its essentially, kw_tsl = ff*(fi*ki + fdmg*kdmg) + fipen*kipen
+            #kw_tsl[del_d < 0] = 1e5 * k_i
+
+        # Calculating Damage Index
+        with np.errstate(divide='ignore'):
+            dmg_index_after_dmg = np.divide((del_d - del_o)*del_f , (del_f - del_o)*del_d)
+        dmg_index_after_dmg[del_d == 0] = 0
+        # Applies a filter mask to remove the terms when del_d < del_o, setting them to 0
+        dmg_index = np.multiply(f_dmg, dmg_index_after_dmg)
+        dmg_index[del_d > del_f] = 1
         
-        
-    
-    return kw_tsl
+        return kw_tsl, dmg_index

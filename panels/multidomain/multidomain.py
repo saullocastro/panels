@@ -13,6 +13,8 @@ from panels.logger import msg, warn
 from panels.shell import DOUBLE, check_c
 import panels.modelDB as modelDB
 
+import sys
+sys.path.append('C:/Users/natha/Documents/GitHub/panels')
 from . import connections
 
 
@@ -354,9 +356,9 @@ class MultiDomain(object):
 
         return ax, data
 
-    def calc_results(self, c, group, vec='w', gridx=50, gridy=50,  
+    def calc_results(self, c, group=None, vec='w', gridx=50, gridy=50,  
                      no_x_gauss = None, no_y_gauss = None, 
-                     cte_panel_force=None, x_cte_force=None, y_cte_force=None):
+                     eval_panel=None, x_cte_force=None, y_cte_force=None):
         
         r"""Contour plot for a Ritz constants vector.
 
@@ -389,6 +391,8 @@ class MultiDomain(object):
             Number of gauss sampling points along x and y respectively where the displacement field is to be calculated
             Either one of no_x_gauss and no_y_gauss needs to be specified or both
             When specified, stress_gauss_points and strain_gauss points are called instead
+        eval_panel : Shell object
+            Used to evaluate results for a single panel (that is passed) instead of an entire group of panels
         """
         
         displs = ['u', 'v', 'w', 'phix', 'phiy']
@@ -409,13 +413,16 @@ class MultiDomain(object):
         # res = dict of all keywords in that specific input dict
         # size of each variable = no_panel_in_group x grid_pts_Y x grid_pts_X
         if vec in displs:
-            res = self.uvw(c, group, gridx=gridx, gridy=gridy, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss)
+            res = self.uvw(c, group, gridx=gridx, gridy=gridy, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss,
+                           eval_panel=eval_panel)
         elif vec in strains:
-            res = self.strain(c, group, gridx=gridx, gridy=gridy, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss)
+            res = self.strain(c, group, gridx=gridx, gridy=gridy, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss,
+                              eval_panel=eval_panel)
         elif vec in stresses:
-            res = self.stress(c, group, gridx=gridx, gridy=gridy, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss)
+            res = self.stress(c, group, gridx=gridx, gridy=gridy, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss,
+                              eval_panel=eval_panel)
         elif vec in forces:
-            res = self.force(c, group, cte_panel_force=cte_panel_force, x_cte_force=x_cte_force,
+            res = self.force(c, group, eval_panel=eval_panel, x_cte_force=x_cte_force,
                             y_cte_force=y_cte_force, gridx=gridx, gridy=gridy,
                             no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss)
         else:
@@ -424,7 +431,8 @@ class MultiDomain(object):
                 
         return res
 
-    def uvw(self, c, group, gridx=50, gridy=50, no_x_gauss=None, no_y_gauss=None):
+    def uvw(self, c, group, gridx=50, gridy=50, no_x_gauss=None, no_y_gauss=None,
+            eval_panel=None):
         r"""Calculate the displacement field
 
         For a given full set of Ritz constants ``c``, the displacement
@@ -449,6 +457,8 @@ class MultiDomain(object):
             Number of gauss sampling points along x and y respectively where the displacement field is to be calculated
             Either one of no_x_gauss and no_y_gauss needs to be specified or both
             Both can be different
+        eval_panel : Shell object
+            Used to evaluate results for a single panel (that is passed) instead of an entire group of panels
 
         Returns
         -------
@@ -463,9 +473,19 @@ class MultiDomain(object):
 
         """
         res = dict(x=[], y=[], u=[], v=[], w=[], phix=[], phiy=[])
-        for panel in self.panels:
-            if panel.group != group:
-                continue
+        
+        # Used generally when the field for the entire group is needed
+        if eval_panel is None:
+            loop_panels = self.panels
+        # Used when the field for just a single panel is needed
+        if eval_panel is not None:
+            loop_panels = [eval_panel]
+        
+        for panel in loop_panels:
+            if eval_panel is None:
+                if panel.group != group:
+                    continue
+
             c_panel = c[panel.col_start: panel.col_end]
             c_panel = np.ascontiguousarray(c_panel, dtype=DOUBLE)
             model = panel.model
@@ -518,7 +538,8 @@ class MultiDomain(object):
         return res
 
 
-    def strain(self, c, group, gridx=50, gridy=50, NLterms=True, no_x_gauss=None, no_y_gauss=None):
+    def strain(self, c, group, gridx=50, gridy=50, NLterms=True, no_x_gauss=None, no_y_gauss=None,
+               eval_panel=None):
         r"""Calculate the strain field
         Strains and curvatures at each point ???? all x and y or just diagonal terms ????
 
@@ -545,6 +566,8 @@ class MultiDomain(object):
             Number of gauss sampling points along x and y respectively where the displacement field is to be calculated
             Either one of no_x_gauss and no_y_gauss needs to be specified or both
             Both can be different
+        eval_panel : Shell object
+            Used to evaluate results for a single panel (that is passed) instead of an entire group of panels
 
         Returns
         -------
@@ -557,10 +580,18 @@ class MultiDomain(object):
         
         # res = results
         res = dict(x=[], y=[], exx=[], eyy=[], gxy=[], kxx=[], kyy=[], kxy=[])
-        for panel in self.panels:
-            # If that panel's (in the MD assembly) group is not whose strain u want, skip it
-            if panel.group != group:
-                continue
+        
+        if eval_panel is None:
+            loop_panels = self.panels
+        # Used when the field for just a single panel is needed
+        if eval_panel is not None:
+            loop_panels = [eval_panel]
+        
+        for panel in loop_panels:
+            if eval_panel is None:
+                if panel.group != group:
+                    continue
+                
             c_panel = c[panel.col_start: panel.col_end]
             c_panel = np.ascontiguousarray(c_panel, dtype=DOUBLE)
             model = panel.model
@@ -618,7 +649,7 @@ class MultiDomain(object):
 
 
     def stress(self, c, group, gridx=50, gridy=50, NLterms=True, no_x_gauss=None, no_y_gauss=None,
-               cte_panel_force=None, x_cte_force=None, y_cte_force=None):
+               eval_panel=None, x_cte_force=None, y_cte_force=None):
         r"""Calculate the stress (Nx) field
 
         Parameters
@@ -641,6 +672,8 @@ class MultiDomain(object):
             Number of gauss sampling points along x and y respectively where the displacement field is to be calculated
             Either one of no_x_gauss and no_y_gauss needs to be specified or both
             Both can be different
+        eval_panel : Shell object
+            Used to evaluate results for a single panel (that is passed) instead of an entire group of panels
 
         Returns
         -------
@@ -652,14 +685,14 @@ class MultiDomain(object):
         res = dict(x=[], y=[], Nxx=[], Nyy=[], Nxy=[], Mxx=[], Myy=[], Mxy=[])
         
         # Used generally when the stress field for the entire group is needed
-        if cte_panel_force is None:
+        if eval_panel is None:
             loop_panels = self.panels
         # Used when the stress field for just a single panel is needed
-        if cte_panel_force is not None:
-            loop_panels = [cte_panel_force]
+        if eval_panel is not None:
+            loop_panels = [eval_panel]
         
         for panel in loop_panels:
-            if cte_panel_force is None:
+            if eval_panel is None:
                 if panel.group != group:
                     continue
             c_panel = c[panel.col_start: panel.col_end]
@@ -732,7 +765,7 @@ class MultiDomain(object):
             res['Mxy'].append(Ns[..., 5])
         return res
 
-    def force(self, c, group, cte_panel_force=None, x_cte_force=None, y_cte_force=None,
+    def force(self, c, group, eval_panel, x_cte_force=None, y_cte_force=None,
               gridx=50, gridy=50, NLterms=True, no_x_gauss=None, no_y_gauss=None):
         
         """Calculate the force along a line (xcte or ycte)
@@ -747,8 +780,8 @@ class MultiDomain(object):
             A group to plot. Each panel in ``panels`` should contain an
                 attribute ``group``, which is used to identify which entities
                 should be plotted together.
-        cte_panel_force : shell obj
-            Panel at which the force needs to be calculated
+        eval_panel : Shell object
+            Used to evaluate results for a single panel (that is passed) instead of an entire group of panels
         x_cte_force or y_cte_force : x or y coordinates of line at which force is to be calc
             Coordinates are relative to specific panel
         gridx : int, optional
@@ -775,8 +808,6 @@ class MultiDomain(object):
         # Empty dict - keys added later on
         res = dict()
         
-        if cte_panel_force is None:
-            raise ValueError('Panel missing')
         if x_cte_force is None and y_cte_force is None:
             raise ValueError('x_cte or y_cte needs to be specified')
         if x_cte_force is not None and y_cte_force is not None:
@@ -789,7 +820,7 @@ class MultiDomain(object):
             raise ValueError('Gauss points more than 64 not coded')
             
         res_stress = self.stress(c=c, group=group, 
-                                 cte_panel_force = cte_panel_force, x_cte_force = x_cte_force, y_cte_force = y_cte_force,
+                                 eval_panel = eval_panel, x_cte_force = x_cte_force, y_cte_force = y_cte_force,
                                  gridx=gridx, gridy=gridy, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss)
         
         for vec in ['Nxx', 'Nyy', 'Nxy']:
@@ -830,13 +861,23 @@ class MultiDomain(object):
     
         return res
 
-    def get_kC_conn(self, conn=None, finalize=True):
+    def get_kC_conn(self, conn=None, finalize=True, c=None):
         '''
             Calc the stiffness matrix due to the connectivities
             
             conn = List of dicts 
                 Each elem of the list = dict for a single connection pair 
                 Each dict contains info of that specific with connection pair
+                    Example: conn = [dict(p1=top1, p2=top2, func='SSxcte', xcte1=top1.a, xcte2=0)]
+                
+                For func, possible options are:
+                    'SSxcte' and 'SSycte' = between 2 skins along an edge
+                    'BFxcte' and 'BFycte' = between stiffener base and flange
+                    'SB'                  = btwn 2 skins connected over an area
+                    'SB_TSL'              = btwn 2 skins connected over an area with a TSL introduced 
+                                                at the interface
+                            Required param:
+                                tsl_type, no_x_gauss, no_x_gauss
         '''
         if conn is None:
             if self.conn is None:
@@ -855,6 +896,7 @@ class MultiDomain(object):
             # connecti = ith connection pair
             p1_temp = connecti['p1']
             p2_temp = connecti['p2']
+            # pA and pB are the two panels that are finally passed on
             if p1_temp.col_start < p2_temp.col_start:
                 pA = p1_temp
                 pB = p2_temp
@@ -938,7 +980,10 @@ class MultiDomain(object):
                         kt, kr, pA, pB, connecti['xcte2'],
                         size, row0=pB.row_start, col0=pB.col_start)
                         
-            elif connection_function == 'SB':
+            elif connection_function == 'SB' or (connection_function == 'SB_TSL' and c is None):
+                # c is None with SB_TSL implies the inital state of loading so no damage
+                # so original SB connection still applies 
+                
                 kt, kr = connections.calc_kt_kr(pA, pB, 'bot-top')
                 # print('kt SB connection : ', kt)
                 kt = 1*kt
@@ -952,26 +997,30 @@ class MultiDomain(object):
                         size, row0=pB.row_start, col0=pB.col_start)
             
             # Traction Seperation Law introduced at the interface
-            elif connection_function == 'SB_TSL':
+            elif connection_function == 'SB_TSL' and c is not None:
+                # Executed when c is not None i.e some displacements have occured so damage 'might' be created
                 tsl_type = connecti['tsl_type']
                 
-                res_pan_top = 
-                res_pan_bot = 
-                del_d = self.calc_separation(res_pan_top, res_pan_bot)
+                # ATTENTION: pA NEEDS to be the top one and pB, the bottom panel
+                no_x_gauss = connecti['no_x_gauss']
+                no_y_gauss = connecti['no_y_gauss']
                 
-                kt = connections.calc_kw_tsl(pA, pB, tsl_type, del_d)
-                print(f'kw TSL : {kt:.1e}')
+                kw_tsl, dmg_index, del_d = self.calc_k_dmg(c=c, pA=pA, pB=pB, 
+                                         no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type)
                 
                 dsb = sum(pA.plyts)/2. + sum(pB.plyts)/2.
-                kC_conn += connections.kCSB.fkCSB11(kt, dsb, pA,
-                        size, row0=pA.row_start, col0=pA.col_start)
-                kC_conn += connections.kCSB.fkCSB12(kt, dsb, pA, pB,
-                        size, row0=pA.row_start, col0=pB.col_start)
-                kC_conn += connections.kCSB.fkCSB22(kt, pA, pB,
-                        size, row0=pB.row_start, col0=pB.col_start)
-                  
+                kC_conn += connections.kCSB_dmg.fkCSB11_dmg(kt=kt, dsb=dsb, p1=pA,
+                        size=size, row0=pA.row_start, col0=pA.col_start,
+                        no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, kw_tsl=kw_tsl)
+                kC_conn += connections.kCSB_dmg.fkCSB12_dmg(kt=kt, dsb=dsb, p1=pA, p2=pB,
+                        size=size, row0=pA.row_start, col0=pB.col_start, 
+                        no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, kw_tsl=kw_tsl)
+                kC_conn += connections.kCSB_dmg.fkCSB22_dmg(kt=kt, p1=pA, p2=pB,
+                        size=size, row0=pB.row_start, col0=pB.col_start, 
+                        no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, kw_tsl=kw_tsl)
+                
             else:
-                raise ValueError(f'{connection_function} not recognized.')
+                raise ValueError(f'{connection_function} not recognized. Provide a correct function if you expect results')
 
         if finalize:
             kC_conn = finalize_symmetric_matrix(kC_conn)
@@ -1022,7 +1071,7 @@ class MultiDomain(object):
 
         # NOTE move this to another class method? it's a bid hidden
         # Adding kC_conn to KC panel
-        kC_conn = self.get_kC_conn(conn=conn)
+        kC_conn = self.get_kC_conn(conn=conn, c=c)
         
         # print(f'max kC_conn : {np.max(kC_conn):.2e}      kC_wo_conn : {np.max(kC):.2e}')
         
@@ -1099,7 +1148,7 @@ class MultiDomain(object):
                     col0=p.col_start, silent=silent, finalize=False, NLgeom=True)
         if finalize:
             kT = finalize_symmetric_matrix(kT)
-        kC_conn = self.get_kC_conn()
+        kC_conn = self.get_kC_conn(c=c)
         kT += kC_conn
         self.kT = kT
         msg('finished!', level=2, silent=silent)
@@ -1145,10 +1194,29 @@ class MultiDomain(object):
                 
                 !!!!!! PANEL TOP NEEDS TO BE THE ONE ON THE TOP !!!!!!!
         '''
-        
-        if res_pan_top['x'] != res_pan_bot['x'] or res_pan_top['y'] != res_pan_bot['y']:
+
+        if not (np.all(res_pan_top['x'][0] == res_pan_bot['x'][0]) and np.all(res_pan_top['y'][0] == res_pan_bot['y'][0])):
             raise ValueError('Grid used to evaluate the displ of both panels dont match')
-            
-        del_d = res_pan_top['w'] - res_pan_bot['w']
+          
+        # [0] bec its a list of results per panel and since theres only 1 panel, its the first one
+        del_d = res_pan_top['w'][0] - res_pan_bot['w'][0]
         
         return del_d
+    
+    def calc_k_dmg(self, c, pA, pB, no_x_gauss, no_y_gauss, tsl_type):
+        
+        '''
+            Calculates the damaged k_tsl and the damage index
+        '''
+        
+        # Calculating the separation between the panels
+        res_pan_top = self.calc_results(c=c, eval_panel=pA, vec='w', 
+                                no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss)
+        res_pan_bot = self.calc_results(c=c, eval_panel=pB, vec='w', 
+                                no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss)
+        del_d = self.calc_separation(res_pan_top, res_pan_bot)
+        
+        # Calculating stiffness grid
+        kw_tsl, dmg_index = connections.calc_kw_tsl(pA=pA, pB=pB, tsl_type=tsl_type, del_d=del_d)
+        
+        return kw_tsl, dmg_index, del_d
