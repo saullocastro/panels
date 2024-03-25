@@ -11,6 +11,7 @@
   #define EXPORTIT
 #endif
 
+// Vec containing all the SFs (element is one term)
 EXPORTIT void vec_f(double *f, double xi,
            double xi1t, double xi1r, double xi2t, double xi2r) {
     f[0] = xi1t*(0.25*pow(xi, 3) - 0.75*xi + 0.5);

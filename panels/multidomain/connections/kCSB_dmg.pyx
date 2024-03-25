@@ -33,7 +33,7 @@ cdef extern from 'legendre_gauss_quadrature.hpp':
 
 
 # TODO: explain dsb parameter
-def fkCSB11_dmg(double kt, double dsb, object p1, int size, int row0, int col0, 
+def fkCSB11_dmg(double dsb, object p1, int size, int row0, int col0, 
             int no_x_gauss, int no_y_gauss, double [:,::1] kw_tsl):
     r"""
     Penalty approach calculation to skin-base ycte panel 1 position.
@@ -82,6 +82,7 @@ def fkCSB11_dmg(double kt, double dsb, object p1, int size, int row0, int col0,
 
     cdef double f1Au, f1Av, f1Aw, f1Awxi, f1Bu, f1Bv, f1Bw, f1Bwxi
     cdef double g1Au, g1Av, g1Aw, g1Aweta, g1Bu, g1Bv, g1Bw, g1Bweta
+    cdef double kt
 
     a1 = p1.a
     b1 = p1.b
@@ -134,6 +135,7 @@ def fkCSB11_dmg(double kt, double dsb, object p1, int size, int row0, int col0,
                     # That is going through all rows for a single col then onto the next col
                     # (as per x, y and results by calc_results)
                 kt = kw_tsl[pty, ptx]
+                # kt = kw_tsl[ptx, pty] # Wrong
                 
                 c = -1
                 for i1 in range(m1):
@@ -216,7 +218,7 @@ def fkCSB11_dmg(double kt, double dsb, object p1, int size, int row0, int col0,
 
 
 # TODO: explain dsb parameter
-def fkCSB12_dmg(double kt, double dsb, object p1, object p2, int size, int row0, int col0,
+def fkCSB12_dmg(double dsb, object p1, object p2, int size, int row0, int col0,
                 int no_x_gauss, int no_y_gauss, double [:,::1] kw_tsl):
     r"""
     Penalty approach calculation to skin-base ycte panel 1 and panel 2 coupling position.
@@ -268,6 +270,7 @@ def fkCSB12_dmg(double kt, double dsb, object p1, object p2, int size, int row0,
 
     cdef double f1Au, f2Bu, f1Av, f2Bv, f1Aw, f2Bw, f1Awxi
     cdef double g1Au, g2Bu, g1Av, g2Bv, g1Aw, g2Bw, g1Aweta
+    cdef double kt
 
     a1 = p1.a
     b1 = p1.b
@@ -323,6 +326,7 @@ def fkCSB12_dmg(double kt, double dsb, object p1, object p2, int size, int row0,
                     # That is going through all rows for a single col then onto the next col
                     # (as per x, y and results by calc_results)
                 kt = kw_tsl[pty, ptx]
+                # kt = kw_tsl[ptx, pty]
                 
                 c = -1
                 for i1 in range(m1):
@@ -395,7 +399,7 @@ def fkCSB12_dmg(double kt, double dsb, object p1, object p2, int size, int row0,
     return kCSB12
 
 
-def fkCSB22_dmg(double kt, object p1, object p2, int size, int row0, int col0,
+def fkCSB22_dmg(object p1, object p2, int size, int row0, int col0,
                 int no_x_gauss, int no_y_gauss, double [:,::1] kw_tsl):
     r"""
     Penalty approach calculation to skin-base ycte panel 2 position.
@@ -442,6 +446,7 @@ def fkCSB22_dmg(double kt, object p1, object p2, int size, int row0, int col0,
 
     cdef double f2Au, f2Bu, f2Av, f2Bv, f2Aw, f2Bw
     cdef double g2Au, g2Bu, g2Av, g2Bv, g2Aw, g2Bw
+    cdef double kt
 
     a1 = p1.a
     b1 = p1.b
@@ -486,6 +491,7 @@ def fkCSB22_dmg(double kt, object p1, object p2, int size, int row0, int col0,
                     # That is going through all rows for a single col then onto the next col
                     # (as per x, y and results by calc_results)
                 kt = kw_tsl[pty, ptx]
+                # kt = kw_tsl[ptx, pty]
                 
                 c = -1
                 for i2 in range(m2):

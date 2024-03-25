@@ -195,7 +195,7 @@ def calc_kw_tsl(pA, pB, tsl_type, del_d=None):
             hpB = pB.lam.h    
             k_ipen = 4*A11_pA*A11_pB/((A11_pA + A11_pB)*(hpA + hpB)) / min(pA.a, pA.b)
         else:
-            k_ipen = (1e10)*k_i      # Arbitary higher value than initial stiffness
+            k_ipen = (1e2)*k_i      # Arbitary higher value than initial stiffness
         
         # Overall k that takes into account inital k as well
         kw_tsl = np.multiply(f_f, f_i*k_i + np.multiply(f_dmg,k_dmg)) + f_ipen*k_ipen

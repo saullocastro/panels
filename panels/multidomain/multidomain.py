@@ -106,7 +106,7 @@ class MultiDomain(object):
         return self.size
 
 
-    def plot(self, c, group, invert_y=False, vec='w', filename='', ax=None,
+    def plot(self, c='None', group='None', invert_y=False, vec='w', filename='', ax=None,
             figsize=(3.5, 2.), save=True, title='', identify=False,
             show_boundaries=False, boundary_line='--k', boundary_linewidth=1.,
             colorbar=False, cbar_nticks=10, cbar_format=None, cbar_title='',
@@ -114,7 +114,8 @@ class MultiDomain(object):
             dpi=400, texts=[], xs=None, ys=None, gridx=50, gridy=50,
             num_levels=400, vecmin=None, vecmax=None,
             no_x_gauss = None, no_y_gauss = None, 
-            res = None, silent=True, display_zero = False, flip_plot=False):
+            res = None, silent=True, display_zero = False, flip_plot=False,
+            eval_panel=None):
         r"""Contour plot for a Ritz constants vector.
 
         Parameters
@@ -265,10 +266,23 @@ class MultiDomain(object):
             warn('Invalid colormap, using "jet"', level=1)
             colormap_obj = cm.jet
 
+        # Used generally when the field for the entire group is needed
+        if eval_panel is None:
+            loop_panels = self.panels
+        # Used when the field for just a single panel is needed
+        if eval_panel is not None:
+            loop_panels = [eval_panel]
+
         count = -1
-        for i, panel in enumerate(self.panels):
-            if panel.group != group:
-                continue
+        
+        for i, panel in enumerate(loop_panels):
+            if eval_panel is None:
+                if panel.group != group:
+                    continue
+        
+        # for i, panel in enumerate(self.panels):
+        #     if panel.group != group:
+        #         continue
             count += 1
             # x y flipped bec it needs to be plotted
             if flip_plot == False:
@@ -283,9 +297,9 @@ class MultiDomain(object):
             # print(np.shape(xplot), np.shape(yplot), np.shape(field))
             contour = ax.contourf(xplot, yplot, field, levels=levels,
                     cmap=colormap_obj)
-            # if identify:
-            #     ax.text(xplot.mean(), yplot.mean(), 'P {0:02d}'.format(i+1),
-            #             transform=ax.transData, ha='center')
+            if identify:
+                ax.text(xplot.mean(), yplot.mean(), 'P {0:02d}'.format(i+1),
+                        transform=ax.transData, ha='center')
             if show_boundaries:
                 # Also takes care of gauss point field
                 if flip_plot == False:
@@ -861,7 +875,7 @@ class MultiDomain(object):
     
         return res
 
-    def get_kC_conn(self, conn=None, finalize=True, c=None):
+    def get_kC_conn(self, conn=None, finalize=True, c=None, kw_tsl=None):
         '''
             Calc the stiffness matrix due to the connectivities
             
@@ -980,7 +994,7 @@ class MultiDomain(object):
                         kt, kr, pA, pB, connecti['xcte2'],
                         size, row0=pB.row_start, col0=pB.col_start)
                         
-            elif connection_function == 'SB' or (connection_function == 'SB_TSL' and c is None):
+            elif connection_function == 'SB': # or (connection_function == 'SB_TSL' and c is None):
                 # c is None with SB_TSL implies the inital state of loading so no damage
                 # so original SB connection still applies 
                 
@@ -997,25 +1011,26 @@ class MultiDomain(object):
                         size, row0=pB.row_start, col0=pB.col_start)
             
             # Traction Seperation Law introduced at the interface
-            elif connection_function == 'SB_TSL' and c is not None:
+            elif connection_function == 'SB_TSL': # and c is not None:
                 # Executed when c is not None i.e some displacements have occured so damage 'might' be created
                 tsl_type = connecti['tsl_type']
                 
                 # ATTENTION: pA NEEDS to be the top one and pB, the bottom panel
                 no_x_gauss = connecti['no_x_gauss']
                 no_y_gauss = connecti['no_y_gauss']
-                
-                kw_tsl, dmg_index, del_d = self.calc_k_dmg(c=c, pA=pA, pB=pB, 
-                                         no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type)
-                
+
+                if kw_tsl is None:
+                    kw_tsl, dmg_index, del_d = self.calc_k_dmg(c=c, pA=pA, pB=pB, 
+                                             no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type)
+            
                 dsb = sum(pA.plyts)/2. + sum(pB.plyts)/2.
-                kC_conn += connections.kCSB_dmg.fkCSB11_dmg(kt=kt, dsb=dsb, p1=pA,
+                kC_conn += connections.kCSB_dmg.fkCSB11_dmg(dsb=dsb, p1=pA,
                         size=size, row0=pA.row_start, col0=pA.col_start,
                         no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, kw_tsl=kw_tsl)
-                kC_conn += connections.kCSB_dmg.fkCSB12_dmg(kt=kt, dsb=dsb, p1=pA, p2=pB,
+                kC_conn += connections.kCSB_dmg.fkCSB12_dmg(dsb=dsb, p1=pA, p2=pB,
                         size=size, row0=pA.row_start, col0=pB.col_start, 
                         no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, kw_tsl=kw_tsl)
-                kC_conn += connections.kCSB_dmg.fkCSB22_dmg(kt=kt, p1=pA, p2=pB,
+                kC_conn += connections.kCSB_dmg.fkCSB22_dmg(p1=pA, p2=pB,
                         size=size, row0=pB.row_start, col0=pB.col_start, 
                         no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, kw_tsl=kw_tsl)
                 
@@ -1133,7 +1148,7 @@ class MultiDomain(object):
         return kM
 
 
-    def calc_kT(self, c=None, silent=True, finalize=True, inc=None):
+    def calc_kT(self, c=None, silent=True, finalize=True, inc=None, kw_tsl=None):
         msg('Calculating kT for assembly...', level=2, silent=silent)
         size = self.get_size()
         kT = 0
@@ -1148,7 +1163,7 @@ class MultiDomain(object):
                     col0=p.col_start, silent=silent, finalize=False, NLgeom=True)
         if finalize:
             kT = finalize_symmetric_matrix(kT)
-        kC_conn = self.get_kC_conn(c=c)
+        kC_conn = self.get_kC_conn(c=c, kw_tsl=kw_tsl)
         kT += kC_conn
         self.kT = kT
         msg('finished!', level=2, silent=silent)
@@ -1164,7 +1179,7 @@ class MultiDomain(object):
             if p.col_start is None:
                 raise ValueError('Shell attributes "col_start" must be defined!')
             fint += p.calc_fint(c=c, size=size, col0=p.col_start, silent=silent)
-        kC_conn = self.get_kC_conn()
+        kC_conn = self.get_kC_conn(c=c)
         fint += kC_conn*c
         self.fint = fint
         msg('finished!', level=2, silent=silent)

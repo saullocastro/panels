@@ -1050,16 +1050,16 @@ def test_dcb_vs_fem(no_pan, no_terms, plies):
     # Plotting results
     if True:
         for vec in ['w']:#, 'Mxx']:#, 'Myy', 'Mxy']:#, 'Nxx', 'Nyy']:
-            res_bot = assy.calc_results(c=c0, group='bot', vec=vec, no_x_gauss=3, no_y_gauss=5)
-            res_top = assy.calc_results(c=c0, group='top', vec=vec, no_x_gauss=3, no_y_gauss=5)
+            res_bot = assy.calc_results(c=c0, group='bot', vec=vec, no_x_gauss=30, no_y_gauss=50)
+            res_top = assy.calc_results(c=c0, group='top', vec=vec, no_x_gauss=30, no_y_gauss=50)
             vecmin = min(np.min(np.array(res_top[vec])), np.min(np.array(res_bot[vec])))
             vecmax = max(np.max(np.array(res_top[vec])), np.max(np.array(res_bot[vec])))
-            print()
-            print(res_top['x'][0])
-            print()
-            print(res_bot['y'][0])
-            print()
-            print(res_top['w'][0])
+            # print()
+            # print(res_top['x'][0])
+            # print()
+            # print(res_bot['y'][0])
+            # print()
+            # print(res_top['w'][0])
             if vec != 'w':
                 print(f'{vec} :: {vecmin:.3f}  {vecmax:.3f}')
             # if vec == 'w':
@@ -1087,6 +1087,18 @@ def test_dcb_vs_fem(no_pan, no_terms, plies):
                     assy.plot(c=c0, group='top', vec=vec, filename='test_dcb_before_opening_top_tsl.png', show_boundaries=True,
                                               colorbar=True, res = res_top, vecmax=vecmax, vecmin=vecmin, display_zero=True,
                                               flip_plot=False)
+            
+            # Calcuate separation
+            if True:
+                res_pan_top = assy.calc_results(c=c0, eval_panel=top1, vec='w', 
+                                        no_x_gauss=20, no_y_gauss=20)
+                res_pan_bot = assy.calc_results(c=c0, eval_panel=bot1, vec='w', 
+                                        no_x_gauss=20, no_y_gauss=20)
+                del_d = assy.calc_separation(res_pan_top, res_pan_bot)
+                plt.figure()
+                plt.contourf(del_d, cmap='jet')
+                plt.colorbar()
+                plt.show()
             
             # Open images
             if generate_plots:

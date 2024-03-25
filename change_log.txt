@@ -1,0 +1,116 @@
+BUG FIXES:
+1. test_dcb_before_opening and _tsl:
+--- Fixed bugs related to using more than 2 panels per level
+
+2. multidomain class:
+-- calc_kC_conn: Fixed issue with random panel order for the TSL connection type
+
+====================================================================================================
+
+DEV:
+1. multidomain class:
+-- plot:
+----- Added options to only compute (and return) results without plotting them
+----- Added functionality to pass precalculated results to just plot them vs having to recalculate them every time the plot function is called. 
+----- Created a common colourbar for all panel groups (using the prev dev)
+----- Cleaned up the code to calculate results 
+----- Modified plotting code (visual changes, added tick for 0)
+
+2. multidomain class:
+-- calc_results (added)
+----- Calculates and returns results - makes it more accessible, helps normalize colourbars
+
+3. test_dcb_before_opening and _tsl:
+----- Can now switch between 2+ panels per level (experimental - to check if the TSL works)
+
+====================================================================================================
+
+KNOWN ISSUES:
+1. DCB deform downwards upon applying an upward displacement 
+2. Structure consisting of 2 and 3 panels have (slightly) different results
+
+
+
+=======================================================================================
+=======================================================================================
+=======================================================================================
+=======================================================================================
+
+26-02-23 onwards:
+
+DEV: 
+	Summary: Force calculation + gaussian grid point compatibility 
+	
+1. multidomain class:
+-- force (NEW):
+----- Calculates force over a constant x or y line for a specified panel
+		Done by numerically integrating the stress field along that line
+		
+-- uvw, strain, stress:
+----- Added generation of gaussian points (if required) 
+----- Adding extra sampling points to the grid at the locations where force is requested (either x or y depending on request)
+
+-- stress:
+----- Functionality to compute stresses in a single panel (vs group) - used to compute forces
+		
+-- plot:
+----- Modified boundary plotting code to also handle gaussian points
+
+
+
+=======================================================================================
+=======================================================================================
+=======================================================================================
+=======================================================================================
+
+11-03-23 onwards:
+
+DEV: Calc damaged stiffness + TSL penalty stiff matrix
+
+1. kCSB (added):
+-- Calculates penalty stiffness matrix for the damaged region with traction separation law by integrating over the concerned region
+
+2. penalties:
+-- Calculation of the out-of-plane stiffness per integration point across the entire contact interface
+---- Considers damaged stiffness
+---- Non-interpenetration constraint added by high penalty stiffness
+---- No stiffness upon failure
+
+3. test_dcb_damage:
+-- Implemented nonlinear NR method to recreate a linear case (improved the residual term by adding the prescribed displacement's contribuition) 
+
+4. Shell class:
+-- Added error codes for non-existant orders of bardell functions
+
+5. print_legendre_gauss_quadrature_C:
+-- Changed 'write binary' (wb) to 'write' (w); and changed functions to support Py 3 (vs the older Py 2 earlier implemented)
+
+6. legendre_gauss_quadrature.cpp (/panels/core/src):
+-- Added weights and gauss points till 128 terms
+
+
+=======================================================================================
+=======================================================================================
+=======================================================================================
+=======================================================================================
+
+18-03-23 onwards:
+
+DEV: Damage Propagation (BUG: in interpenetration)
+
+1. kCSB_dmg.pyx:
+-- Fixed bugs involving wrong variables
+
+2. penalties.py:
+-- Calc damage index for each integration point
+-- Added possibility to use k_SB (connection stiffness) when there is interpenetration 
+
+3. multidomain.py:
+-- Edited functions to include options to compute results for a single panel instead of a group
+-- Fixed bugs in calc_separation - bug: Extracting results from the obtained ones
+
+4. test_dcb_damaage.py:
+-- test_kCconn_SB_damage: Test function for kCSB_dmg when there is no damage as a benchmark case
+-- test_kw_tsl: Test function to calc kw_tsl, del_d (separation) and damage index across the panel
+-- test_dcb_damage_prop: Test function to calculate damage propagation across the panel 
+----- HAS BUGS - INTERPENETRATION PROBLEM UNSOLVED
