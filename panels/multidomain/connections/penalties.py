@@ -158,7 +158,7 @@ def calc_kw_tsl(pA, pB, tsl_type, del_d=None):
             raise ValueError('Out of plane separation field is required')
         
         # Cohesive Law Parameters
-        del_o = 0.002*2/5     # [mm]      - Separation at damage onset (damage variable = 0)
+        del_o = 0.0002*2/5     # [mm]      - Separation at damage onset (damage variable = 0)
         del_f = 0.1           # [mm]      - Separation at complete failure (damage variable = 1)
         tau_o = 80          # [MPa]     - Traction at damage onset
         k_i = tau_o/del_o     # [N/mm^3]  - Initial out of plane stiffness
@@ -198,7 +198,7 @@ def calc_kw_tsl(pA, pB, tsl_type, del_d=None):
             k_ipen = (1e2)*k_i      # Arbitary higher value than initial stiffness
         
         # Overall k that takes into account inital k as well
-        kw_tsl = np.multiply(f_f, f_i*k_i + np.multiply(f_dmg,k_dmg)) + f_ipen*k_ipen
+        kw_tsl = np.multiply(np.invert(f_ipen), np.multiply(f_f, f_i*k_i + np.multiply(f_dmg,k_dmg))) + f_ipen*k_ipen
             # Its essentially, kw_tsl = ff*(fi*ki + fdmg*kdmg) + fipen*kipen
             #kw_tsl[del_d < 0] = 1e5 * k_i
 

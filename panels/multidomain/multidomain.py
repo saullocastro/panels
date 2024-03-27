@@ -15,7 +15,8 @@ import panels.modelDB as modelDB
 
 import sys
 sys.path.append('C:/Users/natha/Documents/GitHub/panels')
-from . import connections
+from panels.multidomain import connections
+from panels.multidomain.connections import kCSB_dmg
 
 
 def default_field(panel, gridx, gridy):
@@ -898,8 +899,8 @@ class MultiDomain(object):
                 raise RuntimeError('No connectivity dictionary defined!')
             conn = self.conn
 
-        if self.kC_conn is not None:
-            return self.kC_conn
+        # if self.kC_conn is not None:
+        #     return self.kC_conn
 
         size = self.get_size()
 
@@ -1018,11 +1019,15 @@ class MultiDomain(object):
                 # ATTENTION: pA NEEDS to be the top one and pB, the bottom panel
                 no_x_gauss = connecti['no_x_gauss']
                 no_y_gauss = connecti['no_y_gauss']
+                p_top = connecti['p1']
+                p_bot = connecti['p2']
 
-                if kw_tsl is None:
-                    kw_tsl, dmg_index, del_d = self.calc_k_dmg(c=c, pA=pA, pB=pB, 
-                                             no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type)
-            
+                kw_tsl, dmg_index, del_d = self.calc_k_dmg(c=c, pA=p_top, pB=p_bot, 
+                                         no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type)
+                
+                print(f'   kw MD class {np.min(kw_tsl):.1e}      dmg {np.max(dmg_index)}')
+                
+                print('kc_conn_MD')
                 dsb = sum(pA.plyts)/2. + sum(pB.plyts)/2.
                 kC_conn += connections.kCSB_dmg.fkCSB11_dmg(dsb=dsb, p1=pA,
                         size=size, row0=pA.row_start, col0=pA.col_start,
@@ -1163,7 +1168,7 @@ class MultiDomain(object):
                     col0=p.col_start, silent=silent, finalize=False, NLgeom=True)
         if finalize:
             kT = finalize_symmetric_matrix(kT)
-        kC_conn = self.get_kC_conn(c=c, kw_tsl=kw_tsl)
+        kC_conn = self.get_kC_conn(c=c)
         kT += kC_conn
         self.kT = kT
         msg('finished!', level=2, silent=silent)

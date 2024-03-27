@@ -113,7 +113,8 @@ def fkCSB11_dmg(double dsb, object p1, int size, int row0, int col0,
     kCSB11r = np.zeros((fdim,), dtype=INT)
     kCSB11c = np.zeros((fdim,), dtype=INT)
     kCSB11v = np.zeros((fdim,), dtype=DOUBLE)
-    
+
+    # print(f'        KCSB_11 -- kw_tsl {np.min(kw_tsl):.2e} {np.max(kw_tsl):.2e}')
     
     with nogil:
         # kCSB11
@@ -309,6 +310,8 @@ def fkCSB12_dmg(double dsb, object p1, object p2, int size, int row0, int col0,
     kCSB12r = np.zeros((fdim,), dtype=INT)
     kCSB12c = np.zeros((fdim,), dtype=INT)
     kCSB12v = np.zeros((fdim,), dtype=DOUBLE)
+    
+    # print(f'        KCSB_12 -- kw_tsl {np.min(kw_tsl):.2e} {np.max(kw_tsl):.2e}')
 
     with nogil:
         # kCSB12
@@ -475,6 +478,8 @@ def fkCSB22_dmg(object p1, object p2, int size, int row0, int col0,
     kCSB22r = np.zeros((fdim,), dtype=INT)
     kCSB22c = np.zeros((fdim,), dtype=INT)
     kCSB22v = np.zeros((fdim,), dtype=DOUBLE)
+    
+    # print(f'        KCSB_22 -- kw_tsl {np.min(kw_tsl):.2e} {np.max(kw_tsl):.2e}')
 
     with nogil:
         

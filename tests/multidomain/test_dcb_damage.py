@@ -18,6 +18,7 @@ from panels.multidomain import MultiDomain
 
 # Open images
 from matplotlib import image as img
+
 from matplotlib import pyplot as plt
 import matplotlib.animation as animation
 
@@ -581,7 +582,7 @@ def test_kw_tsl(no_pan, no_terms, plies):
     del_d[2,3] = 1 # should be 0
     del_d[12,0] = 0.09999 # Should be close to 0
     del_d[12,3] = 0 # Should be ki
-    del_d[12,2] = -0.2 # Should be high
+    del_d[12,2] = -0.2 # Should be high (k_penalty)
     kw_tsl, dmg_index = connections.calc_kw_tsl(pA=top1, pB=bot1, tsl_type='bilinear', del_d=del_d)
     
     return kw_tsl, dmg_index
@@ -607,8 +608,8 @@ def test_dcb_damage_prop(no_terms, plies):
     a = 225 # mm
     b = 25  # mm
     # Dimensions of panel 1 and 2
-    a1 = 0.7*a
-    a2 = 0.15*a
+    a1 = 0.9*a
+    a2 = 0.05*a
 
     #others
     m_tsl = no_terms
@@ -737,7 +738,7 @@ def test_dcb_damage_prop(no_terms, plies):
            dict(p1=bot1, p2=bot2, func='SSxcte', xcte1=bot1.a, xcte2=0),
            dict(p1=bot2, p2=bot3, func='SSxcte', xcte1=bot2.a, xcte2=0),
            # dict(p1=top1, p2=bot1, func='SB'), #'_TSL', tsl_type = 'linear'), 
-           dict(p1=top1, p2=bot1, func='SB_TSL', tsl_type = 'bilinear', no_x_gauss=50, no_y_gauss=15)
+           dict(p1=top1, p2=bot1, func='SB_TSL', tsl_type = 'bilinear', no_x_gauss=30, no_y_gauss=15)
         ]
     
     # This determines the positions of each panel's (sub)matrix in the global matrix when made a MD obj below
@@ -801,8 +802,8 @@ def test_dcb_damage_prop(no_terms, plies):
         
         
     # -------------------- INCREMENTATION --------------------------
-    wp_max = 20 # [mm]
-    no_iter_disp = 10
+    wp_max = 120  # [mm]
+    no_iter_disp = 240
     
     disp_iter_no = 0
     
@@ -812,8 +813,8 @@ def test_dcb_damage_prop(no_terms, plies):
             no_x_gauss = conn_list['no_x_gauss']
             no_y_gauss = conn_list['no_y_gauss']
             tsl_type = conn_list['tsl_type']
-            pA = conn_list['p1']
-            pB = conn_list['p2']
+            p_top = conn_list['p1']
+            p_bot = conn_list['p2']
             break
         
     # Initilaize mat to store results
@@ -823,7 +824,7 @@ def test_dcb_damage_prop(no_terms, plies):
     
     # Displacement Incrementation
     for wp in np.linspace(0.01, wp_max, no_iter_disp): 
-        print('wp', wp)
+        print(f'------------ wp = {wp:.3f} ---------------')
         
         # Prescribed Displacements
         if True:
@@ -864,22 +865,25 @@ def test_dcb_damage_prop(no_terms, plies):
         if disp_iter_no != 0:
             kT = assy.calc_kT(c=c) 
         if disp_iter_no == 0 and np.max(ci) == 0:
-            kT = assy.calc_kT()
+            kT = assy.calc_kT(c=ci)
             k0 = kT + kCp
         
-        epsilon = 1.e-8 # Convergence criteria
+        epsilon = 1.e-4 # Convergence criteria
         D = k0.diagonal() # For convergence - calc at beginning of load increment
         
         count = 0 # Tracks number of NR iterations 
 
         # Modified Newton Raphson Iteration
         while True:
+            print()
+            print(f"------------ NR start {count+1}--------------")
             dc = solve(k0, -Ri, silent=True)
             c = ci + dc
             fint = np.asarray(assy.calc_fint(c=c))
             Ri = fint - fext + kCp*c
             # print(f'Ri {np.linalg.norm(Ri)}')
             crisfield_test = scaling(Ri, D)/max(scaling(fext, D), scaling(fint, D))
+            print(f'    crisfield {crisfield_test:.4f}')
             if crisfield_test < epsilon:
                 # print(f'         Ri {np.linalg.norm(Ri)}')
                 # print()
@@ -888,13 +892,16 @@ def test_dcb_damage_prop(no_terms, plies):
             # print()
             count += 1
             kT = assy.calc_kT(c=c) 
-            # print(f'kC {np.max(kC)}')
             k0 = kT + kCp
             ci = c.copy()
+            kw_tsl_iter, dmg_index_iter, del_d_iter = assy.calc_k_dmg(c=c, pA=p_top, pB=p_bot, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type)
+            print(f"------------ NR end {count} -- wp={wp:.2f}  dmg {np.max(dmg_index_iter):.3f}   del_d {np.min(del_d_iter):.2e}---------")
             if count > 500:
+                print('Unconverged Results !!!!!!!!!!!!!!!!!!!')
+                return final_res, dmg_index, del_d, kw_tsl
                 raise RuntimeError('NR not converged :(') 
             
-        kw_tsl[:,:,disp_iter_no], dmg_index[:,:,disp_iter_no], del_d[:,:,disp_iter_no] = assy.calc_k_dmg(c=c, pA=pA, pB=pB, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type)
+        kw_tsl[:,:,disp_iter_no], dmg_index[:,:,disp_iter_no], del_d[:,:,disp_iter_no] = assy.calc_k_dmg(c=c, pA=p_top, pB=p_bot, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type)
         print(f'        max dmg_index {np.max(dmg_index[:,:,disp_iter_no])}')
         # print(f'        max del_d {np.max(del_d[:,:,disp_iter_no])}')
         # print(f'       min del_d {np.min(del_d[:,:,disp_iter_no])}')
@@ -969,11 +976,12 @@ def test_dcb_damage_prop(no_terms, plies):
         for animate_var in ["dmg_index", "del_d", 'kw_tsl']:
             frames = [] # for storing the generated images
             fig = plt.figure()
+            plt.title(animate_var)
             for i in range(np.shape(locals()[animate_var])[2]):
                 frames.append([plt.imshow(locals()[animate_var][:,:,i],animated=True)])
             
-            ani = animation.ArtistAnimation(fig, frames, interval=50, blit=True,
-                                            repeat_delay=1000)
+            ani = animation.ArtistAnimation(fig, frames, interval=120, blit=True,
+                                            repeat_delay=5000)
             plt.colorbar()
             ani.save(f'{animate_var}.gif', writer='imagemagick')
             
@@ -1392,18 +1400,24 @@ def test_dcb_damage_prop_modified_k(no_terms, plies):
 
 
 if __name__ == "__main__":
-    # test_dcb_non_linear(3, 4, 1)
-    # kw_tsl, dmg_index = test_kw_tsl(1, 6, 1)
-    final_res, dmg_index, del_d, kw_tsl = test_dcb_damage_prop(no_terms=8, plies=15)
-    # final_res, dmg_index, del_d, kw_tsl = test_dcb_damage_prop_modified_k(no_terms=10, plies=15)
+    animate = False
+    
+    if not animate:
+        # test_dcb_non_linear(3, 4, 1)
+        # kw_tsl, dmg_index = test_kw_tsl(1, 6, 1)
+        final_res, dmg_index, del_d, kw_tsl = test_dcb_damage_prop(no_terms=8, plies=15)
+        # final_res, dmg_index, del_d, kw_tsl = test_dcb_damage_prop_modified_k(no_terms=10, plies=15)
 
-    if False:
-        frames = [] # for storing the generated images
-        fig = plt.figure()
-        for i in range(np.shape(dmg_index)[2]):
-            frames.append([plt.imshow(dmg_index[:,:,i],animated=True)])
-        
-        ani = animation.ArtistAnimation(fig, frames, interval=500, blit=True,
-                                        repeat_delay=1000)
-        plt.colorbar()
-        ani.save(f'dmg_index.gif', writer='imagemagick')
+    
+    if animate:    
+        for animate_var in ["dmg_index", "del_d", 'kw_tsl']:
+            frames = [] # for storing the generated images
+            fig = plt.figure()
+            plt.title(animate_var)
+            for i in range(np.shape(globals()[animate_var])[2]):
+                frames.append([plt.imshow(globals()[animate_var][:,:,i],animated=True)])
+            
+            ani = animation.ArtistAnimation(fig, frames, interval=120, blit=True,
+                                            repeat_delay=5000)
+            plt.colorbar()
+            ani.save(f'{animate_var}.gif', writer='imagemagick')
