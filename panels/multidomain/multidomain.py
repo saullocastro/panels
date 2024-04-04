@@ -13,8 +13,8 @@ from panels.logger import msg, warn
 from panels.shell import DOUBLE, check_c
 import panels.modelDB as modelDB
 
-import sys
-sys.path.append('C:/Users/natha/Documents/GitHub/panels')
+# import sys
+# sys.path.append('C:/Users/natha/Documents/GitHub/panels')
 from panels.multidomain import connections
 from panels.multidomain.connections import kCSB_dmg
 
@@ -665,7 +665,8 @@ class MultiDomain(object):
 
     def stress(self, c, group, gridx=50, gridy=50, NLterms=True, no_x_gauss=None, no_y_gauss=None,
                eval_panel=None, x_cte_force=None, y_cte_force=None):
-        r"""Calculate the stress (Nx) field
+        
+        r"""Calculate the stress (Nx, Mx etc) field
 
         Parameters
         ----------
@@ -834,6 +835,7 @@ class MultiDomain(object):
         if no_x_gauss > 64 or no_y_gauss > 64:
             raise ValueError('Gauss points more than 64 not coded')
             
+        # Stress field for a single panel of interest
         res_stress = self.stress(c=c, group=group, 
                                  eval_panel = eval_panel, x_cte_force = x_cte_force, y_cte_force = y_cte_force,
                                  gridx=gridx, gridy=gridy, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss)
@@ -875,6 +877,45 @@ class MultiDomain(object):
             res[f'F{vec[1:]}'] = force_intgn
     
         return res
+    
+    
+    def force_out_plane(self, c, group, eval_panel, x_cte_force=None, y_cte_force=None,
+              gridx=50, gridy=50, NLterms=True, no_x_gauss=None, no_y_gauss=None):
+        
+        res_stress = self.stress(c=c, group=group, 
+                                 eval_panel = eval_panel, x_cte_force = x_cte_force, y_cte_force = y_cte_force,
+                                 gridx=gridx, gridy=gridy, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss)
+        
+        dy = np.zeros(no_y_gauss, dtype=np.float64)
+        weights_y = np.zeros(no_y_gauss, dtype=np.float64)
+        get_points_weights(no_y_gauss, dy, weights_y)
+        
+        dx = np.zeros(no_x_gauss, dtype=np.float64)
+        weights_x = np.zeros(no_x_gauss, dtype=np.float64)
+        get_points_weights(no_x_gauss, dx, weights_x)
+        
+        # Points used for distance to calc derivatives
+        if True: # unchanged dx, dy
+            dx_diff = dx.copy()
+            dy_diff = dy.copy()
+        else: # convert to physical dimensions
+            dx_diff = (eval_panel.a/2)*(dx + 1)
+            dy_diff = (eval_panel.b/2)*(dy + 1)
+        
+        # Derivatives wrt x, y
+        dMxx_dy, dMxx_dx = np.gradient(res_stress['Mxx'][0], dy_diff, dx_diff)
+        dMxy_dy, dMxy_dx = np.gradient(res_stress['Mxy'][0], dy_diff, dx_diff)
+        dMyy_dy, dMyy_dx = np.gradient(res_stress['Myy'][0], dy_diff, dx_diff)
+        
+        Qx = dMxx_dx + dMxy_dy
+        Qy = dMxy_dx + dMyy_dy
+        
+        Q_tot = Qx + Qy
+        # HARD CODED - WRONG - CHANGE
+        
+        
+        
+    
 
     def get_kC_conn(self, conn=None, finalize=True, c=None, kw_tsl=None):
         '''
@@ -1025,9 +1066,9 @@ class MultiDomain(object):
                 kw_tsl, dmg_index, del_d = self.calc_k_dmg(c=c, pA=p_top, pB=p_bot, 
                                          no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type)
                 
-                print(f'   kw MD class {np.min(kw_tsl):.1e}      dmg {np.max(dmg_index)}')
+                # print(f'   kw MD class {np.min(kw_tsl):.1e}      dmg {np.max(dmg_index):.3f}')
                 
-                print('kc_conn_MD')
+                # print('kc_conn_MD')
                 dsb = sum(pA.plyts)/2. + sum(pB.plyts)/2.
                 kC_conn += connections.kCSB_dmg.fkCSB11_dmg(dsb=dsb, p1=pA,
                         size=size, row0=pA.row_start, col0=pA.col_start,
@@ -1153,7 +1194,7 @@ class MultiDomain(object):
         return kM
 
 
-    def calc_kT(self, c=None, silent=True, finalize=True, inc=None, kw_tsl=None):
+    def calc_kT(self, c=None, silent=True, finalize=True, inc=None, kw_tsl=None, kC_conn=None):
         msg('Calculating kT for assembly...', level=2, silent=silent)
         size = self.get_size()
         kT = 0
@@ -1168,14 +1209,15 @@ class MultiDomain(object):
                     col0=p.col_start, silent=silent, finalize=False, NLgeom=True)
         if finalize:
             kT = finalize_symmetric_matrix(kT)
-        kC_conn = self.get_kC_conn(c=c)
+        if kC_conn is None:
+            kC_conn = self.get_kC_conn(c=c)
         kT += kC_conn
         self.kT = kT
         msg('finished!', level=2, silent=silent)
         return kT
 
 
-    def calc_fint(self, c, silent=True, inc=1.):
+    def calc_fint(self, c, silent=True, inc=1., kC_conn=None):
         msg('Calculating internal forces for assembly...', level=2, silent=silent)
         size = self.get_size()
         # fint = 0
@@ -1184,7 +1226,8 @@ class MultiDomain(object):
             if p.col_start is None:
                 raise ValueError('Shell attributes "col_start" must be defined!')
             fint += p.calc_fint(c=c, size=size, col0=p.col_start, silent=silent)
-        kC_conn = self.get_kC_conn(c=c)
+        if kC_conn is None:
+            kC_conn = self.get_kC_conn(c=c)
         fint += kC_conn*c
         self.fint = fint
         msg('finished!', level=2, silent=silent)
@@ -1234,7 +1277,21 @@ class MultiDomain(object):
                                 no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss)
         res_pan_bot = self.calc_results(c=c, eval_panel=pB, vec='w', 
                                 no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss)
-        del_d = self.calc_separation(res_pan_top, res_pan_bot)
+        # Separation for the current NR iteration
+        del_d_curr = self.calc_separation(res_pan_top, res_pan_bot)
+        
+        # Considering max del_d for all displacement/load steps
+        # self.del_d is already the max over all disp steps at each integration point
+        
+        # For the first iteration of the first disp/load step
+        if not hasattr(self, "del_d"):
+            self.del_d = del_d_curr
+            del_d = del_d_curr.copy()
+        # 2nd iteration onwards compare with existing del_d (self.del_d)
+        else:
+            del_d = np.amax(np.array([self.del_d, del_d_curr]), axis = 0)
+                # Max of each elem - np.array returns 2 x (shape(nx, ny))
+            self.del_d = del_d.copy()
         
         # Calculating stiffness grid
         kw_tsl, dmg_index = connections.calc_kw_tsl(pA=pA, pB=pB, tsl_type=tsl_type, del_d=del_d)

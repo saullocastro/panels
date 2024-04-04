@@ -738,7 +738,7 @@ def test_dcb_damage_prop(no_terms, plies):
            dict(p1=bot1, p2=bot2, func='SSxcte', xcte1=bot1.a, xcte2=0),
            dict(p1=bot2, p2=bot3, func='SSxcte', xcte1=bot2.a, xcte2=0),
            # dict(p1=top1, p2=bot1, func='SB'), #'_TSL', tsl_type = 'linear'), 
-           dict(p1=top1, p2=bot1, func='SB_TSL', tsl_type = 'bilinear', no_x_gauss=30, no_y_gauss=15)
+           dict(p1=top1, p2=bot1, func='SB_TSL', tsl_type = 'bilinear', no_x_gauss=60, no_y_gauss=30)
         ]
     
     # This determines the positions of each panel's (sub)matrix in the global matrix when made a MD obj below
@@ -756,7 +756,9 @@ def test_dcb_damage_prop(no_terms, plies):
         disp_panel = top2
     if no_pan == 3:
         disp_panel = top3
-        
+    
+
+
 
     if True:
         ######## THIS SHOULD BE CHANGED LATER PER DISP TYPE ###########################################
@@ -771,7 +773,7 @@ def test_dcb_damage_prop(no_terms, plies):
     if False:
         # Prescribed Displacements
         if True:
-            disp_type = 'line_xcte' # change based on what's being applied
+            disp_type = 'point' # change based on what's being applied
             
             if disp_type == 'point':
                 # Penalty Stiffness
@@ -802,8 +804,8 @@ def test_dcb_damage_prop(no_terms, plies):
         
         
     # -------------------- INCREMENTATION --------------------------
-    wp_max = 120  # [mm]
-    no_iter_disp = 240
+    wp_max = 100  # [mm]
+    no_iter_disp = 100
     
     disp_iter_no = 0
     
@@ -879,34 +881,39 @@ def test_dcb_damage_prop(no_terms, plies):
             print(f"------------ NR start {count+1}--------------")
             dc = solve(k0, -Ri, silent=True)
             c = ci + dc
-            fint = np.asarray(assy.calc_fint(c=c))
+            
+            kC_conn = assy.get_kC_conn(c=c)
+            fint = np.asarray(assy.calc_fint(c=c, kC_conn=kC_conn))
             Ri = fint - fext + kCp*c
             # print(f'Ri {np.linalg.norm(Ri)}')
+            
             crisfield_test = scaling(Ri, D)/max(scaling(fext, D), scaling(fint, D))
             print(f'    crisfield {crisfield_test:.4f}')
             if crisfield_test < epsilon:
-                # print(f'         Ri {np.linalg.norm(Ri)}')
-                # print()
                 break
-            # print(crisfield_test)
-            # print()
+            
             count += 1
-            kT = assy.calc_kT(c=c) 
+            kT = assy.calc_kT(c=c, kC_conn=kC_conn) 
             k0 = kT + kCp
             ci = c.copy()
+            
+            # Extracting data out of the MD class for plotting etc 
+                # Damage considerations are already implemented in the Multidomain class functions kT, fint - no need to include anything externally
             kw_tsl_iter, dmg_index_iter, del_d_iter = assy.calc_k_dmg(c=c, pA=p_top, pB=p_bot, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type)
             print(f"------------ NR end {count} -- wp={wp:.2f}  dmg {np.max(dmg_index_iter):.3f}   del_d {np.min(del_d_iter):.2e}---------")
             if count > 500:
                 print('Unconverged Results !!!!!!!!!!!!!!!!!!!')
-                return final_res, dmg_index, del_d, kw_tsl
-                raise RuntimeError('NR not converged :(') 
+                return None, dmg_index, del_d, kw_tsl
+                raise RuntimeError('NR didnt converged :(') 
             
         kw_tsl[:,:,disp_iter_no], dmg_index[:,:,disp_iter_no], del_d[:,:,disp_iter_no] = assy.calc_k_dmg(c=c, pA=p_top, pB=p_bot, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type)
-        print(f'        max dmg_index {np.max(dmg_index[:,:,disp_iter_no])}')
+        print(f'                    max dmg_index {np.max(dmg_index[:,:,disp_iter_no])}')
         # print(f'        max del_d {np.max(del_d[:,:,disp_iter_no])}')
         # print(f'       min del_d {np.min(del_d[:,:,disp_iter_no])}')
         # print(f'        max kw_tsl {np.max(kw_tsl[:,:,disp_iter_no])}')
+        print()
         disp_iter_no += 1
+
         
         if np.all(dmg_index == 1):
             print('Cohesive Zone has failed')
@@ -973,20 +980,48 @@ def test_dcb_damage_prop(no_terms, plies):
     
     animate = True
     if animate:    
+        def animate(i):
+            curr_res = frames[i]
+            max_res = np.max(curr_res)
+            min_res = np.min(curr_res)
+            if animate_var == 'dmg_index':
+                if min_res == 0:
+                    vmin = 0.0
+                    vmax = 1.0
+                else: 
+                    possible_min_cbar = [0,0.5,0.85,0.9,0.95,0.99]
+                    vmin = max(list(filter(lambda x: x<min_res, possible_min_cbar)))
+                    vmax = 1.0
+            else:
+                vmin = min_res
+                vmax = max_res
+            im = ax.imshow(curr_res)
+            fig.colorbar(im, cax=cax)
+            im.set_data(curr_res)
+            im.set_clim(vmin, vmax)
+            tx.set_text(f'{animate_var} Step {i}')
+        
+        from mpl_toolkits.axes_grid1 import make_axes_locatable
+        
         for animate_var in ["dmg_index", "del_d", 'kw_tsl']:
-            frames = [] # for storing the generated images
+            
             fig = plt.figure()
-            plt.title(animate_var)
+            ax = fig.add_subplot(111)    
+            div = make_axes_locatable(ax)
+            cax = div.append_axes('right', '5%', '5%')
+            
+            frames = [] # for storing the generated images
             for i in range(np.shape(locals()[animate_var])[2]):
-                frames.append([plt.imshow(locals()[animate_var][:,:,i],animated=True)])
-            
-            ani = animation.ArtistAnimation(fig, frames, interval=120, blit=True,
-                                            repeat_delay=5000)
-            plt.colorbar()
+                frames.append(locals()[animate_var][:,:,i])
+                
+            cv0 = frames[0]
+            im = ax.imshow(cv0) 
+            cb = fig.colorbar(im, cax=cax)
+            tx = ax.set_title('Frame 0')
+                
+            ani = animation.FuncAnimation(fig, animate, frames=np.shape(locals()[animate_var])[2],
+                                          interval = 200, repeat_delay=1000)
             ani.save(f'{animate_var}.gif', writer='imagemagick')
-            
-            # ani.save('movie.mp4')
-            # plt.show()
         
     return final_res, dmg_index, del_d, kw_tsl
 
@@ -1409,15 +1444,114 @@ if __name__ == "__main__":
         # final_res, dmg_index, del_d, kw_tsl = test_dcb_damage_prop_modified_k(no_terms=10, plies=15)
 
     
-    if animate:    
-        for animate_var in ["dmg_index", "del_d", 'kw_tsl']:
-            frames = [] # for storing the generated images
-            fig = plt.figure()
-            plt.title(animate_var)
-            for i in range(np.shape(globals()[animate_var])[2]):
-                frames.append([plt.imshow(globals()[animate_var][:,:,i],animated=True)])
+    if animate:
+        # Func Animation
+        if True:
+            def animate(i):
+                curr_res = frames[i]
+                max_res = np.max(curr_res)
+                min_res = np.min(curr_res)
+                if animate_var == 'dmg_index':
+                    if min_res == 0:
+                        vmin = 0.0
+                        vmax = 1.0
+                    else: 
+                        possible_min_cbar = [0,0.5,0.85,0.9,0.95,0.99]
+                        vmin = max(list(filter(lambda x: x<min_res, possible_min_cbar)))
+                        vmax = 1.0
+                else:
+                    vmin = min_res
+                    vmax = max_res
+                im = ax.imshow(curr_res)
+                fig.colorbar(im, cax=cax)
+                im.set_data(curr_res)
+                im.set_clim(vmin, vmax)
+                tx.set_text(f'{animate_var} Step {i}')
             
-            ani = animation.ArtistAnimation(fig, frames, interval=120, blit=True,
-                                            repeat_delay=5000)
-            plt.colorbar()
-            ani.save(f'{animate_var}.gif', writer='imagemagick')
+            from mpl_toolkits.axes_grid1 import make_axes_locatable
+            
+            for animate_var in ["dmg_index", "del_d", 'kw_tsl']:
+                
+                fig = plt.figure()
+                ax = fig.add_subplot(111)    
+                div = make_axes_locatable(ax)
+                cax = div.append_axes('right', '5%', '5%')
+                
+                frames = [] # for storing the generated images
+                for i in range(np.shape(globals()[animate_var])[2]):
+                    frames.append(globals()[animate_var][:,:,i])
+                    
+                cv0 = frames[0]
+                im = ax.imshow(cv0) 
+                cb = fig.colorbar(im, cax=cax)
+                tx = ax.set_title('Frame 0')
+                    
+                ani = animation.FuncAnimation(fig, animate, frames=np.shape(globals()[animate_var])[2],
+                                              interval = 200, repeat_delay=1000)
+                ani.save(f'{animate_var}.gif', writer='imagemagick')
+                
+        # Artist animation
+        if False:
+            for animate_var in ["dmg_index"]:#, "del_d", 'kw_tsl']:
+                frames = [] # for storing the generated images
+                fig = plt.figure()
+                plt.title(animate_var)
+                for i in range(np.shape(globals()[animate_var])[2]):
+                    # plt.title(f'{animate_var}')
+                    frames.append([plt.imshow(globals()[animate_var][:,:,i],animated=True), 
+                                   plt.annotate(f"Step {i}", xy=(5,0)), 
+                                   plt.colorbar()])
+                
+                ani = animation.ArtistAnimation(fig, frames, interval=300, blit=True,
+                                                repeat_delay=5000)
+                # plt.colorbar()
+                FFwriter = animation.FFMpegWriter(fps=10)
+                ani.save(f'{animate_var}.mp4', writer=FFwriter)
+        
+        if False:
+            for animate_var in ["dmg_index"]:#, "del_d", 'kw_tsl']:
+                plt.figure()
+                ax = plt.gca()
+                ticks_low_dmg = np.linspace(np.min(globals()[animate_var]), np.max(globals()[animate_var]), 10)
+                ticklabels_low_dmg = [('%1.4f' % label) for label in ticks_low_dmg]
+                ticks_high_dmg = np.linspace(0.85, 1, 10)
+                ticklabels_high_dmg = [('%1.4f' % label) for label in ticks_high_dmg]
+                for disp_step in range(np.shape(globals()[animate_var])[2]):
+                    plt.title(animate_var)
+                    if np.min(globals()[animate_var]) > 0.85:
+                        ticks = ticks_high_dmg
+                        ticklabels = ticklabels_high_dmg
+                        vmin = 0.85
+                        vmax = 1.00
+                    else:
+                        ticks = ticks_low_dmg
+                        ticklabels = ticklabels_low_dmg
+                        vmin = 0.00
+                        vmax = 1.00
+                    plt.contourf(globals()[animate_var][:,:,disp_step], vmin=vmin, vmax=vmax)
+                    cbar = plt.colorbar()
+                    # cbar.set_ticks(ticks)
+                    # cbar.set_ticklabels(ticklabels)
+                    plt.pause(1e-9)
+                # fig.savefig(f'{animate_var}.mp4', transparent=True,
+                #             bbox_inches='tight', pad_inches=0.05)
+            
+            # if True:
+            #     plt.clf()
+            #     fig = plt.gcf()
+            #     v = u[1::DOF]
+            #     scale = 1000
+            #     ticks = scale*np.linspace(v.min(), v.max(), 5)
+            #     ticklabels = [('%1.4f' % vi) for vi in np.linspace(v.min(), v.max(), 5)]
+            #     ax = plt.gca()
+            #     for i in range(1, len(t)):
+            #         if i % plot_freq == 0:
+            #             ax.clear()
+            #             ax.set_ylim(scale*v.min(),scale*v.max())
+            #             ax.set_title('$t = %1.3f s$' % t[i])
+            #             ax.set_yticks(ticks)
+            #             ax.set_yticklabels(ticklabels)
+            #             ax.plot(x, scale*v[:, i])
+            #             plt.pause(1e-9)
+            #             if not plt.fignum_exists(fig.number):
+            #                 break

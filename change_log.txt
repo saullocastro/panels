@@ -36,7 +36,7 @@ KNOWN ISSUES:
 =======================================================================================
 =======================================================================================
 
-26-02-23 onwards:
+26-02-24 onwards:
 
 DEV: 
 	Summary: Force calculation + gaussian grid point compatibility 
@@ -56,14 +56,23 @@ DEV:
 -- plot:
 ----- Modified boundary plotting code to also handle gaussian points
 
-
-
 =======================================================================================
 =======================================================================================
 =======================================================================================
 =======================================================================================
 
-11-03-23 onwards:
+10-03-24 commit on:
+
+DEV: Curvature constraints for XCTE connection
+
+- Curvature constraints for connecting panels (currently only applies to xcte connections)
+
+=======================================================================================
+=======================================================================================
+=======================================================================================
+=======================================================================================
+
+11-03-24 onwards:
 
 DEV: Calc damaged stiffness + TSL penalty stiff matrix
 
@@ -94,7 +103,7 @@ DEV: Calc damaged stiffness + TSL penalty stiff matrix
 =======================================================================================
 =======================================================================================
 
-18-03-23 onwards:
+18-03-24 onwards:
 
 DEV: Damage Propagation (BUG: in interpenetration)
 
@@ -103,7 +112,7 @@ DEV: Damage Propagation (BUG: in interpenetration)
 
 2. penalties.py:
 -- Calc damage index for each integration point
--- Added possibility to use k_SB (connection stiffness) when there is interpenetration 
+-- Added possibility to use k_SB (connection stiffness) when there is interpenetration vs very high values
 
 3. multidomain.py:
 -- Edited functions to include options to compute results for a single panel instead of a group
@@ -114,3 +123,34 @@ DEV: Damage Propagation (BUG: in interpenetration)
 -- test_kw_tsl: Test function to calc kw_tsl, del_d (separation) and damage index across the panel
 -- test_dcb_damage_prop: Test function to calculate damage propagation across the panel 
 ----- HAS BUGS - INTERPENETRATION PROBLEM UNSOLVED
+
+
+
+25-03-24 onwards:
+
+BUG: Fixed updating kCSB_dmg per NR iteration
+
+1. test_dcb_damage:
+-- Fixed issue of stiffness bands (bec of high penalty stiffness) from not moving as damage front moves
+
+2. multidomain.py class:
+-- get_kC_conn:
+---- Removed option to skip function when kC_conn exists (it was skipping it for each NR iteration so kCSB_dmg was not updated after the first iteration of the first load step)
+
+3. penalties.py:
+-- Added filter mask to prevent k_i and k_dmg from being added when penetration between bodies occurs
+
+
+
+27-03-24 onwards:
+
+BUG FIX: Damage healing 
+
+1. multidomain.py:
+-- calc_k_dmg:
+---- Fixed bug where damage would heal in the subsquent iterations
+	 Implemented way to store max damage state and compare current one with it, before calc kw_tsl
+	 
+2. test_dcb_damage.py class:
+-- Added function to check monotonicity of damage variable 
+-- Improved plotting code

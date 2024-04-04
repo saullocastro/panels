@@ -169,7 +169,7 @@ def calc_kw_tsl(pA, pB, tsl_type, del_d=None):
         with np.errstate(divide='ignore'):   
             k_dmg = k_i * del_o * np.divide((del_f - del_d) , (del_f - del_o)*del_d)
             # Overwriting stiffnesses where separation is zero
-        k_dmg[del_d == 0] = k_i
+        k_dmg[del_d == 0] = k_i # CONVERT TO np.isclose !!!!!!!!!!
         
         # Filter maps/mask to enable the original stiffness to be added at the same time
         f_i = del_d < del_o         # Filter mask for initial stiffness (before damage)

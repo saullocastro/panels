@@ -825,6 +825,8 @@ def test_dcb_vs_fem_force(no_pan, no_terms, plies):
 def test_dcb_vs_fem(no_pan, no_terms, plies):
 
     '''
+        Does not have TSL - Just testing bending for now 
+        
         Testing it with FEM
         Values are taken from 'Characterization and analysis of the interlaminar behavior of thermoplastic
         composites considering fiber bridging and R-curve effects'
@@ -841,7 +843,7 @@ def test_dcb_vs_fem(no_pan, no_terms, plies):
     ply_thickness = 0.14 # mm
 
     # Plate dimensions (overall)
-    a = 225 # mm
+    a = 100 # mm
     b = 25  # mm
     # Dimensions of panel 1 and 2
     a1 = 0.5*a
@@ -855,8 +857,9 @@ def test_dcb_vs_fem(no_pan, no_terms, plies):
     n = no_terms
     # print(f'no terms : {m}')
 
-    simple_layup = [+45, -45]*plies + [0, 90]*plies
+    # simple_layup = [+45, -45]*plies + [0, 90]*plies
     # simple_layup = [0, 0]*10 + [0, 0]*10
+    simple_layup = [0]*15
     simple_layup += simple_layup[::-1]
     # simple_layup += simple_layup[::-1]
     print('plies ',np.shape(simple_layup)[0])
@@ -883,8 +886,8 @@ def test_dcb_vs_fem(no_pan, no_terms, plies):
     BC = 'bot_end_fixed'
     # Possible strs: 'bot_fully_fixed', 'bot_end_fixed'
     
-    clamped = True
-    ss = False
+    clamped = False
+    ss = True
     
     if clamped:
         bot_r = 0
@@ -1021,7 +1024,7 @@ def test_dcb_vs_fem(no_pan, no_terms, plies):
         if disp_type == 'line_xcte':
             kCp = fkCld_xcte(0., 0., kw, disp_panel, disp_panel.a, size, disp_panel.row_start, disp_panel.col_start)
             disp_panel.add_distr_pd_fixed_x(disp_panel.a, None, None, kw,
-                                      funcu=None, funcv=None, funcw = lambda y: 5) #*y/top2.b, cte=True)
+                                      funcu=None, funcv=None, funcw = lambda y: 6.021) #*y/top2.b, cte=True)
         if disp_type == 'line_ycte':
             kCp = fkCld_ycte(0., 0., kw, disp_panel, disp_panel.b, size, disp_panel.row_start, disp_panel.col_start)
             disp_panel.add_distr_pd_fixed_y(disp_panel.b, None, None, kw,
@@ -1029,6 +1032,7 @@ def test_dcb_vs_fem(no_pan, no_terms, plies):
     kCp = finalize_symmetric_matrix(kCp)
     # fext = disp_panel.calc_fext(size=size, col0=disp_panel.col_start)
     fext = assy.calc_fext()
+    print(np.max(fext))
     
     
     # print(f'max kCp {np.max(kCp):.1e}')
@@ -1047,9 +1051,14 @@ def test_dcb_vs_fem(no_pan, no_terms, plies):
     
     generate_plots = True
     
+    # TESTING Qx, Qy - REMOVE LATER !!!!!!!!!!!!!!!!!!!!!!!
+    if True:
+        assy.force_out_plane(c0, group=None, eval_panel=top3, x_cte_force=None, y_cte_force=None,
+                  gridx=50, gridy=50, NLterms=True, no_x_gauss=3, no_y_gauss=5)
+            
     # Plotting results
     if True:
-        for vec in ['w']:#, 'Mxx']:#, 'Myy', 'Mxy']:#, 'Nxx', 'Nyy']:
+        for vec in ['w', 'Nxx']:#, 'Myy', 'Mxy']:#, 'Nxx', 'Nyy']:
             res_bot = assy.calc_results(c=c0, group='bot', vec=vec, no_x_gauss=30, no_y_gauss=50)
             res_top = assy.calc_results(c=c0, group='top', vec=vec, no_x_gauss=30, no_y_gauss=50)
             vecmin = min(np.min(np.array(res_top[vec])), np.min(np.array(res_bot[vec])))
@@ -1075,7 +1084,7 @@ def test_dcb_vs_fem(no_pan, no_terms, plies):
                 print(f'Global TOP {vec} :: {np.min(np.array(res_top[vec])):.3f}  {np.max(np.array(res_top[vec])):.3f}')
                 print(f'Global BOT {vec} :: {np.min(np.array(res_bot[vec])):.3f}  {np.max(np.array(res_bot[vec])):.3f}')
                 # print(res_bot[vec][1][:,-1]) # disp at the tip
-                final_res = np.min(np.array(res_top[vec]))
+                final_res = res_top
             
             if generate_plots:
                 # if vec == 'w':
@@ -1089,7 +1098,7 @@ def test_dcb_vs_fem(no_pan, no_terms, plies):
                                               flip_plot=False)
             
             # Calcuate separation
-            if True:
+            if generate_plots:
                 res_pan_top = assy.calc_results(c=c0, eval_panel=top1, vec='w', 
                                         no_x_gauss=20, no_y_gauss=20)
                 res_pan_bot = assy.calc_results(c=c0, eval_panel=bot1, vec='w', 
@@ -1112,14 +1121,14 @@ def test_dcb_vs_fem(no_pan, no_terms, plies):
         force_panel = top2
     if no_pan == 3:
         force_panel = top3
-    if False:
+    if True:
         vec = 'Fxx'
         res_bot = assy.calc_results(c=c0, group='bot', vec=vec, no_x_gauss=50, no_y_gauss=60,
-                                cte_panel_force=force_panel, x_cte_force=force_panel.a)
+                                eval_panel=force_panel, x_cte_force=force_panel.a)
         print(res_bot)
     
         
-    return final_res
+    return final_res, fext
 
 
 if __name__ == "__main__":
@@ -1127,6 +1136,6 @@ if __name__ == "__main__":
     # print('10 terms -- 3 panels')
     # test_dcb_vs_fem(2, 15, 1)
     # print('------------------------------------')
-    test_dcb_vs_fem(3, 4, 1)
+    final_res, fext = test_dcb_vs_fem(3, 8, 1)
     # test_dcb_vs_fem(3, 10, 1)
     # print('------------------------------------')
