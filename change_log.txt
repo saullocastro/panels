@@ -125,10 +125,16 @@ DEV: Damage Propagation (BUG: in interpenetration)
 ----- HAS BUGS - INTERPENETRATION PROBLEM UNSOLVED
 
 
+=======================================================================================
+=======================================================================================
+=======================================================================================
+=======================================================================================
+
+
 
 25-03-24 onwards:
 
-BUG: Fixed updating kCSB_dmg per NR iteration
+BUG: Fixed updating kCSB_dmg per NR iteration (solved interpenetration problem)
 
 1. test_dcb_damage:
 -- Fixed issue of stiffness bands (bec of high penalty stiffness) from not moving as damage front moves
@@ -139,6 +145,13 @@ BUG: Fixed updating kCSB_dmg per NR iteration
 
 3. penalties.py:
 -- Added filter mask to prevent k_i and k_dmg from being added when penetration between bodies occurs
+
+
+
+=======================================================================================
+=======================================================================================
+=======================================================================================
+=======================================================================================
 
 
 
@@ -154,3 +167,37 @@ BUG FIX: Damage healing
 2. test_dcb_damage.py class:
 -- Added function to check monotonicity of damage variable 
 -- Improved plotting code
+
+
+=======================================================================================
+=======================================================================================
+=======================================================================================
+=======================================================================================
+
+
+12-04-24 commit:
+
+DEV: Force calculation (BUGS EXIST!!)
+
+1. multidomain.py:
+-- force_out_plane:
+---- Implemented 3 different methods to calculate the out of plane force (applied load) 
+------ Line integral of Qx along the edge of the top plate (where the load is applied)
+------ Area integral of q over the whole plate/s (comes from the equilibirum equations)
+------ Von-Karmans non linear equations (from CK's and J.N.Reddy's books) to find pz which is then integrated over an area or line (using dirac delta)
+
+-- Only the first implementation is reliable - rest unsure
+
+2. legendre_gauss_quadrature.cpp:
+-- Added gauss points and weights for numerical integration till 304
+
+3. test_dcb_before_opening_tsl.py:
+-- Added function that is just a beam bending of a single arm of the DCB
+   The shell is split up into two subpanels. 
+
+
+
+=======================================================================================
+=======================================================================================
+=======================================================================================
+=======================================================================================

@@ -158,10 +158,14 @@ def calc_kw_tsl(pA, pB, tsl_type, del_d=None):
             raise ValueError('Out of plane separation field is required')
         
         # Cohesive Law Parameters
-        del_o = 0.0002*2/5     # [mm]      - Separation at damage onset (damage variable = 0)
-        del_f = 0.1           # [mm]      - Separation at complete failure (damage variable = 1)
-        tau_o = 80          # [MPa]     - Traction at damage onset
+        del_o = 87E-6     # [mm]      - Separation at damage onset (damage variable = 0)
+        del_f = 0.025747           # [mm]      - Separation at complete failure (damage variable = 1)
+        tau_o = 87          # [MPa]     - Traction at damage onset
         k_i = tau_o/del_o     # [N/mm^3]  - Initial out of plane stiffness
+        
+        # Overwiting with values from MM_onecoh_impl.inp file
+        del_o = 0.000115813
+        k_i = 750367.4026
         
         k_dmg = np.zeros_like(del_d)
         # Stiffness when there is damage

@@ -735,12 +735,15 @@ class MultiDomain(object):
             else:
                 y = linspace(0, panel.b, gridy)
                 
-            # Adding extra points where the force is requested    
-            if x_cte_force is not None:
-                x = np.sort(np.append(x, np.array([x_cte_force])))
-                    # not sorting it so that the last i
-            if y_cte_force is not None:
-                y = np.sort(np.append(y, np.array([y_cte_force])))
+            if False:
+                # Adding extra points where the force is requested    
+                # Not executed at the moment as adding an extra term breaks the out of plane force calc 
+                    # bec Qx needs the point locations - fix it by adding the same point in the force ftn
+                if x_cte_force is not None:
+                    x = np.sort(np.append(x, np.array([x_cte_force])))
+                        # not sorting it so that the last i
+                if y_cte_force is not None:
+                    y = np.sort(np.append(y, np.array([y_cte_force])))
                 
             xs, ys = np.meshgrid(x, y, copy=False)
             # Scalar inputs are converted to 1D arrays, whilst higher-dimensional inputs are preserved
@@ -832,8 +835,8 @@ class MultiDomain(object):
             raise ValueError('Both x_cte_force and no_y_gauss need to be specified')
         if y_cte_force is not None and no_x_gauss is None:
             raise ValueError('Both y_cte_force and no_x_gauss need to be specified')
-        if no_x_gauss > 64 or no_y_gauss > 64:
-            raise ValueError('Gauss points more than 64 not coded')
+        if no_x_gauss > 304 or no_y_gauss > 304:
+            raise ValueError('Gauss points more than 304 not coded')
             
         # Stress field for a single panel of interest
         res_stress = self.stress(c=c, group=group, 
@@ -882,37 +885,179 @@ class MultiDomain(object):
     def force_out_plane(self, c, group, eval_panel, x_cte_force=None, y_cte_force=None,
               gridx=50, gridy=50, NLterms=True, no_x_gauss=None, no_y_gauss=None):
         
-        res_stress = self.stress(c=c, group=group, 
-                                 eval_panel = eval_panel, x_cte_force = x_cte_force, y_cte_force = y_cte_force,
-                                 gridx=gridx, gridy=gridy, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss)
+        line_int = True
+        area_int = False
+        von_karman_NL_int = False
         
-        dy = np.zeros(no_y_gauss, dtype=np.float64)
-        weights_y = np.zeros(no_y_gauss, dtype=np.float64)
-        get_points_weights(no_y_gauss, dy, weights_y)
-        
-        dx = np.zeros(no_x_gauss, dtype=np.float64)
-        weights_x = np.zeros(no_x_gauss, dtype=np.float64)
-        get_points_weights(no_x_gauss, dx, weights_x)
-        
-        # Points used for distance to calc derivatives
-        if True: # unchanged dx, dy
-            dx_diff = dx.copy()
-            dy_diff = dy.copy()
-        else: # convert to physical dimensions
-            dx_diff = (eval_panel.a/2)*(dx + 1)
-            dy_diff = (eval_panel.b/2)*(dy + 1)
-        
-        # Derivatives wrt x, y
-        dMxx_dy, dMxx_dx = np.gradient(res_stress['Mxx'][0], dy_diff, dx_diff)
-        dMxy_dy, dMxy_dx = np.gradient(res_stress['Mxy'][0], dy_diff, dx_diff)
-        dMyy_dy, dMyy_dx = np.gradient(res_stress['Myy'][0], dy_diff, dx_diff)
-        
-        Qx = dMxx_dx + dMxy_dy
-        Qy = dMxy_dx + dMyy_dy
-        
-        Q_tot = Qx + Qy
-        # HARD CODED - WRONG - CHANGE
-        
+        # Original one - uses gauss points in both x and y
+        if area_int:
+            # no_x_gauss = 128
+            # no_y_gauss = 100            
+            
+            res_stress = self.stress(c=c, group=group, 
+                                     eval_panel = eval_panel, x_cte_force = x_cte_force, y_cte_force = y_cte_force,
+                                     gridx=gridx, gridy=gridy, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss)
+            
+            # Gauss points and weights
+            y_gauss = np.zeros(no_y_gauss, dtype=np.float64)
+            weights_y = np.zeros(no_y_gauss, dtype=np.float64)
+            get_points_weights(no_y_gauss, y_gauss, weights_y)
+            
+            x_gauss = np.zeros(no_x_gauss, dtype=np.float64)
+            weights_x = np.zeros(no_x_gauss, dtype=np.float64)
+            get_points_weights(no_x_gauss, x_gauss, weights_x)
+            
+            # Points used for distance to calc derivatives
+            if False: # unchanged dx, dy
+                dx = x_gauss.copy()
+                dy = y_gauss.copy()
+            else: # convert to physical dimensions
+                dx = (eval_panel.a/2)*(x_gauss + 1)
+                dy = (eval_panel.b/2)*(y_gauss + 1)
+            
+            # Derivatives wrt x, y
+            dMxx_dy, dMxx_dx = np.gradient(res_stress['Mxx'][0], dy, dx)
+            dMxy_dy, dMxy_dx = np.gradient(res_stress['Mxy'][0], dy, dx)
+            dMyy_dy, dMyy_dx = np.gradient(res_stress['Myy'][0], dy, dx)
+            
+            Qx = dMxx_dx + dMxy_dy
+            Qy = dMxy_dx + dMyy_dy
+            
+            # Line Integral of Qx - considers gauss points in x and y 
+            if False:
+                # FOR XCTE
+                Q_tot = Qx + Qy
+                # print(Q_tot)
+                # HARD CODED - WRONG - CHANGE
+                Q_int = Q_tot[:,-1]
+                force_intgn = np.dot(weights_y, Q_int)*(eval_panel.b/2)
+                print(f'Force {force_intgn} WARNING: hardcoded for the tip for xcte !!!')
+                # print(res_stress['Mxx'][0][:,-1])
+            
+            # Area integral of q
+            else:
+                dQx_dy, dQx_dx = np.gradient(Qx, dy, dx)
+                dQy_dy, dQy_dx = np.gradient(Qy, dy, dx)
+                
+                q = -(dQx_dx + dQy_dy)
+                
+                weights_x_mesh, weights_y_mesh = np.meshgrid(weights_x, weights_y, copy=False)
+                eff_weight = np.multiply(weights_x_mesh, weights_y_mesh)
+                force_intgn = np.sum(np.multiply(eff_weight, q))*(eval_panel.b*eval_panel.a/4)
+                print(f'Force (int area q) {force_intgn}')
+         
+        # Uses gauss points for y and evenly spaced points for x so that there is a point at x=a
+        if line_int:
+            res_stress = self.stress(c=c, group=group, 
+                                     eval_panel = eval_panel, x_cte_force = x_cte_force, y_cte_force = y_cte_force,
+                                     gridx=gridx, gridy=None, no_x_gauss=None, no_y_gauss=no_y_gauss)
+            
+            
+            # Line Integral of Qx - considers gauss points in only y
+            if True:
+                # Gauss points and weights
+                y_gauss = np.zeros(no_y_gauss, dtype=np.float64)
+                weights_y = np.zeros(no_y_gauss, dtype=np.float64)
+                get_points_weights(no_y_gauss, y_gauss, weights_y)
+                
+                dx = np.linspace(0, eval_panel.a, gridx)
+                
+                # Points used for distance to calc derivatives
+                if False: # unchanged dx, dy
+                    dx = x_gauss.copy()
+                    dy = y_gauss.copy()
+                else: # convert to physical dimensions
+                    # dx = (eval_panel.a/2)*(x_gauss + 1)
+                    dy = (eval_panel.b/2)*(y_gauss + 1)
+                
+                dMxx_dy, dMxx_dx = np.gradient(res_stress['Mxx'][0], dy, dx)
+                dMxy_dy, dMxy_dx = np.gradient(res_stress['Mxy'][0], dy, dx)
+                dMyy_dy, dMyy_dx = np.gradient(res_stress['Myy'][0], dy, dx)
+                
+                # print('WARNING: Avg Moment being returned along edge not force')
+                # return np.mean(dMxx_dx[:,-1]) 
+                
+                Qx = dMxx_dx + dMxy_dy
+                Qy = dMxy_dx + dMyy_dy
+                
+                # FOR XCTE
+                Q_tot = Qx + Qy
+                # print(Q_tot)
+                # HARD CODED - WRONG - CHANGE
+                Q_int = Q_tot[:,-2]
+                print('WARNING QINT IS BEING RETURNED NOT FORCE')
+                return Q_int
+            
+                force_intgn = np.dot(weights_y, Q_int)*(eval_panel.b/2)
+                print(f'Force line int Qx {force_intgn} WARNING: hardcoded for the tip for xcte !!!')
+                # print(res_stress['Mxx'][0][:,-1])
+                
+            
+        if von_karman_NL_int:
+            
+            res_uvw = self.uvw(c=c, group=group, gridx=gridx, gridy=gridy, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss,
+                    eval_panel=eval_panel)
+            res_stress = self.stress(c=c, group=group, 
+                                     eval_panel = eval_panel, x_cte_force = x_cte_force, y_cte_force = y_cte_force,
+                                     gridx=gridx, gridy=gridy, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss)
+
+            # Gauss points and weights
+            y_gauss = np.zeros(no_y_gauss, dtype=np.float64)
+            weights_y = np.zeros(no_y_gauss, dtype=np.float64)
+            get_points_weights(no_y_gauss, y_gauss, weights_y)
+            
+            x_gauss = np.zeros(no_x_gauss, dtype=np.float64)
+            weights_x = np.zeros(no_x_gauss, dtype=np.float64)
+            get_points_weights(no_x_gauss, x_gauss, weights_x)
+            
+            # Points used for distance to calc derivatives
+            if False: # unchanged dx, dy
+                dx = x_gauss.copy()
+                dy = y_gauss.copy()
+            else: # convert to physical dimensions
+                dx = (eval_panel.a/2)*(x_gauss + 1)
+                dy = (eval_panel.b/2)*(y_gauss + 1)
+            
+            # Derivatives wrt x, y
+            dw_dy, dw_dx = np.gradient(res_uvw['w'][0], dy, dx)
+            d2w_dxdy, d2w_dx2 = np.gradient(dw_dx, dy, dx)
+            d3w_dx2dy, d3w_dx3 = np.gradient(d2w_dx2, dy, dx)
+            d4w_dx3dy, d4w_dx4 = np.gradient(d3w_dx3, dy, dx)
+            
+            d2w_dy2, d2w_dxdy = np.gradient(dw_dy, dy, dx)
+            d3w_dy3, d3w_dxdy2 = np.gradient(d2w_dy2, dy, dx)
+            d4w_dy4, d4w_dxdy3 = np.gradient(d3w_dy3, dy, dx)
+            
+            d4w_dx2dy2, d4w_dx3dy = np.gradient(d3w_dx2dy, dy, dx)
+            
+            # ABD
+            F = eval_panel.ABD
+            D11 = F[3,3]
+            D12 = F[3,4]
+            D22 = F[4,4]
+            D66 = F[5,5]
+
+            Nxx = res_stress['Nxx'][0]
+            Nxy = res_stress['Nxy'][0]
+            Nyy = res_stress['Nyy'][0]
+                        
+            pz = D11*d4w_dx4 + 2*(D12 + 2*D66)*d4w_dx2dy2 + D22*d4w_dy4 
+            - (np.multiply(Nxx, d2w_dx2) + 2*np.multiply(Nxy, d2w_dxdy) + np.multiply(Nyy, d2w_dy2))
+
+            # Area integral
+            if False:
+                weights_x_mesh, weights_y_mesh = np.meshgrid(weights_x, weights_y, copy=False)
+                eff_weight = np.multiply(weights_x_mesh, weights_y_mesh)
+                force_intgn = np.sum(np.multiply(eff_weight, pz))*(eval_panel.b*eval_panel.a/4)
+    
+                print(f'Force area int qz (CK) {force_intgn} WARNING: hardcoded !!!')
+                
+            # Line integral
+            else:
+                force_intgn = np.dot(weights_y, pz[:,-1])*(eval_panel.b/2)
+                print(f'Force line int qz (CK) {force_intgn} WARNING: hardcoded !!!')
+            
+        return force_intgn
         
         
     
@@ -1000,6 +1145,10 @@ class MultiDomain(object):
                 # kt = 1*kt
                 kr = 2.5*kr
                 kk = 1*kt
+                
+                kt = 1e9 
+                kr = 1e9
+                kk = 1e9
                 # print(f'        Modified kt, kr, kk XCTE : {kt:.1e} {kr:.1e} {kk:.1e}')
     
                 kC_conn += connections.kCSSxcte.fkCSSxcte11(
@@ -1042,7 +1191,10 @@ class MultiDomain(object):
                 
                 kt, kr = connections.calc_kt_kr(pA, pB, 'bot-top')
                 # print('kt SB connection : ', kt)
-                kt = 1*kt
+                # print(kt)
+                # kt = 1*kt
+                kt = 1e9 # same stiffness as TSL
+                print(f'kt_SB : {kt:.2e}')
                 # print(f'        Modified kt SB :       {kt:.1e}')
                 dsb = sum(pA.plyts)/2. + sum(pB.plyts)/2.
                 kC_conn += connections.kCSB.fkCSB11(kt, dsb, pA,
@@ -1057,12 +1209,12 @@ class MultiDomain(object):
                 # Executed when c is not None i.e some displacements have occured so damage 'might' be created
                 tsl_type = connecti['tsl_type']
                 
-                # ATTENTION: pA NEEDS to be the top one and pB, the bottom panel
                 no_x_gauss = connecti['no_x_gauss']
                 no_y_gauss = connecti['no_y_gauss']
                 p_top = connecti['p1']
                 p_bot = connecti['p2']
 
+                # ATTENTION: pA NEEDS to be the top one and pB, the bottom panel
                 kw_tsl, dmg_index, del_d = self.calc_k_dmg(c=c, pA=p_top, pB=p_bot, 
                                          no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type)
                 

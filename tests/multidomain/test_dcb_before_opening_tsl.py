@@ -1,5 +1,8 @@
 import sys
-sys.path.append('..\\..')
+sys.path.append('C:/Users/natha/Documents/GitHub/panels')
+# sys.path.append('..\\..')
+import os
+os.chdir('C:/Users/natha/Documents/GitHub/panels/tests/multidomain')
 
 import numpy as np
 from structsolve import solve
@@ -822,7 +825,7 @@ def test_dcb_vs_fem_force(no_pan, no_terms, plies):
 
 
 
-def test_dcb_vs_fem(no_pan, no_terms, plies):
+def test_dcb_vs_fem(no_pan, no_terms, plies, disp_mag, a2, no_y_gauss, grid_x):
 
     '''
         Does not have TSL - Just testing bending for now 
@@ -846,8 +849,8 @@ def test_dcb_vs_fem(no_pan, no_terms, plies):
     a = 100 # mm
     b = 25  # mm
     # Dimensions of panel 1 and 2
-    a1 = 0.5*a
-    a2 = 0.3*a
+    a1 = 48 #0.5*a
+    a2 = a2 #0.3*a
     
     # no_pan = 3 # no of panels per structure
     # print('No of panels = ', no_pan)
@@ -860,9 +863,9 @@ def test_dcb_vs_fem(no_pan, no_terms, plies):
     # simple_layup = [+45, -45]*plies + [0, 90]*plies
     # simple_layup = [0, 0]*10 + [0, 0]*10
     simple_layup = [0]*15
-    simple_layup += simple_layup[::-1]
     # simple_layup += simple_layup[::-1]
-    print('plies ',np.shape(simple_layup)[0])
+    # simple_layup += simple_layup[::-1]
+    # print('plies ',np.shape(simple_layup)[0])
 
     laminaprop = (E1, E2, nu12, G12, G12, G12)
      
@@ -1013,26 +1016,28 @@ def test_dcb_vs_fem(no_pan, no_terms, plies):
         # print('called first')
         disp_type = 'line_xcte' # change based on what's being applied
         # print('disp_type : ', disp_type)
+        # disp_mag = 3.0
+        # print(f'disp = {disp_mag}')
         
         if disp_type == 'point':
             # Penalty Stiffness
             # Disp in z, so only kw is non zero. ku and kv are zero
             kCp = fkCpd(0., 0., kw, disp_panel, disp_panel.a, disp_panel.b/2, size, disp_panel.row_start, disp_panel.col_start)
             # Point load (added to shell obj)
-            wp = 5 # mm
+            wp = disp_mag # mm
             disp_panel.add_point_pd(disp_panel.a, disp_panel.b/2, 0., 0., 0., 0., kw, wp)
         if disp_type == 'line_xcte':
             kCp = fkCld_xcte(0., 0., kw, disp_panel, disp_panel.a, size, disp_panel.row_start, disp_panel.col_start)
             disp_panel.add_distr_pd_fixed_x(disp_panel.a, None, None, kw,
-                                      funcu=None, funcv=None, funcw = lambda y: 6.021) #*y/top2.b, cte=True)
+                                      funcu=None, funcv=None, funcw = lambda y: disp_mag) #*y/top2.b, cte=True)
         if disp_type == 'line_ycte':
             kCp = fkCld_ycte(0., 0., kw, disp_panel, disp_panel.b, size, disp_panel.row_start, disp_panel.col_start)
             disp_panel.add_distr_pd_fixed_y(disp_panel.b, None, None, kw,
                                       funcu=None, funcv=None, funcw = lambda x: 1) #*x/top2.a, cte=True)
     kCp = finalize_symmetric_matrix(kCp)
+
     # fext = disp_panel.calc_fext(size=size, col0=disp_panel.col_start)
     fext = assy.calc_fext()
-    print(np.max(fext))
     
     
     # print(f'max kCp {np.max(kCp):.1e}')
@@ -1043,38 +1048,44 @@ def test_dcb_vs_fem(no_pan, no_terms, plies):
 
     # fext = disp_panel.calc_fext(size=size, col0=disp_panel.col_start)
     c0 = solve(k0, fext, silent=True, **dict())
-    # fint = np.asarray(assy.calc_fint(c=c0))
-    # print(f'fint {np.linalg.norm(fint)}')
-    # print(f'c0 {np.linalg.norm(c0)}')
-    # print(np.shape(fext), np.shape(c0))
-    # fint = assy.calc_fint(c=c0)
-    
-    generate_plots = True
     
     # TESTING Qx, Qy - REMOVE LATER !!!!!!!!!!!!!!!!!!!!!!!
     if True:
-        assy.force_out_plane(c0, group=None, eval_panel=top3, x_cte_force=None, y_cte_force=None,
-                  gridx=50, gridy=50, NLterms=True, no_x_gauss=3, no_y_gauss=5)
-            
+        final_res = 0
+        for panels_i in [disp_panel]:
+            force_intgn = assy.force_out_plane(c0, group=None, eval_panel=panels_i, x_cte_force=panels_i.a, y_cte_force=None,
+                      gridx=grid_x, gridy=None, NLterms=True, no_x_gauss=None, no_y_gauss=no_y_gauss)
+            final_res += force_intgn
+        # print(final_res)
+        
+        # return final_res
+
+    
+    # Testing Mx at the tip
+    if False:
+        stress = assy.stress(c0, group=None, gridx=100, gridy=None, NLterms=True, no_x_gauss=None, no_y_gauss=128,
+                   eval_panel=top1, x_cte_force=None, y_cte_force=None)
+        final_res = stress["Mxx"][0][:,-1]
+        # print(np.shape(final_res))
+    
+    generate_plots = False    
+    
     # Plotting results
-    if True:
-        for vec in ['w', 'Nxx']:#, 'Myy', 'Mxy']:#, 'Nxx', 'Nyy']:
-            res_bot = assy.calc_results(c=c0, group='bot', vec=vec, no_x_gauss=30, no_y_gauss=50)
-            res_top = assy.calc_results(c=c0, group='top', vec=vec, no_x_gauss=30, no_y_gauss=50)
+    if False:
+        for vec in ['Nxx']:#, 'w', 'Myy', 'Mxy']:#, 'Nxx', 'Nyy']:
+            res_bot = assy.calc_results(c=c0, group='bot', vec=vec, gridx=50, gridy=50)
+            res_top = assy.calc_results(c=c0, group='top', vec=vec, gridx=50, gridy=50)
             vecmin = min(np.min(np.array(res_top[vec])), np.min(np.array(res_bot[vec])))
             vecmax = max(np.max(np.array(res_top[vec])), np.max(np.array(res_bot[vec])))
-            # print()
-            # print(res_top['x'][0])
-            # print()
-            # print(res_bot['y'][0])
-            # print()
-            # print(res_top['w'][0])
+
+            return res_top
+            
             if vec != 'w':
                 print(f'{vec} :: {vecmin:.3f}  {vecmax:.3f}')
             # if vec == 'w':
             if True:
                 # Printing max min per panel
-                if False:
+                if True:
                     for pan in range(0,np.shape(res_bot[vec])[0]):
                         print(f'{vec} top{pan+1} :: {np.min(np.array(res_top[vec][pan])):.3f}  {np.max(np.array(res_top[vec][pan])):.3f}')
                     print('------------------------------')
@@ -1098,7 +1109,7 @@ def test_dcb_vs_fem(no_pan, no_terms, plies):
                                               flip_plot=False)
             
             # Calcuate separation
-            if generate_plots:
+            if False:
                 res_pan_top = assy.calc_results(c=c0, eval_panel=top1, vec='w', 
                                         no_x_gauss=20, no_y_gauss=20)
                 res_pan_bot = assy.calc_results(c=c0, eval_panel=bot1, vec='w', 
@@ -1121,14 +1132,184 @@ def test_dcb_vs_fem(no_pan, no_terms, plies):
         force_panel = top2
     if no_pan == 3:
         force_panel = top3
-    if True:
+    if False:
         vec = 'Fxx'
         res_bot = assy.calc_results(c=c0, group='bot', vec=vec, no_x_gauss=50, no_y_gauss=60,
                                 eval_panel=force_panel, x_cte_force=force_panel.a)
         print(res_bot)
     
         
-    return final_res, fext
+    return final_res
+
+
+
+def single_panel_bending(no_pan, no_terms, plies, disp_mag, a1, no_y_gauss, grid_x):
+    
+        
+    # Properties
+    E1 = (138300. + 128000.)/2. # MPa
+    E2 = (10400. + 11500.)/2. # MPa
+    G12 = 5190. # MPa
+    nu12 = 0.316
+    ply_thickness = 0.14 # mm
+
+    # Plate dimensions (overall)
+    a = 100 # mm
+    b = 25  # mm
+    # Dimensions of panel 1 and 2
+    a1 = a1 #0.5*a
+    # a2 = a2
+
+    #others
+    m = no_terms
+    n = no_terms
+
+    simple_layup = [0]*15
+
+    laminaprop = (E1, E2, nu12, G12, G12, G12)
+     
+    # Top DCB panels
+    top1 = Shell(group='top', x0=0, y0=0, a=a1, b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
+    if no_pan == 2:
+        top2 = Shell(group='top', x0=a1, y0=0, a=a-a1, b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
+    if no_pan == 3:
+        top2 = Shell(group='top', x0=a1, y0=0, a=a2, b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
+        top3 = Shell(group='top', x0=a1+a2, y0=0, a=a-a1-a2, b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
+
+    # boundary conditions
+    
+    BC = 'bot_end_fixed'
+    # Possible strs: 'bot_fully_fixed', 'bot_end_fixed'
+    
+    clamped = True
+    ss = False
+    
+    if clamped:
+        top_r = 0
+        top_t = 0
+    if ss:
+        top_r = 1
+        top_t = 0
+
+    # DCB with only the lower extreme end fixed at the tip. Rest free
+    if BC == 'bot_end_fixed':
+        top1.x1u = top_t ; top1.x1ur = top_r ; top1.x2u = 1 ; top1.x2ur = 1
+        top1.x1v = top_t ; top1.x1vr = top_r ; top1.x2v = 1 ; top1.x2vr = 1 
+        top1.x1w = top_t ; top1.x1wr = top_r ; top1.x2w = 1 ; top1.x2wr = 1 
+        top1.y1u = 1 ; top1.y1ur = 1 ; top1.y2u = 1 ; top1.y2ur = 1
+        top1.y1v = 1 ; top1.y1vr = 1 ; top1.y2v = 1 ; top1.y2vr = 1
+        top1.y1w = 1 ; top1.y1wr = 1 ; top1.y2w = 1 ; top1.y2wr = 1
+        
+        top2.x1u = 1 ; top2.x1ur = 1 ; top2.x2u = 1 ; top2.x2ur = 1
+        top2.x1v = 1 ; top2.x1vr = 1 ; top2.x2v = 1 ; top2.x2vr = 1 
+        top2.x1w = 1 ; top2.x1wr = 1 ; top2.x2w = 1 ; top2.x2wr = 1  
+        top2.y1u = 1 ; top2.y1ur = 1 ; top2.y2u = 1 ; top2.y2ur = 1
+        top2.y1v = 1 ; top2.y1vr = 1 ; top2.y2v = 1 ; top2.y2vr = 1
+        top2.y1w = 1 ; top2.y1wr = 1 ; top2.y2w = 1 ; top2.y2wr = 1
+        
+        if no_pan == 3:
+            raise ValueError('Check if its correct')
+            top3.x1u = 1 ; top3.x1ur = 1 ; top3.x2u = 1 ; top3.x2ur = 1
+            top3.x1v = 1 ; top3.x1vr = 1 ; top3.x2v = 1 ; top3.x2vr = 1 
+            top3.x1w = 1 ; top3.x1wr = 1 ; top3.x2w = 1 ; top3.x2wr = 1  
+            top3.y1u = 1 ; top3.y1ur = 1 ; top3.y2u = 1 ; top3.y2ur = 1
+            top3.y1v = 1 ; top3.y1vr = 1 ; top3.y2v = 1 ; top3.y2vr = 1
+            top3.y1w = 1 ; top3.y1wr = 1 ; top3.y2w = 1 ; top3.y2wr = 1
+    
+    # All connections - list of dict
+    if no_pan == 2:
+        conn = [
+         # skin-skin
+         dict(p1=top1, p2=top2, func='SSxcte', xcte1=top1.a, xcte2=0),
+        ]
+    if no_pan == 3:
+        conn = [
+         # skin-skin
+           dict(p1=top1, p2=top2, func='SSxcte', xcte1=top1.a, xcte2=0),
+           dict(p1=top2, p2=top3, func='SSxcte', xcte1=top2.a, xcte2=0),
+           dict(p1=bot1, p2=bot2, func='SSxcte', xcte1=bot1.a, xcte2=0),
+           dict(p1=bot2, p2=bot3, func='SSxcte', xcte1=bot2.a, xcte2=0),
+           dict(p1=top1, p2=bot1, func='SB'), #'_TSL', tsl_type = 'linear'), 
+            # dict(p1=top2, p2=bot2, func='SB_TSL', tsl_type = 'linear')
+        ]
+    
+    # This determines the positions of each panel's (sub)matrix in the global matrix when made a MD obj below
+    # So changing this changes the placements i.e. starting row and col of each
+    if no_pan == 2:
+        panels = [top1, top2]
+    if no_pan == 3:
+        panels = [bot1, bot2, bot3, top1, top2, top3]
+
+    assy = MultiDomain(panels=panels, conn=conn) # assy is now an object of the MultiDomain class
+    # Here the panels (shell objs) are modified -- their starting positions in the global matrix is assigned etc
+
+    # Panel at which the disp is applied
+    if no_pan == 2:
+        disp_panel = top2
+    if no_pan == 3:
+        disp_panel = top3
+
+    if True:
+        ######## THIS SHOULD BE CHANGED LATER PER DISP TYPE ###########################################
+        ku, kv, kw = calc_ku_kv_kw_point_pd(disp_panel)
+
+    
+    k0 = assy.calc_kC(conn)
+    
+    size = k0.shape[0]
+    
+    # Prescribed Displacements
+    if True:
+        disp_type = 'line_xcte' # change based on what's being applied
+
+        if disp_type == 'point':
+            # Penalty Stiffness
+            # Disp in z, so only kw is non zero. ku and kv are zero
+            kCp = fkCpd(0., 0., kw, disp_panel, disp_panel.a, disp_panel.b/2, size, disp_panel.row_start, disp_panel.col_start)
+            # Point load (added to shell obj)
+            wp = disp_mag # mm
+            disp_panel.add_point_pd(disp_panel.a, disp_panel.b/2, 0., 0., 0., 0., kw, wp)
+        if disp_type == 'line_xcte':
+            kCp = fkCld_xcte(0., 0., kw, disp_panel, disp_panel.a, size, disp_panel.row_start, disp_panel.col_start)
+            disp_panel.add_distr_pd_fixed_x(disp_panel.a, None, None, kw,
+                                      funcu=None, funcv=None, funcw = lambda y: disp_mag) #*y/top2.b, cte=True)
+        if disp_type == 'line_ycte':
+            kCp = fkCld_ycte(0., 0., kw, disp_panel, disp_panel.b, size, disp_panel.row_start, disp_panel.col_start)
+            disp_panel.add_distr_pd_fixed_y(disp_panel.b, None, None, kw,
+                                      funcu=None, funcv=None, funcw = lambda x: 1) #*x/top2.a, cte=True)
+    kCp = finalize_symmetric_matrix(kCp)
+
+    # fext = disp_panel.calc_fext(size=size, col0=disp_panel.col_start)
+    fext = assy.calc_fext()
+    
+    # Tangent (complete) stiffness matrix
+    k0 = k0 + kCp
+
+    # fext = disp_panel.calc_fext(size=size, col0=disp_panel.col_start)
+    c0 = solve(k0, fext, silent=True, **dict())
+    
+    # TESTING Qx, Qy - REMOVE LATER !!!!!!!!!!!!!!!!!!!!!!!
+    if False:
+        final_res = 0
+        for panels_i in [disp_panel]:
+            force_intgn = assy.force_out_plane(c0, group=None, eval_panel=panels_i, x_cte_force=panels_i.a, y_cte_force=None,
+                      gridx=grid_x, gridy=None, NLterms=True, no_x_gauss=no_y_gauss, no_y_gauss=no_y_gauss)
+            final_res += force_intgn
+        # print(final_res)
+        
+    # Calc field results
+    if True:
+        for vec in ['Nxx']:#, 'w', 'Myy', 'Mxy']:#, 'Nxx', 'Nyy']:
+            # res_bot = assy.calc_results(c=c0, group='bot', vec=vec, gridx=50, gridy=50)
+            res_top = assy.calc_results(c=c0, group='top', vec=vec, gridx=50, gridy=50)
+            # vecmin = min(np.min(np.array(res_top[vec])), np.min(np.array(res_bot[vec])))
+            # vecmax = max(np.max(np.array(res_top[vec])), np.max(np.array(res_bot[vec])))
+
+            return res_top['Mxx'][1][:,-1]
+        
+    return final_res
+
+
 
 
 if __name__ == "__main__":
@@ -1136,6 +1317,39 @@ if __name__ == "__main__":
     # print('10 terms -- 3 panels')
     # test_dcb_vs_fem(2, 15, 1)
     # print('------------------------------------')
-    final_res, fext = test_dcb_vs_fem(3, 8, 1)
+    
+    # iter_index = np.unique(np.concatenate((np.linspace(0.1,45,15), np.linspace(45,51.9,30))))
+    
+    # final_res = np.zeros((np.shape(iter_index)[0],2))
+    # final_res = np.zeros((np.shape(iter_index)[0],129))
+    # count = 0
+    # for i in iter_index:
+    #     final_res[count,1] = test_dcb_vs_fem(no_pan=3, no_terms=10, plies=1, disp_mag=1, a2 = i)
+    #     final_res[count,0] = i
+    #     count += 1
     # test_dcb_vs_fem(3, 10, 1)
     # print('------------------------------------')
+    
+    # a2 = 30
+    # final_res_30 = np.zeros((15,2))
+    # no_terms = 30
+    # count = 0
+    # iter_index = [50,100,250,500,750,1000,1500,2500,3750,5000,6250,7500,8750,10000,12500]
+    # for grid_x in iter_index:
+    #     print(f'grid_x {grid_x}')
+    #     final_res_30[count,1] = test_dcb_vs_fem(no_pan=3, no_terms=no_terms, plies=1, disp_mag=1, a2 = a2, no_y_gauss=200, grid_x=grid_x)
+    #     final_res_30[count,0] = a2
+    #     count += 1
+        
+    # SINGLE PLATE TEST 
+    # temp_res_15 = np.zeros((11,2))
+    # count = 0
+    # for a1 in [5,10,17.5,25,32.5,50,62.5,75,82.5,90,95]:
+    #     print(f'a1 {a1}')
+    #     temp_res_15[count, 1] = single_panel_bending(no_pan=2, no_terms=15, plies=1, disp_mag=15, a1 = a1, no_y_gauss=200, grid_x=5000)
+    #     temp_res_15[count, 0] = a1
+    #     count += 1
+    temp_res_50_15 = single_panel_bending(no_pan=2, no_terms=15, plies=1, disp_mag=15, a1 = 50, no_y_gauss=200, grid_x=5000)
+        
+    # DCB TEST
+    # final_res = test_dcb_vs_fem(no_pan=3, no_terms=30, plies=1, disp_mag=1, a2 = 30, no_y_gauss=200, grid_x=5000)

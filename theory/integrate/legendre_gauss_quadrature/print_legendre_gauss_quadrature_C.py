@@ -1,3 +1,5 @@
+# EXECTUE THIS TO FORMAT THE DATA IN THE TXT FILES
+
 # from itertools import izip
 
 ppath = 'out_legendre_gauss_quadrature_points.txt'
@@ -12,13 +14,16 @@ with open(ppath) as pfile, open(wpath) as wfile:
             # Removes " and splits about =, then takes the 2nd part i.e. the number
             out[n] = []
                 # Creates all keys based on n
+            
             for i in range(n):
                 # Runs through n i.e. n points or weights
                 pt, wg = next(myiter)
                     
                 out[n].append([pt.strip(), wg.strip()])
                 # .strip removes all spaces at the beginning and at the end
-# %%
+                
+# %% EXECTUE THIS TO WRITE TO THE C FILE
+
 for v in out.values():
     v.sort(key=lambda x: float(x[0]))
 
