@@ -110,6 +110,7 @@ def shell_fext(shell, inc, size, col0):
             # g[3, col+2] = -(2/a)*fw_xi[i]*gw[j]
             # g[4, col+2] = -(2/b)*fw[i]*gw_eta[j]
         fpt = np.array([[fx, fy, fz, 0, 0]])*inc_i
+            # fx, fy and fz are defined in pd i.e. ku*up, kv*vp, kw*wp
         fext[col0:col1] += fpt.dot(g).ravel()
             # Equivalent to: k*w*S  --- returns contiguous flattened array (1D array)
 
@@ -149,7 +150,8 @@ def shell_fext(shell, inc, size, col0):
             for xi, weight in zip(points, weights):
                 xvar = (xi + 1)*shell.a/2
                 fpt = np.array([[funcu(xvar), funcv(xvar), funcw(xvar), 0, 0]]) * inc_i # Bec funcu etc are ftns of x,y not xi,eta -- # (1x5)
-                    # THis is k_i * i ... i = u,v,w
+                    # THis is k_i * u_i ... i = u,v,w
+                    # funci = force due to that displ_i
                 fg(g, xvar, ycte, shell)
                 # Essentially does this:
                     # g[ fu[i]*gu[j],    fv[i]*gv[j],    fw[i]*gw[j],    -(2/a)*fw_xi[i]*gw[j],   -(2/b)*fw[i]*gw_eta[j] ]

@@ -44,6 +44,11 @@ var('f2Bu, g2Bu, f2Bv, g2Bv, f2Bw, g2Bw, f2Buxi, f2Bvxi, f2Bwxi, g2Bueta, g2Bvet
 var('u2A, v2A, w2A, u2Axi, v2Axi, w2Axi, u2Aeta, v2Aeta, w2Aeta, w2Axixi, w2Axieta, w2Aetaeta')
 var('u2B, v2B, w2B, u2Bxi, v2Bxi, w2Bxi, u2Beta, v2Beta, w2Beta, w2Bxixi, w2Bxieta, w2Betaeta')
 
+######## IMPORTANT ########################
+# All of this should be su1A NOT u1A - As it alreay has removed the c and del_c from the equations
+# That is why when the equations for K are written below it directly has u,v,w instead of su, sv, sw etc
+# It should be like the KC and KG terms!
+
 # PANEL 1 - A terms
 # SF already in terms of xi and eta
 u1A = M([[f1Au*g1Au, 0, 0]])
@@ -92,6 +97,13 @@ w2Bxixi = M([[0, 0, f2Bwxixi*g2Bw]])
 w2Betaeta = M([[0, 0, f2Bw*g2Bwetaeta]])
 
 
+######## IMPORTANT ########################
+# All of this should be su1A NOT u1A - As it alreay has removed the c and del_c from the equations
+# That is why when the equations for K are written below it directly has u,v,w instead of su, sv, sw etc
+# It should be like the KC and KG terms!
+# So the kC terms here already have del_c*del_c removed
+
+
 # Note below that in (u1 - u2')^2 = (u1*u1 - u1*u2 - u2*u1 + u2*u2^2)
   # we only want the upper triangle of the connectivity matrix, thus -u2*u1 is ignored
   
@@ -128,8 +140,9 @@ piece_wise_simplify(kCBFycte22, [])
 kCSB11 = (a1*b1/4)*kt*(u1A.T*u1B + v1A.T*v1B + w1A.T*w1B + u1A.T*w1Bxi*(2*dsb/a1) + w1Axi.T*u1B*(2*dsb/a1) + v1A.T*w1Beta*(2*dsb/b1) + w1Aeta.T*v1B*(2*dsb/b1) + w1Axi.T*w1Bxi*(2*dsb/a1)*(2*dsb/a1) + w1Aeta.T*w1Beta*(2*dsb/b1)*(2*dsb/b1))
     # Contains all squared terms - so all terms of (u + d..w,xi)^2 comes here and so on 
                                     # thats split up: u^2 + u*d..w,xi + d..w,xi*u + (d..w,xi)^2
-############ THERE IS SOME EXTRA c1 HERE ##############################
+############ THERE IS SOME EXTRA c1 HERE - removed ##############################
 kCSB12 = -(a1*b1/4)*kt*(u1A.T*u2B + v1A.T*v2B + w1A.T*w2B + w1Axi.T*u2B*(2*dsb/a1) + w1Aeta.T*v2B*(2*dsb/b1))
+# Instead of 2ab only ab is presented in _12 as ba goes into _21 which is symmetric and is hence not added here
 kCSB22 =  (a1*b1/4)*kt*(u2A.T*u2B + v2A.T*v2B + w2A.T*w2B)
 
 piece_wise_simplify(kCSB11, [])

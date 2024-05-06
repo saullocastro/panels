@@ -412,3 +412,53 @@ def test_dcb_damage_prop_modified_k(no_terms, plies):
             # plt.show()
         
     return final_res, dmg_index, del_d, kw_tsl
+
+
+
+
+# %% Amination - other methods 
+# Artist animation
+if False:
+    for animate_var in ["dmg_index"]:#, "del_d", 'kw_tsl']:
+        frames = [] # for storing the generated images
+        fig = plt.figure()
+        plt.title(animate_var)
+        for i in range(np.shape(globals()[animate_var])[2]):
+            # plt.title(f'{animate_var}')
+            frames.append([plt.imshow(globals()[animate_var][:,:,i],animated=True), 
+                           plt.annotate(f"Step {i}", xy=(5,0)), 
+                           plt.colorbar()])
+        
+        ani = animation.ArtistAnimation(fig, frames, interval=300, blit=True,
+                                        repeat_delay=5000)
+        # plt.colorbar()
+        FFwriter = animation.FFMpegWriter(fps=10)
+        ani.save(f'{animate_var}.mp4', writer=FFwriter)
+
+if False:
+    for animate_var in ["dmg_index"]:#, "del_d", 'kw_tsl']:
+        plt.figure()
+        ax = plt.gca()
+        ticks_low_dmg = np.linspace(np.min(globals()[animate_var]), np.max(globals()[animate_var]), 10)
+        ticklabels_low_dmg = [('%1.4f' % label) for label in ticks_low_dmg]
+        ticks_high_dmg = np.linspace(0.85, 1, 10)
+        ticklabels_high_dmg = [('%1.4f' % label) for label in ticks_high_dmg]
+        for disp_step in range(np.shape(globals()[animate_var])[2]):
+            plt.title(animate_var)
+            if np.min(globals()[animate_var]) > 0.85:
+                ticks = ticks_high_dmg
+                ticklabels = ticklabels_high_dmg
+                vmin = 0.85
+                vmax = 1.00
+            else:
+                ticks = ticks_low_dmg
+                ticklabels = ticklabels_low_dmg
+                vmin = 0.00
+                vmax = 1.00
+            plt.contourf(globals()[animate_var][:,:,disp_step], vmin=vmin, vmax=vmax)
+            cbar = plt.colorbar()
+            # cbar.set_ticks(ticks)
+            # cbar.set_ticklabels(ticklabels)
+            plt.pause(1e-9)
+        # fig.savefig(f'{animate_var}.mp4', transparent=True,
+        #             bbox_inches='tight', pad_inches=0.05)

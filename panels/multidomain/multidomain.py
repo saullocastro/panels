@@ -418,12 +418,12 @@ class MultiDomain(object):
         msg('Computing field variables...', level=1, silent=True)
         
         if no_x_gauss is not None:
-            if no_x_gauss > 128:
-                raise ValueError('Gauss points more than 128 not coded')
+            if no_x_gauss > 304:
+                raise ValueError('Gauss points more than 304 not coded')
                 
         if no_y_gauss is not None:
-            if no_y_gauss > 128:
-                raise ValueError('Gauss points more than 128 not coded')
+            if no_y_gauss > 304:
+                raise ValueError('Gauss points more than 304 not coded')
 
         # res = dict of all keywords in that specific input dict
         # size of each variable = no_panel_in_group x grid_pts_Y x grid_pts_X
@@ -490,7 +490,7 @@ class MultiDomain(object):
         res = dict(x=[], y=[], u=[], v=[], w=[], phix=[], phiy=[])
         
         # Used generally when the field for the entire group is needed
-        if eval_panel is None:
+        if group is not None:
             loop_panels = self.panels
         # Used when the field for just a single panel is needed
         if eval_panel is not None:
@@ -596,7 +596,7 @@ class MultiDomain(object):
         # res = results
         res = dict(x=[], y=[], exx=[], eyy=[], gxy=[], kxx=[], kyy=[], kxy=[])
         
-        if eval_panel is None:
+        if group is not None:
             loop_panels = self.panels
         # Used when the field for just a single panel is needed
         if eval_panel is not None:
@@ -701,7 +701,7 @@ class MultiDomain(object):
         res = dict(x=[], y=[], Nxx=[], Nyy=[], Nxy=[], Mxx=[], Myy=[], Mxy=[])
         
         # Used generally when the stress field for the entire group is needed
-        if eval_panel is None:
+        if group is not None:
             loop_panels = self.panels
         # Used when the stress field for just a single panel is needed
         if eval_panel is not None:
@@ -945,6 +945,8 @@ class MultiDomain(object):
                 eff_weight = np.multiply(weights_x_mesh, weights_y_mesh)
                 force_intgn = np.sum(np.multiply(eff_weight, q))*(eval_panel.b*eval_panel.a/4)
                 print(f'Force (int area q) {force_intgn}')
+                
+                return force_intgn
          
         # Uses gauss points for y and evenly spaced points for x so that there is a point at x=a
         if line_int:
@@ -970,9 +972,9 @@ class MultiDomain(object):
                     # dx = (eval_panel.a/2)*(x_gauss + 1)
                     dy = (eval_panel.b/2)*(y_gauss + 1)
                 
-                dMxx_dy, dMxx_dx = np.gradient(res_stress['Mxx'][0], dy, dx)
-                dMxy_dy, dMxy_dx = np.gradient(res_stress['Mxy'][0], dy, dx)
-                dMyy_dy, dMyy_dx = np.gradient(res_stress['Myy'][0], dy, dx)
+                dMxx_dy, dMxx_dx = np.gradient(res_stress['Mxx'][-1], dy, dx)
+                dMxy_dy, dMxy_dx = np.gradient(res_stress['Mxy'][-1], dy, dx)
+                dMyy_dy, dMyy_dx = np.gradient(res_stress['Myy'][-1], dy, dx)
                 
                 # print('WARNING: Avg Moment being returned along edge not force')
                 # return np.mean(dMxx_dx[:,-1]) 
@@ -985,11 +987,14 @@ class MultiDomain(object):
                 # print(Q_tot)
                 # HARD CODED - WRONG - CHANGE
                 Q_int = Q_tot[:,-2]
-                print('WARNING QINT IS BEING RETURNED NOT FORCE')
-                return Q_int
+                # print('WARNING QINT IS BEING RETURNED NOT FORCE')
+                
             
                 force_intgn = np.dot(weights_y, Q_int)*(eval_panel.b/2)
-                print(f'Force line int Qx {force_intgn} WARNING: hardcoded for the tip for xcte !!!')
+                print(f'Force line int Qx = {force_intgn:.2f} WARNING: hardcoded for the tip!!!')
+                
+                return force_intgn
+                # return Q_int, dy
                 # print(res_stress['Mxx'][0][:,-1])
                 
             
@@ -1045,7 +1050,7 @@ class MultiDomain(object):
             - (np.multiply(Nxx, d2w_dx2) + 2*np.multiply(Nxy, d2w_dxdy) + np.multiply(Nyy, d2w_dy2))
 
             # Area integral
-            if False:
+            if True:
                 weights_x_mesh, weights_y_mesh = np.meshgrid(weights_x, weights_y, copy=False)
                 eff_weight = np.multiply(weights_x_mesh, weights_y_mesh)
                 force_intgn = np.sum(np.multiply(eff_weight, pz))*(eval_panel.b*eval_panel.a/4)
@@ -1143,12 +1148,12 @@ class MultiDomain(object):
                 kt, kr = connections.calc_kt_kr(pA, pB, 'xcte')
                 # print('kt, kr XCTE', kt, kr)
                 # kt = 1*kt
-                kr = 2.5*kr
+                # kr = 2.5*kr
                 kk = 1*kt
                 
-                kt = 1e9 
+                # kt = 1e9 
                 kr = 1e9
-                kk = 1e9
+                # kk = 1e9
                 # print(f'        Modified kt, kr, kk XCTE : {kt:.1e} {kr:.1e} {kk:.1e}')
     
                 kC_conn += connections.kCSSxcte.fkCSSxcte11(
@@ -1190,12 +1195,9 @@ class MultiDomain(object):
                 # so original SB connection still applies 
                 
                 kt, kr = connections.calc_kt_kr(pA, pB, 'bot-top')
-                # print('kt SB connection : ', kt)
-                # print(kt)
-                # kt = 1*kt
                 kt = 1e9 # same stiffness as TSL
-                print(f'kt_SB : {kt:.2e}')
                 # print(f'        Modified kt SB :       {kt:.1e}')
+                
                 dsb = sum(pA.plyts)/2. + sum(pB.plyts)/2.
                 kC_conn += connections.kCSB.fkCSB11(kt, dsb, pA,
                         size, row0=pA.row_start, col0=pA.col_start)
@@ -1285,8 +1287,6 @@ class MultiDomain(object):
         # NOTE move this to another class method? it's a bid hidden
         # Adding kC_conn to KC panel
         kC_conn = self.get_kC_conn(conn=conn, c=c)
-        
-        # print(f'max kC_conn : {np.max(kC_conn):.2e}      kC_wo_conn : {np.max(kC):.2e}')
         
         kC += kC_conn
         # kC += self.kC_conn
@@ -1438,14 +1438,15 @@ class MultiDomain(object):
         # For the first iteration of the first disp/load step
         if not hasattr(self, "del_d"):
             self.del_d = del_d_curr
-            del_d = del_d_curr.copy()
+            max_del_d = del_d_curr.copy()
         # 2nd iteration onwards compare with existing del_d (self.del_d)
         else:
-            del_d = np.amax(np.array([self.del_d, del_d_curr]), axis = 0)
+            max_del_d = np.amax(np.array([self.del_d, del_d_curr]), axis = 0)
+            # print('WARNING: Remove abs')
                 # Max of each elem - np.array returns 2 x (shape(nx, ny))
-            self.del_d = del_d.copy()
+            self.del_d = max_del_d.copy()
         
         # Calculating stiffness grid
-        kw_tsl, dmg_index = connections.calc_kw_tsl(pA=pA, pB=pB, tsl_type=tsl_type, del_d=del_d)
+        kw_tsl, dmg_index = connections.calc_kw_tsl(pA=pA, pB=pB, tsl_type=tsl_type, del_d=max_del_d)
         
-        return kw_tsl, dmg_index, del_d
+        return kw_tsl, dmg_index, max_del_d

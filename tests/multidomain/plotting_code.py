@@ -108,24 +108,144 @@ plt.show()
 
 # %%  2 panels no DCB variation along the edge
 
-plt.figure(figsize=(10,5))
-dy = dy_Mxx.copy()
-plt.plot(dy, temp_res_15, label='15 terms; a=95 mm')
-# plt.plot(dy, temp_res_20, label='20 terms; a=95 mm')
-# plt.plot(dy, temp_res_25, label='25 terms; a=95 mm')
-plt.plot(dy, temp_res_30, label='30 terms; a=95 mm')
+plt.figure(figsize=(8,5))
 
-plt.plot(dy, temp_res_50_15, label='15 terms; a=50 mm')
-# plt.plot(dy, temp_res_50_20, label='20 terms; a=50 mm')
-# plt.plot(dy, temp_res_50_25, label='25 terms; a=50 mm')
-plt.plot(dy, temp_res_50_30, label='30 terms; a=50 mm')
+plt.plot(dy_Qxx_15_30, Qxx_end_15_10, label='15 terms; a2=10 mm')
+plt.plot(dy_Qxx_15_30, Qxx_end_30_10, label='30 terms; a2=10 mm')
+
+plt.plot(dy_Qxx_15_30, Qxx_end_15_30, label='15 terms; a2=30 mm')
+plt.plot(dy_Qxx_15_30, Qxx_end_30_30, label='30 terms; a2=30 mm')
 # plt.plot(np.array([np.min(dy), np.max(dy)]), np.array([118.827, 118.827]), label='FEM')
 
 plt.xlabel('Width (along y) [mm]')
-plt.ylabel('Mxx \n (limits clipped)')
-plt.title('Single plate with 2 panels (no DCB) @ 15 mm tip displ')
-plt.ylim(-1,1)
+plt.ylabel('Qxx')
+plt.title('Applied Load - DCB')
+# plt.ylim(-0.25,0.2)
 
 plt.grid()
 plt.legend()
+plt.show()
+
+# %% Effect of kw (displacement penalty stiffness)
+
+plt.figure(figsize=(8,7))
+
+plt.plot(dy_Qxx_15_8, Qxx_end_15_5, label='15 terms - kw_disp=1e5')
+plt.plot(dy_Qxx_15_8, Qxx_end_15_6, label='15 terms - kw_disp=1e6')
+plt.plot(dy_Qxx_15_8, Qxx_end_15_7, label='15 terms - kw_disp=1e7')
+plt.plot(dy_Qxx_15_8, Qxx_end_15_8, label='15 terms - kw_disp=1e8')
+plt.plot(dy_Qxx_15_8, Qxx_end_15_9, label='15 terms - kw_disp=1e9')
+
+plt.plot(dy_Qxx_30_8, Qxx_end_30_5, label='30 terms - kw_disp=1e5')
+plt.plot(dy_Qxx_30_8, Qxx_end_30_6, label='30 terms - kw_disp=1e6')
+plt.plot(dy_Qxx_30_8, Qxx_end_30_7, label='30 terms - kw_disp=1e7')
+plt.plot(dy_Qxx_30_8, Qxx_end_30_8, label='30 terms - kw_disp=1e8')
+plt.plot(dy_Qxx_30_8, Qxx_end_30_9, label='30 terms - kw_disp=1e9')
+
+plt.xlabel('Width (along y) [mm]')
+plt.ylabel('Qxx')
+plt.title('Variation of kw_disp - Load DCB - a2=30mm')
+
+plt.grid()
+plt.legend()
+plt.show()
+
+# %% - Single panel 
+
+plt.figure(figsize=(7,5))
+
+a1_plot = sp_kr_2_5_1[:, 0]
+
+# 1st no = kr factor; 2nd = kth thousand of gridx; 3rd = kth hundred of gridy
+plt.plot(a1_plot, sp_kr_2_5_05[:,1], label='gridx=500; gridy=100')
+plt.plot(a1_plot, sp_kr_2_5_1[:,1], label='gridx=1000; gridy=100')
+plt.plot(a1_plot, sp_kr_2_5_5[:,1], label='gridx=5000; gridy=100')
+
+plt.plot(a1_plot, sp_kr_2_5_05_2[:,1], label='gridx=500; gridy=200')
+plt.plot(a1_plot, sp_kr_2_5_1_2[:,1], label='gridx=1000; gridy=200')
+plt.plot(a1_plot, sp_kr_2_5_5_2[:,1], label='gridx=5000; gridy=200')
+
+plt.plot(np.array([np.min(a1_plot), np.max(a1_plot)]), np.array([118.827, 118.827]), label='FEM')
+
+
+plt.xlabel('Second panel dimension (a2) [mm]')
+plt.ylabel('Force (line integral) [N]')
+plt.title('SP - kr=2.5*k_calc=1.2E5 - 15 terms - @top3.a @15mm')
+plt.xlim(35,65)
+plt.ylim(117.25,118.9)
+
+plt.grid()
+plt.legend(ncol=2)
+plt.show()
+
+# %%
+plt.figure(figsize=(7,5))
+
+a1_plot = sp_kr2_5[:, 0]
+
+# 1st no = kr factor; 2nd = kth thousand of gridx; 3rd = kth hundred of gridy
+
+plt.plot(a1_plot, sp_kr6_t8[:,1], label='terms=8 kr=1E6')
+plt.plot(a1_plot, sp_kr7_t8[:,1], label='terms=8 kr=1E6')
+
+plt.plot(a1_plot, sp_kr2_5[:,1], label='terms=15 kr=1.2E5')
+plt.plot(a1_plot, sp_kr6[:,1], label='terms=15 kr=1E6')
+plt.plot(a1_plot, sp_kr7[:,1], label='terms=15 kr=1E7')
+plt.plot(a1_plot, sp_kr8[:,1], label='terms=15 kr=1E8')
+# plt.plot(a1_plot, sp_kr9[:,1], label='terms=15 kr=1E9')
+
+# plt.plot(a1_plot, sp_kr12_5_t30[:,1], label='terms=30 kr=1.2E5')
+plt.plot(a1_plot, sp_kr6_t30[:,1], label='terms=30 kr=1E6')
+plt.plot(a1_plot, sp_kr7_t30[:,1], label='terms=30 kr=1E7')
+plt.plot(a1_plot, sp_kr8_t30[:,1], label='terms=30 kr=1E8')
+# plt.plot(a1_plot, sp_kr9_t30[:,1], label='terms=30 kr=1E9')
+
+
+plt.plot(np.array([np.min(a1_plot), np.max(a1_plot)]), np.array([118.827, 118.827]), label='FEM')
+
+
+plt.xlabel('Second panel dimension (a2) [mm]')
+plt.ylabel('Force (line integral) [N]')
+plt.title('SP - Vartn of kr - @top3.a @15mm - gridx=500, gridy=100')
+
+plt.grid()
+plt.legend(ncol=2)
+plt.show()
+
+# %% 
+
+plt.figure(figsize=(7,5))
+
+a1_plot = [0.5,1,5,10,20,30,40,45]
+
+# 1st no = kr factor; 2nd = kth thousand of gridx; 3rd = kth hundred of gridy
+
+# plt.plot(a1_plot, hp_kr6_ksb6_t8[:,1], label='terms=8 kr=1E6 ktSB=1e6')
+
+plt.plot(a1_plot, hp_kr6_ksb6_t15[:,1], label='terms=15 kr=1E6 ktSB=1e6')
+plt.plot(a1_plot, hp_kr6_ksb7_t15[:,1], label='terms=15 kr=1E6 ktSB=1e7')
+plt.plot(a1_plot, hp_kr6_ksb8_t15[:,1], label='terms=15 kr=1E6 ktSB=1e8')
+plt.plot(a1_plot, hp_kr6_ksb9_t15[:,1], label='terms=15 kr=1E6 ktSB=1e9')
+
+# plt.plot(a1_plot, hp_kr6_ksb7_t8[:,1], label='terms=8 kr=1E6 ktSB=1e7')
+
+
+# plt.plot(a1_plot, hp_kr6_ksb6_t30[:,1], label='terms=30 kr=1E6 ktSB=1e6')
+# plt.plot(a1_plot, hp_kr6_ksb7_t30[:,1], label='terms=30 kr=1E6 ktSB=1e7')
+# plt.plot(a1_plot, hp_kr6_ksb8_t30[:,1], label='terms=30 kr=1E6 ktSB=1e8')
+# plt.plot(a1_plot, hp_kr6_ksb9_t30[:,1], label='terms=30 kr=1E6 ktSB=1e9')
+
+
+
+
+plt.plot(np.array([np.min(a1_plot), np.max(a1_plot)]), np.array([1075.01, 1075.01]), label='FEM')
+
+
+plt.xlabel('Second panel dimension (a2) [mm]')
+plt.ylabel('Force (line integral) [N]')
+plt.title('HP - @top3.a @15mm - gridx=1000, gridy=300')
+plt.ylim(800,1200)
+
+plt.grid()
+plt.legend(ncol=2)
 plt.show()

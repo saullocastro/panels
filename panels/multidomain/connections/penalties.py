@@ -158,14 +158,21 @@ def calc_kw_tsl(pA, pB, tsl_type, del_d=None):
             raise ValueError('Out of plane separation field is required')
         
         # Cohesive Law Parameters
-        del_o = 87E-6     # [mm]      - Separation at damage onset (damage variable = 0)
-        del_f = 0.025747           # [mm]      - Separation at complete failure (damage variable = 1)
+        
+        G1c = 1.12   # [kJ/m^2 = N/mm]   - Critical Fracture Energy in Mode 1
         tau_o = 87          # [MPa]     - Traction at damage onset
-        k_i = tau_o/del_o     # [N/mm^3]  - Initial out of plane stiffness
+        
+        if True:
+            del_o = 87E-6     # [mm]      - Separation at damage onset (damage variable = 0)
+            k_i = tau_o/del_o     # [N/mm^3]  - Initial out of plane stiffness
+        else: 
+            k_i = 1E6
+            del_o = tau_o/k_i
+        del_f = 2*G1c/tau_o           # [mm]      - Separation at complete failure (damage variable = 1)
         
         # Overwiting with values from MM_onecoh_impl.inp file
-        del_o = 0.000115813
-        k_i = 750367.4026
+        # del_o = 0.000115813
+        # k_i = 750367.4026
         
         k_dmg = np.zeros_like(del_d)
         # Stiffness when there is damage
@@ -174,6 +181,8 @@ def calc_kw_tsl(pA, pB, tsl_type, del_d=None):
             k_dmg = k_i * del_o * np.divide((del_f - del_d) , (del_f - del_o)*del_d)
             # Overwriting stiffnesses where separation is zero
         k_dmg[del_d == 0] = k_i # CONVERT TO np.isclose !!!!!!!!!!
+        # But it should not matter because youre only checking cases when del_d = 0 i.e. initial value so its already init by 0
+        # So no numerical error will exist
         
         # Filter maps/mask to enable the original stiffness to be added at the same time
         f_i = del_d < del_o         # Filter mask for initial stiffness (before damage)
@@ -203,8 +212,9 @@ def calc_kw_tsl(pA, pB, tsl_type, del_d=None):
         
         # Overall k that takes into account inital k as well
         kw_tsl = np.multiply(np.invert(f_ipen), np.multiply(f_f, f_i*k_i + np.multiply(f_dmg,k_dmg))) + f_ipen*k_ipen
+        # kw_tsl = np.multiply(f_f, f_i*k_i + np.multiply(f_dmg,k_dmg))   
             # Its essentially, kw_tsl = ff*(fi*ki + fdmg*kdmg) + fipen*kipen
-            #kw_tsl[del_d < 0] = 1e5 * k_i
+                #kw_tsl[del_d < 0] = 1e5 * k_i
 
         # Calculating Damage Index
         with np.errstate(divide='ignore'):
