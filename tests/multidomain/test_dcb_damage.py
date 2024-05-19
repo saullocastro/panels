@@ -965,7 +965,7 @@ def test_dcb_damage_prop(no_terms, plies):
         
     # Initilaize mat to store results
     # w_iter = np.unique(np.concatenate((np.linspace(0.01,5,5), np.linspace(5,7,3), np.linspace(7,10,5))))
-    w_iter = np.linspace(0.01,1,90)
+    w_iter = np.linspace(0.01,2.55,100)
     # w_iter = [0.01, 2]
     
     dmg_index = np.zeros((no_y_gauss,no_x_gauss,np.shape(w_iter)[0]))
@@ -1041,9 +1041,10 @@ def test_dcb_damage_prop(no_terms, plies):
             
             # Extracting data out of the MD class for plotting etc 
                 # Damage considerations are already implemented in the Multidomain class functions kT, fint - no need to include anything externally
-            kw_tsl_iter, dmg_index_iter, del_d_iter = assy.calc_k_dmg(c=c, pA=p_top, pB=p_bot, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type)
+
+            # kw_tsl_iter, dmg_index_iter, del_d_iter = assy.calc_k_dmg(c=c, pA=p_top, pB=p_bot, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type)
             # print(f"             NR end {count} -- wp={wp:.3f}  max dmg {np.max(dmg_index_iter):.3f}  ---") # min del_d {np.min(del_d_iter):.2e}---------")
-            print(f'    min del_d {np.min(del_d_iter)}')
+            # print(f'    del_d min {np.min(del_d_iter)}  -- max {np.max(del_d_iter):.4f}')
             
             crisfield_test = scaling(Ri, D)/max(scaling(fext, D), scaling(fint, D))
             # print(f'    crisfield {crisfield_test:.4f}')
@@ -1059,8 +1060,21 @@ def test_dcb_damage_prop(no_terms, plies):
                 print('Unconverged Results !!!!!!!!!!!!!!!!!!!')
                 return None, dmg_index, del_d, kw_tsl
                 raise RuntimeError('NR didnt converged :(') 
+        
+        
+        if hasattr(assy, "del_d"):
+            kw_tsl[:,:,disp_iter_no], dmg_index[:,:,disp_iter_no], del_d[:,:,disp_iter_no]  = assy.calc_k_dmg(c=c, pA=p_top, pB=p_bot, 
+                                 no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type, 
+                                 prev_max_del_d=assy.del_d)
+        else:
+            kw_tsl[:,:,disp_iter_no], dmg_index[:,:,disp_iter_no], del_d[:,:,disp_iter_no]  = assy.calc_k_dmg(c=c, pA=p_top, pB=p_bot, 
+                                 no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type,
+                                 prev_max_del_d=None)
             
-        kw_tsl[:,:,disp_iter_no], dmg_index[:,:,disp_iter_no], del_d[:,:,disp_iter_no] = assy.calc_k_dmg(c=c, pA=p_top, pB=p_bot, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type)
+        # Update max del_d
+        assy.update_max_del_d(curr_max_del_d=del_d[:,:,disp_iter_no])
+        
+        # kw_tsl[:,:,disp_iter_no], dmg_index[:,:,disp_iter_no], del_d[:,:,disp_iter_no] = assy.calc_k_dmg(c=c, pA=p_top, pB=p_bot, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type)
         print(f'                    max dmg_index {np.max(dmg_index[:,:,disp_iter_no]):.4f}')
         # print(f'        max del_d {np.max(del_d[:,:,disp_iter_no])}')
         # print(f'       min del_d {np.min(del_d[:,:,disp_iter_no])}')
@@ -1138,7 +1152,7 @@ def test_dcb_damage_prop(no_terms, plies):
                 img_popup('test_dcb_before_opening_bot_tsl.png',2, f"{vec} bot")
                 plt.show()
     
-    animate = True
+    animate = False
     if animate:    
         def animate(i):
             curr_res = frames[i]

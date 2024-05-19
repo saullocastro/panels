@@ -17,6 +17,8 @@ from panels.multidomain import MultiDomain
 # Open images
 from matplotlib import image as img
 from matplotlib import pyplot as plt
+import matplotlib.animation as animation
+from mpl_toolkits.axes_grid1.inset_locator import mark_inset, zoomed_inset_axes
 
 # Printing with reduced no of points (ease of viewing) - Suppress this to print in scientific notations and restart the kernel
 np.set_printoptions(formatter={'float': lambda x: "{0:0.2f}".format(x)})
@@ -601,7 +603,7 @@ def test_junk():
 
 
 
-def test_dcb_vs_fem(no_pan, no_terms, plies, disp_mag, a2, no_y_gauss, grid_x, kw):
+def test_dcb_vs_fem(no_pan, no_terms, plies, disp_mag, a2, no_y_gauss, grid_x, kw=None):
 
     '''
         Does not have TSL - Just testing bending for now 
@@ -634,7 +636,9 @@ def test_dcb_vs_fem(no_pan, no_terms, plies, disp_mag, a2, no_y_gauss, grid_x, k
     #others
     m = no_terms
     n = no_terms
-    # print(f'no terms : {m}')
+    
+    m_conn = 28
+    n_conn = 28
 
     # simple_layup = [+45, -45]*plies + [0, 90]*plies
     # simple_layup = [0, 0]*10 + [0, 0]*10
@@ -646,14 +650,14 @@ def test_dcb_vs_fem(no_pan, no_terms, plies, disp_mag, a2, no_y_gauss, grid_x, k
     laminaprop = (E1, E2, nu12, G12, G12, G12)
      
     # Top DCB panels
-    top1 = Shell(group='top', x0=0, y0=0, a=a1, b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
+    top1 = Shell(group='top', x0=0, y0=0, a=a1, b=b, m=m_conn, n=n_conn, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
     if no_pan == 2:
         top2 = Shell(group='top', x0=a1, y0=0, a=a-a1, b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
     if no_pan == 3:
         top2 = Shell(group='top', x0=a1, y0=0, a=a2, b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
         top3 = Shell(group='top', x0=a1+a2, y0=0, a=a-a1-a2, b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
     # Bottom DCB panels
-    bot1 = Shell(group='bot', x0=0, y0=0, a=a1, b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
+    bot1 = Shell(group='bot', x0=0, y0=0, a=a1, b=b, m=m_conn, n=n_conn, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
     if no_pan == 2:
         bot2 = Shell(group='bot', x0=a1, y0=0, a=a-a1, b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
     if no_pan == 3:
@@ -843,17 +847,15 @@ def test_dcb_vs_fem(no_pan, no_terms, plies, disp_mag, a2, no_y_gauss, grid_x, k
     
         return Qxx_end, dy_Qxx, Mxx_end, dy_Mxx
     
-    generate_plots = False
+    generate_plots = True
     
     # Plotting results
-    if False:
+    if True:
         for vec in ['w']:#, 'w', 'Myy', 'Mxy']:#, 'Nxx', 'Nyy']:
             res_bot = assy.calc_results(c=c0, group='bot', vec=vec, gridx=50, gridy=50)
             res_top = assy.calc_results(c=c0, group='top', vec=vec, gridx=50, gridy=50)
             vecmin = min(np.min(np.array(res_top[vec])), np.min(np.array(res_bot[vec])))
             vecmax = max(np.max(np.array(res_top[vec])), np.max(np.array(res_bot[vec])))
-
-            return res_top
             
             if vec != 'w':
                 print(f'{vec} :: {vecmin:.3f}  {vecmax:.3f}')
@@ -890,19 +892,64 @@ def test_dcb_vs_fem(no_pan, no_terms, plies, disp_mag, a2, no_y_gauss, grid_x, k
                 img_popup('test_dcb_before_opening_bot_tsl.png',2, f"{vec} bot")
                 plt.show()
                 
+        
     # Calcuate separation
     if True:
         res_pan_top = assy.calc_results(c=c0, eval_panel=top1, vec='w', 
-                                no_x_gauss=20, no_y_gauss=20)
+                                no_x_gauss=200, no_y_gauss=50)
         res_pan_bot = assy.calc_results(c=c0, eval_panel=bot1, vec='w', 
-                                no_x_gauss=20, no_y_gauss=20)
+                                no_x_gauss=200, no_y_gauss=50)
         del_d = assy.calc_separation(res_pan_top, res_pan_bot)
-        plt.figure()
-        plt.contourf(np.abs(del_d), cmap='jet')
+        
+        monoton_top = monotonicity_check_displ(res_pan_top['w'][0])
+        monoton_bot = monotonicity_check_displ(res_pan_bot['w'][0])
+        
+        if np.all(monoton_top):
+            print('Top displ is monotonic')
+            top_mon = 'Monotonic'
+        else:
+            top_mon = 'NOT monotonic'
+        if np.all(monoton_bot):
+            print('Bot displ is monotonic')
+            bot_mon = 'Monotonic'
+        else:
+            bot_mon = 'NOT monotonic'
+        
+        
+        # Plotting separation and displacements
+        vmin=min(np.min(res_pan_top['w'][0]), np.min(res_pan_bot['w'][0]))
+        vmax=max(np.max(res_pan_top['w'][0]), np.max(res_pan_bot['w'][0]))
+        print(np.min(res_pan_top['w'][0]), np.max(res_pan_top['w'][0]))
+        print(np.min(res_pan_bot['w'][0]), np.max(res_pan_bot['w'][0]))
+        levels = np.linspace(vmin, vmax, 20)
+        plt.figure(figsize=(8,14))
+        plt.subplot(3,1,1)
+        plt.contourf(del_d, cmap='jet')
+        plt.gca().set_title(f'Full DCB - Terms: {m}, {m_conn} \n  Separation between plates in contact [mm]')
+        plt.xlabel('x direction')
+        plt.ylabel('y direction')
+        plt.colorbar()
+        plt.subplot(3,1,2)
+        plt.contourf(res_pan_top['w'][0], cmap='jet', levels=levels)
+        plt.gca().set_title(f'Top displ [mm] - {top_mon}')
+        plt.xlabel('x direction')
+        plt.ylabel('y direction')
+        plt.colorbar()
+        plt.subplot(3,1,3)
+        plt.contourf(res_pan_bot['w'][0], cmap='jet', levels=levels)
+        plt.gca().set_title(f'Bot displ [mm] - {bot_mon}')
+        plt.xlabel('x direction')
+        plt.ylabel('y direction')
         plt.colorbar()
         plt.show()
+        
+        
 
-    return final_res
+    
+    final_res = None
+
+    # return res_pan_top, res_pan_bot
+    return monoton_top, monoton_bot
 
 
 
@@ -1393,6 +1440,145 @@ def dcb_one_and_half(no_pan, no_terms, plies, disp_mag, a2, no_y_gauss, grid_x, 
     return monoton_top, monoton_bot
 
 
+
+def test_leg_sigm():
+    import scipy
+    from scipy.optimize import leastsq
+    from panels import Shell
+    
+    def reference(xi):
+        b = 15
+        a = -15
+        c1 = 1
+        c2 = 15
+        x = (xi+1)*(b-a)/2 + a
+        ftn = np.divide(1, 1 + np.exp(-c1*(x-c2)))
+        return ftn
+     
+    # Properties
+    E1 = (138300. + 128000.)/2. # MPa
+    E2 = (10400. + 11500.)/2. # MPa
+    G12 = 5190. # MPa
+    nu12 = 0.316
+    ply_thickness = 0.14 # mm
+
+    # Plate dimensions (overall)
+    a = 100 # mm
+    b = 25  # mm
+
+    simple_layup = [0]*15
+    laminaprop = (E1, E2, nu12, G12, G12, G12)
+    
+    m = 30
+    n = 8
+    xi = np.linspace(-1,1,500)
+    y = reference(xi)
+     
+    def func(c_w):
+        c = np.repeat(c_w, 3)
+        s = Shell(x0=0, y0=0, a=a, b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
+        s.x1u = 1 ; s.x1ur = 0 ; s.x2u = 1 ; s.x2ur = 0
+        s.x1v = 1 ; s.x1vr = 0 ; s.x2v = 1 ; s.x2vr = 0 
+        s.x1w = 1 ; s.x1wr = 0 ; s.x2w = 1 ; s.x2wr = 0 
+        s.y1u = 1 ; s.y1ur = 1 ; s.y2u = 1 ; s.y2ur = 1
+        s.y1v = 1 ; s.y1vr = 1 ; s.y2v = 1 ; s.y2vr = 1
+        s.y1w = 1 ; s.y1wr = 1 ; s.y2w = 1 ; s.y2wr = 1
+        _, fields = s.uvw(c, gridx=500)
+        return fields['w']   #Usign an arbitary row (150) corr to a y coord whose curve is to be matched with the reference ftn
+    
+    def residuals(c_w, y):
+        error = y - func(c_w)
+        print(f'Error {np.linalg.norm(error)}')
+        return error.flatten()
+     
+    res_x, ier = leastsq(func=residuals, x0=np.random.rand(m*n), args=(y), ftol=1.49012e-06, xtol=1.49012e-06)
+    # best_c = popt2.x
+    
+    plt.figure()
+    plt.plot(func(res_x))
+    plt.plot(y)
+    plt.show()
+    
+    return res_x, ier
+    # plt.plot(x, func(x, best_c))
+
+def plot_test_leg_sigm(c_w):
+    import scipy
+    from scipy.optimize import leastsq
+    from panels import Shell
+    
+    def reference(xi):
+        b = 15
+        a = -15
+        c1 = 1
+        c2 = 0
+        x = (xi+1)*(b-a)/2 + a
+        ftn = np.divide(1, 1 + np.exp(-c1*(x-c2)))
+        return ftn
+     
+    # Properties
+    E1 = (138300. + 128000.)/2. # MPa
+    E2 = (10400. + 11500.)/2. # MPa
+    G12 = 5190. # MPa
+    nu12 = 0.316
+    ply_thickness = 0.14 # mm
+
+    # Plate dimensions (overall)
+    a = 100 # mm
+    b = 25  # mm
+
+    simple_layup = [0]*15
+    laminaprop = (E1, E2, nu12, G12, G12, G12)
+    
+    m = 30
+    n = 8
+    xi = np.linspace(-1,1,500)
+    y = reference(xi)
+
+    def func(c_w):
+        c = np.repeat(c_w, 3)
+        s = Shell(x0=0, y0=0, a=a, b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
+        s.x1u = 1 ; s.x1ur = 1 ; s.x2u = 1 ; s.x2ur = 1
+        s.x1v = 1 ; s.x1vr = 1 ; s.x2v = 1 ; s.x2vr = 1 
+        s.x1w = 1 ; s.x1wr = 1 ; s.x2w = 1 ; s.x2wr = 1 
+        s.y1u = 1 ; s.y1ur = 1 ; s.y2u = 1 ; s.y2ur = 1
+        s.y1v = 1 ; s.y1vr = 1 ; s.y2v = 1 ; s.y2vr = 1
+        s.y1w = 1 ; s.y1wr = 1 ; s.y2w = 1 ; s.y2wr = 1
+        _, fields = s.uvw(c, gridx=500)
+        return fields['w'].T
+    
+    if True:
+        fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(10,6))
+        plt.title('Fitting a family of legendre polynomials to a sigmoid function')
+        plt.plot(xi, func(c_w), label='Legendre Polynomials')
+        plt.plot(xi, y, label='Sigmoid')
+        plt.xlabel('xi')
+        plt.ylabel('Ftn value')
+        plt.grid()
+        # plt.legend()
+        ax_zoomed = zoomed_inset_axes(ax, zoom=40, loc='center right')
+        ax_zoomed.plot(xi, func(c_w), label='Legendre Polynomials')
+        ax_zoomed.plot(xi, y, label='Sigmoid')
+        ax_zoomed.set(xlim=[-1,-0.95], ylim=[-0.0025,0.0025])
+        mark_inset(ax, ax_zoomed, loc1=2, loc2=4, fc="none", ec="0.5")
+        plt.show()
+    if False:
+        plt.figure()
+        print(np.shape(func(c_w)))
+        # plt.contourf((func(c_w) - y.reshape((500,1)))/y.reshape((500,1)))
+        plt.contourf(func(c_w))
+        plt.xlabel('eta')
+        plt.ylabel('xi')
+        plt.colorbar()
+        plt.figure()
+        
+    
+    def residuals(c_w, y):
+        error = y - func(c_w)
+        print(f'Error {np.linalg.norm(error)}')
+        return error
+
+
 if __name__ == "__main__":
     # test_dcb_bending_pd_tsl()
     # print('10 terms -- 3 panels')
@@ -1422,6 +1608,9 @@ if __name__ == "__main__":
     #     final_res_30[count,0] = a2
     #     count += 1
         
+    if False:
+        monoton_top, monoton_bot = test_dcb_vs_fem(no_pan=3, no_terms=30, plies=1, disp_mag=15, a2 = 1, no_y_gauss=200, grid_x=200)
+    
     # SINGLE PLATE TEST 
     if False:
         sp_kr7_t8 = np.zeros((11,2))
@@ -1459,5 +1648,9 @@ if __name__ == "__main__":
             hp_kr9_ksb9_t15[count, 0] = a2
             count += 1
 
-    monoton_top, monoton_bot = dcb_one_and_half(no_pan=3, no_terms=25, plies=1, disp_mag=15, 
-                            a2 = 0.5, no_y_gauss=300, grid_x=1000, kw=1e5)
+    # monoton_top, monoton_bot = dcb_one_and_half(no_pan=3, no_terms=25, plies=1, disp_mag=15, 
+                            # a2 = 0.5, no_y_gauss=300, grid_x=1000, kw=1e5)
+                            
+    if True:
+        res_x, ier = test_leg_sigm()
+        # plot_test_leg_sigm(res_x_panel)

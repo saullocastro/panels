@@ -14,9 +14,11 @@
 // Vec containing all the SFs (element is one term)
 EXPORTIT void vec_f(double *f, double xi,
            double xi1t, double xi1r, double xi2t, double xi2r) {
-    f[0] = xi1t*(0.25*pow(xi, 3) - 0.75*xi + 0.5);
+//     f[0] = xi1t*(0.25*pow(xi, 3) - 0.75*xi + 0.5);
+    f[0] = xi1t*(1/(1 + exp((xi+1)*15 - 15)));
     f[1] = xi1r*(0.125*pow(xi, 3) - 0.125*pow(xi, 2) - 0.125*xi + 0.125);
-    f[2] = xi2t*(-0.25*pow(xi, 3) + 0.75*xi + 0.5);
+//     f[2] = xi2t*(-0.25*pow(xi, 3) + 0.75*xi + 0.5);
+    f[2] = xi2t*(1/(1 + exp(-((xi+1)*15 - 15))));
     f[3] = xi2r*(0.125*pow(xi, 3) + 0.125*pow(xi, 2) - 0.125*xi - 0.125);
     f[4] = 0.125*pow(xi, 4) - 0.25*pow(xi, 2) + 0.125;
     f[5] = 0.125*pow(xi, 5) - 0.25*pow(xi, 3) + 0.125*xi;
@@ -49,9 +51,11 @@ EXPORTIT void vec_f(double *f, double xi,
 
 EXPORTIT void vec_fp(double *fp, double xi,
            double xi1t, double xi1r, double xi2t, double xi2r) {
-    fp[0] = xi1t*(0.75*pow(xi, 2) - 0.75);
+//     fp[0] = xi1t*(0.75*pow(xi, 2) - 0.75);
+    fp[0] = -15*xi1t*exp(15*xi)/pow((exp(15*xi) + 1),2);
     fp[1] = xi1r*(0.375*pow(xi, 2) - 0.25*xi - 0.125);
-    fp[2] = xi2t*(-0.75*pow(xi, 2) + 0.75);
+//     fp[2] = xi2t*(-0.75*pow(xi, 2) + 0.75);
+    fp[2] = 15*xi2t*exp(-15*xi)/pow((1 + exp(-15*xi)),2);
     fp[3] = xi2r*(0.375*pow(xi, 2) + 0.25*xi - 0.125);
     fp[4] = 0.5*pow(xi, 3) - 0.5*xi;
     fp[5] = 0.625*pow(xi, 4) - 0.75*pow(xi, 2) + 0.125;

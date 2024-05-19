@@ -198,6 +198,10 @@ def calc_kw_tsl(pA, pB, tsl_type, del_d=None):
             #  |
             #  |
         f_ipen = del_d < 0          # Filter mask for interpenetration stiffness
+        # from matplotlib import pyplot as plt
+        # plt.contourf(f_ipen)
+        # plt.colorbar()
+        # plt.show()
         # High interpenetration stiffness
         if False:                    # Using same stiffness as kCSB - thats used to tie the plates together                   
             build_panel_lam(pA)
@@ -212,7 +216,9 @@ def calc_kw_tsl(pA, pB, tsl_type, del_d=None):
         
         # Overall k that takes into account inital k as well
         kw_tsl = np.multiply(np.invert(f_ipen), np.multiply(f_f, f_i*k_i + np.multiply(f_dmg,k_dmg))) + f_ipen*k_ipen
+        # print('kw_tsl needs to be changed - penalties.py')
         # kw_tsl = np.multiply(f_f, f_i*k_i + np.multiply(f_dmg,k_dmg))   
+        print(f'{np.max(kw_tsl):.3e}')
             # Its essentially, kw_tsl = ff*(fi*ki + fdmg*kdmg) + fipen*kipen
                 #kw_tsl[del_d < 0] = 1e5 * k_i
 

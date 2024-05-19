@@ -1217,8 +1217,14 @@ class MultiDomain(object):
                 p_bot = connecti['p2']
 
                 # ATTENTION: pA NEEDS to be the top one and pB, the bottom panel
-                kw_tsl, dmg_index, del_d = self.calc_k_dmg(c=c, pA=p_top, pB=p_bot, 
-                                         no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type)
+                if hasattr(self, "del_d"):
+                    kw_tsl, dmg_index, del_d = self.calc_k_dmg(c=c, pA=p_top, pB=p_bot, 
+                                         no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type, 
+                                         prev_max_del_d=self.del_d)
+                else:
+                    kw_tsl, dmg_index, del_d = self.calc_k_dmg(c=c, pA=p_top, pB=p_bot, 
+                                         no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type,
+                                         prev_max_del_d=None)
                 
                 # print(f'   kw MD class {np.min(kw_tsl):.1e}      dmg {np.max(dmg_index):.3f}')
                 
@@ -1418,10 +1424,13 @@ class MultiDomain(object):
         
         return del_d
     
-    def calc_k_dmg(self, c, pA, pB, no_x_gauss, no_y_gauss, tsl_type):
+    def calc_k_dmg(self, c, pA, pB, no_x_gauss, no_y_gauss, tsl_type, prev_max_del_d):
         
         '''
             Calculates the damaged k_tsl and the damage index
+            
+            Input:
+                prev_max_del_d = Max separation for the previous converged NR iteration
         '''
         
         # Calculating the separation between the panels
@@ -1431,22 +1440,30 @@ class MultiDomain(object):
                                 no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss)
         # Separation for the current NR iteration
         del_d_curr = self.calc_separation(res_pan_top, res_pan_bot)
+        print(f'    MD del_d_curr min {np.min(del_d_curr):.4e}  -- max {np.max(del_d_curr):.4e}')
         
         # Considering max del_d for all displacement/load steps
-        # self.del_d is already the max over all disp steps at each integration point
-        
-        # For the first iteration of the first disp/load step
-        if not hasattr(self, "del_d"):
-            self.del_d = del_d_curr
+        # prev_max_del_d is already the max over all disp steps at each integration point
+        if prev_max_del_d is not None:
+            max_del_d = np.amax(np.array([prev_max_del_d, del_d_curr]), axis = 0)
+            # Consider only doing it if del_d is +ve as -ve doesnt create any damage
+        else: 
             max_del_d = del_d_curr.copy()
-        # 2nd iteration onwards compare with existing del_d (self.del_d)
-        else:
-            max_del_d = np.amax(np.array([self.del_d, del_d_curr]), axis = 0)
-            # print('WARNING: Remove abs')
-                # Max of each elem - np.array returns 2 x (shape(nx, ny))
-            self.del_d = max_del_d.copy()
+
+        
+        print(f'    MD max_del_d min {np.min(max_del_d):.4e}  -- max {np.max(max_del_d):.4e}')
         
         # Calculating stiffness grid
         kw_tsl, dmg_index = connections.calc_kw_tsl(pA=pA, pB=pB, tsl_type=tsl_type, del_d=max_del_d)
         
         return kw_tsl, dmg_index, max_del_d
+
+
+    def update_max_del_d(self, curr_max_del_d):
+        '''
+            Used to update the maximum del_d (over all loading histories) - this prevents exisiting 
+            damage from vanishing when the updated separation predicts there is less separation than 
+            what was present earlier (as badly modelled self-healing materials aren't part of this thesis)
+        '''
+        self.del_d = curr_max_del_d
+        
