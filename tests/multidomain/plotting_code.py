@@ -8,6 +8,14 @@ Created on Thu Apr 11 16:08:21 2024
 import numpy as np
 import matplotlib.pyplot as plt
 
+from matplotlib import image as img
+from matplotlib import pyplot as plt
+import matplotlib.animation as animation
+import matplotlib as mpl
+from mpl_toolkits.axes_grid1.inset_locator import mark_inset, zoomed_inset_axes, inset_axes
+
+# %%
+
 plt.figure()
 plt.plot(52-final_res_15[:,0], final_res_15[:,1], label='15 terms - [200,128]')
 plt.plot(52-final_res_20[:,0], final_res_20[:,1], label='20 terms - [200,128]')
@@ -249,3 +257,36 @@ plt.ylim(800,1200)
 plt.grid()
 plt.legend(ncol=2)
 plt.show()
+
+# %%
+fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(8,6))
+plt.plot(force_complete_dcb_4[:,0], force_complete_dcb_4[:,1], label='4 panels')
+plt.plot(force_complete_dcb_3[:,0], force_complete_dcb_3[:,1], label='3 panels')
+plt.plot(np.array([np.min(force_complete_dcb_3[:,0]), np.max(force_complete_dcb_3[:,0])]), np.array([31.61059931, 31.61059931]), label='FEM')
+
+plt.xlabel('Length of the panel after the contact region [mm]', fontsize=14)
+plt.ylabel('Force [N]', fontsize=14)
+# plt.title('Variation of kw_disp - Load DCB - a2=30mm')
+
+plt.ylim(28,45)
+# plt.xlim(0,0.3)
+plt.grid()
+plt.legend(fontsize=12)
+
+ax_inset = inset_axes(ax, width="60%", height="50%",
+                       bbox_to_anchor=(.5, .4, 0.7, 0.7),
+                       bbox_transform=ax.transAxes, loc=3)
+ax_inset.plot(force_complete_dcb_4[:,0], force_complete_dcb_4[:,1], label='4 panels')
+ax_inset.plot(force_complete_dcb_3[:,0], force_complete_dcb_3[:,1], label='3 panels')
+ax_inset.plot(np.array([np.min(force_complete_dcb_3[:,0]), np.max(force_complete_dcb_3[:,0])]), np.array([31.61059931, 31.61059931]), label='FEM')
+
+ax_inset.set(xlim=[0,0.2])
+ax_inset.set(ylim=[31.5,34])
+# ax.add_patch(plt.Rectangle((0.03, 0.2), .03, .15, ls="--", ec="k", fc="none",
+#             transform=ax.transAxes))
+mark_inset(ax, ax_inset, loc1=2, loc2=4, fc="none", ec="k", ls='--')
+ax_inset.grid()
+
+
+plt.show()
+

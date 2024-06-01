@@ -1150,9 +1150,9 @@ class MultiDomain(object):
                 # kt = 1*kt
                 # kr = 2.5*kr
                 kk = 1*kt
-                
-                # kt = 1e9 
-                kr = 1e9
+    
+                kt = 1e6 
+                kr = 1e6
                 # kk = 1e9
                 # print(f'        Modified kt, kr, kk XCTE : {kt:.1e} {kr:.1e} {kk:.1e}')
     
@@ -1195,7 +1195,7 @@ class MultiDomain(object):
                 # so original SB connection still applies 
                 
                 kt, kr = connections.calc_kt_kr(pA, pB, 'bot-top')
-                kt = 1e9 # same stiffness as TSL
+                kt = 2e5 # same stiffness as TSL
                 # print(f'        Modified kt SB :       {kt:.1e}')
                 
                 dsb = sum(pA.plyts)/2. + sum(pB.plyts)/2.
@@ -1433,14 +1433,13 @@ class MultiDomain(object):
                 prev_max_del_d = Max separation for the previous converged NR iteration
         '''
         
-        # Calculating the separation between the panels
+        # Calculating the displacements of each panel
         res_pan_top = self.calc_results(c=c, eval_panel=pA, vec='w', 
                                 no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss)
         res_pan_bot = self.calc_results(c=c, eval_panel=pB, vec='w', 
                                 no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss)
         # Separation for the current NR iteration
         del_d_curr = self.calc_separation(res_pan_top, res_pan_bot)
-        print(f'    MD del_d_curr min {np.min(del_d_curr):.4e}  -- max {np.max(del_d_curr):.4e}')
         
         # Considering max del_d for all displacement/load steps
         # prev_max_del_d is already the max over all disp steps at each integration point
@@ -1450,13 +1449,24 @@ class MultiDomain(object):
         else: 
             max_del_d = del_d_curr.copy()
 
+        # print(f'calc_k_dmg: Before del_d min {np.min(max_del_d)}')
         
-        print(f'    MD max_del_d min {np.min(max_del_d):.4e}  -- max {np.max(max_del_d):.4e}')
+        # Rewriting negative displacements and setting them to zero before the positive displ at the right end (tip) 
+        if True:
+            corrected_max_del_d = max_del_d.copy()
+            if np.min(max_del_d) <= 0: # only for negative dipls
+                for i in range(np.shape(max_del_d)[0]):
+                    corrected_max_del_d[i, 0:np.argwhere(corrected_max_del_d[i,:]<=0)[-1][0] + 1] = 0
+                    # [-1] to get the last negative position; [0] to convert it from an array to int; 
+                    # +1 to include the last negative value and set it to 0
+                
+        
+        print(f'calc_k_dmg: Updated del_d -- min {np.min(corrected_max_del_d)} -- max {np.max(corrected_max_del_d):.3e}')
         
         # Calculating stiffness grid
-        kw_tsl, dmg_index = connections.calc_kw_tsl(pA=pA, pB=pB, tsl_type=tsl_type, del_d=max_del_d)
+        kw_tsl, dmg_index = connections.calc_kw_tsl(pA=pA, pB=pB, tsl_type=tsl_type, del_d=corrected_max_del_d)
         
-        return kw_tsl, dmg_index, max_del_d
+        return kw_tsl, dmg_index, corrected_max_del_d
 
 
     def update_max_del_d(self, curr_max_del_d):

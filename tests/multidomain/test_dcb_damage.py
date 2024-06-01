@@ -733,7 +733,7 @@ def test_tsl(no_terms, plies):
     return kw_tsl, dmg_index
     
 
-def test_dcb_damage_prop(no_terms, plies):
+def test_dcb_damage_prop(no_terms, plies, filename=''):
 
     '''
         Damage propagation from a DCB with a precrack
@@ -755,7 +755,7 @@ def test_dcb_damage_prop(no_terms, plies):
     b = 25  # mm
     # Dimensions of panel 1 and 2
     a1 = 52
-    a2 = 1
+    a2 = 0.015
 
     #others
     m_tsl = no_terms
@@ -965,7 +965,8 @@ def test_dcb_damage_prop(no_terms, plies):
         
     # Initilaize mat to store results
     # w_iter = np.unique(np.concatenate((np.linspace(0.01,5,5), np.linspace(5,7,3), np.linspace(7,10,5))))
-    w_iter = np.linspace(0.01,2.55,100)
+    # w_iter = np.linspace(0.01,15,100)
+    w_iter = np.linspace(0.01,8,100)
     # w_iter = [0.01, 2]
     
     dmg_index = np.zeros((no_y_gauss,no_x_gauss,np.shape(w_iter)[0]))
@@ -974,6 +975,7 @@ def test_dcb_damage_prop(no_terms, plies):
     force_intgn = np.zeros((np.shape(w_iter)[0], 2))
     displ_top_root = np.zeros((50,200,np.shape(w_iter)[0]))
     displ_bot_root = np.zeros((50,200,np.shape(w_iter)[0]))
+    c_all = np.zeros((size, np.shape(w_iter)[0]))
     
     
     # Displacement Incrementation
@@ -984,7 +986,7 @@ def test_dcb_damage_prop(no_terms, plies):
         if True:
             disp_type = 'line_xcte' # change based on what's being applied
             
-            # Clears all previously added displs - in NL case, theyre readded so you have 2 disps at the tip
+            # Clears all previously added displs - otherwise in NL case, theyre readded so you have 2 disps at the tip
             disp_panel.clear_disps()
             
             if disp_type == 'point':
@@ -1022,7 +1024,7 @@ def test_dcb_damage_prop(no_terms, plies):
             kT = assy.calc_kT(c=ci)
             k0 = kT + kCp
         
-        epsilon = 1.e-4 # Convergence criteria
+        epsilon = 1.e-7 # Convergence criteria
         D = k0.diagonal() # For convergence - calc at beginning of load increment
         
         count = 0 # Tracks number of NR iterations 
@@ -1071,7 +1073,9 @@ def test_dcb_damage_prop(no_terms, plies):
                                  no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type,
                                  prev_max_del_d=None)
             
-        # Update max del_d
+        c_all[:,disp_iter_no] = c
+            
+        # Update max del_d AFTER a converged NR iteration
         assy.update_max_del_d(curr_max_del_d=del_d[:,:,disp_iter_no])
         
         # kw_tsl[:,:,disp_iter_no], dmg_index[:,:,disp_iter_no], del_d[:,:,disp_iter_no] = assy.calc_k_dmg(c=c, pA=p_top, pB=p_bot, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type)
@@ -1082,7 +1086,7 @@ def test_dcb_damage_prop(no_terms, plies):
         
         
         # Force - TEMP - CHECK LATER AND EDIT/REMOVE
-        if False:
+        if True:
             force_intgn[disp_iter_no, 0] = wp
             force_intgn[disp_iter_no, 1] = assy.force_out_plane(c, group=None, eval_panel=top3, x_cte_force=None, y_cte_force=None,
                       gridx=100, gridy=50, NLterms=True, no_x_gauss=128, no_y_gauss=128)
@@ -1090,12 +1094,16 @@ def test_dcb_damage_prop(no_terms, plies):
             force_intgn = None
         
         # Calc displ of top and bottom panels at each increment
-        res_pan_top = assy.calc_results(c=c, eval_panel=top1, vec='w', 
-                                no_x_gauss=200, no_y_gauss=50)
-        res_pan_bot = assy.calc_results(c=c, eval_panel=bot1, vec='w', 
-                                no_x_gauss=200, no_y_gauss=50)
-        displ_top_root[:,:,disp_iter_no] = res_pan_top['w'][0]
-        displ_bot_root[:,:,disp_iter_no] = res_pan_bot['w'][0]
+        if True:
+            res_pan_top = assy.calc_results(c=c, eval_panel=top1, vec='w', 
+                                    no_x_gauss=200, no_y_gauss=50)
+            res_pan_bot = assy.calc_results(c=c, eval_panel=bot1, vec='w', 
+                                    no_x_gauss=200, no_y_gauss=50)
+            displ_top_root[:,:,disp_iter_no] = res_pan_top['w'][0]
+            displ_bot_root[:,:,disp_iter_no] = res_pan_bot['w'][0]
+        else:
+            res_pan_top = None
+            res_pan_bot = None
         
         disp_iter_no += 1
         print()
@@ -1105,11 +1113,22 @@ def test_dcb_damage_prop(no_terms, plies):
             break
         
         
+    # ------------------ SAVING VARIABLES --------------------
+    if True:
+        np.save(f'{dmg_index}_{filename}', dmg_index)
+        np.save(f'{del_d}_{filename}', del_d)
+        np.save(f'{kw_tsl}_{filename}', kw_tsl)
+        np.save(f'{force_intgn}_{filename}', force_intgn)
+        np.save(f'{displ_top_root}_{filename}', displ_top_root)
+        np.save(f'{displ_bot_root}_{filename}', displ_bot_root)
+        np.save(f'{c_all}_{filename}', c_all)
         
-    c0 = c.copy()
-
+        
+    
     # ------------------ RESULTS AND POST PROCESSING --------------------
     
+    c0 = c.copy()
+
     generate_plots = False
     
     final_res = None
@@ -1177,7 +1196,7 @@ def test_dcb_damage_prop(no_terms, plies):
         
         from mpl_toolkits.axes_grid1 import make_axes_locatable
         
-        for animate_var in ["dmg_index", "del_d", 'kw_tsl']:
+        for animate_var in ["dmg_index", "del_d"]:#, 'kw_tsl']:
             
             fig = plt.figure()
             ax = fig.add_subplot(111)    
@@ -1199,7 +1218,7 @@ def test_dcb_damage_prop(no_terms, plies):
             ani.save(f'{animate_var}.mp4', writer=FFwriter)
             # ani.save(f'{animate_var}.gif', writer='imagemagick')
         
-    return dmg_index, del_d, kw_tsl, force_intgn, displ_top_root, displ_bot_root
+    return dmg_index, del_d, kw_tsl, force_intgn, displ_top_root, displ_bot_root, c_all
 
 
 
@@ -1211,59 +1230,54 @@ if __name__ == "__main__":
         if not animate:
             # test_dcb_non_linear(3, 4, 1)
             # kw_tsl, dmg_index = test_kw_tsl(1, 6, 1)
-            dmg_index, del_d, kw_tsl, force_intgn, displ_top_root, displ_bot_root = test_dcb_damage_prop(no_terms=8, plies=15)
+            dmg_index, del_d, kw_tsl, force_intgn, displ_top_root, displ_bot_root, c_all = test_dcb_damage_prop(no_terms=8, plies=15)
             # final_res, dmg_index, del_d, kw_tsl = test_dcb_damage_prop_modified_k(no_terms=10, plies=15)
     
         
-        if animate:
-            # Func Animation
-            if True:
-                def animate(i):
-                    curr_res = frames[i]
-                    max_res = np.max(curr_res)
-                    min_res = np.min(curr_res)
-                    if animate_var == 'dmg_index':
-                        if min_res == 0:
-                            vmin = 0.0
-                            vmax = 1.0
-                        else: 
-                            possible_min_cbar = [0,0.5,0.85,0.9,0.95,0.99]
-                            vmin = max(list(filter(lambda x: x<min_res, possible_min_cbar)))
-                            vmax = 1.0
-                    else:
-                        vmin = np.min(animate_var)
-                        vmax = np.max(animate_var)
-                    im = ax.imshow(curr_res)
-                    fig.colorbar(im, cax=cax)
-                    im.set_data(curr_res)
-                    im.set_clim(vmin, vmax)
-                    tx.set_text(f'{animate_var}     -   Disp={w_iter[i]:.2f} mm')
+        if animate:    
+            def animate(i):
+                curr_res = frames[i]
+                max_res = np.max(curr_res)
+                min_res = np.min(curr_res)
+                if animate_var == 'dmg_index':
+                    if min_res == 0:
+                        vmin = 0.0
+                        vmax = 1.0
+                    else: 
+                        possible_min_cbar = [0,0.5,0.85,0.9,0.95,0.99]
+                        vmin = max(list(filter(lambda x: x<min_res, possible_min_cbar)))
+                        vmax = 1.0
+                else:
+                    vmin = min_res
+                    vmax = max_res
+                im = ax.imshow(curr_res)
+                fig.colorbar(im, cax=cax)
+                im.set_data(curr_res)
+                im.set_clim(vmin, vmax)
+                tx.set_text(f'{animate_var}     -   Disp={w_iter[i]:.2f} mm')
+            
+            from mpl_toolkits.axes_grid1 import make_axes_locatable
+            
+            for animate_var in ["dmg_index", "del_d"]:
                 
-                from mpl_toolkits.axes_grid1 import make_axes_locatable
+                fig = plt.figure()
+                ax = fig.add_subplot(111)    
+                div = make_axes_locatable(ax)
+                cax = div.append_axes('right', '5%', '5%')
                 
-                # w_iter = np.unique(np.concatenate((np.linspace(0.01,5,5), np.linspace(5,7,15), np.linspace(7,10,2))))
-                w_iter = [0.01, 2]
-                
-                for animate_var in ['del_d', 'dmg_index']:#"dmg_index", "del_d", 'kw_tsl']:
+                frames = [] # for storing the generated images
+                for i in range(np.shape(locals()[animate_var])[2]):
+                    frames.append(locals()[animate_var][:,:,i])
                     
-                    fig = plt.figure()
-                    ax = fig.add_subplot(111)    
-                    div = make_axes_locatable(ax)
-                    cax = div.append_axes('right', '5%', '5%')
+                cv0 = frames[0]
+                im = ax.imshow(cv0) 
+                cb = fig.colorbar(im, cax=cax)
+                tx = ax.set_title('Frame 0')
                     
-                    frames = [] # for storing the generated images
-                    for i in range(np.shape(globals()[animate_var])[2]):
-                        frames.append(globals()[animate_var][:,:,i])
-                        
-                    cv0 = frames[0]
-                    im = ax.imshow(cv0) 
-                    cb = fig.colorbar(im, cax=cax)
-                    tx = ax.set_title('Frame 0')
-                        
-                    ani = animation.FuncAnimation(fig, animate, frames=np.shape(globals()[animate_var])[2],
-                                                  interval = 1000000, repeat_delay=1000)
-                    FFwriter = animation.FFMpegWriter(fps=1)
-                    ani.save(f'{animate_var}.mp4', writer=FFwriter)
-                    # ani.save(f'{animate_var}.gif', writer='imagemagick')
+                ani = animation.FuncAnimation(fig, animate, frames=np.shape(locals()[animate_var])[2],
+                                              interval = 200, repeat_delay=1000)
+                FFwriter = animation.FFMpegWriter(fps=5)
+                ani.save(f'{animate_var}.mp4', writer=FFwriter)
+                # ani.save(f'{animate_var}.gif', writer='imagemagick')
                 
     # kw_tsl, dmg_index = test_tsl(8, 1)

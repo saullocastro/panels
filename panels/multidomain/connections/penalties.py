@@ -160,13 +160,13 @@ def calc_kw_tsl(pA, pB, tsl_type, del_d=None):
         # Cohesive Law Parameters
         
         G1c = 1.12   # [kJ/m^2 = N/mm]   - Critical Fracture Energy in Mode 1
-        tau_o = 87          # [MPa]     - Traction at damage onset
+        tau_o = 87         # [MPa]     - Traction at damage onset
         
-        if True:
+        if False:
             del_o = 87E-6     # [mm]      - Separation at damage onset (damage variable = 0)
             k_i = tau_o/del_o     # [N/mm^3]  - Initial out of plane stiffness
         else: 
-            k_i = 1E6
+            k_i = 1E4
             del_o = tau_o/k_i
         del_f = 2*G1c/tau_o           # [mm]      - Separation at complete failure (damage variable = 1)
         
@@ -218,7 +218,7 @@ def calc_kw_tsl(pA, pB, tsl_type, del_d=None):
         kw_tsl = np.multiply(np.invert(f_ipen), np.multiply(f_f, f_i*k_i + np.multiply(f_dmg,k_dmg))) + f_ipen*k_ipen
         # print('kw_tsl needs to be changed - penalties.py')
         # kw_tsl = np.multiply(f_f, f_i*k_i + np.multiply(f_dmg,k_dmg))   
-        print(f'{np.max(kw_tsl):.3e}')
+        # print(f'{np.max(kw_tsl):.3e}')
             # Its essentially, kw_tsl = ff*(fi*ki + fdmg*kdmg) + fipen*kipen
                 #kw_tsl[del_d < 0] = 1e5 * k_i
 
