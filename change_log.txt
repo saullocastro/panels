@@ -201,3 +201,63 @@ DEV: Force calculation (BUGS EXIST!!)
 =======================================================================================
 =======================================================================================
 =======================================================================================
+
+DEV: Added sigmoid ftn for translation terms
+
+19-05-24 commit:
+
+1. bardell_functions.cpp:
+-- The first and thrid bardell terms are modified to now include sigmoid functions (a,b = -+15, c2=0)
+Not all ftns updated. Only vec_f and vec_fp updated with the new sigmoid definitions. The other ftns have the older bardell functions. 
+
+2. multidomain.py:
+-- BUG FIX: Tracking previous damage was causing the solution of the first NR iteration to be taken as the baseline which was wrong. Corrected it to take the covnered NR solution as the damage of the previous loading step
+
+3. test_dcb_before_opening_tsl.py:
+-- Added 'test_leg_sig' and 'plot_test_leg_sigm' to fit the currently used shape functions to the sigmoid functions. Aimed at seeing if the currently used shape functions (bardell) can predict what is required. 
+
+4. bardell_sigmoid.py: (in \theory\func)
+-- Symbolic differentiation of sigmoid functions 
+
+
+=======================================================================================
+=======================================================================================
+=======================================================================================
+=======================================================================================
+
+
+DEV: family of sigmoid ftns; manually setting negative dipl = 0
+
+01-06-24 commit:
+
+1. bardell_functions.cpp:
+-- Family of sigmoid functions implemented for vec_f and vec_fp (commented out for now as the other functions are still bardell)
+	In essense, bardell is still being used
+	
+2. multidomain class:
+-- calc_k_dmg:
+---- Manually setting all displ after the first negative displ from the opening end to be zero
+
+3. test_dcb_before_opening_tsl:
+-- test_dcb_vs_fem:
+---- Code for 4 panels implemented
+
+4. sigmoid.py (theory\func\sigmoid):
+-- Generates family of sigmoid functions and their derivaties. Then writes it to the file
+
+
+
+
+=======================================================================================
+=======================================================================================
+=======================================================================================
+=======================================================================================
+
+DEV:
+
+commit on: 14-06-24
+
+1.
+
+penalties.calc_kw_tsl:
+- Pass k_i as an argument as well, pB optional

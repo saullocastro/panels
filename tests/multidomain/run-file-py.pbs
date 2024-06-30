@@ -1,0 +1,16 @@
+# Job for Torque PBS 4.2.10
+#
+# PBS parameters (see: man qsub)
+# -----------------------------
+#PBS -j oe
+#PBS -l nodes=1:ppn=20
+#PBS -M n.t.a.dsouza@student.tudelft.nl
+#PBS -m abe
+#PBS -N test_dcb_damage_G1c28e-2_3pan_kiswap
+#PBS -o test_dcb_damage_G1c28e-2_3pan_kiswap.LOG
+#PBS -q asm-medium
+#PBS -rn
+cd ${PBS_O_WORKDIR}
+export PYTHONPATH=~/panels:$PYTHONPATH
+export MYPYTHON=/home/ntadsouza/miniconda3/bin/python
+$MYPYTHON test_dcb_damage.py | tee test_dcb_damage_G1c28e-2_3pan_kiswap.LOG

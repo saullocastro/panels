@@ -121,7 +121,7 @@ def fkCSB11_dmg(double dsb, object p1, int size, int row0, int col0,
         
         for pty in range(no_y_gauss):
             for ptx in range(no_x_gauss):
-                # Makes it more efficient when reading data from memory as memory is read along a row
+                # Makes it more efficient when reading data (kw_tsl) from memory as memory is read along a row
                 # So also accessing memory in the same way helps it out so its not deleting and reaccessing the
                 # same memory everytime. 
                 
@@ -132,8 +132,8 @@ def fkCSB11_dmg(double dsb, object p1, int size, int row0, int col0,
                 weight = weights_xi[ptx] * weights_eta[pty]
                 
                 # Extracting the correct kt
-                    # Currently, the outer loop of x and inner of y, causes it to go through all y for a single x
-                    # That is going through all rows for a single col then onto the next col
+                    # Currently, the outer loop of y and inner of x, causes it to go through all x for a single y
+                    # That is going through all col for a single row then onto the next row
                     # (as per x, y and results by calc_results)
                 kt = kw_tsl[pty, ptx]
                 # kt = kw_tsl[ptx, pty] # Wrong

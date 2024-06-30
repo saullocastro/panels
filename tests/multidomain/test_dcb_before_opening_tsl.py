@@ -1619,7 +1619,7 @@ def plot_test_leg_sigm(c_w=None, ftnval_sig_leg=None, ftnval_leg=None, m=None, n
     simple_layup = [0]*15
     laminaprop = (E1, E2, nu12, G12, G12, G12)
     
-    xi = np.linspace(-1,1,120)
+    xi = np.linspace(-1,1,500)
                 
     def reference(xi, c2):
         b = 15
@@ -1643,7 +1643,7 @@ def plot_test_leg_sigm(c_w=None, ftnval_sig_leg=None, ftnval_leg=None, m=None, n
         _, fields = s.uvw(c, gridx=120)
         return fields['w'][100,:]
     
-    if True:
+    if False:
         if False:
             filename = f'ftn_val_mn_{m}_{n}_c2_{c2}'
             np.save(filename, func(c_w))
@@ -1660,6 +1660,7 @@ def plot_test_leg_sigm(c_w=None, ftnval_sig_leg=None, ftnval_leg=None, m=None, n
             plt.ylabel('Function value', fontsize=14)
             plt.legend(fontsize=14, loc='upper left')
             plt.grid()
+            # Zoomed in view of the existing curve
             if False:
                 ax_zoomed = zoomed_inset_axes(ax, zoom=6, loc='center right')
                 ax_zoomed.plot(xi[:75], func(c_w)[:75], label='Sigmoid enriched Legendre Polynomials', color='red')
@@ -1676,6 +1677,7 @@ def plot_test_leg_sigm(c_w=None, ftnval_sig_leg=None, ftnval_leg=None, m=None, n
                     ax_zoomed.plot(xi, del_d_fit, label='Sigmoid')
                     ax_zoomed.set(xlim=[-1,-0.99995], ylim=[-0.000002,0.000002])
                     mark_inset(ax, ax_zoomed, loc1=3, loc2=4, fc="none", ec="0.5")
+            # Insert any curve in the zoomed in view
             if True:
                 ax_inset = inset_axes(ax, width="60%", height="50%",
                                        bbox_to_anchor=(.1, .2, 1, 1),
@@ -1709,8 +1711,9 @@ def plot_test_leg_sigm(c_w=None, ftnval_sig_leg=None, ftnval_leg=None, m=None, n
             plt.figure()
 
     # Directly using the function values
-    if False:
-        if True:
+    if True:
+        # Using zoomed in views of certain sections of the graphs
+        if False:
             # m = 15
             # n = 8
             # c2 = 0
@@ -1743,10 +1746,45 @@ def plot_test_leg_sigm(c_w=None, ftnval_sig_leg=None, ftnval_leg=None, m=None, n
                     ax_zoomed.plot(xi, ftnval_leg[0,:], label='Legendre Polynomials', color='orange')
                     ax_zoomed.plot(xi, ftnval_leg[1:,:].T, label='_nolegend_', color='orange')
                     ax_zoomed.plot(xi, reference(xi, c2), label='Sigmoid', color='blue')
-                    ax_zoomed.set(xlim=[-0.90,-0.895], ylim=[-0.0005,0.0005])
+                    ax_zoomed.set(xlim=[-0.90,-0.895], ylim=[-0.001,0.001])
                     mark_inset(ax, ax_zoomed, loc1=2, loc2=4, fc="none", ec="0.5")
             plt.show()
     
+        # Plotting another curve in the zoomed in view
+        if True:
+            mpl.rcParams.update(mpl.rcParamsDefault)
+            fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(8,6))
+            plt.title(f'm={m} n={n}', fontsize=14)
+            plt.title(f'm={m} n={n}', fontsize=14)
+            plt.plot(xi, ftnval_sig_leg[0,:], label='Sigmoid enriched Legendre Polynomials', color='red')
+            plt.plot(xi, ftnval_sig_leg[1:,:].T, label='_nolegend_', color='red')
+            plt.plot(xi, ftnval_leg[0,:], label='Legendre Polynomials', color='orange')
+            plt.plot(xi, ftnval_leg[1:,:].T, label='_nolegend_', color='orange')
+            plt.plot(xi, reference(xi, c2), label='Sigmoid', color='dodgerblue')
+            plt.xlabel(r'$\xi$', fontsize=14)
+            plt.ylabel('Function value', fontsize=14)
+            plt.legend(fontsize=13, loc='upper left')
+            plt.grid()
+
+            if True:
+                ax_inset = inset_axes(ax, width="60%", height="50%",
+                                       bbox_to_anchor=(.2 , .2, 1, 1),
+                                       bbox_transform=ax.transAxes, loc=3)
+                
+                ax_inset.plot(xi, ftnval_sig_leg[0,:], label='Sigmoid enriched Legendre Polynomials', color='red', linestyle='dotted', linewidth=0.5, dashes=(2,10))
+                ax_inset.plot(xi, ftnval_sig_leg[1:,:].T, label='_nolegend_', color='red', linestyle='dotted', linewidth=0.5, dashes=(2,10))
+                ax_inset.plot(xi, ftnval_leg[0,:], label='Legendre Polynomials', color='orange')
+                ax_inset.plot(xi, ftnval_leg[1:,:].T, label='_nolegend_', color='orange')
+                ax_inset.plot(xi, reference(xi, c2), label='Sigmoid', color='blue')
+                ax_inset.set(xlim=[-1,0.25], ylim=[-0.001,0.001])
+                ax_inset.grid()
+                # ax.add_patch(plt.Rectangle((0.04, 0.04), .575, .015, ls="--", ec="k", fc="none",
+                           # transform=ax.transAxes))
+                mark_inset(ax, ax_inset, loc1=2, loc2=4, fc="none", ec="0.5")
+            # plt.legend()
+            plt.show()
+
+            
     def residuals(c_w, y):
         error = y - func(c_w)
         print(f'Error {np.linalg.norm(error)}')
@@ -1756,7 +1794,7 @@ def plot_test_leg_sigm(c_w=None, ftnval_sig_leg=None, ftnval_leg=None, m=None, n
 if __name__ == "__main__":
         
     # COMPLETE DCB
-    if True:
+    if False:
         test_dcb_vs_fem(no_pan=4, no_terms=10, plies=1, disp_mag=1, a2=0.015, no_y_gauss=200, grid_x=200)
 
     # DCB TEST
@@ -1806,16 +1844,17 @@ if __name__ == "__main__":
                             # a2 = 0.5, no_y_gauss=300, grid_x=1000, kw=1e5)
                 
     # Fitting arbitary curves using different sets of shape functions
-    if False:
+    if True:
         # res_x, ier = test_leg_sigm(res_x_prev=None, del_d_fit=del_d_fit_interp)
         
         # Plotting stuff 
         if True:
-            m = 19
-            n = 2
+            # m = 10
+            n = 8
             c2 = 15
-            # ftnval_sig_leg = f'ftn_val_mn_{m}_{n}_c2_{c2}'
-            # ftnval_leg = f'legen_ftn_val_mn_{m}_{n}_c2_{c2}'
-            plot_test_leg_sigm(c_w=None, ftnval_sig_leg=legen_ftn_val_mn_19_2_c2_15, ftnval_leg=None, m=m, n=n, c2=c2, del_d_fit=del_d_fit_interp)
-            # plot_test_leg_sigm(c_w=None, ftnval_sig_leg=locals()[ftnval_sig_leg], ftnval_leg=locals()[ftnval_leg], m=m, n=n, c2=c2)
-            # plot_test_leg_sigm(c_w=res_x, m=m, n=n, c2=c2, del_d_fit=del_d_fit_interp)
+            for m in [10,15]:
+                ftnval_sig_leg = f'ftn_val_mn_{m}_{n}_c2_{c2}'
+                ftnval_leg = f'legen_ftn_val_mn_{m}_{n}_c2_{c2}'
+                # plot_test_leg_sigm(c_w=None, ftnval_sig_leg=legen_ftn_val_mn_19_2_c2_15, ftnval_leg=None, m=m, n=n, c2=c2, del_d_fit=del_d_fit_interp)
+                plot_test_leg_sigm(c_w=None, ftnval_sig_leg=locals()[ftnval_sig_leg], ftnval_leg=locals()[ftnval_leg], m=m, n=n, c2=c2)
+                # plot_test_leg_sigm(c_w=res_x, m=m, n=n, c2=c2, del_d_fit=del_d_fit_interp)

@@ -18,6 +18,10 @@ import panels.modelDB as modelDB
 from panels.multidomain import connections
 from panels.multidomain.connections import kCSB_dmg
 
+from matplotlib import pyplot as plt
+
+from multiprocessing import Pool
+
 
 def default_field(panel, gridx, gridy):
     xs = linspace(0, panel.a, gridx)
@@ -32,6 +36,20 @@ def default_field(panel, gridx, gridy):
     ys = ys.ravel()
     return xs, ys, shape
 
+# DOESNT WORK
+def calc_kT_parallel(p, c, size):
+    silent = True
+    kT = 0
+    if p.row_start is None or p.col_start is None:
+        raise ValueError('Shell attributes "row_start" and "col_start" must be defined!')
+    # Both kC and kG are not symmetric now
+    kT += p.calc_kC(c=c, size=size, row0=p.row_start, col0=p.col_start,
+            silent=silent, finalize=False, NLgeom=True) # inc=inc,  - REMOVED bec not in shell
+    # print(f'kC {np.max(kT):.3e}')
+    kT += p.calc_kG(c=c, size=size, row0=p.row_start,
+            col0=p.col_start, silent=silent, finalize=False, NLgeom=True)
+    return kT
+    
 
 class MultiDomain(object):
     r"""Class for multi-domain semi-analytical approach
@@ -985,13 +1003,13 @@ class MultiDomain(object):
                 # FOR XCTE
                 Q_tot = Qx + Qy
                 # print(Q_tot)
-                # HARD CODED - WRONG - CHANGE
-                Q_int = Q_tot[:,-2]
+                # HARD CODED - WRONG - CHANGE 
+                Q_int = Q_tot[:,-2] # -2 is is to get the 2nd last one incase the deri at the tip being one sided deri is not as accurate
                 # print('WARNING QINT IS BEING RETURNED NOT FORCE')
                 
             
                 force_intgn = np.dot(weights_y, Q_int)*(eval_panel.b/2)
-                print(f'Force line int Qx = {force_intgn:.2f} WARNING: hardcoded for the tip!!!')
+                print(f'                Force line int Qx = {force_intgn:.2f} WARNING: hardcoded for the tip!!!')
                 
                 return force_intgn
                 # return Q_int, dy
@@ -1062,7 +1080,55 @@ class MultiDomain(object):
                 force_intgn = np.dot(weights_y, pz[:,-1])*(eval_panel.b/2)
                 print(f'Force line int qz (CK) {force_intgn} WARNING: hardcoded !!!')
             
-        return force_intgn
+            return force_intgn
+    
+    
+    def force_out_plane_damage(self, conn, c):
+        
+        for connecti in conn:
+            if connecti['func'] == 'SB_TSL':
+                no_x_gauss = connecti['no_x_gauss']
+                no_y_gauss = connecti['no_y_gauss']
+                tsl_type = connecti['tsl_type']
+                p_top = connecti['p1']
+                p_bot = connecti['p2']
+                k_i = connecti['k_i']
+                tau_o = connecti['tau_o']
+                G1c = connecti['G1c']
+                
+                # Gauss points and weights
+                x_gauss = np.zeros(no_x_gauss, dtype=np.float64)
+                weights_x = np.zeros(no_x_gauss, dtype=np.float64)
+                get_points_weights(no_x_gauss, x_gauss, weights_x)
+                
+                y_gauss = np.zeros(no_y_gauss, dtype=np.float64)
+                weights_y = np.zeros(no_y_gauss, dtype=np.float64)
+                get_points_weights(no_y_gauss, y_gauss, weights_y)
+                
+                if hasattr(self, "del_d"):
+                    kw_tsl, dmg_index, del_d = self.calc_k_dmg(c=c, pA=p_top, pB=p_bot, 
+                                         no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type, 
+                                         prev_max_del_d=self.del_d, k_i=k_i, tau_o=tau_o, G1c=G1c)
+                tau = np.multiply(kw_tsl, del_d)
+                
+                force_intgn = 0
+                
+                for pty in range(no_y_gauss):
+                    for ptx in range(no_x_gauss):
+                        # Makes it more efficient when reading data (kw_tsl) from memory as memory is read along a row
+                        # So also accessing memory in the same way helps it out so its not deleting and reaccessing the
+                        # same memory everytime. 
+                    
+                        weight = weights_x[ptx] * weights_y[pty]
+                        
+                        tau_xieta = tau[pty, ptx]
+                        #((p_top.a*p_top.b)/4) 
+                        force_intgn += weight * tau_xieta
+                    # print(f'Area integral force damage = {force_intgn}')
+                
+                print(f'                Area integral force damage = {force_intgn:.3e}')
+                return force_intgn
+            
         
         
     
@@ -1099,149 +1165,153 @@ class MultiDomain(object):
         
         # Looping through each connection pair 
         for connecti in conn:
-            # connecti = ith connection pair
-            p1_temp = connecti['p1']
-            p2_temp = connecti['p2']
-            # pA and pB are the two panels that are finally passed on
-            if p1_temp.col_start < p2_temp.col_start:
-                pA = p1_temp
-                pB = p2_temp
-            elif p1_temp.col_start > p2_temp.col_start:
-                pA = p2_temp
-                pB = p1_temp
-                if connecti['func'] == 'SB' or connecti['func'] == 'SB_TSL':
-                    pass
-                else:
-                    if 'xcte1' in connecti.keys() and 'xcte2' in connecti.keys():
-                        temp_xcte = connecti['xcte1']
-                        connecti['xcte1'] = connecti['xcte2']
-                        connecti['xcte2'] = temp_xcte
-                    # y needs to be tested
-                    if 'ycte1' in connecti.keys() and 'ycte2' in connecti.keys():
-                        temp_ycte = connecti['ycte1']
-                        connecti['ycte1'] = connecti['ycte2']
-                        connecti['ycte2'] = temp_ycte
-            
-            connection_function = connecti['func'] # Type of connection
-            
-            if connection_function == 'SSycte':
-                # ftn in panels/multidomain/connections/penalties.py
-                kt, kr = connections.calc_kt_kr(pA, pB, 'ycte') 
+            if connecti['func'] != 'SB_force':
+                # connecti = ith connection pair
+                p1_temp = connecti['p1']
+                p2_temp = connecti['p2']
+                # pA and pB are the two panels that are finally passed on
+                if p1_temp.col_start < p2_temp.col_start:
+                    pA = p1_temp
+                    pB = p2_temp
+                elif p1_temp.col_start > p2_temp.col_start:
+                    pA = p2_temp
+                    pB = p1_temp
+                    if connecti['func'] == 'SB' or connecti['func'] == 'SB_TSL':
+                        pass
+                    else:
+                        if 'xcte1' in connecti.keys() and 'xcte2' in connecti.keys():
+                            temp_xcte = connecti['xcte1']
+                            connecti['xcte1'] = connecti['xcte2']
+                            connecti['xcte2'] = temp_xcte
+                        # y needs to be tested
+                        if 'ycte1' in connecti.keys() and 'ycte2' in connecti.keys():
+                            temp_ycte = connecti['ycte1']
+                            connecti['ycte1'] = connecti['ycte2']
+                            connecti['ycte2'] = temp_ycte
                 
-                # ftn in panels/panels/multidomain/connections
-                # Eq 32 MD paper - expanding squares gives i^2, ij, ji and j^2 which form 
-                #       the 11, 12, 21 and 22 terms of the kC_conn matrix
-                # adds the penalty stiffness to ycte of panel pA position
-                kC_conn += connections.kCSSycte.fkCSSycte11(
-                        kt, kr, pA, connecti['ycte1'],
-                        size, row0=pA.row_start, col0=pA.col_start)
-                # adds the penalty stiffness to ycte of panel 1 and panel 2 coupling position
-                kC_conn += connections.kCSSycte.fkCSSycte12(
-                        kt, kr, pA, pB, connecti['ycte1'], connecti['ycte2'],
-                        size, row0=pA.row_start, col0=pB.col_start)
-                # adds the penalty stiffness to ycte of panel pB position
-                kC_conn += connections.kCSSycte.fkCSSycte22(
-                        kt, kr, pA, pB, connecti['ycte2'],
-                        size, row0=pB.row_start, col0=pB.col_start) 
-            
-            elif connection_function == 'SSxcte':
-                kt, kr = connections.calc_kt_kr(pA, pB, 'xcte')
-                # print('kt, kr XCTE', kt, kr)
-                # kt = 1*kt
-                # kr = 2.5*kr
-                kk = 1*kt
+                connection_function = connecti['func'] # Type of connection
+                
+                if connection_function == 'SSycte':
+                    # ftn in panels/multidomain/connections/penalties.py
+                    kt, kr = connections.calc_kt_kr(pA, pB, 'ycte') 
+                    
+                    # ftn in panels/panels/multidomain/connections
+                    # Eq 32 MD paper - expanding squares gives i^2, ij, ji and j^2 which form 
+                    #       the 11, 12, 21 and 22 terms of the kC_conn matrix
+                    # adds the penalty stiffness to ycte of panel pA position
+                    kC_conn += connections.kCSSycte.fkCSSycte11(
+                            kt, kr, pA, connecti['ycte1'],
+                            size, row0=pA.row_start, col0=pA.col_start)
+                    # adds the penalty stiffness to ycte of panel 1 and panel 2 coupling position
+                    kC_conn += connections.kCSSycte.fkCSSycte12(
+                            kt, kr, pA, pB, connecti['ycte1'], connecti['ycte2'],
+                            size, row0=pA.row_start, col0=pB.col_start)
+                    # adds the penalty stiffness to ycte of panel pB position
+                    kC_conn += connections.kCSSycte.fkCSSycte22(
+                            kt, kr, pA, pB, connecti['ycte2'],
+                            size, row0=pB.row_start, col0=pB.col_start) 
+                
+                elif connection_function == 'SSxcte':
+                    kt, kr = connections.calc_kt_kr(pA, pB, 'xcte')
+                    # print('kt, kr XCTE', kt, kr)
+                    # kt = 1*kt
+                    # kr = 2.5*kr
+                    kk = 1*kt
+        
+                    kt = 1e6 
+                    kr = 1e6
+                    # kk = 1e9
+                    # print(f'        Modified kt, kr, kk XCTE : {kt:.1e} {kr:.1e} {kk:.1e}')
+        
+                    kC_conn += connections.kCSSxcte.fkCSSxcte11(
+                            kt=kt, kr=kr, kk=kk, p1=pA, xcte1=connecti['xcte1'],
+                            size=size, row0=pA.row_start, col0=pA.col_start)
+                    kC_conn += connections.kCSSxcte.fkCSSxcte12(
+                            kt=kt, kr=kr, kk=kk, p1=pA, p2=pB, xcte1=connecti['xcte1'], xcte2=connecti['xcte2'],
+                            size=size, row0=pA.row_start, col0=pB.col_start)
+                    kC_conn += connections.kCSSxcte.fkCSSxcte22(
+                            kt=kt, kr=kr, kk=kk, p1=pA, p2=pB, xcte2=connecti['xcte2'],
+                            size=size, row0=pB.row_start, col0=pB.col_start)
+                
+                elif connection_function == 'BFycte':
+                    kt, kr = connections.calc_kt_kr(pA, pB, 'ycte')
+                    kC_conn += connections.kCBFycte.fkCBFycte11(
+                            kt, kr, pA, connecti['ycte1'],
+                            size, row0=pA.row_start, col0=pA.col_start)
+                    kC_conn += connections.kCBFycte.fkCBFycte12(
+                            kt, kr, pA, pB, connecti['ycte1'], connecti['ycte2'],
+                            size, row0=pA.row_start, col0=pB.col_start)
+                    kC_conn += connections.kCBFycte.fkCBFycte22(
+                            kt, kr, pA, pB, connecti['ycte2'],
+                            size, row0=pB.row_start, col0=pB.col_start)
+                
+                elif connection_function == 'BFxcte':
+                    kt, kr = connections.calc_kt_kr(pA, pB, 'xcte')
+                    kC_conn += connections.kCBFxcte.fkCBFxcte11(
+                            kt, kr, pA, connecti['xcte1'],
+                            size, row0=pA.row_start, col0=pA.col_start)
+                    kC_conn += connections.kCBFxcte.fkCBFxcte12(
+                            kt, kr, pA, pB, connecti['xcte1'], connecti['xcte2'],
+                            size, row0=pA.row_start, col0=pB.col_start)
+                    kC_conn += connections.kCBFxcte.fkCBFxcte22(
+                            kt, kr, pA, pB, connecti['xcte2'],
+                            size, row0=pB.row_start, col0=pB.col_start)
+                            
+                elif connection_function == 'SB': # or (connection_function == 'SB_TSL' and c is None):
+                    # c is None with SB_TSL implies the inital state of loading so no damage
+                    # so original SB connection still applies 
+                    
+                    kt, kr = connections.calc_kt_kr(pA, pB, 'bot-top')
+                    kt = 2e5 # same stiffness as TSL
+                    # print(f'        Modified kt SB :       {kt:.1e}')
+                    
+                    dsb = sum(pA.plyts)/2. + sum(pB.plyts)/2.
+                    kC_conn += connections.kCSB.fkCSB11(kt, dsb, pA,
+                            size, row0=pA.row_start, col0=pA.col_start)
+                    kC_conn += connections.kCSB.fkCSB12(kt, dsb, pA, pB,
+                            size, row0=pA.row_start, col0=pB.col_start)
+                    kC_conn += connections.kCSB.fkCSB22(kt, pA, pB,
+                            size, row0=pB.row_start, col0=pB.col_start)
+                
+                # Traction Seperation Law introduced at the interface
+                elif connection_function == 'SB_TSL': # and c is not None:
+                    # Executed when c is not None i.e some displacements have occured so damage 'might' be created
+                    tsl_type = connecti['tsl_type']
+                    k_i = connecti['k_i']
+                    tau_o = connecti['tau_o']
+                    G1c = connecti['G1c']
+                    
+                    no_x_gauss = connecti['no_x_gauss']
+                    no_y_gauss = connecti['no_y_gauss']
+                    p_top = connecti['p1']
+                    p_bot = connecti['p2']
     
-                kt = 1e6 
-                kr = 1e6
-                # kk = 1e9
-                # print(f'        Modified kt, kr, kk XCTE : {kt:.1e} {kr:.1e} {kk:.1e}')
-    
-                kC_conn += connections.kCSSxcte.fkCSSxcte11(
-                        kt=kt, kr=kr, kk=kk, p1=pA, xcte1=connecti['xcte1'],
-                        size=size, row0=pA.row_start, col0=pA.col_start)
-                kC_conn += connections.kCSSxcte.fkCSSxcte12(
-                        kt=kt, kr=kr, kk=kk, p1=pA, p2=pB, xcte1=connecti['xcte1'], xcte2=connecti['xcte2'],
-                        size=size, row0=pA.row_start, col0=pB.col_start)
-                kC_conn += connections.kCSSxcte.fkCSSxcte22(
-                        kt=kt, kr=kr, kk=kk, p1=pA, p2=pB, xcte2=connecti['xcte2'],
-                        size=size, row0=pB.row_start, col0=pB.col_start)
-            
-            elif connection_function == 'BFycte':
-                kt, kr = connections.calc_kt_kr(pA, pB, 'ycte')
-                kC_conn += connections.kCBFycte.fkCBFycte11(
-                        kt, kr, pA, connecti['ycte1'],
-                        size, row0=pA.row_start, col0=pA.col_start)
-                kC_conn += connections.kCBFycte.fkCBFycte12(
-                        kt, kr, pA, pB, connecti['ycte1'], connecti['ycte2'],
-                        size, row0=pA.row_start, col0=pB.col_start)
-                kC_conn += connections.kCBFycte.fkCBFycte22(
-                        kt, kr, pA, pB, connecti['ycte2'],
-                        size, row0=pB.row_start, col0=pB.col_start)
-            
-            elif connection_function == 'BFxcte':
-                kt, kr = connections.calc_kt_kr(pA, pB, 'xcte')
-                kC_conn += connections.kCBFxcte.fkCBFxcte11(
-                        kt, kr, pA, connecti['xcte1'],
-                        size, row0=pA.row_start, col0=pA.col_start)
-                kC_conn += connections.kCBFxcte.fkCBFxcte12(
-                        kt, kr, pA, pB, connecti['xcte1'], connecti['xcte2'],
-                        size, row0=pA.row_start, col0=pB.col_start)
-                kC_conn += connections.kCBFxcte.fkCBFxcte22(
-                        kt, kr, pA, pB, connecti['xcte2'],
-                        size, row0=pB.row_start, col0=pB.col_start)
-                        
-            elif connection_function == 'SB': # or (connection_function == 'SB_TSL' and c is None):
-                # c is None with SB_TSL implies the inital state of loading so no damage
-                # so original SB connection still applies 
-                
-                kt, kr = connections.calc_kt_kr(pA, pB, 'bot-top')
-                kt = 2e5 # same stiffness as TSL
-                # print(f'        Modified kt SB :       {kt:.1e}')
-                
-                dsb = sum(pA.plyts)/2. + sum(pB.plyts)/2.
-                kC_conn += connections.kCSB.fkCSB11(kt, dsb, pA,
-                        size, row0=pA.row_start, col0=pA.col_start)
-                kC_conn += connections.kCSB.fkCSB12(kt, dsb, pA, pB,
-                        size, row0=pA.row_start, col0=pB.col_start)
-                kC_conn += connections.kCSB.fkCSB22(kt, pA, pB,
-                        size, row0=pB.row_start, col0=pB.col_start)
-            
-            # Traction Seperation Law introduced at the interface
-            elif connection_function == 'SB_TSL': # and c is not None:
-                # Executed when c is not None i.e some displacements have occured so damage 'might' be created
-                tsl_type = connecti['tsl_type']
-                
-                no_x_gauss = connecti['no_x_gauss']
-                no_y_gauss = connecti['no_y_gauss']
-                p_top = connecti['p1']
-                p_bot = connecti['p2']
-
-                # ATTENTION: pA NEEDS to be the top one and pB, the bottom panel
-                if hasattr(self, "del_d"):
-                    kw_tsl, dmg_index, del_d = self.calc_k_dmg(c=c, pA=p_top, pB=p_bot, 
-                                         no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type, 
-                                         prev_max_del_d=self.del_d)
+                    # ATTENTION: pA NEEDS to be the top one and pB, the bottom panel
+                    if hasattr(self, "del_d"):
+                        kw_tsl, dmg_index, del_d = self.calc_k_dmg(c=c, pA=p_top, pB=p_bot, 
+                                             no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type, 
+                                             prev_max_del_d=self.del_d, k_i=k_i, tau_o=tau_o, G1c=G1c)
+                    else:
+                        kw_tsl, dmg_index, del_d = self.calc_k_dmg(c=c, pA=p_top, pB=p_bot, 
+                                             no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type,
+                                             prev_max_del_d=None, k_i=k_i, tau_o=tau_o, G1c=G1c)
+                    
+                    # print(f'   kw MD class {np.min(kw_tsl):.1e}      dmg {np.max(dmg_index):.3f}')
+                    
+                    # print('kc_conn_MD')
+                    dsb = sum(pA.plyts)/2. + sum(pB.plyts)/2.
+                    kC_conn += connections.kCSB_dmg.fkCSB11_dmg(dsb=dsb, p1=pA,
+                            size=size, row0=pA.row_start, col0=pA.col_start,
+                            no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, kw_tsl=kw_tsl)
+                    kC_conn += connections.kCSB_dmg.fkCSB12_dmg(dsb=dsb, p1=pA, p2=pB,
+                            size=size, row0=pA.row_start, col0=pB.col_start, 
+                            no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, kw_tsl=kw_tsl)
+                    kC_conn += connections.kCSB_dmg.fkCSB22_dmg(p1=pA, p2=pB,
+                            size=size, row0=pB.row_start, col0=pB.col_start, 
+                            no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, kw_tsl=kw_tsl)
+                    
                 else:
-                    kw_tsl, dmg_index, del_d = self.calc_k_dmg(c=c, pA=p_top, pB=p_bot, 
-                                         no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type,
-                                         prev_max_del_d=None)
-                
-                # print(f'   kw MD class {np.min(kw_tsl):.1e}      dmg {np.max(dmg_index):.3f}')
-                
-                # print('kc_conn_MD')
-                dsb = sum(pA.plyts)/2. + sum(pB.plyts)/2.
-                kC_conn += connections.kCSB_dmg.fkCSB11_dmg(dsb=dsb, p1=pA,
-                        size=size, row0=pA.row_start, col0=pA.col_start,
-                        no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, kw_tsl=kw_tsl)
-                kC_conn += connections.kCSB_dmg.fkCSB12_dmg(dsb=dsb, p1=pA, p2=pB,
-                        size=size, row0=pA.row_start, col0=pB.col_start, 
-                        no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, kw_tsl=kw_tsl)
-                kC_conn += connections.kCSB_dmg.fkCSB22_dmg(p1=pA, p2=pB,
-                        size=size, row0=pB.row_start, col0=pB.col_start, 
-                        no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, kw_tsl=kw_tsl)
-                
-            else:
-                raise ValueError(f'{connection_function} not recognized. Provide a correct function if you expect results')
+                    raise ValueError(f'{connection_function} not recognized. Provide a correct function if you expect results')
 
         if finalize:
             kC_conn = finalize_symmetric_matrix(kC_conn)
@@ -1357,23 +1427,45 @@ class MultiDomain(object):
         size = self.get_size()
         kT = 0
         #TODO use multiprocessing.Pool here
-        for p in self.panels:
-            if p.row_start is None or p.col_start is None:
-                raise ValueError('Shell attributes "row_start" and "col_start" must be defined!')
-            # Both kC and kG are not symmetric now
-            kT += p.calc_kC(c=c, size=size, row0=p.row_start, col0=p.col_start,
-                    silent=silent, finalize=False, NLgeom=True) # inc=inc,  - REMOVED bec not in shell
-            kT += p.calc_kG(c=c, size=size, row0=p.row_start,
-                    col0=p.col_start, silent=silent, finalize=False, NLgeom=True)
+        
+        # Parallelizing doesnt work
+        parallelize = False
+            # Parallelizing the calc of kT of all panels separately
+                # Only parallelize this if the main function is not parallized. Otherwise parallelize that 
+                # so that many runs can be performed simultaneously and this runs on one core
+        if not parallelize:
+            for p in self.panels:
+                if p.row_start is None or p.col_start is None:
+                    raise ValueError('Shell attributes "row_start" and "col_start" must be defined!')
+                # Both kC and kG are not symmetric now
+                kT += p.calc_kC(c=c, size=size, row0=p.row_start, col0=p.col_start,
+                        silent=silent, finalize=False, NLgeom=True) # inc=inc,  - REMOVED bec not in shell
+                # print(f'kC {np.max(kT):.3e}')
+                kT += p.calc_kG(c=c, size=size, row0=p.row_start,
+                        col0=p.col_start, silent=silent, finalize=False, NLgeom=True)
+                # print(f'kC {np.max(kT):.3e}')
+        
+        # DOESNT WORK - error in pickling
+        if parallelize:
+            ftn_arg = [(p, c, size) for p in self.panels]
+            with Pool() as pool:
+                kT_panels = pool.starmap(calc_kT_parallel, ftn_arg)
+                print(type(kT_panels))
+                # the pool is processing its inputs in parallel, close() and join() 
+                #can be used to synchronize the main process 
+                #with the task processes to ensure proper cleanup.
+                pool.close()
+                pool.join()
+            
         if finalize:
             kT = finalize_symmetric_matrix(kT)
         if kC_conn is None:
             kC_conn = self.get_kC_conn(c=c)
         kT += kC_conn
+        # print(f'kCconn {np.max(kC_conn):.3e}')
         self.kT = kT
         msg('finished!', level=2, silent=silent)
         return kT
-
 
     def calc_fint(self, c, silent=True, inc=1., kC_conn=None):
         msg('Calculating internal forces for assembly...', level=2, silent=silent)
@@ -1405,6 +1497,105 @@ class MultiDomain(object):
         msg('finished!', level=2, silent=silent)
         return fext
 
+
+    def calc_fext_dmg(self, conn, c, prev_max_del_d):
+        '''
+            Calculates the fext term used to simulate a connection between the two domains
+            whose force varies based on the damage - This is to be used as an alternate method
+            to connecting the damage domains in the SB_dmg connection
+
+        Returns
+        -------
+        None.
+
+        '''
+        
+        # size of the complete fext vector
+        size = self.get_size()
+        # External force vector but with just the contribution of the terms forcing the connection
+        fext_conn_force = np.zeros(size, dtype=np.float64) # A vector bec size = single integer
+
+        # Looping through each connection pair 
+        for connecti in conn:
+            if connecti['func'] == 'SB_force':
+                p = connecti['p1']
+                no_x_gauss = connecti['no_x_gauss']
+                no_y_gauss = connecti['no_y_gauss']
+                tsl_type = connecti['tsl_type']
+                k_i = connecti['k_i']
+                
+                # panel info
+                # col0 = p.col_start
+                # col1 = col0 + p.get_size()
+                
+                # Calc traction 
+                kw_tsl, dmg_index, corrected_max_del_d, T_tsl = self.calc_traction(
+                    c=c, pA=p, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type,
+                    prev_max_del_d=prev_max_del_d, k_i=k_i)
+                
+                model = p.model
+                if not model in modelDB.db.keys():
+                    raise ValueError('{} is not a valid model option'.format(model))
+                db = modelDB.db
+                fg = db[model]['field'].fg # model is the model (name) to be used, specified in the shell object
+                # Field is in \panels\panels\models
+                
+                g = np.zeros((5, p.get_size()), dtype=np.float64)
+                
+                # Gauss points and weights
+                xis = np.zeros(no_x_gauss, dtype=np.float64)
+                weights_xi = np.zeros(no_x_gauss, dtype=np.float64)
+                etas = np.zeros(no_y_gauss, dtype=np.float64)
+                weights_eta = np.zeros(no_y_gauss, dtype=np.float64)
+                
+                get_points_weights(no_x_gauss, xis, weights_xi)
+                get_points_weights(no_y_gauss, etas, weights_eta)
+                
+                for pty in range(no_y_gauss):
+                    for ptx in range(no_x_gauss):
+                        # Makes it more efficient when reading data (kw_tsl) from memory as memory is read along a row
+                        # So also accessing memory in the same way helps it out so its not deleting and reaccessing the
+                        # same memory everytime. 
+                        
+                        # Takes the correct index instead of the location
+                        xi = xis[ptx]
+                        eta = etas[pty]
+                        
+                        xvar = (xi + 1)*p.a/2
+                        yvar = (eta + 1)*p.b/2
+
+                        weight = weights_xi[ptx] * weights_eta[pty]
+                        
+                        # Extracting the correct Traction (T) for the specific location
+                            # Currently, the outer loop of y and inner of x, causes it to go through all x for a single y
+                            # That is going through all col for a single row then onto the next row
+                            # (as per x, y and results by calc_results)
+                        T = T_tsl[pty, ptx]
+                        
+                        # fg is in terms of x and y not xi and eta
+                        fg(g, xvar, yvar, p)
+                            # Essentially does this and returns g:
+                                # for j in range(n):
+                                #     for i in range(m):
+                                #         col = DOF*(j*m + i)
+                                #         g[0, col+0] = fu[i]*gu[j]
+                                #         g[1, col+1] = fv[i]*gv[j]
+                                #         g[2, col+2] = fw[i]*gw[j]
+                                #         g[3, col+2] = -(2/a)*fw_xi[i]*gw[j]
+                                #         g[4, col+2] = -(2/b)*fw[i]*gw_eta[j]
+                                
+                        # Shape function of all the w terms evaluated at that specific point
+                        sw = g[2,:]
+                        
+                        fext_conn_force[p.row_start : p.row_end] += fext_conn_force[p.row_start : p.row_end] + (p.a*p.b/4)*weight*sw*T
+                
+            # else:
+            #     connection_function = connecti['func']
+            #     raise ValueError(f'{connection_function} not recognized. Provide a correct function if you expect results')
+        
+        return fext_conn_force
+
+
     def calc_separation(self, res_pan_top, res_pan_bot):
         
         '''
@@ -1424,13 +1615,19 @@ class MultiDomain(object):
         
         return del_d
     
-    def calc_k_dmg(self, c, pA, pB, no_x_gauss, no_y_gauss, tsl_type, prev_max_del_d):
+    
+    def calc_k_dmg(self, c, pA, pB, no_x_gauss, no_y_gauss, tsl_type, prev_max_del_d, k_i=None, tau_o=None, G1c=None):
         
         '''
             Calculates the damaged k_tsl and the damage index
             
             Input:
                 prev_max_del_d = Max separation for the previous converged NR iteration
+                
+                
+            NOTE: Currently this only works for 1 contact region bec of the way del_d is being stored in the 
+                MD object. To ensure that it works for multiple connected domamins, it needs to be stored with the 
+                shell object instead and modify the rest accordingly
         '''
         
         # Calculating the displacements of each panel
@@ -1445,35 +1642,167 @@ class MultiDomain(object):
         # prev_max_del_d is already the max over all disp steps at each integration point
         if prev_max_del_d is not None:
             max_del_d = np.amax(np.array([prev_max_del_d, del_d_curr]), axis = 0)
-            # Consider only doing it if del_d is +ve as -ve doesnt create any damage
+            # TODO: Consider only doing it if del_d is +ve as -ve doesnt create any damage
         else: 
             max_del_d = del_d_curr.copy()
 
         # print(f'calc_k_dmg: Before del_d min {np.min(max_del_d)}')
         
         # Rewriting negative displacements and setting them to zero before the positive displ at the right end (tip) 
+        corrected_max_del_d = max_del_d.copy()
         if True:
-            corrected_max_del_d = max_del_d.copy()
-            if np.min(max_del_d) <= 0: # only for negative dipls
-                for i in range(np.shape(max_del_d)[0]):
+            for i in range(np.shape(max_del_d)[0]):
+                if np.min(max_del_d[i,:]) <= 0: # only for negative dipls
                     corrected_max_del_d[i, 0:np.argwhere(corrected_max_del_d[i,:]<=0)[-1][0] + 1] = 0
                     # [-1] to get the last negative position; [0] to convert it from an array to int; 
                     # +1 to include the last negative value and set it to 0
                 
         
-        print(f'calc_k_dmg: Updated del_d -- min {np.min(corrected_max_del_d)} -- max {np.max(corrected_max_del_d):.3e}')
+        # print(f'calc_k_dmg: Updated del_d -- min {np.min(corrected_max_del_d)} -- max {np.max(corrected_max_del_d):.3e}')
         
         # Calculating stiffness grid
-        kw_tsl, dmg_index = connections.calc_kw_tsl(pA=pA, pB=pB, tsl_type=tsl_type, del_d=corrected_max_del_d)
+        kw_tsl, dmg_index = connections.calc_kw_tsl(pA=pA, pB=pB, tsl_type=tsl_type, k_i=k_i, del_d=corrected_max_del_d, tau_o=tau_o, G1c=G1c)
         
         return kw_tsl, dmg_index, corrected_max_del_d
+        
+    
+    
+    def calc_traction_stiffness(self, kw_tsl, corrected_max_del_d):
+        '''
+            Calculates traction for the approach where SB_TSL connection is used
+        '''
+        tau = np.multiply(kw_tsl, corrected_max_del_d)
+        
+        return tau 
+    
+        
+    
+    def calc_traction(self, c, pA, no_x_gauss, no_y_gauss, tsl_type, prev_max_del_d, k_i=None):
+        '''
+            ONLY FOR FEXT_DMG - For panels with the SB_TSL connection, use calc_k_dmg and multiply kw_tsl 
+                and corrected_max_del_d OR use calc_traction_stiffness()
 
+        Returns
+        -------
+        None.
 
+        '''
+        
+        # After the first iteration - once it has solved for c
+        if c is not None:
+            # Calculating the displacements of each panel
+            res_pan_top = self.calc_results(c=c, eval_panel=pA, vec='w', 
+                                    no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss)
+            # Assuming:
+            #     - the left most end is SS at the very least
+            #     - top and bottom panel's displacements are symmetric about the middle
+            
+            # Separation for the current NR iteration
+            del_d_curr = 2*res_pan_top['w'][0]
+            
+            print(f'calc_traction: max del_d_curr {np.max(del_d_curr)}')
+            
+            # Initilizing prev max with 0 if c exists but no prev max del_d (useful for the first displ step
+                # where c exists but there is no prev max del_d)
+            if prev_max_del_d is None:
+                prev_max_del_d = np.zeros_like(del_d_curr)
+        
+            # Considering max del_d for all displacement/load steps
+            # prev_max_del_d is already the max over all disp steps at each integration point
+            max_del_d = np.amax(np.array([prev_max_del_d, del_d_curr]), axis = 0)
+            # TODO: Consider only doing it if del_d is +ve as -ve doesnt create any damage
+            print(f'calc_traction: max max_del_d {np.max(max_del_d)}')
+        
+            # Rewriting negative displacements and setting them to zero before the positive displ at the right end (tip) 
+            if True:
+                corrected_max_del_d = max_del_d.copy()
+                for i in range(np.shape(max_del_d)[0]):
+                    # Changed - moved inside the loop to prevent errors if no negative element exists in that row
+                    if np.min(max_del_d[i,:]) <= 0: # only for negative dipls
+                        corrected_max_del_d[i, 0:np.argwhere(corrected_max_del_d[i,:]<=0)[-1][0] + 1] = 0
+                        # [-1] to get the last negative position; [0] to convert it from an array to int; 
+                        # +1 to include the last negative value and set it to 0
+            print(f'calc_traction: max corrected_max_del_d {np.max(corrected_max_del_d)}')
+            # print(f'calc_k_dmg: Updated del_d -- min {np.min(corrected_max_del_d)} -- max {np.max(corrected_max_del_d):.3e}')
+             
+        
+        # Used when fext is to be calc before the first NR iteration - set all del_d = 0 so no traction force
+        else:
+            corrected_max_del_d = np.zeros((no_y_gauss, no_x_gauss))
+                 
+        # Calculating stiffness grid
+        kw_tsl, dmg_index = connections.calc_kw_tsl(pA=pA, pB=None, tsl_type=tsl_type, k_i=k_i, del_d=corrected_max_del_d)
+        
+        T_tsl = np.multiply(kw_tsl, corrected_max_del_d)
+        
+        return kw_tsl, dmg_index, corrected_max_del_d, T_tsl
+    
+    
+    def calc_energy_dissipation(self, kw_tsl_j, kw_tsl_j_1, del_d_j, del_d_j_1, tau_o, k_i,
+                                no_x_gauss, no_y_gauss):
+        '''
+            Used to calc the energy dissipiation in the cohesive contact zone
+            
+            Input:
+                j = current displacement step
+                j_1 = previous displacement step
+        '''
+        
+        # Separation corresponding to damage onset
+        del_o = tau_o/k_i
+        
+        # Filters when the previous increment is before initation and the next is after initiation
+        f_j = del_d_j > del_o  
+        f_j_1 = del_o > del_d_j_1
+        f = np.multiply(f_j, f_j_1)     # Only when del_d_j > del_o > del_d_j_1
+        
+        tau_j = self.calc_traction_stiffness(kw_tsl=kw_tsl_j, corrected_max_del_d=del_d_j)
+        tau_j_1 = self.calc_traction_stiffness(kw_tsl=kw_tsl_j_1, corrected_max_del_d=del_d_j_1)
+        
+        # Shifting values of the (j-1)th iteration to the initiation peak of the TSL graph
+        del_d_j_1[f] = del_o
+        tau_j_1[f] = tau_o
+        
+        energy_dissp_intgn_pt = (np.multiply(tau_j_1, del_d_j) - np.multiply(tau_j, del_d_j_1))/2       
+        
+        # Gauss points and weights
+        x_gauss = np.zeros(no_x_gauss, dtype=np.float64)
+        weights_x = np.zeros(no_x_gauss, dtype=np.float64)
+        get_points_weights(no_x_gauss, x_gauss, weights_x)
+        
+        y_gauss = np.zeros(no_y_gauss, dtype=np.float64)
+        weights_y = np.zeros(no_y_gauss, dtype=np.float64)
+        get_points_weights(no_y_gauss, y_gauss, weights_y)
+        
+        energy_dissp = 0
+        
+        for pty in range(no_y_gauss):
+            for ptx in range(no_x_gauss):
+                # Makes it more efficient when reading data (kw_tsl) from memory as memory is read along a row
+                # So also accessing memory in the same way helps it out so its not deleting and reaccessing the
+                # same memory everytime. 
+            
+                weight = weights_x[ptx] * weights_y[pty] 
+                #((p_top.a*p_top.b)/4) 
+                energy_dissp += weight * energy_dissp_intgn_pt[pty, ptx]
+        
+        print(f'                Area integral energy_dissp = {energy_dissp:.3f}')
+        print(np.max(energy_dissp_intgn_pt))
+        
+        # return energy_dissp
+        return np.max(energy_dissp_intgn_pt)
+        
+        
+        
+        
+        
+    
     def update_max_del_d(self, curr_max_del_d):
         '''
             Used to update the maximum del_d (over all loading histories) - this prevents exisiting 
             damage from vanishing when the updated separation predicts there is less separation than 
-            what was present earlier (as badly modelled self-healing materials aren't part of this thesis)
+            what was present earlier (as badly modelled self-healing materials aren't part of this thesis :) )
         '''
         self.del_d = curr_max_del_d
-        
+
+    

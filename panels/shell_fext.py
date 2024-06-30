@@ -104,11 +104,14 @@ def shell_fext(shell, inc, size, col0):
         # This modifies g (based on its memory address so nothing needs to be returned)
         fg(g, x, y, shell)
         # Essentially does this:
-            # g[0, col+0] = fu[i]*gu[j]
-            # g[1, col+1] = fv[i]*gv[j]
-            # g[2, col+2] = fw[i]*gw[j]
-            # g[3, col+2] = -(2/a)*fw_xi[i]*gw[j]
-            # g[4, col+2] = -(2/b)*fw[i]*gw_eta[j]
+            # for j in range(n):
+            #     for i in range(m):
+            #         col = DOF*(j*m + i)
+                    # g[0, col+0] = fu[i]*gu[j]
+                    # g[1, col+1] = fv[i]*gv[j]
+                    # g[2, col+2] = fw[i]*gw[j]
+                    # g[3, col+2] = -(2/a)*fw_xi[i]*gw[j]
+                    # g[4, col+2] = -(2/b)*fw[i]*gw_eta[j]
         fpt = np.array([[fx, fy, fz, 0, 0]])*inc_i
             # fx, fy and fz are defined in pd i.e. ku*up, kv*vp, kw*wp
         fext[col0:col1] += fpt.dot(g).ravel()
@@ -152,6 +155,7 @@ def shell_fext(shell, inc, size, col0):
                 fpt = np.array([[funcu(xvar), funcv(xvar), funcw(xvar), 0, 0]]) * inc_i # Bec funcu etc are ftns of x,y not xi,eta -- # (1x5)
                     # THis is k_i * u_i ... i = u,v,w
                     # funci = force due to that displ_i
+                # fg is in terms of x and y not xi and eta
                 fg(g, xvar, ycte, shell)
                 # Essentially does this:
                     # g[ fu[i]*gu[j],    fv[i]*gv[j],    fw[i]*gw[j],    -(2/a)*fw_xi[i]*gw[j],   -(2/b)*fw[i]*gw_eta[j] ]

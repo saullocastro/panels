@@ -429,7 +429,7 @@ class Shell(object):
         if c is not None:
             check_c(c, size)
             analytical_kC = False
-        # ??????????
+        # For variable stiffness laminates
         if ABDnxny is not None:
             analytical_kC = False
         # For NL Geos, KC (and not KC0) needs to be used so only do it numerically
@@ -476,13 +476,13 @@ class Shell(object):
                 analytical_kG = False
             # This calc KG0 - Geo stiff mat at initial membrane stress state (SA formulation paper - eq 12) and adds it to K0 calc earlier
             
-            # WHY IS KG0 ADDED TO KC ???????????????????????????
-            if analytical_kG:
-                kC += matrices.fkG0(self.Nxx_cte, self.Nyy_cte, self.Nxy_cte, self, size, row0, col0)
-            else:
-                kC += matrices_num.fkG_num(c_cte, ABDnxny, self,
-                        size, row0, col0, nx, ny, NLgeom,
-                        self.Nxx_cte, self.Nyy_cte, self.Nxy_cte)
+            # WHY IS KG0 ADDED TO KC ??????????????????????????? - Maybe its only for c_cte then uncomment it
+            # if analytical_kG:
+            #     kC += matrices.fkG0(self.Nxx_cte, self.Nyy_cte, self.Nxy_cte, self, size, row0, col0)
+            # else:
+            #     kC += matrices_num.fkG_num(c_cte, ABDnxny, self,
+            #             size, row0, col0, nx, ny, NLgeom,
+            #             self.Nxx_cte, self.Nyy_cte, self.Nxy_cte)
 
         if finalize:
             kC = finalize_symmetric_matrix(kC)
