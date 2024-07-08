@@ -559,3 +559,136 @@ def fkCSB22_dmg(object p1, object p2, int size, int row0, int col0,
     kCSB22 = coo_matrix((kCSB22v, (kCSB22r, kCSB22c)), shape=(size, size))
 
     return kCSB22
+
+
+
+def fcrack(object p_top, object p_bot, int size, double [:,::1] kw_tsl_i_1, double [:,::1] del_d_i_1, double [:,::1] kw_tsl_i, int no_x_gauss, int no_y_gauss):
+    # double[:,::1] defines the variable as a 2D, C contiguous memoryview of doubles
+    
+    cdef int m_top, n_top, m_bot, n_bot
+    cdef int i_top, j_top, i_bot, j_bot
+    cdef int row_start_top, row_start_bot
+    cdef double xi, eta, weight
+    cdef int ptx, pty, row
+    cdef double a_top, b_top, a_bot, b_bot
+    
+    cdef double x1u_top, x1ur_top, x2u_top, x2ur_top, x1u_bot, x1ur_bot, x2u_bot, x2ur_bot
+    cdef double x1v_top, x1vr_top, x2v_top, x2vr_top, x1v_bot, x1vr_bot, x2v_bot, x2vr_bot
+    cdef double x1w_top, x1wr_top, x2w_top, x2wr_top, x1w_bot, x1wr_bot, x2w_bot, x2wr_bot
+    cdef double y1u_top, y1ur_top, y2u_top, y2ur_top, y1u_bot, y1ur_bot, y2u_bot, y2ur_bot
+    cdef double y1v_top, y1vr_top, y2v_top, y2vr_top, y1v_bot, y1vr_bot, y2v_bot, y2vr_bot
+    cdef double y1w_top, y1wr_top, y2w_top, y2wr_top, y1w_bot, y1wr_bot, y2w_bot, y2wr_bot
+    
+    # Only single power of SF so only A. No B needed like for u*u
+    cdef double fAw_top, fAw_bot 
+    cdef double gAw_top, gAw_bot
+
+    cdef double [::1] fcrack
+    
+    cdef double del_d_i_1_iter, kw_tsl_i_1_iter, kw_tsl_i_iter
+    
+    cdef double [:] weights_xi, weights_eta, xis, etas
+    
+    m_top = p_top.m
+    n_top = p_top.n
+    m_bot = p_bot.m
+    n_bot = p_bot.n
+    
+    a_top = p_top.a
+    b_top = p_top.b
+    a_bot = p_bot.a
+    b_bot = p_bot.b
+    
+    row_start_top = p_top.row_start
+    row_start_bot = p_bot.row_start
+    
+    # Panel top (ends in top)
+    x1u_top = p_top.x1u ; x1ur_top = p_top.x1ur ; x2u_top = p_top.x2u ; x2ur_top = p_top.x2ur
+    x1v_top = p_top.x1v ; x1vr_top = p_top.x1vr ; x2v_top = p_top.x2v ; x2vr_top = p_top.x2vr
+    x1w_top = p_top.x1w ; x1wr_top = p_top.x1wr ; x2w_top = p_top.x2w ; x2wr_top = p_top.x2wr
+    y1u_top = p_top.y1u ; y1ur_top = p_top.y1ur ; y2u_top = p_top.y2u ; y2ur_top = p_top.y2ur
+    y1v_top = p_top.y1v ; y1vr_top = p_top.y1vr ; y2v_top = p_top.y2v ; y2vr_top = p_top.y2vr
+    y1w_top = p_top.y1w ; y1wr_top = p_top.y1wr ; y2w_top = p_top.y2w ; y2wr_top = p_top.y2wr
+
+    # Panel bot (ends in bot)
+    x1u_bot = p_bot.x1u ; x1ur_bot = p_bot.x1ur ; x2u_bot = p_bot.x2u ; x2ur_bot = p_bot.x2ur
+    x1v_bot = p_bot.x1v ; x1vr_bot = p_bot.x1vr ; x2v_bot = p_bot.x2v ; x2vr_bot = p_bot.x2vr
+    x1w_bot = p_bot.x1w ; x1wr_bot = p_bot.x1wr ; x2w_bot = p_bot.x2w ; x2wr_bot = p_bot.x2wr
+    y1u_bot = p_bot.y1u ; y1ur_bot = p_bot.y1ur ; y2u_bot = p_bot.y2u ; y2ur_bot = p_bot.y2ur
+    y1v_bot = p_bot.y1v ; y1vr_bot = p_bot.y1vr ; y2v_bot = p_bot.y2v ; y2vr_bot = p_bot.y2vr
+    y1w_bot = p_bot.y1w ; y1wr_bot = p_bot.y1wr ; y2w_bot = p_bot.y2w ; y2wr_bot = p_bot.y2wr
+    
+    # Initializing gauss points, weights
+    xis = np.zeros(no_x_gauss, dtype=DOUBLE)
+    weights_xi = np.zeros(no_x_gauss, dtype=DOUBLE)
+    etas = np.zeros(no_y_gauss, dtype=DOUBLE)
+    weights_eta = np.zeros(no_y_gauss, dtype=DOUBLE)
+
+    # Calc gauss points and weights
+    leggauss_quad(no_x_gauss, &xis[0], &weights_xi[0])
+    leggauss_quad(no_y_gauss, &etas[0], &weights_eta[0])
+    
+    fcrack = np.zeros(size, dtype=DOUBLE)
+    
+    with nogil:
+        
+        # TOP Panel
+        for ptx in range(no_x_gauss):
+            for pty in range(no_y_gauss):
+                # Takes the correct index instead of the location
+                xi = xis[ptx]
+                eta = etas[pty]
+    
+                weight = weights_xi[ptx] * weights_eta[pty]
+                
+                # Extracting the correct values (later in fcrack's eqn) [pty, ptx]
+                    # Currently, the outer loop of x and inner of y, causes it to go through all y for a single x
+                    # That is going through all rows for a single col then onto the next col
+                    # (as per x, y and results by calc_results)
+                del_d_i_1_iter = del_d_i_1[pty, ptx]
+                kw_tsl_i_1_iter = kw_tsl_i_1[pty, ptx]
+                kw_tsl_i_iter = kw_tsl_i[pty, ptx]
+                
+                for j_top in range(n_top):
+                    gAw_top = f(j_top, eta, y1w_top, y1wr_top, y2w_top, y2wr_top)
+                    
+                    for i_top in range(m_top):
+                        fAw_top = f(i_top, xi, x1w_top, x1wr_top, x2w_top, x2wr_top)
+                        
+                        row = row_start_top + DOF*(j_top*m_top + i_top)
+                        
+                        fcrack[row+2] += (weight*a_top*b_top/4) * 0.5 * (del_d_i_1_iter*(kw_tsl_i_1_iter - kw_tsl_i_iter)) * (fAw_top * gAw_top)
+        
+        # BOT Panel
+        for ptx in range(no_x_gauss):
+            for pty in range(no_y_gauss):
+                # Takes the correct index instead of the location
+                xi = xis[ptx]
+                eta = etas[pty]
+    
+                weight = weights_xi[ptx] * weights_eta[pty]
+                
+                # Extracting the correct values (later in fcrack's eqn) [pty, ptx]
+                    # Currently, the outer loop of x and inner of y, causes it to go through all y for a single x
+                    # That is going through all rows for a single col then onto the next col
+                    # (as per x, y and results by calc_results)
+                del_d_i_1_iter = del_d_i_1[pty, ptx]
+                kw_tsl_i_1_iter = kw_tsl_i_1[pty, ptx]
+                kw_tsl_i_iter = kw_tsl_i[pty, ptx]
+                
+                
+                for j_bot in range(n_bot):
+                    gAw_bot = f(j_bot, eta, y1w_bot, y1wr_bot, y2w_bot, y2wr_bot)
+                    
+                    for i_bot in range(m_bot):
+                        fAw_bot = f(i_bot, xi, x1w_bot, x1wr_bot, x2w_bot, x2wr_bot)
+                        
+                        row = row_start_bot + DOF*(j_bot*m_bot + i_bot)
+                        
+                        fcrack[row+2] += -(weight*a_bot*b_bot/4) * 0.5 * (del_d_i_1_iter*(kw_tsl_i_1_iter - kw_tsl_i_iter)) * (fAw_bot * gAw_bot)
+    
+    
+    return fcrack
+    
+    
+    

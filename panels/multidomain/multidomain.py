@@ -1296,6 +1296,11 @@ class MultiDomain(object):
                                              no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type,
                                              prev_max_del_d=None, k_i=k_i, tau_o=tau_o, G1c=G1c)
                     
+                    # Overwriting kw_tsl to the original value
+                    if False:
+                        kw_tsl = np.zeros_like(del_d)
+                        kw_tsl[:,:] = k_i
+                        print(f'kw_tsl_overwrite kw_tsl min: {np.min(kw_tsl):.3e}')
                     # print(f'   kw MD class {np.min(kw_tsl):.1e}      dmg {np.max(dmg_index):.3f}')
                     
                     # print('kc_conn_MD')
@@ -1496,6 +1501,51 @@ class MultiDomain(object):
         self.fext = fext
         msg('finished!', level=2, silent=silent)
         return fext
+
+
+    def calc_fcrack(self, c_i, kw_tsl_i_1, del_d_i_1, conn):
+        '''
+        Calculates the force vector associated with the energy needed to create a crack
+        
+        Parameters
+        ----------
+        c_i : TYPE
+            DESCRIPTION.
+        kw_tsl_i_1 : TYPE
+            DESCRIPTION.
+        del_d_i_1 : TYPE
+            DESCRIPTION.
+        conn : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        fcrack : TYPE
+            DESCRIPTION.
+
+        '''
+        size = self.get_size()
+        
+        for connecti in conn:
+            if connecti['func'] == 'SB_TSL':
+                no_x_gauss = connecti['no_x_gauss']
+                no_y_gauss = connecti['no_y_gauss']
+                tsl_type = connecti['tsl_type']
+                p_top = connecti['p1']
+                p_bot = connecti['p2']
+                k_i = connecti['k_i']
+                tau_o = connecti['tau_o']
+                G1c = connecti['G1c']
+                
+                kw_tsl_i, dmg_index_i, del_d_i = self.calc_k_dmg(c=c_i, pA=p_top, pB=p_bot, 
+                         no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type, prev_max_del_d=del_d_i_1,
+                         k_i=k_i, tau_o=tau_o, G1c=G1c)
+                
+                fcrack = connections.kCSB_dmg.fcrack(p_top, p_bot, size, np.ascontiguousarray(kw_tsl_i_1),
+                                                     np.ascontiguousarray(del_d_i_1), np.ascontiguousarray(kw_tsl_i), no_x_gauss, no_y_gauss)
+
+############### REMOVE SCALING FACTOR ######################################
+        return np.multiply(1,fcrack)
 
 
     def calc_fext_dmg(self, conn, c, prev_max_del_d):
@@ -1741,6 +1791,8 @@ class MultiDomain(object):
     def calc_energy_dissipation(self, kw_tsl_j, kw_tsl_j_1, del_d_j, del_d_j_1, tau_o, k_i,
                                 no_x_gauss, no_y_gauss):
         '''
+        INITIAL TESTS SUGGESTS THIS DOESNT WORK -- PROCEED WITH CAUTION 
+        
             Used to calc the energy dissipiation in the cohesive contact zone
             
             Input:

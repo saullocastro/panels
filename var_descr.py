@@ -13,7 +13,7 @@ i,j = row-wise positions for a single col within matrix
     j = outer (larger increments)
     i = inner (smaller increments - handles u v w)
     
-    This should be in the rows
+    This should be in the rows (not columns as shown)
             j = 0                  j = 1          j = 2 ...... j = n-1 (n terms since j controls y)
         -----------------------|------------|-----------|
         

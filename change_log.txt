@@ -253,11 +253,89 @@ DEV: family of sigmoid ftns; manually setting negative dipl = 0
 =======================================================================================
 =======================================================================================
 
-DEV:
+BUGFIX: Fixed updating of c and calc kT + DEV: fext connection (bugs exist)
 
-commit on: 14-06-24
+commit on: 30-06-24
 
-1.
 
-penalties.calc_kw_tsl:
-- Pass k_i as an argument as well, pB optional
+1. multidomain.py 
+-- force_out_plane_daamage : 
+---- Calc force by integrating the traction over the damaged interface - doesnt work as it needs to be scaled up and doesnt work for load reversals
+
+-- calc_KT: 
+---- Attemped parallelizing but doesnt work as some shell objs cant be pickled
+
+-- calc_fext_dmg:
+---- Calc fext term that is used as a connection instead of kSB_conn - doesnt work as intended
+
+-- calc_traction_stiffness:
+---- Calc traction when SB conn is used
+
+-- calc_traction:
+---- Calc traction for fext_dmg (when no SB conn is used)
+
+-- calc_energy_dissipation:
+---- Calculates energy dissipation per displacement increment from the traction separation curve
+
+2. shell.py:
+-- calc_kC:
+---- commented bit that was adding kG to kC (probably was only doing it for c_cte but not 100% sure)
+
+3. plot_dcb_damage.py: (NEW)
+-- Plotting code for test_dcb_damage
+
+4. penalties.calc_kw_tsl:
+- Pass k_i, tau_o, G1c as an argument as well, pB optional
+
+5. run-file-py.pbs:
+-- Run file for submission to the cluster
+
+6. test_dcb_before_opening_tsl:
+-- Added plotting code for zoomed in graphs
+
+7. test_dcb_damage:
+-- test_dcb_damage_prop:
+---- BUG FIX: Updating c, kT after each NR increment
+---- Save variables at the end of each run, and when the run time is close to the cluster end wall time
+---- Cleaned up code and only have test_dcb_damage_prop - All other functions moved to test_dcb_damage_support_and_fext.py
+---- Parallelized it to have multiple runs in parallel for the cluster - support to generate pool arguments
+
+8. test_dcb_damage_support_and_fext.py
+-- Stuff that was oriignally in test_dcb_damage is now moved here
+-- Includes:
+---- test_dcb_damage_prop_fext_conn (using a connecting force at the interface rather than the kSB_conn
+---- postprocess_results_damage (post process results of test_dcb_damage by using c as the input)
+
+
+
+
+=======================================================================================
+=======================================================================================
+=======================================================================================
+=======================================================================================
+
+DEV: fcrack included in residual NR
+TODO: Change max del_d beign stored to max dmg_index (reversal needs to be redone)
+
+commit on: 08-07-24
+
+1. kCSB_dmg.pyx:
+-- fcrack (NEW):
+---- Calculates the force vector associated with the creation of the crack surface
+
+2. multidomain.py:
+-- calc_fcrack (NEW):
+---- Facilitates the calculation of the force vector associated with the creation of the crack surface by calling kCSB_dmg.fcrack
+
+-- get_kC_conn:
+---- Added option to prevent the degraded k from being used in the SB connection - Turned OFF currently
+
+3. test_dcb_damage.py:
+-- test_dcb_damage_prop_fcrack (NEW):
+---- Test code for DCB that includes the fcrack term in the residual terms etc
+
+4. plot_test_dcb_damage.py:
+-- Can convert file names (strings) to latex math for plotting
+
+
+

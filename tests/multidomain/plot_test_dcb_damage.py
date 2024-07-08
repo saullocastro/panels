@@ -30,11 +30,11 @@ np.set_printoptions(formatter={'float': lambda x: "{0:0.2f}".format(x)})
 
 
 
-animate = False
+animate = True
 
 if not animate:
     # Plotting a set of multiple results
-    if False:
+    if True:
         # os.chdir('C:/Users/natha/OneDrive - Delft University of Technology/Fokker Internship/_Thesis/_Results/Raw Results/DCB Damage/3 pan/G1c_112e-2-v2_code')
         
         # Load variables
@@ -50,15 +50,11 @@ if not animate:
             os.chdir('C:/Users/natha/OneDrive - Delft University of Technology/Fokker Internship/_Thesis/_Results/Raw Results/DCB Damage/3 pan')
             FEM = np.load('FEM.npy')
         if True:
-            os.chdir('C:/Users/natha/OneDrive - Delft University of Technology/Fokker Internship/_Thesis/_Results/Raw Results/DCB Damage/3 pan/v3_p3_m15_10_ki1e4_tauo67_wpts15 - nx_ny')
-            all_filename_1 = [f'p3_m15_10_ki1e4_tauo67_nx{nx:.0f}_ny{ny:.0f}_wpts15' for nx, ny in zip([25,30,40,50,60,80],[12,15,20,25,30,40])]
+            os.chdir('C:/Users/natha/OneDrive - Delft University of Technology/Fokker Internship/_Thesis/_Results/Raw Results/DCB Damage/v4 code - force crack/p3_m15_8_ki1e4_tauo67_nx60_ny30_wptsITER_G1c112')
+            all_filename_1 = [f'p3_m15_8_ki1e4_tauo67_nx60_ny30_wpts{wpts:.0f}_G1c112' for wpts in [25,30,45,50]]
             for filename in all_filename_1:
                 globals()[f'force_intgn_{filename}'] = np.load(f'force_intgn_{filename}.npy')
-        if False:
-            os.chdir('C:/Users/natha/OneDrive - Delft University of Technology/Fokker Internship/_Thesis/_Results/Raw Results/DCB Damage/3 pan/v3_G1c_112e-2_witer_test - tau0 67 NOT 87')
-            all_filename_2 = [f'p3_m15_10_ki1e4_tauo87_nx60_ny30_wpts{wpts:.0f}' for wpts in [30,45,60,80,100,120,150,180]]
-            for filename in all_filename_2:
-                globals()[f'force_intgn_{filename}'] = np.load(f'force_intgn_{filename}.npy')
+                globals()[f'force_intgn_dmg_{filename}'] = np.load(f'force_intgn_dmg_{filename}.npy')
 
         all_filename = all_filename_1 #+ all_filename_2
             
@@ -93,16 +89,28 @@ if not animate:
         # plt.figure(figsize=(10,7))
         fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(10,7))
         for filename in all_filename:
-            plt.plot(locals()[f'force_intgn_{filename}'][:,0], locals()[f'force_intgn_{filename}'][:,1], label=filename[filename.find('tauo67_') +7 : filename.find('_wpts')]) # removing starting _ from filename
+            # plt.plot(locals()[f'force_intgn_{filename}'][:,0], locals()[f'force_intgn_{filename}'][:,1], 
+            #          label=filename[filename.find('tauo67_') +7 : filename.find('_wpts')]) # removing starting _ from filename
+            if False: # For nx ny iter
+                label_unformatted = filename[filename.find('tauo67_') +7 : filename.find('_wpts')]
+                label_formatted = label_unformatted.replace('_', ' ')
+                label_formatted = label_formatted.replace('nx', '$n_x$=')
+                label_formatted = label_formatted.replace('ny', '$n_y$=')
+            if True:
+                label_unformatted = filename[filename.find('ny30_') +5 : filename.find('_G1c')]
+                label_formatted = label_unformatted.replace('_', ' ')
+                label_formatted = label_formatted.replace('wpts', '$w_{iter}$=')
+            plt.plot(locals()[f'force_intgn_dmg_{filename}'][:,0], 23*locals()[f'force_intgn_dmg_{filename}'][:,1], 
+                      label=label_formatted)
         plt.plot(FEM[:,0], FEM[:,1], label='FEM')
-        plt.title(r'$G_{1c}$=1.12 $w_{iter}=$15 $k_i$=1e4 $\tau_o$=67', fontsize=14)
+        plt.title(r'$p$3 $m$=15,8 $k_i$=1e4 $\tau_o$=67 $G_{1c}$=1.12 $n_x$=60 $n_x$=30 scaled=23', fontsize=14)
         plt.ylabel('Force [N]', fontsize=14)
         plt.xlabel('Displacement [mm]', fontsize=14)
         plt.xticks(fontsize=14)
         plt.yticks(fontsize=14)
         plt.grid()
         plt.legend(fontsize=14)
-        if True:
+        if False:
                 ax_inset = inset_axes(ax, width="60%", height="50%",
                                        bbox_to_anchor=(.45 , .1, .8, .8),
                                        bbox_transform=ax.transAxes, loc=3)
@@ -119,18 +127,21 @@ if not animate:
         
         
     # Plotting a set of single results    
-    if True:
+    if False:
         if True:
             os.chdir('C:/Users/natha/OneDrive - Delft University of Technology/Fokker Internship/_Thesis/_Results/Raw Results/DCB Damage/3 pan')
             FEM = np.load('FEM.npy')
             
-        plt.figure(figsize=(11,8))
+        plt.figure(figsize=(10,7))
         
         plt.plot(FEM[:,0], FEM[:,1], label='FEM')
-        plt.plot(force_intgn_p3_m15_10_ki1e4_tauo67_nx50_ny25_wreverseloading[:,0], force_intgn_p3_m15_10_ki1e4_tauo67_nx50_ny25_wreverseloading[:,1], label=r'Reverse loading')
-        # plt.plot(force_intgn_p3_m15_10_ki1e4_tauo67_nx50_ny25_wpts15[:,0], force_intgn_p3_m15_10_ki1e4_tauo67_nx50_ny25_wpts15[:,1], label=r'$\tau$=67 $n_x$=50 $n_y$=20 $k_i$=1e4')
         
-        plt.title(r'$\tau$=67 $n_x$=50 $n_y$=25 $k_i$=1e4')
+        plt.plot(force_intgn_dmg_1posve_m15_8_w50_nx60_ny30[:42,0], 22.5*force_intgn_dmg_1posve_m15_8_w50_nx60_ny30[:42,1], 
+                 label=r'Area int (scaled 22.5)')
+        plt.plot(force_intgn_1posve_m15_8_w50_nx60_ny30[:42,0], force_intgn_1posve_m15_8_w50_nx60_ny30[:42,1], 
+                 label=r'Line int')
+        
+        plt.title(r'+1*fcrack $\tau$=67 $n_x$=60 $n_y$=30 $k_i$=1e4 m =15,8 w=50 - UNCONVERGED')
         plt.ylabel('Force [N]', fontsize=14)
         plt.xlabel('Displacement [mm]', fontsize=14)
         plt.xticks(fontsize=14)
@@ -138,11 +149,50 @@ if not animate:
         plt.grid()
         plt.legend(fontsize=14)
         plt.show()
-
+      
+    # Random plot 2
+    if False:
+        if True:
+            os.chdir('C:/Users/natha/OneDrive - Delft University of Technology/Fokker Internship/_Thesis/_Results/Raw Results/DCB Damage/3 pan')
+            FEM = np.load('FEM.npy')
+            
+        plt.figure(figsize=(10,7))
+        
+        plt.plot(FEM[:,0], FEM[:,1], label='FEM')
+        
+        plt.plot(force_intgn_dmg_1posve_m15_8_w50_nx60_ny30[:42,0], 22.5*force_intgn_dmg_1posve_m15_8_w50_nx60_ny30[:42,1], 
+                 label=r'Area (scaled 22.5) - $n_x$=60 $n_y$=30 w=50')
+        plt.plot(force_intgn_1posve_m15_8_w50_nx60_ny30[:42,0], force_intgn_1posve_m15_8_w50_nx60_ny30[:42,1], 
+                 label=r'Line - $n_x$=60 $n_y$=30 w=50')
+        
+        plt.plot(force_intgn_dmg_1posve_m15_8[:,0], 22.5*force_intgn_dmg_1posve_m15_8[:,1], 
+                 label=r'Area (scaled 22.5) - $n_x$=50 $n_y$=25 w=13')
+        plt.plot(force_intgn_1posve_m15_8[:42,0], force_intgn_1posve_m15_8[:,1], 
+                 label=r'Line - $n_x$=50 $n_y$=25 w=13')
+        
+        plt.plot(force_intgn_dmg_1posve_m15_8[:,0], 22.5*force_intgn_dmg_1posve_m15_8[:,1], 
+                 label=r'Area (scaled 22.5) - $n_x$=50 $n_y$=25 w=13')
+        plt.plot(force_intgn_1posve_m15_8[:42,0], force_intgn_1posve_m15_8[:,1], 
+                 label=r'Line - $n_x$=50 $n_y$=25 w=13')
+        
+        plt.plot(force_intgn_p3_m15_10_ki1e4_tauo67_nx60_ny30[:,0], force_intgn_p3_m15_10_ki1e4_tauo67_nx60_ny30[:,1], 
+                 label='Previous version')
+        
+        plt.title(r'+1*fcrack $\tau$=67  $k_i$=1e4 m =15,8 - UNCONVERGED')
+        plt.ylabel('Force [N]', fontsize=14)
+        plt.xlabel('Displacement [mm]', fontsize=14)
+        plt.xticks(fontsize=14)
+        plt.yticks(fontsize=14)
+        plt.grid()
+        plt.legend(fontsize=12)
+        plt.show()
+        
 
 
 # Animate results
-if animate:    
+if animate:
+    from mpl_toolkits.axes_grid1 import make_axes_locatable
+    
     def animate(i):
         curr_res = frames[i]
         max_res = np.max(curr_res)
@@ -162,9 +212,13 @@ if animate:
             possible_min_cbar = [1e-8, 1e-4,1e-3,0.5, np.max(globals()[animate_var])*1.1]
             vmax = min(list(filter(lambda x: x>max_res, possible_min_cbar)))
             vmin = np.min(globals()[animate_var])
-            
             im = ax.imshow(curr_res)
             fig.colorbar(im, cax=cax, format="{x:.2e}")
+        elif animate_var == 'tau_p3_m15_8_ki1e4_tauo67_nx60_ny30_wpts50_G1c112':
+            vmin = np.min(tau_p3_m15_8_ki1e4_tauo67_nx60_ny30_wpts50_G1c112)
+            vmax = np.max(tau_p3_m15_8_ki1e4_tauo67_nx60_ny30_wpts50_G1c112)
+            im = ax.imshow(curr_res)
+            fig.colorbar(im, cax=cax, format="{x:.2f}")
         else:
             vmin = min_res
             vmax = max_res
@@ -172,11 +226,11 @@ if animate:
         # fig.colorbar(im, cax=cax, format="{x:.2f}")
         im.set_data(curr_res)
         im.set_clim(vmin, vmax)
+        
+        # w_iter needs to be defined
         tx.set_text(f'{animate_var}     -   Disp={w_iter[i]:.2f} mm')
     
-    from mpl_toolkits.axes_grid1 import make_axes_locatable
-    
-    for animate_var in ['dmg_index__nx150_ny80']: #["dmg_index"]:#, "del_d"]:
+    for animate_var in ['tau_p3_m15_8_ki1e4_tauo67_nx60_ny30_wpts50_G1c112']: #["dmg_index"]:#, "del_d"]:
         
         fig = plt.figure()
         ax = fig.add_subplot(111)    
