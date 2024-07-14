@@ -18,6 +18,8 @@ from matplotlib import pyplot as plt
 import matplotlib.animation as animation
 import matplotlib as mpl
 from mpl_toolkits.axes_grid1.inset_locator import mark_inset, zoomed_inset_axes, inset_axes
+from matplotlib.markers import MarkerStyle
+from matplotlib.transforms import Affine2D
 
 # To generate mp4's
 import matplotlib
@@ -26,11 +28,15 @@ import matplotlib
 # Printing with reduced no of points (ease of viewing) - Suppress this to print in scientific notations and restart the kernel
 np.set_printoptions(formatter={'float': lambda x: "{0:0.2f}".format(x)})
 
+# To open pop up images - Ignore the syntax warning :)
+# %matplotlib qt 
+# For inline images
+# %matplotlib inline
 
 
 
 
-animate = True
+animate = False
 
 if not animate:
     # Plotting a set of multiple results
@@ -50,14 +56,19 @@ if not animate:
             os.chdir('C:/Users/natha/OneDrive - Delft University of Technology/Fokker Internship/_Thesis/_Results/Raw Results/DCB Damage/3 pan')
             FEM = np.load('FEM.npy')
         if True:
-            os.chdir('C:/Users/natha/OneDrive - Delft University of Technology/Fokker Internship/_Thesis/_Results/Raw Results/DCB Damage/v4 code - force crack/p3_m15_8_ki1e4_tauo67_nx60_ny30_wptsITER_G1c112')
-            all_filename_1 = [f'p3_m15_8_ki1e4_tauo67_nx60_ny30_wpts{wpts:.0f}_G1c112' for wpts in [25,30,45,50]]
+            foldername = 'p3_m15_8_ki1e4_tauoITER_nx60_ny30_wpts50_G1c112'
+            os.chdir('C:/Users/natha/OneDrive - Delft University of Technology/Fokker Internship/_Thesis/_Results/Raw Results/DCB Damage/v4 code - force crack/' + foldername)
+            all_filename_1 = [f'p3_m15_8_ki1e4_tauo{tauo:.0f}_nx60_ny30_wpts50_G1c112' for tauo in [47,67,77,87]]
+            for i in range(len(all_filename_1)):
+                all_filename_1[i] = all_filename_1[i].replace('+0','')
             for filename in all_filename_1:
+                print(filename)
                 globals()[f'force_intgn_{filename}'] = np.load(f'force_intgn_{filename}.npy')
                 globals()[f'force_intgn_dmg_{filename}'] = np.load(f'force_intgn_dmg_{filename}.npy')
 
         all_filename = all_filename_1 #+ all_filename_2
-            
+        
+        # Importing stuff where everything changes
         if False:
             os.chdir('C:/Users/natha/OneDrive - Delft University of Technology/Fokker Internship/_Thesis/_Results/Raw Results/DCB Damage/3 pan/v3/m15')
             ki_all = [1e5, 5e4, 1e4, 5e3]
@@ -89,21 +100,30 @@ if not animate:
         # plt.figure(figsize=(10,7))
         fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(10,7))
         for filename in all_filename:
-            # plt.plot(locals()[f'force_intgn_{filename}'][:,0], locals()[f'force_intgn_{filename}'][:,1], 
-            #          label=filename[filename.find('tauo67_') +7 : filename.find('_wpts')]) # removing starting _ from filename
+            plt.plot(locals()[f'force_intgn_{filename}'][:,0], locals()[f'force_intgn_{filename}'][:,1], 
+                      label='Line b='+filename[filename.find('p3_') + 3 : filename.find('_m')]) # removing starting _ from filename
+            
             if False: # For nx ny iter
                 label_unformatted = filename[filename.find('tauo67_') +7 : filename.find('_wpts')]
                 label_formatted = label_unformatted.replace('_', ' ')
                 label_formatted = label_formatted.replace('nx', '$n_x$=')
                 label_formatted = label_formatted.replace('ny', '$n_y$=')
-            if True:
-                label_unformatted = filename[filename.find('ny30_') +5 : filename.find('_G1c')]
+            if True: # tauo
+                label_unformatted = filename[filename.find('tauo')+0 : filename.find('_nx')]
                 label_formatted = label_unformatted.replace('_', ' ')
-                label_formatted = label_formatted.replace('wpts', '$w_{iter}$=')
-            plt.plot(locals()[f'force_intgn_dmg_{filename}'][:,0], 23*locals()[f'force_intgn_dmg_{filename}'][:,1], 
-                      label=label_formatted)
+                label_formatted = label_formatted.replace('tauo', r"$\tau_o$ = ")
+            if False: # ki
+                label_unformatted = filename[filename.find('ki') : filename.find('_tauo')]
+                label_formatted = label_unformatted.replace('_', ' ')
+                label_formatted = label_formatted.replace('ki', r"$k_i$ = ")
+            if False: # b
+                label_unformatted = filename[filename.find('p3_') + 2 : filename.find('_m')]
+                label_formatted = label_unformatted.replace('_', r"$b$ = ")
+                
+            # plt.plot(locals()[f'force_intgn_dmg_{filename}'][:,0], 325/(52/4)*locals()[f'force_intgn_dmg_{filename}'][:,1], 
+            #           label=label_formatted)
         plt.plot(FEM[:,0], FEM[:,1], label='FEM')
-        plt.title(r'$p$3 $m$=15,8 $k_i$=1e4 $\tau_o$=67 $G_{1c}$=1.12 $n_x$=60 $n_x$=30 scaled=23', fontsize=14)
+        plt.title(r'$p$3 $m$=15,8 $k_i$=1e4 $w_{iter}=50$ $G_{1c}$=1.12 $n_x$=60 $n_x$=30 scaled=25', fontsize=14)
         plt.ylabel('Force [N]', fontsize=14)
         plt.xlabel('Displacement [mm]', fontsize=14)
         plt.xticks(fontsize=14)
@@ -117,8 +137,9 @@ if not animate:
                 
                 # all_filename[1:5:2] + all_filename[4::2]
                 for filename in all_filename:
-                    ax_inset.plot(locals()[f'force_intgn_{filename}'][:,0], locals()[f'force_intgn_{filename}'][:,1], label=filename[filename.find('ny30_') +5 : ]) # removing starting _ from filename
-                ax_inset.set(xlim=[6,8], ylim=[172,202])
+                    ax_inset.plot(locals()[f'force_intgn_dmg_{filename}'][:,0], 23*locals()[f'force_intgn_dmg_{filename}'][:,1], 
+                              label=label_formatted)
+                ax_inset.set(xlim=[6,8], ylim=[165,180])
                 ax_inset.grid()
                 # ax_inset.legend()
                 mark_inset(ax, ax_inset, loc1=2, loc2=4, fc="none", ec="0.5")
@@ -193,7 +214,8 @@ if not animate:
 if animate:
     from mpl_toolkits.axes_grid1 import make_axes_locatable
     
-    def animate(i):
+    def animate_contourf(i):
+        # i = current frame number
         curr_res = frames[i]
         max_res = np.max(curr_res)
         min_res = np.min(curr_res)
@@ -229,25 +251,128 @@ if animate:
         
         # w_iter needs to be defined
         tx.set_text(f'{animate_var}     -   Disp={w_iter[i]:.2f} mm')
+        
+        
+    def animate_plot_scatter(i):
+        scatter_plot.set_offsets(np.stack([globals()[animate_var][i,0], scaling_fct*globals()[animate_var][i,1]]).T)
+        
+        # line_plot.set_xdata(globals()[animate_var][:i+1,0])
+        # line_plot.set_ydata(scaling_fct*globals()[animate_var][:i+1,1])
+        
+        # return (scatter_plot)#, line_plot)
+        
     
-    for animate_var in ['tau_p3_m15_8_ki1e4_tauo67_nx60_ny30_wpts50_G1c112']: #["dmg_index"]:#, "del_d"]:
+    def animate_contourf_scatter_line(i):
+        # i = current frame number
         
-        fig = plt.figure()
-        ax = fig.add_subplot(111)    
-        div = make_axes_locatable(ax)
-        cax = div.append_axes('right', '5%', '5%')
+        scatter_plot.set_offsets(np.stack([globals()['force_intgn_dmg'+animate_var][i,0], 
+                                           scaling_fct*globals()['force_intgn_dmg'+animate_var][i,1]]).T)
         
-        frames = [] # for storing the generated images
-        for i in range(np.shape(locals()[animate_var])[2]):
-            frames.append(locals()[animate_var][:,:,i])
+        curr_res = frames[i]
+        vmin = np.min(globals()['tau'+animate_var])
+        vmax = np.max(globals()['tau'+animate_var])
+        im = ax1.imshow(curr_res)
+        fig.colorbar(im, cax=cax, format="{x:.2f}", ticks=np.linspace(vmin, vmax, 5))
+        im.set_data(curr_res)
+        im.set_clim(vmin, vmax)
+        
+        # w_iter needs to be defined
+        w_iter = globals()['force_intgn_dmg'+animate_var][:,0]
+        tx.set_text(f'Interface Traction    -   Disp={w_iter[i]:.2f} mm')
+        
+        # return scatter_plot
+    
+    # Creates contourf plots
+    if False:
+        for animate_var in ['tau_p3_m15_8_ki1e4_tauo67_nx60_ny30_wpts50_G1c112']: #["dmg_index"]:#, "del_d"]:
             
-        cv0 = frames[0]
-        im = ax.imshow(cv0) 
-        cb = fig.colorbar(im, cax=cax)
-        tx = ax.set_title('Frame 0')
+            fig = plt.figure()
+            ax = fig.add_subplot(1,1,1)    
+            div = make_axes_locatable(ax)
+            cax = div.append_axes('right', '5%', '5%')
             
-        ani = animation.FuncAnimation(fig, animate, frames=np.shape(locals()[animate_var])[2],
-                                      interval = 1000, repeat_delay=1000)
-        FFwriter = animation.FFMpegWriter(fps=2)
-        ani.save(f'{animate_var}.mp4', writer=FFwriter)
-        # ani.save(f'{animate_var}.gif', writer='imagemagick')
+            frames = [] # for storing the generated images
+            for i in range(np.shape(locals()[animate_var])[2]):
+                frames.append(locals()[animate_var][:,:,i])
+                
+            cv0 = frames[0]
+            im = ax.imshow(cv0) 
+            cb = fig.colorbar(im, cax=cax)
+            tx = ax.set_title('Frame 0') # Gets overwritten later
+                
+            ani = animation.FuncAnimation(fig, animate_contourf, frames=np.shape(locals()[animate_var])[2],
+                                          interval = 1000, repeat_delay=1000)
+            FFwriter = animation.FFMpegWriter(fps=2)
+            ani.save(f'{animate_var}.mp4', writer=FFwriter)
+            # ani.save(f'{animate_var}.gif', writer='imagemagick')
+            
+    # Creates line and scatter plots
+    if False:
+        for animate_var in ['force_intgn_dmg_p3_m15_8_ki1e4_tauo67_nx60_ny30_wpts50_G1c112']: #["dmg_index"]:#, "del_d"]:
+            
+            scaling_fct = 23
+            
+            fig = plt.figure()
+            ax = fig.add_subplot(1,1,1)    
+            
+            scatter_plot = ax.scatter(globals()[animate_var][0,0], scaling_fct*globals()[animate_var][0,1], 
+                                      c="r", marker=MarkerStyle('x', transform=Affine2D().rotate_deg(45)), s=50)
+            
+            # Animate the line as well
+            # line_plot = ax.plot(globals()[animate_var][0,0], scaling_fct*globals()[animate_var][0,1])[0]
+            
+            # Constant line plot
+            ax.plot(globals()[animate_var][:,0], scaling_fct*globals()[animate_var][:,1])
+            
+            # plt.rcParams.update({'font.size': 14})
+            ax.set(xlim=[0, 8], ylim=[0,200], xlabel='Displacement [mm]', ylabel='Force [N]')
+            
+                
+            ani = animation.FuncAnimation(fig=fig, func=animate_plot_scatter, frames=np.shape(globals()[animate_var])[0],
+                                          interval = 1000, repeat_delay=1000)
+            # here frames are number of frames, not actual frames
+            FFwriter = animation.FFMpegWriter(fps=2)
+            ani.save(f'{animate_var}.mp4', writer=FFwriter)
+            # ani.save(f'{animate_var}.gif', writer='imagemagick')
+    
+    # Creates both contourf and line/scatter plots
+    if True:
+        for animate_var in ['_p3_m15_8_ki1e4_tauo67_nx60_ny30_wpts50_G1c112']:
+            fig, (ax1, ax2) = plt.subplots(1,2, gridspec_kw={'width_ratios': [2, 1]}, figsize=(10, 4))
+            plt.subplots_adjust(bottom=0.05, left=0.05, right=0.95, top=0.95, wspace=0.5, hspace=0)
+            
+            # 1st plot with contourf plots
+            div = make_axes_locatable(ax1)
+            cax = div.append_axes('right', '5%', '5%')
+            
+            frames = [] # for storing the generated images
+            for i in range(np.shape(globals()['tau'+animate_var])[2]):
+                frames.append(globals()['tau'+animate_var][:,:,i])
+                
+            cv0 = frames[0]
+            im = ax1.imshow(cv0) 
+            cb = fig.colorbar(im, cax=cax)
+            tx = ax1.set_title('Frame 0') # Gets overwritten later
+            
+            # 2nd plot with the load displacement curve
+            scatter_plot = ax2.scatter(globals()['force_intgn_dmg'+animate_var][0,0], 
+                                      scaling_fct*globals()['force_intgn_dmg'+animate_var][0,1], 
+                                      c="r", marker=MarkerStyle('x', transform=Affine2D().rotate_deg(45)), s=50)
+            ax2.set(xlim=[0, 8], ylim=[0,200], xlabel='Displacement [mm]', ylabel='Force [N]')
+            ax2.plot(globals()['force_intgn_dmg'+animate_var][:,0], scaling_fct*globals()['force_intgn_dmg'+animate_var][:,1])
+            ax2.set_aspect('0.04')
+            
+            plt.suptitle(animate_var, y=0.95)
+
+# np.shape(globals()['force_intgn_dmg'+animate_var])[0]
+            ani = animation.FuncAnimation(fig=fig, func=animate_contourf_scatter_line, frames=np.shape(globals()['force_intgn_dmg'+animate_var])[0],
+                                          interval = 1000, repeat_delay=1000)
+            # here frames are number of frames, not actual frames
+            FFwriter = animation.FFMpegWriter(fps=2)
+            ani.save(f'{animate_var}.mp4', writer=FFwriter)
+
+
+
+        
+
+

@@ -1,0 +1,6 @@
+# f_crack_1st_term_p2_11
+# f_crack_1st_term_p2_11_num=1
+c += 1
+f_crack_1st_term_p2r[c] = row+0
+f_crack_1st_term_p2c[c] = col+2
+f_crack_1st_term_p2v[c] += -a_2*b_2*del_i_1*f2Aw*g2Aw*weight*(-k_i + k_i_1)/8

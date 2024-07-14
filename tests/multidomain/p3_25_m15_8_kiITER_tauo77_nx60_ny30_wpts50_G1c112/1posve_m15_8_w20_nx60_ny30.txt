@@ -1,0 +1,103 @@
+************************** IT HAS BEGUN - 1posve_m15_8_w20_nx60_ny30 ******************************
+for ki in [1e4, 5e4, 1e5, 5e5, 1e6]] 
+------------ wp = 0.010 ---------------
+       crisfield 6.6931e-02
+       crisfield 3.3517e-02
+       crisfield 1.6763e-02
+       crisfield 8.4382e-03
+       crisfield 5.9637e-03
+       crisfield 2.7558e-02
+       crisfield 1.8729e-01
+       crisfield 8.1679e-01
+       crisfield 9.9937e-01
+       crisfield 1.0000e+00
+       crisfield 1.0000e+00
+       crisfield 1.0000e+00
+????????????????????? ABORTED 1posve_m15_8_w20_nx60_ny30 ?????????????????????????????
+************************** WAKE UP! ITS DONE! - 1posve_m15_8_w20_nx60_ny30 ******************************
+************************** IT HAS BEGUN - 1posve_m15_8_w20_nx60_ny30 ******************************
+for ki in [1e4, 5e4, 1e5, 5e5, 1e6]] 
+------------ wp = 0.010 ---------------
+       crisfield 6.6931e-02
+       crisfield 3.3517e-02
+       crisfield 1.6763e-02
+       crisfield 8.4382e-03
+       crisfield 5.9637e-03
+       crisfield 2.7558e-02
+       crisfield 1.8729e-01
+       crisfield 8.1679e-01
+       crisfield 9.9937e-01
+       crisfield 1.0000e+00
+       crisfield 1.0000e+00
+       crisfield 1.0000e+00
+????????????????????? ABORTED 1posve_m15_8_w20_nx60_ny30 ?????????????????????????????
+************************** WAKE UP! ITS DONE! - 1posve_m15_8_w20_nx60_ny30 ******************************
+************************** IT HAS BEGUN - 1posve_m15_8_w20_nx60_ny30 ******************************
+for ki in [1e4, 5e4, 1e5, 5e5, 1e6]] 
+------------ wp = 0.010 ---------------
+************************** IT HAS BEGUN - 1posve_m15_8_w20_nx60_ny30 ******************************
+for ki in [1e4, 5e4, 1e5, 5e5, 1e6]] 
+------------ wp = 0.010 ---------------
+       crisfield 1.0493e-05
+0.0% - 1posve_m15_8_w20_nx60_ny30 -- wp=0.010 -- max DI -0.0000
+       Force - Line: 0.375823865752526 -- Area: force_intgn_dmg[disp_iter_no, 1]
+------------ wp = 1.505 ---------------
+       crisfield 7.2794e-03
+       crisfield 3.2939e-03
+       crisfield 2.1702e-02
+       crisfield 4.8801e-01
+       crisfield 2.7095e-01
+       crisfield 9.9993e-01
+************************** IT HAS BEGUN - 1posve_m15_8_w20_nx60_ny30 ******************************
+for ki in [1e4, 5e4, 1e5, 5e5, 1e6]] 
+------------ wp = 0.010 ---------------
+       crisfield 1.0493e-05
+0.0% - 1posve_m15_8_w20_nx60_ny30 -- wp=0.010 -- max DI -0.0000
+       Force - Line: 0.375823865752526 -- Area: force_intgn_dmg[disp_iter_no, 1]
+------------ wp = 1.505 ---------------
+       crisfield 6.8217e-03
+       crisfield 3.3910e-05
+5.6% - 1posve_m15_8_w20_nx60_ny30 -- wp=1.505 -- max DI -0.0000
+       Force - Line: 56.076569469693126 -- Area: force_intgn_dmg[disp_iter_no, 1]
+------------ wp = 3.000 ---------------
+       crisfield 3.7045e-03
+       crisfield 3.4084e-05
+11.1% - 1posve_m15_8_w20_nx60_ny30 -- wp=3.000 -- max DI 0.1464
+       Force - Line: 111.21969448957722 -- Area: force_intgn_dmg[disp_iter_no, 1]
+------------ wp = 3.400 ---------------
+       crisfield 3.2687e-03
+       crisfield 1.8087e-05
+16.7% - 1posve_m15_8_w20_nx60_ny30 -- wp=3.400 -- max DI 0.2836
+       Force - Line: 117.77936786588319 -- Area: force_intgn_dmg[disp_iter_no, 1]
+************************** IT HAS BEGUN - 1posve_m15_8_w20_nx60_ny30 ******************************
+for ki in [1e4, 5e4, 1e5, 5e5, 1e6]] 
+------------ wp = 0.010 ---------------
+       crisfield 1.0493e-05
+0.0% - 1posve_m15_8_w20_nx60_ny30 -- wp=0.010 -- max DI -0.0000
+       Force - Line: 0.375823865752526 -- Area: force_intgn_dmg[disp_iter_no, 1]
+------------ wp = 1.505 ---------------
+************************** IT HAS BEGUN - 1posve_m15_8_w20_nx60_ny30 ******************************
+for ki in [1e4, 5e4, 1e5, 5e5, 1e6]] 
+------------ wp = 0.010 ---------------
+       crisfield 6.6931e-02
+       crisfield 3.3517e-02
+       crisfield 1.6763e-02
+       crisfield 8.4382e-03
+       crisfield 5.9637e-03
+       crisfield 2.7558e-02
+       crisfield 1.8729e-01
+       crisfield 8.1679e-01
+       crisfield 9.9937e-01
+       crisfield 1.0000e+00
+       crisfield 1.0000e+00
+       crisfield 1.0000e+00
+       crisfield 1.0000e+00
+       crisfield 1.0000e+00
+       crisfield 1.0000e+00
+       crisfield 1.0000e+00
+       crisfield nan
+       crisfield nan
+       crisfield nan
+------------ wp = 0.010 ---------------
+------------ wp = 0.010 ---------------
+------------ wp = 0.010 ---------------

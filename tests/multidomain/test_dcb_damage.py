@@ -1,8 +1,11 @@
+local_run = True # True implies running on local device and not the cluster
+
 import sys
-sys.path.append('C:/Users/natha/Documents/GitHub/panels')
-sys.path.append('..\\..')
 import os
-os.chdir('C:/Users/natha/Documents/GitHub/panels/tests/multidomain')
+if local_run:
+    sys.path.append('C:/Users/natha/Documents/GitHub/panels')
+    sys.path.append('..\\..')
+    os.chdir('C:/Users/natha/Documents/GitHub/panels/tests/multidomain')
 
 import numpy as np
 from structsolve import solve
@@ -34,6 +37,11 @@ from multiprocessing import Pool
 
 import sys
 import time
+
+# To open pop up images - Ignore the syntax warning :)
+# %matplotlib qt 
+# For inline images
+# %matplotlib inline
 
 # Modified Newton-Raphson method
 def scaling(vec, D):
@@ -705,7 +713,7 @@ def test_dcb_damage_prop(no_pan, no_terms, filename='', k_i=None, tau_o=None, no
 
 
 
-def test_dcb_damage_prop_fcrack(no_pan, no_terms, filename='', k_i=None, tau_o=None, no_x_gauss=None, no_y_gauss=None, w_iter_no_pts=None, G1c=None):
+def test_dcb_damage_prop_fcrack(phy_dim, no_terms, filename='', k_i=None, tau_o=None, no_x_gauss=None, no_y_gauss=None, w_iter_no_pts=None, G1c=None):
 
     '''
         Damage propagation from a DCB with a precrack
@@ -715,9 +723,27 @@ def test_dcb_damage_prop_fcrack(no_pan, no_terms, filename='', k_i=None, tau_o=N
         All units in MPa, N, mm
     '''    
     
-    print(f'************************** BEGUN {filename} ******************************')
+    foldername = 'p3_25_m15_8_kiITER_tauo77_nx60_ny30_wpts50_G1c112'
+    generation_code = 'for ki in [1e4, 5e4, 1e5, 5e5, 1e6]]'
+    
+    if not os.path.exists(foldername):
+        os.makedirs(foldername)
+    os.chdir(foldername)
+                    
+    # Log to check on multiple runs at once 
+    if not local_run:
+        log_file = open(f'{filename}.txt', 'a')
+        log_file.write(f'************************** IT HAS BEGUN - {filename} ******************************\n')
+        log_file.write(f'{generation_code} \n')
+        log_file.close()
+    
+    print(f'************************** IT HAS BEGUN - {filename} ******************************')
+    sys.stdout.flush()
     # Start time
     start_time = time.time()
+    
+    no_pan = phy_dim[0]
+    b = phy_dim[1]
     
     # Properties
     E1 = (138300. + 128000.)/2. # MPa
@@ -728,7 +754,7 @@ def test_dcb_damage_prop_fcrack(no_pan, no_terms, filename='', k_i=None, tau_o=N
 
     # Plate dimensions (overall)
     a = 100 # mm
-    b = 25  # mm
+    # b = 25  # mm
     # Dimensions of panel 1 and 2
     a1 = 52
     a2 = 0.015
@@ -901,16 +927,17 @@ def test_dcb_damage_prop_fcrack(no_pan, no_terms, filename='', k_i=None, tau_o=N
             ]
     if no_pan == 3:
         conn = [
-         # skin-skin
+           # skin-skin
            dict(p1=top1, p2=top2, func='SSxcte', xcte1=top1.a, xcte2=0),
            dict(p1=top2, p2=top3, func='SSxcte', xcte1=top2.a, xcte2=0),
            dict(p1=bot1, p2=bot2, func='SSxcte', xcte1=bot1.a, xcte2=0),
            dict(p1=bot2, p2=bot3, func='SSxcte', xcte1=bot2.a, xcte2=0),
-           dict(p1=top1, p2=bot1, func='SB_TSL', tsl_type = 'bilinear', no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, k_i=k_i, tau_o=tau_o, G1c=G1c)
+           dict(p1=top1, p2=bot1, func='SB_TSL', tsl_type = 'bilinear', no_x_gauss=no_x_gauss, 
+                no_y_gauss=no_y_gauss, k_i=k_i, tau_o=tau_o, G1c=G1c, k_o=k_i, del_o=tau_o/k_i, del_f=2*G1c/tau_o)
         ]
     if no_pan == 4:
         conn = [
-         # skin-skin
+           # skin-skin
            dict(p1=top1, p2=top2, func='SSxcte', xcte1=top1.a, xcte2=0),
            dict(p1=top2, p2=top3, func='SSxcte', xcte1=top2.a, xcte2=0),
            dict(p1=top3, p2=top4, func='SSxcte', xcte1=top3.a, xcte2=0),
@@ -1005,8 +1032,8 @@ def test_dcb_damage_prop_fcrack(no_pan, no_terms, filename='', k_i=None, tau_o=N
     if w_iter_no_pts is None:
         w_iter_no_pts = 150
         
-    w_iter = np.unique(np.concatenate((np.linspace(0.01,3,int(0.2*w_iter_no_pts)), np.linspace(3,5,int(0.4*w_iter_no_pts)), 
-                                        np.linspace(5,8,int(0.8*w_iter_no_pts)))))
+    w_iter = np.unique(np.concatenate((np.linspace(0.01,3,int(0.15*w_iter_no_pts)), np.linspace(3,5,int(0.3*w_iter_no_pts)), 
+                                        np.linspace(5,8,int(0.55*w_iter_no_pts)))))
     # w_iter = np.linspace(0.01,8,100)
     # w_iter = [0.01, 2]
     # Reverse loading 
@@ -1027,11 +1054,18 @@ def test_dcb_damage_prop_fcrack(no_pan, no_terms, filename='', k_i=None, tau_o=N
     displ_bot_root = np.zeros((50,200,np.shape(w_iter)[0]))
     c_all = np.zeros((size, np.shape(w_iter)[0]))
     
-    quasi_NR = True
+    quasi_NR = False
+    NR_kT_update = 3 # After how many iterations should kT be updated
+    crisfield_test_fail = False
+    
+
     
     # Displacement Incrementation
     for wp in w_iter: 
         # print(f'------------ wp = {wp:.3f} ---------------')
+        log_file = open(f'{filename}.txt', 'a')
+        log_file.write(f'------------ wp = {wp:.3f} ---------------\n')
+        log_file.close()
         
         # Prescribed Displacements
         if True:
@@ -1071,11 +1105,14 @@ def test_dcb_damage_prop_fcrack(no_pan, no_terms, filename='', k_i=None, tau_o=N
             kC_conn = assy.get_kC_conn(c=c)
             # Inital fint (0 bec c=0)
             fint = np.asarray(assy.calc_fint(c=c, kC_conn=kC_conn))
+            # Stiffness matrix for the crack creation 
+            kcrack = assy.calc_kcrack(conn=conn)
             # force vector due to the crack creation
-            fcrack = assy.calc_fcrack(c_i=c, kw_tsl_i_1=kw_tsl[:,:,disp_iter_no-1], del_d_i_1=del_d[:,:,disp_iter_no-1], conn=conn)
+            fcrack = assy.calc_fcrack(c_i=c, kw_tsl_i_1=kw_tsl[:,:,disp_iter_no-1], 
+                                      del_d_i_1=del_d[:,:,disp_iter_no-1], conn=conn, kcrack=kcrack)
             # Residual with disp terms
             Ri = fint - fext + kCp*c + fcrack
-            kT = assy.calc_kT(c=c, kC_conn=kC_conn) 
+            kT = assy.calc_kT(c=c, kC_conn=kC_conn) #+ kcrack
         # Initial step where ci = zeros
         if disp_iter_no == 0 and np.max(ci) == 0: 
             # max(ci) bec if its already calc for an initial guess above, no need to repeat it - 
@@ -1096,6 +1133,8 @@ def test_dcb_damage_prop_fcrack(no_pan, no_terms, filename='', k_i=None, tau_o=N
         D = k0.diagonal() # For convergence - calc at beginning of load increment
         
         count = 0 # Tracks number of NR iterations 
+        
+        crisfield_test_res = np.zeros(1000)
 
         # Modified Newton Raphson Iteration
         while True:
@@ -1105,18 +1144,23 @@ def test_dcb_damage_prop_fcrack(no_pan, no_terms, filename='', k_i=None, tau_o=N
             c = ci + dc
             
             if quasi_NR:
-                if count == 0 or count % 2 == 0:
+                if count == 0 or count % NR_kT_update == 0:
                     kC_conn = assy.get_kC_conn(c=c)
+                    kcrack = assy.calc_kcrack(conn=conn) # should be const so maybe remove it outside the NR loop
             else:
                 kC_conn = assy.get_kC_conn(c=c)
+                kcrack = assy.calc_kcrack(conn=conn) # should be const so maybe remove it outside the NR loop
             fint = np.asarray(assy.calc_fint(c=c, kC_conn=kC_conn))
             # force vector due to the crack creation
-            fcrack = assy.calc_fcrack(c_i=c, kw_tsl_i_1=kw_tsl[:,:,disp_iter_no-1], del_d_i_1=del_d[:,:,disp_iter_no-1], conn=conn)
+            fcrack = assy.calc_fcrack(c_i=c, kw_tsl_i_1=kw_tsl[:,:,disp_iter_no-1], 
+                                      del_d_i_1=del_d[:,:,disp_iter_no-1], conn=conn)#, kcrack=kcrack)
             
             # Might need to calc fext here again if it changes per iteration when fext changes when not using kc_conn for SB
             Ri = fint - fext + kCp*c + fcrack
-            # print(f'Ri {np.linalg.norm(Ri)}')
-            
+            if local_run:
+                print(f'Ri {np.linalg.norm(Ri):.2e}')
+                print(f'pos sun:{np.linalg.norm(fint) + np.linalg.norm(kCp*c) + np.linalg.norm(fcrack):.2e} fint {np.linalg.norm(fint):.2e} kcp {np.linalg.norm(kCp*c):.2e} fcrack {np.linalg.norm(fcrack):.2e}')
+                print(f'fext {np.linalg.norm(fext):.2e}')
             # Extracting data out of the MD class for plotting etc 
                 # Damage considerations are already implemented in the Multidomain class functions kT, fint - no need to include anything externally
 
@@ -1125,22 +1169,50 @@ def test_dcb_damage_prop_fcrack(no_pan, no_terms, filename='', k_i=None, tau_o=N
             # print(f'    del_d min {np.min(del_d_iter)}  -- max {np.max(del_d_iter):.4f}')
             
             crisfield_test = scaling(Ri, D)/max(scaling(fext, D), scaling(fint + kCp*c + fcrack, D))
+            crisfield_test_res[count] = crisfield_test
             # print(np.shape(k0))
             # print(np.linalg.det(k0))
-            print(f'    crisfield {crisfield_test:.4e} ')
+            if local_run:
+                print(f'    crisfield {crisfield_test:.4e} ')
+            else:
+                log_file = open(f'{filename}.txt', 'a')
+                log_file.write(f'       crisfield {crisfield_test:.4e}\n')
+                log_file.close()
             if crisfield_test < epsilon:
                 break
             
             if quasi_NR:
-                if count == 0 or count % 2 == 0:
+                if count == 0 or count % NR_kT_update == 0:
                     kT = assy.calc_kT(c=c, kC_conn=kC_conn) 
-                    k0 = kT + kCp
+                    k0 = kT + kCp + kcrack
             else:
                 kT = assy.calc_kT(c=c, kC_conn=kC_conn) 
-                k0 = kT + kCp
+                k0 = kT + kCp + kcrack
             ci = c.copy()
             
             count += 1
+            
+            # Changing convergence criteria to prevent solutions from diverging
+                # Context: Current soltuions get close to epsilon before diverging
+            if False:
+                if crisfield_test_res[count-1] > crisfield_test_res[0] and crisfield_test_res[count-2] > crisfield_test_res[0]:
+                # Two consecutive crisfield values are larger than the starting guess and epsilon is still small enough, reset c and try again
+                    if epsilon < 1e-3:
+                        epsilon = epsilon*1.2
+                        count = 0
+                        # Updating c to converged c of the previous displacement step
+                        c = c_all[:,disp_iter_no-1]
+                        Ri = fint - fext + kCp*c + fcrack
+                        kT = assy.calc_kT(c=c, kC_conn=kC_conn) 
+                        k0 = kT + kCp
+                    else:
+                        log_file = open(f'{filename}.txt', 'a')
+                        log_file.write(f'ABORTED DUE TO DIVERGING RESULTS {filename}\n')
+                        log_file.close()
+                        crisfield_test_fail = True
+                        break
+            
+
             
             # ------------------ SAVING VARIABLES --------------------
             if True:
@@ -1164,8 +1236,26 @@ def test_dcb_damage_prop_fcrack(no_pan, no_terms, filename='', k_i=None, tau_o=N
                 # np.save(f'displ_bot_root_{filename}', displ_bot_root)
                 np.save(f'c_all_{filename}', c_all)
             
+            # Kills this run but prevents other runs in parallel from being killed due to errors
+            if False:
+                if crisfield_test >= 1:
+                    if True:
+                        np.save(f'dmg_index_{filename}', dmg_index)
+                        np.save(f'del_d_{filename}', del_d)
+                        np.save(f'kw_tsl_{filename}', kw_tsl)
+                        np.save(f'force_intgn_{filename}', force_intgn)
+                        np.save(f'force_intgn_dmg_{filename}', force_intgn_dmg)
+                        # np.save(f'displ_top_root_{filename}', displ_top_root)
+                        # np.save(f'displ_bot_root_{filename}', displ_bot_root)
+                        np.save(f'c_all_{filename}', c_all)
+                    
+                    crisfield_test_fail = True
+                    break
+            
             if count > 1000:
-                print('Unconverged Results !!!!!!!!!!!!!!!!!!!')
+                log_file = open(f'{filename}.txt', 'a')
+                log_file.write('Unconverged Results !!!!!!!!!!!!!!!!!!!\n')
+                log_file.close()
                 # return None, dmg_index, del_d, kw_tsl
                 if True:
                     np.save(f'dmg_index_{filename}', dmg_index)
@@ -1176,7 +1266,18 @@ def test_dcb_damage_prop_fcrack(no_pan, no_terms, filename='', k_i=None, tau_o=N
                     # np.save(f'displ_top_root_{filename}', displ_top_root)
                     # np.save(f'displ_bot_root_{filename}', displ_bot_root)
                     np.save(f'c_all_{filename}', c_all)
-                raise RuntimeError('NR didnt converged :(') 
+                # raise RuntimeError('NR didnt converged :(') 
+                print(f'{filename} -- NR didnt converged :(')
+                crisfield_test_fail = True
+                break
+        
+        if crisfield_test_fail is True:
+            print(f'????????????????????? ABORTED {filename} ?????????????????????????????')
+            log_file = open(f'{filename}.txt', 'a')
+            log_file.write(f'????????????????????? ABORTED {filename} ?????????????????????????????\n')
+            log_file.close()
+            sys.stdout.flush()
+            break
         
         # Edit: should be correct as it is 
                 # Ques: should first update max del d then calc kw_tsl etc ??
@@ -1195,12 +1296,16 @@ def test_dcb_damage_prop_fcrack(no_pan, no_terms, filename='', k_i=None, tau_o=N
         assy.update_max_del_d(curr_max_del_d=del_d[:,:,disp_iter_no])
         
         # kw_tsl[:,:,disp_iter_no], dmg_index[:,:,disp_iter_no], del_d[:,:,disp_iter_no] = assy.calc_k_dmg(c=c, pA=p_top, pB=p_bot, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type)
-        print(f'            {filename} -- wp={wp:.3f} {disp_iter_no/np.shape(w_iter)[0]*100:.1f}% -- max DI {np.max(dmg_index[:,:,disp_iter_no]):.4f}')
+        log_file = open(f'{filename}.txt', 'a')
+        log_file.write(f'{disp_iter_no/np.shape(w_iter)[0]*100:.1f}% - {filename} -- wp={wp:.3f} -- max DI {np.max(dmg_index[:,:,disp_iter_no]):.4f}\n')
+        log_file.close()
+        print(f'            {filename} {disp_iter_no/np.shape(w_iter)[0]*100:.1f}%')
         sys.stdout.flush()
         # print(f'        max del_d {np.max(del_d[:,:,disp_iter_no])}')
         # print(f'       min del_d {np.min(del_d[:,:,disp_iter_no])}')
         # print(f'        max kw_tsl {np.max(kw_tsl[:,:,disp_iter_no])}')
         
+
         
         # Force - TEMP - CHECK LATER AND EDIT/REMOVE
         if True:
@@ -1214,6 +1319,10 @@ def test_dcb_damage_prop_fcrack(no_pan, no_terms, filename='', k_i=None, tau_o=N
         if True:
             force_intgn_dmg[disp_iter_no, 0] = wp
             force_intgn_dmg[disp_iter_no, 1] = assy.force_out_plane_damage(conn=conn, c=c)
+            
+        log_file = open(f'{filename}.txt', 'a')
+        log_file.write(f'       Force - Line: {force_intgn[disp_iter_no, 1]} -- Area: force_intgn_dmg[disp_iter_no, 1]\n')
+        log_file.close()
         
         # Calc displ of top and bottom panels at each increment
         if True:
@@ -1249,8 +1358,12 @@ def test_dcb_damage_prop_fcrack(no_pan, no_terms, filename='', k_i=None, tau_o=N
         # np.save(f'displ_bot_root_{filename}', displ_bot_root)
         np.save(f'c_all_{filename}', c_all)
     
-    print(f'************************** COMPLETED {filename} ******************************')
+    print(f'************************** WAKE UP! ITS DONE! - {filename} ******************************')
     sys.stdout.flush()
+    
+    log_file = open(f'{filename}.txt', 'a')
+    log_file.write((f'************************** WAKE UP! ITS DONE! - {filename} ******************************\n'))
+    log_file.close()
     
     # ------------------ RESULTS AND POST PROCESSING --------------------
     
@@ -1354,16 +1467,16 @@ if __name__ == "__main__":
     # Connection as penalty stiffness
     if True:
         # Single test run
-        if False:
+        if False: # wo fcrack
             # test_dcb_non_linear(3, 4, 1)
             # kw_tsl, dmg_index = test_kw_tsl(1, 6, 1)
             dmg_index, del_d, kw_tsl, force_intgn, displ_top_root, displ_bot_root, c_all = test_dcb_damage_prop(no_pan=3, no_terms=[10,8], filename='', k_i=1e4, tau_o=67, no_x_gauss=50, no_y_gauss=25, w_iter_no_pts=15, G1c=1.12)
+        if True: # with fcrack
+            dmg_index, del_d, kw_tsl, force_intgn, displ_top_root, displ_bot_root, c_all = test_dcb_damage_prop_fcrack(phy_dim=[3,25], no_terms=[12,8], filename='1posve_m15_8_w20_nx60_ny30', k_i=1e4, tau_o=67, no_x_gauss=60, no_y_gauss=30, w_iter_no_pts=20, G1c=1.12)
+        
+        
+        # Parallelization of multiple runs
         if False:
-            dmg_index, del_d, kw_tsl, force_intgn, displ_top_root, displ_bot_root, c_all = test_dcb_damage_prop_fcrack(no_pan=3, no_terms=[15,8], filename='1posve_m15_8_w50_nx60_ny30', k_i=1e4, tau_o=67, no_x_gauss=60, no_y_gauss=30, w_iter_no_pts=38, G1c=1.12)
-        
-        
-        # Parallelization o fmultiple runs
-        if True:
             # test_dcb_damage_prop(no_pan, no_terms, filename='', k_i=None, tau_o=None, 
                                 # no_x_gauss=None, no_y_gauss=None, w_iter_no_pts=None):                
             if False:
@@ -1383,12 +1496,18 @@ if __name__ == "__main__":
                 for i in range(len(ftn_arg)):
                     ftn_arg[i] = list(ftn_arg[i]) # convert to list bec tuples are inmutable
                     ftn_arg[i][2] = ftn_arg[i][2].replace('+0','')
-                    ftn_arg[i] = tuple(ftn_arg[i]) # convert back to tuple 
+                    ftn_arg[i] = tuple(ftn_arg[i]) # convert back to tuple
+                    
+                    # for nx, ny in zip([30,50,60,80,100,30,50,60,80,100],[15,25,30,40,50,8,13,15,20,25]
             
-            ftn_arg = [(3,[15,8],f'p3_m15_8_ki1e4_tauo67_nx60_ny30_wpts{wpts_name:.0f}_G1c112',1e4,67,60,30,wpts,1.12) for wpts, wpts_name in zip([20,24,35,38,45,52],[25,30,45,50,60,70])]
-
+            ftn_arg = [([3,25],[15,8],f'p3_25_m15_8_ki{ki:.0e}_tauo77_nx60_ny30_wpts50_G1c112',ki,77,60,30,40,1.12) for ki in [1e4, 5e4, 1e5, 5e5, 1e6]]
+            for i in range(len(ftn_arg)):
+                ftn_arg[i] = list(ftn_arg[i]) # convert to list bec tuples are inmutable
+                ftn_arg[i][2] = ftn_arg[i][2].replace('+0','')
+                ftn_arg[i] = tuple(ftn_arg[i]) # convert back to tuple
+            
             # create the process pool
-            with Pool() as pool: # using 20 cpus on the cluster
+            with Pool(processes=20) as pool: # using 20 cpus on the cluster
                 pool.starmap(test_dcb_damage_prop_fcrack, ftn_arg)
                 # the pool is processing its inputs in parallel, close() and join() 
                 #can be used to synchronize the main process 

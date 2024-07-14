@@ -1,0 +1,6 @@
+# f_crack_1st_11
+# f_crack_1st_11_num=1
+c += 1
+f_crack_1str[c] = row+0
+f_crack_1stc[c] = col+0
+f_crack_1stv[c] += del_i_1*(-k_i + k_i_1)*(f1Au*g1Au - f1Bu*g1Bu)/2

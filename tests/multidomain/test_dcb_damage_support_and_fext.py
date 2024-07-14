@@ -907,7 +907,18 @@ def postprocess_results_damage(c_all, no_pan, no_terms, filename='', k_i=None, t
     return dmg_index, del_d, kw_tsl, force_intgn, displ_top_root, displ_bot_root, energy_dissp
 
 
+def calc_area_tsl_curve(kw_tsl, del_d):
+    '''
+    Calculates the area under the traction separation curve history for each integration point across all load steps
+    Returns
+    -------
+    None.
 
+    '''
+    
+    tau = np.multiply(kw_tsl, del_d)
+    
+    
 
 
 

@@ -1009,7 +1009,7 @@ class MultiDomain(object):
                 
             
                 force_intgn = np.dot(weights_y, Q_int)*(eval_panel.b/2)
-                print(f'                Force line int Qx = {force_intgn:.2f} WARNING: hardcoded for the tip!!!')
+                # print(f'                Force line int Qx = {force_intgn:.2f} WARNING: hardcoded for the tip!!!')
                 
                 return force_intgn
                 # return Q_int, dy
@@ -1123,10 +1123,10 @@ class MultiDomain(object):
                         
                         tau_xieta = tau[pty, ptx]
                         #((p_top.a*p_top.b)/4) 
-                        force_intgn += weight * tau_xieta
+                        force_intgn += weight * ((p_top.a*p_top.b)/4) * tau_xieta
                     # print(f'Area integral force damage = {force_intgn}')
                 
-                print(f'                Area integral force damage = {force_intgn:.3e}')
+                # print(f'                Area integral force damage = {force_intgn:.3e}')
                 return force_intgn
             
         
@@ -1472,6 +1472,45 @@ class MultiDomain(object):
         msg('finished!', level=2, silent=silent)
         return kT
 
+
+    def calc_kcrack(self, conn, finalize=True, silent=True):
+        
+        size = self.get_size()
+
+        kcrack = 0.
+        
+        for connecti in conn:
+            if connecti['func'] == 'SB_TSL':
+                no_x_gauss = connecti['no_x_gauss']
+                no_y_gauss = connecti['no_y_gauss']
+                tsl_type = connecti['tsl_type']
+                p_top = connecti['p1']
+                p_bot = connecti['p2']
+                k_i = connecti['k_i']
+                tau_o = connecti['tau_o']
+                G1c = connecti['G1c']
+                k_o = connecti['k_o']
+                del_o = connecti['del_o']
+                del_f = connecti['del_f']
+                
+        
+                kcrack += connections.kCSB_dmg.k_crack11(p_top=p_top, size=size, row0=p_top.row_start, 
+                             col0=p_top.col_start, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss,
+                             k_o=k_o, del_o=del_o, del_f=del_f)
+                kcrack += connections.kCSB_dmg.k_crack12(p_top=p_top, p_bot=p_bot, size=size, row0=p_top.row_start, 
+                             col0=p_bot.col_start, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss,
+                             k_o=k_o, del_o=del_o, del_f=del_f)
+                kcrack += connections.kCSB_dmg.k_crack22(p_bot=p_bot, size=size, row0=p_bot.row_start, 
+                             col0=p_bot.col_start, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss,
+                             k_o=k_o, del_o=del_o, del_f=del_f)
+                
+        if finalize:
+            kcrack = finalize_symmetric_matrix(kcrack)
+            
+        return kcrack
+                
+
+
     def calc_fint(self, c, silent=True, inc=1., kC_conn=None):
         msg('Calculating internal forces for assembly...', level=2, silent=silent)
         size = self.get_size()
@@ -1503,7 +1542,7 @@ class MultiDomain(object):
         return fext
 
 
-    def calc_fcrack(self, c_i, kw_tsl_i_1, del_d_i_1, conn):
+    def calc_fcrack(self, c_i, kw_tsl_i_1, del_d_i_1, conn, kcrack=None):
         '''
         Calculates the force vector associated with the energy needed to create a crack
         
@@ -1543,6 +1582,11 @@ class MultiDomain(object):
                 
                 fcrack = connections.kCSB_dmg.fcrack(p_top, p_bot, size, np.ascontiguousarray(kw_tsl_i_1),
                                                      np.ascontiguousarray(del_d_i_1), np.ascontiguousarray(kw_tsl_i), no_x_gauss, no_y_gauss)
+
+                if kcrack is None:
+                    kcrack = self.calc_kcrack(conn)
+                    
+                fcrack += (kcrack@c_i)/2
 
 ############### REMOVE SCALING FACTOR ######################################
         return np.multiply(1,fcrack)

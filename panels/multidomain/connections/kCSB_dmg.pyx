@@ -214,6 +214,10 @@ def fkCSB11_dmg(double dsb, object p1, int size, int row0, int col0,
                                 kCSB11v[c] += weight*(0.25*a1*b1*kt*(f1Aw*f1Bw*g1Aw*g1Bw + 4*(dsb*dsb)*f1Aw*f1Bw*g1Aweta*g1Bweta/(b1*b1) + 4*(dsb*dsb)*f1Awxi*f1Bwxi*g1Aw*g1Bw/(a1*a1)))
 
     kCSB11 = coo_matrix((kCSB11v, (kCSB11r, kCSB11c)), shape=(size, size))
+    # Builds a matrix of size = size x size (so complete size of global MD) and populates it with the data in ..v 
+        # where the rows and cols where that data should go are specified by ..r, ...c
+    # This way its at the correct positions in the global MD matrix as row and col are the starting indices of the 
+        # submatrices in the global MD matrix
 
     return kCSB11
 
@@ -692,3 +696,312 @@ def fcrack(object p_top, object p_bot, int size, double [:,::1] kw_tsl_i_1, doub
     
     
     
+def k_crack11(object p_top, int size, int row0, int col0, int no_x_gauss, int no_y_gauss,
+              double k_o, double del_o, double del_f):
+
+    cdef int m_top, n_top
+    cdef int i1, k1, j1, l1
+    cdef double xi, eta, weight
+    cdef int ptx, pty, c, row, col
+    cdef double a_top, b_top
+    
+    cdef double x1u_top, x1ur_top, x2u_top, x2ur_top
+    cdef double x1v_top, x1vr_top, x2v_top, x2vr_top
+    cdef double x1w_top, x1wr_top, x2w_top, x2wr_top
+    cdef double y1u_top, y1ur_top, y2u_top, y2ur_top
+    cdef double y1v_top, y1vr_top, y2v_top, y2vr_top
+    cdef double y1w_top, y1wr_top, y2w_top, y2wr_top
+    
+    cdef double fAw_top, fBw_top 
+    cdef double gAw_top, gBw_top
+    
+    cdef long [:] k_crack11r, k_crack11c
+    cdef double [:] k_crack11v
+    
+    cdef double [:] weights_xi, weights_eta, xis, etas
+    
+    m_top = p_top.m
+    n_top = p_top.n
+    
+    a_top = p_top.a
+    b_top = p_top.b
+    
+    # Panel top (ends in top)
+    x1u_top = p_top.x1u ; x1ur_top = p_top.x1ur ; x2u_top = p_top.x2u ; x2ur_top = p_top.x2ur
+    x1v_top = p_top.x1v ; x1vr_top = p_top.x1vr ; x2v_top = p_top.x2v ; x2vr_top = p_top.x2vr
+    x1w_top = p_top.x1w ; x1wr_top = p_top.x1wr ; x2w_top = p_top.x2w ; x2wr_top = p_top.x2wr
+    y1u_top = p_top.y1u ; y1ur_top = p_top.y1ur ; y2u_top = p_top.y2u ; y2ur_top = p_top.y2ur
+    y1v_top = p_top.y1v ; y1vr_top = p_top.y1vr ; y2v_top = p_top.y2v ; y2vr_top = p_top.y2vr
+    y1w_top = p_top.y1w ; y1wr_top = p_top.y1wr ; y2w_top = p_top.y2w ; y2wr_top = p_top.y2wr
+    
+    # Initializing gauss points, weights
+    xis = np.zeros(no_x_gauss, dtype=DOUBLE)
+    weights_xi = np.zeros(no_x_gauss, dtype=DOUBLE)
+    etas = np.zeros(no_y_gauss, dtype=DOUBLE)
+    weights_eta = np.zeros(no_y_gauss, dtype=DOUBLE)
+
+    # Calc gauss points and weights
+    leggauss_quad(no_x_gauss, &xis[0], &weights_xi[0])
+    leggauss_quad(no_y_gauss, &etas[0], &weights_eta[0])
+    
+    # Dimension of the number of values that need to be stored
+    fdim = 1*m_top*n_top*m_top*n_top    # 1 bec only 1 term is being added in the for loops
+    
+    k_crack11r = np.zeros((fdim,), dtype=INT)
+    k_crack11c = np.zeros((fdim,), dtype=INT)
+    k_crack11v = np.zeros((fdim,), dtype=DOUBLE)
+    
+    with nogil:
+        
+        for ptx in range(no_x_gauss):
+            for pty in range(no_y_gauss):
+                # Takes the correct index instead of the location
+                xi = xis[ptx]
+                eta = etas[pty]
+
+                weight = weights_xi[ptx] * weights_eta[pty]
+                
+                c = -1
+                for i1 in range(m_top):
+                    fAw_top = f(i1, xi, x1w_top, x1wr_top, x2w_top, x2wr_top)
+                    
+                    for k1 in range(m_top):
+                        fBw_top = f(k1, xi, x1w_top, x1wr_top, x2w_top, x2wr_top)
+                        
+                        for j1 in range(n_top): 
+                            gAw_top = f(j1, eta, y1w_top, y1wr_top, y2w_top, y2wr_top)
+                                    
+                            for l1 in range(n_top):
+                                gBw_top = f(l1, eta, y1w_top, y1wr_top, y2w_top, y2wr_top)
+        
+                                row = row0 + DOF*(j1*m_top + i1)
+                                col = col0 + DOF*(l1*m_top + k1)
+        
+                                #NOTE symmetry - 11
+                                if row > col:
+                                    continue
+        
+                                c += 1
+                                k_crack11r[c] = row+2
+                                k_crack11c[c] = col+2
+                                k_crack11v[c] += -a_top*b_top*del_o*fAw_top*fBw_top*gAw_top*gBw_top*k_o*weight/(4*(del_f - del_o))
+
+    k_crack11 = coo_matrix((k_crack11v, (k_crack11r, k_crack11c)), shape=(size, size))
+    # Builds a matrix of size = size x size (so complete size of global MD) and populates it with the data in ..v 
+        # where the rows and cols where that data should go are specified by ..r, ...c
+    # This way its at the correct positions in the global MD matrix as row and col are the starting indices of the 
+        # submatrices in the global MD matrix
+
+    return k_crack11
+
+
+def k_crack12(object p_top, object p_bot, int size, int row0, int col0, int no_x_gauss, int no_y_gauss,
+              double k_o, double del_o, double del_f):
+
+    cdef int m_top, n_top, m_bot, n_bot
+    cdef int i1, k2, j1, l2
+    cdef double xi, eta, weight
+    cdef int ptx, pty, c, row, col
+    cdef double a_top, b_top
+    
+    cdef double x1u_top, x1ur_top, x2u_top, x2ur_top, x1u_bot, x1ur_bot, x2u_bot, x2ur_bot
+    cdef double x1v_top, x1vr_top, x2v_top, x2vr_top, x1v_bot, x1vr_bot, x2v_bot, x2vr_bot
+    cdef double x1w_top, x1wr_top, x2w_top, x2wr_top, x1w_bot, x1wr_bot, x2w_bot, x2wr_bot
+    cdef double y1u_top, y1ur_top, y2u_top, y2ur_top, y1u_bot, y1ur_bot, y2u_bot, y2ur_bot
+    cdef double y1v_top, y1vr_top, y2v_top, y2vr_top, y1v_bot, y1vr_bot, y2v_bot, y2vr_bot
+    cdef double y1w_top, y1wr_top, y2w_top, y2wr_top, y1w_bot, y1wr_bot, y2w_bot, y2wr_bot
+    
+    cdef double fAw_top, gAw_top
+    cdef double fBw_bot, gBw_bot
+    
+    cdef long [:] k_crack12r, k_crack12c
+    cdef double [:] k_crack12v
+    
+    cdef double [:] weights_xi, weights_eta, xis, etas
+    
+    m_top = p_top.m
+    n_top = p_top.n
+    m_bot = p_bot.m
+    n_bot = p_bot.n
+    
+    a_top = p_top.a
+    b_top = p_top.b
+    
+    # Panel top (ends in top)
+    x1u_top = p_top.x1u ; x1ur_top = p_top.x1ur ; x2u_top = p_top.x2u ; x2ur_top = p_top.x2ur
+    x1v_top = p_top.x1v ; x1vr_top = p_top.x1vr ; x2v_top = p_top.x2v ; x2vr_top = p_top.x2vr
+    x1w_top = p_top.x1w ; x1wr_top = p_top.x1wr ; x2w_top = p_top.x2w ; x2wr_top = p_top.x2wr
+    y1u_top = p_top.y1u ; y1ur_top = p_top.y1ur ; y2u_top = p_top.y2u ; y2ur_top = p_top.y2ur
+    y1v_top = p_top.y1v ; y1vr_top = p_top.y1vr ; y2v_top = p_top.y2v ; y2vr_top = p_top.y2vr
+    y1w_top = p_top.y1w ; y1wr_top = p_top.y1wr ; y2w_top = p_top.y2w ; y2wr_top = p_top.y2wr
+
+    # Panel bot (ends in bot)
+    x1u_bot = p_bot.x1u ; x1ur_bot = p_bot.x1ur ; x2u_bot = p_bot.x2u ; x2ur_bot = p_bot.x2ur
+    x1v_bot = p_bot.x1v ; x1vr_bot = p_bot.x1vr ; x2v_bot = p_bot.x2v ; x2vr_bot = p_bot.x2vr
+    x1w_bot = p_bot.x1w ; x1wr_bot = p_bot.x1wr ; x2w_bot = p_bot.x2w ; x2wr_bot = p_bot.x2wr
+    y1u_bot = p_bot.y1u ; y1ur_bot = p_bot.y1ur ; y2u_bot = p_bot.y2u ; y2ur_bot = p_bot.y2ur
+    y1v_bot = p_bot.y1v ; y1vr_bot = p_bot.y1vr ; y2v_bot = p_bot.y2v ; y2vr_bot = p_bot.y2vr
+    y1w_bot = p_bot.y1w ; y1wr_bot = p_bot.y1wr ; y2w_bot = p_bot.y2w ; y2wr_bot = p_bot.y2wr
+    
+    # Initializing gauss points, weights
+    xis = np.zeros(no_x_gauss, dtype=DOUBLE)
+    weights_xi = np.zeros(no_x_gauss, dtype=DOUBLE)
+    etas = np.zeros(no_y_gauss, dtype=DOUBLE)
+    weights_eta = np.zeros(no_y_gauss, dtype=DOUBLE)
+
+    # Calc gauss points and weights
+    leggauss_quad(no_x_gauss, &xis[0], &weights_xi[0])
+    leggauss_quad(no_y_gauss, &etas[0], &weights_eta[0])
+    
+    # Dimension of the number of values that need to be stored
+    fdim = 1*m_bot*n_bot*m_top*n_top    # 1 bec only 1 term is being added in the for loops
+    
+    k_crack12r = np.zeros((fdim,), dtype=INT)
+    k_crack12c = np.zeros((fdim,), dtype=INT)
+    k_crack12v = np.zeros((fdim,), dtype=DOUBLE)
+    
+    with nogil:
+        
+        for ptx in range(no_x_gauss):
+            for pty in range(no_y_gauss):
+                # Takes the correct index instead of the location
+                xi = xis[ptx]
+                eta = etas[pty]
+
+                weight = weights_xi[ptx] * weights_eta[pty]
+                
+                c = -1
+                for i1 in range(m_top):
+                    fAw_top = f(i1, xi, x1w_top, x1wr_top, x2w_top, x2wr_top)
+                    
+                    for k2 in range(m_bot):
+                        fBw_bot = f(k2, xi, x1w_bot, x1wr_bot, x2w_bot, x2wr_bot)
+                        
+                        for j1 in range(n_top):
+                            gAw_top = f(j1, eta, y1w_top, y1wr_top, y1w_top, y1wr_top)
+                                    
+                            for l2 in range(n_bot):
+                                gBw_bot = f(l2, eta, y1w_bot, y1wr_bot, y2w_bot, y2wr_bot)
+        
+                                row = row0 + DOF*(j1*m_top + i1)
+                                col = col0 + DOF*(l2*m_bot + k2)
+        
+                                #NOTE No symmetry - 12
+                                # if row > col:
+                                #     continue
+        
+                                c += 1
+                                k_crack12r[c] = row+2
+                                k_crack12c[c] = col+2
+                                k_crack12v[c] += a_top*b_top*del_o*fAw_top*fBw_bot*gAw_top*gBw_bot*k_o*weight/(4*(del_f - del_o))
+
+    k_crack12 = coo_matrix((k_crack12v, (k_crack12r, k_crack12c)), shape=(size, size))
+    # Builds a matrix of size = size x size (so complete size of global MD) and populates it with the data in ..v 
+        # where the rows and cols where that data should go are specified by ..r, ...c
+    # This way its at the correct positions in the global MD matrix as row and col are the starting indices of the 
+        # submatrices in the global MD matrix
+
+    return k_crack12
+
+
+def k_crack22(object p_bot, int size, int row0, int col0, int no_x_gauss, int no_y_gauss,
+              double k_o, double del_o, double del_f):
+
+    cdef int m_bot, n_bot
+    cdef int i1, k1, j1, l1
+    cdef double xi, eta, weight
+    cdef int ptx, pty, c, row, col
+    cdef double a_bot, b_bot
+    
+    cdef double x1u_bot, x1ur_bot, x2u_bot, x2ur_bot
+    cdef double x1v_bot, x1vr_bot, x2v_bot, x2vr_bot
+    cdef double x1w_bot, x1wr_bot, x2w_bot, x2wr_bot
+    cdef double y1u_bot, y1ur_bot, y2u_bot, y2ur_bot
+    cdef double y1v_bot, y1vr_bot, y2v_bot, y2vr_bot
+    cdef double y1w_bot, y1wr_bot, y2w_bot, y2wr_bot
+    
+    cdef double fAw_bot, fBw_bot 
+    cdef double gAw_bot, gBw_bot
+    
+    cdef long [:] k_crack22r, k_crack22c
+    cdef double [:] k_crack22v
+    
+    cdef double [:] weights_xi, weights_eta, xis, etas
+    
+    m_bot = p_bot.m
+    n_bot = p_bot.n
+    
+    a_bot = p_bot.a
+    b_bot = p_bot.b
+    
+    # Panel top (ends in top)
+    x1u_bot = p_bot.x1u ; x1ur_bot = p_bot.x1ur ; x2u_bot = p_bot.x2u ; x2ur_bot = p_bot.x2ur
+    x1v_bot = p_bot.x1v ; x1vr_bot = p_bot.x1vr ; x2v_bot = p_bot.x2v ; x2vr_bot = p_bot.x2vr
+    x1w_bot = p_bot.x1w ; x1wr_bot = p_bot.x1wr ; x2w_bot = p_bot.x2w ; x2wr_bot = p_bot.x2wr
+    y1u_bot = p_bot.y1u ; y1ur_bot = p_bot.y1ur ; y2u_bot = p_bot.y2u ; y2ur_bot = p_bot.y2ur
+    y1v_bot = p_bot.y1v ; y1vr_bot = p_bot.y1vr ; y2v_bot = p_bot.y2v ; y2vr_bot = p_bot.y2vr
+    y1w_bot = p_bot.y1w ; y1wr_bot = p_bot.y1wr ; y2w_bot = p_bot.y2w ; y2wr_bot = p_bot.y2wr
+    
+    # Initializing gauss points, weights
+    xis = np.zeros(no_x_gauss, dtype=DOUBLE)
+    weights_xi = np.zeros(no_x_gauss, dtype=DOUBLE)
+    etas = np.zeros(no_y_gauss, dtype=DOUBLE)
+    weights_eta = np.zeros(no_y_gauss, dtype=DOUBLE)
+
+    # Calc gauss points and weights
+    leggauss_quad(no_x_gauss, &xis[0], &weights_xi[0])
+    leggauss_quad(no_y_gauss, &etas[0], &weights_eta[0])
+    
+    # Dimension of the number of values that need to be stored
+    fdim = 1*m_bot*n_bot*m_bot*n_bot    # 1 bec only 1 term is being added in the for loops
+    
+    k_crack22r = np.zeros((fdim,), dtype=INT)
+    k_crack22c = np.zeros((fdim,), dtype=INT)
+    k_crack22v = np.zeros((fdim,), dtype=DOUBLE)
+    
+    with nogil:
+        
+        for ptx in range(no_x_gauss):
+            for pty in range(no_y_gauss):
+                # Takes the correct index instead of the location
+                xi = xis[ptx]
+                eta = etas[pty]
+
+                weight = weights_xi[ptx] * weights_eta[pty]
+                
+                c = -1
+                for i1 in range(m_bot):
+                    fAw_bot = f(i1, xi, x1w_bot, x1wr_bot, x2w_bot, x2wr_bot)
+                    
+                    for k1 in range(m_bot):
+                        fBw_bot = f(k1, xi, x1w_bot, x1wr_bot, x2w_bot, x2wr_bot)
+                        
+                        for j1 in range(n_bot): 
+                            gAw_bot = f(j1, eta, y1w_bot, y1wr_bot, y2w_bot, y2wr_bot)
+                                    
+                            for l1 in range(n_bot):
+                                gBw_bot = f(l1, eta, y1w_bot, y1wr_bot, y2w_bot, y2wr_bot)
+        
+                                row = row0 + DOF*(j1*m_bot + i1)
+                                col = col0 + DOF*(l1*m_bot + k1)
+        
+                                #NOTE symmetry - 22
+                                if row > col:
+                                    continue
+        
+                                c += 1
+                                k_crack22r[c] = row+2
+                                k_crack22c[c] = col+2
+                                k_crack22v[c] += -a_bot*b_bot*del_o*fAw_bot*fBw_bot*gAw_bot*gBw_bot*k_o*weight/(4*(del_f - del_o))
+
+    k_crack22 = coo_matrix((k_crack22v, (k_crack22r, k_crack22c)), shape=(size, size))
+    # Builds a matrix of size = size x size (so complete size of global MD) and populates it with the data in ..v 
+        # where the rows and cols where that data should go are specified by ..r, ...c
+    # This way its at the correct positions in the global MD matrix as row and col are the starting indices of the 
+        # submatrices in the global MD matrix
+
+    return k_crack22
+
+
+
+

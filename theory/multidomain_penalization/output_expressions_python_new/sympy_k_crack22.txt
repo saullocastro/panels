@@ -1,0 +1,6 @@
+# k_crack22_11
+# k_crack22_11_num=1
+c += 1
+k_crack22r[c] = row+2
+k_crack22c[c] = col+2
+k_crack22v[c] += -a_2*b_2*del_o*f2Aw*f2Bw*g2Aw*g2Bw*k_o*weight/(4*(del_f - del_o))
