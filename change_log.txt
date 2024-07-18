@@ -339,3 +339,47 @@ commit on: 08-07-24
 
 
 
+=======================================================================================
+=======================================================================================
+=======================================================================================
+=======================================================================================
+
+DEV: fcrack addl terms added (with linearization assmptn)
+TODO: Change max del_d beign stored to max dmg_index (reversal needs to be redone)
+
+commit on: 14-07-24
+
+1. kCSB_dmg.pyx:
+-- Added code to calc stiffness matrix for crack energy (k_crack_11,12,22)
+
+2. multidomain.py:
+-- calc_kcrack (NEW): 
+---- calc stiffness matrix for crack energy (k_crack_11,12,22) by calling kCSB_dmg.k_crack_11,12,22
+
+-- calc_fcrack:
+---- Added additional terms
+
+3. plot_test_dcb_damage.py:
+-- Added code to plot load displ curve with any field variable
+-- Can do line, scatter plots
+
+
+=======================================================================================
+=======================================================================================
+=======================================================================================
+=======================================================================================
+
+DEV: fcrack addl terms added (varn of ki considered)
+TODO: Change max del_d beign stored to max dmg_index (reversal needs to be redone)
+
+commit on: 19-07-24
+
+1. kCSB_dmg.pyx:
+-- Added extra terms in calc of stiffness matrix for crack energy (k_crack_11,12,22)
+
+2. multidomain.py:
+-- calc_kcrack: 
+---- Extra terms for calc stiffness matrix for crack energy (k_crack_11,12,22) by calling kCSB_dmg.k_crack_11,12,22
+
+-- calc_fcrack:
+---- Added additional terms

@@ -730,11 +730,15 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, filename='', k_i=None, tau_o=
         os.makedirs(foldername)
     os.chdir(foldername)
                     
+    # Delete previous log file - later when appending the file, if the file doesnt exist, it is created
+    if os.path.isfile(f'./{filename}.txt'):
+        os.remove(f'{filename}.txt')
+    
     # Log to check on multiple runs at once 
     if not local_run:
         log_file = open(f'{filename}.txt', 'a')
         log_file.write(f'************************** IT HAS BEGUN - {filename} ******************************\n')
-        log_file.write(f'{generation_code} \n')
+        log_file.write(f'generation code:   {generation_code} \n')
         log_file.close()
     
     print(f'************************** IT HAS BEGUN - {filename} ******************************')
@@ -972,6 +976,7 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, filename='', k_i=None, tau_o=
     if True:
         ######## THIS SHOULD BE CHANGED LATER PER DISP TYPE ###########################################
         ku, kv, kw = calc_ku_kv_kw_point_pd(disp_panel)
+        kw = 1e6
         
     size = assy.get_size()
         
@@ -1032,8 +1037,8 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, filename='', k_i=None, tau_o=
     if w_iter_no_pts is None:
         w_iter_no_pts = 150
         
-    w_iter = np.unique(np.concatenate((np.linspace(0.01,3,int(0.15*w_iter_no_pts)), np.linspace(3,5,int(0.3*w_iter_no_pts)), 
-                                        np.linspace(5,8,int(0.55*w_iter_no_pts)))))
+    w_iter = np.unique(np.concatenate((np.linspace(0.01,3,int(0.3*w_iter_no_pts)), np.linspace(3,5,int(0.3*w_iter_no_pts)), 
+                                        np.linspace(5,8,int(0.4*w_iter_no_pts)))))
     # w_iter = np.linspace(0.01,8,100)
     # w_iter = [0.01, 2]
     # Reverse loading 
@@ -1054,7 +1059,7 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, filename='', k_i=None, tau_o=
     displ_bot_root = np.zeros((50,200,np.shape(w_iter)[0]))
     c_all = np.zeros((size, np.shape(w_iter)[0]))
     
-    quasi_NR = False
+    quasi_NR = True
     NR_kT_update = 3 # After how many iterations should kT be updated
     crisfield_test_fail = False
     
@@ -1106,13 +1111,18 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, filename='', k_i=None, tau_o=
             # Inital fint (0 bec c=0)
             fint = np.asarray(assy.calc_fint(c=c, kC_conn=kC_conn))
             # Stiffness matrix for the crack creation 
-            kcrack = assy.calc_kcrack(conn=conn)
+            if disp_iter_no != 1:
+                kcrack = assy.calc_kcrack(conn=conn, c_i=c, kw_tsl_i_1=kw_tsl[:,:,disp_iter_no-1], 
+                                          del_d_i_1=del_d[:,:,disp_iter_no-1])
+            else:
+                kcrack = np.zeros_like(kC_conn, dtype=np.float64)
             # force vector due to the crack creation
             fcrack = assy.calc_fcrack(c_i=c, kw_tsl_i_1=kw_tsl[:,:,disp_iter_no-1], 
                                       del_d_i_1=del_d[:,:,disp_iter_no-1], conn=conn, kcrack=kcrack)
             # Residual with disp terms
             Ri = fint - fext + kCp*c + fcrack
-            kT = assy.calc_kT(c=c, kC_conn=kC_conn) #+ kcrack
+            
+            kT = assy.calc_kT(c=c, kC_conn=kC_conn) + kcrack
         # Initial step where ci = zeros
         if disp_iter_no == 0 and np.max(ci) == 0: 
             # max(ci) bec if its already calc for an initial guess above, no need to repeat it - 
@@ -1125,7 +1135,11 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, filename='', k_i=None, tau_o=
             # Residual with disp terms
             Ri = fint - fext + kCp*ci
             kT = assy.calc_kT(c=ci, kC_conn=kC_conn)
+            
+            # Setting the max displ field to be 0
+            assy.update_max_del_d(curr_max_del_d=np.zeros((no_y_gauss, no_x_gauss)))
         k0 = kT + kCp
+        
         
         # print(f'kT {np.max(kT):.3e} kcp {np.max(kCp):.3e} k0 {np.max(k0):.3e}')
         
@@ -1146,21 +1160,40 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, filename='', k_i=None, tau_o=
             if quasi_NR:
                 if count == 0 or count % NR_kT_update == 0:
                     kC_conn = assy.get_kC_conn(c=c)
-                    kcrack = assy.calc_kcrack(conn=conn) # should be const so maybe remove it outside the NR loop
+                    if disp_iter_no != 0:
+                        kcrack = assy.calc_kcrack(conn=conn, c_i=c, kw_tsl_i_1=kw_tsl[:,:,disp_iter_no-1], 
+                                              del_d_i_1=del_d[:,:,disp_iter_no-1])
+                    else:
+                        kcrack = assy.calc_kcrack(conn=conn, c_i=c, kw_tsl_i_1=k_i*np.ones((no_y_gauss, no_x_gauss)), 
+                                              del_d_i_1=np.zeros((no_y_gauss, no_x_gauss)))
             else:
                 kC_conn = assy.get_kC_conn(c=c)
-                kcrack = assy.calc_kcrack(conn=conn) # should be const so maybe remove it outside the NR loop
+                if disp_iter_no != 0:
+                    kcrack = assy.calc_kcrack(conn=conn, c_i=c, kw_tsl_i_1=kw_tsl[:,:,disp_iter_no-1], 
+                                          del_d_i_1=del_d[:,:,disp_iter_no-1])
+                else:
+                    kcrack = assy.calc_kcrack(conn=conn, c_i=c, kw_tsl_i_1=k_i*np.ones((no_y_gauss, no_x_gauss)), 
+                                          del_d_i_1=np.zeros((no_y_gauss, no_x_gauss)))
+                    
             fint = np.asarray(assy.calc_fint(c=c, kC_conn=kC_conn))
             # force vector due to the crack creation
-            fcrack = assy.calc_fcrack(c_i=c, kw_tsl_i_1=kw_tsl[:,:,disp_iter_no-1], 
-                                      del_d_i_1=del_d[:,:,disp_iter_no-1], conn=conn)#, kcrack=kcrack)
+            if disp_iter_no != 0:
+                fcrack = assy.calc_fcrack(c_i=c, kw_tsl_i_1=kw_tsl[:,:,disp_iter_no-1], 
+                                      del_d_i_1=del_d[:,:,disp_iter_no-1], conn=conn, kcrack=kcrack)
+            else:
+                fcrack = assy.calc_fcrack(c_i=c, kw_tsl_i_1=k_i*np.ones((no_y_gauss, no_x_gauss)), 
+                                      del_d_i_1=np.zeros((no_y_gauss, no_x_gauss)), conn=conn, kcrack=kcrack)
             
             # Might need to calc fext here again if it changes per iteration when fext changes when not using kc_conn for SB
-            Ri = fint - fext + kCp*c + fcrack
+            # CAN PROBABLY REMOVE IF !!!!!!!!!!!!
+            if disp_iter_no != 0:
+                Ri = fint - fext + kCp*c + fcrack
+            else:
+                Ri = fint - fext + kCp*c + fcrack
             if local_run:
                 print(f'Ri {np.linalg.norm(Ri):.2e}')
-                print(f'pos sun:{np.linalg.norm(fint) + np.linalg.norm(kCp*c) + np.linalg.norm(fcrack):.2e} fint {np.linalg.norm(fint):.2e} kcp {np.linalg.norm(kCp*c):.2e} fcrack {np.linalg.norm(fcrack):.2e}')
-                print(f'fext {np.linalg.norm(fext):.2e}')
+                # print(f'pos sun:{np.linalg.norm(fint) + np.linalg.norm(kCp*c) + np.linalg.norm(fcrack):.2e} fint {np.linalg.norm(fint):.2e} kcp {np.linalg.norm(kCp*c):.2e} fcrack {np.linalg.norm(fcrack):.2e}')
+                # print(f'fext {np.linalg.norm(fext):.2e}')
             # Extracting data out of the MD class for plotting etc 
                 # Damage considerations are already implemented in the Multidomain class functions kT, fint - no need to include anything externally
 
@@ -1168,7 +1201,11 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, filename='', k_i=None, tau_o=
             # print(f"             NR end {count} -- wp={wp:.3f}  max dmg {np.max(dmg_index_iter):.3f}  ---") # min del_d {np.min(del_d_iter):.2e}---------")
             # print(f'    del_d min {np.min(del_d_iter)}  -- max {np.max(del_d_iter):.4f}')
             
-            crisfield_test = scaling(Ri, D)/max(scaling(fext, D), scaling(fint + kCp*c + fcrack, D))
+            # CAN PROBABLY REMOVE IF !!!!!!!!!!!!
+            if disp_iter_no != 0:
+                crisfield_test = scaling(Ri, D)/max(scaling(fext, D), scaling(fint + kCp*c + fcrack, D))
+            else:
+                crisfield_test = scaling(Ri, D)/max(scaling(fext, D), scaling(fint + kCp*c + fcrack, D))
             crisfield_test_res[count] = crisfield_test
             # print(np.shape(k0))
             # print(np.linalg.det(k0))
@@ -1184,10 +1221,18 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, filename='', k_i=None, tau_o=
             if quasi_NR:
                 if count == 0 or count % NR_kT_update == 0:
                     kT = assy.calc_kT(c=c, kC_conn=kC_conn) 
-                    k0 = kT + kCp + kcrack
+                    # CAN PROBABLY REMOVE IF !!!!!!!!!!!!
+                    if disp_iter_no != 0:
+                        k0 = kT + kCp + kcrack
+                    else:
+                        k0 = kT + kCp + kcrack
             else:
                 kT = assy.calc_kT(c=c, kC_conn=kC_conn) 
-                k0 = kT + kCp + kcrack
+                # CAN PROBABLY REMOVE IF !!!!!!!!!!!!
+                if disp_iter_no != 0:
+                    k0 = kT + kCp + kcrack
+                else:
+                    k0 = kT + kCp + kcrack
             ci = c.copy()
             
             count += 1
@@ -1296,11 +1341,15 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, filename='', k_i=None, tau_o=
         assy.update_max_del_d(curr_max_del_d=del_d[:,:,disp_iter_no])
         
         # kw_tsl[:,:,disp_iter_no], dmg_index[:,:,disp_iter_no], del_d[:,:,disp_iter_no] = assy.calc_k_dmg(c=c, pA=p_top, pB=p_bot, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type)
-        log_file = open(f'{filename}.txt', 'a')
-        log_file.write(f'{disp_iter_no/np.shape(w_iter)[0]*100:.1f}% - {filename} -- wp={wp:.3f} -- max DI {np.max(dmg_index[:,:,disp_iter_no]):.4f}\n')
-        log_file.close()
-        print(f'            {filename} {disp_iter_no/np.shape(w_iter)[0]*100:.1f}%')
-        sys.stdout.flush()
+        if not local_run:
+            log_file = open(f'{filename}.txt', 'a')
+            log_file.write(f'{disp_iter_no/np.shape(w_iter)[0]*100:.1f}% - {filename} -- wp={wp:.3f} -- max DI {np.max(dmg_index[:,:,disp_iter_no]):.4f}\n')
+            log_file.close()
+            print(f'            {filename} {disp_iter_no/np.shape(w_iter)[0]*100:.1f}%')
+            sys.stdout.flush()
+        else:
+            print(f'{disp_iter_no/np.shape(w_iter)[0]*100:.1f}% - {filename} -- wp={wp:.3f} -- max DI {np.max(dmg_index[:,:,disp_iter_no]):.4f}\n')
+
         # print(f'        max del_d {np.max(del_d[:,:,disp_iter_no])}')
         # print(f'       min del_d {np.min(del_d[:,:,disp_iter_no])}')
         # print(f'        max kw_tsl {np.max(kw_tsl[:,:,disp_iter_no])}')
@@ -1309,7 +1358,7 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, filename='', k_i=None, tau_o=
         
         # Force - TEMP - CHECK LATER AND EDIT/REMOVE
         if True:
-            force_intgn[disp_iter_no, 0] = wp
+            # force_intgn[disp_iter_no, 0] = wp
             force_intgn[disp_iter_no, 1] = assy.force_out_plane(c, group=None, eval_panel=disp_panel, x_cte_force=None, y_cte_force=None,
                       gridx=100, gridy=50, NLterms=True, no_x_gauss=128, no_y_gauss=128)
         else: 
@@ -1317,21 +1366,43 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, filename='', k_i=None, tau_o=
         
         # Force by area integral of traction in the damaged region
         if True:
-            force_intgn_dmg[disp_iter_no, 0] = wp
+            # force_intgn_dmg[disp_iter_no, 0] = wp
             force_intgn_dmg[disp_iter_no, 1] = assy.force_out_plane_damage(conn=conn, c=c)
             
-        log_file = open(f'{filename}.txt', 'a')
-        log_file.write(f'       Force - Line: {force_intgn[disp_iter_no, 1]} -- Area: force_intgn_dmg[disp_iter_no, 1]\n')
-        log_file.close()
+        if not local_run:
+            log_file = open(f'{filename}.txt', 'a')
+            log_file.write(f'       Force - Line: {force_intgn[disp_iter_no, 1]:.3f} -- Area: {force_intgn_dmg[disp_iter_no, 1]:.3f}\n')
+            log_file.close()
+        else:
+            print(f'       Force - Line: {force_intgn[disp_iter_no, 1]:.3f} -- Area: {force_intgn_dmg[disp_iter_no, 1]:.3f}')
+            
+            plt.figure(figsize=(10,7))
+            plt.plot(force_intgn[:disp_iter_no+1, 0], force_intgn[:disp_iter_no+1, 1], label = 'Line')
+            plt.plot(force_intgn_dmg[:disp_iter_no+1, 0], 4/52*force_intgn_dmg[:disp_iter_no+1, 1], label='Area Int')
+            plt.plot(FEM[:,0],FEM[:,1], label='FEM')
+            plt.ylabel('Force [N]', fontsize=14)
+            plt.xlabel('Displacement [mm]', fontsize=14)
+            plt.xticks(fontsize=14)
+            plt.yticks(fontsize=14)
+            plt.title(f'{filename}')
+            plt.grid()
+            plt.legend(fontsize=14)
+            plt.show()
         
         # Calc displ of top and bottom panels at each increment
         if True:
-            res_pan_top = assy.calc_results(c=c, eval_panel=top1, vec='w', 
+            res_pan_top = assy.calc_results(c=c, eval_panel=disp_panel, vec='w', 
                                     no_x_gauss=200, no_y_gauss=50)
-            res_pan_bot = assy.calc_results(c=c, eval_panel=bot1, vec='w', 
-                                    no_x_gauss=200, no_y_gauss=50)
-            displ_top_root[:,:,disp_iter_no] = res_pan_top['w'][0]
-            displ_bot_root[:,:,disp_iter_no] = res_pan_bot['w'][0]
+            max_displ_w = np.max(res_pan_top['w'][-1])
+            
+            force_intgn[disp_iter_no, 0] = max_displ_w
+            force_intgn_dmg[disp_iter_no, 0] = max_displ_w
+            
+            # print(f'Calc W_TOP: {max_displ_w}')
+            # res_pan_bot = assy.calc_results(c=c, eval_panel=disp_panel, vec='w', 
+            #                         no_x_gauss=200, no_y_gauss=50)
+            # displ_top_root[:,:,disp_iter_no] = res_pan_top['w'][0]
+            # displ_bot_root[:,:,disp_iter_no] = res_pan_bot['w'][0]
         else:
             res_pan_top = None
             res_pan_bot = None
@@ -1391,9 +1462,11 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, filename='', k_i=None, tau_o=
                     for pan in range(0,np.shape(res_bot[vec])[0]): 
                         print(f'{vec} bot{pan+1} :: {np.min(np.array(res_bot[vec][pan])):.3f}  {np.max(np.array(res_bot[vec][pan])):.3f}')
                     print('------------------------------')
-                print(f'Global TOP {vec} :: {np.min(np.array(res_top[vec])):.3f}  {np.max(np.array(res_top[vec])):.3f}')
-                print(f'Global BOT {vec} :: {np.min(np.array(res_bot[vec])):.3f}  {np.max(np.array(res_bot[vec])):.3f}')
+                # print(f'Global TOP {vec} :: {np.min(np.array(res_top[vec])):.3f}  {np.max(np.array(res_top[vec])):.3f}')
+                # print(f'Global BOT {vec} :: {np.min(np.array(res_bot[vec])):.3f}  {np.max(np.array(res_bot[vec])):.3f}')
                 # print(res_bot[vec][1][:,-1]) # disp at the tip
+                max_displ_w = np.max(res_top['w'][-1])
+                print(f'Calc W_TOP: {max_displ_w}')
                 final_res = np.min(np.array(res_top[vec]))
             
             if generate_plots:
@@ -1472,7 +1545,9 @@ if __name__ == "__main__":
             # kw_tsl, dmg_index = test_kw_tsl(1, 6, 1)
             dmg_index, del_d, kw_tsl, force_intgn, displ_top_root, displ_bot_root, c_all = test_dcb_damage_prop(no_pan=3, no_terms=[10,8], filename='', k_i=1e4, tau_o=67, no_x_gauss=50, no_y_gauss=25, w_iter_no_pts=15, G1c=1.12)
         if True: # with fcrack
-            dmg_index, del_d, kw_tsl, force_intgn, displ_top_root, displ_bot_root, c_all = test_dcb_damage_prop_fcrack(phy_dim=[3,25], no_terms=[12,8], filename='1posve_m15_8_w20_nx60_ny30', k_i=1e4, tau_o=67, no_x_gauss=60, no_y_gauss=30, w_iter_no_pts=20, G1c=1.12)
+            dmg_index, del_d, kw_tsl, force_intgn, displ_top_root, displ_bot_root, c_all = test_dcb_damage_prop_fcrack(phy_dim=[3,25], 
+                no_terms=[15,8], filename='1posve_m15_8_w200_nx60_ny30_tau67_ki1e4', k_i=1e4, tau_o=67, no_x_gauss=60, 
+                no_y_gauss=30, w_iter_no_pts=200, G1c=1.12)
         
         
         # Parallelization of multiple runs

@@ -40,7 +40,7 @@ animate = False
 
 if not animate:
     # Plotting a set of multiple results
-    if True:
+    if False:
         # os.chdir('C:/Users/natha/OneDrive - Delft University of Technology/Fokker Internship/_Thesis/_Results/Raw Results/DCB Damage/3 pan/G1c_112e-2-v2_code')
         
         # Load variables
@@ -148,7 +148,7 @@ if not animate:
         
         
     # Plotting a set of single results    
-    if False:
+    if True:
         if True:
             os.chdir('C:/Users/natha/OneDrive - Delft University of Technology/Fokker Internship/_Thesis/_Results/Raw Results/DCB Damage/3 pan')
             FEM = np.load('FEM.npy')
@@ -157,12 +157,12 @@ if not animate:
         
         plt.plot(FEM[:,0], FEM[:,1], label='FEM')
         
-        plt.plot(force_intgn_dmg_1posve_m15_8_w50_nx60_ny30[:42,0], 22.5*force_intgn_dmg_1posve_m15_8_w50_nx60_ny30[:42,1], 
-                 label=r'Area int (scaled 22.5)')
-        plt.plot(force_intgn_1posve_m15_8_w50_nx60_ny30[:42,0], force_intgn_1posve_m15_8_w50_nx60_ny30[:42,1], 
-                 label=r'Line int')
+        plt.plot(force_intgn_dmg_1posve_m15_8_w200_nx60_ny30_tau67_ki1e4[:,0], (4/52)*force_intgn_dmg_1posve_m15_8_w200_nx60_ny30_tau67_ki1e4[:,1], 
+                  label=r'Area int (scaled 4/a)')
+        # plt.plot(force_intgn_1posve_m15_8_w20_nx60_ny30[:,0], force_intgn_1posve_m15_8_w20_nx60_ny30[:,1], 
+        #           label=r'Line int')
         
-        plt.title(r'+1*fcrack $\tau$=67 $n_x$=60 $n_y$=30 $k_i$=1e4 m =15,8 w=50 - UNCONVERGED')
+        plt.title(r'+1*fcrack $\tau$=67 $n_x$=60 $n_y$=30 $k_i$=1e4 m =15,8 w=200')
         plt.ylabel('Force [N]', fontsize=14)
         plt.xlabel('Displacement [mm]', fontsize=14)
         plt.xticks(fontsize=14)
@@ -269,8 +269,8 @@ if animate:
                                            scaling_fct*globals()['force_intgn_dmg'+animate_var][i,1]]).T)
         
         curr_res = frames[i]
-        vmin = np.min(globals()['tau'+animate_var])
-        vmax = np.max(globals()['tau'+animate_var])
+        vmin = np.min(globals()[var_name+animate_var])
+        vmax = np.max(globals()[var_name+animate_var])
         im = ax1.imshow(curr_res)
         fig.colorbar(im, cax=cax, format="{x:.2f}", ticks=np.linspace(vmin, vmax, 5))
         im.set_data(curr_res)
@@ -337,7 +337,8 @@ if animate:
     
     # Creates both contourf and line/scatter plots
     if True:
-        for animate_var in ['_p3_m15_8_ki1e4_tauo67_nx60_ny30_wpts50_G1c112']:
+        var_name = 'dmg_index'
+        for animate_var in ['_1posve_m15_8_w20_nx60_ny30']:
             fig, (ax1, ax2) = plt.subplots(1,2, gridspec_kw={'width_ratios': [2, 1]}, figsize=(10, 4))
             plt.subplots_adjust(bottom=0.05, left=0.05, right=0.95, top=0.95, wspace=0.5, hspace=0)
             
@@ -346,13 +347,14 @@ if animate:
             cax = div.append_axes('right', '5%', '5%')
             
             frames = [] # for storing the generated images
-            for i in range(np.shape(globals()['tau'+animate_var])[2]):
-                frames.append(globals()['tau'+animate_var][:,:,i])
+            for i in range(np.shape(globals()[var_name+animate_var])[2]):
+                frames.append(globals()[var_name+animate_var][:,:,i])
                 
             cv0 = frames[0]
             im = ax1.imshow(cv0) 
             cb = fig.colorbar(im, cax=cax)
             tx = ax1.set_title('Frame 0') # Gets overwritten later
+            scaling_fct = 4/52
             
             # 2nd plot with the load displacement curve
             scatter_plot = ax2.scatter(globals()['force_intgn_dmg'+animate_var][0,0], 

@@ -3,4 +3,4 @@
 c += 1
 k_crack12r[c] = row+2
 k_crack12c[c] = col+2
-k_crack12v[c] += a_1*b_1*del_o*f1Aw*f2Bw*g1Aw*g2Bw*k_o*weight/(4*(del_f - del_o))
+k_crack12v[c] += -a_1*b_1*del_f*del_i_1*del_o*f1Aw*f2Bw*g1Aw*g2Bw*k_o*weight/(4*(del_i*del_i)*(del_f - del_o))

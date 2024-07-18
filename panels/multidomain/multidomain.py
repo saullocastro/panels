@@ -1473,7 +1473,7 @@ class MultiDomain(object):
         return kT
 
 
-    def calc_kcrack(self, conn, finalize=True, silent=True):
+    def calc_kcrack(self, conn, c_i, kw_tsl_i_1, del_d_i_1, finalize=True, silent=True):
         
         size = self.get_size()
 
@@ -1493,16 +1493,27 @@ class MultiDomain(object):
                 del_o = connecti['del_o']
                 del_f = connecti['del_f']
                 
+                kw_tsl, dmg_index, del_d_i = self.calc_k_dmg(c=c_i, pA=p_top, pB=p_bot, no_x_gauss=no_x_gauss, 
+                    no_y_gauss=no_y_gauss, tsl_type=tsl_type, prev_max_del_d=self.del_d, k_i=k_i, tau_o=tau_o, G1c=G1c)
+        
+                # print(np.max(del_d_i-del_d_i_1))
+                
         
                 kcrack += connections.kCSB_dmg.k_crack11(p_top=p_top, size=size, row0=p_top.row_start, 
                              col0=p_top.col_start, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss,
-                             k_o=k_o, del_o=del_o, del_f=del_f)
+                             k_o=k_o, del_o=del_o, del_f=del_f, del_d_i_1=np.ascontiguousarray(del_d_i_1), 
+                             del_d_i=np.ascontiguousarray(del_d_i))
                 kcrack += connections.kCSB_dmg.k_crack12(p_top=p_top, p_bot=p_bot, size=size, row0=p_top.row_start, 
-                             col0=p_bot.col_start, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss,
-                             k_o=k_o, del_o=del_o, del_f=del_f)
+                              col0=p_bot.col_start, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss,
+                              k_o=k_o, del_o=del_o, del_f=del_f, del_d_i_1=np.ascontiguousarray(del_d_i_1), 
+                              del_d_i=np.ascontiguousarray(del_d_i))
                 kcrack += connections.kCSB_dmg.k_crack22(p_bot=p_bot, size=size, row0=p_bot.row_start, 
-                             col0=p_bot.col_start, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss,
-                             k_o=k_o, del_o=del_o, del_f=del_f)
+                              col0=p_bot.col_start, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss,
+                              k_o=k_o, del_o=del_o, del_f=del_f, del_d_i_1=np.ascontiguousarray(del_d_i_1), 
+                              del_d_i=np.ascontiguousarray(del_d_i))
+                
+                # print(np.min(kcrack), np.max(kcrack))
+                
                 
         if finalize:
             kcrack = finalize_symmetric_matrix(kcrack)
@@ -1584,9 +1595,9 @@ class MultiDomain(object):
                                                      np.ascontiguousarray(del_d_i_1), np.ascontiguousarray(kw_tsl_i), no_x_gauss, no_y_gauss)
 
                 if kcrack is None:
-                    kcrack = self.calc_kcrack(conn)
+                    kcrack = self.calc_kcrack(conn=conn, c_i=c_i, kw_tsl_i_1=kw_tsl_i_1, del_d_i_1=del_d_i_1)
                     
-                fcrack += (kcrack@c_i)/2
+                fcrack += (kcrack*c_i)/2
 
 ############### REMOVE SCALING FACTOR ######################################
         return np.multiply(1,fcrack)

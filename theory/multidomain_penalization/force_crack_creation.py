@@ -11,7 +11,7 @@ Created on Sun Mar 10 13:07:49 2024
 import sys
 import os
 # sys.path.append(r'C:\Users\natha\Documents\GitHub\panels\theory\multidomain_penalization')
-os.chdir(r'C:\Users\natha\Documents\GitHub\panels\theory\multidomain_penalization')
+
 
 import numpy as np
 from sympy import Matrix as M, Symbol, init_printing, var
@@ -26,7 +26,7 @@ def piece_wise_simplify(m, vars):
     return m
 
 var('a_1, b_1, a_2, b_2, weight')
-var('del_i_1, k_i_1, k_i, k_o, del_f, del_o')
+var('del_i_1, k_i_1, del_i, k_i, k_o, del_f, del_o')
 
 # Displacements and rotations for panel 1 (or ith panel in eq 32 - http://dx.doi.org/10.1016/j.compstruct.2016.10.026)
 var('f1Au, g1Au, f1Av, g1Av, f1Aw, g1Aw, f1Auxi, f1Avxi, f1Awxi, g1Aueta, g1Aveta, g1Aweta, f1Awxixi, g1Awetaeta')
@@ -114,12 +114,13 @@ piece_wise_simplify(f_crack_1st_term_p1, [])
 piece_wise_simplify(f_crack_1st_term_p2, [])
   
 # Stiffness matrix for the crack creation
+Q = (k_o*del_o)*del_f/(del_f - del_o)
 # Only terms of panel 1
-k_crack11 = -weight*(a_1*b_1/4) * ((del_i_1*k_o*del_o)/((del_f-del_o)*del_i_1)) *  (w1A.T*w1B)
+k_crack11 = weight*(a_1*b_1/4) * ((del_i_1*Q)/(del_i)**2) *  (w1A.T*w1B)
 # Coupling terms of panel 1 and 2 - ab modelled as 2 in 2ab comes when its made symmetric like 12 and 21 positions
-k_crack12 = -weight*(a_1*b_1/4) * ((del_i_1*k_o*del_o)/((del_f-del_o)*del_i_1)) * (-w1A.T*w2B)
+k_crack12 = weight*(a_1*b_1/4) * ((del_i_1*Q)/(del_i)**2) * (-w1A.T*w2B)
 # Terms of panel 2
-k_crack22 = -weight*(a_2*b_2/4) * ((del_i_1*k_o*del_o)/((del_f-del_o)*del_i_1)) *  (w2A.T*w2B)
+k_crack22 = weight*(a_2*b_2/4) * ((del_i_1*Q)/(del_i)**2) *  (w2A.T*w2B)
 
 piece_wise_simplify(k_crack11, [])
 piece_wise_simplify(k_crack12, [])
@@ -127,8 +128,10 @@ piece_wise_simplify(k_crack22, [])
 
 
 # Printing results
+os.chdir('C:/Users/natha/Documents/GitHub/panels')
 from panels.dev.matrixtools import mprint_as_sparse
 
+os.chdir(r'C:\Users\natha\Documents\GitHub\panels\theory\multidomain_penalization')
 outdir = './output_expressions_python_new/'
 import os
 try: os.makedirs(outdir)

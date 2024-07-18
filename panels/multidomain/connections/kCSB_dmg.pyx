@@ -697,7 +697,8 @@ def fcrack(object p_top, object p_bot, int size, double [:,::1] kw_tsl_i_1, doub
     
     
 def k_crack11(object p_top, int size, int row0, int col0, int no_x_gauss, int no_y_gauss,
-              double k_o, double del_o, double del_f):
+              double k_o, double del_o, double del_f, 
+              double [:,::1] del_d_i_1, double [:,::1] del_d_i):
 
     cdef int m_top, n_top
     cdef int i1, k1, j1, l1
@@ -717,6 +718,8 @@ def k_crack11(object p_top, int size, int row0, int col0, int no_x_gauss, int no
     
     cdef long [:] k_crack11r, k_crack11c
     cdef double [:] k_crack11v
+    
+    cdef double del_d_i_1_iter, del_d_i_iter
     
     cdef double [:] weights_xi, weights_eta, xis, etas
     
@@ -761,6 +764,13 @@ def k_crack11(object p_top, int size, int row0, int col0, int no_x_gauss, int no
 
                 weight = weights_xi[ptx] * weights_eta[pty]
                 
+                del_d_i_1_iter = del_d_i_1[pty, ptx]
+                del_d_i_iter = del_d_i[pty, ptx]
+                
+                if del_d_i_iter == 0:
+                    continue
+            
+                
                 c = -1
                 for i1 in range(m_top):
                     fAw_top = f(i1, xi, x1w_top, x1wr_top, x2w_top, x2wr_top)
@@ -784,7 +794,9 @@ def k_crack11(object p_top, int size, int row0, int col0, int no_x_gauss, int no
                                 c += 1
                                 k_crack11r[c] = row+2
                                 k_crack11c[c] = col+2
-                                k_crack11v[c] += -a_top*b_top*del_o*fAw_top*fBw_top*gAw_top*gBw_top*k_o*weight/(4*(del_f - del_o))
+                                # k_crack11v[c] += -a_top*b_top*del_o*fAw_top*fBw_top*gAw_top*gBw_top*k_o*weight/(4*(del_f - del_o)) - # OLD WRONG
+                                k_crack11v[c] += a_top*b_top*del_f*del_d_i_1_iter*del_o*fAw_top*fBw_top*gAw_top*gBw_top*k_o*weight/(4*(del_d_i_iter*del_d_i_iter)*(del_f - del_o))
+
 
     k_crack11 = coo_matrix((k_crack11v, (k_crack11r, k_crack11c)), shape=(size, size))
     # Builds a matrix of size = size x size (so complete size of global MD) and populates it with the data in ..v 
@@ -796,7 +808,8 @@ def k_crack11(object p_top, int size, int row0, int col0, int no_x_gauss, int no
 
 
 def k_crack12(object p_top, object p_bot, int size, int row0, int col0, int no_x_gauss, int no_y_gauss,
-              double k_o, double del_o, double del_f):
+              double k_o, double del_o, double del_f, 
+              double [:,::1] del_d_i_1, double [:,::1] del_d_i):
 
     cdef int m_top, n_top, m_bot, n_bot
     cdef int i1, k2, j1, l2
@@ -816,6 +829,8 @@ def k_crack12(object p_top, object p_bot, int size, int row0, int col0, int no_x
     
     cdef long [:] k_crack12r, k_crack12c
     cdef double [:] k_crack12v
+    
+    cdef double del_d_i_1_iter, del_d_i_iter
     
     cdef double [:] weights_xi, weights_eta, xis, etas
     
@@ -870,6 +885,12 @@ def k_crack12(object p_top, object p_bot, int size, int row0, int col0, int no_x
 
                 weight = weights_xi[ptx] * weights_eta[pty]
                 
+                del_d_i_1_iter = del_d_i_1[pty, ptx]
+                del_d_i_iter = del_d_i[pty, ptx]
+                
+                if del_d_i_iter == 0:
+                    continue
+                
                 c = -1
                 for i1 in range(m_top):
                     fAw_top = f(i1, xi, x1w_top, x1wr_top, x2w_top, x2wr_top)
@@ -893,7 +914,8 @@ def k_crack12(object p_top, object p_bot, int size, int row0, int col0, int no_x
                                 c += 1
                                 k_crack12r[c] = row+2
                                 k_crack12c[c] = col+2
-                                k_crack12v[c] += a_top*b_top*del_o*fAw_top*fBw_bot*gAw_top*gBw_bot*k_o*weight/(4*(del_f - del_o))
+                                # k_crack12v[c] += a_top*b_top*del_o*fAw_top*fBw_bot*gAw_top*gBw_bot*k_o*weight/(4*(del_f - del_o)) # OLD WRONG
+                                k_crack12v[c] += -a_top*b_top*del_f*del_d_i_1_iter*del_o*fAw_top*fBw_bot*gAw_top*gBw_bot*k_o*weight/(4*(del_d_i_iter*del_d_i_iter)*(del_f - del_o))
 
     k_crack12 = coo_matrix((k_crack12v, (k_crack12r, k_crack12c)), shape=(size, size))
     # Builds a matrix of size = size x size (so complete size of global MD) and populates it with the data in ..v 
@@ -905,7 +927,8 @@ def k_crack12(object p_top, object p_bot, int size, int row0, int col0, int no_x
 
 
 def k_crack22(object p_bot, int size, int row0, int col0, int no_x_gauss, int no_y_gauss,
-              double k_o, double del_o, double del_f):
+              double k_o, double del_o, double del_f,
+              double [:,::1] del_d_i_1, double [:,::1] del_d_i):
 
     cdef int m_bot, n_bot
     cdef int i1, k1, j1, l1
@@ -925,6 +948,8 @@ def k_crack22(object p_bot, int size, int row0, int col0, int no_x_gauss, int no
     
     cdef long [:] k_crack22r, k_crack22c
     cdef double [:] k_crack22v
+    
+    cdef double del_d_i_1_iter, del_d_i_iter
     
     cdef double [:] weights_xi, weights_eta, xis, etas
     
@@ -969,6 +994,12 @@ def k_crack22(object p_bot, int size, int row0, int col0, int no_x_gauss, int no
 
                 weight = weights_xi[ptx] * weights_eta[pty]
                 
+                del_d_i_1_iter = del_d_i_1[pty, ptx]
+                del_d_i_iter = del_d_i[pty, ptx]
+                
+                if del_d_i_iter == 0:
+                    continue
+                
                 c = -1
                 for i1 in range(m_bot):
                     fAw_bot = f(i1, xi, x1w_bot, x1wr_bot, x2w_bot, x2wr_bot)
@@ -992,7 +1023,8 @@ def k_crack22(object p_bot, int size, int row0, int col0, int no_x_gauss, int no
                                 c += 1
                                 k_crack22r[c] = row+2
                                 k_crack22c[c] = col+2
-                                k_crack22v[c] += -a_bot*b_bot*del_o*fAw_bot*fBw_bot*gAw_bot*gBw_bot*k_o*weight/(4*(del_f - del_o))
+                                # k_crack22v[c] += -a_bot*b_bot*del_o*fAw_bot*fBw_bot*gAw_bot*gBw_bot*k_o*weight/(4*(del_f - del_o)) # OLD REMOVE
+                                k_crack22v[c] += a_bot*b_bot*del_f*del_d_i_1_iter*del_o*fAw_bot*fBw_bot*gAw_bot*gBw_bot*k_o*weight/(4*(del_d_i_iter*del_d_i_iter)*(del_f - del_o))
 
     k_crack22 = coo_matrix((k_crack22v, (k_crack22r, k_crack22c)), shape=(size, size))
     # Builds a matrix of size = size x size (so complete size of global MD) and populates it with the data in ..v 
