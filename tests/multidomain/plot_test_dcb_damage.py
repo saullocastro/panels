@@ -33,6 +33,8 @@ np.set_printoptions(formatter={'float': lambda x: "{0:0.2f}".format(x)})
 # For inline images
 # %matplotlib inline
 
+from panels.legendre_gauss_quadrature import get_points_weights
+
 
 
 
@@ -40,7 +42,7 @@ animate = False
 
 if not animate:
     # Plotting a set of multiple results
-    if False:
+    if True:
         # os.chdir('C:/Users/natha/OneDrive - Delft University of Technology/Fokker Internship/_Thesis/_Results/Raw Results/DCB Damage/3 pan/G1c_112e-2-v2_code')
         
         # Load variables
@@ -56,15 +58,27 @@ if not animate:
             os.chdir('C:/Users/natha/OneDrive - Delft University of Technology/Fokker Internship/_Thesis/_Results/Raw Results/DCB Damage/3 pan')
             FEM = np.load('FEM.npy')
         if True:
-            foldername = 'p3_m15_8_ki1e4_tauoITER_nx60_ny30_wpts50_G1c112'
-            os.chdir('C:/Users/natha/OneDrive - Delft University of Technology/Fokker Internship/_Thesis/_Results/Raw Results/DCB Damage/v4 code - force crack/' + foldername)
-            all_filename_1 = [f'p3_m15_8_ki1e4_tauo{tauo:.0f}_nx60_ny30_wpts50_G1c112' for tauo in [47,67,77,87]]
+            foldername = 'nokcrack_p3_65_25_mITER_8_kiiter_tauo77_nx60_ny30_wptsiter_G1c112'
+            os.chdir('C:/Users/natha/OneDrive - Delft University of Technology/Fokker Internship/_Thesis/_Results/Raw Results/DCB Damage/v6 - Damage index stored/' + foldername)
+            print(os.getcwd())
+            all_filename_1 = [f'p3_65_25_m{m:.0f}_8_ki{ki:.0e}_tauo77_nx60_ny30_wpts{w_iter:.0f}_G1c112' for m in [10,12,15,18] for ki in [1e4, 1e5] for w_iter in [30,50]] 
+
+
             for i in range(len(all_filename_1)):
                 all_filename_1[i] = all_filename_1[i].replace('+0','')
+
+            for i_list in range(len(all_filename_1)):
+                filename = all_filename_1[i_list]
+                rename_file = filename.replace('_','')
+                print(all_filename_1[i_list])
+                all_filename_1[i_list] = f'FID{rename_file}' 
+                print(f'FID{rename_file}')
+                print(all_filename_1[i_list])
+            # all_filename_1 = rename_file.copy()
+            
             for filename in all_filename_1:
-                print(filename)
-                globals()[f'force_intgn_{filename}'] = np.load(f'force_intgn_{filename}.npy')
-                globals()[f'force_intgn_dmg_{filename}'] = np.load(f'force_intgn_dmg_{filename}.npy')
+                globals()[f'{filename}'] = np.load(f'{filename}.npy')
+                # globals()[f'force_intgn_dmg_{filename}'] = np.load(f'force_intgn_dmg_{filename}.npy')
 
         all_filename = all_filename_1 #+ all_filename_2
         
@@ -100,8 +114,12 @@ if not animate:
         # plt.figure(figsize=(10,7))
         fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(10,7))
         for filename in all_filename:
-            plt.plot(locals()[f'force_intgn_{filename}'][:,0], locals()[f'force_intgn_{filename}'][:,1], 
+            # plt.plot(locals()[f'force_intgn_{filename}'][:,0], locals()[f'force_intgn_{filename}'][:,1], 
+            #           label='Line b='+filename[filename.find('p3_') + 3 : filename.find('_m')]) # removing starting _ from filename
+            
+            plt.plot(locals()[f'{filename}'][:,0], (0.075)*locals()[f'{filename}'][:,1], 
                       label='Line b='+filename[filename.find('p3_') + 3 : filename.find('_m')]) # removing starting _ from filename
+            
             
             if False: # For nx ny iter
                 label_unformatted = filename[filename.find('tauo67_') +7 : filename.find('_wpts')]
@@ -129,7 +147,7 @@ if not animate:
         plt.xticks(fontsize=14)
         plt.yticks(fontsize=14)
         plt.grid()
-        plt.legend(fontsize=14)
+        # plt.legend(fontsize=14)
         if False:
                 ax_inset = inset_axes(ax, width="60%", height="50%",
                                        bbox_to_anchor=(.45 , .1, .8, .8),
@@ -148,7 +166,7 @@ if not animate:
         
         
     # Plotting a set of single results    
-    if True:
+    if False:
         if True:
             os.chdir('C:/Users/natha/OneDrive - Delft University of Technology/Fokker Internship/_Thesis/_Results/Raw Results/DCB Damage/3 pan')
             FEM = np.load('FEM.npy')
@@ -157,12 +175,13 @@ if not animate:
         
         plt.plot(FEM[:,0], FEM[:,1], label='FEM')
         
-        plt.plot(force_intgn_dmg_1posve_m15_8_w200_nx60_ny30_tau67_ki1e4[:,0], (4/52)*force_intgn_dmg_1posve_m15_8_w200_nx60_ny30_tau67_ki1e4[:,1], 
+        plt.plot(temp[:,0], 
+                 (0.071)*temp[:,1], 
                   label=r'Area int (scaled 4/a)')
-        # plt.plot(force_intgn_1posve_m15_8_w20_nx60_ny30[:,0], force_intgn_1posve_m15_8_w20_nx60_ny30[:,1], 
-        #           label=r'Line int')
+        plt.plot(temp1[:,0], temp1[:,1], 
+                  label=r'Line int')
         
-        plt.title(r'+1*fcrack $\tau$=67 $n_x$=60 $n_y$=30 $k_i$=1e4 m =15,8 w=200')
+        plt.title(r'+1*fcrack $\tau$=67 $n_x$=60 $n_y$=30 $k_i$=1e4 $m$=18,8 w=30')
         plt.ylabel('Force [N]', fontsize=14)
         plt.xlabel('Displacement [mm]', fontsize=14)
         plt.xticks(fontsize=14)
@@ -170,6 +189,42 @@ if not animate:
         plt.grid()
         plt.legend(fontsize=14)
         plt.show()
+        
+    # contourf
+    if False:
+        var_name = 'dmg_index'#'kw_tsl_1posve_m15_8_w200_nx60_ny30_tau67_ki1e4'
+        
+        no_x_gauss = 60
+        no_y_gauss = 30
+        
+        a = 22
+        b = 25
+        
+        xis = np.zeros(no_x_gauss, dtype=np.float64)
+        weights_xi = np.zeros(no_x_gauss, dtype=np.float64)
+        etas = np.zeros(no_y_gauss, dtype=np.float64)
+        weights_eta = np.zeros(no_y_gauss, dtype=np.float64)
+        
+        get_points_weights(no_x_gauss, xis, weights_xi)
+        get_points_weights(no_y_gauss, etas, weights_eta)
+        
+        xi_grid, eta_grid = np.meshgrid(xis, etas)
+        
+        x_grid = a*(xi_grid+1)/2
+        y_grid = b*(eta_grid+1)/2
+        
+        plt.contourf(x_grid, y_grid, globals()[var_name][:,:,-1])
+        plt.colorbar()
+        plt.title(r'+1*fcrack $\tau$=67 $n_x$=60 $n_y$=30 $k_i$=1e4 m =15,8 w=200')
+        plt.ylabel('y coordinate [mm]', fontsize=14)
+        plt.xlabel('x coordinate [mm]', fontsize=14)
+        plt.xticks(fontsize=14)
+        plt.yticks(fontsize=14)
+        
+        
+        plt.grid()
+        plt.show()
+        
       
     # Random plot 2
     if False:
@@ -208,6 +263,20 @@ if not animate:
         plt.legend(fontsize=12)
         plt.show()
         
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # Animate results
@@ -249,9 +318,30 @@ if animate:
         im.set_data(curr_res)
         im.set_clim(vmin, vmax)
         
+        w_iter = globals()['force_intgn_dmg'+animate_var][:,0]
         # w_iter needs to be defined
         tx.set_text(f'{animate_var}     -   Disp={w_iter[i]:.2f} mm')
+      
+    
+    def animate_contourf_v2(i):
+        # i = current frame number
         
+        curr_res = frames[i]
+        vmin = np.min(globals()[var_name+animate_var])
+        vmax = np.max(globals()[var_name+animate_var])
+        im.set_array(curr_res.ravel())
+        # im = ax1.pcolormesh(curr_res)
+        # im.set_array(curr_res.ravel())
+        fig.colorbar(im, cax=cax, format="{x:.2f}", ticks=np.linspace(vmin, vmax, 5))
+        # im.set_data(curr_res)
+        im.set_clim(vmin, vmax)
+        
+        # w_iter needs to be defined
+        w_iter = globals()['force_intgn_dmg'+animate_var][:,0]
+        tx.set_text(f'Interface Traction    -   Disp={w_iter[i]:.2f} mm')
+        
+        # return scatter_plot
+    
         
     def animate_plot_scatter(i):
         scatter_plot.set_offsets(np.stack([globals()[animate_var][i,0], scaling_fct*globals()[animate_var][i,1]]).T)
@@ -272,19 +362,22 @@ if animate:
         vmin = np.min(globals()[var_name+animate_var])
         vmax = np.max(globals()[var_name+animate_var])
         im = ax1.imshow(curr_res)
+        # im = ax1.pcolormesh(curr_res)
+        # im.set_array(curr_res.ravel())
         fig.colorbar(im, cax=cax, format="{x:.2f}", ticks=np.linspace(vmin, vmax, 5))
-        im.set_data(curr_res)
-        im.set_clim(vmin, vmax)
+        # im.set_data(curr_res)
+        # im.set_clim(vmin, vmax)
         
         # w_iter needs to be defined
-        w_iter = globals()['force_intgn_dmg'+animate_var][:,0]
+        w_iter = globals()[animate_var][:,0]
         tx.set_text(f'Interface Traction    -   Disp={w_iter[i]:.2f} mm')
         
         # return scatter_plot
     
     # Creates contourf plots
     if False:
-        for animate_var in ['tau_p3_m15_8_ki1e4_tauo67_nx60_ny30_wpts50_G1c112']: #["dmg_index"]:#, "del_d"]:
+        var_name = 'tau'
+        for animate_var in ['_p3_m15_8_ki1e4_tauo67_nx60_ny30_wpts50_G1c112']: #["dmg_index"]:#, "del_d"]:
             
             fig = plt.figure()
             ax = fig.add_subplot(1,1,1)    
@@ -305,10 +398,80 @@ if animate:
             FFwriter = animation.FFMpegWriter(fps=2)
             ani.save(f'{animate_var}.mp4', writer=FFwriter)
             # ani.save(f'{animate_var}.gif', writer='imagemagick')
+    
+        
+    
+    # V2 - Creates contourf plots
+    if True:
+        no_x_gauss = 60
+        no_y_gauss = 30
+        
+        a = 52
+        b = 25
+        
+        xis = np.zeros(no_x_gauss, dtype=np.float64)
+        weights_xi = np.zeros(no_x_gauss, dtype=np.float64)
+        etas = np.zeros(no_y_gauss, dtype=np.float64)
+        weights_eta = np.zeros(no_y_gauss, dtype=np.float64)
+        
+        get_points_weights(no_x_gauss, xis, weights_xi)
+        get_points_weights(no_y_gauss, etas, weights_eta)
+        
+        xi_grid, eta_grid = np.meshgrid(xis, etas)
+        
+        x_grid = a*(xi_grid+1)/2
+        y_grid = b*(eta_grid+1)/2
+        
+        
+        def animate_contourf_v2(i):
+            # i = current frame number
+            
+            curr_res = frames[i][:,40:]
+            vmin = np.min(globals()[var_name+animate_var])
+            vmax = np.max(globals()[var_name+animate_var])
+            im.set_array(curr_res.ravel())
+            # im = ax1.pcolormesh(curr_res)
+            # im.set_array(curr_res.ravel())
+            fig.colorbar(im, cax=cax, format="{x:.2f}", ticks=np.linspace(vmin, vmax, 5))
+            # im.set_data(curr_res)
+            im.set_clim(vmin, vmax)
+            
+            # w_iter needs to be defined
+            w_iter = globals()['force_intgn_dmg'+animate_var][:,0]
+            tx.set_text(f'{var_name}   -   Disp={w_iter[i]:.2f} mm')
+
+
+        var_name = 'tau'
+        
+        for animate_var in ['_p3_m15_8_ki1e4_tauo67_nx60_ny30_wpts50_G1c112']: 
+            
+            fig = plt.figure()
+            ax = fig.add_subplot(1,1,1)    
+            div = make_axes_locatable(ax)
+            cax = div.append_axes('right', '5%', '5%')
+            tx = ax.set_title('Frame 0') # Gets overwritten later
+            
+            frames = [] # for storing the generated images
+            for i in range(np.shape(locals()[var_name+animate_var])[2]):
+                frames.append(locals()[var_name+animate_var][:,:,i])
+                
+            im = ax.pcolormesh(x_grid[:,40:], y_grid[:,40:], frames[0][:,40:])
+            cbar = fig.colorbar(im, cax=cax, format="{x:.2f}")
+            ax.set_xlim([np.min(x_grid[:,40:]), np.max(x_grid[:,40:])])
+            ax.set_ylim([np.min(y_grid[:,40:]), np.max(y_grid[:,40:])])
+            
+            # plt.suptitle(animate_var, y=0.95)
+                
+            ani = animation.FuncAnimation(fig, animate_contourf_v2, frames=np.shape(locals()[var_name+animate_var])[2],
+                                          interval = 1000, repeat_delay=1000)
+            FFwriter = animation.FFMpegWriter(fps=2)
+            ani.save(f'{animate_var}.mp4', writer=FFwriter)
+            # ani.save(f'{animate_var}.gif', writer='imagemagick')
+            
             
     # Creates line and scatter plots
     if False:
-        for animate_var in ['force_intgn_dmg_p3_m15_8_ki1e4_tauo67_nx60_ny30_wpts50_G1c112']: #["dmg_index"]:#, "del_d"]:
+        for animate_var in ['_p3_m15_8_ki1e4_tauo67_nx60_ny30_wpts50_G1c112']: #["dmg_index"]:#, "del_d"]:
             
             scaling_fct = 23
             
@@ -336,9 +499,28 @@ if animate:
             # ani.save(f'{animate_var}.gif', writer='imagemagick')
     
     # Creates both contourf and line/scatter plots
-    if True:
-        var_name = 'dmg_index'
-        for animate_var in ['_1posve_m15_8_w20_nx60_ny30']:
+    if False:
+        no_x_gauss = 60
+        no_y_gauss = 30
+        
+        a = 52
+        b = 25
+        
+        xis = np.zeros(no_x_gauss, dtype=np.float64)
+        weights_xi = np.zeros(no_x_gauss, dtype=np.float64)
+        etas = np.zeros(no_y_gauss, dtype=np.float64)
+        weights_eta = np.zeros(no_y_gauss, dtype=np.float64)
+        
+        get_points_weights(no_x_gauss, xis, weights_xi)
+        get_points_weights(no_y_gauss, etas, weights_eta)
+        
+        xi_grid, eta_grid = np.meshgrid(xis, etas)
+        
+        x_grid = a*(xi_grid+1)/2
+        y_grid = b*(eta_grid+1)/2
+        
+        var_name = 'tau'
+        for animate_var in ['_p3_m15_8_ki1e4_tauo67_nx60_ny30_wpts50_G1c112']:
             fig, (ax1, ax2) = plt.subplots(1,2, gridspec_kw={'width_ratios': [2, 1]}, figsize=(10, 4))
             plt.subplots_adjust(bottom=0.05, left=0.05, right=0.95, top=0.95, wspace=0.5, hspace=0)
             
@@ -354,7 +536,7 @@ if animate:
             im = ax1.imshow(cv0) 
             cb = fig.colorbar(im, cax=cax)
             tx = ax1.set_title('Frame 0') # Gets overwritten later
-            scaling_fct = 4/52
+            scaling_fct = 25
             
             # 2nd plot with the load displacement curve
             scatter_plot = ax2.scatter(globals()['force_intgn_dmg'+animate_var][0,0], 
@@ -371,7 +553,7 @@ if animate:
                                           interval = 1000, repeat_delay=1000)
             # here frames are number of frames, not actual frames
             FFwriter = animation.FFMpegWriter(fps=2)
-            ani.save(f'{animate_var}.mp4', writer=FFwriter)
+            ani.save(f'{animate_var}_1.mp4', writer=FFwriter)
 
 
 

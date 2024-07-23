@@ -15,6 +15,7 @@ from panels.multidomain.connections import calc_ku_kv_kw_point_pd
 from panels.multidomain.connections import fkCpd, fkCld_xcte, fkCld_ycte
 from panels.plot_shell import plot_shell
 from panels.multidomain import MultiDomain
+from panels.legendre_gauss_quadrature import get_points_weights
 
 # Open images
 from matplotlib import image as img
@@ -920,16 +921,101 @@ def calc_area_tsl_curve(kw_tsl, del_d):
     
     
 
+def calc_leng_FPZ(dmg_index, force_intgn_dmg):
+    FPZ_index = np.zeros((np.shape(dmg_index)[2], 2))
+    row_consider = int((np.shape(dmg_index)[0])/2)
+    for i in range(np.shape(dmg_index)[2]):
+        FPZ_index[i,0] = np.argwhere(dmg_index[row_consider,:,i]==0)[-1][0]  # [-1] to get the last negative position; [0] to convert it from an array to int; 
+        if np.max(dmg_index[row_consider,:,i]) == 1:
+            FPZ_index[i,1] = np.argwhere(dmg_index[row_consider,:,i]==1)[0][0]
+        else:
+            FPZ_index[i,1] = np.shape(dmg_index)[1] - 1
+            
+    no_x_gauss = np.shape(dmg_index)[1]
+    no_y_gauss = np.shape(dmg_index)[0]
+    
+    a = 52
+    b = 25
+    
+    xis = np.zeros(no_x_gauss, dtype=np.float64)
+    weights_xi = np.zeros(no_x_gauss, dtype=np.float64)
+    etas = np.zeros(no_y_gauss, dtype=np.float64)
+    weights_eta = np.zeros(no_y_gauss, dtype=np.float64)
+    
+    get_points_weights(no_x_gauss, xis, weights_xi)
+    get_points_weights(no_y_gauss, etas, weights_eta)
+    
+    FPZ_xis = np.zeros((np.shape(dmg_index)[2], 2))
+    for i in range(np.shape(dmg_index)[2]):
+        FPZ_xis[i,0] = xis[int(FPZ_index[i,0])]
+        FPZ_xis[i,1] = xis[int(FPZ_index[i,1])]
+        
+    FPZ_x = a*(FPZ_xis+1)/2
+    
+    plt.figure(figsize=(10,4))
+    plt.subplot(1,2,1)
+    plt.plot(force_intgn_dmg[:,0],FPZ_x[:,1] - FPZ_x[:,0])
+    plt.xlabel('Tip Displacement [mm]')
+    plt.ylabel('Length of FPZ [mm]')        
+    plt.subplot(1,2,2)
+    plt.plot(force_intgn_dmg[:,0],a-FPZ_x[:,0], label='Undamaged crack front')
+    plt.plot(force_intgn_dmg[:,0],a-FPZ_x[:,1], label='Damaged crack front')
+    plt.xlabel('Tip Displacement [mm]')
+    plt.ylabel('Distance from the precrack tip [mm]')  
+    plt.legend()
+    plt.show()
+    
+    return FPZ_index, FPZ_xis, FPZ_x
 
+    def create_parallel_runs():
+        '''
+        Temp place to store it
+        '''
+        if False:
+            ki_all = [1e5, 5e4, 1e4, 5e3]
+            inp_all = np.zeros((16,6)) # 16=4*4, 6 for 6 col
+            m = 10
+            count_inp = 0
+            for ki in ki_all:
+                # 4 bec each inp line as 4 lines
+                inp_all[4*count_inp : 4*count_inp+4,:] = np.array(([3,m,ki,87,150,80],
+                           [3,m,ki,67,60,30],
+                           [3,m,ki,57,60,30],
+                           [3,m,ki,47,60,30]))
+                count_inp += 1
+            ftn_arg = [(int(inp_i[0]),int(inp_i[1]),f'p{inp_i[0]:.0f}_m{inp_i[1]:.0f}_10_ki{inp_i[2]:.0e}_tauo{inp_i[3]:.0f}_nx{inp_i[4]:.0f}_ny{inp_i[5]:.0f}', float(inp_i[2]), float(inp_i[3]), int(inp_i[4]), int(inp_i[5])) for inp_i in inp_all]
+            # Removing +0 from the exponential notation for ki's values
+            for i in range(len(ftn_arg)):
+                ftn_arg[i] = list(ftn_arg[i]) # convert to list bec tuples are inmutable
+                ftn_arg[i][2] = ftn_arg[i][2].replace('+0','')
+                ftn_arg[i] = tuple(ftn_arg[i]) # convert back to tuple
+                
+    
+def rename_files():
+    if True:
+        foldername = 'nokcrack_p3_65_25_mITER_8_kiiter_tauo77_nx60_ny30_wptsiter_G1c112'
+        os.chdir('C:/Users/natha/OneDrive - Delft University of Technology/Fokker Internship/_Thesis/_Results/Raw Results/DCB Damage/v6 - Damage index stored/' + foldername)
+        print(os.getcwd())
+        all_filename_1 = [f'p3_65_25_m{m:.0f}_8_ki{ki:.0e}_tauo77_nx60_ny30_wpts{w_iter:.0f}_G1c112' for m in [10,12,15,18] for ki in [1e4, 1e5] for w_iter in [30,50]] 
 
+        for i in range(len(all_filename_1)):
+            all_filename_1[i] = all_filename_1[i].replace('+0','')
+        
+    for i_list in range(len(all_filename_1)):
+        filename = all_filename_1[i_list]
+        rename_file = filename.replace('_','')
+        print(f'FID{rename_file}')
+        # os.rename(f'force_intgn_{filename}.npy', f'FID{rename_file}.npy')
+     
+def monotonicity_check_displ(check_matrix):
+    monotonicity = np.all(check_matrix[:, :, 1:] >= check_matrix[:, :, :-1], axis=2)
+    if np.all(monotonicity):
+        print('Non Decreasing')
+    else:
+        print('Decreasing')
+    return monotonicity
+           
 
 if __name__ == "__main__":
     
-    if False:
-        test_dcb_damage_prop_fext_conn(no_pan = 3, no_terms=8, plies=15, k_i=1e4)
-    
-    # Post process results
-    if False:
-        dmg_index, del_d, kw_tsl, force_intgn, displ_top_root, displ_bot_root, energy_dissp = postprocess_results_damage(c_all=c_all_p3_m15_10_ki1e4_tauo87_nx60_ny30_wpts45, no_pan=3, 
-                   no_terms=15, filename='p3_m15_10_ki1e4_tauo87_nx60_ny30_wpts45', k_i=1e4, 
-                   tau_o=67, no_x_gauss=60, no_y_gauss=30, w_iter_no_pts=45)
+    rename_files()

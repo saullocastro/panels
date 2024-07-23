@@ -241,3 +241,7 @@ def calc_kw_tsl(pA, pB=None, tsl_type=None, k_i=None, del_d=None, tau_o=None, G1
     
     else:
         raise ValueError('Invalid TSL type')
+        
+    
+
+    

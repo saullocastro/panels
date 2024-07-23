@@ -1105,10 +1105,10 @@ class MultiDomain(object):
                 weights_y = np.zeros(no_y_gauss, dtype=np.float64)
                 get_points_weights(no_y_gauss, y_gauss, weights_y)
                 
-                if hasattr(self, "del_d"):
+                if hasattr(self, "dmg_index"):
                     kw_tsl, dmg_index, del_d = self.calc_k_dmg(c=c, pA=p_top, pB=p_bot, 
                                          no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type, 
-                                         prev_max_del_d=self.del_d, k_i=k_i, tau_o=tau_o, G1c=G1c)
+                                         prev_max_dmg_index=self.dmg_index, k_i=k_i, tau_o=tau_o, G1c=G1c)
                 tau = np.multiply(kw_tsl, del_d)
                 
                 force_intgn = 0
@@ -1287,14 +1287,14 @@ class MultiDomain(object):
                     p_bot = connecti['p2']
     
                     # ATTENTION: pA NEEDS to be the top one and pB, the bottom panel
-                    if hasattr(self, "del_d"):
+                    if hasattr(self, "dmg_index"):
                         kw_tsl, dmg_index, del_d = self.calc_k_dmg(c=c, pA=p_top, pB=p_bot, 
                                              no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type, 
-                                             prev_max_del_d=self.del_d, k_i=k_i, tau_o=tau_o, G1c=G1c)
+                                             prev_max_dmg_index=self.dmg_index, k_i=k_i, tau_o=tau_o, G1c=G1c)
                     else:
                         kw_tsl, dmg_index, del_d = self.calc_k_dmg(c=c, pA=p_top, pB=p_bot, 
                                              no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type,
-                                             prev_max_del_d=None, k_i=k_i, tau_o=tau_o, G1c=G1c)
+                                             prev_max_dmg_index=None, k_i=k_i, tau_o=tau_o, G1c=G1c)
                     
                     # Overwriting kw_tsl to the original value
                     if False:
@@ -1304,7 +1304,7 @@ class MultiDomain(object):
                     # print(f'   kw MD class {np.min(kw_tsl):.1e}      dmg {np.max(dmg_index):.3f}')
                     
                     # print('kc_conn_MD')
-                    dsb = sum(pA.plyts)/2. + sum(pB.plyts)/2.
+                    dsb = sum(p_top.plyts)/2. + sum(p_bot.plyts)/2.
                     kC_conn += connections.kCSB_dmg.fkCSB11_dmg(dsb=dsb, p1=pA,
                             size=size, row0=pA.row_start, col0=pA.col_start,
                             no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, kw_tsl=kw_tsl)
@@ -1486,7 +1486,6 @@ class MultiDomain(object):
                 tsl_type = connecti['tsl_type']
                 p_top = connecti['p1']
                 p_bot = connecti['p2']
-                k_i = connecti['k_i']
                 tau_o = connecti['tau_o']
                 G1c = connecti['G1c']
                 k_o = connecti['k_o']
@@ -1494,10 +1493,7 @@ class MultiDomain(object):
                 del_f = connecti['del_f']
                 
                 kw_tsl, dmg_index, del_d_i = self.calc_k_dmg(c=c_i, pA=p_top, pB=p_bot, no_x_gauss=no_x_gauss, 
-                    no_y_gauss=no_y_gauss, tsl_type=tsl_type, prev_max_del_d=self.del_d, k_i=k_i, tau_o=tau_o, G1c=G1c)
-        
-                # print(np.max(del_d_i-del_d_i_1))
-                
+                    no_y_gauss=no_y_gauss, tsl_type=tsl_type, prev_max_dmg_index=self.dmg_index, k_i=k_o, tau_o=tau_o, G1c=G1c)
         
                 kcrack += connections.kCSB_dmg.k_crack11(p_top=p_top, size=size, row0=p_top.row_start, 
                              col0=p_top.col_start, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss,
@@ -1511,9 +1507,6 @@ class MultiDomain(object):
                               col0=p_bot.col_start, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss,
                               k_o=k_o, del_o=del_o, del_f=del_f, del_d_i_1=np.ascontiguousarray(del_d_i_1), 
                               del_d_i=np.ascontiguousarray(del_d_i))
-                
-                # print(np.min(kcrack), np.max(kcrack))
-                
                 
         if finalize:
             kcrack = finalize_symmetric_matrix(kcrack)
@@ -1583,13 +1576,13 @@ class MultiDomain(object):
                 tsl_type = connecti['tsl_type']
                 p_top = connecti['p1']
                 p_bot = connecti['p2']
-                k_i = connecti['k_i']
+                k_i = connecti['k_o']
                 tau_o = connecti['tau_o']
                 G1c = connecti['G1c']
                 
                 kw_tsl_i, dmg_index_i, del_d_i = self.calc_k_dmg(c=c_i, pA=p_top, pB=p_bot, 
-                         no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type, prev_max_del_d=del_d_i_1,
-                         k_i=k_i, tau_o=tau_o, G1c=G1c)
+                         no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type, 
+                         prev_max_dmg_index=self.dmg_index, k_i=k_i, tau_o=tau_o, G1c=G1c)
                 
                 fcrack = connections.kCSB_dmg.fcrack(p_top, p_bot, size, np.ascontiguousarray(kw_tsl_i_1),
                                                      np.ascontiguousarray(del_d_i_1), np.ascontiguousarray(kw_tsl_i), no_x_gauss, no_y_gauss)
@@ -1721,13 +1714,14 @@ class MultiDomain(object):
         return del_d
     
     
-    def calc_k_dmg(self, c, pA, pB, no_x_gauss, no_y_gauss, tsl_type, prev_max_del_d, k_i=None, tau_o=None, G1c=None):
+    def calc_k_dmg(self, c, pA, pB, no_x_gauss, no_y_gauss, tsl_type, prev_max_dmg_index, 
+                   k_i=None, tau_o=None, G1c=None):
         
         '''
             Calculates the damaged k_tsl and the damage index
             
             Input:
-                prev_max_del_d = Max separation for the previous converged NR iteration
+                prev_max_dmg_index = Max damage index per integration point for the previous converged NR iteration
                 
                 
             NOTE: Currently this only works for 1 contact region bec of the way del_d is being stored in the 
@@ -1743,32 +1737,30 @@ class MultiDomain(object):
         # Separation for the current NR iteration
         del_d_curr = self.calc_separation(res_pan_top, res_pan_bot)
         
-        # Considering max del_d for all displacement/load steps
-        # prev_max_del_d is already the max over all disp steps at each integration point
-        if prev_max_del_d is not None:
-            max_del_d = np.amax(np.array([prev_max_del_d, del_d_curr]), axis = 0)
-            # TODO: Consider only doing it if del_d is +ve as -ve doesnt create any damage
-        else: 
-            max_del_d = del_d_curr.copy()
-
-        # print(f'calc_k_dmg: Before del_d min {np.min(max_del_d)}')
-        
         # Rewriting negative displacements and setting them to zero before the positive displ at the right end (tip) 
-        corrected_max_del_d = max_del_d.copy()
+        corrected_del_d = del_d_curr.copy()
         if True:
-            for i in range(np.shape(max_del_d)[0]):
-                if np.min(max_del_d[i,:]) <= 0: # only for negative dipls
-                    corrected_max_del_d[i, 0:np.argwhere(corrected_max_del_d[i,:]<=0)[-1][0] + 1] = 0
+            for i in range(np.shape(corrected_del_d)[0]):
+                if np.min(corrected_del_d[i,:]) <= 0: # only for negative dipls
+                    corrected_del_d[i, 0:np.argwhere(corrected_del_d[i,:]<=0)[-1][0] + 1] = 0
                     # [-1] to get the last negative position; [0] to convert it from an array to int; 
                     # +1 to include the last negative value and set it to 0
-                
         
-        # print(f'calc_k_dmg: Updated del_d -- min {np.min(corrected_max_del_d)} -- max {np.max(corrected_max_del_d):.3e}')
+        # Calculating dmg index corr to current separation
+        _, dmg_index_curr = connections.calc_kw_tsl(pA=pA, pB=pB, tsl_type=tsl_type, k_i=k_i, 
+                                                    del_d=corrected_del_d, tau_o=tau_o, G1c=G1c)
         
+        # Considering max dmg_index per intgn point for all displ steps
+        # prev_max_dmg_index is already the max over all disp steps at each integration point
+        if prev_max_dmg_index is not None:
+            max_dmg_index = np.amax(np.array([prev_max_dmg_index, dmg_index_curr]), axis = 0)
+        else: # First iteration
+            max_dmg_index = dmg_index_curr.copy()
+
         # Calculating stiffness grid
-        kw_tsl, dmg_index = connections.calc_kw_tsl(pA=pA, pB=pB, tsl_type=tsl_type, k_i=k_i, del_d=corrected_max_del_d, tau_o=tau_o, G1c=G1c)
+        kw_tsl = self.calc_damaged_stiffness(dmg_index=max_dmg_index, k_i=k_i)
         
-        return kw_tsl, dmg_index, corrected_max_del_d
+        return kw_tsl, max_dmg_index, corrected_del_d
         
     
     
@@ -1901,15 +1893,33 @@ class MultiDomain(object):
         
         
         
-        
-        
     
-    def update_max_del_d(self, curr_max_del_d):
+    def update_TSL_history(self, curr_max_dmg_index):
         '''
             Used to update the maximum del_d (over all loading histories) - this prevents exisiting 
             damage from vanishing when the updated separation predicts there is less separation than 
             what was present earlier (as badly modelled self-healing materials aren't part of this thesis :) )
         '''
-        self.del_d = curr_max_del_d
+        self.dmg_index = curr_max_dmg_index
+        
 
-    
+    def calc_damaged_stiffness(self, dmg_index, k_i):
+        '''
+        Calculates the reduced stiffness given the damage index
+
+        Parameters
+        ----------
+        dmg_index : TYPE
+            DESCRIPTION.
+        k_i : TYPE, optional
+            DESCRIPTION. The default is None.
+
+        Returns
+        -------
+        None.
+
+        '''
+        
+        kw_tsl = k_i*(1-dmg_index)
+        
+        return kw_tsl

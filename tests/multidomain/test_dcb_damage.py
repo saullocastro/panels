@@ -2,10 +2,6 @@ local_run = True # True implies running on local device and not the cluster
 
 import sys
 import os
-if local_run:
-    sys.path.append('C:/Users/natha/Documents/GitHub/panels')
-    sys.path.append('..\\..')
-    os.chdir('C:/Users/natha/Documents/GitHub/panels/tests/multidomain')
 
 import numpy as np
 from structsolve import solve
@@ -37,6 +33,14 @@ from multiprocessing import Pool
 
 import sys
 import time
+
+if local_run:
+    os.chdir('C:/Users/natha/OneDrive - Delft University of Technology/Fokker Internship/_Thesis/_Results/Raw Results/DCB Damage/3 pan')
+    FEM = np.load('FEM.npy')
+    
+    sys.path.append('C:/Users/natha/Documents/GitHub/panels')
+    sys.path.append('..\\..')
+    os.chdir('C:/Users/natha/Documents/GitHub/panels/tests/multidomain')
 
 # To open pop up images - Ignore the syntax warning :)
 # %matplotlib qt 
@@ -723,12 +727,7 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, filename='', k_i=None, tau_o=
         All units in MPa, N, mm
     '''    
     
-    foldername = 'p3_25_m15_8_kiITER_tauo77_nx60_ny30_wpts50_G1c112'
-    generation_code = 'for ki in [1e4, 5e4, 1e5, 5e5, 1e6]]'
-    
-    if not os.path.exists(foldername):
-        os.makedirs(foldername)
-    os.chdir(foldername)
+
                     
     # Delete previous log file - later when appending the file, if the file doesnt exist, it is created
     if os.path.isfile(f'./{filename}.txt'):
@@ -738,7 +737,6 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, filename='', k_i=None, tau_o=
     if not local_run:
         log_file = open(f'{filename}.txt', 'a')
         log_file.write(f'************************** IT HAS BEGUN - {filename} ******************************\n')
-        log_file.write(f'generation code:   {generation_code} \n')
         log_file.close()
     
     print(f'************************** IT HAS BEGUN - {filename} ******************************')
@@ -757,10 +755,10 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, filename='', k_i=None, tau_o=
     ply_thickness = 0.14 # mm
 
     # Plate dimensions (overall)
-    a = 100 # mm
+    a = 65 # mm
     # b = 25  # mm
     # Dimensions of panel 1 and 2
-    a1 = 52
+    a1 = 17
     a2 = 0.015
     a3 = 10
 
@@ -937,7 +935,7 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, filename='', k_i=None, tau_o=
            dict(p1=bot1, p2=bot2, func='SSxcte', xcte1=bot1.a, xcte2=0),
            dict(p1=bot2, p2=bot3, func='SSxcte', xcte1=bot2.a, xcte2=0),
            dict(p1=top1, p2=bot1, func='SB_TSL', tsl_type = 'bilinear', no_x_gauss=no_x_gauss, 
-                no_y_gauss=no_y_gauss, k_i=k_i, tau_o=tau_o, G1c=G1c, k_o=k_i, del_o=tau_o/k_i, del_f=2*G1c/tau_o)
+                no_y_gauss=no_y_gauss, tau_o=tau_o, G1c=G1c, k_o=k_i, del_o=tau_o/k_i, del_f=2*G1c/tau_o)
         ]
     if no_pan == 4:
         conn = [
@@ -1036,41 +1034,40 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, filename='', k_i=None, tau_o=
     # Initilaize mat to store results
     if w_iter_no_pts is None:
         w_iter_no_pts = 150
-        
-    w_iter = np.unique(np.concatenate((np.linspace(0.01,3,int(0.3*w_iter_no_pts)), np.linspace(3,5,int(0.3*w_iter_no_pts)), 
+    
+    load_reversal = False
+    if not load_reversal:
+        w_iter = np.unique(np.concatenate((np.linspace(0.01,3,int(0.3*w_iter_no_pts)), np.linspace(3,5,int(0.3*w_iter_no_pts)), 
                                         np.linspace(5,8,int(0.4*w_iter_no_pts)))))
     # w_iter = np.linspace(0.01,8,100)
-    # w_iter = [0.01, 2]
-    # Reverse loading 
+    else:
     # w_iter = np.concatenate((np.linspace(0.01,3,int(0.1*w_iter_no_pts)), np.linspace(3,6,int(0.25*w_iter_no_pts)), 
     #                                    np.linspace(6,7,int(0.25*w_iter_no_pts)),
     #                                    np.linspace(7,0,int(0.1*w_iter_no_pts)), np.linspace(0,7,int(0.1*w_iter_no_pts)), 
     #                                    np.linspace(7,8,int(0.2*w_iter_no_pts)) ))
-    # w_iter = np.array([0.01, 1.01, 2.00, 3.00, 3.33, 3.67, 4.00, 4.33, 4.67, 5.00, 5.33,
-    #        5.67, 6.00, 6.11, 6.22, 6.33, 6.44, 6.55, 6.67, 6.77, 6.89, 6.99, 7.00, 4.67, 2.50, 0.01, 2.50,
-    #        4.67, 7.00, 7.14, 7.25, 7.43, 7.57, 7.7, 7.86, 7.92, 8.00])
+        w_iter = np.array([0.01, 1.01, 2.00, 3.00, 2.0, 0.01, 2.0, 3.0, 4.0])
     
+    # Initilize variables to store results 
     dmg_index = np.zeros((no_y_gauss,no_x_gauss,np.shape(w_iter)[0]))
     del_d = np.zeros((no_y_gauss,no_x_gauss,np.shape(w_iter)[0]))
     kw_tsl = np.zeros((no_y_gauss,no_x_gauss,np.shape(w_iter)[0]))
     force_intgn = np.zeros((np.shape(w_iter)[0], 2))
     force_intgn_dmg = np.zeros((np.shape(w_iter)[0], 2))
-    displ_top_root = np.zeros((50,200,np.shape(w_iter)[0]))
-    displ_bot_root = np.zeros((50,200,np.shape(w_iter)[0]))
     c_all = np.zeros((size, np.shape(w_iter)[0]))
     
     quasi_NR = True
     NR_kT_update = 3 # After how many iterations should kT be updated
-    crisfield_test_fail = False
+    crisfield_test_fail = False # keeps track if the crisfield test has failed or not and prevents the run from aborting
     
+    ignore_var_k = False # Ignore variation of k terms in the TPE so fcrack has only the first term and kcrack = 0
 
     
     # Displacement Incrementation
     for wp in w_iter: 
-        # print(f'------------ wp = {wp:.3f} ---------------')
-        log_file = open(f'{filename}.txt', 'a')
-        log_file.write(f'------------ wp = {wp:.3f} ---------------\n')
-        log_file.close()
+        if not local_run:
+            log_file = open(f'{filename}.txt', 'a')
+            log_file.write(f'------------ wp = {wp:.3f} ---------------\n')
+            log_file.close()
         
         # Prescribed Displacements
         if True:
@@ -1112,8 +1109,11 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, filename='', k_i=None, tau_o=
             fint = np.asarray(assy.calc_fint(c=c, kC_conn=kC_conn))
             # Stiffness matrix for the crack creation 
             if disp_iter_no != 1:
-                kcrack = assy.calc_kcrack(conn=conn, c_i=c, kw_tsl_i_1=kw_tsl[:,:,disp_iter_no-1], 
-                                          del_d_i_1=del_d[:,:,disp_iter_no-1])
+                if not ignore_var_k:
+                    kcrack = assy.calc_kcrack(conn=conn, c_i=c, kw_tsl_i_1=kw_tsl[:,:,disp_iter_no-1], 
+                                              del_d_i_1=del_d[:,:,disp_iter_no-1])
+                else:
+                    kcrack = np.zeros_like(kC_conn, dtype=np.float64)
             else:
                 kcrack = np.zeros_like(kC_conn, dtype=np.float64)
             # force vector due to the crack creation
@@ -1121,8 +1121,10 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, filename='', k_i=None, tau_o=
                                       del_d_i_1=del_d[:,:,disp_iter_no-1], conn=conn, kcrack=kcrack)
             # Residual with disp terms
             Ri = fint - fext + kCp*c + fcrack
-            
             kT = assy.calc_kT(c=c, kC_conn=kC_conn) + kcrack
+            
+            k0 = kT + kCp
+            
         # Initial step where ci = zeros
         if disp_iter_no == 0 and np.max(ci) == 0: 
             # max(ci) bec if its already calc for an initial guess above, no need to repeat it - 
@@ -1130,18 +1132,21 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, filename='', k_i=None, tau_o=
             
             # Doing this to avoid recalc kc_conn and help pass the correct k_i
             kC_conn = assy.get_kC_conn(c=ci)
+            
             # Inital fint (0 bec c=0)
             fint = np.asarray(assy.calc_fint(c=ci, kC_conn=kC_conn))
+            
             # Residual with disp terms
             Ri = fint - fext + kCp*ci
+            
+            # Contains both fint and kC_conn contribution
             kT = assy.calc_kT(c=ci, kC_conn=kC_conn)
             
-            # Setting the max displ field to be 0
-            assy.update_max_del_d(curr_max_del_d=np.zeros((no_y_gauss, no_x_gauss)))
-        k0 = kT + kCp
+            # Setting the max DI to be 0 - needed to calc kcrack
+            assy.update_TSL_history(curr_max_dmg_index=np.zeros((no_y_gauss, no_x_gauss)))
         
+            k0 = kT + kCp
         
-        # print(f'kT {np.max(kT):.3e} kcp {np.max(kCp):.3e} k0 {np.max(k0):.3e}')
         
         epsilon = 1.e-4 # Convergence criteria
         D = k0.diagonal() # For convergence - calc at beginning of load increment
@@ -1154,27 +1159,24 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, filename='', k_i=None, tau_o=
         while True:
             # print()
             # print(f"------------ NR start {count+1}--------------")
+            
             dc = solve(k0, -Ri, silent=True)
             c = ci + dc
             
-            if quasi_NR:
-                if count == 0 or count % NR_kT_update == 0:
-                    kC_conn = assy.get_kC_conn(c=c)
+            # Run it everytime if not quasi_NR or run it selectively if quasi_NR
+            if not quasi_NR or (quasi_NR and (count == 0 or count % NR_kT_update == 0)):
+                kC_conn = assy.get_kC_conn(c=c)
+                if ignore_var_k:
+                    kcrack = np.zeros_like(kC_conn, dtype=np.float64)
+                else:
                     if disp_iter_no != 0:
                         kcrack = assy.calc_kcrack(conn=conn, c_i=c, kw_tsl_i_1=kw_tsl[:,:,disp_iter_no-1], 
                                               del_d_i_1=del_d[:,:,disp_iter_no-1])
                     else:
+                        # Prev disp step doesnt exist so pristine variables
                         kcrack = assy.calc_kcrack(conn=conn, c_i=c, kw_tsl_i_1=k_i*np.ones((no_y_gauss, no_x_gauss)), 
-                                              del_d_i_1=np.zeros((no_y_gauss, no_x_gauss)))
-            else:
-                kC_conn = assy.get_kC_conn(c=c)
-                if disp_iter_no != 0:
-                    kcrack = assy.calc_kcrack(conn=conn, c_i=c, kw_tsl_i_1=kw_tsl[:,:,disp_iter_no-1], 
-                                          del_d_i_1=del_d[:,:,disp_iter_no-1])
-                else:
-                    kcrack = assy.calc_kcrack(conn=conn, c_i=c, kw_tsl_i_1=k_i*np.ones((no_y_gauss, no_x_gauss)), 
                                           del_d_i_1=np.zeros((no_y_gauss, no_x_gauss)))
-                    
+
             fint = np.asarray(assy.calc_fint(c=c, kC_conn=kC_conn))
             # force vector due to the crack creation
             if disp_iter_no != 0:
@@ -1185,27 +1187,9 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, filename='', k_i=None, tau_o=
                                       del_d_i_1=np.zeros((no_y_gauss, no_x_gauss)), conn=conn, kcrack=kcrack)
             
             # Might need to calc fext here again if it changes per iteration when fext changes when not using kc_conn for SB
-            # CAN PROBABLY REMOVE IF !!!!!!!!!!!!
-            if disp_iter_no != 0:
-                Ri = fint - fext + kCp*c + fcrack
-            else:
-                Ri = fint - fext + kCp*c + fcrack
-            if local_run:
-                print(f'Ri {np.linalg.norm(Ri):.2e}')
-                # print(f'pos sun:{np.linalg.norm(fint) + np.linalg.norm(kCp*c) + np.linalg.norm(fcrack):.2e} fint {np.linalg.norm(fint):.2e} kcp {np.linalg.norm(kCp*c):.2e} fcrack {np.linalg.norm(fcrack):.2e}')
-                # print(f'fext {np.linalg.norm(fext):.2e}')
-            # Extracting data out of the MD class for plotting etc 
-                # Damage considerations are already implemented in the Multidomain class functions kT, fint - no need to include anything externally
-
-            # kw_tsl_iter, dmg_index_iter, del_d_iter = assy.calc_k_dmg(c=c, pA=p_top, pB=p_bot, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type)
-            # print(f"             NR end {count} -- wp={wp:.3f}  max dmg {np.max(dmg_index_iter):.3f}  ---") # min del_d {np.min(del_d_iter):.2e}---------")
-            # print(f'    del_d min {np.min(del_d_iter)}  -- max {np.max(del_d_iter):.4f}')
+            Ri = fint - fext + kCp*c + fcrack
             
-            # CAN PROBABLY REMOVE IF !!!!!!!!!!!!
-            if disp_iter_no != 0:
-                crisfield_test = scaling(Ri, D)/max(scaling(fext, D), scaling(fint + kCp*c + fcrack, D))
-            else:
-                crisfield_test = scaling(Ri, D)/max(scaling(fext, D), scaling(fint + kCp*c + fcrack, D))
+            crisfield_test = scaling(Ri, D)/max(scaling(fext, D), scaling(fint + kCp*c + fcrack, D))
             crisfield_test_res[count] = crisfield_test
             # print(np.shape(k0))
             # print(np.linalg.det(k0))
@@ -1215,24 +1199,15 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, filename='', k_i=None, tau_o=
                 log_file = open(f'{filename}.txt', 'a')
                 log_file.write(f'       crisfield {crisfield_test:.4e}\n')
                 log_file.close()
+            
             if crisfield_test < epsilon:
                 break
             
-            if quasi_NR:
-                if count == 0 or count % NR_kT_update == 0:
-                    kT = assy.calc_kT(c=c, kC_conn=kC_conn) 
-                    # CAN PROBABLY REMOVE IF !!!!!!!!!!!!
-                    if disp_iter_no != 0:
-                        k0 = kT + kCp + kcrack
-                    else:
-                        k0 = kT + kCp + kcrack
-            else:
+            if not quasi_NR or (quasi_NR and (count == 0 or count % NR_kT_update == 0)):
                 kT = assy.calc_kT(c=c, kC_conn=kC_conn) 
-                # CAN PROBABLY REMOVE IF !!!!!!!!!!!!
-                if disp_iter_no != 0:
-                    k0 = kT + kCp + kcrack
-                else:
-                    k0 = kT + kCp + kcrack
+                k0 = kT + kCp + kcrack
+            
+            # Update for next starting guess
             ci = c.copy()
             
             count += 1
@@ -1257,43 +1232,10 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, filename='', k_i=None, tau_o=
                         crisfield_test_fail = True
                         break
             
-
-            
-            # ------------------ SAVING VARIABLES --------------------
-            if True:
-                np.save(f'dmg_index_{filename}', dmg_index)
-                np.save(f'del_d_{filename}', del_d)
-                np.save(f'kw_tsl_{filename}', kw_tsl)
-                np.save(f'force_intgn_{filename}', force_intgn)
-                np.save(f'force_intgn_dmg_{filename}', force_intgn_dmg)
-                # np.save(f'displ_top_root_{filename}', displ_top_root)
-                # np.save(f'displ_bot_root_{filename}', displ_bot_root)
-                np.save(f'c_all_{filename}', c_all)
-            
-            # Saving results incase cluster time is exceeded
-            if (time.time() - start_time)/(60*60) > 70: # Max wall time (hrs) on the cluster
-                np.save(f'dmg_index_{filename}', dmg_index)
-                np.save(f'del_d_{filename}', del_d)
-                np.save(f'kw_tsl_{filename}', kw_tsl)
-                np.save(f'force_intgn_{filename}', force_intgn)
-                np.save(f'force_intgn_dmg_{filename}', force_intgn_dmg)
-                # np.save(f'displ_top_root_{filename}', displ_top_root)
-                # np.save(f'displ_bot_root_{filename}', displ_bot_root)
-                np.save(f'c_all_{filename}', c_all)
             
             # Kills this run but prevents other runs in parallel from being killed due to errors
-            if False:
+            if True:
                 if crisfield_test >= 1:
-                    if True:
-                        np.save(f'dmg_index_{filename}', dmg_index)
-                        np.save(f'del_d_{filename}', del_d)
-                        np.save(f'kw_tsl_{filename}', kw_tsl)
-                        np.save(f'force_intgn_{filename}', force_intgn)
-                        np.save(f'force_intgn_dmg_{filename}', force_intgn_dmg)
-                        # np.save(f'displ_top_root_{filename}', displ_top_root)
-                        # np.save(f'displ_bot_root_{filename}', displ_bot_root)
-                        np.save(f'c_all_{filename}', c_all)
-                    
                     crisfield_test_fail = True
                     break
             
@@ -1301,20 +1243,28 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, filename='', k_i=None, tau_o=
                 log_file = open(f'{filename}.txt', 'a')
                 log_file.write('Unconverged Results !!!!!!!!!!!!!!!!!!!\n')
                 log_file.close()
-                # return None, dmg_index, del_d, kw_tsl
-                if True:
-                    np.save(f'dmg_index_{filename}', dmg_index)
-                    np.save(f'del_d_{filename}', del_d)
-                    np.save(f'kw_tsl_{filename}', kw_tsl)
-                    np.save(f'force_intgn_{filename}', force_intgn)
-                    np.save(f'force_intgn_dmg_{filename}', force_intgn_dmg)
-                    # np.save(f'displ_top_root_{filename}', displ_top_root)
-                    # np.save(f'displ_bot_root_{filename}', displ_bot_root)
-                    np.save(f'c_all_{filename}', c_all)
                 # raise RuntimeError('NR didnt converged :(') 
                 print(f'{filename} -- NR didnt converged :(')
                 crisfield_test_fail = True
                 break
+            
+        # ------------------ SAVING VARIABLES (after a completed NR) --------------------
+        if True:
+            np.save(f'DI_{filename}', dmg_index)
+            np.save(f'del_{filename}', del_d)
+            np.save(f'k_{filename}', kw_tsl)
+            np.save(f'F_{filename}', force_intgn)
+            np.save(f'Fdmg_{filename}', force_intgn_dmg)
+            np.save(f'c_{filename}', c_all)
+        
+        # Saving results incase cluster time is exceeded
+        if (time.time() - start_time)/(60*60) > 70: # Max wall time (hrs) on the cluster
+            np.save(f'DI_{filename}', dmg_index)
+            np.save(f'del_{filename}', del_d)
+            np.save(f'k_{filename}', kw_tsl)
+            np.save(f'F_{filename}', force_intgn)
+            np.save(f'Fdmg_{filename}', force_intgn_dmg)
+            np.save(f'c_{filename}', c_all)
         
         if crisfield_test_fail is True:
             print(f'????????????????????? ABORTED {filename} ?????????????????????????????')
@@ -1326,34 +1276,29 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, filename='', k_i=None, tau_o=
         
         # Edit: should be correct as it is 
                 # Ques: should first update max del d then calc kw_tsl etc ??
-        if hasattr(assy, "del_d"):
+        if hasattr(assy, "dmg_index"):
             kw_tsl[:,:,disp_iter_no], dmg_index[:,:,disp_iter_no], del_d[:,:,disp_iter_no]  = assy.calc_k_dmg(c=c, pA=p_top, pB=p_bot, 
                                                  no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type, 
-                                                 prev_max_del_d=assy.del_d, k_i=k_i, tau_o=tau_o)
+                                                 prev_max_dmg_index=assy.dmg_index, k_i=k_i, tau_o=tau_o)
         else:
             kw_tsl[:,:,disp_iter_no], dmg_index[:,:,disp_iter_no], del_d[:,:,disp_iter_no]  = assy.calc_k_dmg(c=c, pA=p_top, pB=p_bot, 
                                                  no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type,
-                                                 prev_max_del_d=None, k_i=k_i, tau_o=tau_o)
+                                                 prev_max_dmg_index=None, k_i=k_i, tau_o=tau_o)
             
         c_all[:,disp_iter_no] = c
             
         # Update max del_d AFTER a converged NR iteration
-        assy.update_max_del_d(curr_max_del_d=del_d[:,:,disp_iter_no])
+        assy.update_TSL_history(curr_max_dmg_index=dmg_index[:,:,disp_iter_no])
         
         # kw_tsl[:,:,disp_iter_no], dmg_index[:,:,disp_iter_no], del_d[:,:,disp_iter_no] = assy.calc_k_dmg(c=c, pA=p_top, pB=p_bot, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type)
         if not local_run:
             log_file = open(f'{filename}.txt', 'a')
-            log_file.write(f'{disp_iter_no/np.shape(w_iter)[0]*100:.1f}% - {filename} -- wp={wp:.3f} -- max DI {np.max(dmg_index[:,:,disp_iter_no]):.4f}\n')
+            log_file.write(f'{(disp_iter_no+1)/np.shape(w_iter)[0]*100:.1f}% - {filename} -- wp={wp:.3f} -- max DI {np.max(dmg_index[:,:,disp_iter_no]):.4f}\n')
             log_file.close()
-            print(f'            {filename} {disp_iter_no/np.shape(w_iter)[0]*100:.1f}%')
+            print(f'            {filename} {(disp_iter_no+1)/np.shape(w_iter)[0]*100:.1f}%')
             sys.stdout.flush()
         else:
             print(f'{disp_iter_no/np.shape(w_iter)[0]*100:.1f}% - {filename} -- wp={wp:.3f} -- max DI {np.max(dmg_index[:,:,disp_iter_no]):.4f}\n')
-
-        # print(f'        max del_d {np.max(del_d[:,:,disp_iter_no])}')
-        # print(f'       min del_d {np.min(del_d[:,:,disp_iter_no])}')
-        # print(f'        max kw_tsl {np.max(kw_tsl[:,:,disp_iter_no])}')
-        
 
         
         # Force - TEMP - CHECK LATER AND EDIT/REMOVE
@@ -1361,8 +1306,6 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, filename='', k_i=None, tau_o=
             # force_intgn[disp_iter_no, 0] = wp
             force_intgn[disp_iter_no, 1] = assy.force_out_plane(c, group=None, eval_panel=disp_panel, x_cte_force=None, y_cte_force=None,
                       gridx=100, gridy=50, NLterms=True, no_x_gauss=128, no_y_gauss=128)
-        else: 
-            force_intgn = None
         
         # Force by area integral of traction in the damaged region
         if True:
@@ -1375,19 +1318,7 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, filename='', k_i=None, tau_o=
             log_file.close()
         else:
             print(f'       Force - Line: {force_intgn[disp_iter_no, 1]:.3f} -- Area: {force_intgn_dmg[disp_iter_no, 1]:.3f}')
-            
-            plt.figure(figsize=(10,7))
-            plt.plot(force_intgn[:disp_iter_no+1, 0], force_intgn[:disp_iter_no+1, 1], label = 'Line')
-            plt.plot(force_intgn_dmg[:disp_iter_no+1, 0], 4/52*force_intgn_dmg[:disp_iter_no+1, 1], label='Area Int')
-            plt.plot(FEM[:,0],FEM[:,1], label='FEM')
-            plt.ylabel('Force [N]', fontsize=14)
-            plt.xlabel('Displacement [mm]', fontsize=14)
-            plt.xticks(fontsize=14)
-            plt.yticks(fontsize=14)
-            plt.title(f'{filename}')
-            plt.grid()
-            plt.legend(fontsize=14)
-            plt.show()
+
         
         # Calc displ of top and bottom panels at each increment
         if True:
@@ -1395,18 +1326,24 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, filename='', k_i=None, tau_o=
                                     no_x_gauss=200, no_y_gauss=50)
             max_displ_w = np.max(res_pan_top['w'][-1])
             
+            # Storing actual panel displ instead of disp that 'should' be applied
             force_intgn[disp_iter_no, 0] = max_displ_w
             force_intgn_dmg[disp_iter_no, 0] = max_displ_w
             
-            # print(f'Calc W_TOP: {max_displ_w}')
-            # res_pan_bot = assy.calc_results(c=c, eval_panel=disp_panel, vec='w', 
-            #                         no_x_gauss=200, no_y_gauss=50)
-            # displ_top_root[:,:,disp_iter_no] = res_pan_top['w'][0]
-            # displ_bot_root[:,:,disp_iter_no] = res_pan_bot['w'][0]
-        else:
-            res_pan_top = None
-            res_pan_bot = None
-        
+            if local_run:
+                plt.figure(figsize=(10,7))
+                plt.plot(force_intgn[:disp_iter_no+1, 0], force_intgn[:disp_iter_no+1, 1], label = 'Line')
+                plt.plot(force_intgn_dmg[:disp_iter_no+1, 0], 4/52*force_intgn_dmg[:disp_iter_no+1, 1], label='Area Int')
+                plt.plot(FEM[:,0],FEM[:,1], label='FEM')
+                plt.ylabel('Force [N]', fontsize=14)
+                plt.xlabel('Displacement [mm]', fontsize=14)
+                plt.xticks(fontsize=14)
+                plt.yticks(fontsize=14)
+                plt.title(f'{filename}')
+                plt.grid()
+                plt.legend(fontsize=14)
+                plt.show()
+                
         disp_iter_no += 1
         print()
         
@@ -1420,34 +1357,31 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, filename='', k_i=None, tau_o=
         
     # ------------------ SAVING VARIABLES --------------------
     if True:
-        np.save(f'dmg_index_{filename}', dmg_index)
-        np.save(f'del_d_{filename}', del_d)
-        np.save(f'kw_tsl_{filename}', kw_tsl)
-        np.save(f'force_intgn_{filename}', force_intgn)
-        np.save(f'force_intgn_dmg_{filename}', force_intgn_dmg)
-        # np.save(f'displ_top_root_{filename}', displ_top_root)
-        # np.save(f'displ_bot_root_{filename}', displ_bot_root)
-        np.save(f'c_all_{filename}', c_all)
+        np.save(f'DI_{filename}', dmg_index)
+        np.save(f'del_{filename}', del_d)
+        np.save(f'k_{filename}', kw_tsl)
+        np.save(f'F_{filename}', force_intgn)
+        np.save(f'Fdmg_{filename}', force_intgn_dmg)
+        np.save(f'c_{filename}', c_all)
     
     print(f'************************** WAKE UP! ITS DONE! - {filename} ******************************')
     sys.stdout.flush()
     
     log_file = open(f'{filename}.txt', 'a')
-    log_file.write((f'************************** WAKE UP! ITS DONE! - {filename} ******************************\n'))
+    log_file.write('It ONLY took {(time.time() - start_time)/(60*60)} hrs')
+    log_file.write(f'************************** WAKE UP! ITS DONE! - {filename} ******************************\n')
     log_file.close()
     
     # ------------------ RESULTS AND POST PROCESSING --------------------
     
-    c0 = c.copy()
-
     generate_plots = False
     
     final_res = None
     # Plotting results
     if False:
         for vec in ['w']:#, 'Mxx']:#, 'Myy', 'Mxy']:#, 'Nxx', 'Nyy']:
-            res_bot = assy.calc_results(c=c0, group='bot', vec=vec, no_x_gauss=None, no_y_gauss=None)
-            res_top = assy.calc_results(c=c0, group='top', vec=vec, no_x_gauss=None, no_y_gauss=None)
+            res_bot = assy.calc_results(c=c, group='bot', vec=vec, no_x_gauss=None, no_y_gauss=None)
+            res_top = assy.calc_results(c=c, group='top', vec=vec, no_x_gauss=None, no_y_gauss=None)
             vecmin = min(np.min(np.array(res_top[vec])), np.min(np.array(res_bot[vec])))
             vecmax = max(np.max(np.array(res_top[vec])), np.max(np.array(res_bot[vec])))
             if vec != 'w':
@@ -1472,64 +1406,19 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, filename='', k_i=None, tau_o=
             if generate_plots:
                 # if vec == 'w':
                 if True:
-                    assy.plot(c=c0, group='bot', vec=vec, filename='test_dcb_before_opening_bot_tsl.png', show_boundaries=True,
+                    assy.plot(c=c, group='bot', vec=vec, filename='test_dcb_before_opening_bot_tsl.png', show_boundaries=True,
                                                 colorbar=True, res = res_bot, vecmax=vecmax, vecmin=vecmin, display_zero=True)
                     
-                    assy.plot(c=c0, group='top', vec=vec, filename='test_dcb_before_opening_top_tsl.png', show_boundaries=True,
+                    assy.plot(c=c, group='top', vec=vec, filename='test_dcb_before_opening_top_tsl.png', show_boundaries=True,
                                               colorbar=True, res = res_top, vecmax=vecmax, vecmin=vecmin, display_zero=True)
             
             # Open images
-            if generate_plots:
-                img_popup('test_dcb_before_opening_top_tsl.png',1, f"{vec} top")
-                img_popup('test_dcb_before_opening_bot_tsl.png',2, f"{vec} bot")
-                plt.show()
+            if local_run:
+                if generate_plots:
+                    img_popup('test_dcb_before_opening_top_tsl.png',1, f"{vec} top")
+                    img_popup('test_dcb_before_opening_bot_tsl.png',2, f"{vec} bot")
+                    plt.show()
     
-    animate = False
-    if animate:    
-        def animate(i):
-            curr_res = frames[i]
-            max_res = np.max(curr_res)
-            min_res = np.min(curr_res)
-            if animate_var == 'dmg_index':
-                if min_res == 0:
-                    vmin = 0.0
-                    vmax = 1.0
-                else: 
-                    possible_min_cbar = [0,0.5,0.85,0.9,0.95,0.99]
-                    vmin = max(list(filter(lambda x: x<min_res, possible_min_cbar)))
-                    vmax = 1.0
-            else:
-                vmin = min_res
-                vmax = max_res
-            im = ax.imshow(curr_res)
-            fig.colorbar(im, cax=cax)
-            im.set_data(curr_res)
-            im.set_clim(vmin, vmax)
-            tx.set_text(f'{animate_var}     -   Disp={w_iter[i]:.2f} mm')
-        
-        from mpl_toolkits.axes_grid1 import make_axes_locatable
-        
-        for animate_var in ["dmg_index", "del_d"]:#, 'kw_tsl']:
-            
-            fig = plt.figure()
-            ax = fig.add_subplot(111)    
-            div = make_axes_locatable(ax)
-            cax = div.append_axes('right', '5%', '5%')
-            
-            frames = [] # for storing the generated images
-            for i in range(np.shape(locals()[animate_var])[2]):
-                frames.append(locals()[animate_var][:,:,i])
-                
-            cv0 = frames[0]
-            im = ax.imshow(cv0) 
-            cb = fig.colorbar(im, cax=cax)
-            tx = ax.set_title('Frame 0')
-                
-            ani = animation.FuncAnimation(fig, animate, frames=np.shape(locals()[animate_var])[2],
-                                          interval = 200, repeat_delay=1000)
-            FFwriter = animation.FFMpegWriter(fps=5)
-            ani.save(f'{animate_var}.mp4', writer=FFwriter)
-            # ani.save(f'{animate_var}.gif', writer='imagemagick')
         
     return dmg_index, del_d, kw_tsl, force_intgn, displ_top_root, displ_bot_root, c_all
 
@@ -1538,57 +1427,54 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, filename='', k_i=None, tau_o=
 if __name__ == "__main__":
     
     # Connection as penalty stiffness
-    if True:
+    if local_run:
         # Single test run
         if False: # wo fcrack
             # test_dcb_non_linear(3, 4, 1)
             # kw_tsl, dmg_index = test_kw_tsl(1, 6, 1)
             dmg_index, del_d, kw_tsl, force_intgn, displ_top_root, displ_bot_root, c_all = test_dcb_damage_prop(no_pan=3, no_terms=[10,8], filename='', k_i=1e4, tau_o=67, no_x_gauss=50, no_y_gauss=25, w_iter_no_pts=15, G1c=1.12)
         if True: # with fcrack
+        # p3_70_25_m18_8_ki1e5_tauo67_nx60_ny30_wpts30_G1c112
             dmg_index, del_d, kw_tsl, force_intgn, displ_top_root, displ_bot_root, c_all = test_dcb_damage_prop_fcrack(phy_dim=[3,25], 
-                no_terms=[15,8], filename='1posve_m15_8_w200_nx60_ny30_tau67_ki1e4', k_i=1e4, tau_o=67, no_x_gauss=60, 
-                no_y_gauss=30, w_iter_no_pts=200, G1c=1.12)
+                no_terms=[8,4], filename='test', k_i=1e5, tau_o=67, no_x_gauss=60, 
+                no_y_gauss=30, w_iter_no_pts=100, G1c=1.12)
         
         
-        # Parallelization of multiple runs
-        if False:
-            # test_dcb_damage_prop(no_pan, no_terms, filename='', k_i=None, tau_o=None, 
-                                # no_x_gauss=None, no_y_gauss=None, w_iter_no_pts=None):                
-            if False:
-                ki_all = [1e5, 5e4, 1e4, 5e3]
-                inp_all = np.zeros((16,6)) # 16=4*4, 6 for 6 col
-                m = 10
-                count_inp = 0
-                for ki in ki_all:
-                    # 4 bec each inp line as 4 lines
-                    inp_all[4*count_inp : 4*count_inp+4,:] = np.array(([3,m,ki,87,150,80],
-                               [3,m,ki,67,60,30],
-                               [3,m,ki,57,60,30],
-                               [3,m,ki,47,60,30]))
-                    count_inp += 1
-                ftn_arg = [(int(inp_i[0]),int(inp_i[1]),f'p{inp_i[0]:.0f}_m{inp_i[1]:.0f}_10_ki{inp_i[2]:.0e}_tauo{inp_i[3]:.0f}_nx{inp_i[4]:.0f}_ny{inp_i[5]:.0f}', float(inp_i[2]), float(inp_i[3]), int(inp_i[4]), int(inp_i[5])) for inp_i in inp_all]
-                # Removing +0 from the exponential notation for ki's values
-                for i in range(len(ftn_arg)):
-                    ftn_arg[i] = list(ftn_arg[i]) # convert to list bec tuples are inmutable
-                    ftn_arg[i][2] = ftn_arg[i][2].replace('+0','')
-                    ftn_arg[i] = tuple(ftn_arg[i]) # convert back to tuple
-                    
-                    # for nx, ny in zip([30,50,60,80,100,30,50,60,80,100],[15,25,30,40,50,8,13,15,20,25]
+    # Parallelization of multiple runs
+    if not local_run:               
+                
+                # for nx, ny in zip([30,50,60,80,100,30,50,60,80,100],[15,25,30,40,50,8,13,15,20,25]
+        # test_dcb_damage_prop_fcrack(phy_dim, no_terms, filename='', k_i=None, tau_o=None, no_x_gauss=None,
+        # no_y_gauss=None, w_iter_no_pts=None, G1c=None)
+
+        
+        ftn_arg = ftn_arg = [([3,25],[15,8],f'p3_65_25_m15_8_ki{ki:.0e}_tauo77_nx60_ny30_wpts{w_iter:.0f}_G1c112',
+                              ki,77,60,30,w_iter,1.12) for ki in [5e3, 1e4, 1e5, 1e6] for w_iter in [30,50,60,80]]
+        for i in range(len(ftn_arg)):
+            ftn_arg[i] = list(ftn_arg[i]) # convert to list bec tuples are inmutable
+            ftn_arg[i][2] = ftn_arg[i][2].replace('+0','')
+            ftn_arg[i] = tuple(ftn_arg[i]) # convert back to tuple
             
-            ftn_arg = [([3,25],[15,8],f'p3_25_m15_8_ki{ki:.0e}_tauo77_nx60_ny30_wpts50_G1c112',ki,77,60,30,40,1.12) for ki in [1e4, 5e4, 1e5, 5e5, 1e6]]
-            for i in range(len(ftn_arg)):
-                ftn_arg[i] = list(ftn_arg[i]) # convert to list bec tuples are inmutable
-                ftn_arg[i][2] = ftn_arg[i][2].replace('+0','')
-                ftn_arg[i] = tuple(ftn_arg[i]) # convert back to tuple
-            
-            # create the process pool
-            with Pool(processes=20) as pool: # using 20 cpus on the cluster
-                pool.starmap(test_dcb_damage_prop_fcrack, ftn_arg)
-                # the pool is processing its inputs in parallel, close() and join() 
-                #can be used to synchronize the main process 
-                #with the task processes to ensure proper cleanup.
-                pool.close()
-                pool.join()
+        
+        foldername = 'kcrack_p3_65_25_m15_8_kiITER_tauo77_nx60_ny30_wptsITER_G1c112'
+        
+        if not os.path.exists(foldername):
+            os.makedirs(foldername)
+        os.chdir(foldername)
+        
+        gen_file = open('generation_file.txt', 'a')
+        gen_file.write('p3_65_25_m15_8_ki{ki:.0e}_tauo77_nx60_ny30_wpts{w_iter:.0f}_G1c112 \n')
+        gen_file.write('ftn_arg = [([3,25],[15,8],,ki,77,60,30,w_iter,1.12) for ki in [5e3, 1e4, 1e5, 1e6] for w_iter in [30,50,60,80]] \n')
+        gen_file.close()
+        
+        # create the process pool
+        with Pool(processes=20) as pool: # using 20 cpus on the cluster
+            pool.starmap(test_dcb_damage_prop_fcrack, ftn_arg)
+            # the pool is processing its inputs in parallel, close() and join() 
+            #can be used to synchronize the main process 
+            #with the task processes to ensure proper cleanup.
+            pool.close()
+            pool.join()
          
 
                 
