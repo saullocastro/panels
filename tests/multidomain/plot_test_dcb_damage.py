@@ -58,106 +58,122 @@ if not animate:
             os.chdir('C:/Users/natha/OneDrive - Delft University of Technology/Fokker Internship/_Thesis/_Results/Raw Results/DCB Damage/3 pan')
             FEM = np.load('FEM.npy')
         if True:
-            foldername = 'nokcrack_p3_65_25_mITER_8_kiiter_tauo77_nx60_ny30_wptsiter_G1c112'
-            os.chdir('C:/Users/natha/OneDrive - Delft University of Technology/Fokker Internship/_Thesis/_Results/Raw Results/DCB Damage/v6 - Damage index stored/' + foldername)
-            print(os.getcwd())
-            all_filename_1 = [f'p3_65_25_m{m:.0f}_8_ki{ki:.0e}_tauo77_nx60_ny30_wpts{w_iter:.0f}_G1c112' for m in [10,12,15,18] for ki in [1e4, 1e5] for w_iter in [30,50]] 
-
+            foldername = 'p3_65_25m10_8kITR_tITR_nx50y25_w45_G112'
+            os.chdir('C:/Users/natha/OneDrive - Delft University of Technology/Fokker Internship/_Thesis/_Results/Raw Results/DCB Damage/v7 - DI converging/' + foldername)
+            # print(os.getcwd())
+            # all_filename_1 = [(f'p3_65_25m10_8k1e4_t{tau:.0f}_nx50y25_w45_G112') for tau in [47,52,57,62,67,72,77,97]]
+            all_filename_1 = [(f'p3_65_25m10_8k{ki:.0e}_t{tau:.0f}_nx50y25_w45_G112') 
+                          for ki in [5e3,7.5e3,1e4,2.5e4,5e4,1e5] for tau in [67]]
+            
+            
 
             for i in range(len(all_filename_1)):
                 all_filename_1[i] = all_filename_1[i].replace('+0','')
 
-            for i_list in range(len(all_filename_1)):
-                filename = all_filename_1[i_list]
-                rename_file = filename.replace('_','')
-                print(all_filename_1[i_list])
-                all_filename_1[i_list] = f'FID{rename_file}' 
-                print(f'FID{rename_file}')
-                print(all_filename_1[i_list])
-            # all_filename_1 = rename_file.copy()
-            
             for filename in all_filename_1:
-                globals()[f'{filename}'] = np.load(f'{filename}.npy')
-                # globals()[f'force_intgn_dmg_{filename}'] = np.load(f'force_intgn_dmg_{filename}.npy')
+                globals()[f'Fdmg_{filename}'] = np.load(f'Fdmg_{filename}.npy')
+                globals()[f'F_{filename}'] = np.load(f'F_{filename}.npy')
 
         all_filename = all_filename_1 #+ all_filename_2
         
-        # Importing stuff where everything changes
-        if False:
-            os.chdir('C:/Users/natha/OneDrive - Delft University of Technology/Fokker Internship/_Thesis/_Results/Raw Results/DCB Damage/3 pan/v3/m15')
-            ki_all = [1e5, 5e4, 1e4, 5e3]
-            inp_all = np.zeros((12,6)) # 16=4*4, 6 for 6 col
-            m = 15
-            count_inp = 0
-            for ki in ki_all:
-                # 4 bec each inp line as 4 lines
-                inp_all[3*count_inp : 3*count_inp+3,:] = np.array((#[3,m,ki,87,150,80],
-                           [3,m,ki,67,60,30],
-                           [3,m,ki,57,60,30],
-                           [3,m,ki,47,60,30]))
-                count_inp += 1
-            ftn_arg = [(int(inp_i[0]),int(inp_i[1]),f'p{inp_i[0]:.0f}_m{inp_i[1]:.0f}_10_ki{inp_i[2]:.0e}_tauo{inp_i[3]:.0f}_nx{inp_i[4]:.0f}_ny{inp_i[5]:.0f}', float(inp_i[2]), float(inp_i[3]), int(inp_i[4]), int(inp_i[5])) for inp_i in inp_all]
-            # Removing +0 from the exponential notation for ki's values
-            for i in range(len(ftn_arg)):
-                ftn_arg[i] = list(ftn_arg[i]) # convert to list bec tuples are inmutable
-                ftn_arg[i][2] = ftn_arg[i][2].replace('+0','')
-                ftn_arg[i] = tuple(ftn_arg[i]) # convert back to tuple 
-                
-            for i_list in range(len(ftn_arg)):
-                filename = ftn_arg[i_list][2]
-                globals()[f'force_intgn_{filename}'] = np.load(f'force_intgn_{filename}.npy')
-                
-            all_filename = [el[2] for el in ftn_arg]
-        
+
         # PLOTTING
         # All arrays should be loaded by this point
         # plt.figure(figsize=(10,7))
         fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(10,7))
+        
+        title_name = all_filename[0]
+        title_name = title_name.replace('m',r' $m$=')
+        title_name = title_name.replace('k',r' $k_i$=')
+        title_name = title_name.replace('_t',r' $\tau_o$=')
+        title_name = title_name.replace('_nx',r' $n_x$=')
+        title_name = title_name.replace('y',r' $n_y$=')
+        title_name = title_name.replace('_w',r' $w=$')
+        title_name = title_name.replace('_G',r' $G_{Ic}$=')
+        title_name = title_name.replace('112','1.12')
+        
+        edit_title = True
+        all_labels = []
+        filename_count = 0
+        
+        plt.plot(FEM[:,0], FEM[:,1], label='FEM', linewidth=3)
+        
         for filename in all_filename:
             # plt.plot(locals()[f'force_intgn_{filename}'][:,0], locals()[f'force_intgn_{filename}'][:,1], 
             #           label='Line b='+filename[filename.find('p3_') + 3 : filename.find('_m')]) # removing starting _ from filename
             
-            plt.plot(locals()[f'{filename}'][:,0], (0.075)*locals()[f'{filename}'][:,1], 
-                      label='Line b='+filename[filename.find('p3_') + 3 : filename.find('_m')]) # removing starting _ from filename
-            
-            
             if False: # For nx ny iter
-                label_unformatted = filename[filename.find('tauo67_') +7 : filename.find('_wpts')]
-                label_formatted = label_unformatted.replace('_', ' ')
-                label_formatted = label_formatted.replace('nx', '$n_x$=')
-                label_formatted = label_formatted.replace('ny', '$n_y$=')
-            if True: # tauo
-                label_unformatted = filename[filename.find('tauo')+0 : filename.find('_nx')]
-                label_formatted = label_unformatted.replace('_', ' ')
-                label_formatted = label_formatted.replace('tauo', r"$\tau_o$ = ")
-            if False: # ki
-                label_unformatted = filename[filename.find('ki') : filename.find('_tauo')]
-                label_formatted = label_unformatted.replace('_', ' ')
-                label_formatted = label_formatted.replace('ki', r"$k_i$ = ")
+                label_unformatted = filename[filename.find('_nx')+0 : filename.find('y')+3]
+                label_formatted = label_unformatted.replace('_nx', '$n_x$=')
+                label_formatted = label_formatted.replace('y', ', $n_y$=')
+                if edit_title:
+                    title_name = title_name[0:title_name.find('n_x')-2] + title_name[title_name.find('y')+5:]
+                    edit_title = False
+            if False: # tauo
+                label_unformatted = filename[filename.find('_t')+0 : filename.find('_nx')]
+                label_formatted = label_unformatted.replace('_t', r"$\tau_o$ = ")
+                if edit_title:
+                    title_name = title_name[0:title_name.find('tau_o')-2] + title_name[title_name.find('tau_o$')+10:]
+                    edit_title = False
+            if True: # ki
+                label_unformatted = filename[filename.find('k')+0 : filename.find('_t')]
+                label_formatted = label_unformatted.replace('k', r"$k_i$ =  ")
+                # label_formatted = label_formatted.replace('e', f"$e^{filename[filename.find('_t')-1]}$")
+                if edit_title:
+                    print(title_name)
+                    title_name = title_name[0:title_name.find('k_i')-2] + title_name[title_name.find('k_i$')+8:]
+                    edit_title = False
             if False: # b
                 label_unformatted = filename[filename.find('p3_') + 2 : filename.find('_m')]
                 label_formatted = label_unformatted.replace('_', r"$b$ = ")
+            if False: # w
+                label_unformatted = filename[filename.find('_w')+0 : filename.find('_G')]
+                label_formatted = label_unformatted.replace('_w', r"$w$ = ")
+                if edit_title:
+                    title_name = title_name[0:title_name.find('w')-2] + title_name[title_name.find('w')+5:]
+                    edit_title = False
+            if False: # m
+                label_unformatted = filename[filename.find('m')+0 : filename.find('k')-2]
+                label_formatted = label_unformatted.replace('m', r"$m$=")
+                label_formatted = label_formatted.replace('_', r",")
+                if edit_title:
+                    print(title_name)
+                    title_name = title_name[0:title_name.find('m')-2] + title_name[title_name.find('m')+14:]
+                    edit_title = False
                 
-            # plt.plot(locals()[f'force_intgn_dmg_{filename}'][:,0], 325/(52/4)*locals()[f'force_intgn_dmg_{filename}'][:,1], 
-            #           label=label_formatted)
-        plt.plot(FEM[:,0], FEM[:,1], label='FEM')
-        plt.title(r'$p$3 $m$=15,8 $k_i$=1e4 $w_{iter}=50$ $G_{1c}$=1.12 $n_x$=60 $n_x$=30 scaled=25', fontsize=14)
+            all_labels.append(label_formatted)
+            scaling = 14
+            scaling_fact = [11.9,13.1,14,17.3,20.2,25]
+            scaling = scaling_fact[filename_count]
+            # plt.plot(locals()[f'Fdmg_{filename}'][:,0], (1/scaling)*locals()[f'Fdmg_{filename}'][:,1], 
+            #           label=label_formatted) # removing starting _ from filename
+            plt.plot(locals()[f'F_{filename}'][:,0], locals()[f'F_{filename}'][:,1], 
+                      label=label_formatted)
+            
+            filename_count += 1
+        
+        
+        plt.title(f'{title_name} scaled=1/{scaling}', fontsize=14)
         plt.ylabel('Force [N]', fontsize=14)
         plt.xlabel('Displacement [mm]', fontsize=14)
         plt.xticks(fontsize=14)
         plt.yticks(fontsize=14)
         plt.grid()
-        # plt.legend(fontsize=14)
+        plt.xlim(0,4)
+        plt.ylim(0,125)
+        plt.legend(fontsize=14, loc='upper left')
         if False:
-                ax_inset = inset_axes(ax, width="60%", height="50%",
+                ax_inset = inset_axes(ax, width="70%", height="60%",
                                        bbox_to_anchor=(.45 , .1, .8, .8),
                                        bbox_transform=ax.transAxes, loc=3)
+                ax_inset.plot(FEM[:,0], FEM[:,1], label='FEM', linewidth=3)
                 
                 # all_filename[1:5:2] + all_filename[4::2]
-                for filename in all_filename:
-                    ax_inset.plot(locals()[f'force_intgn_dmg_{filename}'][:,0], 23*locals()[f'force_intgn_dmg_{filename}'][:,1], 
-                              label=label_formatted)
-                ax_inset.set(xlim=[6,8], ylim=[165,180])
+                for count in range(0,np.shape(all_filename)[0],1): # change last arg to see every n result
+                    filename = all_filename[count]
+                    ax_inset.plot(locals()[f'Fdmg_{filename}'][:,0], (1/scaling)*locals()[f'Fdmg_{filename}'][:,1], 
+                              label=all_labels[count])
+                ax_inset.set(xlim=[6,8], ylim=[155,178])
                 ax_inset.grid()
                 # ax_inset.legend()
                 mark_inset(ax, ax_inset, loc1=2, loc2=4, fc="none", ec="0.5")
@@ -175,19 +191,30 @@ if not animate:
         
         plt.plot(FEM[:,0], FEM[:,1], label='FEM')
         
-        plt.plot(temp[:,0], 
-                 (0.071)*temp[:,1], 
-                  label=r'Area int (scaled 4/a)')
-        plt.plot(temp1[:,0], temp1[:,1], 
-                  label=r'Line int')
+        var_name = 'p3_65_25m12_12_8_8_8k1e4_t87_nx60y30_w300_G112'
         
-        plt.title(r'+1*fcrack $\tau$=67 $n_x$=60 $n_y$=30 $k_i$=1e4 $m$=18,8 w=30')
+        plt.plot(globals()['Fdmg_'+var_name][:,0], 
+                 (1/14.5)*globals()['Fdmg_'+var_name][:,1], 
+                  label=r'Area int (scaled 1/14.5)')
+        
+        var_name = 'p3_65_25m10_10_8_8_8k1e4_t87_nx60y30_w300_G112'
+        
+        plt.plot(globals()['Fdmg_'+var_name][:,0], 
+                 (1/14.5)*globals()['Fdmg_'+var_name][:,1], 
+                  label=r'10')
+        
+        # plt.plot(F_test_12_30_fine[:,0], 
+        #          F_test_12_30_fine[:,1], 
+        #           label=r'Line int (unscaled)')
+        
+        plt.title(r'$\tau$=67 $n_x$=60 $n_y$=30 $k_i$=1e4 $m$=15,8 w=30')
         plt.ylabel('Force [N]', fontsize=14)
         plt.xlabel('Displacement [mm]', fontsize=14)
         plt.xticks(fontsize=14)
         plt.yticks(fontsize=14)
         plt.grid()
         plt.legend(fontsize=14)
+        plt.ylim(0,200)
         plt.show()
         
     # contourf
@@ -555,7 +582,35 @@ if animate:
             FFwriter = animation.FFMpegWriter(fps=2)
             ani.save(f'{animate_var}_1.mp4', writer=FFwriter)
 
-
+# Junkyard code
+if False:
+        # Importing stuff where everything changes
+        if False:
+            os.chdir('C:/Users/natha/OneDrive - Delft University of Technology/Fokker Internship/_Thesis/_Results/Raw Results/DCB Damage/3 pan/v3/m15')
+            ki_all = [1e5, 5e4, 1e4, 5e3]
+            inp_all = np.zeros((12,6)) # 16=4*4, 6 for 6 col
+            m = 15
+            count_inp = 0
+            for ki in ki_all:
+                # 4 bec each inp line as 4 lines
+                inp_all[3*count_inp : 3*count_inp+3,:] = np.array((#[3,m,ki,87,150,80],
+                           [3,m,ki,67,60,30],
+                           [3,m,ki,57,60,30],
+                           [3,m,ki,47,60,30]))
+                count_inp += 1
+            ftn_arg = [(int(inp_i[0]),int(inp_i[1]),f'p{inp_i[0]:.0f}_m{inp_i[1]:.0f}_10_ki{inp_i[2]:.0e}_tauo{inp_i[3]:.0f}_nx{inp_i[4]:.0f}_ny{inp_i[5]:.0f}', float(inp_i[2]), float(inp_i[3]), int(inp_i[4]), int(inp_i[5])) for inp_i in inp_all]
+            # Removing +0 from the exponential notation for ki's values
+            for i in range(len(ftn_arg)):
+                ftn_arg[i] = list(ftn_arg[i]) # convert to list bec tuples are inmutable
+                ftn_arg[i][2] = ftn_arg[i][2].replace('+0','')
+                ftn_arg[i] = tuple(ftn_arg[i]) # convert back to tuple 
+                
+            for i_list in range(len(ftn_arg)):
+                filename = ftn_arg[i_list][2]
+                globals()[f'force_intgn_{filename}'] = np.load(f'force_intgn_{filename}.npy')
+                
+            all_filename = [el[2] for el in ftn_arg]
+        
 
         
 

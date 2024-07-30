@@ -640,8 +640,8 @@ def test_dcb_vs_fem(no_pan, no_terms, plies, disp_mag, a2, no_y_gauss, grid_x, k
     m = no_terms
     n = no_terms
     
-    m_conn = 10
-    n_conn = 10
+    m_conn = 15
+    n_conn = 15
 
     # simple_layup = [+45, -45]*plies + [0, 90]*plies
     # simple_layup = [0, 0]*10 + [0, 0]*10
@@ -908,12 +908,12 @@ def test_dcb_vs_fem(no_pan, no_terms, plies, disp_mag, a2, no_y_gauss, grid_x, k
         for panels_i in [disp_panel]:
             force = assy.force_out_plane(c0, group=None, eval_panel=panels_i, x_cte_force=panels_i.a, y_cte_force=None,
                       gridx=grid_x, gridy=None, NLterms=True, no_x_gauss=300, no_y_gauss=no_y_gauss)
-        # print(f'Force {force}')
+        print(f'Force {force}')
     
     generate_plots = False
     
     # Plotting results
-    if True:
+    if False:
         for vec in ['w']:#, 'w', 'Myy', 'Mxy']:#, 'Nxx', 'Nyy']:
             res_bot = assy.calc_results(c=c0, group='bot', vec=vec, gridx=50, gridy=50)
             res_top = assy.calc_results(c=c0, group='top', vec=vec, gridx=50, gridy=50)
@@ -1794,8 +1794,8 @@ def plot_test_leg_sigm(c_w=None, ftnval_sig_leg=None, ftnval_leg=None, m=None, n
 if __name__ == "__main__":
         
     # COMPLETE DCB
-    if False:
-        test_dcb_vs_fem(no_pan=4, no_terms=10, plies=1, disp_mag=1, a2=0.015, no_y_gauss=200, grid_x=200)
+    if True:
+        test_dcb_vs_fem(no_pan=4, no_terms=15, plies=1, disp_mag=0.08, a2=0.05, no_y_gauss=200, grid_x=200)
 
     # DCB TEST
     # Qxx_end_15_9, dy_Qxx_15_9, Mxx_end_15_9, dy_Mxx_15_9 = test_dcb_vs_fem(no_pan=3, no_terms=30, plies=1, disp_mag=1, 
@@ -1844,7 +1844,7 @@ if __name__ == "__main__":
                             # a2 = 0.5, no_y_gauss=300, grid_x=1000, kw=1e5)
                 
     # Fitting arbitary curves using different sets of shape functions
-    if True:
+    if False:
         # res_x, ier = test_leg_sigm(res_x_prev=None, del_d_fit=del_d_fit_interp)
         
         # Plotting stuff 

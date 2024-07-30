@@ -1060,6 +1060,16 @@ class Shell(object):
         self.point_pds_inc = [] 
         self.distr_pds = []
         self.distr_pds_inc = []
+        
+    def clear_loads(self):
+        '''
+            Used to clear exisiting loads for the panels
+                Useful for non-linear runs where loads are added for each increment
+        '''
+        self.point_loads = []
+        self.point_loads_inc = [] 
+        self.distr_loads = []
+        self.distr_loads_inc = []
 
     def calc_stiffness_point_constraint(self, x, y, u=True, v=True, w=True, phix=False,
             phiy=False, kuvw=1.e6, kphi=1.e5):

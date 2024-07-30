@@ -3,7 +3,7 @@
 # PBS parameters (see: man qsub)
 # -----------------------------
 #PBS -j oe
-#PBS -l nodes=1:ppn=20
+#PBS -l nodes=1:ppn=20:typeiSP
 #PBS -M n.t.a.dsouza@student.tudelft.nl
 #PBS -m abe
 #PBS -N test_dcb_damage_G1c28e-2_3pan_kiswap

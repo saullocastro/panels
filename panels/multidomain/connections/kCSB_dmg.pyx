@@ -566,7 +566,8 @@ def fkCSB22_dmg(object p1, object p2, int size, int row0, int col0,
 
 
 
-def fcrack(object p_top, object p_bot, int size, double [:,::1] kw_tsl_i_1, double [:,::1] del_d_i_1, double [:,::1] kw_tsl_i, int no_x_gauss, int no_y_gauss):
+def fcrack(object p_top, object p_bot, int size, double [:,::1] kw_tsl_i_1, double [:,::1] del_d_i_1, 
+           double [:,::1] kw_tsl_i, int no_x_gauss, int no_y_gauss, double [:,::1] dmg_index):
     # double[:,::1] defines the variable as a 2D, C contiguous memoryview of doubles
     
     cdef int m_top, n_top, m_bot, n_bot
@@ -643,6 +644,9 @@ def fcrack(object p_top, object p_bot, int size, double [:,::1] kw_tsl_i_1, doub
                 xi = xis[ptx]
                 eta = etas[pty]
     
+                if dmg_index[pty, ptx] == 0 or dmg_index[pty, ptx] == 1:
+                    continue
+    
                 weight = weights_xi[ptx] * weights_eta[pty]
                 
                 # Extracting the correct values (later in fcrack's eqn) [pty, ptx]
@@ -669,6 +673,9 @@ def fcrack(object p_top, object p_bot, int size, double [:,::1] kw_tsl_i_1, doub
                 # Takes the correct index instead of the location
                 xi = xis[ptx]
                 eta = etas[pty]
+    
+                if dmg_index[pty, ptx] == 0 or dmg_index[pty, ptx] == 1:
+                    continue
     
                 weight = weights_xi[ptx] * weights_eta[pty]
                 
@@ -698,7 +705,7 @@ def fcrack(object p_top, object p_bot, int size, double [:,::1] kw_tsl_i_1, doub
     
 def k_crack11(object p_top, int size, int row0, int col0, int no_x_gauss, int no_y_gauss,
               double k_o, double del_o, double del_f, 
-              double [:,::1] del_d_i_1, double [:,::1] del_d_i):
+              double [:,::1] del_d_i_1, double [:,::1] del_d_i, double [:,::1] dmg_index):
 
     cdef int m_top, n_top
     cdef int i1, k1, j1, l1
@@ -767,8 +774,13 @@ def k_crack11(object p_top, int size, int row0, int col0, int no_x_gauss, int no
                 del_d_i_1_iter = del_d_i_1[pty, ptx]
                 del_d_i_iter = del_d_i[pty, ptx]
                 
+                # CHANGE TO ABS < CRITERIA - For now its fine bec its being manually set to 0
                 if del_d_i_iter == 0:
                     continue
+                
+                if dmg_index[pty, ptx] == 0 or dmg_index[pty, ptx] == 1:
+                    continue
+                
             
                 
                 c = -1
@@ -797,6 +809,9 @@ def k_crack11(object p_top, int size, int row0, int col0, int no_x_gauss, int no
                                 # k_crack11v[c] += -a_top*b_top*del_o*fAw_top*fBw_top*gAw_top*gBw_top*k_o*weight/(4*(del_f - del_o)) - # OLD WRONG
                                 k_crack11v[c] += a_top*b_top*del_f*del_d_i_1_iter*del_o*fAw_top*fBw_top*gAw_top*gBw_top*k_o*weight/(4*(del_d_i_iter*del_d_i_iter)*(del_f - del_o))
 
+                                # with gil:
+                                #     print(k_crack11v[c])
+
 
     k_crack11 = coo_matrix((k_crack11v, (k_crack11r, k_crack11c)), shape=(size, size))
     # Builds a matrix of size = size x size (so complete size of global MD) and populates it with the data in ..v 
@@ -809,7 +824,7 @@ def k_crack11(object p_top, int size, int row0, int col0, int no_x_gauss, int no
 
 def k_crack12(object p_top, object p_bot, int size, int row0, int col0, int no_x_gauss, int no_y_gauss,
               double k_o, double del_o, double del_f, 
-              double [:,::1] del_d_i_1, double [:,::1] del_d_i):
+              double [:,::1] del_d_i_1, double [:,::1] del_d_i, double [:,::1] dmg_index):
 
     cdef int m_top, n_top, m_bot, n_bot
     cdef int i1, k2, j1, l2
@@ -891,6 +906,9 @@ def k_crack12(object p_top, object p_bot, int size, int row0, int col0, int no_x
                 if del_d_i_iter == 0:
                     continue
                 
+                if dmg_index[pty, ptx] == 0 or dmg_index[pty, ptx] == 1:
+                    continue
+                
                 c = -1
                 for i1 in range(m_top):
                     fAw_top = f(i1, xi, x1w_top, x1wr_top, x2w_top, x2wr_top)
@@ -928,7 +946,7 @@ def k_crack12(object p_top, object p_bot, int size, int row0, int col0, int no_x
 
 def k_crack22(object p_bot, int size, int row0, int col0, int no_x_gauss, int no_y_gauss,
               double k_o, double del_o, double del_f,
-              double [:,::1] del_d_i_1, double [:,::1] del_d_i):
+              double [:,::1] del_d_i_1, double [:,::1] del_d_i, double [:,::1] dmg_index):
 
     cdef int m_bot, n_bot
     cdef int i1, k1, j1, l1
@@ -998,6 +1016,9 @@ def k_crack22(object p_bot, int size, int row0, int col0, int no_x_gauss, int no
                 del_d_i_iter = del_d_i[pty, ptx]
                 
                 if del_d_i_iter == 0:
+                    continue
+                
+                if dmg_index[pty, ptx] == 0 or dmg_index[pty, ptx] == 1:
                     continue
                 
                 c = -1
