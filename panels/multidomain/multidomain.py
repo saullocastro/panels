@@ -1106,7 +1106,7 @@ class MultiDomain(object):
                 get_points_weights(no_y_gauss, y_gauss, weights_y)
                 
                 if hasattr(self, "dmg_index"):
-                    kw_tsl, dmg_index, del_d = self.calc_k_dmg(c=c, pA=p_top, pB=p_bot, 
+                    kw_tsl, dmg_index_max, del_d, dmg_index_curr = self.calc_k_dmg(c=c, pA=p_top, pB=p_bot, 
                                          no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type, 
                                          prev_max_dmg_index=self.dmg_index, k_i=k_i, tau_o=tau_o, G1c=G1c)
                 tau = np.multiply(kw_tsl, del_d)
@@ -1288,11 +1288,11 @@ class MultiDomain(object):
     
                     # ATTENTION: pA NEEDS to be the top one and pB, the bottom panel
                     if hasattr(self, "dmg_index"):
-                        kw_tsl, dmg_index, del_d = self.calc_k_dmg(c=c, pA=p_top, pB=p_bot, 
+                        kw_tsl, dmg_index_max, del_d, dmg_index_curr = self.calc_k_dmg(c=c, pA=p_top, pB=p_bot, 
                                              no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type, 
                                              prev_max_dmg_index=self.dmg_index, k_i=k_i, tau_o=tau_o, G1c=G1c)
                     else:
-                        kw_tsl, dmg_index, del_d = self.calc_k_dmg(c=c, pA=p_top, pB=p_bot, 
+                        kw_tsl, dmg_index_max, del_d, dmg_index_curr = self.calc_k_dmg(c=c, pA=p_top, pB=p_bot, 
                                              no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type,
                                              prev_max_dmg_index=None, k_i=k_i, tau_o=tau_o, G1c=G1c)
                     
@@ -1492,7 +1492,7 @@ class MultiDomain(object):
                 del_o = connecti['del_o']
                 del_f = connecti['del_f']
                 
-                kw_tsl, dmg_index, del_d_i = self.calc_k_dmg(c=c_i, pA=p_top, pB=p_bot, no_x_gauss=no_x_gauss, 
+                kw_tsl, dmg_index_max, del_d_i, dmg_index_curr = self.calc_k_dmg(c=c_i, pA=p_top, pB=p_bot, no_x_gauss=no_x_gauss, 
                     no_y_gauss=no_y_gauss, tsl_type=tsl_type, prev_max_dmg_index=self.dmg_index, k_i=k_o, tau_o=tau_o, G1c=G1c)
         
                 # plt.contourf(del_d_i_1)
@@ -1512,17 +1512,17 @@ class MultiDomain(object):
                 kcrack += connections.kCSB_dmg.k_crack11(p_top=p_top, size=size, row0=p_top.row_start, 
                              col0=p_top.col_start, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss,
                              k_o=k_o, del_o=del_o, del_f=del_f, del_d_i_1=np.ascontiguousarray(del_d_i_1), 
-                             del_d_i=np.ascontiguousarray(del_d_i), dmg_index=np.ascontiguousarray(dmg_index))
+                             del_d_i=np.ascontiguousarray(del_d_i), dmg_index=np.ascontiguousarray(dmg_index_max))
                 print(f'        1st term K crack {np.max(kcrack):.2e}')
                 kcrack += connections.kCSB_dmg.k_crack12(p_top=p_top, p_bot=p_bot, size=size, row0=p_top.row_start, 
                               col0=p_bot.col_start, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss,
                               k_o=k_o, del_o=del_o, del_f=del_f, del_d_i_1=np.ascontiguousarray(del_d_i_1), 
-                              del_d_i=np.ascontiguousarray(del_d_i), dmg_index=np.ascontiguousarray(dmg_index))
+                              del_d_i=np.ascontiguousarray(del_d_i), dmg_index=np.ascontiguousarray(dmg_index_max))
                 print(f'        2nd term K crack {np.max(kcrack):.2e}')
                 kcrack += connections.kCSB_dmg.k_crack22(p_bot=p_bot, size=size, row0=p_bot.row_start, 
                               col0=p_bot.col_start, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss,
                               k_o=k_o, del_o=del_o, del_f=del_f, del_d_i_1=np.ascontiguousarray(del_d_i_1), 
-                              del_d_i=np.ascontiguousarray(del_d_i), dmg_index=np.ascontiguousarray(dmg_index))
+                              del_d_i=np.ascontiguousarray(del_d_i), dmg_index=np.ascontiguousarray(dmg_index_max))
                 print(f'        3rd term K crack {np.max(kcrack):.2e}')
                 print()
                 
@@ -1598,14 +1598,14 @@ class MultiDomain(object):
                 tau_o = connecti['tau_o']
                 G1c = connecti['G1c']
                 
-                kw_tsl_i, dmg_index_i, del_d_i = self.calc_k_dmg(c=c_i, pA=p_top, pB=p_bot, 
+                kw_tsl_i, dmg_index_i_max, del_d_i, dmg_index_curr = self.calc_k_dmg(c=c_i, pA=p_top, pB=p_bot, 
                          no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type, 
                          prev_max_dmg_index=self.dmg_index, k_i=k_i, tau_o=tau_o, G1c=G1c)
                 
                 fcrack = connections.kCSB_dmg.fcrack(p_top=p_top, p_bot=p_bot, size=size, 
                                  kw_tsl_i_1=np.ascontiguousarray(kw_tsl_i_1), del_d_i_1=np.ascontiguousarray(del_d_i_1), 
                                  kw_tsl_i=np.ascontiguousarray(kw_tsl_i), no_x_gauss=no_x_gauss, 
-                                 no_y_gauss=no_y_gauss, dmg_index=np.ascontiguousarray(dmg_index_i))
+                                 no_y_gauss=no_y_gauss, dmg_index=np.ascontiguousarray(dmg_index_i_max))
                 
                 print(f'        1st term F crack {np.linalg.norm(fcrack):.2e}')
 
@@ -1785,7 +1785,7 @@ class MultiDomain(object):
         # Calculating stiffness grid
         kw_tsl = self.calc_damaged_stiffness(dmg_index=max_dmg_index, k_i=k_i)
         
-        return kw_tsl, max_dmg_index, corrected_del_d
+        return kw_tsl, max_dmg_index, corrected_del_d, dmg_index_curr
         
     
     
@@ -1845,7 +1845,6 @@ class MultiDomain(object):
                         # [-1] to get the last negative position; [0] to convert it from an array to int; 
                         # +1 to include the last negative value and set it to 0
             print(f'calc_traction: max corrected_max_del_d {np.max(corrected_max_del_d)}')
-            # print(f'calc_k_dmg: Updated del_d -- min {np.min(corrected_max_del_d)} -- max {np.max(corrected_max_del_d):.3e}')
              
         
         # Used when fext is to be calc before the first NR iteration - set all del_d = 0 so no traction force

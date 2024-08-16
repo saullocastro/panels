@@ -1015,7 +1015,34 @@ def monotonicity_check_displ(check_matrix):
         print('Decreasing')
     return monotonicity
            
+def test_num_intng():
+    no_x_gauss = 30
+    no_y_gauss = 30
+    x_gauss = np.zeros(no_x_gauss, dtype=np.float64)
+    weights_x = np.zeros(no_x_gauss, dtype=np.float64)
+    get_points_weights(no_x_gauss, x_gauss, weights_x)
+    
+    y_gauss = np.zeros(no_y_gauss, dtype=np.float64)
+    weights_y = np.zeros(no_y_gauss, dtype=np.float64)
+    get_points_weights(no_y_gauss, y_gauss, weights_y)
+    
+    
+    force_intgn = 0
+    count = 0
+    
+    for pty in range(no_y_gauss):
+        for ptx in range(no_x_gauss):
+            weight = weights_x[ptx] * weights_y[pty]
+            
+            if count <= 14:
+                tau_xieta = 67
+            else:
+                tau_xieta = 67/2
+            #((p_top.a*p_top.b)/4) 
+            force_intgn += weight * tau_xieta * (21*25/4)
+        count += 1
+    print(force_intgn)
 
 if __name__ == "__main__":
     
-    rename_files()
+    test_num_intng()

@@ -721,7 +721,7 @@ def test_dcb_damage_prop(no_pan, no_terms, filename='', k_i=None, tau_o=None, no
 
 
 
-def test_dcb_damage_prop_fcrack(phy_dim, no_terms, k_i=None, tau_o=None, no_x_gauss=None, no_y_gauss=None, w_iter_no_pts=None, G1c=None, name=''):
+def test_dcb_damage_prop_fcrack(phy_dim, no_terms, k_i=None, tau_o=None, no_x_gauss=None, no_y_gauss=None, w_iter_info=None, G1c=None, name=''):
 
     '''
         Damage propagation from a DCB with a precrack
@@ -741,34 +741,47 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, k_i=None, tau_o=None, no_x_ga
     # Log to check on multiple runs at once 
     if not local_run:
         log_file = open(f'{filename}.txt', 'a')
-        log_file.write(f'************************** IT HAS BEGUN - {filename} ******************************\n')
+        log_file.write(f'************************** HELLO THERE! IT HAS BEGUN - {filename} ******************************\n')
         log_file.close()
         
-        with FileLock(f'STATUS {foldername}.txt.lock'):
-            status_file = open(f'STATUS {foldername}.txt', 'a')
+        with FileLock(f'_STATUS {foldername}.txt.lock'):
+            status_file = open(f'_STATUS {foldername}.txt', 'a')
             status_file.write(f'{filename} IT HAS BEGUN! \n')
             status_file.close()
     
-    print(f'************************** IT HAS BEGUN - {filename} ******************************')
+    print(f'************************** HELLO THERE! IT HAS BEGUN - {filename} ******************************')
     sys.stdout.flush()
     # Start time
     start_time = time.time()
     
     no_pan = phy_dim[0]
-    b = phy_dim[1]
+    a = phy_dim[1]
+    b = phy_dim[2]
+    precrack_len = phy_dim[3]
     
     # Properties
-    E1 = (138300. + 128000.)/2. # MPa
-    E2 = (10400. + 11500.)/2. # MPa
-    G12 = 5190. # MPa
-    nu12 = 0.316
-    ply_thickness = 0.14 # mm
+    if False: # Bas's paper
+        E1 = (138300. + 128000.)/2. # MPa
+        E2 = (10400. + 11500.)/2. # MPa
+        G12 = 5190. # MPa
+        nu12 = 0.316
+        ply_thickness = 0.14 # mm
+        plies = 15
+        simple_layup = [0]*plies
+    if True: # Theodores thesis
+        E1 = 126100. # MPa
+        E2 = 11200. # MPa
+        G12 = 5460. # MPa
+        nu12 = 0.319
+        ply_thickness = 0.14 # mm
+        plies = 15
+        simple_layup = [0]*plies
 
     # Plate dimensions (overall)
-    a = 65 # mm
+    # a = 65 # mm
     # b = 25  # mm
     # Dimensions of panel 1 and 2
-    a1 = 17
+    a1 = a - precrack_len
     a2 = 0.015
     a3 = 10
 
@@ -779,8 +792,7 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, k_i=None, tau_o=None, no_x_ga
     n = no_terms[3]
     # print(f'no terms : {m}')
 
-    plies = 15
-    simple_layup = [0]*plies
+    
     # simple_layup += simple_layup[::-1]
     # print('plies ',np.shape(simple_layup)[0])
 
@@ -1040,15 +1052,18 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, k_i=None, tau_o=None, no_x_ga
             p_top = conn_list['p1']
             p_bot = conn_list['p2']
             break # Assuming there is only 1 connection
-        
+    
+    w_iter_no_pts = w_iter_info[0]
+    w_max = w_iter_info[1]
+    
     # Initilaize mat to store results
     if w_iter_no_pts is None:
-        w_iter_no_pts = 150
+        w_iter_no_pts = 50
     
-    load_reversal = True
+    load_reversal = False
     if not load_reversal:
-        w_iter = np.unique(np.concatenate((np.linspace(0.01,1,int(0.3*w_iter_no_pts)), np.linspace(1,5,int(0.3*w_iter_no_pts)), 
-                                        np.linspace(5,8,int(0.4*w_iter_no_pts)))))
+        w_iter = np.unique(np.concatenate((np.linspace(0.01,0.375*w_max,int(0.3*w_iter_no_pts)), np.linspace(0.375*w_max,0.625*w_max,int(0.3*w_iter_no_pts)), 
+                                        np.linspace(0.625*w_max,w_max,int(0.4*w_iter_no_pts)))))
         # w_iter = np.unique(np.concatenate(( np.linspace(0.01,3.2,int(0.1*w_iter_no_pts)), np.linspace(3.2,3.39,int(0.4*w_iter_no_pts)), 
         #                                 np.linspace(3.4,6,int(0.25*w_iter_no_pts)), np.linspace(6,8,int(0.25*w_iter_no_pts))  )))
     # w_iter = np.linspace(0.01,8,100)
@@ -1060,8 +1075,8 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, k_i=None, tau_o=None, no_x_ga
         w_iter = np.concatenate( ( np.unique(np.concatenate((np.linspace(0.01,1,int(0.3*w_iter_no_pts)), 
                                            np.linspace(1,5,int(0.3*w_iter_no_pts)), 
                                            np.linspace(5,7,int(0.4*2/3*w_iter_no_pts))))), # filters out unique stuff till 7mm
-                                           np.linspace(6,1,5), 
-                                           np.linspace(1.5,6,4),
+                                           np.linspace(6,1.5,5), 
+                                           np.linspace(1.5,6,5),
                                            np.linspace(7,8,int(0.4*1/3*w_iter_no_pts)) ) )
     
     # Initilize variables to store results 
@@ -1305,11 +1320,11 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, k_i=None, tau_o=None, no_x_ga
         # Edit: should be correct as it is 
                 # Ques: should first update max del d then calc kw_tsl etc ??
         if hasattr(assy, "dmg_index"):
-            kw_tsl[:,:,disp_iter_no], dmg_index[:,:,disp_iter_no], del_d[:,:,disp_iter_no]  = assy.calc_k_dmg(c=c, pA=p_top, pB=p_bot, 
+            kw_tsl[:,:,disp_iter_no], dmg_index[:,:,disp_iter_no], del_d[:,:,disp_iter_no], dmg_index_curr  = assy.calc_k_dmg(c=c, pA=p_top, pB=p_bot, 
                                                  no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type, 
                                                  prev_max_dmg_index=assy.dmg_index, k_i=k_i, tau_o=tau_o)
         else:
-            kw_tsl[:,:,disp_iter_no], dmg_index[:,:,disp_iter_no], del_d[:,:,disp_iter_no]  = assy.calc_k_dmg(c=c, pA=p_top, pB=p_bot, 
+            kw_tsl[:,:,disp_iter_no], dmg_index[:,:,disp_iter_no], del_d[:,:,disp_iter_no], dmg_index_curr  = assy.calc_k_dmg(c=c, pA=p_top, pB=p_bot, 
                                                  no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type,
                                                  prev_max_dmg_index=None, k_i=k_i, tau_o=tau_o)
             
@@ -1318,7 +1333,6 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, k_i=None, tau_o=None, no_x_ga
         # Update max del_d AFTER a converged NR iteration
         assy.update_TSL_history(curr_max_dmg_index=dmg_index[:,:,disp_iter_no])
         
-        # kw_tsl[:,:,disp_iter_no], dmg_index[:,:,disp_iter_no], del_d[:,:,disp_iter_no] = assy.calc_k_dmg(c=c, pA=p_top, pB=p_bot, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type)
         if not local_run:
             log_file = open(f'{filename}.txt', 'a')
             log_file.write(f'{(disp_iter_no+1)/np.shape(w_iter)[0]*100:.1f}% - {filename} -- wp={wp:.3f} -- max DI {np.max(dmg_index[:,:,disp_iter_no]):.4f}\n')
@@ -1326,11 +1340,11 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, k_i=None, tau_o=None, no_x_ga
             print(f'            {filename} {(disp_iter_no+1)/np.shape(w_iter)[0]*100:.1f}%')
             sys.stdout.flush()
             
-            with FileLock(f'STATUS {foldername}.txt.lock'):
+            with FileLock(f'_STATUS {foldername}.txt.lock'):
                 # Overwriting the status in the status file 
-                with open(f'STATUS {foldername}.txt', 'r') as status_file:
+                with open(f'_STATUS {foldername}.txt', 'r') as status_file:
                     lines_status = status_file.readlines()
-                with open(f'STATUS {foldername}.txt', 'w') as status_file:
+                with open(f'_STATUS {foldername}.txt', 'w') as status_file:
                     for line in lines_status:
                         if filename not in line: # creating a new file that writes all lines except this one
                             status_file.write(line)
@@ -1411,16 +1425,20 @@ def test_dcb_damage_prop_fcrack(phy_dim, no_terms, k_i=None, tau_o=None, no_x_ga
     log_file.write(f'************************** WAKE UP! ITS DONE! - {filename} ******************************\n')
     log_file.close()
     
-    with FileLock(f'STATUS {foldername}.txt.lock'):
-        # Overwriting the status in the status file 
-        with open(f'STATUS {foldername}.txt', 'r') as status_file:
-            lines_status = status_file.readlines()
-        with open(f'STATUS {foldername}.txt', 'w') as status_file:
-            for line in lines_status:
-                if filename not in line: # creating a new file that writes all lines except this one
-                    status_file.write(line)
-                if filename in line: # replacing the line with the updated progress
-                    status_file.write(f'{(time.time() - start_time)/(60*60)} hrs - {filename} \n')
+    if not local_run:
+        with FileLock(f'_STATUS {foldername}.txt.lock'):
+            # Overwriting the status in the status file 
+            with open(f'_STATUS {foldername}.txt', 'r') as status_file:
+                lines_status = status_file.readlines()
+            with open(f'_STATUS {foldername}.txt', 'w') as status_file:
+                for line in lines_status:
+                    if filename not in line: # creating a new file that writes all lines except this one
+                        status_file.write(line)
+                    if filename in line: # replacing the line with the updated progress
+                        if crisfield_test_fail: # means aborted
+                            status_file.write(f'ABORTED :( - {filename} \n')
+                        else:
+                            status_file.write(f'{(time.time() - start_time)/(60*60)} hrs - {filename} \n')
     
     # ------------------ RESULTS AND POST PROCESSING --------------------
     
@@ -1485,9 +1503,9 @@ if __name__ == "__main__":
             dmg_index, del_d, kw_tsl, force_intgn, displ_top_root, displ_bot_root, c_all = test_dcb_damage_prop(no_pan=3, no_terms=[10,8], filename='', k_i=1e4, tau_o=67, no_x_gauss=50, no_y_gauss=25, w_iter_no_pts=15, G1c=1.12)
         if True: # with fcrack
         # p3_70_25_m18_8_ki1e5_tauo67_nx60_ny30_wpts30_G1c112
-            dmg_index, del_d, kw_tsl, force_intgn, c_all = test_dcb_damage_prop_fcrack(phy_dim=[3,25], 
-                no_terms=[12, 8], filename='p3_65_25m15_8k1e4_t67_nx60ny30_w30_G112', k_i=1e4, tau_o=67, no_x_gauss=60, 
-                no_y_gauss=30, w_iter_no_pts=30, G1c=1.12)
+            dmg_index, del_d, kw_tsl, force_intgn, c_all = test_dcb_damage_prop_fcrack(phy_dim=[3,25,52], 
+                no_terms=[8,8,6,6], name=['test',''], k_i=1e4, tau_o=67, no_x_gauss=50, 
+                no_y_gauss=25, w_iter_info=[10,4], G1c=1.12)
         
         
     # Parallelization of multiple runs
@@ -1497,14 +1515,11 @@ if __name__ == "__main__":
         # test_dcb_damage_prop_fcrack(phy_dim, no_terms, filename='', k_i=None, tau_o=None, no_x_gauss=None,
         # no_y_gauss=None, w_iter_no_pts=None, G1c=None)
 
-        foldername = 'p3_65_25m10_8kITR_tITR_nx50y25_w45REVERSE_G112'
+        foldername = 'Theo_kITR_tITR_p3_90_255_566m10_8_nx60y30_w70_G141'
         
-        ftn_arg_1 = [([3,25],[10,10,8,8],1e4,tau,50,25,45,1.12, 
-                      [f'p3_65_25m10_8k1e4_t{tau:.0f}_nx50y25_w45_G112', foldername]) for tau in [47,52,57,62,67,72,77,97]]
-        ftn_arg_2 = [([3,25],[10,10,8,8],ki,tau,50,25,45,1.12, 
-                      [f'p3_65_25m10_8k{ki:.0e}_t{tau:.0f}_nx50y25_w45_G112', foldername]) 
-                     for ki in [5e3,7.5e3,1e4,2.5e4,5e4,1e5] for tau in [67,87]]
-        ftn_arg = ftn_arg_1 + ftn_arg_2
+        ftn_arg = [([3,90,25.5,56.6],[10,10,8,8],ki,tau,60,30,[70,12],1.41, 
+                      [f'p3_90_255_566_m10_8k{ki:.0e}_t{tau:.0f}_nx60y30_w70_G141', foldername]) 
+                   for ki in [2.5e4, 3.3e4, 6.6e4, 7.5e4] for tau in [47,67,87,107,117,127,137,147] ]
         
         for i in range(len(ftn_arg)):
             ftn_arg[i] = list(ftn_arg[i]) # convert to list bec tuples are inmutable
@@ -1517,13 +1532,13 @@ if __name__ == "__main__":
             os.makedirs(foldername)
         os.chdir(foldername)
         
-        gen_file = open('generation_file.txt', 'a')
+        gen_file = open('_generation_file.txt', 'a')
         gen_file.write('TEMP')
         gen_file.close()
         
-        with FileLock(f'STATUS {foldername}.txt.lock'):
-            status_file = open(f'STATUS {foldername}.txt', 'a')
-            status_file.write(f'STATUS {foldername} \n \n')
+        with FileLock(f'_STATUS {foldername}.txt.lock'):
+            status_file = open(f'_STATUS {foldername}.txt', 'a')
+            status_file.write(f'_STATUS {foldername} \n \n')
             status_file.close()
         
         
