@@ -1530,7 +1530,6 @@ class MultiDomain(object):
             kcrack = finalize_symmetric_matrix(kcrack)
             
         return kcrack
-                
 
 
     def calc_fint(self, c, silent=True, inc=1., kC_conn=None):

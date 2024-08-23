@@ -1043,6 +1043,358 @@ def test_num_intng():
         count += 1
     print(force_intgn)
 
+
+def postprocess_damage_prop_fcrack(phy_dim, no_terms, k_i=None, tau_o=None, no_x_gauss=None,
+                                   no_y_gauss=None, w_iter_info=None, G1c=None, name='', c_all=None):
+
+    '''
+        Damage propagation from a DCB with a precrack
+        
+        Code for 2 panels might not be right
+            
+        All units in MPa, N, mm
+    '''    
+    
+    filename=name[0]
+    foldername=name[1]
+                    
+    # Delete previous log file - later when appending the file, if the file doesnt exist, it is created
+    if os.path.isfile(f'./{filename}.txt'):
+        os.remove(f'{filename}.txt')
+    
+    # Log to check on multiple runs at once 
+    if not local_run:
+        log_file = open(f'{filename}.txt', 'a')
+        log_file.write(f'************************** HELLO THERE! IT HAS BEGUN - {filename} ******************************\n')
+        log_file.close()
+        
+        with FileLock(f'_STATUS {foldername}.txt.lock'):
+            status_file = open(f'_STATUS {foldername}.txt', 'a')
+            status_file.write(f'{filename} IT HAS BEGUN! \n')
+            status_file.close()
+    
+    print(f'************************** HELLO THERE! IT HAS BEGUN - {filename} ******************************')
+    sys.stdout.flush()
+    # Start time
+    start_time = time.time()
+    
+    no_pan = phy_dim[0]
+    a = phy_dim[1]
+    b = phy_dim[2]
+    precrack_len = phy_dim[3]
+    
+    # Properties
+    if False: # Bas's paper
+        E1 = (138300. + 128000.)/2. # MPa
+        E2 = (10400. + 11500.)/2. # MPa
+        G12 = 5190. # MPa
+        nu12 = 0.316
+        ply_thickness = 0.14 # mm
+        plies = 15
+        simple_layup = [0]*plies
+    if True: # Theodores thesis
+        E1 = 126100. # MPa
+        E2 = 11200. # MPa
+        G12 = 5460. # MPa
+        nu12 = 0.319
+        ply_thickness = 0.14 # mm
+        plies = 15
+        simple_layup = [0]*plies
+
+    # Plate dimensions (overall)
+    # a = 65 # mm
+    # b = 25  # mm
+    # Dimensions of panel 1 and 2
+    a1 = a - precrack_len
+    a2 = 0.015
+    a3 = 10
+
+    #others
+    m_tsl = no_terms[0]
+    n_tsl = no_terms[1]
+    m = no_terms[2]
+    n = no_terms[3]
+    # print(f'no terms : {m}')
+
+    
+    # simple_layup += simple_layup[::-1]
+    # print('plies ',np.shape(simple_layup)[0])
+
+    laminaprop = (E1, E2, nu12, G12, G12, G12)
+    
+    # no_pan = 3
+    
+    # Top DCB panels
+    top1 = Shell(group='top', x0=0, y0=0, a=a1, b=b, m=m_tsl, n=n_tsl, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
+    if no_pan == 2:
+        top2 = Shell(group='top', x0=a1, y0=0, a=a-a1, b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
+    if no_pan == 3:
+        top2 = Shell(group='top', x0=a1, y0=0, a=a2, b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
+        top3 = Shell(group='top', x0=a1+a2, y0=0, a=a-a1-a2, b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
+    if no_pan == 4:
+        top2 = Shell(group='top', x0=a1, y0=0, a=a2, b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
+        top3 = Shell(group='top', x0=a1+a2, y0=0, a=a3, b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
+        top4 = Shell(group='top', x0=a1+a2+a3, y0=0, a=a-(a1+a2+a3), b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
+
+    # Bottom DCB panels
+    bot1 = Shell(group='bot', x0=0, y0=0, a=a1, b=b, m=m_tsl, n=n_tsl, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
+    if no_pan == 2:
+        bot2 = Shell(group='bot', x0=a1, y0=0, a=a-a1, b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
+    if no_pan == 3:
+        bot2 = Shell(group='bot', x0=a1, y0=0, a=a2, b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
+        bot3 = Shell(group='bot', x0=a1+a2, y0=0, a=a-a1-a2, b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
+    if no_pan == 4:
+        bot2 = Shell(group='bot', x0=a1, y0=0, a=a2, b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
+        bot3 = Shell(group='bot', x0=a1+a2, y0=0, a=a3, b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
+        bot4 = Shell(group='bot', x0=a1+a2+a3, y0=0, a=a-(a1+a2+a3), b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
+
+
+    # boundary conditions
+    
+    BC = 'bot_end_fixed'
+    # Possible strs: 'bot_fully_fixed', 'bot_end_fixed'
+    
+    clamped = False
+    ss = True
+    
+    if clamped:
+        bot_r = 0
+        bot_t = 0
+        top1_x1_wr = 1
+    if ss:
+        bot_r = 1
+        bot_t = 0
+        top1_x1_wr = 0
+        
+    # DCB with only the lower extreme end fixed at the tip. Rest free
+    if BC == 'bot_end_fixed':
+        top1.x1u = 1 ; top1.x1ur = 1 ; top1.x2u = 1 ; top1.x2ur = 1
+        top1.x1v = 1 ; top1.x1vr = 1 ; top1.x2v = 1 ; top1.x2vr = 1 
+        top1.x1w = 1 ; top1.x1wr = top1_x1_wr ; top1.x2w = 1 ; top1.x2wr = 1 
+        top1.y1u = 1 ; top1.y1ur = 1 ; top1.y2u = 1 ; top1.y2ur = 1
+        top1.y1v = 1 ; top1.y1vr = 1 ; top1.y2v = 1 ; top1.y2vr = 1
+        top1.y1w = 1 ; top1.y1wr = 1 ; top1.y2w = 1 ; top1.y2wr = 1
+        
+        top2.x1u = 1 ; top2.x1ur = 1 ; top2.x2u = 1 ; top2.x2ur = 1
+        top2.x1v = 1 ; top2.x1vr = 1 ; top2.x2v = 1 ; top2.x2vr = 1 
+        top2.x1w = 1 ; top2.x1wr = 1 ; top2.x2w = 1 ; top2.x2wr = 1  
+        top2.y1u = 1 ; top2.y1ur = 1 ; top2.y2u = 1 ; top2.y2ur = 1
+        top2.y1v = 1 ; top2.y1vr = 1 ; top2.y2v = 1 ; top2.y2vr = 1
+        top2.y1w = 1 ; top2.y1wr = 1 ; top2.y2w = 1 ; top2.y2wr = 1
+        
+        if no_pan == 3:
+            top3.x1u = 1 ; top3.x1ur = 1 ; top3.x2u = 1 ; top3.x2ur = 1
+            top3.x1v = 1 ; top3.x1vr = 1 ; top3.x2v = 1 ; top3.x2vr = 1 
+            top3.x1w = 1 ; top3.x1wr = 1 ; top3.x2w = 1 ; top3.x2wr = 1  
+            top3.y1u = 1 ; top3.y1ur = 1 ; top3.y2u = 1 ; top3.y2ur = 1
+            top3.y1v = 1 ; top3.y1vr = 1 ; top3.y2v = 1 ; top3.y2vr = 1
+            top3.y1w = 1 ; top3.y1wr = 1 ; top3.y2w = 1 ; top3.y2wr = 1
+            
+        if no_pan == 4:
+            top3.x1u = 1 ; top3.x1ur = 1 ; top3.x2u = 1 ; top3.x2ur = 1
+            top3.x1v = 1 ; top3.x1vr = 1 ; top3.x2v = 1 ; top3.x2vr = 1 
+            top3.x1w = 1 ; top3.x1wr = 1 ; top3.x2w = 1 ; top3.x2wr = 1  
+            top3.y1u = 1 ; top3.y1ur = 1 ; top3.y2u = 1 ; top3.y2ur = 1
+            top3.y1v = 1 ; top3.y1vr = 1 ; top3.y2v = 1 ; top3.y2vr = 1
+            top3.y1w = 1 ; top3.y1wr = 1 ; top3.y2w = 1 ; top3.y2wr = 1
+            
+            top4.x1u = 1 ; top4.x1ur = 1 ; top4.x2u = 1 ; top4.x2ur = 1
+            top4.x1v = 1 ; top4.x1vr = 1 ; top4.x2v = 1 ; top4.x2vr = 1 
+            top4.x1w = 1 ; top4.x1wr = 1 ; top4.x2w = 1 ; top4.x2wr = 1  
+            top4.y1u = 1 ; top4.y1ur = 1 ; top4.y2u = 1 ; top4.y2ur = 1
+            top4.y1v = 1 ; top4.y1vr = 1 ; top4.y2v = 1 ; top4.y2vr = 1
+            top4.y1w = 1 ; top4.y1wr = 1 ; top4.y2w = 1 ; top4.y2wr = 1
+    
+        bot1.x1u = 1 ; bot1.x1ur = 1 ; bot1.x2u = 1 ; bot1.x2ur = 1
+        bot1.x1v = 1 ; bot1.x1vr = 1 ; bot1.x2v = 1 ; bot1.x2vr = 1
+        bot1.x1w = 1 ; bot1.x1wr = 1 ; bot1.x2w = 1 ; bot1.x2wr = 1
+        bot1.y1u = 1 ; bot1.y1ur = 1 ; bot1.y2u = 1 ; bot1.y2ur = 1
+        bot1.y1v = 1 ; bot1.y1vr = 1 ; bot1.y2v = 1 ; bot1.y2vr = 1
+        bot1.y1w = 1 ; bot1.y1wr = 1 ; bot1.y2w = 1 ; bot1.y2wr = 1
+        
+        if no_pan == 2:
+            bot2.x1u = 1 ; bot2.x1ur = 1 ; bot2.x2u = bot_t ; bot2.x2ur = 1 
+            bot2.x1v = 1 ; bot2.x1vr = 1 ; bot2.x2v = bot_t ; bot2.x2vr = 1
+            bot2.x1w = 1 ; bot2.x1wr = 1 ; bot2.x2w = bot_t ; bot2.x2wr = bot_r
+            bot2.y1u = 1 ; bot2.y1ur = 1 ; bot2.y2u = 1 ; bot2.y2ur = 1
+            bot2.y1v = 1 ; bot2.y1vr = 1 ; bot2.y2v = 1 ; bot2.y2vr = 1
+            bot2.y1w = 1 ; bot2.y1wr = 1 ; bot2.y2w = 1 ; bot2.y2wr = 1
+        
+        if no_pan == 3:
+            bot2.x1u = 1 ; bot2.x1ur = 1 ; bot2.x2u = 1 ; bot2.x2ur = 1
+            bot2.x1v = 1 ; bot2.x1vr = 1 ; bot2.x2v = 1 ; bot2.x2vr = 1 
+            bot2.x1w = 1 ; bot2.x1wr = 1 ; bot2.x2w = 1 ; bot2.x2wr = 1 
+            bot2.y1u = 1 ; bot2.y1ur = 1 ; bot2.y2u = 1 ; bot2.y2ur = 1
+            bot2.y1v = 1 ; bot2.y1vr = 1 ; bot2.y2v = 1 ; bot2.y2vr = 1
+            bot2.y1w = 1 ; bot2.y1wr = 1 ; bot2.y2w = 1 ; bot2.y2wr = 1
+            
+            bot3.x1u = 1 ; bot3.x1ur = 1 ; bot3.x2u = bot_t ; bot3.x2ur = 1 
+            bot3.x1v = 1 ; bot3.x1vr = 1 ; bot3.x2v = bot_t ; bot3.x2vr = 1 
+            bot3.x1w = 1 ; bot3.x1wr = 1 ; bot3.x2w = bot_t ; bot3.x2wr = bot_r 
+            bot3.y1u = 1 ; bot3.y1ur = 1 ; bot3.y2u = 1 ; bot3.y2ur = 1
+            bot3.y1v = 1 ; bot3.y1vr = 1 ; bot3.y2v = 1 ; bot3.y2vr = 1
+            bot3.y1w = 1 ; bot3.y1wr = 1 ; bot3.y2w = 1 ; bot3.y2wr = 1
+            
+        if no_pan == 4:
+            bot2.x1u = 1 ; bot2.x1ur = 1 ; bot2.x2u = 1 ; bot2.x2ur = 1
+            bot2.x1v = 1 ; bot2.x1vr = 1 ; bot2.x2v = 1 ; bot2.x2vr = 1 
+            bot2.x1w = 1 ; bot2.x1wr = 1 ; bot2.x2w = 1 ; bot2.x2wr = 1 
+            bot2.y1u = 1 ; bot2.y1ur = 1 ; bot2.y2u = 1 ; bot2.y2ur = 1
+            bot2.y1v = 1 ; bot2.y1vr = 1 ; bot2.y2v = 1 ; bot2.y2vr = 1
+            bot2.y1w = 1 ; bot2.y1wr = 1 ; bot2.y2w = 1 ; bot2.y2wr = 1
+            
+            bot3.x1u = 1 ; bot3.x1ur = 1 ; bot3.x2u = 1 ; bot3.x2ur = 1 
+            bot3.x1v = 1 ; bot3.x1vr = 1 ; bot3.x2v = 1 ; bot3.x2vr = 1 
+            bot3.x1w = 1 ; bot3.x1wr = 1 ; bot3.x2w = 1 ; bot3.x2wr = 1 
+            bot3.y1u = 1 ; bot3.y1ur = 1 ; bot3.y2u = 1 ; bot3.y2ur = 1
+            bot3.y1v = 1 ; bot3.y1vr = 1 ; bot3.y2v = 1 ; bot3.y2vr = 1
+            bot3.y1w = 1 ; bot3.y1wr = 1 ; bot3.y2w = 1 ; bot3.y2wr = 1
+
+            bot4.x1u = 1 ; bot4.x1ur = 1 ; bot4.x2u = bot_t ; bot4.x2ur = 1 
+            bot4.x1v = 1 ; bot4.x1vr = 1 ; bot4.x2v = bot_t ; bot4.x2vr = 1 
+            bot4.x1w = 1 ; bot4.x1wr = 1 ; bot4.x2w = bot_t ; bot4.x2wr = bot_r 
+            bot4.y1u = 1 ; bot4.y1ur = 1 ; bot4.y2u = 1 ; bot4.y2ur = 1
+            bot4.y1v = 1 ; bot4.y1vr = 1 ; bot4.y2v = 1 ; bot4.y2vr = 1
+            bot4.y1w = 1 ; bot4.y1wr = 1 ; bot4.y2w = 1 ; bot4.y2wr = 1
+            
+    
+    if no_x_gauss is None:
+        no_x_gauss = 60
+    if no_y_gauss is None:
+        no_y_gauss = 30
+    
+    # All connections - list of dict
+    if False: # incomplete
+        if no_pan == 2:
+            conn = [
+             # skin-skin
+             dict(p1=top1, p2=top2, func='SSxcte', xcte1=top1.a, xcte2=0),
+             dict(p1=bot1, p2=bot2, func='SSxcte', xcte1=bot1.a, xcte2=0),
+             dict(p1=top1, p2=bot1, func='SB'), #'_TSL', tsl_type = 'linear'), 
+                # dict(p1=top2, p2=bot2, func='SB_TSL', tsl_type = 'linear')
+            ]
+    if no_pan == 3:
+        conn = [
+           # skin-skin
+           dict(p1=top1, p2=top2, func='SSxcte', xcte1=top1.a, xcte2=0),
+           dict(p1=top2, p2=top3, func='SSxcte', xcte1=top2.a, xcte2=0),
+           dict(p1=bot1, p2=bot2, func='SSxcte', xcte1=bot1.a, xcte2=0),
+           dict(p1=bot2, p2=bot3, func='SSxcte', xcte1=bot2.a, xcte2=0),
+           dict(p1=top1, p2=bot1, func='SB_TSL', tsl_type = 'bilinear', no_x_gauss=no_x_gauss, 
+                no_y_gauss=no_y_gauss, tau_o=tau_o, G1c=G1c, k_o=k_i, del_o=tau_o/k_i, del_f=2*G1c/tau_o)
+        ]
+    if no_pan == 4:
+        conn = [
+           # skin-skin
+           dict(p1=top1, p2=top2, func='SSxcte', xcte1=top1.a, xcte2=0),
+           dict(p1=top2, p2=top3, func='SSxcte', xcte1=top2.a, xcte2=0),
+           dict(p1=top3, p2=top4, func='SSxcte', xcte1=top3.a, xcte2=0),
+           dict(p1=bot1, p2=bot2, func='SSxcte', xcte1=bot1.a, xcte2=0),
+           dict(p1=bot2, p2=bot3, func='SSxcte', xcte1=bot2.a, xcte2=0),
+           dict(p1=bot3, p2=bot4, func='SSxcte', xcte1=bot3.a, xcte2=0),
+           dict(p1=top1, p2=bot1, func='SB_TSL', tsl_type = 'bilinear', no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, k_i=k_i, tau_o=tau_o, G1c=G1c)
+        ]
+    
+    # This determines the positions of each panel's (sub)matrix in the global matrix when made a MD obj below
+    # So changing this changes the placements i.e. starting row and col of each
+    if no_pan == 2:
+        panels = [bot1, bot2, top1, top2]
+    if no_pan == 3:
+        panels = [bot1, bot2, bot3, top1, top2, top3]
+    if no_pan == 4:
+        panels = [bot1, bot2, bot3, bot4, top1, top2, top3, top4]
+
+    assy = MultiDomain(panels=panels, conn=conn) # assy is now an object of the MultiDomain class
+    # Here the panels (shell objs) are modified -- their starting positions in the global matrix is assigned etc
+
+    # Panel at which the disp is applied
+    if no_pan == 2:
+        disp_panel = top2
+    if no_pan == 3:
+        disp_panel = top3
+    if no_pan == 4:
+        disp_panel = top4
+ 
+
+
+    if True:
+        ######## THIS SHOULD BE CHANGED LATER PER DISP TYPE ###########################################
+        ku, kv, kw = calc_ku_kv_kw_point_pd(disp_panel)
+        kw = 1e6
+        
+    size = assy.get_size()
+        
+    # To match the inital increment 
+    wp = 0.01   
+    
+        
+    # -------------------- INCREMENTATION --------------------------
+    # wp_max = 10 # [mm]
+    # no_iter_disp = 100
+    
+    disp_iter_no = 0
+    
+    # Finding info of the connection
+    for conn_list in conn:
+        if conn_list['func'] == 'SB_TSL':
+            no_x_gauss = conn_list['no_x_gauss']
+            no_y_gauss = conn_list['no_y_gauss']
+            tsl_type = conn_list['tsl_type']
+            p_top = conn_list['p1']
+            p_bot = conn_list['p2']
+            break # Assuming there is only 1 connection
+    
+    w_iter_no_pts = w_iter_info[0]
+    w_max = w_iter_info[1]
+    
+    # Initilaize mat to store results
+    if w_iter_no_pts is None:
+        w_iter_no_pts = 50
+    
+    load_reversal = False
+    if not load_reversal:
+        w_iter = np.unique(np.concatenate((np.linspace(0.01,0.375*w_max,int(0.3*w_iter_no_pts)), np.linspace(0.375*w_max,0.625*w_max,int(0.3*w_iter_no_pts)), 
+                                        np.linspace(0.625*w_max,w_max,int(0.4*w_iter_no_pts)))))
+        # w_iter = np.unique(np.concatenate(( np.linspace(0.01,3.2,int(0.1*w_iter_no_pts)), np.linspace(3.2,3.39,int(0.4*w_iter_no_pts)), 
+        #                                 np.linspace(3.4,6,int(0.25*w_iter_no_pts)), np.linspace(6,8,int(0.25*w_iter_no_pts))  )))
+    # w_iter = np.linspace(0.01,8,100)
+    else:
+    # w_iter = np.concatenate((np.linspace(0.01,3,int(0.1*w_iter_no_pts)), np.linspace(3,6,int(0.25*w_iter_no_pts)), 
+    #                                    np.linspace(6,7,int(0.25*w_iter_no_pts)),
+    #                                    np.linspace(7,0,int(0.1*w_iter_no_pts)), np.linspace(0,7,int(0.1*w_iter_no_pts)), 
+    #                                    np.linspace(7,8,int(0.2*w_iter_no_pts)) ))
+        w_iter = np.concatenate( ( np.unique(np.concatenate((np.linspace(0.01,1,int(0.3*w_iter_no_pts)), 
+                                           np.linspace(1,5,int(0.3*w_iter_no_pts)), 
+                                           np.linspace(5,7,int(0.4*2/3*w_iter_no_pts))))), # filters out unique stuff till 7mm
+                                           np.linspace(6,1.5,5), 
+                                           np.linspace(1.5,6,5),
+                                           np.linspace(7,8,int(0.4*1/3*w_iter_no_pts)) ) )
+    
+    # Initilize variables to store results 
+    separation = np.zeros((50,200,np.shape(w_iter)[0]))
+    
+    
+    # Displacement Incrementation
+    for wp in w_iter: 
+        c = c_all[:,disp_iter_no]
+        # Calc displ of top and bottom panels at each increment
+        if True:
+            res_pan_top = assy.calc_results(c=c, group="top", vec='w', no_x_gauss=200, no_y_gauss=50)
+            res_pan_bot = assy.calc_results(c=c, group="bot", vec='w', no_x_gauss=200, no_y_gauss=50)
+            
+        separation[:,:,disp_iter_no] = res_pan_top['w'][0] - res_pan_bot['w'][0]
+        print(np.max(separation[:,:,disp_iter_no]))
+        
+        disp_iter_no += 1
+        
+    np.save(f'deld_{filename}', separation)
+    
+    return separation
+
+
+
 if __name__ == "__main__":
     
-    test_num_intng()
+    separation = postprocess_damage_prop_fcrack(phy_dim=[3,65,25,48], 
+        no_terms=[10,10,8,8], name=['resetdispl',''], k_i=1e4, tau_o=87, no_x_gauss=60, 
+        no_y_gauss=30, w_iter_info=[20,3], G1c=1.12, c_all = c_resetdispl)

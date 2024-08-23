@@ -20,6 +20,7 @@ import matplotlib as mpl
 from mpl_toolkits.axes_grid1.inset_locator import mark_inset, zoomed_inset_axes, inset_axes
 from matplotlib.markers import MarkerStyle
 from matplotlib.transforms import Affine2D
+from matplotlib.ticker import FormatStrFormatter
 
 # To generate mp4's
 import matplotlib
@@ -417,11 +418,11 @@ if not animate:
         plt.show()
         
     #%% contourf
-    if False:
-        var_name = 'k_p3_65_25_48m12_8k1e4_t67_nx50y25_w60_G112'#'kw_tsl_1posve_m15_8_w200_nx60_ny30_tau67_ki1e4'
+    if True:
+        var_name = 'DI_noresetdispl_bas'#'kw_tsl_1posve_m15_8_w200_nx60_ny30_tau67_ki1e4'
         
-        no_x_gauss = 50
-        no_y_gauss = 25
+        no_x_gauss = 60
+        no_y_gauss = 30
         
         a = 17
         b = 25
@@ -439,17 +440,68 @@ if not animate:
         x_grid = a*(xi_grid+1)/2
         y_grid = b*(eta_grid+1)/2
         
-        plt.contourf(x_grid, y_grid, globals()[var_name][:,:,-1])
-        plt.colorbar()
-        plt.title(r'+1*fcrack $\tau$=67 $n_x$=60 $n_y$=30 $k_i$=1e4 m =15,8 w=200')
+        fig, ax = plt.subplots()
+        # levels = [0,0.3,0.4,0.5,0.55,0.57,np.max(globals()[var_name][:,:,17])]
+        levels = None
+        plt.contourf(x_grid, y_grid, globals()[var_name][:,:,25], levels=levels)
+        cbar = plt.colorbar()
+        cbar.ax.yaxis.set_major_formatter(FormatStrFormatter('%.3f'))
+        # plt.title(r'+1*fcrack $\tau$=67 $n_x$=60 $n_y$=30 $k_i$=1e4 m =15,8 w=200')
+        plt.title('Damage Index \n Tip Displacement = 3.94 [mm]', fontsize=14)
         plt.ylabel('y coordinate [mm]', fontsize=14)
         plt.xlabel('x coordinate [mm]', fontsize=14)
         plt.xticks(fontsize=14)
         plt.yticks(fontsize=14)
-        
-        
-        plt.grid()
+        if True:
+            # Y - Ensuring that the ends have tick labels
+            org_yticks = ax.get_yticks() # Get the current y-tick positions - numpy array 
+            org_ytick_labels = [item.get_text() for item in ax.get_yticklabels()] # Get the current y-tick labels - LIST
+            new_yticks = np.sort(np.append(org_yticks, [0,b]))
+            new_yticks = np.unique(new_yticks[new_yticks<=b]) # removing all ticks >b
+            new_ytick_labels = new_yticks.astype(str).tolist()
+            ax.set_yticks(new_yticks)
+            ax.set_yticklabels(new_ytick_labels, fontsize=14)
+            # X - Ensuring that the ends have tick labels
+            org_xticks = ax.get_xticks() # Get the current y-tick positions - numpy array 
+            org_xtick_labels = [item.get_text() for item in ax.get_xticklabels()] # Get the current y-tick labels - LIST
+            new_xticks = np.sort(np.append(org_xticks, [0,a]))
+            new_xticks = np.unique(new_xticks[new_xticks<=a]) # removing all ticks >a
+            new_xtick_labels = new_xticks.astype(str).tolist()
+            ax.set_xticks(new_xticks)
+            ax.set_xticklabels(new_xtick_labels, fontsize=14)
+        # plt.grid()
         plt.show()
+        
+        # >0
+        if False:
+            fig, ax = plt.subplots()
+            plt.contourf(x_grid, y_grid, globals()[var_name][:,:,30]>=0)
+            plt.colorbar()
+            # plt.title(r'+1*fcrack $\tau$=67 $n_x$=60 $n_y$=30 $k_i$=1e4 m =15,8 w=200')
+            plt.title('Relative separtion >= 0 \n Tip Displacement = 4.53 [mm]', fontsize=14)
+            plt.ylabel('y coordinate [mm]', fontsize=14)
+            plt.xlabel('x coordinate [mm]', fontsize=14)
+            plt.xticks(fontsize=14)
+            plt.yticks(fontsize=14)
+            if True:
+                # Y - Ensuring that the ends have tick labels
+                org_yticks = ax.get_yticks() # Get the current y-tick positions - numpy array 
+                org_ytick_labels = [item.get_text() for item in ax.get_yticklabels()] # Get the current y-tick labels - LIST
+                new_yticks = np.sort(np.append(org_yticks, [0,b]))
+                new_yticks = new_yticks[new_yticks<=b] # removing all ticks >b
+                new_ytick_labels = new_yticks.astype(str).tolist()
+                ax.set_yticks(new_yticks)
+                ax.set_yticklabels(new_ytick_labels, fontsize=14)
+                # X - Ensuring that the ends have tick labels
+                org_xticks = ax.get_xticks() # Get the current y-tick positions - numpy array 
+                org_xtick_labels = [item.get_text() for item in ax.get_xticklabels()] # Get the current y-tick labels - LIST
+                new_xticks = np.sort(np.append(org_xticks, [0,a]))
+                new_xticks = new_xticks[new_xticks<=a] # removing all ticks >a
+                new_xtick_labels = new_xticks.astype(str).tolist()
+                ax.set_xticks(new_xticks)
+                ax.set_xticklabels(new_xtick_labels, fontsize=14)
+            # plt.grid()
+            plt.show()
         
       
     # Random plot 2
@@ -505,7 +557,7 @@ if not animate:
 
 
 
-# Animate results
+#%% Animate results
 if animate:
     from mpl_toolkits.axes_grid1 import make_axes_locatable
     

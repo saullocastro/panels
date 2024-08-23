@@ -20,9 +20,12 @@ from matplotlib import pyplot as plt
 import matplotlib.animation as animation
 import matplotlib as mpl
 from mpl_toolkits.axes_grid1.inset_locator import mark_inset, zoomed_inset_axes, inset_axes
+from matplotlib.ticker import FormatStrFormatter
 
 # Printing with reduced no of points (ease of viewing) - Suppress this to print in scientific notations and restart the kernel
 np.set_printoptions(formatter={'float': lambda x: "{0:0.3e}".format(x)})
+
+from panels.legendre_gauss_quadrature import get_points_weights
 
 
 # import os
@@ -626,10 +629,10 @@ def test_dcb_vs_fem(no_pan, no_terms, plies, disp_mag, a2, no_y_gauss, grid_x, k
     ply_thickness = 0.14 # mm
 
     # Plate dimensions (overall)
-    a = 100 # mm
+    a = 65 #100 # mm
     b = 25  # mm
     # Dimensions of panel 1 and 2
-    a1 = 52 #0.5*a
+    a1 = 17 #52 #0.5*a
     a2 = a2 #0.3*a
     a3 = 4
     
@@ -956,11 +959,11 @@ def test_dcb_vs_fem(no_pan, no_terms, plies, disp_mag, a2, no_y_gauss, grid_x, k
                 plt.show()
         
     # Calcuate separation
-    if False:
+    if True:
         res_pan_top = assy.calc_results(c=c0, eval_panel=top1, vec='w', 
-                                no_x_gauss=200, no_y_gauss=50)
+                                no_x_gauss=100, no_y_gauss=50)
         res_pan_bot = assy.calc_results(c=c0, eval_panel=bot1, vec='w', 
-                                no_x_gauss=200, no_y_gauss=50)
+                                no_x_gauss=100, no_y_gauss=50)
         del_d = assy.calc_separation(res_pan_top, res_pan_bot)
         
         monoton_top = monotonicity_check_displ(res_pan_top['w'][0])
@@ -970,13 +973,29 @@ def test_dcb_vs_fem(no_pan, no_terms, plies, disp_mag, a2, no_y_gauss, grid_x, k
             print('Top displ is monotonic')
             top_mon = 'Monotonic'
         else:
-            top_mon = 'NOT monotonic'
+            top_mon = 'NOT Monotonic'
         if np.all(monoton_bot):
             print('Bot displ is monotonic')
             bot_mon = 'Monotonic'
         else:
-            bot_mon = 'NOT monotonic'
+            bot_mon = 'NOT Monotonic'
         
+        no_x_gauss = 100
+        no_y_gauss = 50
+        
+        
+        xis = np.zeros(no_x_gauss, dtype=np.float64)
+        weights_xi = np.zeros(no_x_gauss, dtype=np.float64)
+        etas = np.zeros(no_y_gauss, dtype=np.float64)
+        weights_eta = np.zeros(no_y_gauss, dtype=np.float64)
+        
+        get_points_weights(no_x_gauss, xis, weights_xi)
+        get_points_weights(no_y_gauss, etas, weights_eta)
+        
+        xi_grid, eta_grid = np.meshgrid(xis, etas)
+        
+        x_grid = a1*(xi_grid+1)/2
+        y_grid = b*(eta_grid+1)/2
         
         # Plotting separation and displacements
         vmin=min(np.min(res_pan_top['w'][0]), np.min(res_pan_bot['w'][0]))
@@ -984,25 +1003,83 @@ def test_dcb_vs_fem(no_pan, no_terms, plies, disp_mag, a2, no_y_gauss, grid_x, k
         print(np.min(res_pan_top['w'][0]), np.max(res_pan_top['w'][0]))
         print(np.min(res_pan_bot['w'][0]), np.max(res_pan_bot['w'][0]))
         levels = np.linspace(vmin, vmax, 20)
-        plt.figure(figsize=(8,14))
-        plt.subplot(3,1,1)
-        plt.contourf(del_d, cmap='jet')
-        plt.gca().set_title(f'Full DCB - Terms: {m}, {m_conn} \n  Separation between plates in contact [mm]')
-        plt.xlabel('x direction')
-        plt.ylabel('y direction')
-        plt.colorbar()
-        plt.subplot(3,1,2)
-        plt.contourf(res_pan_top['w'][0], cmap='jet', levels=levels)
-        plt.gca().set_title(f'Top displ [mm] - {top_mon}')
-        plt.xlabel('x direction')
-        plt.ylabel('y direction')
-        plt.colorbar()
-        plt.subplot(3,1,3)
-        plt.contourf(res_pan_bot['w'][0], cmap='jet', levels=levels)
-        plt.gca().set_title(f'Bot displ [mm] - {bot_mon}')
-        plt.xlabel('x direction')
-        plt.ylabel('y direction')
-        plt.colorbar()
+        # plt.figure(figsize=(8,14))
+        # plt.subplot(3,1,1)
+        # plt.contourf(x_grid, y_grid, del_d, cmap='jet')
+        # plt.gca().set_title(f'Full DCB - Terms: {m}, {m_conn} \n  Separation between plates in contact [mm]')
+        # plt.xlabel('x direction')
+        # plt.ylabel('y direction')
+        # plt.colorbar()
+        # plt.subplot(3,1,1)
+        # plt.contourf(x_grid, y_grid, res_pan_top['w'][0], cmap='jet', levels=levels)
+        # plt.gca().set_title(f'Top displ [mm] - {top_mon}')
+        # plt.xlabel('x direction')
+        # plt.ylabel('y direction')
+        # plt.colorbar()
+        # plt.subplot(3,1,2)
+        # plt.contourf(x_grid, y_grid, res_pan_bot['w'][0], cmap='jet', levels=levels)
+        # plt.gca().set_title(f'Bot displ [mm] - {bot_mon}')
+        # plt.xlabel('x direction')
+        # plt.ylabel('y direction')
+        # plt.colorbar()
+        # plt.show()
+        
+        fig, ax = plt.subplots()
+        contour = plt.contourf(x_grid, y_grid, res_pan_top['w'][0], cmap='jet', levels=levels)
+        cbar = plt.colorbar(contour)
+        cbar.ax.yaxis.set_major_formatter(FormatStrFormatter('%.3e'))
+        
+        plt.title(f'Top interface panel displ at tip displ = 1 [mm] \n Terms:{m_conn:.0f},{m:.0f} - {top_mon}', fontsize=14)
+        plt.ylabel('y coordinate [mm]', fontsize=14)
+        plt.xlabel('x coordinate [mm]', fontsize=14)
+        plt.xticks(fontsize=14)
+        plt.yticks(fontsize=14)
+        if True:
+            # Y - Ensuring that the ends have tick labels
+            org_yticks = ax.get_yticks() # Get the current y-tick positions - numpy array 
+            # org_ytick_labels = [item.get_text() for item in ax.get_yticklabels()] # Get the current y-tick labels - LIST
+            new_yticks = np.sort(np.append(org_yticks, [0,b]))
+            new_yticks = np.unique(new_yticks[new_yticks<=b]) # removing all ticks >b
+            new_ytick_labels = new_yticks.astype(str).tolist()
+            ax.set_yticks(new_yticks)
+            ax.set_yticklabels(new_ytick_labels, fontsize=14)
+            # X - Ensuring that the ends have tick labels
+            org_xticks = ax.get_xticks() # Get the current y-tick positions - numpy array 
+            # org_xtick_labels = [item.get_text() for item in ax.get_xticklabels()] # Get the current y-tick labels - LIST
+            new_xticks = np.sort(np.append(org_xticks, [0,a1]))
+            new_xticks = np.unique(new_xticks[new_xticks<=a1]) # removing all ticks >a
+            new_xtick_labels = new_xticks.astype(str).tolist()
+            ax.set_xticks(new_xticks)
+            ax.set_xticklabels(new_xtick_labels, fontsize=14)
+        
+        fig, ax = plt.subplots()
+        contour = plt.contourf(x_grid, y_grid, res_pan_bot['w'][0], cmap='jet', levels=levels)
+        cbar = plt.colorbar(contour)
+        cbar.ax.yaxis.set_major_formatter(FormatStrFormatter('%.3e'))
+        
+        plt.title(f'Bottom interface panel displ at tip displ = 1 [mm] \n Terms:{m_conn:.0f},{m:.0f} - {bot_mon}', fontsize=14)
+        plt.ylabel('y coordinate [mm]', fontsize=14)
+        plt.xlabel('x coordinate [mm]', fontsize=14)
+        plt.xticks(fontsize=14)
+        plt.yticks(fontsize=14)
+        if True:
+            # Y - Ensuring that the ends have tick labels
+            org_yticks = ax.get_yticks() # Get the current y-tick positions - numpy array 
+            # org_ytick_labels = [item.get_text() for item in ax.get_yticklabels()] # Get the current y-tick labels - LIST
+            new_yticks = np.sort(np.append(org_yticks, [0,b]))
+            new_yticks = np.unique(new_yticks[new_yticks<=b]) # removing all ticks >b
+            new_ytick_labels = new_yticks.astype(str).tolist()
+            ax.set_yticks(new_yticks)
+            ax.set_yticklabels(new_ytick_labels, fontsize=14)
+            # X - Ensuring that the ends have tick labels
+            org_xticks = ax.get_xticks() # Get the current y-tick positions - numpy array 
+            # org_xtick_labels = [item.get_text() for item in ax.get_xticklabels()] # Get the current y-tick labels - LIST
+            new_xticks = np.sort(np.append(org_xticks, [0,a1]))
+            new_xticks = np.unique(new_xticks[new_xticks<=a1]) # removing all ticks >a
+            new_xtick_labels = new_xticks.astype(str).tolist()
+            ax.set_xticks(new_xticks)
+            ax.set_xticklabels(new_xtick_labels, fontsize=14)
+        # plt.grid()
         plt.show()
     else:
         monoton_top = None
@@ -1795,7 +1872,7 @@ if __name__ == "__main__":
         
     # COMPLETE DCB
     if True:
-        test_dcb_vs_fem(no_pan=4, no_terms=15, plies=1, disp_mag=0.08, a2=0.05, no_y_gauss=200, grid_x=200)
+        test_dcb_vs_fem(no_pan=3, no_terms=30, plies=1, disp_mag=1, a2=0.05, no_y_gauss=200, grid_x=200)
 
     # DCB TEST
     # Qxx_end_15_9, dy_Qxx_15_9, Mxx_end_15_9, dy_Mxx_15_9 = test_dcb_vs_fem(no_pan=3, no_terms=30, plies=1, disp_mag=1, 
