@@ -181,7 +181,7 @@ for m in matrices:
 # %% Generate terms for kcrack 2nd term
 
 var('sw1, sw2, c1, c2')
-s_delta = M([[sw1, sw2]])
+s_delta = M([[sw1, -sw2]])
 c = M([[c1, c2]]).T
 
 kcrack_temp = (s_delta.T*s_delta)*(c*s_delta)
@@ -190,9 +190,9 @@ print(kcrack_temp)
 
 # %%
 var('w1A, w1B, w1C, w2A, w2B, w2C, c1, c2')
-s_delta_A = M([[w1A, w2A]])
-s_delta_B = M([[w1B, w2B]])
-s_delta_C = M([[w1C, w2C]])
+s_delta_A = M([[w1A, -w2A]])
+s_delta_B = M([[w1B, -w2B]])
+s_delta_C = M([[w1C, -w2C]])
 c = M([[c1, c2]]).T
 
 kcrack_temp = (s_delta_A.T*s_delta_B)*(c*s_delta_C)
@@ -201,7 +201,5 @@ print()
 piece_wise_simplify(kcrack_temp, [])
 print(kcrack_temp)
 
-# %%
-Q = (k_o*del_o)*del_f/(del_f - del_o)
 
 
