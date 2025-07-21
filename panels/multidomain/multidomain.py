@@ -1455,7 +1455,7 @@ class MultiDomain(object):
             ftn_arg = [(p, c, size) for p in self.panels]
             with Pool() as pool:
                 kT_panels = pool.starmap(calc_kT_parallel, ftn_arg)
-                print(type(kT_panels))
+                # print(type(kT_panels))
                 # the pool is processing its inputs in parallel, close() and join() 
                 #can be used to synchronize the main process 
                 #with the task processes to ensure proper cleanup.
@@ -1633,12 +1633,69 @@ class MultiDomain(object):
                 kw_tsl, dmg_index_max, del_d_i, dmg_index_curr = self.calc_k_dmg(c=c_i, pA=p_top, pB=p_bot, no_x_gauss=no_x_gauss, 
                     no_y_gauss=no_y_gauss, tsl_type=tsl_type, prev_max_dmg_index=self.dmg_index, k_i=k_o, tau_o=tau_o, G1c=G1c)
         
-                kcrack_term2 = connections.kCSB_dmg.k_crack_term2(p_top=p_top, p_bot=p_bot, size=size,
-                                    no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, k_o=k_o, del_o=del_o, del_f=del_f,
-                                    del_d_i_1=np.ascontiguousarray(del_d_i_1), del_d_i=np.ascontiguousarray(del_d_i), 
-                                    dmg_index=np.ascontiguousarray(dmg_index_max), c_i=np.ascontiguousarray(c_i))
+                # kcrack_term2 = connections.kCSB_dmg.k_crack_term2(p_top=p_top, p_bot=p_bot, size=size,
+                #                     no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, k_o=k_o, del_o=del_o, del_f=del_f,
+                #                     del_d_i_1=np.ascontiguousarray(del_d_i_1), del_d_i=np.ascontiguousarray(del_d_i), 
+                #                     dmg_index=np.ascontiguousarray(dmg_index_max), c_i=np.ascontiguousarray(c_i))
                 
-        return kcrack_term2
+                # Gauss points and weights
+                x_gauss = np.zeros(no_x_gauss, dtype=np.float64)
+                weights_x = np.zeros(no_x_gauss, dtype=np.float64)
+                get_points_weights(no_x_gauss, x_gauss, weights_x)
+                
+                y_gauss = np.zeros(no_y_gauss, dtype=np.float64)
+                weights_y = np.zeros(no_y_gauss, dtype=np.float64)
+                get_points_weights(no_y_gauss, y_gauss, weights_y)
+                
+                k_crack_term2 = np.zeros((size, size), dtype=np.float64)
+                
+                for ptx in range(no_x_gauss):
+                    for pty in range(no_y_gauss):
+                        # Takes the correct index instead of the location
+                        xi = x_gauss[ptx]
+                        eta = y_gauss[pty]
+                        
+                        if dmg_index_max[pty, ptx] == 0 or dmg_index_max[pty, ptx] == 1:
+                            continue
+                        
+                        del_d_i_1_iter = del_d_i_1[pty, ptx]
+                        del_d_i_iter = del_d_i[pty, ptx]
+                        
+                        if del_d_i_iter == 0:
+                            continue
+            
+                        weight = weights_x[ptx] * weights_y[pty]
+                        
+                        k_crack_term2_partA = np.zeros((size, size), dtype=np.float64) # initlizing it to zero for a new point
+                        
+                        k_crack_term2_partA += connections.kCSB_dmg.k_crack_term2_partA_11(p_top=p_top, size=size, 
+                                                   row0=p_top.row_start, col0=p_top.col_start, no_x_gauss=no_x_gauss,
+                                                   no_y_gauss=no_y_gauss, k_o=k_o, del_o=del_o, del_f=del_f, 
+                                                   del_d_i_1=np.ascontiguousarray(del_d_i_1), del_d_i=np.ascontiguousarray(del_d_i),
+                                                   dmg_index=np.ascontiguousarray(dmg_index_max), xi=xi, eta=eta, ptx=ptx, pty=pty)
+                            
+                        k_crack_term2_partA += connections.kCSB_dmg.k_crack_term2_partA_12(p_top=p_top, p_bot=p_bot, size=size, 
+                                                  row0=p_top.row_start, col0=p_bot.col_start, no_x_gauss=no_x_gauss, 
+                                                  no_y_gauss=no_y_gauss, k_o=k_o, del_o=del_o, del_f=del_f, 
+                                                  del_d_i_1=np.ascontiguousarray(del_d_i_1), del_d_i=np.ascontiguousarray(del_d_i),
+                                                  dmg_index=np.ascontiguousarray(dmg_index_max), xi=xi, eta=eta, ptx=ptx, pty=pty)
+                            
+                        k_crack_term2_partA += connections.kCSB_dmg.k_crack_term2_partA_22(p_bot=p_bot, size=size, 
+                                                  row0=p_bot.row_start, col0=p_bot.col_start, no_x_gauss=no_x_gauss, 
+                                                  no_y_gauss=no_y_gauss, k_o=k_o, del_o=del_o, del_f=del_f, 
+                                                  del_d_i_1=np.ascontiguousarray(del_d_i_1), del_d_i=np.ascontiguousarray(del_d_i),
+                                                  dmg_index=np.ascontiguousarray(dmg_index_max), xi=xi, eta=eta, ptx=ptx, pty=pty)
+                            
+                        k_crack_term2_partB = connections.kCSB_dmg.calc_k_crack_term2_partB(p_top=p_top, p_bot=p_bot, size=size, 
+                                                   no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, 
+                                                   dmg_index=np.ascontiguousarray(dmg_index_max), 
+                                                   c_i=c_i, xi=xi, eta=eta, ptx=ptx, pty=pty)
+                        
+                        k_crack_term2 += (p_top.a*p_top.b/4)*weight*(k_crack_term2_partA @ k_crack_term2_partB)
+            
+                
+                
+        return k_crack_term2
                                        
                                        
     def calc_kcrack_complete(self, conn, c_i, kw_tsl_i_1, del_d_i_1, finalize=True, silent=True):
@@ -1646,18 +1703,18 @@ class MultiDomain(object):
         kcrack_term1 = self.calc_kcrack(conn=conn, c_i=c_i, kw_tsl_i_1=kw_tsl_i_1, del_d_i_1=del_d_i_1, finalize=True, silent=True)
         kcrack_term2 = self.calc_kcrack_term2(conn=conn, c_i=c_i, kw_tsl_i_1=kw_tsl_i_1, del_d_i_1=del_d_i_1, finalize=True, silent=True)
         
-        print(type(kcrack_term1))
-        print(kcrack_term1.dtype)
-        print(type(kcrack_term2))
-        print(kcrack_term2.dtype)
-        print(np.shape(kcrack_term2))
-        print(type(csr_matrix(kcrack_term2)))
-        print(csr_matrix(kcrack_term2).dtype)
+        # print(type(kcrack_term1))
+        # print(kcrack_term1.dtype)
+        # print(type(kcrack_term2))
+        # print(kcrack_term2.dtype)
+        # print(np.shape(kcrack_term2))
+        # print(type(csr_matrix(kcrack_term2)))
+        # print(csr_matrix(kcrack_term2).dtype)
         
         kcrack_complete = kcrack_term1 - csr_matrix(kcrack_term2)
         
-        print(type(kcrack_complete))
-        print(kcrack_complete.dtype)
+        # print(type(kcrack_complete))
+        # print(kcrack_complete.dtype)
         
         return kcrack_complete
 
@@ -1735,7 +1792,7 @@ class MultiDomain(object):
                                  kw_tsl_i_1=np.ascontiguousarray(kw_tsl_i_1), del_d_i_1=np.ascontiguousarray(del_d_i_1), 
                                  kw_tsl_i=np.ascontiguousarray(kw_tsl_i), no_x_gauss=no_x_gauss, 
                                  no_y_gauss=no_y_gauss, dmg_index=np.ascontiguousarray(dmg_index_i_max))
-                print(f'        1st term F crack {np.linalg.norm(fcrack):.2e}')
+                # print(f'        1st term F crack {np.linalg.norm(fcrack):.2e}')
 
                 if kcrack is None:
                     kcrack = self.calc_kcrack(conn=conn, c_i=c_i, kw_tsl_i_1=kw_tsl_i_1, del_d_i_1=del_d_i_1)
@@ -1758,9 +1815,9 @@ class MultiDomain(object):
                 # print(type(fcrack))
                 # print(type(kcrack))
                 # print(type(kw_tsl_i))
-                print(f'        2nd term F crack {np.linalg.norm(fcrack):.2e}')
-                print(fcrack.dtype)
-                print(np.shape(fcrack))
+                print(f'        F crack {np.linalg.norm(fcrack):.2e}')
+                # print(fcrack.dtype)
+                # print(np.shape(fcrack))
                 # print()
 
 

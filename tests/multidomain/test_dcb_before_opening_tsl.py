@@ -628,14 +628,25 @@ def test_dcb_vs_fem(no_pan, no_terms, plies, disp_mag, a2, no_y_gauss, grid_x, k
     nu12 = 0.316
     ply_thickness = 0.14 # mm
 
-    # Plate dimensions (overall)
-    a = 65 #100 # mm
-    b = 25  # mm
-    # Dimensions of panel 1 and 2
-    a1 = 17 #52 #0.5*a
-    a2 = a2 #0.3*a
-    a3 = 4
+    if False:
+        # Plate dimensions (overall)
+        a = 65 #100 # mm
+        b = 25  # mm
+        # Dimensions of panel 1 and 2
+        a1 = 17 #52 #0.5*a
+        a2 = a2 #0.3*a
+        a3 = 4
     
+    if True:
+        # Plate dimensions (overall)
+        a = 20.2 #100 # mm
+        b = 25  # mm
+        # Dimensions of panel 1 and 2
+        a1 = 20 #52 #0.5*a
+        a2 = a2 #0.3*a
+        a3 = 4
+    
+    print(f'a2 = {a2}')
     # no_pan = 3 # no of panels per structure
     # print('No of panels = ', no_pan)
 
@@ -959,7 +970,7 @@ def test_dcb_vs_fem(no_pan, no_terms, plies, disp_mag, a2, no_y_gauss, grid_x, k
                 plt.show()
         
     # Calcuate separation
-    if True:
+    if False:
         res_pan_top = assy.calc_results(c=c0, eval_panel=top1, vec='w', 
                                 no_x_gauss=100, no_y_gauss=50)
         res_pan_bot = assy.calc_results(c=c0, eval_panel=bot1, vec='w', 
@@ -1110,7 +1121,7 @@ def single_panel_bending(no_pan, no_terms, plies, disp_mag, a1, no_y_gauss, grid
     b = 25  # mm
     # Dimensions of panel 1 and 2
     a1 = a1 #0.5*a
-    # a2 = a2
+    a2 = 0.015
 
     #others
     m = no_terms
@@ -1206,7 +1217,7 @@ def single_panel_bending(no_pan, no_terms, plies, disp_mag, a1, no_y_gauss, grid
     size = k0.shape[0]
     
     # Prescribed Displacements
-    if False:
+    if True:
         ku, kv, kw = calc_ku_kv_kw_point_pd(disp_panel)
         
         disp_type = 'point' # change based on what's being applied
@@ -1270,14 +1281,15 @@ def single_panel_bending(no_pan, no_terms, plies, disp_mag, a1, no_y_gauss, grid
     if True:
         final_res = 0
         for panels_i in [disp_panel]:
-            Qxx_end = assy.force_out_plane(c0, group=None, eval_panel=panels_i, x_cte_force=panels_i.a, y_cte_force=None,
+            final_res = assy.force_out_plane(c0, group=None, eval_panel=panels_i, x_cte_force=panels_i.a, y_cte_force=None,
                       gridx=grid_x, gridy=None, NLterms=True, no_x_gauss=no_y_gauss, no_y_gauss=no_y_gauss)
             # final_res += force_intgn
         # print(final_res)
+        print(final_res)
     
     
-    return Qxx_end
-    # return final_res
+    # return Qxx_end
+    return final_res
 
 
 
@@ -1837,7 +1849,7 @@ def plot_test_leg_sigm(c_w=None, ftnval_sig_leg=None, ftnval_leg=None, m=None, n
             plt.plot(xi, ftnval_sig_leg[1:,:].T, label='_nolegend_', color='red')
             plt.plot(xi, ftnval_leg[0,:], label='Legendre Polynomials', color='orange')
             plt.plot(xi, ftnval_leg[1:,:].T, label='_nolegend_', color='orange')
-            plt.plot(xi, reference(xi, c2), label='Sigmoid', color='dodgerblue')
+            plt.plot(xi, reference(xi, c2), label='Test Function', color='dodgerblue')
             plt.xlabel(r'$\xi$', fontsize=14)
             plt.ylabel('Function value', fontsize=14)
             plt.legend(fontsize=13, loc='upper left')
@@ -1872,7 +1884,9 @@ if __name__ == "__main__":
         
     # COMPLETE DCB
     if True:
-        test_dcb_vs_fem(no_pan=3, no_terms=30, plies=1, disp_mag=1, a2=0.05, no_y_gauss=200, grid_x=200)
+        for a2 in [0.15, 0.1,0.099,0.09,0.05,0.01,0.005,0.0015]:
+            test_dcb_vs_fem(no_pan=3, no_terms=10, plies=1, disp_mag=0.01, a2=a2, no_y_gauss=100, grid_x=50)
+            print()
 
     # DCB TEST
     # Qxx_end_15_9, dy_Qxx_15_9, Mxx_end_15_9, dy_Mxx_15_9 = test_dcb_vs_fem(no_pan=3, no_terms=30, plies=1, disp_mag=1, 
@@ -1889,9 +1903,8 @@ if __name__ == "__main__":
             sp_kr7_t8[count, 0] = a1
             count += 1
     if False: 
-        f_calc = single_panel_bending(no_pan=2, no_terms=8, 
-                                        plies=1, disp_mag=118.8, a1=a1, no_y_gauss=100, grid_x=500)
-
+        f_calc = single_panel_bending(no_pan=2, no_terms=10, 
+                                        plies=1, disp_mag=0.01, a1=52, no_y_gauss=100, grid_x=500)
     
     # ONE AND HALF DCB TEST (HALF PANEL)
     if False:

@@ -1547,74 +1547,91 @@ def calc_area_tsl_curve(kw_tsl, del_d):
     
     
 
-def calc_leng_FPZ(dmg_index, force_intgn_dmg):
-    FPZ_index = np.zeros((np.shape(dmg_index)[2], 2))
-    row_consider = int((np.shape(dmg_index)[0])/2)
-    for i in range(np.shape(dmg_index)[2]):
-        FPZ_index[i,0] = np.argwhere(dmg_index[row_consider,:,i]==0)[-1][0]  # [-1] to get the last negative position; [0] to convert it from an array to int; 
-        if np.max(dmg_index[row_consider,:,i]) == 1:
-            FPZ_index[i,1] = np.argwhere(dmg_index[row_consider,:,i]==1)[0][0]
-        else:
-            FPZ_index[i,1] = np.shape(dmg_index)[1] - 1
-            
-    no_x_gauss = np.shape(dmg_index)[1]
-    no_y_gauss = np.shape(dmg_index)[0]
+def calc_leng_FPZ(dmg_index_list, force_intgn_dmg_list):
     
-    a = 52
-    b = 25
-    
-    xis = np.zeros(no_x_gauss, dtype=np.float64)
-    weights_xi = np.zeros(no_x_gauss, dtype=np.float64)
-    etas = np.zeros(no_y_gauss, dtype=np.float64)
-    weights_eta = np.zeros(no_y_gauss, dtype=np.float64)
-    
-    get_points_weights(no_x_gauss, xis, weights_xi)
-    get_points_weights(no_y_gauss, etas, weights_eta)
-    
-    FPZ_xis = np.zeros((np.shape(dmg_index)[2], 2))
-    for i in range(np.shape(dmg_index)[2]):
-        FPZ_xis[i,0] = xis[int(FPZ_index[i,0])]
-        FPZ_xis[i,1] = xis[int(FPZ_index[i,1])]
+    label_name = ['$=67$', '$=87$', '$=107$', '$=137$']
+    plt.figure(figsize=(14,5))
+    for annoying_number in range(0,len(dmg_index_list)):
+        dmg_index = globals()[dmg_index_list[annoying_number]]
+        force_intgn_dmg = globals()[force_intgn_dmg_list[annoying_number]]
+        FPZ_index = np.zeros((np.shape(dmg_index)[2], 2))
+        row_consider = int((np.shape(dmg_index)[0])/2)
+        for i in range(np.shape(dmg_index)[2]):
+            FPZ_index[i,0] = np.argwhere(dmg_index[row_consider,:,i]==0)[-1][0]  # [-1] to get the last negative position; [0] to convert it from an array to int; 
+            if np.max(dmg_index[row_consider,:,i]) == 1:
+                FPZ_index[i,1] = np.argwhere(dmg_index[row_consider,:,i]==1)[0][0]
+            else:
+                FPZ_index[i,1] = np.shape(dmg_index)[1] - 1
+                
+        no_x_gauss = np.shape(dmg_index)[1]
+        no_y_gauss = np.shape(dmg_index)[0]
         
-    FPZ_x = a*(FPZ_xis+1)/2
-    
-    plt.figure(figsize=(10,4))
+        a = 17
+        b = 25
+        
+        xis = np.zeros(no_x_gauss, dtype=np.float64)
+        weights_xi = np.zeros(no_x_gauss, dtype=np.float64)
+        etas = np.zeros(no_y_gauss, dtype=np.float64)
+        weights_eta = np.zeros(no_y_gauss, dtype=np.float64)
+        
+        get_points_weights(no_x_gauss, xis, weights_xi)
+        get_points_weights(no_y_gauss, etas, weights_eta)
+        
+        FPZ_xis = np.zeros((np.shape(dmg_index)[2], 2))
+        for i in range(np.shape(dmg_index)[2]):
+            FPZ_xis[i,0] = xis[int(FPZ_index[i,0])]
+            FPZ_xis[i,1] = xis[int(FPZ_index[i,1])]
+            
+        FPZ_x = a*(FPZ_xis+1)/2
+        
+        
+        plt.subplot(1,2,1)
+        # plt.plot(force_intgn_dmg[:,0],FPZ_x[:,1] - FPZ_x[:,0], '.-')
+        # REMOVE !!!!!!!!!!
+        FPZ_x[-1,:] = FPZ_x[-2,:]
+        plt.plot(force_intgn_dmg[:,0],FPZ_x[:,1] - FPZ_x[:,0], '.-', label=r'$\tau_0$'+label_name[annoying_number])
+        plt.xlabel('Tip Displacement [mm]', fontsize=14)
+        plt.ylabel('Length of Fracture Process Zone (FPZ) [mm]', fontsize=14)
+        plt.grid()
+        plt.legend(fontsize=14)
+        
+        plt.subplot(1,2,2)
+        plt.plot(force_intgn_dmg[:,0],a-FPZ_x[:,0], label=r'$\tau_0$'+label_name[annoying_number])
+        # plt.plot(force_intgn_dmg[:,0],a-FPZ_x[:,1], label='Damaged crack front')
+        plt.xlabel('Tip Displacement [mm]', fontsize=14)
+        plt.ylabel('Distance of crack front from \n the precrack tip [mm]', fontsize=14)  
+        plt.legend(fontsize=14)
+        plt.grid()
     plt.subplot(1,2,1)
-    plt.plot(force_intgn_dmg[:,0],FPZ_x[:,1] - FPZ_x[:,0])
-    plt.xlabel('Tip Displacement [mm]')
-    plt.ylabel('Length of FPZ [mm]')        
+    plt.grid()
     plt.subplot(1,2,2)
-    plt.plot(force_intgn_dmg[:,0],a-FPZ_x[:,0], label='Undamaged crack front')
-    plt.plot(force_intgn_dmg[:,0],a-FPZ_x[:,1], label='Damaged crack front')
-    plt.xlabel('Tip Displacement [mm]')
-    plt.ylabel('Distance from the precrack tip [mm]')  
-    plt.legend()
+    plt.grid()
     plt.show()
     
     return FPZ_index, FPZ_xis, FPZ_x
 
-    def create_parallel_runs():
-        '''
-        Temp place to store it
-        '''
-        if False:
-            ki_all = [1e5, 5e4, 1e4, 5e3]
-            inp_all = np.zeros((16,6)) # 16=4*4, 6 for 6 col
-            m = 10
-            count_inp = 0
-            for ki in ki_all:
-                # 4 bec each inp line as 4 lines
-                inp_all[4*count_inp : 4*count_inp+4,:] = np.array(([3,m,ki,87,150,80],
-                           [3,m,ki,67,60,30],
-                           [3,m,ki,57,60,30],
-                           [3,m,ki,47,60,30]))
-                count_inp += 1
-            ftn_arg = [(int(inp_i[0]),int(inp_i[1]),f'p{inp_i[0]:.0f}_m{inp_i[1]:.0f}_10_ki{inp_i[2]:.0e}_tauo{inp_i[3]:.0f}_nx{inp_i[4]:.0f}_ny{inp_i[5]:.0f}', float(inp_i[2]), float(inp_i[3]), int(inp_i[4]), int(inp_i[5])) for inp_i in inp_all]
-            # Removing +0 from the exponential notation for ki's values
-            for i in range(len(ftn_arg)):
-                ftn_arg[i] = list(ftn_arg[i]) # convert to list bec tuples are inmutable
-                ftn_arg[i][2] = ftn_arg[i][2].replace('+0','')
-                ftn_arg[i] = tuple(ftn_arg[i]) # convert back to tuple
+def create_parallel_runs():
+    '''
+    Temp place to store it
+    '''
+    if False:
+        ki_all = [1e5, 5e4, 1e4, 5e3]
+        inp_all = np.zeros((16,6)) # 16=4*4, 6 for 6 col
+        m = 10
+        count_inp = 0
+        for ki in ki_all:
+            # 4 bec each inp line as 4 lines
+            inp_all[4*count_inp : 4*count_inp+4,:] = np.array(([3,m,ki,87,150,80],
+                       [3,m,ki,67,60,30],
+                       [3,m,ki,57,60,30],
+                       [3,m,ki,47,60,30]))
+            count_inp += 1
+        ftn_arg = [(int(inp_i[0]),int(inp_i[1]),f'p{inp_i[0]:.0f}_m{inp_i[1]:.0f}_10_ki{inp_i[2]:.0e}_tauo{inp_i[3]:.0f}_nx{inp_i[4]:.0f}_ny{inp_i[5]:.0f}', float(inp_i[2]), float(inp_i[3]), int(inp_i[4]), int(inp_i[5])) for inp_i in inp_all]
+        # Removing +0 from the exponential notation for ki's values
+        for i in range(len(ftn_arg)):
+            ftn_arg[i] = list(ftn_arg[i]) # convert to list bec tuples are inmutable
+            ftn_arg[i][2] = ftn_arg[i][2].replace('+0','')
+            ftn_arg[i] = tuple(ftn_arg[i]) # convert back to tuple
                 
     
 def rename_files():
@@ -2021,6 +2038,14 @@ def postprocess_damage_prop_fcrack(phy_dim, no_terms, k_i=None, tau_o=None, no_x
 
 if __name__ == "__main__":
     
-    separation = postprocess_damage_prop_fcrack(phy_dim=[3,65,25,48], 
-        no_terms=[10,10,8,8], name=['resetdispl',''], k_i=1e4, tau_o=87, no_x_gauss=60, 
-        no_y_gauss=30, w_iter_info=[20,3], G1c=1.12, c_all = c_resetdispl)
+    
+    dmg_index_list = ['DI_p3_65_25_48m10_8k1e4_t67_nx50y25_w60_G112',
+                      'DI_p3_65_25_48m10_8k1e4_t87_nx50y25_w60_G112', 
+                      'DI_p3_65_25_48m10_8k1e4_t107_nx50y25_w60_G112',
+                      'DI_p3_65_25_48m10_8k1e4_t127_nx50y25_w60_G112']
+    force_list = ['Fdmg_p3_65_25_48m10_8k1e4_t67_nx50y25_w60_G112', 
+                  'Fdmg_p3_65_25_48m10_8k1e4_t87_nx50y25_w60_G112',
+                  'Fdmg_p3_65_25_48m10_8k1e4_t107_nx50y25_w60_G112',
+                  'Fdmg_p3_65_25_48m10_8k1e4_t127_nx50y25_w60_G112']
+    FPZ_index, FPZ_xis, FPZ_x = calc_leng_FPZ(dmg_index_list, 
+                                              force_list)

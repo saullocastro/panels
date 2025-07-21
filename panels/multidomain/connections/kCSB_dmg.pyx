@@ -1079,6 +1079,7 @@ def k_crack_term2_partA_11(object p_top, int size, int row0, int col0, int no_x_
     
     cdef long [:] k_crack_term2_partA_11r, k_crack_term2_partA_11c
     cdef double [:] k_crack_term2_partA_11v
+    # cdef double [:] k_crack_term2_partA_11
     
     cdef double del_d_i_1_iter, del_d_i_iter
     
@@ -1145,7 +1146,8 @@ def k_crack_term2_partA_11(object p_top, int size, int row0, int col0, int no_x_
                         #     print(k_crack_term2_partA_11v[c])
 
 
-    k_crack_term2_partA_11 = coo_matrix((k_crack_term2_partA_11v, (k_crack_term2_partA_11r, k_crack_term2_partA_11c)), shape=(size, size))
+    k_crack_term2_partA_11 = coo_matrix((np.asarray(k_crack_term2_partA_11v), 
+                                         (np.asarray(k_crack_term2_partA_11r), np.asarray(k_crack_term2_partA_11c))), shape=(size, size))
     # Builds a matrix of size = size x size (so complete size of global MD) and populates it with the data in ..v 
         # where the rows and cols where that data should go are specified by ..r, ...c
     # This way its at the correct positions in the global MD matrix as row and col are the starting indices of the 
@@ -1247,7 +1249,8 @@ def k_crack_term2_partA_12(object p_top, object p_bot, int size, int row0, int c
                         # k_crack_term2_partA_12v[c] += a_top*b_top*del_o*fAw_top*fBw_bot*gAw_top*gBw_bot*k_o*weight/(4*(del_f - del_o)) # OLD WRONG
                         k_crack_term2_partA_12v[c] += -del_f*del_d_i_1_iter*del_o*fAw_top*fBw_bot*gAw_top*gBw_bot*k_o/((del_d_i_iter*del_d_i_iter*del_d_i_iter)*(del_f - del_o))
 
-    k_crack_term2_partA_12 = coo_matrix((k_crack_term2_partA_12v, (k_crack_term2_partA_12r, k_crack_term2_partA_12c)), shape=(size, size))
+    k_crack_term2_partA_12 = coo_matrix((np.asarray(k_crack_term2_partA_12v), 
+                                         (np.asarray(k_crack_term2_partA_12r), np.asarray(k_crack_term2_partA_12c))), shape=(size, size))
     # Builds a matrix of size = size x size (so complete size of global MD) and populates it with the data in ..v 
         # where the rows and cols where that data should go are specified by ..r, ...c
     # This way its at the correct positions in the global MD matrix as row and col are the starting indices of the 
@@ -1339,7 +1342,8 @@ def k_crack_term2_partA_22(object p_bot, int size, int row0, int col0, int no_x_
                         # k_crack22v[c] += -a_bot*b_bot*del_o*fAw_bot*fBw_bot*gAw_bot*gBw_bot*k_o*weight/(4*(del_f - del_o)) # OLD REMOVE
                         k_crack_term2_partA_22v[c] += del_f*del_d_i_1_iter*del_o*fAw_bot*fBw_bot*gAw_bot*gBw_bot*k_o/((del_d_i_iter*del_d_i_iter*del_d_i_iter)*(del_f - del_o))
 
-    k_crack_term2_partA_22 = coo_matrix((k_crack_term2_partA_22v, (k_crack_term2_partA_22r, k_crack_term2_partA_22c)), shape=(size, size))
+    k_crack_term2_partA_22 = coo_matrix((np.asarray(k_crack_term2_partA_22v), 
+                                     (np.asarray(k_crack_term2_partA_22r), np.asarray(k_crack_term2_partA_22c))), shape=(size, size))
     # Builds a matrix of size = size x size (so complete size of global MD) and populates it with the data in ..v 
         # where the rows and cols where that data should go are specified by ..r, ...c
     # This way its at the correct positions in the global MD matrix as row and col are the starting indices of the 
@@ -1544,10 +1548,10 @@ def k_crack_term2(object p_top, object p_bot, int size, int no_x_gauss, int no_y
                 
                 with gil:
                     # k_crack_term2_partA = csr_matrix(k_crack_term2_partA)
-                    k_crack_term2_partA += k_crack_term2_partA_11(p_top=p_top, size=size, row0=p_top.row_start,
-                                  col0=p_top.col_start, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss,
-                                  k_o=k_o, del_o=del_o, del_f=del_f, del_d_i_1=del_d_i_1, 
-                                  del_d_i=del_d_i, dmg_index=dmg_index, xi=xi, eta=eta, ptx=ptx, pty=pty)
+                    np.add(k_crack_term2_partA, k_crack_term2_partA_11(p_top=p_top, size=size, row0=p_top.row_start,
+                                col0=p_top.col_start, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss,
+                                k_o=k_o, del_o=del_o, del_f=del_f, del_d_i_1=del_d_i_1, 
+                                del_d_i=del_d_i, dmg_index=dmg_index, xi=xi, eta=eta, ptx=ptx, pty=pty), out=np.asarray(k_crack_term2_partA))
                     
                     k_crack_term2_partA += k_crack_term2_partA_12(p_top=p_top, p_bot=p_bot, size=size, 
                                   row0=p_top.row_start, col0=p_bot.col_start, no_x_gauss=no_x_gauss, 
