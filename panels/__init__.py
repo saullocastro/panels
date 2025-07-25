@@ -20,7 +20,7 @@ import ctypes
 import numpy as np
 
 from .version import __version__
-from .shell import Shell
+
 
 if ctypes.sizeof(ctypes.c_long) == 8:
     # here the C long will correspond to np.int64
