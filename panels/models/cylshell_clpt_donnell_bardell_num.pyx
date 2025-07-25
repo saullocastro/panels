@@ -2,10 +2,13 @@
 #cython: wraparound=False
 #cython: cdivision=True
 #cython: nonecheck=False
-#cython: profile=False
+#cython: overflowcheck=False
+#cython: embedsignature=True
 #cython: infer_types=False
 from scipy.sparse import coo_matrix
 import numpy as np
+
+from panels import INT, DOUBLE
 
 
 cdef extern from 'bardell_functions.hpp':
@@ -15,10 +18,6 @@ cdef extern from 'bardell_functions.hpp':
 
 cdef extern from 'legendre_gauss_quadrature.hpp':
     void leggauss_quad(int n, double *points, double* weights) nogil
-
-
-DOUBLE = np.float64
-INT = long
 
 cdef int DOF = 3
 

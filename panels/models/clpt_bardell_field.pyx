@@ -2,7 +2,8 @@
 #cython: wraparound=False
 #cython: cdivision=True
 #cython: nonecheck=False
-#cython: profile=False
+#cython: overflowcheck=False
+#cython: embedsignature=True
 #cython: infer_types=False
 import numpy as np
 from libc.stdlib cimport malloc, free
@@ -145,7 +146,6 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys, int
         add_size = 0
     new_size = size + add_size
 
-# ???????????????????????????
     if (size % num_cores) != 0:
         xs_core = np.ascontiguousarray(np.hstack((xs, np.zeros(add_size))).reshape(num_cores, -1), dtype=DOUBLE)
         ys_core = np.ascontiguousarray(np.hstack((ys, np.zeros(add_size))).reshape(num_cores, -1), dtype=DOUBLE)
