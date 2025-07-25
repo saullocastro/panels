@@ -17,6 +17,8 @@ available in this package.
 """
 import ctypes
 
+import numpy as np
+
 from .version import __version__
 from .shell import Shell
 
