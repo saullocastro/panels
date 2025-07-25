@@ -1,7 +1,6 @@
+cython
 numpy
 scipy
 matplotlib
 composites
 structsolve
-sphinx
-numpydoc
