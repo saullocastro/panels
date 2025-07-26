@@ -1,25 +1,18 @@
 import platform
 import gc
+# from multiprocessing import Pool
 
 import numpy as np
 from numpy import linspace, reshape
 from scipy.sparse import csr_matrix
+from structsolve.sparseutils import finalize_symmetric_matrix
+from matplotlib import pyplot as plt
 
 from panels.legendre_gauss_quadrature import get_points_weights
-from structsolve.sparseutils import finalize_symmetric_matrix
-
 from panels.logger import msg, warn
 from panels.shell import DOUBLE, check_c, Shell
 import panels.modelDB as modelDB
-
-# import sys
-# sys.path.append('C:/Users/natha/Documents/GitHub/panels')
 from panels.multidomain import connections
-from panels.multidomain.connections import kCSB_dmg
-
-from matplotlib import pyplot as plt
-
-from multiprocessing import Pool
 
 
 def default_field(panel, gridx, gridy):
@@ -131,7 +124,7 @@ class MultiDomain(object):
             cbar_fontsize=7, colormap='jet', aspect='equal', clean=True,
             dpi=400, texts=[], xs=None, ys=None, gridx=50, gridy=50,
             num_levels=400, vecmin=None, vecmax=None,
-            no_x_gauss = None, no_y_gauss = None,
+            nr_x_gauss = None, nr_y_gauss = None,
             res = None, silent=True, display_zero = False, flip_plot=False,
             eval_panel=None):
         r"""Contour plot for a Ritz constants vector.
@@ -215,9 +208,9 @@ class MultiDomain(object):
             Maximum value for the contour scale.
         calc_data_only : bool, optional
             If only calculated data should be returned.
-        no_x_gauss, no_y_gauss : int
+        nr_x_gauss, nr_y_gauss : int
             Number of gauss sampling points along x and y respectively where the displacement field is to be calculated
-            Either one of no_x_gauss and no_y_gauss needs to be specified or both
+            Either one of nr_x_gauss and nr_y_gauss needs to be specified or both
             When specified, uvw_gauss_points, stress_gauss_points and strain_gauss points are called instead
         calc_res_field_only : bool, optional
             Only calcuates the result fields and returns it back
@@ -250,7 +243,7 @@ class MultiDomain(object):
         # If no results (res) is passed, then compute them
         if res is None:
             res = self.calc_results(c, group, vec = vec, gridx = gridx, gridy = gridy,
-                             no_x_gauss = no_x_gauss, no_y_gauss = no_y_gauss)
+                             nr_x_gauss = nr_x_gauss, nr_y_gauss = nr_y_gauss)
 
         field = np.array(res[vec])
         msg('Finished!', level=1, silent=silent)
@@ -389,7 +382,7 @@ class MultiDomain(object):
         return ax, data
 
     def calc_results(self, c, group=None, vec='w', gridx=50, gridy=50,
-                     no_x_gauss = None, no_y_gauss = None,
+                     nr_x_gauss = None, nr_y_gauss = None,
                      eval_panel=None, x_cte_force=None, y_cte_force=None):
 
         r"""Contour plot for a Ritz constants vector.
@@ -419,9 +412,9 @@ class MultiDomain(object):
             displacement field.
         use_gauss_points : bool, optional
             Uses the gauss integration points (x_gauss and y_gauss) to evaluate the fields
-        no_x_gauss, no_y_gauss : Array
+        nr_x_gauss, nr_y_gauss : Array
             Number of gauss sampling points along x and y respectively where the displacement field is to be calculated
-            Either one of no_x_gauss and no_y_gauss needs to be specified or both
+            Either one of nr_x_gauss and nr_y_gauss needs to be specified or both
             When specified, stress_gauss_points and strain_gauss points are called instead
         eval_panel : Shell object
             Used to evaluate results for a single panel (that is passed) instead of an entire group of panels
@@ -434,36 +427,36 @@ class MultiDomain(object):
 
         msg('Computing field variables...', level=1, silent=True)
 
-        if no_x_gauss is not None:
-            if no_x_gauss > 304:
+        if nr_x_gauss is not None:
+            if nr_x_gauss > 304:
                 raise ValueError('Gauss points more than 304 not coded')
 
-        if no_y_gauss is not None:
-            if no_y_gauss > 304:
+        if nr_y_gauss is not None:
+            if nr_y_gauss > 304:
                 raise ValueError('Gauss points more than 304 not coded')
 
         # res = dict of all keywords in that specific input dict
         # size of each variable = no_panel_in_group x grid_pts_Y x grid_pts_X
         if vec in displs:
-            res = self.uvw(c, group, gridx=gridx, gridy=gridy, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss,
+            res = self.uvw(c, group, gridx=gridx, gridy=gridy, nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss,
                            eval_panel=eval_panel)
         elif vec in strains:
-            res = self.strain(c, group, gridx=gridx, gridy=gridy, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss,
+            res = self.strain(c, group, gridx=gridx, gridy=gridy, nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss,
                               eval_panel=eval_panel)
         elif vec in stresses:
-            res = self.stress(c, group, gridx=gridx, gridy=gridy, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss,
+            res = self.stress(c, group, gridx=gridx, gridy=gridy, nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss,
                               eval_panel=eval_panel)
         elif vec in forces:
             res = self.force(c, group, eval_panel=eval_panel, x_cte_force=x_cte_force,
                             y_cte_force=y_cte_force, gridx=gridx, gridy=gridy,
-                            no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss)
+                            nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss)
         else:
             raise ValueError(
                     '{0} is not a valid vec parameter value!'.format(vec))
 
         return res
 
-    def uvw(self, c, group, gridx=50, gridy=50, no_x_gauss=None, no_y_gauss=None,
+    def uvw(self, c, group, gridx=50, gridy=50, nr_x_gauss=None, nr_y_gauss=None,
             eval_panel=None):
         r"""Calculate the displacement field
 
@@ -485,9 +478,9 @@ class MultiDomain(object):
         gridy : int, optional
             Number of points along the `y` where to calculate the
             displacement field.
-        no_x_gauss, no_y_gauss : int
+        nr_x_gauss, nr_y_gauss : int
             Number of gauss sampling points along x and y respectively where the displacement field is to be calculated
-            Either one of no_x_gauss and no_y_gauss needs to be specified or both
+            Either one of nr_x_gauss and nr_y_gauss needs to be specified or both
             Both can be different
         eval_panel : Shell object
             Used to evaluate results for a single panel (that is passed) instead of an entire group of panels
@@ -523,22 +516,22 @@ class MultiDomain(object):
             model = panel.model
             fuvw = modelDB.db[model]['field'].fuvw
 
-            if no_x_gauss is not None:
+            if nr_x_gauss is not None:
                 # Getting the gauss points and weights for x
                     # Gauss points are between 1 and -1
-                x = np.zeros(no_x_gauss, dtype=np.float64)
-                x_weights = np.zeros(no_x_gauss, dtype=np.float64)
-                get_points_weights(no_x_gauss, x, x_weights)
+                x = np.zeros(nr_x_gauss, dtype=np.float64)
+                x_weights = np.zeros(nr_x_gauss, dtype=np.float64)
+                get_points_weights(nr_x_gauss, x, x_weights)
                 # Converting to physical coord as per panel dimensions
                 # Done bec the clpt_bardell_field.pyx ftn converts it to natural coord
                 x = (panel.a/2)*(x + 1)
             else:
                 x = linspace(0, panel.a, gridx)
-            if no_y_gauss is not None:
+            if nr_y_gauss is not None:
                 # Getting the gauss points and weights for y
-                y = np.zeros(no_y_gauss, dtype=np.float64)
-                y_weights = np.zeros(no_y_gauss, dtype=np.float64)
-                get_points_weights(no_y_gauss, y, y_weights)
+                y = np.zeros(nr_y_gauss, dtype=np.float64)
+                y_weights = np.zeros(nr_y_gauss, dtype=np.float64)
+                get_points_weights(nr_y_gauss, y, y_weights)
                 # Converting to physical coord as per panel dimensions
                 # Done bec the clpt_bardell_field.pyx ftn converts it to natural coord
                 y = (panel.b/2)*(y + 1)
@@ -570,7 +563,7 @@ class MultiDomain(object):
         return res
 
 
-    def strain(self, c, group, gridx=50, gridy=50, NLterms=True, no_x_gauss=None, no_y_gauss=None,
+    def strain(self, c, group, gridx=50, gridy=50, NLterms=True, nr_x_gauss=None, nr_y_gauss=None,
                eval_panel=None):
         r"""Calculate the strain field
         Strains and curvatures at each point ???? all x and y or just diagonal terms ????
@@ -594,9 +587,9 @@ class MultiDomain(object):
             displacement field.
         NLterms : bool
             Flag to indicate whether non-linear strain components should be considered.
-        no_x_gauss, no_y_gauss : int
+        nr_x_gauss, nr_y_gauss : int
             Number of gauss sampling points along x and y respectively where the displacement field is to be calculated
-            Either one of no_x_gauss and no_y_gauss needs to be specified or both
+            Either one of nr_x_gauss and nr_y_gauss needs to be specified or both
             Both can be different
         eval_panel : Shell object
             Used to evaluate results for a single panel (that is passed) instead of an entire group of panels
@@ -633,22 +626,22 @@ class MultiDomain(object):
             # Here x and y are the complete unravelled grid in the x and y coord resp
             # So both have the size = gridx*gridy
             # x and y now have the x and y coord of all the grid points i.e. size = no_grid_x * no_grid_y
-            if no_x_gauss is not None:
+            if nr_x_gauss is not None:
                 # Getting the gauss points and weights for x
                     # Gauss points are between 1 and -1
-                x = np.zeros(no_x_gauss, dtype=np.float64)
-                x_weights = np.zeros(no_x_gauss, dtype=np.float64)
-                get_points_weights(no_x_gauss, x, x_weights)
+                x = np.zeros(nr_x_gauss, dtype=np.float64)
+                x_weights = np.zeros(nr_x_gauss, dtype=np.float64)
+                get_points_weights(nr_x_gauss, x, x_weights)
                 # Converting to physical coord as per panel dimensions
                 # Done bec the clpt_bardell_field.pyx ftn converts it to natural coord
                 x = (panel.a/2)*(x + 1)
             else:
                 x = linspace(0, panel.a, gridx)
-            if no_y_gauss is not None:
+            if nr_y_gauss is not None:
                 # Getting the gauss points and weights for y
-                y = np.zeros(no_y_gauss, dtype=np.float64)
-                y_weights = np.zeros(no_y_gauss, dtype=np.float64)
-                get_points_weights(no_y_gauss, y, y_weights)
+                y = np.zeros(nr_y_gauss, dtype=np.float64)
+                y_weights = np.zeros(nr_y_gauss, dtype=np.float64)
+                get_points_weights(nr_y_gauss, y, y_weights)
                 # Converting to physical coord as per panel dimensions
                 # Done bec the clpt_bardell_field.pyx ftn converts it to natural coord
                 y = (panel.b/2)*(y + 1)
@@ -680,7 +673,7 @@ class MultiDomain(object):
         return res
 
 
-    def stress(self, c, group, gridx=50, gridy=50, NLterms=True, no_x_gauss=None, no_y_gauss=None,
+    def stress(self, c, group, gridx=50, gridy=50, NLterms=True, nr_x_gauss=None, nr_y_gauss=None,
                eval_panel=None, x_cte_force=None, y_cte_force=None):
 
         r"""Calculate the stress (Nx, Mx etc) field
@@ -701,9 +694,9 @@ class MultiDomain(object):
             displacement field.
         NLterms : bool
             Flag to indicate whether non-linear strain components should be considered.
-        no_x_gauss, no_y_gauss : int
+        nr_x_gauss, nr_y_gauss : int
             Number of gauss sampling points along x and y respectively where the displacement field is to be calculated
-            Either one of no_x_gauss and no_y_gauss needs to be specified or both
+            Either one of nr_x_gauss and nr_y_gauss needs to be specified or both
             Both can be different
         eval_panel : Shell object
             Used to evaluate results for a single panel (that is passed) instead of an entire group of panels
@@ -733,20 +726,20 @@ class MultiDomain(object):
             model = panel.model
             fstrain = modelDB.db[model]['field'].fstrain
 
-            if no_x_gauss is not None:
+            if nr_x_gauss is not None:
                 # Getting the gauss points and weights for x
-                x = np.zeros(no_x_gauss, dtype=np.float64)
-                x_weights = np.zeros(no_x_gauss, dtype=np.float64)
-                get_points_weights(no_x_gauss, x, x_weights)
+                x = np.zeros(nr_x_gauss, dtype=np.float64)
+                x_weights = np.zeros(nr_x_gauss, dtype=np.float64)
+                get_points_weights(nr_x_gauss, x, x_weights)
                 # Converting to physical coord as per panel dimensions
                 x = (panel.a/2)*(x + 1)
             else:
                 x = linspace(0, panel.a, gridx)
-            if no_y_gauss is not None:
+            if nr_y_gauss is not None:
                 # Getting the gauss points and weights for y
-                y = np.zeros(no_y_gauss, dtype=np.float64)
-                y_weights = np.zeros(no_y_gauss, dtype=np.float64)
-                get_points_weights(no_y_gauss, y, y_weights)
+                y = np.zeros(nr_y_gauss, dtype=np.float64)
+                y_weights = np.zeros(nr_y_gauss, dtype=np.float64)
+                get_points_weights(nr_y_gauss, y, y_weights)
                 # Converting to physical coord as per panel dimensions
                 y = (panel.b/2)*(y + 1)
             else:
@@ -801,8 +794,9 @@ class MultiDomain(object):
             res['Mxy'].append(Ns[..., 5])
         return res
 
+
     def force(self, c, group, eval_panel, x_cte_force=None, y_cte_force=None,
-              gridx=50, gridy=50, NLterms=True, no_x_gauss=None, no_y_gauss=None):
+              gridx=50, gridy=50, NLterms=True, nr_x_gauss=None, nr_y_gauss=None):
 
         """Calculate the force along a line (xcte or ycte)
 
@@ -828,9 +822,9 @@ class MultiDomain(object):
             displacement field.
         NLterms : bool
             Flag to indicate whether non-linear strain components should be considered.
-        no_x_gauss, no_y_gauss : int
+        nr_x_gauss, nr_y_gauss : int
             Number of gauss sampling points along x and y respectively where the displacement field is to be calculated
-            Either one of no_x_gauss and no_y_gauss needs to be specified or both
+            Either one of nr_x_gauss and nr_y_gauss needs to be specified or both
             Both can be different
 
         Returns
@@ -839,8 +833,6 @@ class MultiDomain(object):
             A dict containing many ``np.ndarrays``, with the keys:
             ``(Fxx, Fyy, Fxy)``.
         """
-
-
         # Empty dict - keys added later on
         res = dict()
 
@@ -848,17 +840,18 @@ class MultiDomain(object):
             raise ValueError('x_cte or y_cte needs to be specified')
         if x_cte_force is not None and y_cte_force is not None:
             raise ValueError('Integration can only be performed along a single line - specify either x_cte or y_cte')
-        if x_cte_force is not None and no_y_gauss is None:
-            raise ValueError('Both x_cte_force and no_y_gauss need to be specified')
-        if y_cte_force is not None and no_x_gauss is None:
-            raise ValueError('Both y_cte_force and no_x_gauss need to be specified')
-        if no_x_gauss > 304 or no_y_gauss > 304:
+        if x_cte_force is not None and nr_y_gauss is None:
+            raise ValueError('Both x_cte_force and nr_y_gauss need to be specified')
+        if y_cte_force is not None and nr_x_gauss is None:
+            raise ValueError('Both y_cte_force and nr_x_gauss need to be specified')
+        if nr_x_gauss > 304 or nr_y_gauss > 304:
             raise ValueError('Gauss points more than 304 not coded')
 
         # Stress field for a single panel of interest
-        res_stress = self.stress(c=c, group=group,
-                                 eval_panel = eval_panel, x_cte_force = x_cte_force, y_cte_force = y_cte_force,
-                                 gridx=gridx, gridy=gridy, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss)
+        res_stress = self.stress(c=c, group=group, eval_panel=eval_panel,
+                                 x_cte_force=x_cte_force, y_cte_force=y_cte_force,
+                                 gridx=gridx, gridy=gridy,
+                                 nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss)
 
         for vec in ['Nxx', 'Nyy', 'Nxy']:
             if x_cte_force is not None:
@@ -869,27 +862,27 @@ class MultiDomain(object):
                     raise ValueError('Error - Check force values')
                 # Extracting stress field for that particular column
                 stress_field = res_stress[vec][0][:, col.min()] # So that only 1 col is taken
-                if np.shape(stress_field)[0] != no_y_gauss:
+                if np.shape(stress_field)[0] != nr_y_gauss:
                     raise ValueError('Size mismatch')
                 # Getting the gauss points and weights
-                y_temp = np.zeros(no_y_gauss, dtype=np.float64)
-                weights = np.zeros(no_y_gauss, dtype=np.float64)
-                get_points_weights(no_y_gauss, y_temp, weights)
+                y_temp = np.zeros(nr_y_gauss, dtype=np.float64)
+                weights = np.zeros(nr_y_gauss, dtype=np.float64)
+                get_points_weights(nr_y_gauss, y_temp, weights)
 
             if y_cte_force is not None:
                 [row, _] = np.where(np.isclose(res_stress['y'][0], y_cte_force))
-                    # Find which row corresponds to values at x_cte_forces
+                    # Find which row corresponds to values at y_cte_forces
                 if row.max() != row.min():
                     # Check that you've picked the right row no
                     raise ValueError('Error - Check force values')
                 # Extracting stress field for that particular column
                 stress_field = res_stress[vec][0][row.min(), :]
-                if np.shape(stress_field)[0] != no_x_gauss:
+                if np.shape(stress_field)[0] != nr_x_gauss:
                     raise ValueError('Size mismatch')
                 # Getting the gauss points and weights
-                x_temp = np.zeros(no_x_gauss, dtype=np.float64)
-                weights = np.zeros(no_x_gauss, dtype=np.float64)
-                get_points_weights(no_x_gauss, x_temp, weights)
+                x_temp = np.zeros(nr_x_gauss, dtype=np.float64)
+                weights = np.zeros(nr_x_gauss, dtype=np.float64)
+                get_points_weights(nr_x_gauss, x_temp, weights)
 
             # Integration
             force_intgn = np.dot(weights, stress_field)
@@ -900,7 +893,7 @@ class MultiDomain(object):
 
 
     def force_out_plane(self, c, group, eval_panel, x_cte_force=None, y_cte_force=None,
-              gridx=50, gridy=50, NLterms=True, no_x_gauss=None, no_y_gauss=None):
+              gridx=50, gridy=50, NLterms=True, nr_x_gauss=None, nr_y_gauss=None):
 
         line_int = True
         area_int = False
@@ -908,21 +901,21 @@ class MultiDomain(object):
 
         # Original one - uses gauss points in both x and y
         if area_int:
-            # no_x_gauss = 128
-            # no_y_gauss = 100
+            # nr_x_gauss = 128
+            # nr_y_gauss = 100
 
             res_stress = self.stress(c=c, group=group,
                                      eval_panel = eval_panel, x_cte_force = x_cte_force, y_cte_force = y_cte_force,
-                                     gridx=gridx, gridy=gridy, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss)
+                                     gridx=gridx, gridy=gridy, nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss)
 
             # Gauss points and weights
-            y_gauss = np.zeros(no_y_gauss, dtype=np.float64)
-            weights_y = np.zeros(no_y_gauss, dtype=np.float64)
-            get_points_weights(no_y_gauss, y_gauss, weights_y)
+            y_gauss = np.zeros(nr_y_gauss, dtype=np.float64)
+            weights_y = np.zeros(nr_y_gauss, dtype=np.float64)
+            get_points_weights(nr_y_gauss, y_gauss, weights_y)
 
-            x_gauss = np.zeros(no_x_gauss, dtype=np.float64)
-            weights_x = np.zeros(no_x_gauss, dtype=np.float64)
-            get_points_weights(no_x_gauss, x_gauss, weights_x)
+            x_gauss = np.zeros(nr_x_gauss, dtype=np.float64)
+            weights_x = np.zeros(nr_x_gauss, dtype=np.float64)
+            get_points_weights(nr_x_gauss, x_gauss, weights_x)
 
             # Points used for distance to calc derivatives
             if False: # unchanged dx, dy
@@ -969,15 +962,15 @@ class MultiDomain(object):
         if line_int:
             res_stress = self.stress(c=c, group=group,
                                      eval_panel = eval_panel, x_cte_force = x_cte_force, y_cte_force = y_cte_force,
-                                     gridx=gridx, gridy=None, no_x_gauss=None, no_y_gauss=no_y_gauss)
+                                     gridx=gridx, gridy=None, nr_x_gauss=None, nr_y_gauss=nr_y_gauss)
 
 
             # Line Integral of Qx - considers gauss points in only y
             if True:
                 # Gauss points and weights
-                y_gauss = np.zeros(no_y_gauss, dtype=np.float64)
-                weights_y = np.zeros(no_y_gauss, dtype=np.float64)
-                get_points_weights(no_y_gauss, y_gauss, weights_y)
+                y_gauss = np.zeros(nr_y_gauss, dtype=np.float64)
+                weights_y = np.zeros(nr_y_gauss, dtype=np.float64)
+                get_points_weights(nr_y_gauss, y_gauss, weights_y)
 
                 dx = np.linspace(0, eval_panel.a, gridx)
 
@@ -1017,20 +1010,22 @@ class MultiDomain(object):
 
         if von_karman_NL_int:
 
-            res_uvw = self.uvw(c=c, group=group, gridx=gridx, gridy=gridy, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss,
+            res_uvw = self.uvw(c=c, group=group, gridx=gridx, gridy=gridy,
+                               nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss,
                     eval_panel=eval_panel)
             res_stress = self.stress(c=c, group=group,
                                      eval_panel = eval_panel, x_cte_force = x_cte_force, y_cte_force = y_cte_force,
-                                     gridx=gridx, gridy=gridy, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss)
+                                     gridx=gridx, gridy=gridy,
+                                     nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss)
 
             # Gauss points and weights
-            y_gauss = np.zeros(no_y_gauss, dtype=np.float64)
-            weights_y = np.zeros(no_y_gauss, dtype=np.float64)
-            get_points_weights(no_y_gauss, y_gauss, weights_y)
+            y_gauss = np.zeros(nr_y_gauss, dtype=np.float64)
+            weights_y = np.zeros(nr_y_gauss, dtype=np.float64)
+            get_points_weights(nr_y_gauss, y_gauss, weights_y)
 
-            x_gauss = np.zeros(no_x_gauss, dtype=np.float64)
-            weights_x = np.zeros(no_x_gauss, dtype=np.float64)
-            get_points_weights(no_x_gauss, x_gauss, weights_x)
+            x_gauss = np.zeros(nr_x_gauss, dtype=np.float64)
+            weights_x = np.zeros(nr_x_gauss, dtype=np.float64)
+            get_points_weights(nr_x_gauss, x_gauss, weights_x)
 
             # Points used for distance to calc derivatives
             if False: # unchanged dx, dy
@@ -1086,8 +1081,8 @@ class MultiDomain(object):
 
         for connecti in conn:
             if connecti['func'] == 'SB_TSL':
-                no_x_gauss = connecti['no_x_gauss']
-                no_y_gauss = connecti['no_y_gauss']
+                nr_x_gauss = connecti['nr_x_gauss']
+                nr_y_gauss = connecti['nr_y_gauss']
                 tsl_type = connecti['tsl_type']
                 p_top = connecti['p1']
                 p_bot = connecti['p2']
@@ -1096,24 +1091,24 @@ class MultiDomain(object):
                 G1c = connecti['G1c']
 
                 # Gauss points and weights
-                x_gauss = np.zeros(no_x_gauss, dtype=np.float64)
-                weights_x = np.zeros(no_x_gauss, dtype=np.float64)
-                get_points_weights(no_x_gauss, x_gauss, weights_x)
+                x_gauss = np.zeros(nr_x_gauss, dtype=np.float64)
+                weights_x = np.zeros(nr_x_gauss, dtype=np.float64)
+                get_points_weights(nr_x_gauss, x_gauss, weights_x)
 
-                y_gauss = np.zeros(no_y_gauss, dtype=np.float64)
-                weights_y = np.zeros(no_y_gauss, dtype=np.float64)
-                get_points_weights(no_y_gauss, y_gauss, weights_y)
+                y_gauss = np.zeros(nr_y_gauss, dtype=np.float64)
+                weights_y = np.zeros(nr_y_gauss, dtype=np.float64)
+                get_points_weights(nr_y_gauss, y_gauss, weights_y)
 
                 if hasattr(self, "dmg_index"):
                     kw_tsl, dmg_index_max, del_d, dmg_index_curr = self.calc_k_dmg(c=c, pA=p_top, pB=p_bot,
-                                         no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type,
+                                         nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, tsl_type=tsl_type,
                                          prev_max_dmg_index=self.dmg_index, k_i=k_i, tau_o=tau_o, G1c=G1c)
                 tau = np.multiply(kw_tsl, del_d)
 
                 force_intgn = 0
 
-                for pty in range(no_y_gauss):
-                    for ptx in range(no_x_gauss):
+                for pty in range(nr_y_gauss):
+                    for ptx in range(nr_x_gauss):
                         # Makes it more efficient when reading data (kw_tsl) from memory as memory is read along a row
                         # So also accessing memory in the same way helps it out so its not deleting and reaccessing the
                         # same memory everytime.
@@ -1127,9 +1122,6 @@ class MultiDomain(object):
 
                 # print(f'                Area integral force damage = {force_intgn:.3e}')
                 return force_intgn
-
-
-
 
 
     def get_kC_conn(self, conn=None, finalize=True, c=None, kw_tsl=None):
@@ -1148,7 +1140,7 @@ class MultiDomain(object):
                     'SB_TSL'              = btwn 2 skins connected over an area with a TSL introduced
                                                 at the interface
                             Required param:
-                                tsl_type, no_x_gauss, no_x_gauss
+                                tsl_type, nr_x_gauss, nr_x_gauss
         '''
         if conn is None:
             if self.conn is None:
@@ -1212,24 +1204,14 @@ class MultiDomain(object):
 
                 elif connection_function == 'SSxcte':
                     kt, kr = connections.calc_kt_kr(pA, pB, 'xcte')
-                    # print('kt, kr XCTE', kt, kr)
-                    # kt = 1*kt
-                    # kr = 2.5*kr
-                    kk = 1*kt
-
-                    kt = 1e6
-                    kr = 1e6
-                    # kk = 1e9
-                    # print(f'        Modified kt, kr, kk XCTE : {kt:.1e} {kr:.1e} {kk:.1e}')
-
                     kC_conn += connections.kCSSxcte.fkCSSxcte11(
-                            kt=kt, kr=kr, kk=kk, p1=pA, xcte1=connecti['xcte1'],
+                            kt=kt, kr=kr, p1=pA, xcte1=connecti['xcte1'],
                             size=size, row0=pA.row_start, col0=pA.col_start)
                     kC_conn += connections.kCSSxcte.fkCSSxcte12(
-                            kt=kt, kr=kr, kk=kk, p1=pA, p2=pB, xcte1=connecti['xcte1'], xcte2=connecti['xcte2'],
+                            kt=kt, kr=kr, p1=pA, p2=pB, xcte1=connecti['xcte1'], xcte2=connecti['xcte2'],
                             size=size, row0=pA.row_start, col0=pB.col_start)
                     kC_conn += connections.kCSSxcte.fkCSSxcte22(
-                            kt=kt, kr=kr, kk=kk, p1=pA, p2=pB, xcte2=connecti['xcte2'],
+                            kt=kt, kr=kr, p1=pA, p2=pB, xcte2=connecti['xcte2'],
                             size=size, row0=pB.row_start, col0=pB.col_start)
 
                 elif connection_function == 'BFycte':
@@ -1280,19 +1262,19 @@ class MultiDomain(object):
                     tau_o = connecti['tau_o']
                     G1c = connecti['G1c']
 
-                    no_x_gauss = connecti['no_x_gauss']
-                    no_y_gauss = connecti['no_y_gauss']
+                    nr_x_gauss = connecti['nr_x_gauss']
+                    nr_y_gauss = connecti['nr_y_gauss']
                     p_top = connecti['p1']
                     p_bot = connecti['p2']
 
                     # ATTENTION: pA NEEDS to be the top one and pB, the bottom panel
                     if hasattr(self, "dmg_index"):
                         kw_tsl, dmg_index_max, del_d, dmg_index_curr = self.calc_k_dmg(c=c, pA=p_top, pB=p_bot,
-                                             no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type,
+                                             nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, tsl_type=tsl_type,
                                              prev_max_dmg_index=self.dmg_index, k_i=k_i, tau_o=tau_o, G1c=G1c)
                     else:
                         kw_tsl, dmg_index_max, del_d, dmg_index_curr = self.calc_k_dmg(c=c, pA=p_top, pB=p_bot,
-                                             no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type,
+                                             nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, tsl_type=tsl_type,
                                              prev_max_dmg_index=None, k_i=k_i, tau_o=tau_o, G1c=G1c)
 
                     # Overwriting kw_tsl to the original value
@@ -1306,13 +1288,13 @@ class MultiDomain(object):
                     dsb = sum(p_top.plyts)/2. + sum(p_bot.plyts)/2.
                     kC_conn += connections.kCSB_dmg.fkCSB11_dmg(dsb=dsb, p1=pA,
                             size=size, row0=pA.row_start, col0=pA.col_start,
-                            no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, kw_tsl=kw_tsl)
+                            nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, kw_tsl=kw_tsl)
                     kC_conn += connections.kCSB_dmg.fkCSB12_dmg(dsb=dsb, p1=pA, p2=pB,
                             size=size, row0=pA.row_start, col0=pB.col_start,
-                            no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, kw_tsl=kw_tsl)
+                            nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, kw_tsl=kw_tsl)
                     kC_conn += connections.kCSB_dmg.fkCSB22_dmg(p1=pA, p2=pB,
                             size=size, row0=pB.row_start, col0=pB.col_start,
-                            no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, kw_tsl=kw_tsl)
+                            nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, kw_tsl=kw_tsl)
 
                 else:
                     raise ValueError(f'{connection_function} not recognized. Provide a correct function if you expect results')
@@ -1481,8 +1463,8 @@ class MultiDomain(object):
 
         for connecti in conn:
             if connecti['func'] == 'SB_TSL':
-                no_x_gauss = connecti['no_x_gauss']
-                no_y_gauss = connecti['no_y_gauss']
+                nr_x_gauss = connecti['nr_x_gauss']
+                nr_y_gauss = connecti['nr_y_gauss']
                 tsl_type = connecti['tsl_type']
                 p_top = connecti['p1']
                 p_bot = connecti['p2']
@@ -1492,8 +1474,8 @@ class MultiDomain(object):
                 del_o = connecti['del_o']
                 del_f = connecti['del_f']
 
-                kw_tsl, dmg_index_max, del_d_i, dmg_index_curr = self.calc_k_dmg(c=c_i, pA=p_top, pB=p_bot, no_x_gauss=no_x_gauss,
-                    no_y_gauss=no_y_gauss, tsl_type=tsl_type, prev_max_dmg_index=self.dmg_index, k_i=k_o, tau_o=tau_o, G1c=G1c)
+                kw_tsl, dmg_index_max, del_d_i, dmg_index_curr = self.calc_k_dmg(c=c_i, pA=p_top, pB=p_bot, nr_x_gauss=nr_x_gauss,
+                    nr_y_gauss=nr_y_gauss, tsl_type=tsl_type, prev_max_dmg_index=self.dmg_index, k_i=k_o, tau_o=tau_o, G1c=G1c)
 
                 # plt.contourf(del_d_i_1)
                 # plt.colorbar()
@@ -1510,17 +1492,17 @@ class MultiDomain(object):
 
 
                 kcrack += connections.kCSB_dmg.k_crack11(p_top=p_top, size=size, row0=p_top.row_start,
-                             col0=p_top.col_start, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss,
+                             col0=p_top.col_start, nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss,
                              k_o=k_o, del_o=del_o, del_f=del_f, del_d_i_1=np.ascontiguousarray(del_d_i_1),
                              del_d_i=np.ascontiguousarray(del_d_i), dmg_index=np.ascontiguousarray(dmg_index_max))
                 # print(f'        1st term K crack {np.max(kcrack):.2e}')
                 kcrack += connections.kCSB_dmg.k_crack12(p_top=p_top, p_bot=p_bot, size=size, row0=p_top.row_start,
-                              col0=p_bot.col_start, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss,
+                              col0=p_bot.col_start, nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss,
                               k_o=k_o, del_o=del_o, del_f=del_f, del_d_i_1=np.ascontiguousarray(del_d_i_1),
                               del_d_i=np.ascontiguousarray(del_d_i), dmg_index=np.ascontiguousarray(dmg_index_max))
                 # print(f'        2nd term K crack {np.max(kcrack):.2e}')
                 kcrack += connections.kCSB_dmg.k_crack22(p_bot=p_bot, size=size, row0=p_bot.row_start,
-                              col0=p_bot.col_start, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss,
+                              col0=p_bot.col_start, nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss,
                               k_o=k_o, del_o=del_o, del_f=del_f, del_d_i_1=np.ascontiguousarray(del_d_i_1),
                               del_d_i=np.ascontiguousarray(del_d_i), dmg_index=np.ascontiguousarray(dmg_index_max))
                 print(f'        K crack term 1 {np.max(kcrack):.2e}')
@@ -1543,8 +1525,8 @@ class MultiDomain(object):
 
     #         for connecti in conn:
     #             if connecti['func'] == 'SB_TSL':
-    #                 no_x_gauss = connecti['no_x_gauss']
-    #                 no_y_gauss = connecti['no_y_gauss']
+    #                 nr_x_gauss = connecti['nr_x_gauss']
+    #                 nr_y_gauss = connecti['nr_y_gauss']
     #                 tsl_type = connecti['tsl_type']
     #                 p_top = connecti['p1']
     #                 p_bot = connecti['p2']
@@ -1554,24 +1536,24 @@ class MultiDomain(object):
     #                 del_o = connecti['del_o']
     #                 del_f = connecti['del_f']
 
-    #                 kw_tsl, dmg_index_max, del_d_i, dmg_index_curr = self.calc_k_dmg(c=c_i, pA=p_top, pB=p_bot, no_x_gauss=no_x_gauss,
-    #                     no_y_gauss=no_y_gauss, tsl_type=tsl_type, prev_max_dmg_index=self.dmg_index, k_i=k_o, tau_o=tau_o, G1c=G1c)
+    #                 kw_tsl, dmg_index_max, del_d_i, dmg_index_curr = self.calc_k_dmg(c=c_i, pA=p_top, pB=p_bot, nr_x_gauss=nr_x_gauss,
+    #                     nr_y_gauss=nr_y_gauss, tsl_type=tsl_type, prev_max_dmg_index=self.dmg_index, k_i=k_o, tau_o=tau_o, G1c=G1c)
 
     #                 # Part A
     #                 kcrack_term2_partA += connections.kCSB_dmg.k_crack_term2_partA_11(p_top=p_top, size=size, row0=p_top.row_start,
-    #                              col0=p_top.col_start, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss,
+    #                              col0=p_top.col_start, nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss,
     #                              k_o=k_o, del_o=del_o, del_f=del_f, del_d_i_1=np.ascontiguousarray(del_d_i_1),
     #                              del_d_i=np.ascontiguousarray(del_d_i), dmg_index=np.ascontiguousarray(dmg_index_max))
     #                 # print(f'        1st term K crack {np.max(kcrack_term2_partA):.2e}')
 
     #                 kcrack_term2_partA += connections.kCSB_dmg.k_crack_term2_partA_12(p_top=p_top, p_bot=p_bot, size=size, row0=p_top.row_start,
-    #                               col0=p_bot.col_start, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss,
+    #                               col0=p_bot.col_start, nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss,
     #                               k_o=k_o, del_o=del_o, del_f=del_f, del_d_i_1=np.ascontiguousarray(del_d_i_1),
     #                               del_d_i=np.ascontiguousarray(del_d_i), dmg_index=np.ascontiguousarray(dmg_index_max))
     #                 # print(f'        2nd term K crack {np.max(kcrack_term2_partA):.2e}')
 
     #                 kcrack_term2_partA += connections.kCSB_dmg.k_crack_term2_partA_22(p_bot=p_bot, size=size, row0=p_bot.row_start,
-    #                               col0=p_bot.col_start, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss,
+    #                               col0=p_bot.col_start, nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss,
     #                               k_o=k_o, del_o=del_o, del_f=del_f, del_d_i_1=np.ascontiguousarray(del_d_i_1),
     #                               del_d_i=np.ascontiguousarray(del_d_i), dmg_index=np.ascontiguousarray(dmg_index_max))
     #                 print(f'        K crack term 2 {np.max(kcrack_term2_partA):.2e}')
@@ -1583,7 +1565,7 @@ class MultiDomain(object):
     #                 # Part B
     #                 c = c_i.copy()
     #                 kcrack_term2_partB = connections.kCSB_dmg.k_crack_term2_partB(p_top=p_top, p_bot=p_bot, size=size,
-    #                                 no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss,
+    #                                 nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss,
     #                                 dmg_index=np.ascontiguousarray(dmg_index_max), c_i=np.ascontiguousarray(c))
 
     #                 # converting it from 0D to 1D
@@ -1618,8 +1600,8 @@ class MultiDomain(object):
 
         for connecti in conn:
             if connecti['func'] == 'SB_TSL':
-                no_x_gauss = connecti['no_x_gauss']
-                no_y_gauss = connecti['no_y_gauss']
+                nr_x_gauss = connecti['nr_x_gauss']
+                nr_y_gauss = connecti['nr_y_gauss']
                 tsl_type = connecti['tsl_type']
                 p_top = connecti['p1']
                 p_bot = connecti['p2']
@@ -1629,27 +1611,27 @@ class MultiDomain(object):
                 del_o = connecti['del_o']
                 del_f = connecti['del_f']
 
-                kw_tsl, dmg_index_max, del_d_i, dmg_index_curr = self.calc_k_dmg(c=c_i, pA=p_top, pB=p_bot, no_x_gauss=no_x_gauss,
-                    no_y_gauss=no_y_gauss, tsl_type=tsl_type, prev_max_dmg_index=self.dmg_index, k_i=k_o, tau_o=tau_o, G1c=G1c)
+                kw_tsl, dmg_index_max, del_d_i, dmg_index_curr = self.calc_k_dmg(c=c_i, pA=p_top, pB=p_bot, nr_x_gauss=nr_x_gauss,
+                    nr_y_gauss=nr_y_gauss, tsl_type=tsl_type, prev_max_dmg_index=self.dmg_index, k_i=k_o, tau_o=tau_o, G1c=G1c)
 
                 # kcrack_term2 = connections.kCSB_dmg.k_crack_term2(p_top=p_top, p_bot=p_bot, size=size,
-                #                     no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, k_o=k_o, del_o=del_o, del_f=del_f,
+                #                     nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, k_o=k_o, del_o=del_o, del_f=del_f,
                 #                     del_d_i_1=np.ascontiguousarray(del_d_i_1), del_d_i=np.ascontiguousarray(del_d_i),
                 #                     dmg_index=np.ascontiguousarray(dmg_index_max), c_i=np.ascontiguousarray(c_i))
 
                 # Gauss points and weights
-                x_gauss = np.zeros(no_x_gauss, dtype=np.float64)
-                weights_x = np.zeros(no_x_gauss, dtype=np.float64)
-                get_points_weights(no_x_gauss, x_gauss, weights_x)
+                x_gauss = np.zeros(nr_x_gauss, dtype=np.float64)
+                weights_x = np.zeros(nr_x_gauss, dtype=np.float64)
+                get_points_weights(nr_x_gauss, x_gauss, weights_x)
 
-                y_gauss = np.zeros(no_y_gauss, dtype=np.float64)
-                weights_y = np.zeros(no_y_gauss, dtype=np.float64)
-                get_points_weights(no_y_gauss, y_gauss, weights_y)
+                y_gauss = np.zeros(nr_y_gauss, dtype=np.float64)
+                weights_y = np.zeros(nr_y_gauss, dtype=np.float64)
+                get_points_weights(nr_y_gauss, y_gauss, weights_y)
 
                 k_crack_term2 = np.zeros((size, size), dtype=np.float64)
 
-                for ptx in range(no_x_gauss):
-                    for pty in range(no_y_gauss):
+                for ptx in range(nr_x_gauss):
+                    for pty in range(nr_y_gauss):
                         # Takes the correct index instead of the location
                         xi = x_gauss[ptx]
                         eta = y_gauss[pty]
@@ -1668,25 +1650,25 @@ class MultiDomain(object):
                         k_crack_term2_partA = np.zeros((size, size), dtype=np.float64) # initlizing it to zero for a new point
 
                         k_crack_term2_partA += connections.kCSB_dmg.k_crack_term2_partA_11(p_top=p_top, size=size,
-                                                   row0=p_top.row_start, col0=p_top.col_start, no_x_gauss=no_x_gauss,
-                                                   no_y_gauss=no_y_gauss, k_o=k_o, del_o=del_o, del_f=del_f,
+                                                   row0=p_top.row_start, col0=p_top.col_start, nr_x_gauss=nr_x_gauss,
+                                                   nr_y_gauss=nr_y_gauss, k_o=k_o, del_o=del_o, del_f=del_f,
                                                    del_d_i_1=np.ascontiguousarray(del_d_i_1), del_d_i=np.ascontiguousarray(del_d_i),
                                                    dmg_index=np.ascontiguousarray(dmg_index_max), xi=xi, eta=eta, ptx=ptx, pty=pty)
 
                         k_crack_term2_partA += connections.kCSB_dmg.k_crack_term2_partA_12(p_top=p_top, p_bot=p_bot, size=size,
-                                                  row0=p_top.row_start, col0=p_bot.col_start, no_x_gauss=no_x_gauss,
-                                                  no_y_gauss=no_y_gauss, k_o=k_o, del_o=del_o, del_f=del_f,
+                                                  row0=p_top.row_start, col0=p_bot.col_start, nr_x_gauss=nr_x_gauss,
+                                                  nr_y_gauss=nr_y_gauss, k_o=k_o, del_o=del_o, del_f=del_f,
                                                   del_d_i_1=np.ascontiguousarray(del_d_i_1), del_d_i=np.ascontiguousarray(del_d_i),
                                                   dmg_index=np.ascontiguousarray(dmg_index_max), xi=xi, eta=eta, ptx=ptx, pty=pty)
 
                         k_crack_term2_partA += connections.kCSB_dmg.k_crack_term2_partA_22(p_bot=p_bot, size=size,
-                                                  row0=p_bot.row_start, col0=p_bot.col_start, no_x_gauss=no_x_gauss,
-                                                  no_y_gauss=no_y_gauss, k_o=k_o, del_o=del_o, del_f=del_f,
+                                                  row0=p_bot.row_start, col0=p_bot.col_start, nr_x_gauss=nr_x_gauss,
+                                                  nr_y_gauss=nr_y_gauss, k_o=k_o, del_o=del_o, del_f=del_f,
                                                   del_d_i_1=np.ascontiguousarray(del_d_i_1), del_d_i=np.ascontiguousarray(del_d_i),
                                                   dmg_index=np.ascontiguousarray(dmg_index_max), xi=xi, eta=eta, ptx=ptx, pty=pty)
 
                         k_crack_term2_partB = connections.kCSB_dmg.calc_k_crack_term2_partB(p_top=p_top, p_bot=p_bot, size=size,
-                                                   no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss,
+                                                   nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss,
                                                    dmg_index=np.ascontiguousarray(dmg_index_max),
                                                    c_i=c_i, xi=xi, eta=eta, ptx=ptx, pty=pty)
 
@@ -1774,8 +1756,8 @@ class MultiDomain(object):
 
         for connecti in conn:
             if connecti['func'] == 'SB_TSL':
-                no_x_gauss = connecti['no_x_gauss']
-                no_y_gauss = connecti['no_y_gauss']
+                nr_x_gauss = connecti['nr_x_gauss']
+                nr_y_gauss = connecti['nr_y_gauss']
                 tsl_type = connecti['tsl_type']
                 p_top = connecti['p1']
                 p_bot = connecti['p2']
@@ -1784,13 +1766,13 @@ class MultiDomain(object):
                 G1c = connecti['G1c']
 
                 kw_tsl_i, dmg_index_i_max, del_d_i, dmg_index_curr = self.calc_k_dmg(c=c_i, pA=p_top, pB=p_bot,
-                         no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type,
+                         nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, tsl_type=tsl_type,
                          prev_max_dmg_index=self.dmg_index, k_i=k_i, tau_o=tau_o, G1c=G1c)
 
                 fcrack = connections.kCSB_dmg.fcrack(p_top=p_top, p_bot=p_bot, size=size,
                                  kw_tsl_i_1=np.ascontiguousarray(kw_tsl_i_1), del_d_i_1=np.ascontiguousarray(del_d_i_1),
-                                 kw_tsl_i=np.ascontiguousarray(kw_tsl_i), no_x_gauss=no_x_gauss,
-                                 no_y_gauss=no_y_gauss, dmg_index=np.ascontiguousarray(dmg_index_i_max))
+                                 kw_tsl_i=np.ascontiguousarray(kw_tsl_i), nr_x_gauss=nr_x_gauss,
+                                 nr_y_gauss=nr_y_gauss, dmg_index=np.ascontiguousarray(dmg_index_i_max))
                 # print(f'        1st term F crack {np.linalg.norm(fcrack):.2e}')
 
                 if kcrack is None:
@@ -1845,8 +1827,8 @@ class MultiDomain(object):
         for connecti in conn:
             if connecti['func'] == 'SB_force':
                 p = connecti['p1']
-                no_x_gauss = connecti['no_x_gauss']
-                no_y_gauss = connecti['no_y_gauss']
+                nr_x_gauss = connecti['nr_x_gauss']
+                nr_y_gauss = connecti['nr_y_gauss']
                 tsl_type = connecti['tsl_type']
                 k_i = connecti['k_i']
 
@@ -1856,7 +1838,7 @@ class MultiDomain(object):
 
                 # Calc traction
                 kw_tsl, dmg_index, corrected_max_del_d, T_tsl = self.calc_traction(
-                    c=c, pA=p, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type,
+                    c=c, pA=p, nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, tsl_type=tsl_type,
                     prev_max_del_d=prev_max_del_d, k_i=k_i)
 
                 model = p.model
@@ -1869,16 +1851,16 @@ class MultiDomain(object):
                 g = np.zeros((5, p.get_size()), dtype=np.float64)
 
                 # Gauss points and weights
-                xis = np.zeros(no_x_gauss, dtype=np.float64)
-                weights_xi = np.zeros(no_x_gauss, dtype=np.float64)
-                etas = np.zeros(no_y_gauss, dtype=np.float64)
-                weights_eta = np.zeros(no_y_gauss, dtype=np.float64)
+                xis = np.zeros(nr_x_gauss, dtype=np.float64)
+                weights_xi = np.zeros(nr_x_gauss, dtype=np.float64)
+                etas = np.zeros(nr_y_gauss, dtype=np.float64)
+                weights_eta = np.zeros(nr_y_gauss, dtype=np.float64)
 
-                get_points_weights(no_x_gauss, xis, weights_xi)
-                get_points_weights(no_y_gauss, etas, weights_eta)
+                get_points_weights(nr_x_gauss, xis, weights_xi)
+                get_points_weights(nr_y_gauss, etas, weights_eta)
 
-                for pty in range(no_y_gauss):
-                    for ptx in range(no_x_gauss):
+                for pty in range(nr_y_gauss):
+                    for ptx in range(nr_x_gauss):
                         # Makes it more efficient when reading data (kw_tsl) from memory as memory is read along a row
                         # So also accessing memory in the same way helps it out so its not deleting and reaccessing the
                         # same memory everytime.
@@ -1942,7 +1924,7 @@ class MultiDomain(object):
         return del_d
 
 
-    def calc_k_dmg(self, c, pA, pB, no_x_gauss, no_y_gauss, tsl_type, prev_max_dmg_index,
+    def calc_k_dmg(self, c, pA, pB, nr_x_gauss, nr_y_gauss, tsl_type, prev_max_dmg_index,
                    k_i=None, tau_o=None, G1c=None):
 
         '''
@@ -1959,9 +1941,9 @@ class MultiDomain(object):
 
         # Calculating the displacements of each panel
         res_pan_top = self.calc_results(c=c, eval_panel=pA, vec='w',
-                                no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss)
+                                nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss)
         res_pan_bot = self.calc_results(c=c, eval_panel=pB, vec='w',
-                                no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss)
+                                nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss)
         # Separation for the current NR iteration
         del_d_curr = self.calc_separation(res_pan_top, res_pan_bot)
 
@@ -1991,7 +1973,6 @@ class MultiDomain(object):
         return kw_tsl, max_dmg_index, corrected_del_d, dmg_index_curr
 
 
-
     def calc_traction_stiffness(self, kw_tsl, corrected_max_del_d):
         '''
             Calculates traction for the approach where SB_TSL connection is used
@@ -2001,8 +1982,7 @@ class MultiDomain(object):
         return tau
 
 
-
-    def calc_traction(self, c, pA, no_x_gauss, no_y_gauss, tsl_type, prev_max_del_d, k_i=None):
+    def calc_traction(self, c, pA, nr_x_gauss, nr_y_gauss, tsl_type, prev_max_del_d, k_i=None):
         '''
             ONLY FOR FEXT_DMG - For panels with the SB_TSL connection, use calc_k_dmg and multiply kw_tsl
                 and corrected_max_del_d OR use calc_traction_stiffness()
@@ -2017,7 +1997,7 @@ class MultiDomain(object):
         if c is not None:
             # Calculating the displacements of each panel
             res_pan_top = self.calc_results(c=c, eval_panel=pA, vec='w',
-                                    no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss)
+                                    nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss)
             # Assuming:
             #     - the left most end is SS at the very least
             #     - top and bottom panel's displacements are symmetric about the middle
@@ -2052,7 +2032,7 @@ class MultiDomain(object):
 
         # Used when fext is to be calc before the first NR iteration - set all del_d = 0 so no traction force
         else:
-            corrected_max_del_d = np.zeros((no_y_gauss, no_x_gauss))
+            corrected_max_del_d = np.zeros((nr_y_gauss, nr_x_gauss))
 
         # Calculating stiffness grid
         kw_tsl, dmg_index = connections.calc_kw_tsl(pA=pA, pB=None, tsl_type=tsl_type, k_i=k_i, del_d=corrected_max_del_d)
@@ -2063,7 +2043,7 @@ class MultiDomain(object):
 
 
     def calc_energy_dissipation(self, kw_tsl_j, kw_tsl_j_1, del_d_j, del_d_j_1, tau_o, k_i,
-                                no_x_gauss, no_y_gauss):
+                                nr_x_gauss, nr_y_gauss):
         '''
         INITIAL TESTS SUGGESTS THIS DOESNT WORK -- PROCEED WITH CAUTION
 
@@ -2092,18 +2072,18 @@ class MultiDomain(object):
         energy_dissp_intgn_pt = (np.multiply(tau_j_1, del_d_j) - np.multiply(tau_j, del_d_j_1))/2
 
         # Gauss points and weights
-        x_gauss = np.zeros(no_x_gauss, dtype=np.float64)
-        weights_x = np.zeros(no_x_gauss, dtype=np.float64)
-        get_points_weights(no_x_gauss, x_gauss, weights_x)
+        x_gauss = np.zeros(nr_x_gauss, dtype=np.float64)
+        weights_x = np.zeros(nr_x_gauss, dtype=np.float64)
+        get_points_weights(nr_x_gauss, x_gauss, weights_x)
 
-        y_gauss = np.zeros(no_y_gauss, dtype=np.float64)
-        weights_y = np.zeros(no_y_gauss, dtype=np.float64)
-        get_points_weights(no_y_gauss, y_gauss, weights_y)
+        y_gauss = np.zeros(nr_y_gauss, dtype=np.float64)
+        weights_y = np.zeros(nr_y_gauss, dtype=np.float64)
+        get_points_weights(nr_y_gauss, y_gauss, weights_y)
 
         energy_dissp = 0
 
-        for pty in range(no_y_gauss):
-            for ptx in range(no_x_gauss):
+        for pty in range(nr_y_gauss):
+            for ptx in range(nr_x_gauss):
                 # Makes it more efficient when reading data (kw_tsl) from memory as memory is read along a row
                 # So also accessing memory in the same way helps it out so its not deleting and reaccessing the
                 # same memory everytime.
@@ -2117,8 +2097,6 @@ class MultiDomain(object):
 
         # return energy_dissp
         return np.max(energy_dissp_intgn_pt)
-
-
 
 
     def update_TSL_history(self, curr_max_dmg_index):
