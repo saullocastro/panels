@@ -418,6 +418,10 @@ class MultiDomain(object):
             When specified, stress_gauss_points and strain_gauss points are called instead
         eval_panel : Shell object
             Used to evaluate results for a single panel (that is passed) instead of an entire group of panels
+        x_cte_force or y_cte_force : float
+            Constant `x` or `y` coordinate of a line at which the force is to be
+            calculated. Coordinates are relative to specific panel, i.e. `0 \le
+            x \le a`, `0 \le y \le b`.
         """
 
         displs = ['u', 'v', 'w', 'phix', 'phiy']
@@ -447,9 +451,8 @@ class MultiDomain(object):
             res = self.stress(c, group, gridx=gridx, gridy=gridy, nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss,
                               eval_panel=eval_panel)
         elif vec in forces:
-            res = self.force(c, group, eval_panel=eval_panel, x_cte_force=x_cte_force,
-                            y_cte_force=y_cte_force, gridx=gridx, gridy=gridy,
-                            nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss)
+            res = self.force(c, group, eval_panel=eval_panel, x_cte_force=x_cte_force, y_cte_force=y_cte_force,
+                             gridx=gridx, gridy=gridy, nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss)
         else:
             raise ValueError(
                     '{0} is not a valid vec parameter value!'.format(vec))
@@ -812,8 +815,10 @@ class MultiDomain(object):
                 should be plotted together.
         eval_panel : Shell object
             Used to evaluate results for a single panel (that is passed) instead of an entire group of panels
-        x_cte_force or y_cte_force : x or y coordinates of line at which force is to be calc
-            Coordinates are relative to specific panel
+        x_cte_force or y_cte_force : float
+            Constant `x` or `y` coordinate of a line at which the force is to be
+            calculated. Coordinates are relative to specific panel, i.e. `0 \le
+            x \le a`, `0 \le y \le b`.
         gridx : int, optional
             Number of points along the `x` axis where to calculate the
             displacement field.
@@ -823,9 +828,9 @@ class MultiDomain(object):
         NLterms : bool
             Flag to indicate whether non-linear strain components should be considered.
         nr_x_gauss, nr_y_gauss : int
-            Number of gauss sampling points along x and y respectively where the displacement field is to be calculated
-            Either one of nr_x_gauss and nr_y_gauss needs to be specified or both
-            Both can be different
+            Number of gauss sampling points along `x` and `y`, respectively. The
+            displacement field is to be calculated along either one of
+            ``nr_x_gauss`` or ``nr_y_gauss``.
 
         Returns
         -------
@@ -837,15 +842,19 @@ class MultiDomain(object):
         res = dict()
 
         if x_cte_force is None and y_cte_force is None:
-            raise ValueError('x_cte or y_cte needs to be specified')
+            raise ValueError('x_cte or y_cte need to be specified')
         if x_cte_force is not None and y_cte_force is not None:
             raise ValueError('Integration can only be performed along a single line - specify either x_cte or y_cte')
         if x_cte_force is not None and nr_y_gauss is None:
             raise ValueError('Both x_cte_force and nr_y_gauss need to be specified')
         if y_cte_force is not None and nr_x_gauss is None:
             raise ValueError('Both y_cte_force and nr_x_gauss need to be specified')
-        if nr_x_gauss > 304 or nr_y_gauss > 304:
-            raise ValueError('Gauss points more than 304 not coded')
+        if nr_x_gauss is not None:
+            if nr_x_gauss > 304:
+                raise ValueError('Gauss points should be <= 304 points')
+        if nr_y_gauss is not None:
+            if nr_y_gauss > 304:
+                raise ValueError('Gauss points should be <= 304 points')
 
         # Stress field for a single panel of interest
         res_stress = self.stress(c=c, group=group, eval_panel=eval_panel,
