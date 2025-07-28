@@ -92,4 +92,5 @@ from . kCSSxcte import *
 from . kCSSycte import *
 from . kCBFxcte import *
 from . kCpd import *
+from . kCSB_dmg import *
 from . penalties import *

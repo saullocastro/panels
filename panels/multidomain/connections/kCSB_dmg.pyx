@@ -35,7 +35,7 @@ cdef extern from 'legendre_gauss_quadrature.hpp':
 
 # TODO: explain dsb parameter
 def fkCSB11_dmg(double dsb, object p1, int size, int row0, int col0, 
-            int no_x_gauss, int no_y_gauss, double [:,::1] kw_tsl):
+            int nr_x_gauss, int nr_y_gauss, double [:,::1] kw_tsl):
     r"""
     Penalty approach calculation to skin-base ycte panel 1 position.
 
@@ -54,11 +54,11 @@ def fkCSB11_dmg(double dsb, object p1, int size, int row0, int col0,
         Row position of constitutive matrix being calculated.
     col0 : int
         Column position of constitutive matrix being calculated.
-    no_x_gauss, no_y_gauss : int
+    nr_x_gauss, nr_y_gauss : int
         Number of integration points in x and y
     kw_tsl : numpy array
         Out of plane stiffness due to the TSL for each damage instance. This is a grid that is mapped to the
-        integration points provided by no_x_gauss and no_y_gauss, with values for each of those points.
+        integration points provided by nr_x_gauss and nr_y_gauss, with values for each of those points.
             [:,::1] reads with an increment of 1 in the column
 
     Returns
@@ -102,14 +102,14 @@ def fkCSB11_dmg(double dsb, object p1, int size, int row0, int col0,
     # i.e. in this case there are 7 instances of terms being added so it preallocates that amount of memory
 
     # Initializing gauss points, weights
-    xis = np.zeros(no_x_gauss, dtype=DOUBLE)
-    weights_xi = np.zeros(no_x_gauss, dtype=DOUBLE)
-    etas = np.zeros(no_y_gauss, dtype=DOUBLE)
-    weights_eta = np.zeros(no_y_gauss, dtype=DOUBLE)
+    xis = np.zeros(nr_x_gauss, dtype=DOUBLE)
+    weights_xi = np.zeros(nr_x_gauss, dtype=DOUBLE)
+    etas = np.zeros(nr_y_gauss, dtype=DOUBLE)
+    weights_eta = np.zeros(nr_y_gauss, dtype=DOUBLE)
 
     # Calc gauss points and weights
-    leggauss_quad(no_x_gauss, &xis[0], &weights_xi[0])
-    leggauss_quad(no_y_gauss, &etas[0], &weights_eta[0])
+    leggauss_quad(nr_x_gauss, &xis[0], &weights_xi[0])
+    leggauss_quad(nr_y_gauss, &etas[0], &weights_eta[0])
     
     kCSB11r = np.zeros((fdim,), dtype=INT)
     kCSB11c = np.zeros((fdim,), dtype=INT)
@@ -120,8 +120,8 @@ def fkCSB11_dmg(double dsb, object p1, int size, int row0, int col0,
     with nogil:
         # kCSB11
         
-        for pty in range(no_y_gauss):
-            for ptx in range(no_x_gauss):
+        for pty in range(nr_y_gauss):
+            for ptx in range(nr_x_gauss):
                 # Makes it more efficient when reading data (kw_tsl) from memory as memory is read along a row
                 # So also accessing memory in the same way helps it out so its not deleting and reaccessing the
                 # same memory everytime. 
@@ -225,7 +225,7 @@ def fkCSB11_dmg(double dsb, object p1, int size, int row0, int col0,
 
 # TODO: explain dsb parameter
 def fkCSB12_dmg(double dsb, object p1, object p2, int size, int row0, int col0,
-                int no_x_gauss, int no_y_gauss, double [:,::1] kw_tsl):
+                int nr_x_gauss, int nr_y_gauss, double [:,::1] kw_tsl):
     r"""
     Penalty approach calculation to skin-base ycte panel 1 and panel 2 coupling position.
 
@@ -303,14 +303,14 @@ def fkCSB12_dmg(double dsb, object p1, object p2, int size, int row0, int col0,
     fdim = 5*m1*n1*m2*n2
 
     # Initializing gauss points, weights
-    xis = np.zeros(no_x_gauss, dtype=DOUBLE)
-    weights_xi = np.zeros(no_x_gauss, dtype=DOUBLE)
-    etas = np.zeros(no_y_gauss, dtype=DOUBLE)
-    weights_eta = np.zeros(no_y_gauss, dtype=DOUBLE)
+    xis = np.zeros(nr_x_gauss, dtype=DOUBLE)
+    weights_xi = np.zeros(nr_x_gauss, dtype=DOUBLE)
+    etas = np.zeros(nr_y_gauss, dtype=DOUBLE)
+    weights_eta = np.zeros(nr_y_gauss, dtype=DOUBLE)
 
     # Calc gauss points and weights
-    leggauss_quad(no_x_gauss, &xis[0], &weights_xi[0])
-    leggauss_quad(no_y_gauss, &etas[0], &weights_eta[0])
+    leggauss_quad(nr_x_gauss, &xis[0], &weights_xi[0])
+    leggauss_quad(nr_y_gauss, &etas[0], &weights_eta[0])
 
     kCSB12r = np.zeros((fdim,), dtype=INT)
     kCSB12c = np.zeros((fdim,), dtype=INT)
@@ -321,8 +321,8 @@ def fkCSB12_dmg(double dsb, object p1, object p2, int size, int row0, int col0,
     with nogil:
         # kCSB12
         
-        for ptx in range(no_x_gauss):
-            for pty in range(no_y_gauss):
+        for ptx in range(nr_x_gauss):
+            for pty in range(nr_y_gauss):
                 # Takes the correct index instead of the location
                 xi = xis[ptx]
                 eta = etas[pty]
@@ -408,7 +408,7 @@ def fkCSB12_dmg(double dsb, object p1, object p2, int size, int row0, int col0,
 
 
 def fkCSB22_dmg(object p1, object p2, int size, int row0, int col0,
-                int no_x_gauss, int no_y_gauss, double [:,::1] kw_tsl):
+                int nr_x_gauss, int nr_y_gauss, double [:,::1] kw_tsl):
     r"""
     Penalty approach calculation to skin-base ycte panel 2 position.
 
@@ -471,14 +471,14 @@ def fkCSB22_dmg(object p1, object p2, int size, int row0, int col0,
     fdim = 3*m2*n2*m2*n2
     
     # Initializing gauss points, weights
-    xis = np.zeros(no_x_gauss, dtype=DOUBLE)
-    weights_xi = np.zeros(no_x_gauss, dtype=DOUBLE)
-    etas = np.zeros(no_y_gauss, dtype=DOUBLE)
-    weights_eta = np.zeros(no_y_gauss, dtype=DOUBLE)
+    xis = np.zeros(nr_x_gauss, dtype=DOUBLE)
+    weights_xi = np.zeros(nr_x_gauss, dtype=DOUBLE)
+    etas = np.zeros(nr_y_gauss, dtype=DOUBLE)
+    weights_eta = np.zeros(nr_y_gauss, dtype=DOUBLE)
 
     # Calc gauss points and weights
-    leggauss_quad(no_x_gauss, &xis[0], &weights_xi[0])
-    leggauss_quad(no_y_gauss, &etas[0], &weights_eta[0])
+    leggauss_quad(nr_x_gauss, &xis[0], &weights_xi[0])
+    leggauss_quad(nr_y_gauss, &etas[0], &weights_eta[0])
 
     kCSB22r = np.zeros((fdim,), dtype=INT)
     kCSB22c = np.zeros((fdim,), dtype=INT)
@@ -488,8 +488,8 @@ def fkCSB22_dmg(object p1, object p2, int size, int row0, int col0,
 
     with nogil:
         
-        for ptx in range(no_x_gauss):
-            for pty in range(no_y_gauss):
+        for ptx in range(nr_x_gauss):
+            for pty in range(nr_y_gauss):
                 # Takes the correct index instead of the location
                 xi = xis[ptx]
                 eta = etas[pty]
@@ -568,7 +568,7 @@ def fkCSB22_dmg(object p1, object p2, int size, int row0, int col0,
 
 
 def fcrack(object p_top, object p_bot, int size, double [:,::1] kw_tsl_i_1, double [:,::1] del_d_i_1, 
-           double [:,::1] kw_tsl_i, int no_x_gauss, int no_y_gauss, double [:,::1] dmg_index):
+           double [:,::1] kw_tsl_i, int nr_x_gauss, int nr_y_gauss, double [:,::1] dmg_index):
     # double[:,::1] defines the variable as a 2D, C contiguous memoryview of doubles
     
     cdef int m_top, n_top, m_bot, n_bot
@@ -625,22 +625,22 @@ def fcrack(object p_top, object p_bot, int size, double [:,::1] kw_tsl_i_1, doub
     y1w_bot = p_bot.y1w ; y1wr_bot = p_bot.y1wr ; y2w_bot = p_bot.y2w ; y2wr_bot = p_bot.y2wr
     
     # Initializing gauss points, weights
-    xis = np.zeros(no_x_gauss, dtype=DOUBLE)
-    weights_xi = np.zeros(no_x_gauss, dtype=DOUBLE)
-    etas = np.zeros(no_y_gauss, dtype=DOUBLE)
-    weights_eta = np.zeros(no_y_gauss, dtype=DOUBLE)
+    xis = np.zeros(nr_x_gauss, dtype=DOUBLE)
+    weights_xi = np.zeros(nr_x_gauss, dtype=DOUBLE)
+    etas = np.zeros(nr_y_gauss, dtype=DOUBLE)
+    weights_eta = np.zeros(nr_y_gauss, dtype=DOUBLE)
 
     # Calc gauss points and weights
-    leggauss_quad(no_x_gauss, &xis[0], &weights_xi[0])
-    leggauss_quad(no_y_gauss, &etas[0], &weights_eta[0])
+    leggauss_quad(nr_x_gauss, &xis[0], &weights_xi[0])
+    leggauss_quad(nr_y_gauss, &etas[0], &weights_eta[0])
     
     fcrack = np.zeros(size, dtype=DOUBLE)
     
     with nogil:
         
         # TOP Panel
-        for ptx in range(no_x_gauss):
-            for pty in range(no_y_gauss):
+        for ptx in range(nr_x_gauss):
+            for pty in range(nr_y_gauss):
                 # Takes the correct index instead of the location
                 xi = xis[ptx]
                 eta = etas[pty]
@@ -669,8 +669,8 @@ def fcrack(object p_top, object p_bot, int size, double [:,::1] kw_tsl_i_1, doub
                         fcrack[row+2] += (weight*a_top*b_top/4) * 0.5 * (del_d_i_1_iter*(kw_tsl_i_1_iter - kw_tsl_i_iter)) * (fAw_top * gAw_top)
         
         # BOT Panel
-        for ptx in range(no_x_gauss):
-            for pty in range(no_y_gauss):
+        for ptx in range(nr_x_gauss):
+            for pty in range(nr_y_gauss):
                 # Takes the correct index instead of the location
                 xi = xis[ptx]
                 eta = etas[pty]
@@ -704,7 +704,7 @@ def fcrack(object p_top, object p_bot, int size, double [:,::1] kw_tsl_i_1, doub
     
     
     
-def k_crack11(object p_top, int size, int row0, int col0, int no_x_gauss, int no_y_gauss,
+def k_crack11(object p_top, int size, int row0, int col0, int nr_x_gauss, int nr_y_gauss,
               double k_o, double del_o, double del_f, 
               double [:,::1] del_d_i_1, double [:,::1] del_d_i, double [:,::1] dmg_index):
 
@@ -746,14 +746,14 @@ def k_crack11(object p_top, int size, int row0, int col0, int no_x_gauss, int no
     y1w_top = p_top.y1w ; y1wr_top = p_top.y1wr ; y2w_top = p_top.y2w ; y2wr_top = p_top.y2wr
     
     # Initializing gauss points, weights
-    xis = np.zeros(no_x_gauss, dtype=DOUBLE)
-    weights_xi = np.zeros(no_x_gauss, dtype=DOUBLE)
-    etas = np.zeros(no_y_gauss, dtype=DOUBLE)
-    weights_eta = np.zeros(no_y_gauss, dtype=DOUBLE)
+    xis = np.zeros(nr_x_gauss, dtype=DOUBLE)
+    weights_xi = np.zeros(nr_x_gauss, dtype=DOUBLE)
+    etas = np.zeros(nr_y_gauss, dtype=DOUBLE)
+    weights_eta = np.zeros(nr_y_gauss, dtype=DOUBLE)
 
     # Calc gauss points and weights
-    leggauss_quad(no_x_gauss, &xis[0], &weights_xi[0])
-    leggauss_quad(no_y_gauss, &etas[0], &weights_eta[0])
+    leggauss_quad(nr_x_gauss, &xis[0], &weights_xi[0])
+    leggauss_quad(nr_y_gauss, &etas[0], &weights_eta[0])
     
     # Dimension of the number of values that need to be stored
     fdim = 1*m_top*n_top*m_top*n_top    # 1 bec only 1 term is being added in the for loops
@@ -764,8 +764,8 @@ def k_crack11(object p_top, int size, int row0, int col0, int no_x_gauss, int no
     
     with nogil:
         
-        for ptx in range(no_x_gauss):
-            for pty in range(no_y_gauss):
+        for ptx in range(nr_x_gauss):
+            for pty in range(nr_y_gauss):
                 # Takes the correct index instead of the location
                 xi = xis[ptx]
                 eta = etas[pty]
@@ -823,7 +823,7 @@ def k_crack11(object p_top, int size, int row0, int col0, int no_x_gauss, int no
     return k_crack11
 
 
-def k_crack12(object p_top, object p_bot, int size, int row0, int col0, int no_x_gauss, int no_y_gauss,
+def k_crack12(object p_top, object p_bot, int size, int row0, int col0, int nr_x_gauss, int nr_y_gauss,
               double k_o, double del_o, double del_f, 
               double [:,::1] del_d_i_1, double [:,::1] del_d_i, double [:,::1] dmg_index):
 
@@ -875,14 +875,14 @@ def k_crack12(object p_top, object p_bot, int size, int row0, int col0, int no_x
     y1w_bot = p_bot.y1w ; y1wr_bot = p_bot.y1wr ; y2w_bot = p_bot.y2w ; y2wr_bot = p_bot.y2wr
     
     # Initializing gauss points, weights
-    xis = np.zeros(no_x_gauss, dtype=DOUBLE)
-    weights_xi = np.zeros(no_x_gauss, dtype=DOUBLE)
-    etas = np.zeros(no_y_gauss, dtype=DOUBLE)
-    weights_eta = np.zeros(no_y_gauss, dtype=DOUBLE)
+    xis = np.zeros(nr_x_gauss, dtype=DOUBLE)
+    weights_xi = np.zeros(nr_x_gauss, dtype=DOUBLE)
+    etas = np.zeros(nr_y_gauss, dtype=DOUBLE)
+    weights_eta = np.zeros(nr_y_gauss, dtype=DOUBLE)
 
     # Calc gauss points and weights
-    leggauss_quad(no_x_gauss, &xis[0], &weights_xi[0])
-    leggauss_quad(no_y_gauss, &etas[0], &weights_eta[0])
+    leggauss_quad(nr_x_gauss, &xis[0], &weights_xi[0])
+    leggauss_quad(nr_y_gauss, &etas[0], &weights_eta[0])
     
     # Dimension of the number of values that need to be stored
     fdim = 1*m_bot*n_bot*m_top*n_top    # 1 bec only 1 term is being added in the for loops
@@ -893,8 +893,8 @@ def k_crack12(object p_top, object p_bot, int size, int row0, int col0, int no_x
     
     with nogil:
         
-        for ptx in range(no_x_gauss):
-            for pty in range(no_y_gauss):
+        for ptx in range(nr_x_gauss):
+            for pty in range(nr_y_gauss):
                 # Takes the correct index instead of the location
                 xi = xis[ptx]
                 eta = etas[pty]
@@ -945,7 +945,7 @@ def k_crack12(object p_top, object p_bot, int size, int row0, int col0, int no_x
     return k_crack12
 
 
-def k_crack22(object p_bot, int size, int row0, int col0, int no_x_gauss, int no_y_gauss,
+def k_crack22(object p_bot, int size, int row0, int col0, int nr_x_gauss, int nr_y_gauss,
               double k_o, double del_o, double del_f,
               double [:,::1] del_d_i_1, double [:,::1] del_d_i, double [:,::1] dmg_index):
 
@@ -987,14 +987,14 @@ def k_crack22(object p_bot, int size, int row0, int col0, int no_x_gauss, int no
     y1w_bot = p_bot.y1w ; y1wr_bot = p_bot.y1wr ; y2w_bot = p_bot.y2w ; y2wr_bot = p_bot.y2wr
     
     # Initializing gauss points, weights
-    xis = np.zeros(no_x_gauss, dtype=DOUBLE)
-    weights_xi = np.zeros(no_x_gauss, dtype=DOUBLE)
-    etas = np.zeros(no_y_gauss, dtype=DOUBLE)
-    weights_eta = np.zeros(no_y_gauss, dtype=DOUBLE)
+    xis = np.zeros(nr_x_gauss, dtype=DOUBLE)
+    weights_xi = np.zeros(nr_x_gauss, dtype=DOUBLE)
+    etas = np.zeros(nr_y_gauss, dtype=DOUBLE)
+    weights_eta = np.zeros(nr_y_gauss, dtype=DOUBLE)
 
     # Calc gauss points and weights
-    leggauss_quad(no_x_gauss, &xis[0], &weights_xi[0])
-    leggauss_quad(no_y_gauss, &etas[0], &weights_eta[0])
+    leggauss_quad(nr_x_gauss, &xis[0], &weights_xi[0])
+    leggauss_quad(nr_y_gauss, &etas[0], &weights_eta[0])
     
     # Dimension of the number of values that need to be stored
     fdim = 1*m_bot*n_bot*m_bot*n_bot    # 1 bec only 1 term is being added in the for loops
@@ -1005,8 +1005,8 @@ def k_crack22(object p_bot, int size, int row0, int col0, int no_x_gauss, int no
     
     with nogil:
         
-        for ptx in range(no_x_gauss):
-            for pty in range(no_y_gauss):
+        for ptx in range(nr_x_gauss):
+            for pty in range(nr_y_gauss):
                 # Takes the correct index instead of the location
                 xi = xis[ptx]
                 eta = etas[pty]
@@ -1058,7 +1058,7 @@ def k_crack22(object p_bot, int size, int row0, int col0, int no_x_gauss, int no
 
 
 # Evaluated at a specific point (xi, eta)
-def k_crack_term2_partA_11(object p_top, int size, int row0, int col0, int no_x_gauss, int no_y_gauss,
+def k_crack_term2_partA_11(object p_top, int size, int row0, int col0, int nr_x_gauss, int nr_y_gauss,
               double k_o, double del_o, double del_f, 
               double [:,::1] del_d_i_1, double [:,::1] del_d_i, double [:,::1] dmg_index, 
               double xi, double eta, int ptx, int pty):
@@ -1157,7 +1157,7 @@ def k_crack_term2_partA_11(object p_top, int size, int row0, int col0, int no_x_
     return k_crack_term2_partA_11
 
 
-def k_crack_term2_partA_12(object p_top, object p_bot, int size, int row0, int col0, int no_x_gauss, int no_y_gauss,
+def k_crack_term2_partA_12(object p_top, object p_bot, int size, int row0, int col0, int nr_x_gauss, int nr_y_gauss,
               double k_o, double del_o, double del_f, 
               double [:,::1] del_d_i_1, double [:,::1] del_d_i, double [:,::1] dmg_index, 
               double xi, double eta, int ptx, int pty):
@@ -1260,7 +1260,7 @@ def k_crack_term2_partA_12(object p_top, object p_bot, int size, int row0, int c
     return k_crack_term2_partA_12
 
 
-def k_crack_term2_partA_22(object p_bot, int size, int row0, int col0, int no_x_gauss, int no_y_gauss,
+def k_crack_term2_partA_22(object p_bot, int size, int row0, int col0, int nr_x_gauss, int nr_y_gauss,
               double k_o, double del_o, double del_f,
               double [:,::1] del_d_i_1, double [:,::1] del_d_i, double [:,::1] dmg_index, 
               double xi, double eta, int ptx, int pty):
@@ -1354,7 +1354,7 @@ def k_crack_term2_partA_22(object p_bot, int size, int row0, int col0, int no_x_
 
 
 # Evaluated at a specific point (xi, eta)
-def calc_k_crack_term2_partB(object p_top, object p_bot, int size, int no_x_gauss, int no_y_gauss, double [:,::1] dmg_index, 
+def calc_k_crack_term2_partB(object p_top, object p_bot, int size, int nr_x_gauss, int nr_y_gauss, double [:,::1] dmg_index, 
             double [:] c_i, double xi, double eta, int ptx, int pty):
     # double[:,::1] defines the variable as a 2D, C contiguous memoryview of doubles
     
@@ -1458,7 +1458,7 @@ def calc_k_crack_term2_partB(object p_top, object p_bot, int size, int no_x_gaus
     return k_crack_term2_partB
 
 
-def k_crack_term2(object p_top, object p_bot, int size, int no_x_gauss, int no_y_gauss,
+def k_crack_term2(object p_top, object p_bot, int size, int nr_x_gauss, int nr_y_gauss,
               double k_o, double del_o, double del_f, 
               double [:,::1] del_d_i_1, double [:,::1] del_d_i, double [:,::1] dmg_index, double [:] c_i):
 
@@ -1511,14 +1511,14 @@ def k_crack_term2(object p_top, object p_bot, int size, int no_x_gauss, int no_y
     y1w_bot = p_bot.y1w ; y1wr_bot = p_bot.y1wr ; y2w_bot = p_bot.y2w ; y2wr_bot = p_bot.y2wr
     
     # Initializing gauss points, weights
-    xis = np.zeros(no_x_gauss, dtype=DOUBLE)
-    weights_xi = np.zeros(no_x_gauss, dtype=DOUBLE)
-    etas = np.zeros(no_y_gauss, dtype=DOUBLE)
-    weights_eta = np.zeros(no_y_gauss, dtype=DOUBLE)
+    xis = np.zeros(nr_x_gauss, dtype=DOUBLE)
+    weights_xi = np.zeros(nr_x_gauss, dtype=DOUBLE)
+    etas = np.zeros(nr_y_gauss, dtype=DOUBLE)
+    weights_eta = np.zeros(nr_y_gauss, dtype=DOUBLE)
     
     # Calc gauss points and weights
-    leggauss_quad(no_x_gauss, &xis[0], &weights_xi[0])
-    leggauss_quad(no_y_gauss, &etas[0], &weights_eta[0])
+    leggauss_quad(nr_x_gauss, &xis[0], &weights_xi[0])
+    leggauss_quad(nr_y_gauss, &etas[0], &weights_eta[0])
     
     k_crack_term2 = np.zeros((size, size), dtype=DOUBLE)
     k_crack_term2_partA = np.zeros((size, size), dtype=DOUBLE)
@@ -1526,8 +1526,8 @@ def k_crack_term2(object p_top, object p_bot, int size, int no_x_gauss, int no_y
 
     with nogil:
         
-        for ptx in range(no_x_gauss):
-            for pty in range(no_y_gauss):
+        for ptx in range(nr_x_gauss):
+            for pty in range(nr_y_gauss):
                 # Takes the correct index instead of the location
                 xi = xis[ptx]
                 eta = etas[pty]
@@ -1550,22 +1550,22 @@ def k_crack_term2(object p_top, object p_bot, int size, int no_x_gauss, int no_y
                 with gil:
                     # k_crack_term2_partA = csr_matrix(k_crack_term2_partA)
                     np.add(k_crack_term2_partA, k_crack_term2_partA_11(p_top=p_top, size=size, row0=p_top.row_start,
-                                col0=p_top.col_start, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss,
+                                col0=p_top.col_start, nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss,
                                 k_o=k_o, del_o=del_o, del_f=del_f, del_d_i_1=del_d_i_1, 
                                 del_d_i=del_d_i, dmg_index=dmg_index, xi=xi, eta=eta, ptx=ptx, pty=pty), out=np.asarray(k_crack_term2_partA))
                     
                     k_crack_term2_partA += k_crack_term2_partA_12(p_top=p_top, p_bot=p_bot, size=size, 
-                                  row0=p_top.row_start, col0=p_bot.col_start, no_x_gauss=no_x_gauss, 
-                                  no_y_gauss=no_y_gauss, k_o=k_o, del_o=del_o, del_f=del_f, del_d_i_1=del_d_i_1, 
+                                  row0=p_top.row_start, col0=p_bot.col_start, nr_x_gauss=nr_x_gauss, 
+                                  nr_y_gauss=nr_y_gauss, k_o=k_o, del_o=del_o, del_f=del_f, del_d_i_1=del_d_i_1, 
                                   del_d_i=del_d_i, dmg_index=dmg_index, xi=xi, eta=eta, ptx=ptx, pty=pty)
                     
                     k_crack_term2_partA += k_crack_term2_partA_22(p_bot=p_bot, size=size, 
-                                  row0=p_bot.row_start, col0=p_bot.col_start, no_x_gauss=no_x_gauss, 
-                                  no_y_gauss=no_y_gauss, k_o=k_o, del_o=del_o, del_f=del_f, del_d_i_1=del_d_i_1, 
+                                  row0=p_bot.row_start, col0=p_bot.col_start, nr_x_gauss=nr_x_gauss, 
+                                  nr_y_gauss=nr_y_gauss, k_o=k_o, del_o=del_o, del_f=del_f, del_d_i_1=del_d_i_1, 
                                   del_d_i=del_d_i, dmg_index=dmg_index, xi=xi, eta=eta, ptx=ptx, pty=pty)
                     
                     k_crack_term2_partB = calc_k_crack_term2_partB(p_top=p_top, p_bot=p_bot, size=size, 
-                                   no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, dmg_index=dmg_index, 
+                                   nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, dmg_index=dmg_index, 
                                    c_i=c_i, xi=xi, eta=eta, ptx=ptx, pty=pty)
                 
                 for iter_1 in range(size): # since theyre square matrices
