@@ -1,8 +1,5 @@
 import sys
-sys.path.append('C:/Users/natha/Documents/GitHub/panels')
-sys.path.append('..\\..')
-import os
-os.chdir('C:/Users/natha/Documents/GitHub/panels/tests/multidomain')
+sys.path.append('../..')
 
 import numpy as np
 from structsolve import solve

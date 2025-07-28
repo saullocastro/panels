@@ -1,5 +1,5 @@
 import sys
-sys.path.append('..\\..')
+sys.path.append('../..')
 
 import numpy as np
 from structsolve import solve
@@ -23,7 +23,7 @@ def img_popup(filename):
     # To open pop up images - Ignore the syntax warning :)
     # %matplotlib qt
     # For inline images
-    %matplotlib inline
+    #%matplotlib inline
 
     plt.title(filename)
     image = img.imread(filename)
@@ -53,8 +53,8 @@ def test_dcb_bending_pd():
     a1 = 0.5*a
 
     #others
-    m = 8
-    n = 8
+    m = 6
+    n = 6
 
     simple_layup = [+45, -45]*20 + [0, 90]*20
     simple_layup += simple_layup[::-1]
@@ -229,8 +229,8 @@ def test_dcb_bending_pd_single():
     a1 = 0.5*a
 
     #others
-    m = 8
-    n = 8
+    m = 6
+    n = 6
 
     simple_layup = [+45, -45]*20 + [0, 90]*20
     simple_layup += simple_layup[::-1]

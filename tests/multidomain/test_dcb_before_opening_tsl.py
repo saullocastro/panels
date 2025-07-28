@@ -1,8 +1,5 @@
 import sys
-sys.path.append('C:/Users/natha/Documents/GitHub/panels')
-# sys.path.append('..\\..')
-import os
-os.chdir('C:/Users/natha/Documents/GitHub/panels/tests/multidomain')
+sys.path.append('../..')
 
 import numpy as np
 from structsolve import solve
@@ -28,9 +25,6 @@ np.set_printoptions(formatter={'float': lambda x: "{0:0.3e}".format(x)})
 from panels.legendre_gauss_quadrature import get_points_weights
 
 
-# import os
-# os.chdir('C:/Users/natha/Documents/GitHub/panels/tests/multidomain')
-
 def img_popup(filename, plot_no = None, title = None):
 
     # plot_no = current plot no
@@ -48,7 +42,7 @@ def img_popup(filename, plot_no = None, title = None):
         else:
             plt.title(title)
         plt.imshow(image)
-        plt.show()
+        #plt.show()
     else:
         if title is None:
             plt.subplot(1,2,plot_no).set_title(filename)
@@ -76,7 +70,7 @@ def convergence():
     plt.ylabel('w [mm]')
     plt.yticks(np.arange(np.min(final_res), np.max(final_res), 0.01))
     # plt.ylim([np.min(final_res), np.max(final_res)])
-    plt.show()
+    #plt.show()
 
 
 def monotonicity_check_displ(check_matrix):
@@ -549,7 +543,7 @@ def test_junk():
     # Plotting results
     if True:
         vec = 'Nxx'
-        res_bot = assy.calc_results(c=c0, group='bot', vec=vec, no_x_gauss=50, no_y_gauss=50)
+        res_bot = assy.calc_results(c=c0, group='bot', vec=vec, nr_x_gauss=50, nr_y_gauss=50)
         # print(type(res_bot))
         # print(np.shape(res_bot['x']))
         # print(res_bot['x'][0])
@@ -560,7 +554,7 @@ def test_junk():
         # print(temp_row)
         # print(temp_col)
 
-        res_top = assy.calc_results(c=c0, group='top', vec=vec, no_x_gauss=50, no_y_gauss=50)
+        res_top = assy.calc_results(c=c0, group='top', vec=vec, nr_x_gauss=50, nr_y_gauss=50)
         vecmin = min(np.min(np.array(res_top[vec])), np.min(np.array(res_bot[vec])))
         vecmax = max(np.max(np.array(res_top[vec])), np.max(np.array(res_bot[vec])))
         print(vecmin, vecmax)
@@ -574,8 +568,8 @@ def test_junk():
     # Test for force
     if True:
         vec = 'Fxx'
-        res_bot = assy.calc_results(c=c0, group='bot', vec=vec, no_x_gauss=5, no_y_gauss=6,
-                                    cte_panel_force=bot2, y_cte_force=bot2.b)
+        res_bot = assy.calc_results(c=c0, group='bot', vec=vec, nr_x_gauss=5, nr_y_gauss=6,
+                                    y_cte_force=bot2.b)
         print(res_bot)
         # print(type(res_bot))
         # print(np.shape(res_bot['x']))
@@ -587,7 +581,7 @@ def test_junk():
         # print(temp_row)
         # print(temp_col)
 
-        # res_top = assy.calc_results(c=c0, group='top', vec=vec, no_x_gauss=5, no_y_gauss=5)
+        # res_top = assy.calc_results(c=c0, group='top', vec=vec, nr_x_gauss=5, nr_y_gauss=5)
         # vecmin = min(np.min(np.array(res_top[vec])), np.min(np.array(res_bot[vec])))
         # vecmax = max(np.max(np.array(res_top[vec])), np.max(np.array(res_bot[vec])))
         # print(vecmin, vecmax)
@@ -607,7 +601,7 @@ def test_junk():
 
 
 
-def test_dcb_vs_fem(no_pan, no_terms, plies, disp_mag, a2, no_y_gauss, grid_x, kw=None):
+def test_dcb_vs_fem(no_pan, no_terms, plies, disp_mag, a2, nr_y_gauss, grid_x, kw=None):
 
     '''
         Full DCB
@@ -910,7 +904,7 @@ def test_dcb_vs_fem(no_pan, no_terms, plies, disp_mag, a2, no_y_gauss, grid_x, k
 
     # Testing Mx at the tip
     if False:
-        stress = assy.stress(c0, group=None, gridx=100, gridy=100, NLterms=True, no_x_gauss=None, no_y_gauss=None,
+        stress = assy.stress(c0, group=None, gridx=100, gridy=100, NLterms=True, nr_x_gauss=None, nr_y_gauss=None,
                    eval_panel=top1, x_cte_force=None, y_cte_force=None)
         Mxx_end = stress["Mxx"][0][:,-1]
         dy_Mxx = np.linspace(0,disp_panel.b, 100)
@@ -921,7 +915,7 @@ def test_dcb_vs_fem(no_pan, no_terms, plies, disp_mag, a2, no_y_gauss, grid_x, k
         force = 0
         for panels_i in [disp_panel]:
             force = assy.force_out_plane(c0, group=None, eval_panel=panels_i, x_cte_force=panels_i.a, y_cte_force=None,
-                      gridx=grid_x, gridy=None, NLterms=True, no_x_gauss=300, no_y_gauss=no_y_gauss)
+                      gridx=grid_x, gridy=None, NLterms=True, nr_x_gauss=300, nr_y_gauss=nr_y_gauss)
         print(f'Force {force}')
 
     generate_plots = False
@@ -967,14 +961,14 @@ def test_dcb_vs_fem(no_pan, no_terms, plies, disp_mag, a2, no_y_gauss, grid_x, k
             if generate_plots:
                 img_popup('test_dcb_before_opening_top_tsl.png',1, f"{vec} top")
                 img_popup('test_dcb_before_opening_bot_tsl.png',2, f"{vec} bot")
-                plt.show()
+                #plt.show()
 
     # Calcuate separation
     if False:
         res_pan_top = assy.calc_results(c=c0, eval_panel=top1, vec='w',
-                                no_x_gauss=100, no_y_gauss=50)
+                                nr_x_gauss=100, nr_y_gauss=50)
         res_pan_bot = assy.calc_results(c=c0, eval_panel=bot1, vec='w',
-                                no_x_gauss=100, no_y_gauss=50)
+                                nr_x_gauss=100, nr_y_gauss=50)
         del_d = assy.calc_separation(res_pan_top, res_pan_bot)
 
         monoton_top = monotonicity_check_displ(res_pan_top['w'][0])
@@ -991,17 +985,17 @@ def test_dcb_vs_fem(no_pan, no_terms, plies, disp_mag, a2, no_y_gauss, grid_x, k
         else:
             bot_mon = 'NOT Monotonic'
 
-        no_x_gauss = 100
-        no_y_gauss = 50
+        nr_x_gauss = 100
+        nr_y_gauss = 50
 
 
-        xis = np.zeros(no_x_gauss, dtype=np.float64)
-        weights_xi = np.zeros(no_x_gauss, dtype=np.float64)
-        etas = np.zeros(no_y_gauss, dtype=np.float64)
-        weights_eta = np.zeros(no_y_gauss, dtype=np.float64)
+        xis = np.zeros(nr_x_gauss, dtype=np.float64)
+        weights_xi = np.zeros(nr_x_gauss, dtype=np.float64)
+        etas = np.zeros(nr_y_gauss, dtype=np.float64)
+        weights_eta = np.zeros(nr_y_gauss, dtype=np.float64)
 
-        get_points_weights(no_x_gauss, xis, weights_xi)
-        get_points_weights(no_y_gauss, etas, weights_eta)
+        get_points_weights(nr_x_gauss, xis, weights_xi)
+        get_points_weights(nr_y_gauss, etas, weights_eta)
 
         xi_grid, eta_grid = np.meshgrid(xis, etas)
 
@@ -1091,7 +1085,7 @@ def test_dcb_vs_fem(no_pan, no_terms, plies, disp_mag, a2, no_y_gauss, grid_x, k
             ax.set_xticks(new_xticks)
             ax.set_xticklabels(new_xtick_labels, fontsize=14)
         # plt.grid()
-        plt.show()
+        #plt.show()
     else:
         monoton_top = None
         monoton_bot = None
@@ -1106,7 +1100,7 @@ def test_dcb_vs_fem(no_pan, no_terms, plies, disp_mag, a2, no_y_gauss, grid_x, k
 
 
 
-def single_panel_bending(no_pan, no_terms, plies, disp_mag, a1, no_y_gauss, grid_x):
+def single_panel_bending(no_pan, no_terms, plies, disp_mag, a1, nr_y_gauss, grid_x):
 
 
     # Properties
@@ -1282,7 +1276,7 @@ def single_panel_bending(no_pan, no_terms, plies, disp_mag, a1, no_y_gauss, grid
         final_res = 0
         for panels_i in [disp_panel]:
             final_res = assy.force_out_plane(c0, group=None, eval_panel=panels_i, x_cte_force=panels_i.a, y_cte_force=None,
-                      gridx=grid_x, gridy=None, NLterms=True, no_x_gauss=no_y_gauss, no_y_gauss=no_y_gauss)
+                      gridx=grid_x, gridy=None, NLterms=True, nr_x_gauss=nr_y_gauss, nr_y_gauss=nr_y_gauss)
             # final_res += force_intgn
         # print(final_res)
         print(final_res)
@@ -1293,7 +1287,7 @@ def single_panel_bending(no_pan, no_terms, plies, disp_mag, a1, no_y_gauss, grid
 
 
 
-def dcb_one_and_half(no_pan, no_terms, plies, disp_mag, a2, no_y_gauss, grid_x, kw):
+def dcb_one_and_half(no_pan, no_terms, plies, disp_mag, a2, nr_y_gauss, grid_x, kw):
 
     '''
     ONE HALF PANEL or HALF PANEL
@@ -1492,11 +1486,11 @@ def dcb_one_and_half(no_pan, no_terms, plies, disp_mag, a2, no_y_gauss, grid_x, 
             # Open images
             if generate_plots:
                 img_popup('test_dcb_before_opening_bot_tsl.png',1, f"{vec} bot")
-                plt.show()
+                #plt.show()
 
     # Testing Mx at the tip
     if False:
-        stress = assy.stress(c0, group=None, gridx=100, gridy=100, NLterms=True, no_x_gauss=None, no_y_gauss=None,
+        stress = assy.stress(c0, group=None, gridx=100, gridy=100, NLterms=True, nr_x_gauss=None, nr_y_gauss=None,
                    eval_panel=top1, x_cte_force=None, y_cte_force=None)
         Mxx_end = stress["Mxx"][0][:,-1]
         dy_Mxx = np.linspace(0,disp_panel.b, 100)
@@ -1507,7 +1501,7 @@ def dcb_one_and_half(no_pan, no_terms, plies, disp_mag, a2, no_y_gauss, grid_x, 
         force = 0
         for panels_i in [top3]:
             force = assy.force_out_plane(c0, group=None, eval_panel=panels_i, x_cte_force=panels_i.a, y_cte_force=None,
-                      gridx=grid_x, gridy=None, NLterms=True, no_x_gauss=300, no_y_gauss=no_y_gauss)
+                      gridx=grid_x, gridy=None, NLterms=True, nr_x_gauss=300, nr_y_gauss=nr_y_gauss)
             # final_res += force_intgn
 
         # return force
@@ -1555,14 +1549,14 @@ def dcb_one_and_half(no_pan, no_terms, plies, disp_mag, a2, no_y_gauss, grid_x, 
             if generate_plots:
                 img_popup('test_dcb_before_opening_top_tsl.png',1, f"{vec} top")
                 img_popup('test_dcb_before_opening_bot_tsl.png',2, f"{vec} bot")
-                plt.show()
+                #plt.show()
 
     # Calcuate separation
     if False:
         res_pan_top = assy.calc_results(c=c0, eval_panel=top1, vec='w',
-                                no_x_gauss=200, no_y_gauss=50)
+                                nr_x_gauss=200, nr_y_gauss=50)
         res_pan_bot = assy.calc_results(c=c0, eval_panel=bot1, vec='w',
-                                no_x_gauss=200, no_y_gauss=50)
+                                nr_x_gauss=200, nr_y_gauss=50)
         print(np.shape(res_pan_bot['w'][0]))
         del_d = assy.calc_separation(res_pan_top, res_pan_bot)
         # Plotting separation and displacements
@@ -1584,7 +1578,7 @@ def dcb_one_and_half(no_pan, no_terms, plies, disp_mag, a2, no_y_gauss, grid_x, 
         plt.contourf(res_pan_bot['w'][0], cmap='jet', levels=levels)
         plt.gca().set_title('Bot displ [mm]')
         plt.colorbar()
-        plt.show()
+        #plt.show()
 
         monoton_top = monotonicity_check_displ(res_pan_top['w'][0])
         monoton_bot = monotonicity_check_displ(res_pan_bot['w'][0])
@@ -1605,7 +1599,6 @@ def dcb_one_and_half(no_pan, no_terms, plies, disp_mag, a2, no_y_gauss, grid_x, 
 def test_leg_sigm(res_x_prev=None, del_d_fit=None):
     import scipy
     from scipy.optimize import leastsq
-    from panels import Shell
 
     c2 = 15
 
@@ -1659,7 +1652,7 @@ def test_leg_sigm(res_x_prev=None, del_d_fit=None):
     else:
         guess = res_x_prev
 
-    res_x, ier = leastsq(func=residuals, x0=guess, args=(del_d_fit), ftol=1.49012e-4, xtol=1.49012e-4)
+    res_x, ier = leastsq(func=residuals, x0=guess, args=(del_d_fit,), ftol=1.49012e-4, xtol=1.49012e-4)
     # best_c = popt2.x
 
     if False:
@@ -1680,7 +1673,7 @@ def test_leg_sigm(res_x_prev=None, del_d_fit=None):
             ax_zoomed.set(xlim=[-1,-0.95], ylim=[-0.0025,0.0025])
             mark_inset(ax, ax_zoomed, loc1=2, loc2=4, fc="none", ec="0.5")
         # plt.legend()
-        plt.show()
+        #plt.show()
     if True:
         filename = f'legen_ftn_val_mn_{m}_{n}_c2_{c2}'
         np.save(filename, func(res_x))
@@ -1779,7 +1772,7 @@ def plot_test_leg_sigm(c_w=None, ftnval_sig_leg=None, ftnval_leg=None, m=None, n
                            transform=ax.transAxes))
                 mark_inset(ax, ax_inset, loc1=2, loc2=4, fc="none", ec="0.5")
             # plt.legend()
-            plt.show()
+            #plt.show()
         if True:
             print(np.min(func(c_w)))
             # print(f'{func(c_w)[0:5]}')
@@ -1788,7 +1781,7 @@ def plot_test_leg_sigm(c_w=None, ftnval_sig_leg=None, ftnval_leg=None, m=None, n
         if False:
             plt.figure()
             plt.plot(func(c_w)[:70])
-            plt.show()
+            #plt.show()
         if False:
             plt.figure()
             print(np.shape(func(c_w)))
@@ -1837,7 +1830,7 @@ def plot_test_leg_sigm(c_w=None, ftnval_sig_leg=None, ftnval_leg=None, m=None, n
                     ax_zoomed.plot(xi, reference(xi, c2), label='Sigmoid', color='blue')
                     ax_zoomed.set(xlim=[-0.90,-0.895], ylim=[-0.001,0.001])
                     mark_inset(ax, ax_zoomed, loc1=2, loc2=4, fc="none", ec="0.5")
-            plt.show()
+            #plt.show()
 
         # Plotting another curve in the zoomed in view
         if True:
@@ -1871,7 +1864,7 @@ def plot_test_leg_sigm(c_w=None, ftnval_sig_leg=None, ftnval_leg=None, m=None, n
                            # transform=ax.transAxes))
                 mark_inset(ax, ax_inset, loc1=2, loc2=4, fc="none", ec="0.5")
             # plt.legend()
-            plt.show()
+            #plt.show()
 
 
     def residuals(c_w, y):
@@ -1885,12 +1878,12 @@ if __name__ == "__main__":
     # COMPLETE DCB
     if True:
         for a2 in [0.15, 0.1,0.099,0.09,0.05,0.01,0.005,0.0015]:
-            test_dcb_vs_fem(no_pan=3, no_terms=10, plies=1, disp_mag=0.01, a2=a2, no_y_gauss=100, grid_x=50)
+            test_dcb_vs_fem(no_pan=3, no_terms=10, plies=1, disp_mag=0.01, a2=a2, nr_y_gauss=100, grid_x=50)
             print()
 
     # DCB TEST
     # Qxx_end_15_9, dy_Qxx_15_9, Mxx_end_15_9, dy_Mxx_15_9 = test_dcb_vs_fem(no_pan=3, no_terms=30, plies=1, disp_mag=1,
-    #                                 a2 = 1, no_y_gauss=100, grid_x=1000, kw=1e5)
+    #                                 a2 = 1, nr_y_gauss=100, grid_x=1000, kw=1e5)
 
     # SINGLE PLATE TEST
     if False:
@@ -1899,12 +1892,12 @@ if __name__ == "__main__":
         for a1 in [5]:#,10,17.5,25,32.5,50,62.5,75,82.5,90,95]:
             print(f'a1 {a1}')
             sp_kr7_t8[count, 1] = single_panel_bending(no_pan=2, no_terms=8,
-                                            plies=1, disp_mag=15, a1=a1, no_y_gauss=100, grid_x=500)
+                                            plies=1, disp_mag=15, a1=a1, nr_y_gauss=100, grid_x=500)
             sp_kr7_t8[count, 0] = a1
             count += 1
     if False:
         f_calc = single_panel_bending(no_pan=2, no_terms=10,
-                                        plies=1, disp_mag=0.01, a1=52, no_y_gauss=100, grid_x=500)
+                                        plies=1, disp_mag=0.01, a1=52, nr_y_gauss=100, grid_x=500)
 
     # ONE AND HALF DCB TEST (HALF PANEL)
     if False:
@@ -1913,12 +1906,12 @@ if __name__ == "__main__":
         for a2 in [0.5]:#,1,5]:#,10,20,30]:
             print(f'a2 {a2}')
             hp_kr9_ksb9_t15[count, 1] = dcb_one_and_half(no_pan=3, no_terms=25, plies=1, disp_mag=15,
-                                    a2 = a2, no_y_gauss=300, grid_x=1000, kw=1e5)
+                                    a2 = a2, nr_y_gauss=300, grid_x=1000, kw=1e5)
             hp_kr9_ksb9_t15[count, 0] = a2
             count += 1
     if False:
         dcb_one_and_half(no_pan=3, no_terms=25, plies=1, disp_mag=1075.01,
-                                a2 = 24, no_y_gauss=300, grid_x=1000, kw=1e5)
+                                a2 = 24, nr_y_gauss=300, grid_x=1000, kw=1e5)
 
     if False:
         hp_kr9_ksb9_t15 = np.zeros((7,2))
@@ -1926,12 +1919,12 @@ if __name__ == "__main__":
         for terms in [4,8,12,15,20,25,30]:#,10,20,30]:
             print(f'terms {terms}')
             hp_kr9_ksb9_t15[count, 1] = dcb_one_and_half(no_pan=3, no_terms=terms, plies=1, disp_mag=15,
-                                    a2 = 1, no_y_gauss=300, grid_x=1000, kw=1e5)
+                                    a2 = 1, nr_y_gauss=300, grid_x=1000, kw=1e5)
             hp_kr9_ksb9_t15[count, 0] = a2
             count += 1
 
     # monoton_top, monoton_bot = dcb_one_and_half(no_pan=3, no_terms=25, plies=1, disp_mag=15,
-                            # a2 = 0.5, no_y_gauss=300, grid_x=1000, kw=1e5)
+                            # a2 = 0.5, nr_y_gauss=300, grid_x=1000, kw=1e5)
 
     # Fitting arbitary curves using different sets of shape functions
     if False:
