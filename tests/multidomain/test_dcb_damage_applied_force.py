@@ -1,6 +1,5 @@
-local_run = True # True implies running on local device and not the cluster
-
 import sys
+sys.path.append('../..')
 import os
 
 import numpy as np
@@ -9,14 +8,9 @@ from structsolve.sparseutils import finalize_symmetric_matrix, remove_null_cols
 import time
 import scipy
 
-if local_run:
-    os.chdir('C:/Users/natha/OneDrive - Delft University of Technology/Fokker Internship/_Thesis/_Results/Raw Results/DCB Damage/3 pan')
-    FEM = np.load('FEM.npy')
-
-    sys.path.append('C:/Users/natha/Documents/GitHub/panels')
-    sys.path.append('..\\..')
-    os.chdir('C:/Users/natha/Documents/GitHub/panels/tests/multidomain')
-
+local_run = True # True implies running on local device and not the cluster
+#if local_run:
+    #FEM = np.load('FEM.npy')
 
 from panels.shell import Shell
 from panels.multidomain.connections import calc_ku_kv_kw_point_pd
@@ -92,8 +86,8 @@ def img_popup(filename, plot_no = None, title = None):
 
 
 
-def test_dcb_damage_prop_fcrack_applied_force(phy_dim, no_terms, filename='',
-                  k_i=None, tau_o=None, no_x_gauss=None, no_y_gauss=None, load_iter_no_pts=None, G1c=None):
+def test_dcb_damage_prop_fcrack_applied_force(phy_dim, nr_terms, filename='',
+                  k_i=None, tau_o=None, nr_x_gauss=None, nr_y_gauss=None, load_iter_nr_pts=None, G1c=None):
 
     '''
         FORCE CONTROLLED LOADING
@@ -122,7 +116,7 @@ def test_dcb_damage_prop_fcrack_applied_force(phy_dim, no_terms, filename='',
     # Start time
     start_time = time.time()
 
-    no_pan = phy_dim[0]
+    nr_pan = phy_dim[0]
     b = phy_dim[1]
 
     # Properties
@@ -141,10 +135,10 @@ def test_dcb_damage_prop_fcrack_applied_force(phy_dim, no_terms, filename='',
     a3 = 10
 
     #others
-    m_tsl = no_terms[0]
-    n_tsl = no_terms[0]
-    m = no_terms[1]
-    n = no_terms[1]
+    m_tsl = nr_terms[0]
+    n_tsl = nr_terms[0]
+    m = nr_terms[1]
+    n = nr_terms[1]
     # print(f'no terms : {m}')
 
     plies = 15
@@ -154,28 +148,28 @@ def test_dcb_damage_prop_fcrack_applied_force(phy_dim, no_terms, filename='',
 
     laminaprop = (E1, E2, nu12, G12, G12, G12)
 
-    # no_pan = 3
+    # nr_pan = 3
 
     # Top DCB panels
     top1 = Shell(group='top', x0=0, y0=0, a=a1, b=b, m=m_tsl, n=n_tsl, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
-    if no_pan == 2:
+    if nr_pan == 2:
         top2 = Shell(group='top', x0=a1, y0=0, a=a-a1, b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
-    if no_pan == 3:
+    if nr_pan == 3:
         top2 = Shell(group='top', x0=a1, y0=0, a=a2, b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
         top3 = Shell(group='top', x0=a1+a2, y0=0, a=a-a1-a2, b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
-    if no_pan == 4:
+    if nr_pan == 4:
         top2 = Shell(group='top', x0=a1, y0=0, a=a2, b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
         top3 = Shell(group='top', x0=a1+a2, y0=0, a=a3, b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
         top4 = Shell(group='top', x0=a1+a2+a3, y0=0, a=a-(a1+a2+a3), b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
 
     # Bottom DCB panels
     bot1 = Shell(group='bot', x0=0, y0=0, a=a1, b=b, m=m_tsl, n=n_tsl, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
-    if no_pan == 2:
+    if nr_pan == 2:
         bot2 = Shell(group='bot', x0=a1, y0=0, a=a-a1, b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
-    if no_pan == 3:
+    if nr_pan == 3:
         bot2 = Shell(group='bot', x0=a1, y0=0, a=a2, b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
         bot3 = Shell(group='bot', x0=a1+a2, y0=0, a=a-a1-a2, b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
-    if no_pan == 4:
+    if nr_pan == 4:
         bot2 = Shell(group='bot', x0=a1, y0=0, a=a2, b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
         bot3 = Shell(group='bot', x0=a1+a2, y0=0, a=a3, b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
         bot4 = Shell(group='bot', x0=a1+a2+a3, y0=0, a=a-(a1+a2+a3), b=b, m=m, n=n, plyt=ply_thickness, stack=simple_layup, laminaprop=laminaprop)
@@ -214,7 +208,7 @@ def test_dcb_damage_prop_fcrack_applied_force(phy_dim, no_terms, filename='',
         top2.y1v = 1 ; top2.y1vr = 1 ; top2.y2v = 1 ; top2.y2vr = 1
         top2.y1w = 1 ; top2.y1wr = 1 ; top2.y2w = 1 ; top2.y2wr = 1
 
-        if no_pan == 3:
+        if nr_pan == 3:
             top3.x1u = 1 ; top3.x1ur = 1 ; top3.x2u = 1 ; top3.x2ur = 1
             top3.x1v = 1 ; top3.x1vr = 1 ; top3.x2v = 1 ; top3.x2vr = 1
             top3.x1w = 1 ; top3.x1wr = 1 ; top3.x2w = 1 ; top3.x2wr = 1
@@ -222,7 +216,7 @@ def test_dcb_damage_prop_fcrack_applied_force(phy_dim, no_terms, filename='',
             top3.y1v = 1 ; top3.y1vr = 1 ; top3.y2v = 1 ; top3.y2vr = 1
             top3.y1w = 1 ; top3.y1wr = 1 ; top3.y2w = 1 ; top3.y2wr = 1
 
-        if no_pan == 4:
+        if nr_pan == 4:
             top3.x1u = 1 ; top3.x1ur = 1 ; top3.x2u = 1 ; top3.x2ur = 1
             top3.x1v = 1 ; top3.x1vr = 1 ; top3.x2v = 1 ; top3.x2vr = 1
             top3.x1w = 1 ; top3.x1wr = 1 ; top3.x2w = 1 ; top3.x2wr = 1
@@ -244,7 +238,7 @@ def test_dcb_damage_prop_fcrack_applied_force(phy_dim, no_terms, filename='',
         bot1.y1v = 1 ; bot1.y1vr = 1 ; bot1.y2v = 1 ; bot1.y2vr = 1
         bot1.y1w = 1 ; bot1.y1wr = 1 ; bot1.y2w = 1 ; bot1.y2wr = 1
 
-        if no_pan == 2:
+        if nr_pan == 2:
             bot2.x1u = 1 ; bot2.x1ur = 1 ; bot2.x2u = bot_t ; bot2.x2ur = 1
             bot2.x1v = 1 ; bot2.x1vr = 1 ; bot2.x2v = bot_t ; bot2.x2vr = 1
             bot2.x1w = 1 ; bot2.x1wr = 1 ; bot2.x2w = bot_t ; bot2.x2wr = bot_r
@@ -252,7 +246,7 @@ def test_dcb_damage_prop_fcrack_applied_force(phy_dim, no_terms, filename='',
             bot2.y1v = 1 ; bot2.y1vr = 1 ; bot2.y2v = 1 ; bot2.y2vr = 1
             bot2.y1w = 1 ; bot2.y1wr = 1 ; bot2.y2w = 1 ; bot2.y2wr = 1
 
-        if no_pan == 3:
+        if nr_pan == 3:
             bot2.x1u = 1 ; bot2.x1ur = 1 ; bot2.x2u = 1 ; bot2.x2ur = 1
             bot2.x1v = 1 ; bot2.x1vr = 1 ; bot2.x2v = 1 ; bot2.x2vr = 1
             bot2.x1w = 1 ; bot2.x1wr = 1 ; bot2.x2w = 1 ; bot2.x2wr = 1
@@ -267,7 +261,7 @@ def test_dcb_damage_prop_fcrack_applied_force(phy_dim, no_terms, filename='',
             bot3.y1v = 1 ; bot3.y1vr = 1 ; bot3.y2v = 1 ; bot3.y2vr = 1
             bot3.y1w = 1 ; bot3.y1wr = 1 ; bot3.y2w = 1 ; bot3.y2wr = 1
 
-        if no_pan == 4:
+        if nr_pan == 4:
             bot2.x1u = 1 ; bot2.x1ur = 1 ; bot2.x2u = 1 ; bot2.x2ur = 1
             bot2.x1v = 1 ; bot2.x1vr = 1 ; bot2.x2v = 1 ; bot2.x2vr = 1
             bot2.x1w = 1 ; bot2.x1wr = 1 ; bot2.x2w = 1 ; bot2.x2wr = 1
@@ -290,14 +284,14 @@ def test_dcb_damage_prop_fcrack_applied_force(phy_dim, no_terms, filename='',
             bot4.y1w = 1 ; bot4.y1wr = 1 ; bot4.y2w = 1 ; bot4.y2wr = 1
 
 
-    if no_x_gauss is None:
-        no_x_gauss = 60
-    if no_y_gauss is None:
-        no_y_gauss = 30
+    if nr_x_gauss is None:
+        nr_x_gauss = 60
+    if nr_y_gauss is None:
+        nr_y_gauss = 30
 
     # All connections - list of dict
     if False: # incomplete
-        if no_pan == 2:
+        if nr_pan == 2:
             conn = [
              # skin-skin
              dict(p1=top1, p2=top2, func='SSxcte', xcte1=top1.a, xcte2=0),
@@ -305,17 +299,17 @@ def test_dcb_damage_prop_fcrack_applied_force(phy_dim, no_terms, filename='',
              dict(p1=top1, p2=bot1, func='SB'), #'_TSL', tsl_type = 'linear'),
                 # dict(p1=top2, p2=bot2, func='SB_TSL', tsl_type = 'linear')
             ]
-    if no_pan == 3:
+    if nr_pan == 3:
         conn = [
            # skin-skin
            dict(p1=top1, p2=top2, func='SSxcte', xcte1=top1.a, xcte2=0),
            dict(p1=top2, p2=top3, func='SSxcte', xcte1=top2.a, xcte2=0),
            dict(p1=bot1, p2=bot2, func='SSxcte', xcte1=bot1.a, xcte2=0),
            dict(p1=bot2, p2=bot3, func='SSxcte', xcte1=bot2.a, xcte2=0),
-           dict(p1=top1, p2=bot1, func='SB_TSL', tsl_type = 'bilinear', no_x_gauss=no_x_gauss,
-                no_y_gauss=no_y_gauss, tau_o=tau_o, G1c=G1c, k_o=k_i, del_o=tau_o/k_i, del_f=2*G1c/tau_o)
+           dict(p1=top1, p2=bot1, func='SB_TSL', tsl_type = 'bilinear', nr_x_gauss=nr_x_gauss,
+                nr_y_gauss=nr_y_gauss, tau_o=tau_o, G1c=G1c, k_o=k_i, del_o=tau_o/k_i, del_f=2*G1c/tau_o)
         ]
-    if no_pan == 4:
+    if nr_pan == 4:
         conn = [
            # skin-skin
            dict(p1=top1, p2=top2, func='SSxcte', xcte1=top1.a, xcte2=0),
@@ -324,27 +318,27 @@ def test_dcb_damage_prop_fcrack_applied_force(phy_dim, no_terms, filename='',
            dict(p1=bot1, p2=bot2, func='SSxcte', xcte1=bot1.a, xcte2=0),
            dict(p1=bot2, p2=bot3, func='SSxcte', xcte1=bot2.a, xcte2=0),
            dict(p1=bot3, p2=bot4, func='SSxcte', xcte1=bot3.a, xcte2=0),
-           dict(p1=top1, p2=bot1, func='SB_TSL', tsl_type = 'bilinear', no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, k_i=k_i, tau_o=tau_o, G1c=G1c)
+           dict(p1=top1, p2=bot1, func='SB_TSL', tsl_type = 'bilinear', nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, k_i=k_i, tau_o=tau_o, G1c=G1c)
         ]
 
     # This determines the positions of each panel's (sub)matrix in the global matrix when made a MD obj below
     # So changing this changes the placements i.e. starting row and col of each
-    if no_pan == 2:
+    if nr_pan == 2:
         panels = [bot1, bot2, top1, top2]
-    if no_pan == 3:
+    if nr_pan == 3:
         panels = [bot1, bot2, bot3, top1, top2, top3]
-    if no_pan == 4:
+    if nr_pan == 4:
         panels = [bot1, bot2, bot3, bot4, top1, top2, top3, top4]
 
     assy = MultiDomain(panels=panels, conn=conn) # assy is now an object of the MultiDomain class
     # Here the panels (shell objs) are modified -- their starting positions in the global matrix is assigned etc
 
     # Panel at which the disp is applied
-    if no_pan == 2:
+    if nr_pan == 2:
         disp_panel = top2
-    if no_pan == 3:
+    if nr_pan == 3:
         disp_panel = top3
-    if no_pan == 4:
+    if nr_pan == 4:
         disp_panel = top4
 
     size = assy.get_size()
@@ -363,36 +357,36 @@ def test_dcb_damage_prop_fcrack_applied_force(phy_dim, no_terms, filename='',
     # Finding info of the connection
     for conn_list in conn:
         if conn_list['func'] == 'SB_TSL':
-            no_x_gauss = conn_list['no_x_gauss']
-            no_y_gauss = conn_list['no_y_gauss']
+            nr_x_gauss = conn_list['nr_x_gauss']
+            nr_y_gauss = conn_list['nr_y_gauss']
             tsl_type = conn_list['tsl_type']
             p_top = conn_list['p1']
             p_bot = conn_list['p2']
             break # Assuming there is only 1 connection
 
     # Initilaize mat to store results
-    if load_iter_no_pts is None:
-        load_iter_no_pts = 150
+    if load_iter_nr_pts is None:
+        load_iter_nr_pts = 150
 
     load_reversal = False
     if not load_reversal:
-        # load_iter = np.unique(np.concatenate((np.linspace(0.01,1,int(0.3*load_iter_no_pts)), np.linspace(1,5,int(0.3*load_iter_no_pts)),
-        #                                 np.linspace(5,8,int(0.4*load_iter_no_pts)))))
-        load_iter = np.unique(np.concatenate((np.linspace(0.01,150,int(0.6*load_iter_no_pts)),
-                                              np.linspace(150,180,int(0.4*load_iter_no_pts)))))
+        # load_iter = np.unique(np.concatenate((np.linspace(0.01,1,int(0.3*load_iter_nr_pts)), np.linspace(1,5,int(0.3*load_iter_nr_pts)),
+        #                                 np.linspace(5,8,int(0.4*load_iter_nr_pts)))))
+        load_iter = np.unique(np.concatenate((np.linspace(0.01,150,int(0.6*load_iter_nr_pts)),
+                                              np.linspace(150,180,int(0.4*load_iter_nr_pts)))))
         load_iter = load_iter/disp_panel.b
     # load_iter = np.linspace(0.01,8,100)
     else:
-    # load_iter = np.concatenate((np.linspace(0.01,3,int(0.1*load_iter_no_pts)), np.linspace(3,6,int(0.25*load_iter_no_pts)),
-    #                                    np.linspace(6,7,int(0.25*load_iter_no_pts)),
-    #                                    np.linspace(7,0,int(0.1*load_iter_no_pts)), np.linspace(0,7,int(0.1*load_iter_no_pts)),
-    #                                    np.linspace(7,8,int(0.2*load_iter_no_pts)) ))
+    # load_iter = np.concatenate((np.linspace(0.01,3,int(0.1*load_iter_nr_pts)), np.linspace(3,6,int(0.25*load_iter_nr_pts)),
+    #                                    np.linspace(6,7,int(0.25*load_iter_nr_pts)),
+    #                                    np.linspace(7,0,int(0.1*load_iter_nr_pts)), np.linspace(0,7,int(0.1*load_iter_nr_pts)),
+    #                                    np.linspace(7,8,int(0.2*load_iter_nr_pts)) ))
         load_iter = np.array([0.01, 1.01, 2.00, 3.00, 2.0, 0.01, 2.0, 3.0, 4.0])
 
     # Initilize variables to store results
-    dmg_index = np.zeros((no_y_gauss,no_x_gauss,np.shape(load_iter)[0]))
-    del_d = np.zeros((no_y_gauss,no_x_gauss,np.shape(load_iter)[0]))
-    kw_tsl = np.zeros((no_y_gauss,no_x_gauss,np.shape(load_iter)[0]))
+    dmg_index = np.zeros((nr_y_gauss,nr_x_gauss,np.shape(load_iter)[0]))
+    del_d = np.zeros((nr_y_gauss,nr_x_gauss,np.shape(load_iter)[0]))
+    kw_tsl = np.zeros((nr_y_gauss,nr_x_gauss,np.shape(load_iter)[0]))
     force_intgn = np.zeros((np.shape(load_iter)[0], 2))
     force_intgn_dmg = np.zeros((np.shape(load_iter)[0], 2))
     c_all = np.zeros((size, np.shape(load_iter)[0]))
@@ -467,7 +461,7 @@ def test_dcb_damage_prop_fcrack_applied_force(phy_dim, no_terms, filename='',
             kT = assy.calc_kT(c=ci, kC_conn=kC_conn)
 
             # Setting the max DI to be 0 - needed to calc kcrack
-            assy.update_TSL_history(curr_max_dmg_index=np.zeros((no_y_gauss, no_x_gauss)))
+            assy.update_TSL_history(curr_max_dmg_index=np.zeros((nr_y_gauss, nr_x_gauss)))
 
             k0 = kT
 
@@ -495,8 +489,8 @@ def test_dcb_damage_prop_fcrack_applied_force(phy_dim, no_terms, filename='',
                 else:
                     if load_iter_no == 0:
                         # Prev disp step doesnt exist so pristine variables
-                        kcrack = assy.calc_kcrack(conn=conn, c_i=c, kw_tsl_i_1=k_i*np.ones((no_y_gauss, no_x_gauss)),
-                                          del_d_i_1=np.zeros((no_y_gauss, no_x_gauss)))
+                        kcrack = assy.calc_kcrack(conn=conn, c_i=c, kw_tsl_i_1=k_i*np.ones((nr_y_gauss, nr_x_gauss)),
+                                          del_d_i_1=np.zeros((nr_y_gauss, nr_x_gauss)))
                     else:
                         kcrack = assy.calc_kcrack(conn=conn, c_i=c, kw_tsl_i_1=kw_tsl[:,:,load_iter_no-1],
                                               del_d_i_1=del_d[:,:,load_iter_no-1])
@@ -505,8 +499,8 @@ def test_dcb_damage_prop_fcrack_applied_force(phy_dim, no_terms, filename='',
 
             # force vector due to the crack creation
             if load_iter_no == 0:
-                fcrack = assy.calc_fcrack(c_i=c, kw_tsl_i_1=k_i*np.ones((no_y_gauss, no_x_gauss)),
-                                      del_d_i_1=np.zeros((no_y_gauss, no_x_gauss)), conn=conn, kcrack=kcrack)
+                fcrack = assy.calc_fcrack(c_i=c, kw_tsl_i_1=k_i*np.ones((nr_y_gauss, nr_x_gauss)),
+                                      del_d_i_1=np.zeros((nr_y_gauss, nr_x_gauss)), conn=conn, kcrack=kcrack)
             else:
                 fcrack = assy.calc_fcrack(c_i=c, kw_tsl_i_1=kw_tsl[:,:,load_iter_no-1],
                                       del_d_i_1=del_d[:,:,load_iter_no-1], conn=conn, kcrack=kcrack)
@@ -612,11 +606,11 @@ def test_dcb_damage_prop_fcrack_applied_force(phy_dim, no_terms, filename='',
                 # Ques: should first update max del d then calc kw_tsl etc ??
         if hasattr(assy, "dmg_index"):
             kw_tsl[:,:,load_iter_no], dmg_index[:,:,load_iter_no], del_d[:,:,load_iter_no]  = assy.calc_k_dmg(c=c, pA=p_top, pB=p_bot,
-                                                 no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type,
+                                                 nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, tsl_type=tsl_type,
                                                  prev_max_dmg_index=assy.dmg_index, k_i=k_i, tau_o=tau_o)
         else:
             kw_tsl[:,:,load_iter_no], dmg_index[:,:,load_iter_no], del_d[:,:,load_iter_no]  = assy.calc_k_dmg(c=c, pA=p_top, pB=p_bot,
-                                                 no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type,
+                                                 nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, tsl_type=tsl_type,
                                                  prev_max_dmg_index=None, k_i=k_i, tau_o=tau_o)
 
         c_all[:,load_iter_no] = c
@@ -624,7 +618,7 @@ def test_dcb_damage_prop_fcrack_applied_force(phy_dim, no_terms, filename='',
         # Update max del_d AFTER a converged NR iteration
         assy.update_TSL_history(curr_max_dmg_index=dmg_index[:,:,load_iter_no])
 
-        # kw_tsl[:,:,load_iter_no], dmg_index[:,:,load_iter_no], del_d[:,:,load_iter_no] = assy.calc_k_dmg(c=c, pA=p_top, pB=p_bot, no_x_gauss=no_x_gauss, no_y_gauss=no_y_gauss, tsl_type=tsl_type)
+        # kw_tsl[:,:,load_iter_no], dmg_index[:,:,load_iter_no], del_d[:,:,load_iter_no] = assy.calc_k_dmg(c=c, pA=p_top, pB=p_bot, nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, tsl_type=tsl_type)
         if not local_run:
             log_file = open(f'{filename}.txt', 'a')
             log_file.write(f'{(load_iter_no+1)/np.shape(load_iter)[0]*100:.1f}% - {filename} -- load_p={load_p:.3f} -- max DI {np.max(dmg_index[:,:,load_iter_no]):.4f}\n')
@@ -638,7 +632,7 @@ def test_dcb_damage_prop_fcrack_applied_force(phy_dim, no_terms, filename='',
         # Calc displ of top and bottom panels at each increment
         if True:
             res_pan_top = assy.calc_results(c=c, eval_panel=disp_panel, vec='w',
-                                    no_x_gauss=200, no_y_gauss=50)
+                                    nr_x_gauss=200, nr_y_gauss=50)
             max_displ_w = np.max(res_pan_top['w'][-1])
 
             # Storing actual panel displ instead of disp that 'should' be applied
@@ -652,7 +646,7 @@ def test_dcb_damage_prop_fcrack_applied_force(phy_dim, no_terms, filename='',
                 plt.figure(figsize=(10,7))
                 plt.plot(force_intgn[:load_iter_no+1, 0], force_intgn[:load_iter_no+1, 1], label = 'Line')
                 plt.plot(force_intgn_dmg[:load_iter_no+1, 0], force_intgn_dmg[:load_iter_no+1, 1], label='Area Int')
-                plt.plot(FEM[:,0],FEM[:,1], label='FEM')
+                #plt.plot(FEM[:,0],FEM[:,1], label='FEM')
                 plt.ylabel('Force [N]', fontsize=14)
                 plt.xlabel('Displacement [mm]', fontsize=14)
                 plt.xticks(fontsize=14)
@@ -704,8 +698,8 @@ def test_dcb_damage_prop_fcrack_applied_force(phy_dim, no_terms, filename='',
     # Plotting results
     if False:
         for vec in ['w']:#, 'Mxx']:#, 'Myy', 'Mxy']:#, 'Nxx', 'Nyy']:
-            res_bot = assy.calc_results(c=c, group='bot', vec=vec, no_x_gauss=None, no_y_gauss=None)
-            res_top = assy.calc_results(c=c, group='top', vec=vec, no_x_gauss=None, no_y_gauss=None)
+            res_bot = assy.calc_results(c=c, group='bot', vec=vec, nr_x_gauss=None, nr_y_gauss=None)
+            res_top = assy.calc_results(c=c, group='top', vec=vec, nr_x_gauss=None, nr_y_gauss=None)
             vecmin = min(np.min(np.array(res_top[vec])), np.min(np.array(res_bot[vec])))
             vecmax = max(np.max(np.array(res_top[vec])), np.max(np.array(res_bot[vec])))
             if vec != 'w':
@@ -755,10 +749,6 @@ if __name__ == "__main__":
         if True: # with fcrack
         # p3_70_25_m18_8_ki1e5_tauo67_nx60_ny30_load_pts30_G1c112
             dmg_index, del_d, kw_tsl, force_intgn, c_all = test_dcb_damage_prop_fcrack_applied_force(phy_dim=[3,25],
-                no_terms=[12,8], filename='test_loadctrl', k_i=1e4, tau_o=87, no_x_gauss=60,
-                no_y_gauss=30, load_iter_no_pts=30, G1c=1.12)
-
-
-
-
+                nr_terms=[12,8], filename='test_loadctrl', k_i=1e4, tau_o=87, nr_x_gauss=60,
+                nr_y_gauss=30, load_iter_nr_pts=30, G1c=1.12)
 
