@@ -1,6 +1,5 @@
 import platform
 import gc
-# from multiprocessing import Pool
 
 import numpy as np
 from numpy import linspace, reshape
@@ -8,7 +7,7 @@ from scipy.sparse import csr_matrix
 from structsolve.sparseutils import finalize_symmetric_matrix
 from matplotlib import pyplot as plt
 
-from panels.legendre_gauss_quadrature import get_points_weights
+from panels.legendre_gauss_quadrature import get_points_weights_304
 from panels.logger import msg, warn
 from panels.shell import DOUBLE, check_c, Shell
 import panels.modelDB as modelDB
@@ -19,7 +18,7 @@ def default_field(panel, gridx, gridy):
     xs = linspace(0, panel.a, gridx)
     ys = linspace(0, panel.b, gridy)
     xs, ys = np.meshgrid(xs, ys, copy=False)
-        # Now xs and ys have the x and y coord of all the grid points i.e. size = no_grid_x * no_grid_y
+    # Now xs and ys have the x and y coord of all the grid points i.e. size = no_grid_x * no_grid_y
     # Scalar inputs are converted to 1D arrays, whilst higher-dimensional inputs are preserved
     xs = np.atleast_1d(np.array(xs, dtype=DOUBLE))
     ys = np.atleast_1d(np.array(ys, dtype=DOUBLE))
@@ -27,20 +26,6 @@ def default_field(panel, gridx, gridy):
     xs = xs.ravel()
     ys = ys.ravel()
     return xs, ys, shape
-
-# DOESNT WORK
-def calc_kT_parallel(p, c, size):
-    silent = True
-    kT = 0
-    if p.row_start is None or p.col_start is None:
-        raise ValueError('Shell attributes "row_start" and "col_start" must be defined!')
-    # Both kC and kG are not symmetric now
-    kT += p.calc_kC(c=c, size=size, row0=p.row_start, col0=p.col_start,
-            silent=silent, finalize=False, NLgeom=True) # inc=inc,  - REMOVED bec not in shell
-    # print(f'kC {np.max(kT):.3e}')
-    kT += p.calc_kG(c=c, size=size, row0=p.row_start,
-            col0=p.col_start, silent=silent, finalize=False, NLgeom=True)
-    return kT
 
 
 class MultiDomain(object):
@@ -110,9 +95,9 @@ class MultiDomain(object):
 
 
     def get_size(self):
-        '''
+        """
         Size of K of a single panel
-        '''
+        """
         self.size = sum([3*p.m*p.n for p in self.panels])
         return self.size
 
@@ -459,6 +444,7 @@ class MultiDomain(object):
 
         return res
 
+
     def uvw(self, c, group, gridx=50, gridy=50, nr_x_gauss=None, nr_y_gauss=None,
             eval_panel=None):
         r"""Calculate the displacement field
@@ -524,7 +510,7 @@ class MultiDomain(object):
                     # Gauss points are between 1 and -1
                 x = np.zeros(nr_x_gauss, dtype=np.float64)
                 x_weights = np.zeros(nr_x_gauss, dtype=np.float64)
-                get_points_weights(nr_x_gauss, x, x_weights)
+                get_points_weights_304(nr_x_gauss, x, x_weights)
                 # Converting to physical coord as per panel dimensions
                 # Done bec the clpt_bardell_field.pyx ftn converts it to natural coord
                 x = (panel.a/2)*(x + 1)
@@ -534,7 +520,7 @@ class MultiDomain(object):
                 # Getting the gauss points and weights for y
                 y = np.zeros(nr_y_gauss, dtype=np.float64)
                 y_weights = np.zeros(nr_y_gauss, dtype=np.float64)
-                get_points_weights(nr_y_gauss, y, y_weights)
+                get_points_weights_304(nr_y_gauss, y, y_weights)
                 # Converting to physical coord as per panel dimensions
                 # Done bec the clpt_bardell_field.pyx ftn converts it to natural coord
                 y = (panel.b/2)*(y + 1)
@@ -634,7 +620,7 @@ class MultiDomain(object):
                     # Gauss points are between 1 and -1
                 x = np.zeros(nr_x_gauss, dtype=np.float64)
                 x_weights = np.zeros(nr_x_gauss, dtype=np.float64)
-                get_points_weights(nr_x_gauss, x, x_weights)
+                get_points_weights_304(nr_x_gauss, x, x_weights)
                 # Converting to physical coord as per panel dimensions
                 # Done bec the clpt_bardell_field.pyx ftn converts it to natural coord
                 x = (panel.a/2)*(x + 1)
@@ -644,7 +630,7 @@ class MultiDomain(object):
                 # Getting the gauss points and weights for y
                 y = np.zeros(nr_y_gauss, dtype=np.float64)
                 y_weights = np.zeros(nr_y_gauss, dtype=np.float64)
-                get_points_weights(nr_y_gauss, y, y_weights)
+                get_points_weights_304(nr_y_gauss, y, y_weights)
                 # Converting to physical coord as per panel dimensions
                 # Done bec the clpt_bardell_field.pyx ftn converts it to natural coord
                 y = (panel.b/2)*(y + 1)
@@ -733,7 +719,7 @@ class MultiDomain(object):
                 # Getting the gauss points and weights for x
                 x = np.zeros(nr_x_gauss, dtype=np.float64)
                 x_weights = np.zeros(nr_x_gauss, dtype=np.float64)
-                get_points_weights(nr_x_gauss, x, x_weights)
+                get_points_weights_304(nr_x_gauss, x, x_weights)
                 # Converting to physical coord as per panel dimensions
                 x = (panel.a/2)*(x + 1)
             else:
@@ -742,7 +728,7 @@ class MultiDomain(object):
                 # Getting the gauss points and weights for y
                 y = np.zeros(nr_y_gauss, dtype=np.float64)
                 y_weights = np.zeros(nr_y_gauss, dtype=np.float64)
-                get_points_weights(nr_y_gauss, y, y_weights)
+                get_points_weights_304(nr_y_gauss, y, y_weights)
                 # Converting to physical coord as per panel dimensions
                 y = (panel.b/2)*(y + 1)
             else:
@@ -876,7 +862,7 @@ class MultiDomain(object):
                 # Getting the gauss points and weights
                 y_temp = np.zeros(nr_y_gauss, dtype=np.float64)
                 weights = np.zeros(nr_y_gauss, dtype=np.float64)
-                get_points_weights(nr_y_gauss, y_temp, weights)
+                get_points_weights_304(nr_y_gauss, y_temp, weights)
 
             if y_cte_force is not None:
                 [row, _] = np.where(np.isclose(res_stress['y'][0], y_cte_force))
@@ -891,10 +877,11 @@ class MultiDomain(object):
                 # Getting the gauss points and weights
                 x_temp = np.zeros(nr_x_gauss, dtype=np.float64)
                 weights = np.zeros(nr_x_gauss, dtype=np.float64)
-                get_points_weights(nr_x_gauss, x_temp, weights)
+                get_points_weights_304(nr_x_gauss, x_temp, weights)
 
             # Integration
             force_intgn = np.dot(weights, stress_field)
+
             # Adding keys by modifying keys of res_stress (F added, N removed)
             res[f'F{vec[1:]}'] = force_intgn
 
@@ -920,11 +907,11 @@ class MultiDomain(object):
             # Gauss points and weights
             y_gauss = np.zeros(nr_y_gauss, dtype=np.float64)
             weights_y = np.zeros(nr_y_gauss, dtype=np.float64)
-            get_points_weights(nr_y_gauss, y_gauss, weights_y)
+            get_points_weights_304(nr_y_gauss, y_gauss, weights_y)
 
             x_gauss = np.zeros(nr_x_gauss, dtype=np.float64)
             weights_x = np.zeros(nr_x_gauss, dtype=np.float64)
-            get_points_weights(nr_x_gauss, x_gauss, weights_x)
+            get_points_weights_304(nr_x_gauss, x_gauss, weights_x)
 
             # Points used for distance to calc derivatives
             if False: # unchanged dx, dy
@@ -979,7 +966,7 @@ class MultiDomain(object):
                 # Gauss points and weights
                 y_gauss = np.zeros(nr_y_gauss, dtype=np.float64)
                 weights_y = np.zeros(nr_y_gauss, dtype=np.float64)
-                get_points_weights(nr_y_gauss, y_gauss, weights_y)
+                get_points_weights_304(nr_y_gauss, y_gauss, weights_y)
 
                 dx = np.linspace(0, eval_panel.a, gridx)
 
@@ -1030,11 +1017,11 @@ class MultiDomain(object):
             # Gauss points and weights
             y_gauss = np.zeros(nr_y_gauss, dtype=np.float64)
             weights_y = np.zeros(nr_y_gauss, dtype=np.float64)
-            get_points_weights(nr_y_gauss, y_gauss, weights_y)
+            get_points_weights_304(nr_y_gauss, y_gauss, weights_y)
 
             x_gauss = np.zeros(nr_x_gauss, dtype=np.float64)
             weights_x = np.zeros(nr_x_gauss, dtype=np.float64)
-            get_points_weights(nr_x_gauss, x_gauss, weights_x)
+            get_points_weights_304(nr_x_gauss, x_gauss, weights_x)
 
             # Points used for distance to calc derivatives
             if False: # unchanged dx, dy
@@ -1087,7 +1074,6 @@ class MultiDomain(object):
 
 
     def force_out_plane_damage(self, conn, c):
-
         for connecti in conn:
             if connecti['func'] == 'SB_TSL':
                 nr_x_gauss = connecti['nr_x_gauss']
@@ -1102,11 +1088,11 @@ class MultiDomain(object):
                 # Gauss points and weights
                 x_gauss = np.zeros(nr_x_gauss, dtype=np.float64)
                 weights_x = np.zeros(nr_x_gauss, dtype=np.float64)
-                get_points_weights(nr_x_gauss, x_gauss, weights_x)
+                get_points_weights_304(nr_x_gauss, x_gauss, weights_x)
 
                 y_gauss = np.zeros(nr_y_gauss, dtype=np.float64)
                 weights_y = np.zeros(nr_y_gauss, dtype=np.float64)
-                get_points_weights(nr_y_gauss, y_gauss, weights_y)
+                get_points_weights_304(nr_y_gauss, y_gauss, weights_y)
 
                 if hasattr(self, "dmg_index"):
                     kw_tsl, dmg_index_max, del_d, dmg_index_curr = self.calc_k_dmg(c=c, pA=p_top, pB=p_bot,
@@ -1125,39 +1111,32 @@ class MultiDomain(object):
                         weight = weights_x[ptx] * weights_y[pty]
 
                         tau_xieta = tau[pty, ptx]
-                        #((p_top.a*p_top.b)/4)
                         force_intgn += weight * ((p_top.a*p_top.b)/4) * tau_xieta
-                    # print(f'Area integral force damage = {force_intgn}')
 
-                # print(f'                Area integral force damage = {force_intgn:.3e}')
                 return force_intgn
 
 
     def get_kC_conn(self, conn=None, finalize=True, c=None, kw_tsl=None):
-        '''
-            Calc the stiffness matrix due to the connectivities
+        """Calc the stiffness matrix due to the connectivities
 
-            conn = List of dicts
-                Each elem of the list = dict for a single connection pair
-                Each dict contains info of that specific with connection pair
-                    Example: conn = [dict(p1=top1, p2=top2, func='SSxcte', xcte1=top1.a, xcte2=0)]
+        conn = List of dicts
+            Each elem of the list = dict for a single connection pair
+            Each dict contains info of that specific with connection pair
+                Example: conn = [dict(p1=top1, p2=top2, func='SSxcte', xcte1=top1.a, xcte2=0)]
 
-                For func, possible options are:
-                    'SSxcte' and 'SSycte' = between 2 skins along an edge
-                    'BFxcte' and 'BFycte' = between stiffener base and flange
-                    'SB'                  = btwn 2 skins connected over an area
-                    'SB_TSL'              = btwn 2 skins connected over an area with a TSL introduced
-                                                at the interface
-                            Required param:
-                                tsl_type, nr_x_gauss, nr_x_gauss
-        '''
+            For func, possible options are:
+                'SSxcte' and 'SSycte' = between 2 skins along an edge
+                'BFxcte' and 'BFycte' = between stiffener base and flange
+                'SB'                  = btwn 2 skins connected over an area
+                'SB_TSL'              = btwn 2 skins connected over an area with a TSL introduced
+                                            at the interface
+                        Required param:
+                            tsl_type, nr_x_gauss, nr_x_gauss
+        """
         if conn is None:
             if self.conn is None:
                 raise RuntimeError('No connectivity dictionary defined!')
             conn = self.conn
-
-        # if self.kC_conn is not None:
-        #     return self.kC_conn
 
         size = self.get_size()
 
@@ -1313,6 +1292,7 @@ class MultiDomain(object):
         self.kC_conn = kC_conn
         #NOTE memory cleanup
         gc.collect()
+
         return kC_conn
 
 
@@ -1360,10 +1340,10 @@ class MultiDomain(object):
         kC_conn = self.get_kC_conn(conn=conn, c=c)
 
         kC += kC_conn
-        # kC += self.kC_conn
 
         self.kC = kC
         msg('finished!', level=2, silent=silent)
+
         return kC
 
 
@@ -1424,33 +1404,17 @@ class MultiDomain(object):
         #TODO use multiprocessing.Pool here
 
         # Parallelizing doesnt work
-        parallelize = False
-            # Parallelizing the calc of kT of all panels separately
-                # Only parallelize this if the main function is not parallized. Otherwise parallelize that
-                # so that many runs can be performed simultaneously and this runs on one core
-        if not parallelize:
-            for p in self.panels:
-                if p.row_start is None or p.col_start is None:
-                    raise ValueError('Shell attributes "row_start" and "col_start" must be defined!')
-                # Both kC and kG are not symmetric now
-                kT += p.calc_kC(c=c, size=size, row0=p.row_start, col0=p.col_start,
-                        silent=silent, finalize=False, NLgeom=True) # inc=inc,  - REMOVED bec not in shell
-                # print(f'kC {np.max(kT):.3e}')
-                kT += p.calc_kG(c=c, size=size, row0=p.row_start,
-                        col0=p.col_start, silent=silent, finalize=False, NLgeom=True)
-                # print(f'kC {np.max(kT):.3e}')
-
-        # DOESNT WORK - error in pickling
-        if parallelize:
-            ftn_arg = [(p, c, size) for p in self.panels]
-            with Pool() as pool:
-                kT_panels = pool.starmap(calc_kT_parallel, ftn_arg)
-                # print(type(kT_panels))
-                # the pool is processing its inputs in parallel, close() and join()
-                #can be used to synchronize the main process
-                #with the task processes to ensure proper cleanup.
-                pool.close()
-                pool.join()
+        # Parallelizing the calc of kT of all panels separately
+        # Only parallelize this if the main function is not parallized. Otherwise parallelize that
+        # so that many runs can be performed simultaneously and this runs on one core
+        for p in self.panels:
+            if p.row_start is None or p.col_start is None:
+                raise ValueError('Shell attributes "row_start" and "col_start" must be defined!')
+            # Both kC and kG are not symmetric now
+            kT += p.calc_kC(c=c, size=size, row0=p.row_start, col0=p.col_start,
+                    silent=silent, finalize=False, NLgeom=True) # inc=inc,  - REMOVED bec not in shell
+            kT += p.calc_kG(c=c, size=size, row0=p.row_start,
+                    col0=p.col_start, silent=silent, finalize=False, NLgeom=True)
 
         if finalize:
             kT = finalize_symmetric_matrix(kT)
@@ -1461,252 +1425,6 @@ class MultiDomain(object):
         self.kT = kT
         msg('finished!', level=2, silent=silent)
         return kT
-
-
-    def calc_kcrack(self, conn, c_i, kw_tsl_i_1, del_d_i_1, finalize=True, silent=True):
-        # Actually just the first term of kcrack
-
-        size = self.get_size()
-
-        kcrack = 0.
-
-        for connecti in conn:
-            if connecti['func'] == 'SB_TSL':
-                nr_x_gauss = connecti['nr_x_gauss']
-                nr_y_gauss = connecti['nr_y_gauss']
-                tsl_type = connecti['tsl_type']
-                p_top = connecti['p1']
-                p_bot = connecti['p2']
-                tau_o = connecti['tau_o']
-                G1c = connecti['G1c']
-                k_o = connecti['k_o']
-                del_o = connecti['del_o']
-                del_f = connecti['del_f']
-
-                kw_tsl, dmg_index_max, del_d_i, dmg_index_curr = self.calc_k_dmg(c=c_i, pA=p_top, pB=p_bot, nr_x_gauss=nr_x_gauss,
-                    nr_y_gauss=nr_y_gauss, tsl_type=tsl_type, prev_max_dmg_index=self.dmg_index, k_i=k_o, tau_o=tau_o, G1c=G1c)
-
-                # plt.contourf(del_d_i_1)
-                # plt.colorbar()
-                # plt.show()
-                # plt.contourf(del_d_i)
-                # plt.colorbar()
-                # plt.show()
-                # plt.contourf(del_d_i - del_d_i_1)
-                # plt.colorbar()
-                # plt.show()
-                # print(f'del_o {del_o:.3e} del_f {del_f:.3e}')
-                # print(f'del_d_i_1 {np.min(del_d_i_1):.3e} {np.max(del_d_i_1):.3e}')
-                # print(f'del_d_i {np.min(del_d_i):.3e} {np.max(del_d_i):.3e}')
-
-
-                kcrack += connections.kCSB_dmg.k_crack11(p_top=p_top, size=size, row0=p_top.row_start,
-                             col0=p_top.col_start, nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss,
-                             k_o=k_o, del_o=del_o, del_f=del_f, del_d_i_1=np.ascontiguousarray(del_d_i_1),
-                             del_d_i=np.ascontiguousarray(del_d_i), dmg_index=np.ascontiguousarray(dmg_index_max))
-                # print(f'        1st term K crack {np.max(kcrack):.2e}')
-                kcrack += connections.kCSB_dmg.k_crack12(p_top=p_top, p_bot=p_bot, size=size, row0=p_top.row_start,
-                              col0=p_bot.col_start, nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss,
-                              k_o=k_o, del_o=del_o, del_f=del_f, del_d_i_1=np.ascontiguousarray(del_d_i_1),
-                              del_d_i=np.ascontiguousarray(del_d_i), dmg_index=np.ascontiguousarray(dmg_index_max))
-                # print(f'        2nd term K crack {np.max(kcrack):.2e}')
-                kcrack += connections.kCSB_dmg.k_crack22(p_bot=p_bot, size=size, row0=p_bot.row_start,
-                              col0=p_bot.col_start, nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss,
-                              k_o=k_o, del_o=del_o, del_f=del_f, del_d_i_1=np.ascontiguousarray(del_d_i_1),
-                              del_d_i=np.ascontiguousarray(del_d_i), dmg_index=np.ascontiguousarray(dmg_index_max))
-                print(f'        K crack term 1 {np.max(kcrack):.2e}')
-                print()
-
-        # print(type(kcrack))
-        # print(kcrack.dtype)
-        if finalize:
-            kcrack = finalize_symmetric_matrix(kcrack)
-
-        return kcrack
-
-
-    # def calc_kcrack_term2(self, conn, c_i, kw_tsl_i_1, del_d_i_1, finalize=True, silent=True):
-
-    #         size = self.get_size()
-
-    #         # kcrack_term2 = 0.
-    #         kcrack_term2_partA = 0.
-
-    #         for connecti in conn:
-    #             if connecti['func'] == 'SB_TSL':
-    #                 nr_x_gauss = connecti['nr_x_gauss']
-    #                 nr_y_gauss = connecti['nr_y_gauss']
-    #                 tsl_type = connecti['tsl_type']
-    #                 p_top = connecti['p1']
-    #                 p_bot = connecti['p2']
-    #                 tau_o = connecti['tau_o']
-    #                 G1c = connecti['G1c']
-    #                 k_o = connecti['k_o']
-    #                 del_o = connecti['del_o']
-    #                 del_f = connecti['del_f']
-
-    #                 kw_tsl, dmg_index_max, del_d_i, dmg_index_curr = self.calc_k_dmg(c=c_i, pA=p_top, pB=p_bot, nr_x_gauss=nr_x_gauss,
-    #                     nr_y_gauss=nr_y_gauss, tsl_type=tsl_type, prev_max_dmg_index=self.dmg_index, k_i=k_o, tau_o=tau_o, G1c=G1c)
-
-    #                 # Part A
-    #                 kcrack_term2_partA += connections.kCSB_dmg.k_crack_term2_partA_11(p_top=p_top, size=size, row0=p_top.row_start,
-    #                              col0=p_top.col_start, nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss,
-    #                              k_o=k_o, del_o=del_o, del_f=del_f, del_d_i_1=np.ascontiguousarray(del_d_i_1),
-    #                              del_d_i=np.ascontiguousarray(del_d_i), dmg_index=np.ascontiguousarray(dmg_index_max))
-    #                 # print(f'        1st term K crack {np.max(kcrack_term2_partA):.2e}')
-
-    #                 kcrack_term2_partA += connections.kCSB_dmg.k_crack_term2_partA_12(p_top=p_top, p_bot=p_bot, size=size, row0=p_top.row_start,
-    #                               col0=p_bot.col_start, nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss,
-    #                               k_o=k_o, del_o=del_o, del_f=del_f, del_d_i_1=np.ascontiguousarray(del_d_i_1),
-    #                               del_d_i=np.ascontiguousarray(del_d_i), dmg_index=np.ascontiguousarray(dmg_index_max))
-    #                 # print(f'        2nd term K crack {np.max(kcrack_term2_partA):.2e}')
-
-    #                 kcrack_term2_partA += connections.kCSB_dmg.k_crack_term2_partA_22(p_bot=p_bot, size=size, row0=p_bot.row_start,
-    #                               col0=p_bot.col_start, nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss,
-    #                               k_o=k_o, del_o=del_o, del_f=del_f, del_d_i_1=np.ascontiguousarray(del_d_i_1),
-    #                               del_d_i=np.ascontiguousarray(del_d_i), dmg_index=np.ascontiguousarray(dmg_index_max))
-    #                 print(f'        K crack term 2 {np.max(kcrack_term2_partA):.2e}')
-    #                 print()
-
-    #                 if finalize: # Makes the matrix symmetric for part A
-    #                     kcrack_term2_partA = finalize_symmetric_matrix(kcrack_term2_partA)
-
-    #                 # Part B
-    #                 c = c_i.copy()
-    #                 kcrack_term2_partB = connections.kCSB_dmg.k_crack_term2_partB(p_top=p_top, p_bot=p_bot, size=size,
-    #                                 nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss,
-    #                                 dmg_index=np.ascontiguousarray(dmg_index_max), c_i=np.ascontiguousarray(c))
-
-    #                 # converting it from 0D to 1D
-    #                 # print(np.shape(s_delta))
-    #                 # s_delta = np.reshape(s_delta, (1, np.shape(s_delta)[0]))
-    #                 # print(np.shape(s_delta))
-    #                 # print(np.shape(c_i))
-    #                 # print(np.shape(c_i))
-
-    #                 # print(type(c_i))
-    #                 # print(c_i.dtype)
-    #                 # print(np.shape(kcrack_term2_partA))
-    #                 # print(np.shape(kcrack_term2_partB))
-    #                 # print(type(kcrack_term2_partA))
-    #                 # print(type(kcrack_term2_partB))
-    #                 # print(kcrack_term2_partA.dtype)
-    #                 # print(kcrack_term2_partB.dtype)
-    #                 # kcrack_term2_partA = np.asarray(kcrack_term2_partA, dtype=np.float64)
-    #                 # kcrack_term2_partB = np.asarray(kcrack_term2_partB, dtype=np.float64)
-
-    #                 # A is csr sparse matrix so using sparse multiplication to prevent it from converting to a py obj bec numpy cant handle it
-    #                 kcrack_term2 = kcrack_term2_partA.multiply(kcrack_term2_partB)
-    #                 # kcrack_term2 = np.multiply(kcrack_term2_partA, kcrack_term2_partB)
-    #                 # print(kcrack_term2.dtype)
-
-    #         return kcrack_term2
-
-
-    def calc_kcrack_term2(self, conn, c_i, kw_tsl_i_1, del_d_i_1, finalize=True, silent=True):
-
-        size = self.get_size()
-
-        for connecti in conn:
-            if connecti['func'] == 'SB_TSL':
-                nr_x_gauss = connecti['nr_x_gauss']
-                nr_y_gauss = connecti['nr_y_gauss']
-                tsl_type = connecti['tsl_type']
-                p_top = connecti['p1']
-                p_bot = connecti['p2']
-                tau_o = connecti['tau_o']
-                G1c = connecti['G1c']
-                k_o = connecti['k_o']
-                del_o = connecti['del_o']
-                del_f = connecti['del_f']
-
-                kw_tsl, dmg_index_max, del_d_i, dmg_index_curr = self.calc_k_dmg(c=c_i, pA=p_top, pB=p_bot, nr_x_gauss=nr_x_gauss,
-                    nr_y_gauss=nr_y_gauss, tsl_type=tsl_type, prev_max_dmg_index=self.dmg_index, k_i=k_o, tau_o=tau_o, G1c=G1c)
-
-                # kcrack_term2 = connections.kCSB_dmg.k_crack_term2(p_top=p_top, p_bot=p_bot, size=size,
-                #                     nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, k_o=k_o, del_o=del_o, del_f=del_f,
-                #                     del_d_i_1=np.ascontiguousarray(del_d_i_1), del_d_i=np.ascontiguousarray(del_d_i),
-                #                     dmg_index=np.ascontiguousarray(dmg_index_max), c_i=np.ascontiguousarray(c_i))
-
-                # Gauss points and weights
-                x_gauss = np.zeros(nr_x_gauss, dtype=np.float64)
-                weights_x = np.zeros(nr_x_gauss, dtype=np.float64)
-                get_points_weights(nr_x_gauss, x_gauss, weights_x)
-
-                y_gauss = np.zeros(nr_y_gauss, dtype=np.float64)
-                weights_y = np.zeros(nr_y_gauss, dtype=np.float64)
-                get_points_weights(nr_y_gauss, y_gauss, weights_y)
-
-                k_crack_term2 = np.zeros((size, size), dtype=np.float64)
-
-                for ptx in range(nr_x_gauss):
-                    for pty in range(nr_y_gauss):
-                        # Takes the correct index instead of the location
-                        xi = x_gauss[ptx]
-                        eta = y_gauss[pty]
-
-                        if dmg_index_max[pty, ptx] == 0 or dmg_index_max[pty, ptx] == 1:
-                            continue
-
-                        del_d_i_1_iter = del_d_i_1[pty, ptx]
-                        del_d_i_iter = del_d_i[pty, ptx]
-
-                        if del_d_i_iter == 0:
-                            continue
-
-                        weight = weights_x[ptx] * weights_y[pty]
-
-                        k_crack_term2_partA = np.zeros((size, size), dtype=np.float64) # initlizing it to zero for a new point
-
-                        k_crack_term2_partA += connections.kCSB_dmg.k_crack_term2_partA_11(p_top=p_top, size=size,
-                                                   row0=p_top.row_start, col0=p_top.col_start, nr_x_gauss=nr_x_gauss,
-                                                   nr_y_gauss=nr_y_gauss, k_o=k_o, del_o=del_o, del_f=del_f,
-                                                   del_d_i_1=np.ascontiguousarray(del_d_i_1), del_d_i=np.ascontiguousarray(del_d_i),
-                                                   dmg_index=np.ascontiguousarray(dmg_index_max), xi=xi, eta=eta, ptx=ptx, pty=pty)
-
-                        k_crack_term2_partA += connections.kCSB_dmg.k_crack_term2_partA_12(p_top=p_top, p_bot=p_bot, size=size,
-                                                  row0=p_top.row_start, col0=p_bot.col_start, nr_x_gauss=nr_x_gauss,
-                                                  nr_y_gauss=nr_y_gauss, k_o=k_o, del_o=del_o, del_f=del_f,
-                                                  del_d_i_1=np.ascontiguousarray(del_d_i_1), del_d_i=np.ascontiguousarray(del_d_i),
-                                                  dmg_index=np.ascontiguousarray(dmg_index_max), xi=xi, eta=eta, ptx=ptx, pty=pty)
-
-                        k_crack_term2_partA += connections.kCSB_dmg.k_crack_term2_partA_22(p_bot=p_bot, size=size,
-                                                  row0=p_bot.row_start, col0=p_bot.col_start, nr_x_gauss=nr_x_gauss,
-                                                  nr_y_gauss=nr_y_gauss, k_o=k_o, del_o=del_o, del_f=del_f,
-                                                  del_d_i_1=np.ascontiguousarray(del_d_i_1), del_d_i=np.ascontiguousarray(del_d_i),
-                                                  dmg_index=np.ascontiguousarray(dmg_index_max), xi=xi, eta=eta, ptx=ptx, pty=pty)
-
-                        k_crack_term2_partB = connections.kCSB_dmg.calc_k_crack_term2_partB(p_top=p_top, p_bot=p_bot, size=size,
-                                                   nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss,
-                                                   dmg_index=np.ascontiguousarray(dmg_index_max),
-                                                   c_i=c_i, xi=xi, eta=eta, ptx=ptx, pty=pty)
-
-                        k_crack_term2 += (p_top.a*p_top.b/4)*weight*(k_crack_term2_partA @ k_crack_term2_partB)
-
-
-
-        return k_crack_term2
-
-
-    def calc_kcrack_complete(self, conn, c_i, kw_tsl_i_1, del_d_i_1, finalize=True, silent=True):
-
-        kcrack_term1 = self.calc_kcrack(conn=conn, c_i=c_i, kw_tsl_i_1=kw_tsl_i_1, del_d_i_1=del_d_i_1, finalize=True, silent=True)
-        kcrack_term2 = self.calc_kcrack_term2(conn=conn, c_i=c_i, kw_tsl_i_1=kw_tsl_i_1, del_d_i_1=del_d_i_1, finalize=True, silent=True)
-
-        # print(type(kcrack_term1))
-        # print(kcrack_term1.dtype)
-        # print(type(kcrack_term2))
-        # print(kcrack_term2.dtype)
-        # print(np.shape(kcrack_term2))
-        # print(type(csr_matrix(kcrack_term2)))
-        # print(csr_matrix(kcrack_term2).dtype)
-
-        kcrack_complete = kcrack_term1 - csr_matrix(kcrack_term2)
-
-        # print(type(kcrack_complete))
-        # print(kcrack_complete.dtype)
-
-        return kcrack_complete
 
 
     def calc_fint(self, c, silent=True, inc=1., kC_conn=None):
@@ -1740,189 +1458,16 @@ class MultiDomain(object):
         return fext
 
 
-    def calc_fcrack(self, c_i, kw_tsl_i_1, del_d_i_1, conn, kcrack=None):
-        '''
-        Calculates the force vector associated with the energy needed to create a crack
-
-        Parameters
-        ----------
-        c_i : TYPE
-            DESCRIPTION.
-        kw_tsl_i_1 : TYPE
-            DESCRIPTION.
-        del_d_i_1 : TYPE
-            DESCRIPTION.
-        conn : TYPE
-            DESCRIPTION.
-
-        Returns
-        -------
-        fcrack : TYPE
-            DESCRIPTION.
-
-        '''
-        size = self.get_size()
-
-        for connecti in conn:
-            if connecti['func'] == 'SB_TSL':
-                nr_x_gauss = connecti['nr_x_gauss']
-                nr_y_gauss = connecti['nr_y_gauss']
-                tsl_type = connecti['tsl_type']
-                p_top = connecti['p1']
-                p_bot = connecti['p2']
-                k_i = connecti['k_o']
-                tau_o = connecti['tau_o']
-                G1c = connecti['G1c']
-
-                kw_tsl_i, dmg_index_i_max, del_d_i, dmg_index_curr = self.calc_k_dmg(c=c_i, pA=p_top, pB=p_bot,
-                         nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, tsl_type=tsl_type,
-                         prev_max_dmg_index=self.dmg_index, k_i=k_i, tau_o=tau_o, G1c=G1c)
-
-                fcrack = connections.kCSB_dmg.fcrack(p_top=p_top, p_bot=p_bot, size=size,
-                                 kw_tsl_i_1=np.ascontiguousarray(kw_tsl_i_1), del_d_i_1=np.ascontiguousarray(del_d_i_1),
-                                 kw_tsl_i=np.ascontiguousarray(kw_tsl_i), nr_x_gauss=nr_x_gauss,
-                                 nr_y_gauss=nr_y_gauss, dmg_index=np.ascontiguousarray(dmg_index_i_max))
-                # print(f'        1st term F crack {np.linalg.norm(fcrack):.2e}')
-
-                if kcrack is None:
-                    kcrack = self.calc_kcrack(conn=conn, c_i=c_i, kw_tsl_i_1=kw_tsl_i_1, del_d_i_1=del_d_i_1)
-
-                # print("ci", np.shape(c_i))
-                # print("kcrack", np.shape(kcrack))
-                # print('fcrack', np.shape(fcrack))
-
-                # print(np.all(kcrack*c_i == kcrack@c_i)) # True
-                # print("ci", np.shape(c_i))
-                # print(c_i.shape)
-                fcrack += (kcrack@c_i)/2
-                # print('kcrack*c_i', np.shape(kcrack*c_i))
-                # print('fcrack', np.shape(fcrack))
-                # fcrack = np.reshape(fcrack, (np.max(np.shape(fcrack)),))
-                # print(np.shape(fcrack))
-                # print(fcrack.dtype)
-                # print(kcrack.dtype)
-                # print(kw_tsl_i.dtype)
-                # print(type(fcrack))
-                # print(type(kcrack))
-                # print(type(kw_tsl_i))
-                print(f'        F crack {np.linalg.norm(fcrack):.2e}')
-                # print(fcrack.dtype)
-                # print(np.shape(fcrack))
-                # print()
-
-
-############### REMOVE SCALING FACTOR ######################################
-        return np.multiply(1,fcrack)
-
-
-    def calc_fext_dmg(self, conn, c, prev_max_del_d):
-        '''
-            Calculates the fext term used to simulate a connection between the two domains
-            whose force varies based on the damage - This is to be used as an alternate method
-            to connecting the damage domains in the SB_dmg connection
-
-        Returns
-        -------
-        None.
-
-        '''
-
-        # size of the complete fext vector
-        size = self.get_size()
-        # External force vector but with just the contribution of the terms forcing the connection
-        fext_conn_force = np.zeros(size, dtype=np.float64) # A vector bec size = single integer
-
-        # Looping through each connection pair
-        for connecti in conn:
-            if connecti['func'] == 'SB_force':
-                p = connecti['p1']
-                nr_x_gauss = connecti['nr_x_gauss']
-                nr_y_gauss = connecti['nr_y_gauss']
-                tsl_type = connecti['tsl_type']
-                k_i = connecti['k_i']
-
-                # panel info
-                # col0 = p.col_start
-                # col1 = col0 + p.get_size()
-
-                # Calc traction
-                kw_tsl, dmg_index, corrected_max_del_d, T_tsl = self.calc_traction(
-                    c=c, pA=p, nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, tsl_type=tsl_type,
-                    prev_max_del_d=prev_max_del_d, k_i=k_i)
-
-                model = p.model
-                if not model in modelDB.db.keys():
-                    raise ValueError('{} is not a valid model option'.format(model))
-                db = modelDB.db
-                fg = db[model]['field'].fg # model is the model (name) to be used, specified in the shell object
-                # Field is in \panels\panels\models
-
-                g = np.zeros((5, p.get_size()), dtype=np.float64)
-
-                # Gauss points and weights
-                xis = np.zeros(nr_x_gauss, dtype=np.float64)
-                weights_xi = np.zeros(nr_x_gauss, dtype=np.float64)
-                etas = np.zeros(nr_y_gauss, dtype=np.float64)
-                weights_eta = np.zeros(nr_y_gauss, dtype=np.float64)
-
-                get_points_weights(nr_x_gauss, xis, weights_xi)
-                get_points_weights(nr_y_gauss, etas, weights_eta)
-
-                for pty in range(nr_y_gauss):
-                    for ptx in range(nr_x_gauss):
-                        # Makes it more efficient when reading data (kw_tsl) from memory as memory is read along a row
-                        # So also accessing memory in the same way helps it out so its not deleting and reaccessing the
-                        # same memory everytime.
-
-                        # Takes the correct index instead of the location
-                        xi = xis[ptx]
-                        eta = etas[pty]
-
-                        xvar = (xi + 1)*p.a/2
-                        yvar = (eta + 1)*p.b/2
-
-                        weight = weights_xi[ptx] * weights_eta[pty]
-
-                        # Extracting the correct Traction (T) for the specific location
-                            # Currently, the outer loop of y and inner of x, causes it to go through all x for a single y
-                            # That is going through all col for a single row then onto the next row
-                            # (as per x, y and results by calc_results)
-                        T = T_tsl[pty, ptx]
-
-                        # fg is in terms of x and y not xi and eta
-                        fg(g, xvar, yvar, p)
-                            # Essentially does this and returns g:
-                                # for j in range(n):
-                                #     for i in range(m):
-                                #         col = DOF*(j*m + i)
-                                #         g[0, col+0] = fu[i]*gu[j]
-                                #         g[1, col+1] = fv[i]*gv[j]
-                                #         g[2, col+2] = fw[i]*gw[j]
-                                #         g[3, col+2] = -(2/a)*fw_xi[i]*gw[j]
-                                #         g[4, col+2] = -(2/b)*fw[i]*gw_eta[j]
-
-                        # Shape function of all the w terms evaluated at that specific point
-                        sw = g[2,:]
-
-                        fext_conn_force[p.row_start : p.row_end] += fext_conn_force[p.row_start : p.row_end] + (p.a*p.b/4)*weight*sw*T
-
-            # else:
-            #     connection_function = connecti['func']
-            #     raise ValueError(f'{connection_function} not recognized. Provide a correct function if you expect results')
-
-        return fext_conn_force
-
-
     def calc_separation(self, res_pan_top, res_pan_bot):
 
-        '''
+        r"""
             Calculates the separation between two panels
 
             INPUT ARGUMENTS:
                 res_pan_A,B
 
                 !!!!!! PANEL TOP NEEDS TO BE THE ONE ON THE TOP !!!!!!!
-        '''
+        """
 
         if not (np.all(res_pan_top['x'][0] == res_pan_bot['x'][0]) and np.all(res_pan_top['y'][0] == res_pan_bot['y'][0])):
             raise ValueError('Grid used to evaluate the displ of both panels dont match')
@@ -1936,7 +1481,7 @@ class MultiDomain(object):
     def calc_k_dmg(self, c, pA, pB, nr_x_gauss, nr_y_gauss, tsl_type, prev_max_dmg_index,
                    k_i=None, tau_o=None, G1c=None):
 
-        '''
+        """
             Calculates the damaged k_tsl and the damage index
 
             Input:
@@ -1946,7 +1491,7 @@ class MultiDomain(object):
             NOTE: Currently this only works for 1 contact region bec of the way del_d is being stored in the
                 MD object. To ensure that it works for multiple connected domamins, it needs to be stored with the
                 shell object instead and modify the rest accordingly
-        '''
+        """
 
         # Calculating the displacements of each panel
         res_pan_top = self.calc_results(c=c, eval_panel=pA, vec='w',
@@ -1983,16 +1528,16 @@ class MultiDomain(object):
 
 
     def calc_traction_stiffness(self, kw_tsl, corrected_max_del_d):
-        '''
+        """
             Calculates traction for the approach where SB_TSL connection is used
-        '''
+        """
         tau = np.multiply(kw_tsl, corrected_max_del_d)
 
         return tau
 
 
     def calc_traction(self, c, pA, nr_x_gauss, nr_y_gauss, tsl_type, prev_max_del_d, k_i=None):
-        '''
+        """
             ONLY FOR FEXT_DMG - For panels with the SB_TSL connection, use calc_k_dmg and multiply kw_tsl
                 and corrected_max_del_d OR use calc_traction_stiffness()
 
@@ -2000,7 +1545,7 @@ class MultiDomain(object):
         -------
         None.
 
-        '''
+        """
 
         # After the first iteration - once it has solved for c
         if c is not None:
@@ -2051,74 +1596,17 @@ class MultiDomain(object):
         return kw_tsl, dmg_index, corrected_max_del_d, T_tsl
 
 
-    def calc_energy_dissipation(self, kw_tsl_j, kw_tsl_j_1, del_d_j, del_d_j_1, tau_o, k_i,
-                                nr_x_gauss, nr_y_gauss):
-        '''
-        INITIAL TESTS SUGGESTS THIS DOESNT WORK -- PROCEED WITH CAUTION
-
-            Used to calc the energy dissipiation in the cohesive contact zone
-
-            Input:
-                j = current displacement step
-                j_1 = previous displacement step
-        '''
-
-        # Separation corresponding to damage onset
-        del_o = tau_o/k_i
-
-        # Filters when the previous increment is before initation and the next is after initiation
-        f_j = del_d_j > del_o
-        f_j_1 = del_o > del_d_j_1
-        f = np.multiply(f_j, f_j_1)     # Only when del_d_j > del_o > del_d_j_1
-
-        tau_j = self.calc_traction_stiffness(kw_tsl=kw_tsl_j, corrected_max_del_d=del_d_j)
-        tau_j_1 = self.calc_traction_stiffness(kw_tsl=kw_tsl_j_1, corrected_max_del_d=del_d_j_1)
-
-        # Shifting values of the (j-1)th iteration to the initiation peak of the TSL graph
-        del_d_j_1[f] = del_o
-        tau_j_1[f] = tau_o
-
-        energy_dissp_intgn_pt = (np.multiply(tau_j_1, del_d_j) - np.multiply(tau_j, del_d_j_1))/2
-
-        # Gauss points and weights
-        x_gauss = np.zeros(nr_x_gauss, dtype=np.float64)
-        weights_x = np.zeros(nr_x_gauss, dtype=np.float64)
-        get_points_weights(nr_x_gauss, x_gauss, weights_x)
-
-        y_gauss = np.zeros(nr_y_gauss, dtype=np.float64)
-        weights_y = np.zeros(nr_y_gauss, dtype=np.float64)
-        get_points_weights(nr_y_gauss, y_gauss, weights_y)
-
-        energy_dissp = 0
-
-        for pty in range(nr_y_gauss):
-            for ptx in range(nr_x_gauss):
-                # Makes it more efficient when reading data (kw_tsl) from memory as memory is read along a row
-                # So also accessing memory in the same way helps it out so its not deleting and reaccessing the
-                # same memory everytime.
-
-                weight = weights_x[ptx] * weights_y[pty]
-                #((p_top.a*p_top.b)/4)
-                energy_dissp += weight * energy_dissp_intgn_pt[pty, ptx]
-
-        print(f'                Area integral energy_dissp = {energy_dissp:.3f}')
-        print(np.max(energy_dissp_intgn_pt))
-
-        # return energy_dissp
-        return np.max(energy_dissp_intgn_pt)
-
-
     def update_TSL_history(self, curr_max_dmg_index):
-        '''
+        """
             Used to update the maximum del_d (over all loading histories) - this prevents exisiting
             damage from vanishing when the updated separation predicts there is less separation than
             what was present earlier (as badly modelled self-healing materials aren't part of this thesis :) )
-        '''
+        """
         self.dmg_index = curr_max_dmg_index
 
 
     def calc_damaged_stiffness(self, dmg_index, k_i):
-        '''
+        """
         Calculates the reduced stiffness given the damage index
 
         Parameters
@@ -2132,7 +1620,7 @@ class MultiDomain(object):
         -------
         None.
 
-        '''
+        """
 
         kw_tsl = k_i*(1-dmg_index)
 
