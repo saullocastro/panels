@@ -158,12 +158,12 @@ class Shell(object):
             # Controls disp/rotation at boundaries i.e. flags
             # 0 = no disp or rotation
             # 1 = disp or rotation permitted
-            
+
             # x1 and x2 are limits of x -- represent BCs with lines x = const
             # y1 and y2 ............. y -- .................. lines y = const
         # - displacement at 4 edges is zero
         # - free to rotate at 4 edges (simply supported by default)
-        
+
         self.x1u = 0.
         self.x1ur = 1.
         self.x2u = 0.
@@ -224,7 +224,7 @@ class Shell(object):
             setattr(self, k, v)
 
         self._clear_matrices()
-        
+
         # Build it if all the parameters are given
         if a is not None and b is not None:
             self._rebuild()
@@ -292,7 +292,7 @@ class Shell(object):
         rows or columns, recalling that this will be the size of the Ritz
         constants' vector `\{c\}`, the internal force vector `\{F_{int}\}` and
         the external force vector `\{F_{ext}\}`.
-        
+
         ONLY RETURNS THE NUMBER OF ROWS ''OR'' COLS
 
         Returns
@@ -370,7 +370,7 @@ class Shell(object):
     def calc_kC(self, size=None, row0=0, col0=0, silent=True, finalize=True,
             c=None, c_cte=None, nx=None, ny=None, ABDnxny=None, NLgeom=False):
         r"""Calculate the constitutive stiffness matrix
-        ---------- Notation as per MD paper: kP_i ----------- 
+        ---------- Notation as per MD paper: kP_i -----------
 
         If ``c`` is not given it calculates the linear constitutive stiffness
         matrix, otherwise the large displacement linear constitutive stiffness
@@ -401,7 +401,8 @@ class Shell(object):
             non-linear terms based on the actual displacement field.
         c_cte : array-like or None, optional
             This must be the result of a static analysis, used to compute
-            initial stress state not affected by the load multiplier.
+            initial stress state not affected by the load multiplier of the
+            linear buckling eigenvalue analysis.
         nx, ny : int or None, optional
             Number of integration points along `x` and `y`, respectively, for
             the Legendre-Gauss quadrature rule applied in the numerical
@@ -424,6 +425,7 @@ class Shell(object):
 
         analytical_kC = True
         analytical_kG = True
+
         # This means a linear analysis is already performed (check panels\tests\tests_shell\test_nonlinear.py)
         # So, the next step is NL. So no analytical
         if c is not None:
@@ -453,8 +455,7 @@ class Shell(object):
         c = np.ascontiguousarray(c, dtype=DOUBLE)
         # returns a contiguous array, how matrices in C are stored. 1 after the other like matlab
 
-        #NOTE the consistency checks for ABDnxny are done within the .pyx
-        #     files
+        #NOTE the consistency checks for ABDnxny are done within the .pyx files
         ABDnxny = self.ABD if ABDnxny is None else ABDnxny
 
         # Calc Kc as per panels/panels/models then the pyx files given by ''matrices'' defined earlier
@@ -475,14 +476,15 @@ class Shell(object):
                 check_c(c_cte, size)
                 analytical_kG = False
             # This calc KG0 - Geo stiff mat at initial membrane stress state (SA formulation paper - eq 12) and adds it to K0 calc earlier
-            
-            # WHY IS KG0 ADDED TO KC ??????????????????????????? - Maybe its only for c_cte then uncomment it
-            # if analytical_kG:
-            #     kC += matrices.fkG0(self.Nxx_cte, self.Nyy_cte, self.Nxy_cte, self, size, row0, col0)
-            # else:
-            #     kC += matrices_num.fkG_num(c_cte, ABDnxny, self,
-            #             size, row0, col0, nx, ny, NLgeom,
-            #             self.Nxx_cte, self.Nyy_cte, self.Nxy_cte)
+            # this is required for combined load cases where the eigenvalue
+            # lambda should be applied to only some of the applied forces
+            if analytical_kG:
+                 kC += matrices.fkG0(self.Nxx_cte, self.Nyy_cte, self.Nxy_cte, self, size, row0, col0)
+            else:
+                 kC += matrices_num.fkG_num(c_cte, ABDnxny, self, size,
+                                            row0, col0, nx, ny,
+                                            NLgeom, self.Nxx_cte,
+                                            self.Nyy_cte, self.Nxy_cte)
 
         if finalize:
             kC = finalize_symmetric_matrix(kC)
@@ -501,8 +503,8 @@ class Shell(object):
     def calc_kG(self, size=None, row0=0, col0=0, silent=True, finalize=True,
             c=None, nx=None, ny=None, ABDnxny=None, NLgeom=False):
         r"""Calculate the (inital stress or) geometric stiffness matrix
-        ---------- Notation as per MD paper: kGp_i ----------- 
-        
+        ---------- Notation as per MD paper: kGp_i -----------
+
         See :meth:`.Shell.calc_kC` for details on each parameter.
 
         """
@@ -932,7 +934,7 @@ class Shell(object):
 
     def add_point_pd(self, x, y, ku, up, kv, vp, kw, wp, cte=True):
         r"""Add a point prescribed displacement with three components
-        
+
         o/p = [location and equivalent force]
 
         Parameters
@@ -990,7 +992,7 @@ class Shell(object):
         if (ku is not None) or (funcu is not None): # ku or funcu is specified
             if ku is None or funcu is None: # if atmost 1 is specified for u means u is to be specified, but is currently incomplete
                 raise ValueError('Both ku and funcu must be specified')
-            new_funcu = lambda y: ku*funcu(y) # y is param in ftn 
+            new_funcu = lambda y: ku*funcu(y) # y is param in ftn
         if (kv is not None) or (funcv is not None):
             if kv is None or funcv is None:
                 raise ValueError('Both kv and funcv must be specified')
@@ -1051,23 +1053,23 @@ class Shell(object):
             self.distr_pds_inc.append([None, y, new_funcu, new_funcv, new_funcw])
 
     def clear_disps(self):
-        
+
         '''
             Used to clear exisiting displacements for the panels
                 Useful for non-linear runs where displacements are added for each increment
         '''
         self.point_pds = []
-        self.point_pds_inc = [] 
+        self.point_pds_inc = []
         self.distr_pds = []
         self.distr_pds_inc = []
-        
+
     def clear_loads(self):
         '''
             Used to clear exisiting loads for the panels
                 Useful for non-linear runs where loads are added for each increment
         '''
         self.point_loads = []
-        self.point_loads_inc = [] 
+        self.point_loads_inc = []
         self.distr_loads = []
         self.distr_loads_inc = []
 
