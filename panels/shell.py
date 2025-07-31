@@ -415,12 +415,13 @@ class Shell(object):
             considered.
 
         """
+        msg('Calculating kC... ', level=2, silent=silent)
+
         self._rebuild()
         if size is None:
             size = self.get_size()
         elif isinstance(size, str):
             size = int(size) + self.get_size()
-        msg('Calculating kC... ', level=2, silent=silent)
 
         analytical_kC = True
         analytical_kG = True
@@ -507,11 +508,13 @@ class Shell(object):
 
         """
         msg('Calculating kG... ', level=2, silent=silent)
+
         self._rebuild()
         if size is None:
             size = self.get_size()
         elif isinstance(size, str):
             size = int(size) + self.get_size()
+
         analytical_kG = True
         if c is not None:
             check_c(c, size)
@@ -572,7 +575,6 @@ class Shell(object):
 
         Parameters
         ----------
-
         h_nxny : (nx, ny) array-like or None, optional
             The constitutive relations for the laminate at each integration
             point.
@@ -583,6 +585,7 @@ class Shell(object):
 
         """
         msg('Calculating kM... ', level=2, silent=silent)
+
         analytical_kM = True
         nx = self.nx if nx is None else nx
         ny = self.ny if ny is None else ny
@@ -635,7 +638,6 @@ class Shell(object):
         r"""Calculate the aerodynamic matrix using the linear piston theory
         """
         msg('Calculating kA... ', level=2, silent=silent)
-
 
         matrices_num = modelDB.db[self.model]['matrices_num']
 
@@ -959,7 +961,7 @@ class Shell(object):
 
     def add_distr_pd_fixed_x(self, x, ku=None, kv=None, kw=None,
                              funcu=None, funcv=None, funcw=None, cte=True):
-        r"""Add a distributed prescribed displacement g(y) ??? at a fixed x position
+        r"""Add a distributed prescribed displacement g(y) at a fixed x position
 
         Parameters
         ----------
@@ -1135,16 +1137,13 @@ class Shell(object):
         inc : float, optional
             Since this function is called during the non-linear analysis,
             ``inc`` will multiply the terms `\{{F_{ext}}_\lambda\}`.
-
         size : int or str, optional
-            The size of the force vector. Can be the size of a global internal
-            force vector of an assembly. When using a string, for example, if
-            '+1' is given it will add 1 to the Shell`s size obtained by the
-            :method:`.Shell.get_size`
-
+            The size of the force vector. Can be the size of the total internal
+            force vector of a multidomain assembly. When using a string, for
+            example, if '+1' is given it will add 1 to the Shell`s size obtained
+            by the :method:`.Shell.get_size`
         col0 : int, optional
-            Offset in a global forcce vector of an assembly.
-
+            Offset in a global force vector of an assembly.
         silent : bool, optional
             A boolean to tell whether the log messages should be printed.
 
@@ -1175,7 +1174,7 @@ class Shell(object):
             for example, if '+1' is given it will add 1 to the Shell`s size
             obtained by the :method:`.Shell.get_size`
         col0 : int, optional
-            Offset in a global internal forcce vector of an assembly.
+            Offset in a global internal force vector of an assembly.
         silent : bool, optional
             A boolean to tell whether the log messages should be printed.
         nx : int, optional
