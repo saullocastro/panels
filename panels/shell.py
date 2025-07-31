@@ -479,12 +479,12 @@ class Shell(object):
             # this is required for combined load cases where the eigenvalue
             # lambda should be applied to only some of the applied forces
             if analytical_kG:
-                 kC += matrices.fkG0(self.Nxx_cte, self.Nyy_cte, self.Nxy_cte, self, size, row0, col0)
+                kC += matrices.fkG0(self.Nxx_cte, self.Nyy_cte, self.Nxy_cte, self, size, row0, col0)
             else:
-                 kC += matrices_num.fkG_num(c_cte, ABDnxny, self, size,
-                                            row0, col0, nx, ny,
-                                            NLgeom, self.Nxx_cte,
-                                            self.Nyy_cte, self.Nxy_cte)
+                kC += matrices_num.fkG_num(c_cte, ABDnxny, self, size,
+                                           row0, col0, nx, ny,
+                                           NLgeom, self.Nxx_cte,
+                                           self.Nyy_cte, self.Nxy_cte)
 
         if finalize:
             kC = finalize_symmetric_matrix(kC)
