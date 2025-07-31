@@ -122,15 +122,15 @@ def fkCSSxcte11(double kt, double kr, object p1, double xcte1, int size, int row
                         c += 1
                         kCSSxcte11r[c] = row+0
                         kCSSxcte11c[c] = col+0
-                        kCSSxcte11v[c] += b1*f1Au*f1Bu*g1Aug1Bu*kt/2
+                        kCSSxcte11v[c] += 0.5*b1*f1Au*f1Bu*g1Aug1Bu*kt
                         c += 1
                         kCSSxcte11r[c] = row+1
                         kCSSxcte11c[c] = col+1
-                        kCSSxcte11v[c] += b1*f1Av*f1Bv*g1Avg1Bv*kt/2
+                        kCSSxcte11v[c] += 0.5*b1*f1Av*f1Bv*g1Avg1Bv*kt
                         c += 1
                         kCSSxcte11r[c] = row+2
                         kCSSxcte11c[c] = col+2
-                        kCSSxcte11v[c] += b1*g1Awg1Bw*((a1*a1)*((a1*a1)*f1Aw*f1Bw*kt + 4*f1Awxi*f1Bwxi*kr))/(2*(a1*a1*a1*a1))
+                        kCSSxcte11v[c] += 0.5*b1*kt*(f1Aw*f1Bw*g1Awg1Bw + 4*f1Awxi*f1Bwxi*g1Awg1Bw*kr/((a1*a1)*kt))
 
     kCSSxcte11 = coo_matrix((kCSSxcte11v, (kCSSxcte11r, kCSSxcte11c)), shape=(size, size))
 
@@ -253,15 +253,15 @@ def fkCSSxcte12(double kt, double kr, object p1, object p2,
                         c += 1
                         kCSSxcte12r[c] = row+0
                         kCSSxcte12c[c] = col+0
-                        kCSSxcte12v[c] += -b1*f1Au*f2Bu*g1Aug2Bu*kt/2
+                        kCSSxcte12v[c] += -0.5*b1*f1Au*f2Bu*g1Aug2Bu*kt
                         c += 1
                         kCSSxcte12r[c] = row+1
                         kCSSxcte12c[c] = col+1
-                        kCSSxcte12v[c] += -b1*f1Av*f2Bv*g1Avg2Bv*kt/2
+                        kCSSxcte12v[c] += -0.5*b1*f1Av*f2Bv*g1Avg2Bv*kt
                         c += 1
                         kCSSxcte12r[c] = row+2
                         kCSSxcte12c[c] = col+2
-                        kCSSxcte12v[c] += b1*g1Awg2Bw*(-a1*a2*(a1*a2*f1Aw*f2Bw*kt + 4*f1Awxi*f2Bwxi*kr))/(2*(a1*a1)*(a2*a2))
+                        kCSSxcte12v[c] += -0.5*b1*kt*(f1Aw*f2Bw*g1Awg2Bw + 4*f1Awxi*f2Bwxi*g1Awg2Bw*kr/(a1*a2*kt))
 
     kCSSxcte12 = coo_matrix((kCSSxcte12v, (kCSSxcte12r, kCSSxcte12c)), shape=(size, size))
 
@@ -369,15 +369,15 @@ def fkCSSxcte22(double kt, double kr, object p1, object p2,
                         c += 1
                         kCSSxcte22r[c] = row+0
                         kCSSxcte22c[c] = col+0
-                        kCSSxcte22v[c] += b1*f2Au*f2Bu*g2Aug2Bu*kt/2
+                        kCSSxcte22v[c] += 0.5*b1*f2Au*f2Bu*g2Aug2Bu*kt
                         c += 1
                         kCSSxcte22r[c] = row+1
                         kCSSxcte22c[c] = col+1
-                        kCSSxcte22v[c] += b1*f2Av*f2Bv*g2Avg2Bv*kt/2
+                        kCSSxcte22v[c] += 0.5*b1*f2Av*f2Bv*g2Avg2Bv*kt
                         c += 1
                         kCSSxcte22r[c] = row+2
                         kCSSxcte22c[c] = col+2
-                        kCSSxcte22v[c] += b1*g2Awg2Bw*((a2*a2)*((a2*a2)*f2Aw*f2Bw*kt + 4*f2Awxi*f2Bwxi*kr))/(2*(a2*a2*a2*a2))
+                        kCSSxcte22v[c] += 0.5*b1*kt*(f2Aw*f2Bw*g2Awg2Bw + 4*f2Awxi*f2Bwxi*g2Awg2Bw*kr/((a2*a2)*kt))
 
     kCSSxcte22 = coo_matrix((kCSSxcte22v, (kCSSxcte22r, kCSSxcte22c)), shape=(size, size))
 
