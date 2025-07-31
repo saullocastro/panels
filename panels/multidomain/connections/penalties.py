@@ -132,7 +132,7 @@ def calc_kw_tsl(pA, pB=None, tsl_type=None, k_i=1.e4, k_ipen=1.e6, del_d=None,
     k_ipen : float
         Out-of-plane penalty stiffness to prevent interpenetration between
         ``pA`` and ``pB``.
-    del_d : np.array
+    del_d : np.ndarray
         A 2D np.array() corresponding to out-of-plane separation field. This is
         the out of plane separation between panels, at each point of the input
         grid.
@@ -147,7 +147,7 @@ def calc_kw_tsl(pA, pB=None, tsl_type=None, k_i=1.e4, k_ipen=1.e6, del_d=None,
     kw_tsl : float
         The out of plane stiffness, when ``tsl_type == 'bilinear'``, this is
         a map of stiffnesses at each point of the input grid.
-    dmg_index : np.array
+    dmg_index : np.ndarray
         The calculated damage at each point across the input grid. Note that
         this is only valid when ``tsl_type == 'bilinear'``.
 
