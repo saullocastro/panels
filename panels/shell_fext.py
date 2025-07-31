@@ -4,15 +4,65 @@ from . import modelDB
 from . legendre_gauss_quadrature import get_points_weights
 
 def shell_fext(shell, inc, size, col0):
-    '''
-        Calc the ext force vector 
-        
-            shell = shell obj
-            inc = incrememts 
-            size = size of K_global
+    r"""Calculate the external force vector
+
+    The function reads the following attributes of the :class:`.Shell` object:
+
+        - ``shell.point_loads`` : list of point loads, each described with ``[x,
+          y, fx, fy, fz]``. See :meth:`.Shell.add_point_load`.
+
+        - ``shell.point_loads_inc`` : similar to ``point_loads`` but this is
+          affected by the load increment in nonlinear analyses.
+
+        - ``shell.distr_loads`` : list of distributed loads, each described with
+          ``[x, None, funcx, funcy, funcz]`` or ``[None, y, funcx, funcy,
+          funcz]`` where ``x`` or ``y`` are the variable over which the load is
+          distributed. See :meth:`.Shell.add_distr_load_fixed_x` or
+          :meth:`.Shell.add_distr_load_fixed_y`.
+
+        - ``shell.distr_loads_inc`` : similar to ``distr_loads``, but this is
+          affected by the load increment in nonlinear analyses.
+
+        - ``shell.point_pds`` : list of prescribed point displacements, each
+          described with ``[x, y, ku*up, kv*vp, kw*wp]``. See
+          :meth:`.Shell.add_point_pd`.
+
+        - ``shell.point_pds_inc`` : similar to ``point_pds``, but this is
+          affected by the load increment in nonlinear analyses.
+
+        - ``shell.distr_pds`` : list of distributed prescribed displacements,
+          each described with ``[x, None, ku*funcu, kv*funcv, kw*funcw]`` or
+          ``[None, y, ku*funcu, kv*funcv, kw*funcw]`` where ``x`` or ``y`` are
+          the variable over which the displacement is distributed. See
+          :meth:`.Shell.add_distr_pd_fixed_x` or
+          :meth:`.Shell.add_distr_pd_fixed_y`.
+
+        - ``shell.distr_pds_inc`` : similar as ``distr_pds``, but this is
+          affected by the load increment in nonlinear analyses.
+
+    Parameters
+    ----------
+    shell : :class:`.Shell`
+        The shell object.
+    inc : float, optional
+        Since this function is called during the non-linear analysis,
+        ``inc`` will multiply the terms `\{{F_{ext}}_\lambda\}`.
             col0 = starting col in the global matrix ?????
-    '''
-    
+    size : int or str, optional
+        The size of the force vector. Can be the size of the total internal
+        force vector of a multidomain assembly. When using a string, for
+        example, if '+1' is given it will add 1 to the Shell`s size obtained
+        by the :method:`.Shell.get_size`
+    col0 : int, optional
+        Offset in a global internal force vector of an assembly.
+
+    Returns
+    -------
+    fext : np.ndarray
+        The external force vector.
+
+    """
+
     model = shell.model
     if not model in modelDB.db.keys():
         raise ValueError('{} is not a valid model option'.format(model))
@@ -28,9 +78,8 @@ def shell_fext(shell, inc, size, col0):
     g = np.zeros((5, shell.get_size()), dtype=np.float64)
     fext = np.zeros(size, dtype=np.float64) # A vector bec size = single integer
 
-    
     # %% Prescribed LOADS
-    
+
     # %%% point loads
     # - grouping point_loads and point_loads_inc
     point_loads = []
@@ -86,7 +135,6 @@ def shell_fext(shell, inc, size, col0):
                 fext[col0:col1] += weight * (shell.b/2) * fpt.dot(g).ravel()
 
 
-
     # %% Prescribed DISPLACEMENTS
 
     # %%% point prescribed displacements
@@ -117,8 +165,6 @@ def shell_fext(shell, inc, size, col0):
         fext[col0:col1] += fpt.dot(g).ravel()
             # Equivalent to: k*w*S  --- returns contiguous flattened array (1D array)
 
-
-
     # %%% distributed prescribed displacements
     # - grouping distr_pds and distr_pds_inc
     distr_pds = []
@@ -139,9 +185,9 @@ def shell_fext(shell, inc, size, col0):
         funcu = funcu if funcu is not None else lambda _: 0 # _ ignores ip var
         funcv = funcv if funcv is not None else lambda _: 0
         funcw = funcw if funcw is not None else lambda _: 0
-        
+
         # Disp along y = const
-        if x is None: 
+        if x is None:
             ycte = y
             # getting integration points and weights
                 # Integration over x so m terms
@@ -159,11 +205,11 @@ def shell_fext(shell, inc, size, col0):
                 fg(g, xvar, ycte, shell)
                 # Essentially does this:
                     # g[ fu[i]*gu[j],    fv[i]*gv[j],    fw[i]*gw[j],    -(2/a)*fw_xi[i]*gw[j],   -(2/b)*fw[i]*gw_eta[j] ]
-                fext[col0:col1] += weight * (shell.a/2) * fpt.dot(g).ravel() 
+                fext[col0:col1] += weight * (shell.a/2) * fpt.dot(g).ravel()
                 # same as np.dot()  -  ravel() to flatten it into a 1D array
-        
+
         # disp along x = const
-        else: 
+        else:
             xcte = x
             # getting integration points and weights
             points = np.zeros(shell.n, dtype=np.float64)
@@ -173,6 +219,6 @@ def shell_fext(shell, inc, size, col0):
                 yvar = (eta + 1)*shell.b/2
                 fpt = np.array([[funcu(yvar), funcv(yvar), funcw(yvar), 0, 0]]) * inc_i
                 fg(g, xcte, yvar, shell)
-                fext[col0:col1] += weight * (shell.b/2) * fpt.dot(g).ravel() 
+                fext[col0:col1] += weight * (shell.b/2) * fpt.dot(g).ravel()
 
     return fext
