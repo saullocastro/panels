@@ -26,7 +26,7 @@ def test_cylinder_blade_stiffened_compression_lb_Nxx_cte():
         Nxxs_blade=Nxxs,
         m=8, n=12)
 
-    assy.plot(eigvecs[:, 0], 'skin', filename='tmp_cylinder_blade_stiffened_compression_lb_Nxx_cte.png')
+    assy.plot(eigvecs[:, 0], 'skin', filename='tmp_cylinder_blade_stiffened_compression_lb_Nxx_cte_eigvec.png')
 
     assert np.isclose(Nxxs[0]*eigvals[0], -51905.843, atol=0.01, rtol=0.001)
 
@@ -48,9 +48,10 @@ def test_cylinder_blade_stiffened_compression_lb_Nxx_from_static():
         npanels=npanels,
         Nxxs_skin=Nxxs,
         Nxxs_blade=Nxxs,
-        m=14, n=14)
+        m=8, n=12)
 
-    assy.plot(c, 'skin', filename='tmp_cylinder_blade_stiffened_compression_lb_Nxx_from_static_c.png')
+    assy.plot(c, 'skin', vec='u', filename='tmp_cylinder_blade_stiffened_compression_lb_Nxx_from_static_u.png', colorbar=True)
+    assy.plot(c, 'skin', vec='w', filename='tmp_cylinder_blade_stiffened_compression_lb_Nxx_from_static_w.png', colorbar=True)
     assy.plot(eigvecs[:, 0], 'skin', filename='tmp_cylinder_blade_stiffened_compression_lb_Nxx_from_static_eigvec.png')
 
     assert np.isclose(Nxxs[0]*eigvals[0], -51905.843, atol=0.01, rtol=0.001)
