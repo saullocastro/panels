@@ -23,8 +23,6 @@ cdef extern from 'bardell_functions.hpp':
                   double xi2t, double xi2r) nogil
     double fp(int i, double xi, double xi1t, double xi1r,
                     double xi2t, double xi2r) nogil
-    double fpp(int i, double xi,
-               double xi1t, double xi1r, double xi2t, double xi2r) nogil
 
 
 def fkCSSxcte11(double kt, double kr, object p1, double xcte1, int size, int row0, int col0):
@@ -71,7 +69,7 @@ def fkCSSxcte11(double kt, double kr, object p1, double xcte1, int size, int row
     cdef double [:] kCSSxcte11v
 
     cdef double xicte1
-    cdef double f1Au, f1Bu, f1Av, f1Bv, f1Aw, f1Bw, f1Awxi, f1Bwxi, f1Awxixi, f1Bwxixi
+    cdef double f1Au, f1Bu, f1Av, f1Bv, f1Aw, f1Bw, f1Awxi, f1Bwxi
     cdef double g1Aug1Bu, g1Avg1Bv, g1Awg1Bw
 
     a1 = p1.a
@@ -107,7 +105,6 @@ def fkCSSxcte11(double kt, double kr, object p1, double xcte1, int size, int row
                     f1Av = f(i1, xicte1, x1v1, x1vr1, x2v1, x2vr1)
                     f1Aw = f(i1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
                     f1Awxi = fp(i1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
-                    f1Awxixi = fpp(i1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
 
                     for k1 in range(m1):
                         row = row0 + DOF*(j1*m1 + i1)
@@ -121,7 +118,6 @@ def fkCSSxcte11(double kt, double kr, object p1, double xcte1, int size, int row
                         f1Bv = f(k1, xicte1, x1v1, x1vr1, x2v1, x2vr1)
                         f1Bw = f(k1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
                         f1Bwxi = fp(k1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
-                        f1Bwxixi = fpp(k1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
 
                         c += 1
                         kCSSxcte11r[c] = row+0
@@ -194,7 +190,7 @@ def fkCSSxcte12(double kt, double kr, object p1, object p2,
 
     cdef double xicte1, xicte2
     cdef double g1Aug2Bu, g1Avg2Bv, g1Awg2Bw
-    cdef double f1Au, f2Bu, f1Av, f2Bv, f1Aw, f2Bw, f1Awxi, f2Bwxi, f1Awxixi, f2Bwxixi
+    cdef double f1Au, f2Bu, f1Av, f2Bv, f1Aw, f2Bw, f1Awxi, f2Bwxi
 
     a1 = p1.a
     b1 = p1.b
@@ -240,7 +236,6 @@ def fkCSSxcte12(double kt, double kr, object p1, object p2,
                     f1Av = f(i1, xicte1, x1v1, x1vr1, x2v1, x2vr1)
                     f1Aw = f(i1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
                     f1Awxi = fp(i1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
-                    f1Awxixi = fpp(i1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
 
                     for k2 in range(m2):
                         row = row0 + DOF*(j1*m1 + i1)
@@ -254,7 +249,6 @@ def fkCSSxcte12(double kt, double kr, object p1, object p2,
                         f2Bv = f(k2, xicte2, x1v2, x1vr2, x2v2, x2vr2)
                         f2Bw = f(k2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
                         f2Bwxi = fp(k2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
-                        f2Bwxixi = fpp(k2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
 
                         c += 1
                         kCSSxcte12r[c] = row+0
@@ -322,7 +316,7 @@ def fkCSSxcte22(double kt, double kr, object p1, object p2,
     cdef double [:] kCSSxcte22v
 
     cdef double xicte2
-    cdef double f2Au, f2Bu, f2Av, f2Bv, f2Aw, f2Bw, f2Awxi, f2Bwxi, f2Awxixi, f2Bwxixi
+    cdef double f2Au, f2Bu, f2Av, f2Bv, f2Aw, f2Bw, f2Awxi, f2Bwxi
     cdef double g2Aug2Bu, g2Avg2Bv, g2Awg2Bw
 
     b1 = p1.b
@@ -358,7 +352,6 @@ def fkCSSxcte22(double kt, double kr, object p1, object p2,
                     f2Av = f(i2, xicte2, x1v2, x1vr2, x2v2, x2vr2)
                     f2Aw = f(i2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
                     f2Awxi = fp(i2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
-                    f2Awxixi = fpp(i2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
 
                     for k2 in range(m2):
                         row = row0 + DOF*(j2*m2 + i2)
@@ -372,7 +365,6 @@ def fkCSSxcte22(double kt, double kr, object p1, object p2,
                         f2Bv = f(k2, xicte2, x1v2, x1vr2, x2v2, x2vr2)
                         f2Bw = f(k2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
                         f2Bwxi = fp(k2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
-                        f2Bwxixi = fpp(k2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
                         
                         c += 1
                         kCSSxcte22r[c] = row+0
