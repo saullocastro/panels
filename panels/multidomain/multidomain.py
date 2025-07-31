@@ -102,23 +102,23 @@ class MultiDomain(object):
         return self.size
 
 
-    def plot(self, c='None', group='None', invert_y=False, vec='w', filename='', ax=None,
+    def plot(self, c=None, group=None, invert_y=False, vec='w', filename='', ax=None,
             figsize=(3.5, 2.), save=True, title='', identify=False,
             show_boundaries=False, boundary_line='--k', boundary_linewidth=1.,
             colorbar=False, cbar_nticks=10, cbar_format=None, cbar_title='',
             cbar_fontsize=7, colormap='jet', aspect='equal', clean=True,
             dpi=400, texts=[], xs=None, ys=None, gridx=50, gridy=50,
             num_levels=400, vecmin=None, vecmax=None,
-            nr_x_gauss = None, nr_y_gauss = None,
-            res = None, silent=True, display_zero = False, flip_plot=False,
+            nr_x_gauss=None, nr_y_gauss=None,
+            res=None, silent=True, display_zero=False, flip_plot=False,
             eval_panel=None):
         r"""Contour plot for a Ritz constants vector.
 
         Parameters
         ----------
-        c : np.ndarray
+        c : np.ndarray or None
             The Ritz constants that will be used to compute the field contour.
-        group : str
+        group : str or None
             A group to plot. Each panel in ``panels`` should contain an
             attribute ``group``, which is used to identify which entities
             should be plotted together.
@@ -217,7 +217,7 @@ class MultiDomain(object):
             Data calculated during the plotting procedure.
 
         """
-        msg('Plotting contour...', silent=True)
+        msg('Plotting contour.../../panels/multidomain/connections/penalties.py..', silent=True)
 
         import matplotlib.cm as cm
         import matplotlib
@@ -227,6 +227,8 @@ class MultiDomain(object):
 
         # If no results (res) is passed, then compute them
         if res is None:
+            if c is None:
+                raise ValueError('Either "c" or "res" must be given as input')
             res = self.calc_results(c, group, vec = vec, gridx = gridx, gridy = gridy,
                              nr_x_gauss = nr_x_gauss, nr_y_gauss = nr_y_gauss)
 
