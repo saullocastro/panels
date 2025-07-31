@@ -555,7 +555,13 @@ class MultiDomain(object):
     def strain(self, c, group, gridx=50, gridy=50, NLterms=True, nr_x_gauss=None, nr_y_gauss=None,
                eval_panel=None):
         r"""Calculate the strain field
-        Strains and curvatures at each point ???? all x and y or just diagonal terms ????
+
+        The strain field consists of in-plane strains (`\varepsilon_{xx}`,
+        `\varepsilon_{yy}`, `\gamma_{xy}`) and curvatures (`\kappa_{xx}`,
+        `\kappa_{yy}`, `\kappa_{xy}`) at each point over the grid of interest.
+        The size of the grid is defined using ``gridx`` and ``gridy``. In the
+        multidomain assembly, each domain will have a corresponding grid
+        defined by this amount of points.
 
         Parameters
         ----------
@@ -564,24 +570,23 @@ class MultiDomain(object):
         group : str
             A group to plot. Each panel in ``panels`` should contain an
             attribute ``group``, which is used to identify which entities
-            should be plotted together.
-
-        EACH PANEL HAS gridx x gridy POINTS !!!
-
+            that should be plotted together.
         gridx : int, optional
-            Number of points along the `x` axis where to calculate the
-            displacement field.
+            Number of points along the `x` axis, where the strain field is
+            calculated.
         gridy : int, optional
-            Number of points along the `y` where to calculate the
-            displacement field.
+            Number of points along the `y` axis, where the strain field is
+            calculated.
         NLterms : bool
             Flag to indicate whether non-linear strain components should be considered.
         nr_x_gauss, nr_y_gauss : int
-            Number of gauss sampling points along x and y respectively where the displacement field is to be calculated
-            Either one of nr_x_gauss and nr_y_gauss needs to be specified or both
-            Both can be different
+            Number of gauss sampling points along x and y respectively where
+            the field is to be calculated. Either one of ``nr_x_gauss`` or
+            ``nr_y_gauss`` needs to be specified, or both. They can be
+            different.
         eval_panel : Shell object
-            Used to evaluate results for a single panel (that is passed) instead of an entire group of panels
+            Used to evaluate results for a single panel (that is passed)
+            instead of an entire group of panels.
 
         Returns
         -------
@@ -591,12 +596,11 @@ class MultiDomain(object):
             Each has the shape: (no_panels_in_group) x gridx x gridy
 
         """
-
-        # res = results
         res = dict(x=[], y=[], exx=[], eyy=[], gxy=[], kxx=[], kyy=[], kxy=[])
 
         if group is not None:
             loop_panels = self.panels
+
         # Used when the field for just a single panel is needed
         if eval_panel is not None:
             loop_panels = [eval_panel]
@@ -665,7 +669,13 @@ class MultiDomain(object):
     def stress(self, c, group, gridx=50, gridy=50, NLterms=True, nr_x_gauss=None, nr_y_gauss=None,
                eval_panel=None, x_cte_force=None, y_cte_force=None):
 
-        r"""Calculate the stress (Nx, Mx etc) field
+        r"""Calculate the stress field
+
+        The stress field consists of in-plane distributed forces (Nxx, Nyy,
+        Nxy) and distributed moments (Mxx, Myy, Mxy) at each point over the
+        grid of interest. The size of the grid is defined using ``gridx`` and
+        ``gridy``. In the multidomain assembly, each domain will have a
+        corresponding grid defined by this amount of points.
 
         Parameters
         ----------
@@ -733,16 +743,6 @@ class MultiDomain(object):
                 y = (panel.b/2)*(y + 1)
             else:
                 y = linspace(0, panel.b, gridy)
-
-            if False:
-                # Adding extra points where the force is requested
-                # Not executed at the moment as adding an extra term breaks the out of plane force calc
-                    # bec Qx needs the point locations - fix it by adding the same point in the force ftn
-                if x_cte_force is not None:
-                    x = np.sort(np.append(x, np.array([x_cte_force])))
-                        # not sorting it so that the last i
-                if y_cte_force is not None:
-                    y = np.sort(np.append(y, np.array([y_cte_force])))
 
             xs, ys = np.meshgrid(x, y, copy=False)
             # Scalar inputs are converted to 1D arrays, whilst higher-dimensional inputs are preserved
@@ -1480,9 +1480,7 @@ class MultiDomain(object):
 
     def calc_k_dmg(self, c, pA, pB, nr_x_gauss, nr_y_gauss, tsl_type, prev_max_dmg_index,
                    k_i=None, tau_o=None, G1c=None):
-
-        """
-            Calculates the damaged k_tsl and the damage index
+        """Calculate the damaged k_tsl and the damage index
 
             Input:
                 prev_max_dmg_index = Max damage index per integration point for the previous converged NR iteration
@@ -1492,7 +1490,6 @@ class MultiDomain(object):
                 MD object. To ensure that it works for multiple connected domamins, it needs to be stored with the
                 shell object instead and modify the rest accordingly
         """
-
         # Calculating the displacements of each panel
         res_pan_top = self.calc_results(c=c, eval_panel=pA, vec='w',
                                 nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss)
@@ -1536,66 +1533,6 @@ class MultiDomain(object):
         return tau
 
 
-    def calc_traction(self, c, pA, nr_x_gauss, nr_y_gauss, tsl_type, prev_max_del_d, k_i=None):
-        """
-            ONLY FOR FEXT_DMG - For panels with the SB_TSL connection, use calc_k_dmg and multiply kw_tsl
-                and corrected_max_del_d OR use calc_traction_stiffness()
-
-        Returns
-        -------
-        None.
-
-        """
-
-        # After the first iteration - once it has solved for c
-        if c is not None:
-            # Calculating the displacements of each panel
-            res_pan_top = self.calc_results(c=c, eval_panel=pA, vec='w',
-                                    nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss)
-            # Assuming:
-            #     - the left most end is SS at the very least
-            #     - top and bottom panel's displacements are symmetric about the middle
-
-            # Separation for the current NR iteration
-            del_d_curr = 2*res_pan_top['w'][0]
-
-            print(f'calc_traction: max del_d_curr {np.max(del_d_curr)}')
-
-            # Initilizing prev max with 0 if c exists but no prev max del_d (useful for the first displ step
-                # where c exists but there is no prev max del_d)
-            if prev_max_del_d is None:
-                prev_max_del_d = np.zeros_like(del_d_curr)
-
-            # Considering max del_d for all displacement/load steps
-            # prev_max_del_d is already the max over all disp steps at each integration point
-            max_del_d = np.amax(np.array([prev_max_del_d, del_d_curr]), axis = 0)
-            # TODO: Consider only doing it if del_d is +ve as -ve doesnt create any damage
-            print(f'calc_traction: max max_del_d {np.max(max_del_d)}')
-
-            # Rewriting negative displacements and setting them to zero before the positive displ at the right end (tip)
-            if True:
-                corrected_max_del_d = max_del_d.copy()
-                for i in range(np.shape(max_del_d)[0]):
-                    # Changed - moved inside the loop to prevent errors if no negative element exists in that row
-                    if np.min(max_del_d[i,:]) <= 0: # only for negative dipls
-                        corrected_max_del_d[i, 0:np.argwhere(corrected_max_del_d[i,:]<=0)[-1][0] + 1] = 0
-                        # [-1] to get the last negative position; [0] to convert it from an array to int;
-                        # +1 to include the last negative value and set it to 0
-            print(f'calc_traction: max corrected_max_del_d {np.max(corrected_max_del_d)}')
-
-
-        # Used when fext is to be calc before the first NR iteration - set all del_d = 0 so no traction force
-        else:
-            corrected_max_del_d = np.zeros((nr_y_gauss, nr_x_gauss))
-
-        # Calculating stiffness grid
-        kw_tsl, dmg_index = connections.calc_kw_tsl(pA=pA, pB=None, tsl_type=tsl_type, k_i=k_i, del_d=corrected_max_del_d)
-
-        T_tsl = np.multiply(kw_tsl, corrected_max_del_d)
-
-        return kw_tsl, dmg_index, corrected_max_del_d, T_tsl
-
-
     def update_TSL_history(self, curr_max_dmg_index):
         """
             Used to update the maximum del_d (over all loading histories) - this prevents exisiting
@@ -1606,8 +1543,7 @@ class MultiDomain(object):
 
 
     def calc_damaged_stiffness(self, dmg_index, k_i):
-        """
-        Calculates the reduced stiffness given the damage index
+        """Calculate the reduced stiffness given the damage index
 
         Parameters
         ----------
@@ -1621,7 +1557,6 @@ class MultiDomain(object):
         None.
 
         """
-
         kw_tsl = k_i*(1-dmg_index)
 
         return kw_tsl
