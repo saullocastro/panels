@@ -1132,6 +1132,8 @@ class Shell(object):
         such that the terms in `\{{F_{ext}}_0\}` are constant and the terms in
         `\{{F_{ext}}_\lambda\}` will be scaled by the parameter ``inc``.
 
+        See the documentation of :func:`.shell_fext` for more details.
+
         Parameters
         ----------
         inc : float, optional
