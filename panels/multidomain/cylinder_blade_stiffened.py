@@ -236,7 +236,7 @@ def cylinder_blade_stiffened_compression_lb_Nxx_from_static(height, r, stack,
     k0 = assy.calc_kC(conns, silent=True)
     incs, cs = static(k0, fext, silent=True)
     c = cs[0]
-    kG = assy.calc_kG(c=c, silent=False)
+    kG = assy.calc_kG(c=c, silent=True)
 
     eigvals = eigvecs = None
     eigvals, eigvecs = lb(k0, kG, tol=0, sparse_solver=True, silent=True,
