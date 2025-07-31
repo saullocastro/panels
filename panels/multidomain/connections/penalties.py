@@ -72,11 +72,15 @@ def calc_kt_kr(p1, p2, connection_type):
 
     Note
     ----
-    Theoretically, the penalty stiffnesses kt and kr can be arbitrarily high in order to impose the energy penalty. However, the
-    use of high values is associated with numerical instabilities such that one should choose the penalty stiffnesses that are just high
-    enough to impose the proper penalties, but not excessively high. In the current study it is proposed to calculate kt and kr based
-    on laminate properties of the panels being connected, instead of using fixed high values, a common practice in the literature.
-    [castro2017AssemblyModels]
+    Theoretically, the penalty stiffnesses kt and kr can be arbitrarily high in
+    order to impose the energy penalty. However, the use of high values is
+    associated with numerical instabilities such that one should choose the
+    penalty stiffnesses that are just high enough to impose the proper
+    penalties, but not excessively high. In the current study it is proposed to
+    calculate kt and kr based on laminate properties of the panels being
+    connected, instead of using fixed high values, a common practice in the
+    literature.  [castro2017AssemblyModels]
+
     """
 
     build_panel_lam(p1)
