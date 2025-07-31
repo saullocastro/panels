@@ -632,7 +632,7 @@ def dcb_damage_prop_no_f_kcrack(phy_dim, nr_terms, k_i=None, tau_o=None, nr_x_ga
 
         plt.figure(figsize=(10,7))
         plt.plot(force_intgn[:disp_iter_no+1, 0], force_intgn[:disp_iter_no+1, 1], label = 'Line')
-		scaling_F_plot = force_intgn[0,1]/force_intgn_dmg[0,1]
+        scaling_F_plot = force_intgn[0,1]/force_intgn_dmg[0,1]
         plt.plot(force_intgn_dmg[:disp_iter_no+1, 0], scaling_F_plot*force_intgn_dmg[:disp_iter_no+1, 1], label='Area Int')
         #plt.plot(FEM[:,0],FEM[:,1], label='FEM')
         plt.ylabel('Force [N]', fontsize=14)
