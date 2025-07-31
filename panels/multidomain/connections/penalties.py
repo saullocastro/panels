@@ -114,78 +114,67 @@ def calc_kt_kr(p1, p2, connection_type):
         return kt, kr
 
 
-def calc_kw_tsl(pA, pB=None, tsl_type=None, k_i=None, del_d=None, tau_o=None, G1c=None):
+def calc_kw_tsl(pA, pB=None, tsl_type=None, k_i=1.e4, k_ipen=1.e6, del_d=None,
+                tau_o=67, G1c=1.12):
+    r"""Calculate out of plane stiffness of the damaged region (where the traction separation law exists)
 
-    '''
-        Calculates out of plane stiffness of the damaged region (where the traction separation law exists)
+    Parameters
+    ----------
+    pA : :class:`.Shell`
+        Top panel.
+    pB : :class:`.Shell`
+        Bottom panel.
+    tsl_type : string
+        Type of TSL to be used. Possible options are: 'linear' (no softening),
+        or 'bilinear' (with linear softening).
+    k_i : float
+        Pristine out-of-plane stiffness, in other words, when there is no damage.
+    k_ipen : float
+        Out-of-plane penalty stiffness to prevent interpenetration between
+        ``pA`` and ``pB``.
+    del_d : np.array
+        A 2D np.array() corresponding to out-of-plane separation field. This is
+        the out of plane separation between panels, at each point of the input
+        grid.
+    tau_o : float
+        Traction at damage onset. The default value is in MPa units.
+    G1c : float
+        Critical fracture energy release rate in mode I. The default value is
+        in kJ/m^2 = N/mm units.
 
-        INPUT ARGUEMENTS:
-            pA = top panel
+    Returns
+    -------
+    kw_tsl : float
+        The out of plane stiffness, when ``tsl_type == 'bilinear'``, this is
+        a map of stiffnesses at each point of the input grid.
+    dmg_index : np.array
+        The calculated damage at each point across the input grid. Note that
+        this is only valid when ``tsl_type == 'bilinear'``.
 
-            pB= bottom panel
-
-            tsl_type = type of TSL to be used
-                Possible options:   'linear' (no softening)
-                                    'bilinear' (w linear softening)
-
-            del_d = 2D np.array() - corresponds to x y for disp
-                Needs to be of a SIGNLE PANEL
-
-            --- ENSURE THAT ITS CORRECT !!!!!!!!!!!!!!!!!!!!
-
-            Out of plane separation between panels (d = damage)
-                    Should contain map of del_d across the whole domain of interest
-
-        RETURN VALUES:
-            kw_tsl = out of plane stiffness
-                if tsl_type == 'bilinear':
-                    returns map of stiffnesses at each point in the input grid
-
-    '''
-
-    if False:
-        if pA.a != pB.a or pA.b != pB.b:
-            raise ValueError('Dimensions of both the panels in contact should be same')
-
+    """
     if tsl_type == 'linear':
         tsl_input = 1e4 # N/mm^3 (from Fig 8a - https://doi.org/10.1016/j.compositesa.2022.107101 - faulty !!!!)
-        # print(tsl_input, pA.a, pA.b)
         kw_tsl = tsl_input  # N/mm^3 (same as kt for SB connection)
 
-        return kw_tsl
+        return kw_tsl, None
 
     elif tsl_type == 'bilinear':
         if del_d is None:
             raise ValueError('Out of plane separation field is required')
 
         # Cohesive Law Parameters
-
-        if G1c is None:
-            G1c = 1.12   # [kJ/m^2 = N/mm]   - Critical Fracture Energy in Mode 1
-        if tau_o is None:
-            tau_o = 67 #87         # [MPa]     - Traction at damage onset
-
-        if False:
-            del_o = 87E-6     # [mm]      - Separation at damage onset (damage variable = 0)
-            k_i = tau_o/del_o     # [N/mm^3]  - Initial out of plane stiffness
-        else:
-            if k_i is None:
-                k_i = 1E4
-            # print(type(tau_o), type(k_i))
-            del_o = tau_o/k_i
-        del_f = 2*G1c/tau_o           # [mm]      - Separation at complete failure (damage variable = 1)
-
-        # Overwiting with values from MM_onecoh_impl.inp file
-        # del_o = 0.000115813
-        # k_i = 750367.4026
+        del_o = tau_o/k_i
+        del_f = 2*G1c/tau_o # [mm] - Separation at complete failure (damage variable = 1)
 
         k_dmg = np.zeros_like(del_d)
         # Stiffness when there is damage
         # Ignoring div by zero error when del_d is 0 for calc of damage. Its overwritten below so its fine :)
         with np.errstate(divide='ignore'):
-            k_dmg = k_i * del_o * np.divide((del_f - del_d) , (del_f - del_o)*del_d)
-            # Overwriting stiffnesses where separation is zero
-        k_dmg[del_d == 0] = k_i # CONVERT TO np.isclose !!!!!!!!!!
+            k_dmg = k_i*del_o*np.divide((del_f - del_d), (del_f - del_o)*del_d)
+
+        # Overwriting stiffnesses where separation is zero
+        k_dmg[np.isclose(del_d, 0)] = k_i
+
         # But it should not matter because youre only checking cases when del_d = 0 i.e. initial value so its already init by 0
         # So no numerical error will exist
 
@@ -202,43 +191,24 @@ def calc_kw_tsl(pA, pB=None, tsl_type=None, k_i=None, del_d=None, tau_o=None, G1
             #  |
             #  |
             #  |
-        f_ipen = del_d < 0          # Filter mask for interpenetration stiffness
-        # from matplotlib import pyplot as plt
-        # plt.contourf(f_ipen)
-        # plt.colorbar()
-        # plt.show()
-        # High interpenetration stiffness
-        if False:                    # Using same stiffness as kCSB - thats used to tie the plates together
-            build_panel_lam(pA)
-            build_panel_lam(pB)
-            A11_pA = pA.lam.A[0, 0]
-            A11_pB = pB.lam.A[0, 0]
-            hpA = pA.lam.h
-            hpB = pB.lam.h
-            k_ipen = 4*A11_pA*A11_pB/((A11_pA + A11_pB)*(hpA + hpB)) / min(pA.a, pA.b)
-        else:
-            k_ipen = (1e2)*k_i      # Arbitary higher value than initial stiffness
+
+        # Filter mask for interpenetration stiffness
+        f_ipen = del_d < 0
 
         # Overall k that takes into account inital k as well
         kw_tsl = np.multiply(np.invert(f_ipen), np.multiply(f_f, f_i*k_i + np.multiply(f_dmg,k_dmg))) + f_ipen*k_ipen
-        # print('kw_tsl needs to be changed - penalties.py')
-        # kw_tsl = np.multiply(f_f, f_i*k_i + np.multiply(f_dmg,k_dmg))
-        # print(f'{np.max(kw_tsl):.3e}')
-            # Its essentially, kw_tsl = ff*(fi*ki + fdmg*kdmg) + fipen*kipen
-                #kw_tsl[del_d < 0] = 1e5 * k_i
 
         # Calculating Damage Index
         with np.errstate(divide='ignore'):
             dmg_index_after_dmg = np.divide((del_d - del_o)*del_f , (del_f - del_o)*del_d)
-        dmg_index_after_dmg[del_d == 0] = 0
+
+        dmg_index_after_dmg[np.isclose(del_d, 0)] = 0
+
         # Applies a filter mask to remove the terms when del_d < del_o, setting them to 0
         dmg_index = np.multiply(f_dmg, dmg_index_after_dmg)
         dmg_index[del_d > del_f] = 1
-
-        # print(f'            k_i = {k_i:.3e}    --    G1c = {G1c}  --  tau_o = {tau_o}')
 
         return kw_tsl, dmg_index
 
     else:
         raise ValueError('Invalid TSL type')
-
