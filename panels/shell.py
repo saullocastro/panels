@@ -370,7 +370,6 @@ class Shell(object):
     def calc_kC(self, size=None, row0=0, col0=0, silent=True, finalize=True,
             c=None, c_cte=None, nx=None, ny=None, ABDnxny=None, NLgeom=False):
         r"""Calculate the constitutive stiffness matrix
-        ---------- Notation as per MD paper: kP_i -----------
 
         If ``c`` is not given it calculates the linear constitutive stiffness
         matrix, otherwise the large displacement linear constitutive stiffness
@@ -503,7 +502,6 @@ class Shell(object):
     def calc_kG(self, size=None, row0=0, col0=0, silent=True, finalize=True,
             c=None, nx=None, ny=None, ABDnxny=None, NLgeom=False):
         r"""Calculate the (inital stress or) geometric stiffness matrix
-        ---------- Notation as per MD paper: kGp_i -----------
 
         See :meth:`.Shell.calc_kC` for details on each parameter.
 
