@@ -539,6 +539,7 @@ class Shell(object):
 
         if analytical_kG:
             kG = matrices.fkG0(self.Nxx, self.Nyy, self.Nxy, self, size, row0, col0)
+
         else:
             if ABDnxny is None:
                 ABDnxny = self._get_lam_ABD()
