@@ -26,13 +26,24 @@ Citing this library
 
 Saullo G. P. Castro, Nathan D'Souza. (2025). Semi-analytical methods for plates, shells and stiffened panels (Version 0.5.0). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
 
+Documentation
+-------------
+
+The documentation is available on: https://saullocastro.github.io/panels.
+
 
 Installation
 ------------
 
 To get the latest version::
 
-    pip install panels
+    python -m pip install panels
+
+History
+-------
+
+- up to version 0.3.x, multidomain methods for pristine structures
+- versions >= 0.5.x, introduction of damaged multidomain connections
 
 
 License
