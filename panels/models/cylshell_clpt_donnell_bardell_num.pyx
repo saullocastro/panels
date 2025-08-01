@@ -108,7 +108,7 @@ def fkC_num(double [::1] cs, object Finput, object shell,
 
     xi1 = -1
     xi2 = +1
-    if x1 != -1 and x2 != -1:
+    if x1 != -1 and x2 != +1:
         xinf = 0
         xsup = shell.a
         xi1 = (x1 - xinf)/(xsup - xinf)*2 - 1
@@ -119,7 +119,7 @@ def fkC_num(double [::1] cs, object Finput, object shell,
 
     eta1 = -1
     eta2 = +1
-    if y1 != -1 and y2 != -1:
+    if y1 != -1 and y2 != +1:
         yinf = 0
         ysup = shell.b
         eta1 = (y1 - yinf)/(ysup - yinf)*2 - 1
@@ -368,7 +368,7 @@ def fkG_num(double [::1] cs, object Finput, object shell,
 
     xi1 = -1
     xi2 = +1
-    if x1 != -1 and x2 != -1:
+    if x1 != -1 and x2 != +1:
         xinf = 0
         xsup = shell.a
         xi1 = (x1 - xinf)/(xsup - xinf)*2 - 1
@@ -379,7 +379,7 @@ def fkG_num(double [::1] cs, object Finput, object shell,
 
     eta1 = -1
     eta2 = +1
-    if y1 != -1 and y2 != -1:
+    if y1 != -1 and y2 != +1:
         yinf = 0
         ysup = shell.b
         eta1 = (y1 - yinf)/(ysup - yinf)*2 - 1
@@ -572,7 +572,7 @@ def fkAx_num(object shell, int size, int row0, int col0, int nx, int ny):
 
     xi1 = -1
     xi2 = +1
-    if x1 != -1 and x2 != -1:
+    if x1 != -1 and x2 != +1:
         xinf = 0
         xsup = shell.a
         xi1 = (x1 - xinf)/(xsup - xinf)*2 - 1
@@ -583,7 +583,7 @@ def fkAx_num(object shell, int size, int row0, int col0, int nx, int ny):
 
     eta1 = -1
     eta2 = +1
-    if y1 != -1 and y2 != -1:
+    if y1 != -1 and y2 != +1:
         yinf = 0
         ysup = shell.b
         eta1 = (y1 - yinf)/(ysup - yinf)*2 - 1
@@ -723,7 +723,7 @@ def calc_fint(double [::1] cs, object Finput, object shell,
 
     xi1 = -1
     xi2 = +1
-    if x1 != -1 and x2 != -1:
+    if x1 != -1 and x2 != +1:
         xinf = 0
         xsup = shell.a
         xi1 = (x1 - xinf)/(xsup - xinf)*2 - 1
@@ -734,7 +734,7 @@ def calc_fint(double [::1] cs, object Finput, object shell,
 
     eta1 = -1
     eta2 = +1
-    if y1 != -1 and y2 != -1:
+    if y1 != -1 and y2 != +1:
         yinf = 0
         ysup = shell.b
         eta1 = (y1 - yinf)/(ysup - yinf)*2 - 1
