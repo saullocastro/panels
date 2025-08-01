@@ -485,10 +485,6 @@ def fkAx(double beta, double gamma, object shell,
                         row = row0 + DOF*(j*m + i)
                         col = col0 + DOF*(l*m + k)
 
-                        #NOTE symmetry
-                        if row > col:
-                            continue
-
                         gAwgBw = integral_ff(j, l, y1w, y1wr, y2w, y2wr, y1w, y1wr, y2w, y2wr)
 
                         c += 1
@@ -541,10 +537,6 @@ def fkAy(double beta, object shell, int size, int row0, int col0):
 
                         row = row0 + DOF*(j*m + i)
                         col = col0 + DOF*(l*m + k)
-
-                        #NOTE symmetry
-                        if row > col:
-                            continue
 
                         gAwetagBw = integral_ffp(l, j, y1w, y1wr, y2w, y2wr, y1w, y1wr, y2w, y2wr)
 

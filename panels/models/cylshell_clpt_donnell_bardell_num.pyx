@@ -622,10 +622,6 @@ def fkAx_num(object shell, int size, int row0, int col0, int nx, int ny):
                                 row = row0 + DOF*(j*m + i)
                                 col = col0 + DOF*(l*m + k)
 
-                                #NOTE symmetry assumption True if no follower forces are used
-                                if row > col:
-                                    continue
-
                                 gBw = f(l, eta, y1w, y1wr, y2w, y2wr)
 
                                 c += 1
