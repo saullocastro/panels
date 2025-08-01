@@ -47,12 +47,12 @@ def shell_fext(shell, inc, size, col0):
     inc : float, optional
         Since this function is called during the non-linear analysis,
         ``inc`` will multiply the terms `\{{F_{ext}}_\lambda\}`.
-            col0 = starting col in the global matrix ?????
+        col0 = starting col in the global matrix ?????
     size : int or str, optional
         The size of the force vector. Can be the size of the total internal
         force vector of a multidomain assembly. When using a string, for
         example, if '+1' is given it will add 1 to the Shell`s size obtained
-        by the :method:`.Shell.get_size`
+        by the :meth:`.Shell.get_size`
     col0 : int, optional
         Offset in a global internal force vector of an assembly.
 

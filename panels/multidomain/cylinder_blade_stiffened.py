@@ -9,9 +9,9 @@ from panels.multidomain import MultiDomain
 
 def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
         width_blades, plyt, laminaprop, npanels, m=8, n=8):
-    r"""Cylinder Assembly
+    r"""Create a cylinder multidomain assembly with blade stiffeners
 
-    The panel assembly looks like::
+    The multidomain assembly looks like::
 
 
         B                               A
@@ -65,9 +65,17 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
 
     Returns
     -------
-    assy, conns : tuple
-        A tuple containing the assembly and the default connectivity
+    md, conns : tuple
+        A tuple containing the multidomain assembly and the default connectivity
         list of dictionaries.
+
+    Notes
+    -----
+    The code of this function is illustrative of how it constructs the
+    multidomain assembly:
+
+    .. literalinclude:: ../../panels/multidomain/cylinder_blade_stiffened.py
+        :pyobject: create_cylinder_blade_stiffened
 
     """
     if npanels < 2:
@@ -121,9 +129,9 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
     for panel, blade in zip(skin, blades):
         conns.append(dict(p1=panel, p2=blade, func='BFycte', ycte1=0, ycte2=0))
 
-    assy = MultiDomain(skin + blades)
+    md = MultiDomain(skin + blades)
 
-    return assy, conns
+    return md, conns
 
 
 def cylinder_blade_stiffened_compression_lb_Nxx_cte(height, r, stack, stack_blades,
@@ -144,7 +152,7 @@ def cylinder_blade_stiffened_compression_lb_Nxx_cte(height, r, stack, stack_blad
 
     Returns
     -------
-    assy, eigvals, eigvecs : tuple
+    md, eigvals, eigvecs : tuple
         Assembly, eigenvalues and eigenvectors.
 
     Examples
@@ -152,11 +160,11 @@ def cylinder_blade_stiffened_compression_lb_Nxx_cte(height, r, stack, stack_blad
 
     The following example is one of the test cases:
 
-    .. literalinclude:: ../../../../../compmech/panel/assembly/tests/test_cylinder_blade_stiffened.py
+    .. literalinclude:: ../../tests/multidomain/test_cylinder_blade_stiffened.py
         :pyobject: test_cylinder_blade_stiffened_compression_lb_Nxx_cte
 
     """
-    assy, conns = create_cylinder_blade_stiffened(height=height, r=r,
+    md, conns = create_cylinder_blade_stiffened(height=height, r=r,
             stack=stack, stack_blades=stack_blades, width_blades=width_blades,
             plyt=plyt, laminaprop=laminaprop, npanels=npanels, m=m, n=n)
     if len(Nxxs_skin) != npanels:
@@ -165,7 +173,7 @@ def cylinder_blade_stiffened_compression_lb_Nxx_cte(height, r, stack, stack_blad
         raise ValueError('The length of "Nxxs_blade" must be the same as "npanels"')
     i_skin = -1
     i_blade = -1
-    for p in assy.panels:
+    for p in md.panels:
         p.x2u = 1
         if 'skin' in p.group:
             i_skin += 1
@@ -174,11 +182,11 @@ def cylinder_blade_stiffened_compression_lb_Nxx_cte(height, r, stack, stack_blad
             i_blade += 1
             p.Nxx = Nxxs_blade[i_blade]
 
-    k0 = assy.calc_kC(conns, silent=True)
-    kG = assy.calc_kG(silent=True)
+    k0 = md.calc_kC(conns, silent=True)
+    kG = md.calc_kG(silent=True)
     eigvals, eigvecs = lb(k0, kG, tol=0, sparse_solver=True, silent=True,
              num_eigvalues=num_eigvalues, num_eigvalues_print=5)
-    return assy, eigvals, eigvecs
+    return md, eigvals, eigvecs
 
 
 def cylinder_blade_stiffened_compression_lb_Nxx_from_static(height, r, stack,
@@ -200,7 +208,7 @@ def cylinder_blade_stiffened_compression_lb_Nxx_from_static(height, r, stack,
 
     Returns
     -------
-    assy, c, eigvals, eigvecs : tuple
+    md, c, eigvals, eigvecs : tuple
         Assembly, static results, eigenvalues and eigenvectors.
 
     Examples
@@ -208,11 +216,11 @@ def cylinder_blade_stiffened_compression_lb_Nxx_from_static(height, r, stack,
 
     The following example is one of the test cases:
 
-    .. literalinclude:: ../../../../../compmech/panel/assembly/tests/test_cylinder.py
+    .. literalinclude:: ../../tests/multidomain/test_cylinder_blade_stiffened.py
         :pyobject: test_cylinder_blade_stiffened_compression_lb_Nxx_from_static
 
     """
-    assy, conns = create_cylinder_blade_stiffened(height=height, r=r,
+    md, conns = create_cylinder_blade_stiffened(height=height, r=r,
             stack=stack, stack_blades=stack_blades, width_blades=width_blades,
             plyt=plyt, laminaprop=laminaprop, npanels=npanels, m=m, n=n)
     if len(Nxxs_skin) != npanels:
@@ -221,7 +229,7 @@ def cylinder_blade_stiffened_compression_lb_Nxx_from_static(height, r, stack,
         raise ValueError('The length of "Nxxs_blade" must be the same as "npanels"')
     i_skin = -1
     i_blade = -1
-    for p in assy.panels:
+    for p in md.panels:
         p.x2u = 1
         if 'skin' in p.group:
             i_skin += 1
@@ -231,18 +239,18 @@ def cylinder_blade_stiffened_compression_lb_Nxx_from_static(height, r, stack,
             Nxx = Nxxs_blade[i_blade]
         p.add_distr_load_fixed_x(p.a, lambda y: Nxx, None, None)
 
-    fext = assy.calc_fext(silent=True)
+    fext = md.calc_fext(silent=True)
 
-    k0 = assy.calc_kC(conns, silent=True)
+    k0 = md.calc_kC(conns, silent=True)
     incs, cs = static(k0, fext, silent=True)
     c = cs[0]
-    kG = assy.calc_kG(c=c, silent=True)
+    kG = md.calc_kG(c=c, silent=True)
 
     eigvals = eigvecs = None
     eigvals, eigvecs = lb(k0, kG, tol=0, sparse_solver=True, silent=True,
              num_eigvalues=num_eigvalues, num_eigvalues_print=5)
 
-    return assy, c, eigvals, eigvecs
+    return md, c, eigvals, eigvecs
 
 
 def cylinder_blade_stiffened_compression_lb_pd_from_static(height, r, stack,
@@ -266,7 +274,7 @@ def cylinder_blade_stiffened_compression_lb_pd_from_static(height, r, stack,
 
     Returns
     -------
-    assy, c, eigvals, eigvecs : tuple
+    md, c, eigvals, eigvecs : tuple
         Assembly, static results, eigenvalues and eigenvectors.
 
     Examples
@@ -274,11 +282,11 @@ def cylinder_blade_stiffened_compression_lb_pd_from_static(height, r, stack,
 
     The following example is one of the test cases:
 
-    .. literalinclude:: ../../../../../compmech/panel/assembly/tests/test_cylinder.py
-        :pyobject: test_cylinder_blade_stiffened_compression_lb_Nxx_from_static
+    .. literalinclude:: ../../tests/multidomain/test_cylinder_blade_stiffened.py
+        :pyobject: test_cylinder_blade_stiffened_compression_lb_pd_from_static
 
     """
-    assy, conns = create_cylinder_blade_stiffened(height=height, r=r,
+    md, conns = create_cylinder_blade_stiffened(height=height, r=r,
             stack=stack, stack_blades=stack_blades, width_blades=width_blades,
             plyt=plyt, laminaprop=laminaprop, npanels=npanels, m=m, n=n)
     if len(pds_skin) != npanels:
@@ -287,7 +295,7 @@ def cylinder_blade_stiffened_compression_lb_pd_from_static(height, r, stack,
         raise ValueError('The length of "pds_blade" must be the same as "npanels"')
     i_skin = -1
     i_blade = -1
-    for p in assy.panels:
+    for p in md.panels:
         p.x2u = 1
         if 'skin' in p.group:
             i_skin += 1
@@ -297,15 +305,15 @@ def cylinder_blade_stiffened_compression_lb_pd_from_static(height, r, stack,
             pd = pds_blade[i_blade]
         p.add_distr_pd_fixed_x(p.a, ku, None, None, lambda y: pd, None, None)
 
-    fext = assy.calc_fext(silent=True)
+    fext = md.calc_fext(silent=True)
 
-    k0 = assy.calc_kC(conns, silent=True)
+    k0 = md.calc_kC(conns, silent=True)
     incs, cs = static(k0, fext, silent=True)
     c = cs[0]
-    kG = assy.calc_kG(c=c, silent=True)
+    kG = md.calc_kG(c=c, silent=True)
 
     eigvals = eigvecs = None
     eigvals, eigvecs = lb(k0, kG, tol=0, sparse_solver=True, silent=True,
              num_eigvalues=num_eigvalues, num_eigvalues_print=5)
 
-    return assy, c, eigvals, eigvecs
+    return md, c, eigvals, eigvecs

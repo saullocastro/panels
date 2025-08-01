@@ -13,7 +13,7 @@ def tstiff2d_1stiff_freq(a, b, ys, bb, bf, defect_a, rho, plyt, laminaprop,
     Ref. [castro2016FlutterPanel]_ .
 
     For more details about the theory involved on the assembly of panels, see
-    [castro2017AssemblyModels]_.
+    [castro2017Multidomain]_ .
 
     The panel assembly looks like::
 

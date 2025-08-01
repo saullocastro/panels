@@ -49,7 +49,7 @@ def calc_kt_kr(p1, p2, connection_type):
     """Calculate translation and rotation penalty constants
 
     For details on how to derive these equations, see
-    [castro2017AssemblyModels]_ (MD paper eqn 34-40)
+    [castro2017Multidomain]_ (MD paper eqn 34-40)
 
     Parameters
     ----------
@@ -79,7 +79,7 @@ def calc_kt_kr(p1, p2, connection_type):
     penalties, but not excessively high. In the current study it is proposed to
     calculate kt and kr based on laminate properties of the panels being
     connected, instead of using fixed high values, a common practice in the
-    literature.  [castro2017AssemblyModels]
+    literature [castro2017Multidomain]_ .
 
     """
 

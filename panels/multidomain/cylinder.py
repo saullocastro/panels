@@ -7,11 +7,11 @@ from panels.shell import Shell
 from panels.multidomain import MultiDomain
 
 
-def create_cylinder_assy(height, r, stack, plyt, laminaprop,
+def create_cylinder(height, r, stack, plyt, laminaprop,
         npanels, m=8, n=8):
-    r"""Cylinder Assembly
+    r"""Create a cylinder multidomain assembly
 
-    The panel assembly looks like::
+    The multidomain assembly looks like::
 
 
         B                             A
@@ -49,9 +49,18 @@ def create_cylinder_assy(height, r, stack, plyt, laminaprop,
 
     Returns
     -------
-    assy, conns : tuple
-        A tuple containing the assembly and the default connectivity
+    md, conns : tuple
+        A tuple containing the multidomain assembly and the default connectivity
         list of dictionaries.
+
+    Notes
+    -----
+    The code of this function is illustrative of how it constructs the
+    multidomain assembly:
+
+    .. literalinclude:: ../../panels/multidomain/cylinder.py
+        :pyobject: create_cylinder
+
 
     """
     if npanels < 2:
@@ -81,16 +90,16 @@ def create_cylinder_assy(height, r, stack, plyt, laminaprop,
             p01 = skin_loop[i+1]
             p02 = skin_loop[i]
             conns.append(dict(p1=p01, p2=p02, func='SSycte', ycte1=0, ycte2=p02.b))
-    assy = MultiDomain(skin)
+    md = MultiDomain(skin)
 
-    return assy, conns
+    return md, conns
 
 
 def cylinder_compression_lb_Nxx_cte(height, r, stack, plyt, laminaprop,
         npanels, Nxxs, m=8, n=8, num_eigvalues=20):
     """Linear buckling analysis with a constant Nxx for each panel
 
-    See :func:`.create_cylinder_assy` for most parameters.
+    See :func:`.create_cylinder` for most parameters.
 
     The cylinder has SS1 at the bottom and SS3 at the top. SS3 means that the
     edge is free to move in the axial direction.
@@ -105,7 +114,7 @@ def cylinder_compression_lb_Nxx_cte(height, r, stack, plyt, laminaprop,
 
     Returns
     -------
-    assy, eigvals, eigvecs : tuple
+    md, eigvals, eigvecs : tuple
         Assembly, eigenvalues and eigenvectors.
 
     Examples
@@ -113,30 +122,30 @@ def cylinder_compression_lb_Nxx_cte(height, r, stack, plyt, laminaprop,
 
     The following example is one of the test cases:
 
-    .. literalinclude:: ../../../../../tests/multidomain/test_cylinder.py
+    .. literalinclude:: ../../tests/multidomain/test_cylinder.py
         :pyobject: test_cylinder_compression_lb_Nxx_cte
 
     """
-    assy, conns = create_cylinder_assy(height=height, r=r, stack=stack, plyt=plyt,
+    md, conns = create_cylinder(height=height, r=r, stack=stack, plyt=plyt,
             laminaprop=laminaprop, npanels=npanels, m=m, n=n)
     if len(Nxxs) != npanels:
         raise ValueError('The length of "Nxxs" must be the same as "npanels"')
-    for i, p in enumerate(assy.panels):
+    for i, p in enumerate(md.panels):
         p.Nxx = Nxxs[i]
         p.x2u = 1
 
-    k0 = assy.calc_kC(conns, silent=True)
-    kG = assy.calc_kG(silent=True)
+    k0 = md.calc_kC(conns, silent=True)
+    kG = md.calc_kG(silent=True)
     eigvals, eigvecs = lb(k0, kG, tol=0, sparse_solver=True, silent=True,
              num_eigvalues=num_eigvalues, num_eigvalues_print=5)
-    return assy, eigvals, eigvecs
+    return md, eigvals, eigvecs
 
 
 def cylinder_compression_lb_Nxx_from_static(height, r, stack, plyt, laminaprop,
         npanels, Nxxs, m=8, n=8, num_eigvalues=20):
     """Linear buckling analysis with a Nxx calculated using static analysis
 
-    See :func:`.create_cylinder_assy` for most parameters.
+    See :func:`.create_cylinder` for most parameters.
 
     The cylinder has SS1 at the bottom and SS3 at the top. SS3 means that the
     edge is free to move in the axial direction.
@@ -150,7 +159,7 @@ def cylinder_compression_lb_Nxx_from_static(height, r, stack, plyt, laminaprop,
 
     Returns
     -------
-    assy, c, eigvals, eigvecs : tuple
+    md, c, eigvals, eigvecs : tuple
         Assembly, static results, eigenvalues and eigenvectors.
 
     Examples
@@ -158,80 +167,29 @@ def cylinder_compression_lb_Nxx_from_static(height, r, stack, plyt, laminaprop,
 
     The following example is one of the test cases:
 
-    .. literalinclude:: ../../../../../compmech/panel/assembly/tests/test_cylinder.py
+    .. literalinclude:: ../../tests/multidomain/test_cylinder.py
         :pyobject: test_cylinder_compression_lb_Nxx_from_static
 
     """
-    assy, conns = create_cylinder_assy(height=height, r=r, stack=stack, plyt=plyt,
+    md, conns = create_cylinder(height=height, r=r, stack=stack, plyt=plyt,
             laminaprop=laminaprop, npanels=npanels, m=m, n=n)
     if len(Nxxs) != npanels:
         raise ValueError('The length of "Nxxs" must be the same as "npanels"')
 
-    for i, p in enumerate(assy.panels):
+    for i, p in enumerate(md.panels):
         p.add_distr_load_fixed_x(p.a, lambda y: Nxxs[i], None, None)
         p.x2u = 1
 
-    fext = assy.calc_fext(silent=True)
+    fext = md.calc_fext(silent=True)
 
-    k0 = assy.calc_kC(conns)
+    k0 = md.calc_kC(conns)
     incs, cs = static(k0, fext, silent=True)
     c = cs[0]
-    kG = assy.calc_kG(c=c)
+    kG = md.calc_kG(c=c)
 
     eigvals = eigvecs = None
     eigvals, eigvecs = lb(k0, kG, tol=0, sparse_solver=True, silent=True,
              num_eigvalues=num_eigvalues, num_eigvalues_print=5)
 
-    return assy, c, eigvals, eigvecs
+    return md, c, eigvals, eigvecs
 
-
-def cylinder_spla(height, r, stack, plyt, laminaprop,
-        npanels, Nxx, SPLA, m=8, n=8):
-    """Non-linear buckling analysis using a perturbation load as imperfection
-
-    See :func:`.create_cylinder_assy` for most parameters.
-
-    Parameters
-    ----------
-    Nxx : float
-        The applied axial compression load
-    SPLA : float
-        The single perturbation load used to induce the imperfection. Applied
-        at the midle of the cylinder meridian.
-
-    Returns
-    -------
-    assy, c : tuple
-        Assembly, static results.
-
-    Examples
-    --------
-
-    The following example is one of the test cases:
-
-    .. literalinclude:: ../../../../../compmech/panel/assembly/tests/test_cylinder.py
-        :pyobject: test_cylinder_spla
-
-    """
-    assy, conns = create_cylinder_assy(height=height, r=r, stack=stack, plyt=plyt,
-            laminaprop=laminaprop, npanels=npanels, m=m, n=n)
-
-    for i, p in enumerate(assy.panels):
-        p.x2u = 1
-
-    for p in assy.panels:
-        p.add_distr_load_fixed_x(p.a, lambda y: p.Nxx, None, None)
-
-    p_spla = assy.panels[0]
-    p_spla.add_point_load(p_spla.a/2, p_spla.b/2, 0, 0, -SPLA, cte=True)
-
-    assy.conn = conns
-    analysis = Analysis(assy.calc_fext, assy.calc_kC, assy.calc_fint,
-            assy.calc_kT)
-    analysis.NL_method = 'NR'
-    analysis.modified_NR = False
-    analysis.line_search = False
-    analysis.kT_initial_state = False
-    incs, cs = analysis.static(NLgeom=True)
-
-    return assy, incs, cs

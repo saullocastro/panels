@@ -50,7 +50,7 @@ def tstiff2d_1stiff_compression(a, b, ys, bb, bf, defect_a, rho, plyt,
                loaded edge     loaded edge
 
     For more details about the theory involved, see
-    [castro2017AssemblyModels]_.
+    [castro2017Multidomain]_ .
 
     Parameters
     ----------

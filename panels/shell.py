@@ -301,7 +301,7 @@ class Shell(object):
             The size of the stiffness matrices. Can be the size of a global
             internal force vector of an assembly. When using a string, for
             example, if '+1' is given it will add 1 to the Shell`s size
-            obtained by the :method:`.Shell.get_size`
+            obtained by the :meth:`.Shell.get_size`
 
         """
         dofs = modelDB.db[self.model]['dofs']
@@ -386,7 +386,7 @@ class Shell(object):
         size : int or str, optional
             The size of the calculated sparse matrices. When using a string,
             for example, if '+1' is given it will add 1 to the Shell`s size
-            obtained by the :method:`.Shell.get_size`
+            obtained by the :meth:`.Shell.get_size`
         row0, col0: int or None, optional
             Offset to populate the output sparse matrix (necessary when
             assemblying shells).
@@ -1153,7 +1153,7 @@ class Shell(object):
             The size of the force vector. Can be the size of the total internal
             force vector of a multidomain assembly. When using a string, for
             example, if '+1' is given it will add 1 to the Shell`s size obtained
-            by the :method:`.Shell.get_size`
+            by the :meth:`.Shell.get_size`
         col0 : int, optional
             Offset in a global force vector of an assembly.
         silent : bool, optional
@@ -1184,7 +1184,7 @@ class Shell(object):
             The size of the internal force vector. Can be the size of a global
             internal force vector of an assembly. When using a string,
             for example, if '+1' is given it will add 1 to the Shell`s size
-            obtained by the :method:`.Shell.get_size`
+            obtained by the :meth:`.Shell.get_size`
         col0 : int, optional
             Offset in a global internal force vector of an assembly.
         silent : bool, optional

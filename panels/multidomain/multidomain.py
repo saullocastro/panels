@@ -34,31 +34,17 @@ class MultiDomain(object):
     This class has some useful methods that will help plotting output for
     different panel groups within the multi-domain and so forth.
 
-    For more details about the theory involved, see
-    [castro2017AssemblyModels]_.
+    For more details about the theory involved, see Castro and Donadon (2017)
+    [castro2017Multidomain]_ .
+
 
     Parameters
     ----------
+
     panels : iterable
         A list, tuple etc of :class:`.Shell` objects.
     conn : dict
         A connectivity dictionary.
-
-    Example
-    -------
-    >>> panel_1 = Shell(*args)
-    >>> panel_2 = Shell(*args)
-    >>> panel_3 = Shell(*args)
-    >>> panels = [panel_1, panel_2]
-    >>> conn = [
-            dict(p1=panel_1, p2=panel_2, func='SSxcte', xcte1=0, xcte2=panel_2.a),
-            dict(p1=panel_2, p2=panel_3, func='SSycte', ycte1=0, ycte2=panel_3.b)
-            ] # A list of dictionary that indicates two connections: (panel_1-panel_2) and (panel_2-panel_3)
-
-    xcte1 = location (x const) in panel 1 which connects to panel 2
-    xcte2 = ........................... 2 ....................... 2
-
-    >>> assembly_1 = MultiDomain(panels, conn)
 
     Notes
     -----
@@ -73,6 +59,59 @@ class MultiDomain(object):
         - 'BFycte': defines a base-flange connection and calls the following functions ``fkCBFycte11``, ``fkCBFycte12``, ``fkCBFycte22``
 
     Explanations about the connetion functions are found in ``connections`` module.
+
+
+    Examples
+    --------
+
+    >>> panel_1 = Shell(*args)
+    >>> panel_2 = Shell(*args)
+    >>> panel_3 = Shell(*args)
+    >>> panels = [panel_1, panel_2]
+    >>> conn = [
+            dict(p1=panel_1, p2=panel_2, func='SSxcte', xcte1=0, xcte2=panel_2.a),
+            dict(p1=panel_2, p2=panel_3, func='SSycte', ycte1=0, ycte2=panel_3.b)
+            ] # A list of dictionary that indicates two connections: (panel_1-panel_2) and (panel_2-panel_3)
+
+    xcte1 = location (x const) in panel 1 which connects to panel 2
+    xcte2 = ........................... 2 ....................... 2
+
+    >>> md = MultiDomain(panels, conn)
+
+    Point or distributed forces or displacements can be easily added by using
+    one of the methods:
+
+        - :meth:`.Shell.add_point_load`
+        - :meth:`.Shell.add_distr_load_fixed_x`
+        - :meth:`.Shell.add_distr_load_fixed_y`
+        - :meth:`.Shell.add_point_pd`
+        - :meth:`.Shell.add_distr_pd_fixed_x`
+        - :meth:`.Shell.add_distr_pd_fixed_y`
+
+    With this, calculating the stiffness matrix, external force vector and
+    solving the systems becomes straightforward:
+
+    >>> kC = md.calc_kC()
+    >>> fext = md.calc_fext()
+
+    Solving with the Python module ``structsolve``:
+
+    >>> from structsolve import static
+    >>>
+    >>> incs, cs = static(k0, fext, silent=True)
+
+    And plotting the results for the group named ``'skin'``.
+
+    >>> md.plot(cs[0], 'skin', filename='tmp_cylinder_compression_lb_Nxx_cte.png')
+
+
+    The group name attribute belongs to each domain, and is passed while
+    instantiating the :class:``.Shell`` object. Furthermore, it is important to
+    pass the correct relative position of each domain within the group for
+    generating consistent plots. For examples on how to create complex
+    multidomains, see :func:`.create_cylinder` and
+    :func:`.create_cylinder_blade_stiffened`.
+
     """
     def __init__(self, panels, conn=None):
         # Initialize the assmbly obj with these values
@@ -1119,7 +1158,10 @@ class MultiDomain(object):
 
 
     def get_kC_conn(self, conn=None, finalize=True, c=None, kw_tsl=None):
-        """Calc the stiffness matrix due to the connectivities
+        r"""Stiffness matrix due to the multidomain connectivities
+
+        These are based on penalty stiffnesses, as detailed in Castro and
+        Donadon (2017) [castro2017Multidomain]_ .
 
         conn = List of dicts
             Each elem of the list = dict for a single connection pair
