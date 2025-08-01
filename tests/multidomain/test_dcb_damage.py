@@ -593,13 +593,18 @@ def dcb_damage_prop_no_f_kcrack(phy_dim, nr_terms, k_i=None, tau_o=None, nr_x_ga
         # Edit: should be correct as it is
             # Ques: should first update max del d then calc kw_tsl etc ??
         if hasattr(assy, "dmg_index"):
-            kw_tsl[:,:,disp_iter_no], dmg_index[:,:,disp_iter_no], del_d[:,:,disp_iter_no], dmg_index_curr  = assy.calc_k_dmg(c=c, pA=p_top, pB=p_bot,
-                                                 nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, tsl_type=tsl_type,
-                                                 prev_max_dmg_index=assy.dmg_index, k_i=k_i, tau_o=tau_o)
+            tmp = assy.calc_k_dmg(c=c, pA=p_top, pB=p_bot,
+                                  nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss,
+                                  tsl_type=tsl_type,
+                                  prev_max_dmg_index=assy.dmg_index, k_i=k_i,
+                                  tau_o=tau_o, G1c=G1c)
         else:
-            kw_tsl[:,:,disp_iter_no], dmg_index[:,:,disp_iter_no], del_d[:,:,disp_iter_no], dmg_index_curr  = assy.calc_k_dmg(c=c, pA=p_top, pB=p_bot,
-                                                 nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, tsl_type=tsl_type,
-                                                 prev_max_dmg_index=None, k_i=k_i, tau_o=tau_o)
+            tmp = assy.calc_k_dmg(c=c, pA=p_top, pB=p_bot,
+                                  nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss,
+                                  tsl_type=tsl_type, prev_max_dmg_index=None,
+                                  k_i=k_i, tau_o=tau_o)
+
+        kw_tsl[:,:,disp_iter_no], dmg_index[:,:,disp_iter_no], del_d[:,:,disp_iter_no], dmg_index_curr = tmp
 
         c_all[:,disp_iter_no] = c
 
@@ -634,7 +639,6 @@ def dcb_damage_prop_no_f_kcrack(phy_dim, nr_terms, k_i=None, tau_o=None, nr_x_ga
         plt.plot(force_intgn[:disp_iter_no+1, 0], force_intgn[:disp_iter_no+1, 1], label = 'Line')
         scaling_F_plot = force_intgn[0,1]/force_intgn_dmg[0,1]
         plt.plot(force_intgn_dmg[:disp_iter_no+1, 0], scaling_F_plot*force_intgn_dmg[:disp_iter_no+1, 1], label='Area Int')
-        #plt.plot(FEM[:,0],FEM[:,1], label='FEM')
         plt.ylabel('Force [N]', fontsize=14)
         plt.xlabel('Displacement [mm]', fontsize=14)
         plt.xticks(fontsize=14)
