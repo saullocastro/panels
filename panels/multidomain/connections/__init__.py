@@ -1,9 +1,9 @@
 r"""
-=====================================================
-Multi-domain connections (:mod:`panels.connections`)
-=====================================================
+===============================================================
+Multidomain connections (:mod:`panels.multidomain.connections`)
+===============================================================
 
-.. currentmodule:: panels.connections
+.. currentmodule:: panels.multidomain.connections
 
 Connection between panel domains. Each panel domain has its own set of Bardell
 approximation functions. Below it is shown the connections currently supported.
@@ -77,13 +77,19 @@ Connection of type::
 Calculating Penalty Constants
 ------------------------------
 
-Function :func:'.calc_kt_kr' is based on Ref [castro2017AssemblyModels]_ and
+Function :func:`.calc_kt_kr` is based on Ref [castro2017Multidomain]_ and
 uses a strain compatibility criterion to calculate penalty constants for
 translation (``kt``) and rotation (``kr``). The aim is to have penalty constants
 that are just high enough to produce the desired compatibility, but not too
 high such that numerical stability issues start to appear.
 
-.. autofunction:: panels.connections.calc_kt_kr
+.. autofunction:: panels.multidomain.connections.calc_kt_kr
+
+Damaged connections were implemented by Nathan (2024) [nathan2024MSc]_ and the
+out-of-plane connectivity stiffness in the presence of a damage mapped using
+traction-separation law is calculated using :func:`.calc_kw_tsl`.
+
+.. autofunction:: panels.multidomain.connections.calc_kw_tsl
 
 """
 from . kCBFycte import *

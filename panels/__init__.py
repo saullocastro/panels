@@ -11,6 +11,9 @@ available in this package.
 .. automodule:: panels.shell
     :members:
 
+.. automodule:: panels.shell_fext
+    :members:
+
 .. automodule:: panels.plot_shell
     :members:
 
