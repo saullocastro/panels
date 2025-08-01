@@ -84,7 +84,7 @@ class Shell(object):
         'y1v', 'y1vr', 'y2v', 'y2vr',
         'y1w', 'y1wr', 'y2w', 'y2wr',
         'plyts', 'laminaprops', 'rhos',
-        'flow', 'beta', 'gamma', 'aeromu', 'rho_air', 'speed_sound', 'Mach', 'V',
+        'flow', 'beta', 'gamma', 'aeromu', 'rho_air', 'speed_sound', 'Mach', 'air_speed',
         'ABD', 'force_orthotropic_laminate',
         'num_eigvalues', 'num_eigvalues_print',
         'out_num_cores', 'increments', 'results',
@@ -203,7 +203,7 @@ class Shell(object):
         self.rho_air = None
         self.speed_sound = None
         self.Mach = None
-        self.V = None
+        self.air_speed = None
 
         # constitutive law
         self.ABD = None
@@ -640,6 +640,7 @@ class Shell(object):
         """
         msg('Calculating kA... ', level=2, silent=silent)
 
+        matrices = modelDB.db[self.model]['matrices']
         matrices_num = modelDB.db[self.model]['matrices_num']
 
         if size is None:
@@ -655,9 +656,10 @@ class Shell(object):
             elif self.Mach < 1:
                 raise ValueError('Mach number must be >= 1')
             elif self.Mach == 1:
+                warn('Mach number forced to 1.0001')
                 self.Mach = 1.0001
             Mach = self.Mach
-            beta = self.rho_air * self.V**2 / (Mach**2 - 1)**0.5
+            beta = self.rho_air * self.air_speed**2 / (Mach**2 - 1)**0.5
             if self.r != 0.:
                 gamma = beta*1./(2.*self.r*(Mach**2 - 1)**0.5)
             else:
@@ -670,16 +672,23 @@ class Shell(object):
         self.gamma = gamma
 
         if self.flow.lower() == 'x':
-            kA = matrices_num.fkAx_num(self, size, row0, col0, self.nx, self.ny)
+            if (self.x1 != -1 and self.x2 != +1) or (self.y1 != -1 and self.y2 != +1):
+                kA = matrices_num.fkAx_num(self, size, row0, col0, self.nx, self.ny)
+            else:
+                kA = matrices.fkAx(beta, gamma, self, size, row0, col0)
+
         elif self.flow.lower() == 'y':
-            kA = matrices_num.fkAy_num(self, size, row0, col0, self.nx, self.ny)
+            if (self.x1 != -1 and self.x2 != +1) or (self.y1 != -1 and self.y2 != +1):
+                kA = matrices_num.fkAy_num(self, size, row0, col0, self.nx, self.ny)
+            else:
+                kA = matrices.fkAy(beta, self, size, row0, col0)
+
         else:
             raise ValueError('Invalid flow value, must be x or y')
 
         if finalize:
             assert np.any(np.isnan(kA.data)) == False
             assert np.any(np.isinf(kA.data)) == False
-            kA = csr_matrix(make_skew_symmetric(kA))
         self.matrices['kA'] = kA
 
         #NOTE memory cleanup
