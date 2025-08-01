@@ -29,6 +29,8 @@ Topics
     :maxdepth: 1
 
     panels.rst
+    multidomain.rst
+    multidomain_connections.rst
     bardell.rst
     ref.rst
 
