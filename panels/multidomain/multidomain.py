@@ -1516,7 +1516,7 @@ class MultiDomain(object):
         # Considering max dmg_index per intgn point for all displ steps
         # prev_max_dmg_index is already the max over all disp steps at each integration point
         if prev_max_dmg_index is not None:
-            max_dmg_index = np.amax(np.array([prev_max_dmg_index, dmg_index_curr]), axis = 0)
+            max_dmg_index = np.amax(np.array([prev_max_dmg_index, dmg_index_curr]), axis=0)
         else: # First iteration
             max_dmg_index = dmg_index_curr.copy()
 
