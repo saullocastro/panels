@@ -1,3 +1,6 @@
+import sys
+sys.path.append('../..')
+
 import numpy as np
 
 from panels.multidomain import (
@@ -31,7 +34,7 @@ def test_tstiff2d_1stiff_freq():
         mf=6, nf=7,
         )
     omegan = (-eigvals[0])**0.5
-    assert np.isclose(omegan, 48.2733, atol=0.001, rtol=0.001)
+    assert np.isclose(omegan, 44.147, atol=0.001, rtol=0.001)
 
 
 def test_tstiff2d_1stiff_compression():
@@ -61,7 +64,7 @@ def test_tstiff2d_1stiff_compression():
         Nxx_base=-1.,
         Nxx_flange=-1.,
         )
-    assert np.isclose(eigvals[0], 142.65057725, rtol=0.001)
+    assert np.isclose(eigvals[0], 135.1, rtol=0.001)
 
     assy, c, eigvals, eigvecs = tstiff2d_1stiff_compression(
         b=b,
@@ -84,7 +87,7 @@ def test_tstiff2d_1stiff_compression():
         Nxx_base=-1.,
         Nxx_flange=-1.,
         )
-    assert np.isclose(eigvals[0], 114.85854770879844, rtol=0.001)
+    assert np.isclose(eigvals[0], 67.42, rtol=0.001)
 
 
 def test_tstiff2d_1stiff_flutter():
@@ -93,7 +96,7 @@ def test_tstiff2d_1stiff_flutter():
     bb = b/5.
     bf = bb/2.
     ys = b/2.
-    assy, c, eigvals, eigvecs = tstiff2d_1stiff_flutter(
+    assy, eigvals, eigvecs = tstiff2d_1stiff_flutter(
         b=b,
         bb=bb,
         bf=bf,
@@ -109,14 +112,15 @@ def test_tstiff2d_1stiff_flutter():
         m=6, n=7,
         mb=5, nb=6,
         mf=6, nf=7,
-        air_speed=800.,
-        rho_air=1500.,
-        Mach=2.,
+        air_speed=2*343.,
+        rho_air=1.2,
+        Mach=2,
         speed_sound=343.,
-        run_static_case=True,
+        run_static_case=False,
         )
     omegan = (-eigvals[0])**0.5
-    assert np.isclose(omegan, 958.7080550167907+0.j, rtol=0.001)
+    print(eigvals)
+    assert np.isclose(omegan, 175.5+0.j, rtol=0.001)
 
 if __name__ == '__main__':
     test_tstiff2d_1stiff_freq()

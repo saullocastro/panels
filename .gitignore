@@ -28,6 +28,10 @@ test*.png
 *.pyo
 *.pyd
 
+# Test result files
+*.txt
+*.npy
+
 .DS_Store
 .vs
 env

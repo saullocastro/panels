@@ -1,9 +1,0 @@
-cython
-numpy
-scipy
-matplotlib
-composites
-structsolve
-coveralls
-pytest
-pytest-cov

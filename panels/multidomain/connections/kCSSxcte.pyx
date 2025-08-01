@@ -2,16 +2,16 @@
 #cython: wraparound=False
 #cython: cdivision=True
 #cython: nonecheck=False
-#cython: profile=False
+#cython: overflowcheck=False
+#cython: embedsignature=True
 #cython: infer_types=False
 from scipy.sparse import coo_matrix
 import numpy as np
 
+from panels import INT, DOUBLE
 
-INT = long
-DOUBLE = np.float64
+
 cdef int DOF = 3
-
 
 cdef extern from 'bardell.hpp':
     double integral_ff(int i, int j,
@@ -365,7 +365,7 @@ def fkCSSxcte22(double kt, double kr, object p1, object p2,
                         f2Bv = f(k2, xicte2, x1v2, x1vr2, x2v2, x2vr2)
                         f2Bw = f(k2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
                         f2Bwxi = fp(k2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
-
+                        
                         c += 1
                         kCSSxcte22r[c] = row+0
                         kCSSxcte22c[c] = col+0

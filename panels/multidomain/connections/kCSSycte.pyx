@@ -2,18 +2,16 @@
 #cython: wraparound=False
 #cython: cdivision=True
 #cython: nonecheck=False
-#cython: profile=False
+#cython: overflowcheck=False
+#cython: embedsignature=True
 #cython: infer_types=False
 from scipy.sparse import coo_matrix
 import numpy as np
 
-from panels import Shell
+from panels import INT, DOUBLE
 
 
-INT = long
-DOUBLE = np.float64
 cdef int DOF = 3
-
 
 cdef extern from 'bardell.hpp':
     double integral_ff(int i, int j,

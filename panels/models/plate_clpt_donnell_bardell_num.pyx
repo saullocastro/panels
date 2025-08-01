@@ -2,10 +2,13 @@
 #cython: wraparound=False
 #cython: cdivision=True
 #cython: nonecheck=False
-#cython: profile=False
+#cython: overflowcheck=False
+#cython: embedsignature=True
 #cython: infer_types=False
 from scipy.sparse import coo_matrix
 import numpy as np
+
+from panels import INT, DOUBLE
 
 
 cdef extern from 'bardell_functions.hpp':
@@ -15,10 +18,6 @@ cdef extern from 'bardell_functions.hpp':
 
 cdef extern from 'legendre_gauss_quadrature.hpp':
     void leggauss_quad(int n, double *points, double* weights) nogil
-
-
-DOUBLE = np.float64
-INT = long
 
 cdef int DOF = 3
 
@@ -109,7 +108,7 @@ def fkC_num(double [::1] cs, object Finput, object shell,
 
     xi1 = -1
     xi2 = +1
-    if x1 != -1 and x2 != -1:
+    if x1 != -1 and x2 != +1:
         xinf = 0
         xsup = shell.a
         xi1 = (x1 - xinf)/(xsup - xinf)*2 - 1
@@ -120,7 +119,7 @@ def fkC_num(double [::1] cs, object Finput, object shell,
 
     eta1 = -1
     eta2 = +1
-    if y1 != -1 and y2 != -1:
+    if y1 != -1 and y2 != +1:
         yinf = 0
         ysup = shell.b
         eta1 = (y1 - yinf)/(ysup - yinf)*2 - 1
@@ -370,7 +369,7 @@ def fkG_num(double [::1] cs, object Finput, object shell,
 
     xi1 = -1
     xi2 = +1
-    if x1 != -1 and x2 != -1:
+    if x1 != -1 and x2 != +1:
         xinf = 0
         xsup = shell.a
         xi1 = (x1 - xinf)/(xsup - xinf)*2 - 1
@@ -381,7 +380,7 @@ def fkG_num(double [::1] cs, object Finput, object shell,
 
     eta1 = -1
     eta2 = +1
-    if y1 != -1 and y2 != -1:
+    if y1 != -1 and y2 != +1:
         yinf = 0
         ysup = shell.b
         eta1 = (y1 - yinf)/(ysup - yinf)*2 - 1
@@ -597,7 +596,7 @@ def fkM_num(object shell, double offset, object hrho_input, int size,
 
     xi1 = -1
     xi2 = +1
-    if x1 != -1 and x2 != -1:
+    if x1 != -1 and x2 != +1:
         xinf = 0
         xsup = shell.a
         xi1 = (x1 - xinf)/(xsup - xinf)*2 - 1
@@ -608,7 +607,7 @@ def fkM_num(object shell, double offset, object hrho_input, int size,
 
     eta1 = -1
     eta2 = +1
-    if y1 != -1 and y2 != -1:
+    if y1 != -1 and y2 != +1:
         yinf = 0
         ysup = shell.b
         eta1 = (y1 - yinf)/(ysup - yinf)*2 - 1
@@ -759,7 +758,7 @@ def fkAx_num(object shell, int size, int row0, int col0, int nx, int ny):
 
     xi1 = -1
     xi2 = +1
-    if x1 != -1 and x2 != -1:
+    if x1 != -1 and x2 != +1:
         xinf = 0
         xsup = shell.a
         xi1 = (x1 - xinf)/(xsup - xinf)*2 - 1
@@ -770,7 +769,7 @@ def fkAx_num(object shell, int size, int row0, int col0, int nx, int ny):
 
     eta1 = -1
     eta2 = +1
-    if y1 != -1 and y2 != -1:
+    if y1 != -1 and y2 != +1:
         yinf = 0
         ysup = shell.b
         eta1 = (y1 - yinf)/(ysup - yinf)*2 - 1
@@ -808,10 +807,6 @@ def fkAx_num(object shell, int size, int row0, int col0, int nx, int ny):
 
                                 row = row0 + DOF*(j*m + i)
                                 col = col0 + DOF*(l*m + k)
-
-                                #NOTE symmetry assumption True if no follower forces are used
-                                if row > col:
-                                    continue
 
                                 gBw = f(l, eta, y1w, y1wr, y2w, y2wr)
 
@@ -874,7 +869,7 @@ def fkAy_num(object shell, int size, int row0, int col0, int nx, int ny):
 
     xi1 = -1
     xi2 = +1
-    if x1 != -1 and x2 != -1:
+    if x1 != -1 and x2 != +1:
         xinf = 0
         xsup = shell.a
         xi1 = (x1 - xinf)/(xsup - xinf)*2 - 1
@@ -885,7 +880,7 @@ def fkAy_num(object shell, int size, int row0, int col0, int nx, int ny):
 
     eta1 = -1
     eta2 = +1
-    if y1 != -1 and y2 != -1:
+    if y1 != -1 and y2 != +1:
         yinf = 0
         ysup = shell.b
         eta1 = (y1 - yinf)/(ysup - yinf)*2 - 1
@@ -922,10 +917,6 @@ def fkAy_num(object shell, int size, int row0, int col0, int nx, int ny):
 
                                 row = row0 + DOF*(j*m + i)
                                 col = col0 + DOF*(l*m + k)
-
-                                #NOTE symmetry assumption True if no follower forces are used
-                                if row > col:
-                                    continue
 
                                 gBw = f(l, eta, y1w, y1wr, y2w, y2wr)
 
@@ -1019,7 +1010,7 @@ def calc_fint(double [::1] cs, object Finput, object shell,
 
     xi1 = -1
     xi2 = +1
-    if x1 != -1 and x2 != -1:
+    if x1 != -1 and x2 != +1:
         xinf = 0
         xsup = shell.a
         xi1 = (x1 - xinf)/(xsup - xinf)*2 - 1
@@ -1030,7 +1021,7 @@ def calc_fint(double [::1] cs, object Finput, object shell,
 
     eta1 = -1
     eta2 = +1
-    if y1 != -1 and y2 != -1:
+    if y1 != -1 and y2 != +1:
         yinf = 0
         ysup = shell.b
         eta1 = (y1 - yinf)/(ysup - yinf)*2 - 1

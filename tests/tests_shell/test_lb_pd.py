@@ -1,8 +1,11 @@
-import numpy as np
+import sys
+sys.path.append('../..')
 
+import numpy as np
 from structsolve import solve, lb
 from structsolve.sparseutils import finalize_symmetric_matrix
-from panels import Shell
+
+from panels.shell import Shell
 from panels.multidomain.connections import calc_ku_kv_kw_line_pd_xcte, calc_ku_kv_kw_line_pd_ycte
 from panels.multidomain.connections import fkCld_xcte, fkCld_ycte
 from panels.plot_shell import plot_shell

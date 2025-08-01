@@ -1,9 +1,10 @@
 import sys
 sys.path.append('../../..')
+
 import numpy as np
 
 from structsolve import static
-from panels import Shell
+from panels.shell import Shell
 
 
 def test_panel_field_outputs():

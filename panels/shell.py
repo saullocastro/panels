@@ -84,7 +84,7 @@ class Shell(object):
         'y1v', 'y1vr', 'y2v', 'y2vr',
         'y1w', 'y1wr', 'y2w', 'y2wr',
         'plyts', 'laminaprops', 'rhos',
-        'flow', 'beta', 'gamma', 'aeromu', 'rho_air', 'speed_sound', 'Mach', 'V',
+        'flow', 'beta', 'gamma', 'aeromu', 'rho_air', 'speed_sound', 'Mach', 'air_speed',
         'ABD', 'force_orthotropic_laminate',
         'num_eigvalues', 'num_eigvalues_print',
         'out_num_cores', 'increments', 'results',
@@ -126,6 +126,8 @@ class Shell(object):
         # approximation series - no of terms in SFs
         self.m = m
         self.n = n
+        if m > 30 or n > 30:
+            raise ValueError('Bardell functions of the order 31 and above are not coded')
         self.size = None
 
         # numerical integration - no of points
@@ -156,12 +158,12 @@ class Shell(object):
             # Controls disp/rotation at boundaries i.e. flags
             # 0 = no disp or rotation
             # 1 = disp or rotation permitted
-            
+
             # x1 and x2 are limits of x -- represent BCs with lines x = const
             # y1 and y2 ............. y -- .................. lines y = const
         # - displacement at 4 edges is zero
         # - free to rotate at 4 edges (simply supported by default)
-        
+
         self.x1u = 0.
         self.x1ur = 1.
         self.x2u = 0.
@@ -201,7 +203,7 @@ class Shell(object):
         self.rho_air = None
         self.speed_sound = None
         self.Mach = None
-        self.V = None
+        self.air_speed = None
 
         # constitutive law
         self.ABD = None
@@ -222,6 +224,10 @@ class Shell(object):
             setattr(self, k, v)
 
         self._clear_matrices()
+
+        # Build it if all the parameters are given
+        if a is not None and b is not None:
+            self._rebuild()
 
 
     def _clear_matrices(self):
@@ -286,7 +292,7 @@ class Shell(object):
         rows or columns, recalling that this will be the size of the Ritz
         constants' vector `\{c\}`, the internal force vector `\{F_{int}\}` and
         the external force vector `\{F_{ext}\}`.
-        
+
         ONLY RETURNS THE NUMBER OF ROWS ''OR'' COLS
 
         Returns
@@ -364,7 +370,6 @@ class Shell(object):
     def calc_kC(self, size=None, row0=0, col0=0, silent=True, finalize=True,
             c=None, c_cte=None, nx=None, ny=None, ABDnxny=None, NLgeom=False):
         r"""Calculate the constitutive stiffness matrix
-        ---------- Notation as per MD paper: kP_i ----------- 
 
         If ``c`` is not given it calculates the linear constitutive stiffness
         matrix, otherwise the large displacement linear constitutive stiffness
@@ -395,7 +400,8 @@ class Shell(object):
             non-linear terms based on the actual displacement field.
         c_cte : array-like or None, optional
             This must be the result of a static analysis, used to compute
-            initial stress state not affected by the load multiplier.
+            initial stress state not affected by the load multiplier of the
+            linear buckling eigenvalue analysis.
         nx, ny : int or None, optional
             Number of integration points along `x` and `y`, respectively, for
             the Legendre-Gauss quadrature rule applied in the numerical
@@ -409,21 +415,23 @@ class Shell(object):
             considered.
 
         """
+        msg('Calculating kC... ', level=2, silent=silent)
+
         self._rebuild()
         if size is None:
             size = self.get_size()
         elif isinstance(size, str):
             size = int(size) + self.get_size()
-        msg('Calculating kC... ', level=2, silent=silent)
 
         analytical_kC = True
         analytical_kG = True
+
         # This means a linear analysis is already performed (check panels\tests\tests_shell\test_nonlinear.py)
         # So, the next step is NL. So no analytical
         if c is not None:
             check_c(c, size)
             analytical_kC = False
-        # ??????????
+        # For variable stiffness laminates
         if ABDnxny is not None:
             analytical_kC = False
         # For NL Geos, KC (and not KC0) needs to be used so only do it numerically
@@ -447,8 +455,7 @@ class Shell(object):
         c = np.ascontiguousarray(c, dtype=DOUBLE)
         # returns a contiguous array, how matrices in C are stored. 1 after the other like matlab
 
-        #NOTE the consistency checks for ABDnxny are done within the .pyx
-        #     files
+        #NOTE the consistency checks for ABDnxny are done within the .pyx files
         ABDnxny = self.ABD if ABDnxny is None else ABDnxny
 
         # Calc Kc as per panels/panels/models then the pyx files given by ''matrices'' defined earlier
@@ -469,14 +476,15 @@ class Shell(object):
                 check_c(c_cte, size)
                 analytical_kG = False
             # This calc KG0 - Geo stiff mat at initial membrane stress state (SA formulation paper - eq 12) and adds it to K0 calc earlier
-            
-            # WHY IS KG0 ADDED TO KC ???????????????????????????
+            # this is required for combined load cases where the eigenvalue
+            # lambda should be applied to only some of the applied forces
             if analytical_kG:
                 kC += matrices.fkG0(self.Nxx_cte, self.Nyy_cte, self.Nxy_cte, self, size, row0, col0)
             else:
-                kC += matrices_num.fkG_num(c_cte, ABDnxny, self,
-                        size, row0, col0, nx, ny, NLgeom,
-                        self.Nxx_cte, self.Nyy_cte, self.Nxy_cte)
+                kC += matrices_num.fkG_num(c_cte, ABDnxny, self, size,
+                                           row0, col0, nx, ny,
+                                           NLgeom, self.Nxx_cte,
+                                           self.Nyy_cte, self.Nxy_cte)
 
         if finalize:
             kC = finalize_symmetric_matrix(kC)
@@ -495,17 +503,18 @@ class Shell(object):
     def calc_kG(self, size=None, row0=0, col0=0, silent=True, finalize=True,
             c=None, nx=None, ny=None, ABDnxny=None, NLgeom=False):
         r"""Calculate the (inital stress or) geometric stiffness matrix
-        ---------- Notation as per MD paper: kGp_i ----------- 
-        
+
         See :meth:`.Shell.calc_kC` for details on each parameter.
 
         """
         msg('Calculating kG... ', level=2, silent=silent)
+
         self._rebuild()
         if size is None:
             size = self.get_size()
         elif isinstance(size, str):
             size = int(size) + self.get_size()
+
         analytical_kG = True
         if c is not None:
             check_c(c, size)
@@ -530,6 +539,7 @@ class Shell(object):
 
         if analytical_kG:
             kG = matrices.fkG0(self.Nxx, self.Nyy, self.Nxy, self, size, row0, col0)
+
         else:
             if ABDnxny is None:
                 ABDnxny = self._get_lam_ABD()
@@ -566,7 +576,6 @@ class Shell(object):
 
         Parameters
         ----------
-
         h_nxny : (nx, ny) array-like or None, optional
             The constitutive relations for the laminate at each integration
             point.
@@ -577,6 +586,7 @@ class Shell(object):
 
         """
         msg('Calculating kM... ', level=2, silent=silent)
+
         analytical_kM = True
         nx = self.nx if nx is None else nx
         ny = self.ny if ny is None else ny
@@ -630,7 +640,7 @@ class Shell(object):
         """
         msg('Calculating kA... ', level=2, silent=silent)
 
-
+        matrices = modelDB.db[self.model]['matrices']
         matrices_num = modelDB.db[self.model]['matrices_num']
 
         if size is None:
@@ -646,9 +656,10 @@ class Shell(object):
             elif self.Mach < 1:
                 raise ValueError('Mach number must be >= 1')
             elif self.Mach == 1:
+                warn('Mach number forced to 1.0001')
                 self.Mach = 1.0001
             Mach = self.Mach
-            beta = self.rho_air * self.V**2 / (Mach**2 - 1)**0.5
+            beta = self.rho_air * self.air_speed**2 / (Mach**2 - 1)**0.5
             if self.r != 0.:
                 gamma = beta*1./(2.*self.r*(Mach**2 - 1)**0.5)
             else:
@@ -661,16 +672,23 @@ class Shell(object):
         self.gamma = gamma
 
         if self.flow.lower() == 'x':
-            kA = matrices_num.fkAx_num(self, size, row0, col0, self.nx, self.ny)
+            if (self.x1 != -1 and self.x2 != +1) or (self.y1 != -1 and self.y2 != +1):
+                kA = matrices_num.fkAx_num(self, size, row0, col0, self.nx, self.ny)
+            else:
+                kA = matrices.fkAx(beta, gamma, self, size, row0, col0)
+
         elif self.flow.lower() == 'y':
-            kA = matrices_num.fkAy_num(self, size, row0, col0, self.nx, self.ny)
+            if (self.x1 != -1 and self.x2 != +1) or (self.y1 != -1 and self.y2 != +1):
+                kA = matrices_num.fkAy_num(self, size, row0, col0, self.nx, self.ny)
+            else:
+                kA = matrices.fkAy(beta, self, size, row0, col0)
+
         else:
             raise ValueError('Invalid flow value, must be x or y')
 
         if finalize:
             assert np.any(np.isnan(kA.data)) == False
             assert np.any(np.isinf(kA.data)) == False
-            kA = csr_matrix(make_skew_symmetric(kA))
         self.matrices['kA'] = kA
 
         #NOTE memory cleanup
@@ -926,7 +944,7 @@ class Shell(object):
 
     def add_point_pd(self, x, y, ku, up, kv, vp, kw, wp, cte=True):
         r"""Add a point prescribed displacement with three components
-        
+
         o/p = [location and equivalent force]
 
         Parameters
@@ -953,7 +971,7 @@ class Shell(object):
 
     def add_distr_pd_fixed_x(self, x, ku=None, kv=None, kw=None,
                              funcu=None, funcv=None, funcw=None, cte=True):
-        r"""Add a distributed prescribed displacement g(y) ??? at a fixed x position
+        r"""Add a distributed prescribed displacement g(y) at a fixed x position
 
         Parameters
         ----------
@@ -984,7 +1002,7 @@ class Shell(object):
         if (ku is not None) or (funcu is not None): # ku or funcu is specified
             if ku is None or funcu is None: # if atmost 1 is specified for u means u is to be specified, but is currently incomplete
                 raise ValueError('Both ku and funcu must be specified')
-            new_funcu = lambda y: ku*funcu(y) # y is param in ftn 
+            new_funcu = lambda y: ku*funcu(y) # y is param in ftn
         if (kv is not None) or (funcv is not None):
             if kv is None or funcv is None:
                 raise ValueError('Both kv and funcv must be specified')
@@ -1044,6 +1062,26 @@ class Shell(object):
         else:
             self.distr_pds_inc.append([None, y, new_funcu, new_funcv, new_funcw])
 
+    def clear_disps(self):
+
+        '''
+            Used to clear exisiting displacements for the panels
+                Useful for non-linear runs where displacements are added for each increment
+        '''
+        self.point_pds = []
+        self.point_pds_inc = []
+        self.distr_pds = []
+        self.distr_pds_inc = []
+
+    def clear_loads(self):
+        '''
+            Used to clear exisiting loads for the panels
+                Useful for non-linear runs where loads are added for each increment
+        '''
+        self.point_loads = []
+        self.point_loads_inc = []
+        self.distr_loads = []
+        self.distr_loads_inc = []
 
     def calc_stiffness_point_constraint(self, x, y, u=True, v=True, w=True, phix=False,
             phiy=False, kuvw=1.e6, kphi=1.e5):
@@ -1104,21 +1142,20 @@ class Shell(object):
         such that the terms in `\{{F_{ext}}_0\}` are constant and the terms in
         `\{{F_{ext}}_\lambda\}` will be scaled by the parameter ``inc``.
 
+        See the documentation of :func:`.shell_fext` for more details.
+
         Parameters
         ----------
         inc : float, optional
             Since this function is called during the non-linear analysis,
             ``inc`` will multiply the terms `\{{F_{ext}}_\lambda\}`.
-
         size : int or str, optional
-            The size of the force vector. Can be the size of a global internal
-            force vector of an assembly. When using a string, for example, if
-            '+1' is given it will add 1 to the Shell`s size obtained by the
-            :method:`.Shell.get_size`
-
+            The size of the force vector. Can be the size of the total internal
+            force vector of a multidomain assembly. When using a string, for
+            example, if '+1' is given it will add 1 to the Shell`s size obtained
+            by the :method:`.Shell.get_size`
         col0 : int, optional
-            Offset in a global forcce vector of an assembly.
-
+            Offset in a global force vector of an assembly.
         silent : bool, optional
             A boolean to tell whether the log messages should be printed.
 
@@ -1149,7 +1186,7 @@ class Shell(object):
             for example, if '+1' is given it will add 1 to the Shell`s size
             obtained by the :method:`.Shell.get_size`
         col0 : int, optional
-            Offset in a global internal forcce vector of an assembly.
+            Offset in a global internal force vector of an assembly.
         silent : bool, optional
             A boolean to tell whether the log messages should be printed.
         nx : int, optional
