@@ -1,0 +1,1077 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Cylindrical shells modeled as panel multidomain assemblies &#8212; panels 0.5.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="_static/documentation_options.js?v=1dd76d02"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'multidomain_cylinder';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Panel multidomain assembly with T-stiffeners modelled as 2D domains" href="multidomain_tstiff2d.html" />
+    <link rel="prev" title="Base class for multidomain" href="multidomain.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">panels 0.5.0 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="panels.html">
+    Semi-analytical models for plates, shells and panels (panels)
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="multidomain.html">
+    Base class for multidomain
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="multidomain_connections.html">
+    Multidomain connections (panels.multidomain.connections)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="bardell.html">
+    Bardell’s Hierarchical Functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ref.html">
+    References
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="panels.html">
+    Semi-analytical models for plates, shells and panels (panels)
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="multidomain.html">
+    Base class for multidomain
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="multidomain_connections.html">
+    Multidomain connections (panels.multidomain.connections)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="bardell.html">
+    Bardell’s Hierarchical Functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ref.html">
+    References
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Cylindrical shells modeled as panel multidomain assemblies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multidomain_tstiff2d.html">Panel multidomain assembly with T-stiffeners modelled as 2D domains</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="multidomain.html" class="nav-link">Base class for multidomain</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Cylindrical shells modeled as panel multidomain assemblies</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="module-panels.multidomain.cylinder">
+<span id="cylindrical-shells-modeled-as-panel-multidomain-assemblies"></span><h1>Cylindrical shells modeled as panel multidomain assemblies<a class="headerlink" href="#module-panels.multidomain.cylinder" title="Link to this heading">#</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="panels.multidomain.cylinder.create_cylinder">
+<span class="sig-prename descclassname"><span class="pre">panels.multidomain.cylinder.</span></span><span class="sig-name descname"><span class="pre">create_cylinder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">height</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stack</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plyt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">laminaprop</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">npanels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.multidomain.cylinder.create_cylinder" title="Link to this definition">#</a></dt>
+<dd><p>Create a cylinder multidomain assembly</p>
+<p>The multidomain assembly looks like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">B</span>                             <span class="n">A</span>
+ <span class="n">_______</span> <span class="n">_______</span> <span class="n">_______</span> <span class="n">_______</span>
+<span class="o">|</span>       <span class="o">|</span>       <span class="o">|</span>       <span class="o">|</span>       <span class="o">|</span>
+<span class="o">|</span>       <span class="o">|</span>       <span class="o">|</span>       <span class="o">|</span>       <span class="o">|</span>
+<span class="o">|</span>       <span class="o">|</span>       <span class="o">|</span>       <span class="o">|</span>       <span class="o">|</span>
+<span class="o">|</span>  <span class="n">p04</span>  <span class="o">|</span>  <span class="n">p03</span>  <span class="o">|</span>  <span class="n">p02</span>  <span class="o">|</span>  <span class="n">p01</span>  <span class="o">|</span>
+<span class="o">|</span>       <span class="o">|</span>       <span class="o">|</span>       <span class="o">|</span>       <span class="o">|</span>    <span class="o">/</span>\  <span class="n">x</span>
+<span class="o">|</span>       <span class="o">|</span>       <span class="o">|</span>       <span class="o">|</span>       <span class="o">|</span>    <span class="o">|</span>
+<span class="o">|</span><span class="n">_______</span><span class="o">|</span><span class="n">_______</span><span class="o">|</span><span class="n">_______</span><span class="o">|</span><span class="n">_______</span><span class="o">|</span>    <span class="o">|</span>
+                                     <span class="o">|</span>
+                           <span class="n">y</span>  <span class="o">&lt;-------</span>
+</pre></div>
+</div>
+<p>where edges <code class="docutils literal notranslate"><span class="pre">A</span></code> and <code class="docutils literal notranslate"><span class="pre">B</span></code> are connected to close the cylinder.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>height</strong><span class="classifier">float</span></dt><dd><p>Cylinder height (along <span class="math notranslate nohighlight">\(x\)</span>).</p>
+</dd>
+<dt><strong>r</strong><span class="classifier">float</span></dt><dd><p>Cylinder radius.</p>
+</dd>
+<dt><strong>stack</strong><span class="classifier">list or tuple</span></dt><dd><p>Stacking sequence for the cylinder.</p>
+</dd>
+<dt><strong>plyt</strong><span class="classifier">float</span></dt><dd><p>Ply thickness.</p>
+</dd>
+<dt><strong>laminaprop</strong><span class="classifier">list or tuple</span></dt><dd><p>Orthotropic lamina properties: <span class="math notranslate nohighlight">\(E_1, E_2, \nu_{12}, G_{12}, G_{13}, G_{23}\)</span>.</p>
+</dd>
+<dt><strong>npanels</strong><span class="classifier">int</span></dt><dd><p>The number of panels the cylinder perimiter.</p>
+</dd>
+<dt><strong>m, n</strong><span class="classifier">int, optional</span></dt><dd><p>Number of approximation terms for each panel.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>md, conns</strong><span class="classifier">tuple</span></dt><dd><p>A tuple containing the multidomain assembly and the default connectivity
+list of dictionaries.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The code of this function is illustrative of how it constructs the
+multidomain assembly:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">create_cylinder</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">stack</span><span class="p">,</span> <span class="n">plyt</span><span class="p">,</span> <span class="n">laminaprop</span><span class="p">,</span>
+        <span class="n">npanels</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">8</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Create a cylinder multidomain assembly</span>
+
+<span class="sd">    The multidomain assembly looks like::</span>
+
+
+<span class="sd">        B                             A</span>
+<span class="sd">         _______ _______ _______ _______</span>
+<span class="sd">        |       |       |       |       |</span>
+<span class="sd">        |       |       |       |       |</span>
+<span class="sd">        |       |       |       |       |</span>
+<span class="sd">        |  p04  |  p03  |  p02  |  p01  |</span>
+<span class="sd">        |       |       |       |       |    /\  x</span>
+<span class="sd">        |       |       |       |       |    |</span>
+<span class="sd">        |_______|_______|_______|_______|    |</span>
+<span class="sd">                                             |</span>
+<span class="sd">                                   y  &lt;-------</span>
+
+<span class="sd">    where edges ``A`` and ``B`` are connected to close the cylinder.</span>
+
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    height : float</span>
+<span class="sd">        Cylinder height (along `x`).</span>
+<span class="sd">    r : float</span>
+<span class="sd">        Cylinder radius.</span>
+<span class="sd">    stack : list or tuple</span>
+<span class="sd">        Stacking sequence for the cylinder.</span>
+<span class="sd">    plyt : float</span>
+<span class="sd">        Ply thickness.</span>
+<span class="sd">    laminaprop : list or tuple</span>
+<span class="sd">        Orthotropic lamina properties: `E_1, E_2, \nu_{12}, G_{12}, G_{13}, G_{23}`.</span>
+<span class="sd">    npanels : int</span>
+<span class="sd">        The number of panels the cylinder perimiter.</span>
+<span class="sd">    m, n : int, optional</span>
+<span class="sd">        Number of approximation terms for each panel.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    md, conns : tuple</span>
+<span class="sd">        A tuple containing the multidomain assembly and the default connectivity</span>
+<span class="sd">        list of dictionaries.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The code of this function is illustrative of how it constructs the</span>
+<span class="sd">    multidomain assembly:</span>
+
+<span class="sd">    .. literalinclude:: ../../panels/multidomain/cylinder.py</span>
+<span class="sd">        :pyobject: create_cylinder</span>
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">npanels</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;At least two panels are needed&#39;</span><span class="p">)</span>
+    <span class="n">skin</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">perimiter</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">r</span>
+    <span class="n">b_skin</span> <span class="o">=</span> <span class="n">perimiter</span> <span class="o">/</span> <span class="n">npanels</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">npanels</span><span class="p">):</span>
+        <span class="n">y0</span> <span class="o">=</span> <span class="n">i</span><span class="o">*</span><span class="n">b_skin</span>
+        <span class="n">panel</span> <span class="o">=</span> <span class="n">Shell</span><span class="p">(</span><span class="n">group</span><span class="o">=</span><span class="s1">&#39;skin&#39;</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y0</span><span class="o">=</span><span class="n">y0</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="n">height</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="n">b_skin</span><span class="p">,</span>
+            <span class="n">r</span><span class="o">=</span><span class="n">r</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">plyt</span><span class="o">=</span><span class="n">plyt</span><span class="p">,</span> <span class="n">stack</span><span class="o">=</span><span class="n">stack</span><span class="p">,</span> <span class="n">laminaprop</span><span class="o">=</span><span class="n">laminaprop</span><span class="p">,</span>
+            <span class="n">x1u</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">x1ur</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">x2u</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">x2ur</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">x1v</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">x1vr</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">x2v</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">x2vr</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">x1w</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">x1wr</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">x2w</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">x2wr</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">y1u</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">y1ur</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">y2u</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">y2ur</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">y1v</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">y1vr</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">y2v</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">y2vr</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">y1w</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">y1wr</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">y2w</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">y2wr</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">skin</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">panel</span><span class="p">)</span>
+    <span class="n">conns</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">skin_loop</span> <span class="o">=</span> <span class="n">skin</span> <span class="o">+</span> <span class="p">[</span><span class="n">skin</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">skin</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">skin</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">p01</span> <span class="o">=</span> <span class="n">skin_loop</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">p02</span> <span class="o">=</span> <span class="n">skin_loop</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">conns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">p1</span><span class="o">=</span><span class="n">p01</span><span class="p">,</span> <span class="n">p2</span><span class="o">=</span><span class="n">p02</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="s1">&#39;SSycte&#39;</span><span class="p">,</span> <span class="n">ycte1</span><span class="o">=</span><span class="n">p01</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">ycte2</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">p01</span> <span class="o">=</span> <span class="n">skin_loop</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">p02</span> <span class="o">=</span> <span class="n">skin_loop</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">conns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">p1</span><span class="o">=</span><span class="n">p01</span><span class="p">,</span> <span class="n">p2</span><span class="o">=</span><span class="n">p02</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="s1">&#39;SSycte&#39;</span><span class="p">,</span> <span class="n">ycte1</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ycte2</span><span class="o">=</span><span class="n">p02</span><span class="o">.</span><span class="n">b</span><span class="p">))</span>
+    <span class="n">md</span> <span class="o">=</span> <span class="n">MultiDomain</span><span class="p">(</span><span class="n">skin</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">md</span><span class="p">,</span> <span class="n">conns</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="panels.multidomain.cylinder.cylinder_compression_lb_Nxx_cte">
+<span class="sig-prename descclassname"><span class="pre">panels.multidomain.cylinder.</span></span><span class="sig-name descname"><span class="pre">cylinder_compression_lb_Nxx_cte</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">height</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stack</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plyt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">laminaprop</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">npanels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nxxs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_eigvalues</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.multidomain.cylinder.cylinder_compression_lb_Nxx_cte" title="Link to this definition">#</a></dt>
+<dd><p>Linear buckling analysis with a constant Nxx for each panel</p>
+<p>See <a class="reference internal" href="#panels.multidomain.cylinder.create_cylinder" title="panels.multidomain.cylinder.create_cylinder"><code class="xref py py-func docutils literal notranslate"><span class="pre">create_cylinder()</span></code></a> for most parameters.</p>
+<p>The cylinder has SS1 at the bottom and SS3 at the top. SS3 means that the
+edge is free to move in the axial direction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>Nxxs</strong><span class="classifier">list</span></dt><dd><p>A Nxx for each panel.</p>
+</dd>
+<dt><strong>num_eigvalues</strong><span class="classifier">int</span></dt><dd><p>Number of eigenvalues to be extracted.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>md, eigvals, eigvecs</strong><span class="classifier">tuple</span></dt><dd><p>Assembly, eigenvalues and eigenvectors.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>The following example is one of the test cases:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_cylinder_compression_lb_Nxx_cte</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Testing assembly function: cylinder_compression_lb_Nxx_cte&#39;</span><span class="p">)</span>
+    <span class="n">height</span> <span class="o">=</span> <span class="mf">0.500</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="mf">0.250</span>
+    <span class="n">npanels</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">Nxxs</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">100.</span><span class="p">]</span><span class="o">*</span><span class="n">npanels</span>
+    <span class="n">assy</span><span class="p">,</span> <span class="n">eigvals</span><span class="p">,</span> <span class="n">eigvecs</span> <span class="o">=</span> <span class="n">cylinder_compression_lb_Nxx_cte</span><span class="p">(</span>
+        <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
+        <span class="n">r</span><span class="o">=</span><span class="n">r</span><span class="p">,</span>
+        <span class="n">plyt</span><span class="o">=</span><span class="mf">0.125e-3</span><span class="p">,</span>
+        <span class="n">stack</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">45</span><span class="p">,</span> <span class="o">-</span><span class="mi">45</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="o">-</span><span class="mi">45</span><span class="p">,</span> <span class="mi">45</span><span class="p">],</span>
+        <span class="n">laminaprop</span><span class="o">=</span><span class="p">(</span><span class="mf">142.5e9</span><span class="p">,</span> <span class="mf">8.7e9</span><span class="p">,</span> <span class="mf">0.28</span><span class="p">,</span> <span class="mf">5.1e9</span><span class="p">,</span> <span class="mf">5.1e9</span><span class="p">,</span> <span class="mf">5.1e9</span><span class="p">),</span>
+        <span class="n">npanels</span><span class="o">=</span><span class="n">npanels</span><span class="p">,</span>
+        <span class="n">Nxxs</span><span class="o">=</span><span class="n">Nxxs</span><span class="p">,</span>
+        <span class="n">m</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+
+    <span class="n">assy</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">eigvecs</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;skin&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;tmp_cylinder_compression_lb_Nxx_cte.png&#39;</span><span class="p">)</span>
+
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">Nxxs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">eigvals</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mf">47319.181</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="panels.multidomain.cylinder.cylinder_compression_lb_Nxx_from_static">
+<span class="sig-prename descclassname"><span class="pre">panels.multidomain.cylinder.</span></span><span class="sig-name descname"><span class="pre">cylinder_compression_lb_Nxx_from_static</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">height</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stack</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plyt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">laminaprop</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">npanels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nxxs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_eigvalues</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.multidomain.cylinder.cylinder_compression_lb_Nxx_from_static" title="Link to this definition">#</a></dt>
+<dd><p>Linear buckling analysis with a Nxx calculated using static analysis</p>
+<p>See <a class="reference internal" href="#panels.multidomain.cylinder.create_cylinder" title="panels.multidomain.cylinder.create_cylinder"><code class="xref py py-func docutils literal notranslate"><span class="pre">create_cylinder()</span></code></a> for most parameters.</p>
+<p>The cylinder has SS1 at the bottom and SS3 at the top. SS3 means that the
+edge is free to move in the axial direction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>Nxxs</strong><span class="classifier">list</span></dt><dd><p>A Nxx for each panel.</p>
+</dd>
+<dt><strong>num_eigvalues</strong><span class="classifier">int</span></dt><dd><p>Number of eigenvalues to be extracted.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>md, c, eigvals, eigvecs</strong><span class="classifier">tuple</span></dt><dd><p>Assembly, static results, eigenvalues and eigenvectors.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>The following example is one of the test cases:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_cylinder_compression_lb_Nxx_from_static</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Testing assembly function: cylinder_compression_lb_Nxx_from_static&#39;</span><span class="p">)</span>
+    <span class="n">height</span> <span class="o">=</span> <span class="mf">0.500</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="mf">0.250</span>
+    <span class="n">npanels</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">Nxxs</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">100.</span><span class="p">]</span><span class="o">*</span><span class="n">npanels</span>
+    <span class="n">assy</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">eigvals</span><span class="p">,</span> <span class="n">eigvecs</span> <span class="o">=</span> <span class="n">cylinder_compression_lb_Nxx_from_static</span><span class="p">(</span>
+        <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
+        <span class="n">r</span><span class="o">=</span><span class="n">r</span><span class="p">,</span>
+        <span class="n">plyt</span><span class="o">=</span><span class="mf">0.125e-3</span><span class="p">,</span>
+        <span class="n">stack</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">45</span><span class="p">,</span> <span class="o">-</span><span class="mi">45</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="o">-</span><span class="mi">45</span><span class="p">,</span> <span class="mi">45</span><span class="p">],</span>
+        <span class="n">laminaprop</span><span class="o">=</span><span class="p">(</span><span class="mf">142.5e9</span><span class="p">,</span> <span class="mf">8.7e9</span><span class="p">,</span> <span class="mf">0.28</span><span class="p">,</span> <span class="mf">5.1e9</span><span class="p">,</span> <span class="mf">5.1e9</span><span class="p">,</span> <span class="mf">5.1e9</span><span class="p">),</span>
+        <span class="n">npanels</span><span class="o">=</span><span class="n">npanels</span><span class="p">,</span>
+        <span class="n">Nxxs</span><span class="o">=</span><span class="n">Nxxs</span><span class="p">,</span>
+        <span class="n">m</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+
+    <span class="n">assy</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="s1">&#39;skin&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;tmp_cylinder_compression_lb_Nxx_from_static_c.png&#39;</span><span class="p">)</span>
+    <span class="n">assy</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">eigvecs</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;skin&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;tmp_cylinder_compression_lb_Nxx_from_static_eigvec.png&#39;</span><span class="p">)</span>
+
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">Nxxs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">eigvals</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mf">47417.912</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<span class="target" id="module-panels.multidomain.cylinder_blade_stiffened"></span><dl class="py function">
+<dt class="sig sig-object py" id="panels.multidomain.cylinder_blade_stiffened.create_cylinder_blade_stiffened">
+<span class="sig-prename descclassname"><span class="pre">panels.multidomain.cylinder_blade_stiffened.</span></span><span class="sig-name descname"><span class="pre">create_cylinder_blade_stiffened</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">height</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stack</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stack_blades</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width_blades</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plyt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">laminaprop</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">npanels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.multidomain.cylinder_blade_stiffened.create_cylinder_blade_stiffened" title="Link to this definition">#</a></dt>
+<dd><p>Create a cylinder multidomain assembly with blade stiffeners</p>
+<p>The multidomain assembly looks like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">B</span>                               <span class="n">A</span>
+ <span class="n">_______</span> <span class="n">_______</span> <span class="n">_______</span> <span class="n">_______</span>
+<span class="o">|</span>       <span class="o">|</span>       <span class="o">|</span>       <span class="o">|</span>       <span class="o">|</span>
+<span class="o">|</span>       <span class="o">|</span>       <span class="o">|</span>       <span class="o">|</span>       <span class="o">|</span>
+<span class="o">|</span>       <span class="o">|</span>       <span class="o">|</span>       <span class="o">|</span>       <span class="o">|</span>
+<span class="o">|</span>  <span class="n">p04</span>  <span class="o">|</span>  <span class="n">p03</span>  <span class="o">|</span>  <span class="n">p02</span>  <span class="o">|</span>  <span class="n">p01</span>  <span class="o">|</span>
+<span class="o">|</span>       <span class="o">|</span>       <span class="o">|</span>       <span class="o">|</span>       <span class="o">|</span>
+<span class="o">|</span>       <span class="o">|</span>       <span class="o">|</span>       <span class="o">|</span>       <span class="o">|</span>
+<span class="o">|</span><span class="n">_______</span><span class="o">|</span><span class="n">_______</span><span class="o">|</span><span class="n">_______</span><span class="o">|</span><span class="n">_______</span><span class="o">|</span>
+
+<span class="n">Blade</span>   <span class="n">Blade</span>   <span class="n">Blade</span>   <span class="n">Blade</span>
+<span class="mi">04</span>      <span class="mi">03</span>      <span class="mi">02</span>      <span class="mi">01</span>
+ <span class="n">_</span>       <span class="n">_</span>       <span class="n">_</span>       <span class="n">_</span>
+<span class="o">|</span> <span class="o">|</span>     <span class="o">|</span> <span class="o">|</span>     <span class="o">|</span> <span class="o">|</span>     <span class="o">|</span> <span class="o">|</span>
+<span class="o">|</span> <span class="o">|</span>     <span class="o">|</span> <span class="o">|</span>     <span class="o">|</span> <span class="o">|</span>     <span class="o">|</span> <span class="o">|</span>
+<span class="o">|</span> <span class="o">|</span>     <span class="o">|</span> <span class="o">|</span>     <span class="o">|</span> <span class="o">|</span>     <span class="o">|</span> <span class="o">|</span>
+<span class="o">|</span> <span class="o">|</span>     <span class="o">|</span> <span class="o">|</span>     <span class="o">|</span> <span class="o">|</span>     <span class="o">|</span> <span class="o">|</span>
+<span class="o">|</span><span class="n">_</span><span class="o">|</span>     <span class="o">|</span><span class="n">_</span><span class="o">|</span>     <span class="o">|</span><span class="n">_</span><span class="o">|</span>     <span class="o">|</span><span class="n">_</span><span class="o">|</span>
+                                       <span class="n">x</span>
+                                     <span class="o">/</span>\
+                                     <span class="o">|</span>
+                                     <span class="o">|</span>
+                           <span class="n">y</span>  <span class="o">&lt;-------</span>
+</pre></div>
+</div>
+<p>where edges <code class="docutils literal notranslate"><span class="pre">A</span></code> and <code class="docutils literal notranslate"><span class="pre">B</span></code> are connected to close de cylinder.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>height</strong><span class="classifier">float</span></dt><dd><p>Cylinder height (along <span class="math notranslate nohighlight">\(x\)</span>).</p>
+</dd>
+<dt><strong>r</strong><span class="classifier">float</span></dt><dd><p>Cylinder radius.</p>
+</dd>
+<dt><strong>stack</strong><span class="classifier">array-like</span></dt><dd><p>Stacking sequence for the cylinder.</p>
+</dd>
+<dt><strong>stack_blades</strong><span class="classifier">list of array-like</span></dt><dd><p>The stacking sequence for each blade (with length = npanels).</p>
+</dd>
+<dt><strong>width_blades</strong><span class="classifier">array-like</span></dt><dd><p>The width for each blade (with length = npanels).</p>
+</dd>
+<dt><strong>plyt</strong><span class="classifier">float</span></dt><dd><p>Ply thickness (assumed unique for the whole structure).</p>
+</dd>
+<dt><strong>laminaprop</strong><span class="classifier">list or tuple</span></dt><dd><p>Orthotropic lamina properties: <span class="math notranslate nohighlight">\(E_1, E_2, \nu_{12}, G_{12}, G_{13}, G_{23}\)</span>.</p>
+</dd>
+<dt><strong>npanels</strong><span class="classifier">int</span></dt><dd><p>The number of panels the cylinder perimiter.</p>
+</dd>
+<dt><strong>m, n</strong><span class="classifier">int, optional</span></dt><dd><p>Number of approximation terms for each panel.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>md, conns</strong><span class="classifier">tuple</span></dt><dd><p>A tuple containing the multidomain assembly and the default connectivity
+list of dictionaries.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The code of this function is illustrative of how it constructs the
+multidomain assembly:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">create_cylinder_blade_stiffened</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">stack</span><span class="p">,</span> <span class="n">stack_blades</span><span class="p">,</span>
+        <span class="n">width_blades</span><span class="p">,</span> <span class="n">plyt</span><span class="p">,</span> <span class="n">laminaprop</span><span class="p">,</span> <span class="n">npanels</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">8</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Create a cylinder multidomain assembly with blade stiffeners</span>
+
+<span class="sd">    The multidomain assembly looks like::</span>
+
+
+<span class="sd">        B                               A</span>
+<span class="sd">         _______ _______ _______ _______</span>
+<span class="sd">        |       |       |       |       |</span>
+<span class="sd">        |       |       |       |       |</span>
+<span class="sd">        |       |       |       |       |</span>
+<span class="sd">        |  p04  |  p03  |  p02  |  p01  |</span>
+<span class="sd">        |       |       |       |       |</span>
+<span class="sd">        |       |       |       |       |</span>
+<span class="sd">        |_______|_______|_______|_______|</span>
+
+<span class="sd">        Blade   Blade   Blade   Blade</span>
+<span class="sd">        04      03      02      01</span>
+<span class="sd">         _       _       _       _</span>
+<span class="sd">        | |     | |     | |     | |</span>
+<span class="sd">        | |     | |     | |     | |</span>
+<span class="sd">        | |     | |     | |     | |</span>
+<span class="sd">        | |     | |     | |     | |</span>
+<span class="sd">        |_|     |_|     |_|     |_|</span>
+<span class="sd">                                               x</span>
+<span class="sd">                                             /\</span>
+<span class="sd">                                             |</span>
+<span class="sd">                                             |</span>
+<span class="sd">                                   y  &lt;-------</span>
+
+<span class="sd">    where edges ``A`` and ``B`` are connected to close de cylinder.</span>
+
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    height : float</span>
+<span class="sd">        Cylinder height (along `x`).</span>
+<span class="sd">    r : float</span>
+<span class="sd">        Cylinder radius.</span>
+<span class="sd">    stack : array-like</span>
+<span class="sd">        Stacking sequence for the cylinder.</span>
+<span class="sd">    stack_blades : list of array-like</span>
+<span class="sd">        The stacking sequence for each blade (with length = npanels).</span>
+<span class="sd">    width_blades : array-like</span>
+<span class="sd">        The width for each blade (with length = npanels).</span>
+<span class="sd">    plyt : float</span>
+<span class="sd">        Ply thickness (assumed unique for the whole structure).</span>
+<span class="sd">    laminaprop : list or tuple</span>
+<span class="sd">        Orthotropic lamina properties: `E_1, E_2, \nu_{12}, G_{12}, G_{13}, G_{23}`.</span>
+<span class="sd">    npanels : int</span>
+<span class="sd">        The number of panels the cylinder perimiter.</span>
+<span class="sd">    m, n : int, optional</span>
+<span class="sd">        Number of approximation terms for each panel.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    md, conns : tuple</span>
+<span class="sd">        A tuple containing the multidomain assembly and the default connectivity</span>
+<span class="sd">        list of dictionaries.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The code of this function is illustrative of how it constructs the</span>
+<span class="sd">    multidomain assembly:</span>
+
+<span class="sd">    .. literalinclude:: ../../panels/multidomain/cylinder_blade_stiffened.py</span>
+<span class="sd">        :pyobject: create_cylinder_blade_stiffened</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">npanels</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;At least two panels are needed&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stack_blades</span><span class="p">)</span> <span class="o">!=</span> <span class="n">npanels</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;stack_blades must have length = npanels&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">width_blades</span><span class="p">)</span> <span class="o">!=</span> <span class="n">npanels</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;width_blades must have length = npanels&#39;</span><span class="p">)</span>
+    <span class="n">skin</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">blades</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">perimiter</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">r</span>
+    <span class="n">b_skin</span> <span class="o">=</span> <span class="n">perimiter</span> <span class="o">/</span> <span class="n">npanels</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">npanels</span><span class="p">):</span>
+        <span class="n">y0</span> <span class="o">=</span> <span class="n">i</span><span class="o">*</span><span class="n">b_skin</span>
+        <span class="n">panel</span> <span class="o">=</span> <span class="n">Shell</span><span class="p">(</span><span class="n">group</span><span class="o">=</span><span class="s1">&#39;skin&#39;</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y0</span><span class="o">=</span><span class="n">y0</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="n">height</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="n">b_skin</span><span class="p">,</span>
+                      <span class="n">r</span><span class="o">=</span><span class="n">r</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">plyt</span><span class="o">=</span><span class="n">plyt</span><span class="p">,</span>
+                      <span class="n">stack</span><span class="o">=</span><span class="n">stack</span><span class="p">,</span> <span class="n">laminaprop</span><span class="o">=</span><span class="n">laminaprop</span><span class="p">,</span>
+                      <span class="n">x1u</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">x1ur</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">x2u</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">x2ur</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                      <span class="n">x1v</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">x1vr</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">x2v</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">x2vr</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                      <span class="n">x1w</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">x1wr</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">x2w</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">x2wr</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                      <span class="n">y1u</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">y1ur</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">y2u</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">y2ur</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                      <span class="n">y1v</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">y1vr</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">y2v</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">y2vr</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                      <span class="n">y1w</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">y1wr</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">y2w</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">y2wr</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">skin</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">panel</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">panel</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">skin</span><span class="p">):</span>
+        <span class="n">y0</span> <span class="o">=</span> <span class="n">i</span><span class="o">*</span><span class="n">b_skin</span>
+        <span class="n">blade_name</span> <span class="o">=</span> <span class="s1">&#39;blade_</span><span class="si">%02d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">i</span>
+        <span class="n">blade</span> <span class="o">=</span> <span class="n">Shell</span><span class="p">(</span><span class="n">group</span><span class="o">=</span><span class="n">blade_name</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y0</span><span class="o">=</span><span class="n">y0</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="n">height</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="n">width_blades</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                      <span class="n">m</span><span class="o">=</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">plyt</span><span class="o">=</span><span class="n">plyt</span><span class="p">,</span>
+                      <span class="n">stack</span><span class="o">=</span><span class="n">stack_blades</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">laminaprop</span><span class="o">=</span><span class="n">laminaprop</span><span class="p">,</span>
+                      <span class="n">x1u</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">x1ur</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">x2u</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">x2ur</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                      <span class="n">x1v</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">x1vr</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">x2v</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">x2vr</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                      <span class="n">x1w</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">x1wr</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">x2w</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">x2wr</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                      <span class="n">y1u</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">y1ur</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">y2u</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">y2ur</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                      <span class="n">y1v</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">y1vr</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">y2v</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">y2vr</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                      <span class="n">y1w</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">y1wr</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">y2w</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">y2wr</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">blades</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">blade</span><span class="p">)</span>
+
+    <span class="n">conns</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">skin_loop</span> <span class="o">=</span> <span class="n">skin</span> <span class="o">+</span> <span class="p">[</span><span class="n">skin</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">skin</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">skin</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">p01</span> <span class="o">=</span> <span class="n">skin_loop</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">p02</span> <span class="o">=</span> <span class="n">skin_loop</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">conns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">p1</span><span class="o">=</span><span class="n">p01</span><span class="p">,</span> <span class="n">p2</span><span class="o">=</span><span class="n">p02</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="s1">&#39;SSycte&#39;</span><span class="p">,</span> <span class="n">ycte1</span><span class="o">=</span><span class="n">p01</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">ycte2</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">p01</span> <span class="o">=</span> <span class="n">skin_loop</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">p02</span> <span class="o">=</span> <span class="n">skin_loop</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">conns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">p1</span><span class="o">=</span><span class="n">p01</span><span class="p">,</span> <span class="n">p2</span><span class="o">=</span><span class="n">p02</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="s1">&#39;SSycte&#39;</span><span class="p">,</span> <span class="n">ycte1</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ycte2</span><span class="o">=</span><span class="n">p02</span><span class="o">.</span><span class="n">b</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">panel</span><span class="p">,</span> <span class="n">blade</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">skin</span><span class="p">,</span> <span class="n">blades</span><span class="p">):</span>
+        <span class="n">conns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">p1</span><span class="o">=</span><span class="n">panel</span><span class="p">,</span> <span class="n">p2</span><span class="o">=</span><span class="n">blade</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="s1">&#39;BFycte&#39;</span><span class="p">,</span> <span class="n">ycte1</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ycte2</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+
+    <span class="n">md</span> <span class="o">=</span> <span class="n">MultiDomain</span><span class="p">(</span><span class="n">skin</span> <span class="o">+</span> <span class="n">blades</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">md</span><span class="p">,</span> <span class="n">conns</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="panels.multidomain.cylinder_blade_stiffened.cylinder_blade_stiffened_compression_lb_Nxx_cte">
+<span class="sig-prename descclassname"><span class="pre">panels.multidomain.cylinder_blade_stiffened.</span></span><span class="sig-name descname"><span class="pre">cylinder_blade_stiffened_compression_lb_Nxx_cte</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">height</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stack</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stack_blades</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width_blades</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plyt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">laminaprop</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">npanels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nxxs_skin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nxxs_blade</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_eigvalues</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.multidomain.cylinder_blade_stiffened.cylinder_blade_stiffened_compression_lb_Nxx_cte" title="Link to this definition">#</a></dt>
+<dd><p>Linear buckling analysis with a constant Nxx for each panel</p>
+<p>See <a class="reference internal" href="#panels.multidomain.cylinder_blade_stiffened.create_cylinder_blade_stiffened" title="panels.multidomain.cylinder_blade_stiffened.create_cylinder_blade_stiffened"><code class="xref py py-func docutils literal notranslate"><span class="pre">create_cylinder_blade_stiffened()</span></code></a> for most parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>Nxxs_skin</strong><span class="classifier">list</span></dt><dd><p>A Nxx for each skin panel.</p>
+</dd>
+<dt><strong>Nxxs_blade</strong><span class="classifier">list</span></dt><dd><p>A Nxx for each blade stiffener.</p>
+</dd>
+<dt><strong>num_eigvalues</strong><span class="classifier">int</span></dt><dd><p>Number of eigenvalues to be extracted.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>md, eigvals, eigvecs</strong><span class="classifier">tuple</span></dt><dd><p>Assembly, eigenvalues and eigenvectors.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>The following example is one of the test cases:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_cylinder_blade_stiffened_compression_lb_Nxx_cte</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Testing assembly function: cylinder_blade_stiffened_compression_lb_Nxx_cte&#39;</span><span class="p">)</span>
+    <span class="n">height</span> <span class="o">=</span> <span class="mf">0.500</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="mf">0.250</span>
+    <span class="n">npanels</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">Nxxs</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">100.</span><span class="p">]</span><span class="o">*</span><span class="n">npanels</span>
+    <span class="n">assy</span><span class="p">,</span> <span class="n">eigvals</span><span class="p">,</span> <span class="n">eigvecs</span> <span class="o">=</span> <span class="n">cylinder_blade_stiffened_compression_lb_Nxx_cte</span><span class="p">(</span>
+        <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
+        <span class="n">r</span><span class="o">=</span><span class="n">r</span><span class="p">,</span>
+        <span class="n">plyt</span><span class="o">=</span><span class="mf">0.125e-3</span><span class="p">,</span>
+        <span class="n">stack</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">45</span><span class="p">,</span> <span class="o">-</span><span class="mi">45</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="o">-</span><span class="mi">45</span><span class="p">,</span> <span class="mi">45</span><span class="p">],</span>
+        <span class="n">stack_blades</span><span class="o">=</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mi">4</span><span class="p">]</span><span class="o">*</span><span class="n">npanels</span><span class="p">,</span>
+        <span class="n">width_blades</span><span class="o">=</span><span class="p">[</span><span class="mf">0.02</span><span class="p">]</span><span class="o">*</span><span class="n">npanels</span><span class="p">,</span>
+        <span class="n">laminaprop</span><span class="o">=</span><span class="p">(</span><span class="mf">142.5e9</span><span class="p">,</span> <span class="mf">8.7e9</span><span class="p">,</span> <span class="mf">0.28</span><span class="p">,</span> <span class="mf">5.1e9</span><span class="p">,</span> <span class="mf">5.1e9</span><span class="p">,</span> <span class="mf">5.1e9</span><span class="p">),</span>
+        <span class="n">npanels</span><span class="o">=</span><span class="n">npanels</span><span class="p">,</span>
+        <span class="n">Nxxs_skin</span><span class="o">=</span><span class="n">Nxxs</span><span class="p">,</span>
+        <span class="n">Nxxs_blade</span><span class="o">=</span><span class="n">Nxxs</span><span class="p">,</span>
+        <span class="n">m</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+
+    <span class="n">assy</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">eigvecs</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;skin&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;tmp_cylinder_blade_stiffened_compression_lb_Nxx_cte_eigvec.png&#39;</span><span class="p">)</span>
+
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">Nxxs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">eigvals</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mf">51905.843</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="panels.multidomain.cylinder_blade_stiffened.cylinder_blade_stiffened_compression_lb_Nxx_from_static">
+<span class="sig-prename descclassname"><span class="pre">panels.multidomain.cylinder_blade_stiffened.</span></span><span class="sig-name descname"><span class="pre">cylinder_blade_stiffened_compression_lb_Nxx_from_static</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">height</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stack</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stack_blades</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width_blades</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plyt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">laminaprop</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">npanels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nxxs_skin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nxxs_blade</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_eigvalues</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.multidomain.cylinder_blade_stiffened.cylinder_blade_stiffened_compression_lb_Nxx_from_static" title="Link to this definition">#</a></dt>
+<dd><p>Linear buckling analysis with a Nxx calculated using static analysis</p>
+<p>See <a class="reference internal" href="#panels.multidomain.cylinder_blade_stiffened.create_cylinder_blade_stiffened" title="panels.multidomain.cylinder_blade_stiffened.create_cylinder_blade_stiffened"><code class="xref py py-func docutils literal notranslate"><span class="pre">create_cylinder_blade_stiffened()</span></code></a> for most parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>Nxxs_skin</strong><span class="classifier">list</span></dt><dd><p>A Nxx for each skin panel.</p>
+</dd>
+<dt><strong>Nxxs_blade</strong><span class="classifier">list</span></dt><dd><p>A Nxx for each blade stiffener.</p>
+</dd>
+<dt><strong>num_eigvalues</strong><span class="classifier">int</span></dt><dd><p>Number of eigenvalues to be extracted.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>md, c, eigvals, eigvecs</strong><span class="classifier">tuple</span></dt><dd><p>Assembly, static results, eigenvalues and eigenvectors.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>The following example is one of the test cases:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_cylinder_blade_stiffened_compression_lb_Nxx_from_static</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Testing assembly function: cylinder_blade_stiffened_compression_lb_Nxx_from_static&#39;</span><span class="p">)</span>
+    <span class="n">height</span> <span class="o">=</span> <span class="mf">0.500</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="mf">0.250</span>
+    <span class="n">npanels</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">Nxxs</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">100.</span><span class="p">]</span><span class="o">*</span><span class="n">npanels</span>
+    <span class="n">assy</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">eigvals</span><span class="p">,</span> <span class="n">eigvecs</span> <span class="o">=</span> <span class="n">cylinder_blade_stiffened_compression_lb_Nxx_from_static</span><span class="p">(</span>
+        <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
+        <span class="n">r</span><span class="o">=</span><span class="n">r</span><span class="p">,</span>
+        <span class="n">plyt</span><span class="o">=</span><span class="mf">0.125e-3</span><span class="p">,</span>
+        <span class="n">stack</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">45</span><span class="p">,</span> <span class="o">-</span><span class="mi">45</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="o">-</span><span class="mi">45</span><span class="p">,</span> <span class="mi">45</span><span class="p">],</span>
+        <span class="n">stack_blades</span><span class="o">=</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mi">4</span><span class="p">]</span><span class="o">*</span><span class="n">npanels</span><span class="p">,</span>
+        <span class="n">width_blades</span><span class="o">=</span><span class="p">[</span><span class="mf">0.02</span><span class="p">]</span><span class="o">*</span><span class="n">npanels</span><span class="p">,</span>
+        <span class="n">laminaprop</span><span class="o">=</span><span class="p">(</span><span class="mf">142.5e9</span><span class="p">,</span> <span class="mf">8.7e9</span><span class="p">,</span> <span class="mf">0.28</span><span class="p">,</span> <span class="mf">5.1e9</span><span class="p">,</span> <span class="mf">5.1e9</span><span class="p">,</span> <span class="mf">5.1e9</span><span class="p">),</span>
+        <span class="n">npanels</span><span class="o">=</span><span class="n">npanels</span><span class="p">,</span>
+        <span class="n">Nxxs_skin</span><span class="o">=</span><span class="n">Nxxs</span><span class="p">,</span>
+        <span class="n">Nxxs_blade</span><span class="o">=</span><span class="n">Nxxs</span><span class="p">,</span>
+        <span class="n">m</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+
+    <span class="n">assy</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="s1">&#39;skin&#39;</span><span class="p">,</span> <span class="n">vec</span><span class="o">=</span><span class="s1">&#39;u&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;tmp_cylinder_blade_stiffened_compression_lb_Nxx_from_static_u.png&#39;</span><span class="p">,</span> <span class="n">colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">assy</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="s1">&#39;skin&#39;</span><span class="p">,</span> <span class="n">vec</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;tmp_cylinder_blade_stiffened_compression_lb_Nxx_from_static_w.png&#39;</span><span class="p">,</span> <span class="n">colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">assy</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="s1">&#39;skin&#39;</span><span class="p">,</span> <span class="n">vec</span><span class="o">=</span><span class="s1">&#39;Nxx&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;tmp_cylinder_blade_stiffened_compression_lb_Nxx_from_static_Nxx.png&#39;</span><span class="p">,</span> <span class="n">colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">assy</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="s1">&#39;skin&#39;</span><span class="p">,</span> <span class="n">vec</span><span class="o">=</span><span class="s1">&#39;Nyy&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;tmp_cylinder_blade_stiffened_compression_lb_Nxx_from_static_Nyy.png&#39;</span><span class="p">,</span> <span class="n">colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">assy</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">eigvecs</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;skin&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;tmp_cylinder_blade_stiffened_compression_lb_Nxx_from_static_eigvec.png&#39;</span><span class="p">)</span>
+
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">Nxxs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">eigvals</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mi">40003</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="panels.multidomain.cylinder_blade_stiffened.cylinder_blade_stiffened_compression_lb_pd_from_static">
+<span class="sig-prename descclassname"><span class="pre">panels.multidomain.cylinder_blade_stiffened.</span></span><span class="sig-name descname"><span class="pre">cylinder_blade_stiffened_compression_lb_pd_from_static</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">height</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stack</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stack_blades</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width_blades</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plyt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">laminaprop</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">npanels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pds_skin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pds_blade</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_eigvalues</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ku</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000000.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.multidomain.cylinder_blade_stiffened.cylinder_blade_stiffened_compression_lb_pd_from_static" title="Link to this definition">#</a></dt>
+<dd><p>Linear buckling analysis with prescribed displacement</p>
+<p>See <a class="reference internal" href="#panels.multidomain.cylinder_blade_stiffened.create_cylinder_blade_stiffened" title="panels.multidomain.cylinder_blade_stiffened.create_cylinder_blade_stiffened"><code class="xref py py-func docutils literal notranslate"><span class="pre">create_cylinder_blade_stiffened()</span></code></a> for most parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>pds_skin</strong><span class="classifier">list</span></dt><dd><p>A prescribed axial compression displacement for each skin panel.</p>
+</dd>
+<dt><strong>pds_blade</strong><span class="classifier">list</span></dt><dd><p>A prescribed axial compression displacement for each blade stiffener.</p>
+</dd>
+<dt><strong>num_eigvalues</strong><span class="classifier">int</span></dt><dd><p>Number of eigenvalues to be extracted.</p>
+</dd>
+<dt><strong>ku</strong><span class="classifier">float</span></dt><dd><p>Penalty stiffness used for prescribing displacements.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>md, c, eigvals, eigvecs</strong><span class="classifier">tuple</span></dt><dd><p>Assembly, static results, eigenvalues and eigenvectors.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>The following example is one of the test cases:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_cylinder_blade_stiffened_compression_lb_pd_from_static</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Testing assembly function: cylinder_blade_stiffened_compression_lb_pd_from_static&#39;</span><span class="p">)</span>
+    <span class="n">height</span> <span class="o">=</span> <span class="mf">0.500</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="mf">0.250</span>
+    <span class="n">npanels</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">pds</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">1.e-3</span><span class="p">]</span><span class="o">*</span><span class="n">npanels</span>
+    <span class="n">assy</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">eigvals</span><span class="p">,</span> <span class="n">eigvecs</span> <span class="o">=</span> <span class="n">cylinder_blade_stiffened_compression_lb_pd_from_static</span><span class="p">(</span>
+        <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
+        <span class="n">r</span><span class="o">=</span><span class="n">r</span><span class="p">,</span>
+        <span class="n">plyt</span><span class="o">=</span><span class="mf">0.125e-3</span><span class="p">,</span>
+        <span class="n">stack</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">45</span><span class="p">,</span> <span class="o">-</span><span class="mi">45</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="o">-</span><span class="mi">45</span><span class="p">,</span> <span class="mi">45</span><span class="p">],</span>
+        <span class="n">stack_blades</span><span class="o">=</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mi">4</span><span class="p">]</span><span class="o">*</span><span class="n">npanels</span><span class="p">,</span>
+        <span class="n">width_blades</span><span class="o">=</span><span class="p">[</span><span class="mf">0.02</span><span class="p">]</span><span class="o">*</span><span class="n">npanels</span><span class="p">,</span>
+        <span class="n">laminaprop</span><span class="o">=</span><span class="p">(</span><span class="mf">142.5e9</span><span class="p">,</span> <span class="mf">8.7e9</span><span class="p">,</span> <span class="mf">0.28</span><span class="p">,</span> <span class="mf">5.1e9</span><span class="p">,</span> <span class="mf">5.1e9</span><span class="p">,</span> <span class="mf">5.1e9</span><span class="p">),</span>
+        <span class="n">npanels</span><span class="o">=</span><span class="n">npanels</span><span class="p">,</span>
+        <span class="n">pds_skin</span><span class="o">=</span><span class="n">pds</span><span class="p">,</span>
+        <span class="n">pds_blade</span><span class="o">=</span><span class="n">pds</span><span class="p">,</span>
+        <span class="n">m</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+
+    <span class="n">assy</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="s1">&#39;skin&#39;</span><span class="p">,</span> <span class="n">vec</span><span class="o">=</span><span class="s1">&#39;u&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;tmp_cylinder_blade_stiffened_compression_lb_pd_from_static_u.png&#39;</span><span class="p">,</span> <span class="n">colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">assy</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="s1">&#39;skin&#39;</span><span class="p">,</span> <span class="n">vec</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;tmp_cylinder_blade_stiffened_compression_lb_pd_from_static_w.png&#39;</span><span class="p">,</span> <span class="n">colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">assy</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="s1">&#39;skin&#39;</span><span class="p">,</span> <span class="n">vec</span><span class="o">=</span><span class="s1">&#39;Nxx&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;tmp_cylinder_blade_stiffened_compression_lb_pd_from_static_Nxx.png&#39;</span><span class="p">,</span> <span class="n">colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">assy</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="s1">&#39;skin&#39;</span><span class="p">,</span> <span class="n">vec</span><span class="o">=</span><span class="s1">&#39;Nyy&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;tmp_cylinder_blade_stiffened_compression_lb_pd_from_static_Nyy.png&#39;</span><span class="p">,</span> <span class="n">colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">assy</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">eigvecs</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;skin&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;tmp_cylinder_blade_stiffened_compression_lb_pd_from_static_eigvec.png&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="multidomain.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Base class for multidomain</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="multidomain_tstiff2d.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Panel multidomain assembly with T-stiffeners modelled as 2D domains</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.multidomain.cylinder.create_cylinder"><code class="docutils literal notranslate"><span class="pre">create_cylinder()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.multidomain.cylinder.cylinder_compression_lb_Nxx_cte"><code class="docutils literal notranslate"><span class="pre">cylinder_compression_lb_Nxx_cte()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.multidomain.cylinder.cylinder_compression_lb_Nxx_from_static"><code class="docutils literal notranslate"><span class="pre">cylinder_compression_lb_Nxx_from_static()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.multidomain.cylinder_blade_stiffened.create_cylinder_blade_stiffened"><code class="docutils literal notranslate"><span class="pre">create_cylinder_blade_stiffened()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.multidomain.cylinder_blade_stiffened.cylinder_blade_stiffened_compression_lb_Nxx_cte"><code class="docutils literal notranslate"><span class="pre">cylinder_blade_stiffened_compression_lb_Nxx_cte()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.multidomain.cylinder_blade_stiffened.cylinder_blade_stiffened_compression_lb_Nxx_from_static"><code class="docutils literal notranslate"><span class="pre">cylinder_blade_stiffened_compression_lb_Nxx_from_static()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.multidomain.cylinder_blade_stiffened.cylinder_blade_stiffened_compression_lb_pd_from_static"><code class="docutils literal notranslate"><span class="pre">cylinder_blade_stiffened_compression_lb_pd_from_static()</span></code></a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/multidomain_cylinder.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2012-2025, Saullo G. P. Castro, Nathan D&#39;Souza.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

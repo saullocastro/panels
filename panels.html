@@ -1,0 +1,1341 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Semi-analytical models for plates, shells and panels (panels) &#8212; panels 0.5.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="_static/documentation_options.js?v=1dd76d02"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'panels';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Base class for multidomain" href="multidomain.html" />
+    <link rel="prev" title="Semi-analytical methods for plates, shells and stiffened panels" href="index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">panels 0.5.0 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#">
+    Semi-analytical models for plates, shells and panels (panels)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="multidomain.html">
+    Base class for multidomain
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="multidomain_connections.html">
+    Multidomain connections (panels.multidomain.connections)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="bardell.html">
+    Bardell’s Hierarchical Functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ref.html">
+    References
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#">
+    Semi-analytical models for plates, shells and panels (panels)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="multidomain.html">
+    Base class for multidomain
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="multidomain_connections.html">
+    Multidomain connections (panels.multidomain.connections)
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="bardell.html">
+    Bardell’s Hierarchical Functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ref.html">
+    References
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Semi-analytical models for plates, shells and panels (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels</span></code>)</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="semi-analytical-models-for-plates-shells-and-panels-panels">
+<span id="module-panels"></span><h1>Semi-analytical models for plates, shells and panels (<a class="reference internal" href="#module-panels" title="panels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">panels</span></code></a>)<a class="headerlink" href="#semi-analytical-models-for-plates-shells-and-panels-panels" title="Link to this heading">#</a></h1>
+<p>Models for plates, shells, stiffened panels, single or multi-domain are
+available in this package.</p>
+<span class="target" id="module-panels.shell"></span><dl class="py class">
+<dt class="sig sig-object py" id="panels.shell.Shell">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">panels.shell.</span></span><span class="sig-name descname"><span class="pre">Shell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stack</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plyt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">laminaprop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">11</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">11</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.shell.Shell" title="Link to this definition">#</a></dt>
+<dd><p>General shell class that can be used for plates or shells</p>
+<p>It works for both plates and cylindrical shells. The right model is selected
+according to parameter <code class="docutils literal notranslate"><span class="pre">r</span></code> (radius).</p>
+<p>The approximation functions for the displacement fields are built using
+<a class="reference internal" href="bardell.html#theory-func-bardell"><span class="std std-ref">Bardell’s functions</span></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>a</strong><span class="classifier">float, optional</span></dt><dd><p>Length (along the <span class="math notranslate nohighlight">\(x\)</span> coordinate).</p>
+</dd>
+<dt><strong>b</strong><span class="classifier">float, optional</span></dt><dd><p>Width (along the <span class="math notranslate nohighlight">\(y\)</span> coordinate).</p>
+</dd>
+<dt><strong>r</strong><span class="classifier">float, optional</span></dt><dd><p>Radius for cylindrical shell.</p>
+</dd>
+<dt><strong>stack</strong><span class="classifier">list or tuple, optional</span></dt><dd><p>A sequence representing the angles for each ply.</p>
+</dd>
+<dt><strong>plyt</strong><span class="classifier">float, optional</span></dt><dd><p>Ply thickness.</p>
+</dd>
+<dt><strong>laminaprop</strong><span class="classifier">list or tuple, optional</span></dt><dd><p>Orthotropic lamina properties: <span class="math notranslate nohighlight">\(E_1, E_2, \nu_{12}, G_{12}, G_{13}, G_{23}\)</span>.</p>
+</dd>
+<dt><strong>rho</strong><span class="classifier">float, optional</span></dt><dd><p>Material density.</p>
+</dd>
+<dt><strong>m, n</strong><span class="classifier">int, optional</span></dt><dd><p>Number of terms for the approximation functions along <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span>,
+respectively.</p>
+</dd>
+<dt><strong>offset</strong><span class="classifier">float, optional</span></dt><dd><p>Laminate offset about shell mid-surface. The offset is measured along
+the normal (<span class="math notranslate nohighlight">\(z\)</span>) axis.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Attributes<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>ABD</strong></dt><dd></dd>
+<dt><strong>Mach</strong></dt><dd></dd>
+<dt><strong>Nxx</strong></dt><dd></dd>
+<dt><strong>Nxx_cte</strong></dt><dd></dd>
+<dt><strong>Nxy</strong></dt><dd></dd>
+<dt><strong>Nxy_cte</strong></dt><dd></dd>
+<dt><strong>Nyy</strong></dt><dd></dd>
+<dt><strong>Nyy_cte</strong></dt><dd></dd>
+<dt><strong>a</strong></dt><dd></dd>
+<dt><strong>aeromu</strong></dt><dd></dd>
+<dt><strong>air_speed</strong></dt><dd></dd>
+<dt><strong>b</strong></dt><dd></dd>
+<dt><strong>bay</strong></dt><dd></dd>
+<dt><strong>beta</strong></dt><dd></dd>
+<dt><strong>col_end</strong></dt><dd></dd>
+<dt><strong>col_start</strong></dt><dd></dd>
+<dt><strong>distr_loads</strong></dt><dd></dd>
+<dt><strong>distr_loads_inc</strong></dt><dd></dd>
+<dt><strong>distr_pds</strong></dt><dd></dd>
+<dt><strong>distr_pds_inc</strong></dt><dd></dd>
+<dt><strong>fields</strong></dt><dd></dd>
+<dt><strong>flow</strong></dt><dd></dd>
+<dt><strong>force_orthotropic_laminate</strong></dt><dd></dd>
+<dt><strong>fsdt_shear_correction</strong></dt><dd></dd>
+<dt><strong>gamma</strong></dt><dd></dd>
+<dt><strong>group</strong></dt><dd></dd>
+<dt><strong>increments</strong></dt><dd></dd>
+<dt><strong>lam</strong></dt><dd></dd>
+<dt><strong>laminaprop</strong></dt><dd></dd>
+<dt><strong>laminaprops</strong></dt><dd></dd>
+<dt><strong>m</strong></dt><dd></dd>
+<dt><strong>matrices</strong></dt><dd></dd>
+<dt><strong>model</strong></dt><dd></dd>
+<dt><strong>n</strong></dt><dd></dd>
+<dt><strong>name</strong></dt><dd></dd>
+<dt><strong>num_eigvalues</strong></dt><dd></dd>
+<dt><strong>num_eigvalues_print</strong></dt><dd></dd>
+<dt><strong>nx</strong></dt><dd></dd>
+<dt><strong>ny</strong></dt><dd></dd>
+<dt><strong>offset</strong></dt><dd></dd>
+<dt><strong>out_num_cores</strong></dt><dd></dd>
+<dt><strong>plot_mesh</strong></dt><dd></dd>
+<dt><strong>plyt</strong></dt><dd></dd>
+<dt><strong>plyts</strong></dt><dd></dd>
+<dt><strong>point_loads</strong></dt><dd></dd>
+<dt><strong>point_loads_inc</strong></dt><dd></dd>
+<dt><strong>point_pds</strong></dt><dd></dd>
+<dt><strong>point_pds_inc</strong></dt><dd></dd>
+<dt><strong>r</strong></dt><dd></dd>
+<dt><strong>results</strong></dt><dd></dd>
+<dt><strong>rho</strong></dt><dd></dd>
+<dt><strong>rho_air</strong></dt><dd></dd>
+<dt><strong>rhos</strong></dt><dd></dd>
+<dt><strong>row_end</strong></dt><dd></dd>
+<dt><strong>row_start</strong></dt><dd></dd>
+<dt><strong>size</strong></dt><dd></dd>
+<dt><strong>speed_sound</strong></dt><dd></dd>
+<dt><strong>stack</strong></dt><dd></dd>
+<dt><strong>x0</strong></dt><dd></dd>
+<dt><strong>x1</strong></dt><dd></dd>
+<dt><strong>x1u</strong></dt><dd></dd>
+<dt><strong>x1ur</strong></dt><dd></dd>
+<dt><strong>x1v</strong></dt><dd></dd>
+<dt><strong>x1vr</strong></dt><dd></dd>
+<dt><strong>x1w</strong></dt><dd></dd>
+<dt><strong>x1wr</strong></dt><dd></dd>
+<dt><strong>x2</strong></dt><dd></dd>
+<dt><strong>x2u</strong></dt><dd></dd>
+<dt><strong>x2ur</strong></dt><dd></dd>
+<dt><strong>x2v</strong></dt><dd></dd>
+<dt><strong>x2vr</strong></dt><dd></dd>
+<dt><strong>x2w</strong></dt><dd></dd>
+<dt><strong>x2wr</strong></dt><dd></dd>
+<dt><strong>y0</strong></dt><dd></dd>
+<dt><strong>y1</strong></dt><dd></dd>
+<dt><strong>y1u</strong></dt><dd></dd>
+<dt><strong>y1ur</strong></dt><dd></dd>
+<dt><strong>y1v</strong></dt><dd></dd>
+<dt><strong>y1vr</strong></dt><dd></dd>
+<dt><strong>y1w</strong></dt><dd></dd>
+<dt><strong>y1wr</strong></dt><dd></dd>
+<dt><strong>y2</strong></dt><dd></dd>
+<dt><strong>y2u</strong></dt><dd></dd>
+<dt><strong>y2ur</strong></dt><dd></dd>
+<dt><strong>y2v</strong></dt><dd></dd>
+<dt><strong>y2vr</strong></dt><dd></dd>
+<dt><strong>y2w</strong></dt><dd></dd>
+<dt><strong>y2wr</strong></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#panels.shell.Shell.add_distr_load_fixed_x" title="panels.shell.Shell.add_distr_load_fixed_x"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_distr_load_fixed_x</span></code></a>(x[, funcx, funcy, ...])</p></td>
+<td><p>Add a distributed force g(y) at a fixed x position</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#panels.shell.Shell.add_distr_load_fixed_y" title="panels.shell.Shell.add_distr_load_fixed_y"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_distr_load_fixed_y</span></code></a>(y[, funcx, funcy, ...])</p></td>
+<td><p>Add a distributed force g(x) at a fixed y position</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#panels.shell.Shell.add_distr_pd_fixed_x" title="panels.shell.Shell.add_distr_pd_fixed_x"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_distr_pd_fixed_x</span></code></a>(x[, ku, kv, kw, funcu, ...])</p></td>
+<td><p>Add a distributed prescribed displacement g(y) at a fixed x position</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#panels.shell.Shell.add_distr_pd_fixed_y" title="panels.shell.Shell.add_distr_pd_fixed_y"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_distr_pd_fixed_y</span></code></a>(y[, ku, kv, kw, funcu, ...])</p></td>
+<td><p>Add a distributed prescribed displacement g(x) at a fixed y position</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#panels.shell.Shell.add_point_load" title="panels.shell.Shell.add_point_load"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_point_load</span></code></a>(x, y, fx, fy, fz[, cte])</p></td>
+<td><p>Add a point load with three components</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#panels.shell.Shell.add_point_pd" title="panels.shell.Shell.add_point_pd"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_point_pd</span></code></a>(x, y, ku, up, kv, vp, kw, wp[, cte])</p></td>
+<td><p>Add a point prescribed displacement with three components</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#panels.shell.Shell.calc_cA" title="panels.shell.Shell.calc_cA"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_cA</span></code></a>(aeromu[, silent, size, finalize])</p></td>
+<td><p>Calculate the aerodynamic damping matrix using the piston theory</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#panels.shell.Shell.calc_fext" title="panels.shell.Shell.calc_fext"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_fext</span></code></a>([inc, size, col0, silent])</p></td>
+<td><p>Calculate the external force vector <span class="math notranslate nohighlight">\(\{F_{ext}\}\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#panels.shell.Shell.calc_fint" title="panels.shell.Shell.calc_fint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_fint</span></code></a>(c[, size, col0, silent, nx, ny, ...])</p></td>
+<td><p>Calculate the internal force vector <span class="math notranslate nohighlight">\(\{F_{int}\}\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#panels.shell.Shell.calc_kA" title="panels.shell.Shell.calc_kA"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_kA</span></code></a>([size, row0, col0, silent, finalize])</p></td>
+<td><p>Calculate the aerodynamic matrix using the linear piston theory</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#panels.shell.Shell.calc_kC" title="panels.shell.Shell.calc_kC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_kC</span></code></a>([size, row0, col0, silent, ...])</p></td>
+<td><p>Calculate the constitutive stiffness matrix</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#panels.shell.Shell.calc_kG" title="panels.shell.Shell.calc_kG"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_kG</span></code></a>([size, row0, col0, silent, ...])</p></td>
+<td><p>Calculate the (inital stress or) geometric stiffness matrix</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#panels.shell.Shell.calc_kM" title="panels.shell.Shell.calc_kM"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_kM</span></code></a>([size, row0, col0, h_nxny, ...])</p></td>
+<td><p>Calculate the mass matrix</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#panels.shell.Shell.calc_stiffness_point_constraint" title="panels.shell.Shell.calc_stiffness_point_constraint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_stiffness_point_constraint</span></code></a>(x, y[, u, ...])</p></td>
+<td><p>Add a point constraint</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#panels.shell.Shell.clear_disps" title="panels.shell.Shell.clear_disps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_disps</span></code></a>()</p></td>
+<td><p>Used to clear exisiting displacements for the panels</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#panels.shell.Shell.clear_loads" title="panels.shell.Shell.clear_loads"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_loads</span></code></a>()</p></td>
+<td><p>Used to clear exisiting loads for the panels</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#panels.shell.Shell.get_size" title="panels.shell.Shell.get_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_size</span></code></a>()</p></td>
+<td><p>Calculate the size of the stiffness matrices</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#panels.shell.Shell.save" title="panels.shell.Shell.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a>()</p></td>
+<td><p>Save the <code class="docutils literal notranslate"><span class="pre">Shell</span></code> object using <code class="docutils literal notranslate"><span class="pre">pickle</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#panels.shell.Shell.strain" title="panels.shell.Shell.strain"><code class="xref py py-obj docutils literal notranslate"><span class="pre">strain</span></code></a>(c[, xs, ys, gridx, gridy, NLgeom])</p></td>
+<td><p>Calculate the strain field</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#panels.shell.Shell.stress" title="panels.shell.Shell.stress"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stress</span></code></a>(c[, ABD, xs, ys, gridx, gridy, NLgeom])</p></td>
+<td><p>Calculate the stress field</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#panels.shell.Shell.uvw" title="panels.shell.Shell.uvw"><code class="xref py py-obj docutils literal notranslate"><span class="pre">uvw</span></code></a>(c[, xs, ys, gridx, gridy])</p></td>
+<td><p>Calculate the displacement field</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="pst-scrollable-table-container"><table class="table">
+<tbody>
+<tr class="row-odd"><td><p><strong>calc_kT</strong></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="panels.shell.Shell.add_distr_load_fixed_x">
+<span class="sig-name descname"><span class="pre">add_distr_load_fixed_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">funcx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">funcy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">funcz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.shell.Shell.add_distr_load_fixed_x" title="Link to this definition">#</a></dt>
+<dd><p>Add a distributed force g(y) at a fixed x position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">float</span></dt><dd><p>The fixed <span class="math notranslate nohighlight">\(x\)</span> position.</p>
+</dd>
+<dt><strong>funcx, funcy, funcz</strong><span class="classifier">function, optional</span></dt><dd><p>The functions of the distributed force components, will be used
+from <span class="math notranslate nohighlight">\(y=0\)</span> to <span class="math notranslate nohighlight">\(y=b\)</span>. At least one of the three must be defined</p>
+</dd>
+<dt><strong>cte</strong><span class="classifier">bool, optional</span></dt><dd><p>Constant forces are not incremented during the non-linear
+analysis.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="panels.shell.Shell.add_distr_load_fixed_y">
+<span class="sig-name descname"><span class="pre">add_distr_load_fixed_y</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">funcx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">funcy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">funcz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.shell.Shell.add_distr_load_fixed_y" title="Link to this definition">#</a></dt>
+<dd><p>Add a distributed force g(x) at a fixed y position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>y</strong><span class="classifier">float</span></dt><dd><p>The fixed <span class="math notranslate nohighlight">\(y\)</span> position.</p>
+</dd>
+<dt><strong>funcx, funcy, funcz</strong><span class="classifier">function, optional</span></dt><dd><p>The functions of the distributed force components, will be used
+from <span class="math notranslate nohighlight">\(x=0\)</span> to <span class="math notranslate nohighlight">\(x=a\)</span>. At least one of the three must be defined</p>
+</dd>
+<dt><strong>cte</strong><span class="classifier">bool, optional</span></dt><dd><p>Constant forces are not incremented during the non-linear
+analysis.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="panels.shell.Shell.add_distr_pd_fixed_x">
+<span class="sig-name descname"><span class="pre">add_distr_pd_fixed_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ku</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">funcu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">funcv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">funcw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.shell.Shell.add_distr_pd_fixed_x" title="Link to this definition">#</a></dt>
+<dd><p>Add a distributed prescribed displacement g(y) at a fixed x position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">float</span></dt><dd><p>The fixed <span class="math notranslate nohighlight">\(x\)</span> position.</p>
+</dd>
+<dt><strong>ku, kv, kw</strong><span class="classifier">float, optional</span></dt><dd><p>The <span class="math notranslate nohighlight">\(x,y,z\)</span> components of the penalty stiffness of the prescribed
+displacement.  At least one of the three must be defined, and
+corresponding to the funcu, funcv, funcw specified.</p>
+</dd>
+<dt><strong>funcu, funcv, funcw</strong><span class="classifier">type: function, optional</span></dt><dd><p>Specify in normal coordinates (x,y) not natural
+The functions of the distributed prescribed displacements, will be used
+from <span class="math notranslate nohighlight">\(y=0\)</span> to <span class="math notranslate nohighlight">\(y=b\)</span>. At least one of the three must be defined, and
+corresponding to the ku, kv, kw specified.</p>
+</dd>
+<dt><strong>cte</strong><span class="classifier">bool, optional</span></dt><dd><p>Constant prescribed displacements are not incremented during the non-linear
+analysis.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="panels.shell.Shell.add_distr_pd_fixed_y">
+<span class="sig-name descname"><span class="pre">add_distr_pd_fixed_y</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ku</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">funcu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">funcv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">funcw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.shell.Shell.add_distr_pd_fixed_y" title="Link to this definition">#</a></dt>
+<dd><p>Add a distributed prescribed displacement g(x) at a fixed y position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>y</strong><span class="classifier">float</span></dt><dd><p>The fixed <span class="math notranslate nohighlight">\(y\)</span> position.</p>
+</dd>
+<dt><strong>ku, kv, kw</strong><span class="classifier">float, optional</span></dt><dd><p>The <span class="math notranslate nohighlight">\(x,y,z\)</span> components of the penalty stiffness of the prescribed
+displacement.  At least one of the three must be defined, and
+corresponding to the funcu, funcv, funcw specified.</p>
+</dd>
+<dt><strong>funcu, funcv, funcw</strong><span class="classifier">type: function, optional</span></dt><dd><p>The functions of the distributed prescribed displacements, will be used
+from <span class="math notranslate nohighlight">\(y=0\)</span> to <span class="math notranslate nohighlight">\(y=b\)</span>. At least one of the three must be defined, and
+corresponding to the ku, kv, kw specified.</p>
+</dd>
+<dt><strong>cte</strong><span class="classifier">bool, optional</span></dt><dd><p>Constant prescribed displacements are not incremented during the non-linear
+analysis.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="panels.shell.Shell.add_point_load">
+<span class="sig-name descname"><span class="pre">add_point_load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.shell.Shell.add_point_load" title="Link to this definition">#</a></dt>
+<dd><p>Add a point load with three components</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">float</span></dt><dd><p>The <span class="math notranslate nohighlight">\(x\)</span> position.</p>
+</dd>
+<dt><strong>y</strong><span class="classifier">float</span></dt><dd><p>The <span class="math notranslate nohighlight">\(y\)</span> position in radians.</p>
+</dd>
+<dt><strong>fx</strong><span class="classifier">float</span></dt><dd><p>The <span class="math notranslate nohighlight">\(x\)</span> component of the force vector.</p>
+</dd>
+<dt><strong>fy</strong><span class="classifier">float</span></dt><dd><p>The <span class="math notranslate nohighlight">\(y\)</span> component of the force vector.</p>
+</dd>
+<dt><strong>fz</strong><span class="classifier">float</span></dt><dd><p>The <span class="math notranslate nohighlight">\(z\)</span> component of the force vector.</p>
+</dd>
+<dt><strong>cte</strong><span class="classifier">bool, optional</span></dt><dd><p>Constant forces are not incremented during the non-linear
+analysis.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="panels.shell.Shell.add_point_pd">
+<span class="sig-name descname"><span class="pre">add_point_pd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ku</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">up</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.shell.Shell.add_point_pd" title="Link to this definition">#</a></dt>
+<dd><p>Add a point prescribed displacement with three components</p>
+<p>o/p = [location and equivalent force]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">float</span></dt><dd><p>The <span class="math notranslate nohighlight">\(x\)</span> position.</p>
+</dd>
+<dt><strong>y</strong><span class="classifier">float</span></dt><dd><p>The <span class="math notranslate nohighlight">\(y\)</span> position in radians.</p>
+</dd>
+<dt><strong>ku, kv, kw</strong><span class="classifier">float</span></dt><dd><p>The <span class="math notranslate nohighlight">\(x,y,z\)</span> component of the penalty stiffness of the prescribed displacement.</p>
+</dd>
+<dt><strong>up, vp, wp</strong><span class="classifier">float</span></dt><dd><p>The <span class="math notranslate nohighlight">\(x,y,z\)</span> components of the prescribed displacement.</p>
+</dd>
+<dt><strong>cte</strong><span class="classifier">bool, optional</span></dt><dd><p>Constant prescribed displacements are not incremented
+during the non-linear analysis.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="panels.shell.Shell.calc_cA">
+<span class="sig-name descname"><span class="pre">calc_cA</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aeromu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">finalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.shell.Shell.calc_cA" title="Link to this definition">#</a></dt>
+<dd><p>Calculate the aerodynamic damping matrix using the piston theory</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="panels.shell.Shell.calc_fext">
+<span class="sig-name descname"><span class="pre">calc_fext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.shell.Shell.calc_fext" title="Link to this definition">#</a></dt>
+<dd><p>Calculate the external force vector <span class="math notranslate nohighlight">\(\{F_{ext}\}\)</span></p>
+<p>Recall that:</p>
+<div class="math notranslate nohighlight">
+\[\{F_{ext}\}=\{{F_{ext}}_0\} + \{{F_{ext}}_\lambda\}\]</div>
+<p>such that the terms in <span class="math notranslate nohighlight">\(\{{F_{ext}}_0\}\)</span> are constant and the terms in
+<span class="math notranslate nohighlight">\(\{{F_{ext}}_\lambda\}\)</span> will be scaled by the parameter <code class="docutils literal notranslate"><span class="pre">inc</span></code>.</p>
+<p>See the documentation of <a class="reference internal" href="#panels.shell_fext.shell_fext" title="panels.shell_fext.shell_fext"><code class="xref py py-func docutils literal notranslate"><span class="pre">shell_fext()</span></code></a> for more details.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>inc</strong><span class="classifier">float, optional</span></dt><dd><p>Since this function is called during the non-linear analysis,
+<code class="docutils literal notranslate"><span class="pre">inc</span></code> will multiply the terms <span class="math notranslate nohighlight">\(\{{F_{ext}}_\lambda\}\)</span>.</p>
+</dd>
+<dt><strong>size</strong><span class="classifier">int or str, optional</span></dt><dd><p>The size of the force vector. Can be the size of the total internal
+force vector of a multidomain assembly. When using a string, for
+example, if ‘+1’ is given it will add 1 to the Shell`s size obtained
+by the <a class="reference internal" href="#panels.shell.Shell.get_size" title="panels.shell.Shell.get_size"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.get_size()</span></code></a></p>
+</dd>
+<dt><strong>col0</strong><span class="classifier">int, optional</span></dt><dd><p>Offset in a global force vector of an assembly.</p>
+</dd>
+<dt><strong>silent</strong><span class="classifier">bool, optional</span></dt><dd><p>A boolean to tell whether the log messages should be printed.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>fext</strong><span class="classifier">np.ndarray</span></dt><dd><p>The external force vector</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="panels.shell.Shell.calc_fint">
+<span class="sig-name descname"><span class="pre">calc_fint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ny</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ABDnxny</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.shell.Shell.calc_fint" title="Link to this definition">#</a></dt>
+<dd><p>Calculate the internal force vector <span class="math notranslate nohighlight">\(\{F_{int}\}\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>c</strong><span class="classifier">np.ndarray</span></dt><dd><p>The Ritz constants vector to be used for the internal forces
+calculation.</p>
+</dd>
+<dt><strong>size</strong><span class="classifier">int or str, optional</span></dt><dd><p>The size of the internal force vector. Can be the size of a global
+internal force vector of an assembly. When using a string,
+for example, if ‘+1’ is given it will add 1 to the Shell`s size
+obtained by the <a class="reference internal" href="#panels.shell.Shell.get_size" title="panels.shell.Shell.get_size"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.get_size()</span></code></a></p>
+</dd>
+<dt><strong>col0</strong><span class="classifier">int, optional</span></dt><dd><p>Offset in a global internal force vector of an assembly.</p>
+</dd>
+<dt><strong>silent</strong><span class="classifier">bool, optional</span></dt><dd><p>A boolean to tell whether the log messages should be printed.</p>
+</dd>
+<dt><strong>nx</strong><span class="classifier">int, optional</span></dt><dd><p>Number of integration points along <span class="math notranslate nohighlight">\(x\)</span>.</p>
+</dd>
+<dt><strong>ny</strong><span class="classifier">int, optional</span></dt><dd><p>Number of integration points along <span class="math notranslate nohighlight">\(y\)</span>.</p>
+</dd>
+<dt><strong>ABDnxny</strong><span class="classifier">np.ndarray, optional</span></dt><dd><p>Laminate stiffness for each integration point, if not supplied it
+will assume constant properties over the shell domain.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>fint</strong><span class="classifier">np.ndarray</span></dt><dd><p>The internal force vector</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="panels.shell.Shell.calc_kA">
+<span class="sig-name descname"><span class="pre">calc_kA</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">finalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.shell.Shell.calc_kA" title="Link to this definition">#</a></dt>
+<dd><p>Calculate the aerodynamic matrix using the linear piston theory</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="panels.shell.Shell.calc_kC">
+<span class="sig-name descname"><span class="pre">calc_kC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">finalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_cte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ny</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ABDnxny</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NLgeom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.shell.Shell.calc_kC" title="Link to this definition">#</a></dt>
+<dd><p>Calculate the constitutive stiffness matrix</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">c</span></code> is not given it calculates the linear constitutive stiffness
+matrix, otherwise the large displacement linear constitutive stiffness
+matrix is calculated. When using <code class="docutils literal notranslate"><span class="pre">c</span></code> the size of <code class="docutils literal notranslate"><span class="pre">c</span></code> must be the
+same as the attribute <code class="docutils literal notranslate"><span class="pre">size</span></code>.</p>
+<p>In multi-domain semi-analytical models the sparse matrices that are
+calculated may have the <code class="docutils literal notranslate"><span class="pre">size</span></code> of the assembled global model, and the
+current constitutive matrix being calculated starts at position
+<code class="docutils literal notranslate"><span class="pre">row0</span></code> and <code class="docutils literal notranslate"><span class="pre">col0</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>size</strong><span class="classifier">int or str, optional</span></dt><dd><p>The size of the calculated sparse matrices. When using a string,
+for example, if ‘+1’ is given it will add 1 to the Shell`s size
+obtained by the <a class="reference internal" href="#panels.shell.Shell.get_size" title="panels.shell.Shell.get_size"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.get_size()</span></code></a></p>
+</dd>
+<dt><strong>row0, col0: int or None, optional</strong></dt><dd><p>Offset to populate the output sparse matrix (necessary when
+assemblying shells).</p>
+</dd>
+<dt><strong>silent</strong><span class="classifier">bool, optional</span></dt><dd><p>A boolean to tell whether the log messages should be printed.</p>
+</dd>
+<dt><strong>finalize</strong><span class="classifier">bool, optional</span></dt><dd><p>Asserts validity of output data and makes the output matrix
+symmetric, should be <code class="docutils literal notranslate"><span class="pre">False</span></code> when assemblying.</p>
+</dd>
+<dt><strong>c</strong><span class="classifier">array-like or None, optional</span></dt><dd><p>This must be the result of a static analysis, used to compute
+non-linear terms based on the actual displacement field.</p>
+</dd>
+<dt><strong>c_cte</strong><span class="classifier">array-like or None, optional</span></dt><dd><p>This must be the result of a static analysis, used to compute
+initial stress state not affected by the load multiplier of the
+linear buckling eigenvalue analysis.</p>
+</dd>
+<dt><strong>nx, ny</strong><span class="classifier">int or None, optional</span></dt><dd><p>Number of integration points along <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span>, respectively, for
+the Legendre-Gauss quadrature rule applied in the numerical
+integration. Only used when <code class="docutils literal notranslate"><span class="pre">c</span></code> is given.</p>
+</dd>
+<dt><strong>ABDnxny</strong><span class="classifier">4-D array-like or None, optional</span></dt><dd><p>The constitutive relations for the laminate at each integration
+point. Must be a 4-D array of shape <code class="docutils literal notranslate"><span class="pre">(nx,</span> <span class="pre">ny,</span> <span class="pre">6,</span> <span class="pre">6)</span></code> when using
+classical laminated plate theory models.</p>
+</dd>
+<dt><strong>NLgeom</strong><span class="classifier">bool, optional</span></dt><dd><p>Flag to indicate if geometrically non-linearities should be
+considered.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="panels.shell.Shell.calc_kG">
+<span class="sig-name descname"><span class="pre">calc_kG</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">finalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ny</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ABDnxny</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NLgeom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.shell.Shell.calc_kG" title="Link to this definition">#</a></dt>
+<dd><p>Calculate the (inital stress or) geometric stiffness matrix</p>
+<p>See <a class="reference internal" href="#panels.shell.Shell.calc_kC" title="panels.shell.Shell.calc_kC"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kC()</span></code></a> for details on each parameter.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="panels.shell.Shell.calc_kM">
+<span class="sig-name descname"><span class="pre">calc_kM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h_nxny</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho_nxny</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ny</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">finalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.shell.Shell.calc_kM" title="Link to this definition">#</a></dt>
+<dd><p>Calculate the mass matrix</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>h_nxny</strong><span class="classifier">(nx, ny) array-like or None, optional</span></dt><dd><p>The constitutive relations for the laminate at each integration
+point.</p>
+</dd>
+<dt><strong>rho_nxny</strong><span class="classifier">(nx, ny) array-like or None, optional</span></dt><dd><p>The material density for the laminate at each integration
+point. If multiple materials exist for the different plies,
+calculate <code class="docutils literal notranslate"><span class="pre">rho</span></code> using a weighted average.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="panels.shell.Shell.calc_stiffness_point_constraint">
+<span class="sig-name descname"><span class="pre">calc_stiffness_point_constraint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phiy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kuvw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kphi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100000.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.shell.Shell.calc_stiffness_point_constraint" title="Link to this definition">#</a></dt>
+<dd><p>Add a point constraint</p>
+<p>This can used to create different types of support and boundary
+conditions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x, y</strong><span class="classifier">float</span></dt><dd><p>Coordinates of the point contraint</p>
+</dd>
+<dt><strong>u, v, w</strong><span class="classifier">bool, optional</span></dt><dd><p>Translational degrees of freedom to be constrained</p>
+</dd>
+<dt><strong>phix, phiy</strong><span class="classifier">bool, optional</span></dt><dd><p>Rotational degrees of freedom to be constrained</p>
+</dd>
+<dt><strong>kuvw</strong><span class="classifier">float, optional</span></dt><dd><p>Penalty constant used for the translational constraints</p>
+</dd>
+<dt><strong>kphi</strong></dt><dd><p>Penalty constant used for the rotational constraints</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>kPC</strong><span class="classifier">csr_matrix</span></dt><dd><p>Stiffness matrix concenrning this point constraint. It must be added
+to the constitutive stiffness matrix in order to be taken into
+account in the calculations.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="panels.shell.Shell.clear_disps">
+<span class="sig-name descname"><span class="pre">clear_disps</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#panels.shell.Shell.clear_disps" title="Link to this definition">#</a></dt>
+<dd><dl class="simple">
+<dt>Used to clear exisiting displacements for the panels</dt><dd><p>Useful for non-linear runs where displacements are added for each increment</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="panels.shell.Shell.clear_loads">
+<span class="sig-name descname"><span class="pre">clear_loads</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#panels.shell.Shell.clear_loads" title="Link to this definition">#</a></dt>
+<dd><dl class="simple">
+<dt>Used to clear exisiting loads for the panels</dt><dd><p>Useful for non-linear runs where loads are added for each increment</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="panels.shell.Shell.get_size">
+<span class="sig-name descname"><span class="pre">get_size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#panels.shell.Shell.get_size" title="Link to this definition">#</a></dt>
+<dd><p>Calculate the size of the stiffness matrices</p>
+<p>The size of the stiffness matrices can be interpreted as the number of
+rows or columns, recalling that this will be the size of the Ritz
+constants’ vector <span class="math notranslate nohighlight">\(\{c\}\)</span>, the internal force vector <span class="math notranslate nohighlight">\(\{F_{int}\}\)</span> and
+the external force vector <span class="math notranslate nohighlight">\(\{F_{ext}\}\)</span>.</p>
+<p>ONLY RETURNS THE NUMBER OF ROWS ‘’OR’’ COLS</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>size</strong><span class="classifier">int</span></dt><dd><p>The size of the stiffness matrices. Can be the size of a global
+internal force vector of an assembly. When using a string, for
+example, if ‘+1’ is given it will add 1 to the Shell`s size
+obtained by the <a class="reference internal" href="#panels.shell.Shell.get_size" title="panels.shell.Shell.get_size"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.get_size()</span></code></a></p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="panels.shell.Shell.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#panels.shell.Shell.save" title="Link to this definition">#</a></dt>
+<dd><p>Save the <code class="docutils literal notranslate"><span class="pre">Shell</span></code> object using <code class="docutils literal notranslate"><span class="pre">pickle</span></code></p>
+<p class="rubric">Notes</p>
+<p>The pickled file will have the name stored in <code class="docutils literal notranslate"><span class="pre">Shell.name</span></code>
+followed by a <code class="docutils literal notranslate"><span class="pre">'.Shell'</span></code> extension.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="panels.shell.Shell.strain">
+<span class="sig-name descname"><span class="pre">strain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gridx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gridy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NLgeom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.shell.Shell.strain" title="Link to this definition">#</a></dt>
+<dd><p>Calculate the strain field</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>c</strong><span class="classifier">np.ndarray</span></dt><dd><p>The Ritz constants vector to be used for the strain field
+calculation.</p>
+</dd>
+<dt><strong>xs</strong><span class="classifier">np.ndarray, optional</span></dt><dd><p>The <span class="math notranslate nohighlight">\(x\)</span> coordinates where to calculate the strains.</p>
+</dd>
+<dt><strong>ys</strong><span class="classifier">np.ndarray, optional</span></dt><dd><p>The <span class="math notranslate nohighlight">\(y\)</span> coordinates where to calculate the strains, must
+have the same shape as <code class="docutils literal notranslate"><span class="pre">xs</span></code>.</p>
+</dd>
+<dt><strong>gridx</strong><span class="classifier">int, optional</span></dt><dd><p>When <code class="docutils literal notranslate"><span class="pre">xs</span></code> and <code class="docutils literal notranslate"><span class="pre">ys</span></code> are not supplied, <code class="docutils literal notranslate"><span class="pre">gridx</span></code> and <code class="docutils literal notranslate"><span class="pre">gridy</span></code>
+are used.</p>
+</dd>
+<dt><strong>gridy</strong><span class="classifier">int, optional</span></dt><dd><p>When <code class="docutils literal notranslate"><span class="pre">xs</span></code> and <code class="docutils literal notranslate"><span class="pre">ys</span></code> are not supplied, <code class="docutils literal notranslate"><span class="pre">gridx</span></code> and <code class="docutils literal notranslate"><span class="pre">gridy</span></code>
+are used.</p>
+</dd>
+<dt><strong>NLgeom</strong><span class="classifier">bool</span></dt><dd><p>Flag to indicate whether non-linear strain components should be considered.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>res</strong><span class="classifier">dict</span></dt><dd><p>A dictionary of <code class="docutils literal notranslate"><span class="pre">np.ndarrays</span></code> with the keys:
+<code class="docutils literal notranslate"><span class="pre">(x,</span> <span class="pre">y,</span> <span class="pre">exx,</span> <span class="pre">eyy,</span> <span class="pre">gxy,</span> <span class="pre">kxx,</span> <span class="pre">kyy,</span> <span class="pre">kxy)</span></code></p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="panels.shell.Shell.stress">
+<span class="sig-name descname"><span class="pre">stress</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ABD</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gridx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gridy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NLgeom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.shell.Shell.stress" title="Link to this definition">#</a></dt>
+<dd><p>Calculate the stress field</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>c</strong><span class="classifier">np.ndarray</span></dt><dd><p>The Ritz constants vector to be used for the strain field
+calculation.</p>
+</dd>
+<dt><strong>ABD</strong><span class="classifier">np.ndarray, optional</span></dt><dd><p>The laminate stiffness matrix. Can be a 6 x 6 (ABD) matrix for
+homogeneous laminates over the whole domain.</p>
+</dd>
+<dt><strong>xs</strong><span class="classifier">np.ndarray, optional</span></dt><dd><p>The <span class="math notranslate nohighlight">\(x\)</span> coordinates where to calculate the strains.</p>
+</dd>
+<dt><strong>ys</strong><span class="classifier">np.ndarray, optional</span></dt><dd><p>The <span class="math notranslate nohighlight">\(y\)</span> coordinates where to calculate the strains, must
+have the same shape as <code class="docutils literal notranslate"><span class="pre">xs</span></code>.</p>
+</dd>
+<dt><strong>gridx</strong><span class="classifier">int, optional</span></dt><dd><p>When <code class="docutils literal notranslate"><span class="pre">xs</span></code> and <code class="docutils literal notranslate"><span class="pre">ys</span></code> are not supplied, <code class="docutils literal notranslate"><span class="pre">gridx</span></code> and <code class="docutils literal notranslate"><span class="pre">gridy</span></code>
+are used.</p>
+</dd>
+<dt><strong>gridy</strong><span class="classifier">int, optional</span></dt><dd><p>When <code class="docutils literal notranslate"><span class="pre">xs</span></code> and <code class="docutils literal notranslate"><span class="pre">ys</span></code> are not supplied, <code class="docutils literal notranslate"><span class="pre">gridx</span></code> and <code class="docutils literal notranslate"><span class="pre">gridy</span></code>
+are used.</p>
+</dd>
+<dt><strong>NLgeom</strong><span class="classifier">bool</span></dt><dd><p>Flag to indicate whether non-linear strain components should be considered.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>res</strong><span class="classifier">dict</span></dt><dd><p>A dictionary of <code class="docutils literal notranslate"><span class="pre">np.ndarrays</span></code> with the keys:
+<code class="docutils literal notranslate"><span class="pre">(x,</span> <span class="pre">y,</span> <span class="pre">Nxx,</span> <span class="pre">Nyy,</span> <span class="pre">Nxy,</span> <span class="pre">Mxx,</span> <span class="pre">Myy,</span> <span class="pre">Mxy)</span></code></p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="panels.shell.Shell.uvw">
+<span class="sig-name descname"><span class="pre">uvw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gridx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gridy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.shell.Shell.uvw" title="Link to this definition">#</a></dt>
+<dd><p>Calculate the displacement field</p>
+<p>For a given full set of Ritz constants <code class="docutils literal notranslate"><span class="pre">c</span></code>, the displacement
+field is calculated and stored in the <code class="docutils literal notranslate"><span class="pre">fields</span></code> parameter of the
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Shell`</span></code> object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>c</strong><span class="classifier">float</span></dt><dd><p>The full set of Ritz constants</p>
+</dd>
+<dt><strong>xs</strong><span class="classifier">np.ndarray</span></dt><dd><p>The <span class="math notranslate nohighlight">\(x\)</span> positions where to calculate the displacement field.
+Default is <code class="docutils literal notranslate"><span class="pre">None</span></code> and the method <code class="docutils literal notranslate"><span class="pre">_default_field</span></code> is used.</p>
+</dd>
+<dt><strong>ys</strong><span class="classifier">np.ndarray</span></dt><dd><p>The <code class="docutils literal notranslate"><span class="pre">y</span></code> positions where to calculate the displacement field.
+Default is <code class="docutils literal notranslate"><span class="pre">None</span></code> and the method <code class="docutils literal notranslate"><span class="pre">_default_field</span></code> is used.</p>
+</dd>
+<dt><strong>gridx</strong><span class="classifier">int</span></dt><dd><p>Number of points along the <span class="math notranslate nohighlight">\(x\)</span> axis where to calculate the
+displacement field.</p>
+</dd>
+<dt><strong>gridy</strong><span class="classifier">int</span></dt><dd><p>Number of points along the <span class="math notranslate nohighlight">\(y\)</span> where to calculate the
+displacement field.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>out</strong><span class="classifier">tuple</span></dt><dd><p>Containing <code class="docutils literal notranslate"><span class="pre">plot_mesh</span></code> and <code class="docutils literal notranslate"><span class="pre">fields</span></code></p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-panels.shell_fext"></span><dl class="py function">
+<dt class="sig sig-object py" id="panels.shell_fext.shell_fext">
+<span class="sig-prename descclassname"><span class="pre">panels.shell_fext.</span></span><span class="sig-name descname"><span class="pre">shell_fext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.shell_fext.shell_fext" title="Link to this definition">#</a></dt>
+<dd><p>Calculate the external force vector</p>
+<p>The function reads the following attributes of the <a class="reference internal" href="#panels.shell.Shell" title="panels.shell.Shell"><code class="xref py py-class docutils literal notranslate"><span class="pre">Shell</span></code></a> object:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">shell.point_loads</span></code> : list of point loads, each described with <code class="docutils literal notranslate"><span class="pre">[x,</span>
+<span class="pre">y,</span> <span class="pre">fx,</span> <span class="pre">fy,</span> <span class="pre">fz]</span></code>. See <a class="reference internal" href="#panels.shell.Shell.add_point_load" title="panels.shell.Shell.add_point_load"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_point_load()</span></code></a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">shell.point_loads_inc</span></code> : similar to <code class="docutils literal notranslate"><span class="pre">point_loads</span></code> but this is
+affected by the load increment in nonlinear analyses.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">shell.distr_loads</span></code> : list of distributed loads, each described with
+<code class="docutils literal notranslate"><span class="pre">[x,</span> <span class="pre">None,</span> <span class="pre">funcx,</span> <span class="pre">funcy,</span> <span class="pre">funcz]</span></code> or <code class="docutils literal notranslate"><span class="pre">[None,</span> <span class="pre">y,</span> <span class="pre">funcx,</span> <span class="pre">funcy,</span>
+<span class="pre">funcz]</span></code> where <code class="docutils literal notranslate"><span class="pre">x</span></code> or <code class="docutils literal notranslate"><span class="pre">y</span></code> are the variable over which the load is
+distributed. See <a class="reference internal" href="#panels.shell.Shell.add_distr_load_fixed_x" title="panels.shell.Shell.add_distr_load_fixed_x"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_distr_load_fixed_x()</span></code></a> or
+<a class="reference internal" href="#panels.shell.Shell.add_distr_load_fixed_y" title="panels.shell.Shell.add_distr_load_fixed_y"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_distr_load_fixed_y()</span></code></a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">shell.distr_loads_inc</span></code> : similar to <code class="docutils literal notranslate"><span class="pre">distr_loads</span></code>, but this is
+affected by the load increment in nonlinear analyses.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">shell.point_pds</span></code> : list of prescribed point displacements, each
+described with <code class="docutils literal notranslate"><span class="pre">[x,</span> <span class="pre">y,</span> <span class="pre">ku*up,</span> <span class="pre">kv*vp,</span> <span class="pre">kw*wp]</span></code>. See
+<a class="reference internal" href="#panels.shell.Shell.add_point_pd" title="panels.shell.Shell.add_point_pd"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_point_pd()</span></code></a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">shell.point_pds_inc</span></code> : similar to <code class="docutils literal notranslate"><span class="pre">point_pds</span></code>, but this is
+affected by the load increment in nonlinear analyses.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">shell.distr_pds</span></code> : list of distributed prescribed displacements,
+each described with <code class="docutils literal notranslate"><span class="pre">[x,</span> <span class="pre">None,</span> <span class="pre">ku*funcu,</span> <span class="pre">kv*funcv,</span> <span class="pre">kw*funcw]</span></code> or
+<code class="docutils literal notranslate"><span class="pre">[None,</span> <span class="pre">y,</span> <span class="pre">ku*funcu,</span> <span class="pre">kv*funcv,</span> <span class="pre">kw*funcw]</span></code> where <code class="docutils literal notranslate"><span class="pre">x</span></code> or <code class="docutils literal notranslate"><span class="pre">y</span></code> are
+the variable over which the displacement is distributed. See
+<a class="reference internal" href="#panels.shell.Shell.add_distr_pd_fixed_x" title="panels.shell.Shell.add_distr_pd_fixed_x"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_distr_pd_fixed_x()</span></code></a> or
+<a class="reference internal" href="#panels.shell.Shell.add_distr_pd_fixed_y" title="panels.shell.Shell.add_distr_pd_fixed_y"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_distr_pd_fixed_y()</span></code></a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">shell.distr_pds_inc</span></code> : similar as <code class="docutils literal notranslate"><span class="pre">distr_pds</span></code>, but this is
+affected by the load increment in nonlinear analyses.</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>shell</strong><span class="classifier"><a class="reference internal" href="#panels.shell.Shell" title="panels.shell.Shell"><code class="xref py py-class docutils literal notranslate"><span class="pre">Shell</span></code></a></span></dt><dd><p>The shell object.</p>
+</dd>
+<dt><strong>inc</strong><span class="classifier">float, optional</span></dt><dd><p>Since this function is called during the non-linear analysis,
+<code class="docutils literal notranslate"><span class="pre">inc</span></code> will multiply the terms <span class="math notranslate nohighlight">\(\{{F_{ext}}_\lambda\}\)</span>.
+col0 = starting col in the global matrix ?????</p>
+</dd>
+<dt><strong>size</strong><span class="classifier">int or str, optional</span></dt><dd><p>The size of the force vector. Can be the size of the total internal
+force vector of a multidomain assembly. When using a string, for
+example, if ‘+1’ is given it will add 1 to the Shell`s size obtained
+by the <a class="reference internal" href="#panels.shell.Shell.get_size" title="panels.shell.Shell.get_size"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.get_size()</span></code></a></p>
+</dd>
+<dt><strong>col0</strong><span class="classifier">int, optional</span></dt><dd><p>Offset in a global internal force vector of an assembly.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>fext</strong><span class="classifier">np.ndarray</span></dt><dd><p>The external force vector.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<span class="target" id="module-panels.plot_shell"></span><dl class="py function">
+<dt class="sig sig-object py" id="panels.plot_shell.plot_shell">
+<span class="sig-prename descclassname"><span class="pre">panels.plot_shell.</span></span><span class="sig-name descname"><span class="pre">plot_shell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">invert_y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'w'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deform_u</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deform_u_sf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(3.5,</span> <span class="pre">2.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colorbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_nticks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'jet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aspect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'equal'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clean</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">400</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">texts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gridx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gridy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">400</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vecmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vecmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_offset_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_offset_y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NLgeom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.plot_shell.plot_shell" title="Link to this definition">#</a></dt>
+<dd><p>Contour plot for a Ritz constants vector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>c</strong><span class="classifier">array_like</span></dt><dd><p>The Ritz constants that will be used to compute the field contour.</p>
+</dd>
+<dt><strong>vec</strong><span class="classifier">str, optional</span></dt><dd><p>Can be one of the components:</p>
+<ul class="simple">
+<li><p>Displacement: <code class="docutils literal notranslate"><span class="pre">'u'</span></code>, <code class="docutils literal notranslate"><span class="pre">'v'</span></code>, <code class="docutils literal notranslate"><span class="pre">'w'</span></code>, <code class="docutils literal notranslate"><span class="pre">'phix'</span></code>, <code class="docutils literal notranslate"><span class="pre">'phiy'</span></code></p></li>
+<li><p>Strain: <code class="docutils literal notranslate"><span class="pre">'exx'</span></code>, <code class="docutils literal notranslate"><span class="pre">'eyy'</span></code>, <code class="docutils literal notranslate"><span class="pre">'gxy'</span></code>, <code class="docutils literal notranslate"><span class="pre">'kxx'</span></code>, <code class="docutils literal notranslate"><span class="pre">'kyy'</span></code>,
+<code class="docutils literal notranslate"><span class="pre">'kxy'</span></code>, <code class="docutils literal notranslate"><span class="pre">'gyz'</span></code>, <code class="docutils literal notranslate"><span class="pre">'gxz'</span></code></p></li>
+<li><p>Stress: <code class="docutils literal notranslate"><span class="pre">'Nxx'</span></code>, <code class="docutils literal notranslate"><span class="pre">'Nyy'</span></code>, <code class="docutils literal notranslate"><span class="pre">'Nxy'</span></code>, <code class="docutils literal notranslate"><span class="pre">'Mxx'</span></code>, <code class="docutils literal notranslate"><span class="pre">'Myy'</span></code>,
+<code class="docutils literal notranslate"><span class="pre">'Mxy'</span></code>, <code class="docutils literal notranslate"><span class="pre">'Qy'</span></code>, <code class="docutils literal notranslate"><span class="pre">'Qx'</span></code></p></li>
+</ul>
+</dd>
+<dt><strong>deform_u</strong><span class="classifier">bool, optional</span></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code> the contour plot will look deformed.</p>
+</dd>
+<dt><strong>deform_u_sf</strong><span class="classifier">float, optional</span></dt><dd><p>The scaling factor used to deform the contour.</p>
+</dd>
+<dt><strong>invert_y</strong><span class="classifier">bool, optional</span></dt><dd><p>Inverts the <span class="math notranslate nohighlight">\(y\)</span> axis of the plot.</p>
+</dd>
+<dt><strong>save</strong><span class="classifier">bool, optional</span></dt><dd><p>Flag telling whether the contour should be saved to an image file.</p>
+</dd>
+<dt><strong>dpi</strong><span class="classifier">int, optional</span></dt><dd><p>Resolution of the saved file in dots per inch.</p>
+</dd>
+<dt><strong>filename</strong><span class="classifier">str, optional</span></dt><dd><p>The file name for the generated image file. If no value is given,
+the <span class="math notranslate nohighlight">\(name\)</span> parameter of the <code class="docutils literal notranslate"><span class="pre">Shell</span></code> object will be used.</p>
+</dd>
+<dt><strong>ax</strong><span class="classifier">AxesSubplot, optional</span></dt><dd><p>When <code class="docutils literal notranslate"><span class="pre">ax</span></code> is given, the contour plot will be created inside it.</p>
+</dd>
+<dt><strong>figsize</strong><span class="classifier">tuple, optional</span></dt><dd><p>The figure size given by <code class="docutils literal notranslate"><span class="pre">(width,</span> <span class="pre">height)</span></code>.</p>
+</dd>
+<dt><strong>title</strong><span class="classifier">str, optional</span></dt><dd><p>If any string is given it is added as title to the contour plot.</p>
+</dd>
+<dt><strong>colorbar</strong><span class="classifier">bool, optional</span></dt><dd><p>If a colorbar should be added to the contour plot.</p>
+</dd>
+<dt><strong>cbar_nticks</strong><span class="classifier">int, optional</span></dt><dd><p>Number of ticks added to the colorbar.</p>
+</dd>
+<dt><strong>cbar_format</strong><span class="classifier">[ None | format string | Formatter object ], optional</span></dt><dd><p>See the <code class="docutils literal notranslate"><span class="pre">matplotlib.pyplot.colorbar</span></code> documentation.</p>
+</dd>
+<dt><strong>cbar_title</strong><span class="classifier">str, optional</span></dt><dd><p>Colorbar title. If <code class="docutils literal notranslate"><span class="pre">cbar_title</span> <span class="pre">==</span> <span class="pre">''</span></code> no title is added.</p>
+</dd>
+<dt><strong>cbar_fontsize</strong><span class="classifier">int, optional</span></dt><dd><p>Fontsize of the colorbar labels.</p>
+</dd>
+<dt><strong>colormap</strong><span class="classifier">string, optional</span></dt><dd><p>Name of a matplotlib available colormap.</p>
+</dd>
+<dt><strong>aspect</strong><span class="classifier">str, optional</span></dt><dd><p>String that will be passed to the <code class="docutils literal notranslate"><span class="pre">AxesSubplot.set_aspect()</span></code>
+method.</p>
+</dd>
+<dt><strong>clean</strong><span class="classifier">bool, optional</span></dt><dd><p>Clean axes ticks, grids, spines etc.</p>
+</dd>
+<dt><strong>xs</strong><span class="classifier">array_like, optional</span></dt><dd><p>The <span class="math notranslate nohighlight">\(x\)</span> positions where to calculate the displacement field.
+Default is <code class="docutils literal notranslate"><span class="pre">None</span></code> and the method <code class="docutils literal notranslate"><span class="pre">_default_field</span></code> is used.</p>
+</dd>
+<dt><strong>ys</strong><span class="classifier">array_like, optional</span></dt><dd><p>The <code class="docutils literal notranslate"><span class="pre">y</span></code> positions where to calculate the displacement field.
+Default is <code class="docutils literal notranslate"><span class="pre">None</span></code> and the method <code class="docutils literal notranslate"><span class="pre">_default_field</span></code> is used.</p>
+</dd>
+<dt><strong>gridx</strong><span class="classifier">int, optional</span></dt><dd><p>Number of points along the <span class="math notranslate nohighlight">\(x\)</span> axis where to calculate the
+displacement field.</p>
+</dd>
+<dt><strong>gridy</strong><span class="classifier">int, optional</span></dt><dd><p>Number of points along the <span class="math notranslate nohighlight">\(y\)</span> where to calculate the
+displacement field.</p>
+</dd>
+<dt><strong>num_levels</strong><span class="classifier">int, optional</span></dt><dd><p>Number of contour levels (higher values make the contour smoother).</p>
+</dd>
+<dt><strong>vecmin</strong><span class="classifier">float, optional</span></dt><dd><p>Minimum value for the contour scale (useful to compare with other
+results). If not specified it will be taken from the calculated
+field.</p>
+</dd>
+<dt><strong>vecmax</strong><span class="classifier">float, optional</span></dt><dd><p>Maximum value for the contour scale.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>ax</strong><span class="classifier">matplotlib.axes.Axes</span></dt><dd><p>The Matplotlib object that can be used to modify the current plot
+if needed.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Semi-analytical methods for plates, shells and stiffened panels</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="multidomain.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Base class for multidomain</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.shell.Shell"><code class="docutils literal notranslate"><span class="pre">Shell</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.shell.Shell.add_distr_load_fixed_x"><code class="docutils literal notranslate"><span class="pre">Shell.add_distr_load_fixed_x()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.shell.Shell.add_distr_load_fixed_y"><code class="docutils literal notranslate"><span class="pre">Shell.add_distr_load_fixed_y()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.shell.Shell.add_distr_pd_fixed_x"><code class="docutils literal notranslate"><span class="pre">Shell.add_distr_pd_fixed_x()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.shell.Shell.add_distr_pd_fixed_y"><code class="docutils literal notranslate"><span class="pre">Shell.add_distr_pd_fixed_y()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.shell.Shell.add_point_load"><code class="docutils literal notranslate"><span class="pre">Shell.add_point_load()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.shell.Shell.add_point_pd"><code class="docutils literal notranslate"><span class="pre">Shell.add_point_pd()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.shell.Shell.calc_cA"><code class="docutils literal notranslate"><span class="pre">Shell.calc_cA()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.shell.Shell.calc_fext"><code class="docutils literal notranslate"><span class="pre">Shell.calc_fext()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.shell.Shell.calc_fint"><code class="docutils literal notranslate"><span class="pre">Shell.calc_fint()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.shell.Shell.calc_kA"><code class="docutils literal notranslate"><span class="pre">Shell.calc_kA()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.shell.Shell.calc_kC"><code class="docutils literal notranslate"><span class="pre">Shell.calc_kC()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.shell.Shell.calc_kG"><code class="docutils literal notranslate"><span class="pre">Shell.calc_kG()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.shell.Shell.calc_kM"><code class="docutils literal notranslate"><span class="pre">Shell.calc_kM()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.shell.Shell.calc_stiffness_point_constraint"><code class="docutils literal notranslate"><span class="pre">Shell.calc_stiffness_point_constraint()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.shell.Shell.clear_disps"><code class="docutils literal notranslate"><span class="pre">Shell.clear_disps()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.shell.Shell.clear_loads"><code class="docutils literal notranslate"><span class="pre">Shell.clear_loads()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.shell.Shell.get_size"><code class="docutils literal notranslate"><span class="pre">Shell.get_size()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.shell.Shell.save"><code class="docutils literal notranslate"><span class="pre">Shell.save()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.shell.Shell.strain"><code class="docutils literal notranslate"><span class="pre">Shell.strain()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.shell.Shell.stress"><code class="docutils literal notranslate"><span class="pre">Shell.stress()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.shell.Shell.uvw"><code class="docutils literal notranslate"><span class="pre">Shell.uvw()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.shell_fext.shell_fext"><code class="docutils literal notranslate"><span class="pre">shell_fext()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.plot_shell.plot_shell"><code class="docutils literal notranslate"><span class="pre">plot_shell()</span></code></a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/panels.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2012-2025, Saullo G. P. Castro, Nathan D&#39;Souza.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
