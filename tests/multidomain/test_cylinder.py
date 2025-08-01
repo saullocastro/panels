@@ -1,3 +1,6 @@
+import sys
+sys.path.append('../..')
+
 import numpy as np
 
 from panels.multidomain import (cylinder_compression_lb_Nxx_cte,

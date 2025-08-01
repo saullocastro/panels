@@ -1,3 +1,9 @@
+[project]
+name = "panels"
+requires-python = ">=3.8"
+dynamic = ["version", "authors", "license", "readme", "description",
+"keywords", "classifiers"]
+
 [build-system]
 requires = ["setuptools", "wheel", "numpy", "cython", "scipy", "matplotlib",
 "composites", "structsolve"]

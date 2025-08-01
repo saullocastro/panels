@@ -2,7 +2,8 @@
 #cython: wraparound=False
 #cython: cdivision=True
 #cython: nonecheck=False
-#cython: profile=False
+#cython: overflowcheck=False
+#cython: embedsignature=True
 #cython: infer_types=False
 import numpy as np
 from libc.stdlib cimport malloc, free
@@ -11,11 +12,11 @@ from cython.parallel import prange
 # \panels\panels\core\src
 cdef extern from 'bardell_functions.hpp':
     double vec_f(double *f, double xi, double xi1t, double xi1r,
-                  double xi2t, double xi2r) nogil
+                  double xi2t, double xi2r) noexcept nogil
     double vec_fp(double *f, double xi, double xi1t, double xi1r,
-                  double xi2t, double xi2r) nogil
+                  double xi2t, double xi2r) noexcept nogil
     double vec_fpp(double *f, double xi, double xi1t, double xi1r,
-                  double xi2t, double xi2r) nogil
+                  double xi2t, double xi2r) noexcept nogil
 
 DOUBLE = np.float64
 
@@ -145,7 +146,6 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys, int
         add_size = 0
     new_size = size + add_size
 
-# ???????????????????????????
     if (size % num_cores) != 0:
         xs_core = np.ascontiguousarray(np.hstack((xs, np.zeros(add_size))).reshape(num_cores, -1), dtype=DOUBLE)
         ys_core = np.ascontiguousarray(np.hstack((ys, np.zeros(add_size))).reshape(num_cores, -1), dtype=DOUBLE)
@@ -186,7 +186,7 @@ cdef void cfuvw(double *c, int m, int n, double a, double b, double *xs,
         double x1w, double x1wr, double x2w, double x2wr,
         double y1u, double y1ur, double y2u, double y2ur,
         double y1v, double y1vr, double y2v, double y2vr,
-        double y1w, double y1wr, double y2w, double y2wr) nogil:
+        double y1w, double y1wr, double y2w, double y2wr) noexcept nogil:
     cdef int i, j, col, pti
     cdef double x, y, u, v, w, xi, eta
     cdef double *fu
@@ -243,7 +243,7 @@ cdef void cfuvw(double *c, int m, int n, double a, double b, double *xs,
 cdef void cfwx(double *c, int m, int n, double a, double b, double *xs,
         double *ys, int size, double *wxs,
         double x1w, double x1wr, double x2w, double x2wr,
-        double y1w, double y1wr, double y2w, double y2wr) nogil:
+        double y1w, double y1wr, double y2w, double y2wr) noexcept nogil:
     cdef int i, j, col, pti
     cdef double x, y, wx, xi, eta
     cdef double *fwxi
@@ -278,7 +278,7 @@ cdef void cfwx(double *c, int m, int n, double a, double b, double *xs,
 cdef void cfwy(double *c, int m, int n, double a, double b, double *xs,
         double *ys, int size, double *wys,
         double x1w, double x1wr, double x2w, double x2wr,
-        double y1w, double y1wr, double y2w, double y2wr) nogil:
+        double y1w, double y1wr, double y2w, double y2wr) noexcept nogil:
     cdef int i, j, col, pti
     cdef double x, y, wy, xi, eta
     cdef double *fw
@@ -336,7 +336,7 @@ cdef void cfg(double[:,::1] g, int m, int n,
               double x1w, double x1wr, double x2w, double x2wr,
               double y1u, double y1ur, double y2u, double y2ur,
               double y1v, double y1vr, double y2v, double y2vr,
-              double y1w, double y1wr, double y2w, double y2wr) nogil:
+              double y1w, double y1wr, double y2w, double y2wr) noexcept nogil:
     cdef int i, j, col
     cdef double xi, eta
     cdef double *fu
@@ -406,7 +406,7 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
         double x1w, double x1wr, double x2w, double x2wr,
         double y1u, double y1ur, double y2u, double y2ur,
         double y1v, double y1vr, double y2v, double y2vr,
-        double y1w, double y1wr, double y2w, double y2wr, int NLgeom) nogil:
+        double y1w, double y1wr, double y2w, double y2wr, int NLgeom) noexcept nogil:
     cdef int i, j, col, pti
     cdef double x, y, xi, eta
     cdef double exx, eyy, gxy, kxx, kyy, kxy

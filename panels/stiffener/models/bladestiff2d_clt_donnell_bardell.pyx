@@ -7,11 +7,11 @@
 from scipy.sparse import coo_matrix
 import numpy as np
 
-INT = long
-DOUBLE = np.float64
+from panels import INT, DOUBLE
+
+
 cdef int DOF = 3
 cdef int DOF1 = 3
-
 
 cdef extern from 'bardell.hpp':
     double integral_ff(int i, int j, double x1t, double x1r, double x2t, double x2r,

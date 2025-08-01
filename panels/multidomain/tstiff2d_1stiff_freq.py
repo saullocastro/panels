@@ -293,8 +293,8 @@ def tstiff2d_1stiff_freq(a, b, ys, bb, bf, defect_a, rho, plyt, laminaprop,
             continue
         valid_conn.append(connecti)
 
-    k0 = assy.calc_kC(conn=valid_conn)
-    kM = assy.calc_kM()
+    k0 = assy.calc_kC(conn=valid_conn, silent=True)
+    kM = assy.calc_kM(silent=True)
 
     eigvals, eigvecs = freq(k0, kM, tol=0, sparse_solver=True, silent=True,
              num_eigvalues=25, num_eigvalues_print=5)

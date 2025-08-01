@@ -1,6 +1,9 @@
+import sys
+sys.path.append('../..')
+
 import numpy as np
 
-from panels import Shell
+from panels.shell import Shell
 from panels.models.plate_clpt_donnell_bardell_num import fkC_num as plate_kC
 from panels.models.cylshell_clpt_donnell_bardell_num import fkC_num as cylshell_kC
 

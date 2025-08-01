@@ -8,7 +8,7 @@ from numpy import linspace, reshape
 from structsolve.sparseutils import finalize_symmetric_matrix, make_skew_symmetric
 
 from panels.logger import msg
-from panels import Shell, modelDB as panelmDB
+from panels.shell import Shell, modelDB as panelmDB
 from panels.stiffener import BladeStiff1D, BladeStiff2D
 
 

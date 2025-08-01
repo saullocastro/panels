@@ -1,0 +1,6 @@
+# k_crack_term2_11_11
+# k_crack_term2_11_11_num=1
+c += 1
+k_crack_term2_11r[c] = row+2
+k_crack_term2_11c[c] = col+2
+k_crack_term2_11v[c] += a_2*b_2*c1w*del_f*del_i_1*del_o*f1Aw*f1Bw*f1Cw*g1Aw*g1Bw*g1Cw*k_o*weight/(4*(del_i*del_i*del_i)*(del_f - del_o))

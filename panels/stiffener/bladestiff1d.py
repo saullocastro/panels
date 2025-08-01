@@ -3,7 +3,7 @@ import gc
 from composites import laminated_plate
 from structsolve.sparseutils import finalize_symmetric_matrix
 
-from panels import Shell
+from panels.shell import Shell
 from panels.logger import msg
 from . import modelDB
 

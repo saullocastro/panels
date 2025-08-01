@@ -1,0 +1,6 @@
+cython
+numpy
+scipy
+matplotlib
+composites
+structsolve

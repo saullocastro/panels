@@ -1,0 +1,421 @@
+BUG FIXES:
+1. test_dcb_before_opening and _tsl:
+--- Fixed bugs related to using more than 2 panels per level
+
+2. multidomain class:
+-- calc_kC_conn: Fixed issue with random panel order for the TSL connection type
+
+====================================================================================================
+
+DEV:
+1. multidomain class:
+-- plot:
+----- Added options to only compute (and return) results without plotting them
+----- Added functionality to pass precalculated results to just plot them vs having to recalculate them every time the plot function is called. 
+----- Created a common colourbar for all panel groups (using the prev dev)
+----- Cleaned up the code to calculate results 
+----- Modified plotting code (visual changes, added tick for 0)
+
+2. multidomain class:
+-- calc_results (added)
+----- Calculates and returns results - makes it more accessible, helps normalize colourbars
+
+3. test_dcb_before_opening and _tsl:
+----- Can now switch between 2+ panels per level (experimental - to check if the TSL works)
+
+====================================================================================================
+
+KNOWN ISSUES:
+1. DCB deform downwards upon applying an upward displacement 
+2. Structure consisting of 2 and 3 panels have (slightly) different results
+
+
+
+=======================================================================================
+=======================================================================================
+=======================================================================================
+=======================================================================================
+
+26-02-24 onwards:
+
+DEV: 
+	Summary: Force calculation + gaussian grid point compatibility 
+	
+1. multidomain class:
+-- force (NEW):
+----- Calculates force over a constant x or y line for a specified panel
+		Done by numerically integrating the stress field along that line
+		
+-- uvw, strain, stress:
+----- Added generation of gaussian points (if required) 
+----- Adding extra sampling points to the grid at the locations where force is requested (either x or y depending on request)
+
+-- stress:
+----- Functionality to compute stresses in a single panel (vs group) - used to compute forces
+		
+-- plot:
+----- Modified boundary plotting code to also handle gaussian points
+
+=======================================================================================
+=======================================================================================
+=======================================================================================
+=======================================================================================
+
+10-03-24 commit on:
+
+DEV: Curvature constraints for XCTE connection
+
+- Curvature constraints for connecting panels (currently only applies to xcte connections)
+
+=======================================================================================
+=======================================================================================
+=======================================================================================
+=======================================================================================
+
+11-03-24 onwards:
+
+DEV: Calc damaged stiffness + TSL penalty stiff matrix
+
+1. kCSB (added):
+-- Calculates penalty stiffness matrix for the damaged region with traction separation law by integrating over the concerned region
+
+2. penalties:
+-- Calculation of the out-of-plane stiffness per integration point across the entire contact interface
+---- Considers damaged stiffness
+---- Non-interpenetration constraint added by high penalty stiffness
+---- No stiffness upon failure
+
+3. test_dcb_damage:
+-- Implemented nonlinear NR method to recreate a linear case (improved the residual term by adding the prescribed displacement's contribuition) 
+
+4. Shell class:
+-- Added error codes for non-existant orders of bardell functions
+
+5. print_legendre_gauss_quadrature_C:
+-- Changed 'write binary' (wb) to 'write' (w); and changed functions to support Py 3 (vs the older Py 2 earlier implemented)
+
+6. legendre_gauss_quadrature.cpp (/panels/core/src):
+-- Added weights and gauss points till 128 terms
+
+
+=======================================================================================
+=======================================================================================
+=======================================================================================
+=======================================================================================
+
+18-03-24 onwards:
+
+DEV: Damage Propagation (BUG: in interpenetration)
+
+1. kCSB_dmg.pyx:
+-- Fixed bugs involving wrong variables
+
+2. penalties.py:
+-- Calc damage index for each integration point
+-- Added possibility to use k_SB (connection stiffness) when there is interpenetration vs very high values
+
+3. multidomain.py:
+-- Edited functions to include options to compute results for a single panel instead of a group
+-- Fixed bugs in calc_separation - bug: Extracting results from the obtained ones
+
+4. test_dcb_damaage.py:
+-- test_kCconn_SB_damage: Test function for kCSB_dmg when there is no damage as a benchmark case
+-- test_kw_tsl: Test function to calc kw_tsl, del_d (separation) and damage index across the panel
+-- test_dcb_damage_prop: Test function to calculate damage propagation across the panel 
+----- HAS BUGS - INTERPENETRATION PROBLEM UNSOLVED
+
+
+=======================================================================================
+=======================================================================================
+=======================================================================================
+=======================================================================================
+
+
+
+25-03-24 onwards:
+
+BUG: Fixed updating kCSB_dmg per NR iteration (solved interpenetration problem)
+
+1. test_dcb_damage:
+-- Fixed issue of stiffness bands (bec of high penalty stiffness) from not moving as damage front moves
+
+2. multidomain.py class:
+-- get_kC_conn:
+---- Removed option to skip function when kC_conn exists (it was skipping it for each NR iteration so kCSB_dmg was not updated after the first iteration of the first load step)
+
+3. penalties.py:
+-- Added filter mask to prevent k_i and k_dmg from being added when penetration between bodies occurs
+
+
+
+=======================================================================================
+=======================================================================================
+=======================================================================================
+=======================================================================================
+
+
+
+27-03-24 onwards:
+
+BUG FIX: Damage healing 
+
+1. multidomain.py:
+-- calc_k_dmg:
+---- Fixed bug where damage would heal in the subsquent iterations
+	 Implemented way to store max damage state and compare current one with it, before calc kw_tsl
+	 
+2. test_dcb_damage.py class:
+-- Added function to check monotonicity of damage variable 
+-- Improved plotting code
+
+
+=======================================================================================
+=======================================================================================
+=======================================================================================
+=======================================================================================
+
+
+12-04-24 commit:
+
+DEV: Force calculation (BUGS EXIST!!)
+
+1. multidomain.py:
+-- force_out_plane:
+---- Implemented 3 different methods to calculate the out of plane force (applied load) 
+------ Line integral of Qx along the edge of the top plate (where the load is applied)
+------ Area integral of q over the whole plate/s (comes from the equilibirum equations)
+------ Von-Karmans non linear equations (from CK's and J.N.Reddy's books) to find pz which is then integrated over an area or line (using dirac delta)
+
+-- Only the first implementation is reliable - rest unsure
+
+2. legendre_gauss_quadrature.cpp:
+-- Added gauss points and weights for numerical integration till 304
+
+3. test_dcb_before_opening_tsl.py:
+-- Added function that is just a beam bending of a single arm of the DCB
+   The shell is split up into two subpanels. 
+
+
+
+=======================================================================================
+=======================================================================================
+=======================================================================================
+=======================================================================================
+
+DEV: Added sigmoid ftn for translation terms
+
+19-05-24 commit:
+
+1. bardell_functions.cpp:
+-- The first and thrid bardell terms are modified to now include sigmoid functions (a,b = -+15, c2=0)
+Not all ftns updated. Only vec_f and vec_fp updated with the new sigmoid definitions. The other ftns have the older bardell functions. 
+
+2. multidomain.py:
+-- BUG FIX: Tracking previous damage was causing the solution of the first NR iteration to be taken as the baseline which was wrong. Corrected it to take the covnered NR solution as the damage of the previous loading step
+
+3. test_dcb_before_opening_tsl.py:
+-- Added 'test_leg_sig' and 'plot_test_leg_sigm' to fit the currently used shape functions to the sigmoid functions. Aimed at seeing if the currently used shape functions (bardell) can predict what is required. 
+
+4. bardell_sigmoid.py: (in \theory\func)
+-- Symbolic differentiation of sigmoid functions 
+
+
+=======================================================================================
+=======================================================================================
+=======================================================================================
+=======================================================================================
+
+
+DEV: family of sigmoid ftns; manually setting negative dipl = 0
+
+01-06-24 commit:
+
+1. bardell_functions.cpp:
+-- Family of sigmoid functions implemented for vec_f and vec_fp (commented out for now as the other functions are still bardell)
+	In essense, bardell is still being used
+	
+2. multidomain class:
+-- calc_k_dmg:
+---- Manually setting all displ after the first negative displ from the opening end to be zero
+
+3. test_dcb_before_opening_tsl:
+-- test_dcb_vs_fem:
+---- Code for 4 panels implemented
+
+4. sigmoid.py (theory\func\sigmoid):
+-- Generates family of sigmoid functions and their derivaties. Then writes it to the file
+
+
+
+
+=======================================================================================
+=======================================================================================
+=======================================================================================
+=======================================================================================
+
+BUGFIX: Fixed updating of c and calc kT + DEV: fext connection (bugs exist)
+
+commit on: 30-06-24
+
+
+1. multidomain.py 
+-- force_out_plane_daamage : 
+---- Calc force by integrating the traction over the damaged interface - doesnt work as it needs to be scaled up and doesnt work for load reversals
+
+-- calc_KT: 
+---- Attemped parallelizing but doesnt work as some shell objs cant be pickled
+
+-- calc_fext_dmg:
+---- Calc fext term that is used as a connection instead of kSB_conn - doesnt work as intended
+
+-- calc_traction_stiffness:
+---- Calc traction when SB conn is used
+
+-- calc_traction:
+---- Calc traction for fext_dmg (when no SB conn is used)
+
+-- calc_energy_dissipation:
+---- Calculates energy dissipation per displacement increment from the traction separation curve
+
+2. shell.py:
+-- calc_kC:
+---- commented bit that was adding kG to kC (probably was only doing it for c_cte but not 100% sure)
+
+3. plot_dcb_damage.py: (NEW)
+-- Plotting code for test_dcb_damage
+
+4. penalties.calc_kw_tsl:
+- Pass k_i, tau_o, G1c as an argument as well, pB optional
+
+5. run-file-py.pbs:
+-- Run file for submission to the cluster
+
+6. test_dcb_before_opening_tsl:
+-- Added plotting code for zoomed in graphs
+
+7. test_dcb_damage:
+-- test_dcb_damage_prop:
+---- BUG FIX: Updating c, kT after each NR increment
+---- Save variables at the end of each run, and when the run time is close to the cluster end wall time
+---- Cleaned up code and only have test_dcb_damage_prop - All other functions moved to test_dcb_damage_support_and_fext.py
+---- Parallelized it to have multiple runs in parallel for the cluster - support to generate pool arguments
+
+8. test_dcb_damage_support_and_fext.py
+-- Stuff that was oriignally in test_dcb_damage is now moved here
+-- Includes:
+---- test_dcb_damage_prop_fext_conn (using a connecting force at the interface rather than the kSB_conn
+---- postprocess_results_damage (post process results of test_dcb_damage by using c as the input)
+
+
+
+
+=======================================================================================
+=======================================================================================
+=======================================================================================
+=======================================================================================
+
+DEV: fcrack included in residual NR
+TODO: Change max del_d beign stored to max dmg_index (reversal needs to be redone)
+
+commit on: 08-07-24
+
+1. kCSB_dmg.pyx:
+-- fcrack (NEW):
+---- Calculates the force vector associated with the creation of the crack surface
+
+2. multidomain.py:
+-- calc_fcrack (NEW):
+---- Facilitates the calculation of the force vector associated with the creation of the crack surface by calling kCSB_dmg.fcrack
+
+-- get_kC_conn:
+---- Added option to prevent the degraded k from being used in the SB connection - Turned OFF currently
+
+3. test_dcb_damage.py:
+-- test_dcb_damage_prop_fcrack (NEW):
+---- Test code for DCB that includes the fcrack term in the residual terms etc
+
+4. plot_test_dcb_damage.py:
+-- Can convert file names (strings) to latex math for plotting
+
+
+
+=======================================================================================
+=======================================================================================
+=======================================================================================
+=======================================================================================
+
+DEV: fcrack addl terms added (with linearization assmptn)
+TODO: Change max del_d beign stored to max dmg_index (reversal needs to be redone)
+
+commit on: 14-07-24
+
+1. kCSB_dmg.pyx:
+-- Added code to calc stiffness matrix for crack energy (k_crack_11,12,22)
+
+2. multidomain.py:
+-- calc_kcrack (NEW): 
+---- calc stiffness matrix for crack energy (k_crack_11,12,22) by calling kCSB_dmg.k_crack_11,12,22
+
+-- calc_fcrack:
+---- Added additional terms
+
+3. plot_test_dcb_damage.py:
+-- Added code to plot load displ curve with any field variable
+-- Can do line, scatter plots
+
+
+=======================================================================================
+=======================================================================================
+=======================================================================================
+=======================================================================================
+
+DEV: fcrack addl terms added (varn of ki considered)
+TODO: Change max del_d beign stored to max dmg_index (reversal needs to be redone)
+
+commit on: 19-07-24
+
+1. kCSB_dmg.pyx:
+-- Added extra terms in calc of stiffness matrix for crack energy (k_crack_11,12,22)
+
+2. multidomain.py:
+-- calc_kcrack: 
+---- Extra terms for calc stiffness matrix for crack energy (k_crack_11,12,22) by calling kCSB_dmg.k_crack_11,12,22
+
+-- calc_fcrack:
+---- Added additional terms
+
+
+=======================================================================================
+=======================================================================================
+=======================================================================================
+=======================================================================================
+
+DEV: Store dmg_index instead of max_del_d per disp step
+BUG EXISTS: NR doesnt converge
+
+commit on: 23-07-24
+
+1. multidomain.py, test_dcb_damage.py
+
+
+=======================================================================================
+=======================================================================================
+=======================================================================================
+=======================================================================================
+
+BUGFIX: NR converges - propagation partially achieved 
+
+commit on: 23-07-24
+
+1. kCSB_dmg.pyx:
+-- Only compute fcrack and kcrack when damage exists and dmg_index is between 0 and 1 (as thats where energy will be dissipated)
+
+
+=======================================================================================
+=======================================================================================
+=======================================================================================
+=======================================================================================
+
+DEV: Quality of life improvements in code/plotting
+
+commit on: 16-08-24

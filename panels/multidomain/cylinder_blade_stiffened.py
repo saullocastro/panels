@@ -236,7 +236,73 @@ def cylinder_blade_stiffened_compression_lb_Nxx_from_static(height, r, stack,
     k0 = assy.calc_kC(conns, silent=True)
     incs, cs = static(k0, fext, silent=True)
     c = cs[0]
-    kG = assy.calc_kG(c=c, silent=False)
+    kG = assy.calc_kG(c=c, silent=True)
+
+    eigvals = eigvecs = None
+    eigvals, eigvecs = lb(k0, kG, tol=0, sparse_solver=True, silent=True,
+             num_eigvalues=num_eigvalues, num_eigvalues_print=5)
+
+    return assy, c, eigvals, eigvecs
+
+
+def cylinder_blade_stiffened_compression_lb_pd_from_static(height, r, stack,
+        stack_blades, width_blades, plyt, laminaprop, npanels, pds_skin,
+        pds_blade, m=8, n=8,
+        num_eigvalues=20, ku=1.e6):
+    """Linear buckling analysis with prescribed displacement
+
+    See :func:`.create_cylinder_blade_stiffened` for most parameters.
+
+    Parameters
+    ----------
+    pds_skin : list
+        A prescribed axial compression displacement for each skin panel.
+    pds_blade : list
+        A prescribed axial compression displacement for each blade stiffener.
+    num_eigvalues : int
+        Number of eigenvalues to be extracted.
+    ku : float
+        Penalty stiffness used for prescribing displacements.
+
+    Returns
+    -------
+    assy, c, eigvals, eigvecs : tuple
+        Assembly, static results, eigenvalues and eigenvectors.
+
+    Examples
+    --------
+
+    The following example is one of the test cases:
+
+    .. literalinclude:: ../../../../../compmech/panel/assembly/tests/test_cylinder.py
+        :pyobject: test_cylinder_blade_stiffened_compression_lb_Nxx_from_static
+
+    """
+    assy, conns = create_cylinder_blade_stiffened(height=height, r=r,
+            stack=stack, stack_blades=stack_blades, width_blades=width_blades,
+            plyt=plyt, laminaprop=laminaprop, npanels=npanels, m=m, n=n)
+    if len(pds_skin) != npanels:
+        raise ValueError('The length of "pds_skin" must be the same as "npanels"')
+    if len(pds_blade) != npanels:
+        raise ValueError('The length of "pds_blade" must be the same as "npanels"')
+    i_skin = -1
+    i_blade = -1
+    for p in assy.panels:
+        p.x2u = 1
+        if 'skin' in p.group:
+            i_skin += 1
+            pd = pds_skin[i_skin]
+        elif 'blade' in p.group:
+            i_blade += 1
+            pd = pds_blade[i_blade]
+        p.add_distr_pd_fixed_x(p.a, ku, None, None, lambda y: pd, None, None)
+
+    fext = assy.calc_fext(silent=True)
+
+    k0 = assy.calc_kC(conns, silent=True)
+    incs, cs = static(k0, fext, silent=True)
+    c = cs[0]
+    kG = assy.calc_kG(c=c, silent=True)
 
     eigvals = eigvecs = None
     eigvals, eigvecs = lb(k0, kG, tol=0, sparse_solver=True, silent=True,

@@ -1,3 +1,6 @@
+import sys
+sys.path.append('../..')
+
 import numpy as np
 from scipy.sparse import csr_matrix
 
@@ -5,7 +8,7 @@ from composites import laminated_plate
 from structsolve import freq
 from structsolve.sparseutils import make_symmetric
 
-from panels import Shell
+from panels.shell import Shell
 import panels.multidomain.connections as connections
 
 

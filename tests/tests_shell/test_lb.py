@@ -1,7 +1,10 @@
+import sys
+sys.path.append('../..')
+
 import numpy as np
 
 from structsolve import lb
-from panels import Shell
+from panels.shell import Shell
 from panels.plot_shell import plot_shell
 
 

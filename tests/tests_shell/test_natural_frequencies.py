@@ -1,7 +1,10 @@
+import sys
+sys.path.append('../..')
+
 import numpy as np
 from structsolve import freq
 
-from panels import Shell
+from panels.shell import Shell
 
 
 models = ['plate_clpt_donnell_bardell', 'cylshell_clpt_donnell_bardell']

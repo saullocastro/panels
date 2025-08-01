@@ -22,31 +22,33 @@ def read(fname):
 
 CLASSIFIERS = """\
 Development Status :: 4 - Beta
+Intended Audience :: Education
 Intended Audience :: Science/Research
 Intended Audience :: Developers
-Intended Audience :: Education
 Intended Audience :: End Users/Desktop
 Topic :: Scientific/Engineering
+Topic :: Scientific/Engineering :: Mathematics
 Topic :: Education
 Topic :: Software Development
 Topic :: Software Development :: Libraries :: Python Modules
 Operating System :: Microsoft :: Windows
 Operating System :: Unix
 Operating System :: POSIX :: BSD
-Programming Language :: Python :: 3.7
 Programming Language :: Python :: 3.8
 Programming Language :: Python :: 3.9
 Programming Language :: Python :: 3.10
 Programming Language :: Python :: 3.11
-License :: OSI Approved :: BSD License
+Programming Language :: Python :: 3.12
+Programming Language :: Python :: 3.13
 
 """
 
 MAJOR = 0
-MINOR = 4
-MICRO = 1
+MINOR = 5
+MICRO = 0
 ISRELEASED = True
 VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
+YEAR = '2025'
 
 
 def write_version_py(filename='panels/version.py'):
@@ -56,13 +58,13 @@ version = '%(version)s'
 full_version = '%(full_version)s'
 svn_revision = '%(svn_revision)s'
 isreleased = %(isreleased)s
+__year__ = '%(year)s'
 if isreleased:
     __version__ = version
 else:
     __version__ = full_version
-
-if not isreleased:
     version = full_version
+
 """
     FULLVERSION, GIT_REVISION = get_version_info()
 
@@ -71,7 +73,9 @@ if not isreleased:
         a.write(cnt % {'version': VERSION,
                        'full_version': FULLVERSION,
                        'svn_revision': GIT_REVISION,
-                       'isreleased': str(ISRELEASED)})
+                       'isreleased': str(ISRELEASED),
+                       'year': YEAR,
+                       })
     finally:
         a.close()
 
@@ -112,15 +116,22 @@ if platform.system() == 'Windows':
     compile_args = ['/openmp']
     link_args = []
 elif platform.system() == 'Linux':
-    compile_args = ['-fopenmp']
-    link_args = ['-fopenmp']
+    compile_args = ['-fopenmp', '-static', '-static-libgcc', '-static-libstdc++']
+    link_args = ['-fopenmp', '-static-libgcc', '-static-libstdc++']
 else: # MAC-OS
     compile_args = []
     link_args = []
 
+if 'CYTHON_TRACE_NOGIL' in os.environ.keys():
+    if os.name == 'nt': # Windows
+        compile_args = ['/O0']
+        link_args = []
+    else: # MAC-OS or Linux
+        compile_args = ['-O0']
+        link_args = []
+
 include_dirs = [
     r'./panels/core/include',
-    r'C:\Users\natha\Documents\GitHub\panels\panels\core\include',
             ]
 
 extensions = [
@@ -137,6 +148,7 @@ extensions = [
     Extension('panels.legendre_gauss_quadrature',
         sources=[
             './panels/core/src/legendre_gauss_quadrature.cpp',
+            './panels/core/src/legendre_gauss_quadrature_304.cpp',
             './panels/legendre_gauss_quadrature.pyx',
             ],
         include_dirs=include_dirs, extra_compile_args=compile_args,
@@ -248,19 +260,21 @@ extensions = [
             ],
         include_dirs=include_dirs, extra_compile_args=compile_args,
               extra_link_args=link_args, language='c++'),
+    Extension('panels.multidomain.connections.kCSB_dmg',
+        sources=[
+            './panels/core/src/bardell.cpp',
+            './panels/core/src/bardell_functions.cpp',
+            './panels/core/src/legendre_gauss_quadrature.cpp',
+            './panels/core/src/legendre_gauss_quadrature_304.cpp',
+            './panels/multidomain/connections/kCSB_dmg.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, language='c++'),
 
     ]
 
 
 FULLVERSION, GIT_REVISION = get_version_info()
-install_requires = [
-    'numpy',
-    'scipy',
-    'matplotlib',
-    'composites',
-    'structsolve',
-    'cython',
-]
 
 write_version_py()
 
@@ -283,20 +297,36 @@ package_data = {
                    ],
         }
 
+keywords = [
+            'Ritz method',
+            'semi-analytical'
+            'Energy-based method',
+            'structural analysis',
+            'structural optimization',
+            'static analysis',
+            'buckling',
+            'vibration',
+            'panel flutter',
+            'structural dynamics',
+            'implicit time integration',
+            'explicit time integration',
+            ]
+
 setup(
     name = 'panels',
     version = FULLVERSION,
-    author = 'Saullo G. P. Castro',
+    author = "Saullo G. P. Castro, Nathan D'Souza",
     author_email = 'S.G.P.Castro@tudelft.nl',
-    description = '\n'.join(DOCLINES),
+    description = ("Semi-analytical models for plates, shells and stiffened panels"),
     long_description = read('README.md'),
     long_description_content_type = 'text/markdown',
     license = '3-Clause BSD',
+    keywords = keywords,
     url = 'https://github.com/saullocastro/panels',
     package_data = package_data,
     data_files = data_files,
     classifiers = [_f for _f in CLASSIFIERS.split('\n') if _f],
-    install_requires = install_requires,
     ext_modules = ext_modules,
+    include_package_data = True,
     packages = find_packages(),
 )

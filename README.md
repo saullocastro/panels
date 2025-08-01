@@ -10,6 +10,7 @@ Coverage status:
 Semi-analytical methods for plates, shells and stiffened panels
 ===============================================================
 
+
 Capabilities:
 
 - linear buckling
@@ -18,6 +19,13 @@ Capabilities:
 - static
 - vibration
 - panel flutter
+
+
+Citing this library
+-------------------
+
+Saullo G. P. Castro, Nathan D'Souza. (2025). Semi-analytical methods for plates, shells and stiffened panels (Version 0.5.0). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
+
 
 Installation
 ------------

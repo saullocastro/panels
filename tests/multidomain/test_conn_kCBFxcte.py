@@ -17,12 +17,14 @@ The first eigen value of each model are compared in this test and a reference NA
 "reference_model_BFxcte.dat" is used to double check the results. Compmech models presents an error
 less than 1% compared with NASTRAN.
 '''
+import sys
+sys.path.append('../..')
 
 import pytest
 import numpy as np
 from structsolve import lb, static
 
-from panels import Shell
+from panels.shell import Shell
 from panels.multidomain import MultiDomain
 
 

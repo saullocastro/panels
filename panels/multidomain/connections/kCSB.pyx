@@ -2,17 +2,18 @@
 #cython: wraparound=False
 #cython: cdivision=True
 #cython: nonecheck=False
-#cython: profile=False
+#cython: overflowcheck=False
+#cython: embedsignature=True
 #cython: infer_types=False
 from scipy.sparse import coo_matrix
 import numpy as np
 
+from panels import INT, DOUBLE
 
-INT = long
-DOUBLE = np.float64
+
 cdef int DOF = 3
 
-
+# x1r,t etc are flags for the edges of the panel
 cdef extern from 'bardell.hpp':
     double integral_ff(int i, int j,
             double x1t, double x1r, double x2t, double x2r,
