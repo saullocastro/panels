@@ -46,7 +46,7 @@ Programming Language :: Python :: 3.14
 
 MAJOR = 0
 MINOR = 5
-MICRO = 1
+MICRO = 2
 ISRELEASED = True
 VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 YEAR = '2026'
