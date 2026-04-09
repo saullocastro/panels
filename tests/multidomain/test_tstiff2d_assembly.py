@@ -63,6 +63,7 @@ def test_tstiff2d_1stiff_compression():
         Nxx_skin=-1.,
         Nxx_base=-1.,
         Nxx_flange=-1.,
+        num_eigvalues=5,
         )
     assert np.isclose(eigvals[0], 135.1, rtol=0.001)
 

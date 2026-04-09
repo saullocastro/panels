@@ -10,7 +10,8 @@ def tstiff2d_1stiff_compression(a, b, ys, bb, bf, defect_a, rho, plyt,
         laminaprop, stack_skin, stack_base, stack_flange,
         Nxx_skin, Nxx_base, Nxx_flange, run_static_case=True,
         r=None, m=8, n=8, mb=None, nb=None, mf=None, nf=None,
-        nx=None, ny=None, nxb=None, nyb=None, nxf=None, nyf=None):
+        nx=None, ny=None, nxb=None, nyb=None, nxf=None, nyf=None,
+        num_eigvalues=25):
     r"""Linear Buckling of T-Stiffened panel with debonding defect
 
     The panel assembly looks like::
@@ -340,7 +341,7 @@ def tstiff2d_1stiff_compression(a, b, ys, bb, bf, defect_a, rho, plyt,
     kG = assy.calc_kG(c=c, silent=True)
 
     eigvals, eigvecs = lb(k0, kG, tol=0, sparse_solver=True, silent=True,
-             num_eigvalues=25, num_eigvalues_print=5)
+             num_eigvalues=num_eigvalues, num_eigvalues_print=5)
 
     if run_static_case:
         return assy, c, eigvals, eigvecs
