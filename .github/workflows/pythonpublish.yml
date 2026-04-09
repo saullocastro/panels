@@ -46,7 +46,7 @@ jobs:
     - name: Build Linux Python wheels, install cibuildwheel
       if: matrix.runs-on == 'ubuntu-latest'
       run: |
-        python3 -m pip install cibuildwheel==2.23.3
+        python3 -m pip install cibuildwheel==3.4.1
     - name: Build Linux Python wheels
       if: matrix.runs-on == 'ubuntu-latest' && matrix.python-version == '3.8'
       env:
