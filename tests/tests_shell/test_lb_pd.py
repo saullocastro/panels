@@ -108,7 +108,7 @@ def test_shell_pd_ycte():
         fext = p.calc_fext()
         c0 = solve(k0, fext)
         kG = p.calc_kG(c=c0)
-        eigvals, eigvecs = lb(k0, kG, silent=True)
+        eigvals, eigvecs = lb(k0, kG, silent=True, num_eigvalues=5)
         print(eigvals)
         plot_shell(p, eigvecs[:, 0], vec='w', filename='test_lb_pd_ycte.png')
 

@@ -21,7 +21,8 @@ def test_cylinder_compression_lb_Nxx_cte():
         laminaprop=(142.5e9, 8.7e9, 0.28, 5.1e9, 5.1e9, 5.1e9),
         npanels=npanels,
         Nxxs=Nxxs,
-        m=8, n=12)
+        m=8, n=12,
+        num_eigvalues=5)
 
     assy.plot(eigvecs[:, 0], 'skin', filename='tmp_cylinder_compression_lb_Nxx_cte.png')
 
@@ -42,7 +43,8 @@ def test_cylinder_compression_lb_Nxx_from_static():
         laminaprop=(142.5e9, 8.7e9, 0.28, 5.1e9, 5.1e9, 5.1e9),
         npanels=npanels,
         Nxxs=Nxxs,
-        m=8, n=12)
+        m=8, n=12,
+        num_eigvalues=5)
 
     assy.plot(c, 'skin', filename='tmp_cylinder_compression_lb_Nxx_from_static_c.png')
     assy.plot(eigvecs[:, 0], 'skin', filename='tmp_cylinder_compression_lb_Nxx_from_static_eigvec.png')

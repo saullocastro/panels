@@ -28,6 +28,6 @@ def test_lb_orthotropic():
     # shear
     s.Nxy = 1
 
-    eigvals, eigvecs = lb(s.calc_kC(), s.calc_kG(), silent=True)
+    eigvals, eigvecs = lb(s.calc_kC(), s.calc_kG(), silent=True, num_eigvalues=5)
     assert np.isclose(eigvals[0], 1375.367, atol=0.1, rtol=0.01)
     plot_shell(s, eigvecs[:, 0], vec='w')
