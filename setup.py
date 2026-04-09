@@ -40,15 +40,16 @@ Programming Language :: Python :: 3.10
 Programming Language :: Python :: 3.11
 Programming Language :: Python :: 3.12
 Programming Language :: Python :: 3.13
+Programming Language :: Python :: 3.14
 
 """
 
 MAJOR = 0
 MINOR = 5
-MICRO = 0
+MICRO = 1
 ISRELEASED = True
 VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
-YEAR = '2025'
+YEAR = '2026'
 
 
 def write_version_py(filename='panels/version.py'):
