@@ -24,7 +24,7 @@ Capabilities:
 Citing this library
 -------------------
 
-Saullo G. P. Castro, Nathan D'Souza. (2025). Semi-analytical methods for plates, shells and stiffened panels (Version 0.5.0). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
+Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.5.1). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
 
 Documentation
 -------------
