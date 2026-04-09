@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Cylindrical shells modeled as panel multidomain assemblies &#8212; panels 0.5.3 documentation</title>
+    <title>Cylindrical shells modeled as panel multidomain assemblies &#8212; panels 0.5.4 documentation</title>
   
   
   
@@ -38,7 +38,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=7f76b32a3354e82990f2" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=7f76b32a3354e82990f2" />
 
-    <script src="_static/documentation_options.js?v=2a2fe768"></script>
+    <script src="_static/documentation_options.js?v=e1a677a5"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
@@ -116,7 +116,7 @@
   
   
   
-    <p class="title logo__title">panels 0.5.3 documentation</p>
+    <p class="title logo__title">panels 0.5.4 documentation</p>
   
 </a></div>
     
@@ -548,7 +548,8 @@ edge is free to move in the axial direction.</p>
         <span class="n">laminaprop</span><span class="o">=</span><span class="p">(</span><span class="mf">142.5e9</span><span class="p">,</span> <span class="mf">8.7e9</span><span class="p">,</span> <span class="mf">0.28</span><span class="p">,</span> <span class="mf">5.1e9</span><span class="p">,</span> <span class="mf">5.1e9</span><span class="p">,</span> <span class="mf">5.1e9</span><span class="p">),</span>
         <span class="n">npanels</span><span class="o">=</span><span class="n">npanels</span><span class="p">,</span>
         <span class="n">Nxxs</span><span class="o">=</span><span class="n">Nxxs</span><span class="p">,</span>
-        <span class="n">m</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+        <span class="n">m</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+        <span class="n">num_eigvalues</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
 
     <span class="n">assy</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">eigvecs</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;skin&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;tmp_cylinder_compression_lb_Nxx_cte.png&#39;</span><span class="p">)</span>
 
@@ -596,7 +597,8 @@ edge is free to move in the axial direction.</p>
         <span class="n">laminaprop</span><span class="o">=</span><span class="p">(</span><span class="mf">142.5e9</span><span class="p">,</span> <span class="mf">8.7e9</span><span class="p">,</span> <span class="mf">0.28</span><span class="p">,</span> <span class="mf">5.1e9</span><span class="p">,</span> <span class="mf">5.1e9</span><span class="p">,</span> <span class="mf">5.1e9</span><span class="p">),</span>
         <span class="n">npanels</span><span class="o">=</span><span class="n">npanels</span><span class="p">,</span>
         <span class="n">Nxxs</span><span class="o">=</span><span class="n">Nxxs</span><span class="p">,</span>
-        <span class="n">m</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+        <span class="n">m</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+        <span class="n">num_eigvalues</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
 
     <span class="n">assy</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="s1">&#39;skin&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;tmp_cylinder_compression_lb_Nxx_from_static_c.png&#39;</span><span class="p">)</span>
     <span class="n">assy</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">eigvecs</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;skin&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;tmp_cylinder_compression_lb_Nxx_from_static_eigvec.png&#39;</span><span class="p">)</span>
@@ -842,7 +844,8 @@ multidomain assembly:</p>
         <span class="n">npanels</span><span class="o">=</span><span class="n">npanels</span><span class="p">,</span>
         <span class="n">Nxxs_skin</span><span class="o">=</span><span class="n">Nxxs</span><span class="p">,</span>
         <span class="n">Nxxs_blade</span><span class="o">=</span><span class="n">Nxxs</span><span class="p">,</span>
-        <span class="n">m</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+        <span class="n">m</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+        <span class="n">num_eigvalues</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
 
     <span class="n">assy</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">eigvecs</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;skin&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;tmp_cylinder_blade_stiffened_compression_lb_Nxx_cte_eigvec.png&#39;</span><span class="p">)</span>
 
@@ -893,7 +896,8 @@ multidomain assembly:</p>
         <span class="n">npanels</span><span class="o">=</span><span class="n">npanels</span><span class="p">,</span>
         <span class="n">Nxxs_skin</span><span class="o">=</span><span class="n">Nxxs</span><span class="p">,</span>
         <span class="n">Nxxs_blade</span><span class="o">=</span><span class="n">Nxxs</span><span class="p">,</span>
-        <span class="n">m</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+        <span class="n">m</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+        <span class="n">num_eigvalues</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
 
     <span class="n">assy</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="s1">&#39;skin&#39;</span><span class="p">,</span> <span class="n">vec</span><span class="o">=</span><span class="s1">&#39;u&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;tmp_cylinder_blade_stiffened_compression_lb_Nxx_from_static_u.png&#39;</span><span class="p">,</span> <span class="n">colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">assy</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="s1">&#39;skin&#39;</span><span class="p">,</span> <span class="n">vec</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;tmp_cylinder_blade_stiffened_compression_lb_Nxx_from_static_w.png&#39;</span><span class="p">,</span> <span class="n">colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
