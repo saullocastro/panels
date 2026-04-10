@@ -11,7 +11,8 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
         laminaprop, stack_skin, stack_base, stack_flange,
         air_speed=None, rho_air=None, Mach=None, speed_sound=None, flow='x',
         Nxx_skin=None, Nxx_base=None, Nxx_flange=None, run_static_case=True,
-        r=None, m=8, n=8, mb=None, nb=None, mf=None, nf=None):
+        r=None, m=8, n=8, mb=None, nb=None, mf=None, nf=None,
+        num_eigvalues=25):
     r"""Flutter of T-Stiffened Shell with possible defect at middle
 
     For more details about each parameter and the aerodynamic formulation see
@@ -110,6 +111,8 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
     mf, nf : int, optional
         Number of terms of the approximation function for the stiffener's
         flange.
+    num_eigvalues : int
+        Number of eigenvalues to be extracted.
 
     Examples
     --------
@@ -353,6 +356,6 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
     kA = csr_matrix(kA)
 
     eigvals, eigvecs = freq((k0 + kG + kA), kM, tol=0, sparse_solver=True, silent=True,
-             num_eigvalues=25, num_eigvalues_print=5)
+             num_eigvalues=num_eigvalues, num_eigvalues_print=5)
 
     return assy, eigvals, eigvecs

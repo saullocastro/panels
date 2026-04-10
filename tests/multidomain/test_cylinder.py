@@ -22,7 +22,7 @@ def test_cylinder_compression_lb_Nxx_cte():
         npanels=npanels,
         Nxxs=Nxxs,
         m=8, n=12,
-        num_eigvalues=5)
+        num_eigvalues=10)
 
     assy.plot(eigvecs[:, 0], 'skin', filename='tmp_cylinder_compression_lb_Nxx_cte.png')
 
@@ -44,7 +44,7 @@ def test_cylinder_compression_lb_Nxx_from_static():
         npanels=npanels,
         Nxxs=Nxxs,
         m=8, n=12,
-        num_eigvalues=5)
+        num_eigvalues=10)
 
     assy.plot(c, 'skin', filename='tmp_cylinder_compression_lb_Nxx_from_static_c.png')
     assy.plot(eigvecs[:, 0], 'skin', filename='tmp_cylinder_compression_lb_Nxx_from_static_eigvec.png')
