@@ -103,7 +103,9 @@ def tstiff2d_1stiff_compression(a, b, ys, bb, bf, defect_a, rho, plyt,
         Define of integration points used for skin, stiffener's base or flange;
         along x and y. Keeping ``None`` will use the default (see
         :class:`.Shell`).
-
+    num_eigvalues : int
+        Number of eigenvalues to be extracted.
+        
     Examples
     --------
 

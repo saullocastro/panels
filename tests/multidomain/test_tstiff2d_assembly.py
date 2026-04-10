@@ -32,6 +32,7 @@ def test_tstiff2d_1stiff_freq():
         m=6, n=7,
         mb=5, nb=6,
         mf=6, nf=7,
+        num_eigvalues=10,
         )
     omegan = (-eigvals[0])**0.5
     assert np.isclose(omegan, 44.147, atol=0.001, rtol=0.001)
@@ -63,7 +64,7 @@ def test_tstiff2d_1stiff_compression():
         Nxx_skin=-1.,
         Nxx_base=-1.,
         Nxx_flange=-1.,
-        num_eigvalues=5,
+        num_eigvalues=10,
         )
     assert np.isclose(eigvals[0], 135.1, rtol=0.001)
 
@@ -87,6 +88,7 @@ def test_tstiff2d_1stiff_compression():
         Nxx_skin=-1.,
         Nxx_base=-1.,
         Nxx_flange=-1.,
+        num_eigvalues=10,
         )
     assert np.isclose(eigvals[0], 67.42, rtol=0.001)
 
@@ -118,6 +120,7 @@ def test_tstiff2d_1stiff_flutter():
         Mach=2,
         speed_sound=343.,
         run_static_case=False,
+        num_eigvalues=10,
         )
     omegan = (-eigvals[0])**0.5
     print(eigvals)
