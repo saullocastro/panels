@@ -27,7 +27,7 @@ The structural matrices are solved with
 Citing this library
 ===================
 
-Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.6.0). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
+Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.6.8). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
 
 
 Documentation
@@ -49,7 +49,11 @@ History
 
 See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
 
-* version 0.6.0 (2026-09-17)
+* version 0.6.8 (2026-09-17)
+    - Fixed `StiffPanelBay.add_panel` and the partial-domain integration of
+      `Shell.calc_kC`, `calc_kG` and `calc_kM`
+    - Reproduction of Stamatelos and Labeas (Computation 2023, 11, 110) in
+      `notebooks/stamatelos_labeas_2023.ipynb`
     - Tangent stiffness matrix that is the exact derivative of the internal
       force vector, giving quadratic convergence to the Newton-Raphson method
     - `Shell` and `MultiDomain` can be passed directly to
