@@ -1,0 +1,53 @@
+cff-version: 1.2.0
+title: >-
+  Semi-analytical methods for plates, shells and stiffened panels
+type: software
+abstract: >-
+  The `panels` module provides semi-analytical (Ritz) models for plates,
+  cylindrical shells and stiffened panels, single or multi-domain, using
+  Bardell's hierarchical functions as approximation functions. Usually, this
+  module is used for:
+
+  * Linear static analyses
+
+  * Linear buckling analyses
+
+  * Frequency and panel flutter analyses
+
+  * Geometrically non-linear static analyses, using the Newton-Raphson method
+    or the arc-length methods of Riks and Crisfield
+
+  * Multi-domain analyses of cylinders, stiffened panels and panels with
+    debonding defects
+message: >-
+  Please, cite this software using:
+  Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.6.0). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
+authors:
+  - family-names: Castro
+    given-names: Saullo G. P.
+    email: S.G.P.Castro@tudelft.nl
+    affiliation: Delft University of Technology
+    orcid: 'https://orcid.org/0000-0001-9711-0991'
+  - family-names: D'Souza
+    given-names: Nathan
+    affiliation: Delft University of Technology
+identifiers:
+  - description: This DOI represents all versions, and will always resolve to the latest one
+    type: doi
+    value: 10.5281/zenodo.2541522
+repository-code: 'https://github.com/saullocastro/panels'
+url: 'https://saullocastro.github.io/panels/'
+license: BSD-3-Clause
+keywords:
+  - semi-analytical methods
+  - Ritz method
+  - plates
+  - shells
+  - stiffened panels
+  - linear buckling
+  - postbuckling
+  - vibration
+  - panel flutter
+  - multi-domain
+version: 0.6.0
+date-released: '2026-09-17'
