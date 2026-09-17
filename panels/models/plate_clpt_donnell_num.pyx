@@ -47,6 +47,7 @@ def fkC_num(double [::1] cs, object Finput, object shell,
     cdef double xi, eta, weight
     cdef double xi1, xi2, eta1, eta2
     cdef double wxi, weta
+    cdef double wx, wy, NxxNL, NyyNL, NxyNL
 
     cdef double [::1] xis, etas, weights_xi, weights_eta
 
@@ -178,6 +179,19 @@ def fkC_num(double [::1] cs, object Finput, object shell,
                 D26 = F[4*6 + 5]
                 D66 = F[5*6 + 5]
 
+                # Membrane stress carried by the nonlinear strain
+                # eps_NL = {w,x^2/2, w,y^2/2, w,x*w,y}. With it, KGNL = KG(N_NL)
+                # is collected in kC such that
+                #     KT = K0 + K0L + KL0 + KLL + KGNL (fkC_num) + KG(N0 + N_L) (fkG_num)
+                # is the exact Jacobian of calc_fint, and fkG_num stays
+                # homogeneous of degree one in cs, as linear buckling requires.
+                # wxi = weta = 0 when NLgeom == 0, then KGNL vanishes
+                wx = (2/a)*wxi
+                wy = (2/b)*weta
+                NxxNL = A11*0.5*wx*wx + A12*0.5*wy*wy + A16*wx*wy
+                NyyNL = A12*0.5*wx*wx + A22*0.5*wy*wy + A26*wx*wy
+                NxyNL = A16*0.5*wx*wx + A26*0.5*wy*wy + A66*wx*wy
+
                 # kC
                 c = -1
                 for i in range(m):
@@ -271,6 +285,11 @@ def fkC_num(double [::1] cs, object Finput, object shell,
                                     kCr[c] = row+2
                                     kCc[c] = col+2
                                 kCv[c] += weight*( 4*intx*inty*((a*a)*fBw*(gBweta*weta*((a*a)*fAw*(A22*gAweta*weta - B22*gAwetaeta) + a*b*(A26*(fAw*gAweta*wxi + fAwxi*gAw*weta) - 2*B26*fAwxi*gAweta) + (b*b)*gAw*(A12*fAwxi*wxi - B12*fAwxixi)) - gBwetaeta*((a*a)*fAw*(B22*gAweta*weta - D22*gAwetaeta) + a*b*(B26*(fAw*gAweta*wxi + fAwxi*gAw*weta) - 2*D26*fAwxi*gAweta) + (b*b)*gAw*(B12*fAwxi*wxi - D12*fAwxixi))) + a*b*(-2*fBwxi*gBweta*((a*a)*fAw*(B26*gAweta*weta - D26*gAwetaeta) + a*b*(B66*(fAw*gAweta*wxi + fAwxi*gAw*weta) - 2*D66*fAwxi*gAweta) + (b*b)*gAw*(B16*fAwxi*wxi - D16*fAwxixi)) + (fBw*gBweta*wxi + fBwxi*gBw*weta)*((a*a)*fAw*(A26*gAweta*weta - B26*gAwetaeta) + a*b*(A66*(fAw*gAweta*wxi + fAwxi*gAw*weta) - 2*B66*fAwxi*gAweta) + (b*b)*gAw*(A16*fAwxi*wxi - B16*fAwxixi))) + (b*b)*gBw*(fBwxi*wxi*((a*a)*fAw*(A12*gAweta*weta - B12*gAwetaeta) + a*b*(A16*(fAw*gAweta*wxi + fAwxi*gAw*weta) - 2*B16*fAwxi*gAweta) + (b*b)*gAw*(A11*fAwxi*wxi - B11*fAwxixi)) - fBwxixi*((a*a)*fAw*(B12*gAweta*weta - D12*gAwetaeta) + a*b*(B16*(fAw*gAweta*wxi + fAwxi*gAw*weta) - 2*D16*fAwxi*gAweta) + (b*b)*gAw*(B11*fAwxi*wxi - D11*fAwxixi))))/((a*a*a*a)*(b*b*b*b)) )
+                                # KGNL
+                                kCv[c] += weight*(intx*inty/4)*(
+                                          NxxNL*(2/a)*fAwxi*gAw*(2/a)*fBwxi*gBw
+                                        + NxyNL*((2/b)*fAw*gAweta*(2/a)*fBwxi*gBw + (2/a)*fAwxi*gAw*(2/b)*fBw*gBweta)
+                                        + NyyNL*(2/b)*fAw*gAweta*(2/b)*fBw*gBweta )
 
     kC = coo_matrix((kCv, (kCr, kCc)), shape=(size, size))
 
@@ -411,23 +430,10 @@ def fkG_num(double [::1] cs, object Finput, object shell,
                 B26 = F[1*6 + 5]
                 B66 = F[2*6 + 5]
 
-                wxi = 0
-                weta = 0
-                if NLgeom == 1:
-                    for j in range(n):
-                        #TODO put these in a lookup vector
-                        gAw = f(j, eta, y1w, y1wr, y2w, y2wr)
-                        gAweta = fp(j, eta, y1w, y1wr, y2w, y2wr)
-                        for i in range(m):
-                            fAw = f(i, xi, x1w, x1wr, x2w, x2wr)
-                            fAwxi = fp(i, xi, x1w, x1wr, x2w, x2wr)
-
-                            col = col0 + DOF*(j*m + i)
-
-                            wxi += cs[col+2]*fAwxi*gAw
-                            weta += cs[col+2]*fAw*gAweta
-
-                # Calculating strain components
+                # Calculating the linear strain components. The stress of the
+                # nonlinear strain enters KT through KGNL in fkC_num, such that
+                # kG is homogeneous of degree one in cs. NLgeom is kept in the
+                # signature for backward compatibility and has no effect here
                 exx = 0.
                 eyy = 0.
                 gxy = 0.
@@ -455,9 +461,9 @@ def fkG_num(double [::1] cs, object Finput, object shell,
 
                         col = col0 + DOF*(j*m + i)
 
-                        exx += cs[col+0]*(2/a)*fAuxi*gAu + 0.5*cs[col+2]*(2/a)*fAwxi*gAw*(2/a)*wxi
-                        eyy += cs[col+1]*(2/b)*fAv*gAveta + 0.5*cs[col+2]*(2/b)*fAw*gAweta*(2/b)*weta
-                        gxy += cs[col+0]*(2/b)*fAu*gAueta + cs[col+1]*(2/a)*fAvxi*gAv + cs[col+2]*(2/b)*weta*(2/a)*fAwxi*gAw + cs[col+2]*(2/a)*wxi*(2/b)*fAw*gAweta
+                        exx += cs[col+0]*(2/a)*fAuxi*gAu
+                        eyy += cs[col+1]*(2/b)*fAv*gAveta
+                        gxy += cs[col+0]*(2/b)*fAu*gAueta + cs[col+1]*(2/a)*fAvxi*gAv
                         kxx += -cs[col+2]*(2/a*2/a)*fAwxixi*gAw
                         kyy += -cs[col+2]*(2/b*2/b)*fAw*gAwetaeta
                         kxy += -2*cs[col+2]*(2/a)*fAwxi*(2/b)*gAweta
@@ -1086,7 +1092,7 @@ def calc_fint(double [::1] cs, object Finput, object shell,
 
                         exx += cs[col+0]*(2/a)*fAuxi*gAu + 0.5*cs[col+2]*(2/a)*fAwxi*gAw*(2/a)*wxi
                         eyy += cs[col+1]*(2/b)*fAv*gAveta + 0.5*cs[col+2]*(2/b)*fAw*gAweta*(2/b)*weta
-                        gxy += cs[col+0]*(2/b)*fAu*gAueta + cs[col+1]*(2/a)*fAvxi*gAv + cs[col+2]*(2/b)*weta*(2/a)*fAwxi*gAw + cs[col+2]*(2/a)*wxi*(2/b)*fAw*gAweta
+                        gxy += cs[col+0]*(2/b)*fAu*gAueta + cs[col+1]*(2/a)*fAvxi*gAv + cs[col+2]*(2/a)*fAwxi*gAw*(2/b)*weta
                         kxx += -cs[col+2]*(2/a*2/a)*fAwxixi*gAw
                         kyy += -cs[col+2]*(2/b*2/b)*fAw*gAwetaeta
                         kxy += -2*cs[col+2]*(2/a*2/b)*fAwxi*gAweta

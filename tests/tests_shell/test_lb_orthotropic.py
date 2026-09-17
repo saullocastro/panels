@@ -17,7 +17,7 @@ def test_lb_orthotropic():
     s.stack = [0, 90, -45, +45, +45, -45, 90, 0]
     s.plyt = 0.125e-3
     s.laminaprop = (142.5e9, 8.7e9, 0.28, 5.1e9, 5.1e9, 5.1e9)
-    s.model = 'cylshell_clpt_donnell_bardell'
+    s.model = 'cylshell_clpt_donnell'
     s.a = 2.
     s.b = 1.
     # radius

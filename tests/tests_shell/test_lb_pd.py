@@ -12,8 +12,8 @@ from panels.plot_shell import plot_shell
 
 
 def test_shell_pd_xcte():
-    for model in ['plate_clpt_donnell_bardell',
-                  'cylshell_clpt_donnell_bardell']:
+    for model in ['plate_clpt_donnell',
+                  'cylshell_clpt_donnell']:
         print('Checking fkG_num for model {0}'.format(model))
         # ssss
         p = Shell()
@@ -63,8 +63,8 @@ def test_shell_pd_xcte():
 
 
 def test_shell_pd_ycte():
-    for model in ['plate_clpt_donnell_bardell',
-                  'cylshell_clpt_donnell_bardell']:
+    for model in ['plate_clpt_donnell',
+                  'cylshell_clpt_donnell']:
         print('Checking fkG_num for model {0}'.format(model))
         # ssss
         p = Shell()

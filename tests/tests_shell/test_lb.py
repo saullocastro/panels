@@ -9,8 +9,8 @@ from panels.plot_shell import plot_shell
 
 
 def test_shell_lb():
-    for model in ['plate_clpt_donnell_bardell',
-                  'cylshell_clpt_donnell_bardell',
+    for model in ['plate_clpt_donnell',
+                  'cylshell_clpt_donnell',
                   ]:
         # ssss
         s = Shell()
