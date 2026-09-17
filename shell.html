@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>References &#8212; panels 0.6.0 documentation</title>
+    <title>Plates and cylindrical shells (panels.shell) &#8212; panels 0.6.0 documentation</title>
   
   
   
@@ -41,11 +41,12 @@
     <script src="_static/documentation_options.js?v=8fa8b3e9"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'ref';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'shell';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="Bardell’s Hierarchical Functions" href="bardell.html" />
+    <link rel="next" title="External force vector (panels.shell_fext)" href="shell_fext.html" />
+    <link rel="prev" title="API reference" href="api.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="0.6.0" />
@@ -193,7 +194,7 @@
 </li>
 
 
-<li class=" ">
+<li class=" current active">
   <a class="nav-link dropdown-item nav-internal" href="api.html">
     API reference
   </a>
@@ -207,8 +208,8 @@
 </li>
 
 
-<li class=" current active">
-  <a class="nav-link dropdown-item nav-internal" href="#">
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ref.html">
     References
   </a>
 </li>
@@ -352,7 +353,7 @@
 </li>
 
 
-<li class="nav-item ">
+<li class="nav-item current active">
   <a class="nav-link nav-internal" href="api.html">
     API reference
   </a>
@@ -366,8 +367,8 @@
 </li>
 
 
-<li class="nav-item current active">
-  <a class="nav-link nav-internal" href="#">
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ref.html">
     References
   </a>
 </li>
@@ -414,7 +415,18 @@
 <nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
-  <div class="bd-toc-item navbar-nav"></div>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Plates and cylindrical shells (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.shell</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="shell_fext.html">External force vector (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.shell_fext</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_shell.html">Contour plots (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.plot_shell</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Model database (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.modelDB</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multidomain.html">Multi-domain assemblies (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multidomain_cylinder.html">Cylinders modeled as multi-domain assemblies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multidomain_tstiff2d.html">Panels with a T-stiffener modeled as 2D domains</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stiffener.html">Blade stiffeners (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.stiffener</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stiffpanelbay.html">Stiffened panel bays (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.stiffpanelbay</span></code>)</a></li>
+</ul>
+</div>
 </nav></div>
     </div>
   
@@ -453,7 +465,10 @@
         <i class="fa-solid fa-home"></i>
       </a>
     </li>
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">References</span></li>
+    
+    <li class="breadcrumb-item"><a href="api.html" class="nav-link">API reference</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Plates and cylindrical shells (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.shell</span></code>)</span></li>
   </ul>
 </nav>
 </div>
@@ -470,28 +485,8 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="references">
-<h1>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h1>
-<div role="list" class="citation-list">
-<div class="citation" id="bardell1991" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span>bardell1991<span class="fn-bracket">]</span></span>
-<p>N .S. Bardell, “Free vibration analysis of a flat plate using the hierarchical finite element method”. Journal of Sound and Vibration, 1991. <a class="reference external" href="https://doi.org/10.1016/0022-460X(91)90855-E">https://doi.org/10.1016/0022-460X(91)90855-E</a>.</p>
-</div>
-<div class="citation" id="castro2016flutterpanel" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span>castro2016FlutterPanel<span class="fn-bracket">]</span></span>
-<p>S.G.P. Castro, T.A.M. Guimarães, D.A. Rade, M.V.Donadon. “Flutter of stiffened composite panels considering the stiffener’s base as a structural element”. Composite Structures, 2016. <a class="reference external" href="https://doi.org/10.1016/j.compstruct.2015.12.056">https://doi.org/10.1016/j.compstruct.2015.12.056</a></p>
-</div>
-<div class="citation" id="castro2017multidomain" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span>castro2017Multidomain<span class="fn-bracket">]</span></span>
-<p>S.G.P. Castro and M.V. Donadon, “Assembly of Semi-Analytical models to Address Linear Buckling and Vibration of Stiffened Composite Panels with Debonding Defect”. Composite Structures, 2017. <a class="reference external" href="https://doi.org/10.1016/j.compstruct.2016.10.026">https://doi.org/10.1016/j.compstruct.2016.10.026</a>.</p>
-</div>
-<div class="citation" id="nathan2024msc" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span>nathan2024MSc<span class="fn-bracket">]</span></span>
-<ol class="upperalpha simple" start="14">
-<li><p>D’Souza, “Multi-Domain Semi-Analytical Cohesive Zone Approach”. Delft University of Technology, 2024. <a class="reference external" href="https://resolver.tudelft.nl/uuid:4709f888-c032-4d9f-97e3-402dfdd47cf1">https://resolver.tudelft.nl/uuid:4709f888-c032-4d9f-97e3-402dfdd47cf1</a>.</p></li>
-</ol>
-</div>
-</div>
+  <section id="plates-and-cylindrical-shells-panels-shell">
+<h1>Plates and cylindrical shells (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.shell</span></code>)<a class="headerlink" href="#plates-and-cylindrical-shells-panels-shell" title="Link to this heading">#</a></h1>
 </section>
 
 
@@ -505,13 +500,22 @@
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="bardell.html"
+       href="api.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Bardell’s Hierarchical Functions</p>
+        <p class="prev-next-title">API reference</p>
       </div>
+    </a>
+    <a class="right-next"
+       href="shell_fext.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">External force vector (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.shell_fext</span></code>)</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
     </a>
 </div>
                 </footer>
@@ -527,7 +531,7 @@
   <div class="sidebar-secondary-item">
 
   <div class="tocsection sourcelink">
-    <a href="_sources/ref.rst.txt">
+    <a href="_sources/shell.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

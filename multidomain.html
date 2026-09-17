@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Base class for multidomain &#8212; panels 0.5.4 documentation</title>
+    <title>Multi-domain assemblies (panels.multidomain) &#8212; panels 0.6.0 documentation</title>
   
   
   
@@ -27,30 +27,29 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=7f76b32a3354e82990f2" rel="stylesheet" />
-<link href="_static/styles/pydata-sphinx-theme.css?digest=7f76b32a3354e82990f2" rel="stylesheet" />
+  <link href="_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="_static/scripts/fontawesome.js?digest=7f76b32a3354e82990f2"></script>
+  <script defer src="_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=7f76b32a3354e82990f2" />
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=7f76b32a3354e82990f2" />
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
-    <script src="_static/documentation_options.js?v=e1a677a5"></script>
+    <script src="_static/documentation_options.js?v=8fa8b3e9"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
-    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'multidomain';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Cylindrical shells modeled as panel multidomain assemblies" href="multidomain_cylinder.html" />
-    <link rel="prev" title="Semi-analytical models for plates, shells and panels (panels)" href="panels.html" />
+    <link rel="next" title="&lt;no title&gt;" href="multidomain_connections.html" />
+    <link rel="prev" title="Model database (panels.modelDB)" href="models.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="" />
+  <meta name="docsearch:version" content="0.6.0" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -68,7 +67,9 @@
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-
+  
+  
+  
   
   <dialog id="pst-search-dialog">
     
@@ -116,7 +117,7 @@
   
   
   
-    <p class="title logo__title">panels 0.5.4 documentation</p>
+    <p class="title logo__title">panels 0.6.0 documentation</p>
   
 </a></div>
     
@@ -131,39 +132,91 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="panels.html">
-    Semi-analytical models for plates, shells and panels (panels)
-  </a>
-</li>
-
-
-<li class="nav-item current active">
-  <a class="nav-link nav-internal" href="#">
-    Base class for multidomain
+  <a class="nav-link nav-internal" href="ex_linear_static.html">
+    Linear static analysis
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="multidomain_connections.html">
-    Multidomain connections (panels.multidomain.connections)
+  <a class="nav-link nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="bardell.html">
+  <a class="nav-link nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" current active">
+  <a class="nav-link dropdown-item nav-internal" href="api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="bardell.html">
     Bardell’s Hierarchical Functions
   </a>
 </li>
 
 
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="ref.html">
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ref.html">
     References
   </a>
 </li>
 
+                </ul>
+            </li>
+            
   </ul>
 </nav></div>
       
@@ -185,11 +238,18 @@
       
         <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
       
     </div>
     
@@ -238,22 +298,64 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="panels.html">
-    Semi-analytical models for plates, shells and panels (panels)
-  </a>
-</li>
-
-
-<li class="nav-item current active">
-  <a class="nav-link nav-internal" href="#">
-    Base class for multidomain
+  <a class="nav-link nav-internal" href="ex_linear_static.html">
+    Linear static analysis
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="multidomain_connections.html">
-    Multidomain connections (panels.multidomain.connections)
+  <a class="nav-link nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="api.html">
+    API reference
   </a>
 </li>
 
@@ -283,18 +385,26 @@
         
           <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
         
       </div>
     
   </div>
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
-        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar"><svg class="pst-icon svg-inline--fa" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
     <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
   </svg>
   <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
@@ -305,9 +415,16 @@
 <nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
-  <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="multidomain_cylinder.html">Cylindrical shells modeled as panel multidomain assemblies</a></li>
-<li class="toctree-l1"><a class="reference internal" href="multidomain_tstiff2d.html">Panel multidomain assembly with T-stiffeners modelled as 2D domains</a></li>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="shell.html">Plates and cylindrical shells (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.shell</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="shell_fext.html">External force vector (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.shell_fext</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_shell.html">Contour plots (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.plot_shell</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Model database (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.modelDB</span></code>)</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Multi-domain assemblies (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multidomain_cylinder.html">Cylinders modeled as multi-domain assemblies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multidomain_tstiff2d.html">Panels with a T-stiffener modeled as 2D domains</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stiffener.html">Blade stiffeners (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.stiffener</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stiffpanelbay.html">Stiffened panel bays (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.stiffpanelbay</span></code>)</a></li>
 </ul>
 </div>
 </nav></div>
@@ -348,7 +465,10 @@
         <i class="fa-solid fa-home"></i>
       </a>
     </li>
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Base class for multidomain</span></li>
+    
+    <li class="breadcrumb-item"><a href="api.html" class="nav-link">API reference</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Multi-domain assemblies (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain</span></code>)</span></li>
   </ul>
 </nav>
 </div>
@@ -365,675 +485,8 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="module-panels.multidomain">
-<span id="base-class-for-multidomain"></span><h1>Base class for multidomain<a class="headerlink" href="#module-panels.multidomain" title="Link to this heading">#</a></h1>
-<section id="multi-domain-semi-analytical-method-panels-multidomain">
-<h2>Multi-Domain semi-analytical method (<a class="reference internal" href="#module-panels.multidomain" title="panels.multidomain"><code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain</span></code></a>)<a class="headerlink" href="#multi-domain-semi-analytical-method-panels-multidomain" title="Link to this heading">#</a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="panels.multidomain.MultiDomain">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">panels.multidomain.</span></span><span class="sig-name descname"><span class="pre">MultiDomain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">panels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.multidomain.MultiDomain" title="Link to this definition">#</a></dt>
-<dd><p>Class for multi-domain semi-analytical approach</p>
-<p>This class has some useful methods that will help plotting output for
-different panel groups within the multi-domain and so forth.</p>
-<p>For more details about the theory involved, see Castro and Donadon (2017)
-<a class="reference internal" href="ref.html#castro2017multidomain" id="id1"><span>[castro2017Multidomain]</span></a> .</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>panels</strong><span class="classifier">iterable</span></dt><dd><p>A list, tuple etc of <a class="reference internal" href="panels.html#panels.shell.Shell" title="panels.shell.Shell"><code class="xref py py-class docutils literal notranslate"><span class="pre">Shell</span></code></a> objects.</p>
-</dd>
-<dt><strong>conn</strong><span class="classifier">dict</span></dt><dd><p>A connectivity dictionary.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p class="rubric">Methods</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#panels.multidomain.MultiDomain.calc_damaged_stiffness" title="panels.multidomain.MultiDomain.calc_damaged_stiffness"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_damaged_stiffness</span></code></a>(dmg_index, k_i)</p></td>
-<td><p>Calculate the reduced stiffness given the damage index</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#panels.multidomain.MultiDomain.calc_kC" title="panels.multidomain.MultiDomain.calc_kC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_kC</span></code></a>([conn, c, silent, finalize, inc])</p></td>
-<td><p>Calculate the constitutive stiffness matrix of the assembly --- this is kP (made by diagonally assemblying kP_i from the MD paper)</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#panels.multidomain.MultiDomain.calc_kG" title="panels.multidomain.MultiDomain.calc_kG"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_kG</span></code></a>([c, silent, finalize])</p></td>
-<td><p>Calculate the geometric stiffness matrix of the assembly</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#panels.multidomain.MultiDomain.calc_k_dmg" title="panels.multidomain.MultiDomain.calc_k_dmg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_k_dmg</span></code></a>(c, pA, pB, nr_x_gauss, ...[, ...])</p></td>
-<td><p>Calculate the damaged k_tsl and the damage index</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#panels.multidomain.MultiDomain.calc_results" title="panels.multidomain.MultiDomain.calc_results"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_results</span></code></a>(c[, group, vec, gridx, gridy, ...])</p></td>
-<td><p>Contour plot for a Ritz constants vector.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#panels.multidomain.MultiDomain.calc_separation" title="panels.multidomain.MultiDomain.calc_separation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_separation</span></code></a>(res_pan_top, res_pan_bot)</p></td>
-<td><p>Calculates the separation between two panels</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#panels.multidomain.MultiDomain.calc_traction_stiffness" title="panels.multidomain.MultiDomain.calc_traction_stiffness"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_traction_stiffness</span></code></a>(kw_tsl, ...)</p></td>
-<td><p>Calculates traction for the approach where SB_TSL connection is used</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#panels.multidomain.MultiDomain.force" title="panels.multidomain.MultiDomain.force"><code class="xref py py-obj docutils literal notranslate"><span class="pre">force</span></code></a>(c, group, eval_panel[, x_cte_force, ...])</p></td>
-<td><p>Calculate the force along a line (xcte or ycte)</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#panels.multidomain.MultiDomain.get_kC_conn" title="panels.multidomain.MultiDomain.get_kC_conn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_kC_conn</span></code></a>([conn, finalize, c, kw_tsl])</p></td>
-<td><p>Stiffness matrix due to the multidomain connectivities</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#panels.multidomain.MultiDomain.get_size" title="panels.multidomain.MultiDomain.get_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_size</span></code></a>()</p></td>
-<td><p>Size of K of a single panel</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#panels.multidomain.MultiDomain.plot" title="panels.multidomain.MultiDomain.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a>([c, group, invert_y, vec, filename, ...])</p></td>
-<td><p>Contour plot for a Ritz constants vector.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#panels.multidomain.MultiDomain.strain" title="panels.multidomain.MultiDomain.strain"><code class="xref py py-obj docutils literal notranslate"><span class="pre">strain</span></code></a>(c, group[, gridx, gridy, NLterms, ...])</p></td>
-<td><p>Calculate the strain field</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#panels.multidomain.MultiDomain.stress" title="panels.multidomain.MultiDomain.stress"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stress</span></code></a>(c, group[, gridx, gridy, NLterms, ...])</p></td>
-<td><p>Calculate the stress field</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#panels.multidomain.MultiDomain.update_TSL_history" title="panels.multidomain.MultiDomain.update_TSL_history"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_TSL_history</span></code></a>(curr_max_dmg_index)</p></td>
-<td><p>Used to update the maximum del_d (over all loading histories) - this prevents exisiting damage from vanishing when the updated separation predicts there is less separation than what was present earlier (as badly modelled self-healing materials aren't part of this thesis :) )</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#panels.multidomain.MultiDomain.uvw" title="panels.multidomain.MultiDomain.uvw"><code class="xref py py-obj docutils literal notranslate"><span class="pre">uvw</span></code></a>(c, group[, gridx, gridy, nr_x_gauss, ...])</p></td>
-<td><p>Calculate the displacement field</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="pst-scrollable-table-container"><table class="table">
-<tbody>
-<tr class="row-odd"><td><p><strong>calc_fext</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>calc_fint</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p><strong>calc_kM</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>calc_kT</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p><strong>force_out_plane</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>force_out_plane_damage</strong></p></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p class="rubric">Notes</p>
-<p>Concerning the conn dictionary, the key ‘func’ stands for the connection function that
-builds the compatibility relations between the panels.</p>
-<dl class="simple">
-<dt>The connections functions available are:</dt><dd><ul class="simple">
-<li><p>‘SSycte’ : defines a skin-skin connection for const x and calls the following functions <code class="docutils literal notranslate"><span class="pre">fkCSSycte11</span></code>, <code class="docutils literal notranslate"><span class="pre">fkCSSycte12</span></code>, <code class="docutils literal notranslate"><span class="pre">fkCSSycte22</span></code></p></li>
-<li><p>‘SSxcte’ : defines a skin-skin connection for const y and calls the following functions <code class="docutils literal notranslate"><span class="pre">fkCSSxcte11</span></code>, <code class="docutils literal notranslate"><span class="pre">fkCSSxcte12</span></code>, <code class="docutils literal notranslate"><span class="pre">fkCSSxcte22</span></code></p></li>
-<li><p>‘SB’ : defines a skin-base connection and calls the following functions <code class="docutils literal notranslate"><span class="pre">fkCBFycte11</span></code>, <code class="docutils literal notranslate"><span class="pre">fkCBFycte12</span></code>, <code class="docutils literal notranslate"><span class="pre">fkCBFycte22</span></code></p></li>
-<li><p>‘BFycte’: defines a base-flange connection and calls the following functions <code class="docutils literal notranslate"><span class="pre">fkCBFycte11</span></code>, <code class="docutils literal notranslate"><span class="pre">fkCBFycte12</span></code>, <code class="docutils literal notranslate"><span class="pre">fkCBFycte22</span></code></p></li>
-</ul>
-</dd>
-</dl>
-<p>Explanations about the connetion functions are found in <code class="docutils literal notranslate"><span class="pre">connections</span></code> module.</p>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">panel_1</span> <span class="o">=</span> <span class="n">Shell</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">panel_2</span> <span class="o">=</span> <span class="n">Shell</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">panel_3</span> <span class="o">=</span> <span class="n">Shell</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">panels</span> <span class="o">=</span> <span class="p">[</span><span class="n">panel_1</span><span class="p">,</span> <span class="n">panel_2</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span> <span class="o">=</span> <span class="p">[</span>
-<span class="go">        dict(p1=panel_1, p2=panel_2, func=&#39;SSxcte&#39;, xcte1=0, xcte2=panel_2.a),</span>
-<span class="go">        dict(p1=panel_2, p2=panel_3, func=&#39;SSycte&#39;, ycte1=0, ycte2=panel_3.b)</span>
-<span class="go">        ] # A list of dictionary that indicates two connections: (panel_1-panel_2) and (panel_2-panel_3)</span>
-</pre></div>
-</div>
-<p>xcte1 = location (x const) in panel 1 which connects to panel 2
-xcte2 = ……………………… 2 ………………….. 2</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">md</span> <span class="o">=</span> <span class="n">MultiDomain</span><span class="p">(</span><span class="n">panels</span><span class="p">,</span> <span class="n">conn</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>Point or distributed forces or displacements can be easily added by using
-one of the methods:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p><a class="reference internal" href="panels.html#panels.shell.Shell.add_point_load" title="panels.shell.Shell.add_point_load"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_point_load()</span></code></a></p></li>
-<li><p><a class="reference internal" href="panels.html#panels.shell.Shell.add_distr_load_fixed_x" title="panels.shell.Shell.add_distr_load_fixed_x"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_distr_load_fixed_x()</span></code></a></p></li>
-<li><p><a class="reference internal" href="panels.html#panels.shell.Shell.add_distr_load_fixed_y" title="panels.shell.Shell.add_distr_load_fixed_y"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_distr_load_fixed_y()</span></code></a></p></li>
-<li><p><a class="reference internal" href="panels.html#panels.shell.Shell.add_point_pd" title="panels.shell.Shell.add_point_pd"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_point_pd()</span></code></a></p></li>
-<li><p><a class="reference internal" href="panels.html#panels.shell.Shell.add_distr_pd_fixed_x" title="panels.shell.Shell.add_distr_pd_fixed_x"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_distr_pd_fixed_x()</span></code></a></p></li>
-<li><p><a class="reference internal" href="panels.html#panels.shell.Shell.add_distr_pd_fixed_y" title="panels.shell.Shell.add_distr_pd_fixed_y"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_distr_pd_fixed_y()</span></code></a></p></li>
-</ul>
-</div></blockquote>
-<p>With this, calculating the stiffness matrix, external force vector and
-solving the systems becomes straightforward:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">kC</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">calc_kC</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fext</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">calc_fext</span><span class="p">()</span>
-</pre></div>
-</div>
-<p>Solving with the Python module <code class="docutils literal notranslate"><span class="pre">structsolve</span></code>:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">structsolve</span><span class="w"> </span><span class="kn">import</span> <span class="n">static</span>
-<span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">incs</span><span class="p">,</span> <span class="n">cs</span> <span class="o">=</span> <span class="n">static</span><span class="p">(</span><span class="n">k0</span><span class="p">,</span> <span class="n">fext</span><span class="p">,</span> <span class="n">silent</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>And plotting the results for the group named <code class="docutils literal notranslate"><span class="pre">'skin'</span></code>.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">md</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;skin&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;tmp_cylinder_compression_lb_Nxx_cte.png&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>The group name attribute belongs to each domain, and is passed while
-instantiating the :class:<code class="docutils literal notranslate"><span class="pre">.Shell</span></code> object. Furthermore, it is important to
-pass the correct relative position of each domain within the group for
-generating consistent plots. For examples on how to create complex
-multidomains, see <a class="reference internal" href="multidomain_cylinder.html#panels.multidomain.cylinder.create_cylinder" title="panels.multidomain.cylinder.create_cylinder"><code class="xref py py-func docutils literal notranslate"><span class="pre">create_cylinder()</span></code></a> and
-<a class="reference internal" href="multidomain_cylinder.html#panels.multidomain.cylinder_blade_stiffened.create_cylinder_blade_stiffened" title="panels.multidomain.cylinder_blade_stiffened.create_cylinder_blade_stiffened"><code class="xref py py-func docutils literal notranslate"><span class="pre">create_cylinder_blade_stiffened()</span></code></a>.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="panels.multidomain.MultiDomain.calc_damaged_stiffness">
-<span class="sig-name descname"><span class="pre">calc_damaged_stiffness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dmg_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_i</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.multidomain.MultiDomain.calc_damaged_stiffness" title="Link to this definition">#</a></dt>
-<dd><p>Calculate the reduced stiffness given the damage index</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>dmg_index</strong><span class="classifier">TYPE</span></dt><dd><p>DESCRIPTION.</p>
-</dd>
-<dt><strong>k_i</strong><span class="classifier">TYPE, optional</span></dt><dd><p>DESCRIPTION. The default is None.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>None.</dt><dd></dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="panels.multidomain.MultiDomain.calc_kC">
-<span class="sig-name descname"><span class="pre">calc_kC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">finalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.multidomain.MultiDomain.calc_kC" title="Link to this definition">#</a></dt>
-<dd><p>Calculate the constitutive stiffness matrix of the assembly
-— this is kP (made by diagonally assemblying kP_i from the MD paper)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>conn</strong><span class="classifier">dict, optional</span></dt><dd><p>A connectivity dictionary. Optional if already defined for the
-assembly.</p>
-</dd>
-<dt><strong>c</strong><span class="classifier">array-like or None, optional</span></dt><dd><p>This must be the result of a static analysis, used to compute
-non-linear terms based on the actual displacement field.</p>
-</dd>
-<dt><strong>silent</strong><span class="classifier">bool, optional</span></dt><dd><p>A boolean to tell whether the log messages should be printed.</p>
-</dd>
-<dt><strong>finalize</strong><span class="classifier">bool, optional</span></dt><dd><p>Asserts validity of output data and makes the output matrix
-symmetric, should be <code class="docutils literal notranslate"><span class="pre">False</span></code> when assemblying.</p>
-</dd>
-<dt><strong>inc</strong><span class="classifier">float, optional</span></dt><dd><p>Dummy argument needed for non-linear analyses.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="panels.multidomain.MultiDomain.calc_kG">
-<span class="sig-name descname"><span class="pre">calc_kG</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">finalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.multidomain.MultiDomain.calc_kG" title="Link to this definition">#</a></dt>
-<dd><p>Calculate the geometric stiffness matrix of the assembly</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>c</strong><span class="classifier">array-like or None, optional</span></dt><dd><p>This must be the result of a static analysis, used to compute
-non-linear terms based on the actual displacement field.</p>
-</dd>
-<dt><strong>silent</strong><span class="classifier">bool, optional</span></dt><dd><p>A boolean to tell whether the log messages should be printed.</p>
-</dd>
-<dt><strong>finalize</strong><span class="classifier">bool, optional</span></dt><dd><p>Asserts validity of output data and makes the output matrix
-symmetric, should be <code class="docutils literal notranslate"><span class="pre">False</span></code> when assemblying.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="panels.multidomain.MultiDomain.calc_k_dmg">
-<span class="sig-name descname"><span class="pre">calc_k_dmg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pB</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nr_x_gauss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nr_y_gauss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tsl_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prev_max_dmg_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_i</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau_o</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">G1c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.multidomain.MultiDomain.calc_k_dmg" title="Link to this definition">#</a></dt>
-<dd><p>Calculate the damaged k_tsl and the damage index</p>
-<dl class="simple">
-<dt>Input:</dt><dd><p>prev_max_dmg_index = Max damage index per integration point for the previous converged NR iteration</p>
-</dd>
-<dt>NOTE: Currently this only works for 1 contact region bec of the way del_d is being stored in the</dt><dd><p>MD object. To ensure that it works for multiple connected domamins, it needs to be stored with the
-shell object instead and modify the rest accordingly</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="panels.multidomain.MultiDomain.calc_results">
-<span class="sig-name descname"><span class="pre">calc_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'w'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gridx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gridy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nr_x_gauss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nr_y_gauss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eval_panel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_cte_force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_cte_force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.multidomain.MultiDomain.calc_results" title="Link to this definition">#</a></dt>
-<dd><p>Contour plot for a Ritz constants vector.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>c</strong><span class="classifier">np.ndarray</span></dt><dd><p>The Ritz constants that will be used to compute the field contour.</p>
-</dd>
-<dt><strong>group</strong><span class="classifier">str</span></dt><dd><p>A group to plot. Each panel in <code class="docutils literal notranslate"><span class="pre">panels</span></code> should contain an
-attribute <code class="docutils literal notranslate"><span class="pre">group</span></code>, which is used to identify which entities
-should be plotted together.</p>
-</dd>
-<dt><strong>vec</strong><span class="classifier">str, optional</span></dt><dd><p>Variable that needs to be calculated
-Can be one of the components:</p>
-<ul class="simple">
-<li><p>Displacement: <code class="docutils literal notranslate"><span class="pre">'u'</span></code>, <code class="docutils literal notranslate"><span class="pre">'v'</span></code>, <code class="docutils literal notranslate"><span class="pre">'w'</span></code>, <code class="docutils literal notranslate"><span class="pre">'phix'</span></code>, <code class="docutils literal notranslate"><span class="pre">'phiy'</span></code></p></li>
-<li><p>Strain: <code class="docutils literal notranslate"><span class="pre">'exx'</span></code>, <code class="docutils literal notranslate"><span class="pre">'eyy'</span></code>, <code class="docutils literal notranslate"><span class="pre">'gxy'</span></code>, <code class="docutils literal notranslate"><span class="pre">'kxx'</span></code>, <code class="docutils literal notranslate"><span class="pre">'kyy'</span></code>,
-<code class="docutils literal notranslate"><span class="pre">'kxy'</span></code>, <code class="docutils literal notranslate"><span class="pre">'gyz'</span></code>, <code class="docutils literal notranslate"><span class="pre">'gxz'</span></code></p></li>
-<li><p>Stress: <code class="docutils literal notranslate"><span class="pre">'Nxx'</span></code>, <code class="docutils literal notranslate"><span class="pre">'Nyy'</span></code>, <code class="docutils literal notranslate"><span class="pre">'Nxy'</span></code>, <code class="docutils literal notranslate"><span class="pre">'Mxx'</span></code>, <code class="docutils literal notranslate"><span class="pre">'Myy'</span></code>,
-<code class="docutils literal notranslate"><span class="pre">'Mxy'</span></code>, <code class="docutils literal notranslate"><span class="pre">'Qy'</span></code>, <code class="docutils literal notranslate"><span class="pre">'Qx'</span></code></p></li>
-</ul>
-</dd>
-<dt><strong>gridx</strong><span class="classifier">int, optional</span></dt><dd><p>Number of points along the <span class="math notranslate nohighlight">\(x\)</span> axis where to calculate the
-displacement field.</p>
-</dd>
-<dt><strong>gridy</strong><span class="classifier">int, optional</span></dt><dd><p>Number of points along the <span class="math notranslate nohighlight">\(y\)</span> where to calculate the
-displacement field.</p>
-</dd>
-<dt><strong>use_gauss_points</strong><span class="classifier">bool, optional</span></dt><dd><p>Uses the gauss integration points (x_gauss and y_gauss) to evaluate the fields</p>
-</dd>
-<dt><strong>nr_x_gauss, nr_y_gauss</strong><span class="classifier">Array</span></dt><dd><p>Number of gauss sampling points along x and y respectively where the displacement field is to be calculated
-Either one of nr_x_gauss and nr_y_gauss needs to be specified or both
-When specified, stress_gauss_points and strain_gauss points are called instead</p>
-</dd>
-<dt><strong>eval_panel</strong><span class="classifier">Shell object</span></dt><dd><p>Used to evaluate results for a single panel (that is passed) instead of an entire group of panels</p>
-</dd>
-<dt><strong>x_cte_force or y_cte_force</strong><span class="classifier">float</span></dt><dd><p>Constant <span class="math notranslate nohighlight">\(x\)</span> or <span class="math notranslate nohighlight">\(y\)</span> coordinate of a line at which the force is to be
-calculated. Coordinates are relative to specific panel, i.e. <span class="math notranslate nohighlight">\(0 \le
-x \le a\)</span>, <span class="math notranslate nohighlight">\(0 \le y \le b\)</span>.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="panels.multidomain.MultiDomain.calc_separation">
-<span class="sig-name descname"><span class="pre">calc_separation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">res_pan_top</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_pan_bot</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.multidomain.MultiDomain.calc_separation" title="Link to this definition">#</a></dt>
-<dd><p>Calculates the separation between two panels</p>
-<dl>
-<dt>INPUT ARGUMENTS:</dt><dd><p>res_pan_A,B</p>
-<p>!!!!!! PANEL TOP NEEDS TO BE THE ONE ON THE TOP !!!!!!!</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="panels.multidomain.MultiDomain.calc_traction_stiffness">
-<span class="sig-name descname"><span class="pre">calc_traction_stiffness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kw_tsl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">corrected_max_del_d</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.multidomain.MultiDomain.calc_traction_stiffness" title="Link to this definition">#</a></dt>
-<dd><p>Calculates traction for the approach where SB_TSL connection is used</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="panels.multidomain.MultiDomain.force">
-<span class="sig-name descname"><span class="pre">force</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eval_panel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_cte_force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_cte_force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gridx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gridy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NLterms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nr_x_gauss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nr_y_gauss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.multidomain.MultiDomain.force" title="Link to this definition">#</a></dt>
-<dd><p>Calculate the force along a line (xcte or ycte)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>c</strong><span class="classifier">float</span></dt><dd><p>The full set of Ritz constants</p>
-</dd>
-<dt><strong>group</strong><span class="classifier">str</span></dt><dd><dl class="simple">
-<dt>Dummy variable in this function - just used to avoid changing the stress</dt><dd><p>function when results for a single panel need to be evaluated</p>
-</dd>
-<dt>A group to plot. Each panel in <code class="docutils literal notranslate"><span class="pre">panels</span></code> should contain an</dt><dd><p>attribute <code class="docutils literal notranslate"><span class="pre">group</span></code>, which is used to identify which entities
-should be plotted together.</p>
-</dd>
-</dl>
-</dd>
-<dt><strong>eval_panel</strong><span class="classifier">Shell object</span></dt><dd><p>Used to evaluate results for a single panel (that is passed) instead of an entire group of panels</p>
-</dd>
-<dt><strong>x_cte_force or y_cte_force</strong><span class="classifier">float</span></dt><dd><p>Constant <span class="math notranslate nohighlight">\(x\)</span> or <span class="math notranslate nohighlight">\(y\)</span> coordinate of a line at which the force is to be
-calculated. Coordinates are relative to specific panel, i.e. <span class="math notranslate nohighlight">\(0 \le
-x \le a\)</span>, <span class="math notranslate nohighlight">\(0 \le y \le b\)</span>.</p>
-</dd>
-<dt><strong>gridx</strong><span class="classifier">int, optional</span></dt><dd><p>Number of points along the <span class="math notranslate nohighlight">\(x\)</span> axis where to calculate the
-displacement field.</p>
-</dd>
-<dt><strong>gridy</strong><span class="classifier">int, optional</span></dt><dd><p>Number of points along the <span class="math notranslate nohighlight">\(y\)</span> where to calculate the
-displacement field.</p>
-</dd>
-<dt><strong>NLterms</strong><span class="classifier">bool</span></dt><dd><p>Flag to indicate whether non-linear strain components should be considered.</p>
-</dd>
-<dt><strong>nr_x_gauss, nr_y_gauss</strong><span class="classifier">int</span></dt><dd><p>Number of gauss sampling points along <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span>, respectively. The
-displacement field is to be calculated along either one of
-<code class="docutils literal notranslate"><span class="pre">nr_x_gauss</span></code> or <code class="docutils literal notranslate"><span class="pre">nr_y_gauss</span></code>.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt><strong>out</strong><span class="classifier">dict</span></dt><dd><p>A dict containing many <code class="docutils literal notranslate"><span class="pre">np.ndarrays</span></code>, with the keys:
-<code class="docutils literal notranslate"><span class="pre">(Fxx,</span> <span class="pre">Fyy,</span> <span class="pre">Fxy)</span></code>.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="panels.multidomain.MultiDomain.get_kC_conn">
-<span class="sig-name descname"><span class="pre">get_kC_conn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">finalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kw_tsl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.multidomain.MultiDomain.get_kC_conn" title="Link to this definition">#</a></dt>
-<dd><p>Stiffness matrix due to the multidomain connectivities</p>
-<p>These are based on penalty stiffnesses, as detailed in Castro and
-Donadon (2017) <a class="reference internal" href="ref.html#castro2017multidomain" id="id2"><span>[castro2017Multidomain]</span></a> .</p>
-<dl>
-<dt>conn = List of dicts</dt><dd><p>Each elem of the list = dict for a single connection pair
-Each dict contains info of that specific with connection pair</p>
-<blockquote>
-<div><p>Example: conn = [dict(p1=top1, p2=top2, func=’SSxcte’, xcte1=top1.a, xcte2=0)]</p>
-</div></blockquote>
-<dl>
-<dt>For func, possible options are:</dt><dd><p>‘SSxcte’ and ‘SSycte’ = between 2 skins along an edge
-‘BFxcte’ and ‘BFycte’ = between stiffener base and flange
-‘SB’                  = btwn 2 skins connected over an area
-‘SB_TSL’              = btwn 2 skins connected over an area with a TSL introduced</p>
-<blockquote>
-<div><blockquote>
-<div><p>at the interface</p>
-</div></blockquote>
-<dl class="simple">
-<dt>Required param:</dt><dd><p>tsl_type, nr_x_gauss, nr_x_gauss</p>
-</dd>
-</dl>
-</div></blockquote>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="panels.multidomain.MultiDomain.get_size">
-<span class="sig-name descname"><span class="pre">get_size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#panels.multidomain.MultiDomain.get_size" title="Link to this definition">#</a></dt>
-<dd><p>Size of K of a single panel</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="panels.multidomain.MultiDomain.plot">
-<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">invert_y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'w'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(3.5,</span> <span class="pre">2.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">identify</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_boundaries</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary_line</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'--k'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary_linewidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colorbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_nticks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'jet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aspect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'equal'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clean</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">400</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">texts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gridx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gridy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">400</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vecmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vecmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nr_x_gauss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nr_y_gauss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display_zero</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flip_plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eval_panel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.multidomain.MultiDomain.plot" title="Link to this definition">#</a></dt>
-<dd><p>Contour plot for a Ritz constants vector.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>c</strong><span class="classifier">np.ndarray or None</span></dt><dd><p>The Ritz constants that will be used to compute the field contour.</p>
-</dd>
-<dt><strong>group</strong><span class="classifier">str or None</span></dt><dd><p>A group to plot. Each panel in <code class="docutils literal notranslate"><span class="pre">panels</span></code> should contain an
-attribute <code class="docutils literal notranslate"><span class="pre">group</span></code>, which is used to identify which entities
-should be plotted together.</p>
-</dd>
-<dt><strong>vec</strong><span class="classifier">str, optional</span></dt><dd><p>Can be one of the components:</p>
-<ul class="simple">
-<li><p>Displacement: <code class="docutils literal notranslate"><span class="pre">'u'</span></code>, <code class="docutils literal notranslate"><span class="pre">'v'</span></code>, <code class="docutils literal notranslate"><span class="pre">'w'</span></code>, <code class="docutils literal notranslate"><span class="pre">'phix'</span></code>, <code class="docutils literal notranslate"><span class="pre">'phiy'</span></code></p></li>
-<li><p>Strain: <code class="docutils literal notranslate"><span class="pre">'exx'</span></code>, <code class="docutils literal notranslate"><span class="pre">'eyy'</span></code>, <code class="docutils literal notranslate"><span class="pre">'gxy'</span></code>, <code class="docutils literal notranslate"><span class="pre">'kxx'</span></code>, <code class="docutils literal notranslate"><span class="pre">'kyy'</span></code>,
-<code class="docutils literal notranslate"><span class="pre">'kxy'</span></code>, <code class="docutils literal notranslate"><span class="pre">'gyz'</span></code>, <code class="docutils literal notranslate"><span class="pre">'gxz'</span></code></p></li>
-<li><p>Stress: <code class="docutils literal notranslate"><span class="pre">'Nxx'</span></code>, <code class="docutils literal notranslate"><span class="pre">'Nyy'</span></code>, <code class="docutils literal notranslate"><span class="pre">'Nxy'</span></code>, <code class="docutils literal notranslate"><span class="pre">'Mxx'</span></code>, <code class="docutils literal notranslate"><span class="pre">'Myy'</span></code>,
-<code class="docutils literal notranslate"><span class="pre">'Mxy'</span></code>, <code class="docutils literal notranslate"><span class="pre">'Qy'</span></code>, <code class="docutils literal notranslate"><span class="pre">'Qx'</span></code></p></li>
-</ul>
-</dd>
-<dt><strong>invert_y</strong><span class="classifier">bool, optional</span></dt><dd><p>Inverts the <span class="math notranslate nohighlight">\(y\)</span> axis of the plot.</p>
-</dd>
-<dt><strong>save</strong><span class="classifier">bool, optional</span></dt><dd><p>Flag telling whether the contour should be saved to an image file.</p>
-</dd>
-<dt><strong>dpi</strong><span class="classifier">int, optional</span></dt><dd><p>Resolution of the saved file in dots per inch.</p>
-</dd>
-<dt><strong>filename</strong><span class="classifier">str, optional</span></dt><dd><p>The file name for the generated image file. If no value is given,
-the <span class="math notranslate nohighlight">\(name\)</span> parameter of the <code class="docutils literal notranslate"><span class="pre">Shell</span></code> object will be used.</p>
-</dd>
-<dt><strong>ax</strong><span class="classifier">AxesSubplot, optional</span></dt><dd><p>When <code class="docutils literal notranslate"><span class="pre">ax</span></code> is given, the contour plot will be created inside it.</p>
-</dd>
-<dt><strong>figsize</strong><span class="classifier">tuple, optional</span></dt><dd><p>The figure size given by <code class="docutils literal notranslate"><span class="pre">(width,</span> <span class="pre">height)</span></code>.</p>
-</dd>
-<dt><strong>title</strong><span class="classifier">str, optional</span></dt><dd><p>If any string is given a title is added to the contour plot.</p>
-</dd>
-<dt><strong>indentify</strong><span class="classifier">bool, optional</span></dt><dd><p>If domains should be identified. If yes, the name of each panel is
-used.</p>
-</dd>
-<dt><strong>show_boundaries</strong><span class="classifier">bool, optional</span></dt><dd><p>If boundaries between domains should be drawn.</p>
-</dd>
-<dt><strong>boundary_line</strong><span class="classifier">str, optional</span></dt><dd><p>Matplotlib string to define line type and color.</p>
-</dd>
-<dt><strong>boundary_linewidth</strong><span class="classifier">float, optional</span></dt><dd><p>Matplotlib float to define line width.</p>
-</dd>
-<dt><strong>colorbar</strong><span class="classifier">bool, optional</span></dt><dd><p>If a colorbar should be added to the contour plot.</p>
-</dd>
-<dt><strong>cbar_nticks</strong><span class="classifier">int, optional</span></dt><dd><p>Number of ticks added to the colorbar.</p>
-</dd>
-<dt><strong>cbar_format</strong><span class="classifier">[ None | format string | Formatter object ], optional</span></dt><dd><p>See the <code class="docutils literal notranslate"><span class="pre">matplotlib.pyplot.colorbar</span></code> documentation.</p>
-</dd>
-<dt><strong>cbar_title</strong><span class="classifier">str, optional</span></dt><dd><p>Colorbar title. If <code class="docutils literal notranslate"><span class="pre">cbar_title</span> <span class="pre">==</span> <span class="pre">''</span></code> no title is added.</p>
-</dd>
-<dt><strong>cbar_fontsize</strong><span class="classifier">int, optional</span></dt><dd><p>Fontsize of the colorbar labels.</p>
-</dd>
-<dt><strong>colormap</strong><span class="classifier">string, optional</span></dt><dd><p>Name of a matplotlib available colormap.</p>
-</dd>
-<dt><strong>aspect</strong><span class="classifier">str, optional</span></dt><dd><p>String that will be passed to the <code class="docutils literal notranslate"><span class="pre">AxesSubplot.set_aspect()</span></code>
-method.</p>
-</dd>
-<dt><strong>clean</strong><span class="classifier">bool, optional</span></dt><dd><p>Clean axes ticks, grids, spines etc.</p>
-</dd>
-<dt><strong>xs</strong><span class="classifier">np.ndarray, optional</span></dt><dd><p>The <span class="math notranslate nohighlight">\(x\)</span> positions where to calculate the displacement field.
-Default is <code class="docutils literal notranslate"><span class="pre">None</span></code> and the method <code class="docutils literal notranslate"><span class="pre">_default_field</span></code> is used.</p>
-</dd>
-<dt><strong>ys</strong><span class="classifier">np.ndarray, optional</span></dt><dd><p>The <code class="docutils literal notranslate"><span class="pre">y</span></code> positions where to calculate the displacement field.
-Default is <code class="docutils literal notranslate"><span class="pre">None</span></code> and the method <code class="docutils literal notranslate"><span class="pre">_default_field</span></code> is used.</p>
-</dd>
-<dt><strong>gridx</strong><span class="classifier">int, optional</span></dt><dd><p>Number of points along the <span class="math notranslate nohighlight">\(x\)</span> axis where to calculate the
-displacement field.</p>
-</dd>
-<dt><strong>gridy</strong><span class="classifier">int, optional</span></dt><dd><p>Number of points along the <span class="math notranslate nohighlight">\(y\)</span> where to calculate the
-displacement field.</p>
-</dd>
-<dt><strong>num_levels</strong><span class="classifier">int, optional</span></dt><dd><p>Number of contour levels (higher values make the contour smoother).</p>
-</dd>
-<dt><strong>vecmin</strong><span class="classifier">float, optional</span></dt><dd><p>Minimum value for the contour scale (useful to compare with other
-results). If not specified it will be taken from the calculated
-field.</p>
-</dd>
-<dt><strong>vecmax</strong><span class="classifier">float, optional</span></dt><dd><p>Maximum value for the contour scale.</p>
-</dd>
-<dt><strong>calc_data_only</strong><span class="classifier">bool, optional</span></dt><dd><p>If only calculated data should be returned.</p>
-</dd>
-<dt><strong>nr_x_gauss, nr_y_gauss</strong><span class="classifier">int</span></dt><dd><p>Number of gauss sampling points along x and y respectively where the displacement field is to be calculated
-Either one of nr_x_gauss and nr_y_gauss needs to be specified or both
-When specified, uvw_gauss_points, stress_gauss_points and strain_gauss points are called instead</p>
-</dd>
-<dt><strong>calc_res_field_only</strong><span class="classifier">bool, optional</span></dt><dd><p>Only calcuates the result fields and returns it back</p>
-</dd>
-<dt><strong>res</strong><span class="classifier">whatever data the stress, strain and uvw functions output, optional</span></dt><dd><p>Contains the results of a previous run. If results already exist, then they’re not computed again</p>
-</dd>
-<dt><strong>silent</strong><span class="classifier">bool, optional</span></dt><dd><p>True = doesnt print any messages</p>
-</dd>
-<dt><strong>display_zero</strong><span class="classifier">bool, optional</span></dt><dd><p>Decides whether 0 should be displayed as a tick in the colour bar or not</p>
-</dd>
-<dt><strong>flip_plot</strong><span class="classifier">bool, optional</span></dt><dd><p>Flips plot so that x axis is now horizontal</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt><strong>ax</strong><span class="classifier">matplotlib.axes.Axes</span></dt><dd><p>The Matplotlib object that can be used to modify the current plot
-if needed.</p>
-</dd>
-<dt><strong>data</strong><span class="classifier">dict</span></dt><dd><p>Data calculated during the plotting procedure.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="panels.multidomain.MultiDomain.strain">
-<span class="sig-name descname"><span class="pre">strain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gridx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gridy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NLterms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nr_x_gauss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nr_y_gauss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eval_panel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.multidomain.MultiDomain.strain" title="Link to this definition">#</a></dt>
-<dd><p>Calculate the strain field</p>
-<p>The strain field consists of in-plane strains (<span class="math notranslate nohighlight">\(\varepsilon_{xx}\)</span>,
-<span class="math notranslate nohighlight">\(\varepsilon_{yy}\)</span>, <span class="math notranslate nohighlight">\(\gamma_{xy}\)</span>) and curvatures (<span class="math notranslate nohighlight">\(\kappa_{xx}\)</span>,
-<span class="math notranslate nohighlight">\(\kappa_{yy}\)</span>, <span class="math notranslate nohighlight">\(\kappa_{xy}\)</span>) at each point over the grid of interest.
-The size of the grid is defined using <code class="docutils literal notranslate"><span class="pre">gridx</span></code> and <code class="docutils literal notranslate"><span class="pre">gridy</span></code>. In the
-multidomain assembly, each domain will have a corresponding grid
-defined by this amount of points.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>c</strong><span class="classifier">float</span></dt><dd><p>The full set of Ritz constants</p>
-</dd>
-<dt><strong>group</strong><span class="classifier">str</span></dt><dd><p>A group to plot. Each panel in <code class="docutils literal notranslate"><span class="pre">panels</span></code> should contain an
-attribute <code class="docutils literal notranslate"><span class="pre">group</span></code>, which is used to identify which entities
-that should be plotted together.</p>
-</dd>
-<dt><strong>gridx</strong><span class="classifier">int, optional</span></dt><dd><p>Number of points along the <span class="math notranslate nohighlight">\(x\)</span> axis, where the strain field is
-calculated.</p>
-</dd>
-<dt><strong>gridy</strong><span class="classifier">int, optional</span></dt><dd><p>Number of points along the <span class="math notranslate nohighlight">\(y\)</span> axis, where the strain field is
-calculated.</p>
-</dd>
-<dt><strong>NLterms</strong><span class="classifier">bool</span></dt><dd><p>Flag to indicate whether non-linear strain components should be considered.</p>
-</dd>
-<dt><strong>nr_x_gauss, nr_y_gauss</strong><span class="classifier">int</span></dt><dd><p>Number of gauss sampling points along x and y respectively where
-the field is to be calculated. Either one of <code class="docutils literal notranslate"><span class="pre">nr_x_gauss</span></code> or
-<code class="docutils literal notranslate"><span class="pre">nr_y_gauss</span></code> needs to be specified, or both. They can be
-different.</p>
-</dd>
-<dt><strong>eval_panel</strong><span class="classifier">Shell object</span></dt><dd><p>Used to evaluate results for a single panel (that is passed)
-instead of an entire group of panels.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt><strong>out</strong><span class="classifier">dict</span></dt><dd><p>A dictionary of <code class="docutils literal notranslate"><span class="pre">np.ndarrays</span></code> with the keys:
-<code class="docutils literal notranslate"><span class="pre">(x,</span> <span class="pre">y,</span> <span class="pre">exx,</span> <span class="pre">eyy,</span> <span class="pre">gxy,</span> <span class="pre">kxx,</span> <span class="pre">kyy,</span> <span class="pre">kxy)</span></code>.
-Each has the shape: (no_panels_in_group) x gridx x gridy</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="panels.multidomain.MultiDomain.stress">
-<span class="sig-name descname"><span class="pre">stress</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gridx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gridy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NLterms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nr_x_gauss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nr_y_gauss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eval_panel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_cte_force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_cte_force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.multidomain.MultiDomain.stress" title="Link to this definition">#</a></dt>
-<dd><p>Calculate the stress field</p>
-<p>The stress field consists of in-plane distributed forces (Nxx, Nyy,
-Nxy) and distributed moments (Mxx, Myy, Mxy) at each point over the
-grid of interest. The size of the grid is defined using <code class="docutils literal notranslate"><span class="pre">gridx</span></code> and
-<code class="docutils literal notranslate"><span class="pre">gridy</span></code>. In the multidomain assembly, each domain will have a
-corresponding grid defined by this amount of points.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>c</strong><span class="classifier">float</span></dt><dd><p>The full set of Ritz constants</p>
-</dd>
-<dt><strong>group</strong><span class="classifier">str</span></dt><dd><p>A group to plot. Each panel in <code class="docutils literal notranslate"><span class="pre">panels</span></code> should contain an
-attribute <code class="docutils literal notranslate"><span class="pre">group</span></code>, which is used to identify which entities
-should be plotted together.</p>
-</dd>
-<dt><strong>gridx</strong><span class="classifier">int, optional</span></dt><dd><p>Number of points along the <span class="math notranslate nohighlight">\(x\)</span> axis where to calculate the
-displacement field.</p>
-</dd>
-<dt><strong>gridy</strong><span class="classifier">int, optional</span></dt><dd><p>Number of points along the <span class="math notranslate nohighlight">\(y\)</span> where to calculate the
-displacement field.</p>
-</dd>
-<dt><strong>NLterms</strong><span class="classifier">bool</span></dt><dd><p>Flag to indicate whether non-linear strain components should be considered.</p>
-</dd>
-<dt><strong>nr_x_gauss, nr_y_gauss</strong><span class="classifier">int</span></dt><dd><p>Number of gauss sampling points along x and y respectively where the displacement field is to be calculated
-Either one of nr_x_gauss and nr_y_gauss needs to be specified or both
-Both can be different</p>
-</dd>
-<dt><strong>eval_panel</strong><span class="classifier">Shell object</span></dt><dd><p>Used to evaluate results for a single panel (that is passed) instead of an entire group of panels</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt><strong>out</strong><span class="classifier">dict</span></dt><dd><p>A dict containing many <code class="docutils literal notranslate"><span class="pre">np.ndarrays</span></code>, with the keys:
-<code class="docutils literal notranslate"><span class="pre">(x,</span> <span class="pre">y,</span> <span class="pre">Nxx,</span> <span class="pre">Nyy,</span> <span class="pre">Nxy,</span> <span class="pre">Mxx,</span> <span class="pre">Myy,</span> <span class="pre">Mxy)</span></code>.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="panels.multidomain.MultiDomain.update_TSL_history">
-<span class="sig-name descname"><span class="pre">update_TSL_history</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curr_max_dmg_index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.multidomain.MultiDomain.update_TSL_history" title="Link to this definition">#</a></dt>
-<dd><p>Used to update the maximum del_d (over all loading histories) - this prevents exisiting
-damage from vanishing when the updated separation predicts there is less separation than
-what was present earlier (as badly modelled self-healing materials aren’t part of this thesis :) )</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="panels.multidomain.MultiDomain.uvw">
-<span class="sig-name descname"><span class="pre">uvw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gridx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gridy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nr_x_gauss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nr_y_gauss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eval_panel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.multidomain.MultiDomain.uvw" title="Link to this definition">#</a></dt>
-<dd><p>Calculate the displacement field</p>
-<p>For a given full set of Ritz constants <code class="docutils literal notranslate"><span class="pre">c</span></code>, the displacement
-field is calculated and stored in the parameters
-<code class="docutils literal notranslate"><span class="pre">u</span></code>, <code class="docutils literal notranslate"><span class="pre">v</span></code>, <code class="docutils literal notranslate"><span class="pre">w</span></code>, <code class="docutils literal notranslate"><span class="pre">phix</span></code>, <code class="docutils literal notranslate"><span class="pre">phiy</span></code> of the <code class="docutils literal notranslate"><span class="pre">Shell</span></code> object.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>c</strong><span class="classifier">float</span></dt><dd><p>The full set of Ritz constants</p>
-</dd>
-<dt><strong>group</strong><span class="classifier">str</span></dt><dd><p>A group to plot. Each panel in <code class="docutils literal notranslate"><span class="pre">panels</span></code> should contain an
-attribute <code class="docutils literal notranslate"><span class="pre">group</span></code>, which is used to identify which entities
-should be plotted together.</p>
-</dd>
-<dt><strong>gridx</strong><span class="classifier">int, optional</span></dt><dd><p>Number of points along the <span class="math notranslate nohighlight">\(x\)</span> axis where to calculate the
-displacement field.</p>
-</dd>
-<dt><strong>gridy</strong><span class="classifier">int, optional</span></dt><dd><p>Number of points along the <span class="math notranslate nohighlight">\(y\)</span> where to calculate the
-displacement field.</p>
-</dd>
-<dt><strong>nr_x_gauss, nr_y_gauss</strong><span class="classifier">int</span></dt><dd><p>Number of gauss sampling points along x and y respectively where the displacement field is to be calculated
-Either one of nr_x_gauss and nr_y_gauss needs to be specified or both
-Both can be different</p>
-</dd>
-<dt><strong>eval_panel</strong><span class="classifier">Shell object</span></dt><dd><p>Used to evaluate results for a single panel (that is passed) instead of an entire group of panels</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt><strong>out</strong><span class="classifier">tuple</span></dt><dd><p>A tuple of <code class="docutils literal notranslate"><span class="pre">np.ndarrays</span></code> containing
-<code class="docutils literal notranslate"><span class="pre">(xs,</span> <span class="pre">ys,</span> <span class="pre">u,</span> <span class="pre">v,</span> <span class="pre">w,</span> <span class="pre">phix,</span> <span class="pre">phiy)</span></code>.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>The returned values <code class="docutils literal notranslate"><span class="pre">u`</span></code>, <code class="docutils literal notranslate"><span class="pre">v</span></code>, <code class="docutils literal notranslate"><span class="pre">w</span></code>, <code class="docutils literal notranslate"><span class="pre">phix</span></code>, <code class="docutils literal notranslate"><span class="pre">phiy</span></code> are
-stored as parameters with the same name in the <code class="docutils literal notranslate"><span class="pre">Shell</span></code> object.</p>
-</dd></dl>
-
-</dd></dl>
-
-</section>
-</section>
-<section id="applications-of-multidomain">
-<h1>Applications of multidomain<a class="headerlink" href="#applications-of-multidomain" title="Link to this heading">#</a></h1>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="multidomain_cylinder.html">Cylindrical shells modeled as panel multidomain assemblies</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="multidomain_cylinder.html#panels.multidomain.cylinder.create_cylinder"><code class="docutils literal notranslate"><span class="pre">create_cylinder()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="multidomain_cylinder.html#panels.multidomain.cylinder.cylinder_compression_lb_Nxx_cte"><code class="docutils literal notranslate"><span class="pre">cylinder_compression_lb_Nxx_cte()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="multidomain_cylinder.html#panels.multidomain.cylinder.cylinder_compression_lb_Nxx_from_static"><code class="docutils literal notranslate"><span class="pre">cylinder_compression_lb_Nxx_from_static()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="multidomain_cylinder.html#panels.multidomain.cylinder_blade_stiffened.create_cylinder_blade_stiffened"><code class="docutils literal notranslate"><span class="pre">create_cylinder_blade_stiffened()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="multidomain_cylinder.html#panels.multidomain.cylinder_blade_stiffened.cylinder_blade_stiffened_compression_lb_Nxx_cte"><code class="docutils literal notranslate"><span class="pre">cylinder_blade_stiffened_compression_lb_Nxx_cte()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="multidomain_cylinder.html#panels.multidomain.cylinder_blade_stiffened.cylinder_blade_stiffened_compression_lb_Nxx_from_static"><code class="docutils literal notranslate"><span class="pre">cylinder_blade_stiffened_compression_lb_Nxx_from_static()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="multidomain_cylinder.html#panels.multidomain.cylinder_blade_stiffened.cylinder_blade_stiffened_compression_lb_pd_from_static"><code class="docutils literal notranslate"><span class="pre">cylinder_blade_stiffened_compression_lb_pd_from_static()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="multidomain_tstiff2d.html">Panel multidomain assembly with T-stiffeners modelled as 2D domains</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="multidomain_tstiff2d.html#panels.multidomain.tstiff2d_1stiff_compression.tstiff2d_1stiff_compression"><code class="docutils literal notranslate"><span class="pre">tstiff2d_1stiff_compression()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="multidomain_tstiff2d.html#panels.multidomain.tstiff2d_1stiff_freq.tstiff2d_1stiff_freq"><code class="docutils literal notranslate"><span class="pre">tstiff2d_1stiff_freq()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="multidomain_tstiff2d.html#panels.multidomain.tstiff2d_1stiff_flutter.tstiff2d_1stiff_flutter"><code class="docutils literal notranslate"><span class="pre">tstiff2d_1stiff_flutter()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</div>
+  <section id="multi-domain-assemblies-panels-multidomain">
+<h1>Multi-domain assemblies (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain</span></code>)<a class="headerlink" href="#multi-domain-assemblies-panels-multidomain" title="Link to this heading">#</a></h1>
 </section>
 
 
@@ -1047,20 +500,20 @@ stored as parameters with the same name in the <code class="docutils literal not
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="panels.html"
+       href="models.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Semi-analytical models for plates, shells and panels (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels</span></code>)</p>
+        <p class="prev-next-title">Model database (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.modelDB</span></code>)</p>
       </div>
     </a>
     <a class="right-next"
-       href="multidomain_cylinder.html"
+       href="multidomain_connections.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Cylindrical shells modeled as panel multidomain assemblies</p>
+        <p class="prev-next-title">&lt;no title&gt;</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -1074,43 +527,6 @@ stored as parameters with the same name in the <code class="docutils literal not
                 <dialog id="pst-secondary-sidebar-modal"></dialog>
                 <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
-
-  <div class="sidebar-secondary-item">
-<div
-    id="pst-page-navigation-heading-2"
-    class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> On this page
-  </div>
-  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
-    <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Base class for multidomain</a><ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#multi-domain-semi-analytical-method-panels-multidomain">Multi-Domain semi-analytical method (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain</span></code>)</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.multidomain.MultiDomain"><code class="docutils literal notranslate"><span class="pre">MultiDomain</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.multidomain.MultiDomain.calc_damaged_stiffness"><code class="docutils literal notranslate"><span class="pre">MultiDomain.calc_damaged_stiffness()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.multidomain.MultiDomain.calc_kC"><code class="docutils literal notranslate"><span class="pre">MultiDomain.calc_kC()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.multidomain.MultiDomain.calc_kG"><code class="docutils literal notranslate"><span class="pre">MultiDomain.calc_kG()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.multidomain.MultiDomain.calc_k_dmg"><code class="docutils literal notranslate"><span class="pre">MultiDomain.calc_k_dmg()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.multidomain.MultiDomain.calc_results"><code class="docutils literal notranslate"><span class="pre">MultiDomain.calc_results()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.multidomain.MultiDomain.calc_separation"><code class="docutils literal notranslate"><span class="pre">MultiDomain.calc_separation()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.multidomain.MultiDomain.calc_traction_stiffness"><code class="docutils literal notranslate"><span class="pre">MultiDomain.calc_traction_stiffness()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.multidomain.MultiDomain.force"><code class="docutils literal notranslate"><span class="pre">MultiDomain.force()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.multidomain.MultiDomain.get_kC_conn"><code class="docutils literal notranslate"><span class="pre">MultiDomain.get_kC_conn()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.multidomain.MultiDomain.get_size"><code class="docutils literal notranslate"><span class="pre">MultiDomain.get_size()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.multidomain.MultiDomain.plot"><code class="docutils literal notranslate"><span class="pre">MultiDomain.plot()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.multidomain.MultiDomain.strain"><code class="docutils literal notranslate"><span class="pre">MultiDomain.strain()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.multidomain.MultiDomain.stress"><code class="docutils literal notranslate"><span class="pre">MultiDomain.stress()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.multidomain.MultiDomain.update_TSL_history"><code class="docutils literal notranslate"><span class="pre">MultiDomain.update_TSL_history()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.multidomain.MultiDomain.uvw"><code class="docutils literal notranslate"><span class="pre">MultiDomain.uvw()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#applications-of-multidomain">Applications of multidomain</a></li>
-</ul>
-
-  </nav></div>
 
   <div class="sidebar-secondary-item">
 
@@ -1134,8 +550,8 @@ stored as parameters with the same name in the <code class="docutils literal not
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="_static/scripts/bootstrap.js?digest=7f76b32a3354e82990f2"></script>
-<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=7f76b32a3354e82990f2"></script>
+  <script defer src="_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1169,7 +585,7 @@ stored as parameters with the same name in the <code class="docutils literal not
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.21.0.
 </p></div>
       
     </div>

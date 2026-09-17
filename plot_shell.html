@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Panels with a T-stiffener modeled as 2D domains &#8212; panels 0.6.0 documentation</title>
+    <title>Contour plots (panels.plot_shell) &#8212; panels 0.6.0 documentation</title>
   
   
   
@@ -41,12 +41,13 @@
     <script src="_static/documentation_options.js?v=8fa8b3e9"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'multidomain_tstiff2d';</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'plot_shell';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Blade stiffeners (panels.stiffener)" href="stiffener.html" />
-    <link rel="prev" title="Cylinders modeled as multi-domain assemblies" href="multidomain_cylinder.html" />
+    <link rel="next" title="Model database (panels.modelDB)" href="models.html" />
+    <link rel="prev" title="External force vector (panels.shell_fext)" href="shell_fext.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="0.6.0" />
@@ -418,11 +419,11 @@
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="shell.html">Plates and cylindrical shells (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.shell</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="shell_fext.html">External force vector (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.shell_fext</span></code>)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="plot_shell.html">Contour plots (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.plot_shell</span></code>)</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Contour plots (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.plot_shell</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="models.html">Model database (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.modelDB</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multidomain.html">Multi-domain assemblies (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multidomain_cylinder.html">Cylinders modeled as multi-domain assemblies</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Panels with a T-stiffener modeled as 2D domains</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multidomain_tstiff2d.html">Panels with a T-stiffener modeled as 2D domains</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stiffener.html">Blade stiffeners (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.stiffener</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stiffpanelbay.html">Stiffened panel bays (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.stiffpanelbay</span></code>)</a></li>
 </ul>
@@ -468,7 +469,7 @@
     
     <li class="breadcrumb-item"><a href="api.html" class="nav-link">API reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Panels with a T-stiffener modeled as 2D domains</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Contour plots (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.plot_shell</span></code>)</span></li>
   </ul>
 </nav>
 </div>
@@ -485,17 +486,94 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="panels-with-a-t-stiffener-modeled-as-2d-domains">
-<h1>Panels with a T-stiffener modeled as 2D domains<a class="headerlink" href="#panels-with-a-t-stiffener-modeled-as-2d-domains" title="Link to this heading">#</a></h1>
-<section id="linear-buckling-panels-multidomain-tstiff2d-1stiff-compression">
-<h2>Linear buckling (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.tstiff2d_1stiff_compression</span></code>)<a class="headerlink" href="#linear-buckling-panels-multidomain-tstiff2d-1stiff-compression" title="Link to this heading">#</a></h2>
-</section>
-<section id="frequency-analysis-panels-multidomain-tstiff2d-1stiff-freq">
-<h2>Frequency analysis (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.tstiff2d_1stiff_freq</span></code>)<a class="headerlink" href="#frequency-analysis-panels-multidomain-tstiff2d-1stiff-freq" title="Link to this heading">#</a></h2>
-</section>
-<section id="flutter-analysis-panels-multidomain-tstiff2d-1stiff-flutter">
-<h2>Flutter analysis (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.tstiff2d_1stiff_flutter</span></code>)<a class="headerlink" href="#flutter-analysis-panels-multidomain-tstiff2d-1stiff-flutter" title="Link to this heading">#</a></h2>
-</section>
+  <section id="contour-plots-panels-plot-shell">
+<h1>Contour plots (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.plot_shell</span></code>)<a class="headerlink" href="#contour-plots-panels-plot-shell" title="Link to this heading">#</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="panels.plot_shell.plot_shell">
+<span class="sig-prename descclassname"><span class="pre">panels.plot_shell.</span></span><span class="sig-name descname"><span class="pre">plot_shell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">invert_y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'w'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deform_u</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deform_u_sf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(3.5,</span> <span class="pre">2.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colorbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_nticks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_fontsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'jet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aspect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'equal'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clean</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">400</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">texts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gridx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gridy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">400</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vecmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vecmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_offset_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_offset_y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NLgeom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.plot_shell.plot_shell" title="Link to this definition">#</a></dt>
+<dd><p>Contour plot for a Ritz constants vector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>c</strong><span class="classifier">array_like</span></dt><dd><p>The Ritz constants that will be used to compute the field contour.</p>
+</dd>
+<dt><strong>vec</strong><span class="classifier">str, optional</span></dt><dd><p>Can be one of the components:</p>
+<ul class="simple">
+<li><p>Displacement: <code class="docutils literal notranslate"><span class="pre">'u'</span></code>, <code class="docutils literal notranslate"><span class="pre">'v'</span></code>, <code class="docutils literal notranslate"><span class="pre">'w'</span></code>, <code class="docutils literal notranslate"><span class="pre">'phix'</span></code>, <code class="docutils literal notranslate"><span class="pre">'phiy'</span></code></p></li>
+<li><p>Strain: <code class="docutils literal notranslate"><span class="pre">'exx'</span></code>, <code class="docutils literal notranslate"><span class="pre">'eyy'</span></code>, <code class="docutils literal notranslate"><span class="pre">'gxy'</span></code>, <code class="docutils literal notranslate"><span class="pre">'kxx'</span></code>, <code class="docutils literal notranslate"><span class="pre">'kyy'</span></code>,
+<code class="docutils literal notranslate"><span class="pre">'kxy'</span></code>, <code class="docutils literal notranslate"><span class="pre">'gyz'</span></code>, <code class="docutils literal notranslate"><span class="pre">'gxz'</span></code></p></li>
+<li><p>Stress: <code class="docutils literal notranslate"><span class="pre">'Nxx'</span></code>, <code class="docutils literal notranslate"><span class="pre">'Nyy'</span></code>, <code class="docutils literal notranslate"><span class="pre">'Nxy'</span></code>, <code class="docutils literal notranslate"><span class="pre">'Mxx'</span></code>, <code class="docutils literal notranslate"><span class="pre">'Myy'</span></code>,
+<code class="docutils literal notranslate"><span class="pre">'Mxy'</span></code>, <code class="docutils literal notranslate"><span class="pre">'Qy'</span></code>, <code class="docutils literal notranslate"><span class="pre">'Qx'</span></code></p></li>
+</ul>
+</dd>
+<dt><strong>deform_u</strong><span class="classifier">bool, optional</span></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code> the contour plot will look deformed.</p>
+</dd>
+<dt><strong>deform_u_sf</strong><span class="classifier">float, optional</span></dt><dd><p>The scaling factor used to deform the contour.</p>
+</dd>
+<dt><strong>invert_y</strong><span class="classifier">bool, optional</span></dt><dd><p>Inverts the <span class="math notranslate nohighlight">\(y\)</span> axis of the plot.</p>
+</dd>
+<dt><strong>save</strong><span class="classifier">bool, optional</span></dt><dd><p>Flag telling whether the contour should be saved to an image file.</p>
+</dd>
+<dt><strong>dpi</strong><span class="classifier">int, optional</span></dt><dd><p>Resolution of the saved file in dots per inch.</p>
+</dd>
+<dt><strong>filename</strong><span class="classifier">str, optional</span></dt><dd><p>The file name for the generated image file. If no value is given,
+the <span class="math notranslate nohighlight">\(name\)</span> parameter of the <code class="docutils literal notranslate"><span class="pre">Shell</span></code> object will be used.</p>
+</dd>
+<dt><strong>ax</strong><span class="classifier">AxesSubplot, optional</span></dt><dd><p>When <code class="docutils literal notranslate"><span class="pre">ax</span></code> is given, the contour plot will be created inside it.</p>
+</dd>
+<dt><strong>figsize</strong><span class="classifier">tuple, optional</span></dt><dd><p>The figure size given by <code class="docutils literal notranslate"><span class="pre">(width,</span> <span class="pre">height)</span></code>.</p>
+</dd>
+<dt><strong>title</strong><span class="classifier">str, optional</span></dt><dd><p>If any string is given it is added as title to the contour plot.</p>
+</dd>
+<dt><strong>colorbar</strong><span class="classifier">bool, optional</span></dt><dd><p>If a colorbar should be added to the contour plot.</p>
+</dd>
+<dt><strong>cbar_nticks</strong><span class="classifier">int, optional</span></dt><dd><p>Number of ticks added to the colorbar.</p>
+</dd>
+<dt><strong>cbar_format</strong><span class="classifier">[ None | format string | Formatter object ], optional</span></dt><dd><p>See the <code class="docutils literal notranslate"><span class="pre">matplotlib.pyplot.colorbar</span></code> documentation.</p>
+</dd>
+<dt><strong>cbar_title</strong><span class="classifier">str, optional</span></dt><dd><p>Colorbar title. If <code class="docutils literal notranslate"><span class="pre">cbar_title</span> <span class="pre">==</span> <span class="pre">''</span></code> no title is added.</p>
+</dd>
+<dt><strong>cbar_fontsize</strong><span class="classifier">int, optional</span></dt><dd><p>Fontsize of the colorbar labels.</p>
+</dd>
+<dt><strong>colormap</strong><span class="classifier">string, optional</span></dt><dd><p>Name of a matplotlib available colormap.</p>
+</dd>
+<dt><strong>aspect</strong><span class="classifier">str, optional</span></dt><dd><p>String that will be passed to the <code class="docutils literal notranslate"><span class="pre">AxesSubplot.set_aspect()</span></code>
+method.</p>
+</dd>
+<dt><strong>clean</strong><span class="classifier">bool, optional</span></dt><dd><p>Clean axes ticks, grids, spines etc.</p>
+</dd>
+<dt><strong>xs</strong><span class="classifier">array_like, optional</span></dt><dd><p>The <span class="math notranslate nohighlight">\(x\)</span> positions where to calculate the displacement field.
+Default is <code class="docutils literal notranslate"><span class="pre">None</span></code> and the method <code class="docutils literal notranslate"><span class="pre">_default_field</span></code> is used.</p>
+</dd>
+<dt><strong>ys</strong><span class="classifier">array_like, optional</span></dt><dd><p>The <code class="docutils literal notranslate"><span class="pre">y</span></code> positions where to calculate the displacement field.
+Default is <code class="docutils literal notranslate"><span class="pre">None</span></code> and the method <code class="docutils literal notranslate"><span class="pre">_default_field</span></code> is used.</p>
+</dd>
+<dt><strong>gridx</strong><span class="classifier">int, optional</span></dt><dd><p>Number of points along the <span class="math notranslate nohighlight">\(x\)</span> axis where to calculate the
+displacement field.</p>
+</dd>
+<dt><strong>gridy</strong><span class="classifier">int, optional</span></dt><dd><p>Number of points along the <span class="math notranslate nohighlight">\(y\)</span> where to calculate the
+displacement field.</p>
+</dd>
+<dt><strong>num_levels</strong><span class="classifier">int, optional</span></dt><dd><p>Number of contour levels (higher values make the contour smoother).</p>
+</dd>
+<dt><strong>vecmin</strong><span class="classifier">float, optional</span></dt><dd><p>Minimum value for the contour scale (useful to compare with other
+results). If not specified it will be taken from the calculated
+field.</p>
+</dd>
+<dt><strong>vecmax</strong><span class="classifier">float, optional</span></dt><dd><p>Maximum value for the contour scale.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>ax</strong><span class="classifier">matplotlib.axes.Axes</span></dt><dd><p>The Matplotlib object that can be used to modify the current plot
+if needed.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
 
@@ -509,20 +587,20 @@
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="multidomain_cylinder.html"
+       href="shell_fext.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Cylinders modeled as multi-domain assemblies</p>
+        <p class="prev-next-title">External force vector (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.shell_fext</span></code>)</p>
       </div>
     </a>
     <a class="right-next"
-       href="stiffener.html"
+       href="models.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Blade stiffeners (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.stiffener</span></code>)</p>
+        <p class="prev-next-title">Model database (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.modelDB</span></code>)</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -545,16 +623,14 @@
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#linear-buckling-panels-multidomain-tstiff2d-1stiff-compression">Linear buckling (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.tstiff2d_1stiff_compression</span></code>)</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#frequency-analysis-panels-multidomain-tstiff2d-1stiff-freq">Frequency analysis (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.tstiff2d_1stiff_freq</span></code>)</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flutter-analysis-panels-multidomain-tstiff2d-1stiff-flutter">Flutter analysis (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.tstiff2d_1stiff_flutter</span></code>)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.plot_shell.plot_shell"><code class="docutils literal notranslate"><span class="pre">plot_shell()</span></code></a></li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
 
   <div class="tocsection sourcelink">
-    <a href="_sources/multidomain_tstiff2d.rst.txt">
+    <a href="_sources/plot_shell.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

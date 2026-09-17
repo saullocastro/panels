@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Index &#8212; panels 0.5.4 documentation</title>
+    <title>Index &#8212; panels 0.6.0 documentation</title>
   
   
   
@@ -26,18 +26,18 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=7f76b32a3354e82990f2" rel="stylesheet" />
-<link href="_static/styles/pydata-sphinx-theme.css?digest=7f76b32a3354e82990f2" rel="stylesheet" />
+  <link href="_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="_static/scripts/fontawesome.js?digest=7f76b32a3354e82990f2"></script>
+  <script defer src="_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=7f76b32a3354e82990f2" />
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=7f76b32a3354e82990f2" />
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
-    <script src="_static/documentation_options.js?v=e1a677a5"></script>
+    <script src="_static/documentation_options.js?v=8fa8b3e9"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'genindex';</script>
@@ -46,7 +46,7 @@
     <link rel="search" title="Search" href="search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="" />
+  <meta name="docsearch:version" content="0.6.0" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -64,7 +64,9 @@
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-
+  
+  
+  
   
   <dialog id="pst-search-dialog">
     
@@ -112,7 +114,7 @@
   
   
   
-    <p class="title logo__title">panels 0.5.4 documentation</p>
+    <p class="title logo__title">panels 0.6.0 documentation</p>
   
 </a></div>
     
@@ -127,39 +129,91 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="panels.html">
-    Semi-analytical models for plates, shells and panels (panels)
+  <a class="nav-link nav-internal" href="ex_linear_static.html">
+    Linear static analysis
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="multidomain.html">
-    Base class for multidomain
+  <a class="nav-link nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="multidomain_connections.html">
-    Multidomain connections (panels.multidomain.connections)
+  <a class="nav-link nav-internal" href="ex_frequency.html">
+    Frequency analysis
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="bardell.html">
+  <a class="nav-link nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="bardell.html">
     Bardell’s Hierarchical Functions
   </a>
 </li>
 
 
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="ref.html">
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ref.html">
     References
   </a>
 </li>
 
+                </ul>
+            </li>
+            
   </ul>
 </nav></div>
       
@@ -181,11 +235,18 @@
       
         <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
       
     </div>
     
@@ -232,22 +293,64 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="panels.html">
-    Semi-analytical models for plates, shells and panels (panels)
+  <a class="nav-link nav-internal" href="ex_linear_static.html">
+    Linear static analysis
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="multidomain.html">
-    Base class for multidomain
+  <a class="nav-link nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="multidomain_connections.html">
-    Multidomain connections (panels.multidomain.connections)
+  <a class="nav-link nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="api.html">
+    API reference
   </a>
 </li>
 
@@ -277,11 +380,18 @@
         
           <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
         
       </div>
     
@@ -319,125 +429,10 @@
 <h1 id="index">Index</h1>
 
 <div class="genindex-jumpbox">
- <a href="#A"><strong>A</strong></a>
- | <a href="#C"><strong>C</strong></a>
- | <a href="#F"><strong>F</strong></a>
- | <a href="#G"><strong>G</strong></a>
- | <a href="#M"><strong>M</strong></a>
+ <a href="#M"><strong>M</strong></a>
  | <a href="#P"><strong>P</strong></a>
- | <a href="#S"><strong>S</strong></a>
- | <a href="#T"><strong>T</strong></a>
- | <a href="#U"><strong>U</strong></a>
  
 </div>
-<h2 id="A">A</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="panels.html#panels.shell.Shell.add_distr_load_fixed_x">add_distr_load_fixed_x() (panels.shell.Shell method)</a>
-</li>
-      <li><a href="panels.html#panels.shell.Shell.add_distr_load_fixed_y">add_distr_load_fixed_y() (panels.shell.Shell method)</a>
-</li>
-      <li><a href="panels.html#panels.shell.Shell.add_distr_pd_fixed_x">add_distr_pd_fixed_x() (panels.shell.Shell method)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="panels.html#panels.shell.Shell.add_distr_pd_fixed_y">add_distr_pd_fixed_y() (panels.shell.Shell method)</a>
-</li>
-      <li><a href="panels.html#panels.shell.Shell.add_point_load">add_point_load() (panels.shell.Shell method)</a>
-</li>
-      <li><a href="panels.html#panels.shell.Shell.add_point_pd">add_point_pd() (panels.shell.Shell method)</a>
-</li>
-  </ul></td>
-</tr></table>
-
-<h2 id="C">C</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="panels.html#panels.shell.Shell.calc_cA">calc_cA() (panels.shell.Shell method)</a>
-</li>
-      <li><a href="multidomain.html#panels.multidomain.MultiDomain.calc_damaged_stiffness">calc_damaged_stiffness() (panels.multidomain.MultiDomain method)</a>
-</li>
-      <li><a href="panels.html#panels.shell.Shell.calc_fext">calc_fext() (panels.shell.Shell method)</a>
-</li>
-      <li><a href="panels.html#panels.shell.Shell.calc_fint">calc_fint() (panels.shell.Shell method)</a>
-</li>
-      <li><a href="multidomain.html#panels.multidomain.MultiDomain.calc_k_dmg">calc_k_dmg() (panels.multidomain.MultiDomain method)</a>
-</li>
-      <li><a href="panels.html#panels.shell.Shell.calc_kA">calc_kA() (panels.shell.Shell method)</a>
-</li>
-      <li><a href="multidomain.html#panels.multidomain.MultiDomain.calc_kC">calc_kC() (panels.multidomain.MultiDomain method)</a>
-
-      <ul>
-        <li><a href="panels.html#panels.shell.Shell.calc_kC">(panels.shell.Shell method)</a>
-</li>
-      </ul></li>
-      <li><a href="multidomain.html#panels.multidomain.MultiDomain.calc_kG">calc_kG() (panels.multidomain.MultiDomain method)</a>
-
-      <ul>
-        <li><a href="panels.html#panels.shell.Shell.calc_kG">(panels.shell.Shell method)</a>
-</li>
-      </ul></li>
-      <li><a href="panels.html#panels.shell.Shell.calc_kM">calc_kM() (panels.shell.Shell method)</a>
-</li>
-      <li><a href="multidomain_connections.html#panels.multidomain.connections.calc_kt_kr">calc_kt_kr() (in module panels.multidomain.connections)</a>
-</li>
-      <li><a href="multidomain_connections.html#panels.multidomain.connections.calc_kw_tsl">calc_kw_tsl() (in module panels.multidomain.connections)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="multidomain.html#panels.multidomain.MultiDomain.calc_results">calc_results() (panels.multidomain.MultiDomain method)</a>
-</li>
-      <li><a href="multidomain.html#panels.multidomain.MultiDomain.calc_separation">calc_separation() (panels.multidomain.MultiDomain method)</a>
-</li>
-      <li><a href="panels.html#panels.shell.Shell.calc_stiffness_point_constraint">calc_stiffness_point_constraint() (panels.shell.Shell method)</a>
-</li>
-      <li><a href="multidomain.html#panels.multidomain.MultiDomain.calc_traction_stiffness">calc_traction_stiffness() (panels.multidomain.MultiDomain method)</a>
-</li>
-      <li><a href="panels.html#panels.shell.Shell.clear_disps">clear_disps() (panels.shell.Shell method)</a>
-</li>
-      <li><a href="panels.html#panels.shell.Shell.clear_loads">clear_loads() (panels.shell.Shell method)</a>
-</li>
-      <li><a href="multidomain_cylinder.html#panels.multidomain.cylinder.create_cylinder">create_cylinder() (in module panels.multidomain.cylinder)</a>
-</li>
-      <li><a href="multidomain_cylinder.html#panels.multidomain.cylinder_blade_stiffened.create_cylinder_blade_stiffened">create_cylinder_blade_stiffened() (in module panels.multidomain.cylinder_blade_stiffened)</a>
-</li>
-      <li><a href="multidomain_cylinder.html#panels.multidomain.cylinder_blade_stiffened.cylinder_blade_stiffened_compression_lb_Nxx_cte">cylinder_blade_stiffened_compression_lb_Nxx_cte() (in module panels.multidomain.cylinder_blade_stiffened)</a>
-</li>
-      <li><a href="multidomain_cylinder.html#panels.multidomain.cylinder_blade_stiffened.cylinder_blade_stiffened_compression_lb_Nxx_from_static">cylinder_blade_stiffened_compression_lb_Nxx_from_static() (in module panels.multidomain.cylinder_blade_stiffened)</a>
-</li>
-      <li><a href="multidomain_cylinder.html#panels.multidomain.cylinder_blade_stiffened.cylinder_blade_stiffened_compression_lb_pd_from_static">cylinder_blade_stiffened_compression_lb_pd_from_static() (in module panels.multidomain.cylinder_blade_stiffened)</a>
-</li>
-      <li><a href="multidomain_cylinder.html#panels.multidomain.cylinder.cylinder_compression_lb_Nxx_cte">cylinder_compression_lb_Nxx_cte() (in module panels.multidomain.cylinder)</a>
-</li>
-      <li><a href="multidomain_cylinder.html#panels.multidomain.cylinder.cylinder_compression_lb_Nxx_from_static">cylinder_compression_lb_Nxx_from_static() (in module panels.multidomain.cylinder)</a>
-</li>
-  </ul></td>
-</tr></table>
-
-<h2 id="F">F</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="multidomain.html#panels.multidomain.MultiDomain.force">force() (panels.multidomain.MultiDomain method)</a>
-</li>
-  </ul></td>
-</tr></table>
-
-<h2 id="G">G</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="multidomain.html#panels.multidomain.MultiDomain.get_kC_conn">get_kC_conn() (panels.multidomain.MultiDomain method)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="multidomain.html#panels.multidomain.MultiDomain.get_size">get_size() (panels.multidomain.MultiDomain method)</a>
-
-      <ul>
-        <li><a href="panels.html#panels.shell.Shell.get_size">(panels.shell.Shell method)</a>
-</li>
-      </ul></li>
-  </ul></td>
-</tr></table>
-
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -445,33 +440,9 @@
     module
 
       <ul>
-        <li><a href="panels.html#module-panels">panels</a>
-</li>
-        <li><a href="multidomain.html#module-panels.multidomain">panels.multidomain</a>
-</li>
-        <li><a href="multidomain_connections.html#module-panels.multidomain.connections">panels.multidomain.connections</a>
-</li>
-        <li><a href="multidomain_cylinder.html#module-panels.multidomain.cylinder">panels.multidomain.cylinder</a>
-</li>
-        <li><a href="multidomain_cylinder.html#module-panels.multidomain.cylinder_blade_stiffened">panels.multidomain.cylinder_blade_stiffened</a>
-</li>
-        <li><a href="multidomain_tstiff2d.html#module-panels.multidomain.tstiff2d_1stiff_compression">panels.multidomain.tstiff2d_1stiff_compression</a>
-</li>
-        <li><a href="multidomain_tstiff2d.html#module-panels.multidomain.tstiff2d_1stiff_flutter">panels.multidomain.tstiff2d_1stiff_flutter</a>
-</li>
-        <li><a href="multidomain_tstiff2d.html#module-panels.multidomain.tstiff2d_1stiff_freq">panels.multidomain.tstiff2d_1stiff_freq</a>
-</li>
-        <li><a href="panels.html#module-panels.plot_shell">panels.plot_shell</a>
-</li>
-        <li><a href="panels.html#module-panels.shell">panels.shell</a>
-</li>
-        <li><a href="panels.html#module-panels.shell_fext">panels.shell_fext</a>
+        <li><a href="api.html#module-panels">panels</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="multidomain.html#panels.multidomain.MultiDomain">MultiDomain (class in panels.multidomain)</a>
-</li>
   </ul></td>
 </tr></table>
 
@@ -482,141 +453,13 @@
     panels
 
       <ul>
-        <li><a href="panels.html#module-panels">module</a>
-</li>
-      </ul></li>
-      <li>
-    panels.multidomain
-
-      <ul>
-        <li><a href="multidomain.html#module-panels.multidomain">module</a>
-</li>
-      </ul></li>
-      <li>
-    panels.multidomain.connections
-
-      <ul>
-        <li><a href="multidomain_connections.html#module-panels.multidomain.connections">module</a>
-</li>
-      </ul></li>
-      <li>
-    panels.multidomain.cylinder
-
-      <ul>
-        <li><a href="multidomain_cylinder.html#module-panels.multidomain.cylinder">module</a>
-</li>
-      </ul></li>
-      <li>
-    panels.multidomain.cylinder_blade_stiffened
-
-      <ul>
-        <li><a href="multidomain_cylinder.html#module-panels.multidomain.cylinder_blade_stiffened">module</a>
-</li>
-      </ul></li>
-      <li>
-    panels.multidomain.tstiff2d_1stiff_compression
-
-      <ul>
-        <li><a href="multidomain_tstiff2d.html#module-panels.multidomain.tstiff2d_1stiff_compression">module</a>
+        <li><a href="api.html#module-panels">module</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li>
-    panels.multidomain.tstiff2d_1stiff_flutter
-
-      <ul>
-        <li><a href="multidomain_tstiff2d.html#module-panels.multidomain.tstiff2d_1stiff_flutter">module</a>
+      <li><a href="plot_shell.html#panels.plot_shell.plot_shell">plot_shell() (in module panels.plot_shell)</a>
 </li>
-      </ul></li>
-      <li>
-    panels.multidomain.tstiff2d_1stiff_freq
-
-      <ul>
-        <li><a href="multidomain_tstiff2d.html#module-panels.multidomain.tstiff2d_1stiff_freq">module</a>
-</li>
-      </ul></li>
-      <li>
-    panels.plot_shell
-
-      <ul>
-        <li><a href="panels.html#module-panels.plot_shell">module</a>
-</li>
-      </ul></li>
-      <li>
-    panels.shell
-
-      <ul>
-        <li><a href="panels.html#module-panels.shell">module</a>
-</li>
-      </ul></li>
-      <li>
-    panels.shell_fext
-
-      <ul>
-        <li><a href="panels.html#module-panels.shell_fext">module</a>
-</li>
-      </ul></li>
-      <li><a href="multidomain.html#panels.multidomain.MultiDomain.plot">plot() (panels.multidomain.MultiDomain method)</a>
-</li>
-      <li><a href="panels.html#panels.plot_shell.plot_shell">plot_shell() (in module panels.plot_shell)</a>
-</li>
-  </ul></td>
-</tr></table>
-
-<h2 id="S">S</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="panels.html#panels.shell.Shell.save">save() (panels.shell.Shell method)</a>
-</li>
-      <li><a href="panels.html#panels.shell.Shell">Shell (class in panels.shell)</a>
-</li>
-      <li><a href="panels.html#panels.shell_fext.shell_fext">shell_fext() (in module panels.shell_fext)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="multidomain.html#panels.multidomain.MultiDomain.strain">strain() (panels.multidomain.MultiDomain method)</a>
-
-      <ul>
-        <li><a href="panels.html#panels.shell.Shell.strain">(panels.shell.Shell method)</a>
-</li>
-      </ul></li>
-      <li><a href="multidomain.html#panels.multidomain.MultiDomain.stress">stress() (panels.multidomain.MultiDomain method)</a>
-
-      <ul>
-        <li><a href="panels.html#panels.shell.Shell.stress">(panels.shell.Shell method)</a>
-</li>
-      </ul></li>
-  </ul></td>
-</tr></table>
-
-<h2 id="T">T</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="multidomain_tstiff2d.html#panels.multidomain.tstiff2d_1stiff_compression.tstiff2d_1stiff_compression">tstiff2d_1stiff_compression() (in module panels.multidomain.tstiff2d_1stiff_compression)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="multidomain_tstiff2d.html#panels.multidomain.tstiff2d_1stiff_flutter.tstiff2d_1stiff_flutter">tstiff2d_1stiff_flutter() (in module panels.multidomain.tstiff2d_1stiff_flutter)</a>
-</li>
-      <li><a href="multidomain_tstiff2d.html#panels.multidomain.tstiff2d_1stiff_freq.tstiff2d_1stiff_freq">tstiff2d_1stiff_freq() (in module panels.multidomain.tstiff2d_1stiff_freq)</a>
-</li>
-  </ul></td>
-</tr></table>
-
-<h2 id="U">U</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="multidomain.html#panels.multidomain.MultiDomain.update_TSL_history">update_TSL_history() (panels.multidomain.MultiDomain method)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="multidomain.html#panels.multidomain.MultiDomain.uvw">uvw() (panels.multidomain.MultiDomain method)</a>
-
-      <ul>
-        <li><a href="panels.html#panels.shell.Shell.uvw">(panels.shell.Shell method)</a>
-</li>
-      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -649,8 +492,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="_static/scripts/bootstrap.js?digest=7f76b32a3354e82990f2"></script>
-<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=7f76b32a3354e82990f2"></script>
+  <script defer src="_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -684,7 +527,7 @@
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.21.0.
 </p></div>
       
     </div>
