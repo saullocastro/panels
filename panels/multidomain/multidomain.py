@@ -1310,7 +1310,8 @@ class MultiDomain(object):
         return kC_conn
 
 
-    def calc_kC(self, conn=None, c=None, silent=True, finalize=True, inc=1.):
+    def calc_kC(self, conn=None, c=None, silent=True, finalize=True, inc=1.,
+            NLgeom=False):
         """Calculate the constitutive stiffness matrix of the assembly
         --- this is kP (made by diagonally assemblying kP_i from the MD paper)
 
@@ -1330,6 +1331,9 @@ class MultiDomain(object):
             symmetric, should be ``False`` when assemblying.
         inc : float, optional
             Dummy argument needed for non-linear analyses.
+        NLgeom : bool, optional
+            If ``True``, the constitutive part of the tangent stiffness matrix
+            at ``c`` is calculated, see :meth:`.Shell.calc_kC`.
 
         """
         size = self.get_size()
@@ -1343,7 +1347,7 @@ class MultiDomain(object):
                 raise ValueError('Shell attributes "row_start" and "col_start" must be defined!')
             # Calc Kc per panel (from the Shell class)
             kC += p.calc_kC(c=c, row0=p.row_start, col0=p.col_start, size=size,
-                    silent=silent, finalize=False)
+                    silent=silent, finalize=False, NLgeom=NLgeom)
 
         # Make the matrix symm at the end
         if finalize:
@@ -1361,7 +1365,7 @@ class MultiDomain(object):
         return kC
 
 
-    def calc_kG(self, c=None, silent=False, finalize=True):
+    def calc_kG(self, c=None, silent=False, finalize=True, NLgeom=False):
         """Calculate the geometric stiffness matrix of the assembly
 
         Parameters
@@ -1375,6 +1379,9 @@ class MultiDomain(object):
         finalize : bool, optional
             Asserts validity of output data and makes the output matrix
             symmetric, should be ``False`` when assemblying.
+        NLgeom : bool, optional
+            If ``True``, the geometric part of the tangent stiffness matrix at
+            ``c`` is calculated, see :meth:`.Shell.calc_kG`.
 
         """
         size = self.get_size()
@@ -1387,7 +1394,7 @@ class MultiDomain(object):
             if p.row_start is None or p.col_start is None:
                 raise ValueError('Shell attributes "row_start" and "col_start" must be defined!')
             kG += p.calc_kG(c=c, row0=p.row_start, col0=p.col_start, size=size,
-                            silent=silent, finalize=False)
+                            silent=silent, finalize=False, NLgeom=NLgeom)
         if finalize:
             kG = finalize_symmetric_matrix(kG)
         self.kG = kG
