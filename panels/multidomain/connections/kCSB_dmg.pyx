@@ -7,6 +7,7 @@
 #cython: infer_types=False
 from scipy.sparse import coo_matrix, csr_matrix
 import numpy as np
+from scipy.special import roots_legendre
 
 from panels import INT, DOUBLE
 
@@ -28,9 +29,6 @@ cdef extern from 'bardell.hpp':
     double integral_fpfp(int i, int j,
             double x1t, double x1r, double x2t, double x2r,
             double y1t, double y1r, double y2t, double y2r) nogil
-
-cdef extern from 'legendre_gauss_quadrature.hpp':
-    void leggauss_quad_304(int n, double *points, double* weights) nogil
 
 
 def fkCSB11_dmg(double dsb, object p1, int size, int row0, int col0, 
@@ -98,15 +96,9 @@ def fkCSB11_dmg(double dsb, object p1, int size, int row0, int col0,
     # 7 is depenedent on the number of terms in the for loop which populate the values of the stiff matrices 
     # i.e. in this case there are 7 instances of terms being added so it preallocates that amount of memory
 
-    # Initializing gauss points, weights
-    xis = np.zeros(nr_x_gauss, dtype=DOUBLE)
-    weights_xi = np.zeros(nr_x_gauss, dtype=DOUBLE)
-    etas = np.zeros(nr_y_gauss, dtype=DOUBLE)
-    weights_eta = np.zeros(nr_y_gauss, dtype=DOUBLE)
-
     # Calc gauss points and weights
-    leggauss_quad_304(nr_x_gauss, &xis[0], &weights_xi[0])
-    leggauss_quad_304(nr_y_gauss, &etas[0], &weights_eta[0])
+    xis, weights_xi = roots_legendre(nr_x_gauss)
+    etas, weights_eta = roots_legendre(nr_y_gauss)
     
     kCSB11r = np.zeros((fdim,), dtype=INT)
     kCSB11c = np.zeros((fdim,), dtype=INT)
@@ -300,15 +292,9 @@ def fkCSB12_dmg(double dsb, object p1, object p2, int size, int row0, int col0,
 
     fdim = 5*m1*n1*m2*n2
 
-    # Initializing gauss points, weights
-    xis = np.zeros(nr_x_gauss, dtype=DOUBLE)
-    weights_xi = np.zeros(nr_x_gauss, dtype=DOUBLE)
-    etas = np.zeros(nr_y_gauss, dtype=DOUBLE)
-    weights_eta = np.zeros(nr_y_gauss, dtype=DOUBLE)
-
     # Calc gauss points and weights
-    leggauss_quad_304(nr_x_gauss, &xis[0], &weights_xi[0])
-    leggauss_quad_304(nr_y_gauss, &etas[0], &weights_eta[0])
+    xis, weights_xi = roots_legendre(nr_x_gauss)
+    etas, weights_eta = roots_legendre(nr_y_gauss)
 
     kCSB12r = np.zeros((fdim,), dtype=INT)
     kCSB12c = np.zeros((fdim,), dtype=INT)
@@ -467,15 +453,9 @@ def fkCSB22_dmg(object p1, object p2, int size, int row0, int col0,
 
     fdim = 3*m2*n2*m2*n2
     
-    # Initializing gauss points, weights
-    xis = np.zeros(nr_x_gauss, dtype=DOUBLE)
-    weights_xi = np.zeros(nr_x_gauss, dtype=DOUBLE)
-    etas = np.zeros(nr_y_gauss, dtype=DOUBLE)
-    weights_eta = np.zeros(nr_y_gauss, dtype=DOUBLE)
-
     # Calc gauss points and weights
-    leggauss_quad_304(nr_x_gauss, &xis[0], &weights_xi[0])
-    leggauss_quad_304(nr_y_gauss, &etas[0], &weights_eta[0])
+    xis, weights_xi = roots_legendre(nr_x_gauss)
+    etas, weights_eta = roots_legendre(nr_y_gauss)
 
     kCSB22r = np.zeros((fdim,), dtype=INT)
     kCSB22c = np.zeros((fdim,), dtype=INT)

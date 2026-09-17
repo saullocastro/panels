@@ -7,7 +7,7 @@ from scipy.sparse import csr_matrix
 from structsolve.sparseutils import finalize_symmetric_matrix
 from matplotlib import pyplot as plt
 
-from panels.legendre_gauss_quadrature import get_points_weights_304
+from scipy.special import roots_legendre
 from panels.logger import msg, warn
 from panels.shell import DOUBLE, check_c, Shell
 import panels.modelDB as modelDB
@@ -549,9 +549,7 @@ class MultiDomain(object):
             if nr_x_gauss is not None:
                 # Getting the gauss points and weights for x
                     # Gauss points are between 1 and -1
-                x = np.zeros(nr_x_gauss, dtype=np.float64)
-                x_weights = np.zeros(nr_x_gauss, dtype=np.float64)
-                get_points_weights_304(nr_x_gauss, x, x_weights)
+                x, x_weights = roots_legendre(nr_x_gauss)
                 # Converting to physical coord as per panel dimensions
                 # Done bec the clpt_bardell_field.pyx ftn converts it to natural coord
                 x = (panel.a/2)*(x + 1)
@@ -559,9 +557,7 @@ class MultiDomain(object):
                 x = linspace(0, panel.a, gridx)
             if nr_y_gauss is not None:
                 # Getting the gauss points and weights for y
-                y = np.zeros(nr_y_gauss, dtype=np.float64)
-                y_weights = np.zeros(nr_y_gauss, dtype=np.float64)
-                get_points_weights_304(nr_y_gauss, y, y_weights)
+                y, y_weights = roots_legendre(nr_y_gauss)
                 # Converting to physical coord as per panel dimensions
                 # Done bec the clpt_bardell_field.pyx ftn converts it to natural coord
                 y = (panel.b/2)*(y + 1)
@@ -663,9 +659,7 @@ class MultiDomain(object):
             if nr_x_gauss is not None:
                 # Getting the gauss points and weights for x
                     # Gauss points are between 1 and -1
-                x = np.zeros(nr_x_gauss, dtype=np.float64)
-                x_weights = np.zeros(nr_x_gauss, dtype=np.float64)
-                get_points_weights_304(nr_x_gauss, x, x_weights)
+                x, x_weights = roots_legendre(nr_x_gauss)
                 # Converting to physical coord as per panel dimensions
                 # Done bec the clpt_bardell_field.pyx ftn converts it to natural coord
                 x = (panel.a/2)*(x + 1)
@@ -673,9 +667,7 @@ class MultiDomain(object):
                 x = linspace(0, panel.a, gridx)
             if nr_y_gauss is not None:
                 # Getting the gauss points and weights for y
-                y = np.zeros(nr_y_gauss, dtype=np.float64)
-                y_weights = np.zeros(nr_y_gauss, dtype=np.float64)
-                get_points_weights_304(nr_y_gauss, y, y_weights)
+                y, y_weights = roots_legendre(nr_y_gauss)
                 # Converting to physical coord as per panel dimensions
                 # Done bec the clpt_bardell_field.pyx ftn converts it to natural coord
                 y = (panel.b/2)*(y + 1)
@@ -768,18 +760,14 @@ class MultiDomain(object):
 
             if nr_x_gauss is not None:
                 # Getting the gauss points and weights for x
-                x = np.zeros(nr_x_gauss, dtype=np.float64)
-                x_weights = np.zeros(nr_x_gauss, dtype=np.float64)
-                get_points_weights_304(nr_x_gauss, x, x_weights)
+                x, x_weights = roots_legendre(nr_x_gauss)
                 # Converting to physical coord as per panel dimensions
                 x = (panel.a/2)*(x + 1)
             else:
                 x = linspace(0, panel.a, gridx)
             if nr_y_gauss is not None:
                 # Getting the gauss points and weights for y
-                y = np.zeros(nr_y_gauss, dtype=np.float64)
-                y_weights = np.zeros(nr_y_gauss, dtype=np.float64)
-                get_points_weights_304(nr_y_gauss, y, y_weights)
+                y, y_weights = roots_legendre(nr_y_gauss)
                 # Converting to physical coord as per panel dimensions
                 y = (panel.b/2)*(y + 1)
             else:
@@ -901,9 +889,7 @@ class MultiDomain(object):
                 if np.shape(stress_field)[0] != nr_y_gauss:
                     raise ValueError('Size mismatch')
                 # Getting the gauss points and weights
-                y_temp = np.zeros(nr_y_gauss, dtype=np.float64)
-                weights = np.zeros(nr_y_gauss, dtype=np.float64)
-                get_points_weights_304(nr_y_gauss, y_temp, weights)
+                y_temp, weights = roots_legendre(nr_y_gauss)
 
             if y_cte_force is not None:
                 [row, _] = np.where(np.isclose(res_stress['y'][0], y_cte_force))
@@ -916,9 +902,7 @@ class MultiDomain(object):
                 if np.shape(stress_field)[0] != nr_x_gauss:
                     raise ValueError('Size mismatch')
                 # Getting the gauss points and weights
-                x_temp = np.zeros(nr_x_gauss, dtype=np.float64)
-                weights = np.zeros(nr_x_gauss, dtype=np.float64)
-                get_points_weights_304(nr_x_gauss, x_temp, weights)
+                x_temp, weights = roots_legendre(nr_x_gauss)
 
             # Integration
             force_intgn = np.dot(weights, stress_field)
@@ -946,13 +930,9 @@ class MultiDomain(object):
                                      gridx=gridx, gridy=gridy, nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss)
 
             # Gauss points and weights
-            y_gauss = np.zeros(nr_y_gauss, dtype=np.float64)
-            weights_y = np.zeros(nr_y_gauss, dtype=np.float64)
-            get_points_weights_304(nr_y_gauss, y_gauss, weights_y)
+            y_gauss, weights_y = roots_legendre(nr_y_gauss)
 
-            x_gauss = np.zeros(nr_x_gauss, dtype=np.float64)
-            weights_x = np.zeros(nr_x_gauss, dtype=np.float64)
-            get_points_weights_304(nr_x_gauss, x_gauss, weights_x)
+            x_gauss, weights_x = roots_legendre(nr_x_gauss)
 
             # Points used for distance to calc derivatives
             if False: # unchanged dx, dy
@@ -1005,9 +985,7 @@ class MultiDomain(object):
             # Line Integral of Qx - considers gauss points in only y
             if True:
                 # Gauss points and weights
-                y_gauss = np.zeros(nr_y_gauss, dtype=np.float64)
-                weights_y = np.zeros(nr_y_gauss, dtype=np.float64)
-                get_points_weights_304(nr_y_gauss, y_gauss, weights_y)
+                y_gauss, weights_y = roots_legendre(nr_y_gauss)
 
                 dx = np.linspace(0, eval_panel.a, gridx)
 
@@ -1056,13 +1034,9 @@ class MultiDomain(object):
                                      nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss)
 
             # Gauss points and weights
-            y_gauss = np.zeros(nr_y_gauss, dtype=np.float64)
-            weights_y = np.zeros(nr_y_gauss, dtype=np.float64)
-            get_points_weights_304(nr_y_gauss, y_gauss, weights_y)
+            y_gauss, weights_y = roots_legendre(nr_y_gauss)
 
-            x_gauss = np.zeros(nr_x_gauss, dtype=np.float64)
-            weights_x = np.zeros(nr_x_gauss, dtype=np.float64)
-            get_points_weights_304(nr_x_gauss, x_gauss, weights_x)
+            x_gauss, weights_x = roots_legendre(nr_x_gauss)
 
             # Points used for distance to calc derivatives
             if False: # unchanged dx, dy
@@ -1127,13 +1101,9 @@ class MultiDomain(object):
                 G1c = connecti['G1c']
 
                 # Gauss points and weights
-                x_gauss = np.zeros(nr_x_gauss, dtype=np.float64)
-                weights_x = np.zeros(nr_x_gauss, dtype=np.float64)
-                get_points_weights_304(nr_x_gauss, x_gauss, weights_x)
+                x_gauss, weights_x = roots_legendre(nr_x_gauss)
 
-                y_gauss = np.zeros(nr_y_gauss, dtype=np.float64)
-                weights_y = np.zeros(nr_y_gauss, dtype=np.float64)
-                get_points_weights_304(nr_y_gauss, y_gauss, weights_y)
+                y_gauss, weights_y = roots_legendre(nr_y_gauss)
 
                 if hasattr(self, "dmg_index"):
                     kw_tsl, dmg_index_max, del_d, dmg_index_curr = self.calc_k_dmg(c=c, pA=p_top, pB=p_bot,

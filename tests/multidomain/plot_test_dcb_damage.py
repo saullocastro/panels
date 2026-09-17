@@ -35,7 +35,7 @@ np.set_printoptions(formatter={'float': lambda x: "{0:0.2f}".format(x)})
 # %matplotlib inline
 
 os.chdir('C:/Users/natha/Documents/GitHub/panels')
-from panels.legendre_gauss_quadrature import get_points_weights
+from scipy.special import roots_legendre
 
 
 
@@ -605,13 +605,9 @@ if not animate:
         a = 33.4
         b = 25.5
         
-        xis = np.zeros(no_x_gauss, dtype=np.float64)
-        weights_xi = np.zeros(no_x_gauss, dtype=np.float64)
-        etas = np.zeros(no_y_gauss, dtype=np.float64)
-        weights_eta = np.zeros(no_y_gauss, dtype=np.float64)
         
-        get_points_weights(no_x_gauss, xis, weights_xi)
-        get_points_weights(no_y_gauss, etas, weights_eta)
+        xis, weights_xi = roots_legendre(no_x_gauss)
+        etas, weights_eta = roots_legendre(no_y_gauss)
         
         xi_grid, eta_grid = np.meshgrid(xis, etas)
         
@@ -869,13 +865,9 @@ if animate:
         a = 52
         b = 25
         
-        xis = np.zeros(no_x_gauss, dtype=np.float64)
-        weights_xi = np.zeros(no_x_gauss, dtype=np.float64)
-        etas = np.zeros(no_y_gauss, dtype=np.float64)
-        weights_eta = np.zeros(no_y_gauss, dtype=np.float64)
         
-        get_points_weights(no_x_gauss, xis, weights_xi)
-        get_points_weights(no_y_gauss, etas, weights_eta)
+        xis, weights_xi = roots_legendre(no_x_gauss)
+        etas, weights_eta = roots_legendre(no_y_gauss)
         
         xi_grid, eta_grid = np.meshgrid(xis, etas)
         
@@ -966,13 +958,9 @@ if animate:
         a = 33.4
         b = 25.5
         
-        xis = np.zeros(no_x_gauss, dtype=np.float64)
-        weights_xi = np.zeros(no_x_gauss, dtype=np.float64)
-        etas = np.zeros(no_y_gauss, dtype=np.float64)
-        weights_eta = np.zeros(no_y_gauss, dtype=np.float64)
         
-        get_points_weights(no_x_gauss, xis, weights_xi)
-        get_points_weights(no_y_gauss, etas, weights_eta)
+        xis, weights_xi = roots_legendre(no_x_gauss)
+        etas, weights_eta = roots_legendre(no_y_gauss)
         
         xi_grid, eta_grid = np.meshgrid(xis, etas)
         
@@ -1084,13 +1072,8 @@ no_y_gauss = 30
 a = 33.4
 b = 25.5
 
-xis = np.zeros(no_x_gauss, dtype=np.float64)
-weights_xi = np.zeros(no_x_gauss, dtype=np.float64)
-etas = np.zeros(no_y_gauss, dtype=np.float64)
-weights_eta = np.zeros(no_y_gauss, dtype=np.float64)
-
-get_points_weights(no_x_gauss, xis, weights_xi)
-get_points_weights(no_y_gauss, etas, weights_eta)
+xis, weights_xi = roots_legendre(no_x_gauss)
+etas, weights_eta = roots_legendre(no_y_gauss)
 
 xi_grid, eta_grid = np.meshgrid(xis, etas)
 
