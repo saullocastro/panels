@@ -551,7 +551,7 @@ class MultiDomain(object):
                     # Gauss points are between 1 and -1
                 x, x_weights = roots_legendre(nr_x_gauss)
                 # Converting to physical coord as per panel dimensions
-                # Done bec the clpt_bardell_field.pyx ftn converts it to natural coord
+                # Done bec the clpt_field.pyx ftn converts it to natural coord
                 x = (panel.a/2)*(x + 1)
             else:
                 x = linspace(0, panel.a, gridx)
@@ -559,7 +559,7 @@ class MultiDomain(object):
                 # Getting the gauss points and weights for y
                 y, y_weights = roots_legendre(nr_y_gauss)
                 # Converting to physical coord as per panel dimensions
-                # Done bec the clpt_bardell_field.pyx ftn converts it to natural coord
+                # Done bec the clpt_field.pyx ftn converts it to natural coord
                 y = (panel.b/2)*(y + 1)
             else:
                 y = linspace(0, panel.b, gridy)
@@ -650,7 +650,7 @@ class MultiDomain(object):
             c_panel = c[panel.col_start: panel.col_end]
             c_panel = np.ascontiguousarray(c_panel, dtype=DOUBLE)
             model = panel.model
-            # In panels\panels\models - for plates, clpt_bardell_field
+            # In panels\panels\models - for plates, clpt_field
             fstrain = modelDB.db[model]['field'].fstrain
 
             # Here x and y are the complete unravelled grid in the x and y coord resp
@@ -661,7 +661,7 @@ class MultiDomain(object):
                     # Gauss points are between 1 and -1
                 x, x_weights = roots_legendre(nr_x_gauss)
                 # Converting to physical coord as per panel dimensions
-                # Done bec the clpt_bardell_field.pyx ftn converts it to natural coord
+                # Done bec the clpt_field.pyx ftn converts it to natural coord
                 x = (panel.a/2)*(x + 1)
             else:
                 x = linspace(0, panel.a, gridx)
@@ -669,7 +669,7 @@ class MultiDomain(object):
                 # Getting the gauss points and weights for y
                 y, y_weights = roots_legendre(nr_y_gauss)
                 # Converting to physical coord as per panel dimensions
-                # Done bec the clpt_bardell_field.pyx ftn converts it to natural coord
+                # Done bec the clpt_field.pyx ftn converts it to natural coord
                 y = (panel.b/2)*(y + 1)
             else:
                 y = linspace(0, panel.b, gridy)

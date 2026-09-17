@@ -249,9 +249,9 @@ class Shell(object):
         self.ny = max(self.ny, self.n)
         if self.model is None:
             if self.r is None:
-                self.model = 'plate_clpt_donnell_bardell'
+                self.model = 'plate_clpt_donnell'
             elif self.r is not None:
-                self.model = 'cylshell_clpt_donnell_bardell'
+                self.model = 'cylshell_clpt_donnell'
 
         valid_models = sorted(modelDB.db.keys())
 
@@ -1228,7 +1228,7 @@ class Shell(object):
         ABDnxny = self.ABD if ABDnxny is None else ABDnxny
 
         c = np.ascontiguousarray(c, dtype=DOUBLE)
-        fint = calc_fint(c, ABDnxny, self, size, col0, nx, ny)
+        fint = np.asarray(calc_fint(c, ABDnxny, self, size, col0, nx, ny))
 
         gc.collect()
 

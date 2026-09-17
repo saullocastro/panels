@@ -4,15 +4,15 @@ sys.path.append('../..')
 import numpy as np
 
 from panels.shell import Shell
-from panels.models.plate_clpt_donnell_bardell_num import fkC_num as plate_kC
-from panels.models.cylshell_clpt_donnell_bardell_num import fkC_num as cylshell_kC
+from panels.models.plate_clpt_donnell_num import fkC_num as plate_kC
+from panels.models.cylshell_clpt_donnell_num import fkC_num as cylshell_kC
 
 
 def test_partial_domain_integration():
     m = 6
     n = 6
     s = Shell()
-    s.model = 'plate_clpt_donnell_bardell'
+    s.model = 'plate_clpt_donnell'
 
     s.a = 7.
     s.b = 3.

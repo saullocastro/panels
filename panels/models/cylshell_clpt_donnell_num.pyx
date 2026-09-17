@@ -47,6 +47,7 @@ def fkC_num(double [::1] cs, object Finput, object shell,
     cdef double xi, eta, weight
     cdef double xi1, xi2, eta1, eta2
     cdef double wxi, weta
+    cdef double wx, wy, NxxNL, NyyNL, NxyNL
 
     cdef double [::1] xis, etas, weights_xi, weights_eta
 
@@ -178,6 +179,19 @@ def fkC_num(double [::1] cs, object Finput, object shell,
                 D26 = F[4*6 + 5]
                 D66 = F[5*6 + 5]
 
+                # Membrane stress carried by the nonlinear strain
+                # eps_NL = {w,x^2/2, w,y^2/2, w,x*w,y}. With it, KGNL = KG(N_NL)
+                # is collected in kC such that
+                #     KT = K0 + K0L + KL0 + KLL + KGNL (fkC_num) + KG(N0 + N_L) (fkG_num)
+                # is the exact Jacobian of calc_fint, and fkG_num stays
+                # homogeneous of degree one in cs, as linear buckling requires.
+                # wxi = weta = 0 when NLgeom == 0, then KGNL vanishes
+                wx = (2/a)*wxi
+                wy = (2/b)*weta
+                NxxNL = A11*0.5*wx*wx + A12*0.5*wy*wy + A16*wx*wy
+                NyyNL = A12*0.5*wx*wx + A22*0.5*wy*wy + A26*wx*wy
+                NxyNL = A16*0.5*wx*wx + A26*0.5*wy*wy + A66*wx*wy
+
                 # kC
                 c = -1
                 for i in range(m):
@@ -269,6 +283,11 @@ def fkC_num(double [::1] cs, object Finput, object shell,
                                     kCr[c] = row+2
                                     kCc[c] = col+2
                                 kCv[c] += weight*( 4*A11*fAwxi*fBwxi*gAw*gBw*intx*inty*(wxi*wxi)/(a*a*a*a) + A12*intx*inty*wxi*((b*b)*gAw*gBw*(fAw*fBwxi + fAwxi*fBw) + r*weta*(4*fAw*fBwxi*gAweta*gBw + 4*fAwxi*fBw*gAw*gBweta))/((a*a)*(b*b)*r) + 4*A16*intx*inty*wxi*(fAw*fBwxi*gAweta*gBw*wxi + fAwxi*gAw*(fBw*gBweta*wxi + 2*fBwxi*gBw*weta))/((a*a*a)*b) + 0.25*A22*fAw*fBw*intx*inty*((b*b)*gAw + 4*gAweta*r*weta)*((b*b)*gBw + 4*gBweta*r*weta)/((b*b*b*b)*(r*r)) + A26*intx*inty*((b*b)*(fAw*(fBw*gAw*gBweta*wxi + fBw*gAweta*gBw*wxi + fBwxi*gAw*gBw*weta) + fAwxi*fBw*gAw*gBw*weta) + 4*r*weta*(fAw*gAweta*(2*fBw*gBweta*wxi + fBwxi*gBw*weta) + fAwxi*fBw*gAw*gBweta*weta))/(a*(b*b*b)*r) + 4*A66*intx*inty*(fAw*gAweta*wxi + fAwxi*gAw*weta)*(fBw*gBweta*wxi + fBwxi*gBw*weta)/((a*a)*(b*b)) - 4*B11*gAw*gBw*intx*inty*wxi*(fAwxi*fBwxixi + fAwxixi*fBwxi)/(a*a*a*a) - B12*intx*inty*((b*b)*gAw*gBw*(fAw*fBwxixi + fAwxixi*fBw) + 4*r*(fAw*gBw*(fBwxi*gAwetaeta*wxi + fBwxixi*gAweta*weta) + fBw*gAw*(fAwxi*gBwetaeta*wxi + fAwxixi*gBweta*weta)))/((a*a)*(b*b)*r) - 4*B16*intx*inty*(fAw*fBwxixi*gAweta*gBw*wxi + fAwxi*(2*fBwxi*gAw*gBweta*wxi + 2*fBwxi*gAweta*gBw*wxi + fBwxixi*gAw*gBw*weta) + fAwxixi*gAw*(fBw*gBweta*wxi + fBwxi*gBw*weta))/((a*a*a)*b) - B22*fAw*fBw*intx*inty*((b*b)*(gAw*gBwetaeta + gAwetaeta*gBw) + r*weta*(4*gAweta*gBwetaeta + 4*gAwetaeta*gBweta))/((b*b*b*b)*r) - 2*B26*intx*inty*((b*b)*(fAw*fBwxi*gAw*gBweta + fAwxi*fBw*gAweta*gBw) + 2*r*(fAw*(fBw*gAweta*gBwetaeta*wxi + fBw*gAwetaeta*gBweta*wxi + 2*fBwxi*gAweta*gBweta*weta + fBwxi*gAwetaeta*gBw*weta) + fAwxi*fBw*weta*(gAw*gBwetaeta + 2*gAweta*gBweta)))/(a*(b*b*b)*r) - 8*B66*intx*inty*(fAw*fBwxi*gAweta*gBweta*wxi + fAwxi*(fBw*gAweta*gBweta*wxi + fBwxi*weta*(gAw*gBweta + gAweta*gBw)))/((a*a)*(b*b)) + 4*D11*fAwxixi*fBwxixi*gAw*gBw*intx*inty/(a*a*a*a) + 4*D12*intx*inty*(fAw*fBwxixi*gAwetaeta*gBw + fAwxixi*fBw*gAw*gBwetaeta)/((a*a)*(b*b)) + 8*D16*intx*inty*(fAwxi*fBwxixi*gAweta*gBw + fAwxixi*fBwxi*gAw*gBweta)/((a*a*a)*b) + 4*D22*fAw*fBw*gAwetaeta*gBwetaeta*intx*inty/(b*b*b*b) + 8*D26*intx*inty*(fAw*fBwxi*gAwetaeta*gBweta + fAwxi*fBw*gAweta*gBwetaeta)/(a*(b*b*b)) + 16*D66*fAwxi*fBwxi*gAweta*gBweta*intx*inty/((a*a)*(b*b)) )
+                                # KGNL
+                                kCv[c] += weight*(intx*inty/4)*(
+                                          NxxNL*(2/a)*fAwxi*gAw*(2/a)*fBwxi*gBw
+                                        + NxyNL*((2/b)*fAw*gAweta*(2/a)*fBwxi*gBw + (2/a)*fAwxi*gAw*(2/b)*fBw*gBweta)
+                                        + NyyNL*(2/b)*fAw*gAweta*(2/b)*fBw*gBweta )
 
     kC = coo_matrix((kCv, (kCr, kCc)), shape=(size, size))
 
@@ -410,23 +429,10 @@ def fkG_num(double [::1] cs, object Finput, object shell,
                 B26 = F[1*6 + 5]
                 B66 = F[2*6 + 5]
 
-                wxi = 0
-                weta = 0
-                if NLgeom == 1:
-                    for j in range(n):
-                        #TODO put these in a lookup vector
-                        gAw = f(j, eta, y1w, y1wr, y2w, y2wr)
-                        gAweta = fp(j, eta, y1w, y1wr, y2w, y2wr)
-                        for i in range(m):
-                            fAw = f(i, xi, x1w, x1wr, x2w, x2wr)
-                            fAwxi = fp(i, xi, x1w, x1wr, x2w, x2wr)
-
-                            col = col0 + DOF*(j*m + i)
-
-                            wxi += cs[col+2]*fAwxi*gAw
-                            weta += cs[col+2]*fAw*gAweta
-
-                # Calculating strain components
+                # Calculating the linear strain components. The stress of the
+                # nonlinear strain enters KT through KGNL in fkC_num, such that
+                # kG is homogeneous of degree one in cs. NLgeom is kept in the
+                # signature for backward compatibility and has no effect here
                 exx = 0.
                 eyy = 0.
                 gxy = 0.
@@ -454,9 +460,9 @@ def fkG_num(double [::1] cs, object Finput, object shell,
 
                         col = col0 + DOF*(j*m + i)
 
-                        exx += cs[col+0]*(2/a)*fAuxi*gAu + 0.5*cs[col+2]*(2/a)*fAwxi*gAw*(2/a)*wxi
-                        eyy += cs[col+1]*(2/b)*fAv*gAveta + 1/r*cs[col+2]*fAw*gAw + 0.5*cs[col+2]*(2/b)*fAw*gAweta*(2/b)*weta
-                        gxy += cs[col+0]*(2/b)*fAu*gAueta + cs[col+1]*(2/a)*fAvxi*gAv + cs[col+2]*(2/b)*weta*(2/a)*fAwxi*gAw + cs[col+2]*(2/a)*wxi*(2/b)*fAw*gAweta
+                        exx += cs[col+0]*(2/a)*fAuxi*gAu
+                        eyy += cs[col+1]*(2/b)*fAv*gAveta + 1/r*cs[col+2]*fAw*gAw
+                        gxy += cs[col+0]*(2/b)*fAu*gAueta + cs[col+1]*(2/a)*fAvxi*gAv
                         kxx += -cs[col+2]*(2/a*2/a)*fAwxixi*gAw
                         kyy += -cs[col+2]*(2/b*2/b)*fAw*gAwetaeta
                         kxy += -2*cs[col+2]*(2/a)*fAwxi*(2/b)*gAweta
@@ -507,7 +513,7 @@ def fkG_num(double [::1] cs, object Finput, object shell,
 
 def fkM_num(object shell, double offset, object hrho_input, int size,
         int row0, int col0, int nx, int ny):
-    from .plate_clpt_donnell_bardell_num import fkM_num as plate_fkM_num
+    from .plate_clpt_donnell_num import fkM_num as plate_fkM_num
     return plate_fkM_num(shell, offset, hrho_input, size, row0, col0, nx, ny)
 
 
@@ -619,7 +625,7 @@ def fkAx_num(object shell, int size, int row0, int col0, int nx, int ny):
 
 
 def fkAy_num(object shell, int size, int row0, int col0, int nx, int ny):
-    from . plate_clpt_donnell_bardell_num import fkAy_num as plate_fkAy_num
+    from . plate_clpt_donnell_num import fkAy_num as plate_fkAy_num
     return plate_fkAy_num(shell, size, row0, col0, nx, ny)
 
 
@@ -805,7 +811,7 @@ def calc_fint(double [::1] cs, object Finput, object shell,
 
                         exx += cs[col+0]*(2/a)*fAuxi*gAu + 0.5*cs[col+2]*(2/a)*fAwxi*gAw*(2/a)*wxi
                         eyy += cs[col+1]*(2/b)*fAv*gAveta + 1./r*cs[col+2]*fAw*gAw + 0.5*cs[col+2]*(2/b)*fAw*gAweta*(2/b)*weta
-                        gxy += cs[col+0]*(2/b)*fAu*gAueta + cs[col+1]*(2/a)*fAvxi*gAv + cs[col+2]*(2/b)*weta*(2/a)*fAwxi*gAw + cs[col+2]*(2/a)*wxi*(2/b)*fAw*gAweta
+                        gxy += cs[col+0]*(2/b)*fAu*gAueta + cs[col+1]*(2/a)*fAvxi*gAv + cs[col+2]*(2/a)*fAwxi*gAw*(2/b)*weta
                         kxx += -cs[col+2]*(2/a*2/a)*fAwxixi*gAw
                         kyy += -cs[col+2]*(2/b*2/b)*fAw*gAwetaeta
                         kxy += -2*cs[col+2]*(2/a*2/b)*fAwxi*gAweta

@@ -67,7 +67,7 @@ class BladeStiff2D(object):
         if fstack is not None:
             self.flange = Shell(m=mf, n=nf, a=bay.a, b=bf, rho=rho,
                     stack=fstack, plyts=fplyts, laminaprops=flaminaprops,
-                    model='plate_clpt_donnell_bardell',
+                    model='plate_clpt_donnell',
                     x1u=0., x1ur=0., x2u=0., x2ur=0.,
                     x1v=0., x1vr=0., x2v=0., x2vr=0.,
                     x1w=0., x1wr=1., x2w=0., x2wr=1.,
@@ -124,7 +124,7 @@ class BladeStiff2D(object):
             else:
                 ktbf, krbf = calc_kt_kr(self.base, self.flange, 'ycte')
 
-            mod = db['bladestiff2d_clt_donnell_bardell']['connections']
+            mod = db['bladestiff2d_clt_donnell']['connections']
             kC += mod.fkCss(ktbf, krbf, self.ys, a, b, m, n,
                             bay.x1u, bay.x1ur, bay.x2u, bay.x2ur,
                             bay.x1v, bay.x1vr, bay.x2v, bay.x2vr,
