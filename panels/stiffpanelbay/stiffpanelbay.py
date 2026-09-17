@@ -22,6 +22,14 @@ def load(name):
         return pickle.load(open(name + '.StiffPanelBay', 'rb'))
 
 
+def _first_not_none(*values):
+    """Return the first value that is not ``None``"""
+    for v in values:
+        if v is not None:
+            return v
+    return None
+
+
 class StiffPanelBay(object):
     r"""Stiffened Shell Bay
 
@@ -491,21 +499,26 @@ class StiffPanelBay(object):
         Additional parameters can be passed using the ``kwargs``.
 
         """
+        #NOTE the laminate and model attributes must be passed to the
+        #     constructor, since Shell.__init__() already calls
+        #     Shell._rebuild(), which needs them to build the laminate
         p = Shell(a=self.a, b=self.b, m=self.m, n=self.n, r=self.r,
                   y1=y1, y2=y2,
+                  model=model if model is not None else self.model,
+                  stack=stack if stack is not None else self.stack,
+                  plyt=plyt if plyt is not None else self.plyt,
+                  plyts=plyts if plyts is not None else self.plyts,
+                  laminaprop=(laminaprop if laminaprop is not None
+                              else self.laminaprop),
+                  laminaprops=(laminaprops if laminaprops is not None
+                               else self.laminaprops),
+                  rho=_first_not_none(rho, self.rho, 0.),
                   x1u=self.x1u, x1ur=self.x1ur, x2u=self.x2u, x2ur=self.x2ur,
                   x1v=self.x1v, x1vr=self.x1vr, x2v=self.x2v, x2vr=self.x2vr,
                   x1w=self.x1w, x1wr=self.x1wr, x2w=self.x2w, x2wr=self.x2wr,
                   y1u=self.y1u, y1ur=self.y1ur, y2u=self.y2u, y2ur=self.y2ur,
                   y1v=self.y1v, y1vr=self.y1vr, y2v=self.y2v, y2vr=self.y2vr,
                   y1w=self.y1w, y1wr=self.y1wr, y2w=self.y2w, y2wr=self.y2wr)
-        p.model = model if model is not None else self.model
-        p.stack = stack if stack is not None else self.stack
-        p.plyt = plyt if plyt is not None else self.plyt
-        p.plyts = plyts if plyts is not None else self.plyts
-        p.laminaprop = laminaprop if laminaprop is not None else self.laminaprop
-        p.laminaprops = laminaprops if laminaprops is not None else self.laminaprops
-        p.rho = rho if rho is not None else self.rho
 
         for k, v in kwargs.items():
             setattr(p, k, v)

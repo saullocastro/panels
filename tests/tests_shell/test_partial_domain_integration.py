@@ -40,7 +40,50 @@ def test_partial_domain_integration():
     assert np.allclose(kCfull.toarray(), (kC_1 + kC_2).toarray())
 
 
+def test_partial_domain_calc_matrices():
+    """Shell.calc_kC/kG/kM must honour (x1, x2, y1, y2)
+
+    The analytical closed-form matrices always integrate the full domain, so
+    ``Shell.calc_*()`` has to switch to the numerically integrated ones
+    whenever only part of the domain is to be integrated. Summing the
+    matrices of adjacent strips must recover the full-domain matrices.
+
+    """
+    kwargs = dict(a=0.7, b=0.3, stack=[0, 45, -45, 90, 90, -45, 45, 0],
+                  plyt=0.125e-3, rho=1600.,
+                  laminaprop=(142.5e9, 8.7e9, 0.28, 5.1e9, 5.1e9, 5.1e9),
+                  model='plate_clpt_donnell', m=10, n=10)
+
+    full = Shell(**kwargs)
+    full.Nxx = -1.
+    assert not full.is_partial_domain()
+    kC_full = full.calc_kC(silent=True).toarray()
+    kG_full = full.calc_kG(silent=True).toarray()
+    kM_full = full.calc_kM(silent=True).toarray()
+
+    kC = np.zeros_like(kC_full)
+    kG = np.zeros_like(kG_full)
+    kM = np.zeros_like(kM_full)
+    edges = np.linspace(0, kwargs['b'], 4)
+    for y1, y2 in zip(edges[:-1], edges[1:]):
+        strip = Shell(**kwargs)
+        strip.Nxx = -1.
+        strip.y1 = y1
+        strip.y2 = y2
+        strip.nx = 4*strip.m
+        strip.ny = 4*strip.n
+        assert strip.is_partial_domain()
+        kC += strip.calc_kC(silent=True).toarray()
+        kG += strip.calc_kG(silent=True).toarray()
+        kM += strip.calc_kM(silent=True).toarray()
+
+    assert np.allclose(kC, kC_full)
+    assert np.allclose(kG, kG_full)
+    assert np.allclose(kM, kM_full)
+
+
 if __name__ == '__main__':
     test_partial_domain_integration()
+    test_partial_domain_calc_matrices()
 
 
