@@ -3,19 +3,19 @@ r"""
 Semi-analytical models for plates, shells and panels (:mod:`panels`)
 ====================================================================
 
-Models for plates, shells, stiffened panels, single or multi-domain are
-available in this package.
-
 .. currentmodule:: panels
 
-.. automodule:: panels.shell
-    :members:
+Ritz models for plates, shells and stiffened panels, single or multi-domain,
+using Bardell's hierarchical functions as approximation functions:
 
-.. automodule:: panels.shell_fext
-    :members:
+- :class:`.Shell`: plates and cylindrical shells, see :mod:`panels.models`
+- :class:`.MultiDomain`: assemblies of shell domains connected by penalties,
+  see :mod:`panels.multidomain.connections`
+- :class:`.BladeStiff1D` and :class:`.BladeStiff2D`: blade stiffeners
+- :class:`.StiffPanelBay`: stiffened panel bays
 
-.. automodule:: panels.plot_shell
-    :members:
+The structural matrices and force vectors of these classes are solved with
+`structsolve <https://github.com/saullocastro/structsolve>`_.
 
 """
 import ctypes

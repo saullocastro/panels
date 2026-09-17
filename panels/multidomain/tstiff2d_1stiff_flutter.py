@@ -119,7 +119,7 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
 
     The following example is one of the test cases:
 
-    .. literalinclude:: ../../../../../compmech/panel/assembly/tests/test_tstiff2d_assembly.py
+    .. literalinclude:: ../../tests/multidomain/test_tstiff2d_assembly.py
         :pyobject: test_tstiff2d_1stiff_flutter
 
     """

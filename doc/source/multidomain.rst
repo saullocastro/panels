@@ -1,12 +1,5 @@
-Base class for multidomain
---------------------------
+Multi-domain assemblies (:mod:`panels.multidomain`)
+===================================================
 
-.. automodule:: panels.multidomain
+.. autoclass:: panels.multidomain.MultiDomain
     :members:
-
-Applications of multidomain
----------------------------
-
-.. toctree::
-    multidomain_cylinder.rst
-    multidomain_tstiff2d.rst

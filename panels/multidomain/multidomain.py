@@ -816,7 +816,7 @@ class MultiDomain(object):
     def force(self, c, group, eval_panel, x_cte_force=None, y_cte_force=None,
               gridx=50, gridy=50, NLterms=True, nr_x_gauss=None, nr_y_gauss=None):
 
-        """Calculate the force along a line (xcte or ycte)
+        r"""Calculate the force along a line (xcte or ycte)
 
         Parameters
         ----------
@@ -1133,19 +1133,33 @@ class MultiDomain(object):
         These are based on penalty stiffnesses, as detailed in Castro and
         Donadon (2017) [castro2017Multidomain]_ .
 
-        conn = List of dicts
-            Each elem of the list = dict for a single connection pair
-            Each dict contains info of that specific with connection pair
-                Example: conn = [dict(p1=top1, p2=top2, func='SSxcte', xcte1=top1.a, xcte2=0)]
+        Parameters
+        ----------
+        conn : list of dict, optional
+            Each element of the list is a dictionary describing a single
+            connection pair, for example::
 
-            For func, possible options are:
-                'SSxcte' and 'SSycte' = between 2 skins along an edge
-                'BFxcte' and 'BFycte' = between stiffener base and flange
-                'SB'                  = btwn 2 skins connected over an area
-                'SB_TSL'              = btwn 2 skins connected over an area with a TSL introduced
-                                            at the interface
-                        Required param:
-                            tsl_type, nr_x_gauss, nr_x_gauss
+                conn = [dict(p1=top1, p2=top2, func='SSxcte', xcte1=top1.a, xcte2=0)]
+
+            The possible options for ``func`` are:
+
+            - ``'SSxcte'`` and ``'SSycte'``: between 2 skins along an edge
+            - ``'BFxcte'`` and ``'BFycte'``: between the base and the flange of
+              a stiffener
+            - ``'SB'``: between 2 skins connected over an area
+            - ``'SB_TSL'``: between 2 skins connected over an area with a
+              traction-separation law (TSL) at the interface, requiring
+              ``tsl_type``, ``nr_x_gauss`` and ``nr_y_gauss``
+
+            If ``None``, the connectivity defined for the assembly is used.
+        finalize : bool, optional
+            Asserts validity of output data and makes the output matrix
+            symmetric.
+        c : array-like or None, optional
+            Ritz constants, used by the damaged connections.
+        kw_tsl : array-like or None, optional
+            Out-of-plane stiffness of the traction-separation law.
+
         """
         if conn is None:
             if self.conn is None:

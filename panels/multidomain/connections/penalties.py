@@ -70,8 +70,8 @@ def calc_kt_kr(p1, p2, connection_type):
     kt, kr : tuple
         A tuple with both values.
 
-    Note
-    ----
+    Notes
+    -----
     Theoretically, the penalty stiffnesses kt and kr can be arbitrarily high in
     order to impose the energy penalty. However, the use of high values is
     associated with numerical instabilities such that one should choose the
