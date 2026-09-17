@@ -816,7 +816,7 @@ class MultiDomain(object):
     def force(self, c, group, eval_panel, x_cte_force=None, y_cte_force=None,
               gridx=50, gridy=50, NLterms=True, nr_x_gauss=None, nr_y_gauss=None):
 
-        """Calculate the force along a line (xcte or ycte)
+        r"""Calculate the force along a line (xcte or ycte)
 
         Parameters
         ----------
@@ -1133,19 +1133,33 @@ class MultiDomain(object):
         These are based on penalty stiffnesses, as detailed in Castro and
         Donadon (2017) [castro2017Multidomain]_ .
 
-        conn = List of dicts
-            Each elem of the list = dict for a single connection pair
-            Each dict contains info of that specific with connection pair
-                Example: conn = [dict(p1=top1, p2=top2, func='SSxcte', xcte1=top1.a, xcte2=0)]
+        Parameters
+        ----------
+        conn : list of dict, optional
+            Each element of the list is a dictionary describing a single
+            connection pair, for example::
 
-            For func, possible options are:
-                'SSxcte' and 'SSycte' = between 2 skins along an edge
-                'BFxcte' and 'BFycte' = between stiffener base and flange
-                'SB'                  = btwn 2 skins connected over an area
-                'SB_TSL'              = btwn 2 skins connected over an area with a TSL introduced
-                                            at the interface
-                        Required param:
-                            tsl_type, nr_x_gauss, nr_x_gauss
+                conn = [dict(p1=top1, p2=top2, func='SSxcte', xcte1=top1.a, xcte2=0)]
+
+            The possible options for ``func`` are:
+
+            - ``'SSxcte'`` and ``'SSycte'``: between 2 skins along an edge
+            - ``'BFxcte'`` and ``'BFycte'``: between the base and the flange of
+              a stiffener
+            - ``'SB'``: between 2 skins connected over an area
+            - ``'SB_TSL'``: between 2 skins connected over an area with a
+              traction-separation law (TSL) at the interface, requiring
+              ``tsl_type``, ``nr_x_gauss`` and ``nr_y_gauss``
+
+            If ``None``, the connectivity defined for the assembly is used.
+        finalize : bool, optional
+            Asserts validity of output data and makes the output matrix
+            symmetric.
+        c : array-like or None, optional
+            Ritz constants, used by the damaged connections.
+        kw_tsl : array-like or None, optional
+            Out-of-plane stiffness of the traction-separation law.
+
         """
         if conn is None:
             if self.conn is None:
@@ -1310,7 +1324,8 @@ class MultiDomain(object):
         return kC_conn
 
 
-    def calc_kC(self, conn=None, c=None, silent=True, finalize=True, inc=1.):
+    def calc_kC(self, conn=None, c=None, silent=True, finalize=True, inc=1.,
+            NLgeom=False):
         """Calculate the constitutive stiffness matrix of the assembly
         --- this is kP (made by diagonally assemblying kP_i from the MD paper)
 
@@ -1330,6 +1345,9 @@ class MultiDomain(object):
             symmetric, should be ``False`` when assemblying.
         inc : float, optional
             Dummy argument needed for non-linear analyses.
+        NLgeom : bool, optional
+            If ``True``, the constitutive part of the tangent stiffness matrix
+            at ``c`` is calculated, see :meth:`.Shell.calc_kC`.
 
         """
         size = self.get_size()
@@ -1343,7 +1361,7 @@ class MultiDomain(object):
                 raise ValueError('Shell attributes "row_start" and "col_start" must be defined!')
             # Calc Kc per panel (from the Shell class)
             kC += p.calc_kC(c=c, row0=p.row_start, col0=p.col_start, size=size,
-                    silent=silent, finalize=False)
+                    silent=silent, finalize=False, NLgeom=NLgeom)
 
         # Make the matrix symm at the end
         if finalize:
@@ -1361,7 +1379,7 @@ class MultiDomain(object):
         return kC
 
 
-    def calc_kG(self, c=None, silent=False, finalize=True):
+    def calc_kG(self, c=None, silent=False, finalize=True, NLgeom=False):
         """Calculate the geometric stiffness matrix of the assembly
 
         Parameters
@@ -1375,6 +1393,9 @@ class MultiDomain(object):
         finalize : bool, optional
             Asserts validity of output data and makes the output matrix
             symmetric, should be ``False`` when assemblying.
+        NLgeom : bool, optional
+            If ``True``, the geometric part of the tangent stiffness matrix at
+            ``c`` is calculated, see :meth:`.Shell.calc_kG`.
 
         """
         size = self.get_size()
@@ -1387,7 +1408,7 @@ class MultiDomain(object):
             if p.row_start is None or p.col_start is None:
                 raise ValueError('Shell attributes "row_start" and "col_start" must be defined!')
             kG += p.calc_kG(c=c, row0=p.row_start, col0=p.col_start, size=size,
-                            silent=silent, finalize=False)
+                            silent=silent, finalize=False, NLgeom=NLgeom)
         if finalize:
             kG = finalize_symmetric_matrix(kG)
         self.kG = kG

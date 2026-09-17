@@ -1,14 +1,38 @@
-Semi-analytical methods for plates, shells and stiffened panels
-===============================================================
+Semi-analytical methods for plates, shells and stiffened panels - panels
+========================================================================
 
+The ``panels`` module provides semi-analytical (Ritz) models for plates,
+cylindrical shells and stiffened panels, using
+:ref:`Bardell's hierarchical functions <theory_func_bardell>` as approximation
+functions. The structural matrices and force vectors are solved with
+`structsolve <https://github.com/saullocastro/structsolve>`_. With ``panels``
+you can run:
 
-Capabilities:
+* Linear static analyses, with field outputs of displacements, strains and
+  stresses
 
-- linear buckling
-- nonlinear postbuckling analysis
-- static
-- vibration
-- panel flutter
+* Linear buckling analyses, with the pre-buckling stress state given by
+  constant stress resultants or calculated with a static analysis
+
+* Frequency analyses, with or without pre-stress
+
+* Panel flutter analyses, using the piston theory
+
+* Geometrically non-linear static analyses based on Donnell's equations, with
+  a tangent stiffness matrix that is the exact derivative of the internal force
+  vector, using:
+
+  - the Newton-Raphson method
+  - the arc-length methods of Riks and Crisfield, able to trace limit points
+    and snap-through
+
+* Multi-domain analyses, connecting shell domains with penalty stiffnesses to
+  model cylinders, stiffened panels and panels with debonding defects
+
+The models are identified by the type of structure, the kinematic theory and
+the non-linear equations, e.g. ``'plate_clpt_donnell'`` and
+``'cylshell_clpt_donnell'``, see :mod:`panels.models`.
+
 
 Code repository
 ---------------
@@ -19,26 +43,61 @@ https://github.com/saullocastro/panels
 Citing this library
 -------------------
 
-Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.5.4). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
+Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.6.0). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
 
 
-Topics
+Usage examples
+--------------
+
+.. toctree::
+    :maxdepth: 1
+
+    ex_linear_static.rst
+    ex_linear_buckling.rst
+    ex_frequency.rst
+    ex_flutter.rst
+    ex_newton_raphson.rst
+    ex_arc_length.rst
+    ex_multidomain_cylinder.rst
+    ex_multidomain_tstiff2d.rst
+
+
+panels API
+----------
+
+.. toctree::
+    :maxdepth: 2
+
+    api.rst
+
+
+Theory
 ------
 
 .. toctree::
     :maxdepth: 1
 
-    panels.rst
-    multidomain.rst
-    multidomain_connections.rst
     bardell.rst
     ref.rst
 
 
-Code repository
----------------
+Installing panels
+-----------------
 
-https://github.com/saullocastro/panels
+Install from the distributed packages by simply doing::
+
+    python -m pip install panels
+
+or from the source code, which requires a C++ compiler to build the Cython
+extensions, using::
+
+    python -m pip install .
+
+
+Changelog
+---------
+
+https://github.com/saullocastro/panels/blob/master/CHANGELOG.md
 
 
 License
@@ -54,4 +113,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-

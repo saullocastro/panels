@@ -10,17 +10,25 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
+import os
+import re
+import sys
+sys.path.insert(0, os.path.abspath('../..'))
+
 
 # -- Project information -----------------------------------------------------
 
-# The full version, including alpha/beta/rc tags
-from panels.version import __version__, __year__
-release = __version__
-
 project = 'panels'
 author = "Saullo G. P. Castro, Nathan D'Souza"
-copyright = '2012-%s, %s' % (__year__, author)
+
+# The full version, including alpha/beta/rc tags, read from setup.py
+with open(os.path.join(os.path.dirname(__file__), '../../setup.py')) as f:
+    setup_py = f.read()
+release = '.'.join(re.search(r'^%s\s*=\s*(\d+)' % name, setup_py, re.M).group(1)
+                   for name in ('MAJOR', 'MINOR', 'MICRO'))
+version = release
+year = re.search(r"^YEAR\s*=\s*'(\d+)'", setup_py, re.M).group(1)
+copyright = '2012-%s, %s' % (year, author)
 
 
 # -- General configuration ---------------------------------------------------
@@ -45,11 +53,15 @@ exclude_patterns = []
 
 default_role = 'math'
 
+# the attributes of the classes are described in their docstrings
+numpydoc_show_class_members = False
+
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
+#html_theme = 'default'
 html_theme = 'pydata_sphinx_theme'
 
 # Add any paths that contain custom static files (such as style sheets) here,

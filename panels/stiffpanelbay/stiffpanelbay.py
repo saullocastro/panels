@@ -1414,7 +1414,7 @@ class StiffPanelBay(object):
         Notes
         -----
         The pickled file will have the name stored in
-        :property:`.StiffPanelBay.name` followed by a
+        ``StiffPanelBay.name`` followed by a
         ``'.StiffPanelBay'`` extension.
 
         """
