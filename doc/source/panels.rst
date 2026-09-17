@@ -1,2 +1,0 @@
-.. automodule:: panels
-    :members:
