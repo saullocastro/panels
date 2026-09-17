@@ -7,6 +7,7 @@
 #cython: infer_types=False
 from scipy.sparse import coo_matrix
 import numpy as np
+from scipy.special import roots_legendre
 
 from panels import INT, DOUBLE
 
@@ -15,9 +16,6 @@ cdef extern from 'bardell_functions.hpp':
     double f(int i, double xi, double xi1t, double xi1r, double xi2t, double xi2r) nogil
     double fp(int i, double xi, double xi1t, double xi1r, double xi2t, double xi2r) nogil
     double fpp(int i, double xi, double xi1t, double xi1r, double xi2t, double xi2r) nogil
-
-cdef extern from 'legendre_gauss_quadrature.hpp':
-    void leggauss_quad(int n, double *points, double* weights) nogil
 
 cdef int DOF = 3
 
@@ -94,13 +92,8 @@ def fkC_num(double [::1] cs, object Finput, object shell,
 
     fdim = 9*m*m*n*n
 
-    xis = np.zeros(nx, dtype=DOUBLE)
-    weights_xi = np.zeros(nx, dtype=DOUBLE)
-    etas = np.zeros(ny, dtype=DOUBLE)
-    weights_eta = np.zeros(ny, dtype=DOUBLE)
-
-    leggauss_quad(nx, &xis[0], &weights_xi[0])
-    leggauss_quad(ny, &etas[0], &weights_eta[0])
+    xis, weights_xi = roots_legendre(nx)
+    etas, weights_eta = roots_legendre(ny)
 
     kCr = np.zeros((fdim,), dtype=INT)
     kCc = np.zeros((fdim,), dtype=INT)
@@ -355,13 +348,8 @@ def fkG_num(double [::1] cs, object Finput, object shell,
 
     fdim = 1*m*m*n*n
 
-    xis = np.zeros(nx, dtype=DOUBLE)
-    weights_xi = np.zeros(nx, dtype=DOUBLE)
-    etas = np.zeros(ny, dtype=DOUBLE)
-    weights_eta = np.zeros(ny, dtype=DOUBLE)
-
-    leggauss_quad(nx, &xis[0], &weights_xi[0])
-    leggauss_quad(ny, &etas[0], &weights_eta[0])
+    xis, weights_xi = roots_legendre(nx)
+    etas, weights_eta = roots_legendre(ny)
 
     kGr = np.zeros((fdim,), dtype=INT)
     kGc = np.zeros((fdim,), dtype=INT)
@@ -582,13 +570,8 @@ def fkM_num(object shell, double offset, object hrho_input, int size,
 
     fdim = 7*m*m*n*n
 
-    xis = np.zeros(nx, dtype=DOUBLE)
-    weights_xi = np.zeros(nx, dtype=DOUBLE)
-    etas = np.zeros(ny, dtype=DOUBLE)
-    weights_eta = np.zeros(ny, dtype=DOUBLE)
-
-    leggauss_quad(nx, &xis[0], &weights_xi[0])
-    leggauss_quad(ny, &etas[0], &weights_eta[0])
+    xis, weights_xi = roots_legendre(nx)
+    etas, weights_eta = roots_legendre(ny)
 
     kMr = np.zeros((fdim,), dtype=INT)
     kMc = np.zeros((fdim,), dtype=INT)
@@ -744,13 +727,8 @@ def fkAx_num(object shell, int size, int row0, int col0, int nx, int ny):
 
     fdim = 1*m*m*n*n
 
-    xis = np.zeros(nx, dtype=DOUBLE)
-    weights_xi = np.zeros(nx, dtype=DOUBLE)
-    etas = np.zeros(ny, dtype=DOUBLE)
-    weights_eta = np.zeros(ny, dtype=DOUBLE)
-
-    leggauss_quad(nx, &xis[0], &weights_xi[0])
-    leggauss_quad(ny, &etas[0], &weights_eta[0])
+    xis, weights_xi = roots_legendre(nx)
+    etas, weights_eta = roots_legendre(ny)
 
     kAr = np.zeros((fdim,), dtype=INT)
     kAc = np.zeros((fdim,), dtype=INT)
@@ -855,13 +833,8 @@ def fkAy_num(object shell, int size, int row0, int col0, int nx, int ny):
 
     fdim = 1*m*m*n*n
 
-    xis = np.zeros(nx, dtype=DOUBLE)
-    weights_xi = np.zeros(nx, dtype=DOUBLE)
-    etas = np.zeros(ny, dtype=DOUBLE)
-    weights_eta = np.zeros(ny, dtype=DOUBLE)
-
-    leggauss_quad(nx, &xis[0], &weights_xi[0])
-    leggauss_quad(ny, &etas[0], &weights_eta[0])
+    xis, weights_xi = roots_legendre(nx)
+    etas, weights_eta = roots_legendre(ny)
 
     kAr = np.zeros((fdim,), dtype=INT)
     kAc = np.zeros((fdim,), dtype=INT)
@@ -998,13 +971,8 @@ def calc_fint(double [::1] cs, object Finput, object shell,
     y1v = shell.y1v; y1vr = shell.y1vr; y2v = shell.y2v; y2vr = shell.y2vr
     y1w = shell.y1w; y1wr = shell.y1wr; y2w = shell.y2w; y2wr = shell.y2wr
 
-    xis = np.zeros(nx, dtype=DOUBLE)
-    weights_xi = np.zeros(nx, dtype=DOUBLE)
-    etas = np.zeros(ny, dtype=DOUBLE)
-    weights_eta = np.zeros(ny, dtype=DOUBLE)
-
-    leggauss_quad(nx, &xis[0], &weights_xi[0])
-    leggauss_quad(ny, &etas[0], &weights_eta[0])
+    xis, weights_xi = roots_legendre(nx)
+    etas, weights_eta = roots_legendre(ny)
 
     fint = np.zeros(size, dtype=DOUBLE)
 

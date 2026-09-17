@@ -145,20 +145,10 @@ extensions = [
             ],
         include_dirs=include_dirs, extra_compile_args=compile_args,
               extra_link_args=link_args, language='c++'),
-# numerical integration
-    Extension('panels.legendre_gauss_quadrature',
-        sources=[
-            './panels/core/src/legendre_gauss_quadrature.cpp',
-            './panels/core/src/legendre_gauss_quadrature_304.cpp',
-            './panels/legendre_gauss_quadrature.pyx',
-            ],
-        include_dirs=include_dirs, extra_compile_args=compile_args,
-              extra_link_args=link_args, language='c++'),
 # field calculation
     Extension('panels.models.clpt_bardell_field',
         sources=[
             './panels/core/src/bardell_functions.cpp',
-            './panels/core/src/legendre_gauss_quadrature.cpp',
             './panels/models/clpt_bardell_field.pyx',
             ],
         include_dirs=include_dirs, extra_compile_args=compile_args,
@@ -174,7 +164,6 @@ extensions = [
     Extension('panels.models.plate_clpt_donnell_bardell_num',
         sources=[
             './panels/core/src/bardell_functions.cpp',
-            './panels/core/src/legendre_gauss_quadrature.cpp',
             './panels/models/plate_clpt_donnell_bardell_num.pyx',
             ],
         include_dirs=include_dirs, extra_compile_args=compile_args,
@@ -189,7 +178,6 @@ extensions = [
     Extension('panels.models.cylshell_clpt_donnell_bardell_num',
         sources=[
             './panels/core/src/bardell_functions.cpp',
-            './panels/core/src/legendre_gauss_quadrature.cpp',
             './panels/models/cylshell_clpt_donnell_bardell_num.pyx',
             ],
         include_dirs=include_dirs, extra_compile_args=compile_args,
@@ -265,8 +253,6 @@ extensions = [
         sources=[
             './panels/core/src/bardell.cpp',
             './panels/core/src/bardell_functions.cpp',
-            './panels/core/src/legendre_gauss_quadrature.cpp',
-            './panels/core/src/legendre_gauss_quadrature_304.cpp',
             './panels/multidomain/connections/kCSB_dmg.pyx',
             ],
         include_dirs=include_dirs, extra_compile_args=compile_args,

@@ -1,7 +1,7 @@
 import numpy as np
 
 from . import modelDB
-from . legendre_gauss_quadrature import get_points_weights
+from scipy.special import roots_legendre
 
 def shell_fext(shell, inc, size, col0):
     r"""Calculate the external force vector
@@ -112,9 +112,7 @@ def shell_fext(shell, inc, size, col0):
         if x is None:
             ycte = y
             # getting integration points and weights
-            points = np.zeros(shell.m, dtype=np.float64)
-            weights = np.zeros(shell.m, dtype=np.float64)
-            get_points_weights(shell.m, points, weights)
+            points, weights = roots_legendre(shell.m)
             # integrating g(x,ycte)*s(x,ycte)*dx = sum(weight_i * ( (a/2) * g(xvar, ycte) * s(xvar, ycte) ))
             for xi, weight in zip(points, weights):
                 xvar = (xi + 1)*shell.a/2
@@ -124,9 +122,7 @@ def shell_fext(shell, inc, size, col0):
         else:
             xcte = x
             # getting integration points and weights
-            points = np.zeros(shell.n, dtype=np.float64)
-            weights = np.zeros(shell.n, dtype=np.float64)
-            get_points_weights(shell.n, points, weights)
+            points, weights = roots_legendre(shell.n)
             # integrating g(xcte,y)*s(xcte,y)*dy = sum(weight_i * ( (b/2) * g(xcte, yvar) * s(xcte, yvar) ))
             for eta, weight in zip(points, weights):
                 yvar = (eta + 1)*shell.b/2
@@ -191,10 +187,7 @@ def shell_fext(shell, inc, size, col0):
             ycte = y
             # getting integration points and weights
                 # Integration over x so m terms
-            points = np.zeros(shell.m, dtype=np.float64)
-            weights = np.zeros(shell.m, dtype=np.float64)
-            get_points_weights(shell.m, points, weights)
-                # Addresses of points and weights get passed -- ftn def uses pointers so changes the address so no return arg
+            points, weights = roots_legendre(shell.m)
             # integrating g(x,ycte)*s(x,ycte)*dx = sum(weight_i * ( (a/2) * g(xvar, ycte) * s(xvar, ycte) ))
             for xi, weight in zip(points, weights):
                 xvar = (xi + 1)*shell.a/2
@@ -212,9 +205,7 @@ def shell_fext(shell, inc, size, col0):
         else:
             xcte = x
             # getting integration points and weights
-            points = np.zeros(shell.n, dtype=np.float64)
-            weights = np.zeros(shell.n, dtype=np.float64)
-            get_points_weights(shell.n, points, weights)
+            points, weights = roots_legendre(shell.n)
             for eta, weight in zip(points, weights):
                 yvar = (eta + 1)*shell.b/2
                 fpt = np.array([[funcu(yvar), funcv(yvar), funcw(yvar), 0, 0]]) * inc_i
