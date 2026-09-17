@@ -285,6 +285,22 @@ class Shell(object):
         self.size = self.get_size()
 
 
+    def is_partial_domain(self):
+        r"""Tell whether this shell integrates only part of its domain
+
+        The attributes ``x1, x2, y1, y2`` are physical coordinates limiting
+        the integration domain, with the sentinels ``x1 = y1 = -1`` and
+        ``x2 = y2 = +1`` meaning that the full domain is integrated (see
+        :class:`.Shell`). Only the numerically integrated matrices honour a
+        partial domain, therefore the analytical closed-form matrices must not
+        be used when this returns ``True``.
+
+        """
+        partial_x = (self.x1 != -1) and (self.x2 != +1)
+        partial_y = (self.y1 != -1) and (self.y2 != +1)
+        return bool(partial_x or partial_y)
+
+
     def get_size(self):
         r"""Calculate the size of the stiffness matrices
 
@@ -426,6 +442,12 @@ class Shell(object):
         analytical_kC = True
         analytical_kG = True
 
+        #NOTE the analytical matrices always integrate the full domain, only
+        #     the numerical ones honour (x1, x2, y1, y2)
+        if self.is_partial_domain():
+            analytical_kC = False
+            analytical_kG = False
+
         # This means a linear analysis is already performed (check panels\tests\tests_shell\test_nonlinear.py)
         # So, the next step is NL. So no analytical
         if c is not None:
@@ -516,6 +538,11 @@ class Shell(object):
             size = int(size) + self.get_size()
 
         analytical_kG = True
+
+        #NOTE see the note in Shell.calc_kC()
+        if self.is_partial_domain():
+            analytical_kG = False
+
         if c is not None:
             check_c(c, size)
             c = np.ascontiguousarray(c, dtype=DOUBLE)
@@ -590,6 +617,10 @@ class Shell(object):
         analytical_kM = True
         nx = self.nx if nx is None else nx
         ny = self.ny if ny is None else ny
+
+        #NOTE see the note in Shell.calc_kC()
+        if self.is_partial_domain():
+            analytical_kM = False
 
         matrices = modelDB.db[self.model]['matrices']
         matrices_num = modelDB.db[self.model]['matrices_num']

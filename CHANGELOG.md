@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.6.0 (2026-09-17)
+## 0.6.8 (2026-09-17)
 
 ### Requirements
 
@@ -43,6 +43,21 @@ The model names `Shell.model = 'plate_clpt_donnell'` and
 `'plate_clpt_donnell_bardell'` and `'cylshell_clpt_donnell_bardell'` are kept
 in `panels.modelDB.db` for backward compatibility.
 
+### Bug fixes
+
+- `StiffPanelBay.add_panel` raised `ValueError: stack must be defined` and made
+  `StiffPanelBay` unusable. It built its `Shell` without the laminate
+  attributes and assigned them only afterwards, but `Shell.__init__` already
+  calls `Shell._rebuild`, which needs them. The laminate, the model and the
+  density are now passed to the constructor.
+- The analytical closed-form matrices `fk0`, `fkG0` and `fkM` always integrate
+  the full shell domain and silently ignored the `(x1, x2, y1, y2)` limits that
+  only the numerically integrated matrices honour. Any assembly with more than
+  one panel over the same approximation functions therefore counted the skin
+  once per panel. `Shell.calc_kC`, `Shell.calc_kG` and `Shell.calc_kM` now
+  select the numerical matrices whenever the new `Shell.is_partial_domain`
+  returns `True`.
+
 ### Enhancements
 
 - `MultiDomain.calc_kC` and `MultiDomain.calc_kG` accept `NLgeom`, forwarded to
@@ -66,6 +81,9 @@ in `panels.modelDB.db` for backward compatibility.
 - API reference with one page per module, and docstrings fixed such that the
   documentation builds without warnings.
 - `CHANGELOG.md` and `CITATION.cff`.
+- `notebooks/stamatelos_labeas_2023.ipynb`, reproducing every result of
+  Stamatelos and Labeas (Computation 2023, 11, 110) and documenting where the
+  published data is incomplete or inconsistent.
 
 ### Tests
 
@@ -79,6 +97,14 @@ in `panels.modelDB.db` for backward compatibility.
 - Snap-through of a hinged cylindrical shell (Sabir and Lock) traced with the
   Riks method of `structsolve`
   (`tests/tests_shell/test_nonlinear_riks.py`).
+- Partial-domain integration of `calc_kC`, `calc_kG` and `calc_kM`, checking
+  that adjacent strips sum to the full-domain matrices
+  (`tests/tests_shell/test_partial_domain_integration.py`).
+- `StiffPanelBay` with blade stiffeners modelled by the 1D flange formulation
+  (`tests/tests_stiffpanelbay/test_stiffpanelbay_lb.py`).
+- Buckling loads of the laminated stiffened plates of Stamatelos and Labeas
+  (Computation 2023, 11, 110), with the published reference values kept in a
+  dictionary (`tests/tests_stiffpanelbay/test_stamatelos_labeas_2023.py`).
 
 ## 0.5.4 (2026-04-09)
 
