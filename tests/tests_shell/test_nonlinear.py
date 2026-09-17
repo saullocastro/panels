@@ -1,3 +1,17 @@
+"""Geometrically nonlinear static analysis with a full Newton-Raphson method
+
+The applied compression is about 37 times the first linear buckling load, deep
+in the postbuckling regime, where several stable equilibrium branches exist.
+The reference deflection corresponds to the branch reached by a load-controlled
+path-following analysis with a secant predictor, which returns the same value
+with 40, 80 and 160 load increments; coarser incrementations may jump to other
+stable branches. Here the full load is applied in a single step, starting from
+the linear solution, which reaches that same branch.
+
+Besides the converged deflection, the test checks that the Newton-Raphson
+iterations converge quadratically, which only happens when the tangent
+stiffness matrix is the exact derivative of the internal force vector.
+"""
 import sys
 sys.path.append('../..')
 
@@ -7,12 +21,25 @@ from structsolve import solve
 from panels.shell import Shell
 
 
+def scaling(vec, D):
+    """
+        A. Peano and R. Riccioni, Automated discretisatton error
+        control in finite element analysis. In Finite Elements m
+        the Commercial Enviror&ent (Editei by J. 26.  Robinson),
+        pp. 368-387. Robinson & Assoc., Verwood.  England (1978)
+    """
+    non_nulls = ~np.isclose(D, 0)
+    vec = vec[non_nulls]
+    D = D[non_nulls]
+    return np.sqrt((vec*np.abs(1/D))@vec)
+
+
 def test_nonlinear():
     m = 6
     n = 6
     for model in [
-            'plate_clpt_donnell_bardell',
-            'cylshell_clpt_donnell_bardell',
+            'plate_clpt_donnell',
+            'cylshell_clpt_donnell',
                   ]:
         print('Testing model: %s' % model)
         s = Shell()
@@ -67,61 +94,44 @@ def test_nonlinear():
         # perturbation load
         s.add_point_load(s.a/2., s.b/2., 0, 0, 0.001, cte=True)
 
-        # solving using Modified Newton-Raphson method
-        def scaling(vec, D):
-            """
-                A. Peano and R. Riccioni, Automated discretisatton error
-                control in finite element analysis. In Finite Elements m
-                the Commercial Enviror&ent (Editei by J. 26.  Robinson),
-                pp. 368-387. Robinson & Assoc., Verwood.  England (1978)
-            """
-            non_nulls = ~np.isclose(D, 0)
-            vec = vec[non_nulls]
-            D = D[non_nulls]
-            return np.sqrt((vec*np.abs(1/D))@vec)
-
         #initial
         fext = s.calc_fext()
-        c0 = solve(s.calc_kC(), fext, silent=True)
-        plot_mesh, fields = s.uvw(c=c0)
+        c = solve(s.calc_kC(), fext, silent=True)
+        plot_mesh, fields = s.uvw(c=c)
         print('  linear wmax', fields['w'].max())
         assert np.isclose(fields['w'].max(), 0.0026619, rtol=0.01)
 
-        count = 0
-        N = s.get_size()
-        fint = s.calc_fint(c=c0)
-        Ri = fint - fext
-        dc = np.zeros(N)
-        ci = c0.copy()
-        epsilon = 1.e-4
-        KT = s.calc_kT(c=c0)
-        # print('KT',np.linalg.det(KT.toarray()))
+        # solving using the full Newton-Raphson method, with the tangent
+        # stiffness matrix updated at every iteration
         D = s.calc_kC().diagonal() # at beginning of load increment
+        epsilon = 1.e-10
+        errors = []
         while True:
-            print()
-            print('  count', count)
-            dc = solve(KT, -Ri, silent=True)
-            print(f'dc {np.linalg.norm(dc)}')
-            c = ci + dc
-            print(f'c {np.linalg.norm(c)}')
-            fint = np.asarray(s.calc_fint(c=c))
-            print(f'fext {np.linalg.norm(fext)}')
-            print(f'fint {np.linalg.norm(fint)}')
+            fint = s.calc_fint(c=c)
             Ri = fint - fext
             crisfield_test = scaling(Ri, D)/max(scaling(fext, D), scaling(fint, D))
-            #print('    crisfield_test', crisfield_test)
+            errors.append(crisfield_test)
+            print('  iteration %d, crisfield_test %1.3e' % (len(errors) - 1, crisfield_test))
             if crisfield_test < epsilon:
-                #print('    converged')
                 break
-            count += 1
-            KT = s.calc_kT(c=c)
-            ci = c.copy()
-            if count > 1000:
+            if len(errors) > 30:
                 raise RuntimeError('Not converged!')
+            KT = s.calc_kT(c=c)
+            c = c + solve(KT, -Ri, silent=True)
 
         plot_mesh, fields = s.uvw(c=c)
         print('  nonlinear wmax', fields['w'].max())
-        assert np.isclose(fields['w'].max(), 0.004574, rtol=0.01)
+        assert np.isclose(fields['w'].max(), 0.004841, rtol=0.01)
+
+        # quadratic convergence: once in the asymptotic range, the order
+        # log(e_k+1)/log(e_k) approaches 2, whereas an inconsistent tangent
+        # gives an order of 1 and needs hundreds of iterations
+        assert len(errors) <= 15, 'too many iterations: %d' % len(errors)
+        orders = [np.log(e1)/np.log(e0) for e0, e1 in zip(errors[:-1], errors[1:])
+                  if 1.e-15 < e1 and e0 < 1.e-2]
+        print('  convergence orders', orders)
+        assert len(orders) >= 2
+        assert min(orders) > 1.6, 'convergence is not quadratic: %s' % orders
 
 
 if __name__ == '__main__':

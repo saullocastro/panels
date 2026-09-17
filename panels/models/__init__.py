@@ -7,9 +7,11 @@ Define structural matrices for each semi-analytical model (:mod:`panels.models`)
 
 The modules herein contained are identified as follows:
 
-    TYPE_THEORY_EQUATION_FIELDFUNCTION_SUFIX
+    TYPE_THEORY_EQUATION_SUFIX
 
 If one of these is not present in the module name, consider not applicable.
+All models use the Rodrigues version of Legendre hierarchic polynomials,
+largely applied by Bardell, as approximation functions.
 
 
 TYPE refers to:
@@ -26,12 +28,6 @@ EQUATION refers to which type of nonlinear equation is being used:
 
 - donnell - kinematic equations using Donnell's equations
 
-FIELDFUNCTION refers to the type of shape function used for the field
-approximation:
-
-- bardell - Rodrigues version of Legendre polynomials, largely applied by
-  Bardell
-
 SUFIX used to indicate additional information
 
 - field - module used to calculate field variables
@@ -39,6 +35,6 @@ SUFIX used to indicate additional information
 
 
 """
-from . import clpt_bardell_field
-from . import cylshell_clpt_donnell_bardell, cylshell_clpt_donnell_bardell_num
-from . import plate_clpt_donnell_bardell, plate_clpt_donnell_bardell_num
+from . import clpt_field
+from . import cylshell_clpt_donnell, cylshell_clpt_donnell_num
+from . import plate_clpt_donnell, plate_clpt_donnell_num

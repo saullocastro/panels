@@ -1059,13 +1059,13 @@ Cell[BoxData[
   "\"\<C:\\\\repositories\\\\panels\\\\theory\\\\shells\\\\cylshell_clpt_\
 donnell_bardell\\\\output_expressions_mathematica\\\\fortran_kC0.txt\>\"", 
    ",", "\"\<C:\\\\repositories\\\\panels\\\\theory\\\\shells\\\\cylshell_\
-clpt_donnell_bardell\\\\output_expressions_mathematica\\\\fortran_kG0.txt\>\"\
+clpt_donnell\\\\output_expressions_mathematica\\\\fortran_kG0.txt\>\"\
 ", ",", "\"\<C:\\\\repositories\\\\panels\\\\theory\\\\shells\\\\cylshell_\
-clpt_donnell_bardell\\\\output_expressions_mathematica\\\\fortran_kG.txt\>\"",
+clpt_donnell\\\\output_expressions_mathematica\\\\fortran_kG.txt\>\"",
     ",", "\"\<C:\\\\repositories\\\\panels\\\\theory\\\\shells\\\\cylshell_\
-clpt_donnell_bardell\\\\output_expressions_mathematica\\\\fortran_kC.txt\>\"",
+clpt_donnell\\\\output_expressions_mathematica\\\\fortran_kC.txt\>\"",
     ",", "\"\<C:\\\\repositories\\\\panels\\\\theory\\\\shells\\\\cylshell_\
-clpt_donnell_bardell\\\\output_expressions_mathematica\\\\fortran_kM.txt\>\""}\
+clpt_donnell\\\\output_expressions_mathematica\\\\fortran_kM.txt\>\""}\
 ], "}"}]], "Input",
  CellChangeTimes->{{3.7380353857707205`*^9, 3.7380353985235963`*^9}}]
 },

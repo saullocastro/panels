@@ -1,0 +1,274 @@
+\section{Tangent stiffness of CLPT plates and cylinders with Donnell kinematics}\label{sec:tangent-CLPT-Donnell}
+
+This section details the internal force vector and the tangent stiffness matrix of the Ritz models of plates and cylindrical shells based on the CLPT with Donnell-type (van K\'arm\'an) kinematics. The goal is to show that each term of the tangent stiffness matrix follows from the exact derivative of the internal force vector, which is required to achieve quadratic convergence in Newton-Raphson iterations, as discussed in Section~\ref{sec:non-linear-static-solution}.
+
+\subsection{Approximation functions}
+
+The three mid-surface displacements are approximated using the Legendre hierarchic polynomials $P_i$ presented in Section~\ref{sec:ESL-plate}, with independent boundary flags for each displacement component and for each direction:
+
+\begin{equation*}
+	\begin{aligned}
+		u(x,y) &= \sum_{i=1}^{m} \sum_{j=1}^{n} c_{ij}^u \, P_i^u(\xi) P_j^u(\eta) \\
+		v(x,y) &= \sum_{i=1}^{m} \sum_{j=1}^{n} c_{ij}^v \, P_i^v(\xi) P_j^v(\eta) \\
+		w(x,y) &= \sum_{i=1}^{m} \sum_{j=1}^{n} c_{ij}^w \, P_i^w(\xi) P_j^w(\eta)
+	\end{aligned}
+\end{equation*}
+
+\noindent where the superscript in $P_i^u(\xi)$ indicates that the flags $\delta_{t1}$, $\delta_{r1}$, $\delta_{t2}$ and $\delta_{r2}$ of the first four terms refer to the boundary conditions of $u$ at $\xi = -1$ and $\xi = +1$, and similarly for $P_j^u(\eta)$, $P_i^v(\xi)$, and so forth. The natural coordinates are:
+
+\begin{equation*}
+	\xi = \frac{2x}{a} - 1 \qquad \eta = \frac{2y}{b} - 1
+\end{equation*}
+
+\noindent where, for the cylindrical shell, $y = r\theta$ is the circumferential arc length and $b$ the corresponding arc length of the panel. Derivatives with respect to the physical coordinates follow from the chain rule:
+
+\begin{equation*}
+	\frac{\partial}{\partial x} = \frac{2}{a}\frac{\partial}{\partial \xi} \qquad \frac{\partial}{\partial y} = \frac{2}{b}\frac{\partial}{\partial \eta}
+\end{equation*}
+
+Using the vector notation of Section~\ref{sec:ESL-plate}:
+
+\begin{equation*}
+	u = \boldsymbol{S}^u \bar{\boldsymbol{c}} \qquad v = \boldsymbol{S}^v \bar{\boldsymbol{c}} \qquad w = \boldsymbol{S}^w \bar{\boldsymbol{c}}
+\end{equation*}
+
+\noindent with the alternated DOF ordering:
+
+\begin{equation*}
+	\bar{\boldsymbol{c}} = \left\{ c_{11}^u \quad c_{11}^v \quad c_{11}^w \quad c_{21}^u \quad c_{21}^v \quad c_{21}^w \quad \cdots \quad c_{mn}^u \quad c_{mn}^v \quad c_{mn}^w \right\}^\top
+\end{equation*}
+
+\noindent such that, using zero-based indices $i$ and $j$, the coefficients $c_{ij}^u$, $c_{ij}^v$ and $c_{ij}^w$ occupy the positions $3(jm+i)$, $3(jm+i)+1$ and $3(jm+i)+2$ of $\bar{\boldsymbol{c}}$. The only non-zero components of $\boldsymbol{S}^u$, $\boldsymbol{S}^v$ and $\boldsymbol{S}^w$ are:
+
+\begin{equation*}
+	S^u_{3(jm+i)} = P_i^u(\xi) P_j^u(\eta) \qquad
+	S^v_{3(jm+i)+1} = P_i^v(\xi) P_j^v(\eta) \qquad
+	S^w_{3(jm+i)+2} = P_i^w(\xi) P_j^w(\eta)
+\end{equation*}
+
+\noindent and, for instance:
+
+\begin{equation*}
+	S^w_{,x} = \frac{2}{a} P_i^{w\prime}(\xi) P_j^w(\eta) \qquad
+	S^w_{,yy} = \frac{4}{b^2} P_i^w(\xi) P_j^{w\prime\prime}(\eta) \qquad
+	S^w_{,xy} = \frac{4}{ab} P_i^{w\prime}(\xi) P_j^{w\prime}(\eta)
+\end{equation*}
+
+\subsection{Kinematics}
+
+The Donnell kinematics of a cylindrical shell are obtained by removing the highlighted terms of Eq.~\ref{eq:CLPT-cylinder-Sanders}, and the plate kinematics of Eq.~\ref{eq:CLPT-plate-vanKarman} are recovered by making $1/r = 0$:
+
+\begin{equation}\label{eq:tangent-donnell-strains}
+	\boldsymbol{\varepsilon}^{(0)} = \left\{ \begin{matrix}
+		u_{,x} + \frac{1}{2} w_{,x}^2 \\[2pt]
+		v_{,y} + \frac{w}{r} + \frac{1}{2} w_{,y}^2 \\[2pt]
+		u_{,y} + v_{,x} + w_{,x} w_{,y}
+	\end{matrix} \right\}
+	\qquad
+	\boldsymbol{\varepsilon}^{(1)} = \left\{ \begin{matrix}
+		-w_{,xx} \\[2pt] -w_{,yy} \\[2pt] -2 w_{,xy}
+	\end{matrix} \right\}
+\end{equation}
+
+The generalised strain and stress vectors are related by the laminate stiffness:
+
+\begin{equation*}
+	\hat{\boldsymbol{\varepsilon}} = \left\{ \begin{matrix} \boldsymbol{\varepsilon}^{(0)} \\ \boldsymbol{\varepsilon}^{(1)} \end{matrix} \right\}
+	\qquad
+	\hat{\boldsymbol{\sigma}} = \left\{ \begin{matrix} \boldsymbol{N} \\ \boldsymbol{M} \end{matrix} \right\}
+	= \begin{bmatrix} \boldsymbol{A} & \boldsymbol{B} \\ \boldsymbol{B} & \boldsymbol{D} \end{bmatrix}
+	\left\{ \begin{matrix} \boldsymbol{\varepsilon}^{(0)} \\ \boldsymbol{\varepsilon}^{(1)} \end{matrix} \right\}
+	= \boldsymbol{C} \hat{\boldsymbol{\varepsilon}}
+\end{equation*}
+
+\noindent with $\boldsymbol{N} = \{N_{xx} \quad N_{yy} \quad N_{xy}\}^\top$ and $\boldsymbol{M} = \{M_{xx} \quad M_{yy} \quad M_{xy}\}^\top$.
+
+\subsubsection{Linear and non-linear differentiation operators}
+
+The linear part of Eq.~\ref{eq:tangent-donnell-strains} is written as $\hat{\boldsymbol{\varepsilon}}_L = \boldsymbol{B}_L \bar{\boldsymbol{c}}$, with:
+
+\begin{equation*}
+	\boldsymbol{B}_L = \begin{bmatrix}
+		\boldsymbol{S}^u_{,x} \\
+		\boldsymbol{S}^v_{,y} + \frac{1}{r}\boldsymbol{S}^w \\
+		\boldsymbol{S}^u_{,y} + \boldsymbol{S}^v_{,x} \\
+		-\boldsymbol{S}^w_{,xx} \\
+		-\boldsymbol{S}^w_{,yy} \\
+		-2\boldsymbol{S}^w_{,xy}
+	\end{bmatrix}
+\end{equation*}
+
+For the non-linear part, it is convenient to define the operator $\boldsymbol{G}$ that extracts the slopes of the deflection:
+
+\begin{equation*}
+	\boldsymbol{G} = \begin{bmatrix} \boldsymbol{G}_1 \\ \boldsymbol{G}_2 \end{bmatrix} = \begin{bmatrix} \boldsymbol{S}^w_{,x} \\ \boldsymbol{S}^w_{,y} \end{bmatrix}
+	\qquad
+	w_{,x} = \boldsymbol{G}_1 \bar{\boldsymbol{c}}
+	\qquad
+	w_{,y} = \boldsymbol{G}_2 \bar{\boldsymbol{c}}
+\end{equation*}
+
+\noindent such that the non-linear differentiation operator becomes:
+
+\begin{equation}\label{eq:tangent-donnell-BNL}
+	\boldsymbol{B}_{NL}(\bar{\boldsymbol{c}}) = \begin{bmatrix}
+		w_{,x} \boldsymbol{G}_1 \\
+		w_{,y} \boldsymbol{G}_2 \\
+		w_{,y} \boldsymbol{G}_1 + w_{,x} \boldsymbol{G}_2 \\
+		\boldsymbol{0} \\ \boldsymbol{0} \\ \boldsymbol{0}
+	\end{bmatrix}
+\end{equation}
+
+Equation~\ref{eq:tangent-donnell-BNL} satisfies both relations of Eq.~\ref{eq:general-strain-B-BNL}. The strain is:
+
+\begin{equation*}
+	\hat{\boldsymbol{\varepsilon}} = \left( \boldsymbol{B}_L + \frac{1}{2}\boldsymbol{B}_{NL} \right) \bar{\boldsymbol{c}}
+	\qquad \text{with} \qquad
+	\hat{\boldsymbol{\varepsilon}}_{NL} = \frac{1}{2}\boldsymbol{B}_{NL}\bar{\boldsymbol{c}} = \left\{ \begin{matrix}
+		\frac{1}{2} w_{,x}^2 \\[2pt] \frac{1}{2} w_{,y}^2 \\[2pt] w_{,x} w_{,y} \\[2pt] 0 \\ 0 \\ 0
+	\end{matrix} \right\}
+\end{equation*}
+
+\noindent and the variation is $\delta \hat{\boldsymbol{\varepsilon}} = (\boldsymbol{B}_L + \boldsymbol{B}_{NL}) \delta\bar{\boldsymbol{c}}$. Note that the factor $\frac{1}{2}$ also applies to the shear row. Evaluating the non-linear shear strain as $\boldsymbol{B}_{NL}\bar{\boldsymbol{c}}$ gives $2 w_{,x} w_{,y}$ instead of $w_{,x} w_{,y}$. That error does not show in $\boldsymbol{B}_{NL}$ itself, but it corrupts the stress state, and therefore the internal force vector and the geometric stiffness matrix. The result is a tangent stiffness matrix that is no longer the derivative of the internal force vector.
+
+\subsection{Internal force vector}
+
+From Eq.~\ref{eq:internal-force-vector}:
+
+\begin{equation*}
+	\boldsymbol{F}_{int} = \int_{\mathcal{A}} (\boldsymbol{B}_L + \boldsymbol{B}_{NL})^\top \hat{\boldsymbol{\sigma}} \, d\mathcal{A}
+\end{equation*}
+
+\noindent which gives, for the three DOFs associated with the term $(i,j)$:
+
+\begin{equation*}
+	\begin{aligned}
+		F_{int}^{u} &= \int_{\mathcal{A}} \left( N_{xx} S^u_{,x} + N_{xy} S^u_{,y} \right) d\mathcal{A} \\
+		F_{int}^{v} &= \int_{\mathcal{A}} \left( N_{yy} S^v_{,y} + N_{xy} S^v_{,x} \right) d\mathcal{A} \\
+		F_{int}^{w} &= \int_{\mathcal{A}} \Big( N_{xx} w_{,x} S^w_{,x} + N_{yy} \left( \tfrac{1}{r} S^w + w_{,y} S^w_{,y} \right) + N_{xy} \left( w_{,y} S^w_{,x} + w_{,x} S^w_{,y} \right) \\
+		&\qquad - M_{xx} S^w_{,xx} - M_{yy} S^w_{,yy} - 2 M_{xy} S^w_{,xy} \Big) d\mathcal{A}
+	\end{aligned}
+\end{equation*}
+
+\subsection{Tangent stiffness matrix}
+
+Following Eqs.~\ref{eq:tangent-stiffness-definition} and \ref{eq:tangent-stiffness-decomposition}:
+
+\begin{equation*}
+	\boldsymbol{K}_T = \frac{\partial \boldsymbol{F}_{int}}{\partial \bar{\boldsymbol{c}}}
+	= \int_{\mathcal{A}} (\boldsymbol{B}_L + \boldsymbol{B}_{NL})^\top \boldsymbol{C} (\boldsymbol{B}_L + \boldsymbol{B}_{NL}) \, d\mathcal{A}
+	+ \int_{\mathcal{A}} \frac{\partial \boldsymbol{B}_{NL}^\top}{\partial \bar{\boldsymbol{c}}} \hat{\boldsymbol{\sigma}} \, d\mathcal{A}
+\end{equation*}
+
+The second integral is evaluated by writing $\boldsymbol{B}_{NL}^\top \hat{\boldsymbol{\sigma}}$ explicitly with Eq.~\ref{eq:tangent-donnell-BNL}:
+
+\begin{equation*}
+	\boldsymbol{B}_{NL}^\top \hat{\boldsymbol{\sigma}} = \boldsymbol{G}_1^\top \left( N_{xx} w_{,x} + N_{xy} w_{,y} \right) + \boldsymbol{G}_2^\top \left( N_{xy} w_{,x} + N_{yy} w_{,y} \right)
+\end{equation*}
+
+\noindent and differentiating with respect to $\bar{\boldsymbol{c}}$ at a fixed stress state:
+
+\begin{equation}\label{eq:tangent-donnell-KG}
+	\boldsymbol{K}_G(\boldsymbol{N}) = \int_{\mathcal{A}} \boldsymbol{G}^\top \tilde{\boldsymbol{N}} \boldsymbol{G} \, d\mathcal{A}
+	\qquad
+	\tilde{\boldsymbol{N}} = \begin{bmatrix} N_{xx} & N_{xy} \\ N_{xy} & N_{yy} \end{bmatrix}
+\end{equation}
+
+\noindent which only has non-zero entries in the $w$--$w$ blocks. For the term pairs $A = (i,j)$ and $B = (k,l)$:
+
+\begin{equation*}
+	K_{G\,[3(jm+i)+2,\;3(lm+k)+2]} = \int_{\mathcal{A}} \left( N_{xx} S^w_{A,x} S^w_{B,x} + N_{xy} \left( S^w_{A,x} S^w_{B,y} + S^w_{A,y} S^w_{B,x} \right) + N_{yy} S^w_{A,y} S^w_{B,y} \right) d\mathcal{A}
+\end{equation*}
+
+\subsubsection{Splitting by degree of homogeneity}
+
+The first integral of $\boldsymbol{K}_T$ expands into the classical groups:
+
+\begin{equation*}
+	\boldsymbol{K}_0 = \int_{\mathcal{A}} \boldsymbol{B}_L^\top \boldsymbol{C} \boldsymbol{B}_L \, d\mathcal{A} \qquad
+	\boldsymbol{K}_{0L} = \int_{\mathcal{A}} \boldsymbol{B}_L^\top \boldsymbol{C} \boldsymbol{B}_{NL} \, d\mathcal{A} \qquad
+	\boldsymbol{K}_{L0} = \boldsymbol{K}_{0L}^\top \qquad
+	\boldsymbol{K}_{LL} = \int_{\mathcal{A}} \boldsymbol{B}_{NL}^\top \boldsymbol{C} \boldsymbol{B}_{NL} \, d\mathcal{A}
+\end{equation*}
+
+The membrane stress in Eq.~\ref{eq:tangent-donnell-KG} is also split, according to the strain that produces it:
+
+\begin{equation*}
+	\boldsymbol{N} = \boldsymbol{N}^0 + \boldsymbol{N}_L + \boldsymbol{N}_{NL}
+	\qquad
+	\boldsymbol{N}_L = \boldsymbol{A}\boldsymbol{\varepsilon}^{(0)}_L + \boldsymbol{B}\boldsymbol{\varepsilon}^{(1)}
+	\qquad
+	\boldsymbol{N}_{NL} = \boldsymbol{A} \left\{ \begin{matrix} \frac{1}{2} w_{,x}^2 \\[2pt] \frac{1}{2} w_{,y}^2 \\[2pt] w_{,x} w_{,y} \end{matrix} \right\}
+\end{equation*}
+
+\noindent where $\boldsymbol{N}^0$ is an optional prescribed pre-stress, used for instance in combined load cases (Section~\ref{sec:combined-load-cases}), and $\boldsymbol{B}$ does not contribute to $\boldsymbol{N}_{NL}$ because $\boldsymbol{\varepsilon}^{(1)}$ is linear for the CLPT. Since Eq.~\ref{eq:tangent-donnell-KG} is linear in $\boldsymbol{N}$:
+
+\begin{equation*}
+	\boldsymbol{K}_G(\boldsymbol{N}) = \boldsymbol{K}_G(\boldsymbol{N}^0 + \boldsymbol{N}_L) + \boldsymbol{K}_{GNL}
+	\qquad \text{with} \qquad
+	\boldsymbol{K}_{GNL} = \boldsymbol{K}_G(\boldsymbol{N}_{NL})
+\end{equation*}
+
+With respect to $\bar{\boldsymbol{c}}$, $\boldsymbol{K}_0$ is constant; $\boldsymbol{K}_{0L}$, $\boldsymbol{K}_{L0}$ and $\boldsymbol{K}_G(\boldsymbol{N}_L)$ are homogeneous of degree one; and $\boldsymbol{K}_{LL}$ and $\boldsymbol{K}_{GNL}$ are homogeneous of degree two. The implementation groups them as:
+
+\begin{equation}\label{eq:tangent-donnell-grouping}
+	\begin{aligned}
+		\boldsymbol{K}_C(\bar{\boldsymbol{c}}) &= \boldsymbol{K}_0 + \boldsymbol{K}_{0L} + \boldsymbol{K}_{L0} + \boldsymbol{K}_{LL} + \boldsymbol{K}_{GNL} \\
+		\boldsymbol{K}_G(\bar{\boldsymbol{c}}) &= \boldsymbol{K}_G(\boldsymbol{N}^0 + \boldsymbol{N}_L) \\
+		\boldsymbol{K}_T(\bar{\boldsymbol{c}}) &= \boldsymbol{K}_C(\bar{\boldsymbol{c}}) + \boldsymbol{K}_G(\bar{\boldsymbol{c}})
+	\end{aligned}
+\end{equation}
+
+Although $\boldsymbol{K}_{GNL}$ is geometric in nature, it is collected together with the constitutive terms so that $\boldsymbol{K}_G(\bar{\boldsymbol{c}})$ stays homogeneous of degree one, $\boldsymbol{K}_G(\lambda\bar{\boldsymbol{c}}) = \lambda\boldsymbol{K}_G(\bar{\boldsymbol{c}})$. The linear buckling problem of Eq.~\ref{eq:linear-buckling} needs this property, because there the load multiplier $\lambda$ scales a stress state obtained from a linear fundamental state. With the grouping of Eq.~\ref{eq:tangent-donnell-grouping}, $\boldsymbol{K}_T$ is the exact Jacobian of $\boldsymbol{F}_{int}$, and the Newton-Raphson update of Eq.~\ref{eq:newton-raphson-update} converges quadratically.
+
+\subsection{Numerical integration}
+
+All integrals are computed in natural coordinates using the Gauss-Legendre quadrature, with $n_\xi$ and $n_\eta$ points:
+
+\begin{equation*}
+	\int_{\mathcal{A}} f \, d\mathcal{A} = \frac{ab}{4} \int_{-1}^{+1} \int_{-1}^{+1} f(\xi, \eta) \, d\xi \, d\eta
+	\approx \frac{ab}{4} \sum_{p=1}^{n_\xi} \sum_{q=1}^{n_\eta} W_p W_q \, f(\xi_p, \eta_q)
+\end{equation*}
+
+\noindent where, for integration over a sub-domain $x_1 \le x \le x_2$ and $y_1 \le y \le y_2$, the factor $ab/4$ becomes $(x_2-x_1)(y_2-y_1)/4$ and the Gauss points are mapped into the corresponding interval of $\xi$ and $\eta$. $\boldsymbol{F}_{int}$ and $\boldsymbol{K}_T$ must be integrated with the same quadrature rule. The consistency between them is then exact at the discrete level, whether or not the quadrature integrates the polynomials exactly.
+
+Table~\ref{tab:tangent-donnell-code} relates the symbols used herein to the variables of the implementation.
+
+\begin{table}[!htbp]
+	\centering
+	\caption[]{Symbols and implementation variables.}
+	\label{tab:tangent-donnell-code}
+	\renewcommand{\arraystretch}{1.3}
+	\begin{tabular}{ll}
+		\toprule
+		Symbol & Variable \\
+		\midrule
+		$P_i^u(\xi)$, $P_i^{u\prime}(\xi)$ & \texttt{fAu}, \texttt{fAuxi} \\
+		$P_j^w(\eta)$, $P_j^{w\prime}(\eta)$, $P_j^{w\prime\prime}(\eta)$ & \texttt{gAw}, \texttt{gAweta}, \texttt{gAwetaeta} \\
+		$P_k^w(\xi)$, $P_l^w(\eta)$ (term $B$) & \texttt{fBw}, \texttt{gBw} \\
+		$\partial w / \partial \xi$, $\partial w / \partial \eta$ & \texttt{wxi}, \texttt{weta} \\
+		$w_{,x}$, $w_{,y}$ & \texttt{wx = (2/a)*wxi}, \texttt{wy = (2/b)*weta} \\
+		$\boldsymbol{N}_{NL}$ & \texttt{NxxNL}, \texttt{NyyNL}, \texttt{NxyNL} \\
+		$\boldsymbol{N}^0$ & \texttt{Nxx0}, \texttt{Nyy0}, \texttt{Nxy0} \\
+		$x_2-x_1$, $y_2-y_1$ & \texttt{intx}, \texttt{inty} \\
+		$W_p W_q$ & \texttt{weight} \\
+		$\boldsymbol{K}_C$, $\boldsymbol{K}_G$, $\boldsymbol{F}_{int}$ & \texttt{fkC\_num}, \texttt{fkG\_num}, \texttt{calc\_fint} \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+\subsection{Verification of the tangent stiffness matrix}
+
+The consistency between $\boldsymbol{K}_T$ and $\boldsymbol{F}_{int}$ is verified by a directional Taylor test. Given an arbitrary state $\bar{\boldsymbol{c}}$ and direction $\boldsymbol{d}$:
+
+\begin{equation*}
+	\boldsymbol{F}_{int}(\bar{\boldsymbol{c}} + h\boldsymbol{d}) = \boldsymbol{F}_{int}(\bar{\boldsymbol{c}}) + h \boldsymbol{K}_T(\bar{\boldsymbol{c}}) \boldsymbol{d} + O(h^2)
+\end{equation*}
+
+\noindent such that the relative error:
+
+\begin{equation*}
+	e(h) = \frac{\left\| \boldsymbol{F}_{int}(\bar{\boldsymbol{c}} + h\boldsymbol{d}) - \boldsymbol{F}_{int}(\bar{\boldsymbol{c}}) - h \boldsymbol{K}_T \boldsymbol{d} \right\|}{\left\| h \boldsymbol{K}_T \boldsymbol{d} \right\|}
+\end{equation*}
+
+\noindent must decrease proportionally to $h$, i.e. $e(h)/h$ must be constant. An inconsistent tangent leaves a remainder of order $h$, and $e(h)$ plateaus instead. The test is complemented by comparing every entry of $\boldsymbol{K}_T$ with a central finite-difference Jacobian of $\boldsymbol{F}_{int}$, and by checking that $\boldsymbol{K}_G(2\bar{\boldsymbol{c}}) = 2\boldsymbol{K}_G(\bar{\boldsymbol{c}})$.

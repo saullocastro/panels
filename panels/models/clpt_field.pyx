@@ -502,7 +502,7 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
                     eyy += c[col+1]*fv[i]*gveta[j]*(2/b) + 1/r*c[col+2]*fw[i]*gw[j] + NLgeom*2/(b*b)*c[col+2]*fw[i]*gweta[j]*weta
                 else:
                     eyy += c[col+1]*fv[i]*gveta[j]*(2/b) + NLgeom*2/(b*b)*c[col+2]*fw[i]*gweta[j]*weta
-                gxy += c[col+0]*fu[i]*gueta[j]*(2/b) + c[col+1]*fvxi[i]*gv[j]*(2/a) + NLgeom*4/(a*b)*(
+                gxy += c[col+0]*fu[i]*gueta[j]*(2/b) + c[col+1]*fvxi[i]*gv[j]*(2/a) + NLgeom*2/(a*b)*( # same as w,x*w,y
                                         c[col+2]*fwxi[i]*gw[j]*weta +
                                         wxi*c[col+2]*fw[i]*gweta[j] )
                 kxx += -c[col+2]*fwxixi[i]*gw[j]*4/(a*a)

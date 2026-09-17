@@ -31,7 +31,7 @@ class BladeStiff1D(object):
         self.bay = bay
         self.panel1 = panel1
         self.panel2 = panel2
-        self.model = 'bladestiff1d_clt_donnell_bardell'
+        self.model = 'bladestiff1d_clt_donnell'
         self.rho = rho
         self.ys = ys
         self.bb = bb

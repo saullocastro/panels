@@ -17,8 +17,8 @@ def test_nonlinear():
     m = 6
     n = 6
     for model in [
-            'plate_clpt_donnell_bardell',
-            'cylshell_clpt_donnell_bardell',
+            'plate_clpt_donnell',
+            'cylshell_clpt_donnell',
                   ]:
         print('Testing model: %s' % model)
         s = Shell()
