@@ -21,7 +21,7 @@ abstract: >-
     debonding defects
 message: >-
   Please, cite this software using:
-  Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.6.9). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
+  Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.6.13). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
 authors:
   - family-names: Castro
     given-names: Saullo G. P.
@@ -49,5 +49,5 @@ keywords:
   - vibration
   - panel flutter
   - multi-domain
-version: 0.6.9
-date-released: '2026-09-17'
+version: 0.6.13
+date-released: '2026-09-18'

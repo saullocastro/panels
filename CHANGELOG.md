@@ -1,6 +1,12 @@
 # Changelog
 
-## 0.7.0 (unreleased)
+## 0.6.13 (2026-09-18)
+
+### Requirements
+
+- `structsolve>=0.4.3`, with the new non-linear solvers (full Newton-Raphson,
+  rewritten arc-length methods of Riks and Crisfield) and the verified sparse
+  solver of `lb`, which could return wrong buckling loads without any warning.
 
 ### Breaking: limits of the integration domain
 
@@ -40,57 +46,6 @@ bit-identical to those of 0.6.9, through both the analytical and the numerical
 integration, and so are the matrices of domains limited on both sides.
 `Shell.is_partial_domain` compares the resolved limits with the edges, and
 `Shell.calc_kA` uses it instead of repeating the old test.
-
-### Bug fixes
-
-- `MultiDomain` connection `'SB'` overwrote the penalty given by
-  `calc_kt_kr` with a hard-coded `kt = 2e5`. That is a N/mm**3 value, about
-  6e-7 of the default penalty in SI units, so a stiffener base was practically
-  disconnected from the skin. The reference values of
-  `tests/multidomain/test_tstiff2d_assembly.py` had been regenerated to match
-  it; restoring the penalty restores their original values.
-- `MultiDomain` connections `'SB'` and `'SB_TSL'` took the panel coming first
-  in the assembly as the top one, so the offset between the mid-surfaces had
-  the wrong sign whenever the bottom panel came first, with errors of up to
-  30 % in a buckling load. `p1` is now always the top panel and `p2` the
-  bottom one, as documented, and panels of different dimensions raise
-  `ValueError`.
-- `MultiDomain.get_kC_conn` swapped `xcte1`/`xcte2` and `ycte1`/`ycte2` inside
-  the user's connection dictionaries when `p1` came after `p2` in the
-  assembly, so every second call, e.g. `calc_kC()` followed by `calc_kT()`,
-  used them swapped back. The dictionaries are no longer modified. A
-  connection of a panel to itself raises `ValueError` instead of
-  `UnboundLocalError`.
-
-### Enhancements
-
-- The `MultiDomain` connection dictionaries accept the keys `'kt'` and `'kr'`
-  to override the penalty constants of `calc_kt_kr`. The default rotation
-  penalty does not grow as the domains become narrower, and for thin skins
-  split in narrow strips it leaves a converged error of about 2 %.
-
-### Tests
-
-- `tests/multidomain/test_stamatelos_labeas_2023_multidomain.py`, the
-  `MultiDomain` counterpart of the Stamatelos and Labeas (2023) test, with
-  plate domains only and every connection strategy: `SSycte` and `SSxcte`
-  (skin strips), `BFycte` (blades as plate domains, at a strip edge and along
-  an interior line, Tables 4 and 5 and Figure 7), `BFxcte` (the same model
-  rotated by 90 degrees, equal to machine precision) and `SB` and `SB_TSL`
-  (the unsymmetric skin split in two bonded sub-laminates).
-- `tests/multidomain/test_conn_kCBFxcte.py` compared the `BFycte` eigenvalue
-  with itself; it now compares it with the `BFxcte` one.
-- `tests/tests_shell/test_partial_domain_limits.py` and
-  `test_stiffpanelbay_lb.py::test_panel_edge_at_one_meter` cover the
-  integration limits.
-
-## 0.6.9 (2026-09-18)
-
-### Requirements
-
-- `structsolve>=0.4.3`, with the new non-linear solvers (full Newton-Raphson,
-  rewritten arc-length methods of Riks and Crisfield) and the verified sparse
-  solver of `lb`, which could return wrong buckling loads without any warning.
 
 ### Breaking: tangent stiffness matrix of the non-linear models
 
@@ -174,6 +129,24 @@ removed from `panels.modelDB.db`, and `Shell._rebuild` now raises
   once per panel. `Shell.calc_kC`, `Shell.calc_kG` and `Shell.calc_kM` now
   select the numerical matrices whenever the new `Shell.is_partial_domain`
   returns `True`.
+- `MultiDomain` connection `'SB'` overwrote the penalty given by
+  `calc_kt_kr` with a hard-coded `kt = 2e5`. That is a N/mm**3 value, about
+  6e-7 of the default penalty in SI units, so a stiffener base was practically
+  disconnected from the skin. The reference values of
+  `tests/multidomain/test_tstiff2d_assembly.py` had been regenerated to match
+  it; restoring the penalty restores their original values.
+- `MultiDomain` connections `'SB'` and `'SB_TSL'` took the panel coming first
+  in the assembly as the top one, so the offset between the mid-surfaces had
+  the wrong sign whenever the bottom panel came first, with errors of up to
+  30 % in a buckling load. `p1` is now always the top panel and `p2` the
+  bottom one, as documented, and panels of different dimensions raise
+  `ValueError`.
+- `MultiDomain.get_kC_conn` swapped `xcte1`/`xcte2` and `ycte1`/`ycte2` inside
+  the user's connection dictionaries when `p1` came after `p2` in the
+  assembly, so every second call, e.g. `calc_kC()` followed by `calc_kT()`,
+  used them swapped back. The dictionaries are no longer modified. A
+  connection of a panel to itself raises `ValueError` instead of
+  `UnboundLocalError`.
 
 ### Enhancements
 
@@ -188,6 +161,10 @@ removed from `panels.modelDB.db`, and `Shell._rebuild` now raises
   C++ sources of the tables (about 7.5 MB) were removed.
 - `num_eigvalues` argument in `tstiff2d_1stiff_compression`,
   `tstiff2d_1stiff_freq` and `tstiff2d_1stiff_flutter`.
+- The `MultiDomain` connection dictionaries accept the keys `'kt'` and `'kr'`
+  to override the penalty constants of `calc_kt_kr`. The default rotation
+  penalty does not grow as the domains become narrower, and for thin skins
+  split in narrow strips it leaves a converged error of about 2 %.
 
 ### Documentation
 
@@ -239,6 +216,18 @@ removed from `panels.modelDB.db`, and `Shell._rebuild` now raises
   convergence of the cylindrical kernels to the plate kernels as
   `r -> infinity`, and the removal of the `NLgeom` argument of `fkG_num` and
   of the legacy model names.
+- `tests/multidomain/test_stamatelos_labeas_2023_multidomain.py`, the
+  `MultiDomain` counterpart of the Stamatelos and Labeas (2023) test, with
+  plate domains only and every connection strategy: `SSycte` and `SSxcte`
+  (skin strips), `BFycte` (blades as plate domains, at a strip edge and along
+  an interior line, Tables 4 and 5 and Figure 7), `BFxcte` (the same model
+  rotated by 90 degrees, equal to machine precision) and `SB` and `SB_TSL`
+  (the unsymmetric skin split in two bonded sub-laminates).
+- `tests/multidomain/test_conn_kCBFxcte.py` compared the `BFycte` eigenvalue
+  with itself; it now compares it with the `BFxcte` one.
+- `tests/tests_shell/test_partial_domain_limits.py` and
+  `test_stiffpanelbay_lb.py::test_panel_edge_at_one_meter` cover the
+  integration limits.
 
 ## 0.5.4 (2026-04-09)
 
