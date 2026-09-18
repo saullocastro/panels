@@ -1,5 +1,89 @@
 # Changelog
 
+## 0.7.0 (unreleased)
+
+### Breaking: limits of the integration domain
+
+The attributes `Shell.x1, x2, y1, y2`, the physical limits of the integration
+domain, default to `None` instead of the sentinels `x1 = y1 = -1` and
+`x2 = y2 = +1`. A `None` limit is the corresponding edge of the shell, `0`,
+`a` or `b`, and each limit is independent of the others. The new
+`Shell.integration_limits()` returns the four limits as floats and raises
+`ValueError` unless `0 <= x1 < x2 <= a` and `0 <= y1 < y2 <= b`. It is called
+by `Shell._rebuild`, so an invalid limit fails when the shell is built.
+
+Code that sets `x1 = -1` or `y1 = -1` to request the full domain now raises
+`ValueError`, and must set `None` instead, or leave the default. There is no
+backward compatibility for the old sentinels, because `+1` is also a valid
+coordinate. For the same reason, code that sets `x2 = +1` or `y2 = +1` alone
+to restore the full domain cannot be detected: it now integrates up to
+`1.0`.
+
+The old convention had two defects, both giving wrong results with no warning:
+
+- `x2 = 1.0` (or `y2 = 1.0`) could not be told apart from the sentinel, so
+  on a shell with `a > 1` the requested limit was replaced by the full
+  domain. A change of 1e-9 in that limit changed the stiffness matrix by
+  34 %. This was reachable through `StiffPanelBay.add_panel`: in a bay of
+  width `b = 1.0` the last panel was integrated over the whole bay, counting
+  its skin twice and giving a buckling load 4.9 % too low, and a panel edge
+  at `y = 1.0` in a wider bay did the same to the first panel.
+- A partial domain was recognized only when both limits of a pair departed
+  from the sentinels, so a single limit, e.g. `x1 = 0.2`, was ignored and the
+  full `x` range was integrated. No caller in panels set a single limit.
+
+The numerical kernels of `plate_clpt_donnell` and `cylshell_clpt_donnell`
+(`fkC_num`, `fkG_num`, `fkM_num`, `fkAx_num`, `fkAy_num` and `calc_fint`) now
+always map the resolved limits to the natural coordinates, which for the full
+domain gives exactly `xi = eta = -1, +1`. The full-domain matrices are
+bit-identical to those of 0.6.9, through both the analytical and the numerical
+integration, and so are the matrices of domains limited on both sides.
+`Shell.is_partial_domain` compares the resolved limits with the edges, and
+`Shell.calc_kA` uses it instead of repeating the old test.
+
+### Bug fixes
+
+- `MultiDomain` connection `'SB'` overwrote the penalty given by
+  `calc_kt_kr` with a hard-coded `kt = 2e5`. That is a N/mm**3 value, about
+  6e-7 of the default penalty in SI units, so a stiffener base was practically
+  disconnected from the skin. The reference values of
+  `tests/multidomain/test_tstiff2d_assembly.py` had been regenerated to match
+  it; restoring the penalty restores their original values.
+- `MultiDomain` connections `'SB'` and `'SB_TSL'` took the panel coming first
+  in the assembly as the top one, so the offset between the mid-surfaces had
+  the wrong sign whenever the bottom panel came first, with errors of up to
+  30 % in a buckling load. `p1` is now always the top panel and `p2` the
+  bottom one, as documented, and panels of different dimensions raise
+  `ValueError`.
+- `MultiDomain.get_kC_conn` swapped `xcte1`/`xcte2` and `ycte1`/`ycte2` inside
+  the user's connection dictionaries when `p1` came after `p2` in the
+  assembly, so every second call, e.g. `calc_kC()` followed by `calc_kT()`,
+  used them swapped back. The dictionaries are no longer modified. A
+  connection of a panel to itself raises `ValueError` instead of
+  `UnboundLocalError`.
+
+### Enhancements
+
+- The `MultiDomain` connection dictionaries accept the keys `'kt'` and `'kr'`
+  to override the penalty constants of `calc_kt_kr`. The default rotation
+  penalty does not grow as the domains become narrower, and for thin skins
+  split in narrow strips it leaves a converged error of about 2 %.
+
+### Tests
+
+- `tests/multidomain/test_stamatelos_labeas_2023_multidomain.py`, the
+  `MultiDomain` counterpart of the Stamatelos and Labeas (2023) test, with
+  plate domains only and every connection strategy: `SSycte` and `SSxcte`
+  (skin strips), `BFycte` (blades as plate domains, at a strip edge and along
+  an interior line, Tables 4 and 5 and Figure 7), `BFxcte` (the same model
+  rotated by 90 degrees, equal to machine precision) and `SB` and `SB_TSL`
+  (the unsymmetric skin split in two bonded sub-laminates).
+- `tests/multidomain/test_conn_kCBFxcte.py` compared the `BFycte` eigenvalue
+  with itself; it now compares it with the `BFxcte` one.
+- `tests/tests_shell/test_partial_domain_limits.py` and
+  `test_stiffpanelbay_lb.py::test_panel_edge_at_one_meter` cover the
+  integration limits.
+
 ## 0.6.9 (2026-09-18)
 
 ### Requirements
