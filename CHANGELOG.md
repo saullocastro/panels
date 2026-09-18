@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.6.8 (2026-09-17)
+## 0.6.9 (2026-09-18)
 
 ### Requirements
 
@@ -24,6 +24,15 @@ strains, `KGNL`, moved from `fkG_num` to `fkC_num` in the models
 Code that calls `calc_kG(c, NLgeom=True)` alone to obtain the geometric
 stiffness matrix of a deformed state now obtains it without `KGNL`.
 
+Following that move, the `NLgeom` argument of the kernels
+`panels.models.plate_clpt_donnell_num.fkG_num` and
+`panels.models.cylshell_clpt_donnell_num.fkG_num` was removed. It had become
+inert, since `KGNL` is assembled by `fkC_num`, so the signature advertised an
+effect it did not have. Code calling these kernels directly must drop the
+argument, which was positional before `Nxx0`. `Shell.calc_kC` and
+`Shell.calc_kG` keep their own `NLgeom` argument, where it still selects the
+numerical integration.
+
 ### Breaking: renamed modules
 
 The suffix `_bardell` was removed from the modules of the models:
@@ -39,12 +48,36 @@ The suffix `_bardell` was removed from the modules of the models:
   `panels.stiffener.models.bladestiff2d_clt_donnell`
 
 The model names `Shell.model = 'plate_clpt_donnell'` and
-`'cylshell_clpt_donnell'` are the new defaults. The legacy names
-`'plate_clpt_donnell_bardell'` and `'cylshell_clpt_donnell_bardell'` are kept
-in `panels.modelDB.db` for backward compatibility.
+`'cylshell_clpt_donnell'` are the only ones accepted. The legacy names
+`'plate_clpt_donnell_bardell'` and `'cylshell_clpt_donnell_bardell'` were
+removed from `panels.modelDB.db`, and `Shell._rebuild` now raises
+`ValueError` listing the valid models when one of them is used.
 
 ### Bug fixes
 
+- `Shell.calc_kC` forwarded an invalid Ritz-constant vector into the nogil
+  kernels. The zero-filled default for `c` was installed only when both `c`
+  and `ABDnxny` were absent, so `calc_kC(ABDnxny=...)` without `c` reached
+  `np.ascontiguousarray(None)`, which returns the shape `(1,)` array `[nan]`.
+  The kernels declare `double [::1] cs` and are compiled with
+  `boundscheck=False`, so with `NLgeom=True` this was read far out of bounds
+  instead of raising. The same gap on `c_cte` was worse: when a constant
+  stress state was set through `Nxx_cte`, `Nyy_cte` or `Nxy_cte` but no
+  `c_cte` was given, `None` reached `fkG_num`, and dereferencing a `None`
+  memoryview segfaulted the interpreter. This hit `calc_kT` on any preloaded
+  panel, since `NLgeom=True` forces the numerical integration.
+- `Shell.calc_fint`, `Shell.uvw` and `Shell.strain` also forwarded `c` into a
+  `double [::1]` argument without checking its size. They now validate it.
+- An unset `Shell.r` silently became `r = 0`, which the cylindrical kernels
+  divide by. The failure surfaced as a bare `AssertionError` from
+  `structsolve.sparseutils.finalize_symmetric_matrix`, with nothing pointing
+  at the radius. The flat-plate limit of a cylindrical shell is
+  `r -> infinity`, not `r = 0`, so `r = 0` is never a valid radius. Models
+  that need one are flagged with `requires_r` in `panels.modelDB`, and
+  `Shell.calc_kC`, `calc_kG`, `calc_kM`, `calc_kA` and `calc_fint` now raise a
+  `ValueError` naming the model and pointing at `'plate_clpt_donnell'` when
+  `r` is `None` or non-positive. The `r = 0` fallback is kept only for the
+  plate models, whose kernels never read it.
 - `StiffPanelBay.add_panel` raised `ValueError: stack must be defined` and made
   `StiffPanelBay` unusable. It built its `Shell` without the laminate
   attributes and assigned them only afterwards, but `Shell.__init__` already
@@ -80,6 +113,17 @@ in `panels.modelDB.db` for backward compatibility.
   panels with a T-stiffener.
 - API reference with one page per module, and docstrings fixed such that the
   documentation builds without warnings.
+- `Shell.calc_kC` documents that its return value is not purely constitutive:
+  with `NLgeom=True` it contains `KGNL`, and with `c_cte` or a non-zero
+  `Nxx_cte`, `Nyy_cte` or `Nxy_cte` it contains `KG(N_cte)`, the device used
+  to superpose combined load cases. `Shell.calc_kG` documents that it stays
+  homogeneous of degree one in `c`, and `Shell.calc_kT`, which had no
+  docstring, documents the grouping of the tangent stiffness matrix.
+- `Shell.calc_kC` claimed that passing `c` gives the large displacement
+  matrix. It does not: `fkC_num` zeroes `w,x` and `w,y` unless `NLgeom == 1`,
+  and `K0L`, `KL0`, `KLL` and `KGNL` are all built from them, so `c` alone
+  still returns `K0`. What `c` selects is the numerical integration over the
+  analytical closed form. The docstring now says so.
 - `CHANGELOG.md` and `CITATION.cff`.
 - `notebooks/stamatelos_labeas_2023.ipynb`, reproducing every result of
   Stamatelos and Labeas (Computation 2023, 11, 110) and documenting where the
@@ -105,6 +149,12 @@ in `panels.modelDB.db` for backward compatibility.
 - Buckling loads of the laminated stiffened plates of Stamatelos and Labeas
   (Computation 2023, 11, 110), with the published reference values kept in a
   dictionary (`tests/tests_stiffpanelbay/test_stamatelos_labeas_2023.py`).
+- Argument handling of the stiffness API
+  (`tests/tests_shell/test_argument_validation.py`): the defaults for `c` and
+  `c_cte`, the size checks of `calc_fint`, the radius validation, the
+  convergence of the cylindrical kernels to the plate kernels as
+  `r -> infinity`, and the removal of the `NLgeom` argument of `fkG_num` and
+  of the legacy model names.
 
 ## 0.5.4 (2026-04-09)
 
