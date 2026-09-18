@@ -27,7 +27,7 @@ The structural matrices are solved with
 Citing this library
 ===================
 
-Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.6.8). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
+Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.6.9). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
 
 
 Documentation
@@ -49,9 +49,12 @@ History
 
 See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
 
-* version 0.6.8 (2026-09-17)
+* version 0.6.9 (2026-09-18)
     - Fixed `StiffPanelBay.add_panel` and the partial-domain integration of
       `Shell.calc_kC`, `calc_kG` and `calc_kM`
+    - Fixed the argument handling of the stiffness API: an invalid `c` or
+      `c_cte` no longer reaches the nogil kernels, and a model that needs a
+      radius raises instead of computing with `r = 0`
     - Reproduction of Stamatelos and Labeas (Computation 2023, 11, 110) in
       `notebooks/stamatelos_labeas_2023.ipynb`
     - Tangent stiffness matrix that is the exact derivative of the internal
@@ -59,7 +62,8 @@ See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
     - `Shell` and `MultiDomain` can be passed directly to
       `structsolve.Analysis`, including the arc-length methods
     - Gauss-Legendre points and weights from `scipy.special.roots_legendre`
-    - Modules of the models renamed without the `_bardell` suffix
+    - Modules of the models renamed without the `_bardell` suffix, and the
+      legacy `_bardell` model names removed from `panels.modelDB.db`
     - Sphinx documentation with usage examples
 * versions 0.5.x
     - Damaged multidomain connections
