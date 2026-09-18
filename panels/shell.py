@@ -375,7 +375,7 @@ class Shell(object):
                     'The integration limits must satisfy 0 <= {0} < {1} <= '
                     '{2}, got {0}={3!r}, {1}={4!r} and {2}={5!r}. Use None '
                     'for an edge of the shell; the sentinels -1 and +1 for '
-                    'the full domain were removed in panels 0.7.0'.format(
+                    'the full domain were removed in panels 0.6.13'.format(
                         name1, name2, dim, getattr(self, name1),
                         getattr(self, name2), length))
             limits += [v1, v2]
