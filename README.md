@@ -27,7 +27,7 @@ The structural matrices are solved with
 Citing this library
 ===================
 
-Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.6.9). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
+Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.6.13). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
 
 
 Documentation
@@ -49,9 +49,21 @@ History
 
 See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
 
-* version 0.6.9 (2026-09-18)
+* version 0.6.13 (2026-09-18)
     - Fixed `StiffPanelBay.add_panel` and the partial-domain integration of
       `Shell.calc_kC`, `calc_kG` and `calc_kM`
+    - The limits `Shell.x1, x2, y1, y2` of the integration domain default to
+      `None` instead of the sentinels `-1` and `+1`, which silently integrated
+      the full domain for a limit at `1.0` and ignored a limit given on one
+      side only; the old `-1` now raises
+    - Fixed the `MultiDomain` skin-base connections: the `'SB'` penalty was a
+      hard-coded mm-unit value, the top and bottom panels depended on their
+      order in the assembly, and the connection dictionaries were modified
+    - Penalty constants of each `MultiDomain` connection can be given with
+      `'kt'` and `'kr'`
+    - Reproduction of Stamatelos and Labeas with plate domains only in
+      `tests/multidomain/test_stamatelos_labeas_2023_multidomain.py`, using
+      every `MultiDomain` connection
     - Fixed the argument handling of the stiffness API: an invalid `c` or
       `c_cte` no longer reaches the nogil kernels, and a model that needs a
       radius raises instead of computing with `r = 0`

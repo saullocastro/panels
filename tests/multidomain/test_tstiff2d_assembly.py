@@ -35,7 +35,13 @@ def test_tstiff2d_1stiff_freq():
         num_eigvalues=10,
         )
     omegan = (-eigvals[0])**0.5
-    assert np.isclose(omegan, 44.147, atol=0.001, rtol=0.001)
+    #NOTE the reference values of this module were changed in 2025 to match
+    #      the skin-base connection 'SB' with a hard-coded penalty
+    #      kt = 2e5, which is a N/mm**3 value and about 6e-7 of the
+    #      penalty given by calc_kt_kr() in these SI units, so the base was
+    #      practically disconnected from the skin. Once the default penalty
+    #      was restored, the values of 2024 came back
+    assert np.isclose(omegan, 48.2733, atol=0.001, rtol=0.001)
 
 
 def test_tstiff2d_1stiff_compression():
@@ -66,7 +72,7 @@ def test_tstiff2d_1stiff_compression():
         Nxx_flange=-1.,
         num_eigvalues=10,
         )
-    assert np.isclose(eigvals[0], 135.1, rtol=0.001)
+    assert np.isclose(eigvals[0], 142.68, rtol=0.001)
 
     assy, c, eigvals, eigvecs = tstiff2d_1stiff_compression(
         b=b,
@@ -90,7 +96,7 @@ def test_tstiff2d_1stiff_compression():
         Nxx_flange=-1.,
         num_eigvalues=10,
         )
-    assert np.isclose(eigvals[0], 67.42, rtol=0.001)
+    assert np.isclose(eigvals[0], 114.86, rtol=0.001)
 
 
 def test_tstiff2d_1stiff_flutter():
@@ -124,7 +130,7 @@ def test_tstiff2d_1stiff_flutter():
         )
     omegan = (-eigvals[0])**0.5
     print(eigvals)
-    assert np.isclose(omegan, 175.5+0.j, rtol=0.001)
+    assert np.isclose(omegan, 446.12+0.j, rtol=0.001)
 
 if __name__ == '__main__':
     test_tstiff2d_1stiff_freq()

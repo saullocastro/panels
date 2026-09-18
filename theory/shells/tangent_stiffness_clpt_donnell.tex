@@ -1,20 +1,64 @@
 \section{Tangent stiffness of CLPT plates and cylinders with Donnell kinematics}\label{sec:tangent-CLPT-Donnell}
 
-This section details the internal force vector and the tangent stiffness matrix of the Ritz models of plates and cylindrical shells based on the CLPT with Donnell-type (van K\'arm\'an) kinematics. The goal is to show that each term of the tangent stiffness matrix follows from the exact derivative of the internal force vector, which is required to achieve quadratic convergence in Newton-Raphson iterations, as discussed in Section~\ref{sec:non-linear-static-solution}.
+This section documents the internal force vector and the tangent stiffness matrix as they are implemented in the Ritz models \texttt{plate\_clpt\_donnell} and \texttt{cylshell\_clpt\_donnell}, both based on the CLPT of Section~\ref{sec:CLPT-plate} with Donnell-Mushtari-Vlasov (van K\'arm\'an) kinematics. Every equation is annotated with the \texttt{file:line} that produces it, such that the reader can move between the equations and the implementation in both directions. The objective is to show that each term of the tangent stiffness matrix follows from the exact derivative of the internal force vector, which is what delivers the quadratic convergence of the Newton-Raphson iterations of Section~\ref{sec:non-linear-static-solution}.
+
+The three matrices named in the title of this section are, in the notation of Eq.~\ref{eq:tangent-stiffness-decomposition}:
+
+\begin{equation}\label{eq:tangent-donnell-KT-split}
+	\boldsymbol{K}_T(\bar{\boldsymbol{c}}) = \boldsymbol{K}_{C0} + \boldsymbol{K}_{CNL}(\bar{\boldsymbol{c}}) + \boldsymbol{K}_G(\bar{\boldsymbol{c}})
+\end{equation}
+
+\noindent whose relation to the grouping used by the implementation, stated in the comment of \texttt{plate\_clpt\_donnell\_num.pyx:173} and of its cylindrical twin, is established in Section~\ref{sec:tangent-donnell-grouping} and tabulated in Section~\ref{sec:tangent-donnell-mapping}. The correspondence is not a renaming only: the boundary between the constitutive and the geometric contributions of Eq.~\ref{eq:tangent-donnell-KT-split} sits at a different place from the one of Eq.~\ref{eq:tangent-stiffness-decomposition}, and Section~\ref{sec:tangent-donnell-discrepancies} says exactly where.
+
+\subsection{The two implementation paths}\label{sec:tangent-donnell-paths}
+
+Each model contributes two modules, registered in \texttt{panels/modelDB.py:11-35} under the keys \texttt{matrices} and \texttt{matrices\_num}:
+
+\begin{itemize}
+	\item The \textbf{closed-form path}, \texttt{matrices}, integrates the full domain analytically. The integrals of products of the approximation functions are evaluated in closed form, and the resulting matrices are constant with respect to $\bar{\boldsymbol{c}}$. It provides \texttt{fk0} (\texttt{plate\_clpt\_donnell.pyx:32}, \texttt{cylshell\_clpt\_donnell.pyx:32}) and \texttt{fkG0} (\texttt{plate\_clpt\_donnell.pyx:273}, \texttt{cylshell\_clpt\_donnell.pyx:274}).
+	\item The \textbf{numerically integrated path}, \texttt{matrices\_num}, applies a Gauss-Legendre rule over $n_x \times n_y$ points, and is the only path that can honour a displacement state $\bar{\boldsymbol{c}}$, a laminate stiffness varying over the domain, or a partial integration domain. It provides \texttt{fkC\_num} (\texttt{plate\_clpt\_donnell\_num.pyx:23}, \texttt{cylshell\_clpt\_donnell\_num.pyx:23}), \texttt{fkG\_num} (\texttt{plate\_clpt\_donnell\_num.pyx:287}, \texttt{cylshell\_clpt\_donnell\_num.pyx:285}) and \texttt{calc\_fint} (\texttt{plate\_clpt\_donnell\_num.pyx:872}, \texttt{cylshell\_clpt\_donnell\_num.pyx:615}).
+\end{itemize}
+
+The selection is made in \texttt{Shell.calc\_kC} (\texttt{panels/shell.py:479}) and \texttt{Shell.calc\_kG} (\texttt{panels/shell.py:671}) by two flags initialised to \texttt{True} at \texttt{panels/shell.py:577-578}, and cleared by the conditions of Table~\ref{tab:tangent-donnell-dispatch}.
+
+\begin{table}[!htbp]
+	\centering
+	\caption[]{Conditions that force the numerically integrated path.}
+	\label{tab:tangent-donnell-dispatch}
+	\renewcommand{\arraystretch}{1.3}
+	\begin{tabular}{lll}
+		\toprule
+		Condition & Affects & \texttt{file:line} \\
+		\midrule
+		\texttt{is\_partial\_domain()} & \texttt{kC} and \texttt{kG} & \texttt{shell.py:582-584}, \texttt{shell.py:711-712} \\
+		\texttt{c} is given & \texttt{kC}, \texttt{kG} & \texttt{shell.py:588-590}, \texttt{shell.py:714-719} \\
+		\texttt{ABDnxny} is given & \texttt{kC} & \texttt{shell.py:592-593} \\
+		\texttt{NLgeom=True} & \texttt{kC} and \texttt{kG} & \texttt{shell.py:595-597}, \texttt{shell.py:724-725} \\
+		\texttt{c\_cte} is given & \texttt{kG} block inside \texttt{kC} & \texttt{shell.py:639-641} \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+\noindent where \texttt{is\_partial\_domain} (\texttt{panels/shell.py:385}) reports whether the integration limits \texttt{x1, x2, y1, y2} differ from the edges of the shell, $0$, $a$ and $b$, after \texttt{Shell.integration\_limits} (\texttt{panels/shell.py:330}) has replaced a limit left as \texttt{None} by the corresponding edge and has validated $0 \le x_1 < x_2 \le a$ and $0 \le y_1 < y_2 \le b$. Two consequences are worth stating explicitly:
+
+\begin{itemize}
+	\item \texttt{Shell.calc\_kT} (\texttt{panels/shell.py:756}) calls both \texttt{calc\_kC} and \texttt{calc\_kG} with \texttt{NLgeom=True} (\texttt{panels/shell.py:785-788}). \textbf{The tangent stiffness matrix therefore always takes the numerically integrated path}, and the closed-form path never participates in a non-linear analysis.
+	\item Conversely, the closed-form path is reached only for $\boldsymbol{K}_{C0}$ and for $\boldsymbol{K}_G$ evaluated at a uniform prescribed membrane stress state, i.e. for linear static analysis and for the classical linear buckling problem of Eq.~\ref{eq:linear-buckling} over a full domain with a constant laminate.
+\end{itemize}
 
 \subsection{Approximation functions}
 
-The three mid-surface displacements are approximated using the Legendre hierarchic polynomials $P_i$ presented in Section~\ref{sec:ESL-plate}, with independent boundary flags for each displacement component and for each direction:
+The three mid-surface displacements are approximated using the hierarchic polynomials $P_i$ of Bardell, evaluated by \texttt{f}, \texttt{fp} and \texttt{fpp} of \texttt{panels/core/include/bardell\_functions.hpp} and implemented in \texttt{panels/core/src/bardell\_functions.cpp}, with the Python wrappers \texttt{calc\_f}, \texttt{calc\_fp}, \texttt{calc\_fpp} of \texttt{panels/bardell.pyx:37-41}. Independent boundary flags are used for each displacement component and for each direction:
 
-\begin{equation*}
+\begin{equation}\label{eq:tangent-donnell-approx}
 	\begin{aligned}
 		u(x,y) &= \sum_{i=1}^{m} \sum_{j=1}^{n} c_{ij}^u \, P_i^u(\xi) P_j^u(\eta) \\
 		v(x,y) &= \sum_{i=1}^{m} \sum_{j=1}^{n} c_{ij}^v \, P_i^v(\xi) P_j^v(\eta) \\
 		w(x,y) &= \sum_{i=1}^{m} \sum_{j=1}^{n} c_{ij}^w \, P_i^w(\xi) P_j^w(\eta)
 	\end{aligned}
-\end{equation*}
+\end{equation}
 
-\noindent where the superscript in $P_i^u(\xi)$ indicates that the flags $\delta_{t1}$, $\delta_{r1}$, $\delta_{t2}$ and $\delta_{r2}$ of the first four terms refer to the boundary conditions of $u$ at $\xi = -1$ and $\xi = +1$, and similarly for $P_j^u(\eta)$, $P_i^v(\xi)$, and so forth. The natural coordinates are:
+\noindent where the superscript in $P_i^u(\xi)$ indicates that the flags $\delta_{t1}$, $\delta_{r1}$, $\delta_{t2}$, $\delta_{r2}$ of the first four terms refer to the boundary conditions of $u$ at $\xi = -1$ and $\xi = +1$, and similarly for $P_j^u(\eta)$, $P_i^v(\xi)$, and so forth. Only the first four terms of \texttt{vec\_f} carry these flags, as \texttt{bardell\_functions.cpp:17-20} shows; the remaining terms vanish together with their first derivative at both ends, which is what makes the set hierarchic. The implementation provides 30 terms (\texttt{bardell\_functions.cpp:3}). The natural coordinates are:
 
 \begin{equation*}
 	\xi = \frac{2x}{a} - 1 \qquad \eta = \frac{2y}{b} - 1
@@ -26,7 +70,7 @@ The three mid-surface displacements are approximated using the Legendre hierarch
 	\frac{\partial}{\partial x} = \frac{2}{a}\frac{\partial}{\partial \xi} \qquad \frac{\partial}{\partial y} = \frac{2}{b}\frac{\partial}{\partial \eta}
 \end{equation*}
 
-Using the vector notation of Section~\ref{sec:ESL-plate}:
+\noindent which is the origin of every factor \texttt{(2/a)} and \texttt{(2/b)} appearing in the kernels, for instance at \texttt{plate\_clpt\_donnell\_num.pyx:1040-1045}. Using the vector notation of Section~\ref{sec:ESL-plate}:
 
 \begin{equation*}
 	u = \boldsymbol{S}^u \bar{\boldsymbol{c}} \qquad v = \boldsymbol{S}^v \bar{\boldsymbol{c}} \qquad w = \boldsymbol{S}^w \bar{\boldsymbol{c}}
@@ -38,7 +82,7 @@ Using the vector notation of Section~\ref{sec:ESL-plate}:
 	\bar{\boldsymbol{c}} = \left\{ c_{11}^u \quad c_{11}^v \quad c_{11}^w \quad c_{21}^u \quad c_{21}^v \quad c_{21}^w \quad \cdots \quad c_{mn}^u \quad c_{mn}^v \quad c_{mn}^w \right\}^\top
 \end{equation*}
 
-\noindent such that, using zero-based indices $i$ and $j$, the coefficients $c_{ij}^u$, $c_{ij}^v$ and $c_{ij}^w$ occupy the positions $3(jm+i)$, $3(jm+i)+1$ and $3(jm+i)+2$ of $\bar{\boldsymbol{c}}$. The only non-zero components of $\boldsymbol{S}^u$, $\boldsymbol{S}^v$ and $\boldsymbol{S}^w$ are:
+\noindent such that, using zero-based indices $i$ and $j$, the coefficients $c_{ij}^u$, $c_{ij}^v$ and $c_{ij}^w$ occupy the positions $3(jm+i)$, $3(jm+i)+1$ and $3(jm+i)+2$ of $\bar{\boldsymbol{c}}$. This is the mapping \texttt{col = col0 + DOF*(j*m + i)} with \texttt{DOF = 3} of \texttt{plate\_clpt\_donnell\_num.pyx:20}, and the size of $\bar{\boldsymbol{c}}$ is $3mn$ (\texttt{panels/shell.py:417}). The only non-zero components of $\boldsymbol{S}^u$, $\boldsymbol{S}^v$ and $\boldsymbol{S}^w$ are:
 
 \begin{equation*}
 	S^u_{3(jm+i)} = P_i^u(\xi) P_j^u(\eta) \qquad
@@ -54,9 +98,11 @@ Using the vector notation of Section~\ref{sec:ESL-plate}:
 	S^w_{,xy} = \frac{4}{ab} P_i^{w\prime}(\xi) P_j^{w\prime}(\eta)
 \end{equation*}
 
-\subsection{Kinematics}
+Throughout the kernels, the pair of indices $(i,j)$ names the row term, denoted $A$, and $(k,l)$ names the column term, denoted $B$; the variables \texttt{fAw}, \texttt{gAweta}, \texttt{fBwxi} and so forth follow that convention. Only the upper triangle is assembled, the lower one being recovered by \texttt{finalize\_symmetric\_matrix} (\texttt{panels/shell.py:657}), which is why every kernel skips the entries with \texttt{row > col} (\texttt{plate\_clpt\_donnell\_num.pyx:218}).
 
-The Donnell kinematics of a cylindrical shell are obtained by removing the highlighted terms of Eq.~\ref{eq:CLPT-cylinder-Sanders}, and the plate kinematics of Eq.~\ref{eq:CLPT-plate-vanKarman} are recovered by making $1/r = 0$:
+\subsection{Kinematics as implemented}\label{sec:tangent-donnell-kinematics}
+
+The Donnell kinematics of a cylindrical shell are obtained by removing the highlighted Sanders-Koiter terms of Eq.~\ref{eq:CLPT-cylinder-Sanders}, and the plate kinematics of Eq.~\ref{eq:CLPT-plate-vanKarman} are recovered by making $1/r = 0$:
 
 \begin{equation}\label{eq:tangent-donnell-strains}
 	\boldsymbol{\varepsilon}^{(0)} = \left\{ \begin{matrix}
@@ -70,24 +116,60 @@ The Donnell kinematics of a cylindrical shell are obtained by removing the highl
 	\end{matrix} \right\}
 \end{equation}
 
+Equation~\ref{eq:tangent-donnell-strains} is the strain state assembled term by term at \texttt{cylshell\_clpt\_donnell\_num.pyx:783-788}, where the hoop term appears as \texttt{1./r*cs[col+2]*fAw*gAw} and the van K\'arm\'an contributions as the products with \texttt{wxi} and \texttt{weta}. The plate differs from it in exactly one place, the absence of that hoop term, which can be seen by comparing \texttt{cylshell\_clpt\_donnell\_num.pyx:784} with \texttt{plate\_clpt\_donnell\_num.pyx:1041}; the five remaining strain components are character for character identical. The same single-term difference holds in \texttt{fkG\_num} (\texttt{cylshell\_clpt\_donnell\_num.pyx:459} against \texttt{plate\_clpt\_donnell\_num.pyx:460}).
+
+\subsubsection{On presenting the plate as the limit of the cylinder}\label{sec:tangent-donnell-limit}
+
+The cylinder is the general case and the plate is its $1/r \to 0$ limit, but this statement must be read as a limit and not as a substitution, for two reasons found in the code.
+
+First, the plate is a \emph{separate implementation}, not a specialisation evaluated at a particular radius: \texttt{modelDB.py:11-35} binds each model to its own pair of modules, and no plate quantity is ever obtained by calling a cylinder kernel.
+
+Second, the limit is $r \to \infty$ and not $r = 0$. The cylindrical kernels contain $1/r$ and $1/r^2$ in denominators, for instance the term \texttt{0.25*A22*...*/((b*b*b*b)*(r*r))} of \texttt{cylshell\_clpt\_donnell\_num.pyx:273} and the term \texttt{0.25*A22*a*b*fAwfBw*gAwgBw/(r*r)} of \texttt{cylshell\_clpt\_donnell.pyx:267}. Evaluating them at $r = 0$ produces infinities, which would only surface later, as an assertion inside \texttt{finalize\_symmetric\_matrix} rejecting the matrix. The radius is therefore validated before any kernel is called. Each model declares in \texttt{panels/modelDB.py} whether it needs one, through the key \texttt{requires\_r}, set for the cylinder at \texttt{modelDB.py:22} and cleared for the plate at \texttt{modelDB.py:34}. \texttt{Shell.\_check\_r} (\texttt{panels/shell.py:300}) raises a \texttt{ValueError} naming the model when \texttt{requires\_r} is set and $r$ is \texttt{None} or $r \leq 0$, and it is called by \texttt{calc\_kC}, \texttt{calc\_kG}, \texttt{calc\_kM}, \texttt{calc\_kA} and \texttt{calc\_fint} (\texttt{panels/shell.py:606}, \texttt{panels/shell.py:730}, \texttt{panels/shell.py:823}, \texttt{panels/shell.py:877}, \texttt{panels/shell.py:1459}). A shell declared with \texttt{model='cylshell\_clpt\_donnell'} and \texttt{r=None} is thus rejected with a message pointing at \texttt{plate\_clpt\_donnell}, rather than being evaluated at a radius that is the opposite of the plate limit.
+
+For the plate model, whose kernels never read \texttt{r}, an unset radius is normalised to zero, the value the remaining code compares against. There $r = 0$ is not a radius but a marker for the absence of one.
+
+Numerically, the convergence of the cylinder towards the plate is first order in $1/r$, as expected from Eq.~\ref{eq:tangent-donnell-strains}, where the hoop term enters linearly. Comparing the two implementations on the same $\bar{\boldsymbol{c}}$, with $a = 0.3$~m, $b = 0.2$~m, $m = n = 4$ and an unsymmetric laminate, gives the relative differences of Table~\ref{tab:tangent-donnell-limit}.
+
+\begin{table}[!htbp]
+	\centering
+	\caption[]{Relative difference between the cylindrical and the plate kernels as the radius grows, at a fixed $\bar{\boldsymbol{c}}$.}
+	\label{tab:tangent-donnell-limit}
+	\renewcommand{\arraystretch}{1.3}
+	\begin{tabular}{rll}
+		\toprule
+		$r$ [m] & $\|\boldsymbol{K}_C^{cyl} - \boldsymbol{K}_C^{plate}\| / \|\boldsymbol{K}_C^{plate}\|$ & $\|\boldsymbol{F}_{int}^{cyl} - \boldsymbol{F}_{int}^{plate}\| / \|\boldsymbol{F}_{int}^{plate}\|$ \\
+		\midrule
+		$10^{0}$ & $3.58 \times 10^{-3}$ & $2.26 \times 10^{-2}$ \\
+		$10^{2}$ & $3.58 \times 10^{-5}$ & $2.26 \times 10^{-4}$ \\
+		$10^{4}$ & $3.58 \times 10^{-7}$ & $2.26 \times 10^{-6}$ \\
+		$10^{6}$ & $3.58 \times 10^{-9}$ & $2.26 \times 10^{-8}$ \\
+		$10^{8}$ & $3.58 \times 10^{-11}$ & $2.26 \times 10^{-10}$ \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+In the equations that follow, the cylinder is written as the general case and the plate is recovered by dropping the terms carrying $1/r$, which is a statement about the equations and not an instruction about the code.
+
+\subsubsection{Constitutive relation}
+
 The generalised strain and stress vectors are related by the laminate stiffness:
 
-\begin{equation*}
+\begin{equation}\label{eq:tangent-donnell-constitutive}
 	\hat{\boldsymbol{\varepsilon}} = \left\{ \begin{matrix} \boldsymbol{\varepsilon}^{(0)} \\ \boldsymbol{\varepsilon}^{(1)} \end{matrix} \right\}
 	\qquad
 	\hat{\boldsymbol{\sigma}} = \left\{ \begin{matrix} \boldsymbol{N} \\ \boldsymbol{M} \end{matrix} \right\}
 	= \begin{bmatrix} \boldsymbol{A} & \boldsymbol{B} \\ \boldsymbol{B} & \boldsymbol{D} \end{bmatrix}
 	\left\{ \begin{matrix} \boldsymbol{\varepsilon}^{(0)} \\ \boldsymbol{\varepsilon}^{(1)} \end{matrix} \right\}
 	= \boldsymbol{C} \hat{\boldsymbol{\varepsilon}}
-\end{equation*}
+\end{equation}
 
-\noindent with $\boldsymbol{N} = \{N_{xx} \quad N_{yy} \quad N_{xy}\}^\top$ and $\boldsymbol{M} = \{M_{xx} \quad M_{yy} \quad M_{xy}\}^\top$.
+\noindent with $\boldsymbol{N} = \{N_{xx} \quad N_{yy} \quad N_{xy}\}^\top$ and $\boldsymbol{M} = \{M_{xx} \quad M_{yy} \quad M_{xy}\}^\top$, which is Eq.~\ref{eq:plate-ABD} written without the transverse shear block. Equation~\ref{eq:tangent-donnell-constitutive} is applied at \texttt{plate\_clpt\_donnell\_num.pyx:1048-1053} and \texttt{cylshell\_clpt\_donnell\_num.pyx:791-796}. The $6 \times 6$ array $\boldsymbol{C}$ is the argument named \texttt{Finput} in every kernel, read from \texttt{Shell.ABD} (\texttt{panels/shell.py:622}, \texttt{panels/shell.py:1462}), itself built by \texttt{Shell.\_get\_lam\_ABD} (\texttt{panels/shell.py:440}). When \texttt{Finput} has the shape $(n_x, n_y, 6, 6)$ it is interpreted as one laminate per integration point, which is how variable stiffness laminates enter (\texttt{plate\_clpt\_donnell\_num.pyx:61-64}); a $(6,6)$ array is used for the whole domain instead (\texttt{plate\_clpt\_donnell\_num.pyx:65-71}). Everything that follows holds pointwise, so a $\boldsymbol{C}$ varying over the domain changes nothing in the derivation.
 
 \subsubsection{Linear and non-linear differentiation operators}
 
 The linear part of Eq.~\ref{eq:tangent-donnell-strains} is written as $\hat{\boldsymbol{\varepsilon}}_L = \boldsymbol{B}_L \bar{\boldsymbol{c}}$, with:
 
-\begin{equation*}
+\begin{equation}\label{eq:tangent-donnell-BL}
 	\boldsymbol{B}_L = \begin{bmatrix}
 		\boldsymbol{S}^u_{,x} \\
 		\boldsymbol{S}^v_{,y} + \frac{1}{r}\boldsymbol{S}^w \\
@@ -96,19 +178,29 @@ The linear part of Eq.~\ref{eq:tangent-donnell-strains} is written as $\hat{\bol
 		-\boldsymbol{S}^w_{,yy} \\
 		-2\boldsymbol{S}^w_{,xy}
 	\end{bmatrix}
-\end{equation*}
+\end{equation}
+
+Equation~\ref{eq:tangent-donnell-BL} is exactly the set of six accumulators of \texttt{fkG\_num} (\texttt{cylshell\_clpt\_donnell\_num.pyx:458-463}, \texttt{plate\_clpt\_donnell\_num.pyx:459-464}), which is the one place in the code where the linear operator appears on its own.
 
 For the non-linear part, it is convenient to define the operator $\boldsymbol{G}$ that extracts the slopes of the deflection:
 
-\begin{equation*}
+\begin{equation}\label{eq:tangent-donnell-G}
 	\boldsymbol{G} = \begin{bmatrix} \boldsymbol{G}_1 \\ \boldsymbol{G}_2 \end{bmatrix} = \begin{bmatrix} \boldsymbol{S}^w_{,x} \\ \boldsymbol{S}^w_{,y} \end{bmatrix}
 	\qquad
 	w_{,x} = \boldsymbol{G}_1 \bar{\boldsymbol{c}}
 	\qquad
 	w_{,y} = \boldsymbol{G}_2 \bar{\boldsymbol{c}}
+\end{equation}
+
+Equation~\ref{eq:tangent-donnell-G} is the Donnell-Mushtari-Vlasov specialisation of the general rotation operators of Eq.~\ref{eq:KG-general}, i.e. $\boldsymbol{G}_1$ and $\boldsymbol{G}_2$ with the highlighted Sanders-Koiter terms $\boldsymbol{S}^u/R_1$ and $\boldsymbol{S}^v/R_2$ removed. The code confirms this: neither \texttt{fkG\_num} nor \texttt{fkG0} contains $\boldsymbol{S}^v$, and both allocate $1 \cdot m^2 n^2$ entries instead of the $9 \cdot m^2 n^2$ of \texttt{fkC\_num} (\texttt{plate\_clpt\_donnell\_num.pyx:376} against \texttt{plate\_clpt\_donnell\_num.pyx:94}), because only the $w$--$w$ block is populated. This is the behaviour described for the Donnell-Mushtari-Vlasov kinematics in Section~\ref{sec:KG-cylinder-DMV}, and it holds for the cylinder as well as for the plate: the $1/r$ term present in $\boldsymbol{B}_L$ has no counterpart in $\boldsymbol{G}$.
+
+In the kernels, the slopes are accumulated in the natural coordinates as \texttt{wxi} and \texttt{weta} (\texttt{plate\_clpt\_donnell\_num.pyx:140-141} for \texttt{fkC\_num}, \texttt{plate\_clpt\_donnell\_num.pyx:1007-1008} for \texttt{calc\_fint}) and converted at \texttt{plate\_clpt\_donnell\_num.pyx:177-178}:
+
+\begin{equation*}
+	w_{,x} = \frac{2}{a}\,\texttt{wxi} \qquad w_{,y} = \frac{2}{b}\,\texttt{weta}
 \end{equation*}
 
-\noindent such that the non-linear differentiation operator becomes:
+With Eq.~\ref{eq:tangent-donnell-G}, the non-linear differentiation operator becomes:
 
 \begin{equation}\label{eq:tangent-donnell-BNL}
 	\boldsymbol{B}_{NL}(\bar{\boldsymbol{c}}) = \begin{bmatrix}
@@ -121,52 +213,54 @@ For the non-linear part, it is convenient to define the operator $\boldsymbol{G}
 
 Equation~\ref{eq:tangent-donnell-BNL} satisfies both relations of Eq.~\ref{eq:general-strain-B-BNL}. The strain is:
 
-\begin{equation*}
+\begin{equation}\label{eq:tangent-donnell-strain-BNL}
 	\hat{\boldsymbol{\varepsilon}} = \left( \boldsymbol{B}_L + \frac{1}{2}\boldsymbol{B}_{NL} \right) \bar{\boldsymbol{c}}
 	\qquad \text{with} \qquad
 	\hat{\boldsymbol{\varepsilon}}_{NL} = \frac{1}{2}\boldsymbol{B}_{NL}\bar{\boldsymbol{c}} = \left\{ \begin{matrix}
 		\frac{1}{2} w_{,x}^2 \\[2pt] \frac{1}{2} w_{,y}^2 \\[2pt] w_{,x} w_{,y} \\[2pt] 0 \\ 0 \\ 0
 	\end{matrix} \right\}
-\end{equation*}
+\end{equation}
 
-\noindent and the variation is $\delta \hat{\boldsymbol{\varepsilon}} = (\boldsymbol{B}_L + \boldsymbol{B}_{NL}) \delta\bar{\boldsymbol{c}}$. Note that the factor $\frac{1}{2}$ also applies to the shear row. Evaluating the non-linear shear strain as $\boldsymbol{B}_{NL}\bar{\boldsymbol{c}}$ gives $2 w_{,x} w_{,y}$ instead of $w_{,x} w_{,y}$. That error does not show in $\boldsymbol{B}_{NL}$ itself, but it corrupts the stress state, and therefore the internal force vector and the geometric stiffness matrix. The result is a tangent stiffness matrix that is no longer the derivative of the internal force vector.
+\noindent and the variation is $\delta \hat{\boldsymbol{\varepsilon}} = (\boldsymbol{B}_L + \boldsymbol{B}_{NL}) \delta\bar{\boldsymbol{c}}$. The factor $\frac{1}{2}$ of Eq.~\ref{eq:tangent-donnell-strain-BNL} applies to the shear row as well, and this is visible in the code as an asymmetry that is easy to mistake for an error: at \texttt{plate\_clpt\_donnell\_num.pyx:1040-1042} the two normal strains carry an explicit \texttt{0.5} whereas the shear strain does not. The reason is that the shear row of $\boldsymbol{B}_{NL}$ already contains two terms, so $\frac{1}{2}\boldsymbol{B}_{NL}\bar{\boldsymbol{c}}$ evaluates to $\frac{1}{2}(2 w_{,x} w_{,y}) = w_{,x}w_{,y}$, which is what the single unscaled product in the code produces. Evaluating the non-linear shear strain as $\boldsymbol{B}_{NL}\bar{\boldsymbol{c}}$ instead would give $2 w_{,x} w_{,y}$. That error does not show in $\boldsymbol{B}_{NL}$ itself, but it corrupts the stress state, and therefore the internal force vector and the geometric stiffness matrix, leaving a tangent stiffness matrix that is no longer the derivative of the internal force vector.
 
-\subsection{Internal force vector}
+\subsection{Internal force vector}\label{sec:tangent-donnell-fint}
 
-From Eq.~\ref{eq:internal-force-vector}:
+From Eq.~\ref{eq:internal-force-vector}, specialised to the mid-surface integration of Eq.~\ref{eq:plate-dU-resultants}:
 
-\begin{equation*}
-	\boldsymbol{F}_{int} = \int_{\mathcal{A}} (\boldsymbol{B}_L + \boldsymbol{B}_{NL})^\top \hat{\boldsymbol{\sigma}} \, d\mathcal{A}
-\end{equation*}
+\begin{equation}\label{eq:tangent-donnell-fint}
+	\boldsymbol{F}_{int}(\bar{\boldsymbol{c}}) = \int_{\mathcal{A}} \left( \boldsymbol{B}_L + \boldsymbol{B}_{NL}(\bar{\boldsymbol{c}}) \right)^\top \hat{\boldsymbol{\sigma}}(\bar{\boldsymbol{c}}) \, d\mathcal{A}
+\end{equation}
 
 \noindent which gives, for the three DOFs associated with the term $(i,j)$:
 
-\begin{equation*}
+\begin{equation}\label{eq:tangent-donnell-fint-rows}
 	\begin{aligned}
 		F_{int}^{u} &= \int_{\mathcal{A}} \left( N_{xx} S^u_{,x} + N_{xy} S^u_{,y} \right) d\mathcal{A} \\
 		F_{int}^{v} &= \int_{\mathcal{A}} \left( N_{yy} S^v_{,y} + N_{xy} S^v_{,x} \right) d\mathcal{A} \\
 		F_{int}^{w} &= \int_{\mathcal{A}} \Big( N_{xx} w_{,x} S^w_{,x} + N_{yy} \left( \tfrac{1}{r} S^w + w_{,y} S^w_{,y} \right) + N_{xy} \left( w_{,y} S^w_{,x} + w_{,x} S^w_{,y} \right) \\
 		&\qquad - M_{xx} S^w_{,xx} - M_{yy} S^w_{,yy} - 2 M_{xy} S^w_{,xy} \Big) d\mathcal{A}
 	\end{aligned}
-\end{equation*}
+\end{equation}
+
+Equation~\ref{eq:tangent-donnell-fint-rows} is \texttt{cylshell\_clpt\_donnell\_num.pyx:817-819}. The hoop contribution $N_{yy} S^w / r$ appears there as \texttt{Nyy*(fAw*gAw/r + ...)}, and the plate form, \texttt{plate\_clpt\_donnell\_num.pyx:1075-1077}, is the same expression without it. Note that $\boldsymbol{B}_L$ contributes the hoop term and the three curvature terms to the $w$ row, whereas $\boldsymbol{B}_{NL}$ contributes the three products of membrane forces with slopes; the $u$ and $v$ rows receive no contribution from $\boldsymbol{B}_{NL}$, which is why they contain only $\boldsymbol{N}$ and no slope.
 
 \subsection{Tangent stiffness matrix}
 
-Following Eqs.~\ref{eq:tangent-stiffness-definition} and \ref{eq:tangent-stiffness-decomposition}:
+Following Eqs.~\ref{eq:tangent-stiffness-definition} and \ref{eq:tangent-stiffness-decomposition}, and differentiating Eq.~\ref{eq:tangent-donnell-fint} with respect to $\bar{\boldsymbol{c}}$:
 
-\begin{equation*}
+\begin{equation}\label{eq:tangent-donnell-KT}
 	\boldsymbol{K}_T = \frac{\partial \boldsymbol{F}_{int}}{\partial \bar{\boldsymbol{c}}}
-	= \int_{\mathcal{A}} (\boldsymbol{B}_L + \boldsymbol{B}_{NL})^\top \boldsymbol{C} (\boldsymbol{B}_L + \boldsymbol{B}_{NL}) \, d\mathcal{A}
-	+ \int_{\mathcal{A}} \frac{\partial \boldsymbol{B}_{NL}^\top}{\partial \bar{\boldsymbol{c}}} \hat{\boldsymbol{\sigma}} \, d\mathcal{A}
-\end{equation*}
+	= \underbrace{\int_{\mathcal{A}} (\boldsymbol{B}_L + \boldsymbol{B}_{NL})^\top \boldsymbol{C} (\boldsymbol{B}_L + \boldsymbol{B}_{NL}) \, d\mathcal{A}}_{\text{from } \partial \hat{\boldsymbol{\sigma}} / \partial \bar{\boldsymbol{c}}}
+	+ \underbrace{\int_{\mathcal{A}} \frac{\partial \boldsymbol{B}_{NL}^\top}{\partial \bar{\boldsymbol{c}}} \hat{\boldsymbol{\sigma}} \, d\mathcal{A}}_{\text{from } \partial \boldsymbol{B}_{NL} / \partial \bar{\boldsymbol{c}}}
+\end{equation}
 
-The second integral is evaluated by writing $\boldsymbol{B}_{NL}^\top \hat{\boldsymbol{\sigma}}$ explicitly with Eq.~\ref{eq:tangent-donnell-BNL}:
+The first integral uses $\partial \hat{\boldsymbol{\sigma}} / \partial \bar{\boldsymbol{c}} = \boldsymbol{C}\,(\boldsymbol{B}_L + \boldsymbol{B}_{NL})$, which follows from Eq.~\ref{eq:tangent-donnell-strain-BNL} together with $\partial (\boldsymbol{B}_{NL}\bar{\boldsymbol{c}}) / \partial \bar{\boldsymbol{c}} = 2\boldsymbol{B}_{NL}$, itself a consequence of $\boldsymbol{B}_{NL}$ being homogeneous of degree one in $\bar{\boldsymbol{c}}$. The second integral is evaluated by writing $\boldsymbol{B}_{NL}^\top \hat{\boldsymbol{\sigma}}$ explicitly with Eq.~\ref{eq:tangent-donnell-BNL}:
 
 \begin{equation*}
 	\boldsymbol{B}_{NL}^\top \hat{\boldsymbol{\sigma}} = \boldsymbol{G}_1^\top \left( N_{xx} w_{,x} + N_{xy} w_{,y} \right) + \boldsymbol{G}_2^\top \left( N_{xy} w_{,x} + N_{yy} w_{,y} \right)
 \end{equation*}
 
-\noindent and differentiating with respect to $\bar{\boldsymbol{c}}$ at a fixed stress state:
+\noindent and differentiating with respect to $\bar{\boldsymbol{c}}$ at a fixed stress state, using Eq.~\ref{eq:tangent-donnell-G}:
 
 \begin{equation}\label{eq:tangent-donnell-KG}
 	\boldsymbol{K}_G(\boldsymbol{N}) = \int_{\mathcal{A}} \boldsymbol{G}^\top \tilde{\boldsymbol{N}} \boldsymbol{G} \, d\mathcal{A}
@@ -174,101 +268,277 @@ The second integral is evaluated by writing $\boldsymbol{B}_{NL}^\top \hat{\bold
 	\tilde{\boldsymbol{N}} = \begin{bmatrix} N_{xx} & N_{xy} \\ N_{xy} & N_{yy} \end{bmatrix}
 \end{equation}
 
-\noindent which only has non-zero entries in the $w$--$w$ blocks. For the term pairs $A = (i,j)$ and $B = (k,l)$:
+Equation~\ref{eq:tangent-donnell-KG} is the Donnell form of Eq.~\ref{eq:KG-cylinder-DMV}, and it only has non-zero entries in the $w$--$w$ blocks. For the term pairs $A = (i,j)$ and $B = (k,l)$:
 
-\begin{equation*}
+\begin{equation}\label{eq:tangent-donnell-KG-entry}
 	K_{G\,[3(jm+i)+2,\;3(lm+k)+2]} = \int_{\mathcal{A}} \left( N_{xx} S^w_{A,x} S^w_{B,x} + N_{xy} \left( S^w_{A,x} S^w_{B,y} + S^w_{A,y} S^w_{B,x} \right) + N_{yy} S^w_{A,y} S^w_{B,y} \right) d\mathcal{A}
-\end{equation*}
+\end{equation}
 
-\subsubsection{Splitting by degree of homogeneity}
+Equation~\ref{eq:tangent-donnell-KG-entry} is transcribed literally at \texttt{cylshell\_clpt\_donnell\_num.pyx:499-502}, where the four products of shape functions appear in the same order. The plate writes the same expression in an algebraically expanded form at \texttt{plate\_clpt\_donnell\_num.pyx:500}; the two are identical after collecting the powers of $a$ and $b$.
 
-The first integral of $\boldsymbol{K}_T$ expands into the classical groups:
+\subsubsection{Which stress enters $\boldsymbol{K}_G$, and the degree of homogeneity}\label{sec:tangent-donnell-grouping}
 
-\begin{equation*}
+The first integral of Eq.~\ref{eq:tangent-donnell-KT} expands into the four classical groups:
+
+\begin{equation}\label{eq:tangent-donnell-K-groups}
 	\boldsymbol{K}_0 = \int_{\mathcal{A}} \boldsymbol{B}_L^\top \boldsymbol{C} \boldsymbol{B}_L \, d\mathcal{A} \qquad
 	\boldsymbol{K}_{0L} = \int_{\mathcal{A}} \boldsymbol{B}_L^\top \boldsymbol{C} \boldsymbol{B}_{NL} \, d\mathcal{A} \qquad
 	\boldsymbol{K}_{L0} = \boldsymbol{K}_{0L}^\top \qquad
 	\boldsymbol{K}_{LL} = \int_{\mathcal{A}} \boldsymbol{B}_{NL}^\top \boldsymbol{C} \boldsymbol{B}_{NL} \, d\mathcal{A}
-\end{equation*}
+\end{equation}
 
-The membrane stress in Eq.~\ref{eq:tangent-donnell-KG} is also split, according to the strain that produces it:
+The membrane stress of Eq.~\ref{eq:tangent-donnell-KG} is also split, according to the strain that produces it:
 
-\begin{equation*}
+\begin{equation}\label{eq:tangent-donnell-N-split}
 	\boldsymbol{N} = \boldsymbol{N}^0 + \boldsymbol{N}_L + \boldsymbol{N}_{NL}
 	\qquad
 	\boldsymbol{N}_L = \boldsymbol{A}\boldsymbol{\varepsilon}^{(0)}_L + \boldsymbol{B}\boldsymbol{\varepsilon}^{(1)}
 	\qquad
 	\boldsymbol{N}_{NL} = \boldsymbol{A} \left\{ \begin{matrix} \frac{1}{2} w_{,x}^2 \\[2pt] \frac{1}{2} w_{,y}^2 \\[2pt] w_{,x} w_{,y} \end{matrix} \right\}
-\end{equation*}
+\end{equation}
 
-\noindent where $\boldsymbol{N}^0$ is an optional prescribed pre-stress, used for instance in combined load cases (Section~\ref{sec:combined-load-cases}), and $\boldsymbol{B}$ does not contribute to $\boldsymbol{N}_{NL}$ because $\boldsymbol{\varepsilon}^{(1)}$ is linear for the CLPT. Since Eq.~\ref{eq:tangent-donnell-KG} is linear in $\boldsymbol{N}$:
+\noindent where $\boldsymbol{N}^0$ is an optional prescribed pre-stress, used for instance in the combined load cases of Section~\ref{sec:combined-load-cases}, and $\boldsymbol{B}$ does not contribute to $\boldsymbol{N}_{NL}$ because $\boldsymbol{\varepsilon}^{(1)}$ is linear for the CLPT. In the code, $\boldsymbol{N}^0 + \boldsymbol{N}_L$ is computed at \texttt{cylshell\_clpt\_donnell\_num.pyx:466-468}, from the arguments \texttt{Nxx0, Nyy0, Nxy0} and from the linear strains of Eq.~\ref{eq:tangent-donnell-BL}; and $\boldsymbol{N}_{NL}$ is computed separately, at \texttt{cylshell\_clpt\_donnell\_num.pyx:179-181}, as \texttt{NxxNL, NyyNL, NxyNL}, where the \texttt{0.5} factors of Eq.~\ref{eq:tangent-donnell-N-split} are explicit. Since Eq.~\ref{eq:tangent-donnell-KG} is linear in $\boldsymbol{N}$:
 
-\begin{equation*}
+\begin{equation}\label{eq:tangent-donnell-KGNL}
 	\boldsymbol{K}_G(\boldsymbol{N}) = \boldsymbol{K}_G(\boldsymbol{N}^0 + \boldsymbol{N}_L) + \boldsymbol{K}_{GNL}
 	\qquad \text{with} \qquad
 	\boldsymbol{K}_{GNL} = \boldsymbol{K}_G(\boldsymbol{N}_{NL})
-\end{equation*}
+\end{equation}
 
-With respect to $\bar{\boldsymbol{c}}$, $\boldsymbol{K}_0$ is constant; $\boldsymbol{K}_{0L}$, $\boldsymbol{K}_{L0}$ and $\boldsymbol{K}_G(\boldsymbol{N}_L)$ are homogeneous of degree one; and $\boldsymbol{K}_{LL}$ and $\boldsymbol{K}_{GNL}$ are homogeneous of degree two. The implementation groups them as:
+With respect to $\bar{\boldsymbol{c}}$: $\boldsymbol{K}_0$ is constant; $\boldsymbol{K}_{0L}$, $\boldsymbol{K}_{L0}$ and $\boldsymbol{K}_G(\boldsymbol{N}_L)$ are homogeneous of degree one; and $\boldsymbol{K}_{LL}$ and $\boldsymbol{K}_{GNL}$ are homogeneous of degree two. The implementation groups them as:
 
 \begin{equation}\label{eq:tangent-donnell-grouping}
 	\begin{aligned}
-		\boldsymbol{K}_C(\bar{\boldsymbol{c}}) &= \boldsymbol{K}_0 + \boldsymbol{K}_{0L} + \boldsymbol{K}_{L0} + \boldsymbol{K}_{LL} + \boldsymbol{K}_{GNL} \\
-		\boldsymbol{K}_G(\bar{\boldsymbol{c}}) &= \boldsymbol{K}_G(\boldsymbol{N}^0 + \boldsymbol{N}_L) \\
-		\boldsymbol{K}_T(\bar{\boldsymbol{c}}) &= \boldsymbol{K}_C(\bar{\boldsymbol{c}}) + \boldsymbol{K}_G(\bar{\boldsymbol{c}})
+		\texttt{fkC\_num} \;\rightarrow\; \boldsymbol{K}_C(\bar{\boldsymbol{c}}) &= \boldsymbol{K}_0 + \boldsymbol{K}_{0L} + \boldsymbol{K}_{L0} + \boldsymbol{K}_{LL} + \boldsymbol{K}_{GNL} \\
+		\texttt{fkG\_num} \;\rightarrow\; \boldsymbol{K}_G(\bar{\boldsymbol{c}}) &= \boldsymbol{K}_G(\boldsymbol{N}^0 + \boldsymbol{N}_L) \\
+		\texttt{calc\_kT} \;\rightarrow\; \boldsymbol{K}_T(\bar{\boldsymbol{c}}) &= \boldsymbol{K}_C(\bar{\boldsymbol{c}}) + \boldsymbol{K}_G(\bar{\boldsymbol{c}})
 	\end{aligned}
 \end{equation}
 
-Although $\boldsymbol{K}_{GNL}$ is geometric in nature, it is collected together with the constitutive terms so that $\boldsymbol{K}_G(\bar{\boldsymbol{c}})$ stays homogeneous of degree one, $\boldsymbol{K}_G(\lambda\bar{\boldsymbol{c}}) = \lambda\boldsymbol{K}_G(\bar{\boldsymbol{c}})$. The linear buckling problem of Eq.~\ref{eq:linear-buckling} needs this property, because there the load multiplier $\lambda$ scales a stress state obtained from a linear fundamental state. With the grouping of Eq.~\ref{eq:tangent-donnell-grouping}, $\boldsymbol{K}_T$ is the exact Jacobian of $\boldsymbol{F}_{int}$, and the Newton-Raphson update of Eq.~\ref{eq:newton-raphson-update} converges quadratically.
+Equation~\ref{eq:tangent-donnell-grouping} is the statement written as a comment at \texttt{plate\_clpt\_donnell\_num.pyx:170-176} and \texttt{cylshell\_clpt\_donnell\_num.pyx:170-176}, and the summation $\boldsymbol{K}_T = \boldsymbol{K}_C + \boldsymbol{K}_G$ happens at \texttt{panels/shell.py:789}. The four constitutive groups of Eq.~\ref{eq:tangent-donnell-K-groups} are not assembled separately: the kernel evaluates the whole product $(\boldsymbol{B}_L + \boldsymbol{B}_{NL})^\top \boldsymbol{C} (\boldsymbol{B}_L + \boldsymbol{B}_{NL})$ in expanded symbolic form, in the nine blocks of \texttt{cylshell\_clpt\_donnell\_num.pyx:233-273}, and $\boldsymbol{K}_{GNL}$ is then added on top of the $w$--$w$ block only, at \texttt{cylshell\_clpt\_donnell\_num.pyx:274-278} under the comment \texttt{\# KGNL}.
 
-\subsection{Numerical integration}
-
-All integrals are computed in natural coordinates using the Gauss-Legendre quadrature, with $n_\xi$ and $n_\eta$ points:
+\paragraph{Why $\boldsymbol{K}_{GNL}$ sits where it does.} Although $\boldsymbol{K}_{GNL}$ is geometric in nature, being a $\boldsymbol{G}^\top \tilde{\boldsymbol{N}} \boldsymbol{G}$ product, it is deliberately collected together with the constitutive terms so that $\boldsymbol{K}_G(\bar{\boldsymbol{c}})$ stays homogeneous of degree one:
 
 \begin{equation*}
-	\int_{\mathcal{A}} f \, d\mathcal{A} = \frac{ab}{4} \int_{-1}^{+1} \int_{-1}^{+1} f(\xi, \eta) \, d\xi \, d\eta
-	\approx \frac{ab}{4} \sum_{p=1}^{n_\xi} \sum_{q=1}^{n_\eta} W_p W_q \, f(\xi_p, \eta_q)
+	\boldsymbol{K}_G(\lambda\bar{\boldsymbol{c}}) = \lambda\,\boldsymbol{K}_G(\bar{\boldsymbol{c}})
 \end{equation*}
 
-\noindent where, for integration over a sub-domain $x_1 \le x \le x_2$ and $y_1 \le y \le y_2$, the factor $ab/4$ becomes $(x_2-x_1)(y_2-y_1)/4$ and the Gauss points are mapped into the corresponding interval of $\xi$ and $\eta$. $\boldsymbol{F}_{int}$ and $\boldsymbol{K}_T$ must be integrated with the same quadrature rule. The consistency between them is then exact at the discrete level, whether or not the quadrature integrates the polynomials exactly.
+The linear buckling problem of Eq.~\ref{eq:linear-buckling} needs this property, because there the load multiplier $\lambda$ scales a stress state obtained from a linear fundamental state, and a $\boldsymbol{K}_G$ containing a degree-two term would make $\lambda$ scale that state non-linearly. Had $\boldsymbol{K}_{GNL}$ been placed in \texttt{fkG\_num}, the eigenvalue problem would no longer be the one of Eq.~\ref{eq:linear-buckling-eigenproblem}. With the grouping of Eq.~\ref{eq:tangent-donnell-grouping}, both requirements are met at once: $\boldsymbol{K}_T$ is the exact Jacobian of $\boldsymbol{F}_{int}$, so the Newton-Raphson update of Eq.~\ref{eq:newton-raphson-update} converges quadratically, and $\boldsymbol{K}_G$ remains usable as the geometric stiffness of a linear buckling analysis. The consequence is that \texttt{fkG\_num} has no switch for $\boldsymbol{N}_{NL}$ at all: its signature (\texttt{plate\_clpt\_donnell\_num.pyx:287-289}, \texttt{cylshell\_clpt\_donnell\_num.pyx:285-287}) takes no \texttt{NLgeom} argument, and the comment at \texttt{plate\_clpt\_donnell\_num.pyx:429-431} and \texttt{cylshell\_clpt\_donnell\_num.pyx:428-430} states why. \texttt{Shell.calc\_kG} still accepts \texttt{NLgeom}, but only to force the numerically integrated path of Table~\ref{tab:tangent-donnell-dispatch}; it does not change the value of $\boldsymbol{K}_G$.
 
-Table~\ref{tab:tangent-donnell-code} relates the symbols used herein to the variables of the implementation.
+\subsubsection{Mapping onto $\boldsymbol{K}_{C0}$, $\boldsymbol{K}_{CNL}$ and $\boldsymbol{K}_G$}
+
+With Eq.~\ref{eq:tangent-donnell-grouping} established, the three-way split of Eq.~\ref{eq:tangent-donnell-KT-split} is:
+
+\begin{equation}\label{eq:tangent-donnell-three-way}
+	\begin{aligned}
+		\boldsymbol{K}_{C0} &= \boldsymbol{K}_0 \\
+		\boldsymbol{K}_{CNL}(\bar{\boldsymbol{c}}) &= \boldsymbol{K}_{0L} + \boldsymbol{K}_{L0} + \boldsymbol{K}_{LL} + \boldsymbol{K}_{GNL} \\
+		\boldsymbol{K}_G(\bar{\boldsymbol{c}}) &= \boldsymbol{K}_G(\boldsymbol{N}^0 + \boldsymbol{N}_L)
+	\end{aligned}
+\end{equation}
+
+\noindent i.e. $\boldsymbol{K}_{C0}$ is everything that \texttt{fkC\_num} produces at $\bar{\boldsymbol{c}} = \boldsymbol{0}$, $\boldsymbol{K}_{CNL}$ is everything else that \texttt{fkC\_num} produces, and $\boldsymbol{K}_G$ is what \texttt{fkG\_num} produces. The partition is clean, but only under that reading of $\boldsymbol{K}_{CNL}$, which is not the obvious one; Section~\ref{sec:tangent-donnell-discrepancies} states the caveat.
+
+There is no separate code path for $\boldsymbol{K}_{C0}$ and $\boldsymbol{K}_{CNL}$: \texttt{fkC\_num} returns their sum. $\boldsymbol{K}_{C0}$ alone is obtained either from the closed-form \texttt{fk0} or by calling \texttt{fkC\_num} with $\bar{\boldsymbol{c}} = \boldsymbol{0}$ or with \texttt{NLgeom=0}, both of which make \texttt{wxi} and \texttt{weta} vanish, since the accumulation loop at \texttt{plate\_clpt\_donnell\_num.pyx:128-141} is guarded by \texttt{if NLgeom == 1}. With $w_{,x} = w_{,y} = 0$ one has $\boldsymbol{B}_{NL} = \boldsymbol{0}$ and $\boldsymbol{N}_{NL} = \boldsymbol{0}$, so $\boldsymbol{K}_{CNL}$ vanishes identically, as the comment at \texttt{plate\_clpt\_donnell\_num.pyx:176} notes.
+
+\subsection{The closed-form path}\label{sec:tangent-donnell-closed-form}
+
+The closed-form kernels evaluate the same $\boldsymbol{K}_0$ and $\boldsymbol{K}_G$, over the full domain and for a constant laminate, by separating the two directions. Every entry of Eq.~\ref{eq:tangent-donnell-K-groups} restricted to $\boldsymbol{B}_L$ is a sum of products of the form
+
+\begin{equation}\label{eq:tangent-donnell-separable}
+	\int_{\mathcal{A}} \frac{\partial^{p} S^{\alpha}_A}{\partial x^{p}} \frac{\partial^{q} S^{\beta}_B}{\partial y^{q}} \, d\mathcal{A}
+	= \frac{ab}{4} \left( \frac{2}{a} \right)^{p} \left( \frac{2}{b} \right)^{q}
+	\int_{-1}^{+1} P_i^{\alpha (p)} P_k^{\beta} \, d\xi \int_{-1}^{+1} P_j^{\alpha} P_l^{\beta (q)} \, d\eta
+\end{equation}
+
+\noindent and the two one-dimensional integrals are evaluated analytically by the six functions declared at \texttt{plate\_clpt\_donnell.pyx:17-29}: \texttt{integral\_ff}, \texttt{integral\_ffp}, \texttt{integral\_ffpp}, \texttt{integral\_fpfp}, \texttt{integral\_fpfpp} and \texttt{integral\_fppfpp}, from \texttt{panels/core/include/bardell.hpp}, wrapped for Python at \texttt{panels/bardell.pyx:57-74}. They are hoisted out of the inner loops, the $\xi$ integrals at \texttt{plate\_clpt\_donnell.pyx:121-169} and the $\eta$ integrals inside the $j$, $l$ loops, which is what makes this path cheap: no quadrature point loop exists at all.
+
+As an example, the first entry of $\boldsymbol{K}_0$, \texttt{plate\_clpt\_donnell.pyx:234}, reads
+
+\begin{verbatim}
+k0v[c] += A11*b*fAuxifBuxi*gAugBu/a + A16*(fAufBuxi*gAuetagBu
+        + fAuxifBu*gAugBueta) + A66*a*fAufBu*gAuetagBueta/b
+\end{verbatim}
+
+\noindent which is the $u$--$u$ entry of $\int \boldsymbol{B}_L^\top \boldsymbol{C} \boldsymbol{B}_L \, d\mathcal{A}$, the factor $b/a$ following from Eq.~\ref{eq:tangent-donnell-separable} with $p = q = 1$. The corresponding cylindrical entry, \texttt{cylshell\_clpt\_donnell.pyx:235}, is identical, the two implementations of $\boldsymbol{K}_0$ differing only by the terms carrying $1/r$ and $1/r^2$ that Eq.~\ref{eq:tangent-donnell-BL} introduces through $\boldsymbol{S}^w/r$; those appear at \texttt{cylshell\_clpt\_donnell.pyx:243}, \texttt{255}, \texttt{259}, \texttt{263} and \texttt{267}.
+
+Two properties of this path bound its use:
+
+\begin{itemize}
+	\item \texttt{fk0} takes no $\bar{\boldsymbol{c}}$ and no per-point laminate; its signature is \texttt{fk0(shell, size, row0, col0)} (\texttt{plate\_clpt\_donnell.pyx:32}). It can only ever produce $\boldsymbol{K}_{C0}$.
+	\item \texttt{fkG0} takes the three membrane stress resultants as \emph{scalars}, \texttt{fkG0(Nxx, Nyy, Nxy, shell, size, row0, col0)} (\texttt{plate\_clpt\_donnell.pyx:273}), so it evaluates $\boldsymbol{K}_G(\boldsymbol{N}^0)$ for a membrane state uniform over the domain. The bodies of \texttt{fkG0} are identical for the plate and for the cylinder, consistent with $\boldsymbol{G}$ of Eq.~\ref{eq:tangent-donnell-G} carrying no $1/r$; the only entry assembled is \texttt{plate\_clpt\_donnell.pyx:332} and \texttt{cylshell\_clpt\_donnell.pyx:334}, which are character for character the same.
+\end{itemize}
+
+The remark of Section~\ref{sec:prebuckling-cylinder}, that $\boldsymbol{K}_G$ must be integrated using the actual distribution of the pre-buckling resultants rather than their classical membrane values, is therefore a statement about choosing \texttt{fkG\_num} over \texttt{fkG0}: the latter cannot represent a non-membrane fundamental state.
+
+\subsection{Numerical integration}\label{sec:tangent-donnell-quadrature}
+
+All integrals of the numerically integrated path are computed in natural coordinates using the Gauss-Legendre quadrature, with $n_x$ and $n_y$ points obtained from \texttt{scipy.special.roots\_legendre} (\texttt{plate\_clpt\_donnell\_num.pyx:96-97}):
+
+\begin{equation}\label{eq:tangent-donnell-quadrature}
+	\int_{\mathcal{A}} f \, d\mathcal{A} = \frac{ab}{4} \int_{-1}^{+1} \int_{-1}^{+1} f(\xi, \eta) \, d\xi \, d\eta
+	\approx \frac{ab}{4} \sum_{p=1}^{n_x} \sum_{q=1}^{n_y} W_p W_q \, f(\xi_p, \eta_q)
+\end{equation}
+
+For integration over a sub-domain $x_1 \le x \le x_2$ and $y_1 \le y \le y_2$, the factor $ab/4$ becomes $(x_2-x_1)(y_2-y_1)/4$, computed as \texttt{intx*inty} at \texttt{plate\_clpt\_donnell\_num.pyx:113-114}, and the Gauss points are mapped into the corresponding interval of $\xi$ and $\eta$ at \texttt{plate\_clpt\_donnell\_num.pyx:121-122}, the interval itself being given by the physical limits returned by \texttt{Shell.integration\_limits} (\texttt{plate\_clpt\_donnell\_num.pyx:86}) and mapped unconditionally at \texttt{plate\_clpt\_donnell\_num.pyx:103-111}, which gives exactly $\xi, \eta = \pm 1$ for the full domain. The factor $1/4$ is not always visible in the kernels: it is sometimes folded into the symbolic expansion, as at \texttt{plate\_clpt\_donnell\_num.pyx:235}, and sometimes written out, as at \texttt{cylshell\_clpt\_donnell\_num.pyx:499}. Both forms are the same number.
+
+$\boldsymbol{F}_{int}$ and $\boldsymbol{K}_T$ must be integrated with the same quadrature rule, which is why \texttt{Shell.calc\_fint} and \texttt{Shell.calc\_kT} both default $n_x$ and $n_y$ to the shell attributes (\texttt{panels/shell.py:1460-1461}, \texttt{panels/shell.py:604-605}). The consistency between them is then exact at the discrete level, whether or not the quadrature integrates the polynomials exactly: Eq.~\ref{eq:tangent-donnell-KT} is the derivative of Eq.~\ref{eq:tangent-donnell-fint} pointwise, hence also after applying the same weighted sum to both.
+
+\subsection{Multi-domain assembly}\label{sec:tangent-donnell-multidomain}
+
+For an assembly of panels, each \texttt{Shell} writes its own contribution into a global matrix of size $\sum_p 3 m_p n_p$, offset by the attributes \texttt{row\_start} and \texttt{col\_start} and passed through as the arguments \texttt{row0} and \texttt{col0} of every kernel. Denoting by $\boldsymbol{L}_p$ the Boolean operator that selects the DOFs of panel $p$ from the global vector, the assembly is:
+
+\begin{equation}\label{eq:tangent-donnell-assembly}
+	\begin{aligned}
+		\boldsymbol{F}_{int} &= \sum_{p} \boldsymbol{L}_p^\top \boldsymbol{F}_{int}^{(p)}(\boldsymbol{L}_p \bar{\boldsymbol{c}}) + \boldsymbol{K}_{C}^{conn} \bar{\boldsymbol{c}} \\
+		\boldsymbol{K}_T &= \sum_{p} \boldsymbol{L}_p^\top \left( \boldsymbol{K}_{C}^{(p)} + \boldsymbol{K}_{G}^{(p)} \right) \boldsymbol{L}_p + \boldsymbol{K}_{C}^{conn}
+	\end{aligned}
+\end{equation}
+
+Equation~\ref{eq:tangent-donnell-assembly} is \texttt{MultiDomain.calc\_fint} (\texttt{panels/multidomain/multidomain.py:1533-1547}) and \texttt{MultiDomain.calc\_kT} (\texttt{panels/multidomain/multidomain.py:1503-1530}). Three points are relevant to the present section:
+
+\begin{itemize}
+	\item The panel-level blocks enter unchanged. \texttt{calc\_kT} of the assembly calls \texttt{p.calc\_kC(..., NLgeom=True)} and \texttt{p.calc\_kG(..., NLgeom=True)} for each panel (\texttt{multidomain.py:1517-1520}), i.e. exactly the two calls of \texttt{Shell.calc\_kT}, so Eq.~\ref{eq:tangent-donnell-grouping} holds panel by panel.
+	\item Both are assembled with \texttt{finalize=False} and the symmetrisation is applied once to the sum (\texttt{multidomain.py:1522-1523}), because each panel only fills its own upper triangle.
+	\item The connection matrix $\boldsymbol{K}_{C}^{conn}$ is added after the loop, to $\boldsymbol{K}_T$ at \texttt{multidomain.py:1524-1526} and, as $\boldsymbol{K}_{C}^{conn}\bar{\boldsymbol{c}}$, to $\boldsymbol{F}_{int}$ at \texttt{multidomain.py:1544}. Its own derivation is out of the scope of this section; what matters here is that it is added consistently to both, so that the assembled $\boldsymbol{K}_T$ remains the derivative of the assembled $\boldsymbol{F}_{int}$ whenever $\boldsymbol{K}_{C}^{conn}$ is independent of $\bar{\boldsymbol{c}}$.
+\end{itemize}
+
+\subsection{Symbols and implementation variables}\label{sec:tangent-donnell-mapping}
+
+Table~\ref{tab:tangent-donnell-code} relates the symbols used herein to the variables of the implementation, and Table~\ref{tab:tangent-donnell-terms} maps the matrix terms.
 
 \begin{table}[!htbp]
 	\centering
-	\caption[]{Symbols and implementation variables.}
+	\caption[]{Symbols and implementation variables. Line numbers refer to the plate kernels unless stated; the cylindrical twins differ by a small offset.}
 	\label{tab:tangent-donnell-code}
 	\renewcommand{\arraystretch}{1.3}
-	\begin{tabular}{ll}
+	\setlength{\tabcolsep}{4pt}
+	\begin{tabular}{lll}
 		\toprule
-		Symbol & Variable \\
+		Symbol & Variable & \texttt{file:line} \\
 		\midrule
-		$P_i^u(\xi)$, $P_i^{u\prime}(\xi)$ & \texttt{fAu}, \texttt{fAuxi} \\
-		$P_j^w(\eta)$, $P_j^{w\prime}(\eta)$, $P_j^{w\prime\prime}(\eta)$ & \texttt{gAw}, \texttt{gAweta}, \texttt{gAwetaeta} \\
-		$P_k^w(\xi)$, $P_l^w(\eta)$ (term $B$) & \texttt{fBw}, \texttt{gBw} \\
-		$\partial w / \partial \xi$, $\partial w / \partial \eta$ & \texttt{wxi}, \texttt{weta} \\
-		$w_{,x}$, $w_{,y}$ & \texttt{wx = (2/a)*wxi}, \texttt{wy = (2/b)*weta} \\
-		$\boldsymbol{N}_{NL}$ & \texttt{NxxNL}, \texttt{NyyNL}, \texttt{NxyNL} \\
-		$\boldsymbol{N}^0$ & \texttt{Nxx0}, \texttt{Nyy0}, \texttt{Nxy0} \\
-		$x_2-x_1$, $y_2-y_1$ & \texttt{intx}, \texttt{inty} \\
-		$W_p W_q$ & \texttt{weight} \\
-		$\boldsymbol{K}_C$, $\boldsymbol{K}_G$, $\boldsymbol{F}_{int}$ & \texttt{fkC\_num}, \texttt{fkG\_num}, \texttt{calc\_fint} \\
+		$\bar{\boldsymbol{c}}$ & \texttt{cs}, \texttt{c} & \texttt{plate\_clpt\_donnell\_num.pyx:23} \\
+		$m$, $n$ & \texttt{m}, \texttt{n} & \texttt{shell.py:417} \\
+		$a$, $b$, $r$ & \texttt{a}, \texttt{b}, \texttt{r} & \texttt{cylshell\_clpt\_donnell\_num.pyx:80} \\
+		$P_i^u(\xi)$, $P_i^{u\prime}(\xi)$ & \texttt{fAu}, \texttt{fAuxi} & \texttt{plate\_clpt\_donnell\_num.pyx:186-187} \\
+		$P_j^w(\eta)$, $P_j^{w\prime}$, $P_j^{w\prime\prime}$ & \texttt{gAw}, \texttt{gAweta}, \texttt{gAwetaeta} & \texttt{plate\_clpt\_donnell\_num.pyx:208-210} \\
+		$P_k^w(\xi)$, $P_l^w(\eta)$ (term $B$) & \texttt{fBw}, \texttt{gBw} & \texttt{plate\_clpt\_donnell\_num.pyx:199, 225} \\
+		$\delta_{t1}$, $\delta_{r1}$, $\delta_{t2}$, $\delta_{r2}$ & \texttt{x1w}, \texttt{x1wr}, \texttt{x2w}, \texttt{x2wr} & \texttt{plate\_clpt\_donnell\_num.pyx:89} \\
+		$\partial w/\partial\xi$, $\partial w/\partial\eta$ & \texttt{wxi}, \texttt{weta} & \texttt{plate\_clpt\_donnell\_num.pyx:140-141} \\
+		$w_{,x}$, $w_{,y}$ & \texttt{wx}, \texttt{wy} & \texttt{plate\_clpt\_donnell\_num.pyx:177-178} \\
+		$\boldsymbol{\varepsilon}^{(0)}$, $\boldsymbol{\varepsilon}^{(1)}$ & \texttt{exx, eyy, gxy}, \texttt{kxx, kyy, kxy} & \texttt{plate\_clpt\_donnell\_num.pyx:1040-1045} \\
+		$\boldsymbol{C}$, i.e. $\boldsymbol{A}$, $\boldsymbol{B}$, $\boldsymbol{D}$ & \texttt{Finput}, \texttt{F}, \texttt{A11} \ldots \texttt{D66} & \texttt{plate\_clpt\_donnell\_num.pyx:149-168} \\
+		$\boldsymbol{N}$, $\boldsymbol{M}$ & \texttt{Nxx, Nyy, Nxy}, \texttt{Mxx, Myy, Mxy} & \texttt{plate\_clpt\_donnell\_num.pyx:1048-1053} \\
+		$\boldsymbol{N}_{NL}$ & \texttt{NxxNL}, \texttt{NyyNL}, \texttt{NxyNL} & \texttt{plate\_clpt\_donnell\_num.pyx:179-181} \\
+		$\boldsymbol{N}^0$ & \texttt{Nxx0, Nyy0, Nxy0}; \texttt{Shell.Nxx} \ldots & \texttt{plate\_clpt\_donnell\_num.pyx:289} \\
+		$\boldsymbol{N}^0 + \boldsymbol{N}_L$ & \texttt{Nxx, Nyy, Nxy} of \texttt{fkG\_num} & \texttt{plate\_clpt\_donnell\_num.pyx:467-469} \\
+		$x_2-x_1$, $y_2-y_1$ & \texttt{intx}, \texttt{inty} & \texttt{plate\_clpt\_donnell\_num.pyx:113-114} \\
+		$W_p W_q$ & \texttt{weight} & \texttt{plate\_clpt\_donnell\_num.pyx:124} \\
+		$n_x$, $n_y$ & \texttt{nx}, \texttt{ny} & \texttt{shell.py:604-605} \\
+		row term $A = (i,j)$, col term $B = (k,l)$ & \texttt{i, j}, \texttt{k, l} & \texttt{plate\_clpt\_donnell\_num.pyx:214-215} \\
+		$3(jm+i)$ & \texttt{DOF*(j*m + i)} & \texttt{plate\_clpt\_donnell\_num.pyx:214} \\
+		$\boldsymbol{L}_p$ offsets & \texttt{row0}, \texttt{col0} & \texttt{multidomain.py:1517-1520} \\
 		\bottomrule
 	\end{tabular}
 \end{table}
 
-\subsection{Verification of the tangent stiffness matrix}
+\begin{table}[!htbp]
+	\centering
+	\caption[]{Matrix terms: notation of this document, name used by the code, producing function and location. The two rows below the second rule hold the terms whose placement differs between the two namings.}
+	\label{tab:tangent-donnell-terms}
+	\renewcommand{\arraystretch}{1.3}
+	\setlength{\tabcolsep}{4pt}
+	\begin{tabular}{lllp{0.30\linewidth}}
+		\toprule
+		Herein & Code name & Function & \texttt{file:line} \\
+		\midrule
+		$\boldsymbol{K}_{C0}$ & \texttt{K0} & \texttt{fk0} & \texttt{plate\_clpt\_donnell.pyx:32}, \texttt{cylshell\_clpt\_donnell.pyx:32} \\
+		$\boldsymbol{K}_{C0}$ & \texttt{K0} & \texttt{fkC\_num}, \texttt{NLgeom=0} & \texttt{plate\_clpt\_donnell\_num.pyx:23}, \texttt{cylshell\_clpt\_donnell\_num.pyx:23} \\
+		$\boldsymbol{K}_{CNL}$ & \texttt{K0L + KL0 + KLL} & \texttt{fkC\_num}, \texttt{NLgeom=1} & \texttt{plate\_clpt\_donnell\_num.pyx:245-275}, \texttt{cylshell\_clpt\_donnell\_num.pyx:243-273} \\
+		$\boldsymbol{K}_G$ & \texttt{KG(N0 + N\_L)} & \texttt{fkG\_num} & \texttt{plate\_clpt\_donnell\_num.pyx:500}, \texttt{cylshell\_clpt\_donnell\_num.pyx:499-502} \\
+		$\boldsymbol{K}_G(\boldsymbol{N}^0)$ & \texttt{KG0} & \texttt{fkG0} & \texttt{plate\_clpt\_donnell.pyx:332}, \texttt{cylshell\_clpt\_donnell.pyx:334} \\
+		$\boldsymbol{F}_{int}$ & \texttt{fint} & \texttt{calc\_fint} & \texttt{plate\_clpt\_donnell\_num.pyx:1075-1077}, \texttt{cylshell\_clpt\_donnell\_num.pyx:817-819} \\
+		$\boldsymbol{K}_T$ & \texttt{kT} & \texttt{Shell.calc\_kT} & \texttt{shell.py:756-792} \\
+		\midrule
+		$\boldsymbol{K}_{CNL}$, part of & \texttt{KGNL} & \texttt{fkC\_num} & \texttt{plate\_clpt\_donnell\_num.pyx:276-280}, \texttt{cylshell\_clpt\_donnell\_num.pyx:274-278} \\
+		not in $\boldsymbol{K}_T$ & \texttt{KG0}, \texttt{KG(c\_cte)} & \texttt{calc\_kC}, added to \texttt{kC} & \texttt{shell.py:634-655} \\
+		\bottomrule
+	\end{tabular}
+\end{table}
 
-The consistency between $\boldsymbol{K}_T$ and $\boldsymbol{F}_{int}$ is verified by a directional Taylor test. Given an arbitrary state $\bar{\boldsymbol{c}}$ and direction $\boldsymbol{d}$:
+\subsection{Verification}\label{sec:tangent-donnell-verification}
 
-\begin{equation*}
-	\boldsymbol{F}_{int}(\bar{\boldsymbol{c}} + h\boldsymbol{d}) = \boldsymbol{F}_{int}(\bar{\boldsymbol{c}}) + h \boldsymbol{K}_T(\bar{\boldsymbol{c}}) \boldsymbol{d} + O(h^2)
-\end{equation*}
+Three test modules pin the claims of this section. The first two are parametrised over \texttt{plate\_clpt\_donnell} and \texttt{cylshell\_clpt\_donnell} and both using an unsymmetric, unbalanced laminate so that $\boldsymbol{B} \neq \boldsymbol{0}$ and $A_{16}, A_{26} \neq 0$.
 
-\noindent such that the relative error:
+\texttt{tests/tests\_shell/test\_tangent\_consistency.py} verifies the Jacobian claim of Eq.~\ref{eq:tangent-donnell-KT} directly:
 
-\begin{equation*}
-	e(h) = \frac{\left\| \boldsymbol{F}_{int}(\bar{\boldsymbol{c}} + h\boldsymbol{d}) - \boldsymbol{F}_{int}(\bar{\boldsymbol{c}}) - h \boldsymbol{K}_T \boldsymbol{d} \right\|}{\left\| h \boldsymbol{K}_T \boldsymbol{d} \right\|}
-\end{equation*}
+\begin{itemize}
+	\item \texttt{test\_tangent\_is\_derivative\_of\_fint} is the directional Taylor test. Given an arbitrary state $\bar{\boldsymbol{c}}$ and direction $\boldsymbol{d}$, $\boldsymbol{F}_{int}(\bar{\boldsymbol{c}} + h\boldsymbol{d}) = \boldsymbol{F}_{int}(\bar{\boldsymbol{c}}) + h \boldsymbol{K}_T(\bar{\boldsymbol{c}}) \boldsymbol{d} + O(h^2)$, so the relative error
+	\begin{equation*}
+		e(h) = \frac{\left\| \boldsymbol{F}_{int}(\bar{\boldsymbol{c}} + h\boldsymbol{d}) - \boldsymbol{F}_{int}(\bar{\boldsymbol{c}}) - h \boldsymbol{K}_T \boldsymbol{d} \right\|}{\left\| h \boldsymbol{K}_T \boldsymbol{d} \right\|}
+	\end{equation*}
+	must fall proportionally to $h$. The test asserts a factor of at least five per decade over $h \in [10^{-6}, 10^{-2}]$, and that $e(h)/h$ does not drift by more than a factor of two. An inconsistent tangent leaves a remainder of order $h$ and $e(h)$ plateaus instead.
+	\item \texttt{test\_tangent\_matches\_finite\_difference\_jacobian} compares every entry of $\boldsymbol{K}_T$ against a central finite-difference Jacobian of $\boldsymbol{F}_{int}$.
+	\item \texttt{test\_kG\_is\_homogeneous\_of\_degree\_one} asserts $\boldsymbol{K}_G(2\bar{\boldsymbol{c}}) = 2\boldsymbol{K}_G(\bar{\boldsymbol{c}})$, which is the property that the placement of $\boldsymbol{K}_{GNL}$ in Eq.~\ref{eq:tangent-donnell-grouping} exists to preserve.
+	\item \texttt{test\_fint\_and\_tangent\_in\_the\_undeformed\_state} asserts $\boldsymbol{F}_{int}(\boldsymbol{0}) = \boldsymbol{0}$ and $\boldsymbol{K}_T(\boldsymbol{0}) = \boldsymbol{K}_{C0}$, which is Eq.~\ref{eq:tangent-donnell-three-way} at $\bar{\boldsymbol{c}} = \boldsymbol{0}$.
+	\item \texttt{test\_newton\_raphson\_converges\_quadratically} manufactures an equilibrium state and checks that the error is squared at each iteration.
+\end{itemize}
 
-\noindent must decrease proportionally to $h$, i.e. $e(h)/h$ must be constant. An inconsistent tangent leaves a remainder of order $h$, and $e(h)$ plateaus instead. The test is complemented by comparing every entry of $\boldsymbol{K}_T$ with a central finite-difference Jacobian of $\boldsymbol{F}_{int}$, and by checking that $\boldsymbol{K}_G(2\bar{\boldsymbol{c}}) = 2\boldsymbol{K}_G(\bar{\boldsymbol{c}})$.
+\texttt{tests/tests\_shell/test\_nonlinear.py} exercises the same tangent in a full Newton-Raphson solution, deep in the postbuckling regime at about 37 times the first linear buckling load, and asserts both the converged deflection and a convergence order above $1.6$.
+
+\texttt{tests/tests\_shell/test\_argument\_validation.py} pins the argument handling around these matrices, and with it three claims of this section:
+
+\begin{itemize}
+	\item \texttt{test\_KGNL\_is\_in\_calc\_kC\_and\_not\_in\_calc\_kG} asserts that $\boldsymbol{K}_G$ is homogeneous of degree one, that \texttt{NLgeom} does not change its value, and that $\boldsymbol{K}_T$ is exactly the sum of the two matrices of Eq.~\ref{eq:tangent-donnell-grouping}.
+	\item \texttt{test\_NLgeom\_and\_not\_c\_selects\_the\_large\_displacement\_matrix} asserts the statement made above, when mapping the code onto Eq.~\ref{eq:tangent-donnell-three-way}, that \texttt{fkC\_num} returns $\boldsymbol{K}_{C0}$ whenever \texttt{NLgeom=0}, whatever $\bar{\boldsymbol{c}}$, and that the result then matches the closed-form \texttt{fk0}.
+	\item \texttt{test\_cylshell\_approaches\_plate\_as\_radius\_grows} asserts the monotonic convergence of Table~\ref{tab:tangent-donnell-limit}, and \texttt{test\_cylshell\_requires\_positive\_radius} that $r = 0$, a negative $r$ and an unset $r$ are all rejected for the cylinder.
+\end{itemize}
+
+Together the first two modules support every claim made here about $\boldsymbol{K}_T$ being the exact Jacobian, about $\boldsymbol{K}_G$ being homogeneous of degree one, and about $\boldsymbol{K}_T(\boldsymbol{0}) = \boldsymbol{K}_{C0}$. They do not separately test the decomposition of Eq.~\ref{eq:tangent-donnell-grouping} term by term, nor the closed-form path against the numerically integrated one; those were verified independently while preparing this section, by rebuilding $\boldsymbol{B}_L$, $\boldsymbol{B}_{NL}$ and $\boldsymbol{G}$ from Eqs.~\ref{eq:tangent-donnell-BL}, \ref{eq:tangent-donnell-BNL} and \ref{eq:tangent-donnell-G} at the Gauss points and comparing against the compiled kernels, with the results of Table~\ref{tab:tangent-donnell-checks}.
+
+\begin{table}[!htbp]
+	\centering
+	\caption[]{Relative difference between the compiled kernels and the equations of this section, rebuilt independently. Both models, $m = n = 4$, $n_x = n_y = 10$, unsymmetric laminate, random $\bar{\boldsymbol{c}}$ with deflections of twenty thicknesses.}
+	\label{tab:tangent-donnell-checks}
+	\renewcommand{\arraystretch}{1.3}
+	\setlength{\tabcolsep}{4pt}
+	\begin{tabular}{llll}
+		\toprule
+		Kernel & Equation & Plate & Cylinder \\
+		\midrule
+		\texttt{fkC\_num} & $\int (\boldsymbol{B}_L + \boldsymbol{B}_{NL})^\top \boldsymbol{C} (\boldsymbol{B}_L + \boldsymbol{B}_{NL}) + \boldsymbol{K}_{GNL}$ & $4.0 \times 10^{-16}$ & $2.3 \times 10^{-16}$ \\
+		\texttt{fkG\_num} & $\boldsymbol{K}_G(\boldsymbol{N}^0 + \boldsymbol{N}_L)$, Eq.~\ref{eq:tangent-donnell-KG} & $5.7 \times 10^{-16}$ & $4.9 \times 10^{-16}$ \\
+		\texttt{calc\_fint} & $\int (\boldsymbol{B}_L + \boldsymbol{B}_{NL})^\top \hat{\boldsymbol{\sigma}}$, Eq.~\ref{eq:tangent-donnell-fint} & $2.2 \times 10^{-16}$ & $2.2 \times 10^{-16}$ \\
+		\texttt{fk0} & \texttt{fkC\_num} at $\bar{\boldsymbol{c}} = \boldsymbol{0}$, $n_x = n_y = 30$ & $4.7 \times 10^{-15}$ & $4.6 \times 10^{-15}$ \\
+		\texttt{fkG0} & \texttt{fkG\_num} at $\bar{\boldsymbol{c}} = \boldsymbol{0}$, $n_x = n_y = 30$ & $8.6 \times 10^{-15}$ & $8.8 \times 10^{-15}$ \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+The last two rows also establish that the closed-form and the numerically integrated paths agree to round-off once the quadrature is fine enough to integrate the polynomials exactly, so the choice between them of Section~\ref{sec:tangent-donnell-paths} is a matter of cost and of capability, not of accuracy.
+
+\subsection{Where the naming and the code do not line up}\label{sec:tangent-donnell-discrepancies}
+
+Two points deserve to be stated rather than smoothed over.
+
+\paragraph{The $\boldsymbol{K}_C$--$\boldsymbol{K}_G$ boundary moves.} The split of Eq.~\ref{eq:tangent-donnell-KT-split} and the split of Eq.~\ref{eq:tangent-stiffness-decomposition} are not the same split, although both sum to the same $\boldsymbol{K}_T$. Writing $\boldsymbol{K}_C$ and $\boldsymbol{K}_G$ for the matrices of Section~\ref{sec:constitutive-stiffness} and Section~\ref{sec:geometric-stiffness}, defined respectively as the first and the second integral of Eq.~\ref{eq:tangent-donnell-KT}:
+
+\begin{equation}\label{eq:tangent-donnell-boundary}
+	\boldsymbol{K}_{C0} + \boldsymbol{K}_{CNL} = \boldsymbol{K}_C + \boldsymbol{K}_{GNL}
+	\qquad
+	\boldsymbol{K}_G^{\text{herein}} = \boldsymbol{K}_G - \boldsymbol{K}_{GNL}
+\end{equation}
+
+The term $\boldsymbol{K}_{GNL}$ is geometric by construction, being $\int \boldsymbol{G}^\top \tilde{\boldsymbol{N}}_{NL} \boldsymbol{G} \, d\mathcal{A}$, yet under the naming of Eq.~\ref{eq:tangent-donnell-KT-split} it belongs to $\boldsymbol{K}_{CNL}$. The three-way split therefore partitions the code's five terms cleanly, but only if $\boldsymbol{K}_{CNL}$ is defined operationally, as \emph{everything \texttt{fkC\_num} adds beyond $\bar{\boldsymbol{c}} = \boldsymbol{0}$}, and not semantically, as \emph{the non-linear constitutive terms}. Under the semantic reading, $\boldsymbol{K}_{GNL}$ has no home in any of the three symbols and the partition fails. This document adopts the operational reading, and Eq.~\ref{eq:tangent-donnell-three-way} states it.
+
+\paragraph{\texttt{calc\_kC} does not always return $\boldsymbol{K}_{C0} + \boldsymbol{K}_{CNL}$.} At \texttt{panels/shell.py:634-655}, if \texttt{c\_cte} is given or any of \texttt{Nxx\_cte}, \texttt{Nyy\_cte}, \texttt{Nxy\_cte} is non-zero, a geometric block is added into the matrix returned as \texttt{kC}, either $\boldsymbol{K}_G(\boldsymbol{N}^{cte})$ through \texttt{fkG0} or $\boldsymbol{K}_G$ evaluated at \texttt{c\_cte} through \texttt{fkG\_num}. This is the superposition device of Section~\ref{sec:combined-load-cases}, which keeps a part of the stress state out of reach of the load multiplier $\lambda$. It means that the symbol $\boldsymbol{K}_{C0} + \boldsymbol{K}_{CNL}$ describes the return value of \texttt{calc\_kC} only when no constant pre-stress is declared. The two modules of Section~\ref{sec:tangent-donnell-verification} that verify the Jacobian set all six of those attributes to zero and do not exercise this branch; the third module does, but only to check that it is reached safely, not the value of the block.
+
+\subsection*{Note on symbols}
+
+Three symbols are used here that do not appear in the sections referenced above, all of them introduced because the implementation distinguishes quantities that the general treatment does not:
+
+\begin{itemize}
+	\item $\boldsymbol{K}_{C0}$ and $\boldsymbol{K}_{CNL}$, for the constant and the state-dependent parts of the matrix returned by \texttt{fkC\_num}. Section~\ref{sec:linear-buckling-solution} writes $\boldsymbol{K}_0$ for the first of them, and that symbol is used here too, in Eq.~\ref{eq:tangent-donnell-K-groups}; $\boldsymbol{K}_{C0}$ is kept in Eq.~\ref{eq:tangent-donnell-KT-split} because the three-way split it belongs to is the one the implementation is organised around.
+	\item $\boldsymbol{N}^0$, $\boldsymbol{N}_L$ and $\boldsymbol{N}_{NL}$, for the three contributions to the membrane stress entering Eq.~\ref{eq:tangent-donnell-KG}. Section~\ref{sec:prebuckling-cylinder} writes $\widehat{\boldsymbol{N}}$ for their sum; the decomposition is needed here because the implementation evaluates the third one separately, and places it on the other side of the $\boldsymbol{K}_C$--$\boldsymbol{K}_G$ boundary.
+	\item $\boldsymbol{L}_p$, for the Boolean selection operator of the multi-domain assembly of Eq.~\ref{eq:tangent-donnell-assembly}, which has no counterpart in the single-domain treatment.
+\end{itemize}
