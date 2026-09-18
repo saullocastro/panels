@@ -285,6 +285,36 @@ class Shell(object):
         self.size = self.get_size()
 
 
+    def _check_r(self):
+        r"""Check that ``Shell.r`` is consistent with the selected model
+
+        Models whose kernels divide by the radius (flagged with ``requires_r``
+        in :mod:`.modelDB`) must be given a positive ``r``. Without this check
+        an unset radius would reach those kernels as ``r = 0``, making every
+        ``1/r`` term infinite and surfacing much later as a bare
+        ``AssertionError`` raised while finalizing the sparse matrix.
+
+        For models that ignore the radius (the plate kernels never read it) an
+        unset ``r`` is normalized to ``0.``, which is the value the rest of the
+        code compares against.
+
+        Note that the flat-plate limit of a cylindrical shell is
+        ``r -> infinity`` (``1/r -> 0``) and not ``r = 0``, hence
+        ``r = 0.`` is never a valid radius for a cylindrical model. Use the
+        ``'plate_clpt_donnell'`` model for flat panels.
+
+        """
+        if modelDB.db[self.model].get('requires_r', False):
+            if self.r is None or self.r <= 0:
+                raise ValueError(
+                    "model '{0}' requires Shell.r to be set to a positive "
+                    "radius (got {1!r}); use 'plate_clpt_donnell' for a flat "
+                    "panel, the flat limit of a cylinder is r -> infinity, "
+                    "not r = 0".format(self.model, self.r))
+        elif self.r is None:
+            self.r = 0.
+
+
     def is_partial_domain(self):
         r"""Tell whether this shell integrates only part of its domain
 
@@ -387,10 +417,52 @@ class Shell(object):
             c=None, c_cte=None, nx=None, ny=None, ABDnxny=None, NLgeom=False):
         r"""Calculate the constitutive stiffness matrix
 
-        If ``c`` is not given it calculates the linear constitutive stiffness
-        matrix, otherwise the large displacement linear constitutive stiffness
-        matrix is calculated. When using ``c`` the size of ``c`` must be the
-        same as the attribute ``size``.
+        It is ``NLgeom``, and not ``c``, that selects the large displacement
+        matrix. With ``NLgeom=False`` the result is the linear constitutive
+        stiffness matrix `[K_0]`, whether or not ``c`` is given, because the
+        kernels zero `w_{,x}` and `w_{,y}` and every large displacement term
+        is built from them. With ``NLgeom=True`` the result is
+        `[K_0] + [K_{0L}] + [K_{L0}] + [K_{LL}] + [K_{G_{NL}}]`, evaluated at
+        ``c``. What ``c`` alone changes is the integration: giving it selects
+        the numerically integrated matrices over the analytical closed form.
+        When using ``c`` its size must be the same as the attribute ``size``.
+
+        Returns
+        -------
+        kC : csr_matrix
+            The matrix described in the notes below. Also stored in
+            ``Shell.matrices`` under the key ``'kC'``.
+
+        Notes
+        -----
+        Despite the name, the returned matrix is not purely constitutive in
+        two cases:
+
+        - With ``NLgeom=True`` the returned matrix also contains
+          `[K_{G_{NL}}]`, the geometric stiffness of the membrane stress
+          carried by the non-linear part of the strain,
+          `\{\varepsilon_{NL}\} = \{w_{,x}^2/2, w_{,y}^2/2, w_{,x} w_{,y}\}`.
+          This term is deliberately collected here instead of in
+          :meth:`.Shell.calc_kG`, so that
+
+          .. math::
+              [K_T] = [K_0] + [K_{0L}] + [K_{L0}] + [K_{LL}] + [K_{G_{NL}}]
+                      + [K_G(N_0 + N_L)]
+
+          with the first five terms returned by this method and the last one
+          by :meth:`.Shell.calc_kG`, is the exact Jacobian of
+          :meth:`.Shell.calc_fint`, while :meth:`.Shell.calc_kG` stays
+          homogeneous of degree one in ``c``, as linear buckling requires.
+
+        - If ``c_cte`` is given, or any of the attributes ``Nxx_cte``,
+          ``Nyy_cte`` or ``Nxy_cte`` is non-zero, the geometric stiffness
+          `[K_G(N_{cte})]` of that constant stress state is added into the
+          returned matrix, which is then no longer `[K_0] + [K_{C_{NL}}]`.
+          This is the device used to superpose combined load cases, where the
+          eigenvalue of a linear buckling analysis must multiply only part of
+          the applied loads. The constant stress state does not scale with
+          that eigenvalue precisely because it is added here and not in
+          :meth:`.Shell.calc_kG`.
 
         In multi-domain semi-analytical models the sparse matrices that are
         calculated may have the ``size`` of the assembled global model, and the
@@ -468,14 +540,20 @@ class Shell(object):
         # Num integration points
         nx = self.nx if nx is None else nx
         ny = self.ny if ny is None else ny
-        self.r = self.r if self.r is not None else 0.
+        self._check_r()
 
-        if c is None and ABDnxny is None:
+        #NOTE c is forwarded to a ``double [::1]`` kernel argument, so it must
+        #     always be a contiguous 1-D array of length ``size``. Passing
+        #     None (or letting np.ascontiguousarray turn None into the shape
+        #     (1,) array [nan]) makes the kernels read out of bounds, since
+        #     bounds checking is disabled in the .pyx files.
+        if c is not None:
+            # returns a contiguous array, how matrices in C are stored. 1 after the other like matlab
+            c = np.ascontiguousarray(c, dtype=DOUBLE)
+        else:
             # Empty c if the interest is only on the heterogeneous
             # laminate properties
             c = np.zeros(size, dtype=DOUBLE)
-        c = np.ascontiguousarray(c, dtype=DOUBLE)
-        # returns a contiguous array, how matrices in C are stored. 1 after the other like matlab
 
         #NOTE the consistency checks for ABDnxny are done within the .pyx files
         ABDnxny = self.ABD if ABDnxny is None else ABDnxny
@@ -496,7 +574,12 @@ class Shell(object):
             if c_cte is not None:
                 msg('NOTE: constant stress state taken into account by c_cte', level=3, silent=silent)
                 check_c(c_cte, size)
+                c_cte = np.ascontiguousarray(c_cte, dtype=DOUBLE)
                 analytical_kG = False
+            else:
+                #NOTE same as for c above, fkG_num takes a ``double [::1]``
+                #     and a None would be dereferenced inside the nogil loop
+                c_cte = np.zeros(size, dtype=DOUBLE)
             # This calc KG0 - Geo stiff mat at initial membrane stress state (SA formulation paper - eq 12) and adds it to K0 calc earlier
             # this is required for combined load cases where the eigenvalue
             # lambda should be applied to only some of the applied forces
@@ -505,8 +588,8 @@ class Shell(object):
             else:
                 kC += matrices_num.fkG_num(c_cte, ABDnxny, self, size,
                                            row0, col0, nx, ny,
-                                           NLgeom, self.Nxx_cte,
-                                           self.Nyy_cte, self.Nxy_cte)
+                                           self.Nxx_cte, self.Nyy_cte,
+                                           self.Nxy_cte)
 
         if finalize:
             kC = finalize_symmetric_matrix(kC)
@@ -524,9 +607,31 @@ class Shell(object):
 
     def calc_kG(self, size=None, row0=0, col0=0, silent=True, finalize=True,
             c=None, nx=None, ny=None, ABDnxny=None, NLgeom=False):
-        r"""Calculate the (inital stress or) geometric stiffness matrix
+        r"""Calculate the (initial stress or) geometric stiffness matrix
+
+        The returned matrix is the geometric stiffness of the membrane stress
+        state obtained from the *linear* part of the strain evaluated at
+        ``c``, superposed with the constant stress state given by the
+        attributes ``Nxx``, ``Nyy`` and ``Nxy``. When ``c`` is not given, only
+        the latter contributes.
 
         See :meth:`.Shell.calc_kC` for details on each parameter.
+
+        Returns
+        -------
+        kG : csr_matrix
+            The geometric stiffness matrix. Also stored in ``Shell.matrices``
+            under the key ``'kG'``.
+
+        Notes
+        -----
+        The returned matrix is homogeneous of degree one in ``c``, which is
+        what makes it usable as the right-hand side of the linear buckling
+        eigenvalue problem. The geometric stiffness of the stress carried by
+        the *non-linear* part of the strain is therefore not included here, it
+        is returned by :meth:`.Shell.calc_kC` when ``NLgeom=True``. For the
+        same reason ``NLgeom`` does not change the value of this matrix, it
+        only forces the numerical instead of the analytical integration.
 
         """
         msg('Calculating kG... ', level=2, silent=silent)
@@ -559,7 +664,7 @@ class Shell(object):
         matrices = modelDB.db[self.model]['matrices']
         matrices_num = modelDB.db[self.model]['matrices_num']
 
-        self.r = self.r if self.r is not None else 0.
+        self._check_r()
 
         nx = self.nx if nx is None else nx
         ny = self.ny if ny is None else ny
@@ -571,7 +676,7 @@ class Shell(object):
             if ABDnxny is None:
                 ABDnxny = self._get_lam_ABD()
             kG = matrices_num.fkG_num(c, ABDnxny, self, size, row0, col0,
-                                      nx, ny, int(NLgeom), self.Nxx, self.Nyy, self.Nxy)
+                                      nx, ny, self.Nxx, self.Nyy, self.Nxy)
 
         if finalize:
             kG = finalize_symmetric_matrix(kG)
@@ -587,6 +692,33 @@ class Shell(object):
 
     def calc_kT(self, size=None, row0=0, col0=0, silent=True, finalize=True,
             c=None, nx=None, ny=None, ABDnxny=None):
+        r"""Calculate the tangent stiffness matrix `[K_T]`
+
+        The tangent stiffness matrix is the exact Jacobian of
+        :meth:`.Shell.calc_fint` with respect to ``c``, assembled as
+
+        .. math::
+            [K_T] = [K_0] + [K_{0L}] + [K_{L0}] + [K_{LL}] + [K_{G_{NL}}]
+                    + [K_G(N_0 + N_L)]
+
+        where all terms but the last come from
+        :meth:`.Shell.calc_kC` with ``NLgeom=True``, and the last one from
+        :meth:`.Shell.calc_kG` with ``NLgeom=True``. Note that `[K_{G_{NL}}]`
+        is grouped with the constitutive matrix and not with the geometric
+        one, see the notes in :meth:`.Shell.calc_kC` and
+        :meth:`.Shell.calc_kG`.
+
+        See :meth:`.Shell.calc_kC` for details on each parameter. Note that
+        ``c_cte`` is not forwarded, so a constant stress state can only be
+        given through the attributes ``Nxx_cte``, ``Nyy_cte`` and ``Nxy_cte``.
+
+        Returns
+        -------
+        kT : csr_matrix
+            The tangent stiffness matrix. Also stored in ``Shell.matrices``
+            under the key ``'kT'``.
+
+        """
         kC = self.calc_kC(size=size, row0=row0, col0=col0, silent=silent, finalize=finalize,
             c=c, nx=nx, ny=ny, ABDnxny=ABDnxny, NLgeom=True)
         kG = self.calc_kG(size=size, row0=row0, col0=col0, silent=silent, finalize=finalize,
@@ -625,7 +757,7 @@ class Shell(object):
         matrices = modelDB.db[self.model]['matrices']
         matrices_num = modelDB.db[self.model]['matrices_num']
 
-        self.r = self.r if self.r is not None else 0.
+        self._check_r()
 
         if size is None:
             size = self.get_size()
@@ -679,7 +811,7 @@ class Shell(object):
         elif isinstance(size, str):
             size = int(size) + self.get_size()
 
-        self.r = self.r if self.r is not None else 0.
+        self._check_r()
 
         if self.beta is None:
             if self.Mach is None:
@@ -782,7 +914,10 @@ class Shell(object):
 
 
         """
+        #NOTE fuvw/fstrain take a ``double [::1]``, see the note in
+        #     Shell.calc_kC() on why c must be checked before being forwarded
         c = np.ascontiguousarray(c, dtype=DOUBLE)
+        check_c(c, self.get_size())
 
         xs, ys, xshape, yshape = self._default_field(xs, ys, gridx, gridy)
         fuvw = modelDB.db[self.model]['field'].fuvw
@@ -828,7 +963,10 @@ class Shell(object):
             ``(x, y, exx, eyy, gxy, kxx, kyy, kxy)``
 
         """
+        #NOTE fuvw/fstrain take a ``double [::1]``, see the note in
+        #     Shell.calc_kC() on why c must be checked before being forwarded
         c = np.ascontiguousarray(c, dtype=DOUBLE)
+        check_c(c, self.get_size())
         xs, ys, xshape, yshape = self._default_field(xs, ys, gridx, gridy)
         fstrain = modelDB.db[self.model]['field'].fstrain
         exx, eyy, gxy, kxx, kyy, kxy = fstrain(c, self, xs, ys, self.out_num_cores, int(NLgeom))
@@ -1253,12 +1391,15 @@ class Shell(object):
         elif isinstance(size, str):
             size = int(size) + self.get_size()
 
-        self.r = self.r if self.r is not None else 0.
+        self._check_r()
         nx = self.nx if nx is None else nx
         ny = self.ny if ny is None else ny
         ABDnxny = self.ABD if ABDnxny is None else ABDnxny
 
+        #NOTE calc_fint takes a ``double [::1]``, see the note in
+        #     Shell.calc_kC() on why c must be checked before being forwarded
         c = np.ascontiguousarray(c, dtype=DOUBLE)
+        check_c(c, size)
         fint = np.asarray(calc_fint(c, ABDnxny, self, size, col0, nx, ny))
 
         gc.collect()
