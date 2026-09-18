@@ -84,8 +84,10 @@ class BladeStiff2D(object):
         assert self.panel1.n == self.panel2.n
         assert self.panel1.r == self.panel2.r
         if self.flange is not None:
+            #NOTE the ply densities are needed by the numerical mass matrix
             self.flange.lam = laminated_plate(self.flange.stack, plyts=self.flange.plyts,
-                                            laminaprops=self.flange.laminaprops)
+                                            laminaprops=self.flange.laminaprops,
+                                            rhos=self.flange.rhos)
             self.flange.lam.calc_equivalent_properties()
 
         if self.base is not None:
@@ -94,6 +96,7 @@ class BladeStiff2D(object):
             self.dpb = h/2. + hb/2.
             self.base.lam = laminated_plate(self.bstack, plyts=self.bplyts,
                                             laminaprops=self.blaminaprops,
+                                            rhos=self.base.rhos,
                                             offset=(-h/2.-hb/2.))
             self.base.lam.calc_equivalent_properties()
 
