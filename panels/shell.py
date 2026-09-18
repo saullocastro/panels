@@ -66,6 +66,16 @@ class Shell(object):
         Laminate offset about shell mid-surface. The offset is measured along
         the normal (`z`) axis.
 
+    Notes
+    -----
+    The attributes ``x1, x2, y1, y2`` limit the integration domain to
+    ``x1 <= x <= x2`` and ``y1 <= y <= y2``, in physical coordinates, while
+    the approximation functions still span the whole ``0 <= x <= a`` and
+    ``0 <= y <= b``. This is how several domains, for instance the panels of
+    a :class:`.StiffPanelBay`, share one set of approximation functions. A
+    limit that is ``None``, the default, is the corresponding edge of the
+    shell, see :meth:`.Shell.integration_limits`.
+
     """
     # Declare all the variables/attributes here to preallocate mem, speed it up. Var not declared here cant be used
     __slots__ = [ 'a', 'x1', 'x2', 'b', 'y1', 'y2', 'r',
@@ -95,11 +105,11 @@ class Shell(object):
             stack=None, plyt=None, laminaprop=None, rho=0,
             m=11, n=11, offset=0., **kwargs):
         self.a = a
-        self.x1 = -1 # used to integrate part of the shell domain, -1 will use 0
-        self.x2 = +1 # used to integrate part of the shell domain, +1 will use a
+        self.x1 = None # limits of the integration domain along x, None will use 0
+        self.x2 = None # and a, see Shell.integration_limits()
         self.b = b
-        self.y1 = -1 # used to integrate part of the shell domain, -1 will use 0
-        self.y2 = +1 # used to integrate part of the shell domain, +1 will use b
+        self.y1 = None # limits of the integration domain along y, None will use 0
+        self.y2 = None # and b, see Shell.integration_limits()
         self.r = r # rad of curvature of panel (for curved panels)
         self.stack = stack
         self.plyt = plyt
@@ -283,6 +293,8 @@ class Shell(object):
             self.lam = lam
             self.ABD = self._get_lam_ABD()
         self.size = self.get_size()
+        # fails early on invalid limits of the integration domain
+        self.integration_limits()
 
 
     def _check_r(self):
@@ -315,20 +327,71 @@ class Shell(object):
             self.r = 0.
 
 
+    def integration_limits(self):
+        r"""Physical limits of the integration domain
+
+        The attributes ``x1, x2, y1, y2`` are physical coordinates, with
+        ``None`` standing for the corresponding edge of the shell: ``x1 = 0``,
+        ``x2 = a``, ``y1 = 0`` and ``y2 = b``. Each limit is independent, so
+        setting only ``x1 = 0.2`` integrates ``0.2 <= x <= a``.
+
+        Returns
+        -------
+        limits : tuple
+            The floats ``(x1, x2, y1, y2)``.
+
+        Raises
+        ------
+        ValueError
+            Unless ``0 <= x1 < x2 <= a`` and ``0 <= y1 < y2 <= b``. Limits
+            outside the shell by a relative ``1e-12`` of ``a`` or ``b`` are
+            taken as the edge, to absorb round-off.
+
+        Notes
+        -----
+        Up to version 0.6.9 the full domain was given by the sentinels ``x1 =
+        y1 = -1`` and ``x2 = y2 = +1``. Since ``+1`` is also a valid
+        coordinate, ``x2 = 1.0`` on a shell with ``a > 1`` silently integrated
+        the full domain, and a limit given on one side only was ignored. The
+        sentinels were removed, and a negative limit is rejected here.
+
+        """
+        limits = []
+        for name1, name2, length, dim in (('x1', 'x2', self.a, 'a'),
+                                          ('y1', 'y2', self.b, 'b')):
+            if length is None:
+                raise ValueError('Shell.{0} must be defined'.format(dim))
+            v1 = getattr(self, name1)
+            v2 = getattr(self, name2)
+            v1 = 0. if v1 is None else float(v1)
+            v2 = float(length) if v2 is None else float(v2)
+            tol = 1e-12*length
+            if -tol <= v1 < 0.:
+                v1 = 0.
+            if length < v2 <= length + tol:
+                v2 = float(length)
+            if not (0. <= v1 < v2 <= length):
+                raise ValueError(
+                    'The integration limits must satisfy 0 <= {0} < {1} <= '
+                    '{2}, got {0}={3!r}, {1}={4!r} and {2}={5!r}. Use None '
+                    'for an edge of the shell; the sentinels -1 and +1 for '
+                    'the full domain were removed in panels 0.7.0'.format(
+                        name1, name2, dim, getattr(self, name1),
+                        getattr(self, name2), length))
+            limits += [v1, v2]
+        return tuple(limits)
+
+
     def is_partial_domain(self):
         r"""Tell whether this shell integrates only part of its domain
 
-        The attributes ``x1, x2, y1, y2`` are physical coordinates limiting
-        the integration domain, with the sentinels ``x1 = y1 = -1`` and
-        ``x2 = y2 = +1`` meaning that the full domain is integrated (see
-        :class:`.Shell`). Only the numerically integrated matrices honour a
-        partial domain, therefore the analytical closed-form matrices must not
-        be used when this returns ``True``.
+        See :meth:`.Shell.integration_limits`. Only the numerically integrated
+        matrices honour a partial domain, therefore the analytical
+        closed-form matrices must not be used when this returns ``True``.
 
         """
-        partial_x = (self.x1 != -1) and (self.x2 != +1)
-        partial_y = (self.y1 != -1) and (self.y2 != +1)
-        return bool(partial_x or partial_y)
+        x1, x2, y1, y2 = self.integration_limits()
+        return bool(x1 > 0 or x2 < self.a or y1 > 0 or y2 < self.b)
 
 
     def get_size(self):
@@ -834,14 +897,16 @@ class Shell(object):
         self.beta = beta
         self.gamma = gamma
 
+        #NOTE see the note in Shell.calc_kC()
+        partial_domain = self.is_partial_domain()
         if self.flow.lower() == 'x':
-            if (self.x1 != -1 and self.x2 != +1) or (self.y1 != -1 and self.y2 != +1):
+            if partial_domain:
                 kA = matrices_num.fkAx_num(self, size, row0, col0, self.nx, self.ny)
             else:
                 kA = matrices.fkAx(beta, gamma, self, size, row0, col0)
 
         elif self.flow.lower() == 'y':
-            if (self.x1 != -1 and self.x2 != +1) or (self.y1 != -1 and self.y2 != +1):
+            if partial_domain:
                 kA = matrices_num.fkAy_num(self, size, row0, col0, self.nx, self.ny)
             else:
                 kA = matrices.fkAy(beta, self, size, row0, col0)

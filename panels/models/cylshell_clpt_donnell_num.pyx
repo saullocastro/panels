@@ -80,10 +80,10 @@ def fkC_num(double [::1] cs, object Finput, object shell,
     r = shell.r
     m = shell.m
     n = shell.n
-    x1 = shell.x1
-    x2 = shell.x2
-    y1 = shell.y1
-    y2 = shell.y2
+    #NOTE physical limits of the integration domain, resolved and validated
+    #      by Shell.integration_limits(); for the full domain the mapping
+    #      below gives exactly xi1 = eta1 = -1 and xi2 = eta2 = +1
+    x1, x2, y1, y2 = shell.integration_limits()
     x1u = shell.x1u; x1ur = shell.x1ur; x2u = shell.x2u; x2ur = shell.x2ur
     x1v = shell.x1v; x1vr = shell.x1vr; x2v = shell.x2v; x2vr = shell.x2vr
     x1w = shell.x1w; x1wr = shell.x1wr; x2w = shell.x2w; x2wr = shell.x2wr
@@ -100,27 +100,15 @@ def fkC_num(double [::1] cs, object Finput, object shell,
     kCc = np.zeros((fdim,), dtype=INT)
     kCv = np.zeros((fdim,), dtype=DOUBLE)
 
-    xi1 = -1
-    xi2 = +1
-    if x1 != -1 and x2 != +1:
-        xinf = 0
-        xsup = shell.a
-        xi1 = (x1 - xinf)/(xsup - xinf)*2 - 1
-        xi2 = (x2 - xinf)/(xsup - xinf)*2 - 1
-    else:
-        x1 = 0
-        x2 = shell.a
+    xinf = 0
+    xsup = shell.a
+    xi1 = (x1 - xinf)/(xsup - xinf)*2 - 1
+    xi2 = (x2 - xinf)/(xsup - xinf)*2 - 1
 
-    eta1 = -1
-    eta2 = +1
-    if y1 != -1 and y2 != +1:
-        yinf = 0
-        ysup = shell.b
-        eta1 = (y1 - yinf)/(ysup - yinf)*2 - 1
-        eta2 = (y2 - yinf)/(ysup - yinf)*2 - 1
-    else:
-        y1 = 0
-        y2 = shell.b
+    yinf = 0
+    ysup = shell.b
+    eta1 = (y1 - yinf)/(ysup - yinf)*2 - 1
+    eta2 = (y2 - yinf)/(ysup - yinf)*2 - 1
 
     intx = x2 - x1
     inty = y2 - y1
@@ -373,10 +361,10 @@ def fkG_num(double [::1] cs, object Finput, object shell,
     r = shell.r
     m = shell.m
     n = shell.n
-    x1 = shell.x1
-    x2 = shell.x2
-    y1 = shell.y1
-    y2 = shell.y2
+    #NOTE physical limits of the integration domain, resolved and validated
+    #      by Shell.integration_limits(); for the full domain the mapping
+    #      below gives exactly xi1 = eta1 = -1 and xi2 = eta2 = +1
+    x1, x2, y1, y2 = shell.integration_limits()
     x1u = shell.x1u; x1ur = shell.x1ur; x2u = shell.x2u; x2ur = shell.x2ur
     x1v = shell.x1v; x1vr = shell.x1vr; x2v = shell.x2v; x2vr = shell.x2vr
     x1w = shell.x1w; x1wr = shell.x1wr; x2w = shell.x2w; x2wr = shell.x2wr
@@ -393,27 +381,15 @@ def fkG_num(double [::1] cs, object Finput, object shell,
     kGc = np.zeros((fdim,), dtype=INT)
     kGv = np.zeros((fdim,), dtype=DOUBLE)
 
-    xi1 = -1
-    xi2 = +1
-    if x1 != -1 and x2 != +1:
-        xinf = 0
-        xsup = shell.a
-        xi1 = (x1 - xinf)/(xsup - xinf)*2 - 1
-        xi2 = (x2 - xinf)/(xsup - xinf)*2 - 1
-    else:
-        x1 = 0
-        x2 = shell.a
+    xinf = 0
+    xsup = shell.a
+    xi1 = (x1 - xinf)/(xsup - xinf)*2 - 1
+    xi2 = (x2 - xinf)/(xsup - xinf)*2 - 1
 
-    eta1 = -1
-    eta2 = +1
-    if y1 != -1 and y2 != +1:
-        yinf = 0
-        ysup = shell.b
-        eta1 = (y1 - yinf)/(ysup - yinf)*2 - 1
-        eta2 = (y2 - yinf)/(ysup - yinf)*2 - 1
-    else:
-        y1 = 0
-        y2 = shell.b
+    yinf = 0
+    ysup = shell.b
+    eta1 = (y1 - yinf)/(ysup - yinf)*2 - 1
+    eta2 = (y2 - yinf)/(ysup - yinf)*2 - 1
 
     intx = x2 - x1
     inty = y2 - y1
@@ -560,10 +536,10 @@ def fkAx_num(object shell, int size, int row0, int col0, int nx, int ny):
     b = shell.b
     m = shell.m
     n = shell.n
-    x1 = shell.x1
-    x2 = shell.x2
-    y1 = shell.y1
-    y2 = shell.y2
+    #NOTE physical limits of the integration domain, resolved and validated
+    #      by Shell.integration_limits(); for the full domain the mapping
+    #      below gives exactly xi1 = eta1 = -1 and xi2 = eta2 = +1
+    x1, x2, y1, y2 = shell.integration_limits()
     beta = shell.beta
     gamma = shell.gamma
     x1w = shell.x1w; x1wr = shell.x1wr; x2w = shell.x2w; x2wr = shell.x2wr
@@ -578,27 +554,15 @@ def fkAx_num(object shell, int size, int row0, int col0, int nx, int ny):
     kAc = np.zeros((fdim,), dtype=INT)
     kAv = np.zeros((fdim,), dtype=DOUBLE)
 
-    xi1 = -1
-    xi2 = +1
-    if x1 != -1 and x2 != +1:
-        xinf = 0
-        xsup = shell.a
-        xi1 = (x1 - xinf)/(xsup - xinf)*2 - 1
-        xi2 = (x2 - xinf)/(xsup - xinf)*2 - 1
-    else:
-        x1 = 0
-        x2 = shell.a
+    xinf = 0
+    xsup = shell.a
+    xi1 = (x1 - xinf)/(xsup - xinf)*2 - 1
+    xi2 = (x2 - xinf)/(xsup - xinf)*2 - 1
 
-    eta1 = -1
-    eta2 = +1
-    if y1 != -1 and y2 != +1:
-        yinf = 0
-        ysup = shell.b
-        eta1 = (y1 - yinf)/(ysup - yinf)*2 - 1
-        eta2 = (y2 - yinf)/(ysup - yinf)*2 - 1
-    else:
-        y1 = 0
-        y2 = shell.b
+    yinf = 0
+    ysup = shell.b
+    eta1 = (y1 - yinf)/(ysup - yinf)*2 - 1
+    eta2 = (y2 - yinf)/(ysup - yinf)*2 - 1
 
     intx = x2 - x1
     inty = y2 - y1
@@ -704,10 +668,10 @@ def calc_fint(double [::1] cs, object Finput, object shell,
     r = shell.r
     m = shell.m
     n = shell.n
-    x1 = shell.x1
-    x2 = shell.x2
-    y1 = shell.y1
-    y2 = shell.y2
+    #NOTE physical limits of the integration domain, resolved and validated
+    #      by Shell.integration_limits(); for the full domain the mapping
+    #      below gives exactly xi1 = eta1 = -1 and xi2 = eta2 = +1
+    x1, x2, y1, y2 = shell.integration_limits()
     x1u = shell.x1u; x1ur = shell.x1ur; x2u = shell.x2u; x2ur = shell.x2ur
     x1v = shell.x1v; x1vr = shell.x1vr; x2v = shell.x2v; x2vr = shell.x2vr
     x1w = shell.x1w; x1wr = shell.x1wr; x2w = shell.x2w; x2wr = shell.x2wr
@@ -720,27 +684,15 @@ def calc_fint(double [::1] cs, object Finput, object shell,
 
     fint = np.zeros(size, dtype=DOUBLE)
 
-    xi1 = -1
-    xi2 = +1
-    if x1 != -1 and x2 != +1:
-        xinf = 0
-        xsup = shell.a
-        xi1 = (x1 - xinf)/(xsup - xinf)*2 - 1
-        xi2 = (x2 - xinf)/(xsup - xinf)*2 - 1
-    else:
-        x1 = 0
-        x2 = shell.a
+    xinf = 0
+    xsup = shell.a
+    xi1 = (x1 - xinf)/(xsup - xinf)*2 - 1
+    xi2 = (x2 - xinf)/(xsup - xinf)*2 - 1
 
-    eta1 = -1
-    eta2 = +1
-    if y1 != -1 and y2 != +1:
-        yinf = 0
-        ysup = shell.b
-        eta1 = (y1 - yinf)/(ysup - yinf)*2 - 1
-        eta2 = (y2 - yinf)/(ysup - yinf)*2 - 1
-    else:
-        y1 = 0
-        y2 = shell.b
+    yinf = 0
+    ysup = shell.b
+    eta1 = (y1 - yinf)/(ysup - yinf)*2 - 1
+    eta2 = (y2 - yinf)/(ysup - yinf)*2 - 1
 
     intx = x2 - x1
     inty = y2 - y1

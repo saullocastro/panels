@@ -2,6 +2,7 @@ import sys
 sys.path.append('../..')
 
 import numpy as np
+import pytest
 from structsolve import lb
 
 from panels.shell import Shell
@@ -74,6 +75,44 @@ def test_unstiffened_bay_matches_single_shell():
                           silent=True, num_eigvalues=4)
 
     assert np.allclose(eigvals_bay[:3], eigvals_shell[:3], rtol=3e-3)
+
+
+@pytest.mark.parametrize('b, edges', [(1.0, [0., 1/3, 2/3, 1.0]),
+                                      (1.5, [0., 1.0, 1.5])])
+def test_panel_edge_at_one_meter(b, edges):
+    """A panel edge at ``y = 1.0`` is a coordinate like any other
+
+    Up to panels 0.6.9 ``y2 = +1`` was also the sentinel meaning "full
+    domain", so the panel ending at ``y = 1.0`` was integrated over the whole
+    bay and its skin was counted more than once: the buckling load of the
+    unit-width bay was 4.9 % too low.
+
+    """
+    m = n = 10
+    bay = StiffPanelBay()
+    bay.a = 2.
+    bay.b = b
+    bay.r = None
+    bay.model = 'plate_clpt_donnell'
+    bay.stack = [0, 90, 90, 0]
+    bay.plyt = 0.5e-3
+    bay.laminaprop = laminaprop
+    bay.m = m
+    bay.n = n
+    for y1, y2 in zip(edges[:-1], edges[1:]):
+        p = bay.add_panel(y1=y1, y2=y2, Nxx=-1.)
+        p.nx = 4*m
+        p.ny = 4*n
+        assert p.is_partial_domain()
+    eigvals_bay, _ = lb(bay.calc_kC(silent=True), bay.calc_kG(silent=True),
+                        silent=True, num_eigvalues=4)
+
+    s = Shell(a=bay.a, b=bay.b, r=None, stack=bay.stack, plyt=bay.plyt,
+              laminaprop=laminaprop, model=bay.model, m=m, n=n)
+    s.Nxx = -1.
+    eigvals_shell, _ = lb(s.calc_kC(silent=True), s.calc_kG(silent=True),
+                          silent=True, num_eigvalues=4)
+    assert np.allclose(eigvals_bay[:3], eigvals_shell[:3], rtol=1e-6)
 
 
 def test_bladestiff1d_increases_buckling_load():
