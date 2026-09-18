@@ -31,7 +31,10 @@ test*.png
 # Test result files
 *.txt
 *.npy
+example_isotropic.png
+
 
 .DS_Store
 .vs
 env
+
