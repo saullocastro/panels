@@ -31,17 +31,20 @@ cdef extern from 'bardell.hpp':
             double y1t, double y1r, double y2t, double y2r) nogil
 
 
-def fkCSB11_dmg(double dsb, object p1, int size, int row0, int col0, 
+def fkCSB11_dmg(double dt, object p1, int size, int row0, int col0, 
             int nr_x_gauss, int nr_y_gauss, double [:,::1] kw_tsl):
     r"""
     Penalty approach calculation to skin-base ycte panel 1 position.
 
     Parameters
     ----------
-    dsb : float
-        dsb = sum(pA.plyts)/2. + sum(pB.plyts)/2.
+    dt : float
+        Distance from the mid-plane of the top panel ``p1`` to the
+        interface, ``dt = sum(p1.plyts)/2.``. The tangential separation is
+        evaluated with the slope of each panel, see
+        ``theory/multidomain_penalization/cohesive_zone_deviations_from_thesis.tex``.
     p1 : Panel
-        Panel() object
+        Top panel
     size : int
         Size of assembly stiffness matrix, which are calculated by sum([3*p.m*p.n for p in self.panels]).
         The size of the assembly can be calculated calling the PanelAssemly.get_size() method.
@@ -180,7 +183,7 @@ def fkCSB11_dmg(double dsb, object p1, int size, int row0, int col0,
                                 c += 1
                                 kCSB11r[c] = row+0
                                 kCSB11c[c] = col+2
-                                kCSB11v[c] += weight*0.5*b1*dsb*f1Au*f1Bwxi*g1Au*g1Bw*kt
+                                kCSB11v[c] += weight*0.5*b1*dt*f1Au*f1Bwxi*g1Au*g1Bw*kt
                                 c += 1
                                 kCSB11r[c] = row+1
                                 kCSB11c[c] = col+1
@@ -188,19 +191,19 @@ def fkCSB11_dmg(double dsb, object p1, int size, int row0, int col0,
                                 c += 1
                                 kCSB11r[c] = row+1
                                 kCSB11c[c] = col+2
-                                kCSB11v[c] += weight*0.5*a1*dsb*f1Av*f1Bw*g1Av*g1Bweta*kt
+                                kCSB11v[c] += weight*0.5*a1*dt*f1Av*f1Bw*g1Av*g1Bweta*kt
                                 c += 1
                                 kCSB11r[c] = row+2
                                 kCSB11c[c] = col+0
-                                kCSB11v[c] += weight*0.5*b1*dsb*f1Awxi*f1Bu*g1Aw*g1Bu*kt
+                                kCSB11v[c] += weight*0.5*b1*dt*f1Awxi*f1Bu*g1Aw*g1Bu*kt
                                 c += 1
                                 kCSB11r[c] = row+2
                                 kCSB11c[c] = col+1
-                                kCSB11v[c] += weight*0.5*a1*dsb*f1Aw*f1Bv*g1Aweta*g1Bv*kt
+                                kCSB11v[c] += weight*0.5*a1*dt*f1Aw*f1Bv*g1Aweta*g1Bv*kt
                                 c += 1
                                 kCSB11r[c] = row+2
                                 kCSB11c[c] = col+2
-                                kCSB11v[c] += weight*(0.25*a1*b1*kt*(f1Aw*f1Bw*g1Aw*g1Bw + 4*(dsb*dsb)*f1Aw*f1Bw*g1Aweta*g1Bweta/(b1*b1) + 4*(dsb*dsb)*f1Awxi*f1Bwxi*g1Aw*g1Bw/(a1*a1)))
+                                kCSB11v[c] += weight*(0.25*a1*b1*kt*(f1Aw*f1Bw*g1Aw*g1Bw + 4*(dt*dt)*f1Aw*f1Bw*g1Aweta*g1Bweta/(b1*b1) + 4*(dt*dt)*f1Awxi*f1Bwxi*g1Aw*g1Bw/(a1*a1)))
 
     kCSB11 = coo_matrix((kCSB11v, (kCSB11r, kCSB11c)), shape=(size, size))
     # Builds a matrix of size = size x size (so complete size of global MD) and populates it with the data in ..v 
@@ -211,19 +214,20 @@ def fkCSB11_dmg(double dsb, object p1, int size, int row0, int col0,
     return kCSB11
 
 
-def fkCSB12_dmg(double dsb, object p1, object p2, int size, int row0, int col0,
+def fkCSB12_dmg(double dt, double db, object p1, object p2, int size, int row0, int col0,
                 int nr_x_gauss, int nr_y_gauss, double [:,::1] kw_tsl):
     r"""
     Penalty approach calculation to skin-base ycte panel 1 and panel 2 coupling position.
 
     Parameters
     ----------
-    dsb : float
-        dsb = sum(pA.plyts)/2. + sum(pB.plyts)/2.
+    dt, db : float
+        Distances from the mid-planes of the top panel ``p1`` and of the
+        bottom panel ``p2`` to the interface.
     p1 : Panel
-        First Panel object
+        Top panel
     p2 : Panel
-        Second Panel object
+        Bottom panel
     ycte1 : float
         Dimension value that determines the flag value eta.
         If ycte1 = 0 => eta = -1, if ycte1 = p1.b => eta = 1.
@@ -264,8 +268,8 @@ def fkCSB12_dmg(double dsb, object p1, object p2, int size, int row0, int col0,
     cdef double [:] kCSB12v
     cdef double [:] weights_xi, weights_eta, xis, etas
 
-    cdef double f1Au, f2Bu, f1Av, f2Bv, f1Aw, f2Bw, f1Awxi
-    cdef double g1Au, g2Bu, g1Av, g2Bv, g1Aw, g2Bw, g1Aweta
+    cdef double f1Au, f2Bu, f1Av, f2Bv, f1Aw, f2Bw, f1Awxi, f2Bwxi
+    cdef double g1Au, g2Bu, g1Av, g2Bv, g1Aw, g2Bw, g1Aweta, g2Bweta
     cdef double kt
 
     a1 = p1.a
@@ -290,7 +294,7 @@ def fkCSB12_dmg(double dsb, object p1, object p2, int size, int row0, int col0,
     y1v2 = p2.y1v ; y1vr2 = p2.y1vr ; y2v2 = p2.y2v ; y2vr2 = p2.y2vr
     y1w2 = p2.y1w ; y1wr2 = p2.y1wr ; y2w2 = p2.y2w ; y2wr2 = p2.y2wr
 
-    fdim = 5*m1*n1*m2*n2
+    fdim = 7*m1*n1*m2*n2
 
     # Calc gauss points and weights
     xis, weights_xi = roots_legendre(nr_x_gauss)
@@ -335,16 +339,16 @@ def fkCSB12_dmg(double dsb, object p1, object p2, int size, int row0, int col0,
                         f2Bv = f(k2, xi, x1v2, x1vr2, x2v2, x2vr2)
                         # f2Bvxi = fp(k2, xi, x1v2, x1vr2, x2v2, x2vr2)
                         f2Bw = f(k2, xi, x1w2, x1wr2, x2w2, x2wr2)
-                        # f2Bwxi = fp(k2, xi, x1w2, x1wr2, x2w2, x2wr2)
+                        f2Bwxi = fp(k2, xi, x1w2, x1wr2, x2w2, x2wr2)
                         # f2Bwxixi = fpp(k2, xi, x1w2, x1wr2, x2w2, x2wr2)
                         
                         for j1 in range(n1):
-                            g1Au = f(j1, eta, y1u1, y1ur1, y1u1, y1ur1)
+                            g1Au = f(j1, eta, y1u1, y1ur1, y2u1, y2ur1)
                             # g1Aueta = fp(j1, eta, y1u1, y1ur1, y1u1, y1ur1)
-                            g1Av = f(j1, eta, y1v1, y1vr1, y1v1, y1vr1)
+                            g1Av = f(j1, eta, y1v1, y1vr1, y2v1, y2vr1)
                             # g1Aveta = fp(j1, eta, y1v1, y1vr1, y1v1, y1vr1)
-                            g1Aw = f(j1, eta, y1w1, y1wr1, y1w1, y1wr1)
-                            g1Aweta = fp(j1, eta, y1w1, y1wr1, y1w1, y1wr1)
+                            g1Aw = f(j1, eta, y1w1, y1wr1, y2w1, y2wr1)
+                            g1Aweta = fp(j1, eta, y1w1, y1wr1, y2w1, y2wr1)
                             # g1Awetaeta = fpp(j1, eta, y1w1, y1wr1, y1w1, y1wr1)
                                     
                             for l2 in range(n2):
@@ -353,7 +357,7 @@ def fkCSB12_dmg(double dsb, object p1, object p2, int size, int row0, int col0,
                                 g2Bv = f(l2, eta, y1v2, y1vr2, y2v2, y2vr2)
                                 # g2Bveta = fp(l2, eta, y1v2, y1vr2, y2v2, y2vr2)
                                 g2Bw = f(l2, eta, y1w2, y1wr2, y2w2, y2wr2)
-                                # g2Bweta = fp(l2, eta, y1w2, y1wr2, y2w2, y2wr2)
+                                g2Bweta = fp(l2, eta, y1w2, y1wr2, y2w2, y2wr2)
                                 # g2Bwetaeta = fpp(l2, eta, y1w2, y1wr2, y2w2, y2wr2)
         
         
@@ -369,40 +373,49 @@ def fkCSB12_dmg(double dsb, object p1, object p2, int size, int row0, int col0,
                                 kCSB12c[c] = col+0
                                 kCSB12v[c] += -weight*0.25*a1*b1*f1Au*f2Bu*g1Au*g2Bu*kt
                                 c += 1
+                                kCSB12r[c] = row+0
+                                kCSB12c[c] = col+2
+                                kCSB12v[c] += weight*0.5*b1*db*f1Au*f2Bwxi*g1Au*g2Bw*kt
+                                c += 1
                                 kCSB12r[c] = row+1
                                 kCSB12c[c] = col+1
                                 kCSB12v[c] += -weight*0.25*a1*b1*f1Av*f2Bv*g1Av*g2Bv*kt
                                 c += 1
+                                kCSB12r[c] = row+1
+                                kCSB12c[c] = col+2
+                                kCSB12v[c] += weight*0.5*a1*db*f1Av*f2Bw*g1Av*g2Bweta*kt
+                                c += 1
                                 kCSB12r[c] = row+2
                                 kCSB12c[c] = col+0
-                                kCSB12v[c] += -weight*0.5*b1*dsb*f1Awxi*f2Bu*g1Aw*g2Bu*kt
+                                kCSB12v[c] += -weight*0.5*b1*dt*f1Awxi*f2Bu*g1Aw*g2Bu*kt
                                 c += 1
                                 kCSB12r[c] = row+2
                                 kCSB12c[c] = col+1
-                                kCSB12v[c] += -weight*0.5*a1*dsb*f1Aw*f2Bv*g1Aweta*g2Bv*kt
+                                kCSB12v[c] += -weight*0.5*a1*dt*f1Aw*f2Bv*g1Aweta*g2Bv*kt
                                 c += 1
                                 kCSB12r[c] = row+2
                                 kCSB12c[c] = col+2
-                                kCSB12v[c] += -weight*0.25*a1*b1*f1Aw*f2Bw*g1Aw*g2Bw*kt
+                                kCSB12v[c] += weight*(0.25*a1*b1*kt*(-f1Aw*f2Bw*g1Aw*g2Bw + 4*dt*db*f1Aw*f2Bw*g1Aweta*g2Bweta/(b1*b1) + 4*dt*db*f1Awxi*f2Bwxi*g1Aw*g2Bw/(a1*a1)))
 
     kCSB12 = coo_matrix((kCSB12v, (kCSB12r, kCSB12c)), shape=(size, size))
 
     return kCSB12
 
 
-def fkCSB22_dmg(object p1, object p2, int size, int row0, int col0,
+def fkCSB22_dmg(double db, object p1, object p2, int size, int row0, int col0,
                 int nr_x_gauss, int nr_y_gauss, double [:,::1] kw_tsl):
     r"""
     Penalty approach calculation to skin-base ycte panel 2 position.
 
     Parameters
     ----------
-    kt : float
-        Translation penalty stiffness.
+    db : float
+        Distance from the mid-plane of the bottom panel ``p2`` to the
+        interface, ``db = sum(p2.plyts)/2.``.
     p1 : Panel
-        First Panel object
+        Top panel, it defines the integration domain
     p2 : Panel
-        Second Panel object
+        Bottom panel
     ycte2 : float
         Dimension value that determines the flag value eta.
         If ycte1 = 0 => eta = -1, if ycte1 = p1.b => eta = 1.
@@ -435,8 +448,8 @@ def fkCSB22_dmg(object p1, object p2, int size, int row0, int col0,
     cdef double [:] kCSB22v
     cdef double [:] weights_xi, weights_eta, xis, etas
 
-    cdef double f2Au, f2Bu, f2Av, f2Bv, f2Aw, f2Bw
-    cdef double g2Au, g2Bu, g2Av, g2Bv, g2Aw, g2Bw
+    cdef double f2Au, f2Bu, f2Av, f2Bv, f2Aw, f2Bw, f2Awxi, f2Bwxi
+    cdef double g2Au, g2Bu, g2Av, g2Bv, g2Aw, g2Bw, g2Aweta, g2Bweta
     cdef double kt
 
     a1 = p1.a
@@ -451,7 +464,7 @@ def fkCSB22_dmg(object p1, object p2, int size, int row0, int col0,
     y1v2 = p2.y1v ; y1vr2 = p2.y1vr ; y2v2 = p2.y2v ; y2vr2 = p2.y2vr
     y1w2 = p2.y1w ; y1wr2 = p2.y1wr ; y2w2 = p2.y2w ; y2wr2 = p2.y2wr
 
-    fdim = 3*m2*n2*m2*n2
+    fdim = 7*m2*n2*m2*n2
     
     # Calc gauss points and weights
     xis, weights_xi = roots_legendre(nr_x_gauss)
@@ -487,7 +500,7 @@ def fkCSB22_dmg(object p1, object p2, int size, int row0, int col0,
                     f2Av = f(i2, xi, x1v2, x1vr2, x2v2, x2vr2)
                     # f2Avxi = fp(i2, xi, x1v2, x1vr2, x2v2, x2vr2)
                     f2Aw = f(i2, xi, x1w2, x1wr2, x2w2, x2wr2)
-                    # f2Awxi = fp(i2, xi, x1w2, x1wr2, x2w2, x2wr2)
+                    f2Awxi = fp(i2, xi, x1w2, x1wr2, x2w2, x2wr2)
                     # f2Awxixi = fpp(i2, xi, x1w2, x1wr2, x2w2, x2wr2)
                     
                     for k2 in range(m2):
@@ -496,7 +509,7 @@ def fkCSB22_dmg(object p1, object p2, int size, int row0, int col0,
                         f2Bv = f(k2, xi, x1v2, x1vr2, x2v2, x2vr2)
                         # f2Bvxi = fp(k2, xi, x1v2, x1vr2, x2v2, x2vr2)
                         f2Bw = f(k2, xi, x1w2, x1wr2, x2w2, x2wr2)
-                        # f2Bwxi = fp(k2, xi, x1w2, x1wr2, x2w2, x2wr2)
+                        f2Bwxi = fp(k2, xi, x1w2, x1wr2, x2w2, x2wr2)
                         # f2Bwxixi = fpp(k2, xi, x1w2, x1wr2, x2w2, x2wr2)
                         
                         for j2 in range(n2):
@@ -505,7 +518,7 @@ def fkCSB22_dmg(object p1, object p2, int size, int row0, int col0,
                             g2Av = f(j2, eta, y1v2, y1vr2, y2v2, y2vr2)
                             # g2Aveta = fp(j2, eta, y1v2, y1vr2, y2v2, y2vr2)
                             g2Aw = f(j2, eta, y1w2, y1wr2, y2w2, y2wr2)
-                            # g2Aweta = fp(j2, eta, y1w2, y1wr2, y2w2, y2wr2)
+                            g2Aweta = fp(j2, eta, y1w2, y1wr2, y2w2, y2wr2)
                             # g2Awetaeta = fpp(j2, eta, y1w2, y1wr2, y2w2, y2wr2)
                                     
                             for l2 in range(n2):
@@ -514,7 +527,7 @@ def fkCSB22_dmg(object p1, object p2, int size, int row0, int col0,
                                 g2Bv = f(l2, eta, y1v2, y1vr2, y2v2, y2vr2)
                                 # g2Bveta = fp(l2, eta, y1v2, y1vr2, y2v2, y2vr2)
                                 g2Bw = f(l2, eta, y1w2, y1wr2, y2w2, y2wr2)
-                                # g2Bweta = fp(l2, eta, y1w2, y1wr2, y2w2, y2wr2)
+                                g2Bweta = fp(l2, eta, y1w2, y1wr2, y2w2, y2wr2)
                                 # g2Bwetaeta = fpp(l2, eta, y1w2, y1wr2, y2w2, y2wr2)
                                 
                                 
@@ -530,13 +543,29 @@ def fkCSB22_dmg(object p1, object p2, int size, int row0, int col0,
                                 kCSB22c[c] = col+0
                                 kCSB22v[c] += weight*0.25*a1*b1*f2Au*f2Bu*g2Au*g2Bu*kt
                                 c += 1
+                                kCSB22r[c] = row+0
+                                kCSB22c[c] = col+2
+                                kCSB22v[c] += -weight*0.5*b1*db*f2Au*f2Bwxi*g2Au*g2Bw*kt
+                                c += 1
                                 kCSB22r[c] = row+1
                                 kCSB22c[c] = col+1
                                 kCSB22v[c] += weight*0.25*a1*b1*f2Av*f2Bv*g2Av*g2Bv*kt
                                 c += 1
+                                kCSB22r[c] = row+1
+                                kCSB22c[c] = col+2
+                                kCSB22v[c] += -weight*0.5*a1*db*f2Av*f2Bw*g2Av*g2Bweta*kt
+                                c += 1
+                                kCSB22r[c] = row+2
+                                kCSB22c[c] = col+0
+                                kCSB22v[c] += -weight*0.5*b1*db*f2Awxi*f2Bu*g2Aw*g2Bu*kt
+                                c += 1
+                                kCSB22r[c] = row+2
+                                kCSB22c[c] = col+1
+                                kCSB22v[c] += -weight*0.5*a1*db*f2Aw*f2Bv*g2Aweta*g2Bv*kt
+                                c += 1
                                 kCSB22r[c] = row+2
                                 kCSB22c[c] = col+2
-                                kCSB22v[c] += weight*0.25*a1*b1*f2Aw*f2Bw*g2Aw*g2Bw*kt
+                                kCSB22v[c] += weight*(0.25*a1*b1*kt*(f2Aw*f2Bw*g2Aw*g2Bw + 4*(db*db)*f2Aw*f2Bw*g2Aweta*g2Bweta/(b1*b1) + 4*(db*db)*f2Awxi*f2Bwxi*g2Aw*g2Bw/(a1*a1)))
 
     kCSB22 = coo_matrix((kCSB22v, (kCSB22r, kCSB22c)), shape=(size, size))
 
