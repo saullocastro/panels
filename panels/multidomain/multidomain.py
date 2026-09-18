@@ -14,6 +14,53 @@ import panels.modelDB as modelDB
 from panels.multidomain import connections
 
 
+def _penalties(connecti, pA, pB, connection_type):
+    r"""Penalty constants of one connection
+
+    The defaults are given by :func:`.calc_kt_kr`, and the keys ``'kt'`` and
+    ``'kr'`` of the connection dictionary override them.
+
+    """
+    kt, kr = connections.calc_kt_kr(pA, pB, connection_type)
+    kt = connecti.get('kt', kt)
+    kr = connecti.get('kr', kr)
+    return kt, kr
+
+
+def _sb_top_bottom(connecti):
+    r"""Top and bottom panels of a skin-base connection
+
+    The kernels of ``'SB'`` and ``'SB_TSL'`` place the second panel at a
+    distance ``dsb`` below the first one, therefore ``p1`` must be the top
+    panel and ``p2`` the bottom one, independently of their order in the
+    assembly. Both must cover the same area, since the kernels integrate over
+    the domain of ``p1`` only.
+
+    """
+    p_top = connecti['p1']
+    p_bot = connecti['p2']
+    if not (np.isclose(p_top.a, p_bot.a) and np.isclose(p_top.b, p_bot.b)):
+        raise ValueError('The panels of a "{0}" connection must have the '
+                         'same dimensions, got a={1}, b={2} and a={3}, b={4}'
+                         .format(connecti['func'], p_top.a, p_top.b,
+                                 p_bot.a, p_bot.b))
+    return p_top, p_bot
+
+
+def _upper_block(k12, p1, p2):
+    r"""Coupling block between ``p1`` and ``p2`` in the upper triangle
+
+    ``k12`` couples the rows of ``p1`` to the columns of ``p2``. The
+    assembled connection matrix is made symmetric from its upper triangle
+    only, see :func:`.finalize_symmetric_matrix`, so when ``p1`` comes after
+    ``p2`` in the assembly the block is transposed.
+
+    """
+    if p1.col_start > p2.col_start:
+        return k12.T
+    return k12
+
+
 def default_field(panel, gridx, gridy):
     xs = linspace(0, panel.a, gridx)
     ys = linspace(0, panel.b, gridy)
@@ -1146,10 +1193,23 @@ class MultiDomain(object):
             - ``'SSxcte'`` and ``'SSycte'``: between 2 skins along an edge
             - ``'BFxcte'`` and ``'BFycte'``: between the base and the flange of
               a stiffener
-            - ``'SB'``: between 2 skins connected over an area
+            - ``'SB'``: between 2 skins connected over an area, where ``p1``
+              is the top panel and ``p2`` the bottom one, whatever their order
+              in the assembly
             - ``'SB_TSL'``: between 2 skins connected over an area with a
               traction-separation law (TSL) at the interface, requiring
               ``tsl_type``, ``nr_x_gauss`` and ``nr_y_gauss``
+
+            The penalty constants default to the values of
+            :func:`.calc_kt_kr`. They can be given for each connection with
+            the keys ``'kt'`` and ``'kr'`` (``'SB'`` uses only ``'kt'``).
+            The default rotation penalty does not grow as the domains
+            become narrower, so thin and narrow domains may need a higher
+            ``'kr'`` to converge to the single-domain result. For ``'SB'``
+            the penalty ``'kt'`` has units of force/length**3 and must be
+            consistent with the units of the model.
+
+            The dictionaries are not modified.
 
             If ``None``, the connectivity defined for the assembly is used.
         finalize : bool, optional
@@ -1173,9 +1233,18 @@ class MultiDomain(object):
         # Looping through each connection pair
         for connecti in conn:
             if connecti['func'] != 'SB_force':
+                #NOTE a local copy is used, because the coordinates of the
+                #     connection are swapped below when p1 comes after p2 in
+                #     the assembly. Swapping them in the user's dictionary
+                #     would swap them back in every other call, for instance
+                #     calc_kC() followed by calc_kT()
+                connecti = dict(connecti)
                 # connecti = ith connection pair
                 p1_temp = connecti['p1']
                 p2_temp = connecti['p2']
+                if p1_temp is p2_temp:
+                    raise ValueError('A connection must be between two '
+                                     'different panels')
                 # pA and pB are the two panels that are finally passed on
                 if p1_temp.col_start < p2_temp.col_start:
                     pA = p1_temp
@@ -1190,7 +1259,6 @@ class MultiDomain(object):
                             temp_xcte = connecti['xcte1']
                             connecti['xcte1'] = connecti['xcte2']
                             connecti['xcte2'] = temp_xcte
-                        # y needs to be tested
                         if 'ycte1' in connecti.keys() and 'ycte2' in connecti.keys():
                             temp_ycte = connecti['ycte1']
                             connecti['ycte1'] = connecti['ycte2']
@@ -1200,7 +1268,7 @@ class MultiDomain(object):
 
                 if connection_function == 'SSycte':
                     # ftn in panels/multidomain/connections/penalties.py
-                    kt, kr = connections.calc_kt_kr(pA, pB, 'ycte')
+                    kt, kr = _penalties(connecti, pA, pB, 'ycte')
 
                     # ftn in panels/panels/multidomain/connections
                     # Eq 32 MD paper - expanding squares gives i^2, ij, ji and j^2 which form
@@ -1219,7 +1287,7 @@ class MultiDomain(object):
                             size, row0=pB.row_start, col0=pB.col_start)
 
                 elif connection_function == 'SSxcte':
-                    kt, kr = connections.calc_kt_kr(pA, pB, 'xcte')
+                    kt, kr = _penalties(connecti, pA, pB, 'xcte')
                     kC_conn += connections.kCSSxcte.fkCSSxcte11(
                             kt=kt, kr=kr, p1=pA, xcte1=connecti['xcte1'],
                             size=size, row0=pA.row_start, col0=pA.col_start)
@@ -1231,7 +1299,7 @@ class MultiDomain(object):
                             size=size, row0=pB.row_start, col0=pB.col_start)
 
                 elif connection_function == 'BFycte':
-                    kt, kr = connections.calc_kt_kr(pA, pB, 'ycte')
+                    kt, kr = _penalties(connecti, pA, pB, 'ycte')
                     kC_conn += connections.kCBFycte.fkCBFycte11(
                             kt, kr, pA, connecti['ycte1'],
                             size, row0=pA.row_start, col0=pA.col_start)
@@ -1243,7 +1311,7 @@ class MultiDomain(object):
                             size, row0=pB.row_start, col0=pB.col_start)
 
                 elif connection_function == 'BFxcte':
-                    kt, kr = connections.calc_kt_kr(pA, pB, 'xcte')
+                    kt, kr = _penalties(connecti, pA, pB, 'xcte')
                     kC_conn += connections.kCBFxcte.fkCBFxcte11(
                             kt, kr, pA, connecti['xcte1'],
                             size, row0=pA.row_start, col0=pA.col_start)
@@ -1254,21 +1322,21 @@ class MultiDomain(object):
                             kt, kr, pA, pB, connecti['xcte2'],
                             size, row0=pB.row_start, col0=pB.col_start)
 
-                elif connection_function == 'SB': # or (connection_function == 'SB_TSL' and c is None):
-                    # c is None with SB_TSL implies the inital state of loading so no damage
-                    # so original SB connection still applies
+                elif connection_function == 'SB':
+                    #NOTE p1 is the top panel and p2 the bottom one, whatever
+                    #     their order in the assembly, see _sb_top_bottom()
+                    p_top, p_bot = _sb_top_bottom(connecti)
+                    kt, _ = _penalties(connecti, p_top, p_bot, 'bot-top')
 
-                    kt, kr = connections.calc_kt_kr(pA, pB, 'bot-top')
-                    kt = 2e5 # same stiffness as TSL
-                    # print(f'        Modified kt SB :       {kt:.1e}')
-
-                    dsb = sum(pA.plyts)/2. + sum(pB.plyts)/2.
-                    kC_conn += connections.kCSB.fkCSB11(kt, dsb, pA,
-                            size, row0=pA.row_start, col0=pA.col_start)
-                    kC_conn += connections.kCSB.fkCSB12(kt, dsb, pA, pB,
-                            size, row0=pA.row_start, col0=pB.col_start)
-                    kC_conn += connections.kCSB.fkCSB22(kt, pA, pB,
-                            size, row0=pB.row_start, col0=pB.col_start)
+                    dsb = sum(p_top.plyts)/2. + sum(p_bot.plyts)/2.
+                    kC_conn += connections.kCSB.fkCSB11(kt, dsb, p_top,
+                            size, row0=p_top.row_start, col0=p_top.col_start)
+                    kC_conn += _upper_block(connections.kCSB.fkCSB12(
+                            kt, dsb, p_top, p_bot,
+                            size, row0=p_top.row_start, col0=p_bot.col_start),
+                            p_top, p_bot)
+                    kC_conn += connections.kCSB.fkCSB22(kt, p_top, p_bot,
+                            size, row0=p_bot.row_start, col0=p_bot.col_start)
 
                 # Traction Seperation Law introduced at the interface
                 elif connection_function == 'SB_TSL': # and c is not None:
@@ -1280,10 +1348,8 @@ class MultiDomain(object):
 
                     nr_x_gauss = connecti['nr_x_gauss']
                     nr_y_gauss = connecti['nr_y_gauss']
-                    p_top = connecti['p1']
-                    p_bot = connecti['p2']
+                    p_top, p_bot = _sb_top_bottom(connecti)
 
-                    # ATTENTION: pA NEEDS to be the top one and pB, the bottom panel
                     if hasattr(self, "dmg_index"):
                         kw_tsl, dmg_index_max, del_d, dmg_index_curr = self.calc_k_dmg(c=c, pA=p_top, pB=p_bot,
                                              nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, tsl_type=tsl_type,
@@ -1302,14 +1368,16 @@ class MultiDomain(object):
 
                     # print('kc_conn_MD')
                     dsb = sum(p_top.plyts)/2. + sum(p_bot.plyts)/2.
-                    kC_conn += connections.kCSB_dmg.fkCSB11_dmg(dsb=dsb, p1=pA,
-                            size=size, row0=pA.row_start, col0=pA.col_start,
+                    kC_conn += connections.kCSB_dmg.fkCSB11_dmg(dsb=dsb, p1=p_top,
+                            size=size, row0=p_top.row_start, col0=p_top.col_start,
                             nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, kw_tsl=kw_tsl)
-                    kC_conn += connections.kCSB_dmg.fkCSB12_dmg(dsb=dsb, p1=pA, p2=pB,
-                            size=size, row0=pA.row_start, col0=pB.col_start,
-                            nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, kw_tsl=kw_tsl)
-                    kC_conn += connections.kCSB_dmg.fkCSB22_dmg(p1=pA, p2=pB,
-                            size=size, row0=pB.row_start, col0=pB.col_start,
+                    kC_conn += _upper_block(connections.kCSB_dmg.fkCSB12_dmg(
+                            dsb=dsb, p1=p_top, p2=p_bot,
+                            size=size, row0=p_top.row_start, col0=p_bot.col_start,
+                            nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, kw_tsl=kw_tsl),
+                            p_top, p_bot)
+                    kC_conn += connections.kCSB_dmg.fkCSB22_dmg(p1=p_top, p2=p_bot,
+                            size=size, row0=p_bot.row_start, col0=p_bot.col_start,
                             nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, kw_tsl=kw_tsl)
 
                 else:

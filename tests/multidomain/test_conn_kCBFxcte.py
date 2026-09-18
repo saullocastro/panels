@@ -245,7 +245,8 @@ def test_kCBFxte(eig_value_panel_BFycte, eig_value_panel_BFxcte):
     This test compare the first eigenvalue of the assemblies.
     They cannot present an error higher than 1%.
     '''
-    assert np.isclose(eig_value_panel_BFycte, eig_value_panel_BFycte, atol=0.01, rtol=0.01)
+    print(eig_value_panel_BFycte, eig_value_panel_BFxcte)
+    assert np.isclose(eig_value_panel_BFycte, eig_value_panel_BFxcte, atol=0.01, rtol=0.01)
 
 
 
