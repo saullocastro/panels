@@ -3,7 +3,7 @@ import gc
 
 import numpy as np
 from numpy import linspace, reshape
-from scipy.sparse import csr_matrix
+from scipy.sparse import csr_matrix, coo_matrix
 from structsolve.sparseutils import finalize_symmetric_matrix
 from matplotlib import pyplot as plt
 
@@ -59,6 +59,10 @@ def _upper_block(k12, p1, p2):
     if p1.col_start > p2.col_start:
         return k12.T
     return k12
+
+
+def _same_domain(p1, p2):
+    return p1.a == p2.a and p1.b == p2.b
 
 
 def default_field(panel, gridx, gridy):
@@ -1160,11 +1164,22 @@ class MultiDomain(object):
 
                 y_gauss, weights_y = roots_legendre(nr_y_gauss)
 
-                if hasattr(self, "dmg_index"):
-                    kw_tsl, dmg_index_max, del_d, dmg_index_curr = self.calc_k_dmg(c=c, pA=p_top, pB=p_bot,
-                                         nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, tsl_type=tsl_type,
-                                         prev_max_dmg_index=self.dmg_index, k_i=k_i, tau_o=tau_o, G1c=G1c)
-                tau = np.multiply(kw_tsl, del_d)
+                prev = self.dmg_index if hasattr(self, "dmg_index") else None
+                kw_tsl, dmg_index_max, del_d, dmg_index_curr = self.calc_k_dmg(c=c, pA=p_top, pB=p_bot,
+                                     nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, tsl_type=tsl_type,
+                                     prev_max_dmg_index=prev, k_i=k_i, tau_o=tau_o, G1c=G1c)
+                #NOTE the traction must be computed with the uncorrected
+                #      separation, the same that enters the internal force
+                #      vector through kC_conn. The corrected separation, with
+                #      the compressive region set to zero, is only used to
+                #      evaluate the damage. Using it here drops the
+                #      compressive tractions that balance the tensile ones
+                res_pan_top = self.calc_results(c=c, eval_panel=p_top, vec='w',
+                                        nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss)
+                res_pan_bot = self.calc_results(c=c, eval_panel=p_bot, vec='w',
+                                        nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss)
+                del_d_raw = self.calc_separation(res_pan_top, res_pan_bot)
+                tau = np.multiply(kw_tsl, del_d_raw)
 
                 force_intgn = 0
 
@@ -1374,19 +1389,27 @@ class MultiDomain(object):
                         print(f'kw_tsl_overwrite kw_tsl min: {np.min(kw_tsl):.3e}')
                     # print(f'   kw MD class {np.min(kw_tsl):.1e}      dmg {np.max(dmg_index):.3f}')
 
-                    # print('kc_conn_MD')
-                    dsb = sum(p_top.plyts)/2. + sum(p_bot.plyts)/2.
-                    kC_conn += connections.kCSB_dmg.fkCSB11_dmg(dsb=dsb, p1=p_top,
-                            size=size, row0=p_top.row_start, col0=p_top.col_start,
-                            nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, kw_tsl=kw_tsl)
-                    kC_conn += _upper_block(connections.kCSB_dmg.fkCSB12_dmg(
-                            dsb=dsb, p1=p_top, p2=p_bot,
-                            size=size, row0=p_top.row_start, col0=p_bot.col_start,
-                            nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, kw_tsl=kw_tsl),
-                            p_top, p_bot)
-                    kC_conn += connections.kCSB_dmg.fkCSB22_dmg(p1=p_top, p2=p_bot,
-                            size=size, row0=p_bot.row_start, col0=p_bot.col_start,
-                            nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, kw_tsl=kw_tsl)
+                    #NOTE the tangential separation uses the slope of each
+                    #      panel, dt and db are the distances from each
+                    #      mid-plane to the interface, see
+                    #      theory/multidomain_penalization/cohesive_zone_deviations_from_thesis.tex
+                    if connecti.get('use_kernels', False) or not _same_domain(p_top, p_bot):
+                        dt = sum(p_top.plyts)/2.
+                        db = sum(p_bot.plyts)/2.
+                        kC_conn += connections.kCSB_dmg.fkCSB11_dmg(dt=dt, p1=p_top,
+                                size=size, row0=p_top.row_start, col0=p_top.col_start,
+                                nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, kw_tsl=kw_tsl)
+                        kC_conn += _upper_block(connections.kCSB_dmg.fkCSB12_dmg(
+                                dt=dt, db=db, p1=p_top, p2=p_bot,
+                                size=size, row0=p_top.row_start, col0=p_bot.col_start,
+                                nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, kw_tsl=kw_tsl),
+                                p_top, p_bot)
+                        kC_conn += connections.kCSB_dmg.fkCSB22_dmg(db=db, p1=p_top, p2=p_bot,
+                                size=size, row0=p_bot.row_start, col0=p_bot.col_start,
+                                nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, kw_tsl=kw_tsl)
+                    else:
+                        kC_conn += self._kC_TSL(p_top, p_bot, nr_x_gauss,
+                                nr_y_gauss, k_i, kw_tsl, size)
 
                 else:
                     raise ValueError(f'{connection_function} not recognized. Provide a correct function if you expect results')
@@ -1609,14 +1632,7 @@ class MultiDomain(object):
         # Separation for the current NR iteration
         del_d_curr = self.calc_separation(res_pan_top, res_pan_bot)
 
-        # Rewriting negative displacements and setting them to zero before the positive displ at the right end (tip)
-        corrected_del_d = del_d_curr.copy()
-        if True:
-            for i in range(np.shape(corrected_del_d)[0]):
-                if np.min(corrected_del_d[i,:]) <= 0: # only for negative dipls
-                    corrected_del_d[i, 0:np.argwhere(corrected_del_d[i,:]<=0)[-1][0] + 1] = 0
-                    # [-1] to get the last negative position; [0] to convert it from an array to int;
-                    # +1 to include the last negative value and set it to 0
+        corrected_del_d = self.correct_separation(del_d_curr)
 
         # Calculating dmg index corr to current separation
         _, dmg_index_curr = connections.calc_kw_tsl(pA=pA, pB=pB, tsl_type=tsl_type, k_i=k_i,
@@ -1633,6 +1649,307 @@ class MultiDomain(object):
         kw_tsl = self.calc_damaged_stiffness(dmg_index=max_dmg_index, k_i=k_i)
 
         return kw_tsl, max_dmg_index, corrected_del_d, dmg_index_curr
+
+
+    @staticmethod
+    def correct_separation(del_d):
+        r"""Remove the separation behind the first compressive point
+
+        Implements Section 6.3.1 of the thesis of D'Souza (2024), assuming a
+        single crack front that advances along ``-x`` (DCB loaded at ``x=a``
+        of the top panel). For each row ``y = cte``, starting from the point
+        of maximum separation (location `A`) and moving towards ``x=0``, the
+        first point with a non-positive separation is found (location `B`),
+        and the separation from ``x=0`` up to `B` is set to zero. Points on
+        the other side of `A` are not modified.
+
+        Parameters
+        ----------
+        del_d : np.ndarray
+            Separation field with shape ``(nr_y_gauss, nr_x_gauss)``.
+
+        Returns
+        -------
+        corrected : np.ndarray
+            The corrected separation field.
+
+        """
+        corrected = np.array(del_d, dtype=DOUBLE, copy=True)
+        for i in range(corrected.shape[0]):
+            row = corrected[i, :]
+            A = np.argmax(row)
+            if row[A] <= 0:
+                continue
+            nonpos = np.flatnonzero(row[:A+1] <= 0)
+            if nonpos.size > 0:
+                B = nonpos[-1]
+                row[:B+1] = 0.
+        return corrected
+
+
+    def _gauss_field_operators(self, panel, nr_x_gauss, nr_y_gauss):
+        r"""Matrices giving `u, v, w, w_{,x}, w_{,y}` at the Gauss points
+
+        The field is linear in the Ritz constants of ``panel``, such that
+        ``N[k] @ c_panel`` gives, for ``k = 0, 1, 2, 3, 4``, respectively `u`,
+        `v`, `w`, `w_{,x}` and `w_{,y}` at the ``nr_y_gauss x nr_x_gauss``
+        Gauss-Legendre points of ``panel``, flattened in the same order used
+        by :meth:`.uvw` and by the ``kw_tsl`` grids of the ``SB_TSL``
+        connection. The matrices are cached because they only depend on the
+        geometry and on the approximation functions.
+
+        Returns
+        -------
+        N : np.ndarray
+            Array with shape ``(5, nr_y_gauss*nr_x_gauss, n_dofs_panel)``.
+        weights : np.ndarray
+            Integration weights, including the Jacobian `ab/4`.
+
+        """
+        cache = self.__dict__.setdefault('_gauss_field_cache', {})
+        key = (id(panel), panel.m, panel.n, panel.a, panel.b, nr_x_gauss,
+               nr_y_gauss)
+        if key in cache:
+            return cache[key]
+        xi, wxi = roots_legendre(nr_x_gauss)
+        eta, weta = roots_legendre(nr_y_gauss)
+        xs, ys = np.meshgrid((panel.a/2)*(xi + 1), (panel.b/2)*(eta + 1))
+        xs = np.ascontiguousarray(xs.ravel(), dtype=DOUBLE)
+        ys = np.ascontiguousarray(ys.ravel(), dtype=DOUBLE)
+        weights = np.outer(weta, wxi).ravel()*panel.a*panel.b/4
+        fuvw = modelDB.db[panel.model]['field'].fuvw
+        ndof = panel.col_end - panel.col_start
+        N = np.zeros((5, xs.shape[0], ndof), dtype=DOUBLE)
+        e = np.zeros(ndof, dtype=DOUBLE)
+        for j in range(ndof):
+            e[:] = 0.
+            e[j] = 1.
+            out = fuvw(e, panel, xs, ys, self.out_num_cores)
+            for k in range(5):
+                N[k, :, j] = out[k]
+        #NOTE fuvw returns phix = -w,x and phiy = -w,y
+        N[3:] *= -1
+        cache[key] = (N, weights)
+        return N, weights
+
+
+    def _tsl_operators(self, p_top, p_bot, nr_x_gauss, nr_y_gauss):
+        r"""Separation operators of an ``SB_TSL`` connection
+
+        Returns ``(Bu, Bv, Bw, weights, dofs)``, where ``Bu @ cc``, ``Bv @
+        cc`` and ``Bw @ cc`` give the separations `\Delta_u, \Delta_v,
+        \Delta_w` at the Gauss-Legendre points of the connection, with ``cc =
+        c[dofs]`` the Ritz constants of the top panel followed by those of the
+        bottom panel. They depend only on the geometry and are cached.
+
+        """
+        cache = self.__dict__.setdefault('_tsl_operators_cache', {})
+        key = (id(p_top), id(p_bot), p_top.col_start, p_bot.col_start,
+               nr_x_gauss, nr_y_gauss)
+        if key in cache:
+            return cache[key]
+        Nt, weights = self._gauss_field_operators(p_top, nr_x_gauss, nr_y_gauss)
+        Nb, _ = self._gauss_field_operators(p_bot, nr_x_gauss, nr_y_gauss)
+        dt = sum(p_top.plyts)/2.
+        db = sum(p_bot.plyts)/2.
+        Bu = np.hstack((Nt[0] + dt*Nt[3], -Nb[0] + db*Nb[3]))
+        Bv = np.hstack((Nt[1] + dt*Nt[4], -Nb[1] + db*Nb[4]))
+        Bw = np.hstack((Nt[2], -Nb[2]))
+        dofs = np.concatenate((np.arange(p_top.col_start, p_top.col_end),
+                               np.arange(p_bot.col_start, p_bot.col_end)))
+        cache[key] = (Bu, Bv, Bw, weights, dofs)
+        return cache[key]
+
+
+    def _kC_TSL(self, p_top, p_bot, nr_x_gauss, nr_y_gauss, k_o, kw_tsl, size):
+        r"""Secant stiffness of an ``SB_TSL`` connection by matrix products
+
+        Computes the same matrix as :func:`.fkCSB11_dmg`,
+        :func:`.fkCSB12_dmg` and :func:`.fkCSB22_dmg`, with the same
+        Gauss-Legendre rule, as:
+
+        .. math::
+
+            [K] = [K_o] - \sum_{\alpha=u,v,w} [B_\alpha]^T
+                  \text{diag}\left(w_g (k_o - k_g)\right) [B_\alpha]
+
+        where `[K_o] = k_o \sum_\alpha [B_\alpha]^T \text{diag}(w_g)
+        [B_\alpha]` is the stiffness of the pristine interface, computed once
+        and cached, `w_g` are the integration weights and `k_g` the entries
+        of ``kw_tsl``. The second term runs only over the points where `k_g
+        \ne k_o`, the damaged points. Only the upper triangle is returned,
+        see :func:`.finalize_symmetric_matrix`.
+
+        """
+        Bu, Bv, Bw, weights, dofs = self._tsl_operators(p_top, p_bot,
+                nr_x_gauss, nr_y_gauss)
+        cache = self.__dict__.setdefault('_tsl_K0_cache', {})
+        key = (id(p_top), id(p_bot), p_top.col_start, p_bot.col_start,
+               nr_x_gauss, nr_y_gauss, k_o)
+        if key not in cache:
+            WB = [(k_o*weights)[:, None]*B for B in (Bu, Bv, Bw)]
+            K0 = Bu.T @ WB[0] + Bv.T @ WB[1] + Bw.T @ WB[2]
+            r, cl = np.meshgrid(dofs, dofs, indexing='ij')
+            upper = cl >= r
+            cache[key] = (K0, r[upper], cl[upper], upper)
+        K0, rows, cols, upper = cache[key]
+        dk = k_o - np.ravel(kw_tsl)
+        dmg = np.flatnonzero(dk)
+        if dmg.size > 0:
+            g = (weights[dmg]*dk[dmg])[:, None]
+            K = K0.copy()
+            for B in (Bu, Bv, Bw):
+                Bd = B[dmg]
+                K -= Bd.T @ (g*Bd)
+        else:
+            K = K0
+        return coo_matrix((K[upper], (rows, cols)), shape=(size, size))
+
+
+    def calc_kT_TSL(self, c, conn=None):
+        r"""Damage-rate part of the tangent stiffness of the cohesive zone
+
+        The internal force of an ``SB_TSL`` connection is `f = K_s(c) c`,
+        where the secant stiffness `K_s` is the matrix of :meth:`.get_kC_conn`,
+        computed with `k = k_o (1 - d)`. Its consistent tangent is `K_s +
+        K_d`, where:
+
+        .. math::
+
+            K_d = - \int_A k_o \frac{\partial d}{\partial \Delta_n}
+                    \left( B_u^T \Delta_u + B_v^T \Delta_v + B_w^T \Delta_n
+                    \right) B_w \, dA
+
+        with `B_u, B_v, B_w` the operators giving the separations `\Delta_u,
+        \Delta_v, \Delta_n` from the Ritz constants. `\partial d/\partial
+        \Delta_n` is only non-zero at the points where the damage grows in
+        the current state, i.e. where the damage computed from the current
+        separation is larger than the damage history and `\Delta_o < \Delta_n <
+        \Delta_f`. The matrix is not symmetric. See
+        theory/multidomain_penalization/cohesive_zone_deviations_from_thesis.tex
+
+        Parameters
+        ----------
+        c : array-like
+            Ritz constants of the assembly.
+        conn : list of dicts, optional
+            Connections, the default is ``self.conn``.
+
+        Returns
+        -------
+        kD : csr_matrix
+            Sparse matrix with the size of the assembly, zero when no point
+            of the cohesive zone is softening.
+
+        """
+        size = self.get_size()
+        if conn is None:
+            conn = self.conn
+        rows = []
+        cols = []
+        vals = []
+        for connecti in conn:
+            if connecti['func'] != 'SB_TSL':
+                continue
+            if connecti['tsl_type'] != 'bilinear':
+                continue
+            k_o = connecti['k_o']
+            tau_o = connecti['tau_o']
+            G1c = connecti['G1c']
+            nr_x_gauss = connecti['nr_x_gauss']
+            nr_y_gauss = connecti['nr_y_gauss']
+            p_top, p_bot = _sb_top_bottom(connecti)
+            prev = self.dmg_index if hasattr(self, "dmg_index") else None
+            _, _, del_n, dmg_index_curr = self.calc_k_dmg(c=c, pA=p_top,
+                    pB=p_bot, nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss,
+                    tsl_type='bilinear', prev_max_dmg_index=prev, k_i=k_o,
+                    tau_o=tau_o, G1c=G1c)
+            del_n = np.ravel(del_n)
+            dmg_index_curr = np.ravel(dmg_index_curr)
+            if prev is None:
+                prev = np.zeros_like(dmg_index_curr)
+            prev = np.ravel(prev)
+            del_o = tau_o/k_o
+            del_f = 2*G1c/tau_o
+            active = ((del_n > del_o) & (del_n < del_f)
+                      & (dmg_index_curr > prev))
+            if not np.any(active):
+                continue
+            # derivative of d = del_f (del_n - del_o)/((del_f - del_o) del_n)
+            dd = del_f*del_o/((del_f - del_o)*del_n[active]**2)
+
+            Bu, Bv, Bw, weights, dofs = self._tsl_operators(p_top, p_bot,
+                    nr_x_gauss, nr_y_gauss)
+            Bu = Bu[active]
+            Bv = Bv[active]
+            Bw = Bw[active]
+            cc = c[dofs]
+            g = k_o*dd*weights[active]
+            #NOTE the separations are the uncorrected ones, the same used in
+            #     the internal force vector
+            Du = Bu @ cc
+            Dv = Bv @ cc
+            Dw = Bw @ cc
+            kD = -(Bu.T @ ((g*Du)[:, None]*Bw)
+                   + Bv.T @ ((g*Dv)[:, None]*Bw)
+                   + Bw.T @ ((g*Dw)[:, None]*Bw))
+            r, cl = np.meshgrid(dofs, dofs, indexing='ij')
+            rows.append(r.ravel())
+            cols.append(cl.ravel())
+            vals.append(kD.ravel())
+        if len(vals) == 0:
+            return csr_matrix((size, size), dtype=DOUBLE)
+        return csr_matrix((np.concatenate(vals), (np.concatenate(rows),
+                           np.concatenate(cols))), shape=(size, size))
+
+
+    def reaction_line_pd_xcte(self, c, panel, x, kw, funcw, nr_y_gauss=None):
+        r"""Out-of-plane reaction of a prescribed displacement along ``x=cte``
+
+        For a prescribed displacement `w_p(y)` imposed with the penalty
+        stiffness `k_w` along the line ``x`` of ``panel``, see
+        :meth:`.Shell.add_distr_pd_fixed_x` and :func:`.fkCld_xcte`, the
+        force applied by the support on the structure is:
+
+        .. math::
+
+            R = \int_0^b k_w \left( w_p(y) - w(x, y) \right) dy
+
+        which is the load measured by the load cell. It is exact for any
+        state of damage of the structure.
+
+        Parameters
+        ----------
+        c : array-like
+            Ritz constants of the assembly.
+        panel : :class:`.Shell`
+            Panel where the displacement is prescribed.
+        x : float
+            Position of the line, in the coordinates of ``panel``.
+        kw : float
+            Penalty stiffness used to prescribe the displacement.
+        funcw : callable
+            Prescribed displacement `w_p(y)`.
+        nr_y_gauss : int, optional
+            Number of Gauss-Legendre points along `y`. The default is
+            ``max(2*panel.n, 20)``.
+
+        Returns
+        -------
+        R : float
+            Reaction force along `z`.
+
+        """
+        if nr_y_gauss is None:
+            nr_y_gauss = max(2*panel.n, 20)
+        eta, weights = roots_legendre(nr_y_gauss)
+        y = np.ascontiguousarray((panel.b/2)*(eta + 1), dtype=DOUBLE)
+        xs = np.ascontiguousarray(np.full_like(y, x), dtype=DOUBLE)
+        c_panel = np.ascontiguousarray(c[panel.col_start: panel.col_end], dtype=DOUBLE)
+        fuvw = modelDB.db[panel.model]['field'].fuvw
+        _, _, w, _, _ = fuvw(c_panel, panel, xs, y, self.out_num_cores)
+        wp = np.array([funcw(yi) for yi in y])
+        return kw*np.dot(weights, wp - np.asarray(w))*panel.b/2
 
 
     def calc_traction_stiffness(self, kw_tsl, corrected_max_del_d):

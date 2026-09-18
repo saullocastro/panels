@@ -1,0 +1,253 @@
+\section{Cohesive zone in the multidomain approach: deviations from D'Souza (2024)}\label{sec:cz-deviations}
+
+This section documents where the implementation of the damaged area connection \texttt{'SB\_TSL'} departs from the MSc thesis of D'Souza (2024), \textit{Multi-Domain Semi-Analytical Cohesive Zone Approach}, TU Delft, from which it originates. Equation numbers of the form ``Eq.~5.12'' refer to the thesis. Each item states the problem, its consequence on the load-displacement curve of the double cantilever beam (DCB), and what the implementation does now. The affected files are \texttt{panels/multidomain/connections/kCSB\_dmg.pyx}, \texttt{panels/multidomain/multidomain.py} and the driver \texttt{tests/multidomain/test\_dcb\_damage.py}.
+
+The reference case is the DCB of Section 7.3 of the thesis: $L=65$~mm, $b=25$~mm, $a_0=48$~mm, arms $[0]_{15}$ with ply thickness 0.14~mm of AS4D/PEKK-FC, $G_{Ic}=1.12$~N/mm, three domains per arm, of which the first one, with length $a_1 = L - a_0 = 17$~mm, carries the cohesive zone.
+
+\subsection{Energy dissipated by crack formation}\label{sec:cz-dev-ucrack}
+
+The thesis adds the term $U_{crack}$ of Eq.~5.18 to the total potential energy, Eq.~5.29, with the force vector $\{f_{crack}\}$ of Eq.~5.28 and the stiffness matrix $[K_{crack}]$ of Eq.~5.26. This counts the dissipated energy twice. The degradation of the penalty stiffness $k^w_{CZ} = k_o(1-d)$ inside $[K^{conn}_{dmg}]$, Eq.~5.5, already makes the traction follow the softening branch of the traction-separation law, and the area under that branch is $G_{Ic}$, exactly as in a finite element with a cohesive law. The implementation has neither $U_{crack}$, $\{f_{crack}\}$ nor $[K_{crack}]$, and the residual is:
+
+\begin{equation}\label{eq:cz-dev-residual}
+	\{R\} = \{f_{int}\}_{panels} + [K^{conn}_{dmg}(d)]\{c\} + [K^{pen}_{PD}]\{c\} - \{f_{ext}\}
+\end{equation}
+
+\noindent where $d$ is the damage variable at each integration point, the largest value between the converged history and the value obtained from the current separation. The sudden increase of the slope at damage onset reported in Section 7.1.4 of the thesis, and the need to drop $[K^2_{crack}]$, are consequences of the double counting.
+
+\subsection{Load measured at the loaded edge}\label{sec:cz-dev-force}
+
+The thesis evaluates the load with two approaches, Section 5.4, and scales the second one, the area integral of the traction, Eq.~5.38, with the ratio between both at the first increment, Section 7.1.4. The area integral was computed with the corrected separation of Section 6.3.1, in which the separation behind the crack front is set to zero. This removes the compressive tractions that balance the tensile ones. For a beam on an elastic foundation the separation behind the peak is physically negative, and its integral is not small. Table~\ref{tab:cz-dev-force} compares, for a linear elastic solution with a tip displacement of 1~mm, the reaction at the loaded edge with the integrals of the traction computed with the full separation $\Delta$ and with the corrected separation $\Delta^{corr}$.
+
+\begin{table}[!htbp]
+	\centering
+	\caption[]{Out-of-plane force of the DCB for a tip displacement of 1~mm, linear solution, default edge penalties.}
+	\label{tab:cz-dev-force}
+	\renewcommand{\arraystretch}{1.3}
+	\begin{tabular}{rrrrr}
+		\toprule
+		$k_o$ [N/mm$^3$] & Reaction [N] & $\int k \Delta \, dA$ [N] & $\int k \Delta^{corr} \, dA$ [N] & $\int Q_x \, dy$ [N] \\
+		\midrule
+		$1\times10^4$ & 25.30 & 25.31 & 353.0 & 24.73 \\
+		$5\times10^4$ & 26.18 & 26.18 & 523.9 & 25.59 \\
+		$2\times10^5$ & 26.69 & 26.70 & 741.2 & 26.09 \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+The ratio between the corrected integral and the reaction depends on $k_o$ and on the damage state, such that a scaling factor fixed at the first increment distorts the curve after damage onset. The line integral of $Q_x$ with finite differences of $M_{xx}$ is 2\% low. The implementation now provides:
+
+\begin{itemize}
+	\item \texttt{MultiDomain.reaction\_line\_pd\_xcte()}, the reaction of the prescribed displacement $w_p(y)$ imposed with the penalty $k_w$ along $x = x_p$:
+	\begin{equation}\label{eq:cz-dev-reaction}
+		R = \int_0^b k_w \left( w_p(y) - w(x_p, y) \right) dy
+	\end{equation}
+	This is what the load cell measures, and it is used for the load-displacement curves.
+	\item \texttt{MultiDomain.force\_out\_plane\_damage()} integrates $\tau = k^w_{CZ} \Delta$ with the full separation $\Delta$, the same that enters Eq.~\ref{eq:cz-dev-residual}. It matches $R$ by equilibrium of the loaded arm and needs no scaling. The corrected separation is used only to compute the damage.
+\end{itemize}
+
+\subsection{Penalty stiffness of the edge connections}\label{sec:cz-dev-edge-penalty}
+
+The default penalties of \texttt{calc\_kt\_kr} for an \texttt{'SSxcte'} connection between two equal laminates are $k_t = A_{11}/h$ and $k_r = D_{11}/h$, from Castro and Donadon (2017). With the penalty energy $k_r (w^i_{,x} - w^j_{,x})^2$ the connection behaves as a rotational spring of stiffness $2 k_r$ per unit width, which adds to a cantilever loaded at the tip a compliance equal to $3h/(2a)$ of its bending compliance, about 7\% for each connection of the DCB arm ($h = 2.1$~mm, $a = 48$~mm). The arms of the reference model have two connections each, at the crack tip moment. Table~\ref{tab:cz-dev-edge-penalty} gives the elastic stiffness of the DCB, $k_o = 2\times10^5$~N/mm$^3$, when the default $k_t$ and $k_r$ are multiplied by a factor.
+
+\begin{table}[!htbp]
+	\centering
+	\caption[]{Elastic stiffness of the DCB versus the factor applied to the default edge penalties.}
+	\label{tab:cz-dev-edge-penalty}
+	\renewcommand{\arraystretch}{1.3}
+	\begin{tabular}{rrr}
+		\toprule
+		Factor & $P/\delta$ [N/mm] & $\Delta_{max}/\delta$ \\
+		\midrule
+		1 & 26.69 & $4.22\times10^{-4}$ \\
+		10 & 32.54 & $5.21\times10^{-4}$ \\
+		100 & 33.27 & $5.35\times10^{-4}$ \\
+		1000 & 33.35 & $5.36\times10^{-4}$ \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+The converged value agrees with a beam on an elastic foundation, $P/\delta \approx 33$~N/mm. With the default penalties the separation at the crack tip, and therefore the damage onset, lag the imposed displacement by 20\%. This is independent of the 0.015~mm domain used between the cohesive domain and the free arm: replacing it by a 5~mm domain gives 27.23~N/mm with the default penalties and 33.28~N/mm with the factor 100. The driver now multiplies the default \texttt{'SSxcte'} penalties by \texttt{edge\_penalty\_factor}, 100 by default. The library defaults are unchanged.
+
+\subsection{Tangential separation of the area connection}\label{sec:cz-dev-kinematics}
+
+The compatibility of the area connection, Eqs.~4.57--4.62, assumes $w^i_{,x} = w^j_{,x}$ and $w^i_{,y} = w^j_{,y}$ (Eq.~4.61) to write the in-plane compatibility with the slope of the top panel only, Eq.~4.62:
+
+\begin{equation}\label{eq:cz-dev-thesis-jump}
+	\Delta u^{thesis} = u^t + (d^t + d^b) \, w^t_{,x} - u^b
+\end{equation}
+
+This holds for a perfect bond, but not inside the fracture process zone, where the two arms rotate in opposite directions. There, Eq.~\ref{eq:cz-dev-thesis-jump} gives a spurious tangential separation, penalised with the same $k^w_{CZ}$, which stiffens the interface exactly where it should open. The implementation now uses the displacement jump between the two surfaces in contact, with the slope of each panel:
+
+\begin{equation}\label{eq:cz-dev-jump}
+	\begin{aligned}
+		\Delta u &= u^t + d^t w^t_{,x} - u^b + d^b w^b_{,x} \\
+		\Delta v &= v^t + d^t w^t_{,y} - v^b + d^b w^b_{,y} \\
+		\Delta w &= w^t - w^b
+	\end{aligned}
+\end{equation}
+
+\noindent where $d^t$ and $d^b$ are the distances from the mid-planes of the top and bottom panels to the interface, $u^t$, $v^t$, $w^t$ and $u^b$, $v^b$, $w^b$ their mid-plane displacements. The penalty energy of Eq.~5.1 becomes:
+
+\begin{equation}\label{eq:cz-dev-energy}
+	U^{tb}_{pen-AR-dmg} = \int_x \int_y k^w_{CZ} \left( \Delta u^2 + \Delta v^2 + \Delta w^2 \right) dx\,dy
+\end{equation}
+
+\noindent and the stiffness matrix is $\int k^w_{CZ} [B_\Delta]^\top [B_\Delta] \, dA$, where $[B_\Delta]$ is the operator that gives the three jumps of Eq.~\ref{eq:cz-dev-jump} from $\{c\}$. With $f$, $g$ the approximation functions, $\xi$, $\eta$ the natural coordinates and $w_{,x} = (2/a) f_{,\xi} g$, $w_{,y} = (2/b) f g_{,\eta}$, the terms that are new or modified with respect to the kernel of the thesis are, before the factor $w_\xi w_\eta \, ab/4$ of the Gauss-Legendre rule:
+
+\begin{itemize}
+	\item block $tt$: the terms of the thesis with $d^t$ in place of $d^t + d^b$;
+	\item block $tb$: $(u^t, w^b)$: $+ \frac{2}{a} d^b f^t_u f^b_{w,\xi} g^t_u g^b_w$; $(v^t, w^b)$: $+ \frac{2}{b} d^b f^t_v f^b_w g^t_v g^b_{w,\eta}$; $(w^t, u^b)$ and $(w^t, v^b)$ with $d^t$; $(w^t, w^b)$: $- f^t_w f^b_w g^t_w g^b_w + \frac{4 d^t d^b}{a^2} f^t_{w,\xi} f^b_{w,\xi} g^t_w g^b_w + \frac{4 d^t d^b}{b^2} f^t_w f^b_w g^t_{w,\eta} g^b_{w,\eta}$;
+	\item block $bb$: $(u^b, w^b)$: $- \frac{2}{a} d^b f_u f_{w,\xi} g_u g_w$; $(v^b, w^b)$: $- \frac{2}{b} d^b f_v f_w g_v g_{w,\eta}$; $(w^b, w^b)$: $+ \frac{4 (d^b)^2}{a^2} f_{w,\xi} f_{w,\xi} g_w g_w + \frac{4 (d^b)^2}{b^2} f_w f_w g_{w,\eta} g_{w,\eta}$.
+\end{itemize}
+
+The functions \texttt{fkCSB11\_dmg(dt, ...)}, \texttt{fkCSB12\_dmg(dt, db, ...)} and \texttt{fkCSB22\_dmg(db, ...)} implement these blocks. They were verified by comparing $\{c\}^\top [K] \{c\}$ with the Gauss-Legendre integral of Eq.~\ref{eq:cz-dev-energy} evaluated from the displacement field, for random $\{c\}$, random boundary flags, panels with different numbers of terms and thicknesses, and a random $k^w_{CZ}$ field: the relative difference is below $10^{-15}$. The kernel of the undamaged connection \texttt{'SB'}, \texttt{kCSB.pyx}, keeps Eq.~\ref{eq:cz-dev-thesis-jump}, which is adequate for a perfect bond.
+
+The same kernel had the approximation functions in $\eta$ of the top panel in the block $tb$ built with the flags of the edge $y_1$ in place of $y_2$. This had no effect on the DCB, where all $y$ flags are 1.
+
+\subsection{Secant stiffness of the cohesive zone in the modified Newton-Raphson}\label{sec:cz-dev-secant}
+
+In the modified Newton-Raphson method of Section 5.3 the driver refreshed $[K^{conn}_{dmg}]$ only every $n_{NR} = 3$ iterations, together with the tangent stiffness matrix. However, $[K^{conn}_{dmg}]$ is the secant stiffness of the cohesive zone and it is part of the internal force vector, Eq.~\ref{eq:cz-dev-residual}. Keeping it frozen makes the residual inconsistent with the traction-separation law, and a converged state may carry a damage field computed with the displacements of earlier iterations. The driver now evaluates $[K^{conn}_{dmg}]$ at every iteration, and only the tangent stiffness of the panels, $[K_C] + [K_G]$, is refreshed every $n_{NR}$ iterations. The iteration matrix of Section 5.3 is $[K_C] + [K_G] + [K^{conn}_{dmg}] + [K^{pen}_{PD}]$, where the secant stiffness of the cohesive zone replaces its tangent. Section~\ref{sec:cz-dev-tangent} adds the missing term.
+
+\subsection{Consistent tangent stiffness of the cohesive zone}\label{sec:cz-dev-tangent}
+
+With the secant stiffness alone, the iteration matrix misses the change of the damage with the displacements. It overestimates the stiffness of every softening point, and the Newton-Raphson iterations converge linearly, slowly, once the crack grows: in the DCB of Section~\ref{sec:cz-dev-force}, the first increment after the first fully damaged point needed more than 130 iterations. The thesis does not derive the tangent of the cohesive zone. It is derived here for the law implemented, where one damage variable degrades the three components of the traction:
+
+\begin{equation}\label{eq:cz-dev-law}
+	\tau_\alpha = k_o \left(1 - d\right) \Delta_\alpha, \qquad \alpha = u, v, w
+\end{equation}
+
+\noindent with $\Delta_\alpha$ given by Eq.~\ref{eq:cz-dev-jump}. The damage is driven by the normal separation after the correction of Section~\ref{sec:cz-dev-correction}, $\bar\Delta_w$, and it is irreversible:
+
+\begin{equation}\label{eq:cz-dev-damage}
+	d = \max\left( d^{h}, \hat d(\bar\Delta_w) \right), \qquad
+	\hat d(\Delta) = \begin{cases}
+		0 & \Delta \le \Delta_o \\
+		\dfrac{\Delta_f (\Delta - \Delta_o)}{(\Delta_f - \Delta_o) \Delta} & \Delta_o < \Delta < \Delta_f \\
+		1 & \Delta \ge \Delta_f
+	\end{cases}
+\end{equation}
+
+\noindent where $d^h$ is the damage of the last converged increment, \texttt{MultiDomain.dmg\_index}. Writing the separations as $\Delta_\alpha = [B_\alpha]\{c\}$, the internal force vector of the connection and its derivative are:
+
+\begin{equation}\label{eq:cz-dev-fint-coh}
+	\{f^{coh}_{int}\} = \int_A k_o (1 - d) \sum_\alpha [B_\alpha]^\top \Delta_\alpha \, dA = [K^{conn}_{dmg}]\{c\}
+\end{equation}
+
+\begin{equation}\label{eq:cz-dev-tangent}
+	\frac{\partial \{f^{coh}_{int}\}}{\partial \{c\}} = [K^{conn}_{dmg}] + [K^{conn}_{\dot d}], \qquad
+	[K^{conn}_{\dot d}] = - \int_A \chi \, k_o \, \hat d'(\Delta_w) \left( \sum_\alpha [B_\alpha]^\top \Delta_\alpha \right) [B_w] \, dA
+\end{equation}
+
+\noindent with:
+
+\begin{equation}\label{eq:cz-dev-dprime}
+	\hat d'(\Delta) = \frac{\Delta_f \Delta_o}{(\Delta_f - \Delta_o) \Delta^2}, \qquad
+	\chi = \begin{cases}
+		1 & \Delta_o < \bar\Delta_w < \Delta_f \text{ and } \hat d(\bar\Delta_w) > d^h \\
+		0 & \text{otherwise}
+	\end{cases}
+\end{equation}
+
+\noindent The mask $\chi$ selects the points where the damage grows in the current state. Where it is 1, the correction of Section~\ref{sec:cz-dev-correction} leaves the separation unchanged, $\bar\Delta_w = \Delta_w$ and $\partial \bar\Delta_w / \partial \{c\} = [B_w]$. The derivative of the correction itself, a switch between 0 and $\Delta_w$, is zero almost everywhere. Some properties of Eq.~\ref{eq:cz-dev-tangent}:
+
+\begin{itemize}
+	\item $[K^{conn}_{\dot d}]$ is not symmetric, because the tangential tractions depend on $\Delta_w$ through $d$, while $d$ does not depend on $\Delta_u$, $\Delta_v$. The term $[B_w]^\top \Delta_w [B_w]$ is symmetric and negative semi-definite; it makes the normal tangent stiffness of a softening point $k_o (1 - d - \hat d' \Delta_w) = -k_o \Delta_o / (\Delta_f - \Delta_o)$, the slope of the descending branch of the bilinear law.
+	\item The iteration matrix becomes $[K_C] + [K_G] + [K^{conn}_{dmg}] + [K^{conn}_{\dot d}] + [K^{pen}_{PD}]$. Under displacement control the prescribed-displacement penalty keeps it regular on the softening branch of the DCB. \texttt{structsolve.solve} uses \texttt{scipy.sparse.linalg.spsolve}, which accepts non-symmetric matrices.
+	\item Like $[K^{conn}_{dmg}]$, $[K^{conn}_{\dot d}]$ is evaluated at every iteration, while $[K_C] + [K_G]$ is still refreshed every $n_{NR}$ iterations.
+\end{itemize}
+
+\texttt{MultiDomain.calc\_kT\_TSL()} evaluates Eq.~\ref{eq:cz-dev-tangent} at the Gauss-Legendre points of the connection, with $[B_\alpha]$ built once per panel from the field functions and cached. The driver uses it when \texttt{consistent\_tangent=True}, the default. It was verified against central finite differences of $[K^{conn}_{dmg}(\{c\})]\{c\}$, for random states in the softening range, with and without points where $d^h > \hat d$: the relative error of $[K^{conn}_{dmg}] + [K^{conn}_{\dot d}]$ is below $2 \times 10^{-9}$, against 9--62\% for $[K^{conn}_{dmg}]$ alone.
+
+\subsection{Assembly of the cohesive stiffness by matrix products}\label{sec:cz-dev-assembly}
+
+The thesis assembles $[K^{conn}_{dmg}]$ with loops over the terms of both panels and over the integration points, where the approximation functions are evaluated inside the loops, \texttt{kCSB\_dmg.pyx}. Because $[K^{conn}_{dmg}]$ is part of the internal force vector, it is needed at every iteration (Section~\ref{sec:cz-dev-secant}), and with $60 \times 30$ integration points and $10 \times 10$, $8 \times 8$ terms these loops took about 11~s per assembly, 77\% of the run time in the elastic range. The implementation now writes the same Gauss-Legendre rule as matrix products. Let $g = 1, \dots, n_g$ be the integration points, with weights $w_g = w_{\xi} w_{\eta} \, ab/4$, and $\{c_{tb}\}$ the Ritz constants of the top panel followed by those of the bottom panel. The operators of Eq.~\ref{eq:cz-dev-jump} evaluated at all points are the $n_g \times n_{dof}$ matrices:
+
+\begin{equation}\label{eq:cz-dev-operators}
+	\begin{aligned}
+		{}[B_u] &= \left[ [N^t_u] + d^t [N^t_{w,x}] \;\; -[N^b_u] + d^b [N^b_{w,x}] \right] \\
+		[B_v] &= \left[ [N^t_v] + d^t [N^t_{w,y}] \;\; -[N^b_v] + d^b [N^b_{w,y}] \right] \\
+		[B_w] &= \left[ [N^t_w] \;\; -[N^b_w] \right]
+	\end{aligned}
+\end{equation}
+
+\noindent where row $g$ of $[N^t_u]$ holds the approximation functions of $u$ of the top panel at point $g$, and so on. The panel functions are the ones of the field evaluation, \texttt{fuvw}, obtained by evaluating the field for each unit vector of Ritz constants. With $\text{diag}(\cdot)$ the diagonal matrix of a vector over the points, the secant stiffness of Eq.~\ref{eq:cz-dev-energy} is:
+
+\begin{equation}\label{eq:cz-dev-K-products}
+	[K^{conn}_{dmg}] = \sum_{\alpha = u, v, w} [B_\alpha]^\top \text{diag}\left( w_g k_g \right) [B_\alpha], \qquad k_g = k_o (1 - d_g)
+\end{equation}
+
+\noindent a product that runs on optimised BLAS routines. The integration rule is the same as in the loops, so the result is the same up to round-off: the two assemblies agree to a relative $10^{-12}$ for random boundary flags, both orders of the panels in the assembly and a damage field with pristine, softening and failed points (\texttt{tests/multidomain/test\_sb\_tsl.py}). The operators depend only on the geometry and on the approximation functions, and they are computed once and cached. The consistent tangent of Eq.~\ref{eq:cz-dev-tangent} uses the same operators, restricted to the rows where $\chi = 1$. Only the upper triangle of Eq.~\ref{eq:cz-dev-K-products} is added to the connection matrix, which is made symmetric afterwards together with the other connections.
+
+\paragraph{Update restricted to the damaged points.} Splitting $k_g = k_o - (k_o - k_g)$ in Eq.~\ref{eq:cz-dev-K-products}:
+
+\begin{equation}\label{eq:cz-dev-K-update}
+	[K^{conn}_{dmg}] = [K^{conn}_{o}] - \sum_{\alpha = u, v, w} [B_\alpha]^\top_{\mathcal{D}} \, \text{diag}\left( w_g (k_o - k_g) \right)_{\mathcal{D}} \, [B_\alpha]_{\mathcal{D}}, \qquad
+	[K^{conn}_{o}] = k_o \sum_{\alpha = u, v, w} [B_\alpha]^\top \text{diag}\left( w_g \right) [B_\alpha]
+\end{equation}
+
+\noindent where $\mathcal{D} = \{ g : k_g \neq k_o \}$ is the set of damaged points and the subscript $\mathcal{D}$ keeps only their rows. $[K^{conn}_{o}]$, the stiffness of the pristine interface, is computed once for each $k_o$ and cached. Before damage onset $\mathcal{D}$ is empty and the assembly reduces to a copy of $[K^{conn}_{o}]$. After onset, $\mathcal{D}$ holds the fracture process zone and the cracked region, and the cost of the correction grows with the number of their points, not with the size of the whole interface. The correction is exact, not an approximation: it is Eq.~\ref{eq:cz-dev-K-products} regrouped. Because $k_g$ is taken from the stiffness field used by the kernels, the approach does not depend on how the damage is computed.
+
+The loops of \texttt{kCSB\_dmg.pyx} are still used when the connection has \texttt{use\_kernels=True}, or when the two panels have different dimensions $a$, $b$, where the kernels evaluate the functions of the bottom panel at the natural coordinates of the top panel. In the elastic range of the DCB, the matrix products and the update of Eq.~\ref{eq:cz-dev-K-update}, together with the changes of Section~\ref{sec:cz-dev-driver}, reduce the time of eight displacement increments from 341~s to 29~s, with the same loads to a relative $1.3 \times 10^{-8}$, the order of the convergence tolerance.
+
+\subsection{Predictor and reuse of the panel tangent stiffness}\label{sec:cz-dev-driver}
+
+Two changes of the driver, \texttt{test\_dcb\_damage.py}, modify the iterations of Section 5.3 but not the equations being solved:
+
+\begin{itemize}
+	\item \textbf{Predictor.} Each increment started from the last converged state. Under displacement control the first residual is then dominated by the jump of the prescribed displacement, and the first iteration always ended with a ratio of Eq.~\ref{eq:cz-dev-criterion} close to 1. The increment $n$ now starts from the linear extrapolation of the last two converged states, $\{c\}_{n}^{0} = \{c\}_{n-1} + \frac{w_{p,n} - w_{p,n-1}}{w_{p,n-1} - w_{p,n-2}} \left( \{c\}_{n-1} - \{c\}_{n-2} \right)$, with the state $w_p = 0$, $\{c\} = 0$ used for the second increment (\texttt{predictor=True}). The damage history is only updated after convergence, so the damage of the predicted state is not stored.
+	\item \textbf{Reuse of $[K_C] + [K_G]$ in the elastic range.} While no point of the interface is damaged, the tangent stiffness of the panels is reused for up to \texttt{kT\_pan\_reuse\_steps} increments, 5 by default, and within an increment it is refreshed every $n_{NR}$ iterations, but not after the first one. The residual is always evaluated exactly, so the converged solution does not change; only the number of iterations can increase. After onset, $[K_C] + [K_G]$ is evaluated at the start of every increment as before.
+\end{itemize}
+
+\subsection{Line search and bisection of increments}\label{sec:cz-dev-robust}
+
+\paragraph{Why Newton-Raphson fails after the peak.} The residual $\{R(\{c\})\} = \{f_{int}\} - \{f_{ext}\} + [K^{pen}_{PD}]\{c\}$ is continuous but only piecewise smooth. Its derivative jumps whenever an integration point crosses $\Delta_o$ (from $k_o$ to the negative softening slope $-k_o \Delta_o/(\Delta_f - \Delta_o)$), crosses $\Delta_f$ (from the softening slope to zero), switches between loading ($\chi = 1$) and unloading ($\hat d \le d^h$), or changes sign and enters or leaves the region zeroed by the correction of Section~\ref{sec:cz-dev-correction}. The consistent tangent of Section~\ref{sec:cz-dev-tangent} is exact only on one side of each kink. Before the peak, few points cross a kink in one iteration and the quadratic convergence is not affected. After the peak, the Ritz functions are global, so a Newton correction moves the whole crack front at once. In the DCB with $k_o = 5 \times 10^4$~N/mm$^3$ and $\tau_o = 87$~MPa, at $w_p = 6.8$~mm, every correction changed $\{c\}$ by 3--20\%, the normal separation of points at the crack front swung between $-0.0018$ and $+0.0039$~mm, about $3 \Delta_o$, and 14--110 points switched between loading and unloading at every iteration. The iterations entered an exact cycle of period 6, with the ratio of Eq.~\ref{eq:cz-dev-criterion} repeating $0.998$, $0.999$, $0.994$, $0.995$, $0.988$, $0.687$, which no number of iterations can break. Two safeguards are added to the driver. Neither changes the equations or the convergence criterion, so a converged state is the same solution as before, only the path to it changes.
+
+\paragraph{Backtracking line search.} With $\{\delta c\}$ the solution of $[K]\{\delta c\} = -\{R(\{c_i\})\}$, where $[K]$ is the iteration matrix of Section~\ref{sec:cz-dev-tangent}, the new iterate is $\{c_{i+1}\} = \{c_i\} + s\{\delta c\}$, with the step length $s$ taken as the first of $s = 1, \frac{1}{2}, \frac{1}{4}, \dots, 2^{-n_{ls}}$ that satisfies:
+
+\begin{equation}\label{eq:cz-dev-armijo}
+	\left\| \{R(\{c_i\} + s\{\delta c\})\} \right\|_D \le \left(1 - 10^{-4} s\right) \left\| \{R(\{c_i\})\} \right\|_D, \qquad
+	\left\| \{v\} \right\|_D = \sqrt{\{v\}^\top [D]^{-1} \{v\}}
+\end{equation}
+
+\noindent where $[D]$ holds the absolute values of the diagonal of $[K]$ at the start of the increment, the scaling of the criterion of Eq.~\ref{eq:cz-dev-criterion}, which balances the rows of the prescribed-displacement penalty against the others. The merit function is the residual norm and not an energy, because the damaged interface has no potential and $[K]$ is not symmetric. When $[K]$ is the exact Jacobian $[J]$ of the residual, $\{\delta c\}$ is a descent direction of this merit function for any positive weighting:
+
+\begin{equation}\label{eq:cz-dev-descent}
+	\left. \frac{d}{ds} \frac{1}{2} \left\| \{R(\{c_i\} + s\{\delta c\})\} \right\|_D^2 \right|_{s=0} = \{R\}^\top [D]^{-1} [J] \{\delta c\} = - \{R\}^\top [D]^{-1} \{R\} < 0
+\end{equation}
+
+\noindent so a small enough $s$ always satisfies Eq.~\ref{eq:cz-dev-armijo}. Between refreshes of $[K_C] + [K_G]$ the iteration matrix is not the exact Jacobian and this is not guaranteed; if no trial satisfies Eq.~\ref{eq:cz-dev-armijo}, the trial with the smallest norm is taken. Halving $s$ halves the jump of the separations and thus reduces the number of kinks crossed per iteration. Each trial costs one evaluation of the residual, which is cheap with the assembly of Section~\ref{sec:cz-dev-assembly}; the trial $s = 1$ is the residual that the iteration needs anyway. The driver uses $n_{ls} = 6$ (\texttt{line\_search\_max}).
+
+\paragraph{Bisection of increments.} If an increment from $w_{p,n-1}$ to $w_{p,n}$ does not converge within $n_{max} = 50$ iterations (\texttt{max\_NR\_iter}), or diverges, its iterates are discarded and the first half, from $w_{p,n-1}$ to $(w_{p,n-1} + w_{p,n})/2$, is solved from the last converged state. This is applied recursively with a stack of pending targets: when a sub-increment converges, the driver tries again to reach the next pending target, and when it fails, the remaining interval is halved again, down to $2^{-6}$ of the original increment (\texttt{max\_bisections}), after which the analysis is aborted. Discarding the iterates is consistent because the damage history $d^h$ is only updated with converged states. Every converged sub-increment updates $d^h$ and the states used by the predictor of Section~\ref{sec:cz-dev-driver}, so a bisected increment follows a finer loading path, which matters for an irreversible law; the results are stored only at the prescribed displacements of the original list. The list of prescribed displacements itself does not change: sub-increments are only created when an increment fails.
+
+\subsection{Convergence criterion}\label{sec:cz-dev-convergence}
+
+The prescribed displacement is imposed with $k_w = 10^6$, such that $\{f_{ext}\}$ and $[K^{pen}_{PD}]\{c\}$ are of the order of $10^6$--$10^7$, while the physical forces are of the order of $10^2$~N. The denominator of Eq.~5.35, $\max(F(\{f_{ext}\}), F(\{f_{int}\}))$, is dominated by the penalty terms, and the tolerance $10^{-4}$ is then not a relative tolerance on the physical forces. The driver now uses:
+
+\begin{equation}\label{eq:cz-dev-criterion}
+	\frac{F(\{R\})}{\max\left( F(\{f_{int}\}), F([K^{pen}_{PD}]\{c\} - \{f_{ext}\}) \right)} < \varepsilon
+\end{equation}
+
+\noindent where the second term of the denominator is the reaction of the prescribed displacement. The large $k_w$ also degrades the accuracy of the first solution of each increment, whose ratio of Eq.~\ref{eq:cz-dev-criterion} can be close to 1. The driver therefore aborts only when the ratio diverges, instead of when it reaches 1.
+
+\subsection{Correction of the separation field}\label{sec:cz-dev-correction}
+
+Section 6.3.1 of the thesis describes the correction as: start at the point of maximum separation, location $A$, move in the direction of decreasing separation up to the first non-positive separation, location $B$, and set the separation to zero beyond $B$. The implementation set to zero, for each row $y = $~cte, everything from $x=0$ up to the \emph{last} non-positive separation of the row. When the approximation functions give a non-positive value between $A$ and the edge of the domain, for instance a small oscillation at $x = a_1$, the whole row was set to zero, including the fracture process zone. \texttt{MultiDomain.correct\_separation()} now implements the description of the thesis, for a crack front that advances along $-x$:
+
+\begin{equation}\label{eq:cz-dev-correction}
+	\Delta^{corr}_{i,j} = \begin{cases}
+		0 & j \le B_i \\
+		\Delta_{i,j} & j > B_i
+	\end{cases}
+	\qquad
+	B_i = \max \left\{ j \le A_i : \Delta_{i,j} \le 0 \right\}, \quad A_i = \arg\max_j \Delta_{i,j}
+\end{equation}
+
+\noindent with $i$ the row and $j$ the column of the grid of integration points, $j$ increasing with $x$. Rows without non-positive values between $x=0$ and $A_i$ are not modified. The negative values of the separation are not only numerical: for a beam on an elastic foundation the separation behind the crack front oscillates with a decaying amplitude, and its first negative lobe does not change when the number of terms of the cohesive domain is increased from 10 to 20.
+
+\subsection{Differences that remain}\label{sec:cz-dev-open}
+
+\begin{itemize}
+	\item The interpenetration stiffness $k_{ipen}$ of Eq.~5.12 is computed by \texttt{calc\_kw\_tsl} but not used: \texttt{calc\_k\_dmg} returns $k_o(1-d)$ also for negative separations, such that a fully damaged point offers no resistance to interpenetration. This does not affect a monotonically loaded DCB.
+	\item The damage history \texttt{MultiDomain.dmg\_index} is stored once per assembly, which restricts the model to one \texttt{'SB\_TSL'} connection.
+	\item The finite element model of Section 5.6 constrains $U_x$ along the loaded edge, while the Ritz model leaves $u$ free there.
+\end{itemize}
