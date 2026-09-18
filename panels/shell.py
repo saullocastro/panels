@@ -347,14 +347,6 @@ class Shell(object):
             outside the shell by a relative ``1e-12`` of ``a`` or ``b`` are
             taken as the edge, to absorb round-off.
 
-        Notes
-        -----
-        Up to version 0.6.9 the full domain was given by the sentinels ``x1 =
-        y1 = -1`` and ``x2 = y2 = +1``. Since ``+1`` is also a valid
-        coordinate, ``x2 = 1.0`` on a shell with ``a > 1`` silently integrated
-        the full domain, and a limit given on one side only was ignored. The
-        sentinels were removed, and a negative limit is rejected here.
-
         """
         limits = []
         for name1, name2, length, dim in (('x1', 'x2', self.a, 'a'),
@@ -374,8 +366,7 @@ class Shell(object):
                 raise ValueError(
                     'The integration limits must satisfy 0 <= {0} < {1} <= '
                     '{2}, got {0}={3!r}, {1}={4!r} and {2}={5!r}. Use None '
-                    'for an edge of the shell; the sentinels -1 and +1 for '
-                    'the full domain were removed in panels 0.6.13'.format(
+                    'for an edge of the shell'.format(
                         name1, name2, dim, getattr(self, name1),
                         getattr(self, name2), length))
             limits += [v1, v2]
@@ -934,8 +925,9 @@ class Shell(object):
 
         if size is None:
             size = self.get_size()
-        matrices_num = modelDB.db[self.model]['matrices_num']
-        cA = matrices_num.fcA(aeromu, self, size, 0, 0)
+        #NOTE fcA is only implemented analytically, over the whole domain
+        matrices = modelDB.db[self.model]['matrices']
+        cA = matrices.fcA(aeromu, self, size, 0, 0)
         cA = cA*(0+1j)
 
         if finalize:
@@ -946,6 +938,8 @@ class Shell(object):
         gc.collect()
 
         msg('finished!', level=2, silent=silent)
+
+        return cA
 
 
     def uvw(self, c, xs=None, ys=None, gridx=300, gridy=300):
@@ -1032,6 +1026,9 @@ class Shell(object):
         #     Shell.calc_kC() on why c must be checked before being forwarded
         c = np.ascontiguousarray(c, dtype=DOUBLE)
         check_c(c, self.get_size())
+        #NOTE fstrain reads Shell.r as a double, an unset radius of a plate
+        #     must be normalized first
+        self._check_r()
         xs, ys, xshape, yshape = self._default_field(xs, ys, gridx, gridy)
         fstrain = modelDB.db[self.model]['field'].fstrain
         exx, eyy, gxy, kxx, kyy, kxy = fstrain(c, self, xs, ys, self.out_num_cores, int(NLgeom))
