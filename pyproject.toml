@@ -6,4 +6,4 @@ dynamic = ["version", "authors", "license", "readme", "description",
 
 [build-system]
 requires = ["setuptools", "wheel", "numpy", "cython", "scipy", "matplotlib",
-"composites", "structsolve"]
+"composites>=0.9.0", "structsolve"]

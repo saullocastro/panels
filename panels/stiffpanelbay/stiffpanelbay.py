@@ -141,15 +141,24 @@ class StiffPanelBay(object):
         for panel in self.panels:
             panel._clear_matrices()
 
+        #NOTE the stiffeners rebuild their laminates before each calculation,
+        #      and composites >= 0.9.0 laminates cannot be pickled
         for s in self.bladestiff1ds:
             s.kC = None
             s.kM = None
             s.kG = None
+            s.flam = None
+            if s.base is not None:
+                s.base._clear_matrices()
 
         for s in self.bladestiff2ds:
             s.kC = None
             s.kM = None
             s.kG = None
+            if s.base is not None:
+                s.base._clear_matrices()
+            if s.flange is not None:
+                s.flange._clear_matrices()
 
         gc.collect()
 
