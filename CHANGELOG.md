@@ -2,8 +2,6 @@
 
 ## 0.6.21 (2026-09-18)
 
-This entry also covers the changes first released in 0.6.13 (2026-09-18).
-
 ### Requirements
 
 - `structsolve>=0.4.3`, with the new non-linear solvers (full Newton-Raphson,
