@@ -49,7 +49,7 @@ History
 
 See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
 
-* version 0.6.21 (2026-09-18), including the changes first released in 0.6.13
+* version 0.6.21 (2026-09-18)
     - Fixed the mass of the base of `BladeStiff2D`, which was missing, and the
       section forces of `MultiDomain.force()`, which lacked the Jacobian
     - `StiffPanelBay.calc_kA()` sums the contribution of every panel, and
