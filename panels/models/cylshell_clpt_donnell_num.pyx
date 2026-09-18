@@ -295,8 +295,28 @@ def fkC_num(double [::1] cs, object Finput, object shell,
 
 
 def fkG_num(double [::1] cs, object Finput, object shell,
-            int size, int row0, int col0, int nx, int ny, int NLgeom=0,
+            int size, int row0, int col0, int nx, int ny,
             double Nxx0=0, double Nyy0=0, double Nxy0=0):
+    """Geometric stiffness matrix of the linear membrane stress state
+
+    The membrane stress used here comes from the *linear* part of the strain
+    evaluated at ``cs``, superposed with the constant stress state
+    ``(Nxx0, Nyy0, Nxy0)``. The result is therefore homogeneous of degree one
+    in ``cs``, which is what the linear buckling eigenvalue problem requires.
+
+    There is deliberately no switch to include the stress of the non-linear
+    strain here. That contribution, ``KGNL``, is collected by
+    :func:`.fkC_num` instead, so that
+
+        KT = K0 + K0L + KL0 + KLL + KGNL   (fkC_num)
+             + KG(N0 + N_L)                (fkG_num)
+
+    is the exact Jacobian of :func:`.calc_fint` while this function stays
+    homogeneous of degree one in ``cs``. Adding ``KGNL`` here would
+    double-count it in the tangent stiffness matrix and break linear
+    buckling. See the comments in :func:`.fkC_num` and :func:`.calc_fint`.
+
+    """
     cdef double x1, x2, y1, y2, xinf, xsup, yinf, ysup
     cdef double a, b, r, intx, inty
     cdef int m, n
@@ -431,8 +451,7 @@ def fkG_num(double [::1] cs, object Finput, object shell,
 
                 # Calculating the linear strain components. The stress of the
                 # nonlinear strain enters KT through KGNL in fkC_num, such that
-                # kG is homogeneous of degree one in cs. NLgeom is kept in the
-                # signature for backward compatibility and has no effect here
+                # kG is homogeneous of degree one in cs
                 exx = 0.
                 eyy = 0.
                 gxy = 0.
