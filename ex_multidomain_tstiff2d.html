@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Panels with a T-stiffener modeled as multi-domain assemblies &#8212; panels 0.6.9 documentation</title>
+    <title>Panels with a T-stiffener modeled as multi-domain assemblies &#8212; panels 0.6.13 documentation</title>
   
   
   
@@ -38,7 +38,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
-    <script src="_static/documentation_options.js?v=084304ff"></script>
+    <script src="_static/documentation_options.js?v=f150e01c"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'ex_multidomain_tstiff2d';</script>
@@ -49,7 +49,7 @@
     <link rel="prev" title="Cylinders modeled as multi-domain assemblies" href="ex_multidomain_cylinder.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.6.9" />
+  <meta name="docsearch:version" content="0.6.13" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -117,7 +117,7 @@
   
   
   
-    <p class="title logo__title">panels 0.6.9 documentation</p>
+    <p class="title logo__title">panels 0.6.13 documentation</p>
   
 </a></div>
     
@@ -509,7 +509,7 @@ stress state from a static analysis, using
         <span class="n">Nxx_flange</span><span class="o">=-</span><span class="mf">1.</span><span class="p">,</span>
         <span class="n">num_eigvalues</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
         <span class="p">)</span>
-    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">eigvals</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">135.1</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">eigvals</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">142.68</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">)</span>
 
     <span class="n">assy</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">eigvals</span><span class="p">,</span> <span class="n">eigvecs</span> <span class="o">=</span> <span class="n">tstiff2d_1stiff_compression</span><span class="p">(</span>
         <span class="n">b</span><span class="o">=</span><span class="n">b</span><span class="p">,</span>
@@ -533,7 +533,7 @@ stress state from a static analysis, using
         <span class="n">Nxx_flange</span><span class="o">=-</span><span class="mf">1.</span><span class="p">,</span>
         <span class="n">num_eigvalues</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
         <span class="p">)</span>
-    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">eigvals</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">67.42</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">eigvals</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">114.86</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Frequency analysis, using <code class="xref py py-func docutils literal notranslate"><span class="pre">tstiff2d_1stiff_freq()</span></code>:</p>
@@ -562,7 +562,13 @@ stress state from a static analysis, using
         <span class="n">num_eigvalues</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="n">omegan</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">eigvals</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mf">0.5</span>
-    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">omegan</span><span class="p">,</span> <span class="mf">44.147</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">)</span>
+    <span class="c1">#NOTE the reference values of this module were changed in 2025 to match</span>
+    <span class="c1">#      the skin-base connection 'SB' with a hard-coded penalty</span>
+    <span class="c1">#      kt = 2e5, which is a N/mm**3 value and about 6e-7 of the</span>
+    <span class="c1">#      penalty given by calc_kt_kr() in these SI units, so the base was</span>
+    <span class="c1">#      practically disconnected from the skin. Once the default penalty</span>
+    <span class="c1">#      was restored, the values of 2024 came back</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">omegan</span><span class="p">,</span> <span class="mf">48.2733</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Flutter analysis with the piston theory, using
@@ -598,7 +604,7 @@ stress state from a static analysis, using
         <span class="p">)</span>
     <span class="n">omegan</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">eigvals</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mf">0.5</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">eigvals</span><span class="p">)</span>
-    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">omegan</span><span class="p">,</span> <span class="mf">175.5</span><span class="o">+</span><span class="mf">0.</span><span class="n">j</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">omegan</span><span class="p">,</span> <span class="mf">446.12</span><span class="o">+</span><span class="mf">0.</span><span class="n">j</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
