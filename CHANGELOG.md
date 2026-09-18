@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.6.13 (2026-09-18)
+## 0.6.21 (2026-09-18)
 
 ### Requirements
 
@@ -147,6 +147,36 @@ removed from `panels.modelDB.db`, and `Shell._rebuild` now raises
   used them swapped back. The dictionaries are no longer modified. A
   connection of a panel to itself raises `ValueError` instead of
   `UnboundLocalError`.
+- `BladeStiff2D` lost the ply densities when rebuilding the laminates of the
+  base and of the flange. The base, integrated numerically over its partial
+  domain, had no mass at all, so natural frequencies and flutter results of
+  bays with a `BladeStiff2D` base were wrong with no warning. The base now
+  adds exactly the mass of a skin strip of the same laminate and width.
+- `MultiDomain.force()` integrated the stress resultants over the natural
+  coordinate without the Jacobian, returning `2*mean(N)` instead of the
+  section force: along `x = cte` the result is now multiplied by `b/2`, and
+  along `y = cte` by `a/2`. `MultiDomain.calc_results()` with
+  `vec='Fxx'`, `'Fyy'` or `'Fxy'` is affected the same way.
+- `StiffPanelBay.calc_kA()` used only the first panel, integrated over its
+  own partial domain, instead of the whole bay. It now sums the contribution
+  of every panel, as `calc_kC()` does, and uses the piston theory parameters
+  of the bay.
+- Methods that always raised an exception:
+  - `Shell.calc_cA()` looked `fcA` up in the numerical module instead of the
+    analytical one. It now also returns the matrix.
+  - `Shell.strain()` and `Shell.stress()`, and therefore `plot_shell()` with
+    a strain or stress field, failed for a plate with an unset radius
+    (`r=None`).
+  - `StiffPanelBay.calc_kA()` and `StiffPanelBay.calc_cA()`.
+  - `StiffPanelBay.calc_fext()` failed with any skin load, and for any bay
+    with a `BladeStiff2D`. Flange loads are read from
+    `BladeStiff2D.forces_flange`.
+  - `StiffPanelBay.save()`.
+  - `StiffPanelBay.get_size()` for a `BladeStiff2D` without flange.
+  - `StiffPanelBay.uvw_stiffener()` for any stiffener after the first one.
+- Removed `StiffPanelBay.tstiff2ds` and the code handling it, left over from
+  the removal of `TStiff2D`: nothing could fill the list, and the external
+  force vector of that code wrote past the end of its buffer.
 
 ### Enhancements
 
@@ -228,6 +258,13 @@ removed from `panels.modelDB.db`, and `Shell._rebuild` now raises
 - `tests/tests_shell/test_partial_domain_limits.py` and
   `test_stiffpanelbay_lb.py::test_panel_edge_at_one_meter` cover the
   integration limits.
+- New tests for `Shell` (`tests/tests_shell/test_shell_api.py`),
+  `plot_shell` (`tests/tests_shell/test_plot_shell.py`), `StiffPanelBay` with
+  `BladeStiff1D` and `BladeStiff2D`
+  (`tests/tests_stiffpanelbay/test_stiffpanelbay_api.py`) and the
+  post-processing of `MultiDomain`
+  (`tests/multidomain/test_multidomain_postprocessing.py`), raising the line
+  coverage of the Python modules from 67 % to 92 %.
 
 ## 0.5.4 (2026-04-09)
 

@@ -923,6 +923,11 @@ class MultiDomain(object):
                                  x_cte_force=x_cte_force, y_cte_force=y_cte_force,
                                  gridx=gridx, gridy=gridy,
                                  nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss)
+        # the panel whose results are in res_stress[...][0]
+        if eval_panel is not None:
+            panel = eval_panel
+        else:
+            panel = [p for p in self.panels if p.group == group][0]
 
         for vec in ['Nxx', 'Nyy', 'Nxy']:
             if x_cte_force is not None:
@@ -937,6 +942,8 @@ class MultiDomain(object):
                     raise ValueError('Size mismatch')
                 # Getting the gauss points and weights
                 y_temp, weights = roots_legendre(nr_y_gauss)
+                # Jacobian of the mapping from the natural coordinate
+                jacobian = panel.b/2
 
             if y_cte_force is not None:
                 [row, _] = np.where(np.isclose(res_stress['y'][0], y_cte_force))
@@ -950,9 +957,10 @@ class MultiDomain(object):
                     raise ValueError('Size mismatch')
                 # Getting the gauss points and weights
                 x_temp, weights = roots_legendre(nr_x_gauss)
+                jacobian = panel.a/2
 
             # Integration
-            force_intgn = np.dot(weights, stress_field)
+            force_intgn = np.dot(weights, stress_field)*jacobian
 
             # Adding keys by modifying keys of res_stress (F added, N removed)
             res[f'F{vec[1:]}'] = force_intgn

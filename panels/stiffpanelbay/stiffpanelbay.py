@@ -76,7 +76,6 @@ class StiffPanelBay(object):
         self.stiffeners = []
         self.bladestiff1ds = []
         self.bladestiff2ds = []
-        self.tstiff2ds = []
 
         # geometry
         self.a = None
@@ -140,9 +139,7 @@ class StiffPanelBay(object):
         self.Ys = None
 
         for panel in self.panels:
-            panel.kC = None
-            panel.kM = None
-            panel.kG = None
+            panel._clear_matrices()
 
         for s in self.bladestiff1ds:
             s.kC = None
@@ -150,11 +147,6 @@ class StiffPanelBay(object):
             s.kG = None
 
         for s in self.bladestiff2ds:
-            s.kC = None
-            s.kM = None
-            s.kG = None
-
-        for s in self.tstiff2ds:
             s.kC = None
             s.kM = None
             s.kG = None
@@ -180,9 +172,6 @@ class StiffPanelBay(object):
             s._rebuild()
 
         for s in self.bladestiff2ds:
-            s._rebuild()
-
-        for s in self.tstiff2ds:
             s._rebuild()
 
 
@@ -226,10 +215,8 @@ class StiffPanelBay(object):
         self.size = dofs*self.m*self.n
 
         for s in self.bladestiff2ds:
-            self.size += s.flange.get_size()
-
-        for s in self.tstiff2ds:
-            self.size += s.base.get_size() + s.flange.get_size()
+            if s.flange is not None:
+                self.size += s.flange.get_size()
 
         return self.size
 
@@ -552,24 +539,12 @@ class StiffPanelBay(object):
         n = self.n
         row0 = dofs*m*n
         col0 = dofs*m*n
-        for i, s in enumerate(self.bladestiff2ds):
-            if i > 0:
-                s_1 = self.bladestiff2ds[i-1]
+        for s in self.bladestiff2ds:
             s.calc_kC(size=size, row0=row0, col0=col0, silent=True,
                       finalize=False)
             if s.flange is not None:
                 row0 += s.flange.get_size()
                 col0 += s.flange.get_size()
-            #TODO summing up coo_matrix objects may be slow!
-            kC += s.kC
-
-        for i, s in enumerate(self.tstiff2ds):
-            if i > 0:
-                s_1 = self.tstiff2ds[i-1]
-            s.calc_kC(size=size, row0=row0, col0=col0, silent=True,
-                      finalize=False)
-            row0 += s.base.get_size() + s.flange.get_size()
-            col0 += s.base.get_size() + s.flange.get_size()
             #TODO summing up coo_matrix objects may be slow!
             kC += s.kC
 
@@ -611,24 +586,12 @@ class StiffPanelBay(object):
         row0 = dofs*m*n
         col0 = dofs*m*n
 
-        for i, s in enumerate(self.bladestiff2ds):
-            if i > 0:
-                s_1 = self.bladestiff2ds[i-1]
+        for s in self.bladestiff2ds:
             s.calc_kG(size=size, row0=row0, col0=col0, silent=True,
                        finalize=False, c=c)
             if s.flange is not None:
                 row0 += s.flange.get_size()
                 col0 += s.flange.get_size()
-            #TODO summing up coo_matrix objects may be slow!
-            kG += s.kG
-
-        for i, s in enumerate(self.tstiff2ds):
-            if i > 0:
-                s_1 = self.tstiff2ds[i-1]
-            s.calc_kG(size=size, row0=row0, col0=col0, silent=True,
-                       finalize=False, c=c)
-            row0 += s.base.get_size() + s.flange.get_size()
-            col0 += s.base.get_size() + s.flange.get_size()
             #TODO summing up coo_matrix objects may be slow!
             kG += s.kG
 
@@ -672,24 +635,12 @@ class StiffPanelBay(object):
         row0 = dofs*m*n
         col0 = dofs*m*n
 
-        for i, s in enumerate(self.bladestiff2ds):
-            if i > 0:
-                s_1 = self.bladestiff2ds[i-1]
+        for s in self.bladestiff2ds:
             s.calc_kM(size=size, row0=row0, col0=col0, silent=True,
                     finalize=False)
             if s.flange is not None:
                 row0 += s.flange.get_size()
                 col0 += s.flange.get_size()
-            #TODO summing up coo_matrix objects may be slow!
-            kM += s.kM
-
-        for i, s in enumerate(self.tstiff2ds):
-            if i > 0:
-                s_1 = self.tstiff2ds[i-1]
-            s.calc_kM(size=size, row0=row0, col0=col0, silent=True,
-                    finalize=False)
-            row0 += s.base.get_size() + s.flange.get_size()
-            col0 += s.base.get_size() + s.flange.get_size()
             #TODO summing up coo_matrix objects may be slow!
             kM += s.kM
 
@@ -706,24 +657,20 @@ class StiffPanelBay(object):
         return kM
 
 
-    def calc_kA(self, silent=False):
-        self._rebuild()
-        msg('Calculating kA... ', level=2, silent=silent)
-        a = self.a
-        b = self.b
+    def _aero_parameters(self):
+        """Piston theory parameters ``beta``, ``gamma`` and ``aeromu``"""
         r = self.r if self.r is not None else 0.
-        m = self.m
-        n = self.n
-
         if self.beta is None:
-            if self.Mach < 1:
+            if self.Mach is None:
+                raise ValueError('Mach number cannot be a NoneValue')
+            elif self.Mach < 1:
                 raise ValueError('Mach number must be >= 1')
             elif self.Mach == 1:
                 self.Mach = 1.0001
             Mach = self.Mach
             beta = self.rho_air * self.V**2 / (Mach**2 - 1)**0.5
             if r != 0.:
-                gamma = beta*1./(2.*self.r*(Mach**2 - 1)**0.5)
+                gamma = beta*1./(2.*r*(Mach**2 - 1)**0.5)
             else:
                 gamma = 0.
             ainf = self.speed_sound
@@ -732,26 +679,25 @@ class StiffPanelBay(object):
             beta = self.beta
             gamma = self.gamma if self.gamma is not None else 0.
             aeromu = self.aeromu if self.aeromu is not None else 0.
+        return beta, gamma, aeromu
 
-        # contributions from panels
+
+    def calc_kA(self, silent=False):
+        self._rebuild()
+        msg('Calculating kA... ', level=2, silent=silent)
+
+        size = self.get_size()
+        beta, gamma, aeromu = self._aero_parameters()
+
+        # contributions from panels, each one integrated over its own domain
         #TODO summing up coo_matrix objects may be slow!
-        #FIXME this only works if the first panel represent the full
-        #      stiffpanelbay domain (mainly integration interval, boundary
-        #      conditions)
-        p = self.panels[0]
-        #FIXME the initialization below looks terrible
-        #      we should move as quick as possible to the strategy of using
-        #      classes more to carry data, avoiding these intrincated methods
-        #      shared among classes... (calc_kC, calc_kG etc)
-        p.flow = self.flow
-        p.Mach = self.Mach
-        p.rho_air = self.rho_air
-        p.speed_sound = self.speed_sound
-        p.size = self.size
-        p.V = self.V
-        p.r = self.r
-        p.calc_kA(silent=True, finalize=False)
-        kA = p.matrices['kA']
+        kA = 0.
+        for p in self.panels:
+            p.flow = self.flow
+            p.beta = beta
+            p.gamma = gamma
+            p.calc_kA(size=size, row0=0, col0=0, silent=True, finalize=False)
+            kA += p.matrices['kA']
 
         assert np.any(np.isnan(kA.data)) == False
         assert np.any(np.isinf(kA.data)) == False
@@ -771,34 +717,13 @@ class StiffPanelBay(object):
     def calc_cA(self, silent=False):
         self._rebuild()
         msg('Calculating cA... ', level=2, silent=silent)
-        a = self.a
-        b = self.b
-        r = self.r
-        m = self.m
-        n = self.n
         size = self.get_size()
+        beta, gamma, aeromu = self._aero_parameters()
 
-        if self.beta is None:
-            if self.Mach < 1:
-                raise ValueError('Mach number must be >= 1')
-            elif self.Mach == 1:
-                self.Mach = 1.0001
-            Mach = self.Mach
-            beta = self.rho_air * self.V**2 / (Mach**2 - 1)**0.5
-            gamma = beta*1./(2.*self.r*(Mach**2 - 1)**0.5)
-            ainf = self.speed_sound
-            aeromu = beta/(Mach*ainf)*(Mach**2 - 2)/(Mach**2 - 1)
-        else:
-            beta = self.beta
-            gamma = self.gamma if self.gamma is not None else 0.
-            aeromu = self.aeromu if self.aeromu is not None else 0.
-
-        # contributions from panels
+        #NOTE Shell.calc_cA() integrates analytically over the whole bay,
+        #     regardless of the panel limits, so a single panel is used
         p = self.panels[0]
-        p.calc_cA(size=size, row0=0, col0=0, silent=silent)
-        cA = p.matrices['cA']
-
-        cA = finalize_symmetric_matrix(cA)
+        cA = p.calc_cA(aeromu, size=size, silent=True, finalize=True)
         self.cA = cA
 
         #NOTE forcing Python garbage collector to clean the memory
@@ -934,21 +859,18 @@ class StiffPanelBay(object):
         dofs = panelmDB.db[self.model]['dofs']
         row_init = dofs*self.m*self.n
 
-        # getting array position
-        for i, s in enumerate(self.stiffeners):
-            if i > 0:
-                s_1 = self.stiffeners[i-1]
-                if isinstance(s, BladeStiff2D):
-                    row_init += s_1.get_size()
-            if i == si:
-                break
+        # getting array position, only the flanges of the BladeStiff2D
+        # stiffeners have their own Ritz constants, see get_size()
+        for s in self.stiffeners[:si]:
+            if isinstance(s, BladeStiff2D) and s.flange is not None:
+                row_init += s.flange.get_size()
+        s = stiff
 
         if region.lower() == 'flange':
+            if stiff.flange is None:
+                raise RuntimeError('This BladeStiff2D has no flange')
             bstiff = stiff.flange.b
-            if isinstance(s, BladeStiff2D):
-                row_final = row_init + s.flange.get_size()
-            else:
-                raise ValueError('Invalid region')
+            row_final = row_init + stiff.flange.get_size()
         else:
             raise ValueError('Invalid region')
 
@@ -1459,57 +1381,36 @@ class StiffPanelBay(object):
         fg = panelmDB.db[self.model]['field'].fg
 
         # punctual forces on skin
+        #NOTE fg() needs a Shell; the shape functions of any panel span the
+        #     whole bay, with the boundary conditions of the bay
         size = dofs*self.m*self.n
-        g = np.zeros((3, size), dtype=DOUBLE)
+        #NOTE fg() fills the rows of u, v, w, phix and phiy
+        g = np.zeros((5, size), dtype=DOUBLE)
         fext_skin = np.zeros(size, dtype=DOUBLE)
         for i, force in enumerate(self.forces_skin):
             x, y, fx, fy, fz = force
-            fg(g, x, y, self)
+            fg(g, x, y, self.panels[0])
 
-            fpt = np.array([[fx, fy, fz]])
+            fpt = np.array([[fx, fy, fz, 0., 0.]])
             fext_skin += fpt.dot(g).ravel()
 
         fext = fext_skin
         # punctual forces on bladestiff2ds
         # flange
         for s in self.bladestiff2ds:
+            if s.flange is None:
+                continue
             fg_flange = panelmDB.db[s.flange.model]['field'].fg
             size = s.flange.get_size()
-            g_flange = np.zeros((3, size), dtype=DOUBLE)
+            g_flange = np.zeros((5, size), dtype=DOUBLE)
             fext_stiffener = np.zeros(size, dtype=DOUBLE)
-            for i, force in enumerate(s.flange.forces):
+            for i, force in enumerate(s.forces_flange):
                 xf, yf, fx, fy, fz = force
                 fg_flange(g_flange, xf, yf, s.flange)
-                fpt = np.array([[fx, fy, fz]])
+                fpt = np.array([[fx, fy, fz, 0., 0.]])
                 fext_stiffener += fpt.dot(g_flange).ravel()
 
             fext = np.concatenate((fext, fext_stiffener))
-
-        # punctual forces on tstiff2ds
-        for s in self.tstiff2ds:
-            # base
-            size = s.base.get_size()
-            g_base = np.zeros((3, size), dtype=DOUBLE)
-            fext_base = np.zeros(size, dtype=DOUBLE)
-            fg_base = panelmDB.db[s.base.model]['field'].fg
-            for i, force in enumerate(s.base.forces):
-                xb, yb, fx, fy, fz = force
-                fg_base(g_base, xb, yb, s.base)
-                fpt = np.array([[fx, fy, fz]])
-                fext_base += fpt.dot(g_base).ravel()
-
-            # flange
-            size = s.flange.get_size()
-            g_flange = np.zeros((3, size), dtype=DOUBLE)
-            fext_flange = np.zeros(size, dtype=DOUBLE)
-            fg_flange = panelmDB.db[s.flange.model]['field'].fg
-            for i, force in enumerate(s.flange.forces):
-                xf, yf, fx, fy, fz = force
-                fg_flange(g_flange, xf, yf, s.flange)
-                fpt = np.array([[fx, fy, fz]])
-                fext_flange += fpt.dot(g_flange).ravel()
-
-            fext = np.concatenate((fext, fext_base, fext_flange))
 
         msg('finished!', level=2, silent=silent)
 

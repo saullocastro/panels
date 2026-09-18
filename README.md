@@ -4,7 +4,7 @@ Github Actions status:
 
 Coverage status:
 
-[![Codecov Status](https://codecov.io/gh/saullocastro/panels/branch/master/graph/badge.svg?token=KD9D8G8D2P)](https://codecov.io/gh/saullocastro/panels)
+[![Codecov Status](https://codecov.io/gh/saullocastro/panels/branch/main/graph/badge.svg?token=KD9D8G8D2P)](https://codecov.io/gh/saullocastro/panels)
 
 
 Semi-analytical methods for plates, shells and stiffened panels
@@ -27,7 +27,7 @@ The structural matrices are solved with
 Citing this library
 ===================
 
-Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.6.13). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
+Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.6.21). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
 
 
 Documentation
@@ -49,7 +49,14 @@ History
 
 See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
 
-* version 0.6.13 (2026-09-18)
+* version 0.6.21 (2026-09-18), including the changes first released in 0.6.13
+    - Fixed the mass of the base of `BladeStiff2D`, which was missing, and the
+      section forces of `MultiDomain.force()`, which lacked the Jacobian
+    - `StiffPanelBay.calc_kA()` sums the contribution of every panel, and
+      `calc_kA`, `calc_cA`, `calc_fext`, `save`, `get_size` and
+      `uvw_stiffener` of `StiffPanelBay` and `Shell.calc_cA` no longer raise
+    - `Shell.strain()` and `Shell.stress()` work for a plate with `r=None`
+    - Line coverage of the tests raised from 67 % to 92 %
     - Fixed `StiffPanelBay.add_panel` and the partial-domain integration of
       `Shell.calc_kC`, `calc_kG` and `calc_kM`
     - The limits `Shell.x1, x2, y1, y2` of the integration domain default to
@@ -87,6 +94,6 @@ License
 =======
 
 Distributed under the 3-Clause BSD license
-(https://raw.github.com/saullocastro/panels/master/LICENSE).
+(https://raw.github.com/saullocastro/panels/main/LICENSE).
 
 Contact: S.G.P.Castro@tudelft.nl

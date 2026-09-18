@@ -34,7 +34,6 @@ Topic :: Software Development :: Libraries :: Python Modules
 Operating System :: Microsoft :: Windows
 Operating System :: Unix
 Operating System :: POSIX :: BSD
-Programming Language :: Python :: 3.8
 Programming Language :: Python :: 3.9
 Programming Language :: Python :: 3.10
 Programming Language :: Python :: 3.11
@@ -46,7 +45,7 @@ Programming Language :: Python :: 3.14
 
 MAJOR = 0
 MINOR = 6
-MICRO = 13
+MICRO = 21
 ISRELEASED = True
 VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 YEAR = '2026'
