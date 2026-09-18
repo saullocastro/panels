@@ -43,7 +43,7 @@ https://github.com/saullocastro/panels
 Citing this library
 -------------------
 
-Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.6.13). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
+Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.6.21). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
 
 
 Usage examples
@@ -97,7 +97,7 @@ extensions, using::
 Changelog
 ---------
 
-https://github.com/saullocastro/panels/blob/master/CHANGELOG.md
+https://github.com/saullocastro/panels/blob/main/CHANGELOG.md
 
 
 License
