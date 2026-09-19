@@ -78,7 +78,7 @@ def dcb_damage_prop_no_f_kcrack(phy_dim, nr_terms, k_i=None, tau_o=None, nr_x_ga
                                 consistent_tangent=True, predictor=True,
                                 kT_pan_reuse_steps=5, line_search=True,
                                 line_search_max=6, max_NR_iter=50,
-                                max_bisections=6):
+                                max_bisections=6, use_kernels=False):
     r"""Damage propagation from a DCB with a precrack
 
         Code for 2 panels might not be right
@@ -105,6 +105,9 @@ def dcb_damage_prop_no_f_kcrack(phy_dim, nr_terms, k_i=None, tau_o=None, nr_x_ga
         max_NR_iter, max_bisections : an increment that does not converge in
             max_NR_iter iterations is bisected, up to max_bisections times,
             before the analysis is aborted.
+        use_kernels : assembles the 'SB_TSL' connection with the Cython
+            kernels of kCSB_dmg.pyx instead of the matrix products, slower,
+            same matrices.
 
         See theory/multidomain_penalization/cohesive_zone_deviations_from_thesis.tex
     """
@@ -337,7 +340,8 @@ def dcb_damage_prop_no_f_kcrack(phy_dim, nr_terms, k_i=None, tau_o=None, nr_x_ga
            dict(p1=bot1, p2=bot2, func='SSxcte', xcte1=bot1.a, xcte2=0),
            dict(p1=bot2, p2=bot3, func='SSxcte', xcte1=bot2.a, xcte2=0),
            dict(p1=top1, p2=bot1, func='SB_TSL', tsl_type = 'bilinear', nr_x_gauss=nr_x_gauss,
-                nr_y_gauss=nr_y_gauss, tau_o=tau_o, G1c=G1c, k_o=k_i, del_o=tau_o/k_i, del_f=2*G1c/tau_o)
+                nr_y_gauss=nr_y_gauss, tau_o=tau_o, G1c=G1c, k_o=k_i, del_o=tau_o/k_i, del_f=2*G1c/tau_o,
+                use_kernels=use_kernels)
         ]
     elif nr_pan == 4:
         conn = [
@@ -348,7 +352,8 @@ def dcb_damage_prop_no_f_kcrack(phy_dim, nr_terms, k_i=None, tau_o=None, nr_x_ga
            dict(p1=bot1, p2=bot2, func='SSxcte', xcte1=bot1.a, xcte2=0),
            dict(p1=bot2, p2=bot3, func='SSxcte', xcte1=bot2.a, xcte2=0),
            dict(p1=bot3, p2=bot4, func='SSxcte', xcte1=bot3.a, xcte2=0),
-           dict(p1=top1, p2=bot1, func='SB_TSL', tsl_type = 'bilinear', nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, k_o=k_i, tau_o=tau_o, G1c=G1c)
+           dict(p1=top1, p2=bot1, func='SB_TSL', tsl_type = 'bilinear', nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, k_o=k_i, tau_o=tau_o, G1c=G1c,
+                use_kernels=use_kernels)
         ]
 
     for conni in conn:

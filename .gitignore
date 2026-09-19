@@ -38,3 +38,6 @@ example_isotropic.png
 .vs
 env
 
+
+# runs of notebooks/convergence_study.py
+convergence_study_runs/
