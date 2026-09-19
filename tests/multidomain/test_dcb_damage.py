@@ -9,7 +9,7 @@ import time
 import scipy
 
 from panels.shell import Shell
-from panels.multidomain.connections import calc_ku_kv_kw_point_pd
+from panels.multidomain.connections import calc_ku_kv_kw_point_pd, calc_kt_kr
 from panels.multidomain.connections import fkCpd, fkCld_xcte, fkCld_ycte
 from panels.plot_shell import plot_shell
 from panels.multidomain import MultiDomain
@@ -73,12 +73,40 @@ def img_popup(filename, plot_no = None, title = None):
         plt.imshow(image)
 
 
-def dcb_damage_prop_no_f_kcrack(phy_dim, nr_terms, k_i=None, tau_o=None, nr_x_gauss=None, nr_y_gauss=None, w_iter_info=None, G1c=None, name=''):
+def dcb_damage_prop_no_f_kcrack(phy_dim, nr_terms, k_i=None, tau_o=None, nr_x_gauss=None, nr_y_gauss=None, w_iter_info=None, G1c=None, name='',
+                                edge_penalty_factor=100., load_reversal=False,
+                                consistent_tangent=True, predictor=True,
+                                kT_pan_reuse_steps=5, line_search=True,
+                                line_search_max=6, max_NR_iter=50,
+                                max_bisections=6):
     r"""Damage propagation from a DCB with a precrack
 
         Code for 2 panels might not be right
 
         All units in MPa, N, mm
+
+        edge_penalty_factor : multiplies the default penalties of
+            :func:`.calc_kt_kr` for the 'SSxcte' connections. With the default
+            penalties each connection behaves as a hinge at the crack-tip
+            moment, and the elastic stiffness of this DCB drops by about 20%.
+        load_reversal : unloads and reloads the specimen close to the end.
+        consistent_tangent : adds the damage-rate part of the tangent
+            stiffness of the cohesive zone, :meth:`.MultiDomain.calc_kT_TSL`,
+            to the Jacobian. Without it only the secant stiffness is used and
+            the convergence is slow while the crack grows.
+        predictor : starts each increment from a linear extrapolation of the
+            last two converged states, instead of the last one.
+        kT_pan_reuse_steps : while there is no damage, the tangent stiffness
+            of the panels is reused for up to this number of increments. The
+            residual is always exact, so the solution does not change. Use 0
+            to evaluate it at the start of every increment.
+        line_search : backtracking line search on the Newton-Raphson
+            corrections, with at most line_search_max halvings of the step.
+        max_NR_iter, max_bisections : an increment that does not converge in
+            max_NR_iter iterations is bisected, up to max_bisections times,
+            before the analysis is aborted.
+
+        See theory/multidomain_penalization/cohesive_zone_deviations_from_thesis.tex
     """
     filename=name[0]
     foldername=name[1]
@@ -320,8 +348,14 @@ def dcb_damage_prop_no_f_kcrack(phy_dim, nr_terms, k_i=None, tau_o=None, nr_x_ga
            dict(p1=bot1, p2=bot2, func='SSxcte', xcte1=bot1.a, xcte2=0),
            dict(p1=bot2, p2=bot3, func='SSxcte', xcte1=bot2.a, xcte2=0),
            dict(p1=bot3, p2=bot4, func='SSxcte', xcte1=bot3.a, xcte2=0),
-           dict(p1=top1, p2=bot1, func='SB_TSL', tsl_type = 'bilinear', nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, k_i=k_i, tau_o=tau_o, G1c=G1c)
+           dict(p1=top1, p2=bot1, func='SB_TSL', tsl_type = 'bilinear', nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, k_o=k_i, tau_o=tau_o, G1c=G1c)
         ]
+
+    for conni in conn:
+        if conni['func'] == 'SSxcte':
+            kt, kr = calc_kt_kr(conni['p1'], conni['p2'], 'xcte')
+            conni['kt'] = edge_penalty_factor*kt
+            conni['kr'] = edge_penalty_factor*kr
 
     # This determines the positions of each panel's (sub)matrix in the global matrix when made a MD obj below
     # So changing this changes the placements i.e. starting row and col of each
@@ -410,7 +444,6 @@ def dcb_damage_prop_no_f_kcrack(phy_dim, nr_terms, k_i=None, tau_o=None, nr_x_ga
     if w_iter_nr_pts is None:
         w_iter_nr_pts = 50
 
-    load_reversal = True
     if not load_reversal:
         w_iter = np.unique(np.concatenate((np.linspace(0.01,0.375*w_max,int(0.3*w_iter_nr_pts)), np.linspace(0.375*w_max,0.625*w_max,int(0.3*w_iter_nr_pts)),
                                         np.linspace(0.625*w_max,w_max,int(0.4*w_iter_nr_pts)))))
@@ -430,139 +463,187 @@ def dcb_damage_prop_no_f_kcrack(phy_dim, nr_terms, k_i=None, tau_o=None, nr_x_ga
     quasi_NR = True
     NR_kT_update = 3 # After how many iterations should kT be updated
     crisfield_test_fail = False # keeps track if the crisfield test has failed or not and prevents the run from aborting
+    kT_pan = None
+    kT_pan_age = 0 # increments since kT_pan was evaluated
 
-    # Displacement Incrementation
-    for wp in w_iter:
-        print(f'------------ wp = {wp:.3f} ---------------\n')
+    def prescribe(wp):
+        """Prescribed displacement wp, returns kCp and fext"""
+        disp_type = 'line_xcte' # change based on what's being applied
 
-        # Prescribed Displacements
-        if True:
-            disp_type = 'line_xcte' # change based on what's being applied
+        # Clears all previously added displs - otherwise in NL case, theyre readded so you have 2 disps at the tip
+        disp_panel.clear_disps()
 
-            # Clears all previously added displs - otherwise in NL case, theyre readded so you have 2 disps at the tip
-            disp_panel.clear_disps()
-
-            if disp_type == 'point':
-                # Penalty Stiffness
-                # Disp in z, so only kw is non zero. ku and kv are zero
-                kCp = fkCpd(0., 0., kw, disp_panel, disp_panel.a, disp_panel.b/2, size, disp_panel.row_start, disp_panel.col_start)
-                # Point load (added to shell obj)
-                disp_panel.add_point_pd(disp_panel.a, disp_panel.b/2, 0., 0., 0., 0., kw, wp)
-            if disp_type == 'line_xcte':
-                kCp = fkCld_xcte(0., 0., kw, disp_panel, disp_panel.a, size, disp_panel.row_start, disp_panel.col_start)
-                disp_panel.add_distr_pd_fixed_x(disp_panel.a, None, None, kw,
-                                           funcu=None, funcv=None, funcw = lambda y: wp) #*y/top2.b, cte=True)
-            if disp_type == 'line_ycte':
-                kCp = fkCld_ycte(0., 0., kw, disp_panel, disp_panel.b, size, disp_panel.row_start, disp_panel.col_start)
-                disp_panel.add_distr_pd_fixed_y(disp_panel.b, None, None, kw,
-                                           funcu=None, funcv=None, funcw = lambda x: wp) #*x/top2.a, cte=True)
+        if disp_type == 'point':
+            # Penalty Stiffness
+            # Disp in z, so only kw is non zero. ku and kv are zero
+            kCp = fkCpd(0., 0., kw, disp_panel, disp_panel.a, disp_panel.b/2, size, disp_panel.row_start, disp_panel.col_start)
+            # Point load (added to shell obj)
+            disp_panel.add_point_pd(disp_panel.a, disp_panel.b/2, 0., 0., 0., 0., kw, wp)
+        if disp_type == 'line_xcte':
+            kCp = fkCld_xcte(0., 0., kw, disp_panel, disp_panel.a, size, disp_panel.row_start, disp_panel.col_start)
+            disp_panel.add_distr_pd_fixed_x(disp_panel.a, None, None, kw,
+                                       funcu=None, funcv=None, funcw = lambda y: wp) #*y/top2.b, cte=True)
+        if disp_type == 'line_ycte':
+            kCp = fkCld_ycte(0., 0., kw, disp_panel, disp_panel.b, size, disp_panel.row_start, disp_panel.col_start)
+            disp_panel.add_distr_pd_fixed_y(disp_panel.b, None, None, kw,
+                                       funcu=None, funcv=None, funcw = lambda x: wp) #*x/top2.a, cte=True)
 
         # Stiffness matrix from penalties due to prescribed displacement
         kCp = finalize_symmetric_matrix(kCp)
 
         # Has to be after the forces/loads are added to the panels
         fext = assy.calc_fext()
+        return kCp, fext
 
-        # Inital guess ci and increment dc (same size as fext)
-        dc = np.zeros_like(fext)
+    # converged states (wp, c), the most recent last, used by the predictor
+    conv_states = [(0., np.zeros(size))]
+    assy.update_TSL_history(curr_max_dmg_index=np.zeros((nr_y_gauss, nr_x_gauss)))
 
+    def newton(wp):
+        """Solves the increment ending at wp from the last converged state
 
-        # All subsequent load steps
-        if disp_iter_no != 0:
-            # Doing this to avoid recalc kc_conn and help pass the correct k_i
+        Returns (converged, c, number of iterations). The damage history is
+        not modified.
+        """
+        nonlocal kT_pan, kT_pan_age
+        kCp, fext = prescribe(wp)
+
+        wp_a, c_a = conv_states[-1]
+        ci = c_a.copy()
+        if predictor and len(conv_states) >= 2:
+            # linear extrapolation in wp of the last two converged states,
+            # the state wp=0 is c=0
+            wp_b, c_b = conv_states[-2]
+            if wp_a != wp_b:
+                ci = c_a + (wp - wp_a)/(wp_a - wp_b)*(c_a - c_b)
+
+        # no damage in the converged states so far
+        elastic = np.max(assy.dmg_index) == 0.
+
+        def residual(c):
             kC_conn = assy.get_kC_conn(c=c)
-            # Inital fint (0 bec c=0)
             fint = np.asarray(assy.calc_fint(c=c, kC_conn=kC_conn))
-            # Residual with disp terms
-            Ri = fint - fext + kCp*c
-            kT = assy.calc_kT(c=c, kC_conn=kC_conn)
+            return fint - fext + kCp*c, fint, kC_conn
 
-            k0 = kT + kCp
-
-        # Initial step where ci = zeros
-        if disp_iter_no == 0 and np.max(ci) == 0:
-            # max(ci) bec if its already calc for an initial guess above, no need to repeat it -
-            #                   only when c is zero (or randomly initialized - modify 'if' then)
-
-            # Doing this to avoid recalc kc_conn and help pass the correct k_i
-            kC_conn = assy.get_kC_conn(c=ci)
-
-            # Inital fint (0 bec c=0)
-            fint = np.asarray(assy.calc_fint(c=ci, kC_conn=kC_conn))
-
-            # Residual with disp terms
-            Ri = fint - fext + kCp*ci
-
-            # Contains both fint and kC_conn contribution
-            kT = assy.calc_kT(c=ci, kC_conn=kC_conn)
-
-            # Setting the max DI to be 0 - needed to calc kcrack
-            assy.update_TSL_history(curr_max_dmg_index=np.zeros((nr_y_gauss, nr_x_gauss)))
-
-            k0 = kT + kCp
-
+        #NOTE kC_conn contains the secant stiffness of the cohesive zone, it is
+        #     part of the internal force vector and must be evaluated at the
+        #     current c in every iteration. Only the tangent stiffness of the
+        #     panels, kT_pan, is kept constant for NR_kT_update iterations.
+        #     kD is the damage-rate part of the consistent tangent of the
+        #     cohesive zone, non-symmetric, also evaluated at every iteration
+        Ri, fint, kC_conn = residual(ci)
+        if kT_pan is None or not elastic or kT_pan_age >= kT_pan_reuse_steps:
+            kT_pan = assy.calc_kT(c=ci, kC_conn=0.)
+            kT_pan_age = 0
+        else:
+            kT_pan_age += 1
+        kD = assy.calc_kT_TSL(c=ci) if consistent_tangent else 0.
+        k0 = kT_pan + kC_conn + kD + kCp
 
         epsilon = 1.e-4 # Convergence criteria
         D = k0.diagonal() # For convergence - calc at beginning of load increment
 
         count = 0 # Tracks number of NR iterations
-
-        crisfield_test_res = np.zeros(1000)
-
-        # Modified Newton Raphson Iteration
         while True:
             dc = solve(k0, -Ri, silent=True)
-            c = ci + dc
 
-            # Run it everytime if not quasi_NR or run it selectively if quasi_NR
-            if not quasi_NR or (quasi_NR and (count == 0 or count % NR_kT_update == 0)):
-                kC_conn = assy.get_kC_conn(c=c)
+            #NOTE backtracking line search on the scaled norm of the
+            #     residual, the step is accepted when the norm decreases
+            #     sufficiently, otherwise the step with the smallest norm
+            #     among the trials is taken
+            r0 = scaling(Ri, D)
+            step = 1.
+            best = None
+            for trial in range(line_search_max + 1):
+                c = ci + step*dc
+                R, fint_t, kC_conn_t = residual(c)
+                r = scaling(R, D)
+                if not np.isfinite(r):
+                    r = np.inf
+                if best is None or r < best[0]:
+                    best = (r, step, c, R, fint_t, kC_conn_t)
+                if not line_search or r <= (1 - 1e-4*step)*r0:
+                    break
+                step *= 0.5
+            _, step, c, Ri, fint, kC_conn = best
+            if step < 1.:
+                print(f'    line search step {step:.4f}')
 
-            fint = np.asarray(assy.calc_fint(c=c, kC_conn=kC_conn))
-
-            # Might need to calc fext here again if it changes per iteration when fext changes when not using kc_conn for SB
-            Ri = fint - fext + kCp*c
-
-            print()
-            print(f'Ri {np.linalg.norm(Ri):.2e}')
-            print(f'fint {np.linalg.norm(fint):.2e}')
-            print(f'-fext {np.linalg.norm(fext):.2e}')
-            print(f'kCp*c {np.linalg.norm(kCp*c):.2e}')
-
-            crisfield_test = scaling(Ri, D)/max(scaling(fext, D), scaling(fint + kCp*c, D))
-            crisfield_test_res[count] = crisfield_test
-
+            #NOTE fext and kCp*c are of the order of kw*wp and dominate the
+            #     original denominator, the physical forces are fint and the
+            #     reaction of the prescribed displacement, kCp*c - fext
+            crisfield_test = scaling(Ri, D)/max(scaling(fint, D), scaling(kCp*c - fext, D))
             print(f'    crisfield {crisfield_test:.4e} ')
 
             if crisfield_test < epsilon:
-                break
+                return True, c, count + 1
 
-            if not quasi_NR or (quasi_NR and (count == 0 or count % NR_kT_update == 0)):
-                kT = assy.calc_kT(c=c, kC_conn=kC_conn)
-                k0 = kT + kCp
-                print(f'        kT {np.max(kT):.2e}')
-                print(f'        kCp {np.max(kCp):.2e}')
+            #NOTE the first iteration of an increment can give a ratio close
+            #     to 1 because kw >> structural stiffness degrades the
+            #     accuracy of the first solve, only divergence aborts
+            if not np.isfinite(crisfield_test) or crisfield_test > 1e3:
+                return False, c, count + 1
+
+            count += 1
+            if count >= max_NR_iter:
+                return False, c, count
+
+            #NOTE while elastic, a kT_pan reused from previous increments is
+            #     kept for NR_kT_update iterations before it is refreshed
+            if (not quasi_NR or count % NR_kT_update == 1
+                    and not (elastic and count == 1)):
+                kT_pan = assy.calc_kT(c=c, kC_conn=0.)
+                kT_pan_age = 0
+            kD = assy.calc_kT_TSL(c=c) if consistent_tangent else 0.
+            k0 = kT_pan + kC_conn + kD + kCp
 
             # Update for next starting guess
             ci = c.copy()
 
-            count += 1
+    def accept(wp, c):
+        """Stores a converged state and updates the damage history"""
+        tmp = assy.calc_k_dmg(c=c, pA=p_top, pB=p_bot,
+                              nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss,
+                              tsl_type=tsl_type,
+                              prev_max_dmg_index=assy.dmg_index, k_i=k_i,
+                              tau_o=tau_o, G1c=G1c)
+        assy.update_TSL_history(curr_max_dmg_index=tmp[1])
+        conv_states.append((wp, c.copy()))
+        del conv_states[:-2]
 
+    # Displacement Incrementation
+    for wp_target in w_iter:
+        print(f'------------ wp = {wp_target:.3f} ---------------\n')
 
-            # Kills this run but prevents other runs in parallel from being killed due to errors
-            if True:
-                if crisfield_test >= 1:
-                    crisfield_test_fail = True
-                    break
-
-            if count > 1000:
+        #NOTE when an increment does not converge, it is bisected and the
+        #     first half is solved from the last converged state, the
+        #     damage history is only updated with converged states
+        pending = [wp_target]
+        # smallest sub-increment allowed before aborting
+        min_inc = abs(wp_target - conv_states[-1][0])/2**max_bisections
+        while pending:
+            wp = pending[-1]
+            converged, c_new, n_iter = newton(wp)
+            if converged:
+                accept(wp, c_new)
+                c = c_new
+                pending.pop()
+                if wp != wp_target:
+                    print(f'    bisection: converged at wp = {wp:.5f} in {n_iter} iterations')
+                continue
+            wp_last = conv_states[-1][0]
+            wp_mid = 0.5*(wp_last + wp)
+            if abs(wp_mid - wp_last) < min_inc*(1 - 1e-9):
+                print(f'{filename} -- NR didnt converged :(')
                 log_file = open(f'{filename}.txt', 'a')
                 log_file.write('Unconverged Results !!!!!!!!!!!!!!!!!!!\n')
                 log_file.close()
-                # raise RuntimeError('NR didnt converged :(')
-                print(f'{filename} -- NR didnt converged :(')
                 crisfield_test_fail = True
+                c = c_new
                 break
+            print(f'    bisection: no convergence at wp = {wp:.5f} after {n_iter} iterations, trying wp = {wp_mid:.5f}')
+            pending.append(wp_mid)
+        wp = wp_target
 
         # ------------------ SAVING VARIABLES (after a completed NR) --------------------
         if True:
@@ -608,23 +689,21 @@ def dcb_damage_prop_no_f_kcrack(phy_dim, nr_terms, k_i=None, tau_o=None, nr_x_ga
 
         c_all[:,disp_iter_no] = c
 
-        # Update max del_d AFTER a converged NR iteration
+        # The damage history was updated in accept(), this is the same state
         assy.update_TSL_history(curr_max_dmg_index=dmg_index[:,:,disp_iter_no])
 
         print(f'{disp_iter_no/np.shape(w_iter)[0]*100:.1f}% - {filename} -- wp={wp:.3f} -- max DI {np.max(dmg_index[:,:,disp_iter_no]):.4f}\n')
 
-        # Force - TEMP - CHECK LATER AND EDIT/REMOVE
-        if True:
-            # force_intgn[disp_iter_no, 0] = wp
-            force_intgn[disp_iter_no, 1] = assy.force_out_plane(c, group=None, eval_panel=disp_panel, x_cte_force=None, y_cte_force=None,
-                      gridx=100, gridy=50, NLterms=True, nr_x_gauss=128, nr_y_gauss=128)
+        # Load measured by the load cell: reaction of the prescribed displacement
+        force_intgn[disp_iter_no, 1] = assy.reaction_line_pd_xcte(c, disp_panel,
+                disp_panel.a, kw, lambda y: wp)
 
-        # Force by area integral of traction in the damaged region
+        # Area integral of the traction, it must match the reaction
         if True:
             # force_intgn_dmg[disp_iter_no, 0] = wp
             force_intgn_dmg[disp_iter_no, 1] = assy.force_out_plane_damage(conn=conn, c=c)
 
-        print(f'       Force - Line: {force_intgn[disp_iter_no, 1]:.3f} -- Area: {force_intgn_dmg[disp_iter_no, 1]:.3f}')
+        print(f'       Force - Reaction: {force_intgn[disp_iter_no, 1]:.3f} -- Traction integral: {force_intgn_dmg[disp_iter_no, 1]:.3f}')
 
         # Calc displ of top and bottom panels at each increment
         res_pan_top = assy.calc_results(c=c, eval_panel=disp_panel, vec='w',
@@ -636,9 +715,8 @@ def dcb_damage_prop_no_f_kcrack(phy_dim, nr_terms, k_i=None, tau_o=None, nr_x_ga
         force_intgn_dmg[disp_iter_no, 0] = max_displ_w
 
         plt.figure(figsize=(10,7))
-        plt.plot(force_intgn[:disp_iter_no+1, 0], force_intgn[:disp_iter_no+1, 1], label = 'Line')
-        scaling_F_plot = force_intgn[0,1]/force_intgn_dmg[0,1]
-        plt.plot(force_intgn_dmg[:disp_iter_no+1, 0], scaling_F_plot*force_intgn_dmg[:disp_iter_no+1, 1], label='Area Int')
+        plt.plot(force_intgn[:disp_iter_no+1, 0], force_intgn[:disp_iter_no+1, 1], label='Reaction')
+        plt.plot(force_intgn_dmg[:disp_iter_no+1, 0], force_intgn_dmg[:disp_iter_no+1, 1], '--', label='Traction integral')
         plt.ylabel('Force [N]', fontsize=14)
         plt.xlabel('Displacement [mm]', fontsize=14)
         plt.xticks(fontsize=14)
@@ -647,6 +725,7 @@ def dcb_damage_prop_no_f_kcrack(phy_dim, nr_terms, k_i=None, tau_o=None, nr_x_ga
         plt.grid()
         plt.legend(fontsize=14)
         plt.savefig('test_dcb_damage.png')
+        plt.close()
 
         disp_iter_no += 1
         print()
