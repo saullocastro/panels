@@ -244,10 +244,195 @@ Section 6.3.1 of the thesis describes the correction as: start at the point of m
 
 \noindent with $i$ the row and $j$ the column of the grid of integration points, $j$ increasing with $x$. Rows without non-positive values between $x=0$ and $A_i$ are not modified. The negative values of the separation are not only numerical: for a beam on an elastic foundation the separation behind the crack front oscillates with a decaying amplitude, and its first negative lobe does not change when the number of terms of the cohesive domain is increased from 10 to 20.
 
+\subsection{Convergence study}\label{sec:cz-dev-convergence-study}
+
+The discretisation of the cohesive domain was studied on the DCB of Section~\ref{sec:cz-dev-force} (length 65~mm, width 25~mm, precrack 48~mm, arms of 15 plies of 0.14~mm, $E_1 = 133.15$~GPa, $E_2 = 10.95$~GPa, $\nu_{12} = 0.316$, $G_{12} = 5.19$~GPa, $G_{Ic} = 1.12$~N/mm), with the driver of Sections~\ref{sec:cz-dev-assembly}--\ref{sec:cz-dev-robust} and two sets of cohesive parameters:
+
+\begin{itemize}
+	\item case A: $k_o = 5 \times 10^4$~N/mm$^3$, $\tau_o = 87$~MPa;
+	\item case B: $k_o = 2 \times 10^5$~N/mm$^3$, $\tau_o = 74.2$~MPa.
+\end{itemize}
+
+The cohesive domain is 17~mm long, the free arms are modelled with $8 \times 8$ terms, and the prescribed displacement goes up to $w_p = 8$~mm in 38 increments, of 0.2~mm after $w_p = 5$~mm. The parameters varied are the number of terms along $x$ of the cohesive domain, $m_{tsl}$, and the number of Gauss-Legendre points along $x$ of the connection, $n_x$, in a full grid $m_{tsl} \in \{10, 15, 20, 25\} \times n_x \in \{60, 120, 180\}$. Separately, from the reference $m_{tsl} = 15$, $n_x = 120$, the study varied the number of terms along $y$ of the cohesive domain ($n_{tsl} = 10 \to 15$), the number of Gauss points along $y$ ($n_y = 30 \to 60$), the number of terms of the other domains ($m = n = 8 \to 12$) and the increment of $w_p$ after 5~mm (halved). The metrics are:
+
+\begin{itemize}
+	\item the peak load $P_{max}$ and the prescribed displacement at the peak, $w_p(P_{max})$;
+	\item the loads at $w_p = 6$, 7 and 8~mm, after the peak;
+	\item the coefficient of variation of the load drop per increment after the peak, $CV = \mathrm{std}(\Delta P)/|\mathrm{mean}(\Delta P)|$, which is small for a smooth softening and large when the crack front advances in jumps and the curve has plateaus;
+	\item the number of increments that did not converge and were bisected (Section~\ref{sec:cz-dev-robust}), and the total number of Newton-Raphson iterations;
+	\item the wall time. The runs shared 16 cores, 8 to 11 at a time, so the wall times only indicate the relative cost.
+\end{itemize}
+
+\begin{table}[htb]
+	\centering
+	\caption{Convergence study, terms $m_{tsl}$ and Gauss points $n_x$ along $x$ of the cohesive domain. Loads in N, displacements in mm, wall time in min. The run B, $m_{tsl} = 25$, $n_x = 60$ was interrupted at $w_p = 7.8$~mm.}
+	\label{tab:cz-dev-conv-grid}
+	\small
+	\begin{tabular}{rrrrrrrrrrr}
+		\toprule
+		$m_{tsl}$ & $n_x$ & $P_{max}$ & $w_p(P_{max})$ & $P(6)$ & $P(7)$ & $P(8)$ & $CV$ & bisections & iterations & time \\
+		\midrule
+		\multicolumn{11}{l}{case A, $k_o = 5 \times 10^4$~N/mm$^3$, $\tau_o = 87$~MPa} \\
+		10 & 60 & 166.96 & 5.80 & 161.97 & 150.68 & 141.10 & 0.81 & 5 & 394 & 32 \\
+		10 & 120 & 167.16 & 5.80 & 161.95 & 150.76 & 141.20 & 0.73 & 0 & 134 & 9 \\
+		10 & 180 & 167.08 & 5.80 & 162.00 & 150.76 & 141.19 & 0.73 & 0 & 135 & 9 \\
+		15 & 60 & 165.92 & 5.60 & 162.53 & 150.52 & 140.70 & 0.32 & 4 & 375 & 56 \\
+		15 & 120 & 165.96 & 5.60 & 162.70 & 150.61 & 140.70 & 0.27 & 0 & 137 & 26 \\
+		15 & 180 & 165.96 & 5.60 & 162.74 & 150.61 & 140.60 & 0.26 & 0 & 138 & 27 \\
+		20 & 60 & 165.91 & 5.60 & 162.45 & 150.49 & 140.69 & 0.32 & 2 & 266 & 91 \\
+		20 & 120 & 165.95 & 5.60 & 162.64 & 150.58 & 140.69 & 0.26 & 0 & 139 & 59 \\
+		20 & 180 & 165.95 & 5.60 & 162.68 & 150.57 & 140.61 & 0.26 & 0 & 140 & 59 \\
+		25 & 60 & 165.91 & 5.60 & 162.44 & 150.49 & 140.69 & 0.32 & 1 & 203 & 158 \\
+		25 & 120 & 165.95 & 5.60 & 162.63 & 150.58 & 140.70 & 0.26 & 0 & 137 & 117 \\
+		25 & 180 & 165.95 & 5.60 & 162.67 & 150.58 & 140.62 & 0.26 & 0 & 136 & 118 \\
+		\midrule
+		\multicolumn{11}{l}{case B, $k_o = 2 \times 10^5$~N/mm$^3$, $\tau_o = 74.2$~MPa} \\
+		10 & 60 & 168.12 & 5.80 & 161.41 & 150.10 & -- & 1.04 & 6 & 469 & 43 \\
+		10 & 120 & 168.17 & 5.80 & 161.19 & 150.41 & 141.41 & 1.08 & 0 & 137 & 9 \\
+		10 & 180 & 168.16 & 5.80 & 161.30 & 150.37 & 141.44 & 1.07 & 0 & 138 & 9 \\
+		15 & 60 & 165.33 & 5.80 & 163.15 & 150.49 & 140.40 & 0.27 & 7 & 542 & 85 \\
+		15 & 120 & 165.36 & 5.80 & 162.76 & 150.42 & 140.75 & 0.16 & 0 & 132 & 27 \\
+		15 & 180 & 165.34 & 5.80 & 162.70 & 150.43 & 140.70 & 0.16 & 0 & 137 & 26 \\
+		20 & 60 & 165.21 & 5.80 & 163.08 & 150.59 & -- & 0.19 & 10 & 727 & 253 \\
+		20 & 120 & 165.24 & 5.80 & 162.71 & 150.57 & 140.86 & 0.13 & 0 & 135 & 57 \\
+		20 & 180 & 165.22 & 5.80 & 162.65 & 150.59 & 140.77 & 0.13 & 0 & 134 & 56 \\
+		25 & 60 & 165.21 & 5.80 & 163.05 & 150.56 & -- & 0.18 & 2 & 274 & -- \\
+		25 & 120 & 165.25 & 5.80 & 162.69 & 150.56 & 140.86 & 0.13 & 0 & 133 & 107 \\
+		25 & 180 & 165.22 & 5.80 & 162.64 & 150.58 & 140.78 & 0.12 & 0 & 134 & 104 \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+\begin{table}[htb]
+	\centering
+	\caption{Convergence study, other parameters, from the reference $m_{tsl} = 15$, $n_x = 120$. With the halved increment the loads at 6 and 7~mm are not on the list of prescribed displacements.}
+	\label{tab:cz-dev-conv-other}
+	\small
+	\begin{tabular}{llrrrrrrrrr}
+		\toprule
+		case & variation & $P_{max}$ & $w_p(P_{max})$ & $P(6)$ & $P(7)$ & $P(8)$ & $CV$ & bisections & iterations & time \\
+		\midrule
+		A & reference & 165.96 & 5.60 & 162.70 & 150.61 & 140.70 & 0.27 & 0 & 137 & 26 \\
+		A & $n_{tsl}$ = 15 & 165.96 & 5.60 & 162.71 & 150.61 & 140.68 & 0.27 & 0 & 141 & 86 \\
+		A & $n_y$ = 60 & 165.97 & 5.60 & 162.69 & 150.62 & 140.72 & 0.27 & 0 & 136 & 24 \\
+		A & $m = n$ = 12 & 165.97 & 5.60 & 162.70 & 150.62 & 140.70 & 0.27 & 0 & 136 & 57 \\
+		A & $\Delta w_p$ halved & 166.16 & 5.68 & -- & -- & 140.70 & 0.19 & 0 & 262 & 46 \\
+		B & reference & 165.36 & 5.80 & 162.76 & 150.42 & 140.75 & 0.16 & 0 & 132 & 27 \\
+		B & $n_{tsl}$ = 15 & 165.35 & 5.80 & 162.77 & 150.42 & 140.74 & 0.16 & 0 & 133 & 80 \\
+		B & $n_y$ = 60 & 165.34 & 5.80 & 162.77 & 150.41 & 140.76 & 0.16 & 0 & 131 & 25 \\
+		B & $m = n$ = 12 & 165.37 & 5.80 & 162.76 & 150.42 & 140.75 & 0.16 & 0 & 131 & 54 \\
+		B & $\Delta w_p$ halved & 165.60 & 5.68 & -- & -- & 140.75 & 0.27 & 0 & 208 & 37 \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+\begin{figure}[htb]
+	\centering
+	% requires \usepackage{pgfplots}
+	\begin{tikzpicture}
+		\begin{groupplot}[group style={group size=2 by 1, horizontal sep=1.5cm},
+			width=0.48\textwidth, height=6cm, xlabel={$w_p$ (mm)}, ylabel={$P$ (N)},
+			xmin=4.7, xmax=8.1, ymin=135, ymax=172, grid=major, legend pos=south west,
+			legend style={font=\scriptsize}, cycle list={{black, dashed, mark=o, mark size=1.2pt},
+			{black, thick}, {gray, only marks, mark=x}}]
+			\nextgroupplot[title={case A}]
+			\addplot coordinates {(4.818,147.66) (5.000,152.56) (5.200,157.78) (5.400,162.69) (5.600,166.68) (5.800,167.16) (6.000,161.95) (6.200,160.49) (6.400,159.73) (6.600,155.19) (6.800,151.36) (7.000,150.76) (7.200,150.00) (7.400,145.73) (7.600,142.80) (7.800,142.10) (8.000,141.20)};
+			\addplot coordinates {(4.818,147.65) (5.000,152.54) (5.200,157.72) (5.400,162.54) (5.600,165.96) (5.800,165.41) (6.000,162.70) (6.200,160.01) (6.400,157.50) (6.600,155.00) (6.800,152.99) (7.000,150.61) (7.200,148.39) (7.400,146.54) (7.600,144.34) (7.800,142.38) (8.000,140.70)};
+			\addplot coordinates {(4.818,147.65) (5.000,152.54) (5.200,157.72) (5.400,162.53) (5.600,165.95) (5.800,165.39) (6.000,162.67) (6.200,159.97) (6.400,157.49) (6.600,155.09) (6.800,152.72) (7.000,150.58) (7.200,148.44) (7.400,146.42) (7.600,144.43) (7.800,142.49) (8.000,140.62)};
+			\legend{{$m_{tsl} = 10$, $n_x = 120$}, {$m_{tsl} = 15$, $n_x = 120$}, {$m_{tsl} = 25$, $n_x = 180$}}
+			\nextgroupplot[title={case B}]
+			\addplot coordinates {(4.818,146.78) (5.000,151.61) (5.200,156.76) (5.400,161.67) (5.600,166.07) (5.800,168.17) (6.000,161.19) (6.200,159.99) (6.400,160.27) (6.600,156.00) (6.800,150.28) (7.000,150.41) (7.200,150.32) (7.400,144.61) (7.600,141.96) (7.800,142.02) (8.000,141.41)};
+			\addplot coordinates {(4.818,146.75) (5.000,151.51) (5.200,156.57) (5.400,161.27) (5.600,165.03) (5.800,165.36) (6.000,162.76) (6.200,160.08) (6.400,157.70) (6.600,154.96) (6.800,153.01) (7.000,150.42) (7.200,148.45) (7.400,146.46) (7.600,144.26) (7.800,142.59) (8.000,140.75)};
+			\addplot coordinates {(4.818,146.73) (5.000,151.50) (5.200,156.56) (5.400,161.26) (5.600,165.08) (5.800,165.22) (6.000,162.64) (6.200,160.04) (6.400,157.48) (6.600,155.09) (6.800,152.75) (7.000,150.58) (7.200,148.41) (7.400,146.45) (7.600,144.47) (7.800,142.61) (8.000,140.78)};
+			\legend{{$m_{tsl} = 10$, $n_x = 120$}, {$m_{tsl} = 15$, $n_x = 120$}, {$m_{tsl} = 25$, $n_x = 180$}}
+		\end{groupplot}
+	\end{tikzpicture}
+	\caption{Load after the peak for different numbers of terms along $x$ of the cohesive domain. With 10 terms the load drops in steps; with 15 or more the curves coincide.}
+	\label{fig:cz-dev-conv}
+\end{figure}
+
+The results, Tables~\ref{tab:cz-dev-conv-grid} and~\ref{tab:cz-dev-conv-other} and Fig.~\ref{fig:cz-dev-conv}, show that:
+
+\begin{itemize}
+	\item \textbf{The Ritz basis of the cohesive domain sets the shape of the response after the peak.} With $m_{tsl} = 10$ the load drops in steps separated by plateaus ($CV = 0.73$--$1.08$), and the peak is 0.7\% (A) and 1.8\% (B) above the converged value. From $m_{tsl} = 15$ the curve is smooth ($CV \leq 0.27$), and $m_{tsl} = 15$, 20 and 25 give the same peak within 0.01~N (A) and 0.15~N (B), and the same loads after the peak within 0.3~N. The opening ahead of the process zone decays as that of a beam on an elastic foundation, with the rate $\lambda = (k_o/4D_{11})^{1/4}$; it is 0.59~mm$^{-1}$ in case A and 0.83~mm$^{-1}$ in case B. The converged $m_{tsl} = 15$ over $L_{tsl} = 17$~mm corresponds to $m_{tsl} = 1.5\,\lambda L_{tsl}$ in case A and $1.06\,\lambda L_{tsl}$ in case B; $m_{tsl} \approx 1.5\,\lambda L_{tsl}$ is used as a conservative rule for other geometries.
+	\item \textbf{The number of Gauss points along $x$ sets the robustness, not the converged answer.} With $n_x = 60$ the loads are within 0.5~N of those with $n_x \geq 120$, but 1 to 10 increments needed bisection and the iterations increased 1.5 to 5.4 times, because the crack front crosses several integration points in one increment (Section~\ref{sec:cz-dev-robust}). With $n_x = 120$ and 180 no increment was bisected in any run. The cohesive zone length, estimated as $l_{cz} = 0.88\,E_2 G_{Ic}/\tau_o^2$ (Rice's model, Turon et al.\ 2007), is 1.43~mm in case A and 1.96~mm in case B; $n_x = 120$ over 17~mm gives a spacing of the Gauss points at the middle of the domain of $\pi L_{tsl}/(2 n_x) = 0.22$~mm, about $l_{cz}/6.4$ in case A, i.e.\ $n_x \approx 10\,L_{tsl}/l_{cz}$. This is the rule used for other geometries.
+	\item \textbf{The discretisation along $y$ and of the other domains does not matter here.} $n_{tsl} = 15$, $n_y = 60$ and $m = n = 12$ change the loads by at most 0.02~N, since the specimen is uniform across the width.
+	\item \textbf{Halving the increment changes only where the peak is sampled.} The peak rises by 0.2~N (0.12\%) and moves to $w_p = 5.68$~mm, closer to the true maximum; the loads on the common increments are the same.
+\end{itemize}
+
+The recommended discretisation for this DCB is therefore $m_{tsl} = 15$, $n_x = 120$, $n_{tsl} = 10$, $n_y = 30$, with $8 \times 8$ terms in the other domains. It gives $P_{max} = 165.96$~N at $w_p = 5.6$~mm in case A and 165.36~N at 5.8~mm in case B, in about 26~min of wall time on a shared machine, against about 171~N at about 6~mm for the finite element model of the thesis (Section 5.6).
+
+\subsection{Validation against the literature}\label{sec:cz-dev-validation}
+
+The model was compared with seven references that report mode I DCB results: Alfano and Crisfield (2001), Camanho et al.\ (2003), Turon et al.\ (2007), Tijs et al.\ (2022), Leci\~nana et al.\ (2023) and the PhD thesis of Tijs (2023), plus Krueger (2012), whose benchmarks are for the mixed-mode bending specimen and are only recorded, see below. Each reference has a notebook in \texttt{notebooks/} with a dictionary of the FE cases and one of the experimental tests, a comparison table, a plot and a discussion; the \texttt{panels} results are stored in \texttt{notebooks/results/*.npz}.
+
+\paragraph{Model.} \texttt{notebooks/dcb\_utils.py} builds a symmetric DCB: CLPT arms, far end clamped, arm tips opened to $\pm\delta/2$ by prescribed displacements, the load being the reaction of the prescribed displacement. The bonded region is split into a cohesive domain (\texttt{'SB\_TSL'}, bilinear law) of length $L_{tsl}$ ahead of the initial crack front and a perfect bond (\texttt{'SB'}) over the rest, such that only the region reached by the crack needs the resolution of the cohesive zone. A weld narrower than the specimen (Tijs 2023) is represented by starting the integration points outside the bonded strip fully damaged. The solution procedure is that of Sections~\ref{sec:cz-dev-tangent}--\ref{sec:cz-dev-robust}. The discretisation follows the rules of Section~\ref{sec:cz-dev-convergence-study}, $m_{tsl} = 1.5\,\lambda L_{tsl}$ with at most 25 terms and $n_x = 10\,L_{tsl}/l_{cz}$ with at most 300 points, and $L_{tsl}$ covers the crack growth plus a margin of $2\pi/\lambda + 3\,l_{cz}$ for the process zone and the compressive lobe ahead of it; the range of openings is limited so that $L_{tsl}$ stays resolved, which allows 5--13~mm of crack growth. The penalty stiffness is $k_o = 10^5$~N/mm$^3$: a longer decay length $1/\lambda$ needs fewer terms, and for the DCB of Turon et al.\ (2007) the peak load with the $k_o = 10^6$~N/mm$^3$ of the paper differs by 0.03\% (64.07 against 64.05~N), in line with their Fig.~9. The reference curves of linear elastic fracture mechanics (LEFM) are the simple and the corrected beam theories, the latter with the crack length $a + \chi h$ of Williams, $\chi = \sqrt{E_{11}/(11 G_{13})\,[3 - 2(\Gamma/(1+\Gamma))^2]}$, $\Gamma = 1.18\sqrt{E_{11}E_{22}}/G_{13}$, and the bending stiffness $D_{11} b$ of the arm.
+
+\paragraph{Data.} Values given in tables of the references are used as such ($^{t}$ in Table~\ref{tab:cz-dev-val-peaks}); curves were read from the figures by eye ($^{d}$), with an uncertainty of about 2--5~N, and $^{m}$ marks the mean of the digitised peaks of several tests (full weld: 150 and 170~N; weld center: 122--136~N). The notebooks state the assumptions needed where the references are incomplete: the opening convention (Alfano and Crisfield plot the displacement of one arm, $\delta = 2u$), the crack length of one test of Tijs et al.\ (2022) inferred from its compliance, and the elastic properties and length of the welded specimens of Tijs (2023).
+
+\begin{table}[htb]
+	\centering
+	\caption{Peak loads of the mode I DCB references. $P_{max}$ in N, $\delta$ at $P_{max}$ in mm, differences of \texttt{panels} in \%, $\Delta K_0$ is the difference of the initial stiffness of \texttt{panels} to the corrected beam theory (CBT), $\Delta a$ the crack growth of the \texttt{panels} run in mm. $^{t}$: value of a table of the reference; $^{d}$: digitised; $^{m}$: mean of digitised tests.}
+	\label{tab:cz-dev-val-peaks}
+	\scriptsize
+	\setlength{\tabcolsep}{3pt}
+	\begin{tabular}{lrrrrrrrrrr}
+		\toprule
+		& \multicolumn{2}{c}{\texttt{panels}} & \multicolumn{2}{c}{FE (reference)} & \multicolumn{2}{c}{test} & \multicolumn{2}{c}{CBT} & & \\
+		case & $P_{max}$ & $\delta$ & $P_{max}$ & diff. & $P_{max}$ & diff. & $P_{max}$ & diff. & $\Delta K_0$ & $\Delta a$ \\
+		\midrule
+		Alfano 2001, Table I, $t_o$ = 57 MPa & 64.6 & 1.83 & 61.5$^{d}$ & +5.0 & -- & -- & 63.2 & +2.2 & +17 & 10.5 \\
+		Alfano 2001, Table I, $t_o$ = 1.7 MPa & 50.9 & 2.90 & 49.5$^{d}$ & +2.9 & -- & -- & 63.2 & -19.4 & -24 & 5.8 \\
+		Alfano 2001, XAS-913C & 93.8 & 1.91 & 90.0$^{d}$ & +4.2 & -- & -- & 91.6 & +2.3 & +17 & 10.6 \\
+		Camanho 2003, AS4/PEEK & 139.9 & 4.12 & 155.3$^{t}$ & -9.9 & 147.1$^{t}$ & -4.9 & 138.9 & +0.7 & +13 & 8.2 \\
+		Turon 2007, T300/977-2 & 64.1 & 4.18 & 57.0$^{d}$ & +12.4 & 62.0$^{d}$ & +3.3 & 63.3 & +1.3 & +12 & 13.0 \\
+		Tijs 2022, $a_0$ = 48 mm & 166.2 & 5.68 & 167.0$^{d}$ & -0.5 & 142.0$^{d}$ & +17.0 & 164.5 & +1.1 & +14 & 11.8 \\
+		Tijs 2022, $a_0$ = 40 mm & 197.5 & 3.99 & -- & -- & 161.0$^{d}$ & +22.7 & 194.5 & +1.5 & +17 & 11.8 \\
+		Tijs 2023, full weld, 2.1 N/mm & 148.3 & 6.48 & 155.0$^{d}$ & -4.3 & 160.0$^{m}$ & -7.3 & 155.5 & -4.6 & +4 & 4.9 \\
+		Tijs 2023, weld center, 2.1 N/mm & 119.2 & 5.75 & 128.0$^{d}$ & -6.9 & 129.0$^{m}$ & -7.6 & 123.0 & -3.1 & +8 & 5.2 \\
+		Tijs 2023, weld center, 1.95 N/mm & 115.0 & 5.56 & 122.0$^{d}$ & -5.7 & 123.0$^{d}$ & -6.5 & 118.5 & -3.0 & +8 & 5.7 \\
+		Tijs 2023, weld center, 1.12 N/mm & 87.8 & 4.09 & 96.0$^{d}$ & -8.6 & -- & -- & 89.8 & -2.3 & +9 & 9.2 \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+\begin{table}[htb]
+	\centering
+	\caption{Initial compliance: \texttt{panels} against measured compliances and the corrected beam theory (CBT). Differences of \texttt{panels} in \%, over the crack lengths listed.}
+	\label{tab:cz-dev-val-compliance}
+	\small
+	\begin{tabular}{llrr}
+		\toprule
+		reference & specimens, crack lengths & vs test & vs CBT \\
+		\midrule
+		Leci\~nana et al.\ (2023), Fig.~10 & UD, 25~mm, $a_0$ = 32.05--42.97~mm & $-18.9$ to $-15.5$ & $-20.0$ to $-15.5$ \\
+		Tijs (2023), Table 5.4.1 & autoclave UD, 25~mm, $a$ = 30--45~mm & $-41.4$ to $-28.0$ & $-20.9$ to $-14.7$ \\
+		Tijs (2023), Table 5.4.1 & full weld QI, 25~mm, $a$ = 30--45~mm & $-15.2$ to $-4.7$ & $-12.0$ to $-6.8$ \\
+		Tijs (2023), Table 5.4.1 & weld center QI, 12.7~mm, $a$ = 30--45~mm & $-2.1$ to $+6.6$ & $-13.5$ to $-7.5$ \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+The results, Tables~\ref{tab:cz-dev-val-peaks} and~\ref{tab:cz-dev-val-compliance}, show that:
+
+\begin{itemize}
+	\item \textbf{Same cohesive law as the reference.} For the DCB of Tijs et al.\ (2022), which is also the reference case of the thesis, the FE model of the paper uses the same geometry, material and bilinear law ($G_{Ic}$ = 1.12~N/mm, $\tau^0$ = 87~MPa). \texttt{panels} predicts 166.2~N at 5.68~mm against 167~N at 5.7~mm, $-0.5$\% on the load and $-0.4$\% on the opening.
+	\item \textbf{Cohesive zone beyond LEFM.} With the low strength $t_o$ = 1.7~MPa of Alfano and Crisfield (2001) the process zone is of the order of the specimen length and the peak of their interface model is 22\% below the corrected beam theory; \texttt{panels} reproduces it within 2.9\%, at the same opening and with the same initial stiffness (+3.2\%).
+	\item \textbf{Nominal strengths.} For the unidirectional specimens with nominal strengths, the \texttt{panels} peak is within 2.3\% of the corrected beam theory in every case, and after the peak it follows the LEFM propagation branch (48.9 against 49.0~N at $\delta$ = 3.22~mm for Alfano and Crisfield, Table I). The FE results of the references scatter by about $\pm 10$\% around the corrected beam theory: 1~mm decohesion elements for a cohesive zone of 1.35~mm in Camanho et al.\ (2003), whose FE peak is above both the test and the beam theories, and about 57~N in Turon et al.\ (2007), below both.
+	\item \textbf{Tests.} The tests with a bilinear-like response are predicted within 5\% (Camanho et al.\ $-4.9$\%, Turon et al.\ +3.3\%). The AS4D/PEKK-FC tests show a strong R-curve (initiation about 0.7~N/mm, propagation 1.12~N/mm) that a bilinear law with the propagation toughness cannot represent: \texttt{panels}, the bilinear FE model of Tijs et al.\ and the corrected beam theory are all 15--23\% above these tests, which the tabular law of the paper matches. Fibre bridging also makes the experimental curves decrease more slowly than every model after the peak.
+	\item \textbf{Welded joints.} For the welded DCB of Tijs (2023) \texttt{panels} is 4--9\% below the FE results of the thesis, 2--5\% below the corrected beam theory and 6.5--7.6\% below the tests with a single toughness value. The cohesive zone is long compared with the arm thickness ($l_{cz}$ = 2.5--2.7~mm, $h$ = 2.24~mm), which lowers the peak below the LEFM limit; the FE model of the thesis is not described in enough detail to separate this effect from its modelling assumptions.
+	\item \textbf{Initial compliance.} The CLPT arms of \texttt{panels} are too stiff for the unidirectional specimens: the compliance is 15--19\% below the tests and 15--21\% below the corrected beam theory, which matches the tests of Leci\~nana et al.\ within 4\%. The arms have no transverse shear deformation, which is large for these materials ($E_{11}/G_{13}$ = 22--27), and the rotation at the crack front comes only from the elastic foundation of the cohesive interface. The same appears in the load-opening curves as an initial stiffness 12--17\% above the corrected beam theory, while the peak loads, controlled by the energy release rate, are not affected. For the quasi-isotropic welded specimens, with a bending modulus closer to the shear modulus, the compliance of \texttt{panels} is within 15\% of the tests.
+	\item \textbf{Robustness.} All 12 nonlinear runs converged at every opening without bisection.
+\end{itemize}
+
+\paragraph{Krueger (2012).} NASA/CR-2012-217562 gives benchmarks for the mixed-mode bending specimen of IM7/8552 at $G_{II}/G_T$ = 0.2, 0.5 and 0.8, with the critical points (1.64~mm, 128.5~N), (1.34~mm, 385~N) and (1.65~mm, 751~N). They are recorded in \texttt{notebooks/krueger2012\_mmb\_benchmark.ipynb} but not simulated: the damage of \texttt{'SB\_TSL'} is driven by the normal separation only, and the loading lever is not modelled.
+
 \subsection{Differences that remain}\label{sec:cz-dev-open}
 
 \begin{itemize}
 	\item The interpenetration stiffness $k_{ipen}$ of Eq.~5.12 is computed by \texttt{calc\_kw\_tsl} but not used: \texttt{calc\_k\_dmg} returns $k_o(1-d)$ also for negative separations, such that a fully damaged point offers no resistance to interpenetration. This does not affect a monotonically loaded DCB.
 	\item The damage history \texttt{MultiDomain.dmg\_index} is stored once per assembly, which restricts the model to one \texttt{'SB\_TSL'} connection.
 	\item The finite element model of Section 5.6 constrains $U_x$ along the loaded edge, while the Ritz model leaves $u$ free there.
+	\item The arms follow CLPT: without transverse shear deformation, the compliance of unidirectional DCB specimens is 15--21\% below the corrected beam theory (Section~\ref{sec:cz-dev-validation}). A shear deformable kinematics would remove this difference.
+	\item The cohesive law is bilinear and the damage is driven by the normal separation only: R-curve effects (multilinear laws) and mixed-mode delamination are not represented.
 \end{itemize}
