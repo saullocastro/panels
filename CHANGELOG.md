@@ -1,5 +1,96 @@
 # Changelog
 
+## 0.7.0 (2026-09-19)
+
+### Requirements
+
+- `composites>=0.9.0`, whose laminates cannot be pickled, see the fix of
+  `StiffPanelBay.save()` below.
+
+### Breaking: kernels of the `'SB_TSL'` connection
+
+The Cython kernels of `panels.multidomain.connections.kCSB_dmg` take the
+distance from the mid-surface of each panel to the interface, instead of a
+single distance `dsb` between the two mid-surfaces:
+
+- `fkCSB11_dmg(dt, p1, ...)`, `dsb` renamed to `dt`
+- `fkCSB12_dmg(dt, db, p1, p2, ...)`, `dsb` replaced by `dt` and `db`
+- `fkCSB22_dmg(db, p1, p2, ...)`, new first argument `db`
+
+where `dt = sum(p_top.plyts)/2` and `db = sum(p_bot.plyts)/2`. Code calling
+these kernels directly must be updated. The results of `'SB_TSL'`
+connections change with the bug fixes below.
+
+### Bug fixes
+
+- The cohesive zone of the `MultiDomain` connection `'SB_TSL'`, after
+  D'Souza (2024), could not capture the onset of failure of the double
+  cantilever beam (DCB):
+  - The tangential separation used the rotation of the top panel only, over
+    the full distance between the mid-surfaces. It now uses the rotation of
+    each panel over the distance from its mid-surface to the interface, and
+    the 12 block uses the `eta` flags of the top panel.
+  - `MultiDomain.force_out_plane_damage` integrated the tractions with the
+    corrected separation, which drops the compressive tractions that balance
+    the tensile ones. It now uses the uncorrected separation, the same that
+    enters the internal force vector.
+  - The correction of the separation, now in
+    `MultiDomain.correct_separation`, zeroed each row of Gauss points up to
+    its last non-positive point. It now follows Section 6.3.1 of the thesis:
+    from the point of maximum separation towards `x = 0`, it zeroes the
+    separation up to the first non-positive point only.
+  - `MultiDomain.force_out_plane_damage` raised a `NameError` when no damage
+    history (`dmg_index`) was set, e.g. before the first converged
+    increment.
+- `StiffPanelBay.save()` failed with `composites>=0.9.0`, because
+  `_clear_matrices()` did not clear the laminates of the base and flange of
+  the stiffeners, nor `BladeStiff1D.flam`. They are rebuilt before each
+  calculation, so they are now cleared.
+
+### Enhancements
+
+- `MultiDomain.calc_kT_TSL(c)`, the damage-rate part of the tangent stiffness
+  of the cohesive zone, non-symmetric, such that the secant stiffness plus
+  this matrix is the consistent tangent of the `'SB_TSL'` connection.
+- `MultiDomain.reaction_line_pd_xcte`, the reaction of a displacement
+  prescribed along `x = cte`, which is the load measured by the load cell,
+  exact for any state of damage.
+- The secant stiffness of an `'SB_TSL'` connection between panels over the
+  same domain is assembled by matrix products, with the pristine stiffness
+  computed once and an update restricted to the damaged points. The Cython
+  kernels are still used for panels over different domains, or with
+  `'use_kernels': True` in the connection dictionary.
+- The DCB driver of `tests/multidomain/test_dcb_damage.py` measures the load
+  as the reaction of the prescribed displacement, evaluates the cohesive
+  secant stiffness at every iteration as part of the internal force vector,
+  uses a convergence criterion based on the physical forces, stiffer edge
+  penalties, a predictor, a backtracking line search and the bisection of
+  increments.
+
+### Documentation
+
+- `theory/multidomain_penalization/cohesive_zone_deviations_from_thesis.tex`,
+  with the theory of the cohesive zone, the deviations from the thesis of
+  D'Souza (2024) and their verification, a convergence study and the
+  validation against DCB results in the literature.
+- Validation notebooks of the `'SB_TSL'` cohesive zone in mode I DCB tests:
+  `alfano2001_dcb.ipynb`, `camanho2003_dcb.ipynb`, `turon2007_dcb.ipynb`,
+  `tijs2022_dcb.ipynb`, `lecinana2023_dcb.ipynb` and `tijs2023_phd_dcb.ipynb`,
+  with the Krueger (2012) MMB benchmark data in
+  `krueger2012_mmb_benchmark.ipynb` (not simulated). The shared model builder
+  and solver are in `notebooks/dcb_utils.py`, and the non-linear results are
+  cached in `notebooks/results`.
+- `notebooks/validation_summary.ipynb` collects the peak loads of all
+  validation notebooks, and `notebooks/convergence_study.py` reproduces the
+  convergence study of the theory document.
+
+### Tests
+
+- `tests/multidomain/test_sb_tsl.py`: energy of the `kCSB_dmg` kernels with
+  the bottom panel first in the assembly, equality of the matrix-product and
+  kernel assemblies, and a finite-difference check of
+  `MultiDomain.calc_kT_TSL`.
+
 ## 0.6.21 (2026-09-18)
 
 ### Requirements

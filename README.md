@@ -27,7 +27,7 @@ The structural matrices are solved with
 Citing this library
 ===================
 
-Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.6.21). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
+Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.7.0). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
 
 
 Documentation
@@ -49,6 +49,19 @@ History
 
 See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
 
+* version 0.7.0 (2026-09-19)
+    - Fixed the cohesive zone of the `MultiDomain` connection `'SB_TSL'`,
+      which could not capture the onset of failure of the DCB: tangential
+      separation with the rotation of each panel, tractions with the
+      uncorrected separation and separation correction as in the thesis of
+      D'Souza (2024)
+    - Consistent tangent of the cohesive zone, `MultiDomain.calc_kT_TSL()`,
+      and faster assembly of the `'SB_TSL'` secant stiffness
+    - The kernels `fkCSB11_dmg`, `fkCSB12_dmg` and `fkCSB22_dmg` take the
+      distances `dt` and `db` from each mid-surface to the interface
+    - Validation of the cohesive zone against mode I DCB results in the
+      literature, in `notebooks/`, with a convergence study
+    - Fixed `StiffPanelBay.save()` with `composites>=0.9.0`
 * version 0.6.21 (2026-09-18)
     - Fixed the mass of the base of `BladeStiff2D`, which was missing, and the
       section forces of `MultiDomain.force()`, which lacked the Jacobian
