@@ -62,7 +62,7 @@ def _upper_block(k12, p1, p2):
 
 
 def _same_domain(p1, p2):
-    return p1.a == p2.a and p1.b == p2.b
+    return bool(np.isclose(p1.a, p2.a) and np.isclose(p1.b, p2.b))
 
 
 def default_field(panel, gridx, gridy):
@@ -1789,9 +1789,9 @@ class MultiDomain(object):
         if key not in cache:
             WB = [(k_o*weights)[:, None]*B for B in (Bu, Bv, Bw)]
             K0 = Bu.T @ WB[0] + Bv.T @ WB[1] + Bw.T @ WB[2]
-            r, cl = np.meshgrid(dofs, dofs, indexing='ij')
-            upper = cl >= r
-            cache[key] = (K0, r[upper], cl[upper], upper)
+            upper = dofs[None, :] >= dofs[:, None]
+            i, j = np.nonzero(upper)
+            cache[key] = (K0, dofs[i], dofs[j], upper)
         K0, rows, cols, upper = cache[key]
         dk = k_o - np.ravel(kw_tsl)
         dmg = np.flatnonzero(dk)
@@ -1893,9 +1893,8 @@ class MultiDomain(object):
             kD = -(Bu.T @ ((g*Du)[:, None]*Bw)
                    + Bv.T @ ((g*Dv)[:, None]*Bw)
                    + Bw.T @ ((g*Dw)[:, None]*Bw))
-            r, cl = np.meshgrid(dofs, dofs, indexing='ij')
-            rows.append(r.ravel())
-            cols.append(cl.ravel())
+            rows.append(np.repeat(dofs, dofs.size))
+            cols.append(np.tile(dofs, dofs.size))
             vals.append(kD.ravel())
         if len(vals) == 0:
             return csr_matrix((size, size), dtype=DOUBLE)
