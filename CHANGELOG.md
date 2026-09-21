@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.7.0 (2026-09-19)
+## 0.7.1 (2026-09-21)
 
 ### Requirements
 
@@ -74,8 +74,7 @@ connections change with the bug fixes below.
   D'Souza (2024) and their verification, a convergence study and the
   validation against DCB results in the literature.
 - Validation notebooks of the `'SB_TSL'` cohesive zone in mode I DCB tests:
-  `alfano2001_dcb.ipynb`, `camanho2003_dcb.ipynb`, `turon2007_dcb.ipynb`,
-  `tijs2022_dcb.ipynb`, `lecinana2023_dcb.ipynb` and `tijs2023_phd_dcb.ipynb`,
+  `alfano2001_dcb.ipynb`, `camanho2003_dcb.ipynb`, `krueger2008_dcb.ipynb`, `turon2007_dcb.ipynb`,  `tijs2022_dcb.ipynb`, `lecinana2023_dcb.ipynb` and `tijs2023_phd_dcb.ipynb`,
   with the Krueger (2012) MMB benchmark data in
   `krueger2012_mmb_benchmark.ipynb` (not simulated). The shared model builder
   and solver are in `notebooks/dcb_utils.py`, and the non-linear results are
