@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Linear static analysis &#8212; panels 0.7.1 documentation</title>
+    <title>Linear static analysis &#8212; panels 0.8.0 documentation</title>
   
   
   
@@ -38,7 +38,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
-    <script src="_static/documentation_options.js?v=5a057da9"></script>
+    <script src="_static/documentation_options.js?v=486e5634"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
@@ -50,7 +50,7 @@
     <link rel="prev" title="Semi-analytical methods for plates, shells and stiffened panels - panels" href="index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.7.1" />
+  <meta name="docsearch:version" content="0.8.0" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -118,7 +118,7 @@
   
   
   
-    <p class="title logo__title">panels 0.7.1 documentation</p>
+    <p class="title logo__title">panels 0.8.0 documentation</p>
   
 </a></div>
     
@@ -205,6 +205,13 @@
 <li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="bardell.html">
     Bardell’s Hierarchical Functions
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
   </a>
 </li>
 
@@ -369,6 +376,13 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="ref.html">
     References
   </a>
@@ -476,12 +490,16 @@
 <h1>Linear static analysis<a class="headerlink" href="#linear-static-analysis" title="Link to this heading">#</a></h1>
 <p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">Shell</span></code> object describes a plate or a cylindrical shell through its
 attributes: the geometry, the laminate, the number of terms <code class="docutils literal notranslate"><span class="pre">m</span></code> and <code class="docutils literal notranslate"><span class="pre">n</span></code> of
-the approximation functions and the model, here <code class="docutils literal notranslate"><span class="pre">'plate_clpt_donnell'</span></code> or
-<code class="docutils literal notranslate"><span class="pre">'cylshell_clpt_donnell'</span></code>. The boundary conditions are controlled by the
-flags <code class="docutils literal notranslate"><span class="pre">x1u</span></code>, <code class="docutils literal notranslate"><span class="pre">x1ur</span></code>, <code class="docutils literal notranslate"><span class="pre">x2u</span></code>, …, <code class="docutils literal notranslate"><span class="pre">y2wr</span></code>, where <code class="docutils literal notranslate"><span class="pre">0</span></code> constrains and
-<code class="docutils literal notranslate"><span class="pre">1</span></code> releases the translation (e.g. <code class="docutils literal notranslate"><span class="pre">x1u</span></code>) or the rotation (e.g. <code class="docutils literal notranslate"><span class="pre">x1ur</span></code>)
-of each displacement component at each edge, see
-<a class="reference internal" href="bardell.html#theory-func-bardell"><span class="std std-ref">Bardell’s functions</span></a>.</p>
+the approximation functions and the model, by default
+<code class="docutils literal notranslate"><span class="pre">'plate_clpt_donnell'</span></code> for plates and <code class="docutils literal notranslate"><span class="pre">'cylshell_clpt_sanders'</span></code> for
+cylindrical shells, see <code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.models</span></code> for the other models.
+The boundary conditions are controlled by the flags <code class="docutils literal notranslate"><span class="pre">x1u</span></code>, <code class="docutils literal notranslate"><span class="pre">x1ur</span></code>,
+<code class="docutils literal notranslate"><span class="pre">x2u</span></code>, …, <code class="docutils literal notranslate"><span class="pre">y2wr</span></code>, where <code class="docutils literal notranslate"><span class="pre">0</span></code> constrains and <code class="docutils literal notranslate"><span class="pre">1</span></code> releases the
+translation (e.g. <code class="docutils literal notranslate"><span class="pre">x1u</span></code>) or the rotation (e.g. <code class="docutils literal notranslate"><span class="pre">x1ur</span></code>) of each
+displacement component at each edge, see
+<a class="reference internal" href="bardell.html#theory-func-bardell"><span class="std std-ref">Bardell’s functions</span></a>. The models based on shear
+deformation theories have the rotations as independent fields, with the
+analogous flags <code class="docutils literal notranslate"><span class="pre">x1phix</span></code>, <code class="docutils literal notranslate"><span class="pre">x1phixr</span></code>, …, <code class="docutils literal notranslate"><span class="pre">y2phiyr</span></code>.</p>
 <p>The loads are added with <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_point_load()</span></code>,
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_distr_load_fixed_x()</span></code> or <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_distr_load_fixed_y()</span></code>,
 and the linear system <span class="math notranslate nohighlight">\([K_C]\{c\} = \{F_{ext}\}\)</span> is solved with
@@ -493,7 +511,10 @@ below is extracted from one of the <code class="docutils literal notranslate"><s
     <span class="n">m</span> <span class="o">=</span> <span class="mi">7</span>
     <span class="n">n</span> <span class="o">=</span> <span class="mi">6</span>
     <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">'plate_clpt_donnell'</span><span class="p">,</span>
-                  <span class="s1">'cylshell_clpt_donnell'</span><span class="p">]:</span>
+                  <span class="s1">'cylshell_clpt_donnell'</span><span class="p">,</span>
+                  <span class="s1">'cylshell_clpt_sanders'</span><span class="p">,</span>
+                  <span class="s1">'plate_fsdt_donnell'</span><span class="p">,</span>
+                  <span class="s1">'plate_tsdt_donnell'</span><span class="p">]:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">'Testing model </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="n">model</span><span class="p">)</span>
         <span class="n">s</span> <span class="o">=</span> <span class="n">Shell</span><span class="p">()</span>
         <span class="n">s</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>

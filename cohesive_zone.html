@@ -1,0 +1,2229 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Cohesive zone model of the multi-domain approach &#8212; panels 0.8.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
+
+    <script src="_static/documentation_options.js?v=486e5634"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'cohesive_zone';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="References" href="ref.html" />
+    <link rel="prev" title="Bardell’s Hierarchical Functions" href="bardell.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.8.0" />
+  
+    
+    <script src="_static/searchtools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">panels 0.8.0 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="bardell.html">
+    Bardell’s Hierarchical Functions
+  </a>
+</li>
+
+
+<li class=" current active">
+  <a class="nav-link dropdown-item nav-internal" href="#">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ref.html">
+    References
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="bardell.html">
+    Bardell’s Hierarchical Functions
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ref.html">
+    References
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Cohesive zone model of the multi-domain approach</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="cohesive-zone-model-of-the-multi-domain-approach">
+<span id="cohesive-zone"></span><h1>Cohesive zone model of the multi-domain approach<a class="headerlink" href="#cohesive-zone-model-of-the-multi-domain-approach" title="Link to this heading">#</a></h1>
+<p>The area connection <code class="docutils literal notranslate"><span class="pre">'SB_TSL'</span></code> of <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_kC_conn()</span></code> connects
+two skins over an area with a traction-separation law (TSL) at the interface,
+such that the progressive delamination between them can be simulated. It
+originates from the MSc thesis of D’Souza (2024) <a class="reference internal" href="ref.html#nathan2024msc" id="id1"><span>[nathan2024MSc]</span></a>,
+<em>Multi-Domain Semi-Analytical Cohesive Zone Approach</em>. This page describes the
+model as implemented and documents where the implementation departs from the
+thesis. Equation numbers of the form “Eq. 5.12” refer to the thesis. Each
+deviation states the problem, its consequence on the load-displacement curve
+of the double cantilever beam (DCB), and what the implementation does now.</p>
+<p>The implementation is found in:</p>
+<ul class="simple">
+<li><p>the kernels <code class="xref py py-func docutils literal notranslate"><span class="pre">fkCSB11_dmg()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">fkCSB12_dmg()</span></code> and
+<code class="xref py py-func docutils literal notranslate"><span class="pre">fkCSB22_dmg()</span></code> of <code class="docutils literal notranslate"><span class="pre">panels/multidomain/connections/kCSB_dmg.pyx</span></code>,
+and <code class="xref py py-func docutils literal notranslate"><span class="pre">calc_kw_tsl()</span></code>;</p></li>
+<li><p>the methods of <code class="xref py py-class docutils literal notranslate"><span class="pre">MultiDomain</span></code>: <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_kC_conn()</span></code>,
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.calc_k_dmg()</span></code>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.correct_separation()</span></code>,
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.calc_kT_TSL()</span></code>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.reaction_line_pd_xcte()</span></code>
+and <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.force_out_plane_damage()</span></code>;</p></li>
+<li><p>the nonlinear driver <code class="docutils literal notranslate"><span class="pre">tests/multidomain/test_dcb_damage.py</span></code> and its
+counterpart for the validation notebooks, <code class="docutils literal notranslate"><span class="pre">notebooks/dcb_utils.py</span></code>.</p></li>
+</ul>
+<p>The reference case is the DCB of Section 7.3 of the thesis: <span class="math notranslate nohighlight">\(L = 65\)</span> mm,
+<span class="math notranslate nohighlight">\(b = 25\)</span> mm, <span class="math notranslate nohighlight">\(a_0 = 48\)</span> mm, arms <span class="math notranslate nohighlight">\([0]_{15}\)</span> with ply thickness 0.14 mm of
+AS4D/PEKK-FC, <span class="math notranslate nohighlight">\(G_{Ic} = 1.12\)</span> N/mm, three domains per arm, of which the first
+one, with length <span class="math notranslate nohighlight">\(a_1 = L - a_0 = 17\)</span> mm, carries the cohesive zone.</p>
+<section id="traction-separation-law-and-damage">
+<h2>Traction-separation law and damage<a class="headerlink" href="#traction-separation-law-and-damage" title="Link to this heading">#</a></h2>
+<p>The law implemented is bilinear, with one damage variable <span class="math notranslate nohighlight">\(d\)</span> that degrades
+the three components of the traction:</p>
+<div class="math notranslate nohighlight" id="equation-cz-law">
+<span class="eqno">(1)<a class="headerlink" href="#equation-cz-law" title="Link to this equation">#</a></span>\[\tau_\alpha = k_o \left(1 - d\right) \Delta_\alpha, \qquad \alpha = u, v, w\]</div>
+<p>where <span class="math notranslate nohighlight">\(k_o\)</span> is the penalty stiffness of the pristine interface (key <code class="docutils literal notranslate"><span class="pre">'k_o'</span></code>
+of the connection) and <span class="math notranslate nohighlight">\(\Delta_\alpha\)</span> are the separations of
+Eq. <a class="reference internal" href="#equation-cz-jump">(5)</a>. The separation at damage onset is <span class="math notranslate nohighlight">\(\Delta_o = \tau_o/k_o\)</span>
+and the separation at complete failure is <span class="math notranslate nohighlight">\(\Delta_f = 2 G_{Ic}/\tau_o\)</span>, with
+the keys <code class="docutils literal notranslate"><span class="pre">'tau_o'</span></code> and <code class="docutils literal notranslate"><span class="pre">'G1c'</span></code> of the connection. The damage is driven by
+the normal separation after the correction described in
+<a class="reference internal" href="#cohesive-zone-correction"><span class="std std-ref">Correction of the separation field</span></a>, <span class="math notranslate nohighlight">\(\bar\Delta_w\)</span>, and it is irreversible:</p>
+<div class="math notranslate nohighlight" id="equation-cz-damage">
+<span class="eqno">(2)<a class="headerlink" href="#equation-cz-damage" title="Link to this equation">#</a></span>\[\begin{split}d = \max\left( d^{h}, \hat d(\bar\Delta_w) \right), \qquad
+\hat d(\Delta) = \begin{cases}
+    0 &amp; \Delta \le \Delta_o \\
+    \dfrac{\Delta_f (\Delta - \Delta_o)}{(\Delta_f - \Delta_o) \Delta} &amp; \Delta_o &lt; \Delta &lt; \Delta_f \\
+    1 &amp; \Delta \ge \Delta_f
+\end{cases}\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(d^h\)</span> is the damage of the last converged increment, stored in
+<code class="docutils literal notranslate"><span class="pre">MultiDomain.dmg_index</span></code> by <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.update_TSL_history()</span></code>. The
+damage <span class="math notranslate nohighlight">\(\hat d\)</span> is computed by <code class="xref py py-func docutils literal notranslate"><span class="pre">calc_kw_tsl()</span></code> and the maximum with the
+history, together with the degraded stiffness <span class="math notranslate nohighlight">\(k_o (1 - d)\)</span> at each
+integration point, by <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.calc_k_dmg()</span></code>. The area under the
+softening branch of the law is <span class="math notranslate nohighlight">\(G_{Ic}\)</span>.</p>
+</section>
+<section id="correction-of-the-separation-field">
+<span id="cohesive-zone-correction"></span><h2>Correction of the separation field<a class="headerlink" href="#correction-of-the-separation-field" title="Link to this heading">#</a></h2>
+<p>Section 6.3.1 of the thesis describes the correction of the separation used
+to compute the damage as: start at the point of maximum separation, location
+<span class="math notranslate nohighlight">\(A\)</span>, move in the direction of decreasing separation up to the first
+non-positive separation, location <span class="math notranslate nohighlight">\(B\)</span>, and set the separation to zero beyond
+<span class="math notranslate nohighlight">\(B\)</span>. The previous implementation set to zero, for each row <span class="math notranslate nohighlight">\(y =\)</span> cte,
+everything from <span class="math notranslate nohighlight">\(x = 0\)</span> up to the <em>last</em> non-positive separation of the row.
+When the approximation functions give a non-positive value between <span class="math notranslate nohighlight">\(A\)</span> and
+the edge of the domain, for instance a small oscillation at <span class="math notranslate nohighlight">\(x = a_1\)</span>, the
+whole row was set to zero, including the fracture process zone.
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.correct_separation()</span></code> now implements the description of the
+thesis, for a crack front that advances along <span class="math notranslate nohighlight">\(-x\)</span>:</p>
+<div class="math notranslate nohighlight" id="equation-cz-correction">
+<span class="eqno">(3)<a class="headerlink" href="#equation-cz-correction" title="Link to this equation">#</a></span>\[\begin{split}\Delta^{corr}_{i,j} = \begin{cases}
+    0 &amp; j \le B_i \\
+    \Delta_{i,j} &amp; j &gt; B_i
+\end{cases}
+\qquad
+B_i = \max \left\{ j \le A_i : \Delta_{i,j} \le 0 \right\}, \quad A_i = \arg\max_j \Delta_{i,j}\end{split}\]</div>
+<p>with <span class="math notranslate nohighlight">\(i\)</span> the row and <span class="math notranslate nohighlight">\(j\)</span> the column of the grid of integration points, <span class="math notranslate nohighlight">\(j\)</span>
+increasing with <span class="math notranslate nohighlight">\(x\)</span>. Rows without non-positive values between <span class="math notranslate nohighlight">\(x = 0\)</span> and
+<span class="math notranslate nohighlight">\(A_i\)</span> are not modified, and neither are rows without any positive
+separation. The negative values of the separation are not only numerical: for
+a beam on an elastic foundation the separation behind the crack front
+oscillates with a decaying amplitude, and its first negative lobe does not
+change when the number of terms of the cohesive domain is increased from 10
+to 20.</p>
+<p>The corrected separation is used only to compute the damage. The tractions,
+the internal force vector and the stiffness matrices use the full separation.</p>
+</section>
+<section id="separations-at-the-interface">
+<h2>Separations at the interface<a class="headerlink" href="#separations-at-the-interface" title="Link to this heading">#</a></h2>
+<p>The compatibility of the area connection in the thesis, Eqs. 4.57–4.62,
+assumes <span class="math notranslate nohighlight">\(w^i_{,x} = w^j_{,x}\)</span> and <span class="math notranslate nohighlight">\(w^i_{,y} = w^j_{,y}\)</span> (Eq. 4.61) to write
+the in-plane compatibility with the slope of the top panel only, Eq. 4.62:</p>
+<div class="math notranslate nohighlight" id="equation-cz-thesis-jump">
+<span class="eqno">(4)<a class="headerlink" href="#equation-cz-thesis-jump" title="Link to this equation">#</a></span>\[\Delta u^{thesis} = u^t + (d^t + d^b) \, w^t_{,x} - u^b\]</div>
+<p>This holds for a perfect bond, but not inside the fracture process zone,
+where the two arms rotate in opposite directions. There,
+Eq. <a class="reference internal" href="#equation-cz-thesis-jump">(4)</a> gives a spurious tangential separation, penalised
+with the same <span class="math notranslate nohighlight">\(k^w_{CZ}\)</span>, which stiffens the interface exactly where it should
+open. The implementation uses the displacement jump between the two surfaces
+in contact, with the slope of each panel:</p>
+<div class="math notranslate nohighlight" id="equation-cz-jump">
+<span class="eqno">(5)<a class="headerlink" href="#equation-cz-jump" title="Link to this equation">#</a></span>\[\begin{split}\begin{aligned}
+    \Delta_u &amp;= u^t + d^t w^t_{,x} - u^b + d^b w^b_{,x} \\
+    \Delta_v &amp;= v^t + d^t w^t_{,y} - v^b + d^b w^b_{,y} \\
+    \Delta_w &amp;= w^t - w^b
+\end{aligned}\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(d^t\)</span> and <span class="math notranslate nohighlight">\(d^b\)</span> are the distances from the mid-planes of the top and
+bottom panels to the interface, <span class="math notranslate nohighlight">\(u^t, v^t, w^t\)</span> and <span class="math notranslate nohighlight">\(u^b, v^b, w^b\)</span> their
+mid-plane displacements. The top panel is <code class="docutils literal notranslate"><span class="pre">p1</span></code> and the bottom panel is
+<code class="docutils literal notranslate"><span class="pre">p2</span></code> of the connection dictionary, whatever their order in the assembly. With
+these three separations and the degraded stiffness <span class="math notranslate nohighlight">\(k^w_{CZ} = k_o (1 - d)\)</span>,
+the penalty energy of Eq. 5.1 becomes:</p>
+<div class="math notranslate nohighlight" id="equation-cz-energy">
+<span class="eqno">(6)<a class="headerlink" href="#equation-cz-energy" title="Link to this equation">#</a></span>\[U^{tb}_{pen-AR-dmg} = \frac{1}{2} \int_x \int_y k^w_{CZ} \left( \Delta_u^2 +
+\Delta_v^2 + \Delta_w^2 \right) dx\,dy\]</div>
+<p>and the stiffness matrix of the connection is:</p>
+<div class="math notranslate nohighlight" id="equation-cz-stiffness">
+<span class="eqno">(7)<a class="headerlink" href="#equation-cz-stiffness" title="Link to this equation">#</a></span>\[[K^{conn}_{dmg}] = \int_A k^w_{CZ} [B_\Delta]^\top [B_\Delta] \, dA,
+\qquad
+U^{tb}_{pen-AR-dmg} = \frac{1}{2} \{c\}^\top [K^{conn}_{dmg}] \{c\}\]</div>
+<p>where <span class="math notranslate nohighlight">\([B_\Delta]\)</span> is the operator that gives the three separations of
+Eq. <a class="reference internal" href="#equation-cz-jump">(5)</a> from the Ritz constants <span class="math notranslate nohighlight">\(\{c\}\)</span>. For a frozen damage field,
+the internal force of the connection is <span class="math notranslate nohighlight">\([K^{conn}_{dmg}]\{c\}\)</span>, see
+Eq. <a class="reference internal" href="#equation-cz-residual">(8)</a>. The integral is evaluated
+with a Gauss-Legendre rule of <code class="docutils literal notranslate"><span class="pre">nr_x_gauss</span></code> <span class="math notranslate nohighlight">\(\times\)</span> <code class="docutils literal notranslate"><span class="pre">nr_y_gauss</span></code> points
+over the domain of the top panel, and <span class="math notranslate nohighlight">\(k^w_{CZ}\)</span> is given at each of these
+points. The terms of the kernels that are new or modified with respect to the
+thesis are listed in the docstrings of <code class="xref py py-func docutils literal notranslate"><span class="pre">fkCSB11_dmg()</span></code>,
+<code class="xref py py-func docutils literal notranslate"><span class="pre">fkCSB12_dmg()</span></code> and <code class="xref py py-func docutils literal notranslate"><span class="pre">fkCSB22_dmg()</span></code>. The kernel of the undamaged
+connection <code class="docutils literal notranslate"><span class="pre">'SB'</span></code>, <code class="docutils literal notranslate"><span class="pre">kCSB.pyx</span></code>, keeps Eq. <a class="reference internal" href="#equation-cz-thesis-jump">(4)</a>, which is
+adequate for a perfect bond.</p>
+<p>The same kernel had the approximation functions in <span class="math notranslate nohighlight">\(\eta\)</span> of the top panel in
+the coupling block built with the flags of the edge <span class="math notranslate nohighlight">\(y_1\)</span> in place of <span class="math notranslate nohighlight">\(y_2\)</span>.
+This had no effect on the DCB, where all <span class="math notranslate nohighlight">\(y\)</span> flags are 1.</p>
+</section>
+<section id="energy-dissipated-by-crack-formation">
+<h2>Energy dissipated by crack formation<a class="headerlink" href="#energy-dissipated-by-crack-formation" title="Link to this heading">#</a></h2>
+<p>The thesis adds the term <span class="math notranslate nohighlight">\(U_{crack}\)</span> of Eq. 5.18 to the total potential
+energy, Eq. 5.29, with the force vector <span class="math notranslate nohighlight">\(\{f_{crack}\}\)</span> of Eq. 5.28 and the
+stiffness matrix <span class="math notranslate nohighlight">\([K_{crack}]\)</span> of Eq. 5.26. This counts the dissipated energy
+twice. The degradation of the penalty stiffness <span class="math notranslate nohighlight">\(k^w_{CZ} = k_o(1-d)\)</span> inside
+<span class="math notranslate nohighlight">\([K^{conn}_{dmg}]\)</span>, Eq. 5.5, already makes the traction follow the softening
+branch of the traction-separation law, and the area under that branch is
+<span class="math notranslate nohighlight">\(G_{Ic}\)</span>, exactly as in a finite element with a cohesive law. The
+implementation has neither <span class="math notranslate nohighlight">\(U_{crack}\)</span>, <span class="math notranslate nohighlight">\(\{f_{crack}\}\)</span> nor <span class="math notranslate nohighlight">\([K_{crack}]\)</span>, and
+the residual is:</p>
+<div class="math notranslate nohighlight" id="equation-cz-residual">
+<span class="eqno">(8)<a class="headerlink" href="#equation-cz-residual" title="Link to this equation">#</a></span>\[\{R\} = \{f_{int}\}_{panels} + [K^{conn}_{dmg}(d)]\{c\} + [K^{pen}_{PD}]\{c\} - \{f_{ext}\}\]</div>
+<p>where <span class="math notranslate nohighlight">\(d\)</span> is the damage at each integration point, Eq. <a class="reference internal" href="#equation-cz-damage">(2)</a>, the
+largest value between the converged history and the value obtained from the
+current separation, and <span class="math notranslate nohighlight">\([K^{pen}_{PD}]\)</span> is the penalty stiffness of the
+prescribed displacement. The sudden increase of the slope at damage onset
+reported in Section 7.1.4 of the thesis, and the need to drop
+<span class="math notranslate nohighlight">\([K^2_{crack}]\)</span>, are consequences of the double counting.</p>
+</section>
+<section id="consistent-tangent-stiffness">
+<h2>Consistent tangent stiffness<a class="headerlink" href="#consistent-tangent-stiffness" title="Link to this heading">#</a></h2>
+<p>Writing the separations as <span class="math notranslate nohighlight">\(\Delta_\alpha = [B_\alpha]\{c\}\)</span>, the internal
+force vector of the connection and its derivative are:</p>
+<div class="math notranslate nohighlight" id="equation-cz-fint-coh">
+<span class="eqno">(9)<a class="headerlink" href="#equation-cz-fint-coh" title="Link to this equation">#</a></span>\[\{f^{coh}_{int}\} = \int_A k_o (1 - d) \sum_\alpha [B_\alpha]^\top \Delta_\alpha \, dA = [K^{conn}_{dmg}]\{c\}\]</div>
+<div class="math notranslate nohighlight" id="equation-cz-tangent">
+<span class="eqno">(10)<a class="headerlink" href="#equation-cz-tangent" title="Link to this equation">#</a></span>\[\frac{\partial \{f^{coh}_{int}\}}{\partial \{c\}} = [K^{conn}_{dmg}] + [K^{conn}_{\dot d}], \qquad
+[K^{conn}_{\dot d}] = - \int_A \chi \, k_o \, \hat d'(\Delta_w) \left( \sum_\alpha [B_\alpha]^\top \Delta_\alpha \right) [B_w] \, dA\]</div>
+<p>with:</p>
+<div class="math notranslate nohighlight" id="equation-cz-dprime">
+<span class="eqno">(11)<a class="headerlink" href="#equation-cz-dprime" title="Link to this equation">#</a></span>\[\begin{split}\hat d'(\Delta) = \frac{\Delta_f \Delta_o}{(\Delta_f - \Delta_o) \Delta^2}, \qquad
+\chi = \begin{cases}
+    1 &amp; \Delta_o &lt; \bar\Delta_w &lt; \Delta_f \text{ and } \hat d(\bar\Delta_w) &gt; d^h \\
+    0 &amp; \text{otherwise}
+\end{cases}\end{split}\]</div>
+<p>The thesis does not derive the tangent of the cohesive zone. With the secant
+stiffness <span class="math notranslate nohighlight">\([K^{conn}_{dmg}]\)</span> alone, the iteration matrix misses the change of
+the damage with the displacements. It overestimates the stiffness of every
+softening point, and the Newton-Raphson iterations converge linearly, slowly,
+once the crack grows: in the reference DCB, the first increment after the
+first fully damaged point needed more than 130 iterations.</p>
+<p>The mask <span class="math notranslate nohighlight">\(\chi\)</span> selects the points where the damage grows in the current
+state. Where it is 1, the correction of <a class="reference internal" href="#cohesive-zone-correction"><span class="std std-ref">Correction of the separation field</span></a> leaves
+the separation unchanged, <span class="math notranslate nohighlight">\(\bar\Delta_w = \Delta_w\)</span> and <span class="math notranslate nohighlight">\(\partial \bar\Delta_w
+/ \partial \{c\} = [B_w]\)</span>. The derivative of the correction itself, a switch
+between 0 and <span class="math notranslate nohighlight">\(\Delta_w\)</span>, is zero almost everywhere. Some properties of
+Eq. <a class="reference internal" href="#equation-cz-tangent">(10)</a>:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\([K^{conn}_{\dot d}]\)</span> is not symmetric, because the tangential tractions
+depend on <span class="math notranslate nohighlight">\(\Delta_w\)</span> through <span class="math notranslate nohighlight">\(d\)</span>, while <span class="math notranslate nohighlight">\(d\)</span> does not depend on <span class="math notranslate nohighlight">\(\Delta_u\)</span>,
+<span class="math notranslate nohighlight">\(\Delta_v\)</span>. The term <span class="math notranslate nohighlight">\([B_w]^\top \Delta_w [B_w]\)</span> is symmetric and negative
+semi-definite; it makes the normal tangent stiffness of a softening point
+<span class="math notranslate nohighlight">\(k_o (1 - d - \hat d' \Delta_w) = -k_o \Delta_o / (\Delta_f - \Delta_o)\)</span>,
+the slope of the descending branch of the bilinear law.</p></li>
+<li><p>The iteration matrix becomes <span class="math notranslate nohighlight">\([K_C] + [K_G] + [K^{conn}_{dmg}] +
+[K^{conn}_{\dot d}] + [K^{pen}_{PD}]\)</span>. Under displacement control the
+prescribed-displacement penalty keeps it regular on the softening branch of
+the DCB. <code class="docutils literal notranslate"><span class="pre">structsolve.solve</span></code> uses <code class="docutils literal notranslate"><span class="pre">scipy.sparse.linalg.spsolve</span></code>, which
+accepts non-symmetric matrices.</p></li>
+<li><p>Like <span class="math notranslate nohighlight">\([K^{conn}_{dmg}]\)</span>, <span class="math notranslate nohighlight">\([K^{conn}_{\dot d}]\)</span> is evaluated at every
+iteration, while <span class="math notranslate nohighlight">\([K_C] + [K_G]\)</span> is refreshed every <span class="math notranslate nohighlight">\(n_{NR}\)</span> iterations,
+see <a class="reference internal" href="#cohesive-zone-solution"><span class="std std-ref">Solution procedure</span></a>.</p></li>
+</ul>
+<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.calc_kT_TSL()</span></code> evaluates <span class="math notranslate nohighlight">\([K^{conn}_{\dot d}]\)</span> at the
+Gauss-Legendre points of the connection, with <span class="math notranslate nohighlight">\([B_\alpha]\)</span> built once per
+panel from the field functions and cached. The drivers use it by default
+(<code class="docutils literal notranslate"><span class="pre">consistent_tangent=True</span></code> in <code class="docutils literal notranslate"><span class="pre">test_dcb_damage.py</span></code>, always in
+<code class="docutils literal notranslate"><span class="pre">dcb_utils.solve_dcb</span></code>).</p>
+</section>
+<section id="assembly-of-the-cohesive-stiffness-by-matrix-products">
+<h2>Assembly of the cohesive stiffness by matrix products<a class="headerlink" href="#assembly-of-the-cohesive-stiffness-by-matrix-products" title="Link to this heading">#</a></h2>
+<p>The thesis assembles <span class="math notranslate nohighlight">\([K^{conn}_{dmg}]\)</span> with loops over the terms of both
+panels and over the integration points, where the approximation functions are
+evaluated inside the loops, <code class="docutils literal notranslate"><span class="pre">kCSB_dmg.pyx</span></code>. Because <span class="math notranslate nohighlight">\([K^{conn}_{dmg}]\)</span> is
+part of the internal force vector, it is needed at every iteration (see
+<a class="reference internal" href="#cohesive-zone-solution"><span class="std std-ref">Solution procedure</span></a>), and with <span class="math notranslate nohighlight">\(60 \times 30\)</span> integration points and <span class="math notranslate nohighlight">\(10 \times 10\)</span>, <span class="math notranslate nohighlight">\(8 \times 8\)</span> terms these
+loops took about 11 s per assembly, 77% of the run time in the elastic range.
+The implementation now writes the same Gauss-Legendre rule as matrix products.
+Let <span class="math notranslate nohighlight">\(g = 1, \dots, n_g\)</span> be the integration points, with weights <span class="math notranslate nohighlight">\(w_g = w_{\xi}
+w_{\eta} \, ab/4\)</span>, and <span class="math notranslate nohighlight">\(\{c_{tb}\}\)</span> the Ritz constants of the top panel
+followed by those of the bottom panel. The operators of Eq. <a class="reference internal" href="#equation-cz-jump">(5)</a>
+evaluated at all points are the <span class="math notranslate nohighlight">\(n_g \times n_{dof}\)</span> matrices:</p>
+<div class="math notranslate nohighlight" id="equation-cz-operators">
+<span class="eqno">(12)<a class="headerlink" href="#equation-cz-operators" title="Link to this equation">#</a></span>\[\begin{split}\begin{aligned}
+    {}[B_u] &amp;= \left[ [N^t_u] + d^t [N^t_{w,x}] \;\; -[N^b_u] + d^b [N^b_{w,x}] \right] \\
+    [B_v] &amp;= \left[ [N^t_v] + d^t [N^t_{w,y}] \;\; -[N^b_v] + d^b [N^b_{w,y}] \right] \\
+    [B_w] &amp;= \left[ [N^t_w] \;\; -[N^b_w] \right]
+\end{aligned}\end{split}\]</div>
+<p>where row <span class="math notranslate nohighlight">\(g\)</span> of <span class="math notranslate nohighlight">\([N^t_u]\)</span> holds the approximation functions of <span class="math notranslate nohighlight">\(u\)</span> of the
+top panel at point <span class="math notranslate nohighlight">\(g\)</span>, and so on. The panel functions are the ones of the
+field evaluation, <code class="docutils literal notranslate"><span class="pre">fuvw</span></code>, obtained by evaluating the field for each unit
+vector of Ritz constants. With <span class="math notranslate nohighlight">\(\text{diag}(\cdot)\)</span> the diagonal matrix of a
+vector over the points, the secant stiffness is:</p>
+<div class="math notranslate nohighlight" id="equation-cz-k-products">
+<span class="eqno">(13)<a class="headerlink" href="#equation-cz-k-products" title="Link to this equation">#</a></span>\[[K^{conn}_{dmg}] = \sum_{\alpha = u, v, w} [B_\alpha]^\top \text{diag}\left( w_g k_g \right) [B_\alpha], \qquad k_g = k_o (1 - d_g)\]</div>
+<p>a product that runs on optimised BLAS routines. The integration rule is the
+same as in the loops, so the result is the same up to round-off. The
+operators depend only on the geometry and on the approximation functions, and
+they are computed once and cached. The consistent tangent of
+Eq. <a class="reference internal" href="#equation-cz-tangent">(10)</a> uses the same operators, restricted to the rows where
+<span class="math notranslate nohighlight">\(\chi = 1\)</span>. Only the upper triangle of Eq. <a class="reference internal" href="#equation-cz-k-products">(13)</a> is added to
+the connection matrix, which is made symmetric afterwards together with the
+other connections.</p>
+<p><strong>Update restricted to the damaged points.</strong> Splitting <span class="math notranslate nohighlight">\(k_g = k_o - (k_o -
+k_g)\)</span> in Eq. <a class="reference internal" href="#equation-cz-k-products">(13)</a>:</p>
+<div class="math notranslate nohighlight" id="equation-cz-k-update">
+<span class="eqno">(14)<a class="headerlink" href="#equation-cz-k-update" title="Link to this equation">#</a></span>\[[K^{conn}_{dmg}] = [K^{conn}_{o}] - \sum_{\alpha = u, v, w} [B_\alpha]^\top_{\mathcal{D}} \, \text{diag}\left( w_g (k_o - k_g) \right)_{\mathcal{D}} \, [B_\alpha]_{\mathcal{D}}, \qquad
+[K^{conn}_{o}] = k_o \sum_{\alpha = u, v, w} [B_\alpha]^\top \text{diag}\left( w_g \right) [B_\alpha]\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathcal{D} = \{ g : k_g \neq k_o \}\)</span> is the set of damaged points and
+the subscript <span class="math notranslate nohighlight">\(\mathcal{D}\)</span> keeps only their rows. <span class="math notranslate nohighlight">\([K^{conn}_{o}]\)</span>, the
+stiffness of the pristine interface, is computed once for each <span class="math notranslate nohighlight">\(k_o\)</span> and
+cached. Before damage onset <span class="math notranslate nohighlight">\(\mathcal{D}\)</span> is empty and the assembly reduces
+to a copy of <span class="math notranslate nohighlight">\([K^{conn}_{o}]\)</span>. After onset, <span class="math notranslate nohighlight">\(\mathcal{D}\)</span> holds the fracture
+process zone and the cracked region, and the cost of the correction grows
+with the number of their points, not with the size of the whole interface.
+The correction is exact, not an approximation: it is Eq. <a class="reference internal" href="#equation-cz-k-products">(13)</a>
+regrouped. Because <span class="math notranslate nohighlight">\(k_g\)</span> is taken from the stiffness field used by the
+kernels, the approach does not depend on how the damage is computed.</p>
+<p>The loops of <code class="docutils literal notranslate"><span class="pre">kCSB_dmg.pyx</span></code> are used only when the connection has
+<code class="docutils literal notranslate"><span class="pre">use_kernels=True</span></code>. Both assemblies integrate over the domain of the top
+panel and evaluate the functions of the bottom panel at the natural
+coordinates of the top panel, therefore the two panels must have the same
+dimensions <span class="math notranslate nohighlight">\(a\)</span>, <span class="math notranslate nohighlight">\(b\)</span>, which <code class="xref py py-class docutils literal notranslate"><span class="pre">MultiDomain</span></code> checks for the connections
+<code class="docutils literal notranslate"><span class="pre">'SB'</span></code> and <code class="docutils literal notranslate"><span class="pre">'SB_TSL'</span></code>, raising a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> otherwise. In the elastic
+range of the DCB, the matrix products and
+the update of Eq. <a class="reference internal" href="#equation-cz-k-update">(14)</a>, together with the changes of the driver
+described in <a class="reference internal" href="#cohesive-zone-solution"><span class="std std-ref">Solution procedure</span></a>, reduce the time of eight
+displacement increments from 341 s to 29 s, with the same loads to a relative
+<span class="math notranslate nohighlight">\(1.3 \times 10^{-8}\)</span>, the order of the convergence tolerance.</p>
+</section>
+<section id="load-measured-at-the-loaded-edge">
+<h2>Load measured at the loaded edge<a class="headerlink" href="#load-measured-at-the-loaded-edge" title="Link to this heading">#</a></h2>
+<p>The thesis evaluates the load with two approaches, Section 5.4, and scales
+the second one, the area integral of the traction, Eq. 5.38, with the ratio
+between both at the first increment, Section 7.1.4. The area integral was
+computed with the corrected separation of Section 6.3.1, in which the
+separation behind the crack front is set to zero. This removes the
+compressive tractions that balance the tensile ones. For a beam on an elastic
+foundation the separation behind the peak is physically negative, and its
+integral is not small. The table below compares, for a linear elastic
+solution with a tip displacement of 1 mm, the reaction at the loaded edge with
+the integrals of the traction computed with the full separation <span class="math notranslate nohighlight">\(\Delta\)</span> and
+with the corrected separation <span class="math notranslate nohighlight">\(\Delta^{corr}\)</span>.</p>
+<div class="pst-scrollable-table-container"><table class="table" id="id14">
+<caption><span class="caption-text">Out-of-plane force of the DCB for a tip displacement of 1 mm,
+            linear solution, default edge penalties.</span><a class="headerlink" href="#id14" title="Link to this table">#</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><span class="math notranslate nohighlight">\(k_o\)</span> [N/mm³]</p></th>
+<th class="head"><p>Reaction [N]</p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\int k \Delta \, dA\)</span> [N]</p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\int k \Delta^{corr} \, dA\)</span> [N]</p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\int Q_x \, dy\)</span> [N]</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(1\times10^4\)</span></p></td>
+<td><p>25.30</p></td>
+<td><p>25.31</p></td>
+<td><p>353.0</p></td>
+<td><p>24.73</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(5\times10^4\)</span></p></td>
+<td><p>26.18</p></td>
+<td><p>26.18</p></td>
+<td><p>523.9</p></td>
+<td><p>25.59</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(2\times10^5\)</span></p></td>
+<td><p>26.69</p></td>
+<td><p>26.70</p></td>
+<td><p>741.2</p></td>
+<td><p>26.09</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The ratio between the corrected integral and the reaction depends on <span class="math notranslate nohighlight">\(k_o\)</span>
+and on the damage state, such that a scaling factor fixed at the first
+increment distorts the curve after damage onset. The line integral of <span class="math notranslate nohighlight">\(Q_x\)</span>
+with finite differences of <span class="math notranslate nohighlight">\(M_{xx}\)</span> is 2% low. The implementation now
+provides:</p>
+<ul>
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.reaction_line_pd_xcte()</span></code>, the reaction of the prescribed
+displacement <span class="math notranslate nohighlight">\(w_p(y)\)</span> imposed with the penalty <span class="math notranslate nohighlight">\(k_w\)</span> along <span class="math notranslate nohighlight">\(x = x_p\)</span>:</p>
+<div class="math notranslate nohighlight" id="equation-cz-reaction">
+<span class="eqno">(15)<a class="headerlink" href="#equation-cz-reaction" title="Link to this equation">#</a></span>\[R = \int_0^b k_w \left( w_p(y) - w(x_p, y) \right) dy\]</div>
+<p>This is what the load cell measures, and it is used for the
+load-displacement curves.</p>
+</li>
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.force_out_plane_damage()</span></code> integrates <span class="math notranslate nohighlight">\(\tau = k^w_{CZ}
+\Delta\)</span> with the full separation <span class="math notranslate nohighlight">\(\Delta\)</span>, the same that enters
+Eq. <a class="reference internal" href="#equation-cz-residual">(8)</a>. It matches <span class="math notranslate nohighlight">\(R\)</span> by equilibrium of the loaded arm and
+needs no scaling. The corrected separation is used only to compute the
+damage.</p></li>
+</ul>
+</section>
+<section id="penalty-stiffness-of-the-edge-connections">
+<h2>Penalty stiffness of the edge connections<a class="headerlink" href="#penalty-stiffness-of-the-edge-connections" title="Link to this heading">#</a></h2>
+<p>The default penalties of <code class="xref py py-func docutils literal notranslate"><span class="pre">calc_kt_kr()</span></code> for an <code class="docutils literal notranslate"><span class="pre">'SSxcte'</span></code> connection
+between two equal laminates are <span class="math notranslate nohighlight">\(k_t = A_{11}/h\)</span> and <span class="math notranslate nohighlight">\(k_r = D_{11}/h\)</span>, from
+Castro and Donadon (2017) <a class="reference internal" href="ref.html#castro2017multidomain" id="id2"><span>[castro2017Multidomain]</span></a>. With the penalty energy
+<span class="math notranslate nohighlight">\(k_r (w^i_{,x} - w^j_{,x})^2\)</span> the connection behaves as a rotational spring
+of stiffness <span class="math notranslate nohighlight">\(2 k_r\)</span> per unit width, which adds to a cantilever loaded at the
+tip a compliance equal to <span class="math notranslate nohighlight">\(3h/(2a)\)</span> of its bending compliance, about 7% for
+each connection of the DCB arm (<span class="math notranslate nohighlight">\(h = 2.1\)</span> mm, <span class="math notranslate nohighlight">\(a = 48\)</span> mm). The arms of the
+reference model have two connections each, at the crack tip moment. The
+table below gives the elastic stiffness of the DCB, <span class="math notranslate nohighlight">\(k_o = 2\times10^5\)</span>
+N/mm³, when the default <span class="math notranslate nohighlight">\(k_t\)</span> and <span class="math notranslate nohighlight">\(k_r\)</span> are multiplied by a factor.</p>
+<div class="pst-scrollable-table-container"><table class="table" id="id15">
+<caption><span class="caption-text">Elastic stiffness of the DCB versus the factor applied to the
+            default edge penalties.</span><a class="headerlink" href="#id15" title="Link to this table">#</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>Factor</p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(P/\delta\)</span> [N/mm]</p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\Delta_{max}/\delta\)</span></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>26.69</p></td>
+<td><p><span class="math notranslate nohighlight">\(4.22\times10^{-4}\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>10</p></td>
+<td><p>32.54</p></td>
+<td><p><span class="math notranslate nohighlight">\(5.21\times10^{-4}\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p>100</p></td>
+<td><p>33.27</p></td>
+<td><p><span class="math notranslate nohighlight">\(5.35\times10^{-4}\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>1000</p></td>
+<td><p>33.35</p></td>
+<td><p><span class="math notranslate nohighlight">\(5.36\times10^{-4}\)</span></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The converged value agrees with a beam on an elastic foundation, <span class="math notranslate nohighlight">\(P/\delta
+\approx 33\)</span> N/mm. With the default penalties the separation at the crack tip,
+and therefore the damage onset, lag the imposed displacement by 20%. This is
+independent of the 0.015 mm domain used between the cohesive domain and the
+free arm: replacing it by a 5 mm domain gives 27.23 N/mm with the default
+penalties and 33.28 N/mm with the factor 100. The drivers multiply the
+default <code class="docutils literal notranslate"><span class="pre">'SSxcte'</span></code> penalties by <code class="docutils literal notranslate"><span class="pre">edge_penalty_factor</span></code>, 100 by default. The
+library defaults are unchanged.</p>
+</section>
+<section id="solution-procedure">
+<span id="cohesive-zone-solution"></span><h2>Solution procedure<a class="headerlink" href="#solution-procedure" title="Link to this heading">#</a></h2>
+<p>The drivers, <code class="docutils literal notranslate"><span class="pre">tests/multidomain/test_dcb_damage.py</span></code> and
+<code class="docutils literal notranslate"><span class="pre">notebooks/dcb_utils.py</span></code>, solve Eq. <a class="reference internal" href="#equation-cz-residual">(8)</a> under displacement
+control with the modified Newton-Raphson method of Section 5.3 of the thesis.
+The changes described below modify the iterations but, except for the
+convergence criterion, not the equations being solved.</p>
+<p><strong>Secant stiffness of the cohesive zone at every iteration.</strong> The driver of
+the thesis refreshed <span class="math notranslate nohighlight">\([K^{conn}_{dmg}]\)</span> only every <span class="math notranslate nohighlight">\(n_{NR} = 3\)</span> iterations,
+together with the tangent stiffness matrix. However, <span class="math notranslate nohighlight">\([K^{conn}_{dmg}]\)</span> is
+the secant stiffness of the cohesive zone and it is part of the internal force
+vector, Eq. <a class="reference internal" href="#equation-cz-residual">(8)</a>. Keeping it frozen makes the residual
+inconsistent with the traction-separation law, and a converged state may
+carry a damage field computed with the displacements of earlier iterations.
+The drivers now evaluate <span class="math notranslate nohighlight">\([K^{conn}_{dmg}]\)</span> at every iteration, and only the
+tangent stiffness of the panels, <span class="math notranslate nohighlight">\([K_C] + [K_G]\)</span>, is refreshed every <span class="math notranslate nohighlight">\(n_{NR}\)</span>
+iterations. The iteration matrix of Section 5.3 of the thesis is <span class="math notranslate nohighlight">\([K_C] +
+[K_G] + [K^{conn}_{dmg}] + [K^{pen}_{PD}]\)</span>, where the secant stiffness of the
+cohesive zone replaces its tangent; the drivers add the damage-rate term
+<span class="math notranslate nohighlight">\([K^{conn}_{\dot d}]\)</span> of Eq. <a class="reference internal" href="#equation-cz-tangent">(10)</a>.</p>
+<p><strong>Predictor.</strong> Each increment started from the last converged state. Under
+displacement control the first residual is then dominated by the jump of the
+prescribed displacement, and the first iteration always ended with a ratio of
+Eq. <a class="reference internal" href="#equation-cz-criterion">(17)</a> close to 1. The increment <span class="math notranslate nohighlight">\(n\)</span> now starts from the
+linear extrapolation of the last two converged states:</p>
+<div class="math notranslate nohighlight">
+\[\{c\}_{n}^{0} = \{c\}_{n-1} + \frac{w_{p,n} - w_{p,n-1}}{w_{p,n-1} - w_{p,n-2}} \left( \{c\}_{n-1} - \{c\}_{n-2} \right)\]</div>
+<p>with the state <span class="math notranslate nohighlight">\(w_p = 0\)</span>, <span class="math notranslate nohighlight">\(\{c\} = 0\)</span> used for the second increment
+(<code class="docutils literal notranslate"><span class="pre">predictor=True</span></code>). The damage history is only updated after convergence,
+so the damage of the predicted state is not stored.</p>
+<p><strong>Reuse of</strong> <span class="math notranslate nohighlight">\([K_C] + [K_G]\)</span> <strong>in the elastic range.</strong> While no point of the
+interface is damaged, the tangent stiffness of the panels is reused for up to
+<code class="docutils literal notranslate"><span class="pre">kT_pan_reuse_steps</span></code> increments, 5 by default, and within an increment it
+is refreshed every <span class="math notranslate nohighlight">\(n_{NR}\)</span> iterations, but not after the first one. The
+residual is always evaluated exactly, so the converged solution does not
+change; only the number of iterations can increase. After onset, <span class="math notranslate nohighlight">\([K_C] +
+[K_G]\)</span> is evaluated at the start of every increment.</p>
+<p><strong>Why Newton-Raphson fails after the peak.</strong> The residual is continuous but
+only piecewise smooth. Its derivative jumps whenever an integration point
+crosses <span class="math notranslate nohighlight">\(\Delta_o\)</span> (from <span class="math notranslate nohighlight">\(k_o\)</span> to the negative softening slope <span class="math notranslate nohighlight">\(-k_o
+\Delta_o/(\Delta_f - \Delta_o)\)</span>), crosses <span class="math notranslate nohighlight">\(\Delta_f\)</span> (from the softening slope
+to zero), switches between loading (<span class="math notranslate nohighlight">\(\chi = 1\)</span>) and unloading (<span class="math notranslate nohighlight">\(\hat d \le
+d^h\)</span>), or changes sign and enters or leaves the region zeroed by the
+correction of Eq. <a class="reference internal" href="#equation-cz-correction">(3)</a>. The consistent tangent of
+Eq. <a class="reference internal" href="#equation-cz-tangent">(10)</a> is exact only on one side of each kink. Before the peak,
+few points cross a kink in one iteration and the quadratic convergence is not
+affected. After the peak, the Ritz functions are global, so a Newton
+correction moves the whole crack front at once. In the DCB with <span class="math notranslate nohighlight">\(k_o = 5
+\times 10^4\)</span> N/mm³ and <span class="math notranslate nohighlight">\(\tau_o = 87\)</span> MPa, at <span class="math notranslate nohighlight">\(w_p = 6.8\)</span> mm, every correction
+changed <span class="math notranslate nohighlight">\(\{c\}\)</span> by 3–20%, the normal separation of points at the crack front
+swung between <span class="math notranslate nohighlight">\(-0.0018\)</span> and <span class="math notranslate nohighlight">\(+0.0039\)</span> mm, about <span class="math notranslate nohighlight">\(3 \Delta_o\)</span>, and 14–110
+points switched between loading and unloading at every iteration. The
+iterations entered an exact cycle of period 6, with the ratio of
+Eq. <a class="reference internal" href="#equation-cz-criterion">(17)</a> repeating 0.998, 0.999, 0.994, 0.995, 0.988, 0.687,
+which no number of iterations can break. Two safeguards are added to the
+drivers. Neither changes the equations or the convergence criterion, so a
+converged state is the same solution as before, only the path to it changes.</p>
+<p><strong>Backtracking line search.</strong> With <span class="math notranslate nohighlight">\(\{\delta c\}\)</span> the solution of
+<span class="math notranslate nohighlight">\([K]\{\delta c\} = -\{R(\{c_i\})\}\)</span>, where <span class="math notranslate nohighlight">\([K]\)</span> is the iteration matrix, the
+new iterate is <span class="math notranslate nohighlight">\(\{c_{i+1}\} = \{c_i\} + s\{\delta c\}\)</span>, with the step length
+<span class="math notranslate nohighlight">\(s\)</span> taken as the first of <span class="math notranslate nohighlight">\(s = 1, \frac{1}{2}, \frac{1}{4}, \dots,
+2^{-n_{ls}}\)</span> that satisfies:</p>
+<div class="math notranslate nohighlight" id="equation-cz-armijo">
+<span class="eqno">(16)<a class="headerlink" href="#equation-cz-armijo" title="Link to this equation">#</a></span>\[\left\| \{R(\{c_i\} + s\{\delta c\})\} \right\|_D \le \left(1 - 10^{-4} s\right) \left\| \{R(\{c_i\})\} \right\|_D, \qquad
+\left\| \{v\} \right\|_D = \sqrt{\{v\}^\top [D]^{-1} \{v\}}\]</div>
+<p>where <span class="math notranslate nohighlight">\([D]\)</span> holds the absolute values of the diagonal of <span class="math notranslate nohighlight">\([K]\)</span> at the start
+of the increment, the scaling of the criterion of Eq. <a class="reference internal" href="#equation-cz-criterion">(17)</a>,
+which balances the rows of the prescribed-displacement penalty against the
+others. The merit function is the residual norm and not an energy, because
+the damaged interface has no potential and <span class="math notranslate nohighlight">\([K]\)</span> is not symmetric. When <span class="math notranslate nohighlight">\([K]\)</span>
+is the exact Jacobian <span class="math notranslate nohighlight">\([J]\)</span> of the residual, <span class="math notranslate nohighlight">\(\{\delta c\}\)</span> is a descent
+direction of this merit function for any positive weighting:</p>
+<div class="math notranslate nohighlight">
+\[\left. \frac{d}{ds} \frac{1}{2} \left\| \{R(\{c_i\} + s\{\delta c\})\} \right\|_D^2 \right|_{s=0} = \{R\}^\top [D]^{-1} [J] \{\delta c\} = - \{R\}^\top [D]^{-1} \{R\} &lt; 0\]</div>
+<p>so a small enough <span class="math notranslate nohighlight">\(s\)</span> always satisfies Eq. <a class="reference internal" href="#equation-cz-armijo">(16)</a>. Between refreshes
+of <span class="math notranslate nohighlight">\([K_C] + [K_G]\)</span> the iteration matrix is not the exact Jacobian and this is
+not guaranteed; if no trial satisfies Eq. <a class="reference internal" href="#equation-cz-armijo">(16)</a>, the trial with the
+smallest norm is taken, a trial whose residual is not finite counting as an
+infinite norm. Halving <span class="math notranslate nohighlight">\(s\)</span> halves the jump of the separations and
+thus reduces the number of kinks crossed per iteration. Each trial costs one
+evaluation of the residual, which is cheap with the assembly by matrix
+products; the trial <span class="math notranslate nohighlight">\(s = 1\)</span> is the residual that the iteration needs anyway.
+The drivers use <span class="math notranslate nohighlight">\(n_{ls} = 6\)</span> (<code class="docutils literal notranslate"><span class="pre">line_search_max</span></code>).</p>
+<p><strong>Bisection of increments.</strong> If an increment from <span class="math notranslate nohighlight">\(w_{p,n-1}\)</span> to <span class="math notranslate nohighlight">\(w_{p,n}\)</span>
+does not converge within <span class="math notranslate nohighlight">\(n_{max} = 50\)</span> iterations (<code class="docutils literal notranslate"><span class="pre">max_NR_iter</span></code>), or
+diverges, that is, the ratio of Eq. <a class="reference internal" href="#equation-cz-criterion">(17)</a> is not finite or
+exceeds <span class="math notranslate nohighlight">\(10^3\)</span> after any iteration, its iterates are discarded and the first
+half, from <span class="math notranslate nohighlight">\(w_{p,n-1}\)</span> to
+<span class="math notranslate nohighlight">\((w_{p,n-1} + w_{p,n})/2\)</span>, is solved from the last converged state. This is
+applied recursively with a stack of pending targets: when a sub-increment
+converges, the driver tries again to reach the next pending target, and when
+it fails, the remaining interval is halved again, down to <span class="math notranslate nohighlight">\(2^{-6}\)</span> of the
+original increment (<code class="docutils literal notranslate"><span class="pre">max_bisections</span></code>), after which the analysis is aborted.
+Discarding the iterates is consistent because the damage history <span class="math notranslate nohighlight">\(d^h\)</span> is
+only updated with converged states. Every converged sub-increment updates
+<span class="math notranslate nohighlight">\(d^h\)</span> and the states used by the predictor, so a bisected increment follows a
+finer loading path, which matters for an irreversible law; the results are
+stored only at the prescribed displacements of the original list. The list of
+prescribed displacements itself does not change: sub-increments are only
+created when an increment fails.</p>
+<p><strong>Convergence criterion.</strong> The prescribed displacement is imposed with <span class="math notranslate nohighlight">\(k_w =
+10^6\)</span>, such that <span class="math notranslate nohighlight">\(\{f_{ext}\}\)</span> and <span class="math notranslate nohighlight">\([K^{pen}_{PD}]\{c\}\)</span> are of the order of
+<span class="math notranslate nohighlight">\(10^6\)</span>–<span class="math notranslate nohighlight">\(10^7\)</span>, while the physical forces are of the order of <span class="math notranslate nohighlight">\(10^2\)</span> N. The
+denominator of Eq. 5.35 of the thesis, <span class="math notranslate nohighlight">\(\max(F(\{f_{ext}\}),
+F(\{f_{int}\}))\)</span>, is dominated by the penalty terms, and the tolerance
+<span class="math notranslate nohighlight">\(10^{-4}\)</span> is then not a relative tolerance on the physical forces. The
+drivers use:</p>
+<div class="math notranslate nohighlight" id="equation-cz-criterion">
+<span class="eqno">(17)<a class="headerlink" href="#equation-cz-criterion" title="Link to this equation">#</a></span>\[\frac{F(\{R\})}{\max\left( F(\{f_{int}\}), F([K^{pen}_{PD}]\{c\} - \{f_{ext}\}) \right)} &lt; \varepsilon\]</div>
+<p>where <span class="math notranslate nohighlight">\(F(\cdot) = \|\cdot\|_D\)</span> and the second term of the denominator is the
+reaction of the prescribed displacement. The large <span class="math notranslate nohighlight">\(k_w\)</span> also degrades the
+accuracy of the first solution of each increment, whose ratio of
+Eq. <a class="reference internal" href="#equation-cz-criterion">(17)</a> can be close to 1. An increment is therefore declared
+divergent only when the ratio is not finite or exceeds <span class="math notranslate nohighlight">\(10^3\)</span>, instead of
+when it reaches 1. A divergent increment does not abort the analysis: it is
+bisected as described above, and the analysis is aborted only when a
+sub-increment of <span class="math notranslate nohighlight">\(2^{-6}\)</span> of the original increment (<code class="docutils literal notranslate"><span class="pre">max_bisections</span></code>)
+still does not converge.</p>
+</section>
+<section id="verification">
+<h2>Verification<a class="headerlink" href="#verification" title="Link to this heading">#</a></h2>
+<p>The implementation is verified by the tests of
+<code class="docutils literal notranslate"><span class="pre">tests/multidomain/test_sb_tsl.py</span></code>:</p>
+<ul class="simple">
+<li><p>The kernels <code class="xref py py-func docutils literal notranslate"><span class="pre">fkCSB11_dmg()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">fkCSB12_dmg()</span></code> and
+<code class="xref py py-func docutils literal notranslate"><span class="pre">fkCSB22_dmg()</span></code> were verified by comparing <span class="math notranslate nohighlight">\(\{c\}^\top [K] \{c\}\)</span> with
+twice the Gauss-Legendre integral of the penalty energy of
+Eq. <a class="reference internal" href="#equation-cz-energy">(6)</a>, evaluated from the displacement field,
+for random <span class="math notranslate nohighlight">\(\{c\}\)</span>, random boundary flags, panels with different numbers of
+terms and thicknesses, and a random <span class="math notranslate nohighlight">\(k^w_{CZ}\)</span> field: the relative
+difference is below <span class="math notranslate nohighlight">\(10^{-15}\)</span>.</p></li>
+<li><p>The assembly by matrix products and the loops of <code class="docutils literal notranslate"><span class="pre">kCSB_dmg.pyx</span></code> agree to
+a relative <span class="math notranslate nohighlight">\(10^{-12}\)</span> for random boundary flags, both orders of the panels
+in the assembly and a damage field with pristine, softening and failed
+points.</p></li>
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.calc_kT_TSL()</span></code> was verified against central finite
+differences of <span class="math notranslate nohighlight">\([K^{conn}_{dmg}(\{c\})]\{c\}\)</span>, for random states in the
+softening range, with and without points where <span class="math notranslate nohighlight">\(d^h &gt; \hat d\)</span>: the relative
+error of <span class="math notranslate nohighlight">\([K^{conn}_{dmg}] + [K^{conn}_{\dot d}]\)</span> is below <span class="math notranslate nohighlight">\(2 \times
+10^{-9}\)</span>, against 9–62% for <span class="math notranslate nohighlight">\([K^{conn}_{dmg}]\)</span> alone.</p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">'SB_TSL'</span></code> connection between panels of different dimensions raises a
+<code class="docutils literal notranslate"><span class="pre">ValueError</span></code>, with the matrix products and with the kernels.</p></li>
+</ul>
+<p>In the nonlinear analyses, the area integral of the traction,
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.force_out_plane_damage()</span></code>, must match the reaction of the
+prescribed displacement, <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.reaction_line_pd_xcte()</span></code>, which
+the drivers report at every increment.</p>
+</section>
+<section id="convergence-study">
+<h2>Convergence study<a class="headerlink" href="#convergence-study" title="Link to this heading">#</a></h2>
+<p>The discretisation of the cohesive domain was studied on the reference DCB
+(length 65 mm, width 25 mm, precrack 48 mm, arms of 15 plies of 0.14 mm,
+<span class="math notranslate nohighlight">\(E_1 = 133.15\)</span> GPa, <span class="math notranslate nohighlight">\(E_2 = 10.95\)</span> GPa, <span class="math notranslate nohighlight">\(\nu_{12} = 0.316\)</span>, <span class="math notranslate nohighlight">\(G_{12} = 5.19\)</span>
+GPa, <span class="math notranslate nohighlight">\(G_{Ic} = 1.12\)</span> N/mm), with the driver described in
+<a class="reference internal" href="#cohesive-zone-solution"><span class="std std-ref">Solution procedure</span></a> and two sets of cohesive parameters:</p>
+<ul class="simple">
+<li><p>case A: <span class="math notranslate nohighlight">\(k_o = 5 \times 10^4\)</span> N/mm³, <span class="math notranslate nohighlight">\(\tau_o = 87\)</span> MPa;</p></li>
+<li><p>case B: <span class="math notranslate nohighlight">\(k_o = 2 \times 10^5\)</span> N/mm³, <span class="math notranslate nohighlight">\(\tau_o = 74.2\)</span> MPa.</p></li>
+</ul>
+<p>The cohesive domain is 17 mm long, the free arms are modelled with <span class="math notranslate nohighlight">\(8 \times
+8\)</span> terms, and the prescribed displacement goes up to <span class="math notranslate nohighlight">\(w_p = 8\)</span> mm in 38
+increments, of 0.2 mm after <span class="math notranslate nohighlight">\(w_p = 5\)</span> mm. The parameters varied are the
+number of terms along <span class="math notranslate nohighlight">\(x\)</span> of the cohesive domain, <span class="math notranslate nohighlight">\(m_{tsl}\)</span>, and the number of
+Gauss-Legendre points along <span class="math notranslate nohighlight">\(x\)</span> of the connection, <span class="math notranslate nohighlight">\(n_x\)</span>, in a full grid
+<span class="math notranslate nohighlight">\(m_{tsl} \in \{10, 15, 20, 25\} \times n_x \in \{60, 120, 180\}\)</span>. Separately,
+from the reference <span class="math notranslate nohighlight">\(m_{tsl} = 15\)</span>, <span class="math notranslate nohighlight">\(n_x = 120\)</span>, the study varied the number
+of terms along <span class="math notranslate nohighlight">\(y\)</span> of the cohesive domain (<span class="math notranslate nohighlight">\(n_{tsl} = 10 \to 15\)</span>), the number
+of Gauss points along <span class="math notranslate nohighlight">\(y\)</span> (<span class="math notranslate nohighlight">\(n_y = 30 \to 60\)</span>), the number of terms of the
+other domains (<span class="math notranslate nohighlight">\(m = n = 8 \to 12\)</span>) and the increment of <span class="math notranslate nohighlight">\(w_p\)</span> after 5 mm
+(halved). The metrics are:</p>
+<ul class="simple">
+<li><p>the peak load <span class="math notranslate nohighlight">\(P_{max}\)</span> and the prescribed displacement at the peak,
+<span class="math notranslate nohighlight">\(w_p(P_{max})\)</span>;</p></li>
+<li><p>the loads at <span class="math notranslate nohighlight">\(w_p = 6\)</span>, 7 and 8 mm, after the peak;</p></li>
+<li><p>the coefficient of variation of the load drop per increment after the peak,
+<span class="math notranslate nohighlight">\(CV = \mathrm{std}(\Delta P)/|\mathrm{mean}(\Delta P)|\)</span>, which is small for
+a smooth softening and large when the crack front advances in jumps and the
+curve has plateaus;</p></li>
+<li><p>the number of increments that did not converge and were bisected, and the
+total number of Newton-Raphson iterations;</p></li>
+<li><p>the wall time. The runs shared 16 cores, 8 to 11 at a time, so the wall
+times only indicate the relative cost.</p></li>
+</ul>
+<p>The study is reproduced by <code class="docutils literal notranslate"><span class="pre">notebooks/convergence_study.py</span></code>, and the metrics
+and load curves of all runs are stored in
+<code class="docutils literal notranslate"><span class="pre">notebooks/results/convergence_study.json</span></code>.</p>
+<div class="pst-scrollable-table-container"><table class="table" id="id16">
+<caption><span class="caption-text">Convergence study, terms <span class="math notranslate nohighlight">\(m_{tsl}\)</span> and Gauss points <span class="math notranslate nohighlight">\(n_x\)</span>
+            along <span class="math notranslate nohighlight">\(x\)</span> of the cohesive domain. Loads in N, displacements
+            in mm, wall time in min. The runs B, <span class="math notranslate nohighlight">\(n_x = 60\)</span>, with
+            <span class="math notranslate nohighlight">\(m_{tsl} = 10\)</span> and 20 were aborted at <span class="math notranslate nohighlight">\(w_p = 7.2\)</span> and 7.8 mm,
+            when an increment still did not converge after the last
+            bisection, and the run with <span class="math notranslate nohighlight">\(m_{tsl} = 25\)</span> was interrupted at
+            <span class="math notranslate nohighlight">\(w_p = 7.8\)</span> mm.</span><a class="headerlink" href="#id16" title="Link to this table">#</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>case</p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(m_{tsl}\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(n_x\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(P_{max}\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(w_p(P_{max})\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(P(6)\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(P(7)\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(P(8)\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(CV\)</span></p></th>
+<th class="head"><p>bisections</p></th>
+<th class="head"><p>iterations</p></th>
+<th class="head"><p>time</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>A</p></td>
+<td><p>10</p></td>
+<td><p>60</p></td>
+<td><p>166.96</p></td>
+<td><p>5.80</p></td>
+<td><p>161.97</p></td>
+<td><p>150.68</p></td>
+<td><p>141.10</p></td>
+<td><p>0.81</p></td>
+<td><p>5</p></td>
+<td><p>394</p></td>
+<td><p>32</p></td>
+</tr>
+<tr class="row-odd"><td><p>A</p></td>
+<td><p>10</p></td>
+<td><p>120</p></td>
+<td><p>167.16</p></td>
+<td><p>5.80</p></td>
+<td><p>161.95</p></td>
+<td><p>150.76</p></td>
+<td><p>141.20</p></td>
+<td><p>0.73</p></td>
+<td><p>0</p></td>
+<td><p>134</p></td>
+<td><p>9</p></td>
+</tr>
+<tr class="row-even"><td><p>A</p></td>
+<td><p>10</p></td>
+<td><p>180</p></td>
+<td><p>167.08</p></td>
+<td><p>5.80</p></td>
+<td><p>162.00</p></td>
+<td><p>150.76</p></td>
+<td><p>141.19</p></td>
+<td><p>0.73</p></td>
+<td><p>0</p></td>
+<td><p>135</p></td>
+<td><p>9</p></td>
+</tr>
+<tr class="row-odd"><td><p>A</p></td>
+<td><p>15</p></td>
+<td><p>60</p></td>
+<td><p>165.92</p></td>
+<td><p>5.60</p></td>
+<td><p>162.53</p></td>
+<td><p>150.52</p></td>
+<td><p>140.70</p></td>
+<td><p>0.32</p></td>
+<td><p>4</p></td>
+<td><p>375</p></td>
+<td><p>56</p></td>
+</tr>
+<tr class="row-even"><td><p>A</p></td>
+<td><p>15</p></td>
+<td><p>120</p></td>
+<td><p>165.96</p></td>
+<td><p>5.60</p></td>
+<td><p>162.70</p></td>
+<td><p>150.61</p></td>
+<td><p>140.70</p></td>
+<td><p>0.27</p></td>
+<td><p>0</p></td>
+<td><p>137</p></td>
+<td><p>26</p></td>
+</tr>
+<tr class="row-odd"><td><p>A</p></td>
+<td><p>15</p></td>
+<td><p>180</p></td>
+<td><p>165.96</p></td>
+<td><p>5.60</p></td>
+<td><p>162.74</p></td>
+<td><p>150.61</p></td>
+<td><p>140.60</p></td>
+<td><p>0.26</p></td>
+<td><p>0</p></td>
+<td><p>138</p></td>
+<td><p>27</p></td>
+</tr>
+<tr class="row-even"><td><p>A</p></td>
+<td><p>20</p></td>
+<td><p>60</p></td>
+<td><p>165.91</p></td>
+<td><p>5.60</p></td>
+<td><p>162.45</p></td>
+<td><p>150.49</p></td>
+<td><p>140.69</p></td>
+<td><p>0.32</p></td>
+<td><p>2</p></td>
+<td><p>266</p></td>
+<td><p>91</p></td>
+</tr>
+<tr class="row-odd"><td><p>A</p></td>
+<td><p>20</p></td>
+<td><p>120</p></td>
+<td><p>165.95</p></td>
+<td><p>5.60</p></td>
+<td><p>162.64</p></td>
+<td><p>150.58</p></td>
+<td><p>140.69</p></td>
+<td><p>0.26</p></td>
+<td><p>0</p></td>
+<td><p>139</p></td>
+<td><p>59</p></td>
+</tr>
+<tr class="row-even"><td><p>A</p></td>
+<td><p>20</p></td>
+<td><p>180</p></td>
+<td><p>165.95</p></td>
+<td><p>5.60</p></td>
+<td><p>162.68</p></td>
+<td><p>150.57</p></td>
+<td><p>140.61</p></td>
+<td><p>0.26</p></td>
+<td><p>0</p></td>
+<td><p>140</p></td>
+<td><p>59</p></td>
+</tr>
+<tr class="row-odd"><td><p>A</p></td>
+<td><p>25</p></td>
+<td><p>60</p></td>
+<td><p>165.91</p></td>
+<td><p>5.60</p></td>
+<td><p>162.44</p></td>
+<td><p>150.49</p></td>
+<td><p>140.69</p></td>
+<td><p>0.32</p></td>
+<td><p>1</p></td>
+<td><p>203</p></td>
+<td><p>158</p></td>
+</tr>
+<tr class="row-even"><td><p>A</p></td>
+<td><p>25</p></td>
+<td><p>120</p></td>
+<td><p>165.95</p></td>
+<td><p>5.60</p></td>
+<td><p>162.63</p></td>
+<td><p>150.58</p></td>
+<td><p>140.70</p></td>
+<td><p>0.26</p></td>
+<td><p>0</p></td>
+<td><p>137</p></td>
+<td><p>117</p></td>
+</tr>
+<tr class="row-odd"><td><p>A</p></td>
+<td><p>25</p></td>
+<td><p>180</p></td>
+<td><p>165.95</p></td>
+<td><p>5.60</p></td>
+<td><p>162.67</p></td>
+<td><p>150.58</p></td>
+<td><p>140.62</p></td>
+<td><p>0.26</p></td>
+<td><p>0</p></td>
+<td><p>136</p></td>
+<td><p>118</p></td>
+</tr>
+<tr class="row-even"><td><p>B</p></td>
+<td><p>10</p></td>
+<td><p>60</p></td>
+<td><p>168.12</p></td>
+<td><p>5.80</p></td>
+<td><p>161.41</p></td>
+<td><p>150.10</p></td>
+<td><p>–</p></td>
+<td><p>1.04</p></td>
+<td><p>6</p></td>
+<td><p>469</p></td>
+<td><p>43</p></td>
+</tr>
+<tr class="row-odd"><td><p>B</p></td>
+<td><p>10</p></td>
+<td><p>120</p></td>
+<td><p>168.17</p></td>
+<td><p>5.80</p></td>
+<td><p>161.19</p></td>
+<td><p>150.41</p></td>
+<td><p>141.41</p></td>
+<td><p>1.08</p></td>
+<td><p>0</p></td>
+<td><p>137</p></td>
+<td><p>9</p></td>
+</tr>
+<tr class="row-even"><td><p>B</p></td>
+<td><p>10</p></td>
+<td><p>180</p></td>
+<td><p>168.16</p></td>
+<td><p>5.80</p></td>
+<td><p>161.30</p></td>
+<td><p>150.37</p></td>
+<td><p>141.44</p></td>
+<td><p>1.07</p></td>
+<td><p>0</p></td>
+<td><p>138</p></td>
+<td><p>9</p></td>
+</tr>
+<tr class="row-odd"><td><p>B</p></td>
+<td><p>15</p></td>
+<td><p>60</p></td>
+<td><p>165.33</p></td>
+<td><p>5.80</p></td>
+<td><p>163.15</p></td>
+<td><p>150.49</p></td>
+<td><p>140.40</p></td>
+<td><p>0.27</p></td>
+<td><p>7</p></td>
+<td><p>542</p></td>
+<td><p>85</p></td>
+</tr>
+<tr class="row-even"><td><p>B</p></td>
+<td><p>15</p></td>
+<td><p>120</p></td>
+<td><p>165.36</p></td>
+<td><p>5.80</p></td>
+<td><p>162.76</p></td>
+<td><p>150.42</p></td>
+<td><p>140.75</p></td>
+<td><p>0.16</p></td>
+<td><p>0</p></td>
+<td><p>132</p></td>
+<td><p>27</p></td>
+</tr>
+<tr class="row-odd"><td><p>B</p></td>
+<td><p>15</p></td>
+<td><p>180</p></td>
+<td><p>165.34</p></td>
+<td><p>5.80</p></td>
+<td><p>162.70</p></td>
+<td><p>150.43</p></td>
+<td><p>140.70</p></td>
+<td><p>0.16</p></td>
+<td><p>0</p></td>
+<td><p>137</p></td>
+<td><p>26</p></td>
+</tr>
+<tr class="row-even"><td><p>B</p></td>
+<td><p>20</p></td>
+<td><p>60</p></td>
+<td><p>165.21</p></td>
+<td><p>5.80</p></td>
+<td><p>163.08</p></td>
+<td><p>150.59</p></td>
+<td><p>–</p></td>
+<td><p>0.19</p></td>
+<td><p>10</p></td>
+<td><p>727</p></td>
+<td><p>253</p></td>
+</tr>
+<tr class="row-odd"><td><p>B</p></td>
+<td><p>20</p></td>
+<td><p>120</p></td>
+<td><p>165.24</p></td>
+<td><p>5.80</p></td>
+<td><p>162.71</p></td>
+<td><p>150.57</p></td>
+<td><p>140.86</p></td>
+<td><p>0.13</p></td>
+<td><p>0</p></td>
+<td><p>135</p></td>
+<td><p>57</p></td>
+</tr>
+<tr class="row-even"><td><p>B</p></td>
+<td><p>20</p></td>
+<td><p>180</p></td>
+<td><p>165.22</p></td>
+<td><p>5.80</p></td>
+<td><p>162.65</p></td>
+<td><p>150.59</p></td>
+<td><p>140.77</p></td>
+<td><p>0.13</p></td>
+<td><p>0</p></td>
+<td><p>134</p></td>
+<td><p>56</p></td>
+</tr>
+<tr class="row-odd"><td><p>B</p></td>
+<td><p>25</p></td>
+<td><p>60</p></td>
+<td><p>165.21</p></td>
+<td><p>5.80</p></td>
+<td><p>163.05</p></td>
+<td><p>150.56</p></td>
+<td><p>–</p></td>
+<td><p>0.18</p></td>
+<td><p>2</p></td>
+<td><p>274</p></td>
+<td><p>–</p></td>
+</tr>
+<tr class="row-even"><td><p>B</p></td>
+<td><p>25</p></td>
+<td><p>120</p></td>
+<td><p>165.25</p></td>
+<td><p>5.80</p></td>
+<td><p>162.69</p></td>
+<td><p>150.56</p></td>
+<td><p>140.86</p></td>
+<td><p>0.13</p></td>
+<td><p>0</p></td>
+<td><p>133</p></td>
+<td><p>107</p></td>
+</tr>
+<tr class="row-odd"><td><p>B</p></td>
+<td><p>25</p></td>
+<td><p>180</p></td>
+<td><p>165.22</p></td>
+<td><p>5.80</p></td>
+<td><p>162.64</p></td>
+<td><p>150.58</p></td>
+<td><p>140.78</p></td>
+<td><p>0.12</p></td>
+<td><p>0</p></td>
+<td><p>134</p></td>
+<td><p>104</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="pst-scrollable-table-container"><table class="table" id="id17">
+<caption><span class="caption-text">Convergence study, other parameters, from the reference
+            <span class="math notranslate nohighlight">\(m_{tsl} = 15\)</span>, <span class="math notranslate nohighlight">\(n_x = 120\)</span>. With the halved increment the
+            loads at 6 and 7 mm are not on the list of prescribed
+            displacements.</span><a class="headerlink" href="#id17" title="Link to this table">#</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>case</p></th>
+<th class="head"><p>variation</p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(P_{max}\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(w_p(P_{max})\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(P(6)\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(P(7)\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(P(8)\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(CV\)</span></p></th>
+<th class="head"><p>bisections</p></th>
+<th class="head"><p>iterations</p></th>
+<th class="head"><p>time</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>A</p></td>
+<td><p>reference</p></td>
+<td><p>165.96</p></td>
+<td><p>5.60</p></td>
+<td><p>162.70</p></td>
+<td><p>150.61</p></td>
+<td><p>140.70</p></td>
+<td><p>0.27</p></td>
+<td><p>0</p></td>
+<td><p>137</p></td>
+<td><p>26</p></td>
+</tr>
+<tr class="row-odd"><td><p>A</p></td>
+<td><p><span class="math notranslate nohighlight">\(n_{tsl} = 15\)</span></p></td>
+<td><p>165.96</p></td>
+<td><p>5.60</p></td>
+<td><p>162.71</p></td>
+<td><p>150.61</p></td>
+<td><p>140.68</p></td>
+<td><p>0.27</p></td>
+<td><p>0</p></td>
+<td><p>141</p></td>
+<td><p>86</p></td>
+</tr>
+<tr class="row-even"><td><p>A</p></td>
+<td><p><span class="math notranslate nohighlight">\(n_y = 60\)</span></p></td>
+<td><p>165.97</p></td>
+<td><p>5.60</p></td>
+<td><p>162.69</p></td>
+<td><p>150.62</p></td>
+<td><p>140.72</p></td>
+<td><p>0.27</p></td>
+<td><p>0</p></td>
+<td><p>136</p></td>
+<td><p>24</p></td>
+</tr>
+<tr class="row-odd"><td><p>A</p></td>
+<td><p><span class="math notranslate nohighlight">\(m = n = 12\)</span></p></td>
+<td><p>165.97</p></td>
+<td><p>5.60</p></td>
+<td><p>162.70</p></td>
+<td><p>150.62</p></td>
+<td><p>140.70</p></td>
+<td><p>0.27</p></td>
+<td><p>0</p></td>
+<td><p>136</p></td>
+<td><p>57</p></td>
+</tr>
+<tr class="row-even"><td><p>A</p></td>
+<td><p><span class="math notranslate nohighlight">\(\Delta w_p\)</span> halved</p></td>
+<td><p>166.16</p></td>
+<td><p>5.68</p></td>
+<td><p>–</p></td>
+<td><p>–</p></td>
+<td><p>140.70</p></td>
+<td><p>0.19</p></td>
+<td><p>0</p></td>
+<td><p>262</p></td>
+<td><p>46</p></td>
+</tr>
+<tr class="row-odd"><td><p>B</p></td>
+<td><p>reference</p></td>
+<td><p>165.36</p></td>
+<td><p>5.80</p></td>
+<td><p>162.76</p></td>
+<td><p>150.42</p></td>
+<td><p>140.75</p></td>
+<td><p>0.16</p></td>
+<td><p>0</p></td>
+<td><p>132</p></td>
+<td><p>27</p></td>
+</tr>
+<tr class="row-even"><td><p>B</p></td>
+<td><p><span class="math notranslate nohighlight">\(n_{tsl} = 15\)</span></p></td>
+<td><p>165.35</p></td>
+<td><p>5.80</p></td>
+<td><p>162.77</p></td>
+<td><p>150.42</p></td>
+<td><p>140.74</p></td>
+<td><p>0.16</p></td>
+<td><p>0</p></td>
+<td><p>133</p></td>
+<td><p>80</p></td>
+</tr>
+<tr class="row-odd"><td><p>B</p></td>
+<td><p><span class="math notranslate nohighlight">\(n_y = 60\)</span></p></td>
+<td><p>165.34</p></td>
+<td><p>5.80</p></td>
+<td><p>162.77</p></td>
+<td><p>150.41</p></td>
+<td><p>140.76</p></td>
+<td><p>0.16</p></td>
+<td><p>0</p></td>
+<td><p>131</p></td>
+<td><p>25</p></td>
+</tr>
+<tr class="row-even"><td><p>B</p></td>
+<td><p><span class="math notranslate nohighlight">\(m = n = 12\)</span></p></td>
+<td><p>165.37</p></td>
+<td><p>5.80</p></td>
+<td><p>162.76</p></td>
+<td><p>150.42</p></td>
+<td><p>140.75</p></td>
+<td><p>0.16</p></td>
+<td><p>0</p></td>
+<td><p>131</p></td>
+<td><p>54</p></td>
+</tr>
+<tr class="row-odd"><td><p>B</p></td>
+<td><p><span class="math notranslate nohighlight">\(\Delta w_p\)</span> halved</p></td>
+<td><p>165.60</p></td>
+<td><p>5.68</p></td>
+<td><p>–</p></td>
+<td><p>–</p></td>
+<td><p>140.75</p></td>
+<td><p>0.27</p></td>
+<td><p>0</p></td>
+<td><p>208</p></td>
+<td><p>37</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The load after the peak for different numbers of terms along <span class="math notranslate nohighlight">\(x\)</span> of the
+cohesive domain is given below, in N. With 10 terms the load drops in steps;
+with 15 or more the curves coincide.</p>
+<div class="pst-scrollable-table-container"><table class="table" id="id18">
+<caption><span class="caption-text">Load after the peak <span class="math notranslate nohighlight">\(P\)</span> (N) versus the prescribed
+            displacement <span class="math notranslate nohighlight">\(w_p\)</span> (mm), for <span class="math notranslate nohighlight">\(m_{tsl} = 10, n_x = 120\)</span>;
+            <span class="math notranslate nohighlight">\(m_{tsl} = 15, n_x = 120\)</span>; and <span class="math notranslate nohighlight">\(m_{tsl} = 25, n_x = 180\)</span>.</span><a class="headerlink" href="#id18" title="Link to this table">#</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><span class="math notranslate nohighlight">\(w_p\)</span></p></th>
+<th class="head"><p>A, 10/120</p></th>
+<th class="head"><p>A, 15/120</p></th>
+<th class="head"><p>A, 25/180</p></th>
+<th class="head"><p>B, 10/120</p></th>
+<th class="head"><p>B, 15/120</p></th>
+<th class="head"><p>B, 25/180</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>4.818</p></td>
+<td><p>147.66</p></td>
+<td><p>147.65</p></td>
+<td><p>147.65</p></td>
+<td><p>146.78</p></td>
+<td><p>146.75</p></td>
+<td><p>146.73</p></td>
+</tr>
+<tr class="row-odd"><td><p>5.000</p></td>
+<td><p>152.56</p></td>
+<td><p>152.54</p></td>
+<td><p>152.54</p></td>
+<td><p>151.61</p></td>
+<td><p>151.51</p></td>
+<td><p>151.50</p></td>
+</tr>
+<tr class="row-even"><td><p>5.200</p></td>
+<td><p>157.78</p></td>
+<td><p>157.72</p></td>
+<td><p>157.72</p></td>
+<td><p>156.76</p></td>
+<td><p>156.57</p></td>
+<td><p>156.56</p></td>
+</tr>
+<tr class="row-odd"><td><p>5.400</p></td>
+<td><p>162.69</p></td>
+<td><p>162.54</p></td>
+<td><p>162.53</p></td>
+<td><p>161.67</p></td>
+<td><p>161.27</p></td>
+<td><p>161.26</p></td>
+</tr>
+<tr class="row-even"><td><p>5.600</p></td>
+<td><p>166.68</p></td>
+<td><p>165.96</p></td>
+<td><p>165.95</p></td>
+<td><p>166.07</p></td>
+<td><p>165.03</p></td>
+<td><p>165.08</p></td>
+</tr>
+<tr class="row-odd"><td><p>5.800</p></td>
+<td><p>167.16</p></td>
+<td><p>165.41</p></td>
+<td><p>165.39</p></td>
+<td><p>168.17</p></td>
+<td><p>165.36</p></td>
+<td><p>165.22</p></td>
+</tr>
+<tr class="row-even"><td><p>6.000</p></td>
+<td><p>161.95</p></td>
+<td><p>162.70</p></td>
+<td><p>162.67</p></td>
+<td><p>161.19</p></td>
+<td><p>162.76</p></td>
+<td><p>162.64</p></td>
+</tr>
+<tr class="row-odd"><td><p>6.200</p></td>
+<td><p>160.49</p></td>
+<td><p>160.01</p></td>
+<td><p>159.97</p></td>
+<td><p>159.99</p></td>
+<td><p>160.08</p></td>
+<td><p>160.04</p></td>
+</tr>
+<tr class="row-even"><td><p>6.400</p></td>
+<td><p>159.73</p></td>
+<td><p>157.50</p></td>
+<td><p>157.49</p></td>
+<td><p>160.27</p></td>
+<td><p>157.70</p></td>
+<td><p>157.48</p></td>
+</tr>
+<tr class="row-odd"><td><p>6.600</p></td>
+<td><p>155.19</p></td>
+<td><p>155.00</p></td>
+<td><p>155.09</p></td>
+<td><p>156.00</p></td>
+<td><p>154.96</p></td>
+<td><p>155.09</p></td>
+</tr>
+<tr class="row-even"><td><p>6.800</p></td>
+<td><p>151.36</p></td>
+<td><p>152.99</p></td>
+<td><p>152.72</p></td>
+<td><p>150.28</p></td>
+<td><p>153.01</p></td>
+<td><p>152.75</p></td>
+</tr>
+<tr class="row-odd"><td><p>7.000</p></td>
+<td><p>150.76</p></td>
+<td><p>150.61</p></td>
+<td><p>150.58</p></td>
+<td><p>150.41</p></td>
+<td><p>150.42</p></td>
+<td><p>150.58</p></td>
+</tr>
+<tr class="row-even"><td><p>7.200</p></td>
+<td><p>150.00</p></td>
+<td><p>148.39</p></td>
+<td><p>148.44</p></td>
+<td><p>150.32</p></td>
+<td><p>148.45</p></td>
+<td><p>148.41</p></td>
+</tr>
+<tr class="row-odd"><td><p>7.400</p></td>
+<td><p>145.73</p></td>
+<td><p>146.54</p></td>
+<td><p>146.42</p></td>
+<td><p>144.61</p></td>
+<td><p>146.46</p></td>
+<td><p>146.45</p></td>
+</tr>
+<tr class="row-even"><td><p>7.600</p></td>
+<td><p>142.80</p></td>
+<td><p>144.34</p></td>
+<td><p>144.43</p></td>
+<td><p>141.96</p></td>
+<td><p>144.26</p></td>
+<td><p>144.47</p></td>
+</tr>
+<tr class="row-odd"><td><p>7.800</p></td>
+<td><p>142.10</p></td>
+<td><p>142.38</p></td>
+<td><p>142.49</p></td>
+<td><p>142.02</p></td>
+<td><p>142.59</p></td>
+<td><p>142.61</p></td>
+</tr>
+<tr class="row-even"><td><p>8.000</p></td>
+<td><p>141.20</p></td>
+<td><p>140.70</p></td>
+<td><p>140.62</p></td>
+<td><p>141.41</p></td>
+<td><p>140.75</p></td>
+<td><p>140.78</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The results show that:</p>
+<ul class="simple">
+<li><p><strong>The Ritz basis of the cohesive domain sets the shape of the response after
+the peak.</strong> With <span class="math notranslate nohighlight">\(m_{tsl} = 10\)</span> the load drops in steps separated by
+plateaus (<span class="math notranslate nohighlight">\(CV = 0.73\)</span>–<span class="math notranslate nohighlight">\(1.08\)</span>), and the peak is 0.7% (A) and 1.8% (B) above
+the converged value. From <span class="math notranslate nohighlight">\(m_{tsl} = 15\)</span> the curve is smooth (<span class="math notranslate nohighlight">\(CV \leq
+0.27\)</span>), and <span class="math notranslate nohighlight">\(m_{tsl} = 15\)</span>, 20 and 25 give the same peak within 0.01 N (A)
+and 0.15 N (B), and the same loads after the peak within 0.3 N. The opening
+ahead of the process zone decays as that of a beam on an elastic
+foundation, with the rate <span class="math notranslate nohighlight">\(\lambda = (k_o/4D_{11})^{1/4}\)</span>; it is 0.59
+mm⁻¹ in case A and 0.83 mm⁻¹ in case B. The converged <span class="math notranslate nohighlight">\(m_{tsl} = 15\)</span> over
+<span class="math notranslate nohighlight">\(L_{tsl} = 17\)</span> mm corresponds to <span class="math notranslate nohighlight">\(m_{tsl} = 1.5\,\lambda L_{tsl}\)</span> in case A
+and <span class="math notranslate nohighlight">\(1.06\,\lambda L_{tsl}\)</span> in case B; <span class="math notranslate nohighlight">\(m_{tsl} \approx 1.5\,\lambda
+L_{tsl}\)</span> is used as a conservative rule for other geometries.</p></li>
+<li><p><strong>The number of Gauss points along</strong> <span class="math notranslate nohighlight">\(x\)</span> <strong>sets the robustness, not the
+converged answer.</strong> With <span class="math notranslate nohighlight">\(n_x = 60\)</span> the loads are within 0.5 N of those
+with <span class="math notranslate nohighlight">\(n_x \geq 120\)</span>, but 1 to 10 increments needed bisection and the
+iterations increased 1.5 to 5.4 times, because the crack front crosses
+several integration points in one increment (see
+<a class="reference internal" href="#cohesive-zone-solution"><span class="std std-ref">Solution procedure</span></a>). With <span class="math notranslate nohighlight">\(n_x = 120\)</span> and 180 no
+increment was bisected in any run. The cohesive zone length, estimated as
+<span class="math notranslate nohighlight">\(l_{cz} = 0.88\,E_2 G_{Ic}/\tau_o^2\)</span> (Rice’s model, Turon et al. 2007
+<a class="reference internal" href="ref.html#turon2007meshsize" id="id3"><span>[turon2007MeshSize]</span></a>), is 1.43 mm in case A and 1.96 mm in case B; <span class="math notranslate nohighlight">\(n_x =
+120\)</span> over 17 mm gives a spacing of the Gauss points at the middle of the
+domain of <span class="math notranslate nohighlight">\(\pi L_{tsl}/(2 n_x) = 0.22\)</span> mm, about <span class="math notranslate nohighlight">\(l_{cz}/6.4\)</span> in case A,
+i.e. <span class="math notranslate nohighlight">\(n_x \approx 10\,L_{tsl}/l_{cz}\)</span>. This is the rule used for other
+geometries.</p></li>
+<li><p><strong>The discretisation along</strong> <span class="math notranslate nohighlight">\(y\)</span> <strong>and of the other domains does not matter
+here.</strong> <span class="math notranslate nohighlight">\(n_{tsl} = 15\)</span>, <span class="math notranslate nohighlight">\(n_y = 60\)</span> and <span class="math notranslate nohighlight">\(m = n = 12\)</span> change the loads by at
+most 0.02 N, since the specimen is uniform across the width.</p></li>
+<li><p><strong>Halving the increment changes only where the peak is sampled.</strong> The peak
+rises by 0.2 N (0.12%) and moves to <span class="math notranslate nohighlight">\(w_p = 5.68\)</span> mm, closer to the true
+maximum; the loads on the common increments are the same.</p></li>
+</ul>
+<p>The recommended discretisation for this DCB is therefore <span class="math notranslate nohighlight">\(m_{tsl} = 15\)</span>, <span class="math notranslate nohighlight">\(n_x
+= 120\)</span>, <span class="math notranslate nohighlight">\(n_{tsl} = 10\)</span>, <span class="math notranslate nohighlight">\(n_y = 30\)</span>, with <span class="math notranslate nohighlight">\(8 \times 8\)</span> terms in the other
+domains. It gives <span class="math notranslate nohighlight">\(P_{max} = 165.96\)</span> N at <span class="math notranslate nohighlight">\(w_p = 5.6\)</span> mm in case A and 165.36
+N at 5.8 mm in case B, in about 26 min of wall time on a shared machine,
+against about 171 N at about 6 mm for the finite element model of the thesis
+(Section 5.6).</p>
+</section>
+<section id="validation-against-the-literature">
+<h2>Validation against the literature<a class="headerlink" href="#validation-against-the-literature" title="Link to this heading">#</a></h2>
+<p>The model was compared with eight references that report mode I DCB
+results: Alfano and Crisfield (2001) <a class="reference internal" href="ref.html#alfano2001interface" id="id4"><span>[alfano2001Interface]</span></a>, Camanho et al.
+(2003) <a class="reference internal" href="ref.html#camanho2003delamination" id="id5"><span>[camanho2003Delamination]</span></a>, Turon et al. (2007) <a class="reference internal" href="ref.html#turon2007meshsize" id="id6"><span>[turon2007MeshSize]</span></a>,
+Krueger (2008) <a class="reference internal" href="ref.html#krueger2008dcb" id="id7"><span>[krueger2008DCB]</span></a>, Tijs et al. (2022) <a class="reference internal" href="ref.html#tijs2022interlaminar" id="id8"><span>[tijs2022Interlaminar]</span></a>,
+Leciñana et al. (2023) <a class="reference internal" href="ref.html#lecinana2023fatigue" id="id9"><span>[lecinana2023Fatigue]</span></a> and the PhD thesis of Tijs
+(2023) <a class="reference internal" href="ref.html#tijs2023phd" id="id10"><span>[tijs2023PhD]</span></a>, plus Krueger (2012) <a class="reference internal" href="ref.html#krueger2012mmb" id="id11"><span>[krueger2012MMB]</span></a>, whose benchmarks
+are for the mixed-mode bending specimen and are only recorded, see below.
+Each reference has a notebook in <code class="docutils literal notranslate"><span class="pre">notebooks/</span></code> with a dictionary of the FE
+cases and one of the experimental tests, a comparison table, a plot and a
+discussion; the <code class="docutils literal notranslate"><span class="pre">panels</span></code> results are stored in <code class="docutils literal notranslate"><span class="pre">notebooks/results/*.npz</span></code>
+and collected by <code class="docutils literal notranslate"><span class="pre">notebooks/validation_summary.ipynb</span></code>.</p>
+<p><strong>Model.</strong> <code class="docutils literal notranslate"><span class="pre">notebooks/dcb_utils.py</span></code> builds a symmetric DCB: CLPT arms, far
+end clamped, arm tips opened to <span class="math notranslate nohighlight">\(\pm\delta/2\)</span> by prescribed displacements,
+the load being the reaction of the prescribed displacement. The bonded region
+is split into a cohesive domain (<code class="docutils literal notranslate"><span class="pre">'SB_TSL'</span></code>, bilinear law) of length
+<span class="math notranslate nohighlight">\(L_{tsl}\)</span> ahead of the initial crack front and a perfect bond (<code class="docutils literal notranslate"><span class="pre">'SB'</span></code>) over
+the rest, such that only the region reached by the crack needs the resolution
+of the cohesive zone. A weld narrower than the specimen (Tijs 2023) is
+represented by starting the integration points outside the bonded strip fully
+damaged. The solution procedure is the one described in
+<a class="reference internal" href="#cohesive-zone-solution"><span class="std std-ref">Solution procedure</span></a>. The discretisation follows the rules of the
+convergence study (<code class="docutils literal notranslate"><span class="pre">dcb_utils.discretize</span></code>): <span class="math notranslate nohighlight">\(m_{tsl} = \lceil 1.5\,\lambda
+L_{tsl} \rceil\)</span> with at most 25 terms, and <span class="math notranslate nohighlight">\(n_x = 10\,L_{tsl}/l_{cz}\)</span>, but not
+less than <span class="math notranslate nohighlight">\(4\,m_{tsl}\)</span> to integrate the products of the approximation
+functions, rounded up to a multiple of 10 and with at most 300 points, and
+<span class="math notranslate nohighlight">\(L_{tsl}\)</span> covers the crack growth plus a margin
+of <span class="math notranslate nohighlight">\(2\pi/\lambda + 3\,l_{cz}\)</span> for the process zone and the compressive lobe
+ahead of it; the range of openings is limited so that <span class="math notranslate nohighlight">\(L_{tsl}\)</span> stays
+resolved, which allows 5–13 mm of crack growth. The penalty stiffness is
+<span class="math notranslate nohighlight">\(k_o = 10^5\)</span> N/mm³: a longer decay length <span class="math notranslate nohighlight">\(1/\lambda\)</span> needs fewer terms, and
+for the DCB of Turon et al. (2007) the peak load with the <span class="math notranslate nohighlight">\(k_o = 10^6\)</span> N/mm³
+of the paper differs by 0.04% (64.07 against 64.05 N), in line with their
+Fig. 9. The reference curves of linear elastic fracture mechanics (LEFM) are
+the simple and the corrected beam theories, the latter with the crack length
+<span class="math notranslate nohighlight">\(a + \chi h\)</span> of Williams, <span class="math notranslate nohighlight">\(\chi = \sqrt{E_{11}/(11 G_{13})\,[3 -
+2(\Gamma/(1+\Gamma))^2]}\)</span>, <span class="math notranslate nohighlight">\(\Gamma = 1.18\sqrt{E_{11}E_{22}}/G_{13}\)</span>, and the
+bending stiffness <span class="math notranslate nohighlight">\(D_{11} b\)</span> of the arm.</p>
+<p><strong>Data.</strong> Values given in tables of the references are used as such (<span class="math notranslate nohighlight">\(^{t}\)</span>
+in the table of peak loads below); curves were read from the figures by eye
+(<span class="math notranslate nohighlight">\(^{d}\)</span>), with an uncertainty of about 2–5 N, and <span class="math notranslate nohighlight">\(^{m}\)</span> marks the mean of
+the digitised peaks of several tests (full weld: 150 and 170 N; weld center:
+122–136 N). The notebooks state the assumptions needed where the references
+are incomplete: the opening convention (Alfano and Crisfield plot the
+displacement of one arm, <span class="math notranslate nohighlight">\(\delta = 2u\)</span>), the crack length of one test of Tijs
+et al. (2022) inferred from its compliance, and the elastic properties and
+length of the welded specimens of Tijs (2023).</p>
+<div class="pst-scrollable-table-container"><table class="table" id="id19">
+<caption><span class="caption-text">Peak loads of the mode I DCB references. <span class="math notranslate nohighlight">\(P_{max}\)</span> in N,
+            <span class="math notranslate nohighlight">\(\delta\)</span> at <span class="math notranslate nohighlight">\(P_{max}\)</span> in mm, differences of <code class="docutils literal notranslate"><span class="pre">panels</span></code> in %,
+            <span class="math notranslate nohighlight">\(\Delta K_0\)</span> is the difference of the initial stiffness of
+            <code class="docutils literal notranslate"><span class="pre">panels</span></code> to the corrected beam theory (CBT), <span class="math notranslate nohighlight">\(\Delta a\)</span> the
+            crack growth of the <code class="docutils literal notranslate"><span class="pre">panels</span></code> run in mm. <span class="math notranslate nohighlight">\(^{t}\)</span>: value of a
+            table of the reference; <span class="math notranslate nohighlight">\(^{d}\)</span>: digitised; <span class="math notranslate nohighlight">\(^{m}\)</span>: mean of
+            digitised tests; <span class="math notranslate nohighlight">\(^{b}\)</span>: not an FE curve but the VCCT
+            benchmark of Krueger (2008), the onset of delamination at
+            mid-width, 2.6% (UD) and 12.0% (D±30) below the load at which
+            the width-average energy release rate reaches <span class="math notranslate nohighlight">\(G_{Ic}\)</span>. The
+            two Krueger cases are listed with <span class="math notranslate nohighlight">\(\tau_o\)</span> = 40 MPa, the
+            reference giving no strength; with 60 MPa the peaks are 64.2
+            and 109.9 N.</span><a class="headerlink" href="#id19" title="Link to this table">#</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>case</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">panels</span></code> <span class="math notranslate nohighlight">\(P_{max}\)</span></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">panels</span></code> <span class="math notranslate nohighlight">\(\delta\)</span></p></th>
+<th class="head"><p>FE <span class="math notranslate nohighlight">\(P_{max}\)</span></p></th>
+<th class="head"><p>diff. FE</p></th>
+<th class="head"><p>test <span class="math notranslate nohighlight">\(P_{max}\)</span></p></th>
+<th class="head"><p>diff. test</p></th>
+<th class="head"><p>CBT <span class="math notranslate nohighlight">\(P_{max}\)</span></p></th>
+<th class="head"><p>diff. CBT</p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\Delta K_0\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\Delta a\)</span></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Alfano 2001, Table I, <span class="math notranslate nohighlight">\(t_o\)</span> = 57 MPa</p></td>
+<td><p>64.6</p></td>
+<td><p>1.83</p></td>
+<td><p>61.5 <span class="math notranslate nohighlight">\(^{d}\)</span></p></td>
+<td><p>+5.0</p></td>
+<td><p>–</p></td>
+<td><p>–</p></td>
+<td><p>63.2</p></td>
+<td><p>+2.2</p></td>
+<td><p>+17</p></td>
+<td><p>10.5</p></td>
+</tr>
+<tr class="row-odd"><td><p>Alfano 2001, Table I, <span class="math notranslate nohighlight">\(t_o\)</span> = 1.7 MPa</p></td>
+<td><p>50.9</p></td>
+<td><p>2.90</p></td>
+<td><p>49.5 <span class="math notranslate nohighlight">\(^{d}\)</span></p></td>
+<td><p>+2.9</p></td>
+<td><p>–</p></td>
+<td><p>–</p></td>
+<td><p>63.2</p></td>
+<td><p>-19.4</p></td>
+<td><p>-24</p></td>
+<td><p>5.8</p></td>
+</tr>
+<tr class="row-even"><td><p>Alfano 2001, XAS-913C</p></td>
+<td><p>93.8</p></td>
+<td><p>1.91</p></td>
+<td><p>90.0 <span class="math notranslate nohighlight">\(^{d}\)</span></p></td>
+<td><p>+4.2</p></td>
+<td><p>–</p></td>
+<td><p>–</p></td>
+<td><p>91.6</p></td>
+<td><p>+2.3</p></td>
+<td><p>+17</p></td>
+<td><p>10.6</p></td>
+</tr>
+<tr class="row-odd"><td><p>Camanho 2003, AS4/PEEK</p></td>
+<td><p>139.9</p></td>
+<td><p>4.12</p></td>
+<td><p>155.3 <span class="math notranslate nohighlight">\(^{t}\)</span></p></td>
+<td><p>-9.9</p></td>
+<td><p>147.1 <span class="math notranslate nohighlight">\(^{t}\)</span></p></td>
+<td><p>-4.9</p></td>
+<td><p>138.9</p></td>
+<td><p>+0.7</p></td>
+<td><p>+13</p></td>
+<td><p>8.2</p></td>
+</tr>
+<tr class="row-even"><td><p>Turon 2007, T300/977-2</p></td>
+<td><p>64.1</p></td>
+<td><p>4.18</p></td>
+<td><p>57.0 <span class="math notranslate nohighlight">\(^{d}\)</span></p></td>
+<td><p>+12.4</p></td>
+<td><p>62.0 <span class="math notranslate nohighlight">\(^{d}\)</span></p></td>
+<td><p>+3.3</p></td>
+<td><p>63.3</p></td>
+<td><p>+1.3</p></td>
+<td><p>+12</p></td>
+<td><p>13.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Krueger 2008, UD <span class="math notranslate nohighlight">\([0]_{24}\)</span></p></td>
+<td><p>63.6</p></td>
+<td><p>1.40</p></td>
+<td><p>60.7 <span class="math notranslate nohighlight">\(^{b}\)</span></p></td>
+<td><p>+4.7</p></td>
+<td><p>–</p></td>
+<td><p>–</p></td>
+<td><p>62.3</p></td>
+<td><p>+2.1</p></td>
+<td><p>+18</p></td>
+<td><p>9.9</p></td>
+</tr>
+<tr class="row-even"><td><p>Krueger 2008, D±30</p></td>
+<td><p>108.7</p></td>
+<td><p>1.70</p></td>
+<td><p>102.4 <span class="math notranslate nohighlight">\(^{b}\)</span></p></td>
+<td><p>+6.1</p></td>
+<td><p>–</p></td>
+<td><p>–</p></td>
+<td><p>114.7</p></td>
+<td><p>-5.2</p></td>
+<td><p>+10</p></td>
+<td><p>7.6</p></td>
+</tr>
+<tr class="row-odd"><td><p>Tijs 2022, <span class="math notranslate nohighlight">\(a_0\)</span> = 48 mm</p></td>
+<td><p>166.2</p></td>
+<td><p>5.68</p></td>
+<td><p>167.0 <span class="math notranslate nohighlight">\(^{d}\)</span></p></td>
+<td><p>-0.5</p></td>
+<td><p>142.0 <span class="math notranslate nohighlight">\(^{d}\)</span></p></td>
+<td><p>+17.0</p></td>
+<td><p>164.5</p></td>
+<td><p>+1.1</p></td>
+<td><p>+14</p></td>
+<td><p>11.8</p></td>
+</tr>
+<tr class="row-even"><td><p>Tijs 2022, <span class="math notranslate nohighlight">\(a_0\)</span> = 40 mm</p></td>
+<td><p>197.5</p></td>
+<td><p>3.99</p></td>
+<td><p>–</p></td>
+<td><p>–</p></td>
+<td><p>161.0 <span class="math notranslate nohighlight">\(^{d}\)</span></p></td>
+<td><p>+22.7</p></td>
+<td><p>194.5</p></td>
+<td><p>+1.5</p></td>
+<td><p>+17</p></td>
+<td><p>11.8</p></td>
+</tr>
+<tr class="row-odd"><td><p>Tijs 2023, full weld, 2.1 N/mm</p></td>
+<td><p>148.3</p></td>
+<td><p>6.48</p></td>
+<td><p>155.0 <span class="math notranslate nohighlight">\(^{d}\)</span></p></td>
+<td><p>-4.3</p></td>
+<td><p>160.0 <span class="math notranslate nohighlight">\(^{m}\)</span></p></td>
+<td><p>-7.3</p></td>
+<td><p>155.5</p></td>
+<td><p>-4.6</p></td>
+<td><p>+4</p></td>
+<td><p>4.9</p></td>
+</tr>
+<tr class="row-even"><td><p>Tijs 2023, weld center, 2.1 N/mm</p></td>
+<td><p>119.2</p></td>
+<td><p>5.75</p></td>
+<td><p>128.0 <span class="math notranslate nohighlight">\(^{d}\)</span></p></td>
+<td><p>-6.9</p></td>
+<td><p>129.0 <span class="math notranslate nohighlight">\(^{m}\)</span></p></td>
+<td><p>-7.6</p></td>
+<td><p>123.0</p></td>
+<td><p>-3.1</p></td>
+<td><p>+8</p></td>
+<td><p>5.2</p></td>
+</tr>
+<tr class="row-odd"><td><p>Tijs 2023, weld center, 1.95 N/mm</p></td>
+<td><p>115.0</p></td>
+<td><p>5.56</p></td>
+<td><p>122.0 <span class="math notranslate nohighlight">\(^{d}\)</span></p></td>
+<td><p>-5.7</p></td>
+<td><p>123.0 <span class="math notranslate nohighlight">\(^{d}\)</span></p></td>
+<td><p>-6.5</p></td>
+<td><p>118.5</p></td>
+<td><p>-3.0</p></td>
+<td><p>+8</p></td>
+<td><p>5.7</p></td>
+</tr>
+<tr class="row-even"><td><p>Tijs 2023, weld center, 1.12 N/mm</p></td>
+<td><p>87.8</p></td>
+<td><p>4.09</p></td>
+<td><p>96.0 <span class="math notranslate nohighlight">\(^{d}\)</span></p></td>
+<td><p>-8.6</p></td>
+<td><p>–</p></td>
+<td><p>–</p></td>
+<td><p>89.8</p></td>
+<td><p>-2.3</p></td>
+<td><p>+9</p></td>
+<td><p>9.2</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="pst-scrollable-table-container"><table class="table" id="id20">
+<caption><span class="caption-text">Initial compliance: <code class="docutils literal notranslate"><span class="pre">panels</span></code> against measured compliances
+            and the corrected beam theory (CBT). Differences of
+            <code class="docutils literal notranslate"><span class="pre">panels</span></code> in %, over the crack lengths listed.</span><a class="headerlink" href="#id20" title="Link to this table">#</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>reference</p></th>
+<th class="head"><p>specimens, crack lengths</p></th>
+<th class="head"><p>vs test</p></th>
+<th class="head"><p>vs CBT</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Leciñana et al. (2023), Fig. 10</p></td>
+<td><p>UD, 25 mm, <span class="math notranslate nohighlight">\(a_0\)</span> = 32.05–42.97 mm</p></td>
+<td><p>-18.9 to -15.5</p></td>
+<td><p>-20.0 to -15.5</p></td>
+</tr>
+<tr class="row-odd"><td><p>Tijs (2023), Table 5.4.1</p></td>
+<td><p>autoclave UD, 25 mm, <span class="math notranslate nohighlight">\(a\)</span> = 30–45 mm</p></td>
+<td><p>-41.4 to -28.0</p></td>
+<td><p>-20.9 to -14.7</p></td>
+</tr>
+<tr class="row-even"><td><p>Tijs (2023), Table 5.4.1</p></td>
+<td><p>full weld QI, 25 mm, <span class="math notranslate nohighlight">\(a\)</span> = 30–45 mm</p></td>
+<td><p>-15.2 to -4.7</p></td>
+<td><p>-12.0 to -6.8</p></td>
+</tr>
+<tr class="row-odd"><td><p>Tijs (2023), Table 5.4.1</p></td>
+<td><p>weld center QI, 12.7 mm, <span class="math notranslate nohighlight">\(a\)</span> = 30–45 mm</p></td>
+<td><p>-2.1 to +6.6</p></td>
+<td><p>-13.5 to -7.5</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The results show that:</p>
+<ul class="simple">
+<li><p><strong>Same cohesive law as the reference.</strong> For the DCB of Tijs et al. (2022),
+which is also the reference case of the thesis, the FE model of the paper
+uses the same geometry, material and bilinear law (<span class="math notranslate nohighlight">\(G_{Ic}\)</span> = 1.12 N/mm,
+<span class="math notranslate nohighlight">\(\tau^0\)</span> = 87 MPa). <code class="docutils literal notranslate"><span class="pre">panels</span></code> predicts 166.2 N at 5.68 mm against 167 N at
+5.7 mm, -0.5% on the load and -0.4% on the opening.</p></li>
+<li><p><strong>Cohesive zone beyond LEFM.</strong> With the low strength <span class="math notranslate nohighlight">\(t_o\)</span> = 1.7 MPa of
+Alfano and Crisfield (2001) the process zone is of the order of the
+specimen length and the peak of their interface model is 22% below the
+corrected beam theory; <code class="docutils literal notranslate"><span class="pre">panels</span></code> reproduces it within 2.9%, at the same
+opening and with the same initial stiffness (+3.2%).</p></li>
+<li><p><strong>Nominal strengths.</strong> For the unidirectional specimens with nominal
+strengths, the <code class="docutils literal notranslate"><span class="pre">panels</span></code> peak is within 2.3% of the corrected beam theory
+in every case, and after the peak it follows the LEFM propagation branch
+(48.9 against 49.0 N at <span class="math notranslate nohighlight">\(\delta\)</span> = 3.22 mm for Alfano and Crisfield, Table
+I). The FE results of the references scatter by about <span class="math notranslate nohighlight">\(\pm 10\%\)</span> around the
+corrected beam theory: 1 mm decohesion elements for a cohesive zone of 1.35
+mm in Camanho et al. (2003), whose FE peak is above both the test and the
+beam theories, and about 57 N in Turon et al. (2007), below both.</p></li>
+<li><p><strong>Tests.</strong> The tests with a bilinear-like response are predicted within 5%
+(Camanho et al. -4.9%, Turon et al. +3.3%). The AS4D/PEKK-FC tests show a
+strong R-curve (initiation about 0.7 N/mm, propagation 1.12 N/mm) that a
+bilinear law with the propagation toughness cannot represent: <code class="docutils literal notranslate"><span class="pre">panels</span></code>,
+the bilinear FE model of Tijs et al. and the corrected beam theory are all
+15–23% above these tests, which the tabular law of the paper matches.
+Fibre bridging also makes the experimental curves decrease more slowly than
+every model after the peak.</p></li>
+<li><p><strong>Welded joints.</strong> For the welded DCB of Tijs (2023) <code class="docutils literal notranslate"><span class="pre">panels</span></code> is 4–9%
+below the FE results of the thesis, 2–5% below the corrected beam theory
+and 6.5–7.6% below the tests with a single toughness value. The cohesive
+zone is long compared with the arm thickness (<span class="math notranslate nohighlight">\(l_{cz}\)</span> = 2.5–2.7 mm, <span class="math notranslate nohighlight">\(h\)</span> =
+2.24 mm), which lowers the peak below the LEFM limit; the FE model of the
+thesis is not described in enough detail to separate this effect from its
+modelling assumptions.</p></li>
+<li><p><strong>Initial compliance.</strong> The CLPT arms of <code class="docutils literal notranslate"><span class="pre">panels</span></code> are too stiff for the
+unidirectional specimens: the compliance is 15–19% below the tests and
+15–21% below the corrected beam theory, which matches the tests of
+Leciñana et al. within 4%. The arms have no transverse shear deformation,
+which is large for these materials (<span class="math notranslate nohighlight">\(E_{11}/G_{13}\)</span> = 22–27), and the
+rotation at the crack front comes only from the elastic foundation of the
+cohesive interface. The same appears in the load-opening curves as an
+initial stiffness 12–17% above the corrected beam theory, while the peak
+loads, controlled by the energy release rate, are not affected. For the
+quasi-isotropic welded specimens, with a bending modulus closer to the
+shear modulus, the compliance of <code class="docutils literal notranslate"><span class="pre">panels</span></code> is within 15% of the tests.</p></li>
+<li><p><strong>Robustness.</strong> All 16 nonlinear runs converged at every opening without
+bisection.</p></li>
+</ul>
+<p><strong>Krueger (2008).</strong> NASA/TM-2008-215123 <a class="reference internal" href="ref.html#krueger2008dcb" id="id12"><span>[krueger2008DCB]</span></a> gives two mode I DCB
+benchmarks, a unidirectional <span class="math notranslate nohighlight">\([0]_{24}\)</span> specimen of T300/1076 and a
+multidirectional D±30 specimen of C12K/R6376, built with 3D solid elements and
+the virtual crack closure technique, with no cohesive law, no interfacial
+strength and no experiment. Their critical load is the one at which <span class="math notranslate nohighlight">\(G_T\)</span>
+reaches <span class="math notranslate nohighlight">\(G_c\)</span> <em>at mid-width</em>, while <code class="docutils literal notranslate"><span class="pre">panels</span></code> and beam theory follow the
+width average <span class="math notranslate nohighlight">\(\bar{G} = P_{crit}^2 a_e^2/(b\,EI)\)</span>; the two criteria differ
+by <span class="math notranslate nohighlight">\(\sqrt{G_c/\bar{G}}\)</span>, 1.026 and 1.123, which is the whole offset between
+the benchmark and the corrected beam theory. <code class="docutils literal notranslate"><span class="pre">panels</span></code> is 2.1% above the
+corrected beam theory for the unidirectional specimen and 5.2% below it for
+the multidirectional one, whose cohesive zone (<span class="math notranslate nohighlight">\(l_{cz}\)</span> = 1.99 mm with
+<span class="math notranslate nohighlight">\(\tau_o\)</span> = 40 MPa) is not small compared with its 2.0 mm arms. Raising
+<span class="math notranslate nohighlight">\(\tau_o\)</span> from 40 to 60 MPa moves the peaks by 1.0 and 1.2% only, so the
+comparison does not rest on that choice. See
+<code class="docutils literal notranslate"><span class="pre">notebooks/krueger2008_dcb.ipynb</span></code>.</p>
+<p><strong>Krueger (2012).</strong> NASA/CR-2012-217562 <a class="reference internal" href="ref.html#krueger2012mmb" id="id13"><span>[krueger2012MMB]</span></a> gives benchmarks
+for the mixed-mode bending specimen of IM7/8552 at <span class="math notranslate nohighlight">\(G_{II}/G_T\)</span> = 0.2, 0.5 and
+0.8, with the critical points (1.64 mm, 128.5 N), (1.34 mm, 385 N) and (1.65
+mm, 751 N). They are recorded in <code class="docutils literal notranslate"><span class="pre">notebooks/krueger2012_mmb_benchmark.ipynb</span></code>
+but not simulated: the damage of <code class="docutils literal notranslate"><span class="pre">'SB_TSL'</span></code> is driven by the normal
+separation only, and the loading lever is not modelled.</p>
+</section>
+<section id="differences-that-remain">
+<h2>Differences that remain<a class="headerlink" href="#differences-that-remain" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>The interpenetration stiffness <span class="math notranslate nohighlight">\(k_{ipen}\)</span> of Eq. 5.12 is computed by
+<code class="xref py py-func docutils literal notranslate"><span class="pre">calc_kw_tsl()</span></code> but not used: <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.calc_k_dmg()</span></code> returns
+<span class="math notranslate nohighlight">\(k_o(1-d)\)</span> also for negative separations, such that a fully damaged point
+offers no resistance to interpenetration. This does not affect a
+monotonically loaded DCB.</p></li>
+<li><p>The damage history <code class="docutils literal notranslate"><span class="pre">MultiDomain.dmg_index</span></code> is stored once per assembly,
+which restricts the model to one <code class="docutils literal notranslate"><span class="pre">'SB_TSL'</span></code> connection.</p></li>
+<li><p>The finite element model of Section 5.6 of the thesis constrains <span class="math notranslate nohighlight">\(U_x\)</span>
+along the loaded edge, while the Ritz model leaves <span class="math notranslate nohighlight">\(u\)</span> free there.</p></li>
+<li><p>The arms follow CLPT: without transverse shear deformation, the compliance
+of unidirectional DCB specimens is 15–21% below the corrected beam theory
+(see the validation above). A shear deformable kinematics would remove this
+difference.</p></li>
+<li><p>The cohesive law is bilinear and the damage is driven by the normal
+separation only: R-curve effects (multilinear laws) and mixed-mode
+delamination are not represented.</p></li>
+</ul>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="bardell.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Bardell’s Hierarchical Functions</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="ref.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">References</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#traction-separation-law-and-damage">Traction-separation law and damage</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#correction-of-the-separation-field">Correction of the separation field</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#separations-at-the-interface">Separations at the interface</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#energy-dissipated-by-crack-formation">Energy dissipated by crack formation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#consistent-tangent-stiffness">Consistent tangent stiffness</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#assembly-of-the-cohesive-stiffness-by-matrix-products">Assembly of the cohesive stiffness by matrix products</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#load-measured-at-the-loaded-edge">Load measured at the loaded edge</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#penalty-stiffness-of-the-edge-connections">Penalty stiffness of the edge connections</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#solution-procedure">Solution procedure</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#verification">Verification</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#convergence-study">Convergence study</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#validation-against-the-literature">Validation against the literature</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#differences-that-remain">Differences that remain</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="_sources/cohesive_zone.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2012-2026, Saullo G. P. Castro, Nathan D&#39;Souza.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.21.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

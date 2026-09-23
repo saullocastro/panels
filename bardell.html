@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Bardell’s Hierarchical Functions &#8212; panels 0.7.1 documentation</title>
+    <title>Bardell’s Hierarchical Functions &#8212; panels 0.8.0 documentation</title>
   
   
   
@@ -38,7 +38,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
-    <script src="_static/documentation_options.js?v=5a057da9"></script>
+    <script src="_static/documentation_options.js?v=486e5634"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
@@ -46,11 +46,11 @@
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="References" href="ref.html" />
+    <link rel="next" title="Cohesive zone model of the multi-domain approach" href="cohesive_zone.html" />
     <link rel="prev" title="Stiffened panel bays (panels.stiffpanelbay)" href="stiffpanelbay.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.7.1" />
+  <meta name="docsearch:version" content="0.8.0" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -118,7 +118,7 @@
   
   
   
-    <p class="title logo__title">panels 0.7.1 documentation</p>
+    <p class="title logo__title">panels 0.8.0 documentation</p>
   
 </a></div>
     
@@ -205,6 +205,13 @@
 <li class=" current active">
   <a class="nav-link dropdown-item nav-internal" href="#">
     Bardell’s Hierarchical Functions
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
   </a>
 </li>
 
@@ -369,6 +376,13 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="ref.html">
     References
   </a>
@@ -492,8 +506,8 @@ function, herein defined as:</p>
 <section id="generating-bardell-s-functions">
 <h2>Generating Bardell’s functions<a class="headerlink" href="#generating-bardell-s-functions" title="Link to this heading">#</a></h2>
 <p>The following code can be used to generate the Bardell functions for a given
-number of terms <code class="docutils literal notranslate"><span class="pre">nmax</span></code>. The substitution <code class="docutils literal notranslate"><span class="pre">replace('**',</span> <span class="pre">'^')</span></code> aims to
-create an input to Mathematica.</p>
+number of terms <code class="docutils literal notranslate"><span class="pre">nmax</span></code>. The substitution <code class="docutils literal notranslate"><span class="pre">replace('**',</span> <span class="pre">'^')</span></code> makes the
+written output <code class="docutils literal notranslate"><span class="pre">bardell.txt</span></code> more readable.</p>
 <div class="literal-block-wrapper docutils container" id="id2">
 <div class="code-block-caption"><span class="caption-text">../../theory/func/bardell/bardell.py</span><a class="headerlink" href="#id2" title="Link to this code">#</a></div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">division</span>
@@ -608,6 +622,391 @@ Cython:</p>
 </div>
 </div>
 </section>
+<section id="integrals-of-bardell-s-functions">
+<h2>Integrals of Bardell’s functions<a class="headerlink" href="#integrals-of-bardell-s-functions" title="Link to this heading">#</a></h2>
+<p>The integrals over <span class="math notranslate nohighlight">\(\xi \in [-1, +1]\)</span> of the products of Bardell’s functions
+and of their first and second derivatives, used to compute the structural
+matrices, are calculated exactly with SymPy using rational arithmetic. The
+code below writes the C++ source <code class="docutils literal notranslate"><span class="pre">panels/core/src/bardell.cpp</span></code> and the
+corresponding header <code class="docutils literal notranslate"><span class="pre">panels/core/include/bardell.hpp</span></code>, which contain the
+functions <code class="docutils literal notranslate"><span class="pre">integral_ff</span></code>, <code class="docutils literal notranslate"><span class="pre">integral_ffp</span></code>, <code class="docutils literal notranslate"><span class="pre">integral_ffpp</span></code>,
+<code class="docutils literal notranslate"><span class="pre">integral_fpfp</span></code>, <code class="docutils literal notranslate"><span class="pre">integral_fpfpp</span></code> and <code class="docutils literal notranslate"><span class="pre">integral_fppfpp</span></code>:</p>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">../../theory/func/bardell/bardell_integrals_C.py</span><a class="headerlink" href="#id4" title="Link to this code">#</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">"""</span>
+<span class="sd">Integrals of Bardell's hierarchical functions</span>
+<span class="sd">=============================================</span>
+
+<span class="sd">Computes exactly (rational arithmetic) the integrals over xi in [-1, +1] of</span>
+<span class="sd">the products of Bardell's functions and of their derivatives, and writes the</span>
+<span class="sd">C++ source ``panels/core/src/bardell.cpp`` and the header</span>
+<span class="sd">``panels/core/include/bardell.hpp``.</span>
+
+<span class="sd">The first four functions of the row index ``i`` are multiplied by the flags</span>
+<span class="sd">``x1t, x1r, x2t, x2r``, and the first four functions of the column index ``j``</span>
+<span class="sd">by ``y1t, y1r, y2t, y2r``.</span>
+
+<span class="sd">"""</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="kn">import</span> <span class="n">var</span><span class="p">,</span> <span class="n">factorial</span><span class="p">,</span> <span class="n">factorial2</span><span class="p">,</span> <span class="n">Rational</span><span class="p">,</span> <span class="n">Poly</span><span class="p">,</span> <span class="n">Float</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sympy.printing.c</span><span class="w"> </span><span class="kn">import</span> <span class="n">C99CodePrinter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sympy.printing.str</span><span class="w"> </span><span class="kn">import</span> <span class="n">StrPrinter</span>
+
+<span class="n">nmax</span> <span class="o">=</span> <span class="mi">30</span>
+
+<span class="n">here</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+<span class="n">path_src</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">here</span><span class="p">,</span> <span class="s1">'..'</span><span class="p">,</span> <span class="s1">'..'</span><span class="p">,</span> <span class="s1">'..'</span><span class="p">,</span> <span class="s1">'panels'</span><span class="p">,</span> <span class="s1">'core'</span><span class="p">,</span> <span class="s1">'src'</span><span class="p">,</span>
+        <span class="s1">'bardell.cpp'</span><span class="p">)</span>
+<span class="n">path_include</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">here</span><span class="p">,</span> <span class="s1">'..'</span><span class="p">,</span> <span class="s1">'..'</span><span class="p">,</span> <span class="s1">'..'</span><span class="p">,</span> <span class="s1">'panels'</span><span class="p">,</span> <span class="s1">'core'</span><span class="p">,</span>
+        <span class="s1">'include'</span><span class="p">,</span> <span class="s1">'bardell.hpp'</span><span class="p">)</span>
+
+<span class="n">xi</span> <span class="o">=</span> <span class="n">var</span><span class="p">(</span><span class="s1">'xi'</span><span class="p">)</span>
+<span class="n">xflags</span> <span class="o">=</span> <span class="n">var</span><span class="p">(</span><span class="s1">'x1t, x1r, x2t, x2r'</span><span class="p">)</span>
+<span class="n">yflags</span> <span class="o">=</span> <span class="n">var</span><span class="p">(</span><span class="s1">'y1t, y1r, y2t, y2r'</span><span class="p">)</span>
+
+<span class="c1"># Bardell's functions (same definition as in bardell_functions_w_C.py), using</span>
+<span class="c1"># exact rational arithmetic</span>
+<span class="n">u</span> <span class="o">=</span> <span class="p">[</span><span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">Rational</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span><span class="o">*</span><span class="n">xi</span> <span class="o">+</span> <span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span><span class="o">*</span><span class="n">xi</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span>
+     <span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span> <span class="o">-</span> <span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span><span class="o">*</span><span class="n">xi</span> <span class="o">-</span> <span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span><span class="o">*</span><span class="n">xi</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span><span class="o">*</span><span class="n">xi</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span>
+     <span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">Rational</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span><span class="o">*</span><span class="n">xi</span> <span class="o">-</span> <span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span><span class="o">*</span><span class="n">xi</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span>
+     <span class="o">-</span><span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span> <span class="o">-</span> <span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span><span class="o">*</span><span class="n">xi</span> <span class="o">+</span> <span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span><span class="o">*</span><span class="n">xi</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span><span class="o">*</span><span class="n">xi</span><span class="o">**</span><span class="mi">3</span><span class="p">]</span>
+
+<span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">nmax</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">utmp</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">r</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">r</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">den</span> <span class="o">=</span> <span class="mi">2</span><span class="o">**</span><span class="n">n</span><span class="o">*</span><span class="n">factorial</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">*</span><span class="n">factorial</span><span class="p">(</span><span class="n">r</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">utmp</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">**</span><span class="n">n</span><span class="o">*</span><span class="n">factorial2</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">r</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">n</span> <span class="o">-</span> <span class="mi">7</span><span class="p">)</span><span class="o">/</span><span class="n">den</span> <span class="o">*</span> <span class="n">xi</span><span class="o">**</span><span class="p">(</span><span class="n">r</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">u</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">utmp</span><span class="p">))</span>
+
+<span class="n">u</span> <span class="o">=</span> <span class="p">[</span><span class="n">Poly</span><span class="p">(</span><span class="n">ui</span><span class="p">,</span> <span class="n">xi</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s1">'QQ'</span><span class="p">)</span> <span class="k">for</span> <span class="n">ui</span> <span class="ow">in</span> <span class="n">u</span><span class="p">]</span>
+<span class="c1"># derivatives of order 0, 1 and 2</span>
+<span class="n">du</span> <span class="o">=</span> <span class="p">[</span><span class="n">u</span><span class="p">,</span> <span class="p">[</span><span class="n">ui</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">xi</span><span class="p">)</span> <span class="k">for</span> <span class="n">ui</span> <span class="ow">in</span> <span class="n">u</span><span class="p">],</span> <span class="p">[</span><span class="n">ui</span><span class="o">.</span><span class="n">diff</span><span class="p">((</span><span class="n">xi</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="k">for</span> <span class="n">ui</span> <span class="ow">in</span> <span class="n">u</span><span class="p">]]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">flag</span><span class="p">(</span><span class="n">flags</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">flags</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">flags</span><span class="p">)</span> <span class="k">else</span> <span class="mi">1</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">BardellCodePrinter</span><span class="p">(</span><span class="n">C99CodePrinter</span><span class="p">):</span>
+    <span class="c1"># floating-point numbers printed with 15 significant digits</span>
+    <span class="n">_print_Float</span> <span class="o">=</span> <span class="n">StrPrinter</span><span class="o">.</span><span class="n">_print_Float</span>
+
+
+<span class="n">printer</span> <span class="o">=</span> <span class="n">BardellCodePrinter</span><span class="p">()</span>
+
+<span class="c1"># (name in the C++ code, name of the header guard, derivative order of f_i,</span>
+<span class="c1">#  derivative order of f_j)</span>
+<span class="n">integrals</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">'ff'</span><span class="p">,</span> <span class="s1">'ff'</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+             <span class="p">(</span><span class="s1">'ffp'</span><span class="p">,</span> <span class="s1">'ffxi'</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+             <span class="p">(</span><span class="s1">'ffpp'</span><span class="p">,</span> <span class="s1">'ffxixi'</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+             <span class="p">(</span><span class="s1">'fpfp'</span><span class="p">,</span> <span class="s1">'fxifxi'</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+             <span class="p">(</span><span class="s1">'fpfpp'</span><span class="p">,</span> <span class="s1">'fxifxixi'</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+             <span class="p">(</span><span class="s1">'fppfpp'</span><span class="p">,</span> <span class="s1">'fxixifxixi'</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]</span>
+
+<span class="n">header_c</span> <span class="o">=</span> <span class="s2">"""</span>
+<span class="s2">#include &lt;stdlib.h&gt;</span>
+<span class="s2">#include &lt;math.h&gt;</span>
+<span class="s2">#if defined(_WIN32) || defined(__WIN32__)</span>
+<span class="s2">  #define EXPORTIT __declspec(dllexport)</span>
+<span class="s2">#else</span>
+<span class="s2">  #define EXPORTIT</span>
+<span class="s2">#endif</span>
+<span class="s2">"""</span>
+<span class="n">printstr_full</span> <span class="o">=</span> <span class="n">header_c</span>
+
+<span class="n">header_h</span> <span class="o">=</span> <span class="s2">"""</span>
+<span class="s2">#if defined(_WIN32) || defined(__WIN32__)</span>
+<span class="s2">  #define IMPORTIT __declspec(dllimport)</span>
+<span class="s2">#else</span>
+<span class="s2">  #define IMPORTIT</span>
+<span class="s2">#endif</span>
+<span class="s2">"""</span>
+<span class="n">printstr_full_h</span> <span class="o">=</span> <span class="n">header_h</span>
+
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">guard</span><span class="p">,</span> <span class="n">di</span><span class="p">,</span> <span class="n">dj</span> <span class="ow">in</span> <span class="n">integrals</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">'integral_</span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+    <span class="n">printstr</span> <span class="o">=</span> <span class="s1">''</span>
+    <span class="n">printstr</span> <span class="o">+=</span> <span class="s1">'EXPORTIT double integral_</span><span class="si">%s</span><span class="s1">(int i, int j,</span><span class="se">\n</span><span class="s1">'</span> <span class="o">%</span> <span class="n">name</span>
+    <span class="n">printstr</span> <span class="o">+=</span> <span class="s1">'           double x1t, double x1r, double x2t, double x2r,</span><span class="se">\n</span><span class="s1">'</span>
+    <span class="n">printstr</span> <span class="o">+=</span> <span class="s1">'           double y1t, double y1r, double y2t, double y2r) {</span><span class="se">\n</span><span class="s1">'</span>
+
+    <span class="n">printstr_h</span> <span class="o">=</span> <span class="s1">'</span><span class="se">\n</span><span class="s1">'</span>
+    <span class="n">printstr_h</span> <span class="o">+=</span> <span class="s1">'#ifndef BARDELL_</span><span class="si">%s</span><span class="s1">_H</span><span class="se">\n</span><span class="s1">'</span> <span class="o">%</span> <span class="n">guard</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="n">printstr_h</span> <span class="o">+=</span> <span class="s1">'#define BARDELL_</span><span class="si">%s</span><span class="s1">_H</span><span class="se">\n</span><span class="s1">'</span> <span class="o">%</span> <span class="n">guard</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="n">printstr_h</span> <span class="o">+=</span> <span class="n">printstr</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">' {'</span><span class="p">,</span> <span class="s1">';'</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">'EXPORTIT'</span><span class="p">,</span> <span class="s1">'IMPORTIT'</span><span class="p">)</span>
+    <span class="n">printstr_h</span> <span class="o">+=</span> <span class="s1">'#endif /** BARDELL_</span><span class="si">%s</span><span class="s1">_H */</span><span class="se">\n</span><span class="s1">'</span> <span class="o">%</span> <span class="n">guard</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="n">printstr_h</span> <span class="o">+=</span> <span class="s1">'</span><span class="se">\n</span><span class="s1">'</span>
+
+    <span class="n">firstrow</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nmax</span><span class="p">):</span>
+        <span class="n">activerow</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nmax</span><span class="p">):</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="p">(</span><span class="n">du</span><span class="p">[</span><span class="n">di</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">du</span><span class="p">[</span><span class="n">dj</span><span class="p">][</span><span class="n">j</span><span class="p">])</span><span class="o">.</span><span class="n">integrate</span><span class="p">()</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">p</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">activerow</span><span class="p">:</span>
+                <span class="n">activerow</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">if</span> <span class="n">firstrow</span><span class="p">:</span>
+                    <span class="n">firstrow</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">printstr</span> <span class="o">+=</span> <span class="s1">'    switch(i) {</span><span class="se">\n</span><span class="s1">'</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">printstr</span> <span class="o">+=</span> <span class="s1">'        default:</span><span class="se">\n</span><span class="s1">'</span>
+                    <span class="n">printstr</span> <span class="o">+=</span> <span class="s1">'            return 0.;</span><span class="se">\n</span><span class="s1">'</span>
+                    <span class="n">printstr</span> <span class="o">+=</span> <span class="s1">'        }</span><span class="se">\n</span><span class="s1">'</span>
+                <span class="n">printstr</span> <span class="o">+=</span> <span class="s1">'    case </span><span class="si">%d</span><span class="s1">:</span><span class="se">\n</span><span class="s1">'</span> <span class="o">%</span> <span class="n">i</span>
+                <span class="n">printstr</span> <span class="o">+=</span> <span class="s1">'        switch(j) {</span><span class="se">\n</span><span class="s1">'</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="o">.</span><span class="n">is_integer</span><span class="p">:</span>
+                <span class="c1"># exact value rounded to the nearest double-precision number,</span>
+                <span class="c1"># later printed with 15 significant digits</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">Float</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+            <span class="n">expr</span> <span class="o">=</span> <span class="n">value</span><span class="o">*</span><span class="n">flag</span><span class="p">(</span><span class="n">xflags</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span><span class="o">*</span><span class="n">flag</span><span class="p">(</span><span class="n">yflags</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+            <span class="n">printstr</span> <span class="o">+=</span> <span class="s1">'        case </span><span class="si">%d</span><span class="s1">:</span><span class="se">\n</span><span class="s1">'</span> <span class="o">%</span> <span class="n">j</span>
+            <span class="n">printstr</span> <span class="o">+=</span> <span class="s1">'            return </span><span class="si">%s</span><span class="s1">;</span><span class="se">\n</span><span class="s1">'</span> <span class="o">%</span> <span class="n">printer</span><span class="o">.</span><span class="n">doprint</span><span class="p">(</span><span class="n">expr</span><span class="o">.</span><span class="n">evalf</span><span class="p">())</span>
+    <span class="n">printstr</span> <span class="o">+=</span> <span class="s1">'        default:</span><span class="se">\n</span><span class="s1">'</span>
+    <span class="n">printstr</span> <span class="o">+=</span> <span class="s1">'            return 0.;</span><span class="se">\n</span><span class="s1">'</span>
+    <span class="n">printstr</span> <span class="o">+=</span> <span class="s1">'        }</span><span class="se">\n</span><span class="s1">'</span>
+    <span class="n">printstr</span> <span class="o">+=</span> <span class="s1">'    default:</span><span class="se">\n</span><span class="s1">'</span>
+    <span class="n">printstr</span> <span class="o">+=</span> <span class="s1">'        return 0.;</span><span class="se">\n</span><span class="s1">'</span>
+    <span class="n">printstr</span> <span class="o">+=</span> <span class="s1">'    }</span><span class="se">\n</span><span class="s1">'</span>
+    <span class="n">printstr</span> <span class="o">+=</span> <span class="s1">'}</span><span class="se">\n</span><span class="s1">'</span>
+
+    <span class="n">printstr_full</span> <span class="o">+=</span> <span class="n">printstr</span>
+    <span class="n">printstr_full_h</span> <span class="o">+=</span> <span class="n">printstr_h</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path_include</span><span class="p">,</span> <span class="s1">'w'</span><span class="p">)</span> <span class="k">as</span> <span class="n">g</span><span class="p">:</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">printstr_full_h</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path_src</span><span class="p">,</span> <span class="s1">'w'</span><span class="p">)</span> <span class="k">as</span> <span class="n">g</span><span class="p">:</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">printstr_full</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="displacement-field">
+<h2>Displacement field<a class="headerlink" href="#displacement-field" title="Link to this heading">#</a></h2>
+<p>The displacement field of each model is a sum over the terms <span class="math notranslate nohighlight">\((i, j)\)</span> of the
+products of Bardell’s functions along <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span>, with the boundary flags of
+each field. The code below derives the contribution of each term to <span class="math notranslate nohighlight">\(u, v, w,
+\phi_x, \phi_y\)</span> for the models based on the classical laminated plate theory,
+with Donnell’s or the Sanders-Koiter kinematics, and on the shear deformation
+theories, and checks it against the function <code class="docutils literal notranslate"><span class="pre">fg</span></code> of the field modules
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.models.clpt_field</span></code> and <code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.models.fsdt_tsdt_field</span></code>:</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">../../theory/func/bardell/fuvw.py</span><a class="headerlink" href="#id5" title="Link to this code">#</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sa">r</span><span class="sd">"""</span>
+<span class="sd">Displacement field of the Ritz approximation (replaces fuvw.nb)</span>
+
+<span class="sd">The displacement field of every model is built with Bardell's functions</span>
+<span class="sd">`f_i(\xi)` along `x` and `g_j(\eta)` along `y`, with `\xi = 2x/a - 1` and</span>
+<span class="sd">`\eta = 2y/b - 1`, each field having its own boundary flags. With the Ritz</span>
+<span class="sd">constants of the term `(i, j)` stored at ``DOF*(j*m + i)``, the fields</span>
+<span class="sd">`\{u, v, w, \phi_x, \phi_y\}` at a point are</span>
+
+<span class="sd">.. math::</span>
+
+<span class="sd">    \{u, v, w, \phi_x, \phi_y\}^T = \sum_{j=0}^{n-1} \sum_{i=0}^{m-1}</span>
+<span class="sd">        [g_{ij}] \{c_{ij}\}</span>
+
+<span class="sd">where the matrix `[g_{ij}]`, with 5 rows and ``DOF`` columns, is derived</span>
+<span class="sd">below for:</span>
+
+<span class="sd">- ``'clpt_donnell'``: the classical laminated plate theory (CLPT) with</span>
+<span class="sd">  Donnell's kinematics, ``DOF = 3``, `\phi_x = -w_{,x}` and `\phi_y =</span>
+<span class="sd">  -w_{,y}`, used by ``'plate_clpt_donnell'`` and ``'cylshell_clpt_donnell'``;</span>
+<span class="sd">- ``'clpt_sanders'``: the CLPT with the Sanders-Koiter kinematics, ``DOF =</span>
+<span class="sd">  3``, `\phi_y = -w_{,y} + v/r`, used by ``'cylshell_clpt_sanders'``;</span>
+<span class="sd">- ``'sdt'``: the first-order and third-order shear deformation theories</span>
+<span class="sd">  (FSDT and TSDT), ``DOF = 5``, with the rotations `\phi_x, \phi_y` as</span>
+<span class="sd">  independent fields, used by ``'plate_fsdt_donnell'``,</span>
+<span class="sd">  ``'plate_tsdt_donnell'``, ``'cylshell_fsdt_donnell'`` and</span>
+<span class="sd">  ``'cylshell_tsdt_donnell'``;</span>
+<span class="sd">- ``'sdt_sanders'``: the FSDT and TSDT with the Sanders-Koiter kinematics,</span>
+<span class="sd">  ``DOF = 5``, whose rotation of the normal about `x` is `\Phi_y = \phi_y +</span>
+<span class="sd">  v/r`, used by ``'cylshell_fsdt_sanders'`` and ``'cylshell_tsdt_sanders'``.</span>
+
+<span class="sd">The displacements through the thickness of the last two are</span>
+
+<span class="sd">.. math::</span>
+
+<span class="sd">    u(z) = u + z \phi_x - c_1 z^3 (\phi_x + w_{,x}) \qquad</span>
+<span class="sd">    v(z) = v + z \Phi_y - c_1 z^3 (\phi_y + w_{,y}) \qquad</span>
+<span class="sd">    w(z) = w</span>
+
+<span class="sd">with `c_1 = 0` for the FSDT and `c_1 = 4/(3 h^2)` for the TSDT, and `\Phi_y =</span>
+<span class="sd">\phi_y` for ``'sdt'``.</span>
+
+<span class="sd">The matrices `[g_{ij}]` are those of the function ``fg`` of the field modules</span>
+<span class="sd">:mod:`panels.models.clpt_field` and :mod:`panels.models.fsdt_tsdt_field`,</span>
+<span class="sd">whose function ``fuvw`` evaluates the sum above. Running this script prints</span>
+<span class="sd">and writes the expressions to ``./output_expressions_python/`` and checks</span>
+<span class="sd">them numerically against ``fg``.</span>
+
+<span class="sd">"""</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)))</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">Matrix</span> <span class="k">as</span> <span class="n">M</span><span class="p">,</span> <span class="n">Rational</span><span class="p">,</span> <span class="n">Symbol</span><span class="p">,</span> <span class="n">diff</span><span class="p">,</span> <span class="n">factorial</span><span class="p">,</span>
+                   <span class="n">factorial2</span><span class="p">,</span> <span class="n">lambdify</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">zeros</span><span class="p">)</span>
+
+<span class="n">var</span><span class="p">(</span><span class="s1">'xi, eta, a, b, r, z, c1'</span><span class="p">)</span>
+
+<span class="n">FIELDS</span> <span class="o">=</span> <span class="p">(</span><span class="s1">'u'</span><span class="p">,</span> <span class="s1">'v'</span><span class="p">,</span> <span class="s1">'w'</span><span class="p">,</span> <span class="s1">'phix'</span><span class="p">,</span> <span class="s1">'phiy'</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">bardell</span><span class="p">(</span><span class="n">nmax</span><span class="o">=</span><span class="mi">30</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Bardell's functions, the first four multiplied by the flags of the</span>
+<span class="sd">    translation and rotation at `\xi = -1` and `\xi = +1`"""</span>
+    <span class="n">t1</span><span class="p">,</span> <span class="n">r1</span><span class="p">,</span> <span class="n">t2</span><span class="p">,</span> <span class="n">r2</span> <span class="o">=</span> <span class="n">var</span><span class="p">(</span><span class="s1">'t1, r1, t2, r2'</span><span class="p">)</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="p">[</span><span class="n">t1</span><span class="o">*</span><span class="p">(</span><span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">Rational</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span><span class="o">*</span><span class="n">xi</span> <span class="o">+</span> <span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span><span class="o">*</span><span class="n">xi</span><span class="o">**</span><span class="mi">3</span><span class="p">),</span>
+         <span class="n">r1</span><span class="o">*</span><span class="p">(</span><span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span> <span class="o">-</span> <span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span><span class="o">*</span><span class="n">xi</span> <span class="o">-</span> <span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span><span class="o">*</span><span class="n">xi</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span><span class="o">*</span><span class="n">xi</span><span class="o">**</span><span class="mi">3</span><span class="p">),</span>
+         <span class="n">t2</span><span class="o">*</span><span class="p">(</span><span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">Rational</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span><span class="o">*</span><span class="n">xi</span> <span class="o">-</span> <span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span><span class="o">*</span><span class="n">xi</span><span class="o">**</span><span class="mi">3</span><span class="p">),</span>
+         <span class="n">r2</span><span class="o">*</span><span class="p">(</span><span class="o">-</span><span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span> <span class="o">-</span> <span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span><span class="o">*</span><span class="n">xi</span> <span class="o">+</span> <span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span><span class="o">*</span><span class="n">xi</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span><span class="o">*</span><span class="n">xi</span><span class="o">**</span><span class="mi">3</span><span class="p">)]</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">nmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">sum</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">**</span><span class="n">n</span><span class="o">*</span><span class="n">factorial2</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">k</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">n</span> <span class="o">-</span> <span class="mi">7</span><span class="p">)</span>
+                     <span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">n</span><span class="o">*</span><span class="n">factorial</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">*</span><span class="n">factorial</span><span class="p">(</span><span class="n">k</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span><span class="o">*</span><span class="n">xi</span><span class="o">**</span><span class="p">(</span><span class="n">k</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                     <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">k</span><span class="o">//</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">t1</span><span class="p">,</span> <span class="n">r1</span><span class="p">,</span> <span class="n">t2</span><span class="p">,</span> <span class="n">r2</span><span class="p">),</span> <span class="n">f</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">shape_function_matrix</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Matrix `[g_{ij}]` in terms of the symbols ``f&lt;field&gt;``, ``g&lt;field&gt;``</span>
+<span class="sd">    of the term `(i, j)` and of their derivatives ``f&lt;field&gt;xi``,</span>
+<span class="sd">    ``g&lt;field&gt;eta``"""</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">Symbol</span><span class="p">(</span><span class="s1">'f'</span> <span class="o">+</span> <span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">FIELDS</span><span class="p">}</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">Symbol</span><span class="p">(</span><span class="s1">'g'</span> <span class="o">+</span> <span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">FIELDS</span><span class="p">}</span>
+    <span class="n">fwxi</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s1">'fwxi'</span><span class="p">)</span>
+    <span class="n">gweta</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s1">'gweta'</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">model</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'clpt_donnell'</span><span class="p">,</span> <span class="s1">'clpt_sanders'</span><span class="p">):</span>
+        <span class="n">G</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">G</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">'u'</span><span class="p">]</span><span class="o">*</span><span class="n">g</span><span class="p">[</span><span class="s1">'u'</span><span class="p">]</span>
+        <span class="n">G</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">'v'</span><span class="p">]</span><span class="o">*</span><span class="n">g</span><span class="p">[</span><span class="s1">'v'</span><span class="p">]</span>
+        <span class="n">G</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">'w'</span><span class="p">]</span><span class="o">*</span><span class="n">g</span><span class="p">[</span><span class="s1">'w'</span><span class="p">]</span>
+        <span class="n">G</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="mi">2</span><span class="o">/</span><span class="n">a</span><span class="p">)</span><span class="o">*</span><span class="n">fwxi</span><span class="o">*</span><span class="n">g</span><span class="p">[</span><span class="s1">'w'</span><span class="p">]</span>
+        <span class="n">G</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="mi">2</span><span class="o">/</span><span class="n">b</span><span class="p">)</span><span class="o">*</span><span class="n">f</span><span class="p">[</span><span class="s1">'w'</span><span class="p">]</span><span class="o">*</span><span class="n">gweta</span>
+        <span class="k">if</span> <span class="n">model</span> <span class="o">==</span> <span class="s1">'clpt_sanders'</span><span class="p">:</span>
+            <span class="n">G</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">'v'</span><span class="p">]</span><span class="o">*</span><span class="n">g</span><span class="p">[</span><span class="s1">'v'</span><span class="p">]</span><span class="o">/</span><span class="n">r</span>
+        <span class="k">return</span> <span class="n">G</span>
+    <span class="k">assert</span> <span class="n">model</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'sdt'</span><span class="p">,</span> <span class="s1">'sdt_sanders'</span><span class="p">)</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">FIELDS</span><span class="p">):</span>
+        <span class="n">G</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">*</span><span class="n">g</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">model</span> <span class="o">==</span> <span class="s1">'sdt_sanders'</span><span class="p">:</span>
+        <span class="c1"># rotation of the normal Phiy = phiy + v/r</span>
+        <span class="n">G</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">'v'</span><span class="p">]</span><span class="o">*</span><span class="n">g</span><span class="p">[</span><span class="s1">'v'</span><span class="p">]</span><span class="o">/</span><span class="n">r</span>
+    <span class="k">return</span> <span class="n">G</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">through_thickness</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">sanders</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""`u(z), v(z), w(z)` of the models based on shear deformation theories,</span>
+<span class="sd">    per Ritz constant of the term `(i, j)`, where the row of ``phiy`` of</span>
+<span class="sd">    ``G`` is `\Phi_y`"""</span>
+    <span class="n">fwxi</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s1">'fwxi'</span><span class="p">)</span>
+    <span class="n">gweta</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s1">'gweta'</span><span class="p">)</span>
+    <span class="n">wx</span> <span class="o">=</span> <span class="n">M</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="o">/</span><span class="n">a</span><span class="p">)</span><span class="o">*</span><span class="n">fwxi</span><span class="o">*</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">'gw'</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+    <span class="n">wy</span> <span class="o">=</span> <span class="n">M</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="o">/</span><span class="n">b</span><span class="p">)</span><span class="o">*</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">'fw'</span><span class="p">)</span><span class="o">*</span><span class="n">gweta</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+    <span class="n">phiy</span> <span class="o">=</span> <span class="n">G</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">G</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span><span class="o">/</span><span class="n">r</span> <span class="k">if</span> <span class="n">sanders</span> <span class="k">else</span> <span class="n">G</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">uz</span> <span class="o">=</span> <span class="n">G</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+</span> <span class="n">z</span><span class="o">*</span><span class="n">G</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">c1</span><span class="o">*</span><span class="n">z</span><span class="o">**</span><span class="mi">3</span><span class="o">*</span><span class="p">(</span><span class="n">G</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+</span> <span class="n">wx</span><span class="p">)</span>
+    <span class="n">vz</span> <span class="o">=</span> <span class="n">G</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+</span> <span class="n">z</span><span class="o">*</span><span class="n">G</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">c1</span><span class="o">*</span><span class="n">z</span><span class="o">**</span><span class="mi">3</span><span class="o">*</span><span class="p">(</span><span class="n">phiy</span> <span class="o">+</span> <span class="n">wy</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">M</span><span class="p">([</span><span class="n">uz</span><span class="p">,</span> <span class="n">vz</span><span class="p">,</span> <span class="n">G</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]])</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">check</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">panels_models</span><span class="p">,</span> <span class="n">num_checks</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Compares `[g_{ij}]` with ``fg`` of the field module of panels"""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">panels.shell</span><span class="w"> </span><span class="kn">import</span> <span class="n">Shell</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">panels</span><span class="w"> </span><span class="kn">import</span> <span class="n">modelDB</span>
+
+    <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">flags</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">bardell</span><span class="p">()</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">shape_function_matrix</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">dof</span> <span class="o">=</span> <span class="n">G</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">fnum</span> <span class="o">=</span> <span class="p">[</span><span class="n">lambdify</span><span class="p">((</span><span class="n">xi</span><span class="p">,)</span> <span class="o">+</span> <span class="n">flags</span><span class="p">,</span> <span class="n">fi</span><span class="p">)</span> <span class="k">for</span> <span class="n">fi</span> <span class="ow">in</span> <span class="n">f</span><span class="p">]</span>
+    <span class="n">fpnum</span> <span class="o">=</span> <span class="p">[</span><span class="n">lambdify</span><span class="p">((</span><span class="n">xi</span><span class="p">,)</span> <span class="o">+</span> <span class="n">flags</span><span class="p">,</span> <span class="n">diff</span><span class="p">(</span><span class="n">fi</span><span class="p">,</span> <span class="n">xi</span><span class="p">))</span> <span class="k">for</span> <span class="n">fi</span> <span class="ow">in</span> <span class="n">f</span><span class="p">]</span>
+    <span class="n">Gnum</span> <span class="o">=</span> <span class="n">lambdify</span><span class="p">([</span><span class="n">Symbol</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span>
+                     <span class="p">[</span><span class="s1">'f'</span> <span class="o">+</span> <span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">FIELDS</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s1">'g'</span> <span class="o">+</span> <span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">FIELDS</span><span class="p">]</span>
+                     <span class="o">+</span> <span class="p">[</span><span class="s1">'fwxi'</span><span class="p">,</span> <span class="s1">'gweta'</span><span class="p">,</span> <span class="s1">'a'</span><span class="p">,</span> <span class="s1">'b'</span><span class="p">,</span> <span class="s1">'r'</span><span class="p">]],</span> <span class="n">G</span><span class="p">)</span>
+    <span class="n">worst</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">panels_models</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_checks</span><span class="p">):</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">Shell</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">stack</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">90</span><span class="p">],</span> <span class="n">plyt</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span>
+                      <span class="n">laminaprop</span><span class="o">=</span><span class="p">(</span><span class="mf">142.5e9</span><span class="p">,</span> <span class="mf">8.7e9</span><span class="p">,</span> <span class="mf">0.28</span><span class="p">,</span> <span class="mf">5.1e9</span><span class="p">,</span> <span class="mf">5.1e9</span><span class="p">,</span> <span class="mf">5.1e9</span><span class="p">),</span>
+                      <span class="n">m</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">r</span> <span class="o">=</span> <span class="mf">1.3</span> <span class="k">if</span> <span class="s1">'cylshell'</span> <span class="ow">in</span> <span class="n">name</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">FIELDS</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="s1">'xy'</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'1'</span><span class="p">,</span> <span class="s1">'2'</span><span class="p">):</span>
+                        <span class="nb">setattr</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">d</span> <span class="o">+</span> <span class="n">e</span> <span class="o">+</span> <span class="n">k</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)))</span>
+                        <span class="nb">setattr</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">d</span> <span class="o">+</span> <span class="n">e</span> <span class="o">+</span> <span class="n">k</span> <span class="o">+</span> <span class="s1">'r'</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)))</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">_rebuild</span><span class="p">()</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">_check_r</span><span class="p">()</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">a</span><span class="p">),</span> <span class="n">rng</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">b</span><span class="p">)</span>
+            <span class="n">g_panels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">get_size</span><span class="p">()))</span>
+            <span class="n">modelDB</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s1">'field'</span><span class="p">]</span><span class="o">.</span><span class="n">fg</span><span class="p">(</span><span class="n">g_panels</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+            <span class="n">ksi</span><span class="p">,</span> <span class="n">et</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="o">/</span><span class="n">s</span><span class="o">.</span><span class="n">a</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">y</span><span class="o">/</span><span class="n">s</span><span class="o">.</span><span class="n">b</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="n">g_sympy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">g_panels</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">m</span><span class="p">):</span>
+                    <span class="n">vals</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">FIELDS</span><span class="p">:</span>
+                        <span class="n">bx</span> <span class="o">=</span> <span class="p">[</span><span class="nb">getattr</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="s1">'x'</span> <span class="o">+</span> <span class="n">e</span> <span class="o">+</span> <span class="n">k</span> <span class="o">+</span> <span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span>
+                              <span class="p">((</span><span class="s1">'1'</span><span class="p">,</span> <span class="s1">''</span><span class="p">),</span> <span class="p">(</span><span class="s1">'1'</span><span class="p">,</span> <span class="s1">'r'</span><span class="p">),</span> <span class="p">(</span><span class="s1">'2'</span><span class="p">,</span> <span class="s1">''</span><span class="p">),</span> <span class="p">(</span><span class="s1">'2'</span><span class="p">,</span> <span class="s1">'r'</span><span class="p">))]</span>
+                        <span class="n">by</span> <span class="o">=</span> <span class="p">[</span><span class="nb">getattr</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="s1">'y'</span> <span class="o">+</span> <span class="n">e</span> <span class="o">+</span> <span class="n">k</span> <span class="o">+</span> <span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span>
+                              <span class="p">((</span><span class="s1">'1'</span><span class="p">,</span> <span class="s1">''</span><span class="p">),</span> <span class="p">(</span><span class="s1">'1'</span><span class="p">,</span> <span class="s1">'r'</span><span class="p">),</span> <span class="p">(</span><span class="s1">'2'</span><span class="p">,</span> <span class="s1">''</span><span class="p">),</span> <span class="p">(</span><span class="s1">'2'</span><span class="p">,</span> <span class="s1">'r'</span><span class="p">))]</span>
+                        <span class="n">vals</span><span class="p">[</span><span class="s1">'f'</span> <span class="o">+</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">fnum</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="n">ksi</span><span class="p">,</span> <span class="o">*</span><span class="n">bx</span><span class="p">)</span>
+                        <span class="n">vals</span><span class="p">[</span><span class="s1">'g'</span> <span class="o">+</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">fnum</span><span class="p">[</span><span class="n">j</span><span class="p">](</span><span class="n">et</span><span class="p">,</span> <span class="o">*</span><span class="n">by</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="s1">'w'</span><span class="p">:</span>
+                            <span class="n">vals</span><span class="p">[</span><span class="s1">'fwxi'</span><span class="p">]</span> <span class="o">=</span> <span class="n">fpnum</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="n">ksi</span><span class="p">,</span> <span class="o">*</span><span class="n">bx</span><span class="p">)</span>
+                            <span class="n">vals</span><span class="p">[</span><span class="s1">'gweta'</span><span class="p">]</span> <span class="o">=</span> <span class="n">fpnum</span><span class="p">[</span><span class="n">j</span><span class="p">](</span><span class="n">et</span><span class="p">,</span> <span class="o">*</span><span class="n">by</span><span class="p">)</span>
+                    <span class="n">args</span> <span class="o">=</span> <span class="p">([</span><span class="n">vals</span><span class="p">[</span><span class="s1">'f'</span> <span class="o">+</span> <span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">FIELDS</span><span class="p">]</span>
+                            <span class="o">+</span> <span class="p">[</span><span class="n">vals</span><span class="p">[</span><span class="s1">'g'</span> <span class="o">+</span> <span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">FIELDS</span><span class="p">]</span>
+                            <span class="o">+</span> <span class="p">[</span><span class="n">vals</span><span class="p">[</span><span class="s1">'fwxi'</span><span class="p">],</span> <span class="n">vals</span><span class="p">[</span><span class="s1">'gweta'</span><span class="p">],</span> <span class="n">s</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">b</span><span class="p">,</span>
+                               <span class="n">s</span><span class="o">.</span><span class="n">r</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">r</span> <span class="k">else</span> <span class="mf">1.</span><span class="p">])</span>
+                    <span class="n">col</span> <span class="o">=</span> <span class="n">dof</span><span class="o">*</span><span class="p">(</span><span class="n">j</span><span class="o">*</span><span class="n">s</span><span class="o">.</span><span class="n">m</span> <span class="o">+</span> <span class="n">i</span><span class="p">)</span>
+                    <span class="n">g_sympy</span><span class="p">[:,</span> <span class="n">col</span><span class="p">:</span><span class="n">col</span> <span class="o">+</span> <span class="n">dof</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Gnum</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+            <span class="n">scale</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">g_panels</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="mf">1.</span><span class="p">)</span>
+            <span class="n">worst</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">worst</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">g_sympy</span> <span class="o">-</span> <span class="n">g_panels</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">/</span><span class="n">scale</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">worst</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">'__main__'</span><span class="p">:</span>
+    <span class="n">outdir</span> <span class="o">=</span> <span class="s1">'./output_expressions_python/'</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">cases</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">'clpt_donnell'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'plate_clpt_donnell'</span><span class="p">,</span> <span class="s1">'cylshell_clpt_donnell'</span><span class="p">],</span>
+        <span class="s1">'clpt_sanders'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'cylshell_clpt_sanders'</span><span class="p">],</span>
+        <span class="s1">'sdt'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'plate_fsdt_donnell'</span><span class="p">,</span> <span class="s1">'plate_tsdt_donnell'</span><span class="p">,</span>
+                <span class="s1">'cylshell_fsdt_donnell'</span><span class="p">,</span> <span class="s1">'cylshell_tsdt_donnell'</span><span class="p">],</span>
+        <span class="s1">'sdt_sanders'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'cylshell_fsdt_sanders'</span><span class="p">,</span> <span class="s1">'cylshell_tsdt_sanders'</span><span class="p">],</span>
+        <span class="p">}</span>
+    <span class="k">for</span> <span class="n">model</span><span class="p">,</span> <span class="n">panels_models</span> <span class="ow">in</span> <span class="n">cases</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">G</span> <span class="o">=</span> <span class="n">shape_function_matrix</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'# [g_ij] of the </span><span class="si">%s</span><span class="s1"> kinematics, rows u, v, w, phix, phiy'</span> <span class="o">%</span> <span class="n">model</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">G</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">G</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                <span class="k">if</span> <span class="n">G</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">l</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">'g[</span><span class="si">%d</span><span class="s1">, col+</span><span class="si">%d</span><span class="s1">] = </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">G</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">l</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">'sdt'</span><span class="p">):</span>
+            <span class="n">U</span> <span class="o">=</span> <span class="n">through_thickness</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">sanders</span><span class="o">=</span><span class="n">model</span> <span class="o">==</span> <span class="s1">'sdt_sanders'</span><span class="p">)</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">'# u(z), v(z), w(z)'</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">((</span><span class="s1">'uz'</span><span class="p">,</span> <span class="s1">'vz'</span><span class="p">,</span> <span class="s1">'wz'</span><span class="p">)):</span>
+                <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">U</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                    <span class="k">if</span> <span class="n">U</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">l</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">'</span><span class="si">%s</span><span class="s1">[col+</span><span class="si">%d</span><span class="s1">] = </span><span class="si">%s</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">U</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">l</span><span class="p">]))</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">+</span> <span class="s1">'</span><span class="se">\n</span><span class="s1">'</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">outdir</span> <span class="o">+</span> <span class="s1">'fuvw_</span><span class="si">%s</span><span class="s1">.txt'</span> <span class="o">%</span> <span class="n">model</span><span class="p">,</span> <span class="s1">'w'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+        <span class="n">err</span> <span class="o">=</span> <span class="n">check</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">panels_models</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'</span><span class="si">%s</span><span class="s1">: max relative difference to panels fg = </span><span class="si">%.2e</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="n">err</span> <span class="o">&lt;</span> <span class="mf">1e-12</span>
+</pre></div>
+</div>
+</div>
+</section>
 </section>
 
 
@@ -630,11 +1029,11 @@ Cython:</p>
       </div>
     </a>
     <a class="right-next"
-       href="ref.html"
+       href="cohesive_zone.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">References</p>
+        <p class="prev-next-title">Cohesive zone model of the multi-domain approach</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -659,6 +1058,8 @@ Cython:</p>
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#generating-bardell-s-functions">Generating Bardell’s functions</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#integrals-of-bardell-s-functions">Integrals of Bardell’s functions</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#displacement-field">Displacement field</a></li>
 </ul>
   </nav></div>
 

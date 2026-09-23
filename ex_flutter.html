@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Panel flutter analysis &#8212; panels 0.7.1 documentation</title>
+    <title>Panel flutter analysis &#8212; panels 0.8.0 documentation</title>
   
   
   
@@ -38,7 +38,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
-    <script src="_static/documentation_options.js?v=5a057da9"></script>
+    <script src="_static/documentation_options.js?v=486e5634"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
@@ -50,7 +50,7 @@
     <link rel="prev" title="Frequency analysis" href="ex_frequency.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.7.1" />
+  <meta name="docsearch:version" content="0.8.0" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -118,7 +118,7 @@
   
   
   
-    <p class="title logo__title">panels 0.7.1 documentation</p>
+    <p class="title logo__title">panels 0.8.0 documentation</p>
   
 </a></div>
     
@@ -205,6 +205,13 @@
 <li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="bardell.html">
     Bardell’s Hierarchical Functions
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
   </a>
 </li>
 
@@ -369,6 +376,13 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="ref.html">
     References
   </a>
@@ -485,7 +499,10 @@ eigenvalues become complex. The code below is extracted from one of the
 pre-stress:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_aero</span><span class="p">():</span>
     <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">'plate_clpt_donnell'</span><span class="p">,</span>
-                  <span class="s1">'cylshell_clpt_donnell'</span><span class="p">]:</span>
+                  <span class="s1">'cylshell_clpt_donnell'</span><span class="p">,</span>
+                  <span class="s1">'cylshell_clpt_sanders'</span><span class="p">,</span>
+                  <span class="s1">'plate_fsdt_donnell'</span><span class="p">,</span>
+                  <span class="s1">'plate_tsdt_donnell'</span><span class="p">]:</span>
         <span class="k">for</span> <span class="n">pre_stress</span> <span class="ow">in</span> <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">]:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">'Flutter Analysis Piston Theory, consider_pre_stress=</span><span class="si">{0}</span><span class="s1">, model=</span><span class="si">{1}</span><span class="s1">'</span><span class="o">.</span>
                   <span class="nb">format</span><span class="p">(</span><span class="n">pre_stress</span><span class="p">,</span> <span class="n">model</span><span class="p">))</span>

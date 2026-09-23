@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Semi-analytical methods for plates, shells and stiffened panels - panels &#8212; panels 0.7.1 documentation</title>
+    <title>Semi-analytical methods for plates, shells and stiffened panels - panels &#8212; panels 0.8.0 documentation</title>
   
   
   
@@ -38,7 +38,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
-    <script src="_static/documentation_options.js?v=5a057da9"></script>
+    <script src="_static/documentation_options.js?v=486e5634"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'index';</script>
@@ -48,7 +48,7 @@
     <link rel="next" title="Linear static analysis" href="ex_linear_static.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.7.1" />
+  <meta name="docsearch:version" content="0.8.0" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -116,7 +116,7 @@
   
   
   
-    <p class="title logo__title">panels 0.7.1 documentation</p>
+    <p class="title logo__title">panels 0.8.0 documentation</p>
   
 </a></div>
     
@@ -203,6 +203,13 @@
 <li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="bardell.html">
     Bardell’s Hierarchical Functions
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
   </a>
 </li>
 
@@ -369,6 +376,13 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="ref.html">
     References
   </a>
@@ -456,18 +470,34 @@ and snap-through</p></li>
 </ul>
 </li>
 <li><p>Multi-domain analyses, connecting shell domains with penalty stiffnesses to
-model cylinders, stiffened panels and panels with debonding defects</p></li>
+model cylinders, stiffened panels and panels with debonding defects, also
+with the shear deformation theories</p></li>
 </ul>
 <p>The models are identified by the type of structure, the kinematic theory and
-the non-linear equations, e.g. <code class="docutils literal notranslate"><span class="pre">'plate_clpt_donnell'</span></code> and
-<code class="docutils literal notranslate"><span class="pre">'cylshell_clpt_donnell'</span></code>, see <code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.models</span></code>.</p>
+the non-linear equations, see <code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.models</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'plate_clpt_donnell'</span></code>: plates, classical laminated plate theory (CLPT)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'plate_fsdt_donnell'</span></code>: plates, first-order shear deformation theory</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'plate_tsdt_donnell'</span></code>: plates, third-order shear deformation theory of
+Reddy</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'cylshell_clpt_donnell'</span></code>: cylindrical shells, CLPT with Donnell’s
+kinematics</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'cylshell_clpt_sanders'</span></code>: cylindrical shells, CLPT with Sanders-Koiter’s
+kinematics, which give zero strains for rigid-body motions</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'cylshell_fsdt_donnell'</span></code>, <code class="docutils literal notranslate"><span class="pre">'cylshell_tsdt_donnell'</span></code>: cylindrical
+shells, first-order and third-order shear deformation theories with
+Donnell’s kinematics</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'cylshell_fsdt_sanders'</span></code>, <code class="docutils literal notranslate"><span class="pre">'cylshell_tsdt_sanders'</span></code>: cylindrical
+shells, first-order and third-order shear deformation theories with
+Sanders-Koiter’s kinematics</p></li>
+</ul>
 <section id="code-repository">
 <h2>Code repository<a class="headerlink" href="#code-repository" title="Link to this heading">#</a></h2>
 <p><a class="github reference external" href="https://github.com/saullocastro/panels">saullocastro/panels</a></p>
 </section>
 <section id="citing-this-library">
 <h2>Citing this library<a class="headerlink" href="#citing-this-library" title="Link to this heading">#</a></h2>
-<p>Saullo G. P. Castro, Nathan D’Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.7.1). Zenodo. DOI: <a class="reference external" href="https://doi.org/10.5281/zenodo.2541522">https://doi.org/10.5281/zenodo.2541522</a>.</p>
+<p>Saullo G. P. Castro, Nathan D’Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.8.0). Zenodo. DOI: <a class="reference external" href="https://doi.org/10.5281/zenodo.2541522">https://doi.org/10.5281/zenodo.2541522</a>.</p>
 </section>
 <section id="usage-examples">
 <h2>Usage examples<a class="headerlink" href="#usage-examples" title="Link to this heading">#</a></h2>
@@ -509,6 +539,7 @@ the non-linear equations, e.g. <code class="docutils literal notranslate"><span 
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="bardell.html">Bardell’s Hierarchical Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cohesive_zone.html">Cohesive zone model of the multi-domain approach</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ref.html">References</a></li>
 </ul>
 </div>

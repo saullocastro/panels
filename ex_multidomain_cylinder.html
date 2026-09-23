@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Cylinders modeled as multi-domain assemblies &#8212; panels 0.7.1 documentation</title>
+    <title>Cylinders modeled as multi-domain assemblies &#8212; panels 0.8.0 documentation</title>
   
   
   
@@ -38,7 +38,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
-    <script src="_static/documentation_options.js?v=5a057da9"></script>
+    <script src="_static/documentation_options.js?v=486e5634"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'ex_multidomain_cylinder';</script>
@@ -49,7 +49,7 @@
     <link rel="prev" title="Non-linear static analysis with the arc-length methods" href="ex_arc_length.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.7.1" />
+  <meta name="docsearch:version" content="0.8.0" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -117,7 +117,7 @@
   
   
   
-    <p class="title logo__title">panels 0.7.1 documentation</p>
+    <p class="title logo__title">panels 0.8.0 documentation</p>
   
 </a></div>
     
@@ -204,6 +204,13 @@
 <li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="bardell.html">
     Bardell’s Hierarchical Functions
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
   </a>
 </li>
 
@@ -368,6 +375,13 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="ref.html">
     References
   </a>
@@ -499,7 +513,9 @@ calculated with <code class="xref py py-func docutils literal notranslate"><span
 
     <span class="n">assy</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">eigvecs</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="s1">'skin'</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">'tmp_cylinder_compression_lb_Nxx_cte.png'</span><span class="p">)</span>
 
-    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">Nxxs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">eigvals</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mf">47319.181</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">)</span>
+    <span class="c1">#NOTE Sanders kinematics, the default for cylinders, the Donnell</span>
+    <span class="c1">#     kinematics gave -47319.181</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">Nxxs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">eigvals</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mf">47055.984</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Linear buckling with the pre-buckling stress state calculated from a static
@@ -524,7 +540,9 @@ analysis, with <code class="xref py py-func docutils literal notranslate"><span 
     <span class="n">assy</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="s1">'skin'</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">'tmp_cylinder_compression_lb_Nxx_from_static_c.png'</span><span class="p">)</span>
     <span class="n">assy</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">eigvecs</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="s1">'skin'</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">'tmp_cylinder_compression_lb_Nxx_from_static_eigvec.png'</span><span class="p">)</span>
 
-    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">Nxxs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">eigvals</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mf">47417.912</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">)</span>
+    <span class="c1">#NOTE Sanders kinematics, the default for cylinders, the Donnell</span>
+    <span class="c1">#     kinematics gave -47417.912</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">Nxxs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">eigvals</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mf">47162.406</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Blade stiffeners can be added along the length of the cylinder, modeled as
@@ -556,7 +574,10 @@ additional domains connected to the skin, see
     <span class="n">assy</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="s1">'skin'</span><span class="p">,</span> <span class="n">vec</span><span class="o">=</span><span class="s1">'Nyy'</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">'tmp_cylinder_blade_stiffened_compression_lb_Nxx_from_static_Nyy.png'</span><span class="p">,</span> <span class="n">colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">assy</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">eigvecs</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="s1">'skin'</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">'tmp_cylinder_blade_stiffened_compression_lb_Nxx_from_static_eigvec.png'</span><span class="p">)</span>
 
-    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">Nxxs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">eigvals</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mi">40003</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">)</span>
+    <span class="c1">#NOTE Sanders kinematics, the default for cylinders, the Donnell</span>
+    <span class="c1">#     kinematics gave -40003, and -39921.838 with the rotation of</span>
+    <span class="c1">#     'BFycte' without the term v/r of the Sanders kinematics</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">Nxxs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">eigvals</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mf">39993.838</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
