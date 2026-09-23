@@ -21,7 +21,9 @@ from structsolve.sparseutils import finalize_symmetric_matrix
 from panels import modelDB
 from panels.shell import Shell
 
-CYLINDERS = ['cylshell_clpt_donnell', 'cylshell_clpt_sanders']
+CYLINDERS = ['cylshell_clpt_donnell', 'cylshell_clpt_sanders',
+             'cylshell_fsdt_donnell', 'cylshell_fsdt_sanders',
+             'cylshell_tsdt_donnell', 'cylshell_tsdt_sanders']
 PLATES = ['plate_clpt_donnell', 'plate_fsdt_donnell', 'plate_tsdt_donnell']
 
 

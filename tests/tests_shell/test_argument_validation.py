@@ -94,7 +94,11 @@ def test_calc_fint_rejects_wrongly_sized_c():
 
 
 @pytest.mark.parametrize('model', ['cylshell_clpt_donnell',
-                                   'cylshell_clpt_sanders'])
+                                   'cylshell_clpt_sanders',
+                                   'cylshell_fsdt_donnell',
+                                   'cylshell_fsdt_sanders',
+                                   'cylshell_tsdt_donnell',
+                                   'cylshell_tsdt_sanders'])
 @pytest.mark.parametrize('bad_r', [None, 0., -0.4])
 def test_cylshell_requires_positive_radius(bad_r, model):
     """An unset or non-positive radius must be caught at the API boundary
@@ -130,12 +134,18 @@ def test_plate_still_accepts_unset_radius(model):
     s.strain(c, gridx=5, gridy=5)
 
 
-@pytest.mark.parametrize('model', ['cylshell_clpt_donnell',
-                                   'cylshell_clpt_sanders'])
-def test_cylshell_approaches_plate_as_radius_grows(model):
+@pytest.mark.parametrize('model, plate_model', [
+    ('cylshell_clpt_donnell', 'plate_clpt_donnell'),
+    ('cylshell_clpt_sanders', 'plate_clpt_donnell'),
+    ('cylshell_fsdt_donnell', 'plate_fsdt_donnell'),
+    ('cylshell_fsdt_sanders', 'plate_fsdt_donnell'),
+    ('cylshell_tsdt_donnell', 'plate_tsdt_donnell'),
+    ('cylshell_tsdt_sanders', 'plate_tsdt_donnell'),
+    ])
+def test_cylshell_approaches_plate_as_radius_grows(model, plate_model):
     """r -> infinity, and not r = 0, is the flat-plate limit"""
     size = None
-    plate = make_shell(model='plate_clpt_donnell', r=None)
+    plate = make_shell(model=plate_model, r=None)
     size = plate.get_size()
     c = np.linspace(0.1, 1., size)*1e-3
     kplate = plate.calc_kC(c=c, NLgeom=True).toarray()

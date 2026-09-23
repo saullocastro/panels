@@ -20,13 +20,16 @@ import sys
 sys.path.append('../..')
 
 import numpy as np
+from scipy.linalg import eigh
 import pytest
 
 from panels import modelDB
 from panels.shell import Shell
 
 MODELS = ['plate_clpt_donnell', 'cylshell_clpt_donnell',
-          'cylshell_clpt_sanders', 'plate_fsdt_donnell', 'plate_tsdt_donnell']
+          'cylshell_clpt_sanders', 'plate_fsdt_donnell', 'plate_tsdt_donnell',
+          'cylshell_fsdt_donnell', 'cylshell_fsdt_sanders',
+          'cylshell_tsdt_donnell', 'cylshell_tsdt_sanders']
 
 
 def make_shell(model):
@@ -175,36 +178,53 @@ def test_newton_raphson_converges_quadratically(model):
     an equilibrium state by construction, with deflections well above the
     thickness. Starting nearby, a consistent tangent gives e_k+1 ~ C e_k^2,
     independently of any postbuckling branch selection.
+
+    The constant C grows with the norm of the inverse of KT, such that a
+    random state close to a critical point, where KT is nearly singular,
+    needs more iterations even with the exact tangent, e.g. the Donnell
+    cylinders of the shear deformation theories with the seed 13, where the
+    smallest eigenvalue of KT relative to K0 is -0.005. The states whose KT
+    has an eigenvalue relative to K0 below 0.05 in modulus are therefore
+    discarded.
     """
     s, fint, KT = make_callables(model)
-    rng = np.random.default_rng(13)
-    c_eq = random_state(s, rng)
-    # DOFs removed by the boundary conditions carry no stiffness
-    used = ~np.isclose(KT(c_eq).diagonal(), 0)
-    c_eq[~used] = 0
+    for seed in range(13, 33):
+        rng = np.random.default_rng(seed)
+        c_eq = random_state(s, rng)
+        # DOFs removed by the boundary conditions carry no stiffness
+        used = ~np.isclose(KT(c_eq).diagonal(), 0)
+        c_eq[~used] = 0
+        K0 = s.calc_kC(c=np.zeros_like(c_eq)).toarray()[np.ix_(used, used)]
+        lam = eigh(KT(c_eq)[np.ix_(used, used)], K0, eigvals_only=True)
+        if np.abs(lam).min() > 0.05:
+            break
+    else:
+        raise AssertionError('no regular equilibrium state found')
     fext = fint(c_eq)
 
     c = c_eq + 1.e-2*random_state(s, rng)
     c[~used] = 0
     errors = [np.linalg.norm(c - c_eq)/np.linalg.norm(c_eq)]
     # stopping well above round-off, which is about 1.e-12 here
-    while errors[-1] > 1.e-8 and len(errors) < 10:
+    while errors[-1] > 1.e-8 and len(errors) < 12:
         K = KT(c)[np.ix_(used, used)]
         R = fint(c) - fext
         c[used] -= np.linalg.solve(K, R[used])
         errors.append(np.linalg.norm(c - c_eq)/np.linalg.norm(c_eq))
 
-    # from 1.e-2 to below 1.e-8 takes 3 iterations with a quadratic rate, and
-    # about 10 or more with a linear rate
-    assert len(errors) <= 4, 'too many iterations: %s' % errors
-    # the order log(e_k+1)/log(e_k) is 2 for quadratic and 1 for linear rates,
-    # measured in the asymptotic range, e_k < 1.e-2, and above the round-off
-    # floor, which for the shear deformation theories is about 1.e-10 due to
-    # the conditioning of KT (about 1.e12 against 1.e8 for the CLPT)
+    # from 1.e-2 to below 1.e-8 takes 2 to 5 iterations with a quadratic
+    # rate, depending on C, and more than 10 with a linear rate
+    assert len(errors) - 1 <= 6, 'too many iterations: %s' % errors
+    # the order p = log(e_k+1/e_k)/log(e_k/e_k-1) is exactly 2 for e_k+1 =
+    # C e_k^2, whatever C, and 1 for a linear rate. It is measured above the
+    # round-off floor, which for the shear deformation theories is about
+    # 1.e-10 due to the conditioning of KT (about 1.e12 against 1.e8 for the
+    # CLPT)
     floor = 1.e-9 if modelDB.db[model]['dofs'] == 5 else 1.e-12
-    orders = [np.log(e1)/np.log(e0) for e0, e1 in zip(errors[:-1], errors[1:])
-              if e0 < 1.e-2 and e1 > floor]
-    assert len(orders) >= 1, 'no step in the asymptotic range: %s' % errors
+    orders = [np.log(e2/e1)/np.log(e1/e0)
+              for e0, e1, e2 in zip(errors[:-2], errors[1:-1], errors[2:])
+              if e2 > floor]
+    assert len(orders) >= 1, 'no step above the round-off floor: %s' % errors
     assert min(orders) > 1.5, 'convergence is not quadratic: %s' % errors
 
 
