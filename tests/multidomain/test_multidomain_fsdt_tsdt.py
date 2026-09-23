@@ -18,6 +18,9 @@ verified against single-domain models and against the literature:
   the connected laminates are stiffer than the single laminate. In both cases
   the difference vanishes with `(h/a)^2`.
 
+The FSDT uses the shear correction factor `k = 5/6` of the references,
+instead of the default ``Shell.fsdt_shear_correction = 'rohwer'``.
+
 References:
 
 - Noor, A. K., "Free vibrations of multilayered composite plates", AIAA J.,
@@ -93,6 +96,10 @@ def make_plate(model, a, b, h, stack, laminaprop, bcs='SSSS', m=10, n=10,
     s.rho = RHO
     s.m = m
     s.n = n
+    # the k = 5/6 of the references, which is also needed by the 'SB'
+    # connection to reproduce a single laminate, instead of the default
+    # 'rohwer', which depends on the stacking sequence of each laminate
+    s.fsdt_shear_correction = 5/6
     for edge, kind in zip(('x1', 'y1', 'x2', 'y2'), bcs):
         set_edge(s, edge, kind)
     s._rebuild()

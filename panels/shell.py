@@ -86,11 +86,13 @@ class Shell(object):
     conditions of the models based on the classical laminated plate theory.
 
     The attribute ``fsdt_shear_correction`` controls the transverse shear
-    stiffness of the first-order shear deformation theory (FSDT): a float
-    ``k`` multiplies the uncorrected stiffness, ``A_ts = k*Abar_ts``, with
-    ``5/6`` as default, whereas ``'rohwer'``, ``'vlachoutsis'``,
-    ``'constant'`` or ``None`` select the corresponding method of
-    :meth:`composites.Laminate.calc_transverse_shear_stiffness`. The
+    stiffness of the first-order shear deformation theory (FSDT):
+    ``'rohwer'``, the default, ``'vlachoutsis'``, ``'constant'`` or ``None``
+    select the corresponding method of
+    :meth:`composites.Laminate.calc_transverse_shear_stiffness`, whereas a
+    float ``k`` multiplies the uncorrected stiffness, ``A_ts = k*Abar_ts``.
+    The equilibrium approach of Rohwer (1988) gives ``k = 5/6`` for a
+    homogeneous plate and accounts for the stacking sequence otherwise. The
     third-order shear deformation theory (TSDT) needs no shear correction.
 
     The attributes ``x1, x2, y1, y2`` limit the integration domain to
@@ -160,7 +162,7 @@ class Shell(object):
 
         # model
         self.model = None
-        self.fsdt_shear_correction = 5/6. # in case of First-order Shear Deformation Theory
+        self.fsdt_shear_correction = 'rohwer' # in case of First-order Shear Deformation Theory
 
         # approximation series - no of terms in SFs
         self.m = m

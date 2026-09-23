@@ -8,8 +8,9 @@ are exact:
 - along `x = 0, a`: `v = w = \phi_y = 0`, with `u` and `\phi_x` free
 - along `y = 0, b`: `u = w = \phi_x = 0`, with `v` and `\phi_y` free
 
-The FSDT uses the shear correction factor `k = 5/6`, the default of
-``Shell.fsdt_shear_correction``, unless stated otherwise. The mass matrices
+The FSDT uses the shear correction factor `k = 5/6` of the references,
+instead of the default ``Shell.fsdt_shear_correction = 'rohwer'``, unless
+stated otherwise. The mass matrices
 include the rotary and the higher-order inertia, consistently with the
 displacement field of each theory.
 
@@ -112,6 +113,7 @@ def make_plate(model, a, h, stack, laminaprop, bcs='SSSS', m=12, n=12,
     s.rho = RHO
     s.m = m
     s.n = n
+    s.fsdt_shear_correction = 5/6
     for edge, kind in zip(('x1', 'y1', 'x2', 'y2'), bcs):
         set_edge(s, edge, kind)
     s._rebuild()
@@ -419,7 +421,8 @@ if __name__ == '__main__':
 
 def test_shear_correction_options():
     """A float k scales the uncorrected transverse shear stiffness, whereas a
-    string selects the method of the composites module"""
+    string selects the method of the composites module, 'rohwer' by default"""
+    assert Shell().fsdt_shear_correction == 'rohwer'
     kwargs = dict(a=0.3, h=0.01, stack=[0, 45, 90], laminaprop=orthotropic(20),
                   m=4, n=4)
     s = make_plate(FSDT, **kwargs)
@@ -435,6 +438,12 @@ def test_shear_correction_options():
     s._rebuild()
     assert np.allclose(s.ABD[6:, 6:], s.lam.Ats)
     assert not np.allclose(s.ABD[6:, 6:], 5/6*Abar)
+    # Rohwer's method gives k = 5/6 for a homogeneous plate
+    s = make_plate(FSDT, a=0.3, h=0.01, stack=[0], laminaprop=(70.e9, 0.3),
+                   m=4, n=4)
+    s.fsdt_shear_correction = 'rohwer'
+    s._rebuild()
+    assert np.allclose(s.ABD[6:, 6:], 5/6*s.lam.Abar_ts)
     # the TSDT needs no shear correction
     s = make_plate(TSDT, **kwargs)
     assert np.allclose(s.ABD[9:11, 9:11], Abar)

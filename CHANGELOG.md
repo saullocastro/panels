@@ -22,10 +22,13 @@ regression values of the multi-domain cylinders of
 - `'plate_fsdt_donnell'`: plates with the first-order shear deformation
   theory (FSDT) and von Karman kinematics, with 5 DOFs `u, v, w, phix, phiy`
   per term. The shear correction is controlled by
-  `Shell.fsdt_shear_correction`: a float `k` multiplies the uncorrected
-  transverse shear stiffness, `5/6` by default, whereas `'rohwer'`,
-  `'vlachoutsis'`, `'constant'` or `None` select the method of
-  `composites.Laminate.calc_transverse_shear_stiffness`.
+  `Shell.fsdt_shear_correction`: `'rohwer'`, the default, `'vlachoutsis'`,
+  `'constant'` or `None` select the method of
+  `composites.Laminate.calc_transverse_shear_stiffness`, whereas a float `k`
+  multiplies the uncorrected transverse shear stiffness. The equilibrium
+  approach of Rohwer (1988) gives `k = 5/6` for a homogeneous plate and
+  accounts for the stacking sequence otherwise. The tests compared with
+  references that use `k = 5/6` set it explicitly.
 - `'plate_tsdt_donnell'`: plates with the third-order shear deformation
   theory of Reddy (1984) and von Karman kinematics, with 5 DOFs per term.
 - `'cylshell_fsdt_donnell'`, `'cylshell_tsdt_donnell'`: cylindrical shells

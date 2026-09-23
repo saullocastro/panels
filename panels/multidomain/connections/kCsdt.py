@@ -31,7 +31,8 @@ domains:
   `\phi_x, \Phi_y` is also penalized, and for the FSDT two panels connected
   with a high ``kr`` behave like a single laminate with both stacking
   sequences, provided that the shear correction factor is a constant, e.g.
-  the default ``Shell.fsdt_shear_correction = 5/6``. The TSDT laminates have
+  ``Shell.fsdt_shear_correction = 5/6``; the default, ``'rohwer'``, depends on
+  the stacking sequence of each laminate. The TSDT laminates have
   zero transverse shear strains at their faces, including the interface,
   and are therefore stiffer than a single TSDT laminate. The offsets of the
   laminates are not considered, as in the kernels of the models with 3 DOFs.

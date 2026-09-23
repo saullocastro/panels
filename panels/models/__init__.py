@@ -80,7 +80,8 @@ The available models, which are selected with ``Shell.model``, are:
 - ``'plate_fsdt_donnell'``: flat plates, first-order shear deformation
   theory (FSDT, Reissner-Mindlin) with von Karman non-linear kinematics, 5
   DOFs ``u, v, w, phix, phiy``. The transverse shear stiffness is controlled
-  by ``Shell.fsdt_shear_correction``, with `k = 5/6` by default.
+  by ``Shell.fsdt_shear_correction``, with the method of Rohwer (1988) by
+  default.
 
 - ``'plate_tsdt_donnell'``: flat plates, third-order shear deformation
   theory of Reddy (1984) with von Karman non-linear kinematics, 5 DOFs ``u,
