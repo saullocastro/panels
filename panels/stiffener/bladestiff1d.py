@@ -90,6 +90,7 @@ class BladeStiff1D(object):
                     y1w=bay.y1w, y1wr=bay.y1wr, y2w=bay.y2w, y2wr=bay.y2wr,
                     y1=y1, y2=y2)
             self.Asb = self.bb*hb
+        self.hb = hb
 
         #TODO check offset effect on curved panels
         self.dbf = self.bf/2. + hb + h/2.
