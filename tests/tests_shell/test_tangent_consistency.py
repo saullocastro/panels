@@ -22,10 +22,11 @@ sys.path.append('../..')
 import numpy as np
 import pytest
 
+from panels import modelDB
 from panels.shell import Shell
 
-DOF = 3
-MODELS = ['plate_clpt_donnell', 'cylshell_clpt_donnell']
+MODELS = ['plate_clpt_donnell', 'cylshell_clpt_donnell',
+          'cylshell_clpt_sanders', 'plate_fsdt_donnell', 'plate_tsdt_donnell']
 
 
 def make_shell(model):
@@ -63,7 +64,14 @@ def random_state(s, rng):
     well above it, such that the nonlinear terms carry weight"""
     h_shell = len(s.stack)*s.plyt
     c = h_shell*rng.standard_normal(s.get_size())
-    c[2::DOF] *= 20
+    dofs = modelDB.db[s.model]['dofs']
+    c[2::dofs] *= 20
+    if dofs == 5:
+        # independent rotations phix, phiy of the shear deformation theories,
+        # of the order of the slopes of w, such that the state is not
+        # dominated by the transverse shear strains
+        c[3::dofs] *= 20/min(s.a, s.b)
+        c[4::dofs] *= 20/min(s.a, s.b)
     return c
 
 
@@ -189,8 +197,14 @@ def test_newton_raphson_converges_quadratically(model):
     # from 1.e-2 to below 1.e-8 takes 3 iterations with a quadratic rate, and
     # about 10 or more with a linear rate
     assert len(errors) <= 4, 'too many iterations: %s' % errors
-    # the order log(e_k+1)/log(e_k) is 2 for quadratic and 1 for linear rates
-    orders = [np.log(e1)/np.log(e0) for e0, e1 in zip(errors[:-1], errors[1:])]
+    # the order log(e_k+1)/log(e_k) is 2 for quadratic and 1 for linear rates,
+    # measured in the asymptotic range, e_k < 1.e-2, and above the round-off
+    # floor, which for the shear deformation theories is about 1.e-10 due to
+    # the conditioning of KT (about 1.e12 against 1.e8 for the CLPT)
+    floor = 1.e-9 if modelDB.db[model]['dofs'] == 5 else 1.e-12
+    orders = [np.log(e1)/np.log(e0) for e0, e1 in zip(errors[:-1], errors[1:])
+              if e0 < 1.e-2 and e1 > floor]
+    assert len(orders) >= 1, 'no step in the asymptotic range: %s' % errors
     assert min(orders) > 1.5, 'convergence is not quadratic: %s' % errors
 
 

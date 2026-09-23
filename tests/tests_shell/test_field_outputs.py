@@ -11,7 +11,10 @@ def test_panel_field_outputs():
     m = 7
     n = 6
     for model in ['plate_clpt_donnell',
-                  'cylshell_clpt_donnell']:
+                  'cylshell_clpt_donnell',
+                  'cylshell_clpt_sanders',
+                  'plate_fsdt_donnell',
+                  'plate_tsdt_donnell']:
         print('Testing model %s' % model)
         s = Shell()
         s.model = model

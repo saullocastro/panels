@@ -93,8 +93,10 @@ def test_calc_fint_rejects_wrongly_sized_c():
         s.calc_fint(c=None)
 
 
+@pytest.mark.parametrize('model', ['cylshell_clpt_donnell',
+                                   'cylshell_clpt_sanders'])
 @pytest.mark.parametrize('bad_r', [None, 0., -0.4])
-def test_cylshell_requires_positive_radius(bad_r):
+def test_cylshell_requires_positive_radius(bad_r, model):
     """An unset or non-positive radius must be caught at the API boundary
 
     The flat limit of a cylindrical shell is r -> infinity, not r = 0, so
@@ -102,7 +104,7 @@ def test_cylshell_requires_positive_radius(bad_r):
     where every 1/r term became inf, and the failure surfaced as a bare
     AssertionError raised inside structsolve while finalizing the matrix.
     """
-    s = make_shell(model='cylshell_clpt_donnell', r=0.4)
+    s = make_shell(model=model, r=0.4)
     size = s.get_size()
     s.r = bad_r
     for call in (lambda: s.calc_kC(),
@@ -114,14 +116,23 @@ def test_cylshell_requires_positive_radius(bad_r):
             call()
 
 
-def test_plate_still_accepts_unset_radius():
+@pytest.mark.parametrize('model', ['plate_clpt_donnell', 'plate_fsdt_donnell',
+                                   'plate_tsdt_donnell'])
+def test_plate_still_accepts_unset_radius(model):
     """The plate kernels never read r, an unset r must keep working"""
-    s = make_shell(model='plate_clpt_donnell', r=None)
+    s = make_shell(model=model, r=None)
     assert s.calc_kC().shape == (s.get_size(), s.get_size())
     assert s.r == 0.
+    # the field outputs must not read an unset r either
+    c = np.linspace(0.1, 1., s.get_size())*1e-3
+    s.r = None
+    s.uvw(c, gridx=5, gridy=5)
+    s.strain(c, gridx=5, gridy=5)
 
 
-def test_cylshell_approaches_plate_as_radius_grows():
+@pytest.mark.parametrize('model', ['cylshell_clpt_donnell',
+                                   'cylshell_clpt_sanders'])
+def test_cylshell_approaches_plate_as_radius_grows(model):
     """r -> infinity, and not r = 0, is the flat-plate limit"""
     size = None
     plate = make_shell(model='plate_clpt_donnell', r=None)
@@ -132,7 +143,7 @@ def test_cylshell_approaches_plate_as_radius_grows():
 
     previous = None
     for r in (1., 1e4, 1e8):
-        cyl = make_shell(model='cylshell_clpt_donnell', r=r)
+        cyl = make_shell(model=model, r=r)
         kcyl = cyl.calc_kC(c=c, NLgeom=True).toarray()
         rel = np.abs(kcyl - kplate).max()/scale
         if previous is not None:
@@ -150,7 +161,7 @@ def test_fkG_num_has_no_NLgeom_parameter():
     fails loudly instead of silently getting KG(N0 + N_L).
     """
     from panels import modelDB
-    for model in ('plate_clpt_donnell', 'cylshell_clpt_donnell'):
+    for model in modelDB.db:
         fkG_num = modelDB.db[model]['matrices_num'].fkG_num
         # the embedded signature is the first line of the docstring
         signature = fkG_num.__doc__.splitlines()[0]
