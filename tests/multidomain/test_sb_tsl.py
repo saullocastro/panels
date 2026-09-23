@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from scipy.special import roots_legendre
 from structsolve.sparseutils import finalize_symmetric_matrix
 
@@ -122,3 +123,18 @@ def test_calc_kT_TSL_finite_differences():
 if __name__ == '__main__':
     test_kCSB_dmg_energy()
     test_calc_kT_TSL_finite_differences()
+
+
+def test_panels_must_share_the_area():
+    """The kernels and the matrix products integrate over the domain of the
+    top panel, the bottom panel must have the same dimensions"""
+    for use_kernels in (False, True):
+        _, top, bot = _panels(2, flags_random=False)
+        bot.a = top.a/2
+        conn = [dict(p1=top, p2=bot, func='SB_TSL', tsl_type='bilinear',
+                     nr_x_gauss=10, nr_y_gauss=8, k_o=5e4, tau_o=87.,
+                     G1c=1.12, use_kernels=use_kernels)]
+        assy = MultiDomain(panels=[top, bot], conn=conn)
+        c = np.zeros(assy.get_size())
+        with pytest.raises(ValueError, match='same dimensions'):
+            assy.get_kC_conn(c=c)
