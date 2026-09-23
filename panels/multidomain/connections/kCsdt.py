@@ -1,30 +1,34 @@
 r"""
 Connections of the models based on shear deformation theories
 
-The models ``'plate_fsdt_donnell'`` and ``'plate_tsdt_donnell'`` have 5 DOFs
-per term, `u, v, w, \phi_x, \phi_y`, and the displacement field
+The plate and cylindrical shell models based on the first-order (FSDT) and
+third-order (TSDT) shear deformation theories, e.g. ``'plate_fsdt_donnell'``
+or ``'cylshell_tsdt_sanders'``, have 5 DOFs per term, `u, v, w, \phi_x,
+\phi_y`, and the displacement field
 
 .. math::
 
     u(z) = u + z \phi_x - c_1 z^3 \left(\phi_x + w_{,x}\right) \qquad
-    v(z) = v + z \phi_y - c_1 z^3 \left(\phi_y + w_{,y}\right) \qquad
+    v(z) = v + z \Phi_y - c_1 z^3 \left(\phi_y + w_{,y}\right) \qquad
     w(z) = w
 
 with `c_1 = 0` for the first-order (FSDT) and `c_1 = 4/(3 h^2)` for the
-third-order shear deformation theory (TSDT). The penalty stiffness matrices
+third-order shear deformation theory (TSDT), and where `\Phi_y = \phi_y +
+v/r` is the rotation of the normal about `x` with the Sanders-Koiter
+kinematics, `\Phi_y = \phi_y` otherwise. The penalty stiffness matrices
 below enforce the compatibility between the displacement fields of two
 domains:
 
 - :func:`.fkCSSxcte_sdt` and :func:`.fkCSSycte_sdt`, between two skins along
   an edge, penalize the difference of `u, v, w` with ``kt`` and of
-  `\phi_x, \phi_y` with ``kr``. For the TSDT the normal derivative of `w`,
+  `\phi_x, \Phi_y` with ``kr``. For the TSDT the normal derivative of `w`,
   which also enters the displacement field, is penalized with ``kr`` too.
 - :func:`.fkCSB_sdt`, between two skins connected over an area, penalizes
   with ``kt`` the difference of the displacements `u(z), v(z), w(z)` at the
   interface, where the top panel has `z = -h_{top}/2` and the bottom panel
   `z = +h_{bot}/2`. The laminates may then rotate independently, like in a
   layerwise theory. When ``kr`` is given the difference of the rotations
-  `\phi_x, \phi_y` is also penalized, and for the FSDT two panels connected
+  `\phi_x, \Phi_y` is also penalized, and for the FSDT two panels connected
   with a high ``kr`` behave like a single laminate with both stacking
   sequences, provided that the shear correction factor is a constant, e.g.
   the default ``Shell.fsdt_shear_correction = 5/6``. The TSDT laminates have
@@ -55,9 +59,24 @@ U, V, W, PHIX, PHIY = range(DOF)
 
 def _check_sdt(*panels):
     for p in panels:
-        if p.model not in ('plate_fsdt_donnell', 'plate_tsdt_donnell'):
+        if p.model is None or not ('fsdt' in p.model or 'tsdt' in p.model):
             raise ValueError("Expected a model based on shear deformation "
                              "theories, got model '{0}'".format(p.model))
+
+
+def _rinv_sanders(p):
+    r"""`1/r` of a panel with the Sanders-Koiter kinematics, zero otherwise"""
+    return 1./p.r if 'sanders' in p.model else 0.
+
+
+def _rotation_y(p):
+    r"""Terms of the rotation of the normal about `x`, `\Phi_y = \phi_y +
+    v/r` with the Sanders-Koiter kinematics"""
+    terms = [(PHIY, 0, 0, 1.)]
+    rinv = _rinv_sanders(p)
+    if rinv != 0:
+        terms.append((V, 0, 0, rinv))
+    return terms
 
 
 def _is_tsdt(p):
@@ -192,7 +211,7 @@ def _edge_components(kt, kr, p1, p2, normal):
         (kt, ((p1, [(V, 0, 0, 1.)]), (p2, [(V, 0, 0, 1.)]))),
         (kt, ((p1, [(W, 0, 0, 1.)]), (p2, [(W, 0, 0, 1.)]))),
         (kr, ((p1, [(PHIX, 0, 0, 1.)]), (p2, [(PHIX, 0, 0, 1.)]))),
-        (kr, ((p1, [(PHIY, 0, 0, 1.)]), (p2, [(PHIY, 0, 0, 1.)]))),
+        (kr, ((p1, _rotation_y(p1)), (p2, _rotation_y(p2)))),
         ]
     if _is_tsdt(p1) or _is_tsdt(p2):
         dx, dy = (1, 0) if normal == 'x' else (0, 1)
@@ -261,7 +280,8 @@ def _surface_terms(p, z):
     cphi = z - c1*z**3
     cw = -c1*z**3
     tu = [(U, 0, 0, 1.), (PHIX, 0, 0, cphi), (W, 1, 0, cw)]
-    tv = [(V, 0, 0, 1.), (PHIY, 0, 0, cphi), (W, 0, 1, cw)]
+    #NOTE v(z) = v + z*(phiy + v/r) - c1*z**3*(phiy + w,y) with Sanders
+    tv = [(V, 0, 0, 1. + z*_rinv_sanders(p)), (PHIY, 0, 0, cphi), (W, 0, 1, cw)]
     return tu, tv
 
 
@@ -296,6 +316,6 @@ def fkCSB_sdt(kt, p_top, p_bot, size, kr=0.):
         (kt, ((p_top, tv_top), (p_bot, tv_bot))),
         (kt, ((p_top, [(W, 0, 0, 1.)]), (p_bot, [(W, 0, 0, 1.)]))),
         (kr, ((p_top, [(PHIX, 0, 0, 1.)]), (p_bot, [(PHIX, 0, 0, 1.)]))),
-        (kr, ((p_top, [(PHIY, 0, 0, 1.)]), (p_bot, [(PHIY, 0, 0, 1.)]))),
+        (kr, ((p_top, _rotation_y(p_top)), (p_bot, _rotation_y(p_bot)))),
         ]
     return _connection_matrix(comps, dict(x=None, y=None), size)

@@ -88,6 +88,23 @@ The available models, which are selected with ``Shell.model``, are:
   stresses vanish at `z = \pm h/2`, which assumes the reference surface at
   mid-thickness, i.e. no laminate offset.
 
+- ``'cylshell_fsdt_donnell'``, ``'cylshell_tsdt_donnell'``: cylindrical
+  shells, FSDT and TSDT with the Donnell kinematics, 5 DOFs ``u, v, w, phix,
+  phiy``, i.e. the plate models with the hoop strain `w/r` and the curvature
+  term of the piston theory.
+
+- ``'cylshell_fsdt_sanders'``, ``'cylshell_tsdt_sanders'``: cylindrical
+  shells, FSDT and TSDT with the Sanders-Koiter kinematics, 5 DOFs ``u, v,
+  w, phix, phiy``. The rotation of the normal about `x` is `\phi_y + v/r`,
+  which enters the displacement field, the changes of curvature and the
+  mass matrix, the twist includes the rotation about the normal, and the
+  non-linear terms use `\beta_y = w_{,y} - v/r`, such that all strains
+  vanish for any small rigid-body motion. No Sanders-Koiter term appears in
+  the third-order terms of the TSDT, and the transverse shear strains are
+  those of the Donnell kinematics. For these models the fields ``phiy`` of
+  :func:`.fsdt_tsdt_field.fuvw` and :func:`.fsdt_tsdt_field.fg` are the
+  rotation of the normal `\phi_y + v/r`.
+
 The kinematic equations of each model, from which the integrands of the
 matrices are generated, are in the ``theory/shells`` folder of the
 repository. The models with 5 DOFs are supported by :class:`.MultiDomain`
@@ -102,3 +119,7 @@ from . import plate_clpt_donnell, plate_clpt_donnell_num
 from . import fsdt_tsdt_field
 from . import plate_fsdt_donnell, plate_fsdt_donnell_num
 from . import plate_tsdt_donnell, plate_tsdt_donnell_num
+from . import cylshell_fsdt_donnell, cylshell_fsdt_donnell_num
+from . import cylshell_fsdt_sanders, cylshell_fsdt_sanders_num
+from . import cylshell_tsdt_donnell, cylshell_tsdt_donnell_num
+from . import cylshell_tsdt_sanders, cylshell_tsdt_sanders_num

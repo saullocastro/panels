@@ -35,10 +35,13 @@ flange must follow with `w_{2,y} = \theta`. With the Donnell kinematics the
 term `v/r` is neglected in the rotations and in the curvatures of the shell
 alike, and the kernels are unchanged.
 
-For the models based on shear deformation theories, ``'plate_fsdt_donnell'``
-and ``'plate_tsdt_donnell'``, with 5 DOFs `u, v, w, \phi_x, \phi_y` per
-term, the rotation of the normal about `x` is `\omega_i = -\phi_{y,i}`, and
-the rotation penalty is `k_r (\phi_{y,1} - \phi_{y,2})^2`, see
+For the models based on shear deformation theories, e.g.
+``'plate_fsdt_donnell'`` or ``'cylshell_tsdt_sanders'``, with 5 DOFs `u, v,
+w, \phi_x, \phi_y` per term, the rotation of the normal about `x` is
+`\omega_i = -\Phi_{y,i}`, where `\Phi_y = \phi_y + v/r` for the
+kinematics of Sanders-Koiter and `\Phi_y = \phi_y` otherwise, and the
+rotation penalty is `k_r (\Phi_{y,1} - \Phi_{y,2})^2`, with ``rinv1`` and
+``rinv2`` as for the CLPT, see
 :func:`.fkCBFycte11_sdt`, :func:`.fkCBFycte12_sdt` and
 :func:`.fkCBFycte22_sdt`. For the TSDT, the derivative `w_{,y}` that enters
 the displacement field is not penalized: at a T-joint only the rotation of
@@ -504,9 +507,22 @@ FIELDS_SDT = ('u', 'v', 'w', 'phix', 'phiy')
 
 def _check_sdt(*panels):
     for p in panels:
-        if p.model not in ('plate_fsdt_donnell', 'plate_tsdt_donnell'):
+        if p.model is None or not ('fsdt' in p.model or 'tsdt' in p.model):
             raise ValueError("Expected a model based on shear deformation "
                              "theories, got model '{0}'".format(p.model))
+
+
+def _rotation_terms(double coeff, double rinvA, double rinvB):
+    r"""Terms ``(dofA, dofB, coeff)`` of `coeff \Phi_{y,A} \Phi_{y,B}`, with
+    `\Phi_y = \phi_y + v/r` for the kinematics of Sanders-Koiter"""
+    terms = [(PHIY, PHIY, coeff)]
+    if rinvB != 0:
+        terms.append((PHIY, V, coeff*rinvB))
+    if rinvA != 0:
+        terms.append((V, PHIY, coeff*rinvA))
+    if rinvA != 0 and rinvB != 0:
+        terms.append((V, V, coeff*rinvA*rinvB))
+    return terms
 
 
 def _flags_sdt(object p, fields, str direction):
@@ -610,7 +626,7 @@ def _block_sdt(terms, object pA, object pB, double cteA, double cteB,
 
 
 def fkCBFycte11_sdt(double kt, double kr, object p1, double ycte1,
-          int size, int row0, int col0):
+          int size, int row0, int col0, double rinv1=0.):
     r"""
     Base-flange ycte connection for the models based on shear deformation
     theories, block of the base
@@ -634,6 +650,9 @@ def fkCBFycte11_sdt(double kt, double kr, object p1, double ycte1,
         Row position of the block in the assembly.
     col0 : int
         Column position of the block in the assembly.
+    rinv1 : float, optional
+        `1/r_1` when ``p1`` has the kinematics of Sanders-Koiter, zero
+        otherwise.
 
     Returns
     -------
@@ -642,14 +661,14 @@ def fkCBFycte11_sdt(double kt, double kr, object p1, double ycte1,
 
     """
     _check_sdt(p1)
-    terms = [(U, U, kt), (V, V, kt), (W, W, kt), (PHIY, PHIY, kr)]
+    terms = [(U, U, kt), (V, V, kt), (W, W, kt)] + _rotation_terms(kr, rinv1, rinv1)
     cte = 2*ycte1/p1.b - 1.
     return _block_sdt(terms, p1, p1, cte, cte, 'x', 1, size, row0, col0)
 
 
 def fkCBFycte12_sdt(double kt, double kr, object p1, object p2,
           double ycte1, double ycte2,
-          int size, int row0, int col0):
+          int size, int row0, int col0, double rinv1=0., double rinv2=0.):
     r"""
     Base-flange ycte connection for the models based on shear deformation
     theories, block of the base and the flange
@@ -675,6 +694,9 @@ def fkCBFycte12_sdt(double kt, double kr, object p1, object p2,
         Row position of the block in the assembly.
     col0 : int
         Column position of the block in the assembly.
+    rinv1, rinv2 : float, optional
+        `1/r_1` and `1/r_2` when ``p1`` and ``p2`` have the kinematics of
+        Sanders-Koiter, zero otherwise.
 
     Returns
     -------
@@ -683,7 +705,8 @@ def fkCBFycte12_sdt(double kt, double kr, object p1, object p2,
 
     """
     _check_sdt(p1, p2)
-    terms = [(U, U, -kt), (V, W, -kt), (W, V, kt), (PHIY, PHIY, -kr)]
+    terms = ([(U, U, -kt), (V, W, -kt), (W, V, kt)]
+             + _rotation_terms(-kr, rinv1, rinv2))
     cte1 = 2*ycte1/p1.b - 1.
     cte2 = 2*ycte2/p2.b - 1.
     return _block_sdt(terms, p1, p2, cte1, cte2, 'x', 0, size, row0, col0)
@@ -691,7 +714,7 @@ def fkCBFycte12_sdt(double kt, double kr, object p1, object p2,
 
 def fkCBFycte22_sdt(double kt, double kr, object p1, object p2,
           double ycte2,
-          int size, int row0, int col0):
+          int size, int row0, int col0, double rinv2=0.):
     r"""
     Base-flange ycte connection for the models based on shear deformation
     theories, block of the flange
@@ -717,6 +740,9 @@ def fkCBFycte22_sdt(double kt, double kr, object p1, object p2,
         Row position of the block in the assembly.
     col0 : int
         Column position of the block in the assembly.
+    rinv2 : float, optional
+        `1/r_2` when ``p2`` has the kinematics of Sanders-Koiter, zero
+        otherwise.
 
     Returns
     -------
@@ -725,6 +751,6 @@ def fkCBFycte22_sdt(double kt, double kr, object p1, object p2,
 
     """
     _check_sdt(p1, p2)
-    terms = [(U, U, kt), (V, V, kt), (W, W, kt), (PHIY, PHIY, kr)]
+    terms = [(U, U, kt), (V, V, kt), (W, W, kt)] + _rotation_terms(kr, rinv2, rinv2)
     cte = 2*ycte2/p2.b - 1.
     return _block_sdt(terms, p2, p2, cte, cte, 'x', 1, size, row0, col0)

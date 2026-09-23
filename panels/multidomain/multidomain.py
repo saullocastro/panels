@@ -1322,12 +1322,13 @@ class MultiDomain(object):
             :func:`.calc_kt_kr`. They can be given for each connection with
             the keys ``'kt'`` and ``'kr'`` (``'SB'`` uses only ``'kt'``).
 
-            For the models based on shear deformation theories
-            (``'plate_fsdt_donnell'`` and ``'plate_tsdt_donnell'``)
+            For the models based on shear deformation theories, e.g.
+            ``'plate_fsdt_donnell'`` or ``'cylshell_tsdt_sanders'``,
             ``'SSxcte'``, ``'SSycte'`` and ``'SB'`` are available, see
             :mod:`panels.multidomain.connections.kCsdt`, and ``'BFycte'`` and
-            ``'BFxcte'``, whose rotation penalty is on `\phi_y` and `\phi_x`
-            instead of `-w_{,y}` and `-w_{,x}`, see the functions ``*_sdt``
+            ``'BFxcte'``, whose rotation penalty is on `\phi_y` (`\phi_y +
+            v/r` with the Sanders-Koiter kinematics) and `\phi_x` instead of
+            `-w_{,y}` and `-w_{,x}`, see the functions ``*_sdt``
             of :mod:`panels.multidomain.connections.kCBFycte` and
             :mod:`panels.multidomain.connections.kCBFxcte`. ``'SB_TSL'`` is
             not available for these models. The edge connections
@@ -1596,12 +1597,18 @@ class MultiDomain(object):
             mod = getattr(connections, 'kCBF' + cte)
             kt, kr = _penalties(connecti, pA, pB, cte)
             c1, c2 = connecti[cte + '1'], connecti[cte + '2']
+            #NOTE with the Sanders-Koiter kinematics the rotation about x is
+            #     phiy + v/r, the rotation about y of 'BFxcte' is phix
+            kw1, kw12, kw2 = {}, {}, {}
+            if cte == 'ycte':
+                rb, rf = _rinv_sanders(pb), _rinv_sanders(pf)
+                kw1, kw12, kw2 = dict(rinv1=rb), dict(rinv1=rb, rinv2=rf), dict(rinv2=rf)
             k11 = getattr(mod, 'fkCBF%s11_sdt' % cte)(kt, kr, pb, c1, size,
-                    pb.row_start, pb.col_start)
+                    pb.row_start, pb.col_start, **kw1)
             k12 = getattr(mod, 'fkCBF%s12_sdt' % cte)(kt, kr, pb, pf, c1, c2,
-                    size, pb.row_start, pf.col_start)
+                    size, pb.row_start, pf.col_start, **kw12)
             k22 = getattr(mod, 'fkCBF%s22_sdt' % cte)(kt, kr, pb, pf, c2, size,
-                    pf.row_start, pf.col_start)
+                    pf.row_start, pf.col_start, **kw2)
             return k11 + _upper_block(k12, pb, pf) + k22
         raise NotImplementedError(
             "Connection '{0}' is not implemented for the models based on "

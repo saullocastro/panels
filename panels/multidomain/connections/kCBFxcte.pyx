@@ -25,9 +25,10 @@ per term, `\omega_i = -w_{i,x}`, also with the kinematics of Sanders-Koiter,
 whose rotation about `y` has no term of the curvature, see
 :func:`.fkCBFxcte11`, :func:`.fkCBFxcte12` and :func:`.fkCBFxcte22`.
 
-For the models based on shear deformation theories, ``'plate_fsdt_donnell'``
-and ``'plate_tsdt_donnell'``, with 5 DOFs `u, v, w, \phi_x, \phi_y` per
-term, `\omega_i = \phi_{x,i}` and the rotation penalty is `k_r (\phi_{x,1} -
+For the models based on shear deformation theories, e.g.
+``'plate_fsdt_donnell'`` or ``'cylshell_tsdt_sanders'``, with 5 DOFs `u, v,
+w, \phi_x, \phi_y` per term, `\omega_i = \phi_{x,i}`, also with the
+kinematics of Sanders-Koiter, and the rotation penalty is `k_r (\phi_{x,1} -
 \phi_{x,2})^2`, see :func:`.fkCBFxcte11_sdt`, :func:`.fkCBFxcte12_sdt` and
 :func:`.fkCBFxcte22_sdt`. For the TSDT, the derivative `w_{,x}` that enters
 the displacement field is not penalized: at a T-joint only the rotation of
@@ -427,7 +428,7 @@ FIELDS_SDT = ('u', 'v', 'w', 'phix', 'phiy')
 
 def _check_sdt(*panels):
     for p in panels:
-        if p.model not in ('plate_fsdt_donnell', 'plate_tsdt_donnell'):
+        if p.model is None or not ('fsdt' in p.model or 'tsdt' in p.model):
             raise ValueError("Expected a model based on shear deformation "
                              "theories, got model '{0}'".format(p.model))
 

@@ -45,6 +45,54 @@ db = {
                     # the plate kernels never read r
                     'requires_r': False,
                     },
+    'cylshell_fsdt_donnell': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    'field': fsdt_tsdt_field,
+                    'matrices': cylshell_fsdt_donnell,
+                    'matrices_num': cylshell_fsdt_donnell_num,
+                    'dofs': 5,
+                    'e_num': 8,
+                    # the kernels divide by r, a radius is mandatory
+                    'requires_r': True,
+                    },
+    'cylshell_fsdt_sanders': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    'field': fsdt_tsdt_field,
+                    'matrices': cylshell_fsdt_sanders,
+                    'matrices_num': cylshell_fsdt_sanders_num,
+                    'dofs': 5,
+                    'e_num': 8,
+                    # the kernels divide by r, a radius is mandatory
+                    'requires_r': True,
+                    },
+    'cylshell_tsdt_donnell': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    'field': fsdt_tsdt_field,
+                    'matrices': cylshell_tsdt_donnell,
+                    'matrices_num': cylshell_tsdt_donnell_num,
+                    'dofs': 5,
+                    'e_num': 13,
+                    # the kernels divide by r, a radius is mandatory
+                    'requires_r': True,
+                    },
+    'cylshell_tsdt_sanders': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    'field': fsdt_tsdt_field,
+                    'matrices': cylshell_tsdt_sanders,
+                    'matrices_num': cylshell_tsdt_sanders_num,
+                    'dofs': 5,
+                    'e_num': 13,
+                    # the kernels divide by r, a radius is mandatory
+                    'requires_r': True,
+                    },
     'plate_fsdt_donnell': {
                     'linear static': True,
                     'linear buckling': True,

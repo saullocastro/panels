@@ -96,8 +96,8 @@ Models based on shear deformation theories
 
 The kernels above assume the 3 DOFs `u, v, w` of the models based on the
 classical laminated plate theory. The connections ``'SSxcte'``, ``'SSycte'``
-and ``'SB'`` of the models ``'plate_fsdt_donnell'`` and
-``'plate_tsdt_donnell'``, with the 5 DOFs `u, v, w, \phi_x, \phi_y`, are in
+and ``'SB'`` of the plate and cylindrical shell models based on the FSDT
+and TSDT, with the 5 DOFs `u, v, w, \phi_x, \phi_y`, are in
 :mod:`panels.multidomain.connections.kCsdt`, and the connections ``'BFycte'``
 and ``'BFxcte'`` of these models are the functions ``fkCBFycte*_sdt`` and
 ``fkCBFxcte*_sdt`` of :mod:`panels.multidomain.connections.kCBFycte` and

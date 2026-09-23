@@ -76,8 +76,8 @@ class Shell(object):
     x2ur, ..., y2w, y2wr``, where for instance ``x1v`` multiplies the value
     and ``x1vr`` the derivative of the approximation functions of `v` at the
     edge `x = x_1`, with ``0`` removing and ``1`` keeping that degree of
-    freedom. The models based on shear deformation theories
-    (``'plate_fsdt_donnell'`` and ``'plate_tsdt_donnell'``) have the
+    freedom. The models based on shear deformation theories, e.g.
+    ``'plate_fsdt_donnell'`` or ``'cylshell_tsdt_sanders'``, have the
     rotations `\phi_x` and `\phi_y` as independent fields, which are
     controlled by the analogous flags ``x1phix, x1phixr, ..., y2phiy,
     y2phiyr``. Their default is the hard simply supported condition, with
