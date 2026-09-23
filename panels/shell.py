@@ -37,8 +37,12 @@ def check_c(c, size):
 class Shell(object):
     r"""General shell class that can be used for plates or shells
 
-    It works for both plates and cylindrical shells. The right model is selected
-    according to parameter ``r`` (radius).
+    It works for both plates and cylindrical shells. When the attribute
+    ``model`` is not set, it is selected according to parameter ``r``
+    (radius): ``'plate_clpt_donnell'`` when ``r`` is ``None`` and
+    ``'cylshell_clpt_sanders'`` otherwise. The Donnell kinematics of
+    cylindrical shells remain available with ``model =
+    'cylshell_clpt_donnell'``, see :mod:`panels.models`.
 
     The approximation functions for the displacement fields are built using
     :ref:`Bardell's functions <theory_func_bardell>`.
@@ -68,6 +72,27 @@ class Shell(object):
 
     Notes
     -----
+    The boundary conditions are controlled by the flags ``x1u, x1ur, x2u,
+    x2ur, ..., y2w, y2wr``, where for instance ``x1v`` multiplies the value
+    and ``x1vr`` the derivative of the approximation functions of `v` at the
+    edge `x = x_1`, with ``0`` removing and ``1`` keeping that degree of
+    freedom. The models based on shear deformation theories
+    (``'plate_fsdt_donnell'`` and ``'plate_tsdt_donnell'``) have the
+    rotations `\phi_x` and `\phi_y` as independent fields, which are
+    controlled by the analogous flags ``x1phix, x1phixr, ..., y2phiy,
+    y2phiyr``. Their default is the hard simply supported condition, with
+    the tangential rotation removed at each edge (``x1phiy = x2phiy = 0`` and
+    ``y1phix = y2phix = 0``), consistent with the default boundary
+    conditions of the models based on the classical laminated plate theory.
+
+    The attribute ``fsdt_shear_correction`` controls the transverse shear
+    stiffness of the first-order shear deformation theory (FSDT): a float
+    ``k`` multiplies the uncorrected stiffness, ``A_ts = k*Abar_ts``, with
+    ``5/6`` as default, whereas ``'rohwer'``, ``'vlachoutsis'``,
+    ``'constant'`` or ``None`` select the corresponding method of
+    :meth:`composites.Laminate.calc_transverse_shear_stiffness`. The
+    third-order shear deformation theory (TSDT) needs no shear correction.
+
     The attributes ``x1, x2, y1, y2`` limit the integration domain to
     ``x1 <= x <= x2`` and ``y1 <= y <= y2``, in physical coordinates, while
     the approximation functions still span the whole ``0 <= x <= a`` and
@@ -93,6 +118,10 @@ class Shell(object):
         'y1u', 'y1ur', 'y2u', 'y2ur',
         'y1v', 'y1vr', 'y2v', 'y2vr',
         'y1w', 'y1wr', 'y2w', 'y2wr',
+        'x1phix', 'x1phixr', 'x2phix', 'x2phixr',
+        'x1phiy', 'x1phiyr', 'x2phiy', 'x2phiyr',
+        'y1phix', 'y1phixr', 'y2phix', 'y2phixr',
+        'y1phiy', 'y1phiyr', 'y2phiy', 'y2phiyr',
         'plyts', 'laminaprops', 'rhos',
         'flow', 'beta', 'gamma', 'aeromu', 'rho_air', 'speed_sound', 'Mach', 'air_speed',
         'ABD', 'force_orthotropic_laminate',
@@ -200,6 +229,27 @@ class Shell(object):
         self.y2w = 0.
         self.y2wr = 1.
 
+        #NOTE rotations, only used by the shear deformation theories, the
+        #     default is the hard simply supported condition, where the
+        #     rotation tangential to each edge is zero
+        self.x1phix = 1.
+        self.x1phixr = 1.
+        self.x2phix = 1.
+        self.x2phixr = 1.
+        self.x1phiy = 0.
+        self.x1phiyr = 1.
+        self.x2phiy = 0.
+        self.x2phiyr = 1.
+
+        self.y1phix = 0.
+        self.y1phixr = 1.
+        self.y2phix = 0.
+        self.y2phixr = 1.
+        self.y1phiy = 1.
+        self.y1phiyr = 1.
+        self.y2phiy = 1.
+        self.y2phiyr = 1.
+
         # material
         self.plyts = None
         self.laminaprops = None
@@ -261,7 +311,7 @@ class Shell(object):
             if self.r is None:
                 self.model = 'plate_clpt_donnell'
             elif self.r is not None:
-                self.model = 'cylshell_clpt_donnell'
+                self.model = 'cylshell_clpt_sanders'
 
         valid_models = sorted(modelDB.db.keys())
 
@@ -286,10 +336,16 @@ class Shell(object):
             self.plyts = [self.plyt for i in self.stack]
 
         if self.stack is not None:
+            k = self.fsdt_shear_correction
+            if k is None or isinstance(k, str):
+                shear_correction = k
+            else:
+                shear_correction = 'rohwer'
             lam = laminated_plate(stack=self.stack, plyts=self.plyts,
                                       laminaprops=self.laminaprops,
                                       rhos=self.rhos,
-                                      offset=self.offset)
+                                      offset=self.offset,
+                                      shear_correction=shear_correction)
             self.lam = lam
             self.ABD = self._get_lam_ABD()
         self.size = self.get_size()
@@ -429,15 +485,63 @@ class Shell(object):
 
 
     def _get_lam_ABD(self, silent=False):
+        r"""Constitutive matrix of the laminate, as required by the model
+
+        - Classical laminated plate theory (CLPT), ``6 x 6``: the ``ABD``
+          matrix.
+
+        - First-order shear deformation theory (FSDT), ``8 x 8``: ``[[A, B,
+          0], [B, D, 0], [0, 0, Ats]]``, where ``Ats`` is the shear corrected
+          transverse shear stiffness of the `(yz, xz)` components, see the
+          attribute ``fsdt_shear_correction``.
+
+        - Third-order shear deformation theory (TSDT), ``13 x 13``: ``[[A, B,
+          E, 0, 0], [B, D, F, 0, 0], [E, F, H, 0, 0], [0, 0, 0, Abar_ts,
+          Dtrans], [0, 0, 0, Dtrans, Ftrans]]``, without shear correction.
+
+        The rows and columns are in the order of the generalized strains of
+        each model, see :meth:`.Shell.strain`.
+
+        """
         if self.lam is None:
             raise RuntimeError('lam object is None!')
+        lam = self.lam
         if 'clpt' in self.model:
-            ABD = self.lam.ABD
+            ABD = lam.ABD
         elif 'fsdt' in self.model:
-            ABD = self.lam.ABDE
-            ABD[6:, 6:] *= self.fsdt_shear_correction
+            ABD = np.zeros((8, 8), dtype=DOUBLE)
+            ABD[:6, :6] = lam.ABD
+            k = self.fsdt_shear_correction
+            if k is None or isinstance(k, str):
+                ABD[6:, 6:] = lam.Ats
+            else:
+                ABD[6:, 6:] = k*lam.Abar_ts
+        elif 'tsdt' in self.model:
+            ABD = np.zeros((13, 13), dtype=DOUBLE)
+            ABD[0:3, 0:3] = lam.A
+            ABD[0:3, 3:6] = lam.B
+            ABD[0:3, 6:9] = lam.E
+            ABD[3:6, 0:3] = lam.B
+            ABD[3:6, 3:6] = lam.D
+            ABD[3:6, 6:9] = lam.F
+            ABD[6:9, 0:3] = lam.E
+            ABD[6:9, 3:6] = lam.F
+            ABD[6:9, 6:9] = lam.H
+            ABD[9:11, 9:11] = lam.Abar_ts
+            ABD[9:11, 11:13] = lam.Dtrans
+            ABD[11:13, 9:11] = lam.Dtrans
+            ABD[11:13, 11:13] = lam.Ftrans
 
-        if self.force_orthotropic_laminate:
+        if self.force_orthotropic_laminate and 'tsdt' in self.model:
+            msg('', silent=silent)
+            msg('Forcing orthotropic laminate...', level=2, silent=silent)
+            # the 16 and 26 terms of A, B, D, E, F, H and the 45 shear terms
+            for i in (0, 1, 3, 4, 6, 7):
+                for j in (2, 5, 8):
+                    ABD[i, j] = ABD[j, i] = 0.
+            for i, j in ((9, 10), (11, 12), (9, 12), (10, 11)):
+                ABD[i, j] = ABD[j, i] = 0.
+        elif self.force_orthotropic_laminate:
             msg('', silent=silent)
             msg('Forcing orthotropic laminate...', level=2, silent=silent)
             ABD[0, 2] = 0. # A16
@@ -854,6 +958,36 @@ class Shell(object):
 
     def calc_kA(self, size=None, row0=0, col0=0, silent=True, finalize=True):
         r"""Calculate the aerodynamic matrix using the linear piston theory
+
+        For a flow along `x`, the aerodynamic load on the shell along `w` is
+
+        .. math::
+
+            q = \beta w_{,x} + \gamma w
+
+        and the aerodynamic matrix is `[K_A] = -\int \{N_w\}^T (\beta
+        \{N_w\}_{,x} + \gamma \{N_w\}) dA`, entering the equations of motion
+        as `([K] + [K_A] + \lambda^2 [M])\{c\} = \{0\}`, where `\{N_w\}` are
+        the approximation functions of `w`. The flutter boundary does not
+        depend on the sign of `\beta`, i.e. on the flow direction. When
+        ``beta`` is not given it is calculated from the Mach number `M` as
+        `\beta = \rho_{air} U^2/\sqrt{M^2 - 1}`.
+
+        The term `\gamma w` is Krumhaar's correction of the piston theory for
+        the external flow over a cylinder, with `w` positive outwards:
+
+        .. math::
+
+            \gamma = \frac{\beta}{2 r \sqrt{M^2 - 1}}
+
+        such that an outward displacement lowers the pressure on the shell,
+        which is pulled outwards, a softening effect that does not depend on
+        the flow direction. It is obtained expanding the exact linear
+        potential flow over a cylinder with a sinusoidal radial displacement
+        for short wavelengths. Flat plates have `\gamma = 0`, and a ``gamma``
+        given for a plate model is ignored. For a flow along `y` the
+        curvature correction is not included.
+
         """
         msg('Calculating kA... ', level=2, silent=silent)
 
@@ -877,13 +1011,19 @@ class Shell(object):
                 self.Mach = 1.0001
             Mach = self.Mach
             beta = self.rho_air * self.air_speed**2 / (Mach**2 - 1)**0.5
-            if self.r != 0.:
+            #NOTE the curvature term exists only for cylindrical shells
+            if modelDB.db[self.model].get('requires_r', False):
                 gamma = beta*1./(2.*self.r*(Mach**2 - 1)**0.5)
             else:
                 gamma = 0.
         else:
             beta = self.beta
             gamma = self.gamma if self.gamma is not None else 0.
+            if not modelDB.db[self.model].get('requires_r', False):
+                if gamma != 0.:
+                    warn('gamma = {0} ignored, plates have gamma = 0'.format(
+                         gamma), level=1, silent=silent)
+                gamma = 0.
 
         self.beta = beta
         self.gamma = gamma
@@ -1019,7 +1159,12 @@ class Shell(object):
         -------
         res : dict
             A dictionary of ``np.ndarrays`` with the keys:
-            ``(x, y, exx, eyy, gxy, kxx, kyy, kxy)``
+            ``(x, y, exx, eyy, gxy, kxx, kyy, kxy)``. The models based on
+            shear deformation theories also return the transverse shear
+            strains ``(gyz, gxz)`` and, for the third-order theory, the
+            higher-order terms ``(kxx3, kyy3, kxy3, gyz2, gxz2)``, such that
+            the strains at a distance `z` from the mid-surface are
+            ``exx + z*kxx + z**3*kxx3`` and ``gyz + z**2*gyz2``.
 
         """
         #NOTE fuvw/fstrain take a ``double [::1]``, see the note in
@@ -1030,19 +1175,29 @@ class Shell(object):
         #     must be normalized first
         self._check_r()
         xs, ys, xshape, yshape = self._default_field(xs, ys, gridx, gridy)
-        fstrain = modelDB.db[self.model]['field'].fstrain
-        exx, eyy, gxy, kxx, kyy, kxy = fstrain(c, self, xs, ys, self.out_num_cores, int(NLgeom))
+        field = modelDB.db[self.model]['field']
+        strains = field.fstrain(c, self, xs, ys, self.out_num_cores, int(NLgeom))
 
         self.plot_mesh['Xs'] = xs.reshape(xshape)
         self.plot_mesh['Ys'] = ys.reshape(yshape)
-        self.fields['exx'] = exx.reshape(xshape)
-        self.fields['eyy'] = eyy.reshape(xshape)
-        self.fields['gxy'] = gxy.reshape(xshape)
-        self.fields['kxx'] = kxx.reshape(xshape)
-        self.fields['kyy'] = kyy.reshape(xshape)
-        self.fields['kxy'] = kxy.reshape(xshape)
+        for name, value in zip(self._strain_names(), strains):
+            self.fields[name] = value.reshape(xshape)
 
         return self.plot_mesh, self.fields
+
+
+    def _strain_names(self):
+        field = modelDB.db[self.model]['field']
+        if hasattr(field, 'strain_names'):
+            return field.strain_names(self)
+        return ('exx', 'eyy', 'gxy', 'kxx', 'kyy', 'kxy')
+
+
+    def _stress_names(self):
+        field = modelDB.db[self.model]['field']
+        if hasattr(field, 'stress_names'):
+            return field.stress_names(self)
+        return ('Nxx', 'Nyy', 'Nxy', 'Mxx', 'Myy', 'Mxy')
 
 
     def stress(self, c, ABD=None, xs=None, ys=None, gridx=300, gridy=300, NLgeom=True):
@@ -1074,16 +1229,15 @@ class Shell(object):
         -------
         res : dict
             A dictionary of ``np.ndarrays`` with the keys:
-            ``(x, y, Nxx, Nyy, Nxy, Mxx, Myy, Mxy)``
+            ``(x, y, Nxx, Nyy, Nxy, Mxx, Myy, Mxy)``. The models based on
+            shear deformation theories also return the transverse shear
+            forces ``(Qy, Qx)`` and, for the third-order theory, the
+            higher-order resultants ``(Pxx, Pyy, Pxy, Ry, Rx)`` conjugate to
+            ``(kxx3, kyy3, kxy3, gyz2, gxz2)``, see :meth:`.Shell.strain`.
 
         """
         plot_mesh, fields = self.strain(c, xs, ys, gridx, gridy, NLgeom)
-        exx = fields['exx']
-        eyy = fields['eyy']
-        gxy = fields['gxy']
-        kxx = fields['kxx']
-        kyy = fields['kyy']
-        kxy = fields['kxy']
+        strains = [fields[name] for name in self._strain_names()]
         if ABD is None:
             ABD = self.ABD
         if ABD is None:
@@ -1091,12 +1245,8 @@ class Shell(object):
         #TODO implement for variable stiffness!
 
         self.plot_mesh = plot_mesh
-        self.fields['Nxx'] = exx*ABD[0, 0] + eyy*ABD[0, 1] + gxy*ABD[0, 2] + kxx*ABD[0, 3] + kyy*ABD[0, 4] + kxy*ABD[0, 5]
-        self.fields['Nyy'] = exx*ABD[1, 0] + eyy*ABD[1, 1] + gxy*ABD[1, 2] + kxx*ABD[1, 3] + kyy*ABD[1, 4] + kxy*ABD[1, 5]
-        self.fields['Nxy'] = exx*ABD[2, 0] + eyy*ABD[2, 1] + gxy*ABD[2, 2] + kxx*ABD[2, 3] + kyy*ABD[2, 4] + kxy*ABD[2, 5]
-        self.fields['Mxx'] = exx*ABD[3, 0] + eyy*ABD[3, 1] + gxy*ABD[3, 2] + kxx*ABD[3, 3] + kyy*ABD[3, 4] + kxy*ABD[3, 5]
-        self.fields['Myy'] = exx*ABD[4, 0] + eyy*ABD[4, 1] + gxy*ABD[4, 2] + kxx*ABD[4, 3] + kyy*ABD[4, 4] + kxy*ABD[4, 5]
-        self.fields['Mxy'] = exx*ABD[5, 0] + eyy*ABD[5, 1] + gxy*ABD[5, 2] + kxx*ABD[5, 3] + kyy*ABD[5, 4] + kxy*ABD[5, 5]
+        for i, name in enumerate(self._stress_names()):
+            self.fields[name] = sum(e*ABD[i, j] for j, e in enumerate(strains))
 
         return self.plot_mesh, self.fields
 
