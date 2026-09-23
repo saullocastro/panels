@@ -1,5 +1,5 @@
-import sys
-sys.path.append(r'C:\repositories\panels')
+import os
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 import numpy as np
 from sympy import Matrix as M, Symbol, init_printing, var
@@ -96,14 +96,16 @@ kG = intx*inty/4*GA.T*Nmat*GB
 maux = M([[   1,   0,   0,  -d,  0],
           [   0,   1,   0,   0, -d],
           [   0,   0,   1,   0,  0],
-          [ -d,   0, 0, (h^2/12 + d^2), 0],
-          [    0, -d, 0, 0, (h^2/12 + d^2)]])
+          [ -d,   0, 0, (h**2/12 + d**2), 0],
+          [    0, -d, 0, 0, (h**2/12 + d**2)]])
 
 gA5 = M([suA, svA, swA, -(2/a)*swAxi, -(2/b)*swAeta])
 gB5 = M([suB, svB, swB, -(2/a)*swBxi, -(2/b)*swBeta])
 kM = intx*inty/4*h*rho*gA5.T*maux*gB5
 
-# Aerodynamic and damping matrix using piston's theory
+# Aerodynamic and damping matrix using piston's theory, with the aerodynamic
+# load q = beta*w,x + gamma*w along w and the curvature term gamma*w, see
+# Shell.calc_kA()
 
 kAx = -intx*inty/4 * (beta*(2/a)*swAxi.T*swB + gamma*swA.T*swB)
 kAy = -intx*inty/4 * beta*(2/b)*swAeta.T*swB

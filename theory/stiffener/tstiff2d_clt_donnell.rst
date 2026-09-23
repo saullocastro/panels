@@ -1,1 +1,1 @@
-please, refer to ../stiffpanelbay/tstiff2d_clt_donnell
+please, refer to ../multidomain_panels/tstiff2d_clt_donnell
