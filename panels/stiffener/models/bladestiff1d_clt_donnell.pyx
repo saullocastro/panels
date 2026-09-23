@@ -172,6 +172,79 @@ def fkMf(double ys, double rho, double h, double hb, double hf, double a,
          double y1v, double y1vr, double y2v, double y2vr,
          double y1w, double y1wr, double y2w, double y2wr,
          int size, int row0, int col0):
+    r"""Mass matrix of the 1D flange of the blade stiffener
+
+    The flange, of height `b_f` and thickness `h_f`, is a beam along `x` at
+    `y = y_s`, below the panel, whose centroid is at the distance `d_f = b_f/2
+    + h_b + h/2` from the mid-surface of the panel, `h` being the thickness of
+    the panel and `h_b` the thickness of the stiffener's base. With the
+    rotations `\phi_x = -w_{,x}` and `\phi_y = -w_{,y}` of the panel, the
+    mass matrix is:
+
+    .. math::
+        [M_{sf}] = \rho h_f b_f \int_x [S(x, y_s)]^T [k_{mf}] [S(x, y_s)] dx
+
+    where `[S]` gives `\{u, v, w, \phi_x, \phi_y\}^T` and
+
+    .. math::
+        [k_{mf}] = \begin{bmatrix}
+                   1 & 0 & 0 & -d_f & 0 \\
+                   0 & 1 & 0 & 0 & -d_f \\
+                   0 & 0 & 1 & 0 & 0 \\
+                   -d_f & 0 & 0 & k_{mf44} & 0 \\
+                   0 & -d_f & 0 & 0 & k_{mf55}
+                   \end{bmatrix}, \quad
+        k_{mf44} = k_{mf55} = \frac{b_f^2}{12} + d_f^2
+                 = \frac{b_f^2}{3} + \frac{b_f (h + 2 h_b)}{2}
+                   + \frac{(h + 2 h_b)^2}{4}
+
+    obtained integrating the kinetic energy through the height of the
+    flange, see ``theory/stiffener/mass_matrix_1D_stiffeners.py`` and
+    ``theory/multidomain_panels/bladestiff1d_clt_donnell/``.
+
+    .. note:: Correction with respect to Eq. (26) of Castro et al. (2016)
+              [castro2016FlutterPanel]_, whose matrix `[k_{mf}]` has `-2
+              d_f` in the terms coupling the displacements `u, v` and the
+              rotations `\phi_x, \phi_y`. The in-plane displacements of the
+              flange at its centroid are `u - d_f \phi_x` and `v - d_f
+              \phi_y`, and the term `-2 d_f u \phi_x` of `(u - d_f
+              \phi_x)^2` is shared by the two symmetric entries `(1, 4)` and
+              `(4, 1)` of `[k_{mf}]`, which are then `-d_f`, consistent with
+              the term `d_f^2` of `k_{mf44}` and with the offset of the mass
+              matrix of the shells. Up to version 0.7.1 this kernel used `-2
+              d_f`, doubling the inertial coupling between the flange and the
+              panel. Eq. (27) of the same paper, for the stiffener's base, has
+              the same factor, `-2 d_b`, but the base is a :class:`.Shell`
+              with offset whose mass matrix uses `-d_b`.
+
+    Parameters
+    ----------
+    ys : float
+        Coordinate `y` of the stiffener.
+    rho : float
+        Density of the flange.
+    h : float
+        Thickness of the panel.
+    hb, hf : float
+        Thicknesses of the stiffener's base and of the flange.
+    a, b : float
+        Dimensions of the panel.
+    bf, df : float
+        Height of the flange and distance `d_f` of its centroid to the
+        mid-surface of the panel.
+    m, n : int
+        Number of terms along `x` and `y`.
+    x1u, ..., y2wr : float
+        Boundary conditions of the panel.
+    size, row0, col0 : int
+        Size of the global matrix and position of this matrix in it.
+
+    Returns
+    -------
+    kMf : :class:`scipy.sparse.coo_matrix`
+        Upper triangle of the mass matrix of the flange.
+
+    """
     cdef double fAufBu, fAufBwxi, fAvfBv, fAvfBw, fAwxifBu, fAwfBv, fAwfBw
     cdef double fAwxifBwxi
     cdef double gAu, gBu, gAv, gBv, gAw, gBw, gAweta, gBweta
@@ -233,7 +306,7 @@ def fkMf(double ys, double rho, double h, double hb, double hf, double a,
                         c += 1
                         kMfr[c] = row+0
                         kMfc[c] = col+2
-                        kMfv[c] += 2*bf*df*fAufBwxi*gAu*gBw*hf*rho
+                        kMfv[c] += bf*df*fAufBwxi*gAu*gBw*hf*rho
                         c += 1
                         kMfr[c] = row+1
                         kMfc[c] = col+1
@@ -241,15 +314,15 @@ def fkMf(double ys, double rho, double h, double hb, double hf, double a,
                         c += 1
                         kMfr[c] = row+1
                         kMfc[c] = col+2
-                        kMfv[c] += 2*a*bf*df*fAvfBw*gAv*gBweta*hf*rho/b
+                        kMfv[c] += a*bf*df*fAvfBw*gAv*gBweta*hf*rho/b
                         c += 1
                         kMfr[c] = row+2
                         kMfc[c] = col+0
-                        kMfv[c] += 2*bf*df*fAwxifBu*gAw*gBu*hf*rho
+                        kMfv[c] += bf*df*fAwxifBu*gAw*gBu*hf*rho
                         c += 1
                         kMfr[c] = row+2
                         kMfc[c] = col+1
-                        kMfv[c] += 2*a*bf*df*fAwfBv*gAweta*gBv*hf*rho/b
+                        kMfv[c] += a*bf*df*fAwfBv*gAweta*gBv*hf*rho/b
                         c += 1
                         kMfr[c] = row+2
                         kMfc[c] = col+2
