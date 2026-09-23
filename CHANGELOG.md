@@ -1,5 +1,217 @@
 # Changelog
 
+## 0.8.0 (2026-09-23)
+
+### Breaking: default model of cylindrical shells
+
+A `Shell` with a radius `r` and no `model` uses the Sanders-Koiter kinematics,
+`'cylshell_clpt_sanders'`, instead of the Donnell kinematics. The Donnell
+kinematics remain available with `model='cylshell_clpt_donnell'`. The
+regression values of the multi-domain cylinders of
+`tests/multidomain/test_cylinder.py` and
+`tests/multidomain/test_cylinder_blade_stiffened.py` decreased by 0.2% to
+0.6%, the Donnell values are kept in the comments.
+
+### New models
+
+- `'cylshell_clpt_sanders'`: cylindrical shells with the classical laminated
+  plate theory (CLPT) and the Sanders-Koiter kinematics, whose strains vanish
+  for any rigid-body motion. The rotation of the normal about the axis,
+  `phiy = -w,y + v/r`, enters the non-linear strains, the geometric stiffness
+  matrix, the mass matrix, the field outputs and the point constraints.
+- `'plate_fsdt_donnell'`: plates with the first-order shear deformation
+  theory (FSDT) and von Karman kinematics, with 5 DOFs `u, v, w, phix, phiy`
+  per term. The shear correction is controlled by
+  `Shell.fsdt_shear_correction`: `'rohwer'`, the default, `'vlachoutsis'`,
+  `'constant'` or `None` select the method of
+  `composites.Laminate.calc_transverse_shear_stiffness`, whereas a float `k`
+  multiplies the uncorrected transverse shear stiffness. The equilibrium
+  approach of Rohwer (1988) gives `k = 5/6` for a homogeneous plate and
+  accounts for the stacking sequence otherwise. The tests compared with
+  references that use `k = 5/6` set it explicitly.
+- `'plate_tsdt_donnell'`: plates with the third-order shear deformation
+  theory of Reddy (1984) and von Karman kinematics, with 5 DOFs per term.
+- `'cylshell_fsdt_donnell'`, `'cylshell_tsdt_donnell'`: cylindrical shells
+  with the FSDT and the TSDT and the Donnell kinematics, 5 DOFs per term.
+- `'cylshell_fsdt_sanders'`, `'cylshell_tsdt_sanders'`: cylindrical shells
+  with the FSDT and the TSDT and the Sanders-Koiter kinematics, 5 DOFs per
+  term, whose strains, including the transverse shear strains, vanish for
+  any rigid-body motion. The rotation of the normal about the axis, `phiy +
+  v/r`, enters the displacement field and the mass matrix, the changes of
+  curvature include `v,y/r` and the rotation about the normal, and the
+  non-linear terms use `w,y - v/r`, following Sanders (1959, 1963) and, for
+  the TSDT, Reddy and Liu (1985), with no Sanders-Koiter terms in the
+  third-order terms. The field output `phiy` and the approximation `fg` of
+  `phiy` are the rotation of the normal `phiy + v/r`, which the connections
+  `'SSxcte'`, `'SSycte'`, `'SB'` and `'BFycte'` also use.
+- All the new models provide the analytical and the numerically integrated
+  constitutive, geometric, mass and aerodynamic matrices, the internal force
+  vector and the exact tangent stiffness matrix, such that linear static,
+  linear buckling, frequency, flutter and non-linear static analyses are
+  available. The integrands are generated from the kinematics in
+  `theory/shells/cylshell_clpt_sanders/` and `theory/shells/fsdt_tsdt/`,
+  which generates the six models based on the FSDT and TSDT, plates and
+  cylinders, and replaces `theory/shells/plate_fsdt_tsdt_donnell/`.
+
+### API
+
+- The boundary condition flags of the rotations, `x1phix, x1phixr, ...,
+  y2phiyr`, used by the FSDT and TSDT models. Their default is the hard simply
+  supported condition, with the rotation tangential to each edge removed.
+- `Shell.strain()` and `Shell.stress()` also return the transverse shear
+  strains and forces, and the higher-order terms of the TSDT, for the models
+  based on shear deformation theories.
+- `MultiDomain` supports the FSDT and TSDT models with the connections
+  `'SSxcte'`, `'SSycte'` and `'SB'`, implemented in
+  `panels.multidomain.connections.kCsdt`, and `'BFycte'` and `'BFxcte'`,
+  implemented in the functions `fkCBFycte*_sdt` and `fkCBFxcte*_sdt` of
+  `kCBFycte.pyx` and `kCBFxcte.pyx`. The edge connections penalize
+  `u, v, w` with `kt` and the rotations `phix, phiy` with `kr`, and for the
+  TSDT also the normal derivative of `w`. The `'SB'` connection penalizes the
+  displacements at the interface of the two laminates and, when `kr` is
+  given, the difference of their rotations, with which two FSDT laminates
+  behave like a single laminate with both stacking sequences. The
+  base-flange connections penalize the rotation of the normals about the
+  axis of the connection, `phiy` (`'BFycte'`) and `phix` (`'BFxcte'`), where
+  the models based on the classical laminated plate theory use `-w,y` and
+  `-w,x`; for the TSDT the derivative of `w` is not penalized. `'SB_TSL'`,
+  and connections between models with a different number of DOFs, raise
+  `NotImplementedError`.
+- `MultiDomain.strain()` and `MultiDomain.stress()` also return the
+  transverse shear strains and forces, and the higher-order terms of the
+  TSDT, for the panels of the models based on shear deformation theories.
+- `StiffPanelBay` raises `NotImplementedError` for models with 5 DOFs, since
+  its stiffeners assume 3 DOFs.
+
+### Tests
+
+- Literature benchmarks for the new models: Leissa (1973), Loy et al. (1997)
+  and Batdorf for Donnell against Sanders kinematics, Sanders' rigid-body
+  criterion, Noor (1973, 1975), Whitney and Pagano (1970), Pagano (1970),
+  Reddy (1984), Liew et al. (1993), Hashemi and Arsanjani (2005) and Leissa
+  (1973) for the plates. The existing tests also run the new models.
+- Multi-domain FSDT and TSDT plates, `tests/multidomain/test_multidomain_fsdt_tsdt.py`:
+  plates divided in two and four domains reproduce the frequencies of Noor
+  (1973), the deflection of Pagano (1970) at the interior corner of four
+  domains and the single-domain results; two FSDT laminates connected with
+  `'SB'` reproduce the single laminate with both stacking sequences, and
+  without the rotations tied converge to it with `(h/a)^2`, as the TSDT
+  laminates do.
+- Cylindrical shells with the FSDT and TSDT,
+  `tests/tests_shell/test_fsdt_tsdt_cylinders.py`: Leissa (1973), Table 2.8,
+  where the Sanders-Koiter FSDT and TSDT are within 0.07 % of 3D elasticity
+  for `R/h = 20`; Batdorf's axial buckling of a thin panel; Sanders'
+  rigid-body criterion, including the transverse shear strains; an exact
+  Navier solution of a thick cross-ply shell; the consistency of the
+  analytical and numerical matrices and of the tangent stiffness matrix; a
+  cylinder divided in two domains, and the base-flange connection of a
+  Sanders-Koiter skin. The generic tests also run the new models.
+- `tests/tests_shell/test_tangent_consistency.py`: the Newton-Raphson test
+  measures the order of convergence with `log(e_k+1/e_k)/log(e_k/e_k-1)`,
+  which is 2 for `e_k+1 = C e_k^2` whatever the constant `C`, instead of
+  `log(e_k+1)/log(e_k)`, which falls below 2 for large `C`, and discards the
+  manufactured equilibrium states whose tangent stiffness is nearly
+  singular, where `C` grows with the norm of its inverse.
+
+### Bug fixes
+
+- Curvature term `gamma` of the piston theory, Krumhaar's correction for the
+  external flow over a cylinder, made consistent in all kernels. With the
+  aerodynamic load `q = beta*w,x + gamma*w` along `w`, positive outwards,
+  `gamma` softens the shell independently of the flow direction, as obtained
+  expanding the exact potential flow over a cylinder with a sinusoidal radial
+  displacement (`tests/tests_shell/test_aero_curvature.py`). The numerical
+  kernel `cylshell_clpt_donnell_num.fkAx_num`, also used by
+  `'cylshell_clpt_sanders'`, had the opposite sign of the analytical
+  `fkAx`, which changed the flutter of cylinders with partial integration
+  domains. Flat plates have `gamma = 0`: the kernels of the plate models no
+  longer include the term, `Shell.calc_kA()` ignores a `gamma` given for a
+  plate with a warning, and `StiffPanelBay` computes `gamma` only for the
+  cylindrical models. The load and the sign convention are documented in
+  `Shell.calc_kA()`.
+- Mass matrix of the 1D flange of `BladeStiff1D`, kernel
+  `bladestiff1d_clt_donnell.fkMf`: the terms coupling the displacements
+  `u, v` and the rotations `phix, phiy` were twice the value given by the
+  integration of the kinetic energy through the height of the flange. They
+  followed Eq. (26) of Castro et al. (2016),
+  https://doi.org/10.1016/j.compstruct.2015.12.056, whose matrix `kmf` has
+  `-2*df` where `-df` is correct. The correction is documented in the
+  docstring of `fkMf` and checked against the kinetic energy integrated from
+  the displacement field (`tests/tests_stiffpanelbay/test_bladestiff1d_mass.py`).
+  The base of the stiffener is a `Shell` with offset and was not affected,
+  although Eq. (27) of the same paper has the same factor.
+- `BladeStiff1D.hb` stayed zero with a base, which removed the thickness of
+  the base from the rotary inertia of the flange in `fkMf`.
+- The rotation penalty of the connection `'BFycte'` used `w,y` for the skin
+  also with the Sanders-Koiter kinematics, whose rotation about `x` is
+  `w,y - v/r`. The kernels of `kCBFycte.pyx` take the optional arguments
+  `rinv1` and `rinv2`, `1/r` of each panel with the Sanders-Koiter kinematics
+  and zero otherwise, set by `MultiDomain`. A rigid-body rotation of a
+  stiffened cylinder about its axis is now free of energy
+  (`tests/multidomain/test_bf_sanders.py`). The matrices of the Donnell
+  kinematics and of flat plates are unchanged, and `'BFxcte'` needs no
+  change, since the rotation about `y` is `-w,x` for both kinematics. The
+  buckling loads of the blade-stiffened cylinders of
+  `tests/multidomain/test_cylinder_blade_stiffened.py` increased by 0.003%
+  and 0.18%.
+- `'BFycte'` and `'BFxcte'` took the first panel in the assembly as the
+  base, whatever `p1` and `p2`: with the flange before the base the flange
+  was rotated by 90 degrees in the opposite direction. `p1` is now always
+  the base and `p2` the flange, as documented. The assemblies of the
+  repository have the base first and are not affected
+  (`tests/multidomain/test_bf_sdt.py`, both orders).
+- `'SB_TSL'`: removed the fallback to the kernels of `kCSB_dmg.pyx` for
+  panels of different dimensions, which could not be reached, since both
+  assemblies require panels of the same dimensions and `MultiDomain` raises
+  an error otherwise.
+
+### Theory
+
+- `theory/multidomain_penalization/connections.py` matches the current
+  kernels: the curvature penalty removed from `kCSSxcte` is no longer
+  derived, `kCBFxcte`, the rotation of the Sanders-Koiter kinematics of
+  `kCBFycte` and the connections of the FSDT and TSDT models of `kCsdt.py`
+  and of `kCBFycte.pyx` and `kCBFxcte.pyx` were added, and the script runs
+  from any location.
+- The `^` of `theory/shells/cylshell_clpt_donnell/cylshell_clpt_donnell.py`,
+  which sympy took as a logical XOR in the mass matrix, is now a power.
+- The Mathematica notebooks were replaced by SymPy scripts, verified against
+  the notebooks and against the kernels:
+  - `theory/func/bardell/bardell_integrals_C.py`, which writes
+    `panels/core/src/bardell.cpp` and `panels/core/include/bardell.hpp`
+    byte for byte, instead of `bardell_integrals*.nb`;
+  - `theory/func/bardell/fuvw.py`, the displacement field of the CLPT with
+    the Donnell and Sanders-Koiter kinematics and of the FSDT and TSDT,
+    checked against `fg` of the field modules, instead of `fuvw.nb`;
+  - `bladestiff1d_clt_donnell.py` and `bladestiff2d_clt_donnell.py` in
+    `theory/multidomain_panels/`, and
+    `theory/stiffener/mass_matrix_1D_stiffeners.py`, which also replaces
+    `theory/multidomain_panels/mass_matrix.nb`;
+  - `connections.py`, `plate_clpt_donnell.py` and `cylshell_clpt_donnell.py`,
+    which already derived the matrices of their notebooks.
+
+  The notebook of the cone is kept, and the T stiffener
+  (`tstiff2d_clt_donnell`) is kept as it was. Elsewhere, the scripts that
+  converted the Mathematica output (`print_expressions_python.py`,
+  `print_bardell_integrals_*.py`) and all the old outputs of the theory
+  folder were removed. The generator of the
+  Sanders cylinder is now `theory/shells/cylshell_clpt_sanders/derive_expressions.py`.
+
+### Documentation
+
+- `doc/source/cohesive_zone.rst`, the theory of the cohesive zone of the
+  `'SB_TSL'` connection, its deviations from the thesis of D'Souza (2024),
+  its verification, the convergence study and the validation against the
+  literature, replaces
+  `theory/multidomain_penalization/cohesive_zone_deviations_from_thesis.tex`.
+  What is specific to a function is now in its docstring:
+  `panels.multidomain.connections.kCSB_dmg` and the methods of `MultiDomain`
+  of the `'SB_TSL'` connection.
+- `doc/source/bardell.rst` documents the SymPy scripts of the integrals and
+  of the displacement field.
+- The tables of the validation of `doc/source/cohesive_zone.rst` include the
+  DCB benchmarks of Krueger (2008).
+
 ## 0.7.1 (2026-09-21)
 
 ### Requirements

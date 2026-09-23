@@ -600,7 +600,9 @@ def fkAx_num(object shell, int size, int row0, int col0, int nx, int ny):
                                 if ptx == 0 and pty == 0:
                                     kAr[c] = row+2
                                     kAc[c] = col+2
-                                kAv[c] += weight*( 0.25*intx*inty*(fAw*fBw*gAw*gBw*gamma - 2*beta*fAwxi*fBw*gAw*gBw/a) )
+                                #NOTE the curvature term -gamma*w of the
+                                #      pressure, see Shell.calc_kA()
+                                kAv[c] += weight*( -0.25*intx*inty*(fAw*fBw*gAw*gBw*gamma + 2*beta*fAwxi*fBw*gAw*gBw/a) )
 
     kAx = coo_matrix((kAv, (kAr, kAc)), shape=(size, size))
 

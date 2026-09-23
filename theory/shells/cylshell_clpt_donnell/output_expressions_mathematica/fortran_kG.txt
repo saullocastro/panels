@@ -1,4 +1,0 @@
-List(List(0,0,0),List(0,0,0),List(0,0,
-   (fAwxi*fBwxi*gAw*gBw*intx*inty*Nxx)/a**2 + 
-    ((fAw*fBwxi*gAweta*gBw + fAwxi*fBw*gAw*gBweta)*intx*inty*Nxy)/(a*b) + 
-    (fAw*fBw*gAweta*gBweta*intx*inty*Nyy)/b**2))

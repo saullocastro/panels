@@ -40,6 +40,9 @@ def test_nonlinear():
     for model in [
             'plate_clpt_donnell',
             'cylshell_clpt_donnell',
+            'cylshell_clpt_sanders',
+            'plate_fsdt_donnell',
+            'plate_tsdt_donnell',
                   ]:
         print('Testing model: %s' % model)
         s = Shell()
@@ -130,6 +133,13 @@ def test_nonlinear():
         orders = [np.log(e1)/np.log(e0) for e0, e1 in zip(errors[:-1], errors[1:])
                   if 1.e-15 < e1 and e0 < 1.e-2]
         print('  convergence orders', orders)
+        if 'fsdt' in model or 'tsdt' in model:
+            #NOTE for this very thin plate, a/h = 8000, the residual of the
+            #     shear deformation theories reaches its round-off floor, of
+            #     the order of eps*(G/E)*(a/h)**2 ~ 1e-9, within the asymptotic
+            #     range, where the order cannot be measured; their quadratic
+            #     convergence is pinned by test_tangent_consistency.py
+            continue
         assert len(orders) >= 2
         assert min(orders) > 1.6, 'convergence is not quadratic: %s' % orders
 

@@ -683,7 +683,7 @@ def fkM_num(object shell, double offset, object hrho_input, int size,
 
 def fkAx_num(object shell, int size, int row0, int col0, int nx, int ny):
     cdef double x1, x2, y1, y2, xinf, xsup, yinf, ysup
-    cdef double a, b, beta, gamma, intx, inty
+    cdef double a, b, beta, intx, inty
     cdef int m, n
     cdef double x1w, x1wr, x2w, x2wr
     cdef double y1w, y1wr, y2w, y2wr
@@ -710,7 +710,6 @@ def fkAx_num(object shell, int size, int row0, int col0, int nx, int ny):
     #      below gives exactly xi1 = eta1 = -1 and xi2 = eta2 = +1
     x1, x2, y1, y2 = shell.integration_limits()
     beta = shell.beta
-    gamma = shell.gamma
     x1w = shell.x1w; x1wr = shell.x1wr; x2w = shell.x2w; x2wr = shell.x2wr
     y1w = shell.y1w; y1wr = shell.y1wr; y2w = shell.y2w; y2wr = shell.y2wr
 
@@ -769,7 +768,9 @@ def fkAx_num(object shell, int size, int row0, int col0, int nx, int ny):
                                 if ptx == 0 and pty == 0:
                                     kAr[c] = row+2
                                     kAc[c] = col+2
-                                kAv[c] += weight*( 0.25*intx*inty*(fAw*fBw*gAw*gBw*gamma - 2*beta*fAwxi*fBw*gAw*gBw/a) )
+                                #NOTE flat plates have no curvature term
+                                #      gamma, see Shell.calc_kA()
+                                kAv[c] += weight*( 0.25*intx*inty*(-2*beta*fAwxi*fBw*gAw*gBw/a) )
 
     kAx = coo_matrix((kAv, (kAr, kAc)), shape=(size, size))
 

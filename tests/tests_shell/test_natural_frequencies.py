@@ -7,7 +7,10 @@ from structsolve import freq
 from panels.shell import Shell
 
 
-models = ['plate_clpt_donnell', 'cylshell_clpt_donnell']
+models = ['plate_clpt_donnell', 'cylshell_clpt_donnell',
+          'cylshell_clpt_sanders', 'plate_fsdt_donnell', 'plate_tsdt_donnell',
+          'cylshell_fsdt_donnell', 'cylshell_fsdt_sanders',
+          'cylshell_tsdt_donnell', 'cylshell_tsdt_sanders']
 
 def test_panel_freq():
     for model in models:

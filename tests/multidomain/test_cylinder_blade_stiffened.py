@@ -30,7 +30,10 @@ def test_cylinder_blade_stiffened_compression_lb_Nxx_cte():
 
     assy.plot(eigvecs[:, 0], 'skin', filename='tmp_cylinder_blade_stiffened_compression_lb_Nxx_cte_eigvec.png')
 
-    assert np.isclose(Nxxs[0]*eigvals[0], -51905.843, atol=0.01, rtol=0.001)
+    #NOTE Sanders kinematics, the default for cylinders, the Donnell
+    #     kinematics gave -51905.843, and -51605.448 with the rotation of
+    #     'BFycte' without the term v/r of the Sanders kinematics
+    assert np.isclose(Nxxs[0]*eigvals[0], -51606.918, atol=0.01, rtol=0.001)
 
 
 def test_cylinder_blade_stiffened_compression_lb_Nxx_from_static():
@@ -59,7 +62,10 @@ def test_cylinder_blade_stiffened_compression_lb_Nxx_from_static():
     assy.plot(c, 'skin', vec='Nyy', filename='tmp_cylinder_blade_stiffened_compression_lb_Nxx_from_static_Nyy.png', colorbar=True)
     assy.plot(eigvecs[:, 0], 'skin', filename='tmp_cylinder_blade_stiffened_compression_lb_Nxx_from_static_eigvec.png')
 
-    assert np.isclose(Nxxs[0]*eigvals[0], -40003, atol=0.01, rtol=0.001)
+    #NOTE Sanders kinematics, the default for cylinders, the Donnell
+    #     kinematics gave -40003, and -39921.838 with the rotation of
+    #     'BFycte' without the term v/r of the Sanders kinematics
+    assert np.isclose(Nxxs[0]*eigvals[0], -39993.838, atol=0.01, rtol=0.001)
 
 
 def test_cylinder_blade_stiffened_compression_lb_pd_from_static():

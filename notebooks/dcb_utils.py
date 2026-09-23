@@ -18,7 +18,7 @@ displacement of the top arm.
 The nonlinear solution follows ``tests/multidomain/test_dcb_damage.py``:
 modified Newton-Raphson with the consistent tangent of the cohesive zone, a
 linear predictor, backtracking line search and bisection of increments.
-See theory/multidomain_penalization/cohesive_zone_deviations_from_thesis.tex
+See doc/source/cohesive_zone.rst
 
 Units: N, mm, MPa.
 
@@ -158,6 +158,31 @@ def solve_dcb(case, openings, kw=1.e6, epsilon=1.e-4, NR_kT_update=3,
     openings : array-like
         Increasing opening displacements `\delta` of the arm tips, the tips
         move `\pm \delta/2`.
+    kw : float, optional
+        Penalty stiffness of the prescribed displacements.
+    epsilon : float, optional
+        Tolerance of the convergence criterion, the ratio between the scaled
+        norm of the residual and the largest of those of the internal force
+        and of the reaction of the prescribed displacements.
+    NR_kT_update : int, optional
+        The tangent stiffness of the panels is refreshed every
+        ``NR_kT_update`` iterations, the secant and the damage-rate
+        stiffness of the cohesive zone at every iteration.
+    kT_pan_reuse_steps : int, optional
+        While no point of the cohesive zone is softening (`0 < d < 1`), the
+        tangent stiffness of the panels is reused for up to this number of
+        openings. The points that are fully damaged from the start, outside
+        ``bond_width``, do not count as damage.
+    line_search_max : int, optional
+        Maximum number of halvings of the step of the backtracking line
+        search. A trial whose residual is not finite counts as an infinite
+        norm.
+    max_NR_iter, max_bisections : int, optional
+        An opening that does not converge in ``max_NR_iter`` iterations, or
+        whose ratio of the convergence criterion is not finite or exceeds
+        `10^3`, is bisected from the last converged state; the analysis is
+        aborted only when a sub-increment of ``2**-max_bisections`` of the
+        original increment still does not converge.
     save : str, optional
         ``.npz`` file updated after every converged opening.
 
@@ -363,7 +388,13 @@ def bending_modulus(case):
 def chi_williams(E11, E22, G13):
     r"""Crack length correction factor of corrected beam theory
 
-    `a_{eff} = a + \chi h`, Williams (1989)
+    `a_{eff} = a + \chi h`, Williams (1989), with:
+
+    .. math::
+
+        \chi = \sqrt{\frac{E_{11}}{11 G_{13}} \left[3 - 2 \left(
+        \frac{\Gamma}{1 + \Gamma} \right)^2 \right]}, \qquad
+        \Gamma = 1.18 \frac{\sqrt{E_{11} E_{22}}}{G_{13}}
 
     """
     Gamma = 1.18*np.sqrt(E11*E22)/G13
@@ -526,7 +557,20 @@ def resolution(case, terms_per_decay=1.5, points_per_lcz=10., m_max=25):
 
 
 def discretize(case, L_tsl, terms_per_decay=1.5, points_per_lcz=10., m_max=25):
-    """Sets ``L_tsl``, ``m_tsl`` and ``nx`` of ``case`` from :func:`resolution`"""
+    r"""Sets ``L_tsl``, ``m_tsl`` and ``nx`` of ``case`` from :func:`resolution`
+
+    With `\lambda` and `l_{cz}` of :func:`resolution`:
+
+    - `m_{tsl} = \lceil 1.5\,\lambda L_{tsl} \rceil`, at most ``m_max`` = 25
+      terms;
+    - `n_x = 10\,L_{tsl}/l_{cz}`, but not less than `4\,m_{tsl}` to
+      integrate the products of the approximation functions, rounded up to a
+      multiple of 10 and with at most 300 points, the Gauss-Legendre rules of
+      ``panels`` going up to 304 points.
+
+    Returns a copy of ``case``.
+
+    """
     lam, lcz, _ = resolution(case, terms_per_decay, points_per_lcz, m_max)
     case = dict(case)
     case['L_tsl'] = L_tsl

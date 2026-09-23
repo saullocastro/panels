@@ -28,7 +28,7 @@ def test_check_c():
 
 
 @pytest.mark.parametrize('kwargs, match', [
-    (dict(model='plate_fsdt_donnell'), 'valid models'),
+    (dict(model='plate_unknown_theory'), 'valid models'),
     (dict(stack=[]), 'stack must be defined'),
     (dict(laminaprop=None), 'laminaprop must be defined'),
     (dict(plyt=None), 'plyt must be defined'),

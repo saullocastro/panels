@@ -9,7 +9,10 @@ from panels.shell import Shell
 
 def test_panel_fkG_num():
     for model in ['plate_clpt_donnell',
-                  'cylshell_clpt_donnell']:
+                  'cylshell_clpt_donnell',
+                  'cylshell_clpt_sanders',
+                  'plate_fsdt_donnell',
+                  'plate_tsdt_donnell']:
         print('Checking fkG_num for model {0}'.format(model))
         # ssss
         p = Shell()
@@ -63,7 +66,10 @@ def test_panel_fkG_num():
 
 def test_panel_fkG_num_ABDnxny():
     for model in ['plate_clpt_donnell',
-                  'cylshell_clpt_donnell']:
+                  'cylshell_clpt_donnell',
+                  'cylshell_clpt_sanders',
+                  'plate_fsdt_donnell',
+                  'plate_tsdt_donnell']:
         print('Checking fkG_num for model {0}'.format(model))
         # ssss
         p = Shell()

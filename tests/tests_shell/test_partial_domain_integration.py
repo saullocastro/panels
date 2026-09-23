@@ -2,6 +2,7 @@ import sys
 sys.path.append('../..')
 
 import numpy as np
+import pytest
 
 from panels.shell import Shell
 from panels.models.plate_clpt_donnell_num import fkC_num as plate_kC
@@ -40,7 +41,13 @@ def test_partial_domain_integration():
     assert np.allclose(kCfull.toarray(), (kC_1 + kC_2).toarray())
 
 
-def test_partial_domain_calc_matrices():
+@pytest.mark.parametrize('model', ['plate_clpt_donnell',
+                                   'cylshell_clpt_sanders',
+                                   'plate_fsdt_donnell',
+                                   'plate_tsdt_donnell',
+                                   'cylshell_fsdt_sanders',
+                                   'cylshell_tsdt_donnell'])
+def test_partial_domain_calc_matrices(model):
     """Shell.calc_kC/kG/kM must honour (x1, x2, y1, y2)
 
     The analytical closed-form matrices always integrate the full domain, so
@@ -52,7 +59,9 @@ def test_partial_domain_calc_matrices():
     kwargs = dict(a=0.7, b=0.3, stack=[0, 45, -45, 90, 90, -45, 45, 0],
                   plyt=0.125e-3, rho=1600.,
                   laminaprop=(142.5e9, 8.7e9, 0.28, 5.1e9, 5.1e9, 5.1e9),
-                  model='plate_clpt_donnell', m=10, n=10)
+                  model=model, m=10, n=10)
+    if model.startswith('cylshell'):
+        kwargs['r'] = 0.5
 
     full = Shell(**kwargs)
     full.Nxx = -1.
@@ -84,6 +93,8 @@ def test_partial_domain_calc_matrices():
 
 if __name__ == '__main__':
     test_partial_domain_integration()
-    test_partial_domain_calc_matrices()
+    for model in ('plate_clpt_donnell', 'cylshell_clpt_sanders',
+                  'plate_fsdt_donnell', 'plate_tsdt_donnell'):
+        test_partial_domain_calc_matrices(model)
 
 

@@ -24,13 +24,25 @@ cdef int NMAX = 30
 cdef int DOF = 3
 
 
+def is_sanders(object s):
+    r'''Tell whether the model of ``s`` uses Sanders-Koiter kinematics
+
+    With Sanders-Koiter kinematics the rotation of the normal about the `x`
+    axis is `\phi_y = -w_{,y} + v/r`, instead of `-w_{,y}`, and the changes of
+    curvature receive terms in `u` and `v`, see
+    :mod:`panels.models.cylshell_clpt_sanders_num`.
+
+    '''
+    return 1 if 'sanders' in s.model else 0
+
+
 def fuvw(double [::1] c, object s, double [::1] xs, double [::1] ys,
         int num_cores=4):
     '''
         Calculates the displacement field at all points in the provided grid
     '''
-    cdef double a, b
-    cdef int m, n
+    cdef double a, b, r
+    cdef int m, n, sanders
     cdef double x1u, x1ur, x2u, x2ur
     cdef double x1v, x1vr, x2v, x2vr
     cdef double x1w, x1wr, x2w, x2wr
@@ -98,6 +110,15 @@ def fuvw(double [::1] c, object s, double [::1] xs, double [::1] ys,
         for j in range(size_core):
             phixs[i, j] *= -1.
             phiys[i, j] *= -1.
+
+    #NOTE r is only read for the Sanders kinematics, because Shell.uvw() does
+    #     not normalize an unset radius of a plate
+    sanders = is_sanders(s)
+    if sanders == 1:
+        r = s.r
+        for i in range(num_cores):
+            for j in range(size_core):
+                phiys[i, j] += vs[i, j]/r
     return (np.ravel(us)[:size], np.ravel(vs)[:size], np.ravel(ws)[:size],
             np.ravel(phixs)[:size], np.ravel(phiys)[:size])
 
@@ -117,7 +138,7 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys, int
     '''
     
     cdef double a, b, r
-    cdef int m, n
+    cdef int m, n, sanders
     cdef double x1u, x1ur, x2u, x2ur
     cdef double x1v, x1vr, x2v, x2vr
     cdef double x1w, x1wr, x2w, x2wr
@@ -129,6 +150,7 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys, int
     r = s.r
     m = s.m
     n = s.n
+    sanders = is_sanders(s)
     x1u = s.x1u; x1ur = s.x1ur; x2u = s.x2u; x2ur = s.x2ur
     x1v = s.x1v; x1vr = s.x1vr; x2v = s.x2v; x2vr = s.x2vr
     x1w = s.x1w; x1wr = s.x1wr; x2w = s.x2w; x2wr = s.x2wr
@@ -173,7 +195,7 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys, int
               x1w, x1wr, x2w, x2wr,
               y1u, y1ur, y2u, y2ur,
               y1v, y1vr, y2v, y2vr,
-              y1w, y1wr, y2w, y2wr, NLgeom)
+              y1w, y1wr, y2w, y2wr, NLgeom, sanders)
 
     return (np.ravel(exxs)[:size], np.ravel(eyys)[:size], np.ravel(gxys)[:size],
             np.ravel(kxxs)[:size], np.ravel(kyys)[:size], np.ravel(kxys)[:size])
@@ -320,7 +342,9 @@ def fg(double[:, ::1] g, double x, double y, object s):
     b = s.b
     m = s.m
     n = s.n
-    cfg(g, m, n, x, y, a, b,
+    #NOTE r is only read for the Sanders kinematics, a plate may have r = None
+    r = s.r if is_sanders(s) == 1 else 0.
+    cfg(g, m, n, x, y, a, b, r,
         s.x1u, s.x1ur, s.x2u, s.x2ur,
         s.x1v, s.x1vr, s.x2v, s.x2vr,
         s.x1w, s.x1wr, s.x2w, s.x2wr,
@@ -330,7 +354,7 @@ def fg(double[:, ::1] g, double x, double y, object s):
 
 
 cdef void cfg(double[:,::1] g, int m, int n,
-              double x, double y, double a, double b,
+              double x, double y, double a, double b, double r,
               double x1u, double x1ur, double x2u, double x2ur,
               double x1v, double x1vr, double x2v, double x2vr,
               double x1w, double x1wr, double x2w, double x2wr,
@@ -382,6 +406,9 @@ cdef void cfg(double[:,::1] g, int m, int n,
             g[2, col+2] = fw[i]*gw[j]
             g[3, col+2] = -(2/a)*fw_xi[i]*gw[j]
             g[4, col+2] = -(2/b)*fw[i]*gw_eta[j]
+            if r != 0:
+                # Sanders-Koiter kinematics, phiy = -w,y + v/r
+                g[4, col+1] = fv[i]*gv[j]/r
 
     free(fu)
     free(gu)
@@ -406,7 +433,8 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
         double x1w, double x1wr, double x2w, double x2wr,
         double y1u, double y1ur, double y2u, double y2ur,
         double y1v, double y1vr, double y2v, double y2vr,
-        double y1w, double y1wr, double y2w, double y2wr, int NLgeom) noexcept nogil:
+        double y1w, double y1wr, double y2w, double y2wr, int NLgeom,
+        int sanders) noexcept nogil:
     cdef int i, j, col, pti
     cdef double x, y, xi, eta
     cdef double exx, eyy, gxy, kxx, kyy, kxy
@@ -428,7 +456,7 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
     cdef double *gweta
     cdef double *gwetaeta
 
-    cdef double wxi, weta
+    cdef double wxi, weta, v, phix, phiy
 
     fu = <double *>malloc(NMAX * sizeof(double *))
     fuxi = <double *>malloc(NMAX * sizeof(double *))
@@ -478,6 +506,7 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
 
         wxi = 0
         weta = 0
+        v = 0
 
         # Sum through all m*n terms
         for j in range(n):
@@ -485,7 +514,46 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
                 col = DOF*(j*m + i)
                 wxi += c[col+2]*fwxi[i]*gw[j]
                 weta += c[col+2]*fw[i]*gweta[j]
+                v += c[col+1]*fv[i]*gv[j]
                 # +2 to get w (+0 is u, +1 is v)
+
+        if sanders == 1:
+            # Sanders-Koiter kinematics, the non-linear strain is
+            # {phix^2/2, phiy^2/2, phix*phiy}, with phix = -w,x and
+            # phiy = -w,y + v/r
+            phix = -(2/a)*wxi
+            phiy = -(2/b)*weta + v/r
+
+            exx = 0
+            eyy = 0
+            gxy = 0
+            kxx = 0
+            kyy = 0
+            kxy = 0
+
+            for j in range(n):
+                for i in range(m):
+                    col = DOF*(j*m + i)
+                    exx += c[col+0]*fuxi[i]*gu[j]*(2/a)
+                    eyy += c[col+1]*fv[i]*gveta[j]*(2/b) + 1/r*c[col+2]*fw[i]*gw[j]
+                    gxy += c[col+0]*fu[i]*gueta[j]*(2/b) + c[col+1]*fvxi[i]*gv[j]*(2/a)
+                    kxx += -c[col+2]*fwxixi[i]*gw[j]*4/(a*a)
+                    kyy += -c[col+2]*fw[i]*gwetaeta[j]*4/(b*b) + 1/r*c[col+1]*fv[i]*gveta[j]*(2/b)
+                    kxy += (-2*c[col+2]*fwxi[i]*gweta[j]*4/(a*b)
+                            + 1.5/r*c[col+1]*fvxi[i]*gv[j]*(2/a)
+                            - 0.5/r*c[col+0]*fu[i]*gueta[j]*(2/b))
+
+            exx += NLgeom*0.5*phix*phix
+            eyy += NLgeom*0.5*phiy*phiy
+            gxy += NLgeom*phix*phiy
+
+            exxs[pti] = exx
+            eyys[pti] = eyy
+            gxys[pti] = gxy
+            kxxs[pti] = kxx
+            kyys[pti] = kyy
+            kxys[pti] = kxy
+            continue
 
         exx = 0
         eyy = 0

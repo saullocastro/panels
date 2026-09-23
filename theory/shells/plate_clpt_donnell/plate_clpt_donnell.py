@@ -1,5 +1,5 @@
-import sys
-sys.path.append(r'C:\repositories\panels')
+import os
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 import numpy as np
 from sympy import Matrix as M, Symbol, init_printing, var
@@ -109,9 +109,10 @@ gA5 = M([suA, svA, swA, -(2/a)*swAxi, -(2/b)*swAeta])
 gB5 = M([suB, svB, swB, -(2/a)*swBxi, -(2/b)*swBeta])
 kM = intx*inty/4*h*rho*gA5.T*maux*gB5
 
-# Aerodynamic and damping matrix using piston's theory
+# Aerodynamic and damping matrix using piston's theory, flat plates have no
+# curvature term gamma, see Shell.calc_kA()
 
-kAx = -intx*inty/4 * (beta*(2/a)*swAxi.T*swB + gamma*swA.T*swB)
+kAx = -intx*inty/4 * beta*(2/a)*swAxi.T*swB
 kAy = -intx*inty/4 * beta*(2/b)*swAeta.T*swB
 
 cA = -intx*inty/4*aeromu*swA.T*swB

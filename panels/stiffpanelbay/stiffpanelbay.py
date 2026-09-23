@@ -176,6 +176,12 @@ class StiffPanelBay(object):
                 assert self.model == p.model
             else:
                 self.model = p.model
+        #NOTE the stiffener kernels assume the 3 DOFs u, v, w of the models
+        #     based on the classical laminated plate theory
+        if self.model is not None and panelmDB.db[self.model]['dofs'] != 3:
+            raise NotImplementedError(
+                "StiffPanelBay only supports models with 3 DOFs per term "
+                "(u, v, w), got model '{0}'".format(self.model))
 
         for s in self.bladestiff1ds:
             s._rebuild()
@@ -678,7 +684,9 @@ class StiffPanelBay(object):
                 self.Mach = 1.0001
             Mach = self.Mach
             beta = self.rho_air * self.V**2 / (Mach**2 - 1)**0.5
-            if r != 0.:
+            #NOTE the curvature term exists only for cylindrical shells, see
+            #     Shell.calc_kA()
+            if panelmDB.db[self.model].get('requires_r', False):
                 gamma = beta*1./(2.*r*(Mach**2 - 1)**0.5)
             else:
                 gamma = 0.
