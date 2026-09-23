@@ -44,8 +44,8 @@ Programming Language :: Python :: 3.14
 """
 
 MAJOR = 0
-MINOR = 7
-MICRO = 1
+MINOR = 8
+MICRO = 0
 ISRELEASED = True
 VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 YEAR = '2026'
@@ -167,6 +167,41 @@ extensions = [
             ],
         include_dirs=include_dirs, extra_compile_args=compile_args,
               extra_link_args=link_args, language='c++'),
+    Extension('panels.models.fsdt_tsdt_field',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/fsdt_tsdt_field.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, language='c++'),
+    Extension('panels.models.plate_fsdt_donnell',
+        sources=[
+            './panels/core/src/bardell.cpp',
+            './panels/models/plate_fsdt_donnell.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, language='c++'),
+    Extension('panels.models.plate_fsdt_donnell_num',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/plate_fsdt_donnell_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, language='c++'),
+    Extension('panels.models.plate_tsdt_donnell',
+        sources=[
+            './panels/core/src/bardell.cpp',
+            './panels/models/plate_tsdt_donnell.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, language='c++'),
+    Extension('panels.models.plate_tsdt_donnell_num',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/plate_tsdt_donnell_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, language='c++'),
     Extension('panels.models.cylshell_clpt_donnell',
         sources=[
             './panels/core/src/bardell.cpp',
@@ -178,6 +213,20 @@ extensions = [
         sources=[
             './panels/core/src/bardell_functions.cpp',
             './panels/models/cylshell_clpt_donnell_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, language='c++'),
+    Extension('panels.models.cylshell_clpt_sanders',
+        sources=[
+            './panels/core/src/bardell.cpp',
+            './panels/models/cylshell_clpt_sanders.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, language='c++'),
+    Extension('panels.models.cylshell_clpt_sanders_num',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/cylshell_clpt_sanders_num.pyx',
             ],
         include_dirs=include_dirs, extra_compile_args=compile_args,
               extra_link_args=link_args, language='c++'),
