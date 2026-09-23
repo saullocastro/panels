@@ -2,8 +2,7 @@ r"""Convergence study of the cohesive zone ('SB_TSL') on the reference DCB
 
 Reproduces the convergence study, the elastic-range timing and the check of
 ``dcb_utils`` against the driver, documented in
-theory/multidomain_penalization/cohesive_zone_deviations_from_thesis.tex,
-Section "Convergence study".
+doc/source/cohesive_zone.rst, Section "Convergence study".
 
 The reference DCB is the one of ``tests/multidomain/test_dcb_damage.py``:
 length 65 mm, width 25 mm, precrack 48 mm, arms of 15 plies of 0.14 mm of
@@ -24,12 +23,12 @@ Usage, from the root of the repository::
 each, depending on the case and on the machine), in parallel, writing the log
 of case TAG to ``<out>/TAG.log`` and the driver files to ``<out>/TAG/``.
 ``collect`` reads the logs and prints the metrics of the study. The metrics of
-the runs of the theory document are stored in
+the runs of the documentation page are stored in
 ``notebooks/results/convergence_study.json``.
 
 ``timing`` runs the eight elastic increments of the driver with the matrix
 products and with the Cython kernels, without the predictor and the reuse of
-the panel tangent. The 341 s of the theory document were measured with the
+the panel tangent. The 341 s of the documentation page were measured with the
 code before these changes (commit 0b619a1), and this comparison isolates the
 part of the gain that the current code can still switch off.
 
