@@ -103,13 +103,62 @@ def dcb_damage_prop_no_f_kcrack(phy_dim, nr_terms, k_i=None, tau_o=None, nr_x_ga
         line_search : backtracking line search on the Newton-Raphson
             corrections, with at most line_search_max halvings of the step.
         max_NR_iter, max_bisections : an increment that does not converge in
-            max_NR_iter iterations is bisected, up to max_bisections times,
-            before the analysis is aborted.
+            max_NR_iter iterations, or diverges, is bisected, and the
+            analysis is aborted only when a sub-increment of
+            2**-max_bisections of the original increment still does not
+            converge.
         use_kernels : assembles the 'SB_TSL' connection with the Cython
             kernels of kCSB_dmg.pyx instead of the matrix products, slower,
             same matrices.
 
-        See theory/multidomain_penalization/cohesive_zone_deviations_from_thesis.tex
+        The DCB is loaded under displacement control, with the prescribed
+        displacement `w_p` imposed with the penalty `k_w = 10^6` along the
+        loaded edge of the top arm, and the residual is:
+
+        .. math::
+
+            \{R\} = \{f_{int}\}_{panels} + [K^{conn}_{dmg}(d)]\{c\}
+                    + [K^{pen}_{PD}]\{c\} - \{f_{ext}\}
+
+        without the term `U_{crack}` of the thesis of D'Souza (2024)
+        [nathan2024MSc]_, which counts the dissipated energy twice. The
+        secant stiffness of the cohesive zone `[K^{conn}_{dmg}]` is part of
+        the internal force vector and is evaluated at every iteration, like
+        its damage-rate part `[K^{conn}_{\dot d}]`, while the tangent
+        stiffness of the panels `[K_C] + [K_G]` is refreshed every
+        ``NR_kT_update = 3`` iterations (modified Newton-Raphson). The
+        iteration matrix is `[K_C] + [K_G] + [K^{conn}_{dmg}] +
+        [K^{conn}_{\dot d}] + [K^{pen}_{PD}]`.
+
+        With ``predictor=True`` the increment `n` starts from
+        `\{c\}_{n-1} + \frac{w_{p,n} - w_{p,n-1}}{w_{p,n-1} - w_{p,n-2}}
+        (\{c\}_{n-1} - \{c\}_{n-2})`, with the state `w_p = 0`, `\{c\} = 0`
+        used for the second increment. The line search takes the first step
+        `s = 1, 1/2, \dots, 2^{-n_{ls}}` with `\|R(c_i + s \delta c)\|_D \le
+        (1 - 10^{-4} s) \|R(c_i)\|_D`, or the trial with the smallest norm,
+        a trial whose residual is not finite counting as an infinite norm,
+        where `\|v\|_D = \sqrt{v^T D^{-1} v}` and `D` holds the absolute
+        values of the diagonal of the iteration matrix at the start of the
+        increment. The convergence criterion is:
+
+        .. math::
+
+            \frac{\|R\|_D}{\max\left( \|f_{int}\|_D,
+            \|[K^{pen}_{PD}]\{c\} - \{f_{ext}\}\|_D \right)} < 10^{-4}
+
+        with the reaction of the prescribed displacement in place of
+        `\{f_{ext}\}`, which is dominated by the penalty `k_w`. An increment
+        whose ratio is not finite or exceeds `10^3`, or that does not
+        converge in ``max_NR_iter`` iterations, is discarded and bisected; the
+        damage history is only updated with converged states. A sub-increment
+        of `2^{-6}` of the original increment (``max_bisections``) that still
+        does not converge aborts the analysis. The load is
+        the reaction of the prescribed displacement,
+        :meth:`.MultiDomain.reaction_line_pd_xcte`, and the area integral of
+        the traction, :meth:`.MultiDomain.force_out_plane_damage`, must match
+        it.
+
+        See doc/source/cohesive_zone.rst
     """
     filename=name[0]
     foldername=name[1]
