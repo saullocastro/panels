@@ -3,12 +3,16 @@ Linear static analysis
 
 A :class:`.Shell` object describes a plate or a cylindrical shell through its
 attributes: the geometry, the laminate, the number of terms ``m`` and ``n`` of
-the approximation functions and the model, here ``'plate_clpt_donnell'`` or
-``'cylshell_clpt_donnell'``. The boundary conditions are controlled by the
-flags ``x1u``, ``x1ur``, ``x2u``, ..., ``y2wr``, where ``0`` constrains and
-``1`` releases the translation (e.g. ``x1u``) or the rotation (e.g. ``x1ur``)
-of each displacement component at each edge, see
-:ref:`Bardell's functions <theory_func_bardell>`.
+the approximation functions and the model, by default
+``'plate_clpt_donnell'`` for plates and ``'cylshell_clpt_sanders'`` for
+cylindrical shells, see :mod:`panels.models` for the other models.
+The boundary conditions are controlled by the flags ``x1u``, ``x1ur``,
+``x2u``, ..., ``y2wr``, where ``0`` constrains and ``1`` releases the
+translation (e.g. ``x1u``) or the rotation (e.g. ``x1ur``) of each
+displacement component at each edge, see
+:ref:`Bardell's functions <theory_func_bardell>`. The models based on shear
+deformation theories have the rotations as independent fields, with the
+analogous flags ``x1phix``, ``x1phixr``, ..., ``y2phiyr``.
 
 The loads are added with :meth:`.Shell.add_point_load`,
 :meth:`.Shell.add_distr_load_fixed_x` or :meth:`.Shell.add_distr_load_fixed_y`,

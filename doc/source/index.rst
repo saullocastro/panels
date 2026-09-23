@@ -27,11 +27,20 @@ you can run:
     and snap-through
 
 * Multi-domain analyses, connecting shell domains with penalty stiffnesses to
-  model cylinders, stiffened panels and panels with debonding defects
+  model cylinders, stiffened panels and panels with debonding defects, also
+  with the shear deformation theories
 
 The models are identified by the type of structure, the kinematic theory and
-the non-linear equations, e.g. ``'plate_clpt_donnell'`` and
-``'cylshell_clpt_donnell'``, see :mod:`panels.models`.
+the non-linear equations, see :mod:`panels.models`:
+
+* ``'plate_clpt_donnell'``: plates, classical laminated plate theory (CLPT)
+* ``'plate_fsdt_donnell'``: plates, first-order shear deformation theory
+* ``'plate_tsdt_donnell'``: plates, third-order shear deformation theory of
+  Reddy
+* ``'cylshell_clpt_donnell'``: cylindrical shells, CLPT with Donnell's
+  kinematics
+* ``'cylshell_clpt_sanders'``: cylindrical shells, CLPT with Sanders-Koiter's
+  kinematics, which give zero strains for rigid-body motions
 
 
 Code repository
@@ -78,6 +87,7 @@ Theory
     :maxdepth: 1
 
     bardell.rst
+    cohesive_zone.rst
     ref.rst
 
 
