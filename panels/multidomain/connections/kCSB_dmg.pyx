@@ -131,8 +131,8 @@ def fkCSB11_dmg(double dt, object p1, int size, int row0, int col0,
         Number of integration points in x and y
     kw_tsl : numpy array
         Out of plane stiffness due to the TSL for each damage instance. This is a grid that is mapped to the
-        integration points provided by nr_x_gauss and nr_y_gauss, with values for each of those points.
-            [:,::1] reads with an increment of 1 in the column
+        integration points provided by nr_x_gauss and nr_y_gauss, with values for each of those points,
+        with shape ``(nr_y_gauss, nr_x_gauss)`` and C-contiguous.
 
     Returns
     -------
@@ -347,8 +347,8 @@ def fkCSB12_dmg(double dt, double db, object p1, object p2, int size, int row0, 
         Column position of constitutive matrix being calculated.
     kw_tsl : numpy array
         Out of plane stiffness due to the TSL for each damage instance. This is a grid that is mapped to the
-        integration points provided by nr_x_gauss and nr_y_gauss, with values for each of those points.
-            [:,::1] reads with an increment of 1 in the column
+        integration points provided by nr_x_gauss and nr_y_gauss, with values for each of those points,
+        with shape ``(nr_y_gauss, nr_x_gauss)`` and C-contiguous.
 
     Returns
     -------

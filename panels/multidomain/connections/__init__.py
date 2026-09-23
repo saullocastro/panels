@@ -81,6 +81,16 @@ Connection of type::
        <----        <----
 
 
+Damaged skin-base connection
+----------------------------
+
+The connection ``'SB_TSL'``, with a traction-separation law at the
+interface, see :ref:`cohesive_zone`.
+
+.. automodule:: panels.multidomain.connections.kCSB_dmg
+    :members: fkCSB11_dmg, fkCSB12_dmg, fkCSB22_dmg
+
+
 Models based on shear deformation theories
 -------------------------------------------
 
@@ -100,10 +110,12 @@ and ``'BFxcte'`` of these models are the functions ``fkCBFycte*_sdt`` and
 .. automodule:: panels.multidomain.connections.kCBFycte
     :members: fkCBFycte11, fkCBFycte12, fkCBFycte22, fkCBFycte11_sdt,
               fkCBFycte12_sdt, fkCBFycte22_sdt
+    :private-members: _block_sdt
 
 .. automodule:: panels.multidomain.connections.kCBFxcte
     :members: fkCBFxcte11, fkCBFxcte12, fkCBFxcte22, fkCBFxcte11_sdt,
               fkCBFxcte12_sdt, fkCBFxcte22_sdt
+    :private-members: _block_sdt
 
 
 Calculating Penalty Constants

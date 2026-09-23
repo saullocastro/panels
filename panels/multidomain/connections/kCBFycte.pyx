@@ -528,17 +528,9 @@ cdef void _terms_sdt(int nt, long [::1] dofA, long [::1] dofB,
         int nacA, int nacB, double cteA, double cteB, double jac,
         int along_x, int upper, int row0, int col0,
         long [::1] r, long [::1] c, double [::1] v) noexcept nogil:
-    r"""Penalty terms `coeff \int q_A q_B` along the connection
-
-    ``al*`` are the flags of the functions along the connection, integrated
-    with ``integral_ff``, ``ac*`` the flags of the functions across it,
-    evaluated at the natural coordinates ``cteA`` and ``cteB``. ``nal*`` and
-    ``nac*`` are the numbers of terms along and across the connection. The
-    term `(i, j)`, with `i` along `x`, has the Ritz constants at
-    ``DOF_SDT*(j*m + i)``. With ``upper = 1`` only the upper triangle is
-    kept.
-
-    """
+    #NOTE the terms computed here are described in _block_sdt(); ``al*`` are
+    #     the flags of the functions along the connection and ``ac*`` those
+    #     of the functions across it, ``nal*`` and ``nac*`` their numbers
     cdef int t, iA, iB, jA, jB, row, col, pos, mA, mB
     cdef double I, gA, gB
     pos = 0
@@ -570,8 +562,20 @@ cdef void _terms_sdt(int nt, long [::1] dofA, long [::1] dofB,
 
 def _block_sdt(terms, object pA, object pB, double cteA, double cteB,
         str along, int upper, int size, int row0, int col0):
-    r"""Block of the connection matrix between ``pA`` and ``pB`` from the
-    list ``terms`` of ``(dofA, dofB, coeff)``, see :func:`._terms_sdt`"""
+    r"""Block of the connection matrix between ``pA`` and ``pB``
+
+    Each element ``(dofA, dofB, coeff)`` of ``terms`` adds the penalty term
+    `coeff \int q_A q_B`, where `q_A` is the field ``dofA`` of ``pA`` and
+    `q_B` the field ``dofB`` of ``pB``, with the DOFs `u, v, w, \phi_x,
+    \phi_y` numbered from 0 to 4. The approximation functions along the
+    connection, ``along`` being ``'x'`` or ``'y'``, are integrated with the
+    integrals of Bardell's functions over the length of ``pA``, and those
+    across it are evaluated at the natural coordinates ``cteA`` and
+    ``cteB``. The term `(i, j)` of a panel, with `i` along `x` and `j`
+    along `y`, has its Ritz constants at ``5*(j*m + i)``. With ``upper = 1``
+    only the upper triangle is kept, for the blocks of a single panel.
+
+    """
     cdef int nt, nalA, nalB, nacA, nacB, n
     cdef long [::1] dofA, dofB, r, c
     cdef double [::1] coeff, v
