@@ -41,6 +41,12 @@ the non-linear equations, see :mod:`panels.models`:
   kinematics
 * ``'cylshell_clpt_sanders'``: cylindrical shells, CLPT with Sanders-Koiter's
   kinematics, which give zero strains for rigid-body motions
+* ``'cylshell_fsdt_donnell'``, ``'cylshell_tsdt_donnell'``: cylindrical
+  shells, first-order and third-order shear deformation theories with
+  Donnell's kinematics
+* ``'cylshell_fsdt_sanders'``, ``'cylshell_tsdt_sanders'``: cylindrical
+  shells, first-order and third-order shear deformation theories with
+  Sanders-Koiter's kinematics
 
 
 Code repository
