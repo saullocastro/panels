@@ -10,7 +10,7 @@ Coverage status:
 Semi-analytical methods for plates, shells and stiffened panels
 ===============================================================
 
-- Linear static analyses, with field outputs of displacements, strains and
+- Linear and non-linear static analyses, with field outputs of displacements, strains and
   stresses
 - Linear buckling
 - Vibration, with or without pre-stress
@@ -19,6 +19,8 @@ Semi-analytical methods for plates, shells and stiffened panels
   Newton-Raphson method or the arc-length methods of Riks and Crisfield
 - Multi-domain assemblies of cylinders, stiffened panels and panels with
   debonding defects
+- CLPT, FSDT and TSDT kinematics for plates and cylindrical shells
+- Donnell and Sanders-Koiter kinematics for cylindrical shells
 
 The structural matrices are solved with
 [structsolve](https://github.com/saullocastro/structsolve).
@@ -49,6 +51,13 @@ History
 
 See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
 
+* version 0.8.0 (2026-09-23)
+    - FSDT and TSDT for plate and cylindrical shells
+    - Sanders-Koiter for cylindrical shells
+    - Shell and Multidomain connections supporting FSDT, TSDT and Sanders-Koiter kinematics
+    - Many improvements in the documentation
+    - New tests based on literature
+    - BUG fixes on aerodynamic matrix of cylindrical shells and mass matrix of stiffener 1D
 * version 0.7.1 (2026-09-21)
     - Fixed the cohesive zone of the `MultiDomain` connection `'SB_TSL'`,
       which could not capture the onset of failure of the DCB: tangential
