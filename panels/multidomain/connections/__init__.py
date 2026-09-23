@@ -21,7 +21,14 @@ Connection of type::
                           _|
 
 ``ycte`` indicates the connection exists at a constant `y_1` for panel 1
-(base) and `y_2` for panel 2 (flange).
+(base) and `y_2` for panel 2 (flange). The rotation penalty uses the rotation
+of the normal about `x` of each panel, `-w_{,y}` for the classical laminated
+plate theory, including the term `v/r` for the Sanders-Koiter kinematics, and
+`\phi_y` for the FSDT and TSDT, see
+:mod:`panels.multidomain.connections.kCBFycte`. The connection ``'BFxcte'``,
+along `y`, penalizes `-w_{,x}` or `\phi_x`, see
+:mod:`panels.multidomain.connections.kCBFxcte`. In both, ``p1`` is the base
+and ``p2`` the flange.
 
 kCSB
 ---------
@@ -74,6 +81,31 @@ Connection of type::
        <----        <----
 
 
+Models based on shear deformation theories
+-------------------------------------------
+
+The kernels above assume the 3 DOFs `u, v, w` of the models based on the
+classical laminated plate theory. The connections ``'SSxcte'``, ``'SSycte'``
+and ``'SB'`` of the models ``'plate_fsdt_donnell'`` and
+``'plate_tsdt_donnell'``, with the 5 DOFs `u, v, w, \phi_x, \phi_y`, are in
+:mod:`panels.multidomain.connections.kCsdt`, and the connections ``'BFycte'``
+and ``'BFxcte'`` of these models are the functions ``fkCBFycte*_sdt`` and
+``fkCBFxcte*_sdt`` of :mod:`panels.multidomain.connections.kCBFycte` and
+:mod:`panels.multidomain.connections.kCBFxcte`, with the rotation penalty on
+`\phi_y` and `\phi_x`.
+
+.. automodule:: panels.multidomain.connections.kCsdt
+    :members: fkCSSxcte_sdt, fkCSSycte_sdt, fkCSB_sdt
+
+.. automodule:: panels.multidomain.connections.kCBFycte
+    :members: fkCBFycte11, fkCBFycte12, fkCBFycte22, fkCBFycte11_sdt,
+              fkCBFycte12_sdt, fkCBFycte22_sdt
+
+.. automodule:: panels.multidomain.connections.kCBFxcte
+    :members: fkCBFxcte11, fkCBFxcte12, fkCBFxcte22, fkCBFxcte11_sdt,
+              fkCBFxcte12_sdt, fkCBFxcte22_sdt
+
+
 Calculating Penalty Constants
 ------------------------------
 
@@ -100,3 +132,4 @@ from . kCBFxcte import *
 from . kCpd import *
 from . kCSB_dmg import *
 from . penalties import *
+from . import kCsdt

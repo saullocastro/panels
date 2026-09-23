@@ -5,6 +5,38 @@
 #cython: overflowcheck=False
 #cython: embedsignature=True
 #cython: infer_types=False
+r"""
+Kernels of the base-flange connection ``'BFxcte'``
+
+Connection along `y` between the edge `x_1 =` ``xcte1`` of the stiffener's
+base, or skin, ``p1``, and the edge `x_2 =` ``xcte2`` of the flange ``p2``,
+normal to ``p1``. With the local axes of the flange rotated by 90 degrees
+about the common axis `y`, the penalty energy is:
+
+.. math::
+
+    U = \frac{1}{2} \int_y k_t \left[ (u_1 - w_2)^2 + (v_1 - v_2)^2 +
+        (w_1 + u_2)^2 \right] + k_r \left( \omega_1 - \omega_2 \right)^2 dy
+
+where `\omega_i` is the rotation of the normal of each panel about `y`,
+positive with the right-hand rule in its own local axes. For the models
+based on the classical laminated plate theory (CLPT), with 3 DOFs `u, v, w`
+per term, `\omega_i = -w_{i,x}`, also with the kinematics of Sanders-Koiter,
+whose rotation about `y` has no term of the curvature, see
+:func:`.fkCBFxcte11`, :func:`.fkCBFxcte12` and :func:`.fkCBFxcte22`.
+
+For the models based on shear deformation theories, ``'plate_fsdt_donnell'``
+and ``'plate_tsdt_donnell'``, with 5 DOFs `u, v, w, \phi_x, \phi_y` per
+term, `\omega_i = \phi_{x,i}` and the rotation penalty is `k_r (\phi_{x,1} -
+\phi_{x,2})^2`, see :func:`.fkCBFxcte11_sdt`, :func:`.fkCBFxcte12_sdt` and
+:func:`.fkCBFxcte22_sdt`. For the TSDT, the derivative `w_{,x}` that enters
+the displacement field is not penalized: at a T-joint only the rotation of
+the normals is common to the two panels. The rotation `\phi_y` of each panel
+is a drilling rotation of the other and is not penalized either.
+
+The terms are derived in ``theory/multidomain_penalization/connections.py``.
+
+"""
 from scipy.sparse import coo_matrix
 import numpy as np
 
@@ -382,3 +414,236 @@ def fkCBFxcte22(double kt, double kr, object p1, object p2, double xcte2,
     kCBFxcte22 = coo_matrix((kCBFxcte22v, (kCBFxcte22r, kCBFxcte22c)), shape=(size, size))
 
     return kCBFxcte22
+
+
+# ----------------------------------------------------------------------------
+# Models based on shear deformation theories (FSDT and TSDT), 5 DOFs per term
+# ----------------------------------------------------------------------------
+
+cdef int DOF_SDT = 5
+U, V, W, PHIX, PHIY = range(5)
+FIELDS_SDT = ('u', 'v', 'w', 'phix', 'phiy')
+
+
+def _check_sdt(*panels):
+    for p in panels:
+        if p.model not in ('plate_fsdt_donnell', 'plate_tsdt_donnell'):
+            raise ValueError("Expected a model based on shear deformation "
+                             "theories, got model '{0}'".format(p.model))
+
+
+def _flags_sdt(object p, fields, str direction):
+    r"""Boundary flags ``(1t, 1r, 2t, 2r)`` along ``direction`` of each field
+    of ``fields``"""
+    out = np.zeros((len(fields), 4), dtype=DOUBLE)
+    for t, field in enumerate(fields):
+        name = FIELDS_SDT[field]
+        out[t, 0] = getattr(p, direction + '1' + name)
+        out[t, 1] = getattr(p, direction + '1' + name + 'r')
+        out[t, 2] = getattr(p, direction + '2' + name)
+        out[t, 3] = getattr(p, direction + '2' + name + 'r')
+    return out
+
+
+cdef void _terms_sdt(int nt, long [::1] dofA, long [::1] dofB,
+        double [::1] coeff, double [:, ::1] alA, double [:, ::1] alB,
+        double [:, ::1] acA, double [:, ::1] acB, int nalA, int nalB,
+        int nacA, int nacB, double cteA, double cteB, double jac,
+        int along_x, int upper, int row0, int col0,
+        long [::1] r, long [::1] c, double [::1] v) noexcept nogil:
+    r"""Penalty terms `coeff \int q_A q_B` along the connection
+
+    ``al*`` are the flags of the functions along the connection, integrated
+    with ``integral_ff``, ``ac*`` the flags of the functions across it,
+    evaluated at the natural coordinates ``cteA`` and ``cteB``. ``nal*`` and
+    ``nac*`` are the numbers of terms along and across the connection. The
+    term `(i, j)`, with `i` along `x`, has the Ritz constants at
+    ``DOF_SDT*(j*m + i)``. With ``upper = 1`` only the upper triangle is
+    kept.
+
+    """
+    cdef int t, iA, iB, jA, jB, row, col, pos, mA, mB
+    cdef double I, gA, gB
+    pos = 0
+    mA = nalA if along_x else nacA
+    mB = nalB if along_x else nacB
+    for t in range(nt):
+        for iA in range(nalA):
+            for iB in range(nalB):
+                I = jac*integral_ff(iA, iB, alA[t, 0], alA[t, 1], alA[t, 2],
+                        alA[t, 3], alB[t, 0], alB[t, 1], alB[t, 2], alB[t, 3])
+                for jA in range(nacA):
+                    gA = f(jA, cteA, acA[t, 0], acA[t, 1], acA[t, 2], acA[t, 3])
+                    for jB in range(nacB):
+                        gB = f(jB, cteB, acB[t, 0], acB[t, 1], acB[t, 2], acB[t, 3])
+                        if along_x:
+                            row = row0 + DOF_SDT*(jA*mA + iA) + dofA[t]
+                            col = col0 + DOF_SDT*(jB*mB + iB) + dofB[t]
+                        else:
+                            row = row0 + DOF_SDT*(iA*mA + jA) + dofA[t]
+                            col = col0 + DOF_SDT*(iB*mB + jB) + dofB[t]
+                        if upper and row > col:
+                            v[pos] = 0.
+                        else:
+                            v[pos] = coeff[t]*I*gA*gB
+                        r[pos] = row
+                        c[pos] = col
+                        pos += 1
+
+
+def _block_sdt(terms, object pA, object pB, double cteA, double cteB,
+        str along, int upper, int size, int row0, int col0):
+    r"""Block of the connection matrix between ``pA`` and ``pB`` from the
+    list ``terms`` of ``(dofA, dofB, coeff)``, see :func:`._terms_sdt`"""
+    cdef int nt, nalA, nalB, nacA, nacB, n
+    cdef long [::1] dofA, dofB, r, c
+    cdef double [::1] coeff, v
+    cdef double [:, ::1] alA, alB, acA, acB
+    cdef double jac
+    cdef int along_x = along == 'x'
+    across = 'y' if along_x else 'x'
+    nt = len(terms)
+    dofA = np.array([t[0] for t in terms], dtype=INT)
+    dofB = np.array([t[1] for t in terms], dtype=INT)
+    coeff = np.array([t[2] for t in terms], dtype=DOUBLE)
+    alA = _flags_sdt(pA, [t[0] for t in terms], along)
+    alB = _flags_sdt(pB, [t[1] for t in terms], along)
+    acA = _flags_sdt(pA, [t[0] for t in terms], across)
+    acB = _flags_sdt(pB, [t[1] for t in terms], across)
+    if along == 'x':
+        nalA, nalB, nacA, nacB = pA.m, pB.m, pA.n, pB.n
+        #NOTE the connection spans the length of pA
+        jac = pA.a/2.
+    else:
+        nalA, nalB, nacA, nacB = pA.n, pB.n, pA.m, pB.m
+        jac = pA.b/2.
+    n = nt*nalA*nalB*nacA*nacB
+    r = np.zeros(n, dtype=INT)
+    c = np.zeros(n, dtype=INT)
+    v = np.zeros(n, dtype=DOUBLE)
+    with nogil:
+        _terms_sdt(nt, dofA, dofB, coeff, alA, alB, acA, acB, nalA, nalB,
+                   nacA, nacB, cteA, cteB, jac, along_x, upper, row0,
+                   col0, r, c, v)
+    return coo_matrix((v, (r, c)), shape=(size, size))
+
+
+def fkCBFxcte11_sdt(double kt, double kr, object p1, double xcte1,
+          int size, int row0, int col0):
+    r"""
+    Base-flange xcte connection for the models based on shear deformation
+    theories, block of the base
+
+    The rotation penalty is on `\phi_x`, see the module docstring of
+    :mod:`panels.multidomain.connections.kCBFxcte`.
+
+    Parameters
+    ----------
+    kt : float
+        Translation penalty stiffness.
+    kr : float
+        Rotation penalty stiffness.
+    p1 : Panel
+        Base, or skin.
+    xcte1 : float
+        Coordinate `x_1` of the connection in ``p1``.
+    size : int
+        Size of the assembly.
+    row0 : int
+        Row position of the block in the assembly.
+    col0 : int
+        Column position of the block in the assembly.
+
+    Returns
+    -------
+    kCBFxcte11_sdt : scipy.sparse.coo_matrix
+        Upper triangle of the block of the base.
+
+    """
+    _check_sdt(p1)
+    terms = [(U, U, kt), (V, V, kt), (W, W, kt), (PHIX, PHIX, kr)]
+    cte = 2*xcte1/p1.a - 1.
+    return _block_sdt(terms, p1, p1, cte, cte, 'y', 1, size, row0, col0)
+
+
+def fkCBFxcte12_sdt(double kt, double kr, object p1, object p2,
+          double xcte1, double xcte2,
+          int size, int row0, int col0):
+    r"""
+    Base-flange xcte connection for the models based on shear deformation
+    theories, block of the base and the flange
+
+    The rotation penalty is on `\phi_x`, see the module docstring of
+    :mod:`panels.multidomain.connections.kCBFxcte`.
+
+    Parameters
+    ----------
+    kt : float
+        Translation penalty stiffness.
+    kr : float
+        Rotation penalty stiffness.
+    p1 : Panel
+        Base, or skin.
+    p2 : Panel
+        Flange.
+    xcte1, xcte2 : float
+        Coordinates `x_1` and `x_2` of the connection in ``p1`` and ``p2``.
+    size : int
+        Size of the assembly.
+    row0 : int
+        Row position of the block in the assembly.
+    col0 : int
+        Column position of the block in the assembly.
+
+    Returns
+    -------
+    kCBFxcte12_sdt : scipy.sparse.coo_matrix
+        Coupling block, rows of the base and columns of the flange.
+
+    """
+    _check_sdt(p1, p2)
+    terms = [(U, W, -kt), (V, V, -kt), (W, U, kt), (PHIX, PHIX, -kr)]
+    cte1 = 2*xcte1/p1.a - 1.
+    cte2 = 2*xcte2/p2.a - 1.
+    return _block_sdt(terms, p1, p2, cte1, cte2, 'y', 0, size, row0, col0)
+
+
+def fkCBFxcte22_sdt(double kt, double kr, object p1, object p2,
+          double xcte2,
+          int size, int row0, int col0):
+    r"""
+    Base-flange xcte connection for the models based on shear deformation
+    theories, block of the flange
+
+    The rotation penalty is on `\phi_x`, see the module docstring of
+    :mod:`panels.multidomain.connections.kCBFxcte`.
+
+    Parameters
+    ----------
+    kt : float
+        Translation penalty stiffness.
+    kr : float
+        Rotation penalty stiffness.
+    p1 : Panel
+        Base, or skin.
+    p2 : Panel
+        Flange.
+    xcte2 : float
+        Coordinate `x_2` of the connection in ``p2``.
+    size : int
+        Size of the assembly.
+    row0 : int
+        Row position of the block in the assembly.
+    col0 : int
+        Column position of the block in the assembly.
+
+    Returns
+    -------
+    kCBFxcte22_sdt : scipy.sparse.coo_matrix
+        Upper triangle of the block of the flange.
+
+    """
+    _check_sdt(p1, p2)
+    terms = [(U, U, kt), (V, V, kt), (W, W, kt), (PHIX, PHIX, kr)]
+    cte = 2*xcte2/p2.a - 1.
+    return _block_sdt(terms, p2, p2, cte, cte, 'y', 1, size, row0, col0)
