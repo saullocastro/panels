@@ -6,15 +6,15 @@
 #cython: embedsignature=True
 #cython: infer_types=False
 r"""
-Numerically integrated matrices of flat plates using the first-order shear deformation theory (FSDT) with von
+Flat plates using the first-order shear deformation theory (FSDT) with von
 Karman kinematics
 
-See the kinematic equations in
-``theory/shells/plate_fsdt_tsdt_donnell/plate_fsdt_tsdt_donnell.py``, from
-where the integrands herein have been generated. The degrees of freedom of
-each term of the approximation are ``u, v, w, phix, phiy``, and the
-constitutive matrix ``Finput`` must be ``8 x 8``, with the rows and
-columns in the order of the generalized strains::
+Numerically integrated matrices. See the kinematic equations in
+``theory/shells/fsdt_tsdt/fsdt_tsdt.py``, from where the integrands herein
+have been generated. The degrees of freedom of each term of the
+approximation are ``u, v, w, phix, phiy``, and the constitutive matrix
+``Finput`` must be ``8 x 8``, with the rows and columns in the order of
+the generalized strains::
 
     exx, eyy, gxy, kxx, kyy, kxy, gyz, gxz
 
@@ -74,7 +74,7 @@ def fkC_num(double [::1] cs, object Finput, object shell,
     cdef double gBweta, gBphix, gBphixeta, gBphiy, gBphiyeta
     cdef double xi, eta, weight
     cdef double xi1, xi2, eta1, eta2
-    cdef double wx, wy, NxxNL, NyyNL, NxyNL
+    cdef double bx, by, NxxNL, NyyNL, NxyNL
 
     cdef double [::1] xis, etas, weights_xi, weights_eta
 
@@ -153,8 +153,8 @@ def fkC_num(double [::1] cs, object Finput, object shell,
 
                 weight = weights_xi[ptx] * weights_eta[pty]
 
-                wx = 0
-                wy = 0
+                bx = 0
+                by = 0
                 if NLgeom == 1:
                     for j in range(n):
                         #TODO put these in a lookup vector
@@ -167,8 +167,8 @@ def fkC_num(double [::1] cs, object Finput, object shell,
 
                             col = col0 + DOF*(j*m + i)
 
-                            wx += (2/a)*cs[col+2]*fAwxi*gAw
-                            wy += (2/b)*cs[col+2]*fAw*gAweta
+                            bx += (2/a)*cs[col+2]*fAwxi*gAw
+                            by += (2/b)*cs[col+2]*fAw*gAweta
 
                 if one_F_each_point == 1:
                     for i in range(NE):
@@ -199,15 +199,15 @@ def fkC_num(double [::1] cs, object Finput, object shell,
                 A55 = F[7*NE + 7]
 
                 # Membrane stress carried by the nonlinear strain
-                # eps_NL = {w,x^2/2, w,y^2/2, w,x*w,y}. With it, KGNL = KG(N_NL)
+                # eps_NL = {bx^2/2, by^2/2, bx*by}. With it, KGNL = KG(N_NL)
                 # is collected in kC such that
                 #     KT = K0 + K0L + KL0 + KLL + KGNL (fkC_num) + KG(N0 + N_L) (fkG_num)
                 # is the exact Jacobian of calc_fint, and fkG_num stays
                 # homogeneous of degree one in cs, as linear buckling requires.
-                # wx = wy = 0 when NLgeom == 0, then KGNL vanishes
-                NxxNL = A11*0.5*wx*wx + A12*0.5*wy*wy + A16*wx*wy
-                NyyNL = A12*0.5*wx*wx + A22*0.5*wy*wy + A26*wx*wy
-                NxyNL = A16*0.5*wx*wx + A26*0.5*wy*wy + A66*wx*wy
+                # bx = by = 0 when NLgeom == 0, then KGNL vanishes
+                NxxNL = A11*0.5*bx*bx + A12*0.5*by*by + A16*bx*by
+                NyyNL = A12*0.5*bx*bx + A22*0.5*by*by + A26*bx*by
+                NxyNL = A16*0.5*bx*bx + A26*0.5*by*by + A66*bx*by
 
                 # kC
                 c = -1
@@ -281,7 +281,7 @@ def fkC_num(double [::1] cs, object Finput, object shell,
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+0
                                     kCc[c] = col+2
-                                kCv[c] += weight*(intx*inty/4)*( 4*A11*fAuxi*fBwxi*gAu*gBw*wx/(a*a) + 4*A12*fAuxi*fBw*gAu*gBweta*wy/(a*b) + 4*A16*(a*fAu*fBwxi*gAueta*gBw*wx + a*fAuxi*fBw*gAu*gBweta*wx + b*fAuxi*fBwxi*gAu*gBw*wy)/((a*a)*b) + 4*A26*fAu*fBw*gAueta*gBweta*wy/(b*b) + 4*A66*fAu*gAueta*(a*fBw*gBweta*wx + b*fBwxi*gBw*wy)/(a*(b*b)) )
+                                kCv[c] += weight*(intx*inty/4)*( 4*A11*bx*fAuxi*fBwxi*gAu*gBw/(a*a) + 4*A12*by*fAuxi*fBw*gAu*gBweta/(a*b) + 4*A16*(a*bx*fAu*fBwxi*gAueta*gBw + a*bx*fAuxi*fBw*gAu*gBweta + b*by*fAuxi*fBwxi*gAu*gBw)/((a*a)*b) + 4*A26*by*fAu*fBw*gAueta*gBweta/(b*b) + 4*A66*fAu*gAueta*(a*bx*fBw*gBweta + b*by*fBwxi*gBw)/(a*(b*b)) )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+0
@@ -306,7 +306,7 @@ def fkC_num(double [::1] cs, object Finput, object shell,
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+1
                                     kCc[c] = col+2
-                                kCv[c] += weight*(intx*inty/4)*( 4*A12*fAv*fBwxi*gAveta*gBw*wx/(a*b) + 4*A16*fAvxi*fBwxi*gAv*gBw*wx/(a*a) + 4*A22*fAv*fBw*gAveta*gBweta*wy/(b*b) + 4*A26*(a*fAv*fBw*gAveta*gBweta*wx + b*fAv*fBwxi*gAveta*gBw*wy + b*fAvxi*fBw*gAv*gBweta*wy)/(a*(b*b)) + 4*A66*fAvxi*gAv*(a*fBw*gBweta*wx + b*fBwxi*gBw*wy)/((a*a)*b) )
+                                kCv[c] += weight*(intx*inty/4)*( 4*A12*bx*fAv*fBwxi*gAveta*gBw/(a*b) + 4*A16*bx*fAvxi*fBwxi*gAv*gBw/(a*a) + 4*A22*by*fAv*fBw*gAveta*gBweta/(b*b) + 4*A26*(a*bx*fAv*fBw*gAveta*gBweta + b*by*fAv*fBwxi*gAveta*gBw + b*by*fAvxi*fBw*gAv*gBweta)/(a*(b*b)) + 4*A66*fAvxi*gAv*(a*bx*fBw*gBweta + b*by*fBwxi*gBw)/((a*a)*b) )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+1
@@ -321,29 +321,29 @@ def fkC_num(double [::1] cs, object Finput, object shell,
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+2
                                     kCc[c] = col+0
-                                kCv[c] += weight*(intx*inty/4)*( 4*A11*fAwxi*fBuxi*gAw*gBu*wx/(a*a) + 4*A12*fAw*fBuxi*gAweta*gBu*wy/(a*b) + 4*A16*(a*fAw*fBuxi*gAweta*gBu*wx + a*fAwxi*fBu*gAw*gBueta*wx + b*fAwxi*fBuxi*gAw*gBu*wy)/((a*a)*b) + 4*A26*fAw*fBu*gAweta*gBueta*wy/(b*b) + 4*A66*fBu*gBueta*(a*fAw*gAweta*wx + b*fAwxi*gAw*wy)/(a*(b*b)) )
+                                kCv[c] += weight*(intx*inty/4)*( 4*A11*bx*fAwxi*fBuxi*gAw*gBu/(a*a) + 4*A12*by*fAw*fBuxi*gAweta*gBu/(a*b) + 4*A16*(a*bx*fAw*fBuxi*gAweta*gBu + a*bx*fAwxi*fBu*gAw*gBueta + b*by*fAwxi*fBuxi*gAw*gBu)/((a*a)*b) + 4*A26*by*fAw*fBu*gAweta*gBueta/(b*b) + 4*A66*fBu*gBueta*(a*bx*fAw*gAweta + b*by*fAwxi*gAw)/(a*(b*b)) )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+2
                                     kCc[c] = col+1
-                                kCv[c] += weight*(intx*inty/4)*( 4*A12*fAwxi*fBv*gAw*gBveta*wx/(a*b) + 4*A16*fAwxi*fBvxi*gAw*gBv*wx/(a*a) + 4*A22*fAw*fBv*gAweta*gBveta*wy/(b*b) + 4*A26*(a*fAw*fBv*gAweta*gBveta*wx + b*fAw*fBvxi*gAweta*gBv*wy + b*fAwxi*fBv*gAw*gBveta*wy)/(a*(b*b)) + 4*A66*fBvxi*gBv*(a*fAw*gAweta*wx + b*fAwxi*gAw*wy)/((a*a)*b) )
+                                kCv[c] += weight*(intx*inty/4)*( 4*A12*bx*fAwxi*fBv*gAw*gBveta/(a*b) + 4*A16*bx*fAwxi*fBvxi*gAw*gBv/(a*a) + 4*A22*by*fAw*fBv*gAweta*gBveta/(b*b) + 4*A26*(a*bx*fAw*fBv*gAweta*gBveta + b*by*fAw*fBvxi*gAweta*gBv + b*by*fAwxi*fBv*gAw*gBveta)/(a*(b*b)) + 4*A66*fBvxi*gBv*(a*bx*fAw*gAweta + b*by*fAwxi*gAw)/((a*a)*b) )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+2
                                     kCc[c] = col+2
-                                kCv[c] += weight*(intx*inty/4)*( 4*A11*fAwxi*fBwxi*gAw*gBw*(wx*wx)/(a*a) + 4*A12*wx*wy*(fAw*fBwxi*gAweta*gBw + fAwxi*fBw*gAw*gBweta)/(a*b) + 4*A16*wx*(a*fAw*fBwxi*gAweta*gBw*wx + a*fAwxi*fBw*gAw*gBweta*wx + 2*b*fAwxi*fBwxi*gAw*gBw*wy)/((a*a)*b) + 4*A22*fAw*fBw*gAweta*gBweta*(wy*wy)/(b*b) + 4*A26*wy*(2*a*fAw*fBw*gAweta*gBweta*wx + b*fAw*fBwxi*gAweta*gBw*wy + b*fAwxi*fBw*gAw*gBweta*wy)/(a*(b*b)) + 4*A44*fAw*fBw*gAweta*gBweta/(b*b) + 4*A45*(fAw*fBwxi*gAweta*gBw + fAwxi*fBw*gAw*gBweta)/(a*b) + 4*A55*fAwxi*fBwxi*gAw*gBw/(a*a) + 4*A66*(a*fAw*gAweta*wx + b*fAwxi*gAw*wy)*(a*fBw*gBweta*wx + b*fBwxi*gBw*wy)/((a*a)*(b*b)) )
+                                kCv[c] += weight*(intx*inty/4)*( 4*A11*(bx*bx)*fAwxi*fBwxi*gAw*gBw/(a*a) + 4*A12*bx*by*(fAw*fBwxi*gAweta*gBw + fAwxi*fBw*gAw*gBweta)/(a*b) + 4*A16*bx*(a*bx*fAw*fBwxi*gAweta*gBw + a*bx*fAwxi*fBw*gAw*gBweta + 2*b*by*fAwxi*fBwxi*gAw*gBw)/((a*a)*b) + 4*A22*(by*by)*fAw*fBw*gAweta*gBweta/(b*b) + 4*A26*by*(2*a*bx*fAw*fBw*gAweta*gBweta + b*by*fAw*fBwxi*gAweta*gBw + b*by*fAwxi*fBw*gAw*gBweta)/(a*(b*b)) + 4*A44*fAw*fBw*gAweta*gBweta/(b*b) + 4*A45*(fAw*fBwxi*gAweta*gBw + fAwxi*fBw*gAw*gBweta)/(a*b) + 4*A55*fAwxi*fBwxi*gAw*gBw/(a*a) + 4*A66*(a*bx*fAw*gAweta + b*by*fAwxi*gAw)*(a*bx*fBw*gBweta + b*by*fBwxi*gBw)/((a*a)*(b*b)) )
                                 # KGNL
                                 kCv[c] += weight*(intx*inty/4)*( 4*NxxNL*fAwxi*fBwxi*gAw*gBw/(a*a) + 4*NxyNL*(fAw*fBwxi*gAweta*gBw + fAwxi*fBw*gAw*gBweta)/(a*b) + 4*NyyNL*fAw*fBw*gAweta*gBweta/(b*b) )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+2
                                     kCc[c] = col+3
-                                kCv[c] += weight*(intx*inty/4)*( 2*A45*fAw*fBphix*gAweta*gBphix/b + 2*A55*fAwxi*fBphix*gAw*gBphix/a + 4*B11*fAwxi*fBphixxi*gAw*gBphix*wx/(a*a) + 4*B12*fAw*fBphixxi*gAweta*gBphix*wy/(a*b) + 4*B16*(a*fAw*fBphixxi*gAweta*gBphix*wx + a*fAwxi*fBphix*gAw*gBphixeta*wx + b*fAwxi*fBphixxi*gAw*gBphix*wy)/((a*a)*b) + 4*B26*fAw*fBphix*gAweta*gBphixeta*wy/(b*b) + 4*B66*fBphix*gBphixeta*(a*fAw*gAweta*wx + b*fAwxi*gAw*wy)/(a*(b*b)) )
+                                kCv[c] += weight*(intx*inty/4)*( 2*A45*fAw*fBphix*gAweta*gBphix/b + 2*A55*fAwxi*fBphix*gAw*gBphix/a + 4*B11*bx*fAwxi*fBphixxi*gAw*gBphix/(a*a) + 4*B12*by*fAw*fBphixxi*gAweta*gBphix/(a*b) + 4*B16*(a*bx*fAw*fBphixxi*gAweta*gBphix + a*bx*fAwxi*fBphix*gAw*gBphixeta + b*by*fAwxi*fBphixxi*gAw*gBphix)/((a*a)*b) + 4*B26*by*fAw*fBphix*gAweta*gBphixeta/(b*b) + 4*B66*fBphix*gBphixeta*(a*bx*fAw*gAweta + b*by*fAwxi*gAw)/(a*(b*b)) )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+2
                                     kCc[c] = col+4
-                                kCv[c] += weight*(intx*inty/4)*( 2*A44*fAw*fBphiy*gAweta*gBphiy/b + 2*A45*fAwxi*fBphiy*gAw*gBphiy/a + 4*B12*fAwxi*fBphiy*gAw*gBphiyeta*wx/(a*b) + 4*B16*fAwxi*fBphiyxi*gAw*gBphiy*wx/(a*a) + 4*B22*fAw*fBphiy*gAweta*gBphiyeta*wy/(b*b) + 4*B26*(a*fAw*fBphiy*gAweta*gBphiyeta*wx + b*fAw*fBphiyxi*gAweta*gBphiy*wy + b*fAwxi*fBphiy*gAw*gBphiyeta*wy)/(a*(b*b)) + 4*B66*fBphiyxi*gBphiy*(a*fAw*gAweta*wx + b*fAwxi*gAw*wy)/((a*a)*b) )
+                                kCv[c] += weight*(intx*inty/4)*( 2*A44*fAw*fBphiy*gAweta*gBphiy/b + 2*A45*fAwxi*fBphiy*gAw*gBphiy/a + 4*B12*bx*fAwxi*fBphiy*gAw*gBphiyeta/(a*b) + 4*B16*bx*fAwxi*fBphiyxi*gAw*gBphiy/(a*a) + 4*B22*by*fAw*fBphiy*gAweta*gBphiyeta/(b*b) + 4*B26*(a*bx*fAw*fBphiy*gAweta*gBphiyeta + b*by*fAw*fBphiyxi*gAweta*gBphiy + b*by*fAwxi*fBphiy*gAw*gBphiyeta)/(a*(b*b)) + 4*B66*fBphiyxi*gBphiy*(a*bx*fAw*gAweta + b*by*fAwxi*gAw)/((a*a)*b) )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+3
@@ -358,7 +358,7 @@ def fkC_num(double [::1] cs, object Finput, object shell,
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+3
                                     kCc[c] = col+2
-                                kCv[c] += weight*(intx*inty/4)*( 2*A45*fAphix*fBw*gAphix*gBweta/b + 2*A55*fAphix*fBwxi*gAphix*gBw/a + 4*B11*fAphixxi*fBwxi*gAphix*gBw*wx/(a*a) + 4*B12*fAphixxi*fBw*gAphix*gBweta*wy/(a*b) + 4*B16*(a*fAphix*fBwxi*gAphixeta*gBw*wx + a*fAphixxi*fBw*gAphix*gBweta*wx + b*fAphixxi*fBwxi*gAphix*gBw*wy)/((a*a)*b) + 4*B26*fAphix*fBw*gAphixeta*gBweta*wy/(b*b) + 4*B66*fAphix*gAphixeta*(a*fBw*gBweta*wx + b*fBwxi*gBw*wy)/(a*(b*b)) )
+                                kCv[c] += weight*(intx*inty/4)*( 2*A45*fAphix*fBw*gAphix*gBweta/b + 2*A55*fAphix*fBwxi*gAphix*gBw/a + 4*B11*bx*fAphixxi*fBwxi*gAphix*gBw/(a*a) + 4*B12*by*fAphixxi*fBw*gAphix*gBweta/(a*b) + 4*B16*(a*bx*fAphix*fBwxi*gAphixeta*gBw + a*bx*fAphixxi*fBw*gAphix*gBweta + b*by*fAphixxi*fBwxi*gAphix*gBw)/((a*a)*b) + 4*B26*by*fAphix*fBw*gAphixeta*gBweta/(b*b) + 4*B66*fAphix*gAphixeta*(a*bx*fBw*gBweta + b*by*fBwxi*gBw)/(a*(b*b)) )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+3
@@ -383,7 +383,7 @@ def fkC_num(double [::1] cs, object Finput, object shell,
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+4
                                     kCc[c] = col+2
-                                kCv[c] += weight*(intx*inty/4)*( 2*A44*fAphiy*fBw*gAphiy*gBweta/b + 2*A45*fAphiy*fBwxi*gAphiy*gBw/a + 4*B12*fAphiy*fBwxi*gAphiyeta*gBw*wx/(a*b) + 4*B16*fAphiyxi*fBwxi*gAphiy*gBw*wx/(a*a) + 4*B22*fAphiy*fBw*gAphiyeta*gBweta*wy/(b*b) + 4*B26*(a*fAphiy*fBw*gAphiyeta*gBweta*wx + b*fAphiy*fBwxi*gAphiyeta*gBw*wy + b*fAphiyxi*fBw*gAphiy*gBweta*wy)/(a*(b*b)) + 4*B66*fAphiyxi*gAphiy*(a*fBw*gBweta*wx + b*fBwxi*gBw*wy)/((a*a)*b) )
+                                kCv[c] += weight*(intx*inty/4)*( 2*A44*fAphiy*fBw*gAphiy*gBweta/b + 2*A45*fAphiy*fBwxi*gAphiy*gBw/a + 4*B12*bx*fAphiy*fBwxi*gAphiyeta*gBw/(a*b) + 4*B16*bx*fAphiyxi*fBwxi*gAphiy*gBw/(a*a) + 4*B22*by*fAphiy*fBw*gAphiyeta*gBweta/(b*b) + 4*B26*(a*bx*fAphiy*fBw*gAphiyeta*gBweta + b*by*fAphiy*fBwxi*gAphiyeta*gBw + b*by*fAphiyxi*fBw*gAphiy*gBweta)/(a*(b*b)) + 4*B66*fAphiyxi*gAphiy*(a*bx*fBw*gBweta + b*by*fBwxi*gBw)/((a*a)*b) )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+4
@@ -1073,7 +1073,7 @@ def calc_fint(double [::1] cs, object Finput, object shell,
 
     cdef double xi, eta, weight
     cdef double xi1, xi2, eta1, eta2
-    cdef double wx, wy
+    cdef double bx, by
 
     cdef double fAu, fAuxi, fAv, fAvxi, fAw
     cdef double fAwxi, fAwxixi, fAphix, fAphixxi, fAphiy
@@ -1161,21 +1161,21 @@ def calc_fint(double [::1] cs, object Finput, object shell,
                             #TODO could assume symmetry
                             F[i*NE + j] = Fnxny[ptx, pty, i, j]
 
-                wx = 0
-                wy = 0
+                bx = 0
+                by = 0
                 for j in range(n):
-                    #TODO save in buffer
+                    #TODO put these in a lookup vector
                     gAw = f(j, eta, y1w, y1wr, y2w, y2wr)
                     gAweta = fp(j, eta, y1w, y1wr, y2w, y2wr)
                     for i in range(m):
-                        #TODO save in buffer
+                        #TODO put these in a lookup vector
                         fAw = f(i, xi, x1w, x1wr, x2w, x2wr)
                         fAwxi = fp(i, xi, x1w, x1wr, x2w, x2wr)
 
                         col = col0 + DOF*(j*m + i)
 
-                        wx += (2/a)*cs[col+2]*fAwxi*gAw
-                        wy += (2/b)*cs[col+2]*fAw*gAweta
+                        bx += (2/a)*cs[col+2]*fAwxi*gAw
+                        by += (2/b)*cs[col+2]*fAw*gAweta
 
                 # current generalized strain state
                 for i in range(NE):
@@ -1219,10 +1219,10 @@ def calc_fint(double [::1] cs, object Finput, object shell,
                         e[6] += cs[col+4]*fAphiy*gAphiy + 2*cs[col+2]*fAw*gAweta/b
                         e[7] += cs[col+3]*fAphix*gAphix + 2*cs[col+2]*fAwxi*gAw/a
 
-                # nonlinear strain eps_NL = {w,x^2/2, w,y^2/2, w,x*w,y}
-                e[0] += 0.5*wx*wx
-                e[1] += 0.5*wy*wy
-                e[2] += wx*wy
+                # nonlinear strain eps_NL = {bx^2/2, by^2/2, bx*by}
+                e[0] += 0.5*bx*bx
+                e[1] += 0.5*by*by
+                e[2] += bx*by
 
                 # current generalized stress state
                 for i in range(NE):
@@ -1267,7 +1267,7 @@ def calc_fint(double [::1] cs, object Finput, object shell,
 
                         fint[col+0] += weight*(intx*inty/4)*( 2*Nxx*fAuxi*gAu/a + 2*Nxy*fAu*gAueta/b )
                         fint[col+1] += weight*(intx*inty/4)*( 2*Nxy*fAvxi*gAv/a + 2*Nyy*fAv*gAveta/b )
-                        fint[col+2] += weight*(intx*inty/4)*( 2*Nxx*fAwxi*gAw*wx/a + 2*Nxy*(a*fAw*gAweta*wx + b*fAwxi*gAw*wy)/(a*b) + 2*Nyy*fAw*gAweta*wy/b + 2*Qx*fAwxi*gAw/a + 2*Qy*fAw*gAweta/b )
+                        fint[col+2] += weight*(intx*inty/4)*( 2*Nxx*bx*fAwxi*gAw/a + 2*Nxy*(a*bx*fAw*gAweta + b*by*fAwxi*gAw)/(a*b) + 2*Nyy*by*fAw*gAweta/b + 2*Qx*fAwxi*gAw/a + 2*Qy*fAw*gAweta/b )
                         fint[col+3] += weight*(intx*inty/4)*( 2*Mxx*fAphixxi*gAphix/a + 2*Mxy*fAphix*gAphixeta/b + Qx*fAphix*gAphix )
                         fint[col+4] += weight*(intx*inty/4)*( 2*Mxy*fAphiyxi*gAphiy/a + 2*Myy*fAphiy*gAphiyeta/b + Qy*fAphiy*gAphiy )
 

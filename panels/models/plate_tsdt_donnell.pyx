@@ -6,13 +6,13 @@
 #cython: embedsignature=True
 #cython: infer_types=False
 r"""
-Analytical matrices of flat plates using the Reddy's third-order shear deformation theory (TSDT) with von Karman
-kinematics, integrated over the full domain
+Flat plates using the Reddy's third-order shear deformation theory (TSDT)
+with von Karman kinematics
 
-See the kinematic equations in
-``theory/shells/plate_fsdt_tsdt_donnell/plate_fsdt_tsdt_donnell.py``, from
-where the integrands herein have been generated. The degrees of freedom of
-each term of the approximation are ``u, v, w, phix, phiy``.
+Analytical matrices, integrated over the full domain. See the kinematic
+equations in ``theory/shells/fsdt_tsdt/fsdt_tsdt.py``, from where the
+integrands herein have been generated. The degrees of freedom of each term
+of the approximation are ``u, v, w, phix, phiy``.
 
 """
 from scipy.sparse import coo_matrix

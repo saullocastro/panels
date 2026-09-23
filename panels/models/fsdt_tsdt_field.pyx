@@ -6,12 +6,14 @@
 #cython: embedsignature=True
 #cython: infer_types=False
 r"""
-Field variables of the plate models using the first-order (FSDT) and Reddy's
-third-order (TSDT) shear deformation theories
+Field variables of the plate and cylindrical shell models using the
+first-order (FSDT) and Reddy's third-order (TSDT) shear deformation theories
 
 The degrees of freedom of each term of the approximation are ``u, v, w, phix,
-phiy``. See the kinematic equations in
-``theory/shells/plate_fsdt_tsdt_donnell/plate_fsdt_tsdt_donnell.py``.
+phiy``. See the kinematic equations in ``theory/shells/fsdt_tsdt/fsdt_tsdt.py``.
+For the models with the Sanders-Koiter kinematics, the rotation of the
+normal about `x` is `\phi_y + v/r`, which is the field ``phiy`` returned by
+:func:`.fuvw` and the approximation of ``phiy`` of :func:`.fg`.
 
 """
 import numpy as np
@@ -36,6 +38,16 @@ FIELDS = ('u', 'v', 'w', 'phix', 'phiy')
 
 def is_tsdt(object s):
     return 1 if 'tsdt' in s.model else 0
+
+
+def is_sanders(object s):
+    return 1 if 'sanders' in s.model else 0
+
+
+def rinv(object s):
+    r'''`1/r` for the cylinders and zero for the plates, which may have
+    ``r = None``'''
+    return 1./s.r if 'cylshell' in s.model else 0.
 
 
 def strain_names(object s):
@@ -121,9 +133,10 @@ def fuvw(double [::1] c, object s, double [::1] xs, double [::1] ys,
         Calculates the displacement field at all points in the provided grid
 
         Returns ``u, v, w, phix, phiy``, where ``phix`` and ``phiy`` are the
-        independent rotations of the normal.
+        rotations of the normal, `\phi_x` and `\phi_y`, and `\phi_y + v/r`
+        for the Sanders-Koiter kinematics.
     '''
-    cdef double a, b
+    cdef double a, b, sr
     cdef int m, n, pti, k, size
     cdef double bcs[40]
     cdef double [:, ::1] out
@@ -143,6 +156,8 @@ def fuvw(double [::1] c, object s, double [::1] xs, double [::1] ys,
     b = s.b
     m = s.m
     n = s.n
+    #NOTE r is only read for the cylinders, a plate may have r = None
+    sr = rinv(s)*is_sanders(s)
     read_bcs(s, bcs)
     size = xs.shape[0]
     out = np.zeros((NFIELDS, size), dtype=DOUBLE)
@@ -160,6 +175,7 @@ def fuvw(double [::1] c, object s, double [::1] xs, double [::1] ys,
                         val, dx, dy, dxx, dyy, dxy)
             for k in range(NFIELDS):
                 out[k, pti] = val[k]
+            out[4, pti] += sr*val[1]
     free(f)
     return tuple(np.asarray(out[k]) for k in range(NFIELDS))
 
@@ -171,7 +187,7 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys,
 
         The strains are returned in the order given by :func:`.strain_names`.
     '''
-    cdef double a, b, h, c1
+    cdef double a, b, h, c1, ri, sr, bx, by
     cdef int m, n, pti, size, tsdt
     cdef double bcs[40]
     cdef double [:, ::1] out
@@ -197,6 +213,9 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys,
     if tsdt == 1:
         h = sum(s.plyts)
         c1 = 4./(3.*h*h)
+    #NOTE r is only read for the cylinders, a plate may have r = None
+    ri = rinv(s)
+    sr = ri*is_sanders(s)
     read_bcs(s, bcs)
     size = xs.shape[0]
     out = np.zeros((13 if tsdt == 1 else 8, size), dtype=DOUBLE)
@@ -213,12 +232,15 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys,
             derivatives(&c[0], m, n, a, b, f, fxi, fxixi, g, geta, getaeta,
                         val, dx, dy, dxx, dyy, dxy)
             # u, v, w, phix, phiy = 0, 1, 2, 3, 4
-            out[0, pti] = dx[0] + NLgeom*0.5*dx[2]*dx[2]
-            out[1, pti] = dy[1] + NLgeom*0.5*dy[2]*dy[2]
-            out[2, pti] = dy[0] + dx[1] + NLgeom*dx[2]*dy[2]
+            # rotations of the von Karman terms, beta_y = w,y - v/r (Sanders)
+            bx = dx[2]
+            by = dy[2] - sr*val[1]
+            out[0, pti] = dx[0] + NLgeom*0.5*bx*bx
+            out[1, pti] = dy[1] + ri*val[2] + NLgeom*0.5*by*by
+            out[2, pti] = dy[0] + dx[1] + NLgeom*bx*by
             out[3, pti] = dx[3]
-            out[4, pti] = dy[4]
-            out[5, pti] = dy[3] + dx[4]
+            out[4, pti] = dy[4] + sr*dy[1]
+            out[5, pti] = dy[3] + dx[4] + sr*(1.5*dx[1] - 0.5*dy[0])
             gyz = val[4] + dy[2]
             gxz = val[3] + dx[2]
             if tsdt == 1:
@@ -239,10 +261,12 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys,
 def fg(double[:, ::1] g, double x, double y, object s):
     '''
         Approximation functions of ``u, v, w, phix, phiy`` at ``(x, y)``,
-        stored in the rows of ``g``, which must have shape ``(5, size)``
+        stored in the rows of ``g``, which must have shape ``(5, size)``. For
+        the Sanders-Koiter kinematics the row of ``phiy`` gives the rotation
+        of the normal `\phi_y + v/r`
     '''
     cdef int m, n, i, j, k, col
-    cdef double a, b
+    cdef double a, b, sr
     cdef double bcs[40]
     cdef double *f
     cdef double *fxi
@@ -256,6 +280,7 @@ def fg(double[:, ::1] g, double x, double y, object s):
     b = s.b
     m = s.m
     n = s.n
+    sr = rinv(s)*is_sanders(s)
     read_bcs(s, bcs)
     f = <double *>malloc(6*NFIELDS*NMAX*sizeof(double))
     fxi = &f[NFIELDS*NMAX]
@@ -269,4 +294,5 @@ def fg(double[:, ::1] g, double x, double y, object s):
             col = DOF*(j*m + i)
             for k in range(NFIELDS):
                 g[k, col+k] = f[k*NMAX+i]*gg[k*NMAX+j]
+            g[4, col+1] = sr*f[1*NMAX+i]*gg[1*NMAX+j]
     free(f)

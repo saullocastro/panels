@@ -6,15 +6,15 @@
 #cython: embedsignature=True
 #cython: infer_types=False
 r"""
-Numerically integrated matrices of flat plates using the Reddy's third-order shear deformation theory (TSDT) with von
-Karman kinematics
+Flat plates using the Reddy's third-order shear deformation theory (TSDT)
+with von Karman kinematics
 
-See the kinematic equations in
-``theory/shells/plate_fsdt_tsdt_donnell/plate_fsdt_tsdt_donnell.py``, from
-where the integrands herein have been generated. The degrees of freedom of
-each term of the approximation are ``u, v, w, phix, phiy``, and the
-constitutive matrix ``Finput`` must be ``13 x 13``, with the rows and
-columns in the order of the generalized strains::
+Numerically integrated matrices. See the kinematic equations in
+``theory/shells/fsdt_tsdt/fsdt_tsdt.py``, from where the integrands herein
+have been generated. The degrees of freedom of each term of the
+approximation are ``u, v, w, phix, phiy``, and the constitutive matrix
+``Finput`` must be ``13 x 13``, with the rows and columns in the order of
+the generalized strains::
 
     exx, eyy, gxy, kxx, kyy, kxy, kxx3, kyy3, kxy3, gyz, gxz, gyz2, gxz2
 
@@ -82,7 +82,7 @@ def fkC_num(double [::1] cs, object Finput, object shell,
     cdef double gBphiyeta
     cdef double xi, eta, weight
     cdef double xi1, xi2, eta1, eta2
-    cdef double wx, wy, NxxNL, NyyNL, NxyNL
+    cdef double bx, by, NxxNL, NyyNL, NxyNL
 
     cdef double [::1] xis, etas, weights_xi, weights_eta
 
@@ -163,8 +163,8 @@ def fkC_num(double [::1] cs, object Finput, object shell,
 
                 weight = weights_xi[ptx] * weights_eta[pty]
 
-                wx = 0
-                wy = 0
+                bx = 0
+                by = 0
                 if NLgeom == 1:
                     for j in range(n):
                         #TODO put these in a lookup vector
@@ -177,8 +177,8 @@ def fkC_num(double [::1] cs, object Finput, object shell,
 
                             col = col0 + DOF*(j*m + i)
 
-                            wx += (2/a)*cs[col+2]*fAwxi*gAw
-                            wy += (2/b)*cs[col+2]*fAw*gAweta
+                            bx += (2/a)*cs[col+2]*fAwxi*gAw
+                            by += (2/b)*cs[col+2]*fAw*gAweta
 
                 if one_F_each_point == 1:
                     for i in range(NE):
@@ -233,15 +233,15 @@ def fkC_num(double [::1] cs, object Finput, object shell,
                 F55 = F[12*NE + 12]
 
                 # Membrane stress carried by the nonlinear strain
-                # eps_NL = {w,x^2/2, w,y^2/2, w,x*w,y}. With it, KGNL = KG(N_NL)
+                # eps_NL = {bx^2/2, by^2/2, bx*by}. With it, KGNL = KG(N_NL)
                 # is collected in kC such that
                 #     KT = K0 + K0L + KL0 + KLL + KGNL (fkC_num) + KG(N0 + N_L) (fkG_num)
                 # is the exact Jacobian of calc_fint, and fkG_num stays
                 # homogeneous of degree one in cs, as linear buckling requires.
-                # wx = wy = 0 when NLgeom == 0, then KGNL vanishes
-                NxxNL = A11*0.5*wx*wx + A12*0.5*wy*wy + A16*wx*wy
-                NyyNL = A12*0.5*wx*wx + A22*0.5*wy*wy + A26*wx*wy
-                NxyNL = A16*0.5*wx*wx + A26*0.5*wy*wy + A66*wx*wy
+                # bx = by = 0 when NLgeom == 0, then KGNL vanishes
+                NxxNL = A11*0.5*bx*bx + A12*0.5*by*by + A16*bx*by
+                NyyNL = A12*0.5*bx*bx + A22*0.5*by*by + A26*bx*by
+                NxyNL = A16*0.5*bx*bx + A26*0.5*by*by + A66*bx*by
 
                 # kC
                 c = -1
@@ -319,7 +319,7 @@ def fkC_num(double [::1] cs, object Finput, object shell,
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+0
                                     kCc[c] = col+2
-                                kCv[c] += weight*(intx*inty/4)*( 4*A11*fAuxi*fBwxi*gAu*gBw*wx/(a*a) + 4*A12*fAuxi*fBw*gAu*gBweta*wy/(a*b) + A16*(4*fAu*fBwxi*gAueta*gBw*wx/(a*b) + 4*fAuxi*fBw*gAu*gBweta*wx/(a*b) + 4*fAuxi*fBwxi*gAu*gBw*wy/(a*a)) + 4*A26*fAu*fBw*gAueta*gBweta*wy/(b*b) + A66*(4*fAu*fBw*gAueta*gBweta*wx/(b*b) + 4*fAu*fBwxi*gAueta*gBw*wy/(a*b)) - 8*E11*c1*fAuxi*fBwxixi*gAu*gBw/(a*a*a) - 8*E12*c1*fAuxi*fBw*gAu*gBwetaeta/(a*(b*b)) + E16*(-8*c1*fAu*fBwxixi*gAueta*gBw/((a*a)*b) - 16*c1*fAuxi*fBwxi*gAu*gBweta/((a*a)*b)) - 8*E26*c1*fAu*fBw*gAueta*gBwetaeta/(b*b*b) - 16*E66*c1*fAu*fBwxi*gAueta*gBweta/(a*(b*b)) )
+                                kCv[c] += weight*(intx*inty/4)*( 4*A11*bx*fAuxi*fBwxi*gAu*gBw/(a*a) + 4*A12*by*fAuxi*fBw*gAu*gBweta/(a*b) + A16*(4*bx*fAu*fBwxi*gAueta*gBw/(a*b) + 4*bx*fAuxi*fBw*gAu*gBweta/(a*b) + 4*by*fAuxi*fBwxi*gAu*gBw/(a*a)) + 4*A26*by*fAu*fBw*gAueta*gBweta/(b*b) + A66*(4*bx*fAu*fBw*gAueta*gBweta/(b*b) + 4*by*fAu*fBwxi*gAueta*gBw/(a*b)) - 8*E11*c1*fAuxi*fBwxixi*gAu*gBw/(a*a*a) - 8*E12*c1*fAuxi*fBw*gAu*gBwetaeta/(a*(b*b)) + E16*(-8*c1*fAu*fBwxixi*gAueta*gBw/((a*a)*b) - 16*c1*fAuxi*fBwxi*gAu*gBweta/((a*a)*b)) - 8*E26*c1*fAu*fBw*gAueta*gBwetaeta/(b*b*b) - 16*E66*c1*fAu*fBwxi*gAueta*gBweta/(a*(b*b)) )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+0
@@ -344,7 +344,7 @@ def fkC_num(double [::1] cs, object Finput, object shell,
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+1
                                     kCc[c] = col+2
-                                kCv[c] += weight*(intx*inty/4)*( 4*A12*fAv*fBwxi*gAveta*gBw*wx/(a*b) + 4*A16*fAvxi*fBwxi*gAv*gBw*wx/(a*a) + 4*A22*fAv*fBw*gAveta*gBweta*wy/(b*b) + A26*(4*fAv*fBw*gAveta*gBweta*wx/(b*b) + 4*fAv*fBwxi*gAveta*gBw*wy/(a*b) + 4*fAvxi*fBw*gAv*gBweta*wy/(a*b)) + A66*(4*fAvxi*fBw*gAv*gBweta*wx/(a*b) + 4*fAvxi*fBwxi*gAv*gBw*wy/(a*a)) - 8*E12*c1*fAv*fBwxixi*gAveta*gBw/((a*a)*b) - 8*E16*c1*fAvxi*fBwxixi*gAv*gBw/(a*a*a) - 8*E22*c1*fAv*fBw*gAveta*gBwetaeta/(b*b*b) + E26*(-16*c1*fAv*fBwxi*gAveta*gBweta/(a*(b*b)) - 8*c1*fAvxi*fBw*gAv*gBwetaeta/(a*(b*b))) - 16*E66*c1*fAvxi*fBwxi*gAv*gBweta/((a*a)*b) )
+                                kCv[c] += weight*(intx*inty/4)*( 4*A12*bx*fAv*fBwxi*gAveta*gBw/(a*b) + 4*A16*bx*fAvxi*fBwxi*gAv*gBw/(a*a) + 4*A22*by*fAv*fBw*gAveta*gBweta/(b*b) + A26*(4*bx*fAv*fBw*gAveta*gBweta/(b*b) + 4*by*fAv*fBwxi*gAveta*gBw/(a*b) + 4*by*fAvxi*fBw*gAv*gBweta/(a*b)) + A66*(4*bx*fAvxi*fBw*gAv*gBweta/(a*b) + 4*by*fAvxi*fBwxi*gAv*gBw/(a*a)) - 8*E12*c1*fAv*fBwxixi*gAveta*gBw/((a*a)*b) - 8*E16*c1*fAvxi*fBwxixi*gAv*gBw/(a*a*a) - 8*E22*c1*fAv*fBw*gAveta*gBwetaeta/(b*b*b) + E26*(-16*c1*fAv*fBwxi*gAveta*gBweta/(a*(b*b)) - 8*c1*fAvxi*fBw*gAv*gBwetaeta/(a*(b*b))) - 16*E66*c1*fAvxi*fBwxi*gAv*gBweta/((a*a)*b) )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+1
@@ -359,29 +359,29 @@ def fkC_num(double [::1] cs, object Finput, object shell,
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+2
                                     kCc[c] = col+0
-                                kCv[c] += weight*(intx*inty/4)*( 4*A11*fAwxi*fBuxi*gAw*gBu*wx/(a*a) + 4*A12*fAw*fBuxi*gAweta*gBu*wy/(a*b) + A16*(4*fAw*fBuxi*gAweta*gBu*wx/(a*b) + 4*fAwxi*fBu*gAw*gBueta*wx/(a*b) + 4*fAwxi*fBuxi*gAw*gBu*wy/(a*a)) + 4*A26*fAw*fBu*gAweta*gBueta*wy/(b*b) + A66*(4*fAw*fBu*gAweta*gBueta*wx/(b*b) + 4*fAwxi*fBu*gAw*gBueta*wy/(a*b)) - 8*E11*c1*fAwxixi*fBuxi*gAw*gBu/(a*a*a) - 8*E12*c1*fAw*fBuxi*gAwetaeta*gBu/(a*(b*b)) + E16*(-16*c1*fAwxi*fBuxi*gAweta*gBu/((a*a)*b) - 8*c1*fAwxixi*fBu*gAw*gBueta/((a*a)*b)) - 8*E26*c1*fAw*fBu*gAwetaeta*gBueta/(b*b*b) - 16*E66*c1*fAwxi*fBu*gAweta*gBueta/(a*(b*b)) )
+                                kCv[c] += weight*(intx*inty/4)*( 4*A11*bx*fAwxi*fBuxi*gAw*gBu/(a*a) + 4*A12*by*fAw*fBuxi*gAweta*gBu/(a*b) + A16*(4*bx*fAw*fBuxi*gAweta*gBu/(a*b) + 4*bx*fAwxi*fBu*gAw*gBueta/(a*b) + 4*by*fAwxi*fBuxi*gAw*gBu/(a*a)) + 4*A26*by*fAw*fBu*gAweta*gBueta/(b*b) + A66*(4*bx*fAw*fBu*gAweta*gBueta/(b*b) + 4*by*fAwxi*fBu*gAw*gBueta/(a*b)) - 8*E11*c1*fAwxixi*fBuxi*gAw*gBu/(a*a*a) - 8*E12*c1*fAw*fBuxi*gAwetaeta*gBu/(a*(b*b)) + E16*(-16*c1*fAwxi*fBuxi*gAweta*gBu/((a*a)*b) - 8*c1*fAwxixi*fBu*gAw*gBueta/((a*a)*b)) - 8*E26*c1*fAw*fBu*gAwetaeta*gBueta/(b*b*b) - 16*E66*c1*fAwxi*fBu*gAweta*gBueta/(a*(b*b)) )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+2
                                     kCc[c] = col+1
-                                kCv[c] += weight*(intx*inty/4)*( 4*A12*fAwxi*fBv*gAw*gBveta*wx/(a*b) + 4*A16*fAwxi*fBvxi*gAw*gBv*wx/(a*a) + 4*A22*fAw*fBv*gAweta*gBveta*wy/(b*b) + A26*(4*fAw*fBv*gAweta*gBveta*wx/(b*b) + 4*fAw*fBvxi*gAweta*gBv*wy/(a*b) + 4*fAwxi*fBv*gAw*gBveta*wy/(a*b)) + A66*(4*fAw*fBvxi*gAweta*gBv*wx/(a*b) + 4*fAwxi*fBvxi*gAw*gBv*wy/(a*a)) - 8*E12*c1*fAwxixi*fBv*gAw*gBveta/((a*a)*b) - 8*E16*c1*fAwxixi*fBvxi*gAw*gBv/(a*a*a) - 8*E22*c1*fAw*fBv*gAwetaeta*gBveta/(b*b*b) + E26*(-8*c1*fAw*fBvxi*gAwetaeta*gBv/(a*(b*b)) - 16*c1*fAwxi*fBv*gAweta*gBveta/(a*(b*b))) - 16*E66*c1*fAwxi*fBvxi*gAweta*gBv/((a*a)*b) )
+                                kCv[c] += weight*(intx*inty/4)*( 4*A12*bx*fAwxi*fBv*gAw*gBveta/(a*b) + 4*A16*bx*fAwxi*fBvxi*gAw*gBv/(a*a) + 4*A22*by*fAw*fBv*gAweta*gBveta/(b*b) + A26*(4*bx*fAw*fBv*gAweta*gBveta/(b*b) + 4*by*fAw*fBvxi*gAweta*gBv/(a*b) + 4*by*fAwxi*fBv*gAw*gBveta/(a*b)) + A66*(4*bx*fAw*fBvxi*gAweta*gBv/(a*b) + 4*by*fAwxi*fBvxi*gAw*gBv/(a*a)) - 8*E12*c1*fAwxixi*fBv*gAw*gBveta/((a*a)*b) - 8*E16*c1*fAwxixi*fBvxi*gAw*gBv/(a*a*a) - 8*E22*c1*fAw*fBv*gAwetaeta*gBveta/(b*b*b) + E26*(-8*c1*fAw*fBvxi*gAwetaeta*gBv/(a*(b*b)) - 16*c1*fAwxi*fBv*gAweta*gBveta/(a*(b*b))) - 16*E66*c1*fAwxi*fBvxi*gAweta*gBv/((a*a)*b) )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+2
                                     kCc[c] = col+2
-                                kCv[c] += weight*(intx*inty/4)*( 4*A11*fAwxi*fBwxi*gAw*gBw*(wx*wx)/(a*a) + A12*(4*fAw*fBwxi*gAweta*gBw*wx*wy/(a*b) + 4*fAwxi*fBw*gAw*gBweta*wx*wy/(a*b)) + A16*(4*fAw*fBwxi*gAweta*gBw*(wx*wx)/(a*b) + 4*fAwxi*fBw*gAw*gBweta*(wx*wx)/(a*b) + 8*fAwxi*fBwxi*gAw*gBw*wx*wy/(a*a)) + 4*A22*fAw*fBw*gAweta*gBweta*(wy*wy)/(b*b) + A26*(8*fAw*fBw*gAweta*gBweta*wx*wy/(b*b) + 4*fAw*fBwxi*gAweta*gBw*(wy*wy)/(a*b) + 4*fAwxi*fBw*gAw*gBweta*(wy*wy)/(a*b)) + 4*A44*fAw*fBw*gAweta*gBweta/(b*b) + A45*(4*fAw*fBwxi*gAweta*gBw/(a*b) + 4*fAwxi*fBw*gAw*gBweta/(a*b)) + 4*A55*fAwxi*fBwxi*gAw*gBw/(a*a) + A66*(4*fAw*fBw*gAweta*gBweta*(wx*wx)/(b*b) + 4*fAw*fBwxi*gAweta*gBw*wx*wy/(a*b) + 4*fAwxi*fBw*gAw*gBweta*wx*wy/(a*b) + 4*fAwxi*fBwxi*gAw*gBw*(wy*wy)/(a*a)) - 24*D44*c1*fAw*fBw*gAweta*gBweta/(b*b) + D45*(-24*c1*fAw*fBwxi*gAweta*gBw/(a*b) - 24*c1*fAwxi*fBw*gAw*gBweta/(a*b)) - 24*D55*c1*fAwxi*fBwxi*gAw*gBw/(a*a) + E11*(-8*c1*fAwxi*fBwxixi*gAw*gBw*wx/(a*a*a) - 8*c1*fAwxixi*fBwxi*gAw*gBw*wx/(a*a*a)) + E12*(-8*c1*fAw*fBwxi*gAwetaeta*gBw*wx/(a*(b*b)) - 8*c1*fAwxi*fBw*gAw*gBwetaeta*wx/(a*(b*b)) - 8*c1*fAw*fBwxixi*gAweta*gBw*wy/((a*a)*b) - 8*c1*fAwxixi*fBw*gAw*gBweta*wy/((a*a)*b)) + E16*(-8*c1*fAw*fBwxixi*gAweta*gBw*wx/((a*a)*b) - 16*c1*fAwxi*fBwxi*gAw*gBweta*wx/((a*a)*b) - 16*c1*fAwxi*fBwxi*gAweta*gBw*wx/((a*a)*b) - 8*c1*fAwxixi*fBw*gAw*gBweta*wx/((a*a)*b) - 8*c1*fAwxi*fBwxixi*gAw*gBw*wy/(a*a*a) - 8*c1*fAwxixi*fBwxi*gAw*gBw*wy/(a*a*a)) + E22*(-8*c1*fAw*fBw*gAweta*gBwetaeta*wy/(b*b*b) - 8*c1*fAw*fBw*gAwetaeta*gBweta*wy/(b*b*b)) + E26*(-8*c1*fAw*fBw*gAweta*gBwetaeta*wx/(b*b*b) - 8*c1*fAw*fBw*gAwetaeta*gBweta*wx/(b*b*b) - 16*c1*fAw*fBwxi*gAweta*gBweta*wy/(a*(b*b)) - 8*c1*fAw*fBwxi*gAwetaeta*gBw*wy/(a*(b*b)) - 8*c1*fAwxi*fBw*gAw*gBwetaeta*wy/(a*(b*b)) - 16*c1*fAwxi*fBw*gAweta*gBweta*wy/(a*(b*b))) + E66*(-16*c1*fAw*fBwxi*gAweta*gBweta*wx/(a*(b*b)) - 16*c1*fAwxi*fBw*gAweta*gBweta*wx/(a*(b*b)) - 16*c1*fAwxi*fBwxi*gAw*gBweta*wy/((a*a)*b) - 16*c1*fAwxi*fBwxi*gAweta*gBw*wy/((a*a)*b)) + 36*F44*(c1*c1)*fAw*fBw*gAweta*gBweta/(b*b) + F45*(36*(c1*c1)*fAw*fBwxi*gAweta*gBw/(a*b) + 36*(c1*c1)*fAwxi*fBw*gAw*gBweta/(a*b)) + 36*F55*(c1*c1)*fAwxi*fBwxi*gAw*gBw/(a*a) + 16*H11*(c1*c1)*fAwxixi*fBwxixi*gAw*gBw/(a*a*a*a) + H12*(16*(c1*c1)*fAw*fBwxixi*gAwetaeta*gBw/((a*a)*(b*b)) + 16*(c1*c1)*fAwxixi*fBw*gAw*gBwetaeta/((a*a)*(b*b))) + H16*(32*(c1*c1)*fAwxi*fBwxixi*gAweta*gBw/((a*a*a)*b) + 32*(c1*c1)*fAwxixi*fBwxi*gAw*gBweta/((a*a*a)*b)) + 16*H22*(c1*c1)*fAw*fBw*gAwetaeta*gBwetaeta/(b*b*b*b) + H26*(32*(c1*c1)*fAw*fBwxi*gAwetaeta*gBweta/(a*(b*b*b)) + 32*(c1*c1)*fAwxi*fBw*gAweta*gBwetaeta/(a*(b*b*b))) + 64*H66*(c1*c1)*fAwxi*fBwxi*gAweta*gBweta/((a*a)*(b*b)) )
+                                kCv[c] += weight*(intx*inty/4)*( 4*A11*(bx*bx)*fAwxi*fBwxi*gAw*gBw/(a*a) + A12*(4*bx*by*fAw*fBwxi*gAweta*gBw/(a*b) + 4*bx*by*fAwxi*fBw*gAw*gBweta/(a*b)) + A16*(4*(bx*bx)*fAw*fBwxi*gAweta*gBw/(a*b) + 4*(bx*bx)*fAwxi*fBw*gAw*gBweta/(a*b) + 8*bx*by*fAwxi*fBwxi*gAw*gBw/(a*a)) + 4*A22*(by*by)*fAw*fBw*gAweta*gBweta/(b*b) + A26*(8*bx*by*fAw*fBw*gAweta*gBweta/(b*b) + 4*(by*by)*fAw*fBwxi*gAweta*gBw/(a*b) + 4*(by*by)*fAwxi*fBw*gAw*gBweta/(a*b)) + 4*A44*fAw*fBw*gAweta*gBweta/(b*b) + A45*(4*fAw*fBwxi*gAweta*gBw/(a*b) + 4*fAwxi*fBw*gAw*gBweta/(a*b)) + 4*A55*fAwxi*fBwxi*gAw*gBw/(a*a) + A66*(4*(bx*bx)*fAw*fBw*gAweta*gBweta/(b*b) + 4*bx*by*fAw*fBwxi*gAweta*gBw/(a*b) + 4*bx*by*fAwxi*fBw*gAw*gBweta/(a*b) + 4*(by*by)*fAwxi*fBwxi*gAw*gBw/(a*a)) - 24*D44*c1*fAw*fBw*gAweta*gBweta/(b*b) + D45*(-24*c1*fAw*fBwxi*gAweta*gBw/(a*b) - 24*c1*fAwxi*fBw*gAw*gBweta/(a*b)) - 24*D55*c1*fAwxi*fBwxi*gAw*gBw/(a*a) + E11*(-8*bx*c1*fAwxi*fBwxixi*gAw*gBw/(a*a*a) - 8*bx*c1*fAwxixi*fBwxi*gAw*gBw/(a*a*a)) + E12*(-8*bx*c1*fAw*fBwxi*gAwetaeta*gBw/(a*(b*b)) - 8*bx*c1*fAwxi*fBw*gAw*gBwetaeta/(a*(b*b)) - 8*by*c1*fAw*fBwxixi*gAweta*gBw/((a*a)*b) - 8*by*c1*fAwxixi*fBw*gAw*gBweta/((a*a)*b)) + E16*(-8*bx*c1*fAw*fBwxixi*gAweta*gBw/((a*a)*b) - 16*bx*c1*fAwxi*fBwxi*gAw*gBweta/((a*a)*b) - 16*bx*c1*fAwxi*fBwxi*gAweta*gBw/((a*a)*b) - 8*bx*c1*fAwxixi*fBw*gAw*gBweta/((a*a)*b) - 8*by*c1*fAwxi*fBwxixi*gAw*gBw/(a*a*a) - 8*by*c1*fAwxixi*fBwxi*gAw*gBw/(a*a*a)) + E22*(-8*by*c1*fAw*fBw*gAweta*gBwetaeta/(b*b*b) - 8*by*c1*fAw*fBw*gAwetaeta*gBweta/(b*b*b)) + E26*(-8*bx*c1*fAw*fBw*gAweta*gBwetaeta/(b*b*b) - 8*bx*c1*fAw*fBw*gAwetaeta*gBweta/(b*b*b) - 16*by*c1*fAw*fBwxi*gAweta*gBweta/(a*(b*b)) - 8*by*c1*fAw*fBwxi*gAwetaeta*gBw/(a*(b*b)) - 8*by*c1*fAwxi*fBw*gAw*gBwetaeta/(a*(b*b)) - 16*by*c1*fAwxi*fBw*gAweta*gBweta/(a*(b*b))) + E66*(-16*bx*c1*fAw*fBwxi*gAweta*gBweta/(a*(b*b)) - 16*bx*c1*fAwxi*fBw*gAweta*gBweta/(a*(b*b)) - 16*by*c1*fAwxi*fBwxi*gAw*gBweta/((a*a)*b) - 16*by*c1*fAwxi*fBwxi*gAweta*gBw/((a*a)*b)) + 36*F44*(c1*c1)*fAw*fBw*gAweta*gBweta/(b*b) + F45*(36*(c1*c1)*fAw*fBwxi*gAweta*gBw/(a*b) + 36*(c1*c1)*fAwxi*fBw*gAw*gBweta/(a*b)) + 36*F55*(c1*c1)*fAwxi*fBwxi*gAw*gBw/(a*a) + 16*H11*(c1*c1)*fAwxixi*fBwxixi*gAw*gBw/(a*a*a*a) + H12*(16*(c1*c1)*fAw*fBwxixi*gAwetaeta*gBw/((a*a)*(b*b)) + 16*(c1*c1)*fAwxixi*fBw*gAw*gBwetaeta/((a*a)*(b*b))) + H16*(32*(c1*c1)*fAwxi*fBwxixi*gAweta*gBw/((a*a*a)*b) + 32*(c1*c1)*fAwxixi*fBwxi*gAw*gBweta/((a*a*a)*b)) + 16*H22*(c1*c1)*fAw*fBw*gAwetaeta*gBwetaeta/(b*b*b*b) + H26*(32*(c1*c1)*fAw*fBwxi*gAwetaeta*gBweta/(a*(b*b*b)) + 32*(c1*c1)*fAwxi*fBw*gAweta*gBwetaeta/(a*(b*b*b))) + 64*H66*(c1*c1)*fAwxi*fBwxi*gAweta*gBweta/((a*a)*(b*b)) )
                                 # KGNL
                                 kCv[c] += weight*(intx*inty/4)*( 4*NxxNL*fAwxi*fBwxi*gAw*gBw/(a*a) + 4*NxyNL*(fAw*fBwxi*gAweta*gBw + fAwxi*fBw*gAw*gBweta)/(a*b) + 4*NyyNL*fAw*fBw*gAweta*gBweta/(b*b) )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+2
                                     kCc[c] = col+3
-                                kCv[c] += weight*(intx*inty/4)*( 2*A45*fAw*fBphix*gAweta*gBphix/b + 2*A55*fAwxi*fBphix*gAw*gBphix/a + 4*B11*fAwxi*fBphixxi*gAw*gBphix*wx/(a*a) + 4*B12*fAw*fBphixxi*gAweta*gBphix*wy/(a*b) + B16*(4*fAw*fBphixxi*gAweta*gBphix*wx/(a*b) + 4*fAwxi*fBphix*gAw*gBphixeta*wx/(a*b) + 4*fAwxi*fBphixxi*gAw*gBphix*wy/(a*a)) + 4*B26*fAw*fBphix*gAweta*gBphixeta*wy/(b*b) + B66*(4*fAw*fBphix*gAweta*gBphixeta*wx/(b*b) + 4*fAwxi*fBphix*gAw*gBphixeta*wy/(a*b)) - 12*D45*c1*fAw*fBphix*gAweta*gBphix/b - 12*D55*c1*fAwxi*fBphix*gAw*gBphix/a - 4*E11*c1*fAwxi*fBphixxi*gAw*gBphix*wx/(a*a) - 4*E12*c1*fAw*fBphixxi*gAweta*gBphix*wy/(a*b) + E16*(-4*c1*fAw*fBphixxi*gAweta*gBphix*wx/(a*b) - 4*c1*fAwxi*fBphix*gAw*gBphixeta*wx/(a*b) - 4*c1*fAwxi*fBphixxi*gAw*gBphix*wy/(a*a)) - 4*E26*c1*fAw*fBphix*gAweta*gBphixeta*wy/(b*b) + E66*(-4*c1*fAw*fBphix*gAweta*gBphixeta*wx/(b*b) - 4*c1*fAwxi*fBphix*gAw*gBphixeta*wy/(a*b)) - 8*F11*c1*fAwxixi*fBphixxi*gAw*gBphix/(a*a*a) - 8*F12*c1*fAw*fBphixxi*gAwetaeta*gBphix/(a*(b*b)) + F16*(-16*c1*fAwxi*fBphixxi*gAweta*gBphix/((a*a)*b) - 8*c1*fAwxixi*fBphix*gAw*gBphixeta/((a*a)*b)) - 8*F26*c1*fAw*fBphix*gAwetaeta*gBphixeta/(b*b*b) + 18*F45*(c1*c1)*fAw*fBphix*gAweta*gBphix/b + 18*F55*(c1*c1)*fAwxi*fBphix*gAw*gBphix/a - 16*F66*c1*fAwxi*fBphix*gAweta*gBphixeta/(a*(b*b)) + 8*H11*(c1*c1)*fAwxixi*fBphixxi*gAw*gBphix/(a*a*a) + 8*H12*(c1*c1)*fAw*fBphixxi*gAwetaeta*gBphix/(a*(b*b)) + H16*(16*(c1*c1)*fAwxi*fBphixxi*gAweta*gBphix/((a*a)*b) + 8*(c1*c1)*fAwxixi*fBphix*gAw*gBphixeta/((a*a)*b)) + 8*H26*(c1*c1)*fAw*fBphix*gAwetaeta*gBphixeta/(b*b*b) + 16*H66*(c1*c1)*fAwxi*fBphix*gAweta*gBphixeta/(a*(b*b)) )
+                                kCv[c] += weight*(intx*inty/4)*( 2*A45*fAw*fBphix*gAweta*gBphix/b + 2*A55*fAwxi*fBphix*gAw*gBphix/a + 4*B11*bx*fAwxi*fBphixxi*gAw*gBphix/(a*a) + 4*B12*by*fAw*fBphixxi*gAweta*gBphix/(a*b) + B16*(4*bx*fAw*fBphixxi*gAweta*gBphix/(a*b) + 4*bx*fAwxi*fBphix*gAw*gBphixeta/(a*b) + 4*by*fAwxi*fBphixxi*gAw*gBphix/(a*a)) + 4*B26*by*fAw*fBphix*gAweta*gBphixeta/(b*b) + B66*(4*bx*fAw*fBphix*gAweta*gBphixeta/(b*b) + 4*by*fAwxi*fBphix*gAw*gBphixeta/(a*b)) - 12*D45*c1*fAw*fBphix*gAweta*gBphix/b - 12*D55*c1*fAwxi*fBphix*gAw*gBphix/a - 4*E11*bx*c1*fAwxi*fBphixxi*gAw*gBphix/(a*a) - 4*E12*by*c1*fAw*fBphixxi*gAweta*gBphix/(a*b) + E16*(-4*bx*c1*fAw*fBphixxi*gAweta*gBphix/(a*b) - 4*bx*c1*fAwxi*fBphix*gAw*gBphixeta/(a*b) - 4*by*c1*fAwxi*fBphixxi*gAw*gBphix/(a*a)) - 4*E26*by*c1*fAw*fBphix*gAweta*gBphixeta/(b*b) + E66*(-4*bx*c1*fAw*fBphix*gAweta*gBphixeta/(b*b) - 4*by*c1*fAwxi*fBphix*gAw*gBphixeta/(a*b)) - 8*F11*c1*fAwxixi*fBphixxi*gAw*gBphix/(a*a*a) - 8*F12*c1*fAw*fBphixxi*gAwetaeta*gBphix/(a*(b*b)) + F16*(-16*c1*fAwxi*fBphixxi*gAweta*gBphix/((a*a)*b) - 8*c1*fAwxixi*fBphix*gAw*gBphixeta/((a*a)*b)) - 8*F26*c1*fAw*fBphix*gAwetaeta*gBphixeta/(b*b*b) + 18*F45*(c1*c1)*fAw*fBphix*gAweta*gBphix/b + 18*F55*(c1*c1)*fAwxi*fBphix*gAw*gBphix/a - 16*F66*c1*fAwxi*fBphix*gAweta*gBphixeta/(a*(b*b)) + 8*H11*(c1*c1)*fAwxixi*fBphixxi*gAw*gBphix/(a*a*a) + 8*H12*(c1*c1)*fAw*fBphixxi*gAwetaeta*gBphix/(a*(b*b)) + H16*(16*(c1*c1)*fAwxi*fBphixxi*gAweta*gBphix/((a*a)*b) + 8*(c1*c1)*fAwxixi*fBphix*gAw*gBphixeta/((a*a)*b)) + 8*H26*(c1*c1)*fAw*fBphix*gAwetaeta*gBphixeta/(b*b*b) + 16*H66*(c1*c1)*fAwxi*fBphix*gAweta*gBphixeta/(a*(b*b)) )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+2
                                     kCc[c] = col+4
-                                kCv[c] += weight*(intx*inty/4)*( 2*A44*fAw*fBphiy*gAweta*gBphiy/b + 2*A45*fAwxi*fBphiy*gAw*gBphiy/a + 4*B12*fAwxi*fBphiy*gAw*gBphiyeta*wx/(a*b) + 4*B16*fAwxi*fBphiyxi*gAw*gBphiy*wx/(a*a) + 4*B22*fAw*fBphiy*gAweta*gBphiyeta*wy/(b*b) + B26*(4*fAw*fBphiy*gAweta*gBphiyeta*wx/(b*b) + 4*fAw*fBphiyxi*gAweta*gBphiy*wy/(a*b) + 4*fAwxi*fBphiy*gAw*gBphiyeta*wy/(a*b)) + B66*(4*fAw*fBphiyxi*gAweta*gBphiy*wx/(a*b) + 4*fAwxi*fBphiyxi*gAw*gBphiy*wy/(a*a)) - 12*D44*c1*fAw*fBphiy*gAweta*gBphiy/b - 12*D45*c1*fAwxi*fBphiy*gAw*gBphiy/a - 4*E12*c1*fAwxi*fBphiy*gAw*gBphiyeta*wx/(a*b) - 4*E16*c1*fAwxi*fBphiyxi*gAw*gBphiy*wx/(a*a) - 4*E22*c1*fAw*fBphiy*gAweta*gBphiyeta*wy/(b*b) + E26*(-4*c1*fAw*fBphiy*gAweta*gBphiyeta*wx/(b*b) - 4*c1*fAw*fBphiyxi*gAweta*gBphiy*wy/(a*b) - 4*c1*fAwxi*fBphiy*gAw*gBphiyeta*wy/(a*b)) + E66*(-4*c1*fAw*fBphiyxi*gAweta*gBphiy*wx/(a*b) - 4*c1*fAwxi*fBphiyxi*gAw*gBphiy*wy/(a*a)) - 8*F12*c1*fAwxixi*fBphiy*gAw*gBphiyeta/((a*a)*b) - 8*F16*c1*fAwxixi*fBphiyxi*gAw*gBphiy/(a*a*a) - 8*F22*c1*fAw*fBphiy*gAwetaeta*gBphiyeta/(b*b*b) + F26*(-8*c1*fAw*fBphiyxi*gAwetaeta*gBphiy/(a*(b*b)) - 16*c1*fAwxi*fBphiy*gAweta*gBphiyeta/(a*(b*b))) + 18*F44*(c1*c1)*fAw*fBphiy*gAweta*gBphiy/b + 18*F45*(c1*c1)*fAwxi*fBphiy*gAw*gBphiy/a - 16*F66*c1*fAwxi*fBphiyxi*gAweta*gBphiy/((a*a)*b) + 8*H12*(c1*c1)*fAwxixi*fBphiy*gAw*gBphiyeta/((a*a)*b) + 8*H16*(c1*c1)*fAwxixi*fBphiyxi*gAw*gBphiy/(a*a*a) + 8*H22*(c1*c1)*fAw*fBphiy*gAwetaeta*gBphiyeta/(b*b*b) + H26*(8*(c1*c1)*fAw*fBphiyxi*gAwetaeta*gBphiy/(a*(b*b)) + 16*(c1*c1)*fAwxi*fBphiy*gAweta*gBphiyeta/(a*(b*b))) + 16*H66*(c1*c1)*fAwxi*fBphiyxi*gAweta*gBphiy/((a*a)*b) )
+                                kCv[c] += weight*(intx*inty/4)*( 2*A44*fAw*fBphiy*gAweta*gBphiy/b + 2*A45*fAwxi*fBphiy*gAw*gBphiy/a + 4*B12*bx*fAwxi*fBphiy*gAw*gBphiyeta/(a*b) + 4*B16*bx*fAwxi*fBphiyxi*gAw*gBphiy/(a*a) + 4*B22*by*fAw*fBphiy*gAweta*gBphiyeta/(b*b) + B26*(4*bx*fAw*fBphiy*gAweta*gBphiyeta/(b*b) + 4*by*fAw*fBphiyxi*gAweta*gBphiy/(a*b) + 4*by*fAwxi*fBphiy*gAw*gBphiyeta/(a*b)) + B66*(4*bx*fAw*fBphiyxi*gAweta*gBphiy/(a*b) + 4*by*fAwxi*fBphiyxi*gAw*gBphiy/(a*a)) - 12*D44*c1*fAw*fBphiy*gAweta*gBphiy/b - 12*D45*c1*fAwxi*fBphiy*gAw*gBphiy/a - 4*E12*bx*c1*fAwxi*fBphiy*gAw*gBphiyeta/(a*b) - 4*E16*bx*c1*fAwxi*fBphiyxi*gAw*gBphiy/(a*a) - 4*E22*by*c1*fAw*fBphiy*gAweta*gBphiyeta/(b*b) + E26*(-4*bx*c1*fAw*fBphiy*gAweta*gBphiyeta/(b*b) - 4*by*c1*fAw*fBphiyxi*gAweta*gBphiy/(a*b) - 4*by*c1*fAwxi*fBphiy*gAw*gBphiyeta/(a*b)) + E66*(-4*bx*c1*fAw*fBphiyxi*gAweta*gBphiy/(a*b) - 4*by*c1*fAwxi*fBphiyxi*gAw*gBphiy/(a*a)) - 8*F12*c1*fAwxixi*fBphiy*gAw*gBphiyeta/((a*a)*b) - 8*F16*c1*fAwxixi*fBphiyxi*gAw*gBphiy/(a*a*a) - 8*F22*c1*fAw*fBphiy*gAwetaeta*gBphiyeta/(b*b*b) + F26*(-8*c1*fAw*fBphiyxi*gAwetaeta*gBphiy/(a*(b*b)) - 16*c1*fAwxi*fBphiy*gAweta*gBphiyeta/(a*(b*b))) + 18*F44*(c1*c1)*fAw*fBphiy*gAweta*gBphiy/b + 18*F45*(c1*c1)*fAwxi*fBphiy*gAw*gBphiy/a - 16*F66*c1*fAwxi*fBphiyxi*gAweta*gBphiy/((a*a)*b) + 8*H12*(c1*c1)*fAwxixi*fBphiy*gAw*gBphiyeta/((a*a)*b) + 8*H16*(c1*c1)*fAwxixi*fBphiyxi*gAw*gBphiy/(a*a*a) + 8*H22*(c1*c1)*fAw*fBphiy*gAwetaeta*gBphiyeta/(b*b*b) + H26*(8*(c1*c1)*fAw*fBphiyxi*gAwetaeta*gBphiy/(a*(b*b)) + 16*(c1*c1)*fAwxi*fBphiy*gAweta*gBphiyeta/(a*(b*b))) + 16*H66*(c1*c1)*fAwxi*fBphiyxi*gAweta*gBphiy/((a*a)*b) )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+3
@@ -396,7 +396,7 @@ def fkC_num(double [::1] cs, object Finput, object shell,
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+3
                                     kCc[c] = col+2
-                                kCv[c] += weight*(intx*inty/4)*( 2*A45*fAphix*fBw*gAphix*gBweta/b + 2*A55*fAphix*fBwxi*gAphix*gBw/a + 4*B11*fAphixxi*fBwxi*gAphix*gBw*wx/(a*a) + 4*B12*fAphixxi*fBw*gAphix*gBweta*wy/(a*b) + B16*(4*fAphix*fBwxi*gAphixeta*gBw*wx/(a*b) + 4*fAphixxi*fBw*gAphix*gBweta*wx/(a*b) + 4*fAphixxi*fBwxi*gAphix*gBw*wy/(a*a)) + 4*B26*fAphix*fBw*gAphixeta*gBweta*wy/(b*b) + B66*(4*fAphix*fBw*gAphixeta*gBweta*wx/(b*b) + 4*fAphix*fBwxi*gAphixeta*gBw*wy/(a*b)) - 12*D45*c1*fAphix*fBw*gAphix*gBweta/b - 12*D55*c1*fAphix*fBwxi*gAphix*gBw/a - 4*E11*c1*fAphixxi*fBwxi*gAphix*gBw*wx/(a*a) - 4*E12*c1*fAphixxi*fBw*gAphix*gBweta*wy/(a*b) + E16*(-4*c1*fAphix*fBwxi*gAphixeta*gBw*wx/(a*b) - 4*c1*fAphixxi*fBw*gAphix*gBweta*wx/(a*b) - 4*c1*fAphixxi*fBwxi*gAphix*gBw*wy/(a*a)) - 4*E26*c1*fAphix*fBw*gAphixeta*gBweta*wy/(b*b) + E66*(-4*c1*fAphix*fBw*gAphixeta*gBweta*wx/(b*b) - 4*c1*fAphix*fBwxi*gAphixeta*gBw*wy/(a*b)) - 8*F11*c1*fAphixxi*fBwxixi*gAphix*gBw/(a*a*a) - 8*F12*c1*fAphixxi*fBw*gAphix*gBwetaeta/(a*(b*b)) + F16*(-8*c1*fAphix*fBwxixi*gAphixeta*gBw/((a*a)*b) - 16*c1*fAphixxi*fBwxi*gAphix*gBweta/((a*a)*b)) - 8*F26*c1*fAphix*fBw*gAphixeta*gBwetaeta/(b*b*b) + 18*F45*(c1*c1)*fAphix*fBw*gAphix*gBweta/b + 18*F55*(c1*c1)*fAphix*fBwxi*gAphix*gBw/a - 16*F66*c1*fAphix*fBwxi*gAphixeta*gBweta/(a*(b*b)) + 8*H11*(c1*c1)*fAphixxi*fBwxixi*gAphix*gBw/(a*a*a) + 8*H12*(c1*c1)*fAphixxi*fBw*gAphix*gBwetaeta/(a*(b*b)) + H16*(8*(c1*c1)*fAphix*fBwxixi*gAphixeta*gBw/((a*a)*b) + 16*(c1*c1)*fAphixxi*fBwxi*gAphix*gBweta/((a*a)*b)) + 8*H26*(c1*c1)*fAphix*fBw*gAphixeta*gBwetaeta/(b*b*b) + 16*H66*(c1*c1)*fAphix*fBwxi*gAphixeta*gBweta/(a*(b*b)) )
+                                kCv[c] += weight*(intx*inty/4)*( 2*A45*fAphix*fBw*gAphix*gBweta/b + 2*A55*fAphix*fBwxi*gAphix*gBw/a + 4*B11*bx*fAphixxi*fBwxi*gAphix*gBw/(a*a) + 4*B12*by*fAphixxi*fBw*gAphix*gBweta/(a*b) + B16*(4*bx*fAphix*fBwxi*gAphixeta*gBw/(a*b) + 4*bx*fAphixxi*fBw*gAphix*gBweta/(a*b) + 4*by*fAphixxi*fBwxi*gAphix*gBw/(a*a)) + 4*B26*by*fAphix*fBw*gAphixeta*gBweta/(b*b) + B66*(4*bx*fAphix*fBw*gAphixeta*gBweta/(b*b) + 4*by*fAphix*fBwxi*gAphixeta*gBw/(a*b)) - 12*D45*c1*fAphix*fBw*gAphix*gBweta/b - 12*D55*c1*fAphix*fBwxi*gAphix*gBw/a - 4*E11*bx*c1*fAphixxi*fBwxi*gAphix*gBw/(a*a) - 4*E12*by*c1*fAphixxi*fBw*gAphix*gBweta/(a*b) + E16*(-4*bx*c1*fAphix*fBwxi*gAphixeta*gBw/(a*b) - 4*bx*c1*fAphixxi*fBw*gAphix*gBweta/(a*b) - 4*by*c1*fAphixxi*fBwxi*gAphix*gBw/(a*a)) - 4*E26*by*c1*fAphix*fBw*gAphixeta*gBweta/(b*b) + E66*(-4*bx*c1*fAphix*fBw*gAphixeta*gBweta/(b*b) - 4*by*c1*fAphix*fBwxi*gAphixeta*gBw/(a*b)) - 8*F11*c1*fAphixxi*fBwxixi*gAphix*gBw/(a*a*a) - 8*F12*c1*fAphixxi*fBw*gAphix*gBwetaeta/(a*(b*b)) + F16*(-8*c1*fAphix*fBwxixi*gAphixeta*gBw/((a*a)*b) - 16*c1*fAphixxi*fBwxi*gAphix*gBweta/((a*a)*b)) - 8*F26*c1*fAphix*fBw*gAphixeta*gBwetaeta/(b*b*b) + 18*F45*(c1*c1)*fAphix*fBw*gAphix*gBweta/b + 18*F55*(c1*c1)*fAphix*fBwxi*gAphix*gBw/a - 16*F66*c1*fAphix*fBwxi*gAphixeta*gBweta/(a*(b*b)) + 8*H11*(c1*c1)*fAphixxi*fBwxixi*gAphix*gBw/(a*a*a) + 8*H12*(c1*c1)*fAphixxi*fBw*gAphix*gBwetaeta/(a*(b*b)) + H16*(8*(c1*c1)*fAphix*fBwxixi*gAphixeta*gBw/((a*a)*b) + 16*(c1*c1)*fAphixxi*fBwxi*gAphix*gBweta/((a*a)*b)) + 8*H26*(c1*c1)*fAphix*fBw*gAphixeta*gBwetaeta/(b*b*b) + 16*H66*(c1*c1)*fAphix*fBwxi*gAphixeta*gBweta/(a*(b*b)) )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+3
@@ -421,7 +421,7 @@ def fkC_num(double [::1] cs, object Finput, object shell,
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+4
                                     kCc[c] = col+2
-                                kCv[c] += weight*(intx*inty/4)*( 2*A44*fAphiy*fBw*gAphiy*gBweta/b + 2*A45*fAphiy*fBwxi*gAphiy*gBw/a + 4*B12*fAphiy*fBwxi*gAphiyeta*gBw*wx/(a*b) + 4*B16*fAphiyxi*fBwxi*gAphiy*gBw*wx/(a*a) + 4*B22*fAphiy*fBw*gAphiyeta*gBweta*wy/(b*b) + B26*(4*fAphiy*fBw*gAphiyeta*gBweta*wx/(b*b) + 4*fAphiy*fBwxi*gAphiyeta*gBw*wy/(a*b) + 4*fAphiyxi*fBw*gAphiy*gBweta*wy/(a*b)) + B66*(4*fAphiyxi*fBw*gAphiy*gBweta*wx/(a*b) + 4*fAphiyxi*fBwxi*gAphiy*gBw*wy/(a*a)) - 12*D44*c1*fAphiy*fBw*gAphiy*gBweta/b - 12*D45*c1*fAphiy*fBwxi*gAphiy*gBw/a - 4*E12*c1*fAphiy*fBwxi*gAphiyeta*gBw*wx/(a*b) - 4*E16*c1*fAphiyxi*fBwxi*gAphiy*gBw*wx/(a*a) - 4*E22*c1*fAphiy*fBw*gAphiyeta*gBweta*wy/(b*b) + E26*(-4*c1*fAphiy*fBw*gAphiyeta*gBweta*wx/(b*b) - 4*c1*fAphiy*fBwxi*gAphiyeta*gBw*wy/(a*b) - 4*c1*fAphiyxi*fBw*gAphiy*gBweta*wy/(a*b)) + E66*(-4*c1*fAphiyxi*fBw*gAphiy*gBweta*wx/(a*b) - 4*c1*fAphiyxi*fBwxi*gAphiy*gBw*wy/(a*a)) - 8*F12*c1*fAphiy*fBwxixi*gAphiyeta*gBw/((a*a)*b) - 8*F16*c1*fAphiyxi*fBwxixi*gAphiy*gBw/(a*a*a) - 8*F22*c1*fAphiy*fBw*gAphiyeta*gBwetaeta/(b*b*b) + F26*(-16*c1*fAphiy*fBwxi*gAphiyeta*gBweta/(a*(b*b)) - 8*c1*fAphiyxi*fBw*gAphiy*gBwetaeta/(a*(b*b))) + 18*F44*(c1*c1)*fAphiy*fBw*gAphiy*gBweta/b + 18*F45*(c1*c1)*fAphiy*fBwxi*gAphiy*gBw/a - 16*F66*c1*fAphiyxi*fBwxi*gAphiy*gBweta/((a*a)*b) + 8*H12*(c1*c1)*fAphiy*fBwxixi*gAphiyeta*gBw/((a*a)*b) + 8*H16*(c1*c1)*fAphiyxi*fBwxixi*gAphiy*gBw/(a*a*a) + 8*H22*(c1*c1)*fAphiy*fBw*gAphiyeta*gBwetaeta/(b*b*b) + H26*(16*(c1*c1)*fAphiy*fBwxi*gAphiyeta*gBweta/(a*(b*b)) + 8*(c1*c1)*fAphiyxi*fBw*gAphiy*gBwetaeta/(a*(b*b))) + 16*H66*(c1*c1)*fAphiyxi*fBwxi*gAphiy*gBweta/((a*a)*b) )
+                                kCv[c] += weight*(intx*inty/4)*( 2*A44*fAphiy*fBw*gAphiy*gBweta/b + 2*A45*fAphiy*fBwxi*gAphiy*gBw/a + 4*B12*bx*fAphiy*fBwxi*gAphiyeta*gBw/(a*b) + 4*B16*bx*fAphiyxi*fBwxi*gAphiy*gBw/(a*a) + 4*B22*by*fAphiy*fBw*gAphiyeta*gBweta/(b*b) + B26*(4*bx*fAphiy*fBw*gAphiyeta*gBweta/(b*b) + 4*by*fAphiy*fBwxi*gAphiyeta*gBw/(a*b) + 4*by*fAphiyxi*fBw*gAphiy*gBweta/(a*b)) + B66*(4*bx*fAphiyxi*fBw*gAphiy*gBweta/(a*b) + 4*by*fAphiyxi*fBwxi*gAphiy*gBw/(a*a)) - 12*D44*c1*fAphiy*fBw*gAphiy*gBweta/b - 12*D45*c1*fAphiy*fBwxi*gAphiy*gBw/a - 4*E12*bx*c1*fAphiy*fBwxi*gAphiyeta*gBw/(a*b) - 4*E16*bx*c1*fAphiyxi*fBwxi*gAphiy*gBw/(a*a) - 4*E22*by*c1*fAphiy*fBw*gAphiyeta*gBweta/(b*b) + E26*(-4*bx*c1*fAphiy*fBw*gAphiyeta*gBweta/(b*b) - 4*by*c1*fAphiy*fBwxi*gAphiyeta*gBw/(a*b) - 4*by*c1*fAphiyxi*fBw*gAphiy*gBweta/(a*b)) + E66*(-4*bx*c1*fAphiyxi*fBw*gAphiy*gBweta/(a*b) - 4*by*c1*fAphiyxi*fBwxi*gAphiy*gBw/(a*a)) - 8*F12*c1*fAphiy*fBwxixi*gAphiyeta*gBw/((a*a)*b) - 8*F16*c1*fAphiyxi*fBwxixi*gAphiy*gBw/(a*a*a) - 8*F22*c1*fAphiy*fBw*gAphiyeta*gBwetaeta/(b*b*b) + F26*(-16*c1*fAphiy*fBwxi*gAphiyeta*gBweta/(a*(b*b)) - 8*c1*fAphiyxi*fBw*gAphiy*gBwetaeta/(a*(b*b))) + 18*F44*(c1*c1)*fAphiy*fBw*gAphiy*gBweta/b + 18*F45*(c1*c1)*fAphiy*fBwxi*gAphiy*gBw/a - 16*F66*c1*fAphiyxi*fBwxi*gAphiy*gBweta/((a*a)*b) + 8*H12*(c1*c1)*fAphiy*fBwxixi*gAphiyeta*gBw/((a*a)*b) + 8*H16*(c1*c1)*fAphiyxi*fBwxixi*gAphiy*gBw/(a*a*a) + 8*H22*(c1*c1)*fAphiy*fBw*gAphiyeta*gBwetaeta/(b*b*b) + H26*(16*(c1*c1)*fAphiy*fBwxi*gAphiyeta*gBweta/(a*(b*b)) + 8*(c1*c1)*fAphiyxi*fBw*gAphiy*gBwetaeta/(a*(b*b))) + 16*H66*(c1*c1)*fAphiyxi*fBwxi*gAphiy*gBweta/((a*a)*b) )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+4
@@ -1168,7 +1168,7 @@ def calc_fint(double [::1] cs, object Finput, object shell,
 
     cdef double xi, eta, weight
     cdef double xi1, xi2, eta1, eta2
-    cdef double wx, wy
+    cdef double bx, by
 
     cdef double fAu, fAuxi, fAv, fAvxi, fAw
     cdef double fAwxi, fAwxixi, fAphix, fAphixxi, fAphiy
@@ -1258,21 +1258,21 @@ def calc_fint(double [::1] cs, object Finput, object shell,
                             #TODO could assume symmetry
                             F[i*NE + j] = Fnxny[ptx, pty, i, j]
 
-                wx = 0
-                wy = 0
+                bx = 0
+                by = 0
                 for j in range(n):
-                    #TODO save in buffer
+                    #TODO put these in a lookup vector
                     gAw = f(j, eta, y1w, y1wr, y2w, y2wr)
                     gAweta = fp(j, eta, y1w, y1wr, y2w, y2wr)
                     for i in range(m):
-                        #TODO save in buffer
+                        #TODO put these in a lookup vector
                         fAw = f(i, xi, x1w, x1wr, x2w, x2wr)
                         fAwxi = fp(i, xi, x1w, x1wr, x2w, x2wr)
 
                         col = col0 + DOF*(j*m + i)
 
-                        wx += (2/a)*cs[col+2]*fAwxi*gAw
-                        wy += (2/b)*cs[col+2]*fAw*gAweta
+                        bx += (2/a)*cs[col+2]*fAwxi*gAw
+                        by += (2/b)*cs[col+2]*fAw*gAweta
 
                 # current generalized strain state
                 for i in range(NE):
@@ -1321,10 +1321,10 @@ def calc_fint(double [::1] cs, object Finput, object shell,
                         e[11] += -3*c1*cs[col+4]*fAphiy*gAphiy - 6*c1*cs[col+2]*fAw*gAweta/b
                         e[12] += -3*c1*cs[col+3]*fAphix*gAphix - 6*c1*cs[col+2]*fAwxi*gAw/a
 
-                # nonlinear strain eps_NL = {w,x^2/2, w,y^2/2, w,x*w,y}
-                e[0] += 0.5*wx*wx
-                e[1] += 0.5*wy*wy
-                e[2] += wx*wy
+                # nonlinear strain eps_NL = {bx^2/2, by^2/2, bx*by}
+                e[0] += 0.5*bx*bx
+                e[1] += 0.5*by*by
+                e[2] += bx*by
 
                 # current generalized stress state
                 for i in range(NE):
@@ -1374,7 +1374,7 @@ def calc_fint(double [::1] cs, object Finput, object shell,
 
                         fint[col+0] += weight*(intx*inty/4)*( 2*Nxx*fAuxi*gAu/a + 2*Nxy*fAu*gAueta/b )
                         fint[col+1] += weight*(intx*inty/4)*( 2*Nxy*fAvxi*gAv/a + 2*Nyy*fAv*gAveta/b )
-                        fint[col+2] += weight*(intx*inty/4)*( 2*Nxx*fAwxi*gAw*wx/a + 2*Nxy*(a*fAw*gAweta*wx + b*fAwxi*gAw*wy)/(a*b) + 2*Nyy*fAw*gAweta*wy/b - 4*Pxx*c1*fAwxixi*gAw/(a*a) - 8*Pxy*c1*fAwxi*gAweta/(a*b) - 4*Pyy*c1*fAw*gAwetaeta/(b*b) + 2*Qx*fAwxi*gAw/a + 2*Qy*fAw*gAweta/b - 6*Rx*c1*fAwxi*gAw/a - 6*Ry*c1*fAw*gAweta/b )
+                        fint[col+2] += weight*(intx*inty/4)*( 2*Nxx*bx*fAwxi*gAw/a + 2*Nxy*(a*bx*fAw*gAweta + b*by*fAwxi*gAw)/(a*b) + 2*Nyy*by*fAw*gAweta/b - 4*Pxx*c1*fAwxixi*gAw/(a*a) - 8*Pxy*c1*fAwxi*gAweta/(a*b) - 4*Pyy*c1*fAw*gAwetaeta/(b*b) + 2*Qx*fAwxi*gAw/a + 2*Qy*fAw*gAweta/b - 6*Rx*c1*fAwxi*gAw/a - 6*Ry*c1*fAw*gAweta/b )
                         fint[col+3] += weight*(intx*inty/4)*( 2*Mxx*fAphixxi*gAphix/a + 2*Mxy*fAphix*gAphixeta/b - 2*Pxx*c1*fAphixxi*gAphix/a - 2*Pxy*c1*fAphix*gAphixeta/b + Qx*fAphix*gAphix - 3*Rx*c1*fAphix*gAphix )
                         fint[col+4] += weight*(intx*inty/4)*( 2*Mxy*fAphiyxi*gAphiy/a + 2*Myy*fAphiy*gAphiyeta/b - 2*Pxy*c1*fAphiyxi*gAphiy/a - 2*Pyy*c1*fAphiy*gAphiyeta/b + Qy*fAphiy*gAphiy - 3*Ry*c1*fAphiy*gAphiy )
 
