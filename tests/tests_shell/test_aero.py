@@ -9,7 +9,10 @@ from panels.shell import Shell
 
 def test_aero():
     for model in ['plate_clpt_donnell',
-                  'cylshell_clpt_donnell']:
+                  'cylshell_clpt_donnell',
+                  'cylshell_clpt_sanders',
+                  'plate_fsdt_donnell',
+                  'plate_tsdt_donnell']:
         for pre_stress in [False, True]:
             print('Flutter Analysis Piston Theory, consider_pre_stress={0}, model={1}'.
                   format(pre_stress, model))
