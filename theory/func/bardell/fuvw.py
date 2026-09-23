@@ -22,16 +22,23 @@ below for:
   3``, `\phi_y = -w_{,y} + v/r`, used by ``'cylshell_clpt_sanders'``;
 - ``'sdt'``: the first-order and third-order shear deformation theories
   (FSDT and TSDT), ``DOF = 5``, with the rotations `\phi_x, \phi_y` as
-  independent fields, used by ``'plate_fsdt_donnell'`` and
-  ``'plate_tsdt_donnell'``. The displacements through the thickness are
+  independent fields, used by ``'plate_fsdt_donnell'``,
+  ``'plate_tsdt_donnell'``, ``'cylshell_fsdt_donnell'`` and
+  ``'cylshell_tsdt_donnell'``;
+- ``'sdt_sanders'``: the FSDT and TSDT with the Sanders-Koiter kinematics,
+  ``DOF = 5``, whose rotation of the normal about `x` is `\Phi_y = \phi_y +
+  v/r`, used by ``'cylshell_fsdt_sanders'`` and ``'cylshell_tsdt_sanders'``.
 
-  .. math::
+The displacements through the thickness of the last two are
 
-      u(z) = u + z \phi_x - c_1 z^3 (\phi_x + w_{,x}) \qquad
-      v(z) = v + z \phi_y - c_1 z^3 (\phi_y + w_{,y}) \qquad
-      w(z) = w
+.. math::
 
-  with `c_1 = 0` for the FSDT and `c_1 = 4/(3 h^2)` for the TSDT.
+    u(z) = u + z \phi_x - c_1 z^3 (\phi_x + w_{,x}) \qquad
+    v(z) = v + z \Phi_y - c_1 z^3 (\phi_y + w_{,y}) \qquad
+    w(z) = w
+
+with `c_1 = 0` for the FSDT and `c_1 = 4/(3 h^2)` for the TSDT, and `\Phi_y =
+\phi_y` for ``'sdt'``.
 
 The matrices `[g_{ij}]` are those of the function ``fg`` of the field modules
 :mod:`panels.models.clpt_field` and :mod:`panels.models.fsdt_tsdt_field`,
@@ -85,22 +92,27 @@ def shape_function_matrix(model):
         if model == 'clpt_sanders':
             G[4, 1] = f['v']*g['v']/r
         return G
-    assert model == 'sdt'
+    assert model in ('sdt', 'sdt_sanders')
     G = zeros(5, 5)
     for k, name in enumerate(FIELDS):
         G[k, k] = f[name]*g[name]
+    if model == 'sdt_sanders':
+        # rotation of the normal Phiy = phiy + v/r
+        G[4, 1] = f['v']*g['v']/r
     return G
 
 
-def through_thickness(G):
+def through_thickness(G, sanders=False):
     r"""`u(z), v(z), w(z)` of the models based on shear deformation theories,
-    per Ritz constant of the term `(i, j)`"""
+    per Ritz constant of the term `(i, j)`, where the row of ``phiy`` of
+    ``G`` is `\Phi_y`"""
     fwxi = Symbol('fwxi')
     gweta = Symbol('gweta')
     wx = M([[0, 0, (2/a)*fwxi*Symbol('gw'), 0, 0]])
     wy = M([[0, 0, (2/b)*Symbol('fw')*gweta, 0, 0]])
+    phiy = G[4, :] - G[1, :]/r if sanders else G[4, :]
     uz = G[0, :] + z*G[3, :] - c1*z**3*(G[3, :] + wx)
-    vz = G[1, :] + z*G[4, :] - c1*z**3*(G[4, :] + wy)
+    vz = G[1, :] + z*G[4, :] - c1*z**3*(phiy + wy)
     return M([uz, vz, G[2, :]])
 
 
@@ -167,7 +179,9 @@ if __name__ == '__main__':
     cases = {
         'clpt_donnell': ['plate_clpt_donnell', 'cylshell_clpt_donnell'],
         'clpt_sanders': ['cylshell_clpt_sanders'],
-        'sdt': ['plate_fsdt_donnell', 'plate_tsdt_donnell'],
+        'sdt': ['plate_fsdt_donnell', 'plate_tsdt_donnell',
+                'cylshell_fsdt_donnell', 'cylshell_tsdt_donnell'],
+        'sdt_sanders': ['cylshell_fsdt_sanders', 'cylshell_tsdt_sanders'],
         }
     for model, panels_models in cases.items():
         G = shape_function_matrix(model)
@@ -176,8 +190,8 @@ if __name__ == '__main__':
             for l in range(G.shape[1]):
                 if G[k, l] != 0:
                     lines.append('g[%d, col+%d] = %s' % (k, l, G[k, l]))
-        if model == 'sdt':
-            U = through_thickness(G)
+        if model.startswith('sdt'):
+            U = through_thickness(G, sanders=model == 'sdt_sanders')
             lines.append('# u(z), v(z), w(z)')
             for k, name in enumerate(('uz', 'vz', 'wz')):
                 for l in range(U.shape[1]):

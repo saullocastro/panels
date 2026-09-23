@@ -203,11 +203,14 @@ piece_wise_simplify(kCSB22, [])
 # 5 DOFs per term u, v, w, phix, phiy, with the displacement field
 #
 #     u(z) = u + z phix - c1 z^3 (phix + w,x)
-#     v(z) = v + z phiy - c1 z^3 (phiy + w,y)
+#     v(z) = v + z Phiy - c1 z^3 (phiy + w,y)
 #     w(z) = w
 #
-# where c1 = 0 for the FSDT and c1 = 4/(3 h^2) for the TSDT
-var('krw, cphi1, cw1, cphi2, cw2')
+# where c1 = 0 for the FSDT and c1 = 4/(3 h^2) for the TSDT, and Phiy =
+# phiy + v/r is the rotation of the normal about x with the Sanders-Koiter
+# kinematics, see theory/shells/fsdt_tsdt, obtained with rinv1 = 1/r1 and
+# rinv2 = 1/r2 of each panel, and Phiy = phiy with rinv = 0 otherwise
+var('krw, cphi1, cw1, cphi2, cw2, zi1, zi2')
 var('f1Aphix, g1Aphix, f1Aphiy, g1Aphiy, f1Bphix, g1Bphix, f1Bphiy, g1Bphiy')
 var('f2Aphix, g2Aphix, f2Aphiy, g2Aphiy, f2Bphix, g2Bphix, f2Bphiy, g2Bphiy')
 
@@ -228,68 +231,75 @@ def sdt_vectors(p, s):
 s1A, s1B = sdt_vectors(1, 'A'), sdt_vectors(1, 'B')
 s2A, s2B = sdt_vectors(2, 'A'), sdt_vectors(2, 'B')
 
-# XCTE and YCTE: penalty kt on u, v, w, kr on phix, phiy and, for the TSDT,
+def Phiy(s, p):
+    r"""Rotation of the normal about x of panel ``p``"""
+    return s['phiy'] + (rinv1 if p == 1 else rinv2)*s['v']
+
+# XCTE and YCTE: penalty kt on u, v, w, kr on phix, Phiy and, for the TSDT,
 # krw = kr on the derivative of w normal to the edge, which enters the
 # displacement field, krw = 0 for the FSDT
-def sdt_edge(sA, sB, jac, normal, LA, LB):
+def sdt_edge(sA, pA, sB, pB, jac, normal, LA, LB):
     return jac*(kt*(sA['u'].T*sB['u'] + sA['v'].T*sB['v'] + sA['w'].T*sB['w'])
-              + kr*(sA['phix'].T*sB['phix'] + sA['phiy'].T*sB['phiy'])
+              + kr*(sA['phix'].T*sB['phix'] + Phiy(sA, pA).T*Phiy(sB, pB))
               + krw*((2/LA)*sA[normal].T)*((2/LB)*sB[normal]))
 
-kCSSxcte_sdt11 =  sdt_edge(s1A, s1B, b1/2, 'wxi', a1, a1)
-kCSSxcte_sdt12 = -sdt_edge(s1A, s2B, b1/2, 'wxi', a1, a2)
-kCSSxcte_sdt22 =  sdt_edge(s2A, s2B, b1/2, 'wxi', a2, a2)
+kCSSxcte_sdt11 =  sdt_edge(s1A, 1, s1B, 1, b1/2, 'wxi', a1, a1)
+kCSSxcte_sdt12 = -sdt_edge(s1A, 1, s2B, 2, b1/2, 'wxi', a1, a2)
+kCSSxcte_sdt22 =  sdt_edge(s2A, 2, s2B, 2, b1/2, 'wxi', a2, a2)
 
-kCSSycte_sdt11 =  sdt_edge(s1A, s1B, a1/2, 'weta', b1, b1)
-kCSSycte_sdt12 = -sdt_edge(s1A, s2B, a1/2, 'weta', b1, b2)
-kCSSycte_sdt22 =  sdt_edge(s2A, s2B, a1/2, 'weta', b2, b2)
+kCSSycte_sdt11 =  sdt_edge(s1A, 1, s1B, 1, a1/2, 'weta', b1, b1)
+kCSSycte_sdt12 = -sdt_edge(s1A, 1, s2B, 2, a1/2, 'weta', b1, b2)
+kCSSycte_sdt22 =  sdt_edge(s2A, 2, s2B, 2, a1/2, 'weta', b2, b2)
 
 # SB: penalty kt on the displacements at the interface, z = -h1/2 for the
 # top panel (1) and z = +h2/2 for the bottom panel (2), and kr on the
 # difference of rotations (kr = 0 connects only the interface)
 #
 #     u_p(z) = u_p + cphi_p phix_p + cw_p w_p,x
-#     v_p(z) = v_p + cphi_p phiy_p + cw_p w_p,y
+#     v_p(z) = (1 + zi_p rinv_p) v_p + cphi_p phiy_p + cw_p w_p,y
 #
-# with cphi_p = z - c1_p z^3 and cw_p = -c1_p z^3, which for the TSDT give
-# cphi1 = -h1/3, cw1 = h1/6, cphi2 = h2/3, cw2 = -h2/6 and for the FSDT
-# cphi1 = -h1/2, cphi2 = h2/2, cw1 = cw2 = 0
+# with zi_p the coordinate z of the interface in panel p, cphi_p = zi_p -
+# c1_p zi_p^3 and cw_p = -c1_p zi_p^3, which for the TSDT give cphi1 =
+# -h1/3, cw1 = h1/6, cphi2 = h2/3, cw2 = -h2/6 and for the FSDT cphi1 =
+# -h1/2, cphi2 = h2/2, cw1 = cw2 = 0, and zi1 = -h1/2, zi2 = h2/2
 def sdt_interface(s, p):
-    cphi, cw = (cphi1, cw1) if p == 1 else (cphi2, cw2)
+    cphi, cw, zi, rinv = ((cphi1, cw1, zi1, rinv1) if p == 1 else
+                          (cphi2, cw2, zi2, rinv2))
     L = dict(x=a1 if p == 1 else a2, y=b1 if p == 1 else b2)
     qu = s['u'] + cphi*s['phix'] + cw*(2/L['x'])*s['wxi']
-    qv = s['v'] + cphi*s['phiy'] + cw*(2/L['y'])*s['weta']
+    qv = (1 + zi*rinv)*s['v'] + cphi*s['phiy'] + cw*(2/L['y'])*s['weta']
     return qu, qv
 
 def sdt_sb(sA, pA, sB, pB):
     quA, qvA = sdt_interface(sA, pA)
     quB, qvB = sdt_interface(sB, pB)
     return (a1*b1/4)*(kt*(quA.T*quB + qvA.T*qvB + sA['w'].T*sB['w'])
-                    + kr*(sA['phix'].T*sB['phix'] + sA['phiy'].T*sB['phiy']))
+                    + kr*(sA['phix'].T*sB['phix'] + Phiy(sA, pA).T*Phiy(sB, pB)))
 
 kCSB_sdt11 =  sdt_sb(s1A, 1, s1B, 1)
 kCSB_sdt12 = -sdt_sb(s1A, 1, s2B, 2)
 kCSB_sdt22 =  sdt_sb(s2A, 2, s2B, 2)
 
 # BFycte and BFxcte: base (1) and flange (2), as for the CLPT above, with
-# the rotation penalty on the rotations of the normals phiy (BFycte) and
-# phix (BFxcte) instead of -w,y and -w,x. For the TSDT the derivative of w
-# normal to the connection is not penalized, at a T-joint only the rotation
-# of the normals is common to both panels. The other rotation of each panel
-# is a drilling rotation of the other panel and is not penalized
-def sdt_bfycte(sA, sB, flangeB):
+# the rotation penalty on the rotations of the normals Phiy (BFycte) and
+# phix (BFxcte) instead of -w,y (+ v/r for Sanders) and -w,x. For the TSDT
+# the derivative of w normal to the connection is not penalized, at a
+# T-joint only the rotation of the normals is common to both panels. The
+# other rotation of each panel is a drilling rotation of the other panel and
+# is not penalized
+def sdt_bfycte(sA, pA, sB, pB, flangeB):
     vB, wB = (sB['w'], -sB['v']) if flangeB else (sB['v'], sB['w'])
     return (a1/2)*(kt*(sA['u'].T*sB['u'] + sA['v'].T*vB + sA['w'].T*wB)
-                 + kr*sA['phiy'].T*sB['phiy'])
+                 + kr*Phiy(sA, pA).T*Phiy(sB, pB))
 
 def sdt_bfxcte(sA, sB, flangeB):
     uB, wB = (sB['w'], -sB['u']) if flangeB else (sB['u'], sB['w'])
     return (b1/2)*(kt*(sA['u'].T*uB + sA['v'].T*sB['v'] + sA['w'].T*wB)
                  + kr*sA['phix'].T*sB['phix'])
 
-kCBFycte_sdt11 =  sdt_bfycte(s1A, s1B, False)
-kCBFycte_sdt12 = -sdt_bfycte(s1A, s2B, True)
-kCBFycte_sdt22 =  sdt_bfycte(s2A, s2B, False)
+kCBFycte_sdt11 =  sdt_bfycte(s1A, 1, s1B, 1, False)
+kCBFycte_sdt12 = -sdt_bfycte(s1A, 1, s2B, 2, True)
+kCBFycte_sdt22 =  sdt_bfycte(s2A, 2, s2B, 2, False)
 
 kCBFxcte_sdt11 =  sdt_bfxcte(s1A, s1B, False)
 kCBFxcte_sdt12 = -sdt_bfxcte(s1A, s2B, True)

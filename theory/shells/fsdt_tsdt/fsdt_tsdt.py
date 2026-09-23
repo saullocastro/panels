@@ -1,39 +1,45 @@
-r"""Flat plates using the FSDT and Reddy's TSDT with von Karman kinematics
+r"""Plates and cylindrical shells using the FSDT and Reddy's TSDT
 
 The domain `0 \le x \le a`, `0 \le y \le b` is mapped onto
-`-1 \le \xi, \eta \le +1`. The field variables are `u, v, w, \phi_x,
-\phi_y`, in this order, which are the 5 degrees of freedom of each term of
-the approximation.
+`-1 \le \xi, \eta \le +1`. For the cylinders, `y = r \theta` is the arc length
+along the circumference, such that `\frac{1}{r} (\cdot)_{,\theta} =
+(\cdot)_{,y}`. The field variables are `u, v, w, \phi_x, \phi_y`, in this
+order, which are the 5 degrees of freedom of each term of the approximation.
 
-First-order shear deformation theory (FSDT), Reissner-Mindlin:
+The kinematics of the cylinders follow Sanders (1959, 1963) for the FSDT and
+Reddy and Liu (1985) for the TSDT, specialised to a circular cylinder,
+adopting the shallow shell assumption `R(z) = r + z \approx r`, as in
+``theory/shells/cylshell_clpt_sanders`` for the CLPT.
 
-.. math::
-
-    u(z) = u + z \phi_x \qquad v(z) = v + z \phi_y \qquad w(z) = w
-
-Third-order shear deformation theory (TSDT) of Reddy (1984), which enforces
-zero transverse shear stresses at `z = \pm h/2`, with `c_1 = 4/(3 h^2)`:
+Displacement field, with `c_1 = 4/(3 h^2)` for the third-order shear
+deformation theory (TSDT) of Reddy (1984), and `c_1 = 0` for the first-order
+shear deformation theory (FSDT):
 
 .. math::
 
     u(z) = u + z \phi_x - c_1 z^3 (\phi_x + w_{,x})
 
-    v(z) = v + z \phi_y - c_1 z^3 (\phi_y + w_{,y})
+    v(z) = v + z \left(\phi_y + \boxed{\frac{v}{r}}\right)
+           - c_1 z^3 (\phi_y + w_{,y})
 
     w(z) = w
 
 The strains are, in Voigt notation, `\varepsilon = \varepsilon^{(0)} + z
 \varepsilon^{(1)} + z^3 \varepsilon^{(3)}` and `\gamma = \gamma^{(0)} + z^2
-\gamma^{(2)}`:
+\gamma^{(2)}`, with the rotations `\beta_x = w_{,x}` and `\beta_y = w_{,y} -
+\boxed{v/r}` of the von Karman non-linear terms:
 
 .. math::
 
-    \varepsilon^{(0)} = \{ u_{,x} + \frac{1}{2} w_{,x}^2,\
-                           v_{,y} + \frac{1}{2} w_{,y}^2,\
-                           u_{,y} + v_{,x} + w_{,x} w_{,y} \}
+    \varepsilon^{(0)} = \{ u_{,x} + \frac{1}{2} \beta_x^2,\
+                           v_{,y} + \frac{w}{r} + \frac{1}{2} \beta_y^2,\
+                           u_{,y} + v_{,x} + \beta_x \beta_y \}
 
-    \varepsilon^{(1)} = \{ \phi_{x,x},\ \phi_{y,y},\
-                           \phi_{x,y} + \phi_{y,x} \}
+    \varepsilon^{(1)} = \{ \phi_{x,x},\
+                           \phi_{y,y} + \boxed{\frac{1}{r} v_{,y}},\
+                           \phi_{x,y} + \phi_{y,x}
+                           + \boxed{\frac{3}{2} \frac{1}{r} v_{,x}
+                           - \frac{1}{2} \frac{1}{r} u_{,y}} \}
 
     \varepsilon^{(3)} = -c_1 \{ \phi_{x,x} + w_{,xx},\
                                 \phi_{y,y} + w_{,yy},\
@@ -44,8 +50,22 @@ The strains are, in Voigt notation, `\varepsilon = \varepsilon^{(0)} + z
 
     \gamma^{(2)} = -3 c_1 \gamma^{(0)}
 
-The FSDT is obtained with `c_1 = 0`. The generalized constitutive matrix,
-with the rows and columns in the order of the generalized strains above, is:
+The boxed terms are the corrections of Sanders (1959, 1963), which make all
+the strains vanish for any small rigid-body motion: the rotation of the
+transverse normal about `x` is `\Phi_y = \phi_y + v/r`, and the rotation about
+the normal, `\omega_3 = \frac{1}{2}(v_{,x} - u_{,y})`, enters the twist. With
+Sanders' correction of the displacement field, the term `-v/r` of the 3D
+transverse shear strain `\gamma_{yz}` cancels, and no correction appears in
+the `z^3` terms. The models are:
+
+- ``geometry='plate'``: flat plates, `1/r = 0`, with von Karman kinematics;
+- ``geometry='cylshell'``, ``kinematics='donnell'``: cylindrical shells with
+  the Donnell kinematics, without the boxed terms;
+- ``geometry='cylshell'``, ``kinematics='sanders'``: cylindrical shells with
+  the Sanders-Koiter kinematics.
+
+The generalized constitutive matrix, with the rows and columns in the order
+of the generalized strains above, is:
 
 - FSDT, ``8 x 8``: ``[[A, B, 0], [B, D, 0], [0, 0, Ats]]``, where ``Ats`` is
   the shear corrected transverse shear stiffness ``[[A44, A45], [A45,
@@ -62,18 +82,23 @@ above through the thickness, with the same convention for the laminate
 offset ``d`` as the CLPT mass matrices of this package, i.e. `z` spans from
 `-h/2 - d` to `h/2 - d`.
 
-In the numerically integrated matrices, ``wx`` and ``wy`` are the values of
-`w_{,x}` and `w_{,y}` at the integration point, which vanish unless the
+The aerodynamic matrices use the piston theory, with the load `q = \beta
+w_{,x} + \gamma w` along `w` for a flow along `x`, see
+:meth:`.Shell.calc_kA`, where the curvature term `\gamma` exists only for the
+cylinders.
+
+In the numerically integrated matrices, ``bx`` and ``by`` are the values of
+`\beta_x` and `\beta_y` at the integration point, which vanish unless the
 geometric non-linearity is considered.
 
 """
 import os
 
 import numpy as np
-from sympy import Matrix as M, collect, expand, integrate, var, zeros
+from sympy import Matrix as M, Rational, collect, expand, integrate, var, zeros
 
-var('a, b, h, d, rho, c1, z, wx, wy')
-var('aeromu, beta')
+var('a, b, r, h, d, rho, c1, z, bx, by')
+var('aeromu, beta, gamma')
 var('A11, A12, A16, A22, A26, A66')
 var('B11, B12, B16, B22, B26, B66')
 var('D11, D12, D16, D22, D26, D66')
@@ -85,6 +110,15 @@ var('Nxx, Nyy, Nxy, Mxx, Myy, Mxy, Pxx, Pyy, Pxy, Qy, Qx, Ry, Rx')
 
 FIELDS = ('u', 'v', 'w', 'phix', 'phiy')
 DOF = len(FIELDS)
+
+MODELS = {
+    'plate_fsdt_donnell': ('fsdt', 'plate', 'donnell'),
+    'plate_tsdt_donnell': ('tsdt', 'plate', 'donnell'),
+    'cylshell_fsdt_donnell': ('fsdt', 'cylshell', 'donnell'),
+    'cylshell_fsdt_sanders': ('fsdt', 'cylshell', 'sanders'),
+    'cylshell_tsdt_donnell': ('tsdt', 'cylshell', 'donnell'),
+    'cylshell_tsdt_sanders': ('tsdt', 'cylshell', 'sanders'),
+}
 
 
 def sym3(p):
@@ -134,9 +168,8 @@ def stress_names(theory):
     return (Nxx, Nyy, Nxy, Mxx, Myy, Mxy, Pxx, Pyy, Pxy, Qy, Qx, Ry, Rx)
 
 
-def shape_functions(side, theory):
+def shape_functions(side, theory, geometry='plate', kinematics='donnell'):
     r"""Operators of side ``'A'`` or ``'B'``, as rows of 5 DOFs"""
-    s = globals()
     def sf(field, dxi=0, deta=0):
         fname = 'f{0}{1}{2}'.format(side, field, 'xi'*dxi)
         gname = 'g{0}{1}{2}'.format(side, field, 'eta'*deta)
@@ -144,6 +177,13 @@ def shape_functions(side, theory):
         row[0, FIELDS.index(field)] = var(fname)*var(gname)
         return row
 
+    # 1/r and the switch of the Sanders-Koiter terms
+    rinv = 1/r if geometry == 'cylshell' else 0
+    sk = 1 if kinematics == 'sanders' else 0
+    if geometry == 'plate' and sk:
+        raise ValueError('flat plates have no Sanders-Koiter terms')
+
+    u, v, w = sf('u'), sf('v'), sf('w')
     ux, uy = (2/a)*sf('u', 1), (2/b)*sf('u', 0, 1)
     vx, vy = (2/a)*sf('v', 1), (2/b)*sf('v', 0, 1)
     wxA, wyA = (2/a)*sf('w', 1), (2/b)*sf('w', 0, 1)
@@ -154,10 +194,17 @@ def shape_functions(side, theory):
     phixx, phixy = (2/a)*sf('phix', 1), (2/b)*sf('phix', 0, 1)
     phiyx, phiyy = (2/a)*sf('phiy', 1), (2/b)*sf('phiy', 0, 1)
 
-    eps0 = M([ux + wx*wxA,
-              vy + wy*wyA,
-              uy + vx + wx*wyA + wy*wxA])
-    eps1 = M([phixx, phiyy, phixy + phiyx])
+    # variations of the rotations of the von Karman terms, beta_x = w,x and
+    # beta_y = w,y - v/r (Sanders)
+    dbx = wxA
+    dby = wyA - sk*rinv*v
+
+    eps0 = M([ux + bx*dbx,
+              vy + rinv*w + by*dby,
+              uy + vx + bx*dby + by*dbx])
+    eps1 = M([phixx,
+              phiyy + sk*rinv*vy,
+              phixy + phiyx + sk*rinv*(Rational(3, 2)*vx - Rational(1, 2)*uy)])
     gam0 = M([phiy + wyA, phix + wxA])
     if theory == 'fsdt':
         B = M([eps0, eps1, gam0])
@@ -165,24 +212,23 @@ def shape_functions(side, theory):
         eps3 = -c1*M([phixx + wxx, phiyy + wyy, phixy + phiyx + 2*wxy])
         gam2 = -3*c1*gam0
         B = M([eps0, eps1, eps3, gam0, gam2])
-    B0 = B.subs({wx: 0, wy: 0})
+    B0 = B.subs({bx: 0, by: 0})
 
-    G = M([wxA, wyA])
+    G = M([dbx, dby])
 
     # displacements through the thickness
     if theory == 'fsdt':
-        uz = sf('u') + z*phix
-        vz = sf('v') + z*phiy
+        uz = u + z*phix
+        vz = v + z*(phiy + sk*rinv*v)
     else:
-        uz = sf('u') + z*phix - c1*z**3*(phix + wxA)
-        vz = sf('v') + z*phiy - c1*z**3*(phiy + wyA)
-    wz = sf('w')
+        uz = u + z*phix - c1*z**3*(phix + wxA)
+        vz = v + z*(phiy + sk*rinv*v) - c1*z**3*(phiy + wyA)
+    wz = w
 
-    return dict(B=B, B0=B0, G=G, uz=uz, vz=vz, wz=wz, w=sf('w'), wx=wxA,
-                wy=wyA)
+    return dict(B=B, B0=B0, G=G, uz=uz, vz=vz, wz=wz, w=w, wx=wxA, wy=wyA)
 
 
-def build(theory):
+def build(theory, geometry='plate', kinematics='donnell'):
     r"""Integrands of all the matrices of ``theory``, 'fsdt' or 'tsdt'
 
     The integrands are given per unit area of the natural domain, such that
@@ -191,8 +237,8 @@ def build(theory):
     `\xi` and `\eta`, where ``intx = x2 - x1`` and ``inty = y2 - y1``.
 
     """
-    SA = shape_functions('A', theory)
-    SB = shape_functions('B', theory)
+    SA = shape_functions('A', theory, geometry, kinematics)
+    SB = shape_functions('B', theory, geometry, kinematics)
     F = constitutive(theory)
 
     # Constitutive stiffness matrix, with K0L, KL0 and KLL
@@ -213,9 +259,12 @@ def build(theory):
     T = (SA['uz'].T*SB['uz'] + SA['vz'].T*SB['vz'] + SA['wz'].T*SB['wz'])
     kM = rho*T.applyfunc(lambda e: integrate(expand(e), (z, -h/2 - d, h/2 - d)))
 
-    # Aerodynamic and damping matrices using the piston theory, flat plates
-    # have no curvature term gamma, see Shell.calc_kA()
+    # Aerodynamic and damping matrices using the piston theory, with the load
+    # q = beta*w,x + gamma*w along w, where flat plates have no curvature
+    # term gamma, see Shell.calc_kA()
     kAx = -beta*SA['wx'].T*SB['w']
+    if geometry == 'cylshell':
+        kAx += -gamma*SA['w'].T*SB['w']
     kAy = -beta*SA['wy'].T*SB['w']
     cA = -aeromu*SA['w'].T*SB['w']
 
@@ -223,22 +272,16 @@ def build(theory):
                 cA=cA, F=F, B0=SA['B0'])
 
 
-def collect_for(m, vars):
-    m = m.copy()
-    for (i, j), mij in np.ndenumerate(m):
-        m[i, j] = collect(expand(mij), vars)
-    return m
-
-
 if __name__ == '__main__':
     from panels.dev.matrixtools import mprint_as_sparse
 
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
     outdir = './output_expressions_python/'
     os.makedirs(outdir, exist_ok=True)
-    for theory in ('fsdt', 'tsdt'):
-        matrices = build(theory)
+    for model, args in MODELS.items():
+        matrices = build(*args)
         for name in ('kC', 'kC0', 'fint', 'kG', 'kM', 'kAx', 'kAy', 'cA'):
             m = matrices[name]
             out = mprint_as_sparse(m, name, '11', print_file=False)
-            with open(outdir + 'sympy_%s_%s.txt' % (theory, name), 'w') as f:
+            with open(outdir + 'sympy_%s_%s.txt' % (model, name), 'w') as f:
                 f.write(out)

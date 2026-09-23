@@ -1,7 +1,16 @@
-"""Generate panels/models/plate_{fsdt,tsdt}_donnell{,_num}.pyx"""
+"""Generate the kernels of the models based on the FSDT and TSDT
+
+Writes ``panels/models/<model>.pyx`` and ``panels/models/<model>_num.pyx``
+for each model of ``fsdt_tsdt.MODELS``, or for the models given as
+arguments::
+
+    python write_pyx.py [model ...]
+
+"""
 import os
 import re
 import sys
+import textwrap
 import time
 
 import numpy as np
@@ -12,9 +21,9 @@ from sympy.printing.str import StrPrinter
 REPO = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                     '..', '..', '..'))
 sys.path.insert(0, REPO)
-sys.path.insert(0, os.path.join(REPO, 'theory', 'shells', 'plate_fsdt_tsdt_donnell'))
+sys.path.insert(0, os.path.join(REPO, 'theory', 'shells', 'fsdt_tsdt'))
 
-import plate_fsdt_tsdt_donnell as th
+import fsdt_tsdt as th
 from panels.dev.matrixtools import pow2mult
 
 FIELDS = th.FIELDS
@@ -355,9 +364,62 @@ def strain_lines(B0, indent):
     return L
 
 
-def generate(theory):
+DESCRIPTION = {
+    ('plate', 'donnell'): 'flat plates using the {title} with von Karman kinematics',
+    ('cylshell', 'donnell'): ('cylindrical shells using the {title} with the '
+                              'Donnell kinematics'),
+    ('cylshell', 'sanders'): ('cylindrical shells using the {title} with the '
+                              'Sanders-Koiter kinematics'),
+}
+
+
+def nl_block(sanders, indent, cond):
+    r"""Rotations ``bx = w,x`` and ``by = w,y - v/r`` (Sanders) of the von
+    Karman terms at the integration point"""
+    s = ' '*indent
+    t = ' '*(indent + 4) if cond else s
+    L = [s + 'bx = 0', s + 'by = 0']
+    if cond:
+        L.append(s + 'if NLgeom == 1:')
+    L += [t + 'for j in range(n):',
+          t + '    #TODO put these in a lookup vector',
+          t + '    gAw = f(j, eta, y1w, y1wr, y2w, y2wr)',
+          t + '    gAweta = fp(j, eta, y1w, y1wr, y2w, y2wr)']
+    if sanders:
+        L.append(t + '    gAv = f(j, eta, y1v, y1vr, y2v, y2vr)')
+    L += [t + '    for i in range(m):',
+          t + '        #TODO put these in a lookup vector',
+          t + '        fAw = f(i, xi, x1w, x1wr, x2w, x2wr)',
+          t + '        fAwxi = fp(i, xi, x1w, x1wr, x2w, x2wr)']
+    if sanders:
+        L.append(t + '        fAv = f(i, xi, x1v, x1vr, x2v, x2vr)')
+    L += ['',
+          t + '        col = col0 + DOF*(j*m + i)',
+          '',
+          t + '        bx += (2/a)*cs[col+2]*fAwxi*gAw',
+          t + '        by += (2/b)*cs[col+2]*fAw*gAweta']
+    if sanders:
+        L.append(t + '        by -= cs[col+1]*fAv*gAv/r')
+    return '\n'.join(L)
+
+
+def with_radius(text, cyl):
+    r"""Reads the radius ``r`` in every function of the cylinders"""
+    if not cyl:
+        return text
+    n = text.count('    n = shell.n\n')
+    text = text.replace('    cdef double a, b', '    cdef double r\n    cdef double a, b')
+    text = text.replace('    n = shell.n\n', '    n = shell.n\n    r = shell.r\n')
+    assert n > 0 and text.count('    cdef double r\n') == n
+    return text
+
+
+def generate(model):
     t0 = time.time()
-    mats = th.build(theory)
+    theory, geometry, kinematics = th.MODELS[model]
+    cyl = geometry == 'cylshell'
+    sanders = kinematics == 'sanders'
+    mats = th.build(theory, geometry, kinematics)
     Fsym = mats['F']
     NE = Fsym.shape[0]
     cvars = tuple(sympy.Symbol(n) for n in const_names(Fsym))
@@ -365,9 +427,10 @@ def generate(theory):
     area = a*b/4
     do_factor = theory == 'fsdt'
 
-    mod = 'plate_{0}_donnell'.format(theory)
+    mod = model
     title = {'fsdt': 'first-order shear deformation theory (FSDT)',
              'tsdt': "Reddy's third-order shear deformation theory (TSDT)"}[theory]
+    desc = DESCRIPTION[(geometry, kinematics)].format(title=title)
     c1_line = '    c1 = 4./(3.*h*h)' if theory == 'tsdt' else ''
     c1_cdef = ', h, c1' if theory == 'tsdt' else ''
     c1_read = '    h = sum(shell.plyts)\n' + c1_line if theory == 'tsdt' else ''
@@ -378,17 +441,16 @@ def generate(theory):
     kAx = mats['kAx'].applyfunc(lambda e: expand(area*e))
     kAy = mats['kAy'].applyfunc(lambda e: expand(area*e))
     cA = mats['cA'].applyfunc(lambda e: expand(area*e))
-    print(theory, 'analytical simplified', time.time() - t0)
+    print(model, 'analytical simplified', time.time() - t0)
 
     # --------------------------------------------------------------- analytical
     A = [HEADER + '''r"""
-Analytical matrices of flat plates using the {title} with von Karman
-kinematics, integrated over the full domain
+{desc}
 
-See the kinematic equations in
-``theory/shells/plate_fsdt_tsdt_donnell/plate_fsdt_tsdt_donnell.py``, from
-where the integrands herein have been generated. The degrees of freedom of
-each term of the approximation are ``u, v, w, phix, phiy``.
+Analytical matrices, integrated over the full domain. See the kinematic
+equations in ``theory/shells/fsdt_tsdt/fsdt_tsdt.py``, from where the
+integrands herein have been generated. The degrees of freedom of each term
+of the approximation are ``u, v, w, phix, phiy``.
 
 """
 from scipy.sparse import coo_matrix
@@ -415,7 +477,7 @@ cdef extern from 'bardell.hpp':
     double integral_fppfpp(int i, int j, double x1t, double x1r, double x2t, double x2r,
                        double y1t, double y1r, double y2t, double y2r) nogil
 
-'''.format(title=title, DOF=DOF, NE=NE)]
+'''.format(desc=textwrap.fill(desc[0].upper() + desc[1:], 76), DOF=DOF, NE=NE)]
     k0_cdef = '\n'.join(['    cdef double a, b' + c1_cdef,
                          '    cdef double [:, ::1] F',
                          '    cdef int m, n',
@@ -450,12 +512,12 @@ cdef extern from 'bardell.hpp':
         '    cdef double a, b\n    cdef int m, n', '', 'cA', cA, True))
     A.append('')
     with open(os.path.join(REPO, 'panels', 'models', mod + '.pyx'), 'w', newline='\n') as f:
-        f.write('\n'.join(A))
-    print(theory, 'analytical written', time.time() - t0)
+        f.write(with_radius('\n'.join(A), cyl))
+    print(model, 'analytical written', time.time() - t0)
 
     # --------------------------------------------------------------- numerical
     kC = entries(mats['kC'].applyfunc(lambda e: simp(e, cvars, do_factor)))
-    print(theory, 'kC simplified', time.time() - t0)
+    print(model, 'kC simplified', time.time() - t0)
     NxxNL, NyyNL, NxyNL = sympy.symbols('NxxNL, NyyNL, NxyNL')
     kGNL = {(i, j): pstr(v) for i, j, v in entries(mats['kG'].subs(
         {th.Nxx: NxxNL, th.Nyy: NyyNL, th.Nxy: NxyNL}, simultaneous=True).applyfunc(
@@ -470,7 +532,7 @@ cdef extern from 'bardell.hpp':
     fintn = [(i, pstr(v)) for i, j, v in entries(mats['fint'].applyfunc(
         lambda e: simp(e, snames)))]
     kCn = [(i, j, pstr(v)) for i, j, v in kC]
-    print(theory, 'numerical simplified', time.time() - t0)
+    print(model, 'numerical simplified', time.time() - t0)
 
     B0 = mats['B0']
     ne_names = ('exx, eyy, gxy, kxx, kyy, kxy, gyz, gxz' if theory == 'fsdt' else
@@ -478,15 +540,14 @@ cdef extern from 'bardell.hpp':
     sn = ', '.join(s.name for s in snames)
 
     NUM = [HEADER + '''r"""
-Numerically integrated matrices of flat plates using the {title} with von
-Karman kinematics
+{desc}
 
-See the kinematic equations in
-``theory/shells/plate_fsdt_tsdt_donnell/plate_fsdt_tsdt_donnell.py``, from
-where the integrands herein have been generated. The degrees of freedom of
-each term of the approximation are ``u, v, w, phix, phiy``, and the
-constitutive matrix ``Finput`` must be ``{NE} x {NE}``, with the rows and
-columns in the order of the generalized strains::
+Numerically integrated matrices. See the kinematic equations in
+``theory/shells/fsdt_tsdt/fsdt_tsdt.py``, from where the integrands herein
+have been generated. The degrees of freedom of each term of the
+approximation are ``u, v, w, phix, phiy``, and the constitutive matrix
+``Finput`` must be ``{NE} x {NE}``, with the rows and columns in the order of
+the generalized strains::
 
     {ne_names}
 
@@ -509,7 +570,8 @@ cdef extern from 'bardell_functions.hpp':
 
 cdef int DOF = {DOF}
 cdef int NE = {NE}
-'''.format(title=title, DOF=DOF, NE=NE, ne_names=ne_names, sn=sn)]
+'''.format(desc=textwrap.fill(desc[0].upper() + desc[1:], 76), DOF=DOF, NE=NE,
+           ne_names=ne_names, sn=sn)]
 
     c1n_cdef = ', h, c1' if theory == 'tsdt' else ''
     c1n_read = ('    #NOTE the traction-free faces are assumed at z = +-h/2\n'
@@ -537,7 +599,7 @@ def fkC_num(double [::1] cs, object Finput, object shell,
 {basis}
     cdef double xi, eta, weight
     cdef double xi1, xi2, eta1, eta2
-    cdef double wx, wy, NxxNL, NyyNL, NxyNL
+    cdef double bx, by, NxxNL, NyyNL, NxyNL
 
     cdef double [::1] xis, etas, weights_xi, weights_eta
 
@@ -566,22 +628,7 @@ def fkC_num(double [::1] cs, object Finput, object shell,
 
     with nogil:
 {POINT}
-                wx = 0
-                wy = 0
-                if NLgeom == 1:
-                    for j in range(n):
-                        #TODO put these in a lookup vector
-                        gAw = f(j, eta, y1w, y1wr, y2w, y2wr)
-                        gAweta = fp(j, eta, y1w, y1wr, y2w, y2wr)
-                        for i in range(m):
-                            #TODO put these in a lookup vector
-                            fAw = f(i, xi, x1w, x1wr, x2w, x2wr)
-                            fAwxi = fp(i, xi, x1w, x1wr, x2w, x2wr)
-
-                            col = col0 + DOF*(j*m + i)
-
-                            wx += (2/a)*cs[col+2]*fAwxi*gAw
-                            wy += (2/b)*cs[col+2]*fAw*gAweta
+{nl}
 
                 if one_F_each_point == 1:
                     for i in range(NE):
@@ -592,15 +639,15 @@ def fkC_num(double [::1] cs, object Finput, object shell,
 {read}
 
                 # Membrane stress carried by the nonlinear strain
-                # eps_NL = {{w,x^2/2, w,y^2/2, w,x*w,y}}. With it, KGNL = KG(N_NL)
+                # eps_NL = {{bx^2/2, by^2/2, bx*by}}. With it, KGNL = KG(N_NL)
                 # is collected in kC such that
                 #     KT = K0 + K0L + KL0 + KLL + KGNL (fkC_num) + KG(N0 + N_L) (fkG_num)
                 # is the exact Jacobian of calc_fint, and fkG_num stays
                 # homogeneous of degree one in cs, as linear buckling requires.
-                # wx = wy = 0 when NLgeom == 0, then KGNL vanishes
-                NxxNL = A11*0.5*wx*wx + A12*0.5*wy*wy + A16*wx*wy
-                NyyNL = A12*0.5*wx*wx + A22*0.5*wy*wy + A26*wx*wy
-                NxyNL = A16*0.5*wx*wx + A26*0.5*wy*wy + A66*wx*wy
+                # bx = by = 0 when NLgeom == 0, then KGNL vanishes
+                NxxNL = A11*0.5*bx*bx + A12*0.5*by*by + A16*bx*by
+                NyyNL = A12*0.5*bx*bx + A22*0.5*by*by + A26*bx*by
+                NxyNL = A16*0.5*bx*bx + A26*0.5*by*by + A66*bx*by
 
 {loops}
 
@@ -608,9 +655,10 @@ def fkC_num(double [::1] cs, object Finput, object shell,
 
     return kC
 '''.format(c1=c1n_cdef, BC_CDEF=BC_CDEF, cc=cdefs([v.name for v in cvars]),
-           basis=basis_cdefs(set(names) | {'fAw', 'fAwxi', 'gAw', 'gAweta'}),
+           basis=basis_cdefs(set(names) | {'fAw', 'fAwxi', 'gAw', 'gAweta'}
+                             | ({'fAv', 'gAv'} if sanders else set())),
            FINPUT=finput(NE), c1read=c1n_read, LIMITS=LIMITS, BC_BLOCK=BC_BLOCK,
-           nnz=len(kCn), MAPPING=MAPPING, POINT=POINT,
+           nnz=len(kCn), MAPPING=MAPPING, POINT=POINT, nl=nl_block(sanders, 16, True),
            read=const_read(Fsym, 16), loops=loops))
 
     # fkG_num
@@ -813,8 +861,9 @@ def fkM_num(object shell, double offset, object hrho_input, int size,
            c1pt=('                c1 = 4./(3.*h*h)\n' if theory == 'tsdt' else '')))
 
     # fkAx_num and fkAy_num
-    for fname, ents, beta_gamma in (('fkAx_num', kAxn, 'beta = shell.beta'),
-                                    ('fkAy_num', kAyn, 'beta = shell.beta')):
+    for fname, ents, beta_gamma in (
+            ('fkAx_num', kAxn, 'beta = shell.beta' + ('\n    gamma = shell.gamma' if cyl else '')),
+            ('fkAy_num', kAyn, 'beta = shell.beta')):
         L = []
         for i, j, v in ents:
             L += entry('kA', i, j, v)
@@ -823,7 +872,7 @@ def fkM_num(object shell, double offset, object hrho_input, int size,
 
 def {fname}(object shell, int size, int row0, int col0, int nx, int ny):
     cdef double x1, x2, y1, y2, xinf, xsup, yinf, ysup
-    cdef double a, b, beta, intx, inty
+    cdef double a, b, beta, intx, inty{gcdef}
     cdef int m, n
 {BC_CDEF}
 
@@ -868,6 +917,7 @@ def {fname}(object shell, int size, int row0, int col0, int nx, int ny):
     return kA
 '''.format(fname=fname, BC_CDEF=BC_CDEF, basis=basis_cdefs(set(names)),
            LIMITS=LIMITS, bg=beta_gamma, BC_BLOCK=BC_BLOCK, nnz=len(ents),
+           gcdef=', gamma' if cyl and fname == 'fkAx_num' else '',
            MAPPING=MAPPING, POINT=POINT, loops=loops))
 
     # calc_fint
@@ -891,7 +941,7 @@ def calc_fint(double [::1] cs, object Finput, object shell,
 
     cdef double xi, eta, weight
     cdef double xi1, xi2, eta1, eta2
-    cdef double wx, wy
+    cdef double bx, by
 
 {basis}
 
@@ -924,21 +974,7 @@ def calc_fint(double [::1] cs, object Finput, object shell,
                             #TODO could assume symmetry
                             F[i*NE + j] = Fnxny[ptx, pty, i, j]
 
-                wx = 0
-                wy = 0
-                for j in range(n):
-                    #TODO save in buffer
-                    gAw = f(j, eta, y1w, y1wr, y2w, y2wr)
-                    gAweta = fp(j, eta, y1w, y1wr, y2w, y2wr)
-                    for i in range(m):
-                        #TODO save in buffer
-                        fAw = f(i, xi, x1w, x1wr, x2w, x2wr)
-                        fAwxi = fp(i, xi, x1w, x1wr, x2w, x2wr)
-
-                        col = col0 + DOF*(j*m + i)
-
-                        wx += (2/a)*cs[col+2]*fAwxi*gAw
-                        wy += (2/b)*cs[col+2]*fAw*gAweta
+{nl}
 
                 # current generalized strain state
                 for i in range(NE):
@@ -955,10 +991,10 @@ def calc_fint(double [::1] cs, object Finput, object shell,
 
 {strains}
 
-                # nonlinear strain eps_NL = {{w,x^2/2, w,y^2/2, w,x*w,y}}
-                e[0] += 0.5*wx*wx
-                e[1] += 0.5*wy*wy
-                e[2] += wx*wy
+                # nonlinear strain eps_NL = {{bx^2/2, by^2/2, bx*by}}
+                e[0] += 0.5*bx*bx
+                e[1] += 0.5*by*by
+                e[2] += bx*by
 
                 # current generalized stress state
                 for i in range(NE):
@@ -982,13 +1018,13 @@ def calc_fint(double [::1] cs, object Finput, object shell,
            LIMITS=LIMITS, BC_BLOCK=BC_BLOCK, MAPPING=MAPPING, POINT=POINT,
            gl='\n'.join(gl1), fl='\n'.join(fl1),
            strains='\n'.join(strain_lines(B0, 24)), sassign=s_assign,
-           FINT='\n'.join(fint_lines), NE=NE))
+           FINT='\n'.join(fint_lines), NE=NE, nl=nl_block(sanders, 16, False)))
 
     with open(os.path.join(REPO, 'panels', 'models', mod + '_num.pyx'), 'w', newline='\n') as f:
-        f.write(''.join(NUM))
-    print(theory, 'numerical written', time.time() - t0)
+        f.write(with_radius(''.join(NUM), cyl))
+    print(model, 'numerical written', time.time() - t0)
 
 
 if __name__ == '__main__':
-    for theory in sys.argv[1:] or ['fsdt', 'tsdt']:
-        generate(theory)
+    for model in sys.argv[1:] or th.MODELS:
+        generate(model)
