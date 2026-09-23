@@ -26,7 +26,9 @@ def test_cylinder_compression_lb_Nxx_cte():
 
     assy.plot(eigvecs[:, 0], 'skin', filename='tmp_cylinder_compression_lb_Nxx_cte.png')
 
-    assert np.isclose(Nxxs[0]*eigvals[0], -47319.181, atol=0.01, rtol=0.001)
+    #NOTE Sanders kinematics, the default for cylinders, the Donnell
+    #     kinematics gave -47319.181
+    assert np.isclose(Nxxs[0]*eigvals[0], -47055.984, atol=0.01, rtol=0.001)
 
 
 def test_cylinder_compression_lb_Nxx_from_static():
@@ -49,4 +51,6 @@ def test_cylinder_compression_lb_Nxx_from_static():
     assy.plot(c, 'skin', filename='tmp_cylinder_compression_lb_Nxx_from_static_c.png')
     assy.plot(eigvecs[:, 0], 'skin', filename='tmp_cylinder_compression_lb_Nxx_from_static_eigvec.png')
 
-    assert np.isclose(Nxxs[0]*eigvals[0], -47417.912, atol=0.01, rtol=0.001)
+    #NOTE Sanders kinematics, the default for cylinders, the Donnell
+    #     kinematics gave -47417.912
+    assert np.isclose(Nxxs[0]*eigvals[0], -47162.406, atol=0.01, rtol=0.001)
