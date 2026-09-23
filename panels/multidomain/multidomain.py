@@ -33,8 +33,11 @@ def _sb_top_bottom(connecti):
     The kernels of ``'SB'`` and ``'SB_TSL'`` place the second panel at a
     distance ``dsb`` below the first one, therefore ``p1`` must be the top
     panel and ``p2`` the bottom one, independently of their order in the
-    assembly. Both must cover the same area, since the kernels integrate over
-    the domain of ``p1`` only.
+    assembly. Both must cover the same area, since the kernels of
+    ``kCSB.pyx`` and ``kCSB_dmg.pyx`` and the operators of
+    :meth:`.MultiDomain._tsl_operators` integrate over the domain of ``p1``
+    only, evaluating the functions of ``p2`` at the natural coordinates of
+    ``p1``.
 
     """
     p_top = connecti['p1']
@@ -45,6 +48,21 @@ def _sb_top_bottom(connecti):
                          .format(connecti['func'], p_top.a, p_top.b,
                                  p_bot.a, p_bot.b))
     return p_top, p_bot
+
+
+def _bf_base_flange(connecti):
+    r"""Base and flange of a base-flange connection
+
+    The kernels of ``'BFycte'`` and ``'BFxcte'`` rotate the local axes of
+    the flange by 90 degrees about the axis of the connection with respect to
+    those of the base, see :mod:`panels.multidomain.connections.kCBFycte`,
+    therefore ``p1`` must be the base, or skin, and ``p2`` the flange,
+    independently of their order in the assembly. The coordinates of the
+    connection, ``xcte1``, ``xcte2`` or ``ycte1``, ``ycte2``, refer to ``p1``
+    and ``p2``, respectively.
+
+    """
+    return connecti['p1'], connecti['p2']
 
 
 def _upper_block(k12, p1, p2):
@@ -61,8 +79,31 @@ def _upper_block(k12, p1, p2):
     return k12
 
 
-def _same_domain(p1, p2):
-    return bool(np.isclose(p1.a, p2.a) and np.isclose(p1.b, p2.b))
+def _rinv_sanders(p):
+    r"""`1/r` of a panel with the kinematics of Sanders-Koiter, zero otherwise
+
+    With the kinematics of Sanders-Koiter the rotation of the normal about
+    the `x` axis includes the term `v/r`, `\phi_y = -w_{,y} + v/r`, which
+    enters the rotation penalty of the connection ``'BFycte'``, see
+    :mod:`panels.multidomain.connections.kCBFycte`.
+
+    """
+    if p.model is not None and 'sanders' in p.model:
+        return 1./p.r
+    return 0.
+
+
+def _dofs(p):
+    r"""Number of DOFs per term of the model of ``p``
+
+    A panel without a model gets one of the default models, which are based
+    on the classical laminated plate theory with 3 DOFs, see
+    :meth:`.Shell._rebuild`.
+
+    """
+    if p.model is None:
+        return 3
+    return modelDB.db[p.model]['dofs']
 
 
 def default_field(panel, gridx, gridy):
@@ -178,8 +219,10 @@ class MultiDomain(object):
             # This actually modifies the shell obj (i.e. passed panels)
             p.row_start = row0 # 1st panel starts at 0,0. Rest start at end of last matrix  --- Assembly of Kp_i from the paper
             p.col_start = col0
-            row0 += 3*p.m*p.n # 3 bec 3 dof i.e. u,v,w - For FSDT, change to 5
-            col0 += 3*p.m*p.n
+            #NOTE 3 DOFs u, v, w for the classical laminated plate theory and
+            #     5 DOFs u, v, w, phix, phiy for the shear deformation theories
+            row0 += _dofs(p)*p.m*p.n
+            col0 += _dofs(p)*p.m*p.n
             p.row_end = row0 # This is now the start for the next panel to be assembled
             p.col_end = col0
 
@@ -188,7 +231,7 @@ class MultiDomain(object):
         """
         Size of K of a single panel
         """
-        self.size = sum([3*p.m*p.n for p in self.panels])
+        self.size = sum([_dofs(p)*p.m*p.n for p in self.panels])
         return self.size
 
 
@@ -502,8 +545,10 @@ class MultiDomain(object):
         """
 
         displs = ['u', 'v', 'w', 'phix', 'phiy']
-        strains = ['exx', 'eyy', 'gxy', 'kxx', 'kyy', 'kxy', 'gyz', 'gxz']
-        stresses = ['Nxx', 'Nyy', 'Nxy', 'Mxx', 'Myy', 'Mxy', 'Qy', 'Qx']
+        strains = ['exx', 'eyy', 'gxy', 'kxx', 'kyy', 'kxy', 'gyz', 'gxz',
+                   'kxx3', 'kyy3', 'kxy3', 'gyz2', 'gxz2']
+        stresses = ['Nxx', 'Nyy', 'Nxy', 'Mxx', 'Myy', 'Mxy', 'Qy', 'Qx',
+                    'Pxx', 'Pyy', 'Pxy', 'Ry', 'Rx']
         forces = ['Fxx', 'Fyy', 'Fxy']
 
         msg('Computing field variables...', level=1, silent=True)
@@ -682,6 +727,10 @@ class MultiDomain(object):
             A dictionary of ``np.ndarrays`` with the keys:
             ``(x, y, exx, eyy, gxy, kxx, kyy, kxy)``.
             Each has the shape: (no_panels_in_group) x gridx x gridy
+            The panels of the models based on shear deformation theories
+            also give the strains ``(gyz, gxz)`` and, for the third-order
+            theory, ``(kxx3, kyy3, kxy3, gyz2, gxz2)``, see
+            :meth:`.Shell.strain`.
 
         """
         res = dict(x=[], y=[], exx=[], eyy=[], gxy=[], kxx=[], kyy=[], kxy=[])
@@ -736,16 +785,14 @@ class MultiDomain(object):
             x = np.ascontiguousarray(x)
             y = np.ascontiguousarray(y)
 
-            exx, eyy, gxy, kxx, kyy, kxy = fstrain(c_panel, panel, x, y,
-                    self.out_num_cores, NLgeom=int(NLterms))
+            strains = fstrain(c_panel, panel, x, y, self.out_num_cores,
+                              NLgeom=int(NLterms))
             res['x'].append(reshape(x, shape))
             res['y'].append(reshape(y, shape))
-            res['exx'].append(reshape(exx, shape))
-            res['eyy'].append(reshape(eyy, shape))
-            res['gxy'].append(reshape(gxy, shape))
-            res['kxx'].append(reshape(kxx, shape))
-            res['kyy'].append(reshape(kyy, shape))
-            res['kxy'].append(reshape(kxy, shape))
+            #NOTE the models based on shear deformation theories have more
+            #     strain components, see Shell.strain()
+            for name, value in zip(panel._strain_names(), strains):
+                res.setdefault(name, []).append(reshape(value, shape))
 
         return res
 
@@ -788,7 +835,10 @@ class MultiDomain(object):
         -------
         out : dict
             A dict containing many ``np.ndarrays``, with the keys:
-            ``(x, y, Nxx, Nyy, Nxy, Mxx, Myy, Mxy)``.
+            ``(x, y, Nxx, Nyy, Nxy, Mxx, Myy, Mxy)``. The panels of the
+            models based on shear deformation theories also give the
+            resultants ``(Qy, Qx)`` and, for the third-order theory,
+            ``(Pxx, Pyy, Pxy, Ry, Rx)``, see :meth:`.Shell.stress`.
 
         """
         res = dict(x=[], y=[], Nxx=[], Nyy=[], Nxy=[], Mxx=[], Myy=[], Mxy=[])
@@ -835,32 +885,21 @@ class MultiDomain(object):
             x = np.ascontiguousarray(x)
             y = np.ascontiguousarray(y)
 
-            exx, eyy, gxy, kxx, kyy, kxy = fstrain(c_panel, panel, x, y,
-                    self.out_num_cores, NLgeom=int(NLterms))
-            exx = reshape(exx, shape)
-            eyy = reshape(eyy, shape)
-            gxy = reshape(gxy, shape)
-            kxx = reshape(kxx, shape)
-            kyy = reshape(kyy, shape)
-            kxy = reshape(kxy, shape)
-            Ns = np.zeros((exx.shape + (6,)))
+            strains = [reshape(e, shape) for e in fstrain(c_panel, panel, x,
+                       y, self.out_num_cores, NLgeom=int(NLterms))]
             F = panel.ABD
             if F is None:
                 raise ValueError('Laminate ABD matrix not defined for panel')
-            for i in range(6):
-                Ns[..., i] = (exx*F[i, 0] + eyy*F[i, 1] + gxy*F[i, 2]
-                            + kxx*F[i, 3] + kyy*F[i, 4] + kxy*F[i, 5])
 
             # For x: Each row goes from 0 to panel.a
             # For y: Each col goes from 0 to panel.b
             res['x'].append(reshape(x, shape))
             res['y'].append(reshape(y, shape))
-            res['Nxx'].append(Ns[..., 0])
-            res['Nyy'].append(Ns[..., 1])
-            res['Nxy'].append(Ns[..., 2])
-            res['Mxx'].append(Ns[..., 3])
-            res['Myy'].append(Ns[..., 4])
-            res['Mxy'].append(Ns[..., 5])
+            #NOTE the models based on shear deformation theories have more
+            #     stress resultants, see Shell.stress()
+            for i, name in enumerate(panel._stress_names()):
+                res.setdefault(name, []).append(
+                        sum(e*F[i, j] for j, e in enumerate(strains)))
         return res
 
 
@@ -974,6 +1013,13 @@ class MultiDomain(object):
 
     def force_out_plane(self, c, group, eval_panel, x_cte_force=None, y_cte_force=None,
               gridx=50, gridy=50, NLterms=True, nr_x_gauss=None, nr_y_gauss=None):
+
+        #NOTE the out-of-plane force is obtained from the derivatives of the
+        #     moments of the classical laminated plate theory
+        if eval_panel is not None and _dofs(eval_panel) != 3:
+            raise NotImplementedError(
+                "force_out_plane only supports models with 3 DOFs per term "
+                "(u, v, w), got model '{0}'".format(eval_panel.model))
 
         line_int = True
         area_int = False
@@ -1148,6 +1194,41 @@ class MultiDomain(object):
 
 
     def force_out_plane_damage(self, conn, c):
+        r"""Area integral of the normal traction of an ``SB_TSL`` connection
+
+        Integrates, over the domain of the top panel of the first ``SB_TSL``
+        connection of ``conn``:
+
+        .. math::
+
+            F = \int_A k^w_{CZ} \Delta_w \, dA
+
+        with `k^w_{CZ} = k_o (1 - d)` from :meth:`.calc_k_dmg` and the full
+        normal separation `\Delta_w = w^t - w^b`, the same that enters the
+        internal force vector. The corrected separation of
+        :meth:`.correct_separation`, with the compressive region behind the
+        crack front set to zero, is used only to compute the damage: using it
+        here would drop the compressive tractions that balance the tensile
+        ones, and the thesis of D'Souza (2024) [nathan2024MSc]_ needed to
+        scale that integral by the ratio to the reaction at the first
+        increment. Computed with the full separation, `F` matches the
+        reaction of the prescribed displacement,
+        :meth:`.reaction_line_pd_xcte`, by equilibrium of the loaded arm, and
+        needs no scaling. See :ref:`cohesive_zone`.
+
+        Parameters
+        ----------
+        conn : list of dict
+            Connections, the first ``SB_TSL`` connection is used.
+        c : array-like
+            Ritz constants of the assembly.
+
+        Returns
+        -------
+        force_intgn : float
+            Out-of-plane force transmitted by the cohesive interface.
+
+        """
         for connecti in conn:
             if connecti['func'] == 'SB_TSL':
                 nr_x_gauss = connecti['nr_x_gauss']
@@ -1214,18 +1295,48 @@ class MultiDomain(object):
             The possible options for ``func`` are:
 
             - ``'SSxcte'`` and ``'SSycte'``: between 2 skins along an edge
-            - ``'BFxcte'`` and ``'BFycte'``: between the base and the flange of
-              a stiffener
+            - ``'BFxcte'`` and ``'BFycte'``: between the base, or skin,
+              ``p1`` and the flange ``p2`` of a stiffener, whatever their
+              order in the assembly, see
+              :mod:`panels.multidomain.connections.kCBFycte` and
+              :mod:`panels.multidomain.connections.kCBFxcte`
             - ``'SB'``: between 2 skins connected over an area, where ``p1``
               is the top panel and ``p2`` the bottom one, whatever their order
               in the assembly
             - ``'SB_TSL'``: between 2 skins connected over an area with a
               traction-separation law (TSL) at the interface, requiring
-              ``tsl_type``, ``nr_x_gauss`` and ``nr_y_gauss``
+              ``tsl_type``, ``nr_x_gauss``, ``nr_y_gauss``, ``k_o``,
+              ``tau_o`` and ``G1c``, where ``p1`` is the top panel and
+              ``p2`` the bottom one. The matrix is computed by matrix
+              products, see :meth:`._kC_TSL`, or, with the key
+              ``use_kernels=True``, by the slower kernels of
+              :mod:`panels.multidomain.connections.kCSB_dmg`, which give the
+              same matrix. See :ref:`cohesive_zone`
+
+            The panels of ``'SB'`` and ``'SB_TSL'`` must have the same
+            dimensions `a`, `b`, otherwise a ``ValueError`` is raised: the
+            integration is over the domain of ``p1``, with the functions of
+            ``p2`` evaluated at the natural coordinates of ``p1``.
 
             The penalty constants default to the values of
             :func:`.calc_kt_kr`. They can be given for each connection with
             the keys ``'kt'`` and ``'kr'`` (``'SB'`` uses only ``'kt'``).
+
+            For the models based on shear deformation theories
+            (``'plate_fsdt_donnell'`` and ``'plate_tsdt_donnell'``)
+            ``'SSxcte'``, ``'SSycte'`` and ``'SB'`` are available, see
+            :mod:`panels.multidomain.connections.kCsdt`, and ``'BFycte'`` and
+            ``'BFxcte'``, whose rotation penalty is on `\phi_y` and `\phi_x`
+            instead of `-w_{,y}` and `-w_{,x}`, see the functions ``*_sdt``
+            of :mod:`panels.multidomain.connections.kCBFycte` and
+            :mod:`panels.multidomain.connections.kCBFxcte`. ``'SB_TSL'`` is
+            not available for these models. The edge connections
+            also penalize the independent rotations `\phi_x, \phi_y` with
+            ``'kr'``, and the rotation flags of the connected edges (e.g.
+            ``x2phiy``) must be released as the other flags. The ``'SB'``
+            connection penalizes the displacements at the interface of the
+            laminates, and the difference of their rotations only when
+            ``'kr'`` is given, with units of force/length.
             The default rotation penalty does not grow as the domains
             become narrower, so thin and narrow domains may need a higher
             ``'kr'`` to converge to the single-domain result. For ``'SB'``
@@ -1275,7 +1386,9 @@ class MultiDomain(object):
                 elif p1_temp.col_start > p2_temp.col_start:
                     pA = p2_temp
                     pB = p1_temp
-                    if connecti['func'] == 'SB' or connecti['func'] == 'SB_TSL':
+                    #NOTE the kernels of 'SB', 'SB_TSL', 'BFycte' and
+                    #     'BFxcte' distinguish p1 from p2, see _bf_base_flange()
+                    if connecti['func'] in ('SB', 'SB_TSL', 'BFycte', 'BFxcte'):
                         pass
                     else:
                         if 'xcte1' in connecti.keys() and 'xcte2' in connecti.keys():
@@ -1288,6 +1401,12 @@ class MultiDomain(object):
                             connecti['ycte2'] = temp_ycte
 
                 connection_function = connecti['func'] # Type of connection
+
+                #NOTE models based on shear deformation theories, with the 5
+                #     DOFs u, v, w, phix, phiy per term
+                if _dofs(pA) != 3 or _dofs(pB) != 3:
+                    kC_conn += self._kC_conn_sdt(connecti, pA, pB, size)
+                    continue
 
                 if connection_function == 'SSycte':
                     # ftn in panels/multidomain/connections/penalties.py
@@ -1322,28 +1441,39 @@ class MultiDomain(object):
                             size=size, row0=pB.row_start, col0=pB.col_start)
 
                 elif connection_function == 'BFycte':
+                    pb, pf = _bf_base_flange(connecti)
                     kt, kr = _penalties(connecti, pA, pB, 'ycte')
+                    #NOTE the rotation about x of a panel with the Sanders-
+                    #     Koiter kinematics is w,y - v/r, see kCBFycte.pyx.
+                    #     The rotation about y of 'BFxcte' is -w,x for both
+                    #     kinematics
+                    rinvb = _rinv_sanders(pb)
+                    rinvf = _rinv_sanders(pf)
                     kC_conn += connections.kCBFycte.fkCBFycte11(
-                            kt, kr, pA, connecti['ycte1'],
-                            size, row0=pA.row_start, col0=pA.col_start)
-                    kC_conn += connections.kCBFycte.fkCBFycte12(
-                            kt, kr, pA, pB, connecti['ycte1'], connecti['ycte2'],
-                            size, row0=pA.row_start, col0=pB.col_start)
+                            kt, kr, pb, connecti['ycte1'],
+                            size, row0=pb.row_start, col0=pb.col_start,
+                            rinv1=rinvb)
+                    kC_conn += _upper_block(connections.kCBFycte.fkCBFycte12(
+                            kt, kr, pb, pf, connecti['ycte1'], connecti['ycte2'],
+                            size, row0=pb.row_start, col0=pf.col_start,
+                            rinv1=rinvb, rinv2=rinvf), pb, pf)
                     kC_conn += connections.kCBFycte.fkCBFycte22(
-                            kt, kr, pA, pB, connecti['ycte2'],
-                            size, row0=pB.row_start, col0=pB.col_start)
+                            kt, kr, pb, pf, connecti['ycte2'],
+                            size, row0=pf.row_start, col0=pf.col_start,
+                            rinv2=rinvf)
 
                 elif connection_function == 'BFxcte':
+                    pb, pf = _bf_base_flange(connecti)
                     kt, kr = _penalties(connecti, pA, pB, 'xcte')
                     kC_conn += connections.kCBFxcte.fkCBFxcte11(
-                            kt, kr, pA, connecti['xcte1'],
-                            size, row0=pA.row_start, col0=pA.col_start)
-                    kC_conn += connections.kCBFxcte.fkCBFxcte12(
-                            kt, kr, pA, pB, connecti['xcte1'], connecti['xcte2'],
-                            size, row0=pA.row_start, col0=pB.col_start)
+                            kt, kr, pb, connecti['xcte1'],
+                            size, row0=pb.row_start, col0=pb.col_start)
+                    kC_conn += _upper_block(connections.kCBFxcte.fkCBFxcte12(
+                            kt, kr, pb, pf, connecti['xcte1'], connecti['xcte2'],
+                            size, row0=pb.row_start, col0=pf.col_start), pb, pf)
                     kC_conn += connections.kCBFxcte.fkCBFxcte22(
-                            kt, kr, pA, pB, connecti['xcte2'],
-                            size, row0=pB.row_start, col0=pB.col_start)
+                            kt, kr, pb, pf, connecti['xcte2'],
+                            size, row0=pf.row_start, col0=pf.col_start)
 
                 elif connection_function == 'SB':
                     #NOTE p1 is the top panel and p2 the bottom one, whatever
@@ -1391,9 +1521,13 @@ class MultiDomain(object):
 
                     #NOTE the tangential separation uses the slope of each
                     #      panel, dt and db are the distances from each
-                    #      mid-plane to the interface, see
-                    #      theory/multidomain_penalization/cohesive_zone_deviations_from_thesis.tex
-                    if connecti.get('use_kernels', False) or not _same_domain(p_top, p_bot):
+                    #      mid-plane to the interface, see _tsl_operators(),
+                    #      the docstring of kCSB_dmg.pyx and
+                    #      doc/source/cohesive_zone.rst. The kernels and
+                    #      the matrix products of _kC_TSL() give the same
+                    #      matrix, both require panels of the same
+                    #      dimensions, checked by _sb_top_bottom()
+                    if connecti.get('use_kernels', False):
                         dt = sum(p_top.plyts)/2.
                         db = sum(p_bot.plyts)/2.
                         kC_conn += connections.kCSB_dmg.fkCSB11_dmg(dt=dt, p1=p_top,
@@ -1421,6 +1555,58 @@ class MultiDomain(object):
         gc.collect()
 
         return kC_conn
+
+
+    def _kC_conn_sdt(self, connecti, pA, pB, size):
+        r"""Connection matrix between panels of the models based on shear
+        deformation theories, see :mod:`panels.multidomain.connections.kCsdt`
+        and the functions ``*_sdt`` of
+        :mod:`panels.multidomain.connections.kCBFycte` and
+        :mod:`panels.multidomain.connections.kCBFxcte`
+
+        ``pA`` comes before ``pB`` in the assembly and the coordinates of the
+        connection in ``connecti`` are already ordered accordingly.
+
+        """
+        func = connecti['func']
+        if _dofs(pA) != _dofs(pB):
+            raise NotImplementedError(
+                "Connection '{0}' between models with a different number of "
+                "DOFs per term, got models '{1}' and '{2}'".format(func,
+                pA.model, pB.model))
+        kCsdt = connections.kCsdt
+        if func == 'SSxcte':
+            kt, kr = _penalties(connecti, pA, pB, 'xcte')
+            return kCsdt.fkCSSxcte_sdt(kt, kr, pA, pB, connecti['xcte1'],
+                                       connecti['xcte2'], size)
+        elif func == 'SSycte':
+            kt, kr = _penalties(connecti, pA, pB, 'ycte')
+            return kCsdt.fkCSSycte_sdt(kt, kr, pA, pB, connecti['ycte1'],
+                                       connecti['ycte2'], size)
+        elif func == 'SB':
+            p_top, p_bot = _sb_top_bottom(connecti)
+            kt, _ = _penalties(connecti, p_top, p_bot, 'bot-top')
+            kr = connecti.get('kr', 0.)
+            return kCsdt.fkCSB_sdt(kt, p_top, p_bot, size, kr=kr)
+        elif func in ('BFycte', 'BFxcte'):
+            #NOTE the rotation penalty is on phiy ('BFycte') or phix
+            #     ('BFxcte'), see kCBFycte.pyx and kCBFxcte.pyx
+            pb, pf = _bf_base_flange(connecti)
+            cte = func[2:]
+            mod = getattr(connections, 'kCBF' + cte)
+            kt, kr = _penalties(connecti, pA, pB, cte)
+            c1, c2 = connecti[cte + '1'], connecti[cte + '2']
+            k11 = getattr(mod, 'fkCBF%s11_sdt' % cte)(kt, kr, pb, c1, size,
+                    pb.row_start, pb.col_start)
+            k12 = getattr(mod, 'fkCBF%s12_sdt' % cte)(kt, kr, pb, pf, c1, c2,
+                    size, pb.row_start, pf.col_start)
+            k22 = getattr(mod, 'fkCBF%s22_sdt' % cte)(kt, kr, pb, pf, c2, size,
+                    pf.row_start, pf.col_start)
+            return k11 + _upper_block(k12, pb, pf) + k22
+        raise NotImplementedError(
+            "Connection '{0}' is not implemented for the models based on "
+            "shear deformation theories, got models '{1}' and '{2}'".format(
+            func, pA.model, pB.model))
 
 
     def calc_kC(self, conn=None, c=None, silent=True, finalize=True, inc=1.,
@@ -1614,15 +1800,45 @@ class MultiDomain(object):
 
     def calc_k_dmg(self, c, pA, pB, nr_x_gauss, nr_y_gauss, tsl_type, prev_max_dmg_index,
                    k_i=None, tau_o=None, G1c=None):
-        """Calculate the damaged k_tsl and the damage index
+        r"""Calculate the damaged k_tsl and the damage index
 
-            Input:
-                prev_max_dmg_index = Max damage index per integration point for the previous converged NR iteration
+        The damage is driven by the normal separation `\Delta_w = w^t - w^b`
+        at the Gauss-Legendre points of the connection, after the correction
+        of :meth:`.correct_separation`, `\bar\Delta_w`, and it is
+        irreversible:
 
+        .. math::
 
-            NOTE: Currently this only works for 1 contact region bec of the way del_d is being stored in the
-                MD object. To ensure that it works for multiple connected domamins, it needs to be stored with the
-                shell object instead and modify the rest accordingly
+            d = \max\left( d^{h}, \hat d(\bar\Delta_w) \right), \qquad
+            \hat d(\Delta) = \begin{cases}
+                0 & \Delta \le \Delta_o \\
+                \frac{\Delta_f (\Delta - \Delta_o)}{(\Delta_f - \Delta_o) \Delta}
+                  & \Delta_o < \Delta < \Delta_f \\
+                1 & \Delta \ge \Delta_f
+            \end{cases}
+
+        where `d^h` is ``prev_max_dmg_index``, the damage of the last
+        converged increment, `\hat d` is computed by :func:`.calc_kw_tsl`,
+        `\Delta_o = \tau_o/k_o` and `\Delta_f = 2 G_{Ic}/\tau_o`. The
+        stiffness of the interface is `k^w_{CZ} = k_o (1 - d)`, the same for
+        the three components of the traction, see :ref:`cohesive_zone`. It is
+        also used for negative separations, the interpenetration stiffness
+        of :func:`.calc_kw_tsl` is not used.
+
+        Input:
+            prev_max_dmg_index = Max damage index per integration point for
+            the previous converged NR iteration, or ``None``
+
+        Returns ``(kw_tsl, max_dmg_index, corrected_del_d, dmg_index_curr)``,
+        the stiffness `k^w_{CZ}`, the damage `d`, the corrected separation
+        `\bar\Delta_w` and the damage `\hat d(\bar\Delta_w)` of the current
+        state, all with shape ``(nr_y_gauss, nr_x_gauss)``.
+
+        NOTE: Currently this only works for 1 contact region bec of the way
+            the damage history is being stored in the MD object. To ensure
+            that it works for multiple connected domamins, it needs to be
+            stored with the shell object instead and modify the rest
+            accordingly
         """
         # Calculating the displacements of each panel
         res_pan_top = self.calc_results(c=c, eval_panel=pA, vec='w',
@@ -1661,7 +1877,29 @@ class MultiDomain(object):
         of maximum separation (location `A`) and moving towards ``x=0``, the
         first point with a non-positive separation is found (location `B`),
         and the separation from ``x=0`` up to `B` is set to zero. Points on
-        the other side of `A` are not modified.
+        the other side of `A` are not modified:
+
+        .. math::
+
+            \Delta^{corr}_{i,j} = \begin{cases}
+                0 & j \le B_i \\
+                \Delta_{i,j} & j > B_i
+            \end{cases}
+            \qquad
+            B_i = \max \left\{ j \le A_i : \Delta_{i,j} \le 0 \right\}, \quad
+            A_i = \arg\max_j \Delta_{i,j}
+
+        with `i` the row and `j` the column of the grid of integration
+        points, `j` increasing with `x`. Rows without non-positive values
+        between ``x=0`` and `A_i`, or without positive values, are not
+        modified. A previous implementation set to zero everything from
+        ``x=0`` up to the *last* non-positive separation of the row, which
+        removed the whole fracture process zone when the approximation
+        functions gave a non-positive value between `A` and the edge of the
+        domain. The negative separations are physical: for a beam on an
+        elastic foundation the separation behind the crack front oscillates
+        with a decaying amplitude. The corrected separation is used only to
+        compute the damage, see :meth:`.calc_k_dmg` and :ref:`cohesive_zone`.
 
         Parameters
         ----------
@@ -1742,6 +1980,39 @@ class MultiDomain(object):
         c[dofs]`` the Ritz constants of the top panel followed by those of the
         bottom panel. They depend only on the geometry and are cached.
 
+        The separations are the displacement jump between the two surfaces in
+        contact, with the slope of each panel:
+
+        .. math::
+
+            \begin{aligned}
+                \Delta_u &= u^t + d^t w^t_{,x} - u^b + d^b w^b_{,x} \\
+                \Delta_v &= v^t + d^t w^t_{,y} - v^b + d^b w^b_{,y} \\
+                \Delta_w &= w^t - w^b
+            \end{aligned}
+
+        where `d^t` and `d^b` are the distances from the mid-planes of the
+        top and bottom panels to the interface. With the matrices `[N]` of
+        :meth:`._gauss_field_operators`, whose row `g` holds the
+        approximation functions of each field at the point `g`, the operators
+        are the `n_g \times n_{dof}` matrices:
+
+        .. math::
+
+            \begin{aligned}
+                {}[B_u] &= \left[ [N^t_u] + d^t [N^t_{w,x}] \;\;
+                           -[N^b_u] + d^b [N^b_{w,x}] \right] \\
+                [B_v] &= \left[ [N^t_v] + d^t [N^t_{w,y}] \;\;
+                         -[N^b_v] + d^b [N^b_{w,y}] \right] \\
+                [B_w] &= \left[ [N^t_w] \;\; -[N^b_w] \right]
+            \end{aligned}
+
+        Unlike the compatibility of the thesis of D'Souza (2024)
+        [nathan2024MSc]_, Eq. 4.62, which uses the slope of the top panel
+        only, this gives no spurious tangential separation in the fracture
+        process zone, where the two arms rotate in opposite directions. See
+        :ref:`cohesive_zone`.
+
         """
         cache = self.__dict__.setdefault('_tsl_operators_cache', {})
         key = (id(p_top), id(p_bot), p_top.col_start, p_bot.col_start,
@@ -1779,6 +2050,25 @@ class MultiDomain(object):
         of ``kw_tsl``. The second term runs only over the points where `k_g
         \ne k_o`, the damaged points. Only the upper triangle is returned,
         see :func:`.finalize_symmetric_matrix`.
+
+        The expression above is the Gauss-Legendre rule
+
+        .. math::
+
+            [K] = \sum_{\alpha=u,v,w} [B_\alpha]^T
+                  \text{diag}\left(w_g k_g\right) [B_\alpha]
+
+        regrouped with `k_g = k_o - (k_o - k_g)`, therefore it is exact, not
+        an approximation, and it does not depend on how the damage is
+        computed. Before damage onset the assembly reduces to a
+        copy of `[K_o]`, after onset the cost of the correction grows with
+        the number of points of the fracture process zone and of the cracked
+        region, not with the size of the whole interface. The operators
+        `[B_\alpha]` are those of :meth:`._tsl_operators`. The result agrees
+        with the kernels of ``kCSB_dmg.pyx`` to a relative `10^{-12}`, see
+        ``tests/multidomain/test_sb_tsl.py``; the kernels are still used
+        when the connection has ``use_kernels=True``. See
+        :ref:`cohesive_zone`.
 
         """
         Bu, Bv, Bw, weights, dofs = self._tsl_operators(p_top, p_bot,
@@ -1821,12 +2111,54 @@ class MultiDomain(object):
                     \right) B_w \, dA
 
         with `B_u, B_v, B_w` the operators giving the separations `\Delta_u,
-        \Delta_v, \Delta_n` from the Ritz constants. `\partial d/\partial
+        \Delta_v, \Delta_n` from the Ritz constants, see
+        :meth:`._tsl_operators`. `\partial d/\partial
         \Delta_n` is only non-zero at the points where the damage grows in
         the current state, i.e. where the damage computed from the current
         separation is larger than the damage history and `\Delta_o < \Delta_n <
-        \Delta_f`. The matrix is not symmetric. See
-        theory/multidomain_penalization/cohesive_zone_deviations_from_thesis.tex
+        \Delta_f`. The matrix is not symmetric. See :ref:`cohesive_zone`.
+
+        For the bilinear law of :meth:`.calc_k_dmg`, `\tau_\alpha = k_o (1 -
+        d) \Delta_\alpha` for `\alpha = u, v, w`, with the damage `d =
+        \max(d^h, \hat d(\bar\Delta_n))` driven by the corrected normal
+        separation `\bar\Delta_n`:
+
+        .. math::
+
+            \frac{\partial d}{\partial \Delta_n} = \chi \, \hat d'(\Delta_n),
+            \qquad
+            \hat d'(\Delta) = \frac{\Delta_f \Delta_o}{(\Delta_f - \Delta_o)
+            \Delta^2}, \qquad
+            \chi = \begin{cases}
+                1 & \Delta_o < \bar\Delta_n < \Delta_f \text{ and }
+                    \hat d(\bar\Delta_n) > d^h \\
+                0 & \text{otherwise}
+            \end{cases}
+
+        Where `\chi = 1` the correction of :meth:`.correct_separation` leaves
+        the separation unchanged, `\bar\Delta_n = \Delta_n`, and the
+        derivative of the correction itself is zero almost everywhere. The
+        tangential separations use the uncorrected values, the same used in
+        the internal force vector. Some properties:
+
+        - `K_d` is not symmetric, because the tangential tractions depend on
+          `\Delta_n` through `d`, while `d` does not depend on `\Delta_u`,
+          `\Delta_v`.
+        - The term `B_w^T \Delta_n B_w` is symmetric and negative
+          semi-definite; it makes the normal tangent stiffness of a softening
+          point `k_o (1 - d - \hat d' \Delta_n) = -k_o \Delta_o / (\Delta_f -
+          \Delta_o)`, the slope of the descending branch of the law.
+        - With the secant stiffness alone the Newton-Raphson iterations
+          converge linearly once the crack grows. The iteration matrix
+          `[K_C] + [K_G] + K_s + K_d + [K^{pen}_{PD}]` is non-symmetric,
+          ``structsolve.solve`` accepts it.
+
+        The matrix was verified against central finite differences of `K_s(c)
+        c`, for random states in the softening range, with and without points
+        where `d^h > \hat d`: the relative error of `K_s + K_d` is below `2
+        \times 10^{-9}`, against 9--62% for `K_s` alone, see
+        ``tests/multidomain/test_sb_tsl.py``. Only connections with
+        ``tsl_type='bilinear'`` contribute.
 
         Parameters
         ----------
@@ -1915,7 +2247,9 @@ class MultiDomain(object):
             R = \int_0^b k_w \left( w_p(y) - w(x, y) \right) dy
 
         which is the load measured by the load cell. It is exact for any
-        state of damage of the structure.
+        state of damage of the structure, and it is used for the
+        load-displacement curves of the cohesive zone model, see
+        :ref:`cohesive_zone`.
 
         Parameters
         ----------
@@ -1961,10 +2295,25 @@ class MultiDomain(object):
 
 
     def update_TSL_history(self, curr_max_dmg_index):
-        """
-            Used to update the maximum del_d (over all loading histories) - this prevents exisiting
-            damage from vanishing when the updated separation predicts there is less separation than
-            what was present earlier (as badly modelled self-healing materials aren't part of this thesis :) )
+        r"""Store the damage history `d^h` of the cohesive zone
+
+        Sets ``self.dmg_index``, the damage `d^h` used by
+        :meth:`.calc_k_dmg`, :meth:`.get_kC_conn`, :meth:`.calc_kT_TSL` and
+        :meth:`.force_out_plane_damage`, such that the existing damage does
+        not vanish when the separation decreases, `d = \max(d^h, \hat d)`.
+        The drivers call it only with converged states, typically with the
+        damage `d` returned by :meth:`.calc_k_dmg`, so the iterates of an
+        increment that is discarded and bisected, or the predicted state at
+        the start of an increment, do not modify the history. It is stored
+        once per assembly, which restricts the model to one ``'SB_TSL'``
+        connection. See :ref:`cohesive_zone`.
+
+        Parameters
+        ----------
+        curr_max_dmg_index : np.ndarray
+            Damage at the Gauss-Legendre points of the connection, with
+            shape ``(nr_y_gauss, nr_x_gauss)``.
+
         """
         self.dmg_index = curr_max_dmg_index
 
