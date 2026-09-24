@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Panels with a T-stiffener modeled as multi-domain assemblies &#8212; panels 0.8.0 documentation</title>
+    <title>Panels with a T-stiffener modeled as multi-domain assemblies &#8212; panels 0.9.0 documentation</title>
   
   
   
@@ -38,7 +38,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
-    <script src="_static/documentation_options.js?v=486e5634"></script>
+    <script src="_static/documentation_options.js?v=39bb1c6d"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'ex_multidomain_tstiff2d';</script>
@@ -49,7 +49,7 @@
     <link rel="prev" title="Cylinders modeled as multi-domain assemblies" href="ex_multidomain_cylinder.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.8.0" />
+  <meta name="docsearch:version" content="0.9.0" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -117,7 +117,7 @@
   
   
   
-    <p class="title logo__title">panels 0.8.0 documentation</p>
+    <p class="title logo__title">panels 0.9.0 documentation</p>
   
 </a></div>
     
@@ -204,6 +204,13 @@
 <li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="bardell.html">
     Bardell’s Hierarchical Functions
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="multidomain_null_space.html">
+    Exact connections with the null-space method
   </a>
 </li>
 
@@ -375,6 +382,13 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="cohesive_zone.html">
     Cohesive zone model of the multi-domain approach
   </a>
@@ -492,6 +506,9 @@ skin, the base and the flange of the stiffener, following Castro and Donadon
 (2017) <a class="reference internal" href="ref.html#castro2017multidomain" id="id1"><span>[castro2017Multidomain]</span></a>. A debonding defect of length <code class="docutils literal notranslate"><span class="pre">defect_a</span></code> is
 included at the middle of the panel, where the base is not connected to the
 skin.</p>
+<p>The connections are imposed exactly with the default
+<code class="docutils literal notranslate"><span class="pre">conn_method='null-space'</span></code>, see <a class="reference internal" href="multidomain_null_space.html#null-space"><span class="std std-ref">Exact connections with the null-space method</span></a>, or with penalty
+stiffnesses with <code class="docutils literal notranslate"><span class="pre">conn_method='penalty'</span></code>.</p>
 <p>Linear buckling, with constant stress resultants or with the pre-buckling
 stress state from a static analysis, using
 <code class="xref py py-func docutils literal notranslate"><span class="pre">tstiff2d_1stiff_compression()</span></code>:</p>
@@ -521,7 +538,7 @@ stress state from a static analysis, using
         <span class="n">Nxx_skin</span><span class="o">=-</span><span class="mf">1.</span><span class="p">,</span>
         <span class="n">Nxx_base</span><span class="o">=-</span><span class="mf">1.</span><span class="p">,</span>
         <span class="n">Nxx_flange</span><span class="o">=-</span><span class="mf">1.</span><span class="p">,</span>
-        <span class="n">num_eigvalues</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">num_eigvalues</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">conn_method</span><span class="o">=</span><span class="s1">'penalty'</span>
         <span class="p">)</span>
     <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">eigvals</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">142.68</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">)</span>
 
@@ -545,7 +562,7 @@ stress state from a static analysis, using
         <span class="n">Nxx_skin</span><span class="o">=-</span><span class="mf">1.</span><span class="p">,</span>
         <span class="n">Nxx_base</span><span class="o">=-</span><span class="mf">1.</span><span class="p">,</span>
         <span class="n">Nxx_flange</span><span class="o">=-</span><span class="mf">1.</span><span class="p">,</span>
-        <span class="n">num_eigvalues</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">num_eigvalues</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">conn_method</span><span class="o">=</span><span class="s1">'penalty'</span>
         <span class="p">)</span>
     <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">eigvals</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">114.86</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">)</span>
 </pre></div>
@@ -573,7 +590,7 @@ stress state from a static analysis, using
         <span class="n">m</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
         <span class="n">mb</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">nb</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
         <span class="n">mf</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">nf</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
-        <span class="n">num_eigvalues</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">num_eigvalues</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">conn_method</span><span class="o">=</span><span class="s1">'penalty'</span>
         <span class="p">)</span>
     <span class="n">omegan</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">eigvals</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mf">0.5</span>
     <span class="c1">#NOTE the reference values of this module were changed in 2025 to match</span>
@@ -614,7 +631,7 @@ stress state from a static analysis, using
         <span class="n">Mach</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
         <span class="n">speed_sound</span><span class="o">=</span><span class="mf">343.</span><span class="p">,</span>
         <span class="n">run_static_case</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">num_eigvalues</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">num_eigvalues</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">conn_method</span><span class="o">=</span><span class="s1">'penalty'</span>
         <span class="p">)</span>
     <span class="n">omegan</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">eigvals</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mf">0.5</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">eigvals</span><span class="p">)</span>

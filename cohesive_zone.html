@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Cohesive zone model of the multi-domain approach &#8212; panels 0.8.0 documentation</title>
+    <title>Cohesive zone model of the multi-domain approach &#8212; panels 0.9.0 documentation</title>
   
   
   
@@ -38,7 +38,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
 
-    <script src="_static/documentation_options.js?v=486e5634"></script>
+    <script src="_static/documentation_options.js?v=39bb1c6d"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
@@ -47,10 +47,10 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="References" href="ref.html" />
-    <link rel="prev" title="Bardell’s Hierarchical Functions" href="bardell.html" />
+    <link rel="prev" title="Exact connections with the null-space method" href="multidomain_null_space.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.8.0" />
+  <meta name="docsearch:version" content="0.9.0" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -118,7 +118,7 @@
   
   
   
-    <p class="title logo__title">panels 0.8.0 documentation</p>
+    <p class="title logo__title">panels 0.9.0 documentation</p>
   
 </a></div>
     
@@ -205,6 +205,13 @@
 <li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="bardell.html">
     Bardell’s Hierarchical Functions
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="multidomain_null_space.html">
+    Exact connections with the null-space method
   </a>
 </li>
 
@@ -371,6 +378,13 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="bardell.html">
     Bardell’s Hierarchical Functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="multidomain_null_space.html">
+    Exact connections with the null-space method
   </a>
 </li>
 
@@ -592,8 +606,13 @@ in contact, with the slope of each panel:</p>
 \end{aligned}\end{split}\]</div>
 <p>where <span class="math notranslate nohighlight">\(d^t\)</span> and <span class="math notranslate nohighlight">\(d^b\)</span> are the distances from the mid-planes of the top and
 bottom panels to the interface, <span class="math notranslate nohighlight">\(u^t, v^t, w^t\)</span> and <span class="math notranslate nohighlight">\(u^b, v^b, w^b\)</span> their
-mid-plane displacements. The top panel is <code class="docutils literal notranslate"><span class="pre">p1</span></code> and the bottom panel is
-<code class="docutils literal notranslate"><span class="pre">p2</span></code> of the connection dictionary, whatever their order in the assembly. With
+mid-plane displacements. Top and bottom refer to the <span class="math notranslate nohighlight">\(z\)</span> axis, normal to the
+mid-surfaces and common to both panels, pointing up in the DCB: the top panel
+is the panel on the positive side of the interface along <span class="math notranslate nohighlight">\(z\)</span>, whose face <span class="math notranslate nohighlight">\(z =
+-d^t\)</span> is at the interface, and it is <code class="docutils literal notranslate"><span class="pre">p1</span></code> of the connection dictionary; the
+bottom panel is the one on the negative side, whose face <span class="math notranslate nohighlight">\(z = +d^b\)</span> is at the
+interface, and it is <code class="docutils literal notranslate"><span class="pre">p2</span></code>, whatever their order in the assembly, see
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_kC_conn()</span></code>. With
 these three separations and the degraded stiffness <span class="math notranslate nohighlight">\(k^w_{CZ} = k_o (1 - d)\)</span>,
 the penalty energy of Eq. 5.1 becomes:</p>
 <div class="math notranslate nohighlight" id="equation-cz-energy">
@@ -2108,12 +2127,12 @@ delamination are not represented.</p></li>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="bardell.html"
+       href="multidomain_null_space.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Bardell’s Hierarchical Functions</p>
+        <p class="prev-next-title">Exact connections with the null-space method</p>
       </div>
     </a>
     <a class="right-next"

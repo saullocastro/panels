@@ -1,0 +1,967 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Exact connections with the null-space method &#8212; panels 0.9.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
+
+    <script src="_static/documentation_options.js?v=39bb1c6d"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'multidomain_null_space';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Cohesive zone model of the multi-domain approach" href="cohesive_zone.html" />
+    <link rel="prev" title="Bardell’s Hierarchical Functions" href="bardell.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.9.0" />
+  
+    
+    <script src="_static/searchtools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">panels 0.9.0 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="bardell.html">
+    Bardell’s Hierarchical Functions
+  </a>
+</li>
+
+
+<li class=" current active">
+  <a class="nav-link dropdown-item nav-internal" href="#">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ref.html">
+    References
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="bardell.html">
+    Bardell’s Hierarchical Functions
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ref.html">
+    References
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Exact connections with the null-space method</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="exact-connections-with-the-null-space-method">
+<span id="null-space"></span><h1>Exact connections with the null-space method<a class="headerlink" href="#exact-connections-with-the-null-space-method" title="Link to this heading">#</a></h1>
+<p>The domains of a <code class="xref py py-class docutils literal notranslate"><span class="pre">MultiDomain</span></code> assembly were originally connected
+with penalty stiffnesses, see <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_kC_conn()</span></code> and
+<a class="reference internal" href="ref.html#castro2017multidomain" id="id1"><span>[castro2017Multidomain]</span></a>, still available with <code class="docutils literal notranslate"><span class="pre">conn_method='penalty'</span></code>.
+The penalty method adds, for each quantity <span class="math notranslate nohighlight">\(q_k\)</span>
+that must be continuous across a connection, the energy:</p>
+<div class="math notranslate nohighlight" id="equation-ns-penalty">
+<span class="eqno">(1)<a class="headerlink" href="#equation-ns-penalty" title="Link to this equation">#</a></span>\[U_k = \frac{1}{2} k_k \int \left( q_k^{(1)} - q_k^{(2)} \right)^2\]</div>
+<p>where <span class="math notranslate nohighlight">\(k_k\)</span> is the translation or rotation penalty constant, <code class="docutils literal notranslate"><span class="pre">'kt'</span></code> or
+<code class="docutils literal notranslate"><span class="pre">'kr'</span></code>, and the integral is along the connected edges, or over the area of
+the connection <code class="docutils literal notranslate"><span class="pre">'SB'</span></code>. The continuity is then only approximate. Low penalty
+constants make the assembly too flexible, and high ones make the stiffness
+matrix ill-conditioned. The default constants of <code class="xref py py-func docutils literal notranslate"><span class="pre">calc_kt_kr()</span></code> are a
+compromise, and they can still lead to errors of a few percent, see
+<a class="reference internal" href="#null-space-results"><span class="std std-ref">Comparison with the penalty method</span></a>.</p>
+<p>With <code class="docutils literal notranslate"><span class="pre">conn_method='null-space'</span></code>, the default, the connections are imposed
+exactly, as with penalty constants going to infinity, without any penalty
+constant:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">md</span> <span class="o">=</span> <span class="n">MultiDomain</span><span class="p">(</span><span class="n">panels</span><span class="p">,</span> <span class="n">conn</span><span class="p">)</span>  <span class="c1"># conn_method='null-space'</span>
+</pre></div>
+</div>
+<p>and the penalty method is selected with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">md</span> <span class="o">=</span> <span class="n">MultiDomain</span><span class="p">(</span><span class="n">panels</span><span class="p">,</span> <span class="n">conn</span><span class="p">,</span> <span class="n">conn_method</span><span class="o">=</span><span class="s1">'penalty'</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The connections that can be imposed with the null-space method are given in
+<code class="xref py py-data docutils literal notranslate"><span class="pre">nullspace.NULL_SPACE_FUNCS</span></code>: <code class="docutils literal notranslate"><span class="pre">'SSxcte'</span></code>, <code class="docutils literal notranslate"><span class="pre">'SSycte'</span></code>,
+<code class="docutils literal notranslate"><span class="pre">'BFxcte'</span></code>, <code class="docutils literal notranslate"><span class="pre">'BFycte'</span></code> and <code class="docutils literal notranslate"><span class="pre">'SB'</span></code>, for all the models, see
+<a class="reference internal" href="#null-space-quantities"><span class="std std-ref">Quantities imposed</span></a>. The damaged connection <code class="docutils literal notranslate"><span class="pre">'SB_TSL'</span></code> represents
+the physical stiffness of a cohesive interface, see <a class="reference internal" href="cohesive_zone.html#cohesive-zone"><span class="std std-ref">Cohesive zone model of the multi-domain approach</span></a>,
+and it keeps its penalty stiffness also with <code class="docutils literal notranslate"><span class="pre">conn_method='null-space'</span></code>.</p>
+<section id="theory">
+<h2>Theory<a class="headerlink" href="#theory" title="Link to this heading">#</a></h2>
+<p>The quantities <span class="math notranslate nohighlight">\(q_k\)</span> of Eq. <a class="reference internal" href="#equation-ns-penalty">(1)</a> are linear combinations of the
+Ritz constants <span class="math notranslate nohighlight">\(\{c\}\)</span> of the two domains. Since Bardell’s functions are
+polynomials, see <a class="reference internal" href="bardell.html#theory-func-bardell"><span class="std std-ref">Bardell’s Hierarchical Functions</span></a>, the difference <span class="math notranslate nohighlight">\(q_k^{(1)} -
+q_k^{(2)}\)</span> is a polynomial along the connection, of the natural coordinate
+<span class="math notranslate nohighlight">\(\xi\)</span> or <span class="math notranslate nohighlight">\(\eta\)</span> shared by the two domains. It vanishes everywhere when it
+vanishes at as many points as the number of its coefficients, and the
+connections become the homogeneous linear constraints:</p>
+<div class="math notranslate nohighlight" id="equation-ns-constraints">
+<span class="eqno">(2)<a class="headerlink" href="#equation-ns-constraints" title="Link to this equation">#</a></span>\[[B] \{c\} = \{0\}\]</div>
+<p>where each row of <span class="math notranslate nohighlight">\([B]\)</span> is <span class="math notranslate nohighlight">\(q_k^{(1)} - q_k^{(2)}\)</span> at one Gauss-Legendre
+point along the connection, or over the area of <code class="docutils literal notranslate"><span class="pre">'SB'</span></code>, see
+<code class="xref py py-func docutils literal notranslate"><span class="pre">nullspace.constraint_matrix()</span></code>. The first four functions of Bardell
+are cubic and the function <span class="math notranslate nohighlight">\(i \ge 4\)</span> has the order <span class="math notranslate nohighlight">\(i\)</span>, so that
+<span class="math notranslate nohighlight">\(\max(m_1, m_2, 4)\)</span> points are used along <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(\max(n_1, n_2, 4)\)</span> along
+<span class="math notranslate nohighlight">\(y\)</span>. The zero energy of Eq. <a class="reference internal" href="#equation-ns-penalty">(1)</a> and the constraints of
+Eq. <a class="reference internal" href="#equation-ns-constraints">(2)</a> are equivalent: the vectors with zero penalty energy
+are exactly those that satisfy the constraints, which is verified for every
+connection and model in <code class="docutils literal notranslate"><span class="pre">tests/multidomain/test_null_space.py</span></code>.</p>
+<section id="why-not-lagrange-multipliers">
+<h3>Why not Lagrange multipliers<a class="headerlink" href="#why-not-lagrange-multipliers" title="Link to this heading">#</a></h3>
+<p>The constraints could be imposed with Lagrange multipliers <span class="math notranslate nohighlight">\(\{\lambda\}\)</span>,
+which add one unknown per constraint and give the system:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{bmatrix} [K] &amp; [B]^T \\ [B] &amp; [0] \end{bmatrix}
+\begin{Bmatrix} \{c\} \\ \{\lambda\} \end{Bmatrix} =
+\begin{Bmatrix} \{f\} \\ \{0\} \end{Bmatrix}\end{split}\]</div>
+<p>This matrix is indefinite. For the linear buckling and frequency analyses
+the geometric stiffness matrix and the mass matrix have zero rows and
+columns for the multipliers, giving infinite eigenvalues that the
+shift-and-invert eigenvalue solvers of <code class="docutils literal notranslate"><span class="pre">structsolve</span></code> do not handle. Instead
+of adding unknowns, the null-space method removes them, giving the same
+solution.</p>
+</section>
+<section id="elimination-of-the-constraints">
+<h3>Elimination of the constraints<a class="headerlink" href="#elimination-of-the-constraints" title="Link to this heading">#</a></h3>
+<p>All the vectors that satisfy Eq. <a class="reference internal" href="#equation-ns-constraints">(2)</a> are written with a
+basis <span class="math notranslate nohighlight">\([T]\)</span> of the null space of <span class="math notranslate nohighlight">\([B]\)</span>, <span class="math notranslate nohighlight">\([B] [T] = [0]\)</span>:</p>
+<div class="math notranslate nohighlight" id="equation-ns-t">
+<span class="eqno">(3)<a class="headerlink" href="#equation-ns-t" title="Link to this equation">#</a></span>\[\{c\} = [T] \{c_r\}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\{c_r\}\)</span> are the independent Ritz constants. Substituting
+Eq. <a class="reference internal" href="#equation-ns-t">(3)</a> into the total potential energy gives the reduced system:</p>
+<div class="math notranslate nohighlight" id="equation-ns-reduced">
+<span class="eqno">(4)<a class="headerlink" href="#equation-ns-reduced" title="Link to this equation">#</a></span>\[[K_r] = [T]^T [K] [T], \qquad [K_{G r}] = [T]^T [K_G] [T], \qquad
+[M_r] = [T]^T [M] [T], \qquad \{f_r\} = [T]^T \{f\}\]</div>
+<p>where <span class="math notranslate nohighlight">\([K]\)</span>, <span class="math notranslate nohighlight">\([K_G]\)</span>, <span class="math notranslate nohighlight">\([M]\)</span> and <span class="math notranslate nohighlight">\(\{f\}\)</span> are the matrices and vectors of the
+domains, which do not contain the connections imposed exactly. The reduced
+stiffness matrix is symmetric and positive definite whenever the connected
+assembly has no rigid-body motion, like the stiffness matrix of the penalty
+method, and the static, linear buckling, frequency and non-linear solvers of
+<code class="docutils literal notranslate"><span class="pre">structsolve</span></code> are used unchanged. The constraints are linear in <span class="math notranslate nohighlight">\(\{c\}\)</span>,
+therefore <span class="math notranslate nohighlight">\([T]\)</span> does not change during a non-linear analysis:</p>
+<div class="math notranslate nohighlight">
+\[\{f_{int, r}\} = [T]^T \{f_{int}\}([T] \{c_r\}), \qquad
+[K_{T r}] = [T]^T [K_T]([T] \{c_r\}) [T]\]</div>
+<p><span class="math notranslate nohighlight">\([T]\)</span> is built by <code class="xref py py-func docutils literal notranslate"><span class="pre">nullspace.null_space_basis()</span></code>, one connection at a
+time:</p>
+<ol class="arabic simple">
+<li><p>the rows of <span class="math notranslate nohighlight">\([B]\)</span> of the connection are normalized to a unit norm and
+written in the independent Ritz constants of the connections already
+processed, <span class="math notranslate nohighlight">\([B] [T]\)</span>;</p></li>
+<li><p>the rank of the constraints is revealed with a QR decomposition with
+column pivoting, <span class="math notranslate nohighlight">\([B] [T] [P] = [Q] [R]\)</span>, and each pivot larger than the
+tolerance <code class="docutils literal notranslate"><span class="pre">tol</span></code> gives one independent constraint;</p></li>
+<li><p>the Ritz constants of the pivot columns are eliminated, <span class="math notranslate nohighlight">\(\{c_e\} =
+-[R_{11}]^{-1} [R_{12}] \{c_k\}\)</span>, where <span class="math notranslate nohighlight">\(\{c_k\}\)</span> are the remaining
+constants, and <span class="math notranslate nohighlight">\([T]\)</span> is updated.</p></li>
+</ol>
+<p>Redundant constraints are found in step 2 and dropped. They happen for
+instance at a corner shared by four domains, around a closed cylinder, or
+where a boundary condition flag already removes the term that a constraint
+would remove. Bardell’s functions of order 5 and higher vanish together with
+their slope at the ends of the domain, <span class="math notranslate nohighlight">\(\xi = \pm 1\)</span>, so the constraints of
+an edge involve only the first four functions across it, and <span class="math notranslate nohighlight">\([T]\)</span> has very
+few non-zero terms: the elimination is similar to the assembly of the
+hierarchical elements of the p-version of the finite element method. A
+connection along an interior line, e.g. <code class="docutils literal notranslate"><span class="pre">'BFycte'</span></code> at the middle of the
+base, involves all the functions across the line.</p>
+<p>The terms removed by the boundary condition flags are zero rows and columns
+of the matrices of the domains, as with the penalty method, and remain in
+<span class="math notranslate nohighlight">\(\{c_r\}\)</span> with zero rows and columns in the reduced matrices.</p>
+<p><span class="math notranslate nohighlight">\([T]\)</span> is stored in <code class="docutils literal notranslate"><span class="pre">MultiDomain.T</span></code> and reused while the connections, the
+number of terms and the boundary condition flags do not change, see
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_T()</span></code>.</p>
+</section>
+</section>
+<section id="quantities-imposed">
+<span id="null-space-quantities"></span><h2>Quantities imposed<a class="headerlink" href="#quantities-imposed" title="Link to this heading">#</a></h2>
+<p>The quantities imposed by each connection are those of the corresponding
+penalty kernels, with <code class="docutils literal notranslate"><span class="pre">p1</span></code> and <code class="docutils literal notranslate"><span class="pre">p2</span></code> the first and second panels of the
+connection. For <code class="docutils literal notranslate"><span class="pre">'SB'</span></code>, the two panels share the axes <span class="math notranslate nohighlight">\(x, y, z\)</span>, <span class="math notranslate nohighlight">\(z\)</span> being
+normal to their mid-surfaces, <code class="docutils literal notranslate"><span class="pre">p1</span></code> is the panel on the positive side of the
+interface along <span class="math notranslate nohighlight">\(z\)</span> and <code class="docutils literal notranslate"><span class="pre">p2</span></code> the one on the negative side, e.g. a stiffener
+base on the side of positive <span class="math notranslate nohighlight">\(z\)</span> of a skin is <code class="docutils literal notranslate"><span class="pre">p1</span></code> and the skin <code class="docutils literal notranslate"><span class="pre">p2</span></code>,
+see <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_kC_conn()</span></code>:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<colgroup>
+<col style="width: 12.0%" />
+<col style="width: 44.0%" />
+<col style="width: 44.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Connection</p></th>
+<th class="head"><p>Classical laminated plate theory (3 DOFs)</p></th>
+<th class="head"><p>Shear deformation theories (5 DOFs)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">'SSxcte'</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(u, v, w, w_{,x}\)</span>, see <code class="docutils literal notranslate"><span class="pre">kCSSxcte.pyx</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(u, v, w, \phi_x, \Phi_y\)</span>, and <span class="math notranslate nohighlight">\(w_{,x}\)</span> for the TSDT, see
+<code class="xref py py-func docutils literal notranslate"><span class="pre">fkCSSxcte_sdt()</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">'SSycte'</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(u, v, w, w_{,y}\)</span>, see <code class="docutils literal notranslate"><span class="pre">kCSSycte.pyx</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(u, v, w, \phi_x, \Phi_y\)</span>, and <span class="math notranslate nohighlight">\(w_{,y}\)</span> for the TSDT, see
+<code class="xref py py-func docutils literal notranslate"><span class="pre">fkCSSycte_sdt()</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">'BFycte'</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(u_1 = u_2\)</span>, <span class="math notranslate nohighlight">\(v_1 = w_2\)</span>, <span class="math notranslate nohighlight">\(w_1 = -v_2\)</span>, <span class="math notranslate nohighlight">\(w_{1,y} - v_1/r_1 =
+w_{2,y} - v_2/r_2\)</span>, see <code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.connections.kCBFycte</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(u_1 = u_2\)</span>, <span class="math notranslate nohighlight">\(v_1 = w_2\)</span>, <span class="math notranslate nohighlight">\(w_1 = -v_2\)</span>, <span class="math notranslate nohighlight">\(\Phi_{y1} = \Phi_{y2}\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">'BFxcte'</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(u_1 = w_2\)</span>, <span class="math notranslate nohighlight">\(v_1 = v_2\)</span>, <span class="math notranslate nohighlight">\(w_1 = -u_2\)</span>, <span class="math notranslate nohighlight">\(w_{1,x} = w_{2,x}\)</span>, see
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.connections.kCBFxcte</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(u_1 = w_2\)</span>, <span class="math notranslate nohighlight">\(v_1 = v_2\)</span>, <span class="math notranslate nohighlight">\(w_1 = -u_2\)</span>, <span class="math notranslate nohighlight">\(\phi_{x1} = \phi_{x2}\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">'SB'</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(u_1 + d_{sb} w_{1,x} = u_2\)</span>, <span class="math notranslate nohighlight">\(v_1 + d_{sb} w_{1,y} = v_2\)</span>, <span class="math notranslate nohighlight">\(w_1 =
+w_2\)</span>, with <span class="math notranslate nohighlight">\(d_{sb} = h_1/2 + h_2/2\)</span>, see <code class="docutils literal notranslate"><span class="pre">kCSB.pyx</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(u, v, w\)</span> at the interface, <span class="math notranslate nohighlight">\(z = -h_1/2\)</span> of <code class="docutils literal notranslate"><span class="pre">p1</span></code> and <span class="math notranslate nohighlight">\(z = h_2/2\)</span>
+of <code class="docutils literal notranslate"><span class="pre">p2</span></code>, see <code class="xref py py-func docutils literal notranslate"><span class="pre">fkCSB_sdt()</span></code>, and <span class="math notranslate nohighlight">\(\phi_x, \Phi_y\)</span> only when
+the key <code class="docutils literal notranslate"><span class="pre">'kr'</span></code> of the connection is given and not zero</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>where <span class="math notranslate nohighlight">\(\Phi_y = \phi_y + v/r\)</span> with the Sanders-Koiter kinematics and <span class="math notranslate nohighlight">\(\Phi_y
+= \phi_y\)</span> otherwise, and the terms <span class="math notranslate nohighlight">\(v/r\)</span> of the classical laminated plate
+theory are present only with the Sanders-Koiter kinematics. The keys
+<code class="docutils literal notranslate"><span class="pre">'kt'</span></code> and <code class="docutils literal notranslate"><span class="pre">'kr'</span></code> of the connections are not used, apart from <code class="docutils literal notranslate"><span class="pre">'kr'</span></code>
+of <code class="docutils literal notranslate"><span class="pre">'SB'</span></code> with the shear deformation theories, which tells whether the
+rotations are connected.</p>
+</section>
+<section id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Link to this heading">#</a></h2>
+<p>The matrices and vectors computed by <code class="xref py py-class docutils literal notranslate"><span class="pre">MultiDomain</span></code> have the size of
+all the Ritz constants and do not contain the connections imposed exactly:
+solving them directly would leave the domains disconnected. They are reduced
+with <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.reduce()</span></code> before solving, and the solutions are expanded to
+all the Ritz constants with <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.expand()</span></code>, which are used by
+the post-processing methods, e.g. <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.uvw()</span></code>,
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.stress()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.plot()</span></code>. With
+<code class="docutils literal notranslate"><span class="pre">conn_method='penalty'</span></code>, <span class="math notranslate nohighlight">\([T]\)</span> is the identity matrix, so that the same
+code runs with both methods.</p>
+<p>Linear static analysis:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">structsolve</span><span class="w"> </span><span class="kn">import</span> <span class="n">solve</span>
+
+<span class="n">md</span> <span class="o">=</span> <span class="n">MultiDomain</span><span class="p">(</span><span class="n">panels</span><span class="p">,</span> <span class="n">conn</span><span class="p">)</span>
+<span class="n">kC</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">calc_kC</span><span class="p">()</span>
+<span class="n">fext</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">calc_fext</span><span class="p">()</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">solve</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">kC</span><span class="p">),</span> <span class="n">md</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">fext</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>Linear buckling analysis with the pre-buckling state of a static analysis:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">structsolve</span><span class="w"> </span><span class="kn">import</span> <span class="n">lb</span><span class="p">,</span> <span class="n">static</span>
+
+<span class="n">kC</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">calc_kC</span><span class="p">())</span>
+<span class="n">incs</span><span class="p">,</span> <span class="n">cs</span> <span class="o">=</span> <span class="n">static</span><span class="p">(</span><span class="n">kC</span><span class="p">,</span> <span class="n">md</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">calc_fext</span><span class="p">()))</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">cs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">kG</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">calc_kG</span><span class="p">(</span><span class="n">c</span><span class="o">=</span><span class="n">c</span><span class="p">))</span>
+<span class="n">eigvals</span><span class="p">,</span> <span class="n">eigvecs</span> <span class="o">=</span> <span class="n">lb</span><span class="p">(</span><span class="n">kC</span><span class="p">,</span> <span class="n">kG</span><span class="p">)</span>
+<span class="n">eigvecs</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">eigvecs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Frequency analysis:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">structsolve</span><span class="w"> </span><span class="kn">import</span> <span class="n">freq</span>
+
+<span class="n">eigvals</span><span class="p">,</span> <span class="n">eigvecs</span> <span class="o">=</span> <span class="n">freq</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">calc_kC</span><span class="p">()),</span> <span class="n">md</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">calc_kM</span><span class="p">()))</span>
+<span class="n">eigvecs</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">eigvecs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Geometrically non-linear analysis, with the functions of the reduced problem
+given by <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_reduced_functions()</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">structsolve</span><span class="w"> </span><span class="kn">import</span> <span class="n">Analysis</span>
+
+<span class="n">an</span> <span class="o">=</span> <span class="n">Analysis</span><span class="p">(</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">get_reduced_functions</span><span class="p">())</span>
+<span class="n">an</span><span class="o">.</span><span class="n">static</span><span class="p">(</span><span class="n">NLgeom</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">cs</span> <span class="o">=</span> <span class="p">[</span><span class="n">md</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">c_r</span><span class="p">)</span> <span class="k">for</span> <span class="n">c_r</span> <span class="ow">in</span> <span class="n">an</span><span class="o">.</span><span class="n">cs</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>The functions <code class="xref py py-func docutils literal notranslate"><span class="pre">create_cylinder()</span></code>,
+<code class="xref py py-func docutils literal notranslate"><span class="pre">create_cylinder_blade_stiffened()</span></code>, the analyses of
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.cylinder</span></code> and
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.cylinder_blade_stiffened</span></code>, and
+<code class="xref py py-func docutils literal notranslate"><span class="pre">tstiff2d_1stiff_freq()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">tstiff2d_1stiff_compression()</span></code> and
+<code class="xref py py-func docutils literal notranslate"><span class="pre">tstiff2d_1stiff_flutter()</span></code> take the argument <code class="docutils literal notranslate"><span class="pre">conn_method</span></code>.</p>
+</section>
+<section id="comparison-with-the-penalty-method">
+<span id="null-space-results"></span><h2>Comparison with the penalty method<a class="headerlink" href="#comparison-with-the-penalty-method" title="Link to this heading">#</a></h2>
+<p>The results below are verified in <code class="docutils literal notranslate"><span class="pre">tests/multidomain/test_null_space.py</span></code>.</p>
+<p>The penalty method is more flexible than the exact connections, and its
+error decreases with the inverse of the penalty constants. For a thin plate
+divided in 2x2 domains, with the classical laminated plate theory, the error
+of the first frequencies is 1.3% with the default constants of
+<code class="xref py py-func docutils literal notranslate"><span class="pre">calc_kt_kr()</span></code>, and it becomes 0.13%, 0.013% and 0.0013% with 10, 100 and
+1000 times higher constants. The condition number of the stiffness matrix
+grows with the penalty constants: for the 4-domain plate of
+<code class="docutils literal notranslate"><span class="pre">tests/multidomain/test_conn_4panels_kt_kr.py</span></code>, the reduced stiffness matrix
+of the null-space method has a condition number about 600 times lower than
+the stiffness matrix of the penalty method with the default constants, and
+<span class="math notranslate nohighlight">\(6 \times 10^4\)</span> times lower than with 100 times higher constants.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<colgroup>
+<col style="width: 40.0%" />
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Case</p></th>
+<th class="head"><p>Penalty, default constants</p></th>
+<th class="head"><p>Penalty, higher constants</p></th>
+<th class="head"><p>Null-space</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Frequencies of a thick plate divided in 2x2 domains, FSDT, error
+with respect to the single domain (Noor 1973)</p></td>
+<td><p><span class="math notranslate nohighlight">\(7.8 \times 10^{-2}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(9.5 \times 10^{-5}\)</span> (1000 times)</p></td>
+<td><p><span class="math notranslate nohighlight">\(3 \times 10^{-12}\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>Laminates <span class="math notranslate nohighlight">\([0/90]\)</span> over <span class="math notranslate nohighlight">\([0/90]\)</span> with <code class="docutils literal notranslate"><span class="pre">'SB'</span></code>, error of the
+frequencies with respect to <span class="math notranslate nohighlight">\([0/90]_2\)</span>, CLPT</p></td>
+<td></td>
+<td><p><span class="math notranslate nohighlight">\(8 \times 10^{-6}\)</span> (<span class="math notranslate nohighlight">\(10^5\)</span> times)</p></td>
+<td><p><span class="math notranslate nohighlight">\(6 \times 10^{-13}\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p>Same, large deflection with the von Karman kinematics</p></td>
+<td></td>
+<td></td>
+<td><p><span class="math notranslate nohighlight">\(10^{-15}\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>Blade-stiffened cylinder, buckling load with the pre-buckling state
+of a static analysis, <span class="math notranslate nohighlight">\(N_{xx}\)</span> (N/m)</p></td>
+<td><p>-39993.8</p></td>
+<td><p>-41694.9 (1000 times)</p></td>
+<td><p>-41696.7</p></td>
+</tr>
+<tr class="row-even"><td><p>Closed cylinder, buckling load <span class="math notranslate nohighlight">\(N_{xx}\)</span> (N/m)</p></td>
+<td><p>-47056.0</p></td>
+<td></td>
+<td><p>-47113.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>T-stiffened panel, first frequency (rad/s)</p></td>
+<td><p>48.2733</p></td>
+<td><p>48.3858 (100 times)</p></td>
+<td><p>48.3875</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The default penalty constants underestimate the buckling load of the
+blade-stiffened cylinder by 4%, whereas the higher constants converge to the
+result of the null-space method.</p>
+</section>
+<section id="limitations">
+<h2>Limitations<a class="headerlink" href="#limitations" title="Link to this heading">#</a></h2>
+<p>A connection imposed exactly constrains the domains exactly as the penalty
+method does with infinite penalty constants, which may constrain the
+approximation more than the penalty method with the default constants does:</p>
+<ul class="simple">
+<li><p>When the two domains have a different number of terms along the
+connection, the terms of the trace of the richer domain that the other
+domain cannot represent are forced to vanish.</p></li>
+<li><p>The boundary condition flags at the ends of an edge of one domain are
+imposed on the other domain.</p></li>
+<li><p>With <code class="docutils literal notranslate"><span class="pre">'SB'</span></code> and the classical laminated plate theory, <span class="math notranslate nohighlight">\(u_1 = u_2 - d_{sb}
+w_{,x}\)</span>. Restraining the normal in-plane displacement of an edge in both
+domains, e.g. <span class="math notranslate nohighlight">\(u = 0\)</span> at <span class="math notranslate nohighlight">\(x = 0\)</span>, also restrains the rotation <span class="math notranslate nohighlight">\(w_{,x}\)</span> at
+that edge, which is clamped. The in-plane displacements of the bonded
+laminates must be restrained consistently with the single laminate that
+they represent, e.g. restraining only the tangential displacement of the
+edges, as in <code class="docutils literal notranslate"><span class="pre">test_skin_base_nonlinear_equals_single_laminate</span></code>.</p></li>
+</ul>
+<p>Only the connections of the domains are imposed exactly: the prescribed
+displacements of <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_point_pd()</span></code>,
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_distr_pd_fixed_x()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_distr_pd_fixed_y()</span></code>,
+and the traction-separation law of <code class="docutils literal notranslate"><span class="pre">'SB_TSL'</span></code>, remain penalty stiffnesses.</p>
+<p>The rank of the constraints is found with the tolerance <code class="docutils literal notranslate"><span class="pre">tol</span></code> of
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_T()</span></code>, <code class="docutils literal notranslate"><span class="pre">1e-9</span></code> by default, which applies to the
+constraints normalized to a unit norm. The independent constraints have
+pivots many orders of magnitude above the round-off errors of the redundant
+ones, and a warning is issued when this gap is smaller than <span class="math notranslate nohighlight">\(10^4\)</span>.</p>
+</section>
+<section id="api">
+<h2>API<a class="headerlink" href="#api" title="Link to this heading">#</a></h2>
+<p>The methods of <code class="xref py py-class docutils literal notranslate"><span class="pre">MultiDomain</span></code> for the null-space method are
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_T()</span></code>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.reduce()</span></code>,
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.expand()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_reduced_functions()</span></code>.</p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="bardell.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Bardell’s Hierarchical Functions</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="cohesive_zone.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Cohesive zone model of the multi-domain approach</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#theory">Theory</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#why-not-lagrange-multipliers">Why not Lagrange multipliers</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#elimination-of-the-constraints">Elimination of the constraints</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#quantities-imposed">Quantities imposed</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#usage">Usage</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#comparison-with-the-penalty-method">Comparison with the penalty method</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#limitations">Limitations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#api">API</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="_sources/multidomain_null_space.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2012-2026, Saullo G. P. Castro, Nathan D&#39;Souza.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.21.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
