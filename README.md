@@ -17,8 +17,7 @@ Semi-analytical methods for plates, shells and stiffened panels
 - Panel flutter using the piston theory
 - Geometrically non-linear static analyses (postbuckling) using the
   Newton-Raphson method or the arc-length methods of Riks and Crisfield
-- Multi-domain assemblies of cylinders, stiffened panels and panels with
-  debonding defects
+- Multi-domain assemblies of plates, cylindrical shells, cylinders, stiffened panels, with the domains connected exactly with the null-space method, the default, or by penalty stiffnesses. Debonding defects or cohesive zone can be simulated
 - CLPT, FSDT and TSDT kinematics for plates and cylindrical shells
 - Donnell and Sanders-Koiter kinematics for cylindrical shells
 
@@ -50,7 +49,8 @@ History
 =======
 
 See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
-
+* version 0.9.0 (2026-09-24)
+    - Null-space connection, exact, new default, as alternative to penalty-based connection
 * version 0.8.0 (2026-09-23)
     - FSDT and TSDT for plate and cylindrical shells
     - Sanders-Koiter for cylindrical shells
