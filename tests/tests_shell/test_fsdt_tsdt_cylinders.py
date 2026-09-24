@@ -363,7 +363,7 @@ def test_multidomain_split_cylinder(model):
     normal `\Phi_y`, which is `\phi_y + v/r` for Sanders' kinematics.
     """
     panels, conn = split_cylinder(model, 2)
-    md = MultiDomain(panels, conn)
+    md = MultiDomain(panels, conn, conn_method='penalty')
     K, used = remove_null_cols(md.calc_kC(), silent=True)
     M = md.calc_kM(silent=True).tocsr()[used][:, used]
     w_md = np.sqrt(eigsh(K, M=M, k=1, sigma=-1., which='LM')[0][0])
@@ -399,7 +399,8 @@ def test_bf_rigid_rotation_of_sanders_skin(theory):
     kt, kr = 1.e8, 1.e4
     md = MultiDomain(panels=[base, flange],
                      conn=[dict(p1=base, p2=flange, func='BFycte',
-                                ycte1=base.b/2, ycte2=0., kt=kt, kr=kr)])
+                                ycte1=base.b/2, ycte2=0., kt=kt, kr=kr)],
+                                conn_method='penalty')
     theta = 1.e-3
 
     def fit(p, targets):

@@ -26,7 +26,7 @@ def test_cylinder_blade_stiffened_compression_lb_Nxx_cte():
         Nxxs_skin=Nxxs,
         Nxxs_blade=Nxxs,
         m=8, n=12,
-        num_eigvalues=10)
+        num_eigvalues=10, conn_method='penalty')
 
     assy.plot(eigvecs[:, 0], 'skin', filename='tmp_cylinder_blade_stiffened_compression_lb_Nxx_cte_eigvec.png')
 
@@ -54,7 +54,7 @@ def test_cylinder_blade_stiffened_compression_lb_Nxx_from_static():
         Nxxs_skin=Nxxs,
         Nxxs_blade=Nxxs,
         m=8, n=12,
-        num_eigvalues=10)
+        num_eigvalues=10, conn_method='penalty')
 
     assy.plot(c, 'skin', vec='u', filename='tmp_cylinder_blade_stiffened_compression_lb_Nxx_from_static_u.png', colorbar=True)
     assy.plot(c, 'skin', vec='w', filename='tmp_cylinder_blade_stiffened_compression_lb_Nxx_from_static_w.png', colorbar=True)
@@ -85,7 +85,7 @@ def test_cylinder_blade_stiffened_compression_lb_pd_from_static():
         npanels=npanels,
         pds_skin=pds,
         pds_blade=pds,
-        m=8, n=12)
+        m=8, n=12, conn_method='penalty')
 
     assy.plot(c, 'skin', vec='u', filename='tmp_cylinder_blade_stiffened_compression_lb_pd_from_static_u.png', colorbar=True)
     assy.plot(c, 'skin', vec='w', filename='tmp_cylinder_blade_stiffened_compression_lb_pd_from_static_w.png', colorbar=True)

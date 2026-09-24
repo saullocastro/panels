@@ -32,7 +32,7 @@ def test_tstiff2d_1stiff_freq():
         m=6, n=7,
         mb=5, nb=6,
         mf=6, nf=7,
-        num_eigvalues=10,
+        num_eigvalues=10, conn_method='penalty'
         )
     omegan = (-eigvals[0])**0.5
     #NOTE the reference values of this module were changed in 2025 to match
@@ -70,7 +70,7 @@ def test_tstiff2d_1stiff_compression():
         Nxx_skin=-1.,
         Nxx_base=-1.,
         Nxx_flange=-1.,
-        num_eigvalues=10,
+        num_eigvalues=10, conn_method='penalty'
         )
     assert np.isclose(eigvals[0], 142.68, rtol=0.001)
 
@@ -94,7 +94,7 @@ def test_tstiff2d_1stiff_compression():
         Nxx_skin=-1.,
         Nxx_base=-1.,
         Nxx_flange=-1.,
-        num_eigvalues=10,
+        num_eigvalues=10, conn_method='penalty'
         )
     assert np.isclose(eigvals[0], 114.86, rtol=0.001)
 
@@ -126,7 +126,7 @@ def test_tstiff2d_1stiff_flutter():
         Mach=2,
         speed_sound=343.,
         run_static_case=False,
-        num_eigvalues=10,
+        num_eigvalues=10, conn_method='penalty'
         )
     omegan = (-eigvals[0])**0.5
     print(eigvals)

@@ -27,7 +27,7 @@ def _panels(seed, flags_random):
 def test_kCSB_dmg_energy():
     rng, top, bot = _panels(1, flags_random=True)
     # bot first in the assembly, the 12 block is transposed
-    assy = MultiDomain(panels=[bot, top], conn=[])
+    assy = MultiDomain(panels=[bot, top], conn=[], conn_method='penalty')
     size = assy.get_size()
     nx, ny = 20, 12
     kw = rng.uniform(0.5, 2., (ny, nx))
@@ -64,7 +64,7 @@ def test_kC_TSL_matrix_products_vs_kernels():
                      nr_x_gauss=nx, nr_y_gauss=ny, k_o=k_o, tau_o=tau_o,
                      G1c=G1c)]
         panels = [bot, top] if order == 'bot-top' else [top, bot]
-        assy = MultiDomain(panels=panels, conn=conn)
+        assy = MultiDomain(panels=panels, conn=conn, conn_method='penalty')
         size = assy.get_size()
         c = rng.standard_normal(size)
         rt = assy.uvw(c, None, nr_x_gauss=nx, nr_y_gauss=ny, eval_panel=top)
@@ -88,7 +88,7 @@ def test_calc_kT_TSL_finite_differences():
     k_o, tau_o, G1c = 5e4, 87., 1.12
     conn = [dict(p1=top, p2=bot, func='SB_TSL', tsl_type='bilinear',
                  nr_x_gauss=nx, nr_y_gauss=ny, k_o=k_o, tau_o=tau_o, G1c=G1c)]
-    assy = MultiDomain(panels=[bot, top], conn=conn)
+    assy = MultiDomain(panels=[bot, top], conn=conn, conn_method='penalty')
     size = assy.get_size()
     c = rng.standard_normal(size)
     rt = assy.uvw(c, None, nr_x_gauss=nx, nr_y_gauss=ny, eval_panel=top)
@@ -134,7 +134,7 @@ def test_panels_must_share_the_area():
         conn = [dict(p1=top, p2=bot, func='SB_TSL', tsl_type='bilinear',
                      nr_x_gauss=10, nr_y_gauss=8, k_o=5e4, tau_o=87.,
                      G1c=1.12, use_kernels=use_kernels)]
-        assy = MultiDomain(panels=[top, bot], conn=conn)
+        assy = MultiDomain(panels=[top, bot], conn=conn, conn_method='penalty')
         c = np.zeros(assy.get_size())
         with pytest.raises(ValueError, match='same dimensions'):
             assy.get_kC_conn(c=c)

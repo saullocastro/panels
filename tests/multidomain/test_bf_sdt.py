@@ -77,7 +77,8 @@ def test_energy(model, func, order):
     cte2 = 0.
     panels = [base, flange] if order == 'base first' else [flange, base]
     md = MultiDomain(panels=panels, conn=[_conn(func, base, flange, cte1,
-                                                cte2, kt=kt, kr=kr)])
+                                                cte2, kt=kt, kr=kr)],
+                                                conn_method='penalty')
     K = md.get_kC_conn().toarray()
     xi, wg = np.polynomial.legendre.leggauss(30)
     s = (xi + 1)*L/2
@@ -148,7 +149,8 @@ def test_rigid_rotation_about_the_connection(model, func, order):
     kt, kr = 1.e8, 1.e4
     panels = [base, flange] if order == 'base first' else [flange, base]
     md = MultiDomain(panels=panels, conn=[_conn(func, base, flange, cte1, 0.,
-                                                kt=kt, kr=kr)])
+                                                kt=kt, kr=kr)],
+                                                conn_method='penalty')
     c = np.zeros(md.get_size())
     c[base.col_start:base.col_end] = _fit(base, tb)
     c[flange.col_start:flange.col_end] = _fit(flange, tf)
@@ -173,7 +175,8 @@ def _freq(model, func):
                 setattr(flange, e + d + r, 1.)
     cte1 = base.b/2 if func == 'BFycte' else base.a/2
     md = MultiDomain(panels=[base, flange],
-                     conn=[_conn(func, base, flange, cte1, 0.)])
+                     conn=[_conn(func, base, flange, cte1, 0.)],
+                     conn_method='penalty')
     K, _ = remove_null_cols(md.calc_kC(silent=True))
     M, _ = remove_null_cols(md.calc_kM(silent=True))
     return np.sqrt(eigh(K.toarray(), M.toarray(), eigvals_only=True,

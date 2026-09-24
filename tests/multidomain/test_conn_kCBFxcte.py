@@ -108,7 +108,7 @@ def eig_value_panel_BFycte():
     ]
 
     panels = [B1, B2, L1, L2]
-    assy = MultiDomain(panels, conn)
+    assy = MultiDomain(panels, conn, conn_method='penalty')
     k0 = assy.calc_kC()
 
     #Static load case
@@ -214,7 +214,7 @@ def eig_value_panel_BFxcte():
     ]
 
     panels = [B1, B2, T1, T2]
-    assy = MultiDomain(panels, conn)
+    assy = MultiDomain(panels, conn, conn_method='penalty')
     k0 = assy.calc_kC()
 
     #Static load case
