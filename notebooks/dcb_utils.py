@@ -27,6 +27,7 @@ import os
 import time
 
 import numpy as np
+from scipy.sparse import csr_matrix
 from structsolve import solve
 from structsolve.sparseutils import finalize_symmetric_matrix
 
@@ -78,7 +79,13 @@ def build_dcb(case):
         thickness, default a single 0-degree ply of thickness ``h``; when
         given, ``h`` is ``plyt*len(stack)``), ``bond_width`` (width of a
         central bonded strip narrower than the arms, see
-        :func:`solve_dcb`).
+        :func:`solve_dcb`), ``conn_method`` (``'penalty'``, the default
+        here, with which the results stored in ``results/*.npz`` were
+        obtained, or ``'null-space'``, the default of :class:`.MultiDomain`,
+        which imposes the ``'SSxcte'`` and ``'SB'`` connections exactly and
+        ignores ``edge_penalty_factor``, see ``conn_method_comparison.ipynb``;
+        the cohesive zone ``'SB_TSL'`` is a penalty stiffness in both
+        cases).
 
     Returns
     -------
@@ -140,7 +147,8 @@ def build_dcb(case):
             c['kr'] = factor*kr
 
     panels = bot + top
-    assy = MultiDomain(panels=panels, conn=conn)
+    assy = MultiDomain(panels=panels, conn=conn,
+                       conn_method=case.get('conn_method', 'penalty'))
     return dict(assy=assy, conn=conn, top_tsl=top_tsl, bot_tsl=bot_tsl,
                 top_arm=top_arm, bot_arm=bot_arm, nx=nx, ny=ny,
                 size=assy.get_size())
@@ -204,6 +212,18 @@ def solve_dcb(case, openings, kw=1.e6, epsilon=1.e-4, NR_kT_update=3,
     nx, ny, size = model['nx'], model['ny'], model['size']
     k_o, tau_o, G1c = case['k_o'], case['tau_o'], case['G1c']
 
+    #NOTE with the null-space method the Newton-Raphson iterations solve the
+    #     problem reduced to the independent Ritz constants, c = T c_r, and
+    #     the convergence criterion uses the reduced vectors. The operators
+    #     are the identity with the penalty method
+    if assy.conn_method == 'null-space':
+        T = assy.get_T()
+        red = lambda v: T.T @ v
+        red_mat = lambda K: csr_matrix(T.T @ K @ T)
+        expand = lambda v: T @ v
+    else:
+        red = red_mat = expand = lambda x: x
+
     def prescribe(delta):
         kCp = 0
         for p, sign in ((top_arm, +1), (bot_arm, -1)):
@@ -249,18 +269,18 @@ def solve_dcb(case, openings, kw=1.e6, epsilon=1.e-4, NR_kT_update=3,
             state['age'] = 0
         else:
             state['age'] += 1
-        k0 = state['kT_pan'] + kC_conn + assy.calc_kT_TSL(c=ci) + kCp
+        k0 = red_mat(state['kT_pan'] + kC_conn + assy.calc_kT_TSL(c=ci) + kCp)
         D = k0.diagonal()
         count = 0
         while True:
-            dc = solve(k0, -Ri, silent=True)
-            r0 = _scaling(Ri, D)
+            dc = expand(solve(k0, -red(Ri), silent=True))
+            r0 = _scaling(red(Ri), D)
             step = 1.
             best = None
             for _ in range(line_search_max + 1):
                 c = ci + step*dc
                 R, fint_t, kC_t = residual(c)
-                r = _scaling(R, D)
+                r = _scaling(red(R), D)
                 if not np.isfinite(r):
                     r = np.inf
                 if best is None or r < best[0]:
@@ -269,7 +289,8 @@ def solve_dcb(case, openings, kw=1.e6, epsilon=1.e-4, NR_kT_update=3,
                     break
                 step *= 0.5
             _, c, Ri, fint, kC_conn = best
-            crit = _scaling(Ri, D)/max(_scaling(fint, D), _scaling(kCp*c - fext, D))
+            crit = _scaling(red(Ri), D)/max(_scaling(red(fint), D),
+                                            _scaling(red(kCp*c - fext), D))
             count += 1
             if crit < epsilon:
                 return True, c, count
@@ -278,7 +299,7 @@ def solve_dcb(case, openings, kw=1.e6, epsilon=1.e-4, NR_kT_update=3,
             if count % NR_kT_update == 1 and not (elastic and count == 1):
                 state['kT_pan'] = assy.calc_kT(c=c, kC_conn=0.)
                 state['age'] = 0
-            k0 = state['kT_pan'] + kC_conn + assy.calc_kT_TSL(c=c) + kCp
+            k0 = red_mat(state['kT_pan'] + kC_conn + assy.calc_kT_TSL(c=c) + kCp)
             ci = c
 
     def accept(delta, c):
