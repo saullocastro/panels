@@ -61,7 +61,8 @@ def calc_kt_kr(p1, p2, connection_type):
         One of the types:
             - 'xcte'
             - 'ycte'
-            - 'bot-top'
+            - 'bot-top': ``'SB'``, ``p1`` and ``p2`` on the positive and
+              negative sides of the interface along `z`
             - 'xcte-ycte': to a 90° connection
             - 'ycte-xcte': to a 90° connection
 
@@ -125,9 +126,10 @@ def calc_kw_tsl(pA, pB=None, tsl_type=None, k_i=1.e4, k_ipen=1.e6, del_d=None,
     Parameters
     ----------
     pA : :class:`.Shell`
-        Top panel.
+        Panel on the positive side of the interface along the `z` axis of
+        both panels, ``p1`` of the connection.
     pB : :class:`.Shell`
-        Bottom panel.
+        Panel on the negative side of the interface along `z`, ``p2``.
     tsl_type : string
         Type of TSL to be used. Possible options are: 'linear' (no softening),
         or 'bilinear' (with linear softening).

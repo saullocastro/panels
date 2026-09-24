@@ -8,10 +8,16 @@
 r"""
 Kernels of the damaged skin-base connection ``'SB_TSL'``
 
-Stiffness matrix of the area connection between a top panel ``p1`` and a
-bottom panel ``p2`` with a traction-separation law at the interface, see
-:ref:`cohesive_zone`. The kernels evaluate, with a Gauss-Legendre rule of
-``nr_x_gauss`` x ``nr_y_gauss`` points over the domain of ``p1``:
+Stiffness matrix of the area connection between two panels ``p1`` and
+``p2`` with a traction-separation law at the interface, see
+:ref:`cohesive_zone`. The two panels share the axes `x, y, z`, `z` being
+normal to their mid-surfaces, and ``p1`` is the panel on the positive side of
+the interface along `z`, ``p2`` the one on the negative side: the face `z =
+-h_1/2` of ``p1`` is connected to the face `z = +h_2/2` of ``p2``, see
+:meth:`.MultiDomain.get_kC_conn`. The superscripts `t` and `b` below refer to
+``p1`` and ``p2``, the top and bottom panels when `z` points up. The kernels
+evaluate, with a Gauss-Legendre rule of ``nr_x_gauss`` x ``nr_y_gauss``
+points over the domain of ``p1``:
 
 .. math::
 
@@ -33,9 +39,11 @@ panel:
         \Delta_w &= w^t - w^b
     \end{aligned}
 
-where `d^t` and `d^b` are the distances from the mid-planes of the top and
-bottom panels to the interface, `u^t, v^t, w^t` and `u^b, v^b, w^b` their
-mid-plane displacements. The compatibility of the thesis of D'Souza (2024)
+where `d^t = h_1/2` and `d^b = h_2/2` are the distances from the mid-planes
+of ``p1`` and ``p2`` to the interface, `u^t, v^t, w^t` and `u^b, v^b, w^b`
+their mid-plane displacements. The normal separation `\Delta_w` is positive,
+opening the interface, when ``p1`` moves along the positive `z` direction
+with respect to ``p2``. The compatibility of the thesis of D'Souza (2024)
 [nathan2024MSc]_, Eqs. 4.57--4.62, assumes equal slopes of both panels
 (Eq. 4.61) and writes `\Delta_u = u^t + (d^t + d^b) w^t_{,x} - u^b`
 (Eq. 4.62), which holds for a perfect bond but gives a spurious tangential
@@ -45,12 +53,12 @@ opposite directions. The kernel of the undamaged connection ``'SB'``,
 
 With `f`, `g` the approximation functions along `\xi` and `\eta`, and `w_{,x}
 = (2/a) f_{,\xi} g`, `w_{,y} = (2/b) f g_{,\eta}`, the terms of each block are
-listed in the docstrings of :func:`.fkCSB11_dmg` (top-top),
-:func:`.fkCSB12_dmg` (top-bottom) and :func:`.fkCSB22_dmg` (bottom-bottom),
+listed in the docstrings of :func:`.fkCSB11_dmg` (``p1``-``p1``),
+:func:`.fkCSB12_dmg` (``p1``-``p2``) and :func:`.fkCSB22_dmg` (``p2``-``p2``),
 before the factor `w_\xi w_\eta \, ab/4` of the Gauss-Legendre rule, with `a`,
-`b` the dimensions of ``p1``. The bottom panel must cover the same area as the
-top one, its functions are evaluated at the natural coordinates of the top
-panel, which :meth:`.MultiDomain.get_kC_conn` checks.
+`b` the dimensions of ``p1``. ``p2`` must cover the same area as ``p1``, its
+functions are evaluated at the natural coordinates of ``p1``, which
+:meth:`.MultiDomain.get_kC_conn` checks.
 
 The kernels were verified by comparing `\{c\}^T [K] \{c\}` with the
 Gauss-Legendre integral of `k^w_{CZ} (\Delta_u^2 + \Delta_v^2 + \Delta_w^2)`
@@ -96,7 +104,7 @@ def fkCSB11_dmg(double dt, object p1, int size, int row0, int col0,
     r"""
     Penalty approach calculation to skin-base ycte panel 1 position.
 
-    Block top-top of the damaged skin-base connection, see the module
+    Block ``p1``-``p1`` of the damaged skin-base connection, see the module
     docstring of :mod:`panels.multidomain.connections.kCSB_dmg` and
     :ref:`cohesive_zone`. With the notation of the module docstring, the
     terms at each integration point, before the factor `w_\xi w_\eta \,
@@ -115,11 +123,11 @@ def fkCSB11_dmg(double dt, object p1, int size, int row0, int col0,
     Parameters
     ----------
     dt : float
-        Distance from the mid-plane of the top panel ``p1`` to the
-        interface, ``dt = sum(p1.plyts)/2.``. The tangential separation is
+        Distance from the mid-plane of ``p1`` to the interface, ``dt =
+        sum(p1.plyts)/2.``. The tangential separation is
         evaluated with the slope of each panel, see the module docstring.
     p1 : Panel
-        Top panel
+        Panel on the positive side of the interface along `z`
     size : int
         Size of assembly stiffness matrix, which are calculated by sum([3*p.m*p.n for p in self.panels]).
         The size of the assembly can be calculated calling the PanelAssemly.get_size() method.
@@ -294,10 +302,10 @@ def fkCSB12_dmg(double dt, double db, object p1, object p2, int size, int row0, 
     r"""
     Penalty approach calculation to skin-base ycte panel 1 and panel 2 coupling position.
 
-    Block top-bottom of the damaged skin-base connection, see the module
+    Block ``p1``-``p2`` of the damaged skin-base connection, see the module
     docstring of :mod:`panels.multidomain.connections.kCSB_dmg` and
-    :ref:`cohesive_zone`. With the superscripts `t` for the top panel ``p1``
-    (rows) and `b` for the bottom panel ``p2`` (columns), the terms at each
+    :ref:`cohesive_zone`. With the superscripts `t` for ``p1`` (rows) and `b`
+    for ``p2`` (columns), the terms at each
     integration point, before the factor `w_\xi w_\eta \, ab/4 \, k^w_{CZ}`,
     are:
 
@@ -314,8 +322,8 @@ def fkCSB12_dmg(double dt, double db, object p1, object p2, int size, int row0, 
     With respect to the kernel of the thesis of D'Souza (2024)
     [nathan2024MSc]_, the terms `(u^t, w^b)`, `(v^t, w^b)` and `(w^t, w^b)`
     are new or modified, and `(w^t, u^b)`, `(w^t, v^b)` use `d^t`. The kernel
-    of the thesis also built the approximation functions in `\eta` of the top
-    panel with the flags of the edge `y_1` in place of `y_2`, which had no
+    of the thesis also built the approximation functions in `\eta` of ``p1``
+    with the flags of the edge `y_1` in place of `y_2`, which had no
     effect on the DCB, where all `y` flags are 1.
 
     The block couples the rows of ``p1`` to the columns of ``p2``, it must be
@@ -324,12 +332,12 @@ def fkCSB12_dmg(double dt, double db, object p1, object p2, int size, int row0, 
     Parameters
     ----------
     dt, db : float
-        Distances from the mid-planes of the top panel ``p1`` and of the
-        bottom panel ``p2`` to the interface.
+        Distances from the mid-planes of ``p1`` and of ``p2`` to the
+        interface.
     p1 : Panel
-        Top panel
+        Panel on the positive side of the interface along `z`
     p2 : Panel
-        Bottom panel
+        Panel on the negative side of the interface along `z`
     ycte1 : float
         Dimension value that determines the flag value eta.
         If ycte1 = 0 => eta = -1, if ycte1 = p1.b => eta = 1.
@@ -509,9 +517,9 @@ def fkCSB22_dmg(double db, object p1, object p2, int size, int row0, int col0,
     r"""
     Penalty approach calculation to skin-base ycte panel 2 position.
 
-    Block bottom-bottom of the damaged skin-base connection, see the module
+    Block ``p2``-``p2`` of the damaged skin-base connection, see the module
     docstring of :mod:`panels.multidomain.connections.kCSB_dmg` and
-    :ref:`cohesive_zone`. With the functions of the bottom panel ``p2``, the
+    :ref:`cohesive_zone`. With the functions of ``p2``, the
     terms at each integration point, before the factor `w_\xi w_\eta \, ab/4
     \, k^w_{CZ}` with `a`, `b` the dimensions of ``p1``, are:
 
@@ -529,12 +537,13 @@ def fkCSB22_dmg(double db, object p1, object p2, int size, int row0, int col0,
     Parameters
     ----------
     db : float
-        Distance from the mid-plane of the bottom panel ``p2`` to the
-        interface, ``db = sum(p2.plyts)/2.``.
+        Distance from the mid-plane of ``p2`` to the interface, ``db =
+        sum(p2.plyts)/2.``.
     p1 : Panel
-        Top panel, it defines the integration domain
+        Panel on the positive side of the interface along `z`, it defines
+        the integration domain
     p2 : Panel
-        Bottom panel
+        Panel on the negative side of the interface along `z`
     ycte2 : float
         Dimension value that determines the flag value eta.
         If ycte1 = 0 => eta = -1, if ycte1 = p1.b => eta = 1.

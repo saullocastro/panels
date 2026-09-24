@@ -138,8 +138,13 @@ in contact, with the slope of each panel:
 
 where `d^t` and `d^b` are the distances from the mid-planes of the top and
 bottom panels to the interface, `u^t, v^t, w^t` and `u^b, v^b, w^b` their
-mid-plane displacements. The top panel is ``p1`` and the bottom panel is
-``p2`` of the connection dictionary, whatever their order in the assembly. With
+mid-plane displacements. Top and bottom refer to the `z` axis, normal to the
+mid-surfaces and common to both panels, pointing up in the DCB: the top panel
+is the panel on the positive side of the interface along `z`, whose face `z =
+-d^t` is at the interface, and it is ``p1`` of the connection dictionary; the
+bottom panel is the one on the negative side, whose face `z = +d^b` is at the
+interface, and it is ``p2``, whatever their order in the assembly, see
+:meth:`.MultiDomain.get_kC_conn`. With
 these three separations and the degraded stiffness `k^w_{CZ} = k_o (1 - d)`,
 the penalty energy of Eq. 5.1 becomes:
 

@@ -183,8 +183,10 @@ piece_wise_simplify(kCBFxcte22, [])
 
 # Connection between panel skin and stiffener's base - SB CONNECTION
 # connection panel-base integrated over xi' and eta'
-# The top panel (1) is extrapolated to the mid-surface of the bottom panel
-# (2), at a distance dsb = h1/2 + h2/2 below the mid-surface of (1):
+# Panel (1) is on the positive side of the interface along the z axis common
+# to both panels, and panel (2) on the negative side. Panel (1) is
+# extrapolated to the mid-surface of panel (2), at a distance
+# dsb = h1/2 + h2/2 from the mid-surface of (1) along -z:
 #     u1 + dsb*w1,x = u2,  v1 + dsb*w1,y = v2,  w1 = w2
 kCSB11 = (a1*b1/4)*kt*(u1A.T*u1B + v1A.T*v1B + w1A.T*w1B + u1A.T*w1Bxi*(2*dsb/a1) + w1Axi.T*u1B*(2*dsb/a1) + v1A.T*w1Beta*(2*dsb/b1) + w1Aeta.T*v1B*(2*dsb/b1) + w1Axi.T*w1Bxi*(2*dsb/a1)*(2*dsb/a1) + w1Aeta.T*w1Beta*(2*dsb/b1)*(2*dsb/b1))
     # Contains all squared terms - so all terms of (u + d..w,xi)^2 comes here and so on 
@@ -251,8 +253,9 @@ kCSSycte_sdt11 =  sdt_edge(s1A, 1, s1B, 1, a1/2, 'weta', b1, b1)
 kCSSycte_sdt12 = -sdt_edge(s1A, 1, s2B, 2, a1/2, 'weta', b1, b2)
 kCSSycte_sdt22 =  sdt_edge(s2A, 2, s2B, 2, a1/2, 'weta', b2, b2)
 
-# SB: penalty kt on the displacements at the interface, z = -h1/2 for the
-# top panel (1) and z = +h2/2 for the bottom panel (2), and kr on the
+# SB: penalty kt on the displacements at the interface, z = -h1/2 for panel
+# (1), on the positive side of the interface along z, and z = +h2/2 for panel
+# (2), on the negative side, and kr on the
 # difference of rotations (kr = 0 connects only the interface)
 #
 #     u_p(z) = u_p + cphi_p phix_p + cw_p w_p,x
