@@ -12,7 +12,7 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
         air_speed=None, rho_air=None, Mach=None, speed_sound=None, flow='x',
         Nxx_skin=None, Nxx_base=None, Nxx_flange=None, run_static_case=True,
         r=None, m=8, n=8, mb=None, nb=None, mf=None, nf=None,
-        num_eigvalues=25):
+        num_eigvalues=25, conn_method='null-space'):
     r"""Flutter of T-Stiffened Shell with possible defect at middle
 
     For more details about each parameter and the aerodynamic formulation see
@@ -113,6 +113,9 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
         flange.
     num_eigvalues : int
         Number of eigenvalues to be extracted.
+    conn_method : str, optional
+        How the connections are imposed, ``'null-space'``, the default, or
+        ``'penalty'``, see :class:`.MultiDomain`.
 
     Examples
     --------
@@ -307,7 +310,7 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
               p10, p11, p12, p13, p14, p15]
     skin = [p01, p02, p03, p04, p05, p06, p07, p08, p09]
 
-    assy = MultiDomain(panels)
+    assy = MultiDomain(panels, conn_method=conn_method)
 
     size = assy.get_size()
 
@@ -317,7 +320,7 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
             continue
         valid_conn.append(connecti)
 
-    k0 = assy.calc_kC(valid_conn, silent=True)
+    k0 = assy.reduce(assy.calc_kC(valid_conn, silent=True))
 
     c = None
     if run_static_case:
@@ -329,18 +332,18 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
                 p.add_distr_load_fixed_x(0, lambda y: p.Nxx, None, None)
                 fext[p.col_start: p.col_end] = p.calc_fext(silent=True)
 
-            incs, cs = static(k0, -fext, silent=True)
-            c = cs[0]
+            incs, cs = static(k0, -assy.reduce(fext), silent=True)
+            c = assy.expand(cs[0])
 
         for p in panels:
             p.Nxx = 0.
 
-        kG = assy.calc_kG(c=c, silent=True)
+        kG = assy.reduce(assy.calc_kG(c=c, silent=True))
 
     else:
         kG = 0.
 
-    kM = assy.calc_kM(silent=True)
+    kM = assy.reduce(assy.calc_kM(silent=True))
 
     kA = 0
     for p in skin:
@@ -353,9 +356,9 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
 
     assert np.any(np.isnan(kA.data)) == False
     assert np.any(np.isinf(kA.data)) == False
-    kA = csr_matrix(kA)
+    kA = assy.reduce(csr_matrix(kA))
 
     eigvals, eigvecs = freq((k0 + kG + kA), kM, tol=0, sparse_solver=True, silent=True,
              num_eigvalues=num_eigvalues, num_eigvalues_print=5)
 
-    return assy, eigvals, eigvecs
+    return assy, eigvals, assy.expand(eigvecs)

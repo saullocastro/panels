@@ -11,7 +11,7 @@ def tstiff2d_1stiff_compression(a, b, ys, bb, bf, defect_a, rho, plyt,
         Nxx_skin, Nxx_base, Nxx_flange, run_static_case=True,
         r=None, m=8, n=8, mb=None, nb=None, mf=None, nf=None,
         nx=None, ny=None, nxb=None, nyb=None, nxf=None, nyf=None,
-        num_eigvalues=25):
+        num_eigvalues=25, conn_method='null-space'):
     r"""Linear Buckling of T-Stiffened panel with debonding defect
 
     The panel assembly looks like::
@@ -105,7 +105,10 @@ def tstiff2d_1stiff_compression(a, b, ys, bb, bf, defect_a, rho, plyt,
         :class:`.Shell`).
     num_eigvalues : int
         Number of eigenvalues to be extracted.
-        
+    conn_method : str, optional
+        How the connections are imposed, ``'null-space'``, the default, or
+        ``'penalty'``, see :class:`.MultiDomain`.
+
     Examples
     --------
 
@@ -317,7 +320,7 @@ def tstiff2d_1stiff_compression(a, b, ys, bb, bf, defect_a, rho, plyt,
     panels = [p01, p02, p03, p04, p05, p06, p07, p08, p09,
             p10, p11, p12, p13, p14, p15]
 
-    assy = MultiDomain(panels)
+    assy = MultiDomain(panels, conn_method=conn_method)
 
     size = sum([3*p.m*p.n for p in panels])
 
@@ -327,7 +330,7 @@ def tstiff2d_1stiff_compression(a, b, ys, bb, bf, defect_a, rho, plyt,
             continue
         valid_conn.append(connecti)
 
-    k0 = assy.calc_kC(valid_conn, silent=True)
+    k0 = assy.reduce(assy.calc_kC(valid_conn, silent=True))
     c = None
     if run_static_case:
         fext = np.zeros(size)
@@ -335,15 +338,16 @@ def tstiff2d_1stiff_compression(a, b, ys, bb, bf, defect_a, rho, plyt,
             p.add_distr_load_fixed_x(0, lambda y: p.Nxx, None, None)
             fext[p.col_start: p.col_end] = p.calc_fext(silent=True)
 
-        incs, cs = static(k0, -fext, silent=True)
-        c = cs[0]
+        incs, cs = static(k0, -assy.reduce(fext), silent=True)
+        c = assy.expand(cs[0])
         for p in panels:
             p.Nxx = 0.
 
-    kG = assy.calc_kG(c=c, silent=True)
+    kG = assy.reduce(assy.calc_kG(c=c, silent=True))
 
     eigvals, eigvecs = lb(k0, kG, tol=0, sparse_solver=True, silent=True,
              num_eigvalues=num_eigvalues, num_eigvalues_print=5)
+    eigvecs = assy.expand(eigvecs)
 
     if run_static_case:
         return assy, c, eigvals, eigvecs

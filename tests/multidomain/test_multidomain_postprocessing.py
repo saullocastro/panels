@@ -56,7 +56,7 @@ def tension():
     kt, kr = calc_kt_kr(p1, p2, 'xcte')
     conn = [dict(p1=p1, p2=p2, func='SSxcte', xcte1=p1.a, xcte2=0.,
                  kt=kt, kr=kr)]
-    md = MultiDomain([p1, p2], conn)
+    md = MultiDomain([p1, p2], conn, conn_method='penalty')
     c = solve(md.calc_kC(), md.calc_fext(), silent=True)
     return md, c
 
@@ -238,7 +238,7 @@ def test_connection_to_itself_is_rejected(tension):
 def test_get_kC_conn_without_connections():
     p = Shell(a=1., b=1., r=0., m=4, n=4, stack=[0], plyt=1e-3,
               laminaprop=(E, nu), model='plate_clpt_donnell')
-    md = MultiDomain([p])
+    md = MultiDomain([p], conn_method='penalty')
     with pytest.raises(RuntimeError, match='No connectivity'):
         md.get_kC_conn()
 

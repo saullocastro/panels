@@ -26,7 +26,6 @@ cdef extern from 'bardell.hpp':
             double y1t, double y1r, double y2t, double y2r) nogil
 
 
-# TODO: explain dsb parameter
 def fkCSB11(double kt, double dsb, object p1, int size, int row0, int col0):
     r"""
     Penalty approach calculation to skin-base ycte panel 1 position.
@@ -36,9 +35,11 @@ def fkCSB11(double kt, double dsb, object p1, int size, int row0, int col0):
     kt : float
         Translation penalty stiffness.
     dsb : float
-        dsb = sum(pA.plyts)/2. + sum(pB.plyts)/2.
+        Distance between the mid-surfaces of the two panels along `z`,
+        ``dsb = sum(p1.plyts)/2. + sum(p2.plyts)/2.``
     p1 : Panel
-        Panel() object
+        Panel on the positive side of the interface along the `z` axis of
+        both panels, see :meth:`.MultiDomain.get_kC_conn`
     ycte1 : float
         Dimension value that determines the flag value eta.
         If ycte1 = 0 => eta = -1, if ycte1 = p1.b => eta = 1.
@@ -156,7 +157,6 @@ def fkCSB11(double kt, double dsb, object p1, int size, int row0, int col0):
     return kCSB11
 
 
-# TODO: explain dsb parameter
 def fkCSB12(double kt, double dsb, object p1, object p2, int size, int row0, int col0):
     r"""
     Penalty approach calculation to skin-base ycte panel 1 and panel 2 coupling position.
@@ -166,10 +166,13 @@ def fkCSB12(double kt, double dsb, object p1, object p2, int size, int row0, int
     kt : float
         Translation penalty stiffness.
     dsb : float
+        Distance between the mid-surfaces of the two panels along `z`,
+        ``dsb = sum(p1.plyts)/2. + sum(p2.plyts)/2.``
     p1 : Panel
-        First Panel object
+        Panel on the positive side of the interface along the `z` axis of
+        both panels, see :meth:`.MultiDomain.get_kC_conn`
     p2 : Panel
-        Second Panel object
+        Panel on the negative side of the interface along `z`
     ycte1 : float
         Dimension value that determines the flag value eta.
         If ycte1 = 0 => eta = -1, if ycte1 = p1.b => eta = 1.
@@ -295,9 +298,10 @@ def fkCSB22(double kt, object p1, object p2, int size, int row0, int col0):
     kt : float
         Translation penalty stiffness.
     p1 : Panel
-        First Panel object
+        Panel on the positive side of the interface along the `z` axis of
+        both panels, see :meth:`.MultiDomain.get_kC_conn`
     p2 : Panel
-        Second Panel object
+        Panel on the negative side of the interface along `z`
     ycte2 : float
         Dimension value that determines the flag value eta.
         If ycte1 = 0 => eta = -1, if ycte1 = p1.b => eta = 1.

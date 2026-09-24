@@ -243,7 +243,7 @@ def single_blade(variant, phi, load_blade, factor=1.):
         conn.append(dict(p1=skins[0], p2=f, func='BFycte', ycte1=ycte1,
                          ycte2=0., **penalties(skins[0], f, 'ycte', factor)))
         f.Nxx = blade_axial_load(load_blade)
-    md = MultiDomain(skins + [f], conn)
+    md = MultiDomain(skins + [f], conn, conn_method='penalty')
     size = md.get_size()
     if variant == 'rotated':
         kG = sum(kG_linear(p, -1., phi, p.x0, B_312, size, direction='y')
@@ -273,7 +273,7 @@ def test_strips_recover_the_single_domain_skin(along):
     m, n = (12, 8) if along == 'y' else (8, 12)
     for factor, rtol in ((1., 2.5e-2), (PENALTY_FACTOR, 5e-4)):
         skins, conn = strips(A_312, B_312, STACK_312, 3, m, n, along, factor)
-        md = MultiDomain(skins, conn)
+        md = MultiDomain(skins, conn, conn_method='penalty')
         size = md.get_size()
         kG = sum(kG_linear(p, -1., 1., p.y0, B_312, size) for p in skins)
         eigvals, _ = buckling(md, kG)
@@ -288,7 +288,7 @@ def test_table3_all_three_modes_with_strips():
     scale, _ = spb.table3_scale()
     skins, conn = strips(A_312, B_312, STACK_312, 3, 12, 8, 'y',
                          PENALTY_FACTOR)
-    md = MultiDomain(skins, conn)
+    md = MultiDomain(skins, conn, conn_method='penalty')
     size = md.get_size()
     kG = sum(kG_linear(p, -1., 1., p.y0, B_312, size) for p in skins)
     eigvals, _ = buckling(md, kG)
@@ -309,7 +309,7 @@ def test_table2_laminates_with_strips_along_the_load(name):
                          PENALTY_FACTOR, laminaprop=LAMINAPROP_311)
     skins[0].x1wr = 0.
     skins[-1].x2wr = 0.
-    md = MultiDomain(skins, conn)
+    md = MultiDomain(skins, conn, conn_method='penalty')
     size = md.get_size()
     kG = sum(kG_linear(p, -1., 0., 0., B_311, size) for p in skins)
     eigvals, _ = buckling(md, kG)
@@ -374,7 +374,7 @@ def figure7_multidomain(height, m=12, n=6, mf=12, nf=4):
                       laminaprop=LAMINAPROP_311, t_skin=t_skin)
             conn.append(dict(p1=p, p2=f, func='BFycte', ycte1=p.b, ycte2=0.))
             blades.append(f)
-    md = MultiDomain(skins + blades, conn)
+    md = MultiDomain(skins + blades, conn, conn_method='penalty')
     size = md.get_size()
     kG = sum(kG_linear(p, -1., 0., p.y0, B_322, size) for p in skins)
     eigvals, _ = buckling(md, kG, num_eigvalues=4)
@@ -432,7 +432,7 @@ def sb_split(func, order, kt=None):
                      k_o=kt, tau_o=1e30, G1c=1e30, nr_x_gauss=2*M_SB,
                      nr_y_gauss=2*N_SB)]
     md = MultiDomain([top, bot] if order == 'top first' else [bot, top],
-                     conn)
+                     conn, conn_method='penalty')
     size = md.get_size()
     if func == 'SB_TSL':
         c = np.zeros(size)
@@ -484,7 +484,8 @@ def test_sb_old_hardcoded_penalty_was_far_too_soft():
 def test_sb_panels_must_share_the_area():
     top = plate(A_312, B_312, STACK_312[N_BOTTOM:], 6, 6)
     bot = plate(A_312/2, B_312, STACK_312[:N_BOTTOM], 6, 6)
-    md = MultiDomain([top, bot], [dict(p1=top, p2=bot, func='SB')])
+    md = MultiDomain([top, bot], [dict(p1=top, p2=bot, func='SB')],
+                     conn_method='penalty')
     with pytest.raises(ValueError, match='same dimensions'):
         md.calc_kC(silent=True)
 
@@ -504,9 +505,9 @@ def test_connection_order_and_repeated_calls():
     reversed_conn = [dict(p1=skins[1], p2=skins[0], func='SSycte', ycte1=0.,
                           ycte2=skins[0].b)]
     before = dict(reversed_conn[0])
-    md_ref = MultiDomain(skins, conn)
+    md_ref = MultiDomain(skins, conn, conn_method='penalty')
     k_ref = md_ref.get_kC_conn().toarray()
-    md = MultiDomain(skins, reversed_conn)
+    md = MultiDomain(skins, reversed_conn, conn_method='penalty')
     k1 = md.get_kC_conn().toarray()
     k2 = md.get_kC_conn().toarray()
     assert reversed_conn[0] == before
@@ -518,7 +519,7 @@ def test_connection_order_and_repeated_calls():
 def test_connection_to_itself_is_rejected():
     p = plate(A_312, B_312, STACK_312, 6, 6)
     md = MultiDomain([p], [dict(p1=p, p2=p, func='SSycte', ycte1=0.,
-                                ycte2=p.b)])
+                                ycte2=p.b)], conn_method='penalty')
     with pytest.raises(ValueError, match='different panels'):
         md.get_kC_conn()
 

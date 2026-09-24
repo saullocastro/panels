@@ -26,9 +26,11 @@ you can run:
   - the arc-length methods of Riks and Crisfield, able to trace limit points
     and snap-through
 
-* Multi-domain analyses, connecting shell domains with penalty stiffnesses to
-  model cylinders, stiffened panels and panels with debonding defects, also
-  with the shear deformation theories
+* Multi-domain analyses, connecting shell domains exactly with the
+  :ref:`null-space method <null_space>`, the default, or with penalty
+  stiffnesses, to model cylinders,
+  stiffened panels and panels with debonding defects, also with the shear
+  deformation theories
 
 The models are identified by the type of structure, the kinematic theory and
 the non-linear equations, see :mod:`panels.models`:
@@ -93,6 +95,7 @@ Theory
     :maxdepth: 1
 
     bardell.rst
+    multidomain_null_space.rst
     cohesive_zone.rst
     ref.rst
 

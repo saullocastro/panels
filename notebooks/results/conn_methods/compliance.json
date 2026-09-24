@@ -1,0 +1,104 @@
+[
+ {
+  "notebook": "tijs2023_phd_dcb.ipynb",
+  "a0": 30.0,
+  "penalty": 0.00784778075430118,
+  "null-space": 0.007833164576422937
+ },
+ {
+  "notebook": "tijs2023_phd_dcb.ipynb",
+  "a0": 35.0,
+  "penalty": 0.0122590162357661,
+  "null-space": 0.012239118396560566
+ },
+ {
+  "notebook": "tijs2023_phd_dcb.ipynb",
+  "a0": 40.0,
+  "penalty": 0.018075536515485043,
+  "null-space": 0.018049542286879758
+ },
+ {
+  "notebook": "tijs2023_phd_dcb.ipynb",
+  "a0": 45.0,
+  "penalty": 0.025492044648344783,
+  "null-space": 0.025459139368038813
+ },
+ {
+  "notebook": "tijs2023_phd_dcb.ipynb",
+  "a0": 30.0,
+  "penalty": 0.012342557798596082,
+  "null-space": 0.012316901146737707
+ },
+ {
+  "notebook": "tijs2023_phd_dcb.ipynb",
+  "a0": 35.0,
+  "penalty": 0.019269812161901986,
+  "null-space": 0.01923483916951485
+ },
+ {
+  "notebook": "tijs2023_phd_dcb.ipynb",
+  "a0": 40.0,
+  "penalty": 0.028417410093907605,
+  "null-space": 0.028371663408723567
+ },
+ {
+  "notebook": "tijs2023_phd_dcb.ipynb",
+  "a0": 45.0,
+  "penalty": 0.040096688898223556,
+  "null-space": 0.04003870766274127
+ },
+ {
+  "notebook": "tijs2023_phd_dcb.ipynb",
+  "a0": 30.0,
+  "penalty": 0.023891016758068834,
+  "null-space": 0.023843148107003963
+ },
+ {
+  "notebook": "tijs2023_phd_dcb.ipynb",
+  "a0": 35.0,
+  "penalty": 0.037480024021446456,
+  "null-space": 0.03741467298833046
+ },
+ {
+  "notebook": "tijs2023_phd_dcb.ipynb",
+  "a0": 40.0,
+  "penalty": 0.055445436208742295,
+  "null-space": 0.05535983770967586
+ },
+ {
+  "notebook": "tijs2023_phd_dcb.ipynb",
+  "a0": 45.0,
+  "penalty": 0.07839871246975438,
+  "null-space": 0.07829007654442835
+ },
+ {
+  "notebook": "lecinana2023_dcb.ipynb",
+  "a0": 32.05,
+  "penalty": 0.009551263876253312,
+  "null-space": 0.009534724003687736
+ },
+ {
+  "notebook": "lecinana2023_dcb.ipynb",
+  "a0": 33.4,
+  "penalty": 0.010762818826614657,
+  "null-space": 0.010744855456408842
+ },
+ {
+  "notebook": "lecinana2023_dcb.ipynb",
+  "a0": 35.93,
+  "penalty": 0.013301468018591679,
+  "null-space": 0.013280678363137496
+ },
+ {
+  "notebook": "lecinana2023_dcb.ipynb",
+  "a0": 38.05,
+  "penalty": 0.01571339385536041,
+  "null-space": 0.015690076710412233
+ },
+ {
+  "notebook": "lecinana2023_dcb.ipynb",
+  "a0": 42.97,
+  "penalty": 0.022397623026589864,
+  "null-space": 0.022367880792614515
+ }
+]

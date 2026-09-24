@@ -25,8 +25,10 @@ domains:
   which also enters the displacement field, is penalized with ``kr`` too.
 - :func:`.fkCSB_sdt`, between two skins connected over an area, penalizes
   with ``kt`` the difference of the displacements `u(z), v(z), w(z)` at the
-  interface, where the top panel has `z = -h_{top}/2` and the bottom panel
-  `z = +h_{bot}/2`. The laminates may then rotate independently, like in a
+  interface, the face `z = -h_1/2` of the panel on the positive side of the
+  interface along the common `z` axis, ``p_top`` (``p1`` of the connection),
+  and the face `z = +h_2/2` of the panel on the negative side, ``p_bot``
+  (``p2``), see :meth:`.MultiDomain.get_kC_conn`. The laminates may then rotate independently, like in a
   layerwise theory. When ``kr`` is given the difference of the rotations
   `\phi_x, \Phi_y` is also penalized, and for the FSDT two panels connected
   with a high ``kr`` behave like a single laminate with both stacking
@@ -294,7 +296,9 @@ def fkCSB_sdt(kt, p_top, p_bot, size, kr=0.):
     kt : float
         Translation penalty stiffness, per unit area.
     p_top, p_bot : :class:`.Shell`
-        Top and bottom panels, covering the same area.
+        Panels on the positive and negative sides of the interface along
+        their common `z` axis, ``p1`` and ``p2`` of the connection, covering
+        the same area.
     size : int
         Size of the assembly.
     kr : float, optional

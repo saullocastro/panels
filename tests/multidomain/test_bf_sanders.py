@@ -57,7 +57,8 @@ def test_energy(base_model):
     kt, kr = 1.3e7, 2.1e3
     md = MultiDomain(panels=[base, flange],
                      conn=[dict(p1=base, p2=flange, func='BFycte', ycte1=ycte1,
-                                ycte2=ycte2, kt=kt, kr=kr)])
+                                ycte2=ycte2, kt=kt, kr=kr)],
+                                conn_method='penalty')
     K = md.get_kC_conn().toarray()
     rng = np.random.default_rng(0)
     xi, wx = np.polynomial.legendre.leggauss(30)
@@ -75,7 +76,7 @@ def test_energy(base_model):
 
 def test_donnell_and_plates_unchanged():
     base, flange = _panels('cylshell_clpt_donnell', seed=5)
-    md = MultiDomain(panels=[base, flange], conn=[])
+    md = MultiDomain(panels=[base, flange], conn=[], conn_method='penalty')
     size = md.get_size()
     args = (1.e7, 1.e3)
     K = (kCBFycte.fkCBFycte11(*args, base, 0., size, base.row_start,
@@ -86,7 +87,7 @@ def test_donnell_and_plates_unchanged():
                                 flange.row_start, flange.col_start))
     conn = [dict(p1=base, p2=flange, func='BFycte', ycte1=0., ycte2=0.,
                  kt=args[0], kr=args[1])]
-    md = MultiDomain(panels=[base, flange], conn=conn)
+    md = MultiDomain(panels=[base, flange], conn=conn, conn_method='penalty')
     assert np.array_equal(finalize_symmetric_matrix(K).toarray(),
                           md.get_kC_conn().toarray())
 
@@ -123,7 +124,7 @@ def test_rigid_rotation_about_the_axis():
     kt, kr = 1.e8, 1.e4
     conn = [dict(p1=base, p2=flange, func='BFycte', ycte1=ycte1, ycte2=ycte2,
                  kt=kt, kr=kr)]
-    md = MultiDomain(panels=[base, flange], conn=conn)
+    md = MultiDomain(panels=[base, flange], conn=conn, conn_method='penalty')
     theta = 1.e-3
     zero = lambda x, y: 0.*x
     c = np.zeros(md.get_size())

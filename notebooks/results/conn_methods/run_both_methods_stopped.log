@@ -1,0 +1,10 @@
+alfano2001_dcb.ipynb[6]:20: UserWarning: FigureCanvasAgg is non-interactive, and thus cannot be shown
+camanho2003_dcb.ipynb[5]:25: UserWarning: FigureCanvasAgg is non-interactive, and thus cannot be shown
+krueger2008_dcb.ipynb[5]:31: UserWarning: FigureCanvasAgg is non-interactive, and thus cannot be shown
+krueger2008_dcb.ipynb[8]:27: UserWarning: FigureCanvasAgg is non-interactive, and thus cannot be shown
+tijs2022_dcb.ipynb[4]:58: UserWarning: FigureCanvasAgg is non-interactive, and thus cannot be shown
+tijs2023_phd_dcb.ipynb[2]:26: UserWarning: FigureCanvasAgg is non-interactive, and thus cannot be shown
+tijs2023_phd_dcb.ipynb[7]:25: UserWarning: FigureCanvasAgg is non-interactive, and thus cannot be shown
+turon2007_dcb.ipynb[6]:22: UserWarning: FigureCanvasAgg is non-interactive, and thus cannot be shown
+lecinana2023_dcb.ipynb[2]:22: UserWarning: FigureCanvasAgg is non-interactive, and thus cannot be shown
+32 runs, 7 in parallel

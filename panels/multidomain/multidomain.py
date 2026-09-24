@@ -12,6 +12,7 @@ from panels.logger import msg, warn
 from panels.shell import DOUBLE, check_c, Shell
 import panels.modelDB as modelDB
 from panels.multidomain import connections
+from panels.multidomain.connections import nullspace
 
 
 def _penalties(connecti, pA, pB, connection_type):
@@ -28,12 +29,17 @@ def _penalties(connecti, pA, pB, connection_type):
 
 
 def _sb_top_bottom(connecti):
-    r"""Top and bottom panels of a skin-base connection
+    r"""Panels on the positive and negative sides of a skin-base connection
 
-    The kernels of ``'SB'`` and ``'SB_TSL'`` place the second panel at a
-    distance ``dsb`` below the first one, therefore ``p1`` must be the top
-    panel and ``p2`` the bottom one, independently of their order in the
-    assembly. Both must cover the same area, since the kernels of
+    The kernels of ``'SB'`` and ``'SB_TSL'`` place the mid-surface of the
+    second panel at a distance ``dsb`` from that of the first one along the
+    negative `z` direction, the `z` axis being normal to the mid-surfaces of
+    both panels, therefore ``p1`` must be the panel on the positive side of
+    the interface along `z`, and ``p2`` the one on the negative side,
+    independently of their order in the assembly: the face `z = -h_1/2` of
+    ``p1`` is connected to the face `z = +h_2/2` of ``p2``. The two panels
+    must have the same axes `x, y, z`. Both must cover the same area, since
+    the kernels of
     ``kCSB.pyx`` and ``kCSB_dmg.pyx`` and the operators of
     :meth:`.MultiDomain._tsl_operators` integrate over the domain of ``p1``
     only, evaluating the functions of ``p2`` at the natural coordinates of
@@ -137,6 +143,22 @@ class MultiDomain(object):
         A list, tuple etc of :class:`.Shell` objects.
     conn : dict
         A connectivity dictionary.
+    conn_method : str, optional
+        How the connections are imposed:
+
+        - ``'null-space'`` (default): exactly, eliminating the constrained
+          Ritz constants with a basis of the null space of the constraints,
+          see :meth:`.get_T` and
+          :mod:`panels.multidomain.connections.nullspace`. The matrices and
+          vectors must then be reduced with :meth:`.reduce` before solving,
+          and the solutions expanded with :meth:`.expand`. The penalty
+          constants ``'kt'`` and ``'kr'`` of the connections are not used,
+          apart from the key ``'kr'`` of ``'SB'`` for the shear deformation
+          theories, which tells whether the rotations are connected. The
+          damaged connection ``'SB_TSL'`` keeps its penalty stiffness
+        - ``'penalty'``: with penalty stiffnesses added to the stiffness
+          matrix, see :meth:`.get_kC_conn`, solving directly for all the
+          Ritz constants
 
     Notes
     -----
@@ -147,7 +169,7 @@ class MultiDomain(object):
     The connections functions available are:
         - 'SSycte' : defines a skin-skin connection for const x and calls the following functions ``fkCSSycte11``, ``fkCSSycte12``, ``fkCSSycte22``
         - 'SSxcte' : defines a skin-skin connection for const y and calls the following functions ``fkCSSxcte11``, ``fkCSSxcte12``, ``fkCSSxcte22``
-        - 'SB' : defines a skin-base connection and calls the following functions ``fkCBFycte11``, ``fkCBFycte12``, ``fkCBFycte22``
+        - 'SB' : defines a skin-base connection over an area and calls the following functions ``fkCSB11``, ``fkCSB12``, ``fkCSB22``, see :meth:`.get_kC_conn` for the roles of ``p1`` and ``p2``
         - 'BFycte': defines a base-flange connection and calls the following functions ``fkCBFycte11``, ``fkCBFycte12``, ``fkCBFycte22``
 
     Explanations about the connetion functions are found in ``connections`` module.
@@ -170,6 +192,9 @@ class MultiDomain(object):
 
     >>> md = MultiDomain(panels, conn)
 
+    The connections are imposed exactly with the default
+    ``conn_method='null-space'``, see :meth:`.get_T`.
+
     Point or distributed forces or displacements can be easily added by using
     one of the methods:
 
@@ -180,21 +205,35 @@ class MultiDomain(object):
         - :meth:`.Shell.add_distr_pd_fixed_x`
         - :meth:`.Shell.add_distr_pd_fixed_y`
 
-    With this, calculating the stiffness matrix, external force vector and
-    solving the systems becomes straightforward:
+    With this, calculating the stiffness matrix and the external force
+    vector is straightforward:
 
     >>> kC = md.calc_kC()
     >>> fext = md.calc_fext()
 
-    Solving with the Python module ``structsolve``:
+    These have the size of all the Ritz constants. With the default
+    ``conn_method='null-space'`` they are reduced to the independent Ritz
+    constants before solving, here with the Python module ``structsolve``,
+    and the solution is expanded back to all the Ritz constants:
 
     >>> from structsolve import static
     >>>
-    >>> incs, cs = static(k0, fext, silent=True)
+    >>> incs, cs = static(md.reduce(kC), md.reduce(fext), silent=True)
+    >>> c = md.expand(cs[0])
+
+    Solving ``kC`` and ``fext`` directly would leave the domains
+    disconnected, since ``kC`` then contains no connection stiffness. With
+    ``conn_method='penalty'`` the matrices contain the penalty stiffnesses of
+    the connections and are solved directly, ``md.reduce()`` and
+    ``md.expand()`` being then the identity:
+
+    >>> md = MultiDomain(panels, conn, conn_method='penalty')
+    >>> incs, cs = static(md.calc_kC(), md.calc_fext(), silent=True)
+    >>> c = cs[0]
 
     And plotting the results for the group named ``'skin'``.
 
-    >>> md.plot(cs[0], 'skin', filename='tmp_cylinder_compression_lb_Nxx_cte.png')
+    >>> md.plot(c, 'skin', filename='tmp_cylinder_compression_lb_Nxx_cte.png')
 
 
     The group name attribute belongs to each domain, and is passed while
@@ -205,10 +244,18 @@ class MultiDomain(object):
     :func:`.create_cylinder_blade_stiffened`.
 
     """
-    def __init__(self, panels, conn=None):
+    def __init__(self, panels, conn=None, conn_method='null-space'):
+        if conn_method not in ('penalty', 'null-space'):
+            raise ValueError("conn_method must be 'penalty' or 'null-space', "
+                             "got '{0}'".format(conn_method))
         # Initialize the assmbly obj with these values
         self.conn = conn
+        self.conn_method = conn_method
         self.kC_conn = None
+        self.T = None
+        self._T_key = None
+        self._T_tol = 1.e-9
+        self._conn_used = None
         self.panels = panels
         self.size = None
         self.out_num_cores = 4
@@ -233,6 +280,159 @@ class MultiDomain(object):
         """
         self.size = sum([_dofs(p)*p.m*p.n for p in self.panels])
         return self.size
+
+
+    def _resolve_conn(self, conn):
+        r"""Connections given, or those of the assembly, or those used last
+        by :meth:`.get_kC_conn`, e.g. through ``calc_kC(conn)``"""
+        if conn is not None:
+            return conn
+        if self.conn is not None:
+            return self.conn
+        if self._conn_used is not None:
+            return self._conn_used
+        raise RuntimeError('No connectivity dictionary defined!')
+
+
+    def _null_space(self, connecti):
+        r"""Whether the connection is imposed with the null-space method"""
+        return (self.conn_method == 'null-space'
+                and connecti['func'] in nullspace.NULL_SPACE_FUNCS)
+
+
+    def _T_signature(self, conn):
+        r"""Data that define `[T]`, used to reuse it while unchanged"""
+        keys = ('func', 'xcte1', 'xcte2', 'ycte1', 'ycte2')
+        sig_conn = tuple((tuple(ci.get(k) for k in keys), id(ci['p1']),
+                          id(ci['p2']), bool(ci.get('kr', 0.)))
+                         for ci in conn if self._null_space(ci))
+        sig_panels = []
+        for p in self.panels:
+            bcs = tuple(float(getattr(p, d + e + f + r))
+                        for d in 'xy' for e in '12'
+                        for f in nullspace.FIELDS[:_dofs(p)] for r in ('', 'r'))
+            plyts = () if p.plyts is None else tuple(p.plyts)
+            sig_panels.append((id(p), p.m, p.n, p.a, p.b, p.r, p.model,
+                               p.col_start, plyts, bcs))
+        return sig_conn, tuple(sig_panels)
+
+
+    def get_T(self, conn=None, tol=None):
+        r"""Basis of the null space of the connections imposed exactly
+
+        With ``conn_method='null-space'``, the default, the Ritz constants of
+        the assembly that satisfy all the connections of
+        :data:`.nullspace.NULL_SPACE_FUNCS` are `\{c\} = [T] \{c_r\}`, see
+        :mod:`panels.multidomain.connections.nullspace`. The matrices and
+        vectors computed by this class, which do not contain these
+        connections, are reduced with :meth:`.reduce` before solving, and
+        the solution is expanded with :meth:`.expand`::
+
+            kC = md.calc_kC()
+            kG = md.calc_kG(c=c)
+            eigvals, eigvecs_r = lb(md.reduce(kC), md.reduce(kG))
+            eigvecs = md.expand(eigvecs_r)
+
+        With ``conn_method='penalty'``, `[T]` is the identity matrix and the
+        same code solves the problem with the penalty method.
+
+        `[T]` is stored in the attribute ``T`` and reused while the
+        connections, the number of terms and the boundary conditions of the
+        panels do not change, also by :meth:`.reduce` and :meth:`.expand`.
+
+        Parameters
+        ----------
+        conn : list of dict, optional
+            The connections, see :meth:`.get_kC_conn`. If ``None``, those of
+            the assembly are used, or those used last by
+            :meth:`.get_kC_conn`, e.g. through ``calc_kC(conn)``.
+        tol : float, optional
+            Tolerance to find the rank of the constraints, see
+            :func:`.nullspace.null_space_basis`. If ``None``, the last one
+            given is used, initially ``1e-9``.
+
+        Returns
+        -------
+        T : scipy.sparse.csr_matrix
+            Matrix with shape ``(size, size_r)``, with ``size_r`` the number
+            of independent Ritz constants.
+
+        """
+        size = self.get_size()
+        conn = self._resolve_conn(conn)
+        if tol is not None:
+            self._T_tol = tol
+        tol = self._T_tol
+        key = (self._T_signature(conn), tol)
+        if self.T is not None and self._T_key == key:
+            return self.T
+        Bs = [nullspace.constraint_matrix(ci, size)
+              for ci in conn if self._null_space(ci)]
+        self.T = nullspace.null_space_basis(Bs, size, tol=tol)
+        self._T_key = key
+        return self.T
+
+
+    def reduce(self, A):
+        r"""Reduce a matrix or a vector to the independent Ritz constants
+
+        Returns `[T]^T [A] [T]` for a matrix and `[T]^T \{A\}` for a vector,
+        with `[T]` from :meth:`.get_T`.
+
+        """
+        T = self.get_T()
+        if isinstance(A, np.ndarray) and A.ndim == 1:
+            return T.T @ A
+        return csr_matrix(T.T @ A @ T)
+
+
+    def expand(self, c_r):
+        r"""Ritz constants of the assembly from the independent ones
+
+        Returns `[T] \{c_r\}`, with `[T]` from :meth:`.get_T`. ``c_r`` can
+        also be a 2D array, e.g. with one eigenvector per column.
+
+        """
+        T = self.get_T()
+        return T @ c_r
+
+
+    def get_reduced_functions(self):
+        r"""Functions of the reduced problem for ``structsolve.Analysis``
+
+        The functions take and return quantities reduced to the independent
+        Ritz constants, see :meth:`.get_T`, and can be used for the
+        non-linear analyses::
+
+            from structsolve import Analysis
+            an = Analysis(*md.get_reduced_functions())
+            an.static(NLgeom=True)
+            cs = [md.expand(c_r) for c_r in an.cs]
+
+        Returns
+        -------
+        calc_fext, calc_fint, calc_kC, calc_kG : tuple of functions
+
+        """
+        T = self.get_T()
+
+        def calc_fext(inc=1., silent=True):
+            return T.T @ self.calc_fext(inc=inc, silent=silent)
+
+        def calc_fint(c, inc=1., silent=True):
+            return T.T @ self.calc_fint(c=T @ c, inc=inc, silent=silent)
+
+        def calc_kC(c=None, NLgeom=False, inc=1., silent=True):
+            c = None if c is None else T @ c
+            return csr_matrix(T.T @ self.calc_kC(c=c, NLgeom=NLgeom, inc=inc,
+                              silent=silent) @ T)
+
+        def calc_kG(c=None, NLgeom=False, silent=True):
+            c = None if c is None else T @ c
+            return csr_matrix(T.T @ self.calc_kG(c=c, NLgeom=NLgeom,
+                              silent=silent) @ T)
+
+        return calc_fext, calc_fint, calc_kC, calc_kG
 
 
     def plot(self, c=None, group=None, invert_y=False, vec='w', filename='', ax=None,
@@ -1196,8 +1396,8 @@ class MultiDomain(object):
     def force_out_plane_damage(self, conn, c):
         r"""Area integral of the normal traction of an ``SB_TSL`` connection
 
-        Integrates, over the domain of the top panel of the first ``SB_TSL``
-        connection of ``conn``:
+        Integrates, over the domain of the panel ``p1`` of the first
+        ``SB_TSL`` connection of ``conn``:
 
         .. math::
 
@@ -1282,7 +1482,9 @@ class MultiDomain(object):
         r"""Stiffness matrix due to the multidomain connectivities
 
         These are based on penalty stiffnesses, as detailed in Castro and
-        Donadon (2017) [castro2017Multidomain]_ .
+        Donadon (2017) [castro2017Multidomain]_ . With the default
+        ``conn_method='null-space'`` only the connections that are not
+        imposed exactly by :meth:`.get_T` enter this matrix, see below.
 
         Parameters
         ----------
@@ -1300,14 +1502,26 @@ class MultiDomain(object):
               order in the assembly, see
               :mod:`panels.multidomain.connections.kCBFycte` and
               :mod:`panels.multidomain.connections.kCBFxcte`
-            - ``'SB'``: between 2 skins connected over an area, where ``p1``
-              is the top panel and ``p2`` the bottom one, whatever their order
-              in the assembly
+            - ``'SB'``: between 2 skins connected over an area, e.g. the base
+              of a stiffener bonded to a skin, a pad-up of a skin, or the
+              arms of a double cantilever beam. The two panels share the
+              axes `x, y, z`, `z` being normal to their mid-surfaces, and
+              ``p1`` is the panel on the positive side of the interface
+              along `z`, ``p2`` the one on the negative side, whatever their
+              order in the assembly: the face `z = -h_1/2` of ``p1`` is
+              connected to the face `z = +h_2/2` of ``p2``, whose
+              mid-surfaces are `d_{sb} = (h_1 + h_2)/2` apart. For example,
+              a stiffener base on the side of positive `z` of the skin is
+              ``p1`` and the skin ``p2``, while a pad-up on the side of
+              negative `z` is ``p2`` and the skin ``p1``. For a double
+              cantilever beam with `z` pointing up, ``p1`` is the upper arm
             - ``'SB_TSL'``: between 2 skins connected over an area with a
               traction-separation law (TSL) at the interface, requiring
               ``tsl_type``, ``nr_x_gauss``, ``nr_y_gauss``, ``k_o``,
-              ``tau_o`` and ``G1c``, where ``p1`` is the top panel and
-              ``p2`` the bottom one. The matrix is computed by matrix
+              ``tau_o`` and ``G1c``, with ``p1`` and ``p2`` as for ``'SB'``,
+              so that the normal separation `w_1 - w_2` of the interface is
+              positive, opening it, when ``p1`` moves along the positive `z`
+              direction with respect to ``p2``. The matrix is computed by matrix
               products, see :meth:`._kC_TSL`, or, with the key
               ``use_kernels=True``, by the slower kernels of
               :mod:`panels.multidomain.connections.kCSB_dmg`, which give the
@@ -1347,6 +1561,11 @@ class MultiDomain(object):
             The dictionaries are not modified.
 
             If ``None``, the connectivity defined for the assembly is used.
+
+            With ``conn_method='null-space'`` the connections of
+            :data:`.nullspace.NULL_SPACE_FUNCS` are imposed exactly by
+            :meth:`.get_T` and do not enter this matrix, which then contains
+            only the connections ``'SB_TSL'``.
         finalize : bool, optional
             Asserts validity of output data and makes the output matrix
             symmetric.
@@ -1356,17 +1575,17 @@ class MultiDomain(object):
             Out-of-plane stiffness of the traction-separation law.
 
         """
-        if conn is None:
-            if self.conn is None:
-                raise RuntimeError('No connectivity dictionary defined!')
-            conn = self.conn
+        conn = self._resolve_conn(conn)
+        self._conn_used = conn
 
         size = self.get_size()
 
-        kC_conn = 0.
+        kC_conn = coo_matrix((size, size), dtype=DOUBLE)
 
         # Looping through each connection pair
         for connecti in conn:
+            if self._null_space(connecti):
+                continue
             if connecti['func'] != 'SB_force':
                 #NOTE a local copy is used, because the coordinates of the
                 #     connection are swapped below when p1 comes after p2 in
@@ -1477,8 +1696,10 @@ class MultiDomain(object):
                             size, row0=pf.row_start, col0=pf.col_start)
 
                 elif connection_function == 'SB':
-                    #NOTE p1 is the top panel and p2 the bottom one, whatever
-                    #     their order in the assembly, see _sb_top_bottom()
+                    #NOTE p1 is the panel on the positive side of the
+                    #     interface along z and p2 the one on the negative
+                    #     side, whatever their order in the assembly, see
+                    #     _sb_top_bottom()
                     p_top, p_bot = _sb_top_bottom(connecti)
                     kt, _ = _penalties(connecti, p_top, p_bot, 'bot-top')
 
@@ -1793,7 +2014,9 @@ class MultiDomain(object):
             INPUT ARGUMENTS:
                 res_pan_A,B
 
-                !!!!!! PANEL TOP NEEDS TO BE THE ONE ON THE TOP !!!!!!!
+                ``res_pan_top`` must be the results of the panel on the
+                positive side of the interface along `z`, ``p1`` of the
+                ``'SB_TSL'`` connection, see :meth:`.get_kC_conn`
         """
 
         if not (np.all(res_pan_top['x'][0] == res_pan_bot['x'][0]) and np.all(res_pan_top['y'][0] == res_pan_bot['y'][0])):
@@ -1880,7 +2103,7 @@ class MultiDomain(object):
 
         Implements Section 6.3.1 of the thesis of D'Souza (2024), assuming a
         single crack front that advances along ``-x`` (DCB loaded at ``x=a``
-        of the top panel). For each row ``y = cte``, starting from the point
+        of the panel ``p1``). For each row ``y = cte``, starting from the point
         of maximum separation (location `A`) and moving towards ``x=0``, the
         first point with a non-positive separation is found (location `B`),
         and the separation from ``x=0`` up to `B` is set to zero. Points on
@@ -1984,8 +2207,11 @@ class MultiDomain(object):
         Returns ``(Bu, Bv, Bw, weights, dofs)``, where ``Bu @ cc``, ``Bv @
         cc`` and ``Bw @ cc`` give the separations `\Delta_u, \Delta_v,
         \Delta_w` at the Gauss-Legendre points of the connection, with ``cc =
-        c[dofs]`` the Ritz constants of the top panel followed by those of the
-        bottom panel. They depend only on the geometry and are cached.
+        c[dofs]`` the Ritz constants of ``p_top``, the panel ``p1`` of the
+        connection, on the positive side of the interface along `z`, followed
+        by those of ``p_bot``, the panel ``p2``, on the negative side, see
+        :meth:`.get_kC_conn`. They depend only on the geometry and are
+        cached.
 
         The separations are the displacement jump between the two surfaces in
         contact, with the slope of each panel:
@@ -1998,8 +2224,9 @@ class MultiDomain(object):
                 \Delta_w &= w^t - w^b
             \end{aligned}
 
-        where `d^t` and `d^b` are the distances from the mid-planes of the
-        top and bottom panels to the interface. With the matrices `[N]` of
+        where the superscripts `t` and `b` refer to ``p1`` and ``p2``, and
+        `d^t = h_1/2` and `d^b = h_2/2` are the distances from their
+        mid-planes to the interface. With the matrices `[N]` of
         :meth:`._gauss_field_operators`, whose row `g` holds the
         approximation functions of each field at the point `g`, the operators
         are the `n_g \times n_{dof}` matrices:
@@ -2015,7 +2242,7 @@ class MultiDomain(object):
             \end{aligned}
 
         Unlike the compatibility of the thesis of D'Souza (2024)
-        [nathan2024MSc]_, Eq. 4.62, which uses the slope of the top panel
+        [nathan2024MSc]_, Eq. 4.62, which uses the slope of ``p1``
         only, this gives no spurious tangential separation in the fracture
         process zone, where the two arms rotate in opposite directions. See
         :ref:`cohesive_zone`.

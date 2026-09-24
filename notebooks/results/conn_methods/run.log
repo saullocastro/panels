@@ -1,0 +1,17 @@
+16 runs, 8 in parallel
+Thu Sep 24 09:08:55 2026: done alfano2001_TableI_to1.7                  null-space 7993 s
+Thu Sep 24 09:58:57 2026: done tijs2023_weld_center_autoclave           null-space 10990 s
+Thu Sep 24 10:02:47 2026: done camanho2003_DCB_AS4PEEK                  null-space 11223 s
+Thu Sep 24 10:06:42 2026: done alfano2001_TableI_to57                   null-space 11458 s
+Thu Sep 24 10:09:11 2026: done tijs2022_a40                             null-space 11602 s
+Thu Sep 24 10:11:42 2026: done tijs2022_a48                             null-space 11756 s
+Thu Sep 24 10:13:07 2026: done turon2007_le0.125_tau60                  null-space 11844 s
+Thu Sep 24 10:22:06 2026: done alfano2001_TableII_XAS913C               null-space 12376 s
+Thu Sep 24 11:30:42 2026: done tijs2023_weld_center_standard            null-space 8507 s
+Thu Sep 24 12:09:28 2026: done tijs2023_weld_center                     null-space 7830 s
+Thu Sep 24 12:12:31 2026: done tijs2023_full_weld                       null-space 7784 s
+Thu Sep 24 12:28:25 2026: done turon2007_le0.125_tau60_K1e6             null-space 8355 s
+Thu Sep 24 12:29:08 2026: done krueger2008_DCB_MD_tau40                 null-space 7622 s
+Thu Sep 24 12:42:06 2026: done krueger2008_DCB_MD_tau60                 null-space 8939 s
+Thu Sep 24 12:52:20 2026: done krueger2008_DCB_UD_tau40                 null-space 9638 s
+Thu Sep 24 13:01:15 2026: done krueger2008_DCB_UD_tau60                 null-space 10473 s

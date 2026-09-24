@@ -7,7 +7,7 @@ from panels.multidomain import MultiDomain
 def tstiff2d_1stiff_freq(a, b, ys, bb, bf, defect_a, rho, plyt, laminaprop,
         stack_skin, stack_base, stack_flange,
         r=None, m=8, n=8, mb=None, nb=None, mf=None, nf=None,
-        num_eigvalues=25):
+        num_eigvalues=25, conn_method='null-space'):
     r"""Frequency T-Stiffened Shell with possible defect at middle
 
     For more details about each parameter and the aerodynamic formulation see
@@ -90,6 +90,9 @@ def tstiff2d_1stiff_freq(a, b, ys, bb, bf, defect_a, rho, plyt, laminaprop,
         flange.
     num_eigvalues : int
         Number of eigenvalues to be extracted.
+    conn_method : str, optional
+        How the connections are imposed, ``'null-space'``, the default, or
+        ``'penalty'``, see :class:`.MultiDomain`.
 
     Examples
     --------
@@ -286,7 +289,7 @@ def tstiff2d_1stiff_freq(a, b, ys, bb, bf, defect_a, rho, plyt, laminaprop,
     base = [p10, p12, p14]
     flange = [p11, p13, p15]
 
-    assy = MultiDomain(panels)
+    assy = MultiDomain(panels, conn_method=conn_method)
 
     size = assy.get_size()
 
@@ -296,10 +299,10 @@ def tstiff2d_1stiff_freq(a, b, ys, bb, bf, defect_a, rho, plyt, laminaprop,
             continue
         valid_conn.append(connecti)
 
-    k0 = assy.calc_kC(conn=valid_conn, silent=True)
-    kM = assy.calc_kM(silent=True)
+    k0 = assy.reduce(assy.calc_kC(conn=valid_conn, silent=True))
+    kM = assy.reduce(assy.calc_kM(silent=True))
 
     eigvals, eigvecs = freq(k0, kM, tol=0, sparse_solver=True, silent=True,
              num_eigvalues=num_eigvalues, num_eigvalues_print=5)
 
-    return assy, eigvals, eigvecs
+    return assy, eigvals, assy.expand(eigvecs)

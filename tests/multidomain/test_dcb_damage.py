@@ -420,7 +420,8 @@ def dcb_damage_prop_no_f_kcrack(phy_dim, nr_terms, k_i=None, tau_o=None, nr_x_ga
     elif nr_pan == 4:
         panels = [bot1, bot2, bot3, bot4, top1, top2, top3, top4]
 
-    assy = MultiDomain(panels=panels, conn=conn) # assy is now an object of the MultiDomain class
+    assy = MultiDomain(panels=panels, conn=conn,
+                       conn_method='penalty') # assy is now an object of the MultiDomain class
     # Here the panels (shell objs) are modified -- their starting positions in the global matrix is assigned etc
 
     # Panel at which the disp is applied

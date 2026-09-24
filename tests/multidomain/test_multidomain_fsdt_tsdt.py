@@ -192,7 +192,7 @@ def test_frequencies_divided_plate_noor(model, layout):
     stack = [0, 90, 0, 90]
     laminaprop = orthotropic(10)
     panels, conn = domains(model, a, h, stack, laminaprop, layout)
-    md = MultiDomain(panels, conn)
+    md = MultiDomain(panels, conn, conn_method='penalty')
     omegas = frequencies(md.calc_kC(), md.calc_kM(silent=True), k=8)
     scale = a**2/h*np.sqrt(RHO/E2)
     assert np.isclose(omegas[0]*scale, NOOR_1973[model], rtol=1e-4)
@@ -222,7 +222,7 @@ def test_bending_divided_plate_pagano(model):
     laminaprop = orthotropic(25, G12=0.5, G13=0.5, G23=0.2)
     panels, conn = domains(model, a, h, stack, laminaprop, '2x2', xs=0.5,
                            ys=0.5)
-    md = MultiDomain(panels, conn)
+    md = MultiDomain(panels, conn, conn_method='penalty')
     size = md.get_size()
     fext = sum(sinusoidal_load(p, q0, a, size) for p in panels)
     c = solve(md.calc_kC(), fext, silent=True)
@@ -269,7 +269,7 @@ def sb_plates(model, ah, stack_top, stack_bot, factor, kr_factor=None, m=10,
     if kr_factor is not None:
         h = a/ah
         conn['kr'] = kr_factor*factor*kt*h**2
-    md = MultiDomain([top, bot], [conn])
+    md = MultiDomain([top, bot], [conn], conn_method='penalty')
     #NOTE the first ply of a stacking sequence is at the bottom
     single = make_plate(model, a, a, a/ah, list(stack_bot) + list(stack_top),
                         laminaprop, m=m, n=n)
@@ -336,7 +336,7 @@ def test_unsupported_connections(func):
     p2 = make_plate(FSDT, 0.5, 0.5, 0.01, [0, 90], orthotropic(10), m=4, n=4)
     conn = [dict(p1=p1, p2=p2, func=func, xcte1=p1.a, xcte2=0, ycte1=p1.b,
                  ycte2=0)]
-    md = MultiDomain([p1, p2], conn)
+    md = MultiDomain([p1, p2], conn, conn_method='penalty')
     with pytest.raises(NotImplementedError, match=func):
         md.get_kC_conn()
 
@@ -344,7 +344,7 @@ def test_unsupported_connections(func):
 def test_connection_between_different_theories():
     p1 = make_plate(CLPT, 0.5, 0.5, 0.01, [0, 90], orthotropic(10), m=4, n=4)
     p2 = make_plate(FSDT, 0.5, 0.5, 0.01, [0, 90], orthotropic(10), m=4, n=4)
-    md = MultiDomain([p1, p2])
+    md = MultiDomain([p1, p2], conn_method='penalty')
     assert md.get_size() == (3 + 5)*4*4
     conn = [dict(p1=p1, p2=p2, func='SSxcte', xcte1=p1.a, xcte2=0)]
     with pytest.raises(NotImplementedError, match='different number of DOFs'):

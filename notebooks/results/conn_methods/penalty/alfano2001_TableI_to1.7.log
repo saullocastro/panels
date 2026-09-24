@@ -1,0 +1,24 @@
+alfano2001_TableI_to1.7 penalty, alfano2001_dcb.ipynb, started Thu Sep 24 05:58:44 2026
+delta=0.1000 P=3.565 Ptrac=3.547 a=30.00 dmax=0.967 it=6
+delta=0.2000 P=6.701 Ptrac=6.619 a=30.00 dmax=0.991 it=4
+delta=0.3000 P=9.597 Ptrac=9.549 a=30.00 dmax=0.996 it=4
+delta=0.4000 P=12.321 Ptrac=12.376 a=30.00 dmax=0.998 it=3
+delta=0.5000 P=14.890 Ptrac=15.059 a=30.00 dmax=0.998 it=3
+delta=0.6000 P=17.347 Ptrac=17.593 a=30.00 dmax=0.999 it=3
+delta=0.7000 P=19.703 Ptrac=19.968 a=30.00 dmax=0.999 it=3
+delta=0.8000 P=21.960 Ptrac=22.173 a=30.00 dmax=0.999 it=3
+delta=0.9000 P=24.140 Ptrac=24.259 a=30.00 dmax=0.999 it=3
+delta=1.0000 P=26.246 Ptrac=26.230 a=30.00 dmax=1.000 it=2
+delta=1.1000 P=28.239 Ptrac=28.071 a=30.00 dmax=1.000 it=2
+delta=1.2000 P=30.189 Ptrac=29.870 a=30.00 dmax=1.000 it=2
+delta=1.3000 P=32.035 Ptrac=31.600 a=30.00 dmax=1.000 it=2
+delta=1.4000 P=33.851 Ptrac=33.315 a=30.00 dmax=1.000 it=2
+delta=1.5000 P=35.563 Ptrac=35.000 a=30.00 dmax=1.000 it=2
+delta=1.6000 P=37.259 Ptrac=36.680 a=30.00 dmax=1.000 it=2
+delta=1.7000 P=38.837 Ptrac=38.337 a=30.00 dmax=1.000 it=2
+delta=1.8000 P=40.388 Ptrac=39.988 a=30.00 dmax=1.000 it=2
+delta=1.9000 P=41.835 Ptrac=41.595 a=30.00 dmax=1.000 it=2
+delta=2.0000 P=43.217 Ptrac=43.174 a=30.00 dmax=1.000 it=2
+delta=2.1000 P=44.516 Ptrac=44.686 a=30.00 dmax=1.000 it=2
+delta=2.2000 P=45.704 Ptrac=46.099 a=30.00 dmax=1.000 it=2
+delta=2.3000 P=46.846 Ptrac=47.459 a=30.00 dmax=1.000 it=3

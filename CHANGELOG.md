@@ -1,5 +1,76 @@
 # Changelog
 
+## 0.9.0 (2026-09-24)
+
+### Breaking: the multi-domain connections are exact by default
+
+`MultiDomain` and the functions of `panels.multidomain.cylinder`,
+`panels.multidomain.cylinder_blade_stiffened` and
+`panels.multidomain.tstiff2d_1stiff_*` use `conn_method='null-space'` by
+default, see below. The matrices and vectors of `MultiDomain`, e.g.
+`calc_kC()`, `calc_kG()`, `calc_kM()` and `calc_fext()`, then no longer
+contain the connections imposed exactly: they must be reduced with
+`MultiDomain.reduce()` before solving, and the solutions expanded with
+`MultiDomain.expand()`, otherwise the domains are disconnected. Scripts that
+solve these matrices directly must either reduce them or create the assembly
+with `conn_method='penalty'`, which gives the previous results. The functions
+of `panels.multidomain` already return the expanded solutions. The tests of
+the penalty kernels and the notebooks
+`stamatelos_labeas_2023_multidomain.ipynb` and those of the DCB, through
+`notebooks/dcb_utils.py`, use `conn_method='penalty'`, with which their
+stored results were obtained.
+
+### New: exact multi-domain connections with the null-space method
+
+`MultiDomain(panels, conn, conn_method='null-space')` imposes the connections
+`'SSxcte'`, `'SSycte'`, `'BFxcte'`, `'BFycte'` and `'SB'` exactly, for all
+the models, instead of adding penalty stiffnesses. The quantities penalized
+by each kernel become linear constraints `B c = 0`, eliminated with a sparse
+basis `T` of their null space, `c = T c_r`, see
+`panels.multidomain.connections.nullspace` and the documentation page
+"Exact connections with the null-space method". No penalty constant is
+needed, the results are the limit of the penalty method for penalty
+constants going to infinity, and the reduced stiffness matrix is much better
+conditioned. The penalty method remains available with
+`conn_method='penalty'`, whose results are unchanged.
+
+- `MultiDomain.get_T()`, `MultiDomain.reduce()` and `MultiDomain.expand()`
+  reduce the matrices and vectors to the independent Ritz constants and
+  expand the solutions back, and `MultiDomain.get_reduced_functions()` gives
+  the functions of the reduced problem for `structsolve.Analysis`, for the
+  non-linear analyses. With `conn_method='penalty'`, `T` is the identity.
+- Redundant constraints, e.g. around a closed cylinder or at a corner shared
+  by four domains, are detected and dropped.
+- The damaged connection `'SB_TSL'` and the prescribed displacements remain
+  penalty stiffnesses.
+- `MultiDomain.get_kC_conn()`, and therefore `calc_kC()`, `calc_kT()` and
+  `calc_fint()`, called without connections on an assembly created without
+  them, use the connections of the last call, e.g. `calc_kC(conns)`, instead
+  of raising a `RuntimeError`.
+- The functions of `panels.multidomain.cylinder`,
+  `panels.multidomain.cylinder_blade_stiffened` and
+  `panels.multidomain.tstiff2d_1stiff_*` take the argument `conn_method`.
+- A plate divided in domains gives the frequencies of the single-domain
+  plate to `1e-8` or better with the FSDT and TSDT, where the penalty method
+  needs 1000 times the default penalty constants to reach `1e-4`. Two
+  laminates connected with `'SB'` are the single laminate with both stacking
+  sequences to machine precision, also in large deflection. The default
+  penalty constants underestimate the buckling load of the blade-stiffened
+  cylinder of `tests/multidomain/test_cylinder_blade_stiffened.py`, with the
+  pre-buckling state of a static analysis, by 4%: -39993.8 N/m against
+  -41696.7 N/m.
+
+### Documentation
+
+- The panels `p1` and `p2` of the connections `'SB'` and `'SB_TSL'` are
+  defined by the `z` axis common to both panels, normal to their
+  mid-surfaces, instead of top and bottom: `p1` is the panel on the positive
+  side of the interface along `z` and `p2` the one on the negative side, so
+  that the face `z = -h1/2` of `p1` is connected to the face `z = +h2/2` of
+  `p2`, e.g. a stiffener base on the side of positive `z` of a skin is `p1`,
+  and a pad-up on the side of negative `z` is `p2`. The convention of the
+  kernels is unchanged.
+
 ## 0.8.0 (2026-09-23)
 
 ### Breaking: default model of cylindrical shells
