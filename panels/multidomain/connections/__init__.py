@@ -7,6 +7,9 @@ Multidomain connections (:mod:`panels.multidomain.connections`)
 
 Connection between panel domains. Each panel domain has its own set of Bardell
 approximation functions. Below it is shown the connections currently supported.
+They are imposed exactly with the null-space method by default, see
+:ref:`null_space`, or with the penalty stiffnesses of the kernels below with
+``conn_method='penalty'``.
 
 kCBFycte
 ---------
@@ -35,10 +38,19 @@ kCSB
 
 Connection of type::
 
-               ======        ==> base
-               ------        --> skin
+               ======        ==> base, p1
+               ------        --> skin, p2
+                               |
+                               v -z
 
-Takes into account the offset between the two mid-surfaces.
+Takes into account the offset between the two mid-surfaces. The two panels
+share the axes `x, y, z`, `z` being normal to their mid-surfaces, and ``p1``
+is the panel on the positive side of the interface along `z`, ``p2`` the one
+on the negative side, whatever their roles or their order in the assembly:
+the face `z = -h_1/2` of ``p1`` is connected to the face `z = +h_2/2` of
+``p2``. The sketch shows a stiffener base on the side of positive `z` of the
+skin; a pad-up on the side of negative `z` of a skin is ``p2``, with the skin
+``p1``. The same holds for ``'SB_TSL'``.
 
 
 kCSSxcte
@@ -118,6 +130,20 @@ and ``'BFxcte'`` of these models are the functions ``fkCBFycte*_sdt`` and
     :private-members: _block_sdt
 
 
+Exact connections: the null-space method
+----------------------------------------
+
+With ``MultiDomain(..., conn_method='null-space')``, the default, the
+connections
+``'SSxcte'``, ``'SSycte'``, ``'BFxcte'``, ``'BFycte'`` and ``'SB'`` are not
+added as penalty stiffnesses, but imposed exactly: the quantities penalized
+by the kernels above become linear constraints `[B] \{c\} = \{0\}`, which
+are eliminated with a basis `[T]` of their null space, `\{c\} = [T]
+\{c_r\}`. No penalty constant is needed, and the results are the limit of
+the penalty method for penalty constants going to infinity, see
+:ref:`null_space` and :mod:`panels.multidomain.connections.nullspace`.
+
+
 Calculating Penalty Constants
 ------------------------------
 
@@ -125,7 +151,9 @@ Function :func:`.calc_kt_kr` is based on Ref [castro2017Multidomain]_ and
 uses a strain compatibility criterion to calculate penalty constants for
 translation (``kt``) and rotation (``kr``). The aim is to have penalty constants
 that are just high enough to produce the desired compatibility, but not too
-high such that numerical stability issues start to appear.
+high such that numerical stability issues start to appear. The penalty
+constants are not used by the connections imposed with the null-space
+method, see :ref:`null_space`.
 
 .. autofunction:: panels.multidomain.connections.calc_kt_kr
 
@@ -145,3 +173,4 @@ from . kCpd import *
 from . kCSB_dmg import *
 from . penalties import *
 from . import kCsdt
+from . import nullspace

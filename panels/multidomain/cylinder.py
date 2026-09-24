@@ -8,7 +8,7 @@ from panels.multidomain import MultiDomain
 
 
 def create_cylinder(height, r, stack, plyt, laminaprop,
-        npanels, m=8, n=8):
+        npanels, m=8, n=8, conn_method='null-space'):
     r"""Create a cylinder multidomain assembly
 
     The multidomain assembly looks like::
@@ -46,6 +46,9 @@ def create_cylinder(height, r, stack, plyt, laminaprop,
         The number of panels the cylinder perimiter.
     m, n : int, optional
         Number of approximation terms for each panel.
+    conn_method : str, optional
+        How the connections are imposed, ``'null-space'``, the default, or
+        ``'penalty'``, see :class:`.MultiDomain`.
 
     Returns
     -------
@@ -90,13 +93,13 @@ def create_cylinder(height, r, stack, plyt, laminaprop,
             p01 = skin_loop[i+1]
             p02 = skin_loop[i]
             conns.append(dict(p1=p01, p2=p02, func='SSycte', ycte1=0, ycte2=p02.b))
-    md = MultiDomain(skin)
+    md = MultiDomain(skin, conn_method=conn_method)
 
     return md, conns
 
 
 def cylinder_compression_lb_Nxx_cte(height, r, stack, plyt, laminaprop,
-        npanels, Nxxs, m=8, n=8, num_eigvalues=20):
+        npanels, Nxxs, m=8, n=8, num_eigvalues=20, conn_method='null-space'):
     """Linear buckling analysis with a constant Nxx for each panel
 
     See :func:`.create_cylinder` for most parameters.
@@ -110,6 +113,9 @@ def cylinder_compression_lb_Nxx_cte(height, r, stack, plyt, laminaprop,
         A Nxx for each panel.
     num_eigvalues : int
         Number of eigenvalues to be extracted.
+    conn_method : str, optional
+        How the connections are imposed, ``'null-space'``, the default, or
+        ``'penalty'``, see :class:`.MultiDomain`.
 
 
     Returns
@@ -127,22 +133,23 @@ def cylinder_compression_lb_Nxx_cte(height, r, stack, plyt, laminaprop,
 
     """
     md, conns = create_cylinder(height=height, r=r, stack=stack, plyt=plyt,
-            laminaprop=laminaprop, npanels=npanels, m=m, n=n)
+            laminaprop=laminaprop, npanels=npanels, m=m, n=n,
+            conn_method=conn_method)
     if len(Nxxs) != npanels:
         raise ValueError('The length of "Nxxs" must be the same as "npanels"')
     for i, p in enumerate(md.panels):
         p.Nxx = Nxxs[i]
         p.x2u = 1
 
-    k0 = md.calc_kC(conns, silent=True)
-    kG = md.calc_kG(silent=True)
+    k0 = md.reduce(md.calc_kC(conns, silent=True))
+    kG = md.reduce(md.calc_kG(silent=True))
     eigvals, eigvecs = lb(k0, kG, tol=0, sparse_solver=True, silent=True,
              num_eigvalues=num_eigvalues, num_eigvalues_print=5)
-    return md, eigvals, eigvecs
+    return md, eigvals, md.expand(eigvecs)
 
 
 def cylinder_compression_lb_Nxx_from_static(height, r, stack, plyt, laminaprop,
-        npanels, Nxxs, m=8, n=8, num_eigvalues=20):
+        npanels, Nxxs, m=8, n=8, num_eigvalues=20, conn_method='null-space'):
     """Linear buckling analysis with a Nxx calculated using static analysis
 
     See :func:`.create_cylinder` for most parameters.
@@ -156,6 +163,9 @@ def cylinder_compression_lb_Nxx_from_static(height, r, stack, plyt, laminaprop,
         A Nxx for each panel.
     num_eigvalues : int
         Number of eigenvalues to be extracted.
+    conn_method : str, optional
+        How the connections are imposed, ``'null-space'``, the default, or
+        ``'penalty'``, see :class:`.MultiDomain`.
 
     Returns
     -------
@@ -172,7 +182,8 @@ def cylinder_compression_lb_Nxx_from_static(height, r, stack, plyt, laminaprop,
 
     """
     md, conns = create_cylinder(height=height, r=r, stack=stack, plyt=plyt,
-            laminaprop=laminaprop, npanels=npanels, m=m, n=n)
+            laminaprop=laminaprop, npanels=npanels, m=m, n=n,
+            conn_method=conn_method)
     if len(Nxxs) != npanels:
         raise ValueError('The length of "Nxxs" must be the same as "npanels"')
 
@@ -182,14 +193,15 @@ def cylinder_compression_lb_Nxx_from_static(height, r, stack, plyt, laminaprop,
 
     fext = md.calc_fext(silent=True)
 
-    k0 = md.calc_kC(conns)
-    incs, cs = static(k0, fext, silent=True)
-    c = cs[0]
-    kG = md.calc_kG(c=c)
+    k0 = md.reduce(md.calc_kC(conns))
+    incs, cs = static(k0, md.reduce(fext), silent=True)
+    c = md.expand(cs[0])
+    kG = md.reduce(md.calc_kG(c=c))
 
     eigvals = eigvecs = None
     eigvals, eigvecs = lb(k0, kG, tol=0, sparse_solver=True, silent=True,
              num_eigvalues=num_eigvalues, num_eigvalues_print=5)
+    eigvecs = md.expand(eigvecs)
 
     return md, c, eigvals, eigvecs
 

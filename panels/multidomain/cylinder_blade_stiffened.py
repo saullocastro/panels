@@ -8,7 +8,8 @@ from panels.multidomain import MultiDomain
 
 
 def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
-        width_blades, plyt, laminaprop, npanels, m=8, n=8):
+        width_blades, plyt, laminaprop, npanels, m=8, n=8,
+        conn_method='null-space'):
     r"""Create a cylinder multidomain assembly with blade stiffeners
 
     The multidomain assembly looks like::
@@ -62,6 +63,9 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
         The number of panels the cylinder perimiter.
     m, n : int, optional
         Number of approximation terms for each panel.
+    conn_method : str, optional
+        How the connections are imposed, ``'null-space'``, the default, or
+        ``'penalty'``, see :class:`.MultiDomain`.
 
     Returns
     -------
@@ -129,14 +133,15 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
     for panel, blade in zip(skin, blades):
         conns.append(dict(p1=panel, p2=blade, func='BFycte', ycte1=0, ycte2=0))
 
-    md = MultiDomain(skin + blades)
+    md = MultiDomain(skin + blades, conn_method=conn_method)
 
     return md, conns
 
 
 def cylinder_blade_stiffened_compression_lb_Nxx_cte(height, r, stack, stack_blades,
         width_blades, plyt, laminaprop,
-        npanels, Nxxs_skin, Nxxs_blade, m=8, n=8, num_eigvalues=20):
+        npanels, Nxxs_skin, Nxxs_blade, m=8, n=8, num_eigvalues=20,
+        conn_method='null-space'):
     """Linear buckling analysis with a constant Nxx for each panel
 
     See :func:`.create_cylinder_blade_stiffened` for most parameters.
@@ -149,6 +154,9 @@ def cylinder_blade_stiffened_compression_lb_Nxx_cte(height, r, stack, stack_blad
         A Nxx for each blade stiffener.
     num_eigvalues : int
         Number of eigenvalues to be extracted.
+    conn_method : str, optional
+        How the connections are imposed, ``'null-space'``, the default, or
+        ``'penalty'``, see :class:`.MultiDomain`.
 
     Returns
     -------
@@ -166,7 +174,8 @@ def cylinder_blade_stiffened_compression_lb_Nxx_cte(height, r, stack, stack_blad
     """
     md, conns = create_cylinder_blade_stiffened(height=height, r=r,
             stack=stack, stack_blades=stack_blades, width_blades=width_blades,
-            plyt=plyt, laminaprop=laminaprop, npanels=npanels, m=m, n=n)
+            plyt=plyt, laminaprop=laminaprop, npanels=npanels, m=m, n=n,
+            conn_method=conn_method)
     if len(Nxxs_skin) != npanels:
         raise ValueError('The length of "Nxxs_skin" must be the same as "npanels"')
     if len(Nxxs_blade) != npanels:
@@ -182,17 +191,17 @@ def cylinder_blade_stiffened_compression_lb_Nxx_cte(height, r, stack, stack_blad
             i_blade += 1
             p.Nxx = Nxxs_blade[i_blade]
 
-    k0 = md.calc_kC(conns, silent=True)
-    kG = md.calc_kG(silent=True)
+    k0 = md.reduce(md.calc_kC(conns, silent=True))
+    kG = md.reduce(md.calc_kG(silent=True))
     eigvals, eigvecs = lb(k0, kG, tol=0, sparse_solver=True, silent=True,
              num_eigvalues=num_eigvalues, num_eigvalues_print=5)
-    return md, eigvals, eigvecs
+    return md, eigvals, md.expand(eigvecs)
 
 
 def cylinder_blade_stiffened_compression_lb_Nxx_from_static(height, r, stack,
         stack_blades, width_blades, plyt, laminaprop, npanels, Nxxs_skin,
         Nxxs_blade, m=8, n=8,
-        num_eigvalues=20):
+        num_eigvalues=20, conn_method='null-space'):
     """Linear buckling analysis with a Nxx calculated using static analysis
 
     See :func:`.create_cylinder_blade_stiffened` for most parameters.
@@ -205,6 +214,9 @@ def cylinder_blade_stiffened_compression_lb_Nxx_from_static(height, r, stack,
         A Nxx for each blade stiffener.
     num_eigvalues : int
         Number of eigenvalues to be extracted.
+    conn_method : str, optional
+        How the connections are imposed, ``'null-space'``, the default, or
+        ``'penalty'``, see :class:`.MultiDomain`.
 
     Returns
     -------
@@ -222,7 +234,8 @@ def cylinder_blade_stiffened_compression_lb_Nxx_from_static(height, r, stack,
     """
     md, conns = create_cylinder_blade_stiffened(height=height, r=r,
             stack=stack, stack_blades=stack_blades, width_blades=width_blades,
-            plyt=plyt, laminaprop=laminaprop, npanels=npanels, m=m, n=n)
+            plyt=plyt, laminaprop=laminaprop, npanels=npanels, m=m, n=n,
+            conn_method=conn_method)
     if len(Nxxs_skin) != npanels:
         raise ValueError('The length of "Nxxs_skin" must be the same as "npanels"')
     if len(Nxxs_blade) != npanels:
@@ -241,14 +254,15 @@ def cylinder_blade_stiffened_compression_lb_Nxx_from_static(height, r, stack,
 
     fext = md.calc_fext(silent=True)
 
-    k0 = md.calc_kC(conns, silent=True)
-    incs, cs = static(k0, fext, silent=True)
-    c = cs[0]
-    kG = md.calc_kG(c=c, silent=True)
+    k0 = md.reduce(md.calc_kC(conns, silent=True))
+    incs, cs = static(k0, md.reduce(fext), silent=True)
+    c = md.expand(cs[0])
+    kG = md.reduce(md.calc_kG(c=c, silent=True))
 
     eigvals = eigvecs = None
     eigvals, eigvecs = lb(k0, kG, tol=0, sparse_solver=True, silent=True,
              num_eigvalues=num_eigvalues, num_eigvalues_print=5)
+    eigvecs = md.expand(eigvecs)
 
     return md, c, eigvals, eigvecs
 
@@ -256,7 +270,7 @@ def cylinder_blade_stiffened_compression_lb_Nxx_from_static(height, r, stack,
 def cylinder_blade_stiffened_compression_lb_pd_from_static(height, r, stack,
         stack_blades, width_blades, plyt, laminaprop, npanels, pds_skin,
         pds_blade, m=8, n=8,
-        num_eigvalues=20, ku=1.e6):
+        num_eigvalues=20, ku=1.e6, conn_method='null-space'):
     """Linear buckling analysis with prescribed displacement
 
     See :func:`.create_cylinder_blade_stiffened` for most parameters.
@@ -271,6 +285,9 @@ def cylinder_blade_stiffened_compression_lb_pd_from_static(height, r, stack,
         Number of eigenvalues to be extracted.
     ku : float
         Penalty stiffness used for prescribing displacements.
+    conn_method : str, optional
+        How the connections are imposed, ``'null-space'``, the default, or
+        ``'penalty'``, see :class:`.MultiDomain`.
 
     Returns
     -------
@@ -288,7 +305,8 @@ def cylinder_blade_stiffened_compression_lb_pd_from_static(height, r, stack,
     """
     md, conns = create_cylinder_blade_stiffened(height=height, r=r,
             stack=stack, stack_blades=stack_blades, width_blades=width_blades,
-            plyt=plyt, laminaprop=laminaprop, npanels=npanels, m=m, n=n)
+            plyt=plyt, laminaprop=laminaprop, npanels=npanels, m=m, n=n,
+            conn_method=conn_method)
     if len(pds_skin) != npanels:
         raise ValueError('The length of "pds_skin" must be the same as "npanels"')
     if len(pds_blade) != npanels:
@@ -307,13 +325,14 @@ def cylinder_blade_stiffened_compression_lb_pd_from_static(height, r, stack,
 
     fext = md.calc_fext(silent=True)
 
-    k0 = md.calc_kC(conns, silent=True)
-    incs, cs = static(k0, fext, silent=True)
-    c = cs[0]
-    kG = md.calc_kG(c=c, silent=True)
+    k0 = md.reduce(md.calc_kC(conns, silent=True))
+    incs, cs = static(k0, md.reduce(fext), silent=True)
+    c = md.expand(cs[0])
+    kG = md.reduce(md.calc_kG(c=c, silent=True))
 
     eigvals = eigvecs = None
     eigvals, eigvecs = lb(k0, kG, tol=0, sparse_solver=True, silent=True,
              num_eigvalues=num_eigvalues, num_eigvalues_print=5)
+    eigvecs = md.expand(eigvecs)
 
     return md, c, eigvals, eigvecs
