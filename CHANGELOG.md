@@ -1,5 +1,39 @@
 # Changelog
 
+## Unreleased
+
+### New: interactive 3D plots of multi-domain assemblies
+
+`MultiDomain.plot3d(c)` draws the assembly in 3D with plotly, which is an
+optional dependency (`pip install plotly`). Each domain is placed in the
+global coordinate system by its origin `(x0, y0, z0)`, a point `point_x` on
+its `x` axis and a point `point_xy` on its `xy` plane, the new attributes
+`Shell.z0`, `Shell.point_x` and `Shell.point_xy`:
+
+    vec_x = point_x - (x0, y0, z0)
+    vec_xy = point_xy - (x0, y0, z0)
+    vec_z = np.cross(vec_x, vec_xy)
+    vec_y = np.cross(vec_z, vec_x)
+
+By default the local axes are the global ones, as in the 2D plots of
+`MultiDomain.plot()`. The cylindrical shells are drawn curved, with `w`
+positive outwards. The domains are drawn deformed by the displacements `u`,
+`v` and `w` times a scale factor, by default such that the largest
+displacement is 10 % of the size of the assembly, and colored by one of the
+outputs of `MultiDomain.plot()`, `'u'`, ..., `'exx'`, ..., `'Nxx'`, ...,
+selected in a drop-down menu. Saved with `filename` to an HTML file, or shown
+with `show=True` in a browser or a notebook, the figure has controls to
+toggle `u`, `v` and `w` and to change the scale factor, and keyboard
+shortcuts while the mouse pointer is over it: `u`, `v`, `w` toggle the
+displacements, `+` and `-` change the scale factor, `0` shows the undeformed
+geometry, `r` resets, `n` and `p` select the next and previous outputs and
+`o` toggles the orthographic and perspective projections.
+
+- `Shell.global_frame()` gives the origin and the local axes of a domain,
+  `Shell.global_coords(x, y)` the global coordinates of points of its
+  mid-surface and the directions of `u`, `v` and `w` at them, and
+  `Shell.is_curved()` tells whether it is drawn as a cylindrical surface.
+
 ## 0.9.0 (2026-09-24)
 
 ### Breaking: the multi-domain connections are exact by default

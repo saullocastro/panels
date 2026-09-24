@@ -95,6 +95,10 @@ class Shell(object):
     homogeneous plate and accounts for the stacking sequence otherwise. The
     third-order shear deformation theory (TSDT) needs no shear correction.
 
+    The attributes ``x0, y0, z0, point_x, point_xy`` place the shell in the
+    global coordinate system of the 3D plots, see :meth:`.Shell.global_frame`
+    and :meth:`.MultiDomain.plot3d`.
+
     The attributes ``x1, x2, y1, y2`` limit the integration domain to
     ``x1 <= x <= x2`` and ``y1 <= y <= y2``, in physical coordinates, while
     the approximation functions still span the whole ``0 <= x <= a`` and
@@ -107,7 +111,8 @@ class Shell(object):
     # Declare all the variables/attributes here to preallocate mem, speed it up. Var not declared here cant be used
     __slots__ = [ 'a', 'x1', 'x2', 'b', 'y1', 'y2', 'r',
         'stack', 'plyt', 'laminaprop', 'rho', 'offset',
-        'group', 'x0', 'y0', 'row_start', 'col_start', 'row_end', 'col_end',
+        'group', 'x0', 'y0', 'z0', 'point_x', 'point_xy',
+        'row_start', 'col_start', 'row_end', 'col_end',
         'name', 'bay', 'model',
         'fsdt_shear_correction',
         'm', 'n', 'nx', 'ny', 'size',
@@ -152,6 +157,9 @@ class Shell(object):
         self.group = None # Group name (useful when plotting multiple panels together)
         self.x0 = None # starting position of the panel in the global CS
         self.y0 = None
+        self.z0 = None # used by the 3D plots, see Shell.global_frame()
+        self.point_x = None # point on the local x axis, in the global CS
+        self.point_xy = None # point on the local xy plane, in the global CS
         self.row_start = None
         self.col_start = None
         self.row_end = None
@@ -441,6 +449,122 @@ class Shell(object):
         """
         x1, x2, y1, y2 = self.integration_limits()
         return bool(x1 > 0 or x2 < self.a or y1 > 0 or y2 < self.b)
+
+
+    def global_frame(self):
+        r"""Origin and axes of the shell in the global coordinate system
+
+        The origin is ``(x0, y0, z0)``, a ``None`` standing for ``0``, and the
+        local axes are defined by the point ``point_x``, on the `x` axis, and
+        by the point ``point_xy``, on the `xy` plane, both given with three
+        global coordinates::
+
+            vec_x = point_x - (x0, y0, z0)
+            vec_xy = point_xy - (x0, y0, z0)
+            vec_z = np.cross(vec_x, vec_xy)
+            vec_y = np.cross(vec_z, vec_x)
+
+        By default ``point_x = (x0 + 1, y0, z0)`` and ``point_xy = (x0, y0 +
+        1, z0)``, such that the local axes are those of the global coordinate
+        system, as in the 2D plots of :meth:`.MultiDomain.plot`. For a
+        cylindrical shell these are the axes at the point `x = y = 0` of the
+        shell, see :meth:`.Shell.global_coords`.
+
+        Returns
+        -------
+        origin : np.ndarray
+            The global coordinates of the origin, with shape ``(3,)``.
+        axes : np.ndarray
+            The unit vectors of the local axes `x`, `y` and `z` in the rows,
+            with shape ``(3, 3)``.
+
+        """
+        origin = np.array([0. if v is None else v for v in
+                           (self.x0, self.y0, getattr(self, 'z0', None))],
+                          dtype=DOUBLE)
+        point_x = getattr(self, 'point_x', None)
+        point_xy = getattr(self, 'point_xy', None)
+        vec_x = (np.array([1., 0., 0.]) if point_x is None
+                 else np.asarray(point_x, dtype=DOUBLE) - origin)
+        vec_xy = (np.array([0., 1., 0.]) if point_xy is None
+                  else np.asarray(point_xy, dtype=DOUBLE) - origin)
+        if vec_x.shape != (3,) or vec_xy.shape != (3,):
+            raise ValueError('point_x and point_xy must have three coordinates')
+        vec_z = np.cross(vec_x, vec_xy)
+        vec_y = np.cross(vec_z, vec_x)
+        norms = np.array([np.linalg.norm(v) for v in (vec_x, vec_y, vec_z)])
+        # relative to the lengths, since vec_xy may be parallel to vec_x
+        if (norms[0] == 0 or norms[2] <= 1e-12*norms[0]
+                *np.linalg.norm(vec_xy)):
+            raise ValueError('point_x must differ from the origin (x0, y0, '
+                             'z0) and point_xy must not lie on the x axis, '
+                             'got point_x={0!r}, point_xy={1!r}'.format(
+                                 point_x, point_xy))
+        axes = np.array([vec_x, vec_y, vec_z])/norms[:, None]
+        return origin, axes
+
+
+    def is_curved(self):
+        r"""Tell whether the mid-surface is a cylindrical surface
+
+        ``True`` for the models of cylindrical shells, flagged with
+        ``requires_r`` in :mod:`.modelDB`, with a positive radius ``r``.
+
+        """
+        if self.r is None or self.r <= 0:
+            return False
+        if self.model is None:
+            return True
+        return bool(modelDB.db[self.model].get('requires_r', False))
+
+
+    def global_coords(self, x, y):
+        r"""Global coordinates and local axes at points of the mid-surface
+
+        The local axes are those of :meth:`.Shell.global_frame`. For a
+        cylindrical shell, see :meth:`.Shell.is_curved`, `y` is the arc length
+        along the circumference, of radius ``r``, whose centre is at `z = -r`
+        on the local axes of the origin, such that `w` is positive outwards,
+        consistent with `arepsilon_{yy} = v_{,y} + w/r`. Then, with `	heta
+        = y/r`, the mid-surface is `x \hat{x} + r \sin 	heta \hat{y} + r
+        (\cos 	heta - 1) \hat{z}`, the tangent along `y` is `\cos 	heta
+        \hat{y} - \sin 	heta \hat{z}` and the normal is `\sin 	heta
+        \hat{y} + \cos 	heta \hat{z}`.
+
+        Parameters
+        ----------
+        x, y : array-like
+            Coordinates of the points in the local coordinate system of the
+            shell, `0 \le x \le a`, `0 \le y \le b`, with the same shape or
+            broadcastable.
+
+        Returns
+        -------
+        X, ex, ey, ez : np.ndarray
+            With the shape of the points and an additional last axis of size 3,
+            the global coordinates of the points and the unit vectors along
+            which the displacements `u`, `v` and `w` act at each point. The
+            global position of the displaced point is ``X + u[..., None]*ex +
+            v[..., None]*ey + w[..., None]*ez``.
+
+        """
+        origin, (ax, ay, az) = self.global_frame()
+        x, y = np.broadcast_arrays(np.asarray(x, dtype=DOUBLE),
+                                   np.asarray(y, dtype=DOUBLE))
+        ones = np.ones(x.shape + (1,))
+        ex = ones*ax
+        if self.is_curved():
+            theta = (y/self.r)[..., None]
+            sin, cos = np.sin(theta), np.cos(theta)
+            X = (origin + x[..., None]*ax + self.r*sin*ay
+                 + self.r*(cos - 1)*az)
+            ey = cos*ay - sin*az
+            ez = sin*ay + cos*az
+        else:
+            X = origin + x[..., None]*ax + y[..., None]*ay
+            ey = ones*ay
+            ez = ones*az
+        return X, ex, ey, ez
 
 
     def get_size(self):
