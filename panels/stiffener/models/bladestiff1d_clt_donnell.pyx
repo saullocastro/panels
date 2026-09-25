@@ -2,6 +2,7 @@
 #cython: wraparound=False
 #cython: cdivision=True
 #cython: nonecheck=False
+#cython: initializedcheck=False
 #cython: profile=False
 #cython: infer_types=False
 from scipy.sparse import coo_matrix
