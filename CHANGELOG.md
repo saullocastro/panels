@@ -1,5 +1,63 @@
 # Changelog
 
+## 0.9.1 (2026-09-25)
+
+### Build: Cython directives and compiler flags
+
+- Every module is compiled with `initializedcheck=False`. Cython no longer
+  checks, at each memoryview access, that the memoryview has been assigned.
+  Reading an unassigned memoryview attribute from Python still raises
+  `AttributeError`, because the property getters keep their own check.
+- `setup.py` passed `linetrace=True` to every build. Without `CYTHON_TRACE`
+  the line tracing itself stays compiled out, but the directive also
+  generates profiling hooks that are active by default and run at every call
+  of a Python-visible function. The directive is now set only for a coverage
+  build, see below.
+- Compiler flags: `-O3` and `-fno-math-errno` for GCC and Clang, and an
+  explicit `/O2` for MSVC, which setuptools already combines with `/GL`.
+  OpenMP stays, since `panels/models/clpt_field.pyx` uses `prange`. Flags
+  that change floating-point results, such as `/fp:fast` or `-ffast-math`,
+  and flags that tie a wheel to the CPU that built it, such as
+  `-march=native`, are deliberately not used.
+
+The same changes made `pyfe3d` and `composites` up to 2.8 times and 24%
+faster, but not `panels`. Its memoryviews are local variables, which Cython
+already knows to be assigned, so the generated code had almost no checks for
+`initializedcheck=False` to remove (2 per model), and each matrix is built by
+a handful of calls, which makes the per-call cost of the profiling hooks
+negligible. The cost does not change measurably. Measured on an AMD x86-64 laptop CPU (family 25, model 117),
+Windows 11, Python 3.13, NumPy 2.4, Cython 3.2, MSVC, with the process pinned
+to one core at high priority, minimum of 3 interleaved runs of 5 repetitions
+each (`benchmarks/bench_build_flags.py`), in milliseconds per call for
+`m = n = 12`; `kC`, `kG` and `kM` are integrated analytically, and `kC(c)`,
+`kG(c)` and `fint(c)` numerically. Each cell gives the cost before and after
+this change, with the relative difference:
+
+| Model | kC | kG | kM | kC(c) | kG(c) | fint(c) |
+| - | - | - | - | - | - | - |
+| `plate_clpt_donnell` | 24.09 / 23.86 (-1%) | 7.19 / 7.45 (+4%) | 17.49 / 17.89 (+2%) | 1583.66 / 1602.44 (+1%) | 693.77 / 686.89 (-1%) | 41.69 / 41.18 (-1%) |
+| `cylshell_clpt_sanders` | 25.31 / 24.53 (-3%) | 12.36 / 12.86 (+4%) | 17.63 / 17.82 (+1%) | 2146.72 / 2133.46 (-1%) | 723.22 / 722.30 (-0%) | 44.60 / 44.83 (+1%) |
+| `plate_fsdt_donnell` | 43.09 / 42.57 (-1%) | 7.18 / 7.02 (-2%) | 20.34 / 20.55 (+1%) | 2753.77 / 2714.43 (-1%) | 486.27 / 492.08 (+1%) | 60.70 / 60.13 (-1%) |
+| `cylshell_fsdt_sanders` | 50.74 / 50.03 (-1%) | 12.78 / 12.92 (+1%) | 20.50 / 20.38 (-1%) | 3094.37 / 3032.40 (-2%) | 732.51 / 727.61 (-1%) | 64.52 / 63.79 (-1%) |
+| `cylshell_tsdt_donnell` | 53.26 / 53.72 (+1%) | 7.09 / 7.08 (-0%) | 32.71 / 31.68 (-3%) | 4439.99 / 4463.94 (+1%) | 489.35 / 489.04 (-0%) | 62.79 / 61.77 (-2%) |
+
+All differences are within the measurement noise of about 4%. The whole test
+suite passes with the new build.
+
+### Coverage build
+
+`setup.py` now recognises a coverage build, requested either with
+`CYTHON_TRACE_NOGIL` in the environment or with `--define CYTHON_TRACE_NOGIL`,
+and compiles it unoptimized with line tracing. Since Python 3.12 Cython
+traces through `sys.monitoring` by default, which the `Cython.Coverage`
+plugin does not follow, so the coverage build now requests the legacy tracing
+with `CYTHON_USE_SYS_MONITORING=0`. `.github/workflows/coverage.yml` runs on
+Python 3.13, where the same setup left every `.pyx` file out of the coverage
+report of `composites`; this was not measured for `panels`. Switching between
+a coverage build and a normal one regenerates the C++ files of the Cython
+modules, which cythonize would otherwise reuse from the other mode, and
+leaves the hand-written sources in `panels/core/src` alone.
+
 ## 0.9.0 (2026-09-24)
 
 ### Breaking: the multi-domain connections are exact by default
