@@ -525,7 +525,7 @@ class Shell(object):
         cylindrical shell, see :meth:`.Shell.is_curved`, `y` is the arc length
         along the circumference, of radius ``r``, whose centre is at `z = -r`
         on the local axes of the origin, such that `w` is positive outwards,
-        consistent with `arepsilon_{yy} = v_{,y} + w/r`. Then, with `	heta
+        consistent with `varepsilon_{yy} = v_{,y} + w/r`. Then, with `	heta
         = y/r`, the mid-surface is `x \hat{x} + r \sin 	heta \hat{y} + r
         (\cos 	heta - 1) \hat{z}`, the tangent along `y` is `\cos 	heta
         \hat{y} - \sin 	heta \hat{z}` and the normal is `\sin 	heta
