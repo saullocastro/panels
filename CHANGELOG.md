@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.9.1 (2026-09-25)
 
 ### New: interactive 3D plots of multi-domain assemblies
 
