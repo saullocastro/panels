@@ -116,6 +116,7 @@ class Shell(object):
         'fsdt_shear_correction',
         'm', 'n', 'nx', 'ny', 'size',
         'point_loads', 'point_loads_inc', 'distr_loads', 'distr_loads_inc',
+        'pressure_loads', 'pressure_loads_inc',
         'point_pds', 'point_pds_inc', 'distr_pds', 'distr_pds_inc',
         'Nxx', 'Nyy', 'Nxy', 'Nxx_cte', 'Nyy_cte', 'Nxy_cte',
         'x1u', 'x1ur', 'x2u', 'x2ur',
@@ -187,6 +188,8 @@ class Shell(object):
         self.point_loads_inc = [] #NOTE see add_point_load
         self.distr_loads = [] #NOTE see add_distr_load_fixed_x and add_distr_load_fixed_y
         self.distr_loads_inc = [] # NOTE see add_distr_load_fixed_x and add_distr_load_fixed_y
+        self.pressure_loads = [] #NOTE see add_pressure_load
+        self.pressure_loads_inc = [] #NOTE see add_pressure_load
         # prescribed displacements
         self.point_pds = [] #NOTE see add_point_pd
         self.point_pds_inc = [] #NOTE see add_point_pd
@@ -1448,6 +1451,64 @@ class Shell(object):
             self.distr_loads_inc.append([None, y, funcx, funcy, funcz])
 
 
+    def add_pressure_load(self, p, x1=None, x2=None, y1=None, y2=None,
+            cte=True):
+        r"""Add a pressure load distributed over the domain or over a patch
+
+        The pressure acts along the normal `z` of the undeformed mid-surface,
+        with the same sign convention as ``fz`` in :meth:`.add_point_load`,
+        i.e. a positive ``p`` pushes along `+z`. For the cylindrical shells
+        `w` is positive outwards, see :meth:`.Shell.global_coords`, such that
+        an external pressure is negative. The load is a dead load: its
+        direction does not follow the deformation in the non-linear analyses.
+
+        The equivalent nodal force vector is computed by
+        :func:`.shell_fext`, integrating `p(x, y)` times the approximation
+        functions of `w` with ``nx*ny`` Gauss-Legendre points over the loaded
+        patch.
+
+        Parameters
+        ----------
+        p : float or function
+            The pressure, as a force per unit area of mid-surface. Either a
+            constant, or a function ``p(x, y)`` of the physical coordinates,
+            being `y` the arc length for the cylindrical shells.
+        x1, x2, y1, y2 : float, optional
+            Physical limits of the loaded patch, ``x1 <= x <= x2`` and ``y1 <=
+            y <= y2``. A limit that is ``None`` is the corresponding limit of
+            the integration domain of the shell, see
+            :meth:`.Shell.integration_limits`, such that by default the whole
+            domain is loaded. A patch is intersected with the integration
+            domain, which matters only for the partial domains of an
+            assembly.
+        cte : bool, optional
+            Constant forces are not incremented during the non-linear
+            analysis.
+
+        """
+        if p is None:
+            raise ValueError('p must be a float or a function p(x, y)')
+        if not callable(p):
+            p = float(p)
+        for name, value, length in (('x1', x1, self.a), ('x2', x2, self.a),
+                                    ('y1', y1, self.b), ('y2', y2, self.b)):
+            if value is not None and length is not None:
+                tol = 1e-12*length
+                if not (-tol <= value <= length + tol):
+                    raise ValueError('{0}={1!r} is outside the shell, 0 <= '
+                                     '{0} <= {2!r}'.format(name, value, length))
+        if x1 is not None and x2 is not None and not x1 < x2:
+            raise ValueError('x1 < x2 is required, got x1={0!r} and '
+                             'x2={1!r}'.format(x1, x2))
+        if y1 is not None and y2 is not None and not y1 < y2:
+            raise ValueError('y1 < y2 is required, got y1={0!r} and '
+                             'y2={1!r}'.format(y1, y2))
+        if cte:
+            self.pressure_loads.append([x1, x2, y1, y2, p])
+        else:
+            self.pressure_loads_inc.append([x1, x2, y1, y2, p])
+
+
     def add_point_pd(self, x, y, ku, up, kv, vp, kw, wp, cte=True):
         r"""Add a point prescribed displacement with three components
 
@@ -1588,6 +1649,8 @@ class Shell(object):
         self.point_loads_inc = []
         self.distr_loads = []
         self.distr_loads_inc = []
+        self.pressure_loads = []
+        self.pressure_loads_inc = []
 
     def calc_stiffness_point_constraint(self, x, y, u=True, v=True, w=True, phix=False,
             phiy=False, kuvw=1.e6, kphi=1.e5):

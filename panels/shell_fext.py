@@ -23,6 +23,16 @@ def shell_fext(shell, inc, size, col0):
         - ``shell.distr_loads_inc`` : similar to ``distr_loads``, but this is
           affected by the load increment in nonlinear analyses.
 
+        - ``shell.pressure_loads`` : list of pressure loads, each described
+          with ``[x1, x2, y1, y2, p]``, where ``p`` is a float or a function
+          ``p(x, y)`` acting along `z` over the patch ``x1 <= x <= x2``, ``y1
+          <= y <= y2``, a ``None`` limit standing for the corresponding limit
+          of :meth:`.Shell.integration_limits`. See
+          :meth:`.Shell.add_pressure_load`.
+
+        - ``shell.pressure_loads_inc`` : similar to ``pressure_loads``, but
+          this is affected by the load increment in nonlinear analyses.
+
         - ``shell.point_pds`` : list of prescribed point displacements, each
           described with ``[x, y, ku*up, kv*vp, kw*wp]``. See
           :meth:`.Shell.add_point_pd`.
@@ -129,6 +139,36 @@ def shell_fext(shell, inc, size, col0):
                 fpt = np.array([[funcx(yvar), funcy(yvar), funcz(yvar), 0, 0]]) * inc_i
                 fg(g, xcte, yvar, shell)
                 fext[col0:col1] += weight * (shell.b/2) * fpt.dot(g).ravel()
+
+    # %%% pressure loads
+    # - grouping pressure_loads and pressure_loads_inc
+    pressure_loads = []
+    for load in shell.pressure_loads:
+        pressure_loads.append(load + [1.]) #NOTE adding inc = 1.
+    for load in shell.pressure_loads_inc:
+        pressure_loads.append(load + [inc])
+    if len(pressure_loads) > 0:
+        dx1, dx2, dy1, dy2 = shell.integration_limits()
+        # integrating p(x,y)*gw(x,y)*dx*dy over the patch with nx*ny
+        # Gauss-Legendre points, gw being the row of g associated with w
+        xis, wxs = roots_legendre(shell.nx)
+        etas, wys = roots_legendre(shell.ny)
+    for x1, x2, y1, y2, p, inc_i in pressure_loads:
+        # the patch, intersected with the integration domain of the shell
+        x1 = dx1 if x1 is None else max(x1, dx1)
+        x2 = dx2 if x2 is None else min(x2, dx2)
+        y1 = dy1 if y1 is None else max(y1, dy1)
+        y2 = dy2 if y2 is None else min(y2, dy2)
+        if not (x1 < x2 and y1 < y2):
+            continue
+        xs = x1 + (xis + 1)*(x2 - x1)/2
+        ys = y1 + (etas + 1)*(y2 - y1)/2
+        jac = (x2 - x1)/2*(y2 - y1)/2
+        for yvar, wy in zip(ys, wys):
+            for xvar, wx in zip(xs, wxs):
+                pval = p(xvar, yvar) if callable(p) else p
+                fg(g, xvar, yvar, shell)
+                fext[col0:col1] += (wx*wy*jac*pval*inc_i)*g[2]
 
 
     # %% Prescribed DISPLACEMENTS
