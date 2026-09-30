@@ -4,11 +4,10 @@ from multiprocessing import cpu_count
 
 import numpy as np
 from scipy.sparse import csr_matrix
-from scipy.sparse.linalg import eigs, eigsh
 from scipy.linalg import eig
-from numpy import linspace, deg2rad
+from numpy import linspace
 from composites import laminated_plate
-from structsolve.sparseutils import remove_null_cols, make_skew_symmetric, finalize_symmetric_matrix
+from structsolve.sparseutils import finalize_symmetric_matrix
 
 from .logger import msg, warn
 from . import modelDB
