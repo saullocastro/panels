@@ -416,8 +416,9 @@ class MultiDomain(object):
         """
         T = self.get_T()
 
-        def calc_fext(inc=1., silent=True):
-            return T.T @ self.calc_fext(inc=inc, silent=silent)
+        def calc_fext(inc=1., silent=True, c=None):
+            c = None if c is None else T @ c
+            return T.T @ self.calc_fext(inc=inc, silent=silent, c=c)
 
         def calc_fint(c, inc=1., silent=True):
             return T.T @ self.calc_fint(c=T @ c, inc=inc, silent=silent)
@@ -1960,10 +1961,13 @@ class MultiDomain(object):
             Asserts validity of output data and makes the output matrix
             symmetric, should be ``False`` when assemblying.
         inc : float, optional
-            Dummy argument needed for non-linear analyses.
+            Load factor of the incremented follower pressure loads of the
+            panels, see :meth:`.Shell.calc_kCfollower`.
         NLgeom : bool, optional
             If ``True``, the constitutive part of the tangent stiffness matrix
-            at ``c`` is calculated, see :meth:`.Shell.calc_kC`.
+            at ``c`` is calculated, see :meth:`.Shell.calc_kC`, plus the load
+            stiffness of the follower pressure loads of the panels when
+            ``finalize=True``.
 
         """
         size = self.get_size()
@@ -1988,6 +1992,10 @@ class MultiDomain(object):
         kC_conn = self.get_kC_conn(conn=conn, c=c)
 
         kC += kC_conn
+
+        #NOTE unsymmetric, added after the symmetrization, see Shell.calc_kC
+        if NLgeom and finalize:
+            kC = kC + self._calc_kCfollower(c, inc, silent)
 
         self.kC = kC
         msg('finished!', level=2, silent=silent)
@@ -2032,6 +2040,18 @@ class MultiDomain(object):
         return kG
 
 
+    def _calc_kCfollower(self, c, inc, silent):
+        r"""Load stiffness of the follower pressure loads of the panels,
+        unsymmetric, see :meth:`.Shell.calc_kCfollower`"""
+        size = self.get_size()
+        kCf = csr_matrix((size, size))
+        for p in self.panels:
+            if p.has_follower_loads():
+                kCf = kCf + p.calc_kCfollower(c=c, inc=inc, size=size,
+                        row0=p.row_start, col0=p.col_start, silent=silent)
+        return kCf
+
+
     def calc_kM(self, silent=False, finalize=True):
         msg('Calculating kM for assembly...', level=2, silent=silent)
         size = self.get_size()
@@ -2069,6 +2089,9 @@ class MultiDomain(object):
 
         if finalize:
             kT = finalize_symmetric_matrix(kT)
+            #NOTE unsymmetric, added after the symmetrization
+            kT = kT + self._calc_kCfollower(c, 1. if inc is None else inc,
+                                            silent)
         if kC_conn is None:
             kC_conn = self.get_kC_conn(c=c)
         kT += kC_conn
@@ -2086,7 +2109,8 @@ class MultiDomain(object):
         for p in self.panels:
             if p.col_start is None:
                 raise ValueError('Shell attributes "col_start" must be defined!')
-            fint += p.calc_fint(c=c, size=size, col0=p.col_start, silent=silent)
+            fint += p.calc_fint(c=c, size=size, col0=p.col_start, silent=silent,
+                                inc=inc)
         if kC_conn is None:
             kC_conn = self.get_kC_conn(c=c)
         fint += kC_conn*c
@@ -2095,7 +2119,13 @@ class MultiDomain(object):
         return fint
 
 
-    def calc_fext(self, inc=1., silent=True):
+    def calc_fext(self, inc=1., silent=True, c=None):
+        r"""External force vector of the assembly
+
+        With ``c``, the follower pressure loads of the panels are evaluated
+        in this configuration, see :meth:`.Shell.calc_fext`.
+
+        """
         msg('Calculating external forces for assembly...', level=2, silent=silent)
         size = self.get_size()
         fext = 0
@@ -2103,7 +2133,7 @@ class MultiDomain(object):
             if p.col_start is None:
                 raise ValueError('Shell attributes "col_start" must be defined!')
             fext += p.calc_fext(inc=inc, size=size, col0=p.col_start,
-                                silent=silent)
+                                silent=silent, c=c)
         self.fext = fext
         msg('finished!', level=2, silent=silent)
         return fext
