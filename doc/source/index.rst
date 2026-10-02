@@ -75,6 +75,7 @@ Usage examples
     ex_flutter.rst
     ex_newton_raphson.rst
     ex_arc_length.rst
+    ex_follower_pressure.rst
     ex_multidomain_cylinder.rst
     ex_multidomain_tstiff2d.rst
 
