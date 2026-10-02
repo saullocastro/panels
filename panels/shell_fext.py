@@ -24,10 +24,15 @@ def shell_fext(shell, inc, size, col0):
           affected by the load increment in nonlinear analyses.
 
         - ``shell.pressure_loads`` : list of pressure loads, each described
-          with ``[x1, x2, y1, y2, p]``, where ``p`` is a float or a function
-          ``p(x, y)`` acting along `z` over the patch ``x1 <= x <= x2``, ``y1
-          <= y <= y2``, a ``None`` limit standing for the corresponding limit
-          of :meth:`.Shell.integration_limits`. See
+          with ``[x1, x2, y1, y2, p, follower, zp]``, where ``p`` is a float
+          or a function ``p(x, y)`` acting along `z` over the patch ``x1 <= x
+          <= x2``, ``y1 <= y <= y2``, a ``None`` limit standing for the
+          corresponding limit of :meth:`.Shell.integration_limits`,
+          ``follower`` is ``None`` for a dead load or the truncation of the
+          area vector of a follower load, ``'linear'`` or ``'quadratic'``,
+          and ``zp`` is the position of the loaded surface, see
+          :func:`.pressure_patches`. A follower load contributes here with
+          its value in the undeformed state, equal to the dead load, see
           :meth:`.Shell.add_pressure_load`.
 
         - ``shell.pressure_loads_inc`` : similar to ``pressure_loads``, but
@@ -141,34 +146,22 @@ def shell_fext(shell, inc, size, col0):
                 fext[col0:col1] += weight * (shell.b/2) * fpt.dot(g).ravel()
 
     # %%% pressure loads
-    # - grouping pressure_loads and pressure_loads_inc
-    pressure_loads = []
-    for load in shell.pressure_loads:
-        pressure_loads.append(load + [1.]) #NOTE adding inc = 1.
-    for load in shell.pressure_loads_inc:
-        pressure_loads.append(load + [inc])
-    if len(pressure_loads) > 0:
-        dx1, dx2, dy1, dy2 = shell.integration_limits()
-        # integrating p(x,y)*gw(x,y)*dx*dy over the patch with nx*ny
-        # Gauss-Legendre points, gw being the row of g associated with w
+    # integrating p(x,y)*gw(x,y)*dx*dy over each patch with nx*ny
+    # Gauss-Legendre points, gw being the row of g associated with w; the
+    # follower loads enter with their value in the undeformed state
+    if shell.pressure_loads or shell.pressure_loads_inc:
         xis, wxs = roots_legendre(shell.nx)
         etas, wys = roots_legendre(shell.ny)
-    for x1, x2, y1, y2, p, inc_i in pressure_loads:
-        # the patch, intersected with the integration domain of the shell
-        x1 = dx1 if x1 is None else max(x1, dx1)
-        x2 = dx2 if x2 is None else min(x2, dx2)
-        y1 = dy1 if y1 is None else max(y1, dy1)
-        y2 = dy2 if y2 is None else min(y2, dy2)
-        if not (x1 < x2 and y1 < y2):
-            continue
+    for patch in pressure_patches(shell, inc):
+        x1, x2, y1, y2 = patch['limits']
         xs = x1 + (xis + 1)*(x2 - x1)/2
         ys = y1 + (etas + 1)*(y2 - y1)/2
         jac = (x2 - x1)/2*(y2 - y1)/2
-        for yvar, wy in zip(ys, wys):
-            for xvar, wx in zip(xs, wxs):
-                pval = p(xvar, yvar) if callable(p) else p
+        pnxny = patch['pnxny']
+        for j, (yvar, wy) in enumerate(zip(ys, wys)):
+            for i, (xvar, wx) in enumerate(zip(xs, wxs)):
                 fg(g, xvar, yvar, shell)
-                fext[col0:col1] += (wx*wy*jac*pval*inc_i)*g[2]
+                fext[col0:col1] += (wx*wy*jac*pnxny[i, j])*g[2]
 
 
     # %% Prescribed DISPLACEMENTS
@@ -253,3 +246,82 @@ def shell_fext(shell, inc, size, col0):
                 fext[col0:col1] += weight * (shell.b/2) * fpt.dot(g).ravel()
 
     return fext
+
+
+def pressure_factor(shell, zp):
+    r"""Factor of a pressure acting on the surface ``z = zp``
+
+    For a cylindrical shell, see :meth:`.Shell.is_curved`, a pressure ``p``
+    on the surface of radius ``r + zp`` has the resultant ``p (r + zp)`` per
+    unit length of mid-surface arc, and is applied as ``p (1 + zp/r)`` per
+    unit area of mid-surface. Its direction and change of area are those of
+    the mid-surface, the shallow-shell approximation described in
+    ``theory/shells/follower_pressure/follower_pressure.py``. For plates the
+    factor is ``1``.
+
+    """
+    if zp and shell.is_curved():
+        return 1. + zp/shell.r
+    return 1.
+
+
+def pressure_patches(shell, inc, follower_only=False):
+    r"""Patches and integration point values of the pressure loads
+
+    Parameters
+    ----------
+    shell : :class:`.Shell`
+        The shell object, whose ``pressure_loads`` and ``pressure_loads_inc``
+        are read, see :func:`.shell_fext`.
+    inc : float
+        Load factor that multiplies the pressures of ``pressure_loads_inc``.
+    follower_only : bool, optional
+        Return only the follower loads.
+
+    Returns
+    -------
+    patches : list of dict
+        For each load whose patch intersects the integration domain of the
+        shell, a dictionary with:
+
+        - ``'limits'``: ``(x1, x2, y1, y2)``, the patch intersected with
+          :meth:`.Shell.integration_limits`;
+        - ``'pnxny'``: array of shape ``(shell.nx, shell.ny)`` with the
+          pressure at the Gauss-Legendre points of the patch, multiplied by
+          the load factor and by :func:`.pressure_factor`;
+        - ``'follower'``: ``None``, ``'linear'`` or ``'quadratic'``.
+
+    """
+    loads = [(load, 1.) for load in shell.pressure_loads]
+    loads += [(load, inc) for load in shell.pressure_loads_inc]
+    if not loads:
+        return []
+    dx1, dx2, dy1, dy2 = shell.integration_limits()
+    xis = roots_legendre(shell.nx)[0]
+    etas = roots_legendre(shell.ny)[0]
+    patches = []
+    for load, inc_i in loads:
+        x1, x2, y1, y2, p = load[:5]
+        follower = load[5] if len(load) > 5 else None
+        zp = load[6] if len(load) > 6 else 0.
+        if follower_only and follower is None:
+            continue
+        # the patch, intersected with the integration domain of the shell
+        x1 = dx1 if x1 is None else max(x1, dx1)
+        x2 = dx2 if x2 is None else min(x2, dx2)
+        y1 = dy1 if y1 is None else max(y1, dy1)
+        y2 = dy2 if y2 is None else min(y2, dy2)
+        if not (x1 < x2 and y1 < y2):
+            continue
+        xs = x1 + (xis + 1)*(x2 - x1)/2
+        ys = y1 + (etas + 1)*(y2 - y1)/2
+        if callable(p):
+            pnxny = np.array([[p(x, y) for y in ys] for x in xs],
+                             dtype=np.float64)
+        else:
+            pnxny = np.full((xs.shape[0], ys.shape[0]), p, dtype=np.float64)
+        pnxny *= inc_i*pressure_factor(shell, zp)
+        patches.append(dict(limits=(x1, x2, y1, y2),
+                            pnxny=np.ascontiguousarray(pnxny),
+                            follower=follower))
+    return patches

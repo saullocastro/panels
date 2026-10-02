@@ -11,7 +11,7 @@ from structsolve.sparseutils import finalize_symmetric_matrix
 
 from .logger import msg, warn
 from . import modelDB
-from . shell_fext import shell_fext
+from . shell_fext import shell_fext, pressure_patches
 
 DOUBLE = np.float64
 
@@ -304,7 +304,8 @@ class Shell(object):
 
     def _clear_matrices(self):
         self.lam = None
-        self.matrices = dict(kC=None, kG=None, kT=None, kM=None, kA=None, cA=None)
+        self.matrices = dict(kC=None, kG=None, kT=None, kM=None, kA=None, cA=None,
+                             kCfollower=None)
         self.fields = dict(
                 u=None, v=None, w=None, phix=None, phiy=None,
                 exx=None, eyy=None, gxy=None, kxx=None, kyy=None, kxy=None, gyz=None, gxz=None,
@@ -700,7 +701,8 @@ class Shell(object):
 
 
     def calc_kC(self, size=None, row0=0, col0=0, silent=True, finalize=True,
-            c=None, c_cte=None, nx=None, ny=None, ABDnxny=None, NLgeom=False):
+            c=None, c_cte=None, nx=None, ny=None, ABDnxny=None, NLgeom=False,
+            inc=1.):
         r"""Calculate the constitutive stiffness matrix
 
         It is ``NLgeom``, and not ``c``, that selects the large displacement
@@ -739,6 +741,16 @@ class Shell(object):
           by :meth:`.Shell.calc_kG`, is the exact Jacobian of
           :meth:`.Shell.calc_fint`, while :meth:`.Shell.calc_kG` stays
           homogeneous of degree one in ``c``, as linear buckling requires.
+
+        - With ``NLgeom=True`` and ``finalize=True`` the load stiffness of the
+          follower pressure loads, :meth:`.Shell.calc_kCfollower` at ``c``
+          and load factor ``inc``, is added, such that the sum of this matrix
+          and :meth:`.Shell.calc_kG` is the exact Jacobian of
+          :meth:`.Shell.calc_fint` at the same ``inc``. With
+          ``finalize=False``, as in an assembly, it is not added, because the
+          load stiffness is unsymmetric and the caller symmetrizes the
+          assembled upper triangle; it must then be added after the
+          finalization, see :meth:`.MultiDomain.calc_kC`.
 
         - If ``c_cte`` is given, or any of the attributes ``Nxx_cte``,
           ``Nyy_cte`` or ``Nxy_cte`` is non-zero, the geometric stiffness
@@ -787,6 +799,9 @@ class Shell(object):
         NLgeom : bool, optional
             Flag to indicate if geometrically non-linearities should be
             considered.
+        inc : float, optional
+            Load factor of the incremented follower pressure loads, used only
+            with ``NLgeom=True``, see :meth:`.Shell.calc_kCfollower`.
 
         """
         msg('Calculating kC... ', level=2, silent=silent)
@@ -879,6 +894,10 @@ class Shell(object):
 
         if finalize:
             kC = finalize_symmetric_matrix(kC)
+            #NOTE unsymmetric, hence added after the symmetrization
+            if NLgeom and self.has_follower_loads():
+                kC = kC + self.calc_kCfollower(c=c, inc=inc, size=size,
+                        row0=row0, col0=col0, silent=silent)
         self.matrices['kC'] = kC
 
         #NOTE forcing Python garbage collector to clean the memory
@@ -977,7 +996,7 @@ class Shell(object):
 
 
     def calc_kT(self, size=None, row0=0, col0=0, silent=True, finalize=True,
-            c=None, nx=None, ny=None, ABDnxny=None):
+            c=None, nx=None, ny=None, ABDnxny=None, inc=1.):
         r"""Calculate the tangent stiffness matrix `[K_T]`
 
         The tangent stiffness matrix is the exact Jacobian of
@@ -989,7 +1008,10 @@ class Shell(object):
 
         where all terms but the last come from
         :meth:`.Shell.calc_kC` with ``NLgeom=True``, and the last one from
-        :meth:`.Shell.calc_kG` with ``NLgeom=True``. Note that `[K_{G_{NL}}]`
+        :meth:`.Shell.calc_kG` with ``NLgeom=True``. With follower pressure
+        loads, the load stiffness :meth:`.Shell.calc_kCfollower` at the load
+        factor ``inc`` is included, through :meth:`.Shell.calc_kC`, and the
+        matrix is then unsymmetric in general. Note that `[K_{G_{NL}}]`
         is grouped with the constitutive matrix and not with the geometric
         one, see the notes in :meth:`.Shell.calc_kC` and
         :meth:`.Shell.calc_kG`.
@@ -1006,13 +1028,137 @@ class Shell(object):
 
         """
         kC = self.calc_kC(size=size, row0=row0, col0=col0, silent=silent, finalize=finalize,
-            c=c, nx=nx, ny=ny, ABDnxny=ABDnxny, NLgeom=True)
+            c=c, nx=nx, ny=ny, ABDnxny=ABDnxny, NLgeom=True, inc=inc)
         kG = self.calc_kG(size=size, row0=row0, col0=col0, silent=silent, finalize=finalize,
             c=c, nx=nx, ny=ny, ABDnxny=ABDnxny, NLgeom=True)
         kT = kC + kG
         self.matrices['kT'] = kT
 
         return kT
+
+
+    def has_follower_loads(self):
+        r"""Tell whether any pressure load is a follower load, see
+        :meth:`.Shell.add_pressure_load`"""
+        return any(len(load) > 5 and load[5] is not None
+                   for load in self.pressure_loads + self.pressure_loads_inc)
+
+
+    def _follower_matrices(self):
+        matrices_num = modelDB.db[self.model]['matrices_num']
+        if not hasattr(matrices_num, 'fkCfollower_num'):
+            raise NotImplementedError('follower pressure loads are not '
+                                      'implemented for model {0}'.format(
+                                          self.model))
+        return matrices_num
+
+
+    def calc_kCfollower(self, c=None, inc=1., size=None, row0=0, col0=0,
+            silent=True, finalize=True):
+        r"""Calculate the load stiffness matrix of the follower pressure loads
+
+        The follower pressure loads, see :meth:`.Shell.add_pressure_load`,
+        have the force vector `\{F_p(c)\}`, which depends on the
+        configuration, and the returned matrix is the stiffness contribution
+
+        .. math::
+            [K_{C_{follower}}] = - \frac{\partial \{F_p\}}{\partial \{c\}}
+
+        evaluated at ``c``, with the pressures of the incremented loads
+        (``cte=False``) multiplied by the load factor ``inc`` and those of the
+        constant loads by ``1``. It enters the tangent stiffness matrix as
+        `[K_T] = [K_C] + [K_G] + [K_{C_{follower}}]`, see
+        :meth:`.Shell.calc_kT`, and the linear buckling problem of a follower
+        pressure as ``lb(kC0, kG + kCfollower)``, with ``kG`` and
+        ``kCfollower`` for a unit load factor.
+
+        The matrix is unsymmetric in general, see the notes in
+        ``theory/shells/follower_pressure/follower_pressure.py``: it is
+        symmetric when the pressure is uniform over the whole integration
+        domain and, on each edge, either `w` or the displacement normal to
+        the edge is zero. It is therefore assembled in full and never
+        symmetrized. For the first-order area vector (``follower='linear'``)
+        it does not depend on ``c``.
+
+        Parameters
+        ----------
+        c : array-like or None, optional
+            The Ritz constants, with the size ``size``. Only used by the
+            loads with ``follower='quadratic'``. ``None`` is the undeformed
+            state.
+        inc : float, optional
+            Load factor of the incremented follower loads.
+        size, row0, col0, silent :
+            See :meth:`.Shell.calc_kC`.
+        finalize : bool, optional
+            Checks for ``nan`` and ``inf`` values. The matrix is never
+            symmetrized.
+
+        Returns
+        -------
+        kCfollower : csr_matrix
+            Also stored in ``Shell.matrices`` under the key ``'kCfollower'``.
+
+        """
+        msg('Calculating kCfollower... ', level=2, silent=silent)
+        self._rebuild()
+        if size is None:
+            size = self.get_size()
+        elif isinstance(size, str):
+            size = int(size) + self.get_size()
+        self._check_r()
+        if c is None:
+            c = np.zeros(size, dtype=DOUBLE)
+        else:
+            c = np.ascontiguousarray(c, dtype=DOUBLE)
+            check_c(c, size)
+        kCf = csr_matrix((size, size), dtype=DOUBLE)
+        patches = pressure_patches(self, inc, follower_only=True)
+        if patches:
+            matrices_num = self._follower_matrices()
+        for patch in patches:
+            x1, x2, y1, y2 = patch['limits']
+            quadratic = int(patch['follower'] == 'quadratic')
+            kCf = kCf + csr_matrix(matrices_num.fkCfollower_num(c,
+                patch['pnxny'], x1, x2, y1, y2, self, size, row0, col0,
+                quadratic))
+        kCf.eliminate_zeros()
+        if finalize:
+            assert not np.any(np.isnan(kCf.data))
+            assert not np.any(np.isinf(kCf.data))
+        self.matrices['kCfollower'] = kCf
+        msg('finished!', level=2, silent=silent)
+        return kCf
+
+
+    def calc_fext_follower(self, c, inc=1., size=None, col0=0,
+            reference=True):
+        r"""Force vector `\{F_p(c)\}` of the follower pressure loads
+
+        The pressures of the incremented loads are multiplied by ``inc``. With
+        ``reference=False`` the part of the undeformed state, `\{F_p(0)\}`,
+        which :meth:`.Shell.calc_fext` already contains, is excluded. See
+        :meth:`.Shell.add_pressure_load`.
+
+        """
+        if size is None:
+            size = self.get_size()
+        elif isinstance(size, str):
+            size = int(size) + self.get_size()
+        self._check_r()
+        c = np.ascontiguousarray(c, dtype=DOUBLE)
+        check_c(c, size)
+        fp = np.zeros(size, dtype=DOUBLE)
+        patches = pressure_patches(self, inc, follower_only=True)
+        if patches:
+            matrices_num = self._follower_matrices()
+        for patch in patches:
+            x1, x2, y1, y2 = patch['limits']
+            quadratic = int(patch['follower'] == 'quadratic')
+            fp += np.asarray(matrices_num.calc_fext_follower(c,
+                patch['pnxny'], x1, x2, y1, y2, self, size, col0, quadratic,
+                int(reference)))
+        return fp
 
 
     def calc_kM(self, size=None, row0=0, col0=0, h_nxny=None, rho_nxny=None,
@@ -1452,20 +1598,51 @@ class Shell(object):
 
 
     def add_pressure_load(self, p, x1=None, x2=None, y1=None, y2=None,
-            cte=True):
+            cte=True, follower=False, zp=0.):
         r"""Add a pressure load distributed over the domain or over a patch
 
         The pressure acts along the normal `z` of the undeformed mid-surface,
         with the same sign convention as ``fz`` in :meth:`.add_point_load`,
         i.e. a positive ``p`` pushes along `+z`. For the cylindrical shells
         `w` is positive outwards, see :meth:`.Shell.global_coords`, such that
-        an external pressure is negative. The load is a dead load: its
-        direction does not follow the deformation in the non-linear analyses.
+        an external pressure is negative.
+
+        With ``follower=False`` the load is a dead load: its direction does
+        not follow the deformation in the non-linear analyses. Otherwise it
+        is a follower (hydrostatic) pressure, normal to the deformed
+        mid-surface and acting on its deformed area, with the force vector
+
+        .. math::
+            \{F_p(c)\} = \int p \left(\{N_u\} a_x + \{N_v\} a_y
+                         + \{N_w\} a_z\right) dx dy
+
+        where `(a_x, a_y, a_z)` is the area vector of the deformed
+        mid-surface per unit undeformed area. With ``follower=True`` or
+        ``'linear'`` it is truncated to first order in the displacement
+        gradients, consistently with the moderate-rotation strains of the
+        models:
+
+        .. math::
+            a_x = -w_{,x}, \quad a_y = -w_{,y} + k_v v, \quad
+            a_z = 1 + u_{,x} + v_{,y} + k_w w
+
+        with `k_w = 1/r` for the cylinders and `k_v = 1/r` for the Sanders
+        kinematics only, zero otherwise. With ``'quadratic'`` the complete
+        (bilinear) area vector of the kinematics is used. See
+        ``theory/shells/follower_pressure/follower_pressure.py``.
+
+        In the undeformed state a follower load equals the dead load, and
+        :meth:`.Shell.calc_fext` returns this reference vector. The part that
+        depends on the configuration enters :meth:`.Shell.calc_fint` (with a
+        negative sign) and its derivative the tangent stiffness matrix
+        through :meth:`.Shell.calc_kCfollower`, both at the load factor
+        ``inc`` of the incremented loads. The configuration-dependent force
+        vector is :meth:`.Shell.calc_fext` with ``c``.
 
         The equivalent nodal force vector is computed by
         :func:`.shell_fext`, integrating `p(x, y)` times the approximation
         functions of `w` with ``nx*ny`` Gauss-Legendre points over the loaded
-        patch.
+        patch, the same points used by the follower terms.
 
         Parameters
         ----------
@@ -1483,7 +1660,21 @@ class Shell(object):
             assembly.
         cte : bool, optional
             Constant forces are not incremented during the non-linear
-            analysis.
+            analysis. Note that the non-linear solvers of ``structsolve``
+            scale the whole :meth:`.Shell.calc_fext` by their load factor,
+            so with them use ``cte=False`` for loads that follow the load
+            factor.
+        follower : bool or str, optional
+            ``False`` for a dead load, ``True`` or ``'linear'`` for a follower
+            pressure with the first-order area vector, ``'quadratic'`` for the
+            complete area vector.
+        zp : float, optional
+            Position along `z` of the surface on which the pressure acts,
+            e.g. ``h/2`` for the outer face of a cylinder. For the cylindrical
+            shells the pressure is applied as ``p*(1 + zp/r)`` per unit area
+            of mid-surface, which is the resultant of ``p`` acting on the
+            radius ``r + zp``, with the direction and change of area of the
+            mid-surface (shallow shell). Plates are not affected.
 
         """
         if p is None:
@@ -1503,10 +1694,18 @@ class Shell(object):
         if y1 is not None and y2 is not None and not y1 < y2:
             raise ValueError('y1 < y2 is required, got y1={0!r} and '
                              'y2={1!r}'.format(y1, y2))
+        if follower is False or follower is None:
+            follower = None
+        elif follower is True or follower == 'linear':
+            follower = 'linear'
+        elif follower != 'quadratic':
+            raise ValueError("follower must be False, True, 'linear' or "
+                             "'quadratic', got {0!r}".format(follower))
+        zp = float(zp)
         if cte:
-            self.pressure_loads.append([x1, x2, y1, y2, p])
+            self.pressure_loads.append([x1, x2, y1, y2, p, follower, zp])
         else:
-            self.pressure_loads_inc.append([x1, x2, y1, y2, p])
+            self.pressure_loads_inc.append([x1, x2, y1, y2, p, follower, zp])
 
 
     def add_point_pd(self, x, y, ku, up, kv, vp, kw, wp, cte=True):
@@ -1699,7 +1898,7 @@ class Shell(object):
         return kPC
 
 
-    def calc_fext(self, inc=1., size=None, col0=0, silent=True):
+    def calc_fext(self, inc=1., size=None, col0=0, silent=True, c=None):
         r"""Calculate the external force vector `\{F_{ext}\}`
 
         Recall that:
@@ -1711,7 +1910,10 @@ class Shell(object):
         such that the terms in `\{{F_{ext}}_0\}` are constant and the terms in
         `\{{F_{ext}}_\lambda\}` will be scaled by the parameter ``inc``.
 
-        See the documentation of :func:`.shell_fext` for more details.
+        See the documentation of :func:`.shell_fext` for more details. The
+        follower pressure loads, see :meth:`.Shell.add_pressure_load`,
+        contribute with their value in the undeformed state, unless ``c`` is
+        given.
 
         Parameters
         ----------
@@ -1727,6 +1929,12 @@ class Shell(object):
             Offset in a global force vector of an assembly.
         silent : bool, optional
             A boolean to tell whether the log messages should be printed.
+        c : array-like or None, optional
+            The Ritz constants, with the size ``size``. When given, the
+            follower pressure loads are evaluated in this configuration,
+            i.e. ``fext(c) = fext + (F_p(c) - F_p(0))``, the load vector that
+            the arc-length solvers of ``structsolve`` use as the derivative
+            of the residual with respect to the load factor.
 
         Returns
         -------
@@ -1736,12 +1944,29 @@ class Shell(object):
         """
         self._rebuild()
         msg('Calculating external forces...', level=2, silent=silent)
-        return shell_fext(self, inc=inc, size=size, col0=col0)
+        fext = shell_fext(self, inc=inc, size=size, col0=col0)
+        if c is not None and self.has_follower_loads():
+            fext += self.calc_fext_follower(c, inc=inc, size=fext.shape[0],
+                                            col0=col0, reference=False)
+        return fext
 
 
     def calc_fint(self, c, size=None, col0=0, silent=True, nx=None,
-            ny=None, ABDnxny=None):
+            ny=None, ABDnxny=None, inc=1.):
         r"""Calculate the internal force vector `\{F_{int}\}`
+
+        With follower pressure loads, see :meth:`.Shell.add_pressure_load`,
+        the part of their force vector that depends on the configuration is
+        subtracted, such that
+
+        .. math::
+            \{R\} = \{F_{ext}\} - \{F_{int}\}
+                  = \{F_{ext}\} + (\{F_p(c)\} - \{F_p(0)\})
+                    - \{F_{int}^{elastic}(c)\}
+
+        with :meth:`.Shell.calc_fext` at the same ``inc``, and the tangent
+        stiffness matrix :meth:`.Shell.calc_kT` at ``inc`` is its exact
+        Jacobian.
 
 
         Parameters
@@ -1765,6 +1990,8 @@ class Shell(object):
         ABDnxny : np.ndarray, optional
             Laminate stiffness for each integration point, if not supplied it
             will assume constant properties over the shell domain.
+        inc : float, optional
+            Load factor of the incremented follower pressure loads.
 
         Returns
         -------
@@ -1801,6 +2028,9 @@ class Shell(object):
         c = np.ascontiguousarray(c, dtype=DOUBLE)
         check_c(c, size)
         fint = np.asarray(calc_fint(c, ABDnxny, self, size, col0, nx, ny))
+        if self.has_follower_loads():
+            fint = fint - self.calc_fext_follower(c, inc=inc, size=size,
+                                                  col0=col0, reference=False)
 
         gc.collect()
 
