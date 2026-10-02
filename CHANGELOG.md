@@ -35,13 +35,17 @@
 - `MultiDomain.calc_fint`, `calc_kC`, `calc_kT`, `calc_fext` and
   `get_reduced_functions()` forward `inc` and `c`, and add the follower load
   stiffness of the panels after the symmetrization.
-- Requires the `inc`/`c` keyword support of `structsolve` (branch
-  `follower-loads`) for the non-linear solvers to pass the load factor.
-- With the `structsolve` branch `follower-loads`,
-  `Analysis.static(NLgeom=False)` solves the geometrically linear problem with
-  the follower load in the current configuration, `(k0 + kCfollower) c =
-  fext`, and `structsolve.freq` gives the kinetic criterion (flutter) of
-  the tangent stiffness matrix with the unsymmetric load stiffness.
+- Requires `structsolve>=0.5.0`: its solvers pass the load factor `inc` to
+  the callables that accept it, the arc-length methods use the load vector
+  of the current configuration, `lb` and `freq` handle unsymmetric matrices,
+  `Analysis.static(NLgeom=False)` solves the geometrically linear problem
+  with the follower load in the current configuration, `(k0 + kCfollower) c
+  = fext`, and `freq` gives the kinetic criterion (flutter) of the tangent
+  stiffness matrix with the unsymmetric load stiffness.
+- Theory: new documentation page *Follower pressure loads: theory*,
+  `doc/source/follower_pressure.rst`, with the derivation of the force
+  vector, the internal force vector, the load stiffness `kCfollower` and its
+  symmetry conditions.
 - Verification: `tests/tests_shell/test_follower_pressure.py`; validation
   against closed forms and the literature (Han et al. 2004, Kardomateas 1993,
   Kardomateas and Simitses 2003, Schweizerhof and Ramm 1984, NASA/SP-8007-2020/REV 2):
