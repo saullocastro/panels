@@ -97,6 +97,7 @@ Theory
 
     bardell.rst
     multidomain_null_space.rst
+    follower_pressure.rst
     cohesive_zone.rst
     ref.rst
 

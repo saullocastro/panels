@@ -1,3 +1,5 @@
+.. _ex_follower_pressure:
+
 Follower (hydrostatic) pressure
 ===============================
 
@@ -9,8 +11,7 @@ vector enters :meth:`.Shell.calc_fint`, and its load stiffness
 :meth:`.Shell.calc_kCfollower`, which is unsymmetric in general, enters
 :meth:`.Shell.calc_kT`, both at the load factor ``inc``. The theory, the
 truncation of the area vector and the conditions for a symmetric load
-stiffness are documented in
-``theory/shells/follower_pressure/follower_pressure.md``.
+stiffness are derived in :ref:`follower_pressure`.
 
 Linear buckling of rings and long cylinders
 -------------------------------------------
@@ -52,7 +53,7 @@ of the current configuration in the arc-length methods:
     :pyobject: test_newton_raphson_converges_quadratically
 
 Linear static analysis and kinetic criterion
--------------------------------------------
+--------------------------------------------
 
 A geometrically linear structure under a follower load solves the
 unsymmetric system ``(k0 + kCfollower) c = fext``, which
