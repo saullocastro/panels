@@ -626,7 +626,7 @@ class Shell(object):
 
         - Third-order shear deformation theory (TSDT), ``13 x 13``: ``[[A, B,
           E, 0, 0], [B, D, F, 0, 0], [E, F, H, 0, 0], [0, 0, 0, Abar_ts,
-          Dtrans], [0, 0, 0, Dtrans, Ftrans]]``, without shear correction.
+          Dts], [0, 0, 0, Dts, Fts]]``, without shear correction.
 
         The rows and columns are in the order of the generalized strains of
         each model, see :meth:`.Shell.strain`.
@@ -657,9 +657,9 @@ class Shell(object):
             ABD[6:9, 3:6] = lam.F
             ABD[6:9, 6:9] = lam.H
             ABD[9:11, 9:11] = lam.Abar_ts
-            ABD[9:11, 11:13] = lam.Dtrans
-            ABD[11:13, 9:11] = lam.Dtrans
-            ABD[11:13, 11:13] = lam.Ftrans
+            ABD[9:11, 11:13] = lam.Dts
+            ABD[11:13, 9:11] = lam.Dts
+            ABD[11:13, 11:13] = lam.Fts
 
         if self.force_orthotropic_laminate and 'tsdt' in self.model:
             msg('', silent=silent)

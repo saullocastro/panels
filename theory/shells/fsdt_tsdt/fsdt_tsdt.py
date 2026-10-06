@@ -72,8 +72,8 @@ of the generalized strains above, is:
   A55]]`` of the `(yz, xz)` components.
 
 - TSDT, ``13 x 13``: ``[[A, B, E, 0, 0], [B, D, F, 0, 0], [E, F, H, 0, 0],
-  [0, 0, 0, Abar_ts, Dtrans], [0, 0, 0, Dtrans, Ftrans]]``, where
-  ``Abar_ts``, ``Dtrans`` and ``Ftrans`` are the integrals of the
+  [0, 0, 0, Abar_ts, Dts], [0, 0, 0, Dts, Fts]]``, where
+  ``Abar_ts``, ``Dts`` and ``Fts`` are the integrals of the
   transverse shear stiffness multiplied by `1`, `z^2` and `z^4`, with no
   shear correction.
 

@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.11.0 (2026-10-06)
 
 ### New: follower (hydrostatic) pressure loads
 
@@ -55,6 +55,14 @@
   `schweizerhof1984_pressure_loads.ipynb` and
   `nasa_sp8007_external_pressure.ipynb`, with the helpers of
   `notebooks/follower_utils.py`.
+
+### Changed
+
+- The TSDT constitutive matrix `Shell.ABD` uses `Laminate.Dts` and
+  `Laminate.Fts` of `composites`, which replace the deprecated
+  `Laminate.Dtrans` and `Laminate.Ftrans`. The values are the same.
+- Requires `composites>=0.9.12`, the first version with `Laminate.Dts` and
+  `Laminate.Fts`.
 
 ## 0.10.0 (2026-09-25)
 
