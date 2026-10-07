@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Follower pressure loads: theory &#8212; panels 0.11.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=64cc4de3f052d77215f0" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=64cc4de3f052d77215f0" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="_static/scripts/fontawesome.js?digest=64cc4de3f052d77215f0"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=64cc4de3f052d77215f0" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=64cc4de3f052d77215f0" />
+
+    <script src="_static/documentation_options.js?v=f3b36f1a"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'follower_pressure';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Cohesive zone model of the multi-domain approach" href="cohesive_zone.html" />
+    <link rel="prev" title="Exact connections with the null-space method" href="multidomain_null_space.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.11.0" />
+  
+    
+    <script src="_static/searchtools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">panels 0.11.0 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="bardell.html">
+    Bardell’s Hierarchical Functions
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class=" current active">
+  <a class="nav-link dropdown-item nav-internal" href="#" aria-current="page">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ref.html">
+    References
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="bardell.html">
+    Bardell’s Hierarchical Functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#" aria-current="page">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ref.html">
+    References
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button type="button" id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Follower pressure loads: theory</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="follower-pressure-loads-theory">
+<span id="follower-pressure"></span><h1>Follower pressure loads: theory<a class="headerlink" href="#follower-pressure-loads-theory" title="Link to this heading">#</a></h1>
+<p>A pressure created by a gas or a liquid acts normal to the current surface
+and on its current area. With <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_pressure_load()</span></code> and
+<code class="docutils literal notranslate"><span class="pre">follower=True</span></code> the pressure <span class="math notranslate nohighlight">\(p\)</span> follows the deformed mid-surface of the
+shell, as opposed to the default dead load, <code class="docutils literal notranslate"><span class="pre">follower=False</span></code>, which keeps
+the direction and the area of the undeformed mid-surface. The pressure
+<span class="math notranslate nohighlight">\(p(x, y)\)</span> is a function of the undeformed coordinates, i.e. a <em>body-attached
+follower load</em> in the classification of Schweizerhof and Ramm
+<a class="reference internal" href="ref.html#schweizerhof1984pressure" id="id1"><span>[schweizerhof1984Pressure]</span></a>. It is the load of the hydrostatic buckling of
+rings and cylinders, see e.g. <a class="reference internal" href="ref.html#timoshenko1961stability" id="id2"><span>[timoshenko1961Stability]</span></a>,
+<a class="reference internal" href="ref.html#brush1975buckling" id="id3"><span>[brush1975Buckling]</span></a> and <a class="reference internal" href="ref.html#simitses1976stability" id="id4"><span>[simitses1976Stability]</span></a>, and of the elasticity
+solutions of thick orthotropic and sandwich cylinders under external
+pressure <a class="reference internal" href="ref.html#kardomateas1993orthotropic" id="id5"><span>[kardomateas1993Orthotropic]</span></a>, <a class="reference internal" href="ref.html#kardomateas1995orthotropic" id="id6"><span>[kardomateas1995Orthotropic]</span></a>,
+<a class="reference internal" href="ref.html#kardomateas2003sandwich" id="id7"><span>[kardomateas2003Sandwich]</span></a>, <a class="reference internal" href="ref.html#han2004sandwichcylinder" id="id8"><span>[han2004SandwichCylinder]</span></a>,
+<a class="reference internal" href="ref.html#kardomateas2005sandwich" id="id9"><span>[kardomateas2005Sandwich]</span></a>, in which the pressure “remains normal to the
+deflected surface during the buckling process”.</p>
+<p>This section derives the force vector of the follower pressure, its
+contribution to the internal force vector and its load stiffness matrix
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kCfollower()</span></code>, and discusses when this matrix is symmetric.
+The derivation is implemented with sympy in
+<code class="docutils literal notranslate"><span class="pre">theory/shells/follower_pressure/follower_pressure.py</span></code>, which also
+generates the kernels <code class="docutils literal notranslate"><span class="pre">calc_fext_follower</span></code> and <code class="docutils literal notranslate"><span class="pre">fkCfollower_num</span></code> of every
+model, see <a class="reference internal" href="#follower-pressure-implementation"><span class="std std-ref">Implementation and verification</span></a>.</p>
+<section id="virtual-work-of-the-pressure">
+<h2>Virtual work of the pressure<a class="headerlink" href="#virtual-work-of-the-pressure" title="Link to this heading">#</a></h2>
+<p>Let <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span> be the coordinates of the undeformed mid-surface, <span class="math notranslate nohighlight">\(y\)</span> being
+the arc length for the cylindrical shells, and <span class="math notranslate nohighlight">\(\{e_x, e_y, e_z\}\)</span> the local
+basis of the undeformed mid-surface, with <span class="math notranslate nohighlight">\(e_z\)</span> the normal, positive outwards
+for the cylinders of radius <span class="math notranslate nohighlight">\(r\)</span>, such that <span class="math notranslate nohighlight">\(e_{y,y} = -e_z/r\)</span> and
+<span class="math notranslate nohighlight">\(e_{z,y} = e_y/r\)</span>. The displacement of the mid-surface is <span class="math notranslate nohighlight">\(\mathbf{u} = u
+e_x + v e_y + w e_z\)</span>, and the position of the deformed mid-surface is
+<span class="math notranslate nohighlight">\(\mathbf{X} = \mathbf{X}_0 + \mathbf{u}\)</span>. A pressure <span class="math notranslate nohighlight">\(p\)</span>, positive along
+<span class="math notranslate nohighlight">\(+e_z\)</span> as the force <code class="docutils literal notranslate"><span class="pre">fz</span></code> of <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_point_load()</span></code> (an external
+pressure on a cylinder is negative), acting normal to the deformed
+mid-surface and on its deformed area, does the virtual work:</p>
+<div class="math notranslate nohighlight" id="equation-fp-virtual-work">
+<span class="eqno">(1)<a class="headerlink" href="#equation-fp-virtual-work" title="Link to this equation">#</a></span>\[\delta W_p = \int_{A} p \, \mathbf{n} \cdot \delta\mathbf{u} \, dA
+           = \int_{A_0} p \, \mathbf{a} \cdot \delta\mathbf{u}
+             \, dx \, dy,
+\qquad
+\mathbf{a} = \mathbf{X}_{,x} \times \mathbf{X}_{,y}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathbf{a}\)</span> is the area vector of the deformed mid-surface per unit
+undeformed area, <span class="math notranslate nohighlight">\(\mathbf{n} \, dA = \mathbf{a} \, dx \, dy\)</span>. For the models
+based on the shear deformation theories, FSDT and TSDT, the pressure acts on
+the mid-surface, such that only <span class="math notranslate nohighlight">\(u\)</span>, <span class="math notranslate nohighlight">\(v\)</span> and <span class="math notranslate nohighlight">\(w\)</span> enter Eq.
+<a class="reference internal" href="#equation-fp-virtual-work">(1)</a>, never the rotations <span class="math notranslate nohighlight">\(\phi_x\)</span> and <span class="math notranslate nohighlight">\(\phi_y\)</span>.</p>
+<p>In the local basis:</p>
+<div class="math notranslate nohighlight" id="equation-fp-tangents">
+<span class="eqno">(2)<a class="headerlink" href="#equation-fp-tangents" title="Link to this equation">#</a></span>\[\begin{split}\mathbf{X}_{,x} = \mathbf{A} = \begin{Bmatrix} 1 + u_{,x} \\ v_{,x} \\
+                               w_{,x} \end{Bmatrix},
+\qquad
+\mathbf{X}_{,y} = \mathbf{B} = \begin{Bmatrix} u_{,y} \\
+                               1 + v_{,y} + k_w w \\
+                               w_{,y} - k_v v \end{Bmatrix}\end{split}\]</div>
+<p>with the factors of the kinematics of each model:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>kinematics</p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(k_w\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(k_v\)</span></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>plate</p></td>
+<td><p><span class="math notranslate nohighlight">\(0\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(0\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>cylinder, Donnell</p></td>
+<td><p><span class="math notranslate nohighlight">\(1/r\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(0\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p>cylinder, Sanders</p></td>
+<td><p><span class="math notranslate nohighlight">\(1/r\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1/r\)</span></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>For the plates and the Sanders cylinders Eq. <a class="reference internal" href="#equation-fp-tangents">(2)</a> is the exact
+geometry, and <span class="math notranslate nohighlight">\(w_{,y} - v/r\)</span> is the rotation of the Sanders kinematics,
+<span class="math notranslate nohighlight">\(\phi_y = -w_{,y} + v/r\)</span>, see <code class="docutils literal notranslate"><span class="pre">theory/shells/cylshell_clpt_sanders</span></code> and
+<code class="docutils literal notranslate"><span class="pre">theory/shells/fsdt_tsdt</span></code>. The Donnell cylinders neglect <span class="math notranslate nohighlight">\(v/r\)</span>
+in the rotation, as their strains do. The area vector <span class="math notranslate nohighlight">\(\mathbf{a} =
+\mathbf{A} \times \mathbf{B}\)</span> is bilinear in the displacement gradients:</p>
+<div class="math notranslate nohighlight" id="equation-fp-area-vector">
+<span class="eqno">(3)<a class="headerlink" href="#equation-fp-area-vector" title="Link to this equation">#</a></span>\[\begin{split}\mathbf{a} = \mathbf{a}_0 + \mathbf{a}_1 + \mathbf{a}_2,
+\qquad
+\mathbf{a}_0 = \begin{Bmatrix} 0 \\ 0 \\ 1 \end{Bmatrix},
+\qquad
+\mathbf{a}_1 = \begin{Bmatrix} -w_{,x} \\ -w_{,y} + k_v v \\
+               u_{,x} + v_{,y} + k_w w \end{Bmatrix},\end{split}\]</div>
+<div class="math notranslate nohighlight" id="equation-fp-area-vector-2">
+<span class="eqno">(4)<a class="headerlink" href="#equation-fp-area-vector-2" title="Link to this equation">#</a></span>\[\begin{split}\mathbf{a}_2 = \begin{Bmatrix}
+    v_{,x} (w_{,y} - k_v v) - w_{,x} (v_{,y} + k_w w) \\
+    w_{,x} u_{,y} - u_{,x} (w_{,y} - k_v v) \\
+    u_{,x} (v_{,y} + k_w w) - v_{,x} u_{,y}
+\end{Bmatrix}\end{split}\]</div>
+<p>The dead part <span class="math notranslate nohighlight">\(\mathbf{a}_0\)</span> is the dead load. The first-order part
+<span class="math notranslate nohighlight">\(\mathbf{a}_1\)</span> contains the rotation of the normal, <span class="math notranslate nohighlight">\((-w_{,x}, -w_{,y} + k_v
+v)\)</span>, and the change of area, <span class="math notranslate nohighlight">\(u_{,x} + v_{,y} + k_w w\)</span>, which is the sum of
+the linear membrane strains <span class="math notranslate nohighlight">\(\varepsilon_{xx} + \varepsilon_{yy}\)</span>.</p>
+</section>
+<section id="truncation-consistent-with-the-strains">
+<h2>Truncation consistent with the strains<a class="headerlink" href="#truncation-consistent-with-the-strains" title="Link to this heading">#</a></h2>
+<p>The strains of all models are of moderate rotations, von Kármán, Donnell or
+Sanders, i.e. with the in-plane gradients <span class="math notranslate nohighlight">\(u_{,x} \sim \varepsilon\)</span> and the
+rotations <span class="math notranslate nohighlight">\(w_{,x} \sim \varepsilon^{1/2}\)</span>. The virtual displacements are
+ordered alike, <span class="math notranslate nohighlight">\(\delta u \sim \varepsilon^{1/2} \delta w\)</span>, such that the
+integrand of Eq. <a class="reference internal" href="#equation-fp-virtual-work">(1)</a>, <span class="math notranslate nohighlight">\(p (a_z \delta w + a_x \delta u +
+a_y \delta v)\)</span>, has:</p>
+<ul class="simple">
+<li><p>from <span class="math notranslate nohighlight">\(\mathbf{a}_0 + \mathbf{a}_1\)</span>: the terms <span class="math notranslate nohighlight">\(p \, \delta w\)</span> and <span class="math notranslate nohighlight">\(p \,
+O(\varepsilon) \, \delta w\)</span>;</p></li>
+<li><p>from <span class="math notranslate nohighlight">\(\mathbf{a}_2\)</span>: the terms <span class="math notranslate nohighlight">\(p \, O(\varepsilon^2) \, \delta w\)</span>, of the
+order of the terms neglected by the strains themselves.</p></li>
+</ul>
+<p>The consistent truncation is therefore the first-order area vector,
+<code class="docutils literal notranslate"><span class="pre">follower=True</span></code> or <code class="docutils literal notranslate"><span class="pre">'linear'</span></code>:</p>
+<div class="math notranslate nohighlight" id="equation-fp-truncation">
+<span class="eqno">(5)<a class="headerlink" href="#equation-fp-truncation" title="Link to this equation">#</a></span>\[\mathbf{a} \approx \mathbf{a}_0 + \mathbf{a}_1\]</div>
+<p>With <code class="docutils literal notranslate"><span class="pre">follower='quadratic'</span></code> the complete area vector of Eq.
+<a class="reference internal" href="#equation-fp-area-vector">(3)</a> is used instead, which is useful to check the
+sensitivity of a result to the truncation.</p>
+</section>
+<section id="force-vector">
+<h2>Force vector<a class="headerlink" href="#force-vector" title="Link to this heading">#</a></h2>
+<p>With the approximation of the displacements by the Ritz constants <span class="math notranslate nohighlight">\(\{c\}\)</span>,
+see <a class="reference internal" href="bardell.html#theory-func-bardell"><span class="std std-ref">Bardell’s Hierarchical Functions</span></a>,</p>
+<div class="math notranslate nohighlight" id="equation-fp-ritz">
+<span class="eqno">(6)<a class="headerlink" href="#equation-fp-ritz" title="Link to this equation">#</a></span>\[u = \{N_u\}^T \{c\}, \qquad v = \{N_v\}^T \{c\}, \qquad
+w = \{N_w\}^T \{c\}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\{N_u\}\)</span>, <span class="math notranslate nohighlight">\(\{N_v\}\)</span> and <span class="math notranslate nohighlight">\(\{N_w\}\)</span> are the vectors of the approximation
+functions of each field, null at the positions of the other degrees of
+freedom, Eq. <a class="reference internal" href="#equation-fp-virtual-work">(1)</a> gives the force vector of the follower
+pressure:</p>
+<div class="math notranslate nohighlight" id="equation-fp-force">
+<span class="eqno">(7)<a class="headerlink" href="#equation-fp-force" title="Link to this equation">#</a></span>\[\{F_p(c)\} = \int_{A_0} p \left( \{N_u\} a_x + \{N_v\} a_y + \{N_w\} a_z
+             \right) dx \, dy\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathbf{a}\)</span> is evaluated at <span class="math notranslate nohighlight">\(\{c\}\)</span> with Eq. <a class="reference internal" href="#equation-fp-truncation">(5)</a>, or
+Eq. <a class="reference internal" href="#equation-fp-area-vector">(3)</a> for <code class="docutils literal notranslate"><span class="pre">'quadratic'</span></code>. In the undeformed state,
+<span class="math notranslate nohighlight">\(\mathbf{a} = \mathbf{a}_0\)</span> and the follower load equals the dead load:</p>
+<div class="math notranslate nohighlight" id="equation-fp-force-reference">
+<span class="eqno">(8)<a class="headerlink" href="#equation-fp-force-reference" title="Link to this equation">#</a></span>\[\{F_p(0)\} = \int_{A_0} p \{N_w\} \, dx \, dy\]</div>
+<p>which is the reference force vector returned by <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_fext()</span></code>,
+see <code class="xref py py-func docutils literal notranslate"><span class="pre">shell_fext()</span></code>. For the first-order area vector <span class="math notranslate nohighlight">\(\{F_p\}\)</span> is affine
+in <span class="math notranslate nohighlight">\(\{c\}\)</span>:</p>
+<div class="math notranslate nohighlight" id="equation-fp-force-affine">
+<span class="eqno">(9)<a class="headerlink" href="#equation-fp-force-affine" title="Link to this equation">#</a></span>\[\{F_p(c)\} = \{F_p(0)\} + [K_p] \{c\}\]</div>
+</section>
+<section id="load-stiffness-matrix">
+<h2>Load stiffness matrix<a class="headerlink" href="#load-stiffness-matrix" title="Link to this heading">#</a></h2>
+<p>The Jacobian of the force vector, the load stiffness, is:</p>
+<div class="math notranslate nohighlight" id="equation-fp-jacobian">
+<span class="eqno">(10)<a class="headerlink" href="#equation-fp-jacobian" title="Link to this equation">#</a></span>\[[K_p] = \frac{\partial \{F_p\}}{\partial \{c\}}, \qquad
+K_{p_{ij}} = \int_{A_0} p \, \mathbf{N}_i \cdot
+             \frac{\partial \mathbf{a}}{\partial c_j} \, dx \, dy\]</div>
+<p>with <span class="math notranslate nohighlight">\(\mathbf{N}_i = (N_{u_i}, N_{v_i}, N_{w_i})\)</span> and, from <span class="math notranslate nohighlight">\(\mathbf{a} =
+\mathbf{A} \times \mathbf{B}\)</span>:</p>
+<div class="math notranslate nohighlight" id="equation-fp-da-dc">
+<span class="eqno">(11)<a class="headerlink" href="#equation-fp-da-dc" title="Link to this equation">#</a></span>\[\frac{\partial \mathbf{a}}{\partial c_j} =
+    \frac{\partial \mathbf{A}}{\partial c_j} \times \mathbf{B}
+    + \mathbf{A} \times \frac{\partial \mathbf{B}}{\partial c_j}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\partial \mathbf{A}/\partial c_j = (N_{u_j,x}, N_{v_j,x},
+N_{w_j,x})\)</span> and <span class="math notranslate nohighlight">\(\partial \mathbf{B}/\partial c_j = (N_{u_j,y}, N_{v_j,y} +
+k_w N_{w_j}, N_{w_j,y} - k_v N_{v_j})\)</span>. For the first-order area vector,
+<span class="math notranslate nohighlight">\(\mathbf{A}\)</span> and <span class="math notranslate nohighlight">\(\mathbf{B}\)</span> are replaced by <span class="math notranslate nohighlight">\(\mathbf{A}_0 = e_x\)</span> and
+<span class="math notranslate nohighlight">\(\mathbf{B}_0 = e_y\)</span> in Eq. <a class="reference internal" href="#equation-fp-da-dc">(11)</a>, <span class="math notranslate nohighlight">\([K_p]\)</span> does not depend on
+<span class="math notranslate nohighlight">\(\{c\}\)</span>, and its blocks between the fields of the rows (<span class="math notranslate nohighlight">\(\delta u, \delta v,
+\delta w\)</span>) and of the columns (<span class="math notranslate nohighlight">\(u, v, w\)</span>) are:</p>
+<div class="math notranslate nohighlight" id="equation-fp-blocks">
+<span class="eqno">(12)<a class="headerlink" href="#equation-fp-blocks" title="Link to this equation">#</a></span>\[\begin{split}[K_p] = \int_{A_0} p \begin{bmatrix}
+    0 &amp; 0 &amp; -\{N_u\}\{N_{w,x}\}^T \\
+    0 &amp; k_v \{N_v\}\{N_v\}^T &amp; -\{N_v\}\{N_{w,y}\}^T \\
+    \{N_w\}\{N_{u,x}\}^T &amp; \{N_w\}\{N_{v,y}\}^T &amp;
+        k_w \{N_w\}\{N_w\}^T
+\end{bmatrix} dx \, dy\end{split}\]</div>
+<p>The matrix returned by <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kCfollower()</span></code> is the contribution to
+the tangent stiffness matrix:</p>
+<div class="math notranslate nohighlight" id="equation-fp-kcfollower">
+<span class="eqno">(13)<a class="headerlink" href="#equation-fp-kcfollower" title="Link to this equation">#</a></span>\[[K_{C_{follower}}] = - \frac{\partial \{F_p\}}{\partial \{c\}} = -[K_p]\]</div>
+<p>such that all the stiffness matrices are additive, see Eq.
+<a class="reference internal" href="#equation-fp-tangent">(16)</a>. For an external pressure on a cylinder with Sanders’ kinematics, <span class="math notranslate nohighlight">\(p &lt; 0\)</span>,
+the block <span class="math notranslate nohighlight">\(-k_v p \{N_v\}\{N_v\}^T\)</span> of <span class="math notranslate nohighlight">\([K_{C_{follower}}]\)</span> is positive
+definite, the stiffening that cancels the destabilizing hoop prestress of the
+rigid rotation, see <a class="reference internal" href="#follower-pressure-ring"><span class="std std-ref">Ring under uniform pressure</span></a>.</p>
+</section>
+<section id="internal-force-vector-residual-and-tangent-stiffness">
+<h2>Internal force vector, residual and tangent stiffness<a class="headerlink" href="#internal-force-vector-residual-and-tangent-stiffness" title="Link to this heading">#</a></h2>
+<p>The pressures of the loads added with <code class="docutils literal notranslate"><span class="pre">cte=False</span></code> are multiplied by the
+load factor <span class="math notranslate nohighlight">\(\lambda\)</span>, <code class="docutils literal notranslate"><span class="pre">inc</span></code>, and those with <code class="docutils literal notranslate"><span class="pre">cte=True</span></code> are constant.
+Writing <span class="math notranslate nohighlight">\(\{F_p(c)\}\)</span> for the sum over the follower loads with their
+multipliers, the residual of the equilibrium is:</p>
+<div class="math notranslate nohighlight" id="equation-fp-residual">
+<span class="eqno">(14)<a class="headerlink" href="#equation-fp-residual" title="Link to this equation">#</a></span>\[\{R(c, \lambda)\} = \{F_{ext}(\lambda)\} + \left( \{F_p(c)\} -
+                    \{F_p(0)\} \right) - \{F_{int}^e(c)\}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\{F_{ext}(\lambda)\}\)</span> is <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_fext()</span></code>, which includes the
+reference part <span class="math notranslate nohighlight">\(\{F_p(0)\}\)</span> of the follower loads, and <span class="math notranslate nohighlight">\(\{F_{int}^e(c)\}\)</span> is
+the internal force vector of the strains. <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_fint()</span></code> returns
+the internal force vector with the configuration-dependent part of the
+follower loads:</p>
+<div class="math notranslate nohighlight" id="equation-fp-fint">
+<span class="eqno">(15)<a class="headerlink" href="#equation-fp-fint" title="Link to this equation">#</a></span>\[\{F_{int}(c, \lambda)\} = \{F_{int}^e(c)\} - \left( \{F_p(c)\} -
+                          \{F_p(0)\} \right)\]</div>
+<p>such that <span class="math notranslate nohighlight">\(\{R\} = \{F_{ext}(\lambda)\} - \{F_{int}(c, \lambda)\}\)</span>, the form
+used by <code class="xref py py-class docutils literal notranslate"><span class="pre">structsolve.Analysis</span></code>. The tangent stiffness matrix,
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kT()</span></code>, is its exact Jacobian:</p>
+<div class="math notranslate nohighlight" id="equation-fp-tangent">
+<span class="eqno">(16)<a class="headerlink" href="#equation-fp-tangent" title="Link to this equation">#</a></span>\[[K_T] = \frac{\partial \{F_{int}\}}{\partial \{c\}}
+      = [K_0] + [K_{0L}] + [K_{L0}] + [K_{LL}] + [K_{G_{NL}}]
+        + [K_G(N_0 + N_L)] + [K_{C_{follower}}]\]</div>
+<p>and the derivative of the residual with respect to the load factor, used by
+the arc-length methods, is the load vector of the current configuration,
+<code class="docutils literal notranslate"><span class="pre">calc_fext(inc=1.,</span> <span class="pre">c=c)</span></code> for the loads proportional to <span class="math notranslate nohighlight">\(\lambda\)</span>:</p>
+<div class="math notranslate nohighlight" id="equation-fp-dr-dlambda">
+<span class="eqno">(17)<a class="headerlink" href="#equation-fp-dr-dlambda" title="Link to this equation">#</a></span>\[\frac{\partial \{R\}}{\partial \lambda} = \{F_{ext}(1)\} + \{F_p(c)\} -
+                                         \{F_p(0)\}\]</div>
+<p>From version 0.5.0, <code class="docutils literal notranslate"><span class="pre">structsolve</span></code> passes the load factor to the callables
+that accept the keyword argument <code class="docutils literal notranslate"><span class="pre">inc</span></code> and uses Eq. <a class="reference internal" href="#equation-fp-dr-dlambda">(17)</a> in
+the arc-length methods.</p>
+</section>
+<section id="linear-analyses">
+<h2>Linear analyses<a class="headerlink" href="#linear-analyses" title="Link to this heading">#</a></h2>
+<p><strong>Linear static analysis.</strong> A geometrically linear structure under a
+follower load with the first-order area vector is in equilibrium when
+<span class="math notranslate nohighlight">\([K_0]\{c\} = \{F_p(c)\}\)</span>, i.e., from Eqs. <a class="reference internal" href="#equation-fp-force-affine">(9)</a> and
+<a class="reference internal" href="#equation-fp-kcfollower">(13)</a>:</p>
+<div class="math notranslate nohighlight" id="equation-fp-linear-static">
+<span class="eqno">(18)<a class="headerlink" href="#equation-fp-linear-static" title="Link to this equation">#</a></span>\[\left( [K_0] + [K_{C_{follower}}] \right) \{c\} = \{F_p(0)\}\]</div>
+<p>an unsymmetric linear system in general, solved by
+<code class="docutils literal notranslate"><span class="pre">structsolve.Analysis.static(NLgeom=False)</span></code> when <code class="docutils literal notranslate"><span class="pre">calc_fext</span></code> accepts the
+configuration <code class="docutils literal notranslate"><span class="pre">c</span></code>.</p>
+<p><strong>Linear buckling, static criterion.</strong> With the prestate <span class="math notranslate nohighlight">\(\{c_0\}\)</span> of the
+reference load, the geometric stiffness <span class="math notranslate nohighlight">\([K_G(c_0)]\)</span> and the load stiffness
+both scale with the load factor:</p>
+<div class="math notranslate nohighlight" id="equation-fp-lb">
+<span class="eqno">(19)<a class="headerlink" href="#equation-fp-lb" title="Link to this equation">#</a></span>\[\left( [K_0] + \lambda \left( [K_G(c_0)] + [K_{C_{follower}}] \right)
+\right) \{c\} = \{0\}\]</div>
+<p>solved by <code class="docutils literal notranslate"><span class="pre">structsolve.lb(kC0,</span> <span class="pre">kG</span> <span class="pre">+</span> <span class="pre">kCfollower)</span></code>, which uses the solvers
+of unsymmetric matrices when needed.</p>
+<p><strong>Kinetic criterion.</strong> A non-conservative system may lose stability by
+flutter, which Eq. <a class="reference internal" href="#equation-fp-lb">(19)</a> does not detect: the eigenvalues
+<span class="math notranslate nohighlight">\(\lambda^2 = -\omega^2\)</span> of <span class="math notranslate nohighlight">\(([K_T] + \lambda^2 [M])\{c\} = \{0\}\)</span>, with the
+load stiffness in <span class="math notranslate nohighlight">\([K_T]\)</span>, are real below the critical load and become
+complex conjugate pairs at a flutter load, <code class="docutils literal notranslate"><span class="pre">structsolve.freq</span></code>.</p>
+</section>
+<section id="symmetry-of-the-load-stiffness-matrix">
+<h2>Symmetry of the load stiffness matrix<a class="headerlink" href="#symmetry-of-the-load-stiffness-matrix" title="Link to this heading">#</a></h2>
+<p>For the first-order area vector, <span class="math notranslate nohighlight">\([K_p]\)</span> is the matrix of the bilinear form</p>
+<div class="math notranslate nohighlight" id="equation-fp-bilinear">
+<span class="eqno">(20)<a class="headerlink" href="#equation-fp-bilinear" title="Link to this equation">#</a></span>\[P(\delta, \Delta) = \int_{A_0} p \, \delta\mathbf{u} \cdot
+                    \mathbf{a}_1(\Delta\mathbf{u}) \, dx \, dy\]</div>
+<p>and integrating by parts, the skew part is (verified symbolically by
+<code class="docutils literal notranslate"><span class="pre">check_symmetry</span></code> of <code class="docutils literal notranslate"><span class="pre">follower_pressure.py</span></code>):</p>
+<div class="math notranslate nohighlight" id="equation-fp-skew">
+<span class="eqno">(21)<a class="headerlink" href="#equation-fp-skew" title="Link to this equation">#</a></span>\[P(\delta, \Delta) - P(\Delta, \delta) =
+- \oint_{\partial A_p} p \left[ (\delta u \, \Delta w - \delta w \,
+  \Delta u) n_x + (\delta v \, \Delta w - \delta w \, \Delta v) n_y
+  \right] ds
++ \int_{A_p} \left[ p_{,x} (\delta u \, \Delta w - \delta w \, \Delta u)
+  + p_{,y} (\delta v \, \Delta w - \delta w \, \Delta v) \right]
+  dx \, dy\]</div>
+<p>over the loaded region <span class="math notranslate nohighlight">\(A_p\)</span>, independently of <span class="math notranslate nohighlight">\(k_w\)</span> and <span class="math notranslate nohighlight">\(k_v\)</span>. Therefore
+<span class="math notranslate nohighlight">\([K_{C_{follower}}]\)</span> is symmetric if and only if <span class="math notranslate nohighlight">\(p\)</span> is uniform over the
+whole integration domain and, on each edge, either <span class="math notranslate nohighlight">\(w = 0\)</span> or the
+displacement normal to the edge is zero, <span class="math notranslate nohighlight">\(u\)</span> on the edges <span class="math notranslate nohighlight">\(x = const\)</span> and
+<span class="math notranslate nohighlight">\(v\)</span> on the edges <span class="math notranslate nohighlight">\(y = const\)</span>. This is the case of simply supported or
+clamped panels, of symmetry planes and of closed rings. Free or partially
+restrained edges, patches, whose edges are inside the shell, and a
+non-uniform <span class="math notranslate nohighlight">\(p(x, y)\)</span> give an unsymmetric load stiffness, a non-conservative
+load. This is Table 2 of <a class="reference internal" href="ref.html#schweizerhof1984pressure" id="id10"><span>[schweizerhof1984Pressure]</span></a> for body-attached
+loads, see also <a class="reference internal" href="ref.html#hibbitt1979follower" id="id11"><span>[hibbitt1979Follower]</span></a>. When it is symmetric the load is
+conservative, with the potential</p>
+<div class="math notranslate nohighlight" id="equation-fp-potential">
+<span class="eqno">(22)<a class="headerlink" href="#equation-fp-potential" title="Link to this equation">#</a></span>\[\Pi_p = - \lambda \left( \{F_p(0)\}^T \{c\} + \frac{1}{2} \{c\}^T [K_p]
+        \{c\} \right)\]</div>
+<p>For the quadratic area vector <span class="math notranslate nohighlight">\([K_p]\)</span> depends on <span class="math notranslate nohighlight">\(\{c\}\)</span> and is not
+symmetric in general. A hydrostatic head, a pressure that depends on the
+current position, would add a further term, not implemented.</p>
+</section>
+<section id="load-surface">
+<h2>Load surface<a class="headerlink" href="#load-surface" title="Link to this heading">#</a></h2>
+<p>A pressure <span class="math notranslate nohighlight">\(p\)</span> on the surface <span class="math notranslate nohighlight">\(z = z_p\)</span> of a cylinder, e.g. the outer face
+<span class="math notranslate nohighlight">\(z_p = h/2\)</span> of a thick sandwich, has the resultant <span class="math notranslate nohighlight">\(p (r + z_p)\)</span> per unit
+length of mid-surface arc. With <code class="docutils literal notranslate"><span class="pre">add_pressure_load(...,</span> <span class="pre">zp=zp)</span></code> it is
+applied as</p>
+<div class="math notranslate nohighlight" id="equation-fp-zp">
+<span class="eqno">(23)<a class="headerlink" href="#equation-fp-zp" title="Link to this equation">#</a></span>\[p \left( 1 + \frac{z_p}{r} \right)\]</div>
+<p>per unit mid-surface area, with the direction and the change of area of the
+mid-surface, as in a shallow shell, see <code class="xref py py-func docutils literal notranslate"><span class="pre">pressure_factor()</span></code>. The terms
+of relative order <span class="math notranslate nohighlight">\(z_p \kappa\)</span>, <span class="math notranslate nohighlight">\(\kappa\)</span> the change of curvature, in the
+change of area and the moment of the in-plane components about the
+mid-surface are neglected; for a ring mode <span class="math notranslate nohighlight">\(n\)</span> they are of relative order
+<span class="math notranslate nohighlight">\(n^2 z_p / r\)</span> in the load stiffness. Plates are not affected.</p>
+</section>
+<section id="ring-under-uniform-pressure">
+<span id="follower-pressure-ring"></span><h2>Ring under uniform pressure<a class="headerlink" href="#ring-under-uniform-pressure" title="Link to this heading">#</a></h2>
+<p>For a ring in plane strain, mode <span class="math notranslate nohighlight">\(w = W \cos(n y/r)\)</span>, <span class="math notranslate nohighlight">\(v = V \sin(n y/r)\)</span>,
+membrane prestress <span class="math notranslate nohighlight">\(N_{yy} = p r\)</span> and the CLPT strains of the kernels, the
+second variation of the total potential is</p>
+<div class="math notranslate nohighlight" id="equation-fp-ring">
+<span class="eqno">(24)<a class="headerlink" href="#equation-fp-ring" title="Link to this equation">#</a></span>\[U_2 = \frac{1}{2} \oint \left( A \varepsilon_{yy}^2 + D \kappa_{yy}^2 +
+      N_{yy} \beta_y^2 \right) dy - \frac{1}{2} \oint p \, \mathbf{u}
+      \cdot \mathbf{a}_1(\mathbf{u}) \, dy\]</div>
+<p>with <span class="math notranslate nohighlight">\(\beta_y = w_{,y} - k_v v\)</span>. In the inextensional limit its singularity
+gives <span class="math notranslate nohighlight">\(p_{cr} r^3/D\)</span> (<code class="docutils literal notranslate"><span class="pre">ring_buckling</span></code> in <code class="docutils literal notranslate"><span class="pre">follower_pressure.py</span></code>):</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>kinematics</p></th>
+<th class="head"><p>follower
+(hydrostatic)</p></th>
+<th class="head"><p>dead
+(constant
+direction)</p></th>
+<th class="head"><p>centrally
+directed</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Sanders</p></td>
+<td><p><span class="math notranslate nohighlight">\(-3\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(-4\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(-9/2\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>Donnell</p></td>
+<td><p><span class="math notranslate nohighlight">\(-16/5\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(-4\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(-64/15\)</span></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The Sanders values are the classical ones, see <a class="reference internal" href="ref.html#timoshenko1961stability" id="id12"><span>[timoshenko1961Stability]</span></a>,
+<a class="reference internal" href="ref.html#brush1975buckling" id="id13"><span>[brush1975Buckling]</span></a> and Table 3 of <a class="reference internal" href="ref.html#schweizerhof1984pressure" id="id14"><span>[schweizerhof1984Pressure]</span></a>, and the
+follower value is the hydrostatic
+critical pressure <span class="math notranslate nohighlight">\(3D/r^3\)</span> of the long cylinders, Eq. (66) of
+<a class="reference internal" href="ref.html#nasa2020sp8007" id="id15"><span>[nasa2020SP8007]</span></a>. With the FSDT and the transverse shear stiffness <span class="math notranslate nohighlight">\(S\)</span>, the
+follower load gives <span class="math notranslate nohighlight">\(p_{cr} = 3D/(r^3 (1 + 4D/(S r^2)))\)</span>, the shell formula
+of <a class="reference internal" href="ref.html#han2004sandwichcylinder" id="id16"><span>[han2004SandwichCylinder]</span></a>.</p>
+<p>With Sanders’ kinematics and a dead pressure, the rigid rotation <span class="math notranslate nohighlight">\(v =
+const\)</span>, <span class="math notranslate nohighlight">\(w = 0\)</span>, strain free, has the energy <span class="math notranslate nohighlight">\(\oint N_{yy} (v/r)^2 dy &lt; 0\)</span>
+under an external pressure, a spurious mode at a vanishing critical load
+whenever <span class="math notranslate nohighlight">\(v\)</span> is free at an edge. The follower load stiffness adds <span class="math notranslate nohighlight">\(-\oint p
+\, v^2/r \, dy\)</span>, which cancels it exactly.</p>
+</section>
+<section id="implementation-and-verification">
+<span id="follower-pressure-implementation"></span><h2>Implementation and verification<a class="headerlink" href="#implementation-and-verification" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">theory/shells/follower_pressure/follower_pressure.py</span></code>: the sympy
+derivation of Eqs. <a class="reference internal" href="#equation-fp-area-vector">(3)</a>, <a class="reference internal" href="#equation-fp-force">(7)</a> and
+<a class="reference internal" href="#equation-fp-jacobian">(10)</a> in the notation of the kernels, the symmetry identity
+Eq. <a class="reference internal" href="#equation-fp-skew">(21)</a> and the ring closed forms; <code class="docutils literal notranslate"><span class="pre">write_pyx.py</span></code> writes the
+kernels <code class="docutils literal notranslate"><span class="pre">calc_fext_follower</span></code> (Eq. <a class="reference internal" href="#equation-fp-force">(7)</a>) and
+<code class="docutils literal notranslate"><span class="pre">fkCfollower_num</span></code> (Eq. <a class="reference internal" href="#equation-fp-kcfollower">(13)</a>, assembled in full, not as an
+upper triangle) into every <code class="docutils literal notranslate"><span class="pre">panels/models/&lt;model&gt;_num.pyx</span></code>, integrated
+with <code class="docutils literal notranslate"><span class="pre">nx*ny</span></code> Gauss-Legendre points over each loaded patch, the same
+points as Eq. <a class="reference internal" href="#equation-fp-force-reference">(8)</a> in <code class="xref py py-func docutils literal notranslate"><span class="pre">shell_fext()</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tests/tests_shell/test_follower_pressure.py</span></code>: Eq.
+<a class="reference internal" href="#equation-fp-force-reference">(8)</a>, Taylor tests of Eq. <a class="reference internal" href="#equation-fp-force">(7)</a> against Eq.
+<a class="reference internal" href="#equation-fp-jacobian">(10)</a>, finite-difference Jacobian of Eq. <a class="reference internal" href="#equation-fp-fint">(15)</a> against
+Eq. <a class="reference internal" href="#equation-fp-tangent">(16)</a>, quadratic convergence of Newton-Raphson and Riks,
+the symmetry conditions of Eq. <a class="reference internal" href="#equation-fp-skew">(21)</a> and Eq.
+<a class="reference internal" href="#equation-fp-linear-static">(18)</a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tests/tests_shell/test_follower_pressure_validation.py</span></code> and the
+notebooks of <a class="reference internal" href="ex_follower_pressure.html#ex-follower-pressure"><span class="std std-ref">Follower (hydrostatic) pressure</span></a>: the ring closed forms, finite
+cylinders, <a class="reference internal" href="ref.html#nasa2020sp8007" id="id17"><span>[nasa2020SP8007]</span></a>, <a class="reference internal" href="ref.html#kardomateas1993orthotropic" id="id18"><span>[kardomateas1993Orthotropic]</span></a>,
+<a class="reference internal" href="ref.html#han2004sandwichcylinder" id="id19"><span>[han2004SandwichCylinder]</span></a>, <a class="reference internal" href="ref.html#kardomateas2003sandwich" id="id20"><span>[kardomateas2003Sandwich]</span></a> and
+<a class="reference internal" href="ref.html#schweizerhof1984pressure" id="id21"><span>[schweizerhof1984Pressure]</span></a>.</p></li>
+</ul>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="multidomain_null_space.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Exact connections with the null-space method</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="cohesive_zone.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Cohesive zone model of the multi-domain approach</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#virtual-work-of-the-pressure">Virtual work of the pressure</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#truncation-consistent-with-the-strains">Truncation consistent with the strains</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#force-vector">Force vector</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#load-stiffness-matrix">Load stiffness matrix</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#internal-force-vector-residual-and-tangent-stiffness">Internal force vector, residual and tangent stiffness</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#linear-analyses">Linear analyses</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#symmetry-of-the-load-stiffness-matrix">Symmetry of the load stiffness matrix</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#load-surface">Load surface</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ring-under-uniform-pressure">Ring under uniform pressure</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#implementation-and-verification">Implementation and verification</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="_sources/follower_pressure.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=64cc4de3f052d77215f0"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=64cc4de3f052d77215f0"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2012-2026, Saullo G. P. Castro, Nathan D&#39;Souza.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.22.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
