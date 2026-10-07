@@ -52,10 +52,9 @@ See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
 * version 0.11.0 (2026-10-07)
     - Follower (hydrostatic) pressure loads, `Shell.add_pressure_load(..., follower=True)`, with the unsymmetric load stiffness `kCfollower` in `Shell` and `MultiDomain`
     - Theory documentation, verification tests and validation notebooks of the follower pressure
-    - TSDT uses `Laminate.Dts` and `Laminate.Fts`, requires `composites>=0.9.12` and `structsolve>=0.5.0`
-* version 0.10.0 (2026-09-25)
     - Interactive 3D plots of multi-domain assemblies with plotly, `MultiDomain.plot3d()`
     - Improved Cython and compiler flags
+    - TSDT uses `Laminate.Dts` and `Laminate.Fts`, requires `composites>=0.9.12` and `structsolve>=0.5.0`
 * version 0.9.0 (2026-09-24)
     - Null-space connection, exact, new default, as alternative to penalty-based connection
 * version 0.8.0 (2026-09-23)

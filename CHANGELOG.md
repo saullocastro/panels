@@ -56,16 +56,6 @@
   `nasa_sp8007_external_pressure.ipynb`, with the helpers of
   `notebooks/follower_utils.py`.
 
-### Changed
-
-- The TSDT constitutive matrix `Shell.ABD` uses `Laminate.Dts` and
-  `Laminate.Fts` of `composites`, which replace the deprecated
-  `Laminate.Dtrans` and `Laminate.Ftrans`. The values are the same.
-- Requires `composites>=0.9.12`, the first version with `Laminate.Dts` and
-  `Laminate.Fts`.
-
-## 0.10.0 (2026-09-25)
-
 ### New: interactive 3D plots of multi-domain assemblies
 
 `MultiDomain.plot3d(c)` draws the assembly in 3D with plotly, which is an
@@ -153,6 +143,14 @@ report of `composites`; this was not measured for `panels`. Switching between
 a coverage build and a normal one regenerates the C++ files of the Cython
 modules, which cythonize would otherwise reuse from the other mode, and
 leaves the hand-written sources in `panels/core/src` alone.
+
+### Changed
+
+- The TSDT constitutive matrix `Shell.ABD` uses `Laminate.Dts` and
+  `Laminate.Fts` of `composites`, which replace the deprecated
+  `Laminate.Dtrans` and `Laminate.Ftrans`. The values are the same.
+- Requires `composites>=0.9.12`, the first version with `Laminate.Dts` and
+  `Laminate.Fts`.
 
 ## 0.9.0 (2026-09-24)
 
