@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.11.0 (2026-10-06)
+## 0.11.0 (2026-10-07)
 
 ### New: follower (hydrostatic) pressure loads
 

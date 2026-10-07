@@ -15,8 +15,8 @@ Semi-analytical methods for plates, shells and stiffened panels
 - Linear buckling
 - Vibration, with or without pre-stress
 - Panel flutter using the piston theory
-- Geometrically non-linear static analyses (postbuckling) using the
-  Newton-Raphson method or the arc-length methods of Riks and Crisfield
+- Geometrically non-linear static analyses (postbuckling) using the Newton-Raphson method or the arc-length methods of Riks and Crisfield
+- Dead or follower (hydrostatic) pressure loads, with the unsymmetric load stiffness of the follower pressure
 - Multi-domain assemblies of plates, cylindrical shells, cylinders, stiffened panels, with the domains connected exactly with the null-space method, the default, or by penalty stiffnesses. Debonding defects or cohesive zone can be simulated
 - CLPT, FSDT and TSDT kinematics for plates and cylindrical shells
 - Donnell and Sanders-Koiter kinematics for cylindrical shells
@@ -28,7 +28,7 @@ The structural matrices are solved with
 Citing this library
 ===================
 
-Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.10.0). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
+Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.11.0). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
 
 
 Documentation
@@ -49,6 +49,10 @@ History
 =======
 
 See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
+* version 0.11.0 (2026-10-07)
+    - Follower (hydrostatic) pressure loads, `Shell.add_pressure_load(..., follower=True)`, with the unsymmetric load stiffness `kCfollower` in `Shell` and `MultiDomain`
+    - Theory documentation, verification tests and validation notebooks of the follower pressure
+    - TSDT uses `Laminate.Dts` and `Laminate.Fts`, requires `composites>=0.9.12` and `structsolve>=0.5.0`
 * version 0.10.0 (2026-09-25)
     - Interactive 3D plots of multi-domain assemblies with plotly, `MultiDomain.plot3d()`
     - Improved Cython and compiler flags
