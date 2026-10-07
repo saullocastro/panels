@@ -416,8 +416,9 @@ class MultiDomain(object):
         """
         T = self.get_T()
 
-        def calc_fext(inc=1., silent=True):
-            return T.T @ self.calc_fext(inc=inc, silent=silent)
+        def calc_fext(inc=1., silent=True, c=None):
+            c = None if c is None else T @ c
+            return T.T @ self.calc_fext(inc=inc, silent=silent, c=c)
 
         def calc_fint(c, inc=1., silent=True):
             return T.T @ self.calc_fint(c=T @ c, inc=inc, silent=silent)
@@ -700,6 +701,109 @@ class MultiDomain(object):
         msg('finished!', silent=silent)
 
         return ax, data
+
+
+    def plot3d(self, c, group=None, vec='w', vecs=None, displ='uvw',
+               scale=None, gridx=30, gridy=30, colormap='jet', title='',
+               filename='', show=False, show_undeformed=True,
+               include_plotlyjs=True, silent=True):
+        r"""Interactive 3D plot of the assembly with plotly
+
+        Each domain is placed in the global coordinate system by its
+        attributes ``x0, y0, z0``, the origin, ``point_x``, a point on its
+        `x` axis, and ``point_xy``, a point on its `xy` plane, see
+        :meth:`.Shell.global_frame`. The cylindrical shells are drawn curved,
+        see :meth:`.Shell.global_coords`. The domains are drawn deformed by
+        the displacements `u`, `v` and `w` times a scale factor, and colored
+        by one of the outputs, which is selected in a drop-down menu.
+
+        When the figure is shown in a web page, i.e. with ``filename`` or
+        with ``show=True`` and a renderer of plotly based on HTML, such as
+        ``'browser'`` or ``'notebook'``, controls above the figure toggle
+        the displacements `u`, `v` and `w` and change the scale factor, and
+        while the mouse pointer is over the figure the keys:
+
+        - ``u``, ``v``, ``w``: toggle the displacement
+        - ``+`` and ``-``: multiply and divide the scale factor by 1.5
+        - ``0``: undeformed geometry, with a zero scale factor
+        - ``r``: reset the displacements and the scale factor
+        - ``n`` and ``p``: next and previous output
+        - ``o``: toggle the orthographic and perspective projections
+
+        The renderers without JavaScript, e.g. that of VS Code, keep the
+        drop-down menu of the outputs and the initial deformed geometry.
+
+        Parameters
+        ----------
+        c : np.ndarray
+            The Ritz constants of the assembly, e.g. ``md.expand(c_r)``.
+        group : str, list of str or None, optional
+            The groups of the panels to plot, all the panels if ``None``.
+        vec : str, optional
+            The output initially shown, see :meth:`.plot`.
+        vecs : list of str or None, optional
+            The outputs that can be selected: the displacements ``'u'``,
+            ``'v'``, ``'w'``, ``'phix'``, ``'phiy'``, the strains and the
+            stress resultants, see :meth:`.plot`. If ``None``, all those
+            available for all the plotted panels.
+        displ : str, optional
+            The displacements initially applied to the geometry, any
+            combination of ``'u'``, ``'v'`` and ``'w'``, or ``''`` for the
+            undeformed geometry.
+        scale : float or None, optional
+            Scale factor of the displacements. If ``None``, the largest
+            displacement is drawn with 10 % of the size of the assembly.
+        gridx, gridy : int, optional
+            Number of points along the `x` and `y` axes of each panel.
+        colormap : str, optional
+            A colorscale of plotly, e.g. ``'jet'`` or ``'viridis'``.
+        title : str, optional
+            Title of the figure.
+        filename : str, optional
+            If given, the figure is saved to this HTML file, with the
+            controls of the displacements.
+        show : bool, optional
+            Show the figure with ``fig.show()``.
+        show_undeformed : bool, optional
+            If the edges of the undeformed panels are initially visible, they
+            are toggled in the legend.
+        include_plotlyjs : bool or str, optional
+            See ``plotly.io.write_html``, ``True`` gives a file that works
+            offline, ``'cdn'`` a much smaller one.
+        silent : bool, optional
+            Do not print messages.
+
+        Returns
+        -------
+        fig : plotly.graph_objects.Figure
+            The figure.
+        data : dict
+            With the keys ``'vecs'``, the outputs, ``'vecmin'`` and
+            ``'vecmax'``, dictionaries with the range of each output,
+            ``'scale'``, the scale factor, and ``'post_script'``, the
+            JavaScript of the controls, to show them with
+            ``fig.show(post_script=data['post_script'])`` or
+            ``fig.write_html(filename, post_script=data['post_script'])``.
+
+        Examples
+        --------
+
+        A T-stiffened panel whose flange stands along the global `z` axis,
+        above the line `y = y_s` of the skin::
+
+            flange.x0, flange.y0, flange.z0 = 0., ys, 0.
+            flange.point_x = (1., ys, 0.)
+            flange.point_xy = (0., ys, 1.)
+            fig, data = md.plot3d(c, filename='tstiff.html')
+
+        """
+        from panels.multidomain.plot3d import plot3d
+        return plot3d(self, c, group=group, vec=vec, vecs=vecs, displ=displ,
+                      scale=scale, gridx=gridx, gridy=gridy,
+                      colormap=colormap, title=title, filename=filename,
+                      show=show, show_undeformed=show_undeformed,
+                      include_plotlyjs=include_plotlyjs, silent=silent)
+
 
     def calc_results(self, c, group=None, vec='w', gridx=50, gridy=50,
                      nr_x_gauss = None, nr_y_gauss = None,
@@ -1857,10 +1961,13 @@ class MultiDomain(object):
             Asserts validity of output data and makes the output matrix
             symmetric, should be ``False`` when assemblying.
         inc : float, optional
-            Dummy argument needed for non-linear analyses.
+            Load factor of the incremented follower pressure loads of the
+            panels, see :meth:`.Shell.calc_kCfollower`.
         NLgeom : bool, optional
             If ``True``, the constitutive part of the tangent stiffness matrix
-            at ``c`` is calculated, see :meth:`.Shell.calc_kC`.
+            at ``c`` is calculated, see :meth:`.Shell.calc_kC`, plus the load
+            stiffness of the follower pressure loads of the panels when
+            ``finalize=True``.
 
         """
         size = self.get_size()
@@ -1885,6 +1992,10 @@ class MultiDomain(object):
         kC_conn = self.get_kC_conn(conn=conn, c=c)
 
         kC += kC_conn
+
+        #NOTE unsymmetric, added after the symmetrization, see Shell.calc_kC
+        if NLgeom and finalize:
+            kC = kC + self._calc_kCfollower(c, inc, silent)
 
         self.kC = kC
         msg('finished!', level=2, silent=silent)
@@ -1929,6 +2040,18 @@ class MultiDomain(object):
         return kG
 
 
+    def _calc_kCfollower(self, c, inc, silent):
+        r"""Load stiffness of the follower pressure loads of the panels,
+        unsymmetric, see :meth:`.Shell.calc_kCfollower`"""
+        size = self.get_size()
+        kCf = csr_matrix((size, size))
+        for p in self.panels:
+            if p.has_follower_loads():
+                kCf = kCf + p.calc_kCfollower(c=c, inc=inc, size=size,
+                        row0=p.row_start, col0=p.col_start, silent=silent)
+        return kCf
+
+
     def calc_kM(self, silent=False, finalize=True):
         msg('Calculating kM for assembly...', level=2, silent=silent)
         size = self.get_size()
@@ -1966,6 +2089,9 @@ class MultiDomain(object):
 
         if finalize:
             kT = finalize_symmetric_matrix(kT)
+            #NOTE unsymmetric, added after the symmetrization
+            kT = kT + self._calc_kCfollower(c, 1. if inc is None else inc,
+                                            silent)
         if kC_conn is None:
             kC_conn = self.get_kC_conn(c=c)
         kT += kC_conn
@@ -1983,7 +2109,8 @@ class MultiDomain(object):
         for p in self.panels:
             if p.col_start is None:
                 raise ValueError('Shell attributes "col_start" must be defined!')
-            fint += p.calc_fint(c=c, size=size, col0=p.col_start, silent=silent)
+            fint += p.calc_fint(c=c, size=size, col0=p.col_start, silent=silent,
+                                inc=inc)
         if kC_conn is None:
             kC_conn = self.get_kC_conn(c=c)
         fint += kC_conn*c
@@ -1992,7 +2119,13 @@ class MultiDomain(object):
         return fint
 
 
-    def calc_fext(self, inc=1., silent=True):
+    def calc_fext(self, inc=1., silent=True, c=None):
+        r"""External force vector of the assembly
+
+        With ``c``, the follower pressure loads of the panels are evaluated
+        in this configuration, see :meth:`.Shell.calc_fext`.
+
+        """
         msg('Calculating external forces for assembly...', level=2, silent=silent)
         size = self.get_size()
         fext = 0
@@ -2000,7 +2133,7 @@ class MultiDomain(object):
             if p.col_start is None:
                 raise ValueError('Shell attributes "col_start" must be defined!')
             fext += p.calc_fext(inc=inc, size=size, col0=p.col_start,
-                                silent=silent)
+                                silent=silent, c=c)
         self.fext = fext
         msg('finished!', level=2, silent=silent)
         return fext

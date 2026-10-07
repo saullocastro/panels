@@ -7,6 +7,15 @@ import re
 
 from sanders_exprs import ANALYTICAL, NUMERICAL
 
+#NOTE the follower-pressure kernels, appended to the numerical module
+import importlib.util
+_spec = importlib.util.spec_from_file_location('follower_write_pyx',
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), '..',
+                 'follower_pressure', 'write_pyx.py'))
+_follower = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_follower)
+follower_block = _follower.pyx_block
+
 REPO = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                     '..', '..', '..'))
 
@@ -767,5 +776,8 @@ if __name__ == '__main__':
     with open(os.path.join(REPO, 'panels', 'models', 'cylshell_clpt_sanders.pyx'), 'w', newline='\n') as f:
         f.write(analytical_module())
     with open(os.path.join(REPO, 'panels', 'models', 'cylshell_clpt_sanders_num.pyx'), 'w', newline='\n') as f:
-        f.write(numerical_module())
+        #NOTE the follower-pressure kernels, see
+        #     theory/shells/follower_pressure/write_pyx.py
+        f.write(numerical_module() + '\n\n'
+                + follower_block('cylshell_clpt_sanders'))
     print('written')

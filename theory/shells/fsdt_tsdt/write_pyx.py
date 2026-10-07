@@ -25,6 +25,14 @@ sys.path.insert(0, os.path.join(REPO, 'theory', 'shells', 'fsdt_tsdt'))
 
 import fsdt_tsdt as th
 from panels.dev.matrixtools import pow2mult
+#NOTE the follower-pressure kernels, appended to the numerical modules
+import importlib.util
+_spec = importlib.util.spec_from_file_location('follower_write_pyx',
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), '..',
+                 'follower_pressure', 'write_pyx.py'))
+_follower = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_follower)
+follower_block = _follower.pyx_block
 
 FIELDS = th.FIELDS
 DOF = th.DOF
@@ -1021,7 +1029,9 @@ def calc_fint(double [::1] cs, object Finput, object shell,
            FINT='\n'.join(fint_lines), NE=NE, nl=nl_block(sanders, 16, False)))
 
     with open(os.path.join(REPO, 'panels', 'models', mod + '_num.pyx'), 'w', newline='\n') as f:
-        f.write(with_radius(''.join(NUM), cyl))
+        #NOTE the follower-pressure kernels, see
+        #     theory/shells/follower_pressure/write_pyx.py
+        f.write(with_radius(''.join(NUM), cyl) + '\n\n' + follower_block(model))
     print(model, 'numerical written', time.time() - t0)
 
 

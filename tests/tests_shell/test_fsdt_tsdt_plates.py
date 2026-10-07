@@ -447,8 +447,8 @@ def test_shear_correction_options():
     # the TSDT needs no shear correction
     s = make_plate(TSDT, **kwargs)
     assert np.allclose(s.ABD[9:11, 9:11], Abar)
-    assert np.allclose(s.ABD[9:11, 11:13], s.lam.Dtrans)
-    assert np.allclose(s.ABD[11:13, 11:13], s.lam.Ftrans)
+    assert np.allclose(s.ABD[9:11, 11:13], s.lam.Dts)
+    assert np.allclose(s.ABD[11:13, 11:13], s.lam.Fts)
 
 
 @pytest.mark.parametrize('model', [FSDT, TSDT])
