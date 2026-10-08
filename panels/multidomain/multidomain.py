@@ -1,5 +1,4 @@
 import platform
-import gc
 
 import numpy as np
 from numpy import linspace, reshape
@@ -1923,8 +1922,6 @@ class MultiDomain(object):
         if finalize:
             kC_conn = finalize_symmetric_matrix(kC_conn)
         self.kC_conn = kC_conn
-        #NOTE memory cleanup
-        gc.collect()
 
         return kC_conn
 

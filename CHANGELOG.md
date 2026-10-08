@@ -84,6 +84,19 @@ module `panels.json_io` mirrors `composites.json_io`:
 - Installation in Pyodide, with a browser example saving to `io.BytesIO`
   for download, in the README and the documentation.
 
+### Performance
+
+- Removed the explicit `gc.collect()` after each matrix and internal force
+  vector of `Shell`, `MultiDomain`, `StiffPanelBay`, `BladeStiff1D` and
+  `BladeStiff2D`. The arrays are freed as soon as they are no longer
+  referenced, a full collection only reclaims reference cycles, which Python
+  collects automatically, and it walks every object of the process: it took
+  70 % of the time of the non-linear analysis with the cohesive zone of
+  `tests/multidomain/test_dcb_damage.py`. The memory of 300 repeated
+  calculations of `calc_kC`, `calc_kG` and `calc_fint` is the same with and
+  without it, the memory leak mentioned in the removed comments is no longer
+  observed. `_clear_matrices()` still calls it.
+
 ### Maintenance
 
 - GitHub Actions updated: `actions/checkout@v7`, `actions/setup-python@v7`,

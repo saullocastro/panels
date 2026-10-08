@@ -579,11 +579,6 @@ class StiffPanelBay(object):
         kC = finalize_symmetric_matrix(kC)
         self.kC = kC
 
-        #NOTE forcing Python garbage collector to clean the memory
-        #     it DOES make a difference! There is a memory leak not
-        #     identified, probably in the csr_matrix process
-        gc.collect()
-
         msg('finished!', level=2, silent=silent)
 
         return kC
@@ -627,11 +622,6 @@ class StiffPanelBay(object):
         kG = finalize_symmetric_matrix(kG)
         self.kG = kG
 
-        #NOTE forcing Python garbage collector to clean the memory
-        #     it DOES make a difference! There is a memory leak not
-        #     identified, probably in the csr_matrix process
-        gc.collect()
-
         msg('finished!', level=2, silent=silent)
 
         return kG
@@ -674,11 +664,6 @@ class StiffPanelBay(object):
 
         kM = finalize_symmetric_matrix(kM)
         self.kM = kM
-
-        #NOTE forcing Python garbage collector to clean the memory
-        #     it DOES make a difference! There is a memory leak not
-        #     identified, probably in the csr_matrix process
-        gc.collect()
 
         msg('finished!', level=2, silent=silent)
 
@@ -734,11 +719,6 @@ class StiffPanelBay(object):
         kA = csr_matrix(make_skew_symmetric(kA))
         self.kA = kA
 
-        #NOTE forcing Python garbage collector to clean the memory
-        #     it DOES make a difference! There is a memory leak not
-        #     identified, probably in the csr_matrix process
-        gc.collect()
-
         msg('finished!', level=2, silent=silent)
 
         return kA
@@ -755,11 +735,6 @@ class StiffPanelBay(object):
         p = self.panels[0]
         cA = p.calc_cA(aeromu, size=size, silent=True, finalize=True)
         self.cA = cA
-
-        #NOTE forcing Python garbage collector to clean the memory
-        #     it DOES make a difference! There is a memory leak not
-        #     identified, probably in the csr_matrix process
-        gc.collect()
 
         msg('finished!', level=2, silent=silent)
 

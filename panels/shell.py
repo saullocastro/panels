@@ -915,11 +915,6 @@ class Shell(object):
                         row0=row0, col0=col0, silent=silent)
         self.matrices['kC'] = kC
 
-        #NOTE forcing Python garbage collector to clean the memory
-        #     it DOES make a difference! There is a memory leak not
-        #     identified, probably in the csr_matrix process
-        gc.collect()
-
         msg('finished!', level=2, silent=silent)
 
         return kC
@@ -1001,9 +996,6 @@ class Shell(object):
         if finalize:
             kG = finalize_symmetric_matrix(kG)
         self.matrices['kG'] = kG
-
-        #NOTE memory cleanup
-        gc.collect()
 
         msg('finished!', level=2, silent=silent)
 
@@ -1237,9 +1229,6 @@ class Shell(object):
             kM = finalize_symmetric_matrix(kM)
         self.matrices['kM'] = kM
 
-        #NOTE memory cleanup
-        gc.collect()
-
         msg('finished!', level=2, silent=silent)
 
         return kM
@@ -1339,9 +1328,6 @@ class Shell(object):
             assert np.any(np.isinf(kA.data)) == False
         self.matrices['kA'] = kA
 
-        #NOTE memory cleanup
-        gc.collect()
-
         msg('finished!', level=2, silent=silent)
 
         return kA
@@ -1362,9 +1348,6 @@ class Shell(object):
         if finalize:
             cA = finalize_symmetric_matrix(cA)
         self.matrices['cA'] = cA
-
-        #NOTE memory cleanup
-        gc.collect()
 
         msg('finished!', level=2, silent=silent)
 
@@ -2046,8 +2029,6 @@ class Shell(object):
         if self.has_follower_loads():
             fint = fint - self.calc_fext_follower(c, inc=inc, size=size,
                                                   col0=col0, reference=False)
-
-        gc.collect()
 
         msg('finished!', level=2, silent=silent)
 
