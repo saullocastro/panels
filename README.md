@@ -28,7 +28,7 @@ The structural matrices are solved with
 Citing this library
 ===================
 
-Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.11.0). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
+Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.11.1). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
 
 
 Documentation
@@ -116,7 +116,7 @@ History
 =======
 
 See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
-* unreleased
+* version 0.11.1 (2026-10-08)
     - Saving and loading in a zip file with JSON and NumPy arrays, replacing pickle: `Shell.save()`, `StiffPanelBay.save()`, `MultiDomain.save()`, also to `io.BytesIO`, and `panels.json_io`
     - Pyodide support: `await micropip.install("panels")` in the browser, and the whole test suite runs in Pyodide in GitHub Actions
     - Requires `composites>=0.9.21` and `structsolve>=0.6.1`

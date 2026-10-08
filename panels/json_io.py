@@ -36,7 +36,7 @@ The file is a zip archive, compressed with ``ZIP_DEFLATED``, containing:
       {
         "type": "Shell",
         "format_version": 1,
-        "panels_version": "0.11.0",
+        "panels_version": "0.11.1",
         "data": {...}
       }
 

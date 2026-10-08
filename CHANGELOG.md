@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.11.1 (2026-10-08)
 
 ### Saving and loading in a JSON + NumPy zip file
 
