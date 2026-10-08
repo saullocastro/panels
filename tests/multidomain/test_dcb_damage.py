@@ -28,8 +28,6 @@ import matplotlib
 # Printing with reduced no of points (ease of viewing) - Suppress this to print in scientific notations and restart the kernel
 np.set_printoptions(formatter={'float': lambda x: "{0:0.2f}".format(x)})
 
-from multiprocessing import Pool
-
 import sys
 import time
 

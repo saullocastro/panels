@@ -54,6 +54,36 @@ module `panels.json_io` mirrors `composites.json_io`:
 - Requires `composites>=0.9.21`, which provides `composites.json_io`.
 - Tests in `tests/test_json.py`.
 
+### Pyodide (WebAssembly)
+
+- A WebAssembly wheel for Pyodide 314 (CPython 3.14), tagged
+  `pyemscripten_2026_0_wasm32` (PEP 783), is built with cibuildwheel 4.3.0,
+  tested in Pyodide on every push (new workflow `pyodide.yml`, with the test
+  suite split in three parallel jobs to stay within the 6 h limit of the
+  runners) and published on PyPI on tags (new job `deploy-pyodide` of
+  `pythonpublish.yml`), such
+  that `await micropip.install("panels")` works in the browser. NumPy, SciPy
+  and matplotlib come with Pyodide, `structsolve` is pure Python and
+  `composites` has its WebAssembly wheel on PyPI.
+- `setup.py` detects the Emscripten cross-compilation of `pyodide-build` and
+  builds without OpenMP, with which the `prange` loops of
+  `panels.models.clpt_field` run serially, and without the GCC runtime link
+  flags.
+- The runtime dependencies are declared in `pyproject.toml`: `numpy`,
+  `scipy`, `matplotlib`, `composites>=0.9.21` and `structsolve>=0.6.1`,
+  the first version of structsolve supporting Pyodide.
+  The build requires only `setuptools`, `wheel` and `cython`, since no Cython
+  module cimports NumPy or composites.
+- `out_num_cores` defaults to `os.cpu_count() or 1` instead of
+  `multiprocessing.cpu_count()`, which raises where the number of CPUs is
+  unknown.
+- The unused import of `multiprocessing.Pool` was removed from
+  `tests/multidomain/test_dcb_damage.py`.
+- The tests run with `MPLBACKEND=Agg` in Pyodide.
+- New classifier `Environment :: WebAssembly :: Emscripten`.
+- Installation in Pyodide, with a browser example saving to `io.BytesIO`
+  for download, in the README and the documentation.
+
 ### Maintenance
 
 - Removed the outdated comment that composites laminates cannot be pickled,

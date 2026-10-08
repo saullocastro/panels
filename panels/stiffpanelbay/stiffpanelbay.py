@@ -1,5 +1,5 @@
 import gc
-from multiprocessing import cpu_count
+import os
 
 import numpy as np
 from scipy.sparse import csr_matrix
@@ -133,7 +133,7 @@ class StiffPanelBay(object):
         self.V = None
 
         # output queries
-        self.out_num_cores = cpu_count()
+        self.out_num_cores = os.cpu_count() or 1
 
         self._clear_matrices()
 

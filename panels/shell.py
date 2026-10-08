@@ -1,5 +1,5 @@
 import gc
-from multiprocessing import cpu_count
+import os
 
 import numpy as np
 from scipy.sparse import csr_matrix
@@ -299,7 +299,9 @@ class Shell(object):
         self.num_eigvalues_print = 5
 
         # output queries
-        self.out_num_cores = cpu_count()
+        #NOTE os.cpu_count() may return None, e.g. in WebAssembly (Pyodide),
+        #     where the kernels run serially without OpenMP
+        self.out_num_cores = os.cpu_count() or 1
 
         # outputs
         self.increments = None
