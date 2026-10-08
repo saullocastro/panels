@@ -79,8 +79,8 @@ def test_partial_domain_calc_matrices(model):
         strip.Nxx = -1.
         strip.y1 = y1
         strip.y2 = y2
-        strip.nx = 4*strip.m
-        strip.ny = 4*strip.n
+        #NOTE the default 2*m x 2*n Gauss-Legendre points of a strip already
+        #      integrate exactly the polynomial integrands of the matrices
         assert strip.is_partial_domain()
         kC += strip.calc_kC(silent=True).toarray()
         kG += strip.calc_kG(silent=True).toarray()

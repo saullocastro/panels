@@ -61,10 +61,10 @@ def test_unstiffened_bay_matches_single_shell():
     bay = _bay(nstiff=0)
     bay.panels = []
     b = bay.b
+    #NOTE the default 2*m x 2*n Gauss-Legendre points of each panel already
+    #     integrate exactly the polynomial integrands of the matrices
     for y1, y2 in zip([0, b/3, 2*b/3], [b/3, 2*b/3, b]):
-        p = bay.add_panel(y1=y1, y2=y2, Nxx=-1.)
-        p.nx = 4*p.m
-        p.ny = 4*p.n
+        bay.add_panel(y1=y1, y2=y2, Nxx=-1.)
     eigvals_bay, _ = lb(bay.calc_kC(silent=True), bay.calc_kG(silent=True),
                         silent=True, num_eigvalues=4)
 
