@@ -78,6 +78,10 @@ module `panels.json_io` mirrors `composites.json_io`:
   the first version of structsolve supporting Pyodide.
   The build requires only `setuptools`, `wheel` and `cython`, since no Cython
   module cimports NumPy or composites.
+- Fixed a heap buffer overflow of `panels.models.clpt_field`, harmless on
+  64-bit platforms only: its work arrays of doubles were allocated with the
+  size of pointers, `malloc(NMAX * sizeof(double *))`, half the size needed
+  in WebAssembly, where pointers have 4 bytes, crashing Pyodide.
 - `out_num_cores` defaults to `os.cpu_count() or 1` instead of
   `multiprocessing.cpu_count()`, which raises where the number of CPUs is
   unknown.
