@@ -1,5 +1,64 @@
 # Changelog
 
+## Unreleased
+
+### Saving and loading in a JSON + NumPy zip file
+
+A zip file replaces pickle as the way to save objects to files. The new
+module `panels.json_io` mirrors `composites.json_io`:
+
+- `Shell.save(fname=None)`, `StiffPanelBay.save(fname=None)` and the new
+  `MultiDomain.save(fname=None)` write `<name>.shell.zip`,
+  `<name>.stiffpanelbay.zip` and `<name>.multidomain.zip` by default, or to
+  the given path or binary file object, e.g. `io.BytesIO`, which is how a
+  browser application saves without a file system.
+- `panels.shell.load(name)`, `panels.stiffpanelbay.load(name)` and the new
+  `panels.multidomain.load(name)` accept the name with or without the
+  extension, a path or a binary file object, and check the type of the saved
+  object. `panels.json_io.save(obj, fname)` and `panels.json_io.load(fname)`
+  handle the three classes.
+- New attribute `MultiDomain.name`, also a keyword argument of
+  `MultiDomain`, default `'multidomain'`.
+- The zip file, compressed with `ZIP_DEFLATED`, contains `model.json`, with
+  the envelope `{"type", "format_version", "panels_version", "data"}`, and
+  one `arrays/<key>.npy` member per NumPy array, referenced in the JSON as
+  `{"__ndarray__": "arrays/<key>.npy"}`. The inputs (geometry, `m`, `n`,
+  boundary conditions, `stack`, `plyts`, `laminaprops`, `offset`, loads,
+  names) are stored in JSON, the arrays (`ABD`, `fields`, `plot_mesh`,
+  `results`, `StiffPanelBay.u`, `MultiDomain.dmg_index`, ...) in `.npy`.
+  The laminates, e.g. `Shell.lam` and `BladeStiff1D.flam`, are embedded with
+  `composites.to_dict`. The JSON is strict: `nan` and `inf` are stored as
+  the strings `"NaN"`, `"Infinity"` and `"-Infinity"`.
+- The panels and stiffeners of a `StiffPanelBay` and the panels and
+  connections of a `MultiDomain` are saved with them, and the references to
+  the panels (`panel1`, `panel2`, `p1`, `p2`) are restored as references to
+  the loaded panels.
+- An explicit list of attributes is stored for each class. Saving an
+  attribute whose value is not supported, e.g. the function of a distributed
+  load or of a pressure `p(x, y)`, raises `TypeError` and writes no file. The
+  matrices (`Shell.matrices`, `StiffPanelBay.kC`, `MultiDomain.kC`,
+  `MultiDomain.T`, ...) and the number of threads `out_num_cores` are not
+  stored.
+- `save()` no longer modifies the object: the pickle version cleared its
+  matrices, laminate and field outputs.
+- Loading is safe for files from untrusted sources: the arrays are read with
+  `allow_pickle=False`, the members are read in memory and never extracted,
+  only the members referenced by `model.json` are read, and unknown keys,
+  missing or extra members, object arrays and newer format versions raise
+  `ValueError`.
+- The pickle files `.Shell` and `.StiffPanelBay` of older versions are still
+  loaded, with a `DeprecationWarning` saying that pickle files are unsafe
+  from untrusted sources. Pickling is still supported for `copy.deepcopy`
+  and for passing objects between processes, e.g. with `multiprocessing`,
+  but it is no longer recommended to save objects to files.
+- Requires `composites>=0.9.21`, which provides `composites.json_io`.
+- Tests in `tests/test_json.py`.
+
+### Maintenance
+
+- Removed the outdated comment that composites laminates cannot be pickled,
+  which is no longer true since composites 0.9.2.
+
 ## 0.11.0 (2026-10-07)
 
 ### New: follower (hydrostatic) pressure loads

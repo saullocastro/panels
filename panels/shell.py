@@ -1,5 +1,4 @@
 import gc
-import pickle
 from multiprocessing import cpu_count
 
 import numpy as np
@@ -12,15 +11,29 @@ from structsolve.sparseutils import finalize_symmetric_matrix
 from .logger import msg, warn
 from . import modelDB
 from . shell_fext import shell_fext, pressure_patches
+from . import json_io
 
 DOUBLE = np.float64
 
 
 def load(name):
-    if '.Shell' in name:
-        return pickle.load(open(name, 'rb'))
-    else:
-        return pickle.load(open(name + '.Shell', 'rb'))
+    r"""Load a :class:`.Shell` saved by :meth:`.Shell.save`
+
+    Parameters
+    ----------
+    name : str, path-like or file object
+        Name of the file, with or without the extension ``'.shell.zip'``,
+        or a binary file object opened for reading, e.g.
+        :class:`io.BytesIO`. The pickle files ``'.Shell'`` saved by older
+        versions of panels are also loaded, with a ``DeprecationWarning``,
+        see :mod:`panels.json_io`.
+
+    Returns
+    -------
+    shell : :class:`.Shell`
+
+    """
+    return json_io._load_type(name, 'Shell', ('.shell.zip', '.Shell'))
 
 
 def check_c(c, size):
@@ -2039,20 +2052,24 @@ class Shell(object):
         return fint
 
 
-    def save(self):
-        r"""Save the ``Shell`` object using ``pickle``
+    def save(self, fname=None):
+        r"""Save the ``Shell`` object to a zip file
 
-        Notes
-        -----
-        The pickled file will have the name stored in ``Shell.name``
-        followed by a ``'.Shell'`` extension.
+        The inputs are stored in JSON and the arrays, such as ``ABD`` and the
+        results in ``fields``, in NumPy's ``.npy`` format, see
+        :mod:`panels.json_io`. The matrices in ``Shell.matrices`` are not
+        stored. The object is not modified.
+
+        Parameters
+        ----------
+        fname : str, path-like or file object, optional
+            Name of the file, or a binary file object opened for writing,
+            e.g. :class:`io.BytesIO`. By default the name stored in
+            ``Shell.name`` followed by the extension ``'.shell.zip'``.
 
         """
-        name = self.name + '.Shell'
-        msg('Saving Shell to {}'.format(name))
-
-        self._clear_matrices()
-
-        with open(name, 'wb') as f:
-            pickle.dump(self, f, protocol=pickle.HIGHEST_PROTOCOL)
-
+        if fname is None:
+            fname = self.name + '.shell.zip'
+        if not hasattr(fname, 'write'):
+            msg('Saving Shell to {}'.format(fname))
+        json_io.save(self, fname)

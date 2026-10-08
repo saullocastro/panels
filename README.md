@@ -45,10 +45,33 @@ To get the latest version:
     python -m pip install panels
 
 
+Saving and loading
+==================
+
+`Shell`, `StiffPanelBay` and `MultiDomain` are saved with `save()` to a zip
+file with the inputs in JSON and the arrays, such as the results, in NumPy's
+`.npy` format, see `panels.json_io`. The files are independent of the Python
+version, readable outside Python and safe to load from untrusted sources,
+unlike pickle:
+
+```python
+from panels.shell import load
+s.name = 'plate'
+s.save()              # writes plate.shell.zip
+s2 = load('plate')
+```
+
+The pickle files saved by older versions are still loaded, with a
+`DeprecationWarning`.
+
+
 History
 =======
 
 See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
+* unreleased
+    - Saving and loading in a zip file with JSON and NumPy arrays, replacing pickle: `Shell.save()`, `StiffPanelBay.save()`, `MultiDomain.save()`, also to `io.BytesIO`, and `panels.json_io`
+    - Requires `composites>=0.9.21`
 * version 0.11.0 (2026-10-07)
     - Follower (hydrostatic) pressure loads, `Shell.add_pressure_load(..., follower=True)`, with the unsymmetric load stiffness `kCfollower` in `Shell` and `MultiDomain`
     - Theory documentation, verification tests and validation notebooks of the follower pressure

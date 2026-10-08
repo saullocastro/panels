@@ -8,11 +8,30 @@ from structsolve.sparseutils import finalize_symmetric_matrix
 from matplotlib import pyplot as plt
 
 from scipy.special import roots_legendre
+from panels import json_io
 from panels.logger import msg, warn
 from panels.shell import DOUBLE, check_c, Shell
 import panels.modelDB as modelDB
 from panels.multidomain import connections
 from panels.multidomain.connections import nullspace
+
+
+def load(name):
+    r"""Load a :class:`.MultiDomain` saved by :meth:`.MultiDomain.save`
+
+    Parameters
+    ----------
+    name : str, path-like or file object
+        Name of the file, with or without the extension
+        ``'.multidomain.zip'``, or a binary file object opened for reading,
+        e.g. :class:`io.BytesIO`.
+
+    Returns
+    -------
+    md : :class:`.MultiDomain`
+
+    """
+    return json_io._load_type(name, 'MultiDomain', ('.multidomain.zip', ))
 
 
 def _penalties(connecti, pA, pB, connection_type):
@@ -159,6 +178,8 @@ class MultiDomain(object):
         - ``'penalty'``: with penalty stiffnesses added to the stiffness
           matrix, see :meth:`.get_kC_conn`, solving directly for all the
           Ritz constants
+    name : str, optional
+        Name of the assembly, used by :meth:`.save`.
 
     Notes
     -----
@@ -244,11 +265,13 @@ class MultiDomain(object):
     :func:`.create_cylinder_blade_stiffened`.
 
     """
-    def __init__(self, panels, conn=None, conn_method='null-space'):
+    def __init__(self, panels, conn=None, conn_method='null-space',
+                 name='multidomain'):
         if conn_method not in ('penalty', 'null-space'):
             raise ValueError("conn_method must be 'penalty' or 'null-space', "
                              "got '{0}'".format(conn_method))
         # Initialize the assmbly obj with these values
+        self.name = name
         self.conn = conn
         self.conn_method = conn_method
         self.kC_conn = None
@@ -272,6 +295,29 @@ class MultiDomain(object):
             col0 += _dofs(p)*p.m*p.n
             p.row_end = row0 # This is now the start for the next panel to be assembled
             p.col_end = col0
+
+
+    def save(self, fname=None):
+        r"""Save the :class:`.MultiDomain` object to a zip file
+
+        The panels and the connections are saved with the assembly, see
+        :mod:`panels.json_io`. The matrices, including the null-space basis
+        ``T``, are not stored. The object is not modified.
+
+        Parameters
+        ----------
+        fname : str, path-like or file object, optional
+            Name of the file, or a binary file object opened for writing,
+            e.g. :class:`io.BytesIO`. By default the name stored in
+            ``MultiDomain.name`` followed by the extension
+            ``'.multidomain.zip'``.
+
+        """
+        if fname is None:
+            fname = self.name + '.multidomain.zip'
+        if not hasattr(fname, 'write'):
+            msg('Saving MultiDomain to {0}'.format(fname))
+        json_io.save(self, fname)
 
 
     def get_size(self):

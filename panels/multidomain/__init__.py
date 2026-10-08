@@ -10,7 +10,7 @@ Multi-Domain semi-analytical method (:mod:`panels.multidomain`)
 
 
 """
-from . multidomain import MultiDomain
+from . multidomain import MultiDomain, load
 from . tstiff2d_1stiff_freq import *
 from . tstiff2d_1stiff_compression import *
 from . tstiff2d_1stiff_flutter import *

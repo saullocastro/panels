@@ -346,9 +346,10 @@ def test_save_and_load(tmp_path):
         p.calc_kC()
     bay.name = str(tmp_path / 'bay')
     bay.save()
-    assert bay.kC is None
-    assert all(v is None for p in bay.panels for v in p.matrices.values())
-    for name in (bay.name, bay.name + '.StiffPanelBay'):
+    # the saved object is not modified
+    assert bay.kC is not None
+    assert all(p.matrices['kC'] is not None for p in bay.panels)
+    for name in (bay.name, bay.name + '.stiffpanelbay.zip'):
         bay2 = load(name)
         assert len(bay2.panels) == 2
         assert len(bay2.bladestiff2ds) == 1

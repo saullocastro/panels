@@ -16,3 +16,4 @@ API reference
     multidomain_tstiff2d.rst
     stiffener.rst
     stiffpanelbay.rst
+    json_io.rst

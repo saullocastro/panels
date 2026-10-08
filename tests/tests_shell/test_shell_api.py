@@ -198,12 +198,14 @@ def test_fields_of_plate_with_unset_radius(method):
         assert np.array_equal(unset[k], zero[k])
 
 
+
 def test_save_and_load(tmp_path):
     s = _plate()
     s.calc_kC()
     s.name = str(tmp_path / 'plate')
     s.save()
-    for name in (s.name, s.name + '.Shell'):
+    assert s.matrices['kC'] is not None
+    for name in (s.name, s.name + '.shell.zip'):
         s2 = load(name)
         assert s2.a == s.a and s2.b == s.b
         assert s2.stack == s.stack

@@ -14,6 +14,9 @@ using Bardell's hierarchical functions as approximation functions:
 - :class:`.BladeStiff1D` and :class:`.BladeStiff2D`: blade stiffeners
 - :class:`.StiffPanelBay`: stiffened panel bays
 
+These classes are saved to and loaded from zip files with JSON and NumPy
+arrays, see :mod:`panels.json_io`.
+
 The structural matrices and force vectors of these classes are solved with
 `structsolve <https://github.com/saullocastro/structsolve>`_.
 
