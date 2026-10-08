@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Model database (panels.modelDB) &#8212; panels 0.11.1 documentation</title>
+    <title>Saving and loading in a JSON + NumPy zip container (panels.json_io) &#8212; panels 0.11.1 documentation</title>
   
   
   
@@ -40,12 +40,12 @@
     <script src="_static/documentation_options.js?v=57cbeb03"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'models';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'json_io';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Multi-domain assemblies (panels.multidomain)" href="multidomain.html" />
-    <link rel="prev" title="Contour plots (panels.plot_shell)" href="plot_shell.html" />
+    <link rel="next" title="Bardell’s Hierarchical Functions" href="bardell.html" />
+    <link rel="prev" title="Stiffened panel bays (panels.stiffpanelbay)" href="stiffpanelbay.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
@@ -475,13 +475,13 @@
 <li class="toctree-l1"><a class="reference internal" href="shell.html">Plates and cylindrical shells (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.shell</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="shell_fext.html">External force vector (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.shell_fext</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plot_shell.html">Contour plots (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.plot_shell</span></code>)</a></li>
-<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">Model database (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.modelDB</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Model database (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.modelDB</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multidomain.html">Multi-domain assemblies (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multidomain_cylinder.html">Cylinders modeled as multi-domain assemblies</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multidomain_tstiff2d.html">Panels with a T-stiffener modeled as 2D domains</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stiffener.html">Blade stiffeners (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.stiffener</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stiffpanelbay.html">Stiffened panel bays (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.stiffpanelbay</span></code>)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="json_io.html">Saving and loading in a JSON + NumPy zip container (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.json_io</span></code>)</a></li>
+<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">Saving and loading in a JSON + NumPy zip container (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.json_io</span></code>)</a></li>
 
 
 </ul>
@@ -527,7 +527,7 @@
     
     <li class="breadcrumb-item"><a href="api.html" class="nav-link">API reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Model database (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.modelDB</span></code>)</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Saving and loading in a JSON + NumPy zip container (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.json_io</span></code>)</span></li>
   </ul>
 </nav>
 </div>
@@ -544,9 +544,133 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="model-database-panels-modeldb">
-<h1>Model database (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.modelDB</span></code>)<a class="headerlink" href="#model-database-panels-modeldb" title="Link to this heading">#</a></h1>
+  <section id="saving-and-loading-in-a-json-numpy-zip-container-panels-json-io">
+<span id="module-panels.json_io"></span><h1>Saving and loading in a JSON + NumPy zip container (<a class="reference internal" href="#module-panels.json_io" title="panels.json_io"><code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.json_io</span></code></a>)<a class="headerlink" href="#saving-and-loading-in-a-json-numpy-zip-container-panels-json-io" title="Link to this heading">#</a></h1>
+<p>The objects <code class="xref py py-class docutils literal notranslate"><span class="pre">Shell</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">StiffPanelBay</span></code>, with its stiffeners
+<code class="xref py py-class docutils literal notranslate"><span class="pre">BladeStiff1D</span></code> and <code class="xref py py-class docutils literal notranslate"><span class="pre">BladeStiff2D</span></code>, and <code class="xref py py-class docutils literal notranslate"><span class="pre">MultiDomain</span></code>
+are saved to and loaded from a zip file with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">panels</span><span class="w"> </span><span class="kn">import</span> <span class="n">Shell</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">panels.shell</span><span class="w"> </span><span class="kn">import</span> <span class="n">load</span>
+
+<span class="n">s</span> <span class="o">=</span> <span class="n">Shell</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">stack</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">plyt</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span>
+          <span class="n">laminaprop</span><span class="o">=</span><span class="p">(</span><span class="mf">71e9</span><span class="p">,</span> <span class="mf">0.33</span><span class="p">),</span> <span class="n">m</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">'plate'</span>
+<span class="n">s</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>              <span class="c1"># writes plate.shell.zip</span>
+<span class="n">s2</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s1">'plate'</span><span class="p">)</span>    <span class="c1"># or load('plate.shell.zip')</span>
+</pre></div>
+</div>
+<p>or with the functions <a class="reference internal" href="#panels.json_io.save" title="panels.json_io.save"><code class="xref py py-func docutils literal notranslate"><span class="pre">save()</span></code></a> and <a class="reference internal" href="#panels.json_io.load" title="panels.json_io.load"><code class="xref py py-func docutils literal notranslate"><span class="pre">load()</span></code></a> of this module, which
+handle the three classes. Instead of a file name, both accept a binary file
+object, e.g. <code class="xref py py-class docutils literal notranslate"><span class="pre">io.BytesIO</span></code>, which is how a browser application running
+on Pyodide saves without a file system:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
+<span class="n">buf</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">()</span>
+<span class="n">s</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span>  <span class="c1"># bytes, e.g. offered for download</span>
+</pre></div>
+</div>
+<p>The file is a zip archive, compressed with <code class="docutils literal notranslate"><span class="pre">ZIP_DEFLATED</span></code>, containing:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">model.json</span></code>: the inputs, such as the geometry, the number of terms
+<code class="docutils literal notranslate"><span class="pre">m</span></code> and <code class="docutils literal notranslate"><span class="pre">n</span></code>, the boundary conditions, the stacking sequence, the ply
+thicknesses, the lamina properties and the loads, in the envelope:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"Shell"</span><span class="p">,</span>
+  <span class="s2">"format_version"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+  <span class="s2">"panels_version"</span><span class="p">:</span> <span class="s2">"0.11.1"</span><span class="p">,</span>
+  <span class="s2">"data"</span><span class="p">:</span> <span class="p">{</span><span class="o">...</span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">arrays/&lt;key&gt;.npy</span></code>: every NumPy array, e.g. the constitutive matrix
+<code class="docutils literal notranslate"><span class="pre">ABD</span></code> and the results <code class="docutils literal notranslate"><span class="pre">fields</span></code> or <code class="docutils literal notranslate"><span class="pre">results['eigvecs']</span></code>, written by
+<code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.save()</span></code> with <code class="docutils literal notranslate"><span class="pre">allow_pickle=False</span></code>. In <code class="docutils literal notranslate"><span class="pre">model.json</span></code> an array
+is replaced by <code class="docutils literal notranslate"><span class="pre">{&quot;__ndarray__&quot;:</span> <span class="pre">&quot;arrays/&lt;key&gt;.npy&quot;}</span></code>.</p></li>
+</ul>
+<p>The laminates, e.g. <code class="xref py py-attr docutils literal notranslate"><span class="pre">Shell.lam</span></code>, are embedded in <code class="docutils literal notranslate"><span class="pre">model.json</span></code> with
+<code class="xref py py-func docutils literal notranslate"><span class="pre">composites.to_dict()</span></code>. The JSON is strict, readable by <code class="docutils literal notranslate"><span class="pre">JSON.parse</span></code> in
+JavaScript: the floats <code class="docutils literal notranslate"><span class="pre">nan</span></code>, <code class="docutils literal notranslate"><span class="pre">inf</span></code> and <code class="docutils literal notranslate"><span class="pre">-inf</span></code> are stored as the
+strings <code class="docutils literal notranslate"><span class="pre">&quot;NaN&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;Infinity&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;-Infinity&quot;</span></code>. Tuples are loaded as
+lists and NumPy scalars as Python <code class="docutils literal notranslate"><span class="pre">int</span></code> or <code class="docutils literal notranslate"><span class="pre">float</span></code>.</p>
+<p>Only an explicit list of attributes of each class is stored, such that the
+format does not depend on implementation details. Saving an attribute whose
+value is not supported raises <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>, e.g. the functions of the
+distributed loads <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_distr_load_fixed_x()</span></code> or of a pressure
+<code class="docutils literal notranslate"><span class="pre">p(x,</span> <span class="pre">y)</span></code>. The following are not stored and are recomputed on demand: the
+structural matrices (<code class="docutils literal notranslate"><span class="pre">Shell.matrices</span></code>, <code class="docutils literal notranslate"><span class="pre">StiffPanelBay.kC</span></code>,
+<code class="docutils literal notranslate"><span class="pre">MultiDomain.kC</span></code>, <code class="docutils literal notranslate"><span class="pre">MultiDomain.T</span></code>, …), the number of threads
+<code class="docutils literal notranslate"><span class="pre">out_num_cores</span></code>, which takes the default of the machine that loads the
+file, and the attributes of Python subclasses, the loaded object having the
+type of the base class.</p>
+<p>Loading is safe for files from untrusted sources, unlike pickle: the arrays
+are read with <code class="docutils literal notranslate"><span class="pre">allow_pickle=False</span></code>, the members are read in memory and
+never extracted, only the members referenced by <code class="docutils literal notranslate"><span class="pre">model.json</span></code> are read,
+after checking that their uncompressed sizes do not exceed <code class="docutils literal notranslate"><span class="pre">max_size</span></code> in
+total, and unknown keys, missing or extra members and newer format versions
+raise <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>.</p>
+<p>The pickle files written by older versions of panels are not loaded, since a
+pickle file can execute arbitrary code. One from a trusted source can be
+converted by loading it with <code class="xref py py-func docutils literal notranslate"><span class="pre">pickle.load()</span></code> and saving the object again.</p>
 </section>
+<dl class="py function">
+<dt class="sig sig-object py" id="panels.json_io.save">
+<span class="sig-prename descclassname"><span class="pre">panels.json_io.</span></span><span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.json_io.save" title="Link to this definition">#</a></dt>
+<dd><p>Save an object to a zip file</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>obj</strong><span class="classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">Shell</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">StiffPanelBay</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">MultiDomain</span></code></span></dt><dd><p>The object to be saved. It is not modified.</p>
+</dd>
+<dt><strong>fname</strong><span class="classifier">str, path-like or file object</span></dt><dd><p>Name of the file, or a binary file object opened for writing, e.g.
+<code class="xref py py-class docutils literal notranslate"><span class="pre">io.BytesIO</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>TypeError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">obj</span></code> is not one of the supported classes, or if one of its
+stored attributes has a value that cannot be saved, e.g. a function.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="panels.json_io.load">
+<span class="sig-prename descclassname"><span class="pre">panels.json_io.</span></span><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4294967296</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.json_io.load" title="Link to this definition">#</a></dt>
+<dd><p>Load an object from a zip file created by <a class="reference internal" href="#panels.json_io.save" title="panels.json_io.save"><code class="xref py py-func docutils literal notranslate"><span class="pre">save()</span></code></a></p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>fname</strong><span class="classifier">str, path-like or file object</span></dt><dd><p>Name of the file, or a binary file object opened for reading, e.g.
+<code class="xref py py-class docutils literal notranslate"><span class="pre">io.BytesIO</span></code>.</p>
+</dd>
+<dt><strong>max_size</strong><span class="classifier">int, optional</span></dt><dd><p>Maximum total uncompressed size of the members read, in bytes, 4 GiB
+by default. It is checked before reading, against the sizes declared
+in the zip file.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>obj</strong><span class="classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">Shell</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">StiffPanelBay</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">MultiDomain</span></code></span></dt><dd><p>The object.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>If the file is not a zip file saved by panels, e.g. a pickle file of
+an older version, is not valid, has unknown keys, missing or extra
+members, exceeds <code class="docutils literal notranslate"><span class="pre">max_size</span></code>, or was saved by a newer format
+version.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
 
 
                 </article>
@@ -559,20 +683,20 @@
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="plot_shell.html"
+       href="stiffpanelbay.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Contour plots (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.plot_shell</span></code>)</p>
+        <p class="prev-next-title">Stiffened panel bays (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.stiffpanelbay</span></code>)</p>
       </div>
     </a>
     <a class="right-next"
-       href="multidomain.html"
+       href="bardell.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Multi-domain assemblies (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain</span></code>)</p>
+        <p class="prev-next-title">Bardell’s Hierarchical Functions</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -588,9 +712,24 @@
 
 
   <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Saving and loading in a JSON + NumPy zip container (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.json_io</span></code>)</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.json_io.save"><code class="docutils literal notranslate"><span class="pre">save()</span></code></a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#panels.json_io.load"><code class="docutils literal notranslate"><span class="pre">load()</span></code></a></li>
+</ul>
+
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
 
   <div class="tocsection sourcelink">
-    <a href="_sources/models.rst.txt">
+    <a href="_sources/json_io.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Semi-analytical methods for plates, shells and stiffened panels - panels &#8212; panels 0.11.0 documentation</title>
+    <title>Semi-analytical methods for plates, shells and stiffened panels - panels &#8212; panels 0.11.1 documentation</title>
   
   
   
@@ -26,18 +26,18 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=64cc4de3f052d77215f0" rel="stylesheet" />
-<link href="_static/styles/pydata-sphinx-theme.css?digest=64cc4de3f052d77215f0" rel="stylesheet" />
+  <link href="_static/styles/theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="_static/scripts/fontawesome.js?digest=64cc4de3f052d77215f0"></script>
+  <script defer src="_static/scripts/fontawesome.js?digest=18bd87630a240e9c25be"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=64cc4de3f052d77215f0" />
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=64cc4de3f052d77215f0" />
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
 
-    <script src="_static/documentation_options.js?v=f3b36f1a"></script>
+    <script src="_static/documentation_options.js?v=57cbeb03"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'index';</script>
@@ -46,8 +46,9 @@
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Linear static analysis" href="ex_linear_static.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.11.0" />
+  <meta name="docsearch:version" content="0.11.1" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -115,7 +116,7 @@
   
   
   
-    <p class="title logo__title">panels 0.11.0 documentation</p>
+    <p class="title logo__title">panels 0.11.1 documentation</p>
   
 </a></div>
     
@@ -540,7 +541,7 @@ Sanders-Koiter’s kinematics</p></li>
 </section>
 <section id="citing-this-library">
 <h2>Citing this library<a class="headerlink" href="#citing-this-library" title="Link to this heading">#</a></h2>
-<p>Saullo G. P. Castro, Nathan D’Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.11.0). Zenodo. DOI: <a class="reference external" href="https://doi.org/10.5281/zenodo.2541522">https://doi.org/10.5281/zenodo.2541522</a>.</p>
+<p>Saullo G. P. Castro, Nathan D’Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.11.1). Zenodo. DOI: <a class="reference external" href="https://doi.org/10.5281/zenodo.2541522">https://doi.org/10.5281/zenodo.2541522</a>.</p>
 </section>
 <section id="usage-examples">
 <h2>Usage examples<a class="headerlink" href="#usage-examples" title="Link to this heading">#</a></h2>
@@ -573,6 +574,9 @@ Sanders-Koiter’s kinematics</p></li>
 <li class="toctree-l2"><a class="reference internal" href="multidomain_tstiff2d.html">Panels with a T-stiffener modeled as 2D domains</a></li>
 <li class="toctree-l2"><a class="reference internal" href="stiffener.html">Blade stiffeners (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.stiffener</span></code>)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="stiffpanelbay.html">Stiffened panel bays (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.stiffpanelbay</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="json_io.html">Saving and loading in a JSON + NumPy zip container (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.json_io</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="json_io.html#panels.json_io.save"><code class="docutils literal notranslate"><span class="pre">save()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="json_io.html#panels.json_io.load"><code class="docutils literal notranslate"><span class="pre">load()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -601,6 +605,46 @@ extensions, using:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="o">.</span>
 </pre></div>
 </div>
+<p>In the browser, with <a class="reference external" href="https://pyodide.org">Pyodide</a> 314 (CPython 3.14),
+which already distributes NumPy, SciPy and matplotlib, the WebAssembly wheel
+published on PyPI is installed with <code class="docutils literal notranslate"><span class="pre">micropip</span></code>, together with
+<code class="docutils literal notranslate"><span class="pre">composites</span></code> and <code class="docutils literal notranslate"><span class="pre">structsolve</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">micropip</span>
+<span class="k">await</span> <span class="n">micropip</span><span class="o">.</span><span class="n">install</span><span class="p">(</span><span class="s2">"panels"</span><span class="p">)</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">structsolve</span><span class="w"> </span><span class="kn">import</span> <span class="n">lb</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">panels.shell</span><span class="w"> </span><span class="kn">import</span> <span class="n">Shell</span><span class="p">,</span> <span class="n">load</span>
+
+<span class="n">s</span> <span class="o">=</span> <span class="n">Shell</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">stack</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">45</span><span class="p">,</span> <span class="o">-</span><span class="mi">45</span><span class="p">,</span> <span class="mi">90</span><span class="p">],</span> <span class="n">plyt</span><span class="o">=</span><span class="mf">0.125e-3</span><span class="p">,</span>
+          <span class="n">laminaprop</span><span class="o">=</span><span class="p">(</span><span class="mf">142.5e9</span><span class="p">,</span> <span class="mf">8.7e9</span><span class="p">,</span> <span class="mf">0.28</span><span class="p">,</span> <span class="mf">5.1e9</span><span class="p">,</span> <span class="mf">5.1e9</span><span class="p">,</span> <span class="mf">3.0e9</span><span class="p">),</span>
+          <span class="n">m</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">s</span><span class="o">.</span><span class="n">Nxx</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.</span>
+<span class="n">eigvals</span><span class="p">,</span> <span class="n">eigvecs</span> <span class="o">=</span> <span class="n">lb</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">calc_kC</span><span class="p">(),</span> <span class="n">s</span><span class="o">.</span><span class="n">calc_kG</span><span class="p">(),</span> <span class="n">silent</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">s</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s1">'eigvals'</span><span class="p">]</span> <span class="o">=</span> <span class="n">eigvals</span>
+<span class="n">s</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s1">'eigvecs'</span><span class="p">]</span> <span class="o">=</span> <span class="n">eigvecs</span>
+
+<span class="c1"># saving to memory, since a web page has no file system</span>
+<span class="n">buf</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">()</span>
+<span class="n">s</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span>
+
+<span class="c1"># offering the file for download</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">js</span><span class="w"> </span><span class="kn">import</span> <span class="n">Blob</span><span class="p">,</span> <span class="n">Object</span><span class="p">,</span> <span class="n">URL</span><span class="p">,</span> <span class="n">document</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyodide.ffi</span><span class="w"> </span><span class="kn">import</span> <span class="n">to_js</span>
+<span class="n">blob</span> <span class="o">=</span> <span class="n">Blob</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">to_js</span><span class="p">([</span><span class="n">data</span><span class="p">]),</span> <span class="n">to_js</span><span class="p">({</span><span class="s1">'type'</span><span class="p">:</span> <span class="s1">'application/zip'</span><span class="p">},</span>
+                                     <span class="n">dict_converter</span><span class="o">=</span><span class="n">Object</span><span class="o">.</span><span class="n">fromEntries</span><span class="p">))</span>
+<span class="n">link</span> <span class="o">=</span> <span class="n">document</span><span class="o">.</span><span class="n">createElement</span><span class="p">(</span><span class="s1">'a'</span><span class="p">)</span>
+<span class="n">link</span><span class="o">.</span><span class="n">href</span> <span class="o">=</span> <span class="n">URL</span><span class="o">.</span><span class="n">createObjectURL</span><span class="p">(</span><span class="n">blob</span><span class="p">)</span>
+<span class="n">link</span><span class="o">.</span><span class="n">download</span> <span class="o">=</span> <span class="s1">'plate.shell.zip'</span>
+<span class="n">link</span><span class="o">.</span><span class="n">click</span><span class="p">()</span>
+
+<span class="c1"># loading the bytes back, e.g. from a file uploaded by the user</span>
+<span class="n">s2</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>In Pyodide the field outputs run serially, without OpenMP. See
+<a class="reference internal" href="json_io.html#module-panels.json_io" title="panels.json_io"><code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.json_io</span></code></a> for the format of the saved files.</p>
 </section>
 <section id="changelog">
 <h2>Changelog<a class="headerlink" href="#changelog" title="Link to this heading">#</a></h2>
@@ -705,8 +749,8 @@ extensions, using:</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="_static/scripts/bootstrap.js?digest=64cc4de3f052d77215f0"></script>
-<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=64cc4de3f052d77215f0"></script>
+  <script defer src="_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -739,7 +783,7 @@ extensions, using:</p>
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.22.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.23.0.
 </p></div>
       
     </div>
