@@ -156,17 +156,14 @@ else: # MAC-OS
     link_args = []
 
 if trace:
-    # NOTE optimized: every traced line is a call to __Pyx_TraceLine() with
-    #      its line number, which the compiler keeps, such that the coverage
-    #      is the same as unoptimized (/Od gave the same report, 30 % slower).
-    #      Without OpenMP, such that the tracing happens in the main thread.
-    #      Since Python 3.12 Cython traces through sys.monitoring by default,
-    #      which the Cython.Coverage plugin cannot follow, hence the legacy
-    #      tracing
-    if os.name == 'nt': # Windows
-        compile_args = ['/O2']
-    else: # MAC-OS or Linux
-        compile_args = ['-O3', '-fno-math-errno']
+    # NOTE the flags of the normal build, without OpenMP, such that the
+    #      tracing happens in the main thread. Every traced line is a call to
+    #      __Pyx_TraceLine() with its line number, which the compiler keeps,
+    #      such that the coverage is the same as unoptimized (/Od gave the
+    #      same report, 30 % slower). Since Python 3.12 Cython traces through
+    #      sys.monitoring by default, which the Cython.Coverage plugin cannot
+    #      follow, hence the legacy tracing
+    compile_args = [arg for arg in compile_args if 'openmp' not in arg]
     link_args = []
     define_macros = [('CYTHON_TRACE_NOGIL', '1'),
                      ('CYTHON_USE_SYS_MONITORING', '0')]
