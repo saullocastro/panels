@@ -4,12 +4,11 @@ on: [push]
 
 jobs:
   build:
-    # NOTE the test suite is split in parts that run in parallel, each
-    #      building the wheel, since it takes about 1 h natively, half of it
-    #      in test_dcb_damage.py, and WebAssembly is slower; a single job
-    #      could exceed the limit of 6 h of the GitHub-hosted runners. The
-    #      paths are given from {project}/tests, such that tests/conftest.py
-    #      is always loaded
+    # NOTE the test suite is split in two parts of similar duration that run
+    #      in parallel, each building the wheel, such that a slower
+    #      WebAssembly run stays well within the limit of 6 h of the
+    #      GitHub-hosted runners. The paths are given from {project}/tests,
+    #      such that tests/conftest.py is always loaded
     strategy:
       fail-fast: false
       matrix:
@@ -22,13 +21,6 @@ jobs:
               {project}/tests --ignore={project}/tests/tests_shell
               --ignore={project}/tests/tests_stiffpanelbay
               --ignore={project}/tests/test_json.py
-              --ignore={project}/tests/multidomain/test_dcb_damage.py
-          - name: dcb_damage
-            pytest-args: >-
-              {project}/tests --ignore={project}/tests/tests_shell
-              --ignore={project}/tests/tests_stiffpanelbay
-              --ignore={project}/tests/test_json.py
-              -k test_dcb_damage
     name: build (${{ matrix.part.name }})
     runs-on: ubuntu-latest
 

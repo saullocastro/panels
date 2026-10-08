@@ -59,7 +59,7 @@ module `panels.json_io` mirrors `composites.json_io`:
 - A WebAssembly wheel for Pyodide 314 (CPython 3.14), tagged
   `pyemscripten_2026_0_wasm32` (PEP 783), is built with cibuildwheel 4.3.0,
   tested in Pyodide on every push (new workflow `pyodide.yml`, with the test
-  suite split in three parallel jobs to stay within the 6 h limit of the
+  suite split in two parallel jobs to stay within the 6 h limit of the
   runners) and published on PyPI on tags (new job `deploy-pyodide` of
   `pythonpublish.yml`), such
   that `await micropip.install("panels")` works in the browser. NumPy, SciPy
@@ -68,7 +68,7 @@ module `panels.json_io` mirrors `composites.json_io`:
 - `setup.py` detects the Emscripten cross-compilation of `pyodide-build` and
   builds without OpenMP, with which the `prange` loops of
   `panels.models.clpt_field` run serially, and without the GCC runtime link
-  flags.
+  flags. A coverage build with line tracing is never made for Emscripten.
 - The runtime dependencies are declared in `pyproject.toml`: `numpy`,
   `scipy`, `matplotlib`, `composites>=0.9.21` and `structsolve>=0.6.1`,
   the first version of structsolve supporting Pyodide.
@@ -114,6 +114,12 @@ module `panels.json_io` mirrors `composites.json_io`:
   `JamesIves/github-pages-deploy-action@v4`.
 - Removed the outdated comment that composites laminates cannot be pickled,
   which is no longer true since composites 0.9.2.
+- The coverage workflow, cancelled at the limit of 6 h of the runners since
+  2026-09-30, runs the test suite in three parallel parts, each uploading its
+  report to Codecov, which waits for the 3 reports (new `codecov.yml`). The
+  coverage build is optimized, `/O2` or `-O3` instead of `/Od` or `-O0`: every
+  traced line being a call with its line number, the coverage report is the
+  same, and the traced tests run 24 % faster.
 
 ## 0.11.0 (2026-10-07)
 

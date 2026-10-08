@@ -1,0 +1,8 @@
+# NOTE the coverage of a commit is uploaded in 3 parts, see
+#      .github/workflows/coverage.yml, the status and the comment wait for
+#      all of them
+codecov:
+  notify:
+    after_n_builds: 3
+comment:
+  after_n_builds: 3

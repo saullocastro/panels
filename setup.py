@@ -134,6 +134,9 @@ trace = ('CYTHON_TRACE_NOGIL' in os.environ.keys()
 emscripten = (os.environ.get('PYODIDE') == '1'
               or sys.platform == 'emscripten'
               or sysconfig.get_platform().startswith('emscripten'))
+# NOTE never a coverage build for WebAssembly: the line tracing would only
+#      slow down the wheel and the tests in Pyodide
+trace = trace and not emscripten
 
 define_macros = []
 if emscripten:
@@ -153,13 +156,17 @@ else: # MAC-OS
     link_args = []
 
 if trace:
-    # NOTE unoptimized, so that every traced line maps to code. Since Python
-    #      3.12 Cython traces through sys.monitoring by default, which the
-    #      Cython.Coverage plugin cannot follow, hence the legacy tracing
+    # NOTE optimized: every traced line is a call to __Pyx_TraceLine() with
+    #      its line number, which the compiler keeps, such that the coverage
+    #      is the same as unoptimized (/Od gave the same report, 30 % slower).
+    #      Without OpenMP, such that the tracing happens in the main thread.
+    #      Since Python 3.12 Cython traces through sys.monitoring by default,
+    #      which the Cython.Coverage plugin cannot follow, hence the legacy
+    #      tracing
     if os.name == 'nt': # Windows
-        compile_args = ['/Od']
+        compile_args = ['/O2']
     else: # MAC-OS or Linux
-        compile_args = ['-O0']
+        compile_args = ['-O3', '-fno-math-errno']
     link_args = []
     define_macros = [('CYTHON_TRACE_NOGIL', '1'),
                      ('CYTHON_USE_SYS_MONITORING', '0')]

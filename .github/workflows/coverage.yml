@@ -4,11 +4,27 @@ on: [push]
 
 jobs:
   build:
-
+    # NOTE the line tracing of the Cython modules makes the tests about 20
+    #      times slower, the suite is split in parts that run in parallel,
+    #      each uploading its report, merged by Codecov, see codecov.yml,
+    #      such that every part stays well within the limit of 6 h of the
+    #      GitHub-hosted runners. The parts take about 10, 6 and 8 min without
+    #      the tracing
     strategy:
+      fail-fast: false
       matrix:
         runs-on: [ubuntu-latest]
         python-version: ['3.13']
+        part:
+          - name: shell
+            pytest-args: tests/tests_shell
+          - name: multidomain-stiffpanelbay
+            pytest-args: >-
+              tests --ignore=tests/tests_shell
+              --ignore=tests/multidomain/test_dcb_damage.py
+          - name: dcb_damage
+            pytest-args: tests/multidomain/test_dcb_damage.py
+    name: build (${{ matrix.part.name }})
     runs-on: ${{ matrix.runs-on }}
 
     steps:
@@ -29,11 +45,12 @@ jobs:
         python setup.py build_ext --inplace --define CYTHON_TRACE_NOGIL
     - name: Test with pytest and coverage report
       run: |
-        coverage run -m pytest tests
+        coverage run -m pytest ${{ matrix.part.pytest-args }}
         coverage report
     - name: "Upload coverage to Codecov"
       uses: codecov/codecov-action@v7
       with:
-        token: ${{ secrets.CODECOV_UPLOAD_TOKEN }} 
+        token: ${{ secrets.CODECOV_UPLOAD_TOKEN }}
+        name: ${{ matrix.part.name }}
         fail_ci_if_error: true
         verbose: true
