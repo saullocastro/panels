@@ -3,7 +3,11 @@ name = "panels"
 requires-python = ">=3.8"
 dynamic = ["version", "authors", "license", "readme", "description",
 "keywords", "classifiers"]
+dependencies = ["numpy", "scipy", "matplotlib", "composites>=0.9.21",
+"structsolve>=0.6.1"]
 
+# NOTE only Cython is needed to build: no Cython module cimports numpy or
+#      composites. Every package listed here must also be resolved when
+#      cross-compiling to WebAssembly, see .github/workflows/pyodide.yml
 [build-system]
-requires = ["setuptools", "wheel", "numpy", "cython", "scipy", "matplotlib",
-"composites>=0.9.12", "structsolve>=0.5.0"]
+requires = ["setuptools", "wheel", "cython"]

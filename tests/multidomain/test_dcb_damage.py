@@ -28,8 +28,6 @@ import matplotlib
 # Printing with reduced no of points (ease of viewing) - Suppress this to print in scientific notations and restart the kernel
 np.set_printoptions(formatter={'float': lambda x: "{0:0.2f}".format(x)})
 
-from multiprocessing import Pool
-
 import sys
 import time
 
@@ -853,13 +851,51 @@ def dcb_damage_prop_no_f_kcrack(phy_dim, nr_terms, k_i=None, tau_o=None, nr_x_ga
     return dmg_index, del_d, kw_tsl, force_intgn, c_all
 
 
-def test_dcb_damage_prop_no_f_kcrack():
+#NOTE reference results of dcb_damage_prop_no_f_kcrack() with the parameters
+#      of the test below, at the end of each increment: the displacement of
+#      the loaded edge [mm], the load [N], the fraction of the Gauss-Legendre
+#      points of the cohesive zone that are fully damaged and the maximum
+#      damage. A coarser cohesive zone, e.g. nr_y_gauss=5, does not converge
+#      after the peak load
+REF_W = np.array([0.01, 1.50496, 2.99992, 3.999893, 4.999867, 5.999846,
+                  6.999834, 7.999823])
+REF_P = np.array([0.3068, 46.1723, 92.039, 122.3813, 151.3491, 163.3487,
+                  150.7351, 139.2826])
+REF_FAILED = np.array([0., 0., 0., 0., 0., 0.1664, 0.384, 0.5408])
+REF_MAX_DMG = np.array([0., 0., 0., 0.3875, 0.7474, 1., 1., 1.])
+
+
+def test_dcb_damage_prop_no_f_kcrack(tmp_path, monkeypatch):
     # p3_70_25_m18_8_ki1e5_tauo67_nx60_ny30_wpts30_G1c112
+    # the driver writes its results to the current directory
+    monkeypatch.chdir(tmp_path)
     dmg_index, del_d, kw_tsl, force_intgn, c_all = dcb_damage_prop_no_f_kcrack(phy_dim=[3,65,25,48],
         nr_terms=[8, 8, 6, 6], name=['test_nokcrack',''], k_i=1e4, tau_o=87, nr_x_gauss=50,
         nr_y_gauss=25, w_iter_info=[10,8], G1c=1.12)
+    w, P = force_intgn.T
+    traction = np.load('Fdmg_test_nokcrack.npy')[:, 1]
+    nr_points = dmg_index.shape[0]*dmg_index.shape[1]
+    failed = (dmg_index == 1).reshape(nr_points, -1).mean(axis=0)
+    max_dmg = dmg_index.reshape(nr_points, -1).max(axis=0)
+
+    # every increment converged, the driver aborts otherwise, leaving the
+    # results of the next increments at zero
+    assert np.allclose(w, REF_W, rtol=1e-4)
+    # equilibrium: the reaction of the prescribed displacement is the area
+    # integral of the tractions of the cohesive zone
+    assert np.allclose(traction, P, rtol=1e-6, atol=1e-6*P.max())
+    # load-displacement curve: linear, then softening once the crack grows
+    assert np.allclose(P, REF_P, rtol=1e-3)
+    assert np.argmax(P) == 5
+    # no damage up to 3 mm, then a growing fully damaged area
+    assert np.all(max_dmg[:3] <= 0.)
+    assert np.allclose(max_dmg, REF_MAX_DMG, atol=1e-3)
+    assert np.allclose(failed, REF_FAILED, atol=0.01)
+    assert np.all(np.diff(failed) >= 0)
 
 
 if __name__ == "__main__":
-    # Single run tests
-    test_dcb_damage_prop_no_f_kcrack()
+    # Single run, the results are written to the current directory
+    dcb_damage_prop_no_f_kcrack(phy_dim=[3,65,25,48], nr_terms=[8, 8, 6, 6],
+        name=['test_nokcrack',''], k_i=1e4, tau_o=87, nr_x_gauss=50,
+        nr_y_gauss=25, w_iter_info=[10,8], G1c=1.12)

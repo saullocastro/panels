@@ -1,12 +1,12 @@
 import gc
-import pickle
-from multiprocessing import cpu_count
+import os
 
 import numpy as np
 from scipy.sparse import csr_matrix
 from numpy import linspace, reshape
 from structsolve.sparseutils import finalize_symmetric_matrix, make_skew_symmetric
 
+from panels import json_io
 from panels.logger import msg
 from panels.shell import Shell, modelDB as panelmDB
 from panels.stiffener import BladeStiff1D, BladeStiff2D
@@ -15,11 +15,26 @@ from panels.stiffener import BladeStiff1D, BladeStiff2D
 DOUBLE = np.float64
 
 
-def load(name):
-    if '.StiffPanelBay' in name:
-        return pickle.load(open(name, 'rb'))
-    else:
-        return pickle.load(open(name + '.StiffPanelBay', 'rb'))
+def load(name, max_size=json_io.MAX_SIZE):
+    r"""Load a :class:`.StiffPanelBay` saved by :meth:`.StiffPanelBay.save`
+
+    Parameters
+    ----------
+    name : str, path-like or file object
+        Name of the file, with or without the extension
+        ``'.stiffpanelbay.zip'``, or a binary file object opened for
+        reading, e.g. :class:`io.BytesIO`.
+    max_size : int, optional
+        Maximum total uncompressed size of the members read, in bytes, 4 GiB
+        by default, see :func:`panels.json_io.load`.
+
+    Returns
+    -------
+    bay : :class:`.StiffPanelBay`
+
+    """
+    return json_io._load_type(name, 'StiffPanelBay', ('.stiffpanelbay.zip', ),
+                              max_size)
 
 
 def _first_not_none(*values):
@@ -119,7 +134,7 @@ class StiffPanelBay(object):
         self.V = None
 
         # output queries
-        self.out_num_cores = cpu_count()
+        self.out_num_cores = os.cpu_count() or 1
 
         self._clear_matrices()
 
@@ -141,8 +156,7 @@ class StiffPanelBay(object):
         for panel in self.panels:
             panel._clear_matrices()
 
-        #NOTE the stiffeners rebuild their laminates before each calculation,
-        #      and composites >= 0.9.0 laminates cannot be pickled
+        #NOTE the stiffeners rebuild their laminates before each calculation
         for s in self.bladestiff1ds:
             s.kC = None
             s.kM = None
@@ -566,11 +580,6 @@ class StiffPanelBay(object):
         kC = finalize_symmetric_matrix(kC)
         self.kC = kC
 
-        #NOTE forcing Python garbage collector to clean the memory
-        #     it DOES make a difference! There is a memory leak not
-        #     identified, probably in the csr_matrix process
-        gc.collect()
-
         msg('finished!', level=2, silent=silent)
 
         return kC
@@ -614,11 +623,6 @@ class StiffPanelBay(object):
         kG = finalize_symmetric_matrix(kG)
         self.kG = kG
 
-        #NOTE forcing Python garbage collector to clean the memory
-        #     it DOES make a difference! There is a memory leak not
-        #     identified, probably in the csr_matrix process
-        gc.collect()
-
         msg('finished!', level=2, silent=silent)
 
         return kG
@@ -661,11 +665,6 @@ class StiffPanelBay(object):
 
         kM = finalize_symmetric_matrix(kM)
         self.kM = kM
-
-        #NOTE forcing Python garbage collector to clean the memory
-        #     it DOES make a difference! There is a memory leak not
-        #     identified, probably in the csr_matrix process
-        gc.collect()
 
         msg('finished!', level=2, silent=silent)
 
@@ -721,11 +720,6 @@ class StiffPanelBay(object):
         kA = csr_matrix(make_skew_symmetric(kA))
         self.kA = kA
 
-        #NOTE forcing Python garbage collector to clean the memory
-        #     it DOES make a difference! There is a memory leak not
-        #     identified, probably in the csr_matrix process
-        gc.collect()
-
         msg('finished!', level=2, silent=silent)
 
         return kA
@@ -742,11 +736,6 @@ class StiffPanelBay(object):
         p = self.panels[0]
         cA = p.calc_cA(aeromu, size=size, silent=True, finalize=True)
         self.cA = cA
-
-        #NOTE forcing Python garbage collector to clean the memory
-        #     it DOES make a difference! There is a memory leak not
-        #     identified, probably in the csr_matrix process
-        gc.collect()
 
         msg('finished!', level=2, silent=silent)
 
@@ -1360,23 +1349,27 @@ class StiffPanelBay(object):
         return ax
 
 
-    def save(self):
-        r"""Save the :class:`StiffPanelBay` object using ``pickle``
+    def save(self, fname=None):
+        r"""Save the :class:`StiffPanelBay` object to a zip file
 
-        Notes
-        -----
-        The pickled file will have the name stored in
-        ``StiffPanelBay.name`` followed by a
-        ``'.StiffPanelBay'`` extension.
+        The panels and stiffeners are saved with the bay, see
+        :mod:`panels.json_io`. The matrices are not stored. The object is not
+        modified.
+
+        Parameters
+        ----------
+        fname : str, path-like or file object, optional
+            Name of the file, or a binary file object opened for writing,
+            e.g. :class:`io.BytesIO`. By default the name stored in
+            ``StiffPanelBay.name`` followed by the extension
+            ``'.stiffpanelbay.zip'``.
 
         """
-        name = self.name + '.StiffPanelBay'
-        msg('Saving StiffPanelBay to {0}'.format(name))
-
-        self._clear_matrices()
-
-        with open(name, 'wb') as f:
-            pickle.dump(self, f, protocol=pickle.HIGHEST_PROTOCOL)
+        if fname is None:
+            fname = self.name + '.stiffpanelbay.zip'
+        if not hasattr(fname, 'write'):
+            msg('Saving StiffPanelBay to {0}'.format(fname))
+        json_io.save(self, fname)
 
 
     def calc_fext(self, silent=False):

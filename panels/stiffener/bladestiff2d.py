@@ -1,4 +1,3 @@
-import gc
 
 from composites import laminated_plate
 from structsolve.sparseutils import finalize_symmetric_matrix
@@ -164,11 +163,6 @@ class BladeStiff2D(object):
             kC = finalize_symmetric_matrix(kC)
         self.kC = kC
 
-        #NOTE forcing Python garbage collector to clean the memory
-        #     it DOES make a difference! There is a memory leak not
-        #     identified, probably in the csr_matrix process
-        gc.collect()
-
         msg('finished!', level=2, silent=silent)
 
 
@@ -191,11 +185,6 @@ class BladeStiff2D(object):
             kG = finalize_symmetric_matrix(kG)
         self.kG = kG
 
-        #NOTE forcing Python garbage collector to clean the memory
-        #     it DOES make a difference! There is a memory leak not
-        #     identified, probably in the csr_matrix process
-        gc.collect()
-
         msg('finished!', level=2, silent=silent)
 
 
@@ -214,11 +203,6 @@ class BladeStiff2D(object):
         if finalize:
             kM = finalize_symmetric_matrix(kM)
         self.kM = kM
-
-        #NOTE forcing Python garbage collector to clean the memory
-        #     it DOES make a difference! There is a memory leak not
-        #     identified, probably in the csr_matrix process
-        gc.collect()
 
         msg('finished!', level=2, silent=silent)
 

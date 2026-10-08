@@ -1,6 +1,5 @@
 import gc
-import pickle
-from multiprocessing import cpu_count
+import os
 
 import numpy as np
 from scipy.sparse import csr_matrix
@@ -12,15 +11,30 @@ from structsolve.sparseutils import finalize_symmetric_matrix
 from .logger import msg, warn
 from . import modelDB
 from . shell_fext import shell_fext, pressure_patches
+from . import json_io
 
 DOUBLE = np.float64
 
 
-def load(name):
-    if '.Shell' in name:
-        return pickle.load(open(name, 'rb'))
-    else:
-        return pickle.load(open(name + '.Shell', 'rb'))
+def load(name, max_size=json_io.MAX_SIZE):
+    r"""Load a :class:`.Shell` saved by :meth:`.Shell.save`
+
+    Parameters
+    ----------
+    name : str, path-like or file object
+        Name of the file, with or without the extension ``'.shell.zip'``,
+        or a binary file object opened for reading, e.g.
+        :class:`io.BytesIO`.
+    max_size : int, optional
+        Maximum total uncompressed size of the members read, in bytes, 4 GiB
+        by default, see :func:`panels.json_io.load`.
+
+    Returns
+    -------
+    shell : :class:`.Shell`
+
+    """
+    return json_io._load_type(name, 'Shell', ('.shell.zip', ), max_size)
 
 
 def check_c(c, size):
@@ -286,7 +300,9 @@ class Shell(object):
         self.num_eigvalues_print = 5
 
         # output queries
-        self.out_num_cores = cpu_count()
+        #NOTE os.cpu_count() may return None, e.g. in WebAssembly (Pyodide),
+        #     where the kernels run serially without OpenMP
+        self.out_num_cores = os.cpu_count() or 1
 
         # outputs
         self.increments = None
@@ -900,11 +916,6 @@ class Shell(object):
                         row0=row0, col0=col0, silent=silent)
         self.matrices['kC'] = kC
 
-        #NOTE forcing Python garbage collector to clean the memory
-        #     it DOES make a difference! There is a memory leak not
-        #     identified, probably in the csr_matrix process
-        gc.collect()
-
         msg('finished!', level=2, silent=silent)
 
         return kC
@@ -986,9 +997,6 @@ class Shell(object):
         if finalize:
             kG = finalize_symmetric_matrix(kG)
         self.matrices['kG'] = kG
-
-        #NOTE memory cleanup
-        gc.collect()
 
         msg('finished!', level=2, silent=silent)
 
@@ -1222,9 +1230,6 @@ class Shell(object):
             kM = finalize_symmetric_matrix(kM)
         self.matrices['kM'] = kM
 
-        #NOTE memory cleanup
-        gc.collect()
-
         msg('finished!', level=2, silent=silent)
 
         return kM
@@ -1324,9 +1329,6 @@ class Shell(object):
             assert np.any(np.isinf(kA.data)) == False
         self.matrices['kA'] = kA
 
-        #NOTE memory cleanup
-        gc.collect()
-
         msg('finished!', level=2, silent=silent)
 
         return kA
@@ -1347,9 +1349,6 @@ class Shell(object):
         if finalize:
             cA = finalize_symmetric_matrix(cA)
         self.matrices['cA'] = cA
-
-        #NOTE memory cleanup
-        gc.collect()
 
         msg('finished!', level=2, silent=silent)
 
@@ -2032,27 +2031,29 @@ class Shell(object):
             fint = fint - self.calc_fext_follower(c, inc=inc, size=size,
                                                   col0=col0, reference=False)
 
-        gc.collect()
-
         msg('finished!', level=2, silent=silent)
 
         return fint
 
 
-    def save(self):
-        r"""Save the ``Shell`` object using ``pickle``
+    def save(self, fname=None):
+        r"""Save the ``Shell`` object to a zip file
 
-        Notes
-        -----
-        The pickled file will have the name stored in ``Shell.name``
-        followed by a ``'.Shell'`` extension.
+        The inputs are stored in JSON and the arrays, such as ``ABD`` and the
+        results in ``fields``, in NumPy's ``.npy`` format, see
+        :mod:`panels.json_io`. The matrices in ``Shell.matrices`` are not
+        stored. The object is not modified.
+
+        Parameters
+        ----------
+        fname : str, path-like or file object, optional
+            Name of the file, or a binary file object opened for writing,
+            e.g. :class:`io.BytesIO`. By default the name stored in
+            ``Shell.name`` followed by the extension ``'.shell.zip'``.
 
         """
-        name = self.name + '.Shell'
-        msg('Saving Shell to {}'.format(name))
-
-        self._clear_matrices()
-
-        with open(name, 'wb') as f:
-            pickle.dump(self, f, protocol=pickle.HIGHEST_PROTOCOL)
-
+        if fname is None:
+            fname = self.name + '.shell.zip'
+        if not hasattr(fname, 'write'):
+            msg('Saving Shell to {}'.format(fname))
+        json_io.save(self, fname)

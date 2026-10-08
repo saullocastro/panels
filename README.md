@@ -45,10 +45,81 @@ To get the latest version:
     python -m pip install panels
 
 
+Running in the browser with Pyodide
+===================================
+
+A WebAssembly wheel is published on PyPI for [Pyodide](https://pyodide.org)
+314 (CPython 3.14), such that `panels` runs in the browser, e.g. in
+JupyterLite or in a web page with Pyodide. NumPy, SciPy and matplotlib come
+with Pyodide, and `micropip` installs `composites` and `structsolve` from PyPI:
+
+```python
+import micropip
+await micropip.install("panels")
+
+import io
+from structsolve import lb
+from panels.shell import Shell, load
+
+s = Shell(a=0.6, b=0.4, stack=[0, 45, -45, 90], plyt=0.125e-3,
+          laminaprop=(142.5e9, 8.7e9, 0.28, 5.1e9, 5.1e9, 3.0e9), m=10, n=10)
+s.Nxx = -1.
+eigvals, eigvecs = lb(s.calc_kC(), s.calc_kG(), silent=True)
+print('critical load: Nxx = %1.2f N/m' % -eigvals[0])
+s.results['eigvals'] = eigvals
+s.results['eigvecs'] = eigvecs
+
+# saving to memory, since a web page has no file system
+buf = io.BytesIO()
+s.save(buf)
+data = buf.getvalue()
+
+# offering the file for download
+from js import Blob, Object, URL, document
+from pyodide.ffi import to_js
+blob = Blob.new(to_js([data]), to_js({'type': 'application/zip'},
+                                     dict_converter=Object.fromEntries))
+link = document.createElement('a')
+link.href = URL.createObjectURL(blob)
+link.download = 'plate.shell.zip'
+link.click()
+
+# loading the bytes back, e.g. from a file uploaded by the user
+s2 = load(io.BytesIO(data))
+```
+
+In Pyodide the field outputs run serially, without OpenMP.
+
+
+Saving and loading
+==================
+
+`Shell`, `StiffPanelBay` and `MultiDomain` are saved with `save()` to a zip
+file with the inputs in JSON and the arrays, such as the results, in NumPy's
+`.npy` format, see `panels.json_io`. The files are independent of the Python
+version, readable outside Python and safe to load from untrusted sources,
+unlike pickle:
+
+```python
+from panels.shell import load
+s.name = 'plate'
+s.save()              # writes plate.shell.zip
+s2 = load('plate')
+```
+
+The pickle files saved by older versions are no longer loaded, since a pickle
+file can execute arbitrary code; one from a trusted source can be converted
+by loading it with `pickle.load()` and saving the object again.
+
+
 History
 =======
 
 See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
+* unreleased
+    - Saving and loading in a zip file with JSON and NumPy arrays, replacing pickle: `Shell.save()`, `StiffPanelBay.save()`, `MultiDomain.save()`, also to `io.BytesIO`, and `panels.json_io`
+    - Pyodide support: `await micropip.install("panels")` in the browser, and the whole test suite runs in Pyodide in GitHub Actions
+    - Requires `composites>=0.9.21` and `structsolve>=0.6.1`
 * version 0.11.0 (2026-10-07)
     - Follower (hydrostatic) pressure loads, `Shell.add_pressure_load(..., follower=True)`, with the unsymmetric load stiffness `kCfollower` in `Shell` and `MultiDomain`
     - Theory documentation, verification tests and validation notebooks of the follower pressure

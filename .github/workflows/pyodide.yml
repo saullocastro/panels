@@ -1,0 +1,59 @@
+name: pyodide
+
+on: [push]
+
+jobs:
+  build:
+    # NOTE the test suite is split in two parts of similar duration that run
+    #      in parallel, each building the wheel, such that a slower
+    #      WebAssembly run stays well within the limit of 6 h of the
+    #      GitHub-hosted runners. The paths are given from {project}/tests,
+    #      such that tests/conftest.py is always loaded
+    strategy:
+      fail-fast: false
+      matrix:
+        part:
+          - name: shell
+            pytest-args: >-
+              {project}/tests --ignore={project}/tests/multidomain
+          - name: multidomain
+            pytest-args: >-
+              {project}/tests --ignore={project}/tests/tests_shell
+              --ignore={project}/tests/tests_stiffpanelbay
+              --ignore={project}/tests/test_json.py
+    name: build (${{ matrix.part.name }})
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Set up Python
+      uses: actions/setup-python@v7
+      with:
+        python-version: '3.14'
+
+    - name: Install cibuildwheel
+      run: |
+        pipx install cibuildwheel==4.3.0
+
+    # NOTE cp314-pyodide_wasm32 targets Pyodide 314 (CPython 3.14), whose
+    #      wheels are tagged pyemscripten_2026_0_wasm32 (PEP 783) and are
+    #      accepted by PyPI. The tests run in Node.js with Pyodide; numpy,
+    #      scipy and matplotlib come with Pyodide, structsolve is pure Python
+    #      and composites has its WebAssembly wheel on PyPI (>= 0.9.21)
+    - name: Build and test the WebAssembly wheel
+      env:
+        CIBW_PLATFORM: pyodide
+        CIBW_BUILD: cp314-pyodide_wasm32
+        CIBW_TEST_REQUIRES: pytest plotly
+        CIBW_TEST_ENVIRONMENT: MPLBACKEND=Agg
+        CIBW_TEST_COMMAND: python -m pytest ${{ matrix.part.pytest-args }}
+      run: |
+        cibuildwheel --output-dir dist
+
+    - name: Upload the WebAssembly wheel
+      if: matrix.part.name == 'shell'
+      uses: actions/upload-artifact@v7
+      with:
+        name: pyodide-wheel
+        path: dist/*.whl

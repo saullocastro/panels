@@ -1,5 +1,134 @@
 # Changelog
 
+## Unreleased
+
+### Saving and loading in a JSON + NumPy zip file
+
+A zip file replaces pickle as the way to save objects to files. The new
+module `panels.json_io` mirrors `composites.json_io`:
+
+- `Shell.save(fname=None)`, `StiffPanelBay.save(fname=None)` and the new
+  `MultiDomain.save(fname=None)` write `<name>.shell.zip`,
+  `<name>.stiffpanelbay.zip` and `<name>.multidomain.zip` by default, or to
+  the given path or binary file object, e.g. `io.BytesIO`, which is how a
+  browser application saves without a file system.
+- `panels.shell.load(name)`, `panels.stiffpanelbay.load(name)` and the new
+  `panels.multidomain.load(name)` accept the name with or without the
+  extension, a path or a binary file object, and check the type of the saved
+  object. `panels.json_io.save(obj, fname)` and `panels.json_io.load(fname)`
+  handle the three classes.
+- New attribute `MultiDomain.name`, also a keyword argument of
+  `MultiDomain`, default `'multidomain'`.
+- The zip file, compressed with `ZIP_DEFLATED`, contains `model.json`, with
+  the envelope `{"type", "format_version", "panels_version", "data"}`, and
+  one `arrays/<key>.npy` member per NumPy array, referenced in the JSON as
+  `{"__ndarray__": "arrays/<key>.npy"}`. The inputs (geometry, `m`, `n`,
+  boundary conditions, `stack`, `plyts`, `laminaprops`, `offset`, loads,
+  names) are stored in JSON, the arrays (`ABD`, `fields`, `plot_mesh`,
+  `results`, `StiffPanelBay.u`, `MultiDomain.dmg_index`, ...) in `.npy`.
+  The laminates, e.g. `Shell.lam` and `BladeStiff1D.flam`, are embedded with
+  `composites.to_dict`. The JSON is strict: `nan` and `inf` are stored as
+  the strings `"NaN"`, `"Infinity"` and `"-Infinity"`.
+- The panels and stiffeners of a `StiffPanelBay` and the panels and
+  connections of a `MultiDomain` are saved with them, and the references to
+  the panels (`panel1`, `panel2`, `p1`, `p2`) are restored as references to
+  the loaded panels.
+- An explicit list of attributes is stored for each class. Saving an
+  attribute whose value is not supported, e.g. the function of a distributed
+  load or of a pressure `p(x, y)`, raises `TypeError` and writes no file. The
+  matrices (`Shell.matrices`, `StiffPanelBay.kC`, `MultiDomain.kC`,
+  `MultiDomain.T`, ...) and the number of threads `out_num_cores` are not
+  stored.
+- `save()` no longer modifies the object: the pickle version cleared its
+  matrices, laminate and field outputs.
+- Loading is safe for files from untrusted sources: the arrays are read with
+  `allow_pickle=False`, the members are read in memory and never extracted,
+  only the members referenced by `model.json` are read, after checking that
+  their uncompressed sizes declared in the zip file do not exceed the new
+  argument `max_size` of the functions `load`, 4 GiB by default, and unknown
+  keys, missing or extra members, object arrays and newer format versions
+  raise `ValueError`.
+- The pickle files `.Shell` and `.StiffPanelBay` of older versions are no
+  longer loaded, since a pickle file can execute arbitrary code: `load()`
+  raises `ValueError` for any file that is not a zip file saved by panels.
+  One from a trusted source can be converted by loading it with
+  `pickle.load()` and saving the object again. Pickling is still supported
+  for `copy.deepcopy` and for passing objects between processes, e.g. with
+  `multiprocessing`.
+- Requires `composites>=0.9.21`, which provides `composites.json_io`.
+- Tests in `tests/test_json.py`.
+
+### Pyodide (WebAssembly)
+
+- A WebAssembly wheel for Pyodide 314 (CPython 3.14), tagged
+  `pyemscripten_2026_0_wasm32` (PEP 783), is built with cibuildwheel 4.3.0,
+  tested in Pyodide on every push (new workflow `pyodide.yml`, with the test
+  suite split in two parallel jobs to stay within the 6 h limit of the
+  runners) and published on PyPI on tags (new job `deploy-pyodide` of
+  `pythonpublish.yml`), such
+  that `await micropip.install("panels")` works in the browser. NumPy, SciPy
+  and matplotlib come with Pyodide, `structsolve` is pure Python and
+  `composites` has its WebAssembly wheel on PyPI.
+- `setup.py` detects the Emscripten cross-compilation of `pyodide-build` and
+  builds without OpenMP, with which the `prange` loops of
+  `panels.models.clpt_field` run serially, and without the GCC runtime link
+  flags. A coverage build with line tracing is never made for Emscripten.
+- The runtime dependencies are declared in `pyproject.toml`: `numpy`,
+  `scipy`, `matplotlib`, `composites>=0.9.21` and `structsolve>=0.6.1`,
+  the first version of structsolve supporting Pyodide.
+  The build requires only `setuptools`, `wheel` and `cython`, since no Cython
+  module cimports NumPy or composites.
+- Fixed a heap buffer overflow of `panels.models.clpt_field`, harmless on
+  64-bit platforms only: its work arrays of doubles were allocated with the
+  size of pointers, `malloc(NMAX * sizeof(double *))`, half the size needed
+  in WebAssembly, where pointers have 4 bytes, crashing Pyodide.
+- `out_num_cores` defaults to `os.cpu_count() or 1` instead of
+  `multiprocessing.cpu_count()`, which raises where the number of CPUs is
+  unknown.
+- The unused import of `multiprocessing.Pool` was removed from
+  `tests/multidomain/test_dcb_damage.py`.
+- The tests run with `MPLBACKEND=Agg` in Pyodide.
+- New classifier `Environment :: WebAssembly :: Emscripten`.
+- Installation in Pyodide, with a browser example saving to `io.BytesIO`
+  for download, in the README and the documentation.
+
+### Performance
+
+- Removed the explicit `gc.collect()` after each matrix and internal force
+  vector of `Shell`, `MultiDomain`, `StiffPanelBay`, `BladeStiff1D` and
+  `BladeStiff2D`. The arrays are freed as soon as they are no longer
+  referenced, a full collection only reclaims reference cycles, which Python
+  collects automatically, and it walks every object of the process: it took
+  70 % of the time of the non-linear analysis with the cohesive zone of
+  `tests/multidomain/test_dcb_damage.py`. The memory of 300 repeated
+  calculations of `calc_kC`, `calc_kG` and `calc_fint` is the same with and
+  without it, the memory leak mentioned in the removed comments is no longer
+  observed. `_clear_matrices()` still calls it.
+
+### Tests
+
+- `tests/multidomain/test_dcb_damage.py` checks its results, it had no
+  assertion: every increment converged, the driver aborting silently
+  otherwise, the reaction equals the area integral of the cohesive tractions,
+  the load-displacement curve and the damage match the reference results.
+  Its results are written to a temporary directory instead of the working
+  directory. 446 s instead of 1514 s with the removal of `gc.collect()`.
+
+### Maintenance
+
+- GitHub Actions updated: `actions/checkout@v7`, `actions/setup-python@v7`,
+  `actions/upload-artifact@v7`, `codecov/codecov-action@v7`,
+  `softprops/action-gh-release@v3` and
+  `JamesIves/github-pages-deploy-action@v4`.
+- Removed the outdated comment that composites laminates cannot be pickled,
+  which is no longer true since composites 0.9.2.
+- The coverage workflow, cancelled at the limit of 6 h of the runners since
+  2026-09-30, runs the test suite in three parallel parts, each uploading its
+  report to Codecov, which waits for the 3 reports (new `codecov.yml`). The
+  coverage build is optimized, `/O2` or `-O3` instead of `/Od` or `-O0`: every
+  traced line being a call with its line number, the coverage report is the
+  same, and the traced tests run 24 % faster.
+
 ## 0.11.0 (2026-10-07)
 
 ### New: follower (hydrostatic) pressure loads

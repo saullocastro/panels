@@ -2,5 +2,5 @@ cython
 numpy
 scipy
 matplotlib
-composites>=0.9.12
-structsolve>=0.5.0
+composites>=0.9.21
+structsolve>=0.6.1

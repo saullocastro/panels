@@ -219,12 +219,12 @@ cdef void cfuvw(double *c, int m, int n, double a, double b, double *xs,
     cdef double *gv
     cdef double *gw
 
-    fu = <double *>malloc(NMAX * sizeof(double *))
-    gu = <double *>malloc(NMAX * sizeof(double *))
-    fv = <double *>malloc(NMAX * sizeof(double *))
-    gv = <double *>malloc(NMAX * sizeof(double *))
-    fw = <double *>malloc(NMAX * sizeof(double *))
-    gw = <double *>malloc(NMAX * sizeof(double *))
+    fu = <double *>malloc(NMAX * sizeof(double))
+    gu = <double *>malloc(NMAX * sizeof(double))
+    fv = <double *>malloc(NMAX * sizeof(double))
+    gv = <double *>malloc(NMAX * sizeof(double))
+    fw = <double *>malloc(NMAX * sizeof(double))
+    gw = <double *>malloc(NMAX * sizeof(double))
 
     for pti in range(size):
         x = xs[pti]
@@ -272,8 +272,8 @@ cdef void cfwx(double *c, int m, int n, double a, double b, double *xs,
     cdef double *fwxi
     cdef double *gw
 
-    fwxi = <double *>malloc(NMAX * sizeof(double *))
-    gw = <double *>malloc(NMAX * sizeof(double *))
+    fwxi = <double *>malloc(NMAX * sizeof(double))
+    gw = <double *>malloc(NMAX * sizeof(double))
 
     for pti in range(size):
         x = xs[pti]
@@ -307,8 +307,8 @@ cdef void cfwy(double *c, int m, int n, double a, double b, double *xs,
     cdef double *fw
     cdef double *gweta
 
-    fw = <double *>malloc(NMAX * sizeof(double *))
-    gweta = <double *>malloc(NMAX * sizeof(double *))
+    fw = <double *>malloc(NMAX * sizeof(double))
+    gweta = <double *>malloc(NMAX * sizeof(double))
 
     for pti in range(size):
         x = xs[pti]
@@ -373,18 +373,18 @@ cdef void cfg(double[:,::1] g, int m, int n,
     cdef double *gw
     cdef double *gw_eta
 
-    fu = <double *>malloc(NMAX * sizeof(double *))
+    fu = <double *>malloc(NMAX * sizeof(double))
     # NMAX defined earlier
     # <double *> = explicitly casting the result of malloc to a pointer to double. 
     #  result of malloc = initially a generic pointer (void*). By casting it to a double*, you inform
     # the compiler that you intend to treat the allocated memory as if it stores a double 
-    gu = <double *>malloc(NMAX * sizeof(double *))
-    fv = <double *>malloc(NMAX * sizeof(double *))
-    gv = <double *>malloc(NMAX * sizeof(double *))
-    fw = <double *>malloc(NMAX * sizeof(double *))
-    fw_xi = <double *>malloc(NMAX * sizeof(double *))
-    gw = <double *>malloc(NMAX * sizeof(double *))
-    gw_eta = <double *>malloc(NMAX * sizeof(double *))
+    gu = <double *>malloc(NMAX * sizeof(double))
+    fv = <double *>malloc(NMAX * sizeof(double))
+    gv = <double *>malloc(NMAX * sizeof(double))
+    fw = <double *>malloc(NMAX * sizeof(double))
+    fw_xi = <double *>malloc(NMAX * sizeof(double))
+    gw = <double *>malloc(NMAX * sizeof(double))
+    gw_eta = <double *>malloc(NMAX * sizeof(double))
 
     xi = 2*x/a - 1.
     eta = 2*y/b - 1.
@@ -459,20 +459,20 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
 
     cdef double wxi, weta, v, phix, phiy
 
-    fu = <double *>malloc(NMAX * sizeof(double *))
-    fuxi = <double *>malloc(NMAX * sizeof(double *))
-    gu = <double *>malloc(NMAX * sizeof(double *))
-    gueta = <double *>malloc(NMAX * sizeof(double *))
-    fv = <double *>malloc(NMAX * sizeof(double *))
-    fvxi = <double *>malloc(NMAX * sizeof(double *))
-    gv = <double *>malloc(NMAX * sizeof(double *))
-    gveta = <double *>malloc(NMAX * sizeof(double *))
-    fw = <double *>malloc(NMAX * sizeof(double *))
-    fwxi = <double *>malloc(NMAX * sizeof(double *))
-    fwxixi = <double *>malloc(NMAX * sizeof(double *))
-    gw = <double *>malloc(NMAX * sizeof(double *))
-    gweta = <double *>malloc(NMAX * sizeof(double *))
-    gwetaeta = <double *>malloc(NMAX * sizeof(double *))
+    fu = <double *>malloc(NMAX * sizeof(double))
+    fuxi = <double *>malloc(NMAX * sizeof(double))
+    gu = <double *>malloc(NMAX * sizeof(double))
+    gueta = <double *>malloc(NMAX * sizeof(double))
+    fv = <double *>malloc(NMAX * sizeof(double))
+    fvxi = <double *>malloc(NMAX * sizeof(double))
+    gv = <double *>malloc(NMAX * sizeof(double))
+    gveta = <double *>malloc(NMAX * sizeof(double))
+    fw = <double *>malloc(NMAX * sizeof(double))
+    fwxi = <double *>malloc(NMAX * sizeof(double))
+    fwxixi = <double *>malloc(NMAX * sizeof(double))
+    gw = <double *>malloc(NMAX * sizeof(double))
+    gweta = <double *>malloc(NMAX * sizeof(double))
+    gwetaeta = <double *>malloc(NMAX * sizeof(double))
 
     if r == 0:
         flagcyl = 0

@@ -198,12 +198,32 @@ def test_fields_of_plate_with_unset_radius(method):
         assert np.array_equal(unset[k], zero[k])
 
 
+@pytest.mark.parametrize('model', ['plate_clpt_donnell', 'cylshell_clpt_sanders',
+                                   'plate_fsdt_donnell'])
+@pytest.mark.parametrize('method', ['uvw', 'strain'])
+def test_fields_independent_of_out_num_cores(model, method):
+    """The points are split among ``out_num_cores`` chunks, computed in
+    parallel with OpenMP or serially, e.g. in Pyodide, with the same result"""
+    kw = dict(model=model, r=1. if 'cylshell' in model else None)
+    c = np.random.default_rng(0).random(_plate(**kw).get_size())
+    fields = []
+    for num_cores in (1, 3, 8):
+        s = _plate(**kw)
+        s.out_num_cores = num_cores
+        fields.append(getattr(s, method)(c, gridx=5, gridy=7)[1])
+    for k, v in fields[0].items():
+        if v is not None:
+            for other in fields[1:]:
+                assert np.array_equal(other[k], v), k
+
+
 def test_save_and_load(tmp_path):
     s = _plate()
     s.calc_kC()
     s.name = str(tmp_path / 'plate')
     s.save()
-    for name in (s.name, s.name + '.Shell'):
+    assert s.matrices['kC'] is not None
+    for name in (s.name, s.name + '.shell.zip'):
         s2 = load(name)
         assert s2.a == s.a and s2.b == s.b
         assert s2.stack == s.stack
