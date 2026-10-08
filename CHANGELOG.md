@@ -86,6 +86,10 @@ module `panels.json_io` mirrors `composites.json_io`:
 
 ### Maintenance
 
+- GitHub Actions updated: `actions/checkout@v7`, `actions/setup-python@v7`,
+  `actions/upload-artifact@v7`, `codecov/codecov-action@v7`,
+  `softprops/action-gh-release@v3` and
+  `JamesIves/github-pages-deploy-action@v4`.
 - Removed the outdated comment that composites laminates cannot be pickled,
   which is no longer true since composites 0.9.2.
 
