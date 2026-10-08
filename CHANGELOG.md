@@ -97,6 +97,15 @@ module `panels.json_io` mirrors `composites.json_io`:
   without it, the memory leak mentioned in the removed comments is no longer
   observed. `_clear_matrices()` still calls it.
 
+### Tests
+
+- `tests/multidomain/test_dcb_damage.py` checks its results, it had no
+  assertion: every increment converged, the driver aborting silently
+  otherwise, the reaction equals the area integral of the cohesive tractions,
+  the load-displacement curve and the damage match the reference results.
+  Its results are written to a temporary directory instead of the working
+  directory. 446 s instead of 1514 s with the removal of `gc.collect()`.
+
 ### Maintenance
 
 - GitHub Actions updated: `actions/checkout@v7`, `actions/setup-python@v7`,
