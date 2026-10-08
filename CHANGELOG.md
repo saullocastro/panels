@@ -43,14 +43,18 @@ module `panels.json_io` mirrors `composites.json_io`:
   matrices, laminate and field outputs.
 - Loading is safe for files from untrusted sources: the arrays are read with
   `allow_pickle=False`, the members are read in memory and never extracted,
-  only the members referenced by `model.json` are read, and unknown keys,
-  missing or extra members, object arrays and newer format versions raise
-  `ValueError`.
-- The pickle files `.Shell` and `.StiffPanelBay` of older versions are still
-  loaded, with a `DeprecationWarning` saying that pickle files are unsafe
-  from untrusted sources. Pickling is still supported for `copy.deepcopy`
-  and for passing objects between processes, e.g. with `multiprocessing`,
-  but it is no longer recommended to save objects to files.
+  only the members referenced by `model.json` are read, after checking that
+  their uncompressed sizes declared in the zip file do not exceed the new
+  argument `max_size` of the functions `load`, 4 GiB by default, and unknown
+  keys, missing or extra members, object arrays and newer format versions
+  raise `ValueError`.
+- The pickle files `.Shell` and `.StiffPanelBay` of older versions are no
+  longer loaded, since a pickle file can execute arbitrary code: `load()`
+  raises `ValueError` for any file that is not a zip file saved by panels.
+  One from a trusted source can be converted by loading it with
+  `pickle.load()` and saving the object again. Pickling is still supported
+  for `copy.deepcopy` and for passing objects between processes, e.g. with
+  `multiprocessing`.
 - Requires `composites>=0.9.21`, which provides `composites.json_io`.
 - Tests in `tests/test_json.py`.
 

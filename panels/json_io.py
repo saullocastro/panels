@@ -64,13 +64,14 @@ type of the base class.
 
 Loading is safe for files from untrusted sources, unlike pickle: the arrays
 are read with ``allow_pickle=False``, the members are read in memory and
-never extracted, only the members referenced by ``model.json`` are read, and
-unknown keys, missing or extra members and newer format versions raise
-``ValueError``.
+never extracted, only the members referenced by ``model.json`` are read,
+after checking that their uncompressed sizes do not exceed ``max_size`` in
+total, and unknown keys, missing or extra members and newer format versions
+raise ``ValueError``.
 
-The pickle files written by older versions of panels are still loaded by
-:func:`.load`, with a ``DeprecationWarning``, since loading a pickle file
-from an untrusted source can execute arbitrary code.
+The pickle files written by older versions of panels are not loaded, since a
+pickle file can execute arbitrary code. One from a trusted source can be
+converted by loading it with :func:`pickle.load` and saving the object again.
 
 """
 import io
@@ -78,9 +79,7 @@ import json
 import math
 import numbers
 import os
-import pickle
 import re
-import warnings
 import zipfile
 
 import numpy as np
@@ -91,6 +90,8 @@ from .version import __version__
 
 
 FORMAT_VERSION = 1
+# NOTE default limit of the total uncompressed size of the members read
+MAX_SIZE = 4*2**30
 
 _ENVELOPE_KEYS = ('type', 'format_version', 'panels_version', 'data')
 _MODEL_JSON = 'model.json'
@@ -179,11 +180,23 @@ class _Writer(object):
 
 
 class _Reader(object):
-    r"""Reads the arrays referenced by ``model.json``"""
-    def __init__(self, zf):
+    r"""Reads ``model.json`` and the arrays it references, at most
+    ``max_size`` bytes uncompressed in total"""
+    def __init__(self, zf, max_size):
         self.zf = zf
         self.names = set(zf.namelist())
         self.used = set()
+        self.left = max_size
+
+    def read(self, member):
+        # NOTE the declared size is checked before decompressing, zipfile
+        #      does not return more than the declared size of a member
+        size = self.zf.getinfo(member).file_size
+        if size > self.left:
+            raise ValueError('The uncompressed size of the members of the zip '
+                             'file exceeds max_size, reading %r' % member)
+        self.left -= size
+        return self.zf.read(member)
 
     def array(self, member):
         if not isinstance(member, str) or not _MEMBER_RE.fullmatch(member):
@@ -194,7 +207,7 @@ class _Reader(object):
         # NOTE read_array reads only the .npy format, whereas np.load would
         #      also open a nested .npz archive
         try:
-            value = np.lib.format.read_array(io.BytesIO(self.zf.read(member)),
+            value = np.lib.format.read_array(io.BytesIO(self.read(member)),
                                              allow_pickle=False)
         except ValueError as e:
             raise ValueError('Invalid array %r: %s' % (member, e))
@@ -590,7 +603,7 @@ def save(obj, fname):
             zf.writestr(member, buf.getvalue())
 
 
-def _load_zip(f):
+def _load_zip(f, max_size):
     with zipfile.ZipFile(f, 'r') as zf:
         names = zf.namelist()
         if len(names) != len(set(names)):
@@ -598,8 +611,9 @@ def _load_zip(f):
         if _MODEL_JSON not in names:
             raise ValueError('Missing member in the zip file: %r'
                              % _MODEL_JSON)
+        r = _Reader(zf, max_size)
         try:
-            d = json.loads(zf.read(_MODEL_JSON).decode('utf-8'),
+            d = json.loads(r.read(_MODEL_JSON).decode('utf-8'),
                            parse_constant=_reject_constant)
         except UnicodeDecodeError as e:
             raise ValueError('Invalid %s: %s' % (_MODEL_JSON, e))
@@ -620,7 +634,6 @@ def _load_zip(f):
         typename = d.get('type')
         if typename not in _DECODERS:
             raise ValueError('Unknown type: %r' % (typename, ))
-        r = _Reader(zf)
         obj = _DECODERS[typename](d.get('data', {}), r)
         extra = r.names - r.used - {_MODEL_JSON}
         if extra:
@@ -629,55 +642,44 @@ def _load_zip(f):
     return typename, obj
 
 
-def _load_pickle(f, stacklevel):
-    warnings.warn('Loading a pickle file of an older version of panels. '
-                  'Pickle files are unsafe from untrusted sources, since '
-                  'they can execute arbitrary code; save the object again to '
-                  'convert it to the zip format', DeprecationWarning,
-                  stacklevel=stacklevel)
-    return pickle.load(f)
-
-
-def _load(fname, suffixes=(), stacklevel=2):
-    r"""Load a zip or a legacy pickle file, returns ``(typename, obj)``
+def _load(fname, suffixes=(), max_size=MAX_SIZE):
+    r"""Load a zip file, returns ``(typename, obj)``
 
     A name without the file extension is completed with the first suffix of
-    ``suffixes`` for which the file exists. ``stacklevel`` is that of
-    :func:`warnings.warn` as if called by this function.
+    ``suffixes`` for which the file exists.
 
     """
-    if hasattr(fname, 'read'):
-        f = fname
-        if zipfile.is_zipfile(f):
-            f.seek(0)
-            return _load_zip(f)
-        f.seek(0)
-        obj = _load_pickle(f, stacklevel + 1)
-        return type(obj).__name__, obj
-    fname = os.fspath(fname)
-    if not os.path.isfile(fname):
-        for suffix in suffixes:
-            if os.path.isfile(fname + suffix):
-                fname = fname + suffix
-                break
-    if zipfile.is_zipfile(fname):
-        return _load_zip(fname)
-    with open(fname, 'rb') as f:
-        obj = _load_pickle(f, stacklevel + 1)
-    return type(obj).__name__, obj
+    if not hasattr(fname, 'read'):
+        fname = os.fspath(fname)
+        if not os.path.isfile(fname):
+            for suffix in suffixes:
+                if os.path.isfile(fname + suffix):
+                    fname = fname + suffix
+                    break
+        with open(fname, 'rb') as f:
+            return _load(f, max_size=max_size)
+    if not zipfile.is_zipfile(fname):
+        raise ValueError('Not a zip file saved by panels. The pickle files of '
+                         'older versions of panels are not loaded, since they '
+                         'can execute arbitrary code; one from a trusted '
+                         'source can be loaded with pickle.load() and saved '
+                         'again')
+    fname.seek(0)
+    return _load_zip(fname, max_size)
 
 
-def load(fname):
+def load(fname, max_size=MAX_SIZE):
     r"""Load an object from a zip file created by :func:`.save`
-
-    Pickle files saved by older versions of panels are also loaded, with a
-    ``DeprecationWarning``.
 
     Parameters
     ----------
     fname : str, path-like or file object
         Name of the file, or a binary file object opened for reading, e.g.
         :class:`io.BytesIO`.
+    max_size : int, optional
+        Maximum total uncompressed size of the members read, in bytes, 4 GiB
+        by default. It is checked before reading, against the sizes declared
+        in the zip file.
 
     Returns
     -------
@@ -687,18 +689,20 @@ def load(fname):
     Raises
     ------
     ValueError
-        If the file is not valid, has unknown keys, missing or extra members,
-        or was saved by a newer format version.
+        If the file is not a zip file saved by panels, e.g. a pickle file of
+        an older version, is not valid, has unknown keys, missing or extra
+        members, exceeds ``max_size``, or was saved by a newer format
+        version.
 
     """
-    return _load(fname, stacklevel=3)[1]
+    return _load(fname, max_size=max_size)[1]
 
 
-def _load_type(fname, typename, suffixes):
+def _load_type(fname, typename, suffixes, max_size):
     r"""Load an object that must be of type ``typename``, used by the
     functions ``load`` of the modules :mod:`panels.shell`,
     :mod:`panels.stiffpanelbay` and :mod:`panels.multidomain`"""
-    loaded, obj = _load(fname, suffixes, stacklevel=4)
+    loaded, obj = _load(fname, suffixes, max_size)
     if loaded != typename:
         raise ValueError('Expected a saved %s, got %s' % (typename, loaded))
     return obj

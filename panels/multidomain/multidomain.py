@@ -15,7 +15,7 @@ from panels.multidomain import connections
 from panels.multidomain.connections import nullspace
 
 
-def load(name):
+def load(name, max_size=json_io.MAX_SIZE):
     r"""Load a :class:`.MultiDomain` saved by :meth:`.MultiDomain.save`
 
     Parameters
@@ -24,13 +24,17 @@ def load(name):
         Name of the file, with or without the extension
         ``'.multidomain.zip'``, or a binary file object opened for reading,
         e.g. :class:`io.BytesIO`.
+    max_size : int, optional
+        Maximum total uncompressed size of the members read, in bytes, 4 GiB
+        by default, see :func:`panels.json_io.load`.
 
     Returns
     -------
     md : :class:`.MultiDomain`
 
     """
-    return json_io._load_type(name, 'MultiDomain', ('.multidomain.zip', ))
+    return json_io._load_type(name, 'MultiDomain', ('.multidomain.zip', ),
+                              max_size)
 
 
 def _penalties(connecti, pA, pB, connection_type):

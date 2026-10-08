@@ -485,26 +485,74 @@ def test_invalid_files():
                                                     raw.encode('utf-8')}))))
 
 
-def test_old_pickle_files(tmp_path):
+UNPICKLED = []
+
+
+def _unpickled():
+    UNPICKLED.append(1)
+    return 'executed'
+
+
+class _Payload:
+    def __reduce__(self):
+        return (_unpickled, ())
+
+
+def test_pickle_files_are_not_loaded(tmp_path):
+    """Pickle files, e.g. of older versions, can execute arbitrary code"""
+    data = pickle.dumps(_Payload())
+    (tmp_path / 'plate.Shell').write_bytes(data)
+    for f in (tmp_path / 'plate.Shell', io.BytesIO(data)):
+        with pytest.raises(ValueError, match='Not a zip file saved by panels'):
+            load_shell(f)
+        with pytest.raises(ValueError, match='Not a zip file saved by panels'):
+            json_io.load(f)
+    # the extension of the old pickle files is no longer completed
+    with pytest.raises(FileNotFoundError):
+        load_shell(tmp_path / 'plate')
+    assert UNPICKLED == []
+
+
+def test_max_size(monkeypatch):
     s = _shell()
-    s.calc_kC()
-    s.matrices['kC'] = None
-    with open(tmp_path / 'plate.Shell', 'wb') as f:
-        pickle.dump(s, f, protocol=pickle.HIGHEST_PROTOCOL)
-    with pytest.warns(DeprecationWarning, match='unsafe from untrusted'):
-        s2 = load_shell(str(tmp_path / 'plate'))
-    assert_array_equal(s2.ABD, s.ABD)
-    with pytest.warns(DeprecationWarning, match='unsafe from untrusted'):
-        s3 = json_io.load(io.BytesIO(pickle.dumps(s)))
-    assert_array_equal(s3.ABD, s.ABD)
-    bay = _bay('2d')
-    with open(tmp_path / 'bay.StiffPanelBay', 'wb') as f:
-        pickle.dump(bay, f, protocol=pickle.HIGHEST_PROTOCOL)
-    with pytest.warns(DeprecationWarning) as record:
-        bay2 = load_bay(str(tmp_path / 'bay'))
-    # reported at the caller
-    assert record[0].filename == __file__
-    assert_array_equal(_bay_lb(bay2)[2], _bay_lb(bay)[2])
+    s.results['eigvals'] = np.arange(3.)
+    data = _save(s)
+    with zipfile.ZipFile(io.BytesIO(data)) as zf:
+        total = sum(zi.file_size for zi in zf.infolist())
+        json_size = zf.getinfo('model.json').file_size
+    load_shell(io.BytesIO(data), max_size=total)
+    json_io.load(io.BytesIO(data), max_size=total)
+    with pytest.raises(ValueError, match='exceeds max_size'):
+        load_shell(io.BytesIO(data), max_size=total - 1)
+    with pytest.raises(ValueError, match="exceeds max_size, reading "
+                       "'model.json'"):
+        load_shell(io.BytesIO(data), max_size=json_size - 1)
+
+    # a highly compressed member is rejected before it is decompressed
+    big = io.BytesIO()
+    np.save(big, np.zeros(2**23))
+    members = _members(data)
+    members['arrays/Shell.ABD.npy'] = big.getvalue()
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, 'w', compression=zipfile.ZIP_DEFLATED) as zf:
+        for name, value in members.items():
+            zf.writestr(name, value)
+    assert len(buf.getvalue()) < 2**20
+    read = []
+    original = zipfile.ZipFile.read
+
+    def spy(self, name, *args, **kwargs):
+        read.append(name)
+        return original(self, name, *args, **kwargs)
+
+    monkeypatch.setattr(zipfile.ZipFile, 'read', spy)
+    with pytest.raises(ValueError, match="exceeds max_size, reading "
+                       "'arrays/Shell.ABD.npy'"):
+        load_shell(io.BytesIO(buf.getvalue()), max_size=2**25)
+    assert 'arrays/Shell.ABD.npy' not in read
+    # the default of 4 GiB
+    assert json_io.MAX_SIZE == 4*2**30
+    assert type(load_shell(io.BytesIO(buf.getvalue()))) is Shell
 
 
 def test_still_picklable():

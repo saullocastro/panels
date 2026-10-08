@@ -16,7 +16,7 @@ from . import json_io
 DOUBLE = np.float64
 
 
-def load(name):
+def load(name, max_size=json_io.MAX_SIZE):
     r"""Load a :class:`.Shell` saved by :meth:`.Shell.save`
 
     Parameters
@@ -24,16 +24,17 @@ def load(name):
     name : str, path-like or file object
         Name of the file, with or without the extension ``'.shell.zip'``,
         or a binary file object opened for reading, e.g.
-        :class:`io.BytesIO`. The pickle files ``'.Shell'`` saved by older
-        versions of panels are also loaded, with a ``DeprecationWarning``,
-        see :mod:`panels.json_io`.
+        :class:`io.BytesIO`.
+    max_size : int, optional
+        Maximum total uncompressed size of the members read, in bytes, 4 GiB
+        by default, see :func:`panels.json_io.load`.
 
     Returns
     -------
     shell : :class:`.Shell`
 
     """
-    return json_io._load_type(name, 'Shell', ('.shell.zip', '.Shell'))
+    return json_io._load_type(name, 'Shell', ('.shell.zip', ), max_size)
 
 
 def check_c(c, size):

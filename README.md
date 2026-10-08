@@ -107,8 +107,9 @@ s.save()              # writes plate.shell.zip
 s2 = load('plate')
 ```
 
-The pickle files saved by older versions are still loaded, with a
-`DeprecationWarning`.
+The pickle files saved by older versions are no longer loaded, since a pickle
+file can execute arbitrary code; one from a trusted source can be converted
+by loading it with `pickle.load()` and saving the object again.
 
 
 History
