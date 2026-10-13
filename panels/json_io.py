@@ -113,6 +113,8 @@ _SHELL_ATTRS = (
     'point_loads', 'point_loads_inc', 'distr_loads', 'distr_loads_inc',
     'pressure_loads', 'pressure_loads_inc',
     'point_pds', 'point_pds_inc', 'distr_pds', 'distr_pds_inc',
+    'point_pds_values', 'point_pds_values_inc',
+    'distr_pds_values', 'distr_pds_values_inc',
     'Nxx', 'Nyy', 'Nxy', 'Nxx_cte', 'Nyy_cte', 'Nxy_cte',
     ) + _BC_FLAGS + tuple(
         edge + phi + r for edge in ('x1', 'x2', 'y1', 'y2')
@@ -141,10 +143,10 @@ _BLADESTIFF2D_ATTRS = (
     'rho', 'ys', 'bb', 'forces_flange', 'bstack', 'bplyts', 'blaminaprops',
     'dpb',
     )
-_MULTIDOMAIN_ATTRS = ('name', 'conn_method', 'size', 'dmg_index', 'fint',
-                      'fext')
+_MULTIDOMAIN_ATTRS = ('name', 'conn_method', 'pd_method', 'size', 'dmg_index',
+                      'fint', 'fext')
 # NOTE attributes whose strings are never non-finite floats
-_STR_ATTRS = ('name', 'model', 'group', 'flow', 'conn_method')
+_STR_ATTRS = ('name', 'model', 'group', 'flow', 'conn_method', 'pd_method')
 
 
 def _encode_float(value):
@@ -529,7 +531,11 @@ def _multidomain_from_data(data, r):
     conn_method = data.get('conn_method', 'null-space')
     if conn_method not in ('penalty', 'null-space'):
         raise ValueError('Invalid conn_method: %r' % (conn_method, ))
-    md = MultiDomain(panels, conn, conn_method=conn_method)
+    pd_method = data.get('pd_method', 'penalty')
+    if pd_method not in ('penalty', 'null-space'):
+        raise ValueError('Invalid pd_method: %r' % (pd_method, ))
+    md = MultiDomain(panels, conn, conn_method=conn_method,
+                     pd_method=pd_method)
     _decode_attrs(md, data, _MULTIDOMAIN_ATTRS, r)
     md._conn_used = _conn_from_data(data.get('conn_used'), panels, r)
     if 'T_tol' in data:

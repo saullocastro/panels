@@ -3,6 +3,7 @@ import platform
 import numpy as np
 from numpy import linspace, reshape
 from scipy.sparse import csr_matrix, coo_matrix
+from structsolve import lb, solve
 from structsolve.sparseutils import finalize_symmetric_matrix
 from matplotlib import pyplot as plt
 
@@ -181,6 +182,25 @@ class MultiDomain(object):
         - ``'penalty'``: with penalty stiffnesses added to the stiffness
           matrix, see :meth:`.get_kC_conn`, solving directly for all the
           Ritz constants
+    pd_method : str, optional
+        How the prescribed displacements of the panels are imposed, see
+        :meth:`.Shell.add_point_pd`, :meth:`.Shell.add_distr_pd_fixed_x` and
+        :meth:`.Shell.add_distr_pd_fixed_y`:
+
+        - ``'penalty'`` (default): their forces `k u_p` enter
+          :meth:`.calc_fext`, and the penalty stiffnesses must be added to
+          the stiffness matrix by the user, e.g. with :func:`.fkCpd`,
+          :func:`.fkCld_xcte` or :func:`.fkCld_ycte`
+        - ``'null-space'``: exactly, as linear constraints eliminated
+          together with the connections, `\{c\} = [T] \{c_r\} +
+          \{c_{p0}\} + \lambda \{c_{p1}\}`, see :ref:`null_space_pd`,
+          :meth:`.get_cp`, :meth:`.expand`, :meth:`.get_reduced_functions`,
+          :meth:`.linear_static`, :meth:`.linear_buckling`,
+          :meth:`.reaction_pd` and :meth:`.reaction_resultant`. The penalty
+          constants are not used, and :meth:`.calc_fext` does not contain
+          the forces of the prescribed displacements. This works with any
+          ``conn_method``, also for a single panel without connections,
+          ``MultiDomain([shell], conn=[], pd_method='null-space')``
     name : str, optional
         Name of the assembly, used by :meth:`.save`.
 
@@ -269,18 +289,29 @@ class MultiDomain(object):
 
     """
     def __init__(self, panels, conn=None, conn_method='null-space',
-                 name='multidomain'):
+                 name='multidomain', pd_method='penalty'):
         if conn_method not in ('penalty', 'null-space'):
             raise ValueError("conn_method must be 'penalty' or 'null-space', "
                              "got '{0}'".format(conn_method))
+        if pd_method not in ('penalty', 'null-space'):
+            raise ValueError("pd_method must be 'penalty' or 'null-space', "
+                             "got '{0}'".format(pd_method))
         # Initialize the assmbly obj with these values
         self.name = name
         self.conn = conn
         self.conn_method = conn_method
+        self.pd_method = pd_method
         self.kC_conn = None
         self.T = None
         self._T_key = None
         self._T_tol = 1.e-9
+        self._rhs_tol = 1.e-8
+        self._elim = None
+        self._pd_blocks = []
+        self._pd_conn = []
+        self._cp_cache = None
+        self.c_p0 = None
+        self.c_p1 = None
         self._conn_used = None
         self.panels = panels
         self.size = None
@@ -363,11 +394,23 @@ class MultiDomain(object):
             plyts = () if p.plyts is None else tuple(p.plyts)
             sig_panels.append((id(p), p.m, p.n, p.a, p.b, p.r, p.model,
                                p.col_start, plyts, bcs))
-        return sig_conn, tuple(sig_panels)
+        if self.pd_method != 'null-space':
+            return sig_conn, tuple(sig_panels)
+        #NOTE the positions and the prescribed components define [T], the
+        #     prescribed values only the particular solutions, see get_cp()
+        sig_pds = tuple((id(p), cte, tuple(values[:2]),
+                         tuple(v is not None for v in values[2:]))
+                        for p in self.panels
+                        for cte, values_list in (
+                            (True, p.point_pds_values + p.distr_pds_values),
+                            (False, p.point_pds_values_inc
+                                    + p.distr_pds_values_inc))
+                        for values in values_list)
+        return sig_conn, tuple(sig_panels), sig_pds
 
 
-    def get_T(self, conn=None, tol=None):
-        r"""Basis of the null space of the connections imposed exactly
+    def get_T(self, conn=None, tol=None, rhs_tol=None):
+        r"""Basis of the null space of the constraints imposed exactly
 
         With ``conn_method='null-space'``, the default, the Ritz constants of
         the assembly that satisfy all the connections of
@@ -385,9 +428,17 @@ class MultiDomain(object):
         With ``conn_method='penalty'``, `[T]` is the identity matrix and the
         same code solves the problem with the penalty method.
 
+        With ``pd_method='null-space'``, the prescribed displacements of the
+        panels are also constraints, `[B_d] \{c\} = \{d_0\} + \lambda
+        \{d_1\}`, eliminated after the connections, and `[T]` is the basis
+        of the null space of all the constraints; the particular solutions
+        are given by :meth:`.get_cp`, see :ref:`null_space_pd`.
+
         `[T]` is stored in the attribute ``T`` and reused while the
         connections, the number of terms and the boundary conditions of the
-        panels do not change, also by :meth:`.reduce` and :meth:`.expand`.
+        panels, and the positions and components of the prescribed
+        displacements with ``pd_method='null-space'``, do not change, also
+        by :meth:`.reduce` and :meth:`.expand`.
 
         Parameters
         ----------
@@ -399,6 +450,10 @@ class MultiDomain(object):
             Tolerance to find the rank of the constraints, see
             :func:`.nullspace.null_space_basis`. If ``None``, the last one
             given is used, initially ``1e-9``.
+        rhs_tol : float, optional
+            Relative tolerance of the consistency of the prescribed
+            displacements, see :meth:`.nullspace.Elimination.particular`.
+            If ``None``, the last one given is used, initially ``1e-8``.
 
         Returns
         -------
@@ -412,14 +467,186 @@ class MultiDomain(object):
         if tol is not None:
             self._T_tol = tol
         tol = self._T_tol
+        if rhs_tol is not None and rhs_tol != self._rhs_tol:
+            self._rhs_tol = rhs_tol
+            self._cp_cache = None
         key = (self._T_signature(conn), tol)
         if self.T is not None and self._T_key == key:
             return self.T
         Bs = [nullspace.constraint_matrix(ci, size)
               for ci in conn if self._null_space(ci)]
-        self.T = nullspace.null_space_basis(Bs, size, tol=tol)
+        blocks = []
+        if self.pd_method == 'null-space':
+            for p in self.panels:
+                blocks += nullspace.pd_blocks(p, size)
+        if blocks:
+            elim = nullspace.Elimination(size, tol)
+            for B in Bs:
+                elim.add(B)
+            for i, block in enumerate(blocks):
+                elim.add(block['B'], rhs=True, info=block)
+            self.T = elim.finish()
+            self._elim = elim
+        else:
+            self.T = nullspace.null_space_basis(Bs, size, tol=tol)
+            self._elim = None
+        self._pd_blocks = blocks
+        self._pd_conn = [ci for ci in conn if self._null_space(ci)]
+        self._cp_cache = None
         self._T_key = key
         return self.T
+
+
+    def _panel_label(self, p):
+        i = [j for j, pj in enumerate(self.panels) if pj is p][0]
+        return "panel {0} (name '{1}', group '{2}')".format(i, p.name, p.group)
+
+
+    def _pd_label(self, block):
+        comp = nullspace.PD_COMPONENTS[block['comp']]
+        x, y = block['x'], block['y']
+        if x is not None and y is not None:
+            where = 'at (x, y) = ({0:g}, {1:g})'.format(x, y)
+        elif y is None:
+            where = 'along x = {0:g}'.format(x)
+        else:
+            where = 'along y = {0:g}'.format(y)
+        return '{0} {1} of {2} (cte={3})'.format(comp, where,
+               self._panel_label(block['panel']), block['cte'])
+
+
+    def _pd_zero_flags(self, block, ends=True):
+        r"""Boundary condition flags equal to zero that restrain the
+        prescribed component at its points, with ``ends=False`` only those
+        that restrain it along the whole line"""
+        p = block['panel']
+        flags = []
+        for field, der_x, der_y, _ in nullspace._pd_terms(p, block['comp']):
+            for direction, cte, length, der in (('x', block['x'], p.a, der_x),
+                                                ('y', block['y'], p.b, der_y)):
+                edges = []
+                if cte is None and not ends:
+                    continue
+                if cte is None or np.isclose(cte, 0.):
+                    edges.append('1')
+                if cte is None or np.isclose(cte, length):
+                    edges.append('2')
+                for edge in edges:
+                    name = (direction + edge + nullspace.FIELDS[field]
+                            + ('r' if der else ''))
+                    if float(getattr(p, name)) == 0. and name not in flags:
+                        flags.append(name)
+        return flags
+
+
+    def _pd_describe(self, resultant=False):
+        r"""Message of the inconsistent prescribed displacements, see
+        :meth:`.nullspace.Elimination.particular`"""
+        def describe(i, block, res, atol):
+            p = block['panel']
+            k = int(np.argmax(np.abs(res)))
+            label = self._pd_label(block)
+            flags = self._pd_zero_flags(block)
+            if resultant:
+                return ('The reaction resultant of the selected lines is not '
+                        'defined: a unit translation of the selected lines '
+                        'is not compatible with the other constraints at {0}, '
+                        'e.g. a corner shared with a prescribed line not '
+                        'selected, or connected to it; select all the lines '
+                        'of the edge'.format(label))
+            if block['B'][k].nnz == 0:
+                flags = self._pd_zero_flags(block, ends=False) or flags
+                return ('The prescribed {0} is not possible: this component '
+                        'is removed by the boundary condition flags {1} = 0 '
+                        'of the panel; set them to 1 to prescribe a non-zero '
+                        'value, or remove the prescription'.format(label,
+                        ', '.join(flags) or '(none found)'))
+            panels = {id(p)}
+            for ci in self._pd_conn:
+                if ci['p1'] is p or ci['p2'] is p:
+                    panels.update((id(ci['p1']), id(ci['p2'])))
+            before = ['connection {0!r} between {1} and {2}'.format(
+                      ci['func'], self._panel_label(ci['p1']),
+                      self._panel_label(ci['p2'])) for ci in self._pd_conn
+                      if ci['p1'] is p or ci['p2'] is p]
+            before += ['prescribed ' + self._pd_label(b)
+                       for b in self._pd_blocks[:i]
+                       if id(b['panel']) in panels]
+            msg_flags = ''
+            if flags:
+                msg_flags = ('; the boundary condition flags {0} = 0 of the '
+                             'panel also restrain it'.format(', '.join(flags)))
+            return ('The prescribed {0} is not consistent with the '
+                    'constraints imposed before it, the redundant constraint '
+                    'at its point {1} has the residual {2:.2e} > {3:.2e}{4}. '
+                    'Constraints imposed before it on the same or connected '
+                    'panels: {5}. With constant (cte=True) and incremented '
+                    '(cte=False) prescriptions, each set must be consistent '
+                    'by itself; with functions that are not polynomials, '
+                    'see the parameter "rhs_tol" of MultiDomain.get_T'
+                    .format(label, k, abs(res[k]), atol, msg_flags,
+                            '; '.join(before) or 'none'))
+        return describe
+
+
+    def get_cp(self):
+        r"""Particular solutions of the prescribed displacements
+
+        With ``pd_method='null-space'`` the prescribed displacements are the
+        constraints `[B_d] \{c\} = \{d_0\} + \lambda \{d_1\}`, `\{d_0\}`
+        from the constant prescriptions (``cte=True``) and `\{d_1\}` from
+        those incremented with the load factor (``cte=False``), and every
+        admissible configuration is
+
+        .. math::
+
+            \{c\} = [T] \{c_r\} + \{c_{p0}\} + \lambda \{c_{p1}\}
+
+        with `[B] \{c_{p0}\} = \{0; d_0\}` and `[B] \{c_{p1}\} = \{0;
+        d_1\}` for `[B]` the constraints of the connections and of the
+        prescribed displacements, see :ref:`null_space_pd`. They are
+        computed in the elimination of :meth:`.get_T`, which is reused while
+        only the prescribed values change, and stored in the attributes
+        ``c_p0`` and ``c_p1``.
+
+        Returns
+        -------
+        c_p0, c_p1 : np.ndarray
+            Vectors with the size of the assembly, null without prescribed
+            displacements or with ``pd_method='penalty'``.
+
+        Raises
+        ------
+        ValueError
+            When the prescribed displacements are not consistent, with the
+            panels, the prescriptions and the constraints involved.
+
+        """
+        self.get_T()
+        size = self.get_size()
+        blocks = self._pd_blocks
+        if not blocks:
+            self.c_p0 = np.zeros(size, dtype=DOUBLE)
+            self.c_p1 = np.zeros(size, dtype=DOUBLE)
+            return self.c_p0, self.c_p1
+        #NOTE [T] is reused while the positions and the components do not
+        #     change, the values are read again from the panels
+        entries = [e for p in self.panels for e in nullspace.pd_entries(p)]
+        assert len(entries) == len(blocks)
+        for block, entry in zip(blocks, entries):
+            block['value'] = entry[-1]
+        ds = [nullspace.pd_rhs(b) for b in blocks]
+        key = np.concatenate(ds)
+        if (self._cp_cache is not None
+                and np.array_equal(self._cp_cache[0], key)):
+            return self.c_p0, self.c_p1
+        d0 = [d if b['cte'] else 0*d for d, b in zip(ds, blocks)]
+        d1 = [0*d if b['cte'] else d for d, b in zip(ds, blocks)]
+        describe = self._pd_describe()
+        self.c_p0 = self._elim.particular(d0, self._rhs_tol, describe)
+        self.c_p1 = self._elim.particular(d1, self._rhs_tol, describe)
+        self._cp_cache = (key, )
+        return self.c_p0, self.c_p1
 
 
     def reduce(self, A):
@@ -435,15 +662,42 @@ class MultiDomain(object):
         return csr_matrix(T.T @ A @ T)
 
 
-    def expand(self, c_r):
+    def expand(self, c_r, lbd=None):
         r"""Ritz constants of the assembly from the independent ones
 
         Returns `[T] \{c_r\}`, with `[T]` from :meth:`.get_T`. ``c_r`` can
         also be a 2D array, e.g. with one eigenvector per column.
 
+        With ``pd_method='null-space'`` and prescribed displacements, a
+        configuration of the structure at the load factor ``lbd`` is
+        `[T] \{c_r\} + \{c_{p0}\} + \lambda \{c_{p1}\}`, see :meth:`.get_cp`,
+        whereas a mode, e.g. an eigenvector of a linear buckling or frequency
+        analysis, or an increment of the configuration, is `[T] \{c_r\}`::
+
+            c = md.expand(c_r, lbd)        # configuration
+            phi = md.expand(eigvecs_r)     # modes
+            cs = [md.expand(c_r, lbd) for c_r, lbd in zip(an.cs, an.increments)]
+
+        Parameters
+        ----------
+        c_r : array-like
+            Independent Ritz constants, 1D, or 2D with one vector per
+            column.
+        lbd : float or None, optional
+            Load factor of a configuration. With ``None``, the default,
+            `[T] \{c_r\}` is returned, unchanged with respect to the
+            previous versions.
+
         """
         T = self.get_T()
-        return T @ c_r
+        if lbd is None:
+            return T @ c_r
+        c_p0, c_p1 = self.get_cp()
+        c_p = c_p0 + lbd*c_p1
+        c = T @ c_r
+        if c.ndim == 2:
+            return c + c_p[:, None]
+        return c + c_p
 
 
     def get_reduced_functions(self):
@@ -456,7 +710,30 @@ class MultiDomain(object):
             from structsolve import Analysis
             an = Analysis(*md.get_reduced_functions())
             an.static(NLgeom=True)
-            cs = [md.expand(c_r) for c_r in an.cs]
+            cs = [md.expand(c_r, lbd) for c_r, lbd in zip(an.cs,
+                                                          an.increments)]
+
+        With ``pd_method='null-space'`` and prescribed displacements, the
+        configuration is `\{c\} = [T] \{c_r\} + \{c_{p0}\} + \lambda
+        \{c_{p1}\}`, see :meth:`.get_cp`, and the functions are, see
+        :ref:`null_space_pd`:
+
+        - ``calc_fint(c, inc)``: `[T]^T \{F_{int}(c, \lambda)\}`, with
+          `\lambda` = ``inc``;
+        - ``calc_kC(c, NLgeom, inc)`` and ``calc_kG(c, NLgeom, inc)``: `[T]^T
+          [K] [T]` at `c`, the exact Jacobian `-\partial R_r/\partial c_r`;
+        - ``calc_fext(inc=1., c=None, lbd=None)``: without ``c``, the
+          reference vector `[T]^T \{F_{ext}\}`, which the solvers scale by
+          `\lambda`; with ``c`` and ``lbd``, the derivative of the residual
+          with respect to the load factor, `\partial R_r/\partial \lambda =
+          [T]^T (\{F_{ext}\} - [K_T(c)] \{c_{p1}\})`, which ``structsolve``
+          0.7.0 or newer passes in the non-linear analyses.
+
+        The linear static analysis ``Analysis.static(NLgeom=False)`` cannot
+        contain the constant prescribed displacements and is not available
+        then: ``calc_fext`` raises an error when called with ``c`` and
+        without ``lbd``; see :meth:`.linear_static` instead. The prescribed
+        values used are those when this method is called.
 
         Returns
         -------
@@ -464,25 +741,327 @@ class MultiDomain(object):
 
         """
         T = self.get_T()
+        if not self._pd_blocks:
+            def calc_fext(inc=1., silent=True, c=None):
+                c = None if c is None else T @ c
+                return T.T @ self.calc_fext(inc=inc, silent=silent, c=c)
 
-        def calc_fext(inc=1., silent=True, c=None):
-            c = None if c is None else T @ c
-            return T.T @ self.calc_fext(inc=inc, silent=silent, c=c)
+            def calc_fint(c, inc=1., silent=True):
+                return T.T @ self.calc_fint(c=T @ c, inc=inc, silent=silent)
+
+            def calc_kC(c=None, NLgeom=False, inc=1., silent=True):
+                c = None if c is None else T @ c
+                return csr_matrix(T.T @ self.calc_kC(c=c, NLgeom=NLgeom, inc=inc,
+                                  silent=silent) @ T)
+
+            def calc_kG(c=None, NLgeom=False, silent=True):
+                c = None if c is None else T @ c
+                return csr_matrix(T.T @ self.calc_kG(c=c, NLgeom=NLgeom,
+                                  silent=silent) @ T)
+
+            return calc_fext, calc_fint, calc_kC, calc_kG
+
+        c_p0, c_p1 = self.get_cp()
+        has_p1 = bool(np.any(c_p1))
+        #NOTE the last full matrices, calc_fext(c, lbd) needs K_T at the
+        #     configuration of the last calc_kC and calc_kG of structsolve
+        cache = {}
+
+        def full(c_r, lbd):
+            return T @ c_r + c_p0 + lbd*c_p1
+
+        def cached(name, c, args, func):
+            hit = cache.get(name)
+            if hit is not None and hit[0] == args and np.array_equal(hit[1], c):
+                return hit[2]
+            out = func()
+            cache[name] = (args, c.copy(), out)
+            return out
+
+        def kC_full(c, NLgeom, inc, silent):
+            return cached('kC', c, (NLgeom, inc), lambda: self.calc_kC(c=c,
+                          NLgeom=NLgeom, inc=inc, silent=silent))
+
+        def kG_full(c, NLgeom, silent):
+            return cached('kG', c, (NLgeom, ), lambda: self.calc_kG(c=c,
+                          NLgeom=NLgeom, silent=silent))
+
+        def calc_fext(inc=1., silent=True, c=None, lbd=None):
+            if c is None:
+                return T.T @ self.calc_fext(inc=inc, silent=silent)
+            if lbd is None:
+                raise ValueError('With the prescribed displacements of '
+                    'pd_method="null-space", calc_fext(c=c) requires the '
+                    'load factor "lbd", passed by structsolve>=0.7.0 in the '
+                    'non-linear analyses; the linear static analysis '
+                    'Analysis.static(NLgeom=False) is not available, use '
+                    'MultiDomain.linear_static()')
+            cf = full(c, lbd)
+            fext = self.calc_fext(inc=inc, silent=silent, c=cf)
+            if has_p1:
+                kT = kC_full(cf, True, lbd, silent) + kG_full(cf, True, silent)
+                fext = fext - inc*(kT @ c_p1)
+            return T.T @ fext
 
         def calc_fint(c, inc=1., silent=True):
-            return T.T @ self.calc_fint(c=T @ c, inc=inc, silent=silent)
+            return T.T @ self.calc_fint(c=full(c, inc), inc=inc, silent=silent)
 
         def calc_kC(c=None, NLgeom=False, inc=1., silent=True):
-            c = None if c is None else T @ c
-            return csr_matrix(T.T @ self.calc_kC(c=c, NLgeom=NLgeom, inc=inc,
-                              silent=silent) @ T)
+            if c is None:
+                kC = self.calc_kC(c=None, NLgeom=NLgeom, inc=inc, silent=silent)
+            else:
+                kC = kC_full(full(c, inc), NLgeom, inc, silent)
+            return csr_matrix(T.T @ kC @ T)
 
-        def calc_kG(c=None, NLgeom=False, silent=True):
-            c = None if c is None else T @ c
-            return csr_matrix(T.T @ self.calc_kG(c=c, NLgeom=NLgeom,
-                              silent=silent) @ T)
+        def calc_kG(c=None, NLgeom=False, inc=1., silent=True):
+            if c is None:
+                kG = self.calc_kG(c=None, NLgeom=NLgeom, silent=silent)
+            else:
+                kG = kG_full(full(c, inc), NLgeom, silent)
+            return csr_matrix(T.T @ kG @ T)
 
         return calc_fext, calc_fint, calc_kC, calc_kG
+
+
+    def _linear_state(self, kC, fext, c_p, silent=True):
+        r"""Solution of `[K_r] \{c_r\} = [T]^T (\{F\} - [K] \{c_p\})`,
+        returned as `[T] \{c_r\} + \{c_p\}`"""
+        T = self.get_T()
+        rhs = T.T @ (fext - kC @ c_p)
+        c_r = solve(csr_matrix(T.T @ kC @ T), rhs, silent=silent)
+        return T @ c_r + c_p
+
+
+    def linear_static(self, lbd=1., silent=True):
+        r"""Linear static analysis with exact prescribed displacements
+
+        Solves
+
+        .. math::
+
+            [T]^T [K] [T] \{c_r\} = [T]^T \left(\lambda \{F_{ext}\} - [K]
+            (\{c_{p0}\} + \lambda \{c_{p1}\})\right)
+
+        with `[K]` from :meth:`.calc_kC`, `\{F_{ext}\}` from
+        ``calc_fext(inc=1.)``, scaled by `\lambda` as in the analyses of
+        ``structsolve``, and `\{c_{p0}\}`, `\{c_{p1}\}` from
+        :meth:`.get_cp`. Without prescribed displacements imposed exactly it
+        is the linear static analysis of the reduced problem, with
+        ``pd_method='penalty'`` the penalty stiffnesses not being added.
+
+        Parameters
+        ----------
+        lbd : float, optional
+            Load factor.
+        silent : bool, optional
+            A boolean to tell whether the log messages should be printed.
+
+        Returns
+        -------
+        c : np.ndarray
+            Ritz constants of the assembly.
+
+        """
+        c_p0, c_p1 = self.get_cp()
+        kC = self.calc_kC(silent=silent)
+        fext = lbd*self.calc_fext(inc=1., silent=silent)
+        return self._linear_state(kC, fext, c_p0 + lbd*c_p1, silent=silent)
+
+
+    def linear_buckling(self, num_eigvalues=25, c=None, silent=True,
+                        **kwargs):
+        r"""Linear buckling analysis with exact prescribed displacements
+
+        The pre-buckling state is linear in the load factor, `\{c(\lambda)\}
+        = \{c_0\} + \lambda \{c_1\}`, see :meth:`.linear_static`, with
+        `\{c_0\}` due to the constant prescribed displacements alone and
+        `\{c_1\}` due to the load and the incremented prescribed
+        displacements. The critical load factors `\lambda` solve
+
+        .. math::
+
+            \left([K_r] + [K_{G,r}(c_0)] + \lambda [K_{G,r}(c_1)]\right)
+            \{\phi_r\} = \{0\}
+
+        with the matrices reduced with `[T]`, see :meth:`.reduce`. Without
+        constant prescribed displacements, `\{c_0\} = 0` and it is the usual
+        linear buckling analysis about the linear static solution for
+        `\lambda = 1`.
+
+        Parameters
+        ----------
+        num_eigvalues : int, optional
+            Number of eigenvalues, passed to ``structsolve.lb``.
+        c : array-like, optional
+            A pre-buckling state of the assembly, `\{c_1\}`, instead of the
+            linear static solution, with `\{c_0\} = 0`.
+        silent : bool, optional
+            A boolean to tell whether the log messages should be printed.
+        kwargs : dict, optional
+            Other arguments of ``structsolve.lb``.
+
+        Returns
+        -------
+        eigvals, eigvecs : tuple
+            The critical load factors and the modes of the assembly, one
+            per column, `[T] \{\phi_r\}`.
+
+        """
+        T = self.get_T()
+        kC = self.calc_kC(silent=silent)
+        kC_r = csr_matrix(T.T @ kC @ T)
+        if c is None:
+            c_p0, c_p1 = self.get_cp()
+            fext = self.calc_fext(inc=1., silent=silent)
+            c1 = self._linear_state(kC, fext, c_p1, silent=silent)
+            if np.any(c_p0):
+                c0 = self._linear_state(kC, 0*fext, c_p0, silent=silent)
+                kC_r = kC_r + self.reduce(self.calc_kG(c=c0, silent=silent))
+        else:
+            c1 = c
+        kG_r = self.reduce(self.calc_kG(c=c1, silent=silent))
+        eigvals, eigvecs = lb(kC_r, kG_r, num_eigvalues=num_eigvalues,
+                              silent=silent, **kwargs)
+        return eigvals, self.expand(eigvecs)
+
+
+    def _reaction_residual(self, c, lbd, NLgeom):
+        r"""`\{r(c, \lambda)\} = \{F_{int}(c)\} - \lambda \{F_{ext}\}`"""
+        c = np.asarray(c, dtype=DOUBLE)
+        fext = self.calc_fext(inc=1., silent=True)
+        if NLgeom:
+            return self.calc_fint(c=c, inc=lbd, silent=True) - lbd*fext
+        return self.calc_kC(silent=True) @ c - lbd*fext
+
+
+    def reaction_pd(self, c, lbd=1., NLgeom=True):
+        r"""Generalized reactions of the prescribed displacements
+
+        With ``pd_method='null-space'``, the reaction work-conjugate to each
+        set of prescribed displacements, the constant ones (``cte=True``)
+        and the incremented ones (``cte=False``), is
+
+        .. math::
+
+            P_j = \{c_{pj}\}^T \{r(c, \lambda)\}, \qquad \{r(c, \lambda)\} =
+            \{F_{int}(c)\} - \lambda \{F_{ext}\}
+
+        with `\{c_{pj}\}` from :meth:`.get_cp`. It does not depend on the
+        choice of the particular solution, because `[T]^T \{r\} = 0` at
+        equilibrium, and `P_j \delta` is the work of the reactions for the
+        prescribed values multiplied by `\delta`. For a uniform
+        end-shortening `\delta` of an edge, `P_j = N \delta` with `N` the
+        total axial reaction, see :meth:`.reaction_resultant`, and `P_1 =
+        \partial W/\partial \lambda` is the force conjugate to the load
+        factor of a displacement-controlled analysis.
+
+        Parameters
+        ----------
+        c : array-like
+            Ritz constants of the assembly at equilibrium, see
+            :meth:`.expand`.
+        lbd : float, optional
+            Load factor of ``c``, `\{F_{ext}\}` being ``calc_fext(inc=1.)``
+            scaled by ``lbd`` as in the analyses of ``structsolve``.
+        NLgeom : bool, optional
+            With ``True``, `\{F_{int}(c)\}` is :meth:`.calc_fint`, for the
+            geometrically non-linear analyses; with ``False``, `[K] \{c\}`
+            with `[K]` from :meth:`.calc_kC`, exact for
+            :meth:`.linear_static`.
+
+        Returns
+        -------
+        P : dict
+            ``{'cte': P_0, 'inc': P_1}``.
+
+        """
+        c_p0, c_p1 = self.get_cp()
+        r = self._reaction_residual(c, lbd, NLgeom)
+        return dict(cte=float(c_p0 @ r), inc=float(c_p1 @ r))
+
+
+    def reaction_resultant(self, c, lines, lbd=1., NLgeom=True):
+        r"""Resultant reaction forces along prescribed lines or points
+
+        With ``pd_method='null-space'``, the resultant of the reactions of
+        the selected prescriptions along the local direction `u`, `v` or `w`
+        of the panels is
+
+        .. math::
+
+            F_u = \{c_u\}^T \{r(c, \lambda)\}
+
+        with `\{c_u\}` a solution of the constraints for a unit translation
+        `u = 1` of the selected prescriptions that prescribe `u`, all the
+        other prescribed values being zero, and `\{r\}` as in
+        :meth:`.reaction_pd`. For instance, the total axial force at the
+        loaded end of a cylinder made of several panels is `F_u` with all
+        the lines of that end selected. A line whose ends are shared with a
+        prescription not selected, directly or through a connection, has no
+        resultant of its own, the force at the shared corner being
+        undetermined, and an error is raised.
+
+        Parameters
+        ----------
+        c : array-like
+            Ritz constants of the assembly at equilibrium.
+        lines : list of tuple
+            The prescriptions selected, ``(panel, 'x', x)`` for the lines
+            ``x = cte`` of :meth:`.Shell.add_distr_pd_fixed_x`, ``(panel,
+            'y', y)`` for :meth:`.Shell.add_distr_pd_fixed_y` and ``(panel,
+            'xy', (x, y))`` for the points of :meth:`.Shell.add_point_pd`.
+        lbd : float, optional
+            Load factor of ``c``, see :meth:`.reaction_pd`.
+        NLgeom : bool, optional
+            See :meth:`.reaction_pd`.
+
+        Returns
+        -------
+        F : np.ndarray
+            ``[F_u, F_v, F_w]``, ``nan`` for a direction not prescribed in
+            the selected prescriptions.
+
+        """
+        if self.pd_method != 'null-space':
+            raise ValueError('reaction_resultant() requires '
+                             'pd_method="null-space"')
+        self.get_T()
+        blocks = self._pd_blocks
+
+        def matches(block, sel):
+            p, kind, where = sel
+            if block['panel'] is not p:
+                return False
+            x, y = block['x'], block['y']
+            if kind == 'x':
+                return y is None and np.isclose(x, where)
+            if kind == 'y':
+                return x is None and np.isclose(y, where)
+            if kind == 'xy':
+                return (x is not None and y is not None
+                        and np.isclose(x, where[0]) and np.isclose(y, where[1]))
+            raise ValueError("The kind of a selected prescription must be "
+                             "'x', 'y' or 'xy', got {0!r}".format(kind))
+
+        selected = [any(matches(b, sel) for sel in lines) for b in blocks]
+        for sel in lines:
+            if not any(matches(b, sel) for b in blocks):
+                raise ValueError('No prescribed displacement {0!r} along {1} '
+                                 '= {2} of {3}'.format(sel[1], sel[1], sel[2],
+                                 self._panel_label(sel[0])))
+        r = self._reaction_residual(c, lbd, NLgeom)
+        F = np.full(3, np.nan)
+        for comp in (nullspace.U, nullspace.V, nullspace.W):
+            unit = [sel and b['comp'] == comp
+                    for sel, b in zip(selected, blocks)]
+            if not any(unit):
+                continue
+            ds = [np.full(b['B'].shape[0], 1. if u else 0.)
+                  for u, b in zip(unit, blocks)]
+            c_u = self._elim.particular(ds, self._rhs_tol,
+                                        self._pd_describe(resultant=True))
+            F[comp] = c_u @ r
+        return F
 
 
     def plot(self, c=None, group=None, invert_y=False, vec='w', filename='', ax=None,
@@ -2172,6 +2751,10 @@ class MultiDomain(object):
         With ``c``, the follower pressure loads of the panels are evaluated
         in this configuration, see :meth:`.Shell.calc_fext`.
 
+        With ``pd_method='null-space'``, the forces `k u_p` of the prescribed
+        displacements are not included, since they are imposed exactly, see
+        :meth:`.get_cp`.
+
         """
         msg('Calculating external forces for assembly...', level=2, silent=silent)
         size = self.get_size()
@@ -2180,7 +2763,8 @@ class MultiDomain(object):
             if p.col_start is None:
                 raise ValueError('Shell attributes "col_start" must be defined!')
             fext += p.calc_fext(inc=inc, size=size, col0=p.col_start,
-                                silent=silent, c=c)
+                                silent=silent, c=c,
+                                include_pds=self.pd_method == 'penalty')
         self.fext = fext
         msg('finished!', level=2, silent=silent)
         return fext
