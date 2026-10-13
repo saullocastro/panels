@@ -98,6 +98,8 @@ Theory
     bardell.rst
     multidomain_null_space.rst
     follower_pressure.rst
+    tangent_product.rst
+    tabulation.rst
     cohesive_zone.rst
     ref.rst
 

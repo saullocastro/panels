@@ -15,7 +15,7 @@ Semi-analytical methods for plates, shells and stiffened panels
 - Linear buckling
 - Vibration, with or without pre-stress
 - Panel flutter using the piston theory
-- Geometrically non-linear static analyses (postbuckling) using the Newton-Raphson method or the arc-length methods of Riks and Crisfield
+- Geometrically non-linear static analyses (postbuckling) using the Newton-Raphson method or the arc-length methods of Riks and Crisfield, with the product of the tangent stiffness matrix by a vector available without assembly
 - Dead or follower (hydrostatic) pressure loads, with the unsymmetric load stiffness of the follower pressure
 - Multi-domain assemblies of plates, cylindrical shells, cylinders, stiffened panels, with the domains connected exactly with the null-space method, the default, or by penalty stiffnesses. Debonding defects or cohesive zone can be simulated
 - Prescribed displacements and rotations imposed exactly with the null-space method, `MultiDomain(..., pd_method='null-space')`, for displacement control in linear static, linear buckling and geometrically non-linear (Newton-Raphson, Riks, Crisfield) analyses, with the reaction forces; or by penalty stiffnesses, the default
@@ -119,6 +119,8 @@ History
 See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
 * version 0.12.0 (2026-10-13)
     - Prescribed displacements imposed exactly with the null-space method, `MultiDomain(..., pd_method='null-space')`, as inhomogeneous linear constraints `c = T c_r + c_p0 + lbd*c_p1`: linear static, linear buckling, Newton-Raphson and arc-length analyses under displacement control, reactions `MultiDomain.reaction_pd()` and `MultiDomain.reaction_resultant()`, also for a single `Shell`; prescribed rotations; the penalty method remains the default
+    - The numerically integrated kernels evaluate the approximation functions once per integration point instead of in their innermost loops, with identical results: the non-linear matrices, the connections, the cohesive zone and the stiffeners are assembled several times faster
+    - `Shell.calc_kTv()` and `MultiDomain.calc_kTv()`: product of the tangent stiffness matrix by a vector without assembling it, for all the models, at the cost of one evaluation of the internal forces; used for the displacement control with prescribed displacements imposed exactly
     - BUG: `fkCld_xcte` and `fkCld_ycte` placed the penalty stiffnesses of `ku` and `kv` at the rows and columns of `w`
     - Requires `structsolve>=0.7.0`
 * version 0.11.1 (2026-10-08)
