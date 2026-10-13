@@ -3,7 +3,7 @@ import numpy as np
 from . import modelDB
 from scipy.special import roots_legendre
 
-def shell_fext(shell, inc, size, col0):
+def shell_fext(shell, inc, size, col0, include_pds=True):
     r"""Calculate the external force vector
 
     The function reads the following attributes of the :class:`.Shell` object:
@@ -70,6 +70,11 @@ def shell_fext(shell, inc, size, col0):
         by the :meth:`.Shell.get_size`
     col0 : int, optional
         Offset in a global internal force vector of an assembly.
+    include_pds : bool, optional
+        Whether the forces of the prescribed displacements are included. The
+        prescribed rotations, see :meth:`.Shell.add_point_pd`, are only
+        available with ``MultiDomain(..., pd_method='null-space')``, which
+        excludes these forces.
 
     Returns
     -------
@@ -165,6 +170,11 @@ def shell_fext(shell, inc, size, col0):
 
 
     # %% Prescribed DISPLACEMENTS
+    if not include_pds:
+        return fext
+    if shell.has_rotation_pds():
+        raise NotImplementedError('Prescribed rotations are only available '
+                'with MultiDomain(..., pd_method="null-space")')
 
     # %%% point prescribed displacements
     # - grouping point_pds and point_pds_inc

@@ -36,6 +36,13 @@ The quantities of each connection are those of its penalty kernel, see
 :data:`NULL_SPACE_FUNCS`, the damaged connection ``'SB_TSL'`` is a physical
 stiffness of the interface and remains a penalty stiffness.
 
+With ``MultiDomain(..., pd_method='null-space')`` the prescribed
+displacements of the panels are the inhomogeneous constraints `[B_d] \{c\}
+= \{d_0\} + \lambda \{d_1\}`, built by :func:`.pd_constraint_matrix` and
+eliminated after the connections by :class:`.Elimination`, which also gives
+the particular solutions `\{c\} = [T] \{c_r\} + \{c_{p0}\} + \lambda
+\{c_{p1}\}`, see :ref:`null_space_pd`.
+
 """
 import numpy as np
 from numpy.polynomial.legendre import leggauss
@@ -261,6 +268,312 @@ def constraint_matrix(connecti, size):
     return B.tocsr()
 
 
+#: Components that can be prescribed exactly, in the order of the values
+#: stored by :meth:`.Shell.add_point_pd`, :meth:`.Shell.add_distr_pd_fixed_x`
+#: and :meth:`.Shell.add_distr_pd_fixed_y`
+PD_COMPONENTS = FIELDS
+
+
+def _pd_terms(p, comp):
+    r"""Terms ``(field, der_x, der_y, coeff)`` of a prescribed component,
+    the rows of ``fg`` of the field module of the model: `\phi_x = -w_{,x}`
+    and `\phi_y = -w_{,y}` for the classical laminated plate theory, the
+    fields `\phi_x` and `\phi_y` for the shear deformation theories, plus
+    `v/r` in `\phi_y` with the Sanders-Koiter kinematics"""
+    if comp in (U, V, W):
+        return [(comp, 0, 0, 1.)]
+    if _dofs(p) == 3:
+        if comp == PHIX:
+            return [(W, 1, 0, -1.)]
+        terms = [(W, 0, 1, -1.)]
+    else:
+        if comp == PHIX:
+            return [(PHIX, 0, 0, 1.)]
+        terms = [(PHIY, 0, 0, 1.)]
+    rinv = _rinv_sanders(p)
+    if rinv != 0:
+        terms.append((V, 0, 0, rinv))
+    return terms
+
+
+def pd_points(p, x, y):
+    r"""Points of a prescribed displacement of ``p``
+
+    A point ``(x, y)``, or the line ``x`` (``y=None``) or ``y`` (``x=None``)
+    with as many Gauss-Legendre points as the coefficients of the
+    polynomials along it, ``max(n, 4)`` or ``max(m, 4)``, see
+    :func:`._points`.
+
+    Returns
+    -------
+    xis, etas : np.ndarray
+        Natural coordinates of the points, the rows of the constraints being
+        ordered as ``l*len(xis) + k`` for the point ``(xis[k], etas[l])``.
+    s : np.ndarray or None
+        Coordinate along the line of each row, where the prescribed function
+        is evaluated, ``None`` for a point.
+
+    """
+    if x is None and y is None:
+        raise ValueError('x and y cannot be None when defining displacements')
+    for name, value, length in (('x', x, p.a), ('y', y, p.b)):
+        if value is not None and not (-1e-12*length <= value
+                                      <= length*(1 + 1e-12)):
+            raise ValueError('The prescribed displacement at {0}={1} is out '
+                             'of the panel, 0 <= {0} <= {2}'.format(name,
+                             value, length))
+    if x is not None and y is not None:
+        return np.array([2*x/p.a - 1]), np.array([2*y/p.b - 1]), None
+    if y is None:
+        etas = leggauss(max(p.n, 4))[0]
+        return np.array([2*x/p.a - 1]), etas, (etas + 1)*p.b/2
+    xis = leggauss(max(p.m, 4))[0]
+    return xis, np.array([2*y/p.b - 1]), (xis + 1)*p.a/2
+
+
+def pd_constraint_matrix(p, comp, x, y, size):
+    r"""Rows `[B]` of a prescribed component at a point or along a line
+
+    Parameters
+    ----------
+    p : :class:`.Shell`
+        Panel, with ``col_start`` defined.
+    comp : int
+        Index of the component in :data:`PD_COMPONENTS`.
+    x, y : float or None
+        The point, or the line, see :func:`.pd_points`.
+    size : int
+        Size of the assembly.
+
+    Returns
+    -------
+    B : scipy.sparse.csr_matrix
+        The rows of `[B] \{c\} = \{d\}`, one per point of
+        :func:`.pd_points`.
+
+    """
+    xis, etas, _ = pd_points(p, x, y)
+    rows, cols, vals = [], [], []
+    for field, der_x, der_y, coeff in _pd_terms(p, comp):
+        F = _eval(p, field, der_x, 'x', xis)
+        G = _eval(p, field, der_y, 'y', etas)
+        block = coeff*np.kron(G, F)
+        r, c = np.nonzero(block)
+        rows.append(r)
+        cols.append(p.col_start + _dofs(p)*c + field)
+        vals.append(block[r, c])
+    B = coo_matrix((np.concatenate(vals),
+                    (np.concatenate(rows), np.concatenate(cols))),
+                   shape=(len(xis)*len(etas), size))
+    B.sum_duplicates()
+    return B.tocsr()
+
+
+def pd_entries(p):
+    r"""Prescribed components of a panel, ``(cte, x, y, comp, value)`` in
+    the order of :func:`.pd_blocks`, the constant ones first"""
+    for cte, points, lines in ((True, p.point_pds_values, p.distr_pds_values),
+            (False, p.point_pds_values_inc, p.distr_pds_values_inc)):
+        for values in points + lines:
+            x, y = values[:2]
+            for comp, value in enumerate(values[2:]):
+                if value is not None:
+                    yield cte, x, y, comp, value
+
+
+def pd_blocks(p, size):
+    r"""Prescribed displacements of a panel imposed exactly
+
+    One block per prescription and component, see
+    :meth:`.Shell.add_point_pd`, :meth:`.Shell.add_distr_pd_fixed_x` and
+    :meth:`.Shell.add_distr_pd_fixed_y`, the constant ones first.
+
+    Returns
+    -------
+    blocks : list of dict
+        With the keys ``'panel'``, ``'x'``, ``'y'``, ``'comp'`` (index in
+        :data:`PD_COMPONENTS`), ``'value'`` (float or function), ``'cte'``
+        and ``'B'``, see :func:`.pd_constraint_matrix`.
+
+    """
+    return [dict(panel=p, x=x, y=y, comp=comp, value=value, cte=cte,
+                 B=pd_constraint_matrix(p, comp, x, y, size))
+            for cte, x, y, comp, value in pd_entries(p)]
+
+
+def pd_rhs(block):
+    r"""Prescribed values of a block of :func:`.pd_blocks` at its points"""
+    _, _, s = pd_points(block['panel'], block['x'], block['y'])
+    value = block['value']
+    if s is None:
+        return np.array([value], dtype=DOUBLE)
+    return np.array([value(si) for si in s], dtype=DOUBLE)
+
+
+class Elimination(object):
+    r"""Elimination of linear constraints, one block of rows at a time
+
+    The constraints of each block, `[B] \{c\} = \{d\}`, are written in the
+    independent Ritz constants left by the previous blocks, `\{c\} = [T]
+    \{c_r\} + \{c_p\}`, and eliminated with a QR decomposition with column
+    pivoting, see :func:`.null_space_basis`. The blocks added with
+    ``rhs=True``, e.g. the prescribed displacements, keep the data needed to
+    compute particular solutions `\{c_p\}` for any right-hand sides, see
+    :meth:`.particular`, without repeating the decompositions.
+
+    Parameters
+    ----------
+    size : int
+        Size of the assembly.
+    tol : float
+        Tolerance to find the rank of the constraints, see
+        :func:`.null_space_basis`.
+
+    """
+    def __init__(self, size, tol):
+        self.size = size
+        self.tol = tol
+        self.T = identity(size, dtype=DOUBLE, format='csr')
+        self.min_kept = np.inf
+        self.max_dropped = 0.
+        #: data of the blocks added with ``rhs=True``, in order
+        self.steps = []
+
+    def add(self, B, rhs=False, info=None):
+        r"""Eliminate the constraints of a block
+
+        Parameters
+        ----------
+        B : sparse matrix
+            Rows of the constraints, with ``size`` columns.
+        rhs : bool, optional
+            Whether the constraints may have a non-null right-hand side.
+            The homogeneous blocks must all be added before the first block
+            with ``rhs=True``.
+        info : object, optional
+            Description of the block, stored with its data.
+
+        """
+        T = self.T
+        tol = self.tol
+        B = csr_matrix(B)
+        #NOTE the rows are normalized only once, so that a redundant row,
+        #     after written in the reduced Ritz constants, has only round-off
+        #     errors that are compared with the absolute tolerance
+        norms = np.sqrt(np.asarray(B.multiply(B).sum(axis=1)).ravel())
+        B = csr_matrix(B.multiply(1./np.where(norms > 0, norms, 1.)[:, None]))
+        Bt = (B @ T).toarray()
+        step = None
+        if rhs:
+            step = dict(info=info, B=B, norms=norms, rank=0)
+            self.steps.append(step)
+        elif self.steps:
+            raise RuntimeError('The homogeneous constraints must be added '
+                               'before the ones with a right-hand side')
+        J = np.flatnonzero(np.abs(Bt).max(axis=0, initial=0) > tol)
+        if J.size == 0:
+            return
+        Q, R, P = qr(Bt[:, J], mode='economic', pivoting=True)
+        d = np.abs(np.diag(R))
+        rank = int(np.sum(d > tol))
+        if rank < d.size:
+            self.max_dropped = max(self.max_dropped, d[rank])
+        if rank == 0:
+            return
+        self.min_kept = min(self.min_kept, d[rank - 1])
+        eliminated = J[P[:rank]]
+        kept = J[P[rank:]]
+        #NOTE R11 c_eliminated + R12 c_kept = Q1^T d
+        X = -solve_triangular(R[:rank, :rank], R[:rank, rank:])
+        X[np.abs(X) < 1e-14*np.abs(X).max(initial=0.)] = 0.
+        if step is not None:
+            #NOTE particular solution with c_kept = 0, see particular()
+            step.update(rank=rank, Q1=Q[:, :rank], R11=R[:rank, :rank],
+                        Bte=Bt[:, eliminated], Te=T[:, eliminated].tocsc())
+        nr = T.shape[1]
+        remaining = np.setdiff1d(np.arange(nr), eliminated)
+        new_index = -np.ones(nr, dtype=int)
+        new_index[remaining] = np.arange(remaining.size)
+        re, ce = np.nonzero(X)
+        S = coo_matrix((np.concatenate((np.ones(remaining.size), X[re, ce])),
+                        (np.concatenate((remaining, eliminated[re])),
+                         np.concatenate((np.arange(remaining.size),
+                                         new_index[kept[ce]])))),
+                       shape=(nr, remaining.size))
+        self.T = (T @ S.tocsr()).tocsr()
+
+    def finish(self):
+        r"""Basis `[T]` of the null space of all the constraints added"""
+        if self.max_dropped > 0 and self.min_kept < 1e4*self.max_dropped:
+            warn('Null-space method: the rank of the constraints is not well '
+                 'defined, the smallest independent pivot is {0:.1e} and the '
+                 'largest redundant one {1:.1e}, see the parameter "tol"'
+                 .format(self.min_kept, self.max_dropped))
+        self.T.eliminate_zeros()
+        return self.T
+
+    def particular(self, ds, rhs_tol=1.e-8, describe=None):
+        r"""Particular solution of the blocks added with ``rhs=True``
+
+        Parameters
+        ----------
+        ds : list of array-like
+            Right-hand side `\{d\}` of each block added with ``rhs=True``,
+            in the order they were added.
+        rhs_tol : float, optional
+            Relative tolerance of the consistency of the right-hand sides.
+            The constraints dropped as redundant, e.g. at the corner where a
+            prescribed edge meets a connection or another prescribed edge,
+            must be satisfied by the particular solution within ``rhs_tol``
+            times the largest prescribed value, both for the normalized
+            rows.
+        describe : callable, optional
+            ``describe(i, info, res, atol)`` returns the message of the
+            error raised when the block ``i`` is not consistent, ``res``
+            being the residuals of its normalized rows.
+
+        Returns
+        -------
+        c_p : np.ndarray
+            Vector with ``size`` elements satisfying `[B] \{c_p\} =
+            \{d\}` for all the blocks, and `[B] \{c_p\} = \{0\}` for the
+            homogeneous ones.
+
+        Raises
+        ------
+        ValueError
+            When the right-hand sides are not consistent.
+
+        """
+        cp = np.zeros(self.size, dtype=DOUBLE)
+        if len(ds) != len(self.steps):
+            raise ValueError('Expected {0} right-hand sides, got {1}'.format(
+                             len(self.steps), len(ds)))
+        dns = [np.asarray(d, dtype=DOUBLE)/np.where(step['norms'] > 0,
+               step['norms'], 1.) for d, step in zip(ds, self.steps)]
+        scale = max([np.abs(dn).max(initial=0.) for dn in dns], default=0.)
+        if scale == 0:
+            return cp
+        atol = rhs_tol*scale
+        for i, (step, dn) in enumerate(zip(self.steps, dns)):
+            dt = dn - step['B'] @ cp
+            if step['rank'] > 0:
+                y = solve_triangular(step['R11'], step['Q1'].T @ dt)
+                res = dt - step['Bte'] @ y
+                cp += step['Te'] @ y
+            else:
+                res = dt
+            if np.abs(res).max(initial=0.) > atol:
+                if describe is None:
+                    msg = ('The right-hand side of the constrained block {0} '
+                           'is not consistent with the previous constraints'
+                           .format(i))
+                else:
+                    msg = describe(i, step['info'], res, atol)
+                raise ValueError(msg)
+        return cp
+
+
 def null_space_basis(Bs, size, tol=1.e-9):
     r"""Sparse basis `[T]` of the null space of the constraints
 
@@ -285,48 +598,7 @@ def null_space_basis(Bs, size, tol=1.e-9):
         \{c_r\}` satisfies all the constraints for any `\{c_r\}`.
 
     """
-    T = identity(size, dtype=DOUBLE, format='csr')
-    min_kept = np.inf
-    max_dropped = 0.
+    elim = Elimination(size, tol)
     for B in Bs:
-        B = csr_matrix(B)
-        #NOTE the rows are normalized only once, so that a redundant row,
-        #     after written in the reduced Ritz constants, has only round-off
-        #     errors that are compared with the absolute tolerance
-        norms = np.sqrt(np.asarray(B.multiply(B).sum(axis=1)).ravel())
-        B = csr_matrix(B.multiply(1./np.where(norms > 0, norms, 1.)[:, None]))
-        Bt = (B @ T).toarray()
-        J = np.flatnonzero(np.abs(Bt).max(axis=0, initial=0) > tol)
-        if J.size == 0:
-            continue
-        _, R, P = qr(Bt[:, J], mode='economic', pivoting=True)
-        d = np.abs(np.diag(R))
-        rank = int(np.sum(d > tol))
-        if rank < d.size:
-            max_dropped = max(max_dropped, d[rank])
-        if rank == 0:
-            continue
-        min_kept = min(min_kept, d[rank - 1])
-        eliminated = J[P[:rank]]
-        kept = J[P[rank:]]
-        #NOTE R11 c_eliminated + R12 c_kept = 0
-        X = -solve_triangular(R[:rank, :rank], R[:rank, rank:])
-        X[np.abs(X) < 1e-14*np.abs(X).max(initial=0.)] = 0.
-        nr = T.shape[1]
-        remaining = np.setdiff1d(np.arange(nr), eliminated)
-        new_index = -np.ones(nr, dtype=int)
-        new_index[remaining] = np.arange(remaining.size)
-        re, ce = np.nonzero(X)
-        S = coo_matrix((np.concatenate((np.ones(remaining.size), X[re, ce])),
-                        (np.concatenate((remaining, eliminated[re])),
-                         np.concatenate((np.arange(remaining.size),
-                                         new_index[kept[ce]])))),
-                       shape=(nr, remaining.size))
-        T = (T @ S.tocsr()).tocsr()
-    if max_dropped > 0 and min_kept < 1e4*max_dropped:
-        warn('Null-space method: the rank of the constraints is not well '
-             'defined, the smallest independent pivot is {0:.1e} and the '
-             'largest redundant one {1:.1e}, see the parameter "tol"'
-             .format(min_kept, max_dropped))
-    T.eliminate_zeros()
-    return T
+        elim.add(B)
+    return elim.finish()

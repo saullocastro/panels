@@ -18,6 +18,7 @@ Semi-analytical methods for plates, shells and stiffened panels
 - Geometrically non-linear static analyses (postbuckling) using the Newton-Raphson method or the arc-length methods of Riks and Crisfield
 - Dead or follower (hydrostatic) pressure loads, with the unsymmetric load stiffness of the follower pressure
 - Multi-domain assemblies of plates, cylindrical shells, cylinders, stiffened panels, with the domains connected exactly with the null-space method, the default, or by penalty stiffnesses. Debonding defects or cohesive zone can be simulated
+- Prescribed displacements and rotations imposed exactly with the null-space method, `MultiDomain(..., pd_method='null-space')`, for displacement control in linear static, linear buckling and geometrically non-linear (Newton-Raphson, Riks, Crisfield) analyses, with the reaction forces; or by penalty stiffnesses, the default
 - CLPT, FSDT and TSDT kinematics for plates and cylindrical shells
 - Donnell and Sanders-Koiter kinematics for cylindrical shells
 
@@ -28,7 +29,7 @@ The structural matrices are solved with
 Citing this library
 ===================
 
-Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.11.1). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
+Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.12.0). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
 
 
 Documentation
@@ -116,6 +117,10 @@ History
 =======
 
 See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
+* version 0.12.0 (2026-10-13)
+    - Prescribed displacements imposed exactly with the null-space method, `MultiDomain(..., pd_method='null-space')`, as inhomogeneous linear constraints `c = T c_r + c_p0 + lbd*c_p1`: linear static, linear buckling, Newton-Raphson and arc-length analyses under displacement control, reactions `MultiDomain.reaction_pd()` and `MultiDomain.reaction_resultant()`, also for a single `Shell`; prescribed rotations; the penalty method remains the default
+    - BUG: `fkCld_xcte` and `fkCld_ycte` placed the penalty stiffnesses of `ku` and `kv` at the rows and columns of `w`
+    - Requires `structsolve>=0.7.0`
 * version 0.11.1 (2026-10-08)
     - Saving and loading in a zip file with JSON and NumPy arrays, replacing pickle: `Shell.save()`, `StiffPanelBay.save()`, `MultiDomain.save()`, also to `io.BytesIO`, and `panels.json_io`
     - Pyodide support: `await micropip.install("panels")` in the browser, and the whole test suite runs in Pyodide in GitHub Actions

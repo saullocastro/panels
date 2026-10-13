@@ -132,6 +132,8 @@ class Shell(object):
         'point_loads', 'point_loads_inc', 'distr_loads', 'distr_loads_inc',
         'pressure_loads', 'pressure_loads_inc',
         'point_pds', 'point_pds_inc', 'distr_pds', 'distr_pds_inc',
+        'point_pds_values', 'point_pds_values_inc',
+        'distr_pds_values', 'distr_pds_values_inc',
         'Nxx', 'Nyy', 'Nxy', 'Nxx_cte', 'Nyy_cte', 'Nxy_cte',
         'x1u', 'x1ur', 'x2u', 'x2ur',
         'x1v', 'x1vr', 'x2v', 'x2vr',
@@ -210,6 +212,13 @@ class Shell(object):
         self.distr_pds = [] #NOTE see add_distr_pd_fixed_x and add_distr_pd_fixed_y
         self.distr_pds_inc = [] # NOTE see add_distr_pd_fixed_x and add_distr_pd_fixed_y
             # Stored as [x pos, y pos of applied displ, force x, y, z due to that displ]
+        # prescribed values, used by MultiDomain(..., pd_method='null-space'):
+        # [x, y, up, vp, wp, phixp, phiyp] and [x, None, funcu, funcv, funcw,
+        # funcphix, funcphiy] or [None, y, ...], None for a free component
+        self.point_pds_values = []
+        self.point_pds_values_inc = []
+        self.distr_pds_values = []
+        self.distr_pds_values_inc = []
         # uniform membrane stress state
         self.Nxx = 0.
         self.Nyy = 0.
@@ -1707,10 +1716,20 @@ class Shell(object):
             self.pressure_loads_inc.append([x1, x2, y1, y2, p, follower, zp])
 
 
-    def add_point_pd(self, x, y, ku, up, kv, vp, kw, wp, cte=True):
-        r"""Add a point prescribed displacement with three components
+    def add_point_pd(self, x, y, ku, up, kv, vp, kw, wp, cte=True,
+                     kphix=None, phixp=None, kphiy=None, phiyp=None):
+        r"""Add a point prescribed displacement with up to five components
 
         o/p = [location and equivalent force]
+
+        With the penalty method, the default of :class:`.MultiDomain`, the
+        prescribed displacement enters the external force vector as `k u_p`,
+        see :func:`.shell_fext`, and the penalty stiffness must be added to
+        the stiffness matrix, e.g. with :func:`.fkCpd`. With
+        ``MultiDomain(..., pd_method='null-space')`` it is imposed exactly,
+        see :ref:`null_space_pd`: the values of the penalty constants are
+        not used, a component being prescribed when its penalty constant is
+        neither ``None`` nor zero and its value is not ``None``.
 
         Parameters
         ----------
@@ -1725,18 +1744,72 @@ class Shell(object):
         cte : bool, optional
             Constant prescribed displacements are not incremented
             during the non-linear analysis.
+        kphix, phixp, kphiy, phiyp : float, optional
+            Prescribed rotations, only with ``pd_method='null-space'``, the
+            rotations `\phi_x` and `\phi_y` of the approximation functions
+            of the model: `-w_{,x}` and `-w_{,y}` for the classical
+            laminated plate theory, plus `v/r` for `\phi_y` with the
+            Sanders-Koiter kinematics.
 
         """
+        def given(k, value):
+            return k is not None and k != 0 and value is not None
+        values = [x, y] + [value if given(k, value) else None
+                           for k, value in ((ku, up), (kv, vp), (kw, wp),
+                                            (kphix, phixp), (kphiy, phiyp))]
+        pd = [x, y] + [k*value if k is not None and value is not None else 0.
+                       for k, value in ((ku, up), (kv, vp), (kw, wp))]
         if cte:
-            self.point_pds.append([x, y, ku*up, kv*vp, kw*wp])
+            self.point_pds.append(pd)
             # Adds the location and force
+            self.point_pds_values.append(values)
         else:
-            self.point_pds_inc.append([x, y, ku*up, kv*vp, kw*wp])
+            self.point_pds_inc.append(pd)
+            self.point_pds_values_inc.append(values)
+
+
+    def _add_distr_pd(self, x, y, ks, funcs, cte):
+        r"""See :meth:`.add_distr_pd_fixed_x` and
+        :meth:`.add_distr_pd_fixed_y`, ``ks`` and ``funcs`` for ``u, v, w,
+        phix, phiy``"""
+        if not any(ks):
+            raise ValueError('At least one penalty constant must be different than None')
+        if not any(funcs):
+            raise ValueError('At least one function must be different than None')
+        # Force funtns = k * displ ftn
+        new_funcs = []
+        for name, k, func in zip(('u', 'v', 'w', 'phix', 'phiy'), ks, funcs):
+            new_func = None
+            if (k is not None) or (func is not None): # k or func is specified
+                if k is None or func is None: # if atmost 1 is specified the component is incomplete
+                    raise ValueError('Both k{0} and func{0} must be specified'.format(name))
+                new_func = lambda s, k=k, func=func: k*func(s) # s is the coordinate along the line
+            new_funcs.append(new_func)
+        values = [x, y] + [func if k is not None and k != 0 else None
+                           for k, func in zip(ks, funcs)]
+        pd = [x, y] + new_funcs[:3]
+        if cte:
+            self.distr_pds.append(pd)
+            self.distr_pds_values.append(values)
+        else:
+            self.distr_pds_inc.append(pd)
+            self.distr_pds_values_inc.append(values)
 
 
     def add_distr_pd_fixed_x(self, x, ku=None, kv=None, kw=None,
-                             funcu=None, funcv=None, funcw=None, cte=True):
+                             funcu=None, funcv=None, funcw=None, cte=True,
+                             kphix=None, kphiy=None, funcphix=None,
+                             funcphiy=None):
         r"""Add a distributed prescribed displacement g(y) at a fixed x position
+
+        With the penalty method, the default of :class:`.MultiDomain`, the
+        prescribed displacement enters the external force vector as `k
+        g(y)`, see :func:`.shell_fext`, and the penalty stiffness must be
+        added to the stiffness matrix, e.g. with :func:`.fkCld_xcte`. With
+        ``MultiDomain(..., pd_method='null-space')`` it is imposed exactly,
+        see :ref:`null_space_pd`: the values of the penalty constants are
+        not used, a component being prescribed when its penalty constant is
+        neither ``None`` nor zero.
 
         Parameters
         ----------
@@ -1754,37 +1827,29 @@ class Shell(object):
         cte : bool, optional
             Constant prescribed displacements are not incremented during the non-linear
             analysis.
+        kphix, kphiy, funcphix, funcphiy : optional
+            Prescribed rotations, only with ``pd_method='null-space'``, see
+            :meth:`.add_point_pd`.
 
         """
-        if not any((ku, kv, kw)):
-            raise ValueError('At least one penalty constant must be different than None')
-        if not any((funcu, funcv, funcw)):
-            raise ValueError('At least one function must be different than None')
-        # Force funtns = k * displ ftn
-        new_funcu = None
-        new_funcv = None
-        new_funcw = None
-        if (ku is not None) or (funcu is not None): # ku or funcu is specified
-            if ku is None or funcu is None: # if atmost 1 is specified for u means u is to be specified, but is currently incomplete
-                raise ValueError('Both ku and funcu must be specified')
-            new_funcu = lambda y: ku*funcu(y) # y is param in ftn
-        if (kv is not None) or (funcv is not None):
-            if kv is None or funcv is None:
-                raise ValueError('Both kv and funcv must be specified')
-            new_funcv = lambda y: kv*funcv(y)
-        if (kw is not None) or (funcw is not None):
-            if kw is None or funcw is None:
-                raise ValueError('Both kw and funcw must be specified')
-            new_funcw = lambda y: kw*funcw(y)
-        if cte:
-            self.distr_pds.append([x, None, new_funcu, new_funcv, new_funcw])
-        else:
-            self.distr_pds_inc.append([x, None, new_funcu, new_funcv, new_funcw])
+        self._add_distr_pd(x, None, (ku, kv, kw, kphix, kphiy),
+                           (funcu, funcv, funcw, funcphix, funcphiy), cte)
 
 
     def add_distr_pd_fixed_y(self, y, ku=None, kv=None, kw=None,
-                             funcu=None, funcv=None, funcw=None, cte=True):
+                             funcu=None, funcv=None, funcw=None, cte=True,
+                             kphix=None, kphiy=None, funcphix=None,
+                             funcphiy=None):
         r"""Add a distributed prescribed displacement g(x) at a fixed y position
+
+        With the penalty method, the default of :class:`.MultiDomain`, the
+        prescribed displacement enters the external force vector as `k
+        g(x)`, see :func:`.shell_fext`, and the penalty stiffness must be
+        added to the stiffness matrix, e.g. with :func:`.fkCld_ycte`. With
+        ``MultiDomain(..., pd_method='null-space')`` it is imposed exactly,
+        see :ref:`null_space_pd`: the values of the penalty constants are
+        not used, a component being prescribed when its penalty constant is
+        neither ``None`` nor zero.
 
         Parameters
         ----------
@@ -1796,36 +1861,26 @@ class Shell(object):
             corresponding to the funcu, funcv, funcw specified.
         funcu, funcv, funcw : type: function, optional
             The functions of the distributed prescribed displacements, will be used
-            from `y=0` to `y=b`. At least one of the three must be defined, and
+            from `x=0` to `x=a`. At least one of the three must be defined, and
             corresponding to the ku, kv, kw specified.
         cte : bool, optional
             Constant prescribed displacements are not incremented during the non-linear
             analysis.
+        kphix, kphiy, funcphix, funcphiy : optional
+            Prescribed rotations, only with ``pd_method='null-space'``, see
+            :meth:`.add_point_pd`.
 
         """
-        if not any((ku, kv, kw)):
-            raise ValueError('At least one penalty constant must be different than None')
-        if not any((funcu, funcv, funcw)):
-            raise ValueError('At least one function must be different than None')
-        new_funcu = None
-        new_funcv = None
-        new_funcw = None
-        if (ku is not None) or (funcu is not None):
-            if ku is None or funcu is None:
-                raise ValueError('Both ku and funcu must be specified')
-            new_funcu = lambda x: ku*funcu(x)
-        if (kv is not None) or (funcv is not None):
-            if kv is None or funcv is None:
-                raise ValueError('Both kv and funcv must be specified')
-            new_funcv = lambda x: kv*funcv(x)
-        if (kw is not None) or (funcw is not None):
-            if kw is None or funcw is None:
-                raise ValueError('Both kw and funcw must be specified')
-            new_funcw = lambda x: kw*funcw(x)
-        if cte:
-            self.distr_pds.append([None, y, new_funcu, new_funcv, new_funcw])
-        else:
-            self.distr_pds_inc.append([None, y, new_funcu, new_funcv, new_funcw])
+        self._add_distr_pd(None, y, (ku, kv, kw, kphix, kphiy),
+                           (funcu, funcv, funcw, funcphix, funcphiy), cte)
+
+    def has_rotation_pds(self):
+        r"""Whether rotations are prescribed, which only
+        ``MultiDomain(..., pd_method='null-space')`` supports"""
+        return any(values[5] is not None or values[6] is not None
+                   for values in self.point_pds_values
+                   + self.point_pds_values_inc + self.distr_pds_values
+                   + self.distr_pds_values_inc)
 
     def clear_disps(self):
 
@@ -1837,6 +1892,10 @@ class Shell(object):
         self.point_pds_inc = []
         self.distr_pds = []
         self.distr_pds_inc = []
+        self.point_pds_values = []
+        self.point_pds_values_inc = []
+        self.distr_pds_values = []
+        self.distr_pds_values_inc = []
 
     def clear_loads(self):
         '''
@@ -1897,7 +1956,8 @@ class Shell(object):
         return kPC
 
 
-    def calc_fext(self, inc=1., size=None, col0=0, silent=True, c=None):
+    def calc_fext(self, inc=1., size=None, col0=0, silent=True, c=None,
+                  include_pds=True):
         r"""Calculate the external force vector `\{F_{ext}\}`
 
         Recall that:
@@ -1934,6 +1994,11 @@ class Shell(object):
             i.e. ``fext(c) = fext + (F_p(c) - F_p(0))``, the load vector that
             the arc-length solvers of ``structsolve`` use as the derivative
             of the residual with respect to the load factor.
+        include_pds : bool, optional
+            Whether the forces `k u_p` of the prescribed displacements
+            imposed with the penalty method are included.
+            ``MultiDomain(..., pd_method='null-space')`` imposes them exactly
+            instead, and excludes these forces.
 
         Returns
         -------
@@ -1943,7 +2008,8 @@ class Shell(object):
         """
         self._rebuild()
         msg('Calculating external forces...', level=2, silent=silent)
-        fext = shell_fext(self, inc=inc, size=size, col0=col0)
+        fext = shell_fext(self, inc=inc, size=size, col0=col0,
+                          include_pds=include_pds)
         if c is not None and self.has_follower_loads():
             fext += self.calc_fext_follower(c, inc=inc, size=fext.shape[0],
                                             col0=col0, reference=False)
