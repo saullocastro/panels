@@ -1054,6 +1054,91 @@ class Shell(object):
         return kT
 
 
+    def calc_kTv(self, c, v, size=None, col0=0, silent=True, nx=None,
+            ny=None, ABDnxny=None, inc=1.):
+        r"""Product of the tangent stiffness matrix by a vector
+
+        Returns `[K_T(c)] \{v\}`, with `[K_T]` of :meth:`.Shell.calc_kT` at
+        the load factor ``inc``, i.e. the directional derivative of
+        :meth:`.Shell.calc_fint` along ``v``, without assembling `[K_T]`. At
+        each integration point, see ``theory/shells/tangent_product``,
+
+        .. math::
+
+            [K_T] \{v\} = \int \left( [B(\beta)]^T [F] [B(\beta)] \{v\} +
+            [G]^T [N] [G] \{v\} \right) dA
+
+        where `\{\beta\} = [G] \{c\}` are the rotations of the von Kármán
+        terms, `[B(\beta)]` the strain operator, linear in `\{\beta\}`, and
+        `[N]` the membrane stresses at ``c``, plus the constant ones
+        ``Nxx_cte``, ``Nyy_cte`` and ``Nxy_cte``. The cost is about that of
+        :meth:`.Shell.calc_fint`, instead of the assembly of `[K_T]`, whose
+        cost grows with the square of the number of terms.
+
+        With follower pressure loads, the product of their load stiffness
+        :meth:`.Shell.calc_kCfollower` is the central difference
+
+        .. math::
+
+            -\frac{\partial \{F_p\}}{\partial \{c\}} \{v\} = -\frac{\{F_p(c +
+            t v)\} - \{F_p(c - t v)\}}{2 t}
+
+        which is exact for any `t`, `\{F_p(c)\}` being at most quadratic in
+        `\{c\}`; `t = \|c\|/\|v\|` avoids the cancellation of large and
+        small terms.
+
+        Parameters
+        ----------
+        c : np.ndarray
+            Ritz constants of the configuration.
+        v : np.ndarray
+            The vector, with the size of ``c``.
+        size, col0, silent, nx, ny, ABDnxny, inc :
+            See :meth:`.Shell.calc_fint`.
+
+        Returns
+        -------
+        kTv : np.ndarray
+            The product.
+
+        """
+        msg('Calculating kT*v...', level=2, silent=silent)
+        matrices_num = modelDB.db[self.model].get('matrices_num')
+        calc_kTv = getattr(matrices_num, 'calc_kTv', None)
+        if calc_kTv is None:
+            raise NotImplementedError('calc_kTv not implemented for model {0}'
+                                      .format(self.model))
+        if size is None:
+            size = self.get_size()
+        elif isinstance(size, str):
+            size = int(size) + self.get_size()
+
+        self._check_r()
+        nx = self.nx if nx is None else nx
+        ny = self.ny if ny is None else ny
+        ABDnxny = self.ABD if ABDnxny is None else ABDnxny
+
+        #NOTE see the note in Shell.calc_kC() on why c and v must be checked
+        #     before being forwarded
+        c = np.ascontiguousarray(c, dtype=DOUBLE)
+        v = np.ascontiguousarray(v, dtype=DOUBLE)
+        check_c(c, size)
+        check_c(v, size)
+        kTv = np.asarray(calc_kTv(c, v, ABDnxny, self, size, col0, nx, ny,
+                                  self.Nxx_cte, self.Nyy_cte, self.Nxy_cte))
+        if self.has_follower_loads():
+            norm_v = np.linalg.norm(v)
+            if norm_v > 0:
+                t = max(np.linalg.norm(c)/norm_v, 1.)
+                fp = lambda cc: self.calc_fext_follower(cc, inc=inc,
+                        size=size, col0=col0, reference=False)
+                kTv = kTv - (fp(c + t*v) - fp(c - t*v))/(2*t)
+
+        msg('finished!', level=2, silent=silent)
+
+        return kTv
+
+
     def has_follower_loads(self):
         r"""Tell whether any pressure load is a follower load, see
         :meth:`.Shell.add_pressure_load`"""
