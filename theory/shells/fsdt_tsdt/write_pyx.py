@@ -25,6 +25,7 @@ sys.path.insert(0, os.path.join(REPO, 'theory', 'shells', 'fsdt_tsdt'))
 
 import fsdt_tsdt as th
 from panels.dev.matrixtools import pow2mult
+from panels.dev.tabulate import tabulate_basis
 #NOTE the follower-pressure kernels, appended to the numerical modules
 import importlib.util
 _spec = importlib.util.spec_from_file_location('follower_write_pyx',
@@ -33,6 +34,13 @@ _spec = importlib.util.spec_from_file_location('follower_write_pyx',
 _follower = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_follower)
 follower_block = _follower.pyx_block
+#NOTE the kernel of the product of the tangent stiffness matrix by a vector
+_spec = importlib.util.spec_from_file_location('tangent_write_pyx',
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), '..',
+                 'tangent_product', 'write_pyx.py'))
+_tangent = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_tangent)
+tangent_block = _tangent.pyx_block
 
 FIELDS = th.FIELDS
 DOF = th.DOF
@@ -127,6 +135,7 @@ HEADER = """#cython: boundscheck=False
 #cython: wraparound=False
 #cython: cdivision=True
 #cython: nonecheck=False
+#cython: initializedcheck=False
 #cython: overflowcheck=False
 #cython: embedsignature=True
 #cython: infer_types=False
@@ -1031,7 +1040,11 @@ def calc_fint(double [::1] cs, object Finput, object shell,
     with open(os.path.join(REPO, 'panels', 'models', mod + '_num.pyx'), 'w', newline='\n') as f:
         #NOTE the follower-pressure kernels, see
         #     theory/shells/follower_pressure/write_pyx.py
-        f.write(with_radius(''.join(NUM), cyl) + '\n\n' + follower_block(model))
+        #NOTE the approximation functions evaluated once per integration
+        #     point, see panels/dev/tabulate.py
+        f.write(tabulate_basis(with_radius(''.join(NUM), cyl)) + '\n\n'
+                + follower_block(model)
+                + '\n\n' + tangent_block(model))
     print(model, 'numerical written', time.time() - t0)
 
 
