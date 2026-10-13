@@ -134,7 +134,9 @@ def test_membrane_patch_test_isotropic(layout, model):
         X, Y, f = fields(p, c)
         assert np.allclose(f['u'], -delta*X/a, rtol=0, atol=1e-12*delta)
         assert np.allclose(f['v'], NU*delta*Y/a, rtol=0, atol=1e-12*delta)
-        assert np.allclose(f['w'], 0, rtol=0, atol=1e-12*delta)
+        # w is decoupled, but its round-off is the membrane round-off
+        # amplified by the stiffness ratio, of order (a/h)**2
+        assert np.allclose(f['w'], 0, rtol=0, atol=1e-8*delta)
     N = E*h*b*delta/a
     P = md.reaction_pd(c, NLgeom=False)
     assert np.isclose(P['inc'], N*delta, rtol=1e-10)
