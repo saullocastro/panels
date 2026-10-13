@@ -258,12 +258,12 @@ def fkCld_xcte(double ku, double kv, double kw, object p, double xp,
                         fBw = f(k, xip, x1w, x1wr, x2w, x2wr)
             
                         c += 1
-                        kCld_xcter[c] = row+2
-                        kCld_xctec[c] = col+2
+                        kCld_xcter[c] = row+0
+                        kCld_xctec[c] = col+0
                         kCld_xctev[c] += ku*b*fAu*fBu*gAugBu/2.
                         c += 1
-                        kCld_xcter[c] = row+2
-                        kCld_xctec[c] = col+2
+                        kCld_xcter[c] = row+1
+                        kCld_xctec[c] = col+1
                         kCld_xctev[c] += kv*b*fAv*fBv*gAvgBv/2.
                         c += 1
                         kCld_xcter[c] = row+2
@@ -382,12 +382,12 @@ def fkCld_ycte(double ku, double kv, double kw, object p, double yp,
                         gBw = f(l, etap, y1w, y1wr, y2w, y2wr)
             
                         c += 1
-                        kCld_ycter[c] = row+2
-                        kCld_yctec[c] = col+2
+                        kCld_ycter[c] = row+0
+                        kCld_yctec[c] = col+0
                         kCld_yctev[c] += ku*a*fAufBu*gAu*gBu/2.
                         c += 1
-                        kCld_ycter[c] = row+2
-                        kCld_yctec[c] = col+2
+                        kCld_ycter[c] = row+1
+                        kCld_yctec[c] = col+1
                         kCld_yctev[c] += kv*a*fAvfBv*gAv*gBv/2.
                         c += 1
                         kCld_ycter[c] = row+2
