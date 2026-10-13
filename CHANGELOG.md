@@ -60,7 +60,9 @@ displacements imposed exactly" of `doc/source/multidomain_null_space.rst`.
   method `calc_fext` raises `NotImplementedError`.
 - `Shell` stores the prescribed values in the new attributes
   `point_pds_values`, `point_pds_values_inc`, `distr_pds_values` and
-  `distr_pds_values_inc`, also saved by `json_io`, as `MultiDomain.pd_method`.
+  `distr_pds_values_inc`. `json_io` saves the point values, together with
+  `MultiDomain.pd_method` and the `rhs_tol` of `MultiDomain.get_T()`; the
+  distributed ones contain functions and, as `distr_pds`, cannot be saved.
   A penalty constant `None` with a value now prescribes nothing in
   `add_point_pd`, instead of raising `TypeError`.
 - `Shell.calc_fext(..., include_pds=True)` and `shell_fext(...,

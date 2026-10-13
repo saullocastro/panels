@@ -1718,7 +1718,7 @@ class Shell(object):
 
     def add_point_pd(self, x, y, ku, up, kv, vp, kw, wp, cte=True,
                      kphix=None, phixp=None, kphiy=None, phiyp=None):
-        r"""Add a point prescribed displacement with three components
+        r"""Add a point prescribed displacement with up to five components
 
         o/p = [location and equivalent force]
 

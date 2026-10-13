@@ -975,6 +975,8 @@ class MultiDomain(object):
             ``{'cte': P_0, 'inc': P_1}``.
 
         """
+        if self.pd_method != 'null-space':
+            raise ValueError('reaction_pd() requires pd_method="null-space"')
         c_p0, c_p1 = self.get_cp()
         r = self._reaction_residual(c, lbd, NLgeom)
         return dict(cte=float(c_p0 @ r), inc=float(c_p1 @ r))

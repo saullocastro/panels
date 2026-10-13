@@ -247,6 +247,11 @@ def test_penalty_unchanged_and_excluded_from_fext():
     assert np.array_equal(fext_ns, f_load)
     with pytest.raises(ValueError, match='pd_method'):
         MultiDomain([p], conn=[], pd_method='lagrange')
+    c = np.zeros(fext.size)
+    with pytest.raises(ValueError, match='requires pd_method'):
+        MultiDomain([p], conn=[]).reaction_pd(c)
+    with pytest.raises(ValueError, match='requires pd_method'):
+        MultiDomain([p], conn=[]).reaction_resultant(c, [(p, 'x', 0.2)])
     p.add_point_pd(0.1, 0.1, None, None, None, None, None, None,
                    kphix=1., phixp=0.)
     with pytest.raises(NotImplementedError, match='rotations'):
@@ -670,11 +675,13 @@ def test_save_and_load():
     p.add_point_pd(0., 0., 0, None, 1., 0., 0, None)
     p.add_point_pd(1., 0.3, 1., -1e-3, 0, None, 0, None, cte=False)
     md = MultiDomain([p], conn=[], pd_method='null-space')
+    md.get_T(rhs_tol=1e-6)
     f = io.BytesIO()
     md.save(f)
     f.seek(0)
     md2 = json_io.load(f)
     assert md2.pd_method == 'null-space'
+    assert md2._rhs_tol == 1e-6
     q = md2.panels[0]
     assert q.point_pds_values == p.point_pds_values
     assert q.point_pds_values_inc == p.point_pds_values_inc
