@@ -57,6 +57,7 @@ def fkCSSycte11(double kt, double kr, object p1, double ycte1,
         A sparse matrix that adds the penalty stiffness to ycte of panel p1 position.
 
     """
+    cdef double [:, ::1] gtab1
     cdef int i1, k1, j1, l1, c, row, col
     cdef int m1, n1
     cdef double a1, b1
@@ -93,8 +94,17 @@ def fkCSSycte11(double kt, double kr, object p1, double ycte1,
     kCSSycte11c = np.zeros((fdim,), dtype=INT)
     kCSSycte11v = np.zeros((fdim,), dtype=DOUBLE)
 
+    gtab1 = np.zeros((4, n1), dtype=DOUBLE)
+
     with nogil:
         c = -1
+        # approximation functions evaluated once, see panels/dev/tabulate.py
+        for j1 in range(n1):
+            gtab1[0, j1] = f(j1, etacte1, y1u1, y1ur1, y2u1, y2ur1)
+            gtab1[1, j1] = f(j1, etacte1, y1v1, y1vr1, y2v1, y2vr1)
+            gtab1[2, j1] = f(j1, etacte1, y1w1, y1wr1, y2w1, y2wr1)
+            gtab1[3, j1] = fp(j1, etacte1, y1w1, y1wr1, y2w1, y2wr1)
+
         for i1 in range(m1):
             for k1 in range(m1):
 
@@ -103,10 +113,10 @@ def fkCSSycte11(double kt, double kr, object p1, double ycte1,
                 f1Awf1Bw = integral_ff(i1, k1, x1w1, x1wr1, x2w1, x2wr1, x1w1, x1wr1, x2w1, x2wr1)
 
                 for j1 in range(n1):
-                    g1Au = f(j1, etacte1, y1u1, y1ur1, y2u1, y2ur1)
-                    g1Av = f(j1, etacte1, y1v1, y1vr1, y2v1, y2vr1)
-                    g1Aw = f(j1, etacte1, y1w1, y1wr1, y2w1, y2wr1)
-                    g1Aweta = fp(j1, etacte1, y1w1, y1wr1, y2w1, y2wr1)
+                    g1Au = gtab1[0, j1]
+                    g1Av = gtab1[1, j1]
+                    g1Aw = gtab1[2, j1]
+                    g1Aweta = gtab1[3, j1]
 
                     for l1 in range(n1):
                         row = row0 + DOF*(j1*m1 + i1)
@@ -116,10 +126,10 @@ def fkCSSycte11(double kt, double kr, object p1, double ycte1,
                         if row > col:
                             continue
 
-                        g1Bu = f(l1, etacte1, y1u1, y1ur1, y2u1, y2ur1)
-                        g1Bv = f(l1, etacte1, y1v1, y1vr1, y2v1, y2vr1)
-                        g1Bw = f(l1, etacte1, y1w1, y1wr1, y2w1, y2wr1)
-                        g1Bweta = fp(l1, etacte1, y1w1, y1wr1, y2w1, y2wr1)
+                        g1Bu = gtab1[0, l1]
+                        g1Bv = gtab1[1, l1]
+                        g1Bw = gtab1[2, l1]
+                        g1Bweta = gtab1[3, l1]
 
                         c += 1
                         kCSSycte11r[c] = row+0
@@ -177,6 +187,7 @@ def fkCSSycte12(double kt, double kr, object p1, object p2,
         A sparse matrix that adds the penalty stiffness to ycte of panel 1 and panel 2 coupling position.
 
     """
+    cdef double [:, ::1] gtab1, gtab2
     cdef int i1, k2, j1, l2, c, row, col
     cdef int m1, n1, m2, n2
     cdef double a1, b1, b2
@@ -224,8 +235,23 @@ def fkCSSycte12(double kt, double kr, object p1, object p2,
     kCSSycte12c = np.zeros((fdim,), dtype=INT)
     kCSSycte12v = np.zeros((fdim,), dtype=DOUBLE)
 
+    gtab1 = np.zeros((4, n1), dtype=DOUBLE)
+    gtab2 = np.zeros((4, n2), dtype=DOUBLE)
+
     with nogil:
         c = -1
+        # approximation functions evaluated once, see panels/dev/tabulate.py
+        for j1 in range(n1):
+            gtab1[0, j1] = f(j1, etacte1, y1u1, y1ur1, y2u1, y2ur1)
+            gtab1[1, j1] = f(j1, etacte1, y1v1, y1vr1, y2v1, y2vr1)
+            gtab1[2, j1] = f(j1, etacte1, y1w1, y1wr1, y2w1, y2wr1)
+            gtab1[3, j1] = fp(j1, etacte1, y1w1, y1wr1, y2w1, y2wr1)
+        for l2 in range(n2):
+            gtab2[0, l2] = f(l2, etacte2, y1u2, y1ur2, y2u2, y2ur2)
+            gtab2[1, l2] = f(l2, etacte2, y1v2, y1vr2, y2v2, y2vr2)
+            gtab2[2, l2] = f(l2, etacte2, y1w2, y1wr2, y2w2, y2wr2)
+            gtab2[3, l2] = fp(l2, etacte2, y1w2, y1wr2, y2w2, y2wr2)
+
         for i1 in range(m1):
             for k2 in range(m2):
 
@@ -235,10 +261,10 @@ def fkCSSycte12(double kt, double kr, object p1, object p2,
 
                 for j1 in range(n1):
 
-                    g1Au = f(j1, etacte1, y1u1, y1ur1, y2u1, y2ur1)
-                    g1Av = f(j1, etacte1, y1v1, y1vr1, y2v1, y2vr1)
-                    g1Aw = f(j1, etacte1, y1w1, y1wr1, y2w1, y2wr1)
-                    g1Aweta = fp(j1, etacte1, y1w1, y1wr1, y2w1, y2wr1)
+                    g1Au = gtab1[0, j1]
+                    g1Av = gtab1[1, j1]
+                    g1Aw = gtab1[2, j1]
+                    g1Aweta = gtab1[3, j1]
 
                     for l2 in range(n2):
                         row = row0 + DOF*(j1*m1 + i1)
@@ -248,10 +274,10 @@ def fkCSSycte12(double kt, double kr, object p1, object p2,
                         #if row > col:
                             #continue
 
-                        g2Bu = f(l2, etacte2, y1u2, y1ur2, y2u2, y2ur2)
-                        g2Bv = f(l2, etacte2, y1v2, y1vr2, y2v2, y2vr2)
-                        g2Bw = f(l2, etacte2, y1w2, y1wr2, y2w2, y2wr2)
-                        g2Bweta = fp(l2, etacte2, y1w2, y1wr2, y2w2, y2wr2)
+                        g2Bu = gtab2[0, l2]
+                        g2Bv = gtab2[1, l2]
+                        g2Bw = gtab2[2, l2]
+                        g2Bweta = gtab2[3, l2]
 
                         c += 1
                         kCSSycte12r[c] = row+0
@@ -305,6 +331,7 @@ def fkCSSycte22(double kt, double kr, object p1, object p2,
         A sparse matrix that adds the penalty stiffness to ycte of panel p2 position.
 
     """
+    cdef double [:, ::1] gtab2
     cdef int i2, k2, j2, l2, c, row, col
     cdef int m2, n2
     cdef double a1, b2
@@ -341,8 +368,17 @@ def fkCSSycte22(double kt, double kr, object p1, object p2,
     kCSSycte22c = np.zeros((fdim,), dtype=INT)
     kCSSycte22v = np.zeros((fdim,), dtype=DOUBLE)
 
+    gtab2 = np.zeros((4, n2), dtype=DOUBLE)
+
     with nogil:
         c = -1
+        # approximation functions evaluated once, see panels/dev/tabulate.py
+        for j2 in range(n2):
+            gtab2[0, j2] = f(j2, etacte2, y1u2, y1ur2, y2u2, y2ur2)
+            gtab2[1, j2] = f(j2, etacte2, y1v2, y1vr2, y2v2, y2vr2)
+            gtab2[2, j2] = f(j2, etacte2, y1w2, y1wr2, y2w2, y2wr2)
+            gtab2[3, j2] = fp(j2, etacte2, y1w2, y1wr2, y2w2, y2wr2)
+
         for i2 in range(m2):
             for k2 in range(m2):
 
@@ -351,10 +387,10 @@ def fkCSSycte22(double kt, double kr, object p1, object p2,
                 f2Awf2Bw = integral_ff(i2, k2, x1w2, x1wr2, x2w2, x2wr2, x1w2, x1wr2, x2w2, x2wr2)
 
                 for j2 in range(n2):
-                    g2Au = f(j2, etacte2, y1u2, y1ur2, y2u2, y2ur2)
-                    g2Av = f(j2, etacte2, y1v2, y1vr2, y2v2, y2vr2)
-                    g2Aw = f(j2, etacte2, y1w2, y1wr2, y2w2, y2wr2)
-                    g2Aweta = fp(j2, etacte2, y1w2, y1wr2, y2w2, y2wr2)
+                    g2Au = gtab2[0, j2]
+                    g2Av = gtab2[1, j2]
+                    g2Aw = gtab2[2, j2]
+                    g2Aweta = gtab2[3, j2]
 
                     for l2 in range(n2):
                         row = row0 + DOF*(j2*m2 + i2)
@@ -364,10 +400,10 @@ def fkCSSycte22(double kt, double kr, object p1, object p2,
                         if row > col:
                             continue
 
-                        g2Bu = f(l2, etacte2, y1u2, y1ur2, y2u2, y2ur2)
-                        g2Bv = f(l2, etacte2, y1v2, y1vr2, y2v2, y2vr2)
-                        g2Bw = f(l2, etacte2, y1w2, y1wr2, y2w2, y2wr2)
-                        g2Bweta = fp(l2, etacte2, y1w2, y1wr2, y2w2, y2wr2)
+                        g2Bu = gtab2[0, l2]
+                        g2Bv = gtab2[1, l2]
+                        g2Bw = gtab2[2, l2]
+                        g2Bweta = gtab2[3, l2]
 
                         c += 1
                         kCSSycte22r[c] = row+0

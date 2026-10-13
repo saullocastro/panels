@@ -56,6 +56,7 @@ def fkCSSxcte11(double kt, double kr, object p1, double xcte1, int size, int row
         A sparse matrix that adds the penalty stiffness to xcte of panel p1 position.
 
     """
+    cdef double [:, ::1] ftab1
     cdef int i1, k1, j1, l1, c, row, col
     cdef int m1, n1
     cdef double a1, b1
@@ -93,8 +94,17 @@ def fkCSSxcte11(double kt, double kr, object p1, double xcte1, int size, int row
     kCSSxcte11c = np.zeros((fdim,), dtype=INT)
     kCSSxcte11v = np.zeros((fdim,), dtype=DOUBLE)
 
+    ftab1 = np.zeros((4, m1), dtype=DOUBLE)
+
     with nogil:
         c = -1
+        # approximation functions evaluated once, see panels/dev/tabulate.py
+        for i1 in range(m1):
+            ftab1[0, i1] = f(i1, xicte1, x1u1, x1ur1, x2u1, x2ur1)
+            ftab1[1, i1] = f(i1, xicte1, x1v1, x1vr1, x2v1, x2vr1)
+            ftab1[2, i1] = f(i1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
+            ftab1[3, i1] = fp(i1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
+
         for j1 in range(n1):
             for l1 in range(n1):
                 g1Aug1Bu = integral_ff(j1, l1, y1u1, y1ur1, y2u1, y2ur1, y1u1, y1ur1, y2u1, y2ur1)
@@ -102,10 +112,10 @@ def fkCSSxcte11(double kt, double kr, object p1, double xcte1, int size, int row
                 g1Awg1Bw = integral_ff(j1, l1, y1w1, y1wr1, y2w1, y2wr1, y1w1, y1wr1, y2w1, y2wr1)
 
                 for i1 in range(m1):
-                    f1Au = f(i1, xicte1, x1u1, x1ur1, x2u1, x2ur1)
-                    f1Av = f(i1, xicte1, x1v1, x1vr1, x2v1, x2vr1)
-                    f1Aw = f(i1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
-                    f1Awxi = fp(i1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
+                    f1Au = ftab1[0, i1]
+                    f1Av = ftab1[1, i1]
+                    f1Aw = ftab1[2, i1]
+                    f1Awxi = ftab1[3, i1]
 
                     for k1 in range(m1):
                         row = row0 + DOF*(j1*m1 + i1)
@@ -115,10 +125,10 @@ def fkCSSxcte11(double kt, double kr, object p1, double xcte1, int size, int row
                         if row > col:
                             continue
 
-                        f1Bu = f(k1, xicte1, x1u1, x1ur1, x2u1, x2ur1)
-                        f1Bv = f(k1, xicte1, x1v1, x1vr1, x2v1, x2vr1)
-                        f1Bw = f(k1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
-                        f1Bwxi = fp(k1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
+                        f1Bu = ftab1[0, k1]
+                        f1Bv = ftab1[1, k1]
+                        f1Bw = ftab1[2, k1]
+                        f1Bwxi = ftab1[3, k1]
 
                         c += 1
                         kCSSxcte11r[c] = row+0
@@ -176,6 +186,7 @@ def fkCSSxcte12(double kt, double kr, object p1, object p2,
         A sparse matrix that adds the penalty stiffness to xcte of panel 1 and panel 2 coupling position.
 
     """
+    cdef double [:, ::1] ftab1, ftab2
     cdef int i1, k2, j1, l2, c, row, col
     cdef int m1, n1, m2, n2
     cdef double a1, a2, b1, b2
@@ -224,8 +235,23 @@ def fkCSSxcte12(double kt, double kr, object p1, object p2,
     kCSSxcte12c = np.zeros((fdim,), dtype=INT)
     kCSSxcte12v = np.zeros((fdim,), dtype=DOUBLE)
 
+    ftab1 = np.zeros((4, m1), dtype=DOUBLE)
+    ftab2 = np.zeros((4, m2), dtype=DOUBLE)
+
     with nogil:
         c = -1
+        # approximation functions evaluated once, see panels/dev/tabulate.py
+        for i1 in range(m1):
+            ftab1[0, i1] = f(i1, xicte1, x1u1, x1ur1, x2u1, x2ur1)
+            ftab1[1, i1] = f(i1, xicte1, x1v1, x1vr1, x2v1, x2vr1)
+            ftab1[2, i1] = f(i1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
+            ftab1[3, i1] = fp(i1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
+        for k2 in range(m2):
+            ftab2[0, k2] = f(k2, xicte2, x1u2, x1ur2, x2u2, x2ur2)
+            ftab2[1, k2] = f(k2, xicte2, x1v2, x1vr2, x2v2, x2vr2)
+            ftab2[2, k2] = f(k2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
+            ftab2[3, k2] = fp(k2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
+
         for j1 in range(n1):
             for l2 in range(n2):
                 g1Aug2Bu = integral_ff(j1, l2, y1u1, y1ur1, y2u1, y2ur1, y1u2, y1ur2, y2u2, y2ur2)
@@ -233,10 +259,10 @@ def fkCSSxcte12(double kt, double kr, object p1, object p2,
                 g1Awg2Bw = integral_ff(j1, l2, y1w1, y1wr1, y2w1, y2wr1, y1w2, y1wr2, y2w2, y2wr2)
 
                 for i1 in range(m1):
-                    f1Au = f(i1, xicte1, x1u1, x1ur1, x2u1, x2ur1)
-                    f1Av = f(i1, xicte1, x1v1, x1vr1, x2v1, x2vr1)
-                    f1Aw = f(i1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
-                    f1Awxi = fp(i1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
+                    f1Au = ftab1[0, i1]
+                    f1Av = ftab1[1, i1]
+                    f1Aw = ftab1[2, i1]
+                    f1Awxi = ftab1[3, i1]
 
                     for k2 in range(m2):
                         row = row0 + DOF*(j1*m1 + i1)
@@ -246,10 +272,10 @@ def fkCSSxcte12(double kt, double kr, object p1, object p2,
                         #if row > col:
                             #continue
 
-                        f2Bu = f(k2, xicte2, x1u2, x1ur2, x2u2, x2ur2)
-                        f2Bv = f(k2, xicte2, x1v2, x1vr2, x2v2, x2vr2)
-                        f2Bw = f(k2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
-                        f2Bwxi = fp(k2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
+                        f2Bu = ftab2[0, k2]
+                        f2Bv = ftab2[1, k2]
+                        f2Bw = ftab2[2, k2]
+                        f2Bwxi = ftab2[3, k2]
 
                         c += 1
                         kCSSxcte12r[c] = row+0
@@ -303,6 +329,7 @@ def fkCSSxcte22(double kt, double kr, object p1, object p2,
         A sparse matrix that adds the penalty stiffness to xcte of panel p2 position.
 
     """
+    cdef double [:, ::1] ftab2
     cdef int i2, k2, j2, l2, c, row, col
     cdef int m2, n2
     cdef double b1, a2, b2
@@ -340,8 +367,17 @@ def fkCSSxcte22(double kt, double kr, object p1, object p2,
     kCSSxcte22c = np.zeros((fdim,), dtype=INT)
     kCSSxcte22v = np.zeros((fdim,), dtype=DOUBLE)
 
+    ftab2 = np.zeros((4, m2), dtype=DOUBLE)
+
     with nogil:
         c = -1
+        # approximation functions evaluated once, see panels/dev/tabulate.py
+        for i2 in range(m2):
+            ftab2[0, i2] = f(i2, xicte2, x1u2, x1ur2, x2u2, x2ur2)
+            ftab2[1, i2] = f(i2, xicte2, x1v2, x1vr2, x2v2, x2vr2)
+            ftab2[2, i2] = f(i2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
+            ftab2[3, i2] = fp(i2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
+
         for j2 in range(n2):
             for l2 in range(n2):
                 g2Aug2Bu = integral_ff(j2, l2, y1u2, y1ur2, y2u2, y2ur2, y1u2, y1ur2, y2u2, y2ur2)
@@ -349,10 +385,10 @@ def fkCSSxcte22(double kt, double kr, object p1, object p2,
                 g2Awg2Bw = integral_ff(j2, l2, y1w2, y1wr2, y2w2, y2wr2, y1w2, y1wr2, y2w2, y2wr2)
 
                 for i2 in range(m2):
-                    f2Au = f(i2, xicte2, x1u2, x1ur2, x2u2, x2ur2)
-                    f2Av = f(i2, xicte2, x1v2, x1vr2, x2v2, x2vr2)
-                    f2Aw = f(i2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
-                    f2Awxi = fp(i2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
+                    f2Au = ftab2[0, i2]
+                    f2Av = ftab2[1, i2]
+                    f2Aw = ftab2[2, i2]
+                    f2Awxi = ftab2[3, i2]
 
                     for k2 in range(m2):
                         row = row0 + DOF*(j2*m2 + i2)
@@ -362,10 +398,10 @@ def fkCSSxcte22(double kt, double kr, object p1, object p2,
                         if row > col:
                             continue
 
-                        f2Bu = f(k2, xicte2, x1u2, x1ur2, x2u2, x2ur2)
-                        f2Bv = f(k2, xicte2, x1v2, x1vr2, x2v2, x2vr2)
-                        f2Bw = f(k2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
-                        f2Bwxi = fp(k2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
+                        f2Bu = ftab2[0, k2]
+                        f2Bv = ftab2[1, k2]
+                        f2Bw = ftab2[2, k2]
+                        f2Bwxi = ftab2[3, k2]
                         
                         c += 1
                         kCSSxcte22r[c] = row+0

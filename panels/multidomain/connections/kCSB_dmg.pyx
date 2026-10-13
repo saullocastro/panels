@@ -149,6 +149,7 @@ def fkCSB11_dmg(double dt, object p1, int size, int row0, int col0,
         A sparse matrix that adds the penalty stiffness to ycte of panel p1 position.
 
     """
+    cdef double [:, ::1] ftab1, gtab1
     cdef int i1, k1, j1, l1, c, row, col, ptx, pty
     cdef int m1, n1
     cdef double a1, b1, xi, eta, weight
@@ -193,6 +194,9 @@ def fkCSB11_dmg(double dt, object p1, int size, int row0, int col0,
 
     # print(f'        KCSB_11 -- kw_tsl {np.min(kw_tsl):.2e} {np.max(kw_tsl):.2e}')
     
+    ftab1 = np.zeros((4, m1), dtype=DOUBLE)
+    gtab1 = np.zeros((4, n1), dtype=DOUBLE)
+
     with nogil:
         # kCSB11
         
@@ -215,41 +219,53 @@ def fkCSB11_dmg(double dt, object p1, int size, int row0, int col0,
                 kt = kw_tsl[pty, ptx]
                 
                 c = -1
+                # approximation functions evaluated once, see panels/dev/tabulate.py
+                for i1 in range(m1):
+                    ftab1[0, i1] = f(i1, xi, x1u1, x1ur1, x2u1, x2ur1)
+                    ftab1[1, i1] = f(i1, xi, x1v1, x1vr1, x2v1, x2vr1)
+                    ftab1[2, i1] = f(i1, xi, x1w1, x1wr1, x2w1, x2wr1)
+                    ftab1[3, i1] = fp(i1, xi, x1w1, x1wr1, x2w1, x2wr1)
+                for j1 in range(n1):
+                    gtab1[0, j1] = f(j1, eta, y1u1, y1ur1, y2u1, y2ur1)
+                    gtab1[1, j1] = f(j1, eta, y1v1, y1vr1, y2v1, y2vr1)
+                    gtab1[2, j1] = f(j1, eta, y1w1, y1wr1, y2w1, y2wr1)
+                    gtab1[3, j1] = fp(j1, eta, y1w1, y1wr1, y2w1, y2wr1)
+
                 for i1 in range(m1):
                     # NOTE: When any of these are uncommented, make sure they are defined earlier (cdef etc)
-                    f1Au = f(i1, xi, x1u1, x1ur1, x2u1, x2ur1)
+                    f1Au = ftab1[0, i1]
                     # f1Auxi = fp(i1, xi, x1u1, x1ur1, x2u1, x2ur1)
-                    f1Av = f(i1, xi, x1v1, x1vr1, x2v1, x2vr1)
+                    f1Av = ftab1[1, i1]
                     # f1Avxi = fp(i1, xi, x1v1, x1vr1, x2v1, x2vr1)
-                    f1Aw = f(i1, xi, x1w1, x1wr1, x2w1, x2wr1)
-                    f1Awxi = fp(i1, xi, x1w1, x1wr1, x2w1, x2wr1)
+                    f1Aw = ftab1[2, i1]
+                    f1Awxi = ftab1[3, i1]
                     # f1Awxixi = fpp(i1, xi, x1w1, x1wr1, x2w1, x2wr1)
                     
                     for k1 in range(m1):
-                        f1Bu = f(k1, xi, x1u1, x1ur1, x2u1, x2ur1)
+                        f1Bu = ftab1[0, k1]
                         # f1Buxi = fp(k1, xi, x1u1, x1ur1, x2u1, x2ur1)
-                        f1Bv = f(k1, xi, x1v1, x1vr1, x2v1, x2vr1)
+                        f1Bv = ftab1[1, k1]
                         # f1Bvxi = fp(k1, xi, x1v1, x1vr1, x2v1, x2vr1)
-                        f1Bw = f(k1, xi, x1w1, x1wr1, x2w1, x2wr1)
-                        f1Bwxi = fp(k1, xi, x1w1, x1wr1, x2w1, x2wr1)
+                        f1Bw = ftab1[2, k1]
+                        f1Bwxi = ftab1[3, k1]
                         # f1Bwxixi = fpp(k1, xi, x1w1, x1wr1, x2w1, x2wr1)
                         
                         for j1 in range(n1): 
-                            g1Au = f(j1, eta, y1u1, y1ur1, y2u1, y2ur1)
+                            g1Au = gtab1[0, j1]
                             # g1Aueta = fp(j1, eta, y1u1, y1ur1, y2u1, y2ur1)
-                            g1Av = f(j1, eta, y1v1, y1vr1, y2v1, y2vr1)
+                            g1Av = gtab1[1, j1]
                             # g1Aveta = fp(j1, eta, y1v1, y1vr1, y2v1 y2vr1)
-                            g1Aw = f(j1, eta, y1w1, y1wr1, y2w1, y2wr1)
-                            g1Aweta = fp(j1, eta, y1w1, y1wr1, y2w1, y2wr1)
+                            g1Aw = gtab1[2, j1]
+                            g1Aweta = gtab1[3, j1]
                             # g1Awetaeta = fpp(j1, eta, y1w1, y1wr1, y2w1, y2wr1)
                                     
                             for l1 in range(n1):
-                                g1Bu = f(l1, eta, y1u1, y1ur1, y2u1, y2ur1)
+                                g1Bu = gtab1[0, l1]
                                 # g1Bueta = fp(l1, eta, y1u1, y1ur1, y2u1, y2ur1)
-                                g1Bv = f(l1, eta, y1v1, y1vr1, y2v1, y2vr1)
+                                g1Bv = gtab1[1, l1]
                                 # g1Bveta = fp(l1, eta, y1v1, y1vr1, y2v1, y2vr1)
-                                g1Bw = f(l1, eta, y1w1, y1wr1, y2w1, y2wr1)
-                                g1Bweta = fp(l1, eta, y1w1, y1wr1, y2w1, y2wr1)
+                                g1Bw = gtab1[2, l1]
+                                g1Bweta = gtab1[3, l1]
                                 # g1Bwetaeta = fpp(l1, eta, y1w1, y1wr1, y2w1, y2wr1)
         
         
@@ -365,6 +381,7 @@ def fkCSB12_dmg(double dt, double db, object p1, object p2, int size, int row0, 
         A sparse matrix that adds the penalty stiffness to ycte of panel 1 and panel 2 coupling position.
 
     """
+    cdef double [:, ::1] ftab1, ftab2, gtab1, gtab2
     cdef int i1, j1, k2, l2, c, row, col, ptx, pty
     cdef int m1, n1, m2, n2
     cdef double a1, b1, xi, eta, weight
@@ -417,6 +434,11 @@ def fkCSB12_dmg(double dt, double db, object p1, object p2, int size, int row0, 
     
     # print(f'        KCSB_12 -- kw_tsl {np.min(kw_tsl):.2e} {np.max(kw_tsl):.2e}')
 
+    ftab1 = np.zeros((4, m1), dtype=DOUBLE)
+    ftab2 = np.zeros((4, m2), dtype=DOUBLE)
+    gtab1 = np.zeros((4, n1), dtype=DOUBLE)
+    gtab2 = np.zeros((4, n2), dtype=DOUBLE)
+
     with nogil:
         # kCSB12
         
@@ -435,40 +457,62 @@ def fkCSB12_dmg(double dt, double db, object p1, object p2, int size, int row0, 
                 kt = kw_tsl[pty, ptx]
                 
                 c = -1
+                # approximation functions evaluated once, see panels/dev/tabulate.py
                 for i1 in range(m1):
-                    f1Au = f(i1, xi, x1u1, x1ur1, x2u1, x2ur1)
+                    ftab1[0, i1] = f(i1, xi, x1u1, x1ur1, x2u1, x2ur1)
+                    ftab1[1, i1] = f(i1, xi, x1v1, x1vr1, x2v1, x2vr1)
+                    ftab1[2, i1] = f(i1, xi, x1w1, x1wr1, x2w1, x2wr1)
+                    ftab1[3, i1] = fp(i1, xi, x1w1, x1wr1, x2w1, x2wr1)
+                for k2 in range(m2):
+                    ftab2[0, k2] = f(k2, xi, x1u2, x1ur2, x2u2, x2ur2)
+                    ftab2[1, k2] = f(k2, xi, x1v2, x1vr2, x2v2, x2vr2)
+                    ftab2[2, k2] = f(k2, xi, x1w2, x1wr2, x2w2, x2wr2)
+                    ftab2[3, k2] = fp(k2, xi, x1w2, x1wr2, x2w2, x2wr2)
+                for j1 in range(n1):
+                    gtab1[0, j1] = f(j1, eta, y1u1, y1ur1, y2u1, y2ur1)
+                    gtab1[1, j1] = f(j1, eta, y1v1, y1vr1, y2v1, y2vr1)
+                    gtab1[2, j1] = f(j1, eta, y1w1, y1wr1, y2w1, y2wr1)
+                    gtab1[3, j1] = fp(j1, eta, y1w1, y1wr1, y2w1, y2wr1)
+                for l2 in range(n2):
+                    gtab2[0, l2] = f(l2, eta, y1u2, y1ur2, y2u2, y2ur2)
+                    gtab2[1, l2] = f(l2, eta, y1v2, y1vr2, y2v2, y2vr2)
+                    gtab2[2, l2] = f(l2, eta, y1w2, y1wr2, y2w2, y2wr2)
+                    gtab2[3, l2] = fp(l2, eta, y1w2, y1wr2, y2w2, y2wr2)
+
+                for i1 in range(m1):
+                    f1Au = ftab1[0, i1]
                     # f1Auxi = fp(i1, xi, x1u1, x1ur1, x2u1, x2ur1)
-                    f1Av = f(i1, xi, x1v1, x1vr1, x2v1, x2vr1)
+                    f1Av = ftab1[1, i1]
                     # f1Avxi = fp(i1, xi, x1v1, x1vr1, x2v1, x2vr1)
-                    f1Aw = f(i1, xi, x1w1, x1wr1, x2w1, x2wr1)
-                    f1Awxi = fp(i1, xi, x1w1, x1wr1, x2w1, x2wr1)
+                    f1Aw = ftab1[2, i1]
+                    f1Awxi = ftab1[3, i1]
                     # f1Awxixi = fpp(i1, xi, x1w1, x1wr1, x2w1, x2wr1)
                     
                     for k2 in range(m2):
-                        f2Bu = f(k2, xi, x1u2, x1ur2, x2u2, x2ur2)
+                        f2Bu = ftab2[0, k2]
                         # f2Buxi = fp(k2, xi, x1u2, x1ur2, x2u2, x2ur2)
-                        f2Bv = f(k2, xi, x1v2, x1vr2, x2v2, x2vr2)
+                        f2Bv = ftab2[1, k2]
                         # f2Bvxi = fp(k2, xi, x1v2, x1vr2, x2v2, x2vr2)
-                        f2Bw = f(k2, xi, x1w2, x1wr2, x2w2, x2wr2)
-                        f2Bwxi = fp(k2, xi, x1w2, x1wr2, x2w2, x2wr2)
+                        f2Bw = ftab2[2, k2]
+                        f2Bwxi = ftab2[3, k2]
                         # f2Bwxixi = fpp(k2, xi, x1w2, x1wr2, x2w2, x2wr2)
                         
                         for j1 in range(n1):
-                            g1Au = f(j1, eta, y1u1, y1ur1, y2u1, y2ur1)
+                            g1Au = gtab1[0, j1]
                             # g1Aueta = fp(j1, eta, y1u1, y1ur1, y1u1, y1ur1)
-                            g1Av = f(j1, eta, y1v1, y1vr1, y2v1, y2vr1)
+                            g1Av = gtab1[1, j1]
                             # g1Aveta = fp(j1, eta, y1v1, y1vr1, y1v1, y1vr1)
-                            g1Aw = f(j1, eta, y1w1, y1wr1, y2w1, y2wr1)
-                            g1Aweta = fp(j1, eta, y1w1, y1wr1, y2w1, y2wr1)
+                            g1Aw = gtab1[2, j1]
+                            g1Aweta = gtab1[3, j1]
                             # g1Awetaeta = fpp(j1, eta, y1w1, y1wr1, y1w1, y1wr1)
                                     
                             for l2 in range(n2):
-                                g2Bu = f(l2, eta, y1u2, y1ur2, y2u2, y2ur2)
+                                g2Bu = gtab2[0, l2]
                                 # g2Bueta = fp(l2, eta, y1u2, y1ur2, y2u2, y2ur2)
-                                g2Bv = f(l2, eta, y1v2, y1vr2, y2v2, y2vr2)
+                                g2Bv = gtab2[1, l2]
                                 # g2Bveta = fp(l2, eta, y1v2, y1vr2, y2v2, y2vr2)
-                                g2Bw = f(l2, eta, y1w2, y1wr2, y2w2, y2wr2)
-                                g2Bweta = fp(l2, eta, y1w2, y1wr2, y2w2, y2wr2)
+                                g2Bw = gtab2[2, l2]
+                                g2Bweta = gtab2[3, l2]
                                 # g2Bwetaeta = fpp(l2, eta, y1w2, y1wr2, y2w2, y2wr2)
         
         
@@ -563,6 +607,7 @@ def fkCSB22_dmg(double db, object p1, object p2, int size, int row0, int col0,
         A sparse matrix that adds the penalty stiffness to ycte of panel p2 position.
 
     """
+    cdef double [:, ::1] ftab2, gtab2
     cdef int i2, k2, j2, l2, c, row, col, ptx, pty
     cdef int m2, n2
     cdef double a1, b1, xi, eta, weight
@@ -605,6 +650,9 @@ def fkCSB22_dmg(double db, object p1, object p2, int size, int row0, int col0,
     
     # print(f'        KCSB_22 -- kw_tsl {np.min(kw_tsl):.2e} {np.max(kw_tsl):.2e}')
 
+    ftab2 = np.zeros((4, m2), dtype=DOUBLE)
+    gtab2 = np.zeros((4, n2), dtype=DOUBLE)
+
     with nogil:
         
         for ptx in range(nr_x_gauss):
@@ -623,40 +671,52 @@ def fkCSB22_dmg(double db, object p1, object p2, int size, int row0, int col0,
                 # kt = kw_tsl[ptx, pty]
                 
                 c = -1
+                # approximation functions evaluated once, see panels/dev/tabulate.py
                 for i2 in range(m2):
-                    f2Au = f(i2, xi, x1u2, x1ur2, x2u2, x2ur2)
+                    ftab2[0, i2] = f(i2, xi, x1u2, x1ur2, x2u2, x2ur2)
+                    ftab2[1, i2] = f(i2, xi, x1v2, x1vr2, x2v2, x2vr2)
+                    ftab2[2, i2] = f(i2, xi, x1w2, x1wr2, x2w2, x2wr2)
+                    ftab2[3, i2] = fp(i2, xi, x1w2, x1wr2, x2w2, x2wr2)
+                for j2 in range(n2):
+                    gtab2[0, j2] = f(j2, eta, y1u2, y1ur2, y2u2, y2ur2)
+                    gtab2[1, j2] = f(j2, eta, y1v2, y1vr2, y2v2, y2vr2)
+                    gtab2[2, j2] = f(j2, eta, y1w2, y1wr2, y2w2, y2wr2)
+                    gtab2[3, j2] = fp(j2, eta, y1w2, y1wr2, y2w2, y2wr2)
+
+                for i2 in range(m2):
+                    f2Au = ftab2[0, i2]
                     # f2Auxi = fp(i2, xi, x1u2, x1ur2, x2u2, x2ur2)
-                    f2Av = f(i2, xi, x1v2, x1vr2, x2v2, x2vr2)
+                    f2Av = ftab2[1, i2]
                     # f2Avxi = fp(i2, xi, x1v2, x1vr2, x2v2, x2vr2)
-                    f2Aw = f(i2, xi, x1w2, x1wr2, x2w2, x2wr2)
-                    f2Awxi = fp(i2, xi, x1w2, x1wr2, x2w2, x2wr2)
+                    f2Aw = ftab2[2, i2]
+                    f2Awxi = ftab2[3, i2]
                     # f2Awxixi = fpp(i2, xi, x1w2, x1wr2, x2w2, x2wr2)
                     
                     for k2 in range(m2):
-                        f2Bu = f(k2, xi, x1u2, x1ur2, x2u2, x2ur2)
+                        f2Bu = ftab2[0, k2]
                         # f2Buxi = fp(k2, xi, x1u2, x1ur2, x2u2, x2ur2)
-                        f2Bv = f(k2, xi, x1v2, x1vr2, x2v2, x2vr2)
+                        f2Bv = ftab2[1, k2]
                         # f2Bvxi = fp(k2, xi, x1v2, x1vr2, x2v2, x2vr2)
-                        f2Bw = f(k2, xi, x1w2, x1wr2, x2w2, x2wr2)
-                        f2Bwxi = fp(k2, xi, x1w2, x1wr2, x2w2, x2wr2)
+                        f2Bw = ftab2[2, k2]
+                        f2Bwxi = ftab2[3, k2]
                         # f2Bwxixi = fpp(k2, xi, x1w2, x1wr2, x2w2, x2wr2)
                         
                         for j2 in range(n2):
-                            g2Au = f(j2, eta, y1u2, y1ur2, y2u2, y2ur2)
+                            g2Au = gtab2[0, j2]
                             # g2Aueta = fp(j2, eta, y1u2, y1ur2, y2u2, y2ur2)
-                            g2Av = f(j2, eta, y1v2, y1vr2, y2v2, y2vr2)
+                            g2Av = gtab2[1, j2]
                             # g2Aveta = fp(j2, eta, y1v2, y1vr2, y2v2, y2vr2)
-                            g2Aw = f(j2, eta, y1w2, y1wr2, y2w2, y2wr2)
-                            g2Aweta = fp(j2, eta, y1w2, y1wr2, y2w2, y2wr2)
+                            g2Aw = gtab2[2, j2]
+                            g2Aweta = gtab2[3, j2]
                             # g2Awetaeta = fpp(j2, eta, y1w2, y1wr2, y2w2, y2wr2)
                                     
                             for l2 in range(n2):
-                                g2Bu = f(l2, eta, y1u2, y1ur2, y2u2, y2ur2)
+                                g2Bu = gtab2[0, l2]
                                 # g2Bueta = fp(l2, eta, y1u2, y1ur2, y2u2, y2ur2)
-                                g2Bv = f(l2, eta, y1v2, y1vr2, y2v2, y2vr2)
+                                g2Bv = gtab2[1, l2]
                                 # g2Bveta = fp(l2, eta, y1v2, y1vr2, y2v2, y2vr2)
-                                g2Bw = f(l2, eta, y1w2, y1wr2, y2w2, y2wr2)
-                                g2Bweta = fp(l2, eta, y1w2, y1wr2, y2w2, y2wr2)
+                                g2Bw = gtab2[2, l2]
+                                g2Bweta = gtab2[3, l2]
                                 # g2Bwetaeta = fpp(l2, eta, y1w2, y1wr2, y2w2, y2wr2)
                                 
                                 

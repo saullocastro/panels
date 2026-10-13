@@ -31,6 +31,7 @@ def fkCss(double kt, double kr, double ys, double a, double b, int m, int n,
           double y1v, double y1vr, double y2v, double y2vr,
           double y1w, double y1wr, double y2w, double y2wr,
           int size, int row0, int col0):
+    cdef double [:, ::1] gtab
     cdef int i, k, j, l, c, row, col
     cdef double eta
 
@@ -48,9 +49,18 @@ def fkCss(double kt, double kr, double ys, double a, double b, int m, int n,
     kCssc = np.zeros((fdim,), dtype=INT)
     kCssv = np.zeros((fdim,), dtype=DOUBLE)
 
+    gtab = np.zeros((4, n), dtype=DOUBLE)
+
     with nogil:
         # kCss
         c = -1
+        # approximation functions evaluated once, see panels/dev/tabulate.py
+        for j in range(n):
+            gtab[0, j] = f(j, eta, y1u, y1ur, y2u, y2ur)
+            gtab[1, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
+            gtab[2, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
+            gtab[3, j] = fp(j, eta, y1w, y1wr, y2w, y2wr)
+
         for i in range(m):
             for k in range(m):
                 fAufBu = integral_ff(i, k, x1u, x1ur, x2u, x2ur, x1u, x1ur, x2u, x2ur)
@@ -58,10 +68,10 @@ def fkCss(double kt, double kr, double ys, double a, double b, int m, int n,
                 fAwfBw = integral_ff(i, k, x1w, x1wr, x2w, x2wr, x1w, x1wr, x2w, x2wr)
 
                 for j in range(n):
-                    gAu = f(j, eta, y1u, y1ur, y2u, y2ur)
-                    gAv = f(j, eta, y1v, y1vr, y2v, y2vr)
-                    gAw = f(j, eta, y1w, y1wr, y2w, y2wr)
-                    gAweta = fp(j, eta, y1w, y1wr, y2w, y2wr)
+                    gAu = gtab[0, j]
+                    gAv = gtab[1, j]
+                    gAw = gtab[2, j]
+                    gAweta = gtab[3, j]
 
                     for l in range(n):
                         row = row0 + DOF*(j*m + i)
@@ -71,10 +81,10 @@ def fkCss(double kt, double kr, double ys, double a, double b, int m, int n,
                         if row > col:
                             continue
 
-                        gBu = f(l, eta, y1u, y1ur, y2u, y2ur)
-                        gBv = f(l, eta, y1v, y1vr, y2v, y2vr)
-                        gBw = f(l, eta, y1w, y1wr, y2w, y2wr)
-                        gBweta = fp(l, eta, y1w, y1wr, y2w, y2wr)
+                        gBu = gtab[0, l]
+                        gBv = gtab[1, l]
+                        gBw = gtab[2, l]
+                        gBweta = gtab[3, l]
 
                         c += 1
                         kCssr[c] = row+0
@@ -109,6 +119,7 @@ def fkCsf(double kt, double kr, double ys, double a, double b, double bf,
           double y1vf, double y1vrf, double y2vf, double y2vrf,
           double y1wf, double y1wrf, double y2wf, double y2wrf,
           int size, int row0, int col0):
+    cdef double [:, ::1] gtab, gtabf
     cdef int i, j, k1, l1, c, row, col
     cdef double eta
 
@@ -126,9 +137,24 @@ def fkCsf(double kt, double kr, double ys, double a, double b, double bf,
     kCsfc = np.zeros((fdim,), dtype=INT)
     kCsfv = np.zeros((fdim,), dtype=DOUBLE)
 
+    gtab = np.zeros((4, n), dtype=DOUBLE)
+    gtabf = np.zeros((4, n1), dtype=DOUBLE)
+
     with nogil:
         # kCsf
         c = -1
+        # approximation functions evaluated once, see panels/dev/tabulate.py
+        for j in range(n):
+            gtab[0, j] = f(j, eta, y1u, y1ur, y2u, y2ur)
+            gtab[1, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
+            gtab[2, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
+            gtab[3, j] = fp(j, eta, y1w, y1wr, y2w, y2wr)
+        for l1 in range(n1):
+            gtabf[0, l1] = f(l1, -1., y1uf, y1urf, y2uf, y2urf)
+            gtabf[1, l1] = f(l1, -1., y1vf, y1vrf, y2vf, y2vrf)
+            gtabf[2, l1] = f(l1, -1., y1wf, y1wrf, y2wf, y2wrf)
+            gtabf[3, l1] = fp(l1, -1., y1wf, y1wrf, y2wf, y2wrf)
+
         for i in range(m):
             for k1 in range(m1):
                 fAurBu = integral_ff(i, k1, x1u, x1ur, x2u, x2ur, x1uf, x1urf, x2uf, x2urf)
@@ -137,10 +163,10 @@ def fkCsf(double kt, double kr, double ys, double a, double b, double bf,
                 fAwrBw = integral_ff(i, k1, x1w, x1wr, x2w, x2wr, x1wf, x1wrf, x2wf, x2wrf)
 
                 for j in range(n):
-                    gAu = f(j, eta, y1u, y1ur, y2u, y2ur)
-                    gAv = f(j, eta, y1v, y1vr, y2v, y2vr)
-                    gAw = f(j, eta, y1w, y1wr, y2w, y2wr)
-                    gAweta = fp(j, eta, y1w, y1wr, y2w, y2wr)
+                    gAu = gtab[0, j]
+                    gAv = gtab[1, j]
+                    gAw = gtab[2, j]
+                    gAweta = gtab[3, j]
 
                     for l1 in range(n1):
                         row = row0 + DOF1*(j*m + i)
@@ -150,10 +176,10 @@ def fkCsf(double kt, double kr, double ys, double a, double b, double bf,
                         #if row > col:
                             #continue
 
-                        sBu = f(l1, -1., y1uf, y1urf, y2uf, y2urf)
-                        sBv = f(l1, -1., y1vf, y1vrf, y2vf, y2vrf)
-                        sBw = f(l1, -1., y1wf, y1wrf, y2wf, y2wrf)
-                        sBweta = fp(l1, -1., y1wf, y1wrf, y2wf, y2wrf)
+                        sBu = gtabf[0, l1]
+                        sBv = gtabf[1, l1]
+                        sBw = gtabf[2, l1]
+                        sBweta = gtabf[3, l1]
 
                         c += 1
                         kCsfr[c] = row+0
@@ -185,6 +211,7 @@ def fkCff(double kt, double kr, double a, double bf, int m1, int n1,
           double y1vf, double y1vrf, double y2vf, double y2vrf,
           double y1wf, double y1wrf, double y2wf, double y2wrf,
           int size, int row0, int col0):
+    cdef double [:, ::1] gtabf
     cdef int i1, k1, j1, l1, c, row, col
 
     cdef long [:] kCffr, kCffc
@@ -199,10 +226,19 @@ def fkCff(double kt, double kr, double a, double bf, int m1, int n1,
     kCffc = np.zeros((fdim,), dtype=INT)
     kCffv = np.zeros((fdim,), dtype=DOUBLE)
 
+    gtabf = np.zeros((4, n1), dtype=DOUBLE)
+
     with nogil:
 
         # kCff
         c = -1
+        # approximation functions evaluated once, see panels/dev/tabulate.py
+        for j1 in range(n1):
+            gtabf[0, j1] = f(j1, -1., y1uf, y1urf, y2uf, y2urf)
+            gtabf[1, j1] = f(j1, -1., y1vf, y1vrf, y2vf, y2vrf)
+            gtabf[2, j1] = f(j1, -1., y1wf, y1wrf, y2wf, y2wrf)
+            gtabf[3, j1] = fp(j1, -1., y1wf, y1wrf, y2wf, y2wrf)
+
         for i1 in range(m1):
             for k1 in range(m1):
                 rAurBu = integral_ff(i1, k1, x1uf, x1urf, x2uf, x2urf, x1uf, x1urf, x2uf, x2urf)
@@ -210,10 +246,10 @@ def fkCff(double kt, double kr, double a, double bf, int m1, int n1,
                 rAwrBw = integral_ff(i1, k1, x1wf, x1wrf, x2wf, x2wrf, x1wf, x1wrf, x2wf, x2wrf)
 
                 for j1 in range(n1):
-                    sAu = f(j1, -1., y1uf, y1urf, y2uf, y2urf)
-                    sAv = f(j1, -1., y1vf, y1vrf, y2vf, y2vrf)
-                    sAw = f(j1, -1., y1wf, y1wrf, y2wf, y2wrf)
-                    sAweta = fp(j1, -1., y1wf, y1wrf, y2wf, y2wrf)
+                    sAu = gtabf[0, j1]
+                    sAv = gtabf[1, j1]
+                    sAw = gtabf[2, j1]
+                    sAweta = gtabf[3, j1]
 
                     for l1 in range(n1):
                         row = row0 + DOF1*(j1*m1 + i1)
@@ -223,10 +259,10 @@ def fkCff(double kt, double kr, double a, double bf, int m1, int n1,
                         if row > col:
                             continue
 
-                        sBu = f(l1, -1., y1uf, y1urf, y2uf, y2urf)
-                        sBv = f(l1, -1., y1vf, y1vrf, y2vf, y2vrf)
-                        sBw = f(l1, -1., y1wf, y1wrf, y2wf, y2wrf)
-                        sBweta = fp(l1, -1., y1wf, y1wrf, y2wf, y2wrf)
+                        sBu = gtabf[0, l1]
+                        sBv = gtabf[1, l1]
+                        sBw = gtabf[2, l1]
+                        sBweta = gtabf[3, l1]
 
                         c += 1
                         kCffr[c] = row+0

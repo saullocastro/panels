@@ -53,6 +53,7 @@ def fkCpd(double ku, double kv, double kw, object p, double xp, double yp,
         f here = function i.e. ftn for kCpd
 
     """
+    cdef double [:, ::1] gtab, ftab
     cdef int i, k, j, l, c, row, col
     cdef int m, n # no of terms in x,y
     cdef double a, b, xip, etap
@@ -100,27 +101,40 @@ def fkCpd(double ku, double kv, double kw, object p, double xp, double yp,
     # i, j are for the rows (see the line where the row is being updated) - check var_descr.py CHECK 
     # k, l are for the cols
     
+    gtab = np.zeros((3, n), dtype=DOUBLE)
+    ftab = np.zeros((3, m), dtype=DOUBLE)
+
     with nogil:
         xip = 2*xp/a - 1.
         etap = 2*yp/b - 1.
         
         c = -1
+        # approximation functions evaluated once, see panels/dev/tabulate.py
         for j in range(n):
-            gAu = f(j, etap, y1u, y1ur, y2u, y2ur) # the point location should be in natural coords
-            gAv = f(j, etap, y1v, y1vr, y2v, y2vr)
-            gAw = f(j, etap, y1w, y1wr, y2w, y2wr)
+            gtab[0, j] = f(j, etap, y1u, y1ur, y2u, y2ur)
+            gtab[1, j] = f(j, etap, y1v, y1vr, y2v, y2vr)
+            gtab[2, j] = f(j, etap, y1w, y1wr, y2w, y2wr)
+        for i in range(m):
+            ftab[0, i] = f(i, xip, x1u, x1ur, x2u, x2ur)
+            ftab[1, i] = f(i, xip, x1v, x1vr, x2v, x2vr)
+            ftab[2, i] = f(i, xip, x1w, x1wr, x2w, x2wr)
+
+        for j in range(n):
+            gAu = gtab[0, j] # the point location should be in natural coords
+            gAv = gtab[1, j]
+            gAw = gtab[2, j]
             # Generates a single shape function, based on the bardell function number j 
                 # So its actually gAw_j
     
             for l in range(n):
-                gBu = f(l, etap, y1u, y1ur, y2u, y2ur)
-                gBv = f(l, etap, y1v, y1vr, y2v, y2vr)
-                gBw = f(l, etap, y1w, y1wr, y2w, y2wr)
+                gBu = gtab[0, l]
+                gBv = gtab[1, l]
+                gBw = gtab[2, l]
         
                 for i in range(m):
-                    fAu = f(i, xip, x1u, x1ur, x2u, x2ur)
-                    fAv = f(i, xip, x1v, x1vr, x2v, x2vr)
-                    fAw = f(i, xip, x1w, x1wr, x2w, x2wr)
+                    fAu = ftab[0, i]
+                    fAv = ftab[1, i]
+                    fAw = ftab[2, i]
             
                     for k in range(m):
                         row = row0 + DOF*(j*m + i) # row0 = starting row of this submatrix in the global matrix
@@ -130,9 +144,9 @@ def fkCpd(double ku, double kv, double kw, object p, double xp, double yp,
                         if row > col:
                             continue
 
-                        fBu = f(k, xip, x1u, x1ur, x2u, x2ur)
-                        fBv = f(k, xip, x1v, x1vr, x2v, x2vr)
-                        fBw = f(k, xip, x1w, x1wr, x2w, x2wr)
+                        fBu = ftab[0, k]
+                        fBv = ftab[1, k]
+                        fBw = ftab[2, k]
             
                         c += 1
                         kCpdr[c] = row+0
@@ -181,6 +195,7 @@ def fkCld_xcte(double ku, double kv, double kw, object p, double xp,
         displacement with constant x (so integral over y).
 
     """
+    cdef double [:, ::1] ftab
     cdef int i, k, j, l, c, row, col
     cdef int m, n
     cdef double a, b, xip
@@ -227,10 +242,18 @@ def fkCld_xcte(double ku, double kv, double kw, object p, double xp,
     # i, j are for the rows (see the line where the row is being updated) - WHY THOUHG?? CHECK 
     # k, l are for the cols
     
+    ftab = np.zeros((3, m), dtype=DOUBLE)
+
     with nogil:
         xip = 2*xp/a - 1.
         
         c = -1
+        # approximation functions evaluated once, see panels/dev/tabulate.py
+        for i in range(m):
+            ftab[0, i] = f(i, xip, x1u, x1ur, x2u, x2ur)
+            ftab[1, i] = f(i, xip, x1v, x1vr, x2v, x2vr)
+            ftab[2, i] = f(i, xip, x1w, x1wr, x2w, x2wr)
+
         for j in range(n):    
             for l in range(n):
                 # j and l are for y coord i.e. g - since thats being integrated, loop it outside
@@ -241,9 +264,9 @@ def fkCld_xcte(double ku, double kv, double kw, object p, double xp,
                 gAwgBw = integral_ff(j, l, y1w, y1wr, y2w, y2wr, y1w, y1wr, y2w, y2wr)
 
                 for i in range(m):
-                    fAu = f(i, xip, x1u, x1ur, x2u, x2ur)
-                    fAv = f(i, xip, x1v, x1vr, x2v, x2vr)
-                    fAw = f(i, xip, x1w, x1wr, x2w, x2wr)
+                    fAu = ftab[0, i]
+                    fAv = ftab[1, i]
+                    fAw = ftab[2, i]
             
                     for k in range(m):
                         row = row0 + DOF*(j*m + i)
@@ -253,9 +276,9 @@ def fkCld_xcte(double ku, double kv, double kw, object p, double xp,
                         if row > col:
                             continue
 
-                        fBu = f(k, xip, x1u, x1ur, x2u, x2ur)
-                        fBv = f(k, xip, x1v, x1vr, x2v, x2vr)
-                        fBw = f(k, xip, x1w, x1wr, x2w, x2wr)
+                        fBu = ftab[0, k]
+                        fBv = ftab[1, k]
+                        fBw = ftab[2, k]
             
                         c += 1
                         kCld_xcter[c] = row+0
@@ -304,6 +327,7 @@ def fkCld_ycte(double ku, double kv, double kw, object p, double yp,
         displacement with constant y (so integral over x).
 
     """
+    cdef double [:, ::1] gtab
     cdef int i, k, j, l, c, row, col
     cdef int m, n
     cdef double a, b, etap
@@ -350,11 +374,19 @@ def fkCld_ycte(double ku, double kv, double kw, object p, double yp,
     # i, j are for the rows (see the line where the row is being updated) - WHY THOUHG?? CHECK 
     # k, l are for the cols
     
+    gtab = np.zeros((3, n), dtype=DOUBLE)
+
     with nogil:
         etap = 2*yp/b - 1.
         
         c = -1
 
+
+        # approximation functions evaluated once, see panels/dev/tabulate.py
+        for j in range(n):
+            gtab[0, j] = f(j, etap, y1u, y1ur, y2u, y2ur)
+            gtab[1, j] = f(j, etap, y1v, y1vr, y2v, y2vr)
+            gtab[2, j] = f(j, etap, y1w, y1wr, y2w, y2wr)
 
         for i in range(m):
             for k in range(m):
@@ -364,9 +396,9 @@ def fkCld_ycte(double ku, double kv, double kw, object p, double yp,
                 fAwfBw = integral_ff(i, k, x1w, x1wr, x2w, x2wr, x1w, x1wr, x2w, x2wr)
 
                 for j in range(n):    
-                    gAu = f(j, etap, y1u, y1ur, y2u, y2ur)
-                    gAv = f(j, etap, y1v, y1vr, y2v, y2vr)
-                    gAw = f(j, etap, y1w, y1wr, y2w, y2wr)
+                    gAu = gtab[0, j]
+                    gAv = gtab[1, j]
+                    gAw = gtab[2, j]
 
                     for l in range(n):
             
@@ -377,9 +409,9 @@ def fkCld_ycte(double ku, double kv, double kw, object p, double yp,
                         if row > col:
                             continue
 
-                        gBu = f(l, etap, y1u, y1ur, y2u, y2ur)
-                        gBv = f(l, etap, y1v, y1vr, y2v, y2vr)
-                        gBw = f(l, etap, y1w, y1wr, y2w, y2wr)
+                        gBu = gtab[0, l]
+                        gBv = gtab[1, l]
+                        gBw = gtab[2, l]
             
                         c += 1
                         kCld_ycter[c] = row+0
