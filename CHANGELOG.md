@@ -1,5 +1,89 @@
 # Changelog
 
+## 0.12.0 (2026-10-13)
+
+### New: prescribed displacements imposed exactly with the null-space method
+
+`MultiDomain(..., pd_method='null-space')` imposes the prescribed
+displacements of `Shell.add_point_pd`, `Shell.add_distr_pd_fixed_x` and
+`Shell.add_distr_pd_fixed_y` exactly, as the inhomogeneous linear constraints
+`B_d c = d_0 + lbd*d_1`, `d_0` from the constant prescriptions
+(`cte=True`) and `d_1` from those incremented with the load factor
+(`cte=False`), eliminated together with the connections:
+`c = T c_r + c_p0 + lbd*c_p1`. The default `pd_method='penalty'` keeps the
+previous behaviour, bit for bit. See the new section "Prescribed
+displacements imposed exactly" of `doc/source/multidomain_null_space.rst`.
+
+- `nullspace.Elimination`: the elimination of `null_space_basis` one block
+  at a time, unchanged for the connections (`T` is bit-identical), keeping
+  the data of the blocks with a right-hand side, from which the particular
+  solutions are computed for any prescribed values without a new
+  decomposition. New `nullspace.pd_constraint_matrix`, `pd_points`,
+  `pd_blocks`, `pd_entries`, `pd_rhs` and `PD_COMPONENTS`. The constraints
+  are taken at `max(n, 4)` (or `max(m, 4)`) Gauss-Legendre points along a
+  line, exact along the whole line for polynomial prescribed functions up to
+  that degree.
+- `MultiDomain.get_T(conn=None, tol=None, rhs_tol=None)` also eliminates the
+  prescribed displacements; `T` is rebuilt only when their positions or
+  components change. New `MultiDomain.get_cp()` returns `c_p0` and `c_p1`
+  (attributes `c_p0`, `c_p1`), reading the prescribed values again from the
+  panels.
+- `MultiDomain.expand(c_r, lbd=None)`: with `lbd`, the configuration
+  `T c_r + c_p0 + lbd*c_p1`; without it, `T c_r`, as before, e.g. for modes.
+- `MultiDomain.get_reduced_functions()`: with prescribed displacements, the
+  callables build the configuration from `inc`, `calc_kG` declares `inc`,
+  and `calc_fext(inc, c=c, lbd=lbd)` returns `dR_r/dlbd =
+  T^T (F_ext - K_T(c) c_p1)`, which `structsolve>=0.7.0` uses in the
+  predictors, in the arc-length constraint and in the convergence criterion.
+  The full tangent stiffness matrix of the last configuration is cached, so
+  that `dR_r/dlbd` costs no extra assembly in the arc-length methods.
+  `Analysis.static(NLgeom=False)` raises an error pointing to the new
+  `MultiDomain.linear_static()`. Without prescribed displacements the
+  callables are unchanged.
+- New `MultiDomain.linear_static(lbd=1.)` and
+  `MultiDomain.linear_buckling(num_eigvalues=25, c=None, **kwargs)`, whose
+  pre-buckling state `c_0 + lbd*c_1` separates the constant prescribed
+  displacements.
+- Reactions: `MultiDomain.reaction_pd(c, lbd=1., NLgeom=True)`, the
+  generalized reactions `c_pj^T (F_int(c) - lbd*F_ext)` work-conjugate to the
+  constant and the incremented prescriptions, independent of the particular
+  solution; `MultiDomain.reaction_resultant(c, lines, lbd=1., NLgeom=True)`,
+  the resultant forces along `u`, `v`, `w` of selected prescribed lines or
+  points.
+- Redundant prescriptions are dropped when consistent, e.g. at corners with
+  connections or other prescriptions, or on terms removed by boundary
+  condition flags; inconsistent ones raise a `ValueError` naming the panels,
+  the prescriptions, the flags to release and the constraints involved.
+- Prescribed rotations, `kphix`, `phixp`, `kphiy`, `phiyp` of
+  `Shell.add_point_pd` and `kphix`, `funcphix`, `kphiy`, `funcphiy` of the
+  distributed ones, only with `pd_method='null-space'`; with the penalty
+  method `calc_fext` raises `NotImplementedError`.
+- `Shell` stores the prescribed values in the new attributes
+  `point_pds_values`, `point_pds_values_inc`, `distr_pds_values` and
+  `distr_pds_values_inc`, also saved by `json_io`, as `MultiDomain.pd_method`.
+  A penalty constant `None` with a value now prescribes nothing in
+  `add_point_pd`, instead of raising `TypeError`.
+- `Shell.calc_fext(..., include_pds=True)` and `shell_fext(...,
+  include_pds=True)`; `MultiDomain.calc_fext` excludes the forces of the
+  prescribed displacements with `pd_method='null-space'`.
+- A single panel is wrapped as `MultiDomain([shell], conn=[],
+  pd_method='null-space')`.
+- Tests: `tests/multidomain/test_null_space_pd.py`.
+
+### Bug fix
+
+- `fkCld_xcte` and `fkCld_ycte` (`panels/multidomain/connections/kCpd.pyx`)
+  placed the penalty stiffnesses of `ku` and `kv` at the rows and columns of
+  `w` instead of `u` and `v`, a transcription error with respect to
+  `theory/multidomain_penalization/kCpd.py`, which generates the correct
+  entries. Only the line prescribed displacements of `u` and `v` with the
+  penalty method are affected; the prescribed `w` of the cohesive zone and
+  DCB examples is unchanged. New test `test_line_penalty_kernels`.
+
+### Dependencies
+
+- Requires `structsolve>=0.7.0`.
+
 ## 0.11.1 (2026-10-08)
 
 ### Saving and loading in a JSON + NumPy zip file
