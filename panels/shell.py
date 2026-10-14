@@ -998,8 +998,7 @@ class Shell(object):
             kG = matrices.fkG0(self.Nxx, self.Nyy, self.Nxy, self, size, row0, col0)
 
         else:
-            if ABDnxny is None:
-                ABDnxny = self._get_lam_ABD()
+            ABDnxny = self.ABD if ABDnxny is None else ABDnxny
             kG = matrices_num.fkG_num(c, ABDnxny, self, size, row0, col0,
                                       nx, ny, self.Nxx, self.Nyy, self.Nxy)
 
