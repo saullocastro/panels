@@ -43,7 +43,6 @@ env
 dcb_mode_I_convergence_study_runs/
 # runs of the other scripts of notebooks/, see notebooks/README.md
 dcb_mode_I_solver_study_runs/
-thesis_timing_runs/
 dcb_mode_I_validation_rerun_runs/
 *_driver.log
 *_driver.err
