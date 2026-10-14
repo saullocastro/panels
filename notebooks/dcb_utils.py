@@ -23,6 +23,7 @@ See doc/source/cohesive_zone.rst
 Units: N, mm, MPa.
 
 """
+import json
 import os
 import time
 
@@ -31,9 +32,17 @@ from scipy.sparse import csr_matrix
 from structsolve import solve
 from structsolve.sparseutils import finalize_symmetric_matrix
 
+import panels
 from panels.shell import Shell
 from panels.multidomain import MultiDomain
-from panels.multidomain.connections import calc_kt_kr, fkCld_xcte
+from panels.multidomain.connections import (calc_kt_kr, fkCld_xcte,
+        tsl_resolution, tsl_margin, tsl_discretization)
+
+# keys of ``case`` that define the model, stored with the results
+MODEL_KEYS = ('E1', 'E2', 'nu12', 'G12', 'h', 'b', 'L', 'a0', 'L_tsl', 'G1c',
+              'tau_o', 'k_o', 'm_tsl', 'n_tsl', 'm', 'n', 'nx', 'ny',
+              'edge_penalty_factor', 'stack', 'plyt', 'bond_width',
+              'conn_method')
 
 
 def _stack(case):
@@ -62,6 +71,21 @@ def _scaling(vec, D):
     return np.sqrt((vec*np.abs(1/D)) @ vec)
 
 
+def model_case(case):
+    """Copy of ``case`` with the defaults of :func:`build_dcb` filled in
+
+    A missing ``m_tsl`` or ``nx`` is given by the rules of :func:`discretize`
+    for the ``L_tsl`` of ``case``.
+
+    """
+    if 'm_tsl' not in case or 'nx' not in case:
+        case = dict(discretize(case, case['L_tsl']), **case)
+    return dict(case, n_tsl=case.get('n_tsl', 10), m=case.get('m', 8),
+                n=case.get('n', 8), ny=case.get('ny', 30),
+                edge_penalty_factor=case.get('edge_penalty_factor', 100.),
+                conn_method=case.get('conn_method', 'penalty'))
+
+
 def build_dcb(case):
     r"""Build the multidomain model of a DCB
 
@@ -72,9 +96,11 @@ def build_dcb(case):
         (width), ``L`` (length), ``a0`` (initial crack length), ``L_tsl``
         (length of the cohesive domain, ``<= L - a0``), ``G1c`` (N/mm),
         ``tau_o`` (MPa), ``k_o`` (N/mm3). Optional: ``m_tsl, n_tsl`` (terms
-        of the cohesive domain, default 15, 10), ``m, n`` (terms of the other
+        of the cohesive domain, by default ``m_tsl`` from the rule of
+        :func:`discretize` and ``n_tsl = 10``), ``m, n`` (terms of the other
         domains, default 8, 8), ``nx, ny`` (Gauss points of the cohesive
-        domain, default 120, 30), ``edge_penalty_factor`` (default 100),
+        domain, by default ``nx`` from the rule of :func:`discretize` and
+        ``ny = 30``), ``edge_penalty_factor`` (default 100),
         ``stack`` and ``plyt`` (stacking sequence of each arm and ply
         thickness, default a single 0-degree ply of thickness ``h``; when
         given, ``h`` is ``plyt*len(stack)``), ``bond_width`` (width of a
@@ -90,7 +116,8 @@ def build_dcb(case):
     Returns
     -------
     model : dict
-        With the assembly, the panels and the connections.
+        With the assembly, the panels, the connections and ``case``, a copy
+        of the input with the discretisation that was used.
 
     """
     E1, E2, nu12, G12 = case['E1'], case['E2'], case['nu12'], case['G12']
@@ -100,9 +127,9 @@ def build_dcb(case):
     L_tsl = case['L_tsl']
     L_bond = L - a0 - L_tsl
     assert L_bond >= -1e-9, 'L_tsl must be <= L - a0'
-    m_tsl, n_tsl = case.get('m_tsl', 15), case.get('n_tsl', 10)
-    m, n = case.get('m', 8), case.get('n', 8)
-    nx, ny = case.get('nx', 120), case.get('ny', 30)
+    used = model_case(case)
+    m_tsl, n_tsl, m, n = used['m_tsl'], used['n_tsl'], used['m'], used['n']
+    nx, ny = used['nx'], used['ny']
 
     def shell(group, x0, a, mm, nn):
         s = Shell(group=group, x0=x0, y0=0, a=a, b=b, m=mm, n=nn, plyt=plyt,
@@ -139,7 +166,7 @@ def build_dcb(case):
     conn.append(dict(p1=top_tsl, p2=bot_tsl, func='SB_TSL', tsl_type='bilinear',
                      nr_x_gauss=nx, nr_y_gauss=ny, k_o=case['k_o'],
                      tau_o=case['tau_o'], G1c=case['G1c']))
-    factor = case.get('edge_penalty_factor', 100.)
+    factor = used['edge_penalty_factor']
     for c in conn:
         if c['func'] == 'SSxcte':
             kt, kr = calc_kt_kr(c['p1'], c['p2'], 'xcte')
@@ -147,16 +174,16 @@ def build_dcb(case):
             c['kr'] = factor*kr
 
     panels = bot + top
-    assy = MultiDomain(panels=panels, conn=conn,
-                       conn_method=case.get('conn_method', 'penalty'))
+    assy = MultiDomain(panels=panels, conn=conn, conn_method=used['conn_method'])
     return dict(assy=assy, conn=conn, top_tsl=top_tsl, bot_tsl=bot_tsl,
                 top_arm=top_arm, bot_arm=bot_arm, nx=nx, ny=ny,
-                size=assy.get_size())
+                size=assy.get_size(), case=used)
 
 
 def solve_dcb(case, openings, kw=1.e6, epsilon=1.e-4, NR_kT_update=3,
               kT_pan_reuse_steps=5, line_search_max=6, max_NR_iter=50,
-              max_bisections=6, save=None, verbose=False):
+              max_bisections=6, consistent_tangent=True, save=None,
+              verbose=False, trace=None):
     r"""Solve the DCB under a list of prescribed openings
 
     Parameters
@@ -191,8 +218,16 @@ def solve_dcb(case, openings, kw=1.e6, epsilon=1.e-4, NR_kT_update=3,
         `10^3`, is bisected from the last converged state; the analysis is
         aborted only when a sub-increment of ``2**-max_bisections`` of the
         original increment still does not converge.
+    consistent_tangent : bool, optional
+        With ``False`` the damage-rate stiffness of the cohesive zone is left
+        out of the tangent, which is then the secant stiffness only, to
+        compare with the consistent tangent.
     save : str, optional
         ``.npz`` file updated after every converged opening.
+    trace : list, optional
+        If given, ``(delta, iteration, criterion, step)`` of every
+        Newton-Raphson iteration is appended to it, ``step`` being the
+        step of the line search that was taken.
 
     Returns
     -------
@@ -201,11 +236,26 @@ def solve_dcb(case, openings, kw=1.e6, epsilon=1.e-4, NR_kT_update=3,
         (integral of the cohesive tractions, must match ``P``), ``a``
         (crack length at the mid-width, from the fully damaged points),
         ``dmax`` (maximum damage), ``iters`` (Newton-Raphson iterations per
-        opening), ``failed`` (number of bisections), ``aborted``, ``time``.
+        opening), ``failed`` (number of bisections), ``aborted``,
+        ``max_rel_P_traction`` (see :func:`equilibrium_check`), ``time``
+        (wall time, s), ``cpu_time`` (CPU time of the process, s), and the
+        provenance of the run: ``case`` (the keys of ``MODEL_KEYS`` with the
+        discretisation that was used), ``solver`` (the solver settings
+        above), ``panels_version`` and ``conn_method``.
 
     """
     t0 = time.time()
+    cpu0 = time.process_time()
     model = build_dcb(case)
+    used = model['case']
+    meta = dict(case={k: used[k] for k in MODEL_KEYS if used.get(k) is not None},
+                solver=dict(kw=kw, epsilon=epsilon, NR_kT_update=NR_kT_update,
+                            kT_pan_reuse_steps=kT_pan_reuse_steps,
+                            line_search_max=line_search_max,
+                            max_NR_iter=max_NR_iter, max_bisections=max_bisections,
+                            consistent_tangent=consistent_tangent),
+                panels_version=panels.__version__,
+                conn_method=model['assy'].conn_method)
     assy, conn = model['assy'], model['conn']
     top_tsl, bot_tsl = model['top_tsl'], model['bot_tsl']
     top_arm, bot_arm = model['top_arm'], model['bot_arm']
@@ -223,6 +273,8 @@ def solve_dcb(case, openings, kw=1.e6, epsilon=1.e-4, NR_kT_update=3,
         expand = lambda v: T @ v
     else:
         red = red_mat = expand = lambda x: x
+
+    kT_TSL = (lambda c: assy.calc_kT_TSL(c=c)) if consistent_tangent else (lambda c: 0)
 
     def prescribe(delta):
         kCp = 0
@@ -269,7 +321,7 @@ def solve_dcb(case, openings, kw=1.e6, epsilon=1.e-4, NR_kT_update=3,
             state['age'] = 0
         else:
             state['age'] += 1
-        k0 = red_mat(state['kT_pan'] + kC_conn + assy.calc_kT_TSL(c=ci) + kCp)
+        k0 = red_mat(state['kT_pan'] + kC_conn + kT_TSL(ci) + kCp)
         D = k0.diagonal()
         count = 0
         while True:
@@ -284,14 +336,16 @@ def solve_dcb(case, openings, kw=1.e6, epsilon=1.e-4, NR_kT_update=3,
                 if not np.isfinite(r):
                     r = np.inf
                 if best is None or r < best[0]:
-                    best = (r, c, R, fint_t, kC_t)
+                    best = (r, c, R, fint_t, kC_t, step)
                 if r <= (1 - 1e-4*step)*r0:
                     break
                 step *= 0.5
-            _, c, Ri, fint, kC_conn = best
+            _, c, Ri, fint, kC_conn, best_step = best
             crit = _scaling(red(Ri), D)/max(_scaling(red(fint), D),
                                             _scaling(red(kCp*c - fext), D))
             count += 1
+            if trace is not None:
+                trace.append((delta, count, crit, best_step))
             if crit < epsilon:
                 return True, c, count
             if not np.isfinite(crit) or crit > 1e3 or count >= max_NR_iter:
@@ -299,7 +353,7 @@ def solve_dcb(case, openings, kw=1.e6, epsilon=1.e-4, NR_kT_update=3,
             if count % NR_kT_update == 1 and not (elastic and count == 1):
                 state['kT_pan'] = assy.calc_kT(c=c, kC_conn=0.)
                 state['age'] = 0
-            k0 = red_mat(state['kT_pan'] + kC_conn + assy.calc_kT_TSL(c=c) + kCp)
+            k0 = red_mat(state['kT_pan'] + kC_conn + kT_TSL(c) + kCp)
             ci = c
 
     def accept(delta, c):
@@ -313,7 +367,7 @@ def solve_dcb(case, openings, kw=1.e6, epsilon=1.e-4, NR_kT_update=3,
     xi, _ = np.polynomial.legendre.leggauss(nx)
     x_gauss = top_tsl.a/2*(xi + 1)
     res = dict(delta=[], P=[], P_traction=[], a=[], dmax=[], iters=[],
-               failed=0, aborted=False)
+               failed=0, aborted=False, **meta)
     for delta_target in openings:
         pending = [delta_target]
         min_inc = abs(delta_target - conv[-1][0])/2**max_bisections
@@ -360,42 +414,113 @@ def solve_dcb(case, openings, kw=1.e6, epsilon=1.e-4, NR_kT_update=3,
                   f'a={a_crack:.2f} dmax={np.max(dmg):.3f} it={iters}', flush=True)
         if save is not None:
             _save(save, res, t0)
+    res['max_rel_P_traction'] = equilibrium_check(res, case)
     res['time'] = time.time() - t0
+    res['cpu_time'] = time.process_time() - cpu0
     if save is not None:
         _save(save, res, t0)
     return {k: np.asarray(v) if isinstance(v, list) else v for k, v in res.items()}
 
 
+def equilibrium_check(res, case, tol=1e-2):
+    r"""Largest relative difference between the traction integral and the load
+
+    By equilibrium of the loaded arm, the integral of the normal tractions of
+    the cohesive domain, ``P_traction``, is equal to the reaction ``P`` when
+    the cohesive domain carries the whole load. A difference above ``tol``
+    means that the cohesive domain is too short, the compressive lobe ahead
+    of the process zone reaching the perfect bond, whose tractions are not
+    part of the integral, or that its basis is too coarse to represent the
+    tractions, ``m_tsl < lambda L_tsl``. A line is printed with the first
+    opening where the difference exceeds ``tol``, from which the curve is
+    less reliable. Without a perfect bond, ``L_tsl = L - a0``, the clamp
+    takes part of the load and nothing is printed.
+
+    Returns
+    -------
+    max_rel : float
+        ``max |P_traction/P - 1|``, ``nan`` without converged openings.
+
+    """
+    P, Pt = np.asarray(res['P'], dtype=float), np.asarray(res['P_traction'], dtype=float)
+    if len(P) == 0:
+        return np.nan
+    rel = np.abs(Pt/P - 1)
+    over = np.flatnonzero(rel > tol)
+    if over.size and case['L'] - case['a0'] - case['L_tsl'] > 1e-9:
+        print(f"Equilibrium check: |P_traction/P - 1| = {rel.max():.2e} at most, above "
+              f"{tol:g} from delta = {res['delta'][over[0]]:.4g} on ({over.size} of "
+              f"{len(P)} openings): the cohesive domain is too short or its basis "
+              "too coarse, see dcb_utils.equilibrium_check", flush=True)
+    return float(rel.max())
+
+
+# entries of the results stored as JSON text
+_JSON_KEYS = ('case', 'solver')
+
+
 def _save(path, res, t0):
     os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
-    np.savez(path, **{k: np.asarray(v) for k, v in res.items() if k != 'time'},
-             time=time.time() - t0)
+    out = {k: np.asarray(json.dumps(v) if k in _JSON_KEYS else v)
+           for k, v in res.items() if k != 'time'}
+    np.savez(path, **out, time=time.time() - t0)
 
 
 def load(path):
+    """Results saved by :func:`solve_dcb`
+
+    ``case`` and ``solver`` are returned as dictionaries, and
+    ``panels_version`` and ``conn_method`` as strings. They are missing in
+    the files saved before they were introduced.
+
+    """
     data = np.load(path)
-    return {k: data[k] for k in data.files}
+    res = {k: data[k] for k in data.files}
+    for k in _JSON_KEYS:
+        if k in res:
+            res[k] = json.loads(res[k].item())
+    for k in ('panels_version', 'conn_method'):
+        if k in res:
+            res[k] = res[k].item()
+    return res
 
 
 def run_or_load(case, openings, path, rerun=False, **kwargs):
-    """Loads the results in ``path`` or runs :func:`solve_dcb` and saves them"""
+    """Loads the results in ``path`` or runs :func:`solve_dcb` and saves them
+
+    When ``path`` stores the case of the run, a difference to the model of
+    ``case`` is printed.
+
+    """
     if os.path.exists(path) and not rerun:
         res = load(path)
         # a run interrupted before the last opening is run again
         complete = (len(res['delta']) and np.isclose(res['delta'][-1], openings[-1]))
         if complete or res['aborted']:
+            if 'case' in res:
+                used = model_case(case)
+                diff = sorted(k for k in MODEL_KEYS if used.get(k) is not None
+                              and res['case'].get(k) != used[k])
+                if diff:
+                    print(f'WARNING: {path} was obtained with a different model: '
+                          + ', '.join(f'{k} = {res["case"].get(k)} instead of {used[k]}'
+                                      for k in diff))
             return res
     return solve_dcb(case, openings, save=path, **kwargs)
 
 
 # ----------------------------------------------------------- LEFM references
-def D11(case):
-    """Bending stiffness of one arm per unit width, CLPT"""
+def _arm(case):
+    """Shell of one arm, for its laminate"""
     stack, plyt = _stack(case)
     lam = (case['E1'], case['E2'], case['nu12'], case['G12'], case['G12'], case['G12'])
-    s = Shell(group='arm', x0=0, y0=0, a=1., b=1., m=4, n=4, plyt=plyt,
-              stack=stack, laminaprop=lam)
-    return float(s.lam.D[0, 0])
+    return Shell(group='arm', x0=0, y0=0, a=1., b=1., m=4, n=4, plyt=plyt,
+                 stack=stack, laminaprop=lam)
+
+
+def D11(case):
+    """Bending stiffness of one arm per unit width, CLPT"""
+    return float(_arm(case).lam.D[0, 0])
 
 
 def bending_modulus(case):
@@ -553,41 +678,49 @@ def markdown_table(rows, ref=None, delta_ref=None, first_peak=False):
 
 
 def resolution(case, terms_per_decay=1.5, points_per_lcz=10., m_max=25):
-    r"""Discretisation of the cohesive domain from the convergence study
+    r"""Decay rate, cohesive zone length and longest resolved cohesive domain
 
     The Ritz basis must resolve the decay of the opening ahead of the
     process zone, beam on elastic foundation with `\lambda = (k_o/(4
-    D_{11}))^{1/4}`, and the Gauss points must sample the cohesive zone,
-    of length `l_{cz} = 0.88 E_2 G_{Ic}/\tau_o^2` (Rice's estimate, Turon
-    et al. 2007). The converged discretisation of the reference DCB (15
-    terms and 120 points over 17 mm) corresponds to ``m_tsl = 1.5 \lambda
-    L_tsl`` and a spacing of the Gauss points at the middle of the domain,
-    `\pi L_{tsl}/(2 n_x)`, of about `l_{cz}/6`, i.e. ``nx = 10
-    L_tsl/l_cz``.
+    D_{11}))^{1/4}`, and the Gauss points must sample the cohesive zone, of
+    length `l_{cz} = 0.88 E_2 G_{Ic}/\tau_o^2` (Rice's estimate, Turon et
+    al. 2007), see :func:`panels.multidomain.connections.tsl_resolution`.
+    In the convergence study of the reference DCB (Tijs et al. 2022, `L =
+    100` mm, `a_0 = 48` mm, cohesive domain of `L_{tsl} = 24` mm), the
+    loads are within 0.1% of the converged ones from ``m_tsl = 1.2 \lambda
+    L_tsl``, and within 0.02% with 10 Gauss points per `l_{cz}`, ``nx = 10
+    L_tsl/l_cz``. The rules of :func:`discretize` keep a margin on the
+    terms, ``m_tsl = 1.5 \lambda L_tsl``.
 
     Returns
     -------
     lam, lcz, L_tsl_max : float
         ``L_tsl_max`` is the longest cohesive domain resolved with
-        ``m_max`` terms.
+        ``m_max`` terms and ``terms_per_decay`` terms per decay length.
 
     """
-    lam = (case['k_o']/(4*D11(case)))**0.25
-    lcz = 0.88*case['E2']*case['G1c']/case['tau_o']**2
+    lam, lcz = tsl_resolution(_arm(case), case['k_o'], case['tau_o'], case['G1c'])
     return lam, lcz, m_max/(terms_per_decay*lam)
+
+
+def margin(lam, lcz):
+    r"""Length of the cohesive domain ahead of the crack front, `2\pi/\lambda
+    + 3 l_{cz}`, see :func:`panels.multidomain.connections.tsl_margin`"""
+    return tsl_margin(lam, lcz)
 
 
 def discretize(case, L_tsl, terms_per_decay=1.5, points_per_lcz=10., m_max=25):
     r"""Sets ``L_tsl``, ``m_tsl`` and ``nx`` of ``case`` from :func:`resolution`
 
-    With `\lambda` and `l_{cz}` of :func:`resolution`:
+    With `\lambda` and `l_{cz}` of :func:`resolution`, see
+    :func:`panels.multidomain.connections.tsl_discretization`:
 
     - `m_{tsl} = \lceil 1.5\,\lambda L_{tsl} \rceil`, at most ``m_max`` = 25
       terms;
     - `n_x = 10\,L_{tsl}/l_{cz}`, but not less than `4\,m_{tsl}` to
       integrate the products of the approximation functions, rounded up to a
-      multiple of 10 and with at most 300 points, the Gauss-Legendre rules of
-      ``panels`` going up to 304 points.
+      multiple of 10. The Gauss-Legendre rules of ``panels`` have no upper
+      limit.
 
     Returns a copy of ``case``.
 
@@ -595,12 +728,9 @@ def discretize(case, L_tsl, terms_per_decay=1.5, points_per_lcz=10., m_max=25):
     lam, lcz, _ = resolution(case, terms_per_decay, points_per_lcz, m_max)
     case = dict(case)
     case['L_tsl'] = L_tsl
-    case['m_tsl'] = int(min(m_max, np.ceil(terms_per_decay*lam*L_tsl)))
-    nx = points_per_lcz*L_tsl/lcz
-    # at least 4 points per term, to integrate the products of the functions
-    nx = max(nx, 4*case['m_tsl'])
-    # the Gauss-Legendre rules of panels go up to 304 points
-    case['nx'] = int(min(300, np.ceil(nx/10)*10))
+    case['m_tsl'], case['nx'] = tsl_discretization(lam, lcz, L_tsl,
+            terms_per_decay=terms_per_decay, points_per_lcz=points_per_lcz,
+            m_max=m_max)
     return case
 
 

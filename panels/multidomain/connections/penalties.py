@@ -119,9 +119,26 @@ def calc_kt_kr(p1, p2, connection_type):
         return kt, kr
 
 
-def calc_kw_tsl(pA, pB=None, tsl_type=None, k_i=1.e4, k_ipen=1.e6, del_d=None,
-                tau_o=67, G1c=1.12):
-    r"""Calculate out of plane stiffness of the damaged region (where the traction separation law exists)
+def calc_kw_tsl(pA, pB=None, tsl_type='bilinear', k_i=None, del_d=None,
+                tau_o=None, G1c=None):
+    r"""Stiffness and damage of a bilinear traction-separation law
+
+    With `\Delta_o = \tau_o/k_i` and `\Delta_f = 2 G_{Ic}/\tau_o`, the damage
+    of the bilinear law at the separation `\Delta` is:
+
+    .. math::
+
+        \hat d(\Delta) = \begin{cases}
+            0 & \Delta \le \Delta_o \\
+            \frac{\Delta_f (\Delta - \Delta_o)}{(\Delta_f - \Delta_o) \Delta}
+              & \Delta_o < \Delta < \Delta_f \\
+            1 & \Delta \ge \Delta_f
+        \end{cases}
+
+    and the stiffness is `k_i (1 - \hat d)`. Negative separations keep the
+    pristine stiffness `k_i`; there is no additional stiffness against
+    interpenetration. The damage history is not considered here, see
+    :meth:`.MultiDomain.calc_k_dmg`.
 
     Parameters
     ----------
@@ -130,91 +147,60 @@ def calc_kw_tsl(pA, pB=None, tsl_type=None, k_i=1.e4, k_ipen=1.e6, del_d=None,
         both panels, ``p1`` of the connection.
     pB : :class:`.Shell`
         Panel on the negative side of the interface along `z`, ``p2``.
-    tsl_type : string
-        Type of TSL to be used. Possible options are: 'linear' (no softening),
-        or 'bilinear' (with linear softening).
+    tsl_type : str
+        Type of the traction-separation law, only ``'bilinear'`` is
+        available.
     k_i : float
-        Pristine out-of-plane stiffness, in other words, when there is no damage.
-    k_ipen : float
-        Out-of-plane penalty stiffness to prevent interpenetration between
-        ``pA`` and ``pB``.
+        Pristine stiffness of the interface, `k_o`, force/length**3.
     del_d : np.ndarray
-        A 2D np.array() corresponding to out-of-plane separation field. This is
-        the out of plane separation between panels, at each point of the input
-        grid.
+        Normal separation between the panels at each point of the grid.
     tau_o : float
-        Traction at damage onset. The default value is in MPa units.
+        Traction at damage onset, force/length**2.
     G1c : float
-        Critical fracture energy release rate in mode I. The default value is
-        in kJ/m^2 = N/mm units.
+        Critical energy release rate in mode I, force/length.
 
     Returns
     -------
-    kw_tsl : float
-        The out of plane stiffness, when ``tsl_type == 'bilinear'``, this is
-        a map of stiffnesses at each point of the input grid.
+    kw_tsl : np.ndarray
+        Stiffness at each point of the grid.
     dmg_index : np.ndarray
-        The calculated damage at each point across the input grid. Note that
-        this is only valid when ``tsl_type == 'bilinear'``.
+        Damage `\hat d` at each point of the grid.
 
     """
-    if tsl_type == 'linear':
-        tsl_input = 1e4 # N/mm^3 (from Fig 8a - https://doi.org/10.1016/j.compositesa.2022.107101 - faulty !!!!)
-        kw_tsl = tsl_input  # N/mm^3 (same as kt for SB connection)
+    if tsl_type != 'bilinear':
+        raise ValueError(f'tsl_type {tsl_type!r} not available, use "bilinear"')
+    if k_i is None or tau_o is None or G1c is None:
+        raise ValueError('k_i, tau_o and G1c are required')
+    if del_d is None:
+        raise ValueError('Out of plane separation field is required')
 
-        return kw_tsl, None
+    # Cohesive Law Parameters
+    del_o = tau_o/k_i
+    del_f = 2*G1c/tau_o # [mm] - Separation at complete failure (damage variable = 1)
 
-    elif tsl_type == 'bilinear':
-        if del_d is None:
-            raise ValueError('Out of plane separation field is required')
+    # Stiffness when there is damage
+    # Ignoring div by zero error when del_d is 0 for calc of damage. Its overwritten below so its fine :)
+    with np.errstate(divide='ignore'):
+        k_dmg = k_i*del_o*np.divide((del_f - del_d), (del_f - del_o)*del_d)
 
-        # Cohesive Law Parameters
-        del_o = tau_o/k_i
-        del_f = 2*G1c/tau_o # [mm] - Separation at complete failure (damage variable = 1)
+    # Overwriting stiffnesses where separation is zero
+    k_dmg[np.isclose(del_d, 0)] = k_i
 
-        k_dmg = np.zeros_like(del_d)
-        # Stiffness when there is damage
-        # Ignoring div by zero error when del_d is 0 for calc of damage. Its overwritten below so its fine :)
-        with np.errstate(divide='ignore'):
-            k_dmg = k_i*del_o*np.divide((del_f - del_d), (del_f - del_o)*del_d)
+    # Filter maps/mask to enable the original stiffness to be added at the same time
+    f_i = del_d < del_o         # Filter mask for initial stiffness (before damage)
+    f_dmg = del_d >= del_o      #                 degraded stiffness (after damage is created)
+    f_f = del_d <= del_f        #                 failure - ensures k = 0 after failure
 
-        # Overwriting stiffnesses where separation is zero
-        k_dmg[np.isclose(del_d, 0)] = k_i
+    kw_tsl = np.multiply(f_f, f_i*k_i + np.multiply(f_dmg, k_dmg))
 
-        # But it should not matter because youre only checking cases when del_d = 0 i.e. initial value so its already init by 0
-        # So no numerical error will exist
+    # Calculating Damage Index
+    with np.errstate(divide='ignore'):
+        dmg_index_after_dmg = np.divide((del_d - del_o)*del_f , (del_f - del_o)*del_d)
 
-        # Filter maps/mask to enable the original stiffness to be added at the same time
-        f_i = del_d < del_o         # Filter mask for initial stiffness (before damage)
-        f_dmg = del_d >= del_o      #                 degraded stiffness (after damage is created)
-            # Can also be used as a damage map - True = damage exists
-        f_f = del_d <= del_f        #                 failure - ensures k = 0 after failure
+    dmg_index_after_dmg[np.isclose(del_d, 0)] = 0
 
-        # Prevention of interpenetration between panels
-            # Modification in TSL - negative separation has very high positive k
-            #    /\             ^ traction
-            #   /  \            -> separation
-            #  |
-            #  |
-            #  |
+    # Applies a filter mask to remove the terms when del_d < del_o, setting them to 0
+    dmg_index = np.multiply(f_dmg, dmg_index_after_dmg)
+    dmg_index[del_d > del_f] = 1
 
-        # Filter mask for interpenetration stiffness
-        f_ipen = del_d < 0
-
-        # Overall k that takes into account inital k as well
-        kw_tsl = np.multiply(np.invert(f_ipen), np.multiply(f_f, f_i*k_i + np.multiply(f_dmg,k_dmg))) + f_ipen*k_ipen
-
-        # Calculating Damage Index
-        with np.errstate(divide='ignore'):
-            dmg_index_after_dmg = np.divide((del_d - del_o)*del_f , (del_f - del_o)*del_d)
-
-        dmg_index_after_dmg[np.isclose(del_d, 0)] = 0
-
-        # Applies a filter mask to remove the terms when del_d < del_o, setting them to 0
-        dmg_index = np.multiply(f_dmg, dmg_index_after_dmg)
-        dmg_index[del_d > del_f] = 1
-
-        return kw_tsl, dmg_index
-
-    else:
-        raise ValueError('Invalid TSL type')
+    return kw_tsl, dmg_index

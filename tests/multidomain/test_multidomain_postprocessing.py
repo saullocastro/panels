@@ -99,10 +99,17 @@ def test_calc_results_invalid_input(tension):
     md, c = tension
     with pytest.raises(ValueError, match='not a valid vec'):
         md.calc_results(c, 'g', vec='xyz')
-    with pytest.raises(ValueError, match='304'):
-        md.calc_results(c, 'g', vec='w', nr_x_gauss=305)
-    with pytest.raises(ValueError, match='304'):
-        md.calc_results(c, 'g', vec='w', nr_y_gauss=305)
+
+
+@pytest.mark.parametrize('nx, ny', [(305, 4), (4, 305)])
+def test_calc_results_more_than_304_gauss_points(tension, nx, ny):
+    """The Gauss-Legendre rules have no upper limit along x or y"""
+    md, c = tension
+    p2 = md.panels[1]
+    res = md.calc_results(c, 'g', vec='exx', eval_panel=p2, nr_x_gauss=nx,
+                          nr_y_gauss=ny)
+    assert res['exx'][0].shape == (ny, nx)
+    assert np.allclose(res['exx'][0], N/(E*t), rtol=1e-8)
 
 
 @pytest.mark.parametrize('kwargs, match', [
@@ -110,8 +117,6 @@ def test_calc_results_invalid_input(tension):
     (dict(x_cte_force=0.3, y_cte_force=0.1), 'single line'),
     (dict(x_cte_force=0.3), 'nr_y_gauss'),
     (dict(y_cte_force=0.1), 'nr_x_gauss'),
-    (dict(x_cte_force=0.3, nr_y_gauss=305), '304'),
-    (dict(y_cte_force=0.1, nr_x_gauss=305), '304'),
 ])
 def test_force_invalid_input(tension, kwargs, match):
     md, c = tension
@@ -122,9 +127,10 @@ def test_force_invalid_input(tension, kwargs, match):
 def test_force_is_independent_of_the_number_of_gauss_points(tension):
     md, c = tension
     p2 = md.panels[1]
+    # no upper limit for the Gauss-Legendre points
     F = [md.force(c, 'g', eval_panel=p2, x_cte_force=0.3, nr_y_gauss=ng,
-                  gridx=11)['Fxx'] for ng in (4, 10)]
-    assert np.isclose(F[0], F[1])
+                  gridx=11)['Fxx'] for ng in (4, 10, 305)]
+    assert np.allclose(F, F[0])
 
 
 @pytest.mark.parametrize('panel', [0, 1])
