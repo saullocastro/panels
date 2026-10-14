@@ -50,8 +50,14 @@
   the integration points. `MultiDomain.calc_results` and `MultiDomain.force`
   use a constant `ABDnxny` and raise a `ValueError` for one per point.
 - The docstrings of `calc_kC`, `calc_fint` and the related methods document
-  the shape and the point order of `ABDnxny`, and that each block of the
-  matrix must be symmetric, the kernels reading only its upper entries.
+  the shape and the point order of `ABDnxny`.
+- `ABDnxny` is checked before it is integrated, since the kernels read only
+  the upper entries of each block: a `ValueError`, naming the block and the
+  integration point, is raised unless the matrix and its blocks `B` and, for
+  the TSDT, `E`, `F` and `Dts` are symmetric, and the transverse shear is
+  uncoupled from the other strains, as for any laminate, to `1e-10` times
+  the largest entry. A matrix symmetric as a whole but with, e.g., `B12 !=
+  B21` was integrated wrongly without error. The shape is checked as well.
 - Saving and loading: `ABDnxny` is saved instead of `ABD`; the `ABD` of the
   files of older versions is read and discarded, being that of the
   laminate.
@@ -64,7 +70,7 @@
   against the strain energy summed over `Shell.integration_points()`, for
   full and partial domains with `nx != ny`, which a reversed field fails;
   `Shell.ABDnxny` against the argument, within a `MultiDomain`, in
-  `Shell.stress` and saved and loaded.
+  `Shell.stress` and saved and loaded; the checks of `ABDnxny`.
 
 ### New: product of the tangent stiffness matrix by a vector, without assembly
 

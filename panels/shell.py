@@ -547,12 +547,59 @@ class Shell(object):
             ABDnxny = self.ABD
         else:
             ABDnxny = np.asarray(ABDnxny, dtype=DOUBLE)
+            self._check_ABDnxny(ABDnxny)
             if ABDnxny.ndim == 4:
                 nx = ABDnxny.shape[0] if nx is None else nx
                 ny = ABDnxny.shape[1] if ny is None else ny
         nx = self.nx if nx is None else nx
         ny = self.ny if ny is None else ny
         return ABDnxny, nx, ny
+
+
+    def _check_ABDnxny(self, F, rtol=1e-10):
+        r"""Check that the kernels integrate ``F`` as given
+
+        The kernels read only the upper entries of each block of the
+        constitutive matrix, e.g. `B_{12}` from ``F[0, 4]`` and never
+        ``F[1, 3]``, and skip the blocks that couple the transverse shear to
+        the other strains. ``F``, constant or one matrix per point, must
+        therefore be symmetric, have symmetric blocks, ``B`` and, for the
+        TSDT, ``E``, ``F`` and ``Dts``, and zero coupling blocks, as any
+        laminate, to a tolerance ``rtol`` times the largest entry of each
+        matrix.
+
+        """
+        ne = len(self._strain_names())
+        if F.ndim not in (2, 4) or F.shape[-2:] != (ne, ne):
+            raise ValueError('ABDnxny must have the shape ({0}, {0}) or (nx, '
+                    'ny, {0}, {0}) for the model {1}, got {2}'.format(ne,
+                    self.model, F.shape))
+        Fp = F.reshape(-1, ne, ne)
+        tol = rtol*np.abs(Fp).max(axis=(1, 2))
+        checks = [('the matrix', F.swapaxes(-1, -2) - F)]
+        blocks = {6: [('B', 0, 3)], 8: [('B', 0, 3)],
+                  13: [('B', 0, 3), ('E', 0, 6), ('F', 3, 6), ('Dts', 9, 11)]}
+        for name, i, j in blocks[ne]:
+            k = 2 if name == 'Dts' else 3
+            X = F[..., i:i+k, j:j+k]
+            checks.append(('the block ' + name, X.swapaxes(-1, -2) - X))
+        if ne == 8:
+            checks.append(('the coupling to the transverse shear',
+                           F[..., :6, 6:]))
+        elif ne == 13:
+            checks.append(('the coupling to the transverse shear',
+                           F[..., :9, 9:]))
+        for what, R in checks:
+            err = np.abs(R.reshape(len(Fp), -1)).max(axis=1)
+            bad = np.flatnonzero(err > tol)
+            if bad.size:
+                where = ('' if F.ndim == 2 else ' at the point [{0}, {1}]'
+                         .format(*np.unravel_index(bad[0], F.shape[:2])))
+                adj = 'zero' if what.startswith('the coupling') else 'symmetric'
+                raise ValueError('ABDnxny must have {0} {1}, as any laminate, '
+                    'since the kernels read only the upper entries of each '
+                    'block{2}: error {3:.3e}, tolerance {4:.3e}'.format(adj,
+                    what, where, err[bad[0]], tol[bad[0]]))
 
 
     def global_frame(self):
@@ -953,9 +1000,13 @@ class Shell(object):
             :meth:`.Shell.integration_points`, i.e. the Legendre-Gauss points
             mapped to the integration limits
             :meth:`.Shell.integration_limits`, which are not ``[0, a] x [0,
-            b]`` for a partial domain. Each block of the matrix, e.g. ``A``,
-            ``B`` and ``D`` for the CLPT, must be symmetric, as for any
-            laminate, since the kernels read only its upper entries.
+            b]`` for a partial domain. The kernels read only the upper
+            entries of each block, therefore the matrix and each of its
+            blocks, e.g. ``A``, ``B`` and ``D`` for the CLPT, must be
+            symmetric, and the transverse shear uncoupled from the other
+            strains, as for any laminate, otherwise a ``ValueError`` is
+            raised. It is used as given, ``force_orthotropic_laminate``
+            applies only to :attr:`.Shell.ABD`.
         NLgeom : bool, optional
             Flag to indicate if geometrically non-linearities should be
             considered.

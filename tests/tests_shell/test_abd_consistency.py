@@ -22,6 +22,9 @@ stiffness, constant or one matrix per integration point, is the attribute
   against the strain energy summed over these points
 - the attribute gives the matrices of the argument ``ABDnxny``, also within
   a :class:`.MultiDomain`, and the stresses at the integration points
+- a matrix whose blocks are not symmetric, or with the transverse shear
+  coupled to the other strains, is rejected, the kernels reading only the
+  upper entries of each block
 
 """
 import io
@@ -384,3 +387,49 @@ def test_load_ABD_of_older_versions(tmp_path):
     assert s2.ABDnxny is None
     assert np.array_equal(s2.ABD, s.ABD)
 
+
+@pytest.mark.parametrize('model', MODELS)
+def test_ABDnxny_checks(model):
+    s = _shell(model)
+    F = _field(s, 9, 7)
+    ne = F.shape[-1]
+    s.calc_kC(ABDnxny=F)
+    # one wrong entry, the matrix not symmetric
+    G = F.copy()
+    G[2, 3, 0, 1] *= 1.01
+    with pytest.raises(ValueError, match=r'symmetric the matrix.*\[2, 3\]'):
+        s.calc_kC(ABDnxny=G)
+    # symmetric matrix, B not symmetric: B12 != B21
+    G = F.copy()
+    d = 0.01*abs(G[2, 3, 0, 4])
+    G[2, 3, 0, 4] += d
+    G[2, 3, 4, 0] += d
+    with pytest.raises(ValueError, match=r'symmetric the block B'):
+        s.calc_kC(ABDnxny=G)
+    with pytest.raises(ValueError, match=r'symmetric the block B'):
+        s.calc_fint(np.zeros(s.get_size()), ABDnxny=G[2, 3])
+    if ne == 13:
+        for name, (i, j) in (('E', (0, 7)), ('F', (3, 7)), ('Dts', (9, 12))):
+            G = F.copy()
+            d = 0.01*abs(G[2, 3, 0, 0])
+            G[2, 3, i, j] += d
+            G[2, 3, j, i] += d
+            with pytest.raises(ValueError, match='symmetric the block ' + name):
+                s.calc_kC(ABDnxny=G)
+    if ne > 6:
+        G = F.copy()
+        d = 0.01*abs(G[2, 3, 0, 0])
+        G[2, 3, 0, ne - 1] = G[2, 3, ne - 1, 0] = d
+        with pytest.raises(ValueError, match='zero the coupling'):
+            s.calc_kC(ABDnxny=G)
+    # round-off is accepted
+    G = F*(1 + 1e-14*np.random.default_rng(4).standard_normal(F.shape))
+    s.calc_kC(ABDnxny=G)
+    with pytest.raises(ValueError, match='shape'):
+        s.calc_kC(ABDnxny=np.zeros((ne + 1, ne + 1)))
+    with pytest.raises(ValueError, match='shape'):
+        s.calc_kC(ABDnxny=np.zeros((9, ne, ne)))
+    # the attribute is checked as well
+    s.ABDnxny = G[0, 0] + 0.01*abs(G[0, 0]).max()*np.eye(ne, k=1)
+    with pytest.raises(ValueError, match='symmetric the matrix'):
+        s.calc_kC()
