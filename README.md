@@ -117,7 +117,7 @@ History
 =======
 
 See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
-* version 0.12.0 (2026-10-13)
+* version 0.12.0 (2026-10-14)
     - Prescribed displacements imposed exactly with the null-space method, `MultiDomain(..., pd_method='null-space')`, as inhomogeneous linear constraints `c = T c_r + c_p0 + lbd*c_p1`: linear static, linear buckling, Newton-Raphson and arc-length analyses under displacement control, reactions `MultiDomain.reaction_pd()` and `MultiDomain.reaction_resultant()`, also for a single `Shell`; prescribed rotations; the penalty method remains the default
     - BUG: `fkCld_xcte` and `fkCld_ycte` placed the penalty stiffnesses of `ku` and `kv` at the rows and columns of `w`
     - Requires `structsolve>=0.7.0`

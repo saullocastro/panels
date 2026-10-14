@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.12.0 (2026-10-13)
+## 0.12.0 (2026-10-14)
 
 ### New: prescribed displacements imposed exactly with the null-space method
 
