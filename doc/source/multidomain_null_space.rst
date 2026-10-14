@@ -686,14 +686,17 @@ reference being `\lambda \partial R_r/\partial \lambda`, see
 **Run time.** For the linear analyses both methods have the same cost: the
 elimination of the constraints is a small fraction of the assembly. For the
 non-linear analysis above the run time is dominated by the assembly of the
-tangent stiffness matrix: 12.6 s and 15.8 s with the null-space method for
-``relTOL = 1e-6`` and ``1e-10``, against 4.4 s and 9.2 s with the penalty
+tangent stiffness matrix: 0.96 s and 1.29 s with the null-space method for
+``relTOL = 1e-6`` and ``1e-10``, against 0.44 s and 0.90 s with the penalty
 method and `k/(E h) = 10^4`. The null-space method converges to a much
-smaller residual in absolute terms, and ``structsolve`` evaluates `\partial
-R_r/\partial \lambda`, which requires the tangent stiffness matrix, at every
-convergence check, including the converged iterate of each increment; at
-the other iterates the matrix is reused from a cache by
-:meth:`.MultiDomain.get_reduced_functions`.
+smaller residual in absolute terms. Its `\partial R_r/\partial \lambda`
+requires the product `[K_T] \{c_{p1}\}`, computed without assembling
+`[K_T]`, see :ref:`tangent_product`, at the cost of one evaluation of the
+internal force vector, and ``structsolve`` 0.8.0 evaluates it only together
+with the tangent stiffness matrix. With ``panels`` 0.12.0 before these two
+improvements and the tabulation of the approximation functions, see
+:ref:`tabulation`, the same analyses took 12.6 s and 15.8 s against 4.4 s
+and 9.2 s.
 
 **When to use each method.** The null-space method is exact, needs no
 penalty constant, keeps the conditioning of the model, and gives reactions

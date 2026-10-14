@@ -88,6 +88,7 @@ def fkCBFxcte11(double kt, double kr, object p1, double xcte1,
         A sparse matrix that adds the penalty stiffness to xcte of panel p1 position.
 
     """
+    cdef double [:, ::1] ftab1
     cdef int i1, j1, k1, l1, c, row, col
     cdef int m1, n1
     cdef double a1, b1
@@ -124,8 +125,17 @@ def fkCBFxcte11(double kt, double kr, object p1, double xcte1,
     kCBFxcte11c = np.zeros((fdim,), dtype=INT)
     kCBFxcte11v = np.zeros((fdim,), dtype=DOUBLE)
 
+    ftab1 = np.zeros((4, m1), dtype=DOUBLE)
+
     with nogil:
         c = -1
+        # approximation functions evaluated once, see panels/dev/tabulate.py
+        for i1 in range(m1):
+            ftab1[0, i1] = f(i1, xicte1, x1u1, x1ur1, x2u1, x2ur1)
+            ftab1[1, i1] = f(i1, xicte1, x1v1, x1vr1, x2v1, x2vr1)
+            ftab1[2, i1] = f(i1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
+            ftab1[3, i1] = fp(i1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
+
         for j1 in range(n1):
             for l1 in range(n1):
                 g1Auf1Bu = integral_ff(j1, l1, y1u1, y1ur1, y2u1, y2ur1, y1u1, y1ur1, y2u1, y2ur1)
@@ -133,10 +143,10 @@ def fkCBFxcte11(double kt, double kr, object p1, double xcte1,
                 g1Awf1Bw = integral_ff(j1, l1, y1w1, y1wr1, y2w1, y2wr1, y1w1, y1wr1, y2w1, y2wr1)
 
                 for i1 in range(m1):
-                    f1Au = f(i1, xicte1, x1u1, x1ur1, x2u1, x2ur1)
-                    f1Av = f(i1, xicte1, x1v1, x1vr1, x2v1, x2vr1)
-                    f1Aw = f(i1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
-                    f1Awxi = fp(i1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
+                    f1Au = ftab1[0, i1]
+                    f1Av = ftab1[1, i1]
+                    f1Aw = ftab1[2, i1]
+                    f1Awxi = ftab1[3, i1]
 
                     for k1 in range(m1):
                         row = row0 + DOF*(j1*m1 + i1)
@@ -146,10 +156,10 @@ def fkCBFxcte11(double kt, double kr, object p1, double xcte1,
                         if row > col:
                             continue
 
-                        f1Bu = f(k1, xicte1, x1u1, x1ur1, x2u1, x2ur1)
-                        f1Bv = f(k1, xicte1, x1v1, x1vr1, x2v1, x2vr1)
-                        f1Bw = f(k1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
-                        f1Bwxi = fp(k1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
+                        f1Bu = ftab1[0, k1]
+                        f1Bv = ftab1[1, k1]
+                        f1Bw = ftab1[2, k1]
+                        f1Bwxi = ftab1[3, k1]
 
                         c += 1
                         kCBFxcte11r[c] = row+0
@@ -207,6 +217,7 @@ def fkCBFxcte12(double kt, double kr, object p1, object p2,
         A sparse matrix that adds the penalty stiffness to xcte of panel 1 and panel 2 coupling position.
 
     """
+    cdef double [:, ::1] ftab1, ftab2
     cdef int i1, j1, k2, l2, c, row, col
     cdef int m1, n1, m2, n2
     cdef double a1, a2, b1, b2
@@ -255,8 +266,23 @@ def fkCBFxcte12(double kt, double kr, object p1, object p2,
     kCBFxcte12c = np.zeros((fdim,), dtype=INT)
     kCBFxcte12v = np.zeros((fdim,), dtype=DOUBLE)
 
+    ftab1 = np.zeros((4, m1), dtype=DOUBLE)
+    ftab2 = np.zeros((4, m2), dtype=DOUBLE)
+
     with nogil:
         c = -1
+        # approximation functions evaluated once, see panels/dev/tabulate.py
+        for i1 in range(m1):
+            ftab1[0, i1] = f(i1, xicte1, x1u1, x1ur1, x2u1, x2ur1)
+            ftab1[1, i1] = f(i1, xicte1, x1v1, x1vr1, x2v1, x2vr1)
+            ftab1[2, i1] = f(i1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
+            ftab1[3, i1] = fp(i1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
+        for k2 in range(m2):
+            ftab2[0, k2] = f(k2, xicte2, x1u2, x1ur2, x2u2, x2ur2)
+            ftab2[1, k2] = f(k2, xicte2, x1v2, x1vr2, x2v2, x2vr2)
+            ftab2[2, k2] = f(k2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
+            ftab2[3, k2] = fp(k2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
+
         for j1 in range(n1):
             for l2 in range(n2):
                 g1Auf2Bw = integral_ff(j1, l2, y1u1, y1ur1, y2u1, y2ur1, y1w2, y1wr2, y2w2, y2wr2)
@@ -265,10 +291,10 @@ def fkCBFxcte12(double kt, double kr, object p1, object p2,
                 g1Awf2Bw = integral_ff(j1, l2, y1w1, y1wr1, y2w1, y2wr1, y1w2, y1wr2, y2w2, y2wr2)
 
                 for i1 in range(m1):
-                    f1Au = f(i1, xicte1, x1u1, x1ur1, x2u1, x2ur1)
-                    f1Av = f(i1, xicte1, x1v1, x1vr1, x2v1, x2vr1)
-                    f1Aw = f(i1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
-                    f1Awxi = fp(i1, xicte1, x1w1, x1wr1, x2w1, x2wr1)
+                    f1Au = ftab1[0, i1]
+                    f1Av = ftab1[1, i1]
+                    f1Aw = ftab1[2, i1]
+                    f1Awxi = ftab1[3, i1]
 
                     for k2 in range(m2):
                         row = row0 + DOF*(j1*m1 + i1)
@@ -278,10 +304,10 @@ def fkCBFxcte12(double kt, double kr, object p1, object p2,
                         #if row > col:
                             #continue
 
-                        f2Bu = f(k2, xicte2, x1u2, x1ur2, x2u2, x2ur2)
-                        f2Bv = f(k2, xicte2, x1v2, x1vr2, x2v2, x2vr2)
-                        f2Bw = f(k2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
-                        f2Bwxi = fp(k2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
+                        f2Bu = ftab2[0, k2]
+                        f2Bv = ftab2[1, k2]
+                        f2Bw = ftab2[2, k2]
+                        f2Bwxi = ftab2[3, k2]
 
                         c += 1
                         kCBFxcte12r[c] = row+0
@@ -338,6 +364,7 @@ def fkCBFxcte22(double kt, double kr, object p1, object p2, double xcte2,
         A sparse matrix that adds the penalty stiffness to xcte of panel p2 position.
 
     """
+    cdef double [:, ::1] ftab2
     cdef int i2, k2, j2, l2, c, row, col
     cdef int m2, n2
     cdef double b1, a2
@@ -373,8 +400,17 @@ def fkCBFxcte22(double kt, double kr, object p1, object p2, double xcte2,
     kCBFxcte22c = np.zeros((fdim,), dtype=INT)
     kCBFxcte22v = np.zeros((fdim,), dtype=DOUBLE)
 
+    ftab2 = np.zeros((4, m2), dtype=DOUBLE)
+
     with nogil:
         c = -1
+        # approximation functions evaluated once, see panels/dev/tabulate.py
+        for i2 in range(m2):
+            ftab2[0, i2] = f(i2, xicte2, x1u2, x1ur2, x2u2, x2ur2)
+            ftab2[1, i2] = f(i2, xicte2, x1v2, x1vr2, x2v2, x2vr2)
+            ftab2[2, i2] = f(i2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
+            ftab2[3, i2] = fp(i2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
+
         for j2 in range(n2):
             for l2 in range(n2):
                 g2Auf2Bu = integral_ff(j2, l2, y1u2, y1ur2, y2u2, y2ur2, y1u2, y1ur2, y2u2, y2ur2)
@@ -382,10 +418,10 @@ def fkCBFxcte22(double kt, double kr, object p1, object p2, double xcte2,
                 g2Awf2Bw = integral_ff(j2, l2, y1w2, y1wr2, y2w2, y2wr2, y1w2, y1wr2, y2w2, y2wr2)
 
                 for i2 in range(m2):
-                    f2Au = f(i2, xicte2, x1u2, x1ur2, x2u2, x2ur2)
-                    f2Av = f(i2, xicte2, x1v2, x1vr2, x2v2, x2vr2)
-                    f2Aw = f(i2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
-                    f2Awxi = fp(i2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
+                    f2Au = ftab2[0, i2]
+                    f2Av = ftab2[1, i2]
+                    f2Aw = ftab2[2, i2]
+                    f2Awxi = ftab2[3, i2]
 
                     for k2 in range(m2):
                         row = row0 + DOF*(j2*m2 + i2)
@@ -395,10 +431,10 @@ def fkCBFxcte22(double kt, double kr, object p1, object p2, double xcte2,
                         if row > col:
                             continue
 
-                        f2Bu = f(k2, xicte2, x1u2, x1ur2, x2u2, x2ur2)
-                        f2Bv = f(k2, xicte2, x1v2, x1vr2, x2v2, x2vr2)
-                        f2Bw = f(k2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
-                        f2Bwxi = fp(k2, xicte2, x1w2, x1wr2, x2w2, x2wr2)
+                        f2Bu = ftab2[0, k2]
+                        f2Bv = ftab2[1, k2]
+                        f2Bw = ftab2[2, k2]
+                        f2Bwxi = ftab2[3, k2]
 
                         c += 1
                         kCBFxcte22r[c] = row+0
@@ -452,24 +488,31 @@ cdef void _terms_sdt(int nt, long [::1] dofA, long [::1] dofB,
         double [:, ::1] acA, double [:, ::1] acB, int nalA, int nalB,
         int nacA, int nacB, double cteA, double cteB, double jac,
         int along_x, int upper, int row0, int col0,
+        double [::1] gAs, double [::1] gBs,
         long [::1] r, long [::1] c, double [::1] v) noexcept nogil:
     #NOTE the terms computed here are described in _block_sdt(); ``al*`` are
     #     the flags of the functions along the connection and ``ac*`` those
-    #     of the functions across it, ``nal*`` and ``nac*`` their numbers
+    #     of the functions across it, ``nal*`` and ``nac*`` their numbers;
+    #     the functions across it are evaluated once per term ``t`` in
+    #     ``gAs`` and ``gBs``, see panels/dev/tabulate.py
     cdef int t, iA, iB, jA, jB, row, col, pos, mA, mB
     cdef double I, gA, gB
     pos = 0
     mA = nalA if along_x else nacA
     mB = nalB if along_x else nacB
     for t in range(nt):
+        for jA in range(nacA):
+            gAs[jA] = f(jA, cteA, acA[t, 0], acA[t, 1], acA[t, 2], acA[t, 3])
+        for jB in range(nacB):
+            gBs[jB] = f(jB, cteB, acB[t, 0], acB[t, 1], acB[t, 2], acB[t, 3])
         for iA in range(nalA):
             for iB in range(nalB):
                 I = jac*integral_ff(iA, iB, alA[t, 0], alA[t, 1], alA[t, 2],
                         alA[t, 3], alB[t, 0], alB[t, 1], alB[t, 2], alB[t, 3])
                 for jA in range(nacA):
-                    gA = f(jA, cteA, acA[t, 0], acA[t, 1], acA[t, 2], acA[t, 3])
+                    gA = gAs[jA]
                     for jB in range(nacB):
-                        gB = f(jB, cteB, acB[t, 0], acB[t, 1], acB[t, 2], acB[t, 3])
+                        gB = gBs[jB]
                         if along_x:
                             row = row0 + DOF_SDT*(jA*mA + iA) + dofA[t]
                             col = col0 + DOF_SDT*(jB*mB + iB) + dofB[t]
@@ -503,7 +546,7 @@ def _block_sdt(terms, object pA, object pB, double cteA, double cteB,
     """
     cdef int nt, nalA, nalB, nacA, nacB, n
     cdef long [::1] dofA, dofB, r, c
-    cdef double [::1] coeff, v
+    cdef double [::1] coeff, v, gAs, gBs
     cdef double [:, ::1] alA, alB, acA, acB
     cdef double jac
     cdef int along_x = along == 'x'
@@ -527,10 +570,12 @@ def _block_sdt(terms, object pA, object pB, double cteA, double cteB,
     r = np.zeros(n, dtype=INT)
     c = np.zeros(n, dtype=INT)
     v = np.zeros(n, dtype=DOUBLE)
+    gAs = np.zeros(nacA, dtype=DOUBLE)
+    gBs = np.zeros(nacB, dtype=DOUBLE)
     with nogil:
         _terms_sdt(nt, dofA, dofB, coeff, alA, alB, acA, acB, nalA, nalB,
                    nacA, nacB, cteA, cteB, jac, along_x, upper, row0,
-                   col0, r, c, v)
+                   col0, gAs, gBs, r, c, v)
     return coo_matrix((v, (r, c)), shape=(size, size))
 
 

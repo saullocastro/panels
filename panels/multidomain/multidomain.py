@@ -727,7 +727,9 @@ class MultiDomain(object):
           `\lambda`; with ``c`` and ``lbd``, the derivative of the residual
           with respect to the load factor, `\partial R_r/\partial \lambda =
           [T]^T (\{F_{ext}\} - [K_T(c)] \{c_{p1}\})`, which ``structsolve``
-          0.7.0 or newer passes in the non-linear analyses.
+          0.7.0 or newer passes in the non-linear analyses. The product
+          `[K_T(c)] \{c_{p1}\}` comes from :meth:`.calc_kTv`, without the
+          assembly of `[K_T]`.
 
         The linear static analysis ``Analysis.static(NLgeom=False)`` cannot
         contain the constant prescribed displacements and is not available
@@ -763,28 +765,9 @@ class MultiDomain(object):
 
         c_p0, c_p1 = self.get_cp()
         has_p1 = bool(np.any(c_p1))
-        #NOTE the last full matrices, calc_fext(c, lbd) needs K_T at the
-        #     configuration of the last calc_kC and calc_kG of structsolve
-        cache = {}
 
         def full(c_r, lbd):
             return T @ c_r + c_p0 + lbd*c_p1
-
-        def cached(name, c, args, func):
-            hit = cache.get(name)
-            if hit is not None and hit[0] == args and np.array_equal(hit[1], c):
-                return hit[2]
-            out = func()
-            cache[name] = (args, c.copy(), out)
-            return out
-
-        def kC_full(c, NLgeom, inc, silent):
-            return cached('kC', c, (NLgeom, inc), lambda: self.calc_kC(c=c,
-                          NLgeom=NLgeom, inc=inc, silent=silent))
-
-        def kG_full(c, NLgeom, silent):
-            return cached('kG', c, (NLgeom, ), lambda: self.calc_kG(c=c,
-                          NLgeom=NLgeom, silent=silent))
 
         def calc_fext(inc=1., silent=True, c=None, lbd=None):
             if c is None:
@@ -799,25 +782,22 @@ class MultiDomain(object):
             cf = full(c, lbd)
             fext = self.calc_fext(inc=inc, silent=silent, c=cf)
             if has_p1:
-                kT = kC_full(cf, True, lbd, silent) + kG_full(cf, True, silent)
-                fext = fext - inc*(kT @ c_p1)
+                #NOTE the product, without the assembly of [K_T]
+                fext = fext - inc*self.calc_kTv(cf, c_p1, silent=silent,
+                                                inc=lbd)
             return T.T @ fext
 
         def calc_fint(c, inc=1., silent=True):
             return T.T @ self.calc_fint(c=full(c, inc), inc=inc, silent=silent)
 
         def calc_kC(c=None, NLgeom=False, inc=1., silent=True):
-            if c is None:
-                kC = self.calc_kC(c=None, NLgeom=NLgeom, inc=inc, silent=silent)
-            else:
-                kC = kC_full(full(c, inc), NLgeom, inc, silent)
+            c = None if c is None else full(c, inc)
+            kC = self.calc_kC(c=c, NLgeom=NLgeom, inc=inc, silent=silent)
             return csr_matrix(T.T @ kC @ T)
 
         def calc_kG(c=None, NLgeom=False, inc=1., silent=True):
-            if c is None:
-                kG = self.calc_kG(c=None, NLgeom=NLgeom, silent=silent)
-            else:
-                kG = kG_full(full(c, inc), NLgeom, silent)
+            c = None if c is None else full(c, inc)
+            kG = self.calc_kG(c=c, NLgeom=NLgeom, silent=silent)
             return csr_matrix(T.T @ kG @ T)
 
         return calc_fext, calc_fint, calc_kC, calc_kG
@@ -2727,6 +2707,52 @@ class MultiDomain(object):
         self.kT = kT
         msg('finished!', level=2, silent=silent)
         return kT
+
+
+    def calc_kTv(self, c, v, silent=True, inc=1.):
+        r"""Product of the tangent stiffness matrix of the assembly by a
+        vector, without assembly
+
+        Returns `[K_T(c)] \{v\}`, with `[K_T]` the sum of :meth:`.calc_kC`
+        and :meth:`.calc_kG` with ``NLgeom=True`` at the load factor ``inc``,
+        i.e. the directional derivative of :meth:`.calc_fint` along ``v``.
+        The product of each panel comes from :meth:`.Shell.calc_kTv`, whose
+        cost is about that of :meth:`.Shell.calc_fint`, and the connections
+        add ``get_kC_conn(c=c) @ v``.
+
+        Parameters
+        ----------
+        c : array-like
+            Ritz constants of the assembly.
+        v : array-like
+            The vector, with the size of ``c``.
+        silent : bool, optional
+            A boolean to tell whether the log messages should be printed.
+        inc : float, optional
+            Load factor of the incremented follower pressure loads of the
+            panels, see :meth:`.Shell.calc_kCfollower`.
+
+        Returns
+        -------
+        kTv : np.ndarray
+            The product.
+
+        """
+        msg('Calculating kT*v for assembly...', level=2, silent=silent)
+        size = self.get_size()
+        c = np.asarray(c, dtype=DOUBLE)
+        v = np.asarray(v, dtype=DOUBLE)
+        check_c(c, size)
+        check_c(v, size)
+        kTv = np.zeros(size, dtype=DOUBLE)
+        for p in self.panels:
+            if p.col_start is None:
+                raise ValueError('Shell attributes "col_start" must be defined!')
+            kTv += p.calc_kTv(c, v, size=size, col0=p.col_start,
+                              silent=silent, inc=inc)
+        kTv += self.get_kC_conn(c=c) @ v
+        msg('finished!', level=2, silent=silent)
+        return kTv
 
 
     def calc_fint(self, c, silent=True, inc=1., kC_conn=None):

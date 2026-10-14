@@ -4,7 +4,7 @@ requires-python = ">=3.8"
 dynamic = ["version", "authors", "license", "readme", "description",
 "keywords", "classifiers"]
 dependencies = ["numpy", "scipy", "matplotlib", "composites>=0.9.21",
-"structsolve>=0.7.0"]
+"structsolve>=0.8.0"]
 
 # NOTE only Cython is needed to build: no Cython module cimports numpy or
 #      composites. Every package listed here must also be resolved when

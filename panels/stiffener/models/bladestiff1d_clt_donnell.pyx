@@ -39,6 +39,7 @@ def fkCf(double ys, double a, double b, double bf, double df, double E1, double 
          double y1u, double y1ur, double y2u, double y2ur,
          double y1w, double y1wr, double y2w, double y2wr,
          int size, int row0, int col0):
+    cdef double [:, ::1] gtab
     cdef int i, k, j, l, c, row, col
     cdef double eta
 
@@ -58,9 +59,17 @@ def fkCf(double ys, double a, double b, double bf, double df, double E1, double 
     k0fc = np.zeros((fdim,), dtype=INT)
     k0fv = np.zeros((fdim,), dtype=DOUBLE)
 
+    gtab = np.zeros((3, n), dtype=DOUBLE)
+
     with nogil:
         # k0f
         c = -1
+        # approximation functions evaluated once, see panels/dev/tabulate.py
+        for j in range(n):
+            gtab[0, j] = f(j, eta, y1u, y1ur, y2u, y2ur)
+            gtab[1, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
+            gtab[2, j] = fp(j, eta, y1w, y1wr, y2w, y2wr)
+
         for i in range(m):
             for k in range(m):
                 fAuxifBuxi = integral_fpfp(i, k, x1u, x1ur, x2u, x2ur, x1u, x1ur, x2u, x2ur)
@@ -74,9 +83,9 @@ def fkCf(double ys, double a, double b, double bf, double df, double E1, double 
                 fAwxixifBwxixi = integral_fppfpp(i, k, x1w, x1wr, x2w, x2wr, x1w, x1wr, x2w, x2wr)
 
                 for j in range(n):
-                    gAu = f(j, eta, y1u, y1ur, y2u, y2ur)
-                    gAw = f(j, eta, y1w, y1wr, y2w, y2wr)
-                    gAweta = fp(j, eta, y1w, y1wr, y2w, y2wr)
+                    gAu = gtab[0, j]
+                    gAw = gtab[1, j]
+                    gAweta = gtab[2, j]
 
                     for l in range(n):
 
@@ -87,9 +96,9 @@ def fkCf(double ys, double a, double b, double bf, double df, double E1, double 
                         if row > col:
                             continue
 
-                        gBu = f(l, eta, y1u, y1ur, y2u, y2ur)
-                        gBw = f(l, eta, y1w, y1wr, y2w, y2wr)
-                        gBweta = fp(l, eta, y1w, y1wr, y2w, y2wr)
+                        gBu = gtab[0, l]
+                        gBw = gtab[1, l]
+                        gBweta = gtab[2, l]
 
                         c += 1
                         k0fr[c] = row+0
@@ -117,6 +126,7 @@ def fkGf(double ys, double Fx, double a, double b, double bf, int m, int n,
           double x1w, double x1wr, double x2w, double x2wr,
           double y1w, double y1wr, double y2w, double y2wr,
           int size, int row0, int col0):
+    cdef double [:, ::1] gtab
     cdef int i, k, j, l, c, row, col
     cdef double eta
 
@@ -133,15 +143,21 @@ def fkGf(double ys, double Fx, double a, double b, double bf, int m, int n,
     kGfc = np.zeros((fdim,), dtype=INT)
     kGfv = np.zeros((fdim,), dtype=DOUBLE)
 
+    gtab = np.zeros((1, n), dtype=DOUBLE)
+
     with nogil:
         # kGf
         c = -1
+        # approximation functions evaluated once, see panels/dev/tabulate.py
+        for j in range(n):
+            gtab[0, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
+
         for i in range(m):
             for k in range(m):
                 fAwxifBwxi = integral_fpfp(i, k, x1w, x1wr, x2w, x2wr, x1w, x1wr, x2w, x2wr)
 
                 for j in range(n):
-                    gAw = f(j, eta, y1w, y1wr, y2w, y2wr)
+                    gAw = gtab[0, j]
 
                     for l in range(n):
                         row = row0 + DOF*(j*m + i)
@@ -151,7 +167,7 @@ def fkGf(double ys, double Fx, double a, double b, double bf, int m, int n,
                         if row > col:
                             continue
 
-                        gBw = f(l, eta, y1w, y1wr, y2w, y2wr)
+                        gBw = gtab[0, l]
 
                         c += 1
                         kGfr[c] = row+2
@@ -246,6 +262,7 @@ def fkMf(double ys, double rho, double h, double hb, double hf, double a,
         Upper triangle of the mass matrix of the flange.
 
     """
+    cdef double [:, ::1] gtab
     cdef double fAufBu, fAufBwxi, fAvfBv, fAvfBw, fAwxifBu, fAwfBv, fAwfBw
     cdef double fAwxifBwxi
     cdef double gAu, gBu, gAv, gBv, gAw, gBw, gAweta, gBweta
@@ -264,9 +281,18 @@ def fkMf(double ys, double rho, double h, double hb, double hf, double a,
     kMfc = np.zeros((fdim,), dtype=INT)
     kMfv = np.zeros((fdim,), dtype=DOUBLE)
 
+    gtab = np.zeros((4, n), dtype=DOUBLE)
+
     with nogil:
         # kMf
         c = -1
+        # approximation functions evaluated once, see panels/dev/tabulate.py
+        for j in range(n):
+            gtab[0, j] = f(j, eta, y1u, y1ur, y2u, y2ur)
+            gtab[1, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
+            gtab[2, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
+            gtab[3, j] = fp(j, eta, y1w, y1wr, y2w, y2wr)
+
         for i in range(m):
             for k in range(m):
 
@@ -281,10 +307,10 @@ def fkMf(double ys, double rho, double h, double hb, double hf, double a,
 
                 for j in range(n):
 
-                    gAu = f(j, eta, y1u, y1ur, y2u, y2ur)
-                    gAv = f(j, eta, y1v, y1vr, y2v, y2vr)
-                    gAw = f(j, eta, y1w, y1wr, y2w, y2wr)
-                    gAweta = fp(j, eta, y1w, y1wr, y2w, y2wr)
+                    gAu = gtab[0, j]
+                    gAv = gtab[1, j]
+                    gAw = gtab[2, j]
+                    gAweta = gtab[3, j]
 
                     for l in range(n):
 
@@ -295,10 +321,10 @@ def fkMf(double ys, double rho, double h, double hb, double hf, double a,
                         if row > col:
                             continue
 
-                        gBu = f(l, eta, y1u, y1ur, y2u, y2ur)
-                        gBv = f(l, eta, y1v, y1vr, y2v, y2vr)
-                        gBw = f(l, eta, y1w, y1wr, y2w, y2wr)
-                        gBweta = fp(l, eta, y1w, y1wr, y2w, y2wr)
+                        gBu = gtab[0, l]
+                        gBv = gtab[1, l]
+                        gBw = gtab[2, l]
+                        gBweta = gtab[3, l]
 
                         c += 1
                         kMfr[c] = row+0
