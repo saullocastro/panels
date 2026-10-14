@@ -6,7 +6,7 @@ import pickle
 import zipfile
 
 import numpy as np
-from numpy.testing import assert_array_equal
+from numpy.testing import assert_allclose, assert_array_equal
 import pytest
 from structsolve import lb, static
 
@@ -78,6 +78,16 @@ def _assert_same_matrices(m1, m2):
     assert_array_equal(m1.toarray(), m2.toarray())
 
 
+def _assert_same_eigenpairs(eigvals2, eigvecs2, eigvals, eigvecs):
+    r"""The eigenpairs of the same matrices are not reproducible to the last
+    bit across calls of the eigensolver on every platform, e.g. with the
+    Accelerate BLAS of macOS, the matrices are compared exactly instead"""
+    assert_allclose(eigvals2, eigvals, rtol=1e-7)
+    signs = np.sign(np.sum(eigvecs2*eigvecs, axis=0))
+    assert_allclose(eigvecs2*signs, eigvecs, rtol=0,
+                    atol=1e-4*abs(eigvecs).max())
+
+
 def _shell_lb(s):
     kC = s.calc_kC(c=None)
     kG = s.calc_kG()
@@ -117,8 +127,7 @@ def test_shell_before_analysis(model):
     kC2, kG2, eigvals2, eigvecs2 = _shell_lb(s2)
     _assert_same_matrices(kC2, kC)
     _assert_same_matrices(kG2, kG)
-    assert_array_equal(eigvals2, eigvals)
-    assert_array_equal(eigvecs2, eigvecs)
+    _assert_same_eigenpairs(eigvals2, eigvecs2, eigvals, eigvecs)
     assert_array_equal(_shell_static(s2), _shell_static(s))
 
 
@@ -152,8 +161,7 @@ def test_shell_after_analysis(model):
     assert all(v is None for v in s2.matrices.values())
     kC2, kG2, eigvals2, eigvecs2 = _shell_lb(s2)
     _assert_same_matrices(kC2, kC)
-    assert_array_equal(eigvals2, eigvals)
-    assert_array_equal(eigvecs2, eigvecs)
+    _assert_same_eigenpairs(eigvals2, eigvecs2, eigvals, eigvecs)
     assert_array_equal(_shell_static(s2), c)
     s2.stress(c, gridx=7, gridy=5)
     for k, v in s.fields.items():
@@ -210,8 +218,7 @@ def test_stiffpanelbay(stiffener):
     kC2, kG2, eigvals2, eigvecs2 = _bay_lb(bay2)
     _assert_same_matrices(kC2, kC)
     _assert_same_matrices(kG2, kG)
-    assert_array_equal(eigvals2, eigvals)
-    assert_array_equal(eigvecs2, eigvecs)
+    _assert_same_eigenpairs(eigvals2, eigvecs2, eigvals, eigvecs)
     assert_array_equal(bay2.calc_fext(silent=True), bay.calc_fext(silent=True))
 
     # after the analysis
@@ -232,8 +239,7 @@ def test_stiffpanelbay(stiffener):
             == [s in bay.bladestiff1ds for s in bay.stiffeners])
     kC3, _, eigvals3, eigvecs3 = _bay_lb(bay3)
     _assert_same_matrices(kC3, kC)
-    assert_array_equal(eigvals3, eigvals)
-    assert_array_equal(eigvecs3, eigvecs)
+    _assert_same_eigenpairs(eigvals3, eigvecs3, eigvals, eigvecs)
 
 
 def _multidomain(conn_method):

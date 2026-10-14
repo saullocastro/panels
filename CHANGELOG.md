@@ -88,7 +88,7 @@
   `MultiDomain.calc_kTv`, and reuses the factorizations of the tangent
   stiffness matrix in the modified Newton-Raphson method.
 
-## 0.12.0 (2026-10-13)
+## 0.12.0 (2026-10-14)
 
 ### New: prescribed displacements imposed exactly with the null-space method
 
@@ -169,6 +169,13 @@ displacements imposed exactly" of `doc/source/multidomain_null_space.rst`.
   entries. Only the line prescribed displacements of `u` and `v` with the
   penalty method are affected; the prescribed `w` of the cohesive zone and
   DCB examples is unchanged. New test `test_line_penalty_kernels`.
+
+### Tests
+
+- `tests/test_json.py` compares the eigenpairs of the saved and loaded
+  models with a tolerance, eigenvectors up to the sign, since they are not
+  reproducible to the last bit across calls of the eigensolver on macOS.
+  The matrices, stored results and fields are still compared exactly.
 
 ### Dependencies
 
