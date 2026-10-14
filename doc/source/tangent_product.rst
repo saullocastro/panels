@@ -176,7 +176,7 @@ and 11.9 s for `m = n = 12`, i.e. 700 times the product.
 Displacement-controlled post-buckling of the plate of
 ``tests/multidomain/test_null_space_pd.py`` with `m = n = 12` (407 reduced
 degrees of freedom), prescribed displacements imposed exactly, the four
-combinations of ``panels`` before (0.12.0 as merged, with the previous
+combinations of ``panels`` before (0.12.0, with the previous
 kernels and the assembly of `[K_T]` for `\partial R_r/\partial \lambda`)
 and after these developments with ``structsolve`` 0.7.0 and 0.8.0. The
 reactions at `\lambda = 1` agree to all the digits printed:

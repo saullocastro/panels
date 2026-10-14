@@ -29,7 +29,7 @@ The structural matrices are solved with
 Citing this library
 ===================
 
-Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.12.0). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
+Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.13.0). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
 
 
 Documentation
@@ -117,10 +117,12 @@ History
 =======
 
 See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
+* version 0.13.0 (2026-10-14)
+    - `Shell.calc_kTv()` and `MultiDomain.calc_kTv()`: product of the tangent stiffness matrix by a vector without assembling it, for all the models, at the cost of one evaluation of the internal forces; used for the displacement control with prescribed displacements imposed exactly
+    - The numerically integrated kernels evaluate the approximation functions once per integration point instead of in their innermost loops, with identical results: the non-linear matrices, the connections, the cohesive zone and the stiffeners are assembled several times faster
+    - Requires `structsolve>=0.8.0`
 * version 0.12.0 (2026-10-13)
     - Prescribed displacements imposed exactly with the null-space method, `MultiDomain(..., pd_method='null-space')`, as inhomogeneous linear constraints `c = T c_r + c_p0 + lbd*c_p1`: linear static, linear buckling, Newton-Raphson and arc-length analyses under displacement control, reactions `MultiDomain.reaction_pd()` and `MultiDomain.reaction_resultant()`, also for a single `Shell`; prescribed rotations; the penalty method remains the default
-    - The numerically integrated kernels evaluate the approximation functions once per integration point instead of in their innermost loops, with identical results: the non-linear matrices, the connections, the cohesive zone and the stiffeners are assembled several times faster
-    - `Shell.calc_kTv()` and `MultiDomain.calc_kTv()`: product of the tangent stiffness matrix by a vector without assembling it, for all the models, at the cost of one evaluation of the internal forces; used for the displacement control with prescribed displacements imposed exactly
     - BUG: `fkCld_xcte` and `fkCld_ycte` placed the penalty stiffnesses of `ku` and `kv` at the rows and columns of `w`
     - Requires `structsolve>=0.7.0`
 * version 0.11.1 (2026-10-08)
