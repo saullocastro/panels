@@ -2,13 +2,6 @@
 
 ## 0.13.2 (2026-10-14)
 
-### Maintenance
-
-- `.gitignore` without the runs of `thesis_timing.py`, which was moved out
-  of the repository.
-
-## 0.13.1 (2026-10-14)
-
 ### Cohesive zone (`'SB_TSL'`): discretisation rules and checks
 
 - New module `panels.multidomain.connections.tsl` with the rules of the
@@ -51,6 +44,11 @@
   `notebooks/results/dcb_mode_I_convergence_study.json`, and
   `notebooks/validation_summary.ipynb` to
   `notebooks/dcb_mode_I_validation_summary.ipynb`.
+
+### Maintenance
+
+- `.gitignore` without the runs of `thesis_timing.py`, which was moved out
+  of the repository.
 
 ## 0.13.0 (2026-10-14)
 

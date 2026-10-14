@@ -118,11 +118,10 @@ History
 
 See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
 * version 0.13.2 (2026-10-14)
-    - Maintenance: `.gitignore` without the runs of `thesis_timing.py`
-* version 0.13.1 (2026-10-14)
     - Cohesive zone `'SB_TSL'`: rules of the discretisation of the cohesive domain, `tsl_resolution()`, `tsl_margin()` and `tsl_discretization()`, and a warning when the cohesive domain is under-resolved
     - No upper limit for the number of Gauss-Legendre points of `MultiDomain.calc_results()` and `MultiDomain.force()`
     - `calc_kw_tsl()` requires `k_i`, `tau_o` and `G1c`
+    - Maintenance: `.gitignore` without the runs of `thesis_timing.py`
 * version 0.13.0 (2026-10-14)
     - `Shell.calc_kTv()` and `MultiDomain.calc_kTv()`: product of the tangent stiffness matrix by a vector without assembling it, for all the models, at the cost of one evaluation of the internal forces; used for the displacement control with prescribed displacements imposed exactly
     - The numerically integrated kernels evaluate the approximation functions once per integration point instead of in their innermost loops, with identical results: the non-linear matrices, the connections, the cohesive zone and the stiffeners are assembled several times faster
