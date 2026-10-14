@@ -1066,7 +1066,8 @@ class Shell(object):
             # laminate properties
             c = np.zeros(size, dtype=DOUBLE)
 
-        #NOTE the consistency checks for ABDnxny are done within the .pyx files
+        #NOTE ABDnxny is checked by Shell._check_ABDnxny() and its shape
+        #     against nx, ny within the .pyx files
 
         # Calc Kc as per panels/panels/models then the pyx files given by ''matrices'' defined earlier
         # This calc K0 - linear consitutive stiff mat (SA formulation paper - eq 11)

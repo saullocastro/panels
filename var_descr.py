@@ -38,8 +38,11 @@ nx, ny = Number of integration points along `x` and `y`, respectively, for the L
 row0 = starting row of this submatrix in the global matrix
 
 p = prime
-ABDnxny = constitutive relations for the laminate at each integration point.
-    Must be a 4-D array of shape ``(nx, ny, 6, 6)`` when using CLT models.
+ABDnxny = constitutive matrix that is not that of the laminate Shell.lam,
+    attribute of Shell or argument of the calc methods: constant ``(ne, ne)``
+    or one matrix per integration point ``(nx, ny, ne, ne)``, with ne = 6
+    (CLPT), 8 (FSDT) or 13 (TSDT), see Shell.calc_kC() and
+    Shell.integration_points(). Shell.ABD is read-only, from Shell.lam.
 NLgeom : bool, Flag to indicate if geometrically non-linearities should be considered.
 
 
