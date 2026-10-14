@@ -244,7 +244,9 @@ def test_ABDnxny_point_indexing(model, partial):
 
     W = np.outer(wxs, wys)
     ref = np.einsum('ij,ijk,ijkl,ijl', W, eps(v), F, eps(c))
-    assert abs(v @ kC @ c - ref) <= 1e-13*abs(ref)
+    #NOTE the round-off is relative to the terms of the sum, not to the sum
+    scale = np.einsum('ij,ijk,ijkl,ijl', W, abs(eps(v)), abs(F), abs(eps(c)))
+    assert abs(v @ kC @ c - ref) <= 1e-13*scale
     kC_rev = s.calc_kC(c=zeros, ABDnxny=F[::-1, ::-1])
     assert abs(v @ kC_rev @ c - ref) > 1e-6*abs(ref)
 
@@ -319,9 +321,12 @@ def test_stress_variable_stiffness():
     assert np.array_equal(plot_mesh['Ys'], np.meshgrid(xs, ys, indexing='ij')[1])
     eps = np.stack([fields[name] for name in s._strain_names()], axis=-1)
     N = np.einsum('ijkl,ijl->ijk', F, eps)
+    #NOTE summed in another order, the round-off is relative to the terms,
+    #     which cancel out at some points
+    scale = np.einsum('ijkl,ijl->ijk', abs(F), abs(eps))
     for k, name in enumerate(s._stress_names()):
         assert fields[name].shape == (nx, ny)
-        assert np.allclose(fields[name], N[..., k], rtol=1e-13, atol=0)
+        assert np.all(abs(fields[name] - N[..., k]) <= 1e-14*scale[..., k])
     with pytest.raises(ValueError, match='integration points'):
         s.stress(c, xs=xs, ys=ys)
     # any points, with one matrix per point
@@ -330,8 +335,9 @@ def test_stress_variable_stiffness():
     ABD = F[:2, :3]
     fields = s.stress(c, ABD=ABD, xs=X, ys=Y, NLgeom=False)[1]
     eps = np.stack([fields[name] for name in s._strain_names()], axis=-1)
-    assert np.allclose(fields['Nxx'], np.einsum('ijl,ijl->ij', ABD[..., 0, :], eps),
-                       rtol=1e-13, atol=0)
+    Nxx = np.einsum('ijl,ijl->ij', ABD[..., 0, :], eps)
+    scale = np.einsum('ijl,ijl->ij', abs(ABD[..., 0, :]), abs(eps))
+    assert np.all(abs(fields['Nxx'] - Nxx) <= 1e-14*scale)
     with pytest.raises(ValueError, match='shape'):
         s.stress(c, ABD=F, xs=X, ys=Y)
     # a constant ABDnxny is used at any point
@@ -377,3 +383,4 @@ def test_load_ABD_of_older_versions(tmp_path):
     s2 = load(fname)
     assert s2.ABDnxny is None
     assert np.array_equal(s2.ABD, s.ABD)
+
