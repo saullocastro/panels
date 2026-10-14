@@ -1795,9 +1795,7 @@ class MultiDomain(object):
 
             strains = [reshape(e, shape) for e in fstrain(c_panel, panel, x,
                        y, self.out_num_cores, NLgeom=int(NLterms))]
-            F = panel.ABD
-            if F is None:
-                raise ValueError('Laminate ABD matrix not defined for panel')
+            F = panel._get_constant_ABD()
 
             # For x: Each row goes from 0 to panel.a
             # For y: Each col goes from 0 to panel.b
@@ -2066,7 +2064,7 @@ class MultiDomain(object):
             d4w_dx2dy2, d4w_dx3dy = np.gradient(d3w_dx2dy, dy, dx)
 
             # ABD
-            F = eval_panel.ABD
+            F = eval_panel._get_constant_ABD()
             D11 = F[3,3]
             D12 = F[3,4]
             D22 = F[4,4]

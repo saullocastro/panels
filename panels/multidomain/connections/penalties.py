@@ -82,6 +82,14 @@ def calc_kt_kr(p1, p2, connection_type):
     connected, instead of using fixed high values, a common practice in the
     literature [castro2017Multidomain]_ .
 
+    The constants are a scaling of the penalty terms, calculated from the
+    laminates ``p1.lam`` and ``p2.lam``, not from the stiffness integrated by
+    the kernels: they ignore ``Shell.force_orthotropic_laminate`` and
+    ``Shell.ABDnxny``. They depend only on the diagonal terms `A_{11}`,
+    `A_{22}`, `D_{11}`, `D_{22}` and on the thickness, which forcing the
+    orthotropy does not change, whereas with ``ABDnxny`` the penalty
+    constants may have to be scaled, e.g. by multiplying the returned values.
+
     """
 
     build_panel_lam(p1)

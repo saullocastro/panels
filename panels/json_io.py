@@ -40,8 +40,8 @@ The file is a zip archive, compressed with ``ZIP_DEFLATED``, containing:
         "data": {...}
       }
 
-- ``arrays/<key>.npy``: every NumPy array, e.g. the constitutive matrix
-  ``ABD`` and the results ``fields`` or ``results['eigvecs']``, written by
+- ``arrays/<key>.npy``: every NumPy array, e.g. the constitutive matrices
+  ``ABDnxny`` and the results ``fields`` or ``results['eigvecs']``, written by
   :func:`numpy.save` with ``allow_pickle=False``. In ``model.json`` an array
   is replaced by ``{"__ndarray__": "arrays/<key>.npy"}``.
 
@@ -122,10 +122,14 @@ _SHELL_ATTRS = (
     'plyts', 'laminaprops', 'rhos',
     'flow', 'beta', 'gamma', 'aeromu', 'rho_air', 'speed_sound', 'Mach',
     'air_speed',
-    'ABD', 'force_orthotropic_laminate',
+    'ABDnxny', 'force_orthotropic_laminate',
     'num_eigvalues', 'num_eigvalues_print',
     'increments', 'results', 'fields', 'plot_mesh',
     )
+#NOTE saved by panels < 0.13.9, when Shell.ABD was an attribute; it is now
+#     calculated from Shell.lam, so it is read, for the checks of the arrays,
+#     and discarded
+_SHELL_LEGACY_ATTRS = ('ABD', )
 _STIFFPANELBAY_ATTRS = (
     'name', 'forces_skin', 'flow', 'bc', 'model',
     'stack', 'laminaprop', 'laminaprops', 'plyt', 'plyts', 'rho',
@@ -354,9 +358,12 @@ def _shell_to_data(s, path, w):
 
 def _shell_from_data(data, r):
     from .shell import Shell
-    _check_keys(data, _SHELL_ATTRS + ('lam', ), 'Shell')
+    _check_keys(data, _SHELL_ATTRS + _SHELL_LEGACY_ATTRS + ('lam', ), 'Shell')
     s = Shell()
     _decode_attrs(s, data, _SHELL_ATTRS, r)
+    for name in _SHELL_LEGACY_ATTRS:
+        if name in data:
+            _decode(data[name], r)
     if 'lam' in data:
         s.lam = _decode_lam(data['lam'])
     return s

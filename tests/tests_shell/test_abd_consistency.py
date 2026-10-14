@@ -13,8 +13,21 @@ Every kernel must integrate the same constitutive matrix, ``Shell.ABD``:
   closed-form solution, also when divided in domains with
   :class:`.MultiDomain`
 
+``Shell.ABD`` is calculated from the laminate and cannot be set; another
+stiffness, constant or one matrix per integration point, is the attribute
+``Shell.ABDnxny``, ``None`` by default:
+
+- ``ABDnxny[i, j]`` is the matrix of the point ``(xs[i], ys[j])`` of
+  :meth:`.Shell.integration_points`, for full and partial domains, checked
+  against the strain energy summed over these points
+- the attribute gives the matrices of the argument ``ABDnxny``, also within
+  a :class:`.MultiDomain`, and the stresses at the integration points
+
 """
+import io
+import json
 import sys
+import zipfile
 sys.path.append('../..')
 
 import numpy as np
@@ -22,7 +35,7 @@ import pytest
 from structsolve import lb, solve
 
 from panels import modelDB
-from panels.shell import Shell
+from panels.shell import Shell, load
 from panels.multidomain import MultiDomain
 
 
@@ -151,3 +164,216 @@ def test_force_orthotropic_buckling_multidomain():
     ref = _navier_Nxx_cr(_ortho_D(p1), a, b)
     assert np.isclose(eigvals[0], ref, rtol=1e-4)
 
+
+# The constitutive matrix is that of the laminate, Shell.ABD, unless the
+# attribute Shell.ABDnxny is set
+
+def test_ABD_is_read_only_and_follows_the_laminate():
+    s = _shell('plate_clpt_donnell')
+    with pytest.raises(AttributeError, match='ABDnxny'):
+        s.ABD = 2*s.ABD
+    with pytest.raises(AttributeError, match='ABDnxny'):
+        _shell('plate_clpt_donnell', ABD=np.eye(6))
+    assert np.array_equal(s.ABD, s.lam.ABD)
+    s.force_orthotropic_laminate = True
+    assert s.ABD[0, 2] == 0 and s.lam.ABD[0, 2] != 0
+    s.force_orthotropic_laminate = False
+    s.stack = [0., 90.]
+    s.calc_kC()
+    assert np.array_equal(s.ABD, s.lam.ABD) and s.lam.B[0, 0] != 0
+    assert Shell().ABD is None
+
+
+@pytest.mark.parametrize('model', MODELS)
+def test_ABDnxny_is_not_allocated_by_default(model):
+    s = _shell(model)
+    c = 1e-6*np.random.default_rng(0).standard_normal(s.get_size())
+    s.calc_kC()
+    s.calc_kC(c=c, NLgeom=True)
+    s.calc_kG(c=c)
+    s.calc_fint(c)
+    s.calc_kTv(c, c)
+    s.stress(c, gridx=5, gridy=5)
+    assert s.ABDnxny is None
+
+
+def _field(s, nx, ny, seed=0):
+    r"""Stiffness that differs at every integration point, with symmetric
+    blocks: two laminates mixed with independent random fractions"""
+    other = _shell(s.model, stack=[0., 45., 90.], plyt=0.4e-3,
+                   force_orthotropic_laminate=s.force_orthotropic_laminate)
+    rng = np.random.default_rng(seed)
+    alpha = 1 + rng.random((nx, ny))[:, :, None, None]
+    beta = rng.random((nx, ny))[:, :, None, None]
+    return np.ascontiguousarray(alpha*s.ABD + beta*other.ABD)
+
+
+def _partial(s):
+    s.x1 = 0.1*s.a
+    s.x2 = 0.8*s.a
+    s.y1 = 0.25*s.b
+    return s
+
+
+@pytest.mark.parametrize('partial', [False, True])
+@pytest.mark.parametrize('model', MODELS)
+def test_ABDnxny_point_indexing(model, partial):
+    r"""`\{v\}^T [K_0(F)] \{c\}` against the sum of `w_x w_y
+    \{\varepsilon(v)\}^T [F] \{\varepsilon(c)\}` over the points of
+    :meth:`.Shell.integration_points`, with `nx \neq ny` taken from the shape
+    of ``ABDnxny``; the reversed field must give another result"""
+    s = _shell(model)
+    if partial:
+        _partial(s)
+    nx, ny = 9, 7
+    F = _field(s, nx, ny)
+    rng = np.random.default_rng(1)
+    c, v = rng.standard_normal((2, s.get_size()))
+    zeros = np.zeros(s.get_size())
+    kC = s.calc_kC(c=zeros, ABDnxny=F)
+    xs, ys, wxs, wys = s.integration_points(nx, ny)
+    x1, x2, y1, y2 = s.integration_limits()
+    assert np.isclose(wxs.sum(), x2 - x1) and np.isclose(wys.sum(), y2 - y1)
+    assert np.all((xs > x1) & (xs < x2)) and np.all((ys > y1) & (ys < y2))
+    X, Y = np.meshgrid(xs, ys, indexing='ij')
+    names = s._strain_names()
+
+    def eps(c):
+        fields = s.strain(c, xs=X, ys=Y, NLgeom=False)[1]
+        return np.stack([fields[name] for name in names], axis=-1)
+
+    W = np.outer(wxs, wys)
+    ref = np.einsum('ij,ijk,ijkl,ijl', W, eps(v), F, eps(c))
+    assert abs(v @ kC @ c - ref) <= 1e-13*abs(ref)
+    kC_rev = s.calc_kC(c=zeros, ABDnxny=F[::-1, ::-1])
+    assert abs(v @ kC_rev @ c - ref) > 1e-6*abs(ref)
+
+
+@pytest.mark.parametrize('model', MODELS)
+def test_ABDnxny_attribute_equals_argument(model):
+    s = _shell(model)
+    nx, ny = 9, 7
+    F = _field(s, nx, ny)
+    c, v = 1e-4*np.random.default_rng(2).standard_normal((2, s.get_size()))
+    zeros = np.zeros(s.get_size())
+    ref = dict(
+        kC=s.calc_kC(c=zeros, ABDnxny=F),
+        kCNL=s.calc_kC(c=c, ABDnxny=F, NLgeom=True),
+        kG=s.calc_kG(c=c, ABDnxny=F),
+        fint=s.calc_fint(c, ABDnxny=F),
+        kTv=s.calc_kTv(c, v, ABDnxny=F),
+    )
+    s.ABDnxny = F
+    # without c the analytical kC, which ignores ABDnxny, must not be used
+    assert _rel(s.calc_kC(), ref['kC']) == 0
+    assert _rel(s.calc_kC(c=c, NLgeom=True), ref['kCNL']) == 0
+    assert _rel(s.calc_kG(c=c), ref['kG']) == 0
+    assert _rel(s.calc_fint(c), ref['fint']) == 0
+    assert _rel(s.calc_kTv(c, v), ref['kTv']) == 0
+    # nx and ny come from the shape of ABDnxny, not from the attributes
+    assert (s.nx, s.ny) != (nx, ny)
+    with pytest.raises(ValueError):
+        s.calc_kC(nx=s.nx, ny=s.ny)
+
+
+@pytest.mark.parametrize('model', MODELS)
+def test_ABDnxny_constant(model):
+    r"""A constant matrix, e.g. a stiffness that is not that of a stack of
+    plies, gives the analytical matrix of that stiffness"""
+    s = _shell(model)
+    kC = s.calc_kC()
+    s.ABDnxny = 2*s.ABD
+    assert _rel(s.calc_kC(), 2*kC) < 1e-12
+
+
+def test_ABDnxny_multidomain():
+    r"""The panels of a :class:`.MultiDomain` use their attribute
+    ``ABDnxny``, the penalty connections are not changed"""
+    def model():
+        p1 = _shell('plate_clpt_donnell', x0=0., y0=0., a=0.3)
+        p2 = _shell('plate_clpt_donnell', x0=0.3, y0=0., a=0.3)
+        conn = [dict(p1=p1, p2=p2, func='SSxcte', xcte1=p1.a, xcte2=0.)]
+        return MultiDomain([p1, p2], conn), p1
+    md, p1 = model()
+    kC = md.calc_kC()
+    size = md.get_size()
+    F = _field(p1, 9, 7)
+    kp1_lam = p1.calc_kC(size=size, row0=p1.row_start, col0=p1.col_start)
+    kp1 = p1.calc_kC(c=np.zeros(size), ABDnxny=F, size=size,
+                     row0=p1.row_start, col0=p1.col_start)
+    md2, p1b = model()
+    p1b.ABDnxny = F
+    assert _rel(md2.calc_kC(), kC - kp1_lam + kp1) < 1e-12
+
+
+def test_stress_variable_stiffness():
+    s = _shell('plate_fsdt_donnell')
+    nx, ny = 9, 7
+    F = _field(s, nx, ny)
+    c = np.random.default_rng(3).standard_normal(s.get_size())
+    s.ABDnxny = F
+    plot_mesh, fields = s.stress(c, NLgeom=False)
+    # at the integration points, ABDnxny[i, j] at (xs[i], ys[j])
+    xs, ys = s.integration_points(nx, ny)[:2]
+    assert np.array_equal(plot_mesh['Xs'], np.meshgrid(xs, ys, indexing='ij')[0])
+    assert np.array_equal(plot_mesh['Ys'], np.meshgrid(xs, ys, indexing='ij')[1])
+    eps = np.stack([fields[name] for name in s._strain_names()], axis=-1)
+    N = np.einsum('ijkl,ijl->ijk', F, eps)
+    for k, name in enumerate(s._stress_names()):
+        assert fields[name].shape == (nx, ny)
+        assert np.allclose(fields[name], N[..., k], rtol=1e-13, atol=0)
+    with pytest.raises(ValueError, match='integration points'):
+        s.stress(c, xs=xs, ys=ys)
+    # any points, with one matrix per point
+    X = np.array([[0.1, 0.2, 0.3], [0.4, 0.5, 0.55]])
+    Y = 0.5*X
+    ABD = F[:2, :3]
+    fields = s.stress(c, ABD=ABD, xs=X, ys=Y, NLgeom=False)[1]
+    eps = np.stack([fields[name] for name in s._strain_names()], axis=-1)
+    assert np.allclose(fields['Nxx'], np.einsum('ijl,ijl->ij', ABD[..., 0, :], eps),
+                       rtol=1e-13, atol=0)
+    with pytest.raises(ValueError, match='shape'):
+        s.stress(c, ABD=F, xs=X, ys=Y)
+    # a constant ABDnxny is used at any point
+    s.ABDnxny = 2*s.ABD
+    N2 = s.stress(c, xs=X, ys=Y, NLgeom=False)[1]['Nxx'].copy()
+    s.ABDnxny = None
+    N1 = s.stress(c, xs=X, ys=Y, NLgeom=False)[1]['Nxx']
+    assert np.allclose(N2, 2*N1, rtol=1e-14, atol=0)
+
+
+def test_save_load(tmp_path):
+    s = _shell('plate_clpt_donnell', force_orthotropic_laminate=True)
+    s.ABDnxny = _field(s, 9, 7)
+    s.name = str(tmp_path / 'plate')
+    s.save()
+    s2 = load(s.name)
+    assert np.array_equal(s2.ABDnxny, s.ABDnxny)
+    assert np.array_equal(s2.ABD, s.ABD)
+    s2.ABDnxny = None
+    assert _rel(s2.calc_kC(), s.calc_kC(ABDnxny=s.ABD)) < 1e-12
+
+
+def test_load_ABD_of_older_versions(tmp_path):
+    r"""The files of panels < 0.13.9 store the constitutive matrix as
+    ``ABD``, it is read and discarded, being that of the laminate"""
+    s = _shell('plate_clpt_donnell')
+    s.name = str(tmp_path / 'old')
+    s.save()
+    fname = s.name + '.shell.zip'
+    with zipfile.ZipFile(fname) as zf:
+        members = {name: zf.read(name) for name in zf.namelist()}
+    d = json.loads(members['model.json'])
+    assert d['data']['ABDnxny'] is None
+    del d['data']['ABDnxny']
+    d['data']['ABD'] = {'__ndarray__': 'arrays/Shell.ABD.npy'}
+    members['model.json'] = json.dumps(d).encode('utf-8')
+    buf = io.BytesIO()
+    np.save(buf, 3*s.ABD)
+    members['arrays/Shell.ABD.npy'] = buf.getvalue()
+    with zipfile.ZipFile(fname, 'w') as zf:
+        for name, value in members.items():
+            zf.writestr(name, value)
+    s2 = load(fname)
+    assert s2.ABDnxny is None
+    assert np.array_equal(s2.ABD, s.ABD)
