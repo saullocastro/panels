@@ -2668,6 +2668,52 @@ class MultiDomain(object):
 
 
     def calc_kT(self, c=None, silent=True, finalize=True, inc=None, kw_tsl=None, kC_conn=None):
+        r"""Tangent stiffness matrix of the assembly
+
+        The exact Jacobian of :meth:`.MultiDomain.calc_fint`:
+
+        .. math::
+            [K_T] = \sum_p [L_p]^T \left( [K_C^{(p)}] + [K_G^{(p)}] \right)
+                    [L_p] + [K_C^{conn}]
+
+        where, for each panel ``p``, `[K_C^{(p)}]` and `[K_G^{(p)}]` are
+        :meth:`.Shell.calc_kC` and :meth:`.Shell.calc_kG` with
+        ``NLgeom=True`` at ``c``, i.e. the two terms of
+        :meth:`.Shell.calc_kT`, assembled at the offsets ``row_start`` and
+        ``col_start`` of the panel, the operator `[L_p]` selecting its
+        degrees of freedom, and `[K_C^{conn}]` is the matrix of the
+        connections, :meth:`.MultiDomain.get_kC_conn`. The panels are
+        assembled with ``finalize=False``, each filling its upper triangle,
+        and the sum is symmetrized once. The load stiffness of the follower
+        pressure loads of the panels, :meth:`.Shell.calc_kCfollower` at the
+        load factor ``inc``, unsymmetric, is added after the symmetrization,
+        when ``finalize=True``. See :ref:`tangent_clpt_donnell_multidomain`.
+
+        Parameters
+        ----------
+        c : np.ndarray or None, optional
+            Ritz constants of the assembly, of size :meth:`.get_size`.
+        silent : bool, optional
+            A boolean to tell whether the log messages should be printed.
+        finalize : bool, optional
+            Symmetrize the sum of the panels and add the load stiffness of
+            the follower pressure loads.
+        inc : float or None, optional
+            Load factor of the follower pressure loads, ``None`` for ``1.``.
+        kw_tsl : np.ndarray or None, optional
+            Not used: the stiffness of a damaged cohesive connection enters
+            through ``kC_conn``, see :meth:`.get_kC_conn`.
+        kC_conn : sparse matrix or None, optional
+            The matrix of the connections, by default
+            :meth:`.get_kC_conn` at ``c``.
+
+        Returns
+        -------
+        kT : sparse matrix
+            The tangent stiffness matrix, also stored in the attribute
+            ``kT``.
+
+        """
         msg('Calculating kT for assembly...', level=2, silent=silent)
         size = self.get_size()
         kT = 0
@@ -2747,6 +2793,39 @@ class MultiDomain(object):
 
 
     def calc_fint(self, c, silent=True, inc=1., kC_conn=None):
+        r"""Internal force vector of the assembly
+
+        .. math::
+            \{F_{int}\} = \sum_p [L_p]^T \{F_{int}^{(p)}([L_p] \{c\})\}
+                          + [K_C^{conn}] \{c\}
+
+        where `\{F_{int}^{(p)}\}` is :meth:`.Shell.calc_fint` of each
+        panel at the load factor ``inc``, which includes the part of the
+        follower pressure loads that depends on the configuration, assembled
+        at the offset ``col_start`` of the panel, and `[K_C^{conn}]` is the
+        matrix of the connections, :meth:`.get_kC_conn`, the penalty
+        connections being linear in ``c``. :meth:`.MultiDomain.calc_kT` is
+        its exact Jacobian, see :ref:`tangent_clpt_donnell_multidomain`.
+
+        Parameters
+        ----------
+        c : np.ndarray
+            Ritz constants of the assembly, of size :meth:`.get_size`.
+        silent : bool, optional
+            A boolean to tell whether the log messages should be printed.
+        inc : float, optional
+            Load factor of the follower pressure loads.
+        kC_conn : sparse matrix or None, optional
+            The matrix of the connections, by default
+            :meth:`.get_kC_conn` at ``c``.
+
+        Returns
+        -------
+        fint : np.ndarray
+            The internal force vector, also stored in the attribute
+            ``fint``.
+
+        """
         msg('Calculating internal forces for assembly...', level=2, silent=silent)
         size = self.get_size()
         # fint = 0
