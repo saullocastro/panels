@@ -117,14 +117,15 @@ History
 =======
 
 See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
-* version 0.13.2 (2026-10-14)
+* version 0.13.9 (2026-10-14)
+    - BUG: the analytical constitutive stiffness matrix of the CLPT models ignored `force_orthotropic_laminate`, inconsistently with the internal forces and the numerical matrices
+    - `Shell.ABD` is calculated from the laminate and read-only; new attribute `Shell.ABDnxny` for a stiffness that is not that of the laminate, constant or one matrix per integration point, used by all the kernels, also within a `MultiDomain`, and by `Shell.stress()`; new `Shell.integration_points()`
+    - `Shell.calc_kTv()` and `MultiDomain.calc_kTv()`: product of the tangent stiffness matrix by a vector without assembling it, for all the models, at the cost of one evaluation of the internal forces; used for the displacement control with prescribed displacements imposed exactly
+    - The numerically integrated kernels evaluate the approximation functions once per integration point instead of in their innermost loops, with identical results: the non-linear matrices, the connections, the cohesive zone and the stiffeners are assembled several times faster
     - Cohesive zone `'SB_TSL'`: rules of the discretisation of the cohesive domain, `tsl_resolution()`, `tsl_margin()` and `tsl_discretization()`, and a warning when the cohesive domain is under-resolved
     - No upper limit for the number of Gauss-Legendre points of `MultiDomain.calc_results()` and `MultiDomain.force()`
     - `calc_kw_tsl()` requires `k_i`, `tau_o` and `G1c`
     - Maintenance: `.gitignore` without the runs of `thesis_timing.py`
-* version 0.13.0 (2026-10-14)
-    - `Shell.calc_kTv()` and `MultiDomain.calc_kTv()`: product of the tangent stiffness matrix by a vector without assembling it, for all the models, at the cost of one evaluation of the internal forces; used for the displacement control with prescribed displacements imposed exactly
-    - The numerically integrated kernels evaluate the approximation functions once per integration point instead of in their innermost loops, with identical results: the non-linear matrices, the connections, the cohesive zone and the stiffeners are assembled several times faster
     - Requires `structsolve>=0.8.0`
 * version 0.12.0 (2026-10-14)
     - Prescribed displacements imposed exactly with the null-space method, `MultiDomain(..., pd_method='null-space')`, as inhomogeneous linear constraints `c = T c_r + c_p0 + lbd*c_p1`: linear static, linear buckling, Newton-Raphson and arc-length analyses under displacement control, reactions `MultiDomain.reaction_pd()` and `MultiDomain.reaction_resultant()`, also for a single `Shell`; prescribed rotations; the penalty method remains the default
