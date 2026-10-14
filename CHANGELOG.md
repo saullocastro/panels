@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.13.2 (2026-10-14)
+
+### Maintenance
+
+- `.gitignore` without the runs of `thesis_timing.py`, which was moved out
+  of the repository.
+
 ## 0.13.1 (2026-10-14)
 
 ### Cohesive zone (`'SB_TSL'`): discretisation rules and checks

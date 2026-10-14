@@ -29,7 +29,7 @@ The structural matrices are solved with
 Citing this library
 ===================
 
-Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.13.1). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
+Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.13.2). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
 
 
 Documentation
@@ -117,6 +117,8 @@ History
 =======
 
 See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
+* version 0.13.2 (2026-10-14)
+    - Maintenance: `.gitignore` without the runs of `thesis_timing.py`
 * version 0.13.1 (2026-10-14)
     - Cohesive zone `'SB_TSL'`: rules of the discretisation of the cohesive domain, `tsl_resolution()`, `tsl_margin()` and `tsl_discretization()`, and a warning when the cohesive domain is under-resolved
     - No upper limit for the number of Gauss-Legendre points of `MultiDomain.calc_results()` and `MultiDomain.force()`
