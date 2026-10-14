@@ -82,6 +82,13 @@ displacements imposed exactly" of `doc/source/multidomain_null_space.rst`.
   penalty method are affected; the prescribed `w` of the cohesive zone and
   DCB examples is unchanged. New test `test_line_penalty_kernels`.
 
+### Tests
+
+- `tests/test_json.py` compares the eigenpairs of the saved and loaded
+  models with a tolerance, eigenvectors up to the sign, since they are not
+  reproducible to the last bit across calls of the eigensolver on macOS.
+  The matrices, stored results and fields are still compared exactly.
+
 ### Dependencies
 
 - Requires `structsolve>=0.7.0`.
