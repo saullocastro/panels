@@ -41,3 +41,9 @@ env
 
 # runs of notebooks/convergence_study.py
 convergence_study_runs/
+# runs of the other scripts of notebooks/, see notebooks/README.md
+solver_study_runs/
+thesis_timing_runs/
+validation_rerun_runs/
+*_driver.log
+*_driver.err
