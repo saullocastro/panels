@@ -319,6 +319,394 @@ blade-stiffened cylinder by 4%, whereas the higher constants converge to the
 result of the null-space method.
 
 
+.. _null_space_pd:
+
+Prescribed displacements imposed exactly
+----------------------------------------
+
+The prescribed displacements of :meth:`.Shell.add_point_pd`,
+:meth:`.Shell.add_distr_pd_fixed_x` and :meth:`.Shell.add_distr_pd_fixed_y`
+are imposed by default with the penalty method: their forces `k u_p` enter
+the external force vector and the penalty stiffnesses, e.g. of
+:func:`.fkCpd`, :func:`.fkCld_xcte` and :func:`.fkCld_ycte`, must be added to
+the stiffness matrix by the user. With ``pd_method='null-space'`` they are
+imposed exactly, as inhomogeneous linear constraints eliminated together
+with the connections, without any penalty constant::
+
+    md = MultiDomain(panels, conn, pd_method='null-space')
+
+A single panel is wrapped in a :class:`.MultiDomain` without connections,
+``MultiDomain([shell], conn=[], pd_method='null-space')``. Both settings are
+independent: the connections may be imposed with either ``conn_method``.
+The default ``pd_method='penalty'`` keeps the previous behaviour.
+
+The same methods of :class:`.Shell` define the prescribed displacements.
+With ``pd_method='null-space'`` the values of the penalty constants are not
+used: a component is prescribed when its penalty constant is neither
+``None`` nor zero and its value is given, the same rule as for the penalty
+method, where a null penalty constant prescribes nothing. The rotations
+`\phi_x` and `\phi_y` of the approximation functions of the model, `-w_{,x}`
+and `-w_{,y}` for the classical laminated plate theory, the fields `\phi_x`
+and `\phi_y` for the shear deformation theories, plus `v/r` in `\phi_y` with
+the Sanders-Koiter kinematics, can also be prescribed, only with
+``pd_method='null-space'``, through the keyword arguments ``kphix``,
+``phixp``, ``kphiy`` and ``phiyp`` of :meth:`.Shell.add_point_pd`, or
+``kphix``, ``funcphix``, ``kphiy`` and ``funcphiy`` of the distributed ones.
+For example, a uniform end-shortening `\delta` of a plate, incremented with
+the load factor, with the lateral contraction free::
+
+    p.add_distr_pd_fixed_x(0., ku=1., funcu=lambda y: 0.)
+    p.add_distr_pd_fixed_x(p.a, ku=1., funcu=lambda y: -delta, cte=False)
+    p.add_point_pd(0., 0., 0, None, 1., 0., 0, None)  # v = 0 at a corner
+
+Theory
+~~~~~~
+
+The connections give the homogeneous constraints `[B_h] \{c\} = \{0\}` of
+Eq. :eq:`ns-constraints`, and the prescribed displacements the
+inhomogeneous constraints:
+
+.. math::
+    :label: ns-pd
+
+    [B_d] \{c\} = \{d_0\} + \lambda \{d_1\}
+
+where `\{d_0\}` collects the constant prescribed values, ``cte=True``, and
+`\{d_1\}` those scaled by the load factor `\lambda`, ``cte=False``. Each row
+of `[B_d]` is the prescribed component at a point, or at a Gauss-Legendre
+point along a prescribed line, with ``max(n, 4)`` points along `y` for the
+lines ``x = cte`` and ``max(m, 4)`` along `x` for the lines ``y = cte``, see
+:func:`.nullspace.pd_constraint_matrix`. As for the connections, the
+component along the line is a polynomial with that many coefficients: the
+constraint holds along the whole line when the prescribed function is a
+polynomial of degree up to ``max(n, 4) - 1``, e.g. a uniform or a linear
+end-shortening; otherwise it holds at the Gauss-Legendre points, the
+prescribed function being interpolated by the approximation functions.
+
+With `[B] = [B_h; B_d]`, every admissible configuration is
+
+.. math::
+    :label: ns-pd-c
+
+    \{c\} = [T] \{c_r\} + \{c_{p0}\} + \lambda \{c_{p1}\}
+
+where `[T]` spans the null space of `[B]` and `\{c_{p0}\}`, `\{c_{p1}\}`
+are particular solutions, `[B] \{c_{p0}\} = \{0; d_0\}` and `[B]
+\{c_{p1}\} = \{0; d_1\}`, see :meth:`.MultiDomain.get_cp`. They are
+obtained in the same elimination as `[T]`, see
+:class:`.nullspace.Elimination`: the constraints are eliminated one block
+at a time, the connections first, each block written in the independent
+Ritz constants left by the previous ones, `[B] ([T] \{c_r\} + \{c_p\}) =
+\{d\}`, and decomposed with a QR decomposition with column pivoting, which
+gives both the new `[T]` and the correction of `\{c_p\}` for the
+right-hand side `\{d\} - [B] \{c_p\}`. The data of the decompositions are
+kept, such that `\{c_{p0}\}` and `\{c_{p1}\}` are computed again without
+any decomposition when only the prescribed values change, e.g. in a loop
+over the end-shortening; `[T]` changes only with the positions and the
+components prescribed.
+
+Substituting Eq. :eq:`ns-pd-c` into the residual of the unconstrained
+system, `\{R(c, \lambda)\} = \lambda \{F_{ext}\} - \{F_{int}(c, \lambda)\}`,
+and projecting it with `[T]^T` gives the reduced problem solved by
+``structsolve``:
+
+.. math::
+    :label: ns-pd-reduced
+
+    \{F_{int, r}(c_r, \lambda)\} &= [T]^T \{F_{int}(c)\} \\
+    [K_{T, r}] &= [T]^T [K_T(c)] [T] = -\frac{\partial R_r}{\partial c_r} \\
+    \frac{\partial R_r}{\partial \lambda} &= [T]^T \left(\{F_{ext}\} -
+        [K_T(c)] \{c_{p1}\}\right)
+
+`[K_{T, r}]` is the exact Jacobian, and `\partial R_r/\partial \lambda`
+depends on the configuration and on the load factor. ``structsolve`` 0.7.0
+passes the load factor to ``calc_fext`` when it declares the keyword
+argument ``lbd``, and uses `\partial R_r/\partial \lambda` in the predictors
+and in the constraint of the arc-length methods, and as a reference of the
+relative convergence criterion, since under a prescribed displacement alone
+both `[T]^T \{F_{ext}\}` and `[T]^T \{F_{int}\}` vanish at equilibrium, see
+:meth:`.MultiDomain.get_reduced_functions`.
+
+The linear static analysis solves
+
+.. math::
+
+    [K_r] \{c_r\} = [T]^T \left(\lambda \{F_{ext}\} - [K] (\{c_{p0}\} +
+    \lambda \{c_{p1}\})\right)
+
+see :meth:`.MultiDomain.linear_static`, the loads of ``calc_fext(inc=1.)``
+being scaled by `\lambda` as in the analyses of ``structsolve``. The linear
+buckling analysis about the pre-buckling state `\{c(\lambda)\} = \{c_0\} +
+\lambda \{c_1\}`, with `\{c_0\}` due to the constant prescribed
+displacements and `\{c_1\}` due to the load and the incremented ones,
+solves `([K_r] + [K_{G, r}(c_0)] + \lambda [K_{G, r}(c_1)]) \{\phi_r\} =
+\{0\}`, see :meth:`.MultiDomain.linear_buckling`. The modes satisfy the
+homogeneous constraints, `\{\phi\} = [T] \{\phi_r\}`: under displacement
+control the prescribed components of the modes are zero, whereas under the
+equivalent load they are free. For a flat plate the modes of the linear
+buckling analysis are out of plane and both critical loads are equal, for a
+cylinder, whose modes couple the membrane and bending displacements, the
+critical end-shortening of a cylinder of 5 panels is 3.8% higher than the
+end-shortening of the critical axial load with ``x2u=1``.
+
+Reactions
+~~~~~~~~~
+
+With `\{r(c, \lambda)\} = \{F_{int}(c)\} - \lambda \{F_{ext}\}` the residual
+of the unconstrained system, the force applied by the supports on the
+structure, the generalized reaction work-conjugate to the set `j` of
+prescribed displacements, the constant or the incremented ones, is
+
+.. math::
+    :label: ns-pd-reaction
+
+    P_j = \{c_{pj}\}^T \{r(c, \lambda)\}
+
+see :meth:`.MultiDomain.reaction_pd`. It does not depend on the choice of
+the particular solution, since `[T]^T \{r\} = \{0\}` at equilibrium.
+`P_j \delta` is the work of the reactions for the prescribed values
+multiplied by `\delta`: for a uniform end-shortening `\delta` of an edge
+with the total axial reaction `N`, `P_1 = N \delta`, and `P_1 = \partial
+U/\partial \lambda` is the force conjugate to the load factor of a
+displacement-controlled analysis.
+
+The resultant of the reactions along selected prescribed lines or points,
+in the direction `u`, `v` or `w` of the panels, is `F_u = \{c_u\}^T \{r\}`,
+with `\{c_u\}` a solution of the constraints for a unit translation `u = 1`
+of the selected prescriptions that prescribe `u`, all the other prescribed
+values being zero, see :meth:`.MultiDomain.reaction_resultant`. A line whose
+ends are shared with a prescription that is not selected, directly or
+through a connection, has no resultant of its own, the force at the shared
+corner being undetermined, and an error is raised: for instance, the total
+axial force at the end of a cylinder made of several panels is the
+resultant of all the lines of that end. The sign is that of the force
+applied by the support on the structure, `F_u = -N` at the shortened end.
+
+Redundant and inconsistent prescriptions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+As for the connections, a constraint that is a linear combination of the
+previous ones is redundant and dropped, e.g. at the corner where a
+prescribed edge meets a connection or another prescribed edge, or on a term
+already removed by a boundary condition flag. A redundant constraint is
+dropped only when its right-hand side is consistent, i.e. satisfied by the
+particular solution within ``rhs_tol`` of :meth:`.MultiDomain.get_T`,
+`10^{-8}` by default, relative to the largest prescribed value. Otherwise
+:meth:`.MultiDomain.get_cp` raises a ``ValueError`` that names the
+prescription, the panel, the boundary condition flags that restrain it, and
+the connections and prescriptions imposed before it on the same or
+connected panels:
+
+- a prescribed edge meeting another one with a different value at a
+  corner, or across a connection;
+- a non-zero value on a term removed by a boundary condition flag, e.g. `u
+  = \delta` along ``x = a`` with ``x2u = 0``: the message tells to set the
+  flag to 1, whereas `u = 0` is consistent and dropped;
+- the constant and the incremented sets must each be consistent by
+  themselves, since the constraints hold for every `\lambda`: the same line
+  cannot have a constant and an incremented prescription of the same
+  component;
+- a function that is not a polynomial, prescribed along a line whose end is
+  restrained by a flag, is consistent only within the interpolation error,
+  which may exceed ``rhs_tol`` with few terms.
+
+API
+~~~
+
+- ``MultiDomain(..., pd_method='null-space')``
+- :meth:`.MultiDomain.get_T` and :meth:`.MultiDomain.get_cp`: `[T]`,
+  `\{c_{p0}\}` and `\{c_{p1}\}`, also in the attributes ``T``, ``c_p0``
+  and ``c_p1``
+- :meth:`.MultiDomain.expand`: ``expand(c_r, lbd)`` returns the
+  configuration of Eq. :eq:`ns-pd-c`, ``expand(c_r)`` returns `[T]
+  \{c_r\}`, e.g. for the modes
+- :meth:`.MultiDomain.get_reduced_functions`: the callables of
+  ``structsolve.Analysis`` for the non-linear analyses, Newton-Raphson and
+  the arc-length methods, requiring ``structsolve>=0.7.0``. The linear
+  static analysis of ``Analysis.static(NLgeom=False)`` cannot contain the
+  constant prescribed displacements and raises an error, see
+  :meth:`.MultiDomain.linear_static`
+- :meth:`.MultiDomain.linear_static` and :meth:`.MultiDomain.linear_buckling`
+- :meth:`.MultiDomain.reaction_pd` and :meth:`.MultiDomain.reaction_resultant`
+- :meth:`.MultiDomain.calc_fext` excludes the forces of the prescribed
+  displacements with ``pd_method='null-space'``
+
+Example
+~~~~~~~
+
+A simply supported plate under a uniform end-shortening, with the lateral
+edges free in-plane: linear buckling, then the post-buckling path under
+displacement control, with a small lateral load as imperfection::
+
+    import numpy as np
+    from structsolve import Analysis
+    from panels.shell import Shell
+    from panels.multidomain import MultiDomain
+
+    a, b, h = 0.3, 0.2, 1e-3
+    p = Shell(a=a, b=b, m=8, n=8, model='plate_clpt_donnell', stack=[0],
+              plyt=h, laminaprop=(70e9, 0.3))
+    for edge in ('x1', 'x2', 'y1', 'y2'):
+        setattr(p, edge + 'u', 1.)  # u and v free at the edges, w = 0
+        setattr(p, edge + 'v', 1.)
+    md = MultiDomain([p], conn=[], pd_method='null-space')
+
+    def prescribe(delta):
+        p.clear_disps()
+        p.add_distr_pd_fixed_x(0., ku=1., funcu=lambda y: 0.)
+        p.add_distr_pd_fixed_x(a, ku=1., funcu=lambda y: -delta, cte=False)
+        p.add_point_pd(0., 0., 0, None, 1., 0., 0, None)
+
+    # linear buckling: the eigenvalue is the critical end-shortening
+    prescribe(1.)
+    eigvals, modes = md.linear_buckling(num_eigvalues=3)
+    delta_cr = eigvals[0]
+
+    # post-buckling up to three times the critical end-shortening
+    prescribe(3*delta_cr)
+    p.add_point_load(a/2, b/2, 0., 0., 2.)
+    an = Analysis(*md.get_reduced_functions())
+    an.NL_method = 'arc_length_riks'
+    an.maxArcLength = 100.
+    an.static(NLgeom=True)
+    cs = [md.expand(c_r, lbd) for c_r, lbd in zip(an.cs, an.increments)]
+    N = [-md.reaction_resultant(c, [(p, 'x', a)], lbd)[0]
+         for c, lbd in zip(cs, an.increments)]
+
+The arc length of ``structsolve`` is scaled by the linear solution, which
+has no out-of-plane displacement under an end-shortening, therefore the
+post-buckling path is long in these units, and ``maxArcLength`` may need to
+be increased. The tests of ``tests/multidomain/test_null_space_pd.py`` give
+more examples, among them:
+
+.. literalinclude:: ../../tests/multidomain/test_null_space_pd.py
+    :pyobject: test_membrane_patch_test_isotropic
+
+.. literalinclude:: ../../tests/multidomain/test_null_space_pd.py
+    :pyobject: test_nonlinear_displacement_control
+
+.. _null_space_pd_penalty:
+
+Penalty vs null-space displacement control
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The penalty method imposes a prescribed displacement `u_p` with the energy
+`\frac{1}{2} k \int (u - u_p)^2`, i.e. a spring of stiffness `k` between the
+structure and the support: the structure is more flexible, the prescribed
+value is not reached, and the error decreases with `1/k`, while the
+condition number of the stiffness matrix grows with `k`. The null-space
+method has no penalty constant. The cases below were run with the models of
+``tests/multidomain/test_null_space_pd.py``, the penalty stiffnesses being
+those of :func:`.fkCld_xcte` and :func:`.fkCpd`; `E h` is the membrane
+stiffness of the isotropic plate and `A_{11}` that of the laminate of the
+cylinder.
+
+**Accuracy and conditioning, linear static.** Plate under a uniform
+end-shortening with the lateral contraction restrained along `y = 0, b`,
+``m = n = 10``, 300 Ritz constants, 280 independent ones with the null-space
+method. Errors of the Ritz constants and of the axial reaction, and condition
+number of the stiffness matrix; the reduced stiffness matrix of the
+null-space method has the condition number `1.4 \times 10^{11}`:
+
+.. list-table::
+    :header-rows: 1
+
+    * - `k / (E h)`
+      - `10`
+      - `10^2`
+      - `10^4`
+      - `10^6`
+      - `10^8`
+      - `10^{10}`
+    * - error of `\{c\}`
+      - `1.6 \times 10^{-1}`
+      - `2.0 \times 10^{-2}`
+      - `2.0 \times 10^{-4}`
+      - `2.0 \times 10^{-6}`
+      - `2.0 \times 10^{-8}`
+      - `3.1 \times 10^{-9}`
+    * - error of the reaction
+      - `-1.8 \times 10^{-1}`
+      - `-2.2 \times 10^{-2}`
+      - `-2.2 \times 10^{-4}`
+      - `-2.2 \times 10^{-6}`
+      - `-2.2 \times 10^{-8}`
+      - `-1.2 \times 10^{-6}`
+    * - condition number
+      - `2.5 \times 10^{12}`
+      - `2.0 \times 10^{13}`
+      - `2.0 \times 10^{15}`
+      - `2.0 \times 10^{17}`
+      - `1.8 \times 10^{19}`
+      - `1.8 \times 10^{21}`
+
+The reaction of the penalty method, `k \int (u_p - u)`, is the product of a
+large constant and a small difference, and loses accuracy by cancellation
+for the highest constants.
+
+**Linear buckling.** Cylinder of 5 panels under a uniform end-shortening,
+see ``test_cylinder_end_shortening``. The error of the critical
+end-shortening of the penalty method is `1.4 \times 10^{-1}`, `1.3 \times
+10^{-2}`, `1.3 \times 10^{-3}`, `1.3 \times 10^{-4}` and `1.3 \times
+10^{-6}` for `k/A_{11} = 10, 10^2, 10^3, 10^4, 10^6`, from above, since the
+penalty springs shorten the cylinder less than the prescribed value. Both
+methods take about 3.8 s. With `k/A_{11} = 10^6` the sparse eigenvalue
+solver of ``structsolve`` fails its verification of the residuals of the
+eigenpairs, because of the conditioning, and ``structsolve.lb`` falls back to
+the dense solver with a ``DenseFallbackWarning``.
+
+**Non-linear analysis.** Post-buckling of the plate at twice the critical
+end-shortening, ``m = n = 8``, Newton-Raphson with 8 increments; error of
+the axial reaction of the penalty method with the default convergence
+tolerance ``relTOL = 1e-6`` and with ``relTOL = 1e-10``:
+
+.. list-table::
+    :header-rows: 1
+
+    * - `k / (E h)`
+      - `10^2`
+      - `10^4`
+      - `10^6`
+    * - ``relTOL = 1e-6``
+      - `-3.6 \times 10^{-2}`
+      - `-5.5 \times 10^{-4}`
+      - `-2.1 \times 10^{-1}`
+    * - ``relTOL = 1e-10``
+      - `-3.6 \times 10^{-2}`
+      - `-3.8 \times 10^{-4}`
+      - `-1.9 \times 10^{-5}`
+
+The relative convergence criterion of the penalty method is relative to the
+penalty forces `k u_p`, which grow with `k`: with the default tolerance, the
+highest penalty constant gives the largest error, 21%, after converging in
+fewer iterations. The null-space method has no such trade-off, its
+reference being `\lambda \partial R_r/\partial \lambda`, see
+:ref:`null_space_pd`.
+
+**Run time.** For the linear analyses both methods have the same cost: the
+elimination of the constraints is a small fraction of the assembly. For the
+non-linear analysis above the run time is dominated by the assembly of the
+tangent stiffness matrix: 12.6 s and 15.8 s with the null-space method for
+``relTOL = 1e-6`` and ``1e-10``, against 4.4 s and 9.2 s with the penalty
+method and `k/(E h) = 10^4`. The null-space method converges to a much
+smaller residual in absolute terms, and ``structsolve`` evaluates `\partial
+R_r/\partial \lambda`, which requires the tangent stiffness matrix, at every
+convergence check, including the converged iterate of each increment; at
+the other iterates the matrix is reused from a cache by
+:meth:`.MultiDomain.get_reduced_functions`.
+
+**When to use each method.** The null-space method is exact, needs no
+penalty constant, keeps the conditioning of the model, and gives reactions
+that do not depend on any constant; it is recommended for displacement
+control, e.g. the end-shortening of panels and shells, and for linear
+buckling under prescribed displacements. The penalty method remains the
+default for backward compatibility, and it is needed when the prescribed
+displacement represents a physical stiffness, e.g. a load cell or a loading
+fixture, or for models that rely on the penalty forms, e.g. the cohesive zone
+examples of :ref:`cohesive_zone`, whose reaction is given by
+:meth:`.MultiDomain.reaction_line_pd_xcte`.
+
+
 Limitations
 -----------
 
@@ -341,10 +729,11 @@ approximation more than the penalty method with the default constants does:
   they represent, e.g. restraining only the tangential displacement of the
   edges, as in ``test_skin_base_nonlinear_equals_single_laminate``.
 
-Only the connections of the domains are imposed exactly: the prescribed
-displacements of :meth:`.Shell.add_point_pd`,
-:meth:`.Shell.add_distr_pd_fixed_x` and :meth:`.Shell.add_distr_pd_fixed_y`,
-and the traction-separation law of ``'SB_TSL'``, remain penalty stiffnesses.
+The prescribed displacements of :meth:`.Shell.add_point_pd`,
+:meth:`.Shell.add_distr_pd_fixed_x` and :meth:`.Shell.add_distr_pd_fixed_y`
+remain penalty stiffnesses by default, and are imposed exactly with
+``pd_method='null-space'``, see :ref:`null_space_pd`. The
+traction-separation law of ``'SB_TSL'`` remains a penalty stiffness.
 
 The rank of the constraints is found with the tolerance ``tol`` of
 :meth:`.MultiDomain.get_T`, ``1e-9`` by default, which applies to the
@@ -358,7 +747,11 @@ API
 
 The methods of :class:`.MultiDomain` for the null-space method are
 :meth:`.MultiDomain.get_T`, :meth:`.MultiDomain.reduce`,
-:meth:`.MultiDomain.expand` and :meth:`.MultiDomain.get_reduced_functions`.
+:meth:`.MultiDomain.expand` and :meth:`.MultiDomain.get_reduced_functions`,
+and for the prescribed displacements :meth:`.MultiDomain.get_cp`,
+:meth:`.MultiDomain.linear_static`, :meth:`.MultiDomain.linear_buckling`,
+:meth:`.MultiDomain.reaction_pd` and :meth:`.MultiDomain.reaction_resultant`,
+see :ref:`null_space_pd`.
 
 .. automodule:: panels.multidomain.connections.nullspace
 
@@ -368,3 +761,19 @@ The methods of :class:`.MultiDomain` for the null-space method are
 .. autofunction:: panels.multidomain.connections.nullspace.constraint_matrix
 
 .. autofunction:: panels.multidomain.connections.nullspace.null_space_basis
+
+.. autoclass:: panels.multidomain.connections.nullspace.Elimination
+    :members:
+
+.. autodata:: panels.multidomain.connections.nullspace.PD_COMPONENTS
+    :no-value:
+
+.. autofunction:: panels.multidomain.connections.nullspace.pd_constraint_matrix
+
+.. autofunction:: panels.multidomain.connections.nullspace.pd_points
+
+.. autofunction:: panels.multidomain.connections.nullspace.pd_blocks
+
+.. autofunction:: panels.multidomain.connections.nullspace.pd_entries
+
+.. autofunction:: panels.multidomain.connections.nullspace.pd_rhs

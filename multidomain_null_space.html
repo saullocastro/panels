@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Exact connections with the null-space method &#8212; panels 0.11.1 documentation</title>
+    <title>Exact connections with the null-space method &#8212; panels 0.12.0 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
 
-    <script src="_static/documentation_options.js?v=57cbeb03"></script>
+    <script src="_static/documentation_options.js?v=61ccb1f1"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
@@ -50,7 +50,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.11.1" />
+  <meta name="docsearch:version" content="0.12.0" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -118,7 +118,7 @@
   
   
   
-    <p class="title logo__title">panels 0.11.1 documentation</p>
+    <p class="title logo__title">panels 0.12.0 documentation</p>
   
 </a></div>
     
@@ -829,6 +829,430 @@ of a static analysis, <span class="math notranslate nohighlight">\(N_{xx}\)</spa
 blade-stiffened cylinder by 4%, whereas the higher constants converge to the
 result of the null-space method.</p>
 </section>
+<section id="prescribed-displacements-imposed-exactly">
+<span id="null-space-pd"></span><h2>Prescribed displacements imposed exactly<a class="headerlink" href="#prescribed-displacements-imposed-exactly" title="Link to this heading">#</a></h2>
+<p>The prescribed displacements of <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_point_pd()</span></code>,
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_distr_pd_fixed_x()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_distr_pd_fixed_y()</span></code>
+are imposed by default with the penalty method: their forces <span class="math notranslate nohighlight">\(k u_p\)</span> enter
+the external force vector and the penalty stiffnesses, e.g. of
+<code class="xref py py-func docutils literal notranslate"><span class="pre">fkCpd()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">fkCld_xcte()</span></code> and <code class="xref py py-func docutils literal notranslate"><span class="pre">fkCld_ycte()</span></code>, must be added to
+the stiffness matrix by the user. With <code class="docutils literal notranslate"><span class="pre">pd_method='null-space'</span></code> they are
+imposed exactly, as inhomogeneous linear constraints eliminated together
+with the connections, without any penalty constant:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">md</span> <span class="o">=</span> <span class="n">MultiDomain</span><span class="p">(</span><span class="n">panels</span><span class="p">,</span> <span class="n">conn</span><span class="p">,</span> <span class="n">pd_method</span><span class="o">=</span><span class="s1">'null-space'</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>A single panel is wrapped in a <code class="xref py py-class docutils literal notranslate"><span class="pre">MultiDomain</span></code> without connections,
+<code class="docutils literal notranslate"><span class="pre">MultiDomain([shell],</span> <span class="pre">conn=[],</span> <span class="pre">pd_method='null-space')</span></code>. Both settings are
+independent: the connections may be imposed with either <code class="docutils literal notranslate"><span class="pre">conn_method</span></code>.
+The default <code class="docutils literal notranslate"><span class="pre">pd_method='penalty'</span></code> keeps the previous behaviour.</p>
+<p>The same methods of <code class="xref py py-class docutils literal notranslate"><span class="pre">Shell</span></code> define the prescribed displacements.
+With <code class="docutils literal notranslate"><span class="pre">pd_method='null-space'</span></code> the values of the penalty constants are not
+used: a component is prescribed when its penalty constant is neither
+<code class="docutils literal notranslate"><span class="pre">None</span></code> nor zero and its value is given, the same rule as for the penalty
+method, where a null penalty constant prescribes nothing. The rotations
+<span class="math notranslate nohighlight">\(\phi_x\)</span> and <span class="math notranslate nohighlight">\(\phi_y\)</span> of the approximation functions of the model, <span class="math notranslate nohighlight">\(-w_{,x}\)</span>
+and <span class="math notranslate nohighlight">\(-w_{,y}\)</span> for the classical laminated plate theory, the fields <span class="math notranslate nohighlight">\(\phi_x\)</span>
+and <span class="math notranslate nohighlight">\(\phi_y\)</span> for the shear deformation theories, plus <span class="math notranslate nohighlight">\(v/r\)</span> in <span class="math notranslate nohighlight">\(\phi_y\)</span> with
+the Sanders-Koiter kinematics, can also be prescribed, only with
+<code class="docutils literal notranslate"><span class="pre">pd_method='null-space'</span></code>, through the keyword arguments <code class="docutils literal notranslate"><span class="pre">kphix</span></code>,
+<code class="docutils literal notranslate"><span class="pre">phixp</span></code>, <code class="docutils literal notranslate"><span class="pre">kphiy</span></code> and <code class="docutils literal notranslate"><span class="pre">phiyp</span></code> of <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_point_pd()</span></code>, or
+<code class="docutils literal notranslate"><span class="pre">kphix</span></code>, <code class="docutils literal notranslate"><span class="pre">funcphix</span></code>, <code class="docutils literal notranslate"><span class="pre">kphiy</span></code> and <code class="docutils literal notranslate"><span class="pre">funcphiy</span></code> of the distributed ones.
+For example, a uniform end-shortening <span class="math notranslate nohighlight">\(\delta\)</span> of a plate, incremented with
+the load factor, with the lateral contraction free:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">p</span><span class="o">.</span><span class="n">add_distr_pd_fixed_x</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="n">ku</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">funcu</span><span class="o">=</span><span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="mf">0.</span><span class="p">)</span>
+<span class="n">p</span><span class="o">.</span><span class="n">add_distr_pd_fixed_x</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">ku</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">funcu</span><span class="o">=</span><span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="o">-</span><span class="n">delta</span><span class="p">,</span> <span class="n">cte</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">p</span><span class="o">.</span><span class="n">add_point_pd</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># v = 0 at a corner</span>
+</pre></div>
+</div>
+<section id="id2">
+<h3>Theory<a class="headerlink" href="#id2" title="Link to this heading">#</a></h3>
+<p>The connections give the homogeneous constraints <span class="math notranslate nohighlight">\([B_h] \{c\} = \{0\}\)</span> of
+Eq. <a class="reference internal" href="#equation-ns-constraints">(2)</a>, and the prescribed displacements the
+inhomogeneous constraints:</p>
+<div class="math notranslate nohighlight" id="equation-ns-pd">
+<span class="eqno">(5)<a class="headerlink" href="#equation-ns-pd" title="Link to this equation">#</a></span>\[[B_d] \{c\} = \{d_0\} + \lambda \{d_1\}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\{d_0\}\)</span> collects the constant prescribed values, <code class="docutils literal notranslate"><span class="pre">cte=True</span></code>, and
+<span class="math notranslate nohighlight">\(\{d_1\}\)</span> those scaled by the load factor <span class="math notranslate nohighlight">\(\lambda\)</span>, <code class="docutils literal notranslate"><span class="pre">cte=False</span></code>. Each row
+of <span class="math notranslate nohighlight">\([B_d]\)</span> is the prescribed component at a point, or at a Gauss-Legendre
+point along a prescribed line, with <code class="docutils literal notranslate"><span class="pre">max(n,</span> <span class="pre">4)</span></code> points along <span class="math notranslate nohighlight">\(y\)</span> for the
+lines <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">cte</span></code> and <code class="docutils literal notranslate"><span class="pre">max(m,</span> <span class="pre">4)</span></code> along <span class="math notranslate nohighlight">\(x\)</span> for the lines <code class="docutils literal notranslate"><span class="pre">y</span> <span class="pre">=</span> <span class="pre">cte</span></code>, see
+<code class="xref py py-func docutils literal notranslate"><span class="pre">nullspace.pd_constraint_matrix()</span></code>. As for the connections, the
+component along the line is a polynomial with that many coefficients: the
+constraint holds along the whole line when the prescribed function is a
+polynomial of degree up to <code class="docutils literal notranslate"><span class="pre">max(n,</span> <span class="pre">4)</span> <span class="pre">-</span> <span class="pre">1</span></code>, e.g. a uniform or a linear
+end-shortening; otherwise it holds at the Gauss-Legendre points, the
+prescribed function being interpolated by the approximation functions.</p>
+<p>With <span class="math notranslate nohighlight">\([B] = [B_h; B_d]\)</span>, every admissible configuration is</p>
+<div class="math notranslate nohighlight" id="equation-ns-pd-c">
+<span class="eqno">(6)<a class="headerlink" href="#equation-ns-pd-c" title="Link to this equation">#</a></span>\[\{c\} = [T] \{c_r\} + \{c_{p0}\} + \lambda \{c_{p1}\}\]</div>
+<p>where <span class="math notranslate nohighlight">\([T]\)</span> spans the null space of <span class="math notranslate nohighlight">\([B]\)</span> and <span class="math notranslate nohighlight">\(\{c_{p0}\}\)</span>, <span class="math notranslate nohighlight">\(\{c_{p1}\}\)</span>
+are particular solutions, <span class="math notranslate nohighlight">\([B] \{c_{p0}\} = \{0; d_0\}\)</span> and <span class="math notranslate nohighlight">\([B]
+\{c_{p1}\} = \{0; d_1\}\)</span>, see <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_cp()</span></code>. They are
+obtained in the same elimination as <span class="math notranslate nohighlight">\([T]\)</span>, see
+<code class="xref py py-class docutils literal notranslate"><span class="pre">nullspace.Elimination</span></code>: the constraints are eliminated one block
+at a time, the connections first, each block written in the independent
+Ritz constants left by the previous ones, <span class="math notranslate nohighlight">\([B] ([T] \{c_r\} + \{c_p\}) =
+\{d\}\)</span>, and decomposed with a QR decomposition with column pivoting, which
+gives both the new <span class="math notranslate nohighlight">\([T]\)</span> and the correction of <span class="math notranslate nohighlight">\(\{c_p\}\)</span> for the
+right-hand side <span class="math notranslate nohighlight">\(\{d\} - [B] \{c_p\}\)</span>. The data of the decompositions are
+kept, such that <span class="math notranslate nohighlight">\(\{c_{p0}\}\)</span> and <span class="math notranslate nohighlight">\(\{c_{p1}\}\)</span> are computed again without
+any decomposition when only the prescribed values change, e.g. in a loop
+over the end-shortening; <span class="math notranslate nohighlight">\([T]\)</span> changes only with the positions and the
+components prescribed.</p>
+<p>Substituting Eq. <a class="reference internal" href="#equation-ns-pd-c">(6)</a> into the residual of the unconstrained
+system, <span class="math notranslate nohighlight">\(\{R(c, \lambda)\} = \lambda \{F_{ext}\} - \{F_{int}(c, \lambda)\}\)</span>,
+and projecting it with <span class="math notranslate nohighlight">\([T]^T\)</span> gives the reduced problem solved by
+<code class="docutils literal notranslate"><span class="pre">structsolve</span></code>:</p>
+<div class="math notranslate nohighlight" id="equation-ns-pd-reduced">
+<span class="eqno">(7)<a class="headerlink" href="#equation-ns-pd-reduced" title="Link to this equation">#</a></span>\[\begin{split}\{F_{int, r}(c_r, \lambda)\} &amp;= [T]^T \{F_{int}(c)\} \\
+[K_{T, r}] &amp;= [T]^T [K_T(c)] [T] = -\frac{\partial R_r}{\partial c_r} \\
+\frac{\partial R_r}{\partial \lambda} &amp;= [T]^T \left(\{F_{ext}\} -
+    [K_T(c)] \{c_{p1}\}\right)\end{split}\]</div>
+<p><span class="math notranslate nohighlight">\([K_{T, r}]\)</span> is the exact Jacobian, and <span class="math notranslate nohighlight">\(\partial R_r/\partial \lambda\)</span>
+depends on the configuration and on the load factor. <code class="docutils literal notranslate"><span class="pre">structsolve</span></code> 0.7.0
+passes the load factor to <code class="docutils literal notranslate"><span class="pre">calc_fext</span></code> when it declares the keyword
+argument <code class="docutils literal notranslate"><span class="pre">lbd</span></code>, and uses <span class="math notranslate nohighlight">\(\partial R_r/\partial \lambda\)</span> in the predictors
+and in the constraint of the arc-length methods, and as a reference of the
+relative convergence criterion, since under a prescribed displacement alone
+both <span class="math notranslate nohighlight">\([T]^T \{F_{ext}\}\)</span> and <span class="math notranslate nohighlight">\([T]^T \{F_{int}\}\)</span> vanish at equilibrium, see
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_reduced_functions()</span></code>.</p>
+<p>The linear static analysis solves</p>
+<div class="math notranslate nohighlight">
+\[[K_r] \{c_r\} = [T]^T \left(\lambda \{F_{ext}\} - [K] (\{c_{p0}\} +
+\lambda \{c_{p1}\})\right)\]</div>
+<p>see <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.linear_static()</span></code>, the loads of <code class="docutils literal notranslate"><span class="pre">calc_fext(inc=1.)</span></code>
+being scaled by <span class="math notranslate nohighlight">\(\lambda\)</span> as in the analyses of <code class="docutils literal notranslate"><span class="pre">structsolve</span></code>. The linear
+buckling analysis about the pre-buckling state <span class="math notranslate nohighlight">\(\{c(\lambda)\} = \{c_0\} +
+\lambda \{c_1\}\)</span>, with <span class="math notranslate nohighlight">\(\{c_0\}\)</span> due to the constant prescribed
+displacements and <span class="math notranslate nohighlight">\(\{c_1\}\)</span> due to the load and the incremented ones,
+solves <span class="math notranslate nohighlight">\(([K_r] + [K_{G, r}(c_0)] + \lambda [K_{G, r}(c_1)]) \{\phi_r\} =
+\{0\}\)</span>, see <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.linear_buckling()</span></code>. The modes satisfy the
+homogeneous constraints, <span class="math notranslate nohighlight">\(\{\phi\} = [T] \{\phi_r\}\)</span>: under displacement
+control the prescribed components of the modes are zero, whereas under the
+equivalent load they are free. For a flat plate the modes of the linear
+buckling analysis are out of plane and both critical loads are equal, for a
+cylinder, whose modes couple the membrane and bending displacements, the
+critical end-shortening of a cylinder of 5 panels is 3.8% higher than the
+end-shortening of the critical axial load with <code class="docutils literal notranslate"><span class="pre">x2u=1</span></code>.</p>
+</section>
+<section id="reactions">
+<h3>Reactions<a class="headerlink" href="#reactions" title="Link to this heading">#</a></h3>
+<p>With <span class="math notranslate nohighlight">\(\{r(c, \lambda)\} = \{F_{int}(c)\} - \lambda \{F_{ext}\}\)</span> the residual
+of the unconstrained system, the force applied by the supports on the
+structure, the generalized reaction work-conjugate to the set <span class="math notranslate nohighlight">\(j\)</span> of
+prescribed displacements, the constant or the incremented ones, is</p>
+<div class="math notranslate nohighlight" id="equation-ns-pd-reaction">
+<span class="eqno">(8)<a class="headerlink" href="#equation-ns-pd-reaction" title="Link to this equation">#</a></span>\[P_j = \{c_{pj}\}^T \{r(c, \lambda)\}\]</div>
+<p>see <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.reaction_pd()</span></code>. It does not depend on the choice of
+the particular solution, since <span class="math notranslate nohighlight">\([T]^T \{r\} = \{0\}\)</span> at equilibrium.
+<span class="math notranslate nohighlight">\(P_j \delta\)</span> is the work of the reactions for the prescribed values
+multiplied by <span class="math notranslate nohighlight">\(\delta\)</span>: for a uniform end-shortening <span class="math notranslate nohighlight">\(\delta\)</span> of an edge
+with the total axial reaction <span class="math notranslate nohighlight">\(N\)</span>, <span class="math notranslate nohighlight">\(P_1 = N \delta\)</span>, and <span class="math notranslate nohighlight">\(P_1 = \partial
+U/\partial \lambda\)</span> is the force conjugate to the load factor of a
+displacement-controlled analysis.</p>
+<p>The resultant of the reactions along selected prescribed lines or points,
+in the direction <span class="math notranslate nohighlight">\(u\)</span>, <span class="math notranslate nohighlight">\(v\)</span> or <span class="math notranslate nohighlight">\(w\)</span> of the panels, is <span class="math notranslate nohighlight">\(F_u = \{c_u\}^T \{r\}\)</span>,
+with <span class="math notranslate nohighlight">\(\{c_u\}\)</span> a solution of the constraints for a unit translation <span class="math notranslate nohighlight">\(u = 1\)</span>
+of the selected prescriptions that prescribe <span class="math notranslate nohighlight">\(u\)</span>, all the other prescribed
+values being zero, see <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.reaction_resultant()</span></code>. A line whose
+ends are shared with a prescription that is not selected, directly or
+through a connection, has no resultant of its own, the force at the shared
+corner being undetermined, and an error is raised: for instance, the total
+axial force at the end of a cylinder made of several panels is the
+resultant of all the lines of that end. The sign is that of the force
+applied by the support on the structure, <span class="math notranslate nohighlight">\(F_u = -N\)</span> at the shortened end.</p>
+</section>
+<section id="redundant-and-inconsistent-prescriptions">
+<h3>Redundant and inconsistent prescriptions<a class="headerlink" href="#redundant-and-inconsistent-prescriptions" title="Link to this heading">#</a></h3>
+<p>As for the connections, a constraint that is a linear combination of the
+previous ones is redundant and dropped, e.g. at the corner where a
+prescribed edge meets a connection or another prescribed edge, or on a term
+already removed by a boundary condition flag. A redundant constraint is
+dropped only when its right-hand side is consistent, i.e. satisfied by the
+particular solution within <code class="docutils literal notranslate"><span class="pre">rhs_tol</span></code> of <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_T()</span></code>,
+<span class="math notranslate nohighlight">\(10^{-8}\)</span> by default, relative to the largest prescribed value. Otherwise
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_cp()</span></code> raises a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> that names the
+prescription, the panel, the boundary condition flags that restrain it, and
+the connections and prescriptions imposed before it on the same or
+connected panels:</p>
+<ul class="simple">
+<li><p>a prescribed edge meeting another one with a different value at a
+corner, or across a connection;</p></li>
+<li><p>a non-zero value on a term removed by a boundary condition flag, e.g. <span class="math notranslate nohighlight">\(u
+= \delta\)</span> along <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">a</span></code> with <code class="docutils literal notranslate"><span class="pre">x2u</span> <span class="pre">=</span> <span class="pre">0</span></code>: the message tells to set the
+flag to 1, whereas <span class="math notranslate nohighlight">\(u = 0\)</span> is consistent and dropped;</p></li>
+<li><p>the constant and the incremented sets must each be consistent by
+themselves, since the constraints hold for every <span class="math notranslate nohighlight">\(\lambda\)</span>: the same line
+cannot have a constant and an incremented prescription of the same
+component;</p></li>
+<li><p>a function that is not a polynomial, prescribed along a line whose end is
+restrained by a flag, is consistent only within the interpolation error,
+which may exceed <code class="docutils literal notranslate"><span class="pre">rhs_tol</span></code> with few terms.</p></li>
+</ul>
+</section>
+<section id="api">
+<h3>API<a class="headerlink" href="#api" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">MultiDomain(...,</span> <span class="pre">pd_method='null-space')</span></code></p></li>
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_T()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_cp()</span></code>: <span class="math notranslate nohighlight">\([T]\)</span>,
+<span class="math notranslate nohighlight">\(\{c_{p0}\}\)</span> and <span class="math notranslate nohighlight">\(\{c_{p1}\}\)</span>, also in the attributes <code class="docutils literal notranslate"><span class="pre">T</span></code>, <code class="docutils literal notranslate"><span class="pre">c_p0</span></code>
+and <code class="docutils literal notranslate"><span class="pre">c_p1</span></code></p></li>
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.expand()</span></code>: <code class="docutils literal notranslate"><span class="pre">expand(c_r,</span> <span class="pre">lbd)</span></code> returns the
+configuration of Eq. <a class="reference internal" href="#equation-ns-pd-c">(6)</a>, <code class="docutils literal notranslate"><span class="pre">expand(c_r)</span></code> returns <span class="math notranslate nohighlight">\([T]
+\{c_r\}\)</span>, e.g. for the modes</p></li>
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_reduced_functions()</span></code>: the callables of
+<code class="docutils literal notranslate"><span class="pre">structsolve.Analysis</span></code> for the non-linear analyses, Newton-Raphson and
+the arc-length methods, requiring <code class="docutils literal notranslate"><span class="pre">structsolve&gt;=0.7.0</span></code>. The linear
+static analysis of <code class="docutils literal notranslate"><span class="pre">Analysis.static(NLgeom=False)</span></code> cannot contain the
+constant prescribed displacements and raises an error, see
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.linear_static()</span></code></p></li>
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.linear_static()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.linear_buckling()</span></code></p></li>
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.reaction_pd()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.reaction_resultant()</span></code></p></li>
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.calc_fext()</span></code> excludes the forces of the prescribed
+displacements with <code class="docutils literal notranslate"><span class="pre">pd_method='null-space'</span></code></p></li>
+</ul>
+</section>
+<section id="example">
+<h3>Example<a class="headerlink" href="#example" title="Link to this heading">#</a></h3>
+<p>A simply supported plate under a uniform end-shortening, with the lateral
+edges free in-plane: linear buckling, then the post-buckling path under
+displacement control, with a small lateral load as imperfection:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">structsolve</span><span class="w"> </span><span class="kn">import</span> <span class="n">Analysis</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">panels.shell</span><span class="w"> </span><span class="kn">import</span> <span class="n">Shell</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">panels.multidomain</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiDomain</span>
+
+<span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">1e-3</span>
+<span class="n">p</span> <span class="o">=</span> <span class="n">Shell</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="n">b</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s1">'plate_clpt_donnell'</span><span class="p">,</span> <span class="n">stack</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+          <span class="n">plyt</span><span class="o">=</span><span class="n">h</span><span class="p">,</span> <span class="n">laminaprop</span><span class="o">=</span><span class="p">(</span><span class="mf">70e9</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'x1'</span><span class="p">,</span> <span class="s1">'x2'</span><span class="p">,</span> <span class="s1">'y1'</span><span class="p">,</span> <span class="s1">'y2'</span><span class="p">):</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">edge</span> <span class="o">+</span> <span class="s1">'u'</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)</span>  <span class="c1"># u and v free at the edges, w = 0</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">edge</span> <span class="o">+</span> <span class="s1">'v'</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)</span>
+<span class="n">md</span> <span class="o">=</span> <span class="n">MultiDomain</span><span class="p">([</span><span class="n">p</span><span class="p">],</span> <span class="n">conn</span><span class="o">=</span><span class="p">[],</span> <span class="n">pd_method</span><span class="o">=</span><span class="s1">'null-space'</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">prescribe</span><span class="p">(</span><span class="n">delta</span><span class="p">):</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">clear_disps</span><span class="p">()</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_distr_pd_fixed_x</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="n">ku</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">funcu</span><span class="o">=</span><span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="mf">0.</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_distr_pd_fixed_x</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">ku</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">funcu</span><span class="o">=</span><span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="o">-</span><span class="n">delta</span><span class="p">,</span> <span class="n">cte</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_point_pd</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+<span class="c1"># linear buckling: the eigenvalue is the critical end-shortening</span>
+<span class="n">prescribe</span><span class="p">(</span><span class="mf">1.</span><span class="p">)</span>
+<span class="n">eigvals</span><span class="p">,</span> <span class="n">modes</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">linear_buckling</span><span class="p">(</span><span class="n">num_eigvalues</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">delta_cr</span> <span class="o">=</span> <span class="n">eigvals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="c1"># post-buckling up to three times the critical end-shortening</span>
+<span class="n">prescribe</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">delta_cr</span><span class="p">)</span>
+<span class="n">p</span><span class="o">.</span><span class="n">add_point_load</span><span class="p">(</span><span class="n">a</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">b</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">)</span>
+<span class="n">an</span> <span class="o">=</span> <span class="n">Analysis</span><span class="p">(</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">get_reduced_functions</span><span class="p">())</span>
+<span class="n">an</span><span class="o">.</span><span class="n">NL_method</span> <span class="o">=</span> <span class="s1">'arc_length_riks'</span>
+<span class="n">an</span><span class="o">.</span><span class="n">maxArcLength</span> <span class="o">=</span> <span class="mf">100.</span>
+<span class="n">an</span><span class="o">.</span><span class="n">static</span><span class="p">(</span><span class="n">NLgeom</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">cs</span> <span class="o">=</span> <span class="p">[</span><span class="n">md</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">c_r</span><span class="p">,</span> <span class="n">lbd</span><span class="p">)</span> <span class="k">for</span> <span class="n">c_r</span><span class="p">,</span> <span class="n">lbd</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">an</span><span class="o">.</span><span class="n">cs</span><span class="p">,</span> <span class="n">an</span><span class="o">.</span><span class="n">increments</span><span class="p">)]</span>
+<span class="n">N</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">md</span><span class="o">.</span><span class="n">reaction_resultant</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="p">[(</span><span class="n">p</span><span class="p">,</span> <span class="s1">'x'</span><span class="p">,</span> <span class="n">a</span><span class="p">)],</span> <span class="n">lbd</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+     <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">lbd</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">cs</span><span class="p">,</span> <span class="n">an</span><span class="o">.</span><span class="n">increments</span><span class="p">)]</span>
+</pre></div>
+</div>
+<p>The arc length of <code class="docutils literal notranslate"><span class="pre">structsolve</span></code> is scaled by the linear solution, which
+has no out-of-plane displacement under an end-shortening, therefore the
+post-buckling path is long in these units, and <code class="docutils literal notranslate"><span class="pre">maxArcLength</span></code> may need to
+be increased. The tests of <code class="docutils literal notranslate"><span class="pre">tests/multidomain/test_null_space_pd.py</span></code> give
+more examples, among them:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s1">'layout'</span><span class="p">,</span> <span class="p">[</span><span class="s1">'single'</span><span class="p">,</span> <span class="s1">'2x2'</span><span class="p">])</span>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s1">'model'</span><span class="p">,</span> <span class="p">[</span><span class="s1">'plate_clpt_donnell'</span><span class="p">,</span> <span class="s1">'plate_fsdt_donnell'</span><span class="p">])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_membrane_patch_test_isotropic</span><span class="p">(</span><span class="n">layout</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Uniform end-shortening `\delta`, with the lateral contraction free:</span>
+<span class="sd">    exact uniform strain, `u = -\delta x/a`, `v = \nu \delta y/a`, and the</span>
+<span class="sd">    reactions `P = N \delta` and `F_u = -N`, `N = E h b \delta/a`"""</span>
+    <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">delta</span> <span class="o">=</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mf">2e-3</span><span class="p">,</span> <span class="mf">1e-3</span>
+    <span class="k">if</span> <span class="n">layout</span> <span class="o">==</span> <span class="s1">'single'</span><span class="p">:</span>
+        <span class="n">ps</span> <span class="o">=</span> <span class="p">[</span><span class="n">plate</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">)]</span>
+        <span class="n">conn</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">loaded</span><span class="p">,</span> <span class="n">fixed</span> <span class="o">=</span> <span class="n">ps</span><span class="p">,</span> <span class="n">ps</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ps</span><span class="p">,</span> <span class="n">conn</span> <span class="o">=</span> <span class="n">two_by_two</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="n">h</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">loaded</span><span class="p">,</span> <span class="n">fixed</span> <span class="o">=</span> <span class="p">(</span><span class="n">ps</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">ps</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span> <span class="p">(</span><span class="n">ps</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ps</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">fixed</span><span class="p">:</span>
+        <span class="n">end_shortening</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">delta</span><span class="p">,</span> <span class="n">x2</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">loaded</span><span class="p">:</span>
+        <span class="n">end_shortening</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">delta</span><span class="p">,</span> <span class="n">x1</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">ps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">add_point_pd</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">md</span> <span class="o">=</span> <span class="n">MultiDomain</span><span class="p">(</span><span class="n">ps</span><span class="p">,</span> <span class="n">conn</span><span class="p">,</span> <span class="n">pd_method</span><span class="o">=</span><span class="s1">'null-space'</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">linear_static</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">ps</span><span class="p">:</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">fields</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s1">'u'</span><span class="p">],</span> <span class="o">-</span><span class="n">delta</span><span class="o">*</span><span class="n">X</span><span class="o">/</span><span class="n">a</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-12</span><span class="o">*</span><span class="n">delta</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s1">'v'</span><span class="p">],</span> <span class="n">NU</span><span class="o">*</span><span class="n">delta</span><span class="o">*</span><span class="n">Y</span><span class="o">/</span><span class="n">a</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-12</span><span class="o">*</span><span class="n">delta</span><span class="p">)</span>
+        <span class="c1"># w is decoupled, but its round-off is the membrane round-off</span>
+        <span class="c1"># amplified by the stiffness ratio, of order (a/h)**2</span>
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s1">'w'</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-8</span><span class="o">*</span><span class="n">delta</span><span class="p">)</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">E</span><span class="o">*</span><span class="n">h</span><span class="o">*</span><span class="n">b</span><span class="o">*</span><span class="n">delta</span><span class="o">/</span><span class="n">a</span>
+    <span class="n">P</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">reaction_pd</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">NLgeom</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">P</span><span class="p">[</span><span class="s1">'inc'</span><span class="p">],</span> <span class="n">N</span><span class="o">*</span><span class="n">delta</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">P</span><span class="p">[</span><span class="s1">'cte'</span><span class="p">]</span> <span class="o">==</span> <span class="mf">0.</span>
+    <span class="n">F</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">reaction_resultant</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="p">[(</span><span class="n">p</span><span class="p">,</span> <span class="s1">'x'</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">loaded</span><span class="p">],</span>
+                              <span class="n">NLgeom</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">F</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="n">N</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">F</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
+    <span class="n">F</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">reaction_resultant</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="p">[(</span><span class="n">p</span><span class="p">,</span> <span class="s1">'x'</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">fixed</span><span class="p">],</span> <span class="n">NLgeom</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">F</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">N</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s1">'method'</span><span class="p">,</span> <span class="p">[</span><span class="s1">'NR'</span><span class="p">,</span> <span class="s1">'arc_length_riks'</span><span class="p">,</span>
+                                    <span class="s1">'arc_length_crisfield'</span><span class="p">])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_nonlinear_displacement_control</span><span class="p">(</span><span class="n">method</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Post-buckling under displacement control: every converged increment</span>
+<span class="sd">    satisfies `\|[T]^T r\| \leq` ``relTOL`` `\|\lambda \partial R_r/\partial</span>
+<span class="sd">    \lambda\|`, the methods agree, and the reaction is below the linear one"""</span>
+    <span class="n">md</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">delta</span> <span class="o">=</span> <span class="n">plate_postbuckling</span><span class="p">()</span>
+    <span class="n">an</span> <span class="o">=</span> <span class="n">Analysis</span><span class="p">(</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">get_reduced_functions</span><span class="p">())</span>
+    <span class="n">an</span><span class="o">.</span><span class="n">NL_method</span> <span class="o">=</span> <span class="n">method</span>
+    <span class="n">an</span><span class="o">.</span><span class="n">initialInc</span> <span class="o">=</span> <span class="mf">0.2</span>
+    <span class="c1">#NOTE the arc length is scaled by the linear solution, without the</span>
+    <span class="c1">#     out-of-plane deflection of the post-buckling path</span>
+    <span class="n">an</span><span class="o">.</span><span class="n">maxArcLength</span> <span class="o">=</span> <span class="mf">100.</span>
+    <span class="n">an</span><span class="o">.</span><span class="n">static</span><span class="p">(</span><span class="n">NLgeom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">silent</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">an</span><span class="o">.</span><span class="n">increments</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="mf">1.</span><span class="p">)</span>
+    <span class="n">fext</span><span class="p">,</span> <span class="n">fint</span><span class="p">,</span> <span class="n">kC</span><span class="p">,</span> <span class="n">kG</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">get_reduced_functions</span><span class="p">()</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">get_T</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">c_r</span><span class="p">,</span> <span class="n">lbd</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">an</span><span class="o">.</span><span class="n">cs</span><span class="p">,</span> <span class="n">an</span><span class="o">.</span><span class="n">increments</span><span class="p">):</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">c_r</span><span class="p">,</span> <span class="n">lbd</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">_reaction_residual</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">lbd</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="n">fext</span><span class="p">(</span><span class="n">inc</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">c_r</span><span class="p">,</span> <span class="n">lbd</span><span class="o">=</span><span class="n">lbd</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">r</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">1.01e-6</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">lbd</span><span class="o">*</span><span class="n">q</span><span class="p">)</span>
+    <span class="n">P</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">reaction_pd</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)[</span><span class="s1">'inc'</span><span class="p">]</span><span class="o">/</span><span class="n">delta</span>
+    <span class="n">N_lin</span> <span class="o">=</span> <span class="n">E</span><span class="o">*</span><span class="n">p</span><span class="o">.</span><span class="n">plyt</span><span class="o">*</span><span class="n">p</span><span class="o">.</span><span class="n">b</span><span class="o">*</span><span class="n">delta</span><span class="o">/</span><span class="n">p</span><span class="o">.</span><span class="n">a</span>
+    <span class="k">assert</span> <span class="mf">0.5</span> <span class="o">&lt;</span> <span class="n">P</span><span class="o">/</span><span class="n">N_lin</span> <span class="o">&lt;</span> <span class="mf">0.7</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="mf">2420.</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">2e-3</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="penalty-vs-null-space-displacement-control">
+<span id="null-space-pd-penalty"></span><h3>Penalty vs null-space displacement control<a class="headerlink" href="#penalty-vs-null-space-displacement-control" title="Link to this heading">#</a></h3>
+<p>The penalty method imposes a prescribed displacement <span class="math notranslate nohighlight">\(u_p\)</span> with the energy
+<span class="math notranslate nohighlight">\(\frac{1}{2} k \int (u - u_p)^2\)</span>, i.e. a spring of stiffness <span class="math notranslate nohighlight">\(k\)</span> between the
+structure and the support: the structure is more flexible, the prescribed
+value is not reached, and the error decreases with <span class="math notranslate nohighlight">\(1/k\)</span>, while the
+condition number of the stiffness matrix grows with <span class="math notranslate nohighlight">\(k\)</span>. The null-space
+method has no penalty constant. The cases below were run with the models of
+<code class="docutils literal notranslate"><span class="pre">tests/multidomain/test_null_space_pd.py</span></code>, the penalty stiffnesses being
+those of <code class="xref py py-func docutils literal notranslate"><span class="pre">fkCld_xcte()</span></code> and <code class="xref py py-func docutils literal notranslate"><span class="pre">fkCpd()</span></code>; <span class="math notranslate nohighlight">\(E h\)</span> is the membrane
+stiffness of the isotropic plate and <span class="math notranslate nohighlight">\(A_{11}\)</span> that of the laminate of the
+cylinder.</p>
+<p><strong>Accuracy and conditioning, linear static.</strong> Plate under a uniform
+end-shortening with the lateral contraction restrained along <span class="math notranslate nohighlight">\(y = 0, b\)</span>,
+<code class="docutils literal notranslate"><span class="pre">m</span> <span class="pre">=</span> <span class="pre">n</span> <span class="pre">=</span> <span class="pre">10</span></code>, 300 Ritz constants, 280 independent ones with the null-space
+method. Errors of the Ritz constants and of the axial reaction, and condition
+number of the stiffness matrix; the reduced stiffness matrix of the
+null-space method has the condition number <span class="math notranslate nohighlight">\(1.4 \times 10^{11}\)</span>:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p><span class="math notranslate nohighlight">\(k / (E h)\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(10\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(10^2\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(10^4\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(10^6\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(10^8\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(10^{10}\)</span></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>error of <span class="math notranslate nohighlight">\(\{c\}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.6 \times 10^{-1}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(2.0 \times 10^{-2}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(2.0 \times 10^{-4}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(2.0 \times 10^{-6}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(2.0 \times 10^{-8}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(3.1 \times 10^{-9}\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>error of the reaction</p></td>
+<td><p><span class="math notranslate nohighlight">\(-1.8 \times 10^{-1}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(-2.2 \times 10^{-2}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(-2.2 \times 10^{-4}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(-2.2 \times 10^{-6}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(-2.2 \times 10^{-8}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(-1.2 \times 10^{-6}\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p>condition number</p></td>
+<td><p><span class="math notranslate nohighlight">\(2.5 \times 10^{12}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(2.0 \times 10^{13}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(2.0 \times 10^{15}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(2.0 \times 10^{17}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.8 \times 10^{19}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.8 \times 10^{21}\)</span></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The reaction of the penalty method, <span class="math notranslate nohighlight">\(k \int (u_p - u)\)</span>, is the product of a
+large constant and a small difference, and loses accuracy by cancellation
+for the highest constants.</p>
+<p><strong>Linear buckling.</strong> Cylinder of 5 panels under a uniform end-shortening,
+see <code class="docutils literal notranslate"><span class="pre">test_cylinder_end_shortening</span></code>. The error of the critical
+end-shortening of the penalty method is <span class="math notranslate nohighlight">\(1.4 \times 10^{-1}\)</span>, <span class="math notranslate nohighlight">\(1.3 \times
+10^{-2}\)</span>, <span class="math notranslate nohighlight">\(1.3 \times 10^{-3}\)</span>, <span class="math notranslate nohighlight">\(1.3 \times 10^{-4}\)</span> and <span class="math notranslate nohighlight">\(1.3 \times
+10^{-6}\)</span> for <span class="math notranslate nohighlight">\(k/A_{11} = 10, 10^2, 10^3, 10^4, 10^6\)</span>, from above, since the
+penalty springs shorten the cylinder less than the prescribed value. Both
+methods take about 3.8 s. With <span class="math notranslate nohighlight">\(k/A_{11} = 10^6\)</span> the sparse eigenvalue
+solver of <code class="docutils literal notranslate"><span class="pre">structsolve</span></code> fails its verification of the residuals of the
+eigenpairs, because of the conditioning, and <code class="docutils literal notranslate"><span class="pre">structsolve.lb</span></code> falls back to
+the dense solver with a <code class="docutils literal notranslate"><span class="pre">DenseFallbackWarning</span></code>.</p>
+<p><strong>Non-linear analysis.</strong> Post-buckling of the plate at twice the critical
+end-shortening, <code class="docutils literal notranslate"><span class="pre">m</span> <span class="pre">=</span> <span class="pre">n</span> <span class="pre">=</span> <span class="pre">8</span></code>, Newton-Raphson with 8 increments; error of
+the axial reaction of the penalty method with the default convergence
+tolerance <code class="docutils literal notranslate"><span class="pre">relTOL</span> <span class="pre">=</span> <span class="pre">1e-6</span></code> and with <code class="docutils literal notranslate"><span class="pre">relTOL</span> <span class="pre">=</span> <span class="pre">1e-10</span></code>:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p><span class="math notranslate nohighlight">\(k / (E h)\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(10^2\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(10^4\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(10^6\)</span></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">relTOL</span> <span class="pre">=</span> <span class="pre">1e-6</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(-3.6 \times 10^{-2}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(-5.5 \times 10^{-4}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(-2.1 \times 10^{-1}\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">relTOL</span> <span class="pre">=</span> <span class="pre">1e-10</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(-3.6 \times 10^{-2}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(-3.8 \times 10^{-4}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(-1.9 \times 10^{-5}\)</span></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The relative convergence criterion of the penalty method is relative to the
+penalty forces <span class="math notranslate nohighlight">\(k u_p\)</span>, which grow with <span class="math notranslate nohighlight">\(k\)</span>: with the default tolerance, the
+highest penalty constant gives the largest error, 21%, after converging in
+fewer iterations. The null-space method has no such trade-off, its
+reference being <span class="math notranslate nohighlight">\(\lambda \partial R_r/\partial \lambda\)</span>, see
+<a class="reference internal" href="#null-space-pd"><span class="std std-ref">Prescribed displacements imposed exactly</span></a>.</p>
+<p><strong>Run time.</strong> For the linear analyses both methods have the same cost: the
+elimination of the constraints is a small fraction of the assembly. For the
+non-linear analysis above the run time is dominated by the assembly of the
+tangent stiffness matrix: 12.6 s and 15.8 s with the null-space method for
+<code class="docutils literal notranslate"><span class="pre">relTOL</span> <span class="pre">=</span> <span class="pre">1e-6</span></code> and <code class="docutils literal notranslate"><span class="pre">1e-10</span></code>, against 4.4 s and 9.2 s with the penalty
+method and <span class="math notranslate nohighlight">\(k/(E h) = 10^4\)</span>. The null-space method converges to a much
+smaller residual in absolute terms, and <code class="docutils literal notranslate"><span class="pre">structsolve</span></code> evaluates <span class="math notranslate nohighlight">\(\partial
+R_r/\partial \lambda\)</span>, which requires the tangent stiffness matrix, at every
+convergence check, including the converged iterate of each increment; at
+the other iterates the matrix is reused from a cache by
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_reduced_functions()</span></code>.</p>
+<p><strong>When to use each method.</strong> The null-space method is exact, needs no
+penalty constant, keeps the conditioning of the model, and gives reactions
+that do not depend on any constant; it is recommended for displacement
+control, e.g. the end-shortening of panels and shells, and for linear
+buckling under prescribed displacements. The penalty method remains the
+default for backward compatibility, and it is needed when the prescribed
+displacement represents a physical stiffness, e.g. a load cell or a loading
+fixture, or for models that rely on the penalty forms, e.g. the cohesive zone
+examples of <a class="reference internal" href="cohesive_zone.html#cohesive-zone"><span class="std std-ref">Cohesive zone model of the multi-domain approach</span></a>, whose reaction is given by
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.reaction_line_pd_xcte()</span></code>.</p>
+</section>
+</section>
 <section id="limitations">
 <h2>Limitations<a class="headerlink" href="#limitations" title="Link to this heading">#</a></h2>
 <p>A connection imposed exactly constrains the domains exactly as the penalty
@@ -848,21 +1272,26 @@ laminates must be restrained consistently with the single laminate that
 they represent, e.g. restraining only the tangential displacement of the
 edges, as in <code class="docutils literal notranslate"><span class="pre">test_skin_base_nonlinear_equals_single_laminate</span></code>.</p></li>
 </ul>
-<p>Only the connections of the domains are imposed exactly: the prescribed
-displacements of <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_point_pd()</span></code>,
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_distr_pd_fixed_x()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_distr_pd_fixed_y()</span></code>,
-and the traction-separation law of <code class="docutils literal notranslate"><span class="pre">'SB_TSL'</span></code>, remain penalty stiffnesses.</p>
+<p>The prescribed displacements of <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_point_pd()</span></code>,
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_distr_pd_fixed_x()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_distr_pd_fixed_y()</span></code>
+remain penalty stiffnesses by default, and are imposed exactly with
+<code class="docutils literal notranslate"><span class="pre">pd_method='null-space'</span></code>, see <a class="reference internal" href="#null-space-pd"><span class="std std-ref">Prescribed displacements imposed exactly</span></a>. The
+traction-separation law of <code class="docutils literal notranslate"><span class="pre">'SB_TSL'</span></code> remains a penalty stiffness.</p>
 <p>The rank of the constraints is found with the tolerance <code class="docutils literal notranslate"><span class="pre">tol</span></code> of
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_T()</span></code>, <code class="docutils literal notranslate"><span class="pre">1e-9</span></code> by default, which applies to the
 constraints normalized to a unit norm. The independent constraints have
 pivots many orders of magnitude above the round-off errors of the redundant
 ones, and a warning is issued when this gap is smaller than <span class="math notranslate nohighlight">\(10^4\)</span>.</p>
 </section>
-<section id="api">
-<h2>API<a class="headerlink" href="#api" title="Link to this heading">#</a></h2>
+<section id="id3">
+<h2>API<a class="headerlink" href="#id3" title="Link to this heading">#</a></h2>
 <p>The methods of <code class="xref py py-class docutils literal notranslate"><span class="pre">MultiDomain</span></code> for the null-space method are
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_T()</span></code>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.reduce()</span></code>,
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.expand()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_reduced_functions()</span></code>.</p>
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.expand()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_reduced_functions()</span></code>,
+and for the prescribed displacements <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_cp()</span></code>,
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.linear_static()</span></code>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.linear_buckling()</span></code>,
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.reaction_pd()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.reaction_resultant()</span></code>,
+see <a class="reference internal" href="#null-space-pd"><span class="std std-ref">Prescribed displacements imposed exactly</span></a>.</p>
 </section>
 </section>
 
@@ -921,8 +1350,17 @@ ones, and a warning is issued when this gap is smaller than <span class="math no
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#quantities-imposed">Quantities imposed</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#usage">Usage</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#comparison-with-the-penalty-method">Comparison with the penalty method</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prescribed-displacements-imposed-exactly">Prescribed displacements imposed exactly</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Theory</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#reactions">Reactions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#redundant-and-inconsistent-prescriptions">Redundant and inconsistent prescriptions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#api">API</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#example">Example</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#penalty-vs-null-space-displacement-control">Penalty vs null-space displacement control</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#limitations">Limitations</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#api">API</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">API</a></li>
 </ul>
   </nav></div>
 
