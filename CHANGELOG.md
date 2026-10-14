@@ -1,5 +1,50 @@
 # Changelog
 
+## 0.13.1 (2026-10-14)
+
+### Cohesive zone (`'SB_TSL'`): discretisation rules and checks
+
+- New module `panels.multidomain.connections.tsl` with the rules of the
+  convergence study of `doc/source/cohesive_zone.rst`:
+  `tsl_resolution(p1, k_o, tau_o, G1c)` returns the decay rate of the
+  opening `lambda = (k_o/(4 D11))**0.25` and the cohesive zone length
+  `l_cz = 0.88 E2 G1c/tau_o**2`, `tsl_margin(lam, lcz)` the length
+  `2 pi/lambda + 3 l_cz` needed ahead of the crack front, and
+  `tsl_discretization(lam, lcz, L_tsl)` the terms `m = 1.5 lambda L_tsl` and
+  Gauss points `nx = 10 L_tsl/l_cz` along `x`.
+- `MultiDomain.calc_k_dmg` prints a warning, once, the first time a point is
+  damaged, when the cohesive domain has fewer than `1.2 lambda a` terms or
+  `7 a/l_cz` Gauss points along `x`.
+- The Gauss-Legendre points of `MultiDomain.calc_results` and
+  `MultiDomain.force` are no longer limited to 304: the rules come from
+  `scipy.special.roots_legendre`, without an upper limit.
+- `connections.calc_kw_tsl` requires `k_i`, `tau_o` and `G1c` instead of
+  silent defaults, accepts only `tsl_type='bilinear'`, and no longer has the
+  unused interpenetration stiffness `k_ipen`; the damage and the stiffness
+  are unchanged.
+- Tests: `tests/multidomain/test_tsl_resolution.py`; in
+  `tests/multidomain/test_multidomain_postprocessing.py`, the checks that
+  more than 304 Gauss points raise a `ValueError` are replaced by checks
+  that 305 points along `x` or `y` give the same results.
+
+### Notebooks
+
+- `doc/source/cohesive_zone.rst`: new convergence study of the cohesive
+  domain, on the DCB of Tijs et al. (2022) with `L = 100` mm, and run times
+  of panels 0.13.0.
+- `notebooks/dcb_utils.py`: `discretize` without a cap on the Gauss points,
+  `build_dcb` fills a missing `m_tsl` or `nx` from the rules, and the
+  results store the case, the solver settings, the version of `panels` and
+  the connection method; `run_or_load` reports a stored run of a different
+  model.
+- New `notebooks/README.md`, `notebooks/dcb_mode_I_solver_study.py` and
+  `notebooks/dcb_mode_I_validation_rerun.py`.
+- Renamed, after their scope, the mode I DCB: `notebooks/convergence_study.py`
+  to `notebooks/dcb_mode_I_convergence_study.py`, with its results
+  `notebooks/results/dcb_mode_I_convergence_study.json`, and
+  `notebooks/validation_summary.ipynb` to
+  `notebooks/dcb_mode_I_validation_summary.ipynb`.
+
 ## 0.13.0 (2026-10-14)
 
 ### New: product of the tangent stiffness matrix by a vector, without assembly
