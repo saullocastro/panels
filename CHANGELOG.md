@@ -72,6 +72,25 @@
   `Shell.ABDnxny` against the argument, within a `MultiDomain`, in
   `Shell.stress` and saved and loaded; the checks of `ABDnxny`.
 
+### Documentation: tangent stiffness of the CLPT models with Donnell kinematics
+
+- The derivation of the internal force vector and of the tangent stiffness
+  matrix of `plate_clpt_donnell` and `cylshell_clpt_donnell`, kept as the
+  LaTeX file `theory/shells/tangent_stiffness_clpt_donnell.tex`, outside the
+  documentation and with line numbers of the code that were out of date, is
+  now a section of `doc/source/tangent_product.rst`, renamed "Tangent
+  stiffness matrix and its product by a vector": the two integration paths
+  and when each is taken, the approximation functions, the kinematics, the
+  operators `B_L`, `B_NL` and `G`, the internal force vector, the grouping
+  of the terms between `calc_kC` and `calc_kG` and why `K_GNL` is in
+  `calc_kC`, the closed-form path, the quadrature, the multi-domain
+  assembly, the symbols against the variables of the kernels, and the
+  verification. Each equation names the function or kernel that evaluates
+  it, checked against the current code, and the equations it needed from
+  outside are written out. The `.tex` is removed and `*.tex` ignored.
+- New docstrings of `MultiDomain.calc_kT` and `MultiDomain.calc_fint`; the
+  argument `kw_tsl` of `MultiDomain.calc_kT` is documented as not used.
+
 ### New: product of the tangent stiffness matrix by a vector, without assembly
 
 - `Shell.calc_kTv(c, v, ..., inc=1.)` and `MultiDomain.calc_kTv(c, v,
