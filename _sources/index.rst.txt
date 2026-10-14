@@ -60,7 +60,7 @@ https://github.com/saullocastro/panels
 Citing this library
 -------------------
 
-Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.12.0). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
+Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.13.0). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
 
 
 Usage examples
@@ -98,6 +98,8 @@ Theory
     bardell.rst
     multidomain_null_space.rst
     follower_pressure.rst
+    tangent_product.rst
+    tabulation.rst
     cohesive_zone.rst
     ref.rst
 

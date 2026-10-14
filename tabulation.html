@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Approximation functions tabulated at the integration points &#8212; panels 0.13.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="_static/scripts/fontawesome.js?digest=18bd87630a240e9c25be"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
+
+    <script src="_static/documentation_options.js?v=1019fba8"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'tabulation';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Cohesive zone model of the multi-domain approach" href="cohesive_zone.html" />
+    <link rel="prev" title="Product of the tangent stiffness matrix by a vector" href="tangent_product.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.13.0" />
+  
+    
+    <script src="_static/searchtools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">panels 0.13.0 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="bardell.html">
+    Bardell’s Hierarchical Functions
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tangent_product.html">
+    Product of the tangent stiffness matrix by a vector
+  </a>
+</li>
+
+
+<li class=" current active">
+  <a class="nav-link dropdown-item nav-internal" href="#" aria-current="page">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ref.html">
+    References
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="bardell.html">
+    Bardell’s Hierarchical Functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tangent_product.html">
+    Product of the tangent stiffness matrix by a vector
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#" aria-current="page">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ref.html">
+    References
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button type="button" id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Approximation functions tabulated at the integration points</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="approximation-functions-tabulated-at-the-integration-points">
+<span id="tabulation"></span><h1>Approximation functions tabulated at the integration points<a class="headerlink" href="#approximation-functions-tabulated-at-the-integration-points" title="Link to this heading">#</a></h1>
+<p>The numerically integrated matrices and vectors of <code class="docutils literal notranslate"><span class="pre">panels</span></code> are sums over
+the integration points of products of the approximation functions of the
+Ritz method. This page describes how the kernels evaluate these functions:
+before version 0.13.0 they were evaluated again in every loop over the terms
+of the matrix, the innermost loop included; they are now evaluated once per
+integration point and term, in tables. The results are the same, bit for
+bit, and the assembly is several times faster.</p>
+<section id="integrands">
+<h2>Integrands<a class="headerlink" href="#integrands" title="Link to this heading">#</a></h2>
+<p>Each field of a panel is approximated with the products of the hierarchical
+functions of Bardell, see <a class="reference internal" href="bardell.html#theory-func-bardell"><span class="std std-ref">Bardell’s Hierarchical Functions</span></a>, along <span class="math notranslate nohighlight">\(\xi\)</span> and <span class="math notranslate nohighlight">\(\eta\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[u(\xi, \eta) = \sum_{j=0}^{n-1} \sum_{i=0}^{m-1} c_{u, ij}\, f_i(\xi)\,
+g_j(\eta)\]</div>
+<p>where <span class="math notranslate nohighlight">\(f_i\)</span> and <span class="math notranslate nohighlight">\(g_j\)</span> depend on the boundary conditions of the field, i.e.
+the flags <code class="docutils literal notranslate"><span class="pre">x1u,</span> <span class="pre">x1ur,</span> <span class="pre">x2u,</span> <span class="pre">x2ur</span></code> along <span class="math notranslate nohighlight">\(x\)</span> and <code class="docutils literal notranslate"><span class="pre">y1u,</span> <span class="pre">y1ur,</span> <span class="pre">y2u,</span> <span class="pre">y2ur</span></code>
+along <span class="math notranslate nohighlight">\(y\)</span>. The entry of a stiffness matrix between the terms <span class="math notranslate nohighlight">\((i, j)\)</span> and
+<span class="math notranslate nohighlight">\((k, l)\)</span> is the sum over the <span class="math notranslate nohighlight">\(n_x \times n_y\)</span> Gauss-Legendre points</p>
+<div class="math notranslate nohighlight">
+\[K_{(ij)(kl)} = \sum_{p=1}^{n_x} \sum_{q=1}^{n_y} w_p w_q\,
+\mathcal{F}\left(f_i(\xi_p), f_k(\xi_p), g_j(\eta_q), g_l(\eta_q),
+\ldots\right)\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathcal{F}\)</span> combines the functions and their derivatives <span class="math notranslate nohighlight">\(f'\)</span>,
+<span class="math notranslate nohighlight">\(f''\)</span>, <span class="math notranslate nohighlight">\(g'\)</span>, <span class="math notranslate nohighlight">\(g''\)</span> of each field with the constitutive matrix and, for the
+non-linear matrices, with the displacement gradients at the point.</p>
+</section>
+<section id="previous-implementation-functions-in-the-innermost-loop">
+<h2>Previous implementation: functions in the innermost loop<a class="headerlink" href="#previous-implementation-functions-in-the-innermost-loop" title="Link to this heading">#</a></h2>
+<p>The kernels had the structure below, e.g. <code class="docutils literal notranslate"><span class="pre">fkC_num</span></code> of
+<code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell_num.pyx</span></code>, with seven functions per side:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">ptx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nx</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">pty</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ny</span><span class="p">):</span>
+        <span class="n">xi</span><span class="p">,</span> <span class="n">eta</span><span class="p">,</span> <span class="n">weight</span> <span class="o">=</span> <span class="o">...</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>
+            <span class="n">fAu</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">xi</span><span class="p">,</span> <span class="n">x1u</span><span class="p">,</span> <span class="n">x1ur</span><span class="p">,</span> <span class="n">x2u</span><span class="p">,</span> <span class="n">x2ur</span><span class="p">)</span>
+            <span class="o">...</span>                                   <span class="c1"># 7 functions of i</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>
+                <span class="n">fBu</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">xi</span><span class="p">,</span> <span class="n">x1u</span><span class="p">,</span> <span class="n">x1ur</span><span class="p">,</span> <span class="n">x2u</span><span class="p">,</span> <span class="n">x2ur</span><span class="p">)</span>
+                <span class="o">...</span>                               <span class="c1"># 7 functions of k</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+                    <span class="n">gAu</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">eta</span><span class="p">,</span> <span class="n">y1u</span><span class="p">,</span> <span class="n">y1ur</span><span class="p">,</span> <span class="n">y2u</span><span class="p">,</span> <span class="n">y2ur</span><span class="p">)</span>
+                    <span class="o">...</span>                           <span class="c1"># 7 functions of j</span>
+                    <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+                        <span class="n">gBu</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">eta</span><span class="p">,</span> <span class="n">y1u</span><span class="p">,</span> <span class="n">y1ur</span><span class="p">,</span> <span class="n">y2u</span><span class="p">,</span> <span class="n">y2ur</span><span class="p">)</span>
+                        <span class="o">...</span>                       <span class="c1"># 7 functions of l</span>
+                        <span class="n">kCv</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">+=</span> <span class="n">weight</span><span class="o">*</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>    <span class="c1"># the entries of (ij)(kl)</span>
+</pre></div>
+</div>
+<p>The value of <span class="math notranslate nohighlight">\(g_l(\eta_q)\)</span> does not depend on <span class="math notranslate nohighlight">\(i\)</span>, <span class="math notranslate nohighlight">\(k\)</span> or <span class="math notranslate nohighlight">\(j\)</span>, but it was
+computed again for each of them: per integration point, <span class="math notranslate nohighlight">\(7 m^2 n^2\)</span>
+evaluations in the innermost loop, <span class="math notranslate nohighlight">\(7 m^2 n\)</span> in the loop over <span class="math notranslate nohighlight">\(j\)</span>, and so
+on, for only <span class="math notranslate nohighlight">\(7 (m + n)\)</span> distinct values. Each evaluation is a polynomial
+of degree up to 29 in <span class="math notranslate nohighlight">\(\xi\)</span>, selected by the index of the term, see
+<code class="docutils literal notranslate"><span class="pre">panels/core/src/bardell_functions.cpp</span></code>, which costs much more than the
+arithmetic of the entry itself. For <span class="math notranslate nohighlight">\(m = n = 12\)</span> this is about 10^5
+evaluations per integration point, against 168 distinct values.</p>
+<p>The internal force vector, <code class="docutils literal notranslate"><span class="pre">calc_fint</span></code>, has three loops over the <span class="math notranslate nohighlight">\(m n\)</span>
+terms per integration point (the rotations, the strains, the forces), with
+the functions evaluated again in each; the connections between panels and
+the stiffeners have the same nested structure, along a line or over an
+area.</p>
+</section>
+<section id="current-implementation-tables-per-integration-point">
+<h2>Current implementation: tables per integration point<a class="headerlink" href="#current-implementation-tables-per-integration-point" title="Link to this heading">#</a></h2>
+<p>The functions are evaluated once per integration point and term, at the
+start of the loop over the integration points, in a table along <span class="math notranslate nohighlight">\(x\)</span> and
+another along <span class="math notranslate nohighlight">\(y\)</span>, and the loops over the terms read them:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ftab</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">7</span><span class="p">,</span> <span class="n">m</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">DOUBLE</span><span class="p">)</span>
+<span class="n">gtab</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">7</span><span class="p">,</span> <span class="n">n</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">DOUBLE</span><span class="p">)</span>
+<span class="k">with</span> <span class="n">nogil</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">ptx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nx</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">pty</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ny</span><span class="p">):</span>
+            <span class="n">xi</span><span class="p">,</span> <span class="n">eta</span><span class="p">,</span> <span class="n">weight</span> <span class="o">=</span> <span class="o">...</span>
+            <span class="c1"># approximation functions evaluated once</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>
+                <span class="n">ftab</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">xi</span><span class="p">,</span> <span class="n">x1u</span><span class="p">,</span> <span class="n">x1ur</span><span class="p">,</span> <span class="n">x2u</span><span class="p">,</span> <span class="n">x2ur</span><span class="p">)</span>
+                <span class="o">...</span>                               <span class="c1"># one row per function</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+                <span class="n">gtab</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">eta</span><span class="p">,</span> <span class="n">y1u</span><span class="p">,</span> <span class="n">y1ur</span><span class="p">,</span> <span class="n">y2u</span><span class="p">,</span> <span class="n">y2ur</span><span class="p">)</span>
+                <span class="o">...</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>
+                <span class="n">fAu</span> <span class="o">=</span> <span class="n">ftab</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+                <span class="o">...</span>
+                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>
+                    <span class="n">fBu</span> <span class="o">=</span> <span class="n">ftab</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span>
+                    <span class="o">...</span>
+                    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+                        <span class="n">gAu</span> <span class="o">=</span> <span class="n">gtab</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
+                        <span class="o">...</span>
+                        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+                            <span class="n">gBu</span> <span class="o">=</span> <span class="n">gtab</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">l</span><span class="p">]</span>
+                            <span class="o">...</span>
+                            <span class="n">kCv</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">+=</span> <span class="n">weight</span><span class="o">*</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Per integration point the number of evaluations falls from <span class="math notranslate nohighlight">\(O(m^2 n^2)\)</span> to
+<span class="math notranslate nohighlight">\(O(m + n)\)</span>, with tables of a few kilobytes; the loops over the pairs of
+terms keep only the arithmetic of the entries, which is unchanged. The
+functions read from the tables are the same numbers, combined in the same
+order, such that the matrices and vectors are identical, bit for bit, to
+those of the previous implementation.</p>
+<p>The kernels that integrate along a line, e.g. the connections at a constant
+<span class="math notranslate nohighlight">\(\xi\)</span> or the prescribed displacements, evaluate the functions across the
+line at a single coordinate: their tables are filled once, before the
+outermost loop over the terms.</p>
+</section>
+<section id="kernels">
+<h2>Kernels<a class="headerlink" href="#kernels" title="Link to this heading">#</a></h2>
+<p>All the kernels that evaluate the approximation functions in their loops
+over the terms are tabulated:</p>
+<ul class="simple">
+<li><p>the 9 geometrically non-linear models, <code class="docutils literal notranslate"><span class="pre">panels/models/&lt;model&gt;_num.pyx</span></code>:
+<code class="docutils literal notranslate"><span class="pre">fkC_num</span></code>, <code class="docutils literal notranslate"><span class="pre">fkG_num</span></code>, <code class="docutils literal notranslate"><span class="pre">calc_fint</span></code>, <code class="docutils literal notranslate"><span class="pre">fkM_num</span></code>, <code class="docutils literal notranslate"><span class="pre">fkAx_num</span></code>,
+<code class="docutils literal notranslate"><span class="pre">fkAy_num</span></code>, <code class="docutils literal notranslate"><span class="pre">calc_fext_follower</span></code> and <code class="docutils literal notranslate"><span class="pre">fkCfollower_num</span></code>;</p></li>
+<li><p>the connections, <code class="docutils literal notranslate"><span class="pre">panels/multidomain/connections</span></code>: <code class="docutils literal notranslate"><span class="pre">kCSSxcte</span></code>,
+<code class="docutils literal notranslate"><span class="pre">kCSSycte</span></code>, <code class="docutils literal notranslate"><span class="pre">kCBFxcte</span></code>, <code class="docutils literal notranslate"><span class="pre">kCBFycte</span></code> (including the shear
+deformation theories), <code class="docutils literal notranslate"><span class="pre">kCpd</span></code> (prescribed displacements) and
+<code class="docutils literal notranslate"><span class="pre">kCSB_dmg</span></code> (skin-base connection with damage, the cohesive zone of the
+double cantilever beam, see <a class="reference internal" href="cohesive_zone.html#cohesive-zone"><span class="std std-ref">Cohesive zone model of the multi-domain approach</span></a>);</p></li>
+<li><p>the blade stiffeners, <code class="docutils literal notranslate"><span class="pre">panels/stiffener/models</span></code>.</p></li>
+</ul>
+<p>The analytical kernels, which use closed-form integrals of the products of
+the functions, e.g. <code class="docutils literal notranslate"><span class="pre">fk0</span></code> or <code class="docutils literal notranslate"><span class="pre">kCSB</span></code>, are not affected. The kernel
+<code class="docutils literal notranslate"><span class="pre">calc_kTv</span></code> of the product of the tangent stiffness matrix by a vector,
+see <a class="reference internal" href="tangent_product.html#tangent-product"><span class="std std-ref">Product of the tangent stiffness matrix by a vector</span></a>, is written with the tables from the start.</p>
+</section>
+<section id="implementation">
+<h2>Implementation<a class="headerlink" href="#implementation" title="Link to this heading">#</a></h2>
+<p>The rewriting is done by <code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.dev.tabulate</span></code>, applied by the
+generators of the modules, <code class="docutils literal notranslate"><span class="pre">theory/shells/fsdt_tsdt/write_pyx.py</span></code>,
+<code class="docutils literal notranslate"><span class="pre">theory/shells/cylshell_clpt_sanders/write_pyx.py</span></code> and
+<code class="docutils literal notranslate"><span class="pre">theory/shells/follower_pressure/write_pyx.py</span></code>, and with <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span>
+<span class="pre">panels.dev.tabulate</span> <span class="pre">&lt;file.pyx&gt;</span> <span class="pre">...</span></code> to the modules written by hand. For
+each kernel it</p>
+<ol class="arabic simple">
+<li><p>finds the calls <code class="docutils literal notranslate"><span class="pre">NAME</span> <span class="pre">=</span> <span class="pre">f(IDX,</span> <span class="pre">COORD,</span> <span class="pre">x1F,</span> <span class="pre">x1Fr,</span> <span class="pre">x2F,</span> <span class="pre">x2Fr)</span></code>, with
+<code class="docutils literal notranslate"><span class="pre">f</span></code>, <code class="docutils literal notranslate"><span class="pre">fp</span></code> or <code class="docutils literal notranslate"><span class="pre">fpp</span></code>, the flags of the field <code class="docutils literal notranslate"><span class="pre">F</span></code> along <span class="math notranslate nohighlight">\(x\)</span> (or
+<span class="math notranslate nohighlight">\(y\)</span>) and an optional suffix of the panel, e.g. <code class="docutils literal notranslate"><span class="pre">x1u1</span></code> for the panel 1
+of a connection, and fails on a call in another form;</p></li>
+<li><p>groups them in one table per direction, panel and coordinate, with one
+row per function and as many columns as the loop over <code class="docutils literal notranslate"><span class="pre">IDX</span></code>;</p></li>
+<li><p>fills the tables right before the loops over the terms of the loop over
+the integration points, after checking that the coordinates are not
+modified afterwards, and replaces each call by the read of the table;</p></li>
+<li><p>declares and allocates the tables outside the <code class="docutils literal notranslate"><span class="pre">nogil</span></code> block.</p></li>
+</ol>
+<p>A kernel already tabulated is left unchanged, such that applying it twice
+does nothing. The helper <code class="docutils literal notranslate"><span class="pre">_terms_sdt</span></code> of the connections of the shear
+deformation theories, whose flags come from an array, was tabulated by
+hand in the same way.</p>
+</section>
+<section id="verification">
+<h2>Verification<a class="headerlink" href="#verification" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>The matrices and vectors of every tabulated kernel were compared, bit for
+bit, with those of the previous implementation, recording the output of
+each call while running 20 test files of the models, of the follower
+pressures, of the partial integration domains, of the aerodynamic
+matrices, of the connections, of the cohesive zone and of the stiffened
+panels: the 73946 calls of 92 kernels gave identical outputs.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tests/test_tabulate.py</span></code> checks the rewriting and that no kernel of the
+package evaluates the approximation functions in its loops any more.</p></li>
+<li><p>The tests of the package, among which the consistency of the tangent
+stiffness matrix with the internal force vector,
+<code class="docutils literal notranslate"><span class="pre">tests/tests_shell/test_tangent_consistency.py</span></code>, are unchanged and
+pass.</p></li>
+</ul>
+</section>
+<section id="performance">
+<h2>Performance<a class="headerlink" href="#performance" title="Link to this heading">#</a></h2>
+<p>Single shell, laminate <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">45,</span> <span class="pre">-45,</span> <span class="pre">90]</span></code>, <code class="docutils literal notranslate"><span class="pre">nx</span> <span class="pre">=</span> <span class="pre">2m</span></code>, <code class="docutils literal notranslate"><span class="pre">ny</span> <span class="pre">=</span> <span class="pre">2n</span></code>
+integration points, a follower pressure, one core, times in seconds before
+and after the tabulation, with the speed-up:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>model, <span class="math notranslate nohighlight">\(m = n\)</span></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">fkC_num</span></code> (<code class="docutils literal notranslate"><span class="pre">NLgeom</span></code>)</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">fkG_num</span></code> (<code class="docutils literal notranslate"><span class="pre">NLgeom</span></code>)</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">calc_fint</span></code></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">fkCfollower_num</span></code></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">fkM_num</span></code></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell</span></code>, 8</p></td>
+<td><p>0.26 → 0.028 (9.5)</p></td>
+<td><p>0.11 → 0.0039 (29)</p></td>
+<td><p>0.020 → 0.0028 (7.2)</p></td>
+<td><p>0.35 → 0.023 (15)</p></td>
+<td><p>0.18 → 0.0085 (21)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell</span></code>, 12</p></td>
+<td><p>4.95 → 0.30 (17)</p></td>
+<td><p>2.03 → 0.033 (62)</p></td>
+<td><p>0.17 → 0.015 (11)</p></td>
+<td><p>6.21 → 0.24 (26)</p></td>
+<td><p>3.11 → 0.087 (36)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell</span></code>, 16</p></td>
+<td><p>39.6 → 1.65 (24)</p></td>
+<td><p>16.1 → 0.17 (97)</p></td>
+<td><p>0.76 → 0.051 (15)</p></td>
+<td><p>49.0 → 1.33 (37)</p></td>
+<td><p>24.0 → 0.48 (50)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cylshell_fsdt_sanders</span></code>, 12</p></td>
+<td><p>8.48 → 1.54 (5.5)</p></td>
+<td><p>2.34 → 0.074 (32)</p></td>
+<td><p>0.23 → 0.021 (11)</p></td>
+<td><p>6.26 → 0.38 (16)</p></td>
+<td><p>4.05 → 0.12 (33)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">plate_tsdt_donnell</span></code>, 12</p></td>
+<td><p>10.3 → 2.92 (3.5)</p></td>
+<td><p>1.53 → 0.040 (39)</p></td>
+<td><p>0.23 → 0.022 (10)</p></td>
+<td><p>6.20 → 0.24 (26)</p></td>
+<td><p>5.01 → 0.54 (9.2)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The speed-up grows with the number of terms. It is smaller for <code class="docutils literal notranslate"><span class="pre">fkC_num</span></code>
+of the shear deformation theories, whose integrands have more arithmetic
+per pair of terms, which the tabulation does not change.</p>
+<p>Connections between two plates with <span class="math notranslate nohighlight">\(m = n = 8\)</span> and <span class="math notranslate nohighlight">\(12\)</span>, the skin-base
+connection with damage integrated with <span class="math notranslate nohighlight">\(50 \times 25\)</span> points:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>kernel</p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(m = n = 8\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(m = n = 12\)</span></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">kCSSxcte</span></code> (the three blocks)</p></td>
+<td><p>1.5 → 0.32 ms (4.9)</p></td>
+<td><p>9.8 → 0.66 ms (15)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">kCSB_dmg</span></code> (the three blocks)</p></td>
+<td><p>3.60 → 0.106 s (34)</p></td>
+<td><p>27.5 → 0.49 s (57)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">kCpd</span></code></p></td>
+<td><p>0.19 → 0.057 ms (3.3)</p></td>
+<td><p>1.1 → 0.16 ms (7.1)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The double cantilever beam with cohesive zone of
+<code class="docutils literal notranslate"><span class="pre">tests/multidomain/test_dcb_damage.py</span></code> runs in 2 min 45 s instead of
+7 min 28 s, its non-linear matrices of the panels and its connections
+being tabulated; its cohesive zone is assembled with cached operators by
+default, or with <code class="docutils literal notranslate"><span class="pre">kCSB_dmg</span></code> with <code class="docutils literal notranslate"><span class="pre">use_kernels=True</span></code>.</p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="tangent_product.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Product of the tangent stiffness matrix by a vector</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="cohesive_zone.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Cohesive zone model of the multi-domain approach</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#integrands">Integrands</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#previous-implementation-functions-in-the-innermost-loop">Previous implementation: functions in the innermost loop</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#current-implementation-tables-per-integration-point">Current implementation: tables per integration point</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#kernels">Kernels</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#implementation">Implementation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#verification">Verification</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#performance">Performance</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="_sources/tabulation.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2012-2026, Saullo G. P. Castro, Nathan D&#39;Souza.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.23.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

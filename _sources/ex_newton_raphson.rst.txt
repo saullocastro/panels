@@ -28,6 +28,11 @@ approximation of `\{F_{int}\}` must decrease quadratically with the step size:
 .. literalinclude:: ../../tests/tests_shell/test_tangent_consistency.py
     :pyobject: test_tangent_is_derivative_of_fint
 
+The product of the tangent stiffness matrix by a vector, `[K_T] \{v\}`, is
+available without assembling `[K_T]`, at the cost of one evaluation of the
+internal force vector, with :meth:`.Shell.calc_kTv` and
+:meth:`.MultiDomain.calc_kTv`, see :ref:`tangent_product`.
+
 The methods ``calc_fext``, ``calc_fint``, ``calc_kC`` and ``calc_kG`` of
 :class:`.Shell` and :class:`.MultiDomain` have the signatures required by
 :class:`structsolve.Analysis`, which implements the Newton-Raphson method with
