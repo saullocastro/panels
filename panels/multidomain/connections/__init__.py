@@ -163,6 +163,14 @@ traction-separation law is calculated using :func:`.calc_kw_tsl`.
 
 .. autofunction:: panels.multidomain.connections.calc_kw_tsl
 
+The discretisation of the cohesive domain of a ``'SB_TSL'`` connection
+follows from :func:`.tsl_resolution`, :func:`.tsl_margin` and
+:func:`.tsl_discretization`, see :mod:`panels.multidomain.connections.tsl`.
+
+.. autofunction:: panels.multidomain.connections.tsl_resolution
+.. autofunction:: panels.multidomain.connections.tsl_margin
+.. autofunction:: panels.multidomain.connections.tsl_discretization
+
 """
 from . kCBFycte import *
 from . kCSB import *
@@ -172,5 +180,6 @@ from . kCBFxcte import *
 from . kCpd import *
 from . kCSB_dmg import *
 from . penalties import *
+from . tsl import tsl_resolution, tsl_margin, tsl_discretization
 from . import kCsdt
 from . import nullspace

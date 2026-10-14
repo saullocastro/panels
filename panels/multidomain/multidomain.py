@@ -1446,10 +1446,12 @@ class MultiDomain(object):
             displacement field.
         use_gauss_points : bool, optional
             Uses the gauss integration points (x_gauss and y_gauss) to evaluate the fields
-        nr_x_gauss, nr_y_gauss : Array
+        nr_x_gauss, nr_y_gauss : int
             Number of gauss sampling points along x and y respectively where the displacement field is to be calculated
             Either one of nr_x_gauss and nr_y_gauss needs to be specified or both
             When specified, stress_gauss_points and strain_gauss points are called instead
+            The Gauss-Legendre points come from :func:`scipy.special.roots_legendre`,
+            without an upper limit
         eval_panel : Shell object
             Used to evaluate results for a single panel (that is passed) instead of an entire group of panels
         x_cte_force or y_cte_force : float
@@ -1466,14 +1468,6 @@ class MultiDomain(object):
         forces = ['Fxx', 'Fyy', 'Fxy']
 
         msg('Computing field variables...', level=1, silent=True)
-
-        if nr_x_gauss is not None:
-            if nr_x_gauss > 304:
-                raise ValueError('Gauss points more than 304 not coded')
-
-        if nr_y_gauss is not None:
-            if nr_y_gauss > 304:
-                raise ValueError('Gauss points more than 304 not coded')
 
         # res = dict of all keywords in that specific input dict
         # size of each variable = no_panel_in_group x grid_pts_Y x grid_pts_X
@@ -1868,12 +1862,6 @@ class MultiDomain(object):
             raise ValueError('Both x_cte_force and nr_y_gauss need to be specified')
         if y_cte_force is not None and nr_x_gauss is None:
             raise ValueError('Both y_cte_force and nr_x_gauss need to be specified')
-        if nr_x_gauss is not None:
-            if nr_x_gauss > 304:
-                raise ValueError('Gauss points should be <= 304 points')
-        if nr_y_gauss is not None:
-            if nr_y_gauss > 304:
-                raise ValueError('Gauss points should be <= 304 points')
 
         # Stress field for a single panel of interest
         res_stress = self.stress(c=c, group=group, eval_panel=eval_panel,
@@ -2239,7 +2227,12 @@ class MultiDomain(object):
               products, see :meth:`._kC_TSL`, or, with the key
               ``use_kernels=True``, by the slower kernels of
               :mod:`panels.multidomain.connections.kCSB_dmg`, which give the
-              same matrix. See :ref:`cohesive_zone`
+              same matrix. ``nr_x_gauss`` and ``nr_y_gauss`` are the numbers
+              of Gauss-Legendre points of the interface, computed by
+              :func:`scipy.special.roots_legendre` without an upper limit;
+              the terms and points along `x` that resolve the cohesive zone
+              are given by :func:`.tsl_discretization`. See
+              :ref:`cohesive_zone`
 
             The panels of ``'SB'`` and ``'SB_TSL'`` must have the same
             dimensions `a`, `b`, otherwise a ``ValueError`` is raised: the
@@ -2844,8 +2837,15 @@ class MultiDomain(object):
         `\Delta_o = \tau_o/k_o` and `\Delta_f = 2 G_{Ic}/\tau_o`. The
         stiffness of the interface is `k^w_{CZ} = k_o (1 - d)`, the same for
         the three components of the traction, see :ref:`cohesive_zone`. It is
-        also used for negative separations, the interpenetration stiffness
-        of :func:`.calc_kw_tsl` is not used.
+        also used for negative separations: there is no additional stiffness
+        against interpenetration.
+
+        The first time a point is damaged, the discretisation of ``pA`` along
+        `x` is checked against the rules of
+        :mod:`panels.multidomain.connections.tsl`, and a warning is printed
+        when ``pA.m < 1.2*lam*pA.a`` or ``nr_x_gauss < 7*pA.a/lcz``, with
+        ``lam, lcz`` of :func:`.tsl_resolution`. The check is done once per
+        ``pA`` and ``nr_x_gauss``.
 
         Input:
             prev_max_dmg_index = Max damage index per integration point for
@@ -2875,6 +2875,8 @@ class MultiDomain(object):
         # Calculating dmg index corr to current separation
         _, dmg_index_curr = connections.calc_kw_tsl(pA=pA, pB=pB, tsl_type=tsl_type, k_i=k_i,
                                                     del_d=corrected_del_d, tau_o=tau_o, G1c=G1c)
+        if np.any(dmg_index_curr > 0):
+            self._check_tsl_resolution(pA, nr_x_gauss, k_i, tau_o, G1c)
 
         # Considering max dmg_index per intgn point for all displ steps
         # prev_max_dmg_index is already the max over all disp steps at each integration point
@@ -2887,6 +2889,31 @@ class MultiDomain(object):
         kw_tsl = self.calc_damaged_stiffness(dmg_index=max_dmg_index, k_i=k_i)
 
         return kw_tsl, max_dmg_index, corrected_del_d, dmg_index_curr
+
+
+    def _check_tsl_resolution(self, pA, nr_x_gauss, k_o, tau_o, G1c):
+        r"""Warns once if the cohesive domain ``pA`` is under-resolved along `x`
+
+        See :meth:`.calc_k_dmg` and :mod:`panels.multidomain.connections.tsl`.
+        """
+        checked = self.__dict__.setdefault('_tsl_resolution_checked', set())
+        key = (id(pA), nr_x_gauss)
+        if key in checked:
+            return
+        checked.add(key)
+        lam, lcz = connections.tsl_resolution(pA, k_o, tau_o, G1c)
+        terms = pA.m/(lam*pA.a)
+        points = nr_x_gauss*lcz/pA.a
+        if terms < 1.2:
+            warn(f'SB_TSL: {pA.m} terms along x over {pA.a:g} give {terms:.2f} '
+                 f'terms per decay length 1/lambda = {1/lam:.3g}, below 1.2; '
+                 f'recommended m = 1.5*lambda*a = {1.5*lam*pA.a:.1f}, see '
+                 'panels.multidomain.connections.tsl_discretization')
+        if points < 7:
+            warn(f'SB_TSL: {nr_x_gauss} Gauss points along x over {pA.a:g} give '
+                 f'{points:.2f} points per cohesive zone length l_cz = {lcz:.3g}, '
+                 f'below 7; recommended nx = 10*a/l_cz = {10*pA.a/lcz:.0f}, see '
+                 'panels.multidomain.connections.tsl_discretization')
 
 
     @staticmethod
