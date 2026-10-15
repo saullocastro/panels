@@ -705,8 +705,9 @@ and the driver described in :ref:`cohesive_zone_solution`. The cohesive
 domain is `L_{tsl} = 24` mm long, of the 52 mm ligament, and the opening goes
 up to `\delta = 8` mm in 38 increments: 23 equal increments up to 5 mm and
 increments of 0.2 mm after it. The opening ahead of the process zone decays
-with the rate `\lambda = (k_o/4D_{11})^{1/4}`, 0.70 mm⁻¹ in case A and 0.83
-mm⁻¹ in case B, and the cohesive zone length estimated with Rice's model,
+with the rate `\lambda = (k_o/2D_{11})^{1/4}` of two arms connected by an
+elastic foundation of stiffness `k_o`, the opening being `w^t - w^b`, 0.83
+mm⁻¹ in case A and 0.99 mm⁻¹ in case B, and the cohesive zone length estimated with Rice's model,
 `l_{cz} = 0.88\,E_2 G_{Ic}/\tau_o^2` (Turon et al. 2007
 [turon2007MeshSize]_), is 1.43 mm in both cases.
 
@@ -1397,8 +1398,8 @@ alone.
 The results show that:
 
 - **The Ritz basis of the cohesive domain sets the shape of the response after
-  the peak.** The cohesive domain spans `\lambda L_{tsl} = 16.8` (A) and 20.0
-  (B) decay lengths. With `m_{tsl} = 10`, 0.6 and 0.5 terms per decay length,
+  the peak.** The cohesive domain spans `\lambda L_{tsl} = 20.0` (A) and 23.8
+  (B) decay lengths. With `m_{tsl} = 10`, 0.50 and 0.42 terms per decay length,
   the basis cannot follow the process zone: the load overshoots the converged
   curve up to 168.2--169.4 N at `\delta = 6.2`--6.4 mm, 1.3--2.0% above the
   converged peak, and then drops by up to 14 N (A) and 19 N (B) in one
@@ -1409,11 +1410,11 @@ The results show that:
   `m_{tsl} = 20` the error is at most 0.21% for `n_x \geq 120`, and 25 and 30
   terms give the same loads to 0.02% with `n_x = 180`. Against the terms per
   decay length, `m_{tsl}/(\lambda L_{tsl})`, the errors of both cases fall on
-  one curve: about 1% at 0.75--0.9, at most 0.14% from 1.0 and below 0.1%
-  from 1.2, with `n_x = 180`. The rule `m_{tsl} = 1.5\,\lambda L_{tsl}` keeps
+  one curve: about 1% at 0.63--0.75, at most 0.14% from 0.84 and below 0.1%
+  from 1.0, with `n_x = 180`. The rule `m_{tsl} = 1.25\,\lambda L_{tsl}` keeps
   a margin over this threshold; with at most 25 terms it limits the cohesive
-  domain of case A to `25/(1.5\lambda) = 23.8` mm. The Bardell functions go
-  up to 30 terms, so a cohesive domain longer than `30/(1.2\lambda)` is not
+  domain of case A to `25/(1.25\lambda) = 24.0` mm. The Bardell functions go
+  up to 30 terms, so a cohesive domain longer than `30/(1.0\lambda)` is not
   resolved.
 - **The Gauss points along** `x` **set the robustness and a floor of the
   error.** `n_x = 60`, 120 and 180 over 24 mm correspond to 3.6, 7.1 and 10.7
@@ -1439,7 +1440,7 @@ The results show that:
 - **The length of the cohesive domain is detected by** `e_{eq}`, **not by the
   load.** At the last opening the crack has grown by 9.8 mm, and the margin
   `2\pi/\lambda + 3 l_{cz}` for the process zone and the compressive lobe
-  ahead of it is 13.2 mm (A) and 11.8 mm (B), so `L_{tsl} = 24` mm contains
+  ahead of it is 11.8 mm (A) and 10.6 mm (B), so `L_{tsl} = 24` mm contains
   both up to `\delta = 8` mm and `e_{eq}` stays below 0.09% (A) and 0.004%
   (B), the larger value of case A coming from its longer decay length. With
   `L_{tsl} = 17` mm the loads are within 0.06--0.25% of the converged ones,
@@ -1464,7 +1465,7 @@ mm, `m_{tsl} = 25`, `n_x = 180`, `n_{tsl} = 10`, `n_y = 30`, with `8 \times
 .. math::
     :label: cz-rules
 
-    m_{tsl} = 1.5\,\lambda L_{tsl}, \qquad
+    m_{tsl} = 1.25\,\lambda L_{tsl}, \qquad
     n_x = 10\,\frac{L_{tsl}}{l_{cz}}, \qquad
     L_{tsl} \geq \Delta a + \frac{2\pi}{\lambda} + 3 l_{cz}
 
@@ -1473,18 +1474,21 @@ with `\Delta a` the crack growth up to the last opening, `m_{tsl} \leq 25`,
 30` and `m = n = 8` in the other domains. They are implemented in
 :func:`.tsl_resolution`, :func:`.tsl_margin` and :func:`.tsl_discretization`,
 and :meth:`.MultiDomain.calc_k_dmg` prints a warning, the first time a point
-is damaged, when `m_{tsl} < 1.2\,\lambda L_{tsl}` or `n_x < 7\,L_{tsl}/l_{cz}`.
+is damaged, when `m_{tsl} < 1.0\,\lambda L_{tsl}` or `n_x < 7\,L_{tsl}/l_{cz}`.
+Before version 0.13.11 the rate was `(k_o/4D_{11})^{1/4}`, that of one arm on
+a rigid foundation, `2^{-1/4}` times the rate of the symmetric DCB, and the
+factors of the rules were 1.5 and 1.2 instead of 1.25 and 1.0.
 The Gauss-Legendre points and weights are computed by
 :func:`scipy.special.roots_legendre`, without an upper limit for `n_x`.
 
 **Discretisation of the validation runs.** The validation runs below use the
 rules of Eq. :eq:`cz-rules` with 25 terms and the corresponding `L_{tsl} =
-25/(1.5\lambda)`, and the range of openings is limited such that the crack
+25/(1.25\lambda)`, and the range of openings is limited such that the crack
 growth plus the margin fits in `L_{tsl}`. The low-strength case of Alfano and
 Crisfield needs a cohesive domain over the whole bonded length, `L_{tsl} = 70`
 mm, for which the first rule asks for 94 terms with `k_o = 10^5` N/mm³, more
 than the 30 Bardell functions. It is therefore run with `k_o = 10^3` N/mm³,
-for which `m_{tsl} = 30 = 1.5\,\lambda L_{tsl}` and `n_x = 4 m_{tsl} = 120`
+for which `m_{tsl} = 30 = 1.27\,\lambda L_{tsl}` and `n_x = 4 m_{tsl} = 120`
 meet both rules. The damage onset, `\Delta_o = \tau_o/k_o = 1.7 \times
 10^{-3}` mm, remains far below the separation at failure, `\Delta_f =
 2G_{Ic}/\tau_o = 0.33` mm, so the softening branch that governs this case is
@@ -1534,7 +1538,7 @@ represented by starting the integration points outside the bonded strip fully
 damaged. The solution procedure is the one described in
 :ref:`cohesive_zone_solution`. The discretisation follows the rules of
 Eq. :eq:`cz-rules` (``dcb_utils.discretize``): `m_{tsl} = \lceil
-1.5\,\lambda L_{tsl} \rceil` with at most 25 terms, and `n_x =
+1.25\,\lambda L_{tsl} \rceil` with at most 25 terms, and `n_x =
 10\,L_{tsl}/l_{cz}`, but not less than `4\,m_{tsl}` to integrate the
 products of the approximation functions, rounded up to a multiple of 10, and
 `L_{tsl}` covers the crack growth plus a margin of `2\pi/\lambda + 3\,l_{cz}`

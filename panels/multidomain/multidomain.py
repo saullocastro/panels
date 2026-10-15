@@ -2922,8 +2922,8 @@ class MultiDomain(object):
         The first time a point is damaged, the discretisation of ``pA`` along
         `x` is checked against the rules of
         :mod:`panels.multidomain.connections.tsl`, and a warning is printed
-        when ``pA.m < 1.2*lam*pA.a`` or ``nr_x_gauss < 7*pA.a/lcz``, with
-        ``lam, lcz`` of :func:`.tsl_resolution`. The check is done once per
+        when ``pA.m < 1.0*lam*pA.a`` or ``nr_x_gauss < 7*pA.a/lcz``, with
+        ``lam, lcz`` of :func:`.tsl_resolution` for ``pA`` and ``pB``. The check is done once per
         ``pA`` and ``nr_x_gauss``.
 
         Input:
@@ -2955,7 +2955,7 @@ class MultiDomain(object):
         _, dmg_index_curr = connections.calc_kw_tsl(pA=pA, pB=pB, tsl_type=tsl_type, k_i=k_i,
                                                     del_d=corrected_del_d, tau_o=tau_o, G1c=G1c)
         if np.any(dmg_index_curr > 0):
-            self._check_tsl_resolution(pA, nr_x_gauss, k_i, tau_o, G1c)
+            self._check_tsl_resolution(pA, nr_x_gauss, k_i, tau_o, G1c, pB=pB)
 
         # Considering max dmg_index per intgn point for all displ steps
         # prev_max_dmg_index is already the max over all disp steps at each integration point
@@ -2970,7 +2970,7 @@ class MultiDomain(object):
         return kw_tsl, max_dmg_index, corrected_del_d, dmg_index_curr
 
 
-    def _check_tsl_resolution(self, pA, nr_x_gauss, k_o, tau_o, G1c):
+    def _check_tsl_resolution(self, pA, nr_x_gauss, k_o, tau_o, G1c, pB=None):
         r"""Warns once if the cohesive domain ``pA`` is under-resolved along `x`
 
         See :meth:`.calc_k_dmg` and :mod:`panels.multidomain.connections.tsl`.
@@ -2980,13 +2980,13 @@ class MultiDomain(object):
         if key in checked:
             return
         checked.add(key)
-        lam, lcz = connections.tsl_resolution(pA, k_o, tau_o, G1c)
+        lam, lcz = connections.tsl_resolution(pA, k_o, tau_o, G1c, p2=pB)
         terms = pA.m/(lam*pA.a)
         points = nr_x_gauss*lcz/pA.a
-        if terms < 1.2:
+        if terms < 1.0:
             warn(f'SB_TSL: {pA.m} terms along x over {pA.a:g} give {terms:.2f} '
-                 f'terms per decay length 1/lambda = {1/lam:.3g}, below 1.2; '
-                 f'recommended m = 1.5*lambda*a = {1.5*lam*pA.a:.1f}, see '
+                 f'terms per decay length 1/lambda = {1/lam:.3g}, below 1.0; '
+                 f'recommended m = 1.25*lambda*a = {1.25*lam*pA.a:.1f}, see '
                  'panels.multidomain.connections.tsl_discretization')
         if points < 7:
             warn(f'SB_TSL: {nr_x_gauss} Gauss points along x over {pA.a:g} give '

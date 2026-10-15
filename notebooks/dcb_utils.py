@@ -677,20 +677,21 @@ def markdown_table(rows, ref=None, delta_ref=None, first_peak=False):
     return '\n'.join(lines)
 
 
-def resolution(case, terms_per_decay=1.5, points_per_lcz=10., m_max=25):
+def resolution(case, terms_per_decay=1.25, points_per_lcz=10., m_max=25):
     r"""Decay rate, cohesive zone length and longest resolved cohesive domain
 
     The Ritz basis must resolve the decay of the opening ahead of the
-    process zone, beam on elastic foundation with `\lambda = (k_o/(4
-    D_{11}))^{1/4}`, and the Gauss points must sample the cohesive zone, of
-    length `l_{cz} = 0.88 E_2 G_{Ic}/\tau_o^2` (Rice's estimate, Turon et
-    al. 2007), see :func:`panels.multidomain.connections.tsl_resolution`.
-    In the convergence study of the reference DCB (Tijs et al. 2022, `L =
-    100` mm, `a_0 = 48` mm, cohesive domain of `L_{tsl} = 24` mm), the
-    loads are within 0.1% of the converged ones from ``m_tsl = 1.2 \lambda
-    L_tsl``, and within 0.02% with 10 Gauss points per `l_{cz}`, ``nx = 10
+    process zone, two arms connected by an elastic foundation with `\lambda
+    = (k_o/(2 D_{11}))^{1/4}`, and the Gauss points must sample the cohesive
+    zone, of length `l_{cz} = 0.88 E_2 G_{Ic}/\tau_o^2` (Rice's estimate,
+    Turon et al. 2007), see
+    :func:`panels.multidomain.connections.tsl_resolution`. In the
+    convergence study of the reference DCB (Tijs et al. 2022, `L = 100` mm,
+    `a_0 = 48` mm, cohesive domain of `L_{tsl} = 24` mm), the loads are
+    within 0.1% of the converged ones from ``m_tsl = 1.0 \lambda L_tsl``,
+    and within 0.02% with 10 Gauss points per `l_{cz}`, ``nx = 10
     L_tsl/l_cz``. The rules of :func:`discretize` keep a margin on the
-    terms, ``m_tsl = 1.5 \lambda L_tsl``.
+    terms, ``m_tsl = 1.25 \lambda L_tsl``.
 
     Returns
     -------
@@ -709,13 +710,13 @@ def margin(lam, lcz):
     return tsl_margin(lam, lcz)
 
 
-def discretize(case, L_tsl, terms_per_decay=1.5, points_per_lcz=10., m_max=25):
+def discretize(case, L_tsl, terms_per_decay=1.25, points_per_lcz=10., m_max=25):
     r"""Sets ``L_tsl``, ``m_tsl`` and ``nx`` of ``case`` from :func:`resolution`
 
     With `\lambda` and `l_{cz}` of :func:`resolution`, see
     :func:`panels.multidomain.connections.tsl_discretization`:
 
-    - `m_{tsl} = \lceil 1.5\,\lambda L_{tsl} \rceil`, at most ``m_max`` = 25
+    - `m_{tsl} = \lceil 1.25\,\lambda L_{tsl} \rceil`, at most ``m_max`` = 25
       terms;
     - `n_x = 10\,L_{tsl}/l_{cz}`, but not less than `4\,m_{tsl}` to
       integrate the products of the approximation functions, rounded up to a

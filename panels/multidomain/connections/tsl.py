@@ -2,14 +2,19 @@ r"""Discretisation of a cohesive domain (``'SB_TSL'`` connection)
 
 The rules below come from the convergence study of the cohesive zone on a
 mode I double cantilever beam (DCB), see :ref:`cohesive_zone`. The opening
-ahead of the process zone decays as that of a beam on an elastic foundation,
-with the rate
+ahead of the process zone decays as that of two beams connected by an elastic
+foundation of stiffness `k_o`: with the opening `\Delta = w_1 - w_2` and the
+bending stiffnesses `D_{11}^{(1)}`, `D_{11}^{(2)}` of the two panels,
+`\Delta_{,xxxx} + 4 \lambda^4 \Delta = 0` with the rate
 
 .. math::
 
-    \lambda = \left( \frac{k_o}{4 D_{11}} \right)^{1/4}
+    \lambda = \left[ \frac{k_o}{4} \left( \frac{1}{D_{11}^{(1)}} +
+    \frac{1}{D_{11}^{(2)}} \right) \right]^{1/4}
 
-and the cohesive zone has the length, Rice's estimate as used by Turon et
+which is `\lambda = (k_o/2 D_{11})^{1/4}` for the symmetric DCB and tends to
+`(k_o/4 D_{11}^{(1)})^{1/4}` when the second panel is much stiffer than the
+first. The cohesive zone has the length, Rice's estimate as used by Turon et
 al. (2007):
 
 .. math::
@@ -19,11 +24,15 @@ al. (2007):
 The Ritz basis along `x` of the cohesive domain must resolve the decay, and
 the Gauss-Legendre points along `x` must sample the cohesive zone. With `m`
 terms and `n_x` points over a cohesive domain of length `L_{tsl}`, the loads
-of the DCB are converged to 0.1% from `m = 1.2 \lambda L_{tsl}`, and to
+of the DCB are converged to 0.1% from `m = 1.0 \lambda L_{tsl}`, and to
 0.02% with `n_x = 10 L_{tsl}/l_{cz}`; with `n_x = 7 L_{tsl}/l_{cz}` the error
 is 0.1-0.2%, and with fewer points the error has a floor of about 0.6-0.9%
 and the solution needs bisections. The recommended values are
-`m = 1.5 \lambda L_{tsl}` and `n_x = 10 L_{tsl}/l_{cz}`.
+`m = 1.25 \lambda L_{tsl}` and `n_x = 10 L_{tsl}/l_{cz}`.
+
+Before version 0.13.11 the rate was `(k_o/4 D_{11})^{1/4}`, that of one beam
+on a rigid foundation, `2^{-1/4}` times the rate of the symmetric DCB, and
+the factors of the rules were 1.2 and 1.5 instead of 1.0 and 1.25.
 
 """
 import numpy as np
@@ -31,7 +40,7 @@ import numpy as np
 from .penalties import build_panel_lam
 
 
-def tsl_resolution(p1, k_o, tau_o, G1c, E2=None):
+def tsl_resolution(p1, k_o, tau_o, G1c, E2=None, p2=None):
     r"""Decay rate of the opening and length of the cohesive zone
 
     Parameters
@@ -49,6 +58,10 @@ def tsl_resolution(p1, k_o, tau_o, G1c, E2=None):
     E2 : float, optional
         Transverse modulus used in `l_{cz}`. By default the second value of
         the first lamina of ``p1.laminaprops``.
+    p2 : :class:`.Shell`, optional
+        Panel ``p2`` of the connection, whose `D_{11}` is used in the same
+        way. By default that of ``p1``, the symmetric DCB, `\lambda =
+        (k_o/2 D_{11})^{1/4}`.
 
     Returns
     -------
@@ -57,10 +70,15 @@ def tsl_resolution(p1, k_o, tau_o, G1c, E2=None):
 
     """
     build_panel_lam(p1)
-    D11 = p1.lam.D[0, 0]
+    D11_1 = p1.lam.D[0, 0]
+    if p2 is None:
+        D11_2 = D11_1
+    else:
+        build_panel_lam(p2)
+        D11_2 = p2.lam.D[0, 0]
     if E2 is None:
         E2 = p1.laminaprops[0][1]
-    lam = (k_o/(4*D11))**0.25
+    lam = (k_o*(1/D11_1 + 1/D11_2)/4)**0.25
     lcz = 0.88*E2*G1c/tau_o**2
     return lam, lcz
 
@@ -77,7 +95,7 @@ def tsl_margin(lam, lcz):
     return 2*np.pi/lam + 3*lcz
 
 
-def tsl_discretization(lam, lcz, L_tsl, terms_per_decay=1.5, points_per_lcz=10.,
+def tsl_discretization(lam, lcz, L_tsl, terms_per_decay=1.25, points_per_lcz=10.,
                        m_max=25):
     r"""Terms and Gauss points along `x` of a cohesive domain
 
@@ -90,7 +108,7 @@ def tsl_discretization(lam, lcz, L_tsl, terms_per_decay=1.5, points_per_lcz=10.,
     The Gauss-Legendre points and weights are computed by
     :func:`scipy.special.roots_legendre`, without an upper limit for `n_x`.
     The Bardell functions go up to 30 terms, so a cohesive domain longer than
-    `30/(1.2 \lambda)` is not resolved.
+    `30/(1.0 \lambda)` is not resolved.
 
     Parameters
     ----------
