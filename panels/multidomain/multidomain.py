@@ -2667,7 +2667,7 @@ class MultiDomain(object):
         return kM
 
 
-    def calc_kT(self, c=None, silent=True, finalize=True, inc=None, kw_tsl=None, kC_conn=None):
+    def calc_kT(self, c=None, silent=True, finalize=True, inc=None, kC_conn=None):
         r"""Tangent stiffness matrix of the assembly
 
         The exact Jacobian of :meth:`.MultiDomain.calc_fint`:
@@ -2700,12 +2700,11 @@ class MultiDomain(object):
             the follower pressure loads.
         inc : float or None, optional
             Load factor of the follower pressure loads, ``None`` for ``1.``.
-        kw_tsl : np.ndarray or None, optional
-            Not used: the stiffness of a damaged cohesive connection enters
-            through ``kC_conn``, see :meth:`.get_kC_conn`.
         kC_conn : sparse matrix or None, optional
             The matrix of the connections, by default
-            :meth:`.get_kC_conn` at ``c``.
+            :meth:`.get_kC_conn` at ``c``. The stiffness of a damaged
+            cohesive connection, ``'SB_TSL'``, is part of it, see
+            :meth:`.get_kC_conn`.
 
         Returns
         -------

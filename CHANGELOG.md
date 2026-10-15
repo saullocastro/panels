@@ -88,8 +88,10 @@
   verification. Each equation names the function or kernel that evaluates
   it, checked against the current code, and the equations it needed from
   outside are written out. The `.tex` is removed and `*.tex` ignored.
-- New docstrings of `MultiDomain.calc_kT` and `MultiDomain.calc_fint`; the
-  argument `kw_tsl` of `MultiDomain.calc_kT` is documented as not used.
+- New docstrings of `MultiDomain.calc_kT` and `MultiDomain.calc_fint`.
+- `MultiDomain.calc_kT` no longer has the argument `kw_tsl`, which was not
+  used: the stiffness of a damaged cohesive connection is part of the
+  matrix of the connections, `kC_conn`.
 
 ### New: product of the tangent stiffness matrix by a vector, without assembly
 
