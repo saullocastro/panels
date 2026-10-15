@@ -1526,7 +1526,7 @@ again with more Gauss points).
 
 The case of Camanho et al. (2003) is kept for reference, but it is not used
 to validate the model: the FE and experimental load-opening curves of the
-reference are 12--21% more compliant than the corrected beam theory, more
+reference are 12--21% less stiff than the corrected beam theory, more
 than transverse shear and root rotation explain, and the reference does not
 give enough detail to find out why; the experimental peak, 147.1 N, is 6%
 above the corrected beam theory with the same `G_{Ic}`; and the FE model has
@@ -1579,8 +1579,8 @@ length of the welded specimens of Tijs (2023).
                 table of the reference; `^{d}`: digitised; `^{m}`: mean of
                 digitised tests; `^{b}`: not an FE curve but the VCCT
                 benchmark of Krueger (2008), the onset of delamination at
-                mid-width, 2.6% (UD) and 12.0% (D±30) below the load at which
-                the width-average energy release rate reaches `G_{Ic}`. The
+                mid-width; the load at which the width-average energy release
+                rate reaches `G_{Ic}` is 2.6% (UD) and 12.3% (D±30) above it. The
                 two Krueger cases are listed with `\tau_o` = 40 MPa, the
                 reference giving no strength; with 60 MPa the peaks are 64.2
                 and 110.0 N. `^{k}`: `k_o = 10^3` N/mm³, see the convergence
