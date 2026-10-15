@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Product of the tangent stiffness matrix by a vector &#8212; panels 0.13.2 documentation</title>
+    <title>Tangent stiffness matrix and its product by a vector &#8212; panels 0.13.9 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
 
-    <script src="_static/documentation_options.js?v=8399f5db"></script>
+    <script src="_static/documentation_options.js?v=97f24cbe"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
@@ -50,7 +50,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.13.2" />
+  <meta name="docsearch:version" content="0.13.9" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -118,7 +118,7 @@
   
   
   
-    <p class="title logo__title">panels 0.13.2 documentation</p>
+    <p class="title logo__title">panels 0.13.9 documentation</p>
   
 </a></div>
     
@@ -232,7 +232,7 @@
 
 <li class=" current active">
   <a class="nav-link dropdown-item nav-internal" href="#" aria-current="page">
-    Product of the tangent stiffness matrix by a vector
+    Tangent stiffness matrix and its product by a vector
   </a>
 </li>
 
@@ -433,7 +433,7 @@
 
 <li class="nav-item current active">
   <a class="nav-link nav-internal" href="#" aria-current="page">
-    Product of the tangent stiffness matrix by a vector
+    Tangent stiffness matrix and its product by a vector
   </a>
 </li>
 
@@ -539,7 +539,7 @@
         <i class="fa-solid fa-home"></i>
       </a>
     </li>
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Product of the tangent stiffness matrix by a vector</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Tangent stiffness matrix and its product by a vector</span></li>
   </ul>
 </nav>
 </div>
@@ -556,8 +556,1033 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="product-of-the-tangent-stiffness-matrix-by-a-vector">
-<span id="tangent-product"></span><h1>Product of the tangent stiffness matrix by a vector<a class="headerlink" href="#product-of-the-tangent-stiffness-matrix-by-a-vector" title="Link to this heading">#</a></h1>
+  <section id="tangent-stiffness-matrix-and-its-product-by-a-vector">
+<span id="tangent-product"></span><h1>Tangent stiffness matrix and its product by a vector<a class="headerlink" href="#tangent-stiffness-matrix-and-its-product-by-a-vector" title="Link to this heading">#</a></h1>
+<p>This page documents how the internal force vector and its exact Jacobian,
+the tangent stiffness matrix, are implemented:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#tangent-clpt-donnell"><span class="std std-ref">Tangent stiffness of the CLPT models with Donnell kinematics</span></a> derives <span class="math notranslate nohighlight">\(\{F_{int}\}\)</span> and <span class="math notranslate nohighlight">\([K_T]\)</span> of the
+models <code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell</span></code> and <code class="docutils literal notranslate"><span class="pre">cylshell_clpt_donnell</span></code> and relates
+every term to the function of the implementation that evaluates it,
+including the two integration paths, the grouping of the terms between
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kC()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kG()</span></code>, and the multi-domain
+assembly;</p></li>
+<li><p><a class="reference internal" href="#tangent-ktv"><span class="std std-ref">Product of the tangent stiffness matrix by a vector</span></a> derives the product <span class="math notranslate nohighlight">\([K_T(c)] \{v\}\)</span> for all the
+geometrically non-linear models, <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kTv()</span></code>, evaluated without
+assembling <span class="math notranslate nohighlight">\([K_T]\)</span>.</p></li>
+</ul>
+<section id="tangent-stiffness-of-the-clpt-models-with-donnell-kinematics">
+<span id="tangent-clpt-donnell"></span><h2>Tangent stiffness of the CLPT models with Donnell kinematics<a class="headerlink" href="#tangent-stiffness-of-the-clpt-models-with-donnell-kinematics" title="Link to this heading">#</a></h2>
+<p>This section documents the internal force vector and the tangent stiffness
+matrix as they are implemented in the models <code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell</span></code> and
+<code class="docutils literal notranslate"><span class="pre">cylshell_clpt_donnell</span></code>, both based on the classical laminated plate
+theory (CLPT) with the Donnell-Mushtari-Vlasov (von Kármán) kinematics.
+Each equation is related to the function of the implementation that
+evaluates it, such that the reader can move between the equations and the
+code in both directions. The objective is to show that each term of the
+tangent stiffness matrix follows from the exact derivative of the internal
+force vector,</p>
+<div class="math notranslate nohighlight" id="equation-donnell-kt-definition">
+<span class="eqno">(1)<a class="headerlink" href="#equation-donnell-kt-definition" title="Link to this equation">#</a></span>\[\boldsymbol{K}_T(\bar{\boldsymbol{c}}) = \frac{\partial
+\boldsymbol{F}_{int}}{\partial \bar{\boldsymbol{c}}}\]</div>
+<p>which is what delivers the quadratic convergence of the Newton-Raphson
+iterations <span class="math notranslate nohighlight">\(\boldsymbol{K}_T(\bar{\boldsymbol{c}}_k) \Delta
+\bar{\boldsymbol{c}} = \boldsymbol{F}_{ext} -
+\boldsymbol{F}_{int}(\bar{\boldsymbol{c}}_k)\)</span>, see
+<a class="reference internal" href="ex_newton_raphson.html"><span class="doc">Non-linear static analysis with the Newton-Raphson method</span></a>. In the notation of
+<a class="reference internal" href="#tangent-ktv"><span class="std std-ref">Product of the tangent stiffness matrix by a vector</span></a>, <span class="math notranslate nohighlight">\([B(\beta)] = \boldsymbol{B}_L +
+\boldsymbol{B}_{NL}\)</span>, <span class="math notranslate nohighlight">\([G] = \boldsymbol{G}\)</span> and <span class="math notranslate nohighlight">\([F] = \boldsymbol{C}\)</span>.</p>
+<p>The tangent stiffness matrix is classically decomposed as</p>
+<div class="math notranslate nohighlight" id="equation-donnell-kt-classical">
+<span class="eqno">(2)<a class="headerlink" href="#equation-donnell-kt-classical" title="Link to this equation">#</a></span>\[\boldsymbol{K}_T = \boldsymbol{K}_0 + \boldsymbol{K}_{0L} +
+\boldsymbol{K}_{L0} + \boldsymbol{K}_{LL} + \boldsymbol{K}_G(\boldsymbol{N})\]</div>
+<p>with the constitutive matrices <span class="math notranslate nohighlight">\(\boldsymbol{K}_0\)</span> to <span class="math notranslate nohighlight">\(\boldsymbol{K}_{LL}\)</span>
+and the geometric stiffness <span class="math notranslate nohighlight">\(\boldsymbol{K}_G\)</span> of the membrane stress
+<span class="math notranslate nohighlight">\(\boldsymbol{N}\)</span>, see <a class="reference internal" href="#equation-donnell-k-groups">(16)</a> and <a class="reference internal" href="#equation-donnell-kg">(14)</a>. The
+implementation is organised around a three-way split:</p>
+<div class="math notranslate nohighlight" id="equation-donnell-kt-split">
+<span class="eqno">(3)<a class="headerlink" href="#equation-donnell-kt-split" title="Link to this equation">#</a></span>\[\boldsymbol{K}_T(\bar{\boldsymbol{c}}) = \boldsymbol{K}_{C0} +
+\boldsymbol{K}_{CNL}(\bar{\boldsymbol{c}}) +
+\boldsymbol{K}_G(\bar{\boldsymbol{c}})\]</div>
+<p>whose relation to the grouping of the implementation, stated in a comment
+of <code class="docutils literal notranslate"><span class="pre">fkC_num</span></code> in <code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell_num.pyx</span></code> and in its cylindrical
+twin, is established in <a class="reference internal" href="#tangent-clpt-donnell-grouping"><span class="std std-ref">Which stress enters the geometric stiffness, and the degree of homogeneity</span></a> and tabulated
+in <a class="reference internal" href="#tangent-clpt-donnell-mapping"><span class="std std-ref">Symbols and implementation variables</span></a>. The correspondence is not a
+renaming only: the boundary between the constitutive and the geometric
+contributions of <a class="reference internal" href="#equation-donnell-kt-split">(3)</a> sits at a different place from the
+one of <a class="reference internal" href="#equation-donnell-kt-classical">(2)</a>, and
+<a class="reference internal" href="#tangent-clpt-donnell-discrepancies"><span class="std std-ref">Where the naming and the code do not line up</span></a> says exactly where.</p>
+<section id="the-two-implementation-paths">
+<span id="tangent-clpt-donnell-paths"></span><h3>The two implementation paths<a class="headerlink" href="#the-two-implementation-paths" title="Link to this heading">#</a></h3>
+<p>Each model contributes two modules, registered in <code class="docutils literal notranslate"><span class="pre">panels/modelDB.py</span></code>
+under the keys <code class="docutils literal notranslate"><span class="pre">matrices</span></code> and <code class="docutils literal notranslate"><span class="pre">matrices_num</span></code>:</p>
+<ul class="simple">
+<li><p>The <strong>closed-form path</strong>, <code class="docutils literal notranslate"><span class="pre">matrices</span></code>, integrates the full domain
+analytically. The integrals of products of the approximation functions
+are evaluated in closed form, and the resulting matrices are constant
+with respect to <span class="math notranslate nohighlight">\(\bar{\boldsymbol{c}}\)</span>. It provides <code class="docutils literal notranslate"><span class="pre">fk0</span></code> and
+<code class="docutils literal notranslate"><span class="pre">fkG0</span></code> of <code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell.pyx</span></code> and <code class="docutils literal notranslate"><span class="pre">cylshell_clpt_donnell.pyx</span></code>.</p></li>
+<li><p>The <strong>numerically integrated path</strong>, <code class="docutils literal notranslate"><span class="pre">matrices_num</span></code>, applies a
+Gauss-Legendre rule over <span class="math notranslate nohighlight">\(n_x \times n_y\)</span> points, and is the only path
+that can honour a displacement state <span class="math notranslate nohighlight">\(\bar{\boldsymbol{c}}\)</span>, a laminate
+stiffness varying over the domain, or a partial integration domain. It
+provides <code class="docutils literal notranslate"><span class="pre">fkC_num</span></code>, <code class="docutils literal notranslate"><span class="pre">fkG_num</span></code> and <code class="docutils literal notranslate"><span class="pre">calc_fint</span></code> of
+<code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell_num.pyx</span></code> and <code class="docutils literal notranslate"><span class="pre">cylshell_clpt_donnell_num.pyx</span></code>.</p></li>
+</ul>
+<p>The selection is made in <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kC()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kG()</span></code>
+by two flags, <code class="docutils literal notranslate"><span class="pre">analytical_kC</span></code> and <code class="docutils literal notranslate"><span class="pre">analytical_kG</span></code>, initialised to
+<code class="docutils literal notranslate"><span class="pre">True</span></code> and cleared by the conditions of the following table.</p>
+<div class="pst-scrollable-table-container"><table class="table" id="id2">
+<caption><span class="caption-text">Conditions that force the numerically integrated path</span><a class="headerlink" href="#id2" title="Link to this table">#</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>Condition</p></th>
+<th class="head"><p>Affects</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.is_partial_domain()</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">kC</span></code> and <code class="docutils literal notranslate"><span class="pre">kG</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">c</span></code> is given</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">kC</span></code> and <code class="docutils literal notranslate"><span class="pre">kG</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>the argument <code class="docutils literal notranslate"><span class="pre">ABDnxny</span></code> is given, or the attribute
+<code class="docutils literal notranslate"><span class="pre">Shell.ABDnxny</span></code> is set</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">kC</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">NLgeom=True</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">kC</span></code> and <code class="docutils literal notranslate"><span class="pre">kG</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">c_cte</span></code> is given</p></td>
+<td><p>the <code class="docutils literal notranslate"><span class="pre">kG</span></code> block inside <code class="docutils literal notranslate"><span class="pre">kC</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.is_partial_domain()</span></code> reports whether the integration limits
+<code class="docutils literal notranslate"><span class="pre">x1,</span> <span class="pre">x2,</span> <span class="pre">y1,</span> <span class="pre">y2</span></code> differ from the edges of the shell, <span class="math notranslate nohighlight">\(0\)</span>, <span class="math notranslate nohighlight">\(a\)</span> and <span class="math notranslate nohighlight">\(b\)</span>,
+after <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.integration_limits()</span></code> has replaced a limit left as
+<code class="docutils literal notranslate"><span class="pre">None</span></code> by the corresponding edge and has validated <span class="math notranslate nohighlight">\(0 \le x_1 &lt; x_2 \le
+a\)</span> and <span class="math notranslate nohighlight">\(0 \le y_1 &lt; y_2 \le b\)</span>. Two consequences are worth stating
+explicitly:</p>
+<ul class="simple">
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kT()</span></code> calls both <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kC()</span></code> and
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kG()</span></code> with <code class="docutils literal notranslate"><span class="pre">NLgeom=True</span></code>. <strong>The tangent stiffness
+matrix therefore always takes the numerically integrated path</strong>, and the
+closed-form path never participates in a non-linear analysis.</p></li>
+<li><p>Conversely, the closed-form path is reached only for <span class="math notranslate nohighlight">\(\boldsymbol{K}_{C0}\)</span>
+and for <span class="math notranslate nohighlight">\(\boldsymbol{K}_G\)</span> evaluated at a uniform prescribed membrane
+stress state, i.e. for a linear static analysis and for the classical
+linear buckling problem <span class="math notranslate nohighlight">\((\boldsymbol{K}_0 + \lambda \boldsymbol{K}_G)
+\boldsymbol{q} = \boldsymbol{0}\)</span>, over a full domain with a constant
+laminate.</p></li>
+</ul>
+</section>
+<section id="approximation-functions">
+<h3>Approximation functions<a class="headerlink" href="#approximation-functions" title="Link to this heading">#</a></h3>
+<p>The three mid-surface displacements are approximated using the hierarchic
+polynomials <span class="math notranslate nohighlight">\(P_i\)</span> of Bardell, see <a class="reference internal" href="bardell.html#theory-func-bardell"><span class="std std-ref">Bardell’s Hierarchical Functions</span></a>, evaluated by
+<code class="docutils literal notranslate"><span class="pre">f</span></code>, <code class="docutils literal notranslate"><span class="pre">fp</span></code> and <code class="docutils literal notranslate"><span class="pre">fpp</span></code> of <code class="docutils literal notranslate"><span class="pre">panels/core/include/bardell_functions.hpp</span></code>,
+implemented in <code class="docutils literal notranslate"><span class="pre">panels/core/src/bardell_functions.cpp</span></code>, with the Python
+wrappers <code class="docutils literal notranslate"><span class="pre">calc_f</span></code>, <code class="docutils literal notranslate"><span class="pre">calc_fp</span></code> and <code class="docutils literal notranslate"><span class="pre">calc_fpp</span></code> of
+<code class="docutils literal notranslate"><span class="pre">panels/bardell.pyx</span></code>. Independent boundary flags are used for each
+displacement component and for each direction:</p>
+<div class="math notranslate nohighlight" id="equation-donnell-approx">
+<span class="eqno">(4)<a class="headerlink" href="#equation-donnell-approx" title="Link to this equation">#</a></span>\[\begin{split}\begin{aligned}
+    u(x,y) &amp;= \sum_{i=1}^{m} \sum_{j=1}^{n} c_{ij}^u \, P_i^u(\xi) P_j^u(\eta) \\
+    v(x,y) &amp;= \sum_{i=1}^{m} \sum_{j=1}^{n} c_{ij}^v \, P_i^v(\xi) P_j^v(\eta) \\
+    w(x,y) &amp;= \sum_{i=1}^{m} \sum_{j=1}^{n} c_{ij}^w \, P_i^w(\xi) P_j^w(\eta)
+\end{aligned}\end{split}\]</div>
+<p>where the superscript in <span class="math notranslate nohighlight">\(P_i^u(\xi)\)</span> indicates that the flags
+<span class="math notranslate nohighlight">\(\delta_{t1}\)</span>, <span class="math notranslate nohighlight">\(\delta_{r1}\)</span>, <span class="math notranslate nohighlight">\(\delta_{t2}\)</span>, <span class="math notranslate nohighlight">\(\delta_{r2}\)</span> of the first
+four terms refer to the boundary conditions of <span class="math notranslate nohighlight">\(u\)</span> at <span class="math notranslate nohighlight">\(\xi = -1\)</span> and <span class="math notranslate nohighlight">\(\xi =
++1\)</span>, and similarly for <span class="math notranslate nohighlight">\(P_j^u(\eta)\)</span>, <span class="math notranslate nohighlight">\(P_i^v(\xi)\)</span>, and so forth. Only the
+first four terms of <code class="docutils literal notranslate"><span class="pre">vec_f</span></code> in <code class="docutils literal notranslate"><span class="pre">bardell_functions.cpp</span></code> carry these
+flags; the remaining terms vanish together with their first derivative at
+both ends, which is what makes the set hierarchic. The implementation
+provides 30 terms. The natural coordinates are:</p>
+<div class="math notranslate nohighlight">
+\[\xi = \frac{2x}{a} - 1 \qquad \eta = \frac{2y}{b} - 1\]</div>
+<p>where, for the cylindrical shell, <span class="math notranslate nohighlight">\(y = r\theta\)</span> is the circumferential arc
+length and <span class="math notranslate nohighlight">\(b\)</span> the corresponding arc length of the panel. Derivatives with
+respect to the physical coordinates follow from the chain rule:</p>
+<div class="math notranslate nohighlight">
+\[\frac{\partial}{\partial x} = \frac{2}{a}\frac{\partial}{\partial \xi}
+\qquad \frac{\partial}{\partial y} = \frac{2}{b}\frac{\partial}{\partial
+\eta}\]</div>
+<p>which is the origin of every factor <code class="docutils literal notranslate"><span class="pre">(2/a)</span></code> and <code class="docutils literal notranslate"><span class="pre">(2/b)</span></code> appearing in
+the kernels, for instance in the strains of <code class="docutils literal notranslate"><span class="pre">calc_fint</span></code>. In vector
+notation:</p>
+<div class="math notranslate nohighlight">
+\[u = \boldsymbol{S}^u \bar{\boldsymbol{c}} \qquad v = \boldsymbol{S}^v
+\bar{\boldsymbol{c}} \qquad w = \boldsymbol{S}^w \bar{\boldsymbol{c}}\]</div>
+<p>with the alternated ordering of the degrees of freedom:</p>
+<div class="math notranslate nohighlight">
+\[\bar{\boldsymbol{c}} = \left\{ c_{11}^u \quad c_{11}^v \quad c_{11}^w
+\quad c_{21}^u \quad c_{21}^v \quad c_{21}^w \quad \cdots \quad
+c_{mn}^u \quad c_{mn}^v \quad c_{mn}^w \right\}^\top\]</div>
+<p>such that, using zero-based indices <span class="math notranslate nohighlight">\(i\)</span> and <span class="math notranslate nohighlight">\(j\)</span>, the coefficients
+<span class="math notranslate nohighlight">\(c_{ij}^u\)</span>, <span class="math notranslate nohighlight">\(c_{ij}^v\)</span> and <span class="math notranslate nohighlight">\(c_{ij}^w\)</span> occupy the positions <span class="math notranslate nohighlight">\(3(jm+i)\)</span>,
+<span class="math notranslate nohighlight">\(3(jm+i)+1\)</span> and <span class="math notranslate nohighlight">\(3(jm+i)+2\)</span> of <span class="math notranslate nohighlight">\(\bar{\boldsymbol{c}}\)</span>. This is the mapping
+<code class="docutils literal notranslate"><span class="pre">col</span> <span class="pre">=</span> <span class="pre">col0</span> <span class="pre">+</span> <span class="pre">DOF*(j*m</span> <span class="pre">+</span> <span class="pre">i)</span></code> with <code class="docutils literal notranslate"><span class="pre">DOF</span> <span class="pre">=</span> <span class="pre">3</span></code> of the kernels, and the
+size of <span class="math notranslate nohighlight">\(\bar{\boldsymbol{c}}\)</span> is <span class="math notranslate nohighlight">\(3mn\)</span>, see <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.get_size()</span></code>. The
+only non-zero components of <span class="math notranslate nohighlight">\(\boldsymbol{S}^u\)</span>, <span class="math notranslate nohighlight">\(\boldsymbol{S}^v\)</span> and
+<span class="math notranslate nohighlight">\(\boldsymbol{S}^w\)</span> are:</p>
+<div class="math notranslate nohighlight">
+\[S^u_{3(jm+i)} = P_i^u(\xi) P_j^u(\eta) \qquad
+S^v_{3(jm+i)+1} = P_i^v(\xi) P_j^v(\eta) \qquad
+S^w_{3(jm+i)+2} = P_i^w(\xi) P_j^w(\eta)\]</div>
+<p>and, for instance:</p>
+<div class="math notranslate nohighlight">
+\[S^w_{,x} = \frac{2}{a} P_i^{w\prime}(\xi) P_j^w(\eta) \qquad
+S^w_{,yy} = \frac{4}{b^2} P_i^w(\xi) P_j^{w\prime\prime}(\eta) \qquad
+S^w_{,xy} = \frac{4}{ab} P_i^{w\prime}(\xi) P_j^{w\prime}(\eta)\]</div>
+<p>Throughout the kernels, the pair of indices <span class="math notranslate nohighlight">\((i,j)\)</span> names the row term,
+denoted <span class="math notranslate nohighlight">\(A\)</span>, and <span class="math notranslate nohighlight">\((k,l)\)</span> names the column term, denoted <span class="math notranslate nohighlight">\(B\)</span>; the variables
+<code class="docutils literal notranslate"><span class="pre">fAw</span></code>, <code class="docutils literal notranslate"><span class="pre">gAweta</span></code>, <code class="docutils literal notranslate"><span class="pre">fBwxi</span></code> and so forth follow that convention, read
+from the tables of the approximation functions evaluated once per
+integration point, see <a class="reference internal" href="tabulation.html#tabulation"><span class="std std-ref">Approximation functions tabulated at the integration points</span></a>. Only the upper triangle is
+assembled, the lower one being recovered by <code class="docutils literal notranslate"><span class="pre">finalize_symmetric_matrix</span></code>
+of <code class="docutils literal notranslate"><span class="pre">structsolve</span></code>, called by <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kC()</span></code> and
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kG()</span></code> with <code class="docutils literal notranslate"><span class="pre">finalize=True</span></code>, which is why every kernel
+skips the entries with <code class="docutils literal notranslate"><span class="pre">row</span> <span class="pre">&gt;</span> <span class="pre">col</span></code>.</p>
+</section>
+<section id="kinematics-as-implemented">
+<span id="tangent-clpt-donnell-kinematics"></span><h3>Kinematics as implemented<a class="headerlink" href="#kinematics-as-implemented" title="Link to this heading">#</a></h3>
+<p>The Donnell kinematics of a cylindrical shell neglect the terms of the
+Sanders-Koiter kinematics that bring the in-plane displacements into the
+rotations and the curvatures, see the model <code class="docutils literal notranslate"><span class="pre">cylshell_clpt_sanders</span></code>, and
+the plate kinematics of von Kármán are recovered by making <span class="math notranslate nohighlight">\(1/r = 0\)</span>:</p>
+<div class="math notranslate nohighlight" id="equation-donnell-strains">
+<span class="eqno">(5)<a class="headerlink" href="#equation-donnell-strains" title="Link to this equation">#</a></span>\[\begin{split}\boldsymbol{\varepsilon}^{(0)} = \left\{ \begin{matrix}
+    u_{,x} + \frac{1}{2} w_{,x}^2 \\[2pt]
+    v_{,y} + \frac{w}{r} + \frac{1}{2} w_{,y}^2 \\[2pt]
+    u_{,y} + v_{,x} + w_{,x} w_{,y}
+\end{matrix} \right\}
+\qquad
+\boldsymbol{\varepsilon}^{(1)} = \left\{ \begin{matrix}
+    -w_{,xx} \\[2pt] -w_{,yy} \\[2pt] -2 w_{,xy}
+\end{matrix} \right\}\end{split}\]</div>
+<p><a class="reference internal" href="#equation-donnell-strains">(5)</a> is the strain state assembled term by term in
+<code class="docutils literal notranslate"><span class="pre">calc_fint</span></code> of <code class="docutils literal notranslate"><span class="pre">cylshell_clpt_donnell_num.pyx</span></code>, where the hoop term
+appears as <code class="docutils literal notranslate"><span class="pre">1./r*cs[col+2]*fAw*gAw</span></code> and the von Kármán contributions as
+the products with <code class="docutils literal notranslate"><span class="pre">wxi</span></code> and <code class="docutils literal notranslate"><span class="pre">weta</span></code>. The plate, <code class="docutils literal notranslate"><span class="pre">calc_fint</span></code> of
+<code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell_num.pyx</span></code>, differs from it in exactly one place, the
+absence of that hoop term in <code class="docutils literal notranslate"><span class="pre">eyy</span></code>; the five remaining strain components
+are character for character identical. The same single-term difference
+holds in <code class="docutils literal notranslate"><span class="pre">fkG_num</span></code>.</p>
+<section id="on-presenting-the-plate-as-the-limit-of-the-cylinder">
+<span id="tangent-clpt-donnell-limit"></span><h4>On presenting the plate as the limit of the cylinder<a class="headerlink" href="#on-presenting-the-plate-as-the-limit-of-the-cylinder" title="Link to this heading">#</a></h4>
+<p>The cylinder is the general case and the plate is its <span class="math notranslate nohighlight">\(1/r \to 0\)</span> limit,
+but this statement must be read as a limit and not as a substitution, for
+two reasons found in the code.</p>
+<p>First, the plate is a <em>separate implementation</em>, not a specialisation
+evaluated at a particular radius: <code class="docutils literal notranslate"><span class="pre">panels/modelDB.py</span></code> binds each model to
+its own pair of modules, and no plate quantity is ever obtained by calling
+a cylinder kernel.</p>
+<p>Second, the limit is <span class="math notranslate nohighlight">\(r \to \infty\)</span> and not <span class="math notranslate nohighlight">\(r = 0\)</span>. The cylindrical
+kernels contain <span class="math notranslate nohighlight">\(1/r\)</span> and <span class="math notranslate nohighlight">\(1/r^2\)</span> in denominators, for instance the term
+<code class="docutils literal notranslate"><span class="pre">0.25*A22*a*b*fAwfBw*gAwgBw/(r*r)</span></code> of <code class="docutils literal notranslate"><span class="pre">fk0</span></code> in
+<code class="docutils literal notranslate"><span class="pre">cylshell_clpt_donnell.pyx</span></code> and the corresponding terms of <code class="docutils literal notranslate"><span class="pre">fkC_num</span></code>.
+Evaluating them at <span class="math notranslate nohighlight">\(r = 0\)</span> produces infinities, which would only surface
+later, as an assertion inside <code class="docutils literal notranslate"><span class="pre">finalize_symmetric_matrix</span></code> rejecting the
+matrix. The radius is therefore validated before any kernel is called.
+Each model declares in <code class="docutils literal notranslate"><span class="pre">panels/modelDB.py</span></code> whether it needs one, through
+the key <code class="docutils literal notranslate"><span class="pre">requires_r</span></code>, set for the cylinders and cleared for the plates.
+<code class="docutils literal notranslate"><span class="pre">Shell._check_r()</span></code> raises a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> naming the model when
+<code class="docutils literal notranslate"><span class="pre">requires_r</span></code> is set and <span class="math notranslate nohighlight">\(r\)</span> is <code class="docutils literal notranslate"><span class="pre">None</span></code> or <span class="math notranslate nohighlight">\(r \leq 0\)</span>, and it is called
+by the methods that reach the kernels, e.g. <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kC()</span></code>,
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kG()</span></code>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kM()</span></code>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kA()</span></code> and
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_fint()</span></code>. A shell declared with
+<code class="docutils literal notranslate"><span class="pre">model='cylshell_clpt_donnell'</span></code> and <code class="docutils literal notranslate"><span class="pre">r=None</span></code> is thus rejected with a
+message pointing at <code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell</span></code>, rather than being evaluated at a
+radius that is the opposite of the plate limit.</p>
+<p>For the plate model, whose kernels never read <code class="docutils literal notranslate"><span class="pre">r</span></code>, an unset radius is
+normalised to zero, the value the remaining code compares against. There
+<span class="math notranslate nohighlight">\(r = 0\)</span> is not a radius but a marker for the absence of one.</p>
+<p>Numerically, the convergence of the cylinder towards the plate is first
+order in <span class="math notranslate nohighlight">\(1/r\)</span>, as expected from <a class="reference internal" href="#equation-donnell-strains">(5)</a>, where the hoop term
+enters linearly. Comparing the two implementations on the same
+<span class="math notranslate nohighlight">\(\bar{\boldsymbol{c}}\)</span>, with <span class="math notranslate nohighlight">\(a = 0.3\)</span> m, <span class="math notranslate nohighlight">\(b = 0.2\)</span> m, <span class="math notranslate nohighlight">\(m = n = 4\)</span> and an
+unsymmetric laminate, gives the relative differences:</p>
+<div class="pst-scrollable-table-container"><table class="table" id="id3">
+<caption><span class="caption-text">Relative difference between the cylindrical and the plate
+            kernels as the radius grows, at a fixed <span class="math notranslate nohighlight">\(\bar{\boldsymbol{c}}\)</span></span><a class="headerlink" href="#id3" title="Link to this table">#</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p><span class="math notranslate nohighlight">\(r\)</span> [m]</p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\|\boldsymbol{K}_C^{cyl} - \boldsymbol{K}_C^{plate}\| /
+\|\boldsymbol{K}_C^{plate}\|\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\|\boldsymbol{F}_{int}^{cyl} - \boldsymbol{F}_{int}^{plate}\| /
+\|\boldsymbol{F}_{int}^{plate}\|\)</span></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(10^{0}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(3.58 \times 10^{-3}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(2.26 \times 10^{-2}\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(10^{2}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(3.58 \times 10^{-5}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(2.26 \times 10^{-4}\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(10^{4}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(3.58 \times 10^{-7}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(2.26 \times 10^{-6}\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(10^{6}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(3.58 \times 10^{-9}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(2.26 \times 10^{-8}\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(10^{8}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(3.58 \times 10^{-11}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(2.26 \times 10^{-10}\)</span></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>In the equations that follow, the cylinder is written as the general case
+and the plate is recovered by dropping the terms carrying <span class="math notranslate nohighlight">\(1/r\)</span>, which is a
+statement about the equations and not an instruction about the code.</p>
+</section>
+<section id="constitutive-relation">
+<h4>Constitutive relation<a class="headerlink" href="#constitutive-relation" title="Link to this heading">#</a></h4>
+<p>The generalised strain and stress vectors are related by the laminate
+stiffness:</p>
+<div class="math notranslate nohighlight" id="equation-donnell-constitutive">
+<span class="eqno">(6)<a class="headerlink" href="#equation-donnell-constitutive" title="Link to this equation">#</a></span>\[\begin{split}\hat{\boldsymbol{\varepsilon}} = \left\{ \begin{matrix}
+\boldsymbol{\varepsilon}^{(0)} \\ \boldsymbol{\varepsilon}^{(1)}
+\end{matrix} \right\}
+\qquad
+\hat{\boldsymbol{\sigma}} = \left\{ \begin{matrix} \boldsymbol{N} \\
+\boldsymbol{M} \end{matrix} \right\}
+= \begin{bmatrix} \boldsymbol{A} &amp; \boldsymbol{B} \\ \boldsymbol{B} &amp;
+\boldsymbol{D} \end{bmatrix}
+\left\{ \begin{matrix} \boldsymbol{\varepsilon}^{(0)} \\
+\boldsymbol{\varepsilon}^{(1)} \end{matrix} \right\}
+= \boldsymbol{C} \hat{\boldsymbol{\varepsilon}}\end{split}\]</div>
+<p>with <span class="math notranslate nohighlight">\(\boldsymbol{N} = \{N_{xx} \quad N_{yy} \quad N_{xy}\}^\top\)</span> and
+<span class="math notranslate nohighlight">\(\boldsymbol{M} = \{M_{xx} \quad M_{yy} \quad M_{xy}\}^\top\)</span>.
+<a class="reference internal" href="#equation-donnell-constitutive">(6)</a> is applied in <code class="docutils literal notranslate"><span class="pre">calc_fint</span></code> of both models. The
+<span class="math notranslate nohighlight">\(6 \times 6\)</span> array <span class="math notranslate nohighlight">\(\boldsymbol{C}\)</span> is the argument named <code class="docutils literal notranslate"><span class="pre">Finput</span></code> of
+every kernel, read from the attribute <code class="docutils literal notranslate"><span class="pre">Shell.ABDnxny</span></code> when it is set,
+else from the read-only property <code class="xref py py-attr docutils literal notranslate"><span class="pre">Shell.ABD</span></code>, calculated by
+<code class="docutils literal notranslate"><span class="pre">Shell._get_lam_ABD()</span></code> from the laminate <code class="docutils literal notranslate"><span class="pre">Shell.lam</span></code>. When <code class="docutils literal notranslate"><span class="pre">Finput</span></code>
+has the shape <span class="math notranslate nohighlight">\((n_x, n_y, 6, 6)\)</span> it is interpreted as one constitutive
+matrix per integration point, which is how variable stiffness laminates
+enter, see <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.integration_points()</span></code>; a <span class="math notranslate nohighlight">\((6, 6)\)</span> array is used for
+the whole domain instead. Everything that follows holds pointwise, so a
+<span class="math notranslate nohighlight">\(\boldsymbol{C}\)</span> varying over the domain changes nothing in the derivation.</p>
+</section>
+<section id="linear-and-non-linear-differentiation-operators">
+<h4>Linear and non-linear differentiation operators<a class="headerlink" href="#linear-and-non-linear-differentiation-operators" title="Link to this heading">#</a></h4>
+<p>The linear part of <a class="reference internal" href="#equation-donnell-strains">(5)</a> is written as
+<span class="math notranslate nohighlight">\(\hat{\boldsymbol{\varepsilon}}_L = \boldsymbol{B}_L \bar{\boldsymbol{c}}\)</span>,
+with:</p>
+<div class="math notranslate nohighlight" id="equation-donnell-bl">
+<span class="eqno">(7)<a class="headerlink" href="#equation-donnell-bl" title="Link to this equation">#</a></span>\[\begin{split}\boldsymbol{B}_L = \begin{bmatrix}
+    \boldsymbol{S}^u_{,x} \\
+    \boldsymbol{S}^v_{,y} + \frac{1}{r}\boldsymbol{S}^w \\
+    \boldsymbol{S}^u_{,y} + \boldsymbol{S}^v_{,x} \\
+    -\boldsymbol{S}^w_{,xx} \\
+    -\boldsymbol{S}^w_{,yy} \\
+    -2\boldsymbol{S}^w_{,xy}
+\end{bmatrix}\end{split}\]</div>
+<p><a class="reference internal" href="#equation-donnell-bl">(7)</a> is exactly the set of six accumulators of the strains in
+<code class="docutils literal notranslate"><span class="pre">fkG_num</span></code>, which is the one place in the code where the linear operator
+appears on its own.</p>
+<p>For the non-linear part, it is convenient to define the operator
+<span class="math notranslate nohighlight">\(\boldsymbol{G}\)</span> that extracts the slopes of the deflection:</p>
+<div class="math notranslate nohighlight" id="equation-donnell-g">
+<span class="eqno">(8)<a class="headerlink" href="#equation-donnell-g" title="Link to this equation">#</a></span>\[\begin{split}\boldsymbol{G} = \begin{bmatrix} \boldsymbol{G}_1 \\ \boldsymbol{G}_2
+\end{bmatrix} = \begin{bmatrix} \boldsymbol{S}^w_{,x} \\
+\boldsymbol{S}^w_{,y} \end{bmatrix}
+\qquad
+w_{,x} = \boldsymbol{G}_1 \bar{\boldsymbol{c}}
+\qquad
+w_{,y} = \boldsymbol{G}_2 \bar{\boldsymbol{c}}\end{split}\]</div>
+<p><a class="reference internal" href="#equation-donnell-g">(8)</a> is the Donnell-Mushtari-Vlasov specialisation of the
+rotation operators: the Sanders-Koiter kinematics add the terms
+<span class="math notranslate nohighlight">\(\boldsymbol{S}^u/R_1\)</span> and <span class="math notranslate nohighlight">\(\boldsymbol{S}^v/R_2\)</span> of the in-plane
+displacements, with the principal radii of curvature <span class="math notranslate nohighlight">\(R_1\)</span> and <span class="math notranslate nohighlight">\(R_2\)</span>. The
+code confirms this: neither <code class="docutils literal notranslate"><span class="pre">fkG_num</span></code> nor <code class="docutils literal notranslate"><span class="pre">fkG0</span></code> contains
+<span class="math notranslate nohighlight">\(\boldsymbol{S}^v\)</span>, and both allocate <span class="math notranslate nohighlight">\(1 \cdot m^2 n^2\)</span> entries instead of
+the <span class="math notranslate nohighlight">\(9 \cdot m^2 n^2\)</span> of <code class="docutils literal notranslate"><span class="pre">fkC_num</span></code> (<code class="docutils literal notranslate"><span class="pre">fdim</span></code>), because only the <span class="math notranslate nohighlight">\(w\)</span>–<span class="math notranslate nohighlight">\(w\)</span>
+block is populated. This holds for the cylinder as well as for the plate:
+the <span class="math notranslate nohighlight">\(1/r\)</span> term present in <span class="math notranslate nohighlight">\(\boldsymbol{B}_L\)</span> has no counterpart in
+<span class="math notranslate nohighlight">\(\boldsymbol{G}\)</span>.</p>
+<p>In the kernels, the slopes are accumulated in the natural coordinates as
+<code class="docutils literal notranslate"><span class="pre">wxi</span></code> and <code class="docutils literal notranslate"><span class="pre">weta</span></code>, in <code class="docutils literal notranslate"><span class="pre">fkC_num</span></code> and in <code class="docutils literal notranslate"><span class="pre">calc_fint</span></code>, and converted as:</p>
+<div class="math notranslate nohighlight">
+\[w_{,x} = \frac{2}{a}\,\texttt{wxi} \qquad w_{,y} = \frac{2}{b}\,\texttt{weta}\]</div>
+<p>With <a class="reference internal" href="#equation-donnell-g">(8)</a>, the non-linear differentiation operator becomes:</p>
+<div class="math notranslate nohighlight" id="equation-donnell-bnl">
+<span class="eqno">(9)<a class="headerlink" href="#equation-donnell-bnl" title="Link to this equation">#</a></span>\[\begin{split}\boldsymbol{B}_{NL}(\bar{\boldsymbol{c}}) = \begin{bmatrix}
+    w_{,x} \boldsymbol{G}_1 \\
+    w_{,y} \boldsymbol{G}_2 \\
+    w_{,y} \boldsymbol{G}_1 + w_{,x} \boldsymbol{G}_2 \\
+    \boldsymbol{0} \\ \boldsymbol{0} \\ \boldsymbol{0}
+\end{bmatrix}\end{split}\]</div>
+<p>which gives the strain and its variation:</p>
+<div class="math notranslate nohighlight" id="equation-donnell-strain-bnl">
+<span class="eqno">(10)<a class="headerlink" href="#equation-donnell-strain-bnl" title="Link to this equation">#</a></span>\[\begin{split}\hat{\boldsymbol{\varepsilon}} = \left( \boldsymbol{B}_L + \frac{1}{2}\boldsymbol{B}_{NL} \right) \bar{\boldsymbol{c}}
+\qquad
+\hat{\boldsymbol{\varepsilon}}_{NL} = \frac{1}{2}\boldsymbol{B}_{NL}\bar{\boldsymbol{c}} = \left\{ \begin{matrix}
+    \frac{1}{2} w_{,x}^2 \\[2pt] \frac{1}{2} w_{,y}^2 \\[2pt] w_{,x} w_{,y} \\[2pt] 0 \\ 0 \\ 0
+\end{matrix} \right\}
+\qquad
+\delta \hat{\boldsymbol{\varepsilon}} = (\boldsymbol{B}_L + \boldsymbol{B}_{NL}) \delta\bar{\boldsymbol{c}}\end{split}\]</div>
+<p>The factor <span class="math notranslate nohighlight">\(\frac{1}{2}\)</span> of <a class="reference internal" href="#equation-donnell-strain-bnl">(10)</a> applies to the shear
+row as well, and this is visible in the code as an asymmetry that is easy
+to mistake for an error: in the strains of <code class="docutils literal notranslate"><span class="pre">calc_fint</span></code> the two normal
+strains carry an explicit <code class="docutils literal notranslate"><span class="pre">0.5</span></code> whereas the shear strain does not. The
+reason is that the shear row of <span class="math notranslate nohighlight">\(\boldsymbol{B}_{NL}\)</span> already contains two
+terms, so <span class="math notranslate nohighlight">\(\frac{1}{2}\boldsymbol{B}_{NL}\bar{\boldsymbol{c}}\)</span> evaluates to
+<span class="math notranslate nohighlight">\(\frac{1}{2}(2 w_{,x} w_{,y}) = w_{,x}w_{,y}\)</span>, which is what the single
+unscaled product in the code produces. Evaluating the non-linear shear
+strain as <span class="math notranslate nohighlight">\(\boldsymbol{B}_{NL}\bar{\boldsymbol{c}}\)</span> instead would give <span class="math notranslate nohighlight">\(2
+w_{,x} w_{,y}\)</span>. That error does not show in <span class="math notranslate nohighlight">\(\boldsymbol{B}_{NL}\)</span> itself,
+but it corrupts the stress state, and therefore the internal force vector
+and the geometric stiffness matrix, leaving a tangent stiffness matrix that
+is no longer the derivative of the internal force vector.</p>
+</section>
+</section>
+<section id="internal-force-vector">
+<span id="tangent-clpt-donnell-fint"></span><h3>Internal force vector<a class="headerlink" href="#internal-force-vector" title="Link to this heading">#</a></h3>
+<p>The internal force vector is the derivative of the strain energy, <span class="math notranslate nohighlight">\(U =
+\frac{1}{2} \int_{\mathcal{A}} \hat{\boldsymbol{\varepsilon}}^\top
+\boldsymbol{C} \hat{\boldsymbol{\varepsilon}} \, d\mathcal{A}\)</span>, integrated
+over the mid-surface, with respect to <span class="math notranslate nohighlight">\(\bar{\boldsymbol{c}}\)</span>:</p>
+<div class="math notranslate nohighlight" id="equation-donnell-fint">
+<span class="eqno">(11)<a class="headerlink" href="#equation-donnell-fint" title="Link to this equation">#</a></span>\[\boldsymbol{F}_{int}(\bar{\boldsymbol{c}}) = \int_{\mathcal{A}} \left(
+\boldsymbol{B}_L + \boldsymbol{B}_{NL}(\bar{\boldsymbol{c}})
+\right)^\top \hat{\boldsymbol{\sigma}}(\bar{\boldsymbol{c}}) \,
+d\mathcal{A}\]</div>
+<p>which gives, for the three degrees of freedom associated with the term
+<span class="math notranslate nohighlight">\((i,j)\)</span>:</p>
+<div class="math notranslate nohighlight" id="equation-donnell-fint-rows">
+<span class="eqno">(12)<a class="headerlink" href="#equation-donnell-fint-rows" title="Link to this equation">#</a></span>\[\begin{split}\begin{aligned}
+    F_{int}^{u} &amp;= \int_{\mathcal{A}} \left( N_{xx} S^u_{,x} + N_{xy} S^u_{,y} \right) d\mathcal{A} \\
+    F_{int}^{v} &amp;= \int_{\mathcal{A}} \left( N_{yy} S^v_{,y} + N_{xy} S^v_{,x} \right) d\mathcal{A} \\
+    F_{int}^{w} &amp;= \int_{\mathcal{A}} \Big( N_{xx} w_{,x} S^w_{,x} + N_{yy} \left( \tfrac{1}{r} S^w + w_{,y} S^w_{,y} \right) + N_{xy} \left( w_{,y} S^w_{,x} + w_{,x} S^w_{,y} \right) \\
+    &amp;\qquad - M_{xx} S^w_{,xx} - M_{yy} S^w_{,yy} - 2 M_{xy} S^w_{,xy} \Big) d\mathcal{A}
+\end{aligned}\end{split}\]</div>
+<p><a class="reference internal" href="#equation-donnell-fint-rows">(12)</a> is the update of <code class="docutils literal notranslate"><span class="pre">fint</span></code> in <code class="docutils literal notranslate"><span class="pre">calc_fint</span></code> of
+<code class="docutils literal notranslate"><span class="pre">cylshell_clpt_donnell_num.pyx</span></code>. The hoop contribution <span class="math notranslate nohighlight">\(N_{yy} S^w / r\)</span>
+appears there as <code class="docutils literal notranslate"><span class="pre">Nyy*(fAw*gAw/r</span> <span class="pre">+</span> <span class="pre">...)</span></code>, and the plate form, in
+<code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell_num.pyx</span></code>, is the same expression without it. Note
+that <span class="math notranslate nohighlight">\(\boldsymbol{B}_L\)</span> contributes the hoop term and the three curvature
+terms to the <span class="math notranslate nohighlight">\(w\)</span> row, whereas <span class="math notranslate nohighlight">\(\boldsymbol{B}_{NL}\)</span> contributes the three
+products of membrane forces with slopes; the <span class="math notranslate nohighlight">\(u\)</span> and <span class="math notranslate nohighlight">\(v\)</span> rows receive no
+contribution from <span class="math notranslate nohighlight">\(\boldsymbol{B}_{NL}\)</span>, which is why they contain only
+<span class="math notranslate nohighlight">\(\boldsymbol{N}\)</span> and no slope.</p>
+</section>
+<section id="tangent-stiffness-matrix">
+<h3>Tangent stiffness matrix<a class="headerlink" href="#tangent-stiffness-matrix" title="Link to this heading">#</a></h3>
+<p>Differentiating <a class="reference internal" href="#equation-donnell-fint">(11)</a> with respect to <span class="math notranslate nohighlight">\(\bar{\boldsymbol{c}}\)</span>,
+<a class="reference internal" href="#equation-donnell-kt-definition">(1)</a>:</p>
+<div class="math notranslate nohighlight" id="equation-donnell-kt">
+<span class="eqno">(13)<a class="headerlink" href="#equation-donnell-kt" title="Link to this equation">#</a></span>\[\boldsymbol{K}_T = \frac{\partial \boldsymbol{F}_{int}}{\partial \bar{\boldsymbol{c}}}
+= \underbrace{\int_{\mathcal{A}} (\boldsymbol{B}_L + \boldsymbol{B}_{NL})^\top \boldsymbol{C} (\boldsymbol{B}_L + \boldsymbol{B}_{NL}) \, d\mathcal{A}}_{\text{from } \partial \hat{\boldsymbol{\sigma}} / \partial \bar{\boldsymbol{c}}}
++ \underbrace{\int_{\mathcal{A}} \frac{\partial \boldsymbol{B}_{NL}^\top}{\partial \bar{\boldsymbol{c}}} \hat{\boldsymbol{\sigma}} \, d\mathcal{A}}_{\text{from } \partial \boldsymbol{B}_{NL} / \partial \bar{\boldsymbol{c}}}\]</div>
+<p>The first integral uses <span class="math notranslate nohighlight">\(\partial \hat{\boldsymbol{\sigma}} / \partial
+\bar{\boldsymbol{c}} = \boldsymbol{C}\,(\boldsymbol{B}_L +
+\boldsymbol{B}_{NL})\)</span>, which follows from <a class="reference internal" href="#equation-donnell-strain-bnl">(10)</a> together
+with <span class="math notranslate nohighlight">\(\partial (\boldsymbol{B}_{NL}\bar{\boldsymbol{c}}) / \partial
+\bar{\boldsymbol{c}} = 2\boldsymbol{B}_{NL}\)</span>, itself a consequence of
+<span class="math notranslate nohighlight">\(\boldsymbol{B}_{NL}\)</span> being homogeneous of degree one in
+<span class="math notranslate nohighlight">\(\bar{\boldsymbol{c}}\)</span>. The second integral is evaluated by writing
+<span class="math notranslate nohighlight">\(\boldsymbol{B}_{NL}^\top \hat{\boldsymbol{\sigma}}\)</span> explicitly with
+<a class="reference internal" href="#equation-donnell-bnl">(9)</a>:</p>
+<div class="math notranslate nohighlight">
+\[\boldsymbol{B}_{NL}^\top \hat{\boldsymbol{\sigma}} = \boldsymbol{G}_1^\top
+\left( N_{xx} w_{,x} + N_{xy} w_{,y} \right) + \boldsymbol{G}_2^\top
+\left( N_{xy} w_{,x} + N_{yy} w_{,y} \right)\]</div>
+<p>and differentiating with respect to <span class="math notranslate nohighlight">\(\bar{\boldsymbol{c}}\)</span> at a fixed stress
+state, using <a class="reference internal" href="#equation-donnell-g">(8)</a>:</p>
+<div class="math notranslate nohighlight" id="equation-donnell-kg">
+<span class="eqno">(14)<a class="headerlink" href="#equation-donnell-kg" title="Link to this equation">#</a></span>\[\begin{split}\boldsymbol{K}_G(\boldsymbol{N}) = \int_{\mathcal{A}} \boldsymbol{G}^\top
+\tilde{\boldsymbol{N}} \boldsymbol{G} \, d\mathcal{A}
+\qquad
+\tilde{\boldsymbol{N}} = \begin{bmatrix} N_{xx} &amp; N_{xy} \\ N_{xy} &amp;
+N_{yy} \end{bmatrix}\end{split}\]</div>
+<p><a class="reference internal" href="#equation-donnell-kg">(14)</a> is the geometric stiffness of the Donnell-Mushtari-Vlasov
+kinematics, and it only has non-zero entries in the <span class="math notranslate nohighlight">\(w\)</span>–<span class="math notranslate nohighlight">\(w\)</span> blocks. For
+the term pairs <span class="math notranslate nohighlight">\(A = (i,j)\)</span> and <span class="math notranslate nohighlight">\(B = (k,l)\)</span>:</p>
+<div class="math notranslate nohighlight" id="equation-donnell-kg-entry">
+<span class="eqno">(15)<a class="headerlink" href="#equation-donnell-kg-entry" title="Link to this equation">#</a></span>\[K_{G\,[3(jm+i)+2,\;3(lm+k)+2]} = \int_{\mathcal{A}} \left( N_{xx}
+S^w_{A,x} S^w_{B,x} + N_{xy} \left( S^w_{A,x} S^w_{B,y} + S^w_{A,y}
+S^w_{B,x} \right) + N_{yy} S^w_{A,y} S^w_{B,y} \right) d\mathcal{A}\]</div>
+<p><a class="reference internal" href="#equation-donnell-kg-entry">(15)</a> is transcribed literally in <code class="docutils literal notranslate"><span class="pre">fkG_num</span></code> of
+<code class="docutils literal notranslate"><span class="pre">cylshell_clpt_donnell_num.pyx</span></code>, where the four products of shape
+functions appear in the same order. The plate writes the same expression in
+an algebraically expanded form; the two are identical after collecting the
+powers of <span class="math notranslate nohighlight">\(a\)</span> and <span class="math notranslate nohighlight">\(b\)</span>.</p>
+<section id="which-stress-enters-the-geometric-stiffness-and-the-degree-of-homogeneity">
+<span id="tangent-clpt-donnell-grouping"></span><h4>Which stress enters the geometric stiffness, and the degree of homogeneity<a class="headerlink" href="#which-stress-enters-the-geometric-stiffness-and-the-degree-of-homogeneity" title="Link to this heading">#</a></h4>
+<p>The first integral of <a class="reference internal" href="#equation-donnell-kt">(13)</a> expands into the four classical
+groups of <a class="reference internal" href="#equation-donnell-kt-classical">(2)</a>:</p>
+<div class="math notranslate nohighlight" id="equation-donnell-k-groups">
+<span class="eqno">(16)<a class="headerlink" href="#equation-donnell-k-groups" title="Link to this equation">#</a></span>\[\boldsymbol{K}_0 = \int_{\mathcal{A}} \boldsymbol{B}_L^\top \boldsymbol{C} \boldsymbol{B}_L \, d\mathcal{A} \qquad
+\boldsymbol{K}_{0L} = \int_{\mathcal{A}} \boldsymbol{B}_L^\top \boldsymbol{C} \boldsymbol{B}_{NL} \, d\mathcal{A} \qquad
+\boldsymbol{K}_{L0} = \boldsymbol{K}_{0L}^\top \qquad
+\boldsymbol{K}_{LL} = \int_{\mathcal{A}} \boldsymbol{B}_{NL}^\top \boldsymbol{C} \boldsymbol{B}_{NL} \, d\mathcal{A}\]</div>
+<p>The membrane stress of <a class="reference internal" href="#equation-donnell-kg">(14)</a> is also split, according to the
+strain that produces it:</p>
+<div class="math notranslate nohighlight" id="equation-donnell-n-split">
+<span class="eqno">(17)<a class="headerlink" href="#equation-donnell-n-split" title="Link to this equation">#</a></span>\[\begin{split}\boldsymbol{N} = \boldsymbol{N}^0 + \boldsymbol{N}_L + \boldsymbol{N}_{NL}
+\qquad
+\boldsymbol{N}_L = \boldsymbol{A}\boldsymbol{\varepsilon}^{(0)}_L + \boldsymbol{B}\boldsymbol{\varepsilon}^{(1)}
+\qquad
+\boldsymbol{N}_{NL} = \boldsymbol{A} \left\{ \begin{matrix} \frac{1}{2}
+w_{,x}^2 \\[2pt] \frac{1}{2} w_{,y}^2 \\[2pt] w_{,x} w_{,y} \end{matrix}
+\right\}\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\boldsymbol{N}^0\)</span> is an optional prescribed pre-stress, used for
+instance to superpose combined load cases, see <code class="docutils literal notranslate"><span class="pre">c_cte</span></code> and <code class="docutils literal notranslate"><span class="pre">Nxx_cte</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Nyy_cte</span></code>, <code class="docutils literal notranslate"><span class="pre">Nxy_cte</span></code> in <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kC()</span></code>, and <span class="math notranslate nohighlight">\(\boldsymbol{B}\)</span> does
+not contribute to <span class="math notranslate nohighlight">\(\boldsymbol{N}_{NL}\)</span> because <span class="math notranslate nohighlight">\(\boldsymbol{\varepsilon}^{(1)}\)</span>
+is linear for the CLPT. In the code, <span class="math notranslate nohighlight">\(\boldsymbol{N}^0 + \boldsymbol{N}_L\)</span>
+is computed in <code class="docutils literal notranslate"><span class="pre">fkG_num</span></code>, from the arguments <code class="docutils literal notranslate"><span class="pre">Nxx0,</span> <span class="pre">Nyy0,</span> <span class="pre">Nxy0</span></code> and from
+the linear strains of <a class="reference internal" href="#equation-donnell-bl">(7)</a>; and <span class="math notranslate nohighlight">\(\boldsymbol{N}_{NL}\)</span> is
+computed separately, in <code class="docutils literal notranslate"><span class="pre">fkC_num</span></code>, as <code class="docutils literal notranslate"><span class="pre">NxxNL,</span> <span class="pre">NyyNL,</span> <span class="pre">NxyNL</span></code>, where the
+<code class="docutils literal notranslate"><span class="pre">0.5</span></code> factors of <a class="reference internal" href="#equation-donnell-n-split">(17)</a> are explicit. Since
+<a class="reference internal" href="#equation-donnell-kg">(14)</a> is linear in <span class="math notranslate nohighlight">\(\boldsymbol{N}\)</span>:</p>
+<div class="math notranslate nohighlight" id="equation-donnell-kgnl">
+<span class="eqno">(18)<a class="headerlink" href="#equation-donnell-kgnl" title="Link to this equation">#</a></span>\[\boldsymbol{K}_G(\boldsymbol{N}) = \boldsymbol{K}_G(\boldsymbol{N}^0 +
+\boldsymbol{N}_L) + \boldsymbol{K}_{GNL}
+\qquad \text{with} \qquad
+\boldsymbol{K}_{GNL} = \boldsymbol{K}_G(\boldsymbol{N}_{NL})\]</div>
+<p>With respect to <span class="math notranslate nohighlight">\(\bar{\boldsymbol{c}}\)</span>: <span class="math notranslate nohighlight">\(\boldsymbol{K}_0\)</span> is constant;
+<span class="math notranslate nohighlight">\(\boldsymbol{K}_{0L}\)</span>, <span class="math notranslate nohighlight">\(\boldsymbol{K}_{L0}\)</span> and
+<span class="math notranslate nohighlight">\(\boldsymbol{K}_G(\boldsymbol{N}_L)\)</span> are homogeneous of degree one; and
+<span class="math notranslate nohighlight">\(\boldsymbol{K}_{LL}\)</span> and <span class="math notranslate nohighlight">\(\boldsymbol{K}_{GNL}\)</span> are homogeneous of degree
+two. The implementation groups them as:</p>
+<div class="math notranslate nohighlight" id="equation-donnell-grouping">
+<span class="eqno">(19)<a class="headerlink" href="#equation-donnell-grouping" title="Link to this equation">#</a></span>\[\begin{split}\begin{aligned}
+    \texttt{fkC_num} \;\rightarrow\; \boldsymbol{K}_C(\bar{\boldsymbol{c}}) &amp;= \boldsymbol{K}_0 + \boldsymbol{K}_{0L} + \boldsymbol{K}_{L0} + \boldsymbol{K}_{LL} + \boldsymbol{K}_{GNL} \\
+    \texttt{fkG_num} \;\rightarrow\; \boldsymbol{K}_G(\bar{\boldsymbol{c}}) &amp;= \boldsymbol{K}_G(\boldsymbol{N}^0 + \boldsymbol{N}_L) \\
+    \texttt{calc_kT} \;\rightarrow\; \boldsymbol{K}_T(\bar{\boldsymbol{c}}) &amp;= \boldsymbol{K}_C(\bar{\boldsymbol{c}}) + \boldsymbol{K}_G(\bar{\boldsymbol{c}})
+\end{aligned}\end{split}\]</div>
+<p><a class="reference internal" href="#equation-donnell-grouping">(19)</a> is the statement written as a comment in <code class="docutils literal notranslate"><span class="pre">fkC_num</span></code>
+of both models, and the summation <span class="math notranslate nohighlight">\(\boldsymbol{K}_T = \boldsymbol{K}_C +
+\boldsymbol{K}_G\)</span> happens in <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kT()</span></code>. The four constitutive
+groups of <a class="reference internal" href="#equation-donnell-k-groups">(16)</a> are not assembled separately: the kernel
+evaluates the whole product <span class="math notranslate nohighlight">\((\boldsymbol{B}_L + \boldsymbol{B}_{NL})^\top
+\boldsymbol{C} (\boldsymbol{B}_L + \boldsymbol{B}_{NL})\)</span> in expanded
+symbolic form, in nine blocks, one per pair of displacements, and
+<span class="math notranslate nohighlight">\(\boldsymbol{K}_{GNL}\)</span> is then added on top of the <span class="math notranslate nohighlight">\(w\)</span>–<span class="math notranslate nohighlight">\(w\)</span> block only,
+under the comment <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">KGNL</span></code>.</p>
+<p><strong>Why</strong> <span class="math notranslate nohighlight">\(\boldsymbol{K}_{GNL}\)</span> <strong>sits where it does.</strong> Although
+<span class="math notranslate nohighlight">\(\boldsymbol{K}_{GNL}\)</span> is geometric in nature, being a
+<span class="math notranslate nohighlight">\(\boldsymbol{G}^\top \tilde{\boldsymbol{N}} \boldsymbol{G}\)</span> product, it is
+deliberately collected together with the constitutive terms so that
+<span class="math notranslate nohighlight">\(\boldsymbol{K}_G(\bar{\boldsymbol{c}})\)</span> stays homogeneous of degree one:</p>
+<div class="math notranslate nohighlight">
+\[\boldsymbol{K}_G(\lambda\bar{\boldsymbol{c}}) = \lambda\,\boldsymbol{K}_G(\bar{\boldsymbol{c}})\]</div>
+<p>The linear buckling problem <span class="math notranslate nohighlight">\((\boldsymbol{K}_0 + \lambda
+\boldsymbol{K}_G(\bar{\boldsymbol{c}}_0)) \boldsymbol{q} = \boldsymbol{0}\)</span>
+needs this property, because there the load multiplier <span class="math notranslate nohighlight">\(\lambda\)</span> scales a
+stress state obtained from a linear fundamental state
+<span class="math notranslate nohighlight">\(\bar{\boldsymbol{c}}_0\)</span>, and a <span class="math notranslate nohighlight">\(\boldsymbol{K}_G\)</span> containing a degree-two
+term would make <span class="math notranslate nohighlight">\(\lambda\)</span> scale that state non-linearly, such that the
+problem would no longer be a linear eigenvalue problem. With the grouping of
+<a class="reference internal" href="#equation-donnell-grouping">(19)</a>, both requirements are met at once:
+<span class="math notranslate nohighlight">\(\boldsymbol{K}_T\)</span> is the exact Jacobian of <span class="math notranslate nohighlight">\(\boldsymbol{F}_{int}\)</span>, so the
+Newton-Raphson iterations converge quadratically, and <span class="math notranslate nohighlight">\(\boldsymbol{K}_G\)</span>
+remains usable as the geometric stiffness of a linear buckling analysis. The
+consequence is that <code class="docutils literal notranslate"><span class="pre">fkG_num</span></code> has no switch for <span class="math notranslate nohighlight">\(\boldsymbol{N}_{NL}\)</span> at
+all: its signature takes no <code class="docutils literal notranslate"><span class="pre">NLgeom</span></code> argument, and its docstring states
+why. <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kG()</span></code> still accepts <code class="docutils literal notranslate"><span class="pre">NLgeom</span></code>, but only to force the
+numerically integrated path of <a class="reference internal" href="#tangent-clpt-donnell-paths"><span class="std std-ref">The two implementation paths</span></a>; it does
+not change the value of <span class="math notranslate nohighlight">\(\boldsymbol{K}_G\)</span>.</p>
+</section>
+<section id="mapping-onto-the-three-way-split">
+<h4>Mapping onto the three-way split<a class="headerlink" href="#mapping-onto-the-three-way-split" title="Link to this heading">#</a></h4>
+<p>With <a class="reference internal" href="#equation-donnell-grouping">(19)</a> established, the three-way split of
+<a class="reference internal" href="#equation-donnell-kt-split">(3)</a> is:</p>
+<div class="math notranslate nohighlight" id="equation-donnell-three-way">
+<span class="eqno">(20)<a class="headerlink" href="#equation-donnell-three-way" title="Link to this equation">#</a></span>\[\begin{split}\begin{aligned}
+    \boldsymbol{K}_{C0} &amp;= \boldsymbol{K}_0 \\
+    \boldsymbol{K}_{CNL}(\bar{\boldsymbol{c}}) &amp;= \boldsymbol{K}_{0L} + \boldsymbol{K}_{L0} + \boldsymbol{K}_{LL} + \boldsymbol{K}_{GNL} \\
+    \boldsymbol{K}_G(\bar{\boldsymbol{c}}) &amp;= \boldsymbol{K}_G(\boldsymbol{N}^0 + \boldsymbol{N}_L)
+\end{aligned}\end{split}\]</div>
+<p>i.e. <span class="math notranslate nohighlight">\(\boldsymbol{K}_{C0}\)</span> is everything that <code class="docutils literal notranslate"><span class="pre">fkC_num</span></code> produces at
+<span class="math notranslate nohighlight">\(\bar{\boldsymbol{c}} = \boldsymbol{0}\)</span>, <span class="math notranslate nohighlight">\(\boldsymbol{K}_{CNL}\)</span> is
+everything else that <code class="docutils literal notranslate"><span class="pre">fkC_num</span></code> produces, and <span class="math notranslate nohighlight">\(\boldsymbol{K}_G\)</span> is what
+<code class="docutils literal notranslate"><span class="pre">fkG_num</span></code> produces. The partition is clean, but only under that reading of
+<span class="math notranslate nohighlight">\(\boldsymbol{K}_{CNL}\)</span>, which is not the obvious one;
+<a class="reference internal" href="#tangent-clpt-donnell-discrepancies"><span class="std std-ref">Where the naming and the code do not line up</span></a> states the caveat.</p>
+<p>There is no separate code path for <span class="math notranslate nohighlight">\(\boldsymbol{K}_{C0}\)</span> and
+<span class="math notranslate nohighlight">\(\boldsymbol{K}_{CNL}\)</span>: <code class="docutils literal notranslate"><span class="pre">fkC_num</span></code> returns their sum. <span class="math notranslate nohighlight">\(\boldsymbol{K}_{C0}\)</span>
+alone is obtained either from the closed-form <code class="docutils literal notranslate"><span class="pre">fk0</span></code> or by calling
+<code class="docutils literal notranslate"><span class="pre">fkC_num</span></code> with <span class="math notranslate nohighlight">\(\bar{\boldsymbol{c}} = \boldsymbol{0}\)</span> or with
+<code class="docutils literal notranslate"><span class="pre">NLgeom=0</span></code>, both of which make <code class="docutils literal notranslate"><span class="pre">wxi</span></code> and <code class="docutils literal notranslate"><span class="pre">weta</span></code> vanish, since their
+accumulation is guarded by <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">NLgeom</span> <span class="pre">==</span> <span class="pre">1</span></code>. With <span class="math notranslate nohighlight">\(w_{,x} = w_{,y} = 0\)</span>
+one has <span class="math notranslate nohighlight">\(\boldsymbol{B}_{NL} = \boldsymbol{0}\)</span> and <span class="math notranslate nohighlight">\(\boldsymbol{N}_{NL} =
+\boldsymbol{0}\)</span>, so <span class="math notranslate nohighlight">\(\boldsymbol{K}_{CNL}\)</span> vanishes identically, as a
+comment in <code class="docutils literal notranslate"><span class="pre">fkC_num</span></code> notes.</p>
+</section>
+</section>
+<section id="the-closed-form-path">
+<span id="tangent-clpt-donnell-closed-form"></span><h3>The closed-form path<a class="headerlink" href="#the-closed-form-path" title="Link to this heading">#</a></h3>
+<p>The closed-form kernels evaluate the same <span class="math notranslate nohighlight">\(\boldsymbol{K}_0\)</span> and
+<span class="math notranslate nohighlight">\(\boldsymbol{K}_G\)</span>, over the full domain and for a constant laminate, by
+separating the two directions. Every entry of <a class="reference internal" href="#equation-donnell-k-groups">(16)</a>
+restricted to <span class="math notranslate nohighlight">\(\boldsymbol{B}_L\)</span> is a sum of products of the form</p>
+<div class="math notranslate nohighlight" id="equation-donnell-separable">
+<span class="eqno">(21)<a class="headerlink" href="#equation-donnell-separable" title="Link to this equation">#</a></span>\[\int_{\mathcal{A}} \frac{\partial^{p} S^{\alpha}_A}{\partial x^{p}}
+\frac{\partial^{q} S^{\beta}_B}{\partial y^{q}} \, d\mathcal{A}
+= \frac{ab}{4} \left( \frac{2}{a} \right)^{p} \left( \frac{2}{b}
+\right)^{q} \int_{-1}^{+1} P_i^{\alpha (p)} P_k^{\beta} \, d\xi
+\int_{-1}^{+1} P_j^{\alpha} P_l^{\beta (q)} \, d\eta\]</div>
+<p>and the two one-dimensional integrals are evaluated analytically by the six
+functions <code class="docutils literal notranslate"><span class="pre">integral_ff</span></code>, <code class="docutils literal notranslate"><span class="pre">integral_ffp</span></code>, <code class="docutils literal notranslate"><span class="pre">integral_ffpp</span></code>,
+<code class="docutils literal notranslate"><span class="pre">integral_fpfp</span></code>, <code class="docutils literal notranslate"><span class="pre">integral_fpfpp</span></code> and <code class="docutils literal notranslate"><span class="pre">integral_fppfpp</span></code> of
+<code class="docutils literal notranslate"><span class="pre">panels/core/include/bardell.hpp</span></code>, declared at the top of
+<code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell.pyx</span></code> and wrapped for Python as <code class="docutils literal notranslate"><span class="pre">calc_integral_ff</span></code>
+and so forth in <code class="docutils literal notranslate"><span class="pre">panels/bardell.pyx</span></code>. They are hoisted out of the inner
+loops, the <span class="math notranslate nohighlight">\(\xi\)</span> integrals inside the <span class="math notranslate nohighlight">\(i\)</span>, <span class="math notranslate nohighlight">\(k\)</span> loops and the <span class="math notranslate nohighlight">\(\eta\)</span>
+integrals inside the <span class="math notranslate nohighlight">\(j\)</span>, <span class="math notranslate nohighlight">\(l\)</span> loops, which is what makes this path cheap: no
+loop over integration points exists at all.</p>
+<p>As an example, the first entry of <span class="math notranslate nohighlight">\(\boldsymbol{K}_0\)</span> in <code class="docutils literal notranslate"><span class="pre">fk0</span></code> of
+<code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell.pyx</span></code> reads</p>
+<div class="highlight-cython notranslate"><div class="highlight"><pre><span></span><span class="n">k0v</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">+=</span> <span class="n">A11</span><span class="o">*</span><span class="n">b</span><span class="o">*</span><span class="n">fAuxifBuxi</span><span class="o">*</span><span class="n">gAugBu</span><span class="o">/</span><span class="n">a</span> <span class="o">+</span> <span class="n">A16</span><span class="o">*</span><span class="p">(</span><span class="n">fAufBuxi</span><span class="o">*</span><span class="n">gAuetagBu</span>
+        <span class="o">+</span> <span class="n">fAuxifBu</span><span class="o">*</span><span class="n">gAugBueta</span><span class="p">)</span> <span class="o">+</span> <span class="n">A66</span><span class="o">*</span><span class="n">a</span><span class="o">*</span><span class="n">fAufBu</span><span class="o">*</span><span class="n">gAuetagBueta</span><span class="o">/</span><span class="n">b</span>
+</pre></div>
+</div>
+<p>which is the <span class="math notranslate nohighlight">\(u\)</span>–<span class="math notranslate nohighlight">\(u\)</span> entry of <span class="math notranslate nohighlight">\(\int \boldsymbol{B}_L^\top \boldsymbol{C}
+\boldsymbol{B}_L \, d\mathcal{A}\)</span>, the factor <span class="math notranslate nohighlight">\(b/a\)</span> following from
+<a class="reference internal" href="#equation-donnell-separable">(21)</a> with <span class="math notranslate nohighlight">\(p = q = 1\)</span>. The corresponding cylindrical
+entry, in <code class="docutils literal notranslate"><span class="pre">fk0</span></code> of <code class="docutils literal notranslate"><span class="pre">cylshell_clpt_donnell.pyx</span></code>, is identical, the two
+implementations of <span class="math notranslate nohighlight">\(\boldsymbol{K}_0\)</span> differing only by the five entries
+carrying <span class="math notranslate nohighlight">\(1/r\)</span> and <span class="math notranslate nohighlight">\(1/r^2\)</span> that <a class="reference internal" href="#equation-donnell-bl">(7)</a> introduces through
+<span class="math notranslate nohighlight">\(\boldsymbol{S}^w/r\)</span>.</p>
+<p>Two properties of this path bound its use:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">fk0</span></code> takes no <span class="math notranslate nohighlight">\(\bar{\boldsymbol{c}}\)</span> and no constitutive matrix per
+point; its signature is <code class="docutils literal notranslate"><span class="pre">fk0(shell,</span> <span class="pre">size,</span> <span class="pre">row0,</span> <span class="pre">col0)</span></code>. It can only
+ever produce <span class="math notranslate nohighlight">\(\boldsymbol{K}_{C0}\)</span>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fkG0</span></code> takes the three membrane stress resultants as <em>scalars</em>,
+<code class="docutils literal notranslate"><span class="pre">fkG0(Nxx,</span> <span class="pre">Nyy,</span> <span class="pre">Nxy,</span> <span class="pre">shell,</span> <span class="pre">size,</span> <span class="pre">row0,</span> <span class="pre">col0)</span></code>, so it evaluates
+<span class="math notranslate nohighlight">\(\boldsymbol{K}_G(\boldsymbol{N}^0)\)</span> for a membrane state uniform over
+the domain. The bodies of <code class="docutils literal notranslate"><span class="pre">fkG0</span></code> are identical for the plate and for the
+cylinder, consistent with <span class="math notranslate nohighlight">\(\boldsymbol{G}\)</span> of <a class="reference internal" href="#equation-donnell-g">(8)</a> carrying no
+<span class="math notranslate nohighlight">\(1/r\)</span>; the only entry assembled is character for character the same in
+both modules.</p></li>
+</ul>
+<p>The geometric stiffness must therefore be integrated with <code class="docutils literal notranslate"><span class="pre">fkG_num</span></code>, and
+not <code class="docutils literal notranslate"><span class="pre">fkG0</span></code>, whenever the pre-buckling resultants are not uniform, e.g.
+near the edges of a cylinder whose fundamental state is not a pure membrane
+state: <code class="docutils literal notranslate"><span class="pre">fkG0</span></code> cannot represent it.</p>
+</section>
+<section id="numerical-integration">
+<span id="tangent-clpt-donnell-quadrature"></span><h3>Numerical integration<a class="headerlink" href="#numerical-integration" title="Link to this heading">#</a></h3>
+<p>All integrals of the numerically integrated path are computed in natural
+coordinates using the Gauss-Legendre quadrature, with <span class="math notranslate nohighlight">\(n_x\)</span> and <span class="math notranslate nohighlight">\(n_y\)</span>
+points obtained from <code class="docutils literal notranslate"><span class="pre">scipy.special.roots_legendre</span></code>:</p>
+<div class="math notranslate nohighlight" id="equation-donnell-quadrature">
+<span class="eqno">(22)<a class="headerlink" href="#equation-donnell-quadrature" title="Link to this equation">#</a></span>\[\int_{\mathcal{A}} f \, d\mathcal{A} = \frac{ab}{4} \int_{-1}^{+1}
+\int_{-1}^{+1} f(\xi, \eta) \, d\xi \, d\eta
+\approx \frac{ab}{4} \sum_{p=1}^{n_x} \sum_{q=1}^{n_y} W_p W_q \,
+f(\xi_p, \eta_q)\]</div>
+<p>For integration over a sub-domain <span class="math notranslate nohighlight">\(x_1 \le x \le x_2\)</span> and <span class="math notranslate nohighlight">\(y_1 \le y \le
+y_2\)</span>, the factor <span class="math notranslate nohighlight">\(ab/4\)</span> becomes <span class="math notranslate nohighlight">\((x_2-x_1)(y_2-y_1)/4\)</span>, computed as
+<code class="docutils literal notranslate"><span class="pre">intx*inty</span></code>, and the Gauss points are mapped into the corresponding
+interval of <span class="math notranslate nohighlight">\(\xi\)</span> and <span class="math notranslate nohighlight">\(\eta\)</span>, the interval itself being given by the
+physical limits returned by <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.integration_limits()</span></code> and mapped
+unconditionally, which gives exactly <span class="math notranslate nohighlight">\(\xi, \eta = \pm 1\)</span> for the full
+domain; <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.integration_points()</span></code> returns the same points and
+weights in physical coordinates. The factor <span class="math notranslate nohighlight">\(1/4\)</span> is not always visible in
+the kernels: it is sometimes folded into the symbolic expansion, as in the
+entries of <code class="docutils literal notranslate"><span class="pre">fkC_num</span></code> of <code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell_num.pyx</span></code>, and sometimes
+written out, as <code class="docutils literal notranslate"><span class="pre">weight*(intx*inty/4)</span></code> in <code class="docutils literal notranslate"><span class="pre">fkG_num</span></code> of
+<code class="docutils literal notranslate"><span class="pre">cylshell_clpt_donnell_num.pyx</span></code>. Both forms are the same number.</p>
+<p><span class="math notranslate nohighlight">\(\boldsymbol{F}_{int}\)</span> and <span class="math notranslate nohighlight">\(\boldsymbol{K}_T\)</span> must be integrated with the
+same quadrature rule, which is why <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_fint()</span></code> and
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kT()</span></code> both default <span class="math notranslate nohighlight">\(n_x\)</span> and <span class="math notranslate nohighlight">\(n_y\)</span> to the attributes <code class="docutils literal notranslate"><span class="pre">nx</span></code>
+and <code class="docutils literal notranslate"><span class="pre">ny</span></code> of the shell, or to the shape of <code class="docutils literal notranslate"><span class="pre">ABDnxny</span></code> when it has one
+matrix per point. The consistency between them is then exact at the
+discrete level, whether or not the quadrature integrates the polynomials
+exactly: <a class="reference internal" href="#equation-donnell-kt">(13)</a> is the derivative of <a class="reference internal" href="#equation-donnell-fint">(11)</a>
+pointwise, hence also after applying the same weighted sum to both.</p>
+</section>
+<section id="multi-domain-assembly">
+<span id="tangent-clpt-donnell-multidomain"></span><h3>Multi-domain assembly<a class="headerlink" href="#multi-domain-assembly" title="Link to this heading">#</a></h3>
+<p>For an assembly of panels, each <code class="xref py py-class docutils literal notranslate"><span class="pre">Shell</span></code> writes its own contribution
+into a global matrix of size <span class="math notranslate nohighlight">\(\sum_p 3 m_p n_p\)</span>, offset by the attributes
+<code class="docutils literal notranslate"><span class="pre">row_start</span></code> and <code class="docutils literal notranslate"><span class="pre">col_start</span></code> and passed through as the arguments
+<code class="docutils literal notranslate"><span class="pre">row0</span></code> and <code class="docutils literal notranslate"><span class="pre">col0</span></code> of every kernel. Denoting by <span class="math notranslate nohighlight">\(\boldsymbol{L}_p\)</span> the
+Boolean operator that selects the degrees of freedom of panel <span class="math notranslate nohighlight">\(p\)</span> from the
+global vector, the assembly is:</p>
+<div class="math notranslate nohighlight" id="equation-donnell-assembly">
+<span class="eqno">(23)<a class="headerlink" href="#equation-donnell-assembly" title="Link to this equation">#</a></span>\[\begin{split}\begin{aligned}
+    \boldsymbol{F}_{int} &amp;= \sum_{p} \boldsymbol{L}_p^\top \boldsymbol{F}_{int}^{(p)}(\boldsymbol{L}_p \bar{\boldsymbol{c}}) + \boldsymbol{K}_{C}^{conn} \bar{\boldsymbol{c}} \\
+    \boldsymbol{K}_T &amp;= \sum_{p} \boldsymbol{L}_p^\top \left( \boldsymbol{K}_{C}^{(p)} + \boldsymbol{K}_{G}^{(p)} \right) \boldsymbol{L}_p + \boldsymbol{K}_{C}^{conn}
+\end{aligned}\end{split}\]</div>
+<p><a class="reference internal" href="#equation-donnell-assembly">(23)</a> is <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.calc_fint()</span></code> and
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.calc_kT()</span></code>. Three points are relevant here:</p>
+<ul class="simple">
+<li><p>The panel-level blocks enter unchanged. <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.calc_kT()</span></code>
+calls <code class="docutils literal notranslate"><span class="pre">p.calc_kC(...,</span> <span class="pre">NLgeom=True)</span></code> and <code class="docutils literal notranslate"><span class="pre">p.calc_kG(...,</span> <span class="pre">NLgeom=True)</span></code>
+for each panel, i.e. exactly the two calls of <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kT()</span></code>, so
+<a class="reference internal" href="#equation-donnell-grouping">(19)</a> holds panel by panel.</p></li>
+<li><p>Both are assembled with <code class="docutils literal notranslate"><span class="pre">finalize=False</span></code> and the symmetrisation is
+applied once to the sum, because each panel only fills its own upper
+triangle. The load stiffness of the follower pressure loads, which is
+unsymmetric, is added after the symmetrisation, see
+<a class="reference internal" href="follower_pressure.html#follower-pressure"><span class="std std-ref">Follower pressure loads: theory</span></a>.</p></li>
+<li><p>The connection matrix <span class="math notranslate nohighlight">\(\boldsymbol{K}_{C}^{conn}\)</span> is added after the
+loop, to <span class="math notranslate nohighlight">\(\boldsymbol{K}_T\)</span> and, as <span class="math notranslate nohighlight">\(\boldsymbol{K}_{C}^{conn}
+\bar{\boldsymbol{c}}\)</span>, to <span class="math notranslate nohighlight">\(\boldsymbol{F}_{int}\)</span>. Its own derivation is
+out of the scope of this section, see <a class="reference internal" href="multidomain_null_space.html#null-space"><span class="std std-ref">Exact connections with the null-space method</span></a>; what matters here
+is that it is added consistently to both, so that the assembled
+<span class="math notranslate nohighlight">\(\boldsymbol{K}_T\)</span> remains the derivative of the assembled
+<span class="math notranslate nohighlight">\(\boldsymbol{F}_{int}\)</span> whenever <span class="math notranslate nohighlight">\(\boldsymbol{K}_{C}^{conn}\)</span> is
+independent of <span class="math notranslate nohighlight">\(\bar{\boldsymbol{c}}\)</span>.</p></li>
+</ul>
+</section>
+<section id="symbols-and-implementation-variables">
+<span id="tangent-clpt-donnell-mapping"></span><h3>Symbols and implementation variables<a class="headerlink" href="#symbols-and-implementation-variables" title="Link to this heading">#</a></h3>
+<p>The following tables relate the symbols used herein to the variables of the
+implementation, those of the plate kernels unless stated, the cylindrical
+twins using the same names, and map the matrix terms.</p>
+<div class="pst-scrollable-table-container"><table class="table" id="id4">
+<caption><span class="caption-text">Symbols and implementation variables</span><a class="headerlink" href="#id4" title="Link to this table">#</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>Symbol</p></th>
+<th class="head"><p>Variable</p></th>
+<th class="head"><p>Where</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\bar{\boldsymbol{c}}\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cs</span></code>, <code class="docutils literal notranslate"><span class="pre">c</span></code></p></td>
+<td><p>argument of the kernels</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(m\)</span>, <span class="math notranslate nohighlight">\(n\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">m</span></code>, <code class="docutils literal notranslate"><span class="pre">n</span></code></p></td>
+<td><p>attributes of <code class="xref py py-class docutils literal notranslate"><span class="pre">Shell</span></code>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.get_size()</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(a\)</span>, <span class="math notranslate nohighlight">\(b\)</span>, <span class="math notranslate nohighlight">\(r\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">a</span></code>, <code class="docutils literal notranslate"><span class="pre">b</span></code>, <code class="docutils literal notranslate"><span class="pre">r</span></code></p></td>
+<td><p>attributes of <code class="xref py py-class docutils literal notranslate"><span class="pre">Shell</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(P_i^u(\xi)\)</span>, <span class="math notranslate nohighlight">\(P_i^{u\prime}(\xi)\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fAu</span></code>, <code class="docutils literal notranslate"><span class="pre">fAuxi</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ftab</span></code> of the kernels</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(P_j^w(\eta)\)</span>, <span class="math notranslate nohighlight">\(P_j^{w\prime}\)</span>, <span class="math notranslate nohighlight">\(P_j^{w\prime\prime}\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">gAw</span></code>, <code class="docutils literal notranslate"><span class="pre">gAweta</span></code>, <code class="docutils literal notranslate"><span class="pre">gAwetaeta</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">gtab</span></code> of the kernels</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(P_k^w(\xi)\)</span>, <span class="math notranslate nohighlight">\(P_l^w(\eta)\)</span> (term <span class="math notranslate nohighlight">\(B\)</span>)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fBw</span></code>, <code class="docutils literal notranslate"><span class="pre">gBw</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ftab</span></code>, <code class="docutils literal notranslate"><span class="pre">gtab</span></code> of the kernels</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\delta_{t1}\)</span>, <span class="math notranslate nohighlight">\(\delta_{r1}\)</span>, <span class="math notranslate nohighlight">\(\delta_{t2}\)</span>, <span class="math notranslate nohighlight">\(\delta_{r2}\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">x1w</span></code>, <code class="docutils literal notranslate"><span class="pre">x1wr</span></code>, <code class="docutils literal notranslate"><span class="pre">x2w</span></code>, <code class="docutils literal notranslate"><span class="pre">x2wr</span></code></p></td>
+<td><p>attributes of <code class="xref py py-class docutils literal notranslate"><span class="pre">Shell</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\partial w/\partial\xi\)</span>, <span class="math notranslate nohighlight">\(\partial w/\partial\eta\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">wxi</span></code>, <code class="docutils literal notranslate"><span class="pre">weta</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fkC_num</span></code>, <code class="docutils literal notranslate"><span class="pre">calc_fint</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(w_{,x}\)</span>, <span class="math notranslate nohighlight">\(w_{,y}\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">wx</span></code>, <code class="docutils literal notranslate"><span class="pre">wy</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fkC_num</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\boldsymbol{\varepsilon}^{(0)}\)</span>, <span class="math notranslate nohighlight">\(\boldsymbol{\varepsilon}^{(1)}\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">exx,</span> <span class="pre">eyy,</span> <span class="pre">gxy</span></code>, <code class="docutils literal notranslate"><span class="pre">kxx,</span> <span class="pre">kyy,</span> <span class="pre">kxy</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">calc_fint</span></code>, <code class="docutils literal notranslate"><span class="pre">fkG_num</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\boldsymbol{C}\)</span>, i.e. <span class="math notranslate nohighlight">\(\boldsymbol{A}\)</span>, <span class="math notranslate nohighlight">\(\boldsymbol{B}\)</span>,
+<span class="math notranslate nohighlight">\(\boldsymbol{D}\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Finput</span></code>, <code class="docutils literal notranslate"><span class="pre">F</span></code>, <code class="docutils literal notranslate"><span class="pre">A11</span></code> … <code class="docutils literal notranslate"><span class="pre">D66</span></code></p></td>
+<td><p>argument of the kernels, <code class="xref py py-attr docutils literal notranslate"><span class="pre">Shell.ABD</span></code>, <code class="docutils literal notranslate"><span class="pre">Shell.ABDnxny</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\boldsymbol{N}\)</span>, <span class="math notranslate nohighlight">\(\boldsymbol{M}\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Nxx,</span> <span class="pre">Nyy,</span> <span class="pre">Nxy</span></code>, <code class="docutils literal notranslate"><span class="pre">Mxx,</span> <span class="pre">Myy,</span> <span class="pre">Mxy</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">calc_fint</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\boldsymbol{N}_{NL}\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">NxxNL</span></code>, <code class="docutils literal notranslate"><span class="pre">NyyNL</span></code>, <code class="docutils literal notranslate"><span class="pre">NxyNL</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fkC_num</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\boldsymbol{N}^0\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Nxx0,</span> <span class="pre">Nyy0,</span> <span class="pre">Nxy0</span></code>; <code class="docutils literal notranslate"><span class="pre">Shell.Nxx</span></code> …</p></td>
+<td><p>arguments of <code class="docutils literal notranslate"><span class="pre">fkG_num</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\boldsymbol{N}^0 + \boldsymbol{N}_L\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Nxx,</span> <span class="pre">Nyy,</span> <span class="pre">Nxy</span></code> of <code class="docutils literal notranslate"><span class="pre">fkG_num</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fkG_num</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(x_2-x_1\)</span>, <span class="math notranslate nohighlight">\(y_2-y_1\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">intx</span></code>, <code class="docutils literal notranslate"><span class="pre">inty</span></code></p></td>
+<td><p>numerical kernels</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(W_p W_q\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">weight</span></code></p></td>
+<td><p>numerical kernels</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(n_x\)</span>, <span class="math notranslate nohighlight">\(n_y\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">nx</span></code>, <code class="docutils literal notranslate"><span class="pre">ny</span></code></p></td>
+<td><p>attributes of <code class="xref py py-class docutils literal notranslate"><span class="pre">Shell</span></code>, arguments of the calc methods</p></td>
+</tr>
+<tr class="row-even"><td><p>row term <span class="math notranslate nohighlight">\(A = (i,j)\)</span>, column term <span class="math notranslate nohighlight">\(B = (k,l)\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">i,</span> <span class="pre">j</span></code>, <code class="docutils literal notranslate"><span class="pre">k,</span> <span class="pre">l</span></code></p></td>
+<td><p>kernels</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(3(jm+i)\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">DOF*(j*m</span> <span class="pre">+</span> <span class="pre">i)</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">row</span></code>, <code class="docutils literal notranslate"><span class="pre">col</span></code> of the kernels</p></td>
+</tr>
+<tr class="row-even"><td><p>offsets of <span class="math notranslate nohighlight">\(\boldsymbol{L}_p\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">row0</span></code>, <code class="docutils literal notranslate"><span class="pre">col0</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">row_start</span></code>, <code class="docutils literal notranslate"><span class="pre">col_start</span></code> in <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.calc_kT()</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The two last rows of the next table hold the terms whose placement differs
+between the two namings.</p>
+<div class="pst-scrollable-table-container"><table class="table" id="id5">
+<caption><span class="caption-text">Matrix terms: notation of this section, name used by the
+            code and producing function</span><a class="headerlink" href="#id5" title="Link to this table">#</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>Herein</p></th>
+<th class="head"><p>Code name</p></th>
+<th class="head"><p>Function</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\boldsymbol{K}_{C0}\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">K0</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fk0</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\boldsymbol{K}_{C0}\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">K0</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fkC_num</span></code> with <code class="docutils literal notranslate"><span class="pre">NLgeom=0</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\boldsymbol{K}_{CNL}\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">K0L</span> <span class="pre">+</span> <span class="pre">KL0</span> <span class="pre">+</span> <span class="pre">KLL</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fkC_num</span></code> with <code class="docutils literal notranslate"><span class="pre">NLgeom=1</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\boldsymbol{K}_G\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">KG(N0</span> <span class="pre">+</span> <span class="pre">N_L)</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fkG_num</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\boldsymbol{K}_G(\boldsymbol{N}^0)\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">KG0</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fkG0</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\boldsymbol{F}_{int}\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fint</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">calc_fint</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\boldsymbol{K}_T\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">kT</span></code></p></td>
+<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kT()</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\boldsymbol{K}_{CNL}\)</span>, part of</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">KGNL</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fkC_num</span></code>, under <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">KGNL</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>not in <span class="math notranslate nohighlight">\(\boldsymbol{K}_T\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">KG0</span></code>, <code class="docutils literal notranslate"><span class="pre">KG(c_cte)</span></code></p></td>
+<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kC()</span></code>, added to <code class="docutils literal notranslate"><span class="pre">kC</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="verification">
+<span id="tangent-clpt-donnell-verification"></span><h3>Verification<a class="headerlink" href="#verification" title="Link to this heading">#</a></h3>
+<p>Three test modules pin the claims of this section. The first two are
+parametrised over <code class="docutils literal notranslate"><span class="pre">plate_clpt_donnell</span></code> and <code class="docutils literal notranslate"><span class="pre">cylshell_clpt_donnell</span></code>, both
+using an unsymmetric, unbalanced laminate so that <span class="math notranslate nohighlight">\(\boldsymbol{B} \neq
+\boldsymbol{0}\)</span> and <span class="math notranslate nohighlight">\(A_{16}, A_{26} \neq 0\)</span>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">tests/tests_shell/test_tangent_consistency.py</span></code> verifies the Jacobian
+claim of <a class="reference internal" href="#equation-donnell-kt">(13)</a> directly:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">test_tangent_is_derivative_of_fint</span></code> is the directional Taylor test.
+Given an arbitrary state <span class="math notranslate nohighlight">\(\bar{\boldsymbol{c}}\)</span> and direction
+<span class="math notranslate nohighlight">\(\boldsymbol{d}\)</span>, <span class="math notranslate nohighlight">\(\boldsymbol{F}_{int}(\bar{\boldsymbol{c}} +
+h\boldsymbol{d}) = \boldsymbol{F}_{int}(\bar{\boldsymbol{c}}) + h
+\boldsymbol{K}_T(\bar{\boldsymbol{c}}) \boldsymbol{d} + O(h^2)\)</span>, so the
+relative error</p>
+<div class="math notranslate nohighlight">
+\[e(h) = \frac{\left\| \boldsymbol{F}_{int}(\bar{\boldsymbol{c}} +
+h\boldsymbol{d}) - \boldsymbol{F}_{int}(\bar{\boldsymbol{c}}) - h
+\boldsymbol{K}_T \boldsymbol{d} \right\|}{\left\| h \boldsymbol{K}_T
+\boldsymbol{d} \right\|}\]</div>
+<p>must fall proportionally to <span class="math notranslate nohighlight">\(h\)</span>. The test asserts a factor of at least
+five per decade over <span class="math notranslate nohighlight">\(h \in [10^{-6}, 10^{-2}]\)</span>, and that <span class="math notranslate nohighlight">\(e(h)/h\)</span> does
+not drift by more than a factor of two. An inconsistent tangent leaves a
+remainder of order <span class="math notranslate nohighlight">\(h\)</span> and <span class="math notranslate nohighlight">\(e(h)\)</span> plateaus instead.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">test_tangent_matches_finite_difference_jacobian</span></code> compares every entry
+of <span class="math notranslate nohighlight">\(\boldsymbol{K}_T\)</span> against a central finite-difference Jacobian of
+<span class="math notranslate nohighlight">\(\boldsymbol{F}_{int}\)</span>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">test_kG_is_homogeneous_of_degree_one</span></code> asserts
+<span class="math notranslate nohighlight">\(\boldsymbol{K}_G(2\bar{\boldsymbol{c}}) =
+2\boldsymbol{K}_G(\bar{\boldsymbol{c}})\)</span>, which is the property that the
+placement of <span class="math notranslate nohighlight">\(\boldsymbol{K}_{GNL}\)</span> in <a class="reference internal" href="#equation-donnell-grouping">(19)</a> exists to
+preserve.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">test_fint_and_tangent_in_the_undeformed_state</span></code> asserts
+<span class="math notranslate nohighlight">\(\boldsymbol{F}_{int}(\boldsymbol{0}) = \boldsymbol{0}\)</span> and
+<span class="math notranslate nohighlight">\(\boldsymbol{K}_T(\boldsymbol{0}) = \boldsymbol{K}_{C0}\)</span>, which is
+<a class="reference internal" href="#equation-donnell-three-way">(20)</a> at <span class="math notranslate nohighlight">\(\bar{\boldsymbol{c}} = \boldsymbol{0}\)</span>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">test_newton_raphson_converges_quadratically</span></code> manufactures an
+equilibrium state and checks that the error is squared at each iteration.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">tests/tests_shell/test_nonlinear.py</span></code> exercises the same tangent in a full
+Newton-Raphson solution, deep in the postbuckling regime at about 37 times
+the first linear buckling load, and asserts both the converged deflection
+and a convergence order above <span class="math notranslate nohighlight">\(1.6\)</span>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">tests/tests_shell/test_argument_validation.py</span></code> pins the argument handling
+around these matrices, and with it three claims of this section:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">test_KGNL_is_in_calc_kC_and_not_in_calc_kG</span></code> asserts that
+<span class="math notranslate nohighlight">\(\boldsymbol{K}_G\)</span> is homogeneous of degree one, that <code class="docutils literal notranslate"><span class="pre">NLgeom</span></code> does not
+change its value, and that <span class="math notranslate nohighlight">\(\boldsymbol{K}_T\)</span> is exactly the sum of the
+two matrices of <a class="reference internal" href="#equation-donnell-grouping">(19)</a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">test_NLgeom_and_not_c_selects_the_large_displacement_matrix</span></code> asserts
+that <code class="docutils literal notranslate"><span class="pre">fkC_num</span></code> returns <span class="math notranslate nohighlight">\(\boldsymbol{K}_{C0}\)</span> whenever <code class="docutils literal notranslate"><span class="pre">NLgeom=0</span></code>,
+whatever <span class="math notranslate nohighlight">\(\bar{\boldsymbol{c}}\)</span>, and that the result then matches the
+closed-form <code class="docutils literal notranslate"><span class="pre">fk0</span></code>, as stated when mapping the code onto
+<a class="reference internal" href="#equation-donnell-three-way">(20)</a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">test_cylshell_approaches_plate_as_radius_grows</span></code> asserts the monotonic
+convergence of <a class="reference internal" href="#tangent-clpt-donnell-limit"><span class="std std-ref">On presenting the plate as the limit of the cylinder</span></a>, and
+<code class="docutils literal notranslate"><span class="pre">test_cylshell_requires_positive_radius</span></code> that <span class="math notranslate nohighlight">\(r = 0\)</span>, a negative <span class="math notranslate nohighlight">\(r\)</span>
+and an unset <span class="math notranslate nohighlight">\(r\)</span> are all rejected for the cylinder.</p></li>
+</ul>
+<p>Together the first two modules support every claim made here about
+<span class="math notranslate nohighlight">\(\boldsymbol{K}_T\)</span> being the exact Jacobian, about <span class="math notranslate nohighlight">\(\boldsymbol{K}_G\)</span> being
+homogeneous of degree one, and about <span class="math notranslate nohighlight">\(\boldsymbol{K}_T(\boldsymbol{0}) =
+\boldsymbol{K}_{C0}\)</span>. They do not separately test the decomposition of
+<a class="reference internal" href="#equation-donnell-grouping">(19)</a> term by term, nor the closed-form path against the
+numerically integrated one; those were verified independently while
+preparing this section, by rebuilding <span class="math notranslate nohighlight">\(\boldsymbol{B}_L\)</span>,
+<span class="math notranslate nohighlight">\(\boldsymbol{B}_{NL}\)</span> and <span class="math notranslate nohighlight">\(\boldsymbol{G}\)</span> from <a class="reference internal" href="#equation-donnell-bl">(7)</a>,
+<a class="reference internal" href="#equation-donnell-bnl">(9)</a> and <a class="reference internal" href="#equation-donnell-g">(8)</a> at the Gauss points and comparing
+against the compiled kernels, with the following results, for both models,
+<span class="math notranslate nohighlight">\(m = n = 4\)</span>, <span class="math notranslate nohighlight">\(n_x = n_y = 10\)</span>, an unsymmetric laminate and a random
+<span class="math notranslate nohighlight">\(\bar{\boldsymbol{c}}\)</span> with deflections of twenty thicknesses.</p>
+<div class="pst-scrollable-table-container"><table class="table" id="id6">
+<caption><span class="caption-text">Relative difference between the compiled kernels and the
+            equations of this section, rebuilt independently</span><a class="headerlink" href="#id6" title="Link to this table">#</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>Kernel</p></th>
+<th class="head"><p>Equation</p></th>
+<th class="head"><p>Plate</p></th>
+<th class="head"><p>Cylinder</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">fkC_num</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(\int (\boldsymbol{B}_L + \boldsymbol{B}_{NL})^\top \boldsymbol{C}
+(\boldsymbol{B}_L + \boldsymbol{B}_{NL}) + \boldsymbol{K}_{GNL}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(4.0 \times 10^{-16}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(2.3 \times 10^{-16}\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">fkG_num</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(\boldsymbol{K}_G(\boldsymbol{N}^0 + \boldsymbol{N}_L)\)</span>,
+<a class="reference internal" href="#equation-donnell-kg">(14)</a></p></td>
+<td><p><span class="math notranslate nohighlight">\(5.7 \times 10^{-16}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(4.9 \times 10^{-16}\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">calc_fint</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(\int (\boldsymbol{B}_L + \boldsymbol{B}_{NL})^\top
+\hat{\boldsymbol{\sigma}}\)</span>, <a class="reference internal" href="#equation-donnell-fint">(11)</a></p></td>
+<td><p><span class="math notranslate nohighlight">\(2.2 \times 10^{-16}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(2.2 \times 10^{-16}\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">fk0</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fkC_num</span></code> at <span class="math notranslate nohighlight">\(\bar{\boldsymbol{c}} = \boldsymbol{0}\)</span>, <span class="math notranslate nohighlight">\(n_x = n_y
+= 30\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(4.7 \times 10^{-15}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(4.6 \times 10^{-15}\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">fkG0</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fkG_num</span></code> at <span class="math notranslate nohighlight">\(\bar{\boldsymbol{c}} = \boldsymbol{0}\)</span>, <span class="math notranslate nohighlight">\(n_x = n_y
+= 30\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(8.6 \times 10^{-15}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(8.8 \times 10^{-15}\)</span></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The last two rows also establish that the closed-form and the numerically
+integrated paths agree to round-off once the quadrature is fine enough to
+integrate the polynomials exactly, so the choice between them of
+<a class="reference internal" href="#tangent-clpt-donnell-paths"><span class="std std-ref">The two implementation paths</span></a> is a matter of cost and of capability,
+not of accuracy.</p>
+</section>
+<section id="where-the-naming-and-the-code-do-not-line-up">
+<span id="tangent-clpt-donnell-discrepancies"></span><h3>Where the naming and the code do not line up<a class="headerlink" href="#where-the-naming-and-the-code-do-not-line-up" title="Link to this heading">#</a></h3>
+<p>Two points deserve to be stated rather than smoothed over.</p>
+<p><strong>The</strong> <span class="math notranslate nohighlight">\(\boldsymbol{K}_C\)</span>–<span class="math notranslate nohighlight">\(\boldsymbol{K}_G\)</span> <strong>boundary moves.</strong> The
+split of <a class="reference internal" href="#equation-donnell-kt-split">(3)</a> and the split of <a class="reference internal" href="#equation-donnell-kt-classical">(2)</a>
+are not the same split, although both sum to the same <span class="math notranslate nohighlight">\(\boldsymbol{K}_T\)</span>.
+Writing <span class="math notranslate nohighlight">\(\boldsymbol{K}_C\)</span> and <span class="math notranslate nohighlight">\(\boldsymbol{K}_G\)</span> for the classical
+constitutive and geometric stiffness matrices, defined respectively as the
+first and the second integral of <a class="reference internal" href="#equation-donnell-kt">(13)</a>:</p>
+<div class="math notranslate nohighlight" id="equation-donnell-boundary">
+<span class="eqno">(24)<a class="headerlink" href="#equation-donnell-boundary" title="Link to this equation">#</a></span>\[\boldsymbol{K}_{C0} + \boldsymbol{K}_{CNL} = \boldsymbol{K}_C +
+\boldsymbol{K}_{GNL}
+\qquad
+\boldsymbol{K}_G^{\text{herein}} = \boldsymbol{K}_G - \boldsymbol{K}_{GNL}\]</div>
+<p>The term <span class="math notranslate nohighlight">\(\boldsymbol{K}_{GNL}\)</span> is geometric by construction, being <span class="math notranslate nohighlight">\(\int
+\boldsymbol{G}^\top \tilde{\boldsymbol{N}}_{NL} \boldsymbol{G} \,
+d\mathcal{A}\)</span>, yet under the naming of <a class="reference internal" href="#equation-donnell-kt-split">(3)</a> it belongs to
+<span class="math notranslate nohighlight">\(\boldsymbol{K}_{CNL}\)</span>. The three-way split therefore partitions the five
+terms of the code cleanly, but only if <span class="math notranslate nohighlight">\(\boldsymbol{K}_{CNL}\)</span> is defined
+operationally, as <em>everything</em> <code class="docutils literal notranslate"><span class="pre">fkC_num</span></code> <em>adds beyond</em>
+<span class="math notranslate nohighlight">\(\bar{\boldsymbol{c}} = \boldsymbol{0}\)</span>, and not semantically, as <em>the
+non-linear constitutive terms</em>. Under the semantic reading,
+<span class="math notranslate nohighlight">\(\boldsymbol{K}_{GNL}\)</span> has no home in any of the three symbols and the
+partition fails. This section adopts the operational reading, and
+<a class="reference internal" href="#equation-donnell-three-way">(20)</a> states it.</p>
+<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kC()</span></code> <strong>does not always return</strong> <span class="math notranslate nohighlight">\(\boldsymbol{K}_{C0} +
+\boldsymbol{K}_{CNL}\)</span>. If <code class="docutils literal notranslate"><span class="pre">c_cte</span></code> is given or any of <code class="docutils literal notranslate"><span class="pre">Nxx_cte</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Nyy_cte</span></code>, <code class="docutils literal notranslate"><span class="pre">Nxy_cte</span></code> is non-zero, a geometric block is added into the
+matrix returned as <code class="docutils literal notranslate"><span class="pre">kC</span></code>, either <span class="math notranslate nohighlight">\(\boldsymbol{K}_G(\boldsymbol{N}^{cte})\)</span>
+through <code class="docutils literal notranslate"><span class="pre">fkG0</span></code> or <span class="math notranslate nohighlight">\(\boldsymbol{K}_G\)</span> evaluated at <code class="docutils literal notranslate"><span class="pre">c_cte</span></code> through
+<code class="docutils literal notranslate"><span class="pre">fkG_num</span></code>. This is the superposition device of combined load cases, which
+keeps a part of the stress state out of reach of the load multiplier
+<span class="math notranslate nohighlight">\(\lambda\)</span>. With <code class="docutils literal notranslate"><span class="pre">NLgeom=True</span></code> and follower pressure loads, their load
+stiffness <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kCfollower()</span></code> is added as well. The symbol
+<span class="math notranslate nohighlight">\(\boldsymbol{K}_{C0} + \boldsymbol{K}_{CNL}\)</span> therefore describes the return
+value of <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kC()</span></code> only when no constant pre-stress and no
+follower load is declared. The two modules of
+<a class="reference internal" href="#tangent-clpt-donnell-verification"><span class="std std-ref">Verification</span></a> that verify the Jacobian set the
+constant stresses to zero and do not exercise this branch; the third module
+does, but only to check that it is reached safely, not the value of the
+block.</p>
+</section>
+<section id="note-on-symbols">
+<h3>Note on symbols<a class="headerlink" href="#note-on-symbols" title="Link to this heading">#</a></h3>
+<p>Three groups of symbols are introduced here because the implementation
+distinguishes quantities that the classical treatment does not:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\boldsymbol{K}_{C0}\)</span> and <span class="math notranslate nohighlight">\(\boldsymbol{K}_{CNL}\)</span>, for the constant and the
+state-dependent parts of the matrix returned by <code class="docutils literal notranslate"><span class="pre">fkC_num</span></code>. The classical
+symbol for the first of them is <span class="math notranslate nohighlight">\(\boldsymbol{K}_0\)</span>, also used here, in
+<a class="reference internal" href="#equation-donnell-k-groups">(16)</a>; <span class="math notranslate nohighlight">\(\boldsymbol{K}_{C0}\)</span> is kept in
+<a class="reference internal" href="#equation-donnell-kt-split">(3)</a> because the three-way split it belongs to is the
+one the implementation is organised around.</p></li>
+<li><p><span class="math notranslate nohighlight">\(\boldsymbol{N}^0\)</span>, <span class="math notranslate nohighlight">\(\boldsymbol{N}_L\)</span> and <span class="math notranslate nohighlight">\(\boldsymbol{N}_{NL}\)</span>, for the
+three contributions to the membrane stress entering <a class="reference internal" href="#equation-donnell-kg">(14)</a>. The
+decomposition is needed here because the implementation evaluates the
+third one separately, and places it on the other side of the
+<span class="math notranslate nohighlight">\(\boldsymbol{K}_C\)</span>–<span class="math notranslate nohighlight">\(\boldsymbol{K}_G\)</span> boundary.</p></li>
+<li><p><span class="math notranslate nohighlight">\(\boldsymbol{L}_p\)</span>, for the Boolean selection operator of the multi-domain
+assembly of <a class="reference internal" href="#equation-donnell-assembly">(23)</a>, which has no counterpart in the
+single-domain treatment.</p></li>
+</ul>
+</section>
+</section>
+<section id="product-of-the-tangent-stiffness-matrix-by-a-vector">
+<span id="tangent-ktv"></span><h2>Product of the tangent stiffness matrix by a vector<a class="headerlink" href="#product-of-the-tangent-stiffness-matrix-by-a-vector" title="Link to this heading">#</a></h2>
 <p><code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kTv()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.calc_kTv()</span></code> return the
 product <span class="math notranslate nohighlight">\([K_T(c)] \{v\}\)</span> of the tangent stiffness matrix of
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kT()</span></code> by a vector, without assembling <span class="math notranslate nohighlight">\([K_T]\)</span>, for all the
@@ -571,7 +1596,7 @@ each configuration, <span class="math notranslate nohighlight">\(\partial R_r/\p
 [K_T(c)] \{c_{p1}\})\)</span>, see <a class="reference internal" href="multidomain_null_space.html#null-space-pd"><span class="std std-ref">Prescribed displacements imposed exactly</span></a>, and what matrix-free
 iterative solvers and directional checks of the tangent need.</p>
 <section id="derivation">
-<h2>Derivation<a class="headerlink" href="#derivation" title="Link to this heading">#</a></h2>
+<h3>Derivation<a class="headerlink" href="#derivation" title="Link to this heading">#</a></h3>
 <p>All the geometrically non-linear models, the plates and the Donnell and
 Sanders cylinders of the CLPT, FSDT and TSDT, have at an integration point
 the generalized strains</p>
@@ -591,7 +1616,7 @@ for Sanders, and <span class="math notranslate nohighlight">\([B(\beta)]\)</span
 <span class="math notranslate nohighlight">\(\{F_{int}\} = \int [B(\beta)]^T [F] \{\varepsilon(c)\} dA\)</span>, and its
 directional derivative along <span class="math notranslate nohighlight">\(\{v\}\)</span> is</p>
 <div class="math notranslate nohighlight" id="equation-ktv">
-<span class="eqno">(1)<a class="headerlink" href="#equation-ktv" title="Link to this equation">#</a></span>\[[K_T] \{v\} = \frac{d}{dt} \{F_{int}(c + t v)\} \Big|_{t=0} =
+<span class="eqno">(25)<a class="headerlink" href="#equation-ktv" title="Link to this equation">#</a></span>\[[K_T] \{v\} = \frac{d}{dt} \{F_{int}(c + t v)\} \Big|_{t=0} =
 \int \left( [B(\beta)]^T [F] [B(\beta)] \{v\} + [G]^T [N] [G] \{v\}
 \right) dA\]</div>
 <p>because the strains are a quadratic form whose bilinear form is
@@ -610,18 +1635,18 @@ the kernels <code class="docutils literal notranslate"><span class="pre">calc_kT
 [B(\beta)] \{v\}\)</span>;</p></li>
 <li><p>the stresses <span class="math notranslate nohighlight">\([F] \{\varepsilon\}\)</span>, of which <span class="math notranslate nohighlight">\([N]\)</span>, and <span class="math notranslate nohighlight">\([F] \{\delta
 \varepsilon\}\)</span>;</p></li>
-<li><p>the sum of <a class="reference internal" href="#equation-ktv">(1)</a> over the terms.</p></li>
+<li><p>the sum of <a class="reference internal" href="#equation-ktv">(25)</a> over the terms.</p></li>
 </ol>
 <p>Each step is a loop over the <span class="math notranslate nohighlight">\(m n\)</span> terms, against a loop over the <span class="math notranslate nohighlight">\(m^2
 n^2\)</span> pairs of terms for the assembly of <span class="math notranslate nohighlight">\([K_T]\)</span>.</p>
 <p>The expressions are generated by <code class="docutils literal notranslate"><span class="pre">theory/shells/tangent_product</span></code>, which
-also verifies with SymPy, for every model, that <a class="reference internal" href="#equation-ktv">(1)</a> is the derivative
+also verifies with SymPy, for every model, that <a class="reference internal" href="#equation-ktv">(25)</a> is the derivative
 of the internal force vector of one term, with a symbolic constitutive
 matrix; <span class="math notranslate nohighlight">\([B]\)</span> and <span class="math notranslate nohighlight">\([G]\)</span> being linear in the degrees of freedom, the
 identity extends to any number of terms.</p>
 </section>
 <section id="follower-pressure-loads">
-<h2>Follower pressure loads<a class="headerlink" href="#follower-pressure-loads" title="Link to this heading">#</a></h2>
+<h3>Follower pressure loads<a class="headerlink" href="#follower-pressure-loads" title="Link to this heading">#</a></h3>
 <p>With follower pressure loads, <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kTv()</span></code> adds the product of
 their load stiffness <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kCfollower()</span></code> as the central
 difference</p>
@@ -633,8 +1658,8 @@ difference</p>
 <code class="docutils literal notranslate"><span class="pre">follower='quadratic'</span></code>, see <a class="reference internal" href="follower_pressure.html#follower-pressure"><span class="std std-ref">Follower pressure loads: theory</span></a>. <span class="math notranslate nohighlight">\(t = \max(\|c\|/\|v\|,
 1)\)</span> avoids the cancellation of large and small terms.</p>
 </section>
-<section id="verification">
-<h2>Verification<a class="headerlink" href="#verification" title="Link to this heading">#</a></h2>
+<section id="id1">
+<h3>Verification<a class="headerlink" href="#id1" title="Link to this heading">#</a></h3>
 <p>The checks of the tangent stiffness matrix of
 <code class="docutils literal notranslate"><span class="pre">tests/tests_shell/test_tangent_consistency.py</span></code> are repeated for the
 product, for all 9 models, in <code class="docutils literal notranslate"><span class="pre">tests/tests_shell/test_tangent_product.py</span></code>:</p>
@@ -705,7 +1730,7 @@ and <span class="math notranslate nohighlight">\(\partial R_r/\partial \lambda\)
 the assembled tangent stiffness matrix.</p>
 </section>
 <section id="performance">
-<h2>Performance<a class="headerlink" href="#performance" title="Link to this heading">#</a></h2>
+<h3>Performance<a class="headerlink" href="#performance" title="Link to this heading">#</a></h3>
 <p>Single shell, laminate <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">45,</span> <span class="pre">-45,</span> <span class="pre">90]</span></code>, <code class="docutils literal notranslate"><span class="pre">nx</span> <span class="pre">=</span> <span class="pre">2m</span></code>, <code class="docutils literal notranslate"><span class="pre">ny</span> <span class="pre">=</span> <span class="pre">2n</span></code>
 integration points, one core; <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kT()</span></code> with the tabulated
 kernels, see <a class="reference internal" href="tabulation.html#tabulation"><span class="std std-ref">Approximation functions tabulated at the integration points</span></a>:</p>
@@ -806,6 +1831,7 @@ assembly of <span class="math notranslate nohighlight">\([K_T]\)</span> for the 
 the products costing 0.2 to 0.5 s in total.</p>
 </section>
 </section>
+</section>
 
 
                 </article>
@@ -854,10 +1880,37 @@ the products costing 0.2 to 0.5 s in total.</p>
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#derivation">Derivation</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#follower-pressure-loads">Follower pressure loads</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#verification">Verification</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#performance">Performance</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tangent-stiffness-of-the-clpt-models-with-donnell-kinematics">Tangent stiffness of the CLPT models with Donnell kinematics</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-two-implementation-paths">The two implementation paths</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#approximation-functions">Approximation functions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#kinematics-as-implemented">Kinematics as implemented</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#on-presenting-the-plate-as-the-limit-of-the-cylinder">On presenting the plate as the limit of the cylinder</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#constitutive-relation">Constitutive relation</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#linear-and-non-linear-differentiation-operators">Linear and non-linear differentiation operators</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#internal-force-vector">Internal force vector</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tangent-stiffness-matrix">Tangent stiffness matrix</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#which-stress-enters-the-geometric-stiffness-and-the-degree-of-homogeneity">Which stress enters the geometric stiffness, and the degree of homogeneity</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#mapping-onto-the-three-way-split">Mapping onto the three-way split</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-closed-form-path">The closed-form path</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#numerical-integration">Numerical integration</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#multi-domain-assembly">Multi-domain assembly</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#symbols-and-implementation-variables">Symbols and implementation variables</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#verification">Verification</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#where-the-naming-and-the-code-do-not-line-up">Where the naming and the code do not line up</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#note-on-symbols">Note on symbols</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#product-of-the-tangent-stiffness-matrix-by-a-vector">Product of the tangent stiffness matrix by a vector</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#derivation">Derivation</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#follower-pressure-loads">Follower pressure loads</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Verification</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#performance">Performance</a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 

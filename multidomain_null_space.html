@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Exact connections with the null-space method &#8212; panels 0.13.2 documentation</title>
+    <title>Exact connections with the null-space method &#8212; panels 0.13.9 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
 
-    <script src="_static/documentation_options.js?v=8399f5db"></script>
+    <script src="_static/documentation_options.js?v=97f24cbe"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
@@ -50,7 +50,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.13.2" />
+  <meta name="docsearch:version" content="0.13.9" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -118,7 +118,7 @@
   
   
   
-    <p class="title logo__title">panels 0.13.2 documentation</p>
+    <p class="title logo__title">panels 0.13.9 documentation</p>
   
 </a></div>
     
@@ -232,7 +232,7 @@
 
 <li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="tangent_product.html">
-    Product of the tangent stiffness matrix by a vector
+    Tangent stiffness matrix and its product by a vector
   </a>
 </li>
 
@@ -433,7 +433,7 @@
 
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="tangent_product.html">
-    Product of the tangent stiffness matrix by a vector
+    Tangent stiffness matrix and its product by a vector
   </a>
 </li>
 
@@ -1266,7 +1266,7 @@ tangent stiffness matrix: 0.96 s and 1.29 s with the null-space method for
 method and <span class="math notranslate nohighlight">\(k/(E h) = 10^4\)</span>. The null-space method converges to a much
 smaller residual in absolute terms. Its <span class="math notranslate nohighlight">\(\partial R_r/\partial \lambda\)</span>
 requires the product <span class="math notranslate nohighlight">\([K_T] \{c_{p1}\}\)</span>, computed without assembling
-<span class="math notranslate nohighlight">\([K_T]\)</span>, see <a class="reference internal" href="tangent_product.html#tangent-product"><span class="std std-ref">Product of the tangent stiffness matrix by a vector</span></a>, at the cost of one evaluation of the
+<span class="math notranslate nohighlight">\([K_T]\)</span>, see <a class="reference internal" href="tangent_product.html#tangent-product"><span class="std std-ref">Tangent stiffness matrix and its product by a vector</span></a>, at the cost of one evaluation of the
 internal force vector, and <code class="docutils literal notranslate"><span class="pre">structsolve</span></code> 0.8.0 evaluates it only together
 with the tangent stiffness matrix. With <code class="docutils literal notranslate"><span class="pre">panels</span></code> 0.12.0 before these two
 improvements and the tabulation of the approximation functions, see

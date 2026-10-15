@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Saving and loading in a JSON + NumPy zip container (panels.json_io) &#8212; panels 0.13.2 documentation</title>
+    <title>Saving and loading in a JSON + NumPy zip container (panels.json_io) &#8212; panels 0.13.9 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
 
-    <script src="_static/documentation_options.js?v=8399f5db"></script>
+    <script src="_static/documentation_options.js?v=97f24cbe"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'json_io';</script>
@@ -49,7 +49,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.13.2" />
+  <meta name="docsearch:version" content="0.13.9" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -117,7 +117,7 @@
   
   
   
-    <p class="title logo__title">panels 0.13.2 documentation</p>
+    <p class="title logo__title">panels 0.13.9 documentation</p>
   
 </a></div>
     
@@ -231,7 +231,7 @@
 
 <li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="tangent_product.html">
-    Product of the tangent stiffness matrix by a vector
+    Tangent stiffness matrix and its product by a vector
   </a>
 </li>
 
@@ -432,7 +432,7 @@
 
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="tangent_product.html">
-    Product of the tangent stiffness matrix by a vector
+    Tangent stiffness matrix and its product by a vector
   </a>
 </li>
 
@@ -605,14 +605,14 @@ thicknesses, the lamina properties and the loads, in the envelope:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
   <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"Shell"</span><span class="p">,</span>
   <span class="s2">"format_version"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-  <span class="s2">"panels_version"</span><span class="p">:</span> <span class="s2">"0.11.1"</span><span class="p">,</span>
+  <span class="s2">"panels_version"</span><span class="p">:</span> <span class="s2">"0.13.9"</span><span class="p">,</span>
   <span class="s2">"data"</span><span class="p">:</span> <span class="p">{</span><span class="o">...</span><span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
 </div>
 </li>
-<li><p><code class="docutils literal notranslate"><span class="pre">arrays/&lt;key&gt;.npy</span></code>: every NumPy array, e.g. the constitutive matrix
-<code class="docutils literal notranslate"><span class="pre">ABD</span></code> and the results <code class="docutils literal notranslate"><span class="pre">fields</span></code> or <code class="docutils literal notranslate"><span class="pre">results['eigvecs']</span></code>, written by
+<li><p><code class="docutils literal notranslate"><span class="pre">arrays/&lt;key&gt;.npy</span></code>: every NumPy array, e.g. the constitutive matrices
+<code class="docutils literal notranslate"><span class="pre">ABDnxny</span></code> and the results <code class="docutils literal notranslate"><span class="pre">fields</span></code> or <code class="docutils literal notranslate"><span class="pre">results['eigvecs']</span></code>, written by
 <code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.save()</span></code> with <code class="docutils literal notranslate"><span class="pre">allow_pickle=False</span></code>. In <code class="docutils literal notranslate"><span class="pre">model.json</span></code> an array
 is replaced by <code class="docutils literal notranslate"><span class="pre">{&quot;__ndarray__&quot;:</span> <span class="pre">&quot;arrays/&lt;key&gt;.npy&quot;}</span></code>.</p></li>
 </ul>
