@@ -257,3 +257,117 @@ def test_KGNL_is_in_calc_kC_and_not_in_calc_kG():
     kT = make_shell().calc_kT(c=c).toarray()
     kC = make_shell().calc_kC(c=c, NLgeom=True).toarray()
     assert np.allclose(kT, kC + kG1, rtol=0, atol=1e-9*np.abs(kT).max())
+
+
+def _plate_av(**kwargs):
+    kw = dict(model='plate_clpt_donnell', a=0.5, b=0.4, stack=[0, 90],
+              plyt=0.5e-3, laminaprop=(140e9, 9e9, 0.3, 5e9, 5e9, 3e9),
+              m=5, n=5)
+    kw.update(kwargs)
+    return Shell(**kw)
+
+
+@pytest.mark.parametrize('method', ['calc_kC', 'calc_kG', 'calc_kM',
+                                    'calc_kA', 'calc_kCfollower'])
+def test_size_as_string_adds_to_the_size_of_the_shell(method):
+    r"""``size='+3'`` gives a matrix 3 rows and columns larger, with the
+    matrix of the shell in its upper-left corner"""
+    s = _plate_av(rho=1600.)
+    if method == 'calc_kA':
+        s.beta = 1.
+    if method == 'calc_kCfollower':
+        s.add_pressure_load(1.e3, follower='linear')
+    n = s.get_size()
+    K = getattr(s, method)().toarray()
+    K3 = getattr(s, method)(size='+3').toarray()
+    assert K3.shape == (n + 3, n + 3)
+    assert np.array_equal(K3[:n, :n], K)
+    assert not K3[n:].any() and not K3[:, n:].any()
+
+
+@pytest.mark.parametrize('method', ['calc_fint', 'calc_kTv',
+                                    'calc_fext_follower'])
+def test_size_as_string_for_vectors(method):
+    s = _plate_av()
+    s.add_pressure_load(1.e3, follower='linear')
+    n = s.get_size()
+    c = 1e-4*np.random.default_rng(0).standard_normal(n)
+    c3 = np.concatenate((c, np.zeros(3)))
+    args = {'calc_fint': (c, ), 'calc_kTv': (c, c),
+            'calc_fext_follower': (c, )}[method]
+    args3 = {'calc_fint': (c3, ), 'calc_kTv': (c3, c3),
+             'calc_fext_follower': (c3, )}[method]
+    f = getattr(s, method)(*args)
+    f3 = getattr(s, method)(*args3, size='+3')
+    assert f3.shape == (n + 3, )
+    assert np.allclose(f3[:n], f, rtol=1e-14, atol=0) and not f3[n:].any()
+
+
+def test_analytical_kC_with_constant_stress():
+    r"""``Nxx_cte`` adds the analytical geometric stiffness of that constant
+    stress state into ``kC``, which ``calc_kG`` gives with ``Nxx``"""
+    s = _plate_av()
+    kC = s.calc_kC()
+    s.Nxx = -1.e3
+    kG = s.calc_kG()
+    s.Nxx = 0.
+    s.Nxx_cte = -1.e3
+    assert np.allclose((s.calc_kC() - kC - kG).toarray(), 0,
+                       atol=1e-12*abs(kC).max())
+
+
+def test_shell_argument_errors():
+    s = _plate_av()
+    with pytest.raises(RuntimeError, match='lam object is None'):
+        Shell()._get_lam_ABD()
+    with pytest.raises(ValueError, match='Shell.a must be defined'):
+        Shell(b=1.).integration_limits()
+    s.point_x = (1., 0.)
+    with pytest.raises(ValueError, match='three coordinates'):
+        s.global_frame()
+    s.point_x = None
+    c = np.zeros(s.get_size())
+    with pytest.raises(ValueError, match='same shape'):
+        s.strain(c, xs=np.array([0.1, 0.2]), ys=np.array([0.1]))
+    with pytest.raises(ValueError, match='At least one function'):
+        s.add_distr_load_fixed_x(0.1)
+    with pytest.raises(ValueError, match='At least one penalty constant'):
+        s.add_distr_pd_fixed_x(0.1)
+    with pytest.raises(ValueError, match='At least one function'):
+        s.add_distr_pd_fixed_x(0.1, ku=1.)
+    with pytest.raises(ValueError, match='Both kv and funcv'):
+        s.add_distr_pd_fixed_x(0.1, ku=1., funcu=lambda y: 0., kv=1.)
+
+
+def test_is_curved_without_model():
+    s = Shell(r=1.)
+    s.model = None
+    assert s.is_curved()
+
+
+def test_models_without_kernels(monkeypatch):
+    r"""The errors of a model registered without the kernels of the
+    tangent product, of the follower pressure loads and of the internal
+    forces"""
+    import types
+    from panels import modelDB
+    s = _plate_av()
+    c = np.zeros(s.get_size())
+    entry = dict(modelDB.db['plate_clpt_donnell'],
+                 matrices_num=types.SimpleNamespace())
+    monkeypatch.setitem(modelDB.db, 'fake_model', entry)
+    s.model = 'fake_model'
+    with pytest.raises(NotImplementedError, match='calc_kTv not implemented'):
+        s.calc_kTv(c, c)
+    with pytest.raises(ValueError, match='calc_fint not implemented'):
+        s.calc_fint(c)
+    s.add_pressure_load(1., follower='linear')
+    with pytest.raises(NotImplementedError, match='follower pressure loads'):
+        s.calc_kCfollower(c=c)
+    monkeypatch.setitem(modelDB.db, 'fake_model',
+                        dict(entry, matrices_num=None))
+    with pytest.raises(ValueError, match='matrices_num not implemented'):
+        s.calc_fint(c)
+    s.model = 'unknown_model'
+    with pytest.raises(ValueError, match='not a valid model'):
+        s.calc_fint(c)

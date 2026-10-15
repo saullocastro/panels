@@ -110,3 +110,22 @@ def test_resolution_warning(capsys):
     # only once
     assy.calc_k_dmg(c=c, **kw)
     assert 'WARNING' not in capsys.readouterr().out
+
+
+def test_penalties_of_the_connections_at_90_degrees():
+    r"""``'xcte-ycte'`` connects the edge `x` = constant of ``p1`` to an edge
+    `y` = constant of ``p2``, the harmonic means of `A_{11}` of ``p1`` and
+    `A_{22}` of ``p2``, and conversely for ``'ycte-xcte'``"""
+    from panels.shell import Shell
+    from panels.multidomain.connections import calc_kt_kr
+    kw = dict(model='plate_clpt_donnell', a=0.5, b=0.3, plyt=0.2e-3,
+              laminaprop=(140e9, 9e9, 0.3, 5e9, 5e9, 3e9), m=4, n=4)
+    p1 = Shell(stack=[0, 0, 90], **kw)
+    p2 = Shell(stack=[90, 45, -45, 0], **kw)
+    h = p1.lam.h + p2.lam.h
+    A11, A22 = p1.lam.A[0, 0], p2.lam.A[1, 1]
+    D11, D22 = p1.lam.D[0, 0], p2.lam.D[1, 1]
+    kt, kr = calc_kt_kr(p1, p2, 'xcte-ycte')
+    assert np.isclose(kt, 4*A11*A22/((A11 + A22)*h))
+    assert np.isclose(kr, 4*D11*D22/((D11 + D22)*h))
+    assert np.allclose(calc_kt_kr(p2, p1, 'ycte-xcte'), (kt, kr))

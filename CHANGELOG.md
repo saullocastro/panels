@@ -72,6 +72,32 @@
   `Shell.ABDnxny` against the argument, within a `MultiDomain`, in
   `Shell.stress` and saved and loaded; the checks of `ABDnxny`.
 
+### Tests and coverage
+
+- Every Python line added or changed for this version is covered by the
+  tests, and so are the new checks of the analytical CLPT kernels, by
+  calling them with a stand-in for `Shell`.
+- New tests of the argument handling of `Shell`, in
+  `tests/tests_shell/test_argument_validation.py`: `size='+n'` of
+  `calc_kC`, `calc_kG`, `calc_kM`, `calc_kA`, `calc_kCfollower`,
+  `calc_fint`, `calc_kTv` and `calc_fext_follower`; `Nxx_cte` in the
+  analytical `calc_kC`; the errors of `_get_lam_ABD`,
+  `integration_limits`, `global_frame`, `strain`,
+  `add_distr_load_fixed_x` and `add_distr_pd_fixed_x`; and the errors of a
+  model registered without the kernels of `calc_kTv`, of the follower
+  pressure loads or of `calc_fint`.
+- New tests of `MultiDomain.stress` and `MultiDomain.force` with
+  `ABDnxny`, and of the penalty constants of the connections
+  `'xcte-ycte'` and `'ycte-xcte'`.
+- `Shell.global_frame` checks that `point_x` and `point_xy` have three
+  coordinates before using them, instead of failing with a broadcasting
+  error.
+- `connections.build_panel_lam` is reduced to `Shell._rebuild()`, the
+  laminate being always built by it, without the unreachable fallback.
+- The branches of `MultiDomain.force_out_plane` disabled by hard-coded
+  switches, the area integral and the von Kármán integral, are excluded
+  from the coverage.
+
 ### Documentation: tangent stiffness of the CLPT models with Donnell kinematics
 
 - The derivation of the internal force vector and of the tangent stiffness

@@ -433,3 +433,37 @@ def test_ABDnxny_checks(model):
     s.ABDnxny = G[0, 0] + 0.01*abs(G[0, 0]).max()*np.eye(ne, k=1)
     with pytest.raises(ValueError, match='symmetric the matrix'):
         s.calc_kC()
+
+
+@pytest.mark.parametrize('model', ['plate_clpt_donnell',
+                                   'cylshell_clpt_donnell',
+                                   'cylshell_clpt_sanders'])
+def test_fk0_requires_6x6_ABD(model):
+    r"""The analytical kernels of the CLPT check the shape of
+    ``shell.ABD``, as those of the FSDT and TSDT, a ``Shell`` always giving
+    the shape of its model"""
+    class FakeShell:
+        a = 0.6
+        b = 0.4
+        r = 0.8
+        ABD = np.eye(8)
+    fk0 = modelDB.db[model]['matrices'].fk0
+    with pytest.raises(ValueError, match='6 x 6'):
+        fk0(FakeShell(), 6, 0, 0)
+
+
+def test_stress_without_laminate():
+    with pytest.raises(ValueError, match='not defined'):
+        Shell().stress(np.zeros(3))
+    # the constant stiffness of MultiDomain.stress() and force()
+    with pytest.raises(ValueError, match='not defined'):
+        Shell()._get_constant_ABD()
+
+
+def test_integration_points_default_to_the_attributes():
+    s = _partial(_shell('plate_clpt_donnell'))
+    s.nx, s.ny = 11, 9
+    for a, b in zip(s.integration_points(), s.integration_points(11, 9)):
+        assert np.array_equal(a, b)
+    xs, ys, wxs, wys = s.integration_points()
+    assert xs.shape == wxs.shape == (11, ) and ys.shape == wys.shape == (9, )
