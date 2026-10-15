@@ -117,7 +117,7 @@ History
 =======
 
 See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
-* version 0.13.11 (2026-10-15)
+* version 0.13.11 (2026-10-16)
     - BUG: the analytical constitutive stiffness matrix of the CLPT models ignored `force_orthotropic_laminate`, inconsistently with the internal forces and the numerical matrices
     - `Shell.ABD` is calculated from the laminate and read-only; new attribute `Shell.ABDnxny` for a stiffness that is not that of the laminate, constant or one matrix per integration point, used by all the kernels, also within a `MultiDomain`, and by `Shell.stress()`, and checked to have symmetric blocks as any laminate; new `Shell.integration_points()`
     - Documentation: the derivation of the tangent stiffness matrix of the CLPT models with Donnell kinematics, formerly a LaTeX file, is part of the theory page of the tangent stiffness

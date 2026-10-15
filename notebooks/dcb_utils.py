@@ -610,8 +610,9 @@ def opening_at_crack_length(case, a, lam, lcz):
     + 1/\lambda`, with `a` the crack front (last fully damaged point), `l_{cz}`
     the process zone ahead of it and `1/\lambda` the offset of a beam on an
     elastic foundation (Kanninen 1973). The corrected beam theory, with
-    `\chi h`, gives a shorter crack at the same opening, by 0.3-1.4 mm in the
-    validation runs, since the CLPT arms have no transverse shear.
+    `\chi h`, gives a shorter crack at the same opening, by about `\chi h -
+    l_{cz} - 1/\lambda`, 1.0-1.2 mm in the unidirectional validation runs,
+    since the CLPT arms have no transverse shear.
 
     """
     EI = D11(case)*case['b']
