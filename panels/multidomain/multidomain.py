@@ -1921,12 +1921,15 @@ class MultiDomain(object):
                 "force_out_plane only supports models with 3 DOFs per term "
                 "(u, v, w), got model '{0}'".format(eval_panel.model))
 
+        #NOTE only the line integral is enabled, the branches of the other
+        #     two integrals are kept for reference and excluded from the
+        #     coverage
         line_int = True
         area_int = False
         von_karman_NL_int = False
 
         # Original one - uses gauss points in both x and y
-        if area_int:
+        if area_int: # pragma: no cover
             # nr_x_gauss = 128
             # nr_y_gauss = 100
 
@@ -2028,7 +2031,7 @@ class MultiDomain(object):
                 # print(res_stress['Mxx'][0][:,-1])
 
 
-        if von_karman_NL_int:
+        if von_karman_NL_int: # pragma: no cover
 
             res_uvw = self.uvw(c=c, group=group, gridx=gridx, gridy=gridy,
                                nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss,

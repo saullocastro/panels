@@ -1,4 +1,3 @@
-from composites import laminated_plate
 import numpy as np
 
 # Penalties for prescribed displs
@@ -31,18 +30,10 @@ def calc_ku_kv_kw_line_pd_ycte(p):
     return ku, kv, kw
 
 def build_panel_lam(panel):
+    r"""Build the laminate ``panel.lam`` with :meth:`.Shell._rebuild`, which
+    raises a ``ValueError`` when the stacking sequence, the ply thicknesses
+    or the properties of the laminae are missing"""
     panel._rebuild()
-    if panel.lam is not None:
-        return
-    if panel.stack is None:
-        raise ValueError('Panel defined without stacking sequence')
-    if panel.plyts is None:
-        raise ValueError('Panel defined without ply thicknesses')
-    if panel.laminaprops is None:
-        raise ValueError('Panel defined without laminae properties')
-    panel.lam = laminated_plate(panel.stack, plyts=panel.plyts,
-            laminaprops=panel.laminaprops)
-    return
 
 # Penalties for connections
 def calc_kt_kr(p1, p2, connection_type):

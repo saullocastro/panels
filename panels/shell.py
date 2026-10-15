@@ -635,12 +635,16 @@ class Shell(object):
                           dtype=DOUBLE)
         point_x = getattr(self, 'point_x', None)
         point_xy = getattr(self, 'point_xy', None)
-        vec_x = (np.array([1., 0., 0.]) if point_x is None
-                 else np.asarray(point_x, dtype=DOUBLE) - origin)
-        vec_xy = (np.array([0., 1., 0.]) if point_xy is None
-                  else np.asarray(point_xy, dtype=DOUBLE) - origin)
-        if vec_x.shape != (3,) or vec_xy.shape != (3,):
+        #NOTE checked before subtracting the origin, which would otherwise
+        #     raise a less clear broadcasting error
+        point_x = origin + [1., 0., 0.] if point_x is None else point_x
+        point_xy = origin + [0., 1., 0.] if point_xy is None else point_xy
+        point_x = np.asarray(point_x, dtype=DOUBLE)
+        point_xy = np.asarray(point_xy, dtype=DOUBLE)
+        if point_x.shape != (3,) or point_xy.shape != (3,):
             raise ValueError('point_x and point_xy must have three coordinates')
+        vec_x = point_x - origin
+        vec_xy = point_xy - origin
         vec_z = np.cross(vec_x, vec_xy)
         vec_y = np.cross(vec_z, vec_x)
         norms = np.array([np.linalg.norm(v) for v in (vec_x, vec_y, vec_z)])
