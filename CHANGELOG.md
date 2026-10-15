@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.13.9 (2026-10-14)
+## 0.13.9 (2026-10-15)
 
 ### Bug fix: one constitutive matrix for all the kernels
 
