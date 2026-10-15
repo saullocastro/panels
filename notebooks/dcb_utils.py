@@ -428,9 +428,9 @@ def equilibrium_check(res, case, tol=1e-2):
     By equilibrium of the loaded arm, the integral of the normal tractions of
     the cohesive domain, ``P_traction``, is equal to the reaction ``P`` when
     the cohesive domain carries the whole load. A difference above ``tol``
-    means that the cohesive domain is too short, the compressive lobe ahead
-    of the process zone reaching the perfect bond, whose tractions are not
-    part of the integral, or that its basis is too coarse to represent the
+    means that the cohesive domain is too short, the tractions ahead of the
+    process zone reaching the perfect bond, whose tractions are not part of
+    the integral (see :func:`margin`), or that its basis is too coarse to represent the
     tractions, ``m_tsl < lambda L_tsl``. A line is printed with the first
     opening where the difference exceeds ``tol``, from which the curve is
     less reliable. Without a perfect bond, ``L_tsl = L - a0``, the clamp
@@ -602,6 +602,23 @@ def a_at_opening(case, delta, corrected=False):
     return max(ae - dh, case['a0'])
 
 
+def opening_at_crack_length(case, a, lam, lcz):
+    r"""Opening at which the crack front of the ``panels`` model reaches ``a``
+
+    LEFM of the model itself: the CLPT arms on the elastic foundation `k_o`
+    of the interface behave as cantilevers of the effective length `a + l_{cz}
+    + 1/\lambda`, with `a` the crack front (last fully damaged point), `l_{cz}`
+    the process zone ahead of it and `1/\lambda` the offset of a beam on an
+    elastic foundation (Kanninen 1973). The corrected beam theory, with
+    `\chi h`, gives a shorter crack at the same opening, by 0.3-1.4 mm in the
+    validation runs, since the CLPT arms have no transverse shear.
+
+    """
+    EI = D11(case)*case['b']
+    ae = a + lcz + 1/lam
+    return 2/3*ae**2*np.sqrt(case['G1c']*_bonded_width(case)/EI)
+
+
 def summary(delta, P, delta_ref=None, first_peak=False):
     r"""Metrics of a load-opening curve
 
@@ -705,8 +722,8 @@ def resolution(case, terms_per_decay=1.25, points_per_lcz=10., m_max=25):
 
 
 def margin(lam, lcz):
-    r"""Length of the cohesive domain ahead of the crack front, `2\pi/\lambda
-    + 3 l_{cz}`, see :func:`panels.multidomain.connections.tsl_margin`"""
+    r"""Length of the cohesive domain ahead of the crack front, `3 l_{cz} +
+    8/\lambda`, see :func:`panels.multidomain.connections.tsl_margin`"""
     return tsl_margin(lam, lcz)
 
 

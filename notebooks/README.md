@@ -19,13 +19,13 @@ against the literature.
 | File | Content |
 |---|---|
 | `dcb_utils.py` | Multidomain model of the DCB (`build_dcb`), nonlinear solution under prescribed openings (`solve_dcb`) with the check of the equilibrium between the load and the cohesive tractions (`equilibrium_check`), stored results (`run_or_load`, `load`), rules of the discretisation (`resolution`, `discretize`, `margin`) and references of linear elastic fracture mechanics (beam theory) |
-| `alfano2001_dcb.ipynb` | Alfano and Crisfield (2001): DCB of Table I with the nominal and the low strength, XAS-913C DCB of Table II |
-| `camanho2003_dcb.ipynb` | Camanho, Dávila and de Moura (2003): AS4/PEEK DCB, kept for reference only, see the note in the notebook |
-| `turon2007_dcb.ipynb` | Turon et al. (2007): T300/977-2 DCB, with the sensitivity to the penalty stiffness |
-| `krueger2008_dcb.ipynb` | Krueger (2008), NASA/TM-2008-215123: unidirectional and multidirectional DCB benchmarks (VCCT) |
-| `tijs2022_dcb.ipynb` | Tijs et al. (2022): AS4D/PEKK-FC DCB, the reference DCB of the convergence study |
-| `tijs2023_phd_dcb.ipynb` | Tijs (2023), PhD thesis: compliance calibration and conduction-welded DCB |
-| `lecinana2023_dcb.ipynb` | Leciñana et al. (2023): initial compliance of AS4D/PEKK-FC DCB specimens (linear analysis) |
+| `dcb_alfano2001.ipynb` | Alfano and Crisfield (2001): DCB of Table I with the nominal and the low strength, XAS-913C DCB of Table II |
+| `dcb_camanho2003.ipynb` | Camanho, Dávila and de Moura (2003): AS4/PEEK DCB, kept for reference only, see the note in the notebook |
+| `dcb_turon2007.ipynb` | Turon et al. (2007): T300/977-2 DCB, with the sensitivity to the penalty stiffness |
+| `dcb_krueger2008.ipynb` | Krueger (2008), NASA/TM-2008-215123: unidirectional and multidirectional DCB benchmarks (VCCT) |
+| `dcb_tijs2022.ipynb` | Tijs et al. (2022): AS4D/PEKK-FC DCB, the reference DCB of the convergence study |
+| `dcb_tijs2023_phd.ipynb` | Tijs (2023), PhD thesis: compliance calibration and conduction-welded DCB |
+| `dcb_lecinana2023.ipynb` | Leciñana et al. (2023): initial compliance of AS4D/PEKK-FC DCB specimens (linear analysis) |
 | `dcb_mode_I_validation_summary.ipynb` | Table of the peak loads of the notebooks above |
 | `krueger2012_mmb_benchmark.ipynb` | Krueger (2012), NASA/CR-2012-217562: mixed-mode bending benchmark data, recorded but not run, the damage of `'SB_TSL'` being driven by the normal separation only |
 | `dcb_mode_I_convergence_study.py` | Convergence study of the discretisation of the cohesive domain on the reference DCB, results in `results/dcb_mode_I_convergence_study.json` |

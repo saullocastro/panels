@@ -72,7 +72,9 @@ def test_tsl_resolution_reference_dcb():
     assert tsl_resolution(arm, 1e5, 87., 1.12, p2=arm) == (lamA, lcz)
     assert np.isclose(lcz, 1.426, atol=5e-4)
     assert lczB == lcz
-    assert np.isclose(tsl_margin(lamA, lcz), 2*np.pi/lamA + 3*lcz)
+    assert np.isclose(tsl_margin(lamA, lcz), 3*lcz + 8/lamA)
+    # 13.9 mm for the reference DCB
+    assert np.isclose(tsl_margin(lamA, lcz), 13.88, atol=5e-3)
     # 25.0 terms and 168 points asked for over 24 mm
     assert tsl_discretization(lamA, lcz, 24.) == (25, 170)
     assert tsl_discretization(lamA, lcz, 24., m_max=30) == (26, 170)

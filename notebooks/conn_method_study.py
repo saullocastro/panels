@@ -63,10 +63,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
 OUT = os.path.join(HERE, 'results', 'conn_methods')
 METHODS = ('penalty', 'null-space')
-DCB_NOTEBOOKS = ('alfano2001_dcb.ipynb', 'camanho2003_dcb.ipynb',
-                 'krueger2008_dcb.ipynb', 'tijs2022_dcb.ipynb',
-                 'tijs2023_phd_dcb.ipynb', 'turon2007_dcb.ipynb',
-                 'lecinana2023_dcb.ipynb')
+DCB_NOTEBOOKS = ('dcb_alfano2001.ipynb', 'dcb_camanho2003.ipynb',
+                 'dcb_krueger2008.ipynb', 'dcb_tijs2022.ipynb',
+                 'dcb_tijs2023_phd.ipynb', 'dcb_turon2007.ipynb',
+                 'dcb_lecinana2023.ipynb')
 STAMATELOS = 'stamatelos_labeas_2023_multidomain.ipynb'
 
 

@@ -86,13 +86,23 @@ def tsl_resolution(p1, k_o, tau_o, G1c, E2=None, p2=None):
 def tsl_margin(lam, lcz):
     r"""Length of the cohesive domain needed ahead of the crack front
 
-    `2\pi/\lambda + 3 l_{cz}`, which contains the process zone and the
-    compressive lobe of the opening ahead of it. A cohesive domain shorter
-    than the crack growth plus this margin lets the compressive lobe reach
-    the end of the cohesive domain.
+    `3 l_{cz} + 8/\lambda`: the process zone, and the region ahead of it
+    where the opening oscillates and decays as `e^{-\lambda x}`, the
+    solution of beams on an elastic foundation (Kanninen 1973, Int. J.
+    Fract. 9, 83-92), here the two panels connected by `k_o`. Beyond
+    `8/\lambda` the opening, and with it the traction outside the cohesive
+    domain, is below `e^{-8} = 3.4 \times 10^{-4}` of its value at the end
+    of the process zone. A cohesive domain shorter than the crack growth plus
+    this margin lets the compressive lobe and the tractions ahead of it reach
+    the perfect bond: the loads are hardly affected, but the integral of the
+    cohesive tractions no longer balances the load. On the DCB validation
+    runs this difference is 0.25% at most with the margin, against up to
+    10% with `2\pi/\lambda + 3 l_{cz}`, when the basis follows
+    :func:`tsl_discretization` and the perfect bond is not wider than the
+    bonded strip.
 
     """
-    return 2*np.pi/lam + 3*lcz
+    return 3*lcz + 8/lam
 
 
 def tsl_discretization(lam, lcz, L_tsl, terms_per_decay=1.25, points_per_lcz=10.,
