@@ -47,8 +47,10 @@
 - `Shell.stress` accepts a stiffness per point, `ABD` of shape `xs.shape +
   (ne, ne)`, and by default uses `Shell.ABDnxny`; with one matrix per
   integration point and without `xs`, `ys`, the stresses are calculated at
-  the integration points. `MultiDomain.calc_results` and `MultiDomain.force`
-  use a constant `ABDnxny` and raise a `ValueError` for one per point.
+  the integration points. `MultiDomain.stress`, and through it
+  `MultiDomain.calc_results`, `MultiDomain.force` and
+  `MultiDomain.force_out_plane`, use a constant `ABDnxny` and raise a
+  `ValueError` for one per point.
 - The docstrings of `calc_kC`, `calc_fint` and the related methods document
   the shape and the point order of `ABDnxny`.
 - `ABDnxny` is checked before it is integrated, since the kernels read only
