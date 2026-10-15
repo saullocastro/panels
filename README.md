@@ -29,7 +29,7 @@ The structural matrices are solved with
 Citing this library
 ===================
 
-Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.13.9). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
+Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.13.11). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
 
 
 Documentation
@@ -117,13 +117,13 @@ History
 =======
 
 See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
-* version 0.13.9 (2026-10-15)
+* version 0.13.11 (2026-10-15)
     - BUG: the analytical constitutive stiffness matrix of the CLPT models ignored `force_orthotropic_laminate`, inconsistently with the internal forces and the numerical matrices
     - `Shell.ABD` is calculated from the laminate and read-only; new attribute `Shell.ABDnxny` for a stiffness that is not that of the laminate, constant or one matrix per integration point, used by all the kernels, also within a `MultiDomain`, and by `Shell.stress()`, and checked to have symmetric blocks as any laminate; new `Shell.integration_points()`
     - Documentation: the derivation of the tangent stiffness matrix of the CLPT models with Donnell kinematics, formerly a LaTeX file, is part of the theory page of the tangent stiffness
     - `Shell.calc_kTv()` and `MultiDomain.calc_kTv()`: product of the tangent stiffness matrix by a vector without assembling it, for all the models, at the cost of one evaluation of the internal forces; used for the displacement control with prescribed displacements imposed exactly
     - The numerically integrated kernels evaluate the approximation functions once per integration point instead of in their innermost loops, with identical results: the non-linear matrices, the connections, the cohesive zone and the stiffeners are assembled several times faster
-    - Cohesive zone `'SB_TSL'`: rules of the discretisation of the cohesive domain, `tsl_resolution()`, `tsl_margin()` and `tsl_discretization()`, and a warning when the cohesive domain is under-resolved
+    - Cohesive zone `'SB_TSL'`: rules of the discretisation of the cohesive domain, `tsl_resolution()`, `tsl_margin()` and `tsl_discretization()`, and a warning when the cohesive domain is under-resolved; the decay rate of the opening is `(k_o (1/D11_1 + 1/D11_2)/4)**0.25`, `(k_o/(2 D11))**0.25` for the symmetric DCB (the tag 0.13.9 used the rate of one panel on a rigid foundation, `(k_o/(4 D11))**0.25`)
     - No upper limit for the number of Gauss-Legendre points of `MultiDomain.calc_results()` and `MultiDomain.force()`
     - `calc_kw_tsl()` requires `k_i`, `tau_o` and `G1c`
     - Maintenance: `.gitignore` without the runs of `thesis_timing.py`

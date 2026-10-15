@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.13.9 (2026-10-15)
+## 0.13.11 (2026-10-15)
 
 ### Bug fix: one constitutive matrix for all the kernels
 
@@ -196,15 +196,25 @@
 
 - New module `panels.multidomain.connections.tsl` with the rules of the
   convergence study of `doc/source/cohesive_zone.rst`:
-  `tsl_resolution(p1, k_o, tau_o, G1c)` returns the decay rate of the
-  opening `lambda = (k_o/(4 D11))**0.25` and the cohesive zone length
-  `l_cz = 0.88 E2 G1c/tau_o**2`, `tsl_margin(lam, lcz)` the length
-  `2 pi/lambda + 3 l_cz` needed ahead of the crack front, and
-  `tsl_discretization(lam, lcz, L_tsl)` the terms `m = 1.5 lambda L_tsl` and
-  Gauss points `nx = 10 L_tsl/l_cz` along `x`.
+  `tsl_resolution(p1, k_o, tau_o, G1c, p2=None)` returns the decay rate of
+  the opening `w1 - w2` of the two panels of the connection,
+  `lambda = (k_o (1/D11_1 + 1/D11_2)/4)**0.25`, `(k_o/(2 D11))**0.25` for
+  the symmetric DCB (by default `p2` has the `D11` of `p1`), and the cohesive
+  zone length `l_cz = 0.88 E2 G1c/tau_o**2`; `tsl_margin(lam, lcz)` the
+  length `2 pi/lambda + 3 l_cz` needed ahead of the crack front; and
+  `tsl_discretization(lam, lcz, L_tsl)` the terms `m = 1.25 lambda L_tsl`
+  and Gauss points `nx = 10 L_tsl/l_cz` along `x`. The loads of the DCB are
+  converged to 0.1% from `m = 1.0 lambda L_tsl`. The tag 0.13.9 used
+  `(k_o/(4 D11))**0.25`, the rate of one panel on a rigid foundation,
+  `2**-0.25` times the rate of the symmetric DCB, with the factors 1.5 and
+  1.2 instead of 1.25 and 1.0; the linear compliance of the DCB of Krueger
+  (2008) confirms the corrected rate (1.1005 times that of the simple beam
+  theory with panels, 1.0973 for two beams connected by the foundation
+  `k_o`, 1.116 with the rate of the tag 0.13.9). The validation runs of the
+  DCB notebooks were repeated with the corrected rules.
 - `MultiDomain.calc_k_dmg` prints a warning, once, the first time a point is
-  damaged, when the cohesive domain has fewer than `1.2 lambda a` terms or
-  `7 a/l_cz` Gauss points along `x`.
+  damaged, when the cohesive domain has fewer than `1.0 lambda a` terms or
+  `7 a/l_cz` Gauss points along `x`, with `lambda` of both panels.
 - The Gauss-Legendre points of `MultiDomain.calc_results` and
   `MultiDomain.force` are no longer limited to 304: the rules come from
   `scipy.special.roots_legendre`, without an upper limit.
@@ -212,7 +222,8 @@
   silent defaults, accepts only `tsl_type='bilinear'`, and no longer has the
   unused interpenetration stiffness `k_ipen`; the damage and the stiffness
   are unchanged.
-- Tests: `tests/multidomain/test_tsl_resolution.py`; in
+- Tests: `tests/multidomain/test_tsl_resolution.py`, including the rate of
+  two different panels and its limit for a rigid second panel; in
   `tests/multidomain/test_multidomain_postprocessing.py`, the checks that
   more than 304 Gauss points raise a `ValueError` are replaced by checks
   that 305 points along `x` or `y` give the same results.
