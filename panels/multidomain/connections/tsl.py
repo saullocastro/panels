@@ -38,7 +38,8 @@ def tsl_resolution(p1, k_o, tau_o, G1c, E2=None):
     ----------
     p1 : :class:`.Shell`
         Panel ``p1`` of the ``'SB_TSL'`` connection, whose bending stiffness
-        `D_{11}` is used.
+        `D_{11}` is used, that of the laminate ``p1.lam``, also when the
+        attribute ``ABDnxny`` is set.
     k_o : float
         Pristine stiffness of the interface, force/length**3.
     tau_o : float

@@ -255,3 +255,28 @@ def test_unknown_connection_function(tension):
     conn = [dict(p1=p1, p2=p2, func='XYZ')]
     with pytest.raises(ValueError, match='not recognized'):
         md.get_kC_conn(conn=conn)
+
+
+def test_stress_and_force_with_ABDnxny(tension):
+    r"""A constant ``ABDnxny`` of a panel is the stiffness of its stresses
+    and section forces; one matrix per integration point is rejected, the
+    post-processing evaluating the stresses at any point"""
+    md, c = tension
+    p1 = md.panels[0]
+    try:
+        # same strains, twice the stiffness in p1
+        p1.ABDnxny = 2*p1.ABD
+        s = md.stress(c, 'g', gridx=7, gridy=5)
+        assert np.allclose(s['Nxx'][0], 2*N, rtol=1e-8)
+        assert np.allclose(s['Nxx'][1], N, rtol=1e-8)
+        res = md.force(c, 'g', eval_panel=p1, x_cte_force=p1.a/2,
+                       nr_y_gauss=4, gridx=11)
+        assert np.isclose(res['Fxx'], 2*N*B)
+        p1.ABDnxny = np.tile(p1.ABD, (p1.nx, p1.ny, 1, 1))
+        with pytest.raises(ValueError, match='one per integration point'):
+            md.stress(c, 'g', gridx=7, gridy=5)
+        with pytest.raises(ValueError, match='one per integration point'):
+            md.force(c, 'g', eval_panel=p1, x_cte_force=p1.a/2,
+                     nr_y_gauss=4, gridx=11)
+    finally:
+        p1.ABDnxny = None

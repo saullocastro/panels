@@ -82,7 +82,9 @@ def fk0(object shell, int size, int row0, int col0):
     a = shell.a
     b = shell.b
     r = shell.r
-    F = shell.lam.ABD
+    F = shell.ABD
+    if F.shape[0] != 6 or F.shape[1] != 6:
+        raise ValueError('shell.ABD must be a 6 x 6 matrix')
     m = shell.m
     n = shell.n
     x1u = shell.x1u; x1ur = shell.x1ur; x2u = shell.x2u; x2ur = shell.x2ur

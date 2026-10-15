@@ -4,6 +4,7 @@ import os
 import numpy as np
 from scipy.sparse import csr_matrix
 from scipy.linalg import eig
+from scipy.special import roots_legendre
 from numpy import linspace
 from composites import laminated_plate
 from structsolve.sparseutils import finalize_symmetric_matrix
@@ -120,6 +121,22 @@ class Shell(object):
     limit that is ``None``, the default, is the corresponding edge of the
     shell, see :meth:`.Shell.integration_limits`.
 
+    The constitutive matrix comes from the laminate, ``Shell.lam``, built
+    from ``stack``, ``plyts``, ``laminaprops`` and ``offset``: it is the
+    read-only property ``Shell.ABD``, see :meth:`.Shell._get_lam_ABD`, with
+    the anisotropic coupling terms zeroed when the attribute
+    ``force_orthotropic_laminate`` is ``True``. Every kernel, analytical or
+    numerical, integrates this same matrix. A stiffness that varies over the
+    domain, or that does not come from a stack of plies, e.g. a
+    functionally graded wall, is given by the attribute ``ABDnxny``, one
+    matrix per integration point, see :meth:`.Shell.integration_points`.
+    When it is set, the stiffness matrices and the internal forces are
+    integrated numerically with it, also within a :class:`.MultiDomain` and
+    by the analyses of ``structsolve``. The laminate still gives the mass,
+    :meth:`.Shell.calc_kM`, the thickness used by the kinematics of the
+    TSDT, and the penalty constants of the connections, see
+    :func:`.calc_kt_kr`.
+
     """
     # Declare all the variables/attributes here to preallocate mem, speed it up. Var not declared here cant be used
     __slots__ = [ 'a', 'x1', 'x2', 'b', 'y1', 'y2', 'r',
@@ -147,7 +164,7 @@ class Shell(object):
         'y1phiy', 'y1phiyr', 'y2phiy', 'y2phiyr',
         'plyts', 'laminaprops', 'rhos',
         'flow', 'beta', 'gamma', 'aeromu', 'rho_air', 'speed_sound', 'Mach', 'air_speed',
-        'ABD', 'force_orthotropic_laminate',
+        'ABDnxny', 'force_orthotropic_laminate',
         'num_eigvalues', 'num_eigvalues_print',
         'out_num_cores', 'increments', 'results',
         'lam', 'matrices', 'fields', 'plot_mesh',
@@ -300,8 +317,8 @@ class Shell(object):
         self.Mach = None
         self.air_speed = None
 
-        # constitutive law
-        self.ABD = None
+        # constitutive law, see the property ABD
+        self.ABDnxny = None
         self.force_orthotropic_laminate = False
 
         # eigenvalue analysis
@@ -385,7 +402,6 @@ class Shell(object):
                                       offset=self.offset,
                                       shear_correction=shear_correction)
             self.lam = lam
-            self.ABD = self._get_lam_ABD()
         self.size = self.get_size()
         # fails early on invalid limits of the integration domain
         self.integration_limits()
@@ -479,6 +495,113 @@ class Shell(object):
         return bool(x1 > 0 or x2 < self.a or y1 > 0 or y2 < self.b)
 
 
+    def integration_points(self, nx=None, ny=None):
+        r"""Points and weights of the numerical integration
+
+        The Legendre-Gauss rule of ``nx`` by ``ny`` points mapped to the
+        integration limits, :meth:`.Shell.integration_limits`, which for a
+        partial domain are not ``[0, a] x [0, b]``. The matrix of point
+        ``(xs[i], ys[j])`` is ``ABDnxny[i, j]``, see :meth:`.Shell.calc_kC`,
+        and
+
+        .. math::
+
+            \int_{x_1}^{x_2} \int_{y_1}^{y_2} f(x, y) dy dx \approx
+            \sum_i \sum_j w_{x_i} w_{y_j} f(x_i, y_j)
+
+        Parameters
+        ----------
+        nx, ny : int or None, optional
+            Number of points along `x` and `y`, by default the attributes
+            ``nx`` and ``ny``, which are used by the kernels.
+
+        Returns
+        -------
+        xs, ys, wxs, wys : np.ndarray
+            The physical coordinates of the points along `x` and `y` and
+            their weights, which sum to ``x2 - x1`` and ``y2 - y1``.
+
+        """
+        nx = self.nx if nx is None else nx
+        ny = self.ny if ny is None else ny
+        x1, x2, y1, y2 = self.integration_limits()
+        xis, wxis = roots_legendre(nx)
+        etas, wetas = roots_legendre(ny)
+        xs = x1 + (xis + 1)/2*(x2 - x1)
+        ys = y1 + (etas + 1)/2*(y2 - y1)
+        return xs, ys, wxis*(x2 - x1)/2, wetas*(y2 - y1)/2
+
+
+    def _get_ABDnxny(self, ABDnxny, nx, ny):
+        r"""Constitutive matrix and points of the numerical kernels
+
+        ``ABDnxny`` if given, else the attribute ``ABDnxny`` if set, else the
+        constant :attr:`.Shell.ABD`. For a matrix per point, the number of
+        points ``nx`` and ``ny`` that are not given default to its shape,
+        otherwise to the attributes ``nx`` and ``ny``.
+
+        """
+        if ABDnxny is None:
+            ABDnxny = self.ABDnxny
+        if ABDnxny is None:
+            ABDnxny = self.ABD
+        else:
+            ABDnxny = np.asarray(ABDnxny, dtype=DOUBLE)
+            self._check_ABDnxny(ABDnxny)
+            if ABDnxny.ndim == 4:
+                nx = ABDnxny.shape[0] if nx is None else nx
+                ny = ABDnxny.shape[1] if ny is None else ny
+        nx = self.nx if nx is None else nx
+        ny = self.ny if ny is None else ny
+        return ABDnxny, nx, ny
+
+
+    def _check_ABDnxny(self, F, rtol=1e-10):
+        r"""Check that the kernels integrate ``F`` as given
+
+        The kernels read only the upper entries of each block of the
+        constitutive matrix, e.g. `B_{12}` from ``F[0, 4]`` and never
+        ``F[1, 3]``, and skip the blocks that couple the transverse shear to
+        the other strains. ``F``, constant or one matrix per point, must
+        therefore be symmetric, have symmetric blocks, ``B`` and, for the
+        TSDT, ``E``, ``F`` and ``Dts``, and zero coupling blocks, as any
+        laminate, to a tolerance ``rtol`` times the largest entry of each
+        matrix.
+
+        """
+        ne = len(self._strain_names())
+        if F.ndim not in (2, 4) or F.shape[-2:] != (ne, ne):
+            raise ValueError('ABDnxny must have the shape ({0}, {0}) or (nx, '
+                    'ny, {0}, {0}) for the model {1}, got {2}'.format(ne,
+                    self.model, F.shape))
+        Fp = F.reshape(-1, ne, ne)
+        tol = rtol*np.abs(Fp).max(axis=(1, 2))
+        checks = [('the matrix', F.swapaxes(-1, -2) - F)]
+        blocks = {6: [('B', 0, 3)], 8: [('B', 0, 3)],
+                  13: [('B', 0, 3), ('E', 0, 6), ('F', 3, 6), ('Dts', 9, 11)]}
+        for name, i, j in blocks[ne]:
+            k = 2 if name == 'Dts' else 3
+            X = F[..., i:i+k, j:j+k]
+            checks.append(('the block ' + name, X.swapaxes(-1, -2) - X))
+        if ne == 8:
+            checks.append(('the coupling to the transverse shear',
+                           F[..., :6, 6:]))
+        elif ne == 13:
+            checks.append(('the coupling to the transverse shear',
+                           F[..., :9, 9:]))
+        for what, R in checks:
+            err = np.abs(R.reshape(len(Fp), -1)).max(axis=1)
+            bad = np.flatnonzero(err > tol)
+            if bad.size:
+                where = ('' if F.ndim == 2 else ' at the point [{0}, {1}]'
+                         .format(*np.unravel_index(bad[0], F.shape[:2])))
+                adj = 'zero' if what.startswith('the coupling') else 'symmetric'
+                raise ValueError('ABDnxny must have {0} {1}, as any laminate, '
+                    'since the kernels read only the upper entries of each '
+                    'block{2}: error {3:.3e}, tolerance {4:.3e}'.format(adj,
+                    what, where, err[bad[0]], tol[bad[0]]))
+
+
     def global_frame(self):
         r"""Origin and axes of the shell in the global coordinate system
 
@@ -512,12 +635,16 @@ class Shell(object):
                           dtype=DOUBLE)
         point_x = getattr(self, 'point_x', None)
         point_xy = getattr(self, 'point_xy', None)
-        vec_x = (np.array([1., 0., 0.]) if point_x is None
-                 else np.asarray(point_x, dtype=DOUBLE) - origin)
-        vec_xy = (np.array([0., 1., 0.]) if point_xy is None
-                  else np.asarray(point_xy, dtype=DOUBLE) - origin)
-        if vec_x.shape != (3,) or vec_xy.shape != (3,):
+        #NOTE checked before subtracting the origin, which would otherwise
+        #     raise a less clear broadcasting error
+        point_x = origin + [1., 0., 0.] if point_x is None else point_x
+        point_xy = origin + [0., 1., 0.] if point_xy is None else point_xy
+        point_x = np.asarray(point_x, dtype=DOUBLE)
+        point_xy = np.asarray(point_xy, dtype=DOUBLE)
+        if point_x.shape != (3,) or point_xy.shape != (3,):
             raise ValueError('point_x and point_xy must have three coordinates')
+        vec_x = point_x - origin
+        vec_xy = point_xy - origin
         vec_z = np.cross(vec_x, vec_xy)
         vec_y = np.cross(vec_z, vec_x)
         norms = np.array([np.linalg.norm(v) for v in (vec_x, vec_y, vec_z)])
@@ -638,6 +765,49 @@ class Shell(object):
         return xs, ys, xshape, yshape
 
 
+    @property
+    def ABD(self):
+        r"""Constitutive matrix of the laminate ``Shell.lam``, read-only
+
+        Calculated by :meth:`.Shell._get_lam_ABD` at each access, therefore
+        always consistent with ``Shell.lam`` and with the attribute
+        ``force_orthotropic_laminate``; ``None`` before the laminate is
+        built. To use another stiffness, constant or varying over the domain,
+        set the attribute ``ABDnxny``, see :meth:`.Shell.calc_kC`.
+
+        """
+        if self.lam is None:
+            return None
+        return self._get_lam_ABD(silent=True)
+
+
+    @ABD.setter
+    def ABD(self, value):
+        raise AttributeError('Shell.ABD is calculated from the laminate '
+            'Shell.lam and cannot be set, use the attribute Shell.ABDnxny '
+            'for a stiffness that is not that of the laminate')
+
+
+    def _get_constant_ABD(self):
+        r"""Constant constitutive matrix of the post-processing
+
+        The attribute ``ABDnxny`` when it is a constant matrix, else
+        :attr:`.Shell.ABD`. A stiffness per integration point raises a
+        ``ValueError``, since the stresses are evaluated at any point.
+
+        """
+        if self.ABDnxny is None:
+            ABD = self.ABD
+        else:
+            ABD = np.asarray(self.ABDnxny, dtype=DOUBLE)
+            if ABD.ndim != 2:
+                raise ValueError('The stresses need a constant stiffness, '
+                    'Shell.ABDnxny has one per integration point')
+        if ABD is None:
+            raise ValueError('Laminate ABD matrix not defined for shell')
+        return ABD
+
+
     def _get_lam_ABD(self, silent=False):
         r"""Constitutive matrix of the laminate, as required by the model
 
@@ -661,7 +831,8 @@ class Shell(object):
             raise RuntimeError('lam object is None!')
         lam = self.lam
         if 'clpt' in self.model:
-            ABD = lam.ABD
+            #NOTE a copy, the coupling terms are zeroed below
+            ABD = np.array(lam.ABD, dtype=DOUBLE)
         elif 'fsdt' in self.model:
             ABD = np.zeros((8, 8), dtype=DOUBLE)
             ABD[:6, :6] = lam.ABD
@@ -816,11 +987,30 @@ class Shell(object):
         nx, ny : int or None, optional
             Number of integration points along `x` and `y`, respectively, for
             the Legendre-Gauss quadrature rule applied in the numerical
-            integration. Only used when ``c`` is given.
-        ABDnxny : 4-D array-like or None, optional
-            The constitutive relations for the laminate at each integration
-            point. Must be a 4-D array of shape ``(nx, ny, 6, 6)`` when using
-            classical laminated plate theory models.
+            integration. Only used by the numerical integration. By default
+            the shape of ``ABDnxny`` when it has one matrix per point, else
+            the attributes ``nx`` and ``ny``.
+        ABDnxny : array-like or None, optional
+            The constitutive matrix, by default the attribute ``ABDnxny``
+            or, when it is ``None``, the matrix of the laminate
+            :attr:`.Shell.ABD`. Any other than :attr:`.Shell.ABD` selects the
+            numerical integration. Either a constant ``(ne, ne)`` matrix or
+            one matrix per integration point, of shape ``(nx, ny, ne, ne)``,
+            where ``ne`` is 6 for the classical laminated plate theory
+            (CLPT), 8 for the first-order (FSDT) and 13 for the third-order
+            (TSDT) shear deformation theories, the rows and columns being in
+            the order of :meth:`.Shell._get_lam_ABD`. ``ABDnxny[i, j]`` is
+            the matrix of the point ``(xs[i], ys[j])`` of
+            :meth:`.Shell.integration_points`, i.e. the Legendre-Gauss points
+            mapped to the integration limits
+            :meth:`.Shell.integration_limits`, which are not ``[0, a] x [0,
+            b]`` for a partial domain. The kernels read only the upper
+            entries of each block, therefore the matrix and each of its
+            blocks, e.g. ``A``, ``B`` and ``D`` for the CLPT, must be
+            symmetric, and the transverse shear uncoupled from the other
+            strains, as for any laminate, otherwise a ``ValueError`` is
+            raised. It is used as given, ``force_orthotropic_laminate``
+            applies only to :attr:`.Shell.ABD`.
         NLgeom : bool, optional
             Flag to indicate if geometrically non-linearities should be
             considered.
@@ -852,7 +1042,7 @@ class Shell(object):
             check_c(c, size)
             analytical_kC = False
         # For variable stiffness laminates
-        if ABDnxny is not None:
+        if ABDnxny is not None or self.ABDnxny is not None:
             analytical_kC = False
         # For NL Geos, KC (and not KC0) needs to be used so only do it numerically
         if NLgeom:
@@ -864,8 +1054,7 @@ class Shell(object):
         matrices_num = modelDB.db[self.model]['matrices_num']
 
         # Num integration points
-        nx = self.nx if nx is None else nx
-        ny = self.ny if ny is None else ny
+        ABDnxny, nx, ny = self._get_ABDnxny(ABDnxny, nx, ny)
         self._check_r()
 
         #NOTE c is forwarded to a ``double [::1]`` kernel argument, so it must
@@ -881,8 +1070,8 @@ class Shell(object):
             # laminate properties
             c = np.zeros(size, dtype=DOUBLE)
 
-        #NOTE the consistency checks for ABDnxny are done within the .pyx files
-        ABDnxny = self.ABD if ABDnxny is None else ABDnxny
+        #NOTE ABDnxny is checked by Shell._check_ABDnxny() and its shape
+        #     against nx, ny within the .pyx files
 
         # Calc Kc as per panels/panels/models then the pyx files given by ''matrices'' defined earlier
         # This calc K0 - linear consitutive stiff mat (SA formulation paper - eq 11)
@@ -991,15 +1180,11 @@ class Shell(object):
 
         self._check_r()
 
-        nx = self.nx if nx is None else nx
-        ny = self.ny if ny is None else ny
-
         if analytical_kG:
             kG = matrices.fkG0(self.Nxx, self.Nyy, self.Nxy, self, size, row0, col0)
 
         else:
-            if ABDnxny is None:
-                ABDnxny = self._get_lam_ABD()
+            ABDnxny, nx, ny = self._get_ABDnxny(ABDnxny, nx, ny)
             kG = matrices_num.fkG_num(c, ABDnxny, self, size, row0, col0,
                                       nx, ny, self.Nxx, self.Nyy, self.Nxy)
 
@@ -1114,9 +1299,7 @@ class Shell(object):
             size = int(size) + self.get_size()
 
         self._check_r()
-        nx = self.nx if nx is None else nx
-        ny = self.ny if ny is None else ny
-        ABDnxny = self.ABD if ABDnxny is None else ABDnxny
+        ABDnxny, nx, ny = self._get_ABDnxny(ABDnxny, nx, ny)
 
         #NOTE see the note in Shell.calc_kC() on why c and v must be checked
         #     before being forwarded
@@ -1576,13 +1759,20 @@ class Shell(object):
             The Ritz constants vector to be used for the strain field
             calculation.
         ABD : np.ndarray, optional
-            The laminate stiffness matrix. Can be a 6 x 6 (ABD) matrix for
-            homogeneous laminates over the whole domain.
+            The constitutive matrix, either constant, of shape ``(ne, ne)``,
+            or one for each point, of shape ``xs.shape + (ne, ne)``, see
+            ``ABDnxny`` in :meth:`.Shell.calc_kC`. By default the attribute
+            ``ABDnxny`` or, when it is ``None``, :attr:`.Shell.ABD`.
         xs : np.ndarray, optional
             The `x` coordinates where to calculate the strains.
         ys : np.ndarray, optional
             The `y` coordinates where to calculate the strains, must
-            have the same shape as ``xs``.
+            have the same shape as ``xs``. When neither ``xs`` and ``ys`` nor
+            ``ABD`` are given and the attribute ``ABDnxny`` has one matrix
+            per integration point, the stresses are calculated at the
+            integration points, where the stiffness is known: ``xs[i, j],
+            ys[i, j]`` is the point of ``ABDnxny[i, j]``, see
+            :meth:`.Shell.integration_points`.
         gridx : int, optional
             When ``xs`` and ``ys`` are not supplied, ``gridx`` and ``gridy``
             are used.
@@ -1603,17 +1793,35 @@ class Shell(object):
             ``(kxx3, kyy3, kxy3, gyz2, gxz2)``, see :meth:`.Shell.strain`.
 
         """
+        if ABD is None and self.ABDnxny is not None:
+            ABD = self.ABDnxny
+            if np.ndim(ABD) == 4:
+                if xs is not None or ys is not None:
+                    raise ValueError('Shell.ABDnxny is known only at the '
+                        'integration points, see Shell.integration_points(), '
+                        'give either xs = ys = None or the stiffness ABD of '
+                        'the points xs, ys')
+                xs, ys = self.integration_points(*np.shape(ABD)[:2])[:2]
+                xs, ys = np.meshgrid(xs, ys, indexing='ij')
+        elif ABD is None:
+            ABD = self.ABD
+            if ABD is None:
+                raise ValueError('Laminate ABD matrix not defined for shell')
+        ABD = np.asarray(ABD, dtype=DOUBLE)
+
         plot_mesh, fields = self.strain(c, xs, ys, gridx, gridy, NLgeom)
         strains = [fields[name] for name in self._strain_names()]
-        if ABD is None:
-            ABD = self.ABD
-        if ABD is None:
-            raise ValueError('Laminate ABD matrix not defined for shell')
-        #TODO implement for variable stiffness!
+        ne = len(strains)
+        shape = strains[0].shape
+        if ABD.shape not in ((ne, ne), shape + (ne, ne)):
+            raise ValueError('ABD must have the shape {0} or {1}, got {2}'
+                             .format((ne, ne), shape + (ne, ne), ABD.shape))
 
         self.plot_mesh = plot_mesh
+        #NOTE ABD[..., i, j] is a scalar for a constant ABD, otherwise an
+        #     array of the shape of the strains
         for i, name in enumerate(self._stress_names()):
-            self.fields[name] = sum(e*ABD[i, j] for j, e in enumerate(strains))
+            self.fields[name] = sum(e*ABD[..., i, j] for j, e in enumerate(strains))
 
         return self.plot_mesh, self.fields
 
@@ -2133,13 +2341,13 @@ class Shell(object):
             Offset in a global internal force vector of an assembly.
         silent : bool, optional
             A boolean to tell whether the log messages should be printed.
-        nx : int, optional
-            Number of integration points along `x`.
-        ny : int, optional
-            Number of integration points along `y`.
+        nx, ny : int, optional
+            Number of integration points along `x` and `y`, see
+            :meth:`.Shell.calc_kC`.
         ABDnxny : np.ndarray, optional
-            Laminate stiffness for each integration point, if not supplied it
-            will assume constant properties over the shell domain.
+            The constitutive matrix, constant or per integration point, by
+            default the attribute ``ABDnxny`` or :attr:`.Shell.ABD`, see
+            :meth:`.Shell.calc_kC`.
         inc : float, optional
             Load factor of the incremented follower pressure loads.
 
@@ -2169,9 +2377,7 @@ class Shell(object):
             size = int(size) + self.get_size()
 
         self._check_r()
-        nx = self.nx if nx is None else nx
-        ny = self.ny if ny is None else ny
-        ABDnxny = self.ABD if ABDnxny is None else ABDnxny
+        ABDnxny, nx, ny = self._get_ABDnxny(ABDnxny, nx, ny)
 
         #NOTE calc_fint takes a ``double [::1]``, see the note in
         #     Shell.calc_kC() on why c must be checked before being forwarded

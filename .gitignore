@@ -46,3 +46,6 @@ dcb_mode_I_solver_study_runs/
 dcb_mode_I_validation_rerun_runs/
 *_driver.log
 *_driver.err
+
+# LaTeX sources: the theory is documented in doc/source/*.rst
+*.tex

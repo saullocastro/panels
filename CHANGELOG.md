@@ -1,56 +1,125 @@
 # Changelog
 
-## 0.13.2 (2026-10-14)
+## 0.13.9 (2026-10-15)
 
-### Cohesive zone (`'SB_TSL'`): discretisation rules and checks
+### Bug fix: one constitutive matrix for all the kernels
 
-- New module `panels.multidomain.connections.tsl` with the rules of the
-  convergence study of `doc/source/cohesive_zone.rst`:
-  `tsl_resolution(p1, k_o, tau_o, G1c)` returns the decay rate of the
-  opening `lambda = (k_o/(4 D11))**0.25` and the cohesive zone length
-  `l_cz = 0.88 E2 G1c/tau_o**2`, `tsl_margin(lam, lcz)` the length
-  `2 pi/lambda + 3 l_cz` needed ahead of the crack front, and
-  `tsl_discretization(lam, lcz, L_tsl)` the terms `m = 1.5 lambda L_tsl` and
-  Gauss points `nx = 10 L_tsl/l_cz` along `x`.
-- `MultiDomain.calc_k_dmg` prints a warning, once, the first time a point is
-  damaged, when the cohesive domain has fewer than `1.2 lambda a` terms or
-  `7 a/l_cz` Gauss points along `x`.
-- The Gauss-Legendre points of `MultiDomain.calc_results` and
-  `MultiDomain.force` are no longer limited to 304: the rules come from
-  `scipy.special.roots_legendre`, without an upper limit.
-- `connections.calc_kw_tsl` requires `k_i`, `tau_o` and `G1c` instead of
-  silent defaults, accepts only `tsl_type='bilinear'`, and no longer has the
-  unused interpenetration stiffness `k_ipen`; the damage and the stiffness
-  are unchanged.
-- Tests: `tests/multidomain/test_tsl_resolution.py`; in
-  `tests/multidomain/test_multidomain_postprocessing.py`, the checks that
-  more than 304 Gauss points raise a `ValueError` are replaced by checks
-  that 305 points along `x` or `y` give the same results.
+- The analytical `fk0` of the three models based on the classical laminated
+  plate theory (`plate_clpt_donnell`, `cylshell_clpt_donnell`,
+  `cylshell_clpt_sanders`) read `shell.lam.ABD` instead of `shell.ABD`, like
+  every other kernel, therefore ignored `force_orthotropic_laminate=True`:
+  the linear static and linear buckling analyses with the analytical `kC`
+  used the anisotropic laminate, which was inconsistent with `calc_fint`,
+  with the numerical tangent stiffness matrix and with the partial domains,
+  e.g. a relative difference of `1.2e-1` between the analytical and the
+  numerical `kC` for the laminate `[30, -60, 15]`. They now read
+  `shell.ABD` and check that it is a 6 x 6 matrix; the generator
+  `theory/shells/cylshell_clpt_sanders/derive_expressions.py` is fixed
+  accordingly. No test, notebook or documented result used
+  `force_orthotropic_laminate=True` with these models, no reference value
+  changes.
+- `Shell.calc_kG` with `c` integrated a new copy of the laminate matrix
+  instead of the one of the other kernels.
 
-### Notebooks
+### Changed: `Shell.ABD` is calculated from the laminate, new `Shell.ABDnxny`
 
-- `doc/source/cohesive_zone.rst`: new convergence study of the cohesive
-  domain, on the DCB of Tijs et al. (2022) with `L = 100` mm, and run times
-  of panels 0.13.0.
-- `notebooks/dcb_utils.py`: `discretize` without a cap on the Gauss points,
-  `build_dcb` fills a missing `m_tsl` or `nx` from the rules, and the
-  results store the case, the solver settings, the version of `panels` and
-  the connection method; `run_or_load` reports a stored run of a different
-  model.
-- New `notebooks/README.md`, `notebooks/dcb_mode_I_solver_study.py` and
-  `notebooks/dcb_mode_I_validation_rerun.py`.
-- Renamed, after their scope, the mode I DCB: `notebooks/convergence_study.py`
-  to `notebooks/dcb_mode_I_convergence_study.py`, with its results
-  `notebooks/results/dcb_mode_I_convergence_study.json`, and
-  `notebooks/validation_summary.ipynb` to
-  `notebooks/dcb_mode_I_validation_summary.ipynb`.
+- `Shell.ABD` is no longer an attribute, whose value set by the user was
+  silently replaced by `_rebuild()` in `calc_kC`, `calc_kG`, `calc_fext`,
+  etc.: it is a read-only property, calculated from `Shell.lam` at each
+  access with the coupling terms zeroed by `force_orthotropic_laminate`,
+  `None` before the laminate is built. Assigning it, also as
+  `Shell(ABD=...)`, raises an `AttributeError`.
+- New attribute `Shell.ABDnxny`, `None` by default, never allocated
+  otherwise: a stiffness that is not that of the laminate, either constant,
+  `(ne, ne)`, or one matrix per integration point, `(nx, ny, ne, ne)`, with
+  `ne` = 6 (CLPT), 8 (FSDT) or 13 (TSDT). When set, `calc_kC`, `calc_kG`,
+  `calc_kT`, `calc_kTv` and `calc_fint` integrate it numerically, the
+  analytical `kC` being skipped, also within a `MultiDomain` and in the
+  analyses of `structsolve`, which call these methods; the argument
+  `ABDnxny` of these methods still takes precedence. With one matrix per
+  point, `nx` and `ny` default to its shape. The mass, the thickness of the
+  TSDT kinematics and the penalty constants of the connections still come
+  from the laminate, as documented in `calc_kt_kr` and `tsl_resolution`.
+- New `Shell.integration_points(nx=None, ny=None)`: the physical
+  coordinates and weights of the Legendre-Gauss points, mapped to
+  `Shell.integration_limits()`, `ABDnxny[i, j]` being the matrix of the
+  point `(xs[i], ys[j])`.
+- `Shell.stress` accepts a stiffness per point, `ABD` of shape `xs.shape +
+  (ne, ne)`, and by default uses `Shell.ABDnxny`; with one matrix per
+  integration point and without `xs`, `ys`, the stresses are calculated at
+  the integration points. `MultiDomain.stress`, and through it
+  `MultiDomain.calc_results`, `MultiDomain.force` and
+  `MultiDomain.force_out_plane`, use a constant `ABDnxny` and raise a
+  `ValueError` for one per point.
+- The docstrings of `calc_kC`, `calc_fint` and the related methods document
+  the shape and the point order of `ABDnxny`.
+- `ABDnxny` is checked before it is integrated, since the kernels read only
+  the upper entries of each block: a `ValueError`, naming the block and the
+  integration point, is raised unless the matrix and its blocks `B` and, for
+  the TSDT, `E`, `F` and `Dts` are symmetric, and the transverse shear is
+  uncoupled from the other strains, as for any laminate, to `1e-10` times
+  the largest entry. A matrix symmetric as a whole but with, e.g., `B12 !=
+  B21` was integrated wrongly without error. The shape is checked as well.
+- Saving and loading: `ABDnxny` is saved instead of `ABD`; the `ABD` of the
+  files of older versions is read and discarded, being that of the
+  laminate.
+- Tests: `tests/tests_shell/test_abd_consistency.py`, for the 9 models: the
+  analytical `kC` against the numerical one with and without
+  `force_orthotropic_laminate`, for an anisotropic, unsymmetric laminate;
+  the equilibrium of the linear static solution according to `calc_fint`;
+  the buckling load of a forced orthotropic plate against the closed-form
+  solution, single and divided in domains; the point order of `ABDnxny`
+  against the strain energy summed over `Shell.integration_points()`, for
+  full and partial domains with `nx != ny`, which a reversed field fails;
+  `Shell.ABDnxny` against the argument, within a `MultiDomain`, in
+  `Shell.stress` and saved and loaded; the checks of `ABDnxny`.
 
-### Maintenance
+### Tests and coverage
 
-- `.gitignore` without the runs of `thesis_timing.py`, which was moved out
-  of the repository.
+- Every Python line added or changed for this version is covered by the
+  tests, and so are the new checks of the analytical CLPT kernels, by
+  calling them with a stand-in for `Shell`.
+- New tests of the argument handling of `Shell`, in
+  `tests/tests_shell/test_argument_validation.py`: `size='+n'` of
+  `calc_kC`, `calc_kG`, `calc_kM`, `calc_kA`, `calc_kCfollower`,
+  `calc_fint`, `calc_kTv` and `calc_fext_follower`; `Nxx_cte` in the
+  analytical `calc_kC`; the errors of `_get_lam_ABD`,
+  `integration_limits`, `global_frame`, `strain`,
+  `add_distr_load_fixed_x` and `add_distr_pd_fixed_x`; and the errors of a
+  model registered without the kernels of `calc_kTv`, of the follower
+  pressure loads or of `calc_fint`.
+- New tests of `MultiDomain.stress` and `MultiDomain.force` with
+  `ABDnxny`, and of the penalty constants of the connections
+  `'xcte-ycte'` and `'ycte-xcte'`.
+- `Shell.global_frame` checks that `point_x` and `point_xy` have three
+  coordinates before using them, instead of failing with a broadcasting
+  error.
+- `connections.build_panel_lam` is reduced to `Shell._rebuild()`, the
+  laminate being always built by it, without the unreachable fallback.
+- The branches of `MultiDomain.force_out_plane` disabled by hard-coded
+  switches, the area integral and the von Kármán integral, are excluded
+  from the coverage.
 
-## 0.13.0 (2026-10-14)
+### Documentation: tangent stiffness of the CLPT models with Donnell kinematics
+
+- The derivation of the internal force vector and of the tangent stiffness
+  matrix of `plate_clpt_donnell` and `cylshell_clpt_donnell`, kept as the
+  LaTeX file `theory/shells/tangent_stiffness_clpt_donnell.tex`, outside the
+  documentation and with line numbers of the code that were out of date, is
+  now a section of `doc/source/tangent_product.rst`, renamed "Tangent
+  stiffness matrix and its product by a vector": the two integration paths
+  and when each is taken, the approximation functions, the kinematics, the
+  operators `B_L`, `B_NL` and `G`, the internal force vector, the grouping
+  of the terms between `calc_kC` and `calc_kG` and why `K_GNL` is in
+  `calc_kC`, the closed-form path, the quadrature, the multi-domain
+  assembly, the symbols against the variables of the kernels, and the
+  verification. Each equation names the function or kernel that evaluates
+  it, checked against the current code, and the equations it needed from
+  outside are written out. The `.tex` is removed and `*.tex` ignored.
+- New docstrings of `MultiDomain.calc_kT` and `MultiDomain.calc_fint`.
+- `MultiDomain.calc_kT` no longer has the argument `kw_tsl`, which was not
+  used: the stiffness of a damaged cohesive connection is part of the
+  matrix of the connections, `kC_conn`.
 
 ### New: product of the tangent stiffness matrix by a vector, without assembly
 
@@ -123,6 +192,31 @@
 - Tests: `tests/test_tabulate.py`, including a check that no kernel of the
   package evaluates the approximation functions in its loops any more.
 
+### Cohesive zone (`'SB_TSL'`): discretisation rules and checks
+
+- New module `panels.multidomain.connections.tsl` with the rules of the
+  convergence study of `doc/source/cohesive_zone.rst`:
+  `tsl_resolution(p1, k_o, tau_o, G1c)` returns the decay rate of the
+  opening `lambda = (k_o/(4 D11))**0.25` and the cohesive zone length
+  `l_cz = 0.88 E2 G1c/tau_o**2`, `tsl_margin(lam, lcz)` the length
+  `2 pi/lambda + 3 l_cz` needed ahead of the crack front, and
+  `tsl_discretization(lam, lcz, L_tsl)` the terms `m = 1.5 lambda L_tsl` and
+  Gauss points `nx = 10 L_tsl/l_cz` along `x`.
+- `MultiDomain.calc_k_dmg` prints a warning, once, the first time a point is
+  damaged, when the cohesive domain has fewer than `1.2 lambda a` terms or
+  `7 a/l_cz` Gauss points along `x`.
+- The Gauss-Legendre points of `MultiDomain.calc_results` and
+  `MultiDomain.force` are no longer limited to 304: the rules come from
+  `scipy.special.roots_legendre`, without an upper limit.
+- `connections.calc_kw_tsl` requires `k_i`, `tau_o` and `G1c` instead of
+  silent defaults, accepts only `tsl_type='bilinear'`, and no longer has the
+  unused interpenetration stiffness `k_ipen`; the damage and the stiffness
+  are unchanged.
+- Tests: `tests/multidomain/test_tsl_resolution.py`; in
+  `tests/multidomain/test_multidomain_postprocessing.py`, the checks that
+  more than 304 Gauss points raise a `ValueError` are replaced by checks
+  that 305 points along `x` or `y` give the same results.
+
 ### Generators
 
 - The whole-module generators `theory/shells/fsdt_tsdt/write_pyx.py` and
@@ -131,12 +225,35 @@
   committed modules, such that they reproduce them exactly;
   `theory/shells/follower_pressure/write_pyx.py` tabulates its kernels.
 
+### Notebooks
+
+- `doc/source/cohesive_zone.rst`: new convergence study of the cohesive
+  domain, on the DCB of Tijs et al. (2022) with `L = 100` mm, and run times
+  of panels 0.13.0.
+- `notebooks/dcb_utils.py`: `discretize` without a cap on the Gauss points,
+  `build_dcb` fills a missing `m_tsl` or `nx` from the rules, and the
+  results store the case, the solver settings, the version of `panels` and
+  the connection method; `run_or_load` reports a stored run of a different
+  model.
+- New `notebooks/README.md`, `notebooks/dcb_mode_I_solver_study.py` and
+  `notebooks/dcb_mode_I_validation_rerun.py`.
+- Renamed, after their scope, the mode I DCB: `notebooks/convergence_study.py`
+  to `notebooks/dcb_mode_I_convergence_study.py`, with its results
+  `notebooks/results/dcb_mode_I_convergence_study.json`, and
+  `notebooks/validation_summary.ipynb` to
+  `notebooks/dcb_mode_I_validation_summary.ipynb`.
+
 ### Dependencies
 
 - Requires `structsolve>=0.8.0`, which evaluates `dR_r/dlbd` only together
   with the tangent stiffness matrix, saving evaluations of
   `MultiDomain.calc_kTv`, and reuses the factorizations of the tangent
   stiffness matrix in the modified Newton-Raphson method.
+
+### Maintenance
+
+- `.gitignore` without the runs of `thesis_timing.py`, which was moved out
+  of the repository.
 
 ## 0.12.0 (2026-10-14)
 

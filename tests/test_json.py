@@ -353,7 +353,6 @@ def test_strict_json_and_arrays():
     assert d['data']['results']['f8'] == {'__ndarray__':
                                           'arrays/Shell.results.f8.npy'}
     assert set(_members(data)) == ({'model.json'}
-        | {'arrays/Shell.ABD.npy'}
         | {'arrays/Shell.results.%s.npy' % k for k in arrays})
     s2 = load_shell(io.BytesIO(data))
     assert s2.Mach == np.inf and s2.gamma == -np.inf and np.isnan(s2.beta)
@@ -431,6 +430,7 @@ def test_unsupported_values(tmp_path):
 def test_invalid_files():
     s = _shell()
     s.results['eigvals'] = np.arange(3.)
+    s.ABDnxny = s.ABD
     data = _save(s)
     d = _model_json(data)
 
@@ -456,7 +456,7 @@ def test_invalid_files():
         load(members=missing)
     with pytest.raises(ValueError, match='not referenced'):
         load(members=dict(members, **{'arrays/extra.npy':
-                                      members['arrays/Shell.ABD.npy']}))
+                                      members['arrays/Shell.ABDnxny.npy']}))
     with pytest.raises(ValueError, match="Missing member in the zip file: "
                        "'model.json'"):
         load_shell(io.BytesIO(_zip({k: v for k, v in members.items()
@@ -464,20 +464,20 @@ def test_invalid_files():
     buf = io.BytesIO()
     np.save(buf, np.array([1, 'a'], dtype=object), allow_pickle=True)
     with pytest.raises(ValueError, match='Object arrays cannot be loaded'):
-        load(members=dict(members, **{'arrays/Shell.ABD.npy':
+        load(members=dict(members, **{'arrays/Shell.ABDnxny.npy':
                                       buf.getvalue()}))
     buf = io.BytesIO()
     np.savez(buf, a=np.arange(3.))
     with pytest.raises(ValueError, match='Invalid array'):
-        load(members=dict(members, **{'arrays/Shell.ABD.npy':
+        load(members=dict(members, **{'arrays/Shell.ABDnxny.npy':
                                       buf.getvalue()}))
     for ref in ('../model.json', 'arrays/missing.npy', 'arrays/a b.npy', 1):
         bad = copy.deepcopy(d)
-        bad['data']['ABD'] = {'__ndarray__': ref}
+        bad['data']['ABDnxny'] = {'__ndarray__': ref}
         with pytest.raises(ValueError, match='member'):
             load(bad)
     bad = copy.deepcopy(d)
-    bad['data']['ABD'] = {'__sparse__': {}}
+    bad['data']['ABDnxny'] = {'__sparse__': {}}
     with pytest.raises(ValueError, match='Unknown marker'):
         load(bad)
     bad = copy.deepcopy(d)
@@ -522,6 +522,7 @@ def test_pickle_files_are_not_loaded(tmp_path):
 def test_max_size(monkeypatch):
     s = _shell()
     s.results['eigvals'] = np.arange(3.)
+    s.ABDnxny = s.ABD
     data = _save(s)
     with zipfile.ZipFile(io.BytesIO(data)) as zf:
         total = sum(zi.file_size for zi in zf.infolist())
@@ -538,7 +539,7 @@ def test_max_size(monkeypatch):
     big = io.BytesIO()
     np.save(big, np.zeros(2**23))
     members = _members(data)
-    members['arrays/Shell.ABD.npy'] = big.getvalue()
+    members['arrays/Shell.ABDnxny.npy'] = big.getvalue()
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, 'w', compression=zipfile.ZIP_DEFLATED) as zf:
         for name, value in members.items():
@@ -553,9 +554,9 @@ def test_max_size(monkeypatch):
 
     monkeypatch.setattr(zipfile.ZipFile, 'read', spy)
     with pytest.raises(ValueError, match="exceeds max_size, reading "
-                       "'arrays/Shell.ABD.npy'"):
+                       "'arrays/Shell.ABDnxny.npy'"):
         load_shell(io.BytesIO(buf.getvalue()), max_size=2**25)
-    assert 'arrays/Shell.ABD.npy' not in read
+    assert 'arrays/Shell.ABDnxny.npy' not in read
     # the default of 4 GiB
     assert json_io.MAX_SIZE == 4*2**30
     assert type(load_shell(io.BytesIO(buf.getvalue()))) is Shell
