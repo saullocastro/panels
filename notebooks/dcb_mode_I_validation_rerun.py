@@ -32,8 +32,8 @@ import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
 OUT = os.path.join(REPO, 'dcb_mode_I_validation_rerun_runs')
-NOTEBOOKS = ['alfano2001_dcb.ipynb', 'camanho2003_dcb.ipynb', 'turon2007_dcb.ipynb',
-             'krueger2008_dcb.ipynb', 'tijs2022_dcb.ipynb', 'tijs2023_phd_dcb.ipynb']
+NOTEBOOKS = ['dcb_alfano2001.ipynb', 'dcb_camanho2003.ipynb', 'dcb_turon2007.ipynb',
+             'dcb_krueger2008.ipynb', 'dcb_tijs2022.ipynb', 'dcb_tijs2023_phd.ipynb']
 
 
 def record():

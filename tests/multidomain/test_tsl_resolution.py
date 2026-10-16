@@ -65,18 +65,42 @@ def test_tsl_resolution_reference_dcb():
                 plyt=0.14, stack=[0]*15, laminaprop=lam)
     lamA, lcz = tsl_resolution(arm, 1e5, 87., 1.12)
     lamB, lczB = tsl_resolution(arm, 2e5, 87., 1.12)
-    assert np.isclose(lamA, 0.701, atol=5e-4)
-    assert np.isclose(lamB, 0.833, atol=5e-4)
+    # symmetric DCB, lambda = (k_o/(2 D11))**0.25
+    assert np.isclose(lamA, 0.8335, atol=5e-4)
+    assert np.isclose(lamB, 0.9912, atol=5e-4)
+    assert np.isclose(lamA, (1e5/(2*arm.lam.D[0, 0]))**0.25, rtol=1e-12)
+    assert tsl_resolution(arm, 1e5, 87., 1.12, p2=arm) == (lamA, lcz)
     assert np.isclose(lcz, 1.426, atol=5e-4)
     assert lczB == lcz
-    assert np.isclose(tsl_margin(lamA, lcz), 2*np.pi/lamA + 3*lcz)
-    # 25.2 terms and 168 points asked for over 24 mm
+    assert np.isclose(tsl_margin(lamA, lcz), 3*lcz + 8/lamA)
+    # 13.9 mm for the reference DCB
+    assert np.isclose(tsl_margin(lamA, lcz), 13.88, atol=5e-3)
+    # 25.0 terms and 168 points asked for over 24 mm
     assert tsl_discretization(lamA, lcz, 24.) == (25, 170)
     assert tsl_discretization(lamA, lcz, 24., m_max=30) == (26, 170)
     # no upper limit for the Gauss points
     assert tsl_discretization(lamA, lcz/3, 24.) == (25, 510)
     # at least 4 points per term
     assert tsl_discretization(lamA, 100., 24.) == (25, 100)
+
+
+def test_tsl_resolution_two_panels():
+    r"""`4 \lambda^4 = k_o (1/D_{11}^{(1)} + 1/D_{11}^{(2)})`, which tends to
+    the rate of one panel on a rigid foundation, `(k_o/(4 D_{11}))^{1/4}`,
+    when the other panel is much stiffer"""
+    lam = (133150., 10950., 0.316, 5190., 5190., 5190.)
+    kw = dict(group='top', x0=0, y0=0, a=24., b=25., m=8, n=8, plyt=0.14,
+              laminaprop=lam)
+    p1 = Shell(stack=[0]*15, **kw)
+    p2 = Shell(stack=[0]*9, **kw)
+    stiff = Shell(stack=[0]*600, **kw)
+    lam12, _ = tsl_resolution(p1, 1e5, 87., 1.12, p2=p2)
+    D1, D2 = p1.lam.D[0, 0], p2.lam.D[0, 0]
+    assert np.isclose(lam12, (1e5*(1/D1 + 1/D2)/4)**0.25, rtol=1e-12)
+    assert np.isclose(lam12, tsl_resolution(p2, 1e5, 87., 1.12, p2=p1)[0],
+                      rtol=1e-14)
+    lam_rigid, _ = tsl_resolution(p1, 1e5, 87., 1.12, p2=stiff)
+    assert np.isclose(lam_rigid, (1e5/(4*D1))**0.25, rtol=1e-5)
 
 
 def test_calc_kw_tsl_parameters():
