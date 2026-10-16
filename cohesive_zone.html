@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Cohesive zone model of the multi-domain approach &#8212; panels 0.13.9 documentation</title>
+    <title>Cohesive zone model of the multi-domain approach &#8212; panels 0.13.11 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
 
-    <script src="_static/documentation_options.js?v=97f24cbe"></script>
+    <script src="_static/documentation_options.js?v=63942e21"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
@@ -50,7 +50,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.13.9" />
+  <meta name="docsearch:version" content="0.13.11" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -118,7 +118,7 @@
   
   
   
-    <p class="title logo__title">panels 0.13.9 documentation</p>
+    <p class="title logo__title">panels 0.13.11 documentation</p>
   
 </a></div>
     
@@ -779,7 +779,7 @@ panels and over the integration points, where the approximation functions are
 evaluated inside the loops, <code class="docutils literal notranslate"><span class="pre">kCSB_dmg.pyx</span></code>. Because <span class="math notranslate nohighlight">\([K^{conn}_{dmg}]\)</span> is
 part of the internal force vector, it is needed at every iteration (see
 <a class="reference internal" href="#cohesive-zone-solution"><span class="std std-ref">Solution procedure</span></a>), and with <span class="math notranslate nohighlight">\(60 \times 30\)</span> integration points and <span class="math notranslate nohighlight">\(10 \times 10\)</span>, <span class="math notranslate nohighlight">\(8 \times 8\)</span> terms these
-loops take 8.7 s per assembly with the code of the thesis (panels 0.6.21), 68%
+loops take 6.5 s per assembly with the code of the thesis (panels 0.6.21), 67%
 of the run time in the elastic range.
 The implementation now writes the same Gauss-Legendre rule as matrix products.
 Let <span class="math notranslate nohighlight">\(g = 1, \dots, n_g\)</span> be the integration points, with weights <span class="math notranslate nohighlight">\(w_g = w_{\xi}
@@ -832,16 +832,17 @@ dimensions <span class="math notranslate nohighlight">\(a\)</span>, <span class=
 (<code class="docutils literal notranslate"><span class="pre">tests/multidomain/test_dcb_damage.py</span></code>, <span class="math notranslate nohighlight">\(60 \times 30\)</span> integration
 points, <span class="math notranslate nohighlight">\(10 \times 10\)</span> and <span class="math notranslate nohighlight">\(8 \times 8\)</span> terms), on a laptop with 16 threads,
 by timing <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_kC_conn()</span></code> in the driver of the thesis
-(panels 0.6.21) and in the current driver (panels 0.13.0). One assembly of <span class="math notranslate nohighlight">\([K^{conn}_{dmg}]\)</span> takes 8.7 s with the loops of
-the thesis (panels 0.6.21) at any damage state, 0.57–0.61 s with the
-current kernels, and 0.037 s with the matrix products for the pristine
-interface and 0.05–0.08 s with 20–100% of the points damaged, 110–240
+(panels 0.6.21) and in the current driver (panels 0.13.11), as the medians
+of three runs, between which the times varied by up to 50%. One assembly of <span class="math notranslate nohighlight">\([K^{conn}_{dmg}]\)</span> takes 6.5 s with the loops of
+the thesis (panels 0.6.21) at any damage state, 0.42 s with the
+current kernels, and 0.035 s with the matrix products for the pristine
+interface and 0.05–0.08 s with 20–100% of the points damaged, 85–190
 times faster than the loops of the thesis. Eight displacement increments in
-the elastic range take 283 s with the code of the thesis and 7.3 s with
-panels 0.13.0, the matrix products and the update of Eq. <a class="reference internal" href="#equation-cz-k-update">(14)</a>
+the elastic range take 218 s with the code of the thesis and 6.4 s with
+panels 0.13.11, the matrix products and the update of Eq. <a class="reference internal" href="#equation-cz-k-update">(14)</a>
 together with the changes of the driver described in
 <a class="reference internal" href="#cohesive-zone-solution"><span class="std std-ref">Solution procedure</span></a>; with the current kernels and without the
-predictor and the reuse of the tangent stiffness they take 27 s, with the
+predictor and the reuse of the tangent stiffness they take 29 s, with the
 same loads to a relative <span class="math notranslate nohighlight">\(3.2 \times 10^{-8}\)</span>, the order of the convergence
 tolerance.</p>
 </section>
@@ -858,9 +859,9 @@ integral is not small. The table below compares, for a linear elastic
 solution with a tip displacement of 1 mm, the reaction at the loaded edge with
 the integrals of the traction computed with the full separation <span class="math notranslate nohighlight">\(\Delta\)</span> and
 with the corrected separation <span class="math notranslate nohighlight">\(\Delta^{corr}\)</span>.</p>
-<div class="pst-scrollable-table-container"><table class="table" id="id18">
+<div class="pst-scrollable-table-container"><table class="table" id="id19">
 <caption><span class="caption-text">Out-of-plane force of the DCB for a tip displacement of 1 mm,
-            linear solution, default edge penalties.</span><a class="headerlink" href="#id18" title="Link to this table">#</a></caption>
+            linear solution, default edge penalties.</span><a class="headerlink" href="#id19" title="Link to this table">#</a></caption>
 <thead>
 <tr class="row-odd"><th class="head"><p><span class="math notranslate nohighlight">\(k_o\)</span> [N/mm³]</p></th>
 <th class="head"><p>Reaction [N]</p></th>
@@ -923,9 +924,9 @@ each connection of the DCB arm (<span class="math notranslate nohighlight">\(h =
 reference model have two connections each, at the crack tip moment. The
 table below gives the elastic stiffness of the DCB, <span class="math notranslate nohighlight">\(k_o = 2\times10^5\)</span>
 N/mm³, when the default <span class="math notranslate nohighlight">\(k_t\)</span> and <span class="math notranslate nohighlight">\(k_r\)</span> are multiplied by a factor.</p>
-<div class="pst-scrollable-table-container"><table class="table" id="id19">
+<div class="pst-scrollable-table-container"><table class="table" id="id20">
 <caption><span class="caption-text">Elastic stiffness of the DCB versus the factor applied to the
-            default edge penalties.</span><a class="headerlink" href="#id19" title="Link to this table">#</a></caption>
+            default edge penalties.</span><a class="headerlink" href="#id20" title="Link to this table">#</a></caption>
 <thead>
 <tr class="row-odd"><th class="head"><p>Factor</p></th>
 <th class="head"><p><span class="math notranslate nohighlight">\(P/\delta\)</span> [N/mm]</p></th>
@@ -1160,8 +1161,9 @@ and the driver described in <a class="reference internal" href="#cohesive-zone-s
 domain is <span class="math notranslate nohighlight">\(L_{tsl} = 24\)</span> mm long, of the 52 mm ligament, and the opening goes
 up to <span class="math notranslate nohighlight">\(\delta = 8\)</span> mm in 38 increments: 23 equal increments up to 5 mm and
 increments of 0.2 mm after it. The opening ahead of the process zone decays
-with the rate <span class="math notranslate nohighlight">\(\lambda = (k_o/4D_{11})^{1/4}\)</span>, 0.70 mm⁻¹ in case A and 0.83
-mm⁻¹ in case B, and the cohesive zone length estimated with Rice’s model,
+with the rate <span class="math notranslate nohighlight">\(\lambda = (k_o/2D_{11})^{1/4}\)</span> of two arms connected by an
+elastic foundation of stiffness <span class="math notranslate nohighlight">\(k_o\)</span>, the opening being <span class="math notranslate nohighlight">\(w^t - w^b\)</span>, 0.83
+mm⁻¹ in case A and 0.99 mm⁻¹ in case B, and the cohesive zone length estimated with Rice’s model,
 <span class="math notranslate nohighlight">\(l_{cz} = 0.88\,E_2 G_{Ic}/\tau_o^2\)</span> (Turon et al. 2007
 <a class="reference internal" href="ref.html#turon2007meshsize" id="id4"><span>[turon2007MeshSize]</span></a>), is 1.43 mm in both cases.</p>
 <p><strong>Runs.</strong> A full grid <span class="math notranslate nohighlight">\(m_{tsl} \in \{10, 15, 20, 25, 30\} \times n_x \in
@@ -1183,8 +1185,9 @@ loaded edge and the area integral of the normal traction of the
 interface, see <a class="reference internal" href="#cohesive-zone-load"><span class="std std-ref">Load measured at the loaded edge</span></a>. Both are equal by equilibrium of
 the loaded arm when the cohesive domain carries the whole load, so <span class="math notranslate nohighlight">\(e_{eq}\)</span>
 grows when the basis does not represent the tractions or when the
-compressive lobe ahead of the process zone reaches the perfect bond beyond
-the cohesive domain, whose tractions are not part of the integral;</p></li>
+tractions ahead of the process zone, its compressive lobe and the decaying
+opening beyond it, reach the perfect bond beyond the cohesive domain,
+whose tractions are not part of the integral;</p></li>
 <li><p>the coefficient of variation of the load drop per increment after the
 peak, <span class="math notranslate nohighlight">\(CV = \mathrm{std}(\Delta P)/|\mathrm{mean}(\Delta P)|\)</span>, which is
 small for a smooth softening and large for a staircase or sawtooth
@@ -1195,11 +1198,11 @@ and the wall time.</p></li>
 <p>The study is reproduced by <code class="docutils literal notranslate"><span class="pre">notebooks/dcb_mode_I_convergence_study.py</span></code>, and
 the metrics and load curves of all runs are stored in
 <code class="docutils literal notranslate"><span class="pre">notebooks/results/dcb_mode_I_convergence_study.json</span></code>. The runs were done
-with panels 0.13.0 on a laptop with 16 threads, eight runs at a time with two threads
+with panels 0.13.11 on a laptop with 16 threads, eight runs at a time with two threads
 each, so the wall times indicate the relative cost; the reference run takes
-11 min in this setting and 5.4 min of wall time (18 min of CPU time) when run
+10 min in this setting and 4.5 min of wall time (17 min of CPU time) when run
 alone.</p>
-<div class="pst-scrollable-table-container"><table class="table" id="id20">
+<div class="pst-scrollable-table-container"><table class="table" id="id21">
 <caption><span class="caption-text">Convergence study, terms <span class="math notranslate nohighlight">\(m_{tsl}\)</span> and Gauss points <span class="math notranslate nohighlight">\(n_x\)</span>
             along <span class="math notranslate nohighlight">\(x\)</span> of the cohesive domain, <span class="math notranslate nohighlight">\(L_{tsl} = 24\)</span> mm. Loads
             in N, openings in mm, <span class="math notranslate nohighlight">\(e_P\)</span> and <span class="math notranslate nohighlight">\(e_{eq}\)</span> in %, wall time in
@@ -1207,7 +1210,7 @@ alone.</p>
             stopped at <span class="math notranslate nohighlight">\(\delta = 6.2\)</span> and 7.2 mm (case A) and 7.4 mm
             (case B), and the run B with <span class="math notranslate nohighlight">\(m_{tsl} = 15\)</span>, <span class="math notranslate nohighlight">\(n_x = 60\)</span> at
             7.8 mm, when an increment did not converge after the last
-            bisection; their <span class="math notranslate nohighlight">\(e_P\)</span> is evaluated up to that opening.</span><a class="headerlink" href="#id20" title="Link to this table">#</a></caption>
+            bisection; their <span class="math notranslate nohighlight">\(e_P\)</span> is evaluated up to that opening.</span><a class="headerlink" href="#id21" title="Link to this table">#</a></caption>
 <thead>
 <tr class="row-odd"><th class="head"><p>case</p></th>
 <th class="head"><p><span class="math notranslate nohighlight">\(m_{tsl}\)</span></p></th>
@@ -1239,7 +1242,7 @@ alone.</p>
 <td><p>19</p></td>
 <td><p>7</p></td>
 <td><p>81</p></td>
-<td><p>8</p></td>
+<td><p>7</p></td>
 </tr>
 <tr class="row-odd"><td><p>A</p></td>
 <td><p>10</p></td>
@@ -1329,7 +1332,7 @@ alone.</p>
 <td><p>0.087</p></td>
 <td><p>3</p></td>
 <td><p>317</p></td>
-<td><p>17</p></td>
+<td><p>15</p></td>
 </tr>
 <tr class="row-odd"><td><p>A</p></td>
 <td><p>20</p></td>
@@ -1359,7 +1362,7 @@ alone.</p>
 <td><p>0.087</p></td>
 <td><p>0</p></td>
 <td><p>136</p></td>
-<td><p>7</p></td>
+<td><p>6</p></td>
 </tr>
 <tr class="row-odd"><td><p>A</p></td>
 <td><p>25</p></td>
@@ -1374,7 +1377,7 @@ alone.</p>
 <td><p>0.088</p></td>
 <td><p>3</p></td>
 <td><p>384</p></td>
-<td><p>33</p></td>
+<td><p>31</p></td>
 </tr>
 <tr class="row-even"><td><p>A</p></td>
 <td><p>25</p></td>
@@ -1404,7 +1407,7 @@ alone.</p>
 <td><p>0.087</p></td>
 <td><p>0</p></td>
 <td><p>139</p></td>
-<td><p>11</p></td>
+<td><p>10</p></td>
 </tr>
 <tr class="row-even"><td><p>A</p></td>
 <td><p>30</p></td>
@@ -1419,7 +1422,7 @@ alone.</p>
 <td><p>0.088</p></td>
 <td><p>3</p></td>
 <td><p>358</p></td>
-<td><p>46</p></td>
+<td><p>43</p></td>
 </tr>
 <tr class="row-odd"><td><p>A</p></td>
 <td><p>30</p></td>
@@ -1434,7 +1437,7 @@ alone.</p>
 <td><p>0.087</p></td>
 <td><p>0</p></td>
 <td><p>135</p></td>
-<td><p>15</p></td>
+<td><p>14</p></td>
 </tr>
 <tr class="row-even"><td><p>A</p></td>
 <td><p>30</p></td>
@@ -1464,7 +1467,7 @@ alone.</p>
 <td><p>20</p></td>
 <td><p>7</p></td>
 <td><p>140</p></td>
-<td><p>9</p></td>
+<td><p>8</p></td>
 </tr>
 <tr class="row-even"><td><p>B</p></td>
 <td><p>10</p></td>
@@ -1509,7 +1512,7 @@ alone.</p>
 <td><p>2.2</p></td>
 <td><p>8</p></td>
 <td><p>222</p></td>
-<td><p>20</p></td>
+<td><p>18</p></td>
 </tr>
 <tr class="row-odd"><td><p>B</p></td>
 <td><p>15</p></td>
@@ -1524,7 +1527,7 @@ alone.</p>
 <td><p>2.2</p></td>
 <td><p>0</p></td>
 <td><p>141</p></td>
-<td><p>4</p></td>
+<td><p>3</p></td>
 </tr>
 <tr class="row-even"><td><p>B</p></td>
 <td><p>15</p></td>
@@ -1554,7 +1557,7 @@ alone.</p>
 <td><p>0.031</p></td>
 <td><p>2</p></td>
 <td><p>238</p></td>
-<td><p>12</p></td>
+<td><p>11</p></td>
 </tr>
 <tr class="row-even"><td><p>B</p></td>
 <td><p>20</p></td>
@@ -1569,7 +1572,7 @@ alone.</p>
 <td><p>0.032</p></td>
 <td><p>0</p></td>
 <td><p>159</p></td>
-<td><p>9</p></td>
+<td><p>8</p></td>
 </tr>
 <tr class="row-odd"><td><p>B</p></td>
 <td><p>20</p></td>
@@ -1599,7 +1602,7 @@ alone.</p>
 <td><p>0.0059</p></td>
 <td><p>1</p></td>
 <td><p>189</p></td>
-<td><p>14</p></td>
+<td><p>13</p></td>
 </tr>
 <tr class="row-odd"><td><p>B</p></td>
 <td><p>25</p></td>
@@ -1629,7 +1632,7 @@ alone.</p>
 <td><p>0.0037</p></td>
 <td><p>0</p></td>
 <td><p>140</p></td>
-<td><p>11</p></td>
+<td><p>10</p></td>
 </tr>
 <tr class="row-odd"><td><p>B</p></td>
 <td><p>30</p></td>
@@ -1644,7 +1647,7 @@ alone.</p>
 <td><p>0.0040</p></td>
 <td><p>2</p></td>
 <td><p>239</p></td>
-<td><p>29</p></td>
+<td><p>28</p></td>
 </tr>
 <tr class="row-even"><td><p>B</p></td>
 <td><p>30</p></td>
@@ -1659,7 +1662,7 @@ alone.</p>
 <td><p>0.0038</p></td>
 <td><p>0</p></td>
 <td><p>137</p></td>
-<td><p>16</p></td>
+<td><p>15</p></td>
 </tr>
 <tr class="row-odd"><td><p>B</p></td>
 <td><p>30</p></td>
@@ -1674,17 +1677,17 @@ alone.</p>
 <td><p>0.0038</p></td>
 <td><p>0</p></td>
 <td><p>141</p></td>
-<td><p>17</p></td>
+<td><p>15</p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<div class="pst-scrollable-table-container"><table class="table" id="id21">
+<div class="pst-scrollable-table-container"><table class="table" id="id22">
 <caption><span class="caption-text">Convergence study, other parameters, varied one at a time
             from the reference discretisation <span class="math notranslate nohighlight">\(L_{tsl} = 24\)</span> mm,
             <span class="math notranslate nohighlight">\(m_{tsl} = 25\)</span>, <span class="math notranslate nohighlight">\(n_x = 180\)</span>, <span class="math notranslate nohighlight">\(n_{tsl} = 10\)</span>, <span class="math notranslate nohighlight">\(n_y = 30\)</span>,
             <span class="math notranslate nohighlight">\(m = n = 8\)</span>. Same quantities and units as above. The halved
-            increment gives 53 openings instead of 38.</span><a class="headerlink" href="#id21" title="Link to this table">#</a></caption>
+            increment gives 53 openings instead of 38.</span><a class="headerlink" href="#id22" title="Link to this table">#</a></caption>
 <thead>
 <tr class="row-odd"><th class="head"><p>case</p></th>
 <th class="head"><p>variation</p></th>
@@ -1714,7 +1717,7 @@ alone.</p>
 <td><p>0.087</p></td>
 <td><p>0</p></td>
 <td><p>139</p></td>
-<td><p>11</p></td>
+<td><p>10</p></td>
 </tr>
 <tr class="row-odd"><td><p>A</p></td>
 <td><p><span class="math notranslate nohighlight">\(n_{tsl} = 15\)</span></p></td>
@@ -1728,7 +1731,7 @@ alone.</p>
 <td><p>0.087</p></td>
 <td><p>0</p></td>
 <td><p>136</p></td>
-<td><p>27</p></td>
+<td><p>25</p></td>
 </tr>
 <tr class="row-even"><td><p>A</p></td>
 <td><p><span class="math notranslate nohighlight">\(n_y = 60\)</span></p></td>
@@ -1770,7 +1773,7 @@ alone.</p>
 <td><p>0.087</p></td>
 <td><p>0</p></td>
 <td><p>184</p></td>
-<td><p>14</p></td>
+<td><p>13</p></td>
 </tr>
 <tr class="row-odd"><td><p>A</p></td>
 <td><p><span class="math notranslate nohighlight">\(L_{tsl} = 17\)</span></p></td>
@@ -1798,7 +1801,7 @@ alone.</p>
 <td><p>33</p></td>
 <td><p>0</p></td>
 <td><p>142</p></td>
-<td><p>4</p></td>
+<td><p>3</p></td>
 </tr>
 <tr class="row-odd"><td><p>B</p></td>
 <td><p>reference</p></td>
@@ -1812,7 +1815,7 @@ alone.</p>
 <td><p>0.0037</p></td>
 <td><p>0</p></td>
 <td><p>140</p></td>
-<td><p>11</p></td>
+<td><p>10</p></td>
 </tr>
 <tr class="row-even"><td><p>B</p></td>
 <td><p><span class="math notranslate nohighlight">\(n_{tsl} = 15\)</span></p></td>
@@ -1826,7 +1829,7 @@ alone.</p>
 <td><p>0.0054</p></td>
 <td><p>0</p></td>
 <td><p>136</p></td>
-<td><p>27</p></td>
+<td><p>26</p></td>
 </tr>
 <tr class="row-odd"><td><p>B</p></td>
 <td><p><span class="math notranslate nohighlight">\(n_y = 60\)</span></p></td>
@@ -1840,7 +1843,7 @@ alone.</p>
 <td><p>0.0042</p></td>
 <td><p>0</p></td>
 <td><p>143</p></td>
-<td><p>13</p></td>
+<td><p>12</p></td>
 </tr>
 <tr class="row-even"><td><p>B</p></td>
 <td><p><span class="math notranslate nohighlight">\(m = n = 12\)</span></p></td>
@@ -1854,7 +1857,7 @@ alone.</p>
 <td><p>0.0036</p></td>
 <td><p>0</p></td>
 <td><p>140</p></td>
-<td><p>14</p></td>
+<td><p>13</p></td>
 </tr>
 <tr class="row-odd"><td><p>B</p></td>
 <td><p><span class="math notranslate nohighlight">\(\Delta\delta\)</span> halved</p></td>
@@ -1882,7 +1885,7 @@ alone.</p>
 <td><p>10</p></td>
 <td><p>0</p></td>
 <td><p>142</p></td>
-<td><p>12</p></td>
+<td><p>11</p></td>
 </tr>
 <tr class="row-odd"><td><p>B</p></td>
 <td><p><span class="math notranslate nohighlight">\(L_{tsl} = 17\)</span>, <span class="math notranslate nohighlight">\(m_{tsl} = 15\)</span>, <span class="math notranslate nohighlight">\(n_x = 120\)</span></p></td>
@@ -1896,7 +1899,7 @@ alone.</p>
 <td><p>11</p></td>
 <td><p>0</p></td>
 <td><p>142</p></td>
-<td><p>4</p></td>
+<td><p>3</p></td>
 </tr>
 </tbody>
 </table>
@@ -1904,8 +1907,8 @@ alone.</p>
 <p>The results show that:</p>
 <ul class="simple">
 <li><p><strong>The Ritz basis of the cohesive domain sets the shape of the response after
-the peak.</strong> The cohesive domain spans <span class="math notranslate nohighlight">\(\lambda L_{tsl} = 16.8\)</span> (A) and 20.0
-(B) decay lengths. With <span class="math notranslate nohighlight">\(m_{tsl} = 10\)</span>, 0.6 and 0.5 terms per decay length,
+the peak.</strong> The cohesive domain spans <span class="math notranslate nohighlight">\(\lambda L_{tsl} = 20.0\)</span> (A) and 23.8
+(B) decay lengths. With <span class="math notranslate nohighlight">\(m_{tsl} = 10\)</span>, 0.50 and 0.42 terms per decay length,
 the basis cannot follow the process zone: the load overshoots the converged
 curve up to 168.2–169.4 N at <span class="math notranslate nohighlight">\(\delta = 6.2\)</span>–6.4 mm, 1.3–2.0% above the
 converged peak, and then drops by up to 14 N (A) and 19 N (B) in one
@@ -1916,11 +1919,11 @@ and four of the six runs stop at <span class="math notranslate nohighlight">\(\d
 <span class="math notranslate nohighlight">\(m_{tsl} = 20\)</span> the error is at most 0.21% for <span class="math notranslate nohighlight">\(n_x \geq 120\)</span>, and 25 and 30
 terms give the same loads to 0.02% with <span class="math notranslate nohighlight">\(n_x = 180\)</span>. Against the terms per
 decay length, <span class="math notranslate nohighlight">\(m_{tsl}/(\lambda L_{tsl})\)</span>, the errors of both cases fall on
-one curve: about 1% at 0.75–0.9, at most 0.14% from 1.0 and below 0.1%
-from 1.2, with <span class="math notranslate nohighlight">\(n_x = 180\)</span>. The rule <span class="math notranslate nohighlight">\(m_{tsl} = 1.5\,\lambda L_{tsl}\)</span> keeps
+one curve: about 1% at 0.63–0.75, at most 0.14% from 0.84 and below 0.1%
+from 1.0, with <span class="math notranslate nohighlight">\(n_x = 180\)</span>. The rule <span class="math notranslate nohighlight">\(m_{tsl} = 1.25\,\lambda L_{tsl}\)</span> keeps
 a margin over this threshold; with at most 25 terms it limits the cohesive
-domain of case A to <span class="math notranslate nohighlight">\(25/(1.5\lambda) = 23.8\)</span> mm. The Bardell functions go
-up to 30 terms, so a cohesive domain longer than <span class="math notranslate nohighlight">\(30/(1.2\lambda)\)</span> is not
+domain of case A to <span class="math notranslate nohighlight">\(25/(1.25\lambda) = 24.0\)</span> mm. The Bardell functions go
+up to 30 terms, so a cohesive domain longer than <span class="math notranslate nohighlight">\(30/(1.0\lambda)\)</span> is not
 resolved.</p></li>
 <li><p><strong>The Gauss points along</strong> <span class="math notranslate nohighlight">\(x\)</span> <strong>set the robustness and a floor of the
 error.</strong> <span class="math notranslate nohighlight">\(n_x = 60\)</span>, 120 and 180 over 24 mm correspond to 3.6, 7.1 and 10.7
@@ -1945,8 +1948,10 @@ insensitivity of the DCB to <span class="math notranslate nohighlight">\(k_o &gt
 (2007).</p></li>
 <li><p><strong>The length of the cohesive domain is detected by</strong> <span class="math notranslate nohighlight">\(e_{eq}\)</span>, <strong>not by the
 load.</strong> At the last opening the crack has grown by 9.8 mm, and the margin
-<span class="math notranslate nohighlight">\(2\pi/\lambda + 3 l_{cz}\)</span> for the process zone and the compressive lobe
-ahead of it is 13.2 mm (A) and 11.8 mm (B), so <span class="math notranslate nohighlight">\(L_{tsl} = 24\)</span> mm contains
+<span class="math notranslate nohighlight">\(3 l_{cz} + 8/\lambda\)</span> for the process zone and the region ahead of it,
+where the opening decays as <span class="math notranslate nohighlight">\(e^{-\lambda x}\)</span>, the solution of beams on an
+elastic foundation <a class="reference internal" href="ref.html#kanninen1973augmenteddcb" id="id5"><span>[kanninen1973AugmentedDCB]</span></a>, to below <span class="math notranslate nohighlight">\(e^{-8}\)</span> of its
+value, is 13.9 mm (A) and 12.4 mm (B), so <span class="math notranslate nohighlight">\(L_{tsl} = 24\)</span> mm contains
 both up to <span class="math notranslate nohighlight">\(\delta = 8\)</span> mm and <span class="math notranslate nohighlight">\(e_{eq}\)</span> stays below 0.09% (A) and 0.004%
 (B), the larger value of case A coming from its longer decay length. With
 <span class="math notranslate nohighlight">\(L_{tsl} = 17\)</span> mm the loads are within 0.06–0.25% of the converged ones,
@@ -1955,8 +1960,8 @@ but from <span class="math notranslate nohighlight">\(\delta = 7.0\)</span> mm (
 to 10–33% at the last opening.</p></li>
 <li><p><strong>The sawtooth is a discrete snap-back.</strong> With too few terms the basis
 cannot follow the process zone continuously, like a cohesive finite element
-mesh that is coarse compared with the cohesive zone <a class="reference internal" href="ref.html#alfano2001interface" id="id5"><span>[alfano2001Interface]</span></a>
-<a class="reference internal" href="ref.html#turon2007meshsize" id="id6"><span>[turon2007MeshSize]</span></a>: the elastic energy builds up while the crack front is
+mesh that is coarse compared with the cohesive zone <a class="reference internal" href="ref.html#alfano2001interface" id="id6"><span>[alfano2001Interface]</span></a>
+<a class="reference internal" href="ref.html#turon2007meshsize" id="id7"><span>[turon2007MeshSize]</span></a>: the elastic energy builds up while the crack front is
 held and is released when a group of integration points fails at once,
 which a displacement-controlled analysis crosses as a sudden load drop. More
 terms refine the displacement field and remove the sawtooth, while more
@@ -1968,25 +1973,32 @@ mm, <span class="math notranslate nohighlight">\(m_{tsl} = 25\)</span>, <span cl
 8\)</span> terms in the other domains, which gives <span class="math notranslate nohighlight">\(P_{max} = 166.10\)</span> N (A) and
 166.15 N (B) at <span class="math notranslate nohighlight">\(\delta = 5.6\)</span> mm. The rules for other geometries are:</p>
 <div class="math notranslate nohighlight" id="equation-cz-rules">
-<span class="eqno">(18)<a class="headerlink" href="#equation-cz-rules" title="Link to this equation">#</a></span>\[m_{tsl} = 1.5\,\lambda L_{tsl}, \qquad
+<span class="eqno">(18)<a class="headerlink" href="#equation-cz-rules" title="Link to this equation">#</a></span>\[m_{tsl} = 1.25\,\lambda L_{tsl}, \qquad
 n_x = 10\,\frac{L_{tsl}}{l_{cz}}, \qquad
-L_{tsl} \geq \Delta a + \frac{2\pi}{\lambda} + 3 l_{cz}\]</div>
+L_{tsl} \geq \Delta a + 3 l_{cz} + \frac{8}{\lambda}\]</div>
 <p>with <span class="math notranslate nohighlight">\(\Delta a\)</span> the crack growth up to the last opening, <span class="math notranslate nohighlight">\(m_{tsl} \leq 25\)</span>,
 <span class="math notranslate nohighlight">\(n_x \geq 4 m_{tsl}\)</span> rounded up to a multiple of 10, <span class="math notranslate nohighlight">\(n_{tsl} = 10\)</span>, <span class="math notranslate nohighlight">\(n_y =
 30\)</span> and <span class="math notranslate nohighlight">\(m = n = 8\)</span> in the other domains. They are implemented in
 <code class="xref py py-func docutils literal notranslate"><span class="pre">tsl_resolution()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">tsl_margin()</span></code> and <code class="xref py py-func docutils literal notranslate"><span class="pre">tsl_discretization()</span></code>,
 and <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.calc_k_dmg()</span></code> prints a warning, the first time a point
-is damaged, when <span class="math notranslate nohighlight">\(m_{tsl} &lt; 1.2\,\lambda L_{tsl}\)</span> or <span class="math notranslate nohighlight">\(n_x &lt; 7\,L_{tsl}/l_{cz}\)</span>.
+is damaged, when <span class="math notranslate nohighlight">\(m_{tsl} &lt; 1.0\,\lambda L_{tsl}\)</span> or <span class="math notranslate nohighlight">\(n_x &lt; 7\,L_{tsl}/l_{cz}\)</span>.
+Before version 0.13.11 the rate was <span class="math notranslate nohighlight">\((k_o/4D_{11})^{1/4}\)</span>, that of one arm on
+a rigid foundation, <span class="math notranslate nohighlight">\(2^{-1/4}\)</span> times the rate of the symmetric DCB, and the
+factors of the rules were 1.5 and 1.2 instead of 1.25 and 1.0. The margin
+was <span class="math notranslate nohighlight">\(2\pi/\lambda + 3 l_{cz}\)</span>, i.e. <span class="math notranslate nohighlight">\(7.47/\lambda + 3 l_{cz}\)</span> with the
+corrected rate; <span class="math notranslate nohighlight">\(2\pi/\lambda + 3 l_{cz}\)</span> with the corrected rate lets the
+tractions reach the perfect bond in the last openings of the validation runs,
+with <span class="math notranslate nohighlight">\(e_{eq}\)</span> up to 10%, against 0.25% at most with <span class="math notranslate nohighlight">\(3 l_{cz} + 8/\lambda\)</span>.
 The Gauss-Legendre points and weights are computed by
 <code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.special.roots_legendre()</span></code>, without an upper limit for <span class="math notranslate nohighlight">\(n_x\)</span>.</p>
 <p><strong>Discretisation of the validation runs.</strong> The validation runs below use the
 rules of Eq. <a class="reference internal" href="#equation-cz-rules">(18)</a> with 25 terms and the corresponding <span class="math notranslate nohighlight">\(L_{tsl} =
-25/(1.5\lambda)\)</span>, and the range of openings is limited such that the crack
+25/(1.25\lambda)\)</span>, and the range of openings is limited such that the crack
 growth plus the margin fits in <span class="math notranslate nohighlight">\(L_{tsl}\)</span>. The low-strength case of Alfano and
 Crisfield needs a cohesive domain over the whole bonded length, <span class="math notranslate nohighlight">\(L_{tsl} = 70\)</span>
 mm, for which the first rule asks for 94 terms with <span class="math notranslate nohighlight">\(k_o = 10^5\)</span> N/mm³, more
 than the 30 Bardell functions. It is therefore run with <span class="math notranslate nohighlight">\(k_o = 10^3\)</span> N/mm³,
-for which <span class="math notranslate nohighlight">\(m_{tsl} = 30 = 1.5\,\lambda L_{tsl}\)</span> and <span class="math notranslate nohighlight">\(n_x = 4 m_{tsl} = 120\)</span>
+for which <span class="math notranslate nohighlight">\(m_{tsl} = 30 = 1.27\,\lambda L_{tsl}\)</span> and <span class="math notranslate nohighlight">\(n_x = 4 m_{tsl} = 120\)</span>
 meet both rules. The damage onset, <span class="math notranslate nohighlight">\(\Delta_o = \tau_o/k_o = 1.7 \times
 10^{-3}\)</span> mm, remains far below the separation at failure, <span class="math notranslate nohighlight">\(\Delta_f =
 2G_{Ic}/\tau_o = 0.33\)</span> mm, so the softening branch that governs this case is
@@ -2000,27 +2012,26 @@ terms, against less than <span class="math notranslate nohighlight">\(10^{-5}\)<
 <section id="validation-against-the-literature">
 <h2>Validation against the literature<a class="headerlink" href="#validation-against-the-literature" title="Link to this heading">#</a></h2>
 <p>The model was compared with eight references that report mode I DCB
-results: Alfano and Crisfield (2001) <a class="reference internal" href="ref.html#alfano2001interface" id="id7"><span>[alfano2001Interface]</span></a>, Camanho et al.
-(2003) <a class="reference internal" href="ref.html#camanho2003delamination" id="id8"><span>[camanho2003Delamination]</span></a>, Turon et al. (2007) <a class="reference internal" href="ref.html#turon2007meshsize" id="id9"><span>[turon2007MeshSize]</span></a>,
-Krueger (2008) <a class="reference internal" href="ref.html#krueger2008dcb" id="id10"><span>[krueger2008DCB]</span></a>, Tijs et al. (2022) <a class="reference internal" href="ref.html#tijs2022interlaminar" id="id11"><span>[tijs2022Interlaminar]</span></a>,
-Leciñana et al. (2023) <a class="reference internal" href="ref.html#lecinana2023fatigue" id="id12"><span>[lecinana2023Fatigue]</span></a> and the PhD thesis of Tijs
-(2023) <a class="reference internal" href="ref.html#tijs2023phd" id="id13"><span>[tijs2023PhD]</span></a>, plus Krueger (2012) <a class="reference internal" href="ref.html#krueger2012mmb" id="id14"><span>[krueger2012MMB]</span></a>, whose benchmarks
+results: Alfano and Crisfield (2001) <a class="reference internal" href="ref.html#alfano2001interface" id="id8"><span>[alfano2001Interface]</span></a>, Camanho et al.
+(2003) <a class="reference internal" href="ref.html#camanho2003delamination" id="id9"><span>[camanho2003Delamination]</span></a>, Turon et al. (2007) <a class="reference internal" href="ref.html#turon2007meshsize" id="id10"><span>[turon2007MeshSize]</span></a>,
+Krueger (2008) <a class="reference internal" href="ref.html#krueger2008dcb" id="id11"><span>[krueger2008DCB]</span></a>, Tijs et al. (2022) <a class="reference internal" href="ref.html#tijs2022interlaminar" id="id12"><span>[tijs2022Interlaminar]</span></a>,
+Leciñana et al. (2023) <a class="reference internal" href="ref.html#lecinana2023fatigue" id="id13"><span>[lecinana2023Fatigue]</span></a> and the PhD thesis of Tijs
+(2023) <a class="reference internal" href="ref.html#tijs2023phd" id="id14"><span>[tijs2023PhD]</span></a>, plus Krueger (2012) <a class="reference internal" href="ref.html#krueger2012mmb" id="id15"><span>[krueger2012MMB]</span></a>, whose benchmarks
 are for the mixed-mode bending specimen and are only recorded, see below.
 Each reference has a notebook in <code class="docutils literal notranslate"><span class="pre">notebooks/</span></code> with a dictionary of the FE
 cases and one of the experimental tests, a comparison table, a plot and a
 discussion; the <code class="docutils literal notranslate"><span class="pre">panels</span></code> results are stored in <code class="docutils literal notranslate"><span class="pre">notebooks/results/*.npz</span></code>
 and collected by <code class="docutils literal notranslate"><span class="pre">notebooks/dcb_mode_I_validation_summary.ipynb</span></code>. The results were
-obtained with panels 0.13.0 (see the table of peak loads for two cases run
-again with more Gauss points).</p>
+obtained with panels 0.13.11.</p>
 <p>The case of Camanho et al. (2003) is kept for reference, but it is not used
 to validate the model: the FE and experimental load-opening curves of the
-reference are 12–21% more compliant than the corrected beam theory, more
+reference are 12–21% less stiff than the corrected beam theory, more
 than transverse shear and root rotation explain, and the reference does not
 give enough detail to find out why; the experimental peak, 147.1 N, is 6%
 above the corrected beam theory with the same <span class="math notranslate nohighlight">\(G_{Ic}\)</span>; and the FE model has
 about one decohesion element per cohesive zone length, which overpredicts the
-peak load <a class="reference internal" href="ref.html#turon2007meshsize" id="id15"><span>[turon2007MeshSize]</span></a>. See the note in
-<code class="docutils literal notranslate"><span class="pre">notebooks/camanho2003_dcb.ipynb</span></code>.</p>
+peak load <a class="reference internal" href="ref.html#turon2007meshsize" id="id16"><span>[turon2007MeshSize]</span></a>. See the note in
+<code class="docutils literal notranslate"><span class="pre">notebooks/dcb_camanho2003.ipynb</span></code>.</p>
 <p><strong>Model.</strong> <code class="docutils literal notranslate"><span class="pre">notebooks/dcb_utils.py</span></code> builds a symmetric DCB: CLPT arms, far
 end clamped, arm tips opened to <span class="math notranslate nohighlight">\(\pm\delta/2\)</span> by prescribed displacements,
 the load being the reaction of the prescribed displacement. The bonded region
@@ -2032,17 +2043,17 @@ represented by starting the integration points outside the bonded strip fully
 damaged. The solution procedure is the one described in
 <a class="reference internal" href="#cohesive-zone-solution"><span class="std std-ref">Solution procedure</span></a>. The discretisation follows the rules of
 Eq. <a class="reference internal" href="#equation-cz-rules">(18)</a> (<code class="docutils literal notranslate"><span class="pre">dcb_utils.discretize</span></code>): <span class="math notranslate nohighlight">\(m_{tsl} = \lceil
-1.5\,\lambda L_{tsl} \rceil\)</span> with at most 25 terms, and <span class="math notranslate nohighlight">\(n_x =
+1.25\,\lambda L_{tsl} \rceil\)</span> with at most 25 terms, and <span class="math notranslate nohighlight">\(n_x =
 10\,L_{tsl}/l_{cz}\)</span>, but not less than <span class="math notranslate nohighlight">\(4\,m_{tsl}\)</span> to integrate the
 products of the approximation functions, rounded up to a multiple of 10, and
-<span class="math notranslate nohighlight">\(L_{tsl}\)</span> covers the crack growth plus a margin of <span class="math notranslate nohighlight">\(2\pi/\lambda + 3\,l_{cz}\)</span>
-for the process zone and the compressive lobe ahead of it; the range of
-openings is limited so that <span class="math notranslate nohighlight">\(L_{tsl}\)</span> stays resolved, which allows 5–13 mm
+<span class="math notranslate nohighlight">\(L_{tsl}\)</span> covers the crack growth plus a margin of <span class="math notranslate nohighlight">\(3\,l_{cz} + 8/\lambda\)</span>
+for the process zone and the decaying opening ahead of it; the range of
+openings is limited so that <span class="math notranslate nohighlight">\(L_{tsl}\)</span> stays resolved, which allows 4–11 mm
 of crack growth. The penalty stiffness is <span class="math notranslate nohighlight">\(k_o = 10^5\)</span> N/mm³, except for the
 low-strength case of Alfano and Crisfield (see the convergence study): a
 longer decay length <span class="math notranslate nohighlight">\(1/\lambda\)</span> needs fewer terms, and for the DCB of Turon
 et al. (2007) the peak load with the <span class="math notranslate nohighlight">\(k_o = 10^6\)</span> N/mm³ of their model
-differs by 0.04% (64.07 against 64.05 N), in line with their Fig. 9. The reference curves of linear elastic fracture mechanics (LEFM) are
+differs by 0.2% (64.13 against 64.02 N), in line with their Fig. 9. The reference curves of linear elastic fracture mechanics (LEFM) are
 the simple and the corrected beam theories, the latter with the crack length
 <span class="math notranslate nohighlight">\(a + \chi h\)</span> of Williams, <span class="math notranslate nohighlight">\(\chi = \sqrt{E_{11}/(11 G_{13})\,[3 -
 2(\Gamma/(1+\Gamma))^2]}\)</span>, <span class="math notranslate nohighlight">\(\Gamma = 1.18\sqrt{E_{11}E_{22}}/G_{13}\)</span>, and the
@@ -2056,7 +2067,7 @@ are incomplete: the opening convention (Alfano and Crisfield plot the
 displacement of one arm, <span class="math notranslate nohighlight">\(\delta = 2u\)</span>), the crack length of one test of Tijs
 et al. (2022) inferred from its compliance, and the elastic properties and
 length of the welded specimens of Tijs (2023).</p>
-<div class="pst-scrollable-table-container"><table class="table" id="id22">
+<div class="pst-scrollable-table-container"><table class="table" id="id23">
 <caption><span class="caption-text">Peak loads of the mode I DCB references. <span class="math notranslate nohighlight">\(P_{max}\)</span> in N,
             <span class="math notranslate nohighlight">\(\delta\)</span> at <span class="math notranslate nohighlight">\(P_{max}\)</span> in mm, differences of <code class="docutils literal notranslate"><span class="pre">panels</span></code> in %,
             <span class="math notranslate nohighlight">\(\Delta K_0\)</span> is the difference of the initial stiffness of
@@ -2065,19 +2076,16 @@ length of the welded specimens of Tijs (2023).</p>
             table of the reference; <span class="math notranslate nohighlight">\(^{d}\)</span>: digitised; <span class="math notranslate nohighlight">\(^{m}\)</span>: mean of
             digitised tests; <span class="math notranslate nohighlight">\(^{b}\)</span>: not an FE curve but the VCCT
             benchmark of Krueger (2008), the onset of delamination at
-            mid-width, 2.6% (UD) and 12.0% (D±30) below the load at which
-            the width-average energy release rate reaches <span class="math notranslate nohighlight">\(G_{Ic}\)</span>. The
+            mid-width; the load at which the width-average energy release
+            rate reaches <span class="math notranslate nohighlight">\(G_{Ic}\)</span> is 2.6% (UD) and 12.3% (D±30) above it. The
             two Krueger cases are listed with <span class="math notranslate nohighlight">\(\tau_o\)</span> = 40 MPa, the
             reference giving no strength; with 60 MPa the peaks are 64.2
             and 110.0 N. <span class="math notranslate nohighlight">\(^{k}\)</span>: <span class="math notranslate nohighlight">\(k_o = 10^3\)</span> N/mm³, see the convergence
             study; with <span class="math notranslate nohighlight">\(10^5\)</span> N/mm³ the peak is 50.8 N at the same
             opening. <span class="math notranslate nohighlight">\(^{n}\)</span>: kept for reference, not used to validate the
-            model, see above. The XAS-913C case and the unidirectional
-            Krueger case with <span class="math notranslate nohighlight">\(\tau_o\)</span> = 60 MPa were run again with 320
-            and 450 Gauss points along <span class="math notranslate nohighlight">\(x\)</span>, as the rules of the
-            convergence study ask, after the limit of 304 points of panels
-            0.13.0 was removed; their loads changed by at most 0.06% of
-            the peak.</span><a class="headerlink" href="#id22" title="Link to this table">#</a></caption>
+            model, see above. Tijs 2022, <span class="math notranslate nohighlight">\(a_0\)</span> = 40 mm: <code class="docutils literal notranslate"><span class="pre">panels</span></code> and
+            CBT with <span class="math notranslate nohighlight">\(G_{Ic}\)</span> = 0.95 N/mm, the propagation toughness of
+            the test without fibre bridging.</span><a class="headerlink" href="#id23" title="Link to this table">#</a></caption>
 <thead>
 <tr class="row-odd"><th class="head"><p>case</p></th>
 <th class="head"><p><code class="docutils literal notranslate"><span class="pre">panels</span></code> <span class="math notranslate nohighlight">\(P_{max}\)</span></p></th>
@@ -2094,18 +2102,18 @@ length of the welded specimens of Tijs (2023).</p>
 </thead>
 <tbody>
 <tr class="row-even"><td><p>Alfano 2001, Table I, <span class="math notranslate nohighlight">\(t_o\)</span> = 57 MPa</p></td>
-<td><p>64.6</p></td>
-<td><p>1.83</p></td>
+<td><p>64.5</p></td>
+<td><p>1.85</p></td>
 <td><p>61.5 <span class="math notranslate nohighlight">\(^{d}\)</span></p></td>
-<td><p>+5.0</p></td>
+<td><p>+4.8</p></td>
 <td><p>–</p></td>
 <td><p>–</p></td>
 <td><p>63.2</p></td>
-<td><p>+2.2</p></td>
+<td><p>+2.1</p></td>
 <td><p>+17</p></td>
-<td><p>10.5</p></td>
+<td><p>9.0</p></td>
 </tr>
-<tr class="row-odd"><td><p>Alfano 2001, Table I, <span class="math notranslate nohighlight">\(t_o\)</span> = 1.7 MPa <span class="math notranslate nohighlight">\(^{k}\)</span></p></td>
+<tr class="row-odd"><td><p>Alfano 2001, Table I, <span class="math notranslate nohighlight">\(t_o\)</span> = 1.7 MPa</p></td>
 <td><p>50.8</p></td>
 <td><p>2.90</p></td>
 <td><p>49.5 <span class="math notranslate nohighlight">\(^{d}\)</span></p></td>
@@ -2118,54 +2126,54 @@ length of the welded specimens of Tijs (2023).</p>
 <td><p>6.0</p></td>
 </tr>
 <tr class="row-even"><td><p>Alfano 2001, XAS-913C</p></td>
-<td><p>93.8</p></td>
-<td><p>1.91</p></td>
+<td><p>93.6</p></td>
+<td><p>1.87</p></td>
 <td><p>90.0 <span class="math notranslate nohighlight">\(^{d}\)</span></p></td>
-<td><p>+4.2</p></td>
+<td><p>+4.0</p></td>
 <td><p>–</p></td>
 <td><p>–</p></td>
 <td><p>91.6</p></td>
-<td><p>+2.3</p></td>
+<td><p>+2.1</p></td>
 <td><p>+17</p></td>
-<td><p>10.6</p></td>
+<td><p>9.1</p></td>
 </tr>
 <tr class="row-odd"><td><p>Camanho 2003, AS4/PEEK <span class="math notranslate nohighlight">\(^{n}\)</span></p></td>
-<td><p>139.9</p></td>
-<td><p>4.12</p></td>
+<td><p>140.1</p></td>
+<td><p>4.09</p></td>
 <td><p>155.3 <span class="math notranslate nohighlight">\(^{t}\)</span></p></td>
-<td><p>-9.9</p></td>
+<td><p>-9.8</p></td>
 <td><p>147.1 <span class="math notranslate nohighlight">\(^{t}\)</span></p></td>
-<td><p>-4.9</p></td>
+<td><p>-4.8</p></td>
 <td><p>138.9</p></td>
-<td><p>+0.7</p></td>
-<td><p>+13</p></td>
-<td><p>8.2</p></td>
+<td><p>+0.9</p></td>
+<td><p>+14</p></td>
+<td><p>7.4</p></td>
 </tr>
 <tr class="row-even"><td><p>Turon 2007, T300/977-2</p></td>
-<td><p>64.1</p></td>
-<td><p>4.18</p></td>
+<td><p>64.0</p></td>
+<td><p>4.16</p></td>
 <td><p>57.0 <span class="math notranslate nohighlight">\(^{d}\)</span></p></td>
-<td><p>+12.4</p></td>
+<td><p>+12.3</p></td>
 <td><p>62.0 <span class="math notranslate nohighlight">\(^{d}\)</span></p></td>
 <td><p>+3.3</p></td>
 <td><p>63.3</p></td>
-<td><p>+1.3</p></td>
+<td><p>+1.2</p></td>
 <td><p>+12</p></td>
-<td><p>13.0</p></td>
+<td><p>11.1</p></td>
 </tr>
 <tr class="row-odd"><td><p>Krueger 2008, UD <span class="math notranslate nohighlight">\([0]_{24}\)</span></p></td>
-<td><p>63.6</p></td>
-<td><p>1.40</p></td>
+<td><p>63.5</p></td>
+<td><p>1.43</p></td>
 <td><p>60.7 <span class="math notranslate nohighlight">\(^{b}\)</span></p></td>
-<td><p>+4.7</p></td>
+<td><p>+4.6</p></td>
 <td><p>–</p></td>
 <td><p>–</p></td>
 <td><p>62.3</p></td>
-<td><p>+2.1</p></td>
+<td><p>+2.0</p></td>
 <td><p>+18</p></td>
-<td><p>9.9</p></td>
+<td><p>8.5</p></td>
 </tr>
-<tr class="row-even"><td><p>Krueger 2008, D±30</p></td>
+<tr class="row-even"><td><p>Krueger 2008, D`pm`30</p></td>
 <td><p>108.7</p></td>
 <td><p>1.70</p></td>
 <td><p>102.4 <span class="math notranslate nohighlight">\(^{b}\)</span></p></td>
@@ -2175,47 +2183,47 @@ length of the welded specimens of Tijs (2023).</p>
 <td><p>114.7</p></td>
 <td><p>-5.2</p></td>
 <td><p>+10</p></td>
-<td><p>7.6</p></td>
+<td><p>7.1</p></td>
 </tr>
 <tr class="row-odd"><td><p>Tijs 2022, <span class="math notranslate nohighlight">\(a_0\)</span> = 48 mm</p></td>
 <td><p>166.2</p></td>
-<td><p>5.68</p></td>
+<td><p>5.66</p></td>
 <td><p>167.0 <span class="math notranslate nohighlight">\(^{d}\)</span></p></td>
 <td><p>-0.5</p></td>
 <td><p>142.0 <span class="math notranslate nohighlight">\(^{d}\)</span></p></td>
-<td><p>+17.0</p></td>
+<td><p>+17.1</p></td>
 <td><p>164.5</p></td>
 <td><p>+1.1</p></td>
 <td><p>+14</p></td>
-<td><p>11.8</p></td>
+<td><p>10.1</p></td>
 </tr>
-<tr class="row-even"><td><p>Tijs 2022, <span class="math notranslate nohighlight">\(a_0\)</span> = 40 mm</p></td>
-<td><p>197.5</p></td>
-<td><p>3.99</p></td>
+<tr class="row-even"><td><p>Tijs 2022, <span class="math notranslate nohighlight">\(a_0\)</span> = 40 mm, 0.95 N/mm</p></td>
+<td><p>182.1</p></td>
+<td><p>3.71</p></td>
 <td><p>–</p></td>
 <td><p>–</p></td>
 <td><p>161.0 <span class="math notranslate nohighlight">\(^{d}\)</span></p></td>
-<td><p>+22.7</p></td>
-<td><p>194.5</p></td>
-<td><p>+1.5</p></td>
+<td><p>+13.1</p></td>
+<td><p>179.1</p></td>
+<td><p>+1.6</p></td>
 <td><p>+17</p></td>
-<td><p>11.8</p></td>
+<td><p>10.6</p></td>
 </tr>
 <tr class="row-odd"><td><p>Tijs 2023, full weld, 2.1 N/mm</p></td>
-<td><p>148.3</p></td>
-<td><p>6.48</p></td>
+<td><p>148.0</p></td>
+<td><p>6.41</p></td>
 <td><p>155.0 <span class="math notranslate nohighlight">\(^{d}\)</span></p></td>
-<td><p>-4.3</p></td>
+<td><p>-4.5</p></td>
 <td><p>160.0 <span class="math notranslate nohighlight">\(^{m}\)</span></p></td>
-<td><p>-7.3</p></td>
+<td><p>-7.5</p></td>
 <td><p>155.5</p></td>
-<td><p>-4.6</p></td>
+<td><p>-4.8</p></td>
 <td><p>+4</p></td>
 <td><p>4.9</p></td>
 </tr>
 <tr class="row-even"><td><p>Tijs 2023, weld center, 2.1 N/mm</p></td>
 <td><p>119.2</p></td>
-<td><p>5.75</p></td>
+<td><p>5.82</p></td>
 <td><p>128.0 <span class="math notranslate nohighlight">\(^{d}\)</span></p></td>
 <td><p>-6.9</p></td>
 <td><p>129.0 <span class="math notranslate nohighlight">\(^{m}\)</span></p></td>
@@ -2223,11 +2231,11 @@ length of the welded specimens of Tijs (2023).</p>
 <td><p>123.0</p></td>
 <td><p>-3.1</p></td>
 <td><p>+8</p></td>
-<td><p>5.2</p></td>
+<td><p>5.5</p></td>
 </tr>
 <tr class="row-odd"><td><p>Tijs 2023, weld center, 1.95 N/mm</p></td>
 <td><p>115.0</p></td>
-<td><p>5.56</p></td>
+<td><p>5.58</p></td>
 <td><p>122.0 <span class="math notranslate nohighlight">\(^{d}\)</span></p></td>
 <td><p>-5.7</p></td>
 <td><p>123.0 <span class="math notranslate nohighlight">\(^{d}\)</span></p></td>
@@ -2235,27 +2243,27 @@ length of the welded specimens of Tijs (2023).</p>
 <td><p>118.5</p></td>
 <td><p>-3.0</p></td>
 <td><p>+8</p></td>
-<td><p>5.7</p></td>
+<td><p>5.8</p></td>
 </tr>
 <tr class="row-even"><td><p>Tijs 2023, weld center, 1.12 N/mm</p></td>
-<td><p>87.8</p></td>
-<td><p>4.09</p></td>
+<td><p>87.9</p></td>
+<td><p>4.13</p></td>
 <td><p>96.0 <span class="math notranslate nohighlight">\(^{d}\)</span></p></td>
-<td><p>-8.6</p></td>
+<td><p>-8.5</p></td>
 <td><p>–</p></td>
 <td><p>–</p></td>
 <td><p>89.8</p></td>
-<td><p>-2.3</p></td>
+<td><p>-2.2</p></td>
 <td><p>+9</p></td>
-<td><p>9.2</p></td>
+<td><p>8.2</p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<div class="pst-scrollable-table-container"><table class="table" id="id23">
+<div class="pst-scrollable-table-container"><table class="table" id="id24">
 <caption><span class="caption-text">Initial compliance: <code class="docutils literal notranslate"><span class="pre">panels</span></code> against measured compliances
             and the corrected beam theory (CBT). Differences of
-            <code class="docutils literal notranslate"><span class="pre">panels</span></code> in %, over the crack lengths listed.</span><a class="headerlink" href="#id23" title="Link to this table">#</a></caption>
+            <code class="docutils literal notranslate"><span class="pre">panels</span></code> in %, over the crack lengths listed.</span><a class="headerlink" href="#id24" title="Link to this table">#</a></caption>
 <thead>
 <tr class="row-odd"><th class="head"><p>reference</p></th>
 <th class="head"><p>specimens, crack lengths</p></th>
@@ -2292,8 +2300,8 @@ length of the welded specimens of Tijs (2023).</p>
 <li><p><strong>Same cohesive law as the reference.</strong> For the DCB of Tijs et al. (2022),
 which is also the reference case of the thesis, the FE model of the paper
 uses the same geometry, material and bilinear law (<span class="math notranslate nohighlight">\(G_{Ic}\)</span> = 1.12 N/mm,
-<span class="math notranslate nohighlight">\(\tau^0\)</span> = 87 MPa). <code class="docutils literal notranslate"><span class="pre">panels</span></code> predicts 166.2 N at 5.68 mm against 167 N at
-5.7 mm, -0.5% on the load and -0.4% on the opening.</p></li>
+<span class="math notranslate nohighlight">\(\tau^0\)</span> = 87 MPa). <code class="docutils literal notranslate"><span class="pre">panels</span></code> predicts 166.2 N at 5.66 mm against 167 N at
+5.7 mm, -0.5% on the load and -0.7% on the opening.</p></li>
 <li><p><strong>Cohesive zone beyond LEFM.</strong> With the low strength <span class="math notranslate nohighlight">\(t_o\)</span> = 1.7 MPa of
 Alfano and Crisfield (2001) the process zone is of the order of the
 specimen length and the peak of their interface model is 22% below the
@@ -2302,20 +2310,22 @@ opening and with the same initial stiffness (+2.3%), with <span class="math notr
 N/mm³ and the cohesive domain over the whole bonded length (see the
 convergence study).</p></li>
 <li><p><strong>Nominal strengths.</strong> For the unidirectional specimens with nominal
-strengths, the <code class="docutils literal notranslate"><span class="pre">panels</span></code> peak is within 2.3% of the corrected beam theory
+strengths, the <code class="docutils literal notranslate"><span class="pre">panels</span></code> peak is within 2.1% of the corrected beam theory
 in every case, and after the peak it follows the LEFM propagation branch
-(48.9 against 49.0 N at <span class="math notranslate nohighlight">\(\delta\)</span> = 3.22 mm for Alfano and Crisfield, Table
-I). The FE results of the references scatter by about <span class="math notranslate nohighlight">\(\pm 10\%\)</span> around the
+(50.7 N, 0.04% below it, at <span class="math notranslate nohighlight">\(\delta\)</span> = 3.00 mm for Alfano and Crisfield,
+Table I). The FE results of the references scatter by about <span class="math notranslate nohighlight">\(\pm 10\%\)</span> around the
 corrected beam theory: 1 mm decohesion elements for a cohesive zone of 1.35
 mm in Camanho et al. (2003), whose FE peak is above both the test and the
 beam theories, and about 57 N in Turon et al. (2007), below both.</p></li>
 <li><p><strong>Tests.</strong> The test of Turon et al. (2007), with a bilinear-like response,
 is predicted within 3.3% (and that of Camanho et al., kept for reference,
-within -4.9%). The AS4D/PEKK-FC tests show a
-strong R-curve (initiation about 0.7 N/mm, propagation 1.12 N/mm) that a
+within -4.8%). The AS4D/PEKK-FC tests show a
+strong R-curve (initiation about 0.7 N/mm, propagation 1.12 N/mm, and 0.95
+N/mm without fibre bridging for the test with <span class="math notranslate nohighlight">\(a_0\)</span> = 40 mm, the
+toughness of its <code class="docutils literal notranslate"><span class="pre">panels</span></code> run) that a
 bilinear law with the propagation toughness cannot represent: <code class="docutils literal notranslate"><span class="pre">panels</span></code>,
 the bilinear FE model of Tijs et al. and the corrected beam theory are all
-15–23% above these tests, which the tabular law of the paper matches.
+11–18% above these tests, which the tabular law of the paper matches.
 Fibre bridging also makes the experimental curves decrease more slowly than
 every model after the peak.</p></li>
 <li><p><strong>Welded joints.</strong> For the welded DCB of Tijs (2023) <code class="docutils literal notranslate"><span class="pre">panels</span></code> is 4–9%
@@ -2337,9 +2347,13 @@ loads, controlled by the energy release rate, are not affected. For the
 quasi-isotropic welded specimens, with a bending modulus closer to the
 shear modulus, the compliance of <code class="docutils literal notranslate"><span class="pre">panels</span></code> is within 15% of the tests.</p></li>
 <li><p><strong>Robustness.</strong> All 17 nonlinear runs converged at every opening without
-bisection, in 1 to 7 iterations.</p></li>
+bisection, in 1 to 8 iterations, and the load balances the integral of
+the cohesive tractions within 0.25% (<span class="math notranslate nohighlight">\(e_{eq}\)</span>), except for the full weld
+(7.6%), whose perfect bond spans the whole width, and the low-strength case
+of Alfano and Crisfield with <span class="math notranslate nohighlight">\(k_o = 10^5\)</span> N/mm³ (1.5%), whose 30 terms are
+only <span class="math notranslate nohighlight">\(0.4\,\lambda L_{tsl}\)</span>.</p></li>
 </ul>
-<p><strong>Krueger (2008).</strong> NASA/TM-2008-215123 <a class="reference internal" href="ref.html#krueger2008dcb" id="id16"><span>[krueger2008DCB]</span></a> gives two mode I DCB
+<p><strong>Krueger (2008).</strong> NASA/TM-2008-215123 <a class="reference internal" href="ref.html#krueger2008dcb" id="id17"><span>[krueger2008DCB]</span></a> gives two mode I DCB
 benchmarks, a unidirectional <span class="math notranslate nohighlight">\([0]_{24}\)</span> specimen of T300/1076 and a
 multidirectional D±30 specimen of C12K/R6376, built with 3D solid elements and
 the virtual crack closure technique, with no cohesive law, no interfacial
@@ -2347,14 +2361,14 @@ strength and no experiment. Their critical load is the one at which <span class=
 reaches <span class="math notranslate nohighlight">\(G_c\)</span> <em>at mid-width</em>, while <code class="docutils literal notranslate"><span class="pre">panels</span></code> and beam theory follow the
 width average <span class="math notranslate nohighlight">\(\bar{G} = P_{crit}^2 a_e^2/(b\,EI)\)</span>; the two criteria differ
 by <span class="math notranslate nohighlight">\(\sqrt{G_c/\bar{G}}\)</span>, 1.026 and 1.123, which is the whole offset between
-the benchmark and the corrected beam theory. <code class="docutils literal notranslate"><span class="pre">panels</span></code> is 2.1% above the
+the benchmark and the corrected beam theory. <code class="docutils literal notranslate"><span class="pre">panels</span></code> is 2.0% above the
 corrected beam theory for the unidirectional specimen and 5.2% below it for
 the multidirectional one, whose cohesive zone (<span class="math notranslate nohighlight">\(l_{cz}\)</span> = 1.99 mm with
 <span class="math notranslate nohighlight">\(\tau_o\)</span> = 40 MPa) is not small compared with its 2.0 mm arms. Raising
-<span class="math notranslate nohighlight">\(\tau_o\)</span> from 40 to 60 MPa moves the peaks by 1.0 and 1.2% only, so the
+<span class="math notranslate nohighlight">\(\tau_o\)</span> from 40 to 60 MPa moves the peaks by 1.1 and 1.2% only, so the
 comparison does not rest on that choice. See
-<code class="docutils literal notranslate"><span class="pre">notebooks/krueger2008_dcb.ipynb</span></code>.</p>
-<p><strong>Krueger (2012).</strong> NASA/CR-2012-217562 <a class="reference internal" href="ref.html#krueger2012mmb" id="id17"><span>[krueger2012MMB]</span></a> gives benchmarks
+<code class="docutils literal notranslate"><span class="pre">notebooks/dcb_krueger2008.ipynb</span></code>.</p>
+<p><strong>Krueger (2012).</strong> NASA/CR-2012-217562 <a class="reference internal" href="ref.html#krueger2012mmb" id="id18"><span>[krueger2012MMB]</span></a> gives benchmarks
 for the mixed-mode bending specimen of IM7/8552 at <span class="math notranslate nohighlight">\(G_{II}/G_T\)</span> = 0.2, 0.5 and
 0.8, with the critical points (1.64 mm, 128.5 N), (1.34 mm, 385 N) and (1.65
 mm, 751 N). They are recorded in <code class="docutils literal notranslate"><span class="pre">notebooks/krueger2012_mmb_benchmark.ipynb</span></code>

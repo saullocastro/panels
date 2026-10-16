@@ -286,7 +286,7 @@ panels and over the integration points, where the approximation functions are
 evaluated inside the loops, ``kCSB_dmg.pyx``. Because `[K^{conn}_{dmg}]` is
 part of the internal force vector, it is needed at every iteration (see
 :ref:`cohesive_zone_solution`), and with `60 \times 30` integration points and `10 \times 10`, `8 \times 8` terms these
-loops take 8.7 s per assembly with the code of the thesis (panels 0.6.21), 68%
+loops take 6.5 s per assembly with the code of the thesis (panels 0.6.21), 67%
 of the run time in the elastic range.
 The implementation now writes the same Gauss-Legendre rule as matrix products.
 Let `g = 1, \dots, n_g` be the integration points, with weights `w_g = w_{\xi}
@@ -354,16 +354,17 @@ The cost was measured on the DCB model of the thesis
 (``tests/multidomain/test_dcb_damage.py``, `60 \times 30` integration
 points, `10 \times 10` and `8 \times 8` terms), on a laptop with 16 threads,
 by timing :meth:`.MultiDomain.get_kC_conn` in the driver of the thesis
-(panels 0.6.21) and in the current driver (panels 0.13.0). One assembly of `[K^{conn}_{dmg}]` takes 8.7 s with the loops of
-the thesis (panels 0.6.21) at any damage state, 0.57--0.61 s with the
-current kernels, and 0.037 s with the matrix products for the pristine
-interface and 0.05--0.08 s with 20--100% of the points damaged, 110--240
+(panels 0.6.21) and in the current driver (panels 0.13.11), as the medians
+of three runs, between which the times varied by up to 50%. One assembly of `[K^{conn}_{dmg}]` takes 6.5 s with the loops of
+the thesis (panels 0.6.21) at any damage state, 0.42 s with the
+current kernels, and 0.035 s with the matrix products for the pristine
+interface and 0.05--0.08 s with 20--100% of the points damaged, 85--190
 times faster than the loops of the thesis. Eight displacement increments in
-the elastic range take 283 s with the code of the thesis and 7.3 s with
-panels 0.13.0, the matrix products and the update of Eq. :eq:`cz-K-update`
+the elastic range take 218 s with the code of the thesis and 6.4 s with
+panels 0.13.11, the matrix products and the update of Eq. :eq:`cz-K-update`
 together with the changes of the driver described in
 :ref:`cohesive_zone_solution`; with the current kernels and without the
-predictor and the reuse of the tangent stiffness they take 27 s, with the
+predictor and the reuse of the tangent stiffness they take 29 s, with the
 same loads to a relative `3.2 \times 10^{-8}`, the order of the convergence
 tolerance.
 
@@ -705,8 +706,9 @@ and the driver described in :ref:`cohesive_zone_solution`. The cohesive
 domain is `L_{tsl} = 24` mm long, of the 52 mm ligament, and the opening goes
 up to `\delta = 8` mm in 38 increments: 23 equal increments up to 5 mm and
 increments of 0.2 mm after it. The opening ahead of the process zone decays
-with the rate `\lambda = (k_o/4D_{11})^{1/4}`, 0.70 mm⁻¹ in case A and 0.83
-mm⁻¹ in case B, and the cohesive zone length estimated with Rice's model,
+with the rate `\lambda = (k_o/2D_{11})^{1/4}` of two arms connected by an
+elastic foundation of stiffness `k_o`, the opening being `w^t - w^b`, 0.83
+mm⁻¹ in case A and 0.99 mm⁻¹ in case B, and the cohesive zone length estimated with Rice's model,
 `l_{cz} = 0.88\,E_2 G_{Ic}/\tau_o^2` (Turon et al. 2007
 [turon2007MeshSize]_), is 1.43 mm in both cases.
 
@@ -729,8 +731,9 @@ cohesive domain (`L_{tsl} = 24 \to 17` mm). The metrics are:
   interface, see :ref:`cohesive_zone_load`. Both are equal by equilibrium of
   the loaded arm when the cohesive domain carries the whole load, so `e_{eq}`
   grows when the basis does not represent the tractions or when the
-  compressive lobe ahead of the process zone reaches the perfect bond beyond
-  the cohesive domain, whose tractions are not part of the integral;
+  tractions ahead of the process zone, its compressive lobe and the decaying
+  opening beyond it, reach the perfect bond beyond the cohesive domain,
+  whose tractions are not part of the integral;
 - the coefficient of variation of the load drop per increment after the
   peak, `CV = \mathrm{std}(\Delta P)/|\mathrm{mean}(\Delta P)|`, which is
   small for a smooth softening and large for a staircase or sawtooth
@@ -741,9 +744,9 @@ cohesive domain (`L_{tsl} = 24 \to 17` mm). The metrics are:
 The study is reproduced by ``notebooks/dcb_mode_I_convergence_study.py``, and
 the metrics and load curves of all runs are stored in
 ``notebooks/results/dcb_mode_I_convergence_study.json``. The runs were done
-with panels 0.13.0 on a laptop with 16 threads, eight runs at a time with two threads
+with panels 0.13.11 on a laptop with 16 threads, eight runs at a time with two threads
 each, so the wall times indicate the relative cost; the reference run takes
-11 min in this setting and 5.4 min of wall time (18 min of CPU time) when run
+10 min in this setting and 4.5 min of wall time (17 min of CPU time) when run
 alone.
 
 .. list-table:: Convergence study, terms `m_{tsl}` and Gauss points `n_x`
@@ -783,7 +786,7 @@ alone.
       - 19
       - 7
       - 81
-      - 8
+      - 7
     * - A
       - 10
       - 120
@@ -867,7 +870,7 @@ alone.
       - 0.087
       - 3
       - 317
-      - 17
+      - 15
     * - A
       - 20
       - 120
@@ -895,7 +898,7 @@ alone.
       - 0.087
       - 0
       - 136
-      - 7
+      - 6
     * - A
       - 25
       - 60
@@ -909,7 +912,7 @@ alone.
       - 0.088
       - 3
       - 384
-      - 33
+      - 31
     * - A
       - 25
       - 120
@@ -937,7 +940,7 @@ alone.
       - 0.087
       - 0
       - 139
-      - 11
+      - 10
     * - A
       - 30
       - 60
@@ -951,7 +954,7 @@ alone.
       - 0.088
       - 3
       - 358
-      - 46
+      - 43
     * - A
       - 30
       - 120
@@ -965,7 +968,7 @@ alone.
       - 0.087
       - 0
       - 135
-      - 15
+      - 14
     * - A
       - 30
       - 180
@@ -993,7 +996,7 @@ alone.
       - 20
       - 7
       - 140
-      - 9
+      - 8
     * - B
       - 10
       - 120
@@ -1035,7 +1038,7 @@ alone.
       - 2.2
       - 8
       - 222
-      - 20
+      - 18
     * - B
       - 15
       - 120
@@ -1049,7 +1052,7 @@ alone.
       - 2.2
       - 0
       - 141
-      - 4
+      - 3
     * - B
       - 15
       - 180
@@ -1077,7 +1080,7 @@ alone.
       - 0.031
       - 2
       - 238
-      - 12
+      - 11
     * - B
       - 20
       - 120
@@ -1091,7 +1094,7 @@ alone.
       - 0.032
       - 0
       - 159
-      - 9
+      - 8
     * - B
       - 20
       - 180
@@ -1119,7 +1122,7 @@ alone.
       - 0.0059
       - 1
       - 189
-      - 14
+      - 13
     * - B
       - 25
       - 120
@@ -1147,7 +1150,7 @@ alone.
       - 0.0037
       - 0
       - 140
-      - 11
+      - 10
     * - B
       - 30
       - 60
@@ -1161,7 +1164,7 @@ alone.
       - 0.0040
       - 2
       - 239
-      - 29
+      - 28
     * - B
       - 30
       - 120
@@ -1175,7 +1178,7 @@ alone.
       - 0.0038
       - 0
       - 137
-      - 16
+      - 15
     * - B
       - 30
       - 180
@@ -1189,7 +1192,7 @@ alone.
       - 0.0038
       - 0
       - 141
-      - 17
+      - 15
 
 .. list-table:: Convergence study, other parameters, varied one at a time
                 from the reference discretisation `L_{tsl} = 24` mm,
@@ -1223,7 +1226,7 @@ alone.
       - 0.087
       - 0
       - 139
-      - 11
+      - 10
     * - A
       - `n_{tsl} = 15`
       - 166.10
@@ -1236,7 +1239,7 @@ alone.
       - 0.087
       - 0
       - 136
-      - 27
+      - 25
     * - A
       - `n_y = 60`
       - 166.10
@@ -1275,7 +1278,7 @@ alone.
       - 0.087
       - 0
       - 184
-      - 14
+      - 13
     * - A
       - `L_{tsl} = 17`
       - 166.08
@@ -1301,7 +1304,7 @@ alone.
       - 33
       - 0
       - 142
-      - 4
+      - 3
     * - B
       - reference
       - 166.15
@@ -1314,7 +1317,7 @@ alone.
       - 0.0037
       - 0
       - 140
-      - 11
+      - 10
     * - B
       - `n_{tsl} = 15`
       - 166.14
@@ -1327,7 +1330,7 @@ alone.
       - 0.0054
       - 0
       - 136
-      - 27
+      - 26
     * - B
       - `n_y = 60`
       - 166.14
@@ -1340,7 +1343,7 @@ alone.
       - 0.0042
       - 0
       - 143
-      - 13
+      - 12
     * - B
       - `m = n = 12`
       - 166.14
@@ -1353,7 +1356,7 @@ alone.
       - 0.0036
       - 0
       - 140
-      - 14
+      - 13
     * - B
       - `\Delta\delta` halved
       - 166.21
@@ -1379,7 +1382,7 @@ alone.
       - 10
       - 0
       - 142
-      - 12
+      - 11
     * - B
       - `L_{tsl} = 17`, `m_{tsl} = 15`, `n_x = 120`
       - 166.12
@@ -1392,13 +1395,13 @@ alone.
       - 11
       - 0
       - 142
-      - 4
+      - 3
 
 The results show that:
 
 - **The Ritz basis of the cohesive domain sets the shape of the response after
-  the peak.** The cohesive domain spans `\lambda L_{tsl} = 16.8` (A) and 20.0
-  (B) decay lengths. With `m_{tsl} = 10`, 0.6 and 0.5 terms per decay length,
+  the peak.** The cohesive domain spans `\lambda L_{tsl} = 20.0` (A) and 23.8
+  (B) decay lengths. With `m_{tsl} = 10`, 0.50 and 0.42 terms per decay length,
   the basis cannot follow the process zone: the load overshoots the converged
   curve up to 168.2--169.4 N at `\delta = 6.2`--6.4 mm, 1.3--2.0% above the
   converged peak, and then drops by up to 14 N (A) and 19 N (B) in one
@@ -1409,11 +1412,11 @@ The results show that:
   `m_{tsl} = 20` the error is at most 0.21% for `n_x \geq 120`, and 25 and 30
   terms give the same loads to 0.02% with `n_x = 180`. Against the terms per
   decay length, `m_{tsl}/(\lambda L_{tsl})`, the errors of both cases fall on
-  one curve: about 1% at 0.75--0.9, at most 0.14% from 1.0 and below 0.1%
-  from 1.2, with `n_x = 180`. The rule `m_{tsl} = 1.5\,\lambda L_{tsl}` keeps
+  one curve: about 1% at 0.63--0.75, at most 0.14% from 0.84 and below 0.1%
+  from 1.0, with `n_x = 180`. The rule `m_{tsl} = 1.25\,\lambda L_{tsl}` keeps
   a margin over this threshold; with at most 25 terms it limits the cohesive
-  domain of case A to `25/(1.5\lambda) = 23.8` mm. The Bardell functions go
-  up to 30 terms, so a cohesive domain longer than `30/(1.2\lambda)` is not
+  domain of case A to `25/(1.25\lambda) = 24.0` mm. The Bardell functions go
+  up to 30 terms, so a cohesive domain longer than `30/(1.0\lambda)` is not
   resolved.
 - **The Gauss points along** `x` **set the robustness and a floor of the
   error.** `n_x = 60`, 120 and 180 over 24 mm correspond to 3.6, 7.1 and 10.7
@@ -1438,8 +1441,10 @@ The results show that:
   (2007).
 - **The length of the cohesive domain is detected by** `e_{eq}`, **not by the
   load.** At the last opening the crack has grown by 9.8 mm, and the margin
-  `2\pi/\lambda + 3 l_{cz}` for the process zone and the compressive lobe
-  ahead of it is 13.2 mm (A) and 11.8 mm (B), so `L_{tsl} = 24` mm contains
+  `3 l_{cz} + 8/\lambda` for the process zone and the region ahead of it,
+  where the opening decays as `e^{-\lambda x}`, the solution of beams on an
+  elastic foundation [kanninen1973AugmentedDCB]_, to below `e^{-8}` of its
+  value, is 13.9 mm (A) and 12.4 mm (B), so `L_{tsl} = 24` mm contains
   both up to `\delta = 8` mm and `e_{eq}` stays below 0.09% (A) and 0.004%
   (B), the larger value of case A coming from its longer decay length. With
   `L_{tsl} = 17` mm the loads are within 0.06--0.25% of the converged ones,
@@ -1464,27 +1469,34 @@ mm, `m_{tsl} = 25`, `n_x = 180`, `n_{tsl} = 10`, `n_y = 30`, with `8 \times
 .. math::
     :label: cz-rules
 
-    m_{tsl} = 1.5\,\lambda L_{tsl}, \qquad
+    m_{tsl} = 1.25\,\lambda L_{tsl}, \qquad
     n_x = 10\,\frac{L_{tsl}}{l_{cz}}, \qquad
-    L_{tsl} \geq \Delta a + \frac{2\pi}{\lambda} + 3 l_{cz}
+    L_{tsl} \geq \Delta a + 3 l_{cz} + \frac{8}{\lambda}
 
 with `\Delta a` the crack growth up to the last opening, `m_{tsl} \leq 25`,
 `n_x \geq 4 m_{tsl}` rounded up to a multiple of 10, `n_{tsl} = 10`, `n_y =
 30` and `m = n = 8` in the other domains. They are implemented in
 :func:`.tsl_resolution`, :func:`.tsl_margin` and :func:`.tsl_discretization`,
 and :meth:`.MultiDomain.calc_k_dmg` prints a warning, the first time a point
-is damaged, when `m_{tsl} < 1.2\,\lambda L_{tsl}` or `n_x < 7\,L_{tsl}/l_{cz}`.
+is damaged, when `m_{tsl} < 1.0\,\lambda L_{tsl}` or `n_x < 7\,L_{tsl}/l_{cz}`.
+Before version 0.13.11 the rate was `(k_o/4D_{11})^{1/4}`, that of one arm on
+a rigid foundation, `2^{-1/4}` times the rate of the symmetric DCB, and the
+factors of the rules were 1.5 and 1.2 instead of 1.25 and 1.0. The margin
+was `2\pi/\lambda + 3 l_{cz}`, i.e. `7.47/\lambda + 3 l_{cz}` with the
+corrected rate; `2\pi/\lambda + 3 l_{cz}` with the corrected rate lets the
+tractions reach the perfect bond in the last openings of the validation runs,
+with `e_{eq}` up to 10%, against 0.25% at most with `3 l_{cz} + 8/\lambda`.
 The Gauss-Legendre points and weights are computed by
 :func:`scipy.special.roots_legendre`, without an upper limit for `n_x`.
 
 **Discretisation of the validation runs.** The validation runs below use the
 rules of Eq. :eq:`cz-rules` with 25 terms and the corresponding `L_{tsl} =
-25/(1.5\lambda)`, and the range of openings is limited such that the crack
+25/(1.25\lambda)`, and the range of openings is limited such that the crack
 growth plus the margin fits in `L_{tsl}`. The low-strength case of Alfano and
 Crisfield needs a cohesive domain over the whole bonded length, `L_{tsl} = 70`
 mm, for which the first rule asks for 94 terms with `k_o = 10^5` N/mm³, more
 than the 30 Bardell functions. It is therefore run with `k_o = 10^3` N/mm³,
-for which `m_{tsl} = 30 = 1.5\,\lambda L_{tsl}` and `n_x = 4 m_{tsl} = 120`
+for which `m_{tsl} = 30 = 1.27\,\lambda L_{tsl}` and `n_x = 4 m_{tsl} = 120`
 meet both rules. The damage onset, `\Delta_o = \tau_o/k_o = 1.7 \times
 10^{-3}` mm, remains far below the separation at failure, `\Delta_f =
 2G_{Ic}/\tau_o = 0.33` mm, so the softening branch that governs this case is
@@ -1510,18 +1522,17 @@ Each reference has a notebook in ``notebooks/`` with a dictionary of the FE
 cases and one of the experimental tests, a comparison table, a plot and a
 discussion; the ``panels`` results are stored in ``notebooks/results/*.npz``
 and collected by ``notebooks/dcb_mode_I_validation_summary.ipynb``. The results were
-obtained with panels 0.13.0 (see the table of peak loads for two cases run
-again with more Gauss points).
+obtained with panels 0.13.11.
 
 The case of Camanho et al. (2003) is kept for reference, but it is not used
 to validate the model: the FE and experimental load-opening curves of the
-reference are 12--21% more compliant than the corrected beam theory, more
+reference are 12--21% less stiff than the corrected beam theory, more
 than transverse shear and root rotation explain, and the reference does not
 give enough detail to find out why; the experimental peak, 147.1 N, is 6%
 above the corrected beam theory with the same `G_{Ic}`; and the FE model has
 about one decohesion element per cohesive zone length, which overpredicts the
 peak load [turon2007MeshSize]_. See the note in
-``notebooks/camanho2003_dcb.ipynb``.
+``notebooks/dcb_camanho2003.ipynb``.
 
 **Model.** ``notebooks/dcb_utils.py`` builds a symmetric DCB: CLPT arms, far
 end clamped, arm tips opened to `\pm\delta/2` by prescribed displacements,
@@ -1534,17 +1545,17 @@ represented by starting the integration points outside the bonded strip fully
 damaged. The solution procedure is the one described in
 :ref:`cohesive_zone_solution`. The discretisation follows the rules of
 Eq. :eq:`cz-rules` (``dcb_utils.discretize``): `m_{tsl} = \lceil
-1.5\,\lambda L_{tsl} \rceil` with at most 25 terms, and `n_x =
+1.25\,\lambda L_{tsl} \rceil` with at most 25 terms, and `n_x =
 10\,L_{tsl}/l_{cz}`, but not less than `4\,m_{tsl}` to integrate the
 products of the approximation functions, rounded up to a multiple of 10, and
-`L_{tsl}` covers the crack growth plus a margin of `2\pi/\lambda + 3\,l_{cz}`
-for the process zone and the compressive lobe ahead of it; the range of
-openings is limited so that `L_{tsl}` stays resolved, which allows 5--13 mm
+`L_{tsl}` covers the crack growth plus a margin of `3\,l_{cz} + 8/\lambda`
+for the process zone and the decaying opening ahead of it; the range of
+openings is limited so that `L_{tsl}` stays resolved, which allows 4--11 mm
 of crack growth. The penalty stiffness is `k_o = 10^5` N/mm³, except for the
 low-strength case of Alfano and Crisfield (see the convergence study): a
 longer decay length `1/\lambda` needs fewer terms, and for the DCB of Turon
 et al. (2007) the peak load with the `k_o = 10^6` N/mm³ of their model
-differs by 0.04% (64.07 against 64.05 N), in line with their Fig. 9. The reference curves of linear elastic fracture mechanics (LEFM) are
+differs by 0.2% (64.13 against 64.02 N), in line with their Fig. 9. The reference curves of linear elastic fracture mechanics (LEFM) are
 the simple and the corrected beam theories, the latter with the crack length
 `a + \chi h` of Williams, `\chi = \sqrt{E_{11}/(11 G_{13})\,[3 -
 2(\Gamma/(1+\Gamma))^2]}`, `\Gamma = 1.18\sqrt{E_{11}E_{22}}/G_{13}`, and the
@@ -1568,19 +1579,16 @@ length of the welded specimens of Tijs (2023).
                 table of the reference; `^{d}`: digitised; `^{m}`: mean of
                 digitised tests; `^{b}`: not an FE curve but the VCCT
                 benchmark of Krueger (2008), the onset of delamination at
-                mid-width, 2.6% (UD) and 12.0% (D±30) below the load at which
-                the width-average energy release rate reaches `G_{Ic}`. The
+                mid-width; the load at which the width-average energy release
+                rate reaches `G_{Ic}` is 2.6% (UD) and 12.3% (D±30) above it. The
                 two Krueger cases are listed with `\tau_o` = 40 MPa, the
                 reference giving no strength; with 60 MPa the peaks are 64.2
                 and 110.0 N. `^{k}`: `k_o = 10^3` N/mm³, see the convergence
                 study; with `10^5` N/mm³ the peak is 50.8 N at the same
                 opening. `^{n}`: kept for reference, not used to validate the
-                model, see above. The XAS-913C case and the unidirectional
-                Krueger case with `\tau_o` = 60 MPa were run again with 320
-                and 450 Gauss points along `x`, as the rules of the
-                convergence study ask, after the limit of 304 points of panels
-                0.13.0 was removed; their loads changed by at most 0.06% of
-                the peak.
+                model, see above. Tijs 2022, `a_0` = 40 mm: ``panels`` and
+                CBT with `G_{Ic}` = 0.95 N/mm, the propagation toughness of
+                the test without fibre bridging.
     :header-rows: 1
 
     * - case
@@ -1595,17 +1603,17 @@ length of the welded specimens of Tijs (2023).
       - `\Delta K_0`
       - `\Delta a`
     * - Alfano 2001, Table I, `t_o` = 57 MPa
-      - 64.6
-      - 1.83
+      - 64.5
+      - 1.85
       - 61.5 `^{d}`
-      - +5.0
+      - +4.8
       - --
       - --
       - 63.2
-      - +2.2
+      - +2.1
       - +17
-      - 10.5
-    * - Alfano 2001, Table I, `t_o` = 1.7 MPa `^{k}`
+      - 9.0
+    * - Alfano 2001, Table I, `t_o` = 1.7 MPa
       - 50.8
       - 2.90
       - 49.5 `^{d}`
@@ -1617,50 +1625,50 @@ length of the welded specimens of Tijs (2023).
       - -25
       - 6.0
     * - Alfano 2001, XAS-913C
-      - 93.8
-      - 1.91
+      - 93.6
+      - 1.87
       - 90.0 `^{d}`
-      - +4.2
+      - +4.0
       - --
       - --
       - 91.6
-      - +2.3
+      - +2.1
       - +17
-      - 10.6
+      - 9.1
     * - Camanho 2003, AS4/PEEK `^{n}`
-      - 139.9
-      - 4.12
+      - 140.1
+      - 4.09
       - 155.3 `^{t}`
-      - -9.9
+      - -9.8
       - 147.1 `^{t}`
-      - -4.9
+      - -4.8
       - 138.9
-      - +0.7
-      - +13
-      - 8.2
+      - +0.9
+      - +14
+      - 7.4
     * - Turon 2007, T300/977-2
-      - 64.1
-      - 4.18
+      - 64.0
+      - 4.16
       - 57.0 `^{d}`
-      - +12.4
+      - +12.3
       - 62.0 `^{d}`
       - +3.3
       - 63.3
-      - +1.3
+      - +1.2
       - +12
-      - 13.0
+      - 11.1
     * - Krueger 2008, UD `[0]_{24}`
-      - 63.6
-      - 1.40
+      - 63.5
+      - 1.43
       - 60.7 `^{b}`
-      - +4.7
+      - +4.6
       - --
       - --
       - 62.3
-      - +2.1
+      - +2.0
       - +18
-      - 9.9
-    * - Krueger 2008, D±30
+      - 8.5
+    * - Krueger 2008, D`\pm`30
       - 108.7
       - 1.70
       - 102.4 `^{b}`
@@ -1670,43 +1678,43 @@ length of the welded specimens of Tijs (2023).
       - 114.7
       - -5.2
       - +10
-      - 7.6
+      - 7.1
     * - Tijs 2022, `a_0` = 48 mm
       - 166.2
-      - 5.68
+      - 5.66
       - 167.0 `^{d}`
       - -0.5
       - 142.0 `^{d}`
-      - +17.0
+      - +17.1
       - 164.5
       - +1.1
       - +14
-      - 11.8
-    * - Tijs 2022, `a_0` = 40 mm
-      - 197.5
-      - 3.99
+      - 10.1
+    * - Tijs 2022, `a_0` = 40 mm, 0.95 N/mm
+      - 182.1
+      - 3.71
       - --
       - --
       - 161.0 `^{d}`
-      - +22.7
-      - 194.5
-      - +1.5
+      - +13.1
+      - 179.1
+      - +1.6
       - +17
-      - 11.8
+      - 10.6
     * - Tijs 2023, full weld, 2.1 N/mm
-      - 148.3
-      - 6.48
+      - 148.0
+      - 6.41
       - 155.0 `^{d}`
-      - -4.3
+      - -4.5
       - 160.0 `^{m}`
-      - -7.3
+      - -7.5
       - 155.5
-      - -4.6
+      - -4.8
       - +4
       - 4.9
     * - Tijs 2023, weld center, 2.1 N/mm
       - 119.2
-      - 5.75
+      - 5.82
       - 128.0 `^{d}`
       - -6.9
       - 129.0 `^{m}`
@@ -1714,10 +1722,10 @@ length of the welded specimens of Tijs (2023).
       - 123.0
       - -3.1
       - +8
-      - 5.2
+      - 5.5
     * - Tijs 2023, weld center, 1.95 N/mm
       - 115.0
-      - 5.56
+      - 5.58
       - 122.0 `^{d}`
       - -5.7
       - 123.0 `^{d}`
@@ -1725,18 +1733,18 @@ length of the welded specimens of Tijs (2023).
       - 118.5
       - -3.0
       - +8
-      - 5.7
+      - 5.8
     * - Tijs 2023, weld center, 1.12 N/mm
-      - 87.8
-      - 4.09
+      - 87.9
+      - 4.13
       - 96.0 `^{d}`
-      - -8.6
+      - -8.5
       - --
       - --
       - 89.8
-      - -2.3
+      - -2.2
       - +9
-      - 9.2
+      - 8.2
 
 .. list-table:: Initial compliance: ``panels`` against measured compliances
                 and the corrected beam theory (CBT). Differences of
@@ -1769,8 +1777,8 @@ The results show that:
 - **Same cohesive law as the reference.** For the DCB of Tijs et al. (2022),
   which is also the reference case of the thesis, the FE model of the paper
   uses the same geometry, material and bilinear law (`G_{Ic}` = 1.12 N/mm,
-  `\tau^0` = 87 MPa). ``panels`` predicts 166.2 N at 5.68 mm against 167 N at
-  5.7 mm, -0.5% on the load and -0.4% on the opening.
+  `\tau^0` = 87 MPa). ``panels`` predicts 166.2 N at 5.66 mm against 167 N at
+  5.7 mm, -0.5% on the load and -0.7% on the opening.
 - **Cohesive zone beyond LEFM.** With the low strength `t_o` = 1.7 MPa of
   Alfano and Crisfield (2001) the process zone is of the order of the
   specimen length and the peak of their interface model is 22% below the
@@ -1779,20 +1787,22 @@ The results show that:
   N/mm³ and the cohesive domain over the whole bonded length (see the
   convergence study).
 - **Nominal strengths.** For the unidirectional specimens with nominal
-  strengths, the ``panels`` peak is within 2.3% of the corrected beam theory
+  strengths, the ``panels`` peak is within 2.1% of the corrected beam theory
   in every case, and after the peak it follows the LEFM propagation branch
-  (48.9 against 49.0 N at `\delta` = 3.22 mm for Alfano and Crisfield, Table
-  I). The FE results of the references scatter by about `\pm 10\%` around the
+  (50.7 N, 0.04% below it, at `\delta` = 3.00 mm for Alfano and Crisfield,
+  Table I). The FE results of the references scatter by about `\pm 10\%` around the
   corrected beam theory: 1 mm decohesion elements for a cohesive zone of 1.35
   mm in Camanho et al. (2003), whose FE peak is above both the test and the
   beam theories, and about 57 N in Turon et al. (2007), below both.
 - **Tests.** The test of Turon et al. (2007), with a bilinear-like response,
   is predicted within 3.3% (and that of Camanho et al., kept for reference,
-  within -4.9%). The AS4D/PEKK-FC tests show a
-  strong R-curve (initiation about 0.7 N/mm, propagation 1.12 N/mm) that a
+  within -4.8%). The AS4D/PEKK-FC tests show a
+  strong R-curve (initiation about 0.7 N/mm, propagation 1.12 N/mm, and 0.95
+  N/mm without fibre bridging for the test with `a_0` = 40 mm, the
+  toughness of its ``panels`` run) that a
   bilinear law with the propagation toughness cannot represent: ``panels``,
   the bilinear FE model of Tijs et al. and the corrected beam theory are all
-  15--23% above these tests, which the tabular law of the paper matches.
+  11--18% above these tests, which the tabular law of the paper matches.
   Fibre bridging also makes the experimental curves decrease more slowly than
   every model after the peak.
 - **Welded joints.** For the welded DCB of Tijs (2023) ``panels`` is 4--9%
@@ -1814,7 +1824,11 @@ The results show that:
   quasi-isotropic welded specimens, with a bending modulus closer to the
   shear modulus, the compliance of ``panels`` is within 15% of the tests.
 - **Robustness.** All 17 nonlinear runs converged at every opening without
-  bisection, in 1 to 7 iterations.
+  bisection, in 1 to 8 iterations, and the load balances the integral of
+  the cohesive tractions within 0.25% (`e_{eq}`), except for the full weld
+  (7.6%), whose perfect bond spans the whole width, and the low-strength case
+  of Alfano and Crisfield with `k_o = 10^5` N/mm³ (1.5%), whose 30 terms are
+  only `0.4\,\lambda L_{tsl}`.
 
 **Krueger (2008).** NASA/TM-2008-215123 [krueger2008DCB]_ gives two mode I DCB
 benchmarks, a unidirectional `[0]_{24}` specimen of T300/1076 and a
@@ -1824,13 +1838,13 @@ strength and no experiment. Their critical load is the one at which `G_T`
 reaches `G_c` *at mid-width*, while ``panels`` and beam theory follow the
 width average `\bar{G} = P_{crit}^2 a_e^2/(b\,EI)`; the two criteria differ
 by `\sqrt{G_c/\bar{G}}`, 1.026 and 1.123, which is the whole offset between
-the benchmark and the corrected beam theory. ``panels`` is 2.1% above the
+the benchmark and the corrected beam theory. ``panels`` is 2.0% above the
 corrected beam theory for the unidirectional specimen and 5.2% below it for
 the multidirectional one, whose cohesive zone (`l_{cz}` = 1.99 mm with
 `\tau_o` = 40 MPa) is not small compared with its 2.0 mm arms. Raising
-`\tau_o` from 40 to 60 MPa moves the peaks by 1.0 and 1.2% only, so the
+`\tau_o` from 40 to 60 MPa moves the peaks by 1.1 and 1.2% only, so the
 comparison does not rest on that choice. See
-``notebooks/krueger2008_dcb.ipynb``.
+``notebooks/dcb_krueger2008.ipynb``.
 
 **Krueger (2012).** NASA/CR-2012-217562 [krueger2012MMB]_ gives benchmarks
 for the mixed-mode bending specimen of IM7/8552 at `G_{II}/G_T` = 0.2, 0.5 and

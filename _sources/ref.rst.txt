@@ -17,6 +17,7 @@ References
 .. [krueger2008DCB] R. Krueger, "An Approach to Assess Delamination Propagation Simulation Capabilities in Commercial Finite Element Codes". NASA/TM-2008-215123, National Institute of Aerospace / NASA Langley Research Center, 2008.
 .. [krueger2012MMB] R. Krueger, "Development and Application of Benchmark Examples for Mixed-Mode I/II Quasi-Static Delamination Propagation Predictions". NASA/CR-2012-217562, NIA Report No. 2012-01, 2012.
 .. [lecinana2023Fatigue] I. Leciñana, J. Renart, A. Turon, J. Zurbitu and B. H. A. H. Tijs, "Characterization and analysis of the mode I interlaminar fatigue behaviour of thermoplastic composites considering R-curve effects". Engineering Fracture Mechanics, 286:109273, 2023. https://doi.org/10.1016/j.engfracmech.2023.109273.
+.. [kanninen1973AugmentedDCB] M. F. Kanninen, "An augmented double cantilever beam model for studying crack propagation and arrest". International Journal of Fracture, 9:83-92, 1973.
 .. [nasa2020SP8007] NASA, "Buckling of thin-walled circular cylinders". NASA/SP-8007-2020/REV 2, NASA Langley Research Center, 2020. https://ntrs.nasa.gov/citations/20205011530.
 .. [nathan2024MSc] N. D'Souza, "Multi-Domain Semi-Analytical Cohesive Zone Approach". Delft University of Technology, 2024. https://resolver.tudelft.nl/uuid:4709f888-c032-4d9f-97e3-402dfdd47cf1.
 .. [schweizerhof1984Pressure] K. Schweizerhof and E. Ramm, "Displacement dependent pressure loads in nonlinear finite element analyses". Computers & Structures, 18(6):1099-1114, 1984. https://doi.org/10.1016/0045-7949(84)90154-8.
