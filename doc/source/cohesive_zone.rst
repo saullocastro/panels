@@ -286,7 +286,7 @@ panels and over the integration points, where the approximation functions are
 evaluated inside the loops, ``kCSB_dmg.pyx``. Because `[K^{conn}_{dmg}]` is
 part of the internal force vector, it is needed at every iteration (see
 :ref:`cohesive_zone_solution`), and with `60 \times 30` integration points and `10 \times 10`, `8 \times 8` terms these
-loops take 5.8 s per assembly with the code of the thesis (panels 0.6.21), 66%
+loops take 6.5 s per assembly with the code of the thesis (panels 0.6.21), 67%
 of the run time in the elastic range.
 The implementation now writes the same Gauss-Legendre rule as matrix products.
 Let `g = 1, \dots, n_g` be the integration points, with weights `w_g = w_{\xi}
@@ -354,16 +354,17 @@ The cost was measured on the DCB model of the thesis
 (``tests/multidomain/test_dcb_damage.py``, `60 \times 30` integration
 points, `10 \times 10` and `8 \times 8` terms), on a laptop with 16 threads,
 by timing :meth:`.MultiDomain.get_kC_conn` in the driver of the thesis
-(panels 0.6.21) and in the current driver (panels 0.13.11). One assembly of `[K^{conn}_{dmg}]` takes 5.8 s with the loops of
-the thesis (panels 0.6.21) at any damage state, 0.39--0.40 s with the
-current kernels, and 0.033 s with the matrix products for the pristine
-interface and 0.05--0.08 s with 20--100% of the points damaged, 75--180
+(panels 0.6.21) and in the current driver (panels 0.13.11), as the medians
+of three runs, between which the times varied by up to 50%. One assembly of `[K^{conn}_{dmg}]` takes 6.5 s with the loops of
+the thesis (panels 0.6.21) at any damage state, 0.42 s with the
+current kernels, and 0.035 s with the matrix products for the pristine
+interface and 0.05--0.08 s with 20--100% of the points damaged, 85--190
 times faster than the loops of the thesis. Eight displacement increments in
-the elastic range take 273 s with the code of the thesis and 6.1 s with
+the elastic range take 218 s with the code of the thesis and 6.4 s with
 panels 0.13.11, the matrix products and the update of Eq. :eq:`cz-K-update`
 together with the changes of the driver described in
 :ref:`cohesive_zone_solution`; with the current kernels and without the
-predictor and the reuse of the tangent stiffness they take 23 s, with the
+predictor and the reuse of the tangent stiffness they take 29 s, with the
 same loads to a relative `3.2 \times 10^{-8}`, the order of the convergence
 tolerance.
 
