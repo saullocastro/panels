@@ -286,7 +286,7 @@ panels and over the integration points, where the approximation functions are
 evaluated inside the loops, ``kCSB_dmg.pyx``. Because `[K^{conn}_{dmg}]` is
 part of the internal force vector, it is needed at every iteration (see
 :ref:`cohesive_zone_solution`), and with `60 \times 30` integration points and `10 \times 10`, `8 \times 8` terms these
-loops take 8.7 s per assembly with the code of the thesis (panels 0.6.21), 68%
+loops take 5.8 s per assembly with the code of the thesis (panels 0.6.21), 66%
 of the run time in the elastic range.
 The implementation now writes the same Gauss-Legendre rule as matrix products.
 Let `g = 1, \dots, n_g` be the integration points, with weights `w_g = w_{\xi}
@@ -354,16 +354,16 @@ The cost was measured on the DCB model of the thesis
 (``tests/multidomain/test_dcb_damage.py``, `60 \times 30` integration
 points, `10 \times 10` and `8 \times 8` terms), on a laptop with 16 threads,
 by timing :meth:`.MultiDomain.get_kC_conn` in the driver of the thesis
-(panels 0.6.21) and in the current driver (panels 0.13.0). One assembly of `[K^{conn}_{dmg}]` takes 8.7 s with the loops of
-the thesis (panels 0.6.21) at any damage state, 0.57--0.61 s with the
-current kernels, and 0.037 s with the matrix products for the pristine
-interface and 0.05--0.08 s with 20--100% of the points damaged, 110--240
+(panels 0.6.21) and in the current driver (panels 0.13.11). One assembly of `[K^{conn}_{dmg}]` takes 5.8 s with the loops of
+the thesis (panels 0.6.21) at any damage state, 0.39--0.40 s with the
+current kernels, and 0.033 s with the matrix products for the pristine
+interface and 0.05--0.08 s with 20--100% of the points damaged, 75--180
 times faster than the loops of the thesis. Eight displacement increments in
-the elastic range take 283 s with the code of the thesis and 7.3 s with
-panels 0.13.0, the matrix products and the update of Eq. :eq:`cz-K-update`
+the elastic range take 273 s with the code of the thesis and 6.1 s with
+panels 0.13.11, the matrix products and the update of Eq. :eq:`cz-K-update`
 together with the changes of the driver described in
 :ref:`cohesive_zone_solution`; with the current kernels and without the
-predictor and the reuse of the tangent stiffness they take 27 s, with the
+predictor and the reuse of the tangent stiffness they take 23 s, with the
 same loads to a relative `3.2 \times 10^{-8}`, the order of the convergence
 tolerance.
 
@@ -743,9 +743,9 @@ cohesive domain (`L_{tsl} = 24 \to 17` mm). The metrics are:
 The study is reproduced by ``notebooks/dcb_mode_I_convergence_study.py``, and
 the metrics and load curves of all runs are stored in
 ``notebooks/results/dcb_mode_I_convergence_study.json``. The runs were done
-with panels 0.13.0 on a laptop with 16 threads, eight runs at a time with two threads
+with panels 0.13.11 on a laptop with 16 threads, eight runs at a time with two threads
 each, so the wall times indicate the relative cost; the reference run takes
-11 min in this setting and 5.4 min of wall time (18 min of CPU time) when run
+10 min in this setting and 4.5 min of wall time (17 min of CPU time) when run
 alone.
 
 .. list-table:: Convergence study, terms `m_{tsl}` and Gauss points `n_x`
@@ -785,7 +785,7 @@ alone.
       - 19
       - 7
       - 81
-      - 8
+      - 7
     * - A
       - 10
       - 120
@@ -869,7 +869,7 @@ alone.
       - 0.087
       - 3
       - 317
-      - 17
+      - 15
     * - A
       - 20
       - 120
@@ -897,7 +897,7 @@ alone.
       - 0.087
       - 0
       - 136
-      - 7
+      - 6
     * - A
       - 25
       - 60
@@ -911,7 +911,7 @@ alone.
       - 0.088
       - 3
       - 384
-      - 33
+      - 31
     * - A
       - 25
       - 120
@@ -939,7 +939,7 @@ alone.
       - 0.087
       - 0
       - 139
-      - 11
+      - 10
     * - A
       - 30
       - 60
@@ -953,7 +953,7 @@ alone.
       - 0.088
       - 3
       - 358
-      - 46
+      - 43
     * - A
       - 30
       - 120
@@ -967,7 +967,7 @@ alone.
       - 0.087
       - 0
       - 135
-      - 15
+      - 14
     * - A
       - 30
       - 180
@@ -995,7 +995,7 @@ alone.
       - 20
       - 7
       - 140
-      - 9
+      - 8
     * - B
       - 10
       - 120
@@ -1037,7 +1037,7 @@ alone.
       - 2.2
       - 8
       - 222
-      - 20
+      - 18
     * - B
       - 15
       - 120
@@ -1051,7 +1051,7 @@ alone.
       - 2.2
       - 0
       - 141
-      - 4
+      - 3
     * - B
       - 15
       - 180
@@ -1079,7 +1079,7 @@ alone.
       - 0.031
       - 2
       - 238
-      - 12
+      - 11
     * - B
       - 20
       - 120
@@ -1093,7 +1093,7 @@ alone.
       - 0.032
       - 0
       - 159
-      - 9
+      - 8
     * - B
       - 20
       - 180
@@ -1121,7 +1121,7 @@ alone.
       - 0.0059
       - 1
       - 189
-      - 14
+      - 13
     * - B
       - 25
       - 120
@@ -1149,7 +1149,7 @@ alone.
       - 0.0037
       - 0
       - 140
-      - 11
+      - 10
     * - B
       - 30
       - 60
@@ -1163,7 +1163,7 @@ alone.
       - 0.0040
       - 2
       - 239
-      - 29
+      - 28
     * - B
       - 30
       - 120
@@ -1177,7 +1177,7 @@ alone.
       - 0.0038
       - 0
       - 137
-      - 16
+      - 15
     * - B
       - 30
       - 180
@@ -1191,7 +1191,7 @@ alone.
       - 0.0038
       - 0
       - 141
-      - 17
+      - 15
 
 .. list-table:: Convergence study, other parameters, varied one at a time
                 from the reference discretisation `L_{tsl} = 24` mm,
@@ -1225,7 +1225,7 @@ alone.
       - 0.087
       - 0
       - 139
-      - 11
+      - 10
     * - A
       - `n_{tsl} = 15`
       - 166.10
@@ -1238,7 +1238,7 @@ alone.
       - 0.087
       - 0
       - 136
-      - 27
+      - 25
     * - A
       - `n_y = 60`
       - 166.10
@@ -1277,7 +1277,7 @@ alone.
       - 0.087
       - 0
       - 184
-      - 14
+      - 13
     * - A
       - `L_{tsl} = 17`
       - 166.08
@@ -1303,7 +1303,7 @@ alone.
       - 33
       - 0
       - 142
-      - 4
+      - 3
     * - B
       - reference
       - 166.15
@@ -1316,7 +1316,7 @@ alone.
       - 0.0037
       - 0
       - 140
-      - 11
+      - 10
     * - B
       - `n_{tsl} = 15`
       - 166.14
@@ -1329,7 +1329,7 @@ alone.
       - 0.0054
       - 0
       - 136
-      - 27
+      - 26
     * - B
       - `n_y = 60`
       - 166.14
@@ -1342,7 +1342,7 @@ alone.
       - 0.0042
       - 0
       - 143
-      - 13
+      - 12
     * - B
       - `m = n = 12`
       - 166.14
@@ -1355,7 +1355,7 @@ alone.
       - 0.0036
       - 0
       - 140
-      - 14
+      - 13
     * - B
       - `\Delta\delta` halved
       - 166.21
@@ -1381,7 +1381,7 @@ alone.
       - 10
       - 0
       - 142
-      - 12
+      - 11
     * - B
       - `L_{tsl} = 17`, `m_{tsl} = 15`, `n_x = 120`
       - 166.12
@@ -1394,7 +1394,7 @@ alone.
       - 11
       - 0
       - 142
-      - 4
+      - 3
 
 The results show that:
 
@@ -1521,8 +1521,7 @@ Each reference has a notebook in ``notebooks/`` with a dictionary of the FE
 cases and one of the experimental tests, a comparison table, a plot and a
 discussion; the ``panels`` results are stored in ``notebooks/results/*.npz``
 and collected by ``notebooks/dcb_mode_I_validation_summary.ipynb``. The results were
-obtained with panels 0.13.0 (see the table of peak loads for two cases run
-again with more Gauss points).
+obtained with panels 0.13.11.
 
 The case of Camanho et al. (2003) is kept for reference, but it is not used
 to validate the model: the FE and experimental load-opening curves of the

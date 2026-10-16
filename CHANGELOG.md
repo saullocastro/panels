@@ -250,7 +250,7 @@
 
 - `doc/source/cohesive_zone.rst`: new convergence study of the cohesive
   domain, on the DCB of Tijs et al. (2022) with `L = 100` mm, and run times
-  of panels 0.13.0.
+  of panels 0.13.11.
 - `notebooks/dcb_utils.py`: `discretize` without a cap on the Gauss points,
   `build_dcb` fills a missing `m_tsl` or `nx` from the rules, and the
   results store the case, the solver settings, the version of `panels` and
