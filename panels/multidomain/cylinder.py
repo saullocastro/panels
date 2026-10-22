@@ -1,3 +1,13 @@
+r"""Cylinders made of several domains (:mod:`panels.multidomain.cylinder`)
+
+:func:`.create_cylinder` builds a closed cylinder from ``npanels`` curved
+panels connected along their longitudinal edges, and
+:func:`.cylinder_compression_lb_Nxx_cte` and
+:func:`.cylinder_compression_lb_Nxx_from_static` run linear buckling
+analyses of it under axial loads. All of them are imported in
+:mod:`panels.multidomain`.
+
+"""
 import numpy as np
 from scipy.sparse import csr_matrix
 
@@ -28,24 +38,43 @@ def create_cylinder(height, r, stack, plyt, laminaprop,
 
     where edges ``A`` and ``B`` are connected to close the cylinder.
 
+    The panels are :class:`.Shell` objects of the group ``'skin'``, each
+    with length ``height``, width ``2*pi*r/npanels``, radius ``r``, ``x0 =
+    0`` and ``y0`` equal to ``i`` times the width for the ``i``-th panel.
+    The boundary condition flags remove `u`, `v` and `w` at the edges `x =
+    0` and `x = height` (``x1u = x2u = x1v = x2v = x1w = x2w = 0``) and keep
+    all the other ones. Consecutive panels are connected with ``'SSycte'``,
+    the edge `y = b` of one to the edge `y = 0` of the next, and the last
+    panel is connected to the first one to close the cylinder. The
+    connections are returned and not stored in the assembly, which is
+    created with ``conn=None``: pass them to :meth:`.MultiDomain.calc_kC`.
+
+    The code of this function is illustrative of how it constructs the
+    multidomain assembly:
+
+    .. literalinclude:: ../../panels/multidomain/cylinder.py
+        :pyobject: create_cylinder
+
 
     Parameters
     ----------
 
     height : float
-        Cylinder height (along `x`).
+        Cylinder height (along `x`), length.
     r : float
-        Cylinder radius.
+        Cylinder radius, length.
     stack : list or tuple
-        Stacking sequence for the cylinder.
+        Stacking sequence for the cylinder, the angle of each ply in
+        degrees.
     plyt : float
-        Ply thickness.
+        Ply thickness, length.
     laminaprop : list or tuple
         Orthotropic lamina properties: `E_1, E_2, \nu_{12}, G_{12}, G_{13}, G_{23}`.
+        The moduli are forces per unit area, `\nu_{12}` is dimensionless.
     npanels : int
         The number of panels the cylinder perimiter.
     m, n : int, optional
-        Number of approximation terms for each panel.
+        Number of approximation terms for each panel. Default ``8``.
     conn_method : str, optional
         How the connections are imposed, ``'null-space'``, the default, or
         ``'penalty'``, see :class:`.MultiDomain`.
@@ -56,14 +85,10 @@ def create_cylinder(height, r, stack, plyt, laminaprop,
         A tuple containing the multidomain assembly and the default connectivity
         list of dictionaries.
 
-    Notes
-    -----
-    The code of this function is illustrative of how it constructs the
-    multidomain assembly:
-
-    .. literalinclude:: ../../panels/multidomain/cylinder.py
-        :pyobject: create_cylinder
-
+    Raises
+    ------
+    ValueError
+        When ``npanels < 2``.
 
     """
     if npanels < 2:
@@ -100,19 +125,46 @@ def create_cylinder(height, r, stack, plyt, laminaprop,
 
 def cylinder_compression_lb_Nxx_cte(height, r, stack, plyt, laminaprop,
         npanels, Nxxs, m=8, n=8, num_eigvalues=20, conn_method='null-space'):
-    """Linear buckling analysis with a constant Nxx for each panel
+    r"""Linear buckling analysis with a constant Nxx for each panel
 
     See :func:`.create_cylinder` for most parameters.
 
     The cylinder has SS1 at the bottom and SS3 at the top. SS3 means that the
     edge is free to move in the axial direction.
 
+    The assembly and its connections come from :func:`.create_cylinder`.
+    The attribute ``Nxx`` of the ``i``-th panel is set to ``Nxxs[i]`` and
+    ``x2u`` to ``1`` for every panel. The constitutive stiffness matrix,
+    :meth:`.MultiDomain.calc_kC` with the connections, and the geometric
+    stiffness matrix, :meth:`.MultiDomain.calc_kG`, are reduced with
+    :meth:`.MultiDomain.reduce` and passed to ``structsolve.lb`` with
+    ``tol=0`` and ``sparse_solver=True``. The eigenvectors are expanded with
+    :meth:`.MultiDomain.expand`.
+
     Parameters
     ----------
+    height : float
+        Cylinder height (along `x`), length.
+    r : float
+        Cylinder radius, length.
+    stack : list or tuple
+        Stacking sequence for the cylinder, the angle of each ply in
+        degrees.
+    plyt : float
+        Ply thickness, length.
+    laminaprop : list or tuple
+        Orthotropic lamina properties: `E_1, E_2, \nu_{12}, G_{12}, G_{13},
+        G_{23}`. The moduli are forces per unit area, `\nu_{12}` is
+        dimensionless.
+    npanels : int
+        The number of panels along the perimeter of the cylinder.
     Nxxs : list
-        A Nxx for each panel.
-    num_eigvalues : int
-        Number of eigenvalues to be extracted.
+        A Nxx for each panel, force per unit length, with length
+        ``npanels``.
+    m, n : int, optional
+        Number of approximation terms for each panel. Default ``8``.
+    num_eigvalues : int, optional
+        Number of eigenvalues to be extracted. Default ``20``.
     conn_method : str, optional
         How the connections are imposed, ``'null-space'``, the default, or
         ``'penalty'``, see :class:`.MultiDomain`.
@@ -121,7 +173,15 @@ def cylinder_compression_lb_Nxx_cte(height, r, stack, plyt, laminaprop,
     Returns
     -------
     md, eigvals, eigvecs : tuple
-        Assembly, eigenvalues and eigenvectors.
+        Assembly, eigenvalues and eigenvectors. ``eigvals`` are the load
+        multipliers returned by ``structsolve.lb``, dimensionless, and
+        ``eigvecs`` has one eigenvector of the assembly per column, with
+        ``md.get_size()`` rows.
+
+    Raises
+    ------
+    ValueError
+        When the length of ``Nxxs`` is not ``npanels``.
 
     Examples
     --------
@@ -150,19 +210,52 @@ def cylinder_compression_lb_Nxx_cte(height, r, stack, plyt, laminaprop,
 
 def cylinder_compression_lb_Nxx_from_static(height, r, stack, plyt, laminaprop,
         npanels, Nxxs, m=8, n=8, num_eigvalues=20, conn_method='null-space'):
-    """Linear buckling analysis with a Nxx calculated using static analysis
+    r"""Linear buckling analysis with a Nxx calculated using static analysis
 
     See :func:`.create_cylinder` for most parameters.
 
     The cylinder has SS1 at the bottom and SS3 at the top. SS3 means that the
     edge is free to move in the axial direction.
 
+    The assembly and its connections come from :func:`.create_cylinder`.
+    Each panel receives a distributed force along `x` at its edge `x =
+    height`, constant along `y`, with :meth:`.Shell.add_distr_load_fixed_x`,
+    and ``x2u`` is set to ``1``; the loads stay in the panels of the
+    returned assembly. A linear static analysis, ``structsolve.static``
+    with the reduced :meth:`.MultiDomain.calc_kC` and
+    :meth:`.MultiDomain.calc_fext`, gives the pre-buckling state ``c``, with
+    which the geometric stiffness matrix :meth:`.MultiDomain.calc_kG` is
+    computed, with its default ``silent=False``, so that its log messages
+    are printed. The reduced matrices are passed to ``structsolve.lb`` with
+    ``tol=0`` and ``sparse_solver=True``, and the eigenvectors are expanded
+    with :meth:`.MultiDomain.expand`.
+
     Parameters
     ----------
+    height : float
+        Cylinder height (along `x`), length.
+    r : float
+        Cylinder radius, length.
+    stack : list or tuple
+        Stacking sequence for the cylinder, the angle of each ply in
+        degrees.
+    plyt : float
+        Ply thickness, length.
+    laminaprop : list or tuple
+        Orthotropic lamina properties: `E_1, E_2, \nu_{12}, G_{12}, G_{13},
+        G_{23}`. The moduli are forces per unit area, `\nu_{12}` is
+        dimensionless.
+    npanels : int
+        The number of panels along the perimeter of the cylinder.
     Nxxs : list
-        A Nxx for each panel.
-    num_eigvalues : int
-        Number of eigenvalues to be extracted.
+        A Nxx for each panel, force per unit length, with length
+        ``npanels``. TODO(author): the load functions ``lambda y:
+        Nxxs[i]`` are evaluated after the loop over the panels, so every
+        panel receives ``Nxxs[-1]``; check whether this is intended.
+    m, n : int, optional
+        Number of approximation terms for each panel. Default ``8``.
+    num_eigvalues : int, optional
+        Number of eigenvalues to be extracted. Default ``20``.
     conn_method : str, optional
         How the connections are imposed, ``'null-space'``, the default, or
         ``'penalty'``, see :class:`.MultiDomain`.
@@ -170,7 +263,16 @@ def cylinder_compression_lb_Nxx_from_static(height, r, stack, plyt, laminaprop,
     Returns
     -------
     md, c, eigvals, eigvecs : tuple
-        Assembly, static results, eigenvalues and eigenvectors.
+        Assembly, static results, eigenvalues and eigenvectors. ``c`` are
+        the Ritz constants of the assembly, 1-D array of size
+        ``md.get_size()``, ``eigvals`` the load multipliers returned by
+        ``structsolve.lb``, dimensionless, and ``eigvecs`` has one
+        eigenvector of the assembly per column.
+
+    Raises
+    ------
+    ValueError
+        When the length of ``Nxxs`` is not ``npanels``.
 
     Examples
     --------

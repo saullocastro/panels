@@ -1,3 +1,12 @@
+r"""Linear buckling of a T-stiffened panel with a debonding defect
+(:mod:`panels.multidomain.tstiff2d_1stiff_compression`)
+
+The function :func:`.tstiff2d_1stiff_compression`, imported in
+:mod:`panels.multidomain`, builds the assembly of 15 domains of a panel
+with one T stiffener and runs its linear buckling analysis under axial
+loads.
+
+"""
 import numpy as np
 
 from structsolve import lb, static
@@ -53,61 +62,109 @@ def tstiff2d_1stiff_compression(a, b, ys, bb, bf, defect_a, rho, plyt,
     For more details about the theory involved, see
     [castro2017Multidomain]_ .
 
+    The skin is divided into 9 domains, ``p01`` to ``p09``, and the base and
+    the flange of the stiffener into 3 domains each, ``p10``, ``p12``,
+    ``p14`` and ``p11``, ``p13``, ``p15``, all :class:`.Shell` objects of
+    the groups ``'skin'``, ``'base'`` and ``'flange'``. The middle row of
+    domains has the length ``defect_a*a`` of the defect, the other two rows
+    half of the remaining length each. The base is connected to the skin
+    with ``'SB'``, except over the defect when ``defect_a > 0``, the flange
+    to the base with ``'BFycte'`` at the middle of the base, and the
+    domains of the skin, of the base and of the flange among themselves
+    with ``'SSxcte'`` and ``'SSycte'``. With ``defect_a = 0`` the middle row
+    still exists, with length ``0.33*a``, and its base is connected to the
+    skin. The flange has no radius, the other domains have the radius
+    ``r``.
+
+    With ``run_static_case=True`` a distributed force along `x`, of
+    intensity ``Nxx_skin``, ``Nxx_base`` or ``Nxx_flange`` and constant along
+    `y`, is added with :meth:`.Shell.add_distr_load_fixed_x` at the edge `x
+    = 0` of the domains ``p07``, ``p08``, ``p09``, ``p14`` and ``p15``, a
+    linear static analysis with ``structsolve.static`` gives the
+    pre-buckling state ``c``, the attributes ``Nxx`` of all the domains are
+    then set to ``0`` and the geometric stiffness matrix is computed at
+    ``c``. With ``run_static_case=False`` the geometric stiffness matrix
+    comes from the constant ``Nxx`` of each domain, and `u` is removed at
+    the edge `x = 0` of the domains ``p07``, ``p08``, ``p09`` and ``p15``.
+    The reduced matrices, see :meth:`.MultiDomain.reduce`, are passed to
+    ``structsolve.lb`` with ``tol=0`` and ``sparse_solver=True``, and the
+    eigenvectors are expanded with :meth:`.MultiDomain.expand`.
+
     Parameters
     ----------
 
     a : float
-        Total length of the assembly (along `x`).
+        Total length of the assembly (along `x`), length.
     b : float
-        Total width of the assembly (along `y`).
+        Total width of the assembly (along `y`), length.
     ys : float
-        Position of the stiffener along `y`.
+        Position of the stiffener along `y`, length.
     bb : float
-        Stiffener's base width.
+        Stiffener's base width, length.
     bf : float
-        Stiffener's flange width.
+        Stiffener's flange width, length.
     defect_a : float
-        Debonding defect/assembly length ratio.
+        Debonding defect/assembly length ratio, dimensionless.
     rho : float
-        Material density.
+        Material density, mass per unit volume.
     plyt : float
-        Ply thickness.
+        Ply thickness, length.
     laminaprop : list or tuple
         Orthotropic lamina properties: `E_1, E_2, \nu_{12}, G_{12}, G_{13}, G_{23}`.
+        The moduli are forces per unit area, `\nu_{12}` is dimensionless.
     stack_skin : list or tuple
-        Stacking sequence for the skin.
+        Stacking sequence for the skin, the angle of each ply in degrees.
     stack_base : list or tuple
-        Stacking sequence for the stiffener's base.
+        Stacking sequence for the stiffener's base, the angles in degrees.
     stack_flange : list or tuple
-        Stacking sequence for the stiffener's flange.
+        Stacking sequence for the stiffener's flange, the angles in degrees.
     Nxx_skin : float
-        Skin load distributed at the assembly edge at `x=0`.
+        Skin load distributed at the assembly edge at `x=0`, force per unit
+        length.
     Nxx_base : float
-        Stiffener's base load distributed at the assembly edge at `x=0`.
+        Stiffener's base load distributed at the assembly edge at `x=0`,
+        force per unit length.
     Nxx_flange : float
-        Stiffener's flange load distributed at the assembly edge at `x=0`.
+        Stiffener's flange load distributed at the assembly edge at `x=0`,
+        force per unit length.
     run_static_case : bool, optional
         If True a static analysis is run before the linear buckling analysis
         to compute the real membrane stress state along the domain, otherwise
         it is assumed constant values of `N_{xx}` for all components.
+        Default ``True``.
     r : float or None, optional
-        Radius of the stiffened panel.
+        Radius of the stiffened panel, length. Default ``None``, a flat
+        panel.
     m, n : int, optional
-        Number of terms of the approximation function for the skin.
+        Number of terms of the approximation function for the skin. Default
+        ``8``.
     mb, nb : int, optional
         Number of terms of the approximation function for the stiffener's base.
+        ``None``, the default, uses ``m`` and ``n``.
     mf, nf : int, optional
         Number of terms of the approximation function for the stiffener's
-        flange.
+        flange. ``None``, the default, uses ``m`` and ``n``.
     nx, ny, nxb, nyb, nxf, nyf : int, optional
         Define of integration points used for skin, stiffener's base or flange;
-        along x and y. Keeping ``None`` will use the default (see
-        :class:`.Shell`).
-    num_eigvalues : int
-        Number of eigenvalues to be extracted.
+        along x and y. Keeping ``None``, the default, uses the number of
+        terms of the corresponding domains, ``m``, ``n``, ``mb``, ``nb``,
+        ``mf`` and ``nf``, respectively.
+    num_eigvalues : int, optional
+        Number of eigenvalues to be extracted. Default ``25``.
     conn_method : str, optional
         How the connections are imposed, ``'null-space'``, the default, or
         ``'penalty'``, see :class:`.MultiDomain`.
+
+    Returns
+    -------
+    assy, c, eigvals, eigvecs : tuple
+        With ``run_static_case=True``: the assembly, :class:`.MultiDomain`,
+        the Ritz constants of the static analysis, 1-D array of size
+        ``assy.get_size()``, the load multipliers returned by
+        ``structsolve.lb``, dimensionless, and the eigenvectors of the
+        assembly, one per column.
+    assy, eigvals, eigvecs : tuple
+        With ``run_static_case=False``: the same without ``c``.
 
     Examples
     --------

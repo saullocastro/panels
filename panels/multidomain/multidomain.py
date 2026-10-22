@@ -1,3 +1,14 @@
+r"""Assembly of several domains (:mod:`panels.multidomain.multidomain`)
+
+The class :class:`.MultiDomain` assembles the matrices and vectors of
+several :class:`.Shell` domains, imposes the connections between them and
+the prescribed displacements, with the null-space or the penalty method,
+computes the reactions, the cohesive-zone connections ``'SB_TSL'`` and the
+fields of the results, and plots them. The function :func:`.load` reads an
+assembly saved with :meth:`.MultiDomain.save`. Both are imported in
+:mod:`panels.multidomain`.
+
+"""
 import platform
 
 import numpy as np
@@ -18,6 +29,10 @@ from panels.multidomain.connections import nullspace
 
 def load(name, max_size=json_io.MAX_SIZE):
     r"""Load a :class:`.MultiDomain` saved by :meth:`.MultiDomain.save`
+
+    The assembly is restored with its panels and connections, see
+    :mod:`panels.json_io`. The matrices, not stored in the file, must be
+    computed again.
 
     Parameters
     ----------
@@ -136,6 +151,32 @@ def _dofs(p):
 
 
 def default_field(panel, gridx, gridy):
+    r"""Grid of points over the domain of a panel
+
+    The points are ``gridx`` equally spaced values of `x` from ``0`` to
+    ``panel.a`` combined with ``gridy`` equally spaced values of `y` from
+    ``0`` to ``panel.b``, as given by :func:`numpy.meshgrid`, and returned
+    flattened.
+
+    Parameters
+    ----------
+    panel : :class:`.Shell`
+        The panel, whose attributes ``a`` and ``b`` are used.
+    gridx : int
+        Number of points along `x`.
+    gridy : int
+        Number of points along `y`.
+
+    Returns
+    -------
+    xs, ys : np.ndarray
+        Coordinates `x` and `y` of the points, length, 1-D arrays of size
+        ``gridx*gridy``.
+    shape : tuple
+        The shape of the grid, ``(gridy, gridx)``, to reshape ``xs``,
+        ``ys`` and the fields computed at them.
+
+    """
     xs = linspace(0, panel.a, gridx)
     ys = linspace(0, panel.b, gridy)
     xs, ys = np.meshgrid(xs, ys, copy=False)
@@ -158,14 +199,40 @@ class MultiDomain(object):
     For more details about the theory involved, see Castro and Donadon (2017)
     [castro2017Multidomain]_ .
 
+    The constructor places the panels one after the other in the vector of
+    Ritz constants of the assembly, in the order given, and sets the
+    attributes ``row_start``, ``col_start``, ``row_end`` and ``col_end`` of
+    each panel accordingly, with 3 degrees of freedom per term for the
+    models based on the classical laminated plate theory, and for a panel
+    without ``model``, and 5 for the models based on shear deformation
+    theories. Creating another assembly with the same panels overwrites
+    these attributes. No matrix is computed.
+
 
     Parameters
     ----------
 
     panels : iterable
         A list, tuple etc of :class:`.Shell` objects.
-    conn : dict
-        A connectivity dictionary.
+    conn : list of dict or None, optional
+        A connectivity dictionary, a list with one dictionary per
+        connection, see :meth:`.get_kC_conn`. With ``None``, the default,
+        the connections must be given to :meth:`.calc_kC` or
+        :meth:`.get_kC_conn`, which keep the last ones used.
+
+        Concerning the conn dictionary, the key 'func' stands for the connection function that
+        builds the compatibility relations between the panels.
+
+        The connections functions available are:
+            - 'SSycte' : defines a skin-skin connection for const y and calls the following functions ``fkCSSycte11``, ``fkCSSycte12``, ``fkCSSycte22``
+            - 'SSxcte' : defines a skin-skin connection for const x and calls the following functions ``fkCSSxcte11``, ``fkCSSxcte12``, ``fkCSSxcte22``
+            - 'SB' : defines a skin-base connection over an area and calls the following functions ``fkCSB11``, ``fkCSB12``, ``fkCSB22``, see :meth:`.get_kC_conn` for the roles of ``p1`` and ``p2``
+            - 'BFycte': defines a base-flange connection and calls the following functions ``fkCBFycte11``, ``fkCBFycte12``, ``fkCBFycte22``
+
+        The connections ``'BFxcte'`` and ``'SB_TSL'`` are also available,
+        see :meth:`.get_kC_conn`.
+
+        Explanations about the connetion functions are found in ``connections`` module.
     conn_method : str, optional
         How the connections are imposed:
 
@@ -202,21 +269,14 @@ class MultiDomain(object):
           ``conn_method``, also for a single panel without connections,
           ``MultiDomain([shell], conn=[], pd_method='null-space')``
     name : str, optional
-        Name of the assembly, used by :meth:`.save`.
+        Name of the assembly, used by :meth:`.save`. Default
+        ``'multidomain'``.
 
-    Notes
-    -----
-
-    Concerning the conn dictionary, the key 'func' stands for the connection function that
-    builds the compatibility relations between the panels.
-
-    The connections functions available are:
-        - 'SSycte' : defines a skin-skin connection for const x and calls the following functions ``fkCSSycte11``, ``fkCSSycte12``, ``fkCSSycte22``
-        - 'SSxcte' : defines a skin-skin connection for const y and calls the following functions ``fkCSSxcte11``, ``fkCSSxcte12``, ``fkCSSxcte22``
-        - 'SB' : defines a skin-base connection over an area and calls the following functions ``fkCSB11``, ``fkCSB12``, ``fkCSB22``, see :meth:`.get_kC_conn` for the roles of ``p1`` and ``p2``
-        - 'BFycte': defines a base-flange connection and calls the following functions ``fkCBFycte11``, ``fkCBFycte12``, ``fkCBFycte22``
-
-    Explanations about the connetion functions are found in ``connections`` module.
+    Raises
+    ------
+    ValueError
+        When ``conn_method`` or ``pd_method`` is not ``'penalty'`` or
+        ``'null-space'``.
 
 
     Examples
@@ -356,7 +416,18 @@ class MultiDomain(object):
 
     def get_size(self):
         """
-        Size of K of a single panel
+        Size of K of the assembly
+
+        The number of Ritz constants of the whole assembly, the sum over the
+        panels of the number of degrees of freedom per term times ``m*n``,
+        which is also the size of the matrices of the assembly. It is stored
+        in the attribute ``size``.
+
+        Returns
+        -------
+        size : int
+            Number of Ritz constants of the assembly.
+
         """
         self.size = sum([_dofs(p)*p.m*p.n for p in self.panels])
         return self.size
@@ -655,6 +726,21 @@ class MultiDomain(object):
         Returns `[T]^T [A] [T]` for a matrix and `[T]^T \{A\}` for a vector,
         with `[T]` from :meth:`.get_T`.
 
+        Parameters
+        ----------
+        A : np.ndarray or sparse matrix
+            A vector, 1-D :class:`numpy.ndarray` of size :meth:`.get_size`,
+            or a matrix with shape ``(size, size)``. Any other input,
+            including a 2-D :class:`numpy.ndarray`, is treated as a matrix.
+
+        Returns
+        -------
+        A_r : np.ndarray or scipy.sparse.csr_matrix
+            1-D array of size ``size_r`` for a vector, or
+            :class:`scipy.sparse.csr_matrix` with shape ``(size_r,
+            size_r)`` for a matrix, with ``size_r`` the number of
+            independent Ritz constants, the number of columns of `[T]`.
+
         """
         T = self.get_T()
         if isinstance(A, np.ndarray) and A.ndim == 1:
@@ -687,6 +773,13 @@ class MultiDomain(object):
             Load factor of a configuration. With ``None``, the default,
             `[T] \{c_r\}` is returned, unchanged with respect to the
             previous versions.
+
+        Returns
+        -------
+        c : np.ndarray
+            Ritz constants of the assembly, 1-D array of size
+            :meth:`.get_size`, or 2-D with one vector per column when
+            ``c_r`` is 2-D.
 
         """
         T = self.get_T()
@@ -954,6 +1047,11 @@ class MultiDomain(object):
         P : dict
             ``{'cte': P_0, 'inc': P_1}``.
 
+        Raises
+        ------
+        ValueError
+            When ``pd_method`` is not ``'null-space'``.
+
         """
         if self.pd_method != 'null-space':
             raise ValueError('reaction_pd() requires pd_method="null-space"')
@@ -1002,6 +1100,14 @@ class MultiDomain(object):
         F : np.ndarray
             ``[F_u, F_v, F_w]``, ``nan`` for a direction not prescribed in
             the selected prescriptions.
+
+        Raises
+        ------
+        ValueError
+            When ``pd_method`` is not ``'null-space'``, when the kind of a
+            selected prescription is not ``'x'``, ``'y'`` or ``'xy'``, or
+            when no prescribed displacement of the panel matches a selected
+            prescription.
 
         """
         if self.pd_method != 'null-space':
@@ -1058,14 +1164,27 @@ class MultiDomain(object):
             eval_panel=None):
         r"""Contour plot for a Ritz constants vector.
 
+        The field ``vec`` of the panels of ``group`` is computed with
+        :meth:`.calc_results`, unless ``res`` is given, and drawn with
+        :meth:`matplotlib.axes.Axes.contourf`, one contour per panel, at
+        the position ``(y0 + y, x0 + x)`` of the plot, i.e. with `y` along
+        the horizontal axis and `x` along the vertical axis, swapped with
+        ``flip_plot=True``. The horizontal axis is always inverted. The
+        levels span ``vecmin`` to ``vecmax`` for all the panels.
+        When ``ax`` is not given a new figure is created; the backend of
+        matplotlib is set to ``'Agg'`` on Linux. With ``save=True`` and no
+        ``ax``, the figure is saved to ``filename`` and closed.
+
         Parameters
         ----------
         c : np.ndarray or None
             The Ritz constants that will be used to compute the field contour.
+            1-D array of size :meth:`.get_size`. Default ``None``, then
+            ``res`` must be given.
         group : str or None
             A group to plot. Each panel in ``panels`` should contain an
             attribute ``group``, which is used to identify which entities
-            should be plotted together.
+            should be plotted together. Default ``None``.
         vec : str, optional
             Can be one of the components:
 
@@ -1074,83 +1193,99 @@ class MultiDomain(object):
               ``'kxy'``, ``'gyz'``, ``'gxz'``
             - Stress: ``'Nxx'``, ``'Nyy'``, ``'Nxy'``, ``'Mxx'``, ``'Myy'``,
               ``'Mxy'``, ``'Qy'``, ``'Qx'``
+
+            Default ``'w'``. The other names accepted by
+            :meth:`.calc_results` can also be given.
         invert_y : bool, optional
-            Inverts the `y` axis of the plot.
+            Inverts the `y` axis of the plot. Default ``False``.
         save : bool, optional
             Flag telling whether the contour should be saved to an image file.
+            Default ``True``, ignored when ``ax`` is given.
         dpi : int, optional
-            Resolution of the saved file in dots per inch.
+            Resolution of the saved file in dots per inch. Default ``400``.
         filename : str, optional
             The file name for the generated image file. If no value is given,
-            the `name` parameter of the ``Shell`` object will be used.
+            ``group + '.png'`` is used.
         ax : AxesSubplot, optional
             When ``ax`` is given, the contour plot will be created inside it.
         figsize : tuple, optional
-            The figure size given by ``(width, height)``.
+            The figure size given by ``(width, height)``. Default ``(3.5,
+            2.)``.
         title : str, optional
             If any string is given a title is added to the contour plot.
-        indentify : bool, optional
-            If domains should be identified. If yes, the name of each panel is
-            used.
+        identify : bool, optional
+            If domains should be identified. If yes, the text ``'P 01'``,
+            ``'P 02'`` etc, with the position of the panel in the assembly,
+            is written at the middle of each panel. Default ``False``.
         show_boundaries : bool, optional
-            If boundaries between domains should be drawn.
+            If boundaries between domains should be drawn. Default ``False``.
         boundary_line : str, optional
-            Matplotlib string to define line type and color.
+            Matplotlib string to define line type and color. Default
+            ``'--k'``.
         boundary_linewidth : float, optional
-            Matplotlib float to define line width.
+            Matplotlib float to define line width. Default ``1.``.
         colorbar : bool, optional
-            If a colorbar should be added to the contour plot.
+            If a colorbar should be added to the contour plot. Default
+            ``False``.
         cbar_nticks : int, optional
-            Number of ticks added to the colorbar.
+            Number of ticks added to the colorbar. Default ``10``.
         cbar_format : [ None | format string | Formatter object ], optional
             See the ``matplotlib.pyplot.colorbar`` documentation.
         cbar_title : str, optional
             Colorbar title. If ``cbar_title == ''`` no title is added.
         cbar_fontsize : int, optional
-            Fontsize of the colorbar labels.
+            Fontsize of the colorbar labels. Default ``7``.
         colormap : string, optional
-            Name of a matplotlib available colormap.
+            Name of a matplotlib available colormap. Default ``'jet'``, also
+            used, with a warning, when the name is not found.
         aspect : str, optional
             String that will be passed to the ``AxesSubplot.set_aspect()``
-            method.
+            method. Default ``'equal'``.
         clean : bool, optional
-            Clean axes ticks, grids, spines etc.
+            Clean axes ticks, grids, spines etc. Default ``True``.
+        texts : list of dict, optional
+            Each dictionary is passed as keyword arguments to
+            ``ax.text(transform=ax.transAxes, **kwargs)``. Default ``[]``.
         xs : np.ndarray, optional
-            The `x` positions where to calculate the displacement field.
-            Default is ``None`` and the method ``_default_field`` is used.
+            Not used, the points come from ``gridx`` and ``gridy`` or from
+            ``nr_x_gauss`` and ``nr_y_gauss``.
         ys : np.ndarray, optional
-            The ``y`` positions where to calculate the displacement field.
-            Default is ``None`` and the method ``_default_field`` is used.
+            Not used, see ``xs``.
         gridx : int, optional
             Number of points along the `x` axis where to calculate the
-            displacement field.
+            displacement field. Default ``50``.
         gridy : int, optional
             Number of points along the `y` where to calculate the
-            displacement field.
+            displacement field. Default ``50``.
         num_levels : int, optional
             Number of contour levels (higher values make the contour smoother).
+            Default ``400``.
         vecmin : float, optional
             Minimum value for the contour scale (useful to compare with other
             results). If not specified it will be taken from the calculated
             field.
         vecmax : float, optional
             Maximum value for the contour scale.
-        calc_data_only : bool, optional
-            If only calculated data should be returned.
-        nr_x_gauss, nr_y_gauss : int
-            Number of gauss sampling points along x and y respectively where the displacement field is to be calculated
-            Either one of nr_x_gauss and nr_y_gauss needs to be specified or both
-            When specified, uvw_gauss_points, stress_gauss_points and strain_gauss points are called instead
-        calc_res_field_only : bool, optional
-            Only calcuates the result fields and returns it back
-        res : whatever data the stress, strain and uvw functions output, optional
-            Contains the results of a previous run. If results already exist, then they're not computed again
+        nr_x_gauss, nr_y_gauss : int or None, optional
+            Number of Gauss-Legendre points along `x` and `y`, respectively,
+            used instead of ``gridx`` or ``gridy`` when not ``None``, the
+            default, see :meth:`.uvw`.
+        res : dict, optional
+            Contains the results of a previous run, as returned by
+            :meth:`.calc_results`. If results already exist, then they're not
+            computed again
         silent : bool, optional
             True = doesnt print any messages
         display_zero : bool, optional
             Decides whether 0 should be displayed as a tick in the colour bar or not
         flip_plot : bool, optional
-            Flips plot so that x axis is now horizontal
+            Flips plot so that x axis is now horizontal. Default ``False``;
+            ``True`` prints a warning that it is still under development.
+        eval_panel : :class:`.Shell` or None, optional
+            When given, only this panel is drawn, instead of the panels of
+            ``group``. TODO(author): ``eval_panel`` is not passed to
+            :meth:`.calc_results`, so the drawn field is the first one of
+            ``res``, of the first panel of ``group``; check.
 
         Returns
         -------
@@ -1158,7 +1293,14 @@ class MultiDomain(object):
             The Matplotlib object that can be used to modify the current plot
             if needed.
         data : dict
-            Data calculated during the plotting procedure.
+            Data calculated during the plotting procedure, with the keys
+            ``'vecmin'`` and ``'vecmax'``.
+
+        Raises
+        ------
+        ValueError
+            When both ``c`` and ``res`` are ``None``, or when ``ax`` is not a
+            :class:`matplotlib.axes.Axes`.
 
         """
         msg('Plotting contour.../../panels/multidomain/connections/penalties.py..', silent=True)
@@ -1419,45 +1561,71 @@ class MultiDomain(object):
                      nr_x_gauss = None, nr_y_gauss = None,
                      eval_panel=None, x_cte_force=None, y_cte_force=None):
 
-        r"""Contour plot for a Ritz constants vector.
+        r"""Results of a Ritz constants vector for a contour plot.
+
+        Computes the results needed to plot the field ``vec``, without
+        plotting: :meth:`.uvw` for a displacement, :meth:`.strain` for a
+        strain, :meth:`.stress` for a stress resultant and :meth:`.force`
+        for a force along a line, ``'Fxx'``, ``'Fyy'`` or ``'Fxy'``. The
+        result of that method is returned with all its keys, not only
+        ``vec``.
 
         Parameters
         ----------
         c : np.ndarray
             The Ritz constants that will be used to compute the field contour.
+            1-D array of size :meth:`.get_size`.
         group : str
             A group to plot. Each panel in ``panels`` should contain an
             attribute ``group``, which is used to identify which entities
-            should be plotted together.
+            should be plotted together. Default ``None``, then
+            ``eval_panel`` must be given.
         vec : str, optional
             Variable that needs to be calculated
             Can be one of the components:
 
             - Displacement: ``'u'``, ``'v'``, ``'w'``, ``'phix'``, ``'phiy'``
             - Strain: ``'exx'``, ``'eyy'``, ``'gxy'``, ``'kxx'``, ``'kyy'``,
-              ``'kxy'``, ``'gyz'``, ``'gxz'``
+              ``'kxy'``, ``'gyz'``, ``'gxz'``, ``'kxx3'``, ``'kyy3'``,
+              ``'kxy3'``, ``'gyz2'``, ``'gxz2'``
             - Stress: ``'Nxx'``, ``'Nyy'``, ``'Nxy'``, ``'Mxx'``, ``'Myy'``,
-              ``'Mxy'``, ``'Qy'``, ``'Qx'``
+              ``'Mxy'``, ``'Qy'``, ``'Qx'``, ``'Pxx'``, ``'Pyy'``,
+              ``'Pxy'``, ``'Ry'``, ``'Rx'``
+            - Force: ``'Fxx'``, ``'Fyy'``, ``'Fxy'``
+
+            Default ``'w'``.
         gridx : int, optional
             Number of points along the `x` axis where to calculate the
-            displacement field.
+            displacement field. Default ``50``.
         gridy : int, optional
             Number of points along the `y` where to calculate the
-            displacement field.
-        use_gauss_points : bool, optional
-            Uses the gauss integration points (x_gauss and y_gauss) to evaluate the fields
-        nr_x_gauss, nr_y_gauss : int
-            Number of gauss sampling points along x and y respectively where the displacement field is to be calculated
-            Either one of nr_x_gauss and nr_y_gauss needs to be specified or both
-            When specified, stress_gauss_points and strain_gauss points are called instead
+            displacement field. Default ``50``.
+        nr_x_gauss, nr_y_gauss : int or None, optional
+            Number of gauss sampling points along x and y respectively where the displacement field is to be calculated,
+            used instead of ``gridx`` or ``gridy`` when not ``None``, the
+            default.
             The Gauss-Legendre points come from :func:`scipy.special.roots_legendre`,
             without an upper limit
         eval_panel : Shell object
             Used to evaluate results for a single panel (that is passed) instead of an entire group of panels
-        x_cte_force or y_cte_force : float
+            Default ``None``.
+        x_cte_force, y_cte_force : float or None, optional
             Constant `x` or `y` coordinate of a line at which the force is to be
             calculated. Coordinates are relative to specific panel, i.e. `0 \le
-            x \le a`, `0 \le y \le b`.
+            x \le a`, `0 \le y \le b`. Used only for the forces, see
+            :meth:`.force`. Default ``None``.
+
+        Returns
+        -------
+        res : dict
+            The output of :meth:`.uvw`, :meth:`.strain`, :meth:`.stress` or
+            :meth:`.force`, see there.
+
+        Raises
+        ------
+        ValueError
+            When ``vec`` is not one of the names above.
+
         """
 
         displs = ['u', 'v', 'w', 'phix', 'phiy']
@@ -1495,40 +1663,51 @@ class MultiDomain(object):
         r"""Calculate the displacement field
 
         For a given full set of Ritz constants ``c``, the displacement
-        field is calculated and stored in the parameters
-        ``u``, ``v``, ``w``, ``phix``, ``phiy`` of the ``Shell`` object.
+        field is calculated with the field functions of the model of each
+        panel, at a grid of points of each panel of ``group``, or of
+        ``eval_panel`` only. The returned values ``u``, ``v``, ``w``,
+        ``phix``, ``phiy`` are not stored in the ``Shell`` objects.
+
+        Along `x` the points are ``gridx`` equally spaced values from ``0``
+        to ``a``, or, when ``nr_x_gauss`` is given, the ``nr_x_gauss``
+        Gauss-Legendre points of :func:`scipy.special.roots_legendre` mapped
+        to ``0 <= x <= a``; along `y` likewise with ``gridy``,
+        ``nr_y_gauss`` and ``b``.
 
         Parameters
         ----------
-        c : float
-            The full set of Ritz constants
+        c : np.ndarray
+            The full set of Ritz constants, 1-D array of size
+            :meth:`.get_size`.
         group : str
             A group to plot. Each panel in ``panels`` should contain an
             attribute ``group``, which is used to identify which entities
-            should be plotted together.
+            should be plotted together. Not used when ``eval_panel`` is
+            given; ``group`` and ``eval_panel`` cannot both be ``None``.
         gridx : int, optional
             Number of points along the `x` axis where to calculate the
-            displacement field.
+            displacement field. Default ``50``.
         gridy : int, optional
             Number of points along the `y` where to calculate the
-            displacement field.
-        nr_x_gauss, nr_y_gauss : int
+            displacement field. Default ``50``.
+        nr_x_gauss, nr_y_gauss : int or None, optional
             Number of gauss sampling points along x and y respectively where the displacement field is to be calculated
-            Either one of nr_x_gauss and nr_y_gauss needs to be specified or both
-            Both can be different
+            Each one can be given or not, independently of the other.
+            Both can be different. Default ``None``, the grid is used.
         eval_panel : Shell object
             Used to evaluate results for a single panel (that is passed) instead of an entire group of panels
+            Default ``None``.
 
         Returns
         -------
-        out : tuple
-            A tuple of ``np.ndarrays`` containing
-            ``(xs, ys, u, v, w, phix, phiy)``.
-
-        Notes
-        -----
-        The returned values ``u```, ``v``, ``w``, ``phix``, ``phiy`` are
-        stored as parameters with the same name in the ``Shell`` object.
+        out : dict
+            A dictionary with the keys ``'x'``, ``'y'``, ``'u'``, ``'v'``,
+            ``'w'``, ``'phix'``, ``'phiy'``, each a list with one
+            ``np.ndarray`` per evaluated panel, in the order of the
+            assembly, with shape ``(ny, nx)``, ``nx`` and ``ny`` the numbers
+            of points along `x` and `y`. ``'x'`` and ``'y'`` are the
+            coordinates of the points in the panel, length, and the others
+            the displacements, length, and the rotations, dimensionless.
 
         """
         res = dict(x=[], y=[], u=[], v=[], w=[], phix=[], phiy=[])
@@ -1602,39 +1781,47 @@ class MultiDomain(object):
         `\kappa_{yy}`, `\kappa_{xy}`) at each point over the grid of interest.
         The size of the grid is defined using ``gridx`` and ``gridy``. In the
         multidomain assembly, each domain will have a corresponding grid
-        defined by this amount of points.
+        defined by this amount of points. The points are those of
+        :meth:`.uvw`, with ``nr_x_gauss`` and ``nr_y_gauss`` replacing
+        ``gridx`` and ``gridy`` when given.
 
         Parameters
         ----------
-        c : float
-            The full set of Ritz constants
+        c : np.ndarray
+            The full set of Ritz constants, 1-D array of size
+            :meth:`.get_size`.
         group : str
             A group to plot. Each panel in ``panels`` should contain an
             attribute ``group``, which is used to identify which entities
-            that should be plotted together.
+            that should be plotted together. Not used when ``eval_panel`` is
+            given; ``group`` and ``eval_panel`` cannot both be ``None``.
         gridx : int, optional
             Number of points along the `x` axis, where the strain field is
-            calculated.
+            calculated. Default ``50``.
         gridy : int, optional
             Number of points along the `y` axis, where the strain field is
-            calculated.
-        NLterms : bool
+            calculated. Default ``50``.
+        NLterms : bool, optional
             Flag to indicate whether non-linear strain components should be considered.
-        nr_x_gauss, nr_y_gauss : int
+            Default ``True``.
+        nr_x_gauss, nr_y_gauss : int or None, optional
             Number of gauss sampling points along x and y respectively where
-            the field is to be calculated. Either one of ``nr_x_gauss`` or
-            ``nr_y_gauss`` needs to be specified, or both. They can be
-            different.
+            the field is to be calculated. Each one can be given or not,
+            independently of the other. They can be different. Default
+            ``None``, the grid is used.
         eval_panel : Shell object
             Used to evaluate results for a single panel (that is passed)
-            instead of an entire group of panels.
+            instead of an entire group of panels. Default ``None``.
 
         Returns
         -------
         out : dict
             A dictionary of ``np.ndarrays`` with the keys:
             ``(x, y, exx, eyy, gxy, kxx, kyy, kxy)``.
-            Each has the shape: (no_panels_in_group) x gridx x gridy
+            Each is a list with one array per evaluated panel, of shape
+            ``(ny, nx)``, ``nx`` and ``ny`` the numbers of points along `x`
+            and `y`. The strains are dimensionless and the curvatures have
+            the dimension of 1/length.
             The panels of the models based on shear deformation theories
             also give the strains ``(gyz, gxz)`` and, for the third-order
             theory, ``(kxx3, kyy3, kxy3, gyz2, gxz2)``, see
@@ -1714,36 +1901,51 @@ class MultiDomain(object):
         Nxy) and distributed moments (Mxx, Myy, Mxy) at each point over the
         grid of interest. The size of the grid is defined using ``gridx`` and
         ``gridy``. In the multidomain assembly, each domain will have a
-        corresponding grid defined by this amount of points.
+        corresponding grid defined by this amount of points. The points are
+        those of :meth:`.uvw`, with ``nr_x_gauss`` and ``nr_y_gauss``
+        replacing ``gridx`` and ``gridy`` when given. The stress resultants
+        are the products of the strains, computed as in :meth:`.strain`, by
+        the constant constitutive matrix of each panel,
+        ``Shell._get_constant_ABD()``.
 
         Parameters
         ----------
-        c : float
-            The full set of Ritz constants
+        c : np.ndarray
+            The full set of Ritz constants, 1-D array of size
+            :meth:`.get_size`.
         group : str
             A group to plot. Each panel in ``panels`` should contain an
             attribute ``group``, which is used to identify which entities
-            should be plotted together.
+            should be plotted together. Not used when ``eval_panel`` is
+            given; ``group`` and ``eval_panel`` cannot both be ``None``.
         gridx : int, optional
             Number of points along the `x` axis where to calculate the
-            displacement field.
+            displacement field. Default ``50``.
         gridy : int, optional
             Number of points along the `y` where to calculate the
-            displacement field.
-        NLterms : bool
+            displacement field. Default ``50``.
+        NLterms : bool, optional
             Flag to indicate whether non-linear strain components should be considered.
-        nr_x_gauss, nr_y_gauss : int
+            Default ``True``.
+        nr_x_gauss, nr_y_gauss : int or None, optional
             Number of gauss sampling points along x and y respectively where the displacement field is to be calculated
-            Either one of nr_x_gauss and nr_y_gauss needs to be specified or both
-            Both can be different
+            Each one can be given or not, independently of the other.
+            Both can be different. Default ``None``, the grid is used.
         eval_panel : Shell object
             Used to evaluate results for a single panel (that is passed) instead of an entire group of panels
+            Default ``None``.
+        x_cte_force, y_cte_force : float or None, optional
+            Not used. Default ``None``.
 
         Returns
         -------
         out : dict
             A dict containing many ``np.ndarrays``, with the keys:
-            ``(x, y, Nxx, Nyy, Nxy, Mxx, Myy, Mxy)``. The panels of the
+            ``(x, y, Nxx, Nyy, Nxy, Mxx, Myy, Mxy)``, each a list with one
+            array per evaluated panel, of shape ``(ny, nx)``, ``nx`` and
+            ``ny`` the numbers of points along `x` and `y`. ``Nxx``, ``Nyy``
+            and ``Nxy`` are forces per unit length, ``Mxx``, ``Myy`` and
+            ``Mxy`` moments per unit length, i.e. forces. The panels of the
             models based on shear deformation theories also give the
             resultants ``(Qy, Qx)`` and, for the third-order theory,
             ``(Pxx, Pyy, Pxy, Ry, Rx)``, see :meth:`.Shell.stress`.
@@ -1814,40 +2016,68 @@ class MultiDomain(object):
 
         r"""Calculate the force along a line (xcte or ycte)
 
+        The stress resultants ``Nxx``, ``Nyy`` and ``Nxy`` of one panel are
+        computed with :meth:`.stress` and integrated with the Gauss-Legendre
+        rule along the line `x` = ``x_cte_force``, over the ``nr_y_gauss``
+        points along `y`, or along the line `y` = ``y_cte_force``, over the
+        ``nr_x_gauss`` points along `x`. The line must pass through the
+        points where the stress resultants are computed: ``x_cte_force``
+        must be one of the points along `x`, the ``gridx`` equally spaced
+        values from ``0`` to ``a`` or the ``nr_x_gauss`` Gauss-Legendre
+        points, and likewise for ``y_cte_force``. The panel is
+        ``eval_panel`` or, when it is ``None``, the first panel of ``group``.
+
         Parameters
         ----------
-        c : float
-            The full set of Ritz constants
+        c : np.ndarray
+            The full set of Ritz constants, 1-D array of size
+            :meth:`.get_size`.
         group : str
             Dummy variable in this function - just used to avoid changing the stress
                 function when results for a single panel need to be evaluated
             A group to plot. Each panel in ``panels`` should contain an
                 attribute ``group``, which is used to identify which entities
                 should be plotted together.
+            Used only when ``eval_panel`` is ``None``, see above.
         eval_panel : Shell object
             Used to evaluate results for a single panel (that is passed) instead of an entire group of panels
-        x_cte_force or y_cte_force : float
+        x_cte_force, y_cte_force : float or None, optional
             Constant `x` or `y` coordinate of a line at which the force is to be
             calculated. Coordinates are relative to specific panel, i.e. `0 \le
-            x \le a`, `0 \le y \le b`.
+            x \le a`, `0 \le y \le b`. Exactly one of them must be given.
+            Default ``None``.
         gridx : int, optional
             Number of points along the `x` axis where to calculate the
-            displacement field.
+            displacement field. Default ``50``.
         gridy : int, optional
             Number of points along the `y` where to calculate the
-            displacement field.
-        NLterms : bool
+            displacement field. Default ``50``.
+        NLterms : bool, optional
             Flag to indicate whether non-linear strain components should be considered.
-        nr_x_gauss, nr_y_gauss : int
+            Not passed to :meth:`.stress`, which uses its default ``True``.
+        nr_x_gauss, nr_y_gauss : int or None, optional
             Number of gauss sampling points along `x` and `y`, respectively. The
             displacement field is to be calculated along either one of
-            ``nr_x_gauss`` or ``nr_y_gauss``.
+            ``nr_x_gauss`` or ``nr_y_gauss``. ``nr_y_gauss`` is required with
+            ``x_cte_force`` and ``nr_x_gauss`` with ``y_cte_force``. Default
+            ``None``.
 
         Returns
         -------
         out : dict
             A dict containing many ``np.ndarrays``, with the keys:
-            ``(Fxx, Fyy, Fxy)``.
+            ``(Fxx, Fyy, Fxy)``. Each value is a scalar, the integral of
+            ``Nxx``, ``Nyy`` or ``Nxy`` along the line, a force.
+
+        Raises
+        ------
+        ValueError
+            When both or none of ``x_cte_force`` and ``y_cte_force`` are
+            given, when ``nr_y_gauss`` is missing with ``x_cte_force`` or
+            ``nr_x_gauss`` with ``y_cte_force``, when the points found on the
+            line are not in a single column or row of the grid, or when
+            their number differs from ``nr_y_gauss`` or ``nr_x_gauss``.
+
         """
         # Empty dict - keys added later on
         res = dict()
@@ -1913,6 +2143,59 @@ class MultiDomain(object):
 
     def force_out_plane(self, c, group, eval_panel, x_cte_force=None, y_cte_force=None,
               gridx=50, gridy=50, NLterms=True, nr_x_gauss=None, nr_y_gauss=None):
+        r"""Out-of-plane force along a line of a panel from its moments
+
+        The moments ``Mxx``, ``Myy`` and ``Mxy`` of ``eval_panel`` are
+        computed with :meth:`.stress` at ``gridx`` equally spaced points
+        along `x`, from ``0`` to ``a``, and ``nr_y_gauss`` Gauss-Legendre
+        points along `y`, and differentiated with :func:`numpy.gradient`
+        to obtain ``Qx = Mxx_x + Mxy_y`` and ``Qy = Mxy_x + Myy_y``. The sum
+        ``Qx + Qy`` at the second last column of points along `x`, `x =
+        a (gridx - 2)/(gridx - 1)`, is integrated along `y` with the
+        Gauss-Legendre weights. The code keeps two other integrals, an area
+        integral and one based on the derivatives of `w`, which are
+        disabled. TODO(author): the integrated line is fixed by the code, a
+        comment marks it as hard coded.
+
+        Parameters
+        ----------
+        c : np.ndarray
+            The full set of Ritz constants, 1-D array of size
+            :meth:`.get_size`.
+        group : str or None
+            Passed to :meth:`.stress`, where it is not used since
+            ``eval_panel`` is given.
+        eval_panel : :class:`.Shell`
+            The panel, required, with a model of 3 degrees of freedom per
+            term.
+        x_cte_force, y_cte_force : float or None, optional
+            Passed to :meth:`.stress`, where they are not used. Default
+            ``None``.
+        gridx : int, optional
+            Number of points along `x`. Default ``50``.
+        gridy : int, optional
+            Not used. Default ``50``.
+        NLterms : bool, optional
+            Not used, :meth:`.stress` uses its default ``True``. Default
+            ``True``.
+        nr_x_gauss : int or None, optional
+            Not used. Default ``None``.
+        nr_y_gauss : int
+            Number of Gauss-Legendre points along `y`, required. Default
+            ``None``.
+
+        Returns
+        -------
+        force_intgn : float
+            The integral of ``Qx + Qy`` along `y`, a force.
+
+        Raises
+        ------
+        NotImplementedError
+            When the model of ``eval_panel`` does not have 3 degrees of
+            freedom per term.
+
+        """
 
         #NOTE the out-of-plane force is obtained from the derivatives of the
         #     moments of the classical laminated plate theory
@@ -2130,6 +2413,7 @@ class MultiDomain(object):
         -------
         force_intgn : float
             Out-of-plane force transmitted by the cohesive interface.
+            ``None`` when ``conn`` has no ``'SB_TSL'`` connection.
 
         """
         for connecti in conn:
@@ -2281,6 +2565,25 @@ class MultiDomain(object):
             Ritz constants, used by the damaged connections.
         kw_tsl : array-like or None, optional
             Out-of-plane stiffness of the traction-separation law.
+            TODO(author): not used, the stiffness of each ``'SB_TSL'``
+            connection is computed with :meth:`.calc_k_dmg` at ``c``.
+
+        Returns
+        -------
+        kC_conn : sparse matrix
+            Matrix with shape ``(size, size)``, ``size`` from
+            :meth:`.get_size`, symmetric when ``finalize=True``, otherwise
+            with the upper triangle only. It is also stored in the attribute
+            ``kC_conn``, and the connections used are kept for the later
+            calls without ``conn``, see :meth:`.get_T`. The damage history
+            of the ``'SB_TSL'`` connections, ``self.dmg_index``, is read and
+            not modified.
+
+        Raises
+        ------
+        ValueError
+            When a connection has ``p1`` and ``p2`` that are the same panel,
+            or a ``'func'`` that is not recognized.
 
         """
         conn = self._resolve_conn(conn)
@@ -2548,12 +2851,22 @@ class MultiDomain(object):
         """Calculate the constitutive stiffness matrix of the assembly
         --- this is kP (made by diagonally assemblying kP_i from the MD paper)
 
+        The matrices :meth:`.Shell.calc_kC` of the panels are assembled at
+        their offsets ``row_start`` and ``col_start``, symmetrized when
+        ``finalize=True``, and the matrix of the connections,
+        :meth:`.get_kC_conn` at ``c``, is added. With ``NLgeom=True`` and
+        ``finalize=True`` the load stiffness of the follower pressure loads
+        of the panels is added last. The penalty stiffnesses of the
+        prescribed displacements are not included. The result is stored in
+        the attribute ``kC``, and the matrix of the connections in
+        ``kC_conn``.
+
         Parameters
         ----------
 
-        conn : dict, optional
-            A connectivity dictionary. Optional if already defined for the
-            assembly.
+        conn : list of dict, optional
+            A connectivity dictionary, see :meth:`.get_kC_conn`. Optional if
+            already defined for the assembly.
         c : array-like or None, optional
             This must be the result of a static analysis, used to compute
             non-linear terms based on the actual displacement field.
@@ -2570,6 +2883,18 @@ class MultiDomain(object):
             at ``c`` is calculated, see :meth:`.Shell.calc_kC`, plus the load
             stiffness of the follower pressure loads of the panels when
             ``finalize=True``.
+
+        Returns
+        -------
+        kC : sparse matrix
+            Matrix with shape ``(size, size)``, ``size`` from
+            :meth:`.get_size`.
+
+        Raises
+        ------
+        ValueError
+            When the attribute ``row_start`` or ``col_start`` of a panel is
+            ``None``.
 
         """
         size = self.get_size()
@@ -2608,6 +2933,11 @@ class MultiDomain(object):
     def calc_kG(self, c=None, silent=False, finalize=True, NLgeom=False):
         """Calculate the geometric stiffness matrix of the assembly
 
+        The matrices :meth:`.Shell.calc_kG` of the panels are assembled at
+        their offsets ``row_start`` and ``col_start`` and symmetrized when
+        ``finalize=True``. The connections do not contribute. The result is
+        stored in the attribute ``kG``.
+
         Parameters
         ----------
 
@@ -2616,12 +2946,25 @@ class MultiDomain(object):
             non-linear terms based on the actual displacement field.
         silent : bool, optional
             A boolean to tell whether the log messages should be printed.
+            Default ``False``.
         finalize : bool, optional
             Asserts validity of output data and makes the output matrix
             symmetric, should be ``False`` when assemblying.
         NLgeom : bool, optional
             If ``True``, the geometric part of the tangent stiffness matrix at
             ``c`` is calculated, see :meth:`.Shell.calc_kG`.
+
+        Returns
+        -------
+        kG : sparse matrix
+            Matrix with shape ``(size, size)``, ``size`` from
+            :meth:`.get_size`.
+
+        Raises
+        ------
+        ValueError
+            When the attribute ``row_start`` or ``col_start`` of a panel is
+            ``None``.
 
         """
         size = self.get_size()
@@ -2655,6 +2998,35 @@ class MultiDomain(object):
 
 
     def calc_kM(self, silent=False, finalize=True):
+        r"""Calculate the mass matrix of the assembly
+
+        The matrices :meth:`.Shell.calc_kM` of the panels are assembled at
+        their offsets ``row_start`` and ``col_start`` and symmetrized when
+        ``finalize=True``. The connections do not contribute. The result is
+        stored in the attribute ``kM``.
+
+        Parameters
+        ----------
+        silent : bool, optional
+            A boolean to tell whether the log messages should be printed.
+            Default ``False``.
+        finalize : bool, optional
+            Makes the output matrix symmetric, should be ``False`` when
+            assemblying. Default ``True``.
+
+        Returns
+        -------
+        kM : sparse matrix
+            Matrix with shape ``(size, size)``, ``size`` from
+            :meth:`.get_size`.
+
+        Raises
+        ------
+        ValueError
+            When the attribute ``row_start`` or ``col_start`` of a panel is
+            ``None``.
+
+        """
         msg('Calculating kM for assembly...', level=2, silent=silent)
         size = self.get_size()
         kM = 0
@@ -2714,6 +3086,12 @@ class MultiDomain(object):
         kT : sparse matrix
             The tangent stiffness matrix, also stored in the attribute
             ``kT``.
+
+        Raises
+        ------
+        ValueError
+            When the attribute ``row_start`` or ``col_start`` of a panel is
+            ``None``.
 
         """
         msg('Calculating kT for assembly...', level=2, silent=silent)
@@ -2776,6 +3154,11 @@ class MultiDomain(object):
         kTv : np.ndarray
             The product.
 
+        Raises
+        ------
+        ValueError
+            When the attribute ``col_start`` of a panel is ``None``.
+
         """
         msg('Calculating kT*v for assembly...', level=2, silent=silent)
         size = self.get_size()
@@ -2827,6 +3210,11 @@ class MultiDomain(object):
             The internal force vector, also stored in the attribute
             ``fint``.
 
+        Raises
+        ------
+        ValueError
+            When the attribute ``col_start`` of a panel is ``None``.
+
         """
         msg('Calculating internal forces for assembly...', level=2, silent=silent)
         size = self.get_size()
@@ -2855,6 +3243,34 @@ class MultiDomain(object):
         displacements are not included, since they are imposed exactly, see
         :meth:`.get_cp`.
 
+        The vectors :meth:`.Shell.calc_fext` of the panels are assembled at
+        their offsets ``col_start``. The result is stored in the attribute
+        ``fext``.
+
+        Parameters
+        ----------
+        inc : float, optional
+            Load factor that multiplies the incremented terms of the panels
+            (``cte=False``), see :meth:`.Shell.calc_fext`, dimensionless.
+            Default ``1.``.
+        silent : bool, optional
+            A boolean to tell whether the log messages should be printed.
+            Default ``True``.
+        c : np.ndarray or None, optional
+            Ritz constants of the assembly, 1-D array of size
+            :meth:`.get_size`, at which the follower pressure loads are
+            evaluated. Default ``None``, the undeformed configuration.
+
+        Returns
+        -------
+        fext : np.ndarray
+            External force vector, 1-D array of size :meth:`.get_size`.
+
+        Raises
+        ------
+        ValueError
+            When the attribute ``col_start`` of a panel is ``None``.
+
         """
         msg('Calculating external forces for assembly...', level=2, silent=silent)
         size = self.get_size()
@@ -2875,12 +3291,32 @@ class MultiDomain(object):
         r"""
             Calculates the separation between two panels
 
-            INPUT ARGUMENTS:
-                res_pan_A,B
+            The normal separation is the difference of the displacements
+            `w` of the first panel of each result, ``res_pan_top['w'][0] -
+            res_pan_bot['w'][0]``, which must be evaluated at the same
+            points.
+
+            Parameters
+            ----------
+            res_pan_top, res_pan_bot : dict
+                Results of :meth:`.uvw` or :meth:`.calc_results` with
+                ``vec='w'``, with the keys ``'x'``, ``'y'`` and ``'w'``.
 
                 ``res_pan_top`` must be the results of the panel on the
                 positive side of the interface along `z`, ``p1`` of the
                 ``'SB_TSL'`` connection, see :meth:`.get_kC_conn`
+
+            Returns
+            -------
+            del_d : np.ndarray
+                Normal separation at each point, length, with the shape of
+                the grid of the results.
+
+            Raises
+            ------
+            ValueError
+                When the coordinates ``'x'`` or ``'y'`` of the two results
+                differ.
         """
 
         if not (np.all(res_pan_top['x'][0] == res_pan_bot['x'][0]) and np.all(res_pan_top['y'][0] == res_pan_bot['y'][0])):
@@ -2926,20 +3362,51 @@ class MultiDomain(object):
         ``lam, lcz`` of :func:`.tsl_resolution` for ``pA`` and ``pB``. The check is done once per
         ``pA`` and ``nr_x_gauss``.
 
-        Input:
-            prev_max_dmg_index = Max damage index per integration point for
-            the previous converged NR iteration, or ``None``
-
-        Returns ``(kw_tsl, max_dmg_index, corrected_del_d, dmg_index_curr)``,
-        the stiffness `k^w_{CZ}`, the damage `d`, the corrected separation
-        `\bar\Delta_w` and the damage `\hat d(\bar\Delta_w)` of the current
-        state, all with shape ``(nr_y_gauss, nr_x_gauss)``.
-
         NOTE: Currently this only works for 1 contact region bec of the way
             the damage history is being stored in the MD object. To ensure
             that it works for multiple connected domamins, it needs to be
             stored with the shell object instead and modify the rest
             accordingly
+
+        Parameters
+        ----------
+        c : np.ndarray
+            Ritz constants of the assembly, 1-D array of size
+            :meth:`.get_size`.
+        pA : :class:`.Shell`
+            Panel on the positive side of the interface along `z`, ``p1`` of
+            the ``'SB_TSL'`` connection.
+        pB : :class:`.Shell`
+            Panel on the negative side of the interface, ``p2``.
+        nr_x_gauss, nr_y_gauss : int
+            Number of Gauss-Legendre points of the interface along `x` and
+            `y`.
+        tsl_type : str
+            Type of the traction-separation law, passed to
+            :func:`.calc_kw_tsl`, which accepts only ``'bilinear'``.
+        prev_max_dmg_index : np.ndarray or None
+            Max damage index per integration point for
+            the previous converged NR iteration, or ``None``
+            With shape ``(nr_y_gauss, nr_x_gauss)``, dimensionless.
+        k_i : float
+            Pristine stiffness of the interface, `k_o`, force/length**3.
+            Required, although the default is ``None``.
+        tau_o : float
+            Traction at damage onset, force/length**2. Required, although
+            the default is ``None``.
+        G1c : float
+            Critical energy release rate in mode I, force/length. Required,
+            although the default is ``None``.
+
+        Returns
+        -------
+        kw_tsl, max_dmg_index, corrected_del_d, dmg_index_curr : np.ndarray
+            The stiffness `k^w_{CZ}`, the damage `d`, the corrected separation
+            `\bar\Delta_w` and the damage `\hat d(\bar\Delta_w)` of the current
+            state, all with shape ``(nr_y_gauss, nr_x_gauss)``. The damage
+            history ``self.dmg_index`` is not modified, see
+            :meth:`.update_TSL_history`.
+
         """
         # Calculating the displacements of each panel
         res_pan_top = self.calc_results(c=c, eval_panel=pA, vec='w',
@@ -3420,6 +3887,24 @@ class MultiDomain(object):
     def calc_traction_stiffness(self, kw_tsl, corrected_max_del_d):
         """
             Calculates traction for the approach where SB_TSL connection is used
+
+            The traction is the element-wise product ``kw_tsl *
+            corrected_max_del_d``. Nothing is stored.
+
+            Parameters
+            ----------
+            kw_tsl : np.ndarray
+                Stiffness of the interface at each point, force/length**3,
+                e.g. from :meth:`.calc_k_dmg`.
+            corrected_max_del_d : np.ndarray
+                Separation at each point, length, with the shape of
+                ``kw_tsl``.
+
+            Returns
+            -------
+            tau : np.ndarray
+                Traction at each point, force/length**2, with the shape of
+                the inputs.
         """
         tau = np.multiply(kw_tsl, corrected_max_del_d)
 
@@ -3453,16 +3938,21 @@ class MultiDomain(object):
     def calc_damaged_stiffness(self, dmg_index, k_i):
         """Calculate the reduced stiffness given the damage index
 
+        Returns ``k_i*(1 - dmg_index)``. Nothing is stored.
+
         Parameters
         ----------
-        dmg_index : TYPE
-            DESCRIPTION.
-        k_i : TYPE, optional
-            DESCRIPTION. The default is None.
+        dmg_index : np.ndarray
+            Damage index at each point, dimensionless, between ``0`` and
+            ``1``.
+        k_i : float
+            Pristine stiffness of the interface, `k_o`, force/length**3.
 
         Returns
         -------
-        None.
+        kw_tsl : np.ndarray
+            Reduced stiffness at each point, force/length**3, with the shape
+            of ``dmg_index``.
 
         """
         kw_tsl = k_i*(1-dmg_index)

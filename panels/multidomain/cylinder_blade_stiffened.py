@@ -1,3 +1,15 @@
+r"""Blade-stiffened cylinders made of several domains
+(:mod:`panels.multidomain.cylinder_blade_stiffened`)
+
+:func:`.create_cylinder_blade_stiffened` builds a closed cylinder from
+``npanels`` curved skin panels, each with a flat blade stiffener, and
+:func:`.cylinder_blade_stiffened_compression_lb_Nxx_cte`,
+:func:`.cylinder_blade_stiffened_compression_lb_Nxx_from_static` and
+:func:`.cylinder_blade_stiffened_compression_lb_pd_from_static` run linear
+buckling analyses of it under axial loads or prescribed axial
+displacements. All of them are imported in :mod:`panels.multidomain`.
+
+"""
 import numpy as np
 from scipy.sparse import csr_matrix
 
@@ -41,28 +53,53 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
 
     where edges ``A`` and ``B`` are connected to close de cylinder.
 
+    The skin panels are :class:`.Shell` objects of the group ``'skin'``,
+    each with length ``height``, width ``2*pi*r/npanels``, radius ``r``,
+    ``x0 = 0`` and ``y0`` equal to ``i`` times the width for the ``i``-th
+    panel. The ``i``-th blade is a flat :class:`.Shell` (no radius) of the
+    group ``'blade_%02d' % i``, with length ``height``, width
+    ``width_blades[i]`` and stacking sequence ``stack_blades[i]``. All the
+    panels have the boundary condition flags that remove `u`, `v` and `w`
+    at the edges `x = 0` and `x = height` (``x1u = x2u = x1v = x2v = x1w =
+    x2w = 0``) and keep all the other ones. Consecutive skin panels are
+    connected with ``'SSycte'``, the edge `y = b` of one to the edge `y = 0`
+    of the next, the last skin panel to the first one, and each skin panel
+    to its blade with ``'BFycte'``, at the edge `y = 0` of both. The
+    assembly contains the skin panels followed by the blades. The
+    connections are returned and not stored in the assembly, which is
+    created with ``conn=None``: pass them to :meth:`.MultiDomain.calc_kC`.
+
+    The code of this function is illustrative of how it constructs the
+    multidomain assembly:
+
+    .. literalinclude:: ../../panels/multidomain/cylinder_blade_stiffened.py
+        :pyobject: create_cylinder_blade_stiffened
+
 
     Parameters
     ----------
 
     height : float
-        Cylinder height (along `x`).
+        Cylinder height (along `x`), length.
     r : float
-        Cylinder radius.
+        Cylinder radius, length.
     stack : array-like
-        Stacking sequence for the cylinder.
+        Stacking sequence for the cylinder, the angle of each ply in
+        degrees.
     stack_blades : list of array-like
-        The stacking sequence for each blade (with length = npanels).
+        The stacking sequence for each blade (with length = npanels), the
+        angles in degrees.
     width_blades : array-like
-        The width for each blade (with length = npanels).
+        The width for each blade (with length = npanels), length.
     plyt : float
-        Ply thickness (assumed unique for the whole structure).
+        Ply thickness (assumed unique for the whole structure), length.
     laminaprop : list or tuple
         Orthotropic lamina properties: `E_1, E_2, \nu_{12}, G_{12}, G_{13}, G_{23}`.
+        The moduli are forces per unit area, `\nu_{12}` is dimensionless.
     npanels : int
         The number of panels the cylinder perimiter.
     m, n : int, optional
-        Number of approximation terms for each panel.
+        Number of approximation terms for each panel. Default ``8``.
     conn_method : str, optional
         How the connections are imposed, ``'null-space'``, the default, or
         ``'penalty'``, see :class:`.MultiDomain`.
@@ -73,13 +110,11 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
         A tuple containing the multidomain assembly and the default connectivity
         list of dictionaries.
 
-    Notes
-    -----
-    The code of this function is illustrative of how it constructs the
-    multidomain assembly:
-
-    .. literalinclude:: ../../panels/multidomain/cylinder_blade_stiffened.py
-        :pyobject: create_cylinder_blade_stiffened
+    Raises
+    ------
+    ValueError
+        When ``npanels < 2``, or when the length of ``stack_blades`` or of
+        ``width_blades`` is not ``npanels``.
 
     """
     if npanels < 2:
@@ -142,18 +177,54 @@ def cylinder_blade_stiffened_compression_lb_Nxx_cte(height, r, stack, stack_blad
         width_blades, plyt, laminaprop,
         npanels, Nxxs_skin, Nxxs_blade, m=8, n=8, num_eigvalues=20,
         conn_method='null-space'):
-    """Linear buckling analysis with a constant Nxx for each panel
+    r"""Linear buckling analysis with a constant Nxx for each panel
 
     See :func:`.create_cylinder_blade_stiffened` for most parameters.
 
+    The assembly and its connections come from
+    :func:`.create_cylinder_blade_stiffened`. For every panel ``x2u`` is set
+    to ``1`` and the attribute ``Nxx`` to the next value of ``Nxxs_skin``
+    for the panels whose group contains ``'skin'``, or of ``Nxxs_blade`` for
+    those whose group contains ``'blade'``, in the order of the panels in
+    the assembly. The constitutive stiffness matrix,
+    :meth:`.MultiDomain.calc_kC` with the connections, and the geometric
+    stiffness matrix, :meth:`.MultiDomain.calc_kG`, are reduced with
+    :meth:`.MultiDomain.reduce` and passed to ``structsolve.lb`` with
+    ``tol=0`` and ``sparse_solver=True``. The eigenvectors are expanded with
+    :meth:`.MultiDomain.expand`.
+
     Parameters
     ----------
+    height : float
+        Cylinder height (along `x`), length.
+    r : float
+        Cylinder radius, length.
+    stack : array-like
+        Stacking sequence for the cylinder, the angle of each ply in
+        degrees.
+    stack_blades : list of array-like
+        The stacking sequence for each blade, with length ``npanels``, the
+        angles in degrees.
+    width_blades : array-like
+        The width for each blade, with length ``npanels``, length.
+    plyt : float
+        Ply thickness, the same for the whole structure, length.
+    laminaprop : list or tuple
+        Orthotropic lamina properties: `E_1, E_2, \nu_{12}, G_{12}, G_{13},
+        G_{23}`. The moduli are forces per unit area, `\nu_{12}` is
+        dimensionless.
+    npanels : int
+        The number of skin panels along the perimeter of the cylinder.
     Nxxs_skin : list
-        A Nxx for each skin panel.
+        A Nxx for each skin panel, force per unit length, with length
+        ``npanels``.
     Nxxs_blade : list
-        A Nxx for each blade stiffener.
-    num_eigvalues : int
-        Number of eigenvalues to be extracted.
+        A Nxx for each blade stiffener, force per unit length, with length
+        ``npanels``.
+    m, n : int, optional
+        Number of approximation terms for each panel. Default ``8``.
+    num_eigvalues : int, optional
+        Number of eigenvalues to be extracted. Default ``20``.
     conn_method : str, optional
         How the connections are imposed, ``'null-space'``, the default, or
         ``'penalty'``, see :class:`.MultiDomain`.
@@ -161,7 +232,16 @@ def cylinder_blade_stiffened_compression_lb_Nxx_cte(height, r, stack, stack_blad
     Returns
     -------
     md, eigvals, eigvecs : tuple
-        Assembly, eigenvalues and eigenvectors.
+        Assembly, eigenvalues and eigenvectors. ``eigvals`` are the load
+        multipliers returned by ``structsolve.lb``, dimensionless, and
+        ``eigvecs`` has one eigenvector of the assembly per column, with
+        ``md.get_size()`` rows.
+
+    Raises
+    ------
+    ValueError
+        When the length of ``Nxxs_skin`` or of ``Nxxs_blade`` is not
+        ``npanels``.
 
     Examples
     --------
@@ -202,18 +282,58 @@ def cylinder_blade_stiffened_compression_lb_Nxx_from_static(height, r, stack,
         stack_blades, width_blades, plyt, laminaprop, npanels, Nxxs_skin,
         Nxxs_blade, m=8, n=8,
         num_eigvalues=20, conn_method='null-space'):
-    """Linear buckling analysis with a Nxx calculated using static analysis
+    r"""Linear buckling analysis with a Nxx calculated using static analysis
 
     See :func:`.create_cylinder_blade_stiffened` for most parameters.
 
+    The assembly and its connections come from
+    :func:`.create_cylinder_blade_stiffened`. For every panel ``x2u`` is set
+    to ``1`` and a distributed force along `x`, constant along `y`, is added
+    at its edge `x = height` with :meth:`.Shell.add_distr_load_fixed_x`,
+    taken from ``Nxxs_skin`` for the panels whose group contains ``'skin'``
+    and from ``Nxxs_blade`` for those whose group contains ``'blade'``; the
+    loads stay in the panels of the returned assembly. A linear static
+    analysis, ``structsolve.static`` with the reduced
+    :meth:`.MultiDomain.calc_kC` and :meth:`.MultiDomain.calc_fext`, gives
+    the pre-buckling state ``c``, with which the geometric stiffness matrix
+    :meth:`.MultiDomain.calc_kG` is computed. The reduced matrices are
+    passed to ``structsolve.lb`` with ``tol=0`` and ``sparse_solver=True``,
+    and the eigenvectors are expanded with :meth:`.MultiDomain.expand`.
+
     Parameters
     ----------
+    height : float
+        Cylinder height (along `x`), length.
+    r : float
+        Cylinder radius, length.
+    stack : array-like
+        Stacking sequence for the cylinder, the angle of each ply in
+        degrees.
+    stack_blades : list of array-like
+        The stacking sequence for each blade, with length ``npanels``, the
+        angles in degrees.
+    width_blades : array-like
+        The width for each blade, with length ``npanels``, length.
+    plyt : float
+        Ply thickness, the same for the whole structure, length.
+    laminaprop : list or tuple
+        Orthotropic lamina properties: `E_1, E_2, \nu_{12}, G_{12}, G_{13},
+        G_{23}`. The moduli are forces per unit area, `\nu_{12}` is
+        dimensionless.
+    npanels : int
+        The number of skin panels along the perimeter of the cylinder.
     Nxxs_skin : list
-        A Nxx for each skin panel.
+        A Nxx for each skin panel, force per unit length, with length
+        ``npanels``.
     Nxxs_blade : list
-        A Nxx for each blade stiffener.
-    num_eigvalues : int
-        Number of eigenvalues to be extracted.
+        A Nxx for each blade stiffener, force per unit length, with length
+        ``npanels``. TODO(author): the load functions ``lambda y: Nxx`` are
+        evaluated after the loop over the panels, so every panel receives
+        the last value, ``Nxxs_blade[-1]``; check whether this is intended.
+    m, n : int, optional
+        Number of approximation terms for each panel. Default ``8``.
+    num_eigvalues : int, optional
+        Number of eigenvalues to be extracted. Default ``20``.
     conn_method : str, optional
         How the connections are imposed, ``'null-space'``, the default, or
         ``'penalty'``, see :class:`.MultiDomain`.
@@ -221,7 +341,17 @@ def cylinder_blade_stiffened_compression_lb_Nxx_from_static(height, r, stack,
     Returns
     -------
     md, c, eigvals, eigvecs : tuple
-        Assembly, static results, eigenvalues and eigenvectors.
+        Assembly, static results, eigenvalues and eigenvectors. ``c`` are
+        the Ritz constants of the assembly, 1-D array of size
+        ``md.get_size()``, ``eigvals`` the load multipliers returned by
+        ``structsolve.lb``, dimensionless, and ``eigvecs`` has one
+        eigenvector of the assembly per column.
+
+    Raises
+    ------
+    ValueError
+        When the length of ``Nxxs_skin`` or of ``Nxxs_blade`` is not
+        ``npanels``.
 
     Examples
     --------
@@ -271,20 +401,67 @@ def cylinder_blade_stiffened_compression_lb_pd_from_static(height, r, stack,
         stack_blades, width_blades, plyt, laminaprop, npanels, pds_skin,
         pds_blade, m=8, n=8,
         num_eigvalues=20, ku=1.e6, conn_method='null-space'):
-    """Linear buckling analysis with prescribed displacement
+    r"""Linear buckling analysis with prescribed displacement
 
     See :func:`.create_cylinder_blade_stiffened` for most parameters.
 
+    The assembly and its connections come from
+    :func:`.create_cylinder_blade_stiffened`, with the default
+    ``pd_method='penalty'`` of :class:`.MultiDomain`. For every panel
+    ``x2u`` is set to ``1`` and the displacement `u`, constant along `y`, is
+    prescribed at its edge `x = height` with the penalty stiffness ``ku``,
+    see :meth:`.Shell.add_distr_pd_fixed_x`, taken from ``pds_skin`` for the
+    panels whose group contains ``'skin'`` and from ``pds_blade`` for those
+    whose group contains ``'blade'``; the prescriptions stay in the panels
+    of the returned assembly. A linear static analysis,
+    ``structsolve.static`` with the reduced :meth:`.MultiDomain.calc_kC`
+    and :meth:`.MultiDomain.calc_fext`, gives the pre-buckling state ``c``,
+    with which the geometric stiffness matrix :meth:`.MultiDomain.calc_kG`
+    is computed. The reduced matrices are passed to ``structsolve.lb`` with
+    ``tol=0`` and ``sparse_solver=True``, and the eigenvectors are expanded
+    with :meth:`.MultiDomain.expand`. TODO(author): the penalty stiffness of
+    the prescribed displacements is not added to the stiffness matrix,
+    only its forces enter :meth:`.MultiDomain.calc_fext`; check whether
+    this is intended.
+
     Parameters
     ----------
+    height : float
+        Cylinder height (along `x`), length.
+    r : float
+        Cylinder radius, length.
+    stack : array-like
+        Stacking sequence for the cylinder, the angle of each ply in
+        degrees.
+    stack_blades : list of array-like
+        The stacking sequence for each blade, with length ``npanels``, the
+        angles in degrees.
+    width_blades : array-like
+        The width for each blade, with length ``npanels``, length.
+    plyt : float
+        Ply thickness, the same for the whole structure, length.
+    laminaprop : list or tuple
+        Orthotropic lamina properties: `E_1, E_2, \nu_{12}, G_{12}, G_{13},
+        G_{23}`. The moduli are forces per unit area, `\nu_{12}` is
+        dimensionless.
+    npanels : int
+        The number of skin panels along the perimeter of the cylinder.
     pds_skin : list
-        A prescribed axial compression displacement for each skin panel.
+        A prescribed axial compression displacement for each skin panel,
+        length, with length ``npanels``.
     pds_blade : list
-        A prescribed axial compression displacement for each blade stiffener.
-    num_eigvalues : int
-        Number of eigenvalues to be extracted.
-    ku : float
-        Penalty stiffness used for prescribing displacements.
+        A prescribed axial compression displacement for each blade stiffener,
+        length, with length ``npanels``. TODO(author): the functions
+        ``lambda y: pd`` are evaluated after the loop over the panels, so
+        every panel receives the last value, ``pds_blade[-1]``; check
+        whether this is intended.
+    m, n : int, optional
+        Number of approximation terms for each panel. Default ``8``.
+    num_eigvalues : int, optional
+        Number of eigenvalues to be extracted. Default ``20``.
+    ku : float, optional
+        Penalty stiffness used for prescribing displacements, force per
+        unit area. Default ``1.e6``.
     conn_method : str, optional
         How the connections are imposed, ``'null-space'``, the default, or
         ``'penalty'``, see :class:`.MultiDomain`.
@@ -292,7 +469,17 @@ def cylinder_blade_stiffened_compression_lb_pd_from_static(height, r, stack,
     Returns
     -------
     md, c, eigvals, eigvecs : tuple
-        Assembly, static results, eigenvalues and eigenvectors.
+        Assembly, static results, eigenvalues and eigenvectors. ``c`` are
+        the Ritz constants of the assembly, 1-D array of size
+        ``md.get_size()``, ``eigvals`` the load multipliers returned by
+        ``structsolve.lb``, dimensionless, and ``eigvecs`` has one
+        eigenvector of the assembly per column.
+
+    Raises
+    ------
+    ValueError
+        When the length of ``pds_skin`` or of ``pds_blade`` is not
+        ``npanels``.
 
     Examples
     --------
