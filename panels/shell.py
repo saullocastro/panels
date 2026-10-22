@@ -1942,20 +1942,27 @@ class Shell(object):
 
 
     def calc_kM(self, size=None, row0=0, col0=0, h_nxny=None, rho_nxny=None,
-            nx=None, ny=None, silent=True, finalize=True):
+            nx=None, ny=None, silent=True, finalize=True, I_nxny=None):
         r"""Calculate the mass matrix
 
-        By default the thickness ``Shell.lam.h`` and the density
-        ``Shell.lam.intrho/Shell.lam.h`` of the laminate are used at every
-        point, and the closed-form matrix is returned, with the laminate
-        offset ``Shell.offset``. When ``h_nxny`` or ``rho_nxny`` is given, or
-        the integration domain is partial, see
-        :meth:`.Shell.is_partial_domain`, the matrix is integrated
-        numerically with ``nx`` by ``ny`` points. Both use the same
-        thickness and density. The laminate ``Shell.lam`` must already be
-        built, e.g. by the constructor or by :meth:`.Shell.calc_kC`; its ply
-        densities are ``rhos`` when given by the user, otherwise ``rho`` for
-        every ply, as of the last rebuild, see :class:`.Shell`.
+        By default the density enters through the moments of the laminate
+        ``Shell.lam``, `I_n = \int \rho z^n dz`, ``intrho``, ``intrhoz``,
+        ..., ``intrhoz6``, with `z` measured from the reference surface and
+        the laminate spanning `-h/2 + d \le z \le h/2 + d`, `d` being the
+        offset ``Shell.offset``, which accounts exactly for the density of
+        each ply, and the closed-form matrix is returned. The matrix is
+        integrated numerically with ``nx`` by ``ny`` points, with the same
+        moments, when the integration domain is partial, see
+        :meth:`.Shell.is_partial_domain`, and with the moments at each
+        integration point when ``h_nxny``, ``rho_nxny`` or ``I_nxny`` is
+        given: ``h_nxny`` and ``rho_nxny``, each defaulting to ``lam.h`` and
+        to the mean density ``lam.intrho/lam.h``, give the moments of a
+        uniform density over `-h/2 + d \le z \le h/2 + d`, whereas
+        ``I_nxny`` gives the moments directly. The laminate ``Shell.lam``
+        must already be built, e.g. by the constructor or by
+        :meth:`.Shell.calc_kC`; its ply densities are ``rhos`` when given
+        by the user, otherwise ``rho`` for every ply, as of the last
+        rebuild, see :class:`.Shell`.
 
         Parameters
         ----------
@@ -1966,12 +1973,12 @@ class Shell(object):
             Offset in the matrix of an assembly. Default ``0``.
         h_nxny : (nx, ny) array-like or None, optional
             The thickness of the laminate at each integration point, a
-            length. Default ``None``.
+            length. With ``I_nxny`` it is used only by the TSDT, for `c_1 =
+            4/(3h^2)`. Default ``None``.
         rho_nxny : (nx, ny) array-like or None, optional
-            The material density for the laminate at each integration
-            point. If multiple materials exist for the different plies,
-            calculate ``rho`` using a weighted average. A mass per unit
-            volume. Default ``None``.
+            The density of the laminate at each integration point, uniform
+            through the thickness, a mass per unit volume. Not accepted with
+            ``I_nxny``. Default ``None``.
         nx, ny : int or None, optional
             Number of integration points along `x` and `y`. Default
             ``None``, the attributes ``nx`` and ``ny``.
@@ -1980,6 +1987,11 @@ class Shell(object):
         finalize : bool, optional
             Symmetrize and check the matrix, ``False`` when assembling.
             Default ``True``.
+        I_nxny : (nx, ny, K) array-like or None, optional
+            The moments `I_n` at each integration point, `n = 0, 1, 2`,
+            ``K = 3``, for the CLPT and the FSDT, and `n = 0, 1, 2, 3, 4,
+            6`, ``K = 6``, for the TSDT, a mass per unit area times
+            length**n. Default ``None``.
 
         Returns
         -------
@@ -1987,6 +1999,13 @@ class Shell(object):
             The mass matrix, a ``csr_matrix`` with ``finalize=True``,
             otherwise the matrix returned by the kernel. Also stored in
             ``Shell.matrices`` under the key ``'kM'``.
+
+        Raises
+        ------
+        ValueError
+            When ``I_nxny`` is given with ``rho_nxny``, or with ``h_nxny``
+            for a model that is not based on the TSDT, or when the shape of
+            ``I_nxny`` is not ``(nx, ny, K)``.
 
         Notes
         -----
@@ -1997,31 +2016,32 @@ class Shell(object):
 
         .. math::
 
-            [M] = \int_A \int_{-h/2 - d}^{h/2 - d} \rho \left( \{N_u(z)\}^T
-            \{N_u(z)\} + \{N_v(z)\}^T \{N_v(z)\} + \{N_w\}^T \{N_w\} \right)
-            dz \, dA
+            [M] = \int_A \int_{-h/2 + d}^{h/2 + d} \rho(z) \left(
+            \{N_u(z)\}^T \{N_u(z)\} + \{N_v(z)\}^T \{N_v(z)\} + \{N_w\}^T
+            \{N_w\} \right) dz \, dA
 
-        where `d` is the offset ``Shell.offset``, `h` and `\rho` the
-        thickness and the density at each point, and `\{N_u(z)\}`,
-        `\{N_v(z)\}`, `\{N_w\}` the approximations of `u(z) = u + z \phi_x -
-        c_1 z^3 (\phi_x + w_{,x})`, `v(z) = v + z \phi_y - c_1 z^3 (\phi_y +
-        w_{,y})` and `w`. For the CLPT `\phi_x = -w_{,x}`, `\phi_y =
-        -w_{,y}` and `c_1 = 0`; for the FSDT `c_1 = 0`; for the TSDT `c_1 =
-        4/(3h^2)`; with the Sanders-Koiter kinematics `v/r` is added to the
-        rotation `\phi_y` multiplied by `z`, see :mod:`panels.models`. The
-        density is constant through the thickness, the mean density of the
-        laminate by default.
+        where `\{N_u(z)\}`, `\{N_v(z)\}`, `\{N_w\}` are the approximations of
+        `u(z) = u + z \phi_x - c_1 z^3 (\phi_x + w_{,x})`, `v(z) = v + z
+        \phi_y - c_1 z^3 (\phi_y + w_{,y})` and `w`. For the CLPT `\phi_x =
+        -w_{,x}`, `\phi_y = -w_{,y}` and `c_1 = 0`; for the FSDT `c_1 = 0`;
+        for the TSDT `c_1 = 4/(3h^2)`; with the Sanders-Koiter kinematics
+        `v/r` is added to the rotation `\phi_y` multiplied by `z`, see
+        :mod:`panels.models`. The integrand being a polynomial in `z`, the
+        integral through the thickness is a combination of the moments
+        `I_n` of the density, `n \le 2`, or `n \le 6` without `n = 5` for
+        the TSDT. The convention of the offset, a laminate centred at `z =
+        d`, is that of :func:`composites.laminated_plate`, also used by the
+        stiffness matrices. A uniform density `\rho` gives
+
+        .. math::
+
+            I_n = \rho \frac{(h/2 + d)^{n + 1} - (-h/2 + d)^{n + 1}}{n + 1}
 
         """
         msg('Calculating kM... ', level=2, silent=silent)
 
-        analytical_kM = True
         nx = self.nx if nx is None else nx
         ny = self.ny if ny is None else ny
-
-        #NOTE see the note in Shell.calc_kC()
-        if self.is_partial_domain():
-            analytical_kM = False
 
         matrices = modelDB.db[self.model]['matrices']
         matrices_num = modelDB.db[self.model]['matrices_num']
@@ -2033,27 +2053,46 @@ class Shell(object):
         elif isinstance(size, str):
             size = int(size) + self.get_size()
 
-        # calculate one h and rho for each integration point OR one for the
-        # whole domain
+        tsdt = '_tsdt_' in self.model
+        powers = (0, 1, 2, 3, 4, 6) if tsdt else (0, 1, 2)
+        lam = self.lam
+        lam_moments = [lam.intrho, lam.intrhoz, lam.intrhoz2, lam.intrhoz3,
+                       lam.intrhoz4, None, lam.intrhoz6]
 
-        if h_nxny is None:
-            h_nxny = np.zeros((nx, ny), dtype=DOUBLE)
-            h_nxny[:, :] = self.lam.h
-        else:
-            analytical_kM = False
-        if rho_nxny is None:
-            rho_nxny = np.zeros((nx, ny), dtype=DOUBLE)
-            #TODO change the whole code to handle the more general intrho,
-            #     allowing different materials along the laminated plate
-            rho_nxny[:, :] = self.lam.intrho/self.lam.h
-        else:
-            analytical_kM = False
+        if I_nxny is not None:
+            if rho_nxny is not None:
+                raise ValueError('I_nxny and rho_nxny cannot be given together')
+            if h_nxny is not None and not tsdt:
+                raise ValueError('h_nxny is used with I_nxny only by the TSDT')
+            I_nxny = np.asarray(I_nxny, dtype=DOUBLE)
+            if I_nxny.shape != (nx, ny, len(powers)):
+                raise ValueError('I_nxny must have the shape {0}'.format(
+                                 (nx, ny, len(powers))))
 
-        if analytical_kM:
-            kM = matrices.fkM(self, self.offset, size, row0, col0)
+        if I_nxny is None and h_nxny is None and rho_nxny is None:
+            I_input = np.array([lam_moments[k] for k in powers]
+                               + ([lam.h] if tsdt else []), dtype=DOUBLE)
+            #NOTE see the note in Shell.calc_kC()
+            if self.is_partial_domain():
+                kM = matrices_num.fkM_num(self, I_input, size, row0, col0, nx, ny)
+            else:
+                kM = matrices.fkM(self, size, row0, col0)
         else:
-            hrho_input = np.concatenate((h_nxny[..., None], rho_nxny[..., None]), axis=2)
-            kM = matrices_num.fkM_num(self, self.offset, hrho_input, size, row0, col0, nx, ny)
+            h = np.full((nx, ny), lam.h, dtype=DOUBLE)
+            if h_nxny is not None:
+                h[:, :] = h_nxny
+            if I_nxny is None:
+                rho = np.full((nx, ny), lam.intrho/lam.h, dtype=DOUBLE)
+                if rho_nxny is not None:
+                    rho[:, :] = rho_nxny
+                z1 = -h/2 + self.offset
+                z2 = h/2 + self.offset
+                I_nxny = np.stack([rho*(z2**(k + 1) - z1**(k + 1))/(k + 1)
+                                   for k in powers], axis=2)
+            if tsdt:
+                I_nxny = np.concatenate((I_nxny, h[..., None]), axis=2)
+            I_input = np.ascontiguousarray(I_nxny, dtype=DOUBLE)
+            kM = matrices_num.fkM_num(self, I_input, size, row0, col0, nx, ny)
 
         if finalize:
             kM = finalize_symmetric_matrix(kM)

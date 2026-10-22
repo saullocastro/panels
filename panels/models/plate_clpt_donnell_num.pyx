@@ -546,7 +546,7 @@ def fkG_num(double [::1] cs, object Finput, object shell,
     return kG
 
 
-def fkM_num(object shell, double offset, object hrho_input, int size,
+def fkM_num(object shell, object I_input, int size,
         int row0, int col0, int nx, int ny):
     cdef double [:, ::1] ftab, gtab
     cdef double x1, x2, y1, y2, xinf, xsup, yinf, ysup
@@ -573,27 +573,25 @@ def fkM_num(object shell, double offset, object hrho_input, int size,
 
     cdef double [::1] xis, etas, weights_xi, weights_eta
 
-    # F as 4-D matrix, must be [nx, ny, 2], when there is one ABD[6, 6] for
-    # each of the nx * ny integration points
-    cdef double h, rho, d
-    cdef double [:, :, ::1] hrho_nxny
+    # moments of the density through the thickness, I0, I1, I2, as a 3-D
+    # matrix [nx, ny, 3] with one set for each of the nx * ny integration
+    # points, or as a 1-D array [3] for the whole integration domain
+    cdef double I0, I1, I2
+    cdef double [:, :, ::1] I_nxny
 
-    cdef int one_hrho_each_point = 0
+    cdef int one_set_each_point = 0
 
-    d = offset
-
-    hrho_input = np.asarray(hrho_input, dtype=DOUBLE)
-    if hrho_input.shape == (nx, ny, 2):
-        hrho_nxny = np.ascontiguousarray(hrho_input)
-        one_hrho_each_point = 1
-    elif hrho_input.shape == (2,):
-        # creating dummy 4-D array that is not used
-        hrho_nxny = np.empty(shape=(0, 0, 0), dtype=DOUBLE)
-        # using a constant F for all the integration domain
-        hrho_input = np.ascontiguousarray(hrho_input)
-        h, rho = hrho_input
+    I_input = np.asarray(I_input, dtype=DOUBLE)
+    if I_input.shape == (nx, ny, 3):
+        I_nxny = np.ascontiguousarray(I_input)
+        one_set_each_point = 1
+    elif I_input.shape == (3, ):
+        # creating dummy 3-D array that is not used
+        I_nxny = np.empty(shape=(0, 0, 0), dtype=DOUBLE)
+        # using constant moments for all the integration domain
+        I0, I1, I2 = I_input
     else:
-        raise ValueError('Invalid shape for Finput!')
+        raise ValueError('Invalid shape for I_input, it must be (nx, ny, 3) or (3, )')
 
     if not 'Shell' in shell.__class__.__name__:
         raise ValueError('a Shell object must be given as input')
@@ -647,9 +645,10 @@ def fkM_num(object shell, double offset, object hrho_input, int size,
 
                 weight = weights_xi[ptx] * weights_eta[pty]
 
-                if one_hrho_each_point == 1:
-                    h = hrho_nxny[ptx, pty, 0]
-                    rho = hrho_nxny[ptx, pty, 1]
+                if one_set_each_point == 1:
+                    I0 = I_nxny[ptx, pty, 0]
+                    I1 = I_nxny[ptx, pty, 1]
+                    I2 = I_nxny[ptx, pty, 2]
 
                 # kM
                 c = -1
@@ -701,37 +700,37 @@ def fkM_num(object shell, double offset, object hrho_input, int size,
                                 if ptx == 0 and pty == 0:
                                     kMr[c] = row+0
                                     kMc[c] = col+0
-                                kMv[c] += weight*( 0.25*fAu*fBu*gAu*gBu*h*intx*inty*rho )
+                                kMv[c] += weight*( 0.25*I0*fAu*fBu*gAu*gBu*intx*inty )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kMr[c] = row+0
                                     kMc[c] = col+2
-                                kMv[c] += weight*( 0.5*d*fAu*fBwxi*gAu*gBw*h*intx*inty*rho/a )
+                                kMv[c] += weight*( -0.5*I1*fAu*fBwxi*gAu*gBw*intx*inty/a )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kMr[c] = row+1
                                     kMc[c] = col+1
-                                kMv[c] += weight*( 0.25*fAv*fBv*gAv*gBv*h*intx*inty*rho )
+                                kMv[c] += weight*( 0.25*I0*fAv*fBv*gAv*gBv*intx*inty )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kMr[c] = row+1
                                     kMc[c] = col+2
-                                kMv[c] += weight*( 0.5*d*fAv*fBw*gAv*gBweta*h*intx*inty*rho/b )
+                                kMv[c] += weight*( -0.5*I1*fAv*fBw*gAv*gBweta*intx*inty/b )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kMr[c] = row+2
                                     kMc[c] = col+0
-                                kMv[c] += weight*( 0.5*d*fAwxi*fBu*gAw*gBu*h*intx*inty*rho/a )
+                                kMv[c] += weight*( -0.5*I1*fAwxi*fBu*gAw*gBu*intx*inty/a )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kMr[c] = row+2
                                     kMc[c] = col+1
-                                kMv[c] += weight*( 0.5*d*fAw*fBv*gAweta*gBv*h*intx*inty*rho/b )
+                                kMv[c] += weight*( -0.5*I1*fAw*fBv*gAweta*gBv*intx*inty/b )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kMr[c] = row+2
                                     kMc[c] = col+2
-                                kMv[c] += weight*( 0.25*h*intx*inty*rho*(fAw*fBw*gAw*gBw + 4*fAw*fBw*gAweta*gBweta*((d*d) + 0.0833333333333333*(h*h))/(b*b) + 4*fAwxi*fBwxi*gAw*gBw*((d*d) + 0.0833333333333333*(h*h))/(a*a)) )
+                                kMv[c] += weight*( 0.25*I0*fAw*fBw*gAw*gBw*intx*inty + I2*fAw*fBw*gAweta*gBweta*intx*inty/(b*b) + I2*fAwxi*fBwxi*gAw*gBw*intx*inty/(a*a) )
 
     kM = coo_matrix((kMv, (kMr, kMc)), shape=(size, size))
 

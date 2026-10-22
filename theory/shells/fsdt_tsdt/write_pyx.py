@@ -43,6 +43,9 @@ _spec.loader.exec_module(_tangent)
 tangent_block = _tangent.pyx_block
 
 FIELDS = th.FIELDS
+#NOTE the moments of the density of composites.Laminate
+LAM_MOMENTS = dict(I0='intrho', I1='intrhoz', I2='intrhoz2', I3='intrhoz3',
+                   I4='intrhoz4', I6='intrhoz6')
 DOF = th.DOF
 FIELD_RE = '(u|v|w|phix|phiy)'
 
@@ -455,6 +458,11 @@ def generate(model):
     kC0 = mats['kC0'].applyfunc(lambda e: simp(area*e, cvars, do_factor))
     kG = mats['kG'].applyfunc(lambda e: simp(area*e, (th.Nxx, th.Nyy, th.Nxy)))
     kM = mats['kM'].applyfunc(lambda e: expand(area*e))
+    # the moments of the density through the thickness used by the theory
+    moment_names = [s.name for s in th.MOMENTS
+                    if any(s in e.free_symbols for e in mats['kM'])]
+    assert moment_names == (['I0', 'I1', 'I2'] if theory == 'fsdt' else
+                            ['I0', 'I1', 'I2', 'I3', 'I4', 'I6']), moment_names
     kAx = mats['kAx'].applyfunc(lambda e: expand(area*e))
     kAy = mats['kAy'].applyfunc(lambda e: expand(area*e))
     cA = mats['cA'].applyfunc(lambda e: expand(area*e))
@@ -511,9 +519,11 @@ cdef extern from 'bardell.hpp':
         '    cdef double a, b\n    cdef int m, n', '', 'kG0', kG, True))
     A.append('\n')
     A.append(analytical_function(
-        'def fkM(object shell, double d, int size, int row0, int col0):',
-        '    cdef double a, b, rho, h' + (', c1' if theory == 'tsdt' else '') + '\n    cdef int m, n',
-        '    rho = shell.lam.intrho/shell.lam.h\n    h = sum(shell.plyts)' + ('\n' + c1_line if theory == 'tsdt' else ''),
+        'def fkM(object shell, int size, int row0, int col0):',
+        '    cdef double a, b, ' + ', '.join(moment_names) + (', h, c1' if theory == 'tsdt' else '') + '\n    cdef int m, n',
+        '\n'.join('    {0} = shell.lam.{1}'.format(name, LAM_MOMENTS[name])
+                  for name in moment_names)
+        + ('\n    h = shell.lam.h\n' + c1_line if theory == 'tsdt' else ''),
         'kM', kM, True))
     A.append('\n')
     A.append(analytical_function(
@@ -542,7 +552,7 @@ cdef extern from 'bardell.hpp':
     kGn = [(i, j, pstr(v)) for i, j, v in entries(mats['kG'].applyfunc(
         lambda e: simp(e, (th.Nxx, th.Nyy, th.Nxy))))]
     kMn = [(i, j, pstr(v)) for i, j, v in entries(mats['kM'].applyfunc(
-        lambda e: collect(expand(e), (sympy.Symbol('d'),))))]
+        lambda e: collect(expand(e), th.MOMENTS)))]
     kAxn = [(i, j, pstr(v)) for i, j, v in entries(mats['kAx'].applyfunc(expand))]
     kAyn = [(i, j, pstr(v)) for i, j, v in entries(mats['kAy'].applyfunc(expand))]
     snames = th.stress_names(theory)
@@ -794,14 +804,15 @@ def fkG_num(double [::1] cs, object Finput, object shell,
            MAPPING=MAPPING, POINT=POINT, gl='\n'.join(gl), fl='\n'.join(fl),
            strains='\n'.join(strain_lines(B0, 24)), loops=loops, NE=NE))
 
-    # fkM_num
+    # fkM_num, the thickness h of the TSDT gives c1 at each point
+    input_names = moment_names + (['h'] if theory == 'tsdt' else [])
     L = []
     for i, j, v in kMn:
         L += entry('kM', i, j, v)
     loops, names = basis_loops('kM', [v for _, _, v in kMn], L)
     NUM.append('''
 
-def fkM_num(object shell, double offset, object hrho_input, int size,
+def fkM_num(object shell, object I_input, int size,
         int row0, int col0, int nx, int ny):
     cdef double x1, x2, y1, y2, xinf, xsup, yinf, ysup
     cdef double a, b, intx, inty{c1}
@@ -819,27 +830,25 @@ def fkM_num(object shell, double offset, object hrho_input, int size,
 
     cdef double [::1] xis, etas, weights_xi, weights_eta
 
-    # hrho as 3-D matrix, must be [nx, ny, 2], when there is one pair (h, rho)
-    # for each of the nx * ny integration points
-    cdef double h, rho, d
-    cdef double [:, :, ::1] hrho_nxny
+    # moments of the density through the thickness, {inames}, as a 3-D
+    # matrix [nx, ny, {K}] with one set for each of the nx * ny integration
+    # points, or as a 1-D array [{K}] for the whole integration domain
+    cdef double {icdef}
+    cdef double [:, :, ::1] I_nxny
 
-    cdef int one_hrho_each_point = 0
+    cdef int one_set_each_point = 0
 
-    d = offset
-
-    hrho_input = np.asarray(hrho_input, dtype=DOUBLE)
-    if hrho_input.shape == (nx, ny, 2):
-        hrho_nxny = np.ascontiguousarray(hrho_input)
-        one_hrho_each_point = 1
-    elif hrho_input.shape == (2,):
+    I_input = np.asarray(I_input, dtype=DOUBLE)
+    if I_input.shape == (nx, ny, {K}):
+        I_nxny = np.ascontiguousarray(I_input)
+        one_set_each_point = 1
+    elif I_input.shape == ({K}, ):
         # creating dummy 3-D array that is not used
-        hrho_nxny = np.empty(shape=(0, 0, 0), dtype=DOUBLE)
-        # using a constant (h, rho) for all the integration domain
-        hrho_input = np.ascontiguousarray(hrho_input)
-        h, rho = hrho_input
+        I_nxny = np.empty(shape=(0, 0, 0), dtype=DOUBLE)
+        # using constant moments for all the integration domain
+        {icdef} = I_input
     else:
-        raise ValueError('Invalid shape for hrho_input!')
+        raise ValueError('Invalid shape for I_input, it must be (nx, ny, {K}) or ({K}, )')
 
     if not 'Shell' in shell.__class__.__name__:
         raise ValueError('a Shell object must be given as input')
@@ -863,9 +872,8 @@ def fkM_num(object shell, double offset, object hrho_input, int size,
 
     with nogil:
 {POINT}
-                if one_hrho_each_point == 1:
-                    h = hrho_nxny[ptx, pty, 0]
-                    rho = hrho_nxny[ptx, pty, 1]
+                if one_set_each_point == 1:
+{iread}
 {c1pt}
 {loops}
 
@@ -875,6 +883,10 @@ def fkM_num(object shell, double offset, object hrho_input, int size,
 '''.format(c1=', c1' if theory == 'tsdt' else '', BC_CDEF=BC_CDEF,
            basis=basis_cdefs(set(names)), LIMITS=LIMITS, BC_BLOCK=BC_BLOCK,
            nnz=len(kMn), MAPPING=MAPPING, POINT=POINT, loops=loops,
+           K=len(input_names), inames=', '.join(input_names),
+           icdef=', '.join(input_names),
+           iread='\n'.join('                    {0} = I_nxny[ptx, pty, {1}]'.format(name, i)
+                           for i, name in enumerate(input_names)),
            c1pt=('                c1 = 4./(3.*h*h)\n' if theory == 'tsdt' else '')))
 
     # fkAx_num and fkAy_num

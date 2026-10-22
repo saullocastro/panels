@@ -78,9 +78,13 @@ of the generalized strains above, is:
   shear correction.
 
 The mass matrices integrate the kinetic energy of the displacement field
-above through the thickness, with the same convention for the laminate
-offset ``d`` as the CLPT mass matrices of this package, i.e. `z` spans from
-`-h/2 - d` to `h/2 - d`.
+above through the thickness, `z` measured from the reference surface and
+spanning the laminate, from `-h/2 + d` to `h/2 + d` with the offset `d`,
+as in :func:`composites.laminated_plate`. The kinetic energy being a
+polynomial in `z`, the density enters only through the moments `I_n =
+\int \rho z^n dz` of the laminate, ``intrho``, ``intrhoz``, ...,
+``intrhoz6`` of :class:`composites.Laminate`: `n = 0, 1, 2` for the FSDT
+and `n = 0, 1, 2, 3, 4, 6` for the TSDT.
 
 The aerodynamic matrices use the piston theory, with the load `q = \beta
 w_{,x} + \gamma w` along `w` for a flow along `x`, see
@@ -95,9 +99,11 @@ geometric non-linearity is considered.
 import os
 
 import numpy as np
-from sympy import Matrix as M, Rational, collect, expand, integrate, var, zeros
+from sympy import Matrix as M, Poly, Rational, collect, expand, var, zeros
 
 var('a, b, r, h, d, rho, c1, z, bx, by')
+var('I0, I1, I2, I3, I4, I5, I6')
+MOMENTS = (I0, I1, I2, I3, I4, I5, I6)
 var('aeromu, beta, gamma')
 var('A11, A12, A16, A22, A26, A66')
 var('B11, B12, B16, B22, B26, B66')
@@ -228,6 +234,13 @@ def shape_functions(side, theory, geometry='plate', kinematics='donnell'):
     return dict(B=B, B0=B0, G=G, uz=uz, vz=vz, wz=wz, w=w, wx=wxA, wy=wyA)
 
 
+def thickness_moments(e):
+    r"""Integral through the thickness of ``rho*e``, ``e`` a polynomial in
+    `z`, with `\int \rho z^n dz` replaced by the moment `I_n`"""
+    p = Poly(expand(e), z)
+    return sum(coef*MOMENTS[n] for (n, ), coef in p.terms())
+
+
 def build(theory, geometry='plate', kinematics='donnell'):
     r"""Integrands of all the matrices of ``theory``, 'fsdt' or 'tsdt'
 
@@ -257,7 +270,7 @@ def build(theory, geometry='plate', kinematics='donnell'):
 
     # Mass matrix, integrated through the thickness
     T = (SA['uz'].T*SB['uz'] + SA['vz'].T*SB['vz'] + SA['wz'].T*SB['wz'])
-    kM = rho*T.applyfunc(lambda e: integrate(expand(e), (z, -h/2 - d, h/2 - d)))
+    kM = T.applyfunc(thickness_moments)
 
     # Aerodynamic and damping matrices using the piston theory, with the load
     # q = beta*w,x + gamma*w along w, where flat plates have no curvature

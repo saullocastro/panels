@@ -40,8 +40,15 @@ def test_closed_form_equals_numerical_with_ply_densities(model):
     s = _shell(model, rhos=RHOS, offset=0.1e-3)
     assert s.rho == 0
     kM = s.calc_kM().toarray()
-    #NOTE giving h_nxny forces the numerical integration
-    kM_num = s.calc_kM(h_nxny=np.full((s.nx, s.ny), s.lam.h)).toarray()
+    #NOTE giving the moments of the laminate at each point forces the
+    #     numerical integration
+    lam = s.lam
+    moments = [lam.intrho, lam.intrhoz, lam.intrhoz2]
+    if '_tsdt_' in model:
+        moments += [lam.intrhoz3, lam.intrhoz4, lam.intrhoz6]
+    I_nxny = np.zeros((s.nx, s.ny, len(moments)))
+    I_nxny[:, :] = moments
+    kM_num = s.calc_kM(I_nxny=I_nxny).toarray()
     assert np.abs(kM).max() > 0
     assert np.abs(kM - kM_num).max() <= 1e-12*np.abs(kM).max()
     rho_mean = np.dot(RHOS, s.plyts)/sum(s.plyts)

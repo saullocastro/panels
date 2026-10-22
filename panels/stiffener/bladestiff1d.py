@@ -216,7 +216,11 @@ class BladeStiff1D(object):
                 raise ValueError('The flange width bf must be given with fstack')
             self.hf = sum(self.fplyts)
             self.Asf = self.bf*self.hf
-            self.flam = laminated_plate(self.fstack, plyts=self.fplyts, laminaprops=self.flaminaprops)
+            #NOTE the density of the flange plies gives the mass of the flange
+            rho = self.rho if self.rho is not None else 0.
+            self.flam = laminated_plate(self.fstack, plyts=self.fplyts,
+                                        laminaprops=self.flaminaprops,
+                                        rhos=[rho for _ in self.fstack])
             self.flam.calc_equivalent_properties()
 
         h = 0.5*sum(self.panel1.plyts) + 0.5*sum(self.panel2.plyts)
@@ -432,8 +436,9 @@ class BladeStiff1D(object):
 
         The stiffener is rebuilt, then the mass matrix of the base,
         :meth:`.Shell.calc_kM`, and that of the flange, computed by the
-        kernel ``fkMf`` with ``rho``, ``hb``, ``hf``, ``bf``, ``dbf`` and the
-        mean thickness of ``panel1`` and ``panel2``, are summed, both at
+        kernel ``fkMf`` with the mass per unit area ``flam.intrho`` of the
+        flange laminate, ``hb``, ``hf``, ``bf``, ``dbf`` and the mean
+        thickness of ``panel1`` and ``panel2``, are summed, both at
         ``row0`` and ``col0``. The result is stored in the attribute ``kM``;
         nothing is returned. Messages are printed unless ``silent=True``,
         also those of the base.
@@ -461,9 +466,12 @@ class BladeStiff1D(object):
         `v - d_f \phi_y`, with the rotations `\phi_x = -w_{,x}` and `\phi_y
         = -w_{,y}` of the skin at `y = y_s`, see the kernel ``fkMf`` of
         ``bladestiff1d_clt_donnell``, whose coupling terms are `-d_f` instead
-        of the `-2 d_f` of Eq. (26) of [1]_. The mass matrix of the
-        base is that of a :class:`.Shell` with offset, see
-        :meth:`.Shell.calc_kM`.
+        of the `-2 d_f` of Eq. (26) of [1]_, the centroid being at `z =
+        -d_f`. The mass matrix of the base is that of a :class:`.Shell` with
+        the offset `-(h/2 + h_b/2)`, see :meth:`.Shell.calc_kM`, whose
+        laminate is centred at `z = -(h/2 + h_b/2)`, below the skin as the
+        flange, such that the coupling terms of `u` and `\phi_x` of the base
+        and of the flange have the same sign, `I_1 < 0` and `-d_f < 0`.
 
         References
         ----------
@@ -484,7 +492,9 @@ class BladeStiff1D(object):
         if self.flam is not None:
             bay = self.bay
             h = 0.5*sum(self.panel1.plyts) + 0.5*sum(self.panel2.plyts)
-            kM += mod.fkMf(self.ys, self.rho, h, self.hb, self.hf, bay.a, bay.b,
+            #NOTE the kernel multiplies rho by hf, the mean density of the
+            #     flange laminate gives its mass per unit area, flam.intrho
+            kM += mod.fkMf(self.ys, self.flam.intrho/self.hf, h, self.hb, self.hf, bay.a, bay.b,
                            self.bf, self.dbf, bay.m, bay.n,
                            bay.x1u, bay.x1ur, bay.x2u, bay.x2ur,
                            bay.x1v, bay.x1vr, bay.x2v, bay.x2vr,

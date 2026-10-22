@@ -548,10 +548,10 @@ def fkG_num(double [::1] cs, object Finput, object shell,
     return kG
 
 
-def fkM_num(object shell, double offset, object hrho_input, int size,
+def fkM_num(object shell, object I_input, int size,
         int row0, int col0, int nx, int ny):
     from .plate_clpt_donnell_num import fkM_num as plate_fkM_num
-    return plate_fkM_num(shell, offset, hrho_input, size, row0, col0, nx, ny)
+    return plate_fkM_num(shell, I_input, size, row0, col0, nx, ny)
 
 
 def fkAx_num(object shell, int size, int row0, int col0, int nx, int ny):

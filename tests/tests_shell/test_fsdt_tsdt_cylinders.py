@@ -73,6 +73,9 @@ def rel(A, B):
 @pytest.mark.parametrize('model', MODELS)
 def test_analytical_and_numerical_matrices_agree(model):
     s = random_panel(model)
+    #NOTE with a laminate offset
+    s.offset = 0.1e-3
+    s._rebuild()
     size = s.get_size()
     mats = modelDB.db[model]['matrices']
     num = modelDB.db[model]['matrices_num']
@@ -83,9 +86,14 @@ def test_analytical_and_numerical_matrices_agree(model):
                fin(mats.fk0(s, size, 0, 0))) < 1e-12
     assert rel(fin(num.fkG_num(z, s.ABD, s, size, 0, 0, nx, ny, 10., -20., 5.)),
                fin(mats.fkG0(10., -20., 5., s, size, 0, 0))) < 1e-12
-    assert rel(fin(num.fkM_num(s, 0.1e-3, np.array([s.lam.h, s.rho]), size, 0,
-                               0, nx, ny)),
-               fin(mats.fkM(s, 0.1e-3, size, 0, 0))) < 1e-12
+    #NOTE the moments of the density of the laminate, with the thickness for
+    #     the TSDT
+    lam = s.lam
+    I_input = [lam.intrho, lam.intrhoz, lam.intrhoz2]
+    if 'tsdt' in model:
+        I_input += [lam.intrhoz3, lam.intrhoz4, lam.intrhoz6, lam.h]
+    assert rel(fin(num.fkM_num(s, np.array(I_input), size, 0, 0, nx, ny)),
+               fin(mats.fkM(s, size, 0, 0))) < 1e-12
     s.beta, s.gamma = 1.3e5, 2.1e5
     assert rel(num.fkAx_num(s, size, 0, 0, nx, ny),
                mats.fkAx(s.beta, s.gamma, s, size, 0, 0)) < 1e-12

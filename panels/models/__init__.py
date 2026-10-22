@@ -147,6 +147,20 @@ apply the Gauss-Legendre quadrature, which also gives the non-linear
 matrices, the internal force vector, a stiffness varying over the domain
 and partial integration domains, see :meth:`.Shell.calc_kC`.
 
+The mass matrices integrate the kinetic energy of the displacement field
+through the thickness, with `z` measured from the reference surface and the
+laminate spanning `-h/2 + d \le z \le h/2 + d`, `d` being the offset
+``Shell.offset``, the convention of :func:`composites.laminated_plate` also
+used by the stiffness matrices. The density enters only through its
+moments `I_n = \int \rho z^n dz`, ``intrho``, ``intrhoz``, ...,
+``intrhoz6`` of :class:`composites.Laminate`, `n = 0, 1, 2` for the CLPT
+and the FSDT and `n = 0, 1, 2, 3, 4, 6` for the TSDT, which account exactly
+for the density of each ply. The kernel ``fkM(shell, size, row0, col0)``
+reads them from ``shell.lam``, and ``fkM_num(shell, I_input, size, row0,
+col0, nx, ny)`` receives them, with the thickness `h` of the TSDT, as one
+set for the whole domain or one set per integration point, see
+:meth:`.Shell.calc_kM`.
+
 References
 ----------
 .. [1] Sanders, J. L., "An improved first-approximation theory for thin
