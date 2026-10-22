@@ -141,7 +141,7 @@ _STIFFPANELBAY_ATTRS = (
 _BLADESTIFF1D_ATTRS = (
     'model', 'rho', 'ys', 'bb', 'hb', 'bf', 'hf',
     'bstack', 'bplyts', 'blaminaprops', 'fstack', 'fplyts', 'flaminaprops',
-    'As', 'Asb', 'Asf', 'Jxx', 'Iyy', 'Fx', 'dbf', 'E1', 'S1', 'F1',
+    'As', 'Asb', 'Asf', 'Jxx', 'Iyy', 'Fx', 'dbf', 'E1', 'S1', 'F1', 'GJ',
     )
 _BLADESTIFF2D_ATTRS = (
     'rho', 'ys', 'bb', 'forces_flange', 'bstack', 'bplyts', 'blaminaprops',

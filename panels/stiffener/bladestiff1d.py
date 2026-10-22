@@ -43,7 +43,7 @@ class BladeStiff1D(object):
     ``panel1`` and ``panel2`` and ``hb`` the thickness of the base, and the
     area of the base is stored in ``Asb``. When ``fstack`` is given, the
     laminate of the flange is stored in ``flam`` and its properties in
-    ``hf``, ``Asf``, ``E1``, ``S1`` and ``F1``. The attributes ``hb`` and
+    ``hf``, ``Asf``, ``E1``, ``S1``, ``F1`` and ``GJ``. The attributes ``hb`` and
     ``As`` are also set and, when ``bf`` is given, ``Iyy``, ``Jxx`` and
     ``dbf``, the distance ``bf/2 + hb + h/2`` from the mid-surface of the
     panels to the centroid of the flange, which are otherwise ``None``.
@@ -113,8 +113,36 @@ class BladeStiff1D(object):
 
     `E_1` being the axial stiffness per unit height of the flange, and the
     section properties `I_{yy} = h_f b_f^3/12` and `J_{xx} = h_f b_f^3/12 +
-    b_f h_f^3/12`. The distance from the mid-surface of the skin to the
-    centroid of the flange is `d_f = b_f/2 + h_b + h/2`.
+    b_f h_f^3/12`, the polar moment of area, which is not used by the
+    kernels. The distance from the mid-surface of the skin to the centroid
+    of the flange is `d_f = b_f/2 + h_b + h/2`.
+
+    The torsional stiffness of the flange is that of a thin laminated strip
+    under uniform (Saint-Venant) torsion:
+
+    .. math::
+
+        G J = 4 b_f D_{66}
+
+    with `D_{66}` of the flange laminate about its own mid-plane, ``flam``.
+    Twisted at the rate `\theta_{,x}`, the strip, `h_f \ll b_f`, has with
+    respect to its mid-plane the displacement `\tilde w = -\theta_{,x} x
+    s`, `s` along the height and `\tilde w` along the thickness, whose
+    curvatures are `\kappa_{xx} = -\tilde w_{,xx} = 0`, `\kappa_{ss} = 0`
+    and `\kappa_{xs} = -2 \tilde w_{,xs} = 2 \theta_{,x}`, such that the
+    bending energy per unit length of the strip is
+
+    .. math::
+
+        U = b_f \frac{1}{2} D_{66} \kappa_{xs}^2 = \frac{1}{2} \left(4 b_f
+        D_{66}\right) \theta_{,x}^2 = \frac{1}{2} G J \theta_{,x}^2
+
+    For an isotropic flange `D_{66} = G h_f^3/12` and `G J = G b_f
+    h_f^3/3`, the Saint-Venant constant `J = b_f h_f^3/3` of a thin
+    rectangle, smaller than the polar moment `J_{xx}`, which overestimates
+    the torsional stiffness of open sections. The couplings `D_{16}` and
+    `D_{26}`, and the effect of the free edges of the strip, of relative
+    order `h_f/b_f`, are neglected.
 
     TODO(author): should the coupling term of `S_1` be `\bar Q_{12} \bar
     Q_{26}/\bar Q_{22}`, and should `y_k` be measured from the mid-plane of
@@ -155,6 +183,7 @@ class BladeStiff1D(object):
         self.Asf = None
         self.Jxx = None
         self.Iyy = None
+        self.GJ = None
 
         self.Fx = None
 
@@ -222,6 +251,8 @@ class BladeStiff1D(object):
                 self.S1 += -yply*ply.h*(ply.q16L - ply.q12L*ply.q16L/ply.q22L)
 
             self.F1 = self.bf**2/12.*self.E1
+            # Saint-Venant torsion of a thin laminated strip
+            self.GJ = 4.*self.bf*self.flam.D66
 
 
     def calc_kC(self, size=None, row0=0, col0=0, silent=False, finalize=True):
@@ -267,19 +298,18 @@ class BladeStiff1D(object):
             [k_{sf}] = \begin{bmatrix}
                 E_1 & -d_f E_1 & S_1 \\
                 -d_f E_1 & F_1 + d_f^2 E_1 & -d_f S_1 \\
-                S_1 & -d_f S_1 & J_{xx}
+                S_1 & -d_f S_1 & G J/b_f
             \end{bmatrix}
 
         with the properties of :class:`.BladeStiff1D`, i.e. `u_{,x} + d_f
         w_{,xx}` is the axial strain at the centroid of the flange, below the
         skin, with the axial stiffness `b_f E_1`, `b_f F_1 = E_1 b_f^3/12` is
         the bending stiffness of the flange about its own centroid, and
-        `-w_{,xy}` is the twist of the flange, which rotates with the skin
-        about `x`.
-
-        TODO(author): the torsion term is `b_f J_{xx} w_{,xy}^2`, with the
-        section property `J_{xx}` (length**4) and without a shear modulus,
-        whereas the other terms have units of energy; is a modulus missing?
+        `-w_{,xy}` is the twist rate of the flange, which rotates with the
+        skin about `x`, the rotation being `w_{,y}`, such that the torsion
+        term is `\frac{1}{2} \int_0^a G J w_{,xy}^2 dx`, with the torsional
+        stiffness `G J = 4 b_f D_{66}` of :class:`.BladeStiff1D`, passed to
+        the kernel ``fkCf`` as `G J/b_f`.
 
         """
         self._rebuild()
@@ -292,8 +322,9 @@ class BladeStiff1D(object):
         if self.flam is not None:
             mod = modelDB.db[self.model]['matrices']
             bay = self.bay
+            #NOTE the kernel multiplies the torsion entry by bf
             kC += mod.fkCf(self.ys, bay.a, bay.b, self.bf, self.dbf, self.E1, self.F1,
-                           self.S1, self.Jxx, bay.m, bay.n,
+                           self.S1, self.GJ/self.bf, bay.m, bay.n,
                            bay.x1u, bay.x1ur, bay.x2u, bay.x2ur,
                            bay.x1w, bay.x1wr, bay.x2w, bay.x2wr,
                            bay.y1u, bay.y1ur, bay.y2u, bay.y2ur,
