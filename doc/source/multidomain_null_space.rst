@@ -439,9 +439,11 @@ and projecting it with `[T]^T` gives the reduced problem solved by
 depends on the configuration and on the load factor. ``structsolve`` 0.7.0
 passes the load factor to ``calc_fext`` when it declares the keyword
 argument ``lbd``, and uses `\partial R_r/\partial \lambda` in the predictors
-and in the constraint of the arc-length methods, and as a reference of the
-relative convergence criterion, since under a prescribed displacement alone
-both `[T]^T \{F_{ext}\}` and `[T]^T \{F_{int}\}` vanish at equilibrium, see
+and in the constraint of the arc-length methods, and `\lambda \partial
+R_r/\partial \lambda` as a reference of the convergence criteria, the
+relative one and Crisfield's, the default since ``structsolve`` 0.8.5,
+because under a prescribed displacement alone both `[T]^T \{F_{ext}\}` and
+`[T]^T \{F_{int}\}` vanish at equilibrium, see
 :meth:`.MultiDomain.get_reduced_functions`.
 
 The linear static analysis solves
@@ -641,25 +643,27 @@ null-space method has the condition number `1.4 \times 10^{11}`:
       - `2.0 \times 10^{-4}`
       - `2.0 \times 10^{-6}`
       - `2.0 \times 10^{-8}`
-      - `3.1 \times 10^{-9}`
+      - `3.2 \times 10^{-9}`
     * - error of the reaction
       - `-1.8 \times 10^{-1}`
       - `-2.2 \times 10^{-2}`
       - `-2.2 \times 10^{-4}`
       - `-2.2 \times 10^{-6}`
-      - `-2.2 \times 10^{-8}`
-      - `-1.2 \times 10^{-6}`
+      - `4.4 \times 10^{-9}`
+      - `-2.3 \times 10^{-6}`
     * - condition number
       - `2.5 \times 10^{12}`
       - `2.0 \times 10^{13}`
       - `2.0 \times 10^{15}`
       - `2.0 \times 10^{17}`
-      - `1.8 \times 10^{19}`
-      - `1.8 \times 10^{21}`
+      - `2.0 \times 10^{19}`
+      - `1.9 \times 10^{21}`
 
-The reaction of the penalty method, `k \int (u_p - u)`, is the product of a
-large constant and a small difference, and loses accuracy by cancellation
-for the highest constants.
+The reaction of the penalty method, `k \int (u_p - u)`, here integrated with
+40 Gauss-Legendre points along `x = a`, is the product of a large constant
+and a small difference, and loses accuracy by cancellation for the highest
+constants: from `k/(E h) = 10^8` its error no longer decreases as `1/k`, and
+depends on the round-off, e.g. on the number of integration points.
 
 **Linear buckling.** Cylinder of 5 panels under a uniform end-shortening,
 see ``test_cylinder_end_shortening``. The error of the critical
@@ -667,53 +671,95 @@ end-shortening of the penalty method is `1.4 \times 10^{-1}`, `1.3 \times
 10^{-2}`, `1.3 \times 10^{-3}`, `1.3 \times 10^{-4}` and `1.3 \times
 10^{-6}` for `k/A_{11} = 10, 10^2, 10^3, 10^4, 10^6`, from above, since the
 penalty springs shorten the cylinder less than the prescribed value. Both
-methods take about 3.8 s. With `k/A_{11} = 10^6` the sparse eigenvalue
-solver of ``structsolve`` fails its verification of the residuals of the
-eigenpairs, because of the conditioning, and ``structsolve.lb`` falls back to
-the dense solver with a ``DenseFallbackWarning``.
+methods take about 0.5 s, from the creation of the model to the critical
+end-shortening. With `k/A_{11} = 10^6` the sparse eigenvalue solver of
+``structsolve`` 0.8.0 failed its verification of the residuals of the
+eigenpairs, because of the conditioning, and ``structsolve.lb`` fell back to
+the dense solver with a ``DenseFallbackWarning``. Since ``structsolve``
+0.8.5 the relative residual of the verification is at least
+``RESIDUAL_FLOOR = 1e-8`` times a scale of the norms of the matrices, and
+the eigenpairs of the sparse solver are accepted.
 
 **Non-linear analysis.** Post-buckling of the plate at twice the critical
-end-shortening, ``m = n = 8``, Newton-Raphson with 8 increments; error of
-the axial reaction of the penalty method with the default convergence
-tolerance ``relTOL = 1e-6`` and with ``relTOL = 1e-10``:
+end-shortening, ``m = n = 8``, with a lateral point load of 30 N at the
+centre as imperfection, as in ``test_nonlinear_reaction_matches_penalty``,
+Newton-Raphson with 8 increments. Error of the axial reaction of the penalty
+method, relative to that of the null-space method, with Crisfield's
+convergence criterion, ``Analysis.convergence = 'crisfield'``, the default of
+``structsolve`` 0.8.5 with ``relTOL = 1e-9``, and with the relative
+criterion, ``'relative'``, the only one up to ``structsolve`` 0.8.0, whose
+default was ``relTOL = 1e-6``:
 
 .. list-table::
     :header-rows: 1
 
-    * - `k / (E h)`
+    * - criterion, `k / (E h)`
       - `10^2`
       - `10^4`
       - `10^6`
-    * - ``relTOL = 1e-6``
+      - `10^8`
+    * - ``'crisfield'``, ``relTOL = 1e-9``
+      - `-3.6 \times 10^{-2}`
+      - `-3.8 \times 10^{-4}`
+      - `-3.8 \times 10^{-6}`
+      - `-5.6 \times 10^{-8}`
+    * - ``'crisfield'``, ``relTOL = 1e-6``
+      - `-3.6 \times 10^{-2}`
+      - `-4.0 \times 10^{-4}`
+      - `-1.9 \times 10^{-5}`
+      - `-1.5 \times 10^{-5}`
+    * - ``'relative'``, ``relTOL = 1e-6``
       - `-3.6 \times 10^{-2}`
       - `-5.5 \times 10^{-4}`
       - `-2.1 \times 10^{-1}`
-    * - ``relTOL = 1e-10``
+      - `1.1`
+    * - ``'relative'``, ``relTOL = 1e-10``
       - `-3.6 \times 10^{-2}`
       - `-3.8 \times 10^{-4}`
       - `-1.9 \times 10^{-5}`
+      - `-1.7 \times 10^{-4}`
 
-The relative convergence criterion of the penalty method is relative to the
-penalty forces `k u_p`, which grow with `k`: with the default tolerance, the
-highest penalty constant gives the largest error, 21%, after converging in
-fewer iterations. The null-space method has no such trade-off, its
-reference being `\lambda \partial R_r/\partial \lambda`, see
-:ref:`null_space_pd`.
+Both criteria compare the norm of the residual with the largest norm of the
+references `\lambda \{F_{ext}\}`, `\{F_{int}\}` and, when they apply, the
+external force vector of the increment of the arc-length methods and
+`\lambda \partial R/\partial \lambda`, see ``structsolve.convergence``. For
+the penalty method `\lambda \{F_{ext}\}` and `\{F_{int}\}` contain the
+penalty forces `k u_p`. The relative criterion measures them with the
+Euclidean norm over all the degrees of freedom, which grows with `k`: with
+``relTOL = 1e-6`` the highest penalty constants give the largest errors,
+21% and 110%, after 12 and 8 evaluations of the internal force vector in
+the 8 increments, against 28 for `k/(E h) = 10^2`, and even with ``relTOL =
+1e-10`` the error grows again from `k/(E h) = 10^6` to `10^8`. Crisfield's
+criterion uses the norm `\|v\|_D = (\sum_j v_j^2/|D_j|)^{1/2}` over the free
+degrees of freedom, `D_j` being the diagonal of the linear stiffness matrix
+``calc_kC()``, which contains the penalty stiffness, such that the scaled
+norm of the penalty forces grows with `\sqrt{k}`, by a factor of 10 for
+each factor of 100 of `k` in this case: with ``relTOL = 1e-9`` the error
+decreases as `1/k` up to `k/(E h) = 10^8`, whereas with ``relTOL = 1e-6`` it
+stops decreasing at about `2 \times 10^{-5}`. The null-space method has no
+such trade-off, its reference being `\lambda \partial R_r/\partial \lambda`,
+see :ref:`null_space_pd`: its reaction is the same to `3 \times 10^{-10}`
+with the four combinations of the table.
 
 **Run time.** For the linear analyses both methods have the same cost: the
 elimination of the constraints is a small fraction of the assembly. For the
 non-linear analysis above the run time is dominated by the assembly of the
-tangent stiffness matrix: 0.96 s and 1.29 s with the null-space method for
-``relTOL = 1e-6`` and ``1e-10``, against 0.44 s and 0.90 s with the penalty
-method and `k/(E h) = 10^4`. The null-space method converges to a much
-smaller residual in absolute terms. Its `\partial R_r/\partial \lambda`
-requires the product `[K_T] \{c_{p1}\}`, computed without assembling
-`[K_T]`, see :ref:`tangent_product`, at the cost of one evaluation of the
-internal force vector, and ``structsolve`` 0.8.0 evaluates it only together
-with the tangent stiffness matrix. With ``panels`` 0.12.0 before these two
-improvements and the tabulation of the approximation functions, see
-:ref:`tabulation`, the same analyses took 12.6 s and 15.8 s against 4.4 s
-and 9.2 s.
+tangent stiffness matrix. With ``panels`` 0.13.21 and ``structsolve`` 0.8.5,
+on the same machine, medians of 15 runs of ``Analysis.static``: 0.60 s with
+the null-space method and Crisfield's criterion with ``relTOL = 1e-9``, and
+0.50 s and 0.66 s with the relative criterion with ``relTOL = 1e-6`` and
+``1e-10``, against 0.46 s, 0.24 s and 0.45 s with the penalty method and
+`k/(E h) = 10^4`. With
+Crisfield's criterion the null-space method factorizes the tangent stiffness
+matrix 29 times, against 25 for the penalty method. Its `\partial
+R_r/\partial \lambda` requires the product `[K_T] \{c_{p1}\}`, computed
+without assembling `[K_T]`, see :ref:`tangent_product`, at the cost of one
+evaluation of the internal force vector, and ``structsolve``, since 0.8.0,
+evaluates it only together with the tangent stiffness matrix. With
+``panels`` 0.12.0 before these two improvements and the tabulation of the
+approximation functions, see :ref:`tabulation`, the same analyses with the
+relative criterion and ``relTOL = 1e-6`` and ``1e-10`` took 12.6 s and
+15.8 s against 4.4 s and 9.2 s.
 
 **When to use each method.** The null-space method is exact, needs no
 penalty constant, keeps the conditioning of the model, and gives reactions
