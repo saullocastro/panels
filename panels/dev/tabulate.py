@@ -189,7 +189,24 @@ def _tabulate_function(text):
 
 def tabulate_basis(source):
     r"""Tabulate the approximation functions of every kernel of the module
-    ``source``, see the module docstring"""
+    ``source``, see the module docstring
+
+    The source is split before each line starting with ``def``, ``cdef``
+    or ``cpdef``; only the parts that are ``def`` functions are rewritten,
+    the others are kept as they are. A ``ValueError`` is raised for a
+    kernel whose calls are not in the expected form.
+
+    Parameters
+    ----------
+    source : str
+        The text of a ``.pyx`` module.
+
+    Returns
+    -------
+    source : str
+        The rewritten text, equal to ``source`` when no kernel is changed.
+
+    """
     #NOTE the cdef functions are not rewritten, their arguments differ
     parts = re.split(r'(?=^(?:def|cdef|cpdef) )', source, flags=re.M)
     return ''.join(_tabulate_function(part) if part.startswith('def ')

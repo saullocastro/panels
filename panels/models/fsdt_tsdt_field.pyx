@@ -38,16 +38,62 @@ FIELDS = ('u', 'v', 'w', 'phix', 'phiy')
 
 
 def is_tsdt(object s):
+    r'''Tell whether the model of ``s`` uses the third-order theory (TSDT)
+
+    The TSDT models have thirteen generalized strains, the FSDT ones eight,
+    see :func:`.strain_names`.
+
+    Parameters
+    ----------
+    s : :class:`.Shell`
+        The shell, whose attribute ``model`` is read.
+
+    Returns
+    -------
+    tsdt : int
+        ``1`` when ``'tsdt'`` is in the name of the model, else ``0``.
+
+    '''
     return 1 if 'tsdt' in s.model else 0
 
 
 def is_sanders(object s):
+    r'''Tell whether the model of ``s`` uses Sanders-Koiter kinematics
+
+    For these models the field ``phiy`` of :func:`.fuvw` and :func:`.fg`
+    is the rotation of the normal `\phi_y + v/r`.
+
+    Parameters
+    ----------
+    s : :class:`.Shell`
+        The shell, whose attribute ``model`` is read.
+
+    Returns
+    -------
+    sanders : int
+        ``1`` when ``'sanders'`` is in the name of the model, else ``0``.
+
+    '''
     return 1 if 'sanders' in s.model else 0
 
 
 def rinv(object s):
     r'''`1/r` for the cylinders and zero for the plates, which may have
-    ``r = None``'''
+    ``r = None``
+
+    A cylinder is a model whose name contains ``'cylshell'``.
+
+    Parameters
+    ----------
+    s : :class:`.Shell`
+        The shell, whose attributes ``model`` and ``r`` are read.
+
+    Returns
+    -------
+    rinv : float
+        ``1/s.r``, per unit length, or ``0.``.
+
+    '''
     return 1./s.r if 'cylshell' in s.model else 0.
 
 
@@ -60,6 +106,16 @@ def strain_names(object s):
     TSDT, the third-order terms ``kxx3, kyy3, kxy3`` of the in-plane strains
     and the second-order terms ``gyz2, gxz2`` of the transverse shear strains.
 
+    Parameters
+    ----------
+    s : :class:`.Shell`
+        The shell, whose attribute ``model`` is read.
+
+    Returns
+    -------
+    names : tuple of str
+        Eight names, or thirteen for the TSDT.
+
     '''
     if is_tsdt(s) == 1:
         return ('exx', 'eyy', 'gxy', 'kxx', 'kyy', 'kxy', 'kxx3', 'kyy3',
@@ -69,6 +125,21 @@ def strain_names(object s):
 
 def stress_names(object s):
     r'''Names of the generalized stresses, conjugate to :func:`.strain_names`
+
+    The stress of each position is conjugate to the strain of the same
+    position of :func:`.strain_names`, e.g. ``'Qy'`` to ``'gyz'``; the
+    names are used as keys of ``Shell.fields`` by :meth:`.Shell.stress`.
+
+    Parameters
+    ----------
+    s : :class:`.Shell`
+        The shell, whose attribute ``model`` is read.
+
+    Returns
+    -------
+    names : tuple of str
+        Eight names, or thirteen for the TSDT.
+
     '''
     if is_tsdt(s) == 1:
         return ('Nxx', 'Nyy', 'Nxy', 'Mxx', 'Myy', 'Mxy', 'Pxx', 'Pyy', 'Pxy',
@@ -136,6 +207,28 @@ def fuvw(double [::1] c, object s, double [::1] xs, double [::1] ys,
         Returns ``u, v, w, phix, phiy``, where ``phix`` and ``phiy`` are the
         rotations of the normal, `\phi_x` and `\phi_y`, and `\phi_y + v/r`
         for the Sanders-Koiter kinematics.
+
+        The points are evaluated serially, one after the other.
+
+        Parameters
+        ----------
+        c : np.ndarray
+            Ritz constants of the shell ``s``, 1-D array of size
+            ``5*s.m*s.n``, see :meth:`.Shell.get_size`.
+        s : :class:`.Shell`
+            The shell, whose dimensions, numbers of terms, boundary
+            condition flags and, for the cylinders, radius are read.
+        xs, ys : np.ndarray
+            Coordinates `x` and `y` of the points, lengths, 1-D arrays of
+            the same size.
+        num_cores : int, optional
+            Not used. Default ``4``.
+
+        Returns
+        -------
+        u, v, w, phix, phiy : np.ndarray
+            The displacements, lengths, and the rotations, dimensionless,
+            1-D arrays of the size of ``xs``.
     '''
     cdef double a, b, sr
     cdef int m, n, pti, k, size
@@ -187,6 +280,33 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys,
         Calculates the generalized strains at all points in the provided grid
 
         The strains are returned in the order given by :func:`.strain_names`.
+
+        The points are evaluated serially, one after the other. For the
+        TSDT the thickness ``h`` is the sum of ``s.plyts``.
+
+        Parameters
+        ----------
+        c : np.ndarray
+            Ritz constants of the shell ``s``, 1-D array of size
+            ``5*s.m*s.n``, see :meth:`.Shell.get_size`.
+        s : :class:`.Shell`
+            The shell, whose dimensions, numbers of terms, boundary
+            condition flags, ply thicknesses and, for the cylinders, radius
+            are read.
+        xs, ys : np.ndarray
+            Coordinates `x` and `y` of the points, lengths, 1-D arrays of
+            the same size.
+        num_cores : int, optional
+            Not used. Default ``4``.
+        NLgeom : int, optional
+            ``1`` to include the non-linear terms of the membrane strains,
+            ``0`` otherwise. Default ``0``.
+
+        Returns
+        -------
+        strains : tuple of np.ndarray
+            Eight, or thirteen for the TSDT, 1-D arrays of the size of
+            ``xs``.
     '''
     cdef double a, b, h, c1, ri, sr, bx, by
     cdef int m, n, pti, size, tsdt
@@ -265,6 +385,29 @@ def fg(double[:, ::1] g, double x, double y, object s):
         stored in the rows of ``g``, which must have shape ``(5, size)``. For
         the Sanders-Koiter kinematics the row of ``phiy`` gives the rotation
         of the normal `\phi_y + v/r`
+
+        The functions are written in place: for each term of column ``col
+        = 5*(j*m + i)``, ``g[k, col+k]`` is the function of the field ``k``
+        of ``u, v, w, phix, phiy`` and ``g[4, col+1]`` the term ``v/r`` of
+        the Sanders-Koiter kinematics, zero otherwise. The other entries
+        are not written, so ``g`` is usually created with zeros. Nothing is
+        returned.
+
+        Parameters
+        ----------
+        g : np.ndarray
+            Output array of shape ``(5, size)``, with ``size`` at least
+            ``5*s.m*s.n``, see :meth:`.Shell.get_size`, C-contiguous.
+        x, y : float
+            Coordinates of the point, lengths.
+        s : :class:`.Shell`
+            The shell, whose dimensions, numbers of terms, boundary
+            condition flags and, for the cylinders, radius are read.
+
+        Raises
+        ------
+        ValueError
+            If the class of ``s`` is not named ``'Shell'``.
     '''
     cdef int m, n, i, j, k, col
     cdef double a, b, sr

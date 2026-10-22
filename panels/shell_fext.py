@@ -1,3 +1,13 @@
+r"""External force vector of a :class:`.Shell` (:mod:`panels.shell_fext`)
+
+:func:`shell_fext` integrates the point loads, distributed loads, pressure
+loads and the forces of the prescribed displacements of a shell into its
+external force vector, the work of :meth:`.Shell.calc_fext`.
+:func:`pressure_patches` and :func:`pressure_factor` prepare the pressure
+loads, which are also used by the follower pressure terms of
+:meth:`.Shell.calc_kCfollower` and :meth:`.Shell.calc_fext_follower`.
+
+"""
 import numpy as np
 
 from . import modelDB
@@ -59,27 +69,39 @@ def shell_fext(shell, inc, size, col0, include_pds=True):
     ----------
     shell : :class:`.Shell`
         The shell object.
-    inc : float, optional
+    inc : float
         Since this function is called during the non-linear analysis,
         ``inc`` will multiply the terms `\{{F_{ext}}_\lambda\}`.
         col0 = starting col in the global matrix ?????
-    size : int or str, optional
+        Dimensionless.
+    size : int, str or None
         The size of the force vector. Can be the size of the total internal
         force vector of a multidomain assembly. When using a string, for
         example, if '+1' is given it will add 1 to the Shell`s size obtained
-        by the :meth:`.Shell.get_size`
-    col0 : int, optional
+        by the :meth:`.Shell.get_size`. ``None`` is the size of the shell.
+    col0 : int
         Offset in a global internal force vector of an assembly.
     include_pds : bool, optional
         Whether the forces of the prescribed displacements are included. The
         prescribed rotations, see :meth:`.Shell.add_point_pd`, are only
         available with ``MultiDomain(..., pd_method='null-space')``, which
-        excludes these forces.
+        excludes these forces. Default ``True``.
 
     Returns
     -------
     fext : np.ndarray
-        The external force vector.
+        The external force vector, 1-D array of size ``size``, zero outside
+        of ``fext[col0:col0 + shell.get_size()]``.
+
+    Raises
+    ------
+    ValueError
+        If ``shell.model`` is not a valid model, or if a distributed load or
+        a distributed prescribed displacement has both or none of ``x`` and
+        ``y`` set to ``None``.
+    NotImplementedError
+        If ``include_pds=True`` and rotations are prescribed, see
+        :meth:`.Shell.has_rotation_pds`.
 
     """
 
@@ -269,6 +291,19 @@ def pressure_factor(shell, zp):
     ``theory/shells/follower_pressure/follower_pressure.py``. For plates the
     factor is ``1``.
 
+    Parameters
+    ----------
+    shell : :class:`.Shell`
+        The shell object, whose ``r`` is read when it is curved.
+    zp : float
+        Position along `z` of the loaded surface, a length.
+
+    Returns
+    -------
+    factor : float
+        ``1 + zp/r`` for a cylindrical shell with ``zp`` nonzero, otherwise
+        ``1.``. Dimensionless.
+
     """
     if zp and shell.is_curved():
         return 1. + zp/shell.r
@@ -278,6 +313,13 @@ def pressure_factor(shell, zp):
 def pressure_patches(shell, inc, follower_only=False):
     r"""Patches and integration point values of the pressure loads
 
+    The loads of ``shell.pressure_loads`` enter with the factor ``1`` and
+    those of ``shell.pressure_loads_inc`` with ``inc``. A load whose patch,
+    intersected with :meth:`.Shell.integration_limits`, is empty is
+    skipped. The pressure is evaluated at the ``shell.nx`` by ``shell.ny``
+    Gauss-Legendre points of the patch, calling ``p(x, y)`` when it is a
+    function.
+
     Parameters
     ----------
     shell : :class:`.Shell`
@@ -285,8 +327,9 @@ def pressure_patches(shell, inc, follower_only=False):
         are read, see :func:`.shell_fext`.
     inc : float
         Load factor that multiplies the pressures of ``pressure_loads_inc``.
+        Dimensionless.
     follower_only : bool, optional
-        Return only the follower loads.
+        Return only the follower loads. Default ``False``.
 
     Returns
     -------

@@ -1,3 +1,15 @@
+r"""Plates and cylindrical shells (:class:`.Shell`)
+
+The class :class:`.Shell` holds the geometry, the laminate, the boundary
+conditions, the loads and the prescribed displacements of a single domain,
+and computes its structural matrices (``calc_kC``, ``calc_kG``, ``calc_kT``,
+``calc_kM``, ``calc_kA``, ``calc_cA``), its force vectors (``calc_fext``,
+``calc_fint``) and its field variables (``uvw``, ``strain``, ``stress``).
+The model of each shell, e.g. ``'plate_clpt_donnell'``, selects the kernels
+listed in :mod:`panels.modelDB`. The function :func:`load` reads a shell
+saved by :meth:`.Shell.save`.
+
+"""
 import gc
 import os
 
@@ -20,6 +32,10 @@ DOUBLE = np.float64
 def load(name, max_size=json_io.MAX_SIZE):
     r"""Load a :class:`.Shell` saved by :meth:`.Shell.save`
 
+    A name without the extension is completed with ``'.shell.zip'`` when no
+    file of that name exists. The file is read with :func:`panels.json_io.load`
+    and must contain a :class:`.Shell`, otherwise a ``ValueError`` is raised.
+
     Parameters
     ----------
     name : str, path-like or file object
@@ -33,12 +49,32 @@ def load(name, max_size=json_io.MAX_SIZE):
     Returns
     -------
     shell : :class:`.Shell`
+        The loaded shell.
 
     """
     return json_io._load_type(name, 'Shell', ('.shell.zip', ), max_size)
 
 
 def check_c(c, size):
+    r"""Check that ``c`` is a vector of Ritz constants of size ``size``
+
+    Nothing is returned, the function only raises when the check fails.
+
+    Parameters
+    ----------
+    c : np.ndarray
+        The vector to check.
+    size : int
+        The expected number of entries, e.g. :meth:`.Shell.get_size`.
+
+    Raises
+    ------
+    TypeError
+        If ``c`` is not a :class:`numpy.ndarray`.
+    ValueError
+        If ``c`` is not 1-D or does not have ``size`` entries.
+
+    """
     # Conducts a check on c
     if not isinstance(c, np.ndarray):
         raise TypeError('"c" must be a NumPy ndarray object')
@@ -61,28 +97,58 @@ class Shell(object):
     The approximation functions for the displacement fields are built using
     :ref:`Bardell's functions <theory_func_bardell>`.
 
+    The constructor sets the default attributes, e.g. simply supported
+    boundary conditions, no loads, ``nx = 2*m`` and ``ny = 2*n`` integration
+    points, then the attributes given in ``kwargs``. When both ``a`` and
+    ``b`` are given the shell is also built: the model is selected, the
+    laminate ``Shell.lam`` is created from ``stack``, ``plyt`` (or
+    ``plyts``), ``laminaprop`` (or ``laminaprops``), ``rho`` and ``offset``
+    with :func:`composites.laminated_plate`, and ``size`` is calculated;
+    this raises a ``ValueError`` when ``stack``, ``laminaprop`` or ``plyt``
+    is missing, the model is unknown or the integration limits are invalid.
+    Otherwise the shell is built by the calculation methods, e.g.
+    :meth:`.Shell.calc_kC`.
+
     Parameters
     ----------
     a : float, optional
-        Length (along the `x` coordinate).
+        Length (along the `x` coordinate). Default ``None``.
     b : float, optional
-        Width (along the `y` coordinate).
+        Width (along the `y` coordinate), the arc length for a cylindrical
+        shell. Default ``None``.
     r : float, optional
-        Radius for cylindrical shell.
+        Radius for cylindrical shell, a length. Default ``None``, which
+        selects a plate model.
     stack : list or tuple, optional
-        A sequence representing the angles for each ply.
+        A sequence representing the angles for each ply, angles in degrees,
+        passed to :func:`composites.laminated_plate`. Default ``None``.
     plyt : float, optional
-        Ply thickness.
+        Ply thickness, a length, used for every ply unless the attribute
+        ``plyts`` is given. Default ``None``.
     laminaprop : list or tuple, optional
         Orthotropic lamina properties: `E_1, E_2, \nu_{12}, G_{12}, G_{13}, G_{23}`.
+        The moduli are forces per unit area and `\nu_{12}` is dimensionless.
+        Used for every ply unless the attribute ``laminaprops`` is given.
+        Default ``None``.
     rho : float, optional
-        Material density.
+        Material density, a mass per unit volume, used for every ply unless
+        the attribute ``rhos`` is given. Default ``0``.
     m, n : int, optional
         Number of terms for the approximation functions along `x` and `y`,
-        respectively.
+        respectively. At most ``30``. Default ``11``.
     offset : float, optional
         Laminate offset about shell mid-surface. The offset is measured along
-        the normal (`z`) axis.
+        the normal (`z`) axis. A length. Default ``0.``.
+    **kwargs : dict, optional
+        Any other attribute of the class, e.g. ``model``, ``x1w`` or
+        ``ABDnxny``, set with :func:`setattr` after the default attributes
+        and before the shell is built.
+
+    Raises
+    ------
+    ValueError
+        If ``m > 30`` or ``n > 30``, the Bardell functions of the order 31
+        and above not being coded.
 
     Notes
     -----
@@ -455,7 +521,8 @@ class Shell(object):
         ValueError
             Unless ``0 <= x1 < x2 <= a`` and ``0 <= y1 < y2 <= b``. Limits
             outside the shell by a relative ``1e-12`` of ``a`` or ``b`` are
-            taken as the edge, to absorb round-off.
+            taken as the edge, to absorb round-off. Also when ``a`` or ``b``
+            is ``None``.
 
         """
         limits = []
@@ -490,6 +557,11 @@ class Shell(object):
         matrices honour a partial domain, therefore the analytical
         closed-form matrices must not be used when this returns ``True``.
 
+        Returns
+        -------
+        partial : bool
+            ``True`` when ``x1 > 0``, ``x2 < a``, ``y1 > 0`` or ``y2 < b``.
+
         """
         x1, x2, y1, y2 = self.integration_limits()
         return bool(x1 > 0 or x2 < self.a or y1 > 0 or y2 < self.b)
@@ -519,7 +591,9 @@ class Shell(object):
         -------
         xs, ys, wxs, wys : np.ndarray
             The physical coordinates of the points along `x` and `y` and
-            their weights, which sum to ``x2 - x1`` and ``y2 - y1``.
+            their weights, which sum to ``x2 - x1`` and ``y2 - y1``. ``xs``
+            and ``wxs`` are 1-D arrays of size ``nx``, ``ys`` and ``wys`` of
+            size ``ny``.
 
         """
         nx = self.nx if nx is None else nx
@@ -629,6 +703,13 @@ class Shell(object):
             The unit vectors of the local axes `x`, `y` and `z` in the rows,
             with shape ``(3, 3)``.
 
+        Raises
+        ------
+        ValueError
+            If ``point_x`` or ``point_xy`` does not have three coordinates,
+            if ``point_x`` coincides with the origin, or if ``point_xy`` lies
+            on the local `x` axis, to a relative tolerance of ``1e-12``.
+
         """
         origin = np.array([0. if v is None else v for v in
                            (self.x0, self.y0, getattr(self, 'z0', None))],
@@ -664,6 +745,13 @@ class Shell(object):
 
         ``True`` for the models of cylindrical shells, flagged with
         ``requires_r`` in :mod:`.modelDB`, with a positive radius ``r``.
+        When ``model`` is not yet set, a positive ``r`` is enough, since the
+        default model with a radius is ``'cylshell_clpt_sanders'``.
+
+        Returns
+        -------
+        curved : bool
+            ``False`` when ``r`` is ``None`` or not positive.
 
         """
         if self.r is None or self.r <= 0:
@@ -732,13 +820,14 @@ class Shell(object):
 
         ONLY RETURNS THE NUMBER OF ROWS ''OR'' COLS
 
+        The size is ``dofs*m*n``, where ``dofs`` is the number of degrees of
+        freedom per term of the model, ``3`` or ``5``, see
+        :mod:`panels.modelDB`. The attribute ``size`` is updated.
+
         Returns
         -------
         size : int
-            The size of the stiffness matrices. Can be the size of a global
-            internal force vector of an assembly. When using a string, for
-            example, if '+1' is given it will add 1 to the Shell`s size
-            obtained by the :meth:`.Shell.get_size`
+            The size of the stiffness matrices of this shell, ``dofs*m*n``.
 
         """
         dofs = modelDB.db[self.model]['dofs']
@@ -783,6 +872,22 @@ class Shell(object):
 
     @ABD.setter
     def ABD(self, value):
+        r"""Setter of :attr:`.Shell.ABD`, which always raises
+
+        Nothing is set, the property is read-only.
+
+        Parameters
+        ----------
+        value : object
+            Ignored.
+
+        Raises
+        ------
+        AttributeError
+            Always, ``Shell.ABD`` is calculated from ``Shell.lam``; the
+            attribute ``ABDnxny`` gives another stiffness.
+
+        """
         raise AttributeError('Shell.ABD is calculated from the laminate '
             'Shell.lam and cannot be set, use the attribute Shell.ABDnxny '
             'for a stiffness that is not that of the laminate')
@@ -968,22 +1073,28 @@ class Shell(object):
         size : int or str, optional
             The size of the calculated sparse matrices. When using a string,
             for example, if '+1' is given it will add 1 to the Shell`s size
-            obtained by the :meth:`.Shell.get_size`
-        row0, col0: int or None, optional
+            obtained by the :meth:`.Shell.get_size`. Default ``None``, the
+            size of this shell, :meth:`.Shell.get_size`.
+        row0, col0 : int, optional
             Offset to populate the output sparse matrix (necessary when
-            assemblying shells).
+            assemblying shells). Default ``0``.
         silent : bool, optional
             A boolean to tell whether the log messages should be printed.
+            Default ``True``, nothing is printed.
         finalize : bool, optional
             Asserts validity of output data and makes the output matrix
-            symmetric, should be ``False`` when assemblying.
-        c : array-like or None, optional
+            symmetric, should be ``False`` when assemblying. Default
+            ``True``.
+        c : np.ndarray or None, optional
             This must be the result of a static analysis, used to compute
-            non-linear terms based on the actual displacement field.
-        c_cte : array-like or None, optional
+            non-linear terms based on the actual displacement field. A 1-D
+            :class:`numpy.ndarray` of size ``size``. Default ``None``, a
+            vector of zeros when needed.
+        c_cte : np.ndarray or None, optional
             This must be the result of a static analysis, used to compute
             initial stress state not affected by the load multiplier of the
-            linear buckling eigenvalue analysis.
+            linear buckling eigenvalue analysis. A 1-D
+            :class:`numpy.ndarray` of size ``size``. Default ``None``.
         nx, ny : int or None, optional
             Number of integration points along `x` and `y`, respectively, for
             the Legendre-Gauss quadrature rule applied in the numerical
@@ -1013,10 +1124,11 @@ class Shell(object):
             applies only to :attr:`.Shell.ABD`.
         NLgeom : bool, optional
             Flag to indicate if geometrically non-linearities should be
-            considered.
+            considered. Default ``False``.
         inc : float, optional
             Load factor of the incremented follower pressure loads, used only
             with ``NLgeom=True``, see :meth:`.Shell.calc_kCfollower`.
+            Dimensionless. Default ``1.``.
 
         """
         msg('Calculating kC... ', level=2, silent=silent)
@@ -1131,6 +1243,37 @@ class Shell(object):
 
         See :meth:`.Shell.calc_kC` for details on each parameter.
 
+        The closed-form matrix of the constant stress state is used unless
+        ``c`` is given, ``NLgeom=True`` or the integration domain is partial,
+        see :meth:`.Shell.is_partial_domain`; then the matrix is integrated
+        numerically with ``ABDnxny``, ``nx`` and ``ny``.
+
+        Parameters
+        ----------
+        size : int or str, optional
+            Size of the matrix, see :meth:`.Shell.calc_kC`. Default ``None``,
+            the size of this shell.
+        row0, col0 : int, optional
+            Offset in the matrix of an assembly. Default ``0``.
+        silent : bool, optional
+            Default ``True``, no log message is printed.
+        finalize : bool, optional
+            Symmetrize and check the matrix, ``False`` when assembling.
+            Default ``True``.
+        c : np.ndarray or None, optional
+            Ritz constants of the configuration, a 1-D array of size
+            ``size``, whose linear membrane stresses enter the matrix.
+            Default ``None``, only ``Nxx``, ``Nyy`` and ``Nxy`` contribute.
+        nx, ny : int or None, optional
+            Number of integration points, see :meth:`.Shell.calc_kC`.
+            Default ``None``.
+        ABDnxny : array-like or None, optional
+            Constitutive matrix, see :meth:`.Shell.calc_kC`. Default
+            ``None``.
+        NLgeom : bool, optional
+            Only forces the numerical integration, see the notes. Default
+            ``False``.
+
         Returns
         -------
         kG : csr_matrix
@@ -1221,6 +1364,33 @@ class Shell(object):
         See :meth:`.Shell.calc_kC` for details on each parameter. Note that
         ``c_cte`` is not forwarded, so a constant stress state can only be
         given through the attributes ``Nxx_cte``, ``Nyy_cte`` and ``Nxy_cte``.
+        The matrices of both calls are also stored in ``Shell.matrices``
+        under the keys ``'kC'`` and ``'kG'``.
+
+        Parameters
+        ----------
+        size : int or str, optional
+            Size of the matrix, see :meth:`.Shell.calc_kC`. Default ``None``,
+            the size of this shell.
+        row0, col0 : int, optional
+            Offset in the matrix of an assembly. Default ``0``.
+        silent : bool, optional
+            Default ``True``, no log message is printed.
+        finalize : bool, optional
+            Passed to :meth:`.Shell.calc_kC` and :meth:`.Shell.calc_kG`,
+            ``False`` when assembling. Default ``True``.
+        c : np.ndarray or None, optional
+            Ritz constants of the configuration, a 1-D array of size
+            ``size``. Default ``None``, the undeformed state.
+        nx, ny : int or None, optional
+            Number of integration points, see :meth:`.Shell.calc_kC`.
+            Default ``None``.
+        ABDnxny : array-like or None, optional
+            Constitutive matrix, see :meth:`.Shell.calc_kC`. Default
+            ``None``.
+        inc : float, optional
+            Load factor of the incremented follower pressure loads,
+            dimensionless. Default ``1.``.
 
         Returns
         -------
@@ -1275,16 +1445,32 @@ class Shell(object):
         Parameters
         ----------
         c : np.ndarray
-            Ritz constants of the configuration.
+            Ritz constants of the configuration, 1-D array of size ``size``.
         v : np.ndarray
             The vector, with the size of ``c``.
-        size, col0, silent, nx, ny, ABDnxny, inc :
-            See :meth:`.Shell.calc_fint`.
+        size : int or str, optional
+            See :meth:`.Shell.calc_fint`. Default ``None``, the size of this
+            shell.
+        col0 : int, optional
+            See :meth:`.Shell.calc_fint`. Default ``0``.
+        silent : bool, optional
+            See :meth:`.Shell.calc_fint`. Default ``True``.
+        nx, ny : int or None, optional
+            See :meth:`.Shell.calc_fint`. Default ``None``.
+        ABDnxny : array-like or None, optional
+            See :meth:`.Shell.calc_fint`. Default ``None``.
+        inc : float, optional
+            See :meth:`.Shell.calc_fint`. Dimensionless. Default ``1.``.
 
         Returns
         -------
         kTv : np.ndarray
-            The product.
+            The product, 1-D array of size ``size``.
+
+        Raises
+        ------
+        NotImplementedError
+            If the numerical kernels of the model have no ``calc_kTv``.
 
         """
         msg('Calculating kT*v...', level=2, silent=silent)
@@ -1324,7 +1510,17 @@ class Shell(object):
 
     def has_follower_loads(self):
         r"""Tell whether any pressure load is a follower load, see
-        :meth:`.Shell.add_pressure_load`"""
+        :meth:`.Shell.add_pressure_load`
+
+        Both ``pressure_loads`` and ``pressure_loads_inc`` are checked.
+
+        Returns
+        -------
+        has_follower : bool
+            ``True`` when a pressure load was added with a ``follower``
+            other than ``False`` or ``None``.
+
+        """
         return any(len(load) > 5 and load[5] is not None
                    for load in self.pressure_loads + self.pressure_loads_inc)
 
@@ -1372,12 +1568,18 @@ class Shell(object):
             loads with ``follower='quadratic'``. ``None`` is the undeformed
             state.
         inc : float, optional
-            Load factor of the incremented follower loads.
-        size, row0, col0, silent :
-            See :meth:`.Shell.calc_kC`.
+            Load factor of the incremented follower loads. Dimensionless.
+            Default ``1.``.
+        size : int or str, optional
+            See :meth:`.Shell.calc_kC`. Default ``None``, the size of this
+            shell.
+        row0, col0 : int, optional
+            See :meth:`.Shell.calc_kC`. Default ``0``.
+        silent : bool, optional
+            See :meth:`.Shell.calc_kC`. Default ``True``.
         finalize : bool, optional
             Checks for ``nan`` and ``inf`` values. The matrix is never
-            symmetrized.
+            symmetrized. Default ``True``.
 
         Returns
         -------
@@ -1423,7 +1625,29 @@ class Shell(object):
         The pressures of the incremented loads are multiplied by ``inc``. With
         ``reference=False`` the part of the undeformed state, `\{F_p(0)\}`,
         which :meth:`.Shell.calc_fext` already contains, is excluded. See
-        :meth:`.Shell.add_pressure_load`.
+        :meth:`.Shell.add_pressure_load`. Only the loads added with a
+        ``follower`` contribute; the dead pressure loads do not.
+
+        Parameters
+        ----------
+        c : array-like
+            Ritz constants of the configuration, 1-D of size ``size``.
+        inc : float, optional
+            Load factor of the incremented follower loads. Dimensionless.
+            Default ``1.``.
+        size : int or str, optional
+            Size of the vector, see :meth:`.Shell.calc_fext`. Default
+            ``None``, the size of this shell.
+        col0 : int, optional
+            Offset in the force vector of an assembly. Default ``0``.
+        reference : bool, optional
+            Whether the part of the undeformed state is included. Default
+            ``True``.
+
+        Returns
+        -------
+        fp : np.ndarray
+            The force vector, 1-D array of size ``size``.
 
         """
         if size is None:
@@ -1450,15 +1674,46 @@ class Shell(object):
             nx=None, ny=None, silent=True, finalize=True):
         r"""Calculate the mass matrix
 
+        By default the thickness ``Shell.lam.h`` and the density
+        ``Shell.lam.intrho/Shell.lam.h`` of the laminate are used at every
+        point, and the closed-form matrix is returned, with the laminate
+        offset ``Shell.offset``. When ``h_nxny`` or ``rho_nxny`` is given, or
+        the integration domain is partial, see
+        :meth:`.Shell.is_partial_domain`, the matrix is integrated
+        numerically with ``nx`` by ``ny`` points. The laminate ``Shell.lam``
+        must already be built, e.g. by the constructor or by
+        :meth:`.Shell.calc_kC`.
+
         Parameters
         ----------
+        size : int or str, optional
+            Size of the matrix, see :meth:`.Shell.calc_kC`. Default ``None``,
+            the size of this shell.
+        row0, col0 : int, optional
+            Offset in the matrix of an assembly. Default ``0``.
         h_nxny : (nx, ny) array-like or None, optional
-            The constitutive relations for the laminate at each integration
-            point.
+            The thickness of the laminate at each integration point, a
+            length. Default ``None``.
         rho_nxny : (nx, ny) array-like or None, optional
             The material density for the laminate at each integration
             point. If multiple materials exist for the different plies,
-            calculate ``rho`` using a weighted average.
+            calculate ``rho`` using a weighted average. A mass per unit
+            volume. Default ``None``.
+        nx, ny : int or None, optional
+            Number of integration points along `x` and `y`. Default
+            ``None``, the attributes ``nx`` and ``ny``.
+        silent : bool, optional
+            Default ``True``, no log message is printed.
+        finalize : bool, optional
+            Symmetrize and check the matrix, ``False`` when assembling.
+            Default ``True``.
+
+        Returns
+        -------
+        kM : csr_matrix or coo_matrix
+            The mass matrix, a ``csr_matrix`` with ``finalize=True``,
+            otherwise the matrix returned by the kernel. Also stored in
+            ``Shell.matrices`` under the key ``'kM'``.
 
         """
         msg('Calculating kM... ', level=2, silent=silent)
@@ -1544,6 +1799,41 @@ class Shell(object):
         given for a plate model is ignored. For a flow along `y` the
         curvature correction is not included.
 
+        The flow direction is the attribute ``flow``, ``'x'`` or ``'y'``.
+        When the attribute ``beta`` is ``None``, ``beta`` and ``gamma`` are
+        calculated from the attributes ``Mach``, ``rho_air`` and
+        ``air_speed``, a ``Mach`` equal to ``1`` being changed to ``1.0001``
+        with a warning; otherwise the attributes ``beta`` and ``gamma`` are
+        used, a ``gamma`` of ``None`` meaning ``0``. The attributes ``beta``
+        and ``gamma`` are updated with the values used. The closed-form
+        matrix is used, or the numerically integrated one for a partial
+        domain, see :meth:`.Shell.is_partial_domain`.
+
+        Parameters
+        ----------
+        size : int or str, optional
+            Size of the matrix, see :meth:`.Shell.calc_kC`. Default ``None``,
+            the size of this shell.
+        row0, col0 : int, optional
+            Offset in the matrix of an assembly. Default ``0``.
+        silent : bool, optional
+            Default ``True``, no log message is printed.
+        finalize : bool, optional
+            Checks for ``nan`` and ``inf`` values. The matrix is never
+            symmetrized. Default ``True``.
+
+        Returns
+        -------
+        kA : coo_matrix
+            The aerodynamic matrix, as returned by the kernel. Also stored in
+            ``Shell.matrices`` under the key ``'kA'``.
+
+        Raises
+        ------
+        ValueError
+            If ``beta`` is ``None`` and ``Mach`` is ``None`` or lower than
+            ``1``, or if ``flow`` is neither ``'x'`` nor ``'y'``.
+
         """
         msg('Calculating kA... ', level=2, silent=silent)
 
@@ -1613,6 +1903,31 @@ class Shell(object):
 
     def calc_cA(self, aeromu, silent=True, size=None, finalize=True):
         r"""Calculate the aerodynamic damping matrix using the piston theory
+
+        The closed-form matrix of the kernel, always over the whole domain
+        and at the offset ``0`` of the matrix, is multiplied by the
+        imaginary unit ``1j``.
+
+        Parameters
+        ----------
+        aeromu : float
+            Aerodynamic damping coefficient of the piston theory.
+            TODO(author): dimension.
+        silent : bool, optional
+            Default ``True``, no log message is printed.
+        size : int or None, optional
+            Size of the matrix. Default ``None``, the size of this shell. A
+            string is not accepted, unlike :meth:`.Shell.calc_kC`.
+        finalize : bool, optional
+            Symmetrize and check the matrix. Default ``True``.
+
+        Returns
+        -------
+        cA : csr_matrix or coo_matrix
+            The complex damping matrix, a ``csr_matrix`` with
+            ``finalize=True``. Also stored in ``Shell.matrices`` under the
+            key ``'cA'``.
+
         """
         msg('Calculating cA... ', level=2, silent=silent)
 
@@ -1639,27 +1954,38 @@ class Shell(object):
         field is calculated and stored in the ``fields`` parameter of the
         :class:`.Shell`` object.
 
+        The entries ``'u'``, ``'v'``, ``'w'``, ``'phix'`` and ``'phiy'`` of
+        ``Shell.fields`` and ``'Xs'``, ``'Ys'`` of ``Shell.plot_mesh`` are
+        updated, all with the shape of ``xs``. When ``xs`` or ``ys`` is
+        ``None``, the points are the grid of ``gridx`` equally spaced values
+        of `x` in ``[0, a]`` by ``gridy`` of `y` in ``[0, b]``, built by
+        :func:`numpy.meshgrid`, of shape ``(gridy, gridx)``.
+
         Parameters
         ----------
-        c : float
-            The full set of Ritz constants
+        c : array-like
+            The full set of Ritz constants, 1-D of size
+            :meth:`.Shell.get_size`.
         xs : np.ndarray
             The `x` positions where to calculate the displacement field.
             Default is ``None`` and the method ``_default_field`` is used.
+            A length.
         ys : np.ndarray
             The ``y`` positions where to calculate the displacement field.
             Default is ``None`` and the method ``_default_field`` is used.
+            A length, with the same shape as ``xs``.
         gridx : int
             Number of points along the `x` axis where to calculate the
-            displacement field.
+            displacement field. Default ``300``.
         gridy : int
             Number of points along the `y` where to calculate the
-            displacement field.
+            displacement field. Default ``300``.
 
         Returns
         -------
         out : tuple
-            Containing ``plot_mesh`` and ``fields``
+            Containing ``plot_mesh`` and ``fields``, the dictionaries
+            ``Shell.plot_mesh`` and ``Shell.fields``.
 
 
         """
@@ -1686,35 +2012,46 @@ class Shell(object):
     def strain(self, c, xs=None, ys=None, gridx=300, gridy=300, NLgeom=True):
         r"""Calculate the strain field
 
+        The generalized strains of the model are stored in ``Shell.fields``,
+        with the shape of ``xs``, and the points in ``'Xs'`` and ``'Ys'`` of
+        ``Shell.plot_mesh``. The points are chosen as in
+        :meth:`.Shell.uvw`. An unset radius ``r`` of a plate is set to
+        ``0.``.
+
         Parameters
         ----------
         c : np.ndarray
             The Ritz constants vector to be used for the strain field
-            calculation.
+            calculation, 1-D of size :meth:`.Shell.get_size`.
         xs : np.ndarray, optional
-            The `x` coordinates where to calculate the strains.
+            The `x` coordinates where to calculate the strains. Default
+            ``None``.
         ys : np.ndarray, optional
             The `y` coordinates where to calculate the strains, must
-            have the same shape as ``xs``.
+            have the same shape as ``xs``. Default ``None``.
         gridx : int, optional
             When ``xs`` and ``ys`` are not supplied, ``gridx`` and ``gridy``
-            are used.
+            are used. Default ``300``.
         gridy : int, optional
             When ``xs`` and ``ys`` are not supplied, ``gridx`` and ``gridy``
-            are used.
+            are used. Default ``300``.
         NLgeom : bool
             Flag to indicate whether non-linear strain components should be considered.
+            Default ``True``.
 
         Returns
         -------
-        res : dict
-            A dictionary of ``np.ndarrays`` with the keys:
-            ``(x, y, exx, eyy, gxy, kxx, kyy, kxy)``. The models based on
+        plot_mesh : dict
+            ``Shell.plot_mesh``, with the points in ``'Xs'`` and ``'Ys'``.
+        fields : dict
+            ``Shell.fields``, a dictionary of ``np.ndarrays`` with the keys:
+            ``(exx, eyy, gxy, kxx, kyy, kxy)``. The models based on
             shear deformation theories also return the transverse shear
             strains ``(gyz, gxz)`` and, for the third-order theory, the
             higher-order terms ``(kxx3, kyy3, kxy3, gyz2, gxz2)``, such that
             the strains at a distance `z` from the mid-surface are
-            ``exx + z*kxx + z**3*kxx3`` and ``gyz + z**2*gyz2``.
+            ``exx + z*kxx + z**3*kxx3`` and ``gyz + z**2*gyz2``. The other
+            entries of ``Shell.fields`` are left as they were.
 
         """
         #NOTE fuvw/fstrain take a ``double [::1]``, see the note in
@@ -1753,21 +2090,28 @@ class Shell(object):
     def stress(self, c, ABD=None, xs=None, ys=None, gridx=300, gridy=300, NLgeom=True):
         r"""Calculate the stress field
 
+        The strains are calculated with :meth:`.Shell.strain`, which updates
+        ``Shell.fields`` and ``Shell.plot_mesh``, and the generalized
+        stresses of the model, the products of ``ABD`` by the strains, are
+        stored in ``Shell.fields`` too, with the shape of ``xs``.
+
         Parameters
         ----------
         c : np.ndarray
             The Ritz constants vector to be used for the strain field
-            calculation.
+            calculation, 1-D of size :meth:`.Shell.get_size`.
         ABD : np.ndarray, optional
             The constitutive matrix, either constant, of shape ``(ne, ne)``,
             or one for each point, of shape ``xs.shape + (ne, ne)``, see
             ``ABDnxny`` in :meth:`.Shell.calc_kC`. By default the attribute
             ``ABDnxny`` or, when it is ``None``, :attr:`.Shell.ABD`.
         xs : np.ndarray, optional
-            The `x` coordinates where to calculate the strains.
+            The `x` coordinates where to calculate the strains. Default
+            ``None``.
         ys : np.ndarray, optional
             The `y` coordinates where to calculate the strains, must
-            have the same shape as ``xs``. When neither ``xs`` and ``ys`` nor
+            have the same shape as ``xs``. Default ``None``, see
+            :meth:`.Shell.uvw`. When neither ``xs`` and ``ys`` nor
             ``ABD`` are given and the attribute ``ABDnxny`` has one matrix
             per integration point, the stresses are calculated at the
             integration points, where the stiffness is known: ``xs[i, j],
@@ -1775,22 +2119,34 @@ class Shell(object):
             :meth:`.Shell.integration_points`.
         gridx : int, optional
             When ``xs`` and ``ys`` are not supplied, ``gridx`` and ``gridy``
-            are used.
+            are used. Default ``300``.
         gridy : int, optional
             When ``xs`` and ``ys`` are not supplied, ``gridx`` and ``gridy``
-            are used.
+            are used. Default ``300``.
         NLgeom : bool
             Flag to indicate whether non-linear strain components should be considered.
+            Default ``True``.
 
         Returns
         -------
-        res : dict
-            A dictionary of ``np.ndarrays`` with the keys:
-            ``(x, y, Nxx, Nyy, Nxy, Mxx, Myy, Mxy)``. The models based on
+        plot_mesh : dict
+            ``Shell.plot_mesh``, with the points in ``'Xs'`` and ``'Ys'``.
+        fields : dict
+            ``Shell.fields``, a dictionary of ``np.ndarrays`` with the keys:
+            ``(Nxx, Nyy, Nxy, Mxx, Myy, Mxy)``. The models based on
             shear deformation theories also return the transverse shear
             forces ``(Qy, Qx)`` and, for the third-order theory, the
             higher-order resultants ``(Pxx, Pyy, Pxy, Ry, Rx)`` conjugate to
             ``(kxx3, kyy3, kxy3, gyz2, gxz2)``, see :meth:`.Shell.strain`.
+            It also contains the strains of :meth:`.Shell.strain`.
+
+        Raises
+        ------
+        ValueError
+            If the attribute ``ABDnxny`` has one matrix per integration point,
+            ``ABD`` is not given and ``xs`` or ``ys`` is given; if no
+            constitutive matrix is defined; or if ``ABD`` has neither the
+            shape ``(ne, ne)`` nor ``xs.shape + (ne, ne)``.
 
         """
         if ABD is None and self.ABDnxny is not None:
@@ -1829,21 +2185,26 @@ class Shell(object):
     def add_point_load(self, x, y, fx, fy, fz, cte=True):
         r"""Add a point load with three components
 
+        The load ``[x, y, fx, fy, fz]`` is appended to the attribute
+        ``point_loads`` when ``cte=True``, otherwise to ``point_loads_inc``,
+        and enters the external force vector, see :func:`.shell_fext`.
+
         Parameters
         ----------
         x : float
-            The `x` position.
+            The `x` position, a length.
         y : float
-            The `y` position in radians.
+            The `y` position, a length, the arc length for the cylindrical
+            shells.
         fx : float
-            The `x` component of the force vector.
+            The `x` component of the force vector, a force.
         fy : float
-            The `y` component of the force vector.
+            The `y` component of the force vector, a force.
         fz : float
-            The `z` component of the force vector.
+            The `z` component of the force vector, a force.
         cte : bool, optional
             Constant forces are not incremented during the non-linear
-            analysis.
+            analysis. Default ``True``.
 
         """
         if cte:
@@ -1855,16 +2216,29 @@ class Shell(object):
     def add_distr_load_fixed_x(self, x, funcx=None, funcy=None, funcz=None, cte=True):
         r"""Add a distributed force g(y) at a fixed x position
 
+        The load ``[x, None, funcx, funcy, funcz]`` is appended to the
+        attribute ``distr_loads`` when ``cte=True``, otherwise to
+        ``distr_loads_inc``. :func:`.shell_fext` integrates it along `y` with
+        ``n`` Gauss-Legendre points, a function that is ``None`` giving a
+        zero component.
+
         Parameters
         ----------
         x : float
-            The fixed `x` position.
+            The fixed `x` position, a length.
         funcx, funcy, funcz : function, optional
             The functions of the distributed force components, will be used
             from `y=0` to `y=b`. At least one of the three must be defined
+            Each is called with the coordinate `y` and returns a force per
+            unit length. Default ``None``.
         cte : bool, optional
             Constant forces are not incremented during the non-linear
-            analysis.
+            analysis. Default ``True``.
+
+        Raises
+        ------
+        ValueError
+            If ``funcx``, ``funcy`` and ``funcz`` are all ``None``.
 
         """
         if not any((funcx, funcy, funcz)):
@@ -1878,16 +2252,29 @@ class Shell(object):
     def add_distr_load_fixed_y(self, y, funcx=None, funcy=None, funcz=None, cte=True):
         r"""Add a distributed force g(x) at a fixed y position
 
+        The load ``[None, y, funcx, funcy, funcz]`` is appended to the
+        attribute ``distr_loads`` when ``cte=True``, otherwise to
+        ``distr_loads_inc``. :func:`.shell_fext` integrates it along `x` with
+        ``m`` Gauss-Legendre points, a function that is ``None`` giving a
+        zero component.
+
         Parameters
         ----------
         y : float
-            The fixed `y` position.
+            The fixed `y` position, a length.
         funcx, funcy, funcz : function, optional
             The functions of the distributed force components, will be used
             from `x=0` to `x=a`. At least one of the three must be defined
+            Each is called with the coordinate `x` and returns a force per
+            unit length. Default ``None``.
         cte : bool, optional
             Constant forces are not incremented during the non-linear
-            analysis.
+            analysis. Default ``True``.
+
+        Raises
+        ------
+        ValueError
+            If ``funcx``, ``funcy`` and ``funcz`` are all ``None``.
 
         """
         if not any((funcx, funcy, funcz)):
@@ -1958,24 +2345,37 @@ class Shell(object):
             :meth:`.Shell.integration_limits`, such that by default the whole
             domain is loaded. A patch is intersected with the integration
             domain, which matters only for the partial domains of an
-            assembly.
+            assembly. Lengths. Default ``None``.
         cte : bool, optional
             Constant forces are not incremented during the non-linear
             analysis. Note that the non-linear solvers of ``structsolve``
             scale the whole :meth:`.Shell.calc_fext` by their load factor,
             so with them use ``cte=False`` for loads that follow the load
-            factor.
+            factor. Default ``True``, the load is appended to the attribute
+            ``pressure_loads``, otherwise to ``pressure_loads_inc``, as
+            ``[x1, x2, y1, y2, p, follower, zp]`` with ``follower`` ``None``,
+            ``'linear'`` or ``'quadratic'``.
         follower : bool or str, optional
             ``False`` for a dead load, ``True`` or ``'linear'`` for a follower
             pressure with the first-order area vector, ``'quadratic'`` for the
-            complete area vector.
+            complete area vector. ``None`` is taken as ``False``. Default
+            ``False``.
         zp : float, optional
             Position along `z` of the surface on which the pressure acts,
             e.g. ``h/2`` for the outer face of a cylinder. For the cylindrical
             shells the pressure is applied as ``p*(1 + zp/r)`` per unit area
             of mid-surface, which is the resultant of ``p`` acting on the
             radius ``r + zp``, with the direction and change of area of the
-            mid-surface (shallow shell). Plates are not affected.
+            mid-surface (shallow shell). Plates are not affected. A length.
+            Default ``0.``.
+
+        Raises
+        ------
+        ValueError
+            If ``p`` is ``None``; if a limit lies outside ``[0, a]`` or ``[0,
+            b]`` by more than a relative ``1e-12``, checked when ``a`` or
+            ``b`` is set; if ``x1 >= x2`` or ``y1 >= y2``; or if
+            ``follower`` is not one of the values above.
 
         """
         if p is None:
@@ -2024,25 +2424,37 @@ class Shell(object):
         not used, a component being prescribed when its penalty constant is
         neither ``None`` nor zero and its value is not ``None``.
 
+        The list ``[x, y, ku*up, kv*vp, kw*wp]``, a component being ``0.``
+        when its penalty constant or value is ``None``, is appended to the
+        attribute ``point_pds``, and ``[x, y, up, vp, wp, phixp, phiyp]``,
+        with ``None`` for the components not prescribed, to
+        ``point_pds_values``; with ``cte=False`` to ``point_pds_inc`` and
+        ``point_pds_values_inc`` instead.
+
         Parameters
         ----------
         x : float
-            The `x` position.
+            The `x` position, a length.
         y : float
-            The `y` position in radians.
+            The `y` position, a length, the arc length for the cylindrical
+            shells.
         ku, kv, kw : float
             The `x,y,z` component of the penalty stiffness of the prescribed displacement.
+            A force per unit length, or ``None``.
         up, vp, wp : float
-            The `x,y,z` components of the prescribed displacement.
+            The `x,y,z` components of the prescribed displacement. Lengths,
+            or ``None``.
         cte : bool, optional
             Constant prescribed displacements are not incremented
-            during the non-linear analysis.
+            during the non-linear analysis. Default ``True``.
         kphix, phixp, kphiy, phiyp : float, optional
             Prescribed rotations, only with ``pd_method='null-space'``, the
             rotations `\phi_x` and `\phi_y` of the approximation functions
             of the model: `-w_{,x}` and `-w_{,y}` for the classical
             laminated plate theory, plus `v/r` for `\phi_y` with the
-            Sanders-Koiter kinematics.
+            Sanders-Koiter kinematics. The rotations ``phixp`` and ``phiyp``
+            are dimensionless; of ``kphix`` and ``kphiy`` only whether they
+            are ``None`` or zero is used. Default ``None``.
 
         """
         def given(k, value):
@@ -2104,25 +2516,44 @@ class Shell(object):
         not used, a component being prescribed when its penalty constant is
         neither ``None`` nor zero.
 
+        The list ``[x, None, ku*funcu, kv*funcv, kw*funcw]``, with ``None``
+        for a component without penalty constant and function, is appended
+        to the attribute ``distr_pds``, and ``[x, None, funcu, funcv, funcw,
+        funcphix, funcphiy]``, with ``None`` for a component whose penalty
+        constant is ``None`` or zero, to ``distr_pds_values``; with
+        ``cte=False`` to ``distr_pds_inc`` and ``distr_pds_values_inc``
+        instead. A ``ValueError`` is raised when all penalty constants or all
+        functions are ``None``, or when only one of the penalty constant and
+        the function of a component is given.
+
         Parameters
         ----------
         x : float
-            The fixed `x` position.
+            The fixed `x` position, a length.
         ku, kv, kw : float, optional
             The `x,y,z` components of the penalty stiffness of the prescribed
             displacement.  At least one of the three must be defined, and
             corresponding to the funcu, funcv, funcw specified.
-        funcu, funcv, funcw : type: function, optional
+            A force per unit length of the line per unit displacement, i.e.
+            a force per unit area. Default ``None``.
+        funcu, funcv, funcw : function, optional
             Specify in normal coordinates (x,y) not natural
             The functions of the distributed prescribed displacements, will be used
             from `y=0` to `y=b`. At least one of the three must be defined, and
-            corresponding to the ku, kv, kw specified.
+            corresponding to the ku, kv, kw specified. Each is called with
+            the coordinate `y` and returns a displacement, a length. Default
+            ``None``.
         cte : bool, optional
             Constant prescribed displacements are not incremented during the non-linear
-            analysis.
-        kphix, kphiy, funcphix, funcphiy : optional
-            Prescribed rotations, only with ``pd_method='null-space'``, see
-            :meth:`.add_point_pd`.
+            analysis. Default ``True``.
+        kphix, kphiy : float, optional
+            Penalty constants of the prescribed rotations, only with
+            ``pd_method='null-space'``, see :meth:`.add_point_pd`. Default
+            ``None``.
+        funcphix, funcphiy : function, optional
+            Prescribed rotations, dimensionless, as functions of `y`, only
+            with ``pd_method='null-space'``, see :meth:`.add_point_pd`.
+            Default ``None``.
 
         """
         self._add_distr_pd(x, None, (ku, kv, kw, kphix, kphiy),
@@ -2144,24 +2575,40 @@ class Shell(object):
         not used, a component being prescribed when its penalty constant is
         neither ``None`` nor zero.
 
+        The list ``[None, y, ku*funcu, kv*funcv, kw*funcw]`` is appended to
+        the attribute ``distr_pds`` and ``[None, y, funcu, funcv, funcw,
+        funcphix, funcphiy]`` to ``distr_pds_values``, or to
+        ``distr_pds_inc`` and ``distr_pds_values_inc`` with ``cte=False``,
+        and a ``ValueError`` is raised, as for
+        :meth:`.add_distr_pd_fixed_x`.
+
         Parameters
         ----------
         y : float
-            The fixed `y` position.
+            The fixed `y` position, a length.
         ku, kv, kw : float, optional
             The `x,y,z` components of the penalty stiffness of the prescribed
             displacement.  At least one of the three must be defined, and
             corresponding to the funcu, funcv, funcw specified.
-        funcu, funcv, funcw : type: function, optional
+            A force per unit length of the line per unit displacement, i.e.
+            a force per unit area. Default ``None``.
+        funcu, funcv, funcw : function, optional
             The functions of the distributed prescribed displacements, will be used
             from `x=0` to `x=a`. At least one of the three must be defined, and
-            corresponding to the ku, kv, kw specified.
+            corresponding to the ku, kv, kw specified. Each is called with
+            the coordinate `x` and returns a displacement, a length. Default
+            ``None``.
         cte : bool, optional
             Constant prescribed displacements are not incremented during the non-linear
-            analysis.
-        kphix, kphiy, funcphix, funcphiy : optional
-            Prescribed rotations, only with ``pd_method='null-space'``, see
-            :meth:`.add_point_pd`.
+            analysis. Default ``True``.
+        kphix, kphiy : float, optional
+            Penalty constants of the prescribed rotations, only with
+            ``pd_method='null-space'``, see :meth:`.add_point_pd`. Default
+            ``None``.
+        funcphix, funcphiy : function, optional
+            Prescribed rotations, dimensionless, as functions of `x`, only
+            with ``pd_method='null-space'``, see :meth:`.add_point_pd`.
+            Default ``None``.
 
         """
         self._add_distr_pd(None, y, (ku, kv, kw, kphix, kphiy),
@@ -2169,7 +2616,18 @@ class Shell(object):
 
     def has_rotation_pds(self):
         r"""Whether rotations are prescribed, which only
-        ``MultiDomain(..., pd_method='null-space')`` supports"""
+        ``MultiDomain(..., pd_method='null-space')`` supports
+
+        Reads the lists ``point_pds_values``, ``point_pds_values_inc``,
+        ``distr_pds_values`` and ``distr_pds_values_inc``, see
+        :meth:`.Shell.add_point_pd`.
+
+        Returns
+        -------
+        has_rotations : bool
+            ``True`` when a value of ``phix`` or ``phiy`` is prescribed.
+
+        """
         return any(values[5] is not None or values[6] is not None
                    for values in self.point_pds_values
                    + self.point_pds_values_inc + self.distr_pds_values
@@ -2177,9 +2635,16 @@ class Shell(object):
 
     def clear_disps(self):
 
-        '''
+        '''Remove all the prescribed displacements
+
             Used to clear exisiting displacements for the panels
                 Useful for non-linear runs where displacements are added for each increment
+
+        The attributes ``point_pds``, ``point_pds_inc``, ``distr_pds``,
+        ``distr_pds_inc``, ``point_pds_values``, ``point_pds_values_inc``,
+        ``distr_pds_values`` and ``distr_pds_values_inc`` are set to empty
+        lists.
+
         '''
         self.point_pds = []
         self.point_pds_inc = []
@@ -2191,9 +2656,16 @@ class Shell(object):
         self.distr_pds_values_inc = []
 
     def clear_loads(self):
-        '''
+        '''Remove all the loads
+
             Used to clear exisiting loads for the panels
                 Useful for non-linear runs where loads are added for each increment
+
+        The attributes ``point_loads``, ``point_loads_inc``,
+        ``distr_loads``, ``distr_loads_inc``, ``pressure_loads`` and
+        ``pressure_loads_inc`` are set to empty lists. The prescribed
+        displacements are kept, see :meth:`.Shell.clear_disps`.
+
         '''
         self.point_loads = []
         self.point_loads_inc = []
@@ -2209,25 +2681,37 @@ class Shell(object):
         This can used to create different types of support and boundary
         conditions.
 
+        The matrix is ``k*outer(g, g)`` summed over the constrained degrees
+        of freedom, with ``g`` the row of the approximation functions of
+        that degree of freedom at ``(x, y)``, see the function ``fg`` of the
+        model. It is returned, not stored nor added to ``Shell.matrices``.
+
         Parameters
         ----------
         x, y : float
-            Coordinates of the point contraint
+            Coordinates of the point contraint, lengths.
         u, v, w : bool, optional
-            Translational degrees of freedom to be constrained
+            Translational degrees of freedom to be constrained. Default
+            ``True``.
         phix, phiy : bool, optional
-            Rotational degrees of freedom to be constrained
+            Rotational degrees of freedom to be constrained. Default
+            ``False``.
         kuvw : float, optional
-            Penalty constant used for the translational constraints
-        kphi :
-            Penalty constant used for the rotational constraints
+            Penalty constant used for the translational constraints, a force
+            per unit length. Default ``1.e6``.
+        kphi : float, optional
+            Penalty constant used for the rotational constraints, a moment
+            per unit rotation. Default ``1.e5``.
 
         Returns
         -------
-        kPC : csr_matrix
+        kPC : numpy.matrix or csr_matrix
            Stiffness matrix concenrning this point constraint. It must be added
            to the constitutive stiffness matrix in order to be taken into
-           account in the calculations.
+           account in the calculations. Of shape ``(size, size)``, with
+           ``size`` from :meth:`.Shell.get_size`. Adding the dense outer
+           products to the empty ``csr_matrix`` gives a dense
+           :class:`numpy.matrix` when any degree of freedom is constrained.
 
         """
         fg = modelDB.db[self.model]['field'].fg
@@ -2272,31 +2756,35 @@ class Shell(object):
         inc : float, optional
             Since this function is called during the non-linear analysis,
             ``inc`` will multiply the terms `\{{F_{ext}}_\lambda\}`.
+            Dimensionless. Default ``1.``.
         size : int or str, optional
             The size of the force vector. Can be the size of the total internal
             force vector of a multidomain assembly. When using a string, for
             example, if '+1' is given it will add 1 to the Shell`s size obtained
-            by the :meth:`.Shell.get_size`
+            by the :meth:`.Shell.get_size`. Default ``None``, the size of
+            this shell.
         col0 : int, optional
-            Offset in a global force vector of an assembly.
+            Offset in a global force vector of an assembly. Default ``0``.
         silent : bool, optional
             A boolean to tell whether the log messages should be printed.
+            Default ``True``, nothing is printed.
         c : array-like or None, optional
             The Ritz constants, with the size ``size``. When given, the
             follower pressure loads are evaluated in this configuration,
             i.e. ``fext(c) = fext + (F_p(c) - F_p(0))``, the load vector that
             the arc-length solvers of ``structsolve`` use as the derivative
-            of the residual with respect to the load factor.
+            of the residual with respect to the load factor. Default
+            ``None``.
         include_pds : bool, optional
             Whether the forces `k u_p` of the prescribed displacements
             imposed with the penalty method are included.
             ``MultiDomain(..., pd_method='null-space')`` imposes them exactly
-            instead, and excludes these forces.
+            instead, and excludes these forces. Default ``True``.
 
         Returns
         -------
         fext : np.ndarray
-            The external force vector
+            The external force vector, 1-D array of size ``size``.
 
         """
         self._rebuild()
@@ -2331,30 +2819,40 @@ class Shell(object):
         ----------
         c : np.ndarray
             The Ritz constants vector to be used for the internal forces
-            calculation.
+            calculation, 1-D of size ``size``.
         size : int or str, optional
             The size of the internal force vector. Can be the size of a global
             internal force vector of an assembly. When using a string,
             for example, if '+1' is given it will add 1 to the Shell`s size
-            obtained by the :meth:`.Shell.get_size`
+            obtained by the :meth:`.Shell.get_size`. Default ``None``, the
+            size of this shell.
         col0 : int, optional
-            Offset in a global internal force vector of an assembly.
+            Offset in a global internal force vector of an assembly. Default
+            ``0``.
         silent : bool, optional
             A boolean to tell whether the log messages should be printed.
+            Default ``True``, nothing is printed.
         nx, ny : int, optional
             Number of integration points along `x` and `y`, see
-            :meth:`.Shell.calc_kC`.
+            :meth:`.Shell.calc_kC`. Default ``None``.
         ABDnxny : np.ndarray, optional
             The constitutive matrix, constant or per integration point, by
             default the attribute ``ABDnxny`` or :attr:`.Shell.ABD`, see
             :meth:`.Shell.calc_kC`.
         inc : float, optional
             Load factor of the incremented follower pressure loads.
+            Dimensionless. Default ``1.``.
 
         Returns
         -------
         fint : np.ndarray
-            The internal force vector
+            The internal force vector, 1-D array of size ``size``.
+
+        Raises
+        ------
+        ValueError
+            If the attribute ``model`` is not a valid model, or if its
+            numerical kernels or their ``calc_fint`` are not implemented.
 
         """
         msg('Calculating internal forces...', level=2, silent=silent)

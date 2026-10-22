@@ -1,3 +1,10 @@
+r"""Contour plots of the field variables of a :class:`.Shell`
+
+The function :func:`plot_shell` draws a filled contour plot of a
+displacement, strain or stress field with :mod:`matplotlib`. On Linux the
+non-interactive backend ``'Agg'`` is selected when this module is imported.
+
+"""
 import platform
 from copy import deepcopy
 
@@ -20,8 +27,20 @@ def plot_shell(shell, c, invert_y=False, vec='w', deform_u=False,
         plot_offset_x=0., plot_offset_y=0., NLgeom=True):
     r"""Contour plot for a Ritz constants vector.
 
+    The field ``vec`` is calculated with :meth:`.Shell.uvw`,
+    :meth:`.Shell.strain` or :meth:`.Shell.stress`, which update
+    ``shell.fields`` and ``shell.plot_mesh``; afterwards the entries of
+    ``shell.fields`` that were not ``None`` before the call are restored,
+    the others keep the calculated values. The plot shows `x` along the
+    vertical axis and `y` along the horizontal axis, and the horizontal axis
+    is inverted. Log messages are printed. When ``save`` is ``True`` the
+    figure is written to ``filename`` and closed with
+    :func:`matplotlib.pyplot.close`.
+
     Parameters
     ----------
+    shell : :class:`.Shell`
+        The shell whose field is plotted.
     c : array_like
         The Ritz constants that will be used to compute the field contour.
     vec : str, optional
@@ -32,42 +51,60 @@ def plot_shell(shell, c, invert_y=False, vec='w', deform_u=False,
           ``'kxy'``, ``'gyz'``, ``'gxz'``
         - Stress: ``'Nxx'``, ``'Nyy'``, ``'Nxy'``, ``'Mxx'``, ``'Myy'``,
           ``'Mxy'``, ``'Qy'``, ``'Qx'``
+
+        Default ``'w'``. The transverse shear components exist only for the
+        models based on shear deformation theories.
     deform_u : bool, optional
-        If ``True`` the contour plot will look deformed.
+        If ``True`` the contour plot will look deformed. The plotted `x`
+        of each point is decreased by ``deform_u_sf*u`` and the plotted `y`
+        increased by ``deform_u_sf*v``. Default ``False``.
     deform_u_sf : float, optional
-        The scaling factor used to deform the contour.
+        The scaling factor used to deform the contour. Dimensionless.
+        Default ``100.``.
     invert_y : bool, optional
-        Inverts the `y` axis of the plot.
+        Inverts the `y` axis of the plot. Default ``False``.
     save : bool, optional
         Flag telling whether the contour should be saved to an image file.
+        Default ``True``, ignored when ``ax`` is given.
     dpi : int, optional
-        Resolution of the saved file in dots per inch.
+        Resolution of the saved file in dots per inch. Default ``400``.
     filename : str, optional
         The file name for the generated image file. If no value is given,
-        the `name` parameter of the ``Shell`` object will be used.
+        ``'test.png'`` is used. Default ``''``.
     ax : AxesSubplot, optional
         When ``ax`` is given, the contour plot will be created inside it.
+        Default ``None``, a new figure is created.
     figsize : tuple, optional
-        The figure size given by ``(width, height)``.
+        The figure size given by ``(width, height)``, in inches, used only
+        for a new figure. Default ``(3.5, 2.)``.
     title : str, optional
         If any string is given it is added as title to the contour plot.
+        Default ``''``.
     colorbar : bool, optional
-        If a colorbar should be added to the contour plot.
+        If a colorbar should be added to the contour plot. Default ``False``.
     cbar_nticks : int, optional
-        Number of ticks added to the colorbar.
+        Number of ticks added to the colorbar. Default ``2``.
     cbar_format : [ None | format string | Formatter object ], optional
-        See the ``matplotlib.pyplot.colorbar`` documentation.
+        See the ``matplotlib.pyplot.colorbar`` documentation. Default
+        ``None``.
     cbar_title : str, optional
-        Colorbar title. If ``cbar_title == ''`` no title is added.
+        Colorbar title. If ``cbar_title == ''`` no title is added. Default
+        ``''``.
     cbar_fontsize : int, optional
-        Fontsize of the colorbar labels.
+        Fontsize of the colorbar labels. Default ``10``.
     colormap : string, optional
-        Name of a matplotlib available colormap.
+        Name of a matplotlib available colormap. An invalid name, or a
+        value that is not a string, gives ``'jet'`` with a warning. Default
+        ``'jet'``.
     aspect : str, optional
         String that will be passed to the ``AxesSubplot.set_aspect()``
-        method.
+        method. Default ``'equal'``.
     clean : bool, optional
-        Clean axes ticks, grids, spines etc.
+        Clean axes ticks, grids, spines etc. Default ``True``.
+    texts : list of dict, optional
+        Keyword arguments of :meth:`matplotlib.axes.Axes.text`, one
+        dictionary per text, placed in axes coordinates
+        (``transform=ax.transAxes``). Default ``[]``.
     xs : array_like, optional
         The `x` positions where to calculate the displacement field.
         Default is ``None`` and the method ``_default_field`` is used.
@@ -76,24 +113,38 @@ def plot_shell(shell, c, invert_y=False, vec='w', deform_u=False,
         Default is ``None`` and the method ``_default_field`` is used.
     gridx : int, optional
         Number of points along the `x` axis where to calculate the
-        displacement field.
+        displacement field. Default ``300``.
     gridy : int, optional
         Number of points along the `y` where to calculate the
-        displacement field.
+        displacement field. Default ``300``.
     num_levels : int, optional
         Number of contour levels (higher values make the contour smoother).
+        Default ``400``.
     vecmin : float, optional
         Minimum value for the contour scale (useful to compare with other
         results). If not specified it will be taken from the calculated
-        field.
+        field. Default ``None``.
     vecmax : float, optional
-        Maximum value for the contour scale.
+        Maximum value for the contour scale. If not specified it will be
+        taken from the calculated field. Default ``None``.
+    plot_offset_x, plot_offset_y : float, optional
+        Offsets added to the coordinates ``x`` and ``y`` of the plotted
+        points, lengths. Default ``0.``.
+    NLgeom : bool, optional
+        Passed to :meth:`.Shell.stress`, used only for the stresses.
+        Default ``True``.
 
     Returns
     -------
     ax : matplotlib.axes.Axes
         The Matplotlib object that can be used to modify the current plot
         if needed.
+
+    Raises
+    ------
+    ValueError
+        If ``vec`` is not one of the components above, or if ``ax`` is not
+        a :class:`matplotlib.axes.Axes`.
 
     """
     msg('Plotting contour...')

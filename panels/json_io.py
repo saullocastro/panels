@@ -580,6 +580,12 @@ def _reject_constant(name):
 def save(obj, fname):
     r"""Save an object to a zip file
 
+    The object is encoded completely before the file is opened, such that
+    an error does not leave a partial file. The zip file, compressed with
+    ``ZIP_DEFLATED``, contains ``model.json`` and one ``arrays/<key>.npy``
+    member per array, see the module docstring. An existing file is
+    overwritten.
+
     Parameters
     ----------
     obj : :class:`.Shell`, :class:`.StiffPanelBay` or :class:`.MultiDomain`
@@ -686,6 +692,13 @@ def _load(fname, suffixes=(), max_size=MAX_SIZE):
 
 def load(fname, max_size=MAX_SIZE):
     r"""Load an object from a zip file created by :func:`.save`
+
+    The type of the object, :class:`.Shell`, :class:`.StiffPanelBay` or
+    :class:`.MultiDomain`, is the one stored in ``model.json``. Unlike the
+    functions ``load`` of :mod:`panels.shell`, :mod:`panels.stiffpanelbay`
+    and :mod:`panels.multidomain`, a file name is used as given, without
+    adding an extension. The members are read in memory, the file is not
+    extracted.
 
     Parameters
     ----------

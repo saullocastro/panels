@@ -3,6 +3,20 @@ Used to configure the main parameters for each implemented model.
 
 .. currentmodule:: panels.modelDB
 
+The dictionary ``db`` maps the name of each model, the attribute
+``Shell.model``, to a dictionary with the keys:
+
+- ``'field'``: the module of the field variables, ``clpt_field`` or
+  ``fsdt_tsdt_field`` of :mod:`panels.models`;
+- ``'matrices'``: the module of the analytically integrated matrices;
+- ``'matrices_num'``: the module of the numerically integrated matrices
+  and of the internal force vector;
+- ``'dofs'``: the number of degrees of freedom per term of the
+  approximation, ``3`` or ``5``;
+- ``'e_num'``: the number of generalized strains, ``6``, ``8`` or ``13``;
+- ``'requires_r'``: whether the kernels need a positive radius ``r``;
+- ``'linear static'``, ``'linear buckling'``, ``'non-linear static'``: flags,
+  ``True`` for every model.
 
 """
 from .models import *
