@@ -1,5 +1,16 @@
 r"""Discretisation of a cohesive domain (``'SB_TSL'`` connection)
 
+The functions give the number of terms and of Gauss-Legendre points along
+`x` of the cohesive domain of a ``'SB_TSL'`` connection, from the laminates
+of the two panels and the parameters of the traction-separation law:
+:func:`tsl_resolution` gives the decay rate of the opening and the length of
+the cohesive zone, :func:`tsl_margin` the length of the cohesive domain
+needed ahead of the crack front, and :func:`tsl_discretization` the terms
+and points along `x`, with the factors ``terms_per_decay=1.25`` and
+``points_per_lcz=10.`` by default. See :ref:`cohesive_zone`.
+
+Notes
+-----
 The rules below come from the convergence study of the cohesive zone on a
 mode I double cantilever beam (DCB), see :ref:`cohesive_zone`. The opening
 ahead of the process zone decays as that of two beams connected by an elastic
@@ -15,7 +26,7 @@ bending stiffnesses `D_{11}^{(1)}`, `D_{11}^{(2)}` of the two panels,
 which is `\lambda = (k_o/2 D_{11})^{1/4}` for the symmetric DCB and tends to
 `(k_o/4 D_{11}^{(1)})^{1/4}` when the second panel is much stiffer than the
 first. The cohesive zone has the length, Rice's estimate as used by Turon et
-al. (2007):
+al. (2007) [1]_:
 
 .. math::
 
@@ -34,6 +45,13 @@ Before version 0.13.11 the rate was `(k_o/4 D_{11})^{1/4}`, that of one beam
 on a rigid foundation, `2^{-1/4}` times the rate of the symmetric DCB, and
 the factors of the rules were 1.2 and 1.5 instead of 1.0 and 1.25.
 
+References
+----------
+.. [1] Turon, A., Davila, C. G., Camanho, P. P., and Costa, J., An
+   engineering solution for mesh size effects in the simulation of
+   delamination using cohesive zone models, Engineering Fracture Mechanics,
+   74, 1665-1682, 2007.
+
 """
 import numpy as np
 
@@ -46,7 +64,7 @@ def tsl_resolution(p1, k_o, tau_o, G1c, E2=None, p2=None):
     The laminates of ``p1`` and, when given, ``p2`` are rebuilt with
     :func:`.build_panel_lam`, and `D_{11}` is read from them. The rate is
     ``(k_o*(1/D11_1 + 1/D11_2)/4)**0.25`` and the length
-    ``0.88*E2*G1c/tau_o**2``, see the module docstring.
+    ``0.88*E2*G1c/tau_o**2``.
 
     Parameters
     ----------
@@ -65,13 +83,23 @@ def tsl_resolution(p1, k_o, tau_o, G1c, E2=None, p2=None):
         second value of the first lamina of ``p1.laminaprops``.
     p2 : :class:`.Shell`, optional
         Panel ``p2`` of the connection, whose `D_{11}` is used in the same
-        way. By default that of ``p1``, the symmetric DCB, `\lambda =
-        (k_o/2 D_{11})^{1/4}`.
+        way. By default that of ``p1``, a symmetric DCB.
 
     Returns
     -------
     lam, lcz : float
         `\lambda`, 1/length, and `l_{cz}`, length.
+
+    Notes
+    -----
+    `\lambda` is the rate of decay of the opening `\Delta = w_1 - w_2` of
+    two beams of bending stiffnesses `D_{11}^{(1)}` and `D_{11}^{(2)}`
+    connected by an elastic foundation of stiffness `k_o`, and `l_{cz}` the
+    length of the cohesive zone, see :mod:`panels.multidomain.connections.tsl`.
+    Without ``p2``, `D_{11}^{(2)} = D_{11}^{(1)}`, the symmetric DCB,
+    `\lambda = (k_o/2 D_{11})^{1/4}`. Only `D_{11}` enters the rate: the
+    opening is assumed to vary along `x`, with the cylindrical bending of
+    the arms of a DCB.
 
     """
     build_panel_lam(p1)
@@ -91,20 +119,10 @@ def tsl_resolution(p1, k_o, tau_o, G1c, E2=None, p2=None):
 def tsl_margin(lam, lcz):
     r"""Length of the cohesive domain needed ahead of the crack front
 
-    `3 l_{cz} + 8/\lambda`: the process zone, and the region ahead of it
-    where the opening oscillates and decays as `e^{-\lambda x}`, the
-    solution of beams on an elastic foundation (Kanninen 1973, Int. J.
-    Fract. 9, 83-92), here the two panels connected by `k_o`. Beyond
-    `8/\lambda` the opening, and with it the traction outside the cohesive
-    domain, is below `e^{-8} = 3.4 \times 10^{-4}` of its value at the end
-    of the process zone. A cohesive domain shorter than the crack growth plus
-    this margin lets the compressive lobe and the tractions ahead of it reach
-    the perfect bond: the loads are hardly affected, but the integral of the
-    cohesive tractions no longer balances the load. On the DCB validation
-    runs this difference is 0.25% at most with the margin, against up to
-    10% with `2\pi/\lambda + 3 l_{cz}`, when the basis follows
-    :func:`tsl_discretization` and the perfect bond is not wider than the
-    bonded strip.
+    ``3*lcz + 8/lam``: the process zone, three times the length of the
+    cohesive zone, and the region ahead of it where the opening oscillates
+    and decays. The cohesive domain should be longer than the expected crack
+    growth plus this margin.
 
     Parameters
     ----------
@@ -120,6 +138,29 @@ def tsl_margin(lam, lcz):
     margin : float
         ``3*lcz + 8/lam``, length.
 
+    Notes
+    -----
+    `3 l_{cz} + 8/\lambda`: the process zone, and the region ahead of it
+    where the opening oscillates and decays as `e^{-\lambda x}`, the
+    solution of beams on an elastic foundation (Kanninen 1973, Int. J.
+    Fract. 9, 83-92) [1]_, here the two panels connected by `k_o`. Beyond
+    `8/\lambda` the opening, and with it the traction outside the cohesive
+    domain, is below `e^{-8} = 3.4 \times 10^{-4}` of its value at the end
+    of the process zone. A cohesive domain shorter than the crack growth plus
+    this margin lets the compressive lobe and the tractions ahead of it reach
+    the perfect bond: the loads are hardly affected, but the integral of the
+    cohesive tractions no longer balances the load. On the DCB validation
+    runs this difference is 0.25% at most with the margin, against up to
+    10% with `2\pi/\lambda + 3 l_{cz}`, when the basis follows
+    :func:`tsl_discretization` and the perfect bond is not wider than the
+    bonded strip.
+
+    References
+    ----------
+    .. [1] Kanninen, M. F., An augmented double cantilever beam model for
+       studying crack propagation and arrest, International Journal of
+       Fracture, 9, 83-92, 1973.
+
     """
     return 3*lcz + 8/lam
 
@@ -128,16 +169,13 @@ def tsl_discretization(lam, lcz, L_tsl, terms_per_decay=1.25, points_per_lcz=10.
                        m_max=25):
     r"""Terms and Gauss points along `x` of a cohesive domain
 
-    - `m = \lceil t \lambda L_{tsl} \rceil`, with `t` given by
-      ``terms_per_decay``, at most ``m_max``;
-    - `n_x = p L_{tsl}/l_{cz}`, with `p` given by ``points_per_lcz``, but not
-      less than `4 m` to integrate the products of the approximation
-      functions, rounded up to a multiple of 10.
+    - ``m = min(m_max, ceil(terms_per_decay*lam*L_tsl))``;
+    - ``nx = points_per_lcz*L_tsl/lcz``, but not less than ``4*m``, rounded
+      up to a multiple of 10.
 
     The Gauss-Legendre points and weights are computed by
     :func:`scipy.special.roots_legendre`, without an upper limit for `n_x`.
-    The Bardell functions go up to 30 terms, so a cohesive domain longer than
-    `30/(1.0 \lambda)` is not resolved.
+    The Bardell functions go up to 30 terms.
 
     Parameters
     ----------
@@ -154,6 +192,21 @@ def tsl_discretization(lam, lcz, L_tsl, terms_per_decay=1.25, points_per_lcz=10.
     -------
     m, nx : int
         Terms and Gauss points along `x`.
+
+    Notes
+    -----
+    - `m = \lceil t \lambda L_{tsl} \rceil`, with `t` given by
+      ``terms_per_decay``, at most ``m_max``, such that the Ritz basis
+      resolves the decay of the opening;
+    - `n_x = p L_{tsl}/l_{cz}`, with `p` given by ``points_per_lcz``, such
+      that the Gauss-Legendre points sample the cohesive zone, but not
+      less than `4 m` to integrate the products of the approximation
+      functions, rounded up to a multiple of 10.
+
+    The defaults are the recommended values of the convergence study, see
+    :mod:`panels.multidomain.connections.tsl`. The Bardell functions go up
+    to 30 terms, so a cohesive domain longer than `30/(1.0 \lambda)` is not
+    resolved.
 
     """
     m = int(min(m_max, np.ceil(terms_per_decay*lam*L_tsl)))

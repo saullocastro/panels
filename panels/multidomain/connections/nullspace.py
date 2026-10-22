@@ -2,15 +2,37 @@ r"""
 Null-space method for the connections
 
 Imposes the connections of a :class:`.MultiDomain` assembly exactly, with
-the default ``conn_method='null-space'``, as the penalty kernels of :mod:`panels.multidomain.connections` would with penalty
-constants going to infinity, see :ref:`null_space` for the theory, the usage
-and a comparison with the penalty method.
+the default ``conn_method='null-space'``, see :ref:`null_space` for the
+usage and a comparison with the penalty method. The quantities penalized by
+the kernels of :mod:`panels.multidomain.connections` become linear
+constraints on the Ritz constants, built by :func:`.constraint_matrix`, one
+row per quantity and point, and eliminated with a sparse basis of their null
+space, built by :func:`.null_space_basis`. The matrices and vectors of the
+assembly are reduced to the independent Ritz constants and the reduced
+problem is solved with the solvers of ``structsolve`` unchanged, see
+:meth:`.MultiDomain.get_T`, :meth:`.MultiDomain.reduce`,
+:meth:`.MultiDomain.expand` and :meth:`.MultiDomain.get_reduced_functions`.
 
-Each penalty kernel adds the energy `\frac{1}{2} k_k \int (q_k^{(1)} -
-q_k^{(2)})^2` for the quantities `q_k` that must be continuous across the
-connection, e.g. `u, v, w` and the rotation of the normal. With Bardell's
-polynomial functions `q_k^{(1)} - q_k^{(2)}` is a polynomial along the
-connection, and it vanishes everywhere when it vanishes at as many
+The quantities of each connection are those of its penalty kernel, see
+:ref:`null_space_quantities`. The connections available are listed in
+:data:`NULL_SPACE_FUNCS`, the damaged connection ``'SB_TSL'`` remains a
+penalty stiffness.
+
+With ``MultiDomain(..., pd_method='null-space')`` the prescribed
+displacements of the panels are constraints with a right-hand side, built
+by :func:`.pd_constraint_matrix` and eliminated after the connections by
+:class:`.Elimination`, which also gives the particular solutions, see
+:ref:`null_space_pd`.
+
+Notes
+-----
+The connections are imposed as the penalty kernels of
+:mod:`panels.multidomain.connections` would with penalty constants going to
+infinity. Each penalty kernel adds the energy `\frac{1}{2} k_k \int
+(q_k^{(1)} - q_k^{(2)})^2` for the quantities `q_k` that must be continuous
+across the connection, e.g. `u, v, w` and the rotation of the normal. With
+Bardell's polynomial functions `q_k^{(1)} - q_k^{(2)}` is a polynomial along
+the connection, and it vanishes everywhere when it vanishes at as many
 Gauss-Legendre points as its number of coefficients. The connections are
 then the linear constraints:
 
@@ -27,14 +49,20 @@ are eliminated with a sparse basis `[T]` of the null space of `[B]`, built by
     \{c\} = [T] \{c_r\}, \qquad [K_r] = [T]^T [K] [T], \qquad
     \{f_r\} = [T]^T \{f\}
 
-and the reduced problem is solved with the solvers of ``structsolve``
-unchanged, see :meth:`.MultiDomain.get_T`, :meth:`.MultiDomain.reduce`,
-:meth:`.MultiDomain.expand` and :meth:`.MultiDomain.get_reduced_functions`.
+The vectors with zero penalty energy are exactly those that satisfy the
+constraints. Lagrange multipliers would add one unknown per constraint and
+give an indefinite system, whose geometric stiffness and mass matrices have
+zero rows and columns for the multipliers, giving infinite eigenvalues that
+the shift-and-invert eigenvalue solvers of ``structsolve`` do not handle.
+The null-space method removes unknowns instead: the reduced stiffness matrix
+is symmetric and positive definite whenever the connected assembly has no
+rigid-body motion, like the stiffness matrix of the penalty method. The
+constraints are linear in `\{c\}`, so `[T]` does not change during a
+non-linear analysis, where `\{f_{int, r}\} = [T]^T \{f_{int}\}([T]
+\{c_r\})` and `[K_{T r}] = [T]^T [K_T]([T] \{c_r\}) [T]`.
 
-The quantities of each connection are those of its penalty kernel, see
-:ref:`null_space_quantities`. The connections available are listed in
-:data:`NULL_SPACE_FUNCS`, the damaged connection ``'SB_TSL'`` is a physical
-stiffness of the interface and remains a penalty stiffness.
+The damaged connection ``'SB_TSL'`` is a physical stiffness of the
+interface, not a constraint, and therefore remains a penalty stiffness.
 
 With ``MultiDomain(..., pd_method='null-space')`` the prescribed
 displacements of the panels are the inhomogeneous constraints `[B_d] \{c\}
@@ -86,7 +114,21 @@ def _num(p, direction):
 def _eval(p, field, der, direction, xis):
     r"""Approximation functions of ``field`` along ``direction``, or their
     first derivative, at the natural coordinates ``xis``, with shape
-    ``(len(xis), num)``"""
+    ``(len(xis), num)``
+
+    The values of the fifth and following functions are set to zero at the
+    ends ``xi = -1`` and ``xi = 1``.
+
+    Notes
+    -----
+    The derivative along `x` is `(2/L) \partial/\partial \xi`, with `\xi =
+    2 x/L - 1` and `L` the length of the panel along ``direction``.
+    The fifth and following functions of Bardell vanish together with their
+    slope at `\xi = \pm 1`; setting them to zero there removes their
+    round-off, which would otherwise give spurious constraints once the rows
+    of `[B]` are normalized, see :meth:`.Elimination.add`.
+
+    """
     flags = tuple(float(getattr(p, direction + edge + FIELDS[field] + r))
                   for edge, r in (('1', ''), ('1', 'r'), ('2', ''), ('2', 'r')))
     num = _num(p, direction)
@@ -110,7 +152,35 @@ def _eval(p, field, der, direction, xis):
 def _clpt_components(func, p1, p2, dsb):
     r"""Quantities of the connections between models with 3 DOFs, each one
     ``((p1, terms1), (p2, terms2))`` with ``terms`` a list of ``(field,
-    der_x, der_y, coeff)``"""
+    der_x, der_y, coeff)``
+
+    ``dsb`` is the distance between the mid-surfaces of ``p1`` and ``p2``,
+    used by ``'SB'``.
+
+    Notes
+    -----
+    The constraints are those of the penalty kernels of the classical
+    laminated plate theory, with the fields of ``p1`` on the left side and
+    those of ``p2`` on the right side:
+
+    - ``'SSxcte'``: `u, v, w` and `w_{,x}` continuous;
+    - ``'SSycte'``: `u, v, w` and `w_{,y}` continuous;
+    - ``'BFycte'``: `u_1 = u_2`, `v_1 = w_2`, `w_1 = -v_2` and `w_{1,y} -
+      v_1/r_1 = w_{2,y} - v_2/r_2`, the flange being normal to the base and
+      the terms `v/r` present only with the Sanders-Koiter kinematics, see
+      :mod:`panels.multidomain.connections.kCBFycte`;
+    - ``'BFxcte'``: `u_1 = w_2`, `v_1 = v_2`, `w_1 = -u_2` and `w_{1,x} =
+      w_{2,x}`, see :mod:`panels.multidomain.connections.kCBFxcte`;
+    - ``'SB'``: `u_1 + d_{sb} w_{1,x} = u_2`, `v_1 + d_{sb} w_{1,y} = v_2`
+      and `w_1 = w_2`, with `d_{sb} = h_1/2 + h_2/2`.
+
+    For ``'SB'``, with the Kirchhoff kinematics `u(z) = u - z w_{,x}`, the
+    face `z = -h_1/2` of ``p1`` and the face `z = +h_2/2` of ``p2`` have the
+    same displacement when `u_1 + (h_1/2) w_{1,x} = u_2 - (h_2/2)
+    w_{2,x}`, and `w_{2,x} = w_{1,x}` since `w_1 = w_2` over the whole
+    area.
+
+    """
     if func == 'SSxcte':
         rot = [(W, 1, 0, 1.)]
         return [((p1, [(f, 0, 0, 1.)]), (p2, [(f, 0, 0, 1.)]))
@@ -143,7 +213,25 @@ def _clpt_components(func, p1, p2, dsb):
 
 def _sdt_components(func, p1, p2, kr_sb):
     r"""Quantities of the connections between models with 5 DOFs, see
-    :func:`._clpt_components`"""
+    :func:`._clpt_components`
+
+    For ``'SB'`` the rotations are connected only when ``kr_sb`` is not zero.
+
+    Notes
+    -----
+    The constraints are those of the penalty kernels of the shear
+    deformation theories: for ``'SSxcte'`` and ``'SSycte'``, `u, v, w,
+    \phi_x, \Phi_y` and, for the TSDT, the derivative of `w` normal to the
+    edge, see :func:`.kCsdt._edge_components`; for ``'BFycte'``, `u_1 =
+    u_2`, `v_1 = w_2`, `w_1 = -v_2` and `\Phi_{y1} = \Phi_{y2}`; for
+    ``'BFxcte'``, `u_1 = w_2`, `v_1 = v_2`, `w_1 = -u_2` and `\phi_{x1} =
+    \phi_{x2}`; for ``'SB'``, `u(z), v(z)` at the face `z = -h_1/2` of
+    ``p1`` equal to those at the face `z = +h_2/2` of ``p2``, see
+    :func:`.kCsdt._surface_terms`, `w_1 = w_2` and, with ``kr_sb``,
+    `\phi_{x1} = \phi_{x2}` and `\Phi_{y1} = \Phi_{y2}`. `\Phi_y` is given by
+    :func:`.kCsdt._rotation_y`.
+
+    """
     if func in ('SSxcte', 'SSycte'):
         comps = kCsdt._edge_components(1., 1., p1, p2, func[2])
         return [sides for _, sides in comps]
@@ -172,8 +260,23 @@ def _sdt_components(func, p1, p2, kr_sb):
 def _points(p1, p2, direction, ctes):
     r"""Natural coordinates of the points of ``p1`` and ``p2`` along
     ``direction``: the constant coordinates of the connection, or the
-    Gauss-Legendre points along it, as many as the coefficients of the
-    polynomials along it"""
+    Gauss-Legendre points along it, ``max(m1, m2, 4)`` or ``max(n1, n2,
+    4)``, the same for both panels
+
+    Raises a ``ValueError`` when the two panels do not have the same length
+    along ``direction``.
+
+    Notes
+    -----
+    The first 4 functions of Bardell are cubic, the term `i \ge 4` has the
+    order `i`, and the derivatives only reduce the order, so the difference
+    `q_k^{(1)} - q_k^{(2)}` of a quantity along the connection is a
+    polynomial of `\xi` (or `\eta`) with at most ``max(num, 4)``
+    coefficients. It vanishes everywhere when it vanishes at as many distinct points. The
+    two panels share the natural coordinate along the connection, which
+    requires the same length.
+
+    """
     if ctes is not None:
         return [np.array([2*ctes[0]/_length(p1, direction) - 1]),
                 np.array([2*ctes[1]/_length(p2, direction) - 1])]
@@ -222,8 +325,8 @@ def constraint_matrix(connecti, size):
     Returns
     -------
     B : scipy.sparse.csr_matrix
-        The constraints `[B] \{c\} = \{0\}`, with ``size`` columns and one
-        row per quantity and point. The rows are not normalized.
+        The constraints ``B @ c = 0``, with ``size`` columns and one row per
+        quantity and point. The rows are not normalized.
 
     Raises
     ------
@@ -238,6 +341,20 @@ def constraint_matrix(connecti, size):
     See Also
     --------
     null_space_basis
+
+    Notes
+    -----
+    Each row is `q_k^{(1)} - q_k^{(2)}` at one point, where the quantity
+    `q_k` is a linear combination of the fields and derivatives of a panel,
+    see :func:`._clpt_components` and :func:`._sdt_components`, such that
+    `[B] \{c\} = \{0\}` holds exactly when the penalty energy
+    `\frac{1}{2} k_k \int (q_k^{(1)} - q_k^{(2)})^2` of the connection
+    vanishes for any `k_k > 0`, see :func:`._points`. For ``'SB'`` the
+    differences are polynomials of `\xi` and `\eta`, and the tensor grid of
+    the Gauss-Legendre points along `x` and `y` gives as many points as
+    their coefficients. The approximation functions are products `f(\xi)
+    g(\eta)`, so each block is the Kronecker product of the values along
+    `x` and along `y`.
 
     """
     func = connecti['func']
@@ -305,10 +422,15 @@ PD_COMPONENTS = FIELDS
 
 def _pd_terms(p, comp):
     r"""Terms ``(field, der_x, der_y, coeff)`` of a prescribed component,
-    the rows of ``fg`` of the field module of the model: `\phi_x = -w_{,x}`
-    and `\phi_y = -w_{,y}` for the classical laminated plate theory, the
-    fields `\phi_x` and `\phi_y` for the shear deformation theories, plus
-    `v/r` in `\phi_y` with the Sanders-Koiter kinematics"""
+    the rows of ``fg`` of the field module of the model
+
+    Notes
+    -----
+    `\phi_x = -w_{,x}` and `\phi_y = -w_{,y}` for the classical laminated
+    plate theory, the fields `\phi_x` and `\phi_y` for the shear deformation
+    theories, plus `v/r` in `\phi_y` with the Sanders-Koiter kinematics.
+
+    """
     if comp in (U, V, W):
         return [(comp, 0, 0, 1.)]
     if _dofs(p) == 3:
@@ -361,6 +483,16 @@ def pd_points(p, x, y):
         ``[0, p.a]`` or ``y`` out of ``[0, p.b]``, with a relative tolerance
         of ``1e-12``.
 
+    Notes
+    -----
+    Along a line, the prescribed component of the panel is a polynomial of
+    the coordinate along the line with at most as many coefficients as the
+    points, see :func:`._points`. Imposing the prescribed function at the
+    Gauss-Legendre points therefore makes the component equal to the
+    polynomial interpolation of the prescribed function at these points,
+    which is the prescribed function itself when it is such a polynomial
+    and the boundary condition flags do not remove the needed terms.
+
     """
     if x is None and y is None:
         raise ValueError('x and y cannot be None when defining displacements')
@@ -383,11 +515,10 @@ def pd_constraint_matrix(p, comp, x, y, size):
     r"""Rows `[B]` of a prescribed component at a point or along a line
 
     The component is evaluated at the points of :func:`.pd_points`, one row
-    per point. The rotations ``'phix'`` and ``'phiy'`` are `-w_{,x}` and
-    `-w_{,y}` for the models with 3 DOFs per term, the fields `\phi_x` and
-    `\phi_y` for those with 5 DOFs, plus the term `v/r` in ``'phiy'`` for
-    the models with the Sanders-Koiter kinematics. The rows are not
-    normalized.
+    per point. The rotations ``'phix'`` and ``'phiy'`` are those of the
+    field module of the model, see :func:`._pd_terms`, derived from `w` for
+    the models with 3 DOFs per term and the fields ``phix`` and ``phiy`` for
+    those with 5 DOFs. The rows are not normalized.
 
     Parameters
     ----------
@@ -403,8 +534,14 @@ def pd_constraint_matrix(p, comp, x, y, size):
     Returns
     -------
     B : scipy.sparse.csr_matrix
-        The rows of `[B] \{c\} = \{d\}`, one per point of
-        :func:`.pd_points`.
+        The rows of ``B @ c = d``, one per point of :func:`.pd_points`.
+
+    Notes
+    -----
+    The rotations ``'phix'`` and ``'phiy'`` are `-w_{,x}` and `-w_{,y}` for
+    the models with 3 DOFs per term, the fields `\phi_x` and `\phi_y` for
+    those with 5 DOFs, plus the term `v/r` in ``'phiy'`` for the models with
+    the Sanders-Koiter kinematics.
 
     """
     xis, etas, _ = pd_points(p, x, y)
@@ -517,12 +654,13 @@ def pd_rhs(block):
 class Elimination(object):
     r"""Elimination of linear constraints, one block of rows at a time
 
-    The constraints of each block, `[B] \{c\} = \{d\}`, are written in the
-    independent Ritz constants left by the previous blocks, `\{c\} = [T]
-    \{c_r\} + \{c_p\}`, and eliminated with a QR decomposition with column
-    pivoting, see :func:`.null_space_basis`. The blocks added with
+    The constraints of each block, rows ``B`` with right-hand sides ``d``,
+    are written in the independent Ritz constants left by the previous
+    blocks and eliminated with a QR decomposition with column pivoting, see
+    :meth:`.add`. The attribute ``T`` holds the basis of the independent
+    Ritz constants left, initially the identity. The blocks added with
     ``rhs=True``, e.g. the prescribed displacements, keep the data needed to
-    compute particular solutions `\{c_p\}` for any right-hand sides, see
+    compute particular solutions for any right-hand sides, see
     :meth:`.particular`, without repeating the decompositions.
 
     Parameters
@@ -532,6 +670,16 @@ class Elimination(object):
     tol : float
         Tolerance to find the rank of the constraints, see
         :func:`.null_space_basis`.
+
+    Notes
+    -----
+    The constraints of each block, `[B] \{c\} = \{d\}`, are written in the
+    independent Ritz constants left by the previous blocks, `\{c\} = [T]
+    \{c_r\} + \{c_p\}`, where `[T]` is a basis of the null space of the
+    homogeneous constraints of the previous blocks and `\{c_p\}` a
+    particular solution of all the previous blocks. Eliminating the blocks
+    one at a time keeps `[T]` sparse, each block involving only the Ritz
+    constants of its panels.
 
     """
     def __init__(self, size, tol):
@@ -574,6 +722,35 @@ class Elimination(object):
         RuntimeError
             When ``rhs=False`` and a block with ``rhs=True`` was already
             added.
+
+        Notes
+        -----
+        With the normalized rows `[B]`, `[\bar B] = [B] [T]` and the columns
+        `J` of `[\bar B]` kept, the QR decomposition with column pivoting
+        `[\bar B_J] [P] = [Q] [R]` reveals the rank `r`, the number of
+        diagonal terms of `[R]` larger than ``tol``. The constants
+        `\{c_e\}` of the first `r` pivot columns are eliminated in favour of
+        the remaining ones, `\{c_k\}`:
+
+        .. math::
+
+            [R_{11}] \{c_e\} + [R_{12}] \{c_k\} = [Q_1]^T \{d\}, \qquad
+            \{c_e\} = -[R_{11}]^{-1} [R_{12}] \{c_k\}
+                      + [R_{11}]^{-1} [Q_1]^T \{d\}
+
+        where `[R_{11}]` is the leading `r \times r` triangle of `[R]` and
+        `[Q_1]` the first `r` columns of `[Q]`. The homogeneous part gives
+        the new basis `[T] [S]`, `[S]` mapping the remaining constants to
+        all the current ones, the terms of `-[R_{11}]^{-1} [R_{12}]` smaller
+        than ``1e-14`` times its largest one being dropped to keep `[T]`
+        sparse. The column pivoting reveals the rank and chooses the
+        eliminated constants such that `[R_{11}]` is well conditioned. The
+        rows are normalized only once,
+        before being multiplied by `[T]`, so that a redundant row has only
+        round-off errors, compared with the absolute tolerance ``tol``. The
+        homogeneous blocks come first so that the particular solution,
+        built in :meth:`.particular` with the basis of each block with
+        ``rhs=True``, satisfies all the homogeneous constraints.
 
         """
         T = self.T
@@ -637,6 +814,14 @@ class Elimination(object):
             The attribute ``T``, with shape ``(size, size - rank)``, ``rank``
             being the number of constraints eliminated.
 
+        Notes
+        -----
+        The independent constraints have pivots many orders of magnitude
+        larger than the round-off left in the redundant ones; a gap smaller
+        than ``1e4`` means that the separation between independent and
+        redundant constraints, and therefore the rank and `[T]`, depend on
+        ``tol``.
+
         """
         if self.max_dropped > 0 and self.min_kept < 1e4*self.max_dropped:
             warn('Null-space method: the rank of the constraints is not well '
@@ -660,7 +845,7 @@ class Elimination(object):
         Parameters
         ----------
         ds : list of array-like
-            Right-hand side `\{d\}` of each block added with ``rhs=True``,
+            Right-hand side ``d`` of each block added with ``rhs=True``,
             in the order they were added.
         rhs_tol : float, optional
             Relative tolerance of the consistency of the right-hand sides.
@@ -678,9 +863,8 @@ class Elimination(object):
         Returns
         -------
         c_p : np.ndarray
-            Vector with ``size`` elements satisfying `[B] \{c_p\} =
-            \{d\}` for all the blocks, and `[B] \{c_p\} = \{0\}` for the
-            homogeneous ones.
+            Vector with ``size`` elements satisfying ``B @ c_p = d`` for all
+            the blocks, and ``B @ c_p = 0`` for the homogeneous ones.
 
         Raises
         ------
@@ -688,6 +872,25 @@ class Elimination(object):
             When the number of right-hand sides is not the number of blocks
             added with ``rhs=True``; when the right-hand sides are not
             consistent.
+
+        Notes
+        -----
+        For the block `i`, with the normalized rows `[B_i]` and right-hand
+        side `\{\bar d_i\}`, the residual of the current particular solution
+        is `\{\delta\} = \{\bar d_i\} - [B_i] \{c_p\}`, and
+
+        .. math::
+
+            \{y\} = [R_{11}]^{-1} [Q_1]^T \{\delta\}, \qquad
+            \{c_p\} \leftarrow \{c_p\} + [T_e] \{y\}
+
+        where `[T_e]` are the columns of the basis `[T]` of the eliminated
+        constants, both stored by :meth:`.add`. The columns of `[T]`
+        satisfy the homogeneous constraints of the previous blocks, which
+        are therefore not changed, and the remaining constants of the block
+        are set to zero. The residual `\{\delta\} - [B_i] [T_e] \{y\}` is
+        zero when `\{\delta\}` is in the range of `[Q_1]`, i.e. when the
+        right-hand side is consistent with the redundant rows.
 
         """
         cp = np.zeros(self.size, dtype=DOUBLE)
@@ -736,16 +939,32 @@ def null_space_basis(Bs, size, tol=1.e-9):
     tol : float, optional
         Tolerance to find the rank of the constraints. Each row is
         normalized to a unit norm, and a constraint is independent when its
-        pivot in the QR decomposition is larger than ``tol``. The
-        independent constraints have pivots many orders of magnitude larger
-        than the round-off errors left in the redundant ones, and a warning
-        is issued when this gap is smaller than ``1e4``. Default ``1.e-9``.
+        pivot in the QR decomposition is larger than ``tol``. A warning is
+        issued when the smallest pivot kept is less than ``1e4`` times the
+        largest pivot dropped. Default ``1.e-9``.
 
     Returns
     -------
     T : scipy.sparse.csr_matrix
-        Matrix with shape ``(size, size - rank)``, such that `\{c\} = [T]
-        \{c_r\}` satisfies all the constraints for any `\{c_r\}`.
+        Matrix with shape ``(size, size - rank)``, such that ``c = T @ c_r``
+        satisfies all the constraints for any ``c_r``.
+
+    Notes
+    -----
+    The basis satisfies `[B] [T] = [0]` for all the constraints, and the
+    matrices and vectors of the assembly are reduced as `[K_r] = [T]^T [K]
+    [T]` and `\{f_r\} = [T]^T \{f\}`, see
+    :mod:`panels.multidomain.connections.nullspace`. The independent
+    constraints have pivots many orders of magnitude larger than the
+    round-off errors left in the redundant ones, see
+    :meth:`.Elimination.finish`. Redundant constraints happen e.g. at a
+    corner shared by four domains, around a closed cylinder, or where a
+    boundary condition flag already removes the term that a constraint would
+    remove. The fifth and following functions of Bardell vanish together
+    with their slope at the ends of the domain, so the constraints of an edge
+    involve only the first four functions across it, and `[T]` has very few
+    non-zero terms, an elimination similar to the assembly of the
+    hierarchical elements of the p-version of the finite element method.
 
     """
     elim = Elimination(size, tol)

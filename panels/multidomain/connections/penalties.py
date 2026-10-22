@@ -34,6 +34,18 @@ def calc_ku_kv_kw_point_pd(p):
     --------
     calc_ku_kv_kw_line_pd_xcte, calc_ku_kv_kw_line_pd_ycte
 
+    Notes
+    -----
+    The constants multiply the penalty energy of the prescribed displacement
+    at the point `(x_p, y_p)`, `\frac{1}{2} (k_u u^2 + k_v v^2 + k_w w^2)`,
+    whose stiffness matrix is computed by the kernel ``fkCpd`` of
+    :mod:`panels.multidomain.connections.kCpd`. Taking the membrane
+    stiffnesses of the laminate makes the penalty scale with the stiffness
+    of the panel, as for :func:`.calc_kt_kr`, instead of a fixed high value.
+
+    TODO(author): why is `k_w` also `A_{11}`, and not a constant related to
+    the bending stiffness of the laminate?
+
     """
     A11 = p.lam.A[0, 0]
     A22 = p.lam.A[1, 1]
@@ -67,6 +79,15 @@ def calc_ku_kv_kw_line_pd_xcte(p):
     --------
     calc_ku_kv_kw_point_pd, calc_ku_kv_kw_line_pd_ycte
 
+    Notes
+    -----
+    The constants multiply the penalty energy of the displacement prescribed
+    along the line `x = x_p`, `\frac{1}{2} \int_y (k_u u^2 + k_v v^2 + k_w
+    w^2) dy`, whose stiffness matrix is computed by the kernel
+    ``fkCld_xcte`` of :mod:`panels.multidomain.connections.kCpd`. The
+    division by the width ``b`` gives the constants per unit length of the
+    line, see :func:`.calc_ku_kv_kw_point_pd`.
+
     """
     A11 = p.lam.A[0, 0]
     A22 = p.lam.A[1, 1]
@@ -99,6 +120,15 @@ def calc_ku_kv_kw_line_pd_ycte(p):
     --------
     calc_ku_kv_kw_point_pd, calc_ku_kv_kw_line_pd_xcte
 
+    Notes
+    -----
+    The constants multiply the penalty energy of the displacement prescribed
+    along the line `y = y_p`, `\frac{1}{2} \int_x (k_u u^2 + k_v v^2 + k_w
+    w^2) dx`, whose stiffness matrix is computed by the kernel
+    ``fkCld_ycte`` of :mod:`panels.multidomain.connections.kCpd`. The
+    division by the length ``a`` gives the constants per unit length of the
+    line, see :func:`.calc_ku_kv_kw_point_pd`.
+
     """
     A11 = p.lam.A[0, 0]
     A22 = p.lam.A[1, 1]
@@ -126,10 +156,7 @@ def build_panel_lam(panel):
 
 # Penalties for connections
 def calc_kt_kr(p1, p2, connection_type):
-    """Calculate translation and rotation penalty constants
-
-    For details on how to derive these equations, see
-    [castro2017Multidomain]_ (MD paper eqn 34-40)
+    r"""Calculate translation and rotation penalty constants
 
     The laminates of both panels are first rebuilt with
     :func:`.build_panel_lam`. The constants are computed from the
@@ -174,7 +201,29 @@ def calc_kt_kr(p1, p2, connection_type):
     penalties, but not excessively high. In the current study it is proposed to
     calculate kt and kr based on laminate properties of the panels being
     connected, instead of using fixed high values, a common practice in the
-    literature [castro2017Multidomain]_ .
+    literature [1]_ .
+
+    For details on how to derive these equations, see [1]_ (MD paper eqn
+    34-40). With the stiffnesses `A^{(1)}, A^{(2)}` and `D^{(1)}, D^{(2)}`
+    of ``p1`` and ``p2`` selected by ``connection_type``, e.g. `A_{11}` and
+    `D_{11}` for ``'xcte'``, and the thicknesses `h_1, h_2`:
+
+    .. math::
+
+        k_t = \frac{4 A^{(1)} A^{(2)}}{(A^{(1)} + A^{(2)}) (h_1 + h_2)},
+        \qquad
+        k_r = \frac{4 D^{(1)} D^{(2)}}{(D^{(1)} + D^{(2)}) (h_1 + h_2)}
+
+    i.e. the harmonic mean of the stiffnesses of the two laminates divided
+    by their mean thickness `(h_1 + h_2)/2`. The translation constant
+    penalizes a difference of displacement along a line, a force per unit
+    area, and the rotation constant a difference of rotation along a line,
+    a force. For ``'bot-top'``, the penalty is integrated over an area, and
+    `k_t` is further divided by `\min(a_1, b_1)` of ``p1``, a force per unit
+    volume.
+
+    TODO(author): confirm the choice of `\min(a_1, b_1)` as the length
+    scale of the area connection ``'bot-top'``.
 
     The constants are a scaling of the penalty terms, calculated from the
     laminates ``p1.lam`` and ``p2.lam``, not from the stiffness integrated by
@@ -183,6 +232,13 @@ def calc_kt_kr(p1, p2, connection_type):
     `A_{22}`, `D_{11}`, `D_{22}` and on the thickness, which forcing the
     orthotropy does not change, whereas with ``ABDnxny`` the penalty
     constants may have to be scaled, e.g. by multiplying the returned values.
+
+    References
+    ----------
+    .. [1] Castro, S. G. P., and Donadon, M. V., Assembly of Semi-Analytical
+       models to Address Linear Buckling and Vibration of Stiffened Composite
+       Panels with Debonding Defect, Composite Structures, 2017.
+       https://doi.org/10.1016/j.compstruct.2016.10.026
 
     """
 
@@ -225,26 +281,17 @@ def calc_kw_tsl(pA, pB=None, tsl_type='bilinear', k_i=None, del_d=None,
                 tau_o=None, G1c=None):
     r"""Stiffness and damage of a bilinear traction-separation law
 
-    With `\Delta_o = \tau_o/k_i` and `\Delta_f = 2 G_{Ic}/\tau_o`, the damage
-    of the bilinear law at the separation `\Delta` is:
-
-    .. math::
-
-        \hat d(\Delta) = \begin{cases}
-            0 & \Delta \le \Delta_o \\
-            \frac{\Delta_f (\Delta - \Delta_o)}{(\Delta_f - \Delta_o) \Delta}
-              & \Delta_o < \Delta < \Delta_f \\
-            1 & \Delta \ge \Delta_f
-        \end{cases}
-
-    and the stiffness is `k_i (1 - \hat d)`. Negative separations keep the
-    pristine stiffness `k_i`; there is no additional stiffness against
-    interpenetration. The damage history is not considered here, see
-    :meth:`.MultiDomain.calc_k_dmg`.
+    The damage at each separation of ``del_d`` is computed from the
+    separation at damage onset ``tau_o/k_i`` and the separation at complete
+    failure ``2*G1c/tau_o``, and the stiffness is ``k_i*(1 - damage)``.
+    Negative separations keep the pristine stiffness ``k_i``; there is no
+    additional stiffness against interpenetration. The damage history is not
+    considered here, see :meth:`.MultiDomain.calc_k_dmg`.
 
     The panels ``pA`` and ``pB`` are not used in the computation. Where
-    ``del_d`` is close to zero the stiffness is `k_i` and the damage zero.
-    Above `\Delta_f` the stiffness is zero and the damage one.
+    ``del_d`` is close to zero the stiffness is ``k_i`` and the damage zero.
+    Above the separation at complete failure the stiffness is zero and the
+    damage one.
 
     Parameters
     ----------
@@ -277,14 +324,45 @@ def calc_kw_tsl(pA, pB=None, tsl_type='bilinear', k_i=None, del_d=None,
         Stiffness at each point of the grid, force/length**3, with the shape
         of ``del_d``.
     dmg_index : np.ndarray
-        Damage `\hat d` at each point of the grid, dimensionless, with the
-        shape of ``del_d``.
+        Damage at each point of the grid, between ``0`` and ``1``,
+        dimensionless, with the shape of ``del_d``.
 
     Raises
     ------
     ValueError
         When ``tsl_type`` is not ``'bilinear'``; when ``k_i``, ``tau_o`` or
         ``G1c`` is ``None``; when ``del_d`` is ``None``.
+
+    Notes
+    -----
+    In the bilinear law the traction grows linearly with the stiffness `k_i`
+    up to the traction `\tau_o`, at the separation `\Delta_o = \tau_o/k_i`,
+    and then decreases linearly to zero at the separation `\Delta_f = 2
+    G_{Ic}/\tau_o`, such that the area under the law is `G_{Ic}` [1]_. With
+    the stiffness `k_i (1 - \hat d)`, the damage of the bilinear law at the
+    separation `\Delta` is:
+
+    .. math::
+
+        \hat d(\Delta) = \begin{cases}
+            0 & \Delta \le \Delta_o \\
+            \frac{\Delta_f (\Delta - \Delta_o)}{(\Delta_f - \Delta_o) \Delta}
+              & \Delta_o < \Delta < \Delta_f \\
+            1 & \Delta \ge \Delta_f
+        \end{cases}
+
+    and the stiffness of the softening branch is `k_i \Delta_o (\Delta_f -
+    \Delta)/((\Delta_f - \Delta_o) \Delta)`. The damage is driven by the
+    normal separation only, in mode I, with the critical energy release
+    rate `G_{Ic}`. The irreversibility of the damage, `d = \max(d^h, \hat
+    d)` with the damage `d^h` of the last converged increment, is applied by
+    :meth:`.MultiDomain.calc_k_dmg`.
+
+    References
+    ----------
+    .. [1] D'Souza, N., Multi-Domain Semi-Analytical Cohesive Zone Approach,
+       MSc thesis, Delft University of Technology, 2024.
+       https://resolver.tudelft.nl/uuid:4709f888-c032-4d9f-97e3-402dfdd47cf1
 
     """
     if tsl_type != 'bilinear':

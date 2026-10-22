@@ -24,12 +24,9 @@ Connection of type::
                           _|
 
 ``ycte`` indicates the connection exists at a constant `y_1` for panel 1
-(base) and `y_2` for panel 2 (flange). The rotation penalty uses the rotation
-of the normal about `x` of each panel, `-w_{,y}` for the classical laminated
-plate theory, including the term `v/r` for the Sanders-Koiter kinematics, and
-`\phi_y` for the FSDT and TSDT, see
+(base) and `y_2` for panel 2 (flange), see
 :mod:`panels.multidomain.connections.kCBFycte`. The connection ``'BFxcte'``,
-along `y`, penalizes `-w_{,x}` or `\phi_x`, see
+along `y`, is the same at a constant `x_1` and `x_2`, see
 :mod:`panels.multidomain.connections.kCBFxcte`. In both, ``p1`` is the base
 and ``p2`` the flange.
 
@@ -43,14 +40,13 @@ Connection of type::
                                |
                                v -z
 
-Takes into account the offset between the two mid-surfaces. The two panels
-share the axes `x, y, z`, `z` being normal to their mid-surfaces, and ``p1``
-is the panel on the positive side of the interface along `z`, ``p2`` the one
-on the negative side, whatever their roles or their order in the assembly:
-the face `z = -h_1/2` of ``p1`` is connected to the face `z = +h_2/2` of
-``p2``. The sketch shows a stiffener base on the side of positive `z` of the
-skin; a pad-up on the side of negative `z` of a skin is ``p2``, with the skin
-``p1``. The same holds for ``'SB_TSL'``.
+The two panels share the axes `x, y, z`, `z` being normal to their
+mid-surfaces, and ``p1`` is the panel on the positive side of the interface
+along `z`, ``p2`` the one on the negative side, whatever their roles or
+their order in the assembly: the face `z = -h_1/2` of ``p1`` is connected to
+the face `z = +h_2/2` of ``p2``. The sketch shows a stiffener base on the
+side of positive `z` of the skin; a pad-up on the side of negative `z` of a
+skin is ``p2``, with the skin ``p1``. The same holds for ``'SB_TSL'``.
 
 
 kCSSxcte
@@ -113,8 +109,7 @@ and TSDT, with the 5 DOFs `u, v, w, \phi_x, \phi_y`, are in
 :mod:`panels.multidomain.connections.kCsdt`, and the connections ``'BFycte'``
 and ``'BFxcte'`` of these models are the functions ``fkCBFycte*_sdt`` and
 ``fkCBFxcte*_sdt`` of :mod:`panels.multidomain.connections.kCBFycte` and
-:mod:`panels.multidomain.connections.kCBFxcte`, with the rotation penalty on
-`\phi_y` and `\phi_x`.
+:mod:`panels.multidomain.connections.kCBFxcte`.
 
 .. automodule:: panels.multidomain.connections.kCsdt
     :members: fkCSSxcte_sdt, fkCSSycte_sdt, fkCSB_sdt
@@ -137,29 +132,24 @@ With ``MultiDomain(..., conn_method='null-space')``, the default, the
 connections
 ``'SSxcte'``, ``'SSycte'``, ``'BFxcte'``, ``'BFycte'`` and ``'SB'`` are not
 added as penalty stiffnesses, but imposed exactly: the quantities penalized
-by the kernels above become linear constraints `[B] \{c\} = \{0\}`, which
-are eliminated with a basis `[T]` of their null space, `\{c\} = [T]
-\{c_r\}`. No penalty constant is needed, and the results are the limit of
-the penalty method for penalty constants going to infinity, see
+by the kernels above become linear constraints on the Ritz constants, which
+are eliminated from them. No penalty constant is needed, see
 :ref:`null_space` and :mod:`panels.multidomain.connections.nullspace`.
 
 
 Calculating Penalty Constants
 ------------------------------
 
-Function :func:`.calc_kt_kr` is based on Ref [castro2017Multidomain]_ and
-uses a strain compatibility criterion to calculate penalty constants for
-translation (``kt``) and rotation (``kr``). The aim is to have penalty constants
-that are just high enough to produce the desired compatibility, but not too
-high such that numerical stability issues start to appear. The penalty
-constants are not used by the connections imposed with the null-space
-method, see :ref:`null_space`.
+Function :func:`.calc_kt_kr` calculates the penalty constants for
+translation (``kt``) and rotation (``kr``) from the laminates of the two
+connected panels. The penalty constants are not used by the connections
+imposed with the null-space method, see :ref:`null_space`.
 
 .. autofunction:: panels.multidomain.connections.calc_kt_kr
 
-Damaged connections were implemented by Nathan (2024) [nathan2024MSc]_ and the
-out-of-plane connectivity stiffness in the presence of a damage mapped using
-traction-separation law is calculated using :func:`.calc_kw_tsl`.
+The out-of-plane connectivity stiffness of a damaged connection, with the
+damage mapped using a traction-separation law, is calculated using
+:func:`.calc_kw_tsl`.
 
 .. autofunction:: panels.multidomain.connections.calc_kw_tsl
 
@@ -170,6 +160,47 @@ follows from :func:`.tsl_resolution`, :func:`.tsl_margin` and
 .. autofunction:: panels.multidomain.connections.tsl_resolution
 .. autofunction:: panels.multidomain.connections.tsl_margin
 .. autofunction:: panels.multidomain.connections.tsl_discretization
+
+Notes
+-----
+Each penalty kernel adds, for each quantity `q_k` that must be continuous
+across the connection, the energy `\frac{1}{2} k_k \int (q_k^{(1)} -
+q_k^{(2)})^2`, integrated along the connected edges, or over the connected
+area for ``'SB'``, with the translation or rotation penalty constant
+`k_k`, ``kt`` or ``kr``. The rotation penalty of ``'BFycte'`` uses the
+rotation of the normal about `x` of each panel, `-w_{,y}` for the classical
+laminated plate theory, including the term `v/r` for the Sanders-Koiter
+kinematics, and `\phi_y` for the FSDT and TSDT, see
+:mod:`panels.multidomain.connections.kCBFycte`; the connection ``'BFxcte'``
+penalizes `-w_{,x}` or `\phi_x`, see
+:mod:`panels.multidomain.connections.kCBFxcte`. The connection ``'SB'``
+takes into account the offset between the two mid-surfaces, see
+:func:`.nullspace._clpt_components` and :func:`.kCsdt.fkCSB_sdt`.
+
+With the null-space method the quantities penalized by the kernels become
+the linear constraints `[B] \{c\} = \{0\}`, which are eliminated with a
+basis `[T]` of their null space, `\{c\} = [T] \{c_r\}`. The results are
+the limit of the penalty method for penalty constants going to infinity,
+see :mod:`panels.multidomain.connections.nullspace`.
+
+Function :func:`.calc_kt_kr` is based on [1]_ and uses a strain
+compatibility criterion to calculate the penalty constants. The aim is to
+have penalty constants that are just high enough to produce the desired
+compatibility, but not too high such that numerical stability issues start
+to appear.
+
+Damaged connections were implemented by Nathan (2024) [2]_, with the
+traction-separation law of :func:`.calc_kw_tsl`.
+
+References
+----------
+.. [1] Castro, S. G. P., and Donadon, M. V., Assembly of Semi-Analytical
+   models to Address Linear Buckling and Vibration of Stiffened Composite
+   Panels with Debonding Defect, Composite Structures, 2017.
+   https://doi.org/10.1016/j.compstruct.2016.10.026
+.. [2] D'Souza, N., Multi-Domain Semi-Analytical Cohesive Zone Approach,
+   MSc thesis, Delft University of Technology, 2024.
+   https://resolver.tudelft.nl/uuid:4709f888-c032-4d9f-97e3-402dfdd47cf1
 
 """
 from . kCBFycte import *

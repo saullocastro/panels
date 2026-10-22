@@ -84,6 +84,48 @@ class BladeStiff1D(object):
         Lamina properties of each ply of the flange, as ``laminaprop`` of
         :class:`.Shell`.
 
+    Notes
+    -----
+    The model is that of the blade stiffener of [1]_, with the stiffener's
+    base as a structural element. The base is a :class:`.Shell` with the
+    approximation functions and the Ritz constants of the skin, whose
+    laminate is offset by `-(h/2 + h_b/2)`, i.e. the base is perfectly
+    bonded below the skin and follows its displacement field. The flange is
+    a beam along `x` at `y = y_s`, normal to the skin and below it, whose
+    displacements are those of the skin along the line `y = y_s`: the
+    cross-section of the flange does not deform, and the local buckling of
+    the flange is not represented.
+
+    The properties of the flange, a laminate of height `b_f` and thickness
+    `h_f`, computed by ``_rebuild()``, are, with the reduced stiffnesses
+    `\bar Q_{ij}` of each ply `k` in the axes of the laminate (``q11L``,
+    ``q12L``, ``q16L``, ``q22L``), its thickness `h_k` and the distance
+    `y_k` of its mid-plane from the first face of the laminate:
+
+    .. math::
+
+        E_1 = \sum_k h_k \left(\bar Q_{11} - \frac{\bar Q_{12}^2}{\bar
+        Q_{22}}\right), \qquad
+        S_1 = -\sum_k y_k h_k \left(\bar Q_{16} - \frac{\bar Q_{12} \bar
+        Q_{16}}{\bar Q_{22}}\right), \qquad
+        F_1 = \frac{b_f^2}{12} E_1
+
+    `E_1` being the axial stiffness per unit height of the flange, and the
+    section properties `I_{yy} = h_f b_f^3/12` and `J_{xx} = h_f b_f^3/12 +
+    b_f h_f^3/12`. The distance from the mid-surface of the skin to the
+    centroid of the flange is `d_f = b_f/2 + h_b + h/2`.
+
+    TODO(author): should the coupling term of `S_1` be `\bar Q_{12} \bar
+    Q_{26}/\bar Q_{22}`, and should `y_k` be measured from the mid-plane of
+    the flange laminate instead of its first face?
+
+    References
+    ----------
+    .. [1] Castro, S. G. P., Guimaraes, T. A. M., Rade, D. A., and Donadon,
+       M. V., Flutter of stiffened composite panels considering the
+       stiffener's base as a structural element, Composite Structures, 2016.
+       https://doi.org/10.1016/j.compstruct.2015.12.056
+
     """
     def __init__(self, bay, rho, panel1, panel2, ys, bb, bf, bstack, bplyts,
             blaminaprops, fstack, fplyts, flaminaprops):
@@ -175,7 +217,7 @@ class BladeStiff1D(object):
 
 
     def calc_kC(self, size=None, row0=0, col0=0, silent=False, finalize=True):
-        """Calculate the linear constitutive stiffness matrix
+        r"""Calculate the linear constitutive stiffness matrix
 
         The stiffener is rebuilt, then the matrix of the base,
         :meth:`.Shell.calc_kC`, and that of the flange, computed by the
@@ -200,6 +242,36 @@ class BladeStiff1D(object):
             :func:`structsolve.sparseutils.finalize_symmetric_matrix`; with
             ``False`` the sum of the upper triangles is stored. Default
             ``True``.
+
+        Notes
+        -----
+        The base is a :class:`.Shell` whose laminate is offset from the
+        mid-surface of the skin, see :meth:`.Shell.calc_kC`. The strain
+        energy of the flange, integrated along `x` at `y = y_s` with the
+        approximation functions of the skin, is
+
+        .. math::
+
+            U_f = \frac{b_f}{2} \int_0^a \{\varepsilon_f\}^T [k_{sf}]
+            \{\varepsilon_f\} dx, \qquad
+            \{\varepsilon_f\} = \begin{Bmatrix} u_{,x} \\ -w_{,xx} \\
+            -w_{,xy} \end{Bmatrix}, \qquad
+            [k_{sf}] = \begin{bmatrix}
+                E_1 & -d_f E_1 & S_1 \\
+                -d_f E_1 & F_1 + d_f^2 E_1 & -d_f S_1 \\
+                S_1 & -d_f S_1 & J_{xx}
+            \end{bmatrix}
+
+        with the properties of :class:`.BladeStiff1D`, i.e. `u_{,x} + d_f
+        w_{,xx}` is the axial strain at the centroid of the flange, below the
+        skin, with the axial stiffness `b_f E_1`, `b_f F_1 = E_1 b_f^3/12` is
+        the bending stiffness of the flange about its own centroid, and
+        `-w_{,xy}` is the twist of the flange, which rotates with the skin
+        about `x`.
+
+        TODO(author): the torsion term is `b_f J_{xx} w_{,xy}^2`, with the
+        section property `J_{xx}` (length**4) and without a shear modulus,
+        whereas the other terms have units of energy; is a modulus missing?
 
         """
         self._rebuild()
@@ -229,7 +301,7 @@ class BladeStiff1D(object):
 
     def calc_kG(self, size=None, row0=0, col0=0, silent=False, finalize=True,
             c=None):
-        """Calculate the linear geometric stiffness matrix
+        r"""Calculate the linear geometric stiffness matrix
 
         The stiffener is rebuilt and only the flange contributes, with the
         kernel ``fkGf`` and the axial force of the attribute ``Fx`` (``0.``
@@ -259,6 +331,18 @@ class BladeStiff1D(object):
         ------
         NotImplementedError
             When ``c`` is not ``None``.
+
+        Notes
+        -----
+        The geometric stiffness of the flange comes from the energy of its
+        axial force `F_x` (``Fx``), integrated along `x` at `y = y_s`:
+
+        .. math::
+
+            U_{G} = \frac{1}{2} \int_0^a F_x w_{,x}^2 dx
+
+        The base adds no geometric stiffness: the whole axial load of the
+        stiffener is assumed to be carried by the flange, through ``Fx``.
 
         """
         #TODO
@@ -290,7 +374,7 @@ class BladeStiff1D(object):
 
 
     def calc_kM(self, size=None, row0=0, col0=0, silent=False, finalize=True):
-        """Calculate the mass matrix
+        r"""Calculate the mass matrix
 
         The stiffener is rebuilt, then the mass matrix of the base,
         :meth:`.Shell.calc_kM`, and that of the flange, computed by the
@@ -315,6 +399,24 @@ class BladeStiff1D(object):
             Whether the matrix is completed from its upper triangle with
             :func:`structsolve.sparseutils.finalize_symmetric_matrix`.
             Default ``True``.
+
+        Notes
+        -----
+        The kinetic energy of the flange is integrated through its height,
+        its in-plane displacements at the centroid being `u - d_f \phi_x` and
+        `v - d_f \phi_y`, with the rotations `\phi_x = -w_{,x}` and `\phi_y
+        = -w_{,y}` of the skin at `y = y_s`, see the kernel ``fkMf`` of
+        ``bladestiff1d_clt_donnell``, whose coupling terms are `-d_f` instead
+        of the `-2 d_f` of Eq. (26) of [1]_. The mass matrix of the
+        base is that of a :class:`.Shell` with offset, see
+        :meth:`.Shell.calc_kM`.
+
+        References
+        ----------
+        .. [1] Castro, S. G. P., Guimaraes, T. A. M., Rade, D. A., and
+           Donadon, M. V., Flutter of stiffened composite panels considering
+           the stiffener's base as a structural element, Composite
+           Structures, 2016. https://doi.org/10.1016/j.compstruct.2015.12.056
 
         """
         self._rebuild()

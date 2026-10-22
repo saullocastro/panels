@@ -4,7 +4,32 @@ Connections of the models based on shear deformation theories
 The plate and cylindrical shell models based on the first-order (FSDT) and
 third-order (TSDT) shear deformation theories, e.g. ``'plate_fsdt_donnell'``
 or ``'cylshell_tsdt_sanders'``, have 5 DOFs per term, `u, v, w, \phi_x,
-\phi_y`, and the displacement field
+\phi_y`. The penalty stiffness matrices below connect two domains of these
+models:
+
+- :func:`.fkCSSxcte_sdt` and :func:`.fkCSSycte_sdt`, between two skins along
+  an edge, penalize the difference of `u, v, w` with ``kt`` and of the
+  rotations `\phi_x` and `\phi_y`, the latter with the term `v/r` of the
+  Sanders-Koiter kinematics, with ``kr``. For the TSDT the derivative of
+  `w` normal to the edge is penalized with ``kr`` too.
+- :func:`.fkCSB_sdt`, between two skins connected over an area, penalizes
+  with ``kt`` the difference of the displacements `u, v, w` at the
+  interface, the face `z = -h_1/2` of the panel on the positive side of the
+  interface along the common `z` axis, ``p_top`` (``p1`` of the connection),
+  and the face `z = +h_2/2` of the panel on the negative side, ``p_bot``
+  (``p2``), see :meth:`.MultiDomain.get_kC_conn`. When ``kr`` is given the
+  difference of the rotations is also penalized.
+
+All the functions return the upper triangle of the connection matrix, with
+the shape ``(size, size)`` of the assembly, as the Cython kernels of the
+models with 3 DOFs, see :func:`structsolve.sparseutils.finalize_symmetric_matrix`.
+
+The matrices are computed with the integrals of :ref:`Bardell's functions
+<theory_func_bardell>`.
+
+Notes
+-----
+The models have the displacement field
 
 .. math::
 
@@ -16,35 +41,31 @@ with `c_1 = 0` for the first-order (FSDT) and `c_1 = 4/(3 h^2)` for the
 third-order shear deformation theory (TSDT), and where `\Phi_y = \phi_y +
 v/r` is the rotation of the normal about `x` with the Sanders-Koiter
 kinematics, `\Phi_y = \phi_y` otherwise. The penalty stiffness matrices
-below enforce the compatibility between the displacement fields of two
-domains:
+enforce the compatibility between the displacement fields of two domains,
+with the penalty energy `\frac{1}{2} \sum_k k_k \int (q_k^{(1)} -
+q_k^{(2)})^2` of the quantities `q_k` of :func:`._connection_matrix`:
 
-- :func:`.fkCSSxcte_sdt` and :func:`.fkCSSycte_sdt`, between two skins along
-  an edge, penalize the difference of `u, v, w` with ``kt`` and of
-  `\phi_x, \Phi_y` with ``kr``. For the TSDT the normal derivative of `w`,
-  which also enters the displacement field, is penalized with ``kr`` too.
-- :func:`.fkCSB_sdt`, between two skins connected over an area, penalizes
-  with ``kt`` the difference of the displacements `u(z), v(z), w(z)` at the
-  interface, the face `z = -h_1/2` of the panel on the positive side of the
-  interface along the common `z` axis, ``p_top`` (``p1`` of the connection),
-  and the face `z = +h_2/2` of the panel on the negative side, ``p_bot``
-  (``p2``), see :meth:`.MultiDomain.get_kC_conn`. The laminates may then rotate independently, like in a
-  layerwise theory. When ``kr`` is given the difference of the rotations
-  `\phi_x, \Phi_y` is also penalized, and for the FSDT two panels connected
-  with a high ``kr`` behave like a single laminate with both stacking
-  sequences, provided that the shear correction factor is a constant, e.g.
-  ``Shell.fsdt_shear_correction = 5/6``; the default, ``'rohwer'``, depends on
-  the stacking sequence of each laminate. The TSDT laminates have
-  zero transverse shear strains at their faces, including the interface,
-  and are therefore stiffer than a single TSDT laminate. The offsets of the
-  laminates are not considered, as in the kernels of the models with 3 DOFs.
+- :func:`.fkCSSxcte_sdt` and :func:`.fkCSSycte_sdt` penalize the
+  difference of `u, v, w` with ``kt`` and of `\phi_x, \Phi_y` with ``kr``.
+  For the TSDT the normal derivative of `w`, which also enters the
+  displacement field, is penalized with ``kr`` too, see
+  :func:`._edge_components`.
+- :func:`.fkCSB_sdt` penalizes with ``kt`` the difference of the
+  displacements `u(z), v(z), w(z)` at the interface, see
+  :func:`._surface_terms`. The laminates may then rotate independently,
+  like in a layerwise theory. When ``kr`` is given the difference of the
+  rotations `\phi_x, \Phi_y` is also penalized, and for the FSDT two panels
+  connected with a high ``kr`` behave like a single laminate with both
+  stacking sequences, provided that the shear correction factor is a
+  constant, e.g. ``Shell.fsdt_shear_correction = 5/6``; the default,
+  ``'rohwer'``, depends on the stacking sequence of each laminate. The TSDT
+  laminates have zero transverse shear strains at their faces, including
+  the interface, and are therefore stiffer than a single TSDT laminate. The
+  offsets of the laminates are not considered, as in the kernels of the
+  models with 3 DOFs.
 
-All the functions return the upper triangle of the connection matrix, with
-the shape ``(size, size)`` of the assembly, as the Cython kernels of the
-models with 3 DOFs, see :func:`structsolve.sparseutils.finalize_symmetric_matrix`.
-
-The matrices are computed with the integrals of :ref:`Bardell's functions
-<theory_func_bardell>`, which are exact for the polynomial approximations.
+The integrals of Bardell's functions are exact for the polynomial
+approximations.
 
 """
 import numpy as np
@@ -73,8 +94,17 @@ def _rinv_sanders(p):
 
 
 def _rotation_y(p):
-    r"""Terms of the rotation of the normal about `x`, `\Phi_y = \phi_y +
-    v/r` with the Sanders-Koiter kinematics"""
+    r"""Terms of the rotation of the normal about `x`, `\phi_y` plus the
+    term `v/r` with the Sanders-Koiter kinematics
+
+    Notes
+    -----
+    `\Phi_y = \phi_y + v/r` with the Sanders-Koiter kinematics, whose
+    rotation of the normal about `x` includes the rigid-body rotation `v/r`
+    of the cross-section, and `\Phi_y = \phi_y` otherwise, the term `v/r`
+    being neglected with the Donnell kinematics and absent for plates.
+
+    """
     terms = [(PHIY, 0, 0, 1.)]
     rinv = _rinv_sanders(p)
     if rinv != 0:
@@ -115,7 +145,18 @@ def _point(p, field, der, direction, coord):
 def _integral(pP, fieldP, derP, pQ, fieldQ, derQ, direction):
     r"""Integral along ``direction`` of the products of the approximation
     functions of ``pP`` and ``pQ``, or of their first derivatives, which must
-    span the same length"""
+    span the same length
+
+    Notes
+    -----
+    With the natural coordinate `\xi = 2 x/L - 1` shared by the two panels,
+    `\int_0^L f_P f_Q dx = \frac{L}{2} \int_{-1}^{1} f_P f_Q d\xi` and each
+    derivative is `\partial/\partial x = (2/L) \partial/\partial \xi`. The
+    integrals along `\xi` are the closed-form integrals of Bardell's
+    functions, ``calc_integral_ff``, ``calc_integral_ffp`` and
+    ``calc_integral_fpfp`` of :mod:`panels.bardell`.
+
+    """
     LP = _length(pP, direction)
     LQ = _length(pQ, direction)
     numP = _num(pP, direction)
@@ -154,10 +195,15 @@ def _factor(pP, termP, cteP, pQ, termQ, cteQ, direction):
 def _connection_matrix(components, ctes, size):
     r"""Penalty stiffness matrix of a connection
 
-    The penalty energy is `\frac{1}{2} \sum_k k_k \int (q_k^1 - q_k^2)^2`,
-    where each quantity `q_k^p` of panel `p` is a linear combination of terms
+    Each penalized quantity of a panel is a linear combination of terms
     ``(field, der_x, der_y, coeff)``, with ``der_x`` and ``der_y`` the orders
-    of the derivatives along `x` and `y`.
+    of the derivatives along `x` and `y`. The products of the terms of the
+    two panels are integrated along the directions where ``ctes`` is
+    ``None`` and evaluated at the constant coordinates otherwise, with a
+    positive sign within a panel and a negative sign between the two
+    panels. A penalty equal to zero adds no term. The upper triangle of the
+    matrix is returned, a :class:`scipy.sparse.coo_matrix` with the shape
+    ``(size, size)``.
 
     Parameters
     ----------
@@ -169,6 +215,28 @@ def _connection_matrix(components, ctes, size):
         connection in ``p1`` and ``p2``.
     size : int
         Size of the assembly.
+
+    Notes
+    -----
+    The penalty energy is `\frac{1}{2} \sum_k k_k \int (q_k^1 - q_k^2)^2`,
+    where each quantity `q_k^p` of panel `p` is a linear combination of terms
+    ``(field, der_x, der_y, coeff)``, `q_k^p = \sum_t \alpha_t \{N_t\}
+    \{c^p\}`, where `\alpha_t` is ``coeff``, `\{N_t\}` the derivative of
+    order ``der_x`` along `x` and ``der_y`` along `y` of the approximation
+    functions of ``field`` and `\{c^p\}` the Ritz constants of panel `p`.
+    The second derivatives of the energy with respect to `\{c^P\}` and
+    `\{c^Q\}` give the blocks
+
+    .. math::
+
+        [K_{PQ}] = \pm k_k \sum_{t \in P} \sum_{s \in Q} \alpha_t \alpha_s
+        \int \{N_t\}^T \{N_s\}
+
+    with the sign `+` for `P = Q` and `-` for `P \neq Q`. The approximation
+    functions are products `f(x) g(y)`, so each integral is the Kronecker
+    product of the factors along `x` and `y` of :func:`._factor`, the
+    integrals of :func:`._integral` or the products of the functions at the
+    constant coordinates of the connection.
 
     """
     rows = []
@@ -208,7 +276,22 @@ def _connection_matrix(components, ctes, size):
 
 def _edge_components(kt, kr, p1, p2, normal):
     r"""Components penalized along an edge, ``normal`` is the direction of
-    the derivative of `w` that enters the TSDT displacement field"""
+    the derivative of `w` that enters the TSDT displacement field
+
+    The differences of `u, v, w` are penalized with ``kt`` and those of
+    `\phi_x` and of the rotation of :func:`._rotation_y` with ``kr``; when
+    ``p1`` or ``p2`` is a TSDT model, the difference of the derivative of `w`
+    along ``normal`` is penalized with ``kr`` too.
+
+    Notes
+    -----
+    The TSDT displacement field contains `w_{,x}` in `u(z)` and `w_{,y}` in
+    `v(z)`, see :mod:`panels.multidomain.connections.kCsdt`. Along the edge,
+    the tangential derivative of `w` is continuous when `w` is, so only the
+    derivative normal to the edge needs to be penalized for the continuity
+    of `u(z)` and `v(z)` through the thickness.
+
+    """
     comps = [
         (kt, ((p1, [(U, 0, 0, 1.)]), (p2, [(U, 0, 0, 1.)]))),
         (kt, ((p1, [(V, 0, 0, 1.)]), (p2, [(V, 0, 0, 1.)]))),
@@ -226,8 +309,9 @@ def fkCSSxcte_sdt(kt, kr, p1, p2, xcte1, xcte2, size):
     r"""Skin-skin connection along `x_1 = x_{cte1}` and `x_2 = x_{cte2}`
 
     The differences of `u, v, w` between the two panels are penalized with
-    ``kt``, those of `\phi_x` and `\Phi_y` with ``kr`` and, when one of
-    the panels is a TSDT model, that of `w_{,x}` with ``kr`` too. The
+    ``kt``, those of the rotations `\phi_x` and `\phi_y`, with the term `v/r`
+    of the Sanders-Koiter kinematics, with ``kr`` and, when one of the
+    panels is a TSDT model, that of `w_{,x}` with ``kr`` too. The
     products of the approximation functions are integrated along `y` and
     evaluated at ``xcte1`` in ``p1`` and ``xcte2`` in ``p2``. The terms are
     placed at ``row_start`` and ``col_start`` of each panel. A penalty
@@ -253,6 +337,21 @@ def fkCSSxcte_sdt(kt, kr, p1, p2, xcte1, xcte2, size):
     kCSSxcte : scipy.sparse.coo_matrix
         Upper triangle of the connection matrix, shape ``(size, size)``.
 
+    Notes
+    -----
+    The penalty energy is
+
+    .. math::
+
+        U = \frac{1}{2} \int_y k_t \left[ (u_1 - u_2)^2 + (v_1 - v_2)^2 +
+            (w_1 - w_2)^2 \right] + k_r \left[ (\phi_{x1} - \phi_{x2})^2 +
+            (\Phi_{y1} - \Phi_{y2})^2 + (w_{1,x} - w_{2,x})^2 \right] dy
+
+    with the fields of ``p1`` at `x_1 = x_{cte1}` and those of ``p2`` at
+    `x_2 = x_{cte2}`, `\Phi_y` given by :func:`._rotation_y`, and the term
+    `w_{,x}` only when one of the panels is a TSDT model, see
+    :func:`._edge_components`.
+
     """
     _check_sdt(p1, p2)
     comps = _edge_components(kt, kr, p1, p2, 'x')
@@ -263,8 +362,9 @@ def fkCSSycte_sdt(kt, kr, p1, p2, ycte1, ycte2, size):
     r"""Skin-skin connection along `y_1 = y_{cte1}` and `y_2 = y_{cte2}`
 
     The differences of `u, v, w` between the two panels are penalized with
-    ``kt``, those of `\phi_x` and `\Phi_y` with ``kr`` and, when one of
-    the panels is a TSDT model, that of `w_{,y}` with ``kr`` too. The
+    ``kt``, those of the rotations `\phi_x` and `\phi_y`, with the term `v/r`
+    of the Sanders-Koiter kinematics, with ``kr`` and, when one of the
+    panels is a TSDT model, that of `w_{,y}` with ``kr`` too. The
     products of the approximation functions are integrated along `x` and
     evaluated at ``ycte1`` in ``p1`` and ``ycte2`` in ``p2``. The terms are
     placed at ``row_start`` and ``col_start`` of each panel. A penalty
@@ -290,6 +390,12 @@ def fkCSSycte_sdt(kt, kr, p1, p2, ycte1, ycte2, size):
     kCSSycte : scipy.sparse.coo_matrix
         Upper triangle of the connection matrix, shape ``(size, size)``.
 
+    Notes
+    -----
+    The penalty energy is that of :func:`.fkCSSxcte_sdt`, integrated along
+    `x` with the fields of ``p1`` at `y_1 = y_{cte1}` and those of ``p2`` at
+    `y_2 = y_{cte2}`, and with `w_{,y}` in place of `w_{,x}`.
+
     """
     _check_sdt(p1, p2)
     comps = _edge_components(kt, kr, p1, p2, 'y')
@@ -298,7 +404,22 @@ def fkCSSycte_sdt(kt, kr, p1, p2, ycte1, ycte2, size):
 
 def _surface_terms(p, z):
     r"""Terms of `u(z)` and `v(z)` of panel ``p`` at the distance `z` from
-    its mid-surface"""
+    its mid-surface
+
+    Notes
+    -----
+    From the displacement field of :mod:`panels.multidomain.connections.kCsdt`:
+
+    .. math::
+
+        u(z) = u + (z - c_1 z^3) \phi_x - c_1 z^3 w_{,x}, \qquad
+        v(z) = (1 + z/r) v + (z - c_1 z^3) \phi_y - c_1 z^3 w_{,y}
+
+    with `c_1 = 4/(3 h^2)` for the TSDT, `h` being the sum of the ply
+    thicknesses of ``p``, `c_1 = 0` for the FSDT, and the term `z v/r` only
+    with the Sanders-Koiter kinematics.
+
+    """
     c1 = 4/(3*sum(p.plyts)**2) if _is_tsdt(p) else 0.
     cphi = z - c1*z**3
     cw = -c1*z**3
@@ -311,13 +432,14 @@ def _surface_terms(p, z):
 def fkCSB_sdt(kt, p_top, p_bot, size, kr=0.):
     r"""Skin-base connection over the area of two panels
 
-    The differences of `u(z)` and `v(z)` between the face `z = -h/2` of
-    ``p_top`` and the face `z = +h/2` of ``p_bot``, ``h`` being the sum of
-    the ply thicknesses of each panel, and the difference of `w` are
-    penalized with ``kt``; the differences of `\phi_x` and `\Phi_y` with
-    ``kr``. The products of the approximation functions are integrated
-    along `x` and `y`. The terms are placed at ``row_start`` and
-    ``col_start`` of each panel. A penalty equal to zero adds no term. A
+    The differences of the in-plane displacements `u` and `v` between the
+    face `z = -h/2` of ``p_top`` and the face `z = +h/2` of ``p_bot``, ``h``
+    being the sum of the ply thicknesses of each panel, and the difference
+    of `w` are penalized with ``kt``; the differences of the rotations
+    `\phi_x` and `\phi_y`, with the term `v/r` of the Sanders-Koiter
+    kinematics, with ``kr``. The products of the approximation functions
+    are integrated along `x` and `y`. The terms are placed at ``row_start``
+    and ``col_start`` of each panel. A penalty equal to zero adds no term. A
     ``ValueError`` is raised by ``_check_sdt`` when a panel is not a model
     based on the FSDT or TSDT.
 
@@ -342,6 +464,22 @@ def fkCSB_sdt(kt, p_top, p_bot, size, kr=0.):
     -------
     kCSB : scipy.sparse.coo_matrix
         Upper triangle of the connection matrix, shape ``(size, size)``.
+
+    Notes
+    -----
+    The penalty energy, integrated over the area of the connection, is
+
+    .. math::
+
+        U = \frac{1}{2} \int_x \int_y k_t \left[ (u_t - u_b)^2 + (v_t -
+            v_b)^2 + (w_t - w_b)^2 \right] + k_r \left[ (\phi_{xt} -
+            \phi_{xb})^2 + (\Phi_{yt} - \Phi_{yb})^2 \right] dy dx
+
+    where `u_t, v_t` are `u(z), v(z)` of ``p_top`` at `z = -h_t/2` and
+    `u_b, v_b` those of ``p_bot`` at `z = +h_b/2`, see
+    :func:`._surface_terms`, and `\Phi_y` is given by :func:`._rotation_y`.
+    With ``kr = 0`` the two laminates may rotate independently at the
+    interface, see :mod:`panels.multidomain.connections.kCsdt`.
 
     """
     _check_sdt(p_top, p_bot)

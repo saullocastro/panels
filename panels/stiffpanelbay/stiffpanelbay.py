@@ -72,6 +72,32 @@ class StiffPanelBay(object):
     - ``bladestiff1ds`` contains the :class:`.BladeStiff1D` stiffeners
     - ``bladestiff2ds`` contains the :class:`.BladeStiff2D` stiffeners
 
+    Notes
+    -----
+    The panels of the skin are :class:`.Shell` objects with the same
+    approximation functions, spanning the whole bay with its boundary
+    conditions, each one integrated only over its strip `y_1 \le y \le
+    y_2`. They share the Ritz constants of the skin, so that the
+    displacement field of the skin is continuous across the panels without
+    any connection, and the matrices of the bay are the sums of those of the
+    panels and of the stiffeners. The bases of the stiffeners also use the
+    Ritz constants of the skin, and only the flanges of the
+    :class:`.BladeStiff2D` stiffeners have their own Ritz constants, which
+    follow those of the skin, see :meth:`.get_size`.
+
+    For the flutter analysis with the piston theory, the matrices enter the
+    equations of motion as `([K] + [K_A] + \lambda^2 [M])\{c\} = \{0\}`, see
+    :meth:`.Shell.calc_kA` and :meth:`.calc_kA`, as in [1]_.
+
+    TODO(author): confirm that the model of the bay is that of [1]_.
+
+    References
+    ----------
+    .. [1] Castro, S. G. P., Guimaraes, T. A. M., Rade, D. A., and Donadon,
+       M. V., Flutter of stiffened composite panels considering the
+       stiffener's base as a structural element, Composite Structures, 2016.
+       https://doi.org/10.1016/j.compstruct.2015.12.056
+
     """
     def __init__(self):
         self.name = ''
@@ -836,7 +862,44 @@ class StiffPanelBay(object):
 
 
     def _aero_parameters(self):
-        """Piston theory parameters ``beta``, ``gamma`` and ``aeromu``"""
+        r"""Piston theory parameters ``beta``, ``gamma`` and ``aeromu``
+
+        When the attribute ``beta`` is ``None`` they are computed from the
+        attributes ``Mach``, ``rho_air``, ``V``, ``speed_sound`` and, for
+        the models that need the radius, ``r``; a ``ValueError`` is raised
+        when ``Mach`` is ``None`` or lower than ``1``, and ``Mach == 1`` is
+        replaced by ``1.0001`` in the attribute ``Mach``. Otherwise the
+        attributes ``beta``, ``gamma`` and ``aeromu`` are returned, ``None``
+        meaning ``0.`` for the last two.
+
+        Returns
+        -------
+        beta, gamma, aeromu : float
+            Parameters of the aerodynamic load, of the curvature correction
+            and of the aerodynamic damping. When computed, ``gamma`` is
+            ``0.`` for the models that do not need the radius.
+
+        Notes
+        -----
+        With the Mach number `M`, the air density `\rho_{air}`, the air speed
+        `V` and the speed of sound `a_\infty`:
+
+        .. math::
+
+            \beta = \frac{\rho_{air} V^2}{\sqrt{M^2 - 1}}, \qquad
+            \gamma = \frac{\beta}{2 r \sqrt{M^2 - 1}}, \qquad
+            \mu_a = \frac{\beta}{M a_\infty} \frac{M^2 - 2}{M^2 - 1}
+
+        `\gamma` is the curvature correction of the piston theory for
+        cylindrical shells, see :meth:`.Shell.calc_kA`, zero for the models
+        without radius, and `\mu_a`, ``aeromu``, the coefficient of the
+        aerodynamic damping, see :meth:`.Shell.calc_cA`. The linear piston
+        theory holds for supersonic flows only, and `\beta` is singular at
+        `M = 1`, hence the replacement of ``Mach == 1`` by ``1.0001``.
+
+        TODO(author): give a source for the expression of ``aeromu``.
+
+        """
         r = self.r if self.r is not None else 0.
         if self.beta is None:
             if self.Mach is None:
@@ -890,6 +953,19 @@ class StiffPanelBay(object):
         kA : scipy.sparse.csr_matrix
             The aerodynamic matrix, of shape ``(size, size)``.
 
+        Notes
+        -----
+        The aerodynamic load of the linear piston theory and the parameters
+        ``beta`` and ``gamma`` are those of :meth:`.Shell.calc_kA` and
+        :meth:`._aero_parameters`. The skew-symmetrization keeps the diagonal
+        and the upper triangle of the sum of the panels and replaces the
+        lower triangle by the opposite of the upper one.
+
+        TODO(author): the term `\gamma w` gives a symmetric matrix and the
+        term `\beta w_{,x}` is skew-symmetric only when the boundary terms
+        of `\int N_i N_{k,x} dx` vanish; is the skew-symmetrization intended,
+        given that :meth:`.Shell.calc_kA` never symmetrizes the matrix?
+
         """
         self._rebuild()
         msg('Calculating kA... ', level=2, silent=silent)
@@ -939,6 +1015,16 @@ class StiffPanelBay(object):
         cA : sparse matrix
             The aerodynamic damping matrix, with complex values, of shape
             ``(size, size)``.
+
+        Notes
+        -----
+        The damping term of the piston theory, with the coefficient
+        ``aeromu`` of :meth:`._aero_parameters`, is proportional to the
+        velocity of `w`, see :meth:`.Shell.calc_cA`, whose matrix is
+        multiplied by the imaginary unit.
+
+        TODO(author): state how ``cA`` enters the flutter eigenvalue
+        problem, e.g. with the factor of the frequency of a harmonic motion.
 
         """
         self._rebuild()
@@ -1724,6 +1810,15 @@ class StiffPanelBay(object):
         -------
         fext : np.ndarray
             The external force vector, 1-D array of size :meth:`.get_size`.
+
+        Notes
+        -----
+        The external force vector is the work-equivalent of the point
+        forces, the virtual work of each force `\{f\} = \{f_x, f_y, f_z\}^T`
+        at `(x, y)` being `\delta\{c\}^T [N(x, y)]^T \{f\}`, where the rows
+        of `[N]` are the approximation functions of `u`, `v` and `w` at the
+        point, given by ``fg``. The rows of the rotations are multiplied by
+        zero: no moment is applied.
 
         """
         msg('Calculating external forces...', level=2, silent=silent)
