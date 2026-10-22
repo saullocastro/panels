@@ -138,6 +138,25 @@ are eliminated from them. No penalty constant is needed, see
 :ref:`null_space` and :mod:`panels.multidomain.connections.nullspace`.
 
 
+Prescribed displacements with penalties
+---------------------------------------
+
+With ``MultiDomain(..., pd_method='penalty')``, the default, a displacement
+prescribed at a point or along a line, see :meth:`.Shell.add_point_pd`,
+:meth:`.Shell.add_distr_pd_fixed_x` and :meth:`.Shell.add_distr_pd_fixed_y`,
+is imposed with a spring between the panel and the support: the penalty
+stiffness is added to the stiffness matrix with the kernels below, for the
+models with 3 and with 5 DOFs per term, and the force of the spring is in the
+external force vector of :func:`.shell_fext`. With ``pd_method='null-space'``
+the prescribed displacements are imposed exactly, see :ref:`null_space_pd`.
+
+.. autofunction:: panels.multidomain.connections.kCpd.fkCpd
+
+.. autofunction:: panels.multidomain.connections.kCpd.fkCld_xcte
+
+.. autofunction:: panels.multidomain.connections.kCpd.fkCld_ycte
+
+
 Calculating Penalty Constants
 ------------------------------
 
