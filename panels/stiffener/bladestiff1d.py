@@ -101,7 +101,8 @@ class BladeStiff1D(object):
     `h_f`, computed by ``_rebuild()``, are, with the reduced stiffnesses
     `\bar Q_{ij}` of each ply `k` in the axes of the laminate (``q11L``,
     ``q12L``, ``q16L``, ``q22L``, ``q26L``), its thickness `h_k` and the
-    distance `y_k` of its mid-plane from the first face of the laminate:
+    distance `y_k` of its mid-surface from the mid-plane of the flange
+    laminate:
 
     .. math::
 
@@ -160,8 +161,15 @@ class BladeStiff1D(object):
     `D_{26}`, and the effect of the free edges of the strip, of relative
     order `h_f/b_f`, are neglected.
 
-    TODO(author): should `y_k` be measured from the mid-plane of the flange
-    laminate instead of its first face?
+    The distances `y_k` are measured from the mid-plane of the flange
+    laminate, at the mid-surface of each ply, as `y_{ply}` of Eq. (16) of
+    [1]_, which does not state the origin: `S_1` couples the axial strain
+    with the shear strain of the twist, which varies linearly through the
+    thickness of the flange about its mid-plane, i.e. it is a coupling of the
+    type `B` of the flange laminate, zero for a symmetric flange, as `F_1`
+    is taken about the centroid of the flange. Measured from the first face,
+    `S_1` would contain the spurious term `-(h_f/2) \sum_k h_k (\bar Q_{16} -
+    \bar Q_{12} \bar Q_{26}/\bar Q_{22})`.
 
     References
     ----------
@@ -262,7 +270,9 @@ class BladeStiff1D(object):
             self.E1 = 0
             #E3 = 0
             self.S1 = 0
-            yply = self.flam.plies[0].h/2.
+            #NOTE y of the mid-surface of each ply from the mid-plane of the
+            #     flange laminate, see the notes of the class
+            yply = self.flam.plies[0].h/2. - self.hf/2.
             for i, ply in enumerate(self.flam.plies):
                 if i > 0:
                     yply += self.flam.plies[i-1].h/2. + self.flam.plies[i].h/2.

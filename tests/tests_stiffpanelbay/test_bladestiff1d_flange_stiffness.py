@@ -5,7 +5,9 @@ r"""Stiffness properties of the 1D flange of :class:`.BladeStiff1D`
   isotropic flange;
 - coupling `S_1` between the axial strain and the twist: the reduced
   stiffness `\bar Q_{16} - \bar Q_{12} \bar Q_{26}/\bar Q_{22}` of each ply
-  with `\sigma_2 = 0` along the height of the flange.
+  with `\sigma_2 = 0` along the height of the flange, with the distance
+  `y_k` of each ply from the mid-plane of the flange laminate, such that
+  `S_1 = 0` for a symmetric flange.
 
 """
 import sys
@@ -102,9 +104,23 @@ def test_S1_condensed_reduced_stiffness():
                       [ply.q16L, ply.q26L, ply.q66L]])
         keep = [0, 2]
         Qc = Q[np.ix_(keep, keep)] - np.outer(Q[keep, 1], Q[1, keep])/Q[1, 1]
-        yk = 0.5*(faces[k] + faces[k + 1])
+        #NOTE the mid-surface of the ply, measured from the mid-plane of the
+        #     flange laminate
+        yk = 0.5*(faces[k] + faces[k + 1]) - faces[-1]/2
         E1 += ply.h*Qc[0, 0]
         S1 += -yk*ply.h*Qc[0, 1]
     assert abs(s.flam.plies[0].q16L - s.flam.plies[0].q26L) > 1e-3*laminaprop[0]
     assert np.isclose(s.E1, E1, rtol=1e-12)
     assert np.isclose(s.S1, S1, rtol=1e-12)
+
+
+@pytest.mark.parametrize('fstack', [[30, -30, -30, 30], [45, 0, -60, -60, 0, 45]])
+def test_S1_vanishes_for_a_symmetric_flange(fstack):
+    r"""`S_1` is a coupling of the type `B`, zero for a laminate symmetric
+    about its mid-plane, as Eq. (16) of Castro et al. (2016) with `y_k` at
+    the mid-surface of each ply measured from the mid-plane of the flange"""
+    bay, s = _stiffener(fstack, laminaprop)
+    scale = sum(ply.h*abs(ply.q16L) for ply in s.flam.plies)*sum(
+        ply.h for ply in s.flam.plies)
+    assert scale > 0
+    assert abs(s.S1) <= 1e-12*scale
