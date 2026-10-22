@@ -14,7 +14,7 @@ import os
 import numpy as np
 from scipy.sparse import csr_matrix
 from numpy import linspace, reshape
-from structsolve.sparseutils import finalize_symmetric_matrix, make_skew_symmetric
+from structsolve.sparseutils import finalize_symmetric_matrix
 
 from panels import json_io
 from panels.logger import msg
@@ -940,9 +940,9 @@ class StiffPanelBay(object):
         of each panel are set to those of the bay, and the matrices of the
         panels, :meth:`.Shell.calc_kA`, each one integrated over its own
         domain, are summed at row and column ``0``. The stiffeners do not
-        contribute. The sum is made skew-symmetric with
-        :func:`structsolve.sparseutils.make_skew_symmetric` and stored in
-        the attribute ``kA``. Messages are printed unless ``silent=True``.
+        contribute. The sum, checked for ``nan`` and ``inf`` values and
+        never symmetrized, as in :meth:`.Shell.calc_kA`, is stored in the
+        attribute ``kA``. Messages are printed unless ``silent=True``.
 
         Parameters
         ----------
@@ -958,14 +958,14 @@ class StiffPanelBay(object):
         -----
         The aerodynamic load of the linear piston theory and the parameters
         ``beta`` and ``gamma`` are those of :meth:`.Shell.calc_kA` and
-        :meth:`._aero_parameters`. The skew-symmetrization keeps the diagonal
-        and the upper triangle of the sum of the panels and replaces the
-        lower triangle by the opposite of the upper one.
-
-        TODO(author): the term `\gamma w` gives a symmetric matrix and the
-        term `\beta w_{,x}` is skew-symmetric only when the boundary terms
-        of `\int N_i N_{k,x} dx` vanish; is the skew-symmetrization intended,
-        given that :meth:`.Shell.calc_kA` never symmetrizes the matrix?
+        :meth:`._aero_parameters`. The matrix is the sum of those of the
+        panels, `[K_A] = \sum_p [K_A^{(p)}]`, each one the virtual work of the
+        aerodynamic load over its domain, see :meth:`.Shell.calc_kA`. The
+        term in `\gamma` gives a symmetric matrix, and the term in `\beta`
+        a skew-symmetric one only when `w` vanishes at the edges normal to
+        the flow, where the boundary terms of `\int N_i N_{k,x} dx` are
+        otherwise not zero, such that `[K_A]` is in general neither
+        symmetric nor skew-symmetric.
 
         """
         self._rebuild()
@@ -986,7 +986,7 @@ class StiffPanelBay(object):
 
         assert np.any(np.isnan(kA.data)) == False
         assert np.any(np.isinf(kA.data)) == False
-        kA = csr_matrix(make_skew_symmetric(kA))
+        kA = csr_matrix(kA)
         self.kA = kA
 
         msg('finished!', level=2, silent=silent)

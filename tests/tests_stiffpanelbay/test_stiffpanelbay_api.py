@@ -400,7 +400,12 @@ def test_calc_fext_flange_point_load():
 
 @pytest.mark.parametrize('flow', ['x', 'y'])
 def test_calc_kA_matches_single_shell(flow):
-    """Splitting the skin into panels must not change kA"""
+    r"""Splitting the skin into panels must not change kA
+
+    With `w = 0` along the four edges the boundary terms of `\int N_i
+    N_{k,x} dx` vanish and the matrix is skew-symmetric.
+
+    """
     bay = _bay()
     bay.flow = flow
     bay.beta = 1.3
@@ -410,11 +415,69 @@ def test_calc_kA_matches_single_shell(flow):
     s.beta = 1.3
     s.gamma = 0.
     kA_s = s.calc_kA(finalize=False)
-    from structsolve.sparseutils import make_skew_symmetric
-    kA_s = make_skew_symmetric(kA_s)
     assert kA.shape == (bay.get_size(), bay.get_size())
     assert abs(kA - kA_s).max() <= 1e-8*abs(kA_s).max()
     assert abs(kA + kA.T).max() <= 1e-12*abs(kA).max()
+
+
+def _free_edge_bay():
+    """One-panel bay with the edge x = a free"""
+    bay = StiffPanelBay()
+    bay.a = 2*b
+    bay.b = b
+    bay.r = None
+    bay.model = 'plate_clpt_donnell'
+    bay.stack = stack
+    bay.plyt = plyt
+    bay.laminaprop = laminaprop
+    bay.rho = 1600.
+    bay.m = bay.n = 8
+    for d in 'uvw':
+        setattr(bay, 'x2' + d, 1.)
+        setattr(bay, 'x2' + d + 'r', 1.)
+    bay.add_panel(0, b)
+    return bay
+
+
+def _cylinder_bay():
+    r"""One-panel bay of a cylindrical panel, `\gamma \neq 0`"""
+    bay = StiffPanelBay()
+    bay.a = 2*b
+    bay.b = b
+    bay.r = 2*b
+    bay.model = 'cylshell_clpt_donnell'
+    bay.stack = stack
+    bay.plyt = plyt
+    bay.laminaprop = laminaprop
+    bay.rho = 1600.
+    bay.m = bay.n = 8
+    bay.add_panel(0, b)
+    return bay
+
+
+@pytest.mark.parametrize('case', ['free_edge', 'cylinder'])
+def test_calc_kA_is_the_sum_of_the_panels(case):
+    r"""The aerodynamic matrix of a one-panel bay is that of the panel
+
+    The virtual work of the load `\beta w_{,x} + \gamma w` of the piston
+    theory gives the matrix of :meth:`.Shell.calc_kA`, which is not
+    skew-symmetric when `w \neq 0` along an edge normal to the flow, or
+    with the symmetric term in `\gamma` of a cylinder.
+
+    """
+    bay = _free_edge_bay() if case == 'free_edge' else _cylinder_bay()
+    bay.flow = 'x'
+    bay.beta = 1.3
+    bay.gamma = 0.7 if case == 'cylinder' else None
+    kA = bay.calc_kA(silent=True)
+    s = _shell(bay)
+    s.flow = 'x'
+    s.beta = 1.3
+    s.gamma = bay.gamma
+    kA_s = s.calc_kA(finalize=False)
+    assert abs(kA_s + kA_s.T).max() > 1e-3*abs(kA_s).max()
+    assert kA.shape == kA_s.shape
+    assert abs(kA - kA_s).max() <= 1e-12*abs(kA_s).max()
 
 
 def test_calc_kA_from_Mach():
