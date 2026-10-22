@@ -43,10 +43,11 @@ class BladeStiff1D(object):
     ``panel1`` and ``panel2`` and ``hb`` the thickness of the base, and the
     area of the base is stored in ``Asb``. When ``fstack`` is given, the
     laminate of the flange is stored in ``flam`` and its properties in
-    ``hf``, ``Asf``, ``E1``, ``S1`` and ``F1``. The attributes ``hb``,
-    ``As``, ``Iyy``, ``Jxx`` and ``dbf``, the distance ``bf/2 + hb + h/2``
-    from the mid-surface of the panels to the centroid of the flange, are
-    also set. The attribute ``model`` is
+    ``hf``, ``Asf``, ``E1``, ``S1`` and ``F1``. The attributes ``hb`` and
+    ``As`` are also set and, when ``bf`` is given, ``Iyy``, ``Jxx`` and
+    ``dbf``, the distance ``bf/2 + hb + h/2`` from the mid-surface of the
+    panels to the centroid of the flange, which are otherwise ``None``.
+    The attribute ``model`` is
     ``'bladestiff1d_clt_donnell'``, and the attribute ``Fx``, the axial
     force of the flange used by :meth:`.calc_kG`, is ``None``.
 
@@ -64,9 +65,9 @@ class BladeStiff1D(object):
         Coordinate `y` of the stiffener, length.
     bb : float or None
         Width of the base, length. Used only when ``bstack`` is given.
-    bf : float
-        Width (height) of the flange, length. It is used to compute ``dbf``
-        also when ``fstack`` is ``None``, so a number is required.
+    bf : float or None
+        Width (height) of the flange, length. Required when ``fstack`` is
+        given, ``None`` is accepted for a stiffener without flange.
     bstack : list or None
         Stacking sequence of the base, as ``stack`` of :class:`.Shell`.
         ``None`` for a stiffener without base.
@@ -167,6 +168,8 @@ class BladeStiff1D(object):
         assert self.panel1.r == self.panel2.r
 
         if self.fstack is not None:
+            if self.bf is None:
+                raise ValueError('The flange width bf must be given with fstack')
             self.hf = sum(self.fplyts)
             self.Asf = self.bf*self.hf
             self.flam = laminated_plate(self.fstack, plyts=self.fplyts, laminaprops=self.flaminaprops)
@@ -193,10 +196,15 @@ class BladeStiff1D(object):
             self.Asb = self.bb*hb
         self.hb = hb
 
-        #TODO check offset effect on curved panels
-        self.dbf = self.bf/2. + hb + h/2.
-        self.Iyy = self.hf*self.bf**3/12.
-        self.Jxx = self.hf*self.bf**3/12. + self.bf*self.hf**3/12.
+        #NOTE the properties of the flange are not needed without flange,
+        #     whose width bf may then be None
+        if self.bf is not None:
+            #TODO check offset effect on curved panels
+            self.dbf = self.bf/2. + hb + h/2.
+            self.Iyy = self.hf*self.bf**3/12.
+            self.Jxx = self.hf*self.bf**3/12. + self.bf*self.hf**3/12.
+        else:
+            self.dbf = self.Iyy = self.Jxx = None
 
         Asb = self.Asb if self.Asb is not None else 0.
         Asf = self.Asf if self.Asf is not None else 0.

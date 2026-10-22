@@ -445,3 +445,33 @@ def test_calc_cA_matches_single_shell():
     cA_s = _shell(bay).calc_cA(2.5, size=bay.get_size())
     assert abs(cA - cA_s).max() == 0
     assert abs(cA).max() > 0
+
+
+def test_bladestiff1d_without_flange_is_bladestiff2d_padup():
+    """A base-only BladeStiff1D needs no flange width ``bf``
+
+    Without flange both blade formulations reduce to the same base, a
+    :class:`.Shell` offset below the skin over the width ``bb``, so their
+    matrices must be identical.
+
+    """
+    bay1d = _bay()
+    bay1d.add_bladestiff1d(ys=b/2, bb=10*tskin, bstack=stack, bplyt=plyt,
+                           blaminaprop=laminaprop)
+    s = bay1d.bladestiff1ds[0]
+    assert s.flam is None
+    assert s.dbf is None and s.Iyy is None and s.Jxx is None
+    bay2d = _padup_bay()
+    assert bay1d.get_size() == bay2d.get_size()
+    for name in ('calc_kC', 'calc_kG', 'calc_kM'):
+        k1d = getattr(bay1d, name)(silent=True)
+        k2d = getattr(bay2d, name)(silent=True)
+        assert abs(k1d - k2d).max() <= 1e-12*abs(k2d).max(), name
+    assert abs(bay1d.calc_kC(silent=True) - _bay().calc_kC(silent=True)).max() > 0
+
+
+def test_bladestiff1d_flange_requires_bf():
+    bay = _bay()
+    with pytest.raises(ValueError, match='bf'):
+        bay.add_bladestiff1d(ys=b/2, fstack=stack, fplyt=plyt,
+                             flaminaprop=laminaprop)

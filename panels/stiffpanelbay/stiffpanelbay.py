@@ -333,7 +333,8 @@ class StiffPanelBay(object):
             Unique lamina properties for all stiffener base plies. Default
             ``None``.
         bf : float, optional
-            Stiffener flange width, length. Default ``None``.
+            Stiffener flange width, length, required with ``fstack``.
+            Default ``None``.
         fstack : list, optional
             Stacking sequence for the stiffener flange laminate. Default
             ``None``, no flange.
