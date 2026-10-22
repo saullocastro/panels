@@ -348,11 +348,18 @@ With ``pd_method='null-space'`` the values of the penalty constants are not
 used: a component is prescribed when its penalty constant is neither
 ``None`` nor zero and its value is given, the same rule as for the penalty
 method, where a null penalty constant prescribes nothing. The rotations
-`\phi_x` and `\phi_y` of the approximation functions of the model, `-w_{,x}`
-and `-w_{,y}` for the classical laminated plate theory, the fields `\phi_x`
-and `\phi_y` for the shear deformation theories, plus `v/r` in `\phi_y` with
-the Sanders-Koiter kinematics, can also be prescribed, only with
-``pd_method='null-space'``, through the keyword arguments ``kphix``,
+of the normal at the reference surface `z = 0` can also be prescribed:
+`-w_{,x}` and `-w_{,y}` for the classical laminated plate theory, and for
+the shear deformation theories `\theta_x` and `\theta_y` of Eq.
+:eq:`tsdt-offset-theta`, the rotations also tied by the connections, which
+are the fields `\phi_x` and `\phi_y` for the FSDT and for the TSDT without
+offset; the rotation about `x` includes `v/r` with the Sanders-Koiter
+kinematics. With an offset `d`, the TSDT rotations `\phi_x` and `\phi_y`
+are those at the mid-surface, `z = d`, and the prescribed rotations at `z =
+0` include the transverse shear, `\theta_x = \phi_x - (4 d^2/h^2)(\phi_x +
+w_{,x})`, see :ref:`tsdt_offset_prescribed_rotations`. The rotations are
+prescribed only with ``pd_method='null-space'``, through the keyword
+arguments ``kphix``,
 ``phixp``, ``kphiy`` and ``phiyp`` of :meth:`.Shell.add_point_pd`, or
 ``kphix``, ``funcphix``, ``kphiy`` and ``funcphiy`` of the distributed ones.
 For example, a uniform end-shortening `\delta` of a plate, incremented with

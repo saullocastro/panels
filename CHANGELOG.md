@@ -36,6 +36,15 @@
   panels with different offsets. The skin-base connection evaluates each
   laminate at its own face, `z = d -+ h/2`. Nothing changes for `d = 0`, for
   the FSDT and for the CLPT.
+- The rotations `phix` and `phiy` prescribed with `Shell.add_point_pd`,
+  `Shell.add_distr_pd_fixed_x` and `Shell.add_distr_pd_fixed_y`
+  (`pd_method='null-space'`) are, for the TSDT, the rotations at the
+  reference surface `z = 0`, `theta = phi - (4 d^2/h^2)(phi + w,x)`, those
+  tied by the connections, instead of the mid-surface rotations `phi`: with
+  an offset the rotation at `z = 0` missed the prescribed value by the term
+  of the transverse shear, e.g. `2.15e-3` instead of the prescribed `2e-3`
+  at a point of a plate with `d = 0.3 h`. Nothing changes for `d = 0`, for
+  the FSDT and for the CLPT.
 - New page `tsdt_offset.rst`.
 
 ### Bug fixes: stiffeners, connections and post-processing

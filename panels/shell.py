@@ -2996,15 +2996,36 @@ class Shell(object):
             during the non-linear analysis. Default ``True``.
         kphix, phixp, kphiy, phiyp : float, optional
             Prescribed rotations, only with ``pd_method='null-space'``, the
-            rotations `\phi_x` and `\phi_y` of the approximation functions
-            of the model: `-w_{,x}` and `-w_{,y}` for the classical
-            laminated plate theory, plus `v/r` for `\phi_y` with the
-            Sanders-Koiter kinematics. The rotations ``phixp`` and ``phiyp``
-            are dimensionless; of ``kphix`` and ``kphiy`` only whether they
-            are ``None`` or zero is used. Default ``None``.
+            rotations of the normal at the reference surface `z = 0`:
+            `-w_{,x}` and `-w_{,y}` for the classical laminated plate
+            theory, `\phi_x` and `\phi_y` for the first-order shear
+            deformation theory, and `\theta_x` and `\theta_y` of the Notes
+            for the third-order one, plus `v/r` about `x` with the
+            Sanders-Koiter kinematics. The rotations ``phixp`` and
+            ``phiyp`` are dimensionless; of ``kphix`` and ``kphiy`` only
+            whether they are ``None`` or zero is used. Default ``None``.
 
         Notes
         -----
+        The prescribed rotations are those of the normal at the reference
+        surface, the rotations also tied by the connections, see
+        :func:`.kCsdt._rotation_x` and :func:`.kCsdt._rotation_y`. With the
+        third-order shear deformation theory (TSDT) and the offset `d` of
+        the laminate, of thickness `h`, they are
+
+        .. math::
+
+            \theta_x = u_{,z}\big|_{z=0} = \phi_x - \frac{4 d^2}{h^2}
+            \left(\phi_x + w_{,x}\right) \qquad
+            \theta_y = v_{,z}\big|_{z=0} = \Phi_y - \frac{4 d^2}{h^2}
+            \left(\phi_y + w_{,y}\right)
+
+        with `\phi_x` and `\phi_y` the rotations at the mid-surface, `z =
+        d`, and `\Phi_y = \phi_y + v/r` with the Sanders-Koiter kinematics,
+        `\Phi_y = \phi_y` otherwise. For the FSDT, and for the TSDT with
+        `d = 0`, `\theta_x = \phi_x` and `\theta_y = \Phi_y`. See
+        :ref:`tsdt_offset_prescribed_rotations`.
+
         The penalty method adds to the energy, for each prescribed
         component, e.g. `u`,
 
@@ -3116,8 +3137,9 @@ class Shell(object):
             ``pd_method='null-space'``, see :meth:`.add_point_pd`. Default
             ``None``.
         funcphix, funcphiy : function, optional
-            Prescribed rotations, dimensionless, as functions of `y`, only
-            with ``pd_method='null-space'``, see :meth:`.add_point_pd`.
+            Prescribed rotations of the normal at the reference surface,
+            dimensionless, as functions of `y`, only with
+            ``pd_method='null-space'``, see :meth:`.add_point_pd`.
             Default ``None``.
 
         Notes
@@ -3180,8 +3202,9 @@ class Shell(object):
             ``pd_method='null-space'``, see :meth:`.add_point_pd`. Default
             ``None``.
         funcphix, funcphiy : function, optional
-            Prescribed rotations, dimensionless, as functions of `x`, only
-            with ``pd_method='null-space'``, see :meth:`.add_point_pd`.
+            Prescribed rotations of the normal at the reference surface,
+            dimensionless, as functions of `x`, only with
+            ``pd_method='null-space'``, see :meth:`.add_point_pd`.
             Default ``None``.
 
         Notes

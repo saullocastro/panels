@@ -140,6 +140,28 @@ connection of panels with different offsets. For the FSDT the rotation is
 constant through the thickness, `\theta = \phi`, and for the CLPT it is
 `-w_{,x}` and `-w_{,y}` for any offset: their connections are unchanged.
 
+.. _tsdt_offset_prescribed_rotations:
+
+Prescribed rotations
+--------------------
+
+The rotations ``phix`` and ``phiy`` prescribed with
+:meth:`.Shell.add_point_pd`, :meth:`.Shell.add_distr_pd_fixed_x` and
+:meth:`.Shell.add_distr_pd_fixed_y`, imposed with ``pd_method='null-space'``,
+see :ref:`null_space_pd`, are the same rotations at the reference surface,
+`\theta_x` and `\theta_y` of Eq. :eq:`tsdt-offset-theta`, computed with the
+offset and the thickness of the panel, see
+:func:`.nullspace.pd_constraint_matrix`. With an offset, the rotations at
+the mid-surface `\phi_x` and `\phi_y` differ from the prescribed values by
+the terms of the transverse shear strains, and for `d = \pm h/2` the
+prescribed rotations are `-w_{,x}` and `\Phi_y - \phi_y - w_{,y}`. For the
+FSDT, and for the TSDT with `d = 0`, the prescribed rotations are `\phi_x`
+and `\Phi_y`, as before. The penalty method,
+``pd_method='penalty'``, does not prescribe rotations.
+
+.. literalinclude:: ../../tests/multidomain/test_tsdt_prescribed_rotations.py
+    :pyobject: test_prescribed_rotation_with_offset
+
 .. _tsdt_offset_example:
 
 Example

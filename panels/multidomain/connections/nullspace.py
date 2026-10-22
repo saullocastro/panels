@@ -426,13 +426,31 @@ PD_COMPONENTS = FIELDS
 
 def _pd_terms(p, comp):
     r"""Terms ``(field, der_x, der_y, coeff)`` of a prescribed component,
-    the rows of ``fg`` of the field module of the model
+    the displacements and the rotations of the normal at the reference
+    surface
+
+    The terms with a zero coefficient are dropped.
 
     Notes
     -----
-    `\phi_x = -w_{,x}` and `\phi_y = -w_{,y}` for the classical laminated
-    plate theory, the fields `\phi_x` and `\phi_y` for the shear deformation
-    theories, plus `v/r` in `\phi_y` with the Sanders-Koiter kinematics.
+    The rotations are `\phi_x = -w_{,x}` and `\phi_y = -w_{,y}` for the
+    classical laminated plate theory, the rows of ``fg`` of the field module
+    of the model, and for the shear deformation theories the rotations at
+    the reference surface `z = 0`, `\theta_x` and `\theta_y` of
+    :func:`.kCsdt._rotation_x` and :func:`.kCsdt._rotation_y`, the
+    rotations also tied by the connections:
+
+    .. math::
+
+        \theta_x = \phi_x - \frac{4 d^2}{h^2} \left(\phi_x + w_{,x}\right)
+        \qquad
+        \theta_y = \Phi_y - \frac{4 d^2}{h^2} \left(\phi_y + w_{,y}\right)
+
+    with the offset `d` and the thickness `h` of the TSDT panel, which are
+    the rows ``phix`` and ``phiy`` of ``fg``, `\phi_x` and `\Phi_y`, for
+    the FSDT and for the TSDT with `d = 0`. `\Phi_y = \phi_y + v/r` with the
+    Sanders-Koiter kinematics, and likewise `v/r` is added to `-w_{,y}` for
+    the classical laminated plate theory.
 
     """
     if comp in (U, V, W):
@@ -441,14 +459,14 @@ def _pd_terms(p, comp):
         if comp == PHIX:
             return [(W, 1, 0, -1.)]
         terms = [(W, 0, 1, -1.)]
-    else:
-        if comp == PHIX:
-            return [(PHIX, 0, 0, 1.)]
-        terms = [(PHIY, 0, 0, 1.)]
-    rinv = _rinv_sanders(p)
-    if rinv != 0:
-        terms.append((V, 0, 0, rinv))
-    return terms
+        rinv = _rinv_sanders(p)
+        if rinv != 0:
+            terms.append((V, 0, 0, rinv))
+        return terms
+    #NOTE for the TSDT with an offset, phix and phiy are the rotations at the
+    #     mid-surface, the rotation at z = 0 includes the transverse shear
+    rotation = kCsdt._rotation_x if comp == PHIX else kCsdt._rotation_y
+    return [term for term in rotation(p) if term[3] != 0]
 
 
 def pd_points(p, x, y):
@@ -520,9 +538,10 @@ def pd_constraint_matrix(p, comp, x, y, size):
 
     The component is evaluated at the points of :func:`.pd_points`, one row
     per point. The rotations ``'phix'`` and ``'phiy'`` are those of the
-    field module of the model, see :func:`._pd_terms`, derived from `w` for
-    the models with 3 DOFs per term and the fields ``phix`` and ``phiy`` for
-    those with 5 DOFs. The rows are not normalized.
+    normal at the reference surface `z = 0`, see :func:`._pd_terms`,
+    derived from `w` for the models with 3 DOFs per term and, for those
+    with 5 DOFs, the fields ``phix`` and ``phiy`` plus, for the TSDT with an
+    offset, the terms of the transverse shear. The rows are not normalized.
 
     Parameters
     ----------
@@ -543,9 +562,19 @@ def pd_constraint_matrix(p, comp, x, y, size):
     Notes
     -----
     The rotations ``'phix'`` and ``'phiy'`` are `-w_{,x}` and `-w_{,y}` for
-    the models with 3 DOFs per term, the fields `\phi_x` and `\phi_y` for
-    those with 5 DOFs, plus the term `v/r` in ``'phiy'`` for the models with
-    the Sanders-Koiter kinematics.
+    the models with 3 DOFs per term and, for those with 5 DOFs, the
+    rotations at the reference surface
+
+    .. math::
+
+        \theta_x = \phi_x - \frac{4 d^2}{h^2} \left(\phi_x + w_{,x}\right)
+        \qquad
+        \theta_y = \phi_y - \frac{4 d^2}{h^2} \left(\phi_y + w_{,y}\right)
+
+    with the offset `d` and the thickness `h` of a TSDT panel, `\theta =
+    \phi` for the FSDT and for `d = 0`, see :func:`.kCsdt._rotation_x` and
+    :func:`.kCsdt._rotation_y`; the term `v/r` is added to ``'phiy'`` for
+    the models with the Sanders-Koiter kinematics.
 
     """
     xis, etas, _ = pd_points(p, x, y)
