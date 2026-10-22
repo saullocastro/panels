@@ -80,8 +80,7 @@ The rotations at the mid-surface are adopted, which gives
     p(z) = -c_1 \left[ (z - d)^3 + d^3 \right], \qquad c_1 = \frac{4}{3
     h^2}
 
-Reddy's field for `d = 0`. The conditions are solved with SymPy by
-``tsdt_offset_cubic()`` of ``theory/shells/fsdt_tsdt/fsdt_tsdt.py``.
+Reddy's field for `d = 0`. The conditions are solved with SymPy.
 
 .. _tsdt_offset_matrices:
 

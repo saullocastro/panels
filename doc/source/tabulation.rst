@@ -145,12 +145,11 @@ see :ref:`tangent_product`, is written with the tables from the start.
 Implementation
 --------------
 
-The rewriting is done by :mod:`panels.dev.tabulate`, applied by the
-generators of the modules, ``theory/shells/fsdt_tsdt/write_pyx.py``,
-``theory/shells/cylshell_clpt_sanders/write_pyx.py`` and
-``theory/shells/follower_pressure/write_pyx.py``, and with ``python -m
-panels.dev.tabulate <file.pyx> ...`` to the modules written by hand. For
-each kernel it
+The rewriting is done by :mod:`panels.dev.tabulate`, applied by the SymPy
+generators of the modules of the shear deformation theories, of the
+cylinders with the Sanders kinematics and of the follower pressure loads,
+and with ``python -m panels.dev.tabulate <file.pyx> ...`` to the modules
+written by hand. For each kernel it
 
 1. finds the calls ``NAME = f(IDX, COORD, x1F, x1Fr, x2F, x2Fr)``, with
    ``f``, ``fp`` or ``fpp``, the flags of the field ``F`` along `x` (or
