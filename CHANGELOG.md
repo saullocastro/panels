@@ -1,5 +1,88 @@
 # Changelog
 
+## 0.13.21 (unreleased)
+
+### Bug fixes: mass matrices
+
+- The closed-form mass matrices `fkM` of the nine models read `shell.rho`,
+  whereas `Shell.calc_kM` and the numerical `fkM_num` use the density of the
+  laminate, `lam.intrho/lam.h`: with per-ply densities `rhos` the two
+  differed, and a `Shell` given only `rhos` had a zero mass matrix.
+  `Shell._rebuild` keeps the lists `plyts`, `laminaprops` and `rhos` given
+  by the user, and `json_io` saves which lists were derived (key
+  `'derived_lists'`; the lists of older files are kept as given).
+- The mass matrices of all the models, closed-form and numerical, integrated
+  a uniform density over `-h/2 - d <= z <= h/2 - d`, whereas the stiffness
+  matrices and composites place the laminate at `-h/2 + d <= z <= h/2 + d`:
+  with an offset the coupling of `u` and `phi` had the wrong sign. The mass
+  matrices now use the moments of the density `I_0` to `I_6` of
+  `composites.Laminate`, exact for per-ply densities. `fkM(shell, size,
+  row0, col0)` reads them from `shell.lam` (the argument `d` is dropped),
+  `fkM_num(shell, I_input, size, row0, col0, nx, ny)` receives them, and
+  `Shell.calc_kM` gains `I_nxny`. With offset 0 and a uniform density the
+  matrices are unchanged to `2e-16`.
+
+### Bug fixes: third-order shear deformation theory with an offset
+
+- With an offset `d`, the cubic term `-c1 z^3 (phi + w,x)` did not make the
+  transverse shear vanish at the faces `z = d -+ h/2`. The field is now
+  `u(z) = u + z phi - c1 [(z - d)^3 + d^3] (phi + w,x)`, Reddy's field for
+  `d = 0`, with `phi` the rotation at the mid-surface of the laminate; the
+  strain energy equals a ply-by-ply integration to `2e-15` (14% off before
+  for `d = 1.2` mm).
+- The connections of the TSDT models tie `u, v, w` and the rotations at the
+  common reference surface `z = 0`, `theta = u,z(0) = phi - (4 d^2/h^2)(phi
+  + w,x)`, instead of the mid-surface rotations `phi`, which differ between
+  panels with different offsets. The skin-base connection evaluates each
+  laminate at its own face, `z = d -+ h/2`. Nothing changes for `d = 0`, for
+  the FSDT and for the CLPT.
+- New page `tsdt_offset.rst`.
+
+### Bug fixes: stiffeners, connections and post-processing
+
+- `BladeStiff1D`: the torsion of the flange used `bf*Jxx*w,xy^2`, without a
+  shear modulus; it now uses the torsional stiffness `GJ = 4 bf D66` of a
+  thin laminated strip, new attribute `BladeStiff1D.GJ`, also saved by
+  `json_io`.
+- `BladeStiff1D`: the coupling `S1` uses the condensed stiffness `Q16 - Q12
+  Q26/Q22` instead of `Q16 - Q12 Q16/Q22`, as in Eq. (16) of Castro et al.,
+  Compos. Struct. 140 (2016), with `y_k` measured from the mid-plane of the
+  flange instead of its first face: `S1` is zero for a symmetric flange.
+  Balanced cross-ply flanges are unaffected.
+- `BladeStiff1D` without a flange accepts `bf=None`.
+- `StiffPanelBay.calc_kA` sums the aerodynamic matrices of the panels without
+  skew-symmetrizing them.
+- The cylinder assembly functions of `panels.multidomain` give each panel its
+  own load; the lambdas bound late and every panel got the load of the last
+  one.
+- `MultiDomain.force_out_plane` integrates `Qx` along `x = x_cte_force` (or
+  `Qy` along `y = y_cte_force`), instead of `Qx + Qy` along a hard-coded
+  line, and checks its arguments.
+- `MultiDomain.plot` computes the field of `eval_panel` and uses `xs` and
+  `ys`.
+
+### Tests
+
+- The Riks test of the hinged cylindrical shell no longer depends on how the
+  arc-length adaptation samples the path, and passes with both convergence
+  criteria of structsolve.
+
+### Documentation
+
+- Functional docstrings of the public API, and Notes and References with
+  the theory of the models, connections, stiffeners, cohesive zone and
+  multidomain assembly.
+- The sign convention of the piston-theory matrices, with the sign of the
+  term of Krumhaar's correction in Eqs. (18), (21) and (29) of Castro et
+  al., Compos. Struct. 140 (2016), stated as a mistake of the paper; the
+  code is unchanged.
+
+### Dependencies
+
+- Requires `composites>=0.9.31`, for `Laminate.intrhoz3`, `intrhoz4` and
+  `intrhoz6`, and `structsolve>=0.8.5`, whose default convergence criterion
+  is Crisfield's.
+
 ## 0.13.11 (2026-10-16)
 
 ### Bug fix: one constitutive matrix for all the kernels
