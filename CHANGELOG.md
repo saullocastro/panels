@@ -67,6 +67,17 @@
   reproduce to `1e-12` for any offsets. New `kCsdt._sb_distances`, used by
   the penalty and null-space `'SB'`, the kernels of `'SB_TSL'` and
   `MultiDomain._tsl_operators`. Without offsets nothing changes.
+- The penalty kernels of the prescribed displacements `fkCpd`, `fkCld_xcte`
+  and `fkCld_ycte` (`panels/multidomain/connections/kCpd.pyx`) used a stride
+  of 3 DOFs per term, `row0 + 3*(j*m + i)`, for all the models: with the
+  FSDT and TSDT models, 5 DOFs per term, the penalty stiffnesses of `u, v, w`
+  landed silently on other DOFs, inconsistent with the forces `k u_p` of
+  `shell_fext`, e.g. `w = 1.1e5` instead of the prescribed `1e-3` at a point
+  of a simply supported `plate_fsdt_donnell` with `k = 1e4 E h`. The kernels
+  read the number of DOFs per term from `modelDB` (signatures unchanged, a
+  `ValueError` for an unknown `p.model`); for the FSDT and TSDT the penalty
+  method now converges to the null-space method with `1/k`, as for the
+  CLPT, whose results are unchanged.
 - `BladeStiff1D` without a flange accepts `bf=None`.
 - `StiffPanelBay.calc_kA` sums the aerodynamic matrices of the panels without
   skew-symmetrizing them.

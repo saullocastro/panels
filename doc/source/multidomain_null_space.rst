@@ -331,8 +331,15 @@ The prescribed displacements of :meth:`.Shell.add_point_pd`,
 :meth:`.Shell.add_distr_pd_fixed_x` and :meth:`.Shell.add_distr_pd_fixed_y`
 are imposed by default with the penalty method: their forces `k u_p` enter
 the external force vector and the penalty stiffnesses, e.g. of
-:func:`.fkCpd`, :func:`.fkCld_xcte` and :func:`.fkCld_ycte`, must be added to
-the stiffness matrix by the user. With ``pd_method='null-space'`` they are
+:func:`.fkCpd`, :func:`.fkCld_xcte` and :func:`.fkCld_ycte`, for the models
+with 3 and 5 degrees of freedom per term, must be added to the stiffness
+matrix by the user, symmetrized with
+:func:`structsolve.sparseutils.finalize_symmetric_matrix`:
+
+.. literalinclude:: ../../tests/multidomain/test_kCpd_kernels.py
+    :pyobject: test_penalty_reaches_prescribed_values
+
+With ``pd_method='null-space'`` they are
 imposed exactly, as inhomogeneous linear constraints eliminated together
 with the connections, without any penalty constant::
 

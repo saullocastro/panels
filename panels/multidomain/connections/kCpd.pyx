@@ -10,9 +10,36 @@ from scipy.sparse import coo_matrix
 import numpy as np
 
 from panels import INT, DOUBLE
+from panels import modelDB as _modelDB
 
 
-cdef int DOF = 3
+def _dofs(p):
+    r"""Number of degrees of freedom per term of the model of ``p``
+
+    Parameters
+    ----------
+    p : :class:`.Shell`
+        Panel whose attribute ``model`` is read.
+
+    Returns
+    -------
+    dofs : int
+        ``3`` for the CLPT models and ``5`` for the FSDT and TSDT models,
+        whose Ritz constants of the term ``(i, j)`` start at ``dofs*(j*m +
+        i)`` with ``u, v, w`` at the offsets ``0, 1, 2``, see
+        :mod:`panels.modelDB`.
+
+    Raises
+    ------
+    ValueError
+        If ``p.model`` is not a model of :mod:`panels.modelDB`.
+
+    """
+    model = getattr(p, 'model', None)
+    if model not in _modelDB.db:
+        raise ValueError('{0!r} is not a valid model, see '
+                         'panels.modelDB'.format(model))
+    return _modelDB.db[model]['dofs']
 
 cdef extern from 'bardell.hpp':
     double integral_ff(int i, int j,
@@ -34,27 +61,41 @@ def fkCpd(double ku, double kv, double kw, object p, double xp, double yp,
     ku, kv, kw : float
         Translation penalty stiffnesses.
         Use this to specify which disp is being provided. The corresponding stiffness is non zero - rest are zero
-    p : Panel
-        Panel() object
+    p : :class:`.Shell`
+        Panel with the prescribed displacement, of any model of
+        :mod:`panels.modelDB`, the stride of its Ritz constants being the
+        number of degrees of freedom per term of the model.
     xp, yp : float
         Positions x and y of the prescribed displacement. This is in physical (x,y) coordinates
     size : int
-        Size of assembly stiffness matrix, which are calculated by sum([3*p.m*p.n for p in self.panels]).
-        The size of the assembly can be calculated calling the PanelAssemly.get_size() method.
+        Size of the stiffness matrix of the assembly, the sum of
+        ``dofs*p.m*p.n`` of its panels, with ``dofs`` the number of degrees
+        of freedom per term of the model of each panel, ``3`` or ``5``, see
+        :mod:`panels.modelDB`; see :meth:`.MultiDomain.get_size` and
+        :meth:`.Shell.get_size`.
     row0 : int
-        Row position of constitutive matrix being calculated.
+        First row of the panel in the matrix of the assembly,
+        ``p.row_start``.
     col0 : int
-        Column position of constitutive matrix being calculated.
+        First column of the panel in the matrix of the assembly,
+        ``p.col_start``.
 
     Returns
     -------
     kCpd : scipy.sparse.coo_matrix
-        A sparse matrix with the penalty stiffness for prescribed point displacement.
-        f here = function i.e. ftn for kCpd
+        A sparse matrix with the penalty stiffness for prescribed point
+        displacement, of shape ``(size, size)``, with the upper triangle only,
+        to be symmetrized with
+        :func:`structsolve.sparseutils.finalize_symmetric_matrix`.
+
+    Raises
+    ------
+    ValueError
+        If ``p.model`` is not a model of :mod:`panels.modelDB`.
 
     """
     cdef double [:, ::1] gtab, ftab
-    cdef int i, k, j, l, c, row, col
+    cdef int i, k, j, l, c, row, col, dofs
     cdef int m, n # no of terms in x,y
     cdef double a, b, xip, etap
     
@@ -74,6 +115,9 @@ def fkCpd(double ku, double kv, double kw, object p, double xp, double yp,
     cdef double fAv, fBv, gAv, gBv
     cdef double fAw, fBw, gAw, gBw
 
+    #NOTE stride of the Ritz constants, 3 or 5 DOFs per term, with u, v, w
+    #     at the offsets 0, 1, 2 of each term
+    dofs = _dofs(p)
     a = p.a
     b = p.b
     m = p.m
@@ -137,8 +181,8 @@ def fkCpd(double ku, double kv, double kw, object p, double xp, double yp,
                     fAw = ftab[2, i]
             
                     for k in range(m):
-                        row = row0 + DOF*(j*m + i) # row0 = starting row of this submatrix in the global matrix
-                        col = col0 + DOF*(l*m + k)
+                        row = row0 + dofs*(j*m + i) # row0 = starting row of this submatrix in the global matrix
+                        col = col0 + dofs*(l*m + k)
 
                         #NOTE symmetry
                         if row > col:
@@ -176,27 +220,42 @@ def fkCld_xcte(double ku, double kv, double kw, object p, double xp,
     ----------
     ku, kv, kw : float
         Translation penalty stiffnesses.
-    p : Panel
-        Panel() object
+    p : :class:`.Shell`
+        Panel with the prescribed displacement, of any model of
+        :mod:`panels.modelDB`, the stride of its Ritz constants being the
+        number of degrees of freedom per term of the model.
     xp : float
         Position x of the prescribed line displacement. This is in physical (x,y) coordinates
     size : int
-        Size of assembly stiffness matrix, which are calculated by sum([3*p.m*p.n for p in self.panels]).
-        The size of the assembly can be calculated calling the PanelAssemly.get_size() method.
+        Size of the stiffness matrix of the assembly, the sum of
+        ``dofs*p.m*p.n`` of its panels, with ``dofs`` the number of degrees
+        of freedom per term of the model of each panel, ``3`` or ``5``, see
+        :mod:`panels.modelDB`; see :meth:`.MultiDomain.get_size` and
+        :meth:`.Shell.get_size`.
     row0 : int
-        Row position of constitutive matrix being calculated.
+        First row of the panel in the matrix of the assembly,
+        ``p.row_start``.
     col0 : int
-        Column position of constitutive matrix being calculated.
+        First column of the panel in the matrix of the assembly,
+        ``p.col_start``.
 
     Returns
     -------
     kCld_xcte : scipy.sparse.coo_matrix
         A sparse matrix with the penalty stiffness for prescribed line
-        displacement with constant x (so integral over y).
+        displacement with constant x (so integral over y), of shape
+        ``(size, size)``, with the upper triangle only, to be symmetrized
+        with
+        :func:`structsolve.sparseutils.finalize_symmetric_matrix`.
+
+    Raises
+    ------
+    ValueError
+        If ``p.model`` is not a model of :mod:`panels.modelDB`.
 
     """
     cdef double [:, ::1] ftab
-    cdef int i, k, j, l, c, row, col
+    cdef int i, k, j, l, c, row, col, dofs
     cdef int m, n
     cdef double a, b, xip
     
@@ -216,6 +275,9 @@ def fkCld_xcte(double ku, double kv, double kw, object p, double xp,
     cdef double fAv, fBv, gAvgBv
     cdef double fAw, fBw, gAwgBw
 
+    #NOTE stride of the Ritz constants, 3 or 5 DOFs per term, with u, v, w
+    #     at the offsets 0, 1, 2 of each term
+    dofs = _dofs(p)
     a = p.a
     b = p.b
     m = p.m
@@ -269,8 +331,8 @@ def fkCld_xcte(double ku, double kv, double kw, object p, double xp,
                     fAw = ftab[2, i]
             
                     for k in range(m):
-                        row = row0 + DOF*(j*m + i)
-                        col = col0 + DOF*(l*m + k)
+                        row = row0 + dofs*(j*m + i)
+                        col = col0 + dofs*(l*m + k)
 
                         #NOTE symmetry
                         if row > col:
@@ -302,33 +364,48 @@ def fkCld_xcte(double ku, double kv, double kw, object p, double xp,
 def fkCld_ycte(double ku, double kv, double kw, object p, double yp,
                int size, int row0, int col0):
     r"""
-    Penalty for prescribed displacement at a point.
+    Penalty for prescribed line displacement with a fixed y coordinate.
 
     Parameters
     ----------
     ku, kv, kw : float
         Translation penalty stiffnesses.
-    p : Panel
-        Panel() object
+    p : :class:`.Shell`
+        Panel with the prescribed displacement, of any model of
+        :mod:`panels.modelDB`, the stride of its Ritz constants being the
+        number of degrees of freedom per term of the model.
     yp : float
         Position y of the prescribed line displacement. This is in physical (x,y) coordinates
     size : int
-        Size of assembly stiffness matrix, which are calculated by sum([3*p.m*p.n for p in self.panels]).
-        The size of the assembly can be calculated calling the PanelAssemly.get_size() method.
+        Size of the stiffness matrix of the assembly, the sum of
+        ``dofs*p.m*p.n`` of its panels, with ``dofs`` the number of degrees
+        of freedom per term of the model of each panel, ``3`` or ``5``, see
+        :mod:`panels.modelDB`; see :meth:`.MultiDomain.get_size` and
+        :meth:`.Shell.get_size`.
     row0 : int
-        Row position of constitutive matrix being calculated.
+        First row of the panel in the matrix of the assembly,
+        ``p.row_start``.
     col0 : int
-        Column position of constitutive matrix being calculated.
+        First column of the panel in the matrix of the assembly,
+        ``p.col_start``.
 
     Returns
     -------
     kCld_ycte : scipy.sparse.coo_matrix
         A sparse matrix with the penalty stiffness for prescribed line
-        displacement with constant y (so integral over x).
+        displacement with constant y (so integral over x), of shape
+        ``(size, size)``, with the upper triangle only, to be symmetrized
+        with
+        :func:`structsolve.sparseutils.finalize_symmetric_matrix`.
+
+    Raises
+    ------
+    ValueError
+        If ``p.model`` is not a model of :mod:`panels.modelDB`.
 
     """
     cdef double [:, ::1] gtab
-    cdef int i, k, j, l, c, row, col
+    cdef int i, k, j, l, c, row, col, dofs
     cdef int m, n
     cdef double a, b, etap
     
@@ -348,6 +425,9 @@ def fkCld_ycte(double ku, double kv, double kw, object p, double yp,
     cdef double fAvfBv, gAv, gBv
     cdef double fAwfBw, gAw, gBw
 
+    #NOTE stride of the Ritz constants, 3 or 5 DOFs per term, with u, v, w
+    #     at the offsets 0, 1, 2 of each term
+    dofs = _dofs(p)
     a = p.a
     b = p.b
     m = p.m
@@ -402,8 +482,8 @@ def fkCld_ycte(double ku, double kv, double kw, object p, double yp,
 
                     for l in range(n):
             
-                        row = row0 + DOF*(j*m + i)
-                        col = col0 + DOF*(l*m + k)
+                        row = row0 + dofs*(j*m + i)
+                        col = col0 + dofs*(l*m + k)
 
                         #NOTE symmetry
                         if row > col:
