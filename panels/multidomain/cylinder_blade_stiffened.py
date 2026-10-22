@@ -349,9 +349,9 @@ def cylinder_blade_stiffened_compression_lb_Nxx_from_static(height, r, stack,
         ``npanels``.
     Nxxs_blade : list
         A Nxx for each blade stiffener, force per unit length, with length
-        ``npanels``. TODO(author): the load functions ``lambda y: Nxx`` are
-        evaluated after the loop over the panels, so every panel receives
-        the last value, ``Nxxs_blade[-1]``; check whether this is intended.
+        ``npanels``. The skin panels and the blades of the assembly
+        receive, in their order in ``md.panels``, the successive values of
+        ``Nxxs_skin`` and ``Nxxs_blade``.
     m, n : int, optional
         Number of approximation terms for each panel. Default ``8``.
     num_eigvalues : int, optional
@@ -410,7 +410,9 @@ def cylinder_blade_stiffened_compression_lb_Nxx_from_static(height, r, stack,
         elif 'blade' in p.group:
             i_blade += 1
             Nxx = Nxxs_blade[i_blade]
-        p.add_distr_load_fixed_x(p.a, lambda y: Nxx, None, None)
+        #NOTE the value is bound when the function is created, the load
+        #     functions are evaluated after the loop
+        p.add_distr_load_fixed_x(p.a, lambda y, Nxx=Nxx: Nxx, None, None)
 
     fext = md.calc_fext(silent=True)
 
@@ -481,10 +483,9 @@ def cylinder_blade_stiffened_compression_lb_pd_from_static(height, r, stack,
         length, with length ``npanels``.
     pds_blade : list
         A prescribed axial compression displacement for each blade stiffener,
-        length, with length ``npanels``. TODO(author): the functions
-        ``lambda y: pd`` are evaluated after the loop over the panels, so
-        every panel receives the last value, ``pds_blade[-1]``; check
-        whether this is intended.
+        length, with length ``npanels``. The skin panels and the blades of
+        the assembly receive, in their order in ``md.panels``, the
+        successive values of ``pds_skin`` and ``pds_blade``.
     m, n : int, optional
         Number of approximation terms for each panel. Default ``8``.
     num_eigvalues : int, optional
@@ -551,7 +552,10 @@ def cylinder_blade_stiffened_compression_lb_pd_from_static(height, r, stack,
         elif 'blade' in p.group:
             i_blade += 1
             pd = pds_blade[i_blade]
-        p.add_distr_pd_fixed_x(p.a, ku, None, None, lambda y: pd, None, None)
+        #NOTE the value is bound when the function is created, the
+        #     functions are evaluated after the loop
+        p.add_distr_pd_fixed_x(p.a, ku, None, None, lambda y, pd=pd: pd,
+                               None, None)
 
     fext = md.calc_fext(silent=True)
 

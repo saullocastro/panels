@@ -280,9 +280,8 @@ def cylinder_compression_lb_Nxx_from_static(height, r, stack, plyt, laminaprop,
         The number of panels along the perimeter of the cylinder.
     Nxxs : list
         A Nxx for each panel, force per unit length, with length
-        ``npanels``. TODO(author): the load functions ``lambda y:
-        Nxxs[i]`` are evaluated after the loop over the panels, so every
-        panel receives ``Nxxs[-1]``; check whether this is intended.
+        ``npanels``, the panel ``i`` of the assembly receiving
+        ``Nxxs[i]``.
     m, n : int, optional
         Number of approximation terms for each panel. Default ``8``.
     num_eigvalues : int, optional
@@ -338,7 +337,9 @@ def cylinder_compression_lb_Nxx_from_static(height, r, stack, plyt, laminaprop,
         raise ValueError('The length of "Nxxs" must be the same as "npanels"')
 
     for i, p in enumerate(md.panels):
-        p.add_distr_load_fixed_x(p.a, lambda y: Nxxs[i], None, None)
+        #NOTE the value is bound when the function is created, the load
+        #     functions are evaluated after the loop
+        p.add_distr_load_fixed_x(p.a, lambda y, Nxx=Nxxs[i]: Nxx, None, None)
         p.x2u = 1
 
     fext = md.calc_fext(silent=True)
