@@ -3,11 +3,11 @@ References
 ==========
 
 .. [alfano2001Interface] G. Alfano and M. A. Crisfield, "Finite element interface models for the delamination analysis of laminated composites: mechanical and computational issues". International Journal for Numerical Methods in Engineering, 50:1701-1736, 2001.
-.. [bardell1991] N .S. Bardell, "Free vibration analysis of a flat plate using the hierarchical finite element method". Journal of Sound and Vibration, 1991. https://doi.org/10.1016/0022-460X(91)90855-E.
+.. [bardell1991] N .S. Bardell, "Free vibration analysis of a flat plate using the hierarchical finite element method". Journal of Sound and Vibration, 151(2):263-289, 1991. https://doi.org/10.1016/0022-460X(91)90855-E.
 .. [brush1975Buckling] D. O. Brush and B. O. Almroth, "Buckling of Bars, Plates, and Shells". McGraw-Hill, New York, 1975.
 .. [camanho2003Delamination] P. P. Camanho, C. G. Dávila and M. F. de Moura, "Numerical simulation of mixed-mode progressive delamination in composite materials". Journal of Composite Materials, 37(16):1415-1438, 2003.
 .. [castro2016FlutterPanel] S.G.P. Castro, T.A.M. Guimarães, D.A. Rade, M.V.Donadon. "Flutter of stiffened composite panels considering the stiffener’s base as a structural element". Composite Structures, 2016. https://doi.org/10.1016/j.compstruct.2015.12.056
-.. [castro2017Multidomain] S.G.P. Castro and M.V. Donadon, "Assembly of Semi-Analytical models to Address Linear Buckling and Vibration of Stiffened Composite Panels with Debonding Defect". Composite Structures, 2017. https://doi.org/10.1016/j.compstruct.2016.10.026.
+.. [castro2017Multidomain] S.G.P. Castro and M.V. Donadon, "Assembly of Semi-Analytical models to Address Linear Buckling and Vibration of Stiffened Composite Panels with Debonding Defect". Composite Structures, 160:232-247, 2017. https://doi.org/10.1016/j.compstruct.2016.10.026.
 .. [han2004SandwichCylinder] J.-H. Han, G. A. Kardomateas and G. J. Simitses, "Elasticity, shell theory and finite element results for the buckling of long sandwich cylindrical shells under external pressure". Composites Part B: Engineering, 35:591-598, 2004. https://doi.org/10.1016/j.compositesb.2003.07.002.
 .. [hibbitt1979Follower] H. D. Hibbitt, "Some follower forces and load stiffness". International Journal for Numerical Methods in Engineering, 14(6):937-941, 1979.
 .. [kardomateas1993Orthotropic] G. A. Kardomateas, "Buckling of thick orthotropic cylindrical shells under external pressure". Journal of Applied Mechanics, 60(1):195-202, 1993.
