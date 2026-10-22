@@ -221,15 +221,17 @@ def _sdt_components(func, p1, p2, kr_sb):
     -----
     The constraints are those of the penalty kernels of the shear
     deformation theories: for ``'SSxcte'`` and ``'SSycte'``, `u, v, w,
-    \phi_x, \Phi_y` and, for the TSDT, the derivative of `w` normal to the
-    edge, see :func:`.kCsdt._edge_components`; for ``'BFycte'``, `u_1 =
-    u_2`, `v_1 = w_2`, `w_1 = -v_2` and `\Phi_{y1} = \Phi_{y2}`; for
-    ``'BFxcte'``, `u_1 = w_2`, `v_1 = v_2`, `w_1 = -u_2` and `\phi_{x1} =
-    \phi_{x2}`; for ``'SB'``, `u(z), v(z)` at the face `z = -h_1/2` of
-    ``p1`` equal to those at the face `z = +h_2/2` of ``p2``, see
+    \theta_x, \theta_y` and, for the TSDT, the derivative of `w` normal to
+    the edge, see :func:`.kCsdt._edge_components`; for ``'BFycte'``, `u_1 =
+    u_2`, `v_1 = w_2`, `w_1 = -v_2` and `\theta_{y1} = \theta_{y2}`; for
+    ``'BFxcte'``, `u_1 = w_2`, `v_1 = v_2`, `w_1 = -u_2` and `\theta_{x1} =
+    \theta_{x2}`; for ``'SB'``, `u(z), v(z)` at the lower face of ``p1``
+    equal to those at the upper face of ``p2``, see :func:`.kCsdt._face` and
     :func:`.kCsdt._surface_terms`, `w_1 = w_2` and, with ``kr_sb``,
-    `\phi_{x1} = \phi_{x2}` and `\Phi_{y1} = \Phi_{y2}`. `\Phi_y` is given by
-    :func:`.kCsdt._rotation_y`.
+    `\theta_{x1} = \theta_{x2}` and `\theta_{y1} = \theta_{y2}`. The
+    rotations `\theta_x`, `\theta_y` are those of the normal at the
+    reference surface, :func:`.kCsdt._rotation_x` and
+    :func:`.kCsdt._rotation_y`, with the offset of each panel for the TSDT.
 
     """
     if func in ('SSxcte', 'SSycte'):
@@ -244,14 +246,14 @@ def _sdt_components(func, p1, p2, kr_sb):
         return [((p1, [(U, 0, 0, 1.)]), (p2, [(W, 0, 0, 1.)])),
                 ((p1, [(V, 0, 0, 1.)]), (p2, [(V, 0, 0, 1.)])),
                 ((p1, [(W, 0, 0, 1.)]), (p2, [(U, 0, 0, -1.)])),
-                ((p1, [(PHIX, 0, 0, 1.)]), (p2, [(PHIX, 0, 0, 1.)]))]
+                ((p1, kCsdt._rotation_x(p1)), (p2, kCsdt._rotation_x(p2)))]
     if func == 'SB':
-        tu1, tv1 = kCsdt._surface_terms(p1, -sum(p1.plyts)/2.)
-        tu2, tv2 = kCsdt._surface_terms(p2, +sum(p2.plyts)/2.)
+        tu1, tv1 = kCsdt._surface_terms(p1, kCsdt._face(p1, -1))
+        tu2, tv2 = kCsdt._surface_terms(p2, kCsdt._face(p2, +1))
         comps = [((p1, tu1), (p2, tu2)), ((p1, tv1), (p2, tv2)),
                  ((p1, [(W, 0, 0, 1.)]), (p2, [(W, 0, 0, 1.)]))]
         if kr_sb:
-            comps += [((p1, [(PHIX, 0, 0, 1.)]), (p2, [(PHIX, 0, 0, 1.)])),
+            comps += [((p1, kCsdt._rotation_x(p1)), (p2, kCsdt._rotation_x(p2))),
                       ((p1, kCsdt._rotation_y(p1)), (p2, kCsdt._rotation_y(p2)))]
         return comps
     raise NotImplementedError(func)
