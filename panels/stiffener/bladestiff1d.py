@@ -100,16 +100,32 @@ class BladeStiff1D(object):
     The properties of the flange, a laminate of height `b_f` and thickness
     `h_f`, computed by ``_rebuild()``, are, with the reduced stiffnesses
     `\bar Q_{ij}` of each ply `k` in the axes of the laminate (``q11L``,
-    ``q12L``, ``q16L``, ``q22L``), its thickness `h_k` and the distance
-    `y_k` of its mid-plane from the first face of the laminate:
+    ``q12L``, ``q16L``, ``q22L``, ``q26L``), its thickness `h_k` and the
+    distance `y_k` of its mid-plane from the first face of the laminate:
 
     .. math::
 
         E_1 = \sum_k h_k \left(\bar Q_{11} - \frac{\bar Q_{12}^2}{\bar
         Q_{22}}\right), \qquad
         S_1 = -\sum_k y_k h_k \left(\bar Q_{16} - \frac{\bar Q_{12} \bar
-        Q_{16}}{\bar Q_{22}}\right), \qquad
+        Q_{26}}{\bar Q_{22}}\right), \qquad
         F_1 = \frac{b_f^2}{12} E_1
+
+    The reduced stiffnesses are those of a beam whose plies are free along
+    the height `s` of the flange, `\sigma_2 = 0`: eliminating `\varepsilon_2
+    = -(\bar Q_{12} \varepsilon_1 + \bar Q_{26} \gamma_{12})/\bar Q_{22}`
+    from `\sigma_1 = \bar Q_{11} \varepsilon_1 + \bar Q_{12} \varepsilon_2 +
+    \bar Q_{16} \gamma_{12}` gives
+
+    .. math::
+
+        \sigma_1 = \left(\bar Q_{11} - \frac{\bar Q_{12}^2}{\bar Q_{22}}
+        \right) \varepsilon_1 + \left(\bar Q_{16} - \frac{\bar Q_{12} \bar
+        Q_{26}}{\bar Q_{22}}\right) \gamma_{12}
+
+    the first coefficient entering `E_1` and the second, the coupling of
+    the axial strain with the shear strain of the twist, `S_1`, as in Eq.
+    (16) of [1]_.
 
     `E_1` being the axial stiffness per unit height of the flange, and the
     section properties `I_{yy} = h_f b_f^3/12` and `J_{xx} = h_f b_f^3/12 +
@@ -144,9 +160,8 @@ class BladeStiff1D(object):
     `D_{26}`, and the effect of the free edges of the strip, of relative
     order `h_f/b_f`, are neglected.
 
-    TODO(author): should the coupling term of `S_1` be `\bar Q_{12} \bar
-    Q_{26}/\bar Q_{22}`, and should `y_k` be measured from the mid-plane of
-    the flange laminate instead of its first face?
+    TODO(author): should `y_k` be measured from the mid-plane of the flange
+    laminate instead of its first face?
 
     References
     ----------
@@ -248,7 +263,7 @@ class BladeStiff1D(object):
                 if i > 0:
                     yply += self.flam.plies[i-1].h/2. + self.flam.plies[i].h/2.
                 self.E1 += ply.h*(ply.q11L - ply.q12L**2/ply.q22L)
-                self.S1 += -yply*ply.h*(ply.q16L - ply.q12L*ply.q16L/ply.q22L)
+                self.S1 += -yply*ply.h*(ply.q16L - ply.q12L*ply.q26L/ply.q22L)
 
             self.F1 = self.bf**2/12.*self.E1
             # Saint-Venant torsion of a thin laminated strip

@@ -17,7 +17,7 @@
 #
 #     E1 = sum_k h_k (Q11 - Q12^2/Q22), per unit width of the flange
 #     F1 = bf^2/12 E1
-#     S1 = -sum_k y_k h_k (Q16 - Q12 Q16/Q22)
+#     S1 = -sum_k y_k h_k (Q16 - Q12 Q26/Q22)
 #     Jxx, the torsion entry of ksf, which receives GJ/bf, with the
 #          torsional stiffness GJ = 4 bf D66 of the flange laminate, a thin
 #          strip under Saint-Venant torsion

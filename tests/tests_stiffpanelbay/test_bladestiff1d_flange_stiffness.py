@@ -2,7 +2,10 @@ r"""Stiffness properties of the 1D flange of :class:`.BladeStiff1D`
 
 - torsion: the Saint-Venant torsional stiffness of a thin laminated strip of
   height `b_f`, `G J = 4 b_f D_{66}`, which is `G b_f h_f^3/3` for an
-  isotropic flange.
+  isotropic flange;
+- coupling `S_1` between the axial strain and the twist: the reduced
+  stiffness `\bar Q_{16} - \bar Q_{12} \bar Q_{26}/\bar Q_{22}` of each ply
+  with `\sigma_2 = 0` along the height of the flange.
 
 """
 import sys
@@ -84,3 +87,24 @@ def test_kC_uses_the_torsional_stiffness():
     assert np.abs(kernel(0., 0., 0., 1.)).max() > 0
     assert np.allclose(kC, expected, rtol=1e-12, atol=1e-12*np.abs(kC).max())
 
+
+def test_S1_condensed_reduced_stiffness():
+    r"""With `\sigma_2 = 0` in each ply the stress `\sigma_1` along the
+    flange is `(\bar Q_{11} - \bar Q_{12}^2/\bar Q_{22}) \varepsilon_1 +
+    (\bar Q_{16} - \bar Q_{12} \bar Q_{26}/\bar Q_{22}) \gamma_{12}`"""
+    fstack = [30, -60, 15, 45]
+    bay, s = _stiffener(fstack, laminaprop)
+    E1 = S1 = 0.
+    faces = np.concatenate(([0.], np.cumsum([ply.h for ply in s.flam.plies])))
+    for k, ply in enumerate(s.flam.plies):
+        Q = np.array([[ply.q11L, ply.q12L, ply.q16L],
+                      [ply.q12L, ply.q22L, ply.q26L],
+                      [ply.q16L, ply.q26L, ply.q66L]])
+        keep = [0, 2]
+        Qc = Q[np.ix_(keep, keep)] - np.outer(Q[keep, 1], Q[1, keep])/Q[1, 1]
+        yk = 0.5*(faces[k] + faces[k + 1])
+        E1 += ply.h*Qc[0, 0]
+        S1 += -yk*ply.h*Qc[0, 1]
+    assert abs(s.flam.plies[0].q16L - s.flam.plies[0].q26L) > 1e-3*laminaprop[0]
+    assert np.isclose(s.E1, E1, rtol=1e-12)
+    assert np.isclose(s.S1, S1, rtol=1e-12)
