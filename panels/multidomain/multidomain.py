@@ -2502,17 +2502,18 @@ class MultiDomain(object):
               gridx=50, gridy=50, NLterms=True, nr_x_gauss=None, nr_y_gauss=None):
         r"""Out-of-plane force along a line of a panel from its moments
 
-        The moments ``Mxx``, ``Myy`` and ``Mxy`` of ``eval_panel`` are
-        computed with :meth:`.stress` at ``gridx`` equally spaced points
-        along `x`, from ``0`` to ``a``, and ``nr_y_gauss`` Gauss-Legendre
-        points along `y`, and differentiated with :func:`numpy.gradient`
-        to obtain the transverse shear forces ``Qx`` and ``Qy`` from the
-        derivatives of the moments. The sum ``Qx + Qy`` at the second last
-        column of points along `x`, `x = a (gridx - 2)/(gridx - 1)`, is
-        integrated along `y` with the Gauss-Legendre weights. The code keeps
-        two other integrals, an area integral and one based on the
-        derivatives of `w`, which are disabled. TODO(author): the integrated
-        line is fixed by the code, a comment marks it as hard coded.
+        The transverse shear force ``Qx`` is integrated along the line `x`
+        = ``x_cte_force``, over ``nr_y_gauss`` Gauss-Legendre points along
+        `y`, or ``Qy`` along the line `y` = ``y_cte_force``, over
+        ``nr_x_gauss`` Gauss-Legendre points along `x`. The shear force is
+        obtained from the derivatives of the moments ``Mxx``, ``Myy`` and
+        ``Mxy`` of ``eval_panel``, computed as in :meth:`.stress` at the
+        points of the line and at the points at a distance `a/(gridx - 1)`
+        (or `b/(gridy - 1)`) on each side of it, inside the panel. When
+        neither line is given, the line is `x = a (gridx - 2)/(gridx - 1)`,
+        the second last of ``gridx`` equally spaced points from ``0`` to
+        ``a``. The code keeps two other integrals, an area integral and one
+        based on the derivatives of `w`, which are disabled.
 
         Parameters
         ----------
@@ -2520,37 +2521,42 @@ class MultiDomain(object):
             The full set of Ritz constants, 1-D array of size
             :meth:`.get_size`.
         group : str or None
-            Passed to :meth:`.stress`, where it is not used since
-            ``eval_panel`` is given.
+            Not used, since ``eval_panel`` is given.
         eval_panel : :class:`.Shell`
             The panel, required, with a model of 3 degrees of freedom per
             term.
         x_cte_force, y_cte_force : float or None, optional
-            Passed to :meth:`.stress`, where they are not used. Default
-            ``None``.
-        gridx : int, optional
-            Number of points along `x`. Default ``50``.
-        gridy : int, optional
-            Not used. Default ``50``.
+            Constant `x` or `y` coordinate of the line, relative to the
+            panel, `0 \le x \le a` or `0 \le y \le b`. At most one of them.
+            Default ``None``, the line `x = a (gridx - 2)/(gridx - 1)`.
+        gridx, gridy : int, optional
+            The step of the finite differences across the line `x` = cte is
+            `a/(gridx - 1)`, and across the line `y` = cte `b/(gridy - 1)`,
+            at least ``3``. Default ``50``.
         NLterms : bool, optional
-            Not used, :meth:`.stress` uses its default ``True``. Default
-            ``True``.
-        nr_x_gauss : int or None, optional
-            Not used. Default ``None``.
-        nr_y_gauss : int
-            Number of Gauss-Legendre points along `y`, required. Default
-            ``None``.
+            Whether the non-linear terms of the strains enter the moments,
+            see :meth:`.stress`. Default ``True``.
+        nr_x_gauss, nr_y_gauss : int or None, optional
+            Number of Gauss-Legendre points along `x` and `y`, ``nr_y_gauss``
+            required for a line `x` = cte, ``nr_x_gauss`` for a line `y` =
+            cte. Default ``None``.
 
         Returns
         -------
         force_intgn : float
-            The integral of ``Qx + Qy`` along `y`, a force.
+            The integral of ``Qx`` along `y`, or of ``Qy`` along `x`, a
+            force.
 
         Raises
         ------
         NotImplementedError
             When the model of ``eval_panel`` does not have 3 degrees of
             freedom per term.
+        ValueError
+            When both ``x_cte_force`` and ``y_cte_force`` are given, when
+            ``nr_y_gauss`` is missing for a line `x` = cte or ``nr_x_gauss``
+            for a line `y` = cte, when the line is outside the panel, or
+            when ``gridx`` or ``gridy`` is lower than ``3``.
 
         Notes
         -----
@@ -2562,20 +2568,27 @@ class MultiDomain(object):
 
             Q_x = M_{xx,x} + M_{xy,y}, \qquad Q_y = M_{xy,x} + M_{yy,y}
 
-        with the derivatives approximated by the second-order finite
-        differences of :func:`numpy.gradient`, one-sided at the edges of the
-        grid, hence the second last column of points, where the differences
-        are central. The returned force is
+        with the derivatives across the line approximated by the
+        second-order finite differences of :func:`numpy.gradient`, central,
+        or one-sided when the line is closer than one step to an edge, and
+        the derivatives along the line by those of :func:`numpy.gradient`
+        over the Gauss-Legendre points. The transverse shear stress
+        `\tau_{xz}` acts on the faces `x` = cte, whose resultant per unit
+        length is `Q_x`, and `\tau_{yz}` on the faces `y` = cte, such that
+        the out-of-plane force transmitted across the line `x = x_c` is
 
         .. math::
 
-            F = \int_0^b (Q_x + Q_y) \, dy \approx \frac{b}{2} \sum_k w_k
-                (Q_x + Q_y)(x, y_k)
+            F = \int_0^b Q_x(x_c, y) \, dy \approx \frac{b}{2} \sum_k w_k
+                Q_x(x_c, y_k)
 
-        TODO(author): the out-of-plane force transmitted across a line `x =`
-        cte is `\int Q_x \, dy`, as in the line integral of `Q_x` of the
-        cohesive zone page, :ref:`cohesive_zone_load`; check why `Q_y` is
-        added.
+        as in the line integral of `Q_x` of the cohesive zone page,
+        :ref:`cohesive_zone_load`, and likewise `F = \int_0^a Q_y(x, y_c)
+        \, dx` across the line `y = y_c`. For a free edge `y = 0` or `y = b`
+        the condition of the classical theory is on the effective shear
+        `Q_y + M_{xy,x}`, not on `M_{xy}`: the twisting moment at the ends of
+        the line, statically equivalent to concentrated forces, is not
+        included in `F`.
 
         """
 
@@ -2648,52 +2661,68 @@ class MultiDomain(object):
 
                 return force_intgn
 
-        # Uses gauss points for y and evenly spaced points for x so that there is a point at x=a
+        # Gauss-Legendre points along the line and three equally spaced
+        # points across it, for the finite differences of the moments
         if line_int:
-            res_stress = self.stress(c=c, group=group,
-                                     eval_panel = eval_panel, x_cte_force = x_cte_force, y_cte_force = y_cte_force,
-                                     gridx=gridx, gridy=None, nr_x_gauss=None, nr_y_gauss=nr_y_gauss)
+            panel = eval_panel
+            if x_cte_force is not None and y_cte_force is not None:
+                raise ValueError('Integration can only be performed along a '
+                                 'single line - specify either x_cte_force or '
+                                 'y_cte_force')
+            xline = y_cte_force is None
+            if xline:
+                if nr_y_gauss is None:
+                    raise ValueError('nr_y_gauss must be given for a line '
+                                     'x = cte')
+                ngrid, ngauss, length, width = gridx, nr_y_gauss, panel.b, panel.a
+                cte = x_cte_force
+                if cte is None:
+                    cte = panel.a*(gridx - 2)/(gridx - 1)
+            else:
+                if nr_x_gauss is None:
+                    raise ValueError('nr_x_gauss must be given for a line '
+                                     'y = cte')
+                ngrid, ngauss, length, width = gridy, nr_x_gauss, panel.a, panel.b
+                cte = y_cte_force
+            if ngrid < 3:
+                raise ValueError('gridx and gridy must be at least 3')
+            if not (0. <= cte <= width):
+                raise ValueError('The line must be inside the panel')
+            step = width/(ngrid - 1)
+            if cte - step < 0.:
+                across, i_cte = cte + step*np.arange(3.), 0
+            elif cte + step > width:
+                across, i_cte = cte + step*np.arange(-2., 1.), 2
+            else:
+                across, i_cte = cte + step*np.arange(-1., 2.), 1
+            s_gauss, weights = roots_legendre(ngauss)
+            along = (length/2)*(s_gauss + 1)
+            x, y = (across, along) if xline else (along, across)
 
+            # moments as in MultiDomain.stress(), rows along y, columns along x
+            xs, ys = np.meshgrid(x, y, copy=False)
+            c_panel = np.ascontiguousarray(c[panel.col_start: panel.col_end],
+                                           dtype=DOUBLE)
+            fstrain = modelDB.db[panel.model]['field'].fstrain
+            strains = [reshape(e, xs.shape) for e in fstrain(c_panel, panel,
+                       np.ascontiguousarray(xs.ravel(), dtype=DOUBLE),
+                       np.ascontiguousarray(ys.ravel(), dtype=DOUBLE),
+                       self.out_num_cores, NLgeom=int(NLterms))]
+            F = panel._get_constant_ABD()
+            names = panel._stress_names()
+            M = {name: sum(e*F[names.index(name), j] for j, e in enumerate(strains))
+                 for name in ('Mxx', 'Myy', 'Mxy')}
 
-            # Line Integral of Qx - considers gauss points in only y
-            if True:
-                # Gauss points and weights
-                y_gauss, weights_y = roots_legendre(nr_y_gauss)
+            if xline:
+                Q = (np.gradient(M['Mxx'], x, axis=1, edge_order=2)
+                     + np.gradient(M['Mxy'], y, axis=0))[:, i_cte]
+            else:
+                Q = (np.gradient(M['Mxy'], x, axis=1)
+                     + np.gradient(M['Myy'], y, axis=0, edge_order=2))[i_cte, :]
 
-                dx = np.linspace(0, eval_panel.a, gridx)
+            force_intgn = np.dot(weights, Q)*(length/2)
 
-                # Points used for distance to calc derivatives
-                if False: # unchanged dx, dy
-                    dx = x_gauss.copy()
-                    dy = y_gauss.copy()
-                else: # convert to physical dimensions
-                    # dx = (eval_panel.a/2)*(x_gauss + 1)
-                    dy = (eval_panel.b/2)*(y_gauss + 1)
-
-                dMxx_dy, dMxx_dx = np.gradient(res_stress['Mxx'][-1], dy, dx)
-                dMxy_dy, dMxy_dx = np.gradient(res_stress['Mxy'][-1], dy, dx)
-                dMyy_dy, dMyy_dx = np.gradient(res_stress['Myy'][-1], dy, dx)
-
-                # print('WARNING: Avg Moment being returned along edge not force')
-                # return np.mean(dMxx_dx[:,-1])
-
-                Qx = dMxx_dx + dMxy_dy
-                Qy = dMxy_dx + dMyy_dy
-
-                # FOR XCTE
-                Q_tot = Qx + Qy
-                # print(Q_tot)
-                # HARD CODED - WRONG - CHANGE
-                Q_int = Q_tot[:,-2] # -2 is is to get the 2nd last one incase the deri at the tip being one sided deri is not as accurate
-                # print('WARNING QINT IS BEING RETURNED NOT FORCE')
-
-
-                force_intgn = np.dot(weights_y, Q_int)*(eval_panel.b/2)
-                # print(f'                Force line int Qx = {force_intgn:.2f} WARNING: hardcoded for the tip!!!')
-
-                return force_intgn
-                # return Q_int, dy
-                # print(res_stress['Mxx'][0][:,-1])
+            return force_intgn
 
 
         if von_karman_NL_int: # pragma: no cover
