@@ -403,7 +403,7 @@ def fkM(object shell, double d, int size, int row0, int col0):
     a = shell.a
     b = shell.b
     r = shell.r
-    rho = shell.rho
+    rho = shell.lam.intrho/shell.lam.h
     h = sum(shell.plyts)
     m = shell.m
     n = shell.n

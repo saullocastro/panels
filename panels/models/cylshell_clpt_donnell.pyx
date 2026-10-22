@@ -363,7 +363,7 @@ def fkM(object shell, double d, int size, int row0, int col0):
         raise ValueError('a Shell object must be given as input')
     a = shell.a
     b = shell.b
-    rho = shell.rho
+    rho = shell.lam.intrho/shell.lam.h
     h = sum(shell.plyts)
     m = shell.m
     n = shell.n

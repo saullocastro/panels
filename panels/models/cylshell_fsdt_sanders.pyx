@@ -595,7 +595,7 @@ def fkM(object shell, double d, int size, int row0, int col0):
     m = shell.m
     n = shell.n
     r = shell.r
-    rho = shell.rho
+    rho = shell.lam.intrho/shell.lam.h
     h = sum(shell.plyts)
     x1u = shell.x1u; x1ur = shell.x1ur; x2u = shell.x2u; x2ur = shell.x2ur
     x1v = shell.x1v; x1vr = shell.x1vr; x2v = shell.x2v; x2vr = shell.x2vr

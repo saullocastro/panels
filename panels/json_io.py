@@ -353,14 +353,23 @@ def _list(data, name):
 def _shell_to_data(s, path, w):
     data = _encode_attrs(s, _SHELL_ATTRS, path, w)
     data['lam'] = _encode_lam(s.lam, path + '.lam')
+    # NOTE the per-ply lists filled by Shell._rebuild(), not by the user
+    data['derived_lists'] = [name for name in ('plyts', 'laminaprops', 'rhos')
+                             if getattr(s, name) and s._is_derived(name)]
     return data
 
 
 def _shell_from_data(data, r):
     from .shell import Shell
-    _check_keys(data, _SHELL_ATTRS + _SHELL_LEGACY_ATTRS + ('lam', ), 'Shell')
+    _check_keys(data, _SHELL_ATTRS + _SHELL_LEGACY_ATTRS
+                + ('lam', 'derived_lists'), 'Shell')
     s = Shell()
     _decode_attrs(s, data, _SHELL_ATTRS, r)
+    # NOTE files of panels < 0.13.12 have no 'derived_lists', their lists
+    #      are then kept as given by the user
+    for name in data.get('derived_lists', []):
+        if name in ('plyts', 'laminaprops', 'rhos') and getattr(s, name):
+            s._set_derived(name, getattr(s, name))
     for name in _SHELL_LEGACY_ATTRS:
         if name in data:
             _decode(data[name], r)

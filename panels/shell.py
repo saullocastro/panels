@@ -109,6 +109,15 @@ class Shell(object):
     Otherwise the shell is built by the calculation methods, e.g.
     :meth:`.Shell.calc_kC`.
 
+    The per-ply lists ``plyts``, ``laminaprops`` and ``rhos`` that are not
+    given by the user are filled with ``plyt``, ``laminaprop`` and ``rho``
+    at every rebuild, such that a later change of ``plyt``,
+    ``laminaprop``, ``rho`` or ``stack`` is taken into account by the next
+    rebuild, e.g. by :meth:`.Shell.calc_kC`. A list given by the user, as
+    an argument, as an attribute, or by changing in place a list filled by
+    the rebuild, is never overwritten and takes precedence over the
+    corresponding scalar.
+
     The boundary conditions are controlled by the flags ``x1u, x1ur, x2u,
     x2ur, ..., y2w, y2wr``, where for instance ``x1v`` multiplies the value
     and ``x1vr`` the derivative of the approximation functions of `v` at the
@@ -171,15 +180,15 @@ class Shell(object):
         passed to :func:`composites.laminated_plate`. Default ``None``.
     plyt : float, optional
         Ply thickness, a length, used for every ply unless the attribute
-        ``plyts`` is given. Default ``None``.
+        ``plyts`` is given by the user. Default ``None``.
     laminaprop : list or tuple, optional
         Orthotropic lamina properties: `E_1, E_2, \nu_{12}, G_{12}, G_{13}, G_{23}`.
         The moduli are forces per unit area and `\nu_{12}` is dimensionless.
-        Used for every ply unless the attribute ``laminaprops`` is given.
-        Default ``None``.
+        Used for every ply unless the attribute ``laminaprops`` is given
+        by the user. Default ``None``.
     rho : float, optional
         Material density, a mass per unit volume, used for every ply unless
-        the attribute ``rhos`` is given. Default ``0``.
+        the attribute ``rhos`` is given by the user. Default ``0``.
     m, n : int, optional
         Number of terms for the approximation functions along `x` and `y`,
         respectively. At most ``30``. Default ``11``.
@@ -287,7 +296,7 @@ class Shell(object):
         'x1phiy', 'x1phiyr', 'x2phiy', 'x2phiyr',
         'y1phix', 'y1phixr', 'y2phix', 'y2phixr',
         'y1phiy', 'y1phiyr', 'y2phiy', 'y2phiyr',
-        'plyts', 'laminaprops', 'rhos',
+        'plyts', 'laminaprops', 'rhos', '_derived_lists',
         'flow', 'beta', 'gamma', 'aeromu', 'rho_air', 'speed_sound', 'Mach', 'air_speed',
         'ABDnxny', 'force_orthotropic_laminate',
         'num_eigvalues', 'num_eigvalues_print',
@@ -431,6 +440,8 @@ class Shell(object):
         self.plyts = None
         self.laminaprops = None
         self.rhos = None
+        # the per-ply lists filled by _rebuild(), see _is_derived()
+        self._derived_lists = {}
 
         # aeroelastic parameters for panel flutter
         self.flow = 'x'
@@ -502,18 +513,20 @@ class Shell(object):
         if not self.stack:
             raise ValueError('stack must be defined')
 
-        if not self.laminaprops:
+        #NOTE the lists not given by the user are derived again from the
+        #     scalars, which may have changed since the last rebuild
+        if self._is_derived('laminaprops'):
             if not self.laminaprop:
                 raise ValueError('laminaprop must be defined')
-            self.laminaprops = [self.laminaprop for i in self.stack]
+            self._set_derived('laminaprops', [self.laminaprop for i in self.stack])
 
-        if not self.rhos:
-            self.rhos = [self.rho for i in self.stack]
+        if self._is_derived('rhos'):
+            self._set_derived('rhos', [self.rho for i in self.stack])
 
-        if not self.plyts:
+        if self._is_derived('plyts'):
             if self.plyt is None:
                 raise ValueError('plyt must be defined')
-            self.plyts = [self.plyt for i in self.stack]
+            self._set_derived('plyts', [self.plyt for i in self.stack])
 
         if self.stack is not None:
             k = self.fsdt_shear_correction
@@ -530,6 +543,35 @@ class Shell(object):
         self.size = self.get_size()
         # fails early on invalid limits of the integration domain
         self.integration_limits()
+
+
+    def _is_derived(self, name):
+        r"""Whether the per-ply list ``name`` was not given by the user
+
+        ``name`` is ``'plyts'``, ``'laminaprops'`` or ``'rhos'``. A list that
+        is ``None`` or empty, or that is still the very list filled by
+        :meth:`._set_derived`, unchanged, is derived from ``plyt``,
+        ``laminaprop`` or ``rho`` at the next rebuild; any other list was
+        given by the user and is kept.
+
+        """
+        value = getattr(self, name)
+        if not value:
+            return True
+        derived = getattr(self, '_derived_lists', None) or {}
+        if name not in derived:
+            return False
+        obj, copy = derived[name]
+        return value is obj and list(value) == copy
+
+
+    def _set_derived(self, name, value):
+        r"""Set the per-ply list ``name`` filled by the rebuild, see
+        :meth:`._is_derived`"""
+        setattr(self, name, value)
+        if getattr(self, '_derived_lists', None) is None:
+            self._derived_lists = {}
+        self._derived_lists[name] = (value, list(value))
 
 
     def _check_r(self):
@@ -1909,9 +1951,11 @@ class Shell(object):
         offset ``Shell.offset``. When ``h_nxny`` or ``rho_nxny`` is given, or
         the integration domain is partial, see
         :meth:`.Shell.is_partial_domain`, the matrix is integrated
-        numerically with ``nx`` by ``ny`` points. The laminate ``Shell.lam``
-        must already be built, e.g. by the constructor or by
-        :meth:`.Shell.calc_kC`.
+        numerically with ``nx`` by ``ny`` points. Both use the same
+        thickness and density. The laminate ``Shell.lam`` must already be
+        built, e.g. by the constructor or by :meth:`.Shell.calc_kC`; its ply
+        densities are ``rhos`` when given by the user, otherwise ``rho`` for
+        every ply, as of the last rebuild, see :class:`.Shell`.
 
         Parameters
         ----------

@@ -513,7 +513,7 @@ cdef extern from 'bardell.hpp':
     A.append(analytical_function(
         'def fkM(object shell, double d, int size, int row0, int col0):',
         '    cdef double a, b, rho, h' + (', c1' if theory == 'tsdt' else '') + '\n    cdef int m, n',
-        '    rho = shell.rho\n    h = sum(shell.plyts)' + ('\n' + c1_line if theory == 'tsdt' else ''),
+        '    rho = shell.lam.intrho/shell.lam.h\n    h = sum(shell.plyts)' + ('\n' + c1_line if theory == 'tsdt' else ''),
         'kM', kM, True))
     A.append('\n')
     A.append(analytical_function(
