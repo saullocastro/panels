@@ -510,6 +510,10 @@ cdef extern from 'bardell.hpp':
                          '    cdef double [:, ::1] F',
                          '    cdef int m, n',
                          cdefs([v.name for v in cvars])])
+    #NOTE the kernels read the property Shell.ABD, and fkM calls
+    #     Shell._get_lam_mid, with C variables already set, which must not
+    #     call matrix-matrix BLAS products, see the note in
+    #     Shell._get_lam_ABD and tests/tests_shell/test_kernel_python_calls.py
     k0_pre = '\n'.join(['    F = shell.ABD', c1_read,
                         "    if F.shape[0] != NE or F.shape[1] != NE:",
                         "        raise ValueError('shell.ABD must be a %d x %d matrix' % (NE, NE))"])

@@ -1078,6 +1078,8 @@ class Shell(object):
             raise RuntimeError('lam object is None!')
         if lam.offset == 0:
             return lam
+        #NOTE called from the kernels fkM, no matrix-matrix BLAS product
+        #     herein, see the note in Shell._get_lam_ABD
         cache = getattr(self, '_lam_mid', None)
         if cache is not None and cache[0] is lam and cache[2] == lam.offset:
             return cache[1]
@@ -1167,9 +1169,17 @@ class Shell(object):
             E, F, H = mid.E, mid.F, mid.H
             d = lam.offset
             #NOTE T^T F_m T written by blocks, see the notes; the products by
-            #     the scalar d do not call BLAS, whose matrix product, called
-            #     from the kernels through this property, was seen to corrupt
-            #     a variable of the compiled kernel cylshell_tsdt_sanders.fk0
+            #     the scalar d do not call BLAS. The kernels of
+            #     panels.models read Shell.ABD, hence run this code, while
+            #     their C variables may be held in registers. The
+            #     matrix-matrix product of MKL 2025.0 on Windows x64
+            #     (cblas_dgemm, reached by numpy.matmul) returns with xmm8 to
+            #     xmm15 changed, which the Windows x64 calling convention
+            #     requires to be preserved: one product T.T @ F_m @ T, or
+            #     even np.eye(13) @ ABD, here gives nan in
+            #     cylshell_tsdt_sanders.fk0. Do not call matrix-matrix BLAS
+            #     products in code reached from the kernels, see
+            #     tests/tests_shell/test_kernel_python_calls.py
             ABD = np.zeros((13, 13), dtype=DOUBLE)
             B1 = d*A + B
             E1 = d**3*A + E
