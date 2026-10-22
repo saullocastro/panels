@@ -328,11 +328,12 @@ Symmetry of the load stiffness matrix
 -------------------------------------
 
 For the first-order area vector, the block of the rows `\delta u` and of the
-columns `w` of Eq. :eq:`fp-blocks`, `-\{N_u\}\{N_{w,x}\}^T`, has as
-transposed counterpart the transpose of the block of the rows `\delta w` and
-of the columns `u`, `\{N_{u,x}\}\{N_w\}^T`, and not
-`-\{N_{w,x}\}\{N_u\}^T`, and similarly for the coupling of `v` and `w`. The
-difference of the two is a derivative,
+columns `w` of Eq. :eq:`fp-blocks` is `-\{N_u\}\{N_{w,x}\}^T`. A symmetric
+matrix would have its transpose, `-\{N_{w,x}\}\{N_u\}^T`, as the block of
+the rows `\delta w` and of the columns `u`, which is instead
+`\{N_w\}\{N_{u,x}\}^T`, and similarly for the coupling of `v` and `w`. The
+difference between the first block and the transpose of the second one is
+a derivative,
 
 .. math::
     :label: fp-skew-block
