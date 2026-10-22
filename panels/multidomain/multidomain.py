@@ -1054,10 +1054,12 @@ class MultiDomain(object):
         Jacobian, and `\partial R_r/\partial \lambda`, returned by
         ``calc_fext`` with ``c`` and ``lbd``, depends on the configuration
         and on the load factor. ``structsolve`` uses it in the predictors
-        and in the constraint of the arc-length methods, and as the
-        reference of the relative convergence criterion, since under a
-        prescribed displacement alone both `[T]^T \{F_{ext}\}` and `[T]^T
-        \{F_{int}\}` vanish at equilibrium. See :ref:`null_space_pd`.
+        and in the constraint of the arc-length methods, and `\lambda
+        \partial R_r/\partial \lambda` as a reference quantity of the
+        convergence criteria, Crisfield's scaled criterion, the default of
+        ``structsolve`` 0.8.5, and the relative one, since under a prescribed
+        displacement alone both `[T]^T \{F_{ext}\}` and `[T]^T \{F_{int}\}`
+        vanish at equilibrium. See :ref:`null_space_pd`.
 
         """
         T = self.get_T()
