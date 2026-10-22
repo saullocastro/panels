@@ -3,7 +3,8 @@ r"""Mass matrices with the density moments `I_n` of the laminate
 The kinetic energy `c^T [M] c` of a random Ritz vector is checked against an
 independent integration of `\rho (u(z)^2 + v(z)^2 + w^2)` ply by ply, with
 `z` from `-h/2 + d` to `h/2 + d`, the convention of the offset `d` of
-:func:`composites.laminated_plate`, and the fields of :meth:`.Shell.uvw`.
+:func:`composites.laminated_plate`, and the fields of :meth:`.Shell.uvw`;
+the cubic term of the TSDT is `-c_1 [(z - d)^3 + d^3] (\phi + w_{,x})`.
 
 """
 import sys
@@ -67,8 +68,9 @@ def kinetic_energy_quadrature(s, c, plyts, rhos, ngp=20, nz=6):
     for t, rho in zip(plyts, rhos):
         for zeta, wz in zip(zg, wzg):
             z = z0 + (zeta + 1)/2*t
-            uz = u + z*phix - c1*z**3*(phix + wx)
-            vz = v + z*phiy - c1*z**3*(phiy3 + wy)
+            cubic = (z - s.offset)**3 + s.offset**3
+            uz = u + z*phix - c1*cubic*(phix + wx)
+            vz = v + z*phiy - c1*cubic*(phiy3 + wy)
             total += rho*wz*t/2*np.sum(W*(uz**2 + vz**2 + w**2))
         z0 += t
     return total
@@ -89,7 +91,8 @@ def test_kinetic_energy_ply_by_ply(model, offset):
 
 
 def _lam_moments(s):
-    lam = s.lam
+    #NOTE the moments about the mid-surface for the TSDT
+    lam = s._get_lam_mid() if '_tsdt_' in s.model else s.lam
     moments = [lam.intrho, lam.intrhoz, lam.intrhoz2]
     if '_tsdt_' in s.model:
         moments += [lam.intrhoz3, lam.intrhoz4, lam.intrhoz6]

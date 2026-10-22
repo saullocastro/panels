@@ -126,8 +126,11 @@ independent fields, with the displacement field and the strains of
 :mod:`panels.models.fsdt_tsdt_field`. The FSDT uses the shear corrected
 transverse shear stiffness, with the method of Rohwer (1988) [4]_ by
 default, see :class:`.Shell`. The TSDT of Reddy (1984) [3]_ needs no shear
-correction, the transverse shear stresses vanish at `z = \pm h/2`, which
-assumes the reference surface at mid-thickness, i.e. no laminate offset.
+correction, the transverse shear stresses vanishing at the faces of the
+laminate, `z = d \pm h/2` with the offset `d`: the cubic term is written
+about the mid-surface, `-c_1 [(z - d)^3 + d^3] (\phi_x + w_{,x})`, which
+keeps `u` the displacement of the reference surface, see
+:meth:`.Shell._get_lam_ABD`.
 The cylinders with the Donnell kinematics are the plate models with the
 hoop strain `w/r` and the curvature term of the piston theory, see
 :meth:`.Shell.calc_kA`. With the Sanders-Koiter kinematics, the rotation of
@@ -154,12 +157,12 @@ laminate spanning `-h/2 + d \le z \le h/2 + d`, `d` being the offset
 used by the stiffness matrices. The density enters only through its
 moments `I_n = \int \rho z^n dz`, ``intrho``, ``intrhoz``, ...,
 ``intrhoz6`` of :class:`composites.Laminate`, `n = 0, 1, 2` for the CLPT
-and the FSDT and `n = 0, 1, 2, 3, 4, 6` for the TSDT, which account exactly
-for the density of each ply. The kernel ``fkM(shell, size, row0, col0)``
-reads them from ``shell.lam``, and ``fkM_num(shell, I_input, size, row0,
-col0, nx, ny)`` receives them, with the thickness `h` of the TSDT, as one
-set for the whole domain or one set per integration point, see
-:meth:`.Shell.calc_kM`.
+and the FSDT, and for the TSDT the moments about the mid-surface, `n = 0,
+1, 2, 3, 4, 6`, see :meth:`.Shell._get_lam_mid`, which account exactly for
+the density of each ply. The kernel ``fkM(shell, size, row0, col0)`` reads
+them from the laminate, and ``fkM_num(shell, I_input, size, row0, col0, nx,
+ny)`` receives them, with the thickness `h` of the TSDT, as one set for the
+whole domain or one set per integration point, see :meth:`.Shell.calc_kM`.
 
 References
 ----------

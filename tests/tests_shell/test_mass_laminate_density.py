@@ -42,7 +42,8 @@ def test_closed_form_equals_numerical_with_ply_densities(model):
     kM = s.calc_kM().toarray()
     #NOTE giving the moments of the laminate at each point forces the
     #     numerical integration
-    lam = s.lam
+    #NOTE the moments about the mid-surface for the TSDT
+    lam = s._get_lam_mid() if '_tsdt_' in model else s.lam
     moments = [lam.intrho, lam.intrhoz, lam.intrhoz2]
     if '_tsdt_' in model:
         moments += [lam.intrhoz3, lam.intrhoz4, lam.intrhoz6]

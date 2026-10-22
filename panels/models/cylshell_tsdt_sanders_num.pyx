@@ -798,10 +798,10 @@ def fkM_num(object shell, object I_input, int size,
 
     cdef double [::1] xis, etas, weights_xi, weights_eta
 
-    # moments of the density through the thickness, I0, I1, I2, I3, I4, I6, h, as a 3-D
+    # moments of the density through the thickness, J0, J1, J2, J3, J4, J6, h, as a 3-D
     # matrix [nx, ny, 7] with one set for each of the nx * ny integration
     # points, or as a 1-D array [7] for the whole integration domain
-    cdef double I0, I1, I2, I3, I4, I6, h
+    cdef double J0, J1, J2, J3, J4, J6, h, d
     cdef double [:, :, ::1] I_nxny
 
     cdef int one_set_each_point = 0
@@ -814,7 +814,7 @@ def fkM_num(object shell, object I_input, int size,
         # creating dummy 3-D array that is not used
         I_nxny = np.empty(shape=(0, 0, 0), dtype=DOUBLE)
         # using constant moments for all the integration domain
-        I0, I1, I2, I3, I4, I6, h = I_input
+        J0, J1, J2, J3, J4, J6, h = I_input
     else:
         raise ValueError('Invalid shape for I_input, it must be (nx, ny, 7) or (7, )')
 
@@ -825,6 +825,7 @@ def fkM_num(object shell, object I_input, int size,
     m = shell.m
     n = shell.n
     r = shell.r
+    d = shell.offset
     #NOTE physical limits of the integration domain, resolved and validated
     #      by Shell.integration_limits(); for the full domain the mapping
     #      below gives exactly xi1 = eta1 = -1 and xi2 = eta2 = +1
@@ -876,12 +877,12 @@ def fkM_num(object shell, object I_input, int size,
                 weight = weights_xi[ptx] * weights_eta[pty]
 
                 if one_set_each_point == 1:
-                    I0 = I_nxny[ptx, pty, 0]
-                    I1 = I_nxny[ptx, pty, 1]
-                    I2 = I_nxny[ptx, pty, 2]
-                    I3 = I_nxny[ptx, pty, 3]
-                    I4 = I_nxny[ptx, pty, 4]
-                    I6 = I_nxny[ptx, pty, 5]
+                    J0 = I_nxny[ptx, pty, 0]
+                    J1 = I_nxny[ptx, pty, 1]
+                    J2 = I_nxny[ptx, pty, 2]
+                    J3 = I_nxny[ptx, pty, 3]
+                    J4 = I_nxny[ptx, pty, 4]
+                    J6 = I_nxny[ptx, pty, 5]
                     h = I_nxny[ptx, pty, 6]
                 c1 = 4./(3.*h*h)
 
@@ -947,87 +948,87 @@ def fkM_num(object shell, object I_input, int size,
                                 if ptx == 0 and pty == 0:
                                     kMr[c] = row+0
                                     kMc[c] = col+0
-                                kMv[c] += weight*(intx*inty/4)*( I0*fAu*fBu*gAu*gBu )
+                                kMv[c] += weight*(intx*inty/4)*( J0*fAu*fBu*gAu*gBu )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kMr[c] = row+0
                                     kMc[c] = col+2
-                                kMv[c] += weight*(intx*inty/4)*( -2*I3*c1*fAu*fBwxi*gAu*gBw/a )
+                                kMv[c] += weight*(intx*inty/4)*( -2*J0*c1*(d*d*d)*fAu*fBwxi*gAu*gBw/a - 2*J3*c1*fAu*fBwxi*gAu*gBw/a )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kMr[c] = row+0
                                     kMc[c] = col+3
-                                kMv[c] += weight*(intx*inty/4)*( I1*fAu*fBphix*gAu*gBphix - I3*c1*fAu*fBphix*gAu*gBphix )
+                                kMv[c] += weight*(intx*inty/4)*( -J0*c1*(d*d*d)*fAu*fBphix*gAu*gBphix + J0*d*fAu*fBphix*gAu*gBphix + J1*fAu*fBphix*gAu*gBphix - J3*c1*fAu*fBphix*gAu*gBphix )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kMr[c] = row+1
                                     kMc[c] = col+1
-                                kMv[c] += weight*(intx*inty/4)*( I0*fAv*fBv*gAv*gBv + 2*I1*fAv*fBv*gAv*gBv/r + I2*fAv*fBv*gAv*gBv/(r*r) )
+                                kMv[c] += weight*(intx*inty/4)*( J0*(d*d)*fAv*fBv*gAv*gBv/(r*r) + 2*J0*d*fAv*fBv*gAv*gBv/r + J0*fAv*fBv*gAv*gBv + 2*J1*d*fAv*fBv*gAv*gBv/(r*r) + 2*J1*fAv*fBv*gAv*gBv/r + J2*fAv*fBv*gAv*gBv/(r*r) )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kMr[c] = row+1
                                     kMc[c] = col+2
-                                kMv[c] += weight*(intx*inty/4)*( -2*I3*c1*fAv*fBw*gAv*gBweta/b - 2*I4*c1*fAv*fBw*gAv*gBweta/(b*r) )
+                                kMv[c] += weight*(intx*inty/4)*( -2*J0*c1*(d*d*d*d)*fAv*fBw*gAv*gBweta/(b*r) - 2*J0*c1*(d*d*d)*fAv*fBw*gAv*gBweta/b - 2*J1*c1*(d*d*d)*fAv*fBw*gAv*gBweta/(b*r) - 2*J3*c1*d*fAv*fBw*gAv*gBweta/(b*r) - 2*J3*c1*fAv*fBw*gAv*gBweta/b - 2*J4*c1*fAv*fBw*gAv*gBweta/(b*r) )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kMr[c] = row+1
                                     kMc[c] = col+4
-                                kMv[c] += weight*(intx*inty/4)*( I1*fAv*fBphiy*gAv*gBphiy + I2*fAv*fBphiy*gAv*gBphiy/r - I3*c1*fAv*fBphiy*gAv*gBphiy - I4*c1*fAv*fBphiy*gAv*gBphiy/r )
+                                kMv[c] += weight*(intx*inty/4)*( -J0*c1*(d*d*d*d)*fAv*fBphiy*gAv*gBphiy/r - J0*c1*(d*d*d)*fAv*fBphiy*gAv*gBphiy + J0*(d*d)*fAv*fBphiy*gAv*gBphiy/r + J0*d*fAv*fBphiy*gAv*gBphiy - J1*c1*(d*d*d)*fAv*fBphiy*gAv*gBphiy/r + 2*J1*d*fAv*fBphiy*gAv*gBphiy/r + J1*fAv*fBphiy*gAv*gBphiy + J2*fAv*fBphiy*gAv*gBphiy/r - J3*c1*d*fAv*fBphiy*gAv*gBphiy/r - J3*c1*fAv*fBphiy*gAv*gBphiy - J4*c1*fAv*fBphiy*gAv*gBphiy/r )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kMr[c] = row+2
                                     kMc[c] = col+0
-                                kMv[c] += weight*(intx*inty/4)*( -2*I3*c1*fAwxi*fBu*gAw*gBu/a )
+                                kMv[c] += weight*(intx*inty/4)*( -2*J0*c1*(d*d*d)*fAwxi*fBu*gAw*gBu/a - 2*J3*c1*fAwxi*fBu*gAw*gBu/a )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kMr[c] = row+2
                                     kMc[c] = col+1
-                                kMv[c] += weight*(intx*inty/4)*( -2*I3*c1*fAw*fBv*gAweta*gBv/b - 2*I4*c1*fAw*fBv*gAweta*gBv/(b*r) )
+                                kMv[c] += weight*(intx*inty/4)*( -2*J0*c1*(d*d*d*d)*fAw*fBv*gAweta*gBv/(b*r) - 2*J0*c1*(d*d*d)*fAw*fBv*gAweta*gBv/b - 2*J1*c1*(d*d*d)*fAw*fBv*gAweta*gBv/(b*r) - 2*J3*c1*d*fAw*fBv*gAweta*gBv/(b*r) - 2*J3*c1*fAw*fBv*gAweta*gBv/b - 2*J4*c1*fAw*fBv*gAweta*gBv/(b*r) )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kMr[c] = row+2
                                     kMc[c] = col+2
-                                kMv[c] += weight*(intx*inty/4)*( I0*fAw*fBw*gAw*gBw + I6*(4*(c1*c1)*fAw*fBw*gAweta*gBweta/(b*b) + 4*(c1*c1)*fAwxi*fBwxi*gAw*gBw/(a*a)) )
+                                kMv[c] += weight*(intx*inty/4)*( J0*fAw*fBw*gAw*gBw + 4*J0*(c1*c1)*(d*d*d*d*d*d)*fAw*fBw*gAweta*gBweta/(b*b) + 4*J0*(c1*c1)*(d*d*d*d*d*d)*fAwxi*fBwxi*gAw*gBw/(a*a) + 8*J3*(c1*c1)*(d*d*d)*fAw*fBw*gAweta*gBweta/(b*b) + 8*J3*(c1*c1)*(d*d*d)*fAwxi*fBwxi*gAw*gBw/(a*a) + 4*J6*(c1*c1)*fAw*fBw*gAweta*gBweta/(b*b) + 4*J6*(c1*c1)*fAwxi*fBwxi*gAw*gBw/(a*a) )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kMr[c] = row+2
                                     kMc[c] = col+3
-                                kMv[c] += weight*(intx*inty/4)*( -2*I4*c1*fAwxi*fBphix*gAw*gBphix/a + 2*I6*(c1*c1)*fAwxi*fBphix*gAw*gBphix/a )
+                                kMv[c] += weight*(intx*inty/4)*( 2*J0*(c1*c1)*(d*d*d*d*d*d)*fAwxi*fBphix*gAw*gBphix/a - 2*J0*c1*(d*d*d*d)*fAwxi*fBphix*gAw*gBphix/a - 2*J1*c1*(d*d*d)*fAwxi*fBphix*gAw*gBphix/a + 4*J3*(c1*c1)*(d*d*d)*fAwxi*fBphix*gAw*gBphix/a - 2*J3*c1*d*fAwxi*fBphix*gAw*gBphix/a - 2*J4*c1*fAwxi*fBphix*gAw*gBphix/a + 2*J6*(c1*c1)*fAwxi*fBphix*gAw*gBphix/a )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kMr[c] = row+2
                                     kMc[c] = col+4
-                                kMv[c] += weight*(intx*inty/4)*( -2*I4*c1*fAw*fBphiy*gAweta*gBphiy/b + 2*I6*(c1*c1)*fAw*fBphiy*gAweta*gBphiy/b )
+                                kMv[c] += weight*(intx*inty/4)*( 2*J0*(c1*c1)*(d*d*d*d*d*d)*fAw*fBphiy*gAweta*gBphiy/b - 2*J0*c1*(d*d*d*d)*fAw*fBphiy*gAweta*gBphiy/b - 2*J1*c1*(d*d*d)*fAw*fBphiy*gAweta*gBphiy/b + 4*J3*(c1*c1)*(d*d*d)*fAw*fBphiy*gAweta*gBphiy/b - 2*J3*c1*d*fAw*fBphiy*gAweta*gBphiy/b - 2*J4*c1*fAw*fBphiy*gAweta*gBphiy/b + 2*J6*(c1*c1)*fAw*fBphiy*gAweta*gBphiy/b )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kMr[c] = row+3
                                     kMc[c] = col+0
-                                kMv[c] += weight*(intx*inty/4)*( I1*fAphix*fBu*gAphix*gBu - I3*c1*fAphix*fBu*gAphix*gBu )
+                                kMv[c] += weight*(intx*inty/4)*( -J0*c1*(d*d*d)*fAphix*fBu*gAphix*gBu + J0*d*fAphix*fBu*gAphix*gBu + J1*fAphix*fBu*gAphix*gBu - J3*c1*fAphix*fBu*gAphix*gBu )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kMr[c] = row+3
                                     kMc[c] = col+2
-                                kMv[c] += weight*(intx*inty/4)*( -2*I4*c1*fAphix*fBwxi*gAphix*gBw/a + 2*I6*(c1*c1)*fAphix*fBwxi*gAphix*gBw/a )
+                                kMv[c] += weight*(intx*inty/4)*( 2*J0*(c1*c1)*(d*d*d*d*d*d)*fAphix*fBwxi*gAphix*gBw/a - 2*J0*c1*(d*d*d*d)*fAphix*fBwxi*gAphix*gBw/a - 2*J1*c1*(d*d*d)*fAphix*fBwxi*gAphix*gBw/a + 4*J3*(c1*c1)*(d*d*d)*fAphix*fBwxi*gAphix*gBw/a - 2*J3*c1*d*fAphix*fBwxi*gAphix*gBw/a - 2*J4*c1*fAphix*fBwxi*gAphix*gBw/a + 2*J6*(c1*c1)*fAphix*fBwxi*gAphix*gBw/a )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kMr[c] = row+3
                                     kMc[c] = col+3
-                                kMv[c] += weight*(intx*inty/4)*( I2*fAphix*fBphix*gAphix*gBphix - 2*I4*c1*fAphix*fBphix*gAphix*gBphix + I6*(c1*c1)*fAphix*fBphix*gAphix*gBphix )
+                                kMv[c] += weight*(intx*inty/4)*( J0*(c1*c1)*(d*d*d*d*d*d)*fAphix*fBphix*gAphix*gBphix - 2*J0*c1*(d*d*d*d)*fAphix*fBphix*gAphix*gBphix + J0*(d*d)*fAphix*fBphix*gAphix*gBphix - 2*J1*c1*(d*d*d)*fAphix*fBphix*gAphix*gBphix + 2*J1*d*fAphix*fBphix*gAphix*gBphix + J2*fAphix*fBphix*gAphix*gBphix + 2*J3*(c1*c1)*(d*d*d)*fAphix*fBphix*gAphix*gBphix - 2*J3*c1*d*fAphix*fBphix*gAphix*gBphix - 2*J4*c1*fAphix*fBphix*gAphix*gBphix + J6*(c1*c1)*fAphix*fBphix*gAphix*gBphix )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kMr[c] = row+4
                                     kMc[c] = col+1
-                                kMv[c] += weight*(intx*inty/4)*( I1*fAphiy*fBv*gAphiy*gBv + I2*fAphiy*fBv*gAphiy*gBv/r - I3*c1*fAphiy*fBv*gAphiy*gBv - I4*c1*fAphiy*fBv*gAphiy*gBv/r )
+                                kMv[c] += weight*(intx*inty/4)*( -J0*c1*(d*d*d*d)*fAphiy*fBv*gAphiy*gBv/r - J0*c1*(d*d*d)*fAphiy*fBv*gAphiy*gBv + J0*(d*d)*fAphiy*fBv*gAphiy*gBv/r + J0*d*fAphiy*fBv*gAphiy*gBv - J1*c1*(d*d*d)*fAphiy*fBv*gAphiy*gBv/r + 2*J1*d*fAphiy*fBv*gAphiy*gBv/r + J1*fAphiy*fBv*gAphiy*gBv + J2*fAphiy*fBv*gAphiy*gBv/r - J3*c1*d*fAphiy*fBv*gAphiy*gBv/r - J3*c1*fAphiy*fBv*gAphiy*gBv - J4*c1*fAphiy*fBv*gAphiy*gBv/r )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kMr[c] = row+4
                                     kMc[c] = col+2
-                                kMv[c] += weight*(intx*inty/4)*( -2*I4*c1*fAphiy*fBw*gAphiy*gBweta/b + 2*I6*(c1*c1)*fAphiy*fBw*gAphiy*gBweta/b )
+                                kMv[c] += weight*(intx*inty/4)*( 2*J0*(c1*c1)*(d*d*d*d*d*d)*fAphiy*fBw*gAphiy*gBweta/b - 2*J0*c1*(d*d*d*d)*fAphiy*fBw*gAphiy*gBweta/b - 2*J1*c1*(d*d*d)*fAphiy*fBw*gAphiy*gBweta/b + 4*J3*(c1*c1)*(d*d*d)*fAphiy*fBw*gAphiy*gBweta/b - 2*J3*c1*d*fAphiy*fBw*gAphiy*gBweta/b - 2*J4*c1*fAphiy*fBw*gAphiy*gBweta/b + 2*J6*(c1*c1)*fAphiy*fBw*gAphiy*gBweta/b )
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kMr[c] = row+4
                                     kMc[c] = col+4
-                                kMv[c] += weight*(intx*inty/4)*( I2*fAphiy*fBphiy*gAphiy*gBphiy - 2*I4*c1*fAphiy*fBphiy*gAphiy*gBphiy + I6*(c1*c1)*fAphiy*fBphiy*gAphiy*gBphiy )
+                                kMv[c] += weight*(intx*inty/4)*( J0*(c1*c1)*(d*d*d*d*d*d)*fAphiy*fBphiy*gAphiy*gBphiy - 2*J0*c1*(d*d*d*d)*fAphiy*fBphiy*gAphiy*gBphiy + J0*(d*d)*fAphiy*fBphiy*gAphiy*gBphiy - 2*J1*c1*(d*d*d)*fAphiy*fBphiy*gAphiy*gBphiy + 2*J1*d*fAphiy*fBphiy*gAphiy*gBphiy + J2*fAphiy*fBphiy*gAphiy*gBphiy + 2*J3*(c1*c1)*(d*d*d)*fAphiy*fBphiy*gAphiy*gBphiy - 2*J3*c1*d*fAphiy*fBphiy*gAphiy*gBphiy - 2*J4*c1*fAphiy*fBphiy*gAphiy*gBphiy + J6*(c1*c1)*fAphiy*fBphiy*gAphiy*gBphiy )
 
     kM = coo_matrix((kMv, (kMr, kMc)), shape=(size, size))
 

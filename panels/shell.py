@@ -19,6 +19,7 @@ from scipy.linalg import eig
 from scipy.special import roots_legendre
 from numpy import linspace
 from composites import laminated_plate
+from composites.core import Laminate
 from structsolve.sparseutils import finalize_symmetric_matrix
 
 from .logger import msg, warn
@@ -296,7 +297,7 @@ class Shell(object):
         'x1phiy', 'x1phiyr', 'x2phiy', 'x2phiyr',
         'y1phix', 'y1phixr', 'y2phix', 'y2phixr',
         'y1phiy', 'y1phiyr', 'y2phiy', 'y2phiyr',
-        'plyts', 'laminaprops', 'rhos', '_derived_lists',
+        'plyts', 'laminaprops', 'rhos', '_derived_lists', '_lam_mid',
         'flow', 'beta', 'gamma', 'aeromu', 'rho_air', 'speed_sound', 'Mach', 'air_speed',
         'ABDnxny', 'force_orthotropic_laminate',
         'num_eigvalues', 'num_eigvalues_print',
@@ -1050,6 +1051,48 @@ class Shell(object):
         return ABD
 
 
+    def _get_lam_mid(self):
+        r"""Laminate ``Shell.lam`` about its mid-surface
+
+        A :class:`composites.Laminate` with the plies, stacking sequence and
+        shear correction of ``Shell.lam`` and a zero offset, whose stiffness
+        matrices and moments of the density, e.g. ``intrhoz6``, are the
+        integrals through the thickness with `\zeta = z - d` measured from
+        the mid-surface, used by the TSDT, see :meth:`._get_lam_ABD` and
+        :meth:`.calc_kM`. It is ``Shell.lam`` itself when the offset is
+        zero, and it is computed again only when ``Shell.lam`` changes.
+
+        Returns
+        -------
+        lam_mid : :class:`composites.Laminate`
+            The laminate about its mid-surface.
+
+        Raises
+        ------
+        RuntimeError
+            When ``Shell.lam`` is ``None``.
+
+        """
+        lam = self.lam
+        if lam is None:
+            raise RuntimeError('lam object is None!')
+        if lam.offset == 0:
+            return lam
+        cache = getattr(self, '_lam_mid', None)
+        if cache is not None and cache[0] is lam and cache[2] == lam.offset:
+            return cache[1]
+        mid = Laminate()
+        mid.offset = 0.
+        mid.stack = list(lam.stack)
+        mid.shear_correction = lam.shear_correction
+        mid.plies = lam.plies
+        mid.h = lam.h
+        mid.calc_constitutive_matrix()
+        mid.calc_equivalent_properties()
+        self._lam_mid = (lam, mid, lam.offset)
+        return mid
+
+
     def _get_lam_ABD(self, silent=False):
         r"""Constitutive matrix of the laminate, as required by the model
 
@@ -1061,9 +1104,11 @@ class Shell(object):
           transverse shear stiffness of the `(yz, xz)` components, see the
           attribute ``fsdt_shear_correction``.
 
-        - Third-order shear deformation theory (TSDT), ``13 x 13``: ``[[A, B,
-          E, 0, 0], [B, D, F, 0, 0], [E, F, H, 0, 0], [0, 0, 0, Abar_ts,
-          Dts], [0, 0, 0, Dts, Fts]]``, without shear correction.
+        - Third-order shear deformation theory (TSDT), ``13 x 13``: ``T^T
+          F_m T``, with ``F_m = [[A, B, E, 0, 0], [B, D, F, 0, 0], [E, F, H,
+          0, 0], [0, 0, 0, Abar_ts, Dts], [0, 0, 0, Dts, Fts]]`` of the
+          laminate about its mid-surface, :meth:`._get_lam_mid`, without
+          shear correction, see the notes.
 
         The rows and columns are in the order of the generalized strains of
         each model, see :meth:`.Shell.strain`.
@@ -1084,6 +1129,23 @@ class Shell(object):
         transverse shear stiffness corrected for the constant transverse
         shear strain of the FSDT, see :class:`.Shell`.
 
+        For the TSDT the cubic term of the displacement field is written
+        about the mid-surface of the laminate, `z = d` with the offset `d`,
+        such that the transverse shear strains vanish at both faces, see
+        :mod:`panels.models`: the in-plane strains are `\varepsilon =
+        \varepsilon^{(0)} + z \varepsilon^{(1)} + \left[(z - d)^3 +
+        d^3\right] \varepsilon^{(3)}` and the transverse shear strains
+        `\gamma = \gamma^{(0)} + (z - d)^2 \gamma^{(2)}`. With `\zeta = z -
+        d`, `\varepsilon = \left(\varepsilon^{(0)} + d \varepsilon^{(1)} +
+        d^3 \varepsilon^{(3)}\right) + \zeta \varepsilon^{(1)} + \zeta^3
+        \varepsilon^{(3)}`, such that the strain energy is that of the
+        laminate about its mid-surface, ``F_m``, whose integrals of `\bar
+        Q \{1, \zeta, \zeta^2, \zeta^3, \zeta^4, \zeta^6\}` and `\bar Q_s
+        \{1, \zeta^2, \zeta^4\}` composites computes with a zero offset,
+        for the strains ``T e``, ``T`` being the identity but for the blocks
+        ``T[0:3, 3:6] = d I`` and ``T[0:3, 6:9] = d^3 I``. With `d = 0` it
+        is the matrix of the laminate ``Shell.lam``.
+
         """
         if self.lam is None:
             raise RuntimeError('lam object is None!')
@@ -1100,20 +1162,31 @@ class Shell(object):
             else:
                 ABD[6:, 6:] = k*lam.Abar_ts
         elif 'tsdt' in self.model:
+            mid = self._get_lam_mid()
+            A, B, D = mid.A, mid.B, mid.D
+            E, F, H = mid.E, mid.F, mid.H
+            d = lam.offset
+            #NOTE T^T F_m T written by blocks, see the notes; the products by
+            #     the scalar d do not call BLAS, whose matrix product, called
+            #     from the kernels through this property, was seen to corrupt
+            #     a variable of the compiled kernel cylshell_tsdt_sanders.fk0
             ABD = np.zeros((13, 13), dtype=DOUBLE)
-            ABD[0:3, 0:3] = lam.A
-            ABD[0:3, 3:6] = lam.B
-            ABD[0:3, 6:9] = lam.E
-            ABD[3:6, 0:3] = lam.B
-            ABD[3:6, 3:6] = lam.D
-            ABD[3:6, 6:9] = lam.F
-            ABD[6:9, 0:3] = lam.E
-            ABD[6:9, 3:6] = lam.F
-            ABD[6:9, 6:9] = lam.H
-            ABD[9:11, 9:11] = lam.Abar_ts
-            ABD[9:11, 11:13] = lam.Dts
-            ABD[11:13, 9:11] = lam.Dts
-            ABD[11:13, 11:13] = lam.Fts
+            B1 = d*A + B
+            E1 = d**3*A + E
+            F1 = d**4*A + d**3*B + d*E + F
+            ABD[0:3, 0:3] = A
+            ABD[0:3, 3:6] = B1
+            ABD[0:3, 6:9] = E1
+            ABD[3:6, 0:3] = B1.T
+            ABD[3:6, 3:6] = d**2*A + 2*d*B + D
+            ABD[3:6, 6:9] = F1
+            ABD[6:9, 0:3] = E1.T
+            ABD[6:9, 3:6] = F1.T
+            ABD[6:9, 6:9] = d**6*A + 2*d**3*E + H
+            ABD[9:11, 9:11] = mid.Abar_ts
+            ABD[9:11, 11:13] = mid.Dts
+            ABD[11:13, 9:11] = mid.Dts
+            ABD[11:13, 11:13] = mid.Fts
 
         if self.force_orthotropic_laminate and 'tsdt' in self.model:
             msg('', silent=silent)
@@ -1989,8 +2062,9 @@ class Shell(object):
             Default ``True``.
         I_nxny : (nx, ny, K) array-like or None, optional
             The moments `I_n` at each integration point, `n = 0, 1, 2`,
-            ``K = 3``, for the CLPT and the FSDT, and `n = 0, 1, 2, 3, 4,
-            6`, ``K = 6``, for the TSDT, a mass per unit area times
+            ``K = 3``, for the CLPT and the FSDT, and for the TSDT the
+            moments `J_n = \int \rho (z - d)^n dz` about the mid-surface,
+            `n = 0, 1, 2, 3, 4, 6`, ``K = 6``, a mass per unit area times
             length**n. Default ``None``.
 
         Returns
@@ -2026,16 +2100,23 @@ class Shell(object):
         -w_{,x}`, `\phi_y = -w_{,y}` and `c_1 = 0`; for the FSDT `c_1 = 0`;
         for the TSDT `c_1 = 4/(3h^2)`; with the Sanders-Koiter kinematics
         `v/r` is added to the rotation `\phi_y` multiplied by `z`, see
-        :mod:`panels.models`. The integrand being a polynomial in `z`, the
+        :mod:`panels.models`, and for the TSDT `z^3` is replaced by `(z -
+        d)^3 + d^3`, the cubic term about the mid-surface, see
+        :meth:`._get_lam_ABD`. The integrand being a polynomial in `z`, the
         integral through the thickness is a combination of the moments
-        `I_n` of the density, `n \le 2`, or `n \le 6` without `n = 5` for
-        the TSDT. The convention of the offset, a laminate centred at `z =
-        d`, is that of :func:`composites.laminated_plate`, also used by the
-        stiffness matrices. A uniform density `\rho` gives
+        `I_n` of the density, `n \le 2`; for the TSDT, whose field is in
+        `\zeta = z - d` a polynomial with the powers `\zeta^0`, `\zeta` and
+        `\zeta^3`, of the moments `J_n` about the mid-surface, `n \le 6`
+        without `n = 5`, those of :meth:`._get_lam_mid`, with `d` in the
+        coefficients. The convention of the offset, a laminate centred at
+        `z = d`, is that of :func:`composites.laminated_plate`, also used
+        by the stiffness matrices. A uniform density `\rho` gives
 
         .. math::
 
             I_n = \rho \frac{(h/2 + d)^{n + 1} - (-h/2 + d)^{n + 1}}{n + 1}
+
+        and `J_n` is `I_n` with `d = 0`.
 
         """
         msg('Calculating kM... ', level=2, silent=silent)
@@ -2056,8 +2137,10 @@ class Shell(object):
         tsdt = '_tsdt_' in self.model
         powers = (0, 1, 2, 3, 4, 6) if tsdt else (0, 1, 2)
         lam = self.lam
-        lam_moments = [lam.intrho, lam.intrhoz, lam.intrhoz2, lam.intrhoz3,
-                       lam.intrhoz4, None, lam.intrhoz6]
+        #NOTE the TSDT uses the moments about the mid-surface
+        mom = self._get_lam_mid() if tsdt else lam
+        lam_moments = [mom.intrho, mom.intrhoz, mom.intrhoz2, mom.intrhoz3,
+                       mom.intrhoz4, None, mom.intrhoz6]
 
         if I_nxny is not None:
             if rho_nxny is not None:
@@ -2085,8 +2168,9 @@ class Shell(object):
                 rho = np.full((nx, ny), lam.intrho/lam.h, dtype=DOUBLE)
                 if rho_nxny is not None:
                     rho[:, :] = rho_nxny
-                z1 = -h/2 + self.offset
-                z2 = h/2 + self.offset
+                d = 0. if tsdt else self.offset
+                z1 = -h/2 + d
+                z2 = h/2 + d
                 I_nxny = np.stack([rho*(z2**(k + 1) - z1**(k + 1))/(k + 1)
                                    for k in powers], axis=2)
             if tsdt:
@@ -2440,7 +2524,8 @@ class Shell(object):
         Notes
         -----
         The strains at a distance `z` from the reference surface are
-        ``exx + z*kxx + z**3*kxx3`` and ``gyz + z**2*gyz2``, and likewise
+        ``exx + z*kxx + ((z - d)**3 + d**3)*kxx3`` and ``gyz + (z -
+        d)**2*gyz2``, `d` being the offset, see :meth:`._get_lam_ABD`, and likewise
         for the other components, with the generalized strains of the
         kinematics of each model, see :mod:`panels.models` and
         :mod:`panels.models.fsdt_tsdt_field`. With ``NLgeom=False`` the

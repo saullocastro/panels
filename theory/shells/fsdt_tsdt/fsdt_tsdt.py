@@ -13,21 +13,32 @@ adopting the shallow shell assumption `R(z) = r + z \approx r`, as in
 
 Displacement field, with `c_1 = 4/(3 h^2)` for the third-order shear
 deformation theory (TSDT) of Reddy (1984), and `c_1 = 0` for the first-order
-shear deformation theory (FSDT):
+shear deformation theory (FSDT), `z` being measured from the reference
+surface and the laminate spanning `d - h/2 \le z \le d + h/2`, with the
+offset `d`:
 
 .. math::
 
-    u(z) = u + z \phi_x - c_1 z^3 (\phi_x + w_{,x})
+    u(z) = u + z \phi_x - c_1 \left[(z - d)^3 + d^3\right] (\phi_x + w_{,x})
 
     v(z) = v + z \left(\phi_y + \boxed{\frac{v}{r}}\right)
-           - c_1 z^3 (\phi_y + w_{,y})
+           - c_1 \left[(z - d)^3 + d^3\right] (\phi_y + w_{,y})
 
     w(z) = w
 
+The cubic term of the TSDT is written about the mid-surface of the
+laminate, such that the transverse shear strains, `\gamma_{xz} = (\phi_x +
+w_{,x}) (1 - 3 c_1 (z - d)^2)` and likewise `\gamma_{yz}`, vanish at both
+faces `z = d \pm h/2` for any offset; the constant `c_1 d^3` keeps `u` and
+`v` the displacements of the reference surface, `z = 0`, as for the CLPT
+and the FSDT, and `\phi_x`, `\phi_y` are the rotations of the normal at the
+mid-surface, `u_{,z}(d) = \phi_x`. With `d = 0` this is Reddy's field.
+
 The strains are, in Voigt notation, `\varepsilon = \varepsilon^{(0)} + z
-\varepsilon^{(1)} + z^3 \varepsilon^{(3)}` and `\gamma = \gamma^{(0)} + z^2
-\gamma^{(2)}`, with the rotations `\beta_x = w_{,x}` and `\beta_y = w_{,y} -
-\boxed{v/r}` of the von Karman non-linear terms:
+\varepsilon^{(1)} + \left[(z - d)^3 + d^3\right] \varepsilon^{(3)}` and
+`\gamma = \gamma^{(0)} + (z - d)^2 \gamma^{(2)}`, with the rotations
+`\beta_x = w_{,x}` and `\beta_y = w_{,y} - \boxed{v/r}` of the von Karman
+non-linear terms:
 
 .. math::
 
@@ -71,20 +82,30 @@ of the generalized strains above, is:
   the shear corrected transverse shear stiffness ``[[A44, A45], [A45,
   A55]]`` of the `(yz, xz)` components.
 
-- TSDT, ``13 x 13``: ``[[A, B, E, 0, 0], [B, D, F, 0, 0], [E, F, H, 0, 0],
-  [0, 0, 0, Abar_ts, Dts], [0, 0, 0, Dts, Fts]]``, where
-  ``Abar_ts``, ``Dts`` and ``Fts`` are the integrals of the
-  transverse shear stiffness multiplied by `1`, `z^2` and `z^4`, with no
-  shear correction.
+- TSDT, ``13 x 13``: ``T^T F_m T``, with ``F_m = [[A, B, E, 0, 0], [B, D,
+  F, 0, 0], [E, F, H, 0, 0], [0, 0, 0, Abar_ts, Dts], [0, 0, 0, Dts,
+  Fts]]`` the matrix of the laminate about its mid-surface, i.e. with the
+  integrals of the stiffness multiplied by `1, \zeta, \zeta^2, \zeta^3,
+  \zeta^4, \zeta^6`, `\zeta = z - d`, and of the transverse shear stiffness
+  multiplied by `1`, `\zeta^2` and `\zeta^4`, with no shear correction, and
+  ``T`` the identity but for the blocks ``T[0:3, 3:6] = d I`` and ``T[0:3,
+  6:9] = d^3 I``, because `\varepsilon = (\varepsilon^{(0)} + d
+  \varepsilon^{(1)} + d^3 \varepsilon^{(3)}) + \zeta \varepsilon^{(1)} +
+  \zeta^3 \varepsilon^{(3)}`, see :meth:`.Shell._get_lam_ABD`. With `d = 0`
+  it is the usual matrix of the laminate.
 
 The mass matrices integrate the kinetic energy of the displacement field
 above through the thickness, `z` measured from the reference surface and
 spanning the laminate, from `-h/2 + d` to `h/2 + d` with the offset `d`,
 as in :func:`composites.laminated_plate`. The kinetic energy being a
-polynomial in `z`, the density enters only through the moments `I_n =
-\int \rho z^n dz` of the laminate, ``intrho``, ``intrhoz``, ...,
-``intrhoz6`` of :class:`composites.Laminate`: `n = 0, 1, 2` for the FSDT
-and `n = 0, 1, 2, 3, 4, 6` for the TSDT.
+polynomial in `z`, the density enters only through its moments: for the
+FSDT `I_n = \int \rho z^n dz`, `n = 0, 1, 2`, ``intrho``, ``intrhoz`` and
+``intrhoz2`` of :class:`composites.Laminate`; for the TSDT, whose field
+contains `z^0`, `z`, `z^2` and `z^3`, the moments about the mid-surface
+`J_n = \int \rho \zeta^n d\zeta`, `\zeta = z - d`, `n = 0, 1, 2, 3, 4, 6`,
+those of the laminate with a zero offset, with the offset `d` in the
+coefficients, since in `\zeta` the field has the powers `\zeta^0`,
+`\zeta` and `\zeta^3` only.
 
 The aerodynamic matrices use the piston theory, with the load `q = \beta
 w_{,x} + \gamma w` along `w` for a flow along `x`, see
@@ -104,6 +125,9 @@ from sympy import Matrix as M, Poly, Rational, collect, expand, var, zeros
 var('a, b, r, h, d, rho, c1, z, bx, by')
 var('I0, I1, I2, I3, I4, I5, I6')
 MOMENTS = (I0, I1, I2, I3, I4, I5, I6)
+# moments of the density about the mid-surface, zeta = z - d
+var('zeta, J0, J1, J2, J3, J4, J5, J6')
+JMOMENTS = (J0, J1, J2, J3, J4, J5, J6)
 var('aeromu, beta, gamma')
 var('A11, A12, A16, A22, A26, A66')
 var('B11, B12, B16, B22, B26, B66')
@@ -227,8 +251,10 @@ def shape_functions(side, theory, geometry='plate', kinematics='donnell'):
         uz = u + z*phix
         vz = v + z*(phiy + sk*rinv*v)
     else:
-        uz = u + z*phix - c1*z**3*(phix + wxA)
-        vz = v + z*(phiy + sk*rinv*v) - c1*z**3*(phiy + wyA)
+        # the cubic term about the mid-surface, z = d, see the docstring
+        cubic = (z - d)**3 + d**3
+        uz = u + z*phix - c1*cubic*(phix + wxA)
+        vz = v + z*(phiy + sk*rinv*v) - c1*cubic*(phiy + wyA)
     wz = w
 
     return dict(B=B, B0=B0, G=G, uz=uz, vz=vz, wz=wz, w=w, wx=wxA, wy=wyA)
@@ -239,6 +265,14 @@ def thickness_moments(e):
     `z`, with `\int \rho z^n dz` replaced by the moment `I_n`"""
     p = Poly(expand(e), z)
     return sum(coef*MOMENTS[n] for (n, ), coef in p.terms())
+
+
+def thickness_moments_mid(e):
+    r"""Integral through the thickness of ``rho*e``, ``e`` a polynomial in
+    `z`, with `z = \zeta + d` and `\int \rho \zeta^n d\zeta` replaced by the
+    moment `J_n` about the mid-surface"""
+    p = Poly(expand(e.subs(z, zeta + d)), zeta)
+    return sum(coef*JMOMENTS[n] for (n, ), coef in p.terms())
 
 
 def build(theory, geometry='plate', kinematics='donnell'):
@@ -270,7 +304,8 @@ def build(theory, geometry='plate', kinematics='donnell'):
 
     # Mass matrix, integrated through the thickness
     T = (SA['uz'].T*SB['uz'] + SA['vz'].T*SB['vz'] + SA['wz'].T*SB['wz'])
-    kM = T.applyfunc(thickness_moments)
+    kM = T.applyfunc(thickness_moments if theory == 'fsdt' else
+                     thickness_moments_mid)
 
     # Aerodynamic and damping matrices using the piston theory, with the load
     # q = beta*w,x + gamma*w along w, where flat plates have no curvature

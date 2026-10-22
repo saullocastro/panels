@@ -674,7 +674,7 @@ def fkG0(double Nxx, double Nyy, double Nxy, object shell,
 
 def fkM(object shell, int size, int row0, int col0):
     cdef double r
-    cdef double a, b, I0, I1, I2, I3, I4, I6, h, c1
+    cdef double a, b, J0, J1, J2, J3, J4, J6, d, h, c1
     cdef int m, n
     cdef double x1u, x1ur, x2u, x2ur
     cdef double x1v, x1vr, x2v, x2vr
@@ -708,12 +708,16 @@ def fkM(object shell, int size, int row0, int col0):
     m = shell.m
     n = shell.n
     r = shell.r
-    I0 = shell.lam.intrho
-    I1 = shell.lam.intrhoz
-    I2 = shell.lam.intrhoz2
-    I3 = shell.lam.intrhoz3
-    I4 = shell.lam.intrhoz4
-    I6 = shell.lam.intrhoz6
+    #NOTE the moments of the density about the mid-surface, those of
+    #     the laminate with a zero offset, and the offset d
+    lam_mid = shell._get_lam_mid()
+    J0 = lam_mid.intrho
+    J1 = lam_mid.intrhoz
+    J2 = lam_mid.intrhoz2
+    J3 = lam_mid.intrhoz3
+    J4 = lam_mid.intrhoz4
+    J6 = lam_mid.intrhoz6
+    d = shell.offset
     h = shell.lam.h
     c1 = 4./(3.*h*h)
     x1u = shell.x1u; x1ur = shell.x1ur; x2u = shell.x2u; x2ur = shell.x2ur
@@ -790,71 +794,71 @@ def fkM(object shell, int size, int row0, int col0):
                         c += 1
                         kMr[c] = row+0
                         kMc[c] = col+0
-                        kMv[c] += 0.25*I0*a*b*fAufBu*gAugBu
+                        kMv[c] += 0.25*J0*a*b*fAufBu*gAugBu
                         c += 1
                         kMr[c] = row+0
                         kMc[c] = col+2
-                        kMv[c] += -0.5*I3*b*c1*fAufBwxi*gAugBw
+                        kMv[c] += -0.5*J0*b*c1*(d*d*d)*fAufBwxi*gAugBw - 0.5*J3*b*c1*fAufBwxi*gAugBw
                         c += 1
                         kMr[c] = row+0
                         kMc[c] = col+3
-                        kMv[c] += 0.25*I1*a*b*fAufBphix*gAugBphix - 0.25*I3*a*b*c1*fAufBphix*gAugBphix
+                        kMv[c] += -0.25*J0*a*b*c1*(d*d*d)*fAufBphix*gAugBphix + 0.25*J0*a*b*d*fAufBphix*gAugBphix + 0.25*J1*a*b*fAufBphix*gAugBphix - 0.25*J3*a*b*c1*fAufBphix*gAugBphix
                         c += 1
                         kMr[c] = row+1
                         kMc[c] = col+1
-                        kMv[c] += 0.25*I0*a*b*fAvfBv*gAvgBv + 0.5*I1*a*b*fAvfBv*gAvgBv/r + 0.25*I2*a*b*fAvfBv*gAvgBv/(r*r)
+                        kMv[c] += 0.25*J0*a*b*(d*d)*fAvfBv*gAvgBv/(r*r) + 0.5*J0*a*b*d*fAvfBv*gAvgBv/r + 0.25*J0*a*b*fAvfBv*gAvgBv + 0.5*J1*a*b*d*fAvfBv*gAvgBv/(r*r) + 0.5*J1*a*b*fAvfBv*gAvgBv/r + 0.25*J2*a*b*fAvfBv*gAvgBv/(r*r)
                         c += 1
                         kMr[c] = row+1
                         kMc[c] = col+2
-                        kMv[c] += -0.5*I3*a*c1*fAvfBw*gAvgBweta - 0.5*I4*a*c1*fAvfBw*gAvgBweta/r
+                        kMv[c] += -0.5*J0*a*c1*(d*d*d*d)*fAvfBw*gAvgBweta/r - 0.5*J0*a*c1*(d*d*d)*fAvfBw*gAvgBweta - 0.5*J1*a*c1*(d*d*d)*fAvfBw*gAvgBweta/r - 0.5*J3*a*c1*d*fAvfBw*gAvgBweta/r - 0.5*J3*a*c1*fAvfBw*gAvgBweta - 0.5*J4*a*c1*fAvfBw*gAvgBweta/r
                         c += 1
                         kMr[c] = row+1
                         kMc[c] = col+4
-                        kMv[c] += 0.25*I1*a*b*fAvfBphiy*gAvgBphiy + 0.25*I2*a*b*fAvfBphiy*gAvgBphiy/r - 0.25*I3*a*b*c1*fAvfBphiy*gAvgBphiy - 0.25*I4*a*b*c1*fAvfBphiy*gAvgBphiy/r
+                        kMv[c] += -0.25*J0*a*b*c1*(d*d*d*d)*fAvfBphiy*gAvgBphiy/r - 0.25*J0*a*b*c1*(d*d*d)*fAvfBphiy*gAvgBphiy + 0.25*J0*a*b*(d*d)*fAvfBphiy*gAvgBphiy/r + 0.25*J0*a*b*d*fAvfBphiy*gAvgBphiy - 0.25*J1*a*b*c1*(d*d*d)*fAvfBphiy*gAvgBphiy/r + 0.5*J1*a*b*d*fAvfBphiy*gAvgBphiy/r + 0.25*J1*a*b*fAvfBphiy*gAvgBphiy + 0.25*J2*a*b*fAvfBphiy*gAvgBphiy/r - 0.25*J3*a*b*c1*d*fAvfBphiy*gAvgBphiy/r - 0.25*J3*a*b*c1*fAvfBphiy*gAvgBphiy - 0.25*J4*a*b*c1*fAvfBphiy*gAvgBphiy/r
                         c += 1
                         kMr[c] = row+2
                         kMc[c] = col+0
-                        kMv[c] += -0.5*I3*b*c1*fAwxifBu*gAwgBu
+                        kMv[c] += -0.5*J0*b*c1*(d*d*d)*fAwxifBu*gAwgBu - 0.5*J3*b*c1*fAwxifBu*gAwgBu
                         c += 1
                         kMr[c] = row+2
                         kMc[c] = col+1
-                        kMv[c] += -0.5*I3*a*c1*fAwfBv*gAwetagBv - 0.5*I4*a*c1*fAwfBv*gAwetagBv/r
+                        kMv[c] += -0.5*J0*a*c1*(d*d*d*d)*fAwfBv*gAwetagBv/r - 0.5*J0*a*c1*(d*d*d)*fAwfBv*gAwetagBv - 0.5*J1*a*c1*(d*d*d)*fAwfBv*gAwetagBv/r - 0.5*J3*a*c1*d*fAwfBv*gAwetagBv/r - 0.5*J3*a*c1*fAwfBv*gAwetagBv - 0.5*J4*a*c1*fAwfBv*gAwetagBv/r
                         c += 1
                         kMr[c] = row+2
                         kMc[c] = col+2
-                        kMv[c] += 0.25*I0*a*b*fAwfBw*gAwgBw + I6*a*(c1*c1)*fAwfBw*gAwetagBweta/b + I6*b*(c1*c1)*fAwxifBwxi*gAwgBw/a
+                        kMv[c] += 0.25*J0*a*b*fAwfBw*gAwgBw + J0*a*(c1*c1)*(d*d*d*d*d*d)*fAwfBw*gAwetagBweta/b + J0*b*(c1*c1)*(d*d*d*d*d*d)*fAwxifBwxi*gAwgBw/a + 2*J3*a*(c1*c1)*(d*d*d)*fAwfBw*gAwetagBweta/b + 2*J3*b*(c1*c1)*(d*d*d)*fAwxifBwxi*gAwgBw/a + J6*a*(c1*c1)*fAwfBw*gAwetagBweta/b + J6*b*(c1*c1)*fAwxifBwxi*gAwgBw/a
                         c += 1
                         kMr[c] = row+2
                         kMc[c] = col+3
-                        kMv[c] += -0.5*I4*b*c1*fAwxifBphix*gAwgBphix + 0.5*I6*b*(c1*c1)*fAwxifBphix*gAwgBphix
+                        kMv[c] += 0.5*J0*b*(c1*c1)*(d*d*d*d*d*d)*fAwxifBphix*gAwgBphix - 0.5*J0*b*c1*(d*d*d*d)*fAwxifBphix*gAwgBphix - 0.5*J1*b*c1*(d*d*d)*fAwxifBphix*gAwgBphix + J3*b*(c1*c1)*(d*d*d)*fAwxifBphix*gAwgBphix - 0.5*J3*b*c1*d*fAwxifBphix*gAwgBphix - 0.5*J4*b*c1*fAwxifBphix*gAwgBphix + 0.5*J6*b*(c1*c1)*fAwxifBphix*gAwgBphix
                         c += 1
                         kMr[c] = row+2
                         kMc[c] = col+4
-                        kMv[c] += -0.5*I4*a*c1*fAwfBphiy*gAwetagBphiy + 0.5*I6*a*(c1*c1)*fAwfBphiy*gAwetagBphiy
+                        kMv[c] += 0.5*J0*a*(c1*c1)*(d*d*d*d*d*d)*fAwfBphiy*gAwetagBphiy - 0.5*J0*a*c1*(d*d*d*d)*fAwfBphiy*gAwetagBphiy - 0.5*J1*a*c1*(d*d*d)*fAwfBphiy*gAwetagBphiy + J3*a*(c1*c1)*(d*d*d)*fAwfBphiy*gAwetagBphiy - 0.5*J3*a*c1*d*fAwfBphiy*gAwetagBphiy - 0.5*J4*a*c1*fAwfBphiy*gAwetagBphiy + 0.5*J6*a*(c1*c1)*fAwfBphiy*gAwetagBphiy
                         c += 1
                         kMr[c] = row+3
                         kMc[c] = col+0
-                        kMv[c] += 0.25*I1*a*b*fAphixfBu*gAphixgBu - 0.25*I3*a*b*c1*fAphixfBu*gAphixgBu
+                        kMv[c] += -0.25*J0*a*b*c1*(d*d*d)*fAphixfBu*gAphixgBu + 0.25*J0*a*b*d*fAphixfBu*gAphixgBu + 0.25*J1*a*b*fAphixfBu*gAphixgBu - 0.25*J3*a*b*c1*fAphixfBu*gAphixgBu
                         c += 1
                         kMr[c] = row+3
                         kMc[c] = col+2
-                        kMv[c] += -0.5*I4*b*c1*fAphixfBwxi*gAphixgBw + 0.5*I6*b*(c1*c1)*fAphixfBwxi*gAphixgBw
+                        kMv[c] += 0.5*J0*b*(c1*c1)*(d*d*d*d*d*d)*fAphixfBwxi*gAphixgBw - 0.5*J0*b*c1*(d*d*d*d)*fAphixfBwxi*gAphixgBw - 0.5*J1*b*c1*(d*d*d)*fAphixfBwxi*gAphixgBw + J3*b*(c1*c1)*(d*d*d)*fAphixfBwxi*gAphixgBw - 0.5*J3*b*c1*d*fAphixfBwxi*gAphixgBw - 0.5*J4*b*c1*fAphixfBwxi*gAphixgBw + 0.5*J6*b*(c1*c1)*fAphixfBwxi*gAphixgBw
                         c += 1
                         kMr[c] = row+3
                         kMc[c] = col+3
-                        kMv[c] += 0.25*I2*a*b*fAphixfBphix*gAphixgBphix - 0.5*I4*a*b*c1*fAphixfBphix*gAphixgBphix + 0.25*I6*a*b*(c1*c1)*fAphixfBphix*gAphixgBphix
+                        kMv[c] += 0.25*J0*a*b*(c1*c1)*(d*d*d*d*d*d)*fAphixfBphix*gAphixgBphix - 0.5*J0*a*b*c1*(d*d*d*d)*fAphixfBphix*gAphixgBphix + 0.25*J0*a*b*(d*d)*fAphixfBphix*gAphixgBphix - 0.5*J1*a*b*c1*(d*d*d)*fAphixfBphix*gAphixgBphix + 0.5*J1*a*b*d*fAphixfBphix*gAphixgBphix + 0.25*J2*a*b*fAphixfBphix*gAphixgBphix + 0.5*J3*a*b*(c1*c1)*(d*d*d)*fAphixfBphix*gAphixgBphix - 0.5*J3*a*b*c1*d*fAphixfBphix*gAphixgBphix - 0.5*J4*a*b*c1*fAphixfBphix*gAphixgBphix + 0.25*J6*a*b*(c1*c1)*fAphixfBphix*gAphixgBphix
                         c += 1
                         kMr[c] = row+4
                         kMc[c] = col+1
-                        kMv[c] += 0.25*I1*a*b*fAphiyfBv*gAphiygBv + 0.25*I2*a*b*fAphiyfBv*gAphiygBv/r - 0.25*I3*a*b*c1*fAphiyfBv*gAphiygBv - 0.25*I4*a*b*c1*fAphiyfBv*gAphiygBv/r
+                        kMv[c] += -0.25*J0*a*b*c1*(d*d*d*d)*fAphiyfBv*gAphiygBv/r - 0.25*J0*a*b*c1*(d*d*d)*fAphiyfBv*gAphiygBv + 0.25*J0*a*b*(d*d)*fAphiyfBv*gAphiygBv/r + 0.25*J0*a*b*d*fAphiyfBv*gAphiygBv - 0.25*J1*a*b*c1*(d*d*d)*fAphiyfBv*gAphiygBv/r + 0.5*J1*a*b*d*fAphiyfBv*gAphiygBv/r + 0.25*J1*a*b*fAphiyfBv*gAphiygBv + 0.25*J2*a*b*fAphiyfBv*gAphiygBv/r - 0.25*J3*a*b*c1*d*fAphiyfBv*gAphiygBv/r - 0.25*J3*a*b*c1*fAphiyfBv*gAphiygBv - 0.25*J4*a*b*c1*fAphiyfBv*gAphiygBv/r
                         c += 1
                         kMr[c] = row+4
                         kMc[c] = col+2
-                        kMv[c] += -0.5*I4*a*c1*fAphiyfBw*gAphiygBweta + 0.5*I6*a*(c1*c1)*fAphiyfBw*gAphiygBweta
+                        kMv[c] += 0.5*J0*a*(c1*c1)*(d*d*d*d*d*d)*fAphiyfBw*gAphiygBweta - 0.5*J0*a*c1*(d*d*d*d)*fAphiyfBw*gAphiygBweta - 0.5*J1*a*c1*(d*d*d)*fAphiyfBw*gAphiygBweta + J3*a*(c1*c1)*(d*d*d)*fAphiyfBw*gAphiygBweta - 0.5*J3*a*c1*d*fAphiyfBw*gAphiygBweta - 0.5*J4*a*c1*fAphiyfBw*gAphiygBweta + 0.5*J6*a*(c1*c1)*fAphiyfBw*gAphiygBweta
                         c += 1
                         kMr[c] = row+4
                         kMc[c] = col+4
-                        kMv[c] += 0.25*I2*a*b*fAphiyfBphiy*gAphiygBphiy - 0.5*I4*a*b*c1*fAphiyfBphiy*gAphiygBphiy + 0.25*I6*a*b*(c1*c1)*fAphiyfBphiy*gAphiygBphiy
+                        kMv[c] += 0.25*J0*a*b*(c1*c1)*(d*d*d*d*d*d)*fAphiyfBphiy*gAphiygBphiy - 0.5*J0*a*b*c1*(d*d*d*d)*fAphiyfBphiy*gAphiygBphiy + 0.25*J0*a*b*(d*d)*fAphiyfBphiy*gAphiygBphiy - 0.5*J1*a*b*c1*(d*d*d)*fAphiyfBphiy*gAphiygBphiy + 0.5*J1*a*b*d*fAphiyfBphiy*gAphiygBphiy + 0.25*J2*a*b*fAphiyfBphiy*gAphiygBphiy + 0.5*J3*a*b*(c1*c1)*(d*d*d)*fAphiyfBphiy*gAphiygBphiy - 0.5*J3*a*b*c1*d*fAphiyfBphiy*gAphiygBphiy - 0.5*J4*a*b*c1*fAphiyfBphiy*gAphiygBphiy + 0.25*J6*a*b*(c1*c1)*fAphiyfBphiy*gAphiygBphiy
 
     kM = coo_matrix((kMv, (kMr, kMc)), shape=(size, size))
 

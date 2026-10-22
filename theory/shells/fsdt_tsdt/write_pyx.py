@@ -45,7 +45,9 @@ tangent_block = _tangent.pyx_block
 FIELDS = th.FIELDS
 #NOTE the moments of the density of composites.Laminate
 LAM_MOMENTS = dict(I0='intrho', I1='intrhoz', I2='intrhoz2', I3='intrhoz3',
-                   I4='intrhoz4', I6='intrhoz6')
+                   I4='intrhoz4', I6='intrhoz6',
+                   J0='intrho', J1='intrhoz', J2='intrhoz2', J3='intrhoz3',
+                   J4='intrhoz4', J6='intrhoz6')
 DOF = th.DOF
 FIELD_RE = '(u|v|w|phix|phiy)'
 
@@ -458,11 +460,12 @@ def generate(model):
     kC0 = mats['kC0'].applyfunc(lambda e: simp(area*e, cvars, do_factor))
     kG = mats['kG'].applyfunc(lambda e: simp(area*e, (th.Nxx, th.Nyy, th.Nxy)))
     kM = mats['kM'].applyfunc(lambda e: expand(area*e))
-    # the moments of the density through the thickness used by the theory
-    moment_names = [s.name for s in th.MOMENTS
+    # the moments of the density through the thickness used by the theory,
+    # about the mid-surface for the TSDT, see fsdt_tsdt.py
+    moment_names = [s.name for s in th.MOMENTS + th.JMOMENTS
                     if any(s in e.free_symbols for e in mats['kM'])]
     assert moment_names == (['I0', 'I1', 'I2'] if theory == 'fsdt' else
-                            ['I0', 'I1', 'I2', 'I3', 'I4', 'I6']), moment_names
+                            ['J0', 'J1', 'J2', 'J3', 'J4', 'J6']), moment_names
     kAx = mats['kAx'].applyfunc(lambda e: expand(area*e))
     kAy = mats['kAy'].applyfunc(lambda e: expand(area*e))
     cA = mats['cA'].applyfunc(lambda e: expand(area*e))
@@ -520,10 +523,14 @@ cdef extern from 'bardell.hpp':
     A.append('\n')
     A.append(analytical_function(
         'def fkM(object shell, int size, int row0, int col0):',
-        '    cdef double a, b, ' + ', '.join(moment_names) + (', h, c1' if theory == 'tsdt' else '') + '\n    cdef int m, n',
-        '\n'.join('    {0} = shell.lam.{1}'.format(name, LAM_MOMENTS[name])
-                  for name in moment_names)
-        + ('\n    h = shell.lam.h\n' + c1_line if theory == 'tsdt' else ''),
+        '    cdef double a, b, ' + ', '.join(moment_names) + (', d, h, c1' if theory == 'tsdt' else '') + '\n    cdef int m, n',
+        ('    #NOTE the moments of the density about the mid-surface, those of\n'
+         '    #     the laminate with a zero offset, and the offset d\n'
+         '    lam_mid = shell._get_lam_mid()\n' if theory == 'tsdt' else '')
+        + '\n'.join('    {0} = {1}.{2}'.format(name, 'lam_mid' if theory == 'tsdt' else 'shell.lam',
+                                             LAM_MOMENTS[name])
+                    for name in moment_names)
+        + ('\n    d = shell.offset\n    h = shell.lam.h\n' + c1_line if theory == 'tsdt' else ''),
         'kM', kM, True))
     A.append('\n')
     A.append(analytical_function(
@@ -833,7 +840,7 @@ def fkM_num(object shell, object I_input, int size,
     # moments of the density through the thickness, {inames}, as a 3-D
     # matrix [nx, ny, {K}] with one set for each of the nx * ny integration
     # points, or as a 1-D array [{K}] for the whole integration domain
-    cdef double {icdef}
+    cdef double {icdef}{dcdef}
     cdef double [:, :, ::1] I_nxny
 
     cdef int one_set_each_point = 0
@@ -856,7 +863,7 @@ def fkM_num(object shell, object I_input, int size,
     b = shell.b
     m = shell.m
     n = shell.n
-{LIMITS}
+{dread}{LIMITS}
 {BC_BLOCK}
 
     fdim = {nnz}*m*m*n*n
@@ -885,6 +892,8 @@ def fkM_num(object shell, object I_input, int size,
            nnz=len(kMn), MAPPING=MAPPING, POINT=POINT, loops=loops,
            K=len(input_names), inames=', '.join(input_names),
            icdef=', '.join(input_names),
+           dcdef=(', d' if theory == 'tsdt' else ''),
+           dread=('    d = shell.offset\n' if theory == 'tsdt' else ''),
            iread='\n'.join('                    {0} = I_nxny[ptx, pty, {1}]'.format(name, i)
                            for i, name in enumerate(input_names)),
            c1pt=('                c1 = 4./(3.*h*h)\n' if theory == 'tsdt' else '')))

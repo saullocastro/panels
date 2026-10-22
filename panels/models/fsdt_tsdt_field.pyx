@@ -26,23 +26,25 @@ Bardell's functions of the boundary flags of `F`, see
 
 The displacement field through the thickness is, with `c_1 = 4/(3 h^2)` for
 the TSDT of Reddy [1]_ and `c_1 = 0` for the FSDT, `s = 1` for the
-Sanders-Koiter kinematics [2]_ and `s = 0` for the Donnell kinematics, and
-`1/r = 0` for the plates:
+Sanders-Koiter kinematics [2]_ and `s = 0` for the Donnell kinematics,
+`1/r = 0` for the plates, `z` measured from the reference surface and the
+laminate spanning `d - h/2 \le z \le d + h/2` with the offset `d`:
 
 .. math::
 
-    u(z) = u + z \phi_x - c_1 z^3 (\phi_x + w_{,x})
+    u(z) = u + z \phi_x - c_1 \left[(z - d)^3 + d^3\right] (\phi_x + w_{,x})
 
     v(z) = v + z \left(\phi_y + s \frac{v}{r}\right)
-           - c_1 z^3 (\phi_y + w_{,y})
+           - c_1 \left[(z - d)^3 + d^3\right] (\phi_y + w_{,y})
 
     w(z) = w
 
 The generalized strains of :func:`.fstrain`, in the order of
 :func:`.strain_names`, are `\varepsilon = \varepsilon^{(0)} + z
-\varepsilon^{(1)} + z^3 \varepsilon^{(3)}` for ``exx, eyy, gxy``, ``kxx,
-kyy, kxy`` and ``kxx3, kyy3, kxy3``, and `\gamma = \gamma^{(0)} + z^2
-\gamma^{(2)}` for ``gyz, gxz`` and ``gyz2, gxz2``, with the rotations
+\varepsilon^{(1)} + \left[(z - d)^3 + d^3\right] \varepsilon^{(3)}` for
+``exx, eyy, gxy``, ``kxx, kyy, kxy`` and ``kxx3, kyy3, kxy3``, and `\gamma
+= \gamma^{(0)} + (z - d)^2 \gamma^{(2)}` for ``gyz, gxz`` and ``gyz2,
+gxz2``, with the rotations
 `\beta_x = w_{,x}` and `\beta_y = w_{,y} - s v/r` of the von Kármán
 non-linear terms:
 
@@ -73,8 +75,11 @@ correction of the displacement field, the term `-v/r` of the transverse
 shear strain `\gamma_{yz}` cancels, and no correction appears in the `z^3`
 terms, as in the shell theory of Reddy and Liu [3]_ specialised to a
 circular cylinder with the shallow shell assumption `r + z \approx r`. The
-transverse shear strain `\gamma^{(0)}(1 - 4 z^2/h^2)` of the TSDT vanishes
-at `z = \pm h/2`, which assumes the reference surface at mid-thickness.
+transverse shear strain `\gamma^{(0)}(1 - 4 (z - d)^2/h^2)` of the TSDT
+vanishes at both faces `z = d \pm h/2`; the cubic term about the
+mid-surface keeps `u`, `v` the displacements of the reference surface,
+`z = 0`, and `\phi_x`, `\phi_y` the rotations of the normal at the
+mid-surface, see :meth:`.Shell._get_lam_ABD`.
 
 References
 ----------
