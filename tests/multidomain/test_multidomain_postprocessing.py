@@ -338,3 +338,17 @@ def test_force_out_plane_invalid_input():
     with pytest.raises(ValueError, match='inside'):
         md.force_out_plane(c, 'c', eval_panel=p, x_cte_force=1.1*A,
                            nr_y_gauss=4)
+
+
+def test_plot_eval_panel_draws_its_field(tension, tmp_path):
+    """With eval_panel the plotted field is that of eval_panel, not that of
+    the first panel of the group"""
+    md, c = tension
+    p1, p2 = md.panels
+    u2 = md.uvw(c, None, gridx=6, gridy=4, eval_panel=p2)['u'][0]
+    u1 = md.uvw(c, None, gridx=6, gridy=4, eval_panel=p1)['u'][0]
+    assert not np.isclose(u1.max(), u2.max())
+    ax, data = md.plot(c, 'g', vec='u', gridx=6, gridy=4, eval_panel=p2,
+                       filename=tmp_path / 'p2.png')
+    assert np.isclose(data['vecmin'], u2.min())
+    assert np.isclose(data['vecmax'], u2.max())

@@ -1591,9 +1591,9 @@ class MultiDomain(object):
             ``True`` prints a warning that it is still under development.
         eval_panel : :class:`.Shell` or None, optional
             When given, only this panel is drawn, instead of the panels of
-            ``group``. TODO(author): ``eval_panel`` is not passed to
-            :meth:`.calc_results`, so the drawn field is the first one of
-            ``res``, of the first panel of ``group``; check.
+            ``group``, with its field computed by :meth:`.calc_results` with
+            the same ``eval_panel``. A ``res`` given with ``eval_panel``
+            must contain the field of this panel only.
 
         Returns
         -------
@@ -1624,7 +1624,8 @@ class MultiDomain(object):
             if c is None:
                 raise ValueError('Either "c" or "res" must be given as input')
             res = self.calc_results(c, group, vec = vec, gridx = gridx, gridy = gridy,
-                             nr_x_gauss = nr_x_gauss, nr_y_gauss = nr_y_gauss)
+                             nr_x_gauss = nr_x_gauss, nr_y_gauss = nr_y_gauss,
+                             eval_panel=eval_panel)
 
         field = np.array(res[vec])
         msg('Finished!', level=1, silent=silent)
