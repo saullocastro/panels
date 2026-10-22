@@ -1,8 +1,40 @@
+r"""Penalty constants of the connections and prescribed displacements
+
+The functions compute the penalty constants from the laminates of the
+panels: :func:`.calc_kt_kr` for the connections between two panels,
+:func:`.calc_ku_kv_kw_point_pd`, :func:`.calc_ku_kv_kw_line_pd_xcte` and
+:func:`.calc_ku_kv_kw_line_pd_ycte` for the prescribed displacements, and
+:func:`.calc_kw_tsl` for the out-of-plane stiffness and the damage of a
+connection with a traction-separation law. All of them are imported in
+:mod:`panels.multidomain.connections`.
+
+"""
 import numpy as np
 
 # Penalties for prescribed displs
 # Used to enforce connections
 def calc_ku_kv_kw_point_pd(p):
+    r"""Penalty constants of a displacement prescribed at a point
+
+    The constants are the membrane stiffnesses of the laminate ``p.lam``,
+    which must already exist: ``ku = A11``, ``kv = A22`` and ``kw = A11``.
+    The laminate is not rebuilt.
+
+    Parameters
+    ----------
+    p : :class:`.Shell`
+        Panel with the prescribed displacement.
+
+    Returns
+    -------
+    ku, kv, kw : float
+        Penalty constants of `u`, `v` and `w`, force per unit length.
+
+    See Also
+    --------
+    calc_ku_kv_kw_line_pd_xcte, calc_ku_kv_kw_line_pd_ycte
+
+    """
     A11 = p.lam.A[0, 0]
     A22 = p.lam.A[1, 1]
     ku = A11
@@ -13,6 +45,29 @@ def calc_ku_kv_kw_point_pd(p):
 
 
 def calc_ku_kv_kw_line_pd_xcte(p):
+    r"""Penalty constants of a displacement prescribed along a line of
+    constant `x`
+
+    The constants are the membrane stiffnesses of the laminate ``p.lam``,
+    which must already exist, divided by the width ``p.b`` of the panel:
+    ``ku = A11/b``, ``kv = A22/b`` and ``kw = A11/b``. The laminate is not
+    rebuilt.
+
+    Parameters
+    ----------
+    p : :class:`.Shell`
+        Panel with the prescribed displacement.
+
+    Returns
+    -------
+    ku, kv, kw : float
+        Penalty constants of `u`, `v` and `w`, force per unit area.
+
+    See Also
+    --------
+    calc_ku_kv_kw_point_pd, calc_ku_kv_kw_line_pd_ycte
+
+    """
     A11 = p.lam.A[0, 0]
     A22 = p.lam.A[1, 1]
     ku = A11 / p.b
@@ -22,6 +77,29 @@ def calc_ku_kv_kw_line_pd_xcte(p):
 
 
 def calc_ku_kv_kw_line_pd_ycte(p):
+    r"""Penalty constants of a displacement prescribed along a line of
+    constant `y`
+
+    The constants are the membrane stiffnesses of the laminate ``p.lam``,
+    which must already exist, divided by the length ``p.a`` of the panel:
+    ``ku = A11/a``, ``kv = A22/a`` and ``kw = A11/a``. The laminate is not
+    rebuilt.
+
+    Parameters
+    ----------
+    p : :class:`.Shell`
+        Panel with the prescribed displacement.
+
+    Returns
+    -------
+    ku, kv, kw : float
+        Penalty constants of `u`, `v` and `w`, force per unit area.
+
+    See Also
+    --------
+    calc_ku_kv_kw_point_pd, calc_ku_kv_kw_line_pd_xcte
+
+    """
     A11 = p.lam.A[0, 0]
     A22 = p.lam.A[1, 1]
     ku = A11 / p.a
@@ -32,7 +110,18 @@ def calc_ku_kv_kw_line_pd_ycte(p):
 def build_panel_lam(panel):
     r"""Build the laminate ``panel.lam`` with :meth:`.Shell._rebuild`, which
     raises a ``ValueError`` when the stacking sequence, the ply thicknesses
-    or the properties of the laminae are missing"""
+    or the properties of the laminae are missing
+
+    The laminate is rebuilt at every call. :meth:`.Shell._rebuild` also sets
+    the other attributes derived from the input of the panel, e.g.
+    ``plyts``, ``laminaprops``, ``rhos`` and ``size``. Nothing is returned.
+
+    Parameters
+    ----------
+    panel : :class:`.Shell`
+        Panel whose laminate is built.
+
+    """
     panel._rebuild()
 
 # Penalties for connections
@@ -41,6 +130,17 @@ def calc_kt_kr(p1, p2, connection_type):
 
     For details on how to derive these equations, see
     [castro2017Multidomain]_ (MD paper eqn 34-40)
+
+    The laminates of both panels are first rebuilt with
+    :func:`.build_panel_lam`. The constants are computed from the
+    membrane and bending stiffnesses `A_{11}`, `A_{22}`, `D_{11}`, `D_{22}`
+    of the laminates and from their thicknesses ``h``: with ``'xcte'`` the
+    terms `A_{11}`, `D_{11}` of both panels are used, with ``'ycte'`` the
+    terms `A_{22}`, `D_{22}`, with ``'xcte-ycte'`` the terms 11 of ``p1``
+    and 22 of ``p2``, and with ``'ycte-xcte'`` the opposite. With
+    ``'bot-top'`` the translation constant uses `A_{11}` and is also
+    divided by ``min(p1.a, p1.b)``, and no rotation constant is computed.
+    The comparison with ``connection_type`` is case-insensitive.
 
     Parameters
     ----------
@@ -60,7 +160,10 @@ def calc_kt_kr(p1, p2, connection_type):
     Returns
     -------
     kt, kr : tuple
-        A tuple with both values.
+        A tuple with both values. ``kt`` is a force per unit area, and a
+        force per unit volume with ``'bot-top'``; ``kr`` is a force, and
+        ``None`` with ``'bot-top'``. The function returns ``None``, not a
+        tuple, when ``connection_type`` is none of the types above.
 
     Notes
     -----
@@ -139,31 +242,49 @@ def calc_kw_tsl(pA, pB=None, tsl_type='bilinear', k_i=None, del_d=None,
     interpenetration. The damage history is not considered here, see
     :meth:`.MultiDomain.calc_k_dmg`.
 
+    The panels ``pA`` and ``pB`` are not used in the computation. Where
+    ``del_d`` is close to zero the stiffness is `k_i` and the damage zero.
+    Above `\Delta_f` the stiffness is zero and the damage one.
+
     Parameters
     ----------
     pA : :class:`.Shell`
         Panel on the positive side of the interface along the `z` axis of
         both panels, ``p1`` of the connection.
-    pB : :class:`.Shell`
+    pB : :class:`.Shell`, optional
         Panel on the negative side of the interface along `z`, ``p2``.
-    tsl_type : str
+        Default ``None``.
+    tsl_type : str, optional
         Type of the traction-separation law, only ``'bilinear'`` is
-        available.
+        available. Default ``'bilinear'``.
     k_i : float
         Pristine stiffness of the interface, `k_o`, force/length**3.
+        Required, the default ``None`` raises a ``ValueError``.
     del_d : np.ndarray
-        Normal separation between the panels at each point of the grid.
+        Normal separation between the panels at each point of the grid,
+        length. Array of any shape. Required, the default ``None`` raises a
+        ``ValueError``.
     tau_o : float
-        Traction at damage onset, force/length**2.
+        Traction at damage onset, force/length**2. Required, the default
+        ``None`` raises a ``ValueError``.
     G1c : float
-        Critical energy release rate in mode I, force/length.
+        Critical energy release rate in mode I, force/length. Required, the
+        default ``None`` raises a ``ValueError``.
 
     Returns
     -------
     kw_tsl : np.ndarray
-        Stiffness at each point of the grid.
+        Stiffness at each point of the grid, force/length**3, with the shape
+        of ``del_d``.
     dmg_index : np.ndarray
-        Damage `\hat d` at each point of the grid.
+        Damage `\hat d` at each point of the grid, dimensionless, with the
+        shape of ``del_d``.
+
+    Raises
+    ------
+    ValueError
+        When ``tsl_type`` is not ``'bilinear'``; when ``k_i``, ``tau_o`` or
+        ``G1c`` is ``None``; when ``del_d`` is ``None``.
 
     """
     if tsl_type != 'bilinear':

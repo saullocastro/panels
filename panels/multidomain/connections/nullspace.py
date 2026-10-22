@@ -191,6 +191,20 @@ def _points(p1, p2, direction, ctes):
 def constraint_matrix(connecti, size):
     r"""Rows of `[B]` of a single connection
 
+    The quantities of the connection, those of its penalty kernel, are
+    evaluated at the points of the connection: the constant coordinates
+    ``xcte1``, ``xcte2`` or ``ycte1``, ``ycte2`` across it and, along it,
+    as many Gauss-Legendre points as the coefficients of the polynomials,
+    ``max(m, 4)`` or ``max(n, 4)`` of the panel with the most terms; for
+    ``'SB'`` these points are used along both `x` and `y`. Each quantity
+    gives one row per point, the terms of ``p1`` with a positive sign and
+    those of ``p2`` with a negative sign, in the columns starting at
+    ``col_start`` of each panel. The models with 3 DOFs per term use the
+    quantities of the classical laminated plate theory, with the distance
+    between the mid-surfaces in ``'SB'``; the models with 5 DOFs those of
+    :mod:`.kCsdt`, where for ``'SB'`` the rotations are also connected when
+    ``connecti['kr']`` is given and not zero.
+
     Parameters
     ----------
     connecti : dict
@@ -208,7 +222,22 @@ def constraint_matrix(connecti, size):
     Returns
     -------
     B : scipy.sparse.csr_matrix
-        The constraints `[B] \{c\} = \{0\}`, with ``size`` columns.
+        The constraints `[B] \{c\} = \{0\}`, with ``size`` columns and one
+        row per quantity and point. The rows are not normalized.
+
+    Raises
+    ------
+    ValueError
+        When ``p1`` and ``p2`` are the same object; for ``'SB'``, when the
+        panels do not have the same dimensions ``a`` and ``b``.
+    NotImplementedError
+        When the models of ``p1`` and ``p2`` have a different number of
+        DOFs per term; when ``connecti['func']`` is not one of
+        :data:`NULL_SPACE_FUNCS`.
+
+    See Also
+    --------
+    null_space_basis
 
     """
     func = connecti['func']
@@ -304,6 +333,17 @@ def pd_points(p, x, y):
     polynomials along it, ``max(n, 4)`` or ``max(m, 4)``, see
     :func:`._points`.
 
+    Parameters
+    ----------
+    p : :class:`.Shell`
+        Panel with the prescribed displacement.
+    x : float or None
+        Coordinate `x` of the point or of the line, length, between ``0``
+        and ``p.a``. ``None`` for a line along `x` at the constant ``y``.
+    y : float or None
+        Coordinate `y` of the point or of the line, length, between ``0``
+        and ``p.b``. ``None`` for a line along `y` at the constant ``x``.
+
     Returns
     -------
     xis, etas : np.ndarray
@@ -311,7 +351,15 @@ def pd_points(p, x, y):
         ordered as ``l*len(xis) + k`` for the point ``(xis[k], etas[l])``.
     s : np.ndarray or None
         Coordinate along the line of each row, where the prescribed function
-        is evaluated, ``None`` for a point.
+        is evaluated, ``None`` for a point. Length, 1-D array with the size
+        of the Gauss-Legendre points.
+
+    Raises
+    ------
+    ValueError
+        When both ``x`` and ``y`` are ``None``; when ``x`` is out of
+        ``[0, p.a]`` or ``y`` out of ``[0, p.b]``, with a relative tolerance
+        of ``1e-12``.
 
     """
     if x is None and y is None:
@@ -333,6 +381,13 @@ def pd_points(p, x, y):
 
 def pd_constraint_matrix(p, comp, x, y, size):
     r"""Rows `[B]` of a prescribed component at a point or along a line
+
+    The component is evaluated at the points of :func:`.pd_points`, one row
+    per point. The rotations ``'phix'`` and ``'phiy'`` are `-w_{,x}` and
+    `-w_{,y}` for the models with 3 DOFs per term, the fields `\phi_x` and
+    `\phi_y` for those with 5 DOFs, plus the term `v/r` in ``'phiy'`` for
+    the models with the Sanders-Koiter kinematics. The rows are not
+    normalized.
 
     Parameters
     ----------
@@ -371,7 +426,33 @@ def pd_constraint_matrix(p, comp, x, y, size):
 
 def pd_entries(p):
     r"""Prescribed components of a panel, ``(cte, x, y, comp, value)`` in
-    the order of :func:`.pd_blocks`, the constant ones first"""
+    the order of :func:`.pd_blocks`, the constant ones first
+
+    The constant prescriptions are read from ``p.point_pds_values`` and
+    ``p.distr_pds_values``, those multiplied by the load factor from
+    ``p.point_pds_values_inc`` and ``p.distr_pds_values_inc``, the points
+    before the lines in each group. Each stored prescription gives one entry
+    per component whose value is not ``None``.
+
+    Parameters
+    ----------
+    p : :class:`.Shell`
+        Panel with the prescribed displacements.
+
+    Yields
+    ------
+    cte : bool
+        ``True`` for a constant prescription, ``False`` for one multiplied
+        by the load factor.
+    x, y : float or None
+        The point, or the line, see :func:`.pd_points`.
+    comp : int
+        Index of the component in :data:`PD_COMPONENTS`.
+    value : float or callable
+        Prescribed value, a function of the coordinate along the line for a
+        line, see :func:`.pd_rhs`.
+
+    """
     for cte, points, lines in ((True, p.point_pds_values, p.distr_pds_values),
             (False, p.point_pds_values_inc, p.distr_pds_values_inc)):
         for values in points + lines:
@@ -388,6 +469,13 @@ def pd_blocks(p, size):
     :meth:`.Shell.add_point_pd`, :meth:`.Shell.add_distr_pd_fixed_x` and
     :meth:`.Shell.add_distr_pd_fixed_y`, the constant ones first.
 
+    Parameters
+    ----------
+    p : :class:`.Shell`
+        Panel with the prescribed displacements, with ``col_start`` defined.
+    size : int
+        Size of the assembly.
+
     Returns
     -------
     blocks : list of dict
@@ -402,7 +490,23 @@ def pd_blocks(p, size):
 
 
 def pd_rhs(block):
-    r"""Prescribed values of a block of :func:`.pd_blocks` at its points"""
+    r"""Prescribed values of a block of :func:`.pd_blocks` at its points
+
+    For a point the value is used as given; for a line the function
+    ``block['value']`` is called at the coordinate along the line of each
+    point, see :func:`.pd_points`.
+
+    Parameters
+    ----------
+    block : dict
+        A block of :func:`.pd_blocks`.
+
+    Returns
+    -------
+    d : np.ndarray
+        1-D array with one value per row of ``block['B']``.
+
+    """
     _, _, s = pd_points(block['panel'], block['x'], block['y'])
     value = block['value']
     if s is None:
@@ -442,6 +546,17 @@ class Elimination(object):
     def add(self, B, rhs=False, info=None):
         r"""Eliminate the constraints of a block
 
+        The rows of ``B`` are normalized to a unit norm and written in the
+        current independent Ritz constants, ``B @ T``. The columns with no
+        entry larger than ``tol`` are skipped, the others are decomposed by
+        a QR decomposition with column pivoting, and the constants of the
+        ``rank`` pivots larger than ``tol`` are eliminated. The attribute
+        ``T`` is replaced by the basis of the remaining constants, and
+        ``min_kept`` and ``max_dropped`` are updated with the smallest pivot
+        kept and the largest pivot dropped. With ``rhs=True`` the data of
+        the block are appended to the attribute ``steps``, also when nothing
+        is eliminated. When no column is left, ``T`` is not changed.
+
         Parameters
         ----------
         B : sparse matrix
@@ -449,9 +564,16 @@ class Elimination(object):
         rhs : bool, optional
             Whether the constraints may have a non-null right-hand side.
             The homogeneous blocks must all be added before the first block
-            with ``rhs=True``.
+            with ``rhs=True``. Default ``False``.
         info : object, optional
-            Description of the block, stored with its data.
+            Description of the block, stored with its data. Default
+            ``None``.
+
+        Raises
+        ------
+        RuntimeError
+            When ``rhs=False`` and a block with ``rhs=True`` was already
+            added.
 
         """
         T = self.T
@@ -503,7 +625,19 @@ class Elimination(object):
         self.T = (T @ S.tocsr()).tocsr()
 
     def finish(self):
-        r"""Basis `[T]` of the null space of all the constraints added"""
+        r"""Basis `[T]` of the null space of all the constraints added
+
+        A warning is issued when a pivot was dropped and the smallest pivot
+        kept is less than ``1e4`` times the largest pivot dropped. The
+        explicit zeros of the attribute ``T`` are removed, in place.
+
+        Returns
+        -------
+        T : scipy.sparse.csr_matrix
+            The attribute ``T``, with shape ``(size, size - rank)``, ``rank``
+            being the number of constraints eliminated.
+
+        """
         if self.max_dropped > 0 and self.min_kept < 1e4*self.max_dropped:
             warn('Null-space method: the rank of the constraints is not well '
                  'defined, the smallest independent pivot is {0:.1e} and the '
@@ -514,6 +648,14 @@ class Elimination(object):
 
     def particular(self, ds, rhs_tol=1.e-8, describe=None):
         r"""Particular solution of the blocks added with ``rhs=True``
+
+        The right-hand sides are divided by the norms of the rows of their
+        blocks, as the rows were, and the blocks are solved in the order
+        they were added, each one with the Ritz constants that it
+        eliminated, using the decompositions stored by :meth:`.add`. The
+        residual of each block, including its redundant rows, is compared
+        with ``rhs_tol`` times the largest normalized right-hand side. When
+        all the right-hand sides are zero a vector of zeros is returned.
 
         Parameters
         ----------
@@ -526,11 +668,12 @@ class Elimination(object):
             prescribed edge meets a connection or another prescribed edge,
             must be satisfied by the particular solution within ``rhs_tol``
             times the largest prescribed value, both for the normalized
-            rows.
+            rows. Default ``1.e-8``.
         describe : callable, optional
             ``describe(i, info, res, atol)`` returns the message of the
             error raised when the block ``i`` is not consistent, ``res``
-            being the residuals of its normalized rows.
+            being the residuals of its normalized rows. Default ``None``, a
+            generic message.
 
         Returns
         -------
@@ -542,7 +685,9 @@ class Elimination(object):
         Raises
         ------
         ValueError
-            When the right-hand sides are not consistent.
+            When the number of right-hand sides is not the number of blocks
+            added with ``rhs=True``; when the right-hand sides are not
+            consistent.
 
         """
         cp = np.zeros(self.size, dtype=DOUBLE)
@@ -577,6 +722,11 @@ class Elimination(object):
 def null_space_basis(Bs, size, tol=1.e-9):
     r"""Sparse basis `[T]` of the null space of the constraints
 
+    The constraints of ``Bs`` are eliminated one connection at a time, in
+    the order given, with :meth:`.Elimination.add`, and the basis is
+    returned by :meth:`.Elimination.finish`, which warns when the rank of
+    the constraints is not well defined.
+
     Parameters
     ----------
     Bs : list of sparse matrices
@@ -589,7 +739,7 @@ def null_space_basis(Bs, size, tol=1.e-9):
         pivot in the QR decomposition is larger than ``tol``. The
         independent constraints have pivots many orders of magnitude larger
         than the round-off errors left in the redundant ones, and a warning
-        is issued when this gap is smaller than ``1e4``.
+        is issued when this gap is smaller than ``1e4``. Default ``1.e-9``.
 
     Returns
     -------

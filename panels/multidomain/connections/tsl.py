@@ -43,6 +43,11 @@ from .penalties import build_panel_lam
 def tsl_resolution(p1, k_o, tau_o, G1c, E2=None, p2=None):
     r"""Decay rate of the opening and length of the cohesive zone
 
+    The laminates of ``p1`` and, when given, ``p2`` are rebuilt with
+    :func:`.build_panel_lam`, and `D_{11}` is read from them. The rate is
+    ``(k_o*(1/D11_1 + 1/D11_2)/4)**0.25`` and the length
+    ``0.88*E2*G1c/tau_o**2``, see the module docstring.
+
     Parameters
     ----------
     p1 : :class:`.Shell`
@@ -56,8 +61,8 @@ def tsl_resolution(p1, k_o, tau_o, G1c, E2=None, p2=None):
     G1c : float
         Critical energy release rate in mode I, force/length.
     E2 : float, optional
-        Transverse modulus used in `l_{cz}`. By default the second value of
-        the first lamina of ``p1.laminaprops``.
+        Transverse modulus used in `l_{cz}`, force/length**2. By default the
+        second value of the first lamina of ``p1.laminaprops``.
     p2 : :class:`.Shell`, optional
         Panel ``p2`` of the connection, whose `D_{11}` is used in the same
         way. By default that of ``p1``, the symmetric DCB, `\lambda =
@@ -101,6 +106,20 @@ def tsl_margin(lam, lcz):
     :func:`tsl_discretization` and the perfect bond is not wider than the
     bonded strip.
 
+    Parameters
+    ----------
+    lam : float
+        Decay rate `\lambda` of the opening, 1/length, see
+        :func:`tsl_resolution`.
+    lcz : float
+        Length of the cohesive zone `l_{cz}`, length, see
+        :func:`tsl_resolution`.
+
+    Returns
+    -------
+    margin : float
+        ``3*lcz + 8/lam``, length.
+
     """
     return 3*lcz + 8/lam
 
@@ -125,11 +144,11 @@ def tsl_discretization(lam, lcz, L_tsl, terms_per_decay=1.25, points_per_lcz=10.
     lam, lcz : float
         See :func:`tsl_resolution`.
     L_tsl : float
-        Length of the cohesive domain along `x`.
+        Length of the cohesive domain along `x`, length.
     terms_per_decay, points_per_lcz : float, optional
-        Factors of the rules.
+        Factors of the rules, dimensionless. Default ``1.25`` and ``10.``.
     m_max : int, optional
-        Maximum number of terms.
+        Maximum number of terms. Default ``25``.
 
     Returns
     -------

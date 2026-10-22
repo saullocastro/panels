@@ -225,23 +225,33 @@ def _edge_components(kt, kr, p1, p2, normal):
 def fkCSSxcte_sdt(kt, kr, p1, p2, xcte1, xcte2, size):
     r"""Skin-skin connection along `x_1 = x_{cte1}` and `x_2 = x_{cte2}`
 
+    The differences of `u, v, w` between the two panels are penalized with
+    ``kt``, those of `\phi_x` and `\Phi_y` with ``kr`` and, when one of
+    the panels is a TSDT model, that of `w_{,x}` with ``kr`` too. The
+    products of the approximation functions are integrated along `y` and
+    evaluated at ``xcte1`` in ``p1`` and ``xcte2`` in ``p2``. The terms are
+    placed at ``row_start`` and ``col_start`` of each panel. A penalty
+    equal to zero adds no term. A ``ValueError`` is raised by
+    ``_check_sdt`` when a panel is not a model based on the FSDT or TSDT.
+
     Parameters
     ----------
     kt : float
-        Translation penalty stiffness.
+        Translation penalty stiffness, force per unit area.
     kr : float
-        Rotation penalty stiffness.
+        Rotation penalty stiffness, force.
     p1, p2 : :class:`.Shell`
-        Panels being connected, with the same width ``b``.
+        Panels being connected, with the same width ``b``, models based on
+        the FSDT or TSDT.
     xcte1, xcte2 : float
-        Coordinates of the connection in each panel.
+        Coordinates of the connection in each panel, length.
     size : int
         Size of the assembly.
 
     Returns
     -------
     kCSSxcte : scipy.sparse.coo_matrix
-        Upper triangle of the connection matrix.
+        Upper triangle of the connection matrix, shape ``(size, size)``.
 
     """
     _check_sdt(p1, p2)
@@ -252,23 +262,33 @@ def fkCSSxcte_sdt(kt, kr, p1, p2, xcte1, xcte2, size):
 def fkCSSycte_sdt(kt, kr, p1, p2, ycte1, ycte2, size):
     r"""Skin-skin connection along `y_1 = y_{cte1}` and `y_2 = y_{cte2}`
 
+    The differences of `u, v, w` between the two panels are penalized with
+    ``kt``, those of `\phi_x` and `\Phi_y` with ``kr`` and, when one of
+    the panels is a TSDT model, that of `w_{,y}` with ``kr`` too. The
+    products of the approximation functions are integrated along `x` and
+    evaluated at ``ycte1`` in ``p1`` and ``ycte2`` in ``p2``. The terms are
+    placed at ``row_start`` and ``col_start`` of each panel. A penalty
+    equal to zero adds no term. A ``ValueError`` is raised by
+    ``_check_sdt`` when a panel is not a model based on the FSDT or TSDT.
+
     Parameters
     ----------
     kt : float
-        Translation penalty stiffness.
+        Translation penalty stiffness, force per unit area.
     kr : float
-        Rotation penalty stiffness.
+        Rotation penalty stiffness, force.
     p1, p2 : :class:`.Shell`
-        Panels being connected, with the same length ``a``.
+        Panels being connected, with the same length ``a``, models based on
+        the FSDT or TSDT.
     ycte1, ycte2 : float
-        Coordinates of the connection in each panel.
+        Coordinates of the connection in each panel, length.
     size : int
         Size of the assembly.
 
     Returns
     -------
     kCSSycte : scipy.sparse.coo_matrix
-        Upper triangle of the connection matrix.
+        Upper triangle of the connection matrix, shape ``(size, size)``.
 
     """
     _check_sdt(p1, p2)
@@ -291,26 +311,37 @@ def _surface_terms(p, z):
 def fkCSB_sdt(kt, p_top, p_bot, size, kr=0.):
     r"""Skin-base connection over the area of two panels
 
+    The differences of `u(z)` and `v(z)` between the face `z = -h/2` of
+    ``p_top`` and the face `z = +h/2` of ``p_bot``, ``h`` being the sum of
+    the ply thicknesses of each panel, and the difference of `w` are
+    penalized with ``kt``; the differences of `\phi_x` and `\Phi_y` with
+    ``kr``. The products of the approximation functions are integrated
+    along `x` and `y`. The terms are placed at ``row_start`` and
+    ``col_start`` of each panel. A penalty equal to zero adds no term. A
+    ``ValueError`` is raised by ``_check_sdt`` when a panel is not a model
+    based on the FSDT or TSDT.
+
     Parameters
     ----------
     kt : float
-        Translation penalty stiffness, per unit area.
+        Translation penalty stiffness, per unit area, with units of
+        force/length**3.
     p_top, p_bot : :class:`.Shell`
         Panels on the positive and negative sides of the interface along
         their common `z` axis, ``p1`` and ``p2`` of the connection, covering
-        the same area.
+        the same area, models based on the FSDT or TSDT.
     size : int
         Size of the assembly.
     kr : float, optional
         Rotation penalty stiffness, per unit area, with units of
         force/length, for instance ``kt*h**2`` with ``h`` the thickness of the
         laminates. With ``kr = 0`` only the displacements at the interface
-        are connected.
+        are connected. Default ``0.``.
 
     Returns
     -------
     kCSB : scipy.sparse.coo_matrix
-        Upper triangle of the connection matrix.
+        Upper triangle of the connection matrix, shape ``(size, size)``.
 
     """
     _check_sdt(p_top, p_bot)
