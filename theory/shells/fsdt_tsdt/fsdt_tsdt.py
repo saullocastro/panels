@@ -32,7 +32,14 @@ w_{,x}) (1 - 3 c_1 (z - d)^2)` and likewise `\gamma_{yz}`, vanish at both
 faces `z = d \pm h/2` for any offset; the constant `c_1 d^3` keeps `u` and
 `v` the displacements of the reference surface, `z = 0`, as for the CLPT
 and the FSDT, and `\phi_x`, `\phi_y` are the rotations of the normal at the
-mid-surface, `u_{,z}(d) = \phi_x`. With `d = 0` this is Reddy's field.
+mid-surface, `u_{,z}(d) = \phi_x`. With `d = 0` this is Reddy's field. The
+conditions on the cubic leave one free parameter, which only selects the
+coordinate where the rotation variable is measured: at the reference
+surface it would be singular when `z = 0` is a face, `d = \pm h/2`, see
+:func:`tsdt_offset_cubic` and ``doc/source/tsdt_offset.rst``. The
+connections tie the rotations at the reference surface, `\theta_x = \phi_x -
+(4 d^2/h^2)(\phi_x + w_{,x})`, see
+:mod:`panels.multidomain.connections.kCsdt`.
 
 The strains are, in Voigt notation, `\varepsilon = \varepsilon^{(0)} + z
 \varepsilon^{(1)} + \left[(z - d)^3 + d^3\right] \varepsilon^{(3)}` and
@@ -258,6 +265,28 @@ def shape_functions(side, theory, geometry='plate', kinematics='donnell'):
     wz = w
 
     return dict(B=B, B0=B0, G=G, uz=uz, vz=vz, wz=wz, w=w, wx=wxA, wy=wyA)
+
+
+def tsdt_offset_cubic():
+    r"""Cubic `p(z)` of the TSDT field `u(z) = u + z \phi_x + p(z) (\phi_x +
+    w_{,x})` with the offset `d`
+
+    Solves `p(0) = 0`, `p'(d \pm h/2) = -1` (zero transverse shear at both
+    faces) and `p'(d) = 0` (`\phi_x` the rotation at the mid-surface), and
+    returns `p(z)`, which is `-c_1 [(z - d)^3 + d^3]`. Without `p'(d) = 0`
+    one parameter is free: it only selects the coordinate where the
+    rotation variable is measured, see ``doc/source/tsdt_offset.rst``.
+
+    """
+    from sympy import solve, symbols
+    p1, p2, p3 = symbols('p1, p2, p3')
+    p = p1*z + p2*z**2 + p3*z**3
+    dp = p.diff(z)
+    sol = solve([dp.subs(z, d - h/2) + 1, dp.subs(z, d + h/2) + 1,
+                 dp.subs(z, d)], [p1, p2, p3], dict=True)[0]
+    p = p.subs(sol)
+    assert expand(p + Rational(4, 3)/h**2*((z - d)**3 + d**3)) == 0
+    return p
 
 
 def thickness_moments(e):

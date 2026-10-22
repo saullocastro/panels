@@ -130,7 +130,16 @@ correction, the transverse shear stresses vanishing at the faces of the
 laminate, `z = d \pm h/2` with the offset `d`: the cubic term is written
 about the mid-surface, `-c_1 [(z - d)^3 + d^3] (\phi_x + w_{,x})`, which
 keeps `u` the displacement of the reference surface, see
-:meth:`.Shell._get_lam_ABD`.
+:meth:`.Shell._get_lam_ABD`. The conditions `p(0) = 0` and `p'(d \pm h/2)
+= -1` on the cubic `p(z)` of `u(z) = u + z \phi_x + p(z)(\phi_x +
+w_{,x})` leave one free parameter, which only selects where the rotation
+variable is measured: `\phi_x` is the rotation at the mid-surface, as in
+Reddy's field for `d = 0`, since at the reference surface the rotation is
+not an independent variable when `z = 0` is a face of the laminate,
+`d = \pm h/2`. Panels with different offsets are connected at their common
+reference surface, with the rotations `\theta_x = \phi_x - (4 d^2/h^2)
+(\phi_x + w_{,x})` at `z = 0`, see
+:mod:`panels.multidomain.connections.kCsdt` and :ref:`tsdt_offset`.
 The cylinders with the Donnell kinematics are the plate models with the
 hoop strain `w/r` and the curvature term of the piston theory, see
 :meth:`.Shell.calc_kA`. With the Sanders-Koiter kinematics, the rotation of

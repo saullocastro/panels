@@ -96,6 +96,7 @@ Theory
     :maxdepth: 1
 
     bardell.rst
+    tsdt_offset.rst
     multidomain_null_space.rst
     follower_pressure.rst
     tangent_product.rst
