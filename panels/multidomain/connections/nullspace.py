@@ -154,8 +154,8 @@ def _clpt_components(func, p1, p2, dsb):
     ``((p1, terms1), (p2, terms2))`` with ``terms`` a list of ``(field,
     der_x, der_y, coeff)``
 
-    ``dsb`` is the distance between the mid-surfaces of ``p1`` and ``p2``,
-    used by ``'SB'``.
+    ``dsb`` is the distance between the reference surfaces of ``p1`` and
+    ``p2``, used by ``'SB'``, see :func:`.kCsdt._sb_distances`.
 
     Notes
     -----
@@ -172,13 +172,15 @@ def _clpt_components(func, p1, p2, dsb):
     - ``'BFxcte'``: `u_1 = w_2`, `v_1 = v_2`, `w_1 = -u_2` and `w_{1,x} =
       w_{2,x}`, see :mod:`panels.multidomain.connections.kCBFxcte`;
     - ``'SB'``: `u_1 + d_{sb} w_{1,x} = u_2`, `v_1 + d_{sb} w_{1,y} = v_2`
-      and `w_1 = w_2`, with `d_{sb} = h_1/2 + h_2/2`.
+      and `w_1 = w_2`, with `d_{sb} = h_1/2 - d_1 + h_2/2 + d_2`, `d_1` and
+      `d_2` being the offsets.
 
-    For ``'SB'``, with the Kirchhoff kinematics `u(z) = u - z w_{,x}`, the
-    face `z = -h_1/2` of ``p1`` and the face `z = +h_2/2` of ``p2`` have the
-    same displacement when `u_1 + (h_1/2) w_{1,x} = u_2 - (h_2/2)
-    w_{2,x}`, and `w_{2,x} = w_{1,x}` since `w_1 = w_2` over the whole
-    area.
+    For ``'SB'``, with the Kirchhoff kinematics `u(z) = u - z w_{,x}`, `z`
+    measured from the reference surface of each panel, the lower face `z =
+    d_1 - h_1/2` of ``p1`` and the upper face `z = d_2 + h_2/2` of ``p2``
+    have the same displacement when `u_1 + (h_1/2 - d_1) w_{1,x} = u_2 -
+    (h_2/2 + d_2) w_{2,x}`, and `w_{2,x} = w_{1,x}` since `w_1 = w_2` over
+    the whole area.
 
     """
     if func == 'SSxcte':
@@ -383,7 +385,7 @@ def constraint_matrix(connecti, size):
             "Connection '{0}' is not available with the null-space method, "
             "the available ones are {1}".format(func, NULL_SPACE_FUNCS))
     if dofs1 == 3:
-        dsb = sum(p1.plyts)/2. + sum(p2.plyts)/2.
+        dsb = sum(kCsdt._sb_distances(p1, p2)) if func == 'SB' else None
         comps = _clpt_components(func, p1, p2, dsb)
     else:
         comps = _sdt_components(func, p1, p2, connecti.get('kr', 0.))

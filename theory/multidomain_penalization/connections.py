@@ -185,8 +185,11 @@ piece_wise_simplify(kCBFxcte22, [])
 # connection panel-base integrated over xi' and eta'
 # Panel (1) is on the positive side of the interface along the z axis common
 # to both panels, and panel (2) on the negative side. Panel (1) is
-# extrapolated to the mid-surface of panel (2), at a distance
-# dsb = h1/2 + h2/2 from the mid-surface of (1) along -z:
+# extrapolated to the reference surface of panel (2), at a distance
+# dsb = h1/2 - d1 + h2/2 + d2 from the reference surface of (1) along -z,
+# with the offsets d1, d2 (the lower face of (1) is at z = d1 - h1/2 and the
+# upper face of (2) at z = d2 + h2/2, each from its own reference surface,
+# see kCsdt._sb_distances):
 #     u1 + dsb*w1,x = u2,  v1 + dsb*w1,y = v2,  w1 = w2
 kCSB11 = (a1*b1/4)*kt*(u1A.T*u1B + v1A.T*v1B + w1A.T*w1B + u1A.T*w1Bxi*(2*dsb/a1) + w1Axi.T*u1B*(2*dsb/a1) + v1A.T*w1Beta*(2*dsb/b1) + w1Aeta.T*v1B*(2*dsb/b1) + w1Axi.T*w1Bxi*(2*dsb/a1)*(2*dsb/a1) + w1Aeta.T*w1Beta*(2*dsb/b1)*(2*dsb/b1))
     # Contains all squared terms - so all terms of (u + d..w,xi)^2 comes here and so on 
@@ -204,11 +207,12 @@ piece_wise_simplify(kCSB22, [])
 # MODELS BASED ON SHEAR DEFORMATION THEORIES (FSDT and TSDT)
 # 5 DOFs per term u, v, w, phix, phiy, with the displacement field
 #
-#     u(z) = u + z phix - c1 z^3 (phix + w,x)
-#     v(z) = v + z Phiy - c1 z^3 (phiy + w,y)
+#     u(z) = u + z phix - c1 [(z - d)^3 + d^3] (phix + w,x)
+#     v(z) = v + z Phiy - c1 [(z - d)^3 + d^3] (phiy + w,y)
 #     w(z) = w
 #
-# where c1 = 0 for the FSDT and c1 = 4/(3 h^2) for the TSDT, and Phiy =
+# with z measured from the reference surface and d the offset of the
+# laminate, where c1 = 0 for the FSDT and c1 = 4/(3 h^2) for the TSDT, and Phiy =
 # phiy + v/r is the rotation of the normal about x with the Sanders-Koiter
 # kinematics, see theory/shells/fsdt_tsdt, obtained with rinv1 = 1/r1 and
 # rinv2 = 1/r2 of each panel, and Phiy = phiy with rinv = 0 otherwise
@@ -253,18 +257,19 @@ kCSSycte_sdt11 =  sdt_edge(s1A, 1, s1B, 1, a1/2, 'weta', b1, b1)
 kCSSycte_sdt12 = -sdt_edge(s1A, 1, s2B, 2, a1/2, 'weta', b1, b2)
 kCSSycte_sdt22 =  sdt_edge(s2A, 2, s2B, 2, a1/2, 'weta', b2, b2)
 
-# SB: penalty kt on the displacements at the interface, z = -h1/2 for panel
-# (1), on the positive side of the interface along z, and z = +h2/2 for panel
-# (2), on the negative side, and kr on the
+# SB: penalty kt on the displacements at the interface, z = d1 - h1/2 for
+# panel (1), on the positive side of the interface along z, and z = d2 + h2/2
+# for panel (2), on the negative side, with the offsets d1, d2, and kr on the
 # difference of rotations (kr = 0 connects only the interface)
 #
 #     u_p(z) = u_p + cphi_p phix_p + cw_p w_p,x
 #     v_p(z) = (1 + zi_p rinv_p) v_p + cphi_p phiy_p + cw_p w_p,y
 #
-# with zi_p the coordinate z of the interface in panel p, cphi_p = zi_p -
-# c1_p zi_p^3 and cw_p = -c1_p zi_p^3, which for the TSDT give cphi1 =
-# -h1/3, cw1 = h1/6, cphi2 = h2/3, cw2 = -h2/6 and for the FSDT cphi1 =
-# -h1/2, cphi2 = h2/2, cw1 = cw2 = 0, and zi1 = -h1/2, zi2 = h2/2
+# with zi_p the coordinate z of the interface in panel p, zi1 = d1 - h1/2,
+# zi2 = d2 + h2/2 (kCsdt._face), cphi_p = zi_p - c1_p g_p and cw_p = -c1_p g_p
+# with g_p = (zi_p - d_p)^3 + d_p^3 (kCsdt._surface_terms), which without
+# offsets give for the TSDT cphi1 = -h1/3, cw1 = h1/6, cphi2 = h2/3, cw2 =
+# -h2/6 and for the FSDT cphi1 = zi1, cphi2 = zi2, cw1 = cw2 = 0
 def sdt_interface(s, p):
     cphi, cw, zi, rinv = ((cphi1, cw1, zi1, rinv1) if p == 1 else
                           (cphi2, cw2, zi2, rinv2))

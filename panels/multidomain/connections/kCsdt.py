@@ -68,9 +68,8 @@ displacement fields of two domains, with the penalty energy `\frac{1}{2}
   laminates have zero transverse shear strains at their faces, including
   the interface, and are therefore stiffer than a single TSDT laminate. The
   interface is the face of each laminate in its own coordinate `z`, at `z
-  = d \mp h/2` for the TSDT; for the FSDT, as for the kernels of the models
-  with 3 DOFs, the offsets are not considered and the faces are at `z =
-  \mp h/2`.
+  = d \mp h/2` with the offset `d` of each panel, for the FSDT and the
+  TSDT, as for the models with 3 DOFs, see :func:`._sb_distances`.
 
 .. rubric:: Rotations at the reference surface
 
@@ -505,13 +504,31 @@ def _face(p, side):
     r"""Coordinate `z`, from the reference surface of ``p``, of its lower
     face, ``side = -1``, or upper face, ``side = +1``
 
-    `z = d + side \, h/2` for the TSDT, with the offset `d` of ``p``, and
-    `z = side \, h/2` for the FSDT, whose offset is not considered, as for
-    the models with 3 DOFs.
+    `z = d + side \, h/2`, with the offset `d` of ``p`` and `h` the sum of
+    its ply thicknesses, the laminate occupying `d - h/2 \le z \le d + h/2`
+    for all the models, see :func:`composites.laminated_plate`. Used by the
+    skin-base connections ``'SB'`` and ``'SB_TSL'`` of all the models, see
+    :func:`._sb_distances`.
 
     """
-    d = p.offset if _is_tsdt(p) else 0.
-    return d + side*sum(p.plyts)/2.
+    return p.offset + side*sum(p.plyts)/2.
+
+
+def _sb_distances(p_top, p_bot):
+    r"""Distances `d^t` and `d^b` from the reference surfaces of ``p_top``
+    and ``p_bot`` to the interface of a skin-base connection
+
+    Returns ``(dt, db)``, with `d^t = h_t/2 - d_t` the distance from the
+    reference surface of ``p_top`` down to its lower face and `d^b = h_b/2 +
+    d_b` the distance from the reference surface of ``p_bot`` up to its upper
+    face, `h` being the sum of the ply thicknesses and `d` the offset of each
+    panel, see :func:`._face`. Their sum `d_{sb} = d^t + d^b` is the distance
+    between the two reference surfaces, zero when the panels share it, e.g.
+    a stiffener base with the offset `d_t = (h_t + h_b)/2` on a skin with
+    `d_b = 0`. Without offsets, `d^t = h_t/2` and `d^b = h_b/2`.
+
+    """
+    return -_face(p_top, -1), _face(p_bot, +1)
 
 
 def fkCSB_sdt(kt, p_top, p_bot, size, kr=0.):

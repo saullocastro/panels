@@ -189,9 +189,12 @@ see :meth:`.MultiDomain.get_kC_conn`:
       - `u_1 = w_2`, `v_1 = v_2`, `w_1 = -u_2`, `\phi_{x1} = \phi_{x2}`
     * - ``'SB'``
       - `u_1 + d_{sb} w_{1,x} = u_2`, `v_1 + d_{sb} w_{1,y} = v_2`, `w_1 =
-        w_2`, with `d_{sb} = h_1/2 + h_2/2`, see ``kCSB.pyx``
-      - `u, v, w` at the interface, `z = -h_1/2` of ``p1`` and `z = h_2/2`
-        of ``p2``, see :func:`.fkCSB_sdt`, and `\phi_x, \Phi_y` only when
+        w_2`, with `d_{sb} = h_1/2 - d_1 + h_2/2 + d_2` the distance
+        between the reference surfaces, `d_1`, `d_2` being the offsets, see
+        ``kCSB.pyx`` and :func:`.kCsdt._sb_distances`
+      - `u, v, w` at the interface, `z = d_1 - h_1/2` of ``p1`` and `z = d_2
+        + h_2/2` of ``p2``, see :func:`.fkCSB_sdt`, and `\phi_x, \Phi_y`
+        only when
         the key ``'kr'`` of the connection is given and not zero
 
 where `\Phi_y = \phi_y + v/r` with the Sanders-Koiter kinematics and `\Phi_y
@@ -725,10 +728,13 @@ approximation more than the penalty method with the default constants does:
   imposed on the other domain.
 
 - With ``'SB'`` and the classical laminated plate theory, `u_1 = u_2 - d_{sb}
-  w_{,x}`. Restraining the normal in-plane displacement of an edge in both
-  domains, e.g. `u = 0` at `x = 0`, also restrains the rotation `w_{,x}` at
-  that edge, which is clamped. The in-plane displacements of the bonded
-  laminates must be restrained consistently with the single laminate that
+  w_{,x}`. When the reference surfaces of the two domains are apart, `d_{sb}
+  \ne 0`, e.g. without offsets, restraining the normal in-plane displacement
+  of an edge in both domains, e.g. `u = 0` at `x = 0`, also restrains the
+  rotation `w_{,x}` at that edge, which is clamped. With offsets that place
+  both reference surfaces at the same height, `d_{sb} = 0` and `u_1 = u_2`.
+  The in-plane displacements of the bonded laminates must be restrained
+  consistently with the single laminate that
   they represent, e.g. restraining only the tangential displacement of the
   edges, as in ``test_skin_base_nonlinear_equals_single_laminate``.
 

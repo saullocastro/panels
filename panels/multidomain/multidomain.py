@@ -69,21 +69,26 @@ def _penalties(connecti, pA, pB, connection_type):
 def _sb_top_bottom(connecti):
     r"""Panels on the positive and negative sides of a skin-base connection
 
-    The kernels of ``'SB'`` and ``'SB_TSL'`` place the mid-surface of the
-    second panel at a distance ``dsb`` from that of the first one along the
-    negative `z` direction, the `z` axis being normal to the mid-surfaces of
-    both panels, therefore ``p1`` must be the panel on the positive side of
-    the interface along `z`, and ``p2`` the one on the negative side,
-    independently of their order in the assembly: the face `z = -h_1/2` of
-    ``p1`` is connected to the face `z = +h_2/2` of ``p2``. The two panels
-    must have the same axes `x, y, z`. Both must cover the same area, with
-    the same dimensions ``a`` and ``b``, otherwise a ``ValueError`` is
+    The kernels of ``'SB'`` and ``'SB_TSL'`` place the reference surface of
+    the second panel at a distance ``dsb`` from that of the first one along
+    the negative `z` direction, the `z` axis being normal to the reference
+    surfaces of both panels, therefore ``p1`` must be the panel on the
+    positive side of the interface along `z`, and ``p2`` the one on the
+    negative side, independently of their order in the assembly: the lower
+    face of ``p1``, `z = d_1 - h_1/2`, is connected to the upper face of
+    ``p2``, `z = d_2 + h_2/2`, each in the coordinate `z` of its panel, with
+    the offsets `d_1`, `d_2` and the thicknesses `h_1`, `h_2`. The two
+    panels must have the same axes `x, y, z`. Both must cover the same area,
+    with the same dimensions ``a`` and ``b``, otherwise a ``ValueError`` is
     raised.
 
     Notes
     -----
-    The mid-surfaces of ``p1`` and ``p2`` are `d_{sb} = h_1/2 + h_2/2`
-    apart. Both panels must cover the same area, since the kernels of
+    The reference surfaces of ``p1`` and ``p2`` are `d_{sb} = h_1/2 - d_1 +
+    h_2/2 + d_2` apart, see :func:`.kCsdt._sb_distances`: `h_1/2 + h_2/2`
+    without offsets, and zero when both panels share the reference surface,
+    e.g. a stiffener base with `d_1 = (h_1 + h_2)/2` on a skin with `d_2 =
+    0`. Both panels must cover the same area, since the kernels of
     ``kCSB.pyx`` and ``kCSB_dmg.pyx`` and the operators of
     :meth:`.MultiDomain._tsl_operators` integrate over the domain of ``p1``
     only, evaluating the functions of ``p2`` at the natural coordinates of
@@ -2918,12 +2923,15 @@ class MultiDomain(object):
             - ``'SB'``: between 2 skins connected over an area, e.g. the base
               of a stiffener bonded to a skin, a pad-up of a skin, or the
               arms of a double cantilever beam. The two panels share the
-              axes `x, y, z`, `z` being normal to their mid-surfaces, and
-              ``p1`` is the panel on the positive side of the interface
-              along `z`, ``p2`` the one on the negative side, whatever their
-              order in the assembly: the face `z = -h_1/2` of ``p1`` is
-              connected to the face `z = +h_2/2` of ``p2``, whose
-              mid-surfaces are `d_{sb} = (h_1 + h_2)/2` apart. For example,
+              axes `x, y, z`, `z` being normal to their reference
+              surfaces, and ``p1`` is the panel on the positive side of the
+              interface along `z`, ``p2`` the one on the negative side,
+              whatever their order in the assembly: the lower face of
+              ``p1``, `z = d_1 - h_1/2`, is connected to the upper face of
+              ``p2``, `z = d_2 + h_2/2`, with the offset ``offset`` and
+              the thickness of each panel, whose reference surfaces are
+              `d_{sb} = h_1/2 - d_1 + h_2/2 + d_2` apart, see
+              :func:`._sb_top_bottom`. For example,
               a stiffener base on the side of positive `z` of the skin is
               ``p1`` and the skin ``p2``, while a pad-up on the side of
               negative `z` is ``p2`` and the skin ``p1``. For a double
@@ -3031,7 +3039,8 @@ class MultiDomain(object):
         the connection, and the rotation about that axis, see
         :func:`._rinv_sanders` and :func:`._bf_base_flange`; for ``'SB'``
         `u_1 + d_{sb} w_{1,x} = u_2`, `v_1 + d_{sb} w_{1,y} = v_2` and `w_1 =
-        w_2`, with the mid-surfaces `d_{sb} = h_1/2 + h_2/2` apart, see
+        w_2`, with the reference surfaces `d_{sb} = h_1/2 - d_1 + h_2/2 +
+        d_2` apart, `d_1` and `d_2` being the offsets, see
         :func:`._sb_top_bottom`. The connections of the shear deformation
         theories are described in :meth:`._kC_conn_sdt`.
 
@@ -3188,7 +3197,7 @@ class MultiDomain(object):
                     p_top, p_bot = _sb_top_bottom(connecti)
                     kt, _ = _penalties(connecti, p_top, p_bot, 'bot-top')
 
-                    dsb = sum(p_top.plyts)/2. + sum(p_bot.plyts)/2.
+                    dsb = sum(connections.kCsdt._sb_distances(p_top, p_bot))
                     kC_conn += connections.kCSB.fkCSB11(kt, dsb, p_top,
                             size, row0=p_top.row_start, col0=p_top.col_start)
                     kC_conn += _upper_block(connections.kCSB.fkCSB12(
@@ -3235,8 +3244,7 @@ class MultiDomain(object):
                     #      matrix, both require panels of the same
                     #      dimensions, checked by _sb_top_bottom()
                     if connecti.get('use_kernels', False):
-                        dt = sum(p_top.plyts)/2.
-                        db = sum(p_bot.plyts)/2.
+                        dt, db = connections.kCsdt._sb_distances(p_top, p_bot)
                         kC_conn += connections.kCSB_dmg.fkCSB11_dmg(dt=dt, p1=p_top,
                                 size=size, row0=p_top.row_start, col0=p_top.col_start,
                                 nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, kw_tsl=kw_tsl)
@@ -3281,8 +3289,9 @@ class MultiDomain(object):
         rotation penalty of ``'BFycte'`` and ``'BFxcte'`` is on `\phi_y`
         (`\phi_y + v/r` with the Sanders-Koiter kinematics) and `\phi_x`
         instead of `-w_{,y}` and `-w_{,x}`. ``'SB'`` penalizes the
-        displacements `u, v, w` at the interface, `z = -h_1/2` of ``p1`` and
-        `z = h_2/2` of ``p2``, and the difference of the rotations only when
+        displacements `u, v, w` at the interface, `z = d_1 - h_1/2` of
+        ``p1`` and `z = d_2 + h_2/2` of ``p2`` with the offsets `d_1`,
+        `d_2`, and the difference of the rotations only when
         ``'kr'`` is given and not zero. The default rotation penalty does not
         grow as the domains become narrower, so thin and narrow domains may
         need a higher ``'kr'`` to converge to the single-domain result. See
@@ -4233,8 +4242,8 @@ class MultiDomain(object):
         by those of ``p_bot``, the panel ``p2``, on the negative side, see
         :meth:`.get_kC_conn`. They are built from the matrices of
         :meth:`._gauss_field_operators` of both panels and from the
-        distances ``h/2`` of their mid-planes to the interface, ``h`` being
-        the sum of the ply thicknesses; they depend only on the geometry and
+        distances of their reference surfaces to the interface, see
+        :func:`.kCsdt._sb_distances`; they depend only on the geometry and
         are cached.
 
         Notes
@@ -4250,9 +4259,14 @@ class MultiDomain(object):
                 \Delta_w &= w^t - w^b
             \end{aligned}
 
-        where the superscripts `t` and `b` refer to ``p1`` and ``p2``, and
-        `d^t = h_1/2` and `d^b = h_2/2` are the distances from their
-        mid-planes to the interface. With the matrices `[N]` of
+        where the superscripts `t` and `b` refer to ``p1`` and ``p2``, `u`,
+        `v` are the displacements of their reference surfaces, and `d^t =
+        h_1/2 - d_1` and `d^b = h_2/2 + d_2` are the distances from their
+        reference surfaces to the interface, the lower face `z = d_1 -
+        h_1/2` of ``p1`` and the upper face `z = d_2 + h_2/2` of ``p2``,
+        with the offsets `d_1`, `d_2`, from the Kirchhoff kinematics `u(z) =
+        u - z w_{,x}`. Without offsets they are `h_1/2` and `h_2/2`, the
+        distances from the mid-planes. With the matrices `[N]` of
         :meth:`._gauss_field_operators`, whose row `g` holds the
         approximation functions of each field at the point `g`, the operators
         are the `n_g \times n_{dof}` matrices:
@@ -4287,8 +4301,7 @@ class MultiDomain(object):
             return cache[key]
         Nt, weights = self._gauss_field_operators(p_top, nr_x_gauss, nr_y_gauss)
         Nb, _ = self._gauss_field_operators(p_bot, nr_x_gauss, nr_y_gauss)
-        dt = sum(p_top.plyts)/2.
-        db = sum(p_bot.plyts)/2.
+        dt, db = connections.kCsdt._sb_distances(p_top, p_bot)
         Bu = np.hstack((Nt[0] + dt*Nt[3], -Nb[0] + db*Nb[3]))
         Bv = np.hstack((Nt[1] + dt*Nt[4], -Nb[1] + db*Nb[4]))
         Bw = np.hstack((Nt[2], -Nb[2]))

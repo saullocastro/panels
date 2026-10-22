@@ -41,11 +41,12 @@ Connection of type::
                                v -z
 
 The two panels share the axes `x, y, z`, `z` being normal to their
-mid-surfaces, and ``p1`` is the panel on the positive side of the interface
-along `z`, ``p2`` the one on the negative side, whatever their roles or
-their order in the assembly: the face `z = -h_1/2` of ``p1`` is connected to
-the face `z = +h_2/2` of ``p2``. The sketch shows a stiffener base on the
-side of positive `z` of the skin; a pad-up on the side of negative `z` of a
+reference surfaces, and ``p1`` is the panel on the positive side of the
+interface along `z`, ``p2`` the one on the negative side, whatever their roles
+or their order in the assembly: the lower face `z = d_1 - h_1/2` of ``p1`` is
+connected to the upper face `z = d_2 + h_2/2` of ``p2``, with the offsets
+`d_1`, `d_2` of the laminates, see :func:`.kCsdt._sb_distances`. The sketch
+shows a stiffener base on the side of positive `z` of the skin; a pad-up on the side of negative `z` of a
 skin is ``p2``, with the skin ``p1``. The same holds for ``'SB_TSL'``.
 
 

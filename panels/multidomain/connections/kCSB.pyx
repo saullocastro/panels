@@ -36,8 +36,10 @@ def fkCSB11(double kt, double dsb, object p1, int size, int row0, int col0):
     kt : float
         Translation penalty stiffness.
     dsb : float
-        Distance between the mid-surfaces of the two panels along `z`,
-        ``dsb = sum(p1.plyts)/2. + sum(p2.plyts)/2.``
+        Distance between the reference surfaces of the two panels along
+        `z`, ``dsb = sum(kCsdt._sb_distances(p1, p2))``, i.e. `h_1/2 - d_1 +
+        h_2/2 + d_2` with the thicknesses `h` and the offsets `d`, see
+        :func:`.kCsdt._sb_distances`
     p1 : Panel
         Panel on the positive side of the interface along the `z` axis of
         both panels, see :meth:`.MultiDomain.get_kC_conn`
@@ -167,8 +169,10 @@ def fkCSB12(double kt, double dsb, object p1, object p2, int size, int row0, int
     kt : float
         Translation penalty stiffness.
     dsb : float
-        Distance between the mid-surfaces of the two panels along `z`,
-        ``dsb = sum(p1.plyts)/2. + sum(p2.plyts)/2.``
+        Distance between the reference surfaces of the two panels along
+        `z`, ``dsb = sum(kCsdt._sb_distances(p1, p2))``, i.e. `h_1/2 - d_1 +
+        h_2/2 + d_2` with the thicknesses `h` and the offsets `d`, see
+        :func:`.kCsdt._sb_distances`
     p1 : Panel
         Panel on the positive side of the interface along the `z` axis of
         both panels, see :meth:`.MultiDomain.get_kC_conn`

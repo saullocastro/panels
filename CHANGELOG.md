@@ -49,6 +49,15 @@
   Compos. Struct. 140 (2016), with `y_k` measured from the mid-plane of the
   flange instead of its first face: `S1` is zero for a symmetric flange.
   Balanced cross-ply flanges are unaffected.
+- The skin-base connections `'SB'` and `'SB_TSL'` connect the lower face of
+  `p1`, `z = d1 - h1/2`, to the upper face of `p2`, `z = d2 + h2/2`, with the
+  offset `d` of each laminate (`Shell.offset`), for all the models; the CLPT
+  and FSDT kernels placed the faces at `z = -+h/2`, ignoring the offsets. Two
+  laminates bonded with `'SB'` with offsets had their first frequency 25%
+  (CLPT) and 41% (FSDT) above that of the single laminate, which they now
+  reproduce to `1e-12` for any offsets. New `kCsdt._sb_distances`, used by
+  the penalty and null-space `'SB'`, the kernels of `'SB_TSL'` and
+  `MultiDomain._tsl_operators`. Without offsets nothing changes.
 - `BladeStiff1D` without a flange accepts `bf=None`.
 - `StiffPanelBay.calc_kA` sums the aerodynamic matrices of the panels without
   skew-symmetrizing them.

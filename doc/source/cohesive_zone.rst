@@ -144,10 +144,16 @@ in contact, with the slope of each panel:
         \Delta_w &= w^t - w^b
     \end{aligned}
 
-where `d^t` and `d^b` are the distances from the mid-planes of the top and
-bottom panels to the interface, `u^t, v^t, w^t` and `u^b, v^b, w^b` their
-mid-plane displacements. Top and bottom refer to the `z` axis, normal to the
-mid-surfaces and common to both panels, pointing up in the DCB: the top panel
+where `d^t` and `d^b` are the distances from the reference surfaces of the
+top and bottom panels to the interface, `u^t, v^t, w^t` and `u^b, v^b, w^b`
+the displacements of their reference surfaces. With the thicknesses `h^t`,
+`h^b` and the offsets `d_t`, `d_b` of the laminates, ``Shell.offset``, each
+laminate occupying `d - h/2 \le z \le d + h/2` in the coordinate `z` of its
+panel, `d^t = h^t/2 - d_t` and `d^b = h^b/2 + d_b`, see
+:func:`.kCsdt._sb_distances`; without offsets, as in the DCB examples, they
+are `h^t/2` and `h^b/2`, the distances from the mid-planes. Top and bottom
+refer to the `z` axis, normal to the reference surfaces and common to both
+panels, pointing up in the DCB: the top panel
 is the panel on the positive side of the interface along `z`, whose face `z =
 -d^t` is at the interface, and it is ``p1`` of the connection dictionary; the
 bottom panel is the one on the negative side, whose face `z = +d^b` is at the
