@@ -116,6 +116,16 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
         When ``npanels < 2``, or when the length of ``stack_blades`` or of
         ``width_blades`` is not ``npanels``.
 
+    Notes
+    -----
+    The connection ``'BFycte'`` makes the displacements of the blade, whose
+    local axes are rotated by 90 degrees about the `x` axis with respect to
+    those of the skin, and the rotation about `x` continuous along the line
+    `y = 0` of the skin panel, where the blade stands normal to the skin,
+    see :meth:`.MultiDomain.get_kC_conn`. The boundary conditions and the
+    redundant constraints of the closed skin are those of
+    :func:`.create_cylinder`.
+
     """
     if npanels < 2:
         raise ValueError('At least two panels are needed')
@@ -243,6 +253,18 @@ def cylinder_blade_stiffened_compression_lb_Nxx_cte(height, r, stack, stack_blad
         When the length of ``Nxxs_skin`` or of ``Nxxs_blade`` is not
         ``npanels``.
 
+    Notes
+    -----
+    The linear buckling analysis is that of
+    :func:`.cylinder_compression_lb_Nxx_cte`, with the membrane stress state
+    `N_{xx}` assumed constant over each panel. The values of ``Nxxs_skin``
+    and ``Nxxs_blade`` are independent: they represent the pre-buckling
+    state of a cylinder with equal axial strains in the skin and in the
+    blades only when they are given approximately in the ratio of the
+    membrane stiffnesses of the laminates, whereas the static analysis of
+    :func:`.cylinder_blade_stiffened_compression_lb_Nxx_from_static` gives
+    a compatible pre-buckling state.
+
     Examples
     --------
 
@@ -352,6 +374,14 @@ def cylinder_blade_stiffened_compression_lb_Nxx_from_static(height, r, stack,
     ValueError
         When the length of ``Nxxs_skin`` or of ``Nxxs_blade`` is not
         ``npanels``.
+
+    Notes
+    -----
+    The pre-buckling state and the linear buckling analysis are those of
+    :func:`.cylinder_compression_lb_Nxx_from_static`: ``c`` is the linear
+    static solution of the reduced problem, and ``eigvals`` are the
+    multipliers `\lambda` of the applied loads in `([K_r] + \lambda
+    [K_{G r}(c)]) \{\phi_r\} = \{0\}`.
 
     Examples
     --------
@@ -480,6 +510,19 @@ def cylinder_blade_stiffened_compression_lb_pd_from_static(height, r, stack,
     ValueError
         When the length of ``pds_skin`` or of ``pds_blade`` is not
         ``npanels``.
+
+    Notes
+    -----
+    The prescribed displacements are imposed with the penalty method, see
+    :meth:`.MultiDomain.calc_fext`: the energy `\frac{1}{2} k_u (u -
+    u_p)^2`, integrated along the edge, gives the force `k_u u_p` of the
+    external force vector and the penalty stiffness `k_u`. The linear
+    buckling analysis is that of
+    :func:`.cylinder_compression_lb_Nxx_from_static`, ``eigvals`` being the
+    multipliers `\lambda` of the pre-buckling state ``c``. Since the
+    penalty stiffness is not in the stiffness matrix, the forces `k_u u_p`
+    act as dead loads, and `u = u_p` is not imposed, see the
+    ``TODO(author)`` of the description.
 
     Examples
     --------

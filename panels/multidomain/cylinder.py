@@ -90,6 +90,17 @@ def create_cylinder(height, r, stack, plyt, laminaprop,
     ValueError
         When ``npanels < 2``.
 
+    Notes
+    -----
+    The boundary condition flags remove the terms of the approximation
+    functions of `u`, `v` and `w` at the ends, which keep the rotations
+    free: the ends are simply supported with the axial displacement
+    restrained. The constraints of the last connection, which closes the
+    cylinder, are in part linear combinations of those of the other
+    connections around the circumference; the null-space method finds
+    these redundant constraints and drops them, see
+    :meth:`.MultiDomain.get_T`.
+
     """
     if npanels < 2:
         raise ValueError('At least two panels are needed')
@@ -183,6 +194,26 @@ def cylinder_compression_lb_Nxx_cte(height, r, stack, plyt, laminaprop,
     ValueError
         When the length of ``Nxxs`` is not ``npanels``.
 
+    Notes
+    -----
+    The linear buckling analysis solves
+
+    .. math::
+
+        \left([K_r] + \lambda [K_{G r}]\right) \{\phi_r\} = \{0\}
+
+    with `[K_r]` and `[K_{G r}]` the reduced constitutive and geometric
+    stiffness matrices, see :meth:`.MultiDomain.reduce`, the latter computed
+    for the membrane stress state `N_{xx}` assumed constant over each panel,
+    without the bending and the redistribution of the stresses of the
+    pre-buckling state near the restrained ends, see
+    :func:`.cylinder_compression_lb_Nxx_from_static`. ``eigvals`` are the
+    multipliers `\lambda` of ``Nxxs``, and the modes are `\{\phi\} = [T]
+    \{\phi_r\}`. TODO(author): the flags of the edge `x = 0`, `u = v = w =
+    0` with the rotation free, would be SS4 in the notation of Almroth,
+    where SS1 is `w = M_{xx} = N_{xx} = N_{xy} = 0` and SS3 is `w = M_{xx}
+    = N_{xx} = v = 0`; check which notation SS1 and SS3 refer to.
+
     Examples
     --------
 
@@ -273,6 +304,23 @@ def cylinder_compression_lb_Nxx_from_static(height, r, stack, plyt, laminaprop,
     ------
     ValueError
         When the length of ``Nxxs`` is not ``npanels``.
+
+    Notes
+    -----
+    The pre-buckling state is the linear static solution `\{c\} = [T]
+    \{c_r\}`, with `[K_r] \{c_r\} = [T]^T \{F_{ext}\}`, which includes
+    the bending of the shell near the ends, where the radial displacement
+    is restrained, and the linear buckling analysis solves
+
+    .. math::
+
+        \left([K_r] + \lambda [K_{G r}(c)]\right) \{\phi_r\} = \{0\}
+
+    with the reduced geometric stiffness matrix of the linear membrane
+    stresses of `\{c\}`, see :meth:`.Shell.calc_kG`, which is linear in
+    `\{c\}`, such that ``eigvals`` are the multipliers `\lambda` of the
+    applied loads. For the boundary conditions SS1 and SS3 see
+    :func:`.cylinder_compression_lb_Nxx_cte`.
 
     Examples
     --------

@@ -24,10 +24,6 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
         num_eigvalues=25, conn_method='null-space'):
     r"""Flutter of T-Stiffened Shell with possible defect at middle
 
-    For more details about each parameter and the aerodynamic formulation see
-    Ref. [castro2016FlutterPanel]_ .
-
-
     The panel assembly looks like::
 
         skin
@@ -164,6 +160,36 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
         The assembly, :class:`.MultiDomain`, the eigenvalues returned by
         ``structsolve.freq``, see there, and the eigenvectors of the
         assembly, one per column, with ``assy.get_size()`` rows.
+
+    Notes
+    -----
+    For more details about each parameter and the aerodynamic formulation see
+    Ref. [1]_ . The eigenvalue problem solved by ``structsolve.freq`` is
+
+    .. math::
+
+        \left([K_r] + [K_{G r}] + [K_{A r}] + \lambda^2 [M_r]\right)
+        \{\phi_r\} = \{0\}
+
+    with the reduced constitutive, geometric and aerodynamic stiffness
+    matrices and the reduced mass matrix, see :meth:`.MultiDomain.reduce`.
+    `[K_A]` is the matrix of the linear piston theory of
+    :meth:`.Shell.calc_kA`, of the skin domains only, since the stiffener is
+    not exposed to the flow; it is not symmetric, and the general
+    eigenvalue solver is used. The flutter onset is found by increasing the
+    aerodynamic load, e.g. ``air_speed``, until two natural frequencies
+    coalesce and the eigenvalues become complex. With
+    ``run_static_case=True`` and loads, `[K_G]` is computed from the
+    linear membrane stresses of the static solution, see
+    :func:`.tstiff2d_1stiff_compression` for the sign of the loads and the
+    model of the debonding defect.
+
+    References
+    ----------
+    .. [1] Castro, S. G. P., Guimarães, T. A. M., Rade, D. A., and Donadon,
+       M. V., Flutter of stiffened composite panels considering the
+       stiffener's base as a structural element, Composite Structures,
+       2016. https://doi.org/10.1016/j.compstruct.2015.12.056
 
     Examples
     --------

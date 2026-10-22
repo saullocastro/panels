@@ -307,6 +307,17 @@ def plot3d(md, c, group=None, vec='w', vecs=None, displ='uvw', scale=None,
         characters than ``'u'``, ``'v'`` and ``'w'``, or when an output of
         ``vecs`` is not available for the model of a plotted panel.
 
+    Notes
+    -----
+    The deformed position of each point of the mid-surface is `\{X\} + s
+    (u \{e_x\} + v \{e_y\} + w \{e_z\})`, with `s` the scale factor and
+    `\{e_x\}`, `\{e_y\}`, `\{e_z\}` the local unit vectors of
+    :meth:`.Shell.global_coords` at the undeformed point, along which `u`,
+    `v` and `w` act; for a cylindrical shell `\{e_y\}` is tangent to the
+    circumference and `\{e_z\}` normal to it. The displacements are added
+    linearly, the rotations ``phix`` and ``phiy`` not being used, so that
+    the drawn geometry is that of small displacements, magnified by `s`.
+
     """
     try:
         import plotly.graph_objects as go

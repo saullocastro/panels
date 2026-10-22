@@ -18,12 +18,6 @@ def tstiff2d_1stiff_freq(a, b, ys, bb, bf, defect_a, rho, plyt, laminaprop,
         num_eigvalues=25, conn_method='null-space'):
     r"""Frequency T-Stiffened Shell with possible defect at middle
 
-    For more details about each parameter and the aerodynamic formulation see
-    Ref. [castro2016FlutterPanel]_ .
-
-    For more details about the theory involved on the assembly of panels, see
-    [castro2017Multidomain]_ .
-
     The panel assembly looks like::
 
         skin
@@ -122,6 +116,40 @@ def tstiff2d_1stiff_freq(a, b, ys, bb, bf, defect_a, rho, plyt, laminaprop,
         The assembly, :class:`.MultiDomain`, the eigenvalues returned by
         ``structsolve.freq``, see there, and the eigenvectors of the
         assembly, one per column, with ``assy.get_size()`` rows.
+
+    Notes
+    -----
+    For more details about each parameter and the aerodynamic formulation see
+    Ref. [2]_. TODO(author): this analysis has no aerodynamic matrix, see
+    :func:`.tstiff2d_1stiff_flutter`; check whether the reference to the
+    aerodynamic formulation is intended here.
+
+    For more details about the theory involved on the assembly of panels, see
+    [1]_. The free vibration problem solved by ``structsolve.freq`` is
+
+    .. math::
+
+        \left([K_r] + \lambda^2 [M_r]\right) \{\phi_r\} = \{0\}, \qquad
+        \lambda^2 = -\omega_n^2
+
+    with `[K_r]` and `[M_r]` the reduced constitutive stiffness and mass
+    matrices, see :meth:`.MultiDomain.reduce`, without pre-stress, and
+    `\omega_n` the natural frequencies in rad/s. The debonding defect is
+    modelled by removing the connection ``'SB'`` between the skin and the
+    base over the middle row of domains, which are then two independent
+    plates connected only at the ends of the defect, without any contact
+    between them.
+
+    References
+    ----------
+    .. [1] Castro, S. G. P., and Donadon, M. V., Assembly of Semi-Analytical
+       models to Address Linear Buckling and Vibration of Stiffened
+       Composite Panels with Debonding Defect, Composite Structures, 2017.
+       https://doi.org/10.1016/j.compstruct.2016.10.026
+    .. [2] Castro, S. G. P., Guimarães, T. A. M., Rade, D. A., and Donadon,
+       M. V., Flutter of stiffened composite panels considering the
+       stiffener's base as a structural element, Composite Structures,
+       2016. https://doi.org/10.1016/j.compstruct.2015.12.056
 
     Examples
     --------

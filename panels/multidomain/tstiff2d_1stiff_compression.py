@@ -59,9 +59,6 @@ def tstiff2d_1stiff_compression(a, b, ys, bb, bf, defect_a, rho, plyt,
                   |_____|         |_____|
                loaded edge     loaded edge
 
-    For more details about the theory involved, see
-    [castro2017Multidomain]_ .
-
     The skin is divided into 9 domains, ``p01`` to ``p09``, and the base and
     the flange of the stiffener into 3 domains each, ``p10``, ``p12``,
     ``p14`` and ``p11``, ``p13``, ``p15``, all :class:`.Shell` objects of
@@ -165,6 +162,42 @@ def tstiff2d_1stiff_compression(a, b, ys, bb, bf, defect_a, rho, plyt,
         assembly, one per column.
     assy, eigvals, eigvecs : tuple
         With ``run_static_case=False``: the same without ``c``.
+
+    Notes
+    -----
+    For more details about the theory involved, see
+    [1]_ . The linear buckling problem solved by ``structsolve.lb`` is
+
+    .. math::
+
+        \left([K_r] + \lambda [K_{G r}]\right) \{\phi_r\} = \{0\}
+
+    with `[K_r]` and `[K_{G r}]` the reduced constitutive and geometric
+    stiffness matrices, see :meth:`.MultiDomain.reduce`, and ``eigvals``
+    the multipliers `\lambda` of the loads. With ``run_static_case=True``,
+    `[K_{G r}]` is computed from the linear membrane stresses of the static
+    solution, see :meth:`.Shell.calc_kG`, which redistributes the load
+    between the skin and the stiffener according to their stiffnesses;
+    the static analysis uses the opposite of the force vector of
+    :meth:`.Shell.add_distr_load_fixed_x`, since at the edge `x = 0`, whose
+    outward normal is `-x`, the force per unit length applied by a stress
+    resultant `N_{xx}` is `-N_{xx}`, such that ``Nxx_skin``, ``Nxx_base``
+    and ``Nxx_flange`` are the stress resultants of the loaded edge,
+    negative in compression, e.g. ``-1.`` in the tests. With ``run_static_case=False`` the constant `N_{xx}` of each
+    domain is assumed, without the redistribution.
+
+    The debonding defect is modelled by removing the connection ``'SB'``
+    between the skin and the base over the middle row of domains, which
+    are then two independent plates connected only at the ends of the
+    defect, without any contact between them: the modes may show the skin
+    and the base interpenetrating over the defect.
+
+    References
+    ----------
+    .. [1] Castro, S. G. P., and Donadon, M. V., Assembly of Semi-Analytical
+       models to Address Linear Buckling and Vibration of Stiffened
+       Composite Panels with Debonding Defect, Composite Structures, 2017.
+       https://doi.org/10.1016/j.compstruct.2016.10.026
 
     Examples
     --------
