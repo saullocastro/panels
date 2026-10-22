@@ -176,7 +176,11 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
     `[K_A]` is the matrix of the linear piston theory of
     :meth:`.Shell.calc_kA`, of the skin domains only, since the stiffener is
     not exposed to the flow; it is not symmetric, and the general
-    eigenvalue solver is used. The flutter onset is found by increasing the
+    eigenvalue solver is used. The sign convention of `[K_A]` is that of
+    :meth:`.Shell.calc_kA`: its term in `\beta` is the transpose of that of
+    Eq. (21) of [1]_, equivalent to reversing the flow direction, and the
+    term in `\gamma` of Eqs. (21) and (29) of [1]_ has the wrong sign, a
+    mistake of the paper, the correction of Krumhaar softening the shell. The flutter onset is found by increasing the
     aerodynamic load, e.g. ``air_speed``, until two natural frequencies
     coalesce and the eigenvalues become complex. With
     ``run_static_case=True`` and loads, `[K_G]` is computed from the

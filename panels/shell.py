@@ -2259,17 +2259,26 @@ class Shell(object):
         with `\{N_w\}_{,y}` and `\gamma = 0` for a flow along `y`, where
         `\{N_w\}` is the row of the approximation functions of `w`,
         entering the equations of motion as `([K] + [K_A] + \lambda^2
-        [M])\{c\} = \{0\}`. Since `\int \{N_w\}_{,x}^T \{N_w\} dA = -\int
-        \{N_w\}^T \{N_w\}_{,x} dA` when `w` vanishes at `x = 0` and `x = a`,
-        the term in `\beta` is then `\beta \int \{N_w\}^T \{N_w\}_{,x} dA`.
-        TODO(author): the previous docstring gave `[K_A] = -\int \{N_w\}^T
-        (\beta \{N_w\}_{,x} + \gamma \{N_w\}) dA`, i.e. the transpose of the
-        term in `\beta` computed by the kernels (checked numerically for
-        ``'plate_clpt_donnell'``, ``'plate_fsdt_donnell'`` and
-        ``'cylshell_clpt_sanders'``), which with `w = 0` at `x = 0, a`
-        differs only by the sign of `\beta`; please confirm the intended
-        sign convention of `q`. The flutter boundary does not depend on the
-        sign of `\beta`, i.e. on the flow direction.
+        [M])\{c\} = \{0\}`, `\lambda^2 = -\omega^2` for a harmonic motion,
+        e.g. with :func:`structsolve.freq`, see :meth:`.Shell.calc_cA` for
+        the damping. This is the convention of panels: the term in `\gamma`
+        is `-\gamma \int \{N_w\}^T \{N_w\} dA` added to the stiffness, which
+        softens the shell, as Krumhaar's correction does [1]_, see below.
+
+        Since `\int \{N_w\}_{,x}^T \{N_w\} dA = -\int \{N_w\}^T \{N_w\}_{,x}
+        dA` when `w` vanishes at `x = 0` and `x = a`, the term in `\beta` is
+        then `\beta \int \{N_w\}^T \{N_w\}_{,x} dA`. The term in `\beta` of
+        panels is the transpose of that of Eq. (21) of [2]_, `[K_{A_x}] =
+        \int \{S^w\}^T (-\beta \{S^w\}_{,x} + \gamma \{S^w\}) dA`, which is
+        added to the stiffness in Eqs. (29)-(31) of [2]_, `([K_{ps}] +
+        [K_A] - \omega^2 [M] + i \omega [C_A])\{c_0\} = \{0\}`: with `w = 0`
+        at `x = 0` and `x = a` the two differ by the sign of `\beta`, i.e.
+        by the direction of the flow, on which the flutter boundary does not
+        depend. The sign of the term in `\gamma` of Eqs. (18), (21) and (29)
+        of [2]_ is reversed, a mistake of the paper: added with a positive
+        sign to the stiffness it stiffens the shell, whereas Krumhaar's
+        correction softens it, as derived independently from the potential
+        flow over a cylinder in pyfe3d; panels keeps the softening term.
 
         The term `\gamma w` is Krumhaar's correction of the piston theory for
         the external flow over a cylinder [1]_, with `w` positive outwards:
@@ -2289,6 +2298,11 @@ class Shell(object):
         .. [1] Krumhaar, H., "The accuracy of linear piston theory when
            applied to cylindrical shells", AIAA Journal, 1(6), 1448-1449,
            1963.
+        .. [2] Castro, S. G. P., Guimaraes, T. A. M., Rade, D. A., and
+           Donadon, M. V., "Flutter of stiffened composite panels considering
+           the stiffener's base as a structural element", Composite
+           Structures, 140, 36-43, 2016.
+           https://doi.org/10.1016/j.compstruct.2015.12.056
 
         """
         msg('Calculating kA... ', level=2, silent=silent)
@@ -2367,8 +2381,9 @@ class Shell(object):
         Parameters
         ----------
         aeromu : float
-            Aerodynamic damping coefficient of the piston theory.
-            TODO(author): dimension.
+            Aerodynamic damping coefficient `\mu` of the piston theory, a
+            pressure per unit velocity, mass/(area time), see
+            :meth:`.StiffPanelBay._aero_parameters`.
         silent : bool, optional
             Default ``True``, no log message is printed.
         size : int or None, optional
@@ -2391,12 +2406,29 @@ class Shell(object):
         the approximation functions of `w`, i.e. the matrix of the
         aerodynamic damping load of the piston theory, proportional to `\mu
         \dot{w}`; :class:`.StiffPanelBay` computes `\mu = \beta (M^2 - 2)/(M
-        a_\infty (M^2 - 1))`, with `a_\infty` the speed of sound, see
-        :meth:`.Shell.calc_kA` for `\beta`. TODO(author): confirm the sign
-        convention of the damping load and how the factor ``1j``, of the
-        velocity `\dot{w} = i \omega w` of a harmonic motion, enters the
-        eigenvalue problem; ``aeromu`` would then be a pressure per unit
-        velocity.
+        a_\infty (M^2 - 1))`, with `a_\infty` the speed of sound, Eq. (18)
+        of [1]_, see :meth:`.Shell.calc_kA` for `\beta`. This is `[C_A] =
+        \int \{S^w\}^T (-\mu \{S^w\}) dA` of Eq. (23) of [1]_. For the
+        harmonic motion `\{c\} e^{i \omega t}`, `\dot{w} = i \omega w`, and
+        the damping enters Eqs. (29)-(31) of [1]_ as `+i \omega [C_A]`; the
+        factor ``1j`` is already in ``cA`` `= i [C_A]`, such that the
+        eigenvalue problem is
+
+        .. math::
+
+            \left([K] + [K_A] - \omega^2 [M] + \omega [c_A]\right)\{c\} =
+            \{0\}
+
+        with `[K_A]` of :meth:`.Shell.calc_kA`, quadratic in `\omega`, e.g.
+        solved in the state-space form of Eq. (32) of [1]_.
+
+        References
+        ----------
+        .. [1] Castro, S. G. P., Guimaraes, T. A. M., Rade, D. A., and
+           Donadon, M. V., "Flutter of stiffened composite panels considering
+           the stiffener's base as a structural element", Composite
+           Structures, 140, 36-43, 2016.
+           https://doi.org/10.1016/j.compstruct.2015.12.056
 
         """
         msg('Calculating cA... ', level=2, silent=silent)

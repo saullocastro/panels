@@ -896,9 +896,18 @@ class StiffPanelBay(object):
         without radius, and `\mu_a`, ``aeromu``, the coefficient of the
         aerodynamic damping, see :meth:`.Shell.calc_cA`. The linear piston
         theory holds for supersonic flows only, and `\beta` is singular at
-        `M = 1`, hence the replacement of ``Mach == 1`` by ``1.0001``.
+        `M = 1`, hence the replacement of ``Mach == 1`` by ``1.0001``. The
+        expressions of `\beta`, `\gamma` and `\mu_a` are those of Eq. (18) of
+        [1]_; the sign of `\gamma` in the matrices of [1]_ is reversed, see
+        :meth:`.Shell.calc_kA`.
 
-        TODO(author): give a source for the expression of ``aeromu``.
+        References
+        ----------
+        .. [1] Castro, S. G. P., Guimaraes, T. A. M., Rade, D. A., and
+           Donadon, M. V., "Flutter of stiffened composite panels considering
+           the stiffener's base as a structural element", Composite
+           Structures, 140, 36-43, 2016.
+           https://doi.org/10.1016/j.compstruct.2015.12.056
 
         """
         r = self.r if self.r is not None else 0.
@@ -965,7 +974,10 @@ class StiffPanelBay(object):
         a skew-symmetric one only when `w` vanishes at the edges normal to
         the flow, where the boundary terms of `\int N_i N_{k,x} dx` are
         otherwise not zero, such that `[K_A]` is in general neither
-        symmetric nor skew-symmetric.
+        symmetric nor skew-symmetric. The sign convention is that of
+        :meth:`.Shell.calc_kA`, `([K] + [K_A] + \lambda^2 [M])\{c\} =
+        \{0\}` with a softening term in `\gamma`, whose sign is reversed in
+        Eqs. (21) and (29) of Castro et al. (2016), a mistake of the paper.
 
         """
         self._rebuild()
@@ -1022,10 +1034,11 @@ class StiffPanelBay(object):
         The damping term of the piston theory, with the coefficient
         ``aeromu`` of :meth:`._aero_parameters`, is proportional to the
         velocity of `w`, see :meth:`.Shell.calc_cA`, whose matrix is
-        multiplied by the imaginary unit.
-
-        TODO(author): state how ``cA`` enters the flutter eigenvalue
-        problem, e.g. with the factor of the frequency of a harmonic motion.
+        multiplied by the imaginary unit, ``cA`` `= i [C_A]` with `[C_A]` of
+        Eq. (23) of Castro et al. (2016): for the harmonic motion `\{c\}
+        e^{i \omega t}` it enters the eigenvalue problem as `([K] + [K_A] -
+        \omega^2 [M] + \omega [c_A])\{c\} = \{0\}`, the term `+i \omega
+        [C_A]` of Eqs. (29)-(31) of that paper.
 
         """
         self._rebuild()
