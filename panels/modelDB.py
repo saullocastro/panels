@@ -18,6 +18,17 @@ The dictionary ``db`` maps the name of each model, the attribute
 - ``'linear static'``, ``'linear buckling'``, ``'non-linear static'``: flags,
   ``True`` for every model.
 
+Notes
+-----
+The ``dofs`` are ``u, v, w`` for the classical laminated plate theory
+(CLPT), whose rotations derive from `w`, and ``u, v, w, phix, phiy`` for
+the shear deformation theories, with independent rotations. The ``e_num``
+generalized strains are the membrane strains and the changes of curvature
+for the CLPT, ``6``, plus the transverse shear strains for the first-order
+theory (FSDT), ``8``, plus the third-order terms of the in-plane strains
+and the second-order terms of the transverse shear strains for the
+third-order theory (TSDT), ``13``, see :mod:`panels.models`.
+
 """
 from .models import *
 

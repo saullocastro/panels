@@ -103,6 +103,20 @@ def shell_fext(shell, inc, size, col0, include_pds=True):
         If ``include_pds=True`` and rotations are prescribed, see
         :meth:`.Shell.has_rotation_pds`.
 
+    Notes
+    -----
+    Each load enters with its virtual work on the approximation functions,
+    the rows `\{g_u\}`, `\{g_v\}`, `\{g_w\}` of the function ``fg`` of the
+    model: a point load gives `f_x \{g_u\} + f_y \{g_v\} + f_z \{g_w\}` at
+    `(x, y)`; a distributed load at a fixed `y` gives `\int_0^a (f_x
+    \{g_u\} + f_y \{g_v\} + f_z \{g_w\}) dx`, computed with ``shell.m``
+    Gauss-Legendre points, and at a fixed `x` the integral along `y` with
+    ``shell.n`` points; a pressure gives `\int \int p \{g_w\} dx dy` over its
+    patch, see :func:`.pressure_patches`. The prescribed displacements
+    imposed with the penalty method give the same vectors with the forces
+    `k u_p`, the right-hand side of the penalty energy, see
+    :meth:`.Shell.add_point_pd`.
+
     """
 
     model = shell.model
@@ -284,12 +298,8 @@ def pressure_factor(shell, zp):
     r"""Factor of a pressure acting on the surface ``z = zp``
 
     For a cylindrical shell, see :meth:`.Shell.is_curved`, a pressure ``p``
-    on the surface of radius ``r + zp`` has the resultant ``p (r + zp)`` per
-    unit length of mid-surface arc, and is applied as ``p (1 + zp/r)`` per
-    unit area of mid-surface. Its direction and change of area are those of
-    the mid-surface, the shallow-shell approximation described in
-    ``theory/shells/follower_pressure/follower_pressure.py``. For plates the
-    factor is ``1``.
+    on the surface ``z = zp`` is applied as ``p (1 + zp/r)`` per unit area
+    of mid-surface. For plates the factor is ``1``.
 
     Parameters
     ----------
@@ -303,6 +313,18 @@ def pressure_factor(shell, zp):
     factor : float
         ``1 + zp/r`` for a cylindrical shell with ``zp`` nonzero, otherwise
         ``1.``. Dimensionless.
+
+    Notes
+    -----
+    A pressure ``p`` on the surface of radius ``r + zp`` has the resultant
+    ``p (r + zp)`` per unit angle, i.e. ``p (1 + zp/r)`` per unit length of
+    mid-surface arc. Its direction and change of area are those of the
+    mid-surface, the shallow-shell approximation: the terms of relative
+    order `z_p \kappa`, with `\kappa` the change of curvature, in the change
+    of area and the moment of the in-plane components about the mid-surface
+    are neglected, which are of relative order `n^2 z_p/r` in the load
+    stiffness of a ring mode with `n` circumferential waves, e.g. about
+    ``0.13`` for `n = 2`, `z_p = h/2` and `r/h = 15`.
 
     """
     if zp and shell.is_curved():

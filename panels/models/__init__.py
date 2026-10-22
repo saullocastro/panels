@@ -29,9 +29,7 @@ EQUATION refers to which type of nonlinear equation is being used:
 
 - donnell - kinematic equations using Donnell's equations, which for flat
   plates are the von Karman equations
-- sanders - kinematic equations using Sanders-Koiter's equations, which,
-  differently from Donnell's, give zero strains for any rigid-body motion of
-  a cylindrical shell
+- sanders - kinematic equations using Sanders-Koiter's equations
 
 SUFIX used to indicate additional information
 
@@ -53,10 +51,56 @@ The available models, which are selected with ``Shell.model``, are:
   Donnell-Mushtari-Vlasov (shallow shell) kinematics, 3 DOFs ``u, v, w``.
 
 - ``'cylshell_clpt_sanders'``: cylindrical shells, CLPT with the
-  Sanders-Koiter kinematics (Sanders 1959, 1963), 3 DOFs ``u, v, w``. This is
-  the default model of a :class:`.Shell` with a radius ``r``. With
-  `y = r \theta` the arc length and `\phi_x = -w_{,x}`, `\phi_y = -w_{,y} +
-  v/r` the rotations of the normal:
+  Sanders-Koiter kinematics, 3 DOFs ``u, v, w``. This is the default model
+  of a :class:`.Shell` with a radius ``r``.
+
+- ``'plate_fsdt_donnell'``: flat plates, first-order shear deformation
+  theory (FSDT, Reissner-Mindlin) with von Karman non-linear kinematics, 5
+  DOFs ``u, v, w, phix, phiy``. The transverse shear stiffness is controlled
+  by ``Shell.fsdt_shear_correction``, ``'rohwer'`` by default.
+
+- ``'plate_tsdt_donnell'``: flat plates, third-order shear deformation
+  theory of Reddy with von Karman non-linear kinematics, 5 DOFs ``u, v, w,
+  phix, phiy``, without shear correction.
+
+- ``'cylshell_fsdt_donnell'``, ``'cylshell_tsdt_donnell'``: cylindrical
+  shells, FSDT and TSDT with the Donnell kinematics, 5 DOFs ``u, v, w, phix,
+  phiy``.
+
+- ``'cylshell_fsdt_sanders'``, ``'cylshell_tsdt_sanders'``: cylindrical
+  shells, FSDT and TSDT with the Sanders-Koiter kinematics, 5 DOFs ``u, v,
+  w, phix, phiy``. For these models the fields ``phiy`` of
+  :func:`.fsdt_tsdt_field.fuvw` and :func:`.fsdt_tsdt_field.fg` are the
+  rotation of the normal ``phiy + v/r``.
+
+The models with 5 DOFs are supported by :class:`.MultiDomain` with the
+connections of :mod:`panels.multidomain.connections.kCsdt`, but not by
+:class:`.StiffPanelBay`, whose stiffeners assume the 3 DOFs of the CLPT.
+
+Notes
+-----
+For the cylinders, `y = r \theta` is the arc length along the
+circumference, `w` is positive outwards, and the shallow shell assumption
+`r + z \approx r` is adopted; for the plates `1/r = 0`. The models with 3
+DOFs have the strains of the CLPT:
+
+- Donnell kinematics, ``'plate_clpt_donnell'`` and
+  ``'cylshell_clpt_donnell'``, which for the plates are the von Kármán
+  strains:
+
+  .. math::
+
+      \varepsilon_{xx} = u_{,x} + \frac{1}{2} w_{,x}^2 \qquad
+      \varepsilon_{yy} = v_{,y} + \frac{w}{r} + \frac{1}{2} w_{,y}^2 \qquad
+      \gamma_{xy} = u_{,y} + v_{,x} + w_{,x} w_{,y}
+
+      \kappa_{xx} = -w_{,xx} \qquad
+      \kappa_{yy} = -w_{,yy} \qquad
+      \kappa_{xy} = -2 w_{,xy}
+
+- Sanders-Koiter kinematics, ``'cylshell_clpt_sanders'``, Sanders (1959,
+  1963) [1]_, [2]_. With `y = r \theta` the arc length and `\phi_x =
+  -w_{,x}`, `\phi_y = -w_{,y} + v/r` the rotations of the normal:
 
   .. math::
 
@@ -77,40 +121,47 @@ The available models, which are selected with ``Shell.model``, are:
   kinematics. The rotation `\phi_y` also enters the mass matrix and the
   point constraints of the rotation about `x`.
 
-- ``'plate_fsdt_donnell'``: flat plates, first-order shear deformation
-  theory (FSDT, Reissner-Mindlin) with von Karman non-linear kinematics, 5
-  DOFs ``u, v, w, phix, phiy``. The transverse shear stiffness is controlled
-  by ``Shell.fsdt_shear_correction``, with the method of Rohwer (1988) by
-  default.
+The models with 5 DOFs have the rotations `\phi_x` and `\phi_y` as
+independent fields, with the displacement field and the strains of
+:mod:`panels.models.fsdt_tsdt_field`. The FSDT uses the shear corrected
+transverse shear stiffness, with the method of Rohwer (1988) [4]_ by
+default, see :class:`.Shell`. The TSDT of Reddy (1984) [3]_ needs no shear
+correction, the transverse shear stresses vanish at `z = \pm h/2`, which
+assumes the reference surface at mid-thickness, i.e. no laminate offset.
+The cylinders with the Donnell kinematics are the plate models with the
+hoop strain `w/r` and the curvature term of the piston theory, see
+:meth:`.Shell.calc_kA`. With the Sanders-Koiter kinematics, the rotation of
+the normal about `x` is `\phi_y + v/r`, which enters the displacement field,
+the changes of curvature and the mass matrix, the twist includes the
+rotation about the normal, and the non-linear terms use `\beta_y = w_{,y} -
+v/r`, such that all strains vanish for any small rigid-body motion. No
+Sanders-Koiter term appears in the third-order terms of the TSDT, and the
+transverse shear strains are those of the Donnell kinematics.
 
-- ``'plate_tsdt_donnell'``: flat plates, third-order shear deformation
-  theory of Reddy (1984) with von Karman non-linear kinematics, 5 DOFs ``u,
-  v, w, phix, phiy``. No shear correction is needed, the transverse shear
-  stresses vanish at `z = \pm h/2`, which assumes the reference surface at
-  mid-thickness, i.e. no laminate offset.
+The integrands of the matrices of each model are derived symbolically from
+these kinematics. The modules without suffix integrate them in closed form
+over the whole domain, with the integrals of Bardell's functions of
+:mod:`panels.bardell`, which requires a constant constitutive matrix and
+matrices that do not depend on the Ritz constants; the modules ``num``
+apply the Gauss-Legendre quadrature, which also gives the non-linear
+matrices, the internal force vector, a stiffness varying over the domain
+and partial integration domains, see :meth:`.Shell.calc_kC`.
 
-- ``'cylshell_fsdt_donnell'``, ``'cylshell_tsdt_donnell'``: cylindrical
-  shells, FSDT and TSDT with the Donnell kinematics, 5 DOFs ``u, v, w, phix,
-  phiy``, i.e. the plate models with the hoop strain `w/r` and the curvature
-  term of the piston theory.
-
-- ``'cylshell_fsdt_sanders'``, ``'cylshell_tsdt_sanders'``: cylindrical
-  shells, FSDT and TSDT with the Sanders-Koiter kinematics, 5 DOFs ``u, v,
-  w, phix, phiy``. The rotation of the normal about `x` is `\phi_y + v/r`,
-  which enters the displacement field, the changes of curvature and the
-  mass matrix, the twist includes the rotation about the normal, and the
-  non-linear terms use `\beta_y = w_{,y} - v/r`, such that all strains
-  vanish for any small rigid-body motion. No Sanders-Koiter term appears in
-  the third-order terms of the TSDT, and the transverse shear strains are
-  those of the Donnell kinematics. For these models the fields ``phiy`` of
-  :func:`.fsdt_tsdt_field.fuvw` and :func:`.fsdt_tsdt_field.fg` are the
-  rotation of the normal `\phi_y + v/r`.
-
-The kinematic equations of each model, from which the integrands of the
-matrices are generated, are in the ``theory/shells`` folder of the
-repository. The models with 5 DOFs are supported by :class:`.MultiDomain`
-with the connections of :mod:`panels.multidomain.connections.kCsdt`, but not
-by :class:`.StiffPanelBay`, whose stiffeners assume the 3 DOFs of the CLPT.
+References
+----------
+.. [1] Sanders, J. L., "An improved first-approximation theory for thin
+   shells", NASA TR R-24, 1959.
+   TODO(author): confirm this source (the title is added to the citation
+   of tests/tests_shell/test_fsdt_tsdt_cylinders.py)
+.. [2] Sanders, J. L., "Nonlinear theories for thin shells", Quarterly of
+   Applied Mathematics, 21(1), 21-36, 1963.
+   TODO(author): confirm this source
+.. [3] Reddy, J. N., "A simple higher-order theory for laminated composite
+   plates", J. Appl. Mech., 51, 745-752, 1984.
+.. [4] Rohwer, K., "Improved transverse shear stiffness for layered finite
+   elements", DFVLR-FB 88-32, 1988.
+   TODO(author): confirm this source (cited in full in the composites
+   package, not in panels)
 
 """
 from . import clpt_field

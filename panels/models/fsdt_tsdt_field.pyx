@@ -11,10 +11,83 @@ Field variables of the plate and cylindrical shell models using the
 first-order (FSDT) and Reddy's third-order (TSDT) shear deformation theories
 
 The degrees of freedom of each term of the approximation are ``u, v, w, phix,
-phiy``. See the kinematic equations in ``theory/shells/fsdt_tsdt/fsdt_tsdt.py``.
-For the models with the Sanders-Koiter kinematics, the rotation of the
-normal about `x` is `\phi_y + v/r`, which is the field ``phiy`` returned by
-:func:`.fuvw` and the approximation of ``phiy`` of :func:`.fg`.
+phiy``. For the models with the Sanders-Koiter kinematics, the rotation of
+the normal about `x` is ``phiy + v/r``, which is the field ``phiy`` returned
+by :func:`.fuvw` and the approximation of ``phiy`` of :func:`.fg`.
+
+Notes
+-----
+Each field `F` of `u, v, w, \phi_x, \phi_y`, of index `k = 0, \dots, 4`, is
+the Ritz series of :class:`.Shell`, `F = \sum_{j} \sum_{i} c_{5(j m + i) +
+k} f_i^F(\xi) g_j^F(\eta)`, with `\xi = 2x/a - 1`, `\eta = 2y/b - 1` and
+Bardell's functions of the boundary flags of `F`, see
+:mod:`panels.bardell`; the derivatives are `F_{,x} = (2/a) F_{,\xi}` and
+`F_{,y} = (2/b) F_{,\eta}`.
+
+The displacement field through the thickness is, with `c_1 = 4/(3 h^2)` for
+the TSDT of Reddy [1]_ and `c_1 = 0` for the FSDT, `s = 1` for the
+Sanders-Koiter kinematics [2]_ and `s = 0` for the Donnell kinematics, and
+`1/r = 0` for the plates:
+
+.. math::
+
+    u(z) = u + z \phi_x - c_1 z^3 (\phi_x + w_{,x})
+
+    v(z) = v + z \left(\phi_y + s \frac{v}{r}\right)
+           - c_1 z^3 (\phi_y + w_{,y})
+
+    w(z) = w
+
+The generalized strains of :func:`.fstrain`, in the order of
+:func:`.strain_names`, are `\varepsilon = \varepsilon^{(0)} + z
+\varepsilon^{(1)} + z^3 \varepsilon^{(3)}` for ``exx, eyy, gxy``, ``kxx,
+kyy, kxy`` and ``kxx3, kyy3, kxy3``, and `\gamma = \gamma^{(0)} + z^2
+\gamma^{(2)}` for ``gyz, gxz`` and ``gyz2, gxz2``, with the rotations
+`\beta_x = w_{,x}` and `\beta_y = w_{,y} - s v/r` of the von Kármán
+non-linear terms:
+
+.. math::
+
+    \varepsilon^{(0)} = \{ u_{,x} + \frac{1}{2} \beta_x^2,\
+                           v_{,y} + \frac{w}{r} + \frac{1}{2} \beta_y^2,\
+                           u_{,y} + v_{,x} + \beta_x \beta_y \}
+
+    \varepsilon^{(1)} = \{ \phi_{x,x},\
+                           \phi_{y,y} + \frac{s}{r} v_{,y},\
+                           \phi_{x,y} + \phi_{y,x}
+                           + \frac{s}{r} \left(\frac{3}{2} v_{,x}
+                           - \frac{1}{2} u_{,y}\right) \}
+
+    \varepsilon^{(3)} = -c_1 \{ \phi_{x,x} + w_{,xx},\
+                                \phi_{y,y} + w_{,yy},\
+                                \phi_{x,y} + \phi_{y,x} + 2 w_{,xy} \}
+
+    \gamma^{(0)} = \{ \phi_y + w_{,y},\ \phi_x + w_{,x} \} \qquad
+    \gamma^{(2)} = -3 c_1 \gamma^{(0)}
+
+The terms in `s` are the corrections of Sanders, which make all the
+strains vanish for any small rigid-body motion: the rotation of the
+transverse normal about `x` is `\phi_y + v/r`, and the rotation about the
+normal, `\frac{1}{2}(v_{,x} - u_{,y})`, enters the twist. With this
+correction of the displacement field, the term `-v/r` of the transverse
+shear strain `\gamma_{yz}` cancels, and no correction appears in the `z^3`
+terms, as in the shell theory of Reddy and Liu [3]_ specialised to a
+circular cylinder with the shallow shell assumption `r + z \approx r`. The
+transverse shear strain `\gamma^{(0)}(1 - 4 z^2/h^2)` of the TSDT vanishes
+at `z = \pm h/2`, which assumes the reference surface at mid-thickness.
+
+References
+----------
+.. [1] Reddy, J. N., "A simple higher-order theory for laminated composite
+   plates", J. Appl. Mech., 51, 745-752, 1984.
+.. [2] Sanders, J. L., "An improved first-approximation theory for thin
+   shells", NASA TR R-24, 1959.
+   TODO(author): confirm this source (the title is added to the citation
+   of tests/tests_shell/test_fsdt_tsdt_cylinders.py)
+.. [3] Reddy, J. N., and Liu, C. F., "A higher-order shear deformation
+   theory of laminated elastic shells", International Journal of
+   Engineering Science, 23(3), 319-330, 1985.
+   TODO(author): confirm this source
 
 """
 import numpy as np
@@ -139,6 +212,28 @@ def stress_names(object s):
     -------
     names : tuple of str
         Eight names, or thirteen for the TSDT.
+
+    Notes
+    -----
+    The generalized stresses are the products of the constitutive matrix of
+    :meth:`.Shell._get_lam_ABD` by the generalized strains, see
+    :meth:`.Shell.stress`. With the in-plane stresses `\sigma = \{\sigma_{xx},
+    \sigma_{yy}, \tau_{xy}\}` and the transverse shear stresses `\tau =
+    \{\tau_{yz}, \tau_{xz}\}` of the displacement field of
+    :mod:`panels.models.fsdt_tsdt_field`, they are the resultants
+
+    .. math::
+
+        \{N, M, P\} = \int_h \sigma \{1, z, z^3\} dz \qquad
+        \{Q, R\} = \int_h \tau \{1, z^2\} dz
+
+    conjugate to `\varepsilon^{(0)}`, `\varepsilon^{(1)}`,
+    `\varepsilon^{(3)}`, `\gamma^{(0)}` and `\gamma^{(2)}`, i.e. the
+    internal virtual work per unit area is `N \cdot \delta\varepsilon^{(0)}
+    + M \cdot \delta\varepsilon^{(1)} + P \cdot \delta\varepsilon^{(3)} + Q
+    \cdot \delta\gamma^{(0)} + R \cdot \delta\gamma^{(2)}`. For the FSDT,
+    `Q` is computed with the shear corrected stiffness, see
+    :class:`.Shell`.
 
     '''
     if is_tsdt(s) == 1:
@@ -276,7 +371,7 @@ def fuvw(double [::1] c, object s, double [::1] xs, double [::1] ys,
 
 def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys,
         int num_cores=4, int NLgeom=0):
-    '''
+    r'''
         Calculates the generalized strains at all points in the provided grid
 
         The strains are returned in the order given by :func:`.strain_names`.
@@ -307,6 +402,13 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys,
         strains : tuple of np.ndarray
             Eight, or thirteen for the TSDT, 1-D arrays of the size of
             ``xs``.
+
+        Notes
+        -----
+        The strains are those of the notes of
+        :mod:`panels.models.fsdt_tsdt_field`, with `c_1 = 4/(3 h^2)` for the
+        TSDT, and with the non-linear terms `\beta_x^2/2`, `\beta_y^2/2`
+        and `\beta_x \beta_y` multiplied by ``NLgeom``.
     '''
     cdef double a, b, h, c1, ri, sr, bx, by
     cdef int m, n, pti, size, tsdt

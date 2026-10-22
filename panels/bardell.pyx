@@ -14,6 +14,54 @@ a natural coordinate `-1 \le \xi \le 1`, and the integrals over
 The boundary conditions enter through the flags that multiply the first
 four terms.
 
+Notes
+-----
+The functions are those applied by Bardell [1]_ in the hierarchical finite
+element method, and used as approximation functions of the Ritz method of
+panels [2]_. The first four terms are the cubic Hermite polynomials,
+multiplied by the flags ``x1t, x1r, x2t, x2r``:
+
+.. math::
+
+    f_0 = x_{1t} \left(\frac{1}{2} - \frac{3}{4}\xi + \frac{1}{4}\xi^3\right)
+    \qquad
+    f_1 = x_{1r} \frac{1}{8}\left(1 - \xi - \xi^2 + \xi^3\right)
+
+    f_2 = x_{2t} \left(\frac{1}{2} + \frac{3}{4}\xi - \frac{1}{4}\xi^3\right)
+    \qquad
+    f_3 = x_{2r} \frac{1}{8}\left(-1 - \xi + \xi^2 + \xi^3\right)
+
+such that, for unit flags, `f_0(-1) = 1` and `f_1'(-1) = 1/2` are the only
+non-zero values and first derivatives of `f_0` and `f_1` at the ends, and
+`f_2(+1) = 1`, `f_3'(+1) = 1/2` those of `f_2` and `f_3`. The terms
+`i \ge 4` are the Legendre-based polynomials in Rodrigues form
+
+.. math::
+
+    f_i = \sum_{n=0}^{\lfloor i/2 \rfloor} \frac{(-1)^n (2i - 2n - 5)!!}
+          {2^n \, n! \, (i - 2n)!} \xi^{i - 2n}
+
+with `(-1)!! = 1`, e.g. `f_4 = (\xi^2 - 1)^2/8`, which vanish together with
+their first derivative at both ends, `\xi = \pm 1`. The set is therefore
+hierarchical: adding terms does not change the lower ones, and only the
+first four terms carry the value and the derivative at the ends. A flag
+``0.`` removes its term, which makes the value (``x1t``, ``x2t``) or the
+first derivative (``x1r``, ``x2r``) of every function zero at that end, an
+essential boundary condition imposed exactly; any non-zero flag keeps the
+term, only scaling it. For example, ``x1t = 0, x1r = 1`` gives a simply
+supported end at `\xi = -1` for `w`, ``x1t = x1r = 0`` a clamped end and
+``x1t = x1r = 1`` a free end.
+
+References
+----------
+.. [1] Bardell, N. S., "Free vibration analysis of a flat plate using the
+   hierarchical finite element method", Journal of Sound and Vibration,
+   1991. https://doi.org/10.1016/0022-460X(91)90855-E
+.. [2] Castro, S. G. P., and Donadon, M. V., "Assembly of Semi-Analytical
+   models to Address Linear Buckling and Vibration of Stiffened Composite
+   Panels with Debonding Defect", Composite Structures, 2017.
+   https://doi.org/10.1016/j.compstruct.2016.10.026
+
 """
 import numpy as np
 
@@ -234,6 +282,23 @@ def calc_integral_ff(int i, int j, double x1t, double x1r, double x2t, double x2
     integral : float
         The value of the integral, dimensionless.
 
+    Notes
+    -----
+    The integrals of the six functions ``calc_integral_*`` are those of the
+    closed-form structural matrices, which separate the two directions of
+    the approximation functions, see :mod:`panels.bardell`. With `x = (\xi +
+    1) a/2`, an integral over the whole length `0 \le x \le a` of a product
+    of the functions and of their derivatives with respect to `x` is
+
+    .. math::
+
+        \int_0^a \frac{d^p f_i}{dx^p} \frac{d^q f_j}{dx^q} dx =
+        \left(\frac{2}{a}\right)^{p + q} \frac{a}{2} \int_{-1}^{1}
+        \frac{d^p f_i}{d\xi^p} \frac{d^q f_j}{d\xi^q} d\xi
+
+    The functions being polynomials, the integrals over `-1 \le \xi \le 1`
+    are exact.
+
     """
     return integral_ff(i, j, x1t, x1r, x2t, x2r, y1t, y1r, y2t, y2r)
 def calc_integral_ffp(int i, int j, double x1t, double x1r, double x2t, double x2r,
@@ -261,6 +326,10 @@ def calc_integral_ffp(int i, int j, double x1t, double x1r, double x2t, double x
     -------
     integral : float
         The value of the integral, dimensionless.
+
+    Notes
+    -----
+    See the notes of :func:`calc_integral_ff`.
 
     """
     return integral_ffp(i, j, x1t, x1r, x2t, x2r, y1t, y1r, y2t, y2r)
@@ -290,6 +359,10 @@ def calc_integral_ffpp(int i, int j, double x1t, double x1r, double x2t, double 
     integral : float
         The value of the integral, dimensionless.
 
+    Notes
+    -----
+    See the notes of :func:`calc_integral_ff`.
+
     """
     return integral_ffpp(i, j, x1t, x1r, x2t, x2r, y1t, y1r, y2t, y2r)
 def calc_integral_fpfp(int i, int j, double x1t, double x1r, double x2t, double x2r,
@@ -317,6 +390,10 @@ def calc_integral_fpfp(int i, int j, double x1t, double x1r, double x2t, double 
     -------
     integral : float
         The value of the integral, dimensionless.
+
+    Notes
+    -----
+    See the notes of :func:`calc_integral_ff`.
 
     """
     return integral_fpfp(i, j, x1t, x1r, x2t, x2r, y1t, y1r, y2t, y2r)
@@ -346,6 +423,10 @@ def calc_integral_fpfpp(int i, int j, double x1t, double x1r, double x2t, double
     integral : float
         The value of the integral, dimensionless.
 
+    Notes
+    -----
+    See the notes of :func:`calc_integral_ff`.
+
     """
     return integral_fpfpp(i, j, x1t, x1r, x2t, x2r, y1t, y1r, y2t, y2r)
 def calc_integral_fppfpp(int i, int j, double x1t, double x1r, double x2t, double x2r,
@@ -373,6 +454,10 @@ def calc_integral_fppfpp(int i, int j, double x1t, double x1r, double x2t, doubl
     -------
     integral : float
         The value of the integral, dimensionless.
+
+    Notes
+    -----
+    See the notes of :func:`calc_integral_ff`.
 
     """
     return integral_fppfpp(i, j, x1t, x1r, x2t, x2r, y1t, y1r, y2t, y2r)

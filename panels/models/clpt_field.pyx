@@ -18,6 +18,17 @@ approximation functions at a point, :func:`.fg`, for the models
 ``'cylshell_clpt_sanders'``, see :mod:`panels.modelDB`. The coordinates
 ``x`` and ``y`` are physical, ``0 <= x <= a`` and ``0 <= y <= b``.
 
+Notes
+-----
+Each field `F` of `u, v, w`, of index `k = 0, 1, 2`, is the Ritz series of
+:class:`.Shell`, `F = \sum_{j} \sum_{i} c_{3(j m + i) + k} f_i^F(\xi)
+g_j^F(\eta)`, with `\xi = 2x/a - 1`, `\eta = 2y/b - 1` and Bardell's
+functions of the boundary flags of `F`, see :mod:`panels.bardell`; the
+derivatives are `F_{,x} = (2/a) F_{,\xi}` and `F_{,y} = (2/b) F_{,\eta}`.
+The rotations of the normal are those of the CLPT, `\phi_x = -w_{,x}` and
+`\phi_y = -w_{,y}`, plus `v/r` for the Sanders-Koiter kinematics, and the
+strains are those of the kinematics of :mod:`panels.models`.
+
 """
 import numpy as np
 from libc.stdlib cimport malloc, free
@@ -41,9 +52,8 @@ cdef int DOF = 3
 def is_sanders(object s):
     r'''Tell whether the model of ``s`` uses Sanders-Koiter kinematics
 
-    With Sanders-Koiter kinematics the rotation of the normal about the `x`
-    axis is `\phi_y = -w_{,y} + v/r`, instead of `-w_{,y}`, and the changes of
-    curvature receive terms in `u` and `v`, see
+    The rotation ``phiy`` of :func:`.fuvw` and :func:`.fg` and the strains
+    of :func:`.fstrain` then include the terms of these kinematics, see
     :mod:`panels.models.cylshell_clpt_sanders_num`.
 
     Parameters
@@ -55,6 +65,12 @@ def is_sanders(object s):
     -------
     sanders : int
         ``1`` when ``'sanders'`` is in the name of the model, else ``0``.
+
+    Notes
+    -----
+    With Sanders-Koiter kinematics the rotation of the normal about the `x`
+    axis is `\phi_y = -w_{,y} + v/r`, instead of `-w_{,y}`, and the changes of
+    curvature receive terms in `u` and `v`, see :mod:`panels.models`.
 
     '''
     return 1 if 'sanders' in s.model else 0
@@ -208,6 +224,13 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys, int
     exxs, eyys, gxys, kxxs, kyys, kxys : np.ndarray
         The membrane strains, dimensionless, and the changes of curvature,
         per unit length, 1-D arrays of the size of ``xs``.
+
+    Notes
+    -----
+    The strains are those of the Donnell or Sanders-Koiter kinematics given
+    in the notes of :mod:`panels.models`, with the quadratic terms of the
+    membrane strains multiplied by ``NLgeom``, and with ``r = 0`` standing
+    for the flat plate, whose hoop strain is zero.
     '''
     
     cdef double a, b, r

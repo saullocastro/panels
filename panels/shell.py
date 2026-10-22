@@ -109,6 +109,53 @@ class Shell(object):
     Otherwise the shell is built by the calculation methods, e.g.
     :meth:`.Shell.calc_kC`.
 
+    The boundary conditions are controlled by the flags ``x1u, x1ur, x2u,
+    x2ur, ..., y2w, y2wr``, where for instance ``x1v`` multiplies the value
+    and ``x1vr`` the derivative of the approximation functions of `v` at the
+    edge `x = 0`, ``x2v`` and ``x2vr`` those at `x = a`, and the flags
+    starting with ``y1`` and ``y2`` those at `y = 0` and `y = b`, with ``0``
+    removing and ``1`` keeping that degree of freedom. By default the values
+    of `u`, `v` and `w` are removed and their derivatives kept on the four
+    edges. The models based on shear deformation theories, e.g.
+    ``'plate_fsdt_donnell'`` or ``'cylshell_tsdt_sanders'``, have the
+    rotations `\phi_x` and `\phi_y` as independent fields, which are
+    controlled by the analogous flags ``x1phix, x1phixr, ..., y2phiy,
+    y2phiyr``, all ``1`` by default except ``x1phiy = x2phiy = 0`` and
+    ``y1phix = y2phix = 0``.
+
+    The attribute ``fsdt_shear_correction`` controls the transverse shear
+    stiffness of the first-order shear deformation theory (FSDT):
+    ``'rohwer'``, the default, ``'vlachoutsis'``, ``'constant'`` or ``None``
+    select the corresponding method of
+    :meth:`composites.Laminate.calc_transverse_shear_stiffness`, whereas a
+    float ``k`` multiplies the uncorrected stiffness, ``A_ts = k*Abar_ts``.
+
+    The attributes ``x0, y0, z0, point_x, point_xy`` place the shell in the
+    global coordinate system of the 3D plots, see :meth:`.Shell.global_frame`
+    and :meth:`.MultiDomain.plot3d`.
+
+    The attributes ``x1, x2, y1, y2`` limit the integration domain to
+    ``x1 <= x <= x2`` and ``y1 <= y <= y2``, in physical coordinates, while
+    the approximation functions still span the whole ``0 <= x <= a`` and
+    ``0 <= y <= b``. A limit that is ``None``, the default, is the
+    corresponding edge of the shell, see :meth:`.Shell.integration_limits`.
+
+    The constitutive matrix comes from the laminate, ``Shell.lam``, built
+    from ``stack``, ``plyts``, ``laminaprops`` and ``offset``: it is the
+    read-only property ``Shell.ABD``, see :meth:`.Shell._get_lam_ABD`, with
+    the anisotropic coupling terms zeroed when the attribute
+    ``force_orthotropic_laminate`` is ``True``. Every kernel, analytical or
+    numerical, integrates this same matrix. A stiffness that varies over the
+    domain, or that does not come from a stack of plies, e.g. a
+    functionally graded wall, is given by the attribute ``ABDnxny``, one
+    matrix per integration point, see :meth:`.Shell.integration_points`.
+    When it is set, the stiffness matrices and the internal forces are
+    integrated numerically with it, also within a :class:`.MultiDomain` and
+    by the analyses of ``structsolve``. The laminate still gives the mass,
+    :meth:`.Shell.calc_kM`, the thickness used by the kinematics of the
+    TSDT, and the penalty constants of the connections, see
+    :func:`.calc_kt_kr`.
+
     Parameters
     ----------
     a : float, optional
@@ -152,56 +199,68 @@ class Shell(object):
 
     Notes
     -----
-    The boundary conditions are controlled by the flags ``x1u, x1ur, x2u,
-    x2ur, ..., y2w, y2wr``, where for instance ``x1v`` multiplies the value
-    and ``x1vr`` the derivative of the approximation functions of `v` at the
-    edge `x = x_1`, with ``0`` removing and ``1`` keeping that degree of
-    freedom. The models based on shear deformation theories, e.g.
-    ``'plate_fsdt_donnell'`` or ``'cylshell_tsdt_sanders'``, have the
-    rotations `\phi_x` and `\phi_y` as independent fields, which are
-    controlled by the analogous flags ``x1phix, x1phixr, ..., y2phiy,
-    y2phiyr``. Their default is the hard simply supported condition, with
-    the tangential rotation removed at each edge (``x1phiy = x2phiy = 0`` and
-    ``y1phix = y2phix = 0``), consistent with the default boundary
-    conditions of the models based on the classical laminated plate theory.
+    The displacement field is approximated with the Ritz method [1]_, as a
+    series of products of Bardell's hierarchical functions [2]_ along `x`
+    and `y`, of the natural coordinates `\xi = 2x/a - 1` and `\eta = 2y/b -
+    1`, `-1 \le \xi, \eta \le 1`:
 
-    The attribute ``fsdt_shear_correction`` controls the transverse shear
-    stiffness of the first-order shear deformation theory (FSDT):
-    ``'rohwer'``, the default, ``'vlachoutsis'``, ``'constant'`` or ``None``
-    select the corresponding method of
-    :meth:`composites.Laminate.calc_transverse_shear_stiffness`, whereas a
-    float ``k`` multiplies the uncorrected stiffness, ``A_ts = k*Abar_ts``.
-    The equilibrium approach of Rohwer (1988) gives ``k = 5/6`` for a
+    .. math::
+
+        u(x, y) = \sum_{j=0}^{n-1} \sum_{i=0}^{m-1} c_{d (j m + i)}
+                  f_i^u(\xi) g_j^u(\eta)
+
+    and likewise for `v`, `w` and, for the shear deformation theories,
+    `\phi_x`, `\phi_y`, with the offsets 1 to 4 in place of 0 in the index
+    of the Ritz constant, where `d` is the number of degrees of freedom per
+    term, 3 or 5, see :mod:`panels.modelDB`. `f_i^u` is the term `i` of
+    Bardell's functions with the flags ``x1u, x1ur, x2u, x2ur`` and `g_j^u`
+    the term `j` with the flags ``y1u, y1ur, y2u, y2ur``, see
+    :mod:`panels.bardell`, and the derivatives follow from `\partial/\partial
+    x = (2/a) \partial/\partial \xi` and `\partial/\partial y = (2/b)
+    \partial/\partial \eta`. The structural matrices and force vectors are
+    the derivatives with respect to the Ritz constants `\{c\}` of the
+    energy, or of the virtual work, integrated over the integration domain,
+    and their size is that of `\{c\}`, see :meth:`.Shell.get_size`.
+
+    Only the first four terms of Bardell's functions have a value or a first
+    derivative different from zero at the ends, `\xi = \pm 1`, see
+    :mod:`panels.bardell`. A flag ``0`` therefore imposes exactly, as an
+    essential boundary condition, a zero value (``x1w = 0``: `w = 0` at `x
+    = 0`) or a zero first derivative normal to the edge (``x1wr = 0``:
+    `w_{,x} = 0` at `x = 0`; ``x1ur = 0``: `u_{,x} = 0`) of the field on the
+    whole edge; with ``1`` the value or the derivative is free and the
+    natural boundary condition results from the energy. The default,
+    `u = v = w = 0` with free derivatives, is the simply supported edge,
+    and ``x1w = x1wr = 0`` a clamped one. For the shear deformation
+    theories the rotations are independent fields, and their default flags
+    give the hard simply supported condition, with the rotation tangential
+    to each edge removed, consistent with the default boundary conditions
+    of the models based on the classical laminated plate theory, where the
+    rotation along the edge, a derivative of `w` along it, is zero with `w`.
+
+    The equilibrium approach of Rohwer (1988) [3]_ gives ``k = 5/6`` for a
     homogeneous plate and accounts for the stacking sequence otherwise. The
     third-order shear deformation theory (TSDT) needs no shear correction.
 
-    The attributes ``x0, y0, z0, point_x, point_xy`` place the shell in the
-    global coordinate system of the 3D plots, see :meth:`.Shell.global_frame`
-    and :meth:`.MultiDomain.plot3d`.
+    Limiting the integration domain to ``x1 <= x <= x2`` and ``y1 <= y <=
+    y2`` while the approximation functions span the whole shell is how
+    several domains, for instance the panels of a :class:`.StiffPanelBay`,
+    share one set of approximation functions: the energy of each domain is
+    integrated over its own region only.
 
-    The attributes ``x1, x2, y1, y2`` limit the integration domain to
-    ``x1 <= x <= x2`` and ``y1 <= y <= y2``, in physical coordinates, while
-    the approximation functions still span the whole ``0 <= x <= a`` and
-    ``0 <= y <= b``. This is how several domains, for instance the panels of
-    a :class:`.StiffPanelBay`, share one set of approximation functions. A
-    limit that is ``None``, the default, is the corresponding edge of the
-    shell, see :meth:`.Shell.integration_limits`.
-
-    The constitutive matrix comes from the laminate, ``Shell.lam``, built
-    from ``stack``, ``plyts``, ``laminaprops`` and ``offset``: it is the
-    read-only property ``Shell.ABD``, see :meth:`.Shell._get_lam_ABD`, with
-    the anisotropic coupling terms zeroed when the attribute
-    ``force_orthotropic_laminate`` is ``True``. Every kernel, analytical or
-    numerical, integrates this same matrix. A stiffness that varies over the
-    domain, or that does not come from a stack of plies, e.g. a
-    functionally graded wall, is given by the attribute ``ABDnxny``, one
-    matrix per integration point, see :meth:`.Shell.integration_points`.
-    When it is set, the stiffness matrices and the internal forces are
-    integrated numerically with it, also within a :class:`.MultiDomain` and
-    by the analyses of ``structsolve``. The laminate still gives the mass,
-    :meth:`.Shell.calc_kM`, the thickness used by the kinematics of the
-    TSDT, and the penalty constants of the connections, see
-    :func:`.calc_kt_kr`.
+    References
+    ----------
+    .. [1] Castro, S. G. P., and Donadon, M. V., "Assembly of Semi-Analytical
+       models to Address Linear Buckling and Vibration of Stiffened
+       Composite Panels with Debonding Defect", Composite Structures, 2017.
+       https://doi.org/10.1016/j.compstruct.2016.10.026
+    .. [2] Bardell, N. S., "Free vibration analysis of a flat plate using the
+       hierarchical finite element method", Journal of Sound and Vibration,
+       1991. https://doi.org/10.1016/0022-460X(91)90855-E
+    .. [3] Rohwer, K., "Improved transverse shear stiffness for layered
+       finite elements", DFVLR-FB 88-32, 1988.
+       TODO(author): confirm this source (cited in full in the composites
+       package, not in panels)
 
     """
     # Declare all the variables/attributes here to preallocate mem, speed it up. Var not declared here cant be used
@@ -486,10 +545,13 @@ class Shell(object):
         unset ``r`` is normalized to ``0.``, which is the value the rest of the
         code compares against.
 
-        Note that the flat-plate limit of a cylindrical shell is
-        ``r -> infinity`` (``1/r -> 0``) and not ``r = 0``, hence
         ``r = 0.`` is never a valid radius for a cylindrical model. Use the
         ``'plate_clpt_donnell'`` model for flat panels.
+
+        Notes
+        -----
+        The flat-plate limit of a cylindrical shell is ``r -> infinity``
+        (``1/r -> 0``) and not ``r = 0``.
 
         """
         if modelDB.db[self.model].get('requires_r', False):
@@ -562,6 +624,15 @@ class Shell(object):
         partial : bool
             ``True`` when ``x1 > 0``, ``x2 < a``, ``y1 > 0`` or ``y2 < b``.
 
+        Notes
+        -----
+        The closed-form matrices are sums of products of the integrals over
+        `-1 \le \xi \le 1` and `-1 \le \eta \le 1` of products of Bardell's
+        functions, see :func:`.calc_integral_ff`, i.e. integrals over the
+        whole shell. Over a part of it the integrals of the functions are
+        not tabulated, and the Gauss-Legendre quadrature of
+        :meth:`.Shell.integration_points` is used instead.
+
         """
         x1, x2, y1, y2 = self.integration_limits()
         return bool(x1 > 0 or x2 < self.a or y1 > 0 or y2 < self.b)
@@ -574,12 +645,9 @@ class Shell(object):
         integration limits, :meth:`.Shell.integration_limits`, which for a
         partial domain are not ``[0, a] x [0, b]``. The matrix of point
         ``(xs[i], ys[j])`` is ``ABDnxny[i, j]``, see :meth:`.Shell.calc_kC`,
-        and
-
-        .. math::
-
-            \int_{x_1}^{x_2} \int_{y_1}^{y_2} f(x, y) dy dx \approx
-            \sum_i \sum_j w_{x_i} w_{y_j} f(x_i, y_j)
+        and the integral of a function over the integration domain is the
+        sum over the points of the products of ``wxs[i]*wys[j]`` by the
+        function at ``(xs[i], ys[j])``.
 
         Parameters
         ----------
@@ -594,6 +662,28 @@ class Shell(object):
             their weights, which sum to ``x2 - x1`` and ``y2 - y1``. ``xs``
             and ``wxs`` are 1-D arrays of size ``nx``, ``ys`` and ``wys`` of
             size ``ny``.
+
+        Notes
+        -----
+        With the Gauss-Legendre points `\xi_i` and weights `w_i` over `-1 \le
+        \xi \le 1`, `x_i = x_1 + (\xi_i + 1)(x_2 - x_1)/2` and `w_{x_i} = w_i
+        (x_2 - x_1)/2`, and likewise along `y`, such that
+
+        .. math::
+
+            \int_{x_1}^{x_2} \int_{y_1}^{y_2} f(x, y) dy dx \approx
+            \sum_i \sum_j w_{x_i} w_{y_j} f(x_i, y_j)
+
+        which is exact for polynomials of degree up to `2 n_x - 1` in `x`
+        and `2 n_y - 1` in `y`. With a constant constitutive matrix the
+        integrands of the stiffness matrices and of the internal force
+        vector are polynomials, products of at most four of Bardell's
+        functions or of their derivatives along each direction, of degree
+        at most `4 \max(m - 1, 3)` in `x`, such that the default ``nx =
+        2*m`` integrates them exactly for `m \ge 4`, and likewise along `y`.
+        TODO(author): confirm that this is the reason of the default ``nx =
+        2*m``, ``ny = 2*n``; the cylinders with the Sanders-Koiter
+        kinematics and the pressure loads ``p(x, y)`` were not checked.
 
         """
         nx = self.nx if nx is None else nx
@@ -767,12 +857,7 @@ class Shell(object):
         The local axes are those of :meth:`.Shell.global_frame`. For a
         cylindrical shell, see :meth:`.Shell.is_curved`, `y` is the arc length
         along the circumference, of radius ``r``, whose centre is at `z = -r`
-        on the local axes of the origin, such that `w` is positive outwards,
-        consistent with `varepsilon_{yy} = v_{,y} + w/r`. Then, with `	heta
-        = y/r`, the mid-surface is `x \hat{x} + r \sin 	heta \hat{y} + r
-        (\cos 	heta - 1) \hat{z}`, the tangent along `y` is `\cos 	heta
-        \hat{y} - \sin 	heta \hat{z}` and the normal is `\sin 	heta
-        \hat{y} + \cos 	heta \hat{z}`.
+        on the local axes of the origin, such that `w` is positive outwards.
 
         Parameters
         ----------
@@ -789,6 +874,16 @@ class Shell(object):
             which the displacements `u`, `v` and `w` act at each point. The
             global position of the displaced point is ``X + u[..., None]*ex +
             v[..., None]*ey + w[..., None]*ez``.
+
+        Notes
+        -----
+        For a cylindrical shell, with `\theta = y/r` and the local axes
+        `\hat{x}`, `\hat{y}`, `\hat{z}` of the origin, the mid-surface is `x
+        \hat{x} + r \sin \theta \hat{y} + r (\cos \theta - 1) \hat{z}`, the
+        tangent along `y` is `\cos \theta \hat{y} - \sin \theta \hat{z}` and
+        the normal is `\sin \theta \hat{y} + \cos \theta \hat{z}`. The
+        outward normal is consistent with the hoop strain `\varepsilon_{yy} =
+        v_{,y} + w/r` of the kinematics, see :mod:`panels.models`.
 
         """
         origin, (ax, ay, az) = self.global_frame()
@@ -931,6 +1026,22 @@ class Shell(object):
         The rows and columns are in the order of the generalized strains of
         each model, see :meth:`.Shell.strain`.
 
+        Notes
+        -----
+        The blocks are the integrals through the thickness of the laminate,
+        computed by :mod:`composites`, of the plane-stress stiffness
+        `\bar{Q}` of the plies, `A, B, D = \int \bar{Q} \{1, z, z^2\} dz`
+        and, for the TSDT, `E, F, H = \int \bar{Q} \{z^3, z^4, z^6\} dz`, and
+        of their transverse shear stiffness `\bar{Q}_s`, ``Abar_ts``,
+        ``Dts``, ``Fts`` `= \int \bar{Q}_s \{1, z^2, z^4\} dz`. With the
+        strains of the displacement field of each theory, see
+        :mod:`panels.models`, the product of this matrix by the generalized
+        strains gives the conjugate stress resultants, see
+        :func:`.fsdt_tsdt_field.stress_names`, and half the product of the
+        strains by it the strain energy per unit area. ``Ats`` is the
+        transverse shear stiffness corrected for the constant transverse
+        shear strain of the FSDT, see :class:`.Shell`.
+
         """
         if self.lam is None:
             raise RuntimeError('lam object is None!')
@@ -1008,60 +1119,35 @@ class Shell(object):
 
         It is ``NLgeom``, and not ``c``, that selects the large displacement
         matrix. With ``NLgeom=False`` the result is the linear constitutive
-        stiffness matrix `[K_0]`, whether or not ``c`` is given, because the
-        kernels zero `w_{,x}` and `w_{,y}` and every large displacement term
-        is built from them. With ``NLgeom=True`` the result is
-        `[K_0] + [K_{0L}] + [K_{L0}] + [K_{LL}] + [K_{G_{NL}}]`, evaluated at
-        ``c``. What ``c`` alone changes is the integration: giving it selects
-        the numerically integrated matrices over the analytical closed form.
-        When using ``c`` its size must be the same as the attribute ``size``.
+        stiffness matrix, whether or not ``c`` is given. With ``NLgeom=True``
+        the result is the part of the tangent stiffness matrix of
+        :meth:`.Shell.calc_kT` that :meth:`.Shell.calc_kG` does not return,
+        evaluated at ``c``. What ``c`` alone changes is the integration:
+        giving it selects the numerically integrated matrices over the
+        analytical closed form, which is also replaced by the numerical
+        integration when ``ABDnxny`` is given or set as attribute, when
+        ``NLgeom=True`` or when the integration domain is partial, see
+        :meth:`.Shell.is_partial_domain`. When using ``c`` its size must be
+        the same as the attribute ``size``.
 
-        Returns
-        -------
-        kC : csr_matrix
-            The matrix described in the notes below. Also stored in
-            ``Shell.matrices`` under the key ``'kC'``.
+        Despite the name, the returned matrix also contains:
 
-        Notes
-        -----
-        Despite the name, the returned matrix is not purely constitutive in
-        two cases:
-
-        - With ``NLgeom=True`` the returned matrix also contains
-          `[K_{G_{NL}}]`, the geometric stiffness of the membrane stress
-          carried by the non-linear part of the strain,
-          `\{\varepsilon_{NL}\} = \{w_{,x}^2/2, w_{,y}^2/2, w_{,x} w_{,y}\}`.
-          This term is deliberately collected here instead of in
-          :meth:`.Shell.calc_kG`, so that
-
-          .. math::
-              [K_T] = [K_0] + [K_{0L}] + [K_{L0}] + [K_{LL}] + [K_{G_{NL}}]
-                      + [K_G(N_0 + N_L)]
-
-          with the first five terms returned by this method and the last one
-          by :meth:`.Shell.calc_kG`, is the exact Jacobian of
-          :meth:`.Shell.calc_fint`, while :meth:`.Shell.calc_kG` stays
-          homogeneous of degree one in ``c``, as linear buckling requires.
-
-        - With ``NLgeom=True`` and ``finalize=True`` the load stiffness of the
-          follower pressure loads, :meth:`.Shell.calc_kCfollower` at ``c``
-          and load factor ``inc``, is added, such that the sum of this matrix
-          and :meth:`.Shell.calc_kG` is the exact Jacobian of
-          :meth:`.Shell.calc_fint` at the same ``inc``. With
-          ``finalize=False``, as in an assembly, it is not added, because the
-          load stiffness is unsymmetric and the caller symmetrizes the
-          assembled upper triangle; it must then be added after the
-          finalization, see :meth:`.MultiDomain.calc_kC`.
-
-        - If ``c_cte`` is given, or any of the attributes ``Nxx_cte``,
-          ``Nyy_cte`` or ``Nxy_cte`` is non-zero, the geometric stiffness
-          `[K_G(N_{cte})]` of that constant stress state is added into the
-          returned matrix, which is then no longer `[K_0] + [K_{C_{NL}}]`.
-          This is the device used to superpose combined load cases, where the
-          eigenvalue of a linear buckling analysis must multiply only part of
-          the applied loads. The constant stress state does not scale with
-          that eigenvalue precisely because it is added here and not in
-          :meth:`.Shell.calc_kG`.
+        - with ``NLgeom=True``, the geometric stiffness of the membrane
+          stresses of the non-linear part of the strains, which
+          :meth:`.Shell.calc_kG` does not include;
+        - with ``NLgeom=True`` and ``finalize=True``, the load stiffness of
+          the follower pressure loads, :meth:`.Shell.calc_kCfollower` at
+          ``c`` and load factor ``inc``, added after the symmetrization. With
+          ``finalize=False``, as in an assembly, it is not added; it must
+          then be added after the finalization, see
+          :meth:`.MultiDomain.calc_kC`;
+        - if ``c_cte`` is given, or any of the attributes ``Nxx_cte``,
+          ``Nyy_cte`` or ``Nxy_cte`` is non-zero, the geometric stiffness of
+          that constant stress state, i.e. :meth:`.Shell.calc_kG` evaluated
+          with ``c_cte`` and ``Nxx_cte``, ``Nyy_cte``, ``Nxy_cte`` in place
+          of ``c`` and ``Nxx``, ``Nyy``, ``Nxy``, in closed form unless
+          ``c_cte`` is given, ``NLgeom=True`` or the integration domain is
+          partial.
 
         In multi-domain semi-analytical models the sparse matrices that are
         calculated may have the ``size`` of the assembled global model, and the
@@ -1129,6 +1215,73 @@ class Shell(object):
             Load factor of the incremented follower pressure loads, used only
             with ``NLgeom=True``, see :meth:`.Shell.calc_kCfollower`.
             Dimensionless. Default ``1.``.
+
+        Returns
+        -------
+        kC : csr_matrix
+            The matrix described above. Also stored in ``Shell.matrices``
+            under the key ``'kC'``.
+
+        Notes
+        -----
+        With the strain operator `[B] = [B_L] + [B_{NL}]`, whose non-linear
+        part `[B_{NL}]` is linear in the rotations `\beta_x`, `\beta_y` of
+        the von Kármán terms, `w_{,x}` and `w_{,y}` (`w_{,y} - v/r` for the
+        Sanders-Koiter kinematics, see :mod:`panels.models`), and the
+        constitutive matrix `[F]` of ``ABDnxny``:
+
+        .. math::
+
+            [K_0] = \int [B_L]^T [F] [B_L] dA \qquad
+            [K_{0L}] = \int [B_L]^T [F] [B_{NL}] dA = [K_{L0}]^T \qquad
+            [K_{LL}] = \int [B_{NL}]^T [F] [B_{NL}] dA
+
+        over the integration domain. With ``NLgeom=False`` the result is the
+        linear constitutive stiffness matrix `[K_0]`, whether or not ``c`` is
+        given, because the kernels zero `w_{,x}` and `w_{,y}` and every large
+        displacement term is built from them. With ``NLgeom=True`` the result
+        is `[K_0] + [K_{0L}] + [K_{L0}] + [K_{LL}] + [K_{G_{NL}}]`, evaluated
+        at ``c``. Despite the name, the returned matrix is not purely
+        constitutive in two cases:
+
+        - With ``NLgeom=True`` the returned matrix also contains
+          `[K_{G_{NL}}]`, the geometric stiffness of the membrane stress
+          carried by the non-linear part of the strain,
+          `\{\varepsilon_{NL}\} = \{w_{,x}^2/2, w_{,y}^2/2, w_{,x} w_{,y}\}`,
+          i.e. `[K_G]` of :meth:`.Shell.calc_kG` with the stresses
+          `[A]\{\varepsilon_{NL}\}`. This term is deliberately collected here
+          instead of in :meth:`.Shell.calc_kG`, so that
+
+          .. math::
+              [K_T] = [K_0] + [K_{0L}] + [K_{L0}] + [K_{LL}] + [K_{G_{NL}}]
+                      + [K_G(N_0 + N_L)]
+
+          with the first five terms returned by this method and the last one
+          by :meth:`.Shell.calc_kG`, is the exact Jacobian of
+          :meth:`.Shell.calc_fint`, while :meth:`.Shell.calc_kG` stays
+          homogeneous of degree one in ``c``, as linear buckling requires.
+
+        - If ``c_cte`` is given, or any of the attributes ``Nxx_cte``,
+          ``Nyy_cte`` or ``Nxy_cte`` is non-zero, the geometric stiffness
+          `[K_G(N_{cte})]` of that constant stress state is added into the
+          returned matrix, which is then no longer `[K_0] + [K_{C_{NL}}]`.
+          This is the device used to superpose combined load cases, where the
+          eigenvalue of a linear buckling analysis must multiply only part of
+          the applied loads. The constant stress state does not scale with
+          that eigenvalue precisely because it is added here and not in
+          :meth:`.Shell.calc_kG`.
+
+        The load stiffness of the follower pressure loads makes the sum of
+        this matrix and :meth:`.Shell.calc_kG` the exact Jacobian of
+        :meth:`.Shell.calc_fint` at the same ``inc``. It is unsymmetric,
+        which is why it is not added with ``finalize=False``: the caller of
+        an assembly symmetrizes the assembled upper triangle.
+
+        The closed-form matrices separate the two directions, with the
+        integrals of Bardell's functions of :mod:`panels.bardell` over the
+        whole domain, which requires a constant `[F]`; the numerical
+        integration uses the points of :meth:`.Shell.integration_points`.
+        See :ref:`tangent_product` for the derivation of the terms.
 
         """
         msg('Calculating kC... ', level=2, silent=silent)
@@ -1282,6 +1435,26 @@ class Shell(object):
 
         Notes
         -----
+        With the rows `[G]` of the approximation functions of the rotations
+        `\beta_x = w_{,x}` and `\beta_y = w_{,y}` (`w_{,y} - v/r` for the
+        Sanders-Koiter kinematics) of the von Kármán terms, see
+        :mod:`panels.models`, the geometric stiffness of the membrane
+        stresses `[N]` is
+
+        .. math::
+
+            [K_G(N)] = \int [G]^T [N] [G] dA \qquad
+            [N] = \begin{bmatrix} N_{xx} & N_{xy} \\ N_{xy} & N_{yy}
+                  \end{bmatrix}
+
+        over the integration domain, with `N = N_0 + N_L`, `N_0` the
+        stresses of the attributes ``Nxx``, ``Nyy``, ``Nxy`` and `N_L` those
+        of the linear part of the strains at ``c``. The linear buckling
+        problem of a fundamental state ``c0``, e.g. of a linear static
+        analysis, is `([K_0] + \lambda [K_G(c_0)])\{u\} = \{0\}`, see
+        :meth:`.Shell.calc_kC` for the stresses that must not scale with
+        `\lambda`.
+
         The returned matrix is homogeneous of degree one in ``c``, which is
         what makes it usable as the right-hand side of the linear buckling
         eigenvalue problem. The geometric stiffness of the stress carried by
@@ -1344,22 +1517,14 @@ class Shell(object):
             c=None, nx=None, ny=None, ABDnxny=None, inc=1.):
         r"""Calculate the tangent stiffness matrix `[K_T]`
 
-        The tangent stiffness matrix is the exact Jacobian of
-        :meth:`.Shell.calc_fint` with respect to ``c``, assembled as
-
-        .. math::
-            [K_T] = [K_0] + [K_{0L}] + [K_{L0}] + [K_{LL}] + [K_{G_{NL}}]
-                    + [K_G(N_0 + N_L)]
-
-        where all terms but the last come from
-        :meth:`.Shell.calc_kC` with ``NLgeom=True``, and the last one from
-        :meth:`.Shell.calc_kG` with ``NLgeom=True``. With follower pressure
-        loads, the load stiffness :meth:`.Shell.calc_kCfollower` at the load
-        factor ``inc`` is included, through :meth:`.Shell.calc_kC`, and the
-        matrix is then unsymmetric in general. Note that `[K_{G_{NL}}]`
-        is grouped with the constitutive matrix and not with the geometric
-        one, see the notes in :meth:`.Shell.calc_kC` and
-        :meth:`.Shell.calc_kG`.
+        The tangent stiffness matrix is the derivative of
+        :meth:`.Shell.calc_fint` with respect to ``c``, assembled as the sum
+        of :meth:`.Shell.calc_kC` and :meth:`.Shell.calc_kG`, both with
+        ``NLgeom=True`` and at ``c``, always with the numerical integration.
+        With follower pressure loads, the load stiffness
+        :meth:`.Shell.calc_kCfollower` at the load factor ``inc`` is
+        included, through :meth:`.Shell.calc_kC`, and the matrix is then
+        unsymmetric in general.
 
         See :meth:`.Shell.calc_kC` for details on each parameter. Note that
         ``c_cte`` is not forwarded, so a constant stress state can only be
@@ -1398,6 +1563,23 @@ class Shell(object):
             The tangent stiffness matrix. Also stored in ``Shell.matrices``
             under the key ``'kT'``.
 
+        Notes
+        -----
+        The tangent stiffness matrix is the exact Jacobian of
+        :meth:`.Shell.calc_fint` with respect to ``c``, assembled as
+
+        .. math::
+            [K_T] = [K_0] + [K_{0L}] + [K_{L0}] + [K_{LL}] + [K_{G_{NL}}]
+                    + [K_G(N_0 + N_L)]
+
+        where all terms but the last come from
+        :meth:`.Shell.calc_kC` with ``NLgeom=True``, and the last one from
+        :meth:`.Shell.calc_kG` with ``NLgeom=True``. Note that `[K_{G_{NL}}]`
+        is grouped with the constitutive matrix and not with the geometric
+        one, see the notes in :meth:`.Shell.calc_kC` and
+        :meth:`.Shell.calc_kG`. Being the exact Jacobian, it gives the
+        quadratic convergence of the Newton-Raphson iterations.
+
         """
         kC = self.calc_kC(size=size, row0=row0, col0=col0, silent=silent, finalize=finalize,
             c=c, nx=nx, ny=ny, ABDnxny=ABDnxny, NLgeom=True, inc=inc)
@@ -1415,32 +1597,13 @@ class Shell(object):
 
         Returns `[K_T(c)] \{v\}`, with `[K_T]` of :meth:`.Shell.calc_kT` at
         the load factor ``inc``, i.e. the directional derivative of
-        :meth:`.Shell.calc_fint` along ``v``, without assembling `[K_T]`. At
-        each integration point, see ``theory/shells/tangent_product``,
-
-        .. math::
-
-            [K_T] \{v\} = \int \left( [B(\beta)]^T [F] [B(\beta)] \{v\} +
-            [G]^T [N] [G] \{v\} \right) dA
-
-        where `\{\beta\} = [G] \{c\}` are the rotations of the von Kármán
-        terms, `[B(\beta)]` the strain operator, linear in `\{\beta\}`, and
-        `[N]` the membrane stresses at ``c``, plus the constant ones
-        ``Nxx_cte``, ``Nyy_cte`` and ``Nxy_cte``. The cost is about that of
-        :meth:`.Shell.calc_fint`, instead of the assembly of `[K_T]`, whose
-        cost grows with the square of the number of terms.
-
-        With follower pressure loads, the product of their load stiffness
-        :meth:`.Shell.calc_kCfollower` is the central difference
-
-        .. math::
-
-            -\frac{\partial \{F_p\}}{\partial \{c\}} \{v\} = -\frac{\{F_p(c +
-            t v)\} - \{F_p(c - t v)\}}{2 t}
-
-        which is exact for any `t`, `\{F_p(c)\}` being at most quadratic in
-        `\{c\}`; `t = \|c\|/\|v\|` avoids the cancellation of large and
-        small terms.
+        :meth:`.Shell.calc_fint` along ``v``, without assembling `[K_T]`,
+        including the constant membrane stresses ``Nxx_cte``, ``Nyy_cte`` and
+        ``Nxy_cte``. The cost is about that of :meth:`.Shell.calc_fint`,
+        instead of the assembly of `[K_T]`, whose cost grows with the square
+        of the number of terms. With follower pressure loads, the product of
+        their load stiffness :meth:`.Shell.calc_kCfollower` is obtained from
+        two evaluations of :meth:`.Shell.calc_fext_follower`, see the notes.
 
         Parameters
         ----------
@@ -1471,6 +1634,38 @@ class Shell(object):
         ------
         NotImplementedError
             If the numerical kernels of the model have no ``calc_kTv``.
+
+        Notes
+        -----
+        At each integration point, see :ref:`tangent_kTv`,
+
+        .. math::
+
+            [K_T] \{v\} = \int \left( [B(\beta)]^T [F] [B(\beta)] \{v\} +
+            [G]^T [N] [G] \{v\} \right) dA
+
+        where `\{\beta\} = [G] \{c\}` are the rotations of the von Kármán
+        terms, `[B(\beta)]` the strain operator, linear in `\{\beta\}`, and
+        `[N]` the membrane stresses at ``c``, plus the constant ones
+        ``Nxx_cte``, ``Nyy_cte`` and ``Nxy_cte``. Since the strains are
+        `\{\varepsilon(c)\} = [B(\beta/2)]\{c\}`, a quadratic form whose
+        bilinear form is `[B(\beta)]`, the first term is the derivative of
+        the strains and the second that of `[B(\beta)]^T` in the internal
+        force vector `\int [B(\beta)]^T [F] \{\varepsilon(c)\} dA`. Each
+        step at a point is a loop over the `m n` terms, against the `m^2
+        n^2` pairs of terms of the assembly of `[K_T]`.
+
+        With follower pressure loads, the product of their load stiffness
+        :meth:`.Shell.calc_kCfollower` is the central difference
+
+        .. math::
+
+            -\frac{\partial \{F_p\}}{\partial \{c\}} \{v\} = -\frac{\{F_p(c +
+            t v)\} - \{F_p(c - t v)\}}{2 t}
+
+        which is exact for any `t`, `\{F_p(c)\}` being at most quadratic in
+        `\{c\}`; `t = \max(\|c\|/\|v\|, 1)` avoids the cancellation of large
+        and small terms.
 
         """
         msg('Calculating kT*v...', level=2, silent=silent)
@@ -1539,27 +1734,20 @@ class Shell(object):
         r"""Calculate the load stiffness matrix of the follower pressure loads
 
         The follower pressure loads, see :meth:`.Shell.add_pressure_load`,
-        have the force vector `\{F_p(c)\}`, which depends on the
-        configuration, and the returned matrix is the stiffness contribution
-
-        .. math::
-            [K_{C_{follower}}] = - \frac{\partial \{F_p\}}{\partial \{c\}}
-
-        evaluated at ``c``, with the pressures of the incremented loads
-        (``cte=False``) multiplied by the load factor ``inc`` and those of the
-        constant loads by ``1``. It enters the tangent stiffness matrix as
-        `[K_T] = [K_C] + [K_G] + [K_{C_{follower}}]`, see
+        have a force vector, :meth:`.Shell.calc_fext_follower`, which
+        depends on the configuration, and the returned matrix is minus its
+        derivative with respect to the Ritz constants, evaluated at ``c``,
+        with the pressures of the incremented loads (``cte=False``)
+        multiplied by the load factor ``inc`` and those of the constant loads
+        by ``1``, integrated over the patch of each load. It enters the
+        tangent stiffness matrix through :meth:`.Shell.calc_kC`, see
         :meth:`.Shell.calc_kT`, and the linear buckling problem of a follower
         pressure as ``lb(kC0, kG + kCfollower)``, with ``kG`` and
         ``kCfollower`` for a unit load factor.
 
-        The matrix is unsymmetric in general, see the notes in
-        ``theory/shells/follower_pressure/follower_pressure.py``: it is
-        symmetric when the pressure is uniform over the whole integration
-        domain and, on each edge, either `w` or the displacement normal to
-        the edge is zero. It is therefore assembled in full and never
-        symmetrized. For the first-order area vector (``follower='linear'``)
-        it does not depend on ``c``.
+        The matrix is unsymmetric in general, therefore it is assembled in
+        full and never symmetrized. For ``follower='linear'`` it does not
+        depend on ``c``.
 
         Parameters
         ----------
@@ -1585,6 +1773,47 @@ class Shell(object):
         -------
         kCfollower : csr_matrix
             Also stored in ``Shell.matrices`` under the key ``'kCfollower'``.
+
+        Notes
+        -----
+        With the force vector `\{F_p(c)\}` of :meth:`.Shell.add_pressure_load`,
+        the returned matrix is the load stiffness
+
+        .. math::
+            [K_{C_{follower}}] = - \frac{\partial \{F_p\}}{\partial \{c\}}
+
+        which enters the tangent stiffness matrix as `[K_T] = [K_C] + [K_G] +
+        [K_{C_{follower}}]`. For the first-order area vector `\{F_p(c)\}` is
+        affine in `\{c\}`, whence a constant matrix, and for the complete
+        area vector it is quadratic. In the linear buckling problem of a
+        hydrostatic prestress, `p = \lambda p_0`, the matrix multiplies
+        `\lambda` together with `[K_G]` of the linear prestress state.
+
+        For the first-order area vector, the skew part of the load stiffness
+        is a sum of a contour integral over the edges of the loaded region,
+        of `p` times the products of the variations of `w` and of the
+        displacement normal to the edge, and of an integral of the
+        derivatives of `p` over the region. The matrix is therefore
+        symmetric, a conservative load, when the pressure is uniform over the
+        whole integration domain and, on each edge, either `w` or the
+        displacement normal to the edge is zero, e.g. simply supported or
+        clamped panels, symmetry planes and closed rings, as found for
+        pressures depending on the reference coordinates by Hibbitt [1]_ and
+        Schweizerhof and Ramm [2]_; it is unsymmetric for free or partially
+        restrained edges, for patches, whose edges are inside the shell, and
+        for a varying ``p(x, y)``. For ``follower='quadratic'`` the matrix at
+        ``c`` different from zero is not symmetric in general. See
+        :ref:`follower_pressure`.
+
+        References
+        ----------
+        .. [1] Hibbitt, H. D., "Some follower forces and load stiffness",
+           International Journal for Numerical Methods in Engineering,
+           14(6), 937-941, 1979.
+        .. [2] Schweizerhof, K., and Ramm, E., "Displacement dependent
+           pressure loads in nonlinear finite element analyses", Computers &
+           Structures, 18(6), 1099-1114, 1984.
+           https://doi.org/10.1016/0045-7949(84)90154-8
 
         """
         msg('Calculating kCfollower... ', level=2, silent=silent)
@@ -1715,6 +1944,30 @@ class Shell(object):
             otherwise the matrix returned by the kernel. Also stored in
             ``Shell.matrices`` under the key ``'kM'``.
 
+        Notes
+        -----
+        The mass matrix is the second derivative with respect to the
+        velocities of the Ritz constants of the kinetic energy of the
+        displacement field through the thickness, with the rotary and, for
+        the TSDT, the higher-order inertia:
+
+        .. math::
+
+            [M] = \int_A \int_{-h/2 - d}^{h/2 - d} \rho \left( \{N_u(z)\}^T
+            \{N_u(z)\} + \{N_v(z)\}^T \{N_v(z)\} + \{N_w\}^T \{N_w\} \right)
+            dz \, dA
+
+        where `d` is the offset ``Shell.offset``, `h` and `\rho` the
+        thickness and the density at each point, and `\{N_u(z)\}`,
+        `\{N_v(z)\}`, `\{N_w\}` the approximations of `u(z) = u + z \phi_x -
+        c_1 z^3 (\phi_x + w_{,x})`, `v(z) = v + z \phi_y - c_1 z^3 (\phi_y +
+        w_{,y})` and `w`. For the CLPT `\phi_x = -w_{,x}`, `\phi_y =
+        -w_{,y}` and `c_1 = 0`; for the FSDT `c_1 = 0`; for the TSDT `c_1 =
+        4/(3h^2)`; with the Sanders-Koiter kinematics `v/r` is added to the
+        rotation `\phi_y` multiplied by `z`, see :mod:`panels.models`. The
+        density is constant through the thickness, the mean density of the
+        laminate by default.
+
         """
         msg('Calculating kM... ', level=2, silent=silent)
 
@@ -1770,44 +2023,26 @@ class Shell(object):
     def calc_kA(self, size=None, row0=0, col0=0, silent=True, finalize=True):
         r"""Calculate the aerodynamic matrix using the linear piston theory
 
-        For a flow along `x`, the aerodynamic load on the shell along `w` is
-
-        .. math::
-
-            q = \beta w_{,x} + \gamma w
-
-        and the aerodynamic matrix is `[K_A] = -\int \{N_w\}^T (\beta
-        \{N_w\}_{,x} + \gamma \{N_w\}) dA`, entering the equations of motion
-        as `([K] + [K_A] + \lambda^2 [M])\{c\} = \{0\}`, where `\{N_w\}` are
-        the approximation functions of `w`. The flutter boundary does not
-        depend on the sign of `\beta`, i.e. on the flow direction. When
-        ``beta`` is not given it is calculated from the Mach number `M` as
-        `\beta = \rho_{air} U^2/\sqrt{M^2 - 1}`.
-
-        The term `\gamma w` is Krumhaar's correction of the piston theory for
-        the external flow over a cylinder, with `w` positive outwards:
-
-        .. math::
-
-            \gamma = \frac{\beta}{2 r \sqrt{M^2 - 1}}
-
-        such that an outward displacement lowers the pressure on the shell,
-        which is pulled outwards, a softening effect that does not depend on
-        the flow direction. It is obtained expanding the exact linear
-        potential flow over a cylinder with a sinusoidal radial displacement
-        for short wavelengths. Flat plates have `\gamma = 0`, and a ``gamma``
-        given for a plate model is ignored. For a flow along `y` the
-        curvature correction is not included.
+        The matrix of the aerodynamic load along `w` of a supersonic flow
+        along `x` or `y`, with the parameters ``beta`` and, for a flow along
+        `x` over a cylinder, ``gamma``, which multiply the terms of the load
+        in `w_{,x}` (or `w_{,y}`) and in `w`, see the notes. Flat plates have
+        ``gamma = 0``, and a ``gamma`` given for a plate model is ignored
+        with a warning. For a flow along `y` the term in ``gamma`` is not
+        included.
 
         The flow direction is the attribute ``flow``, ``'x'`` or ``'y'``.
         When the attribute ``beta`` is ``None``, ``beta`` and ``gamma`` are
-        calculated from the attributes ``Mach``, ``rho_air`` and
-        ``air_speed``, a ``Mach`` equal to ``1`` being changed to ``1.0001``
-        with a warning; otherwise the attributes ``beta`` and ``gamma`` are
-        used, a ``gamma`` of ``None`` meaning ``0``. The attributes ``beta``
-        and ``gamma`` are updated with the values used. The closed-form
-        matrix is used, or the numerically integrated one for a partial
-        domain, see :meth:`.Shell.is_partial_domain`.
+        calculated from the attributes ``Mach``, ``rho_air``, ``air_speed``
+        and, for the cylinders, ``r``, a ``Mach`` equal to ``1`` being
+        changed to ``1.0001`` with a warning; otherwise the attributes
+        ``beta`` and ``gamma`` are used, a ``gamma`` of ``None`` meaning
+        ``0``. The attributes ``beta`` and ``gamma`` are updated with the
+        values used. The closed-form matrix is used, or the numerically
+        integrated one for a partial domain, see
+        :meth:`.Shell.is_partial_domain`. The matrix is added to the
+        stiffness matrix of a frequency analysis, e.g. ``freq(kC + kG + kA,
+        kM)`` of ``structsolve``.
 
         Parameters
         ----------
@@ -1833,6 +2068,60 @@ class Shell(object):
         ValueError
             If ``beta`` is ``None`` and ``Mach`` is ``None`` or lower than
             ``1``, or if ``flow`` is neither ``'x'`` nor ``'y'``.
+
+        Notes
+        -----
+        In the linear piston theory, for a flow along `x`, the aerodynamic
+        load on the shell along `w` is
+
+        .. math::
+
+            q = \beta w_{,x} + \gamma w
+
+        and, for a flow along `y`, `q = \beta w_{,y}`. When ``beta`` is not
+        given it is calculated from the Mach number `M` as `\beta =
+        \rho_{air} U^2/\sqrt{M^2 - 1}`, with `U` the attribute ``air_speed``.
+        The matrix computed by the kernels, rows and columns in the order of
+        the Ritz constants, is
+
+        .. math::
+
+            [K_A] = -\int \left(\beta \{N_w\}_{,x}^T \{N_w\} + \gamma
+            \{N_w\}^T \{N_w\}\right) dA
+
+        with `\{N_w\}_{,y}` and `\gamma = 0` for a flow along `y`, where
+        `\{N_w\}` is the row of the approximation functions of `w`,
+        entering the equations of motion as `([K] + [K_A] + \lambda^2
+        [M])\{c\} = \{0\}`. Since `\int \{N_w\}_{,x}^T \{N_w\} dA = -\int
+        \{N_w\}^T \{N_w\}_{,x} dA` when `w` vanishes at `x = 0` and `x = a`,
+        the term in `\beta` is then `\beta \int \{N_w\}^T \{N_w\}_{,x} dA`.
+        TODO(author): the previous docstring gave `[K_A] = -\int \{N_w\}^T
+        (\beta \{N_w\}_{,x} + \gamma \{N_w\}) dA`, i.e. the transpose of the
+        term in `\beta` computed by the kernels (checked numerically for
+        ``'plate_clpt_donnell'``, ``'plate_fsdt_donnell'`` and
+        ``'cylshell_clpt_sanders'``), which with `w = 0` at `x = 0, a`
+        differs only by the sign of `\beta`; please confirm the intended
+        sign convention of `q`. The flutter boundary does not depend on the
+        sign of `\beta`, i.e. on the flow direction.
+
+        The term `\gamma w` is Krumhaar's correction of the piston theory for
+        the external flow over a cylinder [1]_, with `w` positive outwards:
+
+        .. math::
+
+            \gamma = \frac{\beta}{2 r \sqrt{M^2 - 1}}
+
+        such that an outward displacement lowers the pressure on the shell,
+        which is pulled outwards, a softening effect that does not depend on
+        the flow direction. It is obtained expanding the exact linear
+        potential flow over a cylinder with a sinusoidal radial displacement
+        for short wavelengths.
+
+        References
+        ----------
+        .. [1] Krumhaar, H., "The accuracy of linear piston theory when
+           applied to cylindrical shells", AIAA Journal, 1(6), 1448-1449,
+           1963.
 
         """
         msg('Calculating kA... ', level=2, silent=silent)
@@ -1927,6 +2216,20 @@ class Shell(object):
             The complex damping matrix, a ``csr_matrix`` with
             ``finalize=True``. Also stored in ``Shell.matrices`` under the
             key ``'cA'``.
+
+        Notes
+        -----
+        The kernel computes `-\mu \int \{N_w\}^T \{N_w\} dA` over the whole
+        shell, with `\mu` the parameter ``aeromu`` and `\{N_w\}` the row of
+        the approximation functions of `w`, i.e. the matrix of the
+        aerodynamic damping load of the piston theory, proportional to `\mu
+        \dot{w}`; :class:`.StiffPanelBay` computes `\mu = \beta (M^2 - 2)/(M
+        a_\infty (M^2 - 1))`, with `a_\infty` the speed of sound, see
+        :meth:`.Shell.calc_kA` for `\beta`. TODO(author): confirm the sign
+        convention of the damping load and how the factor ``1j``, of the
+        velocity `\dot{w} = i \omega w` of a harmonic motion, enters the
+        eigenvalue problem; ``aeromu`` would then be a pressure per unit
+        velocity.
 
         """
         msg('Calculating cA... ', level=2, silent=silent)
@@ -2048,10 +2351,17 @@ class Shell(object):
             ``(exx, eyy, gxy, kxx, kyy, kxy)``. The models based on
             shear deformation theories also return the transverse shear
             strains ``(gyz, gxz)`` and, for the third-order theory, the
-            higher-order terms ``(kxx3, kyy3, kxy3, gyz2, gxz2)``, such that
-            the strains at a distance `z` from the mid-surface are
-            ``exx + z*kxx + z**3*kxx3`` and ``gyz + z**2*gyz2``. The other
+            higher-order terms ``(kxx3, kyy3, kxy3, gyz2, gxz2)``. The other
             entries of ``Shell.fields`` are left as they were.
+
+        Notes
+        -----
+        The strains at a distance `z` from the reference surface are
+        ``exx + z*kxx + z**3*kxx3`` and ``gyz + z**2*gyz2``, and likewise
+        for the other components, with the generalized strains of the
+        kinematics of each model, see :mod:`panels.models` and
+        :mod:`panels.models.fsdt_tsdt_field`. With ``NLgeom=False`` the
+        quadratic terms of the membrane strains are omitted.
 
         """
         #NOTE fuvw/fstrain take a ``double [::1]``, see the note in
@@ -2136,9 +2446,10 @@ class Shell(object):
             ``(Nxx, Nyy, Nxy, Mxx, Myy, Mxy)``. The models based on
             shear deformation theories also return the transverse shear
             forces ``(Qy, Qx)`` and, for the third-order theory, the
-            higher-order resultants ``(Pxx, Pyy, Pxy, Ry, Rx)`` conjugate to
-            ``(kxx3, kyy3, kxy3, gyz2, gxz2)``, see :meth:`.Shell.strain`.
-            It also contains the strains of :meth:`.Shell.strain`.
+            higher-order resultants ``(Pxx, Pyy, Pxy, Ry, Rx)``, in the
+            positions of ``(kxx3, kyy3, kxy3, gyz2, gxz2)`` among the
+            strains, see :meth:`.Shell.strain`. It also contains the strains
+            of :meth:`.Shell.strain`.
 
         Raises
         ------
@@ -2147,6 +2458,15 @@ class Shell(object):
             ``ABD`` is not given and ``xs`` or ``ys`` is given; if no
             constitutive matrix is defined; or if ``ABD`` has neither the
             shape ``(ne, ne)`` nor ``xs.shape + (ne, ne)``.
+
+        Notes
+        -----
+        The generalized stresses are the resultants through the thickness
+        conjugate to the generalized strains, e.g. ``Pxx`` to ``kxx3`` and
+        ``Ry`` to ``gyz2``, see :func:`.fsdt_tsdt_field.stress_names` and
+        :meth:`.Shell._get_lam_ABD`. With ``NLgeom=True`` the membrane
+        stresses include those of the quadratic terms of the strains, as in
+        :meth:`.Shell.calc_fint`.
 
         """
         if ABD is None and self.ABDnxny is not None:
@@ -2298,26 +2618,10 @@ class Shell(object):
         With ``follower=False`` the load is a dead load: its direction does
         not follow the deformation in the non-linear analyses. Otherwise it
         is a follower (hydrostatic) pressure, normal to the deformed
-        mid-surface and acting on its deformed area, with the force vector
-
-        .. math::
-            \{F_p(c)\} = \int p \left(\{N_u\} a_x + \{N_v\} a_y
-                         + \{N_w\} a_z\right) dx dy
-
-        where `(a_x, a_y, a_z)` is the area vector of the deformed
-        mid-surface per unit undeformed area. With ``follower=True`` or
-        ``'linear'`` it is truncated to first order in the displacement
-        gradients, consistently with the moderate-rotation strains of the
-        models:
-
-        .. math::
-            a_x = -w_{,x}, \quad a_y = -w_{,y} + k_v v, \quad
-            a_z = 1 + u_{,x} + v_{,y} + k_w w
-
-        with `k_w = 1/r` for the cylinders and `k_v = 1/r` for the Sanders
-        kinematics only, zero otherwise. With ``'quadratic'`` the complete
-        (bilinear) area vector of the kinematics is used. See
-        ``theory/shells/follower_pressure/follower_pressure.py``.
+        mid-surface and acting on its deformed area, with the area vector of
+        the deformed mid-surface truncated to first order in the
+        displacement gradients for ``follower=True`` or ``'linear'``, and
+        complete for ``'quadratic'``, see the notes.
 
         In the undeformed state a follower load equals the dead load, and
         :meth:`.Shell.calc_fext` returns this reference vector. The part that
@@ -2364,10 +2668,8 @@ class Shell(object):
             Position along `z` of the surface on which the pressure acts,
             e.g. ``h/2`` for the outer face of a cylinder. For the cylindrical
             shells the pressure is applied as ``p*(1 + zp/r)`` per unit area
-            of mid-surface, which is the resultant of ``p`` acting on the
-            radius ``r + zp``, with the direction and change of area of the
-            mid-surface (shallow shell). Plates are not affected. A length.
-            Default ``0.``.
+            of mid-surface, see :func:`.pressure_factor`. Plates are not
+            affected. A length. Default ``0.``.
 
         Raises
         ------
@@ -2376,6 +2678,41 @@ class Shell(object):
             b]`` by more than a relative ``1e-12``, checked when ``a`` or
             ``b`` is set; if ``x1 >= x2`` or ``y1 >= y2``; or if
             ``follower`` is not one of the values above.
+
+        Notes
+        -----
+        The follower pressure has the force vector, the virtual work of `p`
+        on the displacements,
+
+        .. math::
+            \{F_p(c)\} = \int p \left(\{N_u\} a_x + \{N_v\} a_y
+                         + \{N_w\} a_z\right) dx dy
+
+        where `(a_x, a_y, a_z)` is the area vector of the deformed
+        mid-surface per unit undeformed area, `\vec{a} = \vec{X}_{,x} \times
+        \vec{X}_{,y}`, with the tangent vectors of the kinematics `\vec{X}_{,x}
+        = (1 + u_{,x}, v_{,x}, w_{,x})` and `\vec{X}_{,y} = (u_{,y}, 1 + v_{,y}
+        + k_w w, w_{,y} - k_v v)` on the local axes of each point, `k_w = 1/r`
+        for the cylinders and `k_v = 1/r` for the Sanders kinematics only,
+        zero otherwise. The Donnell cylinder neglects `v/r` in the rotation,
+        as its strains do. With ``follower=True`` or ``'linear'`` it is
+        truncated to first order in the displacement gradients, consistently
+        with the moderate-rotation strains of the models:
+
+        .. math::
+            a_x = -w_{,x}, \quad a_y = -w_{,y} + k_v v, \quad
+            a_z = 1 + u_{,x} + v_{,y} + k_w w
+
+        With the moderate-rotation ordering of the strains, `u_{,x} \sim
+        \varepsilon` and `w_{,x} \sim \varepsilon^{1/2}`, this keeps every
+        term up to the order `\varepsilon p \delta w`, while the second-order
+        part of the area vector contributes terms of the order of what the
+        von Kármán, Donnell and Sanders strains neglect. With
+        ``'quadratic'`` the complete (bilinear) area vector is used, e.g.
+        for sensitivity checks of the truncation. The rotations of the shear
+        deformation theories do not enter the load. A hydrostatic head, a
+        pressure depending on the current position, is not implemented. See
+        :ref:`follower_pressure`.
 
         """
         if p is None:
@@ -2455,6 +2792,24 @@ class Shell(object):
             Sanders-Koiter kinematics. The rotations ``phixp`` and ``phiyp``
             are dimensionless; of ``kphix`` and ``kphiy`` only whether they
             are ``None`` or zero is used. Default ``None``.
+
+        Notes
+        -----
+        The penalty method adds to the energy, for each prescribed
+        component, e.g. `u`,
+
+        .. math::
+
+            \frac{k_u}{2} \left(u(x, y) - u_p\right)^2 = \frac{k_u}{2}
+            \left(\{g_u\} \{c\} - u_p\right)^2
+
+        with `\{g_u\}` the row of the approximation functions of `u` at the
+        point, see the function ``fg`` of the model, whose derivatives give
+        the penalty stiffness `k_u \{g_u\}^T \{g_u\}` and the force `k_u u_p
+        \{g_u\}^T`. The prescribed value is reached only in the limit of an
+        infinite penalty constant: the error decreases with `k_u` relative to
+        the stiffness of the structure, while the conditioning of the
+        stiffness matrix worsens.
 
         """
         def given(k, value):
@@ -2555,6 +2910,15 @@ class Shell(object):
             with ``pd_method='null-space'``, see :meth:`.add_point_pd`.
             Default ``None``.
 
+        Notes
+        -----
+        With the penalty method the energy of each prescribed component,
+        e.g. `u`, is the integral along the line of the energy of
+        :meth:`.add_point_pd`, `\int_0^b \frac{k_u}{2} (u(x, y) - g(y))^2
+        dy`, with ``ku`` a penalty constant per unit length of the line,
+        which gives the force `\int_0^b k_u g(y) \{g_u\}^T dy` of
+        :func:`.shell_fext` and the penalty stiffness of :func:`.fkCld_xcte`.
+
         """
         self._add_distr_pd(x, None, (ku, kv, kw, kphix, kphiy),
                            (funcu, funcv, funcw, funcphix, funcphiy), cte)
@@ -2609,6 +2973,11 @@ class Shell(object):
             Prescribed rotations, dimensionless, as functions of `x`, only
             with ``pd_method='null-space'``, see :meth:`.add_point_pd`.
             Default ``None``.
+
+        Notes
+        -----
+        The penalty energy is that of :meth:`.add_distr_pd_fixed_x`,
+        integrated along `x` from `0` to `a`.
 
         """
         self._add_distr_pd(None, y, (ku, kv, kw, kphix, kphiy),
@@ -2713,6 +3082,16 @@ class Shell(object):
            products to the empty ``csr_matrix`` gives a dense
            :class:`numpy.matrix` when any degree of freedom is constrained.
 
+        Notes
+        -----
+        The matrix is the second derivative of the penalty energy
+        `\frac{k}{2} (\{g\} \{c\})^2` of each constrained degree of freedom,
+        which prescribes a zero value approximately, with an accuracy and a
+        conditioning that grow and worsen with `k`, see
+        :meth:`.Shell.add_point_pd`. The rotations are those of the rows
+        ``phix`` and ``phiy`` of ``fg``, which include `v/r` for the
+        Sanders-Koiter kinematics.
+
         """
         fg = modelDB.db[self.model]['field'].fg
         size = self.get_size()
@@ -2737,14 +3116,10 @@ class Shell(object):
                   include_pds=True):
         r"""Calculate the external force vector `\{F_{ext}\}`
 
-        Recall that:
-
-        .. math::
-
-            \{F_{ext}\}=\{{F_{ext}}_0\} + \{{F_{ext}}_\lambda\}
-
-        such that the terms in `\{{F_{ext}}_0\}` are constant and the terms in
-        `\{{F_{ext}}_\lambda\}` will be scaled by the parameter ``inc``.
+        The vector is the sum of the constant terms `\{{F_{ext}}_0\}`, of the
+        loads and prescribed displacements added with ``cte=True``, and of
+        the terms `\{{F_{ext}}_\lambda\}`, added with ``cte=False``, which
+        are scaled by the parameter ``inc``.
 
         See the documentation of :func:`.shell_fext` for more details. The
         follower pressure loads, see :meth:`.Shell.add_pressure_load`,
@@ -2801,19 +3176,14 @@ class Shell(object):
             ny=None, ABDnxny=None, inc=1.):
         r"""Calculate the internal force vector `\{F_{int}\}`
 
-        With follower pressure loads, see :meth:`.Shell.add_pressure_load`,
-        the part of their force vector that depends on the configuration is
-        subtracted, such that
-
-        .. math::
-            \{R\} = \{F_{ext}\} - \{F_{int}\}
-                  = \{F_{ext}\} + (\{F_p(c)\} - \{F_p(0)\})
-                    - \{F_{int}^{elastic}(c)\}
-
-        with :meth:`.Shell.calc_fext` at the same ``inc``, and the tangent
-        stiffness matrix :meth:`.Shell.calc_kT` at ``inc`` is its exact
-        Jacobian.
-
+        The internal force vector of the strains at ``c``, integrated
+        numerically with the constitutive matrix ``ABDnxny``. With follower
+        pressure loads, see :meth:`.Shell.add_pressure_load`, the part of
+        their force vector that depends on the configuration,
+        :meth:`.Shell.calc_fext_follower` with ``reference=False`` at the
+        load factor ``inc``, is subtracted, such that the tangent stiffness
+        matrix :meth:`.Shell.calc_kT` at ``inc`` is its derivative with
+        respect to ``c``.
 
         Parameters
         ----------
@@ -2853,6 +3223,31 @@ class Shell(object):
         ValueError
             If the attribute ``model`` is not a valid model, or if its
             numerical kernels or their ``calc_fint`` are not implemented.
+
+        Notes
+        -----
+        The elastic internal force vector is the derivative of the strain
+        energy with respect to the Ritz constants,
+
+        .. math::
+
+            \{F_{int}^{elastic}(c)\} = \int [B(\beta)]^T [F]
+            \{\varepsilon(c)\} dA
+
+        with the generalized strains `\{\varepsilon(c)\} = [B(\beta/2)]
+        \{c\}` of the kinematics of the model and the strain operator
+        `[B(\beta)]`, linear in the rotations `\{\beta\}` of the von Kármán
+        terms, see :meth:`.Shell.calc_kTv`. With follower pressure loads the
+        residual is
+
+        .. math::
+            \{R\} = \{F_{ext}\} - \{F_{int}\}
+                  = \{F_{ext}\} + (\{F_p(c)\} - \{F_p(0)\})
+                    - \{F_{int}^{elastic}(c)\}
+
+        with :meth:`.Shell.calc_fext` at the same ``inc``, and the tangent
+        stiffness matrix :meth:`.Shell.calc_kT` at ``inc`` is its exact
+        Jacobian.
 
         """
         msg('Calculating internal forces...', level=2, silent=silent)
