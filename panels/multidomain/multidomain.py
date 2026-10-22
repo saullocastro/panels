@@ -2382,12 +2382,10 @@ class MultiDomain(object):
             The full set of Ritz constants, 1-D array of size
             :meth:`.get_size`.
         group : str
-            Dummy variable in this function - just used to avoid changing the stress
-                function when results for a single panel need to be evaluated
-            A group to plot. Each panel in ``panels`` should contain an
-                attribute ``group``, which is used to identify which entities
-                should be plotted together.
-            Used only when ``eval_panel`` is ``None``, see above.
+            A group of panels. Each panel in ``panels`` should contain an
+            attribute ``group``, which is used to identify which entities
+            belong together. Used only when ``eval_panel`` is ``None``, see
+            above.
         eval_panel : Shell object
             Used to evaluate results for a single panel (that is passed) instead of an entire group of panels
         x_cte_force, y_cte_force : float or None, optional
