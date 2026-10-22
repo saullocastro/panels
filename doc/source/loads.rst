@@ -6,9 +6,11 @@ Loads
 The loads of a :class:`.Shell` are stored as lists of its attributes and
 converted into the external force vector `\{F_{ext}\}` by
 :meth:`.Shell.calc_fext`, see :func:`.shell_fext`, as the virtual work of
-the loads on the approximation functions. In an assembly, the loads are
-added to its panels and :meth:`.MultiDomain.calc_fext` or
-:meth:`.StiffPanelBay.calc_fext` assembles their vectors.
+the loads on the approximation functions. In a :class:`.MultiDomain`, the
+loads are added to its domains and :meth:`.MultiDomain.calc_fext`
+assembles their vectors, whereas :meth:`.StiffPanelBay.calc_fext` takes
+the point forces of the attribute ``forces_skin`` of the bay and of the
+attributes ``forces_flange`` of its :class:`.BladeStiff2D` stiffeners.
 
 
 Types of loads

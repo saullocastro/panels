@@ -83,9 +83,10 @@ is then approximate, with an error that decreases with the penalty
 constants, while the conditioning of the stiffness matrix worsens.
 
 The prescribed displacements of the domains are imposed with
-``pd_method``, see :ref:`boundary_conditions`. With both methods
-``'null-space'``, :meth:`.MultiDomain.linear_static` and
-:meth:`.MultiDomain.linear_buckling` solve the reduced problems, and
+``pd_method``, see :ref:`boundary_conditions`.
+:meth:`.MultiDomain.linear_static` and :meth:`.MultiDomain.linear_buckling`
+solve the reduced problems, with the prescribed displacements when
+``pd_method='null-space'``, in which case
 :meth:`.MultiDomain.reaction_pd` and :meth:`.MultiDomain.reaction_resultant`
 give the reactions.
 
