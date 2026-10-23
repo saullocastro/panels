@@ -156,6 +156,10 @@
   imposed displacement 20% higher; with the default penalties the separation
   lags the imposed displacement by 21%, not 20%. The linear solutions are
   computed at 0.5 mm, below the damage onset, and scaled to 1 mm.
+- `doc/source/cohesive_zone.rst`: the rotational penalty of an `'SSxcte'`
+  connection is a spring of stiffness `k_r` per unit width, with the energy
+  `k_r (w^i_x - w^j_x)^2/2` of the kernels, which adds `3h/a`, about 13%, to
+  the bending compliance of the DCB arm, not `2 k_r` and 7%.
 
 ### Dependencies
 

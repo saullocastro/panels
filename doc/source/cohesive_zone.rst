@@ -467,10 +467,12 @@ Penalty stiffness of the edge connections
 The default penalties of :func:`.calc_kt_kr` for an ``'SSxcte'`` connection
 between two equal laminates are `k_t = A_{11}/h` and `k_r = D_{11}/h`, from
 Castro and Donadon (2017) [castro2017Multidomain]_. With the penalty energy
-`k_r (w^i_{,x} - w^j_{,x})^2` the connection behaves as a rotational spring
-of stiffness `2 k_r` per unit width, which adds to a cantilever loaded at the
-tip a compliance equal to `3h/(2a)` of its bending compliance, about 7% for
-each connection of the DCB arm (`h = 2.1` mm, `a = 48` mm). The arms of the
+`\frac{1}{2} k_r (w^i_{,x} - w^j_{,x})^2` per unit width, see
+:mod:`panels.multidomain.connections`, the connection behaves as a
+rotational spring of stiffness `k_r` per unit width, which adds to a
+cantilever loaded at the tip a compliance equal to `3 D_{11}/(k_r a) = 3h/a`
+of its bending compliance, about 13% for each connection of the DCB arm (`h
+= 2.1` mm, `a = 48` mm). The arms of the
 reference model have two connections each, at the crack tip moment. The
 table below gives the elastic stiffness of the DCB, `k_o = 2\times10^5`
 N/mm³, when the default `k_t` and `k_r` are multiplied by a factor, with the
