@@ -1151,8 +1151,8 @@ Product of the tangent stiffness matrix by a vector
 :meth:`.Shell.calc_kTv` and :meth:`.MultiDomain.calc_kTv` return the
 product `[K_T(c)] \{v\}` of the tangent stiffness matrix of
 :meth:`.Shell.calc_kT` by a vector, without assembling `[K_T]`, for all the
-geometrically non-linear models. Its cost is that of one evaluation of the
-internal force vector, instead of the assembly of `[K_T]`, whose cost grows
+geometrically non-linear models. Its cost is about that of one evaluation of
+the internal force vector, instead of the assembly of `[K_T]`, whose cost grows
 with the square of the number of terms of the approximation. It is the
 exact product, to round-off, and the exact directional derivative of
 :meth:`.Shell.calc_fint`.
@@ -1275,7 +1275,12 @@ Performance
 
 Single shell, laminate ``[0, 45, -45, 90]``, ``nx = 2m``, ``ny = 2n``
 integration points, one core; :meth:`.Shell.calc_kT` with the tabulated
-kernels, see :ref:`tabulation`:
+kernels, see :ref:`tabulation`; the state `\{c\}` and the vector `\{v\}` of
+``random_state`` of ``tests/tests_shell/test_tangent_consistency.py``. With
+``panels`` 0.13.21, medians of 9 samples, 3 in each of 3 processes,
+interleaved, after a warm-up; ratio: of ``calc_kT`` to ``calc_kTv``;
+difference: relative difference between the product and ``calc_kT(c) @ v``,
+the largest of the three sizes:
 
 .. list-table::
     :header-rows: 1
@@ -1291,71 +1296,108 @@ kernels, see :ref:`tabulation`:
     * - ``plate_clpt_donnell``
       - 8 / 12 / 16
       - 192 / 432 / 768
-      - 0.035 / 0.35 / 1.9 s
-      - 1.5 / 8.1 / 28 ms
-      - 1.8 / 9.6 / 32 ms
-      - 20 / 37 / 59
-      - `2 \times 10^{-15}`
+      - 0.014 / 0.12 / 0.63 s
+      - 0.89 / 3.8 / 12 ms
+      - 1.2 / 5.5 / 18 ms
+      - 12 / 22 / 36
+      - `1.2 \times 10^{-15}`
     * - ``cylshell_fsdt_sanders``
       - 8 / 12 / 16
       - 320 / 720 / 1280
-      - 0.16 / 1.7 / 9.1 s
-      - 2.6 / 14 / 47 ms
-      - 2.9 / 15 / 51 ms
-      - 54 / 109 / 180
-      - `2 \times 10^{-15}`
+      - 0.11 / 1.2 / 6.4 s
+      - 1.7 / 7.5 / 23 ms
+      - 2.0 / 8.9 / 28 ms
+      - 57 / 134 / 232
+      - `1.5 \times 10^{-15}`
     * - ``plate_tsdt_donnell``
       - 8 / 12 / 16
       - 320 / 720 / 1280
-      - 0.28 / 3.0 / 17 s
-      - 2.8 / 15 / 50 ms
-      - 3.1 / 16 / 55 ms
-      - 91 / 184 / 304
-      - `2 \times 10^{-15}`
+      - 0.22 / 2.3 / 13 s
+      - 1.8 / 8.3 / 26 ms
+      - 2.0 / 9.4 / 29 ms
+      - 107 / 249 / 437
+      - `1.4 \times 10^{-15}`
 
-The product costs about one :meth:`.Shell.calc_fint`, and the ratio grows
-with the number of terms. With the previous kernels, whose approximation
-functions were evaluated in the innermost loops, ``calc_kT`` took 7.0, 10.9
-and 11.9 s for `m = n = 12`, i.e. 700 times the product.
+The product costs 1.1 to 1.5 times :meth:`.Shell.calc_fint`, and the ratio
+grows with the number of terms. With the previous kernels of ``panels``
+0.12.0, whose approximation functions were evaluated in the innermost loops,
+``calc_kT`` takes 2.8, 4.7 and 5.8 s for `m = n = 12`, measured in the same
+way, i.e. 500 to 610 times the product. The times published with ``panels``
+0.13.0 were longer, 7.0, 10.9 and 11.9 s with the previous kernels, 700
+times the product of then.
 
 Displacement-controlled post-buckling of the plate of
-``tests/multidomain/test_null_space_pd.py`` with `m = n = 12` (407 reduced
-degrees of freedom), prescribed displacements imposed exactly, the four
-combinations of ``panels`` before (0.12.0, with the previous
-kernels and the assembly of `[K_T]` for `\partial R_r/\partial \lambda`)
-and after these developments with ``structsolve`` 0.7.0 and 0.8.0. The
-reactions at `\lambda = 1` agree to all the digits printed:
+``tests/multidomain/test_null_space_pd.py``, the model of
+``test_nonlinear_displacement_control`` with `m = n = 12` (407 reduced
+degrees of freedom), prescribed displacements imposed exactly. Run time of
+``Analysis.static``, on the same machine, medians of 3 runs in separate
+processes, interleaved, after a warm-up, of ``panels`` before these
+developments (0.12.0, with the previous kernels and the assembly of `[K_T]`
+for `\partial R_r/\partial \lambda`), after them (0.13.0) and 0.13.21, with
+``structsolve`` 0.7.0, 0.8.0 and 0.8.5. Before 0.8.5 the convergence was
+checked with the relative criterion, ``relTOL = 1e-6`` by default;
+``structsolve`` 0.8.5 checks with Crisfield's criterion, ``relTOL = 1e-9``
+by default, and keeps the former with ``Analysis.convergence = 'relative'``:
 
 .. list-table::
     :header-rows: 1
 
     * - ``panels``
       - ``structsolve``
+      - criterion
       - Newton-Raphson
       - modified Newton-Raphson
       - Riks
-    * - before
+    * - 0.12.0
       - 0.7.0
-      - 285 s
-      - 705 s
-      - 363 s
-    * - before
+      - relative, ``1e-6``
+      - 116 s
+      - 279 s
+      - 149 s
+    * - 0.12.0
       - 0.8.0
-      - 229 s
-      - 158 s
-      - 350 s
-    * - after
+      - relative, ``1e-6``
+      - 92.7 s
+      - 73.8 s
+      - 141 s
+    * - 0.13.0
       - 0.7.0
-      - 11.9 s
-      - 9.1 s
-      - 18.7 s
-    * - after
+      - relative, ``1e-6``
+      - 4.84 s
+      - 4.24 s
+      - 7.71 s
+    * - 0.13.0
       - 0.8.0
-      - 11.8 s
-      - 7.8 s
-      - 18.4 s
+      - relative, ``1e-6``
+      - 4.76 s
+      - 3.40 s
+      - 7.60 s
+    * - 0.13.21
+      - 0.8.5
+      - relative, ``1e-6``
+      - 4.99 s
+      - 3.67 s
+      - 7.67 s
+    * - 0.13.21
+      - 0.8.5
+      - Crisfield, ``1e-9``
+      - 5.79 s
+      - 4.19 s
+      - 9.30 s
 
-Before, almost all the time was in the assembly of `[K_T]` inside
-``calc_fext``, for `\partial R_r/\partial \lambda`; after, it is in the
-assembly of `[K_T]` for the Newton iterations, 32, 20 and 50 assemblies,
-the products costing 0.2 to 0.5 s in total.
+The reactions at `\lambda = 1` agree within a relative `4 \times 10^{-6}`
+with the relative criterion, and to ten significant digits with Crisfield's
+criterion. Before, almost all the time was in the assembly of `[K_T]`, about
+3 s each with the previous kernels: with ``structsolve`` 0.7.0 inside
+``calc_fext``, for `\partial R_r/\partial \lambda`, at every iterate where
+`[K_T]` was not cached, e.g. at each iteration of the modified
+Newton-Raphson method, whereas ``structsolve`` 0.8.0 evaluates `\partial
+R_r/\partial \lambda` only together with `[K_T]`. After, with Crisfield's
+criterion, 79 to 87% of the time is in the 37, 25 and 60 assemblies of
+`[K_T]` for the Newton iterations (31, 20 and 49 with the relative
+criterion), and the products cost 0.15 to 0.36 s in total. The times
+published with ``panels`` 0.13.0 for the first four rows were 2.1 to 2.5
+times longer, e.g. 229 s and 11.8 s with ``structsolve`` 0.8.0 and the
+Newton-Raphson method; the speed-ups from 0.12.0 to 0.13.0 are the same
+within 7%, except with the modified Newton-Raphson method and
+``structsolve`` 0.7.0, 77 then and 66 now.
