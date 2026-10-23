@@ -370,7 +370,7 @@ def _shell_from_data(data, r):
     for name in data.get('derived_lists', []):
         if name in ('plyts', 'laminaprops', 'rhos') and getattr(s, name):
             s._set_derived(name, getattr(s, name))
-    # NOTE files of panels < 0.13.21 have no thickness coordinate z in the
+    # NOTE files of panels < 0.14.0 have no thickness coordinate z in the
     #      prescribed displacements, their u and v are those of the
     #      reference surface, z = 0
     for name, length in (('point_pds', 6), ('point_pds_inc', 6),

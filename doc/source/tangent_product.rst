@@ -1277,7 +1277,7 @@ Single shell, laminate ``[0, 45, -45, 90]``, ``nx = 2m``, ``ny = 2n``
 integration points, one core; :meth:`.Shell.calc_kT` with the tabulated
 kernels, see :ref:`tabulation`; the state `\{c\}` and the vector `\{v\}` of
 ``random_state`` of ``tests/tests_shell/test_tangent_consistency.py``. With
-``panels`` 0.13.21, medians of 9 samples, 3 in each of 3 processes,
+``panels`` 0.14.0, medians of 9 samples, 3 in each of 3 processes,
 interleaved, after a warm-up; ratio: of ``calc_kT`` to ``calc_kTv``;
 difference: relative difference between the product and ``calc_kT(c) @ v``,
 the largest of the three sizes:
@@ -1333,7 +1333,7 @@ degrees of freedom), prescribed displacements imposed exactly. Run time of
 ``Analysis.static``, on the same machine, medians of 3 runs in separate
 processes, interleaved, after a warm-up, of ``panels`` before these
 developments (0.12.0, with the previous kernels and the assembly of `[K_T]`
-for `\partial R_r/\partial \lambda`), after them (0.13.0) and 0.13.21, with
+for `\partial R_r/\partial \lambda`), after them (0.13.0) and 0.14.0, with
 ``structsolve`` 0.7.0, 0.8.0 and 0.9.0. Before 0.9.0 the convergence was
 checked with the relative criterion, ``relTOL = 1e-6`` by default;
 ``structsolve`` 0.9.0 checks with Crisfield's criterion, ``relTOL = 1e-9``
@@ -1372,13 +1372,13 @@ by default, and keeps the former with ``Analysis.convergence = 'relative'``:
       - 4.76 s
       - 3.40 s
       - 7.60 s
-    * - 0.13.21
+    * - 0.14.0
       - 0.9.0
       - relative, ``1e-6``
       - 4.99 s
       - 3.67 s
       - 7.67 s
-    * - 0.13.21
+    * - 0.14.0
       - 0.9.0
       - Crisfield, ``1e-9``
       - 5.79 s

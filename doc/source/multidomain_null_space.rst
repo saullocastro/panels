@@ -747,7 +747,7 @@ with the four combinations of the table.
 **Run time.** For the linear analyses both methods have the same cost: the
 elimination of the constraints is a small fraction of the assembly. For the
 non-linear analysis above the run time is dominated by the assembly of the
-tangent stiffness matrix. With ``panels`` 0.13.21 and ``structsolve`` 0.9.0,
+tangent stiffness matrix. With ``panels`` 0.14.0 and ``structsolve`` 0.9.0,
 on the same machine, medians of 15 runs of ``Analysis.static``: 0.60 s with
 the null-space method and Crisfield's criterion with ``relTOL = 1e-9``, and
 0.50 s and 0.66 s with the relative criterion with ``relTOL = 1e-6`` and
