@@ -30,8 +30,8 @@ along `y`, is the same at a constant `x_1` and `x_2`, see
 :mod:`panels.multidomain.connections.kCBFxcte`. In both, ``p1`` is the base
 and ``p2`` the flange.
 
-kCSB
----------
+Skin-base, SB
+-------------
 
 Connection of type::
 
@@ -42,12 +42,18 @@ Connection of type::
 
 The two panels share the axes `x, y, z`, `z` being normal to their
 reference surfaces, and ``p1`` is the panel on the positive side of the
-interface along `z`, ``p2`` the one on the negative side, whatever their roles
-or their order in the assembly: the lower face `z = d_1 - h_1/2` of ``p1`` is
-connected to the upper face `z = d_2 + h_2/2` of ``p2``, with the offsets
-`d_1`, `d_2` of the laminates, see :func:`.kCsdt._sb_distances`. The sketch
-shows a stiffener base on the side of positive `z` of the skin; a pad-up on the side of negative `z` of a
-skin is ``p2``, with the skin ``p1``. The same holds for ``'SB_TSL'``.
+interface along `z`, ``p2`` the one on the negative side, whatever their
+roles or their order in the assembly: the lower face `z_1 = d_1 - h_1/2` of
+``p1`` is connected to the upper face `z_2 = d_2 + h_2/2` of ``p2``, with
+the offsets `d_1`, `d_2` of the laminates, `u_1(z_1) = u_2(z_2)`, `v_1(z_1)
+= v_2(z_2)` and `w_1 = w_2`, each panel with its own kinematics, for all the
+models, see :mod:`panels.multidomain.connections.skin_base`. The sketch
+shows a stiffener base on the side of positive `z` of the skin; a pad-up on
+the side of negative `z` of a skin is ``p2``, with the skin ``p1``. The same
+holds for ``'SB_TSL'``.
+
+.. automodule:: panels.multidomain.connections.skin_base
+    :members: fkCSB
 
 
 kCSSxcte
@@ -103,11 +109,13 @@ interface, see :ref:`cohesive_zone`.
 Models based on shear deformation theories
 -------------------------------------------
 
-The kernels above assume the 3 DOFs `u, v, w` of the models based on the
-classical laminated plate theory. The connections ``'SSxcte'``, ``'SSycte'``
-and ``'SB'`` of the plate and cylindrical shell models based on the FSDT
+The kernels above, apart from :func:`.fkCSB` of ``'SB'``, which serves
+all the models, assume the 3 DOFs `u, v, w` of the models based on the
+classical laminated plate theory. The connections ``'SSxcte'`` and
+``'SSycte'`` of the plate and cylindrical shell models based on the FSDT
 and TSDT, with the 5 DOFs `u, v, w, \phi_x, \phi_y`, are in
-:mod:`panels.multidomain.connections.kCsdt`, and the connections ``'BFycte'``
+:mod:`panels.multidomain.connections.kCsdt`, with :func:`.fkCSB_sdt`, the
+matrix of :func:`.fkCSB` for these models, and the connections ``'BFycte'``
 and ``'BFxcte'`` of these models are the functions ``fkCBFycte*_sdt`` and
 ``fkCBFxcte*_sdt`` of :mod:`panels.multidomain.connections.kCBFycte` and
 :mod:`panels.multidomain.connections.kCBFxcte`.
@@ -197,10 +205,11 @@ kinematics, and `\phi_y` for the FSDT and TSDT, see
 :mod:`panels.multidomain.connections.kCBFycte`; the connection ``'BFxcte'``
 penalizes `-w_{,x}` or `\phi_x`, see
 :mod:`panels.multidomain.connections.kCBFxcte`. The connection ``'SB'``
-takes into account the offset between the two mid-surfaces and, with the
-Sanders-Koiter kinematics, the term `v/r` of the tangential displacement at
-the interface, see :func:`.nullspace._clpt_components` and
-:func:`.kCsdt.fkCSB_sdt`.
+penalizes the displacements `u(z), v(z), w` of the lower face of ``p1``
+and of the upper face of ``p2``, with the offsets of the laminates and the
+kinematics of each panel, with its slope and, with the Sanders-Koiter
+kinematics, the term `v/r`, see :func:`.kCsdt._sb_components` and
+:func:`.fkCSB`.
 
 With the null-space method the quantities penalized by the kernels become
 the linear constraints `[B] \{c\} = \{0\}`, which are eliminated with a
@@ -229,7 +238,7 @@ References
 
 """
 from . kCBFycte import *
-from . kCSB import *
+from . skin_base import fkCSB, fkCSB11, fkCSB12, fkCSB22
 from . kCSSxcte import *
 from . kCSSycte import *
 from . kCBFxcte import *
@@ -238,4 +247,5 @@ from . kCSB_dmg import *
 from . penalties import *
 from . tsl import tsl_resolution, tsl_margin, tsl_discretization
 from . import kCsdt
+from . import skin_base
 from . import nullspace

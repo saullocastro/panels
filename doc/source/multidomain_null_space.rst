@@ -188,20 +188,22 @@ see :meth:`.MultiDomain.get_kC_conn`:
         :mod:`panels.multidomain.connections.kCBFxcte`
       - `u_1 = w_2`, `v_1 = v_2`, `w_1 = -u_2`, `\phi_{x1} = \phi_{x2}`
     * - ``'SB'``
-      - `u_1 + d_{sb} w_{1,x} = u_2`, `(1 - d^t/r_1) v_1 + d_{sb} w_{1,y}
-        = (1 + d^b/r_2) v_2`, `w_1 = w_2`, with `d^t = h_1/2 - d_1`, `d^b =
-        h_2/2 + d_2` and `d_{sb} = d^t + d^b` the distance between the
-        reference surfaces, `d_1`, `d_2` being the offsets, see ``kCSB.pyx``,
-        :func:`.nullspace._clpt_components` and
-        :func:`.kCsdt._sb_distances`
+      - `u_1(z_1) = u_2(z_2)`, `v_1(z_1) = v_2(z_2)`, `w_1 = w_2` at the
+        interface, `z_1 = d_1 - h_1/2` of ``p1`` and `z_2 = d_2 + h_2/2` of
+        ``p2``, `d_1`, `d_2` being the offsets, with `u(z) = u - z w_{,x}`
+        and `v(z) = (1 + z/r) v - z w_{,y}` of each panel, see
+        :func:`.fkCSB`
       - `u, v, w` at the interface, `z = d_1 - h_1/2` of ``p1`` and `z = d_2
-        + h_2/2` of ``p2``, see :func:`.fkCSB_sdt`, and `\phi_x, \Phi_y`
+        + h_2/2` of ``p2``, see :func:`.fkCSB`, and `\phi_x, \Phi_y`
         only when
         the key ``'kr'`` of the connection is given and not zero
 
 where `\Phi_y = \phi_y + v/r` with the Sanders-Koiter kinematics and `\Phi_y
-= \phi_y` otherwise, and the terms `v/r` of the classical laminated plate
-theory are present only with the Sanders-Koiter kinematics. The keys
+= \phi_y` otherwise, and the terms `v/r` and `z/r` of the classical
+laminated plate theory are present only with the Sanders-Koiter kinematics.
+The quantities of ``'SB'`` are the same for all the models, the
+displacements of the faces in contact, see
+:func:`.kCsdt._sb_components`. The keys
 ``'kt'`` and ``'kr'`` of the connections are not used, apart from ``'kr'``
 of ``'SB'`` with the shear deformation theories, which tells whether the
 rotations are connected.
@@ -794,12 +796,14 @@ approximation more than the penalty method with the default constants does:
 - The boundary condition flags at the ends of an edge of one domain are
   imposed on the other domain.
 
-- With ``'SB'`` and the classical laminated plate theory, `u_1 = u_2 - d_{sb}
-  w_{,x}`. When the reference surfaces of the two domains are apart, `d_{sb}
-  \ne 0`, e.g. without offsets, restraining the normal in-plane displacement
-  of an edge in both domains, e.g. `u = 0` at `x = 0`, also restrains the
-  rotation `w_{,x}` at that edge, which is clamped. With offsets that place
-  both reference surfaces at the same height, `d_{sb} = 0` and `u_1 = u_2`.
+- With ``'SB'`` and the classical laminated plate theory, `u_1 - z_1 w_{,x}
+  = u_2 - z_2 w_{,x}`, `z_1` and `z_2` being the faces in contact measured
+  from the reference surface of each domain. When the reference surfaces of
+  the two domains are apart, `z_1 \ne z_2`, e.g. without offsets,
+  restraining the normal in-plane displacement of an edge in both domains,
+  e.g. `u = 0` at `x = 0`, also restrains the rotation `w_{,x}` at that
+  edge, which is clamped. With offsets that place both reference surfaces at
+  the same height, `z_1 = z_2` and `u_1 = u_2`.
   The in-plane displacements of the bonded laminates must be restrained
   consistently with the single laminate that
   they represent, e.g. restraining only the tangential displacement of the

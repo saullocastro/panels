@@ -195,8 +195,9 @@ def test_skin_base_nonlinear_equals_single_laminate():
 
     The in-plane displacements of the edges are only restrained in the
     tangential direction: restraining the normal one in both laminates would
-    also restrain the rotation of the edge, since `u_{top} = u_{bot} - d_{sb}
-    w_{,x}`.
+    also restrain the rotation of the edge, since `u_{top} - z_{top} w_{,x} =
+    u_{bot} - z_{bot} w_{,x}` at the faces in contact, `z_{top} \ne
+    z_{bot}`.
     """
     a = 1.
     h = a/50

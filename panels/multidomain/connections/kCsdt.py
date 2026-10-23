@@ -19,7 +19,16 @@ models:
   interface along the common `z` axis, ``p_top`` (``p1`` of the
   connection), and the upper face of the panel on the negative side,
   ``p_bot`` (``p2``), see :meth:`.MultiDomain.get_kC_conn`. When ``kr`` is
-  given the difference of the rotations is also penalized.
+  given the difference of the rotations is also penalized. It is
+  :func:`.skin_base.fkCSB` restricted to these models.
+
+The private helpers of the displacements at a thickness coordinate,
+:func:`._surface_terms`, of the rotations at the reference surface,
+:func:`._rotation_x` and :func:`._rotation_y`, of the quantities of
+``'SB'``, :func:`._sb_components`, and :func:`._connection_matrix` also
+serve the models with 3 DOFs, see
+:mod:`panels.multidomain.connections.skin_base` and
+:mod:`panels.multidomain.connections.nullspace`.
 
 All the functions return the upper triangle of the connection matrix, with
 the shape ``(size, size)`` of the assembly, as the Cython kernels of the
@@ -68,8 +77,10 @@ displacement fields of two domains, with the penalty energy `\frac{1}{2}
   laminates have zero transverse shear strains at their faces, including
   the interface, and are therefore stiffer than a single TSDT laminate. The
   interface is the face of each laminate in its own coordinate `z`, at `z
-  = d \mp h/2` with the offset `d` of each panel, for the FSDT and the
-  TSDT, as for the models with 3 DOFs, see :func:`._sb_distances`.
+  = d \mp h/2` with the offset `d` of each panel, for all the models, see
+  :func:`._sb_components`; the models with 3 DOFs use the same
+  quantities, with the Kirchhoff kinematics of :func:`._surface_terms`, in
+  :func:`.skin_base.fkCSB`.
 
 .. rubric:: Rotations at the reference surface
 
@@ -102,6 +113,7 @@ import numpy as np
 from scipy.sparse import coo_matrix, triu
 
 from panels import INT, DOUBLE
+import panels.modelDB as modelDB
 from panels.bardell import (calc_vec_f, calc_vec_fp, calc_integral_ff,
         calc_integral_ffp, calc_integral_fpfp)
 
@@ -109,6 +121,15 @@ from panels.bardell import (calc_vec_f, calc_vec_fp, calc_integral_ff,
 DOF = 5
 FIELDS = ('u', 'v', 'w', 'phix', 'phiy')
 U, V, W, PHIX, PHIY = range(DOF)
+
+
+def _dofs(p):
+    r"""Number of DOFs per term of the model of ``p``, ``3`` for the
+    classical laminated plate theory and ``5`` for the shear deformation
+    theories, see :mod:`panels.modelDB`; ``3`` when ``p.model`` is ``None``"""
+    if p.model is None:
+        return 3
+    return modelDB.db[p.model]['dofs']
 
 
 def _check_sdt(*panels):
@@ -120,7 +141,9 @@ def _check_sdt(*panels):
 
 def _rinv_sanders(p):
     r"""`1/r` of a panel with the Sanders-Koiter kinematics, zero otherwise"""
-    return 1./p.r if 'sanders' in p.model else 0.
+    if p.model is not None and 'sanders' in p.model:
+        return 1./p.r
+    return 0.
 
 
 def _rotation_y(p):
@@ -135,12 +158,19 @@ def _rotation_y(p):
     of the cross-section, and `\Phi_y = \phi_y` otherwise, the term `v/r`
     being neglected with the Donnell kinematics and absent for plates. With
     the TSDT field, `\theta_y = \Phi_y - 3 c_1 d^2 (\phi_y + w_{,y}) = (1 -
-    \alpha) \phi_y + v/r - \alpha w_{,y}`, see :func:`._rotation_x`.
+    \alpha) \phi_y + v/r - \alpha w_{,y}`, see :func:`._rotation_x`. For
+    the classical laminated plate theory, 3 DOFs per term, `\theta_y =
+    -w_{,y} + v/r`.
 
     """
+    rinv = _rinv_sanders(p)
+    if _dofs(p) == 3:
+        terms = [(W, 0, 1, -1.)]
+        if rinv != 0:
+            terms.append((V, 0, 0, rinv))
+        return terms
     a = _alpha(p)
     terms = [(PHIY, 0, 0, 1. - a)]
-    rinv = _rinv_sanders(p)
     if rinv != 0:
         terms.append((V, 0, 0, rinv))
     if a != 0:
@@ -169,9 +199,12 @@ def _rotation_x(p):
     With the TSDT field of :mod:`panels.multidomain.connections.kCsdt`,
     `\theta_x = \phi_x - 3 c_1 d^2 (\phi_x + w_{,x}) = (1 - \alpha) \phi_x -
     \alpha w_{,x}`, `\alpha = 4 d^2/h^2`, see :func:`._alpha`; `\theta_x =
-    \phi_x` for the FSDT and for `d = 0`.
+    \phi_x` for the FSDT and for `d = 0`. For the classical laminated plate
+    theory, 3 DOFs per term, `\theta_x = -w_{,x}`.
 
     """
+    if _dofs(p) == 3:
+        return [(W, 1, 0, -1.)]
     a = _alpha(p)
     terms = [(PHIX, 0, 0, 1. - a)]
     if a != 0:
@@ -266,7 +299,9 @@ def _connection_matrix(components, ctes, size):
     positive sign within a panel and a negative sign between the two
     panels. A penalty equal to zero adds no term. The upper triangle of the
     matrix is returned, a :class:`scipy.sparse.coo_matrix` with the shape
-    ``(size, size)``.
+    ``(size, size)``. The terms are placed with the number of DOFs per term
+    of the model of each panel, see :func:`._dofs`, so that the function
+    serves the models with 3 and with 5 DOFs.
 
     Parameters
     ----------
@@ -321,10 +356,12 @@ def _connection_matrix(components, ctes, size):
                                     pQ, termQ, ctes['x'][iQ], 'x')
                         Y = _factor(pP, termP, ctes['y'][iP],
                                     pQ, termQ, ctes['y'][iQ], 'y')
-                        #NOTE Ritz constant of term (i, j) at DOF*(j*m + i)
+                        #NOTE Ritz constant of term (i, j) at dofs*(j*m + i)
                         block = coeff*np.kron(Y, X)
-                        r = pP.row_start + DOF*np.arange(block.shape[0]) + termP[0]
-                        c = pQ.col_start + DOF*np.arange(block.shape[1]) + termQ[0]
+                        r = (pP.row_start + _dofs(pP)*np.arange(block.shape[0])
+                             + termP[0])
+                        c = (pQ.col_start + _dofs(pQ)*np.arange(block.shape[1])
+                             + termQ[0])
                         R, C = np.meshgrid(r, c, indexing='ij')
                         rows.append(R.ravel())
                         cols.append(C.ravel())
@@ -472,11 +509,17 @@ def fkCSSycte_sdt(kt, kr, p1, p2, ycte1, ycte2, size):
 
 def _surface_terms(p, z):
     r"""Terms of `u(z)` and `v(z)` of panel ``p`` at the coordinate `z`
-    measured from its reference surface
+    measured from its reference surface, for every model
+
+    The same operator gives the displacements at the interface of the
+    skin-base connection ``'SB'``, see :func:`._sb_components`, and the
+    prescribed in-plane displacements at a thickness coordinate, see
+    :func:`.nullspace.pd_rows`.
 
     Notes
     -----
-    From the displacement field of :mod:`panels.multidomain.connections.kCsdt`:
+    For the shear deformation theories, from the displacement field of
+    :mod:`panels.multidomain.connections.kCsdt`:
 
     .. math::
 
@@ -486,9 +529,23 @@ def _surface_terms(p, z):
     with `g = (z - d)^3 + d^3`, the offset `d` of ``p``, `c_1 = 4/(3 h^2)`
     for the TSDT, `h` being the sum of the ply thicknesses of ``p``, `c_1 =
     0` for the FSDT, and the term `z v/r` only with the Sanders-Koiter
-    kinematics.
+    kinematics. For the classical laminated plate theory, 3 DOFs per term,
+    the Kirchhoff kinematics give
+
+    .. math::
+
+        u(z) = u - z w_{,x}, \qquad v(z) = (1 + z/r) v - z w_{,y}
+
+    the rotation of the normal about `x` being `-w_{,y} + v/r` with the
+    Sanders-Koiter kinematics.
 
     """
+    rinv = _rinv_sanders(p)
+    if _dofs(p) == 3:
+        #NOTE Kirchhoff: u(z) = u - z w,x and v(z) = v + z (v/r - w,y)
+        tu = [(U, 0, 0, 1.), (W, 1, 0, -z)]
+        tv = [(V, 0, 0, 1. + z*rinv), (W, 0, 1, -z)]
+        return tu, tv
     c1 = 4/(3*sum(p.plyts)**2) if _is_tsdt(p) else 0.
     d = p.offset if _is_tsdt(p) else 0.
     g = (z - d)**3 + d**3
@@ -496,7 +553,7 @@ def _surface_terms(p, z):
     cw = -c1*g
     tu = [(U, 0, 0, 1.), (PHIX, 0, 0, cphi), (W, 1, 0, cw)]
     #NOTE v(z) = v + z*(phiy + v/r) - c1*z**3*(phiy + w,y) with Sanders
-    tv = [(V, 0, 0, 1. + z*_rinv_sanders(p)), (PHIY, 0, 0, cphi), (W, 0, 1, cw)]
+    tv = [(V, 0, 0, 1. + z*rinv), (PHIY, 0, 0, cphi), (W, 0, 1, cw)]
     return tu, tv
 
 
@@ -508,7 +565,7 @@ def _face(p, side):
     its ply thicknesses, the laminate occupying `d - h/2 \le z \le d + h/2`
     for all the models, see :func:`composites.laminated_plate`. Used by the
     skin-base connections ``'SB'`` and ``'SB_TSL'`` of all the models, see
-    :func:`._sb_distances`.
+    :func:`._sb_components` and :func:`._sb_distances`.
 
     """
     return p.offset + side*sum(p.plyts)/2.
@@ -522,13 +579,84 @@ def _sb_distances(p_top, p_bot):
     reference surface of ``p_top`` down to its lower face and `d^b = h_b/2 +
     d_b` the distance from the reference surface of ``p_bot`` up to its upper
     face, `h` being the sum of the ply thicknesses and `d` the offset of each
-    panel, see :func:`._face`. Their sum `d_{sb} = d^t + d^b` is the distance
+    panel, see :func:`._face`. Their sum `d^t + d^b` is the distance
     between the two reference surfaces, zero when the panels share it, e.g.
     a stiffener base with the offset `d_t = (h_t + h_b)/2` on a skin with
-    `d_b = 0`. Without offsets, `d^t = h_t/2` and `d^b = h_b/2`.
+    `d_b = 0`. Without offsets, `d^t = h_t/2` and `d^b = h_b/2`. Used by
+    the separations of ``'SB_TSL'``, see :meth:`.MultiDomain._tsl_operators`
+    and :mod:`panels.multidomain.connections.kCSB_dmg`.
 
     """
     return -_face(p_top, -1), _face(p_bot, +1)
+
+
+def _sb_components(p_top, p_bot, kt=1., kr=0.):
+    r"""Quantities of the skin-base connection ``'SB'``, for every model
+
+    Returns a list of ``(penalty, ((p_top, terms_top), (p_bot,
+    terms_bot)))``, see :func:`._connection_matrix`: `u(z)` and `v(z)` of
+    ``p_top`` at its lower face and of ``p_bot`` at its upper face, see
+    :func:`._face` and :func:`._surface_terms`, and `w`, with the penalty
+    ``kt``, and, for the shear deformation theories when ``kr`` is not
+    zero, the rotations of the normal at the reference surface of each
+    panel, :func:`._rotation_x` and :func:`._rotation_y`, with the penalty
+    ``kr``. The same quantities give the penalty stiffness matrix of
+    :func:`.skin_base.fkCSB` and the constraints of the null-space method,
+    see :func:`.nullspace.constraint_matrix`.
+
+    Parameters
+    ----------
+    p_top, p_bot : :class:`.Shell`
+        Panels on the positive and negative sides of the interface along
+        their common `z` axis, ``p1`` and ``p2`` of the connection.
+    kt, kr : float, optional
+        Penalties of the displacements and of the rotations. Default ``1.``
+        and ``0.``. ``kr`` is not used for the models with 3 DOFs per term.
+
+    Returns
+    -------
+    comps : list
+        Three components, `u`, `v` and `w`, and two more, the rotations,
+        when ``kr`` is not zero and ``p_top`` has 5 DOFs per term.
+
+    Notes
+    -----
+    The connection imposes
+
+    .. math::
+
+        u_1(z_1) = u_2(z_2), \qquad v_1(z_1) = v_2(z_2), \qquad w_1 = w_2
+
+    at the interface, `z_1 = d_1 - h_1/2` in ``p_top`` and `z_2 = d_2 +
+    h_2/2` in ``p_bot``, with the offsets `d_1`, `d_2` and the thicknesses
+    `h_1`, `h_2`, each panel with its own kinematics: for the classical
+    laminated plate theory `u(z) = u - z w_{,x}` and `v(z) = (1 + z/r) v -
+    z w_{,y}`, with the slope of each panel and the term `v/r` only with the
+    Sanders-Koiter kinematics, and for the FSDT and TSDT the fields of
+    :func:`._surface_terms`.
+
+    The rotations of the classical laminated plate theory follow from `w`:
+    `w_1 = w_2` over the area ties the slopes, and the rotations are not
+    connected. With the Sanders-Koiter kinematics, tying also the rotations
+    `-w_{,y} + v/r` of the two reference surfaces would, with `v_1(z_1) =
+    v_2(z_2)` and `r_1 + z_1 = r_2 + z_2`, give `(z_1 - z_2) w_{,y} = 0`,
+    i.e. `w_{,y} = 0` unless the two reference surfaces coincide.
+
+    """
+    tu_top, tv_top = _surface_terms(p_top, _face(p_top, -1))
+    tu_bot, tv_bot = _surface_terms(p_bot, _face(p_bot, +1))
+    comps = [
+        (kt, ((p_top, tu_top), (p_bot, tu_bot))),
+        (kt, ((p_top, tv_top), (p_bot, tv_bot))),
+        (kt, ((p_top, [(W, 0, 0, 1.)]), (p_bot, [(W, 0, 0, 1.)]))),
+        ]
+    #NOTE the rotations of the CLPT follow from w, see the Notes
+    if kr and _dofs(p_top) != 3:
+        comps += [
+            (kr, ((p_top, _rotation_x(p_top)), (p_bot, _rotation_x(p_bot)))),
+            (kr, ((p_top, _rotation_y(p_top)), (p_bot, _rotation_y(p_bot)))),
+            ]
+    return comps
 
 
 def fkCSB_sdt(kt, p_top, p_bot, size, kr=0.):
@@ -544,7 +672,9 @@ def fkCSB_sdt(kt, p_top, p_bot, size, kr=0.):
     are integrated along `x` and `y`. The terms are placed at ``row_start``
     and ``col_start`` of each panel. A penalty equal to zero adds no term. A
     ``ValueError`` is raised by ``_check_sdt`` when a panel is not a model
-    based on the FSDT or TSDT.
+    based on the FSDT or TSDT. The matrix is that of
+    :func:`.skin_base.fkCSB`, which also serves the models based on the
+    classical laminated plate theory.
 
     Parameters
     ----------
@@ -587,13 +717,5 @@ def fkCSB_sdt(kt, p_top, p_bot, size, kr=0.):
 
     """
     _check_sdt(p_top, p_bot)
-    tu_top, tv_top = _surface_terms(p_top, _face(p_top, -1))
-    tu_bot, tv_bot = _surface_terms(p_bot, _face(p_bot, +1))
-    comps = [
-        (kt, ((p_top, tu_top), (p_bot, tu_bot))),
-        (kt, ((p_top, tv_top), (p_bot, tv_bot))),
-        (kt, ((p_top, [(W, 0, 0, 1.)]), (p_bot, [(W, 0, 0, 1.)]))),
-        (kr, ((p_top, _rotation_x(p_top)), (p_bot, _rotation_x(p_bot)))),
-        (kr, ((p_top, _rotation_y(p_top)), (p_bot, _rotation_y(p_bot)))),
-        ]
+    comps = _sb_components(p_top, p_bot, kt, kr)
     return _connection_matrix(comps, dict(x=None, y=None), size)

@@ -21,7 +21,9 @@ Created on Sun Mar 10 13:07:49 2024
 # The kernels in panels/multidomain/connections/ that correspond to each
 # matrix are:
 #
-#   kCSSxcte, kCSSycte, kCBFycte, kCBFxcte, kCSB: kCSS*.pyx, kCBF*.pyx, kCSB.pyx
+#   kCSSxcte, kCSSycte, kCBFycte, kCBFxcte: kCSS*.pyx, kCBF*.pyx
+#   kCSB: skin_base.py (fkCSB), computed from the quantities of
+#   kCsdt._sb_components with the integrals of kCsdt._connection_matrix
 #   kCSSxcte_sdt, kCSSycte_sdt, kCSB_sdt: kCsdt.py, for the models based on
 #   shear deformation theories (FSDT and TSDT) with 5 DOFs per term
 #   kCBFycte_sdt, kCBFxcte_sdt: the functions *_sdt of kCBF*.pyx, for the
@@ -184,31 +186,34 @@ piece_wise_simplify(kCBFxcte22, [])
 # Connection between panel skin and stiffener's base - SB CONNECTION
 # connection panel-base integrated over xi' and eta'
 # Panel (1) is on the positive side of the interface along the z axis common
-# to both panels, and panel (2) on the negative side. Panel (1) is
-# extrapolated to the reference surface of panel (2), at a distance
-# dsb = h1/2 - d1 + h2/2 + d2 from the reference surface of (1) along -z,
-# with the offsets d1, d2 (the lower face of (1) is at z = d1 - h1/2 and the
-# upper face of (2) at z = d2 + h2/2, each from its own reference surface,
-# see kCsdt._sb_distances):
-#     u1 + dsb*w1,x = u2,  cv1*v1 + dsb*w1,y = cv2*v2,  w1 = w2
-# The Kirchhoff kinematics of each panel, u(z) = u - z w,x and v(z) = v + z
-# (rinv v - w,y), with rinv = 1/r for the Sanders-Koiter kinematics and rinv
-# = 0 for the Donnell kinematics and for plates, give at the interface, the
-# lower face z = -dt of (1) and the upper face z = db of (2), dsb = dt + db:
-#     u1 + dt*w1,x = u2 - db*w2,x
-#     (1 - dt*rinv1)*v1 + dt*w1,y = (1 + db*rinv2)*v2 - db*w2,y
-# and w2,x = w1,x, w2,y = w1,y since w1 = w2 over the whole area, hence
-# cv1 = 1 - dt*rinv1 and cv2 = 1 + db*rinv2, both 1 without Sanders-Koiter
-var('dt, db')
-cv1 = 1 - dt*rinv1
-cv2 = 1 + db*rinv2
-kCSB11 = (a1*b1/4)*kt*(u1A.T*u1B + cv1*cv1*v1A.T*v1B + w1A.T*w1B + u1A.T*w1Bxi*(2*dsb/a1) + w1Axi.T*u1B*(2*dsb/a1) + cv1*v1A.T*w1Beta*(2*dsb/b1) + cv1*w1Aeta.T*v1B*(2*dsb/b1) + w1Axi.T*w1Bxi*(2*dsb/a1)*(2*dsb/a1) + w1Aeta.T*w1Beta*(2*dsb/b1)*(2*dsb/b1))
-    # Contains all squared terms - so all terms of (u + d..w,xi)^2 comes here and so on 
-                                    # thats split up: u^2 + u*d..w,xi + d..w,xi*u + (d..w,xi)^2
-############ THERE IS SOME EXTRA c1 HERE - removed ##############################
-kCSB12 = -(a1*b1/4)*kt*(u1A.T*u2B + cv1*cv2*v1A.T*v2B + w1A.T*w2B + w1Axi.T*u2B*(2*dsb/a1) + cv2*w1Aeta.T*v2B*(2*dsb/b1))
+# to both panels, and panel (2) on the negative side. The lower face of (1),
+# zi1 = d1 - h1/2, and the upper face of (2), zi2 = d2 + h2/2, each measured
+# from its own reference surface with the offsets d1, d2 (kCsdt._face), have
+# the same displacements:
+#     u1(zi1) = u2(zi2),  v1(zi1) = v2(zi2),  w1 = w2
+# with the Kirchhoff kinematics of each panel, with its own slope,
+#     u(z) = u - z w,x,  v(z) = (1 + z rinv) v - z w,y
+# rinv = 1/r for the Sanders-Koiter kinematics and rinv = 0 for the Donnell
+# kinematics and for plates (kCsdt._surface_terms). The same quantities are
+# used by all the models, see sdt_interface() below; the matrix is computed
+# by panels.multidomain.connections.skin_base.fkCSB, with the exact
+# integrals of kCsdt._connection_matrix, the blocks below being those of its
+# upper triangle. The form of the thesis of D'Souza (2024),
+#     u1 + dsb w1,x = u2,  dsb = h1/2 - d1 + h2/2 + d2
+# with the slope of (1) only, was used up to panels 0.13
+var('zi1, zi2')
+def clpt_interface(uA, vA, wxiA, wetaA, zi, rinv):
+    qu = uA - zi*(2/a1)*wxiA
+    qv = (1 + zi*rinv)*vA - zi*(2/b1)*wetaA
+    return qu, qv
+qu1A, qv1A = clpt_interface(u1A, v1A, w1Axi, w1Aeta, zi1, rinv1)
+qu1B, qv1B = clpt_interface(u1B, v1B, w1Bxi, w1Beta, zi1, rinv1)
+qu2A, qv2A = clpt_interface(u2A, v2A, w2Axi, w2Aeta, zi2, rinv2)
+qu2B, qv2B = clpt_interface(u2B, v2B, w2Bxi, w2Beta, zi2, rinv2)
+kCSB11 =  (a1*b1/4)*kt*(qu1A.T*qu1B + qv1A.T*qv1B + w1A.T*w1B)
 # Instead of 2ab only ab is presented in _12 as ba goes into _21 which is symmetric and is hence not added here
-kCSB22 =  (a1*b1/4)*kt*(u2A.T*u2B + cv2*cv2*v2A.T*v2B + w2A.T*w2B)
+kCSB12 = -(a1*b1/4)*kt*(qu1A.T*qu2B + qv1A.T*qv2B + w1A.T*w2B)
+kCSB22 =  (a1*b1/4)*kt*(qu2A.T*qu2B + qv2A.T*qv2B + w2A.T*w2B)
 
 piece_wise_simplify(kCSB11, [])
 piece_wise_simplify(kCSB12, [])

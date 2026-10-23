@@ -78,7 +78,6 @@ from scipy.linalg import qr, solve_triangular
 from scipy.sparse import coo_matrix, csr_matrix, identity
 
 from panels import DOUBLE
-import panels.modelDB as modelDB
 from panels.bardell import calc_vec_f, calc_vec_fp
 from panels.logger import warn
 from . import kCsdt
@@ -91,16 +90,8 @@ U, V, W, PHIX, PHIY = range(5)
 FIELDS = ('u', 'v', 'w', 'phix', 'phiy')
 
 
-def _dofs(p):
-    if p.model is None:
-        return 3
-    return modelDB.db[p.model]['dofs']
-
-
-def _rinv_sanders(p):
-    if p.model is not None and 'sanders' in p.model:
-        return 1./p.r
-    return 0.
+_dofs = kCsdt._dofs
+_rinv_sanders = kCsdt._rinv_sanders
 
 
 def _length(p, direction):
@@ -149,13 +140,13 @@ def _eval(p, field, der, direction, xis):
     return out
 
 
-def _clpt_components(func, p1, p2, dsb):
-    r"""Quantities of the connections between models with 3 DOFs, each one
-    ``((p1, terms1), (p2, terms2))`` with ``terms`` a list of ``(field,
+def _clpt_components(func, p1, p2):
+    r"""Quantities of the edge connections between models with 3 DOFs, each
+    one ``((p1, terms1), (p2, terms2))`` with ``terms`` a list of ``(field,
     der_x, der_y, coeff)``
 
-    ``dsb`` is the distance between the reference surfaces of ``p1`` and
-    ``p2``, used by ``'SB'``, see :func:`.kCsdt._sb_distances`.
+    The quantities of ``'SB'``, the same for all the models, are those of
+    :func:`._sb_components`.
 
     Notes
     -----
@@ -170,23 +161,7 @@ def _clpt_components(func, p1, p2, dsb):
       the terms `v/r` present only with the Sanders-Koiter kinematics, see
       :mod:`panels.multidomain.connections.kCBFycte`;
     - ``'BFxcte'``: `u_1 = w_2`, `v_1 = v_2`, `w_1 = -u_2` and `w_{1,x} =
-      w_{2,x}`, see :mod:`panels.multidomain.connections.kCBFxcte`;
-    - ``'SB'``: `u_1 + d_{sb} w_{1,x} = u_2`, `(1 - d^t/r_1) v_1 + d_{sb}
-      w_{1,y} = (1 + d^b/r_2) v_2` and `w_1 = w_2`, with `d^t = h_1/2 -
-      d_1`, `d^b = h_2/2 + d_2`, `d_{sb} = d^t + d^b`, `d_1` and `d_2`
-      being the offsets, and the terms `1/r` present only with the
-      Sanders-Koiter kinematics.
-
-    For ``'SB'``, with the Kirchhoff kinematics `u(z) = u - z w_{,x}` and
-    `v(z) = v + z (v/r - w_{,y})`, `z` measured from the reference surface
-    of each panel and `v/r` only with the Sanders-Koiter kinematics, the
-    lower face `z = -d^t` of ``p1`` and the upper face `z = d^b` of ``p2``
-    have the same displacement when `u_1 + d^t w_{1,x} = u_2 - d^b w_{2,x}`
-    and `(1 - d^t/r_1) v_1 + d^t w_{1,y} = (1 + d^b/r_2) v_2 - d^b
-    w_{2,y}`, and `w_{2,x} = w_{1,x}`, `w_{2,y} = w_{1,y}` since `w_1 = w_2`
-    over the whole area. A rigid rotation about the axis of the cylinder,
-    `v = r \Omega`, then gives no separation when the radius of each panel
-    is that of its reference surface, `r_1 - d^t = r_2 + d^b`.
+      w_{2,x}`, see :mod:`panels.multidomain.connections.kCBFxcte`.
 
     """
     if func == 'SSxcte':
@@ -211,23 +186,36 @@ def _clpt_components(func, p1, p2, dsb):
                 ((p1, [(V, 0, 0, 1.)]), (p2, [(V, 0, 0, 1.)])),
                 ((p1, [(W, 0, 0, 1.)]), (p2, [(U, 0, 0, -1.)])),
                 ((p1, rot), (p2, rot))]
-    if func == 'SB':
-        #NOTE u1 + dsb*w1,x = u2, cv1*v1 + dsb*w1,y = cv2*v2, w1 = w2, see
-        #     kCSB.pyx, cv1 = cv2 = 1 without Sanders-Koiter
-        dt, db = kCsdt._sb_distances(p1, p2)
-        cv1 = 1. - dt*_rinv_sanders(p1)
-        cv2 = 1. + db*_rinv_sanders(p2)
-        return [((p1, [(U, 0, 0, 1.), (W, 1, 0, dsb)]), (p2, [(U, 0, 0, 1.)])),
-                ((p1, [(V, 0, 0, cv1), (W, 0, 1, dsb)]), (p2, [(V, 0, 0, cv2)])),
-                ((p1, [(W, 0, 0, 1.)]), (p2, [(W, 0, 0, 1.)]))]
     raise NotImplementedError(func)
 
 
-def _sdt_components(func, p1, p2, kr_sb):
-    r"""Quantities of the connections between models with 5 DOFs, see
-    :func:`._clpt_components`
+def _sb_components(p1, p2, kr_sb):
+    r"""Quantities of ``'SB'`` for all the models, see
+    :func:`.kCsdt._sb_components`, the rotations of the models with 5 DOFs
+    per term being connected only when ``kr_sb`` is not zero
 
-    For ``'SB'`` the rotations are connected only when ``kr_sb`` is not zero.
+    Notes
+    -----
+    `u(z), v(z)` at the lower face `z_1 = d_1 - h_1/2` of ``p1`` equal to
+    those at the upper face `z_2 = d_2 + h_2/2` of ``p2``, each panel with its
+    own kinematics, see :func:`.kCsdt._surface_terms`, and `w_1 = w_2`. For
+    the classical laminated plate theory, `u_1 - z_1 w_{1,x} = u_2 - z_2
+    w_{2,x}` and `(1 + z_1/r_1) v_1 - z_1 w_{1,y} = (1 + z_2/r_2) v_2 - z_2
+    w_{2,y}`, the terms `1/r` present only with the Sanders-Koiter
+    kinematics. A rigid rotation about the axis of the cylinder, `v = r
+    \Omega`, then gives no separation when the radius of each panel is that
+    of its reference surface, `r_1 + z_1 = r_2 + z_2`. With ``kr_sb`` the
+    rotations of the normal at the reference surfaces of the FSDT and TSDT,
+    :func:`.kCsdt._rotation_x` and :func:`.kCsdt._rotation_y`, are also
+    equal.
+
+    """
+    return [sides for _, sides in kCsdt._sb_components(p1, p2, 1., kr_sb)]
+
+
+def _sdt_components(func, p1, p2):
+    r"""Quantities of the edge connections between models with 5 DOFs, see
+    :func:`._clpt_components`
 
     Notes
     -----
@@ -237,10 +225,7 @@ def _sdt_components(func, p1, p2, kr_sb):
     the edge, see :func:`.kCsdt._edge_components`; for ``'BFycte'``, `u_1 =
     u_2`, `v_1 = w_2`, `w_1 = -v_2` and `\theta_{y1} = \theta_{y2}`; for
     ``'BFxcte'``, `u_1 = w_2`, `v_1 = v_2`, `w_1 = -u_2` and `\theta_{x1} =
-    \theta_{x2}`; for ``'SB'``, `u(z), v(z)` at the lower face of ``p1``
-    equal to those at the upper face of ``p2``, see :func:`.kCsdt._face` and
-    :func:`.kCsdt._surface_terms`, `w_1 = w_2` and, with ``kr_sb``,
-    `\theta_{x1} = \theta_{x2}` and `\theta_{y1} = \theta_{y2}`. The
+    \theta_{x2}`; for ``'SB'`` see :func:`._sb_components`. The
     rotations `\theta_x`, `\theta_y` are those of the normal at the
     reference surface, :func:`.kCsdt._rotation_x` and
     :func:`.kCsdt._rotation_y`, with the offset of each panel for the TSDT.
@@ -259,15 +244,6 @@ def _sdt_components(func, p1, p2, kr_sb):
                 ((p1, [(V, 0, 0, 1.)]), (p2, [(V, 0, 0, 1.)])),
                 ((p1, [(W, 0, 0, 1.)]), (p2, [(U, 0, 0, -1.)])),
                 ((p1, kCsdt._rotation_x(p1)), (p2, kCsdt._rotation_x(p2)))]
-    if func == 'SB':
-        tu1, tv1 = kCsdt._surface_terms(p1, kCsdt._face(p1, -1))
-        tu2, tv2 = kCsdt._surface_terms(p2, kCsdt._face(p2, +1))
-        comps = [((p1, tu1), (p2, tu2)), ((p1, tv1), (p2, tv2)),
-                 ((p1, [(W, 0, 0, 1.)]), (p2, [(W, 0, 0, 1.)]))]
-        if kr_sb:
-            comps += [((p1, kCsdt._rotation_x(p1)), (p2, kCsdt._rotation_x(p2))),
-                      ((p1, kCsdt._rotation_y(p1)), (p2, kCsdt._rotation_y(p2)))]
-        return comps
     raise NotImplementedError(func)
 
 
@@ -316,11 +292,14 @@ def constraint_matrix(connecti, size):
     ``'SB'`` these points are used along both `x` and `y`. Each quantity
     gives one row per point, the terms of ``p1`` with a positive sign and
     those of ``p2`` with a negative sign, in the columns starting at
-    ``col_start`` of each panel. The models with 3 DOFs per term use the
-    quantities of the classical laminated plate theory, with the distance
-    between the mid-surfaces in ``'SB'``; the models with 5 DOFs those of
-    :mod:`.kCsdt`, where for ``'SB'`` the rotations are also connected when
-    ``connecti['kr']`` is given and not zero.
+    ``col_start`` of each panel. The edge connections of the models with 3
+    DOFs per term use the quantities of the classical laminated plate
+    theory, those of the models with 5 DOFs the quantities of
+    :mod:`.kCsdt`; ``'SB'`` uses for all the models the displacements at the
+    faces in contact, the quantities of the penalty matrix of
+    :func:`.skin_base.fkCSB`, see :func:`._sb_components`, and also
+    connects the rotations of the FSDT and TSDT when ``connecti['kr']`` is
+    given and not zero.
 
     Parameters
     ----------
@@ -360,7 +339,8 @@ def constraint_matrix(connecti, size):
     -----
     Each row is `q_k^{(1)} - q_k^{(2)}` at one point, where the quantity
     `q_k` is a linear combination of the fields and derivatives of a panel,
-    see :func:`._clpt_components` and :func:`._sdt_components`, such that
+    see :func:`._clpt_components`, :func:`._sdt_components` and
+    :func:`._sb_components`, such that
     `[B] \{c\} = \{0\}` holds exactly when the penalty energy
     `\frac{1}{2} k_k \int (q_k^{(1)} - q_k^{(2)})^2` of the connection
     vanishes for any `k_k > 0`, see :func:`._points`. For ``'SB'`` the
@@ -394,11 +374,12 @@ def constraint_matrix(connecti, size):
         raise NotImplementedError(
             "Connection '{0}' is not available with the null-space method, "
             "the available ones are {1}".format(func, NULL_SPACE_FUNCS))
-    if dofs1 == 3:
-        dsb = sum(kCsdt._sb_distances(p1, p2)) if func == 'SB' else None
-        comps = _clpt_components(func, p1, p2, dsb)
+    if func == 'SB':
+        comps = _sb_components(p1, p2, connecti.get('kr', 0.))
+    elif dofs1 == 3:
+        comps = _clpt_components(func, p1, p2)
     else:
-        comps = _sdt_components(func, p1, p2, connecti.get('kr', 0.))
+        comps = _sdt_components(func, p1, p2)
     xis = _points(p1, p2, 'x', ctes['x'])
     etas = _points(p1, p2, 'y', ctes['y'])
     npts = len(xis[0])*len(etas[0])
@@ -482,26 +463,13 @@ def _pd_terms(p, comp, z=0.):
     if comp == W or (comp in (U, V) and z == 0):
         return [(comp, 0, 0, 1.)]
     if comp in (U, V):
-        if _dofs(p) == 3:
-            #NOTE Kirchhoff: u(z) = u - z w,x and v(z) = v + z (v/r - w,y)
-            if comp == U:
-                terms = [(U, 0, 0, 1.), (W, 1, 0, -z)]
-            else:
-                terms = [(V, 0, 0, 1. + z*_rinv_sanders(p)), (W, 0, 1, -z)]
-        else:
-            tu, tv = kCsdt._surface_terms(p, z)
-            terms = tu if comp == U else tv
+        #NOTE the operator of the skin-base connection 'SB', all the models
+        tu, tv = kCsdt._surface_terms(p, z)
+        terms = tu if comp == U else tv
         return [term for term in terms if term[3] != 0]
-    if _dofs(p) == 3:
-        if comp == PHIX:
-            return [(W, 1, 0, -1.)]
-        terms = [(W, 0, 1, -1.)]
-        rinv = _rinv_sanders(p)
-        if rinv != 0:
-            terms.append((V, 0, 0, rinv))
-        return terms
     #NOTE for the TSDT with an offset, phix and phiy are the rotations at the
-    #     mid-surface, the rotation at z = 0 includes the transverse shear
+    #     mid-surface, the rotation at z = 0 includes the transverse shear;
+    #     for the CLPT -w,x and -w,y + v/r
     rotation = kCsdt._rotation_x if comp == PHIX else kCsdt._rotation_y
     return [term for term in rotation(p) if term[3] != 0]
 

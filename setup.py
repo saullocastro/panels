@@ -330,14 +330,6 @@ extensions = [
         include_dirs=include_dirs, extra_compile_args=compile_args,
               extra_link_args=link_args, define_macros=define_macros,
               language='c++'),
-    Extension('panels.multidomain.connections.kCSB',
-        sources=[
-            './panels/core/src/bardell.cpp',
-            './panels/multidomain/connections/kCSB.pyx',
-            ],
-        include_dirs=include_dirs, extra_compile_args=compile_args,
-              extra_link_args=link_args, define_macros=define_macros,
-              language='c++'),
     Extension('panels.multidomain.connections.kCSSxcte',
         sources=[
             './panels/core/src/bardell.cpp',

@@ -57,8 +57,9 @@ with respect to ``p2``. The compatibility of the thesis of D'Souza (2024)
 (Eq. 4.61) and writes `\Delta_u = u^t + (d^t + d^b) w^t_{,x} - u^b`
 (Eq. 4.62), which holds for a perfect bond but gives a spurious tangential
 separation inside the fracture process zone, where the two arms rotate in
-opposite directions. The kernel of the undamaged connection ``'SB'``,
-``kCSB.pyx``, keeps the compatibility of the thesis.
+opposite directions. The undamaged connection ``'SB'`` imposes the same
+jump, `\Delta_u = \Delta_v = \Delta_w = 0`, with the slope of each panel,
+see :mod:`panels.multidomain.connections.skin_base`.
 
 With `f`, `g` the approximation functions along `\xi` and `\eta`, and `w_{,x}
 = (2/a) f_{,\xi} g`, `w_{,y} = (2/b) f g_{,\eta}`, the terms of each block are

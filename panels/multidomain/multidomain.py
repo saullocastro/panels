@@ -69,31 +69,29 @@ def _penalties(connecti, pA, pB, connection_type):
 def _sb_top_bottom(connecti):
     r"""Panels on the positive and negative sides of a skin-base connection
 
-    The kernels of ``'SB'`` and ``'SB_TSL'`` place the reference surface of
-    the second panel at a distance ``dsb`` from that of the first one along
-    the negative `z` direction, the `z` axis being normal to the reference
-    surfaces of both panels, therefore ``p1`` must be the panel on the
-    positive side of the interface along `z`, and ``p2`` the one on the
-    negative side, independently of their order in the assembly: the lower
-    face of ``p1``, `z = d_1 - h_1/2`, is connected to the upper face of
-    ``p2``, `z = d_2 + h_2/2`, each in the coordinate `z` of its panel, with
-    the offsets `d_1`, `d_2` and the thicknesses `h_1`, `h_2`. The two
+    The connections ``'SB'`` and ``'SB_TSL'`` connect the lower face of
+    ``p1``, `z = d_1 - h_1/2`, to the upper face of ``p2``, `z = d_2 +
+    h_2/2`, each in the coordinate `z` of its panel, with the offsets `d_1`,
+    `d_2` and the thicknesses `h_1`, `h_2`, the `z` axis being normal to the
+    reference surfaces of both panels, therefore ``p1`` must be the panel on
+    the positive side of the interface along `z`, and ``p2`` the one on the
+    negative side, independently of their order in the assembly. The two
     panels must have the same axes `x, y, z`. Both must cover the same area,
     with the same dimensions ``a`` and ``b``, otherwise a ``ValueError`` is
     raised.
 
     Notes
     -----
-    The reference surfaces of ``p1`` and ``p2`` are `d_{sb} = h_1/2 - d_1 +
-    h_2/2 + d_2` apart, see :func:`.kCsdt._sb_distances`: `h_1/2 + h_2/2`
-    without offsets, and zero when both panels share the reference surface,
-    e.g. a stiffener base with `d_1 = (h_1 + h_2)/2` on a skin with `d_2 =
-    0`. Both panels must cover the same area, since the kernels of
-    ``kCSB.pyx`` and ``kCSB_dmg.pyx`` and the operators of
-    :meth:`.MultiDomain._tsl_operators` integrate over the domain of ``p1``
-    only, evaluating the functions of ``p2`` at the natural coordinates of
-    ``p1``, which correspond to the same physical point only when the two
-    domains coincide.
+    The reference surfaces of ``p1`` and ``p2`` are `h_1/2 - d_1 + h_2/2 +
+    d_2` apart, see :func:`.kCsdt._sb_distances`: `h_1/2 + h_2/2` without
+    offsets, and zero when both panels share the reference surface, e.g. a
+    stiffener base with `d_1 = (h_1 + h_2)/2` on a skin with `d_2 = 0`.
+    Both panels must cover the same area, since :func:`.skin_base.fkCSB`,
+    the null-space constraints of :func:`.nullspace.constraint_matrix`, the
+    kernels of ``kCSB_dmg.pyx`` and the operators of
+    :meth:`.MultiDomain._tsl_operators` evaluate the functions of ``p2`` at
+    the natural coordinates of ``p1``, which correspond to the same physical
+    point only when the two domains coincide.
 
     """
     p_top = connecti['p1']
@@ -243,7 +241,7 @@ class MultiDomain(object):
         The connections functions available are:
             - 'SSycte' : defines a skin-skin connection for const y and calls the following functions ``fkCSSycte11``, ``fkCSSycte12``, ``fkCSSycte22``
             - 'SSxcte' : defines a skin-skin connection for const x and calls the following functions ``fkCSSxcte11``, ``fkCSSxcte12``, ``fkCSSxcte22``
-            - 'SB' : defines a skin-base connection over an area and calls the following functions ``fkCSB11``, ``fkCSB12``, ``fkCSB22``, see :meth:`.get_kC_conn` for the roles of ``p1`` and ``p2``
+            - 'SB' : defines a skin-base connection over an area and calls the function :func:`.skin_base.fkCSB`, see :meth:`.get_kC_conn` for the roles of ``p1`` and ``p2``
             - 'BFycte': defines a base-flange connection and calls the following functions ``fkCBFycte11``, ``fkCBFycte12``, ``fkCBFycte22``
 
         The connections ``'BFxcte'`` and ``'SB_TSL'`` are also available,
@@ -537,8 +535,8 @@ class MultiDomain(object):
         each connection imposed exactly, on whether the rotations of
         ``'SB'`` are connected (key ``'kr'``), on the number of terms, the
         dimensions, the radius, the model and the offset of each panel, on
-        its ply thicknesses, through the distance between the mid-surfaces
-        of ``'SB'``, and on its boundary condition flags, which remove terms
+        its ply thicknesses, through the faces connected by ``'SB'``, and on
+        its boundary condition flags, which remove terms
         of the approximation functions. With ``pd_method='null-space'`` the
         positions and the prescribed components of the prescribed
         displacements add rows to the constraints, whereas the prescribed
@@ -2963,11 +2961,13 @@ class MultiDomain(object):
               surfaces, and ``p1`` is the panel on the positive side of the
               interface along `z`, ``p2`` the one on the negative side,
               whatever their order in the assembly: the lower face of
-              ``p1``, `z = d_1 - h_1/2`, is connected to the upper face of
-              ``p2``, `z = d_2 + h_2/2`, with the offset ``offset`` and
-              the thickness of each panel, whose reference surfaces are
-              `d_{sb} = h_1/2 - d_1 + h_2/2 + d_2` apart, see
-              :func:`._sb_top_bottom`. For example,
+              ``p1``, `z_1 = d_1 - h_1/2`, is connected to the upper face
+              of ``p2``, `z_2 = d_2 + h_2/2`, with the offset ``offset``
+              and the thickness of each panel, `u_1(z_1) = u_2(z_2)`,
+              `v_1(z_1) = v_2(z_2)` and `w_1 = w_2`, each panel with its
+              own kinematics, for all the models, see
+              :func:`.skin_base.fkCSB` and :func:`._sb_top_bottom`. For
+              example,
               a stiffener base on the side of positive `z` of the skin is
               ``p1`` and the skin ``p2``, while a pad-up on the side of
               negative `z` is ``p2`` and the skin ``p1``. For a double
@@ -2994,7 +2994,11 @@ class MultiDomain(object):
 
             The penalty constants default to the values of
             :func:`.calc_kt_kr`. They can be given for each connection with
-            the keys ``'kt'`` and ``'kr'`` (``'SB'`` uses only ``'kt'``).
+            the keys ``'kt'`` and ``'kr'``; for the shear deformation theories
+            ``'SB'`` connects the rotations only when ``'kr'`` is given, with
+            units of force/length, and for all the models the penalty
+            ``'kt'`` of ``'SB'`` has units of force/length**3 and must be
+            consistent with the units of the model.
 
             For the models based on shear deformation theories, e.g.
             ``'plate_fsdt_donnell'`` or ``'cylshell_tsdt_sanders'``,
@@ -3006,12 +3010,7 @@ class MultiDomain(object):
             :meth:`._kC_conn_sdt`. ``'SB_TSL'`` is not available for these
             models. The edge connections also connect the independent
             rotations with ``'kr'``, and the rotation flags of the connected
-            edges (e.g. ``x2phiy``) must be released as the other flags. The
-            ``'SB'`` connection connects the displacements at the interface
-            of the laminates, and their rotations only when ``'kr'`` is
-            given, with units of force/length. For ``'SB'`` the penalty
-            ``'kt'`` has units of force/length**3 and must be consistent with
-            the units of the model.
+            edges (e.g. ``x2phiy``) must be released as the other flags.
 
             The dictionaries are not modified.
 
@@ -3070,11 +3069,17 @@ class MultiDomain(object):
         `w_{,y}` for ``'SSycte'``; for ``'BFycte'`` and ``'BFxcte'`` the
         displacements of the flange, rotated by 90 degrees about the axis of
         the connection, and the rotation about that axis, see
-        :func:`._rinv_sanders` and :func:`._bf_base_flange`; for ``'SB'``
-        `u_1 + d_{sb} w_{1,x} = u_2`, `v_1 + d_{sb} w_{1,y} = v_2` and `w_1 =
-        w_2`, with the reference surfaces `d_{sb} = h_1/2 - d_1 + h_2/2 +
-        d_2` apart, `d_1` and `d_2` being the offsets, see
-        :func:`._sb_top_bottom`. The connections of the shear deformation
+        :func:`._rinv_sanders` and :func:`._bf_base_flange`. For ``'SB'``,
+        for all the models, the quantities are the displacements of the
+        faces in contact, `u_1(z_1)`, `v_1(z_1)` and `w_1` against
+        `u_2(z_2)`, `v_2(z_2)` and `w_2`, with `z_1 = d_1 - h_1/2`, `z_2 =
+        d_2 + h_2/2`, `d_1` and `d_2` being the offsets, `u(z) = u - z
+        w_{,x}` and `v(z) = (1 + z/r) v - z w_{,y}` for the classical
+        laminated plate theory, with the slope of each panel and the term
+        `z v/r` only with the Sanders-Koiter kinematics, see
+        :func:`.skin_base.fkCSB` and :func:`._sb_top_bottom`, and the
+        rotations of the normal of the shear deformation theories when
+        ``'kr'`` is given. The other connections of the shear deformation
         theories are described in :meth:`._kC_conn_sdt`.
 
         The continuity is then only approximate. Low penalty constants make
@@ -3229,24 +3234,11 @@ class MultiDomain(object):
                     #     _sb_top_bottom()
                     p_top, p_bot = _sb_top_bottom(connecti)
                     kt, _ = _penalties(connecti, p_top, p_bot, 'bot-top')
-
-                    dt, db = connections.kCsdt._sb_distances(p_top, p_bot)
-                    dsb = dt + db
-                    #NOTE the term v/r of the Sanders-Koiter kinematics at
-                    #     the interface, see kCSB.pyx
-                    rinvt = _rinv_sanders(p_top)
-                    rinvb = _rinv_sanders(p_bot)
-                    kC_conn += connections.kCSB.fkCSB11(kt, dsb, p_top,
-                            size, row0=p_top.row_start, col0=p_top.col_start,
-                            dt=dt, rinv1=rinvt)
-                    kC_conn += _upper_block(connections.kCSB.fkCSB12(
-                            kt, dsb, p_top, p_bot,
-                            size, row0=p_top.row_start, col0=p_bot.col_start,
-                            dt=dt, db=db, rinv1=rinvt, rinv2=rinvb),
-                            p_top, p_bot)
-                    kC_conn += connections.kCSB.fkCSB22(kt, p_top, p_bot,
-                            size, row0=p_bot.row_start, col0=p_bot.col_start,
-                            db=db, rinv2=rinvb)
+                    #NOTE the faces in contact with the kinematics of each
+                    #     panel, the same matrix for all the models, upper
+                    #     triangle whatever the order of the panels
+                    kC_conn += connections.skin_base.fkCSB(kt, p_top, p_bot,
+                            size, kr=connecti.get('kr', 0.))
 
                 # Traction Seperation Law introduced at the interface
                 elif connection_function == 'SB_TSL': # and c is not None:
@@ -3338,9 +3330,11 @@ class MultiDomain(object):
         displacements `u, v, w` at the interface, `z = d_1 - h_1/2` of
         ``p1`` and `z = d_2 + h_2/2` of ``p2`` with the offsets `d_1`,
         `d_2`, and the difference of the rotations only when
-        ``'kr'`` is given and not zero. The default rotation penalty does not
-        grow as the domains become narrower, so thin and narrow domains may
-        need a higher ``'kr'`` to converge to the single-domain result. See
+        ``'kr'`` is given and not zero, as for the classical laminated
+        plate theory, see :func:`.skin_base.fkCSB`. The default rotation
+        penalty does not grow as the domains become narrower, so thin and
+        narrow domains may need a higher ``'kr'`` to converge to the
+        single-domain result. See
         :meth:`.get_kC_conn` for the penalty energy.
 
         """
@@ -4256,8 +4250,8 @@ class MultiDomain(object):
         rotation about the axis of the cylinder then opens no tangential
         separation when the radius of each panel is that of its reference
         surface. The kernels of ``kCSB_dmg.pyx``, used with the key
-        ``'use_kernels'``, and the connection ``'SB'`` contain the same term
-        `v/r`.
+        ``'use_kernels'``, and the connection ``'SB'``, see
+        :func:`.kCsdt._surface_terms`, contain the same term `v/r`.
 
         """
         cache = self.__dict__.setdefault('_gauss_field_cache', {})
@@ -4341,7 +4335,13 @@ class MultiDomain(object):
         [1]_, Eq. 4.62, which uses the slope of ``p1``
         only, this gives no spurious tangential separation in the fracture
         process zone, where the two arms rotate in opposite directions. See
-        :ref:`cohesive_zone`.
+        :ref:`cohesive_zone`. With `z_1 = -d^t` and `z_2 = d^b`, the rows of
+        the operators are those of the quantities of ``'SB'``, `u_1(z_1) -
+        u_2(z_2)`, `v_1(z_1) - v_2(z_2)` and `w_1 - w_2`, see
+        :func:`.kCsdt._sb_components`, at the Gauss-Legendre points: a
+        pristine interface, with `k_o` at every point, has the matrix of
+        :func:`.skin_base.fkCSB` with `k_t = k_o` when the rule integrates
+        the products of the approximation functions exactly.
 
         References
         ----------

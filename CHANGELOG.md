@@ -152,11 +152,9 @@
   `Shell.add_distr_load_fixed_x` instead.
 - Skin-base connections of curved panels with the Sanders-Koiter kinematics:
   the tangential displacement at the interface, `v(z) = v + z (v/r - w,y)`,
-  now has the term `v/r` in the CLPT connection `'SB'`, penalty kernels
-  `fkCSB11`, `fkCSB12`, `fkCSB22` (new optional arguments `dt`, `db`,
-  `rinv1`, `rinv2`, derived in `theory/multidomain_penalization/
-  connections.py`) and null-space constraints, `(1 - dt/r1) v1 + dsb w1,y =
-  (1 + db/r2) v2`, and in the kernels `fkCSB11_dmg`, `fkCSB12_dmg`,
+  now has the term `v/r` in the CLPT connection `'SB'`, penalty and
+  null-space, see the unified `'SB'` below, and in the kernels
+  `fkCSB11_dmg`, `fkCSB12_dmg`,
   `fkCSB22_dmg` of `'SB_TSL'` with `use_kernels=True` (new optional
   arguments `rinv1`, `rinv2`), which differed from the default matrix
   products by 1.2e-3 relative and now agree to 1.5e-15. A rigid rotation
@@ -165,6 +163,37 @@
   that of a separation `r Omega`, now zero to round-off. The FSDT and TSDT
   `'SB'` already had the term. Nothing changes for the Donnell kinematics
   and for plates.
+- One skin-base connection `'SB'` for every model: `u1(z1) = u2(z2)`,
+  `v1(z1) = v2(z2)` and `w1 = w2` at the faces in contact, `z1 = d1 - h1/2`
+  of `p1` and `z2 = d2 + h2/2` of `p2`, each panel with its own kinematics,
+  `u(z) = u - z w,x` and `v(z) = (1 + z/r) v - z w,y` for the CLPT (the
+  term `z/r` only with the Sanders-Koiter kinematics), with the operator
+  `kCsdt._surface_terms` of the FSDT and TSDT `'SB'` and of the prescribed
+  displacements at a thickness coordinate. The null-space constraints and
+  the penalty matrix, `kt` times the integral of the products of the same
+  quantities, come from `kCsdt._sb_components`. The CLPT used the form of
+  the thesis of D'Souza (2024), `u1 + dsb w1,x = u2` and `(1 - dt/r1) v1 +
+  dsb w1,y = (1 + db/r2) v2`, with the slope of `p1` only, from the
+  hand-written kernels of `kCSB.pyx`. The null-space results do not change:
+  `w1 = w2` at the Gauss-Legendre grid ties the slopes over the whole area,
+  and the two sets of constraints have the same null space to `2.5e-15`.
+  The penalty results change at finite `kt`, all within the tolerances of
+  the tests: for the laminates `[0/90]` over `[0/90]` with `1e5` times the
+  default `kt`, the largest error of the first 8 frequencies with respect to
+  the single laminate, between `6.94e-6` and `8.31e-6` depending on the
+  offsets, is `6.94e-6` for all of them; the
+  T-stiffened panel of `tstiff2d_1stiff_freq` 48.27331 to 48.27327,
+  `tstiff2d_1stiff_compression` 142.6822 to 142.6811 (114.8576 to 114.8542
+  with the static pre-stress), `tstiff2d_1stiff_flutter` 446.1180 to
+  446.1153; the bonded sub-laminates of Stamatelos and Labeas (2023) by
+  `-3.0e-6` at most, and now agree to `5e-8` with the pristine `'SB_TSL'`,
+  whose
+  separations are the same quantities: with `k_o` at every point its matrix
+  is that of `'SB'` with `kt = k_o`. The penalty method converges to the
+  null-space method with `1/kt`, e.g. from `2.7e-2` with the default `kt`
+  to `2.9e-5` with `1000 kt` for two bonded laminates with offsets. The key
+  `'kr'` of `'SB'` is still used only by the FSDT and TSDT, whose rotations
+  are independent. New test file `tests/multidomain/test_sb_unified.py`.
 - Default numbers of integration points: `Shell.nx` and `Shell.ny` follow
   `m` and `n` at the time of the calculation, `max(2*m - 1, 7)` and
   `max(2*n - 1, 7)`, new function `panels.shell.gauss_points`, unless a
@@ -186,6 +215,17 @@
 - `MultiDomain.get_kC_conn` loses the argument `kw_tsl`, which was not used:
   the stiffness of each `'SB_TSL'` connection is computed with
   `MultiDomain.calc_k_dmg` at `c`. Calls passing `kw_tsl` must drop it.
+- New module `panels.multidomain.connections.skin_base` with
+  `fkCSB(kt, p_top, p_bot, size, kr=0.)`, the upper triangle of the matrix
+  of `'SB'` for every model; `kCsdt.fkCSB_sdt` gives the same matrix for
+  the FSDT and TSDT, signature unchanged.
+- The Cython module `panels.multidomain.connections.kCSB` is removed.
+  `fkCSB11`, `fkCSB12` and `fkCSB22`, still importable from
+  `panels.multidomain.connections`, are deprecated and issue a
+  `DeprecationWarning`: they return the blocks of `fkCSB`, with the faces
+  and the kinematics of the panels, and ignore the arguments `dsb`, `dt`,
+  `db`, `rinv1` and `rinv2`. `nullspace._clpt_components` loses the argument
+  `dsb`.
 
 ### Tests
 
