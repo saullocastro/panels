@@ -43,7 +43,7 @@ kept, in `results/`.
 | File | Content |
 |---|---|
 | `conn_method_comparison.ipynb` | The benchmark notebooks with the penalty and the null-space connections |
-| `conn_method_study.py` | Runs and timings of `conn_method_comparison.ipynb`, results in `results/conn_methods/` |
+| `conn_method_study.py` | Runs and timings of `conn_method_comparison.ipynb`, results in `results/conn_methods/`; `results/conn_methods/stored_b7fd4e4/` keeps the DCB penalty results and cases of commit b7fd4e4, with which the null-space runs of 2026-09-24 are compared |
 
 ## Shells and plates
 
