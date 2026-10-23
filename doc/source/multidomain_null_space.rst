@@ -444,7 +444,7 @@ passes the load factor to ``calc_fext`` when it declares the keyword
 argument ``lbd``, and uses `\partial R_r/\partial \lambda` in the predictors
 and in the constraint of the arc-length methods, and `\lambda \partial
 R_r/\partial \lambda` as a reference of the convergence criteria, the
-relative one and Crisfield's, the default since ``structsolve`` 0.8.5,
+relative one and Crisfield's, the default since ``structsolve`` 0.9.0,
 because under a prescribed displacement alone both `[T]^T \{F_{ext}\}` and
 `[T]^T \{F_{int}\}` vanish at equilibrium, see
 :meth:`.MultiDomain.get_reduced_functions`.
@@ -679,7 +679,7 @@ end-shortening. With `k/A_{11} = 10^6` the sparse eigenvalue solver of
 ``structsolve`` 0.8.0 failed its verification of the residuals of the
 eigenpairs, because of the conditioning, and ``structsolve.lb`` fell back to
 the dense solver with a ``DenseFallbackWarning``. Since ``structsolve``
-0.8.5 the relative residual of the verification is at least
+0.9.0 the relative residual of the verification is at least
 ``RESIDUAL_FLOOR = 1e-8`` times a scale of the norms of the matrices, and
 the eigenpairs of the sparse solver are accepted.
 
@@ -689,7 +689,7 @@ centre as imperfection, as in ``test_nonlinear_reaction_matches_penalty``,
 Newton-Raphson with 8 increments. Error of the axial reaction of the penalty
 method, relative to that of the null-space method, with Crisfield's
 convergence criterion, ``Analysis.convergence = 'crisfield'``, the default of
-``structsolve`` 0.8.5 with ``relTOL = 1e-9``, and with the relative
+``structsolve`` 0.9.0 with ``relTOL = 1e-9``, and with the relative
 criterion, ``'relative'``, the only one up to ``structsolve`` 0.8.0, whose
 default was ``relTOL = 1e-6``:
 
@@ -747,7 +747,7 @@ with the four combinations of the table.
 **Run time.** For the linear analyses both methods have the same cost: the
 elimination of the constraints is a small fraction of the assembly. For the
 non-linear analysis above the run time is dominated by the assembly of the
-tangent stiffness matrix. With ``panels`` 0.13.21 and ``structsolve`` 0.8.5,
+tangent stiffness matrix. With ``panels`` 0.13.21 and ``structsolve`` 0.9.0,
 on the same machine, medians of 15 runs of ``Analysis.static``: 0.60 s with
 the null-space method and Crisfield's criterion with ``relTOL = 1e-9``, and
 0.50 s and 0.66 s with the relative criterion with ``relTOL = 1e-6`` and

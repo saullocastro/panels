@@ -163,8 +163,8 @@
 
 ### Dependencies
 
-- Requires `composites>=0.9.31`, for `Laminate.intrhoz3`, `intrhoz4` and
-  `intrhoz6`, and `structsolve>=0.8.5`, whose default convergence criterion
+- Requires `composites>=0.10.0`, for `Laminate.intrhoz3`, `intrhoz4` and
+  `intrhoz6`, and `structsolve>=0.9.0`, whose default convergence criterion
   is Crisfield's.
 
 ## 0.13.11 (2026-10-16)

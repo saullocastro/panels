@@ -1334,9 +1334,9 @@ degrees of freedom), prescribed displacements imposed exactly. Run time of
 processes, interleaved, after a warm-up, of ``panels`` before these
 developments (0.12.0, with the previous kernels and the assembly of `[K_T]`
 for `\partial R_r/\partial \lambda`), after them (0.13.0) and 0.13.21, with
-``structsolve`` 0.7.0, 0.8.0 and 0.8.5. Before 0.8.5 the convergence was
+``structsolve`` 0.7.0, 0.8.0 and 0.9.0. Before 0.9.0 the convergence was
 checked with the relative criterion, ``relTOL = 1e-6`` by default;
-``structsolve`` 0.8.5 checks with Crisfield's criterion, ``relTOL = 1e-9``
+``structsolve`` 0.9.0 checks with Crisfield's criterion, ``relTOL = 1e-9``
 by default, and keeps the former with ``Analysis.convergence = 'relative'``:
 
 .. list-table::
@@ -1373,13 +1373,13 @@ by default, and keeps the former with ``Analysis.convergence = 'relative'``:
       - 3.40 s
       - 7.60 s
     * - 0.13.21
-      - 0.8.5
+      - 0.9.0
       - relative, ``1e-6``
       - 4.99 s
       - 3.67 s
       - 7.67 s
     * - 0.13.21
-      - 0.8.5
+      - 0.9.0
       - Crisfield, ``1e-9``
       - 5.79 s
       - 4.19 s
