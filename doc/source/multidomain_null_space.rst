@@ -350,7 +350,10 @@ A single panel is wrapped in a :class:`.MultiDomain` without connections,
 independent: the connections may be imposed with either ``conn_method``.
 The default ``pd_method='penalty'`` keeps the previous behaviour.
 
-The same methods of :class:`.Shell` define the prescribed displacements.
+The same methods of :class:`.Shell` define the prescribed displacements,
+the in-plane ones at the reference surface or at the thickness coordinate
+of the keyword ``z``, e.g. at the faces of a face-clamped edge, see
+:ref:`boundary_conditions_face_clamp`.
 With ``pd_method='null-space'`` the values of the penalty constants are not
 used: a component is prescribed when its penalty constant is neither
 ``None`` nor zero and its value is given, the same rule as for the penalty
@@ -838,6 +841,8 @@ see :ref:`null_space_pd`.
     :no-value:
 
 .. autofunction:: panels.multidomain.connections.nullspace.pd_constraint_matrix
+
+.. autofunction:: panels.multidomain.connections.nullspace.pd_rows
 
 .. autofunction:: panels.multidomain.connections.nullspace.pd_points
 

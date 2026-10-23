@@ -118,6 +118,10 @@ A single :class:`.Shell` can be supported at a point by the penalty springs
 of :meth:`.Shell.calc_stiffness_point_constraint`, added by the user to the
 constitutive stiffness matrix.
 
+The in-plane displacements `u` and `v` are prescribed at the reference
+surface, `z = 0`, or at the thickness coordinate given by the keyword ``z``
+of these methods, with the same ``z`` given to the penalty kernels.
+
 The example below prescribes a uniform end shortening of a simply supported
 plate with the null-space method, and verifies that it gives the same
 critical state as the equivalent applied load:
@@ -126,3 +130,40 @@ critical state as the equivalent applied load:
     :pyobject: test_linear_buckling_plate_end_shortening_equals_load
 
 More examples are given in :ref:`ex_prescribed_displacements`.
+
+
+.. _boundary_conditions_face_clamp:
+
+Face-clamped edges
+------------------
+
+In tests, an edge is clamped by restraining the displacements of the bottom
+and top faces of the laminate, `z = d \mp h/2`, the section being free to
+deform in between. This face clamp, `u = v = 0` at both faces and `w = 0`,
+is prescribed with the keyword ``z`` of :meth:`.Shell.add_distr_pd_fixed_x`
+and :meth:`.Shell.add_distr_pd_fixed_y`; the flags of the edge are left
+free, ``1``. With the in-plane displacement at `z`, see
+:func:`.nullspace.pd_constraint_matrix`,
+
+.. math::
+
+    u(z) = u + \left(z - c_1 g(z)\right) \phi_x - c_1 g(z) w_{,x}, \qquad
+    g(z) = (z - d)^3 + d^3
+
+with `c_1 = 4/(3 h^2)` for the TSDT and `c_1 = 0` for the FSDT, the two
+faces give `u = \phi_x = 0` for the FSDT, and `u = w_{,x} = 0` for the CLPT,
+`u(z) = u - z w_{,x}`: the face clamp is the clamp of the flags. For the TSDT
+the difference of the two faces gives `(h/3)(2 \phi_x - w_{,x}) = 0` and
+their sum `u = -(d/2)(1 - 4 d^2/h^2) w_{,x}`, two conditions instead of the
+three of the planar clamp; the section warps,
+
+.. math::
+
+    u(z) = \frac{w_{,x}}{2} \zeta \left(1 - \frac{4 \zeta^2}{h^2}\right),
+    \qquad \zeta = z - d
+
+which no combination of flags can express. Along the edge `w = 0` gives
+`w_{,y} = 0`, and the two faces then give `v = \phi_y = 0`. The edge is
+softer than the planar clamp and stiffer than the simple support, and,
+being defined by the physical faces, it does not depend on the reference
+surface. See the example :ref:`ex_face_clamp`.

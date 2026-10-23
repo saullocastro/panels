@@ -136,6 +136,9 @@ class Shell(object):
     theory (CLPT), ``x1phix = x1phiy = 0`` for the first-order shear
     deformation theory (FSDT), and both ``x1wr = 0`` and ``x1phix = x1phiy
     = 0`` for the third-order one (TSDT), see :ref:`boundary_conditions`.
+    An edge clamped by its faces, where the TSDT section may warp, is
+    prescribed with the keyword ``z`` of :meth:`.add_distr_pd_fixed_x` and
+    :meth:`.add_distr_pd_fixed_y`.
 
     The attribute ``fsdt_shear_correction`` controls the transverse shear
     stiffness of the first-order shear deformation theory (FSDT):
@@ -262,7 +265,14 @@ class Shell(object):
     \phi_x = w_{,x} = 0`, hence ``x1wr = 0`` together with ``x1phix = 0``;
     the rotation at the reference surface, `\theta_x = u_{,z}(0)`, is then
     zero for any offset. On `x = 0`, `w = 0` gives `w_{,y} = 0` along the
-    edge, and `v = \phi_y = 0` gives `v(z) = 0`.
+    edge, and `v = \phi_y = 0` gives `v(z) = 0`. A face clamp, `u = v = 0`
+    only at the faces `z = d \mp h/2`, gives the same conditions for the
+    CLPT and the FSDT, whereas for the TSDT it gives the two conditions
+    `\phi_x = w_{,x}/2` and `u = -(d/2)(1 - 4 d^2/h^2) w_{,x}`, leaving the
+    section free to warp, `u(z) = (w_{,x}/2) \zeta (1 - 4 \zeta^2/h^2)` with
+    `\zeta = z - d`; flags cannot express it, and it is imposed with the
+    prescribed displacements at the faces, see
+    :ref:`boundary_conditions_face_clamp`.
 
     The equilibrium approach of Rohwer (1988) [3]_ gives ``k = 5/6`` for a
     homogeneous plate and accounts for the stacking sequence otherwise. The
@@ -379,10 +389,11 @@ class Shell(object):
         self.point_pds_inc = [] #NOTE see add_point_pd
         self.distr_pds = [] #NOTE see add_distr_pd_fixed_x and add_distr_pd_fixed_y
         self.distr_pds_inc = [] # NOTE see add_distr_pd_fixed_x and add_distr_pd_fixed_y
-            # Stored as [x pos, y pos of applied displ, force x, y, z due to that displ]
+            # Stored as [x pos, y pos of applied displ, force x, y, z due to that displ, z coordinate of u and v]
         # prescribed values, used by MultiDomain(..., pd_method='null-space'):
-        # [x, y, up, vp, wp, phixp, phiyp] and [x, None, funcu, funcv, funcw,
-        # funcphix, funcphiy] or [None, y, ...], None for a free component
+        # [x, y, up, vp, wp, phixp, phiyp, z] and [x, None, funcu, funcv,
+        # funcw, funcphix, funcphiy, z] or [None, y, ...], None for a free
+        # component, z the thickness coordinate of u and v
         self.point_pds_values = []
         self.point_pds_values_inc = []
         self.distr_pds_values = []
@@ -2973,10 +2984,15 @@ class Shell(object):
 
 
     def add_point_pd(self, x, y, ku, up, kv, vp, kw, wp, cte=True,
-                     kphix=None, phixp=None, kphiy=None, phiyp=None):
+                     kphix=None, phixp=None, kphiy=None, phiyp=None, z=0.):
         r"""Add a point prescribed displacement with up to five components
 
         o/p = [location and equivalent force]
+
+        The in-plane displacements `u` and `v` are prescribed at the
+        thickness coordinate ``z``, by default at the reference surface,
+        e.g. at the faces of the laminate to clamp an edge by its faces, see
+        :ref:`boundary_conditions_face_clamp`.
 
         With the penalty method, the default of :class:`.MultiDomain`, the
         prescribed displacement enters the external force vector as `k u_p`,
@@ -2987,10 +3003,10 @@ class Shell(object):
         not used, a component being prescribed when its penalty constant is
         neither ``None`` nor zero and its value is not ``None``.
 
-        The list ``[x, y, ku*up, kv*vp, kw*wp]``, a component being ``0.``
-        when its penalty constant or value is ``None``, is appended to the
-        attribute ``point_pds``, and ``[x, y, up, vp, wp, phixp, phiyp]``,
-        with ``None`` for the components not prescribed, to
+        The list ``[x, y, ku*up, kv*vp, kw*wp, z]``, a component being
+        ``0.`` when its penalty constant or value is ``None``, is appended to
+        the attribute ``point_pds``, and ``[x, y, up, vp, wp, phixp, phiyp,
+        z]``, with ``None`` for the components not prescribed, to
         ``point_pds_values``; with ``cte=False`` to ``point_pds_inc`` and
         ``point_pds_values_inc`` instead.
 
@@ -3020,9 +3036,33 @@ class Shell(object):
             Sanders-Koiter kinematics. The rotations ``phixp`` and
             ``phiyp`` are dimensionless; of ``kphix`` and ``kphiy`` only
             whether they are ``None`` or zero is used. Default ``None``.
+        z : float, optional
+            Thickness coordinate, measured from the reference surface, where
+            ``up`` and ``vp`` are prescribed, a length, normally within the
+            laminate, ``offset - h/2 <= z <= offset + h/2``; `w` and the
+            rotations do not depend on it. With the penalty method, the
+            same ``z`` must be given to the penalty stiffness, e.g. to
+            :func:`.fkCpd`. Default ``0.``, the reference surface.
 
         Notes
         -----
+        The in-plane displacements at the coordinate `z` are those of the
+        displacement field of the model, e.g. for the third-order shear
+        deformation theory (TSDT), with the offset `d` and the thickness
+        `h` of the laminate:
+
+        .. math::
+
+            u(z) = u + z \phi_x - c_1 \left[(z - d)^3 + d^3\right]
+            \left(\phi_x + w_{,x}\right), \qquad c_1 = \frac{4}{3 h^2}
+
+        `u(z) = u + z \phi_x` for the first-order theory (FSDT) and `u(z) =
+        u - z w_{,x}` for the classical laminated plate theory (CLPT), and
+        likewise `v(z)`, with the term `z v/r` of the Sanders-Koiter
+        kinematics, see :func:`.nullspace.pd_constraint_matrix`. A
+        prescribed `u(z)` is therefore a linear constraint on `u`, `\phi_x`
+        and `w_{,x}`.
+
         The prescribed rotations are those of the normal at the reference
         surface, the rotations also tied by the connections, see
         :func:`.kCsdt._rotation_x` and :func:`.kCsdt._rotation_y`. With the
@@ -3043,7 +3083,9 @@ class Shell(object):
         :ref:`tsdt_offset_prescribed_rotations`. For the TSDT, `u = 0`, `w
         = 0` and `\theta_x = 0` along an edge `x = cte` do not clamp it,
         the warping term of `u(z)` remaining: the clamp also needs `w_{,x}
-        = 0`, see :ref:`boundary_conditions`.
+        = 0`, which `u(z) = 0` prescribed at three coordinates `z` gives;
+        prescribed at the two faces only, `u(z) = 0` gives the face clamp,
+        see :ref:`boundary_conditions_face_clamp`.
 
         The penalty method adds to the energy, for each prescribed
         component, e.g. `u`,
@@ -3064,11 +3106,13 @@ class Shell(object):
         """
         def given(k, value):
             return k is not None and k != 0 and value is not None
+        z = float(z)
         values = [x, y] + [value if given(k, value) else None
                            for k, value in ((ku, up), (kv, vp), (kw, wp),
                                             (kphix, phixp), (kphiy, phiyp))]
+        values.append(z)
         pd = [x, y] + [k*value if k is not None and value is not None else 0.
-                       for k, value in ((ku, up), (kv, vp), (kw, wp))]
+                       for k, value in ((ku, up), (kv, vp), (kw, wp))] + [z]
         if cte:
             self.point_pds.append(pd)
             # Adds the location and force
@@ -3078,7 +3122,7 @@ class Shell(object):
             self.point_pds_values_inc.append(values)
 
 
-    def _add_distr_pd(self, x, y, ks, funcs, cte):
+    def _add_distr_pd(self, x, y, ks, funcs, cte, z):
         r"""See :meth:`.add_distr_pd_fixed_x` and
         :meth:`.add_distr_pd_fixed_y`, ``ks`` and ``funcs`` for ``u, v, w,
         phix, phiy``"""
@@ -3095,9 +3139,10 @@ class Shell(object):
                     raise ValueError('Both k{0} and func{0} must be specified'.format(name))
                 new_func = lambda s, k=k, func=func: k*func(s) # s is the coordinate along the line
             new_funcs.append(new_func)
+        z = float(z)
         values = [x, y] + [func if k is not None and k != 0 else None
-                           for k, func in zip(ks, funcs)]
-        pd = [x, y] + new_funcs[:3]
+                           for k, func in zip(ks, funcs)] + [z]
+        pd = [x, y] + new_funcs[:3] + [z]
         if cte:
             self.distr_pds.append(pd)
             self.distr_pds_values.append(values)
@@ -3109,8 +3154,11 @@ class Shell(object):
     def add_distr_pd_fixed_x(self, x, ku=None, kv=None, kw=None,
                              funcu=None, funcv=None, funcw=None, cte=True,
                              kphix=None, kphiy=None, funcphix=None,
-                             funcphiy=None):
+                             funcphiy=None, z=0.):
         r"""Add a distributed prescribed displacement g(y) at a fixed x position
+
+        The in-plane displacements `u` and `v` are prescribed at the
+        thickness coordinate ``z``, see :meth:`.add_point_pd`.
 
         With the penalty method, the default of :class:`.MultiDomain`, the
         prescribed displacement enters the external force vector as `k
@@ -3121,11 +3169,12 @@ class Shell(object):
         not used, a component being prescribed when its penalty constant is
         neither ``None`` nor zero.
 
-        The list ``[x, None, ku*funcu, kv*funcv, kw*funcw]``, with ``None``
-        for a component without penalty constant and function, is appended
-        to the attribute ``distr_pds``, and ``[x, None, funcu, funcv, funcw,
-        funcphix, funcphiy]``, with ``None`` for a component whose penalty
-        constant is ``None`` or zero, to ``distr_pds_values``; with
+        The list ``[x, None, ku*funcu, kv*funcv, kw*funcw, z]``, with
+        ``None`` for a component without penalty constant and function, is
+        appended to the attribute ``distr_pds``, and ``[x, None, funcu,
+        funcv, funcw, funcphix, funcphiy, z]``, with ``None`` for a component
+        whose penalty constant is ``None`` or zero, to ``distr_pds_values``;
+        with
         ``cte=False`` to ``distr_pds_inc`` and ``distr_pds_values_inc``
         instead. A ``ValueError`` is raised when all penalty constants or all
         functions are ``None``, or when only one of the penalty constant and
@@ -3160,6 +3209,11 @@ class Shell(object):
             dimensionless, as functions of `y`, only with
             ``pd_method='null-space'``, see :meth:`.add_point_pd`.
             Default ``None``.
+        z : float, optional
+            Thickness coordinate, measured from the reference surface, of
+            the prescribed `u` and `v`, a length, see :meth:`.add_point_pd`;
+            with the penalty method the same ``z`` must be given to
+            :func:`.fkCld_xcte`. Default ``0.``, the reference surface.
 
         Notes
         -----
@@ -3172,14 +3226,17 @@ class Shell(object):
 
         """
         self._add_distr_pd(x, None, (ku, kv, kw, kphix, kphiy),
-                           (funcu, funcv, funcw, funcphix, funcphiy), cte)
+                           (funcu, funcv, funcw, funcphix, funcphiy), cte, z)
 
 
     def add_distr_pd_fixed_y(self, y, ku=None, kv=None, kw=None,
                              funcu=None, funcv=None, funcw=None, cte=True,
                              kphix=None, kphiy=None, funcphix=None,
-                             funcphiy=None):
+                             funcphiy=None, z=0.):
         r"""Add a distributed prescribed displacement g(x) at a fixed y position
+
+        The in-plane displacements `u` and `v` are prescribed at the
+        thickness coordinate ``z``, see :meth:`.add_point_pd`.
 
         With the penalty method, the default of :class:`.MultiDomain`, the
         prescribed displacement enters the external force vector as `k
@@ -3190,9 +3247,9 @@ class Shell(object):
         not used, a component being prescribed when its penalty constant is
         neither ``None`` nor zero.
 
-        The list ``[None, y, ku*funcu, kv*funcv, kw*funcw]`` is appended to
-        the attribute ``distr_pds`` and ``[None, y, funcu, funcv, funcw,
-        funcphix, funcphiy]`` to ``distr_pds_values``, or to
+        The list ``[None, y, ku*funcu, kv*funcv, kw*funcw, z]`` is appended
+        to the attribute ``distr_pds`` and ``[None, y, funcu, funcv, funcw,
+        funcphix, funcphiy, z]`` to ``distr_pds_values``, or to
         ``distr_pds_inc`` and ``distr_pds_values_inc`` with ``cte=False``,
         and a ``ValueError`` is raised, as for
         :meth:`.add_distr_pd_fixed_x`.
@@ -3225,6 +3282,11 @@ class Shell(object):
             dimensionless, as functions of `x`, only with
             ``pd_method='null-space'``, see :meth:`.add_point_pd`.
             Default ``None``.
+        z : float, optional
+            Thickness coordinate, measured from the reference surface, of
+            the prescribed `u` and `v`, a length, see :meth:`.add_point_pd`;
+            with the penalty method the same ``z`` must be given to
+            :func:`.fkCld_ycte`. Default ``0.``, the reference surface.
 
         Notes
         -----
@@ -3233,7 +3295,7 @@ class Shell(object):
 
         """
         self._add_distr_pd(None, y, (ku, kv, kw, kphix, kphiy),
-                           (funcu, funcv, funcw, funcphix, funcphiy), cte)
+                           (funcu, funcv, funcw, funcphix, funcphiy), cte, z)
 
     def has_rotation_pds(self):
         r"""Whether rotations are prescribed, which only

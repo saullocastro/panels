@@ -424,15 +424,31 @@ def constraint_matrix(connecti, size):
 PD_COMPONENTS = FIELDS
 
 
-def _pd_terms(p, comp):
+def _pd_terms(p, comp, z=0.):
     r"""Terms ``(field, der_x, der_y, coeff)`` of a prescribed component,
-    the displacements and the rotations of the normal at the reference
-    surface
+    the displacements `u` and `v` at the thickness coordinate ``z``, `w`
+    and the rotations of the normal at the reference surface
 
     The terms with a zero coefficient are dropped.
 
     Notes
     -----
+    The in-plane displacements at the coordinate `z`, measured from the
+    reference surface, are those of the displacement field of the model:
+
+    .. math::
+
+        u(z) = u + z \Phi_x + p(z) \left(\phi_x + w_{,x}\right) \qquad
+        v(z) = v + z \Phi_y + p(z) \left(\phi_y + w_{,y}\right)
+
+    with `\Phi_x = -w_{,x}`, `\Phi_y = -w_{,y}` and `p(z) = 0` for the
+    classical laminated plate theory, `\Phi_x = \phi_x`, `\Phi_y = \phi_y`
+    for the shear deformation theories, with `p(z) = 0` for the FSDT and
+    `p(z) = -c_1 [(z - d)^3 + d^3]`, `c_1 = 4/(3 h^2)`, for the TSDT, see
+    :func:`.kCsdt._surface_terms`, and the term `v/r` added to `\Phi_y` with
+    the Sanders-Koiter kinematics. For `z = 0` they are the fields `u` and
+    `v`.
+
     The rotations are `\phi_x = -w_{,x}` and `\phi_y = -w_{,y}` for the
     classical laminated plate theory, the rows of ``fg`` of the field module
     of the model, and for the shear deformation theories the rotations at
@@ -453,8 +469,19 @@ def _pd_terms(p, comp):
     the classical laminated plate theory.
 
     """
-    if comp in (U, V, W):
+    if comp == W or (comp in (U, V) and z == 0):
         return [(comp, 0, 0, 1.)]
+    if comp in (U, V):
+        if _dofs(p) == 3:
+            #NOTE Kirchhoff: u(z) = u - z w,x and v(z) = v + z (v/r - w,y)
+            if comp == U:
+                terms = [(U, 0, 0, 1.), (W, 1, 0, -z)]
+            else:
+                terms = [(V, 0, 0, 1. + z*_rinv_sanders(p)), (W, 0, 1, -z)]
+        else:
+            tu, tv = kCsdt._surface_terms(p, z)
+            terms = tu if comp == U else tv
+        return [term for term in terms if term[3] != 0]
     if _dofs(p) == 3:
         if comp == PHIX:
             return [(W, 1, 0, -1.)]
@@ -467,6 +494,56 @@ def _pd_terms(p, comp):
     #     mid-surface, the rotation at z = 0 includes the transverse shear
     rotation = kCsdt._rotation_x if comp == PHIX else kCsdt._rotation_y
     return [term for term in rotation(p) if term[3] != 0]
+
+
+def pd_rows(p, comp, xis, etas, z=0., col0=0, size=None):
+    r"""Rows of a prescribed component at the points of a grid
+
+    One row per point ``(xis[k], etas[l])``, ordered as ``l*len(xis) + k``,
+    whose product with the Ritz constants gives the component at the point,
+    see :func:`._pd_terms`.
+
+    Parameters
+    ----------
+    p : :class:`.Shell`
+        Panel.
+    comp : int
+        Index of the component in :data:`PD_COMPONENTS`.
+    xis, etas : array-like
+        Natural coordinates of the points along `x` and `y`, between ``-1``
+        and ``1``.
+    z : float, optional
+        Thickness coordinate, measured from the reference surface, of the
+        in-plane displacements ``'u'`` and ``'v'``, a length; not used by
+        the other components. Default ``0.``, the reference surface.
+    col0 : int, optional
+        Column of the first Ritz constant of ``p``. Default ``0``.
+    size : int or None, optional
+        Number of columns. Default ``None``, ``col0`` plus the number of
+        Ritz constants of ``p``.
+
+    Returns
+    -------
+    B : scipy.sparse.csr_matrix
+        The rows, with the shape ``(len(xis)*len(etas), size)``.
+
+    """
+    if size is None:
+        size = col0 + _dofs(p)*p.m*p.n
+    rows, cols, vals = [], [], []
+    for field, der_x, der_y, coeff in _pd_terms(p, comp, z):
+        F = _eval(p, field, der_x, 'x', xis)
+        G = _eval(p, field, der_y, 'y', etas)
+        block = coeff*np.kron(G, F)
+        r, c = np.nonzero(block)
+        rows.append(r)
+        cols.append(col0 + _dofs(p)*c + field)
+        vals.append(block[r, c])
+    B = coo_matrix((np.concatenate(vals),
+                    (np.concatenate(rows), np.concatenate(cols))),
+                   shape=(len(xis)*len(etas), size))
+    B.sum_duplicates()
+    return B.tocsr()
 
 
 def pd_points(p, x, y):
@@ -533,15 +610,18 @@ def pd_points(p, x, y):
     return xis, np.array([2*y/p.b - 1]), (xis + 1)*p.a/2
 
 
-def pd_constraint_matrix(p, comp, x, y, size):
+def pd_constraint_matrix(p, comp, x, y, size, z=0.):
     r"""Rows `[B]` of a prescribed component at a point or along a line
 
     The component is evaluated at the points of :func:`.pd_points`, one row
-    per point. The rotations ``'phix'`` and ``'phiy'`` are those of the
-    normal at the reference surface `z = 0`, see :func:`._pd_terms`,
-    derived from `w` for the models with 3 DOFs per term and, for those
-    with 5 DOFs, the fields ``phix`` and ``phiy`` plus, for the TSDT with an
-    offset, the terms of the transverse shear. The rows are not normalized.
+    per point, see :func:`.pd_rows`. The in-plane displacements ``'u'`` and
+    ``'v'`` are those at the thickness coordinate ``z``, which for ``z``
+    different from zero combine `u` or `v` with a rotation and a slope of
+    `w`. The rotations ``'phix'`` and ``'phiy'`` are those of the normal at
+    the reference surface `z = 0`, see :func:`._pd_terms`, derived from `w`
+    for the models with 3 DOFs per term and, for those with 5 DOFs, the
+    fields ``phix`` and ``phiy`` plus, for the TSDT with an offset, the
+    terms of the transverse shear. The rows are not normalized.
 
     Parameters
     ----------
@@ -553,6 +633,9 @@ def pd_constraint_matrix(p, comp, x, y, size):
         The point, or the line, see :func:`.pd_points`.
     size : int
         Size of the assembly.
+    z : float, optional
+        Thickness coordinate of ``'u'`` and ``'v'``, measured from the
+        reference surface, a length. Default ``0.``.
 
     Returns
     -------
@@ -561,6 +644,19 @@ def pd_constraint_matrix(p, comp, x, y, size):
 
     Notes
     -----
+    The in-plane displacements at `z` are, see :func:`._pd_terms`,
+
+    .. math::
+
+        u(z) = u + \left(z - c_1 g\right) \phi_x - c_1 g w_{,x} \qquad
+        v(z) = \left(1 + \frac{z}{r}\right) v + \left(z - c_1 g\right)
+        \phi_y - c_1 g w_{,y}
+
+    with `g = (z - d)^3 + d^3`, `c_1 = 4/(3 h^2)` for the TSDT and `c_1 =
+    0` for the FSDT, the term `z/r` only with the Sanders-Koiter
+    kinematics, and `u(z) = u - z w_{,x}`, `v(z) = (1 + z/r) v - z w_{,y}`
+    for the classical laminated plate theory.
+
     The rotations ``'phix'`` and ``'phiy'`` are `-w_{,x}` and `-w_{,y}` for
     the models with 3 DOFs per term and, for those with 5 DOFs, the
     rotations at the reference surface
@@ -578,24 +674,11 @@ def pd_constraint_matrix(p, comp, x, y, size):
 
     """
     xis, etas, _ = pd_points(p, x, y)
-    rows, cols, vals = [], [], []
-    for field, der_x, der_y, coeff in _pd_terms(p, comp):
-        F = _eval(p, field, der_x, 'x', xis)
-        G = _eval(p, field, der_y, 'y', etas)
-        block = coeff*np.kron(G, F)
-        r, c = np.nonzero(block)
-        rows.append(r)
-        cols.append(p.col_start + _dofs(p)*c + field)
-        vals.append(block[r, c])
-    B = coo_matrix((np.concatenate(vals),
-                    (np.concatenate(rows), np.concatenate(cols))),
-                   shape=(len(xis)*len(etas), size))
-    B.sum_duplicates()
-    return B.tocsr()
+    return pd_rows(p, comp, xis, etas, z, p.col_start, size)
 
 
 def pd_entries(p):
-    r"""Prescribed components of a panel, ``(cte, x, y, comp, value)`` in
+    r"""Prescribed components of a panel, ``(cte, x, y, comp, value, z)`` in
     the order of :func:`.pd_blocks`, the constant ones first
 
     The constant prescriptions are read from ``p.point_pds_values`` and
@@ -621,15 +704,19 @@ def pd_entries(p):
     value : float or callable
         Prescribed value, a function of the coordinate along the line for a
         line, see :func:`.pd_rhs`.
+    z : float
+        Thickness coordinate of the in-plane displacements, see
+        :meth:`.Shell.add_point_pd`.
 
     """
     for cte, points, lines in ((True, p.point_pds_values, p.distr_pds_values),
             (False, p.point_pds_values_inc, p.distr_pds_values_inc)):
         for values in points + lines:
             x, y = values[:2]
-            for comp, value in enumerate(values[2:]):
+            z = values[7]
+            for comp, value in enumerate(values[2:7]):
                 if value is not None:
-                    yield cte, x, y, comp, value
+                    yield cte, x, y, comp, value, z
 
 
 def pd_blocks(p, size):
@@ -649,14 +736,14 @@ def pd_blocks(p, size):
     Returns
     -------
     blocks : list of dict
-        With the keys ``'panel'``, ``'x'``, ``'y'``, ``'comp'`` (index in
-        :data:`PD_COMPONENTS`), ``'value'`` (float or function), ``'cte'``
-        and ``'B'``, see :func:`.pd_constraint_matrix`.
+        With the keys ``'panel'``, ``'x'``, ``'y'``, ``'z'``, ``'comp'``
+        (index in :data:`PD_COMPONENTS`), ``'value'`` (float or function),
+        ``'cte'`` and ``'B'``, see :func:`.pd_constraint_matrix`.
 
     """
-    return [dict(panel=p, x=x, y=y, comp=comp, value=value, cte=cte,
-                 B=pd_constraint_matrix(p, comp, x, y, size))
-            for cte, x, y, comp, value in pd_entries(p)]
+    return [dict(panel=p, x=x, y=y, z=z, comp=comp, value=value, cte=cte,
+                 B=pd_constraint_matrix(p, comp, x, y, size, z))
+            for cte, x, y, comp, value, z in pd_entries(p)]
 
 
 def pd_rhs(block):

@@ -41,6 +41,46 @@ def _dofs(p):
                          'panels.modelDB'.format(model))
     return _modelDB.db[model]['dofs']
 
+
+def _fkC_z(ks, p, xp, yp, z, size, row0, col0):
+    r"""Penalty stiffness of the prescribed `u`, `v` and `w` at the
+    thickness coordinate ``z``, at the point ``(xp, yp)`` or along the line
+    ``xp`` (``yp=None``) or ``yp`` (``xp=None``)
+
+    The rows of each component are those of
+    :func:`.nullspace.pd_rows`, combinations of the fields, of the
+    rotations and of the slopes of `w` for ``z`` different from zero. Along
+    a line the integral is computed with ``max(num, 4)`` Gauss-Legendre
+    points, ``num`` the number of terms along the line, exact for the
+    products of the polynomials of Bardell's functions. Returns the upper
+    triangle, as the kernels with ``z = 0``.
+
+    """
+    from numpy.polynomial.legendre import leggauss
+    from scipy.sparse import triu
+    from panels.multidomain.connections import nullspace
+    if xp is not None and yp is not None:
+        xis = np.array([2*xp/p.a - 1])
+        etas = np.array([2*yp/p.b - 1])
+        weights = np.ones(1)
+    elif yp is None:
+        xis = np.array([2*xp/p.a - 1])
+        etas, weights = leggauss(max(p.n, 4))
+        weights = weights*p.b/2
+    else:
+        xis, weights = leggauss(max(p.m, 4))
+        etas = np.array([2*yp/p.b - 1])
+        weights = weights*p.a/2
+    K = coo_matrix((size, size))
+    for comp, k in enumerate(ks):
+        if k == 0:
+            continue
+        Br = nullspace.pd_rows(p, comp, xis, etas, z, row0, size)
+        Bc = nullspace.pd_rows(p, comp, xis, etas, z, col0, size)
+        K = K + k*(Br.T.multiply(weights[None, :]) @ Bc)
+    return triu(coo_matrix(K), format='coo')
+
+
 cdef extern from 'bardell.hpp':
     double integral_ff(int i, int j,
             double x1t, double x1r, double x2t, double x2r,
@@ -51,10 +91,13 @@ cdef extern from 'bardell_functions.hpp':
                   double xi2t, double xi2r) nogil
 
 
-def fkCpd(double ku, double kv, double kw, object p, double xp, double yp, 
-          int size, int row0, int col0):
+def fkCpd(double ku, double kv, double kw, object p, double xp, double yp,
+          int size, int row0, int col0, double z=0.):
     r"""
     Penalty for prescribed displacement at a point.
+
+    The in-plane displacements are those at the thickness coordinate ``z``,
+    the one given to :meth:`.Shell.add_point_pd`.
 
     Parameters
     ----------
@@ -79,6 +122,10 @@ def fkCpd(double ku, double kv, double kw, object p, double xp, double yp,
     col0 : int
         First column of the panel in the matrix of the assembly,
         ``p.col_start``.
+    z : float, optional
+        Thickness coordinate, measured from the reference surface, of the
+        penalized `u` and `v`, a length. Default ``0.``, the reference
+        surface.
 
     Returns
     -------
@@ -93,7 +140,20 @@ def fkCpd(double ku, double kv, double kw, object p, double xp, double yp,
     ValueError
         If ``p.model`` is not a model of :mod:`panels.modelDB`.
 
+    Notes
+    -----
+    The penalty energy is `\frac{1}{2} \sum_k k_k (\{g_k\} \{c\} -
+    u_{kp})^2`, with `\{g_k\}` the row of the component `k` of `u, v, w`
+    at the point, whose second derivative gives the stiffness `k_k
+    \{g_k\}^T \{g_k\}`. For ``z`` different from zero the rows of `u(z)`
+    and `v(z)` combine `u` or `v`, a rotation and a slope of `w`, see
+    :func:`.nullspace.pd_constraint_matrix`, and the stiffness has terms
+    between these fields.
+
     """
+    if z != 0:
+        _dofs(p)
+        return _fkC_z((ku, kv, kw), p, xp, yp, z, size, row0, col0)
     cdef double [:, ::1] gtab, ftab
     cdef int i, k, j, l, c, row, col, dofs
     cdef int m, n # no of terms in x,y
@@ -212,9 +272,12 @@ def fkCpd(double ku, double kv, double kw, object p, double xp, double yp,
 
 
 def fkCld_xcte(double ku, double kv, double kw, object p, double xp,
-               int size, int row0, int col0):
+               int size, int row0, int col0, double z=0.):
     r"""
     Penalty for prescribed line displacement with a fixed x coordinate.
+
+    The in-plane displacements are those at the thickness coordinate ``z``,
+    the one given to :meth:`.Shell.add_distr_pd_fixed_x`.
 
     Parameters
     ----------
@@ -238,6 +301,10 @@ def fkCld_xcte(double ku, double kv, double kw, object p, double xp,
     col0 : int
         First column of the panel in the matrix of the assembly,
         ``p.col_start``.
+    z : float, optional
+        Thickness coordinate, measured from the reference surface, of the
+        penalized `u` and `v`, a length. Default ``0.``, the reference
+        surface.
 
     Returns
     -------
@@ -253,7 +320,18 @@ def fkCld_xcte(double ku, double kv, double kw, object p, double xp,
     ValueError
         If ``p.model`` is not a model of :mod:`panels.modelDB`.
 
+    Notes
+    -----
+    The penalty energy is that of :func:`.fkCpd` integrated along `y`,
+    `\frac{1}{2} \sum_k \int_0^b k_k (\{g_k\} \{c\} - g_k(y))^2 dy`,
+    with the integrals of Bardell's functions along `y`; for ``z``
+    different from zero the integrals are computed with ``max(n, 4)``
+    Gauss-Legendre points, exact for these polynomials.
+
     """
+    if z != 0:
+        _dofs(p)
+        return _fkC_z((ku, kv, kw), p, xp, None, z, size, row0, col0)
     cdef double [:, ::1] ftab
     cdef int i, k, j, l, c, row, col, dofs
     cdef int m, n
@@ -362,9 +440,12 @@ def fkCld_xcte(double ku, double kv, double kw, object p, double xp,
 
 
 def fkCld_ycte(double ku, double kv, double kw, object p, double yp,
-               int size, int row0, int col0):
+               int size, int row0, int col0, double z=0.):
     r"""
     Penalty for prescribed line displacement with a fixed y coordinate.
+
+    The in-plane displacements are those at the thickness coordinate ``z``,
+    the one given to :meth:`.Shell.add_distr_pd_fixed_y`.
 
     Parameters
     ----------
@@ -388,6 +469,10 @@ def fkCld_ycte(double ku, double kv, double kw, object p, double yp,
     col0 : int
         First column of the panel in the matrix of the assembly,
         ``p.col_start``.
+    z : float, optional
+        Thickness coordinate, measured from the reference surface, of the
+        penalized `u` and `v`, a length. Default ``0.``, the reference
+        surface.
 
     Returns
     -------
@@ -403,7 +488,16 @@ def fkCld_ycte(double ku, double kv, double kw, object p, double yp,
     ValueError
         If ``p.model`` is not a model of :mod:`panels.modelDB`.
 
+    Notes
+    -----
+    The penalty energy is that of :func:`.fkCld_xcte` integrated along `x`,
+    with ``max(m, 4)`` Gauss-Legendre points for ``z`` different from
+    zero.
+
     """
+    if z != 0:
+        _dofs(p)
+        return _fkC_z((ku, kv, kw), p, None, yp, z, size, row0, col0)
     cdef double [:, ::1] gtab
     cdef int i, k, j, l, c, row, col, dofs
     cdef int m, n

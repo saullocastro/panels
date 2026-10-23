@@ -60,6 +60,22 @@
   `boundary_conditions.rst` and `tsdt_offset.rst` and the docstring of
   `Shell` are updated; the thin plates of Leissa (1973) move by less than
   `1.2e-5`, e.g. `'SCSC'` 28.95027 to 28.95059 (reference 28.951).
+- New keyword `z` of `Shell.add_point_pd`, `Shell.add_distr_pd_fixed_x`
+  and `Shell.add_distr_pd_fixed_y`, and of the penalty kernels `fkCpd`,
+  `fkCld_xcte` and `fkCld_ycte`: the in-plane displacements `u` and `v` are
+  prescribed at the thickness coordinate `z`, measured from the reference
+  surface, `u(z) = u + (z - c1 g) phi_x - c1 g w,x` with `g = (z - d)^3 +
+  d^3` for the TSDT (`c1 = 0` for the FSDT, `u(z) = u - z w,x` for the
+  CLPT), with both `pd_method='penalty'` and `pd_method='null-space'`.
+  Default `z = 0`, unchanged. The stored lists `point_pds`, `distr_pds`
+  and `*_values` end with `z`; `json_io` completes the lists of older files
+  with `z = 0`. New function `nullspace.pd_rows`.
+- Face clamp, `u = v = 0` at the faces `z = d -+ h/2` and `w = 0`: the
+  clamp of the flags for the CLPT and the FSDT, and for the TSDT the two
+  conditions `phi = w,x/2` and `u = -(d/2)(1 - 4 d^2/h^2) w,x`, which leave
+  the section free to warp and which the flags cannot express. New test
+  file `tests/multidomain/test_face_clamp.py` and example page
+  `ex_face_clamp.rst`.
 
 ### Bug fixes: stiffeners, connections and post-processing
 

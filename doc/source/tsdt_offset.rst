@@ -172,7 +172,14 @@ constants `u`, `w_{,x}` and `\hat{\gamma}_{xz} = \phi_x + w_{,x}`, all
 zero: `u = \phi_x = w_{,x} = 0`, the flags ``x1u = x1phix = x1wr = 0`` on
 `x = 0`, and then `\theta_x = 0` for any offset. The rotation at the
 reference surface alone, Eq. :eq:`tsdt-offset-theta`, does not clamp the
-edge, see :ref:`boundary_conditions`.
+edge. The face clamp, `u = 0` at `z = d \mp h/2`, gives instead `\phi_x =
+w_{,x}/2` and `u = -(d/2)(1 - 4 d^2/h^2) w_{,x}`, i.e. `u(d) = 0` at the
+mid-surface and `\hat{\gamma}_{xz} = 3 w_{,x}/2`, leaving the section free
+to warp, see :ref:`boundary_conditions_face_clamp`. Both clamps are
+properties of the physical section and do not depend on the offset:
+
+.. literalinclude:: ../../tests/multidomain/test_face_clamp.py
+    :pyobject: test_face_clamp_does_not_depend_on_the_reference_surface
 
 .. _tsdt_offset_example:
 

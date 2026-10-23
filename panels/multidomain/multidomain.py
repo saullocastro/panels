@@ -562,8 +562,8 @@ class MultiDomain(object):
             return sig_conn, tuple(sig_panels)
         #NOTE the positions and the prescribed components define [T], the
         #     prescribed values only the particular solutions, see get_cp()
-        sig_pds = tuple((id(p), cte, tuple(values[:2]),
-                         tuple(v is not None for v in values[2:]))
+        sig_pds = tuple((id(p), cte, tuple(values[:2]), values[7],
+                         tuple(v is not None for v in values[2:7]))
                         for p in self.panels
                         for cte, values_list in (
                             (True, p.point_pds_values + p.distr_pds_values),
@@ -709,6 +709,8 @@ class MultiDomain(object):
 
     def _pd_label(self, block):
         comp = nullspace.PD_COMPONENTS[block['comp']]
+        if block['z'] != 0 and block['comp'] in (nullspace.U, nullspace.V):
+            comp = '{0} at z = {1:g}'.format(comp, block['z'])
         x, y = block['x'], block['y']
         if x is not None and y is not None:
             where = 'at (x, y) = ({0:g}, {1:g})'.format(x, y)
@@ -726,7 +728,8 @@ class MultiDomain(object):
         that restrain it along the whole line"""
         p = block['panel']
         flags = []
-        for field, der_x, der_y, _ in nullspace._pd_terms(p, block['comp']):
+        for field, der_x, der_y, _ in nullspace._pd_terms(p, block['comp'],
+                                                          block['z']):
             for direction, cte, length, der in (('x', block['x'], p.a, der_x),
                                                 ('y', block['y'], p.b, der_y)):
                 edges = []
@@ -868,7 +871,7 @@ class MultiDomain(object):
         entries = [e for p in self.panels for e in nullspace.pd_entries(p)]
         assert len(entries) == len(blocks)
         for block, entry in zip(blocks, entries):
-            block['value'] = entry[-1]
+            block['value'] = entry[4]
         ds = [nullspace.pd_rhs(b) for b in blocks]
         key = np.concatenate(ds)
         if (self._cp_cache is not None

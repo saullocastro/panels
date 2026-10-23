@@ -98,6 +98,7 @@ Usage examples
     ex_arc_length.rst
     ex_follower_pressure.rst
     ex_prescribed_displacements.rst
+    ex_face_clamp.rst
     ex_multidomain_cylinder.rst
     ex_multidomain_tstiff2d.rst
     ex_stiffpanelbay.rst

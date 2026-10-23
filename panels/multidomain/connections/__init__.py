@@ -147,8 +147,11 @@ prescribed at a point or along a line, see :meth:`.Shell.add_point_pd`,
 is imposed with a spring between the panel and the support: the penalty
 stiffness is added to the stiffness matrix with the kernels below, for the
 models with 3 and with 5 DOFs per term, and the force of the spring is in the
-external force vector of :func:`.shell_fext`. With ``pd_method='null-space'``
-the prescribed displacements are imposed exactly, see :ref:`null_space_pd`.
+external force vector of :func:`.shell_fext`. The in-plane displacements
+are those at the thickness coordinate ``z`` of the kernels, the one given to
+the methods of :class:`.Shell`, by default the reference surface. With
+``pd_method='null-space'`` the prescribed displacements are imposed exactly,
+see :ref:`null_space_pd`.
 
 .. autofunction:: panels.multidomain.connections.kCpd.fkCpd
 
