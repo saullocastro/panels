@@ -1,6 +1,6 @@
 [project]
 name = "panels"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 dynamic = ["version", "authors", "license", "readme", "description",
 "keywords", "classifiers"]
 dependencies = ["numpy", "scipy", "matplotlib", "composites>=0.10.0",

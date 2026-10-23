@@ -2,6 +2,10 @@
 
 ## 0.13.21 (unreleased)
 
+### Python versions
+
+- Python 3.9 is no longer supported, it reached its end of life in October 2025: Python 3.10 or newer is required, and the tests and wheels cover Python 3.10 to 3.14.
+
 ### Bug fixes: mass matrices
 
 - The closed-form mass matrices `fkM` of the nine models read `shell.rho`,
