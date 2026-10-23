@@ -1199,8 +1199,9 @@ class Shell(object):
             #     the scalar d do not call BLAS. The kernels of
             #     panels.models read Shell.ABD, hence run this code, while
             #     their C variables may be held in registers. The
-            #     matrix-matrix product of MKL 2025.0 on Windows x64
-            #     (cblas_dgemm, reached by numpy.matmul) returns with xmm8 to
+            #     matrix-matrix product of MKL 2024.2.0 to 2025.0.0 on
+            #     Windows x64 (cblas_dgemm, reached by numpy.matmul; fixed in
+            #     2025.0.1) returns with xmm8 to
             #     xmm15 changed, which the Windows x64 calling convention
             #     requires to be preserved: one product T.T @ F_m @ T, or
             #     even np.eye(13) @ ABD, here gives nan in

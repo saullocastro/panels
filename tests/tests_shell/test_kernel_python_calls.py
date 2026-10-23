@@ -17,7 +17,11 @@ values of ``ABD`` being unchanged, ``cylshell_tsdt_sanders.fk0`` returned
 7761 of its 22500 entries ``nan`` and others wrong by up to `10^{303}`
 times the largest entry, with and without a laminate offset, while the
 kernels of the other models were not affected. Hence the TSDT constitutive matrix
-is assembled by blocks, see :meth:`.Shell._get_lam_ABD`.
+is assembled by blocks, see :meth:`.Shell._get_lam_ABD`. With a minimal
+reproducer independent of panels, the oneMKL builds 2024.2.0, 2024.2.1,
+2024.2.2 and 2025.0.0 changed these registers in ``cblas_dgemm`` for square
+matrices of size 12 or more, 2023.2.0 to 2024.1.0 and 2025.0.1 to 2026.2.0
+did not (AMD processor, Windows 11).
 
 The analytical kernels must be finite and agree with the numerically
 integrated ones, for every model and with and without a laminate offset.

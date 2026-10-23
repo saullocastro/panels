@@ -125,6 +125,13 @@
 - The Riks test of the hinged cylindrical shell no longer depends on how the
   arc-length adaptation samples the path, and passes with both convergence
   criteria of structsolve.
+- `tests/tests_shell/test_kernel_python_calls.py` checks that the kernels
+  are finite and agree with the numerically integrated ones. The
+  constitutive matrix read by the kernels is assembled without
+  matrix-matrix BLAS products, because the `cblas_dgemm` of Intel oneMKL
+  2024.2.0 to 2025.0.0 on Windows x64 changes the registers `xmm8`-`xmm15`
+  that the caller expects to be preserved; oneMKL 2025.0.1 and later, or
+  `MKL_CBWR=COMPATIBLE`, preserve them.
 
 ### Documentation
 
