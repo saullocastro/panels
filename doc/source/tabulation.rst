@@ -138,7 +138,8 @@ over the terms are tabulated:
 - the blade stiffeners, ``panels/stiffener/models``.
 
 The analytical kernels, which use closed-form integrals of the products of
-the functions, e.g. ``fk0`` or ``kCSB``, are not affected. The kernel
+the functions, e.g. ``fk0`` or :func:`.fkCSB` of the skin-base connection,
+are not affected. The kernel
 ``calc_kTv`` of the product of the tangent stiffness matrix by a vector,
 see :ref:`tangent_product`, is written with the tables from the start.
 

@@ -189,12 +189,15 @@ with a Gauss-Legendre rule of ``nr_x_gauss`` `\times` ``nr_y_gauss`` points
 over the domain of the top panel, and `k^w_{CZ}` is given at each of these
 points. The terms of the kernels that are new or modified with respect to the
 thesis are listed in the docstrings of :func:`.fkCSB11_dmg`,
-:func:`.fkCSB12_dmg` and :func:`.fkCSB22_dmg`. The kernel of the undamaged
-connection ``'SB'``, ``kCSB.pyx``, keeps Eq. :eq:`cz-thesis-jump`, which is
-adequate for a perfect bond.
+:func:`.fkCSB12_dmg` and :func:`.fkCSB22_dmg`. The undamaged connection
+``'SB'``, :func:`.fkCSB`, imposes the jump of Eq. :eq:`cz-jump` at zero
+separation, such that the pristine ``'SB_TSL'``, with `k^w_{CZ} = k_o` at
+every point, has the matrix of ``'SB'`` with `k_t = k_o`, as checked by
+``tests/multidomain/test_sb_unified.py``.
 
-The same kernel had the approximation functions in `\eta` of the top panel in
-the coupling block built with the flags of the edge `y_1` in place of `y_2`.
+The damage kernels, ``kCSB_dmg.pyx``, had the approximation functions in
+`\eta` of the top panel in the coupling block built with the flags of the
+edge `y_1` in place of `y_2`.
 This had no effect on the DCB, where all `y` flags are 1.
 
 
