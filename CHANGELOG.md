@@ -132,6 +132,10 @@
   2024.2.0 to 2025.0.0 on Windows x64 changes the registers `xmm8`-`xmm15`
   that the caller expects to be preserved; oneMKL 2025.0.1 and later, or
   `MKL_CBWR=COMPATIBLE`, preserve them.
+- New `tests/multidomain/test_dcb_linear_measures.py`: linear solutions of
+  the DCB model of the thesis of D'Souza (2024), asserting the measures of
+  the load and the effect of the penalties of the edge connections given in
+  `doc/source/cohesive_zone.rst`.
 
 ### Documentation
 
@@ -142,6 +146,16 @@
   term of Krumhaar's correction in Eqs. (18), (21) and (29) of Castro et
   al., Compos. Struct. 140 (2016), stated as a mistake of the paper; the
   code is unchanged.
+- `doc/source/cohesive_zone.rst`: the tables of the out-of-plane force of
+  the DCB for a tip displacement of 1 mm and of its elastic stiffness against
+  the factor on the default edge penalties, and the stiffness with a
+  connecting domain of 5 mm, recomputed with the tangential separation of
+  `'SB_TSL'`, with the slope of each panel; they had been computed with that
+  of Eq. 4.62 of the thesis, with the slope of the top panel only. The
+  reactions are 1.0-1.2% lower and the largest separation per unit of
+  imposed displacement 20% higher; with the default penalties the separation
+  lags the imposed displacement by 21%, not 20%. The linear solutions are
+  computed at 0.5 mm, below the damage onset, and scaled to 1 mm.
 
 ### Dependencies
 

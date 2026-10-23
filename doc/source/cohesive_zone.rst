@@ -390,7 +390,15 @@ foundation the separation behind the peak is physically negative, and its
 integral is not small. The table below compares, for a linear elastic
 solution with a tip displacement of 1 mm, the reaction at the loaded edge with
 the integrals of the traction computed with the full separation `\Delta` and
-with the corrected separation `\Delta^{corr}`.
+with the corrected separation `\Delta^{corr}`, and with the line integral of
+`Q_x` of :meth:`.MultiDomain.force_out_plane` at the second last of 100
+points along `x` of the free arm. The model is the DCB of the thesis with the
+default edge penalties, `10 \times 6` terms in the cohesive domains, `8
+\times 6` terms in the other domains and `60 \times 20` integration points.
+With `k_o = 2\times10^5` N/mm³ an opening of 1 mm exceeds the separation at
+damage onset, `\Delta_o = 4.35\times10^{-4}` mm, therefore the linear
+solution is computed with a tip displacement of 0.5 mm, below the onset for
+the three values of `k_o`, and scaled to 1 mm.
 
 .. list-table:: Out-of-plane force of the DCB for a tip displacement of 1 mm,
                 linear solution, default edge penalties.
@@ -402,26 +410,39 @@ with the corrected separation `\Delta^{corr}`.
       - `\int k \Delta^{corr} \, dA` [N]
       - `\int Q_x \, dy` [N]
     * - `1\times10^4`
-      - 25.30
-      - 25.31
-      - 353.0
-      - 24.73
+      - 24.99
+      - 24.99
+      - 388.1
+      - 24.42
     * - `5\times10^4`
-      - 26.18
-      - 26.18
-      - 523.9
-      - 25.59
+      - 25.87
+      - 25.87
+      - 593.1
+      - 25.28
     * - `2\times10^5`
-      - 26.69
-      - 26.70
-      - 741.2
-      - 26.09
+      - 26.42
+      - 26.42
+      - 839.4
+      - 25.82
 
-The ratio between the corrected integral and the reaction depends on `k_o`
-and on the damage state, such that a scaling factor fixed at the first
-increment distorts the curve after damage onset. The line integral of `Q_x`
-with finite differences of `M_{xx}` is 2% low. The implementation now
-provides:
+The values are asserted by ``tests/multidomain/test_dcb_linear_measures.py``,
+whose function ``dcb_thesis_linear`` builds and solves the model:
+
+.. literalinclude:: ../../tests/multidomain/test_dcb_linear_measures.py
+    :pyobject: test_load_measures
+
+Earlier versions of this page gave, for this table and the table of the next
+section, values computed with the tangential separation of Eq. 4.62 of the thesis
+[nathan2024MSc]_, Eq. :eq:`cz-thesis-jump`, before its correction to
+Eq. :eq:`cz-jump`; restoring Eq. :eq:`cz-thesis-jump` in the current code
+reproduces them, and with Eq. :eq:`cz-jump` the reactions are 1.0--1.2% lower
+and `\Delta_{max}/\delta` of the next section is 20% higher.
+
+The ratio between the corrected integral and the reaction, 15.5 to 31.8,
+depends on `k_o` and on the damage state, such that a scaling factor fixed at
+the first increment distorts the curve after damage onset. The line integral
+of `Q_x` with finite differences of the moments is 2.3% low. The
+implementation now provides:
 
 - :meth:`.MultiDomain.reaction_line_pd_xcte`, the reaction of the prescribed
   displacement `w_p(y)` imposed with the penalty `k_w` along `x = x_p`:
@@ -452,7 +473,8 @@ tip a compliance equal to `3h/(2a)` of its bending compliance, about 7% for
 each connection of the DCB arm (`h = 2.1` mm, `a = 48` mm). The arms of the
 reference model have two connections each, at the crack tip moment. The
 table below gives the elastic stiffness of the DCB, `k_o = 2\times10^5`
-N/mm³, when the default `k_t` and `k_r` are multiplied by a factor.
+N/mm³, when the default `k_t` and `k_r` are multiplied by a factor, with the
+model and the linear solutions of the previous section.
 
 .. list-table:: Elastic stiffness of the DCB versus the factor applied to the
                 default edge penalties.
@@ -462,24 +484,30 @@ N/mm³, when the default `k_t` and `k_r` are multiplied by a factor.
       - `P/\delta` [N/mm]
       - `\Delta_{max}/\delta`
     * - 1
-      - 26.69
-      - `4.22\times10^{-4}`
+      - 26.42
+      - `5.07\times10^{-4}`
     * - 10
-      - 32.54
-      - `5.21\times10^{-4}`
+      - 32.13
+      - `6.26\times10^{-4}`
     * - 100
-      - 33.27
-      - `5.35\times10^{-4}`
+      - 32.84
+      - `6.42\times10^{-4}`
     * - 1000
-      - 33.35
-      - `5.36\times10^{-4}`
+      - 32.92
+      - `6.43\times10^{-4}`
 
 The converged value agrees with a beam on an elastic foundation, `P/\delta
-\approx 33` N/mm. With the default penalties the separation at the crack tip,
-and therefore the damage onset, lag the imposed displacement by 20%. This is
-independent of the 0.015 mm domain used between the cohesive domain and the
-free arm: replacing it by a 5 mm domain gives 27.23 N/mm with the default
-penalties and 33.28 N/mm with the factor 100. The drivers multiply the
+\approx 33` N/mm. With the default penalties the stiffness is 20% lower, and
+the separation at the crack tip, and therefore the damage onset, lag the
+imposed displacement by 21%. This is independent of the 0.015 mm domain used
+between the cohesive domain and the free arm: replacing it by a 5 mm domain
+gives 26.94 N/mm with the default penalties and 32.85 N/mm with the factor
+100. These values are asserted by:
+
+.. literalinclude:: ../../tests/multidomain/test_dcb_linear_measures.py
+    :pyobject: test_edge_penalty_factor
+
+The drivers multiply the
 default ``'SSxcte'`` penalties by ``edge_penalty_factor``, 100 by default. The
 library defaults are unchanged.
 
