@@ -192,11 +192,13 @@ see :meth:`.MultiDomain.get_kC_conn`:
         interface, `z_1 = d_1 - h_1/2` of ``p1`` and `z_2 = d_2 + h_2/2` of
         ``p2``, `d_1`, `d_2` being the offsets, with `u(z) = u - z w_{,x}`
         and `v(z) = (1 + z/r) v - z w_{,y}` of each panel, see
-        :func:`.fkCSB`
+        :func:`.fkCSB`; the rotations are not tied and the key ``'kr'`` is
+        not used
       - `u, v, w` at the interface, `z = d_1 - h_1/2` of ``p1`` and `z = d_2
         + h_2/2` of ``p2``, see :func:`.fkCSB`, and `\phi_x, \Phi_y`
-        only when
-        the key ``'kr'`` of the connection is given and not zero
+        (`\theta_x, \theta_y` of :eq:`tsdt-offset-theta` for the TSDT with
+        an offset) only when the key ``'kr'`` of the connection is given and
+        not zero
 
 where `\Phi_y = \phi_y + v/r` with the Sanders-Koiter kinematics and `\Phi_y
 = \phi_y` otherwise, and the terms `v/r` and `z/r` of the classical
@@ -206,7 +208,12 @@ displacements of the faces in contact, see
 :func:`.kCsdt._sb_components`. The keys
 ``'kt'`` and ``'kr'`` of the connections are not used, apart from ``'kr'``
 of ``'SB'`` with the shear deformation theories, which tells whether the
-rotations are connected.
+rotations are connected. The rotations of the classical laminated plate
+theory, `-w_{,x}` and `-w_{,y} + v/r`, follow from `w`, already tied by `w_1
+= w_2`: tying them too adds redundant constraints, or, with the
+Sanders-Koiter kinematics and distinct reference surfaces, the constraint
+`(z_1 - z_2) w_{,y} = 0`, i.e. `w_{,y} = 0` over the whole area, see
+:func:`.kCsdt._sb_components`.
 
 
 Usage

@@ -207,7 +207,10 @@ def _sb_components(p1, p2, kr_sb):
     of its reference surface, `r_1 + z_1 = r_2 + z_2`. With ``kr_sb`` the
     rotations of the normal at the reference surfaces of the FSDT and TSDT,
     :func:`.kCsdt._rotation_x` and :func:`.kCsdt._rotation_y`, are also
-    equal.
+    equal. ``kr_sb`` is not used for the classical laminated plate theory,
+    whose rotations would add redundant constraints or, with the
+    Sanders-Koiter kinematics, over-constrain the connection, `(z_1 - z_2)
+    w_{,y} = 0`, see :func:`.kCsdt._sb_components`.
 
     """
     return [sides for _, sides in kCsdt._sb_components(p1, p2, 1., kr_sb)]

@@ -83,7 +83,9 @@ MODELS = ['cylshell_clpt_sanders', 'cylshell_fsdt_sanders',
 @pytest.mark.parametrize('model', MODELS)
 def test_sb_penalty_rigid_rotation(model):
     top, bot = _bonded(model, seed=2)
-    kt, kr = 1e12, 1e6
+    kt = 1e12
+    #NOTE the rotation penalty applies only to the FSDT
+    kr = 0. if 'clpt' in model else 1e6
     conn = [dict(p1=top, p2=bot, func='SB', kt=kt, kr=kr)]
     md = MultiDomain([bot, top], conn, conn_method='penalty')
     c = _state(md, top, bot)
@@ -97,7 +99,7 @@ def test_sb_penalty_rigid_rotation(model):
 @pytest.mark.parametrize('model', MODELS)
 def test_sb_null_space_rigid_rotation(model):
     top, bot = _bonded(model, seed=4)
-    conn = dict(p1=top, p2=bot, func='SB', kr=1.)
+    conn = dict(p1=top, p2=bot, func='SB', kr=0. if 'clpt' in model else 1.)
     md = MultiDomain([top, bot], [conn])
     c = _state(md, top, bot)
     B = nullspace.constraint_matrix(conn, md.get_size())

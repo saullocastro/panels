@@ -20,7 +20,9 @@ models:
   connection), and the upper face of the panel on the negative side,
   ``p_bot`` (``p2``), see :meth:`.MultiDomain.get_kC_conn`. When ``kr`` is
   given the difference of the rotations is also penalized. It is
-  :func:`.skin_base.fkCSB` restricted to these models.
+  :func:`.skin_base.fkCSB` restricted to these models, the only ones whose
+  rotations ``kr`` connects in ``'SB'``: the rotations of the models with 3
+  DOFs follow from `w`, see :func:`._sb_components`.
 
 The private helpers of the displacements at a thickness coordinate,
 :func:`._surface_terms`, of the rotations at the reference surface,
@@ -109,6 +111,8 @@ The integrals of Bardell's functions are exact for the polynomial
 approximations.
 
 """
+import warnings
+
 import numpy as np
 from scipy.sparse import coo_matrix, triu
 
@@ -611,13 +615,22 @@ def _sb_components(p_top, p_bot, kt=1., kr=0.):
         their common `z` axis, ``p1`` and ``p2`` of the connection.
     kt, kr : float, optional
         Penalties of the displacements and of the rotations. Default ``1.``
-        and ``0.``. ``kr`` is not used for the models with 3 DOFs per term.
+        and ``0.``. ``kr`` applies only to the FSDT and TSDT, the models
+        with 5 DOFs per term; for the classical laminated plate theory it is
+        not used, see the Notes, and a ``UserWarning`` is issued when it is
+        not zero.
 
     Returns
     -------
     comps : list
         Three components, `u`, `v` and `w`, and two more, the rotations,
         when ``kr`` is not zero and ``p_top`` has 5 DOFs per term.
+
+    Warns
+    -----
+    UserWarning
+        When ``kr`` is not zero and the panels are models of the classical
+        laminated plate theory, whose rotations are not connected.
 
     Notes
     -----
@@ -635,12 +648,22 @@ def _sb_components(p_top, p_bot, kt=1., kr=0.):
     Sanders-Koiter kinematics, and for the FSDT and TSDT the fields of
     :func:`._surface_terms`.
 
-    The rotations of the classical laminated plate theory follow from `w`:
-    `w_1 = w_2` over the area ties the slopes, and the rotations are not
-    connected. With the Sanders-Koiter kinematics, tying also the rotations
-    `-w_{,y} + v/r` of the two reference surfaces would, with `v_1(z_1) =
-    v_2(z_2)` and `r_1 + z_1 = r_2 + z_2`, give `(z_1 - z_2) w_{,y} = 0`,
-    i.e. `w_{,y} = 0` unless the two reference surfaces coincide.
+    The rotation penalty ``kr`` applies only to the FSDT and TSDT, whose
+    rotations `\phi_x`, `\phi_y` are independent of `u, v, w`. The rotations
+    of the classical laminated plate theory, `-w_{,x}` and `-w_{,y} + v/r`,
+    follow from the displacements: `w_1 = w_2` over the area ties the
+    slopes, and the rotations are not connected. Tying them as well would be
+    redundant or would over-constrain the connection:
+
+    - `w_{1,x} = w_{2,x}`, and `w_{1,y} = w_{2,y}` with the Donnell
+      kinematics and for plates, follow from `w_1 = w_2` and are redundant;
+    - with the Sanders-Koiter kinematics, `-w_{1,y} + v_1/r_1 = -w_{2,y} +
+      v_2/r_2` with `w_1 = w_2` gives `v_1/r_1 = v_2/r_2`, and `v_1(z_1) =
+      v_2(z_2)` then becomes `(r_1 + z_1 - r_2 - z_2) v_1/r_1 = (z_1 - z_2)
+      w_{,y}`. With the radius of each panel at its reference surface, `r_1
+      + z_1 = r_2 + z_2`, this is `(z_1 - z_2) w_{,y} = 0`: `w_{,y} = 0`
+      over the whole area unless the two reference surfaces coincide, `z_1 =
+      z_2`, when the condition is again redundant.
 
     """
     tu_top, tv_top = _surface_terms(p_top, _face(p_top, -1))
@@ -651,6 +674,12 @@ def _sb_components(p_top, p_bot, kt=1., kr=0.):
         (kt, ((p_top, [(W, 0, 0, 1.)]), (p_bot, [(W, 0, 0, 1.)]))),
         ]
     #NOTE the rotations of the CLPT follow from w, see the Notes
+    if kr and _dofs(p_top) == 3:
+        warnings.warn("The rotation penalty 'kr' of the connection 'SB' "
+                      "applies only to the FSDT and TSDT; it is not used for "
+                      "the classical laminated plate theory, model '{0}', "
+                      "whose rotations follow from w".format(p_top.model),
+                      UserWarning, stacklevel=3)
     if kr and _dofs(p_top) != 3:
         comps += [
             (kr, ((p_top, _rotation_x(p_top)), (p_bot, _rotation_x(p_bot)))),
@@ -691,7 +720,9 @@ def fkCSB_sdt(kt, p_top, p_bot, size, kr=0.):
         Rotation penalty stiffness, per unit area, with units of
         force/length, for instance ``kt*h**2`` with ``h`` the thickness of the
         laminates. With ``kr = 0`` only the displacements at the interface
-        are connected. Default ``0.``.
+        are connected. Default ``0.``. The rotation penalty of ``'SB'``
+        applies only to the FSDT and TSDT: for the classical laminated plate
+        theory :func:`.skin_base.fkCSB` does not use it.
 
     Returns
     -------
@@ -713,7 +744,13 @@ def fkCSB_sdt(kt, p_top, p_bot, size, kr=0.):
     :func:`._surface_terms`, and `\theta_x`, `\theta_y` are given by
     :func:`._rotation_x` and :func:`._rotation_y`.
     With ``kr = 0`` the two laminates may rotate independently at the
-    interface, see :mod:`panels.multidomain.connections.kCsdt`.
+    interface, see :mod:`panels.multidomain.connections.kCsdt`. The term
+    with `k_r` exists because the rotations `\phi_x`, `\phi_y` of the FSDT
+    and TSDT are independent of `u, v, w`; the rotations of the classical
+    laminated plate theory follow from `w`, and tying them too would be
+    redundant or, with the Sanders-Koiter kinematics and distinct reference
+    surfaces, would impose `(z_1 - z_2) w_{,y} = 0`, see
+    :func:`._sb_components`.
 
     """
     _check_sdt(p_top, p_bot)

@@ -20,7 +20,10 @@ kinematics, see :mod:`panels.multidomain.connections.skin_base`:
 import sys
 sys.path.append('../..')
 
+import warnings
+
 import numpy as np
+import scipy.linalg
 import pytest
 from numpy.polynomial.legendre import leggauss
 from structsolve.sparseutils import finalize_symmetric_matrix
@@ -192,3 +195,78 @@ def test_deprecated_blocks(model):
     K_ref = skin_base.fkCSB(kt, top, bot, size)
     assert np.allclose(K.toarray(), K_ref.toarray(), rtol=0,
                        atol=1e-14*abs(K_ref).max())
+
+
+CLPT_MODELS = ['plate_clpt_donnell', 'cylshell_clpt_sanders',
+               'cylshell_clpt_donnell']
+
+
+@pytest.mark.parametrize('model', MODELS)
+def test_kr_applies_only_to_fsdt_and_tsdt(model):
+    r"""The key ``'kr'`` of ``'SB'`` changes the penalty matrix and the
+    constraints of the FSDT and TSDT only; for the CLPT it is not used and a
+    ``UserWarning`` is issued"""
+    top, bot = _pair(model, seed=6)
+    conn = dict(p1=top, p2=bot, func='SB')
+    md = MultiDomain([top, bot], [conn])
+    size = md.get_size()
+    kt, kr = 2.3e9, 1.7e3
+    K0 = skin_base.fkCSB(kt, top, bot, size).toarray()
+    B0 = nullspace.constraint_matrix(conn, size).toarray()
+    conn_kr = dict(conn, kr=kr)
+    if model in CLPT_MODELS:
+        with pytest.warns(UserWarning, match="'kr'"):
+            K = skin_base.fkCSB(kt, top, bot, size, kr=kr).toarray()
+        with pytest.warns(UserWarning, match="'kr'"):
+            B = nullspace.constraint_matrix(conn_kr, size).toarray()
+        assert np.array_equal(K, K0)
+        assert np.array_equal(B, B0)
+    else:
+        with warnings.catch_warnings():
+            warnings.simplefilter('error')
+            K = skin_base.fkCSB(kt, top, bot, size, kr=kr).toarray()
+            B = nullspace.constraint_matrix(conn_kr, size).toarray()
+        assert not np.allclose(K, K0)
+        assert B.shape[0] > B0.shape[0]
+
+
+def _rank(B):
+    B = B[np.abs(B).max(axis=1) > 0]
+    B = B/np.linalg.norm(B, axis=1, keepdims=True)
+    return np.linalg.matrix_rank(B, tol=1e-9*np.linalg.norm(B, 2))
+
+
+@pytest.mark.parametrize('model', CLPT_MODELS)
+def test_clpt_rotations_are_redundant_or_over_constrain(model, monkeypatch):
+    r"""Tying also the rotations `-w_{,x}` and `-w_{,y} + v/r` of the CLPT
+    adds only redundant constraints with the Donnell kinematics and for
+    plates, whereas with the Sanders-Koiter kinematics and distinct
+    reference surfaces, `z_1 \ne z_2`, it imposes `(z_1 - z_2) w_{,y} = 0`,
+    which is why ``'kr'`` applies only to the FSDT and TSDT"""
+    top, bot = _pair(model, seed=8)
+    assert kCsdt._face(top, -1) != kCsdt._face(bot, +1)
+    conn = dict(p1=top, p2=bot, func='SB')
+    md = MultiDomain([top, bot], [conn])
+    size = md.get_size()
+    B_faces = nullspace.constraint_matrix(conn, size).toarray()
+
+    def rows(comps):
+        monkeypatch.setattr(nullspace, '_sb_components',
+                            lambda p1, p2, kr: comps)
+        return nullspace.constraint_matrix(conn, size).toarray()
+
+    B_rot = rows([((top, kCsdt._rotation_x(top)), (bot, kCsdt._rotation_x(bot))),
+                  ((top, kCsdt._rotation_y(top)), (bot, kCsdt._rotation_y(bot)))])
+    wy = rows([((top, [(kCsdt.W, 0, 1, 1.)]), (bot, []))])
+    B_all = np.vstack([B_faces, B_rot])
+    null_faces = scipy.linalg.null_space(B_faces, rcond=1e-9)
+    null_all = scipy.linalg.null_space(B_all, rcond=1e-9)
+    wy_faces = np.abs(wy @ null_faces).max()
+    wy_all = np.abs(wy @ null_all).max()
+    if model == 'cylshell_clpt_sanders':
+        assert _rank(B_all) > _rank(B_faces)
+        # w,y of the bonded panels vanishes over the whole area
+        assert wy_all < 1e-8*wy_faces
+    else:
+        assert _rank(B_all) == _rank(B_faces)
+        assert null_all.shape[1] == null_faces.shape[1]

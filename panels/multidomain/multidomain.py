@@ -533,7 +533,8 @@ class MultiDomain(object):
         `[T]` spans the null space of the constraints of :meth:`.get_T`,
         whose rows depend on the function, the position and the panels of
         each connection imposed exactly, on whether the rotations of
-        ``'SB'`` are connected (key ``'kr'``), on the number of terms, the
+        ``'SB'`` are connected (key ``'kr'``, used only by the FSDT and
+        TSDT), on the number of terms, the
         dimensions, the radius, the model and the offset of each panel, on
         its ply thicknesses, through the faces connected by ``'SB'``, and on
         its boundary condition flags, which remove terms
@@ -2998,7 +2999,11 @@ class MultiDomain(object):
             ``'SB'`` connects the rotations only when ``'kr'`` is given, with
             units of force/length, and for all the models the penalty
             ``'kt'`` of ``'SB'`` has units of force/length**3 and must be
-            consistent with the units of the model.
+            consistent with the units of the model. The key ``'kr'`` of
+            ``'SB'`` applies only to the FSDT and TSDT: the rotations of the
+            classical laminated plate theory follow from `w`, already tied
+            by `w_1 = w_2`, and a ``'kr'`` given to these models is not used,
+            with a ``UserWarning``, see :func:`.skin_base.fkCSB`.
 
             For the models based on shear deformation theories, e.g.
             ``'plate_fsdt_donnell'`` or ``'cylshell_tsdt_sanders'``,
@@ -3079,7 +3084,8 @@ class MultiDomain(object):
         `z v/r` only with the Sanders-Koiter kinematics, see
         :func:`.skin_base.fkCSB` and :func:`._sb_top_bottom`, and the
         rotations of the normal of the shear deformation theories when
-        ``'kr'`` is given. The other connections of the shear deformation
+        ``'kr'`` is given; ``'kr'`` is not used for the classical laminated
+        plate theory, whose rotations follow from `w`. The other connections of the shear deformation
         theories are described in :meth:`._kC_conn_sdt`.
 
         The continuity is then only approximate. Low penalty constants make
@@ -3329,9 +3335,10 @@ class MultiDomain(object):
         instead of `-w_{,y}` and `-w_{,x}`. ``'SB'`` penalizes the
         displacements `u, v, w` at the interface, `z = d_1 - h_1/2` of
         ``p1`` and `z = d_2 + h_2/2` of ``p2`` with the offsets `d_1`,
-        `d_2`, and the difference of the rotations only when
-        ``'kr'`` is given and not zero, as for the classical laminated
-        plate theory, see :func:`.skin_base.fkCSB`. The default rotation
+        `d_2`, as for the classical laminated plate theory, and the
+        difference of the rotations only when ``'kr'`` is given and not
+        zero, which only these models do, see :func:`.skin_base.fkCSB`. The
+        default rotation
         penalty does not grow as the domains become narrower, so thin and
         narrow domains may need a higher ``'kr'`` to converge to the
         single-domain result. See

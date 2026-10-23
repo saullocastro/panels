@@ -202,7 +202,10 @@ def calc_kt_kr(p1, p2, connection_type):
     kt, kr : tuple
         A tuple with both values. ``kt`` is a force per unit area, and a
         force per unit volume with ``'bot-top'``; ``kr`` is a force, and
-        ``None`` with ``'bot-top'``. The function returns ``None``, not a
+        ``None`` with ``'bot-top'``: the rotation penalty of ``'SB'``, a
+        force per unit length, is given with the key ``'kr'`` of the
+        connection and applies only to the FSDT and TSDT, see
+        :func:`.skin_base.fkCSB`. The function returns ``None``, not a
         tuple, when ``connection_type`` is none of the types above.
 
     Notes

@@ -50,7 +50,11 @@ the offsets `d_1`, `d_2` of the laminates, `u_1(z_1) = u_2(z_2)`, `v_1(z_1)
 models, see :mod:`panels.multidomain.connections.skin_base`. The sketch
 shows a stiffener base on the side of positive `z` of the skin; a pad-up on
 the side of negative `z` of a skin is ``p2``, with the skin ``p1``. The same
-holds for ``'SB_TSL'``.
+holds for ``'SB_TSL'``. The rotation penalty ``'kr'`` of ``'SB'`` applies
+only to the FSDT and TSDT, whose rotations are independent of `u, v, w`;
+the rotations of the classical laminated plate theory follow from `w`,
+already tied by `w_1 = w_2`, and tying them too would over-constrain the
+connection with the Sanders-Koiter kinematics, see :func:`.fkCSB`.
 
 .. automodule:: panels.multidomain.connections.skin_base
     :members: fkCSB
@@ -174,7 +178,9 @@ Calculating Penalty Constants
 Function :func:`.calc_kt_kr` calculates the penalty constants for
 translation (``kt``) and rotation (``kr``) from the laminates of the two
 connected panels. The penalty constants are not used by the connections
-imposed with the null-space method, see :ref:`null_space`.
+imposed with the null-space method, see :ref:`null_space`, apart from the
+key ``'kr'`` of ``'SB'``, which tells whether the rotations of the FSDT and
+TSDT are connected. For ``'SB'`` the function gives no ``kr``.
 
 .. autofunction:: panels.multidomain.connections.calc_kt_kr
 
@@ -209,7 +215,8 @@ penalizes the displacements `u(z), v(z), w` of the lower face of ``p1``
 and of the upper face of ``p2``, with the offsets of the laminates and the
 kinematics of each panel, with its slope and, with the Sanders-Koiter
 kinematics, the term `v/r`, see :func:`.kCsdt._sb_components` and
-:func:`.fkCSB`.
+:func:`.fkCSB`, and, only for the FSDT and TSDT, the rotations of the
+normal at the reference surfaces with ``kr``.
 
 With the null-space method the quantities penalized by the kernels become
 the linear constraints `[B] \{c\} = \{0\}`, which are eliminated with a

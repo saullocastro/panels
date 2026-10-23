@@ -27,8 +27,12 @@ fields of the FSDT and TSDT with the rotations `\phi_x, \phi_y`, the term
 `z v/r` being present only with the Sanders-Koiter kinematics. For the FSDT
 and TSDT, with the key ``'kr'`` of the connection, the rotations of the
 normal at the reference surfaces, :func:`.kCsdt._rotation_x` and
-:func:`.kCsdt._rotation_y`, are also tied; the rotations of the CLPT follow
-from `w`, tied by `w_1 = w_2`, see :func:`.kCsdt._sb_components`.
+:func:`.kCsdt._rotation_y`, are also tied. The rotation penalty ``'kr'``
+applies only to the FSDT and TSDT: the rotations of the CLPT follow from
+`w`, tied by `w_1 = w_2`, and tying them too would be redundant or, with
+the Sanders-Koiter kinematics, would give `(z_1 - z_2) w_{,y} = 0`, an
+over-constrained connection, see :func:`.kCsdt._sb_components`. A ``'kr'``
+given to the CLPT is not used, with a ``UserWarning``.
 
 The same quantities, :func:`.kCsdt._sb_components`, give the constraints
 of the null-space method, :func:`.nullspace.constraint_matrix`, and the
@@ -82,13 +86,20 @@ def fkCSB(kt, p_top, p_bot, size, kr=0.):
         Size of the assembly.
     kr : float, optional
         Rotation penalty stiffness, per unit area, with units of
-        force/length, used only by the models with 5 DOFs per term. Default
-        ``0.``, only the displacements at the interface are connected.
+        force/length, used only by the FSDT and TSDT, the models with 5 DOFs
+        per term. Default ``0.``, only the displacements at the interface
+        are connected.
 
     Returns
     -------
     kCSB : scipy.sparse.coo_matrix
         Upper triangle of the connection matrix, shape ``(size, size)``.
+
+    Warns
+    -----
+    UserWarning
+        When ``kr`` is not zero for the models of the classical laminated
+        plate theory, which do not use it.
 
     Notes
     -----
@@ -114,7 +125,14 @@ def fkCSB(kt, p_top, p_bot, size, kr=0.):
         w_{1,y} - \left(1 + \frac{z_2}{r_2}\right) v_2 + z_2 w_{2,y}
 
     with `1/r = 0` for the Donnell kinematics and for plates. The term with
-    `k_r` is present only for the FSDT and TSDT.
+    `k_r` is present only for the FSDT and TSDT, whose rotations are
+    independent of `u, v, w`. For the CLPT the rotations `-w_{,x}` and
+    `-w_{,y} + v/r` follow from `w`: `w_1 = w_2` already ties `w_{,x}` and
+    `w_{,y}`, and with the Sanders-Koiter kinematics, `w_1 = w_2` and
+    `v_1(z_1) = v_2(z_2)`, tying also `-w_{,y} + v/r` would give `(z_1 -
+    z_2) w_{,y} = 0` for panels with the radii of their reference surfaces,
+    `r_1 + z_1 = r_2 + z_2`, i.e. `w_{,y} = 0` over the area unless the
+    reference surfaces coincide, see :func:`.kCsdt._sb_components`.
 
     """
     comps = kCsdt._sb_components(p_top, p_bot, kt, kr)

@@ -52,7 +52,8 @@ OFFSETS = [(0., 0.), (0.5, 0.), (0.25, -0.25), (0., -0.5), (0.3, -0.2)]
 
 def _bonded(model, offsets, conn_method):
     r"""The laminates `[0/90]` over `[0/90]`, `a/h = 5`, connected by
-    ``'SB'`` with the rotations tied, and the single laminate `[0/90]_2`"""
+    ``'SB'`` with the rotations of the FSDT tied, and the single laminate
+    `[0/90]_2`"""
     a = 1.
     h = a/5
     laminaprop = orthotropic(10)
@@ -62,11 +63,15 @@ def _bonded(model, offsets, conn_method):
         p.offset = d*h
         p._rebuild()
     conn = dict(p1=top, p2=bot, func='SB')
+    #NOTE the rotations are tied only for the FSDT, those of the CLPT follow
+    #     from w, see kCsdt._sb_components
+    tie_rotations = model != CLPT
     if conn_method == 'penalty':
         kt, _ = calc_kt_kr(top, bot, 'bot-top')
         conn['kt'] = 1.e5*kt
-        conn['kr'] = 1.e5*kt*h**2
-    else:
+        if tie_rotations:
+            conn['kr'] = 1.e5*kt*h**2
+    elif tie_rotations:
         conn['kr'] = 1.
     md = MultiDomain([top, bot], [conn], conn_method=conn_method)
     single = make_plate(model, a, a, h, [0, 90, 0, 90], laminaprop)
