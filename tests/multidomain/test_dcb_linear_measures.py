@@ -113,22 +113,28 @@ def test_load_measures():
     # tip displacement of 1 mm, default edge penalties; columns: k_o (N/mm^3),
     # reaction, int k Delta dA, int k Delta^corr dA, int Q_x dy (N)
     table = [
-        (1e4, 24.99, 24.99, 388.1, 24.42),
-        (5e4, 25.87, 25.87, 593.1, 25.28),
-        (2e5, 26.42, 26.42, 839.4, 25.82),
+        (1e4, 24.9847, 24.9902, 388.113, 24.4146),
+        (5e4, 25.8676, 25.8731, 593.064, 25.2804),
+        (2e5, 26.4126, 26.4181, 839.449, 25.8158),
     ]
     for k_o, R, F, F_corr, F_Qx in table:
         res = dcb_thesis_linear(k_o, wp=0.5)
+        # the integrals of the traction change by less than 6e-5 with the
+        # round-off, e.g. with the ordering of the sparse solver
+        assert np.isclose(res['F'], F, rtol=1e-4)
+        assert np.isclose(res['F_corr'], F_corr, rtol=1e-4)
+        # the reaction and the integral of Q_x of the loaded arm carry a
+        # round-off error of up to 3e-4 relative, from the 0.015 mm
+        # connecting domain: with 2*m, 2*m + 4 or 40 integration points
+        # along x (2*n, 2*n + 4, 40 along y) instead of the default, all
+        # integrating the matrices exactly, they change by 1.8e-4, 3.9e-5
+        # and 2.7e-4, the integrals of the traction by less than 2e-6
         assert np.isclose(res['R'], R, rtol=5e-4)
-        assert np.isclose(res['F'], F, rtol=5e-4)
-        assert np.isclose(res['F_corr'], F_corr, rtol=5e-4)
         assert np.isclose(res['F_Qx'], F_Qx, rtol=5e-4)
         # equilibrium of the loaded arm, the traction with the full
-        # separation is the reaction. R = k_w (w_p - w) with k_w = 1e6 is
-        # the difference of nearly equal numbers, sensitive to the
-        # round-off of the solution: matrices equal to 2e-15 with 19, 20 or
-        # 24 integration points along x of the cohesive domains give values
-        # of R scattered by 1.8e-4 relative, hence rtol=5e-4
+        # separation is the reaction to the same round-off: 2.2e-4 here,
+        # below 3e-7 with a connecting domain of 0.15 mm and 2e-9 with 1.5
+        # or 5 mm
         assert np.isclose(res['F'], res['R'], rtol=5e-4)
     # with k_o = 2e5 an opening of 1 mm is beyond the damage onset, hence
     # the linear solution at 0.5 mm, scaled
@@ -137,24 +143,26 @@ def test_load_measures():
 
 def test_edge_penalty_factor():
     # k_o = 2e5 N/mm^3; columns: factor on the default edge penalties,
-    # P/delta (N/mm), Delta_max/delta
+    # P/delta (N/mm), Delta_max/delta; P is the reaction, with the round-off
+    # error of test_load_measures
     table = [
-        (1, 26.42, 5.07e-4),
-        (10, 32.13, 6.26e-4),
-        (100, 32.84, 6.42e-4),
-        (1000, 32.92, 6.43e-4),
+        (1, 26.4126, 5.07227e-4),
+        (10, 32.1270, 6.25816e-4),
+        (100, 32.8380, 6.41724e-4),
+        (1000, 32.9105, 6.43380e-4),
     ]
     res = {}
     for factor, P, del_max in table:
         res[factor] = dcb_thesis_linear(2e5, edge_penalty_factor=factor)
         assert np.isclose(res[factor]['R'], P, rtol=5e-4)
-        assert np.isclose(res[factor]['del_max'], del_max, rtol=1e-3)
+        assert np.isclose(res[factor]['del_max'], del_max, rtol=1e-4)
     # with the default penalties, the stiffness is 20% lower and the
     # separation at the crack front lags the imposed displacement by 21%
     assert np.isclose(1 - res[1]['R']/res[1000]['R'], 0.20, atol=0.005)
     assert np.isclose(1 - res[1]['del_max']/res[1000]['del_max'], 0.21,
                       atol=0.005)
-    # connecting domain of 5 mm instead of 0.015 mm
-    assert np.isclose(dcb_thesis_linear(2e5, a2=5.)['R'], 26.94, rtol=5e-4)
+    # connecting domain of 5 mm instead of 0.015 mm, without the round-off
+    # error of the reaction
+    assert np.isclose(dcb_thesis_linear(2e5, a2=5.)['R'], 26.9437, rtol=1e-5)
     assert np.isclose(dcb_thesis_linear(2e5, edge_penalty_factor=100,
-                                        a2=5.)['R'], 32.85, rtol=5e-4)
+                                        a2=5.)['R'], 32.8512, rtol=1e-5)

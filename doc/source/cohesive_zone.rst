@@ -414,23 +414,31 @@ the three values of `k_o`, and scaled to 1 mm.
       - `\int k \Delta^{corr} \, dA` [N]
       - `\int Q_x \, dy` [N]
     * - `1\times10^4`
-      - 24.99
+      - 24.98
       - 24.99
       - 388.1
-      - 24.42
+      - 24.41
     * - `5\times10^4`
       - 25.87
       - 25.87
       - 593.1
       - 25.28
     * - `2\times10^5`
-      - 26.42
+      - 26.41
       - 26.42
       - 839.4
       - 25.82
 
-The values are asserted by ``tests/multidomain/test_dcb_linear_measures.py``,
-whose function ``dcb_thesis_linear`` builds and solves the model:
+The reaction and the integral of `Q_x` of the loaded arm carry a round-off
+error of up to `3\times10^{-4}` relative, which comes from the 0.015 mm
+connecting domain and changes, e.g., with the number of integration points of
+the panels, whereas the integrals of the traction change by less than
+`2\times10^{-6}`. Therefore the reaction and `\int k \Delta \, dA` differ in
+the fourth digit, by `2.2\times10^{-4}`; the difference falls below
+`3\times10^{-7}` with a connecting domain of 0.15 mm and below
+`2\times10^{-9}` with 1.5 or 5 mm. The values are asserted by
+``tests/multidomain/test_dcb_linear_measures.py``, whose function
+``dcb_thesis_linear`` builds and solves the model:
 
 .. literalinclude:: ../../tests/multidomain/test_dcb_linear_measures.py
     :pyobject: test_load_measures
@@ -490,7 +498,7 @@ model and the linear solutions of the previous section.
       - `P/\delta` [N/mm]
       - `\Delta_{max}/\delta`
     * - 1
-      - 26.42
+      - 26.41
       - `5.07\times10^{-4}`
     * - 10
       - 32.13
@@ -499,7 +507,7 @@ model and the linear solutions of the previous section.
       - 32.84
       - `6.42\times10^{-4}`
     * - 1000
-      - 32.92
+      - 32.91
       - `6.43\times10^{-4}`
 
 The converged value agrees with a beam on an elastic foundation, `P/\delta

@@ -242,7 +242,12 @@
 - New `tests/multidomain/test_dcb_linear_measures.py`: linear solutions of
   the DCB model of the thesis of D'Souza (2024), asserting the measures of
   the load and the effect of the penalties of the edge connections given in
-  `doc/source/cohesive_zone.rst`.
+  `doc/source/cohesive_zone.rst`, to `1e-4` relative for the integrals of
+  the traction and the largest separation, to `5e-4` for the reaction and
+  the integral of `Q_x`, which carry a round-off error of up to `3e-4` from
+  the 0.015 mm connecting domain (it changes with the number of integration
+  points, all exact), and to `1e-5` for the reaction with a 5 mm connecting
+  domain.
 
 ### Documentation
 
