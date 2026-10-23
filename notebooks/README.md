@@ -57,20 +57,18 @@ kept, in `results/`.
 | `kardomateas2003_sandwich_rings.ipynb` | Kardomateas and Simitses (2003): long sandwich cylinders under hydrostatic pressure |
 | `han2004_sandwich_rings.ipynb` | Han, Kardomateas and Simitses (2004): long sandwich cylinders under hydrostatic pressure |
 | `nasa_sp8007_external_pressure.ipynb` | NASA/SP-8007-2020/REV 2: cylinders under lateral and hydrostatic pressure |
-| `talati2025_fgp_cylinders.ipynb` | Talati and Shaterzadeh (2025): functionally graded porous cylinders under lateral and hydrostatic pressure, critical pressures and post-buckling (Riks) with temperature-dependent moduli. There are no thermal loads, and the geometric imperfection is replaced by the equivalent load imperfection. Results in `results/talati2025_*.json` |
 | `schweizerhof1984_pressure_loads.ipynb` | Schweizerhof and Ramm (1984): displacement dependent pressure loads |
 | `sze2004_hinged_roofs.ipynb` | Sabir and Lock (1972), Sze et al. (2004): limit loads of hinged cylindrical roofs |
 | `stamatelos_labeas_2023.ipynb`, `stamatelos_labeas_2023_multidomain.ipynb` | Stamatelos and Labeas (2023): buckling of laminated stiffened plates, single domain and multidomain |
 | `follower_utils.py` | Utilities of the follower (hydrostatic) pressure notebooks |
 | `scf_validation_utils.py` | Utilities of the shear correction notebooks |
 
-## Legacy
+## Quadrature
 
 `test_quadrature_partial_integration_matrix.ipynb` and
 `test_quadrature_partial_integration_of_domain.ipynb` check the partial
-integration of polynomials with Gauss-Legendre rules. They import
-`panels.legendre_gauss_quadrature`, which was replaced by
-`scipy.special.roots_legendre`, and do not run with the current version.
+integration of polynomials with Gauss-Legendre rules, taking the points and
+weights from `scipy.special.roots_legendre`. They do not use `panels`.
 
 ## Results
 
