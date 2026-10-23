@@ -93,4 +93,15 @@ def test_cylinder_blade_stiffened_compression_lb_pd_from_static():
     assy.plot(c, 'skin', vec='Nyy', filename='tmp_cylinder_blade_stiffened_compression_lb_pd_from_static_Nyy.png', colorbar=True)
     assy.plot(eigvecs[:, 0], 'skin', filename='tmp_cylinder_blade_stiffened_compression_lb_pd_from_static_eigvec.png')
 
-    #assert np.isclose(Nxxs[0]*eigvals[0], -51905.843, atol=0.01, rtol=0.001)
+    #NOTE the prescribed displacements are imposed exactly, the end
+    #     x = height of every panel has u = pd in the pre-buckling state
+    for p in assy.panels:
+        mesh, f = p.uvw(c[p.col_start:p.col_end],
+                        xs=np.full(5, p.a), ys=np.linspace(0, p.b, 5))
+        assert np.allclose(f['u'], pds[0], rtol=1e-8, atol=0)
+    #NOTE eigvals multiply the prescribed displacements, the critical
+    #     end-shortening is 4.785e-4; with the penalty forces k_u u_p of the
+    #     former implementation, whose penalty stiffness was not in the
+    #     stiffness matrix, the analysis was load controlled, u at x =
+    #     height reached about 1% of pd and eigvals[0] was 39.99
+    assert np.isclose(eigvals[0], 0.4785448, rtol=1e-5)

@@ -437,29 +437,22 @@ def cylinder_blade_stiffened_compression_lb_pd_from_static(height, r, stack,
 
     See :func:`.create_cylinder_blade_stiffened` for most parameters.
 
-    The assembly and its connections come from
-    :func:`.create_cylinder_blade_stiffened`, with the default
-    ``pd_method='penalty'`` of :class:`.MultiDomain`. For every panel
-    ``x2u`` is set to ``1`` and the displacement `u`, constant along `y`, is
-    prescribed at its edge `x = height` with the penalty stiffness ``ku``,
-    see :meth:`.Shell.add_distr_pd_fixed_x`, taken from ``pds_skin`` for the
-    panels whose group contains ``'skin'`` and from ``pds_blade`` for those
-    whose group contains ``'blade'``; the prescriptions stay in the panels
-    of the returned assembly. A linear static analysis,
-    ``structsolve.static`` with the reduced :meth:`.MultiDomain.calc_kC`
-    and :meth:`.MultiDomain.calc_fext`, gives the pre-buckling state ``c``,
-    with which the geometric stiffness matrix :meth:`.MultiDomain.calc_kG`
-    is computed. The reduced matrices are passed to ``structsolve.lb`` with
-    ``tol=0`` and ``sparse_solver=True``, and the eigenvectors are expanded
-    with :meth:`.MultiDomain.expand`. TODO(author): the penalty stiffness of
-    the prescribed displacements is not added to the stiffness matrix,
-    only its forces enter :meth:`.MultiDomain.calc_fext`; check whether
-    this is intended. With the default ``ku`` the analysis is in effect
-    load controlled: in the example below `u` at `x = height` reaches
-    about 1% of the prescribed value, adding the penalty stiffness changes
-    ``eigvals`` by about 1%, and ``eigvals`` multiply the forces `k_u u_p`.
-    The displacement control is imposed exactly with
-    ``pd_method='null-space'`` and :meth:`.MultiDomain.linear_buckling`.
+    The panels and the connections come from
+    :func:`.create_cylinder_blade_stiffened`, and the returned assembly is
+    a :class:`.MultiDomain` of these panels, with the connections stored in
+    it and ``pd_method='null-space'``, such that the prescribed
+    displacements are imposed exactly. For every panel ``x2u`` is set to
+    ``1`` and the displacement `u`, constant along `y`, is prescribed at
+    its edge `x = height` with :meth:`.Shell.add_distr_pd_fixed_x` and
+    ``cte=False``, i.e. multiplied by the load factor, taken from
+    ``pds_skin`` for the panels whose group contains ``'skin'`` and from
+    ``pds_blade`` for those whose group contains ``'blade'``; the
+    prescriptions stay in the panels of the returned assembly. The linear
+    buckling analysis is :meth:`.MultiDomain.linear_buckling`, with
+    ``tol=0`` and ``sparse_solver=True`` passed to ``structsolve.lb``, and
+    the pre-buckling state ``c`` is :meth:`.MultiDomain.linear_static` for
+    a load factor of 1, which has `u` equal to the prescribed values at `x
+    = height`.
 
     Parameters
     ----------
@@ -496,8 +489,11 @@ def cylinder_blade_stiffened_compression_lb_pd_from_static(height, r, stack,
     num_eigvalues : int, optional
         Number of eigenvalues to be extracted. Default ``20``.
     ku : float, optional
-        Penalty stiffness used for prescribing displacements, force per
-        unit area. Default ``1.e6``.
+        Penalty stiffness stored with the prescribed displacements, force
+        per unit area, see :meth:`.Shell.add_distr_pd_fixed_x`. With
+        ``pd_method='null-space'`` its value does not enter the analysis,
+        it must only be neither ``None`` nor zero, which tells that `u` is
+        prescribed. Default ``1.e6``.
     conn_method : str, optional
         How the connections are imposed, ``'null-space'``, the default, or
         ``'penalty'``, see :class:`.MultiDomain`.
@@ -507,9 +503,9 @@ def cylinder_blade_stiffened_compression_lb_pd_from_static(height, r, stack,
     md, c, eigvals, eigvecs : tuple
         Assembly, static results, eigenvalues and eigenvectors. ``c`` are
         the Ritz constants of the assembly, 1-D array of size
-        ``md.get_size()``, ``eigvals`` the load multipliers returned by
-        ``structsolve.lb``, dimensionless, and ``eigvecs`` has one
-        eigenvector of the assembly per column.
+        ``md.get_size()``, ``eigvals`` the critical load factors, i.e. the
+        multipliers of the prescribed displacements, dimensionless, and
+        ``eigvecs`` has one eigenvector of the assembly per column.
 
     Raises
     ------
@@ -519,16 +515,14 @@ def cylinder_blade_stiffened_compression_lb_pd_from_static(height, r, stack,
 
     Notes
     -----
-    The prescribed displacements are imposed with the penalty method, see
-    :meth:`.MultiDomain.calc_fext`: the energy `\frac{1}{2} k_u (u -
-    u_p)^2`, integrated along the edge, gives the force `k_u u_p` of the
-    external force vector and the penalty stiffness `k_u`. The linear
-    buckling analysis is that of
-    :func:`.cylinder_compression_lb_Nxx_from_static`, ``eigvals`` being the
-    multipliers `\lambda` of the pre-buckling state ``c``. Since the
-    penalty stiffness is not in the stiffness matrix, the forces `k_u u_p`
-    act as dead loads, and `u = u_p` is not imposed, see the
-    ``TODO(author)`` of the description.
+    The prescribed displacements are the linear constraints `u(x = height,
+    y) = \lambda u_p`, eliminated exactly together with the connections,
+    see :ref:`null_space_pd`: the pre-buckling state is `\{c(\lambda)\} =
+    \lambda \{c\}`, with `u = u_p` at `x = height` for `\lambda = 1`, and
+    the critical end-shortening of each panel is ``eigvals[0]`` times its
+    prescribed value. The modes have `u = 0` at `x = height`, the
+    displacement being controlled there. See
+    :meth:`.MultiDomain.linear_buckling`.
 
     Examples
     --------
@@ -547,6 +541,10 @@ def cylinder_blade_stiffened_compression_lb_pd_from_static(height, r, stack,
         raise ValueError('The length of "pds_skin" must be the same as "npanels"')
     if len(pds_blade) != npanels:
         raise ValueError('The length of "pds_blade" must be the same as "npanels"')
+    #NOTE the prescribed displacements imposed exactly, the connections
+    #     stored in the assembly, used by linear_static and linear_buckling
+    md = MultiDomain(md.panels, conns, conn_method=conn_method,
+                     pd_method='null-space')
     i_skin = -1
     i_blade = -1
     for p in md.panels:
@@ -560,18 +558,10 @@ def cylinder_blade_stiffened_compression_lb_pd_from_static(height, r, stack,
         #NOTE the value is bound when the function is created, the
         #     functions are evaluated after the loop
         p.add_distr_pd_fixed_x(p.a, ku, None, None, lambda y, pd=pd: pd,
-                               None, None)
+                               None, None, cte=False)
 
-    fext = md.calc_fext(silent=True)
-
-    k0 = md.reduce(md.calc_kC(conns, silent=True))
-    incs, cs = static(k0, md.reduce(fext), silent=True)
-    c = md.expand(cs[0])
-    kG = md.reduce(md.calc_kG(c=c, silent=True))
-
-    eigvals = eigvecs = None
-    eigvals, eigvecs = lb(k0, kG, tol=0, sparse_solver=True, silent=True,
-             num_eigvalues=num_eigvalues, num_eigvalues_print=5)
-    eigvecs = md.expand(eigvecs)
+    eigvals, eigvecs = md.linear_buckling(num_eigvalues=num_eigvalues,
+            silent=True, tol=0, sparse_solver=True, num_eigvalues_print=5)
+    c = md.linear_static(lbd=1., silent=True)
 
     return md, c, eigvals, eigvecs

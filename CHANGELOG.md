@@ -127,6 +127,17 @@
   line, and checks its arguments.
 - `MultiDomain.plot` computes the field of `eval_panel` and uses `xs` and
   `ys`.
+- `cylinder_blade_stiffened_compression_lb_pd_from_static` imposes the
+  prescribed end-shortening exactly, with `pd_method='null-space'` and
+  `MultiDomain.linear_buckling`: the forces `ku*pd` of the penalty method
+  entered `calc_fext` without the penalty stiffness in the stiffness matrix,
+  so the analysis was load controlled, `u` at `x = height` reaching 1.2% of
+  the prescribed value. The returned assembly stores the connections and has
+  `pd_method='null-space'`, the prescriptions are added with `cte=False`, and
+  `eigvals` multiply the prescribed displacements: 0.4785 for the
+  five-panel cylinder of the tests (`m = 8`, `n = 12`), instead of 39.99, the
+  multiplier of the forces `ku*pd` with `ku = 1e6`. The signature is
+  unchanged; `ku` only flags the prescribed component.
 
 ### API
 

@@ -69,8 +69,13 @@ def test_cylinder_blade_stiffened_pd_from_static_one_pd_per_panel():
             **COMMON)
     expected = _values_by_group(md, pds_skin, pds_blade)
     assert len(expected) == 2*NPANELS
+    assert md.pd_method == 'null-space'
     for p, pd in zip(md.panels, expected):
-        assert len(p.distr_pds) == 1
-        # the prescribed displacement and the force k_u u_p of the penalty
-        assert p.distr_pds_values[0][2](0.) == pd
-        assert np.isclose(p.distr_pds[0][2](0.), ku*pd, rtol=1e-15)
+        # incremented prescriptions, cte=False, multiplied by the load factor
+        assert len(p.distr_pds) == 0
+        assert len(p.distr_pds_inc) == 1
+        assert p.distr_pds_values_inc[0][2](0.) == pd
+        # u = pd at x = a in the pre-buckling state, for a load factor of 1
+        mesh, f = p.uvw(c[p.col_start:p.col_end], xs=np.full(3, p.a),
+                        ys=np.linspace(0, p.b, 3))
+        assert np.allclose(f['u'], pd, rtol=1e-8, atol=0)
