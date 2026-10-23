@@ -124,8 +124,12 @@ def test_load_measures():
         assert np.isclose(res['F_corr'], F_corr, rtol=5e-4)
         assert np.isclose(res['F_Qx'], F_Qx, rtol=5e-4)
         # equilibrium of the loaded arm, the traction with the full
-        # separation is the reaction
-        assert np.isclose(res['F'], res['R'], rtol=1e-4)
+        # separation is the reaction. R = k_w (w_p - w) with k_w = 1e6 is
+        # the difference of nearly equal numbers, sensitive to the
+        # round-off of the solution: matrices equal to 2e-15 with 19, 20 or
+        # 24 integration points along x of the cohesive domains give values
+        # of R scattered by 1.8e-4 relative, hence rtol=5e-4
+        assert np.isclose(res['F'], res['R'], rtol=5e-4)
     # with k_o = 2e5 an opening of 1 mm is beyond the damage onset, hence
     # the linear solution at 0.5 mm, scaled
     assert res['del_max'] > res['del_o']

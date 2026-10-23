@@ -85,6 +85,40 @@ def check_c(c, size):
         raise ValueError('"c" must have the same size as the global stiffness matrix')
 
 
+def gauss_points(num):
+    r"""Default number of Gauss-Legendre points along a direction
+
+    Returns ``max(2*num - 1, 7)``, the smallest number of points that
+    integrates exactly every integrand of the numerical kernels of
+    :class:`.Shell` along a direction with ``num`` approximation terms and a
+    constant constitutive matrix, see :meth:`.Shell.integration_points`.
+
+    Parameters
+    ----------
+    num : int
+        Number of terms of the approximation functions along the direction,
+        ``m`` along `x` or ``n`` along `y`.
+
+    Returns
+    -------
+    points : int
+        Number of Gauss-Legendre points.
+
+    Notes
+    -----
+    Bardell's functions of the terms `i = 0, 1, 2, 3` are cubic and that of
+    the term `i \ge 4` has degree `i`, so that the functions of ``num`` terms
+    have degree at most `p = \max(num - 1, 3)`. The integrands of the
+    internal force vector and of the tangent stiffness matrix with the
+    geometrically non-linear strains are products of four of them, or of
+    their derivatives, along each direction, of degree at most `4 p`, which
+    the Gauss-Legendre rule of `n` points integrates exactly when `2 n - 1
+    \ge 4 p`, i.e. `n \ge 2 p + 1 = \max(2\,num - 1, 7)`.
+
+    """
+    return max(2*num - 1, 7)
+
+
 class Shell(object):
     r"""General shell class that can be used for plates or shells
 
@@ -99,8 +133,9 @@ class Shell(object):
     :ref:`Bardell's functions <theory_func_bardell>`.
 
     The constructor sets the default attributes, e.g. simply supported
-    boundary conditions, no loads, ``nx = 2*m`` and ``ny = 2*n`` integration
-    points, then the attributes given in ``kwargs``. When both ``a`` and
+    boundary conditions, no loads and the numbers of integration points
+    ``nx`` and ``ny`` following ``m`` and ``n``, then the attributes given
+    in ``kwargs``. When both ``a`` and
     ``b`` are given the shell is also built: the model is selected, the
     laminate ``Shell.lam`` is created from ``stack``, ``plyt`` (or
     ``plyts``), ``laminaprop`` (or ``laminaprops``), ``rho`` and ``offset``
@@ -118,6 +153,16 @@ class Shell(object):
     an argument, as an attribute, or by changing in place a list filled by
     the rebuild, is never overwritten and takes precedence over the
     corresponding scalar.
+
+    The numbers of Gauss-Legendre points ``nx`` and ``ny`` of the
+    numerically integrated matrices and vectors are, unless set by the user,
+    ``gauss_points(m)`` and ``gauss_points(n)``, i.e. ``max(2*m - 1, 7)`` and
+    ``max(2*n - 1, 7)`` for the values of ``m`` and ``n`` at the time of the
+    calculation, which integrate exactly every integrand with a constant
+    constitutive matrix, see :func:`.gauss_points` and
+    :meth:`.Shell.integration_points`. A value assigned to ``nx`` or ``ny``,
+    as an attribute or in ``kwargs``, is kept, the rebuild only raising it
+    to ``m`` or ``n``; assigning ``None`` restores the default.
 
     The boundary conditions are controlled by the flags ``x1u, x1ur, x2u,
     x2ur, ..., y2w, y2wr``, where for instance ``x1v`` multiplies the value
@@ -307,7 +352,7 @@ class Shell(object):
         'row_start', 'col_start', 'row_end', 'col_end',
         'name', 'bay', 'model',
         'fsdt_shear_correction',
-        'm', 'n', 'nx', 'ny', 'size',
+        'm', 'n', '_nx', '_ny', 'size',
         'point_loads', 'point_loads_inc', 'distr_loads', 'distr_loads_inc',
         'pressure_loads', 'pressure_loads_inc',
         'point_pds', 'point_pds_inc', 'distr_pds', 'distr_pds_inc',
@@ -374,9 +419,10 @@ class Shell(object):
             raise ValueError('Bardell functions of the order 31 and above are not coded')
         self.size = None
 
-        # numerical integration - no of points
-        self.nx = 2*m
-        self.ny = 2*n
+        # numerical integration - no of points, None follows m and n, see
+        # the properties nx and ny
+        self._nx = None
+        self._ny = None
 
         # loads
         self.point_loads = [] #NOTE see add_point_load
@@ -524,9 +570,49 @@ class Shell(object):
         gc.collect()
 
 
+    @property
+    def nx(self):
+        r"""Number of Gauss-Legendre points along `x` of the numerical
+        integration
+
+        :func:`.gauss_points` of ``m`` at the time of the calculation unless
+        a value was assigned, see :class:`.Shell`; assigning ``None``
+        restores this default.
+
+        """
+        if self._nx is None:
+            return gauss_points(self.m)
+        return self._nx
+
+    @nx.setter
+    def nx(self, value):
+        self._nx = value
+
+    @property
+    def ny(self):
+        r"""Number of Gauss-Legendre points along `y` of the numerical
+        integration
+
+        :func:`.gauss_points` of ``n`` at the time of the calculation unless
+        a value was assigned, see :class:`.Shell`; assigning ``None``
+        restores this default.
+
+        """
+        if self._ny is None:
+            return gauss_points(self.n)
+        return self._ny
+
+    @ny.setter
+    def ny(self, value):
+        self._ny = value
+
     def _rebuild(self):
-        self.nx = max(self.nx, self.m)
-        self.ny = max(self.ny, self.n)
+        #NOTE only the values assigned by the user, the defaults being
+        #     larger than m and n
+        if self._nx is not None:
+            self._nx = max(self._nx, self.m)
+        if self._ny is not None:
+            self._ny = max(self._ny, self.n)
         if self.model is None:
             if self.r is None:
                 self.model = 'plate_clpt_donnell'
@@ -746,26 +832,31 @@ class Shell(object):
             \sum_i \sum_j w_{x_i} w_{y_j} f(x_i, y_j)
 
         which is exact for polynomials of degree up to `2 n_x - 1` in `x`
-        and `2 n_y - 1` in `y`. The default ``nx = 2*m``, ``ny = 2*n`` of
-        :class:`.Shell` is chosen for the exact integration. Bardell's
+        and `2 n_y - 1` in `y`. The default ``nx = gauss_points(m)``, ``ny
+        = gauss_points(n)`` of :class:`.Shell`, see :func:`.gauss_points`,
+        is the smallest number of points for the exact integration. Bardell's
         functions, see Castro and Donadon (2017) [1]_, Eqs. (29) and (30),
-        are of degree at most `\max(m - 1, 3)`. With a constant
+        are of degree at most `p = \max(m - 1, 3)` in `x`. With a constant
         constitutive matrix the integrands of the constitutive stiffness
         and mass matrices are products of two of them or of their
-        derivatives along each direction, and those of the geometric and
-        tangent stiffness matrices and of the internal force vector of at
-        most four, of degree at most `4 \max(m - 1, 3)` in `x`, which ``nx
-        = 2*m`` integrates exactly for `m \ge 4`, and likewise along `y`.
-        The terms in `1/r` of the cylinders, also those in `v/r` of the
-        Sanders-Koiter kinematics, only multiply these products by a
-        constant. The pressure loads ``p(x, y)`` of
-        :meth:`.add_pressure_load` multiply one function, or for the
-        follower terms the product of two, by `p`, and are integrated
-        exactly for a polynomial `p` of low enough degree, e.g. a constant
-        one, and approximately otherwise. ``nx`` and ``ny`` are set by the
-        constructor of :class:`.Shell` from its arguments ``m`` and ``n``;
-        assigning ``m`` or ``n`` later keeps them, the rebuild only raising
-        them to ``m`` and ``n``.
+        derivatives along each direction, of degree at most `2 p`, those of
+        the geometric stiffness matrix of the linear stress state of ``c``
+        of three, of degree at most `3 p`, and those of the tangent
+        stiffness matrix and of the internal force vector with the
+        geometrically non-linear strains of four, of degree at most `4 p`,
+        which `n_x = 2 p + 1 = \max(2 m - 1, 7)` points integrate exactly,
+        and likewise along `y`. The terms in `1/r` of the cylinders, also
+        those in `v/r` of the Sanders-Koiter kinematics, only multiply these
+        products by a constant, and the transverse shear strains and the
+        higher-order terms of the TSDT are again products of the functions
+        and of their derivatives. The pressure loads ``p(x, y)`` of
+        :meth:`.add_pressure_load` multiply one function by `p`, the
+        follower loads with the first-order area vector the product of two
+        and with the complete area vector, ``follower='quadratic'``, of
+        three, and are integrated exactly for a polynomial `p` of low
+        enough degree, e.g. a constant one, and approximately otherwise.
+        ``nx`` and ``ny`` follow ``m`` and ``n`` unless they are assigned,
+        see :class:`.Shell`.
 
         References
         ----------

@@ -165,6 +165,21 @@
   that of a separation `r Omega`, now zero to round-off. The FSDT and TSDT
   `'SB'` already had the term. Nothing changes for the Donnell kinematics
   and for plates.
+- Default numbers of integration points: `Shell.nx` and `Shell.ny` follow
+  `m` and `n` at the time of the calculation, `max(2*m - 1, 7)` and
+  `max(2*n - 1, 7)`, new function `panels.shell.gauss_points`, unless a
+  value is assigned (kept, the rebuild only raising it to `m`, `n`;
+  `None` restores the default). Before, `nx = 2*m` was set only by the
+  constructor, so that `Shell()` followed by `s.m = 20` integrated with 22
+  points, and for `m <= 3` the 6 points of `2*m` did not integrate exactly
+  the internal force vector and the tangent stiffness matrix, products of
+  four functions of degree up to `4 max(m - 1, 3) = 12`. `2*max(m - 1, 3) + 1`
+  points are the fewest that integrate them exactly; for `m >= 4` the new
+  default has one point fewer than `2*m` and the same results to round-off
+  for a constant constitutive matrix and polynomial pressures. `json_io`
+  saves `nx`, `ny` with their value and lists them in `'derived_lists'`
+  when they follow `m`, `n`; the values of older files are kept as
+  assigned.
 
 ### API
 

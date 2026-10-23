@@ -37,8 +37,10 @@ the TSDT with an offset is described in :ref:`tsdt_offset`.
 **Approximation.** The numbers of terms ``m`` and ``n`` of the
 approximation functions along `x` and `y`, at most 30, see
 :ref:`theory_func_bardell`, and the numbers of integration points ``nx``
-and ``ny`` of the numerically integrated matrices, ``2*m`` and ``2*n`` by
-default. The boundary conditions are the flags of the edges, see
+and ``ny`` of the numerically integrated matrices, by default
+``max(2*m - 1, 7)`` and ``max(2*n - 1, 7)`` for the current ``m`` and ``n``,
+the smallest numbers that integrate exactly the products of up to four
+approximation functions, see :func:`.gauss_points`. The boundary conditions are the flags of the edges, see
 :ref:`boundary_conditions`.
 
 **Loads.** Point, line and pressure loads and the constant stress

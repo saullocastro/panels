@@ -353,9 +353,13 @@ def _list(data, name):
 def _shell_to_data(s, path, w):
     data = _encode_attrs(s, _SHELL_ATTRS, path, w)
     data['lam'] = _encode_lam(s.lam, path + '.lam')
-    # NOTE the per-ply lists filled by Shell._rebuild(), not by the user
+    # NOTE the per-ply lists filled by Shell._rebuild(), not by the user,
+    #      and the numbers of integration points nx and ny that follow m and
+    #      n, saved with their current value, which older versions read
     data['derived_lists'] = [name for name in ('plyts', 'laminaprops', 'rhos')
                              if getattr(s, name) and s._is_derived(name)]
+    data['derived_lists'] += [name for name in ('nx', 'ny')
+                              if getattr(s, '_' + name) is None]
     return data
 
 
@@ -370,6 +374,10 @@ def _shell_from_data(data, r):
     for name in data.get('derived_lists', []):
         if name in ('plyts', 'laminaprops', 'rhos') and getattr(s, name):
             s._set_derived(name, getattr(s, name))
+        # NOTE nx and ny follow m and n again; those of files without this
+        #      entry, e.g. of panels < 0.14.0, are kept as assigned values
+        if name in ('nx', 'ny'):
+            setattr(s, name, None)
     # NOTE files of panels < 0.14.0 have no thickness coordinate z in the
     #      prescribed displacements, their u and v are those of the
     #      reference surface, z = 0
