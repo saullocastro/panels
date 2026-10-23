@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.13.21 (unreleased)
+## 0.13.21 (2026-10-23)
 
 ### Python versions
 
