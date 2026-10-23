@@ -186,9 +186,12 @@ Verification
 Performance
 -----------
 
-Single shell, laminate ``[0, 45, -45, 90]``, ``nx = 2m``, ``ny = 2n``
-integration points, a follower pressure, one core, times in seconds before
-and after the tabulation, with the speed-up:
+Single shell, laminate ``[0, 45, -45, 90]``, a follower pressure, one core,
+times in seconds before and after the tabulation, with the speed-up. The
+times were measured with ``nx = 2m``, ``ny = 2n`` integration points, the
+default before ``panels`` 0.14.0, one point more in each direction than the
+current default :func:`panels.shell.gauss_points`, `\max(2m - 1, 7)`, for
+these `m = n \ge 8`:
 
 .. list-table::
     :header-rows: 1
@@ -256,5 +259,6 @@ connection with damage integrated with `50 \times 25` points:
 The double cantilever beam with cohesive zone of
 ``tests/multidomain/test_dcb_damage.py`` runs in 2 min 45 s instead of
 7 min 28 s, its non-linear matrices of the panels and its connections
-being tabulated; its cohesive zone is assembled with cached operators by
+being tabulated, also measured with the default ``nx = 2m``, ``ny = 2n`` of
+the panels before ``panels`` 0.14.0; its cohesive zone is assembled with cached operators by
 default, or with ``kCSB_dmg`` with ``use_kernels=True``.

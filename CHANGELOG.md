@@ -272,6 +272,11 @@
   connection is a spring of stiffness `k_r` per unit width, with the energy
   `k_r (w^i_x - w^j_x)^2/2` of the kernels, which adds `3h/a`, about 13%, to
   the bending compliance of the DCB arm, not `2 k_r` and 7%.
+- `doc/source/tangent_product.rst`: the single-shell timings and the rows of
+  0.14.0 of the displacement-controlled post-buckling re-measured with the
+  default integration points of `gauss_points`; the times of
+  `doc/source/tabulation.rst` and of the older rows, measured with
+  `nx = 2m`, `ny = 2n`, are labelled with these points.
 
 ### Dependencies
 

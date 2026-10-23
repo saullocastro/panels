@@ -1273,14 +1273,17 @@ the assembled tangent stiffness matrix.
 Performance
 ~~~~~~~~~~~
 
-Single shell, laminate ``[0, 45, -45, 90]``, ``nx = 2m``, ``ny = 2n``
-integration points, one core; :meth:`.Shell.calc_kT` with the tabulated
-kernels, see :ref:`tabulation`; the state `\{c\}` and the vector `\{v\}` of
+Single shell, laminate ``[0, 45, -45, 90]``, the default integration points
+of :func:`panels.shell.gauss_points`, `\max(2m - 1, 7)` by `\max(2n - 1,
+7)`, one core; :meth:`.Shell.calc_kT` with the tabulated kernels, see
+:ref:`tabulation`; the state `\{c\}` and the vector `\{v\}` of
 ``random_state`` of ``tests/tests_shell/test_tangent_consistency.py``. With
 ``panels`` 0.14.0, medians of 9 samples, 3 in each of 3 processes,
 interleaved, after a warm-up; ratio: of ``calc_kT`` to ``calc_kTv``;
 difference: relative difference between the product and ``calc_kT(c) @ v``,
-the largest of the three sizes:
+the largest of the three sizes. With the former default, ``nx = 2m``,
+``ny = 2n``, one point more in each direction, the times measured in the
+same session, interleaved, are 3 to 16% longer:
 
 .. list-table::
     :header-rows: 1
@@ -1296,33 +1299,34 @@ the largest of the three sizes:
     * - ``plate_clpt_donnell``
       - 8 / 12 / 16
       - 192 / 432 / 768
-      - 0.014 / 0.12 / 0.63 s
-      - 0.89 / 3.8 / 12 ms
-      - 1.2 / 5.5 / 18 ms
-      - 12 / 22 / 36
-      - `1.2 \times 10^{-15}`
+      - 0.013 / 0.11 / 0.59 s
+      - 0.80 / 3.5 / 11 ms
+      - 1.1 / 5.0 / 16 ms
+      - 12 / 23 / 37
+      - `1.0 \times 10^{-15}`
     * - ``cylshell_fsdt_sanders``
       - 8 / 12 / 16
       - 320 / 720 / 1280
-      - 0.11 / 1.2 / 6.4 s
-      - 1.7 / 7.5 / 23 ms
-      - 2.0 / 8.9 / 28 ms
-      - 57 / 134 / 232
-      - `1.5 \times 10^{-15}`
+      - 0.10 / 1.1 / 6.0 s
+      - 1.5 / 6.7 / 22 ms
+      - 1.7 / 8.2 / 26 ms
+      - 61 / 132 / 234
+      - `9.1 \times 10^{-16}`
     * - ``plate_tsdt_donnell``
       - 8 / 12 / 16
       - 320 / 720 / 1280
-      - 0.22 / 2.3 / 13 s
-      - 1.8 / 8.3 / 26 ms
-      - 2.0 / 9.4 / 29 ms
-      - 107 / 249 / 437
+      - 0.19 / 2.1 / 12 s
+      - 1.6 / 7.6 / 24 ms
+      - 1.7 / 8.7 / 27 ms
+      - 110 / 246 / 441
       - `1.4 \times 10^{-15}`
 
 The product costs 1.1 to 1.5 times :meth:`.Shell.calc_fint`, and the ratio
 grows with the number of terms. With the previous kernels of ``panels``
 0.12.0, whose approximation functions were evaluated in the innermost loops,
 ``calc_kT`` takes 2.8, 4.7 and 5.8 s for `m = n = 12`, measured in the same
-way, i.e. 500 to 610 times the product. The times published with ``panels``
+way with the former default ``nx = 2m``, ``ny = 2n``, i.e. 500 to 610 times
+the product with the same points. The times published with ``panels``
 0.13.0 were longer, 7.0, 10.9 and 11.9 s with the previous kernels, 700
 times the product of then.
 
@@ -1337,7 +1341,12 @@ for `\partial R_r/\partial \lambda`), after them (0.13.0) and 0.14.0, with
 ``structsolve`` 0.7.0, 0.8.0 and 0.9.0. Before 0.9.0 the convergence was
 checked with the relative criterion, ``relTOL = 1e-6`` by default;
 ``structsolve`` 0.9.0 checks with Crisfield's criterion, ``relTOL = 1e-9``
-by default, and keeps the former with ``Analysis.convergence = 'relative'``:
+by default, and keeps the former with ``Analysis.convergence = 'relative'``.
+The rows of 0.12.0 and 0.13.0 were measured with the integration points of
+then, ``nx = 2m``, ``ny = 2n``, i.e. `24 \times 24`; those of 0.14.0 with
+the default of :func:`panels.shell.gauss_points`, `23 \times 23`, in a later
+session in which `24 \times 24` points, interleaved, gave times 1 to 6%
+shorter than in the first one:
 
 .. list-table::
     :header-rows: 1
@@ -1375,15 +1384,15 @@ by default, and keeps the former with ``Analysis.convergence = 'relative'``:
     * - 0.14.0
       - 0.9.0
       - relative, ``1e-6``
-      - 4.99 s
-      - 3.67 s
-      - 7.67 s
+      - 4.36 s
+      - 2.94 s
+      - 6.86 s
     * - 0.14.0
       - 0.9.0
       - Crisfield, ``1e-9``
-      - 5.79 s
-      - 4.19 s
-      - 9.30 s
+      - 5.33 s
+      - 5.36 s
+      - 8.41 s
 
 The reactions at `\lambda = 1` agree within a relative `4 \times 10^{-6}`
 with the relative criterion, and to ten significant digits with Crisfield's
@@ -1393,9 +1402,14 @@ criterion. Before, almost all the time was in the assembly of `[K_T]`, about
 `[K_T]` was not cached, e.g. at each iteration of the modified
 Newton-Raphson method, whereas ``structsolve`` 0.8.0 evaluates `\partial
 R_r/\partial \lambda` only together with `[K_T]`. After, with Crisfield's
-criterion, 79 to 87% of the time is in the 37, 25 and 60 assemblies of
-`[K_T]` for the Newton iterations (31, 20 and 49 with the relative
-criterion), and the products cost 0.15 to 0.36 s in total. The times
+criterion, 80 to 87% of the time is in the 37, 35 and 60 assemblies of
+`[K_T]` for the Newton iterations (31, 19 and 49 with the relative
+criterion), and the products cost 0.19 to 0.32 s in total. The modified
+Newton-Raphson method with Crisfield's criterion takes 16 increments and 35
+assemblies with `23 \times 23` points, but 11 increments and 25 assemblies,
+4.12 s, with `24 \times 24` points in the same session, whereas both
+numbers of points integrate the matrices exactly: its iterations depend on
+the round-off. The times
 published with ``panels`` 0.13.0 for the first four rows were 2.1 to 2.5
 times longer, e.g. 229 s and 11.8 s with ``structsolve`` 0.8.0 and the
 Newton-Raphson method; the speed-ups from 0.12.0 to 0.13.0 are the same
