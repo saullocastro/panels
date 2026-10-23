@@ -3230,15 +3230,23 @@ class MultiDomain(object):
                     p_top, p_bot = _sb_top_bottom(connecti)
                     kt, _ = _penalties(connecti, p_top, p_bot, 'bot-top')
 
-                    dsb = sum(connections.kCsdt._sb_distances(p_top, p_bot))
+                    dt, db = connections.kCsdt._sb_distances(p_top, p_bot)
+                    dsb = dt + db
+                    #NOTE the term v/r of the Sanders-Koiter kinematics at
+                    #     the interface, see kCSB.pyx
+                    rinvt = _rinv_sanders(p_top)
+                    rinvb = _rinv_sanders(p_bot)
                     kC_conn += connections.kCSB.fkCSB11(kt, dsb, p_top,
-                            size, row0=p_top.row_start, col0=p_top.col_start)
+                            size, row0=p_top.row_start, col0=p_top.col_start,
+                            dt=dt, rinv1=rinvt)
                     kC_conn += _upper_block(connections.kCSB.fkCSB12(
                             kt, dsb, p_top, p_bot,
-                            size, row0=p_top.row_start, col0=p_bot.col_start),
+                            size, row0=p_top.row_start, col0=p_bot.col_start,
+                            dt=dt, db=db, rinv1=rinvt, rinv2=rinvb),
                             p_top, p_bot)
                     kC_conn += connections.kCSB.fkCSB22(kt, p_top, p_bot,
-                            size, row0=p_bot.row_start, col0=p_bot.col_start)
+                            size, row0=p_bot.row_start, col0=p_bot.col_start,
+                            db=db, rinv2=rinvb)
 
                 # Traction Seperation Law introduced at the interface
                 elif connection_function == 'SB_TSL': # and c is not None:
@@ -3278,17 +3286,22 @@ class MultiDomain(object):
                     #      dimensions, checked by _sb_top_bottom()
                     if connecti.get('use_kernels', False):
                         dt, db = connections.kCsdt._sb_distances(p_top, p_bot)
+                        rinvt = _rinv_sanders(p_top)
+                        rinvb = _rinv_sanders(p_bot)
                         kC_conn += connections.kCSB_dmg.fkCSB11_dmg(dt=dt, p1=p_top,
                                 size=size, row0=p_top.row_start, col0=p_top.col_start,
-                                nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, kw_tsl=kw_tsl)
+                                nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, kw_tsl=kw_tsl,
+                                rinv1=rinvt)
                         kC_conn += _upper_block(connections.kCSB_dmg.fkCSB12_dmg(
                                 dt=dt, db=db, p1=p_top, p2=p_bot,
                                 size=size, row0=p_top.row_start, col0=p_bot.col_start,
-                                nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, kw_tsl=kw_tsl),
+                                nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, kw_tsl=kw_tsl,
+                                rinv1=rinvt, rinv2=rinvb),
                                 p_top, p_bot)
                         kC_conn += connections.kCSB_dmg.fkCSB22_dmg(db=db, p1=p_top, p2=p_bot,
                                 size=size, row0=p_bot.row_start, col0=p_bot.col_start,
-                                nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, kw_tsl=kw_tsl)
+                                nr_x_gauss=nr_x_gauss, nr_y_gauss=nr_y_gauss, kw_tsl=kw_tsl,
+                                rinv2=rinvb)
                     else:
                         kC_conn += self._kC_TSL(p_top, p_bot, nr_x_gauss,
                                 nr_y_gauss, k_i, kw_tsl, size)
@@ -4243,8 +4256,8 @@ class MultiDomain(object):
         rotation about the axis of the cylinder then opens no tangential
         separation when the radius of each panel is that of its reference
         surface. The kernels of ``kCSB_dmg.pyx``, used with the key
-        ``'use_kernels'``, and the connection ``'SB'`` use `w_{,y}` without
-        `v/r` also for the Sanders-Koiter kinematics.
+        ``'use_kernels'``, and the connection ``'SB'`` contain the same term
+        `v/r`.
 
         """
         cache = self.__dict__.setdefault('_gauss_field_cache', {})

@@ -27,7 +27,8 @@ cdef extern from 'bardell.hpp':
             double y1t, double y1r, double y2t, double y2r) nogil
 
 
-def fkCSB11(double kt, double dsb, object p1, int size, int row0, int col0):
+def fkCSB11(double kt, double dsb, object p1, int size, int row0, int col0,
+            double dt=0., double rinv1=0.):
     r"""
     Penalty approach calculation to skin-base ycte panel 1 position.
 
@@ -54,6 +55,15 @@ def fkCSB11(double kt, double dsb, object p1, int size, int row0, int col0):
         Row position of constitutive matrix being calculated.
     col0 : int
         Column position of constitutive matrix being calculated.
+    dt : float, optional
+        Distance `h_1/2 - d_1` from the reference surface of ``p1`` to the
+        interface, see :func:`.kCsdt._sb_distances`, used only with
+        ``rinv1``. Default ``0.``.
+    rinv1 : float, optional
+        `1/r_1` for ``p1`` with the Sanders-Koiter kinematics, zero
+        otherwise, see :func:`.nullspace._rinv_sanders`: the tangential
+        displacement of ``p1`` at the interface is `(1 - d^t/r_1) v_1 +
+        d^t w_{1,y}`. Default ``0.``, the Donnell kinematics or a plate.
 
     Returns
     -------
@@ -76,6 +86,7 @@ def fkCSB11(double kt, double dsb, object p1, int size, int row0, int col0):
 
     cdef double f1Auf1Bu, f1Auf1Bwxi, f1Avf1Bv, f1Avf1Bw, f1Awf1Bv, f1Awf1Bw, f1Awxif1Bu, f1Awxif1Bwxi
     cdef double g1Aug1Bu, g1Aug1Bw, g1Avg1Bv, g1Avg1Bweta, g1Awg1Bu, g1Awg1Bw, g1Awetag1Bv, g1Awetag1Bweta
+    cdef double cv1
 
     a1 = p1.a
     b1 = p1.b
@@ -87,6 +98,9 @@ def fkCSB11(double kt, double dsb, object p1, int size, int row0, int col0):
     y1u1 = p1.y1u ; y1ur1 = p1.y1ur ; y2u1 = p1.y2u ; y2ur1 = p1.y2ur
     y1v1 = p1.y1v ; y1vr1 = p1.y1vr ; y2v1 = p1.y2v ; y2vr1 = p1.y2vr
     y1w1 = p1.y1w ; y1wr1 = p1.y1wr ; y2w1 = p1.y2w ; y2wr1 = p1.y2wr
+
+    #NOTE coefficients of v at the interface, see the module docstring
+    cv1 = 1. - dt*rinv1
 
     fdim = 7*m1*n1*m1*n1
 
@@ -137,11 +151,11 @@ def fkCSB11(double kt, double dsb, object p1, int size, int row0, int col0):
                         c += 1
                         kCSB11r[c] = row+1
                         kCSB11c[c] = col+1
-                        kCSB11v[c] += 0.25*a1*b1*f1Avf1Bv*g1Avg1Bv*kt
+                        kCSB11v[c] += 0.25*a1*b1*cv1*cv1*f1Avf1Bv*g1Avg1Bv*kt
                         c += 1
                         kCSB11r[c] = row+1
                         kCSB11c[c] = col+2
-                        kCSB11v[c] += 0.5*a1*dsb*f1Avf1Bw*g1Avg1Bweta*kt
+                        kCSB11v[c] += 0.5*a1*cv1*dsb*f1Avf1Bw*g1Avg1Bweta*kt
                         c += 1
                         kCSB11r[c] = row+2
                         kCSB11c[c] = col+0
@@ -149,7 +163,7 @@ def fkCSB11(double kt, double dsb, object p1, int size, int row0, int col0):
                         c += 1
                         kCSB11r[c] = row+2
                         kCSB11c[c] = col+1
-                        kCSB11v[c] += 0.5*a1*dsb*f1Awf1Bv*g1Awetag1Bv*kt
+                        kCSB11v[c] += 0.5*a1*cv1*dsb*f1Awf1Bv*g1Awetag1Bv*kt
                         c += 1
                         kCSB11r[c] = row+2
                         kCSB11c[c] = col+2
@@ -160,7 +174,8 @@ def fkCSB11(double kt, double dsb, object p1, int size, int row0, int col0):
     return kCSB11
 
 
-def fkCSB12(double kt, double dsb, object p1, object p2, int size, int row0, int col0):
+def fkCSB12(double kt, double dsb, object p1, object p2, int size, int row0, int col0,
+            double dt=0., double db=0., double rinv1=0., double rinv2=0.):
     r"""
     Penalty approach calculation to skin-base ycte panel 1 and panel 2 coupling position.
 
@@ -193,6 +208,23 @@ def fkCSB12(double kt, double dsb, object p1, object p2, int size, int row0, int
         Row position of constitutive matrix being calculated.
     col0 : int
         Column position of constitutive matrix being calculated.
+    dt : float, optional
+        Distance `h_1/2 - d_1` from the reference surface of ``p1`` to the
+        interface, see :func:`.kCsdt._sb_distances`, used only with
+        ``rinv1``. Default ``0.``.
+    db : float, optional
+        Distance `h_2/2 + d_2` from the reference surface of ``p2`` to the
+        interface, see :func:`.kCsdt._sb_distances`, used only with
+        ``rinv2``. Default ``0.``.
+    rinv1 : float, optional
+        `1/r_1` for ``p1`` with the Sanders-Koiter kinematics, zero
+        otherwise, see :func:`.nullspace._rinv_sanders`: the tangential
+        displacement of ``p1`` at the interface is `(1 - d^t/r_1) v_1 +
+        d^t w_{1,y}`. Default ``0.``, the Donnell kinematics or a plate.
+    rinv2 : float, optional
+        `1/r_2` for ``p2`` with the Sanders-Koiter kinematics, zero
+        otherwise: the tangential displacement of ``p2`` at the interface is
+        `(1 + d^b/r_2) v_2 - d^b w_{2,y}`. Default ``0.``.
 
     Returns
     -------
@@ -215,6 +247,7 @@ def fkCSB12(double kt, double dsb, object p1, object p2, int size, int row0, int
 
     cdef double f1Auf2Bu, f1Avf2Bv, f1Awf2Bw, f1Awxif2Bu, f1Awf2Bv
     cdef double g1Aug2Bu, g1Avg2Bv, g1Awg2Bw, g1Awetag2Bv, g1Awg2Bu
+    cdef double cv1, cv2
 
     a1 = p1.a
     b1 = p1.b
@@ -235,6 +268,10 @@ def fkCSB12(double kt, double dsb, object p1, object p2, int size, int row0, int
     y1u2 = p2.y1u ; y1ur2 = p2.y1ur ; y2u2 = p2.y2u ; y2ur2 = p2.y2ur
     y1v2 = p2.y1v ; y1vr2 = p2.y1vr ; y2v2 = p2.y2v ; y2vr2 = p2.y2vr
     y1w2 = p2.y1w ; y1wr2 = p2.y1wr ; y2w2 = p2.y2w ; y2wr2 = p2.y2wr
+
+    #NOTE coefficients of v at the interface, see the module docstring
+    cv1 = 1. - dt*rinv1
+    cv2 = 1. + db*rinv2
 
     fdim = 5*m1*n1*m2*n2
 
@@ -275,7 +312,7 @@ def fkCSB12(double kt, double dsb, object p1, object p2, int size, int row0, int
                         c += 1
                         kCSB12r[c] = row+1
                         kCSB12c[c] = col+1
-                        kCSB12v[c] += -0.25*a1*b1*f1Avf2Bv*g1Avg2Bv*kt
+                        kCSB12v[c] += -0.25*a1*b1*cv1*cv2*f1Avf2Bv*g1Avg2Bv*kt
                         c += 1
                         kCSB12r[c] = row+2
                         kCSB12c[c] = col+0
@@ -283,7 +320,7 @@ def fkCSB12(double kt, double dsb, object p1, object p2, int size, int row0, int
                         c += 1
                         kCSB12r[c] = row+2
                         kCSB12c[c] = col+1
-                        kCSB12v[c] += -0.5*a1*dsb*f1Awf2Bv*g1Awetag2Bv*kt
+                        kCSB12v[c] += -0.5*a1*cv2*dsb*f1Awf2Bv*g1Awetag2Bv*kt
                         c += 1
                         kCSB12r[c] = row+2
                         kCSB12c[c] = col+2
@@ -294,7 +331,8 @@ def fkCSB12(double kt, double dsb, object p1, object p2, int size, int row0, int
     return kCSB12
 
 
-def fkCSB22(double kt, object p1, object p2, int size, int row0, int col0):
+def fkCSB22(double kt, object p1, object p2, int size, int row0, int col0,
+            double db=0., double rinv2=0.):
     r"""
     Penalty approach calculation to skin-base ycte panel 2 position.
 
@@ -318,6 +356,14 @@ def fkCSB22(double kt, object p1, object p2, int size, int row0, int col0):
         Row position of constitutive matrix being calculated.
     col0 : int
         Column position of constitutive matrix being calculated.
+    db : float, optional
+        Distance `h_2/2 + d_2` from the reference surface of ``p2`` to the
+        interface, see :func:`.kCsdt._sb_distances`, used only with
+        ``rinv2``. Default ``0.``.
+    rinv2 : float, optional
+        `1/r_2` for ``p2`` with the Sanders-Koiter kinematics, zero
+        otherwise: the tangential displacement of ``p2`` at the interface is
+        `(1 + d^b/r_2) v_2 - d^b w_{2,y}`. Default ``0.``.
 
     Returns
     -------
@@ -340,6 +386,7 @@ def fkCSB22(double kt, object p1, object p2, int size, int row0, int col0):
 
     cdef double f2Auf2Bu, f2Avf2Bv, f2Awf2Bw
     cdef double g2Aug2Bu, g2Avg2Bv, g2Awg2Bw
+    cdef double cv2
 
     a1 = p1.a
     b1 = p1.b
@@ -351,6 +398,9 @@ def fkCSB22(double kt, object p1, object p2, int size, int row0, int col0):
     y1u2 = p2.y1u ; y1ur2 = p2.y1ur ; y2u2 = p2.y2u ; y2ur2 = p2.y2ur
     y1v2 = p2.y1v ; y1vr2 = p2.y1vr ; y2v2 = p2.y2v ; y2vr2 = p2.y2vr
     y1w2 = p2.y1w ; y1wr2 = p2.y1wr ; y2w2 = p2.y2w ; y2wr2 = p2.y2wr
+
+    #NOTE coefficient of v at the interface, see the module docstring
+    cv2 = 1. + db*rinv2
 
     fdim = 3*m2*n2*m2*n2
 
@@ -386,7 +436,7 @@ def fkCSB22(double kt, object p1, object p2, int size, int row0, int col0):
                         c += 1
                         kCSB22r[c] = row+1
                         kCSB22c[c] = col+1
-                        kCSB22v[c] += 0.25*a1*b1*f2Avf2Bv*g2Avg2Bv*kt
+                        kCSB22v[c] += 0.25*a1*b1*cv2*cv2*f2Avf2Bv*g2Avg2Bv*kt
                         c += 1
                         kCSB22r[c] = row+2
                         kCSB22c[c] = col+2

@@ -146,7 +146,11 @@ in contact, with the slope of each panel:
 
 where `d^t` and `d^b` are the distances from the reference surfaces of the
 top and bottom panels to the interface, `u^t, v^t, w^t` and `u^b, v^b, w^b`
-the displacements of their reference surfaces. With the thicknesses `h^t`,
+the displacements of their reference surfaces. For cylindrical panels with
+the Sanders-Koiter kinematics, `v(z) = v + z (v/r - w_{,y})`, and
+`w_{,y}` is replaced by `w_{,y} - v/r` in `\Delta_v`, with the radius `r` of
+the reference surface of each panel, see :meth:`.MultiDomain._tsl_operators`
+and :mod:`panels.multidomain.connections.kCSB_dmg`. With the thicknesses `h^t`,
 `h^b` and the offsets `d_t`, `d_b` of the laminates, ``Shell.offset``, each
 laminate occupying `d - h/2 \le z \le d + h/2` in the coordinate `z` of its
 panel, `d^t = h^t/2 - d_t` and `d^b = h^b/2 + d_b`, see

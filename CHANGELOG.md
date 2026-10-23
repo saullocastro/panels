@@ -150,6 +150,21 @@
   stiffness, e.g. when `Nxx` is the only load, which `linear_buckling` used
   to multiply by the load factor: apply such a load with
   `Shell.add_distr_load_fixed_x` instead.
+- Skin-base connections of curved panels with the Sanders-Koiter kinematics:
+  the tangential displacement at the interface, `v(z) = v + z (v/r - w,y)`,
+  now has the term `v/r` in the CLPT connection `'SB'`, penalty kernels
+  `fkCSB11`, `fkCSB12`, `fkCSB22` (new optional arguments `dt`, `db`,
+  `rinv1`, `rinv2`, derived in `theory/multidomain_penalization/
+  connections.py`) and null-space constraints, `(1 - dt/r1) v1 + dsb w1,y =
+  (1 + db/r2) v2`, and in the kernels `fkCSB11_dmg`, `fkCSB12_dmg`,
+  `fkCSB22_dmg` of `'SB_TSL'` with `use_kernels=True` (new optional
+  arguments `rinv1`, `rinv2`), which differed from the default matrix
+  products by 1.2e-3 relative and now agree to 1.5e-15. A rigid rotation
+  about the axis of two bonded Sanders panels, the radius of each that of
+  its reference surface, had a connection energy of `(dsb/r)^2` = 2e-6 times
+  that of a separation `r Omega`, now zero to round-off. The FSDT and TSDT
+  `'SB'` already had the term. Nothing changes for the Donnell kinematics
+  and for plates.
 
 ### API
 

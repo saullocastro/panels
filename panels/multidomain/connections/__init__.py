@@ -197,8 +197,10 @@ kinematics, and `\phi_y` for the FSDT and TSDT, see
 :mod:`panels.multidomain.connections.kCBFycte`; the connection ``'BFxcte'``
 penalizes `-w_{,x}` or `\phi_x`, see
 :mod:`panels.multidomain.connections.kCBFxcte`. The connection ``'SB'``
-takes into account the offset between the two mid-surfaces, see
-:func:`.nullspace._clpt_components` and :func:`.kCsdt.fkCSB_sdt`.
+takes into account the offset between the two mid-surfaces and, with the
+Sanders-Koiter kinematics, the term `v/r` of the tangential displacement at
+the interface, see :func:`.nullspace._clpt_components` and
+:func:`.kCsdt.fkCSB_sdt`.
 
 With the null-space method the quantities penalized by the kernels become
 the linear constraints `[B] \{c\} = \{0\}`, which are eliminated with a

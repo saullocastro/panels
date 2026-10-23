@@ -171,16 +171,22 @@ def _clpt_components(func, p1, p2, dsb):
       :mod:`panels.multidomain.connections.kCBFycte`;
     - ``'BFxcte'``: `u_1 = w_2`, `v_1 = v_2`, `w_1 = -u_2` and `w_{1,x} =
       w_{2,x}`, see :mod:`panels.multidomain.connections.kCBFxcte`;
-    - ``'SB'``: `u_1 + d_{sb} w_{1,x} = u_2`, `v_1 + d_{sb} w_{1,y} = v_2`
-      and `w_1 = w_2`, with `d_{sb} = h_1/2 - d_1 + h_2/2 + d_2`, `d_1` and
-      `d_2` being the offsets.
+    - ``'SB'``: `u_1 + d_{sb} w_{1,x} = u_2`, `(1 - d^t/r_1) v_1 + d_{sb}
+      w_{1,y} = (1 + d^b/r_2) v_2` and `w_1 = w_2`, with `d^t = h_1/2 -
+      d_1`, `d^b = h_2/2 + d_2`, `d_{sb} = d^t + d^b`, `d_1` and `d_2`
+      being the offsets, and the terms `1/r` present only with the
+      Sanders-Koiter kinematics.
 
-    For ``'SB'``, with the Kirchhoff kinematics `u(z) = u - z w_{,x}`, `z`
-    measured from the reference surface of each panel, the lower face `z =
-    d_1 - h_1/2` of ``p1`` and the upper face `z = d_2 + h_2/2` of ``p2``
-    have the same displacement when `u_1 + (h_1/2 - d_1) w_{1,x} = u_2 -
-    (h_2/2 + d_2) w_{2,x}`, and `w_{2,x} = w_{1,x}` since `w_1 = w_2` over
-    the whole area.
+    For ``'SB'``, with the Kirchhoff kinematics `u(z) = u - z w_{,x}` and
+    `v(z) = v + z (v/r - w_{,y})`, `z` measured from the reference surface
+    of each panel and `v/r` only with the Sanders-Koiter kinematics, the
+    lower face `z = -d^t` of ``p1`` and the upper face `z = d^b` of ``p2``
+    have the same displacement when `u_1 + d^t w_{1,x} = u_2 - d^b w_{2,x}`
+    and `(1 - d^t/r_1) v_1 + d^t w_{1,y} = (1 + d^b/r_2) v_2 - d^b
+    w_{2,y}`, and `w_{2,x} = w_{1,x}`, `w_{2,y} = w_{1,y}` since `w_1 = w_2`
+    over the whole area. A rigid rotation about the axis of the cylinder,
+    `v = r \Omega`, then gives no separation when the radius of each panel
+    is that of its reference surface, `r_1 - d^t = r_2 + d^b`.
 
     """
     if func == 'SSxcte':
@@ -206,9 +212,13 @@ def _clpt_components(func, p1, p2, dsb):
                 ((p1, [(W, 0, 0, 1.)]), (p2, [(U, 0, 0, -1.)])),
                 ((p1, rot), (p2, rot))]
     if func == 'SB':
-        #NOTE u1 + dsb*w1,x = u2, v1 + dsb*w1,y = v2, w1 = w2, see kCSB.pyx
+        #NOTE u1 + dsb*w1,x = u2, cv1*v1 + dsb*w1,y = cv2*v2, w1 = w2, see
+        #     kCSB.pyx, cv1 = cv2 = 1 without Sanders-Koiter
+        dt, db = kCsdt._sb_distances(p1, p2)
+        cv1 = 1. - dt*_rinv_sanders(p1)
+        cv2 = 1. + db*_rinv_sanders(p2)
         return [((p1, [(U, 0, 0, 1.), (W, 1, 0, dsb)]), (p2, [(U, 0, 0, 1.)])),
-                ((p1, [(V, 0, 0, 1.), (W, 0, 1, dsb)]), (p2, [(V, 0, 0, 1.)])),
+                ((p1, [(V, 0, 0, cv1), (W, 0, 1, dsb)]), (p2, [(V, 0, 0, cv2)])),
                 ((p1, [(W, 0, 0, 1.)]), (p2, [(W, 0, 0, 1.)]))]
     raise NotImplementedError(func)
 

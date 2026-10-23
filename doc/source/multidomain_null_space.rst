@@ -188,10 +188,12 @@ see :meth:`.MultiDomain.get_kC_conn`:
         :mod:`panels.multidomain.connections.kCBFxcte`
       - `u_1 = w_2`, `v_1 = v_2`, `w_1 = -u_2`, `\phi_{x1} = \phi_{x2}`
     * - ``'SB'``
-      - `u_1 + d_{sb} w_{1,x} = u_2`, `v_1 + d_{sb} w_{1,y} = v_2`, `w_1 =
-        w_2`, with `d_{sb} = h_1/2 - d_1 + h_2/2 + d_2` the distance
-        between the reference surfaces, `d_1`, `d_2` being the offsets, see
-        ``kCSB.pyx`` and :func:`.kCsdt._sb_distances`
+      - `u_1 + d_{sb} w_{1,x} = u_2`, `(1 - d^t/r_1) v_1 + d_{sb} w_{1,y}
+        = (1 + d^b/r_2) v_2`, `w_1 = w_2`, with `d^t = h_1/2 - d_1`, `d^b =
+        h_2/2 + d_2` and `d_{sb} = d^t + d^b` the distance between the
+        reference surfaces, `d_1`, `d_2` being the offsets, see ``kCSB.pyx``,
+        :func:`.nullspace._clpt_components` and
+        :func:`.kCsdt._sb_distances`
       - `u, v, w` at the interface, `z = d_1 - h_1/2` of ``p1`` and `z = d_2
         + h_2/2` of ``p2``, see :func:`.fkCSB_sdt`, and `\phi_x, \Phi_y`
         only when

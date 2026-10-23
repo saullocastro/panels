@@ -190,14 +190,25 @@ piece_wise_simplify(kCBFxcte22, [])
 # with the offsets d1, d2 (the lower face of (1) is at z = d1 - h1/2 and the
 # upper face of (2) at z = d2 + h2/2, each from its own reference surface,
 # see kCsdt._sb_distances):
-#     u1 + dsb*w1,x = u2,  v1 + dsb*w1,y = v2,  w1 = w2
-kCSB11 = (a1*b1/4)*kt*(u1A.T*u1B + v1A.T*v1B + w1A.T*w1B + u1A.T*w1Bxi*(2*dsb/a1) + w1Axi.T*u1B*(2*dsb/a1) + v1A.T*w1Beta*(2*dsb/b1) + w1Aeta.T*v1B*(2*dsb/b1) + w1Axi.T*w1Bxi*(2*dsb/a1)*(2*dsb/a1) + w1Aeta.T*w1Beta*(2*dsb/b1)*(2*dsb/b1))
+#     u1 + dsb*w1,x = u2,  cv1*v1 + dsb*w1,y = cv2*v2,  w1 = w2
+# The Kirchhoff kinematics of each panel, u(z) = u - z w,x and v(z) = v + z
+# (rinv v - w,y), with rinv = 1/r for the Sanders-Koiter kinematics and rinv
+# = 0 for the Donnell kinematics and for plates, give at the interface, the
+# lower face z = -dt of (1) and the upper face z = db of (2), dsb = dt + db:
+#     u1 + dt*w1,x = u2 - db*w2,x
+#     (1 - dt*rinv1)*v1 + dt*w1,y = (1 + db*rinv2)*v2 - db*w2,y
+# and w2,x = w1,x, w2,y = w1,y since w1 = w2 over the whole area, hence
+# cv1 = 1 - dt*rinv1 and cv2 = 1 + db*rinv2, both 1 without Sanders-Koiter
+var('dt, db')
+cv1 = 1 - dt*rinv1
+cv2 = 1 + db*rinv2
+kCSB11 = (a1*b1/4)*kt*(u1A.T*u1B + cv1*cv1*v1A.T*v1B + w1A.T*w1B + u1A.T*w1Bxi*(2*dsb/a1) + w1Axi.T*u1B*(2*dsb/a1) + cv1*v1A.T*w1Beta*(2*dsb/b1) + cv1*w1Aeta.T*v1B*(2*dsb/b1) + w1Axi.T*w1Bxi*(2*dsb/a1)*(2*dsb/a1) + w1Aeta.T*w1Beta*(2*dsb/b1)*(2*dsb/b1))
     # Contains all squared terms - so all terms of (u + d..w,xi)^2 comes here and so on 
                                     # thats split up: u^2 + u*d..w,xi + d..w,xi*u + (d..w,xi)^2
 ############ THERE IS SOME EXTRA c1 HERE - removed ##############################
-kCSB12 = -(a1*b1/4)*kt*(u1A.T*u2B + v1A.T*v2B + w1A.T*w2B + w1Axi.T*u2B*(2*dsb/a1) + w1Aeta.T*v2B*(2*dsb/b1))
+kCSB12 = -(a1*b1/4)*kt*(u1A.T*u2B + cv1*cv2*v1A.T*v2B + w1A.T*w2B + w1Axi.T*u2B*(2*dsb/a1) + cv2*w1Aeta.T*v2B*(2*dsb/b1))
 # Instead of 2ab only ab is presented in _12 as ba goes into _21 which is symmetric and is hence not added here
-kCSB22 =  (a1*b1/4)*kt*(u2A.T*u2B + v2A.T*v2B + w2A.T*w2B)
+kCSB22 =  (a1*b1/4)*kt*(u2A.T*u2B + cv2*cv2*v2A.T*v2B + w2A.T*w2B)
 
 piece_wise_simplify(kCSB11, [])
 piece_wise_simplify(kCSB12, [])
