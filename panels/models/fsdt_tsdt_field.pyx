@@ -85,14 +85,13 @@ References
 ----------
 .. [1] Reddy, J. N., "A simple higher-order theory for laminated composite
    plates", J. Appl. Mech., 51, 745-752, 1984.
-.. [2] Sanders, J. L., "An improved first-approximation theory for thin
-   shells", NASA TR R-24, 1959.
-   TODO(author): confirm this source (the title is added to the citation
-   of tests/tests_shell/test_fsdt_tsdt_cylinders.py)
+.. [2] Sanders, J. L., "Nonlinear theories for thin shells", Quarterly of
+   Applied Mathematics, 21(1), 21-36, 1963.
+   https://doi.org/10.1090/qam/147023
 .. [3] Reddy, J. N., and Liu, C. F., "A higher-order shear deformation
    theory of laminated elastic shells", International Journal of
    Engineering Science, 23(3), 319-330, 1985.
-   TODO(author): confirm this source
+   https://doi.org/10.1016/0020-7225(85)90051-5
 
 """
 import numpy as np

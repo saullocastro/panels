@@ -295,8 +295,11 @@ class Shell(object):
        1991. https://doi.org/10.1016/0022-460X(91)90855-E
     .. [3] Rohwer, K., "Improved transverse shear stiffness for layered
        finite elements", DFVLR-FB 88-32, 1988.
-       TODO(author): confirm this source (cited in full in the composites
-       package, not in panels)
+       TODO(author): the available copy of the report, whose title page
+       reads "Improved Transverse Shear Stiffnesses for Layered Finite
+       Elements", DFVLR, Institut für Strukturmechanik, Braunschweig, August
+       1988, does not show the number DFVLR-FB 88-32 used in the composites
+       package; confirm the number.
 
     """
     # Declare all the variables/attributes here to preallocate mem, speed it up. Var not declared here cant be used
@@ -745,15 +748,33 @@ class Shell(object):
             \sum_i \sum_j w_{x_i} w_{y_j} f(x_i, y_j)
 
         which is exact for polynomials of degree up to `2 n_x - 1` in `x`
-        and `2 n_y - 1` in `y`. With a constant constitutive matrix the
-        integrands of the stiffness matrices and of the internal force
-        vector are polynomials, products of at most four of Bardell's
-        functions or of their derivatives along each direction, of degree
-        at most `4 \max(m - 1, 3)` in `x`, such that the default ``nx =
-        2*m`` integrates them exactly for `m \ge 4`, and likewise along `y`.
-        TODO(author): confirm that this is the reason of the default ``nx =
-        2*m``, ``ny = 2*n``; the cylinders with the Sanders-Koiter
-        kinematics and the pressure loads ``p(x, y)`` were not checked.
+        and `2 n_y - 1` in `y`. The default ``nx = 2*m``, ``ny = 2*n`` of
+        :class:`.Shell` is chosen for the exact integration. Bardell's
+        functions, see Castro and Donadon (2017) [1]_, Eqs. (29) and (30),
+        are of degree at most `\max(m - 1, 3)`. With a constant
+        constitutive matrix the integrands of the constitutive stiffness
+        and mass matrices are products of two of them or of their
+        derivatives along each direction, and those of the geometric and
+        tangent stiffness matrices and of the internal force vector of at
+        most four, of degree at most `4 \max(m - 1, 3)` in `x`, which ``nx
+        = 2*m`` integrates exactly for `m \ge 4`, and likewise along `y`.
+        The terms in `1/r` of the cylinders, also those in `v/r` of the
+        Sanders-Koiter kinematics, only multiply these products by a
+        constant. The pressure loads ``p(x, y)`` of
+        :meth:`.add_pressure_load` multiply one function, or for the
+        follower terms the product of two, by `p`, and are integrated
+        exactly for a polynomial `p` of low enough degree, e.g. a constant
+        one, and approximately otherwise. ``nx`` and ``ny`` are set by the
+        constructor of :class:`.Shell` from its arguments ``m`` and ``n``;
+        assigning ``m`` or ``n`` later keeps them, the rebuild only raising
+        them to ``m`` and ``n``.
+
+        References
+        ----------
+        .. [1] Castro, S. G. P., and Donadon, M. V., Assembly of Semi-Analytical
+           models to Address Linear Buckling and Vibration of Stiffened
+           Composite Panels with Debonding Defect, Composite Structures, 160,
+           232-247, 2017. https://doi.org/10.1016/j.compstruct.2016.10.026
 
         """
         nx = self.nx if nx is None else nx

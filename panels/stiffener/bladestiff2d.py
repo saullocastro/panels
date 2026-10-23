@@ -105,16 +105,20 @@ class BladeStiff2D(object):
     two edges `y_f = 0` and `y_f = b_f`. Its edge `y_f = 0` is connected to
     the skin along `y = y_s` with the penalty energy of :meth:`.calc_kC`,
     such that the local buckling of the flange is represented, unlike with
-    :class:`.BladeStiff1D`. The base as a structural element follows [1]_.
+    :class:`.BladeStiff1D`. The base as a structural element follows [1]_,
+    Sec. 2, Eqs. (11) and (12), where the flange is a one-dimensional
+    Euler-Bernoulli beam, as in :class:`.BladeStiff1D`; the two-dimensional
+    flange is not part of [1]_.
 
-    TODO(author): confirm that the 2D flange model is also that of [1]_.
+    TODO(author): the source of the two-dimensional flange model and of its
+    connection to the skin.
 
     References
     ----------
     .. [1] Castro, S. G. P., Guimaraes, T. A. M., Rade, D. A., and Donadon,
        M. V., Flutter of stiffened composite panels considering the
-       stiffener's base as a structural element, Composite Structures, 2016.
-       https://doi.org/10.1016/j.compstruct.2015.12.056
+       stiffener's base as a structural element, Composite Structures, 140,
+       36-43, 2016. https://doi.org/10.1016/j.compstruct.2015.12.056
 
     """
     def __init__(self, bay, rho, panel1, panel2, ys, bb, bf, bstack, bplyts,

@@ -124,6 +124,12 @@
 - `MultiDomain.plot` computes the field of `eval_panel` and uses `xs` and
   `ys`.
 
+### API
+
+- `MultiDomain.get_kC_conn` loses the argument `kw_tsl`, which was not used:
+  the stiffness of each `'SB_TSL'` connection is computed with
+  `MultiDomain.calc_k_dmg` at `c`. Calls passing `kw_tsl` must drop it.
+
 ### Tests
 
 - The Riks test of the hinged cylindrical shell no longer depends on how the

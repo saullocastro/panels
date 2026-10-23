@@ -98,8 +98,8 @@ DOFs have the strains of the CLPT:
       \kappa_{yy} = -w_{,yy} \qquad
       \kappa_{xy} = -2 w_{,xy}
 
-- Sanders-Koiter kinematics, ``'cylshell_clpt_sanders'``, Sanders (1959,
-  1963) [1]_, [2]_. With `y = r \theta` the arc length and `\phi_x =
+- Sanders-Koiter kinematics, ``'cylshell_clpt_sanders'``, Sanders (1963)
+  [1]_. With `y = r \theta` the arc length and `\phi_x =
   -w_{,x}`, `\phi_y = -w_{,y} + v/r` the rotations of the normal:
 
   .. math::
@@ -124,8 +124,8 @@ DOFs have the strains of the CLPT:
 The models with 5 DOFs have the rotations `\phi_x` and `\phi_y` as
 independent fields, with the displacement field and the strains of
 :mod:`panels.models.fsdt_tsdt_field`. The FSDT uses the shear corrected
-transverse shear stiffness, with the method of Rohwer (1988) [4]_ by
-default, see :class:`.Shell`. The TSDT of Reddy (1984) [3]_ needs no shear
+transverse shear stiffness, with the method of Rohwer (1988) [3]_ by
+default, see :class:`.Shell`. The TSDT of Reddy (1984) [2]_ needs no shear
 correction, the transverse shear stresses vanishing at the faces of the
 laminate, `z = d \pm h/2` with the offset `d`: the cubic term is written
 about the mid-surface, `-c_1 [(z - d)^3 + d^3] (\phi_x + w_{,x})`, which
@@ -175,19 +175,18 @@ whole domain or one set per integration point, see :meth:`.Shell.calc_kM`.
 
 References
 ----------
-.. [1] Sanders, J. L., "An improved first-approximation theory for thin
-   shells", NASA TR R-24, 1959.
-   TODO(author): confirm this source (the title is added to the citation
-   of tests/tests_shell/test_fsdt_tsdt_cylinders.py)
-.. [2] Sanders, J. L., "Nonlinear theories for thin shells", Quarterly of
+.. [1] Sanders, J. L., "Nonlinear theories for thin shells", Quarterly of
    Applied Mathematics, 21(1), 21-36, 1963.
-   TODO(author): confirm this source
-.. [3] Reddy, J. N., "A simple higher-order theory for laminated composite
+   https://doi.org/10.1090/qam/147023
+.. [2] Reddy, J. N., "A simple higher-order theory for laminated composite
    plates", J. Appl. Mech., 51, 745-752, 1984.
-.. [4] Rohwer, K., "Improved transverse shear stiffness for layered finite
+.. [3] Rohwer, K., "Improved transverse shear stiffness for layered finite
    elements", DFVLR-FB 88-32, 1988.
-   TODO(author): confirm this source (cited in full in the composites
-   package, not in panels)
+   TODO(author): the available copy of the report, whose title page
+   reads "Improved Transverse Shear Stiffnesses for Layered Finite
+   Elements", DFVLR, Institut für Strukturmechanik, Braunschweig, August
+   1988, does not show the number DFVLR-FB 88-32 used in the composites
+   package; confirm the number.
 
 """
 from . import clpt_field

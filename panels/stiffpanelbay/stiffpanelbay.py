@@ -87,16 +87,17 @@ class StiffPanelBay(object):
 
     For the flutter analysis with the piston theory, the matrices enter the
     equations of motion as `([K] + [K_A] + \lambda^2 [M])\{c\} = \{0\}`, see
-    :meth:`.Shell.calc_kA` and :meth:`.calc_kA`, as in [1]_.
-
-    TODO(author): confirm that the model of the bay is that of [1]_.
+    :meth:`.Shell.calc_kA` and :meth:`.calc_kA`. The model of the bay, the
+    skin with the bases of the stiffeners sharing its approximation
+    functions and Ritz constants, and the piston theory, is that of [1]_,
+    Sec. 2.
 
     References
     ----------
     .. [1] Castro, S. G. P., Guimaraes, T. A. M., Rade, D. A., and Donadon,
        M. V., Flutter of stiffened composite panels considering the
-       stiffener's base as a structural element, Composite Structures, 2016.
-       https://doi.org/10.1016/j.compstruct.2015.12.056
+       stiffener's base as a structural element, Composite Structures, 140,
+       36-43, 2016. https://doi.org/10.1016/j.compstruct.2015.12.056
 
     """
     def __init__(self):

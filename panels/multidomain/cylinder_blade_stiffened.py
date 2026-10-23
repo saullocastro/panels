@@ -454,7 +454,12 @@ def cylinder_blade_stiffened_compression_lb_pd_from_static(height, r, stack,
     with :meth:`.MultiDomain.expand`. TODO(author): the penalty stiffness of
     the prescribed displacements is not added to the stiffness matrix,
     only its forces enter :meth:`.MultiDomain.calc_fext`; check whether
-    this is intended.
+    this is intended. With the default ``ku`` the analysis is in effect
+    load controlled: in the example below `u` at `x = height` reaches
+    about 1% of the prescribed value, adding the penalty stiffness changes
+    ``eigvals`` by about 1%, and ``eigvals`` multiply the forces `k_u u_p`.
+    The displacement control is imposed exactly with
+    ``pd_method='null-space'`` and :meth:`.MultiDomain.linear_buckling`.
 
     Parameters
     ----------

@@ -119,11 +119,6 @@ def tstiff2d_1stiff_freq(a, b, ys, bb, bf, defect_a, rho, plyt, laminaprop,
 
     Notes
     -----
-    For more details about each parameter and the aerodynamic formulation see
-    Ref. [2]_. TODO(author): this analysis has no aerodynamic matrix, see
-    :func:`.tstiff2d_1stiff_flutter`; check whether the reference to the
-    aerodynamic formulation is intended here.
-
     For more details about the theory involved on the assembly of panels, see
     [1]_. The free vibration problem solved by ``structsolve.freq`` is
 
@@ -146,10 +141,6 @@ def tstiff2d_1stiff_freq(a, b, ys, bb, bf, defect_a, rho, plyt, laminaprop,
        models to Address Linear Buckling and Vibration of Stiffened
        Composite Panels with Debonding Defect, Composite Structures, 2017.
        https://doi.org/10.1016/j.compstruct.2016.10.026
-    .. [2] Castro, S. G. P., Guimarães, T. A. M., Rade, D. A., and Donadon,
-       M. V., Flutter of stiffened composite panels considering the
-       stiffener's base as a structural element, Composite Structures,
-       2016. https://doi.org/10.1016/j.compstruct.2015.12.056
 
     Examples
     --------

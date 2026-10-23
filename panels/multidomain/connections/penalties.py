@@ -43,8 +43,21 @@ def calc_ku_kv_kw_point_pd(p):
     stiffnesses of the laminate makes the penalty scale with the stiffness
     of the panel, as for :func:`.calc_kt_kr`, instead of a fixed high value.
 
-    TODO(author): why is `k_w` also `A_{11}`, and not a constant related to
-    the bending stiffness of the laminate?
+    The constant of `w` is also `A_{11}`, as in the penalty energies of the
+    connections of Castro and Donadon (2017) [1]_, Sec. 6, Eq. (32), where
+    one translational constant, obtained from the membrane stiffness under
+    the assumption `\epsilon_{xx} = N_{xx}/A_{11}`, Eqs. (33) and (34),
+    multiplies the differences of the three translations `u`, `v` and `w`,
+    the bending stiffness `D_{11}` entering only the constant of the
+    rotation. `A_{11}` has the units of the spring stiffness of a point,
+    force per unit length.
+
+    References
+    ----------
+    .. [1] Castro, S. G. P., and Donadon, M. V., Assembly of Semi-Analytical
+       models to Address Linear Buckling and Vibration of Stiffened
+       Composite Panels with Debonding Defect, Composite Structures, 160,
+       232-247, 2017. https://doi.org/10.1016/j.compstruct.2016.10.026
 
     """
     A11 = p.lam.A[0, 0]
@@ -220,10 +233,13 @@ def calc_kt_kr(p1, p2, connection_type):
     area, and the rotation constant a difference of rotation along a line,
     a force. For ``'bot-top'``, the penalty is integrated over an area, and
     `k_t` is further divided by `\min(a_1, b_1)` of ``p1``, a force per unit
-    volume.
-
-    TODO(author): confirm the choice of `\min(a_1, b_1)` as the length
-    scale of the area connection ``'bot-top'``.
+    volume, the dimensional correction of Eq. (38) of [1]_, since the
+    compatibility of the membrane strains used for the edge connections
+    does not apply to the normal loads of an area connection. The length
+    is an in-plane dimension of the domain, not a thickness: the stiffness
+    of the bond relative to the membrane stiffness of the panels grows as
+    `\min(a_1, b_1)/h`, and the error of the approximate continuity
+    decreases with the size of the domains.
 
     The constants are a scaling of the penalty terms, calculated from the
     laminates ``p1.lam`` and ``p2.lam``, not from the stiffness integrated by

@@ -140,8 +140,9 @@ def cylinder_compression_lb_Nxx_cte(height, r, stack, plyt, laminaprop,
 
     See :func:`.create_cylinder` for most parameters.
 
-    The cylinder has SS1 at the bottom and SS3 at the top. SS3 means that the
-    edge is free to move in the axial direction.
+    The cylinder has the simply supported edges SS1 at the bottom, `x = 0`,
+    and SS2 at the top, `x = height`, in the notation of Almroth [1]_: the
+    top edge is free to move in the axial direction, see the notes.
 
     The assembly and its connections come from :func:`.create_cylinder`.
     The attribute ``Nxx`` of the ``i``-th panel is set to ``Nxxs[i]`` and
@@ -209,10 +210,31 @@ def cylinder_compression_lb_Nxx_cte(height, r, stack, plyt, laminaprop,
     pre-buckling state near the restrained ends, see
     :func:`.cylinder_compression_lb_Nxx_from_static`. ``eigvals`` are the
     multipliers `\lambda` of ``Nxxs``, and the modes are `\{\phi\} = [T]
-    \{\phi_r\}`. TODO(author): the flags of the edge `x = 0`, `u = v = w =
-    0` with the rotation free, would be SS4 in the notation of Almroth,
-    where SS1 is `w = M_{xx} = N_{xx} = N_{xy} = 0` and SS3 is `w = M_{xx}
-    = N_{xx} = v = 0`; check which notation SS1 and SS3 refer to.
+    \{\phi_r\}`.
+
+    The simply supported edges of Almroth [1]_, p. 5, all have `w = 0` and
+    `M_{xx} = 0` (`w_{,xx} = 0`) and differ in the in-plane conditions. With
+    the boundary condition flags of the edge `x = 0` of :class:`.Shell`
+    (``x2u``, ``x2v``, ``x2w`` and ``x2wr`` at `x = a`), a flag ``0``
+    removing the displacement and ``1`` leaving the natural condition:
+
+    ======  ============================  =================================
+    Edge    Conditions                    Flags
+    ======  ============================  =================================
+    SS1     `u = 0`, `v = 0`              ``x1u=0, x1v=0, x1w=0, x1wr=1``
+    SS2     `N_{xx} = 0`, `v = 0`         ``x1u=1, x1v=0, x1w=0, x1wr=1``
+    SS3     `u = 0`, `N_{xy} = 0`         ``x1u=0, x1v=1, x1w=0, x1wr=1``
+    SS4     `N_{xx} = 0`, `N_{xy} = 0`    ``x1u=1, x1v=1, x1w=0, x1wr=1``
+    ======  ============================  =================================
+
+    :func:`.create_cylinder` gives SS1 at both edges, and ``x2u = 1``
+    makes the top edge SS2. Almroth denotes these cases S1 to S4, and C1 to
+    C4 those with `w_{,x} = 0` instead of `w_{,xx} = 0`.
+
+    References
+    ----------
+    .. [1] Almroth, B. O., Influence of edge conditions on the stability of
+       axially compressed cylindrical shells, NASA CR-161, 1965.
 
     Examples
     --------
@@ -245,8 +267,9 @@ def cylinder_compression_lb_Nxx_from_static(height, r, stack, plyt, laminaprop,
 
     See :func:`.create_cylinder` for most parameters.
 
-    The cylinder has SS1 at the bottom and SS3 at the top. SS3 means that the
-    edge is free to move in the axial direction.
+    The cylinder has the simply supported edges SS1 at the bottom and SS2 at
+    the top, see :func:`.cylinder_compression_lb_Nxx_cte`: the top edge is
+    free to move in the axial direction.
 
     The assembly and its connections come from :func:`.create_cylinder`.
     Each panel receives a distributed force along `x` at its edge `x =
@@ -318,7 +341,7 @@ def cylinder_compression_lb_Nxx_from_static(height, r, stack, plyt, laminaprop,
     with the reduced geometric stiffness matrix of the linear membrane
     stresses of `\{c\}`, see :meth:`.Shell.calc_kG`, which is linear in
     `\{c\}`, such that ``eigvals`` are the multipliers `\lambda` of the
-    applied loads. For the boundary conditions SS1 and SS3 see
+    applied loads. For the boundary conditions SS1 and SS2 see
     :func:`.cylinder_compression_lb_Nxx_cte`.
 
     Examples

@@ -1256,8 +1256,12 @@ class MultiDomain(object):
         superposes the constant stress resultants ``Nxx``, ``Nyy`` and
         ``Nxy`` of the panels: when they are not zero and there are constant
         prescribed displacements, they enter both `[K_G(c_0)]` and
-        `[K_G(c_1)]`. TODO(author): check whether this case should be
-        excluded.
+        `[K_G(c_1)]`, i.e. they are applied `1 + \lambda` times instead of
+        `\lambda` times: a constant prescribed rigid translation, which
+        produces no stress, lowers the critical load factors by exactly
+        one. TODO(author): decide whether ``Nxx``, ``Nyy`` and ``Nxy`` should
+        enter only `[K_G(c_0)]`, only `[K_G(c_1)]`, or whether this
+        combination should raise an error.
 
         """
         T = self.get_T()
@@ -2900,7 +2904,7 @@ class MultiDomain(object):
                 return force_intgn
 
 
-    def get_kC_conn(self, conn=None, finalize=True, c=None, kw_tsl=None):
+    def get_kC_conn(self, conn=None, finalize=True, c=None):
         r"""Stiffness matrix due to the multidomain connectivities
 
         These are based on penalty stiffnesses. With the default
@@ -2992,11 +2996,8 @@ class MultiDomain(object):
             Asserts validity of output data and makes the output matrix
             symmetric.
         c : array-like or None, optional
-            Ritz constants, used by the damaged connections.
-        kw_tsl : array-like or None, optional
-            Out-of-plane stiffness of the traction-separation law.
-            TODO(author): not used, the stiffness of each ``'SB_TSL'``
-            connection is computed with :meth:`.calc_k_dmg` at ``c``.
+            Ritz constants, used by the damaged connections, whose
+            stiffness is computed with :meth:`.calc_k_dmg` at ``c``.
 
         Returns
         -------
@@ -4009,7 +4010,11 @@ class MultiDomain(object):
         where `d^h` is ``prev_max_dmg_index``, the damage of the last
         converged increment, `\hat d` is computed by :func:`.calc_kw_tsl`,
         `\Delta_o = \tau_o/k_o` and `\Delta_f = 2 G_{Ic}/\tau_o`, such that
-        the area under the softening branch of the law is `G_{Ic}` [2]_. The
+        the area under the softening branch of the law is `G_{Ic}`. This is
+        the bilinear law of Camanho et al. [2]_, Eqs. (28) and (29), for mode
+        I, with the onset and final separations of its p. 1421, with one
+        damage variable driven by the normal separation for the three
+        components instead of one per mode. The
         stiffness of the interface is `k^w_{CZ} = k_o (1 - d)`, the same for
         the three components of the traction, see :ref:`cohesive_zone`. It is
         also used for negative separations: there is no additional stiffness
@@ -4034,9 +4039,7 @@ class MultiDomain(object):
         .. [2] Camanho, P. P., Dávila, C. G., and de Moura, M. F., Numerical
            simulation of mixed-mode progressive delamination in composite
            materials, Journal of Composite Materials, 37(16), 1415-1438,
-           2003.
-           TODO(author): confirm that this is the source to cite for the
-           bilinear damage law.
+           2003. https://doi.org/10.1177/0021998303034505
 
         """
         # Calculating the displacements of each panel
@@ -4201,10 +4204,18 @@ class MultiDomain(object):
         w_{\eta} \, ab/4`. The slopes come from the rotations of ``fuvw``,
         `w_{,x} = -\phi_x` and `w_{,y} = -\phi_y`, which hold for the models
         based on the classical laminated plate theory with the Donnell
-        kinematics. TODO(author): with the Sanders-Koiter kinematics
-        ``fuvw`` gives `\phi_y = -w_{,y} + v/r`, so that the last matrix
-        gives `w_{,y} - v/r`; check whether this is intended for the curved
-        panels of ``'SB_TSL'``.
+        kinematics. With the Sanders-Koiter kinematics ``fuvw`` gives
+        `\phi_y = -w_{,y} + v/r`, the rotation of the normal about `x`, and
+        the last matrix gives `w_{,y} - v/r`, such that the operator `[B_v]`
+        of :meth:`._tsl_operators` gives the displacement `v(z) = v + z (v/r
+        - w_{,y})` of the Kirchhoff-Love kinematics of the cylinder at the
+        interface, the one also used for the prescribed displacements at
+        `z`, see :mod:`panels.multidomain.connections.nullspace`. A rigid
+        rotation about the axis of the cylinder then opens no tangential
+        separation when the radius of each panel is that of its reference
+        surface. The kernels of ``kCSB_dmg.pyx``, used with the key
+        ``'use_kernels'``, and the connection ``'SB'`` use `w_{,y}` without
+        `v/r` also for the Sanders-Koiter kinematics.
 
         """
         cache = self.__dict__.setdefault('_gauss_field_cache', {})
