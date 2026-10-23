@@ -90,7 +90,11 @@
 - `BladeStiff1D`: the torsion of the flange used `bf*Jxx*w,xy^2`, without a
   shear modulus; it now uses the torsional stiffness `GJ = 4 bf D66` of a
   thin laminated strip, new attribute `BladeStiff1D.GJ`, also saved by
-  `json_io`.
+  `json_io`. The results of Tables 4 and 5 of Stamatelos and Labeas (2023)
+  rise by 1.9% to 3.3%, e.g. from 115.22 to 119.01 N/mm, those of Figure 7
+  by up to 0.04%; `notebooks/stamatelos_labeas_2023.ipynb`,
+  `stamatelos_labeas_2023_multidomain.ipynb` and the Stamatelos section of
+  `conn_method_comparison.ipynb` are updated.
 - `BladeStiff1D`: the coupling `S1` uses the condensed stiffness `Q16 - Q12
   Q26/Q22` instead of `Q16 - Q12 Q16/Q22`, as in Eq. (16) of Castro et al.,
   Compos. Struct. 140 (2016), with `y_k` measured from the mid-plane of the
@@ -193,7 +197,11 @@
   null-space method with `1/kt`, e.g. from `2.7e-2` with the default `kt`
   to `2.9e-5` with `1000 kt` for two bonded laminates with offsets. The key
   `'kr'` of `'SB'` is still used only by the FSDT and TSDT, whose rotations
-  are independent. New test file `tests/multidomain/test_sb_unified.py`.
+  are independent: the rotations of the CLPT follow from `w`, and tying them
+  too would be redundant or, with the Sanders-Koiter kinematics and distinct
+  reference surfaces, would impose `(z1 - z2) w,y = 0`. A `'kr'` given to
+  `'SB'` of the CLPT is not used and now issues a `UserWarning`. New test
+  file `tests/multidomain/test_sb_unified.py`.
 - Default numbers of integration points: `Shell.nx` and `Shell.ny` follow
   `m` and `n` at the time of the calculation, `max(2*m - 1, 7)` and
   `max(2*n - 1, 7)`, new function `panels.shell.gauss_points`, unless a
