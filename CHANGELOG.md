@@ -6,6 +6,10 @@
 
 - Python 3.9 is no longer supported, it reached its end of life in October 2025: Python 3.10 or newer is required, and the tests and wheels cover Python 3.10 to 3.14.
 
+### Packaging
+
+- Packaging: the metadata, with the version, in `pyproject.toml` (PEP 621), built with `setuptools>=77` and Cython; `setup.py` keeps only the Cython extensions with the compiler flags, including those of the WebAssembly build, and writes `panels/version.py` from `pyproject.toml`, with the same fields as before (`MAJOR`, `MINOR`, `MICRO` and `ISRELEASED` are gone from `setup.py`; `isreleased` is true for a version without suffix). The documentation reads the version from `pyproject.toml`. The license is given as the SPDX expression `BSD-3-Clause`, wheel is no longer a build requirement, README.md and LICENSE are no longer installed in the root of the Python environment (`data_files`), and two keywords merged by a missing comma are separated.
+
 ### Bug fixes: mass matrices
 
 - The closed-form mass matrices `fkM` of the nine models read `shell.rho`,

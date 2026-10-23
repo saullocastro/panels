@@ -1,118 +1,65 @@
-"""Semi-analytical models for plates, shells, stiffened panels
+r"""Build of the Cython extensions of panels
+
+The package metadata, including the version, is in ``pyproject.toml``.
+This file keeps only what ``pyproject.toml`` cannot express: the Cython
+extensions with their compiler flags per platform and the file
+``panels/version.py``, written from the version of ``pyproject.toml``
+and read by ``panels.version`` and ``doc/source/conf.py``.
 """
 import platform
 import os
+import re
 import sys
 import sysconfig
-import inspect
-import subprocess
-from setuptools import setup, find_packages
-from setuptools.extension import Extension
 
+from setuptools import setup, Extension
 from Cython.Build import cythonize
 
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
 
-DOCLINES = __doc__.split("\n")
 
-# Utility function to read the README file.
-# Used for the long_description.  It's nice, because now 1) we have a top level
-# README file and 2) it's easier to type in the README file than to put a raw
-# string in below ...
-def read(fname):
-    setupdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-    return open(os.path.join(setupdir, fname)).read()
+setupdir = os.path.dirname(os.path.abspath(__file__))
 
-CLASSIFIERS = """\
-Development Status :: 4 - Beta
-Intended Audience :: Education
-Intended Audience :: Science/Research
-Intended Audience :: Developers
-Intended Audience :: End Users/Desktop
-Topic :: Scientific/Engineering
-Topic :: Scientific/Engineering :: Mathematics
-Topic :: Education
-Topic :: Software Development
-Topic :: Software Development :: Libraries :: Python Modules
-Operating System :: Microsoft :: Windows
-Operating System :: Unix
-Operating System :: POSIX :: BSD
-Environment :: WebAssembly :: Emscripten
-Programming Language :: Python :: 3.10
-Programming Language :: Python :: 3.11
-Programming Language :: Python :: 3.12
-Programming Language :: Python :: 3.13
-Programming Language :: Python :: 3.14
 
-"""
+def read_version():
+    with open(os.path.join(setupdir, 'pyproject.toml'), 'rb') as f:
+        return tomllib.load(f)['project']['version']
 
-MAJOR = 0
-MINOR = 14
-MICRO = 0
-ISRELEASED = True
-VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
+
+# NOTE the year of the copyright of the documentation, read by
+#      doc/source/conf.py
 YEAR = '2026'
 
 
-def write_version_py(filename='panels/version.py'):
+def write_version_py(version):
+    """Write ``panels/version.py``, with the fields of the former scheme
+    (``short_version``, ``version``, ``full_version``, ``svn_revision``,
+    ``isreleased``, ``__year__``, ``__version__``), all from the version
+    of ``pyproject.toml``"""
     cnt = """# This file is generated automatically by the setup.py
 short_version = '%(version)s'
 version = '%(version)s'
-full_version = '%(full_version)s'
-svn_revision = '%(svn_revision)s'
+full_version = '%(version)s'
+svn_revision = ''
 isreleased = %(isreleased)s
 __year__ = '%(year)s'
-if isreleased:
-    __version__ = version
-else:
-    __version__ = full_version
-    version = full_version
-
+__version__ = version
 """
-    FULLVERSION, GIT_REVISION = get_version_info()
-
-    a = open(filename, 'w')
-    try:
-        a.write(cnt % {'version': VERSION,
-                       'full_version': FULLVERSION,
-                       'svn_revision': GIT_REVISION,
-                       'isreleased': str(ISRELEASED),
+    # NOTE a final release has only numbers, e.g. 0.14.0, a development or
+    #      pre-release version has a suffix, e.g. 0.15.0.dev0 or 0.15.0rc1
+    isreleased = re.fullmatch(r'\d+(\.\d+)*', version) is not None
+    version_file = os.path.join(setupdir, 'panels', 'version.py')
+    with open(version_file, 'w', encoding='utf-8', newline='\n') as f:
+        f.write(cnt % {'version': version,
+                       'isreleased': str(isreleased),
                        'year': YEAR,
                        })
-    finally:
-        a.close()
 
 
-def git_version():
-    def _minimal_ext_cmd(cmd):
-        # construct minimal environment
-        env = {}
-        for k in ['SYSTEMROOT', 'PATH']:
-            v = os.environ.get(k)
-            if v is not None:
-                env[k] = v
-        # LANGUAGE is used on win32
-        env['LANGUAGE'] = 'C'
-        env['LANG'] = 'C'
-        env['LC_ALL'] = 'C'
-        out = subprocess.Popen(cmd, stdout=subprocess.PIPE, env=env).communicate()[0]
-        return out
-
-    try:
-        out = _minimal_ext_cmd(['git', 'rev-parse', 'HEAD'])
-        git_revision = out.strip().decode('ascii')
-    except OSError:
-        git_revision = "Unknown"
-
-    return git_revision
-
-
-def get_version_info():
-    FULLVERSION = VERSION
-    GIT_REVISION = ''
-    if not ISRELEASED:
-        GIT_REVISION = git_version()
-        FULLVERSION = VERSION + 'rc' + GIT_REVISION
-    return FULLVERSION, GIT_REVISION
+write_version_py(read_version())
 
 # NOTE a coverage build, see .github/workflows/coverage.yml, requested with
 #      CYTHON_TRACE_NOGIL in the environment or with --define CYTHON_TRACE...
@@ -431,11 +378,6 @@ extensions = [
 
     ]
 
-
-FULLVERSION, GIT_REVISION = get_version_info()
-
-write_version_py()
-
 def generated_with_other_trace_mode(ext):
     r"""Whether the C++ file generated from a Cython source of ``ext`` was
     generated with, or without, line tracing, the opposite of this build
@@ -463,50 +405,6 @@ ext_modules = cythonize(extensions,
                                   for ext in extensions),
                         )
 
-data_files = [('', [
-        'README.md',
-        'LICENSE',
-        ])]
-
-package_data = {
-        'panels': ['*.py', '*.pxd', '*.pyx',
-                   'core/include/*.hpp',
-                   'core/src/*.cpp',
-                   'models/*.pyx', 'models/*.pxd'
-                   'tests/tests_shell/*.py'
-                   ],
-        }
-
-keywords = [
-            'Ritz method',
-            'semi-analytical'
-            'Energy-based method',
-            'structural analysis',
-            'structural optimization',
-            'static analysis',
-            'buckling',
-            'vibration',
-            'panel flutter',
-            'structural dynamics',
-            'implicit time integration',
-            'explicit time integration',
-            ]
-
 setup(
-    name = 'panels',
-    version = FULLVERSION,
-    author = "Saullo G. P. Castro, Nathan D'Souza",
-    author_email = 'S.G.P.Castro@tudelft.nl',
-    description = ("Semi-analytical models for plates, shells and stiffened panels"),
-    long_description = read('README.md'),
-    long_description_content_type = 'text/markdown',
-    license = '3-Clause BSD',
-    keywords = keywords,
-    url = 'https://github.com/saullocastro/panels',
-    package_data = package_data,
-    data_files = data_files,
-    classifiers = [_f for _f in CLASSIFIERS.split('\n') if _f],
-    ext_modules = ext_modules,
-    include_package_data = True,
-    packages = find_packages(),
+    ext_modules=ext_modules,
 )
