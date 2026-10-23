@@ -138,6 +138,18 @@
   five-panel cylinder of the tests (`m = 8`, `n = 12`), instead of 39.99, the
   multiplier of the forces `ku*pd` with `ku = 1e6`. The signature is
   unchanged; `ku` only flags the prescribed component.
+- `MultiDomain.linear_buckling`: the constant stress resultants `Nxx`,
+  `Nyy` and `Nxy` of the panels are a pre-stress, in the geometric stiffness
+  of the constant state `c0` only. With constant prescribed displacements
+  they entered both `K_G(c0)` and `K_G(c1)`, i.e. they were applied `1 +
+  lambda` times: a constant prescribed rigid translation, which produces no
+  stress, lowered the critical load factor by exactly one (161.93 to 160.93
+  for a plate with `Nxx = -1`). Now `K_G(c1)` is computed with them set to
+  zero, also without prescribed displacements and for a given `c`; a
+  `ValueError` is raised when the incremented state has no geometric
+  stiffness, e.g. when `Nxx` is the only load, which `linear_buckling` used
+  to multiply by the load factor: apply such a load with
+  `Shell.add_distr_load_fixed_x` instead.
 
 ### API
 

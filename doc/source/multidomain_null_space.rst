@@ -462,7 +462,9 @@ buckling analysis about the pre-buckling state `\{c(\lambda)\} = \{c_0\} +
 \lambda \{c_1\}`, with `\{c_0\}` due to the constant prescribed
 displacements and `\{c_1\}` due to the load and the incremented ones,
 solves `([K_r] + [K_{G, r}(c_0)] + \lambda [K_{G, r}(c_1)]) \{\phi_r\} =
-\{0\}`, see :meth:`.MultiDomain.linear_buckling`. The modes satisfy the
+\{0\}`, see :meth:`.MultiDomain.linear_buckling`; the constant stress
+resultants ``Nxx``, ``Nyy`` and ``Nxy`` of the panels are part of the
+constant state, in `[K_{G, r}(c_0)]` only. The modes satisfy the
 homogeneous constraints, `\{\phi\} = [T] \{\phi_r\}`: under displacement
 control the prescribed components of the modes are zero, whereas under the
 equivalent load they are free. For a flat plate the modes of the linear

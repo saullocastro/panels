@@ -1200,14 +1200,17 @@ class MultiDomain(object):
         :meth:`._linear_state`: ``c1`` for the external force vector
         ``calc_fext(inc=1.)`` and the incremented prescribed displacements
         ``c_p1``, and ``c0`` for the constant prescribed displacements
-        ``c_p0`` alone. The reduced geometric stiffness matrix of ``c0`` is
-        added to the reduced constitutive stiffness matrix of
-        :meth:`.calc_kC`, and the reduced geometric stiffness matrix of
-        ``c1`` is the second matrix of ``structsolve.lb``, whose eigenvalues
-        are the critical load factors. Without constant prescribed
-        displacements, ``c0`` is zero and it is the usual linear buckling
-        analysis about the linear static solution for a load factor of 1.
-        The matrices are reduced with :meth:`.reduce`.
+        ``c_p0`` alone. The reduced geometric stiffness matrix of ``c0``,
+        which also contains the constant stress resultants ``Nxx``, ``Nyy``
+        and ``Nxy`` of the panels, see :meth:`.Shell.calc_kG`, is added to
+        the reduced constitutive stiffness matrix of :meth:`.calc_kC`, and
+        the reduced geometric stiffness matrix of the stresses of ``c1``
+        alone, computed with the constant stress resultants of the panels
+        set to zero, is the second matrix of ``structsolve.lb``, whose
+        eigenvalues are the critical load factors. Without constant
+        prescribed displacements and constant stress resultants, it is the
+        usual linear buckling analysis about the linear static solution for
+        a load factor of 1. The matrices are reduced with :meth:`.reduce`.
 
         Parameters
         ----------
@@ -1215,7 +1218,8 @@ class MultiDomain(object):
             Number of eigenvalues, passed to ``structsolve.lb``.
         c : array-like, optional
             A pre-buckling state of the assembly, ``c1``, instead of the
-            linear static solution, with ``c0`` zero.
+            linear static solution, with ``c0`` zero; the constant stress
+            resultants of the panels are still a pre-stress.
         silent : bool, optional
             A boolean to tell whether the log messages should be printed.
         kwargs : dict, optional
@@ -1227,6 +1231,17 @@ class MultiDomain(object):
             The critical load factors and the modes of the assembly, one
             per column, expanded with :meth:`.expand` without load factor.
 
+        Raises
+        ------
+        ValueError
+            When the incremented state ``c1`` has no geometric stiffness,
+            e.g. when the only load is given by the constant stress
+            resultants ``Nxx``, ``Nyy`` and ``Nxy`` of the panels, which are
+            not multiplied by the load factor; apply such a load with
+            :meth:`.Shell.add_distr_load_fixed_x` or
+            :meth:`.Shell.add_distr_load_fixed_y` instead, or use
+            :meth:`.calc_kG` and ``structsolve.lb`` directly.
+
         Notes
         -----
         The pre-buckling state is linear in the load factor, `\{c(\lambda)\}
@@ -1234,49 +1249,63 @@ class MultiDomain(object):
         `\{c_0\}` due to the constant prescribed displacements alone and
         `\{c_1\}` due to the load and the incremented prescribed
         displacements. The geometric stiffness matrix of the linear buckling
-        analysis is linear in the pre-buckling state, so that `[K_G(c_0 +
-        \lambda c_1)] = [K_G(c_0)] + \lambda [K_G(c_1)]`, and the critical
-        load factors `\lambda` solve
+        analysis is linear in the membrane stress resultants of the linear
+        strains of the pre-buckling state, see :meth:`.Shell.calc_kG`, to
+        which the constant stress resultants `\{N_0\}` of the attributes
+        ``Nxx``, ``Nyy`` and ``Nxy`` of the panels are superposed. These
+        belong to the constant part of the state, they are not multiplied
+        by the load factor, so that `[K_G(N_0, c_0 + \lambda c_1)] =
+        [K_G(N_0, c_0)] + \lambda [K_G(0, c_1)]`, and the critical load
+        factors `\lambda` solve
 
         .. math::
 
-            \left([K_r] + [K_{G,r}(c_0)] + \lambda [K_{G,r}(c_1)]\right)
-            \{\phi_r\} = \{0\}
+            \left([K_r] + [K_{G,r}(N_0, c_0)] + \lambda [K_{G,r}(0,
+            c_1)]\right) \{\phi_r\} = \{0\}
 
-        with the matrices reduced with `[T]`, see :meth:`.reduce`. Without
-        constant prescribed displacements, `\{c_0\} = 0` and it is the usual
-        linear buckling analysis about the linear static solution for
-        `\lambda = 1`. The modes satisfy the homogeneous constraints,
-        `\{\phi\} = [T] \{\phi_r\}`: under displacement control the
-        prescribed components of the modes are zero, whereas under the
-        equivalent load they are free. See :ref:`null_space_pd`.
-
-        The linearity of `[K_G]` holds for the membrane stress of the
-        linear strains of `\{c\}`, see :meth:`.Shell.calc_kG`, which also
-        superposes the constant stress resultants ``Nxx``, ``Nyy`` and
-        ``Nxy`` of the panels: when they are not zero and there are constant
-        prescribed displacements, they enter both `[K_G(c_0)]` and
-        `[K_G(c_1)]`, i.e. they are applied `1 + \lambda` times instead of
-        `\lambda` times: a constant prescribed rigid translation, which
-        produces no stress, lowers the critical load factors by exactly
-        one. TODO(author): decide whether ``Nxx``, ``Nyy`` and ``Nxy`` should
-        enter only `[K_G(c_0)]`, only `[K_G(c_1)]`, or whether this
-        combination should raise an error.
+        with the matrices reduced with `[T]`, see :meth:`.reduce`. Each
+        constant contribution enters once: a constant prescribed rigid
+        translation, which produces no stress, leaves the critical load
+        factors unchanged. Without constant prescribed displacements and
+        constant stress resultants it is the usual linear buckling analysis
+        about the linear static solution for `\lambda = 1`. The modes
+        satisfy the homogeneous constraints, `\{\phi\} = [T] \{\phi_r\}`:
+        under displacement control the prescribed components of the modes
+        are zero, whereas under the equivalent load they are free. See
+        :ref:`null_space_pd`.
 
         """
         T = self.get_T()
         kC = self.calc_kC(silent=silent)
         kC_r = csr_matrix(T.T @ kC @ T)
+        c0 = None
         if c is None:
             c_p0, c_p1 = self.get_cp()
             fext = self.calc_fext(inc=1., silent=silent)
             c1 = self._linear_state(kC, fext, c_p1, silent=silent)
             if np.any(c_p0):
                 c0 = self._linear_state(kC, 0*fext, c_p0, silent=silent)
-                kC_r = kC_r + self.reduce(self.calc_kG(c=c0, silent=silent))
         else:
             c1 = c
-        kG_r = self.reduce(self.calc_kG(c=c1, silent=silent))
+        has_N0 = any(any((p.Nxx, p.Nyy, p.Nxy)) for p in self.panels)
+        if c0 is not None or has_N0:
+            #NOTE the constant stress resultants of the panels are in the
+            #     geometric stiffness matrix of c0, also when c0 is zero
+            kC_r = kC_r + self.reduce(self.calc_kG(c=c0, silent=silent))
+        N0 = [(p.Nxx, p.Nyy, p.Nxy) for p in self.panels]
+        try:
+            for p in self.panels:
+                p.Nxx = p.Nyy = p.Nxy = 0.
+            kG_r = self.reduce(self.calc_kG(c=c1, silent=silent))
+        finally:
+            for p, (Nxx, Nyy, Nxy) in zip(self.panels, N0):
+                p.Nxx, p.Nyy, p.Nxy = Nxx, Nyy, Nxy
+        if abs(kG_r).max() == 0:
+            raise ValueError('The incremented pre-buckling state has no '
+                'geometric stiffness: there is no load or incremented '
+                'prescribed displacement. The constant stress resultants '
+                'Nxx, Nyy and Nxy of the panels are a pre-stress, not '
+                'multiplied by the load factor')
         eigvals, eigvecs = lb(kC_r, kG_r, num_eigvalues=num_eigvalues,
                               silent=silent, **kwargs)
         return eigvals, self.expand(eigvecs)

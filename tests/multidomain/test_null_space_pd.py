@@ -432,6 +432,50 @@ def test_linear_buckling_plate_end_shortening_equals_load():
         md.get_cp()
 
 
+
+def test_linear_buckling_constant_stress_resultants_rigid_translation():
+    r"""The constant stress resultants ``Nxx`` of a panel are a pre-stress
+    of :meth:`.MultiDomain.linear_buckling`, counted once: a constant
+    prescribed rigid translation, which produces no stress, does not change
+    the critical load factor, and with the pre-stress `N_0` and the
+    incremented uniform `N_{xx} = -1` the critical value is `\lambda_{cr} =
+    N_{cr} - N_0`; before, ``Nxx`` entered the geometric stiffness of the
+    constant state and that of the incremented one, and the translation
+    lowered `\lambda_{cr}` by `N_0`"""
+    a, b = 0.5, 0.3
+
+    def run(N0, u0):
+        p = plate(a, b, h=0.5e-3, m=8, n=8, stack=(0, 90, 90, 0),
+                  laminaprop=LAMINAPROP)
+        p.Nxx = -N0
+        # uniform N_xx = -1, self-equilibrated
+        p.add_distr_load_fixed_x(0., funcx=lambda y: 1.)
+        p.add_distr_load_fixed_x(a, funcx=lambda y: -1.)
+        # in-plane rigid motion, a constant translation u0
+        p.add_point_pd(0., 0., 1., u0, 1., 0., None, None, cte=True)
+        p.add_point_pd(0., b, 1., u0, None, None, None, None, cte=True)
+        md = MultiDomain([p], conn=[], pd_method='null-space')
+        eigvals, _ = md.linear_buckling(num_eigvalues=3)
+        assert p.Nxx == -N0
+        return eigvals[0]
+
+    Ncr = run(0., 0.)
+    assert np.isclose(Ncr, 161.93108924810818, rtol=1e-8)
+    for u0 in (0., 1e-6, 1e-3):
+        assert np.isclose(run(1., u0), Ncr - 1., rtol=1e-10)
+        assert np.isclose(run(0.5*Ncr, u0), 0.5*Ncr, rtol=1e-10)
+
+    # Nxx alone is not multiplied by the load factor
+    p = plate(a, b, h=0.5e-3, m=8, n=8, stack=(0, 90, 90, 0),
+              laminaprop=LAMINAPROP)
+    p.Nxx = -1.
+    p.add_point_pd(0., 0., 1., 0., 1., 0., None, None)
+    p.add_point_pd(0., b, 1., 0., None, None, None, None)
+    md = MultiDomain([p], conn=[], pd_method='null-space')
+    with pytest.raises(ValueError, match='no geometric stiffness'):
+        md.linear_buckling(num_eigvalues=3)
+
+
 def cylinder(pd_method, **kw):
     md, conns = create_cylinder(height=0.5, r=0.25, plyt=0.125e-3,
             stack=[0, 45, -45, 90, -45, 45], laminaprop=LAMINAPROP,
