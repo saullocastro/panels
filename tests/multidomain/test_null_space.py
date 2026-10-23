@@ -57,7 +57,10 @@ def _pair(model, func, seed):
     elif func == 'SB':
         p1 = Shell(a=0.4, b=0.3, m=6, n=6, **kw1)
         p2 = Shell(a=0.4, b=0.3, m=5, n=7, **kw2)
-        conn = dict(p1=p1, p2=p2, func=func, kr=1.)
+        conn = dict(p1=p1, p2=p2, func=func)
+        #NOTE 'kr' of 'SB' applies only to the FSDT and TSDT
+        if 'clpt' not in model:
+            conn['kr'] = 1.
     else:
         #NOTE a flat flange, with the base at an interior line
         kw2 = dict(kw, stack=[0, 90, 90, 0],
@@ -94,8 +97,10 @@ def test_same_constraints_as_penalty(model, func, order):
         md = MultiDomain(panels, [conn], conn_method='null-space')
         T = md.get_T()
         assert T.shape[0] == md.get_size()
-        K = MultiDomain(panels, [dict(conn, kt=1., kr=1.)],
-                        conn_method='penalty').get_kC_conn()
+        pen = dict(conn, kt=1., kr=1.)
+        if func == 'SB' and 'clpt' in model:
+            del pen['kr']
+        K = MultiDomain(panels, [pen], conn_method='penalty').get_kC_conn()
         K = K.toarray()
         assert np.abs(K @ T).max() < 1e-12*np.abs(K).max()
         ev = eigh(K, eigvals_only=True)
