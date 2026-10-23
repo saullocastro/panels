@@ -274,9 +274,10 @@ class Shell(object):
     prescribed displacements at the faces, see
     :ref:`boundary_conditions_face_clamp`.
 
-    The equilibrium approach of Rohwer (1988) [3]_ gives ``k = 5/6`` for a
-    homogeneous plate and accounts for the stacking sequence otherwise. The
-    third-order shear deformation theory (TSDT) needs no shear correction.
+    The equilibrium approach of Rohwer (1988) [3]_, Sec. 3.4, Eqs. (28)-(43),
+    gives ``k = 5/6`` for a homogeneous plate (Sec. 4.1) and accounts for
+    the stacking sequence otherwise. The third-order shear deformation
+    theory (TSDT) needs no shear correction.
 
     Limiting the integration domain to ``x1 <= x <= x2`` and ``y1 <= y <=
     y2`` while the approximation functions span the whole shell is how
@@ -293,13 +294,10 @@ class Shell(object):
     .. [2] Bardell, N. S., "Free vibration analysis of a flat plate using the
        hierarchical finite element method", Journal of Sound and Vibration,
        1991. https://doi.org/10.1016/0022-460X(91)90855-E
-    .. [3] Rohwer, K., "Improved transverse shear stiffness for layered
-       finite elements", DFVLR-FB 88-32, 1988.
-       TODO(author): the available copy of the report, whose title page
-       reads "Improved Transverse Shear Stiffnesses for Layered Finite
-       Elements", DFVLR, Institut für Strukturmechanik, Braunschweig, August
-       1988, does not show the number DFVLR-FB 88-32 used in the composites
-       package; confirm the number.
+    .. [3] Rohwer, K., "Improved transverse shear stiffnesses for layered
+       finite elements", DFVLR-FB 88-32, Deutsche Forschungs- und
+       Versuchsanstalt für Luft- und Raumfahrt (DFVLR), Institut für
+       Strukturmechanik, Braunschweig, 1988.
 
     """
     # Declare all the variables/attributes here to preallocate mem, speed it up. Var not declared here cant be used

@@ -124,7 +124,7 @@ DOFs have the strains of the CLPT:
 The models with 5 DOFs have the rotations `\phi_x` and `\phi_y` as
 independent fields, with the displacement field and the strains of
 :mod:`panels.models.fsdt_tsdt_field`. The FSDT uses the shear corrected
-transverse shear stiffness, with the method of Rohwer (1988) [3]_ by
+transverse shear stiffness of Rohwer (1988) [3]_, Sec. 3.4, Eq. (43), by
 default, see :class:`.Shell`. The TSDT of Reddy (1984) [2]_ needs no shear
 correction, the transverse shear stresses vanishing at the faces of the
 laminate, `z = d \pm h/2` with the offset `d`: the cubic term is written
@@ -180,13 +180,10 @@ References
    https://doi.org/10.1090/qam/147023
 .. [2] Reddy, J. N., "A simple higher-order theory for laminated composite
    plates", J. Appl. Mech., 51, 745-752, 1984.
-.. [3] Rohwer, K., "Improved transverse shear stiffness for layered finite
-   elements", DFVLR-FB 88-32, 1988.
-   TODO(author): the available copy of the report, whose title page
-   reads "Improved Transverse Shear Stiffnesses for Layered Finite
-   Elements", DFVLR, Institut für Strukturmechanik, Braunschweig, August
-   1988, does not show the number DFVLR-FB 88-32 used in the composites
-   package; confirm the number.
+.. [3] Rohwer, K., "Improved transverse shear stiffnesses for layered
+   finite elements", DFVLR-FB 88-32, Deutsche Forschungs- und
+   Versuchsanstalt für Luft- und Raumfahrt (DFVLR), Institut für
+   Strukturmechanik, Braunschweig, 1988.
 
 """
 from . import clpt_field

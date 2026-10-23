@@ -107,11 +107,9 @@ class BladeStiff2D(object):
     such that the local buckling of the flange is represented, unlike with
     :class:`.BladeStiff1D`. The base as a structural element follows [1]_,
     Sec. 2, Eqs. (11) and (12), where the flange is a one-dimensional
-    Euler-Bernoulli beam, as in :class:`.BladeStiff1D`; the two-dimensional
-    flange is not part of [1]_.
-
-    TODO(author): the source of the two-dimensional flange model and of its
-    connection to the skin.
+    Euler-Bernoulli beam, as in :class:`.BladeStiff1D`. The two-dimensional
+    flange and its connection to the skin are a model of this package, not
+    taken from a publication.
 
     References
     ----------

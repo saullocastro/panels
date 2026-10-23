@@ -14,8 +14,9 @@ The models ``'cylshell_fsdt_donnell'``, ``'cylshell_fsdt_sanders'``,
 - Batdorf, S. B., NACA TR 874, 1947: axial buckling of cylindrical panels
   with Donnell's equations.
 
-- Sanders, J. L., NASA TR R-24, 1959: the strains of Sanders' theory vanish
-  for any rigid-body motion.
+- Sanders, J. L., "An improved first-approximation theory for thin shells",
+  NASA TR R-24, 1959: the strains of Sanders' theory vanish for any
+  rigid-body motion.
 
 The Navier solution of the SD-SD panel of the kinematics of
 ``theory/shells/fsdt_tsdt``, implemented independently herein, verifies the
