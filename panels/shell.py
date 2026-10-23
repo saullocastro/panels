@@ -131,7 +131,11 @@ class Shell(object):
     rotations `\phi_x` and `\phi_y` as independent fields, which are
     controlled by the analogous flags ``x1phix, x1phixr, ..., y2phiy,
     y2phiyr``, all ``1`` by default except ``x1phiy = x2phiy = 0`` and
-    ``y1phix = y2phix = 0``.
+    ``y1phix = y2phix = 0``. A clamped edge, e.g. `x = 0`, has ``x1u = x1v
+    = x1w = 0`` and also ``x1wr = 0`` for the classical laminated plate
+    theory (CLPT), ``x1phix = x1phiy = 0`` for the first-order shear
+    deformation theory (FSDT), and both ``x1wr = 0`` and ``x1phix = x1phiy
+    = 0`` for the third-order one (TSDT), see :ref:`boundary_conditions`.
 
     The attribute ``fsdt_shear_correction`` controls the transverse shear
     stiffness of the first-order shear deformation theory (FSDT):
@@ -247,6 +251,18 @@ class Shell(object):
     to each edge removed, consistent with the default boundary conditions
     of the models based on the classical laminated plate theory, where the
     rotation along the edge, a derivative of `w` along it, is zero with `w`.
+
+    A clamped edge keeps the cross-section planar and unrotated, `u(z) =
+    v(z) = 0` for every `z` across the thickness. On `x = 0`, with `u(z) = u
+    - z w_{,x}` for the CLPT, this is `u = w_{,x} = 0`, and with `u(z) = u +
+    z \phi_x` for the FSDT, `u = \phi_x = 0` with `w_{,x}` free. The TSDT
+    field `u(z) = u + z \phi_x - c_1 [(z - d)^3 + d^3] (\phi_x + w_{,x})`,
+    `c_1 = 4/(3 h^2)`, with the offset `d` and the thickness `h` of the
+    laminate, is a cubic in `z` whose coefficients vanish only for `u =
+    \phi_x = w_{,x} = 0`, hence ``x1wr = 0`` together with ``x1phix = 0``;
+    the rotation at the reference surface, `\theta_x = u_{,z}(0)`, is then
+    zero for any offset. On `x = 0`, `w = 0` gives `w_{,y} = 0` along the
+    edge, and `v = \phi_y = 0` gives `v(z) = 0`.
 
     The equilibrium approach of Rohwer (1988) [3]_ gives ``k = 5/6`` for a
     homogeneous plate and accounts for the stacking sequence otherwise. The
@@ -3024,7 +3040,10 @@ class Shell(object):
         d`, and `\Phi_y = \phi_y + v/r` with the Sanders-Koiter kinematics,
         `\Phi_y = \phi_y` otherwise. For the FSDT, and for the TSDT with
         `d = 0`, `\theta_x = \phi_x` and `\theta_y = \Phi_y`. See
-        :ref:`tsdt_offset_prescribed_rotations`.
+        :ref:`tsdt_offset_prescribed_rotations`. For the TSDT, `u = 0`, `w
+        = 0` and `\theta_x = 0` along an edge `x = cte` do not clamp it,
+        the warping term of `u(z)` remaining: the clamp also needs `w_{,x}
+        = 0`, see :ref:`boundary_conditions`.
 
         The penalty method adds to the energy, for each prescribed
         component, e.g. `u`,

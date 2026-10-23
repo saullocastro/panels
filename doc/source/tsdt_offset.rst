@@ -161,6 +161,19 @@ and `\Phi_y`, as before. The penalty method,
 .. literalinclude:: ../../tests/multidomain/test_tsdt_prescribed_rotations.py
     :pyobject: test_prescribed_rotation_with_offset
 
+.. _tsdt_offset_clamped_edges:
+
+Clamped edges
+-------------
+
+A clamped edge keeps the section planar and unrotated, `u(z) = 0` for every
+`z`. Eq. :eq:`tsdt-offset-family` is a cubic in `z` with the three
+constants `u`, `w_{,x}` and `\hat{\gamma}_{xz} = \phi_x + w_{,x}`, all
+zero: `u = \phi_x = w_{,x} = 0`, the flags ``x1u = x1phix = x1wr = 0`` on
+`x = 0`, and then `\theta_x = 0` for any offset. The rotation at the
+reference surface alone, Eq. :eq:`tsdt-offset-theta`, does not clamp the
+edge, see :ref:`boundary_conditions`.
+
 .. _tsdt_offset_example:
 
 Example

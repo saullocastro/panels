@@ -47,6 +47,20 @@
   the FSDT and for the CLPT.
 - New page `tsdt_offset.rst`.
 
+### Clamped edges of the third-order shear deformation theory
+
+- A clamped TSDT edge keeps the cross-section planar and unrotated, `u(z) =
+  v(z) = 0` for every `z`, which requires `u = phi = w,n = 0`: the slope
+  flag, e.g. `x1wr = 0` on `x = 0`, is removed together with the rotation
+  flags. With the slope free the warping term `p(z) (phi + w,x)` remained
+  at the edge: for a square isotropic plate with `h/a = 0.1` clamped on
+  four edges the first frequency `omega a^2 sqrt(rho h/D)` is 32.64 instead
+  of 30.18. The FSDT clamp is unchanged, `w,n` free. The function
+  `set_edge` of `tests/tests_shell/test_fsdt_tsdt_plates.py`, the pages
+  `boundary_conditions.rst` and `tsdt_offset.rst` and the docstring of
+  `Shell` are updated; the thin plates of Leissa (1973) move by less than
+  `1.2e-5`, e.g. `'SCSC'` 28.95027 to 28.95059 (reference 28.951).
+
 ### Bug fixes: stiffeners, connections and post-processing
 
 - `BladeStiff1D`: the torsion of the flange used `bf*Jxx*w,xy^2`, without a

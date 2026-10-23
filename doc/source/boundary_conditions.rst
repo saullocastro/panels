@@ -46,10 +46,25 @@ The models based on shear deformation theories, FSDT and TSDT, have the
 rotations `\phi_x` and `\phi_y` as independent fields, with the flags
 ``x1phix``, ``x1phixr``, ..., ``y2phiyr``. By default only the rotation
 tangential to each edge is removed, ``x1phiy = x2phiy = 0`` and ``y1phix =
-y2phix = 0``, the hard simply supported condition; a clamped edge also
-removes the other rotation, e.g. ``x1phix = 0``, while the slope of `w`
-stays free. The meaning of the default flags is described in
-:class:`.Shell`.
+y2phix = 0``, the hard simply supported condition. A clamped edge keeps
+the cross-section planar and unrotated, `u(z) = v(z) = 0` through the
+thickness, which removes on the edge `x = 0`:
+
+========== ====================================================================
+model      flags of the clamped edge `x = 0` equal to ``0``
+========== ====================================================================
+CLPT       ``x1u``, ``x1v``, ``x1w``, ``x1wr``
+FSDT       ``x1u``, ``x1v``, ``x1w``, ``x1phix``, ``x1phiy``
+TSDT       ``x1u``, ``x1v``, ``x1w``, ``x1phix``, ``x1phiy``, ``x1wr``
+========== ====================================================================
+
+The rotation of the FSDT is constant through the thickness, and its slope
+of `w` stays free. The in-plane displacement of the TSDT, `u(z) = u + z
+\phi_x + p(z) (\phi_x + w_{,x})` with the cubic `p(z)` of Eq.
+:eq:`tsdt-offset-p`, also contains the slope `w_{,x}`, which must be
+removed for `u(z)` to vanish at every `z`; the rotation at the reference
+surface, `\theta_x` of Eq. :eq:`tsdt-offset-theta`, is then zero for any
+offset. The meaning of the default flags is described in :class:`.Shell`.
 
 The function ``set_edge`` of the tests sets the simply supported (with the
 normal displacement free), clamped and free edges of the three plate models
@@ -64,6 +79,14 @@ combinations of these edges agree with the reference values of Leissa
 
 .. literalinclude:: ../../tests/tests_shell/test_fsdt_tsdt_plates.py
     :pyobject: test_frequency_thin_isotropic_plate_leissa
+
+For these thin plates the slope `w_{,x}` of a TSDT clamped edge changes the
+frequencies by less than `1.2 \times 10^{-5}`, e.g. 28.95027 with the slope
+free and 28.95059 with ``x1wr = 0`` for the plate ``'SCSC'``, against 28.951
+of Leissa. For thick plates the difference is large: for the square
+isotropic plate with `h/a = 0.1` clamped on four edges, the first frequency
+`\omega a^2 \sqrt{\rho h/D}` of the TSDT is 30.18 with the slope free and
+32.64 with the slope clamped, close to the 32.62 of the FSDT.
 
 The removed terms leave null rows and columns in the matrices, which the
 solvers of `structsolve <https://github.com/saullocastro/structsolve>`_
