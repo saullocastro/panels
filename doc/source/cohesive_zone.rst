@@ -731,8 +731,8 @@ prescribed displacement, :meth:`.MultiDomain.reaction_line_pd_xcte`, which
 the drivers report at every increment. Both are equal by equilibrium of the
 loaded arm when the cohesive domain carries the whole load, see
 :ref:`cohesive_zone_load`. In the analyses of the reference DCB of the
-convergence study below, up to an opening of 8 mm, they agree within `8.7
-\times 10^{-4}` with `k_o = 10^5` N/mm³ and `3.7 \times 10^{-5}` with `k_o =
+convergence study below, up to an opening of 8 mm, they agree within `8.9
+\times 10^{-4}` with `k_o = 10^5` N/mm³ and `3.8 \times 10^{-5}` with `k_o =
 2 \times 10^5` N/mm³ at every opening.
 
 
@@ -794,20 +794,27 @@ cohesive domain (`L_{tsl} = 24 \to 17` mm). The metrics are:
 
 The study is reproduced by ``notebooks/dcb_mode_I_convergence_study.py``, and
 the metrics and load curves of all runs are stored in
-``notebooks/results/dcb_mode_I_convergence_study.json``. The runs were done
-with panels 0.13.11 on a laptop with 16 threads, eight runs at a time with two threads
-each, so the wall times indicate the relative cost; the reference run takes
-10 min in this setting and 4.5 min of wall time (17 min of CPU time) when run
-alone.
+``notebooks/results/dcb_mode_I_convergence_study.json``. The results are
+those of panels 0.14.0. The wall and CPU times are those of the first
+computation, with panels 0.13.11, on a laptop with 16 threads, eight runs at a
+time with two threads each, so the wall times indicate the relative cost; the
+reference run takes 10 min in this setting and 4.5 min of wall time (17 min of
+CPU time) when run alone. The runs A and B with `m_{tsl} = 10` and `n_x =
+120` changed with panels 0.14.0: their times are those of the runs of 0.13.11,
+with 129 and 119 iterations, which stopped at `\delta = 7.2` and 7.4 mm, as
+the field ``time_note`` of the two runs states.
 
 .. list-table:: Convergence study, terms `m_{tsl}` and Gauss points `n_x`
                 along `x` of the cohesive domain, `L_{tsl} = 24` mm. Loads
                 in N, openings in mm, `e_P` and `e_{eq}` in %, wall time in
-                min. The runs with `m_{tsl} = 10` and `n_x = 60` or 120
-                stopped at `\delta = 6.2` and 7.2 mm (case A) and 7.4 mm
-                (case B), and the run B with `m_{tsl} = 15`, `n_x = 60` at
-                7.8 mm, when an increment did not converge after the last
-                bisection; their `e_P` is evaluated up to that opening.
+                min, of panels 0.13.11 (for A and B with `m_{tsl} = 10`,
+                `n_x = 120`, of the runs of 0.13.11 with 129 and 119
+                iterations). The runs with `m_{tsl} = 10` stopped at
+                `\delta = 6.2` mm (`n_x = 60`) and 7.2 mm (`n_x = 120`) in
+                case A and 7.4 mm (`n_x = 60`) in case B, and the run B with
+                `m_{tsl} = 15`, `n_x = 60` at 7.8 mm, when an increment did
+                not converge after the last bisection; their `e_P` is
+                evaluated up to that opening.
     :header-rows: 1
 
     * - case
@@ -834,9 +841,9 @@ alone.
       - --
       - --
       - 5.1
-      - 19
+      - 18
       - 7
-      - 81
+      - 80
       - 7
     * - A
       - 10
@@ -848,9 +855,9 @@ alone.
       - --
       - 2.16
       - 5.0
-      - 33
-      - 7
-      - 129
+      - 31
+      - 11
+      - 340
       - 10
     * - A
       - 10
@@ -862,9 +869,9 @@ alone.
       - 141.13
       - 1.98
       - 5.0
-      - 47
+      - 44
       - 3
-      - 327
+      - 323
       - 7
     * - A
       - 15
@@ -876,7 +883,7 @@ alone.
       - 139.52
       - 0.63
       - 1.2
-      - 0.32
+      - 0.27
       - 3
       - 283
       - 8
@@ -890,7 +897,7 @@ alone.
       - 139.73
       - 0.56
       - 0.77
-      - 0.31
+      - 0.26
       - 0
       - 145
       - 4
@@ -904,7 +911,7 @@ alone.
       - 139.95
       - 0.51
       - 0.71
-      - 0.30
+      - 0.26
       - 0
       - 139
       - 4
@@ -918,7 +925,7 @@ alone.
       - 140.96
       - 0.42
       - 0.64
-      - 0.087
+      - 0.088
       - 3
       - 317
       - 15
@@ -932,7 +939,7 @@ alone.
       - 140.89
       - 0.26
       - 0.21
-      - 0.087
+      - 0.088
       - 0
       - 143
       - 6
@@ -946,7 +953,7 @@ alone.
       - 140.93
       - 0.24
       - 0.078
-      - 0.087
+      - 0.088
       - 0
       - 136
       - 6
@@ -960,7 +967,7 @@ alone.
       - 140.78
       - 0.40
       - 0.60
-      - 0.088
+      - 0.089
       - 3
       - 384
       - 31
@@ -974,7 +981,7 @@ alone.
       - 140.75
       - 0.24
       - 0.17
-      - 0.087
+      - 0.089
       - 0
       - 135
       - 10
@@ -988,7 +995,7 @@ alone.
       - 140.78
       - 0.23
       - 0.018
-      - 0.087
+      - 0.089
       - 0
       - 139
       - 10
@@ -1002,7 +1009,7 @@ alone.
       - 140.78
       - 0.40
       - 0.60
-      - 0.088
+      - 0.089
       - 3
       - 358
       - 43
@@ -1016,7 +1023,7 @@ alone.
       - 140.77
       - 0.24
       - 0.17
-      - 0.087
+      - 0.089
       - 0
       - 135
       - 14
@@ -1030,7 +1037,7 @@ alone.
       - 140.81
       - 0.24
       - --
-      - 0.087
+      - 0.088
       - 0
       - 140
       - 16
@@ -1044,7 +1051,7 @@ alone.
       - --
       - 2.69
       - 7.2
-      - 20
+      - 18
       - 7
       - 140
       - 8
@@ -1055,12 +1062,12 @@ alone.
       - 6.40
       - 166.41
       - 153.75
-      - --
-      - 2.50
+      - 140.40
+      - 2.14
       - 7.1
-      - 20
-      - 7
-      - 119
+      - 31
+      - 1
+      - 229
       - 10
     * - B
       - 10
@@ -1072,9 +1079,9 @@ alone.
       - 140.42
       - 2.14
       - 7.1
-      - 33
+      - 31
       - 0
-      - 159
+      - 158
       - 3
     * - B
       - 15
@@ -1086,7 +1093,7 @@ alone.
       - --
       - 0.70
       - 1.0
-      - 2.2
+      - 2.3
       - 8
       - 222
       - 18
@@ -1100,7 +1107,7 @@ alone.
       - 139.47
       - 0.59
       - 1.0
-      - 2.2
+      - 2.3
       - 0
       - 141
       - 3
@@ -1114,7 +1121,7 @@ alone.
       - 139.44
       - 0.57
       - 1.0
-      - 2.2
+      - 2.3
       - 0
       - 145
       - 4
@@ -1128,7 +1135,7 @@ alone.
       - 142.31
       - 0.51
       - 0.92
-      - 0.031
+      - 0.032
       - 2
       - 238
       - 11
@@ -1184,7 +1191,7 @@ alone.
       - 140.90
       - 0.23
       - 0.10
-      - 0.0037
+      - 0.0038
       - 0
       - 141
       - 10
@@ -1198,7 +1205,7 @@ alone.
       - 140.75
       - 0.23
       - 0.015
-      - 0.0037
+      - 0.0038
       - 0
       - 140
       - 10
@@ -1212,7 +1219,7 @@ alone.
       - 142.13
       - 0.53
       - 0.82
-      - 0.0040
+      - 0.0041
       - 2
       - 239
       - 28
@@ -1226,7 +1233,7 @@ alone.
       - 140.99
       - 0.24
       - 0.13
-      - 0.0038
+      - 0.0039
       - 0
       - 137
       - 15
@@ -1240,7 +1247,7 @@ alone.
       - 140.77
       - 0.23
       - --
-      - 0.0038
+      - 0.0039
       - 0
       - 141
       - 15
@@ -1248,7 +1255,8 @@ alone.
 .. list-table:: Convergence study, other parameters, varied one at a time
                 from the reference discretisation `L_{tsl} = 24` mm,
                 `m_{tsl} = 25`, `n_x = 180`, `n_{tsl} = 10`, `n_y = 30`,
-                `m = n = 8`. Same quantities and units as above. The halved
+                `m = n = 8`. Same quantities and units as above, wall time
+                of panels 0.13.11. The halved
                 increment gives 53 openings instead of 38.
     :header-rows: 1
 
@@ -1274,7 +1282,7 @@ alone.
       - 140.78
       - 0.23
       - 0.018
-      - 0.087
+      - 0.089
       - 0
       - 139
       - 10
@@ -1287,7 +1295,7 @@ alone.
       - 140.77
       - 0.23
       - 0.020
-      - 0.087
+      - 0.089
       - 0
       - 136
       - 25
@@ -1300,7 +1308,7 @@ alone.
       - 140.77
       - 0.24
       - 0.021
-      - 0.085
+      - 0.087
       - 0
       - 136
       - 12
@@ -1313,7 +1321,7 @@ alone.
       - 140.78
       - 0.24
       - 0.018
-      - 0.086
+      - 0.087
       - 0
       - 134
       - 13
@@ -1326,7 +1334,7 @@ alone.
       - 140.78
       - 0.15
       - 0.018
-      - 0.087
+      - 0.089
       - 0
       - 184
       - 13
@@ -1365,7 +1373,7 @@ alone.
       - 140.75
       - 0.23
       - 0.015
-      - 0.0037
+      - 0.0038
       - 0
       - 140
       - 10
@@ -1404,7 +1412,7 @@ alone.
       - 140.75
       - 0.23
       - 0.015
-      - 0.0036
+      - 0.0038
       - 0
       - 140
       - 13
@@ -1417,7 +1425,7 @@ alone.
       - 140.75
       - 0.15
       - 0.015
-      - 0.0037
+      - 0.0038
       - 0
       - 176
       - 13
@@ -1457,8 +1465,8 @@ The results show that:
   curve up to 168.2--169.4 N at `\delta = 6.2`--6.4 mm, 1.3--2.0% above the
   converged peak, and then drops by up to 14 N (A) and 19 N (B) in one
   increment, a sawtooth with `CV = 2.0`--2.7. The load differs from the
-  converged one by 5--7%, `e_{eq}` is 19--47% from the first increment on,
-  and four of the six runs stop at `\delta = 6.2`--7.4 mm. With `m_{tsl} =
+  converged one by 5--7%, `e_{eq}` is 18--44% from the first increment on,
+  and three of the six runs stop at `\delta = 6.2`--7.4 mm. With `m_{tsl} =
   15` the curve is smooth, `CV = 0.51`--0.70, but still 0.7--1.2% off. From
   `m_{tsl} = 20` the error is at most 0.21% for `n_x \geq 120`, and 25 and 30
   terms give the same loads to 0.02% with `n_x = 180`. Against the terms per

@@ -31,8 +31,12 @@ optionally stores them in a ``.json`` file, with the wall time ``wall_min``
 and the CPU time ``cpu_min`` of each run, in minutes.
 
 The results in ``notebooks/results/dcb_mode_I_convergence_study.json`` were
-obtained with ``run --jobs 8 --longest-first`` on a machine with 16 threads,
-eight runs at a time, and ``collect --json``. The folder of the runs,
+obtained with panels 0.14.0 and ``collect --json``. Their ``wall_min`` and
+``cpu_min`` are those of the first computation, with panels 0.13.11 and
+``run --jobs 8 --longest-first`` on a machine with 16 threads, eight runs at
+a time, as the key ``time_note`` of the file states; the runs
+``A_m10_nx120`` and ``B_m10_nx120``, whose iterations changed with panels
+0.14.0, have their own ``time_note``. The folder of the runs,
 ``dcb_mode_I_convergence_study_runs``, is not part of the repository.
 
 """
