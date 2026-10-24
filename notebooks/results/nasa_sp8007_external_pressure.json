@@ -1,122 +1,122 @@
 {
  "0.3 lateral": {
-  "donnell dead": 3515390.3796345484,
-  "donnell follower": 3506404.827022122,
-  "sanders dead": 3527166.443740528,
-  "sanders follower": 3518192.2422020608
+  "donnell dead": 3515390.379633435,
+  "donnell follower": 3506404.826803143,
+  "sanders dead": 3527166.4437392107,
+  "sanders follower": 3518192.2430846086
  },
  "0.3 hydrostatic": {
-  "donnell dead": 2708204.672480675,
-  "donnell follower": 2702739.93686901,
-  "sanders dead": 2713106.608538149,
-  "sanders follower": 2707665.211265386
+  "donnell dead": 2708204.6724799834,
+  "donnell follower": 2702739.93674952,
+  "sanders dead": 2713106.608538325,
+  "sanders follower": 2707665.2111089956
  },
  "0.5 lateral": {
-  "donnell dead": 1714447.6110869548,
-  "donnell follower": 1705177.4996789075,
-  "sanders dead": 1723620.952888642,
-  "sanders follower": 1714283.3579365264
+  "donnell dead": 1714447.611087155,
+  "donnell follower": 1705177.4997214836,
+  "sanders dead": 1723620.9528888348,
+  "sanders follower": 1714283.3579163798
  },
  "0.5 hydrostatic": {
-  "donnell dead": 1473989.8192767925,
-  "donnell follower": 1467135.7016576363,
-  "sanders dead": 1478425.3501740806,
-  "sanders follower": 1471548.4848761086
+  "donnell dead": 1473989.819276812,
+  "donnell follower": 1467135.7016216058,
+  "sanders dead": 1478425.3501741558,
+  "sanders follower": 1471548.4848248751
  },
  "1 lateral": {
-  "donnell dead": 741794.0571944749,
-  "donnell follower": 732478.9803984334,
-  "sanders dead": 749290.5586737255,
-  "sanders follower": 739776.4910457181
+  "donnell dead": 741794.0571947785,
+  "donnell follower": 732478.9803957185,
+  "sanders dead": 749290.5586736931,
+  "sanders follower": 739776.4910503934
  },
  "1 hydrostatic": {
-  "donnell dead": 688691.6063432248,
-  "donnell follower": 680655.8941595731,
-  "sanders dead": 694034.6504873384,
-  "sanders follower": 685863.8949797644
+  "donnell dead": 688691.60634337,
+  "donnell follower": 680655.8941566565,
+  "sanders dead": 694034.6504872113,
+  "sanders follower": 685863.8949420655
  },
  "2 lateral": {
-  "donnell dead": 343486.5196269416,
-  "donnell follower": 335012.2379972202,
-  "sanders dead": 348578.3360638405,
-  "sanders follower": 339766.15627853555
+  "donnell dead": 343486.51962688623,
+  "donnell follower": 335012.23799734167,
+  "sanders dead": 348578.33606373664,
+  "sanders follower": 339766.15627833543
  },
  "2 hydrostatic": {
-  "donnell dead": 332105.4454396585,
-  "donnell follower": 324177.0720065449,
-  "sanders dead": 336373.2778103495,
-  "sanders follower": 328160.0021978503
+  "donnell dead": 332105.4454397804,
+  "donnell follower": 324177.072005264,
+  "sanders dead": 336373.2778103511,
+  "sanders follower": 328160.0021908353
  },
  "3 lateral": {
-  "donnell dead": 224066.92472452752,
-  "donnell follower": 215935.23204979225,
-  "sanders dead": 228544.58192232662,
-  "sanders follower": 219941.16529152996
+  "donnell dead": 224066.9247243811,
+  "donnell follower": 215935.2320495589,
+  "sanders dead": 228544.58192216363,
+  "sanders follower": 219941.1652920832
  },
  "3 hydrostatic": {
-  "donnell dead": 219258.05741684732,
-  "donnell follower": 211465.63688835024,
-  "sanders dead": 223227.62041966285,
-  "sanders follower": 215012.60900905298
+  "donnell dead": 219258.0574168534,
+  "donnell follower": 211465.63688833988,
+  "sanders dead": 223227.62041960235,
+  "sanders follower": 215012.60900939093
  },
  "5 lateral": {
-  "donnell dead": 133055.87368487456,
-  "donnell follower": 125476.67983602379,
-  "sanders dead": 136693.67098734528,
-  "sanders follower": 128438.46690929601
+  "donnell dead": 133055.8736848278,
+  "donnell follower": 125476.67983598763,
+  "sanders dead": 136693.67098733856,
+  "sanders follower": 128438.46690916116
  },
  "5 hydrostatic": {
-  "donnell dead": 131434.36717398095,
-  "donnell follower": 124033.65390200152,
-  "sanders dead": 134799.89126461066,
-  "sanders follower": 126765.10122193107
+  "donnell dead": 131434.3671738771,
+  "donnell follower": 124033.65390188787,
+  "sanders dead": 134799.89126434023,
+  "sanders follower": 126765.10122194569
  },
  "8 lateral": {
-  "donnell dead": 81758.90970025302,
-  "donnell follower": 73756.2620445283,
-  "sanders dead": 87737.35363912683,
-  "sanders follower": 78219.30573769842
+  "donnell dead": 81758.90970005399,
+  "donnell follower": 73756.26204458167,
+  "sanders dead": 87737.35363883611,
+  "sanders follower": 78219.30573749522
  },
  "8 hydrostatic": {
-  "donnell dead": 81064.40139058602,
-  "donnell follower": 73190.59327862717,
-  "sanders dead": 86795.13221279762,
-  "sanders follower": 77469.54396893043
+  "donnell dead": 81064.40139082962,
+  "donnell follower": 73190.593278716,
+  "sanders dead": 86795.13221252932,
+  "sanders follower": 77469.54396862497
  },
  "12 lateral": {
-  "donnell dead": 63017.14364567832,
-  "donnell follower": 56775.08412794902,
-  "sanders dead": 64235.01089345043,
-  "sanders follower": 57173.02178752612
+  "donnell dead": 63017.143646658435,
+  "donnell follower": 56775.08412774237,
+  "sanders dead": 64235.010892773586,
+  "sanders follower": 57173.02178741275
  },
  "12 hydrostatic": {
-  "donnell dead": 62778.102351211586,
-  "donnell follower": 56580.981640688544,
-  "sanders dead": 63926.77017546396,
-  "sanders follower": 56928.700219495506
+  "donnell dead": 62778.10235084806,
+  "donnell follower": 56580.98164049946,
+  "sanders dead": 63926.77017482698,
+  "sanders follower": 56928.700219383725
  },
  "20 lateral": {
-  "donnell dead": 32535.763303633204,
-  "donnell follower": 26073.19092243745,
-  "sanders dead": 37698.519973104,
-  "sanders follower": 28354.990881561615
+  "donnell dead": 32535.7633043657,
+  "donnell follower": 26073.190922186575,
+  "sanders dead": 37698.51997262915,
+  "sanders follower": 28354.990881088183
  },
  "20 hydrostatic": {
-  "donnell dead": 32435.72337919078,
-  "donnell follower": 26008.90703788925,
-  "sanders dead": 37492.6992202638,
-  "sanders follower": 28238.39240879186
+  "donnell dead": 32435.72337964345,
+  "donnell follower": 26008.90703763538,
+  "sanders dead": 37492.699220639806,
+  "sanders follower": 28238.39240844847
  },
  "30 lateral": {
-  "donnell dead": 27089.951874928898,
-  "donnell follower": 21688.442507336786,
-  "sanders dead": 28122.99077348034,
-  "sanders follower": 21119.044971829895
+  "donnell dead": 27089.951875167717,
+  "donnell follower": 21688.44250716039,
+  "sanders dead": 28122.990773211543,
+  "sanders follower": 21119.044971873576
  },
  "30 hydrostatic": {
-  "donnell dead": 27052.86838758163,
-  "donnell follower": 21664.66660853379,
-  "sanders dead": 28054.58659359608,
-  "sanders follower": 21080.446041024334
+  "donnell dead": 27052.868387296974,
+  "donnell follower": 21664.666608390282,
+  "sanders dead": 28054.58659550302,
+  "sanders follower": 21080.446041366245
  }
 }
