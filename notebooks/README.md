@@ -9,10 +9,9 @@ of the repository and put the repository first on `sys.path`.
 
 Most notebooks load stored results from `results/` and only run `panels`
 again with `RERUN = True` in their first cell. The stored results of the
-notebooks were computed with `panels` 0.14.0, `structsolve` 0.9.1 and
-`composites` 0.10.0, except those of `sze2004_hinged_roofs.ipynb`, see the
-notebook; the results computed again keep the run times of their first
-computation.
+notebooks were computed with `panels` 0.14.0, `structsolve` 0.9.1 (0.9.2
+for `sze2004_hinged_roofs.ipynb`) and `composites` 0.10.0; the results
+computed again keep the run times of their first computation.
 
 ## Mode I double cantilever beam (DCB), cohesive zone model
 
