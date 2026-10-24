@@ -117,7 +117,7 @@ History
 =======
 
 See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
-* version 0.14.0 (2026-10-24)
+* version 0.14.0 (2026-10-25)
     - BUG: the mass matrices used `shell.rho` in the closed-form kernels and the opposite sign of the laminate offset; they now use the moments of the density of the laminate, exact for per-ply densities
     - BUG: TSDT with a laminate offset, the transverse shear vanishes at the faces of the laminate, and the connections tie the rotations at the common reference surface
     - BUG: `BladeStiff1D` torsion with `GJ = 4 bf D66` and coupling `S1` with the condensed stiffness about the mid-plane of the flange; `StiffPanelBay.calc_kA` no longer skew-symmetrizes; one load per panel in the cylinder assembly functions; `MultiDomain.force_out_plane` and `MultiDomain.plot` fixed
