@@ -99,10 +99,15 @@ whole integration domain and on each edge `w = 0` or the normal displacement
 is zero (`u` on `x = const`, `v` on `y = const`): simply supported or clamped
 panels, symmetry planes, closed rings. It is unsymmetric (non-conservative
 load) for free or partially restrained edges, for patches (their edges are
-inside the shell) and for a varying `p(x, y)`. This is the result of Hibbitt
-(1979) and Schweizerhof and Ramm (1984) for a pressure depending on the
-reference coordinates: symmetric for closed surfaces or a fixed boundary of
-the loaded surface. A hydrostatic head `p(X)` of the current position is
+inside the shell) and for a varying `p(x, y)`. This agrees with Hibbitt
+(1979), p. 938 (uniform pressure on a fully enclosed volume, or with
+prescribed displacements on the boundaries of the loaded surface:
+symmetric) and p. 939 (free edges, non-uniform pressure: unsymmetric), and,
+for a pressure depending on the reference coordinates, with Schweizerhof and
+Ramm (1984), Table 2 and Sec. 3.2.1, Eqs. (32)-(35) (the boundary terms
+vanish e.g. when at least two displacement components are prescribed at the
+edge, or when the edge is restrained normal to a continuous surface, such as
+the undeformed surface, `w = 0`). A hydrostatic head `p(X)` of the current position is
 not implemented. For `'quadratic'` the load stiffness at `c != 0` is not
 symmetric in general.
 
@@ -126,8 +131,10 @@ Inextensional limit, `p r^3/D`:
 | Sanders    | -3                     | -4                        | -9/2               |
 | Donnell    | -16/5                  | -4                        | -64/15             |
 
-The Sanders values are the analytical values of Schweizerhof and Ramm (1984),
-Table 3 (hydrostatic 3, constant directional 4, centrally directed 4.5).
+For a ring, with `D` replaced by the bending stiffness `EI` of the ring, the
+Sanders values are the analytical values listed by Schweizerhof and Ramm
+(1984), Table 3 (hydrostatic 3, constant directional 4, centrally directed
+4.5), as reference for their finite element results of a ring.
 
 FSDT, Sanders, follower, inextensional: `p = -3 D/(r^3 (1 + 4 D/(S r^2)))`,
 `S` the transverse shear stiffness, which is the shell formula of Han,

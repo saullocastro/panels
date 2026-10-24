@@ -17,8 +17,11 @@
 #
 #     E1 = sum_k h_k (Q11 - Q12^2/Q22), per unit width of the flange
 #     F1 = bf^2/12 E1
-#     S1 = -sum_k y_k h_k (Q16 - Q12 Q16/Q22)
-#     Jxx = hf bf^3/12 + bf hf^3/12
+#     S1 = -sum_k y_k h_k (Q16 - Q12 Q26/Q22), y_k of the mid-surface of
+#          each ply from the mid-plane of the flange laminate
+#     Jxx, the torsion entry of ksf, which receives GJ/bf, with the
+#          torsional stiffness GJ = 4 bf D66 of the flange laminate, a thin
+#          strip under Saint-Venant torsion
 #     df = bf/2 + hb + h/2, the distance between the mid-surface of the panel
 #          and the centroid of the flange
 #

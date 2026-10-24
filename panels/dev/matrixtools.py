@@ -1,3 +1,11 @@
+r"""Symbolic matrices printed as source code (:mod:`panels.dev.matrixtools`)
+
+Functions used by the scripts that derive the integrands of the structural
+matrices with :mod:`sympy`: the non-zero entries of a matrix are written as
+lines of Python or Cython code, which are returned and optionally written
+to a text file ``print_<name>.txt`` in the current directory.
+
+"""
 import re
 
 import numpy as np
@@ -47,6 +55,55 @@ def pow2mult(instr):
 def mprint_as_sparse(m, mname, sufix, subs=None,
         header=None, print_file=True, collect_for=None,
         pow_by_mul=True, full_symmetric=False):
+    r"""Print the non-zero entries of a matrix as code of a sparse matrix
+
+    The output starts with ``header``, if given, then the lines ``# NAME``
+    and ``# NAME_num=NUM``, with ``NAME`` the name ``mname_sufix`` (or
+    ``mname`` when ``sufix`` is ``''``) and ``NUM`` the number of entries
+    printed. Each non-zero entry ``(i, j)`` gives the lines ``c += 1``,
+    ``MNAMEr[c] = row+i``, ``MNAMEc[c] = col+j`` and ``MNAMEv[c] += VALUE``,
+    with ``MNAME`` the value of ``mname``. With ``subs``, the substitutions
+    whose symbols appear in the output are listed at its start, after the
+    line ``subs``.
+
+    Parameters
+    ----------
+    m : sympy.Matrix
+        The 2-D matrix of symbolic expressions.
+    mname : str
+        Prefix of the names of the arrays of rows, columns and values.
+    sufix : str
+        ``''`` or two characters, for the rows and the columns; a ``'0'``
+        prints the absolute index ``i`` (or ``j``) instead of ``row+i`` (or
+        ``col+j``). Also used in the name of the matrix and of the file.
+    subs : dict, optional
+        Substitutions ``{expression: symbol}`` applied to each entry with
+        ``subs()``. Default ``None``.
+    header : str, optional
+        First line of the output. Default ``None``.
+    print_file : bool, optional
+        Whether the output is also written to the file ``print_NAME.txt``
+        in the current directory. Default ``True``.
+    collect_for : optional
+        Passed to :func:`sympy.collect` with ``evaluate=False``, each
+        collected term being printed on its own line. Default ``None``.
+    pow_by_mul : bool, optional
+        Whether the powers are written as multiplications, see
+        :func:`pow2mult`. Not applied with ``collect_for``. Default ``True``.
+    full_symmetric : bool, optional
+        Whether only the entries with ``i <= j`` are printed, always with
+        absolute indices. Default ``False``.
+
+    Returns
+    -------
+    string : str
+        The output.
+
+    See Also
+    --------
+    mprint_as_array
+
+    """
     if sufix == '':
         left = right = '1'
         namesufix = '{0}'.format(mname)
@@ -118,6 +175,57 @@ def mprint_as_sparse(m, mname, sufix, subs=None,
 def mprint_as_array(m, mname, sufix, use_cse=False,
                     header=None, print_file=True, collect_for=None,
                     pow_by_mul=True, order='C', op='+='):
+    r"""Print the non-zero entries of a matrix as code of a flat array
+
+    The output starts with ``header``, if given, then, with ``use_cse``, the
+    declarations ``cdef double ...`` of the common subexpressions, nine per
+    line, and their assignments after the line ``# subs``, then the lines
+    ``# NAME`` and ``# NAME_num=NUM``, with ``NAME`` the name
+    ``mname_sufix`` and ``NUM`` the number of non-zero entries. Each
+    non-zero entry of flat index ``i`` gives the line ``MNAME[pos+i] OP
+    VALUE``, with ``MNAME`` the value of ``mname`` and ``OP`` that of
+    ``op``.
+
+    Parameters
+    ----------
+    m : sympy.Matrix
+        The matrix of symbolic expressions. With ``use_cse=True`` its
+        entries are replaced in place by the reduced expressions.
+    mname : str
+        Name of the flat array.
+    sufix : str
+        Used in the name of the matrix and of the file.
+    use_cse : bool, optional
+        Whether the common subexpressions are eliminated with
+        :func:`sympy.cse`. Default ``False``.
+    header : str, optional
+        First line of the output. Default ``None``.
+    print_file : bool, optional
+        Whether the output is also written to the file ``print_NAME.txt``
+        in the current directory. Default ``True``.
+    collect_for : optional
+        Passed to :func:`sympy.collect` with ``evaluate=False``, each
+        collected term being printed on its own line. Default ``None``.
+    pow_by_mul : bool, optional
+        Whether the powers ``x**n`` are written as multiplications. Not
+        applied with ``collect_for``. Default ``True``.
+    order : str, optional
+        ``'C'`` for the flat index by rows or ``'F'`` by columns. Another
+        value fails, the iterator over the entries not being defined.
+        Default ``'C'``.
+    op : str, optional
+        The assignment operator of each line. Default ``'+='``.
+
+    Returns
+    -------
+    string : str
+        The output.
+
+    See Also
+    --------
+    mprint_as_sparse
+
+    """
     ls = []
     if use_cse:
         subs, m_list = sympy.cse(m)

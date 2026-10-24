@@ -6,6 +6,30 @@
 #cython: overflowcheck=False
 #cython: embedsignature=True
 #cython: infer_types=False
+r"""
+Field variables of the plate and cylindrical shell models using the
+classical laminated plate theory (CLPT)
+
+The degrees of freedom of each term of the approximation are ``u, v, w``.
+The functions of this module evaluate the displacements and rotations,
+:func:`.fuvw`, the generalized strains, :func:`.fstrain`, and the
+approximation functions at a point, :func:`.fg`, for the models
+``'plate_clpt_donnell'``, ``'cylshell_clpt_donnell'`` and
+``'cylshell_clpt_sanders'``, see :mod:`panels.modelDB`. The coordinates
+``x`` and ``y`` are physical, ``0 <= x <= a`` and ``0 <= y <= b``.
+
+Notes
+-----
+Each field `F` of `u, v, w`, of index `k = 0, 1, 2`, is the Ritz series of
+:class:`.Shell`, `F = \sum_{j} \sum_{i} c_{3(j m + i) + k} f_i^F(\xi)
+g_j^F(\eta)`, with `\xi = 2x/a - 1`, `\eta = 2y/b - 1` and Bardell's
+functions of the boundary flags of `F`, see :mod:`panels.bardell`; the
+derivatives are `F_{,x} = (2/a) F_{,\xi}` and `F_{,y} = (2/b) F_{,\eta}`.
+The rotations of the normal are those of the CLPT, `\phi_x = -w_{,x}` and
+`\phi_y = -w_{,y}`, plus `v/r` for the Sanders-Koiter kinematics, and the
+strains are those of the kinematics of :mod:`panels.models`.
+
+"""
 import numpy as np
 from libc.stdlib cimport malloc, free
 from cython.parallel import prange
@@ -28,10 +52,25 @@ cdef int DOF = 3
 def is_sanders(object s):
     r'''Tell whether the model of ``s`` uses Sanders-Koiter kinematics
 
+    The rotation ``phiy`` of :func:`.fuvw` and :func:`.fg` and the strains
+    of :func:`.fstrain` then include the terms of these kinematics, see
+    :mod:`panels.models.cylshell_clpt_sanders_num`.
+
+    Parameters
+    ----------
+    s : :class:`.Shell`
+        The shell, whose attribute ``model`` is read.
+
+    Returns
+    -------
+    sanders : int
+        ``1`` when ``'sanders'`` is in the name of the model, else ``0``.
+
+    Notes
+    -----
     With Sanders-Koiter kinematics the rotation of the normal about the `x`
     axis is `\phi_y = -w_{,y} + v/r`, instead of `-w_{,y}`, and the changes of
-    curvature receive terms in `u` and `v`, see
-    :mod:`panels.models.cylshell_clpt_sanders_num`.
+    curvature receive terms in `u` and `v`, see :mod:`panels.models`.
 
     '''
     return 1 if 'sanders' in s.model else 0
@@ -39,8 +78,34 @@ def is_sanders(object s):
 
 def fuvw(double [::1] c, object s, double [::1] xs, double [::1] ys,
         int num_cores=4):
-    '''
+    r'''
         Calculates the displacement field at all points in the provided grid
+
+        The points are split into ``num_cores`` chunks evaluated in
+        parallel with OpenMP threads. The rotations are ``phix = -w,x``
+        and ``phiy = -w,y``, plus ``v/r`` for the Sanders-Koiter kinematics,
+        see :func:`.is_sanders`.
+
+        Parameters
+        ----------
+        c : np.ndarray
+            Ritz constants of the shell ``s``, 1-D array of size
+            ``3*s.m*s.n``, see :meth:`.Shell.get_size`.
+        s : :class:`.Shell`
+            The shell, whose dimensions, numbers of terms, boundary
+            condition flags and, for the Sanders-Koiter kinematics, radius
+            are read.
+        xs, ys : np.ndarray
+            Coordinates `x` and `y` of the points, lengths, 1-D arrays of
+            the same size.
+        num_cores : int, optional
+            Number of threads. Default ``4``.
+
+        Returns
+        -------
+        us, vs, ws, phixs, phiys : np.ndarray
+            The displacements, lengths, and the rotations, dimensionless,
+            1-D arrays of the size of ``xs``.
     '''
     cdef double a, b, r
     cdef int m, n, sanders
@@ -129,13 +194,43 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys, int
     #  [::1] means a contigious array
     
     '''
-    Calculates the strain field at all points in the provided grid 
-    
-        c : ritz coeffients of the whole system i.e. size = n_rows of K_global
-        
-        s : Shell obj
-        
-        xs and ys : contigious arrays of the grid divisions in the x and y direction
+    Calculates the strain field at all points in the provided grid
+
+    The points are split into ``num_cores`` chunks evaluated in parallel
+    with OpenMP threads. The strains are those of the Donnell kinematics,
+    or of the Sanders-Koiter kinematics when :func:`.is_sanders` returns
+    ``1``; the hoop strain ``w/r`` is included when ``s.r`` is not zero.
+
+    Parameters
+    ----------
+    c : np.ndarray
+        Ritz constants of the shell ``s``, 1-D array of size ``3*s.m*s.n``,
+        see :meth:`.Shell.get_size`; only these first entries are read.
+    s : :class:`.Shell`
+        Shell obj, whose dimensions, radius ``r`` (a float, ``0.`` for a
+        plate), numbers of terms and boundary condition flags are read.
+    xs, ys : np.ndarray
+        contigious arrays of the grid divisions in the x and y direction,
+        i.e. the coordinates `x` and `y` of the points, lengths, 1-D arrays
+        of the same size.
+    num_cores : int, optional
+        Number of threads. Default ``4``.
+    NLgeom : int, optional
+        ``1`` to include the non-linear terms of the membrane strains,
+        ``0`` otherwise. Default ``0``.
+
+    Returns
+    -------
+    exxs, eyys, gxys, kxxs, kyys, kxys : np.ndarray
+        The membrane strains, dimensionless, and the changes of curvature,
+        per unit length, 1-D arrays of the size of ``xs``.
+
+    Notes
+    -----
+    The strains are those of the Donnell or Sanders-Koiter kinematics given
+    in the notes of :mod:`panels.models`, with the quadratic terms of the
+    membrane strains multiplied by ``NLgeom``, and with ``r = 0`` standing
+    for the flat plate, whose hoop strain is zero.
     '''
     
     cdef double a, b, r
@@ -334,7 +429,34 @@ cdef void cfwy(double *c, int m, int n, double a, double b, double *xs,
 
 
 def fg(double[:, ::1] g, double x, double y, object s):
-    # Accessing the contiguous memory layout for C 
+    r'''Approximation functions of ``u, v, w, phix, phiy`` at ``(x, y)``
+
+    The functions are written in the rows of ``g``, in place: for each term
+    of column ``col = 3*(j*m + i)``, ``g[0, col]``, ``g[1, col+1]`` and
+    ``g[2, col+2]`` are those of ``u``, ``v`` and ``w``, ``g[3, col+2]``
+    that of ``phix = -w,x`` and ``g[4, col+2]`` that of ``phiy = -w,y``;
+    for the Sanders-Koiter kinematics ``g[4, col+1]`` adds ``v/r``. The
+    other entries are not written, so ``g`` is usually created with zeros.
+    Nothing is returned.
+
+    Parameters
+    ----------
+    g : np.ndarray
+        Output array of shape ``(5, size)``, with ``size`` at least
+        ``3*s.m*s.n``, see :meth:`.Shell.get_size`, C-contiguous.
+    x, y : float
+        Coordinates of the point, lengths.
+    s : :class:`.Shell`
+        The shell, whose dimensions, numbers of terms, boundary condition
+        flags and, for the Sanders-Koiter kinematics, radius are read.
+
+    Raises
+    ------
+    ValueError
+        If the class of ``s`` is not named ``'Shell'``.
+
+    '''
+    # Accessing the contiguous memory layout for C
     # ::1 at the 2nd position means that the elements in this 2nd dimension will be 1 element apart in memory.
     
     if s.__class__.__name__ != 'Shell':
@@ -436,6 +558,18 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
         double y1v, double y1vr, double y2v, double y2vr,
         double y1w, double y1wr, double y2w, double y2wr, int NLgeom,
         int sanders) noexcept nogil:
+    r'''Calculates the strain at every point in the provided grid
+
+    Kernel of :func:`.fstrain` for one chunk of ``size`` points: the
+    membrane strains and changes of curvature at ``(xs[k], ys[k])`` are
+    written to ``exxs[k]``, ``eyys[k]``, ``gxys[k]``, ``kxxs[k]``,
+    ``kyys[k]`` and ``kxys[k]``, for the ``m*n`` terms of the Ritz
+    constants ``c``, the boundary condition flags ``x1u, ..., y2wr``, the
+    non-linear terms when ``NLgeom == 1`` and the Sanders-Koiter
+    kinematics when ``sanders == 1``. For the Donnell kinematics the term
+    ``w/r`` is included when ``r`` is not zero.
+
+    '''
     cdef int i, j, col, pti
     cdef double x, y, xi, eta
     cdef double exx, eyy, gxy, kxx, kyy, kxy

@@ -28,13 +28,17 @@ whose rotation about `y` has no term of the curvature, see
 
 For the models based on shear deformation theories, e.g.
 ``'plate_fsdt_donnell'`` or ``'cylshell_tsdt_sanders'``, with 5 DOFs `u, v,
-w, \phi_x, \phi_y` per term, `\omega_i = \phi_{x,i}`, also with the
-kinematics of Sanders-Koiter, and the rotation penalty is `k_r (\phi_{x,1} -
-\phi_{x,2})^2`, see :func:`.fkCBFxcte11_sdt`, :func:`.fkCBFxcte12_sdt` and
-:func:`.fkCBFxcte22_sdt`. For the TSDT, the derivative `w_{,x}` that enters
-the displacement field is not penalized: at a T-joint only the rotation of
-the normals is common to the two panels. The rotation `\phi_y` of each panel
-is a drilling rotation of the other and is not penalized either.
+w, \phi_x, \phi_y` per term, `\omega_i = \theta_{x,i}`, the rotation at the
+reference surface, `z = 0`, `\theta_x = \phi_x - (4 d^2/h^2)(\phi_x +
+w_{,x})` with the offset `d` and the thickness `h` of each panel for the
+TSDT, `\theta_x = \phi_x` otherwise, also with the kinematics of
+Sanders-Koiter, see :func:`.kCsdt._rotation_x`, and the rotation penalty is
+`k_r (\theta_{x,1} - \theta_{x,2})^2`, see :func:`.fkCBFxcte11_sdt`,
+:func:`.fkCBFxcte12_sdt` and :func:`.fkCBFxcte22_sdt`. For the TSDT, the
+derivative `w_{,x}` is not penalized on its own: at a T-joint only the
+rotation of the normals is common to the two panels. The rotation `\phi_y`
+of each panel is a drilling rotation of the other and is not penalized
+either.
 
 The terms are derived in ``theory/multidomain_penalization/connections.py``.
 
@@ -470,6 +474,34 @@ def _check_sdt(*panels):
                              "theories, got model '{0}'".format(p.model))
 
 
+def _alpha(object p):
+    r"""`4 d^2/h^2` of a TSDT panel, with its offset `d` and thickness `h`,
+    zero for the FSDT, see :func:`.kCsdt._rotation_x`"""
+    if 'tsdt' not in p.model:
+        return 0.
+    return 4.*p.offset**2/sum(p.plyts)**2
+
+
+def _product_terms(double coeff, tA, tB):
+    r"""Terms ``(dofA, dofB, coeff, derA, derB)`` of `coeff q_A q_B`, with
+    `q = \sum_t a_t \partial^{der_t} q_t` given by the lists ``(dof, der,
+    a)`` ``tA`` and ``tB``, the derivative being across the connection"""
+    return [(dA, dB, coeff*cA*cB, derA, derB)
+            for dA, derA, cA in tA for dB, derB, cB in tB]
+
+
+def _rotation_ref(object p):
+    r"""Rotation of the normal about `y` at the reference surface, `\theta_x
+    = (1 - \alpha) \phi_x - \alpha w_{,x}`, as ``(dof, der, a)``, see
+    :func:`.kCsdt._rotation_x`; `w_{,x}` is the derivative across the
+    connection"""
+    a = _alpha(p)
+    terms = [(PHIX, 0, 1. - a)]
+    if a != 0:
+        terms.append((W, 1, -a))
+    return terms
+
+
 def _flags_sdt(object p, fields, str direction):
     r"""Boundary flags ``(1t, 1r, 2t, 2r)`` along ``direction`` of each field
     of ``fields``"""
@@ -484,6 +516,7 @@ def _flags_sdt(object p, fields, str direction):
 
 
 cdef void _terms_sdt(int nt, long [::1] dofA, long [::1] dofB,
+        long [::1] derA, long [::1] derB,
         double [::1] coeff, double [:, ::1] alA, double [:, ::1] alB,
         double [:, ::1] acA, double [:, ::1] acB, int nalA, int nalB,
         int nacA, int nacB, double cteA, double cteB, double jac,
@@ -501,10 +534,18 @@ cdef void _terms_sdt(int nt, long [::1] dofA, long [::1] dofB,
     mA = nalA if along_x else nacA
     mB = nalB if along_x else nacB
     for t in range(nt):
+        #NOTE the first derivative across the connection, with respect to
+        #     the natural coordinate, when derA[t] or derB[t] is 1
         for jA in range(nacA):
-            gAs[jA] = f(jA, cteA, acA[t, 0], acA[t, 1], acA[t, 2], acA[t, 3])
+            if derA[t] == 1:
+                gAs[jA] = fp(jA, cteA, acA[t, 0], acA[t, 1], acA[t, 2], acA[t, 3])
+            else:
+                gAs[jA] = f(jA, cteA, acA[t, 0], acA[t, 1], acA[t, 2], acA[t, 3])
         for jB in range(nacB):
-            gBs[jB] = f(jB, cteB, acB[t, 0], acB[t, 1], acB[t, 2], acB[t, 3])
+            if derB[t] == 1:
+                gBs[jB] = fp(jB, cteB, acB[t, 0], acB[t, 1], acB[t, 2], acB[t, 3])
+            else:
+                gBs[jB] = f(jB, cteB, acB[t, 0], acB[t, 1], acB[t, 2], acB[t, 3])
         for iA in range(nalA):
             for iB in range(nalB):
                 I = jac*integral_ff(iA, iB, alA[t, 0], alA[t, 1], alA[t, 2],
@@ -532,10 +573,12 @@ def _block_sdt(terms, object pA, object pB, double cteA, double cteB,
         str along, int upper, int size, int row0, int col0):
     r"""Block of the connection matrix between ``pA`` and ``pB``
 
-    Each element ``(dofA, dofB, coeff)`` of ``terms`` adds the penalty term
-    `coeff \int q_A q_B`, where `q_A` is the field ``dofA`` of ``pA`` and
-    `q_B` the field ``dofB`` of ``pB``, with the DOFs `u, v, w, \phi_x,
-    \phi_y` numbered from 0 to 4. The approximation functions along the
+    Each element ``(dofA, dofB, coeff)`` or ``(dofA, dofB, coeff, derA,
+    derB)`` of ``terms`` adds the penalty term `coeff \int q_A q_B`, where
+    `q_A` is the field ``dofA`` of ``pA``, or its first derivative across
+    the connection when ``derA`` is ``1``, and `q_B` the field ``dofB`` of
+    ``pB``, or its derivative when ``derB`` is ``1``, with the DOFs `u, v,
+    w, \phi_x, \phi_y` numbered from 0 to 4. The approximation functions along the
     connection, ``along`` being ``'x'`` or ``'y'``, are integrated with the
     integrals of Bardell's functions over the length of ``pA``, and those
     across it are evaluated at the natural coordinates ``cteA`` and
@@ -545,7 +588,7 @@ def _block_sdt(terms, object pA, object pB, double cteA, double cteB,
 
     """
     cdef int nt, nalA, nalB, nacA, nacB, n
-    cdef long [::1] dofA, dofB, r, c
+    cdef long [::1] dofA, dofB, derA, derB, r, c
     cdef double [::1] coeff, v, gAs, gBs
     cdef double [:, ::1] alA, alB, acA, acB
     cdef double jac
@@ -554,7 +597,14 @@ def _block_sdt(terms, object pA, object pB, double cteA, double cteB,
     nt = len(terms)
     dofA = np.array([t[0] for t in terms], dtype=INT)
     dofB = np.array([t[1] for t in terms], dtype=INT)
-    coeff = np.array([t[2] for t in terms], dtype=DOUBLE)
+    derA = np.array([t[3] if len(t) > 3 else 0 for t in terms], dtype=INT)
+    derB = np.array([t[4] if len(t) > 3 else 0 for t in terms], dtype=INT)
+    #NOTE d/dx = (2/a) d/dxi and d/dy = (2/b) d/deta across the connection
+    LA = pA.b if along == 'x' else pA.a
+    LB = pB.b if along == 'x' else pB.a
+    coeff = np.array([t[2]*(2./LA)**(t[3] if len(t) > 3 else 0)
+                      *(2./LB)**(t[4] if len(t) > 3 else 0) for t in terms],
+                     dtype=DOUBLE)
     alA = _flags_sdt(pA, [t[0] for t in terms], along)
     alB = _flags_sdt(pB, [t[1] for t in terms], along)
     acA = _flags_sdt(pA, [t[0] for t in terms], across)
@@ -573,7 +623,7 @@ def _block_sdt(terms, object pA, object pB, double cteA, double cteB,
     gAs = np.zeros(nacA, dtype=DOUBLE)
     gBs = np.zeros(nacB, dtype=DOUBLE)
     with nogil:
-        _terms_sdt(nt, dofA, dofB, coeff, alA, alB, acA, acB, nalA, nalB,
+        _terms_sdt(nt, dofA, dofB, derA, derB, coeff, alA, alB, acA, acB, nalA, nalB,
                    nacA, nacB, cteA, cteB, jac, along_x, upper, row0,
                    col0, gAs, gBs, r, c, v)
     return coo_matrix((v, (r, c)), shape=(size, size))
@@ -612,7 +662,8 @@ def fkCBFxcte11_sdt(double kt, double kr, object p1, double xcte1,
 
     """
     _check_sdt(p1)
-    terms = [(U, U, kt), (V, V, kt), (W, W, kt), (PHIX, PHIX, kr)]
+    terms = ([(U, U, kt), (V, V, kt), (W, W, kt)]
+             + _product_terms(kr, _rotation_ref(p1), _rotation_ref(p1)))
     cte = 2*xcte1/p1.a - 1.
     return _block_sdt(terms, p1, p1, cte, cte, 'y', 1, size, row0, col0)
 
@@ -653,7 +704,8 @@ def fkCBFxcte12_sdt(double kt, double kr, object p1, object p2,
 
     """
     _check_sdt(p1, p2)
-    terms = [(U, W, -kt), (V, V, -kt), (W, U, kt), (PHIX, PHIX, -kr)]
+    terms = ([(U, W, -kt), (V, V, -kt), (W, U, kt)]
+             + _product_terms(-kr, _rotation_ref(p1), _rotation_ref(p2)))
     cte1 = 2*xcte1/p1.a - 1.
     cte2 = 2*xcte2/p2.a - 1.
     return _block_sdt(terms, p1, p2, cte1, cte2, 'y', 0, size, row0, col0)
@@ -695,6 +747,7 @@ def fkCBFxcte22_sdt(double kt, double kr, object p1, object p2,
 
     """
     _check_sdt(p1, p2)
-    terms = [(U, U, kt), (V, V, kt), (W, W, kt), (PHIX, PHIX, kr)]
+    terms = ([(U, U, kt), (V, V, kt), (W, W, kt)]
+             + _product_terms(kr, _rotation_ref(p2), _rotation_ref(p2)))
     cte = 2*xcte2/p2.a - 1.
     return _block_sdt(terms, p2, p2, cte, cte, 'y', 1, size, row0, col0)

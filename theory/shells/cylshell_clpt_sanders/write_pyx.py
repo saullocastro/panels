@@ -545,7 +545,7 @@ def fkG_num(double [::1] cs, object Finput, object shell,
     loops, fn, gn = basis_loops('kM', [v for _, _, v in kM], ent_lines)
     out.append('''
 
-def fkM_num(object shell, double offset, object hrho_input, int size,
+def fkM_num(object shell, object I_input, int size,
         int row0, int col0, int nx, int ny):
     cdef double x1, x2, y1, y2, xinf, xsup, yinf, ysup
     cdef double a, b, r, intx, inty
@@ -563,27 +563,25 @@ def fkM_num(object shell, double offset, object hrho_input, int size,
 
     cdef double [::1] xis, etas, weights_xi, weights_eta
 
-    # hrho as 3-D matrix, must be [nx, ny, 2], when there is one pair (h, rho)
-    # for each of the nx * ny integration points
-    cdef double h, rho, d
-    cdef double [:, :, ::1] hrho_nxny
+    # moments of the density through the thickness, I0, I1, I2, as a 3-D
+    # matrix [nx, ny, 3] with one set for each of the nx * ny integration
+    # points, or as a 1-D array [3] for the whole integration domain
+    cdef double I0, I1, I2
+    cdef double [:, :, ::1] I_nxny
 
-    cdef int one_hrho_each_point = 0
+    cdef int one_set_each_point = 0
 
-    d = offset
-
-    hrho_input = np.asarray(hrho_input, dtype=DOUBLE)
-    if hrho_input.shape == (nx, ny, 2):
-        hrho_nxny = np.ascontiguousarray(hrho_input)
-        one_hrho_each_point = 1
-    elif hrho_input.shape == (2,):
+    I_input = np.asarray(I_input, dtype=DOUBLE)
+    if I_input.shape == (nx, ny, 3):
+        I_nxny = np.ascontiguousarray(I_input)
+        one_set_each_point = 1
+    elif I_input.shape == (3, ):
         # creating dummy 3-D array that is not used
-        hrho_nxny = np.empty(shape=(0, 0, 0), dtype=DOUBLE)
-        # using a constant (h, rho) for all the integration domain
-        hrho_input = np.ascontiguousarray(hrho_input)
-        h, rho = hrho_input
+        I_nxny = np.empty(shape=(0, 0, 0), dtype=DOUBLE)
+        # using constant moments for all the integration domain
+        I0, I1, I2 = I_input
     else:
-        raise ValueError('Invalid shape for hrho_input!')
+        raise ValueError('Invalid shape for I_input, it must be (nx, ny, 3) or (3, )')
 
     if not 'Shell' in shell.__class__.__name__:
         raise ValueError('a Shell object must be given as input')
@@ -608,9 +606,10 @@ def fkM_num(object shell, double offset, object hrho_input, int size,
 
     with nogil:
 {POINT}
-                if one_hrho_each_point == 1:
-                    h = hrho_nxny[ptx, pty, 0]
-                    rho = hrho_nxny[ptx, pty, 1]
+                if one_set_each_point == 1:
+                    I0 = I_nxny[ptx, pty, 0]
+                    I1 = I_nxny[ptx, pty, 1]
+                    I2 = I_nxny[ptx, pty, 2]
 
 {loops}
 

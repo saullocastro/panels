@@ -28,6 +28,15 @@ with the rotations of the normal
 
     \phi_x = -w_{,x} \qquad \phi_y = -w_{,y} + \frac{v}{r}
 
+The non-linear terms are a simplification of the Sanders-Koiter theory for
+small strains and moderately small rotations (Sanders 1963), whose
+mid-surface strains also contain `\frac{1}{2}\omega_3^2 = \frac{1}{8}(v_{,x}
+- u_{,y})^2` in `\varepsilon_{xx}` and `\varepsilon_{yy}`, with `\omega_3 =
+\frac{1}{2}(v_{,x} - u_{,y})` the rotation about the normal (Amabili 2008,
+Sec. 1.3.8, Eqs. (1.133)-(1.134)): the rotation about the normal is assumed
+small compared with the other two rotations. The changes of curvature are
+those of Amabili (2008), Sec. 1.3.8, Eqs. (1.136)-(1.138).
+
 Dropping the `v/r` term of `\phi_y` and the `1/r` terms of the changes of
 curvature recovers the Donnell kinematics of ``cylshell_clpt_donnell``.
 
@@ -37,6 +46,11 @@ matrix, is:
 .. math::
 
     u(z) = u + z \phi_x \qquad v(z) = v + z \phi_y \qquad w(z) = w
+
+with `z` measured from the reference surface, the laminate spanning `-h/2
++ d \le z \le h/2 + d` with the offset `d`, such that the density enters
+through the moments `I_n = \int \rho z^n dz`, `n = 0, 1, 2`, of
+:class:`composites.Laminate`.
 
 In the numerically integrated matrices, ``phix`` and ``phiy`` are the values
 of `\phi_x` and `\phi_y` at the integration point, which vanish unless the
@@ -49,6 +63,7 @@ import numpy as np
 from sympy import Matrix as M, collect, expand, var
 
 var('a, b, r, h, d, rho, phix, phiy')
+var('I0, I1, I2')
 var('A11, A12, A16, A22, A26, A66')
 var('B11, B12, B16, B22, B26, B66')
 var('D11, D12, D16, D22, D26, D66')
@@ -133,12 +148,15 @@ def build():
     kG = GA.T*Nmat*GB
 
     # Mass matrix
-    maux = M([[ 1,  0, 0, -d,  0],
-              [ 0,  1, 0,  0, -d],
-              [ 0,  0, 1,  0,  0],
-              [-d,  0, 0, h**2/12 + d**2, 0],
-              [ 0, -d, 0, 0, h**2/12 + d**2]])
-    kM = h*rho*gA5.T*maux*gB5
+    #NOTE the moments I_n of the density through the thickness, with z
+    #     measured from the reference surface, the laminate spanning
+    #     -h/2 + d <= z <= h/2 + d, see composites.Laminate.intrho
+    maux = M([[I0,  0,  0, I1,  0],
+              [ 0, I0,  0,  0, I1],
+              [ 0,  0, I0,  0,  0],
+              [I1,  0,  0, I2,  0],
+              [ 0, I1,  0,  0, I2]])
+    kM = gA5.T*maux*gB5
 
     return dict(kC=kC, kC0=kC0, fint=fint, kG=kG, kM=kM)
 

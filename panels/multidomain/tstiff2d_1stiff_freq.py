@@ -1,3 +1,11 @@
+r"""Natural frequencies of a T-stiffened panel with a debonding defect
+(:mod:`panels.multidomain.tstiff2d_1stiff_freq`)
+
+The function :func:`.tstiff2d_1stiff_freq`, imported in
+:mod:`panels.multidomain`, builds the assembly of 15 domains of a panel
+with one T stiffener and runs its frequency analysis.
+
+"""
 from structsolve import freq
 
 from panels.shell import Shell
@@ -9,12 +17,6 @@ def tstiff2d_1stiff_freq(a, b, ys, bb, bf, defect_a, rho, plyt, laminaprop,
         r=None, m=8, n=8, mb=None, nb=None, mf=None, nf=None,
         num_eigvalues=25, conn_method='null-space'):
     r"""Frequency T-Stiffened Shell with possible defect at middle
-
-    For more details about each parameter and the aerodynamic formulation see
-    Ref. [castro2016FlutterPanel]_ .
-
-    For more details about the theory involved on the assembly of panels, see
-    [castro2017Multidomain]_ .
 
     The panel assembly looks like::
 
@@ -52,47 +54,93 @@ def tstiff2d_1stiff_freq(a, b, ys, bb, bf, defect_a, rho, plyt, laminaprop,
                   |_____|         |_____|
                loaded edge     loaded edge
 
+    The domains and their connections are those of
+    :func:`.tstiff2d_1stiff_compression`: the middle row of domains has the
+    length ``defect_a*a`` of the defect, or ``0.33*a`` when ``defect_a =
+    0``, and its base is not connected to the skin when ``defect_a > 0``.
+    The reduced constitutive stiffness matrix, :meth:`.MultiDomain.calc_kC`
+    with the connections, and the reduced mass matrix,
+    :meth:`.MultiDomain.calc_kM`, are passed to ``structsolve.freq`` with
+    ``tol=0`` and ``sparse_solver=True``, and the eigenvectors are expanded
+    with :meth:`.MultiDomain.expand`.
+
     Parameters
     ----------
 
     a : float
-        Total length of the assembly (along `x`).
+        Total length of the assembly (along `x`), length.
     b : float
-        Total width of the assembly (along `y`).
+        Total width of the assembly (along `y`), length.
     ys : float
-        Position of the stiffener along `y`.
+        Position of the stiffener along `y`, length.
     bb : float
-        Stiffener's base width.
+        Stiffener's base width, length.
     bf : float
-        Stiffener's flange width.
+        Stiffener's flange width, length.
     defect_a : float
-        Debonding defect/assembly length ratio.
+        Debonding defect/assembly length ratio, dimensionless.
     rho : float
-        Material density.
+        Material density, mass per unit volume.
     plyt : float
-        Ply thickness.
+        Ply thickness, length.
     laminaprop : list or tuple
         Orthotropic lamina properties: `E_1, E_2, \nu_{12}, G_{12}, G_{13}, G_{23}`.
+        The moduli are forces per unit area, `\nu_{12}` is dimensionless.
     stack_skin : list or tuple
-        Stacking sequence for the skin.
+        Stacking sequence for the skin, the angle of each ply in degrees.
     stack_base : list or tuple
-        Stacking sequence for the stiffener's base.
+        Stacking sequence for the stiffener's base, the angles in degrees.
     stack_flange : list or tuple
-        Stacking sequence for the stiffener's flange.
+        Stacking sequence for the stiffener's flange, the angles in degrees.
     r : float or None, optional
-        Radius of the stiffened panel.
+        Radius of the stiffened panel, length. Default ``None``, a flat
+        panel.
     m, n : int, optional
-        Number of terms of the approximation function for the skin.
+        Number of terms of the approximation function for the skin. Default
+        ``8``.
     mb, nb : int, optional
         Number of terms of the approximation function for the stiffener's base.
+        ``None``, the default, uses ``m`` and ``n``.
     mf, nf : int, optional
         Number of terms of the approximation function for the stiffener's
-        flange.
-    num_eigvalues : int
-        Number of eigenvalues to be extracted.
+        flange. ``None``, the default, uses ``m`` and ``n``.
+    num_eigvalues : int, optional
+        Number of eigenvalues to be extracted. Default ``25``.
     conn_method : str, optional
         How the connections are imposed, ``'null-space'``, the default, or
         ``'penalty'``, see :class:`.MultiDomain`.
+
+    Returns
+    -------
+    assy, eigvals, eigvecs : tuple
+        The assembly, :class:`.MultiDomain`, the eigenvalues returned by
+        ``structsolve.freq``, see there, and the eigenvectors of the
+        assembly, one per column, with ``assy.get_size()`` rows.
+
+    Notes
+    -----
+    For more details about the theory involved on the assembly of panels, see
+    [1]_. The free vibration problem solved by ``structsolve.freq`` is
+
+    .. math::
+
+        \left([K_r] + \lambda^2 [M_r]\right) \{\phi_r\} = \{0\}, \qquad
+        \lambda^2 = -\omega_n^2
+
+    with `[K_r]` and `[M_r]` the reduced constitutive stiffness and mass
+    matrices, see :meth:`.MultiDomain.reduce`, without pre-stress, and
+    `\omega_n` the natural frequencies in rad/s. The debonding defect is
+    modelled by removing the connection ``'SB'`` between the skin and the
+    base over the middle row of domains, which are then two independent
+    plates connected only at the ends of the defect, without any contact
+    between them.
+
+    References
+    ----------
+    .. [1] Castro, S. G. P., and Donadon, M. V., Assembly of Semi-Analytical
+       models to Address Linear Buckling and Vibration of Stiffened
+       Composite Panels with Debonding Defect, Composite Structures, 2017.
+       https://doi.org/10.1016/j.compstruct.2016.10.026
 
     Examples
     --------

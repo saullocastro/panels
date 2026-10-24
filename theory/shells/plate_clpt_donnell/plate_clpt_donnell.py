@@ -99,15 +99,20 @@ kG = intx*inty/4*GA.T*Nmat*GB
 
 # Mass matrix
 
-maux = M([[   1,   0,   0,  -d,  0],
-          [   0,   1,   0,   0, -d],
-          [   0,   0,   1,   0,  0],
-          [ -d,   0, 0, (h**2/12 + d**2), 0],
-          [    0, -d, 0, 0, (h**2/12 + d**2)]])
+# u(z) = u - z w,x, v(z) = v - z w,y and w, with z measured from the
+# reference surface, the laminate spanning -h/2 + d <= z <= h/2 + d, such
+# that the density enters through the moments I_n = int rho z^n dz of
+# composites.Laminate, intrho, intrhoz and intrhoz2
+var('I0, I1, I2')
+maux = M([[I0,  0,  0, I1,  0],
+          [ 0, I0,  0,  0, I1],
+          [ 0,  0, I0,  0,  0],
+          [I1,  0,  0, I2,  0],
+          [ 0, I1,  0,  0, I2]])
 
 gA5 = M([suA, svA, swA, -(2/a)*swAxi, -(2/b)*swAeta])
 gB5 = M([suB, svB, swB, -(2/a)*swBxi, -(2/b)*swBeta])
-kM = intx*inty/4*h*rho*gA5.T*maux*gB5
+kM = intx*inty/4*gA5.T*maux*gB5
 
 # Aerodynamic and damping matrix using piston's theory, flat plates have no
 # curvature term gamma, see Shell.calc_kA()

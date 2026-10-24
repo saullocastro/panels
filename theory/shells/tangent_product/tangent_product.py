@@ -41,7 +41,7 @@ because `\frac{d}{dt} \{\varepsilon(c + t v)\}|_{t=0} = [B(\beta)] \{v\}`,
 the strains being a quadratic form whose bilinear form is `[B(\beta)]`, and
 `\frac{d}{dt} [B(\beta(c + t v))]^T|_{t=0} \{\sigma\} = [G]^T [N] [G]
 \{v\}` from the derivatives of `[B]` above. These are the two parts that
-``fkC_num`` (`K_0 + K_{0L} + K_{L0} + K_{LL} + K_{G_{NL}}`) and ``fkG_num``
+``fkC_num`` (`K_{C0} + K_{0L} + K_{L0} + K_{LL} + K_{G_{NL}}`) and ``fkG_num``
 (`K_G(N_0 + N_L)`) assemble.
 
 At each integration point the product needs only:

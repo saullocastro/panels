@@ -144,10 +144,20 @@ in contact, with the slope of each panel:
         \Delta_w &= w^t - w^b
     \end{aligned}
 
-where `d^t` and `d^b` are the distances from the mid-planes of the top and
-bottom panels to the interface, `u^t, v^t, w^t` and `u^b, v^b, w^b` their
-mid-plane displacements. Top and bottom refer to the `z` axis, normal to the
-mid-surfaces and common to both panels, pointing up in the DCB: the top panel
+where `d^t` and `d^b` are the distances from the reference surfaces of the
+top and bottom panels to the interface, `u^t, v^t, w^t` and `u^b, v^b, w^b`
+the displacements of their reference surfaces. For cylindrical panels with
+the Sanders-Koiter kinematics, `v(z) = v + z (v/r - w_{,y})`, and
+`w_{,y}` is replaced by `w_{,y} - v/r` in `\Delta_v`, with the radius `r` of
+the reference surface of each panel, see :meth:`.MultiDomain._tsl_operators`
+and :mod:`panels.multidomain.connections.kCSB_dmg`. With the thicknesses `h^t`,
+`h^b` and the offsets `d_t`, `d_b` of the laminates, ``Shell.offset``, each
+laminate occupying `d - h/2 \le z \le d + h/2` in the coordinate `z` of its
+panel, `d^t = h^t/2 - d_t` and `d^b = h^b/2 + d_b`, see
+:func:`.kCsdt._sb_distances`; without offsets, as in the DCB examples, they
+are `h^t/2` and `h^b/2`, the distances from the mid-planes. Top and bottom
+refer to the `z` axis, normal to the reference surfaces and common to both
+panels, pointing up in the DCB: the top panel
 is the panel on the positive side of the interface along `z`, whose face `z =
 -d^t` is at the interface, and it is ``p1`` of the connection dictionary; the
 bottom panel is the one on the negative side, whose face `z = +d^b` is at the
@@ -179,12 +189,15 @@ with a Gauss-Legendre rule of ``nr_x_gauss`` `\times` ``nr_y_gauss`` points
 over the domain of the top panel, and `k^w_{CZ}` is given at each of these
 points. The terms of the kernels that are new or modified with respect to the
 thesis are listed in the docstrings of :func:`.fkCSB11_dmg`,
-:func:`.fkCSB12_dmg` and :func:`.fkCSB22_dmg`. The kernel of the undamaged
-connection ``'SB'``, ``kCSB.pyx``, keeps Eq. :eq:`cz-thesis-jump`, which is
-adequate for a perfect bond.
+:func:`.fkCSB12_dmg` and :func:`.fkCSB22_dmg`. The undamaged connection
+``'SB'``, :func:`.fkCSB`, imposes the jump of Eq. :eq:`cz-jump` at zero
+separation, such that the pristine ``'SB_TSL'``, with `k^w_{CZ} = k_o` at
+every point, has the matrix of ``'SB'`` with `k_t = k_o`, as checked by
+``tests/multidomain/test_sb_unified.py``.
 
-The same kernel had the approximation functions in `\eta` of the top panel in
-the coupling block built with the flags of the edge `y_1` in place of `y_2`.
+The damage kernels, ``kCSB_dmg.pyx``, had the approximation functions in
+`\eta` of the top panel in the coupling block built with the flags of the
+edge `y_1` in place of `y_2`.
 This had no effect on the DCB, where all `y` flags are 1.
 
 
@@ -384,7 +397,15 @@ foundation the separation behind the peak is physically negative, and its
 integral is not small. The table below compares, for a linear elastic
 solution with a tip displacement of 1 mm, the reaction at the loaded edge with
 the integrals of the traction computed with the full separation `\Delta` and
-with the corrected separation `\Delta^{corr}`.
+with the corrected separation `\Delta^{corr}`, and with the line integral of
+`Q_x` of :meth:`.MultiDomain.force_out_plane` at the second last of 100
+points along `x` of the free arm. The model is the DCB of the thesis with the
+default edge penalties, `10 \times 6` terms in the cohesive domains, `8
+\times 6` terms in the other domains and `60 \times 20` integration points.
+With `k_o = 2\times10^5` N/mm³ an opening of 1 mm exceeds the separation at
+damage onset, `\Delta_o = 4.35\times10^{-4}` mm, therefore the linear
+solution is computed with a tip displacement of 0.5 mm, below the onset for
+the three values of `k_o`, and scaled to 1 mm.
 
 .. list-table:: Out-of-plane force of the DCB for a tip displacement of 1 mm,
                 linear solution, default edge penalties.
@@ -396,26 +417,47 @@ with the corrected separation `\Delta^{corr}`.
       - `\int k \Delta^{corr} \, dA` [N]
       - `\int Q_x \, dy` [N]
     * - `1\times10^4`
-      - 25.30
-      - 25.31
-      - 353.0
-      - 24.73
+      - 24.98
+      - 24.99
+      - 388.1
+      - 24.41
     * - `5\times10^4`
-      - 26.18
-      - 26.18
-      - 523.9
-      - 25.59
+      - 25.87
+      - 25.87
+      - 593.1
+      - 25.28
     * - `2\times10^5`
-      - 26.69
-      - 26.70
-      - 741.2
-      - 26.09
+      - 26.41
+      - 26.42
+      - 839.4
+      - 25.82
 
-The ratio between the corrected integral and the reaction depends on `k_o`
-and on the damage state, such that a scaling factor fixed at the first
-increment distorts the curve after damage onset. The line integral of `Q_x`
-with finite differences of `M_{xx}` is 2% low. The implementation now
-provides:
+The reaction and the integral of `Q_x` of the loaded arm carry a round-off
+error of up to `3\times10^{-4}` relative, which comes from the 0.015 mm
+connecting domain and changes, e.g., with the number of integration points of
+the panels, whereas the integrals of the traction change by less than
+`2\times10^{-6}`. Therefore the reaction and `\int k \Delta \, dA` differ in
+the fourth digit, by `2.2\times10^{-4}`; the difference falls below
+`3\times10^{-7}` with a connecting domain of 0.15 mm and below
+`2\times10^{-9}` with 1.5 or 5 mm. The values are asserted by
+``tests/multidomain/test_dcb_linear_measures.py``, whose function
+``dcb_thesis_linear`` builds and solves the model:
+
+.. literalinclude:: ../../tests/multidomain/test_dcb_linear_measures.py
+    :pyobject: test_load_measures
+
+Earlier versions of this page gave, for this table and the table of the next
+section, values computed with the tangential separation of Eq. 4.62 of the thesis
+[nathan2024MSc]_, Eq. :eq:`cz-thesis-jump`, before its correction to
+Eq. :eq:`cz-jump`; restoring Eq. :eq:`cz-thesis-jump` in the current code
+reproduces them, and with Eq. :eq:`cz-jump` the reactions are 1.0--1.2% lower
+and `\Delta_{max}/\delta` of the next section is 20% higher.
+
+The ratio between the corrected integral and the reaction, 15.5 to 31.8,
+depends on `k_o` and on the damage state, such that a scaling factor fixed at
+the first increment distorts the curve after damage onset. The line integral
+of `Q_x` with finite differences of the moments is 2.3% low. The
+implementation now provides:
 
 - :meth:`.MultiDomain.reaction_line_pd_xcte`, the reaction of the prescribed
   displacement `w_p(y)` imposed with the penalty `k_w` along `x = x_p`:
@@ -440,13 +482,16 @@ Penalty stiffness of the edge connections
 The default penalties of :func:`.calc_kt_kr` for an ``'SSxcte'`` connection
 between two equal laminates are `k_t = A_{11}/h` and `k_r = D_{11}/h`, from
 Castro and Donadon (2017) [castro2017Multidomain]_. With the penalty energy
-`k_r (w^i_{,x} - w^j_{,x})^2` the connection behaves as a rotational spring
-of stiffness `2 k_r` per unit width, which adds to a cantilever loaded at the
-tip a compliance equal to `3h/(2a)` of its bending compliance, about 7% for
-each connection of the DCB arm (`h = 2.1` mm, `a = 48` mm). The arms of the
+`\frac{1}{2} k_r (w^i_{,x} - w^j_{,x})^2` per unit width, see
+:mod:`panels.multidomain.connections`, the connection behaves as a
+rotational spring of stiffness `k_r` per unit width, which adds to a
+cantilever loaded at the tip a compliance equal to `3 D_{11}/(k_r a) = 3h/a`
+of its bending compliance, about 13% for each connection of the DCB arm (`h
+= 2.1` mm, `a = 48` mm). The arms of the
 reference model have two connections each, at the crack tip moment. The
 table below gives the elastic stiffness of the DCB, `k_o = 2\times10^5`
-N/mm³, when the default `k_t` and `k_r` are multiplied by a factor.
+N/mm³, when the default `k_t` and `k_r` are multiplied by a factor, with the
+model and the linear solutions of the previous section.
 
 .. list-table:: Elastic stiffness of the DCB versus the factor applied to the
                 default edge penalties.
@@ -456,24 +501,30 @@ N/mm³, when the default `k_t` and `k_r` are multiplied by a factor.
       - `P/\delta` [N/mm]
       - `\Delta_{max}/\delta`
     * - 1
-      - 26.69
-      - `4.22\times10^{-4}`
+      - 26.41
+      - `5.07\times10^{-4}`
     * - 10
-      - 32.54
-      - `5.21\times10^{-4}`
+      - 32.13
+      - `6.26\times10^{-4}`
     * - 100
-      - 33.27
-      - `5.35\times10^{-4}`
+      - 32.84
+      - `6.42\times10^{-4}`
     * - 1000
-      - 33.35
-      - `5.36\times10^{-4}`
+      - 32.91
+      - `6.43\times10^{-4}`
 
 The converged value agrees with a beam on an elastic foundation, `P/\delta
-\approx 33` N/mm. With the default penalties the separation at the crack tip,
-and therefore the damage onset, lag the imposed displacement by 20%. This is
-independent of the 0.015 mm domain used between the cohesive domain and the
-free arm: replacing it by a 5 mm domain gives 27.23 N/mm with the default
-penalties and 33.28 N/mm with the factor 100. The drivers multiply the
+\approx 33` N/mm. With the default penalties the stiffness is 20% lower, and
+the separation at the crack tip, and therefore the damage onset, lag the
+imposed displacement by 21%. This is independent of the 0.015 mm domain used
+between the cohesive domain and the free arm: replacing it by a 5 mm domain
+gives 26.94 N/mm with the default penalties and 32.85 N/mm with the factor
+100. These values are asserted by:
+
+.. literalinclude:: ../../tests/multidomain/test_dcb_linear_measures.py
+    :pyobject: test_edge_penalty_factor
+
+The drivers multiply the
 default ``'SSxcte'`` penalties by ``edge_penalty_factor``, 100 by default. The
 library defaults are unchanged.
 
@@ -622,8 +673,8 @@ converge in 8, 12 and 47 iterations, but at 6.4 mm the ratio stagnates at
 the analysis completes with 3 bisected increments and 384 iterations. The
 bisection is therefore the safeguard of the coarse discretisations, see the
 convergence study. In the 17 nonlinear runs of the validation notebooks, 980
-openings, every opening converged without bisection in 1 to 7 iterations,
-3.0 on average.
+openings, every opening converged without bisection in 1 to 8 iterations,
+2.84 on average.
 
 **Convergence criterion.** The prescribed displacement is imposed with `k_w =
 10^6`, such that `\{f_{ext}\}` and `[K^{pen}_{PD}]\{c\}` are of the order of
@@ -680,8 +731,8 @@ prescribed displacement, :meth:`.MultiDomain.reaction_line_pd_xcte`, which
 the drivers report at every increment. Both are equal by equilibrium of the
 loaded arm when the cohesive domain carries the whole load, see
 :ref:`cohesive_zone_load`. In the analyses of the reference DCB of the
-convergence study below, up to an opening of 8 mm, they agree within `8.7
-\times 10^{-4}` with `k_o = 10^5` N/mm³ and `3.7 \times 10^{-5}` with `k_o =
+convergence study below, up to an opening of 8 mm, they agree within `8.9
+\times 10^{-4}` with `k_o = 10^5` N/mm³ and `3.8 \times 10^{-5}` with `k_o =
 2 \times 10^5` N/mm³ at every opening.
 
 
@@ -743,20 +794,27 @@ cohesive domain (`L_{tsl} = 24 \to 17` mm). The metrics are:
 
 The study is reproduced by ``notebooks/dcb_mode_I_convergence_study.py``, and
 the metrics and load curves of all runs are stored in
-``notebooks/results/dcb_mode_I_convergence_study.json``. The runs were done
-with panels 0.13.11 on a laptop with 16 threads, eight runs at a time with two threads
-each, so the wall times indicate the relative cost; the reference run takes
-10 min in this setting and 4.5 min of wall time (17 min of CPU time) when run
-alone.
+``notebooks/results/dcb_mode_I_convergence_study.json``. The results are
+those of panels 0.14.0. The wall and CPU times are those of the first
+computation, with panels 0.13.11, on a laptop with 16 threads, eight runs at a
+time with two threads each, so the wall times indicate the relative cost; the
+reference run takes 10 min in this setting and 4.5 min of wall time (17 min of
+CPU time) when run alone. The runs A and B with `m_{tsl} = 10` and `n_x =
+120` changed with panels 0.14.0: their times are those of the runs of 0.13.11,
+with 129 and 119 iterations, which stopped at `\delta = 7.2` and 7.4 mm, as
+the field ``time_note`` of the two runs states.
 
 .. list-table:: Convergence study, terms `m_{tsl}` and Gauss points `n_x`
                 along `x` of the cohesive domain, `L_{tsl} = 24` mm. Loads
                 in N, openings in mm, `e_P` and `e_{eq}` in %, wall time in
-                min. The runs with `m_{tsl} = 10` and `n_x = 60` or 120
-                stopped at `\delta = 6.2` and 7.2 mm (case A) and 7.4 mm
-                (case B), and the run B with `m_{tsl} = 15`, `n_x = 60` at
-                7.8 mm, when an increment did not converge after the last
-                bisection; their `e_P` is evaluated up to that opening.
+                min, of panels 0.13.11 (for A and B with `m_{tsl} = 10`,
+                `n_x = 120`, of the runs of 0.13.11 with 129 and 119
+                iterations). The runs with `m_{tsl} = 10` stopped at
+                `\delta = 6.2` mm (`n_x = 60`) and 7.2 mm (`n_x = 120`) in
+                case A and 7.4 mm (`n_x = 60`) in case B, and the run B with
+                `m_{tsl} = 15`, `n_x = 60` at 7.8 mm, when an increment did
+                not converge after the last bisection; their `e_P` is
+                evaluated up to that opening.
     :header-rows: 1
 
     * - case
@@ -783,9 +841,9 @@ alone.
       - --
       - --
       - 5.1
-      - 19
+      - 18
       - 7
-      - 81
+      - 80
       - 7
     * - A
       - 10
@@ -797,9 +855,9 @@ alone.
       - --
       - 2.16
       - 5.0
-      - 33
-      - 7
-      - 129
+      - 31
+      - 11
+      - 340
       - 10
     * - A
       - 10
@@ -811,9 +869,9 @@ alone.
       - 141.13
       - 1.98
       - 5.0
-      - 47
+      - 44
       - 3
-      - 327
+      - 323
       - 7
     * - A
       - 15
@@ -825,7 +883,7 @@ alone.
       - 139.52
       - 0.63
       - 1.2
-      - 0.32
+      - 0.27
       - 3
       - 283
       - 8
@@ -839,7 +897,7 @@ alone.
       - 139.73
       - 0.56
       - 0.77
-      - 0.31
+      - 0.26
       - 0
       - 145
       - 4
@@ -853,7 +911,7 @@ alone.
       - 139.95
       - 0.51
       - 0.71
-      - 0.30
+      - 0.26
       - 0
       - 139
       - 4
@@ -867,7 +925,7 @@ alone.
       - 140.96
       - 0.42
       - 0.64
-      - 0.087
+      - 0.088
       - 3
       - 317
       - 15
@@ -881,7 +939,7 @@ alone.
       - 140.89
       - 0.26
       - 0.21
-      - 0.087
+      - 0.088
       - 0
       - 143
       - 6
@@ -895,7 +953,7 @@ alone.
       - 140.93
       - 0.24
       - 0.078
-      - 0.087
+      - 0.088
       - 0
       - 136
       - 6
@@ -909,7 +967,7 @@ alone.
       - 140.78
       - 0.40
       - 0.60
-      - 0.088
+      - 0.089
       - 3
       - 384
       - 31
@@ -923,7 +981,7 @@ alone.
       - 140.75
       - 0.24
       - 0.17
-      - 0.087
+      - 0.089
       - 0
       - 135
       - 10
@@ -937,7 +995,7 @@ alone.
       - 140.78
       - 0.23
       - 0.018
-      - 0.087
+      - 0.089
       - 0
       - 139
       - 10
@@ -951,7 +1009,7 @@ alone.
       - 140.78
       - 0.40
       - 0.60
-      - 0.088
+      - 0.089
       - 3
       - 358
       - 43
@@ -965,7 +1023,7 @@ alone.
       - 140.77
       - 0.24
       - 0.17
-      - 0.087
+      - 0.089
       - 0
       - 135
       - 14
@@ -979,7 +1037,7 @@ alone.
       - 140.81
       - 0.24
       - --
-      - 0.087
+      - 0.088
       - 0
       - 140
       - 16
@@ -993,7 +1051,7 @@ alone.
       - --
       - 2.69
       - 7.2
-      - 20
+      - 18
       - 7
       - 140
       - 8
@@ -1004,12 +1062,12 @@ alone.
       - 6.40
       - 166.41
       - 153.75
-      - --
-      - 2.50
+      - 140.40
+      - 2.14
       - 7.1
-      - 20
-      - 7
-      - 119
+      - 31
+      - 1
+      - 229
       - 10
     * - B
       - 10
@@ -1021,9 +1079,9 @@ alone.
       - 140.42
       - 2.14
       - 7.1
-      - 33
+      - 31
       - 0
-      - 159
+      - 158
       - 3
     * - B
       - 15
@@ -1035,7 +1093,7 @@ alone.
       - --
       - 0.70
       - 1.0
-      - 2.2
+      - 2.3
       - 8
       - 222
       - 18
@@ -1049,7 +1107,7 @@ alone.
       - 139.47
       - 0.59
       - 1.0
-      - 2.2
+      - 2.3
       - 0
       - 141
       - 3
@@ -1063,7 +1121,7 @@ alone.
       - 139.44
       - 0.57
       - 1.0
-      - 2.2
+      - 2.3
       - 0
       - 145
       - 4
@@ -1077,7 +1135,7 @@ alone.
       - 142.31
       - 0.51
       - 0.92
-      - 0.031
+      - 0.032
       - 2
       - 238
       - 11
@@ -1133,7 +1191,7 @@ alone.
       - 140.90
       - 0.23
       - 0.10
-      - 0.0037
+      - 0.0038
       - 0
       - 141
       - 10
@@ -1147,7 +1205,7 @@ alone.
       - 140.75
       - 0.23
       - 0.015
-      - 0.0037
+      - 0.0038
       - 0
       - 140
       - 10
@@ -1161,7 +1219,7 @@ alone.
       - 142.13
       - 0.53
       - 0.82
-      - 0.0040
+      - 0.0041
       - 2
       - 239
       - 28
@@ -1175,7 +1233,7 @@ alone.
       - 140.99
       - 0.24
       - 0.13
-      - 0.0038
+      - 0.0039
       - 0
       - 137
       - 15
@@ -1189,7 +1247,7 @@ alone.
       - 140.77
       - 0.23
       - --
-      - 0.0038
+      - 0.0039
       - 0
       - 141
       - 15
@@ -1197,7 +1255,8 @@ alone.
 .. list-table:: Convergence study, other parameters, varied one at a time
                 from the reference discretisation `L_{tsl} = 24` mm,
                 `m_{tsl} = 25`, `n_x = 180`, `n_{tsl} = 10`, `n_y = 30`,
-                `m = n = 8`. Same quantities and units as above. The halved
+                `m = n = 8`. Same quantities and units as above, wall time
+                of panels 0.13.11. The halved
                 increment gives 53 openings instead of 38.
     :header-rows: 1
 
@@ -1223,7 +1282,7 @@ alone.
       - 140.78
       - 0.23
       - 0.018
-      - 0.087
+      - 0.089
       - 0
       - 139
       - 10
@@ -1236,7 +1295,7 @@ alone.
       - 140.77
       - 0.23
       - 0.020
-      - 0.087
+      - 0.089
       - 0
       - 136
       - 25
@@ -1249,7 +1308,7 @@ alone.
       - 140.77
       - 0.24
       - 0.021
-      - 0.085
+      - 0.087
       - 0
       - 136
       - 12
@@ -1262,7 +1321,7 @@ alone.
       - 140.78
       - 0.24
       - 0.018
-      - 0.086
+      - 0.087
       - 0
       - 134
       - 13
@@ -1275,7 +1334,7 @@ alone.
       - 140.78
       - 0.15
       - 0.018
-      - 0.087
+      - 0.089
       - 0
       - 184
       - 13
@@ -1314,7 +1373,7 @@ alone.
       - 140.75
       - 0.23
       - 0.015
-      - 0.0037
+      - 0.0038
       - 0
       - 140
       - 10
@@ -1353,7 +1412,7 @@ alone.
       - 140.75
       - 0.23
       - 0.015
-      - 0.0036
+      - 0.0038
       - 0
       - 140
       - 13
@@ -1366,7 +1425,7 @@ alone.
       - 140.75
       - 0.15
       - 0.015
-      - 0.0037
+      - 0.0038
       - 0
       - 176
       - 13
@@ -1406,8 +1465,8 @@ The results show that:
   curve up to 168.2--169.4 N at `\delta = 6.2`--6.4 mm, 1.3--2.0% above the
   converged peak, and then drops by up to 14 N (A) and 19 N (B) in one
   increment, a sawtooth with `CV = 2.0`--2.7. The load differs from the
-  converged one by 5--7%, `e_{eq}` is 19--47% from the first increment on,
-  and four of the six runs stop at `\delta = 6.2`--7.4 mm. With `m_{tsl} =
+  converged one by 5--7%, `e_{eq}` reaches 18--44%,
+  and three of the six runs stop at `\delta = 6.2`--7.4 mm. With `m_{tsl} =
   15` the curve is smooth, `CV = 0.51`--0.70, but still 0.7--1.2% off. From
   `m_{tsl} = 20` the error is at most 0.21% for `n_x \geq 120`, and 25 and 30
   terms give the same loads to 0.02% with `n_x = 180`. Against the terms per
@@ -1522,7 +1581,8 @@ Each reference has a notebook in ``notebooks/`` with a dictionary of the FE
 cases and one of the experimental tests, a comparison table, a plot and a
 discussion; the ``panels`` results are stored in ``notebooks/results/*.npz``
 and collected by ``notebooks/dcb_mode_I_validation_summary.ipynb``. The results were
-obtained with panels 0.13.11.
+obtained with panels 0.14.0; the run times stored with them are those of their
+first computation, with panels 0.13.11.
 
 The case of Camanho et al. (2003) is kept for reference, but it is not used
 to validate the model: the FE and experimental load-opening curves of the

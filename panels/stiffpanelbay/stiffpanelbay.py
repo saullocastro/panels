@@ -1,10 +1,20 @@
+r"""Stiffened panel bay (:class:`.StiffPanelBay`)
+
+The class :class:`.StiffPanelBay` assembles the skin panels of a bay,
+:class:`.Shell` objects separated along `y`, and the blade stiffeners
+:class:`.BladeStiff1D` and :class:`.BladeStiff2D`, and computes the
+stiffness, geometric stiffness, mass and aerodynamic matrices, the external
+force vector and the displacement fields of the assembly. The function
+:func:`.load` reads a bay saved with :meth:`.StiffPanelBay.save`.
+
+"""
 import gc
 import os
 
 import numpy as np
 from scipy.sparse import csr_matrix
 from numpy import linspace, reshape
-from structsolve.sparseutils import finalize_symmetric_matrix, make_skew_symmetric
+from structsolve.sparseutils import finalize_symmetric_matrix
 
 from panels import json_io
 from panels.logger import msg
@@ -17,6 +27,9 @@ DOUBLE = np.float64
 
 def load(name, max_size=json_io.MAX_SIZE):
     r"""Load a :class:`.StiffPanelBay` saved by :meth:`.StiffPanelBay.save`
+
+    The file is read by :mod:`panels.json_io`, which raises a ``ValueError``
+    when it holds an object of another type than :class:`.StiffPanelBay`.
 
     Parameters
     ----------
@@ -58,6 +71,33 @@ class StiffPanelBay(object):
       Controlled by the parameter ``flow``
     - ``bladestiff1ds`` contains the :class:`.BladeStiff1D` stiffeners
     - ``bladestiff2ds`` contains the :class:`.BladeStiff2D` stiffeners
+
+    Notes
+    -----
+    The panels of the skin are :class:`.Shell` objects with the same
+    approximation functions, spanning the whole bay with its boundary
+    conditions, each one integrated only over its strip `y_1 \le y \le
+    y_2`. They share the Ritz constants of the skin, so that the
+    displacement field of the skin is continuous across the panels without
+    any connection, and the matrices of the bay are the sums of those of the
+    panels and of the stiffeners. The bases of the stiffeners also use the
+    Ritz constants of the skin, and only the flanges of the
+    :class:`.BladeStiff2D` stiffeners have their own Ritz constants, which
+    follow those of the skin, see :meth:`.get_size`.
+
+    For the flutter analysis with the piston theory, the matrices enter the
+    equations of motion as `([K] + [K_A] + \lambda^2 [M])\{c\} = \{0\}`, see
+    :meth:`.Shell.calc_kA` and :meth:`.calc_kA`. The model of the bay, the
+    skin with the bases of the stiffeners sharing its approximation
+    functions and Ritz constants, and the piston theory, is that of [1]_,
+    Sec. 2.
+
+    References
+    ----------
+    .. [1] Castro, S. G. P., Guimaraes, T. A. M., Rade, D. A., and Donadon,
+       M. V., Flutter of stiffened composite panels considering the
+       stiffener's base as a structural element, Composite Structures, 140,
+       36-43, 2016. https://doi.org/10.1016/j.compstruct.2015.12.056
 
     """
     def __init__(self):
@@ -231,8 +271,13 @@ class StiffPanelBay(object):
         constants' vector `\{c\}`, the internal force vector `\{F_{int}\}` and
         the external force vector `\{F_{ext}\}`.
 
-        It takes into account the independent degrees of freedom from each of
-        the `.Stiffener2D` objects that belong to the current assembly.
+        It takes into account the independent degrees of freedom from the
+        flange of each of the :class:`.BladeStiff2D` objects that belong to
+        the current assembly.
+
+        The size is ``dofs*m*n`` for the skin, ``dofs`` being the number of
+        DOFs per term of the model in the attribute ``model``, plus the size
+        of each flange. It is also stored in the attribute ``size``.
 
         Returns
         -------
@@ -256,45 +301,75 @@ class StiffPanelBay(object):
             flaminaprop=None, **kwargs):
         r"""Add a new BladeStiff1D to the current panel bay
 
+        The panels must be added before. The panel ``panel1`` of the
+        stiffener is the panel whose edge ``y2`` is equal to ``ys``, and
+        ``panel2`` the one whose edge ``y1`` is equal to ``ys``; for ``ys``
+        close to ``0`` or to the width ``b`` of the bay, both are the panel
+        with that edge. When only ``bplyt``, ``blaminaprop``, ``fplyt`` or
+        ``flaminaprop`` is given, it is repeated for each ply. The new
+        stiffener is appended to the attributes ``bladestiff1ds`` and
+        ``stiffeners``.
+
         Parameters
         ----------
         ys : float
-            Stiffener position.
+            Stiffener position, the coordinate `y`, length.
         rho : float, optional
             Stiffener's material density. If not given the bay density will be
-            used.
+            used. Mass per unit volume. Default ``None``.
         bb : float, optional
-            Stiffener base width.
+            Stiffener base width, length. Default ``None``.
         bstack : list, optional
-            Stacking sequence for the stiffener base laminate.
+            Stacking sequence for the stiffener base laminate. Default
+            ``None``, no base.
         bplyts : list, optional
-            Thicknesses for each stiffener base ply.
+            Thicknesses for each stiffener base ply, length. Default
+            ``None``.
         bplyt : float, optional
-            Unique thickness for all stiffener base plies.
+            Unique thickness for all stiffener base plies, length. Default
+            ``None``.
         blaminaprops : list, optional
-            Lamina properties for each stiffener base ply.
-        blaminaprop : float, optional
-            Unique lamina properties for all stiffener base plies.
-        bf : float
-            Stiffener flange width.
+            Lamina properties for each stiffener base ply. Default ``None``.
+        blaminaprop : list or tuple, optional
+            Unique lamina properties for all stiffener base plies. Default
+            ``None``.
+        bf : float, optional
+            Stiffener flange width, length, required with ``fstack``.
+            Default ``None``.
         fstack : list, optional
-            Stacking sequence for the stiffener flange laminate.
+            Stacking sequence for the stiffener flange laminate. Default
+            ``None``, no flange.
         fplyts : list, optional
-            Thicknesses for each stiffener flange ply.
+            Thicknesses for each stiffener flange ply, length. Default
+            ``None``.
         fplyt : float, optional
-            Unique thickness for all stiffener flange plies.
+            Unique thickness for all stiffener flange plies, length. Default
+            ``None``.
         flaminaprops : list, optional
-            Lamina properties for each stiffener flange ply.
-        flaminaprop : float, optional
-            Unique lamina properties for all stiffener flange plies.
+            Lamina properties for each stiffener flange ply. Default ``None``.
+        flaminaprop : list or tuple, optional
+            Unique lamina properties for all stiffener flange plies. Default
+            ``None``.
+
+        **kwargs : dict, optional
+            Additional parameters, set as attributes of the new stiffener
+            after it is created.
 
         Returns
         -------
         s : :class:`.BladeStiff1D` object
 
-        Notes
-        -----
-        Additional parameters can be passed using the ``kwargs``.
+        Raises
+        ------
+        ValueError
+            When neither ``bstack`` nor ``fstack`` is given; when ``bstack``
+            is given without ``bplyts`` or ``bplyt``, or without
+            ``blaminaprops`` or ``blaminaprop``; when ``fstack`` is given
+            without ``fplyts`` or ``fplyt``, or without ``flaminaprops`` or
+            ``flaminaprop``.
+        RuntimeError
+            When no panel was added; when ``panel1`` or ``panel2`` is not
+            found.
 
         """
         if rho is None:
@@ -369,49 +444,79 @@ class StiffPanelBay(object):
             flaminaprop=None, mf=14, nf=11, **kwargs):
         r"""Add a new BladeStiff2D to the current panel bay
 
+        The panels must be added before. The panel ``panel1`` of the
+        stiffener is the panel whose edge ``y2`` is equal to ``ys``, and
+        ``panel2`` the one whose edge ``y1`` is equal to ``ys``; for ``ys``
+        close to ``0`` or to the width ``b`` of the bay, both are the panel
+        with that edge. When only ``bplyt``, ``blaminaprop``, ``fplyt`` or
+        ``flaminaprop`` is given, it is repeated for each ply. The new
+        stiffener is appended to the attributes ``bladestiff2ds`` and
+        ``stiffeners``.
+
         Parameters
         ----------
         ys : float
-            Stiffener position.
+            Stiffener position, the coordinate `y`, length.
         rho : float, optional
             Stiffener's material density. If not given the bay density will be
-            used.
+            used. Mass per unit volume. Default ``None``.
         bb : float, optional
-            Stiffener base width.
+            Stiffener base width, length. Default ``None``.
         bstack : list, optional
-            Stacking sequence for the stiffener base laminate.
+            Stacking sequence for the stiffener base laminate. Default
+            ``None``, no base.
         bplyts : list, optional
-            Thicknesses for each stiffener base ply.
+            Thicknesses for each stiffener base ply, length. Default
+            ``None``.
         bplyt : float, optional
-            Unique thickness for all stiffener base plies.
+            Unique thickness for all stiffener base plies, length. Default
+            ``None``.
         blaminaprops : list, optional
-            Lamina properties for each stiffener base ply.
-        blaminaprop : float, optional
-            Unique lamina properties for all stiffener base plies.
-        bf : float
-            Stiffener flange width.
+            Lamina properties for each stiffener base ply. Default ``None``.
+        blaminaprop : list or tuple, optional
+            Unique lamina properties for all stiffener base plies. Default
+            ``None``.
+        bf : float, optional
+            Stiffener flange width, length. Default ``None``.
         fstack : list, optional
-            Stacking sequence for the stiffener flange laminate.
+            Stacking sequence for the stiffener flange laminate. Default
+            ``None``, no flange.
         fplyts : list, optional
-            Thicknesses for each stiffener flange ply.
+            Thicknesses for each stiffener flange ply, length. Default
+            ``None``.
         fplyt : float, optional
-            Unique thickness for all stiffener flange plies.
+            Unique thickness for all stiffener flange plies, length. Default
+            ``None``.
         flaminaprops : list, optional
-            Lamina properties for each stiffener flange ply.
-        flaminaprop : float, optional
-            Unique lamina properties for all stiffener flange plies.
+            Lamina properties for each stiffener flange ply. Default ``None``.
+        flaminaprop : list or tuple, optional
+            Unique lamina properties for all stiffener flange plies. Default
+            ``None``.
         mf : int, optional
-            Number of approximation terms for flange, along `x`.
+            Number of approximation terms for flange, along `x`. Default
+            ``14``.
         nf : int, optional
-            Number of approximation terms for flange, along `y`.
+            Number of approximation terms for flange, along `y`. Default
+            ``11``.
+        **kwargs : dict, optional
+            Additional parameters, set as attributes of the new stiffener
+            after it is created.
 
         Returns
         -------
         s : :class:`.BladeStiff2D` object
 
-        Notes
-        -----
-        Additional parameters can be passed using the ``kwargs``.
+        Raises
+        ------
+        ValueError
+            When neither ``bstack`` nor ``fstack`` is given; when ``bstack``
+            is given without ``bplyts`` or ``bplyt``, or without
+            ``blaminaprops`` or ``blaminaprop``; when ``fstack`` is given
+            without ``fplyts`` or ``fplyt``, or without ``flaminaprops`` or
+            ``flaminaprop``.
+        RuntimeError
+            When no panel was added; when ``panel1`` or ``panel2`` is not
+            found.
 
         """
         if rho is None:
@@ -484,35 +589,49 @@ class StiffPanelBay(object):
             laminaprops=None, laminaprop=None, model=None, rho=None, **kwargs):
         r"""Add a new panel to the current panel bay
 
+        The panel is a :class:`.Shell` with the attributes ``a``, ``b``,
+        ``m``, ``n``, ``r`` and the boundary conditions of the bay,
+        integrated between ``y1`` and ``y2``. It is appended to the
+        attribute ``panels``.
+
         Parameters
         ----------
         y1 : float
-            Position of the first panel edge along `y`.
+            Position of the first panel edge along `y`, length.
         y2 : float
-            Position of the second panel edge along `y`.
+            Position of the second panel edge along `y`, length.
         stack : list, optional
             Shell stacking sequence. If not given the stacking sequence of the
-            bay will be used.
+            bay will be used. Default ``None``.
         plyts : list, optional
             Thicknesses for each panel ply. If not supplied the bay ``plyts``
-            attribute will be used.
+            attribute will be used. Length. Default ``None``.
         plyt : float, optional
             Unique thickness to be used for all panel plies. If not supplied
-            the bay ``plyt`` attribute will be used.
+            the bay ``plyt`` attribute will be used. Length. Default ``None``.
         laminaprops : list, optional
-            Lamina properties for each panel ply.
+            Lamina properties for each panel ply. If not supplied the bay
+            ``laminaprops`` attribute is used. Default ``None``.
         laminaprop : list, optional
-            Unique lamina properties for all panel plies.
+            Unique lamina properties for all panel plies. If not supplied the
+            bay ``laminaprop`` attribute is used. Default ``None``.
         model : str, optional
             Not recommended to pass this parameter, but the user can use a
             different model for each panel. It is recommended to defined
-            ``model`` for the bay object.
+            ``model`` for the bay object. Default ``None``, the attribute
+            ``model`` of the bay.
         rho : float, optional
             Shell material density. If not given the bay density will be used.
+            Mass per unit volume. Default ``None``; ``0.`` when the density of
+            the bay is also ``None``.
+        **kwargs : dict, optional
+            Additional parameters, set as attributes of the new panel after
+            it is created.
 
-        Notes
-        -----
-        Additional parameters can be passed using the ``kwargs``.
+        Returns
+        -------
+        p : :class:`.Shell`
+            The new panel.
 
         """
         #NOTE the laminate and model attributes must be passed to the
@@ -545,6 +664,29 @@ class StiffPanelBay(object):
 
 
     def calc_kC(self, silent=False):
+        r"""Calculate the constitutive stiffness matrix of the assembly
+
+        The bay is rebuilt and its size computed with :meth:`.get_size`.
+        The matrices of the panels and of the :class:`.BladeStiff1D`
+        stiffeners are placed at row and column ``0``, the Ritz constants of
+        the skin; those of the :class:`.BladeStiff2D` stiffeners at the Ritz
+        constants of their flanges, which follow those of the skin in the
+        order of the attribute ``bladestiff2ds``. The sum is finalized with
+        :func:`structsolve.sparseutils.finalize_symmetric_matrix` and stored
+        in the attribute ``kC``. Messages are printed unless
+        ``silent=True``.
+
+        Parameters
+        ----------
+        silent : bool, optional
+            Whether the messages are suppressed. Default ``False``.
+
+        Returns
+        -------
+        kC : sparse matrix
+            The constitutive stiffness matrix, of shape ``(size, size)``.
+
+        """
         self._rebuild()
         msg('Calculating kC... ', level=2, silent=silent)
 
@@ -586,6 +728,34 @@ class StiffPanelBay(object):
 
 
     def calc_kG(self, silent=False, c=None):
+        r"""Calculate the geometric stiffness matrix of the assembly
+
+        The bay is rebuilt and its size computed with :meth:`.get_size`.
+        The matrices of the panels, :meth:`.Shell.calc_kG`, and of the
+        :class:`.BladeStiff1D` stiffeners are placed at row and column
+        ``0``; those of the :class:`.BladeStiff2D` stiffeners at the Ritz
+        constants of their flanges, as in :meth:`.calc_kC`. The sum is
+        finalized with
+        :func:`structsolve.sparseutils.finalize_symmetric_matrix` and stored
+        in the attribute ``kG``. Messages are printed unless
+        ``silent=True``.
+
+        Parameters
+        ----------
+        silent : bool, optional
+            Whether the messages are suppressed. Default ``False``.
+        c : array-like or None, optional
+            Ritz constants of the assembly, passed to the panels and to the
+            stiffeners. :meth:`.BladeStiff1D.calc_kG` raises a
+            ``NotImplementedError`` when it is not ``None``, and
+            :meth:`.BladeStiff2D.calc_kG` does not use it. Default ``None``.
+
+        Returns
+        -------
+        kG : sparse matrix
+            The geometric stiffness matrix, of shape ``(size, size)``.
+
+        """
         self._rebuild()
         msg('Calculating kG... ', level=2, silent=silent)
 
@@ -629,6 +799,28 @@ class StiffPanelBay(object):
 
 
     def calc_kM(self, silent=False):
+        r"""Calculate the mass matrix of the assembly
+
+        The bay is rebuilt and its size computed with :meth:`.get_size`.
+        The matrices of the panels and of the :class:`.BladeStiff1D`
+        stiffeners are placed at row and column ``0``; those of the
+        :class:`.BladeStiff2D` stiffeners at the Ritz constants of their
+        flanges, as in :meth:`.calc_kC`. The sum is finalized with
+        :func:`structsolve.sparseutils.finalize_symmetric_matrix` and stored
+        in the attribute ``kM``. Messages are printed unless
+        ``silent=True``.
+
+        Parameters
+        ----------
+        silent : bool, optional
+            Whether the messages are suppressed. Default ``False``.
+
+        Returns
+        -------
+        kM : sparse matrix
+            The mass matrix, of shape ``(size, size)``.
+
+        """
         self._rebuild()
         msg('Calculating kM... ', level=2, silent=silent)
 
@@ -672,7 +864,53 @@ class StiffPanelBay(object):
 
 
     def _aero_parameters(self):
-        """Piston theory parameters ``beta``, ``gamma`` and ``aeromu``"""
+        r"""Piston theory parameters ``beta``, ``gamma`` and ``aeromu``
+
+        When the attribute ``beta`` is ``None`` they are computed from the
+        attributes ``Mach``, ``rho_air``, ``V``, ``speed_sound`` and, for
+        the models that need the radius, ``r``; a ``ValueError`` is raised
+        when ``Mach`` is ``None`` or lower than ``1``, and ``Mach == 1`` is
+        replaced by ``1.0001`` in the attribute ``Mach``. Otherwise the
+        attributes ``beta``, ``gamma`` and ``aeromu`` are returned, ``None``
+        meaning ``0.`` for the last two.
+
+        Returns
+        -------
+        beta, gamma, aeromu : float
+            Parameters of the aerodynamic load, of the curvature correction
+            and of the aerodynamic damping. When computed, ``gamma`` is
+            ``0.`` for the models that do not need the radius.
+
+        Notes
+        -----
+        With the Mach number `M`, the air density `\rho_{air}`, the air speed
+        `V` and the speed of sound `a_\infty`:
+
+        .. math::
+
+            \beta = \frac{\rho_{air} V^2}{\sqrt{M^2 - 1}}, \qquad
+            \gamma = \frac{\beta}{2 r \sqrt{M^2 - 1}}, \qquad
+            \mu_a = \frac{\beta}{M a_\infty} \frac{M^2 - 2}{M^2 - 1}
+
+        `\gamma` is the curvature correction of the piston theory for
+        cylindrical shells, see :meth:`.Shell.calc_kA`, zero for the models
+        without radius, and `\mu_a`, ``aeromu``, the coefficient of the
+        aerodynamic damping, see :meth:`.Shell.calc_cA`. The linear piston
+        theory holds for supersonic flows only, and `\beta` is singular at
+        `M = 1`, hence the replacement of ``Mach == 1`` by ``1.0001``. The
+        expressions of `\beta`, `\gamma` and `\mu_a` are those of Eq. (18) of
+        [1]_; the sign of `\gamma` in the matrices of [1]_ is reversed, see
+        :meth:`.Shell.calc_kA`.
+
+        References
+        ----------
+        .. [1] Castro, S. G. P., Guimaraes, T. A. M., Rade, D. A., and
+           Donadon, M. V., "Flutter of stiffened composite panels considering
+           the stiffener's base as a structural element", Composite
+           Structures, 140, 36-43, 2016.
+           https://doi.org/10.1016/j.compstruct.2015.12.056
+
+        """
         r = self.r if self.r is not None else 0.
         if self.beta is None:
             if self.Mach is None:
@@ -699,6 +937,50 @@ class StiffPanelBay(object):
 
 
     def calc_kA(self, silent=False):
+        r"""Calculate the aerodynamic matrix of the assembly
+
+        The bay is rebuilt and its size computed with :meth:`.get_size`.
+        The parameters ``beta`` and ``gamma`` of the piston theory are the
+        attributes ``beta`` and ``gamma`` of the bay when ``beta`` is given,
+        otherwise they are computed from ``Mach``, ``rho_air``, ``V`` and,
+        for the models that need the radius, ``r``; a ``ValueError`` is
+        raised by ``_aero_parameters()`` when ``Mach`` is then ``None`` or
+        lower than ``1``, and ``Mach == 1`` is replaced by ``1.0001`` in the
+        attribute ``Mach``. The attributes ``flow``, ``beta`` and ``gamma``
+        of each panel are set to those of the bay, and the matrices of the
+        panels, :meth:`.Shell.calc_kA`, each one integrated over its own
+        domain, are summed at row and column ``0``. The stiffeners do not
+        contribute. The sum, checked for ``nan`` and ``inf`` values and
+        never symmetrized, as in :meth:`.Shell.calc_kA`, is stored in the
+        attribute ``kA``. Messages are printed unless ``silent=True``.
+
+        Parameters
+        ----------
+        silent : bool, optional
+            Whether the messages are suppressed. Default ``False``.
+
+        Returns
+        -------
+        kA : scipy.sparse.csr_matrix
+            The aerodynamic matrix, of shape ``(size, size)``.
+
+        Notes
+        -----
+        The aerodynamic load of the linear piston theory and the parameters
+        ``beta`` and ``gamma`` are those of :meth:`.Shell.calc_kA` and
+        :meth:`._aero_parameters`. The matrix is the sum of those of the
+        panels, `[K_A] = \sum_p [K_A^{(p)}]`, each one the virtual work of the
+        aerodynamic load over its domain, see :meth:`.Shell.calc_kA`. The
+        term in `\gamma` gives a symmetric matrix, and the term in `\beta`
+        a skew-symmetric one only when `w` vanishes at the edges normal to
+        the flow, where the boundary terms of `\int N_i N_{k,x} dx` are
+        otherwise not zero, such that `[K_A]` is in general neither
+        symmetric nor skew-symmetric. The sign convention is that of
+        :meth:`.Shell.calc_kA`, `([K] + [K_A] + \lambda^2 [M])\{c\} =
+        \{0\}` with a softening term in `\gamma`, whose sign is reversed in
+        Eqs. (21) and (29) of Castro et al. (2016), a mistake of the paper.
+
+        """
         self._rebuild()
         msg('Calculating kA... ', level=2, silent=silent)
 
@@ -717,7 +999,7 @@ class StiffPanelBay(object):
 
         assert np.any(np.isnan(kA.data)) == False
         assert np.any(np.isinf(kA.data)) == False
-        kA = csr_matrix(make_skew_symmetric(kA))
+        kA = csr_matrix(kA)
         self.kA = kA
 
         msg('finished!', level=2, silent=silent)
@@ -726,6 +1008,40 @@ class StiffPanelBay(object):
 
 
     def calc_cA(self, silent=False):
+        r"""Calculate the aerodynamic damping matrix of the assembly
+
+        The bay is rebuilt and its size computed with :meth:`.get_size`.
+        The parameter ``aeromu`` of the piston theory is the attribute
+        ``aeromu`` of the bay (``0.`` when ``None``) when ``beta`` is given,
+        otherwise it is computed from ``Mach``, ``rho_air``, ``V`` and
+        ``speed_sound``, see :meth:`.calc_kA`. The matrix is that of the
+        first panel, :meth:`.Shell.calc_cA`, which is integrated over the
+        whole bay; the stiffeners do not contribute. It is stored in the
+        attribute ``cA``. Messages are printed unless ``silent=True``.
+
+        Parameters
+        ----------
+        silent : bool, optional
+            Whether the messages are suppressed. Default ``False``.
+
+        Returns
+        -------
+        cA : sparse matrix
+            The aerodynamic damping matrix, with complex values, of shape
+            ``(size, size)``.
+
+        Notes
+        -----
+        The damping term of the piston theory, with the coefficient
+        ``aeromu`` of :meth:`._aero_parameters`, is proportional to the
+        velocity of `w`, see :meth:`.Shell.calc_cA`, whose matrix is
+        multiplied by the imaginary unit, ``cA`` `= i [C_A]` with `[C_A]` of
+        Eq. (23) of Castro et al. (2016): for the harmonic motion `\{c\}
+        e^{i \omega t}` it enters the eigenvalue problem as `([K] + [K_A] -
+        \omega^2 [M] + \omega [c_A])\{c\} = \{0\}`, the term `+i \omega
+        [C_A]` of Eqs. (29)-(31) of that paper.
+
+        """
         self._rebuild()
         msg('Calculating cA... ', level=2, silent=silent)
         size = self.get_size()
@@ -750,34 +1066,46 @@ class StiffPanelBay(object):
         ``u``, ``v``, ``w``, ``phix``, ``phiy`` of the
         :class:`.StiffPanelBay` object.
 
+        Only the Ritz constants of the skin, the first ``dofs*m*n``, are
+        used, with the function ``fuvw`` of the field module of the model.
+        When ``xs`` or ``ys`` is ``None``, the field is computed on a grid of
+        ``gridx`` points along `x`, from ``0`` to ``a``, and ``gridy``
+        points along `y`, from ``0`` to ``b``, also stored in the attributes
+        ``Xs`` and ``Ys``.
+
         Parameters
         ----------
-        c : float
-            The full set of Ritz constants
-        xs : np.ndarray
+        c : array-like
+            The full set of Ritz constants, 1-D array of size
+            :meth:`.get_size`.
+        xs : np.ndarray, optional
             The `x` positions where to calculate the displacement field.
             Default is ``None`` and the method ``_default_field`` is used.
-        ys : np.ndarray
+            Length.
+        ys : np.ndarray, optional
             The ``y`` positions where to calculate the displacement field.
             Default is ``None`` and the method ``_default_field`` is used.
-        gridx : int
+            Length, same shape as ``xs``.
+        gridx : int, optional
             Number of points along the `x` axis where to calculate the
-            displacement field.
-        gridy : int
+            displacement field. Default ``300``.
+        gridy : int, optional
             Number of points along the `y` where to calculate the
-            displacement field.
+            displacement field. Default ``300``.
 
         Returns
         -------
         out : tuple
             A tuple of ``np.ndarrays`` containing
-            ``(u, v, w, phix, phiy)``.
+            ``(u, v, w, phix, phiy)``, each one with the shape of ``xs``, or
+            ``(gridy, gridx)`` for the default grid. The arrays are also
+            stored in the attributes ``u``, ``v``, ``w``, ``phix`` and
+            ``phiy`` of the :class:`.StiffPanelBay` object.
 
-        Notes
-        -----
-        The returned values ``u```, ``v``, ``w``, ``phix``, ``phiy`` are
-        stored as parameters with the same name in the
-        :class:`.StiffPanelBay` object.
+        Raises
+        ------
+        ValueError
+            When the size of ``c`` is not :meth:`.get_size`.
 
         """
         c = np.ascontiguousarray(c, dtype=DOUBLE)
@@ -819,38 +1147,58 @@ class StiffPanelBay(object):
         ``u``, ``v``, ``w``, ``phix``, ``phiy`` of the
         :class:`StiffPanelBay` object.
 
+        Only the flanges of the :class:`.BladeStiff2D` stiffeners have their
+        own Ritz constants: those of the stiffener ``si`` follow the Ritz
+        constants of the skin and of the flanges of the previous
+        :class:`.BladeStiff2D` stiffeners. The field is computed with the
+        function ``fuvw`` of the field module of the model of the flange.
+        When ``xs`` or ``ys`` is ``None``, the field is computed on a grid of
+        ``gridx`` points along `x`, from ``0`` to ``a``, and ``gridy``
+        points along the width of the flange, also stored in the attributes
+        ``Xs`` and ``Ys``.
+
         Parameters
         ----------
-        c : float
-            The full set of Ritz constants
+        c : array-like
+            The full set of Ritz constants, 1-D array of size
+            :meth:`.get_size`.
         si : int
-            Stiffener index.
+            Stiffener index, in the attribute ``stiffeners``.
         region : str, optional
-            Stiffener region ('base', 'flange' etc).
-        xs : np.ndarray
+            Stiffener region ('base', 'flange' etc). Only ``'flange'`` is
+            implemented. Default ``'flange'``.
+        xs : np.ndarray, optional
             The `x` positions where to calculate the displacement field.
             Default is ``None`` and the method ``_default_field`` is used.
-        ys : np.ndarray
+            Length.
+        ys : np.ndarray, optional
             The ``y`` positions where to calculate the displacement field.
             Default is ``None`` and the method ``_default_field`` is used.
-        gridx : int
+            Length, same shape as ``xs``.
+        gridx : int, optional
             Number of points along the `x` axis where to calculate the
-            displacement field.
-        gridy : int
+            displacement field. Default ``300``.
+        gridy : int, optional
             Number of points along the `y` where to calculate the
-            displacement field.
+            displacement field. Default ``300``.
 
         Returns
         -------
         out : tuple
             A tuple of ``np.ndarrays`` containing
-            ``(u, v, w, phix, phiy)``.
+            ``(u, v, w, phix, phiy)``, each one with the shape of ``xs``, or
+            ``(gridy, gridx)`` for the default grid. The arrays are also
+            stored in the attributes ``u``, ``v``, ``w``, ``phix`` and
+            ``phiy`` of the :class:`.StiffPanelBay` object.
 
-        Notes
-        -----
-        The returned values ``u```, ``v``, ``w``, ``phix``, ``phiy`` are
-        stored as parameters with the same name in the
-        :class:`StiffPanelBay` object.
+        Raises
+        ------
+        RuntimeError
+            When the stiffener ``si`` is a :class:`.BladeStiff1D`; when
+            ``region`` is ``'base'``; when the stiffener has no flange.
+        ValueError
+            When ``region`` is neither ``'flange'`` nor ``'base'``; when the
+            size of ``c`` is not :meth:`.get_size`.
 
         """
         c = np.ascontiguousarray(c, dtype=DOUBLE)
@@ -916,6 +1264,20 @@ class StiffPanelBay(object):
             silent=False):
         r"""Contour plot for a Ritz constants vector.
 
+        Contour plot of a displacement field of the skin, computed by
+        :meth:`.uvw_skin`.
+
+        The displacement component ``vec`` is computed at the points of
+        the grid and drawn with ``ax.contourf``, with `y` along the
+        horizontal axis, which is inverted, and `x` along the vertical
+        axis. When ``save`` is ``True`` and ``ax`` is not given, the figure
+        is saved to ``filename`` and closed. The attributes ``u``, ``v``,
+        ``w``, ``phix`` and ``phiy`` are restored afterwards to their
+        values before the call, except those that were ``None``, which keep
+        the computed field; the attributes ``Xs`` and ``Ys`` keep the grid,
+        shifted in place by the displacements when ``deform_u=True``.
+        Messages are printed unless ``silent=True``.
+
         Parameters
         ----------
         c : np.ndarray
@@ -928,14 +1290,19 @@ class StiffPanelBay(object):
               ``'kxy'``, ``'gyz'``, ``'gxz'``
             - Stress: ``'Nxx'``, ``'Nyy'``, ``'Nxy'``, ``'Mxx'``, ``'Myy'``,
               ``'Mxy'``, ``'Qy'``, ``'Qx'``
+
+            Only the displacement components are implemented, the other
+            values raise a ``ValueError``. Default ``'w'``.
         deform_u : bool, optional
-            If ``True`` the contour plot will look deformed.
+            If ``True`` the contour plot will look deformed. The coordinates
+            of the plot are then shifted by ``deform_u_sf`` times the
+            displacements `u` and `v`. Default ``False``.
         deform_u_sf : float, optional
-            The scaling factor used to deform the contour.
+            The scaling factor used to deform the contour. Default ``100.``.
         invert_y : bool, optional
             Inverts the `y` axis of the plot. It may be used to match
             the coordinate system of the finite element models created
-            using the ``desicos.abaqus`` module.
+            using the ``desicos.abaqus`` module. Default ``False``.
         plot_type : int, optional
             For cylinders only ``4`` and ``5`` are valid.
             For cones all the following types can be used:
@@ -946,35 +1313,47 @@ class StiffPanelBay(object):
             - ``4``: stretched opened (`r \times y` vs. `a`)
             - ``5``: stretched opened (`y` vs. `a`)
 
+            The value is not used by this method.
         save : bool, optional
             Flag telling whether the contour should be saved to an image file.
+            Default ``True``. Ignored when ``ax`` is given.
         dpi : int, optional
-            Resolution of the saved file in dots per inch.
+            Resolution of the saved file in dots per inch. Default ``400``.
         filename : str, optional
             The file name for the generated image file. If no value is given,
-            the `name` parameter of the :class:`StiffPanelBay` object
-            will be used.
+            ``'test.png'`` is used. Default ``''``.
         ax : AxesSubplot, optional
-            When ``ax`` is given, the contour plot will be created inside it.
+            When ``ax`` is given, the contour plot will be created inside it,
+            and the figure is not saved. Default ``None``, a new figure is
+            created.
         figsize : tuple, optional
-            The figure size given by ``(width, height)``.
+            The figure size given by ``(width, height)``, used when ``ax`` is
+            not given. Default ``(3.5, 2.)``.
         title : str, optional
             If any string is given it is added as title to the contour plot.
+            Default ``''``.
         colorbar : bool, optional
-            If a colorbar should be added to the contour plot.
+            If a colorbar should be added to the contour plot. Default
+            ``False``.
         cbar_nticks : int, optional
-            Number of ticks added to the colorbar.
+            Number of ticks added to the colorbar. Default ``2``.
         cbar_format : [ None | format string | Formatter object ], optional
-            See the ``matplotlib.pyplot.colorbar`` documentation.
+            See the ``matplotlib.pyplot.colorbar`` documentation. Default
+            ``None``.
         cbar_fontsize : int, optional
-            Fontsize of the colorbar labels.
+            Fontsize of the colorbar labels. Default ``10``.
         cbar_title : str, optional
             Colorbar title. If ``cbar_title == ''`` no title is added.
+            Default ``''``.
         aspect : str, optional
             String that will be passed to the ``AxesSubplot.set_aspect()``
-            method.
+            method. Default ``'equal'``.
         clean : bool, optional
-            Clean axes ticks, grids, spines etc.
+            Clean axes ticks, grids, spines etc. Default ``True``.
+        texts : list of dict, optional
+            Keyword arguments of ``ax.text``, one dictionary per text, with
+            the position in the coordinates of the axes
+            (``transform=ax.transAxes``). Default ``[]``.
         xs : np.ndarray, optional
             The `x` positions where to calculate the displacement field.
             Default is ``None`` and the method ``_default_field`` is used.
@@ -983,26 +1362,35 @@ class StiffPanelBay(object):
             Default is ``None`` and the method ``_default_field`` is used.
         gridx : int, optional
             Number of points along the `x` axis where to calculate the
-            displacement field.
+            displacement field. Default ``300``.
         gridy : int, optional
             Number of points along the `y` where to calculate the
-            displacement field.
+            displacement field. Default ``300``.
         num_levels : int, optional
             Number of contour levels (higher values make the contour smoother).
+            Default ``400``.
         vecmin : float, optional
             Minimum value for the contour scale (useful to compare with other
             results). If not specified it will be taken from the calculated
-            field.
+            field. Default ``None``.
         vecmax : float, optional
-            Maximum value for the contour scale.
+            Maximum value for the contour scale. If not specified it is taken
+            from the calculated field. Default ``None``.
         silent : bool, optional
             A boolean to tell whether the msg messages should be printed.
+            Default ``False``.
 
         Returns
         -------
         ax : matplotlib.axes.Axes
             The Matplotlib object that can be used to modify the current plot
             if needed.
+
+        Raises
+        ------
+        ValueError
+            When ``vec`` is not one of the displacement components; when
+            ``ax`` is given and is not a :class:`matplotlib.axes.Axes`.
 
         """
         msg('Plotting contour...', silent=silent)
@@ -1134,6 +1522,20 @@ class StiffPanelBay(object):
             vecmin=None, vecmax=None, silent=False):
         r"""Contour plot for a Ritz constants vector.
 
+        Contour plot of a displacement field of the flange of a
+        :class:`.BladeStiff2D`, computed by :meth:`.uvw_stiffener`.
+
+        The displacement component ``vec`` is computed at the points of
+        the grid and drawn with ``ax.contourf``, with `y` along the
+        horizontal axis, which is inverted, and `x` along the vertical
+        axis. When ``save`` is ``True`` and ``ax`` is not given, the figure
+        is saved to ``filename`` and closed. The attributes ``u``, ``v``,
+        ``w``, ``phix`` and ``phiy`` are restored afterwards to their
+        values before the call, except those that were ``None``, which keep
+        the computed field; the attributes ``Xs`` and ``Ys`` keep the grid,
+        shifted in place by the displacements when ``deform_u=True``.
+        Messages are printed unless ``silent=True``.
+
         Parameters
         ----------
         c : np.ndarray
@@ -1141,7 +1543,8 @@ class StiffPanelBay(object):
         si : int
             Stiffener index.
         region : str, optional
-            Stiffener region ('base', 'flange' etc).
+            Stiffener region ('base', 'flange' etc). Only ``'flange'`` is
+            implemented, see :meth:`.uvw_stiffener`. Default ``'flange'``.
         vec : str, optional
             Can be one of the components:
 
@@ -1150,14 +1553,19 @@ class StiffPanelBay(object):
               ``'kxy'``, ``'gyz'``, ``'gxz'``
             - Stress: ``'Nxx'``, ``'Nyy'``, ``'Nxy'``, ``'Mxx'``, ``'Myy'``,
               ``'Mxy'``, ``'Qy'``, ``'Qx'``
+
+            Only the displacement components are implemented, the other
+            values raise a ``ValueError``. Default ``'w'``.
         deform_u : bool, optional
-            If ``True`` the contour plot will look deformed.
+            If ``True`` the contour plot will look deformed. The coordinates
+            of the plot are then shifted by ``deform_u_sf`` times the
+            displacements `u` and `v`. Default ``False``.
         deform_u_sf : float, optional
-            The scaling factor used to deform the contour.
+            The scaling factor used to deform the contour. Default ``100.``.
         invert_y : bool, optional
             Inverts the `y` axis of the plot. It may be used to match
             the coordinate system of the finite element models created
-            using the ``desicos.abaqus`` module.
+            using the ``desicos.abaqus`` module. Default ``False``.
         plot_type : int, optional
             For cylinders only ``4`` and ``5`` are valid.
             For cones all the following types can be used:
@@ -1168,35 +1576,47 @@ class StiffPanelBay(object):
             - ``4``: stretched opened (`r \times y` vs. `a`)
             - ``5``: stretched opened (`y` vs. `a`)
 
+            The value is not used by this method.
         save : bool, optional
             Flag telling whether the contour should be saved to an image file.
+            Default ``True``. Ignored when ``ax`` is given.
         dpi : int, optional
-            Resolution of the saved file in dots per inch.
+            Resolution of the saved file in dots per inch. Default ``400``.
         filename : str, optional
             The file name for the generated image file. If no value is given,
-            the `name` parameter of the :class:`StiffPanelBay` object
-            will be used.
+            ``'test.png'`` is used. Default ``''``.
         ax : AxesSubplot, optional
-            When ``ax`` is given, the contour plot will be created inside it.
+            When ``ax`` is given, the contour plot will be created inside it,
+            and the figure is not saved. Default ``None``, a new figure is
+            created.
         figsize : tuple, optional
-            The figure size given by ``(width, height)``.
+            The figure size given by ``(width, height)``, used when ``ax`` is
+            not given. Default ``(3.5, 2.)``.
         title : str, optional
             If any string is given it is added as title to the contour plot.
+            Default ``''``.
         colorbar : bool, optional
-            If a colorbar should be added to the contour plot.
+            If a colorbar should be added to the contour plot. Default
+            ``False``.
         cbar_nticks : int, optional
-            Number of ticks added to the colorbar.
+            Number of ticks added to the colorbar. Default ``2``.
         cbar_format : [ None | format string | Formatter object ], optional
-            See the ``matplotlib.pyplot.colorbar`` documentation.
+            See the ``matplotlib.pyplot.colorbar`` documentation. Default
+            ``None``.
         cbar_fontsize : int, optional
-            Fontsize of the colorbar labels.
+            Fontsize of the colorbar labels. Default ``10``.
         cbar_title : str, optional
             Colorbar title. If ``cbar_title == ''`` no title is added.
+            Default ``''``.
         aspect : str, optional
             String that will be passed to the ``AxesSubplot.set_aspect()``
-            method.
+            method. Default ``'equal'``.
         clean : bool, optional
-            Clean axes ticks, grids, spines etc.
+            Clean axes ticks, grids, spines etc. Default ``True``.
+        texts : list of dict, optional
+            Keyword arguments of ``ax.text``, one dictionary per text, with
+            the position in the coordinates of the axes
+            (``transform=ax.transAxes``). Default ``[]``.
         xs : np.ndarray, optional
             The `x` positions where to calculate the displacement field.
             Default is ``None`` and the method ``_default_field`` is used.
@@ -1205,26 +1625,35 @@ class StiffPanelBay(object):
             Default is ``None`` and the method ``_default_field`` is used.
         gridx : int, optional
             Number of points along the `x` axis where to calculate the
-            displacement field.
+            displacement field. Default ``300``.
         gridy : int, optional
             Number of points along the `y` where to calculate the
-            displacement field.
+            displacement field. Default ``300``.
         num_levels : int, optional
             Number of contour levels (higher values make the contour smoother).
+            Default ``400``.
         vecmin : float, optional
             Minimum value for the contour scale (useful to compare with other
             results). If not specified it will be taken from the calculated
-            field.
+            field. Default ``None``.
         vecmax : float, optional
-            Maximum value for the contour scale.
+            Maximum value for the contour scale. If not specified it is taken
+            from the calculated field. Default ``None``.
         silent : bool, optional
             A boolean to tell whether the msg messages should be printed.
+            Default ``False``.
 
         Returns
         -------
         ax : matplotlib.axes.Axes
             The Matplotlib object that can be used to modify the current plot
             if needed.
+
+        Raises
+        ------
+        ValueError
+            When ``vec`` is not one of the displacement components; when
+            ``ax`` is given and is not a :class:`matplotlib.axes.Axes`.
 
         """
         msg('Plotting contour...', silent=silent)
@@ -1375,15 +1804,36 @@ class StiffPanelBay(object):
     def calc_fext(self, silent=False):
         r"""Calculates the external force vector `\{F_{ext}\}`
 
+        The point forces of the skin, the attribute ``forces_skin``, and
+        those of the flange of each :class:`.BladeStiff2D`, its attribute
+        ``forces_flange``, each one a sequence ``(x, y, fx, fy, fz)`` of the
+        coordinates and of the components along `x`, `y` and `z`, are
+        projected on the approximation functions with the function ``fg`` of
+        the field module of the model, using the first panel for the skin.
+        The vector of the skin is followed by those of the flanges, in the
+        order of the attribute ``bladestiff2ds``; the stiffeners without
+        flange are skipped. The bay is not rebuilt, the attribute ``model``
+        must be set. Messages are printed unless ``silent=True``.
+
         Parameters
         ----------
         silent : bool, optional
             A boolean to tell whether the msg messages should be printed.
+            Default ``False``.
 
         Returns
         -------
         fext : np.ndarray
-            The external force vector
+            The external force vector, 1-D array of size :meth:`.get_size`.
+
+        Notes
+        -----
+        The external force vector is the work-equivalent of the point
+        forces, the virtual work of each force `\{f\} = \{f_x, f_y, f_z\}^T`
+        at `(x, y)` being `\delta\{c\}^T [N(x, y)]^T \{f\}`, where the rows
+        of `[N]` are the approximation functions of `u`, `v` and `w` at the
+        point, given by ``fg``. The rows of the rotations are multiplied by
+        zero: no moment is applied.
 
         """
         msg('Calculating external forces...', level=2, silent=silent)

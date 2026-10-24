@@ -1,0 +1,43 @@
+alfano2001_TableI_to1.7_K1e5 null-space, dcb_alfano2001.ipynb, started Sat Oct 24 08:58:12 2026
+WARNING: SB_TSL: 30 terms along x over 70 give 0.40 terms per decay length 1/lambda = 0.935, below 1.0; recommended m = 1.25*lambda*a = 93.6, see panels.multidomain.connections.tsl_discretization
+delta=0.1000 P=3.566 Ptrac=3.572 a=30.00 dmax=0.967 it=6
+delta=0.2000 P=6.703 Ptrac=6.664 a=30.00 dmax=0.991 it=4
+delta=0.3000 P=9.599 Ptrac=9.568 a=30.00 dmax=0.996 it=3
+delta=0.4000 P=12.323 Ptrac=12.358 a=30.00 dmax=0.998 it=3
+delta=0.5000 P=14.896 Ptrac=14.994 a=30.00 dmax=0.998 it=3
+delta=0.6000 P=17.352 Ptrac=17.471 a=30.00 dmax=0.999 it=3
+delta=0.7000 P=19.707 Ptrac=19.794 a=30.00 dmax=0.999 it=3
+delta=0.8000 P=21.970 Ptrac=21.986 a=30.00 dmax=0.999 it=3
+delta=0.9000 P=24.149 Ptrac=24.074 a=30.00 dmax=0.999 it=3
+delta=1.0000 P=26.242 Ptrac=26.080 a=30.00 dmax=1.000 it=2
+delta=1.1000 P=28.243 Ptrac=28.029 a=30.00 dmax=1.000 it=2
+delta=1.2000 P=30.187 Ptrac=29.951 a=30.00 dmax=1.000 it=3
+delta=1.3000 P=32.061 Ptrac=31.845 a=30.00 dmax=1.000 it=2
+delta=1.4000 P=33.857 Ptrac=33.705 a=30.00 dmax=1.000 it=2
+delta=1.5000 P=35.609 Ptrac=35.543 a=30.00 dmax=1.000 it=2
+delta=1.6000 P=37.259 Ptrac=37.304 a=30.00 dmax=1.000 it=2
+delta=1.7000 P=38.866 Ptrac=39.024 a=30.00 dmax=1.000 it=2
+delta=1.8000 P=40.374 Ptrac=40.630 a=30.00 dmax=1.000 it=3
+delta=1.9000 P=41.832 Ptrac=42.167 a=30.00 dmax=1.000 it=2
+delta=2.0000 P=43.192 Ptrac=43.560 a=30.00 dmax=1.000 it=2
+delta=2.1000 P=44.501 Ptrac=44.872 a=30.00 dmax=1.000 it=2
+delta=2.2000 P=45.703 Ptrac=46.016 a=30.00 dmax=1.000 it=3
+delta=2.3000 P=46.845 Ptrac=47.071 a=30.00 dmax=1.000 it=2
+delta=2.4000 P=47.861 Ptrac=47.948 a=30.00 dmax=1.000 it=3
+delta=2.5000 P=48.786 Ptrac=48.718 a=30.00 dmax=1.000 it=3
+delta=2.6000 P=49.566 Ptrac=49.327 a=30.00 dmax=1.000 it=2
+delta=2.7000 P=50.183 Ptrac=49.803 a=30.00 dmax=1.000 it=3
+delta=2.8000 P=50.651 Ptrac=50.160 a=30.00 dmax=1.000 it=3
+delta=2.9000 P=50.814 Ptrac=50.324 a=30.00 dmax=1.000 it=2
+delta=3.0000 P=50.706 Ptrac=50.314 a=30.00 dmax=1.000 it=3
+delta=3.1000 P=50.135 Ptrac=49.996 a=30.27 dmax=1.000 it=3
+delta=3.2000 P=49.364 Ptrac=49.571 a=30.91 dmax=1.000 it=3
+delta=3.3000 P=48.585 Ptrac=49.079 a=31.63 dmax=1.000 it=3
+delta=3.4000 P=47.791 Ptrac=48.388 a=32.23 dmax=1.000 it=3
+delta=3.5000 P=47.076 Ptrac=47.581 a=32.91 dmax=1.000 it=3
+delta=3.6000 P=46.464 Ptrac=46.731 a=33.28 dmax=1.000 it=4
+delta=3.7000 P=45.878 Ptrac=45.811 a=34.10 dmax=1.000 it=3
+delta=3.8000 P=45.259 Ptrac=44.854 a=34.54 dmax=1.000 it=2
+delta=3.9000 P=44.588 Ptrac=43.969 a=35.00 dmax=1.000 it=3
+delta=4.0000 P=44.013 Ptrac=43.337 a=35.98 dmax=1.000 it=3
+finished Sat Oct 24 09:14:51 2026, 1000 s, 40 openings, aborted False

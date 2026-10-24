@@ -188,18 +188,32 @@ see :meth:`.MultiDomain.get_kC_conn`:
         :mod:`panels.multidomain.connections.kCBFxcte`
       - `u_1 = w_2`, `v_1 = v_2`, `w_1 = -u_2`, `\phi_{x1} = \phi_{x2}`
     * - ``'SB'``
-      - `u_1 + d_{sb} w_{1,x} = u_2`, `v_1 + d_{sb} w_{1,y} = v_2`, `w_1 =
-        w_2`, with `d_{sb} = h_1/2 + h_2/2`, see ``kCSB.pyx``
-      - `u, v, w` at the interface, `z = -h_1/2` of ``p1`` and `z = h_2/2`
-        of ``p2``, see :func:`.fkCSB_sdt`, and `\phi_x, \Phi_y` only when
-        the key ``'kr'`` of the connection is given and not zero
+      - `u_1(z_1) = u_2(z_2)`, `v_1(z_1) = v_2(z_2)`, `w_1 = w_2` at the
+        interface, `z_1 = d_1 - h_1/2` of ``p1`` and `z_2 = d_2 + h_2/2` of
+        ``p2``, `d_1`, `d_2` being the offsets, with `u(z) = u - z w_{,x}`
+        and `v(z) = (1 + z/r) v - z w_{,y}` of each panel, see
+        :func:`.fkCSB`; the rotations are not tied and the key ``'kr'`` is
+        not used
+      - `u, v, w` at the interface, `z = d_1 - h_1/2` of ``p1`` and `z = d_2
+        + h_2/2` of ``p2``, see :func:`.fkCSB`, and `\phi_x, \Phi_y`
+        (`\theta_x, \theta_y` of :eq:`tsdt-offset-theta` for the TSDT with
+        an offset) only when the key ``'kr'`` of the connection is given and
+        not zero
 
 where `\Phi_y = \phi_y + v/r` with the Sanders-Koiter kinematics and `\Phi_y
-= \phi_y` otherwise, and the terms `v/r` of the classical laminated plate
-theory are present only with the Sanders-Koiter kinematics. The keys
+= \phi_y` otherwise, and the terms `v/r` and `z/r` of the classical
+laminated plate theory are present only with the Sanders-Koiter kinematics.
+The quantities of ``'SB'`` are the same for all the models, the
+displacements of the faces in contact, see
+:func:`.kCsdt._sb_components`. The keys
 ``'kt'`` and ``'kr'`` of the connections are not used, apart from ``'kr'``
 of ``'SB'`` with the shear deformation theories, which tells whether the
-rotations are connected.
+rotations are connected. The rotations of the classical laminated plate
+theory, `-w_{,x}` and `-w_{,y} + v/r`, follow from `w`, already tied by `w_1
+= w_2`: tying them too adds redundant constraints, or, with the
+Sanders-Koiter kinematics and distinct reference surfaces, the constraint
+`(z_1 - z_2) w_{,y} = 0`, i.e. `w_{,y} = 0` over the whole area, see
+:func:`.kCsdt._sb_components`.
 
 
 Usage
@@ -328,8 +342,15 @@ The prescribed displacements of :meth:`.Shell.add_point_pd`,
 :meth:`.Shell.add_distr_pd_fixed_x` and :meth:`.Shell.add_distr_pd_fixed_y`
 are imposed by default with the penalty method: their forces `k u_p` enter
 the external force vector and the penalty stiffnesses, e.g. of
-:func:`.fkCpd`, :func:`.fkCld_xcte` and :func:`.fkCld_ycte`, must be added to
-the stiffness matrix by the user. With ``pd_method='null-space'`` they are
+:func:`.fkCpd`, :func:`.fkCld_xcte` and :func:`.fkCld_ycte`, for the models
+with 3 and 5 degrees of freedom per term, must be added to the stiffness
+matrix by the user, symmetrized with
+:func:`structsolve.sparseutils.finalize_symmetric_matrix`:
+
+.. literalinclude:: ../../tests/multidomain/test_kCpd_kernels.py
+    :pyobject: test_penalty_reaches_prescribed_values
+
+With ``pd_method='null-space'`` they are
 imposed exactly, as inhomogeneous linear constraints eliminated together
 with the connections, without any penalty constant::
 
@@ -340,16 +361,26 @@ A single panel is wrapped in a :class:`.MultiDomain` without connections,
 independent: the connections may be imposed with either ``conn_method``.
 The default ``pd_method='penalty'`` keeps the previous behaviour.
 
-The same methods of :class:`.Shell` define the prescribed displacements.
+The same methods of :class:`.Shell` define the prescribed displacements,
+the in-plane ones at the reference surface or at the thickness coordinate
+of the keyword ``z``, e.g. at the faces of a face-clamped edge, see
+:ref:`boundary_conditions_face_clamp`.
 With ``pd_method='null-space'`` the values of the penalty constants are not
 used: a component is prescribed when its penalty constant is neither
 ``None`` nor zero and its value is given, the same rule as for the penalty
 method, where a null penalty constant prescribes nothing. The rotations
-`\phi_x` and `\phi_y` of the approximation functions of the model, `-w_{,x}`
-and `-w_{,y}` for the classical laminated plate theory, the fields `\phi_x`
-and `\phi_y` for the shear deformation theories, plus `v/r` in `\phi_y` with
-the Sanders-Koiter kinematics, can also be prescribed, only with
-``pd_method='null-space'``, through the keyword arguments ``kphix``,
+of the normal at the reference surface `z = 0` can also be prescribed:
+`-w_{,x}` and `-w_{,y}` for the classical laminated plate theory, and for
+the shear deformation theories `\theta_x` and `\theta_y` of Eq.
+:eq:`tsdt-offset-theta`, the rotations also tied by the connections, which
+are the fields `\phi_x` and `\phi_y` for the FSDT and for the TSDT without
+offset; the rotation about `x` includes `v/r` with the Sanders-Koiter
+kinematics. With an offset `d`, the TSDT rotations `\phi_x` and `\phi_y`
+are those at the mid-surface, `z = d`, and the prescribed rotations at `z =
+0` include the transverse shear, `\theta_x = \phi_x - (4 d^2/h^2)(\phi_x +
+w_{,x})`, see :ref:`tsdt_offset_prescribed_rotations`. The rotations are
+prescribed only with ``pd_method='null-space'``, through the keyword
+arguments ``kphix``,
 ``phixp``, ``kphiy`` and ``phiyp`` of :meth:`.Shell.add_point_pd`, or
 ``kphix``, ``funcphix``, ``kphiy`` and ``funcphiy`` of the distributed ones.
 For example, a uniform end-shortening `\delta` of a plate, incremented with
@@ -422,9 +453,11 @@ and projecting it with `[T]^T` gives the reduced problem solved by
 depends on the configuration and on the load factor. ``structsolve`` 0.7.0
 passes the load factor to ``calc_fext`` when it declares the keyword
 argument ``lbd``, and uses `\partial R_r/\partial \lambda` in the predictors
-and in the constraint of the arc-length methods, and as a reference of the
-relative convergence criterion, since under a prescribed displacement alone
-both `[T]^T \{F_{ext}\}` and `[T]^T \{F_{int}\}` vanish at equilibrium, see
+and in the constraint of the arc-length methods, and `\lambda \partial
+R_r/\partial \lambda` as a reference of the convergence criteria, the
+relative one and Crisfield's, the default since ``structsolve`` 0.9.0,
+because under a prescribed displacement alone both `[T]^T \{F_{ext}\}` and
+`[T]^T \{F_{int}\}` vanish at equilibrium, see
 :meth:`.MultiDomain.get_reduced_functions`.
 
 The linear static analysis solves
@@ -440,7 +473,9 @@ buckling analysis about the pre-buckling state `\{c(\lambda)\} = \{c_0\} +
 \lambda \{c_1\}`, with `\{c_0\}` due to the constant prescribed
 displacements and `\{c_1\}` due to the load and the incremented ones,
 solves `([K_r] + [K_{G, r}(c_0)] + \lambda [K_{G, r}(c_1)]) \{\phi_r\} =
-\{0\}`, see :meth:`.MultiDomain.linear_buckling`. The modes satisfy the
+\{0\}`, see :meth:`.MultiDomain.linear_buckling`; the constant stress
+resultants ``Nxx``, ``Nyy`` and ``Nxy`` of the panels are part of the
+constant state, in `[K_{G, r}(c_0)]` only. The modes satisfy the
 homogeneous constraints, `\{\phi\} = [T] \{\phi_r\}`: under displacement
 control the prescribed components of the modes are zero, whereas under the
 equivalent load they are free. For a flat plate the modes of the linear
@@ -624,25 +659,27 @@ null-space method has the condition number `1.4 \times 10^{11}`:
       - `2.0 \times 10^{-4}`
       - `2.0 \times 10^{-6}`
       - `2.0 \times 10^{-8}`
-      - `3.1 \times 10^{-9}`
+      - `3.2 \times 10^{-9}`
     * - error of the reaction
       - `-1.8 \times 10^{-1}`
       - `-2.2 \times 10^{-2}`
       - `-2.2 \times 10^{-4}`
       - `-2.2 \times 10^{-6}`
-      - `-2.2 \times 10^{-8}`
-      - `-1.2 \times 10^{-6}`
+      - `4.4 \times 10^{-9}`
+      - `-2.3 \times 10^{-6}`
     * - condition number
       - `2.5 \times 10^{12}`
       - `2.0 \times 10^{13}`
       - `2.0 \times 10^{15}`
       - `2.0 \times 10^{17}`
-      - `1.8 \times 10^{19}`
-      - `1.8 \times 10^{21}`
+      - `2.0 \times 10^{19}`
+      - `1.9 \times 10^{21}`
 
-The reaction of the penalty method, `k \int (u_p - u)`, is the product of a
-large constant and a small difference, and loses accuracy by cancellation
-for the highest constants.
+The reaction of the penalty method, `k \int (u_p - u)`, here integrated with
+40 Gauss-Legendre points along `x = a`, is the product of a large constant
+and a small difference, and loses accuracy by cancellation for the highest
+constants: from `k/(E h) = 10^8` its error no longer decreases as `1/k`, and
+depends on the round-off, e.g. on the number of integration points.
 
 **Linear buckling.** Cylinder of 5 panels under a uniform end-shortening,
 see ``test_cylinder_end_shortening``. The error of the critical
@@ -650,53 +687,96 @@ end-shortening of the penalty method is `1.4 \times 10^{-1}`, `1.3 \times
 10^{-2}`, `1.3 \times 10^{-3}`, `1.3 \times 10^{-4}` and `1.3 \times
 10^{-6}` for `k/A_{11} = 10, 10^2, 10^3, 10^4, 10^6`, from above, since the
 penalty springs shorten the cylinder less than the prescribed value. Both
-methods take about 3.8 s. With `k/A_{11} = 10^6` the sparse eigenvalue
-solver of ``structsolve`` fails its verification of the residuals of the
-eigenpairs, because of the conditioning, and ``structsolve.lb`` falls back to
-the dense solver with a ``DenseFallbackWarning``.
+methods take about 0.5 s, from the creation of the model to the critical
+end-shortening. With `k/A_{11} = 10^6` the sparse eigenvalue solver of
+``structsolve`` 0.8.0 failed its verification of the residuals of the
+eigenpairs, because of the conditioning, and ``structsolve.lb`` fell back to
+the dense solver with a ``DenseFallbackWarning``. Since ``structsolve``
+0.9.0 the relative residual of the verification is at least
+``RESIDUAL_FLOOR = 1e-8`` times a scale of the norms of the matrices, and
+the eigenpairs of the sparse solver are accepted.
 
 **Non-linear analysis.** Post-buckling of the plate at twice the critical
-end-shortening, ``m = n = 8``, Newton-Raphson with 8 increments; error of
-the axial reaction of the penalty method with the default convergence
-tolerance ``relTOL = 1e-6`` and with ``relTOL = 1e-10``:
+end-shortening, ``m = n = 8``, with a lateral point load of 30 N at the
+centre as imperfection, as in ``test_nonlinear_reaction_matches_penalty``,
+Newton-Raphson with 8 increments. Error of the axial reaction of the penalty
+method, relative to that of the null-space method, with Crisfield's
+convergence criterion, ``Analysis.convergence = 'crisfield'``, the default of
+``structsolve`` 0.9.0 with ``relTOL = 1e-9``, and with the relative
+criterion, ``'relative'``, the only one up to ``structsolve`` 0.8.0, whose
+default was ``relTOL = 1e-6``:
 
 .. list-table::
     :header-rows: 1
 
-    * - `k / (E h)`
+    * - criterion, `k / (E h)`
       - `10^2`
       - `10^4`
       - `10^6`
-    * - ``relTOL = 1e-6``
+      - `10^8`
+    * - ``'crisfield'``, ``relTOL = 1e-9``
+      - `-3.6 \times 10^{-2}`
+      - `-3.8 \times 10^{-4}`
+      - `-3.8 \times 10^{-6}`
+      - `-5.6 \times 10^{-8}`
+    * - ``'crisfield'``, ``relTOL = 1e-6``
+      - `-3.6 \times 10^{-2}`
+      - `-4.0 \times 10^{-4}`
+      - `-1.9 \times 10^{-5}`
+      - `-1.5 \times 10^{-5}`
+    * - ``'relative'``, ``relTOL = 1e-6``
       - `-3.6 \times 10^{-2}`
       - `-5.5 \times 10^{-4}`
       - `-2.1 \times 10^{-1}`
-    * - ``relTOL = 1e-10``
+      - `1.1`
+    * - ``'relative'``, ``relTOL = 1e-10``
       - `-3.6 \times 10^{-2}`
       - `-3.8 \times 10^{-4}`
       - `-1.9 \times 10^{-5}`
+      - `-1.7 \times 10^{-4}`
 
-The relative convergence criterion of the penalty method is relative to the
-penalty forces `k u_p`, which grow with `k`: with the default tolerance, the
-highest penalty constant gives the largest error, 21%, after converging in
-fewer iterations. The null-space method has no such trade-off, its
-reference being `\lambda \partial R_r/\partial \lambda`, see
-:ref:`null_space_pd`.
+Both criteria compare the norm of the residual with the largest norm of the
+references `\lambda \{F_{ext}\}`, `\{F_{int}\}` and, when they apply, the
+external force vector of the increment of the arc-length methods and
+`\lambda \partial R/\partial \lambda`, see ``structsolve.convergence``. For
+the penalty method `\lambda \{F_{ext}\}` and `\{F_{int}\}` contain the
+penalty forces `k u_p`. The relative criterion measures them with the
+Euclidean norm over all the degrees of freedom, which grows with `k`: with
+``relTOL = 1e-6`` the highest penalty constants give the largest errors,
+21% and 110%, after 12 and 8 evaluations of the internal force vector in
+the 8 increments, against 28 for `k/(E h) = 10^2`, and even with ``relTOL =
+1e-10`` the error grows again from `k/(E h) = 10^6` to `10^8`. Crisfield's
+criterion uses the norm `\|v\|_{\boldsymbol{d}} = (\sum_j v_j^2/|d_j|)^{1/2}`
+over the free degrees of freedom, the entries `d_j` of the diagonal scaling
+vector `\boldsymbol{d}` being the diagonal of the linear stiffness matrix
+``calc_kC()``, which contains the penalty stiffness, such that the scaled
+norm of the penalty forces grows with `\sqrt{k}`, by a factor of 10 for
+each factor of 100 of `k` in this case: with ``relTOL = 1e-9`` the error
+decreases as `1/k` up to `k/(E h) = 10^8`, whereas with ``relTOL = 1e-6`` it
+stops decreasing at about `2 \times 10^{-5}`. The null-space method has no
+such trade-off, its reference being `\lambda \partial R_r/\partial \lambda`,
+see :ref:`null_space_pd`: its reaction is the same to `3 \times 10^{-10}`
+with the four combinations of the table.
 
 **Run time.** For the linear analyses both methods have the same cost: the
 elimination of the constraints is a small fraction of the assembly. For the
 non-linear analysis above the run time is dominated by the assembly of the
-tangent stiffness matrix: 0.96 s and 1.29 s with the null-space method for
-``relTOL = 1e-6`` and ``1e-10``, against 0.44 s and 0.90 s with the penalty
-method and `k/(E h) = 10^4`. The null-space method converges to a much
-smaller residual in absolute terms. Its `\partial R_r/\partial \lambda`
-requires the product `[K_T] \{c_{p1}\}`, computed without assembling
-`[K_T]`, see :ref:`tangent_product`, at the cost of one evaluation of the
-internal force vector, and ``structsolve`` 0.8.0 evaluates it only together
-with the tangent stiffness matrix. With ``panels`` 0.12.0 before these two
-improvements and the tabulation of the approximation functions, see
-:ref:`tabulation`, the same analyses took 12.6 s and 15.8 s against 4.4 s
-and 9.2 s.
+tangent stiffness matrix. With ``panels`` 0.14.0 and ``structsolve`` 0.9.0,
+on the same machine, medians of 15 runs of ``Analysis.static``: 0.60 s with
+the null-space method and Crisfield's criterion with ``relTOL = 1e-9``, and
+0.50 s and 0.66 s with the relative criterion with ``relTOL = 1e-6`` and
+``1e-10``, against 0.46 s, 0.24 s and 0.45 s with the penalty method and
+`k/(E h) = 10^4`. With
+Crisfield's criterion the null-space method factorizes the tangent stiffness
+matrix 29 times, against 25 for the penalty method. Its `\partial
+R_r/\partial \lambda` requires the product `[K_T] \{c_{p1}\}`, computed
+without assembling `[K_T]`, see :ref:`tangent_product`, at the cost of one
+evaluation of the internal force vector, and ``structsolve``, since 0.8.0,
+evaluates it only together with the tangent stiffness matrix. With
+``panels`` 0.12.0 before these two improvements and the tabulation of the
+approximation functions, see :ref:`tabulation`, the same analyses with the
+relative criterion and ``relTOL = 1e-6`` and ``1e-10`` took 12.6 s and
+15.8 s against 4.4 s and 9.2 s.
 
 **When to use each method.** The null-space method is exact, needs no
 penalty constant, keeps the conditioning of the model, and gives reactions
@@ -724,11 +804,16 @@ approximation more than the penalty method with the default constants does:
 - The boundary condition flags at the ends of an edge of one domain are
   imposed on the other domain.
 
-- With ``'SB'`` and the classical laminated plate theory, `u_1 = u_2 - d_{sb}
-  w_{,x}`. Restraining the normal in-plane displacement of an edge in both
-  domains, e.g. `u = 0` at `x = 0`, also restrains the rotation `w_{,x}` at
-  that edge, which is clamped. The in-plane displacements of the bonded
-  laminates must be restrained consistently with the single laminate that
+- With ``'SB'`` and the classical laminated plate theory, `u_1 - z_1 w_{,x}
+  = u_2 - z_2 w_{,x}`, `z_1` and `z_2` being the faces in contact measured
+  from the reference surface of each domain. When the reference surfaces of
+  the two domains are apart, `z_1 \ne z_2`, e.g. without offsets,
+  restraining the normal in-plane displacement of an edge in both domains,
+  e.g. `u = 0` at `x = 0`, also restrains the rotation `w_{,x}` at that
+  edge, which is clamped. With offsets that place both reference surfaces at
+  the same height, `z_1 = z_2` and `u_1 = u_2`.
+  The in-plane displacements of the bonded laminates must be restrained
+  consistently with the single laminate that
   they represent, e.g. restraining only the tangential displacement of the
   edges, as in ``test_skin_base_nonlinear_equals_single_laminate``.
 
@@ -772,6 +857,8 @@ see :ref:`null_space_pd`.
     :no-value:
 
 .. autofunction:: panels.multidomain.connections.nullspace.pd_constraint_matrix
+
+.. autofunction:: panels.multidomain.connections.nullspace.pd_rows
 
 .. autofunction:: panels.multidomain.connections.nullspace.pd_points
 

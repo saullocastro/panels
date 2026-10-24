@@ -98,3 +98,32 @@ def test_two_panels_tangent_is_jacobian(model):
     # the follower part is not lost in the assembly
     Kf = np.asarray((T.T @ md._calc_kCfollower(T @ c, inc, True) @ T).todense())
     assert np.linalg.norm(K - J) <= 1.e-3*np.linalg.norm(Kf)
+
+
+def test_closed_cylinder_load_stiffness_symmetric():
+    r"""A uniform follower pressure on a closed cylinder with simply
+    supported ends: the load stiffness of each panel is unsymmetric, the
+    contour integrals along the connected edges cancel only where the
+    displacements of both sides are equal, i.e. in the matrix reduced by the
+    null-space method, but not in the matrix of the penalty method"""
+    from panels.multidomain import create_cylinder
+    for conn_method in ('null-space', 'penalty'):
+        md, conns = create_cylinder(height=0.5, r=0.3, stack=[0, 45, -45, 90],
+                                    plyt=0.125e-3, laminaprop=LAMINAPROP,
+                                    npanels=4, m=6, n=6,
+                                    conn_method=conn_method)
+        size = md.get_size()
+        K = 0
+        for p in md.panels:
+            p.add_pressure_load(-1.e4, follower=True)
+            k = p.calc_kCfollower().toarray()
+            assert np.linalg.norm(k - k.T) > 0.1*np.linalg.norm(k)
+            K = K + p.calc_kCfollower(size=size, row0=p.row_start,
+                                      col0=p.col_start)
+        if conn_method == 'null-space':
+            T = md.get_T(conns)
+            K = (T.T @ K @ T).toarray()
+            assert np.linalg.norm(K - K.T) < 1e-12*np.linalg.norm(K)
+        else:
+            K = K.toarray()
+            assert np.linalg.norm(K - K.T) > 0.1*np.linalg.norm(K)

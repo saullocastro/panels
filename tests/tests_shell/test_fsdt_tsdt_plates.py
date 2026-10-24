@@ -77,7 +77,9 @@ def set_edge(s, edge, kind):
     ``kind`` is ``'S'`` for simply supported (SS-1), ``'C'`` for clamped or
     ``'F'`` for free. The tangential displacement and rotation of an edge of
     constant `x` are `v` and `\phi_y`, and of constant `y`, `u` and
-    `\phi_x`.
+    `\phi_x`. The clamped edge removes `u, v, w`, the slope of `w` normal
+    to the edge for the CLPT, the rotations for the FSDT, and both the
+    rotations and the slope for the TSDT.
     """
     tangential, normal = ('v', 'u') if edge.startswith('x') else ('u', 'v')
     rot_tangential, rot_normal = (('phiy', 'phix') if edge.startswith('x')
@@ -92,9 +94,11 @@ def set_edge(s, edge, kind):
     elif kind == 'C':
         for field in ('u', 'v', 'w', 'phix', 'phiy'):
             setattr(s, edge + field, 0.)
-        # the classical plate theory clamps the slope of w, whereas the
-        # shear deformation theories clamp the rotations, with w,x free
-        if 'clpt' in s.model:
+        # the classical plate theory clamps the slope of w and the FSDT the
+        # rotations, with the slope free; the TSDT clamps both, such that
+        # the warping term p(z) (phi + w,n) of u(z) and v(z) vanishes too
+        # and the section stays planar and unrotated
+        if 'clpt' in s.model or 'tsdt' in s.model:
             setattr(s, edge + 'wr', 0.)
     elif kind != 'F':
         raise ValueError(kind)

@@ -1,3 +1,13 @@
+r"""External force vector of a :class:`.Shell` (:mod:`panels.shell_fext`)
+
+:func:`shell_fext` integrates the point loads, distributed loads, pressure
+loads and the forces of the prescribed displacements of a shell into its
+external force vector, the work of :meth:`.Shell.calc_fext`.
+:func:`pressure_patches` and :func:`pressure_factor` prepare the pressure
+loads, which are also used by the follower pressure terms of
+:meth:`.Shell.calc_kCfollower` and :meth:`.Shell.calc_fext_follower`.
+
+"""
 import numpy as np
 
 from . import modelDB
@@ -39,16 +49,18 @@ def shell_fext(shell, inc, size, col0, include_pds=True):
           this is affected by the load increment in nonlinear analyses.
 
         - ``shell.point_pds`` : list of prescribed point displacements, each
-          described with ``[x, y, ku*up, kv*vp, kw*wp]``. See
+          described with ``[x, y, ku*up, kv*vp, kw*wp, z]``, ``z`` being the
+          thickness coordinate of `u` and `v`. See
           :meth:`.Shell.add_point_pd`.
 
         - ``shell.point_pds_inc`` : similar to ``point_pds``, but this is
           affected by the load increment in nonlinear analyses.
 
         - ``shell.distr_pds`` : list of distributed prescribed displacements,
-          each described with ``[x, None, ku*funcu, kv*funcv, kw*funcw]`` or
-          ``[None, y, ku*funcu, kv*funcv, kw*funcw]`` where ``x`` or ``y`` are
-          the variable over which the displacement is distributed. See
+          each described with ``[x, None, ku*funcu, kv*funcv, kw*funcw, z]``
+          or ``[None, y, ku*funcu, kv*funcv, kw*funcw, z]`` where ``x`` or
+          ``y`` are the variable over which the displacement is distributed.
+          See
           :meth:`.Shell.add_distr_pd_fixed_x` or
           :meth:`.Shell.add_distr_pd_fixed_y`.
 
@@ -59,27 +71,55 @@ def shell_fext(shell, inc, size, col0, include_pds=True):
     ----------
     shell : :class:`.Shell`
         The shell object.
-    inc : float, optional
+    inc : float
         Since this function is called during the non-linear analysis,
         ``inc`` will multiply the terms `\{{F_{ext}}_\lambda\}`.
         col0 = starting col in the global matrix ?????
-    size : int or str, optional
+        Dimensionless.
+    size : int, str or None
         The size of the force vector. Can be the size of the total internal
         force vector of a multidomain assembly. When using a string, for
         example, if '+1' is given it will add 1 to the Shell`s size obtained
-        by the :meth:`.Shell.get_size`
-    col0 : int, optional
+        by the :meth:`.Shell.get_size`. ``None`` is the size of the shell.
+    col0 : int
         Offset in a global internal force vector of an assembly.
     include_pds : bool, optional
         Whether the forces of the prescribed displacements are included. The
         prescribed rotations, see :meth:`.Shell.add_point_pd`, are only
         available with ``MultiDomain(..., pd_method='null-space')``, which
-        excludes these forces.
+        excludes these forces. Default ``True``.
 
     Returns
     -------
     fext : np.ndarray
-        The external force vector.
+        The external force vector, 1-D array of size ``size``, zero outside
+        of ``fext[col0:col0 + shell.get_size()]``.
+
+    Raises
+    ------
+    ValueError
+        If ``shell.model`` is not a valid model, or if a distributed load or
+        a distributed prescribed displacement has both or none of ``x`` and
+        ``y`` set to ``None``.
+    NotImplementedError
+        If ``include_pds=True`` and rotations are prescribed, see
+        :meth:`.Shell.has_rotation_pds`.
+
+    Notes
+    -----
+    Each load enters with its virtual work on the approximation functions,
+    the rows `\{g_u\}`, `\{g_v\}`, `\{g_w\}` of the function ``fg`` of the
+    model: a point load gives `f_x \{g_u\} + f_y \{g_v\} + f_z \{g_w\}` at
+    `(x, y)`; a distributed load at a fixed `y` gives `\int_0^a (f_x
+    \{g_u\} + f_y \{g_v\} + f_z \{g_w\}) dx`, computed with ``shell.m``
+    Gauss-Legendre points, and at a fixed `x` the integral along `y` with
+    ``shell.n`` points; a pressure gives `\int \int p \{g_w\} dx dy` over its
+    patch, see :func:`.pressure_patches`. The prescribed displacements
+    imposed with the penalty method give the same vectors with the forces
+    `k u_p`, the right-hand side of the penalty energy, see
+    :meth:`.Shell.add_point_pd`, with the rows of `u(z)` and `v(z)` of
+    :func:`.nullspace.pd_rows` in place of `\{g_u\}` and `\{g_v\}` for a
+    thickness coordinate `z` different from zero.
 
     """
 
@@ -180,16 +220,22 @@ def shell_fext(shell, inc, size, col0, include_pds=True):
     # - grouping point_pds and point_pds_inc
     point_pds = []
     for pd in shell.point_pds:
-        # pd = [x, y, ku*up, kv*vp, kw*wp]
+        # pd = [x, y, ku*up, kv*vp, kw*wp, z]
         # Adding each pd as an elem of a list, so now point_pds = nestes lists
         # len(point_pds) = no of pds
         point_pds.append(pd + [1.]) #NOTE adding inc = 1. as the last elem of the list
     for pd in shell.point_pds_inc:
         point_pds.append(pd + [inc])
     # - calculating
-    for x, y, fx, fy, fz, inc_i in point_pds:
+    for x, y, fx, fy, fz, z, inc_i in point_pds:
         # This modifies g (based on its memory address so nothing needs to be returned)
         fg(g, x, y, shell)
+        if z != 0:
+            #NOTE u(z) and v(z) combine the fields with the rotations and
+            #     the slopes of w, see nullspace.pd_rows
+            fext[col0:col1] += inc_i*(fz*g[2]
+                                      + _uv_force(shell, fx, fy, x, y, z))
+            continue
         # Essentially does this:
             # for j in range(n):
             #     for i in range(m):
@@ -209,12 +255,12 @@ def shell_fext(shell, inc, size, col0, include_pds=True):
     distr_pds = []
     for pd in shell.distr_pds:
         # Adding the increment size to distr_pds
-        # Finally: distr_pds = [x pos, y pos of applied displ, force x, y, z due to that displ, incremenent size] -- size: (6,)
+        # Finally: distr_pds = [x pos, y pos of applied displ, force x, y, z due to that displ, z coordinate of u and v, incremenent size] -- size: (7,)
         distr_pds.append(pd + [1.]) #NOTE adding inc = 1.
     for pd in shell.distr_pds_inc:
         distr_pds.append(pd + [inc])
 
-    for x, y, funcu, funcv, funcw, inc_i in distr_pds:
+    for x, y, funcu, funcv, funcw, z, inc_i in distr_pds:
         # For distr loads only 1 x or y is needed not both
         # funcu = Force = k * ftn of that disp
         if x is None and y is None:
@@ -234,11 +280,16 @@ def shell_fext(shell, inc, size, col0, include_pds=True):
             # integrating g(x,ycte)*s(x,ycte)*dx = sum(weight_i * ( (a/2) * g(xvar, ycte) * s(xvar, ycte) ))
             for xi, weight in zip(points, weights):
                 xvar = (xi + 1)*shell.a/2
+                fg(g, xvar, ycte, shell)
+                if z != 0:
+                    fext[col0:col1] += weight*(shell.a/2)*inc_i*(
+                        funcw(xvar)*g[2] + _uv_force(shell, funcu(xvar),
+                                                     funcv(xvar), xvar, ycte, z))
+                    continue
                 fpt = np.array([[funcu(xvar), funcv(xvar), funcw(xvar), 0, 0]]) * inc_i # Bec funcu etc are ftns of x,y not xi,eta -- # (1x5)
                     # THis is k_i * u_i ... i = u,v,w
                     # funci = force due to that displ_i
                 # fg is in terms of x and y not xi and eta
-                fg(g, xvar, ycte, shell)
                 # Essentially does this:
                     # g[ fu[i]*gu[j],    fv[i]*gv[j],    fw[i]*gw[j],    -(2/a)*fw_xi[i]*gw[j],   -(2/b)*fw[i]*gw_eta[j] ]
                 fext[col0:col1] += weight * (shell.a/2) * fpt.dot(g).ravel()
@@ -251,23 +302,64 @@ def shell_fext(shell, inc, size, col0, include_pds=True):
             points, weights = roots_legendre(shell.n)
             for eta, weight in zip(points, weights):
                 yvar = (eta + 1)*shell.b/2
-                fpt = np.array([[funcu(yvar), funcv(yvar), funcw(yvar), 0, 0]]) * inc_i
                 fg(g, xcte, yvar, shell)
+                if z != 0:
+                    fext[col0:col1] += weight*(shell.b/2)*inc_i*(
+                        funcw(yvar)*g[2] + _uv_force(shell, funcu(yvar),
+                                                     funcv(yvar), xcte, yvar, z))
+                    continue
+                fpt = np.array([[funcu(yvar), funcv(yvar), funcw(yvar), 0, 0]]) * inc_i
                 fext[col0:col1] += weight * (shell.b/2) * fpt.dot(g).ravel()
 
     return fext
+
+
+def _uv_force(shell, fu, fv, x, y, z):
+    r"""Force vector `f_u \{g_u(z)\} + f_v \{g_v(z)\}` of the prescribed
+    in-plane displacements at the thickness coordinate ``z``, with the size
+    of the Ritz constants of ``shell``, see :func:`.nullspace.pd_rows`"""
+    from .multidomain.connections import nullspace
+    xis = np.array([2*x/shell.a - 1])
+    etas = np.array([2*y/shell.b - 1])
+    out = 0.
+    for comp, f in ((nullspace.U, fu), (nullspace.V, fv)):
+        if f != 0:
+            row = nullspace.pd_rows(shell, comp, xis, etas, z).toarray()[0]
+            out = out + f*row
+    return out
 
 
 def pressure_factor(shell, zp):
     r"""Factor of a pressure acting on the surface ``z = zp``
 
     For a cylindrical shell, see :meth:`.Shell.is_curved`, a pressure ``p``
-    on the surface of radius ``r + zp`` has the resultant ``p (r + zp)`` per
-    unit length of mid-surface arc, and is applied as ``p (1 + zp/r)`` per
-    unit area of mid-surface. Its direction and change of area are those of
-    the mid-surface, the shallow-shell approximation described in
-    ``theory/shells/follower_pressure/follower_pressure.py``. For plates the
-    factor is ``1``.
+    on the surface ``z = zp`` is applied as ``p (1 + zp/r)`` per unit area
+    of mid-surface. For plates the factor is ``1``.
+
+    Parameters
+    ----------
+    shell : :class:`.Shell`
+        The shell object, whose ``r`` is read when it is curved.
+    zp : float
+        Position along `z` of the loaded surface, a length.
+
+    Returns
+    -------
+    factor : float
+        ``1 + zp/r`` for a cylindrical shell with ``zp`` nonzero, otherwise
+        ``1.``. Dimensionless.
+
+    Notes
+    -----
+    A pressure ``p`` on the surface of radius ``r + zp`` has the resultant
+    ``p (r + zp)`` per unit angle, i.e. ``p (1 + zp/r)`` per unit length of
+    mid-surface arc. Its direction and change of area are those of the
+    mid-surface, the shallow-shell approximation: the terms of relative
+    order `z_p \kappa`, with `\kappa` the change of curvature, in the change
+    of area and the moment of the in-plane components about the mid-surface
+    are neglected, which are of relative order `n^2 z_p/r` in the load
+    stiffness of a ring mode with `n` circumferential waves, e.g. about
+    ``0.13`` for `n = 2`, `z_p = h/2` and `r/h = 15`.
 
     """
     if zp and shell.is_curved():
@@ -278,6 +370,13 @@ def pressure_factor(shell, zp):
 def pressure_patches(shell, inc, follower_only=False):
     r"""Patches and integration point values of the pressure loads
 
+    The loads of ``shell.pressure_loads`` enter with the factor ``1`` and
+    those of ``shell.pressure_loads_inc`` with ``inc``. A load whose patch,
+    intersected with :meth:`.Shell.integration_limits`, is empty is
+    skipped. The pressure is evaluated at the ``shell.nx`` by ``shell.ny``
+    Gauss-Legendre points of the patch, calling ``p(x, y)`` when it is a
+    function.
+
     Parameters
     ----------
     shell : :class:`.Shell`
@@ -285,8 +384,9 @@ def pressure_patches(shell, inc, follower_only=False):
         are read, see :func:`.shell_fext`.
     inc : float
         Load factor that multiplies the pressures of ``pressure_loads_inc``.
+        Dimensionless.
     follower_only : bool, optional
-        Return only the follower loads.
+        Return only the follower loads. Default ``False``.
 
     Returns
     -------

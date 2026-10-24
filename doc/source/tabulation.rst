@@ -138,19 +138,19 @@ over the terms are tabulated:
 - the blade stiffeners, ``panels/stiffener/models``.
 
 The analytical kernels, which use closed-form integrals of the products of
-the functions, e.g. ``fk0`` or ``kCSB``, are not affected. The kernel
+the functions, e.g. ``fk0`` or :func:`.fkCSB` of the skin-base connection,
+are not affected. The kernel
 ``calc_kTv`` of the product of the tangent stiffness matrix by a vector,
 see :ref:`tangent_product`, is written with the tables from the start.
 
 Implementation
 --------------
 
-The rewriting is done by :mod:`panels.dev.tabulate`, applied by the
-generators of the modules, ``theory/shells/fsdt_tsdt/write_pyx.py``,
-``theory/shells/cylshell_clpt_sanders/write_pyx.py`` and
-``theory/shells/follower_pressure/write_pyx.py``, and with ``python -m
-panels.dev.tabulate <file.pyx> ...`` to the modules written by hand. For
-each kernel it
+The rewriting is done by :mod:`panels.dev.tabulate`, applied by the SymPy
+generators of the modules of the shear deformation theories, of the
+cylinders with the Sanders kinematics and of the follower pressure loads,
+and with ``python -m panels.dev.tabulate <file.pyx> ...`` to the modules
+written by hand. For each kernel it
 
 1. finds the calls ``NAME = f(IDX, COORD, x1F, x1Fr, x2F, x2Fr)``, with
    ``f``, ``fp`` or ``fpp``, the flags of the field ``F`` along `x` (or
@@ -187,9 +187,12 @@ Verification
 Performance
 -----------
 
-Single shell, laminate ``[0, 45, -45, 90]``, ``nx = 2m``, ``ny = 2n``
-integration points, a follower pressure, one core, times in seconds before
-and after the tabulation, with the speed-up:
+Single shell, laminate ``[0, 45, -45, 90]``, a follower pressure, one core,
+times in seconds before and after the tabulation, with the speed-up. The
+times were measured with ``nx = 2m``, ``ny = 2n`` integration points, the
+default before ``panels`` 0.14.0, one point more in each direction than the
+current default :func:`panels.shell.gauss_points`, `\max(2m - 1, 7)`, for
+these `m = n \ge 8`:
 
 .. list-table::
     :header-rows: 1
@@ -257,5 +260,6 @@ connection with damage integrated with `50 \times 25` points:
 The double cantilever beam with cohesive zone of
 ``tests/multidomain/test_dcb_damage.py`` runs in 2 min 45 s instead of
 7 min 28 s, its non-linear matrices of the panels and its connections
-being tabulated; its cohesive zone is assembled with cached operators by
+being tabulated, also measured with the default ``nx = 2m``, ``ny = 2n`` of
+the panels before ``panels`` 0.14.0; its cohesive zone is assembled with cached operators by
 default, or with ``kCSB_dmg`` with ``use_kernels=True``.

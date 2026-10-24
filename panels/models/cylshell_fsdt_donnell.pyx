@@ -539,9 +539,9 @@ def fkG0(double Nxx, double Nyy, double Nxy, object shell,
     return kG0
 
 
-def fkM(object shell, double d, int size, int row0, int col0):
+def fkM(object shell, int size, int row0, int col0):
     cdef double r
-    cdef double a, b, rho, h
+    cdef double a, b, I0, I1, I2
     cdef int m, n
     cdef double x1u, x1ur, x2u, x2ur
     cdef double x1v, x1vr, x2v, x2vr
@@ -571,8 +571,9 @@ def fkM(object shell, double d, int size, int row0, int col0):
     m = shell.m
     n = shell.n
     r = shell.r
-    rho = shell.rho
-    h = sum(shell.plyts)
+    I0 = shell.lam.intrho
+    I1 = shell.lam.intrhoz
+    I2 = shell.lam.intrhoz2
     x1u = shell.x1u; x1ur = shell.x1ur; x2u = shell.x2u; x2ur = shell.x2ur
     x1v = shell.x1v; x1vr = shell.x1vr; x2v = shell.x2v; x2vr = shell.x2vr
     x1w = shell.x1w; x1wr = shell.x1wr; x2w = shell.x2w; x2wr = shell.x2wr
@@ -629,39 +630,39 @@ def fkM(object shell, double d, int size, int row0, int col0):
                         c += 1
                         kMr[c] = row+0
                         kMc[c] = col+0
-                        kMv[c] += 0.25*a*b*fAufBu*gAugBu*h*rho
+                        kMv[c] += 0.25*I0*a*b*fAufBu*gAugBu
                         c += 1
                         kMr[c] = row+0
                         kMc[c] = col+3
-                        kMv[c] += -0.25*a*b*d*fAufBphix*gAugBphix*h*rho
+                        kMv[c] += 0.25*I1*a*b*fAufBphix*gAugBphix
                         c += 1
                         kMr[c] = row+1
                         kMc[c] = col+1
-                        kMv[c] += 0.25*a*b*fAvfBv*gAvgBv*h*rho
+                        kMv[c] += 0.25*I0*a*b*fAvfBv*gAvgBv
                         c += 1
                         kMr[c] = row+1
                         kMc[c] = col+4
-                        kMv[c] += -0.25*a*b*d*fAvfBphiy*gAvgBphiy*h*rho
+                        kMv[c] += 0.25*I1*a*b*fAvfBphiy*gAvgBphiy
                         c += 1
                         kMr[c] = row+2
                         kMc[c] = col+2
-                        kMv[c] += 0.25*a*b*fAwfBw*gAwgBw*h*rho
+                        kMv[c] += 0.25*I0*a*b*fAwfBw*gAwgBw
                         c += 1
                         kMr[c] = row+3
                         kMc[c] = col+0
-                        kMv[c] += -0.25*a*b*d*fAphixfBu*gAphixgBu*h*rho
+                        kMv[c] += 0.25*I1*a*b*fAphixfBu*gAphixgBu
                         c += 1
                         kMr[c] = row+3
                         kMc[c] = col+3
-                        kMv[c] += 0.25*a*b*(d*d)*fAphixfBphix*gAphixgBphix*h*rho + 0.020833333333333332*a*b*fAphixfBphix*gAphixgBphix*(h*h*h)*rho
+                        kMv[c] += 0.25*I2*a*b*fAphixfBphix*gAphixgBphix
                         c += 1
                         kMr[c] = row+4
                         kMc[c] = col+1
-                        kMv[c] += -0.25*a*b*d*fAphiyfBv*gAphiygBv*h*rho
+                        kMv[c] += 0.25*I1*a*b*fAphiyfBv*gAphiygBv
                         c += 1
                         kMr[c] = row+4
                         kMc[c] = col+4
-                        kMv[c] += 0.25*a*b*(d*d)*fAphiyfBphiy*gAphiygBphiy*h*rho + 0.020833333333333332*a*b*fAphiyfBphiy*gAphiygBphiy*(h*h*h)*rho
+                        kMv[c] += 0.25*I2*a*b*fAphiyfBphiy*gAphiygBphiy
 
     kM = coo_matrix((kMv, (kMr, kMc)), shape=(size, size))
 

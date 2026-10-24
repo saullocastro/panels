@@ -2,103 +2,103 @@
  {
   "notebook": "dcb_tijs2023_phd.ipynb",
   "a0": 30.0,
-  "penalty": 0.00784778075430118,
-  "null-space": 0.007833164576422937
+  "penalty": 0.007847780755489751,
+  "null-space": 0.00783316457633221
  },
  {
   "notebook": "dcb_tijs2023_phd.ipynb",
   "a0": 35.0,
-  "penalty": 0.0122590162357661,
-  "null-space": 0.012239118396560566
+  "penalty": 0.012259016237731879,
+  "null-space": 0.012239118396616181
  },
  {
   "notebook": "dcb_tijs2023_phd.ipynb",
   "a0": 40.0,
-  "penalty": 0.018075536515485043,
-  "null-space": 0.018049542286879758
+  "penalty": 0.018075536517292153,
+  "null-space": 0.018049542287434734
  },
  {
   "notebook": "dcb_tijs2023_phd.ipynb",
   "a0": 45.0,
-  "penalty": 0.025492044648344783,
-  "null-space": 0.025459139368038813
+  "penalty": 0.025492044651882605,
+  "null-space": 0.025459139367057435
  },
  {
   "notebook": "dcb_tijs2023_phd.ipynb",
   "a0": 30.0,
-  "penalty": 0.012342557798596082,
-  "null-space": 0.012316901146737707
+  "penalty": 0.012342564691912892,
+  "null-space": 0.012316901146781778
  },
  {
   "notebook": "dcb_tijs2023_phd.ipynb",
   "a0": 35.0,
-  "penalty": 0.019269812161901986,
-  "null-space": 0.01923483916951485
+  "penalty": 0.019269822625432025,
+  "null-space": 0.01923483917001326
  },
  {
   "notebook": "dcb_tijs2023_phd.ipynb",
   "a0": 40.0,
-  "penalty": 0.028417410093907605,
-  "null-space": 0.028371663408723567
+  "penalty": 0.02841742553968121,
+  "null-space": 0.02837166340968368
  },
  {
   "notebook": "dcb_tijs2023_phd.ipynb",
   "a0": 45.0,
-  "penalty": 0.040096688898223556,
-  "null-space": 0.04003870766274127
+  "penalty": 0.04009671106867999,
+  "null-space": 0.04003870766016156
  },
  {
   "notebook": "dcb_tijs2023_phd.ipynb",
   "a0": 30.0,
-  "penalty": 0.023891016758068834,
-  "null-space": 0.023843148107003963
+  "penalty": 0.02389101673252743,
+  "null-space": 0.02384314810718264
  },
  {
   "notebook": "dcb_tijs2023_phd.ipynb",
   "a0": 35.0,
-  "penalty": 0.037480024021446456,
-  "null-space": 0.03741467298833046
+  "penalty": 0.03748002398117604,
+  "null-space": 0.03741467298895249
  },
  {
   "notebook": "dcb_tijs2023_phd.ipynb",
   "a0": 40.0,
-  "penalty": 0.055445436208742295,
-  "null-space": 0.05535983770967586
+  "penalty": 0.05544543615050758,
+  "null-space": 0.05535983771261044
  },
  {
   "notebook": "dcb_tijs2023_phd.ipynb",
   "a0": 45.0,
-  "penalty": 0.07839871246975438,
-  "null-space": 0.07829007654442835
+  "penalty": 0.07839871238801643,
+  "null-space": 0.07829007654239797
  },
  {
   "notebook": "dcb_lecinana2023.ipynb",
   "a0": 32.05,
-  "penalty": 0.009551263876253312,
-  "null-space": 0.009534724003687736
+  "penalty": 0.009551263877446465,
+  "null-space": 0.009534724003743415
  },
  {
   "notebook": "dcb_lecinana2023.ipynb",
   "a0": 33.4,
-  "penalty": 0.010762818826614657,
-  "null-space": 0.010744855456408842
+  "penalty": 0.010762818828098958,
+  "null-space": 0.010744855456355536
  },
  {
   "notebook": "dcb_lecinana2023.ipynb",
   "a0": 35.93,
-  "penalty": 0.013301468018591679,
-  "null-space": 0.013280678363137496
+  "penalty": 0.013301468019885701,
+  "null-space": 0.013280678362934475
  },
  {
   "notebook": "dcb_lecinana2023.ipynb",
   "a0": 38.05,
-  "penalty": 0.01571339385536041,
-  "null-space": 0.015690076710412233
+  "penalty": 0.0157133938581045,
+  "null-space": 0.015690076709784367
  },
  {
   "notebook": "dcb_lecinana2023.ipynb",
   "a0": 42.97,
-  "penalty": 0.022397623026589864,
-  "null-space": 0.022367880792614515
+  "penalty": 0.022397623029406396,
+  "null-space": 0.02236788079144008
  }
 ]

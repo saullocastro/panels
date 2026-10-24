@@ -280,3 +280,75 @@ def test_stress_and_force_with_ABDnxny(tension):
                      nr_y_gauss=4, gridx=11)
     finally:
         p1.ABDnxny = None
+
+
+def _cantilever(along):
+    r"""Cantilever plate clamped at `x = 0` (or `y = 0`) under a pressure
+
+    With `\nu = 0` the plate bends along one direction only, `M_{xy} = 0`,
+    and the transverse shear force across the line `x = x_c` balances the
+    pressure beyond it, `\int_0^b Q_x \, dy = q b (a - x_c)`.
+
+    """
+    A, Bc, q = 0.6, 0.3, 1.e3
+    a, b = (A, Bc) if along == 'x' else (Bc, A)
+    p = Shell(group='c', x0=0, y0=0, a=a, b=b, r=0.,
+              m=(14 if along == 'x' else 6), n=(6 if along == 'x' else 14),
+              stack=[0], plyt=t, laminaprop=(E, 0.), model='plate_clpt_donnell')
+    for edge in ('x1', 'x2', 'y1', 'y2'):
+        for dof in ('u', 'v', 'w'):
+            setattr(p, edge + dof, 1.)
+            setattr(p, edge + dof + 'r', 1.)
+    clamped = 'x1' if along == 'x' else 'y1'
+    for dof in ('u', 'v', 'w', 'wr'):
+        setattr(p, clamped + dof, 0.)
+    p.add_pressure_load(q)
+    md = MultiDomain([p], [], conn_method='penalty')
+    c = solve(md.calc_kC(), md.calc_fext(), silent=True)
+    return md, c, p, A, Bc, q
+
+
+@pytest.mark.parametrize('xc', [0., 0.15, 0.3, 0.6])
+def test_force_out_plane_along_x_cte(xc):
+    """The force across the line x = x_cte_force balances the pressure"""
+    md, c, p, A, Bc, q = _cantilever('x')
+    F = md.force_out_plane(c, 'c', eval_panel=p, x_cte_force=xc,
+                           nr_y_gauss=10, gridx=200)
+    assert np.isclose(F, q*Bc*(A - xc), rtol=2e-3, atol=2e-3*q*Bc*A)
+
+
+@pytest.mark.parametrize('yc', [0., 0.3])
+def test_force_out_plane_along_y_cte(yc):
+    """Same plate rotated by 90 degrees, the line y = y_cte_force"""
+    md, c, p, A, Bc, q = _cantilever('y')
+    F = md.force_out_plane(c, 'c', eval_panel=p, y_cte_force=yc,
+                           nr_x_gauss=10, gridy=200)
+    assert np.isclose(F, q*Bc*(A - yc), rtol=2e-3, atol=2e-3*q*Bc*A)
+
+
+def test_force_out_plane_invalid_input():
+    md, c, p, A, Bc, q = _cantilever('x')
+    with pytest.raises(ValueError, match='single line'):
+        md.force_out_plane(c, 'c', eval_panel=p, x_cte_force=0.1,
+                           y_cte_force=0.1, nr_x_gauss=4, nr_y_gauss=4)
+    with pytest.raises(ValueError, match='nr_y_gauss'):
+        md.force_out_plane(c, 'c', eval_panel=p, x_cte_force=0.1)
+    with pytest.raises(ValueError, match='nr_x_gauss'):
+        md.force_out_plane(c, 'c', eval_panel=p, y_cte_force=0.1)
+    with pytest.raises(ValueError, match='inside'):
+        md.force_out_plane(c, 'c', eval_panel=p, x_cte_force=1.1*A,
+                           nr_y_gauss=4)
+
+
+def test_plot_eval_panel_draws_its_field(tension, tmp_path):
+    """With eval_panel the plotted field is that of eval_panel, not that of
+    the first panel of the group"""
+    md, c = tension
+    p1, p2 = md.panels
+    u2 = md.uvw(c, None, gridx=6, gridy=4, eval_panel=p2)['u'][0]
+    u1 = md.uvw(c, None, gridx=6, gridy=4, eval_panel=p1)['u'][0]
+    assert not np.isclose(u1.max(), u2.max())
+    ax, data = md.plot(c, 'g', vec='u', gridx=6, gridy=4, eval_panel=p2,
+                       filename=tmp_path / 'p2.png')
+    assert np.isclose(data['vecmin'], u2.min())
+    assert np.isclose(data['vecmax'], u2.max())

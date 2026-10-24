@@ -21,7 +21,9 @@ Created on Sun Mar 10 13:07:49 2024
 # The kernels in panels/multidomain/connections/ that correspond to each
 # matrix are:
 #
-#   kCSSxcte, kCSSycte, kCBFycte, kCBFxcte, kCSB: kCSS*.pyx, kCBF*.pyx, kCSB.pyx
+#   kCSSxcte, kCSSycte, kCBFycte, kCBFxcte: kCSS*.pyx, kCBF*.pyx
+#   kCSB: skin_base.py (fkCSB), computed from the quantities of
+#   kCsdt._sb_components with the integrals of kCsdt._connection_matrix
 #   kCSSxcte_sdt, kCSSycte_sdt, kCSB_sdt: kCsdt.py, for the models based on
 #   shear deformation theories (FSDT and TSDT) with 5 DOFs per term
 #   kCBFycte_sdt, kCBFxcte_sdt: the functions *_sdt of kCBF*.pyx, for the
@@ -184,17 +186,34 @@ piece_wise_simplify(kCBFxcte22, [])
 # Connection between panel skin and stiffener's base - SB CONNECTION
 # connection panel-base integrated over xi' and eta'
 # Panel (1) is on the positive side of the interface along the z axis common
-# to both panels, and panel (2) on the negative side. Panel (1) is
-# extrapolated to the mid-surface of panel (2), at a distance
-# dsb = h1/2 + h2/2 from the mid-surface of (1) along -z:
-#     u1 + dsb*w1,x = u2,  v1 + dsb*w1,y = v2,  w1 = w2
-kCSB11 = (a1*b1/4)*kt*(u1A.T*u1B + v1A.T*v1B + w1A.T*w1B + u1A.T*w1Bxi*(2*dsb/a1) + w1Axi.T*u1B*(2*dsb/a1) + v1A.T*w1Beta*(2*dsb/b1) + w1Aeta.T*v1B*(2*dsb/b1) + w1Axi.T*w1Bxi*(2*dsb/a1)*(2*dsb/a1) + w1Aeta.T*w1Beta*(2*dsb/b1)*(2*dsb/b1))
-    # Contains all squared terms - so all terms of (u + d..w,xi)^2 comes here and so on 
-                                    # thats split up: u^2 + u*d..w,xi + d..w,xi*u + (d..w,xi)^2
-############ THERE IS SOME EXTRA c1 HERE - removed ##############################
-kCSB12 = -(a1*b1/4)*kt*(u1A.T*u2B + v1A.T*v2B + w1A.T*w2B + w1Axi.T*u2B*(2*dsb/a1) + w1Aeta.T*v2B*(2*dsb/b1))
+# to both panels, and panel (2) on the negative side. The lower face of (1),
+# zi1 = d1 - h1/2, and the upper face of (2), zi2 = d2 + h2/2, each measured
+# from its own reference surface with the offsets d1, d2 (kCsdt._face), have
+# the same displacements:
+#     u1(zi1) = u2(zi2),  v1(zi1) = v2(zi2),  w1 = w2
+# with the Kirchhoff kinematics of each panel, with its own slope,
+#     u(z) = u - z w,x,  v(z) = (1 + z rinv) v - z w,y
+# rinv = 1/r for the Sanders-Koiter kinematics and rinv = 0 for the Donnell
+# kinematics and for plates (kCsdt._surface_terms). The same quantities are
+# used by all the models, see sdt_interface() below; the matrix is computed
+# by panels.multidomain.connections.skin_base.fkCSB, with the exact
+# integrals of kCsdt._connection_matrix, the blocks below being those of its
+# upper triangle. The form of the thesis of D'Souza (2024),
+#     u1 + dsb w1,x = u2,  dsb = h1/2 - d1 + h2/2 + d2
+# with the slope of (1) only, was used up to panels 0.13
+var('zi1, zi2')
+def clpt_interface(uA, vA, wxiA, wetaA, zi, rinv):
+    qu = uA - zi*(2/a1)*wxiA
+    qv = (1 + zi*rinv)*vA - zi*(2/b1)*wetaA
+    return qu, qv
+qu1A, qv1A = clpt_interface(u1A, v1A, w1Axi, w1Aeta, zi1, rinv1)
+qu1B, qv1B = clpt_interface(u1B, v1B, w1Bxi, w1Beta, zi1, rinv1)
+qu2A, qv2A = clpt_interface(u2A, v2A, w2Axi, w2Aeta, zi2, rinv2)
+qu2B, qv2B = clpt_interface(u2B, v2B, w2Bxi, w2Beta, zi2, rinv2)
+kCSB11 =  (a1*b1/4)*kt*(qu1A.T*qu1B + qv1A.T*qv1B + w1A.T*w1B)
 # Instead of 2ab only ab is presented in _12 as ba goes into _21 which is symmetric and is hence not added here
-kCSB22 =  (a1*b1/4)*kt*(u2A.T*u2B + v2A.T*v2B + w2A.T*w2B)
+kCSB12 = -(a1*b1/4)*kt*(qu1A.T*qu2B + qv1A.T*qv2B + w1A.T*w2B)
+kCSB22 =  (a1*b1/4)*kt*(qu2A.T*qu2B + qv2A.T*qv2B + w2A.T*w2B)
 
 piece_wise_simplify(kCSB11, [])
 piece_wise_simplify(kCSB12, [])
@@ -204,11 +223,12 @@ piece_wise_simplify(kCSB22, [])
 # MODELS BASED ON SHEAR DEFORMATION THEORIES (FSDT and TSDT)
 # 5 DOFs per term u, v, w, phix, phiy, with the displacement field
 #
-#     u(z) = u + z phix - c1 z^3 (phix + w,x)
-#     v(z) = v + z Phiy - c1 z^3 (phiy + w,y)
+#     u(z) = u + z phix - c1 [(z - d)^3 + d^3] (phix + w,x)
+#     v(z) = v + z Phiy - c1 [(z - d)^3 + d^3] (phiy + w,y)
 #     w(z) = w
 #
-# where c1 = 0 for the FSDT and c1 = 4/(3 h^2) for the TSDT, and Phiy =
+# with z measured from the reference surface and d the offset of the
+# laminate, where c1 = 0 for the FSDT and c1 = 4/(3 h^2) for the TSDT, and Phiy =
 # phiy + v/r is the rotation of the normal about x with the Sanders-Koiter
 # kinematics, see theory/shells/fsdt_tsdt, obtained with rinv1 = 1/r1 and
 # rinv2 = 1/r2 of each panel, and Phiy = phiy with rinv = 0 otherwise
@@ -253,18 +273,19 @@ kCSSycte_sdt11 =  sdt_edge(s1A, 1, s1B, 1, a1/2, 'weta', b1, b1)
 kCSSycte_sdt12 = -sdt_edge(s1A, 1, s2B, 2, a1/2, 'weta', b1, b2)
 kCSSycte_sdt22 =  sdt_edge(s2A, 2, s2B, 2, a1/2, 'weta', b2, b2)
 
-# SB: penalty kt on the displacements at the interface, z = -h1/2 for panel
-# (1), on the positive side of the interface along z, and z = +h2/2 for panel
-# (2), on the negative side, and kr on the
+# SB: penalty kt on the displacements at the interface, z = d1 - h1/2 for
+# panel (1), on the positive side of the interface along z, and z = d2 + h2/2
+# for panel (2), on the negative side, with the offsets d1, d2, and kr on the
 # difference of rotations (kr = 0 connects only the interface)
 #
 #     u_p(z) = u_p + cphi_p phix_p + cw_p w_p,x
 #     v_p(z) = (1 + zi_p rinv_p) v_p + cphi_p phiy_p + cw_p w_p,y
 #
-# with zi_p the coordinate z of the interface in panel p, cphi_p = zi_p -
-# c1_p zi_p^3 and cw_p = -c1_p zi_p^3, which for the TSDT give cphi1 =
-# -h1/3, cw1 = h1/6, cphi2 = h2/3, cw2 = -h2/6 and for the FSDT cphi1 =
-# -h1/2, cphi2 = h2/2, cw1 = cw2 = 0, and zi1 = -h1/2, zi2 = h2/2
+# with zi_p the coordinate z of the interface in panel p, zi1 = d1 - h1/2,
+# zi2 = d2 + h2/2 (kCsdt._face), cphi_p = zi_p - c1_p g_p and cw_p = -c1_p g_p
+# with g_p = (zi_p - d_p)^3 + d_p^3 (kCsdt._surface_terms), which without
+# offsets give for the TSDT cphi1 = -h1/3, cw1 = h1/6, cphi2 = h2/3, cw2 =
+# -h2/6 and for the FSDT cphi1 = zi1, cphi2 = zi2, cw1 = cw2 = 0
 def sdt_interface(s, p):
     cphi, cw, zi, rinv = ((cphi1, cw1, zi1, rinv1) if p == 1 else
                           (cphi2, cw2, zi2, rinv2))

@@ -466,7 +466,8 @@ def sb_monolithic():
 @pytest.mark.parametrize('order', ['top first', 'bottom first'])
 def test_bonded_sublaminates_recover_the_laminate(func, order):
     """The bending-extension coupling of ``[0/90/90/0/0]`` must be rebuilt
-    by the offset ``dsb`` of the connection, whichever domain comes first"""
+    by the connection of the faces in contact, whichever domain comes
+    first"""
     ref = sb_monolithic()
     eigvals = sb_split(func, order)
     assert np.allclose(eigvals[:3], ref[:3], rtol=1e-3)

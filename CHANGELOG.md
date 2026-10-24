@@ -1,5 +1,317 @@
 # Changelog
 
+## 0.14.0 (2026-10-25)
+
+### Python versions
+
+- Python 3.9 is no longer supported, it reached its end of life in October 2025: Python 3.10 or newer is required, and the tests and wheels cover Python 3.10 to 3.14.
+
+### Packaging
+
+- Packaging: the metadata, with the version, in `pyproject.toml` (PEP 621), built with `setuptools>=77` and Cython; `setup.py` keeps only the Cython extensions with the compiler flags, including those of the WebAssembly build, and writes `panels/version.py` from `pyproject.toml`, with the same fields as before (`MAJOR`, `MINOR`, `MICRO` and `ISRELEASED` are gone from `setup.py`; `isreleased` is true for a version without suffix). The documentation reads the version from `pyproject.toml`. The license is given as the SPDX expression `BSD-3-Clause`, wheel is no longer a build requirement, README.md and LICENSE are no longer installed in the root of the Python environment (`data_files`), and two keywords merged by a missing comma are separated.
+
+### Bug fixes: mass matrices
+
+- The closed-form mass matrices `fkM` of the nine models read `shell.rho`,
+  whereas `Shell.calc_kM` and the numerical `fkM_num` use the density of the
+  laminate, `lam.intrho/lam.h`: with per-ply densities `rhos` the two
+  differed, and a `Shell` given only `rhos` had a zero mass matrix.
+  `Shell._rebuild` keeps the lists `plyts`, `laminaprops` and `rhos` given
+  by the user, and `json_io` saves which lists were derived (key
+  `'derived_lists'`; the lists of older files are kept as given).
+- The mass matrices of all the models, closed-form and numerical, integrated
+  a uniform density over `-h/2 - d <= z <= h/2 - d`, whereas the stiffness
+  matrices and composites place the laminate at `-h/2 + d <= z <= h/2 + d`:
+  with an offset the coupling of `u` and `phi` had the wrong sign. The mass
+  matrices now use the moments of the density `I_0` to `I_6` of
+  `composites.Laminate`, exact for per-ply densities. `fkM(shell, size,
+  row0, col0)` reads them from `shell.lam` (the argument `d` is dropped),
+  `fkM_num(shell, I_input, size, row0, col0, nx, ny)` receives them, and
+  `Shell.calc_kM` gains `I_nxny`. With offset 0 and a uniform density the
+  matrices are unchanged to `2e-16`.
+
+### Bug fixes: third-order shear deformation theory with an offset
+
+- With an offset `d`, the cubic term `-c1 z^3 (phi + w,x)` did not make the
+  transverse shear vanish at the faces `z = d -+ h/2`. The field is now
+  `u(z) = u + z phi - c1 [(z - d)^3 + d^3] (phi + w,x)`, Reddy's field for
+  `d = 0`, with `phi` the rotation at the mid-surface of the laminate; the
+  strain energy equals a ply-by-ply integration to `2e-15` (14% off before
+  for `d = 1.2` mm).
+- The connections of the TSDT models tie `u, v, w` and the rotations at the
+  common reference surface `z = 0`, `theta = u,z(0) = phi - (4 d^2/h^2)(phi
+  + w,x)`, instead of the mid-surface rotations `phi`, which differ between
+  panels with different offsets. The skin-base connection evaluates each
+  laminate at its own face, `z = d -+ h/2`. Nothing changes for `d = 0`, for
+  the FSDT and for the CLPT.
+- The rotations `phix` and `phiy` prescribed with `Shell.add_point_pd`,
+  `Shell.add_distr_pd_fixed_x` and `Shell.add_distr_pd_fixed_y`
+  (`pd_method='null-space'`) are, for the TSDT, the rotations at the
+  reference surface `z = 0`, `theta = phi - (4 d^2/h^2)(phi + w,x)`, those
+  tied by the connections, instead of the mid-surface rotations `phi`: with
+  an offset the rotation at `z = 0` missed the prescribed value by the term
+  of the transverse shear, e.g. `2.15e-3` instead of the prescribed `2e-3`
+  at a point of a plate with `d = 0.3 h`. Nothing changes for `d = 0`, for
+  the FSDT and for the CLPT.
+- New page `tsdt_offset.rst`.
+
+### Clamped edges of the third-order shear deformation theory
+
+- A clamped TSDT edge keeps the cross-section planar and unrotated, `u(z) =
+  v(z) = 0` for every `z`, which requires `u = phi = w,n = 0`: the slope
+  flag, e.g. `x1wr = 0` on `x = 0`, is removed together with the rotation
+  flags. With the slope free the warping term `p(z) (phi + w,x)` remained
+  at the edge: for a square isotropic plate with `h/a = 0.1` clamped on
+  four edges the first frequency `omega a^2 sqrt(rho h/D)` is 32.64 instead
+  of 30.18. The FSDT clamp is unchanged, `w,n` free. The function
+  `set_edge` of `tests/tests_shell/test_fsdt_tsdt_plates.py`, the pages
+  `boundary_conditions.rst` and `tsdt_offset.rst` and the docstring of
+  `Shell` are updated; the thin plates of Leissa (1973) move by less than
+  `1.2e-5`, e.g. `'SCSC'` 28.95027 to 28.95059 (reference 28.951).
+- New keyword `z` of `Shell.add_point_pd`, `Shell.add_distr_pd_fixed_x`
+  and `Shell.add_distr_pd_fixed_y`, and of the penalty kernels `fkCpd`,
+  `fkCld_xcte` and `fkCld_ycte`: the in-plane displacements `u` and `v` are
+  prescribed at the thickness coordinate `z`, measured from the reference
+  surface, `u(z) = u + (z - c1 g) phi_x - c1 g w,x` with `g = (z - d)^3 +
+  d^3` for the TSDT (`c1 = 0` for the FSDT, `u(z) = u - z w,x` for the
+  CLPT), with both `pd_method='penalty'` and `pd_method='null-space'`.
+  Default `z = 0`, unchanged. The stored lists `point_pds`, `distr_pds`
+  and `*_values` end with `z`; `json_io` completes the lists of older files
+  with `z = 0`. New function `nullspace.pd_rows`.
+- Face clamp, `u = v = 0` at the faces `z = d -+ h/2` and `w = 0`: the
+  clamp of the flags for the CLPT and the FSDT, and for the TSDT the two
+  conditions `phi = w,x/2` and `u = -(d/2)(1 - 4 d^2/h^2) w,x`, which leave
+  the section free to warp and which the flags cannot express. New test
+  file `tests/multidomain/test_face_clamp.py` and example page
+  `ex_face_clamp.rst`.
+
+### Bug fixes: stiffeners, connections and post-processing
+
+- `BladeStiff1D`: the torsion of the flange used `bf*Jxx*w,xy^2`, without a
+  shear modulus; it now uses the torsional stiffness `GJ = 4 bf D66` of a
+  thin laminated strip, new attribute `BladeStiff1D.GJ`, also saved by
+  `json_io`. The results of Tables 4 and 5 of Stamatelos and Labeas (2023)
+  rise by 1.9% to 3.3%, e.g. from 115.22 to 119.01 N/mm, those of Figure 7
+  by up to 0.04%; `notebooks/stamatelos_labeas_2023.ipynb`,
+  `stamatelos_labeas_2023_multidomain.ipynb` and the Stamatelos section of
+  `conn_method_comparison.ipynb` are updated.
+- `BladeStiff1D`: the coupling `S1` uses the condensed stiffness `Q16 - Q12
+  Q26/Q22` instead of `Q16 - Q12 Q16/Q22`, as in Eq. (16) of Castro et al.,
+  Compos. Struct. 140 (2016), with `y_k` measured from the mid-plane of the
+  flange instead of its first face: `S1` is zero for a symmetric flange.
+  Balanced cross-ply flanges are unaffected.
+- The skin-base connections `'SB'` and `'SB_TSL'` connect the lower face of
+  `p1`, `z = d1 - h1/2`, to the upper face of `p2`, `z = d2 + h2/2`, with the
+  offset `d` of each laminate (`Shell.offset`), for all the models; the CLPT
+  and FSDT kernels placed the faces at `z = -+h/2`, ignoring the offsets. Two
+  laminates bonded with `'SB'` with offsets had their first frequency 25%
+  (CLPT) and 41% (FSDT) above that of the single laminate, which they now
+  reproduce to `1e-12` for any offsets. New `kCsdt._sb_distances`, used by
+  the penalty and null-space `'SB'`, the kernels of `'SB_TSL'` and
+  `MultiDomain._tsl_operators`. Without offsets nothing changes.
+- The penalty kernels of the prescribed displacements `fkCpd`, `fkCld_xcte`
+  and `fkCld_ycte` (`panels/multidomain/connections/kCpd.pyx`) used a stride
+  of 3 DOFs per term, `row0 + 3*(j*m + i)`, for all the models: with the
+  FSDT and TSDT models, 5 DOFs per term, the penalty stiffnesses of `u, v, w`
+  landed silently on other DOFs, inconsistent with the forces `k u_p` of
+  `shell_fext`, e.g. `w = 1.1e5` instead of the prescribed `1e-3` at a point
+  of a simply supported `plate_fsdt_donnell` with `k = 1e4 E h`. The kernels
+  read the number of DOFs per term from `modelDB` (signatures unchanged, a
+  `ValueError` for an unknown `p.model`); for the FSDT and TSDT the penalty
+  method now converges to the null-space method with `1/k`, as for the
+  CLPT, whose results are unchanged.
+- `BladeStiff1D` without a flange accepts `bf=None`.
+- `StiffPanelBay.calc_kA` sums the aerodynamic matrices of the panels without
+  skew-symmetrizing them.
+- The cylinder assembly functions of `panels.multidomain` give each panel its
+  own load; the lambdas bound late and every panel got the load of the last
+  one.
+- `MultiDomain.force_out_plane` integrates `Qx` along `x = x_cte_force` (or
+  `Qy` along `y = y_cte_force`), instead of `Qx + Qy` along a hard-coded
+  line, and checks its arguments.
+- `MultiDomain.plot` computes the field of `eval_panel` and uses `xs` and
+  `ys`.
+- `cylinder_blade_stiffened_compression_lb_pd_from_static` imposes the
+  prescribed end-shortening exactly, with `pd_method='null-space'` and
+  `MultiDomain.linear_buckling`: the forces `ku*pd` of the penalty method
+  entered `calc_fext` without the penalty stiffness in the stiffness matrix,
+  so the analysis was load controlled, `u` at `x = height` reaching 1.2% of
+  the prescribed value. The returned assembly stores the connections and has
+  `pd_method='null-space'`, the prescriptions are added with `cte=False`, and
+  `eigvals` multiply the prescribed displacements: 0.4785 for the
+  five-panel cylinder of the tests (`m = 8`, `n = 12`), instead of 39.99, the
+  multiplier of the forces `ku*pd` with `ku = 1e6`. The signature is
+  unchanged; `ku` only flags the prescribed component.
+- `MultiDomain.linear_buckling`: the constant stress resultants `Nxx`,
+  `Nyy` and `Nxy` of the panels are a pre-stress, in the geometric stiffness
+  of the constant state `c0` only. With constant prescribed displacements
+  they entered both `K_G(c0)` and `K_G(c1)`, i.e. they were applied `1 +
+  lambda` times: a constant prescribed rigid translation, which produces no
+  stress, lowered the critical load factor by exactly one (161.93 to 160.93
+  for a plate with `Nxx = -1`). Now `K_G(c1)` is computed with them set to
+  zero, also without prescribed displacements and for a given `c`; a
+  `ValueError` is raised when the incremented state has no geometric
+  stiffness, e.g. when `Nxx` is the only load, which `linear_buckling` used
+  to multiply by the load factor: apply such a load with
+  `Shell.add_distr_load_fixed_x` instead.
+- Skin-base connections of curved panels with the Sanders-Koiter kinematics:
+  the tangential displacement at the interface, `v(z) = v + z (v/r - w,y)`,
+  now has the term `v/r` in the CLPT connection `'SB'`, penalty and
+  null-space, see the unified `'SB'` below, and in the kernels
+  `fkCSB11_dmg`, `fkCSB12_dmg`,
+  `fkCSB22_dmg` of `'SB_TSL'` with `use_kernels=True` (new optional
+  arguments `rinv1`, `rinv2`), which differed from the default matrix
+  products by 1.2e-3 relative and now agree to 1.5e-15. A rigid rotation
+  about the axis of two bonded Sanders panels, the radius of each that of
+  its reference surface, had a connection energy of `(dsb/r)^2` = 2e-6 times
+  that of a separation `r Omega`, now zero to round-off. The FSDT and TSDT
+  `'SB'` already had the term. Nothing changes for the Donnell kinematics
+  and for plates.
+- One skin-base connection `'SB'` for every model: `u1(z1) = u2(z2)`,
+  `v1(z1) = v2(z2)` and `w1 = w2` at the faces in contact, `z1 = d1 - h1/2`
+  of `p1` and `z2 = d2 + h2/2` of `p2`, each panel with its own kinematics,
+  `u(z) = u - z w,x` and `v(z) = (1 + z/r) v - z w,y` for the CLPT (the
+  term `z/r` only with the Sanders-Koiter kinematics), with the operator
+  `kCsdt._surface_terms` of the FSDT and TSDT `'SB'` and of the prescribed
+  displacements at a thickness coordinate. The null-space constraints and
+  the penalty matrix, `kt` times the integral of the products of the same
+  quantities, come from `kCsdt._sb_components`. The CLPT used the form of
+  the thesis of D'Souza (2024), `u1 + dsb w1,x = u2` and `(1 - dt/r1) v1 +
+  dsb w1,y = (1 + db/r2) v2`, with the slope of `p1` only, from the
+  hand-written kernels of `kCSB.pyx`. The null-space results do not change:
+  `w1 = w2` at the Gauss-Legendre grid ties the slopes over the whole area,
+  and the two sets of constraints have the same null space to `2.5e-15`.
+  The penalty results change at finite `kt`, all within the tolerances of
+  the tests: for the laminates `[0/90]` over `[0/90]` with `1e5` times the
+  default `kt`, the largest error of the first 8 frequencies with respect to
+  the single laminate, between `6.94e-6` and `8.31e-6` depending on the
+  offsets, is `6.94e-6` for all of them; the
+  T-stiffened panel of `tstiff2d_1stiff_freq` 48.27331 to 48.27327,
+  `tstiff2d_1stiff_compression` 142.6822 to 142.6811 (114.8576 to 114.8542
+  with the static pre-stress), `tstiff2d_1stiff_flutter` 446.1180 to
+  446.1153; the bonded sub-laminates of Stamatelos and Labeas (2023) by
+  `-3.0e-6` at most, and now agree to `5e-8` with the pristine `'SB_TSL'`,
+  whose
+  separations are the same quantities: with `k_o` at every point its matrix
+  is that of `'SB'` with `kt = k_o`. The penalty method converges to the
+  null-space method with `1/kt`, e.g. from `2.7e-2` with the default `kt`
+  to `2.9e-5` with `1000 kt` for two bonded laminates with offsets. The key
+  `'kr'` of `'SB'` is still used only by the FSDT and TSDT, whose rotations
+  are independent: the rotations of the CLPT follow from `w`, and tying them
+  too would be redundant or, with the Sanders-Koiter kinematics and distinct
+  reference surfaces, would impose `(z1 - z2) w,y = 0`. A `'kr'` given to
+  `'SB'` of the CLPT is not used and now issues a `UserWarning`. New test
+  file `tests/multidomain/test_sb_unified.py`.
+- Default numbers of integration points: `Shell.nx` and `Shell.ny` follow
+  `m` and `n` at the time of the calculation, `max(2*m - 1, 7)` and
+  `max(2*n - 1, 7)`, new function `panels.shell.gauss_points`, unless a
+  value is assigned (kept, the rebuild only raising it to `m`, `n`;
+  `None` restores the default). Before, `nx = 2*m` was set only by the
+  constructor, so that `Shell()` followed by `s.m = 20` integrated with 22
+  points, and for `m <= 3` the 6 points of `2*m` did not integrate exactly
+  the internal force vector and the tangent stiffness matrix, products of
+  four functions of degree up to `4 max(m - 1, 3) = 12`. `2*max(m - 1, 3) + 1`
+  points are the fewest that integrate them exactly; for `m >= 4` the new
+  default has one point fewer than `2*m` and the same results to round-off
+  for a constant constitutive matrix and polynomial pressures. `json_io`
+  saves `nx`, `ny` with their value and lists them in `'derived_lists'`
+  when they follow `m`, `n`; the values of older files are kept as
+  assigned.
+
+### API
+
+- `MultiDomain.get_kC_conn` loses the argument `kw_tsl`, which was not used:
+  the stiffness of each `'SB_TSL'` connection is computed with
+  `MultiDomain.calc_k_dmg` at `c`. Calls passing `kw_tsl` must drop it.
+- New module `panels.multidomain.connections.skin_base` with
+  `fkCSB(kt, p_top, p_bot, size, kr=0.)`, the upper triangle of the matrix
+  of `'SB'` for every model; `kCsdt.fkCSB_sdt` gives the same matrix for
+  the FSDT and TSDT, signature unchanged.
+- The Cython module `panels.multidomain.connections.kCSB` is removed.
+  `fkCSB11`, `fkCSB12` and `fkCSB22`, still importable from
+  `panels.multidomain.connections`, are deprecated and issue a
+  `DeprecationWarning`: they return the blocks of `fkCSB`, with the faces
+  and the kinematics of the panels, and ignore the arguments `dsb`, `dt`,
+  `db`, `rinv1` and `rinv2`. `nullspace._clpt_components` loses the argument
+  `dsb`.
+
+### Tests
+
+- The Riks test of the hinged cylindrical shell no longer depends on how the
+  arc-length adaptation samples the path, and passes with both convergence
+  criteria of structsolve.
+- `tests/tests_shell/test_kernel_python_calls.py` checks that the kernels
+  are finite and agree with the numerically integrated ones. The
+  constitutive matrix read by the kernels is assembled without
+  matrix-matrix BLAS products, because the `cblas_dgemm` of Intel oneMKL
+  2024.2.0 to 2025.0.0 on Windows x64 changes the registers `xmm8`-`xmm15`
+  that the caller expects to be preserved; oneMKL 2025.0.1 and later, or
+  `MKL_CBWR=COMPATIBLE`, preserve them.
+- New `tests/multidomain/test_dcb_linear_measures.py`: linear solutions of
+  the DCB model of the thesis of D'Souza (2024), asserting the measures of
+  the load and the effect of the penalties of the edge connections given in
+  `doc/source/cohesive_zone.rst`, to `1e-4` relative for the integrals of
+  the traction and the largest separation, to `5e-4` for the reaction and
+  the integral of `Q_x`, which carry a round-off error of up to `3e-4` from
+  the 0.015 mm connecting domain (it changes with the number of integration
+  points, all exact), and to `1e-5` for the reaction with a 5 mm connecting
+  domain.
+
+### Documentation
+
+- Functional docstrings of the public API, and Notes and References with
+  the theory of the models, connections, stiffeners, cohesive zone and
+  multidomain assembly.
+- The sign convention of the piston-theory matrices, with the sign of the
+  term of Krumhaar's correction in Eqs. (18), (21) and (29) of Castro et
+  al., Compos. Struct. 140 (2016), stated as a mistake of the paper; the
+  code is unchanged.
+- `doc/source/cohesive_zone.rst`: the tables of the out-of-plane force of
+  the DCB for a tip displacement of 1 mm and of its elastic stiffness against
+  the factor on the default edge penalties, and the stiffness with a
+  connecting domain of 5 mm, recomputed with the tangential separation of
+  `'SB_TSL'`, with the slope of each panel; they had been computed with that
+  of Eq. 4.62 of the thesis, with the slope of the top panel only. The
+  reactions are 1.0-1.2% lower and the largest separation per unit of
+  imposed displacement 20% higher; with the default penalties the separation
+  lags the imposed displacement by 21%, not 20%. The linear solutions are
+  computed at 0.5 mm, below the damage onset, and scaled to 1 mm.
+- `doc/source/cohesive_zone.rst`: the rotational penalty of an `'SSxcte'`
+  connection is a spring of stiffness `k_r` per unit width, with the energy
+  `k_r (w^i_x - w^j_x)^2/2` of the kernels, which adds `3h/a`, about 13%, to
+  the bending compliance of the DCB arm, not `2 k_r` and 7%.
+- `doc/source/tangent_product.rst`: the single-shell timings and the rows of
+  0.14.0 of the displacement-controlled post-buckling re-measured with the
+  default integration points of `gauss_points`; the times of
+  `doc/source/tabulation.rst` and of the older rows, measured with
+  `nx = 2m`, `ny = 2n`, are labelled with these points.
+- Statements checked against the sources: the non-linear terms of the
+  Sanders-Koiter models, without the rotation about the normal, are a
+  simplification of Sanders' theory for small strains and moderately small
+  rotations, whose mid-surface strains also contain `omega3^2/2` (Amabili
+  2008, Sec. 1.3.8, Eqs. (1.133)-(1.134)), see `panels.models`; the
+  symmetry conditions of the follower load stiffness with their locations in
+  Hibbitt (1979), pp. 938-939, and Schweizerhof and Ramm (1984), Table 2 and
+  Eqs. (32)-(35), whose Table 3 lists the ring values 3, 4 and 4.5 `EI/R^3`;
+  the TSDT of the Sanders cylinders as in Reddy and Liu (1985), Eqs. (5),
+  (7) and (11).
+- Notation of `structsolve` and `pyfe3d`: the linear constitutive stiffness
+  matrix `[K_{C0}]` (was `[K_0]`), the non-linear one `[K_{CNL}] = [K_{0L}] +
+  [K_{L0}] + [K_{LL}]`, and the diagonal scaling vector `d` of Crisfield's
+  criterion (was `D`).
+
+### Dependencies
+
+- Requires `composites>=0.10.0`, for `Laminate.intrhoz3`, `intrhoz4` and
+  `intrhoz6`, and `structsolve>=0.9.2`. The default convergence criterion
+  of `structsolve` is Crisfield's since 0.9.0. 0.9.2 fixes the arc-length
+  methods, which could accept a step that converged back to the point
+  before the last one and then trace the path backwards ("doubling back"):
+  with 0.9.0 and 0.9.1 the Riks path of the `[90/0/90]` hinged roof with
+  `h = 12.7` and the TSDT of `notebooks/sze2004_hinged_roofs.ipynb` turned
+  back down the loading branch at the step through the limit point, and its
+  limit load was 1780.7 instead of 1783.8.
+
 ## 0.13.11 (2026-10-16)
 
 ### Bug fix: one constitutive matrix for all the kernels

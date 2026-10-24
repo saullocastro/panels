@@ -12,9 +12,10 @@ Kernels of the damaged skin-base connection ``'SB_TSL'``
 Stiffness matrix of the area connection between two panels ``p1`` and
 ``p2`` with a traction-separation law at the interface, see
 :ref:`cohesive_zone`. The two panels share the axes `x, y, z`, `z` being
-normal to their mid-surfaces, and ``p1`` is the panel on the positive side of
-the interface along `z`, ``p2`` the one on the negative side: the face `z =
--h_1/2` of ``p1`` is connected to the face `z = +h_2/2` of ``p2``, see
+normal to their reference surfaces, and ``p1`` is the panel on the positive
+side of the interface along `z`, ``p2`` the one on the negative side: the
+lower face `z = d_1 - h_1/2` of ``p1`` is connected to the upper face `z = d_2
++ h_2/2` of ``p2``, with the offsets `d_1`, `d_2`, see
 :meth:`.MultiDomain.get_kC_conn`. The superscripts `t` and `b` below refer to
 ``p1`` and ``p2``, the top and bottom panels when `z` points up. The kernels
 evaluate, with a Gauss-Legendre rule of ``nr_x_gauss`` x ``nr_y_gauss``
@@ -36,21 +37,29 @@ panel:
 
     \begin{aligned}
         \Delta_u &= u^t + d^t w^t_{,x} - u^b + d^b w^b_{,x} \\
-        \Delta_v &= v^t + d^t w^t_{,y} - v^b + d^b w^b_{,y} \\
+        \Delta_v &= c^t_v v^t + d^t w^t_{,y} - c^b_v v^b + d^b w^b_{,y} \\
         \Delta_w &= w^t - w^b
     \end{aligned}
 
-where `d^t = h_1/2` and `d^b = h_2/2` are the distances from the mid-planes
-of ``p1`` and ``p2`` to the interface, `u^t, v^t, w^t` and `u^b, v^b, w^b`
-their mid-plane displacements. The normal separation `\Delta_w` is positive,
+where `d^t = h_1/2 - d_1` and `d^b = h_2/2 + d_2` are the distances from the
+reference surfaces of ``p1`` and ``p2`` to the interface, see
+:func:`.kCsdt._sb_distances`, `h_1/2` and `h_2/2` without offsets, and `u^t,
+v^t, w^t` and `u^b, v^b, w^b` the displacements of their reference
+surfaces. The coefficients `c^t_v = 1 - d^t/r_1` and `c^b_v = 1 + d^b/r_2`
+come from the term `v/r` of the Sanders-Koiter kinematics, `v(z) = v + z
+(v/r - w_{,y})`, with the radii `r_1`, `r_2` of the reference surfaces,
+given to the kernels as ``rinv1`` and ``rinv2``; they are `1` with the
+Donnell kinematics and for plates, ``rinv1 = rinv2 = 0``. They are those of
+the operators of ``MultiDomain._tsl_operators``. The normal separation `\Delta_w` is positive,
 opening the interface, when ``p1`` moves along the positive `z` direction
 with respect to ``p2``. The compatibility of the thesis of D'Souza (2024)
 [nathan2024MSc]_, Eqs. 4.57--4.62, assumes equal slopes of both panels
 (Eq. 4.61) and writes `\Delta_u = u^t + (d^t + d^b) w^t_{,x} - u^b`
 (Eq. 4.62), which holds for a perfect bond but gives a spurious tangential
 separation inside the fracture process zone, where the two arms rotate in
-opposite directions. The kernel of the undamaged connection ``'SB'``,
-``kCSB.pyx``, keeps the compatibility of the thesis.
+opposite directions. The undamaged connection ``'SB'`` imposes the same
+jump, `\Delta_u = \Delta_v = \Delta_w = 0`, with the slope of each panel,
+see :mod:`panels.multidomain.connections.skin_base`.
 
 With `f`, `g` the approximation functions along `\xi` and `\eta`, and `w_{,x}
 = (2/a) f_{,\xi} g`, `w_{,y} = (2/b) f g_{,\eta}`, the terms of each block are
@@ -100,8 +109,9 @@ cdef extern from 'bardell.hpp':
             double y1t, double y1r, double y2t, double y2r) nogil
 
 
-def fkCSB11_dmg(double dt, object p1, int size, int row0, int col0, 
-            int nr_x_gauss, int nr_y_gauss, double [:,::1] kw_tsl):
+def fkCSB11_dmg(double dt, object p1, int size, int row0, int col0,
+            int nr_x_gauss, int nr_y_gauss, double [:,::1] kw_tsl,
+            double rinv1=0.):
     r"""
     Penalty approach calculation to skin-base ycte panel 1 position.
 
@@ -111,21 +121,24 @@ def fkCSB11_dmg(double dt, object p1, int size, int row0, int col0,
     terms at each integration point, before the factor `w_\xi w_\eta \,
     ab/4 \, k^w_{CZ}`, are:
 
-    - `(u, u)`: `f_u f_u g_u g_u`, and similarly for `(v, v)`
+    - `(u, u)`: `f_u f_u g_u g_u`
+    - `(v, v)`: `(c^t_v)^2 f_v f_v g_v g_v`
     - `(u, w)`: `\frac{2}{a} d^t f_u f_{w,\xi} g_u g_w`
-    - `(v, w)`: `\frac{2}{b} d^t f_v f_w g_v g_{w,\eta}`
+    - `(v, w)`: `\frac{2}{b} c^t_v d^t f_v f_w g_v g_{w,\eta}`
     - `(w, w)`: `f_w f_w g_w g_w + \frac{4 (d^t)^2}{a^2} f_{w,\xi} f_{w,\xi}
       g_w g_w + \frac{4 (d^t)^2}{b^2} f_w f_w g_{w,\eta} g_{w,\eta}`
 
-    and the symmetric `(w, u)`, `(w, v)`. These are the terms of the thesis
-    of D'Souza (2024) [nathan2024MSc]_ with `d^t` in place of `d^t + d^b`.
+    and the symmetric `(w, u)`, `(w, v)`. With `c^t_v = 1` these are the
+    terms of the thesis of D'Souza (2024) [nathan2024MSc]_ with `d^t` in
+    place of `d^t + d^b`.
     Only the upper triangle is returned.
 
     Parameters
     ----------
     dt : float
-        Distance from the mid-plane of ``p1`` to the interface, ``dt =
-        sum(p1.plyts)/2.``. The tangential separation is
+        Distance from the reference surface of ``p1`` to the interface,
+        `h_1/2 - d_1` with the offset `d_1`, see
+        :func:`.kCsdt._sb_distances`. The tangential separation is
         evaluated with the slope of each panel, see the module docstring.
     p1 : Panel
         Panel on the positive side of the interface along `z`
@@ -142,6 +155,10 @@ def fkCSB11_dmg(double dt, object p1, int size, int row0, int col0,
         Out of plane stiffness due to the TSL for each damage instance. This is a grid that is mapped to the
         integration points provided by nr_x_gauss and nr_y_gauss, with values for each of those points,
         with shape ``(nr_y_gauss, nr_x_gauss)`` and C-contiguous.
+    rinv1 : float, optional
+        `1/r_1` for ``p1`` with the Sanders-Koiter kinematics, zero
+        otherwise, `c^t_v = 1 - d^t r_1^{-1}`, see the module docstring.
+        Default ``0.``.
 
     Returns
     -------
@@ -167,6 +184,7 @@ def fkCSB11_dmg(double dt, object p1, int size, int row0, int col0,
     cdef double f1Au, f1Av, f1Aw, f1Awxi, f1Bu, f1Bv, f1Bw, f1Bwxi
     cdef double g1Au, g1Av, g1Aw, g1Aweta, g1Bu, g1Bv, g1Bw, g1Bweta
     cdef double kt
+    cdef double cvt = 1. - dt*rinv1
 
     a1 = p1.a
     b1 = p1.b
@@ -287,11 +305,11 @@ def fkCSB11_dmg(double dt, object p1, int size, int row0, int col0,
                                 c += 1
                                 kCSB11r[c] = row+1
                                 kCSB11c[c] = col+1
-                                kCSB11v[c] += weight*0.25*a1*b1*f1Av*f1Bv*g1Av*g1Bv*kt
+                                kCSB11v[c] += weight*0.25*a1*b1*cvt*cvt*f1Av*f1Bv*g1Av*g1Bv*kt
                                 c += 1
                                 kCSB11r[c] = row+1
                                 kCSB11c[c] = col+2
-                                kCSB11v[c] += weight*0.5*a1*dt*f1Av*f1Bw*g1Av*g1Bweta*kt
+                                kCSB11v[c] += weight*0.5*a1*cvt*dt*f1Av*f1Bw*g1Av*g1Bweta*kt
                                 c += 1
                                 kCSB11r[c] = row+2
                                 kCSB11c[c] = col+0
@@ -299,7 +317,7 @@ def fkCSB11_dmg(double dt, object p1, int size, int row0, int col0,
                                 c += 1
                                 kCSB11r[c] = row+2
                                 kCSB11c[c] = col+1
-                                kCSB11v[c] += weight*0.5*a1*dt*f1Aw*f1Bv*g1Aweta*g1Bv*kt
+                                kCSB11v[c] += weight*0.5*a1*cvt*dt*f1Aw*f1Bv*g1Aweta*g1Bv*kt
                                 c += 1
                                 kCSB11r[c] = row+2
                                 kCSB11c[c] = col+2
@@ -315,7 +333,8 @@ def fkCSB11_dmg(double dt, object p1, int size, int row0, int col0,
 
 
 def fkCSB12_dmg(double dt, double db, object p1, object p2, int size, int row0, int col0,
-                int nr_x_gauss, int nr_y_gauss, double [:,::1] kw_tsl):
+                int nr_x_gauss, int nr_y_gauss, double [:,::1] kw_tsl,
+                double rinv1=0., double rinv2=0.):
     r"""
     Penalty approach calculation to skin-base ycte panel 1 and panel 2 coupling position.
 
@@ -326,12 +345,12 @@ def fkCSB12_dmg(double dt, double db, object p1, object p2, int size, int row0, 
     integration point, before the factor `w_\xi w_\eta \, ab/4 \, k^w_{CZ}`,
     are:
 
-    - `(u^t, u^b)`: `- f^t_u f^b_u g^t_u g^b_u`, and similarly for `(v^t,
-      v^b)`
+    - `(u^t, u^b)`: `- f^t_u f^b_u g^t_u g^b_u`
+    - `(v^t, v^b)`: `- c^t_v c^b_v f^t_v f^b_v g^t_v g^b_v`
     - `(u^t, w^b)`: `+ \frac{2}{a} d^b f^t_u f^b_{w,\xi} g^t_u g^b_w`
-    - `(v^t, w^b)`: `+ \frac{2}{b} d^b f^t_v f^b_w g^t_v g^b_{w,\eta}`
+    - `(v^t, w^b)`: `+ \frac{2}{b} c^t_v d^b f^t_v f^b_w g^t_v g^b_{w,\eta}`
     - `(w^t, u^b)`: `- \frac{2}{a} d^t f^t_{w,\xi} f^b_u g^t_w g^b_u`
-    - `(w^t, v^b)`: `- \frac{2}{b} d^t f^t_w f^b_v g^t_{w,\eta} g^b_v`
+    - `(w^t, v^b)`: `- \frac{2}{b} c^b_v d^t f^t_w f^b_v g^t_{w,\eta} g^b_v`
     - `(w^t, w^b)`: `- f^t_w f^b_w g^t_w g^b_w + \frac{4 d^t d^b}{a^2}
       f^t_{w,\xi} f^b_{w,\xi} g^t_w g^b_w + \frac{4 d^t d^b}{b^2} f^t_w f^b_w
       g^t_{w,\eta} g^b_{w,\eta}`
@@ -349,8 +368,8 @@ def fkCSB12_dmg(double dt, double db, object p1, object p2, int size, int row0, 
     Parameters
     ----------
     dt, db : float
-        Distances from the mid-planes of ``p1`` and of ``p2`` to the
-        interface.
+        Distances from the reference surfaces of ``p1`` and of ``p2`` to
+        the interface, see :func:`.kCsdt._sb_distances`.
     p1 : Panel
         Panel on the positive side of the interface along `z`
     p2 : Panel
@@ -374,6 +393,14 @@ def fkCSB12_dmg(double dt, double db, object p1, object p2, int size, int row0, 
         Out of plane stiffness due to the TSL for each damage instance. This is a grid that is mapped to the
         integration points provided by nr_x_gauss and nr_y_gauss, with values for each of those points,
         with shape ``(nr_y_gauss, nr_x_gauss)`` and C-contiguous.
+    rinv1 : float, optional
+        `1/r_1` for ``p1`` with the Sanders-Koiter kinematics, zero
+        otherwise, `c^t_v = 1 - d^t r_1^{-1}`, see the module docstring.
+        Default ``0.``.
+    rinv2 : float, optional
+        `1/r_2` for ``p2`` with the Sanders-Koiter kinematics, zero
+        otherwise, `c^b_v = 1 + d^b r_2^{-1}`, see the module docstring.
+        Default ``0.``.
 
     Returns
     -------
@@ -399,6 +426,8 @@ def fkCSB12_dmg(double dt, double db, object p1, object p2, int size, int row0, 
     cdef double f1Au, f2Bu, f1Av, f2Bv, f1Aw, f2Bw, f1Awxi, f2Bwxi
     cdef double g1Au, g2Bu, g1Av, g2Bv, g1Aw, g2Bw, g1Aweta, g2Bweta
     cdef double kt
+    cdef double cvt = 1. - dt*rinv1
+    cdef double cvb = 1. + db*rinv2
 
     a1 = p1.a
     b1 = p1.b
@@ -534,11 +563,11 @@ def fkCSB12_dmg(double dt, double db, object p1, object p2, int size, int row0, 
                                 c += 1
                                 kCSB12r[c] = row+1
                                 kCSB12c[c] = col+1
-                                kCSB12v[c] += -weight*0.25*a1*b1*f1Av*f2Bv*g1Av*g2Bv*kt
+                                kCSB12v[c] += -weight*0.25*a1*b1*cvt*cvb*f1Av*f2Bv*g1Av*g2Bv*kt
                                 c += 1
                                 kCSB12r[c] = row+1
                                 kCSB12c[c] = col+2
-                                kCSB12v[c] += weight*0.5*a1*db*f1Av*f2Bw*g1Av*g2Bweta*kt
+                                kCSB12v[c] += weight*0.5*a1*cvt*db*f1Av*f2Bw*g1Av*g2Bweta*kt
                                 c += 1
                                 kCSB12r[c] = row+2
                                 kCSB12c[c] = col+0
@@ -546,7 +575,7 @@ def fkCSB12_dmg(double dt, double db, object p1, object p2, int size, int row0, 
                                 c += 1
                                 kCSB12r[c] = row+2
                                 kCSB12c[c] = col+1
-                                kCSB12v[c] += -weight*0.5*a1*dt*f1Aw*f2Bv*g1Aweta*g2Bv*kt
+                                kCSB12v[c] += -weight*0.5*a1*cvb*dt*f1Aw*f2Bv*g1Aweta*g2Bv*kt
                                 c += 1
                                 kCSB12r[c] = row+2
                                 kCSB12c[c] = col+2
@@ -558,7 +587,8 @@ def fkCSB12_dmg(double dt, double db, object p1, object p2, int size, int row0, 
 
 
 def fkCSB22_dmg(double db, object p1, object p2, int size, int row0, int col0,
-                int nr_x_gauss, int nr_y_gauss, double [:,::1] kw_tsl):
+                int nr_x_gauss, int nr_y_gauss, double [:,::1] kw_tsl,
+                double rinv2=0.):
     r"""
     Penalty approach calculation to skin-base ycte panel 2 position.
 
@@ -568,9 +598,10 @@ def fkCSB22_dmg(double db, object p1, object p2, int size, int row0, int col0,
     terms at each integration point, before the factor `w_\xi w_\eta \, ab/4
     \, k^w_{CZ}` with `a`, `b` the dimensions of ``p1``, are:
 
-    - `(u, u)`: `f_u f_u g_u g_u`, and similarly for `(v, v)`
+    - `(u, u)`: `f_u f_u g_u g_u`
+    - `(v, v)`: `(c^b_v)^2 f_v f_v g_v g_v`
     - `(u, w)`: `- \frac{2}{a} d^b f_u f_{w,\xi} g_u g_w`
-    - `(v, w)`: `- \frac{2}{b} d^b f_v f_w g_v g_{w,\eta}`
+    - `(v, w)`: `- \frac{2}{b} c^b_v d^b f_v f_w g_v g_{w,\eta}`
     - `(w, w)`: `f_w f_w g_w g_w + \frac{4 (d^b)^2}{a^2} f_{w,\xi} f_{w,\xi}
       g_w g_w + \frac{4 (d^b)^2}{b^2} f_w f_w g_{w,\eta} g_{w,\eta}`
 
@@ -582,8 +613,9 @@ def fkCSB22_dmg(double db, object p1, object p2, int size, int row0, int col0,
     Parameters
     ----------
     db : float
-        Distance from the mid-plane of ``p2`` to the interface, ``db =
-        sum(p2.plyts)/2.``.
+        Distance from the reference surface of ``p2`` to the interface,
+        `h_2/2 + d_2` with the offset `d_2`, see
+        :func:`.kCsdt._sb_distances`.
     p1 : Panel
         Panel on the positive side of the interface along `z`, it defines
         the integration domain
@@ -600,6 +632,16 @@ def fkCSB22_dmg(double db, object p1, object p2, int size, int row0, int col0,
         Row position of constitutive matrix being calculated.
     col0 : int
         Column position of constitutive matrix being calculated.
+    nr_x_gauss, nr_y_gauss : int
+        Number of integration points in x and y
+    kw_tsl : numpy array
+        Out of plane stiffness due to the TSL for each damage instance. This is a grid that is mapped to the
+        integration points provided by nr_x_gauss and nr_y_gauss, with values for each of those points,
+        with shape ``(nr_y_gauss, nr_x_gauss)`` and C-contiguous.
+    rinv2 : float, optional
+        `1/r_2` for ``p2`` with the Sanders-Koiter kinematics, zero
+        otherwise, `c^b_v = 1 + d^b r_2^{-1}`, see the module docstring.
+        Default ``0.``.
 
     Returns
     -------
@@ -625,6 +667,7 @@ def fkCSB22_dmg(double db, object p1, object p2, int size, int row0, int col0,
     cdef double f2Au, f2Bu, f2Av, f2Bv, f2Aw, f2Bw, f2Awxi, f2Bwxi
     cdef double g2Au, g2Bu, g2Av, g2Bv, g2Aw, g2Bw, g2Aweta, g2Bweta
     cdef double kt
+    cdef double cvb = 1. + db*rinv2
 
     a1 = p1.a
     b1 = p1.b
@@ -738,11 +781,11 @@ def fkCSB22_dmg(double db, object p1, object p2, int size, int row0, int col0,
                                 c += 1
                                 kCSB22r[c] = row+1
                                 kCSB22c[c] = col+1
-                                kCSB22v[c] += weight*0.25*a1*b1*f2Av*f2Bv*g2Av*g2Bv*kt
+                                kCSB22v[c] += weight*0.25*a1*b1*cvb*cvb*f2Av*f2Bv*g2Av*g2Bv*kt
                                 c += 1
                                 kCSB22r[c] = row+1
                                 kCSB22c[c] = col+2
-                                kCSB22v[c] += -weight*0.5*a1*db*f2Av*f2Bw*g2Av*g2Bweta*kt
+                                kCSB22v[c] += -weight*0.5*a1*cvb*db*f2Av*f2Bw*g2Av*g2Bweta*kt
                                 c += 1
                                 kCSB22r[c] = row+2
                                 kCSB22c[c] = col+0
@@ -750,7 +793,7 @@ def fkCSB22_dmg(double db, object p1, object p2, int size, int row0, int col0,
                                 c += 1
                                 kCSB22r[c] = row+2
                                 kCSB22c[c] = col+1
-                                kCSB22v[c] += -weight*0.5*a1*db*f2Aw*f2Bv*g2Aweta*g2Bv*kt
+                                kCSB22v[c] += -weight*0.5*a1*cvb*db*f2Aw*f2Bv*g2Aweta*g2Bv*kt
                                 c += 1
                                 kCSB22r[c] = row+2
                                 kCSB22c[c] = col+2

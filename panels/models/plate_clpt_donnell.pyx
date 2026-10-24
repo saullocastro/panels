@@ -339,8 +339,8 @@ def fkG0(double Nxx, double Nyy, double Nxy, object shell,
     return kG0
 
 
-def fkM(object shell, double d, int size, int row0, int col0):
-    cdef double a, b, rho, h
+def fkM(object shell, int size, int row0, int col0):
+    cdef double a, b, I0, I1, I2
     cdef int m, n
     cdef double x1u, x1ur, x2u, x2ur
     cdef double x1v, x1vr, x2v, x2vr
@@ -361,8 +361,11 @@ def fkM(object shell, double d, int size, int row0, int col0):
         raise ValueError('a Shell object must be given as input')
     a = shell.a
     b = shell.b
-    rho = shell.rho
-    h = sum(shell.plyts)
+    #NOTE the moments of the density through the thickness, with z measured
+    #     from the reference surface, see composites.Laminate.intrho
+    I0 = shell.lam.intrho
+    I1 = shell.lam.intrhoz
+    I2 = shell.lam.intrhoz2
     m = shell.m
     n = shell.n
     x1u = shell.x1u; x1ur = shell.x1ur; x2u = shell.x2u; x2ur = shell.x2ur
@@ -415,31 +418,31 @@ def fkM(object shell, double d, int size, int row0, int col0):
                         c += 1
                         kMr[c] = row+0
                         kMc[c] = col+0
-                        kMv[c] += 0.25*a*b*fAufBu*gAugBu*h*rho
+                        kMv[c] += 0.25*I0*a*b*fAufBu*gAugBu
                         c += 1
                         kMr[c] = row+0
                         kMc[c] = col+2
-                        kMv[c] += 0.5*b*d*fAufBwxi*gAugBw*h*rho
+                        kMv[c] += -0.5*I1*b*fAufBwxi*gAugBw
                         c += 1
                         kMr[c] = row+1
                         kMc[c] = col+1
-                        kMv[c] += 0.25*a*b*fAvfBv*gAvgBv*h*rho
+                        kMv[c] += 0.25*I0*a*b*fAvfBv*gAvgBv
                         c += 1
                         kMr[c] = row+1
                         kMc[c] = col+2
-                        kMv[c] += 0.5*a*d*fAvfBw*gAvgBweta*h*rho
+                        kMv[c] += -0.5*I1*a*fAvfBw*gAvgBweta
                         c += 1
                         kMr[c] = row+2
                         kMc[c] = col+0
-                        kMv[c] += 0.5*b*d*fAwxifBu*gAwgBu*h*rho
+                        kMv[c] += -0.5*I1*b*fAwxifBu*gAwgBu
                         c += 1
                         kMr[c] = row+2
                         kMc[c] = col+1
-                        kMv[c] += 0.5*a*d*fAwfBv*gAwetagBv*h*rho
+                        kMv[c] += -0.5*I1*a*fAwfBv*gAwetagBv
                         c += 1
                         kMr[c] = row+2
                         kMc[c] = col+2
-                        kMv[c] += 0.25*a*b*h*rho*(fAwfBw*gAwgBw + 4*fAwfBw*gAwetagBweta*((d*d) + 0.0833333333333333*(h*h))/(b*b) + 4*fAwxifBwxi*gAwgBw*((d*d) + 0.0833333333333333*(h*h))/(a*a))
+                        kMv[c] += 0.25*I0*a*b*fAwfBw*gAwgBw + I2*a*fAwfBw*gAwetagBweta/b + I2*b*fAwxifBwxi*gAwgBw/a
 
     kM = coo_matrix((kMv, (kMr, kMc)), shape=(size, size))
 

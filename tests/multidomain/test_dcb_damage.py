@@ -39,11 +39,20 @@ import time
 
 # Modified Newton-Raphson method
 def scaling(vec, D):
-    """
-        A. Peano and R. Riccioni, Automated discretisatton error
-        control in finite element analysis. In Finite Elements m
-        the Commercial Enviror&ent (Editei by J. 26.  Robinson),
-        pp. 368-387. Robinson & Assoc., Verwood.  England (1978)
+    """Norm of ``vec`` scaled by the diagonal ``D``, over its non-null entries
+
+    ``sqrt(sum(vec_j**2/|D_j|))``, the scaling that Crisfield (1981, p. 58,
+    Eqs. 27 and 28) attributes to Peano and Riccioni (1978) and uses in the
+    convergence test of his arc-length procedure.
+
+    Crisfield, M. A., A fast incremental/iterative solution procedure that
+    handles "snap-through", Computers & Structures, 13(1-3), 55-62, 1981.
+    https://doi.org/10.1016/0045-7949(81)90108-5
+
+    Peano, A. and Riccioni, R., Automated discretisation error control in
+    finite element analysis, in: Robinson, J. (ed.), Finite Elements in the
+    Commercial Environment, Robinson and Associates, Verwood, 368-387, 1978.
+
     """
     non_nulls = ~np.isclose(D, 0)
     vec = vec[non_nulls]
