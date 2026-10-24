@@ -381,10 +381,15 @@ which no boundary exists; in these cases the load potential is the pressure
 times the change of the enclosed volume. Conversely, `[K_{C_{follower}}]`
 is unsymmetric for free or partially restrained edges, for a pressure
 applied on a patch whose edges lie inside the shell, and for a pressure that
-varies over the surface. This is the result obtained by
-[hibbitt1979Follower]_ and, for body-attached loads, Table 2 of
-[schweizerhof1984Pressure]_, who showed that the pressure load stiffness is
-symmetric for closed surfaces or for loaded surfaces with a fixed boundary.
+varies over the surface. This agrees with [hibbitt1979Follower]_, p. 938,
+for whom a uniform pressure on a fully enclosed volume, or on a surface
+whose boundaries have prescribed displacements, gives a symmetric load
+stiffness, unlike free edges and a non-uniform pressure, p. 939, and, for
+body-attached loads, with Table 2 of [schweizerhof1984Pressure]_, whose
+boundary terms vanish under the conditions of their Sec. 3.2.1, Eqs.
+(32)-(35), e.g. when at least two displacement components are prescribed
+at the edge, or when the edge is restrained normal to a continuous
+surface, such as the undeformed surface of the shell, `w = 0`.
 
 A closed cylinder of ``panels`` is an assembly of domains, see
 :func:`.create_cylinder`, whose load stiffness matrices are each
@@ -454,9 +459,11 @@ Sanders                  `-3`             `-4`             `-9/2`
 Donnell                  `-16/5`          `-4`             `-64/15`
 ======================= =============== =============== ==================
 
-The Sanders values are the classical ones, see [timoshenko1961Stability]_,
-[brush1975Buckling]_ and Table 3 of [schweizerhof1984Pressure]_, and the
-follower value is the hydrostatic
+The Sanders values are the classical ones, see [timoshenko1961Stability]_
+and [brush1975Buckling]_. For a ring, with `D` replaced by the bending
+stiffness `EI` of the ring, they are the analytical values `3`, `4` and
+`4.5` that Table 3 of [schweizerhof1984Pressure]_ lists as reference for
+their finite element results. The follower value is also the hydrostatic
 critical pressure `3D/r^3` of the long cylinders, Eq. (66) of
 [nasa2020SP8007]_. With the FSDT and the transverse shear stiffness `S`, the
 follower load gives `p_{cr} = 3D/(r^3 (1 + 4D/(S r^2)))`, the shell formula

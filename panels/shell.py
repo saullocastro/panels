@@ -2060,13 +2060,14 @@ class Shell(object):
         symmetric, a conservative load, when the pressure is uniform over the
         whole integration domain and, on each edge, either `w` or the
         displacement normal to the edge is zero, e.g. simply supported or
-        clamped panels, symmetry planes and closed rings, as found for
-        pressures depending on the reference coordinates by Hibbitt [1]_ and
-        Schweizerhof and Ramm [2]_; it is unsymmetric for free or partially
-        restrained edges, for patches, whose edges are inside the shell, and
-        for a varying ``p(x, y)``. For ``follower='quadratic'`` the matrix at
-        ``c`` different from zero is not symmetric in general. See
-        :ref:`follower_pressure`.
+        clamped panels, symmetry planes and closed rings, in agreement with
+        Hibbitt [1]_, pp. 938-939, and, for pressures depending on the
+        reference coordinates, with Schweizerhof and Ramm [2]_, Table 2 and
+        the conditions of their Eqs. (32)-(35); it is unsymmetric for free
+        or partially restrained edges, for patches, whose edges are inside
+        the shell, and for a varying ``p(x, y)``. For
+        ``follower='quadratic'`` the matrix at ``c`` different from zero is
+        not symmetric in general. See :ref:`follower_pressure`.
 
         References
         ----------

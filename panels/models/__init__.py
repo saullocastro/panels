@@ -113,13 +113,22 @@ DOFs have the strains of the CLPT:
       \kappa_{xy} = -2 w_{,xy} + \frac{3}{2} \frac{v_{,x}}{r}
                     - \frac{1}{2} \frac{u_{,y}}{r}
 
+  The changes of curvature are those of the Sanders-Koiter theory as
+  written by Amabili (2008) [4]_, Sec. 1.3.8, Eqs. (1.136)-(1.138).
   Differently from the Donnell kinematics, all strains vanish for any
   rigid-body motion, which matters for long shells and for deformations of
   long wavelength, e.g. low circumferential wave numbers. The non-linear
-  terms do not include the rotation about the normal, such that the
-  geometric stiffness of the axial load is the same as for the Donnell
-  kinematics. The rotation `\phi_y` also enters the mass matrix and the
-  point constraints of the rotation about `x`.
+  terms do not include the rotation about the normal, `\omega_3 =
+  \frac{1}{2}(v_{,x} - u_{,y})`, such that the geometric stiffness of the
+  axial load is the same as for the Donnell kinematics. This is a
+  simplification of the Sanders-Koiter non-linear theory for small strains
+  and moderately small rotations [1]_, whose mid-surface strains contain,
+  in addition, the term `\frac{1}{2}\omega_3^2 = \frac{1}{8}(v_{,x} -
+  u_{,y})^2` in both `\varepsilon_{xx}` and `\varepsilon_{yy}` [4]_, Sec.
+  1.3.8, Eqs. (1.133)-(1.134); it amounts to assuming that the rotation
+  about the normal is small compared with the other two rotations. The
+  rotation `\phi_y` also enters the mass matrix and the point constraints
+  of the rotation about `x`.
 
 The models with 5 DOFs have the rotations `\phi_x` and `\phi_y` as
 independent fields, with the displacement field and the strains of
@@ -184,6 +193,9 @@ References
    finite elements", DFVLR-FB 88-32, Deutsche Forschungs- und
    Versuchsanstalt für Luft- und Raumfahrt (DFVLR), Institut für
    Strukturmechanik, Braunschweig, 1988.
+.. [4] Amabili, M., "Nonlinear Vibrations and Stability of Shells and
+   Plates", Cambridge University Press, 2008.
+   https://doi.org/10.1017/CBO9780511619694
 
 """
 from . import clpt_field

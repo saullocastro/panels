@@ -74,7 +74,12 @@ transverse normal about `x` is `\Phi_y = \phi_y + v/r`, and the rotation about
 the normal, `\omega_3 = \frac{1}{2}(v_{,x} - u_{,y})`, enters the twist. With
 Sanders' correction of the displacement field, the term `-v/r` of the 3D
 transverse shear strain `\gamma_{yz}` cancels, and no correction appears in
-the `z^3` terms. The models are:
+the `z^3` terms, as in the displacement field `(1 + z/r) v + z \phi_y + ...`
+of Reddy and Liu (1985), Eqs. (5), (7) and (11). As for the CLPT, see
+``theory/shells/cylshell_clpt_sanders``, the non-linear terms omit the term
+`\frac{1}{2}\omega_3^2` of the Sanders-Koiter theory for small strains and
+moderately small rotations (Amabili 2008, Sec. 1.3.8, Eqs.
+(1.133)-(1.134)). The models are:
 
 - ``geometry='plate'``: flat plates, `1/r = 0`, with von Karman kinematics;
 - ``geometry='cylshell'``, ``kinematics='donnell'``: cylindrical shells with

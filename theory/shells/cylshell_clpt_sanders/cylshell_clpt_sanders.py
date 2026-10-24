@@ -28,6 +28,15 @@ with the rotations of the normal
 
     \phi_x = -w_{,x} \qquad \phi_y = -w_{,y} + \frac{v}{r}
 
+The non-linear terms are a simplification of the Sanders-Koiter theory for
+small strains and moderately small rotations (Sanders 1963), whose
+mid-surface strains also contain `\frac{1}{2}\omega_3^2 = \frac{1}{8}(v_{,x}
+- u_{,y})^2` in `\varepsilon_{xx}` and `\varepsilon_{yy}`, with `\omega_3 =
+\frac{1}{2}(v_{,x} - u_{,y})` the rotation about the normal (Amabili 2008,
+Sec. 1.3.8, Eqs. (1.133)-(1.134)): the rotation about the normal is assumed
+small compared with the other two rotations. The changes of curvature are
+those of Amabili (2008), Sec. 1.3.8, Eqs. (1.136)-(1.138).
+
 Dropping the `v/r` term of `\phi_y` and the `1/r` terms of the changes of
 curvature recovers the Donnell kinematics of ``cylshell_clpt_donnell``.
 

@@ -73,9 +73,11 @@ transverse normal about `x` is `\phi_y + v/r`, and the rotation about the
 normal, `\frac{1}{2}(v_{,x} - u_{,y})`, enters the twist. With this
 correction of the displacement field, the term `-v/r` of the transverse
 shear strain `\gamma_{yz}` cancels, and no correction appears in the `z^3`
-terms, as in the shell theory of Reddy and Liu [3]_ specialised to a
-circular cylinder with the shallow shell assumption `r + z \approx r`. The
-transverse shear strain `\gamma^{(0)}(1 - 4 (z - d)^2/h^2)` of the TSDT
+terms, as in the shell theory of Reddy and Liu [3]_, Eqs. (5), (7) and
+(11), specialised to a circular cylinder with the shallow shell assumption
+`r + z \approx r`. As for the CLPT, the non-linear terms do not include
+the rotation about the normal, a simplification of the Sanders-Koiter
+theory [2]_, see :mod:`panels.models`. The transverse shear strain `\gamma^{(0)}(1 - 4 (z - d)^2/h^2)` of the TSDT
 vanishes at both faces `z = d \pm h/2`; the cubic term about the
 mid-surface keeps `u`, `v` the displacements of the reference surface,
 `z = 0`, and `\phi_x`, `\phi_y` the rotations of the normal at the

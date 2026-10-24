@@ -285,6 +285,16 @@
   default integration points of `gauss_points`; the times of
   `doc/source/tabulation.rst` and of the older rows, measured with
   `nx = 2m`, `ny = 2n`, are labelled with these points.
+- Statements checked against the sources: the non-linear terms of the
+  Sanders-Koiter models, without the rotation about the normal, are a
+  simplification of Sanders' theory for small strains and moderately small
+  rotations, whose mid-surface strains also contain `omega3^2/2` (Amabili
+  2008, Sec. 1.3.8, Eqs. (1.133)-(1.134)), see `panels.models`; the
+  symmetry conditions of the follower load stiffness with their locations in
+  Hibbitt (1979), pp. 938-939, and Schweizerhof and Ramm (1984), Table 2 and
+  Eqs. (32)-(35), whose Table 3 lists the ring values 3, 4 and 4.5 `EI/R^3`;
+  the TSDT of the Sanders cylinders as in Reddy and Liu (1985), Eqs. (5),
+  (7) and (11).
 
 ### Dependencies
 
