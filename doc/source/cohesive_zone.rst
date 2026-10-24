@@ -1573,7 +1573,8 @@ Each reference has a notebook in ``notebooks/`` with a dictionary of the FE
 cases and one of the experimental tests, a comparison table, a plot and a
 discussion; the ``panels`` results are stored in ``notebooks/results/*.npz``
 and collected by ``notebooks/dcb_mode_I_validation_summary.ipynb``. The results were
-obtained with panels 0.13.11.
+obtained with panels 0.14.0; the run times stored with them are those of their
+first computation, with panels 0.13.11.
 
 The case of Camanho et al. (2003) is kept for reference, but it is not used
 to validate the model: the FE and experimental load-opening curves of the
