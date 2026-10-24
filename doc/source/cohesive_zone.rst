@@ -673,8 +673,8 @@ converge in 8, 12 and 47 iterations, but at 6.4 mm the ratio stagnates at
 the analysis completes with 3 bisected increments and 384 iterations. The
 bisection is therefore the safeguard of the coarse discretisations, see the
 convergence study. In the 17 nonlinear runs of the validation notebooks, 980
-openings, every opening converged without bisection in 1 to 7 iterations,
-3.0 on average.
+openings, every opening converged without bisection in 1 to 8 iterations,
+2.84 on average.
 
 **Convergence criterion.** The prescribed displacement is imposed with `k_w =
 10^6`, such that `\{f_{ext}\}` and `[K^{pen}_{PD}]\{c\}` are of the order of
@@ -1465,7 +1465,7 @@ The results show that:
   curve up to 168.2--169.4 N at `\delta = 6.2`--6.4 mm, 1.3--2.0% above the
   converged peak, and then drops by up to 14 N (A) and 19 N (B) in one
   increment, a sawtooth with `CV = 2.0`--2.7. The load differs from the
-  converged one by 5--7%, `e_{eq}` is 18--44% from the first increment on,
+  converged one by 5--7%, `e_{eq}` reaches 18--44%,
   and three of the six runs stop at `\delta = 6.2`--7.4 mm. With `m_{tsl} =
   15` the curve is smooth, `CV = 0.51`--0.70, but still 0.7--1.2% off. From
   `m_{tsl} = 20` the error is at most 0.21% for `n_x \geq 120`, and 25 and 30
