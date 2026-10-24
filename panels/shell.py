@@ -1495,16 +1495,17 @@ class Shell(object):
 
         .. math::
 
-            [K_0] = \int [B_L]^T [F] [B_L] dA \qquad
+            [K_{C0}] = \int [B_L]^T [F] [B_L] dA \qquad
             [K_{0L}] = \int [B_L]^T [F] [B_{NL}] dA = [K_{L0}]^T \qquad
             [K_{LL}] = \int [B_{NL}]^T [F] [B_{NL}] dA
 
-        over the integration domain. With ``NLgeom=False`` the result is the
-        linear constitutive stiffness matrix `[K_0]`, whether or not ``c`` is
-        given, because the kernels zero `w_{,x}` and `w_{,y}` and every large
-        displacement term is built from them. With ``NLgeom=True`` the result
-        is `[K_0] + [K_{0L}] + [K_{L0}] + [K_{LL}] + [K_{G_{NL}}]`, evaluated
-        at ``c``. Despite the name, the returned matrix is not purely
+        over the integration domain, the non-linear constitutive stiffness
+        matrix being `[K_{CNL}] = [K_{0L}] + [K_{L0}] + [K_{LL}]`. With
+        ``NLgeom=False`` the result is the linear constitutive stiffness
+        matrix `[K_{C0}]`, whether or not ``c`` is given, because the kernels
+        zero `w_{,x}` and `w_{,y}` and every large displacement term is built
+        from them. With ``NLgeom=True`` the result is `[K_{C0}] + [K_{CNL}] +
+        [K_{G_{NL}}]`, evaluated at ``c``. Despite the name, the returned matrix is not purely
         constitutive in two cases:
 
         - With ``NLgeom=True`` the returned matrix also contains
@@ -1516,7 +1517,7 @@ class Shell(object):
           instead of in :meth:`.Shell.calc_kG`, so that
 
           .. math::
-              [K_T] = [K_0] + [K_{0L}] + [K_{L0}] + [K_{LL}] + [K_{G_{NL}}]
+              [K_T] = [K_{C0}] + [K_{0L}] + [K_{L0}] + [K_{LL}] + [K_{G_{NL}}]
                       + [K_G(N_0 + N_L)]
 
           with the first five terms returned by this method and the last one
@@ -1527,7 +1528,8 @@ class Shell(object):
         - If ``c_cte`` is given, or any of the attributes ``Nxx_cte``,
           ``Nyy_cte`` or ``Nxy_cte`` is non-zero, the geometric stiffness
           `[K_G(N_{cte})]` of that constant stress state is added into the
-          returned matrix, which is then no longer `[K_0] + [K_{C_{NL}}]`.
+          returned matrix, which is then no longer `[K_{C0}] + [K_{CNL}] +
+          [K_{G_{NL}}]`.
           This is the device used to superpose combined load cases, where the
           eigenvalue of a linear buckling analysis must multiply only part of
           the applied loads. The constant stress state does not scale with
@@ -1714,7 +1716,7 @@ class Shell(object):
         stresses of the attributes ``Nxx``, ``Nyy``, ``Nxy`` and `N_L` those
         of the linear part of the strains at ``c``. The linear buckling
         problem of a fundamental state ``c0``, e.g. of a linear static
-        analysis, is `([K_0] + \lambda [K_G(c_0)])\{u\} = \{0\}`, see
+        analysis, is `([K_{C0}] + \lambda [K_G(c_0)])\{u\} = \{0\}`, see
         :meth:`.Shell.calc_kC` for the stresses that must not scale with
         `\lambda`.
 
@@ -1832,7 +1834,7 @@ class Shell(object):
         :meth:`.Shell.calc_fint` with respect to ``c``, assembled as
 
         .. math::
-            [K_T] = [K_0] + [K_{0L}] + [K_{L0}] + [K_{LL}] + [K_{G_{NL}}]
+            [K_T] = [K_{C0}] + [K_{0L}] + [K_{L0}] + [K_{LL}] + [K_{G_{NL}}]
                     + [K_G(N_0 + N_L)]
 
         where all terms but the last come from

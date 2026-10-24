@@ -295,6 +295,10 @@
   Eqs. (32)-(35), whose Table 3 lists the ring values 3, 4 and 4.5 `EI/R^3`;
   the TSDT of the Sanders cylinders as in Reddy and Liu (1985), Eqs. (5),
   (7) and (11).
+- Notation of `structsolve` and `pyfe3d`: the linear constitutive stiffness
+  matrix `[K_{C0}]` (was `[K_0]`), the non-linear one `[K_{CNL}] = [K_{0L}] +
+  [K_{L0}] + [K_{LL}]`, and the diagonal scaling vector `d` of Crisfield's
+  criterion (was `D`).
 
 ### Dependencies
 

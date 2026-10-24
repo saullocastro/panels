@@ -746,8 +746,9 @@ Euclidean norm over all the degrees of freedom, which grows with `k`: with
 21% and 110%, after 12 and 8 evaluations of the internal force vector in
 the 8 increments, against 28 for `k/(E h) = 10^2`, and even with ``relTOL =
 1e-10`` the error grows again from `k/(E h) = 10^6` to `10^8`. Crisfield's
-criterion uses the norm `\|v\|_D = (\sum_j v_j^2/|D_j|)^{1/2}` over the free
-degrees of freedom, `D_j` being the diagonal of the linear stiffness matrix
+criterion uses the norm `\|v\|_{\boldsymbol{d}} = (\sum_j v_j^2/|d_j|)^{1/2}`
+over the free degrees of freedom, the entries `d_j` of the diagonal scaling
+vector `\boldsymbol{d}` being the diagonal of the linear stiffness matrix
 ``calc_kC()``, which contains the penalty stiffness, such that the scaled
 norm of the penalty forces grows with `\sqrt{k}`, by a factor of 10 for
 each factor of 100 of `k` in this case: with ``relTOL = 1e-9`` the error

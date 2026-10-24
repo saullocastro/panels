@@ -1258,7 +1258,7 @@ product, for all 9 models, in ``tests/tests_shell/test_tangent_product.py``:
   falls as `O(h^2)`;
 - the matrix built column by column from the product against the central
   difference of :meth:`.Shell.calc_fint`;
-- in the undeformed state the product is `[K_0] \{v\}`;
+- in the undeformed state the product is `[K_{C0}] \{v\}`;
 - Newton-Raphson with the tangent built from the product converges
   quadratically:
 

@@ -269,7 +269,7 @@ used by :class:`structsolve.Analysis`. The tangent stiffness matrix,
     :label: fp-tangent
 
     [K_T] = \frac{\partial \{F_{int}\}}{\partial \{c\}}
-          = [K_0] + [K_{0L}] + [K_{L0}] + [K_{LL}] + [K_{G_{NL}}]
+          = [K_{C0}] + [K_{0L}] + [K_{L0}] + [K_{LL}] + [K_{G_{NL}}]
             + [K_G(N_0 + N_L)] + [K_{C_{follower}}]
 
 and the derivative of the residual with respect to the load factor, used by
@@ -292,13 +292,13 @@ Linear analyses
 
 **Linear static analysis.** A geometrically linear structure under a
 follower load with the first-order area vector is in equilibrium when
-`[K_0]\{c\} = \{F_p(c)\}`, i.e., from Eqs. :eq:`fp-force-affine` and
+`[K_{C0}]\{c\} = \{F_p(c)\}`, i.e., from Eqs. :eq:`fp-force-affine` and
 :eq:`fp-kcfollower`:
 
 .. math::
     :label: fp-linear-static
 
-    \left( [K_0] + [K_{C_{follower}}] \right) \{c\} = \{F_p(0)\}
+    \left( [K_{C0}] + [K_{C_{follower}}] \right) \{c\} = \{F_p(0)\}
 
 an unsymmetric linear system in general, solved by
 ``structsolve.Analysis.static(NLgeom=False)`` when ``calc_fext`` accepts the
@@ -311,7 +311,7 @@ both scale with the load factor:
 .. math::
     :label: fp-lb
 
-    \left( [K_0] + \lambda \left( [K_G(c_0)] + [K_{C_{follower}}] \right)
+    \left( [K_{C0}] + \lambda \left( [K_G(c_0)] + [K_{C_{follower}}] \right)
     \right) \{c\} = \{0\}
 
 solved by ``structsolve.lb(kC0, kG + kCfollower)``, which uses the solvers
