@@ -8,7 +8,11 @@ built in place with `python setup.py build_ext --inplace` and on the
 of the repository and put the repository first on `sys.path`.
 
 Most notebooks load stored results from `results/` and only run `panels`
-again with `RERUN = True` in their first cell.
+again with `RERUN = True` in their first cell. The stored results of the
+notebooks were computed with `panels` 0.14.0, `structsolve` 0.9.1 and
+`composites` 0.10.0, except those of `sze2004_hinged_roofs.ipynb`, see the
+notebook; the results computed again keep the run times of their first
+computation.
 
 ## Mode I double cantilever beam (DCB), cohesive zone model
 
@@ -43,7 +47,7 @@ kept, in `results/`.
 | File | Content |
 |---|---|
 | `conn_method_comparison.ipynb` | The benchmark notebooks with the penalty and the null-space connections |
-| `conn_method_study.py` | Runs and timings of `conn_method_comparison.ipynb`, results in `results/conn_methods/`; `results/conn_methods/stored_b7fd4e4/` keeps the DCB penalty results and cases of commit b7fd4e4, with which the null-space runs of 2026-09-24 are compared |
+| `conn_method_study.py` | Runs and timings of `conn_method_comparison.ipynb`: null-space runs of the DCB cases of the notebooks, elastic compliances, profile of the cost and Stamatelos and Labeas models with both methods, results in `results/conn_methods/`; the penalty results of the DCB cases are those of the DCB notebooks, `results/*.npz` |
 
 ## Shells and plates
 

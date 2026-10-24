@@ -24,11 +24,6 @@ Usage, from the root of the repository::
     python notebooks/conn_method_study.py stamatelos
     python notebooks/conn_method_study.py profile [--only NAME ...]
 
-The penalty results of the DCB cases are those stored by the notebooks in
-``notebooks/results/*.npz``: the penalty runs repeated with the current code
-reproduce them to the round-off, so that ``conn_method_comparison.ipynb``
-only needs ``run --methods null-space``.
-
 ``run`` solves the DCB cases, in parallel, longest first, writing
 ``notebooks/results/conn_methods/<method>/<NAME>.npz`` and the log
 ``<NAME>.log``, where ``<NAME>`` is the name of the results file of the
@@ -38,10 +33,32 @@ and ``stamatelos`` runs ``stamatelos_labeas_2023_multidomain.ipynb`` with
 both methods, saving ``compliance.json`` and ``stamatelos.json`` in the same
 folder. ``profile`` times, for each DCB case and each method, the
 components of one Newton-Raphson iteration of ``dcb_utils.solve_dcb`` at the
-opening of the stored peak load, and the tangent stiffness of each panel,
-updating ``profile.json``; with the iteration counts of the runs, these give
-the distribution of the cost of the runs, see ``predicted_cost``. The
-results are compared in ``conn_method_comparison.ipynb``.
+opening of the peak load of ``notebooks/results/<NAME>.npz``, and the
+tangent stiffness of each panel, updating the entries of the cases in
+``profile.json``; with the iteration counts of the runs, these give the
+distribution of the cost of the runs, see ``predicted_cost``.
+
+``conn_method_comparison.ipynb`` takes the DCB cases from :func:`collect`
+and reads:
+
+- penalty: the results of the DCB notebooks, ``notebooks/results/<NAME>.npz``,
+  computed by the notebooks or by ``dcb_mode_I_validation_rerun.py``; the
+  penalty runs of ``run --methods penalty`` are the same runs and are not
+  read
+- null-space: ``notebooks/results/conn_methods/null_space/<NAME>.npz``
+- ``compliance.json``, ``profile.json`` and ``stamatelos.json`` of
+  ``notebooks/results/conn_methods/``
+
+To compute them again with the current code, after the results of the DCB
+notebooks (``python notebooks/dcb_mode_I_validation_rerun.py run``), delete
+``notebooks/results/conn_methods/null_space/*.npz`` and ``profile.json``,
+otherwise complete runs are kept and entries of cases no longer in the
+notebooks remain, and run::
+
+    python notebooks/conn_method_study.py run --methods null-space
+    python notebooks/conn_method_study.py compliance
+    python notebooks/conn_method_study.py profile
+    python notebooks/conn_method_study.py stamatelos
 
 """
 import argparse
