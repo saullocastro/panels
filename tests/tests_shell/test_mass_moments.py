@@ -1,6 +1,6 @@
 r"""Mass matrices with the density moments `I_n` of the laminate
 
-The kinetic energy `c^\top [M] c` of a random Ritz vector is checked against an
+The kinetic energy `\boldsymbol{c}^\top \boldsymbol{M} \boldsymbol{c}` of a random Ritz vector is checked against an
 independent integration of `\rho (u(z)^2 + v(z)^2 + w^2)` ply by ply, with
 `z` from `-h/2 + d` to `h/2 + d`, the convention of the offset `d` of
 :func:`composites.laminated_plate`, and the fields of :meth:`.Shell.uvw`;

@@ -139,7 +139,7 @@ def test_offset_zero_unchanged():
 
 @pytest.mark.parametrize('d1,d2', [(0., 0.5*H), (0.2*H, -0.4*H)])
 def test_edge_penalty_energy(d1, d2):
-    r"""`\{\bar{c}\}^\top [K] \{\bar{c}\}` of ``'SSxcte'`` against the line integral of the
+    r"""`\boldsymbol{c}^\top \boldsymbol{K} \boldsymbol{c}` of ``'SSxcte'`` against the line integral of the
     penalty energy evaluated from the fields"""
     md, p1, p2 = _two_plates(d1, d2)
     kt, kr = 1.3e7, 2.1e3

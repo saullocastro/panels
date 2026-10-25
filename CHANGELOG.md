@@ -309,28 +309,42 @@
   the TSDT of the Sanders cylinders as in Reddy and Liu (1985), Eqs. (5),
   (7) and (11).
 - Notation of `structsolve` and `pyfe3d`: the linear constitutive stiffness
-  matrix `[K_{C0}]` (was `[K_0]`), the non-linear one `[K_{CNL}] = [K_{0L}] +
-  [K_{L0}] + [K_{LL}]`, and the diagonal scaling vector `d` of Crisfield's
-  criterion (was `D`).
-- One notation in the docstrings, `doc/source`, the theory of `theory/`
-  and the comments of the kernels written by its generators:
-  `[K_{C0}]` also in `tangent_product.rst` (was `K_0`); `[K_{CNL}]` as the
-  sum of its three integrals of `[B_L]` and `[B_{NL}]` in `Shell.calc_kC`
-  and `KC0 + KCNL + KGNL` in the comments of the kernels (were `K0 + K0L +
-  KL0 + KLL + KGNL`); `[K_{GNL}]` (was `[K_{G_{NL}}]`); the load stiffness
-  matrix `[K_F] = -d{F_p}/d{c}` of `Shell.calc_kCfollower` (was
-  `[K_{C_{follower}}]`, and `[K_p] = -[K_F]`); the rows `S^u`, `S^v`, `S^w`
-  of the approximation functions (were `{N_u}`, `{N_v}`, `{N_w}`); the
-  tangent vectors `X_{,x}`, `X_{,y}` of the follower pressure (were `A`,
-  `B`, the symbols of the laminate); the constitutive matrix `[ABD]` (was
-  `[F]`); the strain operator `[B_L] + [B_{NL}]` (was `[B(beta)]`); the
-  Ritz constants `c-bar` and the pre-buckling state `c-hat`; Bardell's
-  functions `P_i` (were `f_i` and `g_j`); in `cohesive_zone.rst` the
-  diagonal scaling vector `d` (was `[D]`) and the tangent stiffness matrix
-  `[K_T]` (was the Jacobian `[J]`); the direction `v` of the Taylor test of
-  the tangent (was `d`); `\boldsymbol` (was `\mathbf`, `\vec`) and the
-  transpose `^\top` (was `^T`). The API names, e.g. `calc_kCfollower`, the
-  key `'kCfollower'` and the argument `c`, are unchanged.
+  matrix `K_C0` (was `K_0`), the non-linear one `K_CNL = K_0L + K_L0 +
+  K_LL`, with the terms of `B_NL` only, and the diagonal scaling vector `d`
+  of Crisfield's criterion (was `D`).
+- One notation in the docstrings, `doc/source`, the markdown of the
+  notebooks, the theory of `theory/` and the comments of the kernels
+  written by its generators. Vectors are bold lower case, without braces or
+  overbar, e.g. the Ritz constants `\boldsymbol{c}` (were `{c}`) and the
+  increment `\delta \boldsymbol{c}`, except the force vectors and the
+  residual, upper case, `\boldsymbol{F}_{ext}`, `\boldsymbol{F}_{int}` and
+  `\boldsymbol{R}` (also for the lower case `{f}`, `{f_int}`, `{f_ext}` of
+  the null-space method and of the cohesive zone); matrices are bold upper
+  case, without brackets, e.g. `\boldsymbol{K}` (was `[K]`); the overbar is
+  kept for prescribed values, the membrane stress resultants `Nxx`, `Nyy`,
+  `Nxy` being `\bar{\boldsymbol{N}}` (were `N_0`, `N^0`). `K_C0` also in
+  `tangent_product.rst` (was `K_0`); `K_CNL` as the sum of its three
+  integrals of `B_L` and `B_NL` in `Shell.calc_kC`, and `K_CNL + K_GNL`
+  written out where the matrix of `fkC_num` is meant, in
+  `tangent_product.rst` (`K_CNL` included `K_GNL` there) and in the
+  comments of the kernels, `KC0 + KCNL + KGNL` (were `K0 + K0L + KL0 + KLL
+  + KGNL`); `K_GNL` (was `K_{G_{NL}}`); the load stiffness matrix `K_F =
+  -dF_p/dc` of `Shell.calc_kCfollower` (was `K_{C_{follower}}`, and `K_p =
+  -K_F`); the rows `S^u`, `S^v`, `S^w` of the approximation functions (were
+  `{N_u}`, `{N_v}`, `{N_w}`); the tangent vectors `X_{,x}`, `X_{,y}` of the
+  follower pressure (were `A`, `B`, the symbols of the laminate); the
+  constitutive matrix `ABD` (was `[F]`); the strain operator `B_L + B_NL`
+  (was `[B(beta)]`); the pre-buckling state `c-hat`; the aerodynamic
+  damping matrix `C_A` (was `[c_A]`); Bardell's functions `P_i` (were `f_i`
+  and `g_j`); in `cohesive_zone.rst` the residual `R = F_ext - F_int` (was
+  `F_int - F_ext`), with the Newton correction, the descent of the line
+  search and the denominator of the convergence criterion written
+  accordingly, the diagonal scaling vector `d` (was `[D]`) and the tangent
+  stiffness matrix `K_T` (was the Jacobian `[J]`); the direction `v` of the
+  Taylor test of the tangent (was `d`); `\boldsymbol` (was `\mathbf`,
+  `\vec`) and the transpose `^\top` (was `^T`). The API names, e.g.
+  `calc_kCfollower`, the key `'kCfollower'` and the argument `c`, are
+  unchanged.
 
 ### Dependencies
 

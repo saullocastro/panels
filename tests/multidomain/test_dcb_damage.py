@@ -124,39 +124,39 @@ def dcb_damage_prop_no_f_kcrack(phy_dim, nr_terms, k_i=None, tau_o=None, nr_x_ga
 
         .. math::
 
-            \{R\} = \{f_{int}\}_{panels} + [K^{conn}_{dmg}(d)]\{\bar{c}\}
-                    + [K^{pen}_{PD}]\{\bar{c}\} - \{f_{ext}\}
+            \boldsymbol{R} = \boldsymbol{F}^{panels}_{int} + \boldsymbol{K}^{conn}_{dmg}(d)\boldsymbol{c}
+                    + \boldsymbol{K}^{pen}_{PD}\boldsymbol{c} - \boldsymbol{F}_{ext}
 
         without the term `U_{crack}` of the thesis of D'Souza (2024)
         [nathan2024MSc]_, which counts the dissipated energy twice. The
-        secant stiffness of the cohesive zone `[K^{conn}_{dmg}]` is part of
+        secant stiffness of the cohesive zone `\boldsymbol{K}^{conn}_{dmg}` is part of
         the internal force vector and is evaluated at every iteration, like
-        its damage-rate part `[K^{conn}_{\dot d}]`, while the tangent
-        stiffness of the panels `[K_C] + [K_G]` is refreshed every
+        its damage-rate part `\boldsymbol{K}^{conn}_{\dot d}`, while the tangent
+        stiffness of the panels `\boldsymbol{K}_C + \boldsymbol{K}_G` is refreshed every
         ``NR_kT_update = 3`` iterations (modified Newton-Raphson). The
-        iteration matrix is `[K_C] + [K_G] + [K^{conn}_{dmg}] +
-        [K^{conn}_{\dot d}] + [K^{pen}_{PD}]`.
+        iteration matrix is `\boldsymbol{K}_C + \boldsymbol{K}_G + \boldsymbol{K}^{conn}_{dmg} +
+        \boldsymbol{K}^{conn}_{\dot d} + \boldsymbol{K}^{pen}_{PD}`.
 
         With ``predictor=True`` the increment `n` starts from
-        `\{\bar{c}\}_{n-1} + \frac{w_{p,n} - w_{p,n-1}}{w_{p,n-1} - w_{p,n-2}}
-        (\{\bar{c}\}_{n-1} - \{\bar{c}\}_{n-2})`, with the state `w_p = 0`, `\{\bar{c}\} = 0`
+        `\boldsymbol{c}_{n-1} + \frac{w_{p,n} - w_{p,n-1}}{w_{p,n-1} - w_{p,n-2}}
+        (\boldsymbol{c}_{n-1} - \boldsymbol{c}_{n-2})`, with the state `w_p = 0`, `\boldsymbol{c} = \boldsymbol{0}`
         used for the second increment. The line search takes the first step
-        `s = 1, 1/2, \dots, 2^{-n_{ls}}` with `\|R(\bar{c}_i + s \delta \bar{c})\|_{\boldsymbol{d}} \le (1 - 10^{-4} s) \|R(\bar{c}_i)\|_{\boldsymbol{d}}`,
+        `s = 1, 1/2, \dots, 2^{-n_{ls}}` with `\|\boldsymbol{R}(\boldsymbol{c}_i + s \delta \boldsymbol{c})\|_{\boldsymbol{d}} \le (1 - 10^{-4} s) \|\boldsymbol{R}(\boldsymbol{c}_i)\|_{\boldsymbol{d}}`,
         or the trial with the smallest norm, a trial whose residual is not
-        finite counting as an infinite norm, where `\|v\|_{\boldsymbol{d}} =
-        \sqrt{v^\top [\mathrm{diag}(|\boldsymbol{d}|)]^{-1} v}` and the diagonal
+        finite counting as an infinite norm, where `\|\boldsymbol{v}\|_{\boldsymbol{d}} =
+        \sqrt{\boldsymbol{v}^\top \mathrm{diag}(|\boldsymbol{d}|)^{-1} \boldsymbol{v}}` and the diagonal
         scaling vector `\boldsymbol{d}` holds the diagonal of the iteration
         matrix at the start of the increment. The convergence criterion
         is:
 
         .. math::
 
-            \frac{\|R\|_{\boldsymbol{d}}}{\max\left(
-            \|f_{int}\|_{\boldsymbol{d}}, \|[K^{pen}_{PD}]\{\bar{c}\} -
-            \{f_{ext}\}\|_{\boldsymbol{d}} \right)} < 10^{-4}
+            \frac{\|\boldsymbol{R}\|_{\boldsymbol{d}}}{\max\left(
+            \|\boldsymbol{F}_{int}\|_{\boldsymbol{d}}, \|\boldsymbol{K}^{pen}_{PD}\boldsymbol{c} -
+            \boldsymbol{F}_{ext}\|_{\boldsymbol{d}} \right)} < 10^{-4}
 
         with the reaction of the prescribed displacement in place of
-        `\{f_{ext}\}`, which is dominated by the penalty `k_w`. An increment
+        `\boldsymbol{F}_{ext}`, which is dominated by the penalty `k_w`. An increment
         whose ratio is not finite or exceeds `10^3`, or that does not
         converge in ``max_NR_iter`` iterations, is discarded and bisected; the
         damage history is only updated with converged states. A sub-increment

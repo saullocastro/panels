@@ -106,8 +106,8 @@ to the load factor (``cte=False``). They are imposed by the
 without connections, with ``pd_method``:
 
 - ``'null-space'``: exactly, as linear constraints eliminated together with
-  the connections, the solution being `\{\bar{c}\} = [Z]\{\bar{c}_r\} + \{\bar{c}_{p0}\} +
-  \lambda \{\bar{c}_{p1}\}`, with the reactions of :meth:`.MultiDomain.reaction_pd`
+  the connections, the solution being `\boldsymbol{c} = \boldsymbol{Z}\boldsymbol{c}_r + \boldsymbol{c}_{p0} +
+  \lambda \boldsymbol{c}_{p1}`, with the reactions of :meth:`.MultiDomain.reaction_pd`
   and :meth:`.MultiDomain.reaction_resultant`, see :ref:`null_space_pd`;
 - ``'penalty'``, the default: with springs between the structure and the
   support, whose stiffness the user adds to the stiffness matrix, e.g. with

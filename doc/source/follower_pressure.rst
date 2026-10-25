@@ -144,13 +144,13 @@ Force vector
 ------------
 
 With the approximation of the displacements by the Ritz constants
-`\{\bar{c}\}`, see :ref:`theory_func_bardell`,
+`\boldsymbol{c}`, see :ref:`theory_func_bardell`,
 
 .. math::
     :label: fp-ritz
 
-    u = \boldsymbol{S}^u \{\bar{c}\}, \qquad v = \boldsymbol{S}^v
-    \{\bar{c}\}, \qquad w = \boldsymbol{S}^w \{\bar{c}\}
+    u = \boldsymbol{S}^u \boldsymbol{c}, \qquad v = \boldsymbol{S}^v
+    \boldsymbol{c}, \qquad w = \boldsymbol{S}^w \boldsymbol{c}
 
 where `\boldsymbol{S}^u`, `\boldsymbol{S}^v` and `\boldsymbol{S}^w` are the
 rows of the approximation functions of each field, null at the positions of
@@ -160,11 +160,11 @@ vector of the follower pressure:
 .. math::
     :label: fp-force
 
-    \{F_p(\bar{c})\} = \int_{A_0} p \left( (\boldsymbol{S}^u)^\top a_x +
+    \boldsymbol{F}_p(\boldsymbol{c}) = \int_{A_0} p \left( (\boldsymbol{S}^u)^\top a_x +
     (\boldsymbol{S}^v)^\top a_y + (\boldsymbol{S}^w)^\top a_z \right) dx \,
     dy
 
-where `\boldsymbol{a}` is evaluated at `\{\bar{c}\}` with Eq.
+where `\boldsymbol{a}` is evaluated at `\boldsymbol{c}` with Eq.
 :eq:`fp-truncation`, or Eq. :eq:`fp-area-vector` for ``'quadratic'``. In
 the undeformed state, `\boldsymbol{a} = \boldsymbol{a}_0` and the follower
 load equals the dead load:
@@ -172,18 +172,18 @@ load equals the dead load:
 .. math::
     :label: fp-force-reference
 
-    \{F_p(0)\} = \int_{A_0} p \, (\boldsymbol{S}^w)^\top \, dx \, dy
+    \boldsymbol{F}_p(0) = \int_{A_0} p \, (\boldsymbol{S}^w)^\top \, dx \, dy
 
 which is the reference force vector returned by :meth:`.Shell.calc_fext`,
-see :func:`.shell_fext`. For the first-order area vector `\{F_p\}` is affine
-in `\{\bar{c}\}`:
+see :func:`.shell_fext`. For the first-order area vector `\boldsymbol{F}_p` is affine
+in `\boldsymbol{c}`:
 
 .. math::
     :label: fp-force-affine
 
-    \{F_p(\bar{c})\} = \{F_p(0)\} - [K_F] \{\bar{c}\}
+    \boldsymbol{F}_p(\boldsymbol{c}) = \boldsymbol{F}_p(0) - \boldsymbol{K}_F \boldsymbol{c}
 
-with the load stiffness matrix `[K_F]` of Eq. :eq:`fp-jacobian`.
+with the load stiffness matrix `\boldsymbol{K}_F` of Eq. :eq:`fp-jacobian`.
 
 
 Load stiffness matrix
@@ -196,9 +196,9 @@ all the stiffness matrices are additive, see Eq. :eq:`fp-tangent`:
 .. math::
     :label: fp-jacobian
 
-    [K_F] = - \frac{\partial \{F_p\}}{\partial \{\bar{c}\}}, \qquad
+    \boldsymbol{K}_F = - \frac{\partial \boldsymbol{F}_p}{\partial \boldsymbol{c}}, \qquad
     K_{F_{ij}} = - \int_{A_0} p \, \boldsymbol{S}_i \cdot \frac{\partial
-    \boldsymbol{a}}{\partial \bar{c}_j} \, dx \, dy
+    \boldsymbol{a}}{\partial c_j} \, dx \, dy
 
 with `\boldsymbol{S}_i = (S^u_i, S^v_i, S^w_i)` the functions of the degree
 of freedom `i` and, from `\boldsymbol{a} = \boldsymbol{X}_{,x} \times
@@ -207,23 +207,23 @@ of freedom `i` and, from `\boldsymbol{a} = \boldsymbol{X}_{,x} \times
 .. math::
     :label: fp-da-dc
 
-    \frac{\partial \boldsymbol{a}}{\partial \bar{c}_j} =
-        \frac{\partial \boldsymbol{X}_{,x}}{\partial \bar{c}_j} \times
+    \frac{\partial \boldsymbol{a}}{\partial c_j} =
+        \frac{\partial \boldsymbol{X}_{,x}}{\partial c_j} \times
         \boldsymbol{X}_{,y} + \boldsymbol{X}_{,x} \times \frac{\partial
-        \boldsymbol{X}_{,y}}{\partial \bar{c}_j}
+        \boldsymbol{X}_{,y}}{\partial c_j}
 
-where `\partial \boldsymbol{X}_{,x}/\partial \bar{c}_j = (S^u_{j,x},
-S^v_{j,x}, S^w_{j,x})` and `\partial \boldsymbol{X}_{,y}/\partial \bar{c}_j
+where `\partial \boldsymbol{X}_{,x}/\partial c_j = (S^u_{j,x},
+S^v_{j,x}, S^w_{j,x})` and `\partial \boldsymbol{X}_{,y}/\partial c_j
 = (S^u_{j,y}, S^v_{j,y} + k_w S^w_j, S^w_{j,y} - k_v S^v_j)`. For the
 first-order area vector, `\boldsymbol{X}_{,x}` and `\boldsymbol{X}_{,y}`
-are replaced by `e_x` and `e_y` in Eq. :eq:`fp-da-dc`, `[K_F]` does not
-depend on `\{\bar{c}\}`, and its blocks between the fields of the rows
+are replaced by `e_x` and `e_y` in Eq. :eq:`fp-da-dc`, `\boldsymbol{K}_F` does not
+depend on `\boldsymbol{c}`, and its blocks between the fields of the rows
 (`\delta u, \delta v, \delta w`) and of the columns (`u, v, w`) are:
 
 .. math::
     :label: fp-blocks
 
-    [K_F] = \int_{A_0} p \begin{bmatrix}
+    \boldsymbol{K}_F = \int_{A_0} p \begin{bmatrix}
         0 & 0 & (\boldsymbol{S}^u)^\top \boldsymbol{S}^w_{,x} \\
         0 & -k_v (\boldsymbol{S}^v)^\top \boldsymbol{S}^v &
             (\boldsymbol{S}^v)^\top \boldsymbol{S}^w_{,y} \\
@@ -233,7 +233,7 @@ depend on `\{\bar{c}\}`, and its blocks between the fields of the rows
     \end{bmatrix} dx \, dy
 
 For an external pressure on a cylinder with Sanders' kinematics, `p < 0`,
-the block `-k_v p (\boldsymbol{S}^v)^\top \boldsymbol{S}^v` of `[K_F]` is
+the block `-k_v p (\boldsymbol{S}^v)^\top \boldsymbol{S}^v` of `\boldsymbol{K}_F` is
 positive definite, the stiffening that cancels the destabilizing hoop
 prestress of the rigid rotation, see :ref:`follower_pressure_ring`.
 
@@ -243,36 +243,36 @@ Internal force vector, residual and tangent stiffness
 
 The pressures of the loads added with ``cte=False`` are multiplied by the
 load factor `\lambda`, ``inc``, and those with ``cte=True`` are constant.
-Writing `\{F_p(\bar{c})\}` for the sum over the follower loads with their
+Writing `\boldsymbol{F}_p(\boldsymbol{c})` for the sum over the follower loads with their
 multipliers, the residual of the equilibrium is:
 
 .. math::
     :label: fp-residual
 
-    \{R(\bar{c}, \lambda)\} = \{F_{ext}(\lambda)\} + \left(
-    \{F_p(\bar{c})\} - \{F_p(0)\} \right) - \{F_{int}^e(\bar{c})\}
+    \boldsymbol{R}(\boldsymbol{c}, \lambda) = \boldsymbol{F}_{ext}(\lambda) + \left(
+    \boldsymbol{F}_p(\boldsymbol{c}) - \boldsymbol{F}_p(0) \right) - \boldsymbol{F}_{int}^e(\boldsymbol{c})
 
-where `\{F_{ext}(\lambda)\}` is :meth:`.Shell.calc_fext`, which includes the
-reference part `\{F_p(0)\}` of the follower loads, and
-`\{F_{int}^e(\bar{c})\}` is the internal force vector of the strains.
+where `\boldsymbol{F}_{ext}(\lambda)` is :meth:`.Shell.calc_fext`, which includes the
+reference part `\boldsymbol{F}_p(0)` of the follower loads, and
+`\boldsymbol{F}_{int}^e(\boldsymbol{c})` is the internal force vector of the strains.
 :meth:`.Shell.calc_fint` returns the internal force vector with the
 configuration-dependent part of the follower loads:
 
 .. math::
     :label: fp-fint
 
-    \{F_{int}(\bar{c}, \lambda)\} = \{F_{int}^e(\bar{c})\} - \left(
-    \{F_p(\bar{c})\} - \{F_p(0)\} \right)
+    \boldsymbol{F}_{int}(\boldsymbol{c}, \lambda) = \boldsymbol{F}_{int}^e(\boldsymbol{c}) - \left(
+    \boldsymbol{F}_p(\boldsymbol{c}) - \boldsymbol{F}_p(0) \right)
 
-such that `\{R\} = \{F_{ext}(\lambda)\} - \{F_{int}(\bar{c}, \lambda)\}`,
+such that `\boldsymbol{R} = \boldsymbol{F}_{ext}(\lambda) - \boldsymbol{F}_{int}(\boldsymbol{c}, \lambda)`,
 the form used by :class:`structsolve.Analysis`. The tangent stiffness
 matrix, :meth:`.Shell.calc_kT`, is its exact Jacobian:
 
 .. math::
     :label: fp-tangent
 
-    [K_T] = \frac{\partial \{F_{int}\}}{\partial \{\bar{c}\}}
-          = [K_{C0}] + [K_{CNL}] + [K_{GNL}] + [K_G(N_0 + N_L)] + [K_F]
+    \boldsymbol{K}_T = \frac{\partial \boldsymbol{F}_{int}}{\partial \boldsymbol{c}}
+          = \boldsymbol{K}_{C0} + \boldsymbol{K}_{CNL} + \boldsymbol{K}_{GNL} + \boldsymbol{K}_G(\bar{\boldsymbol{N}} + \boldsymbol{N}_L) + \boldsymbol{K}_F
 
 and the derivative of the residual with respect to the load factor, used by
 the arc-length methods, is the load vector of the current configuration,
@@ -281,8 +281,8 @@ the arc-length methods, is the load vector of the current configuration,
 .. math::
     :label: fp-dr-dlambda
 
-    \frac{\partial \{R\}}{\partial \lambda} = \{F_{ext}(1)\} +
-    \{F_p(\bar{c})\} - \{F_p(0)\}
+    \frac{\partial \boldsymbol{R}}{\partial \lambda} = \boldsymbol{F}_{ext}(1) +
+    \boldsymbol{F}_p(\boldsymbol{c}) - \boldsymbol{F}_p(0)
 
 From version 0.5.0, ``structsolve`` passes the load factor to the callables
 that accept the keyword argument ``inc`` and uses Eq. :eq:`fp-dr-dlambda` in
@@ -294,35 +294,35 @@ Linear analyses
 
 **Linear static analysis.** A geometrically linear structure under a
 follower load with the first-order area vector is in equilibrium when
-`[K_{C0}]\{\bar{c}\} = \{F_p(\bar{c})\}`, i.e., from Eq.
+`\boldsymbol{K}_{C0}\boldsymbol{c} = \boldsymbol{F}_p(\boldsymbol{c})`, i.e., from Eq.
 :eq:`fp-force-affine`:
 
 .. math::
     :label: fp-linear-static
 
-    \left( [K_{C0}] + [K_F] \right) \{\bar{c}\} = \{F_p(0)\}
+    \left( \boldsymbol{K}_{C0} + \boldsymbol{K}_F \right) \boldsymbol{c} = \boldsymbol{F}_p(0)
 
 an unsymmetric linear system in general, solved by
 ``structsolve.Analysis.static(NLgeom=False)`` when ``calc_fext`` accepts the
 configuration ``c``.
 
 **Linear buckling, static criterion.** With the pre-buckling state
-`\{\hat{c}\}` of the reference load, the geometric stiffness
-`[K_G(\hat{c})]` and the load stiffness both scale with the load factor:
+`\hat{\boldsymbol{c}}` of the reference load, the geometric stiffness
+`\boldsymbol{K}_G(\hat{\boldsymbol{c}})` and the load stiffness both scale with the load factor:
 
 .. math::
     :label: fp-lb
 
-    \left( [K_{C0}] + \lambda \left( [K_G(\hat{c})] + [K_F] \right)
-    \right) \{\bar{c}\} = \{0\}
+    \left( \boldsymbol{K}_{C0} + \lambda \left( \boldsymbol{K}_G(\hat{\boldsymbol{c}}) + \boldsymbol{K}_F \right)
+    \right) \boldsymbol{c} = \boldsymbol{0}
 
 solved by ``structsolve.lb(kC0, kG + kCfollower)``, which uses the solvers
 of unsymmetric matrices when needed.
 
 **Kinetic criterion.** A non-conservative system may lose stability by
 flutter, which Eq. :eq:`fp-lb` does not detect: the eigenvalues `\lambda^2
-= -\omega^2` of `([K_T] + \lambda^2 [M])\{\bar{c}\} = \{0\}`, with the load
-stiffness in `[K_T]`, are real below the critical load and become complex
+= -\omega^2` of `(\boldsymbol{K}_T + \lambda^2 \boldsymbol{M})\boldsymbol{c} = \boldsymbol{0}`, with the load
+stiffness in `\boldsymbol{K}_T`, are real below the critical load and become complex
 conjugate pairs at a flutter load, ``structsolve.freq``.
 
 
@@ -355,7 +355,7 @@ load stiffness matrix of Eq. :eq:`fp-blocks` is:
     :label: fp-skew
 
     \begin{aligned}
-    [K_F] - [K_F]^\top = {} &
+    \boldsymbol{K}_F - \boldsymbol{K}_F^\top = {} &
     \oint_{\partial A_p} p \left[ \left( (\boldsymbol{S}^u)^\top
     \boldsymbol{S}^w - (\boldsymbol{S}^w)^\top \boldsymbol{S}^u \right) n_x
     + \left( (\boldsymbol{S}^v)^\top \boldsymbol{S}^w -
@@ -367,7 +367,7 @@ load stiffness matrix of Eq. :eq:`fp-blocks` is:
     \end{aligned}
 
 The curvature terms having cancelled, Eq. :eq:`fp-skew` holds for the
-plates and for the Donnell and Sanders cylinders alike. Hence, `[K_F]` is
+plates and for the Donnell and Sanders cylinders alike. Hence, `\boldsymbol{K}_F` is
 symmetric, and the follower pressure conservative, if and only if:
 
 - `p` is uniform over the loaded region, such that the area integral
@@ -383,7 +383,7 @@ For a load over the whole domain, the second condition is met on the edge
 conditions are met by simply supported and clamped edges, by symmetry
 planes, and by closed surfaces such as complete rings and cylinders, for
 which no boundary exists; in these cases the load potential is the pressure
-times the change of the enclosed volume. Conversely, `[K_F]`
+times the change of the enclosed volume. Conversely, `\boldsymbol{K}_F`
 is unsymmetric for free or partially restrained edges, for a pressure
 applied on a patch whose edges lie inside the shell, and for a pressure that
 varies over the surface. This agrees with [hibbitt1979Follower]_, p. 938,
@@ -407,10 +407,10 @@ is symmetric the load is conservative, with the potential
 .. math::
     :label: fp-potential
 
-    \Pi_p = - \lambda \left( \{F_p(0)\}^\top \{\bar{c}\} - \frac{1}{2}
-            \{\bar{c}\}^\top [K_F] \{\bar{c}\} \right)
+    \Pi_p = - \lambda \left( \boldsymbol{F}_p(0)^\top \boldsymbol{c} - \frac{1}{2}
+            \boldsymbol{c}^\top \boldsymbol{K}_F \boldsymbol{c} \right)
 
-For the quadratic area vector `[K_F]` depends on `\{\bar{c}\}` and is not
+For the quadratic area vector `\boldsymbol{K}_F` depends on `\boldsymbol{c}` and is not
 symmetric in general. A hydrostatic head, a pressure that depends on the
 current position, would add a further term, not implemented.
 

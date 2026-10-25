@@ -1787,12 +1787,12 @@ def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
         double Nyy_cte=0., double Nxy_cte=0.):
     r"""Product of the tangent stiffness matrix by a vector, without assembly
 
-    Returns `[K_T(\bar{c})] \{v\}`, with `[K_T]` the tangent stiffness matrix
-    ``fkC_num(cs, ..., NLgeom=1) + fkG_num(cs, ...)`` at ``cs``, i.e. the
-    exact Jacobian of :func:`calc_fint`, plus the geometric stiffness matrix
-    of the constant membrane stress state ``Nxx_cte``, ``Nyy_cte`` and
-    ``Nxy_cte``, multiplied by ``vs``. At each integration point, see
-    ``theory/shells/tangent_product``::
+    Returns `\boldsymbol{K}_T(\boldsymbol{c}) \boldsymbol{v}`, with `\boldsymbol{K}_T` the
+    tangent stiffness matrix ``fkC_num(cs, ..., NLgeom=1) + fkG_num(cs, ...)``
+    at ``cs``, i.e. the exact Jacobian of :func:`calc_fint`, plus the geometric
+    stiffness matrix of the constant membrane stress state ``Nxx_cte``,
+    ``Nyy_cte`` and ``Nxy_cte``, multiplied by ``vs``. At each integration
+    point, see ``theory/shells/tangent_product``::
 
         beta = [G] cs,   eps = ([B_L] + [B_NL]/2) cs,   deps = ([B_L] + [B_NL]) vs
         kTv += ([B_L] + [B_NL])^T [F] deps + [G]^T [N] [G] vs

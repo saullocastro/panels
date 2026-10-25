@@ -73,13 +73,13 @@ def shell_fext(shell, inc, size, col0, include_pds=True):
         The shell object.
     inc : float
         Since this function is called during the non-linear analysis,
-        ``inc`` will multiply the terms `\{{F_{ext}}_\lambda\}`.
+        ``inc`` will multiply the terms `\boldsymbol{F}_{ext_\lambda}`.
         col0 = starting col in the global matrix ?????
         Dimensionless.
     size : int, str or None
         The size of the force vector. Can be the size of the total internal
         force vector of a multidomain assembly. When using a string, for
-        example, if '+1' is given it will add 1 to the Shell`s size obtained
+        example, if '+1' is given it will add 1 to the shell's size obtained
         by the :meth:`.Shell.get_size`. ``None`` is the size of the shell.
     col0 : int
         Offset in a global internal force vector of an assembly.
@@ -108,17 +108,17 @@ def shell_fext(shell, inc, size, col0, include_pds=True):
     Notes
     -----
     Each load enters with its virtual work on the approximation functions,
-    the rows `\{g_u\}`, `\{g_v\}`, `\{g_w\}` of the function ``fg`` of the
-    model: a point load gives `f_x \{g_u\} + f_y \{g_v\} + f_z \{g_w\}` at
+    the rows `\boldsymbol{g}_u`, `\boldsymbol{g}_v`, `\boldsymbol{g}_w` of the function ``fg`` of the
+    model: a point load gives `f_x \boldsymbol{g}_u + f_y \boldsymbol{g}_v + f_z \boldsymbol{g}_w` at
     `(x, y)`; a distributed load at a fixed `y` gives `\int_0^a (f_x
-    \{g_u\} + f_y \{g_v\} + f_z \{g_w\}) dx`, computed with ``shell.m``
+    \boldsymbol{g}_u + f_y \boldsymbol{g}_v + f_z \boldsymbol{g}_w) dx`, computed with ``shell.m``
     Gauss-Legendre points, and at a fixed `x` the integral along `y` with
-    ``shell.n`` points; a pressure gives `\int \int p \{g_w\} dx dy` over its
+    ``shell.n`` points; a pressure gives `\int \int p \boldsymbol{g}_w dx dy` over its
     patch, see :func:`.pressure_patches`. The prescribed displacements
     imposed with the penalty method give the same vectors with the forces
     `k u_p`, the right-hand side of the penalty energy, see
     :meth:`.Shell.add_point_pd`, with the rows of `u(z)` and `v(z)` of
-    :func:`.nullspace.pd_rows` in place of `\{g_u\}` and `\{g_v\}` for a
+    :func:`.nullspace.pd_rows` in place of `\boldsymbol{g}_u` and `\boldsymbol{g}_v` for a
     thickness coordinate `z` different from zero.
 
     """
@@ -315,7 +315,7 @@ def shell_fext(shell, inc, size, col0, include_pds=True):
 
 
 def _uv_force(shell, fu, fv, x, y, z):
-    r"""Force vector `f_u \{g_u(z)\} + f_v \{g_v(z)\}` of the prescribed
+    r"""Force vector `f_u \boldsymbol{g}_u(z) + f_v \boldsymbol{g}_v(z)` of the prescribed
     in-plane displacements at the thickness coordinate ``z``, with the size
     of the Ritz constants of ``shell``, see :func:`.nullspace.pd_rows`"""
     from .multidomain.connections import nullspace

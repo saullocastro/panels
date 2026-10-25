@@ -38,16 +38,16 @@ then the linear constraints:
 
 .. math::
 
-    [B] \{\bar{c}\} = \{0\}
+    \boldsymbol{B} \boldsymbol{c} = \boldsymbol{0}
 
 built by :func:`.constraint_matrix`, one row per quantity and point. They
-are eliminated with a sparse basis `[Z]` of the null space of `[B]`, built by
+are eliminated with a sparse basis `\boldsymbol{Z}` of the null space of `\boldsymbol{B}`, built by
 :func:`.null_space_basis`:
 
 .. math::
 
-    \{\bar{c}\} = [Z] \{\bar{c}_r\}, \qquad [K_r] = [Z]^\top [K] [Z], \qquad
-    \{f_r\} = [Z]^\top \{f\}
+    \boldsymbol{c} = \boldsymbol{Z} \boldsymbol{c}_r, \qquad \boldsymbol{K}_r = \boldsymbol{Z}^\top \boldsymbol{K} \boldsymbol{Z}, \qquad
+    \boldsymbol{F}_r = \boldsymbol{Z}^\top \boldsymbol{F}
 
 The vectors with zero penalty energy are exactly those that satisfy the
 constraints. Lagrange multipliers would add one unknown per constraint and
@@ -57,19 +57,19 @@ the shift-and-invert eigenvalue solvers of ``structsolve`` do not handle.
 The null-space method removes unknowns instead: the reduced stiffness matrix
 is symmetric and positive definite whenever the connected assembly has no
 rigid-body motion, like the stiffness matrix of the penalty method. The
-constraints are linear in `\{\bar{c}\}`, so `[Z]` does not change during a
-non-linear analysis, where `\{f_{int, r}\} = [Z]^\top \{f_{int}\}([Z]
-\{\bar{c}_r\})` and `[K_{T r}] = [Z]^\top [K_T]([Z] \{\bar{c}_r\}) [Z]`.
+constraints are linear in `\boldsymbol{c}`, so `\boldsymbol{Z}` does not change during a
+non-linear analysis, where `\boldsymbol{F}_{int, r} = \boldsymbol{Z}^\top \boldsymbol{F}_{int}(\boldsymbol{Z}
+\boldsymbol{c}_r)` and `\boldsymbol{K}_{T r} = \boldsymbol{Z}^\top \boldsymbol{K}_T(\boldsymbol{Z} \boldsymbol{c}_r) \boldsymbol{Z}`.
 
 The damaged connection ``'SB_TSL'`` is a physical stiffness of the
 interface, not a constraint, and therefore remains a penalty stiffness.
 
 With ``MultiDomain(..., pd_method='null-space')`` the prescribed
-displacements of the panels are the inhomogeneous constraints `[B_d] \{\bar{c}\}
-= \{d_0\} + \lambda \{d_1\}`, built by :func:`.pd_constraint_matrix` and
+displacements of the panels are the inhomogeneous constraints `\boldsymbol{B}_d \boldsymbol{c}
+= \boldsymbol{d}_0 + \lambda \boldsymbol{d}_1`, built by :func:`.pd_constraint_matrix` and
 eliminated after the connections by :class:`.Elimination`, which also gives
-the particular solutions `\{\bar{c}\} = [Z] \{\bar{c}_r\} + \{\bar{c}_{p0}\} + \lambda
-\{\bar{c}_{p1}\}`, see :ref:`null_space_pd`.
+the particular solutions `\boldsymbol{c} = \boldsymbol{Z} \boldsymbol{c}_r + \boldsymbol{c}_{p0} + \lambda
+\boldsymbol{c}_{p1}`, see :ref:`null_space_pd`.
 
 """
 import numpy as np
@@ -117,7 +117,7 @@ def _eval(p, field, der, direction, xis):
     The fifth and following functions of Bardell vanish together with their
     slope at `\xi = \pm 1`; setting them to zero there removes their
     round-off, which would otherwise give spurious constraints once the rows
-    of `[B]` are normalized, see :meth:`.Elimination.add`.
+    of `\boldsymbol{B}` are normalized, see :meth:`.Elimination.add`.
 
     """
     flags = tuple(float(getattr(p, direction + edge + FIELDS[field] + r))
@@ -285,7 +285,7 @@ def _points(p1, p2, direction, ctes):
 
 
 def constraint_matrix(connecti, size):
-    r"""Rows of `[B]` of a single connection
+    r"""Rows of `\boldsymbol{B}` of a single connection
 
     The quantities of the connection, those of its penalty kernel, are
     evaluated at the points of the connection: the constant coordinates
@@ -344,7 +344,7 @@ def constraint_matrix(connecti, size):
     `q_k` is a linear combination of the fields and derivatives of a panel,
     see :func:`._clpt_components`, :func:`._sdt_components` and
     :func:`._sb_components`, such that
-    `[B] \{\bar{c}\} = \{0\}` holds exactly when the penalty energy
+    `\boldsymbol{B} \boldsymbol{c} = \boldsymbol{0}` holds exactly when the penalty energy
     `\frac{1}{2} k_k \int (q_k^{(1)} - q_k^{(2)})^2` of the connection
     vanishes for any `k_k > 0`, see :func:`._points`. For ``'SB'`` the
     differences are polynomials of `\xi` and `\eta`, and the tensor grid of
@@ -592,7 +592,7 @@ def pd_points(p, x, y):
 
 
 def pd_constraint_matrix(p, comp, x, y, size, z=0.):
-    r"""Rows `[B]` of a prescribed component at a point or along a line
+    r"""Rows `\boldsymbol{B}` of a prescribed component at a point or along a line
 
     The component is evaluated at the points of :func:`.pd_points`, one row
     per point, see :func:`.pd_rows`. The in-plane displacements ``'u'`` and
@@ -774,12 +774,12 @@ class Elimination(object):
 
     Notes
     -----
-    The constraints of each block, `[B] \{\bar{c}\} = \{d\}`, are written in the
-    independent Ritz constants left by the previous blocks, `\{\bar{c}\} = [Z]
-    \{\bar{c}_r\} + \{\bar{c}_p\}`, where `[Z]` is a basis of the null space of the
-    homogeneous constraints of the previous blocks and `\{\bar{c}_p\}` a
+    The constraints of each block, `\boldsymbol{B} \boldsymbol{c} = \boldsymbol{d}`, are written in the
+    independent Ritz constants left by the previous blocks, `\boldsymbol{c} = \boldsymbol{Z}
+    \boldsymbol{c}_r + \boldsymbol{c}_p`, where `\boldsymbol{Z}` is a basis of the null space of the
+    homogeneous constraints of the previous blocks and `\boldsymbol{c}_p` a
     particular solution of all the previous blocks. Eliminating the blocks
-    one at a time keeps `[Z]` sparse, each block involving only the Ritz
+    one at a time keeps `\boldsymbol{Z}` sparse, each block involving only the Ritz
     constants of its panels.
 
     """
@@ -826,29 +826,29 @@ class Elimination(object):
 
         Notes
         -----
-        With the normalized rows `[B]`, `[\bar B] = [B] [Z]` and the columns
-        `J` of `[\bar B]` kept, the QR decomposition with column pivoting
-        `[\bar B_J] [P] = [Q] [R]`, with the upper triangular factor `[R]`,
+        With the normalized rows `\boldsymbol{B}`, `\bar{\boldsymbol{B}} = \boldsymbol{B} \boldsymbol{Z}` and the columns
+        `J` of `\bar{\boldsymbol{B}}` kept, the QR decomposition with column pivoting
+        `\bar{\boldsymbol{B}}_J \boldsymbol{P} = \boldsymbol{Q} \boldsymbol{R}`, with the upper triangular factor `\boldsymbol{R}`,
         not the residual, reveals the rank `r`, the number of diagonal terms
-        of `[R]` larger than ``tol``. The constants
-        `\{\bar{c}_e\}` of the first `r` pivot columns are eliminated in favour of
-        the remaining ones, `\{\bar{c}_k\}`:
+        of `\boldsymbol{R}` larger than ``tol``. The constants
+        `\boldsymbol{c}_e` of the first `r` pivot columns are eliminated in favour of
+        the remaining ones, `\boldsymbol{c}_k`:
 
         .. math::
 
-            [R_{11}] \{\bar{c}_e\} + [R_{12}] \{\bar{c}_k\} = [Q_1]^\top \{d\}, \qquad
-            \{\bar{c}_e\} = -[R_{11}]^{-1} [R_{12}] \{\bar{c}_k\}
-                      + [R_{11}]^{-1} [Q_1]^\top \{d\}
+            \boldsymbol{R}_{11} \boldsymbol{c}_e + \boldsymbol{R}_{12} \boldsymbol{c}_k = \boldsymbol{Q}_1^\top \boldsymbol{d}, \qquad
+            \boldsymbol{c}_e = -\boldsymbol{R}_{11}^{-1} \boldsymbol{R}_{12} \boldsymbol{c}_k
+                      + \boldsymbol{R}_{11}^{-1} \boldsymbol{Q}_1^\top \boldsymbol{d}
 
-        where `[R_{11}]` is the leading `r \times r` triangle of `[R]` and
-        `[Q_1]` the first `r` columns of `[Q]`. The homogeneous part gives
-        the new basis `[Z] [S]`, `[S]` mapping the remaining constants to
-        all the current ones, the terms of `-[R_{11}]^{-1} [R_{12}]` smaller
-        than ``1e-14`` times its largest one being dropped to keep `[Z]`
+        where `\boldsymbol{R}_{11}` is the leading `r \times r` triangle of `\boldsymbol{R}` and
+        `\boldsymbol{Q}_1` the first `r` columns of `\boldsymbol{Q}`. The homogeneous part gives
+        the new basis `\boldsymbol{Z} \boldsymbol{S}`, `\boldsymbol{S}` mapping the remaining constants to
+        all the current ones, the terms of `-\boldsymbol{R}_{11}^{-1} \boldsymbol{R}_{12}` smaller
+        than ``1e-14`` times its largest one being dropped to keep `\boldsymbol{Z}`
         sparse. The column pivoting reveals the rank and chooses the
-        eliminated constants such that `[R_{11}]` is well conditioned. The
+        eliminated constants such that `\boldsymbol{R}_{11}` is well conditioned. The
         rows are normalized only once,
-        before being multiplied by `[Z]`, so that a redundant row has only
+        before being multiplied by `\boldsymbol{Z}`, so that a redundant row has only
         round-off errors, compared with the absolute tolerance ``tol``. The
         homogeneous blocks come first so that the particular solution,
         built in :meth:`.particular` with the basis of each block with
@@ -904,7 +904,7 @@ class Elimination(object):
         self.Z = (Z @ S.tocsr()).tocsr()
 
     def finish(self):
-        r"""Basis `[Z]` of the null space of all the constraints added
+        r"""Basis `\boldsymbol{Z}` of the null space of all the constraints added
 
         A warning is issued when a pivot was dropped and the smallest pivot
         kept is less than ``1e4`` times the largest pivot dropped. The
@@ -921,7 +921,7 @@ class Elimination(object):
         The independent constraints have pivots many orders of magnitude
         larger than the round-off left in the redundant ones; a gap smaller
         than ``1e4`` means that the separation between independent and
-        redundant constraints, and therefore the rank and `[Z]`, depend on
+        redundant constraints, and therefore the rank and `\boldsymbol{Z}`, depend on
         ``tol``.
 
         """
@@ -977,21 +977,21 @@ class Elimination(object):
 
         Notes
         -----
-        For the block `i`, with the normalized rows `[B_i]` and right-hand
-        side `\{\bar d_i\}`, the residual of the current particular solution
-        is `\{\delta\} = \{\bar d_i\} - [B_i] \{\bar{c}_p\}`, and
+        For the block `i`, with the normalized rows `\boldsymbol{B}_i` and right-hand
+        side `\bar{\boldsymbol{d}}_i`, the residual of the current particular solution
+        is `\boldsymbol{\delta} = \bar{\boldsymbol{d}}_i - \boldsymbol{B}_i \boldsymbol{c}_p`, and
 
         .. math::
 
-            \{y\} = [R_{11}]^{-1} [Q_1]^\top \{\delta\}, \qquad
-            \{\bar{c}_p\} \leftarrow \{\bar{c}_p\} + [Z_e] \{y\}
+            \boldsymbol{y} = \boldsymbol{R}_{11}^{-1} \boldsymbol{Q}_1^\top \boldsymbol{\delta}, \qquad
+            \boldsymbol{c}_p \leftarrow \boldsymbol{c}_p + \boldsymbol{Z}_e \boldsymbol{y}
 
-        where `[Z_e]` are the columns of the basis `[Z]` of the eliminated
-        constants, both stored by :meth:`.add`. The columns of `[Z]`
+        where `\boldsymbol{Z}_e` are the columns of the basis `\boldsymbol{Z}` of the eliminated
+        constants, both stored by :meth:`.add`. The columns of `\boldsymbol{Z}`
         satisfy the homogeneous constraints of the previous blocks, which
         are therefore not changed, and the remaining constants of the block
-        are set to zero. The residual `\{\delta\} - [B_i] [Z_e] \{y\}` is
-        zero when `\{\delta\}` is in the range of `[Q_1]`, i.e. when the
+        are set to zero. The residual `\boldsymbol{\delta} - \boldsymbol{B}_i \boldsymbol{Z}_e \boldsymbol{y}` is
+        zero when `\boldsymbol{\delta}` is in the range of `\boldsymbol{Q}_1`, i.e. when the
         right-hand side is consistent with the redundant rows.
 
         """
@@ -1025,7 +1025,7 @@ class Elimination(object):
 
 
 def null_space_basis(Bs, size, tol=1.e-9):
-    r"""Sparse basis `[Z]` of the null space of the constraints
+    r"""Sparse basis `\boldsymbol{Z}` of the null space of the constraints
 
     The constraints of ``Bs`` are eliminated one connection at a time, in
     the order given, with :meth:`.Elimination.add`, and the basis is
@@ -1053,9 +1053,9 @@ def null_space_basis(Bs, size, tol=1.e-9):
 
     Notes
     -----
-    The basis satisfies `[B] [Z] = [0]` for all the constraints, and the
-    matrices and vectors of the assembly are reduced as `[K_r] = [Z]^\top [K]
-    [Z]` and `\{f_r\} = [Z]^\top \{f\}`, see
+    The basis satisfies `\boldsymbol{B} \boldsymbol{Z} = \boldsymbol{0}` for all the constraints, and the
+    matrices and vectors of the assembly are reduced as `\boldsymbol{K}_r = \boldsymbol{Z}^\top \boldsymbol{K}
+    \boldsymbol{Z}` and `\boldsymbol{F}_r = \boldsymbol{Z}^\top \boldsymbol{F}`, see
     :mod:`panels.multidomain.connections.nullspace`. The independent
     constraints have pivots many orders of magnitude larger than the
     round-off errors left in the redundant ones, see
@@ -1064,7 +1064,7 @@ def null_space_basis(Bs, size, tol=1.e-9):
     boundary condition flag already removes the term that a constraint would
     remove. The fifth and following functions of Bardell vanish together
     with their slope at the ends of the domain, so the constraints of an edge
-    involve only the first four functions across it, and `[Z]` has very few
+    involve only the first four functions across it, and `\boldsymbol{Z}` has very few
     non-zero terms, an elimination similar to the assembly of the
     hierarchical elements of the p-version of the finite element method.
 

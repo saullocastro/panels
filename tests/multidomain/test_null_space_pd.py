@@ -3,9 +3,9 @@ r"""Prescribed displacements imposed exactly with the null-space method
 With ``MultiDomain(..., pd_method='null-space')`` the prescribed
 displacements of :meth:`.Shell.add_point_pd`,
 :meth:`.Shell.add_distr_pd_fixed_x` and :meth:`.Shell.add_distr_pd_fixed_y`
-are the constraints `[B_d] \{\bar{c}\} = \{d_0\} + \lambda \{d_1\}`, eliminated
-with the connections, `\{\bar{c}\} = [Z] \{\bar{c}_r\} + \{\bar{c}_{p0}\} + \lambda
-\{\bar{c}_{p1}\}`, see ``doc/source/multidomain_null_space.rst``:
+are the constraints `\boldsymbol{B}_d \boldsymbol{c} = \boldsymbol{d}_0 + \lambda \boldsymbol{d}_1`, eliminated
+with the connections, `\boldsymbol{c} = \boldsymbol{Z} \boldsymbol{c}_r + \boldsymbol{c}_{p0} + \lambda
+\boldsymbol{c}_{p1}`, see ``doc/source/multidomain_null_space.rst``:
 
 - the membrane patch test is exact, for single and multiple domains, with
   the reaction `P = E A u/L`
@@ -13,7 +13,7 @@ with the connections, `\{\bar{c}\} = [Z] \{\bar{c}_r\} + \{\bar{c}_{p0}\} + \lam
 - linear buckling under a prescribed end-shortening is the same as under the
   equivalent load
 - the geometrically non-linear analyses of ``structsolve`` converge under
-  displacement control, with the exact Jacobian and `\partial R/\partial
+  displacement control, with the exact Jacobian and `\partial \boldsymbol{R}/\partial
   \lambda`
 - redundant prescriptions are dropped, inconsistent ones raise errors that
   name the panels, the prescriptions and the flags involved
@@ -151,7 +151,7 @@ def test_membrane_patch_test_isotropic(layout, model):
 
 def test_membrane_patch_test_laminate():
     r"""The same for a quasi-isotropic laminate: `N = b \delta/(a
-    a_{11})`, `\nu_{xy} = -a_{12}/a_{11}`, with `[a] = [A]^{-1}`"""
+    a_{11})`, `\nu_{xy} = -a_{12}/a_{11}`, with `\boldsymbol{a} = \boldsymbol{A}^{-1}`"""
     a, b, delta = 0.5, 0.3, 1e-4
     stack = [0, 45, -45, 90, 90, -45, 45, 0]
     ps, conn = two_by_two(a, b, xs=0.2, ys=0.1, h=1e-3, stack=stack,
@@ -259,8 +259,8 @@ def test_penalty_unchanged_and_excluded_from_fext():
 
 
 def test_mixed_constant_and_incremented_linear():
-    r"""`\bar{c}(\lambda) = \bar{c}_0 + \lambda \bar{c}_1`, with `\bar{c}_0`
-    due to the constant prescribed displacements and `\bar{c}_1` due to the
+    r"""`\boldsymbol{c}(\lambda) = \boldsymbol{c}_0 + \lambda \boldsymbol{c}_1`, with `\boldsymbol{c}_0`
+    due to the constant prescribed displacements and `\boldsymbol{c}_1` due to the
     load and the incremented ones"""
     p = plate(1., 0.6)
     p.add_distr_pd_fixed_x(0., ku=1., funcu=lambda y: 0.)
@@ -287,7 +287,7 @@ def test_mixed_constant_and_incremented_linear():
 
 
 def test_values_are_read_again_and_T_reused():
-    r"""`[Z]` depends on the positions and components only, the particular
+    r"""`\boldsymbol{Z}` depends on the positions and components only, the particular
     solutions on the values, which are read again from the panels"""
     p = plate(1., 0.6)
     end_shortening(p, 1e-3)
@@ -437,11 +437,11 @@ def test_linear_buckling_constant_stress_resultants_rigid_translation():
     r"""The constant stress resultants ``Nxx`` of a panel are a pre-stress
     of :meth:`.MultiDomain.linear_buckling`, counted once: a constant
     prescribed rigid translation, which produces no stress, does not change
-    the critical load factor, and with the pre-stress `N_0` and the
+    the critical load factor, and with the pre-stress `\bar{N}` and the
     incremented uniform `N_{xx} = -1` the critical value is `\lambda_{cr} =
-    N_{cr} - N_0`; before, ``Nxx`` entered the geometric stiffness of the
+    N_{cr} - \bar{N}`; before, ``Nxx`` entered the geometric stiffness of the
     constant state and that of the incremented one, and the translation
-    lowered `\lambda_{cr}` by `N_0`"""
+    lowered `\lambda_{cr}` by `\bar{N}`"""
     a, b = 0.5, 0.3
 
     def run(N0, u0):
@@ -561,7 +561,7 @@ def plate_postbuckling(delta_factor=3., m=8, n=8, P=2.):
                                     'arc_length_crisfield'])
 def test_nonlinear_displacement_control(method):
     r"""Post-buckling under displacement control: every converged increment
-    satisfies `\|[Z]^\top r\| \leq` ``relTOL`` `\|\lambda \partial R_r/\partial
+    satisfies `\|\boldsymbol{Z}^\top \boldsymbol{r}\| \leq` ``relTOL`` `\|\lambda \partial \boldsymbol{R}_r/\partial
     \lambda\|`, the methods agree, and the reaction is below the linear one"""
     md, p, delta = plate_postbuckling()
     an = Analysis(*md.get_reduced_functions())
@@ -628,8 +628,8 @@ def test_nonlinear_reaction_matches_penalty():
 
 
 def test_finite_differences_of_reduced_functions():
-    r"""`[K_{T,r}]` is the Jacobian of ``calc_fint`` and ``calc_fext(c,
-    lbd)`` is `\partial R_r/\partial \lambda`, at a buckled configuration"""
+    r"""`\boldsymbol{K}_{T,r}` is the Jacobian of ``calc_fint`` and ``calc_fext(c,
+    lbd)`` is `\partial \boldsymbol{R}_r/\partial \lambda`, at a buckled configuration"""
     md, p, delta = plate_postbuckling(delta_factor=2., m=6, n=6)
     p.add_distr_pd_fixed_y(p.b, kv=1., funcv=lambda x: 1e-3*delta*x,
                            cte=True)
@@ -701,7 +701,7 @@ def test_linear_static_through_analysis_raises():
 
 def test_without_prescriptions_unchanged():
     r"""Without prescribed displacements, ``pd_method='null-space'`` gives
-    the same `[Z]` and the same reduced functions as the default"""
+    the same `\boldsymbol{Z}` and the same reduced functions as the default"""
     ps, conn = two_by_two()
     md1 = MultiDomain(ps, conn)
     md2 = MultiDomain(ps, conn, pd_method='null-space')

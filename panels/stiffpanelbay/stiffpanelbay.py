@@ -86,7 +86,7 @@ class StiffPanelBay(object):
     follow those of the skin, see :meth:`.get_size`.
 
     For the flutter analysis with the piston theory, the matrices enter the
-    equations of motion as `([K] + [K_A] + \lambda^2 [M])\{\bar{c}\} = \{0\}`, see
+    equations of motion as `(\boldsymbol{K} + \boldsymbol{K}_A + \lambda^2 \boldsymbol{M})\boldsymbol{c} = \boldsymbol{0}`, see
     :meth:`.Shell.calc_kA` and :meth:`.calc_kA`. The model of the bay, the
     skin with the bases of the stiffeners sharing its approximation
     functions and Ritz constants, and the piston theory, is that of [1]_,
@@ -268,8 +268,8 @@ class StiffPanelBay(object):
 
         The size of the stiffness matrices can be interpreted as the number of
         rows or columns, recalling that this will be the size of the Ritz
-        constants' vector `\{\bar{c}\}`, the internal force vector `\{F_{int}\}` and
-        the external force vector `\{F_{ext}\}`.
+        constants' vector `\boldsymbol{c}`, the internal force vector `\boldsymbol{F}_{int}` and
+        the external force vector `\boldsymbol{F}_{ext}`.
 
         It takes into account the independent degrees of freedom from the
         flange of each of the :class:`.BladeStiff2D` objects that belong to
@@ -969,15 +969,15 @@ class StiffPanelBay(object):
         The aerodynamic load of the linear piston theory and the parameters
         ``beta`` and ``gamma`` are those of :meth:`.Shell.calc_kA` and
         :meth:`._aero_parameters`. The matrix is the sum of those of the
-        panels, `[K_A] = \sum_p [K_A^{(p)}]`, each one the virtual work of the
+        panels, `\boldsymbol{K}_A = \sum_p \boldsymbol{K}_A^{(p)}`, each one the virtual work of the
         aerodynamic load over its domain, see :meth:`.Shell.calc_kA`. The
         term in `\gamma` gives a symmetric matrix, and the term in `\beta`
         a skew-symmetric one only when `w` vanishes at the edges normal to
         the flow, where the boundary terms of `\int N_i N_{k,x} dx` are
-        otherwise not zero, such that `[K_A]` is in general neither
+        otherwise not zero, such that `\boldsymbol{K}_A` is in general neither
         symmetric nor skew-symmetric. The sign convention is that of
-        :meth:`.Shell.calc_kA`, `([K] + [K_A] + \lambda^2 [M])\{\bar{c}\} =
-        \{0\}` with a softening term in `\gamma`, whose sign is reversed in
+        :meth:`.Shell.calc_kA`, `(\boldsymbol{K} + \boldsymbol{K}_A + \lambda^2 \boldsymbol{M})\boldsymbol{c} =
+        \boldsymbol{0}` with a softening term in `\gamma`, whose sign is reversed in
         Eqs. (21) and (29) of Castro et al. (2016), a mistake of the paper.
 
         """
@@ -1035,11 +1035,11 @@ class StiffPanelBay(object):
         The damping term of the piston theory, with the coefficient
         ``aeromu`` of :meth:`._aero_parameters`, is proportional to the
         velocity of `w`, see :meth:`.Shell.calc_cA`, whose matrix is
-        multiplied by the imaginary unit, ``cA`` `= i [C_A]` with `[C_A]` of
-        Eq. (23) of Castro et al. (2016): for the harmonic motion `\{\bar{c}\}
-        e^{i \omega t}` it enters the eigenvalue problem as `([K] + [K_A] -
-        \omega^2 [M] + \omega [c_A])\{\bar{c}\} = \{0\}`, the term `+i \omega
-        [C_A]` of Eqs. (29)-(31) of that paper.
+        multiplied by the imaginary unit, ``cA`` `= i \boldsymbol{C}_A` with `\boldsymbol{C}_A` of
+        Eq. (23) of Castro et al. (2016): for the harmonic motion `\boldsymbol{c}
+        e^{i \omega t}` it enters the eigenvalue problem as `(\boldsymbol{K} + \boldsymbol{K}_A -
+        \omega^2 \boldsymbol{M} + \omega \boldsymbol{C}_A)\boldsymbol{c} = \boldsymbol{0}`, the term `+i \omega
+        \boldsymbol{C}_A` of Eqs. (29)-(31) of that paper.
 
         """
         self._rebuild()
@@ -1802,7 +1802,7 @@ class StiffPanelBay(object):
 
 
     def calc_fext(self, silent=False):
-        r"""Calculates the external force vector `\{F_{ext}\}`
+        r"""Calculates the external force vector `\boldsymbol{F}_{ext}`
 
         The point forces of the skin, the attribute ``forces_skin``, and
         those of the flange of each :class:`.BladeStiff2D`, its attribute
@@ -1829,10 +1829,10 @@ class StiffPanelBay(object):
         Notes
         -----
         The external force vector is the work-equivalent of the point
-        forces, the virtual work of each force `\{f\} = \{f_x, f_y, f_z\}^\top`
-        at `(x, y)` being `\delta\{\bar{c}\}^\top [S(x, y)]^\top \{f\}`, where
+        forces, the virtual work of each force `\boldsymbol{f} = \{f_x, f_y, f_z\}^\top`
+        at `(x, y)` being `\delta\boldsymbol{c}^\top \boldsymbol{S}(x, y)^\top \boldsymbol{f}`, where
         the rows `\boldsymbol{S}^u`, `\boldsymbol{S}^v`, `\boldsymbol{S}^w` of
-        `[S]` are the approximation functions of `u`, `v` and `w` at the
+        `\boldsymbol{S}` are the approximation functions of `u`, `v` and `w` at the
         point, given by ``fg``. The rows of the rotations are multiplied by
         zero: no moment is applied.
 

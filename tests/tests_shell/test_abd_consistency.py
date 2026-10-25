@@ -2,11 +2,11 @@ r"""Consistency of the laminate stiffness used by the kernels
 
 Every kernel must integrate the same constitutive matrix, ``Shell.ABD``:
 
-- the analytical `[K_{C0}]` of :meth:`.Shell.calc_kC` must be the numerically
+- the analytical `\boldsymbol{K}_{C0}` of :meth:`.Shell.calc_kC` must be the numerically
   integrated one, ``calc_kC(c=zeros)``, to machine precision, for every model
   and for an anisotropic, unsymmetric laminate, with and without
   ``force_orthotropic_laminate``
-- the linear static solution with the analytical `[K_{C0}]` must be in
+- the linear static solution with the analytical `\boldsymbol{K}_{C0}` must be in
   equilibrium according to :meth:`.Shell.calc_fint`
 - with ``force_orthotropic_laminate=True`` a simply supported plate under
   uniaxial compression is specially orthotropic and its buckling load is the
@@ -96,9 +96,9 @@ def test_force_orthotropic_laminate_changes_both_kC(model):
 @pytest.mark.parametrize('ortho', [False, True])
 @pytest.mark.parametrize('model', MODELS)
 def test_linear_static_is_in_equilibrium(model, ortho):
-    r"""`\{F_{int}(\bar{c})\} = \{F_{ext}\}` for the linear solution, where the
+    r"""`\boldsymbol{F}_{int}(\boldsymbol{c}) = \boldsymbol{F}_{ext}` for the linear solution, where the
     small load makes the non-linear terms of the internal forces vanish:
-    the odd part `(\{F_{int}(\bar{c})\} - \{F_{int}(-\bar{c})\})/2` is free of the
+    the odd part `(\boldsymbol{F}_{int}(\boldsymbol{c}) - \boldsymbol{F}_{int}(-\boldsymbol{c}))/2` is free of the
     quadratic terms, and the cubic ones are `(w/h)^2 \approx 10^{-12}` times
     smaller"""
     s = _shell(model, force_orthotropic_laminate=ortho)
@@ -221,8 +221,8 @@ def _partial(s):
 @pytest.mark.parametrize('partial', [False, True])
 @pytest.mark.parametrize('model', MODELS)
 def test_ABDnxny_point_indexing(model, partial):
-    r"""`\{v\}^\top [K_{C0}(F)] \{\bar{c}\}` against the sum of `w_x w_y
-    \{\varepsilon(v)\}^\top [F] \{\varepsilon(\bar{c})\}` over the points of
+    r"""`\boldsymbol{v}^\top \boldsymbol{K}_{C0}(\boldsymbol{ABD}) \boldsymbol{c}` against the sum of `w_x w_y
+    \boldsymbol{\varepsilon}(\boldsymbol{v})^\top \boldsymbol{ABD} \boldsymbol{\varepsilon}(\boldsymbol{c})` over the points of
     :meth:`.Shell.integration_points`, with `nx \neq ny` taken from the shape
     of ``ABDnxny``; the reversed field must give another result"""
     s = _shell(model)

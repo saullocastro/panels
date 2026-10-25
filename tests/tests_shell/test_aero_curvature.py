@@ -69,7 +69,7 @@ def test_krumhaar_correction():
 
 @pytest.mark.parametrize('model', CYLINDERS)
 def test_curvature_term(model):
-    r"""`[K_A](\gamma) - [K_A](0) = -\gamma \int (\boldsymbol{S}^w)^\top
+    r"""`\boldsymbol{K}_A(\gamma) - \boldsymbol{K}_A(0) = -\gamma \int (\boldsymbol{S}^w)^\top
     \boldsymbol{S}^w dA`, a
     negative semi-definite matrix, the same for the analytical and the
     numerical kernels"""

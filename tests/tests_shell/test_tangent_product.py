@@ -1,6 +1,6 @@
 r"""The product of the tangent stiffness matrix by a vector, without assembly
 
-:meth:`.Shell.calc_kTv` returns `[K_T(\bar{c})] \{v\}` from the kernels
+:meth:`.Shell.calc_kTv` returns `\boldsymbol{K}_T(\boldsymbol{c}) \boldsymbol{v}` from the kernels
 ``calc_kTv`` of ``theory/shells/tangent_product``, at the cost of about one
 :meth:`.Shell.calc_fint`. It must be the product of the assembled tangent
 stiffness matrix of :meth:`.Shell.calc_kT`, i.e. the directional derivative

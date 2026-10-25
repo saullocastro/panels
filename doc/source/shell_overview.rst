@@ -56,22 +56,22 @@ Matrices and vectors
 --------------------
 
 The size of the matrices and vectors is that of the vector of the Ritz
-constants `\{\bar{c}\}`, :meth:`.Shell.get_size`:
+constants `\boldsymbol{c}`, :meth:`.Shell.get_size`:
 
-======================================= =================================== ==========================
-quantity                                 method                               used by
-======================================= =================================== ==========================
-constitutive stiffness `[K_C]`           :meth:`.Shell.calc_kC`               all analyses
-geometric stiffness `[K_G]`              :meth:`.Shell.calc_kG`               buckling, prestress
-mass `[M]`                               :meth:`.Shell.calc_kM`               frequency, flutter
-aerodynamic stiffness and damping        :meth:`.Shell.calc_kA`,              flutter
-                                         :meth:`.Shell.calc_cA`
-external force vector `\{F_{ext}\}`      :meth:`.Shell.calc_fext`             static analyses
-internal force vector `\{F_{int}\}`      :meth:`.Shell.calc_fint`             non-linear analyses
-tangent stiffness `[K_T]`                :meth:`.Shell.calc_kT`               non-linear analyses
-product `[K_T]\{v\}`                     :meth:`.Shell.calc_kTv`              iterative solvers
-load stiffness of follower pressures     :meth:`.Shell.calc_kCfollower`       follower loads
-======================================= =================================== ==========================
+============================================= =================================== ==========================
+quantity                                      method                               used by
+============================================= =================================== ==========================
+constitutive stiffness `\boldsymbol{K}_C`     :meth:`.Shell.calc_kC`               all analyses
+geometric stiffness `\boldsymbol{K}_G`        :meth:`.Shell.calc_kG`               buckling, prestress
+mass `\boldsymbol{M}`                         :meth:`.Shell.calc_kM`               frequency, flutter
+aerodynamic stiffness and damping             :meth:`.Shell.calc_kA`,              flutter
+                                              :meth:`.Shell.calc_cA`
+external force vector `\boldsymbol{F}_{ext}`  :meth:`.Shell.calc_fext`             static analyses
+internal force vector `\boldsymbol{F}_{int}`  :meth:`.Shell.calc_fint`             non-linear analyses
+tangent stiffness `\boldsymbol{K}_T`          :meth:`.Shell.calc_kT`               non-linear analyses
+product `\boldsymbol{K}_T \boldsymbol{v}`     :meth:`.Shell.calc_kTv`              iterative solvers
+load stiffness of follower pressures          :meth:`.Shell.calc_kCfollower`       follower loads
+============================================= =================================== ==========================
 
 The linear matrices of a constant constitutive matrix over the whole domain
 are calculated in closed form; the others, and all of them when ``c``,
@@ -92,10 +92,10 @@ The methods above have the signatures expected by the solvers of
 ``structsolve``:
 
 - linear static: ``solve(kC, fext)``, see :doc:`ex_linear_static`;
-- linear buckling: ``lb(kC, kG)``, with `[K_G]` of the constant stress
+- linear buckling: ``lb(kC, kG)``, with `\boldsymbol{K}_G` of the constant stress
   resultants ``Nxx``, ``Nyy``, ``Nxy`` or of a static solution ``c``, see
   :doc:`ex_linear_buckling`;
-- frequency: ``freq(kC, kM)``, with an optional prestress `[K_G]`, see
+- frequency: ``freq(kC, kM)``, with an optional prestress `\boldsymbol{K}_G`, see
   :doc:`ex_frequency`;
 - panel flutter: ``freq(kC + kG + kA, kM)``, see :ref:`aeroelasticity`;
 - non-linear static: :class:`structsolve.Analysis` with ``calc_fext``,

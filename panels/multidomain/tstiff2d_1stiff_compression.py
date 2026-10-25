@@ -170,12 +170,12 @@ def tstiff2d_1stiff_compression(a, b, ys, bb, bf, defect_a, rho, plyt,
 
     .. math::
 
-        \left([K_r] + \lambda [K_{G r}]\right) \{\phi_r\} = \{0\}
+        \left(\boldsymbol{K}_r + \lambda \boldsymbol{K}_{G r}\right) \boldsymbol{\phi}_r = \boldsymbol{0}
 
-    with `[K_r]` and `[K_{G r}]` the reduced constitutive and geometric
+    with `\boldsymbol{K}_r` and `\boldsymbol{K}_{G r}` the reduced constitutive and geometric
     stiffness matrices, see :meth:`.MultiDomain.reduce`, and ``eigvals``
     the multipliers `\lambda` of the loads. With ``run_static_case=True``,
-    `[K_{G r}]` is computed from the linear membrane stresses of the static
+    `\boldsymbol{K}_{G r}` is computed from the linear membrane stresses of the static
     solution, see :meth:`.Shell.calc_kG`, which redistributes the load
     between the skin and the stiffener according to their stiffnesses;
     the static analysis uses the opposite of the force vector of

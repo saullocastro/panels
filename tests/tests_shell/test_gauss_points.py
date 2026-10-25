@@ -64,7 +64,7 @@ def test_json_io():
                                    'cylshell_tsdt_sanders'])
 @pytest.mark.parametrize('m', [3, 6])
 def test_exact_and_minimal(model, m):
-    r"""The default ``nx`` integrates `\{F_{int}\}` and `[K_T]` exactly,
+    r"""The default ``nx`` integrates `\boldsymbol{F}_{int}` and `\boldsymbol{K}_T` exactly,
     ``nx - 1`` points do not; ``2*m = 6`` points for ``m = 3`` did not"""
     s = shell(model, m, 4)
     rng = np.random.default_rng(0)

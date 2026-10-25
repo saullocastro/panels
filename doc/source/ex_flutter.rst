@@ -5,9 +5,9 @@ The aerodynamic stiffness matrix of the linear piston theory is calculated
 with :meth:`.Shell.calc_kA`, as a function of the aerodynamic parameter
 ``beta`` of the :class:`.Shell` object. The flutter onset is found by
 increasing ``beta`` and solving the eigenvalue problem
-`([K_C] + [K_G] + [K_A] + \lambda^2 [M])\{\bar{c}\} = \{0\}` with
+`(\boldsymbol{K}_C + \boldsymbol{K}_G + \boldsymbol{K}_A + \lambda^2 \boldsymbol{M})\boldsymbol{c} = \boldsymbol{0}` with
 :func:`structsolve.freq`, until two natural frequencies coalesce and the
-eigenvalues become complex. In this convention `[K_A] = -\int \left(\beta
+eigenvalues become complex. In this convention `\boldsymbol{K}_A = -\int \left(\beta
 (\boldsymbol{S}^w_{,x})^\top \boldsymbol{S}^w + \gamma (\boldsymbol{S}^w)^\top
 \boldsymbol{S}^w\right) dA`, with the row `\boldsymbol{S}^w` of the
 approximation functions of `w`, for the load
@@ -18,8 +18,8 @@ correction `\gamma` of Krumhaar softens a cylindrical shell, see
 trailing edges corresponds to reversing the flow direction and does not
 change the flutter boundary, whereas the sign of the term in `\gamma` of
 Eqs. (21) and (29) of that paper is reversed, a mistake of the paper. The
-aerodynamic damping, :meth:`.Shell.calc_cA`, is `i [C_A]` with `[C_A]` of
-Eq. (23) of the paper, entering the eigenvalue problem as `+\omega [c_A]`.
+aerodynamic damping, :meth:`.Shell.calc_cA`, is `i \boldsymbol{C}_A` with `\boldsymbol{C}_A` of
+Eq. (23) of the paper, entering the eigenvalue problem as `+\omega \boldsymbol{C}_A`.
 The code below is extracted from one of the ``panels`` unit tests, which
 verifies the critical ``beta`` with and without pre-stress:
 

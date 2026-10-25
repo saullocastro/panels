@@ -4,7 +4,7 @@ Loads
 =====
 
 The loads of a :class:`.Shell` are stored as lists of its attributes and
-converted into the external force vector `\{F_{ext}\}` by
+converted into the external force vector `\boldsymbol{F}_{ext}` by
 :meth:`.Shell.calc_fext`, see :func:`.shell_fext`, as the virtual work of
 the loads on the approximation functions. In a :class:`.MultiDomain`, the
 loads are added to its domains and :meth:`.MultiDomain.calc_fext`
@@ -38,7 +38,7 @@ Each load is constant (``cte=True``, the default) or incremented
 
 .. math::
 
-    \{F_{ext}(\lambda)\} = \{F_{ext_0}\} + \lambda \{F_{ext_\lambda}\}
+    \boldsymbol{F}_{ext}(\lambda) = \boldsymbol{F}_{ext_0} + \lambda \boldsymbol{F}_{ext_\lambda}
 
 is the vector returned by ``calc_fext(inc=lambda)``. The non-linear solvers
 of `structsolve <https://github.com/saullocastro/structsolve>`_ call

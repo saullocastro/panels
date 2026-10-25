@@ -1,11 +1,11 @@
 r"""Connections imposed exactly with the null-space method
 
 With ``MultiDomain(..., conn_method='null-space')`` the connections are the
-constraints `[B] \{\bar{c}\} = \{0\}`, eliminated with a basis `[Z]` of the null
-space of `[B]`, see :mod:`panels.multidomain.connections.nullspace`:
+constraints `\boldsymbol{B} \boldsymbol{c} = \boldsymbol{0}`, eliminated with a basis `\boldsymbol{Z}` of the null
+space of `\boldsymbol{B}`, see :mod:`panels.multidomain.connections.nullspace`:
 
 - the constraints are those of the penalty kernels: for every connection,
-  model and random boundary condition flags, the vectors `[Z] \{\bar{c}_r\}` have
+  model and random boundary condition flags, the vectors `\boldsymbol{Z} \boldsymbol{c}_r` have
   zero penalty energy, and they are all the vectors with zero penalty energy
 - the solution is the limit of the penalty method for penalty constants
   going to infinity
@@ -83,10 +83,10 @@ def _pair(model, func, seed):
 @pytest.mark.parametrize('func', FUNCS)
 @pytest.mark.parametrize('model', MODELS)
 def test_same_constraints_as_penalty(model, func, order):
-    r"""The null space of the penalty matrix is the span of `[Z]`
+    r"""The null space of the penalty matrix is the span of `\boldsymbol{Z}`
 
-    The vectors `[Z] \{\bar{c}_r\}` have zero penalty energy, `[K_{pen}] [Z] = 0`,
-    and the penalty matrix has as many zero eigenvalues as `[Z]` has
+    The vectors `\boldsymbol{Z} \boldsymbol{c}_r` have zero penalty energy, `\boldsymbol{K}_{pen} \boldsymbol{Z} = \boldsymbol{0}`,
+    and the penalty matrix has as many zero eigenvalues as `\boldsymbol{Z}` has
     columns, with the boundary condition flags removing different terms of
     the two panels.
     """
@@ -119,7 +119,7 @@ def _divided_plate_matrices(model, layout, conn_method):
 
 
 def test_penalty_mode_is_unchanged():
-    r"""With ``conn_method='penalty'`` `[Z]` is the identity and the
+    r"""With ``conn_method='penalty'`` `\boldsymbol{Z}` is the identity and the
     connections are in the stiffness matrix"""
     md, K, M = _divided_plate_matrices(FSDT, '2x2', 'penalty')
     Z = md.get_Z()
@@ -310,7 +310,7 @@ def test_tstiff2d_freq():
 
 
 def test_T_is_reused_and_rebuilt():
-    r"""`[Z]` is rebuilt when a boundary condition flag changes
+    r"""`\boldsymbol{Z}` is rebuilt when a boundary condition flag changes
 
     The terms removed by the flags are zero columns of the matrices, and
     remain independent Ritz constants. Releasing `w` at the edge `y = 0` of

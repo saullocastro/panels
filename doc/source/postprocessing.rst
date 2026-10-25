@@ -3,7 +3,7 @@
 Field outputs, plots and files
 ==============================
 
-The solvers return the Ritz constants `\{\bar{c}\}`, from which the fields are
+The solvers return the Ritz constants `\boldsymbol{c}`, from which the fields are
 calculated at points or over a grid, plotted, and saved with the model.
 
 

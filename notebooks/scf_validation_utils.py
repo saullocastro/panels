@@ -201,7 +201,7 @@ def static_linear(s):
 
 
 def linear_buckling(s, num_eigvalues=5):
-    r"""Lowest eigenvalue of `(K_C + \lambda K_G) c = 0` for the membrane
+    r"""Lowest eigenvalue of `(\boldsymbol{K}_C + \lambda \boldsymbol{K}_G) \boldsymbol{c} = \boldsymbol{0}` for the membrane
     prestate ``Nxx``, ``Nyy``, ``Nxy`` of the shell, and its mode"""
     eigvals, eigvecs = lb(s.calc_kC(), s.calc_kG(), silent=True,
                           num_eigvalues=num_eigvalues)
@@ -224,7 +224,7 @@ def nonlinear_path(s, method='riks', initial_inc=0.1, max_arc_length=None,
     ``initial_inc`` should not be larger than ``max_inc``. With
     ``stop_after_limit``, e.g. ``0.9``, the analysis stops when the load
     factor drops below this fraction of its first maximum, i.e. once the limit
-    point has been passed: the check is done when structsolve computes `K_C`
+    point has been passed: the check is done when structsolve computes `\boldsymbol{K}_C`
     at the start of each step. Returns the load factors and the solutions.
     """
     calc_kC = s.calc_kC

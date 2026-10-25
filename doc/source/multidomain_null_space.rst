@@ -44,7 +44,7 @@ Theory
 ------
 
 The quantities `q_k` of Eq. :eq:`ns-penalty` are linear combinations of the
-Ritz constants `\{\bar{c}\}` of the two domains. Since Bardell's functions are
+Ritz constants `\boldsymbol{c}` of the two domains. Since Bardell's functions are
 polynomials, see :ref:`theory_func_bardell`, the difference `q_k^{(1)} -
 q_k^{(2)}` is a polynomial along the connection, of the natural coordinate
 `\xi` or `\eta` shared by the two domains. It vanishes everywhere when it
@@ -54,9 +54,9 @@ connections become the homogeneous linear constraints:
 .. math::
     :label: ns-constraints
 
-    [B] \{\bar{c}\} = \{0\}
+    \boldsymbol{B} \boldsymbol{c} = \boldsymbol{0}
 
-where each row of `[B]` is `q_k^{(1)} - q_k^{(2)}` at one Gauss-Legendre
+where each row of `\boldsymbol{B}` is `q_k^{(1)} - q_k^{(2)}` at one Gauss-Legendre
 point along the connection, or over the area of ``'SB'``, see
 :func:`.nullspace.constraint_matrix`. The first four functions of Bardell
 are cubic and the function `i \ge 4` has the order `i`, so that
@@ -69,14 +69,14 @@ connection and model in ``tests/multidomain/test_null_space.py``.
 Why not Lagrange multipliers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The constraints could be imposed with Lagrange multipliers `\{\lambda\}`,
+The constraints could be imposed with Lagrange multipliers `\boldsymbol{\lambda}`,
 which add one unknown per constraint and give the system:
 
 .. math::
 
-    \begin{bmatrix} [K] & [B]^\top \\ [B] & [0] \end{bmatrix}
-    \begin{Bmatrix} \{\bar{c}\} \\ \{\lambda\} \end{Bmatrix} =
-    \begin{Bmatrix} \{f\} \\ \{0\} \end{Bmatrix}
+    \begin{bmatrix} \boldsymbol{K} & \boldsymbol{B}^\top \\ \boldsymbol{B} & \boldsymbol{0} \end{bmatrix}
+    \begin{Bmatrix} \boldsymbol{c} \\ \boldsymbol{\lambda} \end{Bmatrix} =
+    \begin{Bmatrix} \boldsymbol{F} \\ \boldsymbol{0} \end{Bmatrix}
 
 This matrix is indefinite. For the linear buckling and frequency analyses
 the geometric stiffness matrix and the mass matrix have zero rows and
@@ -89,56 +89,56 @@ Elimination of the constraints
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 All the vectors that satisfy Eq. :eq:`ns-constraints` are written with a
-basis `[Z]` of the null space of `[B]`, `[B] [Z] = [0]`:
+basis `\boldsymbol{Z}` of the null space of `\boldsymbol{B}`, `\boldsymbol{B} \boldsymbol{Z} = \boldsymbol{0}`:
 
 .. math::
     :label: ns-Z
 
-    \{\bar{c}\} = [Z] \{\bar{c}_r\}
+    \boldsymbol{c} = \boldsymbol{Z} \boldsymbol{c}_r
 
-where `\{\bar{c}_r\}` are the independent Ritz constants. Substituting
+where `\boldsymbol{c}_r` are the independent Ritz constants. Substituting
 Eq. :eq:`ns-Z` into the total potential energy gives the reduced system:
 
 .. math::
     :label: ns-reduced
 
-    [K_r] = [Z]^\top [K] [Z], \qquad [K_{G r}] = [Z]^\top [K_G] [Z], \qquad
-    [M_r] = [Z]^\top [M] [Z], \qquad \{f_r\} = [Z]^\top \{f\}
+    \boldsymbol{K}_r = \boldsymbol{Z}^\top \boldsymbol{K} \boldsymbol{Z}, \qquad \boldsymbol{K}_{G r} = \boldsymbol{Z}^\top \boldsymbol{K}_G \boldsymbol{Z}, \qquad
+    \boldsymbol{M}_r = \boldsymbol{Z}^\top \boldsymbol{M} \boldsymbol{Z}, \qquad \boldsymbol{F}_r = \boldsymbol{Z}^\top \boldsymbol{F}
 
-where `[K]`, `[K_G]`, `[M]` and `\{f\}` are the matrices and vectors of the
+where `\boldsymbol{K}`, `\boldsymbol{K}_G`, `\boldsymbol{M}` and `\boldsymbol{F}` are the matrices and vectors of the
 domains, which do not contain the connections imposed exactly. The reduced
 stiffness matrix is symmetric and positive definite whenever the connected
 assembly has no rigid-body motion, like the stiffness matrix of the penalty
 method, and the static, linear buckling, frequency and non-linear solvers of
-``structsolve`` are used unchanged. The constraints are linear in `\{\bar{c}\}`,
-therefore `[Z]` does not change during a non-linear analysis:
+``structsolve`` are used unchanged. The constraints are linear in `\boldsymbol{c}`,
+therefore `\boldsymbol{Z}` does not change during a non-linear analysis:
 
 .. math::
 
-    \{f_{int, r}\} = [Z]^\top \{f_{int}\}([Z] \{\bar{c}_r\}), \qquad
-    [K_{T r}] = [Z]^\top [K_T]([Z] \{\bar{c}_r\}) [Z]
+    \boldsymbol{F}_{int, r} = \boldsymbol{Z}^\top \boldsymbol{F}_{int}(\boldsymbol{Z} \boldsymbol{c}_r), \qquad
+    \boldsymbol{K}_{T r} = \boldsymbol{Z}^\top \boldsymbol{K}_T(\boldsymbol{Z} \boldsymbol{c}_r) \boldsymbol{Z}
 
-`[Z]` is built by :func:`.nullspace.null_space_basis`, one connection at a
+`\boldsymbol{Z}` is built by :func:`.nullspace.null_space_basis`, one connection at a
 time:
 
-1. the rows of `[B]` of the connection are normalized to a unit norm and
+1. the rows of `\boldsymbol{B}` of the connection are normalized to a unit norm and
    written in the independent Ritz constants of the connections already
-   processed, `[B] [Z]`;
+   processed, `\boldsymbol{B} \boldsymbol{Z}`;
 2. the rank of the constraints is revealed with a QR decomposition with
-   column pivoting, `[B] [Z] [P] = [Q] [R]`, with the permutation `[P]`,
-   the orthogonal factor `[Q]` and the upper triangular factor `[R]` (not
-   the residual `\{R\}`), and each pivot larger than the tolerance ``tol``
+   column pivoting, `\boldsymbol{B} \boldsymbol{Z} \boldsymbol{P} = \boldsymbol{Q} \boldsymbol{R}`, with the permutation `\boldsymbol{P}`,
+   the orthogonal factor `\boldsymbol{Q}` and the upper triangular factor `\boldsymbol{R}` (not
+   the residual `\boldsymbol{R}`), and each pivot larger than the tolerance ``tol``
    gives one independent constraint;
-3. the Ritz constants of the pivot columns are eliminated, `\{\bar{c}_e\} =
-   -[R_{11}]^{-1} [R_{12}] \{\bar{c}_k\}`, where `\{\bar{c}_k\}` are the
-   remaining constants, and `[Z]` is updated.
+3. the Ritz constants of the pivot columns are eliminated, `\boldsymbol{c}_e =
+   -\boldsymbol{R}_{11}^{-1} \boldsymbol{R}_{12} \boldsymbol{c}_k`, where `\boldsymbol{c}_k` are the
+   remaining constants, and `\boldsymbol{Z}` is updated.
 
 Redundant constraints are found in step 2 and dropped. They happen for
 instance at a corner shared by four domains, around a closed cylinder, or
 where a boundary condition flag already removes the term that a constraint
 would remove. Bardell's functions of order 5 and higher vanish together with
 their slope at the ends of the domain, `\xi = \pm 1`, so the constraints of
-an edge involve only the first four functions across it, and `[Z]` has very
+an edge involve only the first four functions across it, and `\boldsymbol{Z}` has very
 few non-zero terms: the elimination is similar to the assembly of the
 hierarchical elements of the p-version of the finite element method. A
 connection along an interior line, e.g. ``'BFycte'`` at the middle of the
@@ -146,9 +146,9 @@ base, involves all the functions across the line.
 
 The terms removed by the boundary condition flags are zero rows and columns
 of the matrices of the domains, as with the penalty method, and remain in
-`\{\bar{c}_r\}` with zero rows and columns in the reduced matrices.
+`\boldsymbol{c}_r` with zero rows and columns in the reduced matrices.
 
-`[Z]` is stored in ``MultiDomain.Z`` and reused while the connections, the
+`\boldsymbol{Z}` is stored in ``MultiDomain.Z`` and reused while the connections, the
 number of terms and the boundary condition flags do not change, see
 :meth:`.MultiDomain.get_Z`.
 
@@ -228,7 +228,7 @@ with :meth:`.MultiDomain.reduce` before solving, and the solutions are expanded 
 all the Ritz constants with :meth:`.MultiDomain.expand`, which are used by
 the post-processing methods, e.g. :meth:`.MultiDomain.uvw`,
 :meth:`.MultiDomain.stress` and :meth:`.MultiDomain.plot`. With
-``conn_method='penalty'``, `[Z]` is the identity matrix, so that the same
+``conn_method='penalty'``, `\boldsymbol{Z}` is the identity matrix, so that the same
 code runs with both methods.
 
 Linear static analysis::
@@ -395,18 +395,18 @@ the load factor, with the lateral contraction free::
 Theory
 ~~~~~~
 
-The connections give the homogeneous constraints `[B_h] \{\bar{c}\} = \{0\}` of
+The connections give the homogeneous constraints `\boldsymbol{B}_h \boldsymbol{c} = \boldsymbol{0}` of
 Eq. :eq:`ns-constraints`, and the prescribed displacements the
 inhomogeneous constraints:
 
 .. math::
     :label: ns-pd
 
-    [B_d] \{\bar{c}\} = \{d_0\} + \lambda \{d_1\}
+    \boldsymbol{B}_d \boldsymbol{c} = \boldsymbol{d}_0 + \lambda \boldsymbol{d}_1
 
-where `\{d_0\}` collects the constant prescribed values, ``cte=True``, and
-`\{d_1\}` those scaled by the load factor `\lambda`, ``cte=False``. Each row
-of `[B_d]` is the prescribed component at a point, or at a Gauss-Legendre
+where `\boldsymbol{d}_0` collects the constant prescribed values, ``cte=True``, and
+`\boldsymbol{d}_1` those scaled by the load factor `\lambda`, ``cte=False``. Each row
+of `\boldsymbol{B}_d` is the prescribed component at a point, or at a Gauss-Legendre
 point along a prescribed line, with ``max(n, 4)`` points along `y` for the
 lines ``x = cte`` and ``max(m, 4)`` along `x` for the lines ``y = cte``, see
 :func:`.nullspace.pd_constraint_matrix`. As for the connections, the
@@ -416,70 +416,70 @@ polynomial of degree up to ``max(n, 4) - 1``, e.g. a uniform or a linear
 end-shortening; otherwise it holds at the Gauss-Legendre points, the
 prescribed function being interpolated by the approximation functions.
 
-With `[B] = [B_h; B_d]`, every admissible configuration is
+With `\boldsymbol{B} = [\boldsymbol{B}_h; \boldsymbol{B}_d]`, every admissible configuration is
 
 .. math::
     :label: ns-pd-c
 
-    \{\bar{c}\} = [Z] \{\bar{c}_r\} + \{\bar{c}_{p0}\} + \lambda \{\bar{c}_{p1}\}
+    \boldsymbol{c} = \boldsymbol{Z} \boldsymbol{c}_r + \boldsymbol{c}_{p0} + \lambda \boldsymbol{c}_{p1}
 
-where `[Z]` spans the null space of `[B]` and `\{\bar{c}_{p0}\}`, `\{\bar{c}_{p1}\}`
-are particular solutions, `[B] \{\bar{c}_{p0}\} = \{0; d_0\}` and `[B]
-\{\bar{c}_{p1}\} = \{0; d_1\}`, see :meth:`.MultiDomain.get_cp`. They are
-obtained in the same elimination as `[Z]`, see
+where `\boldsymbol{Z}` spans the null space of `\boldsymbol{B}` and `\boldsymbol{c}_{p0}`, `\boldsymbol{c}_{p1}`
+are particular solutions, `\boldsymbol{B} \boldsymbol{c}_{p0} = \{\boldsymbol{0}; \boldsymbol{d}_0\}` and `\boldsymbol{B}
+\boldsymbol{c}_{p1} = \{\boldsymbol{0}; \boldsymbol{d}_1\}`, see :meth:`.MultiDomain.get_cp`. They are
+obtained in the same elimination as `\boldsymbol{Z}`, see
 :class:`.nullspace.Elimination`: the constraints are eliminated one block
 at a time, the connections first, each block written in the independent
-Ritz constants left by the previous ones, `[B] ([Z] \{\bar{c}_r\} + \{\bar{c}_p\}) =
-\{d\}`, and decomposed with a QR decomposition with column pivoting, which
-gives both the new `[Z]` and the correction of `\{\bar{c}_p\}` for the
-right-hand side `\{d\} - [B] \{\bar{c}_p\}`. The data of the decompositions are
-kept, such that `\{\bar{c}_{p0}\}` and `\{\bar{c}_{p1}\}` are computed again without
+Ritz constants left by the previous ones, `\boldsymbol{B} (\boldsymbol{Z} \boldsymbol{c}_r + \boldsymbol{c}_p) =
+\boldsymbol{d}`, and decomposed with a QR decomposition with column pivoting, which
+gives both the new `\boldsymbol{Z}` and the correction of `\boldsymbol{c}_p` for the
+right-hand side `\boldsymbol{d} - \boldsymbol{B} \boldsymbol{c}_p`. The data of the decompositions are
+kept, such that `\boldsymbol{c}_{p0}` and `\boldsymbol{c}_{p1}` are computed again without
 any decomposition when only the prescribed values change, e.g. in a loop
-over the end-shortening; `[Z]` changes only with the positions and the
+over the end-shortening; `\boldsymbol{Z}` changes only with the positions and the
 components prescribed.
 
 Substituting Eq. :eq:`ns-pd-c` into the residual of the unconstrained
-system, `\{R(\bar{c}, \lambda)\} = \lambda \{F_{ext}\} - \{F_{int}(\bar{c}, \lambda)\}`,
-and projecting it with `[Z]^\top` gives the reduced problem solved by
+system, `\boldsymbol{R}(\boldsymbol{c}, \lambda) = \lambda \boldsymbol{F}_{ext} - \boldsymbol{F}_{int}(\boldsymbol{c}, \lambda)`,
+and projecting it with `\boldsymbol{Z}^\top` gives the reduced problem solved by
 ``structsolve``:
 
 .. math::
     :label: ns-pd-reduced
 
-    \{F_{int, r}(\bar{c}_r, \lambda)\} &= [Z]^\top \{F_{int}(\bar{c})\} \\
-    [K_{T, r}] &= [Z]^\top [K_T(\bar{c})] [Z] = -\frac{\partial R_r}{\partial \bar{c}_r} \\
-    \frac{\partial R_r}{\partial \lambda} &= [Z]^\top \left(\{F_{ext}\} -
-        [K_T(\bar{c})] \{\bar{c}_{p1}\}\right)
+    \boldsymbol{F}_{int, r}(\boldsymbol{c}_r, \lambda) &= \boldsymbol{Z}^\top \boldsymbol{F}_{int}(\boldsymbol{c}) \\
+    \boldsymbol{K}_{T, r} &= \boldsymbol{Z}^\top \boldsymbol{K}_T(\boldsymbol{c}) \boldsymbol{Z} = -\frac{\partial \boldsymbol{R}_r}{\partial \boldsymbol{c}_r} \\
+    \frac{\partial \boldsymbol{R}_r}{\partial \lambda} &= \boldsymbol{Z}^\top \left(\boldsymbol{F}_{ext} -
+        \boldsymbol{K}_T(\boldsymbol{c}) \boldsymbol{c}_{p1}\right)
 
-`[K_{T, r}]` is the exact Jacobian, and `\partial R_r/\partial \lambda`
+`\boldsymbol{K}_{T, r}` is the exact Jacobian, and `\partial \boldsymbol{R}_r/\partial \lambda`
 depends on the configuration and on the load factor. ``structsolve`` 0.7.0
 passes the load factor to ``calc_fext`` when it declares the keyword
-argument ``lbd``, and uses `\partial R_r/\partial \lambda` in the predictors
+argument ``lbd``, and uses `\partial \boldsymbol{R}_r/\partial \lambda` in the predictors
 and in the constraint of the arc-length methods, and `\lambda \partial
-R_r/\partial \lambda` as a reference of the convergence criteria, the
+\boldsymbol{R}_r/\partial \lambda` as a reference of the convergence criteria, the
 relative one and Crisfield's, the default since ``structsolve`` 0.9.0,
-because under a prescribed displacement alone both `[Z]^\top \{F_{ext}\}` and
-`[Z]^\top \{F_{int}\}` vanish at equilibrium, see
+because under a prescribed displacement alone both `\boldsymbol{Z}^\top \boldsymbol{F}_{ext}` and
+`\boldsymbol{Z}^\top \boldsymbol{F}_{int}` vanish at equilibrium, see
 :meth:`.MultiDomain.get_reduced_functions`.
 
 The linear static analysis solves
 
 .. math::
 
-    [K_r] \{\bar{c}_r\} = [Z]^\top \left(\lambda \{F_{ext}\} - [K] (\{\bar{c}_{p0}\} +
-    \lambda \{\bar{c}_{p1}\})\right)
+    \boldsymbol{K}_r \boldsymbol{c}_r = \boldsymbol{Z}^\top \left(\lambda \boldsymbol{F}_{ext} - \boldsymbol{K} (\boldsymbol{c}_{p0} +
+    \lambda \boldsymbol{c}_{p1})\right)
 
 see :meth:`.MultiDomain.linear_static`, the loads of ``calc_fext(inc=1.)``
 being scaled by `\lambda` as in the analyses of ``structsolve``. The linear
-buckling analysis about the pre-buckling state `\{\hat{c}(\lambda)\} =
-\{\hat{c}_0\} + \lambda \{\hat{c}_1\}`, with `\{\hat{c}_0\}` due to the
-constant prescribed displacements and `\{\hat{c}_1\}` due to the load and
-the incremented ones, solves `([K_r] + [K_{G, r}(\hat{c}_0)] + \lambda
-[K_{G, r}(\hat{c}_1)]) \{\phi_r\} = \{0\}`, see
+buckling analysis about the pre-buckling state `\hat{\boldsymbol{c}}(\lambda) =
+\hat{\boldsymbol{c}}_0 + \lambda \hat{\boldsymbol{c}}_1`, with `\hat{\boldsymbol{c}}_0` due to the
+constant prescribed displacements and `\hat{\boldsymbol{c}}_1` due to the load and
+the incremented ones, solves `(\boldsymbol{K}_r + \boldsymbol{K}_{G, r}(\hat{\boldsymbol{c}}_0) + \lambda
+\boldsymbol{K}_{G, r}(\hat{\boldsymbol{c}}_1)) \boldsymbol{\phi}_r = \boldsymbol{0}`, see
 :meth:`.MultiDomain.linear_buckling`; the constant stress resultants
 ``Nxx``, ``Nyy`` and ``Nxy`` of the panels are part of the constant state,
-in `[K_{G, r}(\hat{c}_0)]` only. The modes satisfy the
-homogeneous constraints, `\{\phi\} = [Z] \{\phi_r\}`: under displacement
+in `\boldsymbol{K}_{G, r}(\hat{\boldsymbol{c}}_0)` only. The modes satisfy the
+homogeneous constraints, `\boldsymbol{\phi} = \boldsymbol{Z} \boldsymbol{\phi}_r`: under displacement
 control the prescribed components of the modes are zero, whereas under the
 equivalent load they are free. For a flat plate the modes of the linear
 buckling analysis are out of plane and both critical loads are equal, for a
@@ -490,7 +490,7 @@ end-shortening of the critical axial load with ``x2u=1``.
 Reactions
 ~~~~~~~~~
 
-With `\{r(\bar{c}, \lambda)\} = \{F_{int}(\bar{c})\} - \lambda \{F_{ext}\}` the residual
+With `\boldsymbol{r}(\boldsymbol{c}, \lambda) = \boldsymbol{F}_{int}(\boldsymbol{c}) - \lambda \boldsymbol{F}_{ext}` the residual
 of the unconstrained system, the force applied by the supports on the
 structure, the generalized reaction work-conjugate to the set `j` of
 prescribed displacements, the constant or the incremented ones, is
@@ -498,10 +498,10 @@ prescribed displacements, the constant or the incremented ones, is
 .. math::
     :label: ns-pd-reaction
 
-    P_j = \{\bar{c}_{pj}\}^\top \{r(\bar{c}, \lambda)\}
+    P_j = \boldsymbol{c}_{pj}^\top \boldsymbol{r}(\boldsymbol{c}, \lambda)
 
 see :meth:`.MultiDomain.reaction_pd`. It does not depend on the choice of
-the particular solution, since `[Z]^\top \{r\} = \{0\}` at equilibrium.
+the particular solution, since `\boldsymbol{Z}^\top \boldsymbol{r} = \boldsymbol{0}` at equilibrium.
 `P_j \delta` is the work of the reactions for the prescribed values
 multiplied by `\delta`: for a uniform end-shortening `\delta` of an edge
 with the total axial reaction `N`, `P_1 = N \delta`, and `P_1 = \partial
@@ -509,8 +509,8 @@ U/\partial \lambda` is the force conjugate to the load factor of a
 displacement-controlled analysis.
 
 The resultant of the reactions along selected prescribed lines or points,
-in the direction `u`, `v` or `w` of the panels, is `F_u = \{\bar{c}_u\}^\top \{r\}`,
-with `\{\bar{c}_u\}` a solution of the constraints for a unit translation `u = 1`
+in the direction `u`, `v` or `w` of the panels, is `F_u = \boldsymbol{c}_u^\top \boldsymbol{r}`,
+with `\boldsymbol{c}_u` a solution of the constraints for a unit translation `u = 1`
 of the selected prescriptions that prescribe `u`, all the other prescribed
 values being zero, see :meth:`.MultiDomain.reaction_resultant`. A line whose
 ends are shared with a prescription that is not selected, directly or
@@ -552,12 +552,12 @@ API
 ~~~
 
 - ``MultiDomain(..., pd_method='null-space')``
-- :meth:`.MultiDomain.get_Z` and :meth:`.MultiDomain.get_cp`: `[Z]`,
-  `\{\bar{c}_{p0}\}` and `\{\bar{c}_{p1}\}`, also in the attributes ``Z``, ``c_p0``
+- :meth:`.MultiDomain.get_Z` and :meth:`.MultiDomain.get_cp`: `\boldsymbol{Z}`,
+  `\boldsymbol{c}_{p0}` and `\boldsymbol{c}_{p1}`, also in the attributes ``Z``, ``c_p0``
   and ``c_p1``
 - :meth:`.MultiDomain.expand`: ``expand(c_r, lbd)`` returns the
-  configuration of Eq. :eq:`ns-pd-c`, ``expand(c_r)`` returns `[Z]
-  \{\bar{c}_r\}`, e.g. for the modes
+  configuration of Eq. :eq:`ns-pd-c`, ``expand(c_r)`` returns `\boldsymbol{Z}
+  \boldsymbol{c}_r`, e.g. for the modes
 - :meth:`.MultiDomain.get_reduced_functions`: the callables of
   ``structsolve.Analysis`` for the non-linear analyses, Newton-Raphson and
   the arc-length methods, requiring ``structsolve>=0.7.0``. The linear
@@ -656,7 +656,7 @@ null-space method has the condition number `1.4 \times 10^{11}`:
       - `10^6`
       - `10^8`
       - `10^{10}`
-    * - error of `\{\bar{c}\}`
+    * - error of `\boldsymbol{c}`
       - `1.6 \times 10^{-1}`
       - `2.0 \times 10^{-2}`
       - `2.0 \times 10^{-4}`
@@ -739,17 +739,17 @@ default was ``relTOL = 1e-6``:
       - `-1.7 \times 10^{-4}`
 
 Both criteria compare the norm of the residual with the largest norm of the
-references `\lambda \{F_{ext}\}`, `\{F_{int}\}` and, when they apply, the
+references `\lambda \boldsymbol{F}_{ext}`, `\boldsymbol{F}_{int}` and, when they apply, the
 external force vector of the increment of the arc-length methods and
-`\lambda \partial R/\partial \lambda`, see ``structsolve.convergence``. For
-the penalty method `\lambda \{F_{ext}\}` and `\{F_{int}\}` contain the
+`\lambda \partial \boldsymbol{R}/\partial \lambda`, see ``structsolve.convergence``. For
+the penalty method `\lambda \boldsymbol{F}_{ext}` and `\boldsymbol{F}_{int}` contain the
 penalty forces `k u_p`. The relative criterion measures them with the
 Euclidean norm over all the degrees of freedom, which grows with `k`: with
 ``relTOL = 1e-6`` the highest penalty constants give the largest errors,
 21% and 110%, after 12 and 8 evaluations of the internal force vector in
 the 8 increments, against 28 for `k/(E h) = 10^2`, and even with ``relTOL =
 1e-10`` the error grows again from `k/(E h) = 10^6` to `10^8`. Crisfield's
-criterion uses the norm `\|v\|_{\boldsymbol{d}} = (\sum_j v_j^2/|d_j|)^{1/2}`
+criterion uses the norm `\|\boldsymbol{v}\|_{\boldsymbol{d}} = (\sum_j v_j^2/|d_j|)^{1/2}`
 over the free degrees of freedom, the entries `d_j` of the diagonal scaling
 vector `\boldsymbol{d}` being the diagonal of the linear stiffness matrix
 ``calc_kC()``, which contains the penalty stiffness, such that the scaled
@@ -757,7 +757,7 @@ norm of the penalty forces grows with `\sqrt{k}`, by a factor of 10 for
 each factor of 100 of `k` in this case: with ``relTOL = 1e-9`` the error
 decreases as `1/k` up to `k/(E h) = 10^8`, whereas with ``relTOL = 1e-6`` it
 stops decreasing at about `2 \times 10^{-5}`. The null-space method has no
-such trade-off, its reference being `\lambda \partial R_r/\partial \lambda`,
+such trade-off, its reference being `\lambda \partial \boldsymbol{R}_r/\partial \lambda`,
 see :ref:`null_space_pd`: its reaction is the same to `3 \times 10^{-10}`
 with the four combinations of the table.
 
@@ -772,8 +772,8 @@ the null-space method and Crisfield's criterion with ``relTOL = 1e-9``, and
 `k/(E h) = 10^4`. With
 Crisfield's criterion the null-space method factorizes the tangent stiffness
 matrix 29 times, against 25 for the penalty method. Its `\partial
-R_r/\partial \lambda` requires the product `[K_T] \{\bar{c}_{p1}\}`, computed
-without assembling `[K_T]`, see :ref:`tangent_product`, at the cost of one
+\boldsymbol{R}_r/\partial \lambda` requires the product `\boldsymbol{K}_T \boldsymbol{c}_{p1}`, computed
+without assembling `\boldsymbol{K}_T`, see :ref:`tangent_product`, at the cost of one
 evaluation of the internal force vector, and ``structsolve``, since 0.8.0,
 evaluates it only together with the tangent stiffness matrix. With
 ``panels`` 0.12.0 before these two improvements and the tabulation of the

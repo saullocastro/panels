@@ -177,13 +177,13 @@ and the stiffness matrix of the connection is:
 .. math::
     :label: cz-stiffness
 
-    [K^{conn}_{dmg}] = \int_A k^w_{CZ} [B_\Delta]^\top [B_\Delta] \, dA,
+    \boldsymbol{K}^{conn}_{dmg} = \int_A k^w_{CZ} \boldsymbol{B}_\Delta^\top \boldsymbol{B}_\Delta \, dA,
     \qquad
-    U^{tb}_{pen-AR-dmg} = \frac{1}{2} \{\bar{c}\}^\top [K^{conn}_{dmg}] \{\bar{c}\}
+    U^{tb}_{pen-AR-dmg} = \frac{1}{2} \boldsymbol{c}^\top \boldsymbol{K}^{conn}_{dmg} \boldsymbol{c}
 
-where `[B_\Delta]` is the operator that gives the three separations of
-Eq. :eq:`cz-jump` from the Ritz constants `\{\bar{c}\}`. For a frozen damage field,
-the internal force of the connection is `[K^{conn}_{dmg}]\{\bar{c}\}`, see
+where `\boldsymbol{B}_\Delta` is the operator that gives the three separations of
+Eq. :eq:`cz-jump` from the Ritz constants `\boldsymbol{c}`. For a frozen damage field,
+the internal force of the connection is `\boldsymbol{K}^{conn}_{dmg}\boldsymbol{c}`, see
 Eq. :eq:`cz-residual`. The integral is evaluated
 with a Gauss-Legendre rule of ``nr_x_gauss`` `\times` ``nr_y_gauss`` points
 over the domain of the top panel, and `k^w_{CZ}` is given at each of these
@@ -205,44 +205,46 @@ Energy dissipated by crack formation
 ------------------------------------
 
 The thesis adds the term `U_{crack}` of Eq. 5.18 to the total potential
-energy, Eq. 5.29, with the force vector `\{f_{crack}\}` of Eq. 5.28 and the
-stiffness matrix `[K_{crack}]` of Eq. 5.26. This counts the dissipated energy
+energy, Eq. 5.29, with the force vector `\boldsymbol{F}_{crack}` of Eq. 5.28 and the
+stiffness matrix `\boldsymbol{K}_{crack}` of Eq. 5.26. This counts the dissipated energy
 twice. The degradation of the penalty stiffness `k^w_{CZ} = k_o(1-d)` inside
-`[K^{conn}_{dmg}]`, Eq. 5.5, already makes the traction follow the softening
+`\boldsymbol{K}^{conn}_{dmg}`, Eq. 5.5, already makes the traction follow the softening
 branch of the traction-separation law, and the area under that branch is
 `G_{Ic}`, exactly as in a finite element with a cohesive law. The
-implementation has neither `U_{crack}`, `\{f_{crack}\}` nor `[K_{crack}]`, and
+implementation has neither `U_{crack}`, `\boldsymbol{F}_{crack}` nor `\boldsymbol{K}_{crack}`, and
 the residual is:
 
 .. math::
     :label: cz-residual
 
-    \{R\} = \{f_{int}\}_{panels} + [K^{conn}_{dmg}(d)]\{\bar{c}\} + [K^{pen}_{PD}]\{\bar{c}\} - \{f_{ext}\}
+    \boldsymbol{R} = \boldsymbol{F}_{ext} - \boldsymbol{F}_{int}, \qquad
+    \boldsymbol{F}_{int} = \boldsymbol{F}^{panels}_{int} + \boldsymbol{K}^{conn}_{dmg}(d)\boldsymbol{c} + \boldsymbol{K}^{pen}_{PD}\boldsymbol{c}
 
-where `d` is the damage at each integration point, Eq. :eq:`cz-damage`, the
+where `\boldsymbol{F}^{panels}_{int}` is the internal force vector of the
+panels, `d` is the damage at each integration point, Eq. :eq:`cz-damage`, the
 largest value between the converged history and the value obtained from the
-current separation, and `[K^{pen}_{PD}]` is the penalty stiffness of the
+current separation, and `\boldsymbol{K}^{pen}_{PD}` is the penalty stiffness of the
 prescribed displacement. The sudden increase of the slope at damage onset
 reported in Section 7.1.4 of the thesis, and the need to drop
-`[K^2_{crack}]`, are consequences of the double counting.
+`\boldsymbol{K}^2_{crack}`, are consequences of the double counting.
 
 
 Consistent tangent stiffness
 ----------------------------
 
-Writing the separations as `\Delta_\alpha = [B_\alpha]\{\bar{c}\}`, the internal
+Writing the separations as `\Delta_\alpha = \boldsymbol{B}_\alpha\boldsymbol{c}`, the internal
 force vector of the connection and its derivative are:
 
 .. math::
     :label: cz-fint-coh
 
-    \{f^{coh}_{int}\} = \int_A k_o (1 - d) \sum_\alpha [B_\alpha]^\top \Delta_\alpha \, dA = [K^{conn}_{dmg}]\{\bar{c}\}
+    \boldsymbol{F}^{coh}_{int} = \int_A k_o (1 - d) \sum_\alpha \boldsymbol{B}_\alpha^\top \Delta_\alpha \, dA = \boldsymbol{K}^{conn}_{dmg}\boldsymbol{c}
 
 .. math::
     :label: cz-tangent
 
-    \frac{\partial \{f^{coh}_{int}\}}{\partial \{\bar{c}\}} = [K^{conn}_{dmg}] + [K^{conn}_{\dot d}], \qquad
-    [K^{conn}_{\dot d}] = - \int_A \chi \, k_o \, \hat d'(\Delta_w) \left( \sum_\alpha [B_\alpha]^\top \Delta_\alpha \right) [B_w] \, dA
+    \frac{\partial \boldsymbol{F}^{coh}_{int}}{\partial \boldsymbol{c}} = \boldsymbol{K}^{conn}_{dmg} + \boldsymbol{K}^{conn}_{\dot d}, \qquad
+    \boldsymbol{K}^{conn}_{\dot d} = - \int_A \chi \, k_o \, \hat d'(\Delta_w) \left( \sum_\alpha \boldsymbol{B}_\alpha^\top \Delta_\alpha \right) \boldsymbol{B}_w \, dA
 
 with:
 
@@ -256,7 +258,7 @@ with:
     \end{cases}
 
 The thesis does not derive the tangent of the cohesive zone. With the secant
-stiffness `[K^{conn}_{dmg}]` alone, the iteration matrix misses the change of
+stiffness `\boldsymbol{K}^{conn}_{dmg}` alone, the iteration matrix misses the change of
 the damage with the displacements. It overestimates the stiffness of every
 softening point, and the Newton-Raphson iterations converge linearly, slowly,
 once the crack grows: in the reference DCB, the first increment after the
@@ -265,27 +267,27 @@ first fully damaged point needed more than 130 iterations.
 The mask `\chi` selects the points where the damage grows in the current
 state. Where it is 1, the correction of :ref:`cohesive_zone_correction` leaves
 the separation unchanged, `\bar\Delta_w = \Delta_w` and `\partial \bar\Delta_w
-/ \partial \{\bar{c}\} = [B_w]`. The derivative of the correction itself, a switch
+/ \partial \boldsymbol{c} = \boldsymbol{B}_w`. The derivative of the correction itself, a switch
 between 0 and `\Delta_w`, is zero almost everywhere. Some properties of
 Eq. :eq:`cz-tangent`:
 
-- `[K^{conn}_{\dot d}]` is not symmetric, because the tangential tractions
+- `\boldsymbol{K}^{conn}_{\dot d}` is not symmetric, because the tangential tractions
   depend on `\Delta_w` through `d`, while `d` does not depend on `\Delta_u`,
-  `\Delta_v`. The term `[B_w]^\top \Delta_w [B_w]` is symmetric and negative
+  `\Delta_v`. The term `\boldsymbol{B}_w^\top \Delta_w \boldsymbol{B}_w` is symmetric and negative
   semi-definite; it makes the normal tangent stiffness of a softening point
   `k_o (1 - d - \hat d' \Delta_w) = -k_o \Delta_o / (\Delta_f - \Delta_o)`,
   the slope of the descending branch of the bilinear law.
-- The iteration matrix becomes `[K_C] + [K_G] + [K^{conn}_{dmg}] +
-  [K^{conn}_{\dot d}] + [K^{pen}_{PD}]`. Under displacement control the
+- The iteration matrix becomes `\boldsymbol{K}_C + \boldsymbol{K}_G + \boldsymbol{K}^{conn}_{dmg} +
+  \boldsymbol{K}^{conn}_{\dot d} + \boldsymbol{K}^{pen}_{PD}`. Under displacement control the
   prescribed-displacement penalty keeps it regular on the softening branch of
   the DCB. ``structsolve.solve`` uses ``scipy.sparse.linalg.spsolve``, which
   accepts non-symmetric matrices.
-- Like `[K^{conn}_{dmg}]`, `[K^{conn}_{\dot d}]` is evaluated at every
-  iteration, while `[K_C] + [K_G]` is refreshed every `n_{NR}` iterations,
+- Like `\boldsymbol{K}^{conn}_{dmg}`, `\boldsymbol{K}^{conn}_{\dot d}` is evaluated at every
+  iteration, while `\boldsymbol{K}_C + \boldsymbol{K}_G` is refreshed every `n_{NR}` iterations,
   see :ref:`cohesive_zone_solution`.
 
-:meth:`.MultiDomain.calc_kT_TSL` evaluates `[K^{conn}_{\dot d}]` at the
-Gauss-Legendre points of the connection, with `[B_\alpha]` built once per
+:meth:`.MultiDomain.calc_kT_TSL` evaluates `\boldsymbol{K}^{conn}_{\dot d}` at the
+Gauss-Legendre points of the connection, with `\boldsymbol{B}_\alpha` built once per
 panel from the field functions and cached. The drivers use it by default
 (``consistent_tangent=True`` in ``test_dcb_damage.py``, always in
 ``dcb_utils.solve_dcb``).
@@ -294,16 +296,16 @@ panel from the field functions and cached. The drivers use it by default
 Assembly of the cohesive stiffness by matrix products
 -----------------------------------------------------
 
-The thesis assembles `[K^{conn}_{dmg}]` with loops over the terms of both
+The thesis assembles `\boldsymbol{K}^{conn}_{dmg}` with loops over the terms of both
 panels and over the integration points, where the approximation functions are
-evaluated inside the loops, ``kCSB_dmg.pyx``. Because `[K^{conn}_{dmg}]` is
+evaluated inside the loops, ``kCSB_dmg.pyx``. Because `\boldsymbol{K}^{conn}_{dmg}` is
 part of the internal force vector, it is needed at every iteration (see
 :ref:`cohesive_zone_solution`), and with `60 \times 30` integration points and `10 \times 10`, `8 \times 8` terms these
 loops take 6.5 s per assembly with the code of the thesis (panels 0.6.21), 67%
 of the run time in the elastic range.
 The implementation now writes the same Gauss-Legendre rule as matrix products.
 Let `g = 1, \dots, n_g` be the integration points, with weights `w_g = w_{\xi}
-w_{\eta} \, ab/4`, and `\{\bar{c}_{tb}\}` the Ritz constants of the top panel
+w_{\eta} \, ab/4`, and `\boldsymbol{c}_{tb}` the Ritz constants of the top panel
 followed by those of the bottom panel. The operators of Eq. :eq:`cz-jump`
 evaluated at all points are the `n_g \times n_{dof}` matrices:
 
@@ -311,12 +313,12 @@ evaluated at all points are the `n_g \times n_{dof}` matrices:
     :label: cz-operators
 
     \begin{aligned}
-        {}[B_u] &= \left[ [N^t_u] + d^t [N^t_{w,x}] \;\; -[N^b_u] + d^b [N^b_{w,x}] \right] \\
-        [B_v] &= \left[ [N^t_v] + d^t [N^t_{w,y}] \;\; -[N^b_v] + d^b [N^b_{w,y}] \right] \\
-        [B_w] &= \left[ [N^t_w] \;\; -[N^b_w] \right]
+        \boldsymbol{B}_u &= \left[ \boldsymbol{N}^t_u + d^t \boldsymbol{N}^t_{w,x} \;\; -\boldsymbol{N}^b_u + d^b \boldsymbol{N}^b_{w,x} \right] \\
+        \boldsymbol{B}_v &= \left[ \boldsymbol{N}^t_v + d^t \boldsymbol{N}^t_{w,y} \;\; -\boldsymbol{N}^b_v + d^b \boldsymbol{N}^b_{w,y} \right] \\
+        \boldsymbol{B}_w &= \left[ \boldsymbol{N}^t_w \;\; -\boldsymbol{N}^b_w \right]
     \end{aligned}
 
-where row `g` of `[N^t_u]` holds the approximation functions of `u` of the
+where row `g` of `\boldsymbol{N}^t_u` holds the approximation functions of `u` of the
 top panel at point `g`, and so on. The panel functions are the ones of the
 field evaluation, ``fuvw``, obtained by evaluating the field for each unit
 vector of Ritz constants. With `\text{diag}(\cdot)` the diagonal matrix of a
@@ -325,7 +327,7 @@ vector over the points, the secant stiffness is:
 .. math::
     :label: cz-K-products
 
-    [K^{conn}_{dmg}] = \sum_{\alpha = u, v, w} [B_\alpha]^\top \text{diag}\left( w_g k_g \right) [B_\alpha], \qquad k_g = k_o (1 - d_g)
+    \boldsymbol{K}^{conn}_{dmg} = \sum_{\alpha = u, v, w} \boldsymbol{B}_\alpha^\top \text{diag}\left( w_g k_g \right) \boldsymbol{B}_\alpha, \qquad k_g = k_o (1 - d_g)
 
 a product that runs on optimised BLAS routines. The integration rule is the
 same as in the loops, so the result is the same up to round-off. The
@@ -342,14 +344,14 @@ k_g)` in Eq. :eq:`cz-K-products`:
 .. math::
     :label: cz-K-update
 
-    [K^{conn}_{dmg}] = [K^{conn}_{o}] - \sum_{\alpha = u, v, w} [B_\alpha]^\top_{\mathcal{D}} \, \text{diag}\left( w_g (k_o - k_g) \right)_{\mathcal{D}} \, [B_\alpha]_{\mathcal{D}}, \qquad
-    [K^{conn}_{o}] = k_o \sum_{\alpha = u, v, w} [B_\alpha]^\top \text{diag}\left( w_g \right) [B_\alpha]
+    \boldsymbol{K}^{conn}_{dmg} = \boldsymbol{K}^{conn}_{o} - \sum_{\alpha = u, v, w} \boldsymbol{B}_{\alpha,\mathcal{D}}^\top \, \text{diag}\left( w_g (k_o - k_g) \right)_{\mathcal{D}} \, \boldsymbol{B}_{\alpha,\mathcal{D}}, \qquad
+    \boldsymbol{K}^{conn}_{o} = k_o \sum_{\alpha = u, v, w} \boldsymbol{B}_\alpha^\top \text{diag}\left( w_g \right) \boldsymbol{B}_\alpha
 
 where `\mathcal{D} = \{ g : k_g \neq k_o \}` is the set of damaged points and
-the subscript `\mathcal{D}` keeps only their rows. `[K^{conn}_{o}]`, the
+the subscript `\mathcal{D}` keeps only their rows. `\boldsymbol{K}^{conn}_{o}`, the
 stiffness of the pristine interface, is computed once for each `k_o` and
 cached. Before damage onset `\mathcal{D}` is empty and the assembly reduces
-to a copy of `[K^{conn}_{o}]`. After onset, `\mathcal{D}` holds the fracture
+to a copy of `\boldsymbol{K}^{conn}_{o}`. After onset, `\mathcal{D}` holds the fracture
 process zone and the cracked region, and the cost of the correction grows
 with the number of their points, not with the size of the whole interface.
 The correction is exact, not an approximation: it is Eq. :eq:`cz-K-products`
@@ -368,7 +370,7 @@ The cost was measured on the DCB model of the thesis
 points, `10 \times 10` and `8 \times 8` terms), on a laptop with 16 threads,
 by timing :meth:`.MultiDomain.get_kC_conn` in the driver of the thesis
 (panels 0.6.21) and in the current driver (panels 0.13.11), as the medians
-of three runs, between which the times varied by up to 50%. One assembly of `[K^{conn}_{dmg}]` takes 6.5 s with the loops of
+of three runs, between which the times varied by up to 50%. One assembly of `\boldsymbol{K}^{conn}_{dmg}` takes 6.5 s with the loops of
 the thesis (panels 0.6.21) at any damage state, 0.42 s with the
 current kernels, and 0.035 s with the matrix products for the pristine
 interface and 0.05--0.08 s with 20--100% of the points damaged, 85--190
@@ -541,18 +543,18 @@ The changes described below modify the iterations but, except for the
 convergence criterion, not the equations being solved.
 
 **Secant stiffness of the cohesive zone at every iteration.** The driver of
-the thesis refreshed `[K^{conn}_{dmg}]` only every `n_{NR} = 3` iterations,
-together with the tangent stiffness matrix. However, `[K^{conn}_{dmg}]` is
+the thesis refreshed `\boldsymbol{K}^{conn}_{dmg}` only every `n_{NR} = 3` iterations,
+together with the tangent stiffness matrix. However, `\boldsymbol{K}^{conn}_{dmg}` is
 the secant stiffness of the cohesive zone and it is part of the internal force
 vector, Eq. :eq:`cz-residual`. Keeping it frozen makes the residual
 inconsistent with the traction-separation law, and a converged state may
 carry a damage field computed with the displacements of earlier iterations.
-The drivers now evaluate `[K^{conn}_{dmg}]` at every iteration, and only the
-tangent stiffness of the panels, `[K_C] + [K_G]`, is refreshed every `n_{NR}`
-iterations. The iteration matrix of Section 5.3 of the thesis is `[K_C] +
-[K_G] + [K^{conn}_{dmg}] + [K^{pen}_{PD}]`, where the secant stiffness of the
+The drivers now evaluate `\boldsymbol{K}^{conn}_{dmg}` at every iteration, and only the
+tangent stiffness of the panels, `\boldsymbol{K}_C + \boldsymbol{K}_G`, is refreshed every `n_{NR}`
+iterations. The iteration matrix of Section 5.3 of the thesis is `\boldsymbol{K}_C +
+\boldsymbol{K}_G + \boldsymbol{K}^{conn}_{dmg} + \boldsymbol{K}^{pen}_{PD}`, where the secant stiffness of the
 cohesive zone replaces its tangent; the drivers add the damage-rate term
-`[K^{conn}_{\dot d}]` of Eq. :eq:`cz-tangent`.
+`\boldsymbol{K}^{conn}_{\dot d}` of Eq. :eq:`cz-tangent`.
 
 **Predictor.** Each increment started from the last converged state. Under
 displacement control the first residual is then dominated by the jump of the
@@ -562,19 +564,19 @@ linear extrapolation of the last two converged states:
 
 .. math::
 
-    \{\bar{c}\}_{n}^{0} = \{\bar{c}\}_{n-1} + \frac{w_{p,n} - w_{p,n-1}}{w_{p,n-1} - w_{p,n-2}} \left( \{\bar{c}\}_{n-1} - \{\bar{c}\}_{n-2} \right)
+    \boldsymbol{c}_{n}^{0} = \boldsymbol{c}_{n-1} + \frac{w_{p,n} - w_{p,n-1}}{w_{p,n-1} - w_{p,n-2}} \left( \boldsymbol{c}_{n-1} - \boldsymbol{c}_{n-2} \right)
 
-with the state `w_p = 0`, `\{\bar{c}\} = 0` used for the second increment
+with the state `w_p = 0`, `\boldsymbol{c} = \boldsymbol{0}` used for the second increment
 (``predictor=True``). The damage history is only updated after convergence,
 so the damage of the predicted state is not stored.
 
-**Reuse of** `[K_C] + [K_G]` **in the elastic range.** While no point of the
+**Reuse of** `\boldsymbol{K}_C + \boldsymbol{K}_G` **in the elastic range.** While no point of the
 interface is damaged, the tangent stiffness of the panels is reused for up to
 ``kT_pan_reuse_steps`` increments, 5 by default, and within an increment it
 is refreshed every `n_{NR}` iterations, but not after the first one. The
 residual is always evaluated exactly, so the converged solution does not
-change; only the number of iterations can increase. After onset, `[K_C] +
-[K_G]` is evaluated at the start of every increment.
+change; only the number of iterations can increase. After onset, `\boldsymbol{K}_C +
+\boldsymbol{K}_G` is evaluated at the start of every increment.
 
 **Why Newton-Raphson fails after the peak.** The residual is continuous but
 only piecewise smooth. Its derivative jumps whenever an integration point
@@ -594,39 +596,40 @@ iterations without the safeguards below converge up to the peak, but at the
 first opening after it, `\delta = 5.8` mm, they enter an exact cycle: from
 the eighth iteration on, the ratio of Eq. :eq:`cz-criterion` repeats values
 between 0.76 and 0.999 with a period of 12 iterations, four times the refresh
-interval `n_{NR} = 3` of `[K_C] + [K_G]`, to a relative `3 \times 10^{-10}`,
+interval `n_{NR} = 3` of `\boldsymbol{K}_C + \boldsymbol{K}_G`, to a relative `3 \times 10^{-10}`,
 which no number of iterations can break. Two safeguards are added to the
 drivers. Neither changes the equations or the convergence criterion, so a
 converged state is the same solution as before, only the path to it changes.
 
-**Backtracking line search.** With `\{\delta \bar{c}\}` the solution of
-`[K]\{\delta \bar{c}\} = -\{R(\{\bar{c}_i\})\}`, where `[K]` is the iteration matrix, the
-new iterate is `\{\bar{c}_{i+1}\} = \{\bar{c}_i\} + s\{\delta \bar{c}\}`, with the step length
+**Backtracking line search.** With `\delta \boldsymbol{c}` the solution of
+`\boldsymbol{K}\delta \boldsymbol{c} = \boldsymbol{R}(\boldsymbol{c}_i)`, where `\boldsymbol{K}` is the iteration matrix, the
+new iterate is `\boldsymbol{c}_{i+1} = \boldsymbol{c}_i + s\delta \boldsymbol{c}`, with the step length
 `s` taken as the first of `s = 1, \frac{1}{2}, \frac{1}{4}, \dots,
 2^{-n_{ls}}` that satisfies:
 
 .. math::
     :label: cz-armijo
 
-    \left\| \{R(\{\bar{c}_i\} + s\{\delta \bar{c}\})\} \right\|_{\boldsymbol{d}} \le \left(1 - 10^{-4} s\right) \left\| \{R(\{\bar{c}_i\})\} \right\|_{\boldsymbol{d}}, \qquad
-    \left\| \{v\} \right\|_{\boldsymbol{d}} = \sqrt{\{v\}^\top [\mathrm{diag}(|\boldsymbol{d}|)]^{-1} \{v\}}
+    \left\| \boldsymbol{R}(\boldsymbol{c}_i + s\delta \boldsymbol{c}) \right\|_{\boldsymbol{d}} \le \left(1 - 10^{-4} s\right) \left\| \boldsymbol{R}(\boldsymbol{c}_i) \right\|_{\boldsymbol{d}}, \qquad
+    \left\| \boldsymbol{v} \right\|_{\boldsymbol{d}} = \sqrt{\boldsymbol{v}^\top \mathrm{diag}(|\boldsymbol{d}|)^{-1} \boldsymbol{v}}
 
 where the entries `d_j` of the diagonal scaling vector `\boldsymbol{d}`, not
-to be confused with the damage `d`, are the diagonal of `[K]` at the start
+to be confused with the damage `d`, are the diagonal of `\boldsymbol{K}` at the start
 of the increment, the scaling of the criterion of Eq. :eq:`cz-criterion`,
 which balances the rows of the prescribed-displacement penalty against the
 others. The merit function is the residual norm and not an energy, because
-the damaged interface has no potential and `[K]` is not symmetric. When `[K]`
-is the tangent stiffness matrix `[K_T]`, the exact Jacobian of the residual,
-`\{\delta \bar{c}\}` is a descent direction of this merit function for any
+the damaged interface has no potential and `\boldsymbol{K}` is not symmetric. When `\boldsymbol{K}`
+is the tangent stiffness matrix `\boldsymbol{K}_T = -\partial \boldsymbol{R}/\partial
+\boldsymbol{c}`, the exact Jacobian of the internal force vector,
+`\delta \boldsymbol{c}` is a descent direction of this merit function for any
 positive weighting:
 
 .. math::
 
-    \left. \frac{d}{ds} \frac{1}{2} \left\| \{R(\{\bar{c}_i\} + s\{\delta \bar{c}\})\} \right\|_{\boldsymbol{d}}^2 \right|_{s=0} = \{R\}^\top [\mathrm{diag}(|\boldsymbol{d}|)]^{-1} [K_T] \{\delta \bar{c}\} = - \{R\}^\top [\mathrm{diag}(|\boldsymbol{d}|)]^{-1} \{R\} < 0
+    \left. \frac{d}{ds} \frac{1}{2} \left\| \boldsymbol{R}(\boldsymbol{c}_i + s\delta \boldsymbol{c}) \right\|_{\boldsymbol{d}}^2 \right|_{s=0} = - \boldsymbol{R}^\top \mathrm{diag}(|\boldsymbol{d}|)^{-1} \boldsymbol{K}_T \delta \boldsymbol{c} = - \boldsymbol{R}^\top \mathrm{diag}(|\boldsymbol{d}|)^{-1} \boldsymbol{R} < 0
 
 so a small enough `s` always satisfies Eq. :eq:`cz-armijo`. Between refreshes
-of `[K_C] + [K_G]` the iteration matrix is not the exact Jacobian and this is
+of `\boldsymbol{K}_C + \boldsymbol{K}_G` the iteration matrix is not the exact Jacobian and this is
 not guaranteed; if no trial satisfies Eq. :eq:`cz-armijo`, the trial with the
 smallest norm is taken, a trial whose residual is not finite counting as an
 infinite norm. Halving `s` halves the jump of the separations and
@@ -679,20 +682,21 @@ openings, every opening converged without bisection in 1 to 8 iterations,
 2.84 on average.
 
 **Convergence criterion.** The prescribed displacement is imposed with `k_w =
-10^6`, such that `\{f_{ext}\}` and `[K^{pen}_{PD}]\{\bar{c}\}` are of the order of
+10^6`, such that `\boldsymbol{F}_{ext}` and `\boldsymbol{K}^{pen}_{PD}\boldsymbol{c}` are of the order of
 `10^6`--`10^7`, while the physical forces are of the order of `10^2` N. The
-denominator of Eq. 5.35 of the thesis, `\max(F(\{f_{ext}\}),
-F(\{f_{int}\}))`, is dominated by the penalty terms, and the tolerance
+denominator of Eq. 5.35 of the thesis, `\max(F(\boldsymbol{F}_{ext}),
+F(\boldsymbol{F}_{int}))`, is dominated by the penalty terms, and the tolerance
 `10^{-4}` is then not a relative tolerance on the physical forces. The
 drivers use:
 
 .. math::
     :label: cz-criterion
 
-    \frac{F(\{R\})}{\max\left( F(\{f_{int}\}), F([K^{pen}_{PD}]\{\bar{c}\} - \{f_{ext}\}) \right)} < \varepsilon
+    \frac{F(\boldsymbol{R})}{\max\left( F(\boldsymbol{F}_{int} - \boldsymbol{K}^{pen}_{PD}\boldsymbol{c}), F(\boldsymbol{K}^{pen}_{PD}\boldsymbol{c} - \boldsymbol{F}_{ext}) \right)} < \varepsilon
 
-where `F(\cdot) = \|\cdot\|_{\boldsymbol{d}}` and the second term of the
-denominator is the
+where `F(\cdot) = \|\cdot\|_{\boldsymbol{d}}`, the first term of the
+denominator is the internal force vector of the panels and of the
+connections, and the second term is the
 reaction of the prescribed displacement. The large `k_w` also degrades the
 accuracy of the first solution of each increment, whose ratio of
 Eq. :eq:`cz-criterion` can be close to 1. An increment is therefore declared
@@ -710,10 +714,10 @@ The implementation is verified by the tests of
 ``tests/multidomain/test_sb_tsl.py``:
 
 - The kernels :func:`.fkCSB11_dmg`, :func:`.fkCSB12_dmg` and
-  :func:`.fkCSB22_dmg` were verified by comparing `\{\bar{c}\}^\top [K] \{\bar{c}\}` with
+  :func:`.fkCSB22_dmg` were verified by comparing `\boldsymbol{c}^\top \boldsymbol{K} \boldsymbol{c}` with
   twice the Gauss-Legendre integral of the penalty energy of
   Eq. :eq:`cz-energy`, evaluated from the displacement field,
-  for random `\{\bar{c}\}`, random boundary flags, panels with different numbers of
+  for random `\boldsymbol{c}`, random boundary flags, panels with different numbers of
   terms and thicknesses, and a random `k^w_{CZ}` field: the relative
   difference is below `10^{-15}`.
 - The assembly by matrix products and the loops of ``kCSB_dmg.pyx`` agree to
@@ -721,10 +725,10 @@ The implementation is verified by the tests of
   in the assembly and a damage field with pristine, softening and failed
   points.
 - :meth:`.MultiDomain.calc_kT_TSL` was verified against central finite
-  differences of `[K^{conn}_{dmg}(\{\bar{c}\})]\{\bar{c}\}`, for random states in the
+  differences of `\boldsymbol{K}^{conn}_{dmg}(\boldsymbol{c})\boldsymbol{c}`, for random states in the
   softening range, with and without points where `d^h > \hat d`: the relative
-  error of `[K^{conn}_{dmg}] + [K^{conn}_{\dot d}]` is below `2 \times
-  10^{-9}`, against 9--62% for `[K^{conn}_{dmg}]` alone.
+  error of `\boldsymbol{K}^{conn}_{dmg} + \boldsymbol{K}^{conn}_{\dot d}` is below `2 \times
+  10^{-9}`, against 9--62% for `\boldsymbol{K}^{conn}_{dmg}` alone.
 - A ``'SB_TSL'`` connection between panels of different dimensions raises a
   ``ValueError``, with the matrix products and with the kernels.
 

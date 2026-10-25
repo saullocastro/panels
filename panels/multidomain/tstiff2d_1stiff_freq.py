@@ -124,10 +124,10 @@ def tstiff2d_1stiff_freq(a, b, ys, bb, bf, defect_a, rho, plyt, laminaprop,
 
     .. math::
 
-        \left([K_r] + \lambda^2 [M_r]\right) \{\phi_r\} = \{0\}, \qquad
+        \left(\boldsymbol{K}_r + \lambda^2 \boldsymbol{M}_r\right) \boldsymbol{\phi}_r = \boldsymbol{0}, \qquad
         \lambda^2 = -\omega_n^2
 
-    with `[K_r]` and `[M_r]` the reduced constitutive stiffness and mass
+    with `\boldsymbol{K}_r` and `\boldsymbol{M}_r` the reduced constitutive stiffness and mass
     matrices, see :meth:`.MultiDomain.reduce`, without pre-stress, and
     `\omega_n` the natural frequencies in rad/s. The debonding defect is
     modelled by removing the connection ``'SB'`` between the skin and the

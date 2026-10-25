@@ -60,13 +60,13 @@ Imposing the connections
 ------------------------
 
 With ``conn_method='null-space'``, the default, the connections are linear
-constraints `[B]\{\bar{c}\} = \{0\}`, imposed exactly with a basis `[Z]` of the
-null space of `[B]`, :meth:`.MultiDomain.get_Z`:
+constraints `\boldsymbol{B}\boldsymbol{c} = \boldsymbol{0}`, imposed exactly with a basis `\boldsymbol{Z}` of the
+null space of `\boldsymbol{B}`, :meth:`.MultiDomain.get_Z`:
 
 .. math::
 
-    \{\bar{c}\} = [Z]\{\bar{c}_r\}, \qquad [K_r] = [Z]^\top [K] [Z], \qquad
-    \{f_r\} = [Z]^\top \{f\}
+    \boldsymbol{c} = \boldsymbol{Z}\boldsymbol{c}_r, \qquad \boldsymbol{K}_r = \boldsymbol{Z}^\top \boldsymbol{K} \boldsymbol{Z}, \qquad
+    \boldsymbol{F}_r = \boldsymbol{Z}^\top \boldsymbol{F}
 
 The matrices and vectors are reduced with :meth:`.MultiDomain.reduce`
 before solving, and the solution is expanded with

@@ -10,9 +10,9 @@ constants of the term `(i, j)` stored at ``DOF*(j*m + i)``, the fields
 .. math::
 
     \{u, v, w, \phi_x, \phi_y\}^\top = \sum_{j=0}^{n-1} \sum_{i=0}^{m-1}
-        [g_{ij}] \{\bar{c}_{ij}\}
+        \boldsymbol{g}_{ij} \boldsymbol{c}_{ij}
 
-where the matrix `[g_{ij}]`, with 5 rows and ``DOF`` columns, is derived
+where the matrix `\boldsymbol{g}_{ij}`, with 5 rows and ``DOF`` columns, is derived
 below for:
 
 - ``'clpt_donnell'``: the classical laminated plate theory (CLPT) with
@@ -40,7 +40,7 @@ The displacements through the thickness of the last two are
 with `c_1 = 0` for the FSDT and `c_1 = 4/(3 h^2)` for the TSDT, and `\Phi_y =
 \phi_y` for ``'sdt'``.
 
-The matrices `[g_{ij}]` are those of the function ``fg`` of the field modules
+The matrices `\boldsymbol{g}_{ij}` are those of the function ``fg`` of the field modules
 :mod:`panels.models.clpt_field` and :mod:`panels.models.fsdt_tsdt_field`,
 whose function ``fuvw`` evaluates the sum above. Running this script prints
 and writes the expressions to ``./output_expressions_python/`` and checks
@@ -75,7 +75,7 @@ def bardell(nmax=30):
 
 
 def shape_function_matrix(model):
-    r"""Matrix `[g_{ij}]` in terms of the symbols ``f<field>``, ``g<field>``
+    r"""Matrix `\boldsymbol{g}_{ij}` in terms of the symbols ``f<field>``, ``g<field>``
     of the term `(i, j)` and of their derivatives ``f<field>xi``,
     ``g<field>eta``"""
     f = {k: Symbol('f' + k) for k in FIELDS}
@@ -117,7 +117,7 @@ def through_thickness(G, sanders=False):
 
 
 def check(model, panels_models, num_checks=3, seed=0):
-    r"""Compares `[g_{ij}]` with ``fg`` of the field module of panels"""
+    r"""Compares `\boldsymbol{g}_{ij}` with ``fg`` of the field module of panels"""
     from panels.shell import Shell
     from panels import modelDB
 

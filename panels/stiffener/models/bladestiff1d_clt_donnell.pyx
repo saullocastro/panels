@@ -199,12 +199,12 @@ def fkMf(double ys, double rho, double h, double hb, double hf, double a,
     mass matrix is:
 
     .. math::
-        [M_{sf}] = \rho h_f b_f \int_x [S(x, y_s)]^\top [k_{mf}] [S(x, y_s)] dx
+        \boldsymbol{M}_{sf} = \rho h_f b_f \int_x \boldsymbol{S}(x, y_s)^\top \boldsymbol{k}_{mf} \boldsymbol{S}(x, y_s) dx
 
-    where `[S]` gives `\{u, v, w, \phi_x, \phi_y\}^\top` and
+    where `\boldsymbol{S}` gives `\{u, v, w, \phi_x, \phi_y\}^\top` and
 
     .. math::
-        [k_{mf}] = \begin{bmatrix}
+        \boldsymbol{k}_{mf} = \begin{bmatrix}
                    1 & 0 & 0 & -d_f & 0 \\
                    0 & 1 & 0 & 0 & -d_f \\
                    0 & 0 & 1 & 0 & 0 \\
@@ -220,13 +220,13 @@ def fkMf(double ys, double rho, double h, double hb, double hf, double a,
     ``theory/multidomain_panels/bladestiff1d_clt_donnell/``.
 
     .. note:: Correction with respect to Eq. (26) of Castro et al. (2016)
-              [castro2016FlutterPanel]_, whose matrix `[k_{mf}]` has `-2
+              [castro2016FlutterPanel]_, whose matrix `\boldsymbol{k}_{mf}` has `-2
               d_f` in the terms coupling the displacements `u, v` and the
               rotations `\phi_x, \phi_y`. The in-plane displacements of the
               flange at its centroid are `u - d_f \phi_x` and `v - d_f
               \phi_y`, and the term `-2 d_f u \phi_x` of `(u - d_f
               \phi_x)^2` is shared by the two symmetric entries `(1, 4)` and
-              `(4, 1)` of `[k_{mf}]`, which are then `-d_f`, consistent with
+              `(4, 1)` of `\boldsymbol{k}_{mf}`, which are then `-d_f`, consistent with
               the term `d_f^2` of `k_{mf44}` and with the offset of the mass
               matrix of the shells. Up to version 0.7.1 this kernel used `-2
               d_f`, doubling the inertial coupling between the flange and the

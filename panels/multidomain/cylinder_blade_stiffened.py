@@ -380,8 +380,8 @@ def cylinder_blade_stiffened_compression_lb_Nxx_from_static(height, r, stack,
     The pre-buckling state and the linear buckling analysis are those of
     :func:`.cylinder_compression_lb_Nxx_from_static`: ``c`` is the linear
     static solution of the reduced problem, and ``eigvals`` are the
-    multipliers `\lambda` of the applied loads in `([K_r] + \lambda
-    [K_{G r}(\bar{c})]) \{\phi_r\} = \{0\}`.
+    multipliers `\lambda` of the applied loads in `(\boldsymbol{K}_r + \lambda
+    \boldsymbol{K}_{G r}(\boldsymbol{c})) \boldsymbol{\phi}_r = \boldsymbol{0}`.
 
     Examples
     --------
@@ -517,8 +517,8 @@ def cylinder_blade_stiffened_compression_lb_pd_from_static(height, r, stack,
     -----
     The prescribed displacements are the linear constraints `u(x = height,
     y) = \lambda u_p`, eliminated exactly together with the connections,
-    see :ref:`null_space_pd`: the pre-buckling state is `\{c(\lambda)\} =
-    \lambda \{\bar{c}\}`, with `u = u_p` at `x = height` for `\lambda = 1`, and
+    see :ref:`null_space_pd`: the pre-buckling state is `\hat{\boldsymbol{c}}(\lambda) =
+    \lambda \hat{\boldsymbol{c}}_1`, with `u = u_p` at `x = height` for `\lambda = 1`, and
     the critical end-shortening of each panel is ``eigvals[0]`` times its
     prescribed value. The modes have `u = 0` at `x = height`, the
     displacement being controlled there. See

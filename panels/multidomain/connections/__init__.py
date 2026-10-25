@@ -219,8 +219,8 @@ kinematics, the term `v/r`, see :func:`.kCsdt._sb_components` and
 normal at the reference surfaces with ``kr``.
 
 With the null-space method the quantities penalized by the kernels become
-the linear constraints `[B] \{\bar{c}\} = \{0\}`, which are eliminated with a
-basis `[Z]` of their null space, `\{\bar{c}\} = [Z] \{\bar{c}_r\}`. The results are
+the linear constraints `\boldsymbol{B} \boldsymbol{c} = \boldsymbol{0}`, which are eliminated with a
+basis `\boldsymbol{Z}` of their null space, `\boldsymbol{c} = \boldsymbol{Z} \boldsymbol{c}_r`. The results are
 the limit of the penalty method for penalty constants going to infinity,
 see :mod:`panels.multidomain.connections.nullspace`.
 

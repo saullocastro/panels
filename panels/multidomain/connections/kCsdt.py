@@ -322,17 +322,17 @@ def _connection_matrix(components, ctes, size):
     -----
     The penalty energy is `\frac{1}{2} \sum_k k_k \int (q_k^1 - q_k^2)^2`,
     where each quantity `q_k^p` of panel `p` is a linear combination of terms
-    ``(field, der_x, der_y, coeff)``, `q_k^p = \sum_t \alpha_t \{N_t\}
-    \{c^p\}`, where `\alpha_t` is ``coeff``, `\{N_t\}` the derivative of
+    ``(field, der_x, der_y, coeff)``, `q_k^p = \sum_t \alpha_t \boldsymbol{N}_t
+    \boldsymbol{c}^p`, where `\alpha_t` is ``coeff``, `\boldsymbol{N}_t` the derivative of
     order ``der_x`` along `x` and ``der_y`` along `y` of the approximation
-    functions of ``field`` and `\{c^p\}` the Ritz constants of panel `p`.
-    The second derivatives of the energy with respect to `\{c^P\}` and
-    `\{c^Q\}` give the blocks
+    functions of ``field`` and `\boldsymbol{c}^p` the Ritz constants of panel `p`.
+    The second derivatives of the energy with respect to `\boldsymbol{c}^P` and
+    `\boldsymbol{c}^Q` give the blocks
 
     .. math::
 
-        [K_{PQ}] = \pm k_k \sum_{t \in P} \sum_{s \in Q} \alpha_t \alpha_s
-        \int \{N_t\}^\top \{N_s\}
+        \boldsymbol{K}_{PQ} = \pm k_k \sum_{t \in P} \sum_{s \in Q} \alpha_t \alpha_s
+        \int \boldsymbol{N}_t^\top \boldsymbol{N}_s
 
     with the sign `+` for `P = Q` and `-` for `P \neq Q`. The approximation
     functions are products `f(x) g(y)`, so each integral is the Kronecker
