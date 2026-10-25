@@ -35,15 +35,15 @@ with open('../../../fortran/bardell/bardell_functions.f90', 'w') as f:
     f.write('END SUBROUTINE\n')
 
     f.write('\n\n')
-    f.write('SUBROUTINE calc_vec_fxi(fxi, xi, xi1t, xi1r, xi2t, xi2r)\n')
+    f.write('SUBROUTINE calc_vec_f_xi(f_xi, xi, xi1t, xi1r, xi2t, xi2r)\n')
     f.write('    REAL*8, INTENT(IN) :: xi, xi1t, xi1r, xi2t, xi2r\n')
-    f.write('    REAL*8, INTENT(OUT) :: fxi(%d)\n' % len(u))
+    f.write('    REAL*8, INTENT(OUT) :: f_xi(%d)\n' % len(u))
     for i in range(len(u)):
         const = consts.get(i)
         if const is None:
-            f.write('    fxi(%d) = %s\n' % (i+1, str(diff(u[i], xi))))
+            f.write('    f_xi(%d) = %s\n' % (i+1, str(diff(u[i], xi))))
         else:
-            f.write('    fxi(%d) = %s*(%s)\n' % (i+1, const, str(diff(u[i], xi))))
+            f.write('    f_xi(%d) = %s*(%s)\n' % (i+1, const, str(diff(u[i], xi))))
     f.write('END SUBROUTINE\n')
 
     f.write('\n\n')
@@ -65,7 +65,7 @@ with open('../../../fortran/bardell/bardell_functions.f90', 'w') as f:
     f.write('END SUBROUTINE\n')
 
     f.write('\n\n')
-    f.write('SUBROUTINE calc_fxi(i, xi, xi1t, xi1r, xi2t, xi2r, out)\n')
+    f.write('SUBROUTINE calc_f_xi(i, xi, xi1t, xi1r, xi2t, xi2r, out)\n')
     f.write('    INTEGER, INTENT(IN) :: i\n')
     f.write('    REAL*8, INTENT(IN) :: xi, xi1t, xi1r, xi2t, xi2r\n')
     f.write('    REAL*8, INTENT(OUT) :: out\n')

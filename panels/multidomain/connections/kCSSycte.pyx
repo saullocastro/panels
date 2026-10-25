@@ -73,7 +73,7 @@ def fkCSSycte11(double kt, double kr, object p1, double ycte1,
 
     cdef double etacte1
     cdef double f1Auf1Bu, f1Avf1Bv, f1Awf1Bw
-    cdef double g1Au, g1Bu, g1Av, g1Bv, g1Aw, g1Bw, g1Aweta, g1Bweta
+    cdef double g1Au, g1Bu, g1Av, g1Bv, g1Aw, g1Bw, g1Aw_eta, g1Bw_eta
 
     a1 = p1.a
     b1 = p1.b
@@ -116,7 +116,7 @@ def fkCSSycte11(double kt, double kr, object p1, double ycte1,
                     g1Au = gtab1[0, j1]
                     g1Av = gtab1[1, j1]
                     g1Aw = gtab1[2, j1]
-                    g1Aweta = gtab1[3, j1]
+                    g1Aw_eta = gtab1[3, j1]
 
                     for l1 in range(n1):
                         row = row0 + DOF*(j1*m1 + i1)
@@ -129,7 +129,7 @@ def fkCSSycte11(double kt, double kr, object p1, double ycte1,
                         g1Bu = gtab1[0, l1]
                         g1Bv = gtab1[1, l1]
                         g1Bw = gtab1[2, l1]
-                        g1Bweta = gtab1[3, l1]
+                        g1Bw_eta = gtab1[3, l1]
 
                         c += 1
                         kCSSycte11r[c] = row+0
@@ -142,7 +142,7 @@ def fkCSSycte11(double kt, double kr, object p1, double ycte1,
                         c += 1
                         kCSSycte11r[c] = row+2
                         kCSSycte11c[c] = col+2
-                        kCSSycte11v[c] += 0.5*a1*kt*(f1Awf1Bw*g1Aw*g1Bw + 4*f1Awf1Bw*g1Aweta*g1Bweta*kr/((b1*b1)*kt))
+                        kCSSycte11v[c] += 0.5*a1*kt*(f1Awf1Bw*g1Aw*g1Bw + 4*f1Awf1Bw*g1Aw_eta*g1Bw_eta*kr/((b1*b1)*kt))
 
     kCSSycte11 = coo_matrix((kCSSycte11v, (kCSSycte11r, kCSSycte11c)), shape=(size, size))
 
@@ -203,7 +203,7 @@ def fkCSSycte12(double kt, double kr, object p1, object p2,
 
     cdef double etacte1, etacte2
     cdef double f1Auf2Bu, f1Avf2Bv, f1Awf2Bw
-    cdef double g1Au, g2Bu, g1Av, g2Bv, g1Aw, g2Bw, g1Aweta, g2Bweta
+    cdef double g1Au, g2Bu, g1Av, g2Bv, g1Aw, g2Bw, g1Aw_eta, g2Bw_eta
 
     a1 = p1.a
     b1 = p1.b
@@ -264,7 +264,7 @@ def fkCSSycte12(double kt, double kr, object p1, object p2,
                     g1Au = gtab1[0, j1]
                     g1Av = gtab1[1, j1]
                     g1Aw = gtab1[2, j1]
-                    g1Aweta = gtab1[3, j1]
+                    g1Aw_eta = gtab1[3, j1]
 
                     for l2 in range(n2):
                         row = row0 + DOF*(j1*m1 + i1)
@@ -277,7 +277,7 @@ def fkCSSycte12(double kt, double kr, object p1, object p2,
                         g2Bu = gtab2[0, l2]
                         g2Bv = gtab2[1, l2]
                         g2Bw = gtab2[2, l2]
-                        g2Bweta = gtab2[3, l2]
+                        g2Bw_eta = gtab2[3, l2]
 
                         c += 1
                         kCSSycte12r[c] = row+0
@@ -290,7 +290,7 @@ def fkCSSycte12(double kt, double kr, object p1, object p2,
                         c += 1
                         kCSSycte12r[c] = row+2
                         kCSSycte12c[c] = col+2
-                        kCSSycte12v[c] += -0.5*a1*kt*(f1Awf2Bw*g1Aw*g2Bw + 4*f1Awf2Bw*g1Aweta*g2Bweta*kr/(b1*b2*kt))
+                        kCSSycte12v[c] += -0.5*a1*kt*(f1Awf2Bw*g1Aw*g2Bw + 4*f1Awf2Bw*g1Aw_eta*g2Bw_eta*kr/(b1*b2*kt))
 
     kCSSycte12 = coo_matrix((kCSSycte12v, (kCSSycte12r, kCSSycte12c)), shape=(size, size))
 
@@ -347,7 +347,7 @@ def fkCSSycte22(double kt, double kr, object p1, object p2,
 
     cdef double etacte2
     cdef double f2Auf2Bu, f2Avf2Bv, f2Awf2Bw
-    cdef double g2Au, g2Bu, g2Av, g2Bv, g2Aw, g2Bw, g2Aweta, g2Bweta
+    cdef double g2Au, g2Bu, g2Av, g2Bv, g2Aw, g2Bw, g2Aw_eta, g2Bw_eta
 
     a1 = p1.a
     b2 = p2.b
@@ -390,7 +390,7 @@ def fkCSSycte22(double kt, double kr, object p1, object p2,
                     g2Au = gtab2[0, j2]
                     g2Av = gtab2[1, j2]
                     g2Aw = gtab2[2, j2]
-                    g2Aweta = gtab2[3, j2]
+                    g2Aw_eta = gtab2[3, j2]
 
                     for l2 in range(n2):
                         row = row0 + DOF*(j2*m2 + i2)
@@ -403,7 +403,7 @@ def fkCSSycte22(double kt, double kr, object p1, object p2,
                         g2Bu = gtab2[0, l2]
                         g2Bv = gtab2[1, l2]
                         g2Bw = gtab2[2, l2]
-                        g2Bweta = gtab2[3, l2]
+                        g2Bw_eta = gtab2[3, l2]
 
                         c += 1
                         kCSSycte22r[c] = row+0
@@ -416,7 +416,7 @@ def fkCSSycte22(double kt, double kr, object p1, object p2,
                         c += 1
                         kCSSycte22r[c] = row+2
                         kCSSycte22c[c] = col+2
-                        kCSSycte22v[c] += 0.5*a1*kt*(f2Awf2Bw*g2Aw*g2Bw + 4*f2Awf2Bw*g2Aweta*g2Bweta*kr/((b2*b2)*kt))
+                        kCSSycte22v[c] += 0.5*a1*kt*(f2Awf2Bw*g2Aw*g2Bw + 4*f2Awf2Bw*g2Aw_eta*g2Bw_eta*kr/((b2*b2)*kt))
 
     kCSSycte22 = coo_matrix((kCSSycte22v, (kCSSycte22r, kCSSycte22c)), shape=(size, size))
 

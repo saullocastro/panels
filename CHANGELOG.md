@@ -367,6 +367,24 @@
   `calc_kCfollower`, the key `'kCfollower'` and the argument `c`, are
   unchanged.
 
+### Clean-up
+
+- The internal names of partial derivatives follow one convention, an
+  underscore introducing the derivative: `fAu_xi`, `gAw_etaeta`, `f1Aw_xi`,
+  `sAw_eta` (were `fAuxi`, `gAwetaeta`, `f1Awxi`, `sAweta`), `w_xi` and
+  `w_x` (were `wxi`, `wx`) in the kernels of the models, connections and
+  stiffeners and in their generators in `theory/`; `fu_xi`, `gw_eta`, `w_x`
+  and `cfw_x` in `panels/models/clpt_field.pyx`; `f_xi`, `g_eta`, `val_x`
+  and `val_xx` (were `fxi`, `geta`, `dx`, `dxx`) in
+  `panels/models/fsdt_tsdt_field.pyx`; `u_x` to `w_y` in the
+  follower-pressure kernels; `w_x`, `w_xx`, `Mxx_x` and `Qx_x` (were
+  `dw_dx`, `d2w_dx2`, `dMxx_dx`, `dQx_dx`) in `MultiDomain.force_out_plane`;
+  also in the tests, notebooks and theory scripts. The public API, the
+  Bardell functions `fp` and `fpp` (`calc_vec_fp`, `integral_ffp`, ...),
+  the names of the integrals of products (e.g. `fAufBuxi`) and
+  the quadrature weights (`wx`, `wxi`, ...) are unchanged, and so are the
+  results, bit for bit.
+
 ### Dependencies
 
 - Requires `composites>=0.10.0`, for `Laminate.intrhoz3`, `intrhoz4` and

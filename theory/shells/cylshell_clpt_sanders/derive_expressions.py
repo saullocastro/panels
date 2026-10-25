@@ -43,7 +43,7 @@ def simp(e, vars=ABD):
     return collect(e, vars, func=factor)
 
 
-BASIS = re.compile(r'^([fg])([AB])([uvw])((?:xi|eta)*)$')
+BASIS = re.compile(r'^([fg])([AB])([uvw])((?:_(?:xi|eta)+)?)$')
 
 
 def basis_info(name):

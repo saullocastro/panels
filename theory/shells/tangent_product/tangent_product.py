@@ -117,20 +117,20 @@ def _clpt_donnell(geometry):
 
     rinv = 1/r if geometry == 'cylshell' else 0
     su, sv, sw = row('u', 'fAu', 'gAu'), row('v', 'fAv', 'gAv'), row('w', 'fAw', 'gAw')
-    suxi, sueta = row('u', 'fAuxi', 'gAu'), row('u', 'fAu', 'gAueta')
-    svxi, sveta = row('v', 'fAvxi', 'gAv'), row('v', 'fAv', 'gAveta')
-    swxi, sweta = row('w', 'fAwxi', 'gAw'), row('w', 'fAw', 'gAweta')
-    swxixi = row('w', 'fAwxixi', 'gAw')
-    swxieta = row('w', 'fAwxi', 'gAweta')
-    swetaeta = row('w', 'fAw', 'gAwetaeta')
-    Gx = (2/a)*swxi
-    Gy = (2/b)*sweta
-    B = M([(2/a)*suxi + bx*Gx,
-           (2/b)*sveta + rinv*sw + by*Gy,
-           (2/b)*sueta + (2/a)*svxi + bx*Gy + by*Gx,
-           -(2/a)**2*swxixi,
-           -(2/b)**2*swetaeta,
-           -2*(2/a)*(2/b)*swxieta])
+    su_xi, su_eta = row('u', 'fAu_xi', 'gAu'), row('u', 'fAu', 'gAu_eta')
+    sv_xi, sv_eta = row('v', 'fAv_xi', 'gAv'), row('v', 'fAv', 'gAv_eta')
+    sw_xi, sw_eta = row('w', 'fAw_xi', 'gAw'), row('w', 'fAw', 'gAw_eta')
+    sw_xixi = row('w', 'fAw_xixi', 'gAw')
+    sw_xieta = row('w', 'fAw_xi', 'gAw_eta')
+    sw_etaeta = row('w', 'fAw', 'gAw_etaeta')
+    Gx = (2/a)*sw_xi
+    Gy = (2/b)*sw_eta
+    B = M([(2/a)*su_xi + bx*Gx,
+           (2/b)*sv_eta + rinv*sw + by*Gy,
+           (2/b)*su_eta + (2/a)*sv_xi + bx*Gy + by*Gx,
+           -(2/a)**2*sw_xixi,
+           -(2/b)**2*sw_etaeta,
+           -2*(2/a)*(2/b)*sw_xieta])
     return B, M([Gx, Gy])
 
 

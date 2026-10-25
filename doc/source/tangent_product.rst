@@ -222,7 +222,7 @@ and, for instance:
 
 Throughout the kernels, the pair of indices `(i,j)` names the row term,
 denoted `A`, and `(k,l)` names the column term, denoted `B`; the variables
-``fAw``, ``gAweta``, ``fBwxi`` and so forth follow that convention, read
+``fAw``, ``gAw_eta``, ``fBw_xi`` and so forth follow that convention, read
 from the tables of the approximation functions evaluated once per
 integration point, see :ref:`tabulation`. Only the upper triangle is
 assembled, the lower one being recovered by ``finalize_symmetric_matrix``
@@ -256,7 +256,7 @@ the plate kinematics of von Kármán are recovered by making `1/r = 0`:
 :eq:`donnell-strains` is the strain state assembled term by term in
 ``calc_fint`` of ``cylshell_clpt_donnell_num.pyx``, where the hoop term
 appears as ``1./r*cs[col+2]*fAw*gAw`` and the von Kármán contributions as
-the products with ``wxi`` and ``weta``. The plate, ``calc_fint`` of
+the products with ``w_xi`` and ``w_eta``. The plate, ``calc_fint`` of
 ``plate_clpt_donnell_num.pyx``, differs from it in exactly one place, the
 absence of that hoop term in ``eyy``; the five remaining strain components
 are character for character identical. The same single-term difference
@@ -416,11 +416,11 @@ the `1/r` term present in `\boldsymbol{B}_L` has no counterpart in
 `\boldsymbol{G}`.
 
 In the kernels, the slopes are accumulated in the natural coordinates as
-``wxi`` and ``weta``, in ``fkC_num`` and in ``calc_fint``, and converted as:
+``w_xi`` and ``w_eta``, in ``fkC_num`` and in ``calc_fint``, and converted as:
 
 .. math::
 
-    w_{,x} = \frac{2}{a}\,\texttt{wxi} \qquad w_{,y} = \frac{2}{b}\,\texttt{weta}
+    w_{,x} = \frac{2}{a}\,\texttt{w_xi} \qquad w_{,y} = \frac{2}{b}\,\texttt{w_eta}
 
 With :eq:`donnell-G`, the non-linear differentiation operator becomes:
 
@@ -691,7 +691,7 @@ There is no separate code path for `\boldsymbol{K}_{C0}`,
 sum. `\boldsymbol{K}_{C0}`
 alone is obtained either from the closed-form ``fk0`` or by calling
 ``fkC_num`` with `\boldsymbol{c} = \boldsymbol{0}` or with
-``NLgeom=0``, both of which make ``wxi`` and ``weta`` vanish, since their
+``NLgeom=0``, both of which make ``w_xi`` and ``w_eta`` vanish, since their
 accumulation is guarded by ``if NLgeom == 1``. With `w_{,x} = w_{,y} = 0`
 one has `\boldsymbol{B}_{NL} = \boldsymbol{0}` and `\boldsymbol{N}_{NL} =
 \boldsymbol{0}`, so `\boldsymbol{K}_{CNL}` and `\boldsymbol{K}_{GNL}` vanish
@@ -865,10 +865,10 @@ twins using the same names, and map the matrix terms.
       - ``a``, ``b``, ``r``
       - attributes of :class:`.Shell`
     * - `P_i^u(\xi)`, `P_i^{u\prime}(\xi)`
-      - ``fAu``, ``fAuxi``
+      - ``fAu``, ``fAu_xi``
       - ``ftab`` of the kernels
     * - `P_j^w(\eta)`, `P_j^{w\prime}`, `P_j^{w\prime\prime}`
-      - ``gAw``, ``gAweta``, ``gAwetaeta``
+      - ``gAw``, ``gAw_eta``, ``gAw_etaeta``
       - ``gtab`` of the kernels
     * - `P_k^w(\xi)`, `P_l^w(\eta)` (term `B`)
       - ``fBw``, ``gBw``
@@ -877,10 +877,10 @@ twins using the same names, and map the matrix terms.
       - ``x1w``, ``x1wr``, ``x2w``, ``x2wr``
       - attributes of :class:`.Shell`
     * - `\partial w/\partial\xi`, `\partial w/\partial\eta`
-      - ``wxi``, ``weta``
+      - ``w_xi``, ``w_eta``
       - ``fkC_num``, ``calc_fint``
     * - `w_{,x}`, `w_{,y}`
-      - ``wx``, ``wy``
+      - ``w_x``, ``w_y``
       - ``fkC_num``
     * - `\boldsymbol{\varepsilon}^{(0)}`, `\boldsymbol{\varepsilon}^{(1)}`
       - ``exx, eyy, gxy``, ``kxx, kyy, kxy``

@@ -49,12 +49,12 @@ var('D11, D12, D16, D22, D26, D66')
 var('Nxx, Nyy, Nxy')
 
 # base (and panel)
-var('fAu, gAu, fAv, gAv, fAw, gAw, fAuxi, fAvxi, fAwxi, gAueta, gAveta, gAweta, fAwxixi, gAwetaeta')
-var('fBu, gBu, fBv, gBv, fBw, gBw, fBuxi, fBvxi, fBwxi, gBueta, gBveta, gBweta, fBwxixi, gBwetaeta')
+var('fAu, gAu, fAv, gAv, fAw, gAw, fAu_xi, fAv_xi, fAw_xi, gAu_eta, gAv_eta, gAw_eta, fAw_xixi, gAw_etaeta')
+var('fBu, gBu, fBv, gBv, fBw, gBw, fBu_xi, fBv_xi, fBw_xi, gBu_eta, gBv_eta, gBw_eta, fBw_xixi, gBw_etaeta')
 
 # flange
-var('rAu, sAu, rAv, sAv, rAw, sAw, rAuxi, rAvxi, rAwxi, sAueta, sAveta, sAweta, rAwxixi, sAwetaeta')
-var('rBu, sBu, rBv, sBv, rBw, sBw, rBuxi, rBvxi, rBwxi, sBueta, sBveta, sBweta, rBwxixi, sBwetaeta')
+var('rAu, sAu, rAv, sAv, rAw, sAw, rAu_xi, rAv_xi, rAw_xi, sAu_eta, sAv_eta, sAw_eta, rAw_xixi, sAw_etaeta')
+var('rBu, sBu, rBv, sBv, rBw, sBw, rBu_xi, rBv_xi, rBw_xi, sBu_eta, sBv_eta, sBw_eta, rBw_xixi, sBw_etaeta')
 
 
 def piece_wise_simplify(m, vars):
@@ -72,15 +72,15 @@ def vectors(f, g, AB):
         u=M([[s('u', 'u'), 0, 0]]),
         v=M([[0, s('v', 'v'), 0]]),
         w=M([[0, 0, s('w', 'w')]]),
-        uxi=M([[s('uxi', 'u'), 0, 0]]),
-        vxi=M([[0, s('vxi', 'v'), 0]]),
-        wxi=M([[0, 0, s('wxi', 'w')]]),
-        ueta=M([[s('u', 'ueta'), 0, 0]]),
-        veta=M([[0, s('v', 'veta'), 0]]),
-        weta=M([[0, 0, s('w', 'weta')]]),
-        wxixi=M([[0, 0, s('wxixi', 'w')]]),
-        wxieta=M([[0, 0, s('wxi', 'weta')]]),
-        wetaeta=M([[0, 0, s('w', 'wetaeta')]]),
+        u_xi=M([[s('u_xi', 'u'), 0, 0]]),
+        v_xi=M([[0, s('v_xi', 'v'), 0]]),
+        w_xi=M([[0, 0, s('w_xi', 'w')]]),
+        u_eta=M([[s('u', 'u_eta'), 0, 0]]),
+        v_eta=M([[0, s('v', 'v_eta'), 0]]),
+        w_eta=M([[0, 0, s('w', 'w_eta')]]),
+        w_xixi=M([[0, 0, s('w_xixi', 'w')]]),
+        w_xieta=M([[0, 0, s('w_xi', 'w_eta')]]),
+        w_etaeta=M([[0, 0, s('w', 'w_etaeta')]]),
         )
 
 
@@ -102,20 +102,20 @@ def B0(s, a, b, r=None):
     r"""Linear strain-displacement matrix, Donnell's cylindrical shell for
     ``r`` given, plate otherwise"""
     curv = s['w']/r if r is not None else 0*s['w']
-    return M([(2/a)*s['uxi'],
-              (2/b)*s['veta'] + curv,
-              (2/b)*s['ueta'] + (2/a)*s['vxi'],
-             -(2/a)*(2/a)*s['wxixi'],
-             -(2/b)*(2/b)*s['wetaeta'],
-             -(2/a)*(2/b)*2*s['wxieta']])
+    return M([(2/a)*s['u_xi'],
+              (2/b)*s['v_eta'] + curv,
+              (2/b)*s['u_eta'] + (2/a)*s['v_xi'],
+             -(2/a)*(2/a)*s['w_xixi'],
+             -(2/b)*(2/b)*s['w_etaeta'],
+             -(2/a)*(2/b)*2*s['w_xieta']])
 
 
 def G(s, a, b):
-    return M([(2/a)*s['wxi'], (2/b)*s['weta']])
+    return M([(2/a)*s['w_xi'], (2/b)*s['w_eta']])
 
 
 def g5(s, a, b):
-    return M([s['u'], s['v'], s['w'], -(2/a)*s['wxi'], -(2/b)*s['weta']])
+    return M([s['u'], s['v'], s['w'], -(2/a)*s['w_xi'], -(2/b)*s['w_eta']])
 
 
 def maux(h, d):
@@ -134,8 +134,8 @@ kMy1y2 = (a*b/4)*h*rho*g5(sA, a, b).T*maux(h, d)*g5(sB, a, b)
 
 # Aerodynamic and damping matrices using piston's theory
 
-kAx = -(a*b/4)*(beta*(2/a)*sA['wxi'].T*sB['w'] + gamma*sA['w'].T*sB['w'])
-kAy = -(a*b/4)*beta*(2/b)*sA['weta'].T*sB['w']
+kAx = -(a*b/4)*(beta*(2/a)*sA['w_xi'].T*sB['w'] + gamma*sA['w'].T*sB['w'])
+kAy = -(a*b/4)*beta*(2/b)*sA['w_eta'].T*sB['w']
 cA = -(a*b/4)*aeromu*sA['w'].T*sB['w']
 
 # Flange, with offset d
@@ -155,17 +155,17 @@ kMf = (a*bf/4)*hf*rho*g5(sAf, a, bf).T*maux(hf, d)*g5(sBf, a, bf)
 kCss = (a/2)*(kt*sA['u'].T*sB['u']
             + kt*sA['v'].T*sB['v']
             + kt*sA['w'].T*sB['w']
-            + kr*((2/b)*sA['weta']).T*((2/b)*sB['weta']))
+            + kr*((2/b)*sA['w_eta']).T*((2/b)*sB['w_eta']))
 
 kCsf = (a/2)*(-kt*sA['u'].T*sBf['u']
               -kt*sA['v'].T*sBf['w']
               +kt*sA['w'].T*sBf['v']
-              -kr*((2/b)*sA['weta']).T*((2/bf)*sBf['weta']))
+              -kr*((2/b)*sA['w_eta']).T*((2/bf)*sBf['w_eta']))
 
 kCff = (a/2)*(kt*sAf['u'].T*sBf['u']
             + kt*sAf['v'].T*sBf['v']
             + kt*sAf['w'].T*sBf['w']
-            + kr*((2/bf)*sAf['weta']).T*((2/bf)*sBf['weta']))
+            + kr*((2/bf)*sAf['w_eta']).T*((2/bf)*sBf['w_eta']))
 
 vars = (A11, A12, A16, A22, A26, A66,
         B11, B12, B16, B22, B26, B66,

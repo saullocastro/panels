@@ -181,8 +181,8 @@ def fkCSB11_dmg(double dt, object p1, int size, int row0, int col0,
     cdef double [:] kCSB11v
     cdef double [:] weights_xi, weights_eta, xis, etas
 
-    cdef double f1Au, f1Av, f1Aw, f1Awxi, f1Bu, f1Bv, f1Bw, f1Bwxi
-    cdef double g1Au, g1Av, g1Aw, g1Aweta, g1Bu, g1Bv, g1Bw, g1Bweta
+    cdef double f1Au, f1Av, f1Aw, f1Aw_xi, f1Bu, f1Bv, f1Bw, f1Bw_xi
+    cdef double g1Au, g1Av, g1Aw, g1Aw_eta, g1Bu, g1Bv, g1Bw, g1Bw_eta
     cdef double kt
     cdef double cvt = 1. - dt*rinv1
 
@@ -252,39 +252,39 @@ def fkCSB11_dmg(double dt, object p1, int size, int row0, int col0,
                 for i1 in range(m1):
                     # NOTE: When any of these are uncommented, make sure they are defined earlier (cdef etc)
                     f1Au = ftab1[0, i1]
-                    # f1Auxi = fp(i1, xi, x1u1, x1ur1, x2u1, x2ur1)
+                    # f1Au_xi = fp(i1, xi, x1u1, x1ur1, x2u1, x2ur1)
                     f1Av = ftab1[1, i1]
-                    # f1Avxi = fp(i1, xi, x1v1, x1vr1, x2v1, x2vr1)
+                    # f1Av_xi = fp(i1, xi, x1v1, x1vr1, x2v1, x2vr1)
                     f1Aw = ftab1[2, i1]
-                    f1Awxi = ftab1[3, i1]
-                    # f1Awxixi = fpp(i1, xi, x1w1, x1wr1, x2w1, x2wr1)
+                    f1Aw_xi = ftab1[3, i1]
+                    # f1Aw_xixi = fpp(i1, xi, x1w1, x1wr1, x2w1, x2wr1)
                     
                     for k1 in range(m1):
                         f1Bu = ftab1[0, k1]
-                        # f1Buxi = fp(k1, xi, x1u1, x1ur1, x2u1, x2ur1)
+                        # f1Bu_xi = fp(k1, xi, x1u1, x1ur1, x2u1, x2ur1)
                         f1Bv = ftab1[1, k1]
-                        # f1Bvxi = fp(k1, xi, x1v1, x1vr1, x2v1, x2vr1)
+                        # f1Bv_xi = fp(k1, xi, x1v1, x1vr1, x2v1, x2vr1)
                         f1Bw = ftab1[2, k1]
-                        f1Bwxi = ftab1[3, k1]
-                        # f1Bwxixi = fpp(k1, xi, x1w1, x1wr1, x2w1, x2wr1)
+                        f1Bw_xi = ftab1[3, k1]
+                        # f1Bw_xixi = fpp(k1, xi, x1w1, x1wr1, x2w1, x2wr1)
                         
                         for j1 in range(n1): 
                             g1Au = gtab1[0, j1]
-                            # g1Aueta = fp(j1, eta, y1u1, y1ur1, y2u1, y2ur1)
+                            # g1Au_eta = fp(j1, eta, y1u1, y1ur1, y2u1, y2ur1)
                             g1Av = gtab1[1, j1]
-                            # g1Aveta = fp(j1, eta, y1v1, y1vr1, y2v1 y2vr1)
+                            # g1Av_eta = fp(j1, eta, y1v1, y1vr1, y2v1 y2vr1)
                             g1Aw = gtab1[2, j1]
-                            g1Aweta = gtab1[3, j1]
-                            # g1Awetaeta = fpp(j1, eta, y1w1, y1wr1, y2w1, y2wr1)
+                            g1Aw_eta = gtab1[3, j1]
+                            # g1Aw_etaeta = fpp(j1, eta, y1w1, y1wr1, y2w1, y2wr1)
                                     
                             for l1 in range(n1):
                                 g1Bu = gtab1[0, l1]
-                                # g1Bueta = fp(l1, eta, y1u1, y1ur1, y2u1, y2ur1)
+                                # g1Bu_eta = fp(l1, eta, y1u1, y1ur1, y2u1, y2ur1)
                                 g1Bv = gtab1[1, l1]
-                                # g1Bveta = fp(l1, eta, y1v1, y1vr1, y2v1, y2vr1)
+                                # g1Bv_eta = fp(l1, eta, y1v1, y1vr1, y2v1, y2vr1)
                                 g1Bw = gtab1[2, l1]
-                                g1Bweta = gtab1[3, l1]
-                                # g1Bwetaeta = fpp(l1, eta, y1w1, y1wr1, y2w1, y2wr1)
+                                g1Bw_eta = gtab1[3, l1]
+                                # g1Bw_etaeta = fpp(l1, eta, y1w1, y1wr1, y2w1, y2wr1)
         
         
                                 row = row0 + DOF*(j1*m1 + i1)
@@ -301,7 +301,7 @@ def fkCSB11_dmg(double dt, object p1, int size, int row0, int col0,
                                 c += 1
                                 kCSB11r[c] = row+0
                                 kCSB11c[c] = col+2
-                                kCSB11v[c] += weight*0.5*b1*dt*f1Au*f1Bwxi*g1Au*g1Bw*kt
+                                kCSB11v[c] += weight*0.5*b1*dt*f1Au*f1Bw_xi*g1Au*g1Bw*kt
                                 c += 1
                                 kCSB11r[c] = row+1
                                 kCSB11c[c] = col+1
@@ -309,19 +309,19 @@ def fkCSB11_dmg(double dt, object p1, int size, int row0, int col0,
                                 c += 1
                                 kCSB11r[c] = row+1
                                 kCSB11c[c] = col+2
-                                kCSB11v[c] += weight*0.5*a1*cvt*dt*f1Av*f1Bw*g1Av*g1Bweta*kt
+                                kCSB11v[c] += weight*0.5*a1*cvt*dt*f1Av*f1Bw*g1Av*g1Bw_eta*kt
                                 c += 1
                                 kCSB11r[c] = row+2
                                 kCSB11c[c] = col+0
-                                kCSB11v[c] += weight*0.5*b1*dt*f1Awxi*f1Bu*g1Aw*g1Bu*kt
+                                kCSB11v[c] += weight*0.5*b1*dt*f1Aw_xi*f1Bu*g1Aw*g1Bu*kt
                                 c += 1
                                 kCSB11r[c] = row+2
                                 kCSB11c[c] = col+1
-                                kCSB11v[c] += weight*0.5*a1*cvt*dt*f1Aw*f1Bv*g1Aweta*g1Bv*kt
+                                kCSB11v[c] += weight*0.5*a1*cvt*dt*f1Aw*f1Bv*g1Aw_eta*g1Bv*kt
                                 c += 1
                                 kCSB11r[c] = row+2
                                 kCSB11c[c] = col+2
-                                kCSB11v[c] += weight*(0.25*a1*b1*kt*(f1Aw*f1Bw*g1Aw*g1Bw + 4*(dt*dt)*f1Aw*f1Bw*g1Aweta*g1Bweta/(b1*b1) + 4*(dt*dt)*f1Awxi*f1Bwxi*g1Aw*g1Bw/(a1*a1)))
+                                kCSB11v[c] += weight*(0.25*a1*b1*kt*(f1Aw*f1Bw*g1Aw*g1Bw + 4*(dt*dt)*f1Aw*f1Bw*g1Aw_eta*g1Bw_eta/(b1*b1) + 4*(dt*dt)*f1Aw_xi*f1Bw_xi*g1Aw*g1Bw/(a1*a1)))
 
     kCSB11 = coo_matrix((kCSB11v, (kCSB11r, kCSB11c)), shape=(size, size))
     # Builds a matrix of size = size x size (so complete size of global MD) and populates it with the data in ..v 
@@ -423,8 +423,8 @@ def fkCSB12_dmg(double dt, double db, object p1, object p2, int size, int row0, 
     cdef double [:] kCSB12v
     cdef double [:] weights_xi, weights_eta, xis, etas
 
-    cdef double f1Au, f2Bu, f1Av, f2Bv, f1Aw, f2Bw, f1Awxi, f2Bwxi
-    cdef double g1Au, g2Bu, g1Av, g2Bv, g1Aw, g2Bw, g1Aweta, g2Bweta
+    cdef double f1Au, f2Bu, f1Av, f2Bv, f1Aw, f2Bw, f1Aw_xi, f2Bw_xi
+    cdef double g1Au, g2Bu, g1Av, g2Bv, g1Aw, g2Bw, g1Aw_eta, g2Bw_eta
     cdef double kt
     cdef double cvt = 1. - dt*rinv1
     cdef double cvb = 1. + db*rinv2
@@ -510,39 +510,39 @@ def fkCSB12_dmg(double dt, double db, object p1, object p2, int size, int row0, 
 
                 for i1 in range(m1):
                     f1Au = ftab1[0, i1]
-                    # f1Auxi = fp(i1, xi, x1u1, x1ur1, x2u1, x2ur1)
+                    # f1Au_xi = fp(i1, xi, x1u1, x1ur1, x2u1, x2ur1)
                     f1Av = ftab1[1, i1]
-                    # f1Avxi = fp(i1, xi, x1v1, x1vr1, x2v1, x2vr1)
+                    # f1Av_xi = fp(i1, xi, x1v1, x1vr1, x2v1, x2vr1)
                     f1Aw = ftab1[2, i1]
-                    f1Awxi = ftab1[3, i1]
-                    # f1Awxixi = fpp(i1, xi, x1w1, x1wr1, x2w1, x2wr1)
+                    f1Aw_xi = ftab1[3, i1]
+                    # f1Aw_xixi = fpp(i1, xi, x1w1, x1wr1, x2w1, x2wr1)
                     
                     for k2 in range(m2):
                         f2Bu = ftab2[0, k2]
-                        # f2Buxi = fp(k2, xi, x1u2, x1ur2, x2u2, x2ur2)
+                        # f2Bu_xi = fp(k2, xi, x1u2, x1ur2, x2u2, x2ur2)
                         f2Bv = ftab2[1, k2]
-                        # f2Bvxi = fp(k2, xi, x1v2, x1vr2, x2v2, x2vr2)
+                        # f2Bv_xi = fp(k2, xi, x1v2, x1vr2, x2v2, x2vr2)
                         f2Bw = ftab2[2, k2]
-                        f2Bwxi = ftab2[3, k2]
-                        # f2Bwxixi = fpp(k2, xi, x1w2, x1wr2, x2w2, x2wr2)
+                        f2Bw_xi = ftab2[3, k2]
+                        # f2Bw_xixi = fpp(k2, xi, x1w2, x1wr2, x2w2, x2wr2)
                         
                         for j1 in range(n1):
                             g1Au = gtab1[0, j1]
-                            # g1Aueta = fp(j1, eta, y1u1, y1ur1, y1u1, y1ur1)
+                            # g1Au_eta = fp(j1, eta, y1u1, y1ur1, y1u1, y1ur1)
                             g1Av = gtab1[1, j1]
-                            # g1Aveta = fp(j1, eta, y1v1, y1vr1, y1v1, y1vr1)
+                            # g1Av_eta = fp(j1, eta, y1v1, y1vr1, y1v1, y1vr1)
                             g1Aw = gtab1[2, j1]
-                            g1Aweta = gtab1[3, j1]
-                            # g1Awetaeta = fpp(j1, eta, y1w1, y1wr1, y1w1, y1wr1)
+                            g1Aw_eta = gtab1[3, j1]
+                            # g1Aw_etaeta = fpp(j1, eta, y1w1, y1wr1, y1w1, y1wr1)
                                     
                             for l2 in range(n2):
                                 g2Bu = gtab2[0, l2]
-                                # g2Bueta = fp(l2, eta, y1u2, y1ur2, y2u2, y2ur2)
+                                # g2Bu_eta = fp(l2, eta, y1u2, y1ur2, y2u2, y2ur2)
                                 g2Bv = gtab2[1, l2]
-                                # g2Bveta = fp(l2, eta, y1v2, y1vr2, y2v2, y2vr2)
+                                # g2Bv_eta = fp(l2, eta, y1v2, y1vr2, y2v2, y2vr2)
                                 g2Bw = gtab2[2, l2]
-                                g2Bweta = gtab2[3, l2]
-                                # g2Bwetaeta = fpp(l2, eta, y1w2, y1wr2, y2w2, y2wr2)
+                                g2Bw_eta = gtab2[3, l2]
+                                # g2Bw_etaeta = fpp(l2, eta, y1w2, y1wr2, y2w2, y2wr2)
         
         
                                 row = row0 + DOF*(j1*m1 + i1)
@@ -559,7 +559,7 @@ def fkCSB12_dmg(double dt, double db, object p1, object p2, int size, int row0, 
                                 c += 1
                                 kCSB12r[c] = row+0
                                 kCSB12c[c] = col+2
-                                kCSB12v[c] += weight*0.5*b1*db*f1Au*f2Bwxi*g1Au*g2Bw*kt
+                                kCSB12v[c] += weight*0.5*b1*db*f1Au*f2Bw_xi*g1Au*g2Bw*kt
                                 c += 1
                                 kCSB12r[c] = row+1
                                 kCSB12c[c] = col+1
@@ -567,19 +567,19 @@ def fkCSB12_dmg(double dt, double db, object p1, object p2, int size, int row0, 
                                 c += 1
                                 kCSB12r[c] = row+1
                                 kCSB12c[c] = col+2
-                                kCSB12v[c] += weight*0.5*a1*cvt*db*f1Av*f2Bw*g1Av*g2Bweta*kt
+                                kCSB12v[c] += weight*0.5*a1*cvt*db*f1Av*f2Bw*g1Av*g2Bw_eta*kt
                                 c += 1
                                 kCSB12r[c] = row+2
                                 kCSB12c[c] = col+0
-                                kCSB12v[c] += -weight*0.5*b1*dt*f1Awxi*f2Bu*g1Aw*g2Bu*kt
+                                kCSB12v[c] += -weight*0.5*b1*dt*f1Aw_xi*f2Bu*g1Aw*g2Bu*kt
                                 c += 1
                                 kCSB12r[c] = row+2
                                 kCSB12c[c] = col+1
-                                kCSB12v[c] += -weight*0.5*a1*cvb*dt*f1Aw*f2Bv*g1Aweta*g2Bv*kt
+                                kCSB12v[c] += -weight*0.5*a1*cvb*dt*f1Aw*f2Bv*g1Aw_eta*g2Bv*kt
                                 c += 1
                                 kCSB12r[c] = row+2
                                 kCSB12c[c] = col+2
-                                kCSB12v[c] += weight*(0.25*a1*b1*kt*(-f1Aw*f2Bw*g1Aw*g2Bw + 4*dt*db*f1Aw*f2Bw*g1Aweta*g2Bweta/(b1*b1) + 4*dt*db*f1Awxi*f2Bwxi*g1Aw*g2Bw/(a1*a1)))
+                                kCSB12v[c] += weight*(0.25*a1*b1*kt*(-f1Aw*f2Bw*g1Aw*g2Bw + 4*dt*db*f1Aw*f2Bw*g1Aw_eta*g2Bw_eta/(b1*b1) + 4*dt*db*f1Aw_xi*f2Bw_xi*g1Aw*g2Bw/(a1*a1)))
 
     kCSB12 = coo_matrix((kCSB12v, (kCSB12r, kCSB12c)), shape=(size, size))
 
@@ -664,8 +664,8 @@ def fkCSB22_dmg(double db, object p1, object p2, int size, int row0, int col0,
     cdef double [:] kCSB22v
     cdef double [:] weights_xi, weights_eta, xis, etas
 
-    cdef double f2Au, f2Bu, f2Av, f2Bv, f2Aw, f2Bw, f2Awxi, f2Bwxi
-    cdef double g2Au, g2Bu, g2Av, g2Bv, g2Aw, g2Bw, g2Aweta, g2Bweta
+    cdef double f2Au, f2Bu, f2Av, f2Bv, f2Aw, f2Bw, f2Aw_xi, f2Bw_xi
+    cdef double g2Au, g2Bu, g2Av, g2Bv, g2Aw, g2Bw, g2Aw_eta, g2Bw_eta
     cdef double kt
     cdef double cvb = 1. + db*rinv2
 
@@ -728,39 +728,39 @@ def fkCSB22_dmg(double db, object p1, object p2, int size, int row0, int col0,
 
                 for i2 in range(m2):
                     f2Au = ftab2[0, i2]
-                    # f2Auxi = fp(i2, xi, x1u2, x1ur2, x2u2, x2ur2)
+                    # f2Au_xi = fp(i2, xi, x1u2, x1ur2, x2u2, x2ur2)
                     f2Av = ftab2[1, i2]
-                    # f2Avxi = fp(i2, xi, x1v2, x1vr2, x2v2, x2vr2)
+                    # f2Av_xi = fp(i2, xi, x1v2, x1vr2, x2v2, x2vr2)
                     f2Aw = ftab2[2, i2]
-                    f2Awxi = ftab2[3, i2]
-                    # f2Awxixi = fpp(i2, xi, x1w2, x1wr2, x2w2, x2wr2)
+                    f2Aw_xi = ftab2[3, i2]
+                    # f2Aw_xixi = fpp(i2, xi, x1w2, x1wr2, x2w2, x2wr2)
                     
                     for k2 in range(m2):
                         f2Bu = ftab2[0, k2]
-                        # f2Buxi = fp(k2, xi, x1u2, x1ur2, x2u2, x2ur2)
+                        # f2Bu_xi = fp(k2, xi, x1u2, x1ur2, x2u2, x2ur2)
                         f2Bv = ftab2[1, k2]
-                        # f2Bvxi = fp(k2, xi, x1v2, x1vr2, x2v2, x2vr2)
+                        # f2Bv_xi = fp(k2, xi, x1v2, x1vr2, x2v2, x2vr2)
                         f2Bw = ftab2[2, k2]
-                        f2Bwxi = ftab2[3, k2]
-                        # f2Bwxixi = fpp(k2, xi, x1w2, x1wr2, x2w2, x2wr2)
+                        f2Bw_xi = ftab2[3, k2]
+                        # f2Bw_xixi = fpp(k2, xi, x1w2, x1wr2, x2w2, x2wr2)
                         
                         for j2 in range(n2):
                             g2Au = gtab2[0, j2]
-                            # g2Aueta = fp(j2, eta, y1u2, y1ur2, y2u2, y2ur2)
+                            # g2Au_eta = fp(j2, eta, y1u2, y1ur2, y2u2, y2ur2)
                             g2Av = gtab2[1, j2]
-                            # g2Aveta = fp(j2, eta, y1v2, y1vr2, y2v2, y2vr2)
+                            # g2Av_eta = fp(j2, eta, y1v2, y1vr2, y2v2, y2vr2)
                             g2Aw = gtab2[2, j2]
-                            g2Aweta = gtab2[3, j2]
-                            # g2Awetaeta = fpp(j2, eta, y1w2, y1wr2, y2w2, y2wr2)
+                            g2Aw_eta = gtab2[3, j2]
+                            # g2Aw_etaeta = fpp(j2, eta, y1w2, y1wr2, y2w2, y2wr2)
                                     
                             for l2 in range(n2):
                                 g2Bu = gtab2[0, l2]
-                                # g2Bueta = fp(l2, eta, y1u2, y1ur2, y2u2, y2ur2)
+                                # g2Bu_eta = fp(l2, eta, y1u2, y1ur2, y2u2, y2ur2)
                                 g2Bv = gtab2[1, l2]
-                                # g2Bveta = fp(l2, eta, y1v2, y1vr2, y2v2, y2vr2)
+                                # g2Bv_eta = fp(l2, eta, y1v2, y1vr2, y2v2, y2vr2)
                                 g2Bw = gtab2[2, l2]
-                                g2Bweta = gtab2[3, l2]
-                                # g2Bwetaeta = fpp(l2, eta, y1w2, y1wr2, y2w2, y2wr2)
+                                g2Bw_eta = gtab2[3, l2]
+                                # g2Bw_etaeta = fpp(l2, eta, y1w2, y1wr2, y2w2, y2wr2)
                                 
                                 
                                 row = row0 + DOF*(j2*m2 + i2)
@@ -777,7 +777,7 @@ def fkCSB22_dmg(double db, object p1, object p2, int size, int row0, int col0,
                                 c += 1
                                 kCSB22r[c] = row+0
                                 kCSB22c[c] = col+2
-                                kCSB22v[c] += -weight*0.5*b1*db*f2Au*f2Bwxi*g2Au*g2Bw*kt
+                                kCSB22v[c] += -weight*0.5*b1*db*f2Au*f2Bw_xi*g2Au*g2Bw*kt
                                 c += 1
                                 kCSB22r[c] = row+1
                                 kCSB22c[c] = col+1
@@ -785,19 +785,19 @@ def fkCSB22_dmg(double db, object p1, object p2, int size, int row0, int col0,
                                 c += 1
                                 kCSB22r[c] = row+1
                                 kCSB22c[c] = col+2
-                                kCSB22v[c] += -weight*0.5*a1*cvb*db*f2Av*f2Bw*g2Av*g2Bweta*kt
+                                kCSB22v[c] += -weight*0.5*a1*cvb*db*f2Av*f2Bw*g2Av*g2Bw_eta*kt
                                 c += 1
                                 kCSB22r[c] = row+2
                                 kCSB22c[c] = col+0
-                                kCSB22v[c] += -weight*0.5*b1*db*f2Awxi*f2Bu*g2Aw*g2Bu*kt
+                                kCSB22v[c] += -weight*0.5*b1*db*f2Aw_xi*f2Bu*g2Aw*g2Bu*kt
                                 c += 1
                                 kCSB22r[c] = row+2
                                 kCSB22c[c] = col+1
-                                kCSB22v[c] += -weight*0.5*a1*cvb*db*f2Aw*f2Bv*g2Aweta*g2Bv*kt
+                                kCSB22v[c] += -weight*0.5*a1*cvb*db*f2Aw*f2Bv*g2Aw_eta*g2Bv*kt
                                 c += 1
                                 kCSB22r[c] = row+2
                                 kCSB22c[c] = col+2
-                                kCSB22v[c] += weight*(0.25*a1*b1*kt*(f2Aw*f2Bw*g2Aw*g2Bw + 4*(db*db)*f2Aw*f2Bw*g2Aweta*g2Bweta/(b1*b1) + 4*(db*db)*f2Awxi*f2Bwxi*g2Aw*g2Bw/(a1*a1)))
+                                kCSB22v[c] += weight*(0.25*a1*b1*kt*(f2Aw*f2Bw*g2Aw*g2Bw + 4*(db*db)*f2Aw*f2Bw*g2Aw_eta*g2Bw_eta/(b1*b1) + 4*(db*db)*f2Aw_xi*f2Bw_xi*g2Aw*g2Bw/(a1*a1)))
 
     kCSB22 = coo_matrix((kCSB22v, (kCSB22r, kCSB22c)), shape=(size, size))
 

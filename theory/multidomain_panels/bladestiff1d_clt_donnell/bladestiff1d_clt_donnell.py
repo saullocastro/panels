@@ -49,8 +49,8 @@ from sympy import Matrix as M, var, collect, simplify
 var('a, b, h, hb, hf, bf, df, rho')
 var('E1, E2, E3, S1, S2, F1, Jxx, Fx')
 
-var('fAu, gAu, fAv, gAv, fAw, gAw, fAuxi, fAvxi, fAwxi, gAueta, gAveta, gAweta, fAwxixi, gAwetaeta')
-var('fBu, gBu, fBv, gBv, fBw, gBw, fBuxi, fBvxi, fBwxi, gBueta, gBveta, gBweta, fBwxixi, gBwetaeta')
+var('fAu, gAu, fAv, gAv, fAw, gAw, fAu_xi, fAv_xi, fAw_xi, gAu_eta, gAv_eta, gAw_eta, fAw_xixi, gAw_etaeta')
+var('fBu, gBu, fBv, gBv, fBw, gBw, fBu_xi, fBv_xi, fBw_xi, gBu_eta, gBv_eta, gBw_eta, fBw_xixi, gBw_etaeta')
 
 
 def piece_wise_simplify(m, vars):
@@ -63,33 +63,33 @@ suA = M([[fAu*gAu, 0, 0]])
 svA = M([[0, fAv*gAv, 0]])
 swA = M([[0, 0, fAw*gAw]])
 
-suAxi = M([[fAuxi*gAu, 0, 0]])
-svAxi = M([[0, fAvxi*gAv, 0]])
-swAxi = M([[0, 0, fAwxi*gAw]])
+suA_xi = M([[fAu_xi*gAu, 0, 0]])
+svA_xi = M([[0, fAv_xi*gAv, 0]])
+swA_xi = M([[0, 0, fAw_xi*gAw]])
 
-suAeta = M([[fAu*gAueta, 0, 0]])
-svAeta = M([[0, fAv*gAveta, 0]])
-swAeta = M([[0, 0, fAw*gAweta]])
+suA_eta = M([[fAu*gAu_eta, 0, 0]])
+svA_eta = M([[0, fAv*gAv_eta, 0]])
+swA_eta = M([[0, 0, fAw*gAw_eta]])
 
-swAxixi = M([[0, 0, fAwxixi*gAw]])
-swAxieta = M([[0, 0, fAwxi*gAweta]])
-swAetaeta = M([[0, 0, fAw*gAwetaeta]])
+swA_xixi = M([[0, 0, fAw_xixi*gAw]])
+swA_xieta = M([[0, 0, fAw_xi*gAw_eta]])
+swA_etaeta = M([[0, 0, fAw*gAw_etaeta]])
 
 suB = M([[fBu*gBu, 0, 0]])
 svB = M([[0, fBv*gBv, 0]])
 swB = M([[0, 0, fBw*gBw]])
 
-suBxi = M([[fBuxi*gBu, 0, 0]])
-svBxi = M([[0, fBvxi*gBv, 0]])
-swBxi = M([[0, 0, fBwxi*gBw]])
+suB_xi = M([[fBu_xi*gBu, 0, 0]])
+svB_xi = M([[0, fBv_xi*gBv, 0]])
+swB_xi = M([[0, 0, fBw_xi*gBw]])
 
-suBeta = M([[fBu*gBueta, 0, 0]])
-svBeta = M([[0, fBv*gBveta, 0]])
-swBeta = M([[0, 0, fBw*gBweta]])
+suB_eta = M([[fBu*gBu_eta, 0, 0]])
+svB_eta = M([[0, fBv*gBv_eta, 0]])
+swB_eta = M([[0, 0, fBw*gBw_eta]])
 
-swBxixi = M([[0, 0, fBwxixi*gBw]])
-swBxieta = M([[0, 0, fBwxi*gBweta]])
-swBetaeta = M([[0, 0, fBw*gBwetaeta]])
+swB_xixi = M([[0, 0, fBw_xixi*gBw]])
+swB_xieta = M([[0, 0, fBw_xi*gBw_eta]])
+swB_etaeta = M([[0, 0, fBw*gBw_etaeta]])
 
 # Constitutive stiffness matrix of the flange
 
@@ -99,23 +99,23 @@ ksf = M([[     E1,      E2,      E2,     -df*E1,      S1],
          [ -df*E1,  -df*E2,  -df*E2, F1 + df**2*E1, -df*S1],
          [     S1,      S2,      S2,     -df*S1,     Jxx]])
 
-gAsf = M([(2/a)*suAxi,
-          (2/a)*swAxi,
-         -(2/a)*swAxi,
-         -(2/a)*(2/a)*swAxixi,
-         -(2/a)*(2/b)*swAxieta])
-gBsf = M([(2/a)*suBxi,
-          (2/a)*swBxi,
-         -(2/a)*swBxi,
-         -(2/a)*(2/a)*swBxixi,
-         -(2/a)*(2/b)*swBxieta])
+gAsf = M([(2/a)*suA_xi,
+          (2/a)*swA_xi,
+         -(2/a)*swA_xi,
+         -(2/a)*(2/a)*swA_xixi,
+         -(2/a)*(2/b)*swA_xieta])
+gBsf = M([(2/a)*suB_xi,
+          (2/a)*swB_xi,
+         -(2/a)*swB_xi,
+         -(2/a)*(2/a)*swB_xixi,
+         -(2/a)*(2/b)*swB_xieta])
 
 k0f = (a/2)*bf*gAsf.T*ksf*gBsf
 
 # Geometric stiffness matrix of the flange, due to the axial force Fx
 
-GA = M([(2/a)*swAxi])
-GB = M([(2/a)*swBxi])
+GA = M([(2/a)*swA_xi])
+GB = M([(2/a)*swB_xi])
 
 kG0f = (a/2)*GA.T*M([[Fx]])*GB
 
@@ -128,8 +128,8 @@ msf = M([[     1,      0, 0,   -df,      0],
          [   -df,      0, 0, kmf44,      0],
          [     0,    -df, 0,     0,  kmf55]])
 
-gA5 = M([suA, svA, swA, -(2/a)*swAxi, -(2/b)*swAeta])
-gB5 = M([suB, svB, swB, -(2/a)*swBxi, -(2/b)*swBeta])
+gA5 = M([suA, svA, swA, -(2/a)*swA_xi, -(2/b)*swA_eta])
+gB5 = M([suB, svB, swB, -(2/a)*swB_xi, -(2/b)*swB_eta])
 
 kMf = (a/2)*hf*bf*rho*gA5.T*msf*gB5
 

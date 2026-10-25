@@ -262,8 +262,8 @@ cdef void read_bcs(object s, double *bcs):
         bcs[k*8 + 7] = getattr(s, 'y2' + field + 'r')
 
 
-cdef void basis(double *bcs, double xi, double eta, double *f, double *fxi,
-        double *fxixi, double *g, double *geta, double *getaeta) noexcept nogil:
+cdef void basis(double *bcs, double xi, double eta, double *f, double *f_xi,
+        double *f_xixi, double *g, double *g_eta, double *g_etaeta) noexcept nogil:
     # values and derivatives of the approximation functions of all the fields
     # at (xi, eta), stored as f[field*NMAX + i] and g[field*NMAX + j]
     cdef int k
@@ -271,33 +271,34 @@ cdef void basis(double *bcs, double xi, double eta, double *f, double *fxi,
     for k in range(NFIELDS):
         bc = &bcs[k*8]
         vec_f(&f[k*NMAX], xi, bc[0], bc[1], bc[2], bc[3])
-        vec_fp(&fxi[k*NMAX], xi, bc[0], bc[1], bc[2], bc[3])
-        vec_fpp(&fxixi[k*NMAX], xi, bc[0], bc[1], bc[2], bc[3])
+        vec_fp(&f_xi[k*NMAX], xi, bc[0], bc[1], bc[2], bc[3])
+        vec_fpp(&f_xixi[k*NMAX], xi, bc[0], bc[1], bc[2], bc[3])
         vec_f(&g[k*NMAX], eta, bc[4], bc[5], bc[6], bc[7])
-        vec_fp(&geta[k*NMAX], eta, bc[4], bc[5], bc[6], bc[7])
-        vec_fpp(&getaeta[k*NMAX], eta, bc[4], bc[5], bc[6], bc[7])
+        vec_fp(&g_eta[k*NMAX], eta, bc[4], bc[5], bc[6], bc[7])
+        vec_fpp(&g_etaeta[k*NMAX], eta, bc[4], bc[5], bc[6], bc[7])
 
 
 cdef void derivatives(double *c, int m, int n, double a, double b,
-        double *f, double *fxi, double *fxixi, double *g, double *geta,
-        double *getaeta, double *val, double *dx, double *dy, double *dxx,
-        double *dyy, double *dxy) noexcept nogil:
+        double *f, double *f_xi, double *f_xixi, double *g, double *g_eta,
+        double *g_etaeta, double *val, double *val_x, double *val_y,
+        double *val_xx, double *val_yy, double *val_xy) noexcept nogil:
     # values and physical derivatives of each field at the point
     cdef int i, j, k, col
     cdef double ck
     for k in range(NFIELDS):
-        val[k] = 0; dx[k] = 0; dy[k] = 0; dxx[k] = 0; dyy[k] = 0; dxy[k] = 0
+        val[k] = 0; val_x[k] = 0; val_y[k] = 0
+        val_xx[k] = 0; val_yy[k] = 0; val_xy[k] = 0
     for j in range(n):
         for i in range(m):
             col = DOF*(j*m + i)
             for k in range(NFIELDS):
                 ck = c[col+k]
                 val[k] += ck*f[k*NMAX+i]*g[k*NMAX+j]
-                dx[k] += ck*(2/a)*fxi[k*NMAX+i]*g[k*NMAX+j]
-                dy[k] += ck*(2/b)*f[k*NMAX+i]*geta[k*NMAX+j]
-                dxx[k] += ck*(2/a)*(2/a)*fxixi[k*NMAX+i]*g[k*NMAX+j]
-                dyy[k] += ck*(2/b)*(2/b)*f[k*NMAX+i]*getaeta[k*NMAX+j]
-                dxy[k] += ck*(2/a)*(2/b)*fxi[k*NMAX+i]*geta[k*NMAX+j]
+                val_x[k] += ck*(2/a)*f_xi[k*NMAX+i]*g[k*NMAX+j]
+                val_y[k] += ck*(2/b)*f[k*NMAX+i]*g_eta[k*NMAX+j]
+                val_xx[k] += ck*(2/a)*(2/a)*f_xixi[k*NMAX+i]*g[k*NMAX+j]
+                val_yy[k] += ck*(2/b)*(2/b)*f[k*NMAX+i]*g_etaeta[k*NMAX+j]
+                val_xy[k] += ck*(2/a)*(2/b)*f_xi[k*NMAX+i]*g_eta[k*NMAX+j]
 
 
 def fuvw(double [::1] c, object s, double [::1] xs, double [::1] ys,
@@ -336,17 +337,17 @@ def fuvw(double [::1] c, object s, double [::1] xs, double [::1] ys,
     cdef double bcs[40]
     cdef double [:, ::1] out
     cdef double *f
-    cdef double *fxi
-    cdef double *fxixi
+    cdef double *f_xi
+    cdef double *f_xixi
     cdef double *g
-    cdef double *geta
-    cdef double *getaeta
+    cdef double *g_eta
+    cdef double *g_etaeta
     cdef double val[5]
-    cdef double dx[5]
-    cdef double dy[5]
-    cdef double dxx[5]
-    cdef double dyy[5]
-    cdef double dxy[5]
+    cdef double val_x[5]
+    cdef double val_y[5]
+    cdef double val_xx[5]
+    cdef double val_yy[5]
+    cdef double val_xy[5]
     a = s.a
     b = s.b
     m = s.m
@@ -357,17 +358,17 @@ def fuvw(double [::1] c, object s, double [::1] xs, double [::1] ys,
     size = xs.shape[0]
     out = np.zeros((NFIELDS, size), dtype=DOUBLE)
     f = <double *>malloc(6*NFIELDS*NMAX*sizeof(double))
-    fxi = &f[NFIELDS*NMAX]
-    fxixi = &f[2*NFIELDS*NMAX]
+    f_xi = &f[NFIELDS*NMAX]
+    f_xixi = &f[2*NFIELDS*NMAX]
     g = &f[3*NFIELDS*NMAX]
-    geta = &f[4*NFIELDS*NMAX]
-    getaeta = &f[5*NFIELDS*NMAX]
+    g_eta = &f[4*NFIELDS*NMAX]
+    g_etaeta = &f[5*NFIELDS*NMAX]
     with nogil:
         for pti in range(size):
-            basis(bcs, 2*xs[pti]/a - 1., 2*ys[pti]/b - 1., f, fxi, fxixi, g,
-                  geta, getaeta)
-            derivatives(&c[0], m, n, a, b, f, fxi, fxixi, g, geta, getaeta,
-                        val, dx, dy, dxx, dyy, dxy)
+            basis(bcs, 2*xs[pti]/a - 1., 2*ys[pti]/b - 1., f, f_xi, f_xixi, g,
+                  g_eta, g_etaeta)
+            derivatives(&c[0], m, n, a, b, f, f_xi, f_xixi, g, g_eta, g_etaeta,
+                        val, val_x, val_y, val_xx, val_yy, val_xy)
             for k in range(NFIELDS):
                 out[k, pti] = val[k]
             out[4, pti] += sr*val[1]
@@ -421,17 +422,17 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys,
     cdef double bcs[40]
     cdef double [:, ::1] out
     cdef double *f
-    cdef double *fxi
-    cdef double *fxixi
+    cdef double *f_xi
+    cdef double *f_xixi
     cdef double *g
-    cdef double *geta
-    cdef double *getaeta
+    cdef double *g_eta
+    cdef double *g_etaeta
     cdef double val[5]
-    cdef double dx[5]
-    cdef double dy[5]
-    cdef double dxx[5]
-    cdef double dyy[5]
-    cdef double dxy[5]
+    cdef double val_x[5]
+    cdef double val_y[5]
+    cdef double val_xx[5]
+    cdef double val_yy[5]
+    cdef double val_xy[5]
     cdef double gyz, gxz
     a = s.a
     b = s.b
@@ -449,33 +450,34 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys,
     size = xs.shape[0]
     out = np.zeros((13 if tsdt == 1 else 8, size), dtype=DOUBLE)
     f = <double *>malloc(6*NFIELDS*NMAX*sizeof(double))
-    fxi = &f[NFIELDS*NMAX]
-    fxixi = &f[2*NFIELDS*NMAX]
+    f_xi = &f[NFIELDS*NMAX]
+    f_xixi = &f[2*NFIELDS*NMAX]
     g = &f[3*NFIELDS*NMAX]
-    geta = &f[4*NFIELDS*NMAX]
-    getaeta = &f[5*NFIELDS*NMAX]
+    g_eta = &f[4*NFIELDS*NMAX]
+    g_etaeta = &f[5*NFIELDS*NMAX]
     with nogil:
         for pti in range(size):
-            basis(bcs, 2*xs[pti]/a - 1., 2*ys[pti]/b - 1., f, fxi, fxixi, g,
-                  geta, getaeta)
-            derivatives(&c[0], m, n, a, b, f, fxi, fxixi, g, geta, getaeta,
-                        val, dx, dy, dxx, dyy, dxy)
+            basis(bcs, 2*xs[pti]/a - 1., 2*ys[pti]/b - 1., f, f_xi, f_xixi, g,
+                  g_eta, g_etaeta)
+            derivatives(&c[0], m, n, a, b, f, f_xi, f_xixi, g, g_eta, g_etaeta,
+                        val, val_x, val_y, val_xx, val_yy, val_xy)
             # u, v, w, phix, phiy = 0, 1, 2, 3, 4
             # rotations of the von Karman terms, beta_y = w,y - v/r (Sanders)
-            bx = dx[2]
-            by = dy[2] - sr*val[1]
-            out[0, pti] = dx[0] + NLgeom*0.5*bx*bx
-            out[1, pti] = dy[1] + ri*val[2] + NLgeom*0.5*by*by
-            out[2, pti] = dy[0] + dx[1] + NLgeom*bx*by
-            out[3, pti] = dx[3]
-            out[4, pti] = dy[4] + sr*dy[1]
-            out[5, pti] = dy[3] + dx[4] + sr*(1.5*dx[1] - 0.5*dy[0])
-            gyz = val[4] + dy[2]
-            gxz = val[3] + dx[2]
+            bx = val_x[2]
+            by = val_y[2] - sr*val[1]
+            out[0, pti] = val_x[0] + NLgeom*0.5*bx*bx
+            out[1, pti] = val_y[1] + ri*val[2] + NLgeom*0.5*by*by
+            out[2, pti] = val_y[0] + val_x[1] + NLgeom*bx*by
+            out[3, pti] = val_x[3]
+            out[4, pti] = val_y[4] + sr*val_y[1]
+            out[5, pti] = (val_y[3] + val_x[4]
+                           + sr*(1.5*val_x[1] - 0.5*val_y[0]))
+            gyz = val[4] + val_y[2]
+            gxz = val[3] + val_x[2]
             if tsdt == 1:
-                out[6, pti] = -c1*(dx[3] + dxx[2])
-                out[7, pti] = -c1*(dy[4] + dyy[2])
-                out[8, pti] = -c1*(dy[3] + dx[4] + 2*dxy[2])
+                out[6, pti] = -c1*(val_x[3] + val_xx[2])
+                out[7, pti] = -c1*(val_y[4] + val_yy[2])
+                out[8, pti] = -c1*(val_y[3] + val_x[4] + 2*val_xy[2])
                 out[9, pti] = gyz
                 out[10, pti] = gxz
                 out[11, pti] = -3*c1*gyz
@@ -521,11 +523,11 @@ def fg(double[:, ::1] g, double x, double y, object s):
     cdef double a, b, sr
     cdef double bcs[40]
     cdef double *f
-    cdef double *fxi
-    cdef double *fxixi
+    cdef double *f_xi
+    cdef double *f_xixi
     cdef double *gg
-    cdef double *geta
-    cdef double *getaeta
+    cdef double *g_eta
+    cdef double *g_etaeta
     if s.__class__.__name__ != 'Shell':
         raise ValueError('A Shell object must be passed')
     a = s.a
@@ -535,12 +537,12 @@ def fg(double[:, ::1] g, double x, double y, object s):
     sr = rinv(s)*is_sanders(s)
     read_bcs(s, bcs)
     f = <double *>malloc(6*NFIELDS*NMAX*sizeof(double))
-    fxi = &f[NFIELDS*NMAX]
-    fxixi = &f[2*NFIELDS*NMAX]
+    f_xi = &f[NFIELDS*NMAX]
+    f_xixi = &f[2*NFIELDS*NMAX]
     gg = &f[3*NFIELDS*NMAX]
-    geta = &f[4*NFIELDS*NMAX]
-    getaeta = &f[5*NFIELDS*NMAX]
-    basis(bcs, 2*x/a - 1., 2*y/b - 1., f, fxi, fxixi, gg, geta, getaeta)
+    g_eta = &f[4*NFIELDS*NMAX]
+    g_etaeta = &f[5*NFIELDS*NMAX]
+    basis(bcs, 2*x/a - 1., 2*y/b - 1., f, f_xi, f_xixi, gg, g_eta, g_etaeta)
     for j in range(n):
         for i in range(m):
             col = DOF*(j*m + i)

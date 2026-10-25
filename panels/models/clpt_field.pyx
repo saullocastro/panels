@@ -162,12 +162,12 @@ def fuvw(double [::1] c, object s, double [::1] xs, double [::1] ys,
               y1v, y1vr, y2v, y2vr,
               y1w, y1wr, y2w, y2wr)
 
-        cfwx(&c[0], m, n, a, b, &xs_core[pti,0], &ys_core[pti,0],
+        cfw_x(&c[0], m, n, a, b, &xs_core[pti,0], &ys_core[pti,0],
              size_core, &phixs[pti,0],
              x1w, x1wr, x2w, x2wr,
              y1w, y1wr, y2w, y2wr)
 
-        cfwy(&c[0], m, n, a, b, &xs_core[pti,0], &ys_core[pti,0],
+        cfw_y(&c[0], m, n, a, b, &xs_core[pti,0], &ys_core[pti,0],
              size_core, &phiys[pti,0],
              x1w, x1wr, x2w, x2wr,
              y1w, y1wr, y2w, y2wr)
@@ -358,16 +358,16 @@ cdef void cfuvw(double *c, int m, int n, double a, double b, double *xs,
     free(gw)
 
 
-cdef void cfwx(double *c, int m, int n, double a, double b, double *xs,
-        double *ys, int size, double *wxs,
+cdef void cfw_x(double *c, int m, int n, double a, double b, double *xs,
+        double *ys, int size, double *w_xs,
         double x1w, double x1wr, double x2w, double x2wr,
         double y1w, double y1wr, double y2w, double y2wr) noexcept nogil:
     cdef int i, j, col, pti
-    cdef double x, y, wx, xi, eta
-    cdef double *fwxi
+    cdef double x, y, w_x, xi, eta
+    cdef double *fw_xi
     cdef double *gw
 
-    fwxi = <double *>malloc(NMAX * sizeof(double))
+    fw_xi = <double *>malloc(NMAX * sizeof(double))
     gw = <double *>malloc(NMAX * sizeof(double))
 
     for pti in range(size):
@@ -377,33 +377,33 @@ cdef void cfwx(double *c, int m, int n, double a, double b, double *xs,
         xi = 2*x/a - 1.
         eta = 2*y/b - 1.
 
-        vec_fp(fwxi, xi, x1w, x1wr, x2w, x2wr)
+        vec_fp(fw_xi, xi, x1w, x1wr, x2w, x2wr)
         vec_f(gw, eta, y1w, y1wr, y2w, y2wr)
 
-        wx = 0
+        w_x = 0
 
         for j in range(n):
             for i in range(m):
                 col = DOF*(j*m + i)
-                wx += (2/a)*c[col+2]*fwxi[i]*gw[j]
+                w_x += (2/a)*c[col+2]*fw_xi[i]*gw[j]
 
-        wxs[pti] = wx
+        w_xs[pti] = w_x
 
-    free(fwxi)
+    free(fw_xi)
     free(gw)
 
 
-cdef void cfwy(double *c, int m, int n, double a, double b, double *xs,
-        double *ys, int size, double *wys,
+cdef void cfw_y(double *c, int m, int n, double a, double b, double *xs,
+        double *ys, int size, double *w_ys,
         double x1w, double x1wr, double x2w, double x2wr,
         double y1w, double y1wr, double y2w, double y2wr) noexcept nogil:
     cdef int i, j, col, pti
-    cdef double x, y, wy, xi, eta
+    cdef double x, y, w_y, xi, eta
     cdef double *fw
-    cdef double *gweta
+    cdef double *gw_eta
 
     fw = <double *>malloc(NMAX * sizeof(double))
-    gweta = <double *>malloc(NMAX * sizeof(double))
+    gw_eta = <double *>malloc(NMAX * sizeof(double))
 
     for pti in range(size):
         x = xs[pti]
@@ -413,19 +413,19 @@ cdef void cfwy(double *c, int m, int n, double a, double b, double *xs,
         eta = 2*y/b - 1.
 
         vec_f(fw, xi, x1w, x1wr, x2w, x2wr)
-        vec_fp(gweta, eta, y1w, y1wr, y2w, y2wr)
+        vec_fp(gw_eta, eta, y1w, y1wr, y2w, y2wr)
 
-        wy = 0
+        w_y = 0
 
         for j in range(n):
             for i in range(m):
                 col = DOF*(j*m + i)
-                wy += (2/b)*c[col+2]*fw[i]*gweta[j]
+                w_y += (2/b)*c[col+2]*fw[i]*gw_eta[j]
 
-        wys[pti] = wy
+        w_ys[pti] = w_y
 
     free(fw)
-    free(gweta)
+    free(gw_eta)
 
 
 def fg(double[:, ::1] g, double x, double y, object s):
@@ -576,37 +576,37 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
     cdef int flagcyl
 
     cdef double *fu
-    cdef double *fuxi
+    cdef double *fu_xi
     cdef double *fv
-    cdef double *fvxi
+    cdef double *fv_xi
     cdef double *fw
-    cdef double *fwxi
-    cdef double *fwxixi
+    cdef double *fw_xi
+    cdef double *fw_xixi
 
     cdef double *gu
-    cdef double *gueta
+    cdef double *gu_eta
     cdef double *gv
-    cdef double *gveta
+    cdef double *gv_eta
     cdef double *gw
-    cdef double *gweta
-    cdef double *gwetaeta
+    cdef double *gw_eta
+    cdef double *gw_etaeta
 
-    cdef double wxi, weta, v, phix, phiy
+    cdef double w_xi, w_eta, v, phix, phiy
 
     fu = <double *>malloc(NMAX * sizeof(double))
-    fuxi = <double *>malloc(NMAX * sizeof(double))
+    fu_xi = <double *>malloc(NMAX * sizeof(double))
     gu = <double *>malloc(NMAX * sizeof(double))
-    gueta = <double *>malloc(NMAX * sizeof(double))
+    gu_eta = <double *>malloc(NMAX * sizeof(double))
     fv = <double *>malloc(NMAX * sizeof(double))
-    fvxi = <double *>malloc(NMAX * sizeof(double))
+    fv_xi = <double *>malloc(NMAX * sizeof(double))
     gv = <double *>malloc(NMAX * sizeof(double))
-    gveta = <double *>malloc(NMAX * sizeof(double))
+    gv_eta = <double *>malloc(NMAX * sizeof(double))
     fw = <double *>malloc(NMAX * sizeof(double))
-    fwxi = <double *>malloc(NMAX * sizeof(double))
-    fwxixi = <double *>malloc(NMAX * sizeof(double))
+    fw_xi = <double *>malloc(NMAX * sizeof(double))
+    fw_xixi = <double *>malloc(NMAX * sizeof(double))
     gw = <double *>malloc(NMAX * sizeof(double))
-    gweta = <double *>malloc(NMAX * sizeof(double))
-    gwetaeta = <double *>malloc(NMAX * sizeof(double))
+    gw_eta = <double *>malloc(NMAX * sizeof(double))
+    gw_etaeta = <double *>malloc(NMAX * sizeof(double))
 
     if r == 0:
         flagcyl = 0
@@ -623,32 +623,32 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
 
         # u functions at x and y (loop gets it through all points)
         vec_f(fu, xi, x1u, x1ur, x2u, x2ur)
-        vec_fp(fuxi, xi, x1u, x1ur, x2u, x2ur)
+        vec_fp(fu_xi, xi, x1u, x1ur, x2u, x2ur)
         vec_f(gu, eta, y1u, y1ur, y2u, y2ur)
-        vec_fp(gueta, eta, y1u, y1ur, y2u, y2ur)
+        vec_fp(gu_eta, eta, y1u, y1ur, y2u, y2ur)
         # v functions 
         vec_f(fv, xi, x1v, x1vr, x2v, x2vr)
-        vec_fp(fvxi, xi, x1v, x1vr, x2v, x2vr)
+        vec_fp(fv_xi, xi, x1v, x1vr, x2v, x2vr)
         vec_f(gv, eta, y1v, y1vr, y2v, y2vr)
-        vec_fp(gveta, eta, y1v, y1vr, y2v, y2vr)
+        vec_fp(gv_eta, eta, y1v, y1vr, y2v, y2vr)
         # w functions 
         vec_f(fw, xi, x1w, x1wr, x2w, x2wr)
-        vec_fp(fwxi, xi, x1w, x1wr, x2w, x2wr)
-        vec_fpp(fwxixi, xi, x1w, x1wr, x2w, x2wr)
+        vec_fp(fw_xi, xi, x1w, x1wr, x2w, x2wr)
+        vec_fpp(fw_xixi, xi, x1w, x1wr, x2w, x2wr)
         vec_f(gw, eta, y1w, y1wr, y2w, y2wr)
-        vec_fp(gweta, eta, y1w, y1wr, y2w, y2wr)
-        vec_fpp(gwetaeta, eta, y1w, y1wr, y2w, y2wr)
+        vec_fp(gw_eta, eta, y1w, y1wr, y2w, y2wr)
+        vec_fpp(gw_etaeta, eta, y1w, y1wr, y2w, y2wr)
 
-        wxi = 0
-        weta = 0
+        w_xi = 0
+        w_eta = 0
         v = 0
 
         # Sum through all m*n terms
         for j in range(n):
             for i in range(m):
                 col = DOF*(j*m + i)
-                wxi += c[col+2]*fwxi[i]*gw[j]
-                weta += c[col+2]*fw[i]*gweta[j]
+                w_xi += c[col+2]*fw_xi[i]*gw[j]
+                w_eta += c[col+2]*fw[i]*gw_eta[j]
                 v += c[col+1]*fv[i]*gv[j]
                 # +2 to get w (+0 is u, +1 is v)
 
@@ -656,8 +656,8 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
             # Sanders-Koiter kinematics, the non-linear strain is
             # {phix^2/2, phiy^2/2, phix*phiy}, with phix = -w,x and
             # phiy = -w,y + v/r
-            phix = -(2/a)*wxi
-            phiy = -(2/b)*weta + v/r
+            phix = -(2/a)*w_xi
+            phiy = -(2/b)*w_eta + v/r
 
             exx = 0
             eyy = 0
@@ -669,14 +669,14 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
             for j in range(n):
                 for i in range(m):
                     col = DOF*(j*m + i)
-                    exx += c[col+0]*fuxi[i]*gu[j]*(2/a)
-                    eyy += c[col+1]*fv[i]*gveta[j]*(2/b) + 1/r*c[col+2]*fw[i]*gw[j]
-                    gxy += c[col+0]*fu[i]*gueta[j]*(2/b) + c[col+1]*fvxi[i]*gv[j]*(2/a)
-                    kxx += -c[col+2]*fwxixi[i]*gw[j]*4/(a*a)
-                    kyy += -c[col+2]*fw[i]*gwetaeta[j]*4/(b*b) + 1/r*c[col+1]*fv[i]*gveta[j]*(2/b)
-                    kxy += (-2*c[col+2]*fwxi[i]*gweta[j]*4/(a*b)
-                            + 1.5/r*c[col+1]*fvxi[i]*gv[j]*(2/a)
-                            - 0.5/r*c[col+0]*fu[i]*gueta[j]*(2/b))
+                    exx += c[col+0]*fu_xi[i]*gu[j]*(2/a)
+                    eyy += c[col+1]*fv[i]*gv_eta[j]*(2/b) + 1/r*c[col+2]*fw[i]*gw[j]
+                    gxy += c[col+0]*fu[i]*gu_eta[j]*(2/b) + c[col+1]*fv_xi[i]*gv[j]*(2/a)
+                    kxx += -c[col+2]*fw_xixi[i]*gw[j]*4/(a*a)
+                    kyy += -c[col+2]*fw[i]*gw_etaeta[j]*4/(b*b) + 1/r*c[col+1]*fv[i]*gv_eta[j]*(2/b)
+                    kxy += (-2*c[col+2]*fw_xi[i]*gw_eta[j]*4/(a*b)
+                            + 1.5/r*c[col+1]*fv_xi[i]*gv[j]*(2/a)
+                            - 0.5/r*c[col+0]*fu[i]*gu_eta[j]*(2/b))
 
             exx += NLgeom*0.5*phix*phix
             eyy += NLgeom*0.5*phiy*phiy
@@ -700,17 +700,17 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
         for j in range(n):
             for i in range(m):
                 col = DOF*(j*m + i)
-                exx += c[col+0]*fuxi[i]*gu[j]*(2/a) + NLgeom*2/(a*a)*c[col+2]*fwxi[i]*gw[j]*wxi # same as wxi^2
+                exx += c[col+0]*fu_xi[i]*gu[j]*(2/a) + NLgeom*2/(a*a)*c[col+2]*fw_xi[i]*gw[j]*w_xi # same as w_xi^2
                 if flagcyl == 1:
-                    eyy += c[col+1]*fv[i]*gveta[j]*(2/b) + 1/r*c[col+2]*fw[i]*gw[j] + NLgeom*2/(b*b)*c[col+2]*fw[i]*gweta[j]*weta
+                    eyy += c[col+1]*fv[i]*gv_eta[j]*(2/b) + 1/r*c[col+2]*fw[i]*gw[j] + NLgeom*2/(b*b)*c[col+2]*fw[i]*gw_eta[j]*w_eta
                 else:
-                    eyy += c[col+1]*fv[i]*gveta[j]*(2/b) + NLgeom*2/(b*b)*c[col+2]*fw[i]*gweta[j]*weta
-                gxy += c[col+0]*fu[i]*gueta[j]*(2/b) + c[col+1]*fvxi[i]*gv[j]*(2/a) + NLgeom*2/(a*b)*( # same as w,x*w,y
-                                        c[col+2]*fwxi[i]*gw[j]*weta +
-                                        wxi*c[col+2]*fw[i]*gweta[j] )
-                kxx += -c[col+2]*fwxixi[i]*gw[j]*4/(a*a)
-                kyy += -c[col+2]*fw[i]*gwetaeta[j]*4/(b*b)
-                kxy += -2*c[col+2]*fwxi[i]*gweta[j]*4/(a*b)
+                    eyy += c[col+1]*fv[i]*gv_eta[j]*(2/b) + NLgeom*2/(b*b)*c[col+2]*fw[i]*gw_eta[j]*w_eta
+                gxy += c[col+0]*fu[i]*gu_eta[j]*(2/b) + c[col+1]*fv_xi[i]*gv[j]*(2/a) + NLgeom*2/(a*b)*( # same as w,x*w,y
+                                        c[col+2]*fw_xi[i]*gw[j]*w_eta +
+                                        w_xi*c[col+2]*fw[i]*gw_eta[j] )
+                kxx += -c[col+2]*fw_xixi[i]*gw[j]*4/(a*a)
+                kyy += -c[col+2]*fw[i]*gw_etaeta[j]*4/(b*b)
+                kxy += -2*c[col+2]*fw_xi[i]*gw_eta[j]*4/(a*b)
 
         # Strains and curvatures at each point in the grid 
         exxs[pti] = exx
@@ -722,17 +722,17 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
 
     # Frees up the allocated mem
     free(fu)
-    free(fuxi)
+    free(fu_xi)
     free(gu)
-    free(gueta)
+    free(gu_eta)
     free(fv)
-    free(fvxi)
+    free(fv_xi)
     free(gv)
-    free(gveta)
+    free(gv_eta)
     free(fw)
-    free(fwxi)
-    free(fwxixi)
+    free(fw_xi)
+    free(fw_xixi)
     free(gw)
-    free(gweta)
-    free(gwetaeta)
+    free(gw_eta)
+    free(gw_etaeta)
 

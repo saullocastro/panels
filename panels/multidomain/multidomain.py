@@ -2671,12 +2671,12 @@ class MultiDomain(object):
                 dy = (eval_panel.b/2)*(y_gauss + 1)
 
             # Derivatives wrt x, y
-            dMxx_dy, dMxx_dx = np.gradient(res_stress['Mxx'][0], dy, dx)
-            dMxy_dy, dMxy_dx = np.gradient(res_stress['Mxy'][0], dy, dx)
-            dMyy_dy, dMyy_dx = np.gradient(res_stress['Myy'][0], dy, dx)
+            Mxx_y, Mxx_x = np.gradient(res_stress['Mxx'][0], dy, dx)
+            Mxy_y, Mxy_x = np.gradient(res_stress['Mxy'][0], dy, dx)
+            Myy_y, Myy_x = np.gradient(res_stress['Myy'][0], dy, dx)
 
-            Qx = dMxx_dx + dMxy_dy
-            Qy = dMxy_dx + dMyy_dy
+            Qx = Mxx_x + Mxy_y
+            Qy = Mxy_x + Myy_y
 
             # Line Integral of Qx - considers gauss points in x and y
             if False:
@@ -2691,10 +2691,10 @@ class MultiDomain(object):
 
             # Area integral of q
             else:
-                dQx_dy, dQx_dx = np.gradient(Qx, dy, dx)
-                dQy_dy, dQy_dx = np.gradient(Qy, dy, dx)
+                Qx_y, Qx_x = np.gradient(Qx, dy, dx)
+                Qy_y, Qy_x = np.gradient(Qy, dy, dx)
 
-                q = -(dQx_dx + dQy_dy)
+                q = -(Qx_x + Qy_y)
 
                 weights_x_mesh, weights_y_mesh = np.meshgrid(weights_x, weights_y, copy=False)
                 eff_weight = np.multiply(weights_x_mesh, weights_y_mesh)
@@ -2791,16 +2791,16 @@ class MultiDomain(object):
                 dy = (eval_panel.b/2)*(y_gauss + 1)
 
             # Derivatives wrt x, y
-            dw_dy, dw_dx = np.gradient(res_uvw['w'][0], dy, dx)
-            d2w_dxdy, d2w_dx2 = np.gradient(dw_dx, dy, dx)
-            d3w_dx2dy, d3w_dx3 = np.gradient(d2w_dx2, dy, dx)
-            d4w_dx3dy, d4w_dx4 = np.gradient(d3w_dx3, dy, dx)
+            w_y, w_x = np.gradient(res_uvw['w'][0], dy, dx)
+            w_xy, w_xx = np.gradient(w_x, dy, dx)
+            w_xxy, w_xxx = np.gradient(w_xx, dy, dx)
+            w_xxxy, w_xxxx = np.gradient(w_xxx, dy, dx)
 
-            d2w_dy2, d2w_dxdy = np.gradient(dw_dy, dy, dx)
-            d3w_dy3, d3w_dxdy2 = np.gradient(d2w_dy2, dy, dx)
-            d4w_dy4, d4w_dxdy3 = np.gradient(d3w_dy3, dy, dx)
+            w_yy, w_xy = np.gradient(w_y, dy, dx)
+            w_yyy, w_xyy = np.gradient(w_yy, dy, dx)
+            w_yyyy, w_xyyy = np.gradient(w_yyy, dy, dx)
 
-            d4w_dx2dy2, d4w_dx3dy = np.gradient(d3w_dx2dy, dy, dx)
+            w_xxyy, w_xxxy = np.gradient(w_xxy, dy, dx)
 
             # ABD
             F = eval_panel._get_constant_ABD()
@@ -2813,8 +2813,8 @@ class MultiDomain(object):
             Nxy = res_stress['Nxy'][0]
             Nyy = res_stress['Nyy'][0]
 
-            pz = D11*d4w_dx4 + 2*(D12 + 2*D66)*d4w_dx2dy2 + D22*d4w_dy4
-            - (np.multiply(Nxx, d2w_dx2) + 2*np.multiply(Nxy, d2w_dxdy) + np.multiply(Nyy, d2w_dy2))
+            pz = D11*w_xxxx + 2*(D12 + 2*D66)*w_xxyy + D22*w_yyyy
+            - (np.multiply(Nxx, w_xx) + 2*np.multiply(Nxy, w_xy) + np.multiply(Nyy, w_yy))
 
             # Area integral
             if True:

@@ -69,8 +69,8 @@ var('B11, B12, B16, B22, B26, B66')
 var('D11, D12, D16, D22, D26, D66')
 var('Nxx, Nyy, Nxy, Mxx, Myy, Mxy')
 
-var('fAu, gAu, fAv, gAv, fAw, gAw, fAuxi, fAvxi, fAwxi, gAueta, gAveta, gAweta, fAwxixi, gAwetaeta')
-var('fBu, gBu, fBv, gBv, fBw, gBw, fBuxi, fBvxi, fBwxi, gBueta, gBveta, gBweta, fBwxixi, gBwetaeta')
+var('fAu, gAu, fAv, gAv, fAw, gAw, fAu_xi, fAv_xi, fAw_xi, gAu_eta, gAv_eta, gAw_eta, fAw_xixi, gAw_etaeta')
+var('fBu, gBu, fBv, gBv, fBw, gBw, fBu_xi, fBv_xi, fBw_xi, gBu_eta, gBv_eta, gBw_eta, fBw_xixi, gBw_etaeta')
 
 ABD = (A11, A12, A16, A22, A26, A66,
        B11, B12, B16, B22, B26, B66,
@@ -92,27 +92,28 @@ def shape_functions(side):
     su = M([[f('f?u')*f('g?u'), 0, 0]])
     sv = M([[0, f('f?v')*f('g?v'), 0]])
     sw = M([[0, 0, f('f?w')*f('g?w')]])
-    suxi = M([[f('f?uxi')*f('g?u'), 0, 0]])
-    svxi = M([[0, f('f?vxi')*f('g?v'), 0]])
-    swxi = M([[0, 0, f('f?wxi')*f('g?w')]])
-    sueta = M([[f('f?u')*f('g?ueta'), 0, 0]])
-    sveta = M([[0, f('f?v')*f('g?veta'), 0]])
-    sweta = M([[0, 0, f('f?w')*f('g?weta')]])
-    swxixi = M([[0, 0, f('f?wxixi')*f('g?w')]])
-    swxieta = M([[0, 0, f('f?wxi')*f('g?weta')]])
-    swetaeta = M([[0, 0, f('f?w')*f('g?wetaeta')]])
+    su_xi = M([[f('f?u_xi')*f('g?u'), 0, 0]])
+    sv_xi = M([[0, f('f?v_xi')*f('g?v'), 0]])
+    sw_xi = M([[0, 0, f('f?w_xi')*f('g?w')]])
+    su_eta = M([[f('f?u')*f('g?u_eta'), 0, 0]])
+    sv_eta = M([[0, f('f?v')*f('g?v_eta'), 0]])
+    sw_eta = M([[0, 0, f('f?w')*f('g?w_eta')]])
+    sw_xixi = M([[0, 0, f('f?w_xixi')*f('g?w')]])
+    sw_xieta = M([[0, 0, f('f?w_xi')*f('g?w_eta')]])
+    sw_etaeta = M([[0, 0, f('f?w')*f('g?w_etaeta')]])
 
     # variations of the rotations phix and phiy
-    Gx = -(2/a)*swxi
-    Gy = -(2/b)*sweta + sv/r
+    Gx = -(2/a)*sw_xi
+    Gy = -(2/b)*sw_eta + sv/r
     G = M([Gx, Gy])
 
-    B = M([(2/a)*suxi + phix*Gx,
-           (2/b)*sveta + sw/r + phiy*Gy,
-           (2/b)*sueta + (2/a)*svxi + phix*Gy + phiy*Gx,
-           -(2/a)**2*swxixi,
-           -(2/b)**2*swetaeta + (2/b)*sveta/r,
-           -2*(2/a)*(2/b)*swxieta + 3/(2*r)*(2/a)*svxi - 1/(2*r)*(2/b)*sueta])
+    B = M([(2/a)*su_xi + phix*Gx,
+           (2/b)*sv_eta + sw/r + phiy*Gy,
+           (2/b)*su_eta + (2/a)*sv_xi + phix*Gy + phiy*Gx,
+           -(2/a)**2*sw_xixi,
+           -(2/b)**2*sw_etaeta + (2/b)*sv_eta/r,
+           -2*(2/a)*(2/b)*sw_xieta + 3/(2*r)*(2/a)*sv_xi
+           - 1/(2*r)*(2/b)*su_eta])
     B0 = B.subs({phix: 0, phiy: 0})
 
     # u(z), v(z), w(z) = u0 + z*phix, v0 + z*phiy, w0

@@ -32,14 +32,14 @@ with open('bardell_floating_point.txt', 'w') as f:
             f.write('    f[%d] = %s*(%s)\n' % (i, const, str(u[i])))
 
     f.write('\n\n')
-    f.write('cdef void calc_vec_fxi(double *fxi, double xi, double xi1t=1., double xi1r=1.,\n' +
+    f.write('cdef void calc_vec_f_xi(double *f_xi, double xi, double xi1t=1., double xi1r=1.,\n' +
             '                       double xi2t=1., double xi2r=1.) nogil:\n')
     for i in range(len(u)):
         const = consts.get(i)
         if const is None:
-            f.write('    fxi[%d] = %s\n' % (i, str(diff(u[i], xi))))
+            f.write('    f_xi[%d] = %s\n' % (i, str(diff(u[i], xi))))
         else:
-            f.write('    fxi[%d] = %s*(%s)\n' % (i, const, str(diff(u[i], xi))))
+            f.write('    f_xi[%d] = %s*(%s)\n' % (i, const, str(diff(u[i], xi))))
 
     f.write('\n\n')
     f.write('cdef double calc_f(int i, double xi, double xi1t, double xi1r,\n' +
@@ -53,7 +53,7 @@ with open('bardell_floating_point.txt', 'w') as f:
             f.write('        return %s*(%s)\n' % (const, str(u[i])))
 
     f.write('\n\n')
-    f.write('cdef double calc_fxi(int i, double xi, double xi1t, double xi1r,\n' +
+    f.write('cdef double calc_f_xi(int i, double xi, double xi1t, double xi1r,\n' +
             '                     double xi2t, double xi2r) nogil:\n')
     for i in range(len(u)):
         const = consts.get(i)

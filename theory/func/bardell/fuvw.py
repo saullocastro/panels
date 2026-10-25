@@ -80,15 +80,15 @@ def shape_function_matrix(model):
     ``g<field>eta``"""
     f = {k: Symbol('f' + k) for k in FIELDS}
     g = {k: Symbol('g' + k) for k in FIELDS}
-    fwxi = Symbol('fwxi')
-    gweta = Symbol('gweta')
+    fw_xi = Symbol('fw_xi')
+    gw_eta = Symbol('gw_eta')
     if model in ('clpt_donnell', 'clpt_sanders'):
         G = zeros(5, 3)
         G[0, 0] = f['u']*g['u']
         G[1, 1] = f['v']*g['v']
         G[2, 2] = f['w']*g['w']
-        G[3, 2] = -(2/a)*fwxi*g['w']
-        G[4, 2] = -(2/b)*f['w']*gweta
+        G[3, 2] = -(2/a)*fw_xi*g['w']
+        G[4, 2] = -(2/b)*f['w']*gw_eta
         if model == 'clpt_sanders':
             G[4, 1] = f['v']*g['v']/r
         return G
@@ -106,13 +106,13 @@ def through_thickness(G, sanders=False):
     r"""`u(z), v(z), w(z)` of the models based on shear deformation theories,
     per Ritz constant of the term `(i, j)`, where the row of ``phiy`` of
     ``G`` is `\Phi_y`"""
-    fwxi = Symbol('fwxi')
-    gweta = Symbol('gweta')
-    wx = M([[0, 0, (2/a)*fwxi*Symbol('gw'), 0, 0]])
-    wy = M([[0, 0, (2/b)*Symbol('fw')*gweta, 0, 0]])
+    fw_xi = Symbol('fw_xi')
+    gw_eta = Symbol('gw_eta')
+    w_x = M([[0, 0, (2/a)*fw_xi*Symbol('gw'), 0, 0]])
+    w_y = M([[0, 0, (2/b)*Symbol('fw')*gw_eta, 0, 0]])
     phiy = G[4, :] - G[1, :]/r if sanders else G[4, :]
-    uz = G[0, :] + z*G[3, :] - c1*z**3*(G[3, :] + wx)
-    vz = G[1, :] + z*G[4, :] - c1*z**3*(phiy + wy)
+    uz = G[0, :] + z*G[3, :] - c1*z**3*(G[3, :] + w_x)
+    vz = G[1, :] + z*G[4, :] - c1*z**3*(phiy + w_y)
     return M([uz, vz, G[2, :]])
 
 
@@ -129,7 +129,7 @@ def check(model, panels_models, num_checks=3, seed=0):
     fpnum = [lambdify((xi,) + flags, diff(fi, xi)) for fi in f]
     Gnum = lambdify([Symbol(s) for s in
                      ['f' + k for k in FIELDS] + ['g' + k for k in FIELDS]
-                     + ['fwxi', 'gweta', 'a', 'b', 'r']], G)
+                     + ['fw_xi', 'gw_eta', 'a', 'b', 'r']], G)
     worst = 0.
     for name in panels_models:
         for _ in range(num_checks):
@@ -160,11 +160,11 @@ def check(model, panels_models, num_checks=3, seed=0):
                         vals['f' + k] = fnum[i](ksi, *bx)
                         vals['g' + k] = fnum[j](et, *by)
                         if k == 'w':
-                            vals['fwxi'] = fpnum[i](ksi, *bx)
-                            vals['gweta'] = fpnum[j](et, *by)
+                            vals['fw_xi'] = fpnum[i](ksi, *bx)
+                            vals['gw_eta'] = fpnum[j](et, *by)
                     args = ([vals['f' + k] for k in FIELDS]
                             + [vals['g' + k] for k in FIELDS]
-                            + [vals['fwxi'], vals['gweta'], s.a, s.b,
+                            + [vals['fw_xi'], vals['gw_eta'], s.a, s.b,
                                s.r if s.r else 1.])
                     col = dof*(j*s.m + i)
                     g_sympy[:, col:col + dof] = np.array(Gnum(*args), dtype=float)

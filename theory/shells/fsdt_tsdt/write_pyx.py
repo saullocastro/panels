@@ -69,7 +69,7 @@ def simp(e, vars, do_factor=True):
     return collect(e, vars)
 
 
-BASIS = re.compile(r'^([fg])([AB])' + FIELD_RE + r'((?:xi|eta)*)$')
+BASIS = re.compile(r'^([fg])([AB])' + FIELD_RE + r'((?:_(?:xi|eta)+)?)$')
 
 
 def basis_info(name):
@@ -284,12 +284,12 @@ def analytical_function(signature, cdef_extra, prelude, name, m, symmetric,
 
 
 def field_names(fg):
-    d = 'xi' if fg == 'f' else 'eta'
+    d = '_xi' if fg == 'f' else '_eta'
     out = []
     for p in FIELDS:
         out += [p, p + d]
         if p == 'w':
-            out.append(p + d + d)
+            out.append(p + d + d[1:])
     return out
 
 
@@ -406,20 +406,20 @@ def nl_block(sanders, indent, cond):
     L += [t + 'for j in range(n):',
           t + '    #TODO put these in a lookup vector',
           t + '    gAw = f(j, eta, y1w, y1wr, y2w, y2wr)',
-          t + '    gAweta = fp(j, eta, y1w, y1wr, y2w, y2wr)']
+          t + '    gAw_eta = fp(j, eta, y1w, y1wr, y2w, y2wr)']
     if sanders:
         L.append(t + '    gAv = f(j, eta, y1v, y1vr, y2v, y2vr)')
     L += [t + '    for i in range(m):',
           t + '        #TODO put these in a lookup vector',
           t + '        fAw = f(i, xi, x1w, x1wr, x2w, x2wr)',
-          t + '        fAwxi = fp(i, xi, x1w, x1wr, x2w, x2wr)']
+          t + '        fAw_xi = fp(i, xi, x1w, x1wr, x2w, x2wr)']
     if sanders:
         L.append(t + '        fAv = f(i, xi, x1v, x1vr, x2v, x2vr)')
     L += ['',
           t + '        col = col0 + DOF*(j*m + i)',
           '',
-          t + '        bx += (2/a)*cs[col+2]*fAwxi*gAw',
-          t + '        by += (2/b)*cs[col+2]*fAw*gAweta']
+          t + '        bx += (2/a)*cs[col+2]*fAw_xi*gAw',
+          t + '        by += (2/b)*cs[col+2]*fAw*gAw_eta']
     if sanders:
         L.append(t + '        by -= cs[col+1]*fAv*gAv/r')
     return '\n'.join(L)
@@ -693,7 +693,7 @@ def fkC_num(double [::1] cs, object Finput, object shell,
 
     return kC
 '''.format(c1=c1n_cdef, BC_CDEF=BC_CDEF, cc=cdefs([v.name for v in cvars]),
-           basis=basis_cdefs(set(names) | {'fAw', 'fAwxi', 'gAw', 'gAweta'}
+           basis=basis_cdefs(set(names) | {'fAw', 'fAw_xi', 'gAw', 'gAw_eta'}
                              | ({'fAv', 'gAv'} if sanders else set())),
            FINPUT=finput(NE), c1read=c1n_read, LIMITS=LIMITS, BC_BLOCK=BC_BLOCK,
            nnz=len(kCn), MAPPING=MAPPING, POINT=POINT, nl=nl_block(sanders, 16, True),

@@ -126,7 +126,7 @@ def fkCBFycte11(double kt, double kr, object p1, double ycte1,
 
     cdef double etacte1
     cdef double f1Auf1Bu, f1Avf1Bv, f1Awf1Bw, f1Avf1Bw, f1Awf1Bv
-    cdef double g1Au, g1Av, g1Aw, g1Aweta, g1Bu, g1Bv, g1Bw, g1Bweta
+    cdef double g1Au, g1Av, g1Aw, g1Aw_eta, g1Bu, g1Bv, g1Bw, g1Bw_eta
 
     a1 = p1.a
     b1 = p1.b
@@ -170,7 +170,7 @@ def fkCBFycte11(double kt, double kr, object p1, double ycte1,
                     g1Au = gtab1[0, j1]
                     g1Av = gtab1[1, j1]
                     g1Aw = gtab1[2, j1]
-                    g1Aweta = gtab1[3, j1]
+                    g1Aw_eta = gtab1[3, j1]
 
                     for l1 in range(n1):
                         row = row0 + DOF*(j1*m1 + i1)
@@ -183,7 +183,7 @@ def fkCBFycte11(double kt, double kr, object p1, double ycte1,
                         g1Bu = gtab1[0, l1]
                         g1Bv = gtab1[1, l1]
                         g1Bw = gtab1[2, l1]
-                        g1Bweta = gtab1[3, l1]
+                        g1Bw_eta = gtab1[3, l1]
 
                         c += 1
                         kCBFycte11r[c] = row+0
@@ -196,7 +196,7 @@ def fkCBFycte11(double kt, double kr, object p1, double ycte1,
                         c += 1
                         kCBFycte11r[c] = row+2
                         kCBFycte11c[c] = col+2
-                        kCBFycte11v[c] += 0.5*a1*kt*(f1Awf1Bw*g1Aw*g1Bw + 4*f1Awf1Bw*g1Aweta*g1Bweta*kr/((b1*b1)*kt))
+                        kCBFycte11v[c] += 0.5*a1*kt*(f1Awf1Bw*g1Aw*g1Bw + 4*f1Awf1Bw*g1Aw_eta*g1Bw_eta*kr/((b1*b1)*kt))
                         if rinv1 != 0:
                             #NOTE Sanders-Koiter rotation w1,y - v1/r1
                             c += 1
@@ -206,11 +206,11 @@ def fkCBFycte11(double kt, double kr, object p1, double ycte1,
                             c += 1
                             kCBFycte11r[c] = row+1
                             kCBFycte11c[c] = col+2
-                            kCBFycte11v[c] += -a1*kr*rinv1*f1Avf1Bw*g1Av*g1Bweta/b1
+                            kCBFycte11v[c] += -a1*kr*rinv1*f1Avf1Bw*g1Av*g1Bw_eta/b1
                             c += 1
                             kCBFycte11r[c] = row+2
                             kCBFycte11c[c] = col+1
-                            kCBFycte11v[c] += -a1*kr*rinv1*f1Awf1Bv*g1Aweta*g1Bv/b1
+                            kCBFycte11v[c] += -a1*kr*rinv1*f1Awf1Bv*g1Aw_eta*g1Bv/b1
 
     kCBFycte11 = coo_matrix((kCBFycte11v, (kCBFycte11r, kCBFycte11c)), shape=(size, size))
 
@@ -277,7 +277,7 @@ def fkCBFycte12(double kt, double kr, object p1, object p2,
 
     cdef double etacte1, etacte2
     cdef double f1Auf2Bu, f1Avf2Bw, f1Awf2Bv, f1Awf2Bw, f1Avf2Bv
-    cdef double g1Au, g1Av, g1Aw, g1Aweta, g2Bu, g2Bv, g2Bw, g2Bweta
+    cdef double g1Au, g1Av, g1Aw, g1Aw_eta, g2Bu, g2Bv, g2Bw, g2Bw_eta
 
     a1 = p1.a
     b1 = p1.b
@@ -338,7 +338,7 @@ def fkCBFycte12(double kt, double kr, object p1, object p2,
                     g1Au = gtab1[0, j1]
                     g1Av = gtab1[1, j1]
                     g1Aw = gtab1[2, j1]
-                    g1Aweta = gtab1[3, j1]
+                    g1Aw_eta = gtab1[3, j1]
 
                     for l2 in range(n2):
                         row = row0 + DOF*(j1*m1 + i1)
@@ -351,7 +351,7 @@ def fkCBFycte12(double kt, double kr, object p1, object p2,
                         g2Bu = gtab2[0, l2]
                         g2Bv = gtab2[1, l2]
                         g2Bw = gtab2[2, l2]
-                        g2Bweta = gtab2[3, l2]
+                        g2Bw_eta = gtab2[3, l2]
 
                         c += 1
                         kCBFycte12r[c] = row+0
@@ -368,7 +368,7 @@ def fkCBFycte12(double kt, double kr, object p1, object p2,
                         c += 1
                         kCBFycte12r[c] = row+2
                         kCBFycte12c[c] = col+2
-                        kCBFycte12v[c] += -2*a1*f1Awf2Bw*g1Aweta*g2Bweta*kr/(b1*b2)
+                        kCBFycte12v[c] += -2*a1*f1Awf2Bw*g1Aw_eta*g2Bw_eta*kr/(b1*b2)
                         if rinv1 != 0 or rinv2 != 0:
                             #NOTE Sanders-Koiter rotations w1,y - v1/r1 and
                             #     w2,y - v2/r2
@@ -379,11 +379,11 @@ def fkCBFycte12(double kt, double kr, object p1, object p2,
                             c += 1
                             kCBFycte12r[c] = row+1
                             kCBFycte12c[c] = col+2
-                            kCBFycte12v[c] += a1*kr*rinv1*f1Avf2Bw*g1Av*g2Bweta/b2
+                            kCBFycte12v[c] += a1*kr*rinv1*f1Avf2Bw*g1Av*g2Bw_eta/b2
                             c += 1
                             kCBFycte12r[c] = row+2
                             kCBFycte12c[c] = col+1
-                            kCBFycte12v[c] += a1*kr*rinv2*f1Awf2Bv*g1Aweta*g2Bv/b1
+                            kCBFycte12v[c] += a1*kr*rinv2*f1Awf2Bv*g1Aw_eta*g2Bv/b1
 
     kCBFycte12 = coo_matrix((kCBFycte12v, (kCBFycte12r, kCBFycte12c)), shape=(size, size))
 
@@ -446,7 +446,7 @@ def fkCBFycte22(double kt, double kr, object p1, object p2,
 
     cdef double etacte2
     cdef double f2Auf2Bu, f2Avf2Bv, f2Awf2Bw, f2Avf2Bw, f2Awf2Bv
-    cdef double g2Au, g2Bu, g2Av, g2Bv, g2Aw, g2Bw, g2Aweta, g2Bweta
+    cdef double g2Au, g2Bu, g2Av, g2Bv, g2Aw, g2Bw, g2Aw_eta, g2Bw_eta
     a1 = p1.a
     b2 = p2.b
     m2 = p2.m
@@ -489,7 +489,7 @@ def fkCBFycte22(double kt, double kr, object p1, object p2,
                     g2Au = gtab2[0, j2]
                     g2Av = gtab2[1, j2]
                     g2Aw = gtab2[2, j2]
-                    g2Aweta = gtab2[3, j2]
+                    g2Aw_eta = gtab2[3, j2]
 
                     for l2 in range(n2):
                         row = row0 + DOF*(j2*m2 + i2)
@@ -502,7 +502,7 @@ def fkCBFycte22(double kt, double kr, object p1, object p2,
                         g2Bu = gtab2[0, l2]
                         g2Bv = gtab2[1, l2]
                         g2Bw = gtab2[2, l2]
-                        g2Bweta = gtab2[3, l2]
+                        g2Bw_eta = gtab2[3, l2]
 
                         c += 1
                         kCBFycte22r[c] = row+0
@@ -515,7 +515,7 @@ def fkCBFycte22(double kt, double kr, object p1, object p2,
                         c += 1
                         kCBFycte22r[c] = row+2
                         kCBFycte22c[c] = col+2
-                        kCBFycte22v[c] += 0.5*a1*kt*(f2Awf2Bw*g2Aw*g2Bw + 4*f2Awf2Bw*g2Aweta*g2Bweta*kr/((b2*b2)*kt))
+                        kCBFycte22v[c] += 0.5*a1*kt*(f2Awf2Bw*g2Aw*g2Bw + 4*f2Awf2Bw*g2Aw_eta*g2Bw_eta*kr/((b2*b2)*kt))
                         if rinv2 != 0:
                             #NOTE Sanders-Koiter rotation w2,y - v2/r2
                             c += 1
@@ -525,11 +525,11 @@ def fkCBFycte22(double kt, double kr, object p1, object p2,
                             c += 1
                             kCBFycte22r[c] = row+1
                             kCBFycte22c[c] = col+2
-                            kCBFycte22v[c] += -a1*kr*rinv2*f2Avf2Bw*g2Av*g2Bweta/b2
+                            kCBFycte22v[c] += -a1*kr*rinv2*f2Avf2Bw*g2Av*g2Bw_eta/b2
                             c += 1
                             kCBFycte22r[c] = row+2
                             kCBFycte22c[c] = col+1
-                            kCBFycte22v[c] += -a1*kr*rinv2*f2Awf2Bv*g2Aweta*g2Bv/b2
+                            kCBFycte22v[c] += -a1*kr*rinv2*f2Awf2Bv*g2Aw_eta*g2Bv/b2
 
     kCBFycte22 = coo_matrix((kCBFycte22v, (kCBFycte22r, kCBFycte22c)), shape=(size, size))
 

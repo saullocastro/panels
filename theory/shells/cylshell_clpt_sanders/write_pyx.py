@@ -123,8 +123,8 @@ def abd_read(indent, D=True):
     return '\n'.join(lines)
 
 
-F_NAMES = ['u', 'uxi', 'v', 'vxi', 'w', 'wxi', 'wxixi']
-G_NAMES = ['u', 'ueta', 'v', 'veta', 'w', 'weta', 'wetaeta']
+F_NAMES = ['u', 'u_xi', 'v', 'v_xi', 'w', 'w_xi', 'w_xixi']
+G_NAMES = ['u', 'u_eta', 'v', 'v_eta', 'w', 'w_eta', 'w_etaeta']
 
 
 def basis_line(fg, side, name, indent):
@@ -374,17 +374,17 @@ def fkC_num(double [::1] cs, object Finput, object shell,
                         #TODO put these in a lookup vector
                         gAv = f(j, eta, y1v, y1vr, y2v, y2vr)
                         gAw = f(j, eta, y1w, y1wr, y2w, y2wr)
-                        gAweta = fp(j, eta, y1w, y1wr, y2w, y2wr)
+                        gAw_eta = fp(j, eta, y1w, y1wr, y2w, y2wr)
                         for i in range(m):
                             #TODO put these in a lookup vector
                             fAv = f(i, xi, x1v, x1vr, x2v, x2vr)
                             fAw = f(i, xi, x1w, x1wr, x2w, x2wr)
-                            fAwxi = fp(i, xi, x1w, x1wr, x2w, x2wr)
+                            fAw_xi = fp(i, xi, x1w, x1wr, x2w, x2wr)
 
                             col = col0 + DOF*(j*m + i)
 
-                            phix += -(2/a)*cs[col+2]*fAwxi*gAw
-                            phiy += -(2/b)*cs[col+2]*fAw*gAweta + cs[col+1]*fAv*gAv/r
+                            phix += -(2/a)*cs[col+2]*fAw_xi*gAw
+                            phiy += -(2/b)*cs[col+2]*fAw*gAw_eta + cs[col+1]*fAv*gAv/r
 
 {ABD}
                 # Membrane stress carried by the nonlinear strain
@@ -405,7 +405,7 @@ def fkC_num(double [::1] cs, object Finput, object shell,
     return kC
 '''.format(BC_CDEF=BC_CDEF, BC_BLOCK=BC_BLOCK, LIMITS=LIMITS, MAPPING=MAPPING,
            POINT=POINT, FINPUT=FINPUT, ABD=abd_read(16), loops=loops,
-           basis=basis_cdefs(fn + ['fAv', 'fAw', 'fAwxi'], gn + ['gAv', 'gAw', 'gAweta']),
+           basis=basis_cdefs(fn + ['fAv', 'fAw', 'fAw_xi'], gn + ['gAv', 'gAw', 'gAw_eta']),
            nnz=len(kC)))
 
     # fkG_num
@@ -413,8 +413,8 @@ def fkC_num(double [::1] cs, object Finput, object shell,
     for i, j, v in kG:
         ent_lines += entry('kG', i, j, v)
     loops, fn, gn = basis_loops('kG', [v for _, _, v in kG], ent_lines)
-    lin = ['fAu', 'fAuxi', 'fAv', 'fAvxi', 'fAw', 'fAwxi', 'fAwxixi',
-           'gAu', 'gAueta', 'gAv', 'gAveta', 'gAw', 'gAweta', 'gAwetaeta']
+    lin = ['fAu', 'fAu_xi', 'fAv', 'fAv_xi', 'fAw', 'fAw_xi', 'fAw_xixi',
+           'gAu', 'gAu_eta', 'gAv', 'gAv_eta', 'gAw', 'gAw_eta', 'gAw_etaeta']
     out.append('''
 
 def fkG_num(double [::1] cs, object Finput, object shell,
@@ -505,19 +505,19 @@ def fkG_num(double [::1] cs, object Finput, object shell,
                     gAu = f(j, eta, y1u, y1ur, y2u, y2ur)
                     gAv = f(j, eta, y1v, y1vr, y2v, y2vr)
                     gAw = f(j, eta, y1w, y1wr, y2w, y2wr)
-                    gAueta = fp(j, eta, y1u, y1ur, y2u, y2ur)
-                    gAveta = fp(j, eta, y1v, y1vr, y2v, y2vr)
-                    gAweta = fp(j, eta, y1w, y1wr, y2w, y2wr)
-                    gAwetaeta = fpp(j, eta, y1w, y1wr, y2w, y2wr)
+                    gAu_eta = fp(j, eta, y1u, y1ur, y2u, y2ur)
+                    gAv_eta = fp(j, eta, y1v, y1vr, y2v, y2vr)
+                    gAw_eta = fp(j, eta, y1w, y1wr, y2w, y2wr)
+                    gAw_etaeta = fpp(j, eta, y1w, y1wr, y2w, y2wr)
 
                     for i in range(m):
                         fAu = f(i, xi, x1u, x1ur, x2u, x2ur)
                         fAv = f(i, xi, x1v, x1vr, x2v, x2vr)
                         fAw = f(i, xi, x1w, x1wr, x2w, x2wr)
-                        fAuxi = fp(i, xi, x1u, x1ur, x2u, x2ur)
-                        fAvxi = fp(i, xi, x1v, x1vr, x2v, x2vr)
-                        fAwxi = fp(i, xi, x1w, x1wr, x2w, x2wr)
-                        fAwxixi = fpp(i, xi, x1w, x1wr, x2w, x2wr)
+                        fAu_xi = fp(i, xi, x1u, x1ur, x2u, x2ur)
+                        fAv_xi = fp(i, xi, x1v, x1vr, x2v, x2vr)
+                        fAw_xi = fp(i, xi, x1w, x1wr, x2w, x2wr)
+                        fAw_xixi = fpp(i, xi, x1w, x1wr, x2w, x2wr)
 
                         col = col0 + DOF*(j*m + i)
 
@@ -655,8 +655,8 @@ def calc_fint(double [::1] cs, object Finput, object shell,
     cdef double xi1, xi2, eta1, eta2
     cdef double phix, phiy
 
-    cdef double fAu, fAuxi, fAv, fAvxi, fAw, fAwxi, fAwxixi
-    cdef double gAu, gAueta, gAv, gAveta, gAw, gAweta, gAwetaeta
+    cdef double fAu, fAu_xi, fAv, fAv_xi, fAw, fAw_xi, fAw_xixi
+    cdef double gAu, gAu_eta, gAv, gAv_eta, gAw, gAw_eta, gAw_etaeta
 
     cdef double [::1] xis, etas, weights_xi, weights_eta, fint
 
@@ -689,17 +689,17 @@ def calc_fint(double [::1] cs, object Finput, object shell,
                     #TODO save in buffer
                     gAv = f(j, eta, y1v, y1vr, y2v, y2vr)
                     gAw = f(j, eta, y1w, y1wr, y2w, y2wr)
-                    gAweta = fp(j, eta, y1w, y1wr, y2w, y2wr)
+                    gAw_eta = fp(j, eta, y1w, y1wr, y2w, y2wr)
                     for i in range(m):
                         #TODO save in buffer
                         fAv = f(i, xi, x1v, x1vr, x2v, x2vr)
                         fAw = f(i, xi, x1w, x1wr, x2w, x2wr)
-                        fAwxi = fp(i, xi, x1w, x1wr, x2w, x2wr)
+                        fAw_xi = fp(i, xi, x1w, x1wr, x2w, x2wr)
 
                         col = col0 + DOF*(j*m + i)
 
-                        phix += -(2/a)*cs[col+2]*fAwxi*gAw
-                        phiy += -(2/b)*cs[col+2]*fAw*gAweta + cs[col+1]*fAv*gAv/r
+                        phix += -(2/a)*cs[col+2]*fAw_xi*gAw
+                        phiy += -(2/b)*cs[col+2]*fAw*gAw_eta + cs[col+1]*fAv*gAv/r
 
                 # current strain state
                 exx = 0.
@@ -712,22 +712,22 @@ def calc_fint(double [::1] cs, object Finput, object shell,
                 for j in range(n):
                     #TODO save in buffer
                     gAu = f(j, eta, y1u, y1ur, y2u, y2ur)
-                    gAueta = fp(j, eta, y1u, y1ur, y2u, y2ur)
+                    gAu_eta = fp(j, eta, y1u, y1ur, y2u, y2ur)
                     gAv = f(j, eta, y1v, y1vr, y2v, y2vr)
-                    gAveta = fp(j, eta, y1v, y1vr, y2v, y2vr)
+                    gAv_eta = fp(j, eta, y1v, y1vr, y2v, y2vr)
                     gAw = f(j, eta, y1w, y1wr, y2w, y2wr)
-                    gAweta = fp(j, eta, y1w, y1wr, y2w, y2wr)
-                    gAwetaeta = fpp(j, eta, y1w, y1wr, y2w, y2wr)
+                    gAw_eta = fp(j, eta, y1w, y1wr, y2w, y2wr)
+                    gAw_etaeta = fpp(j, eta, y1w, y1wr, y2w, y2wr)
 
                     for i in range(m):
                         #TODO save in buffer
                         fAu = f(i, xi, x1u, x1ur, x2u, x2ur)
-                        fAuxi = fp(i, xi, x1u, x1ur, x2u, x2ur)
+                        fAu_xi = fp(i, xi, x1u, x1ur, x2u, x2ur)
                         fAv = f(i, xi, x1v, x1vr, x2v, x2vr)
-                        fAvxi = fp(i, xi, x1v, x1vr, x2v, x2vr)
+                        fAv_xi = fp(i, xi, x1v, x1vr, x2v, x2vr)
                         fAw = f(i, xi, x1w, x1wr, x2w, x2wr)
-                        fAwxi = fp(i, xi, x1w, x1wr, x2w, x2wr)
-                        fAwxixi = fpp(i, xi, x1w, x1wr, x2w, x2wr)
+                        fAw_xi = fp(i, xi, x1w, x1wr, x2w, x2wr)
+                        fAw_xixi = fpp(i, xi, x1w, x1wr, x2w, x2wr)
 
                         col = col0 + DOF*(j*m + i)
 
@@ -748,20 +748,20 @@ def calc_fint(double [::1] cs, object Finput, object shell,
 
                 for j in range(n):
                     gAu = f(j, eta, y1u, y1ur, y2u, y2ur)
-                    gAueta = fp(j, eta, y1u, y1ur, y2u, y2ur)
+                    gAu_eta = fp(j, eta, y1u, y1ur, y2u, y2ur)
                     gAv = f(j, eta, y1v, y1vr, y2v, y2vr)
-                    gAveta = fp(j, eta, y1v, y1vr, y2v, y2vr)
+                    gAv_eta = fp(j, eta, y1v, y1vr, y2v, y2vr)
                     gAw = f(j, eta, y1w, y1wr, y2w, y2wr)
-                    gAweta = fp(j, eta, y1w, y1wr, y2w, y2wr)
-                    gAwetaeta = fpp(j, eta, y1w, y1wr, y2w, y2wr)
+                    gAw_eta = fp(j, eta, y1w, y1wr, y2w, y2wr)
+                    gAw_etaeta = fpp(j, eta, y1w, y1wr, y2w, y2wr)
                     for i in range(m):
                         fAu = f(i, xi, x1u, x1ur, x2u, x2ur)
-                        fAuxi = fp(i, xi, x1u, x1ur, x2u, x2ur)
+                        fAu_xi = fp(i, xi, x1u, x1ur, x2u, x2ur)
                         fAv = f(i, xi, x1v, x1vr, x2v, x2vr)
-                        fAvxi = fp(i, xi, x1v, x1vr, x2v, x2vr)
+                        fAv_xi = fp(i, xi, x1v, x1vr, x2v, x2vr)
                         fAw = f(i, xi, x1w, x1wr, x2w, x2wr)
-                        fAwxi = fp(i, xi, x1w, x1wr, x2w, x2wr)
-                        fAwxixi = fpp(i, xi, x1w, x1wr, x2w, x2wr)
+                        fAw_xi = fp(i, xi, x1w, x1wr, x2w, x2wr)
+                        fAw_xixi = fpp(i, xi, x1w, x1wr, x2w, x2wr)
 
                         col = col0 + DOF*(j*m + i)
 
@@ -774,13 +774,13 @@ def calc_fint(double [::1] cs, object Finput, object shell,
     return ''.join(out)
 
 
-LINSTRAIN = """{ind}exx += cs[col+0]*(2/a)*fAuxi*gAu
-{ind}eyy += cs[col+1]*(2/b)*fAv*gAveta + 1/r*cs[col+2]*fAw*gAw
-{ind}gxy += cs[col+0]*(2/b)*fAu*gAueta + cs[col+1]*(2/a)*fAvxi*gAv
-{ind}kxx += -cs[col+2]*(2/a*2/a)*fAwxixi*gAw
-{ind}kyy += -cs[col+2]*(2/b*2/b)*fAw*gAwetaeta + 1/r*cs[col+1]*(2/b)*fAv*gAveta
-{ind}kxy += (-2*cs[col+2]*(2/a)*fAwxi*(2/b)*gAweta
-{ind}        + 1.5/r*cs[col+1]*(2/a)*fAvxi*gAv - 0.5/r*cs[col+0]*(2/b)*fAu*gAueta)"""
+LINSTRAIN = """{ind}exx += cs[col+0]*(2/a)*fAu_xi*gAu
+{ind}eyy += cs[col+1]*(2/b)*fAv*gAv_eta + 1/r*cs[col+2]*fAw*gAw
+{ind}gxy += cs[col+0]*(2/b)*fAu*gAu_eta + cs[col+1]*(2/a)*fAv_xi*gAv
+{ind}kxx += -cs[col+2]*(2/a*2/a)*fAw_xixi*gAw
+{ind}kyy += -cs[col+2]*(2/b*2/b)*fAw*gAw_etaeta + 1/r*cs[col+1]*(2/b)*fAv*gAv_eta
+{ind}kxy += (-2*cs[col+2]*(2/a)*fAw_xi*(2/b)*gAw_eta
+{ind}        + 1.5/r*cs[col+1]*(2/a)*fAv_xi*gAv - 0.5/r*cs[col+0]*(2/b)*fAu*gAu_eta)"""
 
 
 if __name__ == '__main__':

@@ -32,21 +32,21 @@ var('del_i_1, k_i_1, del_i, k_i, k_o, del_f, del_o')
 var('w1A, w1B, w1C, w2A, w2B, w2C, c1, c2')
 
 # Displacements and rotations for panel 1 (or ith panel in eq 32 - http://dx.doi.org/10.1016/j.compstruct.2016.10.026)
-var('f1Au, g1Au, f1Av, g1Av, f1Aw, g1Aw, f1Auxi, f1Avxi, f1Awxi, g1Aueta, g1Aveta, g1Aweta, f1Awxixi, g1Awetaeta')
-var('f1Bu, g1Bu, f1Bv, g1Bv, f1Bw, g1Bw, f1Buxi, f1Bvxi, f1Bwxi, g1Bueta, g1Bveta, g1Bweta, f1Bwxixi, g1Bwetaeta')
-var('f1Cu, g1Cu, f1Cv, g1Cv, f1Cw, g1Cw, f1Cuxi, f1Cvxi, f1Cwxi, g1Cueta, g1Cveta, g1Cweta, f1Cwxixi, g1Cwetaeta')
+var('f1Au, g1Au, f1Av, g1Av, f1Aw, g1Aw, f1Au_xi, f1Av_xi, f1Aw_xi, g1Au_eta, g1Av_eta, g1Aw_eta, f1Aw_xixi, g1Aw_etaeta')
+var('f1Bu, g1Bu, f1Bv, g1Bv, f1Bw, g1Bw, f1Bu_xi, f1Bv_xi, f1Bw_xi, g1Bu_eta, g1Bv_eta, g1Bw_eta, f1Bw_xixi, g1Bw_etaeta')
+var('f1Cu, g1Cu, f1Cv, g1Cv, f1Cw, g1Cw, f1Cu_xi, f1Cv_xi, f1Cw_xi, g1Cu_eta, g1Cv_eta, g1Cw_eta, f1Cw_xixi, g1Cw_etaeta')
     # A and B are when 2 of the same terms are present i.e. u^2 then it becomes uA*uB so that the matrix can be populated independently
 
-var('u1A, v1A, w1A, u1Axi, v1Axi, w1Axi, u1Aeta, v1Aeta, w1Aeta, w1Axixi, w1Axieta, w1Aetaeta')
-var('u1B, v1B, w1B, u1Bxi, v1Bxi, w1Bxi, u1Beta, v1Beta, w1Beta, w1Bxixi, w1Bxieta, w1Betaeta')
+var('u1A, v1A, w1A, u1A_xi, v1A_xi, w1A_xi, u1A_eta, v1A_eta, w1A_eta, w1A_xixi, w1A_xieta, w1A_etaeta')
+var('u1B, v1B, w1B, u1B_xi, v1B_xi, w1B_xi, u1B_eta, v1B_eta, w1B_eta, w1B_xixi, w1B_xieta, w1B_etaeta')
 
 # Displacements and rotations for panel 2 (or jth panel in eq 32 - http://dx.doi.org/10.1016/j.compstruct.2016.10.026)
-var('f2Au, g2Au, f2Av, g2Av, f2Aw, g2Aw, f2Auxi, f2Avxi, f2Awxi, g2Aueta, g2Aveta, g2Aweta, f2Awxixi, g2Awetaeta')
-var('f2Bu, g2Bu, f2Bv, g2Bv, f2Bw, g2Bw, f2Buxi, f2Bvxi, f2Bwxi, g2Bueta, g2Bveta, g2Bweta, f2Bwxixi, g2Bwetaeta')
-var('f2Cu, g2Cu, f2Cv, g2Cv, f2Cw, g2Cw, f2Cuxi, f2Cvxi, f2Cwxi, g2Cueta, g2Cveta, g2Cweta, f2Cwxixi, g2Cwetaeta')
+var('f2Au, g2Au, f2Av, g2Av, f2Aw, g2Aw, f2Au_xi, f2Av_xi, f2Aw_xi, g2Au_eta, g2Av_eta, g2Aw_eta, f2Aw_xixi, g2Aw_etaeta')
+var('f2Bu, g2Bu, f2Bv, g2Bv, f2Bw, g2Bw, f2Bu_xi, f2Bv_xi, f2Bw_xi, g2Bu_eta, g2Bv_eta, g2Bw_eta, f2Bw_xixi, g2Bw_etaeta')
+var('f2Cu, g2Cu, f2Cv, g2Cv, f2Cw, g2Cw, f2Cu_xi, f2Cv_xi, f2Cw_xi, g2Cu_eta, g2Cv_eta, g2Cw_eta, f2Cw_xixi, g2Cw_etaeta')
 
-var('u2A, v2A, w2A, u2Axi, v2Axi, w2Axi, u2Aeta, v2Aeta, w2Aeta, w2Axixi, w2Axieta, w2Aetaeta')
-var('u2B, v2B, w2B, u2Bxi, v2Bxi, w2Bxi, u2Beta, v2Beta, w2Beta, w2Bxixi, w2Bxieta, w2Betaeta')
+var('u2A, v2A, w2A, u2A_xi, v2A_xi, w2A_xi, u2A_eta, v2A_eta, w2A_eta, w2A_xixi, w2A_xieta, w2A_etaeta')
+var('u2B, v2B, w2B, u2B_xi, v2B_xi, w2B_xi, u2B_eta, v2B_eta, w2B_eta, w2B_xixi, w2B_xieta, w2B_etaeta')
 
 var('c1u, c1v, c1w')
 
@@ -61,23 +61,23 @@ u1A = M([[f1Au*g1Au, 0, 0]])
 v1A = M([[0, f1Av*g1Av, 0]])
 w1A = M([[0, 0, f1Aw*g1Aw]])
 
-# u1Axi is deri of suA wrt xi
-w1Axi = M([[0, 0, f1Awxi*g1Aw]])
-w1Aeta = M([[0, 0, f1Aw*g1Aweta]])
+# u1A_xi is deri of suA wrt xi
+w1A_xi = M([[0, 0, f1Aw_xi*g1Aw]])
+w1A_eta = M([[0, 0, f1Aw*g1Aw_eta]])
 
-w1Axixi = M([[0, 0, f1Awxixi*g1Aw]])
-w1Aetaeta = M([[0, 0, f1Aw*g1Awetaeta]])
+w1A_xixi = M([[0, 0, f1Aw_xixi*g1Aw]])
+w1A_etaeta = M([[0, 0, f1Aw*g1Aw_etaeta]])
 
 # PANEL 1 - B terms
 u1B = M([[f1Bu*g1Bu, 0, 0]])
 v1B = M([[0, f1Bv*g1Bv, 0]])
 w1B = M([[0, 0, f1Bw*g1Bw]])
 
-w1Bxi = M([[0, 0, f1Bwxi*g1Bw]])
-w1Beta = M([[0, 0, f1Bw*g1Bweta]])
+w1B_xi = M([[0, 0, f1Bw_xi*g1Bw]])
+w1B_eta = M([[0, 0, f1Bw*g1Bw_eta]])
 
-w1Bxixi = M([[0, 0, f1Bwxixi*g1Bw]])
-w1Betaeta = M([[0, 0, f1Bw*g1Bwetaeta]])
+w1B_xixi = M([[0, 0, f1Bw_xixi*g1Bw]])
+w1B_etaeta = M([[0, 0, f1Bw*g1Bw_etaeta]])
 
 # PANEL 1 - C terms
 u1C = M([[f1Cu*g1Cu, 0, 0]])
@@ -89,22 +89,22 @@ u2A = M([[f2Au*g2Au, 0, 0]])
 v2A = M([[0, f2Av*g2Av, 0]])
 w2A = M([[0, 0, f2Aw*g2Aw]])
 
-w2Axi = M([[0, 0, f2Awxi*g2Aw]])
-w2Aeta = M([[0, 0, f2Aw*g2Aweta]])
+w2A_xi = M([[0, 0, f2Aw_xi*g2Aw]])
+w2A_eta = M([[0, 0, f2Aw*g2Aw_eta]])
 
-w2Axixi = M([[0, 0, f2Awxixi*g2Aw]])
-w2Aetaeta = M([[0, 0, f2Aw*g2Awetaeta]])
+w2A_xixi = M([[0, 0, f2Aw_xixi*g2Aw]])
+w2A_etaeta = M([[0, 0, f2Aw*g2Aw_etaeta]])
 
 # PANEL 2 - B terms
 u2B = M([[f2Bu*g2Bu, 0, 0]])
 v2B = M([[0, f2Bv*g2Bv, 0]])
 w2B = M([[0, 0, f2Bw*g2Bw]])
 
-w2Bxi = M([[0, 0, f2Bwxi*g2Bw]])
-w2Beta = M([[0, 0, f2Bw*g2Bweta]])
+w2B_xi = M([[0, 0, f2Bw_xi*g2Bw]])
+w2B_eta = M([[0, 0, f2Bw*g2Bw_eta]])
 
-w2Bxixi = M([[0, 0, f2Bwxixi*g2Bw]])
-w2Betaeta = M([[0, 0, f2Bw*g2Bwetaeta]])
+w2B_xixi = M([[0, 0, f2Bw_xixi*g2Bw]])
+w2B_etaeta = M([[0, 0, f2Bw*g2Bw_etaeta]])
 
 # PANEL 2 - C terms
 u2C = M([[f2Cu*g2Cu, 0, 0]])

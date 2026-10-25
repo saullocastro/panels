@@ -213,8 +213,11 @@ def stress_names(theory):
 def shape_functions(side, theory, geometry='plate', kinematics='donnell'):
     r"""Operators of side ``'A'`` or ``'B'``, as rows of 5 DOFs"""
     def sf(field, dxi=0, deta=0):
-        fname = 'f{0}{1}{2}'.format(side, field, 'xi'*dxi)
-        gname = 'g{0}{1}{2}'.format(side, field, 'eta'*deta)
+        # derivatives after an underscore, e.g. fAw_xixi, gAu_eta
+        fname = 'f{0}{1}{2}'.format(side, field,
+                                    '_' + 'xi'*dxi if dxi else '')
+        gname = 'g{0}{1}{2}'.format(side, field,
+                                    '_' + 'eta'*deta if deta else '')
         row = zeros(1, DOF)
         row[0, FIELDS.index(field)] = var(fname)*var(gname)
         return row
@@ -226,32 +229,33 @@ def shape_functions(side, theory, geometry='plate', kinematics='donnell'):
         raise ValueError('flat plates have no Sanders-Koiter terms')
 
     u, v, w = sf('u'), sf('v'), sf('w')
-    ux, uy = (2/a)*sf('u', 1), (2/b)*sf('u', 0, 1)
-    vx, vy = (2/a)*sf('v', 1), (2/b)*sf('v', 0, 1)
-    wxA, wyA = (2/a)*sf('w', 1), (2/b)*sf('w', 0, 1)
-    wxx = (2/a)**2*sf('w', 2)
-    wyy = (2/b)**2*sf('w', 0, 2)
-    wxy = (2/a)*(2/b)*sf('w', 1, 1)
+    u_x, u_y = (2/a)*sf('u', 1), (2/b)*sf('u', 0, 1)
+    v_x, v_y = (2/a)*sf('v', 1), (2/b)*sf('v', 0, 1)
+    wA_x, wA_y = (2/a)*sf('w', 1), (2/b)*sf('w', 0, 1)
+    w_xx = (2/a)**2*sf('w', 2)
+    w_yy = (2/b)**2*sf('w', 0, 2)
+    w_xy = (2/a)*(2/b)*sf('w', 1, 1)
     phix, phiy = sf('phix'), sf('phiy')
-    phixx, phixy = (2/a)*sf('phix', 1), (2/b)*sf('phix', 0, 1)
-    phiyx, phiyy = (2/a)*sf('phiy', 1), (2/b)*sf('phiy', 0, 1)
+    phix_x, phix_y = (2/a)*sf('phix', 1), (2/b)*sf('phix', 0, 1)
+    phiy_x, phiy_y = (2/a)*sf('phiy', 1), (2/b)*sf('phiy', 0, 1)
 
     # variations of the rotations of the von Karman terms, beta_x = w,x and
     # beta_y = w,y - v/r (Sanders)
-    dbx = wxA
-    dby = wyA - sk*rinv*v
+    dbx = wA_x
+    dby = wA_y - sk*rinv*v
 
-    eps0 = M([ux + bx*dbx,
-              vy + rinv*w + by*dby,
-              uy + vx + bx*dby + by*dbx])
-    eps1 = M([phixx,
-              phiyy + sk*rinv*vy,
-              phixy + phiyx + sk*rinv*(Rational(3, 2)*vx - Rational(1, 2)*uy)])
-    gam0 = M([phiy + wyA, phix + wxA])
+    eps0 = M([u_x + bx*dbx,
+              v_y + rinv*w + by*dby,
+              u_y + v_x + bx*dby + by*dbx])
+    eps1 = M([phix_x,
+              phiy_y + sk*rinv*v_y,
+              phix_y + phiy_x
+              + sk*rinv*(Rational(3, 2)*v_x - Rational(1, 2)*u_y)])
+    gam0 = M([phiy + wA_y, phix + wA_x])
     if theory == 'fsdt':
         B = M([eps0, eps1, gam0])
     else:
-        eps3 = -c1*M([phixx + wxx, phiyy + wyy, phixy + phiyx + 2*wxy])
+        eps3 = -c1*M([phix_x + w_xx, phiy_y + w_yy, phix_y + phiy_x + 2*w_xy])
         gam2 = -3*c1*gam0
         B = M([eps0, eps1, eps3, gam0, gam2])
     B0 = B.subs({bx: 0, by: 0})
@@ -265,11 +269,11 @@ def shape_functions(side, theory, geometry='plate', kinematics='donnell'):
     else:
         # the cubic term about the mid-surface, z = d, see the docstring
         cubic = (z - d)**3 + d**3
-        uz = u + z*phix - c1*cubic*(phix + wxA)
-        vz = v + z*(phiy + sk*rinv*v) - c1*cubic*(phiy + wyA)
+        uz = u + z*phix - c1*cubic*(phix + wA_x)
+        vz = v + z*(phiy + sk*rinv*v) - c1*cubic*(phiy + wA_y)
     wz = w
 
-    return dict(B=B, B0=B0, G=G, uz=uz, vz=vz, wz=wz, w=w, wx=wxA, wy=wyA)
+    return dict(B=B, B0=B0, G=G, uz=uz, vz=vz, wz=wz, w=w, w_x=wA_x, w_y=wA_y)
 
 
 def tsdt_offset_cubic():
@@ -344,10 +348,10 @@ def build(theory, geometry='plate', kinematics='donnell'):
     # Aerodynamic and damping matrices using the piston theory, with the load
     # q = beta*w,x + gamma*w along w, where flat plates have no curvature
     # term gamma, see Shell.calc_kA()
-    kAx = -beta*SA['wx'].T*SB['w']
+    kAx = -beta*SA['w_x'].T*SB['w']
     if geometry == 'cylshell':
         kAx += -gamma*SA['w'].T*SB['w']
-    kAy = -beta*SA['wy'].T*SB['w']
+    kAy = -beta*SA['w_y'].T*SB['w']
     cA = -aeromu*SA['w'].T*SB['w']
 
     return dict(kC=kC, kC0=kC0, fint=fint, kG=kG, kM=kM, kAx=kAx, kAy=kAy,
