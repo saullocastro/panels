@@ -1158,7 +1158,7 @@ exact product, to round-off, and the exact directional derivative of
 :meth:`.Shell.calc_fint`.
 
 The product is what the prescribed displacements imposed exactly need at
-each configuration, `\partial R_r/\partial \lambda = [T]^T (\{F_{ext}\} -
+each configuration, `\partial R_r/\partial \lambda = [Z]^T (\{F_{ext}\} -
 [K_T(c)] \{c_{p1}\})`, see :ref:`null_space_pd`, and what matrix-free
 iterative solvers and directional checks of the tangent need.
 

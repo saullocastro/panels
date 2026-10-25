@@ -4,7 +4,7 @@ With ``MultiDomain(..., pd_method='null-space')`` the prescribed
 displacements of :meth:`.Shell.add_point_pd`,
 :meth:`.Shell.add_distr_pd_fixed_x` and :meth:`.Shell.add_distr_pd_fixed_y`
 are the constraints `[B_d] \{c\} = \{d_0\} + \lambda \{d_1\}`, eliminated
-with the connections, `\{c\} = [T] \{c_r\} + \{c_{p0}\} + \lambda
+with the connections, `\{c\} = [Z] \{c_r\} + \{c_{p0}\} + \lambda
 \{c_{p1}\}`, see ``doc/source/multidomain_null_space.rst``:
 
 - the membrane patch test is exact, for single and multiple domains, with
@@ -190,7 +190,7 @@ def test_single_shell_without_conn():
     X, Y, f = fields(p, c)
     assert np.allclose(f['u'], -1e-3*X, atol=1e-15)
     with pytest.raises(RuntimeError, match='No connectivity'):
-        MultiDomain([plate(1., 1.)], pd_method='null-space').get_T()
+        MultiDomain([plate(1., 1.)], pd_method='null-space').get_Z()
 
 
 def penalty_static(p, delta, k):
@@ -278,30 +278,30 @@ def test_mixed_constant_and_incremented_linear():
     assert np.allclose(f['v'][-1, :], 2*2e-4*X[-1, :], atol=1e-14)
     # the work conjugate reactions are independent of the particular solution
     P = md.reaction_pd(c2, lbd=2., NLgeom=False)
-    T = md.get_T()
+    Z = md.get_Z()
     rng = np.random.default_rng(0)
     for name, cp in (('cte', c_p0), ('inc', c_p1)):
-        other = cp + T @ rng.normal(size=T.shape[1])
+        other = cp + Z @ rng.normal(size=Z.shape[1])
         r = md._reaction_residual(c2, 2., False)
         assert np.isclose(other @ r, P[name], rtol=1e-9)
 
 
 def test_values_are_read_again_and_T_reused():
-    r"""`[T]` depends on the positions and components only, the particular
+    r"""`[Z]` depends on the positions and components only, the particular
     solutions on the values, which are read again from the panels"""
     p = plate(1., 0.6)
     end_shortening(p, 1e-3)
     p.add_point_pd(0., 0., 0, None, 1., 0., 0, None)
     md = MultiDomain([p], conn=[], pd_method='null-space')
     c1 = md.linear_static()
-    T = md.get_T()
+    Z = md.get_Z()
     p.clear_disps()
     end_shortening(p, 2e-3)
     p.add_point_pd(0., 0., 0, None, 1., 0., 0, None)
-    assert md.get_T() is T
+    assert md.get_Z() is Z
     assert np.allclose(md.linear_static(), 2*c1, rtol=1e-12)
     p.add_point_pd(0.5, 0.3, 0, None, 0, None, 1., 0.)
-    assert md.get_T() is not T
+    assert md.get_Z() is not Z
 
 
 def test_conflicting_prescriptions_name_panels():
@@ -345,8 +345,8 @@ def test_prescription_removed_by_flag():
     p = plate(1., 0.6, membrane_free=False)
     p.add_distr_pd_fixed_x(1., ku=1., funcu=lambda y: 0.)
     md = MultiDomain([p], conn=[], pd_method='null-space')
-    ref = MultiDomain([plate(1., 0.6, membrane_free=False)], conn=[]).get_T()
-    assert md.get_T().shape == ref.shape
+    ref = MultiDomain([plate(1., 0.6, membrane_free=False)], conn=[]).get_Z()
+    assert md.get_Z().shape == ref.shape
     assert not np.any(md.get_cp()[0])
     p.clear_disps()
     p.add_distr_pd_fixed_x(1., ku=1., funcu=lambda y: 1e-3)
@@ -561,7 +561,7 @@ def plate_postbuckling(delta_factor=3., m=8, n=8, P=2.):
                                     'arc_length_crisfield'])
 def test_nonlinear_displacement_control(method):
     r"""Post-buckling under displacement control: every converged increment
-    satisfies `\|[T]^T r\| \leq` ``relTOL`` `\|\lambda \partial R_r/\partial
+    satisfies `\|[Z]^T r\| \leq` ``relTOL`` `\|\lambda \partial R_r/\partial
     \lambda\|`, the methods agree, and the reaction is below the linear one"""
     md, p, delta = plate_postbuckling()
     an = Analysis(*md.get_reduced_functions())
@@ -573,12 +573,12 @@ def test_nonlinear_displacement_control(method):
     an.static(NLgeom=True, silent=True)
     assert np.isclose(an.increments[-1], 1.)
     fext, fint, kC, kG = md.get_reduced_functions()
-    T = md.get_T()
+    Z = md.get_Z()
     for c_r, lbd in zip(an.cs, an.increments):
         c = md.expand(c_r, lbd)
         r = md._reaction_residual(c, lbd, True)
         q = fext(inc=1., c=c_r, lbd=lbd)
-        assert np.linalg.norm(T.T @ r) <= 1.01e-6*np.linalg.norm(lbd*q)
+        assert np.linalg.norm(Z.T @ r) <= 1.01e-6*np.linalg.norm(lbd*q)
     P = md.reaction_pd(c, 1.)['inc']/delta
     N_lin = E*p.plyt*p.b*delta/p.a
     assert 0.5 < P/N_lin < 0.7
@@ -672,12 +672,12 @@ def test_constant_end_shortening_with_load_parameter():
         an.NL_method = method
         an.static(NLgeom=True, silent=True)
         assert np.isclose(an.increments[-1], 1.)
-        T = md.get_T()
+        Z = md.get_Z()
         for c_r, lbd in zip(an.cs, an.increments):
             c = md.expand(c_r, lbd)
             r = md._reaction_residual(c, lbd, True)
-            assert np.linalg.norm(T.T @ r) <= 1e-5*np.linalg.norm(
-                lbd*T.T @ md.calc_fext())
+            assert np.linalg.norm(Z.T @ r) <= 1e-5*np.linalg.norm(
+                lbd*Z.T @ md.calc_fext())
             X, Y, f = fields(p, c)
             assert np.allclose(f['u'][:, -1], -delta, atol=1e-12*delta)
     # without the incremented set, its reaction is null; at lbd = 0 the
@@ -701,16 +701,16 @@ def test_linear_static_through_analysis_raises():
 
 def test_without_prescriptions_unchanged():
     r"""Without prescribed displacements, ``pd_method='null-space'`` gives
-    the same `[T]` and the same reduced functions as the default"""
+    the same `[Z]` and the same reduced functions as the default"""
     ps, conn = two_by_two()
     md1 = MultiDomain(ps, conn)
     md2 = MultiDomain(ps, conn, pd_method='null-space')
-    T1, T2 = md1.get_T(), md2.get_T()
-    assert (T1 != T2).nnz == 0
+    Z1, Z2 = md1.get_Z(), md2.get_Z()
+    assert (Z1 != Z2).nnz == 0
     for f1, f2 in zip(md1.get_reduced_functions(),
                       md2.get_reduced_functions()):
         assert f1.__code__.co_varnames == f2.__code__.co_varnames
-    c_r = np.random.default_rng(0).normal(size=T1.shape[1])
+    c_r = np.random.default_rng(0).normal(size=Z1.shape[1])
     assert np.array_equal(md1.expand(c_r), md2.expand(c_r, lbd=0.5))
 
 
@@ -719,7 +719,7 @@ def test_save_and_load():
     p.add_point_pd(0., 0., 0, None, 1., 0., 0, None)
     p.add_point_pd(1., 0.3, 1., -1e-3, 0, None, 0, None, cte=False)
     md = MultiDomain([p], conn=[], pd_method='null-space')
-    md.get_T(rhs_tol=1e-6)
+    md.get_Z(rhs_tol=1e-6)
     f = io.BytesIO()
     md.save(f)
     f.seek(0)

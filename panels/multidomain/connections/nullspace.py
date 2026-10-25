@@ -10,7 +10,7 @@ row per quantity and point, and eliminated with a sparse basis of their null
 space, built by :func:`.null_space_basis`. The matrices and vectors of the
 assembly are reduced to the independent Ritz constants and the reduced
 problem is solved with the solvers of ``structsolve`` unchanged, see
-:meth:`.MultiDomain.get_T`, :meth:`.MultiDomain.reduce`,
+:meth:`.MultiDomain.get_Z`, :meth:`.MultiDomain.reduce`,
 :meth:`.MultiDomain.expand` and :meth:`.MultiDomain.get_reduced_functions`.
 
 The quantities of each connection are those of its penalty kernel, see
@@ -41,13 +41,13 @@ then the linear constraints:
     [B] \{c\} = \{0\}
 
 built by :func:`.constraint_matrix`, one row per quantity and point. They
-are eliminated with a sparse basis `[T]` of the null space of `[B]`, built by
+are eliminated with a sparse basis `[Z]` of the null space of `[B]`, built by
 :func:`.null_space_basis`:
 
 .. math::
 
-    \{c\} = [T] \{c_r\}, \qquad [K_r] = [T]^T [K] [T], \qquad
-    \{f_r\} = [T]^T \{f\}
+    \{c\} = [Z] \{c_r\}, \qquad [K_r] = [Z]^T [K] [Z], \qquad
+    \{f_r\} = [Z]^T \{f\}
 
 The vectors with zero penalty energy are exactly those that satisfy the
 constraints. Lagrange multipliers would add one unknown per constraint and
@@ -57,9 +57,9 @@ the shift-and-invert eigenvalue solvers of ``structsolve`` do not handle.
 The null-space method removes unknowns instead: the reduced stiffness matrix
 is symmetric and positive definite whenever the connected assembly has no
 rigid-body motion, like the stiffness matrix of the penalty method. The
-constraints are linear in `\{c\}`, so `[T]` does not change during a
-non-linear analysis, where `\{f_{int, r}\} = [T]^T \{f_{int}\}([T]
-\{c_r\})` and `[K_{T r}] = [T]^T [K_T]([T] \{c_r\}) [T]`.
+constraints are linear in `\{c\}`, so `[Z]` does not change during a
+non-linear analysis, where `\{f_{int, r}\} = [Z]^T \{f_{int}\}([Z]
+\{c_r\})` and `[K_{T r}] = [Z]^T [K_T]([Z] \{c_r\}) [Z]`.
 
 The damaged connection ``'SB_TSL'`` is a physical stiffness of the
 interface, not a constraint, and therefore remains a penalty stiffness.
@@ -68,7 +68,7 @@ With ``MultiDomain(..., pd_method='null-space')`` the prescribed
 displacements of the panels are the inhomogeneous constraints `[B_d] \{c\}
 = \{d_0\} + \lambda \{d_1\}`, built by :func:`.pd_constraint_matrix` and
 eliminated after the connections by :class:`.Elimination`, which also gives
-the particular solutions `\{c\} = [T] \{c_r\} + \{c_{p0}\} + \lambda
+the particular solutions `\{c\} = [Z] \{c_r\} + \{c_{p0}\} + \lambda
 \{c_{p1}\}`, see :ref:`null_space_pd`.
 
 """
@@ -758,7 +758,7 @@ class Elimination(object):
     The constraints of each block, rows ``B`` with right-hand sides ``d``,
     are written in the independent Ritz constants left by the previous
     blocks and eliminated with a QR decomposition with column pivoting, see
-    :meth:`.add`. The attribute ``T`` holds the basis of the independent
+    :meth:`.add`. The attribute ``Z`` holds the basis of the independent
     Ritz constants left, initially the identity. The blocks added with
     ``rhs=True``, e.g. the prescribed displacements, keep the data needed to
     compute particular solutions for any right-hand sides, see
@@ -775,18 +775,18 @@ class Elimination(object):
     Notes
     -----
     The constraints of each block, `[B] \{c\} = \{d\}`, are written in the
-    independent Ritz constants left by the previous blocks, `\{c\} = [T]
-    \{c_r\} + \{c_p\}`, where `[T]` is a basis of the null space of the
+    independent Ritz constants left by the previous blocks, `\{c\} = [Z]
+    \{c_r\} + \{c_p\}`, where `[Z]` is a basis of the null space of the
     homogeneous constraints of the previous blocks and `\{c_p\}` a
     particular solution of all the previous blocks. Eliminating the blocks
-    one at a time keeps `[T]` sparse, each block involving only the Ritz
+    one at a time keeps `[Z]` sparse, each block involving only the Ritz
     constants of its panels.
 
     """
     def __init__(self, size, tol):
         self.size = size
         self.tol = tol
-        self.T = identity(size, dtype=DOUBLE, format='csr')
+        self.Z = identity(size, dtype=DOUBLE, format='csr')
         self.min_kept = np.inf
         self.max_dropped = 0.
         #: data of the blocks added with ``rhs=True``, in order
@@ -796,15 +796,15 @@ class Elimination(object):
         r"""Eliminate the constraints of a block
 
         The rows of ``B`` are normalized to a unit norm and written in the
-        current independent Ritz constants, ``B @ T``. The columns with no
+        current independent Ritz constants, ``B @ Z``. The columns with no
         entry larger than ``tol`` are skipped, the others are decomposed by
         a QR decomposition with column pivoting, and the constants of the
         ``rank`` pivots larger than ``tol`` are eliminated. The attribute
-        ``T`` is replaced by the basis of the remaining constants, and
+        ``Z`` is replaced by the basis of the remaining constants, and
         ``min_kept`` and ``max_dropped`` are updated with the smallest pivot
         kept and the largest pivot dropped. With ``rhs=True`` the data of
         the block are appended to the attribute ``steps``, also when nothing
-        is eliminated. When no column is left, ``T`` is not changed.
+        is eliminated. When no column is left, ``Z`` is not changed.
 
         Parameters
         ----------
@@ -826,7 +826,7 @@ class Elimination(object):
 
         Notes
         -----
-        With the normalized rows `[B]`, `[\bar B] = [B] [T]` and the columns
+        With the normalized rows `[B]`, `[\bar B] = [B] [Z]` and the columns
         `J` of `[\bar B]` kept, the QR decomposition with column pivoting
         `[\bar B_J] [P] = [Q] [R]` reveals the rank `r`, the number of
         diagonal terms of `[R]` larger than ``tol``. The constants
@@ -841,20 +841,20 @@ class Elimination(object):
 
         where `[R_{11}]` is the leading `r \times r` triangle of `[R]` and
         `[Q_1]` the first `r` columns of `[Q]`. The homogeneous part gives
-        the new basis `[T] [S]`, `[S]` mapping the remaining constants to
+        the new basis `[Z] [S]`, `[S]` mapping the remaining constants to
         all the current ones, the terms of `-[R_{11}]^{-1} [R_{12}]` smaller
-        than ``1e-14`` times its largest one being dropped to keep `[T]`
+        than ``1e-14`` times its largest one being dropped to keep `[Z]`
         sparse. The column pivoting reveals the rank and chooses the
         eliminated constants such that `[R_{11}]` is well conditioned. The
         rows are normalized only once,
-        before being multiplied by `[T]`, so that a redundant row has only
+        before being multiplied by `[Z]`, so that a redundant row has only
         round-off errors, compared with the absolute tolerance ``tol``. The
         homogeneous blocks come first so that the particular solution,
         built in :meth:`.particular` with the basis of each block with
         ``rhs=True``, satisfies all the homogeneous constraints.
 
         """
-        T = self.T
+        Z = self.Z
         tol = self.tol
         B = csr_matrix(B)
         #NOTE the rows are normalized only once, so that a redundant row,
@@ -862,7 +862,7 @@ class Elimination(object):
         #     errors that are compared with the absolute tolerance
         norms = np.sqrt(np.asarray(B.multiply(B).sum(axis=1)).ravel())
         B = csr_matrix(B.multiply(1./np.where(norms > 0, norms, 1.)[:, None]))
-        Bt = (B @ T).toarray()
+        Bz = (B @ Z).toarray()
         step = None
         if rhs:
             step = dict(info=info, B=B, norms=norms, rank=0)
@@ -870,10 +870,10 @@ class Elimination(object):
         elif self.steps:
             raise RuntimeError('The homogeneous constraints must be added '
                                'before the ones with a right-hand side')
-        J = np.flatnonzero(np.abs(Bt).max(axis=0, initial=0) > tol)
+        J = np.flatnonzero(np.abs(Bz).max(axis=0, initial=0) > tol)
         if J.size == 0:
             return
-        Q, R, P = qr(Bt[:, J], mode='economic', pivoting=True)
+        Q, R, P = qr(Bz[:, J], mode='economic', pivoting=True)
         d = np.abs(np.diag(R))
         rank = int(np.sum(d > tol))
         if rank < d.size:
@@ -889,8 +889,8 @@ class Elimination(object):
         if step is not None:
             #NOTE particular solution with c_kept = 0, see particular()
             step.update(rank=rank, Q1=Q[:, :rank], R11=R[:rank, :rank],
-                        Bte=Bt[:, eliminated], Te=T[:, eliminated].tocsc())
-        nr = T.shape[1]
+                        Bze=Bz[:, eliminated], Ze=Z[:, eliminated].tocsc())
+        nr = Z.shape[1]
         remaining = np.setdiff1d(np.arange(nr), eliminated)
         new_index = -np.ones(nr, dtype=int)
         new_index[remaining] = np.arange(remaining.size)
@@ -900,19 +900,19 @@ class Elimination(object):
                          np.concatenate((np.arange(remaining.size),
                                          new_index[kept[ce]])))),
                        shape=(nr, remaining.size))
-        self.T = (T @ S.tocsr()).tocsr()
+        self.Z = (Z @ S.tocsr()).tocsr()
 
     def finish(self):
-        r"""Basis `[T]` of the null space of all the constraints added
+        r"""Basis `[Z]` of the null space of all the constraints added
 
         A warning is issued when a pivot was dropped and the smallest pivot
         kept is less than ``1e4`` times the largest pivot dropped. The
-        explicit zeros of the attribute ``T`` are removed, in place.
+        explicit zeros of the attribute ``Z`` are removed, in place.
 
         Returns
         -------
-        T : scipy.sparse.csr_matrix
-            The attribute ``T``, with shape ``(size, size - rank)``, ``rank``
+        Z : scipy.sparse.csr_matrix
+            The attribute ``Z``, with shape ``(size, size - rank)``, ``rank``
             being the number of constraints eliminated.
 
         Notes
@@ -920,7 +920,7 @@ class Elimination(object):
         The independent constraints have pivots many orders of magnitude
         larger than the round-off left in the redundant ones; a gap smaller
         than ``1e4`` means that the separation between independent and
-        redundant constraints, and therefore the rank and `[T]`, depend on
+        redundant constraints, and therefore the rank and `[Z]`, depend on
         ``tol``.
 
         """
@@ -929,8 +929,8 @@ class Elimination(object):
                  'defined, the smallest independent pivot is {0:.1e} and the '
                  'largest redundant one {1:.1e}, see the parameter "tol"'
                  .format(self.min_kept, self.max_dropped))
-        self.T.eliminate_zeros()
-        return self.T
+        self.Z.eliminate_zeros()
+        return self.Z
 
     def particular(self, ds, rhs_tol=1.e-8, describe=None):
         r"""Particular solution of the blocks added with ``rhs=True``
@@ -983,13 +983,13 @@ class Elimination(object):
         .. math::
 
             \{y\} = [R_{11}]^{-1} [Q_1]^T \{\delta\}, \qquad
-            \{c_p\} \leftarrow \{c_p\} + [T_e] \{y\}
+            \{c_p\} \leftarrow \{c_p\} + [Z_e] \{y\}
 
-        where `[T_e]` are the columns of the basis `[T]` of the eliminated
-        constants, both stored by :meth:`.add`. The columns of `[T]`
+        where `[Z_e]` are the columns of the basis `[Z]` of the eliminated
+        constants, both stored by :meth:`.add`. The columns of `[Z]`
         satisfy the homogeneous constraints of the previous blocks, which
         are therefore not changed, and the remaining constants of the block
-        are set to zero. The residual `\{\delta\} - [B_i] [T_e] \{y\}` is
+        are set to zero. The residual `\{\delta\} - [B_i] [Z_e] \{y\}` is
         zero when `\{\delta\}` is in the range of `[Q_1]`, i.e. when the
         right-hand side is consistent with the redundant rows.
 
@@ -1008,8 +1008,8 @@ class Elimination(object):
             dt = dn - step['B'] @ cp
             if step['rank'] > 0:
                 y = solve_triangular(step['R11'], step['Q1'].T @ dt)
-                res = dt - step['Bte'] @ y
-                cp += step['Te'] @ y
+                res = dt - step['Bze'] @ y
+                cp += step['Ze'] @ y
             else:
                 res = dt
             if np.abs(res).max(initial=0.) > atol:
@@ -1024,7 +1024,7 @@ class Elimination(object):
 
 
 def null_space_basis(Bs, size, tol=1.e-9):
-    r"""Sparse basis `[T]` of the null space of the constraints
+    r"""Sparse basis `[Z]` of the null space of the constraints
 
     The constraints of ``Bs`` are eliminated one connection at a time, in
     the order given, with :meth:`.Elimination.add`, and the basis is
@@ -1046,15 +1046,15 @@ def null_space_basis(Bs, size, tol=1.e-9):
 
     Returns
     -------
-    T : scipy.sparse.csr_matrix
-        Matrix with shape ``(size, size - rank)``, such that ``c = T @ c_r``
+    Z : scipy.sparse.csr_matrix
+        Matrix with shape ``(size, size - rank)``, such that ``c = Z @ c_r``
         satisfies all the constraints for any ``c_r``.
 
     Notes
     -----
-    The basis satisfies `[B] [T] = [0]` for all the constraints, and the
-    matrices and vectors of the assembly are reduced as `[K_r] = [T]^T [K]
-    [T]` and `\{f_r\} = [T]^T \{f\}`, see
+    The basis satisfies `[B] [Z] = [0]` for all the constraints, and the
+    matrices and vectors of the assembly are reduced as `[K_r] = [Z]^T [K]
+    [Z]` and `\{f_r\} = [Z]^T \{f\}`, see
     :mod:`panels.multidomain.connections.nullspace`. The independent
     constraints have pivots many orders of magnitude larger than the
     round-off errors left in the redundant ones, see
@@ -1063,7 +1063,7 @@ def null_space_basis(Bs, size, tol=1.e-9):
     boundary condition flag already removes the term that a constraint would
     remove. The fifth and following functions of Bardell vanish together
     with their slope at the ends of the domain, so the constraints of an edge
-    involve only the first four functions across it, and `[T]` has very few
+    involve only the first four functions across it, and `[Z]` has very few
     non-zero terms, an elimination similar to the assembly of the
     hierarchical elements of the p-version of the finite element method.
 

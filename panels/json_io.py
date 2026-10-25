@@ -57,7 +57,7 @@ value is not supported raises ``TypeError``, e.g. the functions of the
 distributed loads :meth:`.Shell.add_distr_load_fixed_x` or of a pressure
 ``p(x, y)``. The following are not stored and are recomputed on demand: the
 structural matrices (``Shell.matrices``, ``StiffPanelBay.kC``,
-``MultiDomain.kC``, ``MultiDomain.T``, ...), the number of threads
+``MultiDomain.kC``, ``MultiDomain.Z``, ...), the number of threads
 ``out_num_cores``, which takes the default of the machine that loads the
 file, and the attributes of Python subclasses, the loaded object having the
 type of the base class.
@@ -552,7 +552,7 @@ def _multidomain_to_data(md, path, w):
     if md.conn is None and md._conn_used is not None:
         data['conn_used'] = _conn_to_data(md._conn_used, md,
                                           path + '._conn_used', w)
-    data['T_tol'] = _encode(md._T_tol, path + '._T_tol', w)
+    data['Z_tol'] = _encode(md._Z_tol, path + '._Z_tol', w)
     data['rhs_tol'] = _encode(md._rhs_tol, path + '._rhs_tol', w)
     return data
 
@@ -560,7 +560,7 @@ def _multidomain_to_data(md, path, w):
 def _multidomain_from_data(data, r):
     from .multidomain import MultiDomain
     _check_keys(data, _MULTIDOMAIN_ATTRS + ('panels', 'conn', 'conn_used',
-                'T_tol', 'rhs_tol'), 'MultiDomain')
+                'Z_tol', 'T_tol', 'rhs_tol'), 'MultiDomain')
     panels = [_shell_from_data(p, r) for p in _list(data, 'panels')]
     conn = _conn_from_data(data.get('conn'), panels, r)
     conn_method = data.get('conn_method', 'null-space')
@@ -573,8 +573,12 @@ def _multidomain_from_data(data, r):
                      pd_method=pd_method)
     _decode_attrs(md, data, _MULTIDOMAIN_ATTRS, r)
     md._conn_used = _conn_from_data(data.get('conn_used'), panels, r)
-    if 'T_tol' in data:
-        md._T_tol = _decode(data['T_tol'], r)
+    # NOTE 'T_tol' is the key of the files written by panels 0.13.11, before
+    #      the null-space basis was renamed Z
+    for key in ('Z_tol', 'T_tol'):
+        if key in data:
+            md._Z_tol = _decode(data[key], r)
+            break
     if 'rhs_tol' in data:
         md._rhs_tol = _decode(data['rhs_tol'], r)
     return md

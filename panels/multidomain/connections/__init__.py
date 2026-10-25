@@ -220,7 +220,7 @@ normal at the reference surfaces with ``kr``.
 
 With the null-space method the quantities penalized by the kernels become
 the linear constraints `[B] \{c\} = \{0\}`, which are eliminated with a
-basis `[T]` of their null space, `\{c\} = [T] \{c_r\}`. The results are
+basis `[Z]` of their null space, `\{c\} = [Z] \{c_r\}`. The results are
 the limit of the penalty method for penalty constants going to infinity,
 see :mod:`panels.multidomain.connections.nullspace`.
 

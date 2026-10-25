@@ -253,7 +253,7 @@ class MultiDomain(object):
 
         - ``'null-space'`` (default): exactly, eliminating the constrained
           Ritz constants with a basis of the null space of the constraints,
-          see :meth:`.get_T` and
+          see :meth:`.get_Z` and
           :mod:`panels.multidomain.connections.nullspace`. The matrices and
           vectors must then be reduced with :meth:`.reduce` before solving,
           and the solutions expanded with :meth:`.expand`. The penalty
@@ -306,8 +306,8 @@ class MultiDomain(object):
       error that decreases with the inverse of the penalty constants, while
       the condition number of the stiffness matrix grows with them;
     - with ``conn_method='null-space'``, as the exact linear constraints
-      `[B] \{c\} = \{0\}`, eliminated with `\{c\} = [T] \{c_r\}`, see
-      :meth:`.get_T`, as with penalty constants going to infinity.
+      `[B] \{c\} = \{0\}`, eliminated with `\{c\} = [Z] \{c_r\}`, see
+      :meth:`.get_Z`, as with penalty constants going to infinity.
 
     The connection ``'SB_TSL'`` represents the physical stiffness of a
     cohesive interface, which degrades with the damage, see
@@ -316,7 +316,7 @@ class MultiDomain(object):
 
     With ``pd_method='null-space'`` the prescribed displacements are the
     inhomogeneous linear constraints `[B_d] \{c\} = \{d_0\} + \lambda
-    \{d_1\}`, and every admissible configuration is `\{c\} = [T] \{c_r\} +
+    \{d_1\}`, and every admissible configuration is `\{c\} = [Z] \{c_r\} +
     \{c_{p0}\} + \lambda \{c_{p1}\}`, see :meth:`.get_cp` and
     :ref:`null_space_pd`. With ``pd_method='penalty'`` a prescribed value
     `u_p` is imposed with the energy `\frac{1}{2} k (u - u_p)^2`, integrated
@@ -351,7 +351,7 @@ class MultiDomain(object):
     >>> md = MultiDomain(panels, conn)
 
     The connections are imposed exactly with the default
-    ``conn_method='null-space'``, see :meth:`.get_T`.
+    ``conn_method='null-space'``, see :meth:`.get_Z`.
 
     Point or distributed forces or displacements can be easily added by using
     one of the methods:
@@ -416,9 +416,9 @@ class MultiDomain(object):
         self.conn_method = conn_method
         self.pd_method = pd_method
         self.kC_conn = None
-        self.T = None
-        self._T_key = None
-        self._T_tol = 1.e-9
+        self.Z = None
+        self._Z_key = None
+        self._Z_tol = 1.e-9
         self._rhs_tol = 1.e-8
         self._elim = None
         self._pd_blocks = []
@@ -450,7 +450,7 @@ class MultiDomain(object):
 
         The panels and the connections are saved with the assembly, see
         :mod:`panels.json_io`. The matrices, including the null-space basis
-        ``T``, are not stored. The object is not modified.
+        ``Z``, are not stored. The object is not modified.
 
         Parameters
         ----------
@@ -510,7 +510,7 @@ class MultiDomain(object):
         The connections of :data:`.nullspace.NULL_SPACE_FUNCS` are continuity
         conditions, homogeneous linear constraints on the Ritz constants,
         `[B] \{c\} = \{0\}`, see :func:`.nullspace.constraint_matrix`,
-        eliminated exactly by :meth:`.get_T`. The other connection,
+        eliminated exactly by :meth:`.get_Z`. The other connection,
         ``'SB_TSL'``, represents the stiffness of a cohesive interface that
         degrades with the damage, and it always enters :meth:`.get_kC_conn`
         as a penalty stiffness.
@@ -520,17 +520,17 @@ class MultiDomain(object):
                 and connecti['func'] in nullspace.NULL_SPACE_FUNCS)
 
 
-    def _T_signature(self, conn):
-        r"""Data that define `[T]`, used to reuse it while unchanged
+    def _Z_signature(self, conn):
+        r"""Data that define `[Z]`, used to reuse it while unchanged
 
         A tuple with the data of the connections imposed exactly, of the
         panels and, with ``pd_method='null-space'``, of the positions and
         the components of the prescribed displacements, compared by
-        :meth:`.get_T`.
+        :meth:`.get_Z`.
 
         Notes
         -----
-        `[T]` spans the null space of the constraints of :meth:`.get_T`,
+        `[Z]` spans the null space of the constraints of :meth:`.get_Z`,
         whose rows depend on the function, the position and the panels of
         each connection imposed exactly, on whether the rotations of
         ``'SB'`` are connected (key ``'kr'``, used only by the FSDT and
@@ -559,7 +559,7 @@ class MultiDomain(object):
                                p.col_start, plyts, bcs))
         if self.pd_method != 'null-space':
             return sig_conn, tuple(sig_panels)
-        #NOTE the positions and the prescribed components define [T], the
+        #NOTE the positions and the prescribed components define [Z], the
         #     prescribed values only the particular solutions, see get_cp()
         sig_pds = tuple((id(p), cte, tuple(values[:2]), values[7],
                          tuple(v is not None for v in values[2:7]))
@@ -572,11 +572,11 @@ class MultiDomain(object):
         return sig_conn, tuple(sig_panels), sig_pds
 
 
-    def get_T(self, conn=None, tol=None, rhs_tol=None):
+    def get_Z(self, conn=None, tol=None, rhs_tol=None):
         r"""Basis of the null space of the constraints imposed exactly
 
         With ``conn_method='null-space'``, the default, returns the matrix
-        ``T`` such that the Ritz constants of the assembly ``c = T @ c_r``
+        ``Z`` such that the Ritz constants of the assembly ``c = Z @ c_r``
         satisfy all the connections of :data:`.nullspace.NULL_SPACE_FUNCS`
         for any vector ``c_r`` of independent Ritz constants, see
         :mod:`panels.multidomain.connections.nullspace`. The matrices and
@@ -590,15 +590,15 @@ class MultiDomain(object):
             eigvecs = md.expand(eigvecs_r)
 
         With ``conn_method='penalty'``, and without prescribed displacements
-        imposed exactly, `[T]` is the identity matrix and the same code
+        imposed exactly, `[Z]` is the identity matrix and the same code
         solves the problem with the penalty method.
 
         With ``pd_method='null-space'``, the prescribed displacements of the
         panels are also constraints, eliminated after the connections, and
-        `[T]` is the basis of the null space of all the constraints; the
+        `[Z]` is the basis of the null space of all the constraints; the
         particular solutions are given by :meth:`.get_cp`.
 
-        `[T]` is stored in the attribute ``T`` and reused while the
+        `[Z]` is stored in the attribute ``Z`` and reused while the
         connections, the number of terms and the boundary conditions of the
         panels, and the positions and components of the prescribed
         displacements with ``pd_method='null-space'``, do not change, also
@@ -621,7 +621,7 @@ class MultiDomain(object):
 
         Returns
         -------
-        T : scipy.sparse.csr_matrix
+        Z : scipy.sparse.csr_matrix
             Matrix with shape ``(size, size_r)``, with ``size_r`` the number
             of independent Ritz constants.
 
@@ -630,12 +630,12 @@ class MultiDomain(object):
         The connections imposed exactly are the homogeneous linear
         constraints `[B] \{c\} = \{0\}`, one block of rows per connection,
         see :func:`.nullspace.constraint_matrix`, and all the vectors that
-        satisfy them are `\{c\} = [T] \{c_r\}`, with `[B] [T] = [0]`, where
+        satisfy them are `\{c\} = [Z] \{c_r\}`, with `[B] [Z] = [0]`, where
         `\{c_r\}` are the independent Ritz constants. Substituting them into
         the total potential energy gives the reduced matrices and vectors of
         :meth:`.reduce`. With ``pd_method='null-space'``, the prescribed
         displacements add the inhomogeneous constraints `[B_d] \{c\} =
-        \{d_0\} + \lambda \{d_1\}`, and `[T]` spans the null space of all
+        \{d_0\} + \lambda \{d_1\}`, and `[Z]` spans the null space of all
         the constraints, see :meth:`.get_cp` and :ref:`null_space_pd`.
 
         The blocks of constraints are eliminated one at a time, the
@@ -662,21 +662,21 @@ class MultiDomain(object):
         and the mass matrix would then have zero rows and columns for the
         multipliers, giving infinite eigenvalues. The null-space method
         removes unknowns instead of adding them, and gives the same solution.
-        Since the constraints are linear in `\{c\}`, `[T]` does not change
+        Since the constraints are linear in `\{c\}`, `[Z]` does not change
         during a non-linear analysis. See :ref:`null_space`.
 
         """
         size = self.get_size()
         conn = self._resolve_conn(conn)
         if tol is not None:
-            self._T_tol = tol
-        tol = self._T_tol
+            self._Z_tol = tol
+        tol = self._Z_tol
         if rhs_tol is not None and rhs_tol != self._rhs_tol:
             self._rhs_tol = rhs_tol
             self._cp_cache = None
-        key = (self._T_signature(conn), tol)
-        if self.T is not None and self._T_key == key:
-            return self.T
+        key = (self._Z_signature(conn), tol)
+        if self.Z is not None and self._Z_key == key:
+            return self.Z
         Bs = [nullspace.constraint_matrix(ci, size)
               for ci in conn if self._null_space(ci)]
         blocks = []
@@ -689,16 +689,16 @@ class MultiDomain(object):
                 elim.add(B)
             for i, block in enumerate(blocks):
                 elim.add(block['B'], rhs=True, info=block)
-            self.T = elim.finish()
+            self.Z = elim.finish()
             self._elim = elim
         else:
-            self.T = nullspace.null_space_basis(Bs, size, tol=tol)
+            self.Z = nullspace.null_space_basis(Bs, size, tol=tol)
             self._elim = None
         self._pd_blocks = blocks
         self._pd_conn = [ci for ci in conn if self._null_space(ci)]
         self._cp_cache = None
-        self._T_key = key
-        return self.T
+        self._Z_key = key
+        return self.Z
 
 
     def _panel_label(self, p):
@@ -790,7 +790,7 @@ class MultiDomain(object):
                     'panels: {5}. With constant (cte=True) and incremented '
                     '(cte=False) prescriptions, each set must be consistent '
                     'by itself; with functions that are not polynomials, '
-                    'see the parameter "rhs_tol" of MultiDomain.get_T'
+                    'see the parameter "rhs_tol" of MultiDomain.get_Z'
                     .format(label, k, abs(res[k]), atol, msg_flags,
                             '; '.join(before) or 'none'))
         return describe
@@ -805,9 +805,9 @@ class MultiDomain(object):
         values of the constant prescriptions (``cte=True``) and ``c_p1``
         with those of the prescriptions incremented with the load factor
         (``cte=False``), the other prescribed values being zero, such that
-        the configuration at the load factor ``lbd`` is ``T @ c_r + c_p0 +
+        the configuration at the load factor ``lbd`` is ``Z @ c_r + c_p0 +
         lbd*c_p1``, see :meth:`.expand`. They are computed in the
-        elimination of :meth:`.get_T`, which is reused while only the
+        elimination of :meth:`.get_Z`, which is reused while only the
         prescribed values change, the values being read again from the
         panels at each call, and they are stored in the attributes ``c_p0``
         and ``c_p1``.
@@ -834,7 +834,7 @@ class MultiDomain(object):
 
         .. math::
 
-            \{c\} = [T] \{c_r\} + \{c_{p0}\} + \lambda \{c_{p1}\}
+            \{c\} = [Z] \{c_r\} + \{c_{p0}\} + \lambda \{c_{p1}\}
 
         with `[B] \{c_{p0}\} = \{0; d_0\}` and `[B] \{c_{p1}\} = \{0;
         d_1\}` for `[B]` the constraints of the connections and of the
@@ -847,25 +847,25 @@ class MultiDomain(object):
         these points otherwise.
 
         The right-hand sides are solved with the QR decompositions stored by
-        :meth:`.get_T`, see :meth:`.nullspace.Elimination.particular`,
+        :meth:`.get_Z`, see :meth:`.nullspace.Elimination.particular`,
         without any new decomposition. Since the constraints hold for every
         `\lambda`, the constant and the incremented sets must each be
         consistent by themselves. A redundant constraint is dropped only when
         the particular solution satisfies it within ``rhs_tol`` of
-        :meth:`.get_T`, relative to the largest prescribed value; otherwise
+        :meth:`.get_Z`, relative to the largest prescribed value; otherwise
         the prescriptions are inconsistent, e.g. two prescribed lines with
         different values at a common corner, or a non-zero value on a term
         removed by a boundary condition flag.
 
         """
-        self.get_T()
+        self.get_Z()
         size = self.get_size()
         blocks = self._pd_blocks
         if not blocks:
             self.c_p0 = np.zeros(size, dtype=DOUBLE)
             self.c_p1 = np.zeros(size, dtype=DOUBLE)
             return self.c_p0, self.c_p1
-        #NOTE [T] is reused while the positions and the components do not
+        #NOTE [Z] is reused while the positions and the components do not
         #     change, the values are read again from the panels
         entries = [e for p in self.panels for e in nullspace.pd_entries(p)]
         assert len(entries) == len(blocks)
@@ -888,8 +888,8 @@ class MultiDomain(object):
     def reduce(self, A):
         r"""Reduce a matrix or a vector to the independent Ritz constants
 
-        Returns ``T.T @ A @ T`` for a matrix and ``T.T @ A`` for a vector,
-        with ``T`` from :meth:`.get_T`.
+        Returns ``Z.T @ A @ Z`` for a matrix and ``Z.T @ A`` for a vector,
+        with ``Z`` from :meth:`.get_Z`.
 
         Parameters
         ----------
@@ -904,15 +904,15 @@ class MultiDomain(object):
             1-D array of size ``size_r`` for a vector, or
             :class:`scipy.sparse.csr_matrix` with shape ``(size_r,
             size_r)`` for a matrix, with ``size_r`` the number of
-            independent Ritz constants, the number of columns of `[T]`.
+            independent Ritz constants, the number of columns of `[Z]`.
 
         Notes
         -----
-        Substituting `\{c\} = [T] \{c_r\}` into the total potential energy,
+        Substituting `\{c\} = [Z] \{c_r\}` into the total potential energy,
         `\frac{1}{2} \{c\}^T [K] \{c\} - \{c\}^T \{f\}`, gives the reduced
-        stiffness matrix `[K_r] = [T]^T [K] [T]` and the reduced force
-        vector `\{f_r\} = [T]^T \{f\}`, and likewise `[K_{G r}] = [T]^T [K_G]
-        [T]` and `[M_r] = [T]^T [M] [T]` for the linear buckling and
+        stiffness matrix `[K_r] = [Z]^T [K] [Z]` and the reduced force
+        vector `\{f_r\} = [Z]^T \{f\}`, and likewise `[K_{G r}] = [Z]^T [K_G]
+        [Z]` and `[M_r] = [Z]^T [M] [Z]` for the linear buckling and
         frequency analyses. `[K_r]` is symmetric and positive definite
         whenever the connected assembly has no rigid-body motion. With
         prescribed displacements imposed exactly, the reduced force vector
@@ -920,25 +920,25 @@ class MultiDomain(object):
         :meth:`.linear_static`. See :ref:`null_space`.
 
         """
-        T = self.get_T()
+        Z = self.get_Z()
         if isinstance(A, np.ndarray) and A.ndim == 1:
-            return T.T @ A
-        return csr_matrix(T.T @ A @ T)
+            return Z.T @ A
+        return csr_matrix(Z.T @ A @ Z)
 
 
     def expand(self, c_r, lbd=None):
         r"""Ritz constants of the assembly from the independent ones
 
-        Returns ``T @ c_r``, with ``T`` from :meth:`.get_T`. ``c_r`` can
+        Returns ``Z @ c_r``, with ``Z`` from :meth:`.get_Z`. ``c_r`` can
         also be a 2D array, e.g. with one eigenvector per column.
 
         With ``pd_method='null-space'`` and prescribed displacements, the
         configuration of the structure at the load factor ``lbd`` is
-        returned when ``lbd`` is given, ``T @ c_r + c_p0 + lbd*c_p1`` with
+        returned when ``lbd`` is given, ``Z @ c_r + c_p0 + lbd*c_p1`` with
         ``c_p0`` and ``c_p1`` from :meth:`.get_cp`, added to each column of
         a 2D ``c_r``, whereas a mode, e.g. an eigenvector of a linear
         buckling or frequency analysis, or an increment of the
-        configuration, is expanded without ``lbd``, ``T @ c_r``::
+        configuration, is expanded without ``lbd``, ``Z @ c_r``::
 
             c = md.expand(c_r, lbd)        # configuration
             phi = md.expand(eigvecs_r)     # modes
@@ -951,7 +951,7 @@ class MultiDomain(object):
             column.
         lbd : float or None, optional
             Load factor of a configuration. With ``None``, the default,
-            ``T @ c_r`` is returned, unchanged with respect to the
+            ``Z @ c_r`` is returned, unchanged with respect to the
             previous versions.
 
         Returns
@@ -965,19 +965,19 @@ class MultiDomain(object):
         -----
         A configuration of the structure at the load factor `\lambda`
         satisfies the inhomogeneous constraints of the prescribed
-        displacements, `\{c\} = [T] \{c_r\} + \{c_{p0}\} + \lambda
+        displacements, `\{c\} = [Z] \{c_r\} + \{c_{p0}\} + \lambda
         \{c_{p1}\}`, see :meth:`.get_cp`, whereas a mode, or an increment of
         the configuration at a constant load factor, satisfies the
         homogeneous constraints only, its prescribed components being zero,
-        and is `[T] \{c_r\}`.
+        and is `[Z] \{c_r\}`.
 
         """
-        T = self.get_T()
+        Z = self.get_Z()
         if lbd is None:
-            return T @ c_r
+            return Z @ c_r
         c_p0, c_p1 = self.get_cp()
         c_p = c_p0 + lbd*c_p1
-        c = T @ c_r
+        c = Z @ c_r
         if c.ndim == 2:
             return c + c_p[:, None]
         return c + c_p
@@ -987,7 +987,7 @@ class MultiDomain(object):
         r"""Functions of the reduced problem for ``structsolve.Analysis``
 
         The functions take and return quantities reduced to the independent
-        Ritz constants, see :meth:`.get_T`, and can be used for the
+        Ritz constants, see :meth:`.get_Z`, and can be used for the
         non-linear analyses::
 
             from structsolve import Analysis
@@ -998,11 +998,11 @@ class MultiDomain(object):
 
         Without prescribed displacements imposed exactly, the functions
         evaluate :meth:`.calc_fext`, :meth:`.calc_fint`, :meth:`.calc_kC` and
-        :meth:`.calc_kG` at the Ritz constants ``T @ c`` and return ``T.T @
-        f`` for the vectors and ``T.T @ K @ T`` for the matrices.
+        :meth:`.calc_kG` at the Ritz constants ``Z @ c`` and return ``Z.T @
+        f`` for the vectors and ``Z.T @ K @ Z`` for the matrices.
 
         With ``pd_method='null-space'`` and prescribed displacements, they
-        are evaluated at the configuration ``c_full = T @ c + c_p0 +
+        are evaluated at the configuration ``c_full = Z @ c + c_p0 +
         lbd*c_p1``, see :meth:`.get_cp`, with ``lbd`` equal to ``inc``,
         except in ``calc_fext``:
 
@@ -1012,8 +1012,8 @@ class MultiDomain(object):
           reduced :meth:`.calc_kC` and :meth:`.calc_kG` at the configuration,
           whose sum is the reduced tangent stiffness matrix;
         - ``calc_fext(inc=1., c=None, lbd=None)``: without ``c``, the
-          reduced reference vector ``T.T @ calc_fext(inc)``, which the
-          solvers scale by the load factor; with ``c`` and ``lbd``, ``T.T @
+          reduced reference vector ``Z.T @ calc_fext(inc)``, which the
+          solvers scale by the load factor; with ``c`` and ``lbd``, ``Z.T @
           (calc_fext(inc, c=c_full) - inc*calc_kTv(c_full, c_p1, inc=lbd))``
           at the configuration of the load factor ``lbd``, the product being
           computed only when ``c_p1`` is not null, which ``structsolve``
@@ -1034,22 +1034,22 @@ class MultiDomain(object):
         Notes
         -----
         Without prescribed displacements imposed exactly, the reduced
-        problem is `[T]^T \{R([T] \{c_r\}, \lambda)\} = \{0\}`, with the
+        problem is `[Z]^T \{R([Z] \{c_r\}, \lambda)\} = \{0\}`, with the
         residual `\{R(c, \lambda)\} = \lambda \{F_{ext}\} - \{F_{int}(c,
-        \lambda)\}` of the unconstrained system and the constant `[T]`,
+        \lambda)\}` of the unconstrained system and the constant `[Z]`,
         since the constraints are linear.
 
         With ``pd_method='null-space'`` and prescribed displacements, the
-        configuration is `\{c\} = [T] \{c_r\} + \{c_{p0}\} + \lambda
+        configuration is `\{c\} = [Z] \{c_r\} + \{c_{p0}\} + \lambda
         \{c_{p1}\}`, and substituting it into the residual and projecting it
-        with `[T]^T` gives the reduced problem solved by ``structsolve``:
+        with `[Z]^T` gives the reduced problem solved by ``structsolve``:
 
         .. math::
 
-            \{F_{int, r}(c_r, \lambda)\} &= [T]^T \{F_{int}(c)\} \\
-            [K_{T, r}] &= [T]^T [K_T(c)] [T] = -\frac{\partial R_r}{\partial
+            \{F_{int, r}(c_r, \lambda)\} &= [Z]^T \{F_{int}(c)\} \\
+            [K_{T, r}] &= [Z]^T [K_T(c)] [Z] = -\frac{\partial R_r}{\partial
                 c_r} \\
-            \frac{\partial R_r}{\partial \lambda} &= [T]^T \left(\{F_{ext}\}
+            \frac{\partial R_r}{\partial \lambda} &= [Z]^T \left(\{F_{ext}\}
                 - [K_T(c)] \{c_{p1}\}\right)
 
         `[K_{T, r}]`, the sum of ``calc_kC`` and ``calc_kG``, is the exact
@@ -1060,28 +1060,28 @@ class MultiDomain(object):
         \partial R_r/\partial \lambda` as a reference quantity of the
         convergence criteria, Crisfield's scaled criterion, the default of
         ``structsolve`` 0.9.0, and the relative one, since under a prescribed
-        displacement alone both `[T]^T \{F_{ext}\}` and `[T]^T \{F_{int}\}`
+        displacement alone both `[Z]^T \{F_{ext}\}` and `[Z]^T \{F_{int}\}`
         vanish at equilibrium. See :ref:`null_space_pd`.
 
         """
-        T = self.get_T()
+        Z = self.get_Z()
         if not self._pd_blocks:
             def calc_fext(inc=1., silent=True, c=None):
-                c = None if c is None else T @ c
-                return T.T @ self.calc_fext(inc=inc, silent=silent, c=c)
+                c = None if c is None else Z @ c
+                return Z.T @ self.calc_fext(inc=inc, silent=silent, c=c)
 
             def calc_fint(c, inc=1., silent=True):
-                return T.T @ self.calc_fint(c=T @ c, inc=inc, silent=silent)
+                return Z.T @ self.calc_fint(c=Z @ c, inc=inc, silent=silent)
 
             def calc_kC(c=None, NLgeom=False, inc=1., silent=True):
-                c = None if c is None else T @ c
-                return csr_matrix(T.T @ self.calc_kC(c=c, NLgeom=NLgeom, inc=inc,
-                                  silent=silent) @ T)
+                c = None if c is None else Z @ c
+                return csr_matrix(Z.T @ self.calc_kC(c=c, NLgeom=NLgeom, inc=inc,
+                                  silent=silent) @ Z)
 
             def calc_kG(c=None, NLgeom=False, silent=True):
-                c = None if c is None else T @ c
-                return csr_matrix(T.T @ self.calc_kG(c=c, NLgeom=NLgeom,
-                                  silent=silent) @ T)
+                c = None if c is None else Z @ c
+                return csr_matrix(Z.T @ self.calc_kG(c=c, NLgeom=NLgeom,
+                                  silent=silent) @ Z)
 
             return calc_fext, calc_fint, calc_kC, calc_kG
 
@@ -1089,11 +1089,11 @@ class MultiDomain(object):
         has_p1 = bool(np.any(c_p1))
 
         def full(c_r, lbd):
-            return T @ c_r + c_p0 + lbd*c_p1
+            return Z @ c_r + c_p0 + lbd*c_p1
 
         def calc_fext(inc=1., silent=True, c=None, lbd=None):
             if c is None:
-                return T.T @ self.calc_fext(inc=inc, silent=silent)
+                return Z.T @ self.calc_fext(inc=inc, silent=silent)
             if lbd is None:
                 raise ValueError('With the prescribed displacements of '
                     'pd_method="null-space", calc_fext(c=c) requires the '
@@ -1107,20 +1107,20 @@ class MultiDomain(object):
                 #NOTE the product, without the assembly of [K_T]
                 fext = fext - inc*self.calc_kTv(cf, c_p1, silent=silent,
                                                 inc=lbd)
-            return T.T @ fext
+            return Z.T @ fext
 
         def calc_fint(c, inc=1., silent=True):
-            return T.T @ self.calc_fint(c=full(c, inc), inc=inc, silent=silent)
+            return Z.T @ self.calc_fint(c=full(c, inc), inc=inc, silent=silent)
 
         def calc_kC(c=None, NLgeom=False, inc=1., silent=True):
             c = None if c is None else full(c, inc)
             kC = self.calc_kC(c=c, NLgeom=NLgeom, inc=inc, silent=silent)
-            return csr_matrix(T.T @ kC @ T)
+            return csr_matrix(Z.T @ kC @ Z)
 
         def calc_kG(c=None, NLgeom=False, inc=1., silent=True):
             c = None if c is None else full(c, inc)
             kG = self.calc_kG(c=c, NLgeom=NLgeom, silent=silent)
-            return csr_matrix(T.T @ kG @ T)
+            return csr_matrix(Z.T @ kG @ Z)
 
         return calc_fext, calc_fint, calc_kC, calc_kG
 
@@ -1128,21 +1128,21 @@ class MultiDomain(object):
     def _linear_state(self, kC, fext, c_p, silent=True):
         r"""Linear static solution with a particular solution ``c_p``
 
-        Solves the system of the reduced matrix ``T.T @ kC @ T`` with the
-        right-hand side ``T.T @ (fext - kC @ c_p)``, with
-        ``structsolve.solve``, and returns ``T @ c_r + c_p``.
+        Solves the system of the reduced matrix ``Z.T @ kC @ Z`` with the
+        right-hand side ``Z.T @ (fext - kC @ c_p)``, with
+        ``structsolve.solve``, and returns ``Z @ c_r + c_p``.
 
         Notes
         -----
-        Substituting `\{c\} = [T] \{c_r\} + \{c_p\}` into `[K] \{c\} =
-        \{F\}` and projecting it with `[T]^T` gives `[K_r] \{c_r\} = [T]^T
-        (\{F\} - [K] \{c_p\})`, with `[K_r] = [T]^T [K] [T]`.
+        Substituting `\{c\} = [Z] \{c_r\} + \{c_p\}` into `[K] \{c\} =
+        \{F\}` and projecting it with `[Z]^T` gives `[K_r] \{c_r\} = [Z]^T
+        (\{F\} - [K] \{c_p\})`, with `[K_r] = [Z]^T [K] [Z]`.
 
         """
-        T = self.get_T()
-        rhs = T.T @ (fext - kC @ c_p)
-        c_r = solve(csr_matrix(T.T @ kC @ T), rhs, silent=silent)
-        return T @ c_r + c_p
+        Z = self.get_Z()
+        rhs = Z.T @ (fext - kC @ c_p)
+        c_r = solve(csr_matrix(Z.T @ kC @ Z), rhs, silent=silent)
+        return Z @ c_r + c_p
 
 
     def linear_static(self, lbd=1., silent=True):
@@ -1175,13 +1175,13 @@ class MultiDomain(object):
 
         .. math::
 
-            [T]^T [K] [T] \{c_r\} = [T]^T \left(\lambda \{F_{ext}\} - [K]
+            [Z]^T [K] [Z] \{c_r\} = [Z]^T \left(\lambda \{F_{ext}\} - [K]
             (\{c_{p0}\} + \lambda \{c_{p1}\})\right)
 
         with `[K]` from :meth:`.calc_kC`, `\{F_{ext}\}` from
         ``calc_fext(inc=1.)``, scaled by `\lambda` as in the analyses of
         ``structsolve``, and `\{c_{p0}\}`, `\{c_{p1}\}` from
-        :meth:`.get_cp`, and returns `\{c\} = [T] \{c_r\} + \{c_{p0}\} +
+        :meth:`.get_cp`, and returns `\{c\} = [Z] \{c_r\} + \{c_{p0}\} +
         \lambda \{c_{p1}\}`. See :ref:`null_space_pd`.
 
         """
@@ -1262,21 +1262,21 @@ class MultiDomain(object):
             \left([K_r] + [K_{G,r}(N_0, c_0)] + \lambda [K_{G,r}(0,
             c_1)]\right) \{\phi_r\} = \{0\}
 
-        with the matrices reduced with `[T]`, see :meth:`.reduce`. Each
+        with the matrices reduced with `[Z]`, see :meth:`.reduce`. Each
         constant contribution enters once: a constant prescribed rigid
         translation, which produces no stress, leaves the critical load
         factors unchanged. Without constant prescribed displacements and
         constant stress resultants it is the usual linear buckling analysis
         about the linear static solution for `\lambda = 1`. The modes
-        satisfy the homogeneous constraints, `\{\phi\} = [T] \{\phi_r\}`:
+        satisfy the homogeneous constraints, `\{\phi\} = [Z] \{\phi_r\}`:
         under displacement control the prescribed components of the modes
         are zero, whereas under the equivalent load they are free. See
         :ref:`null_space_pd`.
 
         """
-        T = self.get_T()
+        Z = self.get_Z()
         kC = self.calc_kC(silent=silent)
-        kC_r = csr_matrix(T.T @ kC @ T)
+        kC_r = csr_matrix(Z.T @ kC @ Z)
         c0 = None
         if c is None:
             c_p0, c_p1 = self.get_cp()
@@ -1320,7 +1320,7 @@ class MultiDomain(object):
         -----
         `\{r(c, \lambda)\} = \{F_{int}(c)\} - \lambda \{F_{ext}\}`. At an
         equilibrium configuration that satisfies the constraints imposed
-        exactly, `[T]^T \{r\} = \{0\}`, and `\{r\}` holds the generalized
+        exactly, `[Z]^T \{r\} = \{0\}`, and `\{r\}` holds the generalized
         forces applied by the constraints on the structure, see
         :meth:`.reaction_pd`.
 
@@ -1378,7 +1378,7 @@ class MultiDomain(object):
             \{F_{int}(c)\} - \lambda \{F_{ext}\}
 
         with `\{c_{pj}\}` from :meth:`.get_cp`. It does not depend on the
-        choice of the particular solution, because `[T]^T \{r\} = 0` at
+        choice of the particular solution, because `[Z]^T \{r\} = 0` at
         equilibrium, and `P_j \delta` is the work of the reactions for the
         prescribed values multiplied by `\delta`. For a uniform
         end-shortening `\delta` of an edge, `P_j = N \delta` with `N` the
@@ -1463,7 +1463,7 @@ class MultiDomain(object):
         if self.pd_method != 'null-space':
             raise ValueError('reaction_resultant() requires '
                              'pd_method="null-space"')
-        self.get_T()
+        self.get_Z()
         blocks = self._pd_blocks
 
         def matches(block, sel):
@@ -2937,7 +2937,7 @@ class MultiDomain(object):
 
         These are based on penalty stiffnesses. With the default
         ``conn_method='null-space'`` only the connections that are not
-        imposed exactly by :meth:`.get_T` enter this matrix, see below.
+        imposed exactly by :meth:`.get_Z` enter this matrix, see below.
 
         Parameters
         ----------
@@ -3023,7 +3023,7 @@ class MultiDomain(object):
 
             With ``conn_method='null-space'`` the connections of
             :data:`.nullspace.NULL_SPACE_FUNCS` are imposed exactly by
-            :meth:`.get_T` and do not enter this matrix, which then contains
+            :meth:`.get_Z` and do not enter this matrix, which then contains
             only the connections ``'SB_TSL'``.
         finalize : bool, optional
             Asserts validity of output data and makes the output matrix
@@ -3039,7 +3039,7 @@ class MultiDomain(object):
             :meth:`.get_size`, symmetric when ``finalize=True``, otherwise
             with the upper triangle only. It is also stored in the attribute
             ``kC_conn``, and the connections used are kept for the later
-            calls without ``conn``, see :meth:`.get_T`. The damage history
+            calls without ``conn``, see :meth:`.get_Z`. The damage history
             of the ``'SB_TSL'`` connections, ``self.dmg_index``, is read and
             not modified.
 
@@ -3093,7 +3093,7 @@ class MultiDomain(object):
         ill-conditioned; the default constants of :func:`.calc_kt_kr` are a
         compromise. The connections of :data:`.nullspace.NULL_SPACE_FUNCS`
         are imposed exactly with ``conn_method='null-space'``, see
-        :meth:`.get_T`.
+        :meth:`.get_Z`.
 
         The connection ``'SB_TSL'`` is a cohesive interface whose secant
         stiffness `k^w_{CZ} = k_o (1 - d)`, the same for the three components
@@ -3456,7 +3456,7 @@ class MultiDomain(object):
         panels and of the penalty energies of the connections, see
         :meth:`.get_kC_conn`; with ``conn_method='null-space'`` the
         connections imposed exactly are not in `[K_C^{conn}]`, see
-        :meth:`.get_T`. The load stiffness of the follower pressure loads
+        :meth:`.get_Z`. The load stiffness of the follower pressure loads
         is not symmetric, therefore it is added after the symmetrization,
         see :meth:`.Shell.calc_kCfollower`.
 

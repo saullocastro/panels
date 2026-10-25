@@ -337,8 +337,8 @@ def profile_case(job, method):
     - ``kC_conn`` and ``fint``: the residual, ``get_kC_conn`` and
       ``calc_fint``
     - ``kT_TSL``: damage-rate stiffness of the cohesive zone
-    - ``sum``, ``reduce``, ``vec``: sum of the matrices, `T^T K T` and the
-      products of the vectors by `T` (null-space only)
+    - ``sum``, ``reduce``, ``vec``: sum of the matrices, `Z^T K Z` and the
+      products of the vectors by `Z` (null-space only)
     - ``solve``: ``structsolve.solve``
     - ``accept`` and ``output``: damage update and reactions of an opening
 
@@ -348,7 +348,7 @@ def profile_case(job, method):
     Returns
     -------
     out : dict
-        Timings in ``'t'``, the setup times ``t_build``, ``t_T`` and
+        Timings in ``'t'``, the setup times ``t_build``, ``t_Z`` and
         ``t_prescribe``, the sizes and the ``cProfile`` statistics of one
         iteration without ``kT_pan``.
 
@@ -373,15 +373,15 @@ def profile_case(job, method):
     out['size'] = size
     if method == 'null-space':
         t = time.perf_counter()
-        T = assy.get_T()
-        out['t_T'] = time.perf_counter() - t
-        out['size_r'] = T.shape[1]
-        out['nnz_T'] = T.nnz
-        red = lambda v: T.T @ v
-        red_mat = lambda K: csr_matrix(T.T @ K @ T)
-        expand = lambda v: T @ v
+        Z = assy.get_Z()
+        out['t_Z'] = time.perf_counter() - t
+        out['size_r'] = Z.shape[1]
+        out['nnz_Z'] = Z.nnz
+        red = lambda v: Z.T @ v
+        red_mat = lambda K: csr_matrix(Z.T @ K @ Z)
+        expand = lambda v: Z @ v
     else:
-        out['t_T'] = 0.
+        out['t_Z'] = 0.
         out['size_r'] = size
         red = red_mat = expand = lambda x: x
 
@@ -551,7 +551,7 @@ def predicted_cost(prof, n, kT_pan=None):
     t = prof['t']
     kT = t['kT_pan'] if kT_pan is None else kT_pan
     return dict(
-        setup=prof['t_build'] + prof['t_T'],
+        setup=prof['t_build'] + prof['t_Z'],
         kT_pan=n['kT_pan']*kT,
         residual=n['residual']*(t['kC_conn'] + t['fint']),
         kT_TSL=n['iter']*t['kT_TSL'],

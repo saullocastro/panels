@@ -218,6 +218,19 @@
   when they follow `m`, `n`; the values of older files are kept as
   assigned.
 
+### Breaking: the null-space basis is `Z`
+
+- The basis of the null space of the connections and prescribed
+  displacements, `c = Z c_r + c_p0 + lbd*c_p1`, is `[Z]` (was `[T]`), which
+  no longer clashes with the transformation matrices `T`, e.g. that of the
+  strains of the TSDT with an offset. Renamed, without aliases (all public
+  in 0.13.11): `MultiDomain.get_T()` -> `MultiDomain.get_Z()`, the
+  attribute `MultiDomain.T` -> `MultiDomain.Z`, the attribute
+  `nullspace.Elimination.T` -> `nullspace.Elimination.Z`, and the keys
+  `'Te'` and `'Bte'` of the dictionaries of `Elimination.steps` -> `'Ze'`
+  and `'Bze'`. The JSON files store the tolerance of the basis as
+  `'Z_tol'` (was `'T_tol'`); the files written by 0.13.11 are still loaded.
+
 ### API
 
 - `MultiDomain.get_kC_conn` loses the argument `kw_tsl`, which was not used:

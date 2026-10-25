@@ -106,7 +106,7 @@ to the load factor (``cte=False``). They are imposed by the
 without connections, with ``pd_method``:
 
 - ``'null-space'``: exactly, as linear constraints eliminated together with
-  the connections, the solution being `\{c\} = [T]\{c_r\} + \{c_{p0}\} +
+  the connections, the solution being `\{c\} = [Z]\{c_r\} + \{c_{p0}\} +
   \lambda \{c_{p1}\}`, with the reactions of :meth:`.MultiDomain.reaction_pd`
   and :meth:`.MultiDomain.reaction_resultant`, see :ref:`null_space_pd`;
 - ``'penalty'``, the default: with springs between the structure and the

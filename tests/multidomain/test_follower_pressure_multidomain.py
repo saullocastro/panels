@@ -80,8 +80,8 @@ def test_two_panels_tangent_is_jacobian(model):
                      conn_method='null-space')
     calc_fext, calc_fint, calc_kC, calc_kG = md.get_reduced_functions()
     rng = np.random.default_rng(3)
-    T = md.get_T()
-    c = 1.e-3*rng.standard_normal(T.shape[1])
+    Z = md.get_Z()
+    c = 1.e-3*rng.standard_normal(Z.shape[1])
     inc = 0.8
     K = (calc_kC(c=c, NLgeom=True, inc=inc)
          + calc_kG(c=c, NLgeom=True)).toarray()
@@ -96,7 +96,7 @@ def test_two_panels_tangent_is_jacobian(model):
     # unsymmetric, the patch and the varying pressure of p2
     assert np.linalg.norm(K - K.T) > 1.e-8*np.linalg.norm(K)
     # the follower part is not lost in the assembly
-    Kf = np.asarray((T.T @ md._calc_kCfollower(T @ c, inc, True) @ T).todense())
+    Kf = np.asarray((Z.T @ md._calc_kCfollower(Z @ c, inc, True) @ Z).todense())
     assert np.linalg.norm(K - J) <= 1.e-3*np.linalg.norm(Kf)
 
 
@@ -121,8 +121,8 @@ def test_closed_cylinder_load_stiffness_symmetric():
             K = K + p.calc_kCfollower(size=size, row0=p.row_start,
                                       col0=p.col_start)
         if conn_method == 'null-space':
-            T = md.get_T(conns)
-            K = (T.T @ K @ T).toarray()
+            Z = md.get_Z(conns)
+            K = (Z.T @ K @ Z).toarray()
             assert np.linalg.norm(K - K.T) < 1e-12*np.linalg.norm(K)
         else:
             K = K.toarray()

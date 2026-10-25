@@ -106,9 +106,9 @@ def test_sb_null_space_rigid_rotation(model):
     assert np.abs(B @ c).max() < 1e-13*R*OMEGA*np.abs(B).max()
     # the rigid rotation is an admissible configuration: it is in the range
     # of the basis of the null space
-    T = md.get_T()
-    c_r = np.linalg.lstsq(T.toarray(), c, rcond=None)[0]
-    assert np.allclose(T @ c_r, c, rtol=0, atol=1e-9*np.abs(c).max())
+    Z = md.get_Z()
+    c_r = np.linalg.lstsq(Z.toarray(), c, rcond=None)[0]
+    assert np.allclose(Z @ c_r, c, rtol=0, atol=1e-9*np.abs(c).max())
 
 
 @pytest.mark.parametrize('use_kernels', [False, True])

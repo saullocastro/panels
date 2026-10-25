@@ -99,7 +99,7 @@ def create_cylinder(height, r, stack, plyt, laminaprop,
     cylinder, are in part linear combinations of those of the other
     connections around the circumference; the null-space method finds
     these redundant constraints and drops them, see
-    :meth:`.MultiDomain.get_T`.
+    :meth:`.MultiDomain.get_Z`.
 
     """
     if npanels < 2:
@@ -209,7 +209,7 @@ def cylinder_compression_lb_Nxx_cte(height, r, stack, plyt, laminaprop,
     without the bending and the redistribution of the stresses of the
     pre-buckling state near the restrained ends, see
     :func:`.cylinder_compression_lb_Nxx_from_static`. ``eigvals`` are the
-    multipliers `\lambda` of ``Nxxs``, and the modes are `\{\phi\} = [T]
+    multipliers `\lambda` of ``Nxxs``, and the modes are `\{\phi\} = [Z]
     \{\phi_r\}`.
 
     The simply supported edges of Almroth [1]_, p. 5, all have `w = 0` and
@@ -329,8 +329,8 @@ def cylinder_compression_lb_Nxx_from_static(height, r, stack, plyt, laminaprop,
 
     Notes
     -----
-    The pre-buckling state is the linear static solution `\{c\} = [T]
-    \{c_r\}`, with `[K_r] \{c_r\} = [T]^T \{F_{ext}\}`, which includes
+    The pre-buckling state is the linear static solution `\{c\} = [Z]
+    \{c_r\}`, with `[K_r] \{c_r\} = [Z]^T \{F_{ext}\}`, which includes
     the bending of the shell near the ends, where the radial displacement
     is restrained, and the linear buckling analysis solves
 
