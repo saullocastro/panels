@@ -7,9 +7,10 @@ at the ends (``u = 0``, ``v,x = w,x = 0``), which contains the ring modes
 ``w = cos(n y/r)`` with ``n = 2, 4, ...``. The linear buckling problem is
 
 .. math::
-    ([K_0] + \lambda ([K_G(c_0)] + [K_{C_{follower}}]))\{c\} = \{0\}
+    ([K_{C0}] + \lambda ([K_G(\hat{c})] + [K_F]))\{\bar{c}\} = \{0\}
 
-with `c_0` the linear static solution of a unit external pressure, solved by
+with the pre-buckling state `\hat{c}`, the linear static solution of a unit
+external pressure, solved by
 :func:`structsolve.lb` with the unsymmetric solvers when needed.
 
 1. Closed forms for the ring, :func:`ring_closed_form`, the same as
@@ -147,8 +148,9 @@ def ring_shell(model, R, stack, plyts, laminaprops, m=4, n=15, **kwargs):
 
 
 def central_load_stiffness(s, p):
-    r"""Load stiffness of a centrally directed load, `-\partial F/\partial c`
-    with `F_v = \int p v/r N_v dA`, integrated independently of the kernels"""
+    r"""Load stiffness of a centrally directed load, `-\partial F/\partial \bar{c}`
+    with `F_v = \int p v/r (\boldsymbol{S}^v)^\top dA`, integrated
+    independently of the kernels"""
     fg = modelDB.db[s.model]['field'].fg
     size = s.get_size()
     g = np.zeros((5, size))

@@ -86,7 +86,7 @@ class StiffPanelBay(object):
     follow those of the skin, see :meth:`.get_size`.
 
     For the flutter analysis with the piston theory, the matrices enter the
-    equations of motion as `([K] + [K_A] + \lambda^2 [M])\{c\} = \{0\}`, see
+    equations of motion as `([K] + [K_A] + \lambda^2 [M])\{\bar{c}\} = \{0\}`, see
     :meth:`.Shell.calc_kA` and :meth:`.calc_kA`. The model of the bay, the
     skin with the bases of the stiffeners sharing its approximation
     functions and Ritz constants, and the piston theory, is that of [1]_,
@@ -268,7 +268,7 @@ class StiffPanelBay(object):
 
         The size of the stiffness matrices can be interpreted as the number of
         rows or columns, recalling that this will be the size of the Ritz
-        constants' vector `\{c\}`, the internal force vector `\{F_{int}\}` and
+        constants' vector `\{\bar{c}\}`, the internal force vector `\{F_{int}\}` and
         the external force vector `\{F_{ext}\}`.
 
         It takes into account the independent degrees of freedom from the
@@ -976,7 +976,7 @@ class StiffPanelBay(object):
         the flow, where the boundary terms of `\int N_i N_{k,x} dx` are
         otherwise not zero, such that `[K_A]` is in general neither
         symmetric nor skew-symmetric. The sign convention is that of
-        :meth:`.Shell.calc_kA`, `([K] + [K_A] + \lambda^2 [M])\{c\} =
+        :meth:`.Shell.calc_kA`, `([K] + [K_A] + \lambda^2 [M])\{\bar{c}\} =
         \{0\}` with a softening term in `\gamma`, whose sign is reversed in
         Eqs. (21) and (29) of Castro et al. (2016), a mistake of the paper.
 
@@ -1036,9 +1036,9 @@ class StiffPanelBay(object):
         ``aeromu`` of :meth:`._aero_parameters`, is proportional to the
         velocity of `w`, see :meth:`.Shell.calc_cA`, whose matrix is
         multiplied by the imaginary unit, ``cA`` `= i [C_A]` with `[C_A]` of
-        Eq. (23) of Castro et al. (2016): for the harmonic motion `\{c\}
+        Eq. (23) of Castro et al. (2016): for the harmonic motion `\{\bar{c}\}
         e^{i \omega t}` it enters the eigenvalue problem as `([K] + [K_A] -
-        \omega^2 [M] + \omega [c_A])\{c\} = \{0\}`, the term `+i \omega
+        \omega^2 [M] + \omega [c_A])\{\bar{c}\} = \{0\}`, the term `+i \omega
         [C_A]` of Eqs. (29)-(31) of that paper.
 
         """
@@ -1829,9 +1829,10 @@ class StiffPanelBay(object):
         Notes
         -----
         The external force vector is the work-equivalent of the point
-        forces, the virtual work of each force `\{f\} = \{f_x, f_y, f_z\}^T`
-        at `(x, y)` being `\delta\{c\}^T [N(x, y)]^T \{f\}`, where the rows
-        of `[N]` are the approximation functions of `u`, `v` and `w` at the
+        forces, the virtual work of each force `\{f\} = \{f_x, f_y, f_z\}^\top`
+        at `(x, y)` being `\delta\{\bar{c}\}^\top [S(x, y)]^\top \{f\}`, where
+        the rows `\boldsymbol{S}^u`, `\boldsymbol{S}^v`, `\boldsymbol{S}^w` of
+        `[S]` are the approximation functions of `u`, `v` and `w` at the
         point, given by ``fg``. The rows of the rotations are multiplied by
         zero: no moment is applied.
 

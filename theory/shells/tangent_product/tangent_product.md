@@ -13,12 +13,12 @@ Derivation and symbolic verification: `tangent_product.py` (sympy), kernels:
 All 9 geometrically non-linear models (plate, Donnell and Sanders cylinders;
 CLPT, FSDT and TSDT) have, at an integration point, generalized strains
 
-    eps(c) = [B(beta/2)] {c},      {beta} = [G] {c}
+    eps(c) = ([B_L] + [B_NL]/2) {c},      {beta} = [G] {c}
 
-with `[B(beta)]` linear in the two rotations `beta` of the von Kármán terms,
+with `[B_NL]` linear in the two rotations `beta` of the von Kármán terms,
 which enter only the membrane rows:
 
-    d[B]/dbeta_x = [Gx; 0; Gy; 0],     d[B]/dbeta_y = [0; Gy; Gx; 0]
+    d[B_NL]/dbeta_x = [Gx; 0; Gy; 0],     d[B_NL]/dbeta_y = [0; Gy; Gx; 0]
 
 | model                    | `beta`                              | source of `[B]`, `[G]`             |
 |--------------------------|-------------------------------------|------------------------------------|
@@ -26,19 +26,22 @@ which enter only the membrane rows:
 | cylshell CLPT Sanders    | `phix = -w,x`, `phiy = -w,y + v/r`  | `cylshell_clpt_sanders.shape_functions` |
 | FSDT/TSDT                | `w,x`, `w,y - sk v/r`               | `fsdt_tsdt.shape_functions`        |
 
-`beta/2` in `[B]` gives `beta_x^2/2`, `beta_y^2/2` and `beta_x beta_y`.
+The factor 1/2 of `[B_NL]` gives `beta_x^2/2`, `beta_y^2/2` and
+`beta_x beta_y`.
 
 ## Product
 
-    F_int = int [B(beta)]^T {sigma} dA,    {sigma} = [F] eps(c)
+    F_int = int ([B_L] + [B_NL])^T {sigma} dA,    {sigma} = [ABD] eps(c)
 
     K_T v = d/dt F_int(c + t v) |_(t=0)
-          = int ( [B(beta)]^T [F] [B(beta)] v  +  [G]^T [N] [G] v ) dA
+          = int ( ([B_L] + [B_NL])^T [ABD] ([B_L] + [B_NL]) v
+                  +  [G]^T [N] [G] v ) dA
 
-since `d eps(c + t v)/dt = [B(beta)] v` (the strains are a quadratic form
-whose bilinear form is `[B(beta)]`) and `d[B]^T/dt sigma = [G]^T [N] [G] v`
-from the derivatives above, `[N] = [[Nxx, Nxy], [Nxy, Nyy]]`. These are the
-two parts assembled by `fkC_num` (`K0 + K0L + KL0 + KLL + KGNL`) and
+since `d eps(c + t v)/dt = ([B_L] + [B_NL]) v` (the strains are a quadratic
+form whose bilinear form is `[B_L] + [B_NL]`) and
+`d[B_NL]^T/dt sigma = [G]^T [N] [G] v` from the derivatives above,
+`[N] = [[Nxx, Nxy], [Nxy, Nyy]]`, `[ABD]` the constitutive matrix. These are
+the two parts assembled by `fkC_num` (`KC0 + KCNL + KGNL`) and
 `fkG_num` (`KG(N0 + NL)`). The constant membrane stresses `Nxx_cte`,
 `Nyy_cte`, `Nxy_cte`, whose geometric stiffness `Shell.calc_kC` adds to
 `K_T`, are added to `[N]`.
@@ -46,17 +49,20 @@ two parts assembled by `fkC_num` (`K0 + K0L + KL0 + KLL + KGNL`) and
 Per integration point, with the basis functions tabulated once:
 
 1. `beta = [G] c` and `dbeta = [G] v` (one loop over the terms);
-2. `eps = [B(beta/2)] c` and `deps = [B(beta)] v` (one loop);
-3. `sigma = [F] eps`, `dsigma = [F] deps`, `[N]` from `sigma` plus the
+2. `eps = ([B_L] + [B_NL]/2) c` and `deps = ([B_L] + [B_NL]) v` (one
+   loop);
+3. `sigma = [ABD] eps`, `dsigma = [ABD] deps`, `[N]` from `sigma` plus the
    constant stresses;
-4. `kTv_i += w ([B_i(beta)]^T dsigma + [G_i]^T [N] dbeta)` (one loop).
+4. `kTv_i += w (([B_L] + [B_NL])_i^T dsigma + [G_i]^T [N] dbeta)` (one
+   loop).
 
 The cost is `O(nx ny m n)`, against `O(nx ny m^2 n^2)` for the assembly of
 `K_T`.
 
 `check(model)` differentiates `F_int` of one term symbolically, with a
-symbolic symmetric `[F]`, and compares it with the generated expressions;
-`[B]` and `[G]` being linear in the degrees of freedom, the identity extends
+symbolic symmetric constitutive matrix `[F]`, and compares it with the
+generated expressions; `[B_NL]` and `[G]` being linear in the degrees of
+freedom, the identity extends
 to any number of terms. Run `python tangent_product.py`.
 
 ## Follower pressure loads

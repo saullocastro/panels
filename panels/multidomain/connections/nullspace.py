@@ -38,7 +38,7 @@ then the linear constraints:
 
 .. math::
 
-    [B] \{c\} = \{0\}
+    [B] \{\bar{c}\} = \{0\}
 
 built by :func:`.constraint_matrix`, one row per quantity and point. They
 are eliminated with a sparse basis `[Z]` of the null space of `[B]`, built by
@@ -46,8 +46,8 @@ are eliminated with a sparse basis `[Z]` of the null space of `[B]`, built by
 
 .. math::
 
-    \{c\} = [Z] \{c_r\}, \qquad [K_r] = [Z]^T [K] [Z], \qquad
-    \{f_r\} = [Z]^T \{f\}
+    \{\bar{c}\} = [Z] \{\bar{c}_r\}, \qquad [K_r] = [Z]^\top [K] [Z], \qquad
+    \{f_r\} = [Z]^\top \{f\}
 
 The vectors with zero penalty energy are exactly those that satisfy the
 constraints. Lagrange multipliers would add one unknown per constraint and
@@ -57,19 +57,19 @@ the shift-and-invert eigenvalue solvers of ``structsolve`` do not handle.
 The null-space method removes unknowns instead: the reduced stiffness matrix
 is symmetric and positive definite whenever the connected assembly has no
 rigid-body motion, like the stiffness matrix of the penalty method. The
-constraints are linear in `\{c\}`, so `[Z]` does not change during a
-non-linear analysis, where `\{f_{int, r}\} = [Z]^T \{f_{int}\}([Z]
-\{c_r\})` and `[K_{T r}] = [Z]^T [K_T]([Z] \{c_r\}) [Z]`.
+constraints are linear in `\{\bar{c}\}`, so `[Z]` does not change during a
+non-linear analysis, where `\{f_{int, r}\} = [Z]^\top \{f_{int}\}([Z]
+\{\bar{c}_r\})` and `[K_{T r}] = [Z]^\top [K_T]([Z] \{\bar{c}_r\}) [Z]`.
 
 The damaged connection ``'SB_TSL'`` is a physical stiffness of the
 interface, not a constraint, and therefore remains a penalty stiffness.
 
 With ``MultiDomain(..., pd_method='null-space')`` the prescribed
-displacements of the panels are the inhomogeneous constraints `[B_d] \{c\}
+displacements of the panels are the inhomogeneous constraints `[B_d] \{\bar{c}\}
 = \{d_0\} + \lambda \{d_1\}`, built by :func:`.pd_constraint_matrix` and
 eliminated after the connections by :class:`.Elimination`, which also gives
-the particular solutions `\{c\} = [Z] \{c_r\} + \{c_{p0}\} + \lambda
-\{c_{p1}\}`, see :ref:`null_space_pd`.
+the particular solutions `\{\bar{c}\} = [Z] \{\bar{c}_r\} + \{\bar{c}_{p0}\} + \lambda
+\{\bar{c}_{p1}\}`, see :ref:`null_space_pd`.
 
 """
 import numpy as np
@@ -344,7 +344,7 @@ def constraint_matrix(connecti, size):
     `q_k` is a linear combination of the fields and derivatives of a panel,
     see :func:`._clpt_components`, :func:`._sdt_components` and
     :func:`._sb_components`, such that
-    `[B] \{c\} = \{0\}` holds exactly when the penalty energy
+    `[B] \{\bar{c}\} = \{0\}` holds exactly when the penalty energy
     `\frac{1}{2} k_k \int (q_k^{(1)} - q_k^{(2)})^2` of the connection
     vanishes for any `k_k > 0`, see :func:`._points`. For ``'SB'`` the
     differences are polynomials of `\xi` and `\eta`, and the tensor grid of
@@ -774,10 +774,10 @@ class Elimination(object):
 
     Notes
     -----
-    The constraints of each block, `[B] \{c\} = \{d\}`, are written in the
-    independent Ritz constants left by the previous blocks, `\{c\} = [Z]
-    \{c_r\} + \{c_p\}`, where `[Z]` is a basis of the null space of the
-    homogeneous constraints of the previous blocks and `\{c_p\}` a
+    The constraints of each block, `[B] \{\bar{c}\} = \{d\}`, are written in the
+    independent Ritz constants left by the previous blocks, `\{\bar{c}\} = [Z]
+    \{\bar{c}_r\} + \{\bar{c}_p\}`, where `[Z]` is a basis of the null space of the
+    homogeneous constraints of the previous blocks and `\{\bar{c}_p\}` a
     particular solution of all the previous blocks. Eliminating the blocks
     one at a time keeps `[Z]` sparse, each block involving only the Ritz
     constants of its panels.
@@ -828,16 +828,17 @@ class Elimination(object):
         -----
         With the normalized rows `[B]`, `[\bar B] = [B] [Z]` and the columns
         `J` of `[\bar B]` kept, the QR decomposition with column pivoting
-        `[\bar B_J] [P] = [Q] [R]` reveals the rank `r`, the number of
-        diagonal terms of `[R]` larger than ``tol``. The constants
-        `\{c_e\}` of the first `r` pivot columns are eliminated in favour of
-        the remaining ones, `\{c_k\}`:
+        `[\bar B_J] [P] = [Q] [R]`, with the upper triangular factor `[R]`,
+        not the residual, reveals the rank `r`, the number of diagonal terms
+        of `[R]` larger than ``tol``. The constants
+        `\{\bar{c}_e\}` of the first `r` pivot columns are eliminated in favour of
+        the remaining ones, `\{\bar{c}_k\}`:
 
         .. math::
 
-            [R_{11}] \{c_e\} + [R_{12}] \{c_k\} = [Q_1]^T \{d\}, \qquad
-            \{c_e\} = -[R_{11}]^{-1} [R_{12}] \{c_k\}
-                      + [R_{11}]^{-1} [Q_1]^T \{d\}
+            [R_{11}] \{\bar{c}_e\} + [R_{12}] \{\bar{c}_k\} = [Q_1]^\top \{d\}, \qquad
+            \{\bar{c}_e\} = -[R_{11}]^{-1} [R_{12}] \{\bar{c}_k\}
+                      + [R_{11}]^{-1} [Q_1]^\top \{d\}
 
         where `[R_{11}]` is the leading `r \times r` triangle of `[R]` and
         `[Q_1]` the first `r` columns of `[Q]`. The homogeneous part gives
@@ -978,12 +979,12 @@ class Elimination(object):
         -----
         For the block `i`, with the normalized rows `[B_i]` and right-hand
         side `\{\bar d_i\}`, the residual of the current particular solution
-        is `\{\delta\} = \{\bar d_i\} - [B_i] \{c_p\}`, and
+        is `\{\delta\} = \{\bar d_i\} - [B_i] \{\bar{c}_p\}`, and
 
         .. math::
 
-            \{y\} = [R_{11}]^{-1} [Q_1]^T \{\delta\}, \qquad
-            \{c_p\} \leftarrow \{c_p\} + [Z_e] \{y\}
+            \{y\} = [R_{11}]^{-1} [Q_1]^\top \{\delta\}, \qquad
+            \{\bar{c}_p\} \leftarrow \{\bar{c}_p\} + [Z_e] \{y\}
 
         where `[Z_e]` are the columns of the basis `[Z]` of the eliminated
         constants, both stored by :meth:`.add`. The columns of `[Z]`
@@ -1053,8 +1054,8 @@ def null_space_basis(Bs, size, tol=1.e-9):
     Notes
     -----
     The basis satisfies `[B] [Z] = [0]` for all the constraints, and the
-    matrices and vectors of the assembly are reduced as `[K_r] = [Z]^T [K]
-    [Z]` and `\{f_r\} = [Z]^T \{f\}`, see
+    matrices and vectors of the assembly are reduced as `[K_r] = [Z]^\top [K]
+    [Z]` and `\{f_r\} = [Z]^\top \{f\}`, see
     :mod:`panels.multidomain.connections.nullspace`. The independent
     constraints have pivots many orders of magnitude larger than the
     round-off errors left in the redundant ones, see

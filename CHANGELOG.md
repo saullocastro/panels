@@ -312,6 +312,25 @@
   matrix `[K_{C0}]` (was `[K_0]`), the non-linear one `[K_{CNL}] = [K_{0L}] +
   [K_{L0}] + [K_{LL}]`, and the diagonal scaling vector `d` of Crisfield's
   criterion (was `D`).
+- One notation in the docstrings, `doc/source`, the theory of `theory/`
+  and the comments of the kernels written by its generators:
+  `[K_{C0}]` also in `tangent_product.rst` (was `K_0`); `[K_{CNL}]` as the
+  sum of its three integrals of `[B_L]` and `[B_{NL}]` in `Shell.calc_kC`
+  and `KC0 + KCNL + KGNL` in the comments of the kernels (were `K0 + K0L +
+  KL0 + KLL + KGNL`); `[K_{GNL}]` (was `[K_{G_{NL}}]`); the load stiffness
+  matrix `[K_F] = -d{F_p}/d{c}` of `Shell.calc_kCfollower` (was
+  `[K_{C_{follower}}]`, and `[K_p] = -[K_F]`); the rows `S^u`, `S^v`, `S^w`
+  of the approximation functions (were `{N_u}`, `{N_v}`, `{N_w}`); the
+  tangent vectors `X_{,x}`, `X_{,y}` of the follower pressure (were `A`,
+  `B`, the symbols of the laminate); the constitutive matrix `[ABD]` (was
+  `[F]`); the strain operator `[B_L] + [B_{NL}]` (was `[B(beta)]`); the
+  Ritz constants `c-bar` and the pre-buckling state `c-hat`; Bardell's
+  functions `P_i` (were `f_i` and `g_j`); in `cohesive_zone.rst` the
+  diagonal scaling vector `d` (was `[D]`) and the tangent stiffness matrix
+  `[K_T]` (was the Jacobian `[J]`); the direction `v` of the Taylor test of
+  the tangent (was `d`); `\boldsymbol` (was `\mathbf`, `\vec`) and the
+  transpose `^\top` (was `^T`). The API names, e.g. `calc_kCfollower`, the
+  key `'kCfollower'` and the argument `c`, are unchanged.
 
 ### Dependencies
 

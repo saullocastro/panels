@@ -306,7 +306,7 @@ class MultiDomain(object):
       error that decreases with the inverse of the penalty constants, while
       the condition number of the stiffness matrix grows with them;
     - with ``conn_method='null-space'``, as the exact linear constraints
-      `[B] \{c\} = \{0\}`, eliminated with `\{c\} = [Z] \{c_r\}`, see
+      `[B] \{\bar{c}\} = \{0\}`, eliminated with `\{\bar{c}\} = [Z] \{\bar{c}_r\}`, see
       :meth:`.get_Z`, as with penalty constants going to infinity.
 
     The connection ``'SB_TSL'`` represents the physical stiffness of a
@@ -315,9 +315,9 @@ class MultiDomain(object):
     its penalty stiffness with both methods, see :meth:`._null_space`.
 
     With ``pd_method='null-space'`` the prescribed displacements are the
-    inhomogeneous linear constraints `[B_d] \{c\} = \{d_0\} + \lambda
-    \{d_1\}`, and every admissible configuration is `\{c\} = [Z] \{c_r\} +
-    \{c_{p0}\} + \lambda \{c_{p1}\}`, see :meth:`.get_cp` and
+    inhomogeneous linear constraints `[B_d] \{\bar{c}\} = \{d_0\} + \lambda
+    \{d_1\}`, and every admissible configuration is `\{\bar{c}\} = [Z] \{\bar{c}_r\} +
+    \{\bar{c}_{p0}\} + \lambda \{\bar{c}_{p1}\}`, see :meth:`.get_cp` and
     :ref:`null_space_pd`. With ``pd_method='penalty'`` a prescribed value
     `u_p` is imposed with the energy `\frac{1}{2} k (u - u_p)^2`, integrated
     along the line for the distributed prescriptions, i.e. a spring of
@@ -509,7 +509,7 @@ class MultiDomain(object):
         -----
         The connections of :data:`.nullspace.NULL_SPACE_FUNCS` are continuity
         conditions, homogeneous linear constraints on the Ritz constants,
-        `[B] \{c\} = \{0\}`, see :func:`.nullspace.constraint_matrix`,
+        `[B] \{\bar{c}\} = \{0\}`, see :func:`.nullspace.constraint_matrix`,
         eliminated exactly by :meth:`.get_Z`. The other connection,
         ``'SB_TSL'``, represents the stiffness of a cohesive interface that
         degrades with the damage, and it always enters :meth:`.get_kC_conn`
@@ -628,13 +628,13 @@ class MultiDomain(object):
         Notes
         -----
         The connections imposed exactly are the homogeneous linear
-        constraints `[B] \{c\} = \{0\}`, one block of rows per connection,
+        constraints `[B] \{\bar{c}\} = \{0\}`, one block of rows per connection,
         see :func:`.nullspace.constraint_matrix`, and all the vectors that
-        satisfy them are `\{c\} = [Z] \{c_r\}`, with `[B] [Z] = [0]`, where
-        `\{c_r\}` are the independent Ritz constants. Substituting them into
+        satisfy them are `\{\bar{c}\} = [Z] \{\bar{c}_r\}`, with `[B] [Z] = [0]`, where
+        `\{\bar{c}_r\}` are the independent Ritz constants. Substituting them into
         the total potential energy gives the reduced matrices and vectors of
         :meth:`.reduce`. With ``pd_method='null-space'``, the prescribed
-        displacements add the inhomogeneous constraints `[B_d] \{c\} =
+        displacements add the inhomogeneous constraints `[B_d] \{\bar{c}\} =
         \{d_0\} + \lambda \{d_1\}`, and `[Z]` spans the null space of all
         the constraints, see :meth:`.get_cp` and :ref:`null_space_pd`.
 
@@ -662,7 +662,7 @@ class MultiDomain(object):
         and the mass matrix would then have zero rows and columns for the
         multipliers, giving infinite eigenvalues. The null-space method
         removes unknowns instead of adding them, and gives the same solution.
-        Since the constraints are linear in `\{c\}`, `[Z]` does not change
+        Since the constraints are linear in `\{\bar{c}\}`, `[Z]` does not change
         during a non-linear analysis. See :ref:`null_space`.
 
         """
@@ -827,16 +827,16 @@ class MultiDomain(object):
         Notes
         -----
         With ``pd_method='null-space'`` the prescribed displacements are the
-        constraints `[B_d] \{c\} = \{d_0\} + \lambda \{d_1\}`, `\{d_0\}`
+        constraints `[B_d] \{\bar{c}\} = \{d_0\} + \lambda \{d_1\}`, `\{d_0\}`
         from the constant prescriptions (``cte=True``) and `\{d_1\}` from
         those incremented with the load factor (``cte=False``), and every
         admissible configuration is
 
         .. math::
 
-            \{c\} = [Z] \{c_r\} + \{c_{p0}\} + \lambda \{c_{p1}\}
+            \{\bar{c}\} = [Z] \{\bar{c}_r\} + \{\bar{c}_{p0}\} + \lambda \{\bar{c}_{p1}\}
 
-        with `[B] \{c_{p0}\} = \{0; d_0\}` and `[B] \{c_{p1}\} = \{0;
+        with `[B] \{\bar{c}_{p0}\} = \{0; d_0\}` and `[B] \{\bar{c}_{p1}\} = \{0;
         d_1\}` for `[B]` the constraints of the connections and of the
         prescribed displacements, see :ref:`null_space_pd`. Each row of
         `[B_d]` is a prescribed component at a point, or at a Gauss-Legendre
@@ -908,11 +908,11 @@ class MultiDomain(object):
 
         Notes
         -----
-        Substituting `\{c\} = [Z] \{c_r\}` into the total potential energy,
-        `\frac{1}{2} \{c\}^T [K] \{c\} - \{c\}^T \{f\}`, gives the reduced
-        stiffness matrix `[K_r] = [Z]^T [K] [Z]` and the reduced force
-        vector `\{f_r\} = [Z]^T \{f\}`, and likewise `[K_{G r}] = [Z]^T [K_G]
-        [Z]` and `[M_r] = [Z]^T [M] [Z]` for the linear buckling and
+        Substituting `\{\bar{c}\} = [Z] \{\bar{c}_r\}` into the total potential energy,
+        `\frac{1}{2} \{\bar{c}\}^\top [K] \{\bar{c}\} - \{\bar{c}\}^\top \{f\}`, gives the reduced
+        stiffness matrix `[K_r] = [Z]^\top [K] [Z]` and the reduced force
+        vector `\{f_r\} = [Z]^\top \{f\}`, and likewise `[K_{G r}] = [Z]^\top [K_G]
+        [Z]` and `[M_r] = [Z]^\top [M] [Z]` for the linear buckling and
         frequency analyses. `[K_r]` is symmetric and positive definite
         whenever the connected assembly has no rigid-body motion. With
         prescribed displacements imposed exactly, the reduced force vector
@@ -965,11 +965,11 @@ class MultiDomain(object):
         -----
         A configuration of the structure at the load factor `\lambda`
         satisfies the inhomogeneous constraints of the prescribed
-        displacements, `\{c\} = [Z] \{c_r\} + \{c_{p0}\} + \lambda
-        \{c_{p1}\}`, see :meth:`.get_cp`, whereas a mode, or an increment of
+        displacements, `\{\bar{c}\} = [Z] \{\bar{c}_r\} + \{\bar{c}_{p0}\} + \lambda
+        \{\bar{c}_{p1}\}`, see :meth:`.get_cp`, whereas a mode, or an increment of
         the configuration at a constant load factor, satisfies the
         homogeneous constraints only, its prescribed components being zero,
-        and is `[Z] \{c_r\}`.
+        and is `[Z] \{\bar{c}_r\}`.
 
         """
         Z = self.get_Z()
@@ -1034,23 +1034,23 @@ class MultiDomain(object):
         Notes
         -----
         Without prescribed displacements imposed exactly, the reduced
-        problem is `[Z]^T \{R([Z] \{c_r\}, \lambda)\} = \{0\}`, with the
-        residual `\{R(c, \lambda)\} = \lambda \{F_{ext}\} - \{F_{int}(c,
+        problem is `[Z]^\top \{R([Z] \{\bar{c}_r\}, \lambda)\} = \{0\}`, with the
+        residual `\{R(\bar{c}, \lambda)\} = \lambda \{F_{ext}\} - \{F_{int}(\bar{c},
         \lambda)\}` of the unconstrained system and the constant `[Z]`,
         since the constraints are linear.
 
         With ``pd_method='null-space'`` and prescribed displacements, the
-        configuration is `\{c\} = [Z] \{c_r\} + \{c_{p0}\} + \lambda
-        \{c_{p1}\}`, and substituting it into the residual and projecting it
-        with `[Z]^T` gives the reduced problem solved by ``structsolve``:
+        configuration is `\{\bar{c}\} = [Z] \{\bar{c}_r\} + \{\bar{c}_{p0}\} + \lambda
+        \{\bar{c}_{p1}\}`, and substituting it into the residual and projecting it
+        with `[Z]^\top` gives the reduced problem solved by ``structsolve``:
 
         .. math::
 
-            \{F_{int, r}(c_r, \lambda)\} &= [Z]^T \{F_{int}(c)\} \\
-            [K_{T, r}] &= [Z]^T [K_T(c)] [Z] = -\frac{\partial R_r}{\partial
-                c_r} \\
-            \frac{\partial R_r}{\partial \lambda} &= [Z]^T \left(\{F_{ext}\}
-                - [K_T(c)] \{c_{p1}\}\right)
+            \{F_{int, r}(\bar{c}_r, \lambda)\} &= [Z]^\top \{F_{int}(\bar{c})\} \\
+            [K_{T, r}] &= [Z]^\top [K_T(\bar{c})] [Z] = -\frac{\partial R_r}{\partial
+                \bar{c}_r} \\
+            \frac{\partial R_r}{\partial \lambda} &= [Z]^\top \left(\{F_{ext}\}
+                - [K_T(\bar{c})] \{\bar{c}_{p1}\}\right)
 
         `[K_{T, r}]`, the sum of ``calc_kC`` and ``calc_kG``, is the exact
         Jacobian, and `\partial R_r/\partial \lambda`, returned by
@@ -1060,7 +1060,7 @@ class MultiDomain(object):
         \partial R_r/\partial \lambda` as a reference quantity of the
         convergence criteria, Crisfield's scaled criterion, the default of
         ``structsolve`` 0.9.0, and the relative one, since under a prescribed
-        displacement alone both `[Z]^T \{F_{ext}\}` and `[Z]^T \{F_{int}\}`
+        displacement alone both `[Z]^\top \{F_{ext}\}` and `[Z]^\top \{F_{int}\}`
         vanish at equilibrium. See :ref:`null_space_pd`.
 
         """
@@ -1134,9 +1134,9 @@ class MultiDomain(object):
 
         Notes
         -----
-        Substituting `\{c\} = [Z] \{c_r\} + \{c_p\}` into `[K] \{c\} =
-        \{F\}` and projecting it with `[Z]^T` gives `[K_r] \{c_r\} = [Z]^T
-        (\{F\} - [K] \{c_p\})`, with `[K_r] = [Z]^T [K] [Z]`.
+        Substituting `\{\bar{c}\} = [Z] \{\bar{c}_r\} + \{\bar{c}_p\}` into `[K] \{\bar{c}\} =
+        \{F\}` and projecting it with `[Z]^\top` gives `[K_r] \{\bar{c}_r\} = [Z]^\top
+        (\{F\} - [K] \{\bar{c}_p\})`, with `[K_r] = [Z]^\top [K] [Z]`.
 
         """
         Z = self.get_Z()
@@ -1175,14 +1175,14 @@ class MultiDomain(object):
 
         .. math::
 
-            [Z]^T [K] [Z] \{c_r\} = [Z]^T \left(\lambda \{F_{ext}\} - [K]
-            (\{c_{p0}\} + \lambda \{c_{p1}\})\right)
+            [Z]^\top [K] [Z] \{\bar{c}_r\} = [Z]^\top \left(\lambda \{F_{ext}\} - [K]
+            (\{\bar{c}_{p0}\} + \lambda \{\bar{c}_{p1}\})\right)
 
         with `[K]` from :meth:`.calc_kC`, `\{F_{ext}\}` from
         ``calc_fext(inc=1.)``, scaled by `\lambda` as in the analyses of
-        ``structsolve``, and `\{c_{p0}\}`, `\{c_{p1}\}` from
-        :meth:`.get_cp`, and returns `\{c\} = [Z] \{c_r\} + \{c_{p0}\} +
-        \lambda \{c_{p1}\}`. See :ref:`null_space_pd`.
+        ``structsolve``, and `\{\bar{c}_{p0}\}`, `\{\bar{c}_{p1}\}` from
+        :meth:`.get_cp`, and returns `\{\bar{c}\} = [Z] \{\bar{c}_r\} + \{\bar{c}_{p0}\} +
+        \lambda \{\bar{c}_{p1}\}`. See :ref:`null_space_pd`.
 
         """
         c_p0, c_p1 = self.get_cp()
@@ -1243,24 +1243,25 @@ class MultiDomain(object):
 
         Notes
         -----
-        The pre-buckling state is linear in the load factor, `\{c(\lambda)\}
-        = \{c_0\} + \lambda \{c_1\}`, see :meth:`.linear_static`, with
-        `\{c_0\}` due to the constant prescribed displacements alone and
-        `\{c_1\}` due to the load and the incremented prescribed
+        The pre-buckling state is linear in the load factor,
+        `\{\hat{c}(\lambda)\} = \{\hat{c}_0\} + \lambda \{\hat{c}_1\}`, see
+        :meth:`.linear_static`, with `\{\hat{c}_0\}` due to the constant
+        prescribed displacements alone and `\{\hat{c}_1\}` due to the load
+        and the incremented prescribed
         displacements. The geometric stiffness matrix of the linear buckling
         analysis is linear in the membrane stress resultants of the linear
         strains of the pre-buckling state, see :meth:`.Shell.calc_kG`, to
         which the constant stress resultants `\{N_0\}` of the attributes
         ``Nxx``, ``Nyy`` and ``Nxy`` of the panels are superposed. These
         belong to the constant part of the state, they are not multiplied
-        by the load factor, so that `[K_G(N_0, c_0 + \lambda c_1)] =
-        [K_G(N_0, c_0)] + \lambda [K_G(0, c_1)]`, and the critical load
-        factors `\lambda` solve
+        by the load factor, so that `[K_G(N_0, \hat{c}_0 + \lambda
+        \hat{c}_1)] = [K_G(N_0, \hat{c}_0)] + \lambda [K_G(0, \hat{c}_1)]`,
+        and the critical load factors `\lambda` solve
 
         .. math::
 
-            \left([K_r] + [K_{G,r}(N_0, c_0)] + \lambda [K_{G,r}(0,
-            c_1)]\right) \{\phi_r\} = \{0\}
+            \left([K_r] + [K_{G,r}(N_0, \hat{c}_0)] + \lambda [K_{G,r}(0,
+            \hat{c}_1)]\right) \{\phi_r\} = \{0\}
 
         with the matrices reduced with `[Z]`, see :meth:`.reduce`. Each
         constant contribution enters once: a constant prescribed rigid
@@ -1318,9 +1319,9 @@ class MultiDomain(object):
 
         Notes
         -----
-        `\{r(c, \lambda)\} = \{F_{int}(c)\} - \lambda \{F_{ext}\}`. At an
+        `\{r(\bar{c}, \lambda)\} = \{F_{int}(\bar{c})\} - \lambda \{F_{ext}\}`. At an
         equilibrium configuration that satisfies the constraints imposed
-        exactly, `[Z]^T \{r\} = \{0\}`, and `\{r\}` holds the generalized
+        exactly, `[Z]^\top \{r\} = \{0\}`, and `\{r\}` holds the generalized
         forces applied by the constraints on the structure, see
         :meth:`.reaction_pd`.
 
@@ -1374,11 +1375,11 @@ class MultiDomain(object):
 
         .. math::
 
-            P_j = \{c_{pj}\}^T \{r(c, \lambda)\}, \qquad \{r(c, \lambda)\} =
-            \{F_{int}(c)\} - \lambda \{F_{ext}\}
+            P_j = \{\bar{c}_{pj}\}^\top \{r(\bar{c}, \lambda)\}, \qquad \{r(\bar{c}, \lambda)\} =
+            \{F_{int}(\bar{c})\} - \lambda \{F_{ext}\}
 
-        with `\{c_{pj}\}` from :meth:`.get_cp`. It does not depend on the
-        choice of the particular solution, because `[Z]^T \{r\} = 0` at
+        with `\{\bar{c}_{pj}\}` from :meth:`.get_cp`. It does not depend on the
+        choice of the particular solution, because `[Z]^\top \{r\} = 0` at
         equilibrium, and `P_j \delta` is the work of the reactions for the
         prescribed values multiplied by `\delta`. For a uniform
         end-shortening `\delta` of an edge, `P_j = N \delta` with `N` the
@@ -1445,9 +1446,9 @@ class MultiDomain(object):
 
         .. math::
 
-            F_u = \{c_u\}^T \{r(c, \lambda)\}
+            F_u = \{\bar{c}_u\}^\top \{r(\bar{c}, \lambda)\}
 
-        with `\{c_u\}` a solution of the constraints for a unit translation
+        with `\{\bar{c}_u\}` a solution of the constraints for a unit translation
         `u = 1` of the selected prescriptions that prescribe `u`, all the
         other prescribed values being zero, i.e. the virtual work of the
         reactions for this unit translation of the selected supports, see
@@ -3102,7 +3103,7 @@ class MultiDomain(object):
         ``self.dmg_index``, and integrated by :meth:`._kC_TSL` or by the
         kernels of :mod:`panels.multidomain.connections.kCSB_dmg`. The
         matrix is the secant stiffness of the interface, `\{f^{coh}_{int}\}
-        = [K^{conn}_{dmg}] \{c\}`; its consistent tangent also needs the
+        = [K^{conn}_{dmg}] \{\bar{c}\}`; its consistent tangent also needs the
         damage-rate part of :meth:`.calc_kT_TSL`. See :ref:`cohesive_zone`.
 
         References
@@ -3449,7 +3450,7 @@ class MultiDomain(object):
 
         .. math::
 
-            [K_C] = \sum_p [L_p]^T [K_C^{(p)}] [L_p] + [K_C^{conn}]
+            [K_C] = \sum_p [L_p]^\top [K_C^{(p)}] [L_p] + [K_C^{conn}]
 
         where `[L_p]` selects the degrees of freedom of the panel ``p``. The
         total potential energy of the assembly is the sum of those of the
@@ -3539,7 +3540,7 @@ class MultiDomain(object):
 
         Notes
         -----
-        `[K_G] = \sum_p [L_p]^T [K_G^{(p)}] [L_p]`, where `[L_p]` selects the
+        `[K_G] = \sum_p [L_p]^\top [K_G^{(p)}] [L_p]`, where `[L_p]` selects the
         degrees of freedom of the panel ``p``. The penalty energies of the
         connections are quadratic forms of the Ritz constants and the
         constraints of the null-space method are linear, so that neither has
@@ -3607,7 +3608,7 @@ class MultiDomain(object):
 
         Notes
         -----
-        `[M] = \sum_p [L_p]^T [M^{(p)}] [L_p]`, where `[L_p]` selects the
+        `[M] = \sum_p [L_p]^\top [M^{(p)}] [L_p]`, where `[L_p]` selects the
         degrees of freedom of the panel ``p``: the connections, penalty
         springs or constraints, carry no mass.
 
@@ -3676,7 +3677,7 @@ class MultiDomain(object):
         The exact Jacobian of :meth:`.MultiDomain.calc_fint`:
 
         .. math::
-            [K_T] = \sum_p [L_p]^T \left( [K_C^{(p)}] + [K_G^{(p)}] \right)
+            [K_T] = \sum_p [L_p]^\top \left( [K_C^{(p)}] + [K_G^{(p)}] \right)
                     [L_p] + [K_C^{conn}]
 
         where, for each panel ``p``, `[K_C^{(p)}]` and `[K_G^{(p)}]` are
@@ -3760,9 +3761,9 @@ class MultiDomain(object):
 
         Notes
         -----
-        `[K_T(c)] \{v\} = \left. \frac{d}{d\epsilon} \{F_{int}(c + \epsilon
+        `[K_T(\bar{c})] \{v\} = \left. \frac{d}{d\epsilon} \{F_{int}(\bar{c} + \epsilon
         v)\} \right|_{\epsilon = 0}`, computed without assembling `[K_T]`,
-        e.g. for the product `[K_T(c)] \{c_{p1}\}` of
+        e.g. for the product `[K_T(\bar{c})] \{\bar{c}_{p1}\}` of
         :meth:`.get_reduced_functions`. For a cohesive connection
         ``'SB_TSL'`` only its secant stiffness enters the product, without
         the damage-rate part of :meth:`.calc_kT_TSL`.
@@ -3821,8 +3822,8 @@ class MultiDomain(object):
         Notes
         -----
         .. math::
-            \{F_{int}\} = \sum_p [L_p]^T \{F_{int}^{(p)}([L_p] \{c\})\}
-                          + [K_C^{conn}] \{c\}
+            \{F_{int}\} = \sum_p [L_p]^\top \{F_{int}^{(p)}([L_p] \{\bar{c}\})\}
+                          + [K_C^{conn}] \{\bar{c}\}
 
         where `\{F_{int}^{(p)}\}` is :meth:`.Shell.calc_fint` of each panel,
         `[L_p]` selects its degrees of freedom, and `[K_C^{conn}]` is the
@@ -4394,10 +4395,10 @@ class MultiDomain(object):
 
         .. math::
 
-            [K] = [K_o] - \sum_{\alpha=u,v,w} [B_\alpha]^T
+            [K] = [K_o] - \sum_{\alpha=u,v,w} [B_\alpha]^\top
                   \text{diag}\left(w_g (k_o - k_g)\right) [B_\alpha]
 
-        where `[K_o] = k_o \sum_\alpha [B_\alpha]^T \text{diag}(w_g)
+        where `[K_o] = k_o \sum_\alpha [B_\alpha]^\top \text{diag}(w_g)
         [B_\alpha]` is the stiffness of the pristine interface, `w_g` are
         the integration weights and `k_g` the entries of ``kw_tsl``. The
         second term runs only over the points where `k_g \ne k_o`, the
@@ -4407,7 +4408,7 @@ class MultiDomain(object):
 
         .. math::
 
-            [K] = \sum_{\alpha=u,v,w} [B_\alpha]^T
+            [K] = \sum_{\alpha=u,v,w} [B_\alpha]^\top
                   \text{diag}\left(w_g k_g\right) [B_\alpha]
 
         regrouped with `k_g = k_o - (k_o - k_g)`, therefore it is exact, not
@@ -4476,7 +4477,7 @@ class MultiDomain(object):
 
         Notes
         -----
-        The internal force of an ``SB_TSL`` connection is `f = K_s(c) c`,
+        The internal force of an ``SB_TSL`` connection is `f = K_s(\bar{c}) \bar{c}`,
         where the secant stiffness `K_s` is the matrix of :meth:`.get_kC_conn`,
         computed with `k = k_o (1 - d)`. Its consistent tangent is `K_s +
         K_d`, where:
@@ -4484,7 +4485,7 @@ class MultiDomain(object):
         .. math::
 
             K_d = - \int_A k_o \frac{\partial d}{\partial \Delta_n}
-                    \left( B_u^T \Delta_u + B_v^T \Delta_v + B_w^T \Delta_n
+                    \left( B_u^\top \Delta_u + B_v^\top \Delta_v + B_w^\top \Delta_n
                     \right) B_w \, dA
 
         with `B_u, B_v, B_w` the operators giving the separations `\Delta_u,
@@ -4521,7 +4522,7 @@ class MultiDomain(object):
         - `K_d` is not symmetric, because the tangential tractions depend on
           `\Delta_n` through `d`, while `d` does not depend on `\Delta_u`,
           `\Delta_v`.
-        - The term `B_w^T \Delta_n B_w` is symmetric and negative
+        - The term `B_w^\top \Delta_n B_w` is symmetric and negative
           semi-definite; it makes the normal tangent stiffness of a softening
           point `k_o (1 - d - \hat d' \Delta_n) = -k_o \Delta_o / (\Delta_f -
           \Delta_o)`, the slope of the descending branch of the law.
@@ -4530,8 +4531,8 @@ class MultiDomain(object):
           `[K_C] + [K_G] + K_s + K_d + [K^{pen}_{PD}]` is non-symmetric,
           ``structsolve.solve`` accepts it.
 
-        The matrix was verified against central finite differences of `K_s(c)
-        c`, for random states in the softening range, with and without points
+        The matrix was verified against central finite differences of `K_s(\bar{c})
+        \bar{c}`, for random states in the softening range, with and without points
         where `d^h > \hat d`: the relative error of `K_s + K_d` is below `2
         \times 10^{-9}`, against 9--62% for `K_s` alone, see
         ``tests/multidomain/test_sb_tsl.py``.

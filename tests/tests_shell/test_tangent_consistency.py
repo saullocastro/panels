@@ -2,7 +2,7 @@
 
 KT = calc_kC(c, NLgeom=True) + calc_kG(c, NLgeom=True), with
 
-    calc_kC -> K0 + K0L + KL0 + KLL + KGNL
+    calc_kC -> KC0 + KCNL + KGNL
     calc_kG -> KG(N0 + N_L)
 
 is what every Newton-Raphson built on the Shell class uses as the Jacobian of

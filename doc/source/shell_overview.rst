@@ -56,7 +56,7 @@ Matrices and vectors
 --------------------
 
 The size of the matrices and vectors is that of the vector of the Ritz
-constants `\{c\}`, :meth:`.Shell.get_size`:
+constants `\{\bar{c}\}`, :meth:`.Shell.get_size`:
 
 ======================================= =================================== ==========================
 quantity                                 method                               used by

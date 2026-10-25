@@ -142,10 +142,10 @@ def fkCpd(double ku, double kv, double kw, object p, double xp, double yp,
 
     Notes
     -----
-    The penalty energy is `\frac{1}{2} \sum_k k_k (\{g_k\} \{c\} -
+    The penalty energy is `\frac{1}{2} \sum_k k_k (\{g_k\} \{\bar{c}\} -
     u_{kp})^2`, with `\{g_k\}` the row of the component `k` of `u, v, w`
     at the point, whose second derivative gives the stiffness `k_k
-    \{g_k\}^T \{g_k\}`. For ``z`` different from zero the rows of `u(z)`
+    \{g_k\}^\top \{g_k\}`. For ``z`` different from zero the rows of `u(z)`
     and `v(z)` combine `u` or `v`, a rotation and a slope of `w`, see
     :func:`.nullspace.pd_constraint_matrix`, and the stiffness has terms
     between these fields.
@@ -323,7 +323,7 @@ def fkCld_xcte(double ku, double kv, double kw, object p, double xp,
     Notes
     -----
     The penalty energy is that of :func:`.fkCpd` integrated along `y`,
-    `\frac{1}{2} \sum_k \int_0^b k_k (\{g_k\} \{c\} - g_k(y))^2 dy`,
+    `\frac{1}{2} \sum_k \int_0^b k_k (\{g_k\} \{\bar{c}\} - g_k(y))^2 dy`,
     with the integrals of Bardell's functions along `y`; for ``z``
     different from zero the integrals are computed with ``max(n, 4)``
     Gauss-Legendre points, exact for these polynomials.

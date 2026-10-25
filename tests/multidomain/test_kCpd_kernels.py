@@ -1,7 +1,7 @@
 r"""Penalty kernels of the prescribed displacements
 
 The kernels of :mod:`panels.multidomain.connections.kCpd` are compared with
-the penalty stiffness `k \int \{g\} \{g\}^T ds` integrated from the rows of
+the penalty stiffness `k \int \{g\} \{g\}^\top ds` integrated from the rows of
 ``fg`` of the field module, see ``theory/multidomain_penalization/kCpd.py``,
 and with the penalty energy computed from the displacement field of
 :meth:`.Shell.uvw`, for the models with 3 and 5 degrees of freedom per term.
@@ -91,7 +91,7 @@ def test_line_penalty_kernels(line, comp, model):
 @pytest.mark.parametrize('comp', [0, 1, 2])
 def test_point_penalty_kernel(comp, model):
     r"""The kernel of the point prescribed displacements, :func:`.fkCpd`, is
-    `k \{g\} \{g\}^T` of the component"""
+    `k \{g\} \{g\}^\top` of the component"""
     p = plate(0.4, 0.3, m=7, n=6, model=model)
     p.col_start = 0
     size = p.get_size()
@@ -114,7 +114,7 @@ def displacements(p, c, xs, ys):
 
 @pytest.mark.parametrize('model', MODELS)
 def test_penalty_energy(model):
-    r"""For random Ritz constants `\{c\}`, `\{c\}^T [K] \{c\}` of the
+    r"""For random Ritz constants `\{\bar{c}\}`, `\{\bar{c}\}^\top [K] \{\bar{c}\}` of the
     kernels is twice the penalty energy of a zero prescribed displacement,
     `k_u u^2 + k_v v^2 + k_w w^2` at the point and its integral along the
     lines, with `u, v, w` of :meth:`.Shell.uvw`, the panel being placed after

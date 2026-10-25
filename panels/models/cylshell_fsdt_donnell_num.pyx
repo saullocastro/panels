@@ -230,7 +230,7 @@ def fkC_num(double [::1] cs, object Finput, object shell,
                 # Membrane stress carried by the nonlinear strain
                 # eps_NL = {bx^2/2, by^2/2, bx*by}. With it, KGNL = KG(N_NL)
                 # is collected in kC such that
-                #     KT = K0 + K0L + KL0 + KLL + KGNL (fkC_num) + KG(N0 + N_L) (fkG_num)
+                #     KT = KC0 + KCNL + KGNL (fkC_num) + KG(N0 + N_L) (fkG_num)
                 # is the exact Jacobian of calc_fint, and fkG_num stays
                 # homogeneous of degree one in cs, as linear buckling requires.
                 # bx = by = 0 when NLgeom == 0, then KGNL vanishes
@@ -443,8 +443,8 @@ def fkG_num(double [::1] cs, object Finput, object shell,
     strain here. That contribution, ``KGNL``, is collected by
     :func:`.fkC_num` instead, so that
 
-        KT = K0 + K0L + KL0 + KLL + KGNL   (fkC_num)
-             + KG(N0 + N_L)                (fkG_num)
+        KT = KC0 + KCNL + KGNL   (fkC_num)
+             + KG(N0 + N_L)      (fkG_num)
 
     is the exact Jacobian of :func:`.calc_fint` while this function stays
     homogeneous of degree one in ``cs``.
@@ -1749,15 +1749,15 @@ def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
         double Nyy_cte=0., double Nxy_cte=0.):
     r"""Product of the tangent stiffness matrix by a vector, without assembly
 
-    Returns `[K_T(c)] \{v\}`, with `[K_T]` the tangent stiffness matrix
+    Returns `[K_T(\bar{c})] \{v\}`, with `[K_T]` the tangent stiffness matrix
     ``fkC_num(cs, ..., NLgeom=1) + fkG_num(cs, ...)`` at ``cs``, i.e. the
     exact Jacobian of :func:`calc_fint`, plus the geometric stiffness matrix
     of the constant membrane stress state ``Nxx_cte``, ``Nyy_cte`` and
     ``Nxy_cte``, multiplied by ``vs``. At each integration point, see
     ``theory/shells/tangent_product``::
 
-        beta = [G] cs,   eps = [B(beta/2)] cs,   deps = [B(beta)] vs
-        kTv += [B(beta)]^T [F] deps + [G]^T [N] [G] vs
+        beta = [G] cs,   eps = ([B_L] + [B_NL]/2) cs,   deps = ([B_L] + [B_NL]) vs
+        kTv += ([B_L] + [B_NL])^T [F] deps + [G]^T [N] [G] vs
 
     with ``[N]`` the membrane stresses of ``[F] eps``, plus the constant
     ones. The cost is about that of :func:`calc_fint`.
@@ -1936,8 +1936,8 @@ def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
                         dbx += 2*fAwxi*gAw/a*vs[col+2]
                         dby += 2*fAw*gAweta/b*vs[col+2]
 
-                # strains of cs, eps = [B(beta/2)] cs, and strain
-                # increment, deps = [B(beta)] vs
+                # strains of cs, eps = ([B_L] + [B_NL]/2) cs, and strain
+                # increment, deps = ([B_L] + [B_NL]) vs
                 for i in range(8):
                     e[i] = 0.
                     de[i] = 0.
@@ -1992,7 +1992,7 @@ def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
                 Nyy = s[1] + Nyy_cte
                 Nxy = s[2] + Nxy_cte
 
-                # [B(beta)]^T ds + [G]^T [N] [G] vs
+                # ([B_L] + [B_NL])^T ds + [G]^T [N] [G] vs
                 for j in range(n):
                     gAu = gtab[0, j]
                     gAueta = gtab[1, j]

@@ -2,15 +2,15 @@ r"""
 Displacement field of the Ritz approximation (replaces fuvw.nb)
 
 The displacement field of every model is built with Bardell's functions
-`f_i(\xi)` along `x` and `g_j(\eta)` along `y`, with `\xi = 2x/a - 1` and
+`P_i(\xi)` along `x` and `P_j(\eta)` along `y`, with `\xi = 2x/a - 1` and
 `\eta = 2y/b - 1`, each field having its own boundary flags. With the Ritz
 constants of the term `(i, j)` stored at ``DOF*(j*m + i)``, the fields
 `\{u, v, w, \phi_x, \phi_y\}` at a point are
 
 .. math::
 
-    \{u, v, w, \phi_x, \phi_y\}^T = \sum_{j=0}^{n-1} \sum_{i=0}^{m-1}
-        [g_{ij}] \{c_{ij}\}
+    \{u, v, w, \phi_x, \phi_y\}^\top = \sum_{j=0}^{n-1} \sum_{i=0}^{m-1}
+        [g_{ij}] \{\bar{c}_{ij}\}
 
 where the matrix `[g_{ij}]`, with 5 rows and ``DOF`` columns, is derived
 below for:

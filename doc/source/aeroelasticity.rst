@@ -39,7 +39,7 @@ Flutter analysis
 
 .. math::
 
-    \left([K_C] + [K_G] + [K_A] + \lambda^2 [M]\right) \{c\} = \{0\}
+    \left([K_C] + [K_G] + [K_A] + \lambda^2 [M]\right) \{\bar{c}\} = \{0\}
 
 solved with :func:`structsolve.freq`, which handles unsymmetric matrices,
 where `[K_G]` is the geometric stiffness of an optional prestress and

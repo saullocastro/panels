@@ -3,9 +3,9 @@ r"""Prescribed displacements imposed exactly with the null-space method
 With ``MultiDomain(..., pd_method='null-space')`` the prescribed
 displacements of :meth:`.Shell.add_point_pd`,
 :meth:`.Shell.add_distr_pd_fixed_x` and :meth:`.Shell.add_distr_pd_fixed_y`
-are the constraints `[B_d] \{c\} = \{d_0\} + \lambda \{d_1\}`, eliminated
-with the connections, `\{c\} = [Z] \{c_r\} + \{c_{p0}\} + \lambda
-\{c_{p1}\}`, see ``doc/source/multidomain_null_space.rst``:
+are the constraints `[B_d] \{\bar{c}\} = \{d_0\} + \lambda \{d_1\}`, eliminated
+with the connections, `\{\bar{c}\} = [Z] \{\bar{c}_r\} + \{\bar{c}_{p0}\} + \lambda
+\{\bar{c}_{p1}\}`, see ``doc/source/multidomain_null_space.rst``:
 
 - the membrane patch test is exact, for single and multiple domains, with
   the reaction `P = E A u/L`
@@ -259,9 +259,9 @@ def test_penalty_unchanged_and_excluded_from_fext():
 
 
 def test_mixed_constant_and_incremented_linear():
-    r"""`c(\lambda) = c_0 + \lambda c_1`, with `c_0` due to the constant
-    prescribed displacements and `c_1` due to the load and the incremented
-    ones"""
+    r"""`\bar{c}(\lambda) = \bar{c}_0 + \lambda \bar{c}_1`, with `\bar{c}_0`
+    due to the constant prescribed displacements and `\bar{c}_1` due to the
+    load and the incremented ones"""
     p = plate(1., 0.6)
     p.add_distr_pd_fixed_x(0., ku=1., funcu=lambda y: 0.)
     p.add_distr_pd_fixed_x(1., ku=1., funcu=lambda y: -1e-3*(1 + y), cte=True)
@@ -561,7 +561,7 @@ def plate_postbuckling(delta_factor=3., m=8, n=8, P=2.):
                                     'arc_length_crisfield'])
 def test_nonlinear_displacement_control(method):
     r"""Post-buckling under displacement control: every converged increment
-    satisfies `\|[Z]^T r\| \leq` ``relTOL`` `\|\lambda \partial R_r/\partial
+    satisfies `\|[Z]^\top r\| \leq` ``relTOL`` `\|\lambda \partial R_r/\partial
     \lambda\|`, the methods agree, and the reaction is below the linear one"""
     md, p, delta = plate_postbuckling()
     an = Analysis(*md.get_reduced_functions())

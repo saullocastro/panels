@@ -101,7 +101,7 @@ def test_skin_base_with_offsets_equals_single_laminate(conn_method, model,
 @pytest.mark.parametrize('use_kernels', [False, True])
 @pytest.mark.parametrize('offsets', [(0., 0.), (1.4, -0.6), (-0.3, 0.9)])
 def test_sb_tsl_energy_with_offsets(offsets, use_kernels):
-    r"""`\{c\}^T [K] \{c\} = \int k_o (\Delta_u^2 + \Delta_v^2 +
+    r"""`\{\bar{c}\}^\top [K] \{\bar{c}\} = \int k_o (\Delta_u^2 + \Delta_v^2 +
     \Delta_w^2) dA` of the pristine interface, with the separations between
     the lower face of the top panel and the upper face of the bottom panel,
     `u(z) = u + z \phi_x` with `\phi_x = -w_{,x}`, evaluated from the

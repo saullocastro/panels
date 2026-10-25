@@ -133,7 +133,7 @@ def build():
     BA, B0A, GA, gA5 = shape_functions('A')
     BB, B0B, GB, gB5 = shape_functions('B')
 
-    # Constitutive stiffness matrix, with K0L, KL0 and KLL
+    # Constitutive stiffness matrix, with KCNL
     kC = BA.T*F*BB
 
     # Linear constitutive stiffness matrix

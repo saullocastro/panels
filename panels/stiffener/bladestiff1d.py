@@ -320,7 +320,7 @@ class BladeStiff1D(object):
 
         .. math::
 
-            U_f = \frac{b_f}{2} \int_0^a \{\varepsilon_f\}^T [k_{sf}]
+            U_f = \frac{b_f}{2} \int_0^a \{\varepsilon_f\}^\top [k_{sf}]
             \{\varepsilon_f\} dx, \qquad
             \{\varepsilon_f\} = \begin{Bmatrix} u_{,x} \\ -w_{,xx} \\
             -w_{,xy} \end{Bmatrix}, \qquad

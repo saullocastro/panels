@@ -322,7 +322,7 @@ def build(theory, geometry='plate', kinematics='donnell'):
     SB = shape_functions('B', theory, geometry, kinematics)
     F = constitutive(theory)
 
-    # Constitutive stiffness matrix, with K0L, KL0 and KLL
+    # Constitutive stiffness matrix, with KCNL
     kC = SA['B'].T*F*SB['B']
 
     # Linear constitutive stiffness matrix

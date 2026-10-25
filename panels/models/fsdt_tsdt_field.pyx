@@ -19,7 +19,7 @@ Notes
 -----
 Each field `F` of `u, v, w, \phi_x, \phi_y`, of index `k = 0, \dots, 4`, is
 the Ritz series of :class:`.Shell`, `F = \sum_{j} \sum_{i} c_{5(j m + i) +
-k} f_i^F(\xi) g_j^F(\eta)`, with `\xi = 2x/a - 1`, `\eta = 2y/b - 1` and
+k} P_i^F(\xi) P_j^F(\eta)`, with `\xi = 2x/a - 1`, `\eta = 2y/b - 1` and
 Bardell's functions of the boundary flags of `F`, see
 :mod:`panels.bardell`; the derivatives are `F_{,x} = (2/a) F_{,\xi}` and
 `F_{,y} = (2/b) F_{,\eta}`.

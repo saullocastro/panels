@@ -16,7 +16,7 @@ analogous flags ``x1phix``, ``x1phixr``, ..., ``y2phiyr``.
 
 The loads are added with :meth:`.Shell.add_point_load`,
 :meth:`.Shell.add_distr_load_fixed_x` or :meth:`.Shell.add_distr_load_fixed_y`,
-and the linear system `[K_C]\{c\} = \{F_{ext}\}` is solved with
+and the linear system `[K_C]\{\bar{c}\} = \{F_{ext}\}` is solved with
 `structsolve <https://github.com/saullocastro/structsolve>`_. The displacement,
 strain and stress fields are calculated from the Ritz constants ``c`` with
 :meth:`.Shell.uvw`, :meth:`.Shell.strain` and :meth:`.Shell.stress`. The code

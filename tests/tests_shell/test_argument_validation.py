@@ -214,9 +214,9 @@ def test_NLgeom_and_not_c_selects_the_large_displacement_matrix():
     """calc_kC's docstring claim, pinned
 
     Giving c only switches calc_kC from the analytical closed form to the
-    numerically integrated kernels. The large displacement terms K0L, KL0,
-    KLL and KGNL are all built from w,x and w,y, which fkC_num zeroes unless
-    NLgeom == 1, so c alone still yields plain K0.
+    numerically integrated kernels. The large displacement terms KCNL and
+    KGNL are all built from w,x and w,y, which fkC_num zeroes unless
+    NLgeom == 1, so c alone still yields plain KC0.
     """
     s = make_shell()
     size = s.get_size()

@@ -69,7 +69,8 @@ def test_krumhaar_correction():
 
 @pytest.mark.parametrize('model', CYLINDERS)
 def test_curvature_term(model):
-    r"""`[K_A](\gamma) - [K_A](0) = -\gamma \int \{N_w\}^T \{N_w\} dA`, a
+    r"""`[K_A](\gamma) - [K_A](0) = -\gamma \int (\boldsymbol{S}^w)^\top
+    \boldsymbol{S}^w dA`, a
     negative semi-definite matrix, the same for the analytical and the
     numerical kernels"""
     s = make(model)
@@ -79,7 +80,7 @@ def test_curvature_term(model):
     size = s.get_size()
     matrices = modelDB.db[model]['matrices']
     matrices_num = modelDB.db[model]['matrices_num']
-    #NOTE fcA gives the upper triangle of -aeromu*int(Nw^T Nw)
+    #NOTE fcA gives the upper triangle of -aeromu*int(Sw^T Sw)
     NtN = -finalize_symmetric_matrix(matrices.fcA(1., s, size, 0, 0)).toarray()
     kA = matrices.fkAx(beta, gamma, s, size, 0, 0).toarray()
     kA0 = matrices.fkAx(beta, 0., s, size, 0, 0).toarray()

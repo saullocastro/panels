@@ -23,13 +23,13 @@ points over the domain of ``p1``:
 
 .. math::
 
-    [K] = \int_A k^w_{CZ} [B_\Delta]^T [B_\Delta] \, dA, \qquad
-    \{c\}^T [K] \{c\} = \int_A k^w_{CZ} \left( \Delta_u^2 + \Delta_v^2 +
+    [K] = \int_A k^w_{CZ} [B_\Delta]^\top [B_\Delta] \, dA, \qquad
+    \{\bar{c}\}^\top [K] \{\bar{c}\} = \int_A k^w_{CZ} \left( \Delta_u^2 + \Delta_v^2 +
     \Delta_w^2 \right) dA
 
 where `k^w_{CZ} = k_o (1 - d)` is given at each integration point by
-``kw_tsl``, the penalty energy of the connection is `U = \frac{1}{2} \{c\}^T
-[K] \{c\}`, and `[B_\Delta]` gives, from the Ritz constants `\{c\}`, the
+``kw_tsl``, the penalty energy of the connection is `U = \frac{1}{2} \{\bar{c}\}^\top
+[K] \{\bar{c}\}`, and `[B_\Delta]` gives, from the Ritz constants `\{\bar{c}\}`, the
 displacement jump between the two surfaces in contact, with the slope of each
 panel:
 
@@ -70,9 +70,9 @@ before the factor `w_\xi w_\eta \, ab/4` of the Gauss-Legendre rule, with `a`,
 functions are evaluated at the natural coordinates of ``p1``, which
 :meth:`.MultiDomain.get_kC_conn` checks.
 
-The kernels were verified by comparing `\{c\}^T [K] \{c\}` with the
+The kernels were verified by comparing `\{\bar{c}\}^\top [K] \{\bar{c}\}` with the
 Gauss-Legendre integral of `k^w_{CZ} (\Delta_u^2 + \Delta_v^2 + \Delta_w^2)`
-evaluated from the displacement field, for random `\{c\}`, random boundary
+evaluated from the displacement field, for random `\{\bar{c}\}`, random boundary
 flags, panels with different numbers of terms and thicknesses, and a random
 `k^w_{CZ}` field: the relative difference is below `10^{-15}`, see
 ``tests/multidomain/test_sb_tsl.py``.

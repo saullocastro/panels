@@ -337,7 +337,7 @@ def profile_case(job, method):
     - ``kC_conn`` and ``fint``: the residual, ``get_kC_conn`` and
       ``calc_fint``
     - ``kT_TSL``: damage-rate stiffness of the cohesive zone
-    - ``sum``, ``reduce``, ``vec``: sum of the matrices, `Z^T K Z` and the
+    - ``sum``, ``reduce``, ``vec``: sum of the matrices, `Z^\top K Z` and the
       products of the vectors by `Z` (null-space only)
     - ``solve``: ``structsolve.solve``
     - ``accept`` and ``output``: damage update and reactions of an opening

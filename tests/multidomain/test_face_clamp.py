@@ -153,7 +153,7 @@ def test_rows_are_the_displacements_at_z(model, offset):
 
 
 def test_penalty_kernels_with_z():
-    r"""The penalty stiffness at ``z`` is `k \{g(z)\}^T \{g(z)\}`, at a
+    r"""The penalty stiffness at ``z`` is `k \{g(z)\}^\top \{g(z)\}`, at a
     point, and the integral along the line; the generic route of ``z != 0``
     with ``z = 0`` gives the closed-form integrals of the kernels"""
     s = plate('plate_tsdt_donnell', offset=0.2*H, m=6, n=7)

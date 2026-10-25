@@ -5,10 +5,12 @@ The aerodynamic stiffness matrix of the linear piston theory is calculated
 with :meth:`.Shell.calc_kA`, as a function of the aerodynamic parameter
 ``beta`` of the :class:`.Shell` object. The flutter onset is found by
 increasing ``beta`` and solving the eigenvalue problem
-`([K_C] + [K_G] + [K_A] + \lambda^2 [M])\{c\} = \{0\}` with
+`([K_C] + [K_G] + [K_A] + \lambda^2 [M])\{\bar{c}\} = \{0\}` with
 :func:`structsolve.freq`, until two natural frequencies coalesce and the
 eigenvalues become complex. In this convention `[K_A] = -\int \left(\beta
-\{N_w\}_{,x}^T \{N_w\} + \gamma \{N_w\}^T \{N_w\}\right) dA`, for the load
+(\boldsymbol{S}^w_{,x})^\top \boldsymbol{S}^w + \gamma (\boldsymbol{S}^w)^\top
+\boldsymbol{S}^w\right) dA`, with the row `\boldsymbol{S}^w` of the
+approximation functions of `w`, for the load
 `q = \beta w_{,x} + \gamma w` of a flow along `x`, where the curvature
 correction `\gamma` of Krumhaar softens a cylindrical shell, see
 :meth:`.Shell.calc_kA`. The term in `\beta` is the transpose of that of Eq.

@@ -332,7 +332,7 @@ def _connection_matrix(components, ctes, size):
     .. math::
 
         [K_{PQ}] = \pm k_k \sum_{t \in P} \sum_{s \in Q} \alpha_t \alpha_s
-        \int \{N_t\}^T \{N_s\}
+        \int \{N_t\}^\top \{N_s\}
 
     with the sign `+` for `P = Q` and `-` for `P \neq Q`. The approximation
     functions are products `f(x) g(y)`, so each integral is the Kronecker

@@ -269,20 +269,20 @@ class Shell(object):
     .. math::
 
         u(x, y) = \sum_{j=0}^{n-1} \sum_{i=0}^{m-1} c_{d (j m + i)}
-                  f_i^u(\xi) g_j^u(\eta)
+                  P_i^u(\xi) P_j^u(\eta)
 
     and likewise for `v`, `w` and, for the shear deformation theories,
     `\phi_x`, `\phi_y`, with the offsets 1 to 4 in place of 0 in the index
     of the Ritz constant, where `d` is the number of degrees of freedom per
-    term, 3 or 5, see :mod:`panels.modelDB`. `f_i^u` is the term `i` of
-    Bardell's functions with the flags ``x1u, x1ur, x2u, x2ur`` and `g_j^u`
+    term, 3 or 5, see :mod:`panels.modelDB`. `P_i^u` is the term `i` of
+    Bardell's functions with the flags ``x1u, x1ur, x2u, x2ur`` and `P_j^u`
     the term `j` with the flags ``y1u, y1ur, y2u, y2ur``, see
     :mod:`panels.bardell`, and the derivatives follow from `\partial/\partial
     x = (2/a) \partial/\partial \xi` and `\partial/\partial y = (2/b)
     \partial/\partial \eta`. The structural matrices and force vectors are
-    the derivatives with respect to the Ritz constants `\{c\}` of the
+    the derivatives with respect to the Ritz constants `\{\bar{c}\}` of the
     energy, or of the virtual work, integrated over the integration domain,
-    and their size is that of `\{c\}`, see :meth:`.Shell.get_size`.
+    and their size is that of `\{\bar{c}\}`, see :meth:`.Shell.get_size`.
 
     Only the first four terms of Bardell's functions have a value or a first
     derivative different from zero at the ends, `\xi = \pm 1`, see
@@ -1090,7 +1090,7 @@ class Shell(object):
 
         The size of the stiffness matrices can be interpreted as the number of
         rows or columns, recalling that this will be the size of the Ritz
-        constants' vector `\{c\}`, the internal force vector `\{F_{int}\}` and
+        constants' vector `\{\bar{c}\}`, the internal force vector `\{F_{int}\}` and
         the external force vector `\{F_{ext}\}`.
 
         ONLY RETURNS THE NUMBER OF ROWS ''OR'' COLS
@@ -1491,25 +1491,24 @@ class Shell(object):
         part `[B_{NL}]` is linear in the rotations `\beta_x`, `\beta_y` of
         the von Kármán terms, `w_{,x}` and `w_{,y}` (`w_{,y} - v/r` for the
         Sanders-Koiter kinematics, see :mod:`panels.models`), and the
-        constitutive matrix `[F]` of ``ABDnxny``:
+        constitutive matrix `[ABD]` of ``ABDnxny``, the linear and the
+        non-linear constitutive stiffness matrices are
 
         .. math::
 
-            [K_{C0}] = \int [B_L]^T [F] [B_L] dA \qquad
-            [K_{0L}] = \int [B_L]^T [F] [B_{NL}] dA = [K_{L0}]^T \qquad
-            [K_{LL}] = \int [B_{NL}]^T [F] [B_{NL}] dA
+            [K_{C0}] = \int [B_L]^\top [ABD] [B_L] dA \qquad
+            [K_{CNL}] = \int \left( [B_L]^\top [ABD] [B_{NL}] + [B_{NL}]^\top [ABD]
+            [B_L] + [B_{NL}]^\top [ABD] [B_{NL}] \right) dA
 
-        over the integration domain, the non-linear constitutive stiffness
-        matrix being `[K_{CNL}] = [K_{0L}] + [K_{L0}] + [K_{LL}]`. With
-        ``NLgeom=False`` the result is the linear constitutive stiffness
-        matrix `[K_{C0}]`, whether or not ``c`` is given, because the kernels
-        zero `w_{,x}` and `w_{,y}` and every large displacement term is built
-        from them. With ``NLgeom=True`` the result is `[K_{C0}] + [K_{CNL}] +
-        [K_{G_{NL}}]`, evaluated at ``c``. Despite the name, the returned matrix is not purely
-        constitutive in two cases:
+        over the integration domain. With ``NLgeom=False`` the result is
+        `[K_{C0}]`, whether or not ``c`` is given, because the kernels zero
+        `w_{,x}` and `w_{,y}` and every large displacement term is built from
+        them. With ``NLgeom=True`` the result is `[K_{C0}] + [K_{CNL}] +
+        [K_{GNL}]`, evaluated at ``c``. Despite the name, the returned matrix
+        is not purely constitutive in two cases:
 
         - With ``NLgeom=True`` the returned matrix also contains
-          `[K_{G_{NL}}]`, the geometric stiffness of the membrane stress
+          `[K_{GNL}]`, the geometric stiffness of the membrane stress
           carried by the non-linear part of the strain,
           `\{\varepsilon_{NL}\} = \{w_{,x}^2/2, w_{,y}^2/2, w_{,x} w_{,y}\}`,
           i.e. `[K_G]` of :meth:`.Shell.calc_kG` with the stresses
@@ -1517,10 +1516,9 @@ class Shell(object):
           instead of in :meth:`.Shell.calc_kG`, so that
 
           .. math::
-              [K_T] = [K_{C0}] + [K_{0L}] + [K_{L0}] + [K_{LL}] + [K_{G_{NL}}]
-                      + [K_G(N_0 + N_L)]
+              [K_T] = [K_{C0}] + [K_{CNL}] + [K_{GNL}] + [K_G(N_0 + N_L)]
 
-          with the first five terms returned by this method and the last one
+          with the first three terms returned by this method and the last one
           by :meth:`.Shell.calc_kG`, is the exact Jacobian of
           :meth:`.Shell.calc_fint`, while :meth:`.Shell.calc_kG` stays
           homogeneous of degree one in ``c``, as linear buckling requires.
@@ -1529,7 +1527,7 @@ class Shell(object):
           ``Nyy_cte`` or ``Nxy_cte`` is non-zero, the geometric stiffness
           `[K_G(N_{cte})]` of that constant stress state is added into the
           returned matrix, which is then no longer `[K_{C0}] + [K_{CNL}] +
-          [K_{G_{NL}}]`.
+          [K_{GNL}]`.
           This is the device used to superpose combined load cases, where the
           eigenvalue of a linear buckling analysis must multiply only part of
           the applied loads. The constant stress state does not scale with
@@ -1544,7 +1542,7 @@ class Shell(object):
 
         The closed-form matrices separate the two directions, with the
         integrals of Bardell's functions of :mod:`panels.bardell` over the
-        whole domain, which requires a constant `[F]`; the numerical
+        whole domain, which requires a constant `[ABD]`; the numerical
         integration uses the points of :meth:`.Shell.integration_points`.
         See :ref:`tangent_product` for the derivation of the terms.
 
@@ -1604,7 +1602,7 @@ class Shell(object):
         #     against nx, ny within the .pyx files
 
         # Calc Kc as per panels/panels/models then the pyx files given by ''matrices'' defined earlier
-        # This calc K0 - linear consitutive stiff mat (SA formulation paper - eq 11)
+        # This calc KC0 - linear consitutive stiff mat (SA formulation paper - eq 11)
             # This will happen by default unless a something is specified that NL Geo is needed
         if analytical_kC:
             kC = matrices.fk0(self, size, row0, col0)
@@ -1708,15 +1706,16 @@ class Shell(object):
 
         .. math::
 
-            [K_G(N)] = \int [G]^T [N] [G] dA \qquad
+            [K_G(N)] = \int [G]^\top [N] [G] dA \qquad
             [N] = \begin{bmatrix} N_{xx} & N_{xy} \\ N_{xy} & N_{yy}
                   \end{bmatrix}
 
         over the integration domain, with `N = N_0 + N_L`, `N_0` the
         stresses of the attributes ``Nxx``, ``Nyy``, ``Nxy`` and `N_L` those
         of the linear part of the strains at ``c``. The linear buckling
-        problem of a fundamental state ``c0``, e.g. of a linear static
-        analysis, is `([K_{C0}] + \lambda [K_G(c_0)])\{u\} = \{0\}`, see
+        problem of a pre-buckling (fundamental) state `\{\hat{c}\}`, e.g. of
+        a linear static analysis, is `([K_{C0}] + \lambda
+        [K_G(\hat{c})])\{u\} = \{0\}`, see
         :meth:`.Shell.calc_kC` for the stresses that must not scale with
         `\lambda`.
 
@@ -1834,12 +1833,11 @@ class Shell(object):
         :meth:`.Shell.calc_fint` with respect to ``c``, assembled as
 
         .. math::
-            [K_T] = [K_{C0}] + [K_{0L}] + [K_{L0}] + [K_{LL}] + [K_{G_{NL}}]
-                    + [K_G(N_0 + N_L)]
+            [K_T] = [K_{C0}] + [K_{CNL}] + [K_{GNL}] + [K_G(N_0 + N_L)]
 
         where all terms but the last come from
         :meth:`.Shell.calc_kC` with ``NLgeom=True``, and the last one from
-        :meth:`.Shell.calc_kG` with ``NLgeom=True``. Note that `[K_{G_{NL}}]`
+        :meth:`.Shell.calc_kG` with ``NLgeom=True``. Note that `[K_{GNL}]`
         is grouped with the constitutive matrix and not with the geometric
         one, see the notes in :meth:`.Shell.calc_kC` and
         :meth:`.Shell.calc_kG`. Being the exact Jacobian, it gives the
@@ -1860,7 +1858,7 @@ class Shell(object):
             ny=None, ABDnxny=None, inc=1.):
         r"""Product of the tangent stiffness matrix by a vector
 
-        Returns `[K_T(c)] \{v\}`, with `[K_T]` of :meth:`.Shell.calc_kT` at
+        Returns `[K_T(\bar{c})] \{v\}`, with `[K_T]` of :meth:`.Shell.calc_kT` at
         the load factor ``inc``, i.e. the directional derivative of
         :meth:`.Shell.calc_fint` along ``v``, without assembling `[K_T]`,
         including the constant membrane stresses ``Nxx_cte``, ``Nyy_cte`` and
@@ -1906,30 +1904,32 @@ class Shell(object):
 
         .. math::
 
-            [K_T] \{v\} = \int \left( [B(\beta)]^T [F] [B(\beta)] \{v\} +
-            [G]^T [N] [G] \{v\} \right) dA
+            [K_T] \{v\} = \int \left( ([B_L] + [B_{NL}])^\top [ABD] ([B_L] +
+            [B_{NL}]) \{v\} + [G]^\top [N] [G] \{v\} \right) dA
 
-        where `\{\beta\} = [G] \{c\}` are the rotations of the von Kármán
-        terms, `[B(\beta)]` the strain operator, linear in `\{\beta\}`, and
-        `[N]` the membrane stresses at ``c``, plus the constant ones
-        ``Nxx_cte``, ``Nyy_cte`` and ``Nxy_cte``. Since the strains are
-        `\{\varepsilon(c)\} = [B(\beta/2)]\{c\}`, a quadratic form whose
-        bilinear form is `[B(\beta)]`, the first term is the derivative of
-        the strains and the second that of `[B(\beta)]^T` in the internal
-        force vector `\int [B(\beta)]^T [F] \{\varepsilon(c)\} dA`. Each
+        where `\{\beta\} = [G] \{\bar{c}\}` are the rotations of the von Kármán
+        terms, `[B_L] + [B_{NL}]` the strain operator, `[B_{NL}]` being
+        linear in `\{\beta\}`, `[ABD]` the constitutive matrix of
+        ``ABDnxny`` and `[N]` the membrane stresses at ``c``, plus the
+        constant ones ``Nxx_cte``, ``Nyy_cte`` and ``Nxy_cte``. Since the
+        strains are `\{\varepsilon(\bar{c})\} = ([B_L] + \tfrac{1}{2} [B_{NL}])
+        \{\bar{c}\}`, a quadratic form whose bilinear form is `[B_L] + [B_{NL}]`,
+        the first term is the derivative of the strains and the second that
+        of `[B_{NL}]^\top` in the internal force vector `\int ([B_L] +
+        [B_{NL}])^\top [ABD] \{\varepsilon(\bar{c})\} dA`. Each
         step at a point is a loop over the `m n` terms, against the `m^2
         n^2` pairs of terms of the assembly of `[K_T]`.
 
         With follower pressure loads, the product of their load stiffness
-        :meth:`.Shell.calc_kCfollower` is the central difference
+        `[K_F]`, :meth:`.Shell.calc_kCfollower`, is the central difference
 
         .. math::
 
-            -\frac{\partial \{F_p\}}{\partial \{c\}} \{v\} = -\frac{\{F_p(c +
-            t v)\} - \{F_p(c - t v)\}}{2 t}
+            [K_F] \{v\} = -\frac{\partial \{F_p\}}{\partial \{\bar{c}\}} \{v\} =
+            -\frac{\{F_p(\bar{c} + t v)\} - \{F_p(\bar{c} - t v)\}}{2 t}
 
-        which is exact for any `t`, `\{F_p(c)\}` being at most quadratic in
-        `\{c\}`; `t = \max(\|c\|/\|v\|, 1)` avoids the cancellation of large
+        which is exact for any `t`, `\{F_p(\bar{c})\}` being at most quadratic in
+        `\{\bar{c}\}`; `t = \max(\|\bar{c}\|/\|v\|, 1)` avoids the cancellation of large
         and small terms.
 
         """
@@ -2041,15 +2041,15 @@ class Shell(object):
 
         Notes
         -----
-        With the force vector `\{F_p(c)\}` of :meth:`.Shell.add_pressure_load`,
+        With the force vector `\{F_p(\bar{c})\}` of :meth:`.Shell.add_pressure_load`,
         the returned matrix is the load stiffness
 
         .. math::
-            [K_{C_{follower}}] = - \frac{\partial \{F_p\}}{\partial \{c\}}
+            [K_F] = - \frac{\partial \{F_p\}}{\partial \{\bar{c}\}}
 
         which enters the tangent stiffness matrix as `[K_T] = [K_C] + [K_G] +
-        [K_{C_{follower}}]`. For the first-order area vector `\{F_p(c)\}` is
-        affine in `\{c\}`, whence a constant matrix, and for the complete
+        [K_F]`. For the first-order area vector `\{F_p(\bar{c})\}` is
+        affine in `\{\bar{c}\}`, whence a constant matrix, and for the complete
         area vector it is quadratic. In the linear buckling problem of a
         hydrostatic prestress, `p = \lambda p_0`, the matrix multiplies
         `\lambda` together with `[K_G]` of the linear prestress state.
@@ -2115,7 +2115,7 @@ class Shell(object):
 
     def calc_fext_follower(self, c, inc=1., size=None, col0=0,
             reference=True):
-        r"""Force vector `\{F_p(c)\}` of the follower pressure loads
+        r"""Force vector `\{F_p(\bar{c})\}` of the follower pressure loads
 
         The pressures of the incremented loads are multiplied by ``inc``. With
         ``reference=False`` the part of the undeformed state, `\{F_p(0)\}`,
@@ -2242,10 +2242,12 @@ class Shell(object):
         .. math::
 
             [M] = \int_A \int_{-h/2 + d}^{h/2 + d} \rho(z) \left(
-            \{N_u(z)\}^T \{N_u(z)\} + \{N_v(z)\}^T \{N_v(z)\} + \{N_w\}^T
-            \{N_w\} \right) dz \, dA
+            (\boldsymbol{S}^u(z))^\top \boldsymbol{S}^u(z) +
+            (\boldsymbol{S}^v(z))^\top \boldsymbol{S}^v(z) +
+            (\boldsymbol{S}^w)^\top \boldsymbol{S}^w \right) dz \, dA
 
-        where `\{N_u(z)\}`, `\{N_v(z)\}`, `\{N_w\}` are the approximations of
+        where the rows `\boldsymbol{S}^u(z)`, `\boldsymbol{S}^v(z)`,
+        `\boldsymbol{S}^w` of the approximation functions give
         `u(z) = u + z \phi_x - c_1 z^3 (\phi_x + w_{,x})`, `v(z) = v + z
         \phi_y - c_1 z^3 (\phi_y + w_{,y})` and `w`. For the CLPT `\phi_x =
         -w_{,x}`, `\phi_y = -w_{,y}` and `c_1 = 0`; for the FSDT `c_1 = 0`;
@@ -2404,25 +2406,29 @@ class Shell(object):
 
         .. math::
 
-            [K_A] = -\int \left(\beta \{N_w\}_{,x}^T \{N_w\} + \gamma
-            \{N_w\}^T \{N_w\}\right) dA
+            [K_A] = -\int \left(\beta (\boldsymbol{S}^w_{,x})^\top
+            \boldsymbol{S}^w + \gamma (\boldsymbol{S}^w)^\top
+            \boldsymbol{S}^w\right) dA
 
-        with `\{N_w\}_{,y}` and `\gamma = 0` for a flow along `y`, where
-        `\{N_w\}` is the row of the approximation functions of `w`,
+        with `\boldsymbol{S}^w_{,y}` and `\gamma = 0` for a flow along `y`,
+        where `\boldsymbol{S}^w` is the row of the approximation functions of
+        `w`,
         entering the equations of motion as `([K] + [K_A] + \lambda^2
-        [M])\{c\} = \{0\}`, `\lambda^2 = -\omega^2` for a harmonic motion,
+        [M])\{\bar{c}\} = \{0\}`, `\lambda^2 = -\omega^2` for a harmonic motion,
         e.g. with :func:`structsolve.freq`, see :meth:`.Shell.calc_cA` for
         the damping. This is the convention of panels: the term in `\gamma`
-        is `-\gamma \int \{N_w\}^T \{N_w\} dA` added to the stiffness, which
+        is `-\gamma \int (\boldsymbol{S}^w)^\top \boldsymbol{S}^w dA` added to
+        the stiffness, which
         softens the shell, as Krumhaar's correction does [1]_, see below.
 
-        Since `\int \{N_w\}_{,x}^T \{N_w\} dA = -\int \{N_w\}^T \{N_w\}_{,x}
-        dA` when `w` vanishes at `x = 0` and `x = a`, the term in `\beta` is
-        then `\beta \int \{N_w\}^T \{N_w\}_{,x} dA`. The term in `\beta` of
+        Since `\int (\boldsymbol{S}^w_{,x})^\top \boldsymbol{S}^w dA = -\int
+        (\boldsymbol{S}^w)^\top \boldsymbol{S}^w_{,x} dA` when `w` vanishes at
+        `x = 0` and `x = a`, the term in `\beta` is then `\beta \int
+        (\boldsymbol{S}^w)^\top \boldsymbol{S}^w_{,x} dA`. The term in `\beta` of
         panels is the transpose of that of Eq. (21) of [2]_, `[K_{A_x}] =
-        \int \{S^w\}^T (-\beta \{S^w\}_{,x} + \gamma \{S^w\}) dA`, which is
+        \int \{S^w\}^\top (-\beta \{S^w\}_{,x} + \gamma \{S^w\}) dA`, which is
         added to the stiffness in Eqs. (29)-(31) of [2]_, `([K_{ps}] +
-        [K_A] - \omega^2 [M] + i \omega [C_A])\{c_0\} = \{0\}`: with `w = 0`
+        [K_A] - \omega^2 [M] + i \omega [C_A])\{\bar{c}_0\} = \{0\}`: with `w = 0`
         at `x = 0` and `x = a` the two differ by the sign of `\beta`, i.e.
         by the direction of the flow, on which the flutter boundary does not
         depend. The sign of the term in `\gamma` of Eqs. (18), (21) and (29)
@@ -2552,22 +2558,23 @@ class Shell(object):
 
         Notes
         -----
-        The kernel computes `-\mu \int \{N_w\}^T \{N_w\} dA` over the whole
-        shell, with `\mu` the parameter ``aeromu`` and `\{N_w\}` the row of
+        The kernel computes `-\mu \int (\boldsymbol{S}^w)^\top \boldsymbol{S}^w
+        dA` over the whole shell, with `\mu` the parameter ``aeromu`` and
+        `\boldsymbol{S}^w` the row of
         the approximation functions of `w`, i.e. the matrix of the
         aerodynamic damping load of the piston theory, proportional to `\mu
         \dot{w}`; :class:`.StiffPanelBay` computes `\mu = \beta (M^2 - 2)/(M
         a_\infty (M^2 - 1))`, with `a_\infty` the speed of sound, Eq. (18)
         of [1]_, see :meth:`.Shell.calc_kA` for `\beta`. This is `[C_A] =
-        \int \{S^w\}^T (-\mu \{S^w\}) dA` of Eq. (23) of [1]_. For the
-        harmonic motion `\{c\} e^{i \omega t}`, `\dot{w} = i \omega w`, and
+        \int \{S^w\}^\top (-\mu \{S^w\}) dA` of Eq. (23) of [1]_. For the
+        harmonic motion `\{\bar{c}\} e^{i \omega t}`, `\dot{w} = i \omega w`, and
         the damping enters Eqs. (29)-(31) of [1]_ as `+i \omega [C_A]`; the
         factor ``1j`` is already in ``cA`` `= i [C_A]`, such that the
         eigenvalue problem is
 
         .. math::
 
-            \left([K] + [K_A] - \omega^2 [M] + \omega [c_A]\right)\{c\} =
+            \left([K] + [K_A] - \omega^2 [M] + \omega [c_A]\right)\{\bar{c}\} =
             \{0\}
 
         with `[K_A]` of :meth:`.Shell.calc_kA`, quadratic in `\omega`, e.g.
@@ -3036,14 +3043,18 @@ class Shell(object):
         on the displacements,
 
         .. math::
-            \{F_p(c)\} = \int p \left(\{N_u\} a_x + \{N_v\} a_y
-                         + \{N_w\} a_z\right) dx dy
+            \{F_p(\bar{c})\} = \int p \left((\boldsymbol{S}^u)^\top a_x +
+                         (\boldsymbol{S}^v)^\top a_y + (\boldsymbol{S}^w)^\top
+                         a_z\right) dx dy
 
-        where `(a_x, a_y, a_z)` is the area vector of the deformed
-        mid-surface per unit undeformed area, `\vec{a} = \vec{X}_{,x} \times
-        \vec{X}_{,y}`, with the tangent vectors of the kinematics `\vec{X}_{,x}
-        = (1 + u_{,x}, v_{,x}, w_{,x})` and `\vec{X}_{,y} = (u_{,y}, 1 + v_{,y}
-        + k_w w, w_{,y} - k_v v)` on the local axes of each point, `k_w = 1/r`
+        where `\boldsymbol{S}^u`, `\boldsymbol{S}^v`, `\boldsymbol{S}^w` are
+        the rows of the approximation functions of `u`, `v`, `w` and `(a_x,
+        a_y, a_z)` is the area vector of the deformed mid-surface per unit
+        undeformed area, `\boldsymbol{a} = \boldsymbol{X}_{,x} \times
+        \boldsymbol{X}_{,y}`, with the tangent vectors of the kinematics
+        `\boldsymbol{X}_{,x} = (1 + u_{,x}, v_{,x}, w_{,x})` and
+        `\boldsymbol{X}_{,y} = (u_{,y}, 1 + v_{,y} + k_w w, w_{,y} - k_v v)`
+        on the local axes of each point, `k_w = 1/r`
         for the cylinders and `k_v = 1/r` for the Sanders kinematics only,
         zero otherwise. The Donnell cylinder neglects `v/r` in the rotation,
         as its strains do. With ``follower=True`` or ``'linear'`` it is
@@ -3207,12 +3218,12 @@ class Shell(object):
         .. math::
 
             \frac{k_u}{2} \left(u(x, y) - u_p\right)^2 = \frac{k_u}{2}
-            \left(\{g_u\} \{c\} - u_p\right)^2
+            \left(\{g_u\} \{\bar{c}\} - u_p\right)^2
 
         with `\{g_u\}` the row of the approximation functions of `u` at the
         point, see the function ``fg`` of the model, whose derivatives give
-        the penalty stiffness `k_u \{g_u\}^T \{g_u\}` and the force `k_u u_p
-        \{g_u\}^T`. The prescribed value is reached only in the limit of an
+        the penalty stiffness `k_u \{g_u\}^\top \{g_u\}` and the force `k_u u_p
+        \{g_u\}^\top`. The prescribed value is reached only in the limit of an
         infinite penalty constant: the error decreases with `k_u` relative to
         the stiffness of the structure, while the conditioning of the
         stiffness matrix worsens.
@@ -3335,7 +3346,7 @@ class Shell(object):
         e.g. `u`, is the integral along the line of the energy of
         :meth:`.add_point_pd`, `\int_0^b \frac{k_u}{2} (u(x, y) - g(y))^2
         dy`, with ``ku`` a penalty constant per unit length of the line,
-        which gives the force `\int_0^b k_u g(y) \{g_u\}^T dy` of
+        which gives the force `\int_0^b k_u g(y) \{g_u\}^\top dy` of
         :func:`.shell_fext` and the penalty stiffness of :func:`.fkCld_xcte`.
 
         """
@@ -3513,7 +3524,7 @@ class Shell(object):
         Notes
         -----
         The matrix is the second derivative of the penalty energy
-        `\frac{k}{2} (\{g\} \{c\})^2` of each constrained degree of freedom,
+        `\frac{k}{2} (\{g\} \{\bar{c}\})^2` of each constrained degree of freedom,
         which prescribes a zero value approximately, with an accuracy and a
         conditioning that grow and worsen with `k`, see
         :meth:`.Shell.add_point_pd`. The rotations are those of the rows
@@ -3574,7 +3585,7 @@ class Shell(object):
         c : array-like or None, optional
             The Ritz constants, with the size ``size``. When given, the
             follower pressure loads are evaluated in this configuration,
-            i.e. ``fext(c) = fext + (F_p(c) - F_p(0))``, the load vector that
+            i.e. ``fext(\bar{c}) = fext + (F_p(\bar{c}) - F_p(0))``, the load vector that
             the arc-length solvers of ``structsolve`` use as the derivative
             of the residual with respect to the load factor. Default
             ``None``.
@@ -3659,19 +3670,21 @@ class Shell(object):
 
         .. math::
 
-            \{F_{int}^{elastic}(c)\} = \int [B(\beta)]^T [F]
-            \{\varepsilon(c)\} dA
+            \{F_{int}^{elastic}(\bar{c})\} = \int ([B_L] + [B_{NL}])^\top [ABD]
+            \{\varepsilon(\bar{c})\} dA
 
-        with the generalized strains `\{\varepsilon(c)\} = [B(\beta/2)]
-        \{c\}` of the kinematics of the model and the strain operator
-        `[B(\beta)]`, linear in the rotations `\{\beta\}` of the von Kármán
-        terms, see :meth:`.Shell.calc_kTv`. With follower pressure loads the
+        with the generalized strains `\{\varepsilon(\bar{c})\} = ([B_L] +
+        \tfrac{1}{2} [B_{NL}]) \{\bar{c}\}` of the kinematics of the model, the
+        strain operator `[B_L] + [B_{NL}]`, `[B_{NL}]` being linear in the
+        rotations `\{\beta\}` of the von Kármán terms, and the constitutive
+        matrix `[ABD]` of ``ABDnxny``, see :meth:`.Shell.calc_kTv`. With
+        follower pressure loads the
         residual is
 
         .. math::
             \{R\} = \{F_{ext}\} - \{F_{int}\}
-                  = \{F_{ext}\} + (\{F_p(c)\} - \{F_p(0)\})
-                    - \{F_{int}^{elastic}(c)\}
+                  = \{F_{ext}\} + (\{F_p(\bar{c})\} - \{F_p(0)\})
+                    - \{F_{int}^{elastic}(\bar{c})\}
 
         with :meth:`.Shell.calc_fext` at the same ``inc``, and the tangent
         stiffness matrix :meth:`.Shell.calc_kT` at ``inc`` is its exact

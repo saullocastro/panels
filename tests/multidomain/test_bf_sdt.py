@@ -67,7 +67,7 @@ def _conn(func, base, flange, cte1, cte2, **kw):
 @pytest.mark.parametrize('func', ['BFycte', 'BFxcte'])
 @pytest.mark.parametrize('model', ['plate_clpt_donnell'] + SDT)
 def test_energy(model, func, order):
-    r"""`\{c\}^T [K] \{c\}` against the line integral of the penalty energy
+    r"""`\{\bar{c}\}^\top [K] \{\bar{c}\}` against the line integral of the penalty energy
     evaluated from the displacement field, the rotation being `\phi_y` or
     `\phi_x`, which are `-w_{,y}` and `-w_{,x}` for the CLPT"""
     base, flange = _panels(model, func, seed=3)

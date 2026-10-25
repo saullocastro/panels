@@ -60,7 +60,7 @@ For the first-order area vector the load stiffness, as a bilinear form
         - oint p [(du Dw - dw Du) nx + (dv Dw - dw Dv) ny] ds
         + int [p,x (du Dw - dw Du) + p,y (dv Dw - dw Dv)] dA
 
-over the loaded region. ``K_p`` is therefore symmetric when ``p`` is uniform
+over the loaded region. ``K_F`` is therefore symmetric when ``p`` is uniform
 over the whole integration domain and, on each edge, either ``w = 0`` or the
 displacement normal to the edge is zero (``u`` on the edges ``x = const``,
 ``v`` on ``y = const``), e.g. simply supported or clamped panels, or the
@@ -193,9 +193,11 @@ def kernel_expressions(geometry, kinematics):
     -------
     acode : list
         ``[ax, ay, az]``, the area vector at the integration point, with
-        ``F_p = int p (Nu ax + Nv ay + Nw az) dA``.
+        ``F_p = int p (Su^T ax + Sv^T ay + Sw^T az) dA``, with the rows
+        ``Su``, ``Sv``, ``Sw`` of the approximation functions.
     kblocks : dict
-        ``{(row_field, col_field): expr}`` of the load stiffness ``-dF_p/dc``,
+        ``{(row_field, col_field): expr}`` of the load stiffness ``K_F =
+        -dF_p/dc``,
         only the blocks that are not identically zero.
 
     """

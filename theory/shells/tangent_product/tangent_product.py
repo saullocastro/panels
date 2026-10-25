@@ -5,54 +5,56 @@ generalized strains at a point are, see the theory of each model,
 
 .. math::
 
-    \{\varepsilon(c)\} = [B(\beta/2)] \{c\}, \qquad \{\beta\} = [G] \{c\}
+    \{\varepsilon(\bar{c})\} = \left( [B_L] + \tfrac{1}{2} [B_{NL}] \right) \{\bar{c}\},
+    \qquad \{\beta\} = [G] \{\bar{c}\}
 
-where `[B(\beta)]` is linear in the rotations `\{\beta\}` of the von Kármán
+where `[B_{NL}]` is linear in the rotations `\{\beta\}` of the von Kármán
 terms, `\{\beta\} = \{w_{,x}, w_{,y}\}` (Donnell, `\{\beta_x, \beta_y\}` with
 `\beta_y = w_{,y} - v/r` for Sanders, `\{\phi_x, \phi_y\}` with the sign
-convention of ``cylshell_clpt_sanders``), and only the membrane rows of
-`[B]` depend on `\{\beta\}`:
+convention of ``cylshell_clpt_sanders``), and enters only the membrane rows:
 
 .. math::
 
-    \frac{\partial [B]}{\partial \beta_x} = \begin{bmatrix} G_x \\ 0 \\ G_y
-    \\ 0 \end{bmatrix}, \qquad \frac{\partial [B]}{\partial \beta_y} =
-    \begin{bmatrix} 0 \\ G_y \\ G_x \\ 0 \end{bmatrix}
+    \frac{\partial [B_{NL}]}{\partial \beta_x} = \begin{bmatrix} G_x \\ 0 \\
+    G_y \\ 0 \end{bmatrix}, \qquad \frac{\partial [B_{NL}]}{\partial \beta_y}
+    = \begin{bmatrix} 0 \\ G_y \\ G_x \\ 0 \end{bmatrix}
 
-Using `\beta/2` in `[B]` gives the quadratic terms `\beta_x^2/2`,
-`\beta_y^2/2` and `\beta_x \beta_y`. The internal force vector is
+The factor `1/2` of `[B_{NL}]` gives the quadratic terms `\beta_x^2/2`,
+`\beta_y^2/2` and `\beta_x \beta_y`. With the constitutive matrix `[ABD]`,
+the internal force vector is
 
 .. math::
 
-    \{F_{int}(c)\} = \int [B(\beta)]^T \{\sigma\}\, dA, \qquad \{\sigma\} =
-    [F] \{\varepsilon(c)\}
+    \{F_{int}(\bar{c})\} = \int ([B_L] + [B_{NL}])^\top \{\sigma\}\, dA, \qquad
+    \{\sigma\} = [ABD] \{\varepsilon(\bar{c})\}
 
 and its directional derivative along `\{v\}`, i.e. the product of the
-tangent stiffness matrix `[K_T] = \partial \{F_{int}\}/\partial \{c\}` by
+tangent stiffness matrix `[K_T] = \partial \{F_{int}\}/\partial \{\bar{c}\}` by
 `\{v\}`, is
 
 .. math::
 
-    [K_T] \{v\} = \int \left( [B(\beta)]^T [F] [B(\beta)] \{v\} + [G]^T
-    [N] [G] \{v\} \right) dA, \qquad [N] = \begin{bmatrix} N_{xx} & N_{xy}
-    \\ N_{xy} & N_{yy} \end{bmatrix}
+    [K_T] \{v\} = \int \left( ([B_L] + [B_{NL}])^\top [ABD] ([B_L] + [B_{NL}])
+    \{v\} + [G]^\top [N] [G] \{v\} \right) dA, \qquad [N] = \begin{bmatrix}
+    N_{xx} & N_{xy} \\ N_{xy} & N_{yy} \end{bmatrix}
 
-because `\frac{d}{dt} \{\varepsilon(c + t v)\}|_{t=0} = [B(\beta)] \{v\}`,
-the strains being a quadratic form whose bilinear form is `[B(\beta)]`, and
-`\frac{d}{dt} [B(\beta(c + t v))]^T|_{t=0} \{\sigma\} = [G]^T [N] [G]
-\{v\}` from the derivatives of `[B]` above. These are the two parts that
-``fkC_num`` (`K_{C0} + K_{0L} + K_{L0} + K_{LL} + K_{G_{NL}}`) and ``fkG_num``
-(`K_G(N_0 + N_L)`) assemble.
+because `\frac{d}{dt} \{\varepsilon(\bar{c} + t v)\}|_{t=0} = ([B_L] + [B_{NL}])
+\{v\}`, the strains being a quadratic form whose bilinear form is `[B_L] +
+[B_{NL}]`, and `\frac{d}{dt} [B_{NL}(\beta(\bar{c} + t v))]^\top|_{t=0} \{\sigma\} =
+[G]^\top [N] [G] \{v\}` from the derivatives of `[B_{NL}]` above. These are
+the two parts that ``fkC_num`` (`K_{C0} + K_{CNL} + K_{GNL}`) and
+``fkG_num`` (`K_G(N_0 + N_L)`) assemble.
 
 At each integration point the product needs only:
 
-1. the rotations `\{\beta\} = [G] \{c\}` and `[G] \{v\}`;
-2. the strains `\{\varepsilon\} = [B(\beta/2)] \{c\}` and the strain
-   increment `\{\delta \varepsilon\} = [B(\beta)] \{v\}`;
-3. the stresses `\{\sigma\} = [F] \{\varepsilon\}`, of which `[N]`, and
-   `\{\delta \sigma\} = [F] \{\delta \varepsilon\}`;
-4. the sum over the terms of `[B(\beta)]^T \{\delta \sigma\} + [G]^T [N] [G]
-   \{v\}`.
+1. the rotations `\{\beta\} = [G] \{\bar{c}\}` and `[G] \{v\}`;
+2. the strains `\{\varepsilon\} = ([B_L] + \tfrac{1}{2} [B_{NL}]) \{\bar{c}\}`
+   and the strain increment `\{\delta \varepsilon\} = ([B_L] + [B_{NL}])
+   \{v\}`;
+3. the stresses `\{\sigma\} = [ABD] \{\varepsilon\}`, of which `[N]`, and
+   `\{\delta \sigma\} = [ABD] \{\delta \varepsilon\}`;
+4. the sum over the terms of `([B_L] + [B_{NL}])^\top \{\delta \sigma\} +
+   [G]^\top [N] [G] \{v\}`.
 
 Each step is a loop over the terms of the approximation, such that the cost
 is about that of :func:`calc_fint`, instead of the loop over the pairs of
@@ -98,7 +100,7 @@ MODELS = {
 
 
 def _clpt_donnell(geometry):
-    r"""`[B(\beta)]` and `[G]` of the CLPT with Donnell kinematics, as in
+    r"""`[B_L] + [B_{NL}]` and `[G]` of the CLPT with Donnell kinematics, as in
     ``plate_clpt_donnell.py`` and ``cylshell_clpt_donnell.py`` with
     `\beta_x = (2/a) w_{,\xi}`, `\beta_y = (2/b) w_{,\eta}`"""
     var = {}
@@ -133,7 +135,7 @@ def _clpt_donnell(geometry):
 
 
 def operators(model):
-    r"""`[B(\beta)]`, `[G]`, the rotation symbols `(\beta_x, \beta_y)`, the
+    r"""`[B_L] + [B_{NL}]`, `[G]`, the rotation symbols `(\beta_x, \beta_y)`, the
     fields and the number of generalized strains of ``model``"""
     theory, geometry, kinematics = MODELS[model]
     if theory == 'clpt' and kinematics == 'donnell':
@@ -160,11 +162,12 @@ def tangent_product(model):
 
     - ``'beta'``: the two rows of `[G]`, giving the rotations from ``cs`` and
       from ``vs``;
-    - ``'eps'``: the columns ``k`` of `[B(\beta/2)]`, the strains from ``cs``;
-    - ``'deps'``: the columns ``k`` of `[B(\beta)]`, the strain increment from
-      ``vs``;
-    - ``'kTv'``: the entry ``k`` of `[B(\beta)]^T \{\delta \sigma\} + [G]^T
-      [N] \{\delta \beta\}`, with the symbols ``ds0, ds1, ...`` of
+    - ``'eps'``: the columns ``k`` of `[B_L] + \tfrac{1}{2} [B_{NL}]`, the
+      strains from ``cs``;
+    - ``'deps'``: the columns ``k`` of `[B_L] + [B_{NL}]`, the strain
+      increment from ``vs``;
+    - ``'kTv'``: the entry ``k`` of `([B_L] + [B_{NL}])^\top \{\delta \sigma\} +
+      [G]^\top [N] \{\delta \beta\}`, with the symbols ``ds0, ds1, ...`` of
       `\{\delta \sigma\}`, ``Nxx, Nyy, Nxy`` of `[N]` and ``dbx, dby`` of
       `\{\delta \beta\} = [G] \{v\}`;
 
@@ -193,9 +196,10 @@ def tangent_product(model):
 def check(model):
     r"""Verify that ``kTv`` is the directional derivative of `\{F_{int}\}`
 
-    For one term with the degrees of freedom `\{c\}`, `\{F_{int}\} =
-    [B(\beta)]^T [F] [B(\beta/2)] \{c\}`, `\{\beta\} = [G] \{c\}`, with a
-    symbolic symmetric `[F]`, is differentiated along `\{v\}`, and compared
+    For one term with the degrees of freedom `\{\bar{c}\}`, `\{F_{int}\} = ([B_L]
+    + [B_{NL}])^\top [F] ([B_L] + \tfrac{1}{2} [B_{NL}]) \{\bar{c}\}`, `\{\beta\} =
+    [G] \{\bar{c}\}`, with a symbolic symmetric constitutive matrix `[F]`, is
+    differentiated along `\{v\}`, and compared
     with the expressions of :func:`tangent_product`.
 
     """

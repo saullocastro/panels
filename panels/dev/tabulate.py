@@ -31,8 +31,8 @@ Notes
 -----
 An entry of a numerically integrated stiffness matrix between the terms
 `(i, j)` and `(k, l)` of the Ritz series is a sum over the Gauss-Legendre
-points of products of the approximation functions `f_i(\xi)`, `f_k(\xi)`,
-`g_j(\eta)` and `g_l(\eta)`, and of their derivatives, see
+points of products of the approximation functions `P_i(\xi)`, `P_k(\xi)`,
+`P_j(\eta)` and `P_l(\eta)`, and of their derivatives, see
 :mod:`panels.bardell`. In the innermost loop over the pairs of terms each
 function is evaluated `m^2 n^2` times per integration point, although it
 depends on one index and one coordinate only. Tabulated, it is evaluated

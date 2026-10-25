@@ -49,8 +49,8 @@ def test_shear_vanishes_at_both_faces(model, offset):
 
 
 def _strain_energy_quadrature(s, c, ngp=16, nz=6):
-    r"""`\frac{1}{2} \int_A \int (\varepsilon^T \bar Q \varepsilon +
-    \gamma^T \bar Q_s \gamma) dz dA`, ply by ply, with the kinematics of the
+    r"""`\frac{1}{2} \int_A \int (\varepsilon^\top \bar Q \varepsilon +
+    \gamma^\top \bar Q_s \gamma) dz dA`, ply by ply, with the kinematics of the
     docstring of this module"""
     xg, wg = leggauss(ngp)
     X, Y = np.meshgrid((xg + 1)/2*s.a, (xg + 1)/2*s.b, indexing='ij')

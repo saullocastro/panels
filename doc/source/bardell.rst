@@ -18,7 +18,7 @@ coded in C++ up to 30 terms and accessed from Python with
 The functions
 -------------
 
-The functions `f_i(\xi)`, `i = 0, 1, \dots, 29`, are defined over the
+The functions `P_i(\xi)`, `i = 0, 1, \dots, 29`, are defined over the
 natural coordinate `-1 \le \xi \le 1`, which maps the length of the domain,
 `\xi = 2x/a - 1` along `x` and `\eta = 2y/b - 1` along `y`. The first four
 terms are cubic Hermite polynomials and the terms `i \ge 4` are polynomials
@@ -27,7 +27,7 @@ Only the first four terms therefore carry a value or a slope at the ends,
 each one at one end only:
 
 ========== ============== ================ ============== ================ ==========
-term `i`    `f_i(-1)`      `f_i'(-1)`       `f_i(+1)`      `f_i'(+1)`       flag
+term `i`    `P_i(-1)`      `P_i'(-1)`       `P_i(+1)`      `P_i'(+1)`       flag
 ========== ============== ================ ============== ================ ==========
 0           1              0                0              0                ``x1t``
 1           0              `1/2`            0              0                ``x1r``
@@ -93,14 +93,14 @@ whole shell, the double integral separates in the two directions:
 .. math::
     :label: bardell-separation
 
-    \int_0^b \int_0^a \frac{\partial^p f_i}{\partial x^p}
-    \frac{\partial^q f_k}{\partial x^q} \,
-    \frac{\partial^r g_j}{\partial y^r} \frac{\partial^s g_l}{\partial y^s}
+    \int_0^b \int_0^a \frac{\partial^p P_i}{\partial x^p}
+    \frac{\partial^q P_k}{\partial x^q} \,
+    \frac{\partial^r P_j}{\partial y^r} \frac{\partial^s P_l}{\partial y^s}
     \, dx \, dy =
     \left(\frac{2}{a}\right)^{p + q} \frac{a}{2}
-    \int_{-1}^{1} f_i^{(p)} f_k^{(q)} \, d\xi
+    \int_{-1}^{1} P_i^{(p)} P_k^{(q)} \, d\xi
     \left(\frac{2}{b}\right)^{r + s} \frac{b}{2}
-    \int_{-1}^{1} g_j^{(r)} g_l^{(s)} \, d\eta
+    \int_{-1}^{1} P_j^{(r)} P_l^{(s)} \, d\eta
 
 with `p, q, r, s \le 2`, where `f` and `g` carry the flags of the fields of
 each term along `x` and `y`. The six one-dimensional integrals,

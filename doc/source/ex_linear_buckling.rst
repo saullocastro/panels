@@ -2,7 +2,7 @@ Linear buckling analysis
 ========================
 
 The linear buckling eigenvalue problem
-`([K_C] + \lambda [K_G])\{c\} = \{0\}` is solved with
+`([K_C] + \lambda [K_G])\{\bar{c}\} = \{0\}` is solved with
 :func:`structsolve.lb`, returning the load multipliers `\lambda`.
 
 Constant pre-buckling stress state

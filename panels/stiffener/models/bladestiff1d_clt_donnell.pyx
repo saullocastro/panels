@@ -199,9 +199,9 @@ def fkMf(double ys, double rho, double h, double hb, double hf, double a,
     mass matrix is:
 
     .. math::
-        [M_{sf}] = \rho h_f b_f \int_x [S(x, y_s)]^T [k_{mf}] [S(x, y_s)] dx
+        [M_{sf}] = \rho h_f b_f \int_x [S(x, y_s)]^\top [k_{mf}] [S(x, y_s)] dx
 
-    where `[S]` gives `\{u, v, w, \phi_x, \phi_y\}^T` and
+    where `[S]` gives `\{u, v, w, \phi_x, \phi_y\}^\top` and
 
     .. math::
         [k_{mf}] = \begin{bmatrix}

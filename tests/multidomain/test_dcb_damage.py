@@ -124,8 +124,8 @@ def dcb_damage_prop_no_f_kcrack(phy_dim, nr_terms, k_i=None, tau_o=None, nr_x_ga
 
         .. math::
 
-            \{R\} = \{f_{int}\}_{panels} + [K^{conn}_{dmg}(d)]\{c\}
-                    + [K^{pen}_{PD}]\{c\} - \{f_{ext}\}
+            \{R\} = \{f_{int}\}_{panels} + [K^{conn}_{dmg}(d)]\{\bar{c}\}
+                    + [K^{pen}_{PD}]\{\bar{c}\} - \{f_{ext}\}
 
         without the term `U_{crack}` of the thesis of D'Souza (2024)
         [nathan2024MSc]_, which counts the dissipated energy twice. The
@@ -138,20 +138,22 @@ def dcb_damage_prop_no_f_kcrack(phy_dim, nr_terms, k_i=None, tau_o=None, nr_x_ga
         [K^{conn}_{\dot d}] + [K^{pen}_{PD}]`.
 
         With ``predictor=True`` the increment `n` starts from
-        `\{c\}_{n-1} + \frac{w_{p,n} - w_{p,n-1}}{w_{p,n-1} - w_{p,n-2}}
-        (\{c\}_{n-1} - \{c\}_{n-2})`, with the state `w_p = 0`, `\{c\} = 0`
+        `\{\bar{c}\}_{n-1} + \frac{w_{p,n} - w_{p,n-1}}{w_{p,n-1} - w_{p,n-2}}
+        (\{\bar{c}\}_{n-1} - \{\bar{c}\}_{n-2})`, with the state `w_p = 0`, `\{\bar{c}\} = 0`
         used for the second increment. The line search takes the first step
-        `s = 1, 1/2, \dots, 2^{-n_{ls}}` with `\|R(c_i + s \delta c)\|_D \le
-        (1 - 10^{-4} s) \|R(c_i)\|_D`, or the trial with the smallest norm,
-        a trial whose residual is not finite counting as an infinite norm,
-        where `\|v\|_D = \sqrt{v^T D^{-1} v}` and `D` holds the absolute
-        values of the diagonal of the iteration matrix at the start of the
-        increment. The convergence criterion is:
+        `s = 1, 1/2, \dots, 2^{-n_{ls}}` with `\|R(\bar{c}_i + s \delta \bar{c})\|_{\boldsymbol{d}} \le (1 - 10^{-4} s) \|R(\bar{c}_i)\|_{\boldsymbol{d}}`,
+        or the trial with the smallest norm, a trial whose residual is not
+        finite counting as an infinite norm, where `\|v\|_{\boldsymbol{d}} =
+        \sqrt{v^\top [\mathrm{diag}(|\boldsymbol{d}|)]^{-1} v}` and the diagonal
+        scaling vector `\boldsymbol{d}` holds the diagonal of the iteration
+        matrix at the start of the increment. The convergence criterion
+        is:
 
         .. math::
 
-            \frac{\|R\|_D}{\max\left( \|f_{int}\|_D,
-            \|[K^{pen}_{PD}]\{c\} - \{f_{ext}\}\|_D \right)} < 10^{-4}
+            \frac{\|R\|_{\boldsymbol{d}}}{\max\left(
+            \|f_{int}\|_{\boldsymbol{d}}, \|[K^{pen}_{PD}]\{\bar{c}\} -
+            \{f_{ext}\}\|_{\boldsymbol{d}} \right)} < 10^{-4}
 
         with the reaction of the prescribed displacement in place of
         `\{f_{ext}\}`, which is dominated by the penalty `k_w`. An increment

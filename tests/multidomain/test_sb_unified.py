@@ -96,7 +96,7 @@ def test_null_space_rows_are_the_face_displacements(model, order):
 @pytest.mark.parametrize('order', ['top first', 'bot first'])
 @pytest.mark.parametrize('model', MODELS)
 def test_penalty_energy_of_the_face_displacements(model, order):
-    r"""`\{c\}^T [K] \{c\} = k_t \int (\Delta_u^2 + \Delta_v^2 +
+    r"""`\{\bar{c}\}^\top [K] \{\bar{c}\} = k_t \int (\Delta_u^2 + \Delta_v^2 +
     \Delta_w^2) dA`, integrated with a Gauss-Legendre rule exact for the
     polynomials of the approximation"""
     top, bot = _pair(model, seed=5)

@@ -390,7 +390,7 @@ def fkC_num(double [::1] cs, object Finput, object shell,
                 # Membrane stress carried by the nonlinear strain
                 # eps_NL = {{phix^2/2, phiy^2/2, phix*phiy}}. With it, KGNL = KG(N_NL)
                 # is collected in kC such that
-                #     KT = K0 + K0L + KL0 + KLL + KGNL (fkC_num) + KG(N0 + N_L) (fkG_num)
+                #     KT = KC0 + KCNL + KGNL (fkC_num) + KG(N0 + N_L) (fkG_num)
                 # is the exact Jacobian of calc_fint, and fkG_num stays
                 # homogeneous of degree one in cs, as linear buckling requires.
                 # phix = phiy = 0 when NLgeom == 0, then KGNL vanishes
@@ -434,8 +434,8 @@ def fkG_num(double [::1] cs, object Finput, object shell,
     strain here. That contribution, ``KGNL``, is collected by
     :func:`.fkC_num` instead, so that
 
-        KT = K0 + K0L + KL0 + KLL + KGNL   (fkC_num)
-             + KG(N0 + N_L)                (fkG_num)
+        KT = KC0 + KCNL + KGNL   (fkC_num)
+             + KG(N0 + N_L)      (fkG_num)
 
     is the exact Jacobian of :func:`.calc_fint` while this function stays
     homogeneous of degree one in ``cs``. Adding ``KGNL`` here would

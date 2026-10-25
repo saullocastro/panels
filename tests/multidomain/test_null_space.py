@@ -1,11 +1,11 @@
 r"""Connections imposed exactly with the null-space method
 
 With ``MultiDomain(..., conn_method='null-space')`` the connections are the
-constraints `[B] \{c\} = \{0\}`, eliminated with a basis `[Z]` of the null
+constraints `[B] \{\bar{c}\} = \{0\}`, eliminated with a basis `[Z]` of the null
 space of `[B]`, see :mod:`panels.multidomain.connections.nullspace`:
 
 - the constraints are those of the penalty kernels: for every connection,
-  model and random boundary condition flags, the vectors `[Z] \{c_r\}` have
+  model and random boundary condition flags, the vectors `[Z] \{\bar{c}_r\}` have
   zero penalty energy, and they are all the vectors with zero penalty energy
 - the solution is the limit of the penalty method for penalty constants
   going to infinity
@@ -85,7 +85,7 @@ def _pair(model, func, seed):
 def test_same_constraints_as_penalty(model, func, order):
     r"""The null space of the penalty matrix is the span of `[Z]`
 
-    The vectors `[Z] \{c_r\}` have zero penalty energy, `[K_{pen}] [Z] = 0`,
+    The vectors `[Z] \{\bar{c}_r\}` have zero penalty energy, `[K_{pen}] [Z] = 0`,
     and the penalty matrix has as many zero eigenvalues as `[Z]` has
     columns, with the boundary condition flags removing different terms of
     the two panels.

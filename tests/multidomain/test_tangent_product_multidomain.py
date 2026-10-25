@@ -5,7 +5,7 @@ It must be the product of the assembled `[K_T]`, ``calc_kC + calc_kG`` with
 ``NLgeom=True``, including the penalty connections and the follower loads,
 and the derivative of :meth:`.MultiDomain.calc_fint`. With prescribed
 displacements imposed exactly, the reduced ``calc_fext(c, lbd)`` uses it for
-`\partial R_r/\partial \lambda = [Z]^T (\{F_{ext}\} - [K_T] \{c_{p1}\})`.
+`\partial R_r/\partial \lambda = [Z]^\top (\{F_{ext}\} - [K_T] \{\bar{c}_{p1}\})`.
 """
 import sys
 sys.path.append('../..')

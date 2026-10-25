@@ -114,8 +114,8 @@ def fkCSB(kt, p_top, p_bot, size, kr=0.):
 
     with `z_1 = d_1 - h_1/2` and `z_2 = d_2 + h_2/2`, see
     :mod:`panels.multidomain.connections.skin_base`. Each quantity is a
-    linear combination `\{B\} \{c\}` of the Ritz constants, and the
-    matrix is `k \int \{B\}^T \{B\}` for each quantity, see
+    linear combination `\{B\} \{\bar{c}\}` of the Ritz constants, and the
+    matrix is `k \int \{B\}^\top \{B\}` for each quantity, see
     :func:`.kCsdt._connection_matrix`. For the CLPT,
 
     .. math::

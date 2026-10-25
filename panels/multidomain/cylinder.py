@@ -329,18 +329,18 @@ def cylinder_compression_lb_Nxx_from_static(height, r, stack, plyt, laminaprop,
 
     Notes
     -----
-    The pre-buckling state is the linear static solution `\{c\} = [Z]
-    \{c_r\}`, with `[K_r] \{c_r\} = [Z]^T \{F_{ext}\}`, which includes
+    The pre-buckling state is the linear static solution `\{\bar{c}\} = [Z]
+    \{\bar{c}_r\}`, with `[K_r] \{\bar{c}_r\} = [Z]^\top \{F_{ext}\}`, which includes
     the bending of the shell near the ends, where the radial displacement
     is restrained, and the linear buckling analysis solves
 
     .. math::
 
-        \left([K_r] + \lambda [K_{G r}(c)]\right) \{\phi_r\} = \{0\}
+        \left([K_r] + \lambda [K_{G r}(\bar{c})]\right) \{\phi_r\} = \{0\}
 
     with the reduced geometric stiffness matrix of the linear membrane
-    stresses of `\{c\}`, see :meth:`.Shell.calc_kG`, which is linear in
-    `\{c\}`, such that ``eigvals`` are the multipliers `\lambda` of the
+    stresses of `\{\bar{c}\}`, see :meth:`.Shell.calc_kG`, which is linear in
+    `\{\bar{c}\}`, such that ``eigvals`` are the multipliers `\lambda` of the
     applied loads. For the boundary conditions SS1 and SS2 see
     :func:`.cylinder_compression_lb_Nxx_cte`.
 
