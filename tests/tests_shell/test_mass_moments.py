@@ -43,12 +43,12 @@ def _fields(s, c, xs, ys):
     s.uvw(c, xs=xs + dx, ys=ys)
     wp = s.fields['w'].ravel().copy()
     s.uvw(c, xs=xs - dx, ys=ys)
-    wx = (wp - s.fields['w'].ravel())/(2*dx)
+    w_x = (wp - s.fields['w'].ravel())/(2*dx)
     s.uvw(c, xs=xs, ys=ys + dy)
     wp = s.fields['w'].ravel().copy()
     s.uvw(c, xs=xs, ys=ys - dy)
-    wy = (wp - s.fields['w'].ravel())/(2*dy)
-    return out + [wx, wy]
+    w_y = (wp - s.fields['w'].ravel())/(2*dy)
+    return out + [w_x, w_y]
 
 
 def kinetic_energy_quadrature(s, c, plyts, rhos, ngp=20, nz=6):
@@ -56,7 +56,7 @@ def kinetic_energy_quadrature(s, c, plyts, rhos, ngp=20, nz=6):
     xg, wg = leggauss(ngp)
     X, Y = np.meshgrid((xg + 1)/2*s.a, (xg + 1)/2*s.b, indexing='ij')
     W = np.outer(wg, wg).ravel()*s.a*s.b/4
-    u, v, w, phix, phiy, wx, wy = _fields(s, c, X.ravel().copy(), Y.ravel().copy())
+    u, v, w, phix, phiy, w_x, w_y = _fields(s, c, X.ravel().copy(), Y.ravel().copy())
     h = sum(plyts)
     c1 = 4/(3*h**2) if '_tsdt_' in s.model else 0.
     #NOTE for the Sanders kinematics phiy of Shell.uvw() includes v/r, which
@@ -69,8 +69,8 @@ def kinetic_energy_quadrature(s, c, plyts, rhos, ngp=20, nz=6):
         for zeta, wz in zip(zg, wzg):
             z = z0 + (zeta + 1)/2*t
             cubic = (z - s.offset)**3 + s.offset**3
-            uz = u + z*phix - c1*cubic*(phix + wx)
-            vz = v + z*phiy - c1*cubic*(phiy3 + wy)
+            uz = u + z*phix - c1*cubic*(phix + w_x)
+            vz = v + z*phiy - c1*cubic*(phiy3 + w_y)
             total += rho*wz*t/2*np.sum(W*(uz**2 + vz**2 + w**2))
         z0 += t
     return total

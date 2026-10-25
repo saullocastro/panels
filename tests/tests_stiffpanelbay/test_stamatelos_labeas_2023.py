@@ -161,9 +161,9 @@ def kG_linear(shell, Nxx, phi, size=None, npts=80):
     """
     m, n, a, b = shell.m, shell.n, shell.a, shell.b
     xi, wt = leggauss(npts)
-    fp = np.array([bardell.calc_vec_fp(x, shell.x1w, shell.x1wr,
+    f_xi = np.array([bardell.calc_vec_fp(x, shell.x1w, shell.x1wr,
                                        shell.x2w, shell.x2wr)[:m] for x in xi])
-    Fxx = (fp.T*wt) @ fp
+    Fxx = (f_xi.T*wt) @ f_xi
     g = np.array([bardell.calc_vec_f(e, shell.y1w, shell.y1wr,
                                      shell.y2w, shell.y2wr)[:n] for e in xi])
     Gyy = (g.T*(wt*(1. - phi*(1. + xi)/2.))) @ g

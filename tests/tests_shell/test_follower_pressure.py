@@ -83,16 +83,16 @@ def fext_follower_by_quadrature(s, func, follower, c, x1=None, x2=None,
         for eta, wy in zip(ptsy, wtsy):
             y = y1 + (eta + 1)*(y2 - y1)/2
             (u, v, w), N = uvw(x, y)
-            ux_, uy_ = [(uvw(x + e*s.a, y)[0] - uvw(x - e*s.a, y)[0])/(2*e*s.a),
+            uvw_x, uvw_y = [(uvw(x + e*s.a, y)[0] - uvw(x - e*s.a, y)[0])/(2*e*s.a),
                         (uvw(x, y + e*s.b)[0] - uvw(x, y - e*s.b)[0])/(2*e*s.b)]
-            ux, vx, wx_ = ux_
-            uy, vy, wy_ = uy_
-            A = np.array([1 + ux, vx, wx_])
-            B = np.array([uy, 1 + vy + kw*w, wy_ - kv*v])
+            u_x, v_x, w_x = uvw_x
+            u_y, v_y, w_y = uvw_y
+            A = np.array([1 + u_x, v_x, w_x])
+            B = np.array([u_y, 1 + v_y + kw*w, w_y - kv*v])
             if follower == 'quadratic':
                 a = np.cross(A, B)
             else:
-                a = np.array([-wx_, -wy_ + kv*v, 1 + ux + vy + kw*w])
+                a = np.array([-w_x, -w_y + kv*v, 1 + u_x + v_y + kw*w])
             out += wx*wy*(x2 - x1)/2*(y2 - y1)/2*func(x, y)*(a @ N)
     return out
 

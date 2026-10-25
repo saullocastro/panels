@@ -55,15 +55,15 @@ def test_integrals_against_quadrature():
     fx = (1., 0., 1., 1.) # x1t, x1r, x2t, x2r of the term i
     fy = (0., 1., 1., 0.) # x1t, x1r, x2t, x2r of the term j
     F = np.array([calc_vec_f(xi, *fx) for xi in xis])
-    Fp = np.array([calc_vec_fp(xi, *fx) for xi in xis])
-    Fpp = np.array([calc_vec_fpp(xi, *fx) for xi in xis])
+    F_xi = np.array([calc_vec_fp(xi, *fx) for xi in xis])
+    F_xixi = np.array([calc_vec_fpp(xi, *fx) for xi in xis])
     G = np.array([calc_vec_f(xi, *fy) for xi in xis])
-    Gp = np.array([calc_vec_fp(xi, *fy) for xi in xis])
-    Gpp = np.array([calc_vec_fpp(xi, *fy) for xi in xis])
+    G_xi = np.array([calc_vec_fp(xi, *fy) for xi in xis])
+    G_xixi = np.array([calc_vec_fpp(xi, *fy) for xi in xis])
     for func, A, B in ((calc_integral_ff, F, G),
-                       (calc_integral_ffp, F, Gp),
-                       (calc_integral_fpfp, Fp, Gp),
-                       (calc_integral_fppfpp, Fpp, Gpp)):
+                       (calc_integral_ffp, F, G_xi),
+                       (calc_integral_fpfp, F_xi, G_xi),
+                       (calc_integral_fppfpp, F_xixi, G_xixi)):
         quad = (A*ws[:, None]).T @ B
         closed = np.array([[func(i, j, *fx, *fy) for j in range(NUM)]
                            for i in range(NUM)])
@@ -73,6 +73,6 @@ def test_integrals_against_quadrature():
     # with respect to x of two terms
     a = 0.7
     i, j = 5, 7
-    dfdx = Fp*2/a
-    ref = np.sum(ws*a/2*dfdx[:, i]*dfdx[:, j])
+    F_x = F_xi*2/a
+    ref = np.sum(ws*a/2*F_x[:, i]*F_x[:, j])
     assert np.isclose((2/a)**2*a/2*calc_integral_fpfp(i, j, *fx, *fx), ref)

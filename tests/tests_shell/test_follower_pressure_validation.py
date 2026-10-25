@@ -263,22 +263,22 @@ def cylinder_closed_form(kinematics, load, m, n, L, R, ABD, Nxx, Nyy, p):
     W8 = np.outer(wg*L/2, np.full(nt, 2*np.pi*R/nt))
     cx, sx, cn, sn = np.cos(l*X), np.sin(l*X), np.cos(n*T), np.sin(n*T)
     zero = np.zeros_like(X)
-    names = ('u', 'ux', 'uy', 'v', 'vx', 'vy', 'w', 'wx', 'wy', 'wxx', 'wyy',
-             'wxy')
+    names = ('u', 'u_x', 'u_y', 'v', 'v_x', 'v_y', 'w', 'w_x', 'w_y', 'w_xx',
+             'w_yy', 'w_xy')
     F = [dict.fromkeys(names, zero) for _ in range(3)]
-    F[0].update(u=cx*cn, ux=-l*sx*cn, uy=-k*cx*sn)
-    F[1].update(v=sx*sn, vx=l*cx*sn, vy=k*sx*cn)
-    F[2].update(w=sx*cn, wx=l*cx*cn, wy=-k*sx*sn, wxx=-l**2*sx*cn,
-                wyy=-k**2*sx*cn, wxy=-l*k*cx*sn)
+    F[0].update(u=cx*cn, u_x=-l*sx*cn, u_y=-k*cx*sn)
+    F[1].update(v=sx*sn, v_x=l*cx*sn, v_y=k*sx*cn)
+    F[2].update(w=sx*cn, w_x=l*cx*cn, w_y=-k*sx*sn, w_xx=-l**2*sx*cn,
+                w_yy=-k**2*sx*cn, w_xy=-l*k*cx*sn)
 
     def strains(f):
-        kyy = -f['wyy']
-        kxy = -2*f['wxy']
+        kyy = -f['w_yy']
+        kxy = -2*f['w_xy']
         if kinematics == 'sanders':
-            kyy = kyy + f['vy']/R
-            kxy = kxy + 1.5*f['vx']/R - 0.5*f['uy']/R
-        return np.array([f['ux'], f['vy'] + f['w']/R, f['uy'] + f['vx'],
-                         -f['wxx'], kyy, kxy])
+            kyy = kyy + f['v_y']/R
+            kxy = kxy + 1.5*f['v_x']/R - 0.5*f['u_y']/R
+        return np.array([f['u_x'], f['v_y'] + f['w']/R, f['u_y'] + f['v_x'],
+                         -f['w_xx'], kyy, kxy])
 
     E = [strains(f) for f in F]
     H0 = np.zeros((3, 3))
@@ -287,12 +287,12 @@ def cylinder_closed_form(kinematics, load, m, n, L, R, ABD, Nxx, Nyy, p):
         for j, fj in enumerate(F):
             H0[i, j] = np.sum(W8*np.einsum('a...,ab,b...->...', E[i], ABD,
                                            E[j]))
-            byi = fi['wy'] - kv*fi['v']
-            byj = fj['wy'] - kv*fj['v']
-            H1[i, j] = np.sum(W8*(Nxx*fi['wx']*fj['wx'] + Nyy*byi*byj))
+            byi = fi['w_y'] - kv*fi['v']
+            byj = fj['w_y'] - kv*fj['v']
+            H1[i, j] = np.sum(W8*(Nxx*fi['w_x']*fj['w_x'] + Nyy*byi*byj))
             if load == 'follower':
-                a1 = (-fj['wx'], -fj['wy'] + kv*fj['v'],
-                      fj['ux'] + fj['vy'] + fj['w']/R)
+                a1 = (-fj['w_x'], -fj['w_y'] + kv*fj['v'],
+                      fj['u_x'] + fj['v_y'] + fj['w']/R)
                 H1[i, j] -= np.sum(W8*p*(fi['u']*a1[0] + fi['v']*a1[1]
                                          + fi['w']*a1[2]))
     lam = eig(H0, -H1, right=False)

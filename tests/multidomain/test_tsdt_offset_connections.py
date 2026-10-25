@@ -158,10 +158,10 @@ def test_edge_penalty_energy(d1, d2):
             out = {k: p.fields[k].ravel().copy() for k in ('u', 'v', 'w')}
             out['thx'], out['thy'] = _rotations(p, c, xs, ys)[:2]
             p.strain(cp, xs=xs, ys=ys, NLgeom=False)
-            out['wx'] = p.fields['gxz'].ravel() - _rotations(p, c, xs, ys)[2]
+            out['w_x'] = p.fields['gxz'].ravel() - _rotations(p, c, xs, ys)[2]
             f.append(out)
         e = (kt*sum((f[0][k] - f[1][k])**2 for k in ('u', 'v', 'w'))
-             + kr*sum((f[0][k] - f[1][k])**2 for k in ('thx', 'thy', 'wx')))
+             + kr*sum((f[0][k] - f[1][k])**2 for k in ('thx', 'thy', 'w_x')))
         ref = np.sum(wg*e)/2
         assert np.isclose(c @ K @ c, ref, rtol=1e-9)
 
