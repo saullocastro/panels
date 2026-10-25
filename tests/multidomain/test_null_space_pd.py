@@ -647,11 +647,11 @@ def test_finite_differences_of_reduced_functions():
         assert np.linalg.norm(dF - K @ v) <= 1e-6*np.linalg.norm(K @ v)
 
     def R(lbd):
-        return lbd*fext(inc=1.) - fint(c_r, inc=lbd)
+        return fint(c_r, inc=lbd) - lbd*fext(inc=1.)
     h = 1e-5
     dR = (R(lbd + h) - R(lbd - h))/(2*h)
     q = fext(inc=1., c=c_r, lbd=lbd)
-    assert np.linalg.norm(dR - q) <= 1e-6*np.linalg.norm(q)
+    assert np.linalg.norm(dR + q) <= 1e-6*np.linalg.norm(q)
 
 
 def test_constant_end_shortening_with_load_parameter():

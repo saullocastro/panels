@@ -223,7 +223,7 @@ def follower_shell(model):
 class Recorder(object):
     r"""Wraps ``Shell.calc_fint`` recording the relative residual of each call
 
-    The residual is `\boldsymbol{R} = inc \, \boldsymbol{F}_{ext} - \boldsymbol{F}_{int}(\boldsymbol{c}, inc)`, as in
+    The residual is `\boldsymbol{R} = \boldsymbol{F}_{int}(\boldsymbol{c}, inc) - inc \, \boldsymbol{F}_{ext}`, as in
     ``structsolve``, with the load factor ``inc`` passed by the solver.
     """
     def __init__(self, s):
@@ -234,7 +234,7 @@ class Recorder(object):
 
     def calc_fint(self, c, inc=1., silent=True):
         fint = self.s.calc_fint(c, inc=inc)
-        R = inc*self.fext - fint
+        R = fint - inc*self.fext
         ref = max(np.linalg.norm(inc*self.fext), np.linalg.norm(fint))
         step = len(self.an.increments)
         self.calls.append((inc, np.linalg.norm(R)/ref, step))
@@ -308,7 +308,7 @@ def test_riks_with_follower_pressure(model):
     assert np.isclose(an.increments[-1], 1.)
     fext = s.calc_fext()
     for lbd, c in zip(an.increments, an.cs):
-        R = lbd*fext - s.calc_fint(c, inc=lbd)
+        R = s.calc_fint(c, inc=lbd) - lbd*fext
         assert np.linalg.norm(R) <= 1.e-10*np.linalg.norm(lbd*fext)
     # quadratic convergence of the bordered system in the steps of the arc
     # length method, the last increment is corrected by Newton-Raphson

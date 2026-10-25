@@ -74,7 +74,7 @@ def test_riks_hinged_cylindrical_shell():
     fext = s.calc_fext()
     for lbd, c in zip(lbds, cs):
         fint = s.calc_fint(c=c)
-        R = lbd*fext - fint
+        R = fint - lbd*fext
         assert np.linalg.norm(R) <= 1.e-5*max(np.linalg.norm(lbd*fext),
                                               np.linalg.norm(fint))
 

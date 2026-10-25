@@ -74,11 +74,11 @@ with `Su`, `Sv`, `Sw` the rows of the approximation functions of `u`, `v`,
 
 Residual and tangent, `mult = inc` for `cte=False` and `1` for `cte=True`:
 
-    R(c, inc) = fext(inc) - fint(c, inc)
+    R(c, inc) = fint(c, inc) - fext(inc)
     fint(c, inc) = fint_elastic(c) - sum mult (F_p(c) - F_p(0))
     K_T(c, inc) = kC(c, NLgeom=True, inc) + kG(c, NLgeom=True)
                 = ... + kCfollower(c, inc)
-    dR/dinc = fext(inc=1., c=c)        (Shell.calc_fext with c)
+    -dR/dinc = fext(inc=1., c=c)       (Shell.calc_fext with c)
 
 At `c = 0` the follower load equals the dead load: `calc_fext` returns
 `F_p(0)` as for `follower=False`.

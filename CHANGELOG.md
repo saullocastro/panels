@@ -269,6 +269,18 @@
   the 0.015 mm connecting domain (it changes with the number of integration
   points, all exact), and to `1e-5` for the reaction with a 5 mm connecting
   domain.
+- The tests that recompute the residual of the solvers of structsolve use
+  `R = F_int - lambda F_ext`, the convention of structsolve from 0.9.3 and
+  of the drivers of panels (were `lambda F_ext - F_int`): the `Recorder` of
+  `tests/tests_shell/test_follower_pressure.py` and its docstring, the
+  equilibrium checks of `test_follower_pressure.py` and
+  `tests/tests_shell/test_nonlinear_riks.py`, and the finite-difference
+  check of `tests/multidomain/test_null_space_pd.py`, which now asserts
+  `dR/dlambda = -calc_fext(c, lbd)` as its docstring states; also
+  `theory/shells/follower_pressure/follower_pressure.md`. The tests do not
+  depend on the convention of the installed structsolve, and the solutions
+  of `Analysis.static` over the suite are bitwise identical with both
+  conventions of structsolve.
 
 ### Documentation
 
