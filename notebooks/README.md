@@ -11,7 +11,11 @@ Most notebooks load stored results from `results/` and only run `panels`
 again with `RERUN = True` in their first cell. The stored results of the
 notebooks were computed with `panels` 0.14.0, `structsolve` 0.9.1 (0.9.2
 for `sze2004_hinged_roofs.ipynb`) and `composites` 0.10.0; the results
-computed again keep the run times of their first computation.
+computed again keep the run times of their first computation, except the
+DCB results, `results/*.npz`, and those of `conn_method_comparison.ipynb`,
+whose run times were measured again with `panels` 0.14.0 and `structsolve`
+0.9.2, one run at a time on an idle machine, with both connection methods
+under the same conditions.
 
 ## Mode I double cantilever beam (DCB), cohesive zone model
 

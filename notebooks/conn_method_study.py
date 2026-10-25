@@ -60,6 +60,12 @@ notebooks remain, and run::
     python notebooks/conn_method_study.py profile
     python notebooks/conn_method_study.py stamatelos
 
+The run times compared by the notebook were measured with ``run --jobs 1``
+and both methods, one run at a time on an idle machine, the two methods of
+each case one after the other; the times of the penalty runs, which
+reproduce the results of the DCB notebooks, were written into
+``notebooks/results/<NAME>.npz``, see their key ``time_note``.
+
 """
 import argparse
 import contextlib
