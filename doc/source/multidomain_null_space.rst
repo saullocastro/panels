@@ -125,12 +125,12 @@ time:
    written in the independent Ritz constants of the connections already
    processed, `\boldsymbol{B} \boldsymbol{Z}`;
 2. the rank of the constraints is revealed with a QR decomposition with
-   column pivoting, `\boldsymbol{B} \boldsymbol{Z} \boldsymbol{P} = \boldsymbol{Q} \boldsymbol{R}`, with the permutation `\boldsymbol{P}`,
-   the orthogonal factor `\boldsymbol{Q}` and the upper triangular factor `\boldsymbol{R}` (not
-   the residual `\boldsymbol{R}`), and each pivot larger than the tolerance ``tol``
+   column pivoting, `\boldsymbol{B} \boldsymbol{Z} \boldsymbol{P} = \boldsymbol{Q} \boldsymbol{U}`, with the permutation `\boldsymbol{P}`,
+   the orthogonal factor `\boldsymbol{Q}` and the upper triangular factor
+   `\boldsymbol{U}`, and each pivot larger than the tolerance ``tol``
    gives one independent constraint;
 3. the Ritz constants of the pivot columns are eliminated, `\boldsymbol{c}_e =
-   -\boldsymbol{R}_{11}^{-1} \boldsymbol{R}_{12} \boldsymbol{c}_k`, where `\boldsymbol{c}_k` are the
+   -\boldsymbol{U}_{11}^{-1} \boldsymbol{U}_{12} \boldsymbol{c}_k`, where `\boldsymbol{c}_k` are the
    remaining constants, and `\boldsymbol{Z}` is updated.
 
 Redundant constraints are found in step 2 and dropped. They happen for
@@ -402,10 +402,10 @@ inhomogeneous constraints:
 .. math::
     :label: ns-pd
 
-    \boldsymbol{B}_d \boldsymbol{c} = \boldsymbol{d}_0 + \lambda \boldsymbol{d}_1
+    \boldsymbol{B}_d \boldsymbol{c} = \bar{\boldsymbol{d}}_0 + \lambda \bar{\boldsymbol{d}}_1
 
-where `\boldsymbol{d}_0` collects the constant prescribed values, ``cte=True``, and
-`\boldsymbol{d}_1` those scaled by the load factor `\lambda`, ``cte=False``. Each row
+where `\bar{\boldsymbol{d}}_0` collects the constant prescribed values, ``cte=True``, and
+`\bar{\boldsymbol{d}}_1` those scaled by the load factor `\lambda`, ``cte=False``. Each row
 of `\boldsymbol{B}_d` is the prescribed component at a point, or at a Gauss-Legendre
 point along a prescribed line, with ``max(n, 4)`` points along `y` for the
 lines ``x = cte`` and ``max(m, 4)`` along `x` for the lines ``y = cte``, see
@@ -424,22 +424,23 @@ With `\boldsymbol{B} = [\boldsymbol{B}_h; \boldsymbol{B}_d]`, every admissible c
     \boldsymbol{c} = \boldsymbol{Z} \boldsymbol{c}_r + \boldsymbol{c}_{p0} + \lambda \boldsymbol{c}_{p1}
 
 where `\boldsymbol{Z}` spans the null space of `\boldsymbol{B}` and `\boldsymbol{c}_{p0}`, `\boldsymbol{c}_{p1}`
-are particular solutions, `\boldsymbol{B} \boldsymbol{c}_{p0} = \{\boldsymbol{0}; \boldsymbol{d}_0\}` and `\boldsymbol{B}
-\boldsymbol{c}_{p1} = \{\boldsymbol{0}; \boldsymbol{d}_1\}`, see :meth:`.MultiDomain.get_cp`. They are
+are particular solutions, `\boldsymbol{B} \boldsymbol{c}_{p0} = \{\boldsymbol{0}; \bar{\boldsymbol{d}}_0\}` and `\boldsymbol{B}
+\boldsymbol{c}_{p1} = \{\boldsymbol{0}; \bar{\boldsymbol{d}}_1\}`, see :meth:`.MultiDomain.get_cp`. They are
 obtained in the same elimination as `\boldsymbol{Z}`, see
 :class:`.nullspace.Elimination`: the constraints are eliminated one block
 at a time, the connections first, each block written in the independent
 Ritz constants left by the previous ones, `\boldsymbol{B} (\boldsymbol{Z} \boldsymbol{c}_r + \boldsymbol{c}_p) =
-\boldsymbol{d}`, and decomposed with a QR decomposition with column pivoting, which
+\boldsymbol{b}`, with the right-hand side `\boldsymbol{b}` of the block, and
+decomposed with a QR decomposition with column pivoting, which
 gives both the new `\boldsymbol{Z}` and the correction of `\boldsymbol{c}_p` for the
-right-hand side `\boldsymbol{d} - \boldsymbol{B} \boldsymbol{c}_p`. The data of the decompositions are
+right-hand side `\boldsymbol{b} - \boldsymbol{B} \boldsymbol{c}_p`. The data of the decompositions are
 kept, such that `\boldsymbol{c}_{p0}` and `\boldsymbol{c}_{p1}` are computed again without
 any decomposition when only the prescribed values change, e.g. in a loop
 over the end-shortening; `\boldsymbol{Z}` changes only with the positions and the
 components prescribed.
 
 Substituting Eq. :eq:`ns-pd-c` into the residual of the unconstrained
-system, `\boldsymbol{R}(\boldsymbol{c}, \lambda) = \lambda \boldsymbol{F}_{ext} - \boldsymbol{F}_{int}(\boldsymbol{c}, \lambda)`,
+system, `\boldsymbol{R}(\boldsymbol{c}, \lambda) = \boldsymbol{F}_{int}(\boldsymbol{c}, \lambda) - \lambda \boldsymbol{F}_{ext}`,
 and projecting it with `\boldsymbol{Z}^\top` gives the reduced problem solved by
 ``structsolve``:
 
@@ -447,14 +448,14 @@ and projecting it with `\boldsymbol{Z}^\top` gives the reduced problem solved by
     :label: ns-pd-reduced
 
     \boldsymbol{F}_{int, r}(\boldsymbol{c}_r, \lambda) &= \boldsymbol{Z}^\top \boldsymbol{F}_{int}(\boldsymbol{c}) \\
-    \boldsymbol{K}_{T, r} &= \boldsymbol{Z}^\top \boldsymbol{K}_T(\boldsymbol{c}) \boldsymbol{Z} = -\frac{\partial \boldsymbol{R}_r}{\partial \boldsymbol{c}_r} \\
-    \frac{\partial \boldsymbol{R}_r}{\partial \lambda} &= \boldsymbol{Z}^\top \left(\boldsymbol{F}_{ext} -
+    \boldsymbol{K}_{T, r} &= \boldsymbol{Z}^\top \boldsymbol{K}_T(\boldsymbol{c}) \boldsymbol{Z} = \frac{\partial \boldsymbol{R}_r}{\partial \boldsymbol{c}_r} \\
+    -\frac{\partial \boldsymbol{R}_r}{\partial \lambda} &= \boldsymbol{Z}^\top \left(\boldsymbol{F}_{ext} -
         \boldsymbol{K}_T(\boldsymbol{c}) \boldsymbol{c}_{p1}\right)
 
-`\boldsymbol{K}_{T, r}` is the exact Jacobian, and `\partial \boldsymbol{R}_r/\partial \lambda`
+`\boldsymbol{K}_{T, r}` is the exact Jacobian, and `-\partial \boldsymbol{R}_r/\partial \lambda`
 depends on the configuration and on the load factor. ``structsolve`` 0.7.0
 passes the load factor to ``calc_fext`` when it declares the keyword
-argument ``lbd``, and uses `\partial \boldsymbol{R}_r/\partial \lambda` in the predictors
+argument ``lbd``, and uses `-\partial \boldsymbol{R}_r/\partial \lambda` in the predictors
 and in the constraint of the arc-length methods, and `\lambda \partial
 \boldsymbol{R}_r/\partial \lambda` as a reference of the convergence criteria, the
 relative one and Crisfield's, the default since ``structsolve`` 0.9.0,

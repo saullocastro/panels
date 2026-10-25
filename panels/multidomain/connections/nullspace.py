@@ -66,7 +66,7 @@ interface, not a constraint, and therefore remains a penalty stiffness.
 
 With ``MultiDomain(..., pd_method='null-space')`` the prescribed
 displacements of the panels are the inhomogeneous constraints `\boldsymbol{B}_d \boldsymbol{c}
-= \boldsymbol{d}_0 + \lambda \boldsymbol{d}_1`, built by :func:`.pd_constraint_matrix` and
+= \bar{\boldsymbol{d}}_0 + \lambda \bar{\boldsymbol{d}}_1`, built by :func:`.pd_constraint_matrix` and
 eliminated after the connections by :class:`.Elimination`, which also gives
 the particular solutions `\boldsymbol{c} = \boldsymbol{Z} \boldsymbol{c}_r + \boldsymbol{c}_{p0} + \lambda
 \boldsymbol{c}_{p1}`, see :ref:`null_space_pd`.
@@ -774,7 +774,7 @@ class Elimination(object):
 
     Notes
     -----
-    The constraints of each block, `\boldsymbol{B} \boldsymbol{c} = \boldsymbol{d}`, are written in the
+    The constraints of each block, `\boldsymbol{B} \boldsymbol{c} = \boldsymbol{b}`, are written in the
     independent Ritz constants left by the previous blocks, `\boldsymbol{c} = \boldsymbol{Z}
     \boldsymbol{c}_r + \boldsymbol{c}_p`, where `\boldsymbol{Z}` is a basis of the null space of the
     homogeneous constraints of the previous blocks and `\boldsymbol{c}_p` a
@@ -828,25 +828,25 @@ class Elimination(object):
         -----
         With the normalized rows `\boldsymbol{B}`, `\bar{\boldsymbol{B}} = \boldsymbol{B} \boldsymbol{Z}` and the columns
         `J` of `\bar{\boldsymbol{B}}` kept, the QR decomposition with column pivoting
-        `\bar{\boldsymbol{B}}_J \boldsymbol{P} = \boldsymbol{Q} \boldsymbol{R}`, with the upper triangular factor `\boldsymbol{R}`,
-        not the residual, reveals the rank `r`, the number of diagonal terms
-        of `\boldsymbol{R}` larger than ``tol``. The constants
+        `\bar{\boldsymbol{B}}_J \boldsymbol{P} = \boldsymbol{Q} \boldsymbol{U}`, with the upper triangular factor `\boldsymbol{U}`,
+        reveals the rank `r`, the number of diagonal terms
+        of `\boldsymbol{U}` larger than ``tol``. The constants
         `\boldsymbol{c}_e` of the first `r` pivot columns are eliminated in favour of
         the remaining ones, `\boldsymbol{c}_k`:
 
         .. math::
 
-            \boldsymbol{R}_{11} \boldsymbol{c}_e + \boldsymbol{R}_{12} \boldsymbol{c}_k = \boldsymbol{Q}_1^\top \boldsymbol{d}, \qquad
-            \boldsymbol{c}_e = -\boldsymbol{R}_{11}^{-1} \boldsymbol{R}_{12} \boldsymbol{c}_k
-                      + \boldsymbol{R}_{11}^{-1} \boldsymbol{Q}_1^\top \boldsymbol{d}
+            \boldsymbol{U}_{11} \boldsymbol{c}_e + \boldsymbol{U}_{12} \boldsymbol{c}_k = \boldsymbol{Q}_1^\top \boldsymbol{b}, \qquad
+            \boldsymbol{c}_e = -\boldsymbol{U}_{11}^{-1} \boldsymbol{U}_{12} \boldsymbol{c}_k
+                      + \boldsymbol{U}_{11}^{-1} \boldsymbol{Q}_1^\top \boldsymbol{b}
 
-        where `\boldsymbol{R}_{11}` is the leading `r \times r` triangle of `\boldsymbol{R}` and
+        where `\boldsymbol{U}_{11}` is the leading `r \times r` triangle of `\boldsymbol{U}` and
         `\boldsymbol{Q}_1` the first `r` columns of `\boldsymbol{Q}`. The homogeneous part gives
         the new basis `\boldsymbol{Z} \boldsymbol{S}`, `\boldsymbol{S}` mapping the remaining constants to
-        all the current ones, the terms of `-\boldsymbol{R}_{11}^{-1} \boldsymbol{R}_{12}` smaller
+        all the current ones, the terms of `-\boldsymbol{U}_{11}^{-1} \boldsymbol{U}_{12}` smaller
         than ``1e-14`` times its largest one being dropped to keep `\boldsymbol{Z}`
         sparse. The column pivoting reveals the rank and chooses the
-        eliminated constants such that `\boldsymbol{R}_{11}` is well conditioned. The
+        eliminated constants such that `\boldsymbol{U}_{11}` is well conditioned. The
         rows are normalized only once,
         before being multiplied by `\boldsymbol{Z}`, so that a redundant row has only
         round-off errors, compared with the absolute tolerance ``tol``. The
@@ -978,12 +978,12 @@ class Elimination(object):
         Notes
         -----
         For the block `i`, with the normalized rows `\boldsymbol{B}_i` and right-hand
-        side `\bar{\boldsymbol{d}}_i`, the residual of the current particular solution
-        is `\boldsymbol{\delta} = \bar{\boldsymbol{d}}_i - \boldsymbol{B}_i \boldsymbol{c}_p`, and
+        side `\boldsymbol{b}_i`, the residual of the current particular solution
+        is `\boldsymbol{\delta} = \boldsymbol{b}_i - \boldsymbol{B}_i \boldsymbol{c}_p`, and
 
         .. math::
 
-            \boldsymbol{y} = \boldsymbol{R}_{11}^{-1} \boldsymbol{Q}_1^\top \boldsymbol{\delta}, \qquad
+            \boldsymbol{y} = \boldsymbol{U}_{11}^{-1} \boldsymbol{Q}_1^\top \boldsymbol{\delta}, \qquad
             \boldsymbol{c}_p \leftarrow \boldsymbol{c}_p + \boldsymbol{Z}_e \boldsymbol{y}
 
         where `\boldsymbol{Z}_e` are the columns of the basis `\boldsymbol{Z}` of the eliminated

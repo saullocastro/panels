@@ -20,13 +20,13 @@ convention of ``cylshell_clpt_sanders``), and enters only the membrane rows:
     = \begin{bmatrix} 0 \\ G_y \\ G_x \\ 0 \end{bmatrix}
 
 The factor `1/2` of `\boldsymbol{B}_{NL}` gives the quadratic terms `\beta_x^2/2`,
-`\beta_y^2/2` and `\beta_x \beta_y`. With the constitutive matrix `\boldsymbol{ABD}`,
+`\beta_y^2/2` and `\beta_x \beta_y`. With the constitutive matrix `\boldsymbol{C}`,
 the internal force vector is
 
 .. math::
 
     \boldsymbol{F}_{int}(\boldsymbol{c}) = \int (\boldsymbol{B}_L + \boldsymbol{B}_{NL})^\top \boldsymbol{\sigma}\, dA, \qquad
-    \boldsymbol{\sigma} = \boldsymbol{ABD} \boldsymbol{\varepsilon}(\boldsymbol{c})
+    \boldsymbol{\sigma} = \boldsymbol{C} \boldsymbol{\varepsilon}(\boldsymbol{c})
 
 and its directional derivative along `\boldsymbol{v}`, i.e. the product of the
 tangent stiffness matrix `\boldsymbol{K}_T = \partial \boldsymbol{F}_{int}/\partial \boldsymbol{c}` by
@@ -34,7 +34,7 @@ tangent stiffness matrix `\boldsymbol{K}_T = \partial \boldsymbol{F}_{int}/\part
 
 .. math::
 
-    \boldsymbol{K}_T \boldsymbol{v} = \int \left( (\boldsymbol{B}_L + \boldsymbol{B}_{NL})^\top \boldsymbol{ABD} (\boldsymbol{B}_L + \boldsymbol{B}_{NL})
+    \boldsymbol{K}_T \boldsymbol{v} = \int \left( (\boldsymbol{B}_L + \boldsymbol{B}_{NL})^\top \boldsymbol{C} (\boldsymbol{B}_L + \boldsymbol{B}_{NL})
     \boldsymbol{v} + \boldsymbol{G}^\top \boldsymbol{N} \boldsymbol{G} \boldsymbol{v} \right) dA, \qquad \boldsymbol{N} = \begin{bmatrix}
     N_{xx} & N_{xy} \\ N_{xy} & N_{yy} \end{bmatrix}
 
@@ -51,8 +51,8 @@ At each integration point the product needs only:
 2. the strains `\boldsymbol{\varepsilon} = (\boldsymbol{B}_L + \tfrac{1}{2} \boldsymbol{B}_{NL}) \boldsymbol{c}`
    and the strain increment `\delta \boldsymbol{\varepsilon} = (\boldsymbol{B}_L + \boldsymbol{B}_{NL})
    \boldsymbol{v}`;
-3. the stresses `\boldsymbol{\sigma} = \boldsymbol{ABD} \boldsymbol{\varepsilon}`, of which `\boldsymbol{N}`, and
-   `\delta \boldsymbol{\sigma} = \boldsymbol{ABD} \delta \boldsymbol{\varepsilon}`;
+3. the stresses `\boldsymbol{\sigma} = \boldsymbol{C} \boldsymbol{\varepsilon}`, of which `\boldsymbol{N}`, and
+   `\delta \boldsymbol{\sigma} = \boldsymbol{C} \delta \boldsymbol{\varepsilon}`;
 4. the sum over the terms of `(\boldsymbol{B}_L + \boldsymbol{B}_{NL})^\top \delta \boldsymbol{\sigma} +
    \boldsymbol{G}^\top \boldsymbol{N} \boldsymbol{G} \boldsymbol{v}`.
 
@@ -197,8 +197,8 @@ def check(model):
     r"""Verify that ``kTv`` is the directional derivative of `\boldsymbol{F}_{int}`
 
     For one term with the degrees of freedom `\boldsymbol{c}`, `\boldsymbol{F}_{int} = (\boldsymbol{B}_L
-    + \boldsymbol{B}_{NL})^\top \boldsymbol{ABD} (\boldsymbol{B}_L + \tfrac{1}{2} \boldsymbol{B}_{NL}) \boldsymbol{c}`, `\boldsymbol{\beta} =
-    \boldsymbol{G} \boldsymbol{c}`, with a symbolic symmetric constitutive matrix `\boldsymbol{ABD}`, is
+    + \boldsymbol{B}_{NL})^\top \boldsymbol{C} (\boldsymbol{B}_L + \tfrac{1}{2} \boldsymbol{B}_{NL}) \boldsymbol{c}`, `\boldsymbol{\beta} =
+    \boldsymbol{G} \boldsymbol{c}`, with a symbolic symmetric constitutive matrix `\boldsymbol{C}`, is
     differentiated along `\boldsymbol{v}`, and compared
     with the expressions of :func:`tangent_product`.
 

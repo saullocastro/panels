@@ -221,8 +221,8 @@ def _partial(s):
 @pytest.mark.parametrize('partial', [False, True])
 @pytest.mark.parametrize('model', MODELS)
 def test_ABDnxny_point_indexing(model, partial):
-    r"""`\boldsymbol{v}^\top \boldsymbol{K}_{C0}(\boldsymbol{ABD}) \boldsymbol{c}` against the sum of `w_x w_y
-    \boldsymbol{\varepsilon}(\boldsymbol{v})^\top \boldsymbol{ABD} \boldsymbol{\varepsilon}(\boldsymbol{c})` over the points of
+    r"""`\boldsymbol{v}^\top \boldsymbol{K}_{C0}(\boldsymbol{C}) \boldsymbol{c}` against the sum of `w_x w_y
+    \boldsymbol{\varepsilon}(\boldsymbol{v})^\top \boldsymbol{C} \boldsymbol{\varepsilon}(\boldsymbol{c})` over the points of
     :meth:`.Shell.integration_points`, with `nx \neq ny` taken from the shape
     of ``ABDnxny``; the reversed field must give another result"""
     s = _shell(model)

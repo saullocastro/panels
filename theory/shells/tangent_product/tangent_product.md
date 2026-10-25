@@ -42,7 +42,7 @@ form whose bilinear form is `[B_L] + [B_NL]`) and
 `d[B_NL]^T/dt sigma = [G]^T [N] [G] v` from the derivatives above,
 `[N] = [[Nxx, Nxy], [Nxy, Nyy]]`, `[ABD]` the constitutive matrix. These are
 the two parts assembled by `fkC_num` (`KC0 + KCNL + KGNL`) and
-`fkG_num` (`KG(N0 + NL)`). The constant membrane stresses `Nxx_cte`,
+`fkG_num` (`KG(Nbar + NL)`). The constant membrane stresses `Nxx_cte`,
 `Nyy_cte`, `Nxy_cte`, whose geometric stiffness `Shell.calc_kC` adds to
 `K_T`, are added to `[N]`.
 

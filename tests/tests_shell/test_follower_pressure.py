@@ -160,8 +160,8 @@ def test_taylor_follower_force(model, follower, kind):
 @pytest.mark.parametrize('follower', TRUNCATIONS)
 @pytest.mark.parametrize('model', MODELS)
 def test_finite_difference_jacobian_of_residual(model, follower):
-    r"""`-\partial \boldsymbol{R}/\partial \boldsymbol{c}`, with `\boldsymbol{R} =
-    \boldsymbol{F}_{ext}(inc) - \boldsymbol{F}_{int}(\boldsymbol{c}, inc)`, against
+    r"""`\partial \boldsymbol{R}/\partial \boldsymbol{c}`, with `\boldsymbol{R} =
+    \boldsymbol{F}_{int}(\boldsymbol{c}, inc) - \boldsymbol{F}_{ext}(inc)`, against
     `\boldsymbol{K}_T(\boldsymbol{c}, inc)`, every entry"""
     s = make_shell(model)
     add_pressure(s, 'constant', follower=follower, scale=100.)

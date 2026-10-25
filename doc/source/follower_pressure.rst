@@ -249,8 +249,8 @@ multipliers, the residual of the equilibrium is:
 .. math::
     :label: fp-residual
 
-    \boldsymbol{R}(\boldsymbol{c}, \lambda) = \boldsymbol{F}_{ext}(\lambda) + \left(
-    \boldsymbol{F}_p(\boldsymbol{c}) - \boldsymbol{F}_p(0) \right) - \boldsymbol{F}_{int}^e(\boldsymbol{c})
+    \boldsymbol{R}(\boldsymbol{c}, \lambda) = \boldsymbol{F}_{int}^e(\boldsymbol{c}) - \left(
+    \boldsymbol{F}_p(\boldsymbol{c}) - \boldsymbol{F}_p(0) \right) - \boldsymbol{F}_{ext}(\lambda)
 
 where `\boldsymbol{F}_{ext}(\lambda)` is :meth:`.Shell.calc_fext`, which includes the
 reference part `\boldsymbol{F}_p(0)` of the follower loads, and
@@ -264,9 +264,9 @@ configuration-dependent part of the follower loads:
     \boldsymbol{F}_{int}(\boldsymbol{c}, \lambda) = \boldsymbol{F}_{int}^e(\boldsymbol{c}) - \left(
     \boldsymbol{F}_p(\boldsymbol{c}) - \boldsymbol{F}_p(0) \right)
 
-such that `\boldsymbol{R} = \boldsymbol{F}_{ext}(\lambda) - \boldsymbol{F}_{int}(\boldsymbol{c}, \lambda)`,
+such that `\boldsymbol{R} = \boldsymbol{F}_{int}(\boldsymbol{c}, \lambda) - \boldsymbol{F}_{ext}(\lambda)`,
 the form used by :class:`structsolve.Analysis`. The tangent stiffness
-matrix, :meth:`.Shell.calc_kT`, is its exact Jacobian:
+matrix, :meth:`.Shell.calc_kT`, is its exact Jacobian, `\partial \boldsymbol{R}/\partial \boldsymbol{c}`:
 
 .. math::
     :label: fp-tangent
@@ -274,14 +274,14 @@ matrix, :meth:`.Shell.calc_kT`, is its exact Jacobian:
     \boldsymbol{K}_T = \frac{\partial \boldsymbol{F}_{int}}{\partial \boldsymbol{c}}
           = \boldsymbol{K}_{C0} + \boldsymbol{K}_{CNL} + \boldsymbol{K}_{GNL} + \boldsymbol{K}_G(\bar{\boldsymbol{N}} + \boldsymbol{N}_L) + \boldsymbol{K}_F
 
-and the derivative of the residual with respect to the load factor, used by
+and minus the derivative of the residual with respect to the load factor, used by
 the arc-length methods, is the load vector of the current configuration,
 ``calc_fext(inc=1., c=c)`` for the loads proportional to `\lambda`:
 
 .. math::
     :label: fp-dr-dlambda
 
-    \frac{\partial \boldsymbol{R}}{\partial \lambda} = \boldsymbol{F}_{ext}(1) +
+    -\frac{\partial \boldsymbol{R}}{\partial \lambda} = \boldsymbol{F}_{ext}(1) +
     \boldsymbol{F}_p(\boldsymbol{c}) - \boldsymbol{F}_p(0)
 
 From version 0.5.0, ``structsolve`` passes the load factor to the callables

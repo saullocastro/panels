@@ -3,7 +3,7 @@ r"""Prescribed displacements imposed exactly with the null-space method
 With ``MultiDomain(..., pd_method='null-space')`` the prescribed
 displacements of :meth:`.Shell.add_point_pd`,
 :meth:`.Shell.add_distr_pd_fixed_x` and :meth:`.Shell.add_distr_pd_fixed_y`
-are the constraints `\boldsymbol{B}_d \boldsymbol{c} = \boldsymbol{d}_0 + \lambda \boldsymbol{d}_1`, eliminated
+are the constraints `\boldsymbol{B}_d \boldsymbol{c} = \bar{\boldsymbol{d}}_0 + \lambda \bar{\boldsymbol{d}}_1`, eliminated
 with the connections, `\boldsymbol{c} = \boldsymbol{Z} \boldsymbol{c}_r + \boldsymbol{c}_{p0} + \lambda
 \boldsymbol{c}_{p1}`, see ``doc/source/multidomain_null_space.rst``:
 
@@ -629,7 +629,7 @@ def test_nonlinear_reaction_matches_penalty():
 
 def test_finite_differences_of_reduced_functions():
     r"""`\boldsymbol{K}_{T,r}` is the Jacobian of ``calc_fint`` and ``calc_fext(c,
-    lbd)`` is `\partial \boldsymbol{R}_r/\partial \lambda`, at a buckled configuration"""
+    lbd)`` is `-\partial \boldsymbol{R}_r/\partial \lambda`, at a buckled configuration"""
     md, p, delta = plate_postbuckling(delta_factor=2., m=6, n=6)
     p.add_distr_pd_fixed_y(p.b, kv=1., funcv=lambda x: 1e-3*delta*x,
                            cte=True)

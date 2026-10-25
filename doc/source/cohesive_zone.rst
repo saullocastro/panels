@@ -217,7 +217,7 @@ the residual is:
 .. math::
     :label: cz-residual
 
-    \boldsymbol{R} = \boldsymbol{F}_{ext} - \boldsymbol{F}_{int}, \qquad
+    \boldsymbol{R} = \boldsymbol{F}_{int} - \boldsymbol{F}_{ext}, \qquad
     \boldsymbol{F}_{int} = \boldsymbol{F}^{panels}_{int} + \boldsymbol{K}^{conn}_{dmg}(d)\boldsymbol{c} + \boldsymbol{K}^{pen}_{PD}\boldsymbol{c}
 
 where `\boldsymbol{F}^{panels}_{int}` is the internal force vector of the
@@ -602,7 +602,7 @@ drivers. Neither changes the equations or the convergence criterion, so a
 converged state is the same solution as before, only the path to it changes.
 
 **Backtracking line search.** With `\delta \boldsymbol{c}` the solution of
-`\boldsymbol{K}\delta \boldsymbol{c} = \boldsymbol{R}(\boldsymbol{c}_i)`, where `\boldsymbol{K}` is the iteration matrix, the
+`\boldsymbol{K}\delta \boldsymbol{c} = -\boldsymbol{R}(\boldsymbol{c}_i)`, where `\boldsymbol{K}` is the iteration matrix, the
 new iterate is `\boldsymbol{c}_{i+1} = \boldsymbol{c}_i + s\delta \boldsymbol{c}`, with the step length
 `s` taken as the first of `s = 1, \frac{1}{2}, \frac{1}{4}, \dots,
 2^{-n_{ls}}` that satisfies:
@@ -619,14 +619,14 @@ of the increment, the scaling of the criterion of Eq. :eq:`cz-criterion`,
 which balances the rows of the prescribed-displacement penalty against the
 others. The merit function is the residual norm and not an energy, because
 the damaged interface has no potential and `\boldsymbol{K}` is not symmetric. When `\boldsymbol{K}`
-is the tangent stiffness matrix `\boldsymbol{K}_T = -\partial \boldsymbol{R}/\partial
-\boldsymbol{c}`, the exact Jacobian of the internal force vector,
+is the tangent stiffness matrix `\boldsymbol{K}_T = \partial \boldsymbol{R}/\partial
+\boldsymbol{c}`, the exact Jacobian of the residual,
 `\delta \boldsymbol{c}` is a descent direction of this merit function for any
 positive weighting:
 
 .. math::
 
-    \left. \frac{d}{ds} \frac{1}{2} \left\| \boldsymbol{R}(\boldsymbol{c}_i + s\delta \boldsymbol{c}) \right\|_{\boldsymbol{d}}^2 \right|_{s=0} = - \boldsymbol{R}^\top \mathrm{diag}(|\boldsymbol{d}|)^{-1} \boldsymbol{K}_T \delta \boldsymbol{c} = - \boldsymbol{R}^\top \mathrm{diag}(|\boldsymbol{d}|)^{-1} \boldsymbol{R} < 0
+    \left. \frac{d}{ds} \frac{1}{2} \left\| \boldsymbol{R}(\boldsymbol{c}_i + s\delta \boldsymbol{c}) \right\|_{\boldsymbol{d}}^2 \right|_{s=0} = \boldsymbol{R}^\top \mathrm{diag}(|\boldsymbol{d}|)^{-1} \boldsymbol{K}_T \delta \boldsymbol{c} = - \boldsymbol{R}^\top \mathrm{diag}(|\boldsymbol{d}|)^{-1} \boldsymbol{R} < 0
 
 so a small enough `s` always satisfies Eq. :eq:`cz-armijo`. Between refreshes
 of `\boldsymbol{K}_C + \boldsymbol{K}_G` the iteration matrix is not the exact Jacobian and this is

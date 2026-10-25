@@ -322,7 +322,14 @@
   the null-space method and of the cohesive zone); matrices are bold upper
   case, without brackets, e.g. `\boldsymbol{K}` (was `[K]`); the overbar is
   kept for prescribed values, the membrane stress resultants `Nxx`, `Nyy`,
-  `Nxy` being `\bar{\boldsymbol{N}}` (were `N_0`, `N^0`). `K_C0` also in
+  `Nxy` being `\bar{\boldsymbol{N}}` (were `N_0`, `N^0`; `KG(Nbar + N_L)` in
+  the comments of the kernels, were `KG(N0 + N_L)`), and the prescribed
+  values of the null-space method `\bar{\boldsymbol{d}}_0`,
+  `\bar{\boldsymbol{d}}_1`, the right-hand side of a block of the
+  elimination being `\boldsymbol{b}`. The residual is `R = F_int - F_ext`
+  in all the pages, also in `follower_pressure.rst` and in the null-space
+  method (were `F_ext - F_int`), with `K_T = dR/dc` and the load vector
+  `-dR/dlambda` of the arc-length methods. `K_C0` also in
   `tangent_product.rst` (was `K_0`); `K_CNL` as the sum of its three
   integrals of `B_L` and `B_NL` in `Shell.calc_kC`, and `K_CNL + K_GNL`
   written out where the matrix of `fkC_num` is meant, in
@@ -333,15 +340,17 @@
   -K_F`); the rows `S^u`, `S^v`, `S^w` of the approximation functions (were
   `{N_u}`, `{N_v}`, `{N_w}`); the tangent vectors `X_{,x}`, `X_{,y}` of the
   follower pressure (were `A`, `B`, the symbols of the laminate); the
-  constitutive matrix `ABD` (was `[F]`); the strain operator `B_L + B_NL`
+  constitutive matrix `C` of the laminate (was `[F]`); the factor `U` of
+  the QR decomposition `Q U` of the null-space method (was `[R]`, now
+  free for the residual); the strain operator `B_L + B_NL`
   (was `[B(beta)]`); the pre-buckling state `c-hat`; the aerodynamic
   damping matrix `C_A` (was `[c_A]`); Bardell's functions `P_i` (were `f_i`
-  and `g_j`); in `cohesive_zone.rst` the residual `R = F_ext - F_int` (was
-  `F_int - F_ext`), with the Newton correction, the descent of the line
-  search and the denominator of the convergence criterion written
-  accordingly, the diagonal scaling vector `d` (was `[D]`) and the tangent
-  stiffness matrix `K_T` (was the Jacobian `[J]`); the direction `v` of the
-  Taylor test of the tangent (was `d`); `\boldsymbol` (was `\mathbf`,
+  and `g_j`); in `cohesive_zone.rst` the residual `R = F_int - F_ext` with
+  `F_int` including the cohesive and the penalty forces, and the first term
+  of the denominator of the convergence criterion `F_int - K_PD c`, the
+  internal force vector of the drivers, the diagonal scaling vector `d`
+  (was `[D]`) and the tangent stiffness matrix `K_T` (was the Jacobian
+  `[J]`); the direction `v` of the Taylor test of the tangent (was `d`); `\boldsymbol` (was `\mathbf`,
   `\vec`) and the transpose `^\top` (was `^T`). The API names, e.g.
   `calc_kCfollower`, the key `'kCfollower'` and the argument `c`, are
   unchanged.

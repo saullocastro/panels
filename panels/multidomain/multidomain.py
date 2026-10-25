@@ -315,8 +315,8 @@ class MultiDomain(object):
     its penalty stiffness with both methods, see :meth:`._null_space`.
 
     With ``pd_method='null-space'`` the prescribed displacements are the
-    inhomogeneous linear constraints `\boldsymbol{B}_d \boldsymbol{c} = \boldsymbol{d}_0 + \lambda
-    \boldsymbol{d}_1`, and every admissible configuration is `\boldsymbol{c} = \boldsymbol{Z} \boldsymbol{c}_r +
+    inhomogeneous linear constraints `\boldsymbol{B}_d \boldsymbol{c} = \bar{\boldsymbol{d}}_0 + \lambda
+    \bar{\boldsymbol{d}}_1`, and every admissible configuration is `\boldsymbol{c} = \boldsymbol{Z} \boldsymbol{c}_r +
     \boldsymbol{c}_{p0} + \lambda \boldsymbol{c}_{p1}`, see :meth:`.get_cp` and
     :ref:`null_space_pd`. With ``pd_method='penalty'`` a prescribed value
     `u_p` is imposed with the energy `\frac{1}{2} k (u - u_p)^2`, integrated
@@ -635,7 +635,7 @@ class MultiDomain(object):
         the total potential energy gives the reduced matrices and vectors of
         :meth:`.reduce`. With ``pd_method='null-space'``, the prescribed
         displacements add the inhomogeneous constraints `\boldsymbol{B}_d \boldsymbol{c} =
-        \boldsymbol{d}_0 + \lambda \boldsymbol{d}_1`, and `\boldsymbol{Z}` spans the null space of all
+        \bar{\boldsymbol{d}}_0 + \lambda \bar{\boldsymbol{d}}_1`, and `\boldsymbol{Z}` spans the null space of all
         the constraints, see :meth:`.get_cp` and :ref:`null_space_pd`.
 
         The blocks of constraints are eliminated one at a time, the
@@ -827,8 +827,8 @@ class MultiDomain(object):
         Notes
         -----
         With ``pd_method='null-space'`` the prescribed displacements are the
-        constraints `\boldsymbol{B}_d \boldsymbol{c} = \boldsymbol{d}_0 + \lambda \boldsymbol{d}_1`, `\boldsymbol{d}_0`
-        from the constant prescriptions (``cte=True``) and `\boldsymbol{d}_1` from
+        constraints `\boldsymbol{B}_d \boldsymbol{c} = \bar{\boldsymbol{d}}_0 + \lambda \bar{\boldsymbol{d}}_1`, `\bar{\boldsymbol{d}}_0`
+        from the constant prescriptions (``cte=True``) and `\bar{\boldsymbol{d}}_1` from
         those incremented with the load factor (``cte=False``), and every
         admissible configuration is
 
@@ -836,8 +836,8 @@ class MultiDomain(object):
 
             \boldsymbol{c} = \boldsymbol{Z} \boldsymbol{c}_r + \boldsymbol{c}_{p0} + \lambda \boldsymbol{c}_{p1}
 
-        with `\boldsymbol{B} \boldsymbol{c}_{p0} = \{\boldsymbol{0}; \boldsymbol{d}_0\}` and `\boldsymbol{B} \boldsymbol{c}_{p1} = \{\boldsymbol{0};
-        \boldsymbol{d}_1\}` for `\boldsymbol{B}` the constraints of the connections and of the
+        with `\boldsymbol{B} \boldsymbol{c}_{p0} = \{\boldsymbol{0}; \bar{\boldsymbol{d}}_0\}` and `\boldsymbol{B} \boldsymbol{c}_{p1} = \{\boldsymbol{0};
+        \bar{\boldsymbol{d}}_1\}` for `\boldsymbol{B}` the constraints of the connections and of the
         prescribed displacements, see :ref:`null_space_pd`. Each row of
         `\boldsymbol{B}_d` is a prescribed component at a point, or at a Gauss-Legendre
         point of a prescribed line, see
@@ -1035,8 +1035,8 @@ class MultiDomain(object):
         -----
         Without prescribed displacements imposed exactly, the reduced
         problem is `\boldsymbol{Z}^\top \boldsymbol{R}(\boldsymbol{Z} \boldsymbol{c}_r, \lambda) = \boldsymbol{0}`, with the
-        residual `\boldsymbol{R}(\boldsymbol{c}, \lambda) = \lambda \boldsymbol{F}_{ext} - \boldsymbol{F}_{int}(\boldsymbol{c},
-        \lambda)` of the unconstrained system and the constant `\boldsymbol{Z}`,
+        residual `\boldsymbol{R}(\boldsymbol{c}, \lambda) = \boldsymbol{F}_{int}(\boldsymbol{c}, \lambda) -
+        \lambda \boldsymbol{F}_{ext}` of the unconstrained system and the constant `\boldsymbol{Z}`,
         since the constraints are linear.
 
         With ``pd_method='null-space'`` and prescribed displacements, the
@@ -1047,13 +1047,13 @@ class MultiDomain(object):
         .. math::
 
             \boldsymbol{F}_{int, r}(\boldsymbol{c}_r, \lambda) &= \boldsymbol{Z}^\top \boldsymbol{F}_{int}(\boldsymbol{c}) \\
-            \boldsymbol{K}_{T, r} &= \boldsymbol{Z}^\top \boldsymbol{K}_T(\boldsymbol{c}) \boldsymbol{Z} = -\frac{\partial \boldsymbol{R}_r}{\partial
+            \boldsymbol{K}_{T, r} &= \boldsymbol{Z}^\top \boldsymbol{K}_T(\boldsymbol{c}) \boldsymbol{Z} = \frac{\partial \boldsymbol{R}_r}{\partial
                 \boldsymbol{c}_r} \\
-            \frac{\partial \boldsymbol{R}_r}{\partial \lambda} &= \boldsymbol{Z}^\top \left(\boldsymbol{F}_{ext}
+            -\frac{\partial \boldsymbol{R}_r}{\partial \lambda} &= \boldsymbol{Z}^\top \left(\boldsymbol{F}_{ext}
                 - \boldsymbol{K}_T(\boldsymbol{c}) \boldsymbol{c}_{p1}\right)
 
         `\boldsymbol{K}_{T, r}`, the sum of ``calc_kC`` and ``calc_kG``, is the exact
-        Jacobian, and `\partial \boldsymbol{R}_r/\partial \lambda`, returned by
+        Jacobian, and `-\partial \boldsymbol{R}_r/\partial \lambda`, returned by
         ``calc_fext`` with ``c`` and ``lbd``, depends on the configuration
         and on the load factor. ``structsolve`` uses it in the predictors
         and in the constraint of the arc-length methods, and `\lambda
@@ -2326,9 +2326,9 @@ class MultiDomain(object):
         Notes
         -----
         For the classical laminated plate theory the stress resultants are
-        `\{N_{xx}, N_{yy}, N_{xy}, M_{xx}, M_{yy}, M_{xy}\} = \boldsymbol{ABD}
+        `\{N_{xx}, N_{yy}, N_{xy}, M_{xx}, M_{yy}, M_{xy}\} = \boldsymbol{C}
         \{\varepsilon_{xx}, \varepsilon_{yy}, \gamma_{xy}, \kappa_{xx},
-        \kappa_{yy}, \kappa_{xy}\}`, with `\boldsymbol{ABD}` the constitutive matrix of
+        \kappa_{yy}, \kappa_{xy}\}`, with `\boldsymbol{C}` the constitutive matrix of
         the laminate, and the shear deformation theories add the transverse
         shear and higher-order terms with their larger constitutive
         matrices, see :meth:`.Shell.stress`. The strains are those of

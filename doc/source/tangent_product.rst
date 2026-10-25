@@ -41,9 +41,8 @@ which is what delivers the quadratic convergence of the Newton-Raphson
 iterations `\boldsymbol{K}_T(\boldsymbol{c}_k) \Delta
 \boldsymbol{c} = \boldsymbol{F}_{ext} -
 \boldsymbol{F}_{int}(\boldsymbol{c}_k)`, see
-:doc:`ex_newton_raphson`. In the notation of
-:ref:`tangent_kTv`, `\boldsymbol{ABD} = \boldsymbol{C}` and the membrane stresses `\tilde{\boldsymbol{N}}` are
-those of :eq:`donnell-KG`.
+:doc:`ex_newton_raphson`. :ref:`tangent_kTv` uses the same notation, with
+the membrane stresses `\tilde{\boldsymbol{N}}` of :eq:`donnell-KG`.
 
 The tangent stiffness matrix is classically decomposed as
 
@@ -942,7 +941,7 @@ between the two namings.
       - ``KCNL``
       - ``fkC_num`` with ``NLgeom=1``
     * - `\boldsymbol{K}_G(\boldsymbol{c})`
-      - ``KG(N0 + N_L)``
+      - ``KG(Nbar + N_L)``
       - ``fkG_num``
     * - `\boldsymbol{K}_G(\bar{\boldsymbol{N}})`
       - ``KG0``
@@ -1170,7 +1169,7 @@ exact product, to round-off, and the exact directional derivative of
 :meth:`.Shell.calc_fint`.
 
 The product is what the prescribed displacements imposed exactly need at
-each configuration, `\partial \boldsymbol{R}_r/\partial \lambda = \boldsymbol{Z}^\top (\boldsymbol{F}_{ext} -
+each configuration, `-\partial \boldsymbol{R}_r/\partial \lambda = \boldsymbol{Z}^\top (\boldsymbol{F}_{ext} -
 \boldsymbol{K}_T(\boldsymbol{c}) \boldsymbol{c}_{p1})`, see :ref:`null_space_pd`, and what matrix-free
 iterative solvers and directional checks of the tangent need.
 
@@ -1199,16 +1198,16 @@ for Sanders, `\boldsymbol{B}_L` is the linear strain operator and `\boldsymbol{B
     \\ \boldsymbol{G}_x \\ 0 \end{bmatrix}
 
 The factor `1/2` of `\boldsymbol{B}_{NL}` gives the quadratic terms `\beta_x^2/2`,
-`\beta_y^2/2` and `\beta_x \beta_y`. With the constitutive matrix `\boldsymbol{ABD}` of
+`\beta_y^2/2` and `\beta_x \beta_y`. With the constitutive matrix `\boldsymbol{C}` of
 ``ABDnxny``, the internal force vector is `\boldsymbol{F}_{int} = \int (\boldsymbol{B}_L +
-\boldsymbol{B}_{NL})^\top \boldsymbol{ABD} \boldsymbol{\varepsilon}(\boldsymbol{c}) dA`, and its directional derivative
+\boldsymbol{B}_{NL})^\top \boldsymbol{C} \boldsymbol{\varepsilon}(\boldsymbol{c}) dA`, and its directional derivative
 along `\boldsymbol{v}` is
 
 .. math::
     :label: kTv
 
     \boldsymbol{K}_T \boldsymbol{v} = \frac{d}{dt} \boldsymbol{F}_{int}(\boldsymbol{c} + t \boldsymbol{v}) \Big|_{t=0} =
-    \int \left( (\boldsymbol{B}_L + \boldsymbol{B}_{NL})^\top \boldsymbol{ABD} (\boldsymbol{B}_L + \boldsymbol{B}_{NL}) \boldsymbol{v} + \boldsymbol{G}^\top
+    \int \left( (\boldsymbol{B}_L + \boldsymbol{B}_{NL})^\top \boldsymbol{C} (\boldsymbol{B}_L + \boldsymbol{B}_{NL}) \boldsymbol{v} + \boldsymbol{G}^\top
     \tilde{\boldsymbol{N}} \boldsymbol{G} \boldsymbol{v} \right) dA
 
 because the strains are a quadratic form whose bilinear form is `\boldsymbol{B}_L +
@@ -1226,7 +1225,7 @@ the kernels ``calc_kTv`` of ``panels/models/<model>_num.pyx`` compute
 1. `\boldsymbol{\beta} = \boldsymbol{G} \boldsymbol{c}` and `\boldsymbol{G} \boldsymbol{v}`;
 2. `\boldsymbol{\varepsilon} = (\boldsymbol{B}_L + \tfrac{1}{2} \boldsymbol{B}_{NL}) \boldsymbol{c}` and
    `\delta \boldsymbol{\varepsilon} = (\boldsymbol{B}_L + \boldsymbol{B}_{NL}) \boldsymbol{v}`;
-3. the stresses `\boldsymbol{ABD} \boldsymbol{\varepsilon}`, of which `\tilde{\boldsymbol{N}}`, and `\boldsymbol{ABD}
+3. the stresses `\boldsymbol{C} \boldsymbol{\varepsilon}`, of which `\tilde{\boldsymbol{N}}`, and `\boldsymbol{C}
    \delta \boldsymbol{\varepsilon}`;
 4. the sum of :eq:`kTv` over the terms.
 

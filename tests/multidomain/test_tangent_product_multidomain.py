@@ -5,7 +5,7 @@ It must be the product of the assembled `\boldsymbol{K}_T`, ``calc_kC + calc_kG`
 ``NLgeom=True``, including the penalty connections and the follower loads,
 and the derivative of :meth:`.MultiDomain.calc_fint`. With prescribed
 displacements imposed exactly, the reduced ``calc_fext(c, lbd)`` uses it for
-`\partial \boldsymbol{R}_r/\partial \lambda = \boldsymbol{Z}^\top (\boldsymbol{F}_{ext} - \boldsymbol{K}_T \boldsymbol{c}_{p1})`.
+`-\partial \boldsymbol{R}_r/\partial \lambda = \boldsymbol{Z}^\top (\boldsymbol{F}_{ext} - \boldsymbol{K}_T \boldsymbol{c}_{p1})`.
 """
 import sys
 sys.path.append('../..')
@@ -79,7 +79,7 @@ def test_product_is_derivative_of_fint(model):
 @pytest.mark.parametrize('model', ['plate_clpt_donnell',
                                    'cylshell_fsdt_sanders'])
 def test_reduced_load_vector_with_prescribed_displacements(model):
-    r"""`\partial \boldsymbol{R}_r/\partial \lambda` from the product equals the one of
+    r"""`-\partial \boldsymbol{R}_r/\partial \lambda` from the product equals the one of
     the assembled tangent stiffness matrix"""
     md = two_panels(model, 'null-space', pd_method='null-space')
     p1, p2 = md.panels

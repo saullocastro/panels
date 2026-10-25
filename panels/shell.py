@@ -1491,14 +1491,14 @@ class Shell(object):
         part `\boldsymbol{B}_{NL}` is linear in the rotations `\beta_x`, `\beta_y` of
         the von Kármán terms, `w_{,x}` and `w_{,y}` (`w_{,y} - v/r` for the
         Sanders-Koiter kinematics, see :mod:`panels.models`), and the
-        constitutive matrix `\boldsymbol{ABD}` of ``ABDnxny``, the linear and the
+        constitutive matrix `\boldsymbol{C}` of ``ABDnxny``, the linear and the
         non-linear constitutive stiffness matrices are
 
         .. math::
 
-            \boldsymbol{K}_{C0} = \int \boldsymbol{B}_L^\top \boldsymbol{ABD} \boldsymbol{B}_L dA \qquad
-            \boldsymbol{K}_{CNL} = \int \left( \boldsymbol{B}_L^\top \boldsymbol{ABD} \boldsymbol{B}_{NL} + \boldsymbol{B}_{NL}^\top \boldsymbol{ABD}
-            \boldsymbol{B}_L + \boldsymbol{B}_{NL}^\top \boldsymbol{ABD} \boldsymbol{B}_{NL} \right) dA
+            \boldsymbol{K}_{C0} = \int \boldsymbol{B}_L^\top \boldsymbol{C} \boldsymbol{B}_L dA \qquad
+            \boldsymbol{K}_{CNL} = \int \left( \boldsymbol{B}_L^\top \boldsymbol{C} \boldsymbol{B}_{NL} + \boldsymbol{B}_{NL}^\top \boldsymbol{C}
+            \boldsymbol{B}_L + \boldsymbol{B}_{NL}^\top \boldsymbol{C} \boldsymbol{B}_{NL} \right) dA
 
         over the integration domain. With ``NLgeom=False`` the result is
         `\boldsymbol{K}_{C0}`, whether or not ``c`` is given, because the kernels zero
@@ -1542,7 +1542,7 @@ class Shell(object):
 
         The closed-form matrices separate the two directions, with the
         integrals of Bardell's functions of :mod:`panels.bardell` over the
-        whole domain, which requires a constant `\boldsymbol{ABD}`; the numerical
+        whole domain, which requires a constant `\boldsymbol{C}`; the numerical
         integration uses the points of :meth:`.Shell.integration_points`.
         See :ref:`tangent_product` for the derivation of the terms.
 
@@ -1904,19 +1904,19 @@ class Shell(object):
 
         .. math::
 
-            \boldsymbol{K}_T \boldsymbol{v} = \int \left( (\boldsymbol{B}_L + \boldsymbol{B}_{NL})^\top \boldsymbol{ABD} (\boldsymbol{B}_L +
+            \boldsymbol{K}_T \boldsymbol{v} = \int \left( (\boldsymbol{B}_L + \boldsymbol{B}_{NL})^\top \boldsymbol{C} (\boldsymbol{B}_L +
             \boldsymbol{B}_{NL}) \boldsymbol{v} + \boldsymbol{G}^\top \boldsymbol{N} \boldsymbol{G} \boldsymbol{v} \right) dA
 
         where `\boldsymbol{\beta} = \boldsymbol{G} \boldsymbol{c}` are the rotations of the von Kármán
         terms, `\boldsymbol{B}_L + \boldsymbol{B}_{NL}` the strain operator, `\boldsymbol{B}_{NL}` being
-        linear in `\boldsymbol{\beta}`, `\boldsymbol{ABD}` the constitutive matrix of
+        linear in `\boldsymbol{\beta}`, `\boldsymbol{C}` the constitutive matrix of
         ``ABDnxny`` and `\boldsymbol{N}` the membrane stresses at ``c``, plus the
         constant ones ``Nxx_cte``, ``Nyy_cte`` and ``Nxy_cte``. Since the
         strains are `\boldsymbol{\varepsilon}(\boldsymbol{c}) = (\boldsymbol{B}_L + \tfrac{1}{2} \boldsymbol{B}_{NL})
         \boldsymbol{c}`, a quadratic form whose bilinear form is `\boldsymbol{B}_L + \boldsymbol{B}_{NL}`,
         the first term is the derivative of the strains and the second that
         of `\boldsymbol{B}_{NL}^\top` in the internal force vector `\int (\boldsymbol{B}_L +
-        \boldsymbol{B}_{NL})^\top \boldsymbol{ABD} \boldsymbol{\varepsilon}(\boldsymbol{c}) dA`. Each
+        \boldsymbol{B}_{NL})^\top \boldsymbol{C} \boldsymbol{\varepsilon}(\boldsymbol{c}) dA`. Each
         step at a point is a loop over the `m n` terms, against the `m^2
         n^2` pairs of terms of the assembly of `\boldsymbol{K}_T`.
 
@@ -3586,8 +3586,8 @@ class Shell(object):
             The Ritz constants, with the size ``size``. When given, the
             follower pressure loads are evaluated in this configuration,
             i.e. ``fext(c) = fext + (F_p(c) - F_p(0))``, the load vector that
-            the arc-length solvers of ``structsolve`` use as the derivative
-            of the residual with respect to the load factor. Default
+            the arc-length solvers of ``structsolve`` use as minus the
+            derivative of the residual with respect to the load factor. Default
             ``None``.
         include_pds : bool, optional
             Whether the forces `k u_p` of the prescribed displacements
@@ -3670,21 +3670,21 @@ class Shell(object):
 
         .. math::
 
-            \boldsymbol{F}_{int}^{elastic}(\boldsymbol{c}) = \int (\boldsymbol{B}_L + \boldsymbol{B}_{NL})^\top \boldsymbol{ABD}
+            \boldsymbol{F}_{int}^{elastic}(\boldsymbol{c}) = \int (\boldsymbol{B}_L + \boldsymbol{B}_{NL})^\top \boldsymbol{C}
             \boldsymbol{\varepsilon}(\boldsymbol{c}) dA
 
         with the generalized strains `\boldsymbol{\varepsilon}(\boldsymbol{c}) = (\boldsymbol{B}_L +
         \tfrac{1}{2} \boldsymbol{B}_{NL}) \boldsymbol{c}` of the kinematics of the model, the
         strain operator `\boldsymbol{B}_L + \boldsymbol{B}_{NL}`, `\boldsymbol{B}_{NL}` being linear in the
         rotations `\boldsymbol{\beta}` of the von Kármán terms, and the constitutive
-        matrix `\boldsymbol{ABD}` of ``ABDnxny``, see :meth:`.Shell.calc_kTv`. With
+        matrix `\boldsymbol{C}` of ``ABDnxny``, see :meth:`.Shell.calc_kTv`. With
         follower pressure loads the
         residual is
 
         .. math::
-            \boldsymbol{R} = \boldsymbol{F}_{ext} - \boldsymbol{F}_{int}
-                  = \boldsymbol{F}_{ext} + (\boldsymbol{F}_p(\boldsymbol{c}) - \boldsymbol{F}_p(0))
-                    - \boldsymbol{F}_{int}^{elastic}(\boldsymbol{c})
+            \boldsymbol{R} = \boldsymbol{F}_{int} - \boldsymbol{F}_{ext}
+                  = \boldsymbol{F}_{int}^{elastic}(\boldsymbol{c})
+                    - (\boldsymbol{F}_p(\boldsymbol{c}) - \boldsymbol{F}_p(0)) - \boldsymbol{F}_{ext}
 
         with :meth:`.Shell.calc_fext` at the same ``inc``, and the tangent
         stiffness matrix :meth:`.Shell.calc_kT` at ``inc`` is its exact

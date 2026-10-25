@@ -167,8 +167,8 @@ def test_fkG_num_has_no_NLgeom_parameter():
 
     It used to accept an NLgeom argument that it never read, because the
     stress of the non-linear strain enters KT through KGNL in fkC_num. The
-    argument is gone, so a caller that still expects KG(N0 + N_L + N_NL) now
-    fails loudly instead of silently getting KG(N0 + N_L).
+    argument is gone, so a caller that still expects KG(Nbar + N_L + N_NL) now
+    fails loudly instead of silently getting KG(Nbar + N_L).
     """
     from panels import modelDB
     for model in modelDB.db:
