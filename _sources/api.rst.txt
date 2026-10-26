@@ -10,6 +10,7 @@ API reference
     shell_fext.rst
     plot_shell.rst
     models.rst
+    bardell_api.rst
     multidomain.rst
     multidomain_connections.rst
     multidomain_cylinder.rst
@@ -17,3 +18,4 @@ API reference
     stiffener.rst
     stiffpanelbay.rst
     json_io.rst
+    dev.rst

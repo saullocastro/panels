@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Multi-domain assemblies &#8212; panels 0.14.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="_static/scripts/fontawesome.js?digest=18bd87630a240e9c25be"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
+
+    <script src="_static/documentation_options.js?v=9e420a66"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'multidomain_overview';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Stiffened panels" href="stiffened_panels.html" />
+    <link rel="prev" title="Loads" href="loads.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.14.0" />
+  
+    
+    <script src="_static/searchtools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">panels 0.14.0 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="shell_overview.html">
+    Plates and cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="bardell.html">
+    Bardell’s hierarchical functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="boundary_conditions.html">
+    Boundary conditions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="loads.html">
+    Loads
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#" aria-current="page">
+    Multi-domain assemblies
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="stiffened_panels.html">
+    Stiffened panels
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="aeroelasticity.html">
+    Panel flutter with the piston theory
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="postprocessing.html">
+    Field outputs, plots and files
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tsdt_offset.html">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tangent_product.html">
+    Tangent stiffness matrix and its product by a vector
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tabulation.html">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_face_clamp.html">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ref.html">
+    References
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="shell_overview.html">
+    Plates and cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="bardell.html">
+    Bardell’s hierarchical functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="boundary_conditions.html">
+    Boundary conditions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="loads.html">
+    Loads
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#" aria-current="page">
+    Multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="stiffened_panels.html">
+    Stiffened panels
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="aeroelasticity.html">
+    Panel flutter with the piston theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="postprocessing.html">
+    Field outputs, plots and files
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tsdt_offset.html">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tangent_product.html">
+    Tangent stiffness matrix and its product by a vector
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tabulation.html">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_face_clamp.html">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ref.html">
+    References
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button type="button" id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Multi-domain assemblies</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="multi-domain-assemblies">
+<span id="multidomain-overview"></span><h1>Multi-domain assemblies<a class="headerlink" href="#multi-domain-assemblies" title="Link to this heading">#</a></h1>
+<p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">MultiDomain</span></code> assembles several <code class="xref py py-class docutils literal notranslate"><span class="pre">Shell</span></code> domains, each one
+with its own approximation functions, see <a class="reference internal" href="bardell.html#theory-func-bardell"><span class="std std-ref">Bardell’s hierarchical functions</span></a>, and
+imposes the compatibility of their displacements along edges or over areas,
+following Castro and Donadon <a class="reference internal" href="ref.html#castro2017multidomain" id="id1"><span>[castro2017Multidomain]</span></a>. Assemblies model
+cylinders and panels divided in domains, stiffened panels whose stiffeners
+are made of plate domains, panels with debonding defects and, with cohesive
+connections, delaminations.</p>
+<section id="assembly">
+<h2>Assembly<a class="headerlink" href="#assembly" title="Link to this heading">#</a></h2>
+<p>The domains are given as a list, and the vector of the Ritz constants of the
+assembly is the concatenation of those of the domains, in that order: the
+constructor sets the attributes <code class="docutils literal notranslate"><span class="pre">row_start</span></code>, <code class="docutils literal notranslate"><span class="pre">col_start</span></code>, <code class="docutils literal notranslate"><span class="pre">row_end</span></code>
+and <code class="docutils literal notranslate"><span class="pre">col_end</span></code> of each domain. The matrices of the assembly,
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.calc_kC()</span></code>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.calc_kG()</span></code>,
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.calc_kM()</span></code>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.calc_kT()</span></code>, and the vectors,
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.calc_fext()</span></code>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.calc_fint()</span></code>, are the sums
+of those of the domains at these positions, see <a class="reference internal" href="shell_overview.html#shell-overview"><span class="std std-ref">Plates and cylindrical shells</span></a>, plus
+the connections. The boundary conditions and the loads are those of each
+domain. The attribute <code class="docutils literal notranslate"><span class="pre">group</span></code> of the domains collects them for the plots
+and the field outputs, and <code class="docutils literal notranslate"><span class="pre">x0</span></code>, <code class="docutils literal notranslate"><span class="pre">y0</span></code> place a domain in the plane of its
+group, see <a class="reference internal" href="postprocessing.html#postprocessing"><span class="std std-ref">Field outputs, plots and files</span></a>.</p>
+</section>
+<section id="connections">
+<h2>Connections<a class="headerlink" href="#connections" title="Link to this heading">#</a></h2>
+<p>Each connection is a dictionary of the list <code class="docutils literal notranslate"><span class="pre">conn</span></code>, with the two domains
+<code class="docutils literal notranslate"><span class="pre">p1</span></code> and <code class="docutils literal notranslate"><span class="pre">p2</span></code>, the key <code class="docutils literal notranslate"><span class="pre">func</span></code> and the position of the connection in
+each domain:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p><code class="docutils literal notranslate"><span class="pre">func</span></code></p></th>
+<th class="head"><p>connection</p></th>
+<th class="head"><p>position</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">'SSxcte'</span></code></p></td>
+<td><p>two skins along an edge of constant <span class="math notranslate nohighlight">\(x\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">xcte1</span></code>, <code class="docutils literal notranslate"><span class="pre">xcte2</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">'SSycte'</span></code></p></td>
+<td><p>two skins along an edge of constant <span class="math notranslate nohighlight">\(y\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ycte1</span></code>, <code class="docutils literal notranslate"><span class="pre">ycte2</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">'BFycte'</span></code></p></td>
+<td><p>base, or skin, <code class="docutils literal notranslate"><span class="pre">p1</span></code> and flange <code class="docutils literal notranslate"><span class="pre">p2</span></code> at constant <span class="math notranslate nohighlight">\(y\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ycte1</span></code>, <code class="docutils literal notranslate"><span class="pre">ycte2</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">'BFxcte'</span></code></p></td>
+<td><p>base, or skin, <code class="docutils literal notranslate"><span class="pre">p1</span></code> and flange <code class="docutils literal notranslate"><span class="pre">p2</span></code> at constant <span class="math notranslate nohighlight">\(x\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">xcte1</span></code>, <code class="docutils literal notranslate"><span class="pre">xcte2</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">'SB'</span></code></p></td>
+<td><p>skin and base over their common area</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">p1</span></code> on the positive side of <span class="math notranslate nohighlight">\(z\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">'SB_TSL'</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">'SB'</span></code> with a cohesive traction-separation law</p></td>
+<td><p>as <code class="docutils literal notranslate"><span class="pre">'SB'</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The kernels and the conventions of each connection are described in
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.connections</span></code>. The connections of the models with
+5 degrees of freedom per term, FSDT and TSDT, are those of
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.connections.kCsdt</span></code>, and two connected domains must
+have the same number of degrees of freedom per term; <code class="docutils literal notranslate"><span class="pre">'SB_TSL'</span></code> is
+available for the classical laminated plate theory only, see
+<a class="reference internal" href="cohesive_zone.html#cohesive-zone"><span class="std std-ref">Cohesive zone model of the multi-domain approach</span></a>.</p>
+</section>
+<section id="imposing-the-connections">
+<h2>Imposing the connections<a class="headerlink" href="#imposing-the-connections" title="Link to this heading">#</a></h2>
+<p>With <code class="docutils literal notranslate"><span class="pre">conn_method='null-space'</span></code>, the default, the connections are linear
+constraints <span class="math notranslate nohighlight">\(\boldsymbol{B}\boldsymbol{c} = \boldsymbol{0}\)</span>, imposed exactly with a basis <span class="math notranslate nohighlight">\(\boldsymbol{Z}\)</span> of the
+null space of <span class="math notranslate nohighlight">\(\boldsymbol{B}\)</span>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_Z()</span></code>:</p>
+<div class="math notranslate nohighlight">
+\[\boldsymbol{c} = \boldsymbol{Z}\boldsymbol{c}_r, \qquad \boldsymbol{K}_r = \boldsymbol{Z}^\top \boldsymbol{K} \boldsymbol{Z}, \qquad
+\boldsymbol{F}_r = \boldsymbol{Z}^\top \boldsymbol{F}\]</div>
+<p>The matrices and vectors are reduced with <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.reduce()</span></code>
+before solving, and the solution is expanded with
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.expand()</span></code>; <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_reduced_functions()</span></code>
+gives the reduced functions for the non-linear analyses of
+<code class="xref py py-class docutils literal notranslate"><span class="pre">structsolve.Analysis</span></code>. The theory and the verification are in
+<a class="reference internal" href="multidomain_null_space.html#null-space"><span class="std std-ref">Exact connections with the null-space method</span></a>.</p>
+<p>With <code class="docutils literal notranslate"><span class="pre">conn_method='penalty'</span></code>, penalty stiffnesses are added to the
+stiffness matrix by <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_kC_conn()</span></code>, with the constants
+<code class="docutils literal notranslate"><span class="pre">'kt'</span></code> and <code class="docutils literal notranslate"><span class="pre">'kr'</span></code> of each connection, by default those of
+<code class="xref py py-func docutils literal notranslate"><span class="pre">calc_kt_kr()</span></code>, and the matrices are solved directly. The continuity
+is then approximate, with an error that decreases with the penalty
+constants, while the conditioning of the stiffness matrix worsens.</p>
+<p>The prescribed displacements of the domains are imposed with
+<code class="docutils literal notranslate"><span class="pre">pd_method</span></code>, see <a class="reference internal" href="boundary_conditions.html#boundary-conditions"><span class="std std-ref">Boundary conditions</span></a>.
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.linear_static()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.linear_buckling()</span></code>
+solve the reduced problems, with the prescribed displacements when
+<code class="docutils literal notranslate"><span class="pre">pd_method='null-space'</span></code>, in which case
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.reaction_pd()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.reaction_resultant()</span></code>
+give the reactions.</p>
+</section>
+<section id="ready-made-assemblies">
+<h2>Ready-made assemblies<a class="headerlink" href="#ready-made-assemblies" title="Link to this heading">#</a></h2>
+<p>The functions of <code class="docutils literal notranslate"><span class="pre">panels.multidomain</span></code> build and analyse complete
+assemblies, and show how to build others:</p>
+<ul class="simple">
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">create_cylinder()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">create_cylinder_blade_stiffened()</span></code> and
+the analyses of <code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.cylinder</span></code> and
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.cylinder_blade_stiffened</span></code>, see
+<a class="reference internal" href="ex_multidomain_cylinder.html"><span class="doc">Cylinders modeled as multi-domain assemblies</span></a>;</p></li>
+<li><p>the panel with one T-stiffener of
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.tstiff2d_1stiff_compression</span></code>,
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.tstiff2d_1stiff_freq</span></code> and
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.tstiff2d_1stiff_flutter</span></code>, see
+<a class="reference internal" href="ex_multidomain_tstiff2d.html"><span class="doc">Panels with a T-stiffener modeled as multi-domain assemblies</span></a>.</p></li>
+</ul>
+</section>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Link to this heading">#</a></h2>
+<p>A square plate divided in two or four domains, simply supported on the
+outer edges, with the connections <code class="docutils literal notranslate"><span class="pre">'SSxcte'</span></code> and <code class="docutils literal notranslate"><span class="pre">'SSycte'</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">domains</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">stack</span><span class="p">,</span> <span class="n">laminaprop</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">xs</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">ys</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+            <span class="n">n</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mf">1.e3</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Square plate divided in domains, with all the outer edges simply</span>
+<span class="sd">    supported</span>
+
+<span class="sd">    ``layout`` is ``'x'`` for two domains divided at `x = x_s a`, ``'y'``</span>
+<span class="sd">    for two domains divided at `y = y_s a`, or ``'2x2'`` for four domains</span>
+<span class="sd">    divided at both, with an interior corner.</span>
+
+<span class="sd">    """</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plate</span><span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">bcs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">make_plate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">stack</span><span class="p">,</span> <span class="n">laminaprop</span><span class="p">,</span> <span class="n">bcs</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">,</span>
+                          <span class="n">x0</span><span class="o">=</span><span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="o">=</span><span class="n">y0</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">layout</span> <span class="o">==</span> <span class="s1">'x'</span><span class="p">:</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="n">plate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">xs</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="s1">'SSFS'</span><span class="p">)</span>
+        <span class="n">p2</span> <span class="o">=</span> <span class="n">plate</span><span class="p">(</span><span class="n">xs</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">xs</span><span class="p">)</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="s1">'FSSS'</span><span class="p">)</span>
+        <span class="n">conn</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">p1</span><span class="o">=</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="o">=</span><span class="n">p2</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="s1">'SSxcte'</span><span class="p">,</span> <span class="n">xcte1</span><span class="o">=</span><span class="n">p1</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">xcte2</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                     <span class="o">**</span><span class="n">penalties</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="s1">'xcte'</span><span class="p">,</span> <span class="n">factor</span><span class="p">))]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">],</span> <span class="n">conn</span>
+    <span class="k">if</span> <span class="n">layout</span> <span class="o">==</span> <span class="s1">'y'</span><span class="p">:</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="n">plate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">ys</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="s1">'SSSF'</span><span class="p">)</span>
+        <span class="n">p2</span> <span class="o">=</span> <span class="n">plate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ys</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">ys</span><span class="p">)</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="s1">'SFSS'</span><span class="p">)</span>
+        <span class="n">conn</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">p1</span><span class="o">=</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="o">=</span><span class="n">p2</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="s1">'SSycte'</span><span class="p">,</span> <span class="n">ycte1</span><span class="o">=</span><span class="n">p1</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">ycte2</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                     <span class="o">**</span><span class="n">penalties</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="s1">'ycte'</span><span class="p">,</span> <span class="n">factor</span><span class="p">))]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">],</span> <span class="n">conn</span>
+    <span class="k">assert</span> <span class="n">layout</span> <span class="o">==</span> <span class="s1">'2x2'</span>
+    <span class="n">p00</span> <span class="o">=</span> <span class="n">plate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">xs</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="n">ys</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="s1">'SSFF'</span><span class="p">)</span>
+    <span class="n">p10</span> <span class="o">=</span> <span class="n">plate</span><span class="p">(</span><span class="n">xs</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">xs</span><span class="p">)</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="n">ys</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="s1">'FSSF'</span><span class="p">)</span>
+    <span class="n">p01</span> <span class="o">=</span> <span class="n">plate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ys</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="n">xs</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">ys</span><span class="p">)</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="s1">'SFFS'</span><span class="p">)</span>
+    <span class="n">p11</span> <span class="o">=</span> <span class="n">plate</span><span class="p">(</span><span class="n">xs</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="n">ys</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">xs</span><span class="p">)</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">ys</span><span class="p">)</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="s1">'FFSS'</span><span class="p">)</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">pA</span><span class="p">,</span> <span class="n">pB</span> <span class="ow">in</span> <span class="p">((</span><span class="n">p00</span><span class="p">,</span> <span class="n">p10</span><span class="p">),</span> <span class="p">(</span><span class="n">p01</span><span class="p">,</span> <span class="n">p11</span><span class="p">)):</span>
+        <span class="n">conn</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">p1</span><span class="o">=</span><span class="n">pA</span><span class="p">,</span> <span class="n">p2</span><span class="o">=</span><span class="n">pB</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="s1">'SSxcte'</span><span class="p">,</span> <span class="n">xcte1</span><span class="o">=</span><span class="n">pA</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">xcte2</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                         <span class="o">**</span><span class="n">penalties</span><span class="p">(</span><span class="n">pA</span><span class="p">,</span> <span class="n">pB</span><span class="p">,</span> <span class="s1">'xcte'</span><span class="p">,</span> <span class="n">factor</span><span class="p">)))</span>
+    <span class="k">for</span> <span class="n">pA</span><span class="p">,</span> <span class="n">pB</span> <span class="ow">in</span> <span class="p">((</span><span class="n">p00</span><span class="p">,</span> <span class="n">p01</span><span class="p">),</span> <span class="p">(</span><span class="n">p10</span><span class="p">,</span> <span class="n">p11</span><span class="p">)):</span>
+        <span class="n">conn</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">p1</span><span class="o">=</span><span class="n">pA</span><span class="p">,</span> <span class="n">p2</span><span class="o">=</span><span class="n">pB</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="s1">'SSycte'</span><span class="p">,</span> <span class="n">ycte1</span><span class="o">=</span><span class="n">pA</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">ycte2</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                         <span class="o">**</span><span class="n">penalties</span><span class="p">(</span><span class="n">pA</span><span class="p">,</span> <span class="n">pB</span><span class="p">,</span> <span class="s1">'ycte'</span><span class="p">,</span> <span class="n">factor</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">p00</span><span class="p">,</span> <span class="n">p10</span><span class="p">,</span> <span class="n">p01</span><span class="p">,</span> <span class="n">p11</span><span class="p">],</span> <span class="n">conn</span>
+</pre></div>
+</div>
+<p>The deflection of the plate under a sinusoidal pressure, solved with the
+null-space method, reduced and expanded back, agrees with the solution of
+Pagano (1970) given in the test:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s1">'model'</span><span class="p">,</span> <span class="p">[</span><span class="n">FSDT</span><span class="p">,</span> <span class="n">TSDT</span><span class="p">])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_bending_divided_plate_pagano</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Pagano (1970), deflection at the interior corner of four domains,</span>
+<span class="sd">    solved with the reduced system and expanded back"""</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="mf">1.</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">a</span><span class="o">/</span><span class="mi">10</span>
+    <span class="n">q0</span> <span class="o">=</span> <span class="mf">1.e3</span>
+    <span class="n">panels</span><span class="p">,</span> <span class="n">conn</span> <span class="o">=</span> <span class="n">domains</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                           <span class="n">orthotropic</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="n">G12</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">G13</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">G23</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span> <span class="s1">'2x2'</span><span class="p">,</span>
+                           <span class="n">xs</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">ys</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">md</span> <span class="o">=</span> <span class="n">MultiDomain</span><span class="p">(</span><span class="n">panels</span><span class="p">,</span> <span class="n">conn</span><span class="p">,</span> <span class="n">conn_method</span><span class="o">=</span><span class="s1">'null-space'</span><span class="p">)</span>
+    <span class="n">fext</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">sinusoidal_load</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">q0</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">md</span><span class="o">.</span><span class="n">get_size</span><span class="p">())</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">panels</span><span class="p">)</span>
+    <span class="n">c_r</span> <span class="o">=</span> <span class="n">solve</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">calc_kC</span><span class="p">()),</span> <span class="n">md</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">fext</span><span class="p">),</span> <span class="n">silent</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">c_r</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">c</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">get_size</span><span class="p">(),)</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">panels</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">uvw</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eval_panel</span><span class="o">=</span><span class="n">p</span><span class="p">,</span> <span class="n">gridx</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">gridy</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s1">'w'</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="nb">int</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">y0</span> <span class="o">==</span> <span class="mi">0</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">x0</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)]</span>
+        <span class="n">wbar</span> <span class="o">=</span> <span class="mi">100</span><span class="o">*</span><span class="n">w</span><span class="o">*</span><span class="n">E2</span><span class="o">*</span><span class="n">h</span><span class="o">**</span><span class="mi">3</span><span class="o">/</span><span class="p">(</span><span class="n">q0</span><span class="o">*</span><span class="n">a</span><span class="o">**</span><span class="mi">4</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">wbar</span><span class="p">,</span> <span class="n">PAGANO</span><span class="p">[</span><span class="n">model</span><span class="p">],</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">2e-4</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Two plates in series under tension, connected with the penalty method, and
+the section force computed by <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.force()</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span><span class="p">(</span><span class="n">scope</span><span class="o">=</span><span class="s1">'module'</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">tension</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">"""Two plates in series under uniform tension ``N``</span>
+
+<span class="sd">    ::</span>
+
+<span class="sd">        u = 0  ________________________</span>
+<span class="sd">         |    |          |            |</span>
+<span class="sd">         |    |    p1    |     p2     | --&gt; N</span>
+<span class="sd">         |    |__________|____________|</span>
+
+<span class="sd">    The stress state is exactly uniform, so the post-processing of every</span>
+<span class="sd">    panel must give ``Nxx = N``, ``exx = N/(E t)`` and ``eyy = -nu exx``.</span>
+
+<span class="sd">    """</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plate</span><span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">a</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">Shell</span><span class="p">(</span><span class="n">group</span><span class="o">=</span><span class="s1">'g'</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="n">B</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+                  <span class="n">stack</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">plyt</span><span class="o">=</span><span class="n">t</span><span class="p">,</span> <span class="n">laminaprop</span><span class="o">=</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">nu</span><span class="p">),</span>
+                  <span class="n">model</span><span class="o">=</span><span class="s1">'plate_clpt_donnell'</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'x1'</span><span class="p">,</span> <span class="s1">'x2'</span><span class="p">,</span> <span class="s1">'y1'</span><span class="p">,</span> <span class="s1">'y2'</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">dof</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'u'</span><span class="p">,</span> <span class="s1">'v'</span><span class="p">,</span> <span class="s1">'w'</span><span class="p">):</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">edge</span> <span class="o">+</span> <span class="n">dof</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">edge</span> <span class="o">+</span> <span class="n">dof</span> <span class="o">+</span> <span class="s1">'r'</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">p</span>
+
+    <span class="n">p1</span> <span class="o">=</span> <span class="n">plate</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">)</span>
+    <span class="n">p2</span> <span class="o">=</span> <span class="n">plate</span><span class="p">(</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">)</span>
+    <span class="n">p1</span><span class="o">.</span><span class="n">x1u</span> <span class="o">=</span> <span class="n">p1</span><span class="o">.</span><span class="n">x1w</span> <span class="o">=</span> <span class="n">p1</span><span class="o">.</span><span class="n">x1wr</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="n">p2</span><span class="o">.</span><span class="n">x2w</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="c1"># removing the rigid body motion along y</span>
+    <span class="n">p1</span><span class="o">.</span><span class="n">add_point_pd</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1e9</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+    <span class="n">p2</span><span class="o">.</span><span class="n">add_distr_load_fixed_x</span><span class="p">(</span><span class="n">p2</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">funcx</span><span class="o">=</span><span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="n">N</span><span class="p">)</span>
+
+    <span class="n">kt</span><span class="p">,</span> <span class="n">kr</span> <span class="o">=</span> <span class="n">calc_kt_kr</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="s1">'xcte'</span><span class="p">)</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">p1</span><span class="o">=</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="o">=</span><span class="n">p2</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="s1">'SSxcte'</span><span class="p">,</span> <span class="n">xcte1</span><span class="o">=</span><span class="n">p1</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">xcte2</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
+                 <span class="n">kt</span><span class="o">=</span><span class="n">kt</span><span class="p">,</span> <span class="n">kr</span><span class="o">=</span><span class="n">kr</span><span class="p">)]</span>
+    <span class="n">md</span> <span class="o">=</span> <span class="n">MultiDomain</span><span class="p">([</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">],</span> <span class="n">conn</span><span class="p">,</span> <span class="n">conn_method</span><span class="o">=</span><span class="s1">'penalty'</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">solve</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">calc_kC</span><span class="p">(),</span> <span class="n">md</span><span class="o">.</span><span class="n">calc_fext</span><span class="p">(),</span> <span class="n">silent</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">md</span><span class="p">,</span> <span class="n">c</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s1">'panel'</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_force_equals_applied_load</span><span class="p">(</span><span class="n">tension</span><span class="p">,</span> <span class="n">panel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The section force along x = cte is the applied load N*b"""</span>
+    <span class="n">md</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">tension</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">panels</span><span class="p">[</span><span class="n">panel</span><span class="p">]</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">force</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="s1">'g'</span><span class="p">,</span> <span class="n">eval_panel</span><span class="o">=</span><span class="n">p</span><span class="p">,</span> <span class="n">x_cte_force</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">a</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">nr_y_gauss</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                   <span class="n">gridx</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">'Fxx'</span><span class="p">],</span> <span class="n">N</span><span class="o">*</span><span class="n">B</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">'Fxy'</span><span class="p">],</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-8</span><span class="o">*</span><span class="n">N</span><span class="o">*</span><span class="n">B</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">'Fyy'</span><span class="p">],</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-8</span><span class="o">*</span><span class="n">N</span><span class="o">*</span><span class="n">B</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="loads.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Loads</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="stiffened_panels.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Stiffened panels</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#assembly">Assembly</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#connections">Connections</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#imposing-the-connections">Imposing the connections</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ready-made-assemblies">Ready-made assemblies</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example">Example</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="_sources/multidomain_overview.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2012-2026, Saullo G. P. Castro, Nathan D&#39;Souza.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.2.0.
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.23.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

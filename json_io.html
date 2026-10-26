@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Saving and loading in a JSON + NumPy zip container (panels.json_io) &#8212; panels 0.13.11 documentation</title>
+    <title>Saving and loading in a JSON + NumPy zip container (panels.json_io) &#8212; panels 0.14.0 documentation</title>
   
   
   
@@ -37,19 +37,19 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
 
-    <script src="_static/documentation_options.js?v=63942e21"></script>
+    <script src="_static/documentation_options.js?v=9e420a66"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'json_io';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Bardell’s Hierarchical Functions" href="bardell.html" />
+    <link rel="next" title="Development tools (panels.dev)" href="dev.html" />
     <link rel="prev" title="Stiffened panel bays (panels.stiffpanelbay)" href="stiffpanelbay.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.13.11" />
+  <meta name="docsearch:version" content="0.14.0" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -117,7 +117,7 @@
   
   
   
-    <p class="title logo__title">panels 0.13.11 documentation</p>
+    <p class="title logo__title">panels 0.14.0 documentation</p>
   
 </a></div>
     
@@ -132,36 +132,36 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_linear_static.html">
-    Linear static analysis
+  <a class="nav-link nav-internal" href="shell_overview.html">
+    Plates and cylindrical shells
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_linear_buckling.html">
-    Linear buckling analysis
+  <a class="nav-link nav-internal" href="bardell.html">
+    Bardell’s hierarchical functions
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_frequency.html">
-    Frequency analysis
+  <a class="nav-link nav-internal" href="boundary_conditions.html">
+    Boundary conditions
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_flutter.html">
-    Panel flutter analysis
+  <a class="nav-link nav-internal" href="loads.html">
+    Loads
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_newton_raphson.html">
-    Non-linear static analysis with the Newton-Raphson method
+  <a class="nav-link nav-internal" href="multidomain_overview.html">
+    Multi-domain assemblies
   </a>
 </li>
 
@@ -174,50 +174,22 @@
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_arc_length.html">
-    Non-linear static analysis with the arc-length methods
+  <a class="nav-link dropdown-item nav-internal" href="stiffened_panels.html">
+    Stiffened panels
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_follower_pressure.html">
-    Follower (hydrostatic) pressure
+  <a class="nav-link dropdown-item nav-internal" href="aeroelasticity.html">
+    Panel flutter with the piston theory
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_cylinder.html">
-    Cylinders modeled as multi-domain assemblies
-  </a>
-</li>
-
-
-<li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_tstiff2d.html">
-    Panels with a T-stiffener modeled as multi-domain assemblies
-  </a>
-</li>
-
-
-<li class=" current active">
-  <a class="nav-link dropdown-item nav-internal" href="api.html">
-    API reference
-  </a>
-</li>
-
-
-<li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="bardell.html">
-    Bardell’s Hierarchical Functions
-  </a>
-</li>
-
-
-<li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="multidomain_null_space.html">
-    Exact connections with the null-space method
+  <a class="nav-link dropdown-item nav-internal" href="postprocessing.html">
+    Field outputs, plots and files
   </a>
 </li>
 
@@ -225,6 +197,20 @@
 <li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="follower_pressure.html">
     Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tsdt_offset.html">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="multidomain_null_space.html">
+    Exact connections with the null-space method
   </a>
 </li>
 
@@ -246,6 +232,104 @@
 <li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="cohesive_zone.html">
     Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_face_clamp.html">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class=" current active">
+  <a class="nav-link dropdown-item nav-internal" href="api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="changelog.html">
+    Changelog
   </a>
 </li>
 
@@ -340,6 +424,104 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="shell_overview.html">
+    Plates and cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="bardell.html">
+    Bardell’s hierarchical functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="boundary_conditions.html">
+    Boundary conditions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="loads.html">
+    Loads
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="multidomain_overview.html">
+    Multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="stiffened_panels.html">
+    Stiffened panels
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="aeroelasticity.html">
+    Panel flutter with the piston theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="postprocessing.html">
+    Field outputs, plots and files
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tsdt_offset.html">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tangent_product.html">
+    Tangent stiffness matrix and its product by a vector
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tabulation.html">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="ex_linear_static.html">
     Linear static analysis
   </a>
@@ -389,6 +571,20 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_face_clamp.html">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="ex_multidomain_cylinder.html">
     Cylinders modeled as multi-domain assemblies
   </a>
@@ -402,6 +598,13 @@
 </li>
 
 
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
 <li class="nav-item current active">
   <a class="nav-link nav-internal" href="api.html">
     API reference
@@ -410,43 +613,8 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="bardell.html">
-    Bardell’s Hierarchical Functions
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="multidomain_null_space.html">
-    Exact connections with the null-space method
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="follower_pressure.html">
-    Follower pressure loads: theory
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="tangent_product.html">
-    Tangent stiffness matrix and its product by a vector
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="tabulation.html">
-    Approximation functions tabulated at the integration points
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="cohesive_zone.html">
-    Cohesive zone model of the multi-domain approach
+  <a class="nav-link nav-internal" href="changelog.html">
+    Changelog
   </a>
 </li>
 
@@ -504,6 +672,8 @@
 <li class="toctree-l1"><a class="reference internal" href="shell_fext.html">External force vector (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.shell_fext</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plot_shell.html">Contour plots (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.plot_shell</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="models.html">Model database (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.modelDB</span></code>)</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="bardell_api.html">Bardell’s functions (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.bardell</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multidomain.html">Multi-domain assemblies (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain</span></code>)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multidomain_cylinder.html">Cylinders modeled as multi-domain assemblies</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multidomain_tstiff2d.html">Panels with a T-stiffener modeled as 2D domains</a></li>
@@ -512,6 +682,7 @@
 <li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">Saving and loading in a JSON + NumPy zip container (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.json_io</span></code>)</a></li>
 
 
+<li class="toctree-l1"><a class="reference internal" href="dev.html">Development tools (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.dev</span></code>)</a></li>
 </ul>
 </div>
 </nav></div>
@@ -605,7 +776,7 @@ thicknesses, the lamina properties and the loads, in the envelope:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
   <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"Shell"</span><span class="p">,</span>
   <span class="s2">"format_version"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-  <span class="s2">"panels_version"</span><span class="p">:</span> <span class="s2">"0.13.11"</span><span class="p">,</span>
+  <span class="s2">"panels_version"</span><span class="p">:</span> <span class="s2">"0.14.0"</span><span class="p">,</span>
   <span class="s2">"data"</span><span class="p">:</span> <span class="p">{</span><span class="o">...</span><span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
@@ -627,7 +798,7 @@ value is not supported raises <code class="docutils literal notranslate"><span c
 distributed loads <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_distr_load_fixed_x()</span></code> or of a pressure
 <code class="docutils literal notranslate"><span class="pre">p(x,</span> <span class="pre">y)</span></code>. The following are not stored and are recomputed on demand: the
 structural matrices (<code class="docutils literal notranslate"><span class="pre">Shell.matrices</span></code>, <code class="docutils literal notranslate"><span class="pre">StiffPanelBay.kC</span></code>,
-<code class="docutils literal notranslate"><span class="pre">MultiDomain.kC</span></code>, <code class="docutils literal notranslate"><span class="pre">MultiDomain.T</span></code>, …), the number of threads
+<code class="docutils literal notranslate"><span class="pre">MultiDomain.kC</span></code>, <code class="docutils literal notranslate"><span class="pre">MultiDomain.Z</span></code>, …), the number of threads
 <code class="docutils literal notranslate"><span class="pre">out_num_cores</span></code>, which takes the default of the machine that loads the
 file, and the attributes of Python subclasses, the loaded object having the
 type of the base class.</p>
@@ -645,6 +816,11 @@ converted by loading it with <code class="xref py py-func docutils literal notra
 <dt class="sig sig-object py" id="panels.json_io.save">
 <span class="sig-prename descclassname"><span class="pre">panels.json_io.</span></span><span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.json_io.save" title="Link to this definition">#</a></dt>
 <dd><p>Save an object to a zip file</p>
+<p>The object is encoded completely before the file is opened, such that
+an error does not leave a partial file. The zip file, compressed with
+<code class="docutils literal notranslate"><span class="pre">ZIP_DEFLATED</span></code>, contains <code class="docutils literal notranslate"><span class="pre">model.json</span></code> and one <code class="docutils literal notranslate"><span class="pre">arrays/&lt;key&gt;.npy</span></code>
+member per array, see the module docstring. An existing file is
+overwritten.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
@@ -669,6 +845,12 @@ stored attributes has a value that cannot be saved, e.g. a function.</p>
 <dt class="sig sig-object py" id="panels.json_io.load">
 <span class="sig-prename descclassname"><span class="pre">panels.json_io.</span></span><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4294967296</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panels.json_io.load" title="Link to this definition">#</a></dt>
 <dd><p>Load an object from a zip file created by <a class="reference internal" href="#panels.json_io.save" title="panels.json_io.save"><code class="xref py py-func docutils literal notranslate"><span class="pre">save()</span></code></a></p>
+<p>The type of the object, <code class="xref py py-class docutils literal notranslate"><span class="pre">Shell</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">StiffPanelBay</span></code> or
+<code class="xref py py-class docutils literal notranslate"><span class="pre">MultiDomain</span></code>, is the one stored in <code class="docutils literal notranslate"><span class="pre">model.json</span></code>. Unlike the
+functions <code class="docutils literal notranslate"><span class="pre">load</span></code> of <code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.shell</span></code>, <code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.stiffpanelbay</span></code>
+and <code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain</span></code>, a file name is used as given, without
+adding an extension. The members are read in memory, the file is not
+extracted.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -720,11 +902,11 @@ version.</p>
       </div>
     </a>
     <a class="right-next"
-       href="bardell.html"
+       href="dev.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Bardell’s Hierarchical Functions</p>
+        <p class="prev-next-title">Development tools (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.dev</span></code>)</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -797,7 +979,7 @@ version.</p>
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.2.0.
   </p>
 </div>
       

@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Approximation functions tabulated at the integration points &#8212; panels 0.13.11 documentation</title>
+    <title>Approximation functions tabulated at the integration points &#8212; panels 0.14.0 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
 
-    <script src="_static/documentation_options.js?v=63942e21"></script>
+    <script src="_static/documentation_options.js?v=9e420a66"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
@@ -50,7 +50,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.13.11" />
+  <meta name="docsearch:version" content="0.14.0" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -118,7 +118,7 @@
   
   
   
-    <p class="title logo__title">panels 0.13.11 documentation</p>
+    <p class="title logo__title">panels 0.14.0 documentation</p>
   
 </a></div>
     
@@ -133,36 +133,36 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_linear_static.html">
-    Linear static analysis
+  <a class="nav-link nav-internal" href="shell_overview.html">
+    Plates and cylindrical shells
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_linear_buckling.html">
-    Linear buckling analysis
+  <a class="nav-link nav-internal" href="bardell.html">
+    Bardell’s hierarchical functions
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_frequency.html">
-    Frequency analysis
+  <a class="nav-link nav-internal" href="boundary_conditions.html">
+    Boundary conditions
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_flutter.html">
-    Panel flutter analysis
+  <a class="nav-link nav-internal" href="loads.html">
+    Loads
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_newton_raphson.html">
-    Non-linear static analysis with the Newton-Raphson method
+  <a class="nav-link nav-internal" href="multidomain_overview.html">
+    Multi-domain assemblies
   </a>
 </li>
 
@@ -175,50 +175,22 @@
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_arc_length.html">
-    Non-linear static analysis with the arc-length methods
+  <a class="nav-link dropdown-item nav-internal" href="stiffened_panels.html">
+    Stiffened panels
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_follower_pressure.html">
-    Follower (hydrostatic) pressure
+  <a class="nav-link dropdown-item nav-internal" href="aeroelasticity.html">
+    Panel flutter with the piston theory
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_cylinder.html">
-    Cylinders modeled as multi-domain assemblies
-  </a>
-</li>
-
-
-<li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_tstiff2d.html">
-    Panels with a T-stiffener modeled as multi-domain assemblies
-  </a>
-</li>
-
-
-<li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="api.html">
-    API reference
-  </a>
-</li>
-
-
-<li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="bardell.html">
-    Bardell’s Hierarchical Functions
-  </a>
-</li>
-
-
-<li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="multidomain_null_space.html">
-    Exact connections with the null-space method
+  <a class="nav-link dropdown-item nav-internal" href="postprocessing.html">
+    Field outputs, plots and files
   </a>
 </li>
 
@@ -226,6 +198,20 @@
 <li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="follower_pressure.html">
     Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tsdt_offset.html">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="multidomain_null_space.html">
+    Exact connections with the null-space method
   </a>
 </li>
 
@@ -247,6 +233,104 @@
 <li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="cohesive_zone.html">
     Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_face_clamp.html">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="changelog.html">
+    Changelog
   </a>
 </li>
 
@@ -341,6 +425,104 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="shell_overview.html">
+    Plates and cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="bardell.html">
+    Bardell’s hierarchical functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="boundary_conditions.html">
+    Boundary conditions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="loads.html">
+    Loads
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="multidomain_overview.html">
+    Multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="stiffened_panels.html">
+    Stiffened panels
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="aeroelasticity.html">
+    Panel flutter with the piston theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="postprocessing.html">
+    Field outputs, plots and files
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tsdt_offset.html">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tangent_product.html">
+    Tangent stiffness matrix and its product by a vector
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#" aria-current="page">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="ex_linear_static.html">
     Linear static analysis
   </a>
@@ -390,6 +572,20 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_face_clamp.html">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="ex_multidomain_cylinder.html">
     Cylinders modeled as multi-domain assemblies
   </a>
@@ -404,6 +600,13 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="api.html">
     API reference
   </a>
@@ -411,43 +614,8 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="bardell.html">
-    Bardell’s Hierarchical Functions
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="multidomain_null_space.html">
-    Exact connections with the null-space method
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="follower_pressure.html">
-    Follower pressure loads: theory
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="tangent_product.html">
-    Tangent stiffness matrix and its product by a vector
-  </a>
-</li>
-
-
-<li class="nav-item current active">
-  <a class="nav-link nav-internal" href="#" aria-current="page">
-    Approximation functions tabulated at the integration points
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="cohesive_zone.html">
-    Cohesive zone model of the multi-domain approach
+  <a class="nav-link nav-internal" href="changelog.html">
+    Changelog
   </a>
 </li>
 
@@ -568,17 +736,17 @@ bit, and the assembly is several times faster.</p>
 <section id="integrands">
 <h2>Integrands<a class="headerlink" href="#integrands" title="Link to this heading">#</a></h2>
 <p>Each field of a panel is approximated with the products of the hierarchical
-functions of Bardell, see <a class="reference internal" href="bardell.html#theory-func-bardell"><span class="std std-ref">Bardell’s Hierarchical Functions</span></a>, along <span class="math notranslate nohighlight">\(\xi\)</span> and <span class="math notranslate nohighlight">\(\eta\)</span>:</p>
+functions of Bardell, see <a class="reference internal" href="bardell.html#theory-func-bardell"><span class="std std-ref">Bardell’s hierarchical functions</span></a>, along <span class="math notranslate nohighlight">\(\xi\)</span> and <span class="math notranslate nohighlight">\(\eta\)</span>:</p>
 <div class="math notranslate nohighlight">
-\[u(\xi, \eta) = \sum_{j=0}^{n-1} \sum_{i=0}^{m-1} c_{u, ij}\, f_i(\xi)\,
-g_j(\eta)\]</div>
-<p>where <span class="math notranslate nohighlight">\(f_i\)</span> and <span class="math notranslate nohighlight">\(g_j\)</span> depend on the boundary conditions of the field, i.e.
+\[u(\xi, \eta) = \sum_{j=0}^{n-1} \sum_{i=0}^{m-1} c_{u, ij}\, P_i(\xi)\,
+P_j(\eta)\]</div>
+<p>where <span class="math notranslate nohighlight">\(P_i\)</span> and <span class="math notranslate nohighlight">\(P_j\)</span> depend on the boundary conditions of the field, i.e.
 the flags <code class="docutils literal notranslate"><span class="pre">x1u,</span> <span class="pre">x1ur,</span> <span class="pre">x2u,</span> <span class="pre">x2ur</span></code> along <span class="math notranslate nohighlight">\(x\)</span> and <code class="docutils literal notranslate"><span class="pre">y1u,</span> <span class="pre">y1ur,</span> <span class="pre">y2u,</span> <span class="pre">y2ur</span></code>
 along <span class="math notranslate nohighlight">\(y\)</span>. The entry of a stiffness matrix between the terms <span class="math notranslate nohighlight">\((i, j)\)</span> and
 <span class="math notranslate nohighlight">\((k, l)\)</span> is the sum over the <span class="math notranslate nohighlight">\(n_x \times n_y\)</span> Gauss-Legendre points</p>
 <div class="math notranslate nohighlight">
 \[K_{(ij)(kl)} = \sum_{p=1}^{n_x} \sum_{q=1}^{n_y} w_p w_q\,
-\mathcal{F}\left(f_i(\xi_p), f_k(\xi_p), g_j(\eta_q), g_l(\eta_q),
+\mathcal{F}\left(P_i(\xi_p), P_k(\xi_p), P_j(\eta_q), P_l(\eta_q),
 \ldots\right)\]</div>
 <p>where <span class="math notranslate nohighlight">\(\mathcal{F}\)</span> combines the functions and their derivatives <span class="math notranslate nohighlight">\(f'\)</span>,
 <span class="math notranslate nohighlight">\(f''\)</span>, <span class="math notranslate nohighlight">\(g'\)</span>, <span class="math notranslate nohighlight">\(g''\)</span> of each field with the constitutive matrix and, for the
@@ -606,7 +774,7 @@ non-linear matrices, with the displacement gradients at the point.</p>
                         <span class="n">kCv</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">+=</span> <span class="n">weight</span><span class="o">*</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>    <span class="c1"># the entries of (ij)(kl)</span>
 </pre></div>
 </div>
-<p>The value of <span class="math notranslate nohighlight">\(g_l(\eta_q)\)</span> does not depend on <span class="math notranslate nohighlight">\(i\)</span>, <span class="math notranslate nohighlight">\(k\)</span> or <span class="math notranslate nohighlight">\(j\)</span>, but it was
+<p>The value of <span class="math notranslate nohighlight">\(P_l(\eta_q)\)</span> does not depend on <span class="math notranslate nohighlight">\(i\)</span>, <span class="math notranslate nohighlight">\(k\)</span> or <span class="math notranslate nohighlight">\(j\)</span>, but it was
 computed again for each of them: per integration point, <span class="math notranslate nohighlight">\(7 m^2 n^2\)</span>
 evaluations in the innermost loop, <span class="math notranslate nohighlight">\(7 m^2 n\)</span> in the loop over <span class="math notranslate nohighlight">\(j\)</span>, and so
 on, for only <span class="math notranslate nohighlight">\(7 (m + n)\)</span> distinct values. Each evaluation is a polynomial
@@ -680,18 +848,18 @@ double cantilever beam, see <a class="reference internal" href="cohesive_zone.ht
 <li><p>the blade stiffeners, <code class="docutils literal notranslate"><span class="pre">panels/stiffener/models</span></code>.</p></li>
 </ul>
 <p>The analytical kernels, which use closed-form integrals of the products of
-the functions, e.g. <code class="docutils literal notranslate"><span class="pre">fk0</span></code> or <code class="docutils literal notranslate"><span class="pre">kCSB</span></code>, are not affected. The kernel
+the functions, e.g. <code class="docutils literal notranslate"><span class="pre">fk0</span></code> or <code class="xref py py-func docutils literal notranslate"><span class="pre">fkCSB()</span></code> of the skin-base connection,
+are not affected. The kernel
 <code class="docutils literal notranslate"><span class="pre">calc_kTv</span></code> of the product of the tangent stiffness matrix by a vector,
 see <a class="reference internal" href="tangent_product.html#tangent-product"><span class="std std-ref">Tangent stiffness matrix and its product by a vector</span></a>, is written with the tables from the start.</p>
 </section>
 <section id="implementation">
 <h2>Implementation<a class="headerlink" href="#implementation" title="Link to this heading">#</a></h2>
-<p>The rewriting is done by <code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.dev.tabulate</span></code>, applied by the
-generators of the modules, <code class="docutils literal notranslate"><span class="pre">theory/shells/fsdt_tsdt/write_pyx.py</span></code>,
-<code class="docutils literal notranslate"><span class="pre">theory/shells/cylshell_clpt_sanders/write_pyx.py</span></code> and
-<code class="docutils literal notranslate"><span class="pre">theory/shells/follower_pressure/write_pyx.py</span></code>, and with <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span>
-<span class="pre">panels.dev.tabulate</span> <span class="pre">&lt;file.pyx&gt;</span> <span class="pre">...</span></code> to the modules written by hand. For
-each kernel it</p>
+<p>The rewriting is done by <a class="reference internal" href="dev.html#module-panels.dev.tabulate" title="panels.dev.tabulate"><code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.dev.tabulate</span></code></a>, applied by the SymPy
+generators of the modules of the shear deformation theories, of the
+cylinders with the Sanders kinematics and of the follower pressure loads,
+and with <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">panels.dev.tabulate</span> <span class="pre">&lt;file.pyx&gt;</span> <span class="pre">...</span></code> to the modules
+written by hand. For each kernel it</p>
 <ol class="arabic simple">
 <li><p>finds the calls <code class="docutils literal notranslate"><span class="pre">NAME</span> <span class="pre">=</span> <span class="pre">f(IDX,</span> <span class="pre">COORD,</span> <span class="pre">x1F,</span> <span class="pre">x1Fr,</span> <span class="pre">x2F,</span> <span class="pre">x2Fr)</span></code>, with
 <code class="docutils literal notranslate"><span class="pre">f</span></code>, <code class="docutils literal notranslate"><span class="pre">fp</span></code> or <code class="docutils literal notranslate"><span class="pre">fpp</span></code>, the flags of the field <code class="docutils literal notranslate"><span class="pre">F</span></code> along <span class="math notranslate nohighlight">\(x\)</span> (or
@@ -728,9 +896,12 @@ pass.</p></li>
 </section>
 <section id="performance">
 <h2>Performance<a class="headerlink" href="#performance" title="Link to this heading">#</a></h2>
-<p>Single shell, laminate <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">45,</span> <span class="pre">-45,</span> <span class="pre">90]</span></code>, <code class="docutils literal notranslate"><span class="pre">nx</span> <span class="pre">=</span> <span class="pre">2m</span></code>, <code class="docutils literal notranslate"><span class="pre">ny</span> <span class="pre">=</span> <span class="pre">2n</span></code>
-integration points, a follower pressure, one core, times in seconds before
-and after the tabulation, with the speed-up:</p>
+<p>Single shell, laminate <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">45,</span> <span class="pre">-45,</span> <span class="pre">90]</span></code>, a follower pressure, one core,
+times in seconds before and after the tabulation, with the speed-up. The
+times were measured with <code class="docutils literal notranslate"><span class="pre">nx</span> <span class="pre">=</span> <span class="pre">2m</span></code>, <code class="docutils literal notranslate"><span class="pre">ny</span> <span class="pre">=</span> <span class="pre">2n</span></code> integration points, the
+default before <code class="docutils literal notranslate"><span class="pre">panels</span></code> 0.14.0, one point more in each direction than the
+current default <code class="xref py py-func docutils literal notranslate"><span class="pre">panels.shell.gauss_points()</span></code>, <span class="math notranslate nohighlight">\(\max(2m - 1, 7)\)</span>, for
+these <span class="math notranslate nohighlight">\(m = n \ge 8\)</span>:</p>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
 <tr class="row-odd"><th class="head"><p>model, <span class="math notranslate nohighlight">\(m = n\)</span></p></th>
@@ -811,7 +982,8 @@ connection with damage integrated with <span class="math notranslate nohighlight
 <p>The double cantilever beam with cohesive zone of
 <code class="docutils literal notranslate"><span class="pre">tests/multidomain/test_dcb_damage.py</span></code> runs in 2 min 45 s instead of
 7 min 28 s, its non-linear matrices of the panels and its connections
-being tabulated; its cohesive zone is assembled with cached operators by
+being tabulated, also measured with the default <code class="docutils literal notranslate"><span class="pre">nx</span> <span class="pre">=</span> <span class="pre">2m</span></code>, <code class="docutils literal notranslate"><span class="pre">ny</span> <span class="pre">=</span> <span class="pre">2n</span></code> of
+the panels before <code class="docutils literal notranslate"><span class="pre">panels</span></code> 0.14.0; its cohesive zone is assembled with cached operators by
 default, or with <code class="docutils literal notranslate"><span class="pre">kCSB_dmg</span></code> with <code class="docutils literal notranslate"><span class="pre">use_kernels=True</span></code>.</p>
 </section>
 </section>
@@ -916,7 +1088,7 @@ default, or with <code class="docutils literal notranslate"><span class="pre">kC
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.2.0.
   </p>
 </div>
       

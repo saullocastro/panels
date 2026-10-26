@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Third-order shear deformation theory with a laminate offset &#8212; panels 0.14.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="_static/scripts/fontawesome.js?digest=18bd87630a240e9c25be"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
+
+    <script src="_static/documentation_options.js?v=9e420a66"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'tsdt_offset';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Exact connections with the null-space method" href="multidomain_null_space.html" />
+    <link rel="prev" title="Follower pressure loads: theory" href="follower_pressure.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.14.0" />
+  
+    
+    <script src="_static/searchtools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">panels 0.14.0 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="shell_overview.html">
+    Plates and cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="bardell.html">
+    Bardell’s hierarchical functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="boundary_conditions.html">
+    Boundary conditions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="loads.html">
+    Loads
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="multidomain_overview.html">
+    Multi-domain assemblies
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="stiffened_panels.html">
+    Stiffened panels
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="aeroelasticity.html">
+    Panel flutter with the piston theory
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="postprocessing.html">
+    Field outputs, plots and files
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class=" current active">
+  <a class="nav-link dropdown-item nav-internal" href="#" aria-current="page">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tangent_product.html">
+    Tangent stiffness matrix and its product by a vector
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tabulation.html">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_face_clamp.html">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ref.html">
+    References
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="shell_overview.html">
+    Plates and cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="bardell.html">
+    Bardell’s hierarchical functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="boundary_conditions.html">
+    Boundary conditions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="loads.html">
+    Loads
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="multidomain_overview.html">
+    Multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="stiffened_panels.html">
+    Stiffened panels
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="aeroelasticity.html">
+    Panel flutter with the piston theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="postprocessing.html">
+    Field outputs, plots and files
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#" aria-current="page">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tangent_product.html">
+    Tangent stiffness matrix and its product by a vector
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tabulation.html">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_face_clamp.html">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ref.html">
+    References
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button type="button" id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Third-order shear deformation theory with a laminate offset</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="third-order-shear-deformation-theory-with-a-laminate-offset">
+<span id="tsdt-offset"></span><h1>Third-order shear deformation theory with a laminate offset<a class="headerlink" href="#third-order-shear-deformation-theory-with-a-laminate-offset" title="Link to this heading">#</a></h1>
+<p>This page documents the displacement field of the models based on Reddy’s
+third-order shear deformation theory (TSDT), <code class="docutils literal notranslate"><span class="pre">'plate_tsdt_donnell'</span></code>,
+<code class="docutils literal notranslate"><span class="pre">'cylshell_tsdt_donnell'</span></code> and <code class="docutils literal notranslate"><span class="pre">'cylshell_tsdt_sanders'</span></code>, when the
+laminate is offset from the reference surface, <code class="docutils literal notranslate"><span class="pre">Shell.offset</span></code>, and how
+panels with different offsets are connected, see <code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.models</span></code> and
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.connections.kCsdt</span></code>.</p>
+<p>The coordinate <span class="math notranslate nohighlight">\(z\)</span> is measured from the reference surface, <span class="math notranslate nohighlight">\(z = 0\)</span>, and the
+laminate of thickness <span class="math notranslate nohighlight">\(h\)</span> occupies <span class="math notranslate nohighlight">\(d - h/2 \le z \le d + h/2\)</span>, with the
+offset <span class="math notranslate nohighlight">\(d\)</span>, the convention of <code class="xref py py-func docutils literal notranslate"><span class="pre">composites.laminated_plate()</span></code>, whose
+stiffness matrices are the integrals through the thickness from <span class="math notranslate nohighlight">\(z = d -
+h/2\)</span>.</p>
+<section id="displacement-field">
+<span id="tsdt-offset-field"></span><h2>Displacement field<a class="headerlink" href="#displacement-field" title="Link to this heading">#</a></h2>
+<p>The in-plane displacements are sought as</p>
+<div class="math notranslate nohighlight" id="equation-tsdt-offset-ansatz">
+<span class="eqno">(1)<a class="headerlink" href="#equation-tsdt-offset-ansatz" title="Link to this equation">#</a></span>\[u(z) = u + z \phi_x + p(z) \left(\phi_x + w_{,x}\right) \qquad
+v(z) = v + z \Phi_y + p(z) \left(\phi_y + w_{,y}\right)\]</div>
+<p>with <span class="math notranslate nohighlight">\(p(z)\)</span> a cubic polynomial, <span class="math notranslate nohighlight">\(\Phi_y = \phi_y + v/r\)</span> with the
+Sanders-Koiter kinematics and <span class="math notranslate nohighlight">\(\Phi_y = \phi_y\)</span> otherwise. The conditions
+on <span class="math notranslate nohighlight">\(p(z)\)</span> are:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(p(0) = 0\)</span>, such that <span class="math notranslate nohighlight">\(u\)</span> and <span class="math notranslate nohighlight">\(v\)</span> are the displacements of the reference
+surface, as for the classical (CLPT) and the first-order (FSDT)
+theories;</p></li>
+<li><p><span class="math notranslate nohighlight">\(p'(d \pm h/2) = -1\)</span>, such that the transverse shear strain
+<span class="math notranslate nohighlight">\(\gamma_{xz} = u_{,z} + w_{,x} = (\phi_x + w_{,x}) (1 + p'(z))\)</span> vanishes
+at both faces.</p></li>
+</ul>
+<p>These three conditions leave one free parameter in the cubic <span class="math notranslate nohighlight">\(p(z)\)</span>. It
+does not change the family of displacement fields: <span class="math notranslate nohighlight">\(\gamma_{xz}\)</span> is a
+quadratic polynomial in <span class="math notranslate nohighlight">\(z\)</span> vanishing at both faces, therefore
+<span class="math notranslate nohighlight">\(\gamma_{xz} = \hat{\gamma}_{xz} (1 - 4 (z - d)^2/h^2)\)</span> for any choice, and
+the integration of <span class="math notranslate nohighlight">\(u_{,z} = \gamma_{xz} - w_{,x}\)</span> with <span class="math notranslate nohighlight">\(u(0) = u\)</span> gives</p>
+<div class="math notranslate nohighlight" id="equation-tsdt-offset-family">
+<span class="eqno">(2)<a class="headerlink" href="#equation-tsdt-offset-family" title="Link to this equation">#</a></span>\[u(z) = u - z w_{,x} + \hat{\gamma}_{xz} \left[ z - \frac{4}{3 h^2}
+\left( (z - d)^3 + d^3 \right) \right]\]</div>
+<p>which depends only on <span class="math notranslate nohighlight">\(u\)</span>, <span class="math notranslate nohighlight">\(w\)</span> and the amplitude <span class="math notranslate nohighlight">\(\hat{\gamma}_{xz}\)</span> of
+the transverse shear strain. The free parameter only selects which
+rotation of the normal is the unknown <span class="math notranslate nohighlight">\(\phi_x = u_{,z}(z_\phi) = -w_{,x} +
+\hat{\gamma}_{xz} (1 - 4 (z_\phi - d)^2/h^2)\)</span>, i.e. the coordinate
+<span class="math notranslate nohighlight">\(z_\phi\)</span> where it is measured:</p>
+<ul class="simple">
+<li><p>at the reference surface, <span class="math notranslate nohighlight">\(z_\phi = 0\)</span>: <span class="math notranslate nohighlight">\(\hat{\gamma}_{xz} = (\phi_x +
+w_{,x})/(1 - 4 d^2/h^2)\)</span>, singular for <span class="math notranslate nohighlight">\(d = \pm h/2\)</span>. When the reference
+surface is a face of the laminate, the transverse shear vanishes there
+and <span class="math notranslate nohighlight">\(u_{,z}(0) = -w_{,x}\)</span>, which cannot be an independent variable; the
+determinant of the relation, proportional to <span class="math notranslate nohighlight">\((2 d - h)(2 d + h)\)</span>,
+vanishes, and the formulation is ill-conditioned when the reference
+surface approaches a face, the common case of a skin and a stiffener
+connected at their common face;</p></li>
+<li><p>at the mid-surface, <span class="math notranslate nohighlight">\(z_\phi = d\)</span>: <span class="math notranslate nohighlight">\(\hat{\gamma}_{xz} = \phi_x +
+w_{,x}\)</span>, regular for any offset;</p></li>
+<li><p>the average through the thickness, <span class="math notranslate nohighlight">\(\bar\phi_x = \frac{1}{h}
+\int u_{,z} dz = -w_{,x} + \frac{2}{3} \hat{\gamma}_{xz}\)</span>, also regular,
+but not Reddy’s variable for <span class="math notranslate nohighlight">\(d = 0\)</span>.</p></li>
+</ul>
+<p>The rotations at the mid-surface are adopted, which gives</p>
+<div class="math notranslate nohighlight" id="equation-tsdt-offset-p">
+<span class="eqno">(3)<a class="headerlink" href="#equation-tsdt-offset-p" title="Link to this equation">#</a></span>\[p(z) = -c_1 \left[ (z - d)^3 + d^3 \right], \qquad c_1 = \frac{4}{3
+h^2}\]</div>
+<p>Reddy’s field for <span class="math notranslate nohighlight">\(d = 0\)</span>. The conditions are solved with SymPy.</p>
+</section>
+<section id="strains-stiffness-and-mass-matrices">
+<span id="tsdt-offset-matrices"></span><h2>Strains, stiffness and mass matrices<a class="headerlink" href="#strains-stiffness-and-mass-matrices" title="Link to this heading">#</a></h2>
+<p>With <span class="math notranslate nohighlight">\(\zeta = z - d\)</span> measured from the mid-surface, the in-plane strains
+and the transverse shear strains are</p>
+<div class="math notranslate nohighlight" id="equation-tsdt-offset-strains">
+<span class="eqno">(4)<a class="headerlink" href="#equation-tsdt-offset-strains" title="Link to this equation">#</a></span>\[\varepsilon = \left( \varepsilon^{(0)} + d \varepsilon^{(1)} + d^3
+\varepsilon^{(3)} \right) + \zeta \varepsilon^{(1)} + \zeta^3
+\varepsilon^{(3)} \qquad
+\gamma = \gamma^{(0)} + \zeta^2 \gamma^{(2)}\]</div>
+<p>with the generalized strains of the TSDT, see
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.models.fsdt_tsdt_field</span></code>. The strain energy is that of the
+laminate about its mid-surface, whose matrices <span class="math notranslate nohighlight">\(A, B, D, E, F, H\)</span> are the
+integrals of the stiffness of the plies multiplied by <span class="math notranslate nohighlight">\(1, \zeta, \zeta^2,
+\zeta^3, \zeta^4, \zeta^6\)</span>, computed by <code class="xref py py-mod docutils literal notranslate"><span class="pre">composites</span></code> with a zero
+offset, <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell._get_lam_mid()</span></code>, for the generalized strains <span class="math notranslate nohighlight">\(T e\)</span>,
+see <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell._get_lam_ABD()</span></code>. In <span class="math notranslate nohighlight">\(z\)</span> the products of the strains would
+require the integrals of <span class="math notranslate nohighlight">\(z^5\)</span>, which do not appear in <span class="math notranslate nohighlight">\(\zeta\)</span>. Likewise,
+the mass matrix uses the moments of the density about the mid-surface,
+<span class="math notranslate nohighlight">\(J_n = \int \rho \zeta^n d\zeta\)</span>, <span class="math notranslate nohighlight">\(n = 0, 1, 2, 3, 4, 6\)</span>, see
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_kM()</span></code>.</p>
+</section>
+<section id="connections-at-the-reference-surface">
+<span id="tsdt-offset-connections"></span><h2>Connections at the reference surface<a class="headerlink" href="#connections-at-the-reference-surface" title="Link to this heading">#</a></h2>
+<p>Panels with different offsets share the reference surface, where the
+connections of <code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.connections.kCsdt</span></code>,
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.connections.kCBFycte</span></code>,
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.multidomain.connections.kCBFxcte</span></code> and of the
+<a class="reference internal" href="multidomain_null_space.html#null-space"><span class="std std-ref">null-space method</span></a> tie <span class="math notranslate nohighlight">\(u, v, w\)</span> and the rotations of
+the normal at <span class="math notranslate nohighlight">\(z = 0\)</span>:</p>
+<div class="math notranslate nohighlight" id="equation-tsdt-offset-theta">
+<span class="eqno">(5)<a class="headerlink" href="#equation-tsdt-offset-theta" title="Link to this equation">#</a></span>\[\theta_x = u_{,z}\big|_{z=0} = \phi_x - \frac{4 d^2}{h^2} \left(\phi_x +
+w_{,x}\right) \qquad
+\theta_y = v_{,z}\big|_{z=0} = \Phi_y - \frac{4 d^2}{h^2} \left(\phi_y +
+w_{,y}\right)\]</div>
+<p>computed with the offset <span class="math notranslate nohighlight">\(d\)</span> and the thickness <span class="math notranslate nohighlight">\(h\)</span> of each panel, see
+<code class="xref py py-func docutils literal notranslate"><span class="pre">kCsdt._rotation_x()</span></code> and <code class="xref py py-func docutils literal notranslate"><span class="pre">kCsdt._rotation_y()</span></code>. For <span class="math notranslate nohighlight">\(d = \pm
+h/2\)</span> they become <span class="math notranslate nohighlight">\(\theta_x = -w_{,x}\)</span> and <span class="math notranslate nohighlight">\(\theta_y = \Phi_y - \phi_y -
+w_{,y}\)</span>. The rotations <span class="math notranslate nohighlight">\(\phi_x, \phi_y\)</span> belong to the mid-surfaces, at the
+coordinates <span class="math notranslate nohighlight">\(z = d\)</span> of each panel, and are not continuous across the
+connection of panels with different offsets. For the FSDT the rotation is
+constant through the thickness, <span class="math notranslate nohighlight">\(\theta = \phi\)</span>, and for the CLPT it is
+<span class="math notranslate nohighlight">\(-w_{,x}\)</span> and <span class="math notranslate nohighlight">\(-w_{,y}\)</span> for any offset: their connections are unchanged.</p>
+</section>
+<section id="prescribed-rotations">
+<span id="tsdt-offset-prescribed-rotations"></span><h2>Prescribed rotations<a class="headerlink" href="#prescribed-rotations" title="Link to this heading">#</a></h2>
+<p>The rotations <code class="docutils literal notranslate"><span class="pre">phix</span></code> and <code class="docutils literal notranslate"><span class="pre">phiy</span></code> prescribed with
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_point_pd()</span></code>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_distr_pd_fixed_x()</span></code> and
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_distr_pd_fixed_y()</span></code>, imposed with <code class="docutils literal notranslate"><span class="pre">pd_method='null-space'</span></code>,
+see <a class="reference internal" href="multidomain_null_space.html#null-space-pd"><span class="std std-ref">Prescribed displacements imposed exactly</span></a>, are the same rotations at the reference surface,
+<span class="math notranslate nohighlight">\(\theta_x\)</span> and <span class="math notranslate nohighlight">\(\theta_y\)</span> of Eq. <a class="reference internal" href="#equation-tsdt-offset-theta">(5)</a>, computed with the
+offset and the thickness of the panel, see
+<code class="xref py py-func docutils literal notranslate"><span class="pre">nullspace.pd_constraint_matrix()</span></code>. With an offset, the rotations at
+the mid-surface <span class="math notranslate nohighlight">\(\phi_x\)</span> and <span class="math notranslate nohighlight">\(\phi_y\)</span> differ from the prescribed values by
+the terms of the transverse shear strains, and for <span class="math notranslate nohighlight">\(d = \pm h/2\)</span> the
+prescribed rotations are <span class="math notranslate nohighlight">\(-w_{,x}\)</span> and <span class="math notranslate nohighlight">\(\Phi_y - \phi_y - w_{,y}\)</span>. For the
+FSDT, and for the TSDT with <span class="math notranslate nohighlight">\(d = 0\)</span>, the prescribed rotations are <span class="math notranslate nohighlight">\(\phi_x\)</span>
+and <span class="math notranslate nohighlight">\(\Phi_y\)</span>, as before. The penalty method,
+<code class="docutils literal notranslate"><span class="pre">pd_method='penalty'</span></code>, does not prescribe rotations.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s1">'model'</span><span class="p">,</span> <span class="p">[</span><span class="s1">'plate_tsdt_donnell'</span><span class="p">,</span>
+                                   <span class="s1">'cylshell_tsdt_sanders'</span><span class="p">])</span>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s1">'kind'</span><span class="p">,</span> <span class="p">[</span><span class="s1">'point'</span><span class="p">,</span> <span class="s1">'line'</span><span class="p">])</span>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s1">'comp'</span><span class="p">,</span> <span class="p">[</span><span class="n">PHIX</span><span class="p">,</span> <span class="n">PHIY</span><span class="p">])</span>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s1">'offset'</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.3</span><span class="o">*</span><span class="n">H</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4</span><span class="o">*</span><span class="n">H</span><span class="p">,</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">H</span><span class="p">])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_prescribed_rotation_with_offset</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">comp</span><span class="p">,</span> <span class="n">offset</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Pressure loaded panel with a prescribed rotation, at a point or</span>
+<span class="sd">    along an edge: the rotation at the reference surface evaluated from the</span>
+<span class="sd">    field is the prescribed value, not the rotation `\phi` at the</span>
+<span class="sd">    mid-surface, which differs by `\alpha \gamma` with the transverse shear</span>
+<span class="sd">    strain `\gamma \neq 0`"""</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">_shell</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_pressure_load</span><span class="p">(</span><span class="o">-</span><span class="mf">2.e5</span><span class="p">)</span>
+    <span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="n">_prescribe</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">comp</span><span class="p">,</span> <span class="n">THETA</span><span class="p">)</span>
+    <span class="n">md</span> <span class="o">=</span> <span class="n">MultiDomain</span><span class="p">([</span><span class="n">p</span><span class="p">],</span> <span class="n">conn</span><span class="o">=</span><span class="p">[],</span> <span class="n">pd_method</span><span class="o">=</span><span class="s1">'null-space'</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">linear_static</span><span class="p">()</span>
+    <span class="n">thx</span><span class="p">,</span> <span class="n">thy</span><span class="p">,</span> <span class="n">phix</span><span class="p">,</span> <span class="n">phiy</span> <span class="o">=</span> <span class="n">_rotations</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">)</span>
+    <span class="n">theta</span><span class="p">,</span> <span class="n">phi</span> <span class="o">=</span> <span class="p">(</span><span class="n">thx</span><span class="p">,</span> <span class="n">phix</span><span class="p">)</span> <span class="k">if</span> <span class="n">comp</span> <span class="o">==</span> <span class="n">PHIX</span> <span class="k">else</span> <span class="p">(</span><span class="n">thy</span><span class="p">,</span> <span class="n">phiy</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-8</span><span class="o">*</span><span class="n">THETA</span><span class="p">)</span>
+    <span class="c1"># the shear strain is not zero at the prescription, phi != theta</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">phi</span> <span class="o">-</span> <span class="n">values</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mf">1e-3</span><span class="o">*</span><span class="n">THETA</span>
+</pre></div>
+</div>
+</section>
+<section id="clamped-edges">
+<span id="tsdt-offset-clamped-edges"></span><h2>Clamped edges<a class="headerlink" href="#clamped-edges" title="Link to this heading">#</a></h2>
+<p>A clamped edge keeps the section planar and unrotated, <span class="math notranslate nohighlight">\(u(z) = 0\)</span> for every
+<span class="math notranslate nohighlight">\(z\)</span>. Eq. <a class="reference internal" href="#equation-tsdt-offset-family">(2)</a> is a cubic in <span class="math notranslate nohighlight">\(z\)</span> with the three
+constants <span class="math notranslate nohighlight">\(u\)</span>, <span class="math notranslate nohighlight">\(w_{,x}\)</span> and <span class="math notranslate nohighlight">\(\hat{\gamma}_{xz} = \phi_x + w_{,x}\)</span>, all
+zero: <span class="math notranslate nohighlight">\(u = \phi_x = w_{,x} = 0\)</span>, the flags <code class="docutils literal notranslate"><span class="pre">x1u</span> <span class="pre">=</span> <span class="pre">x1phix</span> <span class="pre">=</span> <span class="pre">x1wr</span> <span class="pre">=</span> <span class="pre">0</span></code> on
+<span class="math notranslate nohighlight">\(x = 0\)</span>, and then <span class="math notranslate nohighlight">\(\theta_x = 0\)</span> for any offset. The rotation at the
+reference surface alone, Eq. <a class="reference internal" href="#equation-tsdt-offset-theta">(5)</a>, does not clamp the
+edge. The face clamp, <span class="math notranslate nohighlight">\(u = 0\)</span> at <span class="math notranslate nohighlight">\(z = d \mp h/2\)</span>, gives instead <span class="math notranslate nohighlight">\(\phi_x =
+w_{,x}/2\)</span> and <span class="math notranslate nohighlight">\(u = -(d/2)(1 - 4 d^2/h^2) w_{,x}\)</span>, i.e. <span class="math notranslate nohighlight">\(u(d) = 0\)</span> at the
+mid-surface and <span class="math notranslate nohighlight">\(\hat{\gamma}_{xz} = 3 w_{,x}/2\)</span>, leaving the section free
+to warp, see <a class="reference internal" href="boundary_conditions.html#boundary-conditions-face-clamp"><span class="std std-ref">Face-clamped edges</span></a>. Both clamps are
+properties of the physical section and do not depend on the offset:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_face_clamp_does_not_depend_on_the_reference_surface</span><span class="p">():</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""The faces are physical surfaces: the face-clamped homogeneous plate</span>
+<span class="sd">    gives the same deflection for the reference surface at the</span>
+<span class="sd">    mid-surface, `d = 0`, and at `d = 0.3 h` or `d = h/2`, as the planar</span>
+<span class="sd">    clamp of the flags"""</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="s1">'plate_tsdt_donnell'</span>
+    <span class="n">xs</span><span class="p">,</span> <span class="n">ys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">offset</span> <span class="ow">in</span> <span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.3</span><span class="o">*</span><span class="n">H</span><span class="p">,</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">H</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">plate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="n">A</span><span class="p">):</span>
+            <span class="n">face_clamp</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">H</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">static</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">plate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
+        <span class="n">clamp_by_flags</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">'x1'</span><span class="p">)</span>
+        <span class="n">clamp_by_flags</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="s1">'x2'</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">ct</span> <span class="o">=</span> <span class="n">static</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+        <span class="n">res</span><span class="p">[</span><span class="n">offset</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">fields</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">xs</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">ys</span><span class="o">.</span><span class="n">ravel</span><span class="p">())[</span><span class="s1">'w'</span><span class="p">],</span>
+                       <span class="n">fields</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">ct</span><span class="p">,</span> <span class="n">xs</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">ys</span><span class="o">.</span><span class="n">ravel</span><span class="p">())[</span><span class="s1">'w'</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">offset</span> <span class="ow">in</span> <span class="p">(</span><span class="mf">0.3</span><span class="o">*</span><span class="n">H</span><span class="p">,</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">H</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="n">offset</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">res</span><span class="p">[</span><span class="mf">0.</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">res</span><span class="p">[</span><span class="mf">0.</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mf">0.99</span><span class="o">*</span><span class="n">res</span><span class="p">[</span><span class="mf">0.</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="example">
+<span id="tsdt-offset-example"></span><h2>Example<a class="headerlink" href="#example" title="Link to this heading">#</a></h2>
+<p>Two plates with the offsets <span class="math notranslate nohighlight">\(d_1 = 0\)</span> and <span class="math notranslate nohighlight">\(d_2\)</span>, connected along <span class="math notranslate nohighlight">\(x =
+x_s\)</span> with the null-space method and loaded by a pressure, have continuous
+rotations at the reference surface, whereas the rotations at the
+mid-surfaces jump across the connection:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s1">'d2'</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.3</span><span class="o">*</span><span class="n">H</span><span class="p">,</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">H</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">H</span><span class="p">])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_reference_rotation_continuous_with_different_offsets</span><span class="p">(</span><span class="n">d2</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""With the null-space method the rotations at the common reference</span>
+<span class="sd">    surface are continuous across the edge, not those at the mid-surfaces,</span>
+<span class="sd">    which differ by `-\alpha \gamma_{xz}` for `d_1 \neq d_2`"""</span>
+    <span class="n">md</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span> <span class="o">=</span> <span class="n">_two_plates</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="n">d2</span><span class="p">,</span> <span class="n">conn_method</span><span class="o">=</span><span class="s1">'null-space'</span><span class="p">)</span>
+    <span class="n">p1</span><span class="o">.</span><span class="n">add_pressure_load</span><span class="p">(</span><span class="o">-</span><span class="mf">1.e4</span><span class="p">)</span>
+    <span class="n">p2</span><span class="o">.</span><span class="n">add_pressure_load</span><span class="p">(</span><span class="o">-</span><span class="mf">1.e4</span><span class="p">)</span>
+    <span class="n">K</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">calc_kC</span><span class="p">())</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">solve</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">md</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">calc_fext</span><span class="p">()),</span> <span class="n">silent</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+    <span class="n">ys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+    <span class="n">th1x</span><span class="p">,</span> <span class="n">th1y</span><span class="p">,</span> <span class="n">phi1x</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_rotations</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">full_like</span><span class="p">(</span><span class="n">ys</span><span class="p">,</span> <span class="n">p1</span><span class="o">.</span><span class="n">a</span><span class="p">),</span> <span class="n">ys</span><span class="p">)</span>
+    <span class="n">th2x</span><span class="p">,</span> <span class="n">th2y</span><span class="p">,</span> <span class="n">phi2x</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_rotations</span><span class="p">(</span><span class="n">p2</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">ys</span><span class="p">),</span> <span class="n">ys</span><span class="p">)</span>
+    <span class="n">scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">th1x</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">scale</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">th1x</span><span class="p">,</span> <span class="n">th2x</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-9</span><span class="o">*</span><span class="n">scale</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">th1y</span><span class="p">,</span> <span class="n">th2y</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-9</span><span class="o">*</span><span class="n">scale</span><span class="p">)</span>
+    <span class="c1"># the rotations at the mid-surfaces are not continuous</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">phi1x</span> <span class="o">-</span> <span class="n">phi2x</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mf">1e-3</span><span class="o">*</span><span class="n">scale</span>
+</pre></div>
+</div>
+<p>and two plates with the same offset reproduce the single plate:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s1">'conn_method'</span><span class="p">,</span> <span class="p">[</span><span class="s1">'penalty'</span><span class="p">,</span> <span class="s1">'null-space'</span><span class="p">])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_same_offset_split_plate_equals_single_plate</span><span class="p">(</span><span class="n">conn_method</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Two panels with the same offset reproduce the single panel"""</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="mf">0.3</span><span class="o">*</span><span class="n">H</span>
+    <span class="n">md</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span> <span class="o">=</span> <span class="n">_two_plates</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">conn_method</span><span class="o">=</span><span class="n">conn_method</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">conn_method</span> <span class="o">==</span> <span class="s1">'null-space'</span><span class="p">:</span>
+        <span class="n">K</span><span class="p">,</span> <span class="n">M</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">calc_kC</span><span class="p">()),</span> <span class="n">md</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">calc_kM</span><span class="p">(</span><span class="n">silent</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">K</span><span class="p">,</span> <span class="n">M</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">calc_kC</span><span class="p">(),</span> <span class="n">md</span><span class="o">.</span><span class="n">calc_kM</span><span class="p">(</span><span class="n">silent</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">omegas</span> <span class="o">=</span> <span class="n">_frequencies</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+    <span class="n">single</span> <span class="o">=</span> <span class="n">_plate</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="s1">'SSSS'</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">18</span><span class="p">)</span>
+    <span class="n">ref</span> <span class="o">=</span> <span class="n">_frequencies</span><span class="p">(</span><span class="n">single</span><span class="o">.</span><span class="n">calc_kC</span><span class="p">(),</span> <span class="n">single</span><span class="o">.</span><span class="n">calc_kM</span><span class="p">(),</span> <span class="mi">6</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">omegas</span><span class="p">,</span> <span class="n">ref</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For a free homogeneous plate, the choice of the reference surface does not
+change the structure, and the natural frequencies do not depend on the
+offset:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_free_plate_frequencies_do_not_depend_on_the_reference_surface</span><span class="p">():</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""A homogeneous free plate is the same structure for any choice of the</span>
+<span class="sd">    reference surface, whose Ritz spaces coincide for free edges"""</span>
+    <span class="n">f0</span> <span class="o">=</span> <span class="n">_free_plate_freqs</span><span class="p">(</span><span class="mf">0.</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">offset</span> <span class="ow">in</span> <span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.013</span><span class="p">,</span> <span class="mf">0.025</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">_free_plate_freqs</span><span class="p">(</span><span class="n">offset</span><span class="p">),</span> <span class="n">f0</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="follower_pressure.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Follower pressure loads: theory</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="multidomain_null_space.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Exact connections with the null-space method</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#displacement-field">Displacement field</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#strains-stiffness-and-mass-matrices">Strains, stiffness and mass matrices</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#connections-at-the-reference-surface">Connections at the reference surface</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prescribed-rotations">Prescribed rotations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#clamped-edges">Clamped edges</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example">Example</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="_sources/tsdt_offset.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2012-2026, Saullo G. P. Castro, Nathan D&#39;Souza.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.2.0.
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.23.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

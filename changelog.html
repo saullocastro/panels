@@ -1,0 +1,2557 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Changelog &#8212; panels 0.14.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="_static/scripts/fontawesome.js?digest=18bd87630a240e9c25be"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
+
+    <script src="_static/documentation_options.js?v=9e420a66"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'changelog';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="References" href="ref.html" />
+    <link rel="prev" title="Development tools (panels.dev)" href="dev.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.14.0" />
+  
+    
+    <script src="_static/searchtools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">panels 0.14.0 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="shell_overview.html">
+    Plates and cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="bardell.html">
+    Bardell’s hierarchical functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="boundary_conditions.html">
+    Boundary conditions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="loads.html">
+    Loads
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="multidomain_overview.html">
+    Multi-domain assemblies
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="stiffened_panels.html">
+    Stiffened panels
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="aeroelasticity.html">
+    Panel flutter with the piston theory
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="postprocessing.html">
+    Field outputs, plots and files
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tsdt_offset.html">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tangent_product.html">
+    Tangent stiffness matrix and its product by a vector
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tabulation.html">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_face_clamp.html">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class=" current active">
+  <a class="nav-link dropdown-item nav-internal" href="#" aria-current="page">
+    Changelog
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ref.html">
+    References
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="shell_overview.html">
+    Plates and cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="bardell.html">
+    Bardell’s hierarchical functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="boundary_conditions.html">
+    Boundary conditions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="loads.html">
+    Loads
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="multidomain_overview.html">
+    Multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="stiffened_panels.html">
+    Stiffened panels
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="aeroelasticity.html">
+    Panel flutter with the piston theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="postprocessing.html">
+    Field outputs, plots and files
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tsdt_offset.html">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tangent_product.html">
+    Tangent stiffness matrix and its product by a vector
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tabulation.html">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_face_clamp.html">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#" aria-current="page">
+    Changelog
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ref.html">
+    References
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button type="button" id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Changelog</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="changelog">
+<h1>Changelog<a class="headerlink" href="#changelog" title="Link to this heading">#</a></h1>
+<p>The changes of each version, from the file <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> of the
+<a class="reference external" href="https://github.com/saullocastro/panels/blob/main/CHANGELOG.md">repository</a>:</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="gh"># Changelog</span>
+
+<span class="gu">## 0.14.0 (2026-10-26)</span>
+
+<span class="gu">### Python versions</span>
+
+<span class="k">-</span><span class="w"> </span>Python 3.9 is no longer supported, it reached its end of life in October 2025: Python 3.10 or newer is required, and the tests and wheels cover Python 3.10 to 3.14.
+
+<span class="gu">### Packaging</span>
+
+<span class="k">-</span><span class="w"> </span>Packaging: the metadata, with the version, in <span class="sb">`pyproject.toml`</span> (PEP 621), built with <span class="sb">`setuptools&gt;=77`</span> and Cython; <span class="sb">`setup.py`</span> keeps only the Cython extensions with the compiler flags, including those of the WebAssembly build, and writes <span class="sb">`panels/version.py`</span> from <span class="sb">`pyproject.toml`</span>, with the same fields as before (<span class="sb">`MAJOR`</span>, <span class="sb">`MINOR`</span>, <span class="sb">`MICRO`</span> and <span class="sb">`ISRELEASED`</span> are gone from <span class="sb">`setup.py`</span>; <span class="sb">`isreleased`</span> is true for a version without suffix). The documentation reads the version from <span class="sb">`pyproject.toml`</span>. The license is given as the SPDX expression <span class="sb">`BSD-3-Clause`</span>, wheel is no longer a build requirement, README.md and LICENSE are no longer installed in the root of the Python environment (<span class="sb">`data_files`</span>), and two keywords merged by a missing comma are separated.
+
+<span class="gu">### Bug fixes: mass matrices</span>
+
+<span class="k">-</span><span class="w"> </span>The closed-form mass matrices <span class="sb">`fkM`</span> of the nine models read <span class="sb">`shell.rho`</span>,
+  whereas <span class="sb">`Shell.calc_kM`</span> and the numerical <span class="sb">`fkM_num`</span> use the density of the
+  laminate, <span class="sb">`lam.intrho/lam.h`</span>: with per-ply densities <span class="sb">`rhos`</span> the two
+  differed, and a <span class="sb">`Shell`</span> given only <span class="sb">`rhos`</span> had a zero mass matrix.
+  <span class="sb">`Shell._rebuild`</span> keeps the lists <span class="sb">`plyts`</span>, <span class="sb">`laminaprops`</span> and <span class="sb">`rhos`</span> given
+  by the user, and <span class="sb">`json_io`</span> saves which lists were derived (key
+  <span class="sb">`'derived_lists'`</span>; the lists of older files are kept as given).
+<span class="k">-</span><span class="w"> </span>The mass matrices of all the models, closed-form and numerical, integrated
+  a uniform density over <span class="sb">`-h/2 - d &lt;= z &lt;= h/2 - d`</span>, whereas the stiffness
+  matrices and composites place the laminate at <span class="sb">`-h/2 + d &lt;= z &lt;= h/2 + d`</span>:
+  with an offset the coupling of <span class="sb">`u`</span> and <span class="sb">`phi`</span> had the wrong sign. The mass
+  matrices now use the moments of the density <span class="sb">`I_0`</span> to <span class="sb">`I_6`</span> of
+  <span class="sb">`composites.Laminate`</span>, exact for per-ply densities. `fkM(shell, size,
+  row0, col0)` reads them from <span class="sb">`shell.lam`</span> (the argument <span class="sb">`d`</span> is dropped),
+  <span class="sb">`fkM_num(shell, I_input, size, row0, col0, nx, ny)`</span> receives them, and
+  <span class="sb">`Shell.calc_kM`</span> gains <span class="sb">`I_nxny`</span>. With offset 0 and a uniform density the
+  matrices are unchanged to <span class="sb">`2e-16`</span>.
+
+<span class="gu">### Bug fixes: third-order shear deformation theory with an offset</span>
+
+<span class="k">-</span><span class="w"> </span>With an offset <span class="sb">`d`</span>, the cubic term <span class="sb">`-c1 z^3 (phi + w,x)`</span> did not make the
+  transverse shear vanish at the faces <span class="sb">`z = d -+ h/2`</span>. The field is now
+  <span class="sb">`u(z) = u + z phi - c1 [(z - d)^3 + d^3] (phi + w,x)`</span>, Reddy's field for
+  <span class="sb">`d = 0`</span>, with <span class="sb">`phi`</span> the rotation at the mid-surface of the laminate; the
+  strain energy equals a ply-by-ply integration to <span class="sb">`2e-15`</span> (14% off before
+  for <span class="sb">`d = 1.2`</span> mm).
+<span class="k">-</span><span class="w"> </span>The connections of the TSDT models tie <span class="sb">`u, v, w`</span> and the rotations at the
+  common reference surface <span class="sb">`z = 0`</span>, `theta = u,z(0) = phi - (4 d^2/h^2)(phi
+  + w,x)`, instead of the mid-surface rotations <span class="sb">`phi`</span>, which differ between
+  panels with different offsets. The skin-base connection evaluates each
+  laminate at its own face, <span class="sb">`z = d -+ h/2`</span>. Nothing changes for <span class="sb">`d = 0`</span>, for
+  the FSDT and for the CLPT.
+<span class="k">-</span><span class="w"> </span>The rotations <span class="sb">`phix`</span> and <span class="sb">`phiy`</span> prescribed with <span class="sb">`Shell.add_point_pd`</span>,
+  <span class="sb">`Shell.add_distr_pd_fixed_x`</span> and <span class="sb">`Shell.add_distr_pd_fixed_y`</span>
+  (<span class="sb">`pd_method='null-space'`</span>) are, for the TSDT, the rotations at the
+  reference surface <span class="sb">`z = 0`</span>, <span class="sb">`theta = phi - (4 d^2/h^2)(phi + w,x)`</span>, those
+  tied by the connections, instead of the mid-surface rotations <span class="sb">`phi`</span>: with
+  an offset the rotation at <span class="sb">`z = 0`</span> missed the prescribed value by the term
+  of the transverse shear, e.g. <span class="sb">`2.15e-3`</span> instead of the prescribed <span class="sb">`2e-3`</span>
+  at a point of a plate with <span class="sb">`d = 0.3 h`</span>. Nothing changes for <span class="sb">`d = 0`</span>, for
+  the FSDT and for the CLPT.
+<span class="k">-</span><span class="w"> </span>New page <span class="sb">`tsdt_offset.rst`</span>.
+
+<span class="gu">### Clamped edges of the third-order shear deformation theory</span>
+
+<span class="k">-</span><span class="w"> </span>A clamped TSDT edge keeps the cross-section planar and unrotated, `u(z) =
+  v(z) = 0<span class="sb">` for every `</span>z<span class="sb">`, which requires `</span>u = phi = w,n = 0`: the slope
+  flag, e.g. <span class="sb">`x1wr = 0`</span> on <span class="sb">`x = 0`</span>, is removed together with the rotation
+  flags. With the slope free the warping term <span class="sb">`p(z) (phi + w,x)`</span> remained
+  at the edge: for a square isotropic plate with <span class="sb">`h/a = 0.1`</span> clamped on
+  four edges the first frequency <span class="sb">`omega a^2 sqrt(rho h/D)`</span> is 32.64 instead
+  of 30.18. The FSDT clamp is unchanged, <span class="sb">`w,n`</span> free. The function
+  <span class="sb">`set_edge`</span> of <span class="sb">`tests/tests_shell/test_fsdt_tsdt_plates.py`</span>, the pages
+  <span class="sb">`boundary_conditions.rst`</span> and <span class="sb">`tsdt_offset.rst`</span> and the docstring of
+  <span class="sb">`Shell`</span> are updated; the thin plates of Leissa (1973) move by less than
+  <span class="sb">`1.2e-5`</span>, e.g. <span class="sb">`'SCSC'`</span> 28.95027 to 28.95059 (reference 28.951).
+<span class="k">-</span><span class="w"> </span>New keyword <span class="sb">`z`</span> of <span class="sb">`Shell.add_point_pd`</span>, <span class="sb">`Shell.add_distr_pd_fixed_x`</span>
+  and <span class="sb">`Shell.add_distr_pd_fixed_y`</span>, and of the penalty kernels <span class="sb">`fkCpd`</span>,
+  <span class="sb">`fkCld_xcte`</span> and <span class="sb">`fkCld_ycte`</span>: the in-plane displacements <span class="sb">`u`</span> and <span class="sb">`v`</span> are
+  prescribed at the thickness coordinate <span class="sb">`z`</span>, measured from the reference
+  surface, <span class="sb">`u(z) = u + (z - c1 g) phi_x - c1 g w,x`</span> with `g = (z - d)^3 +
+  d^3` for the TSDT (<span class="sb">`c1 = 0`</span> for the FSDT, <span class="sb">`u(z) = u - z w,x`</span> for the
+  CLPT), with both <span class="sb">`pd_method='penalty'`</span> and <span class="sb">`pd_method='null-space'`</span>.
+  Default <span class="sb">`z = 0`</span>, unchanged. The stored lists <span class="sb">`point_pds`</span>, <span class="sb">`distr_pds`</span>
+  and <span class="sb">`*_values`</span> end with <span class="sb">`z`</span>; <span class="sb">`json_io`</span> completes the lists of older files
+  with <span class="sb">`z = 0`</span>. New function <span class="sb">`nullspace.pd_rows`</span>.
+<span class="k">-</span><span class="w"> </span>Face clamp, <span class="sb">`u = v = 0`</span> at the faces <span class="sb">`z = d -+ h/2`</span> and <span class="sb">`w = 0`</span>: the
+  clamp of the flags for the CLPT and the FSDT, and for the TSDT the two
+  conditions <span class="sb">`phi = w,x/2`</span> and <span class="sb">`u = -(d/2)(1 - 4 d^2/h^2) w,x`</span>, which leave
+  the section free to warp and which the flags cannot express. New test
+  file <span class="sb">`tests/multidomain/test_face_clamp.py`</span> and example page
+  <span class="sb">`ex_face_clamp.rst`</span>.
+
+<span class="gu">### Bug fixes: stiffeners, connections and post-processing</span>
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`BladeStiff1D`</span>: the torsion of the flange used <span class="sb">`bf*Jxx*w,xy^2`</span>, without a
+  shear modulus; it now uses the torsional stiffness <span class="sb">`GJ = 4 bf D66`</span> of a
+  thin laminated strip, new attribute <span class="sb">`BladeStiff1D.GJ`</span>, also saved by
+  <span class="sb">`json_io`</span>. The results of Tables 4 and 5 of Stamatelos and Labeas (2023)
+  rise by 1.9% to 3.3%, e.g. from 115.22 to 119.01 N/mm, those of Figure 7
+  by up to 0.04%; <span class="sb">`notebooks/stamatelos_labeas_2023.ipynb`</span>,
+  <span class="sb">`stamatelos_labeas_2023_multidomain.ipynb`</span> and the Stamatelos section of
+  <span class="sb">`conn_method_comparison.ipynb`</span> are updated.
+<span class="k">-</span><span class="w"> </span><span class="sb">`BladeStiff1D`</span>: the coupling <span class="sb">`S1`</span> uses the condensed stiffness `Q16 - Q12
+  Q26/Q22` instead of <span class="sb">`Q16 - Q12 Q16/Q22`</span>, as in Eq. (16) of Castro et al.,
+  Compos. Struct. 140 (2016), with <span class="sb">`y_k`</span> measured from the mid-plane of the
+  flange instead of its first face: <span class="sb">`S1`</span> is zero for a symmetric flange.
+  Balanced cross-ply flanges are unaffected.
+<span class="k">-</span><span class="w"> </span>The skin-base connections <span class="sb">`'SB'`</span> and <span class="sb">`'SB_TSL'`</span> connect the lower face of
+  <span class="sb">`p1`</span>, <span class="sb">`z = d1 - h1/2`</span>, to the upper face of <span class="sb">`p2`</span>, <span class="sb">`z = d2 + h2/2`</span>, with the
+  offset <span class="sb">`d`</span> of each laminate (<span class="sb">`Shell.offset`</span>), for all the models; the CLPT
+  and FSDT kernels placed the faces at <span class="sb">`z = -+h/2`</span>, ignoring the offsets. Two
+  laminates bonded with <span class="sb">`'SB'`</span> with offsets had their first frequency 25%
+  (CLPT) and 41% (FSDT) above that of the single laminate, which they now
+  reproduce to <span class="sb">`1e-12`</span> for any offsets. New <span class="sb">`kCsdt._sb_distances`</span>, used by
+  the penalty and null-space <span class="sb">`'SB'`</span>, the kernels of <span class="sb">`'SB_TSL'`</span> and
+  <span class="sb">`MultiDomain._tsl_operators`</span>. Without offsets nothing changes.
+<span class="k">-</span><span class="w"> </span>The penalty kernels of the prescribed displacements <span class="sb">`fkCpd`</span>, <span class="sb">`fkCld_xcte`</span>
+  and <span class="sb">`fkCld_ycte`</span> (<span class="sb">`panels/multidomain/connections/kCpd.pyx`</span>) used a stride
+  of 3 DOFs per term, <span class="sb">`row0 + 3*(j*m + i)`</span>, for all the models: with the
+  FSDT and TSDT models, 5 DOFs per term, the penalty stiffnesses of <span class="sb">`u, v, w`</span>
+  landed silently on other DOFs, inconsistent with the forces <span class="sb">`k u_p`</span> of
+  <span class="sb">`shell_fext`</span>, e.g. <span class="sb">`w = 1.1e5`</span> instead of the prescribed <span class="sb">`1e-3`</span> at a point
+  of a simply supported <span class="sb">`plate_fsdt_donnell`</span> with <span class="sb">`k = 1e4 E h`</span>. The kernels
+  read the number of DOFs per term from <span class="sb">`modelDB`</span> (signatures unchanged, a
+  <span class="sb">`ValueError`</span> for an unknown <span class="sb">`p.model`</span>); for the FSDT and TSDT the penalty
+  method now converges to the null-space method with <span class="sb">`1/k`</span>, as for the
+  CLPT, whose results are unchanged.
+<span class="k">-</span><span class="w"> </span><span class="sb">`BladeStiff1D`</span> without a flange accepts <span class="sb">`bf=None`</span>.
+<span class="k">-</span><span class="w"> </span><span class="sb">`StiffPanelBay.calc_kA`</span> sums the aerodynamic matrices of the panels without
+  skew-symmetrizing them.
+<span class="k">-</span><span class="w"> </span>The cylinder assembly functions of <span class="sb">`panels.multidomain`</span> give each panel its
+  own load; the lambdas bound late and every panel got the load of the last
+  one.
+<span class="k">-</span><span class="w"> </span><span class="sb">`MultiDomain.force_out_plane`</span> integrates <span class="sb">`Qx`</span> along <span class="sb">`x = x_cte_force`</span> (or
+  <span class="sb">`Qy`</span> along <span class="sb">`y = y_cte_force`</span>), instead of <span class="sb">`Qx + Qy`</span> along a hard-coded
+  line, and checks its arguments.
+<span class="k">-</span><span class="w"> </span><span class="sb">`MultiDomain.plot`</span> computes the field of <span class="sb">`eval_panel`</span> and uses <span class="sb">`xs`</span> and
+  <span class="sb">`ys`</span>.
+<span class="k">-</span><span class="w"> </span><span class="sb">`cylinder_blade_stiffened_compression_lb_pd_from_static`</span> imposes the
+  prescribed end-shortening exactly, with <span class="sb">`pd_method='null-space'`</span> and
+  <span class="sb">`MultiDomain.linear_buckling`</span>: the forces <span class="sb">`ku*pd`</span> of the penalty method
+  entered <span class="sb">`calc_fext`</span> without the penalty stiffness in the stiffness matrix,
+  so the analysis was load controlled, <span class="sb">`u`</span> at <span class="sb">`x = height`</span> reaching 1.2% of
+  the prescribed value. The returned assembly stores the connections and has
+  <span class="sb">`pd_method='null-space'`</span>, the prescriptions are added with <span class="sb">`cte=False`</span>, and
+  <span class="sb">`eigvals`</span> multiply the prescribed displacements: 0.4785 for the
+  five-panel cylinder of the tests (<span class="sb">`m = 8`</span>, <span class="sb">`n = 12`</span>), instead of 39.99, the
+  multiplier of the forces <span class="sb">`ku*pd`</span> with <span class="sb">`ku = 1e6`</span>. The signature is
+  unchanged; <span class="sb">`ku`</span> only flags the prescribed component.
+<span class="k">-</span><span class="w"> </span><span class="sb">`MultiDomain.linear_buckling`</span>: the constant stress resultants <span class="sb">`Nxx`</span>,
+  <span class="sb">`Nyy`</span> and <span class="sb">`Nxy`</span> of the panels are a pre-stress, in the geometric stiffness
+  of the constant state <span class="sb">`c0`</span> only. With constant prescribed displacements
+  they entered both <span class="sb">`K_G(c0)`</span> and <span class="sb">`K_G(c1)`</span>, i.e. they were applied `1 +
+  lambda` times: a constant prescribed rigid translation, which produces no
+  stress, lowered the critical load factor by exactly one (161.93 to 160.93
+  for a plate with <span class="sb">`Nxx = -1`</span>). Now <span class="sb">`K_G(c1)`</span> is computed with them set to
+  zero, also without prescribed displacements and for a given <span class="sb">`c`</span>; a
+  <span class="sb">`ValueError`</span> is raised when the incremented state has no geometric
+  stiffness, e.g. when <span class="sb">`Nxx`</span> is the only load, which <span class="sb">`linear_buckling`</span> used
+  to multiply by the load factor: apply such a load with
+  <span class="sb">`Shell.add_distr_load_fixed_x`</span> instead.
+<span class="k">-</span><span class="w"> </span>Skin-base connections of curved panels with the Sanders-Koiter kinematics:
+  the tangential displacement at the interface, <span class="sb">`v(z) = v + z (v/r - w,y)`</span>,
+  now has the term <span class="sb">`v/r`</span> in the CLPT connection <span class="sb">`'SB'`</span>, penalty and
+  null-space, see the unified <span class="sb">`'SB'`</span> below, and in the kernels
+  <span class="sb">`fkCSB11_dmg`</span>, <span class="sb">`fkCSB12_dmg`</span>,
+  <span class="sb">`fkCSB22_dmg`</span> of <span class="sb">`'SB_TSL'`</span> with <span class="sb">`use_kernels=True`</span> (new optional
+  arguments <span class="sb">`rinv1`</span>, <span class="sb">`rinv2`</span>), which differed from the default matrix
+  products by 1.2e-3 relative and now agree to 1.5e-15. A rigid rotation
+  about the axis of two bonded Sanders panels, the radius of each that of
+  its reference surface, had a connection energy of <span class="sb">`(dsb/r)^2`</span> = 2e-6 times
+  that of a separation <span class="sb">`r Omega`</span>, now zero to round-off. The FSDT and TSDT
+  <span class="sb">`'SB'`</span> already had the term. Nothing changes for the Donnell kinematics
+  and for plates.
+<span class="k">-</span><span class="w"> </span>One skin-base connection <span class="sb">`'SB'`</span> for every model: <span class="sb">`u1(z1) = u2(z2)`</span>,
+  <span class="sb">`v1(z1) = v2(z2)`</span> and <span class="sb">`w1 = w2`</span> at the faces in contact, <span class="sb">`z1 = d1 - h1/2`</span>
+  of <span class="sb">`p1`</span> and <span class="sb">`z2 = d2 + h2/2`</span> of <span class="sb">`p2`</span>, each panel with its own kinematics,
+  <span class="sb">`u(z) = u - z w,x`</span> and <span class="sb">`v(z) = (1 + z/r) v - z w,y`</span> for the CLPT (the
+  term <span class="sb">`z/r`</span> only with the Sanders-Koiter kinematics), with the operator
+  <span class="sb">`kCsdt._surface_terms`</span> of the FSDT and TSDT <span class="sb">`'SB'`</span> and of the prescribed
+  displacements at a thickness coordinate. The null-space constraints and
+  the penalty matrix, <span class="sb">`kt`</span> times the integral of the products of the same
+  quantities, come from <span class="sb">`kCsdt._sb_components`</span>. The CLPT used the form of
+  the thesis of D'Souza (2024), <span class="sb">`u1 + dsb w1,x = u2`</span> and `(1 - dt/r1) v1 +
+  dsb w1,y = (1 + db/r2) v2`, with the slope of <span class="sb">`p1`</span> only, from the
+  hand-written kernels of <span class="sb">`kCSB.pyx`</span>. The null-space results do not change:
+  <span class="sb">`w1 = w2`</span> at the Gauss-Legendre grid ties the slopes over the whole area,
+  and the two sets of constraints have the same null space to <span class="sb">`2.5e-15`</span>.
+  The penalty results change at finite <span class="sb">`kt`</span>, all within the tolerances of
+  the tests: for the laminates <span class="sb">`[0/90]`</span> over <span class="sb">`[0/90]`</span> with <span class="sb">`1e5`</span> times the
+  default <span class="sb">`kt`</span>, the largest error of the first 8 frequencies with respect to
+  the single laminate, between <span class="sb">`6.94e-6`</span> and <span class="sb">`8.31e-6`</span> depending on the
+  offsets, is <span class="sb">`6.94e-6`</span> for all of them; the
+  T-stiffened panel of <span class="sb">`tstiff2d_1stiff_freq`</span> 48.27331 to 48.27327,
+  <span class="sb">`tstiff2d_1stiff_compression`</span> 142.6822 to 142.6811 (114.8576 to 114.8542
+  with the static pre-stress), <span class="sb">`tstiff2d_1stiff_flutter`</span> 446.1180 to
+  446.1153; the bonded sub-laminates of Stamatelos and Labeas (2023) by
+  <span class="sb">`-3.0e-6`</span> at most, and now agree to <span class="sb">`5e-8`</span> with the pristine <span class="sb">`'SB_TSL'`</span>,
+  whose
+  separations are the same quantities: with <span class="sb">`k_o`</span> at every point its matrix
+  is that of <span class="sb">`'SB'`</span> with <span class="sb">`kt = k_o`</span>. The penalty method converges to the
+  null-space method with <span class="sb">`1/kt`</span>, e.g. from <span class="sb">`2.7e-2`</span> with the default <span class="sb">`kt`</span>
+  to <span class="sb">`2.9e-5`</span> with <span class="sb">`1000 kt`</span> for two bonded laminates with offsets. The key
+  <span class="sb">`'kr'`</span> of <span class="sb">`'SB'`</span> is still used only by the FSDT and TSDT, whose rotations
+  are independent: the rotations of the CLPT follow from <span class="sb">`w`</span>, and tying them
+  too would be redundant or, with the Sanders-Koiter kinematics and distinct
+  reference surfaces, would impose <span class="sb">`(z1 - z2) w,y = 0`</span>. A <span class="sb">`'kr'`</span> given to
+  <span class="sb">`'SB'`</span> of the CLPT is not used and now issues a <span class="sb">`UserWarning`</span>. New test
+  file <span class="sb">`tests/multidomain/test_sb_unified.py`</span>.
+<span class="k">-</span><span class="w"> </span>Default numbers of integration points: <span class="sb">`Shell.nx`</span> and <span class="sb">`Shell.ny`</span> follow
+  <span class="sb">`m`</span> and <span class="sb">`n`</span> at the time of the calculation, <span class="sb">`max(2*m - 1, 7)`</span> and
+  <span class="sb">`max(2*n - 1, 7)`</span>, new function <span class="sb">`panels.shell.gauss_points`</span>, unless a
+  value is assigned (kept, the rebuild only raising it to <span class="sb">`m`</span>, <span class="sb">`n`</span>;
+  <span class="sb">`None`</span> restores the default). Before, <span class="sb">`nx = 2*m`</span> was set only by the
+  constructor, so that <span class="sb">`Shell()`</span> followed by <span class="sb">`s.m = 20`</span> integrated with 22
+  points, and for <span class="sb">`m &lt;= 3`</span> the 6 points of <span class="sb">`2*m`</span> did not integrate exactly
+  the internal force vector and the tangent stiffness matrix, products of
+  four functions of degree up to <span class="sb">`4 max(m - 1, 3) = 12`</span>. <span class="sb">`2*max(m - 1, 3) + 1`</span>
+  points are the fewest that integrate them exactly; for <span class="sb">`m &gt;= 4`</span> the new
+  default has one point fewer than <span class="sb">`2*m`</span> and the same results to round-off
+  for a constant constitutive matrix and polynomial pressures. <span class="sb">`json_io`</span>
+  saves <span class="sb">`nx`</span>, <span class="sb">`ny`</span> with their value and lists them in <span class="sb">`'derived_lists'`</span>
+  when they follow <span class="sb">`m`</span>, <span class="sb">`n`</span>; the values of older files are kept as
+  assigned.
+
+<span class="gu">### Breaking: the null-space basis is `Z`</span>
+
+<span class="k">-</span><span class="w"> </span>The basis of the null space of the connections and prescribed
+  displacements, <span class="sb">`c = Z c_r + c_p0 + lbd*c_p1`</span>, is <span class="sb">`[Z]`</span> (was <span class="sb">`[T]`</span>), which
+  no longer clashes with the transformation matrices <span class="sb">`T`</span>, e.g. that of the
+  strains of the TSDT with an offset. Renamed, without aliases (all public
+  in 0.13.11): <span class="sb">`MultiDomain.get_T()`</span> -&gt; <span class="sb">`MultiDomain.get_Z()`</span>, the
+  attribute <span class="sb">`MultiDomain.T`</span> -&gt; <span class="sb">`MultiDomain.Z`</span>, the attribute
+  <span class="sb">`nullspace.Elimination.T`</span> -&gt; <span class="sb">`nullspace.Elimination.Z`</span>, and the keys
+  <span class="sb">`'Te'`</span> and <span class="sb">`'Bte'`</span> of the dictionaries of <span class="sb">`Elimination.steps`</span> -&gt; <span class="sb">`'Ze'`</span>
+  and <span class="sb">`'Bze'`</span>. The JSON files store the tolerance of the basis as
+  <span class="sb">`'Z_tol'`</span> (was <span class="sb">`'T_tol'`</span>); the files written by 0.13.11 are still loaded.
+
+<span class="gu">### API</span>
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`MultiDomain.get_kC_conn`</span> loses the argument <span class="sb">`kw_tsl`</span>, which was not used:
+  the stiffness of each <span class="sb">`'SB_TSL'`</span> connection is computed with
+  <span class="sb">`MultiDomain.calc_k_dmg`</span> at <span class="sb">`c`</span>. Calls passing <span class="sb">`kw_tsl`</span> must drop it.
+<span class="k">-</span><span class="w"> </span>New module <span class="sb">`panels.multidomain.connections.skin_base`</span> with
+  <span class="sb">`fkCSB(kt, p_top, p_bot, size, kr=0.)`</span>, the upper triangle of the matrix
+  of <span class="sb">`'SB'`</span> for every model; <span class="sb">`kCsdt.fkCSB_sdt`</span> gives the same matrix for
+  the FSDT and TSDT, signature unchanged.
+<span class="k">-</span><span class="w"> </span>The Cython module <span class="sb">`panels.multidomain.connections.kCSB`</span> is removed.
+  <span class="sb">`fkCSB11`</span>, <span class="sb">`fkCSB12`</span> and <span class="sb">`fkCSB22`</span>, still importable from
+  <span class="sb">`panels.multidomain.connections`</span>, are deprecated and issue a
+  <span class="sb">`DeprecationWarning`</span>: they return the blocks of <span class="sb">`fkCSB`</span>, with the faces
+  and the kinematics of the panels, and ignore the arguments <span class="sb">`dsb`</span>, <span class="sb">`dt`</span>,
+  <span class="sb">`db`</span>, <span class="sb">`rinv1`</span> and <span class="sb">`rinv2`</span>. <span class="sb">`nullspace._clpt_components`</span> loses the argument
+  <span class="sb">`dsb`</span>.
+
+<span class="gu">### Tests</span>
+
+<span class="k">-</span><span class="w"> </span>The Riks test of the hinged cylindrical shell no longer depends on how the
+  arc-length adaptation samples the path, and passes with both convergence
+  criteria of structsolve.
+<span class="k">-</span><span class="w"> </span><span class="sb">`tests/tests_shell/test_kernel_python_calls.py`</span> checks that the kernels
+  are finite and agree with the numerically integrated ones. The
+  constitutive matrix read by the kernels is assembled without
+  matrix-matrix BLAS products, because the <span class="sb">`cblas_dgemm`</span> of Intel oneMKL
+  2024.2.0 to 2025.0.0 on Windows x64 changes the registers <span class="sb">`xmm8`</span>-<span class="sb">`xmm15`</span>
+  that the caller expects to be preserved; oneMKL 2025.0.1 and later, or
+  <span class="sb">`MKL_CBWR=COMPATIBLE`</span>, preserve them.
+<span class="k">-</span><span class="w"> </span>New <span class="sb">`tests/multidomain/test_dcb_linear_measures.py`</span>: linear solutions of
+  the DCB model of the thesis of D'Souza (2024), asserting the measures of
+  the load and the effect of the penalties of the edge connections given in
+  <span class="sb">`doc/source/cohesive_zone.rst`</span>, to <span class="sb">`1e-4`</span> relative for the integrals of
+  the traction and the largest separation, to <span class="sb">`5e-4`</span> for the reaction and
+  the integral of <span class="sb">`Q_x`</span>, which carry a round-off error of up to <span class="sb">`3e-4`</span> from
+  the 0.015 mm connecting domain (it changes with the number of integration
+  points, all exact), and to <span class="sb">`1e-5`</span> for the reaction with a 5 mm connecting
+  domain.
+<span class="k">-</span><span class="w"> </span>The tests that recompute the residual of the solvers of structsolve use
+  <span class="sb">`R = F_int - lambda F_ext`</span>, the convention of structsolve from 0.9.3 and
+  of the drivers of panels (were <span class="sb">`lambda F_ext - F_int`</span>): the <span class="sb">`Recorder`</span> of
+  <span class="sb">`tests/tests_shell/test_follower_pressure.py`</span> and its docstring, the
+  equilibrium checks of <span class="sb">`test_follower_pressure.py`</span> and
+  <span class="sb">`tests/tests_shell/test_nonlinear_riks.py`</span>, and the finite-difference
+  check of <span class="sb">`tests/multidomain/test_null_space_pd.py`</span>, which now asserts
+  <span class="sb">`dR/dlambda = -calc_fext(c, lbd)`</span> as its docstring states; also
+  <span class="sb">`theory/shells/follower_pressure/follower_pressure.md`</span>. The tests do not
+  depend on the convention of the installed structsolve, and the solutions
+  of <span class="sb">`Analysis.static`</span> over the suite are bitwise identical with both
+  conventions of structsolve.
+
+<span class="gu">### Documentation</span>
+
+<span class="k">-</span><span class="w"> </span>Functional docstrings of the public API, and Notes and References with
+  the theory of the models, connections, stiffeners, cohesive zone and
+  multidomain assembly.
+<span class="k">-</span><span class="w"> </span>The sign convention of the piston-theory matrices, with the sign of the
+  term of Krumhaar's correction in Eqs. (18), (21) and (29) of Castro et
+  al., Compos. Struct. 140 (2016), stated as a mistake of the paper; the
+  code is unchanged.
+<span class="k">-</span><span class="w"> </span><span class="sb">`doc/source/cohesive_zone.rst`</span>: the tables of the out-of-plane force of
+  the DCB for a tip displacement of 1 mm and of its elastic stiffness against
+  the factor on the default edge penalties, and the stiffness with a
+  connecting domain of 5 mm, recomputed with the tangential separation of
+  <span class="sb">`'SB_TSL'`</span>, with the slope of each panel; they had been computed with that
+  of Eq. 4.62 of the thesis, with the slope of the top panel only. The
+  reactions are 1.0-1.2% lower and the largest separation per unit of
+  imposed displacement 20% higher; with the default penalties the separation
+  lags the imposed displacement by 21%, not 20%. The linear solutions are
+  computed at 0.5 mm, below the damage onset, and scaled to 1 mm.
+<span class="k">-</span><span class="w"> </span><span class="sb">`doc/source/cohesive_zone.rst`</span>: the rotational penalty of an <span class="sb">`'SSxcte'`</span>
+  connection is a spring of stiffness <span class="sb">`k_r`</span> per unit width, with the energy
+  <span class="sb">`k_r (w^i_x - w^j_x)^2/2`</span> of the kernels, which adds <span class="sb">`3h/a`</span>, about 13%, to
+  the bending compliance of the DCB arm, not <span class="sb">`2 k_r`</span> and 7%.
+<span class="k">-</span><span class="w"> </span><span class="sb">`doc/source/tangent_product.rst`</span>: the single-shell timings and the rows of
+  0.14.0 of the displacement-controlled post-buckling re-measured with the
+  default integration points of <span class="sb">`gauss_points`</span>; the times of
+  <span class="sb">`doc/source/tabulation.rst`</span> and of the older rows, measured with
+  <span class="sb">`nx = 2m`</span>, <span class="sb">`ny = 2n`</span>, are labelled with these points.
+<span class="k">-</span><span class="w"> </span>Statements checked against the sources: the non-linear terms of the
+  Sanders-Koiter models, without the rotation about the normal, are a
+  simplification of Sanders' theory for small strains and moderately small
+  rotations, whose mid-surface strains also contain <span class="sb">`omega3^2/2`</span> (Amabili
+  2008, Sec. 1.3.8, Eqs. (1.133)-(1.134)), see <span class="sb">`panels.models`</span>; the
+  symmetry conditions of the follower load stiffness with their locations in
+  Hibbitt (1979), pp. 938-939, and Schweizerhof and Ramm (1984), Table 2 and
+  Eqs. (32)-(35), whose Table 3 lists the ring values 3, 4 and 4.5 <span class="sb">`EI/R^3`</span>;
+  the TSDT of the Sanders cylinders as in Reddy and Liu (1985), Eqs. (5),
+  (7) and (11).
+<span class="k">-</span><span class="w"> </span>Notation of <span class="sb">`structsolve`</span> and <span class="sb">`pyfe3d`</span>: the linear constitutive stiffness
+  matrix <span class="sb">`K_C0`</span> (was <span class="sb">`K_0`</span>), the non-linear one `K_CNL = K<span class="ge">_0L + K_</span>L0 +
+  K<span class="ge">_LL`, with the terms of `B_</span>NL` only, and the diagonal scaling vector <span class="sb">`d`</span>
+  of Crisfield's criterion (was <span class="sb">`D`</span>).
+<span class="k">-</span><span class="w"> </span>One notation in the docstrings, <span class="sb">`doc/source`</span>, the markdown of the
+  notebooks, the theory of <span class="sb">`theory/`</span> and the comments of the kernels
+  written by its generators. Vectors are bold lower case, without braces or
+  overbar, e.g. the Ritz constants <span class="sb">`\boldsymbol{c}`</span> (were <span class="sb">`{c}`</span>) and the
+  increment <span class="sb">`\delta \boldsymbol{c}`</span>, except the force vectors and the
+  residual, upper case, <span class="sb">`\boldsymbol{F}_{ext}`</span>, <span class="sb">`\boldsymbol{F}_{int}`</span> and
+  <span class="sb">`\boldsymbol{R}`</span> (also for the lower case <span class="sb">`{f}`</span>, <span class="sb">`{f_int}`</span>, <span class="sb">`{f_ext}`</span> of
+  the null-space method and of the cohesive zone); matrices are bold upper
+  case, without brackets, e.g. <span class="sb">`\boldsymbol{K}`</span> (was <span class="sb">`[K]`</span>); the overbar is
+  kept for prescribed values, the membrane stress resultants <span class="sb">`Nxx`</span>, <span class="sb">`Nyy`</span>,
+  <span class="sb">`Nxy`</span> being <span class="sb">`\bar{\boldsymbol{N}}`</span> (were <span class="sb">`N_0`</span>, <span class="sb">`N^0`</span>; <span class="sb">`KG(Nbar + N_L)`</span> in
+  the comments of the kernels, were <span class="sb">`KG(N0 + N_L)`</span>), and the prescribed
+  values of the null-space method <span class="sb">`\bar{\boldsymbol{d}}_0`</span>,
+  <span class="sb">`\bar{\boldsymbol{d}}_1`</span>, the right-hand side of a block of the
+  elimination being <span class="sb">`\boldsymbol{b}`</span>. The residual is <span class="sb">`R = F_int - F_ext`</span>
+  in all the pages, also in <span class="sb">`follower_pressure.rst`</span> and in the null-space
+  method (were <span class="sb">`F_ext - F_int`</span>), with <span class="sb">`K_T = dR/dc`</span> and the load vector
+  <span class="sb">`-dR/dlambda`</span> of the arc-length methods. <span class="sb">`K_C0`</span> also in
+  <span class="sb">`tangent_product.rst`</span> (was <span class="sb">`K_0`</span>); <span class="sb">`K_CNL`</span> as the sum of its three
+  integrals of <span class="sb">`B_L`</span> and <span class="sb">`B_NL`</span> in <span class="sb">`Shell.calc_kC`</span>, and <span class="sb">`K_CNL + K_GNL`</span>
+  written out where the matrix of <span class="sb">`fkC_num`</span> is meant, in
+  <span class="sb">`tangent_product.rst`</span> (<span class="sb">`K_CNL`</span> included <span class="sb">`K_GNL`</span> there) and in the
+  comments of the kernels, <span class="sb">`KC0 + KCNL + KGNL`</span> (were `K0 + K0L + KL0 + KLL
+  + KGNL`); <span class="sb">`K_GNL`</span> (was <span class="sb">`K_{G_{NL}}`</span>); the load stiffness matrix `K_F =
+  -dF_p/dc` of <span class="sb">`Shell.calc_kCfollower`</span> (was <span class="sb">`K_{C_{follower}}`</span>, and `K_p =
+  -K_F`); the rows <span class="sb">`S^u`</span>, <span class="sb">`S^v`</span>, <span class="sb">`S^w`</span> of the approximation functions (were
+  <span class="sb">`{N_u}`</span>, <span class="sb">`{N_v}`</span>, <span class="sb">`{N_w}`</span>); the tangent vectors <span class="sb">`X_{,x}`</span>, <span class="sb">`X_{,y}`</span> of the
+  follower pressure (were <span class="sb">`A`</span>, <span class="sb">`B`</span>, the symbols of the laminate); the
+  constitutive matrix <span class="sb">`C`</span> of the laminate (was <span class="sb">`[F]`</span>); the factor <span class="sb">`U`</span> of
+  the QR decomposition <span class="sb">`Q U`</span> of the null-space method (was <span class="sb">`[R]`</span>, now
+  free for the residual); the strain operator <span class="sb">`B_L + B_NL`</span>
+  (was <span class="sb">`[B(beta)]`</span>); the pre-buckling state <span class="sb">`c-hat`</span>; the aerodynamic
+  damping matrix <span class="sb">`C_A`</span> (was <span class="sb">`[c_A]`</span>); Bardell's functions <span class="sb">`P_i`</span> (were <span class="sb">`f_i`</span>
+  and <span class="sb">`g_j`</span>); in <span class="sb">`cohesive_zone.rst`</span> the residual <span class="sb">`R = F_int - F_ext`</span> with
+  <span class="sb">`F_int`</span> including the cohesive and the penalty forces, and the first term
+  of the denominator of the convergence criterion <span class="sb">`F_int - K_PD c`</span>, the
+  internal force vector of the drivers, the diagonal scaling vector <span class="sb">`d`</span>
+  (was <span class="sb">`[D]`</span>) and the tangent stiffness matrix <span class="sb">`K_T`</span> (was the Jacobian
+  <span class="sb">`[J]`</span>); the direction <span class="sb">`v`</span> of the Taylor test of the tangent (was <span class="sb">`d`</span>); <span class="sb">`\boldsymbol`</span> (was <span class="sb">`\mathbf`</span>,
+  <span class="sb">`\vec`</span>) and the transpose <span class="sb">`^\top`</span> (was <span class="sb">`^T`</span>). The API names, e.g.
+  <span class="sb">`calc_kCfollower`</span>, the key <span class="sb">`'kCfollower'`</span> and the argument <span class="sb">`c`</span>, are
+  unchanged.
+<span class="k">-</span><span class="w"> </span>New <span class="sb">`notebooks/fk1952_shallow_arches.ipynb`</span>: snap-through of a hinged
+  shallow circular arch, <span class="sb">`lambda_1 = 2.2`</span>, under a sinusoidal dead load,
+  a strip of <span class="sb">`cylshell_clpt_sanders`</span> with <span class="sb">`nu = 0`</span>, traced through both
+  limit points with the Riks and the Crisfield methods of <span class="sb">`structsolve`</span>,
+  each with the convergence criteria <span class="sb">`'crisfield'`</span> and <span class="sb">`'relative'`</span> at the
+  default tolerance, against the symmetric path of Eqs. (15) and (45) of
+  Fung and Kaplan, NACA TN 2840 (1952), solved in the notebook. The four
+  paths coincide; the maximum load is 4.9858 against 4.9822 (+0.074%) and
+  the minimum -0.5883 against -0.5822, differences of the order of
+  <span class="sb">`theta^2 = 2.4e-3`</span>, <span class="sb">`theta`</span> being the half-angle of the arc, the order of
+  the terms in which the model differs from the shallow-arch theory; results
+  stored in <span class="sb">`notebooks/results/fk1952_shallow_arches.json`</span>.
+
+<span class="gu">### Clean-up</span>
+
+<span class="k">-</span><span class="w"> </span>The internal names of partial derivatives follow one convention, an
+  underscore introducing the derivative: <span class="sb">`fAu_xi`</span>, <span class="sb">`gAw_etaeta`</span>, <span class="sb">`f1Aw_xi`</span>,
+  <span class="sb">`sAw_eta`</span> (were <span class="sb">`fAuxi`</span>, <span class="sb">`gAwetaeta`</span>, <span class="sb">`f1Awxi`</span>, <span class="sb">`sAweta`</span>), <span class="sb">`w_xi`</span> and
+  <span class="sb">`w_x`</span> (were <span class="sb">`wxi`</span>, <span class="sb">`wx`</span>) in the kernels of the models, connections and
+  stiffeners and in their generators in <span class="sb">`theory/`</span>; <span class="sb">`fu_xi`</span>, <span class="sb">`gw_eta`</span>, <span class="sb">`w_x`</span>
+  and <span class="sb">`cfw_x`</span> in <span class="sb">`panels/models/clpt_field.pyx`</span>; <span class="sb">`f_xi`</span>, <span class="sb">`g_eta`</span>, <span class="sb">`val_x`</span>
+  and <span class="sb">`val_xx`</span> (were <span class="sb">`fxi`</span>, <span class="sb">`geta`</span>, <span class="sb">`dx`</span>, <span class="sb">`dxx`</span>) in
+  <span class="sb">`panels/models/fsdt_tsdt_field.pyx`</span>; <span class="sb">`u_x`</span> to <span class="sb">`w_y`</span> in the
+  follower-pressure kernels; <span class="sb">`w_x`</span>, <span class="sb">`w_xx`</span>, <span class="sb">`Mxx_x`</span> and <span class="sb">`Qx_x`</span> (were
+  <span class="sb">`dw_dx`</span>, <span class="sb">`d2w_dx2`</span>, <span class="sb">`dMxx_dx`</span>, <span class="sb">`dQx_dx`</span>) in <span class="sb">`MultiDomain.force_out_plane`</span>;
+  also in the tests, notebooks and theory scripts. The public API, the
+  Bardell functions <span class="sb">`fp`</span> and <span class="sb">`fpp`</span> (<span class="sb">`calc_vec_fp`</span>, <span class="sb">`integral_ffp`</span>, ...),
+  the names of the integrals of products (e.g. <span class="sb">`fAufBuxi`</span>) and
+  the quadrature weights (<span class="sb">`wx`</span>, <span class="sb">`wxi`</span>, ...) are unchanged, and so are the
+  results, bit for bit.
+
+<span class="gu">### Dependencies</span>
+
+<span class="k">-</span><span class="w"> </span>Requires <span class="sb">`composites&gt;=0.10.0`</span>, for <span class="sb">`Laminate.intrhoz3`</span>, <span class="sb">`intrhoz4`</span> and
+  <span class="sb">`intrhoz6`</span>, and <span class="sb">`structsolve&gt;=0.9.3`</span>, whose residual is `R = F_int -
+  lambda F<span class="ge">_ext`, with `K_</span>T = dR/dc`, the convention of the documentation of
+  <span class="sb">`panels`</span> (was <span class="sb">`lambda F_ext - F_int`</span> up to 0.9.2). The default
+  convergence criterion of <span class="sb">`structsolve`</span> is Crisfield's since 0.9.0. 0.9.2
+  fixes the arc-length methods, which could accept a step that converged
+  back to the point
+  before the last one and then trace the path backwards ("doubling back"):
+  with 0.9.0 and 0.9.1 the Riks path of the <span class="sb">`[90/0/90]`</span> hinged roof with
+  <span class="sb">`h = 12.7`</span> and the TSDT of <span class="sb">`notebooks/sze2004_hinged_roofs.ipynb`</span> turned
+  back down the loading branch at the step through the limit point, and its
+  limit load was 1780.7 instead of 1783.8.
+
+<span class="gu">## 0.13.11 (2026-10-16)</span>
+
+<span class="gu">### Bug fix: one constitutive matrix for all the kernels</span>
+
+<span class="k">-</span><span class="w"> </span>The analytical <span class="sb">`fk0`</span> of the three models based on the classical laminated
+  plate theory (<span class="sb">`plate_clpt_donnell`</span>, <span class="sb">`cylshell_clpt_donnell`</span>,
+  <span class="sb">`cylshell_clpt_sanders`</span>) read <span class="sb">`shell.lam.ABD`</span> instead of <span class="sb">`shell.ABD`</span>, like
+  every other kernel, therefore ignored <span class="sb">`force_orthotropic_laminate=True`</span>:
+  the linear static and linear buckling analyses with the analytical <span class="sb">`kC`</span>
+  used the anisotropic laminate, which was inconsistent with <span class="sb">`calc_fint`</span>,
+  with the numerical tangent stiffness matrix and with the partial domains,
+  e.g. a relative difference of <span class="sb">`1.2e-1`</span> between the analytical and the
+  numerical <span class="sb">`kC`</span> for the laminate <span class="sb">`[30, -60, 15]`</span>. They now read
+  <span class="sb">`shell.ABD`</span> and check that it is a 6 x 6 matrix; the generator
+  <span class="sb">`theory/shells/cylshell_clpt_sanders/derive_expressions.py`</span> is fixed
+  accordingly. No test, notebook or documented result used
+  <span class="sb">`force_orthotropic_laminate=True`</span> with these models, no reference value
+  changes.
+<span class="k">-</span><span class="w"> </span><span class="sb">`Shell.calc_kG`</span> with <span class="sb">`c`</span> integrated a new copy of the laminate matrix
+  instead of the one of the other kernels.
+
+<span class="gu">### Changed: `Shell.ABD` is calculated from the laminate, new `Shell.ABDnxny`</span>
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`Shell.ABD`</span> is no longer an attribute, whose value set by the user was
+  silently replaced by <span class="sb">`_rebuild()`</span> in <span class="sb">`calc_kC`</span>, <span class="sb">`calc_kG`</span>, <span class="sb">`calc_fext`</span>,
+  etc.: it is a read-only property, calculated from <span class="sb">`Shell.lam`</span> at each
+  access with the coupling terms zeroed by <span class="sb">`force_orthotropic_laminate`</span>,
+  <span class="sb">`None`</span> before the laminate is built. Assigning it, also as
+  <span class="sb">`Shell(ABD=...)`</span>, raises an <span class="sb">`AttributeError`</span>.
+<span class="k">-</span><span class="w"> </span>New attribute <span class="sb">`Shell.ABDnxny`</span>, <span class="sb">`None`</span> by default, never allocated
+  otherwise: a stiffness that is not that of the laminate, either constant,
+  <span class="sb">`(ne, ne)`</span>, or one matrix per integration point, <span class="sb">`(nx, ny, ne, ne)`</span>, with
+  <span class="sb">`ne`</span> = 6 (CLPT), 8 (FSDT) or 13 (TSDT). When set, <span class="sb">`calc_kC`</span>, <span class="sb">`calc_kG`</span>,
+  <span class="sb">`calc_kT`</span>, <span class="sb">`calc_kTv`</span> and <span class="sb">`calc_fint`</span> integrate it numerically, the
+  analytical <span class="sb">`kC`</span> being skipped, also within a <span class="sb">`MultiDomain`</span> and in the
+  analyses of <span class="sb">`structsolve`</span>, which call these methods; the argument
+  <span class="sb">`ABDnxny`</span> of these methods still takes precedence. With one matrix per
+  point, <span class="sb">`nx`</span> and <span class="sb">`ny`</span> default to its shape. The mass, the thickness of the
+  TSDT kinematics and the penalty constants of the connections still come
+  from the laminate, as documented in <span class="sb">`calc_kt_kr`</span> and <span class="sb">`tsl_resolution`</span>.
+<span class="k">-</span><span class="w"> </span>New <span class="sb">`Shell.integration_points(nx=None, ny=None)`</span>: the physical
+  coordinates and weights of the Legendre-Gauss points, mapped to
+  <span class="sb">`Shell.integration_limits()`</span>, <span class="sb">`ABDnxny[i, j]`</span> being the matrix of the
+  point <span class="sb">`(xs[i], ys[j])`</span>.
+<span class="k">-</span><span class="w"> </span><span class="sb">`Shell.stress`</span> accepts a stiffness per point, <span class="sb">`ABD`</span> of shape `xs.shape +
+  (ne, ne)`, and by default uses <span class="sb">`Shell.ABDnxny`</span>; with one matrix per
+  integration point and without <span class="sb">`xs`</span>, <span class="sb">`ys`</span>, the stresses are calculated at
+  the integration points. <span class="sb">`MultiDomain.stress`</span>, and through it
+  <span class="sb">`MultiDomain.calc_results`</span>, <span class="sb">`MultiDomain.force`</span> and
+  <span class="sb">`MultiDomain.force_out_plane`</span>, use a constant <span class="sb">`ABDnxny`</span> and raise a
+  <span class="sb">`ValueError`</span> for one per point.
+<span class="k">-</span><span class="w"> </span>The docstrings of <span class="sb">`calc_kC`</span>, <span class="sb">`calc_fint`</span> and the related methods document
+  the shape and the point order of <span class="sb">`ABDnxny`</span>.
+<span class="k">-</span><span class="w"> </span><span class="sb">`ABDnxny`</span> is checked before it is integrated, since the kernels read only
+  the upper entries of each block: a <span class="sb">`ValueError`</span>, naming the block and the
+  integration point, is raised unless the matrix and its blocks <span class="sb">`B`</span> and, for
+  the TSDT, <span class="sb">`E`</span>, <span class="sb">`F`</span> and <span class="sb">`Dts`</span> are symmetric, and the transverse shear is
+  uncoupled from the other strains, as for any laminate, to <span class="sb">`1e-10`</span> times
+  the largest entry. A matrix symmetric as a whole but with, e.g., `B12 !=
+  B21` was integrated wrongly without error. The shape is checked as well.
+<span class="k">-</span><span class="w"> </span>Saving and loading: <span class="sb">`ABDnxny`</span> is saved instead of <span class="sb">`ABD`</span>; the <span class="sb">`ABD`</span> of the
+  files of older versions is read and discarded, being that of the
+  laminate.
+<span class="k">-</span><span class="w"> </span>Tests: <span class="sb">`tests/tests_shell/test_abd_consistency.py`</span>, for the 9 models: the
+  analytical <span class="sb">`kC`</span> against the numerical one with and without
+  <span class="sb">`force_orthotropic_laminate`</span>, for an anisotropic, unsymmetric laminate;
+  the equilibrium of the linear static solution according to <span class="sb">`calc_fint`</span>;
+  the buckling load of a forced orthotropic plate against the closed-form
+  solution, single and divided in domains; the point order of <span class="sb">`ABDnxny`</span>
+  against the strain energy summed over <span class="sb">`Shell.integration_points()`</span>, for
+  full and partial domains with <span class="sb">`nx != ny`</span>, which a reversed field fails;
+  <span class="sb">`Shell.ABDnxny`</span> against the argument, within a <span class="sb">`MultiDomain`</span>, in
+  <span class="sb">`Shell.stress`</span> and saved and loaded; the checks of <span class="sb">`ABDnxny`</span>.
+
+<span class="gu">### Tests and coverage</span>
+
+<span class="k">-</span><span class="w"> </span>Every Python line added or changed for this version is covered by the
+  tests, and so are the new checks of the analytical CLPT kernels, by
+  calling them with a stand-in for <span class="sb">`Shell`</span>.
+<span class="k">-</span><span class="w"> </span>New tests of the argument handling of <span class="sb">`Shell`</span>, in
+  <span class="sb">`tests/tests_shell/test_argument_validation.py`</span>: <span class="sb">`size='+n'`</span> of
+  <span class="sb">`calc_kC`</span>, <span class="sb">`calc_kG`</span>, <span class="sb">`calc_kM`</span>, <span class="sb">`calc_kA`</span>, <span class="sb">`calc_kCfollower`</span>,
+  <span class="sb">`calc_fint`</span>, <span class="sb">`calc_kTv`</span> and <span class="sb">`calc_fext_follower`</span>; <span class="sb">`Nxx_cte`</span> in the
+  analytical <span class="sb">`calc_kC`</span>; the errors of <span class="sb">`_get_lam_ABD`</span>,
+  <span class="sb">`integration_limits`</span>, <span class="sb">`global_frame`</span>, <span class="sb">`strain`</span>,
+  <span class="sb">`add_distr_load_fixed_x`</span> and <span class="sb">`add_distr_pd_fixed_x`</span>; and the errors of a
+  model registered without the kernels of <span class="sb">`calc_kTv`</span>, of the follower
+  pressure loads or of <span class="sb">`calc_fint`</span>.
+<span class="k">-</span><span class="w"> </span>New tests of <span class="sb">`MultiDomain.stress`</span> and <span class="sb">`MultiDomain.force`</span> with
+  <span class="sb">`ABDnxny`</span>, and of the penalty constants of the connections
+  <span class="sb">`'xcte-ycte'`</span> and <span class="sb">`'ycte-xcte'`</span>.
+<span class="k">-</span><span class="w"> </span><span class="sb">`Shell.global_frame`</span> checks that <span class="sb">`point_x`</span> and <span class="sb">`point_xy`</span> have three
+  coordinates before using them, instead of failing with a broadcasting
+  error.
+<span class="k">-</span><span class="w"> </span><span class="sb">`connections.build_panel_lam`</span> is reduced to <span class="sb">`Shell._rebuild()`</span>, the
+  laminate being always built by it, without the unreachable fallback.
+<span class="k">-</span><span class="w"> </span>The branches of <span class="sb">`MultiDomain.force_out_plane`</span> disabled by hard-coded
+  switches, the area integral and the von Kármán integral, are excluded
+  from the coverage.
+
+<span class="gu">### Documentation: tangent stiffness of the CLPT models with Donnell kinematics</span>
+
+<span class="k">-</span><span class="w"> </span>The derivation of the internal force vector and of the tangent stiffness
+  matrix of <span class="sb">`plate_clpt_donnell`</span> and <span class="sb">`cylshell_clpt_donnell`</span>, kept as the
+  LaTeX file <span class="sb">`theory/shells/tangent_stiffness_clpt_donnell.tex`</span>, outside the
+  documentation and with line numbers of the code that were out of date, is
+  now a section of <span class="sb">`doc/source/tangent_product.rst`</span>, renamed "Tangent
+  stiffness matrix and its product by a vector": the two integration paths
+  and when each is taken, the approximation functions, the kinematics, the
+  operators <span class="sb">`B_L`</span>, <span class="sb">`B_NL`</span> and <span class="sb">`G`</span>, the internal force vector, the grouping
+  of the terms between <span class="sb">`calc_kC`</span> and <span class="sb">`calc_kG`</span> and why <span class="sb">`K_GNL`</span> is in
+  <span class="sb">`calc_kC`</span>, the closed-form path, the quadrature, the multi-domain
+  assembly, the symbols against the variables of the kernels, and the
+  verification. Each equation names the function or kernel that evaluates
+  it, checked against the current code, and the equations it needed from
+  outside are written out. The <span class="sb">`.tex`</span> is removed and <span class="sb">`*.tex`</span> ignored.
+<span class="k">-</span><span class="w"> </span>New docstrings of <span class="sb">`MultiDomain.calc_kT`</span> and <span class="sb">`MultiDomain.calc_fint`</span>.
+<span class="k">-</span><span class="w"> </span><span class="sb">`MultiDomain.calc_kT`</span> no longer has the argument <span class="sb">`kw_tsl`</span>, which was not
+  used: the stiffness of a damaged cohesive connection is part of the
+  matrix of the connections, <span class="sb">`kC_conn`</span>.
+
+<span class="gu">### New: product of the tangent stiffness matrix by a vector, without assembly</span>
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`Shell.calc_kTv(c, v, ..., inc=1.)`</span> and `MultiDomain.calc_kTv(c, v,
+  inc=1.)` return <span class="sb">`K_T(c) v`</span>, with <span class="sb">`K_T`</span> of <span class="sb">`Shell.calc_kT`</span> and of
+  <span class="sb">`MultiDomain.calc_kC + calc_kG`</span> with <span class="sb">`NLgeom=True`</span>, for all the 9
+  geometrically non-linear models, at the cost of about one <span class="sb">`calc_fint`</span>
+  instead of the assembly of <span class="sb">`K_T`</span>, which grows with the square of the
+  number of terms: 20 to 300 times faster than the assembly for <span class="sb">`m = n = 8`</span>
+  to <span class="sb">`16`</span>, see <span class="sb">`doc/source/tangent_product.rst`</span>. Exact to round-off,
+  including the constant membrane stresses <span class="sb">`Nxx_cte`</span>, <span class="sb">`Nyy_cte`</span>, <span class="sb">`Nxy_cte`</span>,
+  one constitutive matrix per integration point, partial integration
+  domains, the follower pressure loads (an exact central difference of their
+  force vector, at most quadratic in <span class="sb">`c`</span>) and, for <span class="sb">`MultiDomain`</span>, the
+  penalty connections.
+<span class="k">-</span><span class="w"> </span>New kernels <span class="sb">`calc_kTv`</span> in every <span class="sb">`panels/models/&lt;model&gt;_num.pyx`</span>,
+  generated by the new <span class="sb">`theory/shells/tangent_product`</span>: at each integration
+  point <span class="sb">`K_T v = [B(beta)]^T [F] [B(beta)] v + [G]^T [N] [G] v`</span>, with the
+  approximation functions tabulated once per point; <span class="sb">`tangent_product.py`</span>
+  verifies with SymPy, for every model, that it is the directional
+  derivative of the internal force vector, and <span class="sb">`tangent_product.md`</span>
+  describes the derivation.
+<span class="k">-</span><span class="w"> </span>New documentation page <span class="sb">`doc/source/tangent_product.rst`</span>; a note in the
+  Newton-Raphson example <span class="sb">`doc/source/ex_newton_raphson.rst`</span>.
+<span class="k">-</span><span class="w"> </span>Tests: <span class="sb">`tests/tests_shell/test_tangent_product.py`</span> (the checks of
+  <span class="sb">`test_tangent_consistency.py`</span> for the product: equality with `calc_kT @
+  v`, Taylor test, finite-difference Jacobian, undeformed state, quadratic
+  convergence of Newton-Raphson) and
+  <span class="sb">`tests/multidomain/test_tangent_product_multidomain.py`</span>.
+
+<span class="gu">### Performance: prescribed displacements imposed exactly</span>
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`MultiDomain.get_reduced_functions()`</span> computes <span class="sb">`K_T(c) c_p1`</span> of
+  <span class="sb">`dR_r/dlbd = T^T (F_ext - K_T(c) c_p1)`</span> with <span class="sb">`MultiDomain.calc_kTv`</span>
+  instead of assembling <span class="sb">`K_T`</span>; the cache of the full tangent stiffness
+  matrices of the last configuration, used only for this product, is
+  removed, and <span class="sb">`calc_kC`</span> and <span class="sb">`calc_kG`</span> of the reduced functions assemble
+  the full matrices directly. With the tabulation below and <span class="sb">`structsolve`</span>
+  0.8.0, see Dependencies, the displacement-controlled post-buckling of a plate with
+  <span class="sb">`m = n = 12`</span> runs in 11.8 s instead of 285 s (Newton-Raphson), 7.8 s
+  instead of 705 s (modified Newton-Raphson) and 18.4 s instead of 363 s
+  (Riks), with the same reactions. The run times of the penalty-vs-null-space
+  study in <span class="sb">`doc/source/multidomain_null_space.rst`</span> are updated.
+
+<span class="gu">### Performance: approximation functions tabulated at the integration points</span>
+
+<span class="k">-</span><span class="w"> </span>Every numerically integrated kernel evaluates the approximation functions
+  once per integration point and term, in tables read by the loops over the
+  terms, instead of again in every loop, the innermost one included: the 9
+  models (<span class="sb">`fkC_num`</span>, <span class="sb">`fkG_num`</span>, <span class="sb">`calc_fint`</span>, <span class="sb">`fkM_num`</span>, <span class="sb">`fkAx_num`</span>,
+  <span class="sb">`fkAy_num`</span>, <span class="sb">`calc_fext_follower`</span>, <span class="sb">`fkCfollower_num`</span>), the connections
+  (<span class="sb">`kCSSxcte`</span>, <span class="sb">`kCSSycte`</span>, <span class="sb">`kCBFxcte`</span>, <span class="sb">`kCBFycte`</span> with the shear deformation
+  theories, <span class="sb">`kCpd`</span>, <span class="sb">`kCSB_dmg`</span>) and the blade stiffeners
+  (<span class="sb">`bladestiff1d_clt_donnell`</span>, <span class="sb">`bladestiff2d_clt_donnell`</span>). Per integration
+  point the number of evaluations falls from <span class="sb">`O(m^2 n^2)`</span> to <span class="sb">`O(m + n)`</span>:
+  for <span class="sb">`m = n = 12`</span>, <span class="sb">`fkC_num`</span> with <span class="sb">`NLgeom`</span> 3.5 to 17 times faster, <span class="sb">`fkG_num`</span>
+  30 to 60, <span class="sb">`calc_fint`</span> 10, <span class="sb">`fkCfollower_num`</span> 16 to 26, <span class="sb">`fkM_num`</span> 9 to 36,
+  <span class="sb">`kCSB_dmg`</span> 57 and <span class="sb">`kCSSxcte`</span> 15; the DCB test with cohesive zone runs in
+  2 min 45 s instead of 7 min 28 s. The results are identical, bit for bit:
+  the outputs of 73946 calls of the 92 kernels recorded while running the
+  tests of the models, follower pressures, partial domains, connections,
+  cohesive zone and stiffened panels are the same as before.
+<span class="k">-</span><span class="w"> </span>New <span class="sb">`panels.dev.tabulate`</span>, which rewrites the kernels, applied by the
+  generators <span class="sb">`fsdt_tsdt/write_pyx.py`</span>, <span class="sb">`cylshell_clpt_sanders/write_pyx.py`</span>
+  and <span class="sb">`follower_pressure/write_pyx.py`</span>, and with `python -m
+  panels.dev.tabulate &lt;file.pyx&gt;` to the modules written by hand. The
+  helper <span class="sb">`_terms_sdt`</span> of <span class="sb">`kCBFxcte`</span> and <span class="sb">`kCBFycte`</span> was tabulated by hand.
+<span class="k">-</span><span class="w"> </span>New documentation page <span class="sb">`doc/source/tabulation.rst`</span>, comparing with the
+  previous implementation.
+<span class="k">-</span><span class="w"> </span>Tests: <span class="sb">`tests/test_tabulate.py`</span>, including a check that no kernel of the
+  package evaluates the approximation functions in its loops any more.
+
+<span class="gu">### Cohesive zone (`'SB_TSL'`): discretisation rules and checks</span>
+
+<span class="k">-</span><span class="w"> </span>New module <span class="sb">`panels.multidomain.connections.tsl`</span> with the rules of the
+  convergence study of <span class="sb">`doc/source/cohesive_zone.rst`</span>:
+  <span class="sb">`tsl_resolution(p1, k_o, tau_o, G1c, p2=None)`</span> returns the decay rate of
+  the opening <span class="sb">`w1 - w2`</span> of the two panels of the connection,
+  <span class="sb">`lambda = (k_o (1/D11_1 + 1/D11_2)/4)**0.25`</span>, <span class="sb">`(k_o/(2 D11))**0.25`</span> for
+  the symmetric DCB (by default <span class="sb">`p2`</span> has the <span class="sb">`D11`</span> of <span class="sb">`p1`</span>), and the cohesive
+  zone length <span class="sb">`l_cz = 0.88 E2 G1c/tau_o**2`</span>; <span class="sb">`tsl_margin(lam, lcz)`</span> the
+  length <span class="sb">`3 l_cz + 8/lambda`</span> needed ahead of the crack front, the process
+  zone and the region where the opening decays as <span class="sb">`exp(-lambda x)`</span>, the
+  solution of beams on an elastic foundation (Kanninen 1973), to below
+  <span class="sb">`exp(-8)`</span> of its value; and
+  <span class="sb">`tsl_discretization(lam, lcz, L_tsl)`</span> the terms <span class="sb">`m = 1.25 lambda L_tsl`</span>
+  and Gauss points <span class="sb">`nx = 10 L_tsl/l_cz`</span> along <span class="sb">`x`</span>. The loads of the DCB are
+  converged to 0.1% from <span class="sb">`m = 1.0 lambda L_tsl`</span>. The tag 0.13.9 used
+  <span class="sb">`(k_o/(4 D11))**0.25`</span>, the rate of one panel on a rigid foundation,
+  <span class="sb">`2**-0.25`</span> times the rate of the symmetric DCB, with the factors 1.5 and
+  1.2 instead of 1.25 and 1.0; the linear compliance of the DCB of Krueger
+  (2008) confirms the corrected rate (1.1005 times that of the simple beam
+  theory with panels, 1.0973 for two beams connected by the foundation
+  <span class="sb">`k_o`</span>, 1.116 with the rate of the tag 0.13.9). The margin of the tag
+  0.13.9, <span class="sb">`2 pi/lambda + 3 l_cz`</span>, is <span class="sb">`7.47/lambda + 3 l_cz`</span> with the
+  corrected rate; <span class="sb">`2 pi/lambda + 3 l_cz`</span> with the corrected rate would let
+  the tractions reach the perfect bond in the last openings of the DCB
+  validation runs, with differences between the load and the integral of
+  the cohesive tractions up to 10%, against 0.25% at most with
+  <span class="sb">`3 l_cz + 8/lambda`</span> when the basis follows the rules and the perfect bond
+  is not wider than the bonded strip. The validation runs of the DCB notebooks were
+  repeated with the corrected rules.
+<span class="k">-</span><span class="w"> </span><span class="sb">`MultiDomain.calc_k_dmg`</span> prints a warning, once, the first time a point is
+  damaged, when the cohesive domain has fewer than <span class="sb">`1.0 lambda a`</span> terms or
+  <span class="sb">`7 a/l_cz`</span> Gauss points along <span class="sb">`x`</span>, with <span class="sb">`lambda`</span> of both panels.
+<span class="k">-</span><span class="w"> </span>The Gauss-Legendre points of <span class="sb">`MultiDomain.calc_results`</span> and
+  <span class="sb">`MultiDomain.force`</span> are no longer limited to 304: the rules come from
+  <span class="sb">`scipy.special.roots_legendre`</span>, without an upper limit.
+<span class="k">-</span><span class="w"> </span><span class="sb">`connections.calc_kw_tsl`</span> requires <span class="sb">`k_i`</span>, <span class="sb">`tau_o`</span> and <span class="sb">`G1c`</span> instead of
+  silent defaults, accepts only <span class="sb">`tsl_type='bilinear'`</span>, and no longer has the
+  unused interpenetration stiffness <span class="sb">`k_ipen`</span>; the damage and the stiffness
+  are unchanged.
+<span class="k">-</span><span class="w"> </span>Tests: <span class="sb">`tests/multidomain/test_tsl_resolution.py`</span>, including the rate of
+  two different panels and its limit for a rigid second panel; in
+  <span class="sb">`tests/multidomain/test_multidomain_postprocessing.py`</span>, the checks that
+  more than 304 Gauss points raise a <span class="sb">`ValueError`</span> are replaced by checks
+  that 305 points along <span class="sb">`x`</span> or <span class="sb">`y`</span> give the same results.
+
+<span class="gu">### Generators</span>
+
+<span class="k">-</span><span class="w"> </span>The whole-module generators <span class="sb">`theory/shells/fsdt_tsdt/write_pyx.py`</span> and
+  <span class="sb">`theory/shells/cylshell_clpt_sanders/write_pyx.py`</span> tabulate the kernels,
+  append <span class="sb">`calc_kTv`</span>, and write the <span class="sb">`initializedcheck=False`</span> directive of the
+  committed modules, such that they reproduce them exactly;
+  <span class="sb">`theory/shells/follower_pressure/write_pyx.py`</span> tabulates its kernels.
+
+<span class="gu">### Notebooks</span>
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`doc/source/cohesive_zone.rst`</span>: new convergence study of the cohesive
+  domain, on the DCB of Tijs et al. (2022) with <span class="sb">`L = 100`</span> mm, and run times
+  of panels 0.13.11.
+<span class="k">-</span><span class="w"> </span><span class="sb">`notebooks/dcb_utils.py`</span>: <span class="sb">`discretize`</span> without a cap on the Gauss points,
+  <span class="sb">`build_dcb`</span> fills a missing <span class="sb">`m_tsl`</span> or <span class="sb">`nx`</span> from the rules, and the
+  results store the case, the solver settings, the version of <span class="sb">`panels`</span> and
+  the connection method; <span class="sb">`run_or_load`</span> reports a stored run of a different
+  model.
+<span class="k">-</span><span class="w"> </span>New <span class="sb">`notebooks/README.md`</span>, <span class="sb">`notebooks/dcb_mode_I_solver_study.py`</span> and
+  <span class="sb">`notebooks/dcb_mode_I_validation_rerun.py`</span>.
+<span class="k">-</span><span class="w"> </span>Renamed, after their scope, the mode I DCB: <span class="sb">`notebooks/convergence_study.py`</span>
+  to <span class="sb">`notebooks/dcb_mode_I_convergence_study.py`</span>, with its results
+  <span class="sb">`notebooks/results/dcb_mode_I_convergence_study.json`</span>, and
+  <span class="sb">`notebooks/validation_summary.ipynb`</span> to
+  <span class="sb">`notebooks/dcb_mode_I_validation_summary.ipynb`</span>.
+<span class="k">-</span><span class="w"> </span>Renamed the DCB notebooks with the prefix <span class="sb">`dcb_`</span>: <span class="sb">`alfano2001_dcb.ipynb`</span>
+  to <span class="sb">`dcb_alfano2001.ipynb`</span>, and in the same way <span class="sb">`dcb_camanho2003.ipynb`</span>,
+  <span class="sb">`dcb_krueger2008.ipynb`</span>, <span class="sb">`dcb_lecinana2023.ipynb`</span>, <span class="sb">`dcb_tijs2022.ipynb`</span>,
+  <span class="sb">`dcb_tijs2023_phd.ipynb`</span> and <span class="sb">`dcb_turon2007.ipynb`</span>.
+<span class="k">-</span><span class="w"> </span>New <span class="sb">`dcb_utils.opening_at_crack_length`</span>: the last opening of the DCB
+  notebooks is that at which the crack front of the model reaches the crack
+  growth covered by the cohesive domain, from the effective crack length
+  <span class="sb">`a + l_cz + 1/lambda`</span>, instead of the corrected beam theory, whose
+  shorter crack let the last openings go beyond the cohesive domain.
+<span class="k">-</span><span class="w"> </span><span class="sb">`dcb_tijs2022.ipynb`</span>: the specimen with <span class="sb">`a_0 = 40`</span> mm is run with
+  <span class="sb">`G_Ic = 0.95`</span> N/mm, the propagation toughness of the test DCB (2) of the
+  paper, and the LEFM curves are given with the toughnesses of the model and
+  the initiation toughness, 0.7 N/mm.
+
+<span class="gu">### Dependencies</span>
+
+<span class="k">-</span><span class="w"> </span>Requires <span class="sb">`structsolve&gt;=0.8.0`</span>, which evaluates <span class="sb">`dR_r/dlbd`</span> only together
+  with the tangent stiffness matrix, saving evaluations of
+  <span class="sb">`MultiDomain.calc_kTv`</span>, and reuses the factorizations of the tangent
+  stiffness matrix in the modified Newton-Raphson method.
+
+<span class="gu">### Maintenance</span>
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`.gitignore`</span> without the runs of <span class="sb">`thesis_timing.py`</span>, which was moved out
+  of the repository.
+
+<span class="gu">## 0.12.0 (2026-10-14)</span>
+
+<span class="gu">### New: prescribed displacements imposed exactly with the null-space method</span>
+
+<span class="sb">`MultiDomain(..., pd_method='null-space')`</span> imposes the prescribed
+displacements of <span class="sb">`Shell.add_point_pd`</span>, <span class="sb">`Shell.add_distr_pd_fixed_x`</span> and
+<span class="sb">`Shell.add_distr_pd_fixed_y`</span> exactly, as the inhomogeneous linear constraints
+<span class="sb">`B_d c = d_0 + lbd*d_1`</span>, <span class="sb">`d_0`</span> from the constant prescriptions
+(<span class="sb">`cte=True`</span>) and <span class="sb">`d_1`</span> from those incremented with the load factor
+(<span class="sb">`cte=False`</span>), eliminated together with the connections:
+<span class="sb">`c = T c_r + c_p0 + lbd*c_p1`</span>. The default <span class="sb">`pd_method='penalty'`</span> keeps the
+previous behaviour, bit for bit. See the new section "Prescribed
+displacements imposed exactly" of <span class="sb">`doc/source/multidomain_null_space.rst`</span>.
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`nullspace.Elimination`</span>: the elimination of <span class="sb">`null_space_basis`</span> one block
+  at a time, unchanged for the connections (<span class="sb">`T`</span> is bit-identical), keeping
+  the data of the blocks with a right-hand side, from which the particular
+  solutions are computed for any prescribed values without a new
+  decomposition. New <span class="sb">`nullspace.pd_constraint_matrix`</span>, <span class="sb">`pd_points`</span>,
+  <span class="sb">`pd_blocks`</span>, <span class="sb">`pd_entries`</span>, <span class="sb">`pd_rhs`</span> and <span class="sb">`PD_COMPONENTS`</span>. The constraints
+  are taken at <span class="sb">`max(n, 4)`</span> (or <span class="sb">`max(m, 4)`</span>) Gauss-Legendre points along a
+  line, exact along the whole line for polynomial prescribed functions up to
+  that degree.
+<span class="k">-</span><span class="w"> </span><span class="sb">`MultiDomain.get_T(conn=None, tol=None, rhs_tol=None)`</span> also eliminates the
+  prescribed displacements; <span class="sb">`T`</span> is rebuilt only when their positions or
+  components change. New <span class="sb">`MultiDomain.get_cp()`</span> returns <span class="sb">`c_p0`</span> and <span class="sb">`c_p1`</span>
+  (attributes <span class="sb">`c_p0`</span>, <span class="sb">`c_p1`</span>), reading the prescribed values again from the
+  panels.
+<span class="k">-</span><span class="w"> </span><span class="sb">`MultiDomain.expand(c_r, lbd=None)`</span>: with <span class="sb">`lbd`</span>, the configuration
+  <span class="sb">`T c_r + c_p0 + lbd*c_p1`</span>; without it, <span class="sb">`T c_r`</span>, as before, e.g. for modes.
+<span class="k">-</span><span class="w"> </span><span class="sb">`MultiDomain.get_reduced_functions()`</span>: with prescribed displacements, the
+  callables build the configuration from <span class="sb">`inc`</span>, <span class="sb">`calc_kG`</span> declares <span class="sb">`inc`</span>,
+  and <span class="sb">`calc_fext(inc, c=c, lbd=lbd)`</span> returns `dR_r/dlbd =
+  T^T (F_ext - K<span class="ge">_T(c) c_</span>p1)`, which <span class="sb">`structsolve&gt;=0.7.0`</span> uses in the
+  predictors, in the arc-length constraint and in the convergence criterion.
+  The full tangent stiffness matrix of the last configuration is cached, so
+  that <span class="sb">`dR_r/dlbd`</span> costs no extra assembly in the arc-length methods.
+  <span class="sb">`Analysis.static(NLgeom=False)`</span> raises an error pointing to the new
+  <span class="sb">`MultiDomain.linear_static()`</span>. Without prescribed displacements the
+  callables are unchanged.
+<span class="k">-</span><span class="w"> </span>New <span class="sb">`MultiDomain.linear_static(lbd=1.)`</span> and
+  <span class="sb">`MultiDomain.linear_buckling(num_eigvalues=25, c=None, **kwargs)`</span>, whose
+  pre-buckling state <span class="sb">`c_0 + lbd*c_1`</span> separates the constant prescribed
+  displacements.
+<span class="k">-</span><span class="w"> </span>Reactions: <span class="sb">`MultiDomain.reaction_pd(c, lbd=1., NLgeom=True)`</span>, the
+  generalized reactions <span class="sb">`c_pj^T (F_int(c) - lbd*F_ext)`</span> work-conjugate to the
+  constant and the incremented prescriptions, independent of the particular
+  solution; <span class="sb">`MultiDomain.reaction_resultant(c, lines, lbd=1., NLgeom=True)`</span>,
+  the resultant forces along <span class="sb">`u`</span>, <span class="sb">`v`</span>, <span class="sb">`w`</span> of selected prescribed lines or
+  points.
+<span class="k">-</span><span class="w"> </span>Redundant prescriptions are dropped when consistent, e.g. at corners with
+  connections or other prescriptions, or on terms removed by boundary
+  condition flags; inconsistent ones raise a <span class="sb">`ValueError`</span> naming the panels,
+  the prescriptions, the flags to release and the constraints involved.
+<span class="k">-</span><span class="w"> </span>Prescribed rotations, <span class="sb">`kphix`</span>, <span class="sb">`phixp`</span>, <span class="sb">`kphiy`</span>, <span class="sb">`phiyp`</span> of
+  <span class="sb">`Shell.add_point_pd`</span> and <span class="sb">`kphix`</span>, <span class="sb">`funcphix`</span>, <span class="sb">`kphiy`</span>, <span class="sb">`funcphiy`</span> of the
+  distributed ones, only with <span class="sb">`pd_method='null-space'`</span>; with the penalty
+  method <span class="sb">`calc_fext`</span> raises <span class="sb">`NotImplementedError`</span>.
+<span class="k">-</span><span class="w"> </span><span class="sb">`Shell`</span> stores the prescribed values in the new attributes
+  <span class="sb">`point_pds_values`</span>, <span class="sb">`point_pds_values_inc`</span>, <span class="sb">`distr_pds_values`</span> and
+  <span class="sb">`distr_pds_values_inc`</span>. <span class="sb">`json_io`</span> saves the point values, together with
+  <span class="sb">`MultiDomain.pd_method`</span> and the <span class="sb">`rhs_tol`</span> of <span class="sb">`MultiDomain.get_T()`</span>; the
+  distributed ones contain functions and, as <span class="sb">`distr_pds`</span>, cannot be saved.
+  A penalty constant <span class="sb">`None`</span> with a value now prescribes nothing in
+  <span class="sb">`add_point_pd`</span>, instead of raising <span class="sb">`TypeError`</span>.
+<span class="k">-</span><span class="w"> </span><span class="sb">`Shell.calc_fext(..., include_pds=True)`</span> and `shell_fext(...,
+  include_pds=True)`; <span class="sb">`MultiDomain.calc_fext`</span> excludes the forces of the
+  prescribed displacements with <span class="sb">`pd_method='null-space'`</span>.
+<span class="k">-</span><span class="w"> </span>A single panel is wrapped as `MultiDomain([shell], conn=[],
+  pd_method='null-space')`.
+<span class="k">-</span><span class="w"> </span>Tests: <span class="sb">`tests/multidomain/test_null_space_pd.py`</span>.
+
+<span class="gu">### Bug fix</span>
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`fkCld_xcte`</span> and <span class="sb">`fkCld_ycte`</span> (<span class="sb">`panels/multidomain/connections/kCpd.pyx`</span>)
+  placed the penalty stiffnesses of <span class="sb">`ku`</span> and <span class="sb">`kv`</span> at the rows and columns of
+  <span class="sb">`w`</span> instead of <span class="sb">`u`</span> and <span class="sb">`v`</span>, a transcription error with respect to
+  <span class="sb">`theory/multidomain_penalization/kCpd.py`</span>, which generates the correct
+  entries. Only the line prescribed displacements of <span class="sb">`u`</span> and <span class="sb">`v`</span> with the
+  penalty method are affected; the prescribed <span class="sb">`w`</span> of the cohesive zone and
+  DCB examples is unchanged. New test <span class="sb">`test_line_penalty_kernels`</span>.
+
+<span class="gu">### Tests</span>
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`tests/test_json.py`</span> compares the eigenpairs of the saved and loaded
+  models with a tolerance, eigenvectors up to the sign, since they are not
+  reproducible to the last bit across calls of the eigensolver on macOS.
+  The matrices, stored results and fields are still compared exactly.
+
+<span class="gu">### Dependencies</span>
+
+<span class="k">-</span><span class="w"> </span>Requires <span class="sb">`structsolve&gt;=0.7.0`</span>.
+
+<span class="gu">## 0.11.1 (2026-10-08)</span>
+
+<span class="gu">### Saving and loading in a JSON + NumPy zip file</span>
+
+A zip file replaces pickle as the way to save objects to files. The new
+module <span class="sb">`panels.json_io`</span> mirrors <span class="sb">`composites.json_io`</span>:
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`Shell.save(fname=None)`</span>, <span class="sb">`StiffPanelBay.save(fname=None)`</span> and the new
+  <span class="sb">`MultiDomain.save(fname=None)`</span> write <span class="sb">`&lt;name&gt;.shell.zip`</span>,
+  <span class="sb">`&lt;name&gt;.stiffpanelbay.zip`</span> and <span class="sb">`&lt;name&gt;.multidomain.zip`</span> by default, or to
+  the given path or binary file object, e.g. <span class="sb">`io.BytesIO`</span>, which is how a
+  browser application saves without a file system.
+<span class="k">-</span><span class="w"> </span><span class="sb">`panels.shell.load(name)`</span>, <span class="sb">`panels.stiffpanelbay.load(name)`</span> and the new
+  <span class="sb">`panels.multidomain.load(name)`</span> accept the name with or without the
+  extension, a path or a binary file object, and check the type of the saved
+  object. <span class="sb">`panels.json_io.save(obj, fname)`</span> and <span class="sb">`panels.json_io.load(fname)`</span>
+  handle the three classes.
+<span class="k">-</span><span class="w"> </span>New attribute <span class="sb">`MultiDomain.name`</span>, also a keyword argument of
+  <span class="sb">`MultiDomain`</span>, default <span class="sb">`'multidomain'`</span>.
+<span class="k">-</span><span class="w"> </span>The zip file, compressed with <span class="sb">`ZIP_DEFLATED`</span>, contains <span class="sb">`model.json`</span>, with
+  the envelope <span class="sb">`{"type", "format_version", "panels_version", "data"}`</span>, and
+  one <span class="sb">`arrays/&lt;key&gt;.npy`</span> member per NumPy array, referenced in the JSON as
+  <span class="sb">`{"__ndarray__": "arrays/&lt;key&gt;.npy"}`</span>. The inputs (geometry, <span class="sb">`m`</span>, <span class="sb">`n`</span>,
+  boundary conditions, <span class="sb">`stack`</span>, <span class="sb">`plyts`</span>, <span class="sb">`laminaprops`</span>, <span class="sb">`offset`</span>, loads,
+  names) are stored in JSON, the arrays (<span class="sb">`ABD`</span>, <span class="sb">`fields`</span>, <span class="sb">`plot_mesh`</span>,
+  <span class="sb">`results`</span>, <span class="sb">`StiffPanelBay.u`</span>, <span class="sb">`MultiDomain.dmg_index`</span>, ...) in <span class="sb">`.npy`</span>.
+  The laminates, e.g. <span class="sb">`Shell.lam`</span> and <span class="sb">`BladeStiff1D.flam`</span>, are embedded with
+  <span class="sb">`composites.to_dict`</span>. The JSON is strict: <span class="sb">`nan`</span> and <span class="sb">`inf`</span> are stored as
+  the strings <span class="sb">`"NaN"`</span>, <span class="sb">`"Infinity"`</span> and <span class="sb">`"-Infinity"`</span>.
+<span class="k">-</span><span class="w"> </span>The panels and stiffeners of a <span class="sb">`StiffPanelBay`</span> and the panels and
+  connections of a <span class="sb">`MultiDomain`</span> are saved with them, and the references to
+  the panels (<span class="sb">`panel1`</span>, <span class="sb">`panel2`</span>, <span class="sb">`p1`</span>, <span class="sb">`p2`</span>) are restored as references to
+  the loaded panels.
+<span class="k">-</span><span class="w"> </span>An explicit list of attributes is stored for each class. Saving an
+  attribute whose value is not supported, e.g. the function of a distributed
+  load or of a pressure <span class="sb">`p(x, y)`</span>, raises <span class="sb">`TypeError`</span> and writes no file. The
+  matrices (<span class="sb">`Shell.matrices`</span>, <span class="sb">`StiffPanelBay.kC`</span>, <span class="sb">`MultiDomain.kC`</span>,
+  <span class="sb">`MultiDomain.T`</span>, ...) and the number of threads <span class="sb">`out_num_cores`</span> are not
+  stored.
+<span class="k">-</span><span class="w"> </span><span class="sb">`save()`</span> no longer modifies the object: the pickle version cleared its
+  matrices, laminate and field outputs.
+<span class="k">-</span><span class="w"> </span>Loading is safe for files from untrusted sources: the arrays are read with
+  <span class="sb">`allow_pickle=False`</span>, the members are read in memory and never extracted,
+  only the members referenced by <span class="sb">`model.json`</span> are read, after checking that
+  their uncompressed sizes declared in the zip file do not exceed the new
+  argument <span class="sb">`max_size`</span> of the functions <span class="sb">`load`</span>, 4 GiB by default, and unknown
+  keys, missing or extra members, object arrays and newer format versions
+  raise <span class="sb">`ValueError`</span>.
+<span class="k">-</span><span class="w"> </span>The pickle files <span class="sb">`.Shell`</span> and <span class="sb">`.StiffPanelBay`</span> of older versions are no
+  longer loaded, since a pickle file can execute arbitrary code: <span class="sb">`load()`</span>
+  raises <span class="sb">`ValueError`</span> for any file that is not a zip file saved by panels.
+  One from a trusted source can be converted by loading it with
+  <span class="sb">`pickle.load()`</span> and saving the object again. Pickling is still supported
+  for <span class="sb">`copy.deepcopy`</span> and for passing objects between processes, e.g. with
+  <span class="sb">`multiprocessing`</span>.
+<span class="k">-</span><span class="w"> </span>Requires <span class="sb">`composites&gt;=0.9.21`</span>, which provides <span class="sb">`composites.json_io`</span>.
+<span class="k">-</span><span class="w"> </span>Tests in <span class="sb">`tests/test_json.py`</span>.
+
+<span class="gu">### Pyodide (WebAssembly)</span>
+
+<span class="k">-</span><span class="w"> </span>A WebAssembly wheel for Pyodide 314 (CPython 3.14), tagged
+  <span class="sb">`pyemscripten_2026_0_wasm32`</span> (PEP 783), is built with cibuildwheel 4.3.0,
+  tested in Pyodide on every push (new workflow <span class="sb">`pyodide.yml`</span>, with the test
+  suite split in two parallel jobs to stay within the 6 h limit of the
+  runners) and published on PyPI on tags (new job <span class="sb">`deploy-pyodide`</span> of
+  <span class="sb">`pythonpublish.yml`</span>), such
+  that <span class="sb">`await micropip.install("panels")`</span> works in the browser. NumPy, SciPy
+  and matplotlib come with Pyodide, <span class="sb">`structsolve`</span> is pure Python and
+  <span class="sb">`composites`</span> has its WebAssembly wheel on PyPI.
+<span class="k">-</span><span class="w"> </span><span class="sb">`setup.py`</span> detects the Emscripten cross-compilation of <span class="sb">`pyodide-build`</span> and
+  builds without OpenMP, with which the <span class="sb">`prange`</span> loops of
+  <span class="sb">`panels.models.clpt_field`</span> run serially, and without the GCC runtime link
+  flags. A coverage build with line tracing is never made for Emscripten.
+<span class="k">-</span><span class="w"> </span>The runtime dependencies are declared in <span class="sb">`pyproject.toml`</span>: <span class="sb">`numpy`</span>,
+  <span class="sb">`scipy`</span>, <span class="sb">`matplotlib`</span>, <span class="sb">`composites&gt;=0.9.21`</span> and <span class="sb">`structsolve&gt;=0.6.1`</span>,
+  the first version of structsolve supporting Pyodide.
+  The build requires only <span class="sb">`setuptools`</span>, <span class="sb">`wheel`</span> and <span class="sb">`cython`</span>, since no Cython
+  module cimports NumPy or composites.
+<span class="k">-</span><span class="w"> </span>Fixed a heap buffer overflow of <span class="sb">`panels.models.clpt_field`</span>, harmless on
+  64-bit platforms only: its work arrays of doubles were allocated with the
+  size of pointers, <span class="sb">`malloc(NMAX * sizeof(double *))`</span>, half the size needed
+  in WebAssembly, where pointers have 4 bytes, crashing Pyodide.
+<span class="k">-</span><span class="w"> </span><span class="sb">`out_num_cores`</span> defaults to <span class="sb">`os.cpu_count() or 1`</span> instead of
+  <span class="sb">`multiprocessing.cpu_count()`</span>, which raises where the number of CPUs is
+  unknown.
+<span class="k">-</span><span class="w"> </span>The unused import of <span class="sb">`multiprocessing.Pool`</span> was removed from
+  <span class="sb">`tests/multidomain/test_dcb_damage.py`</span>.
+<span class="k">-</span><span class="w"> </span>The tests run with <span class="sb">`MPLBACKEND=Agg`</span> in Pyodide.
+<span class="k">-</span><span class="w"> </span>New classifier <span class="sb">`Environment :: WebAssembly :: Emscripten`</span>.
+<span class="k">-</span><span class="w"> </span>Installation in Pyodide, with a browser example saving to <span class="sb">`io.BytesIO`</span>
+  for download, in the README and the documentation.
+
+<span class="gu">### Performance</span>
+
+<span class="k">-</span><span class="w"> </span>Removed the explicit <span class="sb">`gc.collect()`</span> after each matrix and internal force
+  vector of <span class="sb">`Shell`</span>, <span class="sb">`MultiDomain`</span>, <span class="sb">`StiffPanelBay`</span>, <span class="sb">`BladeStiff1D`</span> and
+  <span class="sb">`BladeStiff2D`</span>. The arrays are freed as soon as they are no longer
+  referenced, a full collection only reclaims reference cycles, which Python
+  collects automatically, and it walks every object of the process: it took
+  70 % of the time of the non-linear analysis with the cohesive zone of
+  <span class="sb">`tests/multidomain/test_dcb_damage.py`</span>. The memory of 300 repeated
+  calculations of <span class="sb">`calc_kC`</span>, <span class="sb">`calc_kG`</span> and <span class="sb">`calc_fint`</span> is the same with and
+  without it, the memory leak mentioned in the removed comments is no longer
+  observed. <span class="sb">`_clear_matrices()`</span> still calls it.
+
+<span class="gu">### Tests</span>
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`tests/multidomain/test_dcb_damage.py`</span> checks its results, it had no
+  assertion: every increment converged, the driver aborting silently
+  otherwise, the reaction equals the area integral of the cohesive tractions,
+  the load-displacement curve and the damage match the reference results.
+  Its results are written to a temporary directory instead of the working
+  directory. 446 s instead of 1514 s with the removal of <span class="sb">`gc.collect()`</span>.
+
+<span class="gu">### Maintenance</span>
+
+<span class="k">-</span><span class="w"> </span>GitHub Actions updated: <span class="sb">`actions/checkout@v7`</span>, <span class="sb">`actions/setup-python@v7`</span>,
+  <span class="sb">`actions/upload-artifact@v7`</span>, <span class="sb">`codecov/codecov-action@v7`</span>,
+  <span class="sb">`softprops/action-gh-release@v3`</span> and
+  <span class="sb">`JamesIves/github-pages-deploy-action@v4`</span>.
+<span class="k">-</span><span class="w"> </span>Removed the outdated comment that composites laminates cannot be pickled,
+  which is no longer true since composites 0.9.2.
+<span class="k">-</span><span class="w"> </span>The coverage workflow, cancelled at the limit of 6 h of the runners since
+  2026-09-30, runs the test suite in three parallel parts, each uploading its
+  report to Codecov, which waits for the 3 reports (new <span class="sb">`codecov.yml`</span>). The
+  coverage build is optimized, <span class="sb">`/O2`</span> or <span class="sb">`-O3`</span> instead of <span class="sb">`/Od`</span> or <span class="sb">`-O0`</span>: every
+  traced line being a call with its line number, the coverage report is the
+  same, and the traced tests run 24 % faster.
+
+<span class="gu">## 0.11.0 (2026-10-07)</span>
+
+<span class="gu">### New: follower (hydrostatic) pressure loads</span>
+
+<span class="sb">`Shell.add_pressure_load(p, ..., follower=False, zp=0.)`</span>:
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`follower=True`</span> (or <span class="sb">`'linear'`</span>) makes the pressure follow the deformed
+  mid-surface, normal to it and acting on its deformed area, with the area
+  vector truncated to first order in the displacement gradients, consistent
+  with the moderate-rotation strains of all models: `a = (-w,x, -w,y + kv v,
+  1 + u,x + v,y + kw w)`, <span class="sb">`kw = 1/r`</span> for the cylinders and <span class="sb">`kv = 1/r`</span> for the
+  Sanders kinematics. <span class="sb">`follower='quadratic'`</span> keeps the complete (bilinear)
+  area vector, for sensitivity checks. See
+  <span class="sb">`theory/shells/follower_pressure/follower_pressure.md`</span>.
+<span class="k">-</span><span class="w"> </span><span class="sb">`zp`</span> places the loaded surface at <span class="sb">`z = zp`</span>, e.g. the outer face of a thick
+  sandwich: the pressure is applied as <span class="sb">`p (1 + zp/r)`</span> per unit mid-surface
+  area of the cylinders (shallow shell).
+<span class="k">-</span><span class="w"> </span>In the undeformed state a follower load equals the dead load, so
+  <span class="sb">`Shell.calc_fext()`</span> is unchanged. <span class="sb">`Shell.calc_fext(inc, c=c)`</span> gives the load
+  vector of the configuration <span class="sb">`c`</span>.
+<span class="k">-</span><span class="w"> </span><span class="sb">`Shell.calc_fint(c, inc=1.)`</span> subtracts the configuration-dependent part of
+  the follower loads, scaled by the load factor <span class="sb">`inc`</span> for <span class="sb">`cte=False`</span>.
+<span class="k">-</span><span class="w"> </span>New <span class="sb">`Shell.calc_kCfollower(c=None, inc=1.)`</span>: the load stiffness
+  <span class="sb">`-dF_p/dc`</span>, unsymmetric in general, assembled in full and never
+  symmetrized, stored in <span class="sb">`Shell.matrices['kCfollower']`</span>. It is added by
+  <span class="sb">`Shell.calc_kC(c, NLgeom=True, inc=1.)`</span> (with <span class="sb">`finalize=True`</span>) and therefore
+  by <span class="sb">`Shell.calc_kT(c, inc=1.)`</span>, the exact Jacobian of <span class="sb">`calc_fint`</span>. Linear
+  buckling under hydrostatic pressure: <span class="sb">`lb(kC0, kG + kCfollower)`</span>.
+<span class="k">-</span><span class="w"> </span>New <span class="sb">`Shell.calc_fext_follower(c, inc=1.)`</span> and <span class="sb">`Shell.has_follower_loads()`</span>.
+<span class="k">-</span><span class="w"> </span>The kernels <span class="sb">`calc_fext_follower`</span> and <span class="sb">`fkCfollower_num`</span> of the 9 models are
+  generated by <span class="sb">`theory/shells/follower_pressure/write_pyx.py`</span>, also called by
+  the generators of the FSDT/TSDT and Sanders CLPT modules.
+<span class="k">-</span><span class="w"> </span><span class="sb">`MultiDomain.calc_fint`</span>, <span class="sb">`calc_kC`</span>, <span class="sb">`calc_kT`</span>, <span class="sb">`calc_fext`</span> and
+  <span class="sb">`get_reduced_functions()`</span> forward <span class="sb">`inc`</span> and <span class="sb">`c`</span>, and add the follower load
+  stiffness of the panels after the symmetrization.
+<span class="k">-</span><span class="w"> </span>Requires <span class="sb">`structsolve&gt;=0.5.0`</span>: its solvers pass the load factor <span class="sb">`inc`</span> to
+  the callables that accept it, the arc-length methods use the load vector
+  of the current configuration, <span class="sb">`lb`</span> and <span class="sb">`freq`</span> handle unsymmetric matrices,
+  <span class="sb">`Analysis.static(NLgeom=False)`</span> solves the geometrically linear problem
+  with the follower load in the current configuration, `(k0 + kCfollower) c
+  = fext`, and <span class="sb">`freq`</span> gives the kinetic criterion (flutter) of the tangent
+  stiffness matrix with the unsymmetric load stiffness.
+<span class="k">-</span><span class="w"> </span>Theory: new documentation page <span class="ge">*Follower pressure loads: theory*</span>,
+  <span class="sb">`doc/source/follower_pressure.rst`</span>, with the derivation of the force
+  vector, the internal force vector, the load stiffness <span class="sb">`kCfollower`</span> and its
+  symmetry conditions.
+<span class="k">-</span><span class="w"> </span>Verification: <span class="sb">`tests/tests_shell/test_follower_pressure.py`</span>; validation
+  against closed forms and the literature (Han et al. 2004, Kardomateas 1993,
+  Kardomateas and Simitses 2003, Schweizerhof and Ramm 1984, NASA/SP-8007-2020/REV 2):
+  <span class="sb">`tests/tests_shell/test_follower_pressure_validation.py`</span> and, per
+  reference, the notebooks <span class="sb">`han2004_sandwich_rings.ipynb`</span>,
+  <span class="sb">`kardomateas2003_sandwich_rings.ipynb`</span>, <span class="sb">`kardomateas1993_thick_rings.ipynb`</span>,
+  <span class="sb">`schweizerhof1984_pressure_loads.ipynb`</span> and
+  <span class="sb">`nasa_sp8007_external_pressure.ipynb`</span>, with the helpers of
+  <span class="sb">`notebooks/follower_utils.py`</span>.
+
+<span class="gu">### New: interactive 3D plots of multi-domain assemblies</span>
+
+<span class="sb">`MultiDomain.plot3d(c)`</span> draws the assembly in 3D with plotly, which is an
+optional dependency (<span class="sb">`pip install plotly`</span>). Each domain is placed in the
+global coordinate system by its origin <span class="sb">`(x0, y0, z0)`</span>, a point <span class="sb">`point_x`</span> on
+its <span class="sb">`x`</span> axis and a point <span class="sb">`point_xy`</span> on its <span class="sb">`xy`</span> plane, the new attributes
+<span class="sb">`Shell.z0`</span>, <span class="sb">`Shell.point_x`</span> and <span class="sb">`Shell.point_xy`</span>:
+
+    vec_x = point_x - (x0, y0, z0)
+    vec_xy = point_xy - (x0, y0, z0)
+    vec_z = np.cross(vec_x, vec_xy)
+    vec_y = np.cross(vec_z, vec_x)
+
+By default the local axes are the global ones, as in the 2D plots of
+<span class="sb">`MultiDomain.plot()`</span>. The cylindrical shells are drawn curved, with <span class="sb">`w`</span>
+positive outwards. The domains are drawn deformed by the displacements <span class="sb">`u`</span>,
+<span class="sb">`v`</span> and <span class="sb">`w`</span> times a scale factor, by default such that the largest
+displacement is 10 % of the size of the assembly, and colored by one of the
+outputs of <span class="sb">`MultiDomain.plot()`</span>, <span class="sb">`'u'`</span>, ..., <span class="sb">`'exx'`</span>, ..., <span class="sb">`'Nxx'`</span>, ...,
+selected in a drop-down menu. Saved with <span class="sb">`filename`</span> to an HTML file, or shown
+with <span class="sb">`show=True`</span> in a browser or a notebook, the figure has controls to
+toggle <span class="sb">`u`</span>, <span class="sb">`v`</span> and <span class="sb">`w`</span> and to change the scale factor, and keyboard
+shortcuts while the mouse pointer is over it: <span class="sb">`u`</span>, <span class="sb">`v`</span>, <span class="sb">`w`</span> toggle the
+displacements, <span class="sb">`+`</span> and <span class="sb">`-`</span> change the scale factor, <span class="sb">`0`</span> shows the undeformed
+geometry, <span class="sb">`r`</span> resets, <span class="sb">`n`</span> and <span class="sb">`p`</span> select the next and previous outputs and
+<span class="sb">`o`</span> toggles the orthographic and perspective projections.
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`Shell.global_frame()`</span> gives the origin and the local axes of a domain,
+  <span class="sb">`Shell.global_coords(x, y)`</span> the global coordinates of points of its
+  mid-surface and the directions of <span class="sb">`u`</span>, <span class="sb">`v`</span> and <span class="sb">`w`</span> at them, and
+  <span class="sb">`Shell.is_curved()`</span> tells whether it is drawn as a cylindrical surface.
+
+<span class="gu">### Build: Cython directives and compiler flags</span>
+
+<span class="k">-</span><span class="w"> </span>Every module is compiled with <span class="sb">`initializedcheck=False`</span>. Cython no longer
+  checks, at each memoryview access, that the memoryview has been assigned.
+  Reading an unassigned memoryview attribute from Python still raises
+  <span class="sb">`AttributeError`</span>, because the property getters keep their own check.
+<span class="k">-</span><span class="w"> </span><span class="sb">`setup.py`</span> passed <span class="sb">`linetrace=True`</span> to every build. Without <span class="sb">`CYTHON_TRACE`</span>
+  the line tracing itself stays compiled out, but the directive also
+  generates profiling hooks that are active by default and run at every call
+  of a Python-visible function. The directive is now set only for a coverage
+  build, see below.
+<span class="k">-</span><span class="w"> </span>Compiler flags: <span class="sb">`-O3`</span> and <span class="sb">`-fno-math-errno`</span> for GCC and Clang, and an
+  explicit <span class="sb">`/O2`</span> for MSVC, which setuptools already combines with <span class="sb">`/GL`</span>.
+  OpenMP stays, since <span class="sb">`panels/models/clpt_field.pyx`</span> uses <span class="sb">`prange`</span>. Flags
+  that change floating-point results, such as <span class="sb">`/fp:fast`</span> or <span class="sb">`-ffast-math`</span>,
+  and flags that tie a wheel to the CPU that built it, such as
+  <span class="sb">`-march=native`</span>, are deliberately not used.
+
+The same changes made <span class="sb">`pyfe3d`</span> and <span class="sb">`composites`</span> up to 2.8 times and 24%
+faster, but not <span class="sb">`panels`</span>. Its memoryviews are local variables, which Cython
+already knows to be assigned, so the generated code had almost no checks for
+<span class="sb">`initializedcheck=False`</span> to remove (2 per model), and each matrix is built by
+a handful of calls, which makes the per-call cost of the profiling hooks
+negligible. The cost does not change measurably. Measured on an AMD x86-64 laptop CPU (family 25, model 117),
+Windows 11, Python 3.13, NumPy 2.4, Cython 3.2, MSVC, with the process pinned
+to one core at high priority, minimum of 3 interleaved runs of 5 repetitions
+each (<span class="sb">`benchmarks/bench_build_flags.py`</span>), in milliseconds per call for
+<span class="sb">`m = n = 12`</span>; <span class="sb">`kC`</span>, <span class="sb">`kG`</span> and <span class="sb">`kM`</span> are integrated analytically, and <span class="sb">`kC(c)`</span>,
+<span class="sb">`kG(c)`</span> and <span class="sb">`fint(c)`</span> numerically. Each cell gives the cost before and after
+this change, with the relative difference:
+
+| Model | kC | kG | kM | kC(c) | kG(c) | fint(c) |
+| - | - | - | - | - | - | - |
+| <span class="sb">`plate_clpt_donnell`</span> | 24.09 / 23.86 (-1%) | 7.19 / 7.45 (+4%) | 17.49 / 17.89 (+2%) | 1583.66 / 1602.44 (+1%) | 693.77 / 686.89 (-1%) | 41.69 / 41.18 (-1%) |
+| <span class="sb">`cylshell_clpt_sanders`</span> | 25.31 / 24.53 (-3%) | 12.36 / 12.86 (+4%) | 17.63 / 17.82 (+1%) | 2146.72 / 2133.46 (-1%) | 723.22 / 722.30 (-0%) | 44.60 / 44.83 (+1%) |
+| <span class="sb">`plate_fsdt_donnell`</span> | 43.09 / 42.57 (-1%) | 7.18 / 7.02 (-2%) | 20.34 / 20.55 (+1%) | 2753.77 / 2714.43 (-1%) | 486.27 / 492.08 (+1%) | 60.70 / 60.13 (-1%) |
+| <span class="sb">`cylshell_fsdt_sanders`</span> | 50.74 / 50.03 (-1%) | 12.78 / 12.92 (+1%) | 20.50 / 20.38 (-1%) | 3094.37 / 3032.40 (-2%) | 732.51 / 727.61 (-1%) | 64.52 / 63.79 (-1%) |
+| <span class="sb">`cylshell_tsdt_donnell`</span> | 53.26 / 53.72 (+1%) | 7.09 / 7.08 (-0%) | 32.71 / 31.68 (-3%) | 4439.99 / 4463.94 (+1%) | 489.35 / 489.04 (-0%) | 62.79 / 61.77 (-2%) |
+
+All differences are within the measurement noise of about 4%. The whole test
+suite passes with the new build.
+
+<span class="gu">### Coverage build</span>
+
+<span class="sb">`setup.py`</span> now recognises a coverage build, requested either with
+<span class="sb">`CYTHON_TRACE_NOGIL`</span> in the environment or with <span class="sb">`--define CYTHON_TRACE_NOGIL`</span>,
+and compiles it unoptimized with line tracing. Since Python 3.12 Cython
+traces through <span class="sb">`sys.monitoring`</span> by default, which the <span class="sb">`Cython.Coverage`</span>
+plugin does not follow, so the coverage build now requests the legacy tracing
+with <span class="sb">`CYTHON_USE_SYS_MONITORING=0`</span>. <span class="sb">`.github/workflows/coverage.yml`</span> runs on
+Python 3.13, where the same setup left every <span class="sb">`.pyx`</span> file out of the coverage
+report of <span class="sb">`composites`</span>; this was not measured for <span class="sb">`panels`</span>. Switching between
+a coverage build and a normal one regenerates the C++ files of the Cython
+modules, which cythonize would otherwise reuse from the other mode, and
+leaves the hand-written sources in <span class="sb">`panels/core/src`</span> alone.
+
+<span class="gu">### Changed</span>
+
+<span class="k">-</span><span class="w"> </span>The TSDT constitutive matrix <span class="sb">`Shell.ABD`</span> uses <span class="sb">`Laminate.Dts`</span> and
+  <span class="sb">`Laminate.Fts`</span> of <span class="sb">`composites`</span>, which replace the deprecated
+  <span class="sb">`Laminate.Dtrans`</span> and <span class="sb">`Laminate.Ftrans`</span>. The values are the same.
+<span class="k">-</span><span class="w"> </span>Requires <span class="sb">`composites&gt;=0.9.12`</span>, the first version with <span class="sb">`Laminate.Dts`</span> and
+  <span class="sb">`Laminate.Fts`</span>.
+
+<span class="gu">## 0.9.0 (2026-09-24)</span>
+
+<span class="gu">### Breaking: the multi-domain connections are exact by default</span>
+
+<span class="sb">`MultiDomain`</span> and the functions of <span class="sb">`panels.multidomain.cylinder`</span>,
+<span class="sb">`panels.multidomain.cylinder_blade_stiffened`</span> and
+<span class="sb">`panels.multidomain.tstiff2d_1stiff_*`</span> use <span class="sb">`conn_method='null-space'`</span> by
+default, see below. The matrices and vectors of <span class="sb">`MultiDomain`</span>, e.g.
+<span class="sb">`calc_kC()`</span>, <span class="sb">`calc_kG()`</span>, <span class="sb">`calc_kM()`</span> and <span class="sb">`calc_fext()`</span>, then no longer
+contain the connections imposed exactly: they must be reduced with
+<span class="sb">`MultiDomain.reduce()`</span> before solving, and the solutions expanded with
+<span class="sb">`MultiDomain.expand()`</span>, otherwise the domains are disconnected. Scripts that
+solve these matrices directly must either reduce them or create the assembly
+with <span class="sb">`conn_method='penalty'`</span>, which gives the previous results. The functions
+of <span class="sb">`panels.multidomain`</span> already return the expanded solutions. The tests of
+the penalty kernels and the notebooks
+<span class="sb">`stamatelos_labeas_2023_multidomain.ipynb`</span> and those of the DCB, through
+<span class="sb">`notebooks/dcb_utils.py`</span>, use <span class="sb">`conn_method='penalty'`</span>, with which their
+stored results were obtained.
+
+<span class="gu">### New: exact multi-domain connections with the null-space method</span>
+
+<span class="sb">`MultiDomain(panels, conn, conn_method='null-space')`</span> imposes the connections
+<span class="sb">`'SSxcte'`</span>, <span class="sb">`'SSycte'`</span>, <span class="sb">`'BFxcte'`</span>, <span class="sb">`'BFycte'`</span> and <span class="sb">`'SB'`</span> exactly, for all
+the models, instead of adding penalty stiffnesses. The quantities penalized
+by each kernel become linear constraints <span class="sb">`B c = 0`</span>, eliminated with a sparse
+basis <span class="sb">`T`</span> of their null space, <span class="sb">`c = T c_r`</span>, see
+<span class="sb">`panels.multidomain.connections.nullspace`</span> and the documentation page
+"Exact connections with the null-space method". No penalty constant is
+needed, the results are the limit of the penalty method for penalty
+constants going to infinity, and the reduced stiffness matrix is much better
+conditioned. The penalty method remains available with
+<span class="sb">`conn_method='penalty'`</span>, whose results are unchanged.
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`MultiDomain.get_T()`</span>, <span class="sb">`MultiDomain.reduce()`</span> and <span class="sb">`MultiDomain.expand()`</span>
+  reduce the matrices and vectors to the independent Ritz constants and
+  expand the solutions back, and <span class="sb">`MultiDomain.get_reduced_functions()`</span> gives
+  the functions of the reduced problem for <span class="sb">`structsolve.Analysis`</span>, for the
+  non-linear analyses. With <span class="sb">`conn_method='penalty'`</span>, <span class="sb">`T`</span> is the identity.
+<span class="k">-</span><span class="w"> </span>Redundant constraints, e.g. around a closed cylinder or at a corner shared
+  by four domains, are detected and dropped.
+<span class="k">-</span><span class="w"> </span>The damaged connection <span class="sb">`'SB_TSL'`</span> and the prescribed displacements remain
+  penalty stiffnesses.
+<span class="k">-</span><span class="w"> </span><span class="sb">`MultiDomain.get_kC_conn()`</span>, and therefore <span class="sb">`calc_kC()`</span>, <span class="sb">`calc_kT()`</span> and
+  <span class="sb">`calc_fint()`</span>, called without connections on an assembly created without
+  them, use the connections of the last call, e.g. <span class="sb">`calc_kC(conns)`</span>, instead
+  of raising a <span class="sb">`RuntimeError`</span>.
+<span class="k">-</span><span class="w"> </span>The functions of <span class="sb">`panels.multidomain.cylinder`</span>,
+  <span class="sb">`panels.multidomain.cylinder_blade_stiffened`</span> and
+  <span class="sb">`panels.multidomain.tstiff2d_1stiff_*`</span> take the argument <span class="sb">`conn_method`</span>.
+<span class="k">-</span><span class="w"> </span>A plate divided in domains gives the frequencies of the single-domain
+  plate to <span class="sb">`1e-8`</span> or better with the FSDT and TSDT, where the penalty method
+  needs 1000 times the default penalty constants to reach <span class="sb">`1e-4`</span>. Two
+  laminates connected with <span class="sb">`'SB'`</span> are the single laminate with both stacking
+  sequences to machine precision, also in large deflection. The default
+  penalty constants underestimate the buckling load of the blade-stiffened
+  cylinder of <span class="sb">`tests/multidomain/test_cylinder_blade_stiffened.py`</span>, with the
+  pre-buckling state of a static analysis, by 4%: -39993.8 N/m against
+  -41696.7 N/m.
+
+<span class="gu">### Documentation</span>
+
+<span class="k">-</span><span class="w"> </span>The panels <span class="sb">`p1`</span> and <span class="sb">`p2`</span> of the connections <span class="sb">`'SB'`</span> and <span class="sb">`'SB_TSL'`</span> are
+  defined by the <span class="sb">`z`</span> axis common to both panels, normal to their
+  mid-surfaces, instead of top and bottom: <span class="sb">`p1`</span> is the panel on the positive
+  side of the interface along <span class="sb">`z`</span> and <span class="sb">`p2`</span> the one on the negative side, so
+  that the face <span class="sb">`z = -h1/2`</span> of <span class="sb">`p1`</span> is connected to the face <span class="sb">`z = +h2/2`</span> of
+  <span class="sb">`p2`</span>, e.g. a stiffener base on the side of positive <span class="sb">`z`</span> of a skin is <span class="sb">`p1`</span>,
+  and a pad-up on the side of negative <span class="sb">`z`</span> is <span class="sb">`p2`</span>. The convention of the
+  kernels is unchanged.
+
+<span class="gu">## 0.8.0 (2026-09-23)</span>
+
+<span class="gu">### Breaking: default model of cylindrical shells</span>
+
+A <span class="sb">`Shell`</span> with a radius <span class="sb">`r`</span> and no <span class="sb">`model`</span> uses the Sanders-Koiter kinematics,
+<span class="sb">`'cylshell_clpt_sanders'`</span>, instead of the Donnell kinematics. The Donnell
+kinematics remain available with <span class="sb">`model='cylshell_clpt_donnell'`</span>. The
+regression values of the multi-domain cylinders of
+<span class="sb">`tests/multidomain/test_cylinder.py`</span> and
+<span class="sb">`tests/multidomain/test_cylinder_blade_stiffened.py`</span> decreased by 0.2% to
+0.6%, the Donnell values are kept in the comments.
+
+<span class="gu">### New models</span>
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`'cylshell_clpt_sanders'`</span>: cylindrical shells with the classical laminated
+  plate theory (CLPT) and the Sanders-Koiter kinematics, whose strains vanish
+  for any rigid-body motion. The rotation of the normal about the axis,
+  <span class="sb">`phiy = -w,y + v/r`</span>, enters the non-linear strains, the geometric stiffness
+  matrix, the mass matrix, the field outputs and the point constraints.
+<span class="k">-</span><span class="w"> </span><span class="sb">`'plate_fsdt_donnell'`</span>: plates with the first-order shear deformation
+  theory (FSDT) and von Karman kinematics, with 5 DOFs <span class="sb">`u, v, w, phix, phiy`</span>
+  per term. The shear correction is controlled by
+  <span class="sb">`Shell.fsdt_shear_correction`</span>: <span class="sb">`'rohwer'`</span>, the default, <span class="sb">`'vlachoutsis'`</span>,
+  <span class="sb">`'constant'`</span> or <span class="sb">`None`</span> select the method of
+  <span class="sb">`composites.Laminate.calc_transverse_shear_stiffness`</span>, whereas a float <span class="sb">`k`</span>
+  multiplies the uncorrected transverse shear stiffness. The equilibrium
+  approach of Rohwer (1988) gives <span class="sb">`k = 5/6`</span> for a homogeneous plate and
+  accounts for the stacking sequence otherwise. The tests compared with
+  references that use <span class="sb">`k = 5/6`</span> set it explicitly.
+<span class="k">-</span><span class="w"> </span><span class="sb">`'plate_tsdt_donnell'`</span>: plates with the third-order shear deformation
+  theory of Reddy (1984) and von Karman kinematics, with 5 DOFs per term.
+<span class="k">-</span><span class="w"> </span><span class="sb">`'cylshell_fsdt_donnell'`</span>, <span class="sb">`'cylshell_tsdt_donnell'`</span>: cylindrical shells
+  with the FSDT and the TSDT and the Donnell kinematics, 5 DOFs per term.
+<span class="k">-</span><span class="w"> </span><span class="sb">`'cylshell_fsdt_sanders'`</span>, <span class="sb">`'cylshell_tsdt_sanders'`</span>: cylindrical shells
+  with the FSDT and the TSDT and the Sanders-Koiter kinematics, 5 DOFs per
+  term, whose strains, including the transverse shear strains, vanish for
+  any rigid-body motion. The rotation of the normal about the axis, `phiy +
+  v/r`, enters the displacement field and the mass matrix, the changes of
+  curvature include <span class="sb">`v,y/r`</span> and the rotation about the normal, and the
+  non-linear terms use <span class="sb">`w,y - v/r`</span>, following Sanders (1959, 1963) and, for
+  the TSDT, Reddy and Liu (1985), with no Sanders-Koiter terms in the
+  third-order terms. The field output <span class="sb">`phiy`</span> and the approximation <span class="sb">`fg`</span> of
+  <span class="sb">`phiy`</span> are the rotation of the normal <span class="sb">`phiy + v/r`</span>, which the connections
+  <span class="sb">`'SSxcte'`</span>, <span class="sb">`'SSycte'`</span>, <span class="sb">`'SB'`</span> and <span class="sb">`'BFycte'`</span> also use.
+<span class="k">-</span><span class="w"> </span>All the new models provide the analytical and the numerically integrated
+  constitutive, geometric, mass and aerodynamic matrices, the internal force
+  vector and the exact tangent stiffness matrix, such that linear static,
+  linear buckling, frequency, flutter and non-linear static analyses are
+  available. The integrands are generated from the kinematics in
+  <span class="sb">`theory/shells/cylshell_clpt_sanders/`</span> and <span class="sb">`theory/shells/fsdt_tsdt/`</span>,
+  which generates the six models based on the FSDT and TSDT, plates and
+  cylinders, and replaces <span class="sb">`theory/shells/plate_fsdt_tsdt_donnell/`</span>.
+
+<span class="gu">### API</span>
+
+<span class="k">-</span><span class="w"> </span>The boundary condition flags of the rotations, `x1phix, x1phixr, ...,
+  y2phiyr`, used by the FSDT and TSDT models. Their default is the hard simply
+  supported condition, with the rotation tangential to each edge removed.
+<span class="k">-</span><span class="w"> </span><span class="sb">`Shell.strain()`</span> and <span class="sb">`Shell.stress()`</span> also return the transverse shear
+  strains and forces, and the higher-order terms of the TSDT, for the models
+  based on shear deformation theories.
+<span class="k">-</span><span class="w"> </span><span class="sb">`MultiDomain`</span> supports the FSDT and TSDT models with the connections
+  <span class="sb">`'SSxcte'`</span>, <span class="sb">`'SSycte'`</span> and <span class="sb">`'SB'`</span>, implemented in
+  <span class="sb">`panels.multidomain.connections.kCsdt`</span>, and <span class="sb">`'BFycte'`</span> and <span class="sb">`'BFxcte'`</span>,
+  implemented in the functions <span class="sb">`fkCBFycte*_sdt`</span> and <span class="sb">`fkCBFxcte*_sdt`</span> of
+  <span class="sb">`kCBFycte.pyx`</span> and <span class="sb">`kCBFxcte.pyx`</span>. The edge connections penalize
+  <span class="sb">`u, v, w`</span> with <span class="sb">`kt`</span> and the rotations <span class="sb">`phix, phiy`</span> with <span class="sb">`kr`</span>, and for the
+  TSDT also the normal derivative of <span class="sb">`w`</span>. The <span class="sb">`'SB'`</span> connection penalizes the
+  displacements at the interface of the two laminates and, when <span class="sb">`kr`</span> is
+  given, the difference of their rotations, with which two FSDT laminates
+  behave like a single laminate with both stacking sequences. The
+  base-flange connections penalize the rotation of the normals about the
+  axis of the connection, <span class="sb">`phiy`</span> (<span class="sb">`'BFycte'`</span>) and <span class="sb">`phix`</span> (<span class="sb">`'BFxcte'`</span>), where
+  the models based on the classical laminated plate theory use <span class="sb">`-w,y`</span> and
+  <span class="sb">`-w,x`</span>; for the TSDT the derivative of <span class="sb">`w`</span> is not penalized. <span class="sb">`'SB_TSL'`</span>,
+  and connections between models with a different number of DOFs, raise
+  <span class="sb">`NotImplementedError`</span>.
+<span class="k">-</span><span class="w"> </span><span class="sb">`MultiDomain.strain()`</span> and <span class="sb">`MultiDomain.stress()`</span> also return the
+  transverse shear strains and forces, and the higher-order terms of the
+  TSDT, for the panels of the models based on shear deformation theories.
+<span class="k">-</span><span class="w"> </span><span class="sb">`StiffPanelBay`</span> raises <span class="sb">`NotImplementedError`</span> for models with 5 DOFs, since
+  its stiffeners assume 3 DOFs.
+
+<span class="gu">### Tests</span>
+
+<span class="k">-</span><span class="w"> </span>Literature benchmarks for the new models: Leissa (1973), Loy et al. (1997)
+  and Batdorf for Donnell against Sanders kinematics, Sanders' rigid-body
+  criterion, Noor (1973, 1975), Whitney and Pagano (1970), Pagano (1970),
+  Reddy (1984), Liew et al. (1993), Hashemi and Arsanjani (2005) and Leissa
+  (1973) for the plates. The existing tests also run the new models.
+<span class="k">-</span><span class="w"> </span>Multi-domain FSDT and TSDT plates, <span class="sb">`tests/multidomain/test_multidomain_fsdt_tsdt.py`</span>:
+  plates divided in two and four domains reproduce the frequencies of Noor
+  (1973), the deflection of Pagano (1970) at the interior corner of four
+  domains and the single-domain results; two FSDT laminates connected with
+  <span class="sb">`'SB'`</span> reproduce the single laminate with both stacking sequences, and
+  without the rotations tied converge to it with <span class="sb">`(h/a)^2`</span>, as the TSDT
+  laminates do.
+<span class="k">-</span><span class="w"> </span>Cylindrical shells with the FSDT and TSDT,
+  <span class="sb">`tests/tests_shell/test_fsdt_tsdt_cylinders.py`</span>: Leissa (1973), Table 2.8,
+  where the Sanders-Koiter FSDT and TSDT are within 0.07 % of 3D elasticity
+  for <span class="sb">`R/h = 20`</span>; Batdorf's axial buckling of a thin panel; Sanders'
+  rigid-body criterion, including the transverse shear strains; an exact
+  Navier solution of a thick cross-ply shell; the consistency of the
+  analytical and numerical matrices and of the tangent stiffness matrix; a
+  cylinder divided in two domains, and the base-flange connection of a
+  Sanders-Koiter skin. The generic tests also run the new models.
+<span class="k">-</span><span class="w"> </span><span class="sb">`tests/tests_shell/test_tangent_consistency.py`</span>: the Newton-Raphson test
+  measures the order of convergence with <span class="sb">`log(e_k+1/e_k)/log(e_k/e_k-1)`</span>,
+  which is 2 for <span class="sb">`e_k+1 = C e_k^2`</span> whatever the constant <span class="sb">`C`</span>, instead of
+  <span class="sb">`log(e_k+1)/log(e_k)`</span>, which falls below 2 for large <span class="sb">`C`</span>, and discards the
+  manufactured equilibrium states whose tangent stiffness is nearly
+  singular, where <span class="sb">`C`</span> grows with the norm of its inverse.
+
+<span class="gu">### Bug fixes</span>
+
+<span class="k">-</span><span class="w"> </span>Curvature term <span class="sb">`gamma`</span> of the piston theory, Krumhaar's correction for the
+  external flow over a cylinder, made consistent in all kernels. With the
+  aerodynamic load <span class="sb">`q = beta*w,x + gamma*w`</span> along <span class="sb">`w`</span>, positive outwards,
+  <span class="sb">`gamma`</span> softens the shell independently of the flow direction, as obtained
+  expanding the exact potential flow over a cylinder with a sinusoidal radial
+  displacement (<span class="sb">`tests/tests_shell/test_aero_curvature.py`</span>). The numerical
+  kernel <span class="sb">`cylshell_clpt_donnell_num.fkAx_num`</span>, also used by
+  <span class="sb">`'cylshell_clpt_sanders'`</span>, had the opposite sign of the analytical
+  <span class="sb">`fkAx`</span>, which changed the flutter of cylinders with partial integration
+  domains. Flat plates have <span class="sb">`gamma = 0`</span>: the kernels of the plate models no
+  longer include the term, <span class="sb">`Shell.calc_kA()`</span> ignores a <span class="sb">`gamma`</span> given for a
+  plate with a warning, and <span class="sb">`StiffPanelBay`</span> computes <span class="sb">`gamma`</span> only for the
+  cylindrical models. The load and the sign convention are documented in
+  <span class="sb">`Shell.calc_kA()`</span>.
+<span class="k">-</span><span class="w"> </span>Mass matrix of the 1D flange of <span class="sb">`BladeStiff1D`</span>, kernel
+  <span class="sb">`bladestiff1d_clt_donnell.fkMf`</span>: the terms coupling the displacements
+  <span class="sb">`u, v`</span> and the rotations <span class="sb">`phix, phiy`</span> were twice the value given by the
+  integration of the kinetic energy through the height of the flange. They
+  followed Eq. (26) of Castro et al. (2016),
+  https://doi.org/10.1016/j.compstruct.2015.12.056, whose matrix <span class="sb">`kmf`</span> has
+  <span class="sb">`-2*df`</span> where <span class="sb">`-df`</span> is correct. The correction is documented in the
+  docstring of <span class="sb">`fkMf`</span> and checked against the kinetic energy integrated from
+  the displacement field (<span class="sb">`tests/tests_stiffpanelbay/test_bladestiff1d_mass.py`</span>).
+  The base of the stiffener is a <span class="sb">`Shell`</span> with offset and was not affected,
+  although Eq. (27) of the same paper has the same factor.
+<span class="k">-</span><span class="w"> </span><span class="sb">`BladeStiff1D.hb`</span> stayed zero with a base, which removed the thickness of
+  the base from the rotary inertia of the flange in <span class="sb">`fkMf`</span>.
+<span class="k">-</span><span class="w"> </span>The rotation penalty of the connection <span class="sb">`'BFycte'`</span> used <span class="sb">`w,y`</span> for the skin
+  also with the Sanders-Koiter kinematics, whose rotation about <span class="sb">`x`</span> is
+  <span class="sb">`w,y - v/r`</span>. The kernels of <span class="sb">`kCBFycte.pyx`</span> take the optional arguments
+  <span class="sb">`rinv1`</span> and <span class="sb">`rinv2`</span>, <span class="sb">`1/r`</span> of each panel with the Sanders-Koiter kinematics
+  and zero otherwise, set by <span class="sb">`MultiDomain`</span>. A rigid-body rotation of a
+  stiffened cylinder about its axis is now free of energy
+  (<span class="sb">`tests/multidomain/test_bf_sanders.py`</span>). The matrices of the Donnell
+  kinematics and of flat plates are unchanged, and <span class="sb">`'BFxcte'`</span> needs no
+  change, since the rotation about <span class="sb">`y`</span> is <span class="sb">`-w,x`</span> for both kinematics. The
+  buckling loads of the blade-stiffened cylinders of
+  <span class="sb">`tests/multidomain/test_cylinder_blade_stiffened.py`</span> increased by 0.003%
+  and 0.18%.
+<span class="k">-</span><span class="w"> </span><span class="sb">`'BFycte'`</span> and <span class="sb">`'BFxcte'`</span> took the first panel in the assembly as the
+  base, whatever <span class="sb">`p1`</span> and <span class="sb">`p2`</span>: with the flange before the base the flange
+  was rotated by 90 degrees in the opposite direction. <span class="sb">`p1`</span> is now always
+  the base and <span class="sb">`p2`</span> the flange, as documented. The assemblies of the
+  repository have the base first and are not affected
+  (<span class="sb">`tests/multidomain/test_bf_sdt.py`</span>, both orders).
+<span class="k">-</span><span class="w"> </span><span class="sb">`'SB_TSL'`</span>: removed the fallback to the kernels of <span class="sb">`kCSB_dmg.pyx`</span> for
+  panels of different dimensions, which could not be reached, since both
+  assemblies require panels of the same dimensions and <span class="sb">`MultiDomain`</span> raises
+  an error otherwise.
+
+<span class="gu">### Theory</span>
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`theory/multidomain_penalization/connections.py`</span> matches the current
+  kernels: the curvature penalty removed from <span class="sb">`kCSSxcte`</span> is no longer
+  derived, <span class="sb">`kCBFxcte`</span>, the rotation of the Sanders-Koiter kinematics of
+  <span class="sb">`kCBFycte`</span> and the connections of the FSDT and TSDT models of <span class="sb">`kCsdt.py`</span>
+  and of <span class="sb">`kCBFycte.pyx`</span> and <span class="sb">`kCBFxcte.pyx`</span> were added, and the script runs
+  from any location.
+<span class="k">-</span><span class="w"> </span>The <span class="sb">`^`</span> of <span class="sb">`theory/shells/cylshell_clpt_donnell/cylshell_clpt_donnell.py`</span>,
+  which sympy took as a logical XOR in the mass matrix, is now a power.
+<span class="k">-</span><span class="w"> </span>The Mathematica notebooks were replaced by SymPy scripts, verified against
+  the notebooks and against the kernels:
+<span class="w">  </span><span class="k">-</span><span class="w"> </span><span class="sb">`theory/func/bardell/bardell_integrals_C.py`</span>, which writes
+    <span class="sb">`panels/core/src/bardell.cpp`</span> and <span class="sb">`panels/core/include/bardell.hpp`</span>
+    byte for byte, instead of <span class="sb">`bardell_integrals*.nb`</span>;
+<span class="w">  </span><span class="k">-</span><span class="w"> </span><span class="sb">`theory/func/bardell/fuvw.py`</span>, the displacement field of the CLPT with
+    the Donnell and Sanders-Koiter kinematics and of the FSDT and TSDT,
+    checked against <span class="sb">`fg`</span> of the field modules, instead of <span class="sb">`fuvw.nb`</span>;
+<span class="w">  </span><span class="k">-</span><span class="w"> </span><span class="sb">`bladestiff1d_clt_donnell.py`</span> and <span class="sb">`bladestiff2d_clt_donnell.py`</span> in
+    <span class="sb">`theory/multidomain_panels/`</span>, and
+    <span class="sb">`theory/stiffener/mass_matrix_1D_stiffeners.py`</span>, which also replaces
+    <span class="sb">`theory/multidomain_panels/mass_matrix.nb`</span>;
+<span class="w">  </span><span class="k">-</span><span class="w"> </span><span class="sb">`connections.py`</span>, <span class="sb">`plate_clpt_donnell.py`</span> and <span class="sb">`cylshell_clpt_donnell.py`</span>,
+    which already derived the matrices of their notebooks.
+
+  The notebook of the cone is kept, and the T stiffener
+  (<span class="sb">`tstiff2d_clt_donnell`</span>) is kept as it was. Elsewhere, the scripts that
+  converted the Mathematica output (<span class="sb">`print_expressions_python.py`</span>,
+  <span class="sb">`print_bardell_integrals_*.py`</span>) and all the old outputs of the theory
+  folder were removed. The generator of the
+  Sanders cylinder is now <span class="sb">`theory/shells/cylshell_clpt_sanders/derive_expressions.py`</span>.
+
+<span class="gu">### Documentation</span>
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`doc/source/cohesive_zone.rst`</span>, the theory of the cohesive zone of the
+  <span class="sb">`'SB_TSL'`</span> connection, its deviations from the thesis of D'Souza (2024),
+  its verification, the convergence study and the validation against the
+  literature, replaces
+  <span class="sb">`theory/multidomain_penalization/cohesive_zone_deviations_from_thesis.tex`</span>.
+  What is specific to a function is now in its docstring:
+  <span class="sb">`panels.multidomain.connections.kCSB_dmg`</span> and the methods of <span class="sb">`MultiDomain`</span>
+  of the <span class="sb">`'SB_TSL'`</span> connection.
+<span class="k">-</span><span class="w"> </span><span class="sb">`doc/source/bardell.rst`</span> documents the SymPy scripts of the integrals and
+  of the displacement field.
+<span class="k">-</span><span class="w"> </span>The tables of the validation of <span class="sb">`doc/source/cohesive_zone.rst`</span> include the
+  DCB benchmarks of Krueger (2008).
+
+<span class="gu">## 0.7.1 (2026-09-21)</span>
+
+<span class="gu">### Requirements</span>
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`composites&gt;=0.9.0`</span>, whose laminates cannot be pickled, see the fix of
+  <span class="sb">`StiffPanelBay.save()`</span> below.
+
+<span class="gu">### Breaking: kernels of the `'SB_TSL'` connection</span>
+
+The Cython kernels of <span class="sb">`panels.multidomain.connections.kCSB_dmg`</span> take the
+distance from the mid-surface of each panel to the interface, instead of a
+single distance <span class="sb">`dsb`</span> between the two mid-surfaces:
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`fkCSB11_dmg(dt, p1, ...)`</span>, <span class="sb">`dsb`</span> renamed to <span class="sb">`dt`</span>
+<span class="k">-</span><span class="w"> </span><span class="sb">`fkCSB12_dmg(dt, db, p1, p2, ...)`</span>, <span class="sb">`dsb`</span> replaced by <span class="sb">`dt`</span> and <span class="sb">`db`</span>
+<span class="k">-</span><span class="w"> </span><span class="sb">`fkCSB22_dmg(db, p1, p2, ...)`</span>, new first argument <span class="sb">`db`</span>
+
+where <span class="sb">`dt = sum(p_top.plyts)/2`</span> and <span class="sb">`db = sum(p_bot.plyts)/2`</span>. Code calling
+these kernels directly must be updated. The results of <span class="sb">`'SB_TSL'`</span>
+connections change with the bug fixes below.
+
+<span class="gu">### Bug fixes</span>
+
+<span class="k">-</span><span class="w"> </span>The cohesive zone of the <span class="sb">`MultiDomain`</span> connection <span class="sb">`'SB_TSL'`</span>, after
+  D'Souza (2024), could not capture the onset of failure of the double
+  cantilever beam (DCB):
+<span class="w">  </span><span class="k">-</span><span class="w"> </span>The tangential separation used the rotation of the top panel only, over
+    the full distance between the mid-surfaces. It now uses the rotation of
+    each panel over the distance from its mid-surface to the interface, and
+    the 12 block uses the <span class="sb">`eta`</span> flags of the top panel.
+<span class="w">  </span><span class="k">-</span><span class="w"> </span><span class="sb">`MultiDomain.force_out_plane_damage`</span> integrated the tractions with the
+    corrected separation, which drops the compressive tractions that balance
+    the tensile ones. It now uses the uncorrected separation, the same that
+    enters the internal force vector.
+<span class="w">  </span><span class="k">-</span><span class="w"> </span>The correction of the separation, now in
+    <span class="sb">`MultiDomain.correct_separation`</span>, zeroed each row of Gauss points up to
+    its last non-positive point. It now follows Section 6.3.1 of the thesis:
+    from the point of maximum separation towards <span class="sb">`x = 0`</span>, it zeroes the
+    separation up to the first non-positive point only.
+<span class="w">  </span><span class="k">-</span><span class="w"> </span><span class="sb">`MultiDomain.force_out_plane_damage`</span> raised a <span class="sb">`NameError`</span> when no damage
+    history (<span class="sb">`dmg_index`</span>) was set, e.g. before the first converged
+    increment.
+<span class="k">-</span><span class="w"> </span><span class="sb">`StiffPanelBay.save()`</span> failed with <span class="sb">`composites&gt;=0.9.0`</span>, because
+  <span class="sb">`_clear_matrices()`</span> did not clear the laminates of the base and flange of
+  the stiffeners, nor <span class="sb">`BladeStiff1D.flam`</span>. They are rebuilt before each
+  calculation, so they are now cleared.
+
+<span class="gu">### Enhancements</span>
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`MultiDomain.calc_kT_TSL(c)`</span>, the damage-rate part of the tangent stiffness
+  of the cohesive zone, non-symmetric, such that the secant stiffness plus
+  this matrix is the consistent tangent of the <span class="sb">`'SB_TSL'`</span> connection.
+<span class="k">-</span><span class="w"> </span><span class="sb">`MultiDomain.reaction_line_pd_xcte`</span>, the reaction of a displacement
+  prescribed along <span class="sb">`x = cte`</span>, which is the load measured by the load cell,
+  exact for any state of damage.
+<span class="k">-</span><span class="w"> </span>The secant stiffness of an <span class="sb">`'SB_TSL'`</span> connection between panels over the
+  same domain is assembled by matrix products, with the pristine stiffness
+  computed once and an update restricted to the damaged points. The Cython
+  kernels are still used for panels over different domains, or with
+  <span class="sb">`'use_kernels': True`</span> in the connection dictionary.
+<span class="k">-</span><span class="w"> </span>The DCB driver of <span class="sb">`tests/multidomain/test_dcb_damage.py`</span> measures the load
+  as the reaction of the prescribed displacement, evaluates the cohesive
+  secant stiffness at every iteration as part of the internal force vector,
+  uses a convergence criterion based on the physical forces, stiffer edge
+  penalties, a predictor, a backtracking line search and the bisection of
+  increments.
+
+<span class="gu">### Documentation</span>
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`theory/multidomain_penalization/cohesive_zone_deviations_from_thesis.tex`</span>,
+  with the theory of the cohesive zone, the deviations from the thesis of
+  D'Souza (2024) and their verification, a convergence study and the
+  validation against DCB results in the literature.
+<span class="k">-</span><span class="w"> </span>Validation notebooks of the <span class="sb">`'SB_TSL'`</span> cohesive zone in mode I DCB tests:
+  <span class="sb">`alfano2001_dcb.ipynb`</span>, <span class="sb">`camanho2003_dcb.ipynb`</span>, <span class="sb">`krueger2008_dcb.ipynb`</span>, <span class="sb">`turon2007_dcb.ipynb`</span>,  <span class="sb">`tijs2022_dcb.ipynb`</span>, <span class="sb">`lecinana2023_dcb.ipynb`</span> and <span class="sb">`tijs2023_phd_dcb.ipynb`</span>,
+  with the Krueger (2012) MMB benchmark data in
+  <span class="sb">`krueger2012_mmb_benchmark.ipynb`</span> (not simulated). The shared model builder
+  and solver are in <span class="sb">`notebooks/dcb_utils.py`</span>, and the non-linear results are
+  cached in <span class="sb">`notebooks/results`</span>.
+<span class="k">-</span><span class="w"> </span><span class="sb">`notebooks/validation_summary.ipynb`</span> collects the peak loads of all
+  validation notebooks, and <span class="sb">`notebooks/convergence_study.py`</span> reproduces the
+  convergence study of the theory document.
+
+<span class="gu">### Tests</span>
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`tests/multidomain/test_sb_tsl.py`</span>: energy of the <span class="sb">`kCSB_dmg`</span> kernels with
+  the bottom panel first in the assembly, equality of the matrix-product and
+  kernel assemblies, and a finite-difference check of
+  <span class="sb">`MultiDomain.calc_kT_TSL`</span>.
+
+<span class="gu">## 0.6.21 (2026-09-18)</span>
+
+<span class="gu">### Requirements</span>
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`structsolve&gt;=0.4.3`</span>, with the new non-linear solvers (full Newton-Raphson,
+  rewritten arc-length methods of Riks and Crisfield) and the verified sparse
+  solver of <span class="sb">`lb`</span>, which could return wrong buckling loads without any warning.
+
+<span class="gu">### Breaking: limits of the integration domain</span>
+
+The attributes <span class="sb">`Shell.x1, x2, y1, y2`</span>, the physical limits of the integration
+domain, default to <span class="sb">`None`</span> instead of the sentinels <span class="sb">`x1 = y1 = -1`</span> and
+<span class="sb">`x2 = y2 = +1`</span>. A <span class="sb">`None`</span> limit is the corresponding edge of the shell, <span class="sb">`0`</span>,
+<span class="sb">`a`</span> or <span class="sb">`b`</span>, and each limit is independent of the others. The new
+<span class="sb">`Shell.integration_limits()`</span> returns the four limits as floats and raises
+<span class="sb">`ValueError`</span> unless <span class="sb">`0 &lt;= x1 &lt; x2 &lt;= a`</span> and <span class="sb">`0 &lt;= y1 &lt; y2 &lt;= b`</span>. It is called
+by <span class="sb">`Shell._rebuild`</span>, so an invalid limit fails when the shell is built.
+
+Code that sets <span class="sb">`x1 = -1`</span> or <span class="sb">`y1 = -1`</span> to request the full domain now raises
+<span class="sb">`ValueError`</span>, and must set <span class="sb">`None`</span> instead, or leave the default. There is no
+backward compatibility for the old sentinels, because <span class="sb">`+1`</span> is also a valid
+coordinate. For the same reason, code that sets <span class="sb">`x2 = +1`</span> or <span class="sb">`y2 = +1`</span> alone
+to restore the full domain cannot be detected: it now integrates up to
+<span class="sb">`1.0`</span>.
+
+The old convention had two defects, both giving wrong results with no warning:
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`x2 = 1.0`</span> (or <span class="sb">`y2 = 1.0`</span>) could not be told apart from the sentinel, so
+  on a shell with <span class="sb">`a &gt; 1`</span> the requested limit was replaced by the full
+  domain. A change of 1e-9 in that limit changed the stiffness matrix by
+  34 %. This was reachable through <span class="sb">`StiffPanelBay.add_panel`</span>: in a bay of
+  width <span class="sb">`b = 1.0`</span> the last panel was integrated over the whole bay, counting
+  its skin twice and giving a buckling load 4.9 % too low, and a panel edge
+  at <span class="sb">`y = 1.0`</span> in a wider bay did the same to the first panel.
+<span class="k">-</span><span class="w"> </span>A partial domain was recognized only when both limits of a pair departed
+  from the sentinels, so a single limit, e.g. <span class="sb">`x1 = 0.2`</span>, was ignored and the
+  full <span class="sb">`x`</span> range was integrated. No caller in panels set a single limit.
+
+The numerical kernels of <span class="sb">`plate_clpt_donnell`</span> and <span class="sb">`cylshell_clpt_donnell`</span>
+(<span class="sb">`fkC_num`</span>, <span class="sb">`fkG_num`</span>, <span class="sb">`fkM_num`</span>, <span class="sb">`fkAx_num`</span>, <span class="sb">`fkAy_num`</span> and <span class="sb">`calc_fint`</span>) now
+always map the resolved limits to the natural coordinates, which for the full
+domain gives exactly <span class="sb">`xi = eta = -1, +1`</span>. The full-domain matrices are
+bit-identical to those of 0.6.9, through both the analytical and the numerical
+integration, and so are the matrices of domains limited on both sides.
+<span class="sb">`Shell.is_partial_domain`</span> compares the resolved limits with the edges, and
+<span class="sb">`Shell.calc_kA`</span> uses it instead of repeating the old test.
+
+<span class="gu">### Breaking: tangent stiffness matrix of the non-linear models</span>
+
+The geometric stiffness matrix due to the membrane stress of the non-linear
+strains, <span class="sb">`KGNL`</span>, moved from <span class="sb">`fkG_num`</span> to <span class="sb">`fkC_num`</span> in the models
+<span class="sb">`plate_clpt_donnell`</span> and <span class="sb">`cylshell_clpt_donnell`</span>:
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`calc_kC(c, NLgeom=True)`</span> returns <span class="sb">`K0 + K0L + KL0 + KLL + KGNL`</span>.
+<span class="k">-</span><span class="w"> </span><span class="sb">`calc_kG(c, NLgeom=True)`</span> returns <span class="sb">`KG(N0 + N_L)`</span>, which is homogeneous of
+  degree one in <span class="sb">`c`</span>, as required by linear buckling analyses.
+<span class="k">-</span><span class="w"> </span>The tangent stiffness matrix `calc_kT(c) = calc_kC(c, NLgeom=True) +
+  calc_kG(c, NLgeom=True)` is unchanged, and it is the exact derivative of
+  <span class="sb">`calc_fint(c)`</span>, giving quadratic convergence to the Newton-Raphson method.
+
+Code that calls <span class="sb">`calc_kG(c, NLgeom=True)`</span> alone to obtain the geometric
+stiffness matrix of a deformed state now obtains it without <span class="sb">`KGNL`</span>.
+
+Following that move, the <span class="sb">`NLgeom`</span> argument of the kernels
+<span class="sb">`panels.models.plate_clpt_donnell_num.fkG_num`</span> and
+<span class="sb">`panels.models.cylshell_clpt_donnell_num.fkG_num`</span> was removed. It had become
+inert, since <span class="sb">`KGNL`</span> is assembled by <span class="sb">`fkC_num`</span>, so the signature advertised an
+effect it did not have. Code calling these kernels directly must drop the
+argument, which was positional before <span class="sb">`Nxx0`</span>. <span class="sb">`Shell.calc_kC`</span> and
+<span class="sb">`Shell.calc_kG`</span> keep their own <span class="sb">`NLgeom`</span> argument, where it still selects the
+numerical integration.
+
+<span class="gu">### Breaking: renamed modules</span>
+
+The suffix <span class="sb">`_bardell`</span> was removed from the modules of the models:
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`panels.models.clpt_bardell_field`</span> -&gt; <span class="sb">`panels.models.clpt_field`</span>
+<span class="k">-</span><span class="w"> </span><span class="sb">`panels.models.plate_clpt_donnell_bardell`</span> and <span class="sb">`_num`</span> -&gt;
+  <span class="sb">`panels.models.plate_clpt_donnell`</span> and <span class="sb">`_num`</span>
+<span class="k">-</span><span class="w"> </span><span class="sb">`panels.models.cylshell_clpt_donnell_bardell`</span> and <span class="sb">`_num`</span> -&gt;
+  <span class="sb">`panels.models.cylshell_clpt_donnell`</span> and <span class="sb">`_num`</span>
+<span class="k">-</span><span class="w"> </span><span class="sb">`panels.stiffener.models.bladestiff1d_clt_donnell_bardell`</span> -&gt;
+  <span class="sb">`panels.stiffener.models.bladestiff1d_clt_donnell`</span>
+<span class="k">-</span><span class="w"> </span><span class="sb">`panels.stiffener.models.bladestiff2d_clt_donnell_bardell`</span> -&gt;
+  <span class="sb">`panels.stiffener.models.bladestiff2d_clt_donnell`</span>
+
+The model names <span class="sb">`Shell.model = 'plate_clpt_donnell'`</span> and
+<span class="sb">`'cylshell_clpt_donnell'`</span> are the only ones accepted. The legacy names
+<span class="sb">`'plate_clpt_donnell_bardell'`</span> and <span class="sb">`'cylshell_clpt_donnell_bardell'`</span> were
+removed from <span class="sb">`panels.modelDB.db`</span>, and <span class="sb">`Shell._rebuild`</span> now raises
+<span class="sb">`ValueError`</span> listing the valid models when one of them is used.
+
+<span class="gu">### Bug fixes</span>
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`Shell.calc_kC`</span> forwarded an invalid Ritz-constant vector into the nogil
+  kernels. The zero-filled default for <span class="sb">`c`</span> was installed only when both <span class="sb">`c`</span>
+  and <span class="sb">`ABDnxny`</span> were absent, so <span class="sb">`calc_kC(ABDnxny=...)`</span> without <span class="sb">`c`</span> reached
+  <span class="sb">`np.ascontiguousarray(None)`</span>, which returns the shape <span class="sb">`(1,)`</span> array <span class="sb">`[nan]`</span>.
+  The kernels declare <span class="sb">`double [::1] cs`</span> and are compiled with
+  <span class="sb">`boundscheck=False`</span>, so with <span class="sb">`NLgeom=True`</span> this was read far out of bounds
+  instead of raising. The same gap on <span class="sb">`c_cte`</span> was worse: when a constant
+  stress state was set through <span class="sb">`Nxx_cte`</span>, <span class="sb">`Nyy_cte`</span> or <span class="sb">`Nxy_cte`</span> but no
+  <span class="sb">`c_cte`</span> was given, <span class="sb">`None`</span> reached <span class="sb">`fkG_num`</span>, and dereferencing a <span class="sb">`None`</span>
+  memoryview segfaulted the interpreter. This hit <span class="sb">`calc_kT`</span> on any preloaded
+  panel, since <span class="sb">`NLgeom=True`</span> forces the numerical integration.
+<span class="k">-</span><span class="w"> </span><span class="sb">`Shell.calc_fint`</span>, <span class="sb">`Shell.uvw`</span> and <span class="sb">`Shell.strain`</span> also forwarded <span class="sb">`c`</span> into a
+  <span class="sb">`double [::1]`</span> argument without checking its size. They now validate it.
+<span class="k">-</span><span class="w"> </span>An unset <span class="sb">`Shell.r`</span> silently became <span class="sb">`r = 0`</span>, which the cylindrical kernels
+  divide by. The failure surfaced as a bare <span class="sb">`AssertionError`</span> from
+  <span class="sb">`structsolve.sparseutils.finalize_symmetric_matrix`</span>, with nothing pointing
+  at the radius. The flat-plate limit of a cylindrical shell is
+  <span class="sb">`r -&gt; infinity`</span>, not <span class="sb">`r = 0`</span>, so <span class="sb">`r = 0`</span> is never a valid radius. Models
+  that need one are flagged with <span class="sb">`requires_r`</span> in <span class="sb">`panels.modelDB`</span>, and
+  <span class="sb">`Shell.calc_kC`</span>, <span class="sb">`calc_kG`</span>, <span class="sb">`calc_kM`</span>, <span class="sb">`calc_kA`</span> and <span class="sb">`calc_fint`</span> now raise a
+  <span class="sb">`ValueError`</span> naming the model and pointing at <span class="sb">`'plate_clpt_donnell'`</span> when
+  <span class="sb">`r`</span> is <span class="sb">`None`</span> or non-positive. The <span class="sb">`r = 0`</span> fallback is kept only for the
+  plate models, whose kernels never read it.
+<span class="k">-</span><span class="w"> </span><span class="sb">`StiffPanelBay.add_panel`</span> raised <span class="sb">`ValueError: stack must be defined`</span> and made
+  <span class="sb">`StiffPanelBay`</span> unusable. It built its <span class="sb">`Shell`</span> without the laminate
+  attributes and assigned them only afterwards, but <span class="sb">`Shell.__init__`</span> already
+  calls <span class="sb">`Shell._rebuild`</span>, which needs them. The laminate, the model and the
+  density are now passed to the constructor.
+<span class="k">-</span><span class="w"> </span>The analytical closed-form matrices <span class="sb">`fk0`</span>, <span class="sb">`fkG0`</span> and <span class="sb">`fkM`</span> always integrate
+  the full shell domain and silently ignored the <span class="sb">`(x1, x2, y1, y2)`</span> limits that
+  only the numerically integrated matrices honour. Any assembly with more than
+  one panel over the same approximation functions therefore counted the skin
+  once per panel. <span class="sb">`Shell.calc_kC`</span>, <span class="sb">`Shell.calc_kG`</span> and <span class="sb">`Shell.calc_kM`</span> now
+  select the numerical matrices whenever the new <span class="sb">`Shell.is_partial_domain`</span>
+  returns <span class="sb">`True`</span>.
+<span class="k">-</span><span class="w"> </span><span class="sb">`MultiDomain`</span> connection <span class="sb">`'SB'`</span> overwrote the penalty given by
+  <span class="sb">`calc_kt_kr`</span> with a hard-coded <span class="sb">`kt = 2e5`</span>. That is a N/mm**3 value, about
+  6e-7 of the default penalty in SI units, so a stiffener base was practically
+  disconnected from the skin. The reference values of
+  <span class="sb">`tests/multidomain/test_tstiff2d_assembly.py`</span> had been regenerated to match
+  it; restoring the penalty restores their original values.
+<span class="k">-</span><span class="w"> </span><span class="sb">`MultiDomain`</span> connections <span class="sb">`'SB'`</span> and <span class="sb">`'SB_TSL'`</span> took the panel coming first
+  in the assembly as the top one, so the offset between the mid-surfaces had
+  the wrong sign whenever the bottom panel came first, with errors of up to
+  30 % in a buckling load. <span class="sb">`p1`</span> is now always the top panel and <span class="sb">`p2`</span> the
+  bottom one, as documented, and panels of different dimensions raise
+  <span class="sb">`ValueError`</span>.
+<span class="k">-</span><span class="w"> </span><span class="sb">`MultiDomain.get_kC_conn`</span> swapped <span class="sb">`xcte1`</span>/<span class="sb">`xcte2`</span> and <span class="sb">`ycte1`</span>/<span class="sb">`ycte2`</span> inside
+  the user's connection dictionaries when <span class="sb">`p1`</span> came after <span class="sb">`p2`</span> in the
+  assembly, so every second call, e.g. <span class="sb">`calc_kC()`</span> followed by <span class="sb">`calc_kT()`</span>,
+  used them swapped back. The dictionaries are no longer modified. A
+  connection of a panel to itself raises <span class="sb">`ValueError`</span> instead of
+  <span class="sb">`UnboundLocalError`</span>.
+<span class="k">-</span><span class="w"> </span><span class="sb">`BladeStiff2D`</span> lost the ply densities when rebuilding the laminates of the
+  base and of the flange. The base, integrated numerically over its partial
+  domain, had no mass at all, so natural frequencies and flutter results of
+  bays with a <span class="sb">`BladeStiff2D`</span> base were wrong with no warning. The base now
+  adds exactly the mass of a skin strip of the same laminate and width.
+<span class="k">-</span><span class="w"> </span><span class="sb">`MultiDomain.force()`</span> integrated the stress resultants over the natural
+  coordinate without the Jacobian, returning <span class="sb">`2*mean(N)`</span> instead of the
+  section force: along <span class="sb">`x = cte`</span> the result is now multiplied by <span class="sb">`b/2`</span>, and
+  along <span class="sb">`y = cte`</span> by <span class="sb">`a/2`</span>. <span class="sb">`MultiDomain.calc_results()`</span> with
+  <span class="sb">`vec='Fxx'`</span>, <span class="sb">`'Fyy'`</span> or <span class="sb">`'Fxy'`</span> is affected the same way.
+<span class="k">-</span><span class="w"> </span><span class="sb">`StiffPanelBay.calc_kA()`</span> used only the first panel, integrated over its
+  own partial domain, instead of the whole bay. It now sums the contribution
+  of every panel, as <span class="sb">`calc_kC()`</span> does, and uses the piston theory parameters
+  of the bay.
+<span class="k">-</span><span class="w"> </span>Methods that always raised an exception:
+<span class="w">  </span><span class="k">-</span><span class="w"> </span><span class="sb">`Shell.calc_cA()`</span> looked <span class="sb">`fcA`</span> up in the numerical module instead of the
+    analytical one. It now also returns the matrix.
+<span class="w">  </span><span class="k">-</span><span class="w"> </span><span class="sb">`Shell.strain()`</span> and <span class="sb">`Shell.stress()`</span>, and therefore <span class="sb">`plot_shell()`</span> with
+    a strain or stress field, failed for a plate with an unset radius
+    (<span class="sb">`r=None`</span>).
+<span class="w">  </span><span class="k">-</span><span class="w"> </span><span class="sb">`StiffPanelBay.calc_kA()`</span> and <span class="sb">`StiffPanelBay.calc_cA()`</span>.
+<span class="w">  </span><span class="k">-</span><span class="w"> </span><span class="sb">`StiffPanelBay.calc_fext()`</span> failed with any skin load, and for any bay
+    with a <span class="sb">`BladeStiff2D`</span>. Flange loads are read from
+    <span class="sb">`BladeStiff2D.forces_flange`</span>.
+<span class="w">  </span><span class="k">-</span><span class="w"> </span><span class="sb">`StiffPanelBay.save()`</span>.
+<span class="w">  </span><span class="k">-</span><span class="w"> </span><span class="sb">`StiffPanelBay.get_size()`</span> for a <span class="sb">`BladeStiff2D`</span> without flange.
+<span class="w">  </span><span class="k">-</span><span class="w"> </span><span class="sb">`StiffPanelBay.uvw_stiffener()`</span> for any stiffener after the first one.
+<span class="k">-</span><span class="w"> </span>Removed <span class="sb">`StiffPanelBay.tstiff2ds`</span> and the code handling it, left over from
+  the removal of <span class="sb">`TStiff2D`</span>: nothing could fill the list, and the external
+  force vector of that code wrote past the end of its buffer.
+
+<span class="gu">### Enhancements</span>
+
+<span class="k">-</span><span class="w"> </span><span class="sb">`MultiDomain.calc_kC`</span> and <span class="sb">`MultiDomain.calc_kG`</span> accept <span class="sb">`NLgeom`</span>, forwarded to
+  each domain, such that the methods <span class="sb">`calc_fext`</span>, <span class="sb">`calc_fint`</span>, <span class="sb">`calc_kC`</span> and
+  <span class="sb">`calc_kG`</span> of both <span class="sb">`Shell`</span> and <span class="sb">`MultiDomain`</span> can be passed directly to
+  <span class="sb">`structsolve.Analysis`</span>.
+<span class="k">-</span><span class="w"> </span>The Gauss-Legendre points and weights come from
+  <span class="sb">`scipy.special.roots_legendre`</span>, instead of hardcoded tables, which matches
+  the old tables to <span class="sb">`1e-13`</span> and has no upper limit on the number of
+  integration points (one of the previous tables stopped at 30 points). The
+  C++ sources of the tables (about 7.5 MB) were removed.
+<span class="k">-</span><span class="w"> </span><span class="sb">`num_eigvalues`</span> argument in <span class="sb">`tstiff2d_1stiff_compression`</span>,
+  <span class="sb">`tstiff2d_1stiff_freq`</span> and <span class="sb">`tstiff2d_1stiff_flutter`</span>.
+<span class="k">-</span><span class="w"> </span>The <span class="sb">`MultiDomain`</span> connection dictionaries accept the keys <span class="sb">`'kt'`</span> and <span class="sb">`'kr'`</span>
+  to override the penalty constants of <span class="sb">`calc_kt_kr`</span>. The default rotation
+  penalty does not grow as the domains become narrower, and for thin skins
+  split in narrow strips it leaves a converged error of about 2 %.
+
+<span class="gu">### Documentation</span>
+
+<span class="k">-</span><span class="w"> </span>New Sphinx documentation, in the same style as <span class="sb">`structsolve`</span>, with usage
+  examples extracted from the unit tests: linear static, linear buckling,
+  frequency, flutter, Newton-Raphson, arc-length, multi-domain cylinders and
+  panels with a T-stiffener.
+<span class="k">-</span><span class="w"> </span>API reference with one page per module, and docstrings fixed such that the
+  documentation builds without warnings.
+<span class="k">-</span><span class="w"> </span><span class="sb">`Shell.calc_kC`</span> documents that its return value is not purely constitutive:
+  with <span class="sb">`NLgeom=True`</span> it contains <span class="sb">`KGNL`</span>, and with <span class="sb">`c_cte`</span> or a non-zero
+  <span class="sb">`Nxx_cte`</span>, <span class="sb">`Nyy_cte`</span> or <span class="sb">`Nxy_cte`</span> it contains <span class="sb">`KG(N_cte)`</span>, the device used
+  to superpose combined load cases. <span class="sb">`Shell.calc_kG`</span> documents that it stays
+  homogeneous of degree one in <span class="sb">`c`</span>, and <span class="sb">`Shell.calc_kT`</span>, which had no
+  docstring, documents the grouping of the tangent stiffness matrix.
+<span class="k">-</span><span class="w"> </span><span class="sb">`Shell.calc_kC`</span> claimed that passing <span class="sb">`c`</span> gives the large displacement
+  matrix. It does not: <span class="sb">`fkC_num`</span> zeroes <span class="sb">`w,x`</span> and <span class="sb">`w,y`</span> unless <span class="sb">`NLgeom == 1`</span>,
+  and <span class="sb">`K0L`</span>, <span class="sb">`KL0`</span>, <span class="sb">`KLL`</span> and <span class="sb">`KGNL`</span> are all built from them, so <span class="sb">`c`</span> alone
+  still returns <span class="sb">`K0`</span>. What <span class="sb">`c`</span> selects is the numerical integration over the
+  analytical closed form. The docstring now says so.
+<span class="k">-</span><span class="w"> </span><span class="sb">`CHANGELOG.md`</span> and <span class="sb">`CITATION.cff`</span>.
+<span class="k">-</span><span class="w"> </span><span class="sb">`notebooks/stamatelos_labeas_2023.ipynb`</span>, reproducing every result of
+  Stamatelos and Labeas (Computation 2023, 11, 110) and documenting where the
+  published data is incomplete or inconsistent.
+
+<span class="gu">### Tests</span>
+
+<span class="k">-</span><span class="w"> </span>Consistency of the tangent stiffness matrix
+  (<span class="sb">`tests/tests_shell/test_tangent_consistency.py`</span>): directional Taylor test,
+  finite-difference Jacobian, undeformed state, quadratic convergence of the
+  Newton-Raphson method and homogeneity of <span class="sb">`kG`</span>.
+<span class="k">-</span><span class="w"> </span>Geometrically non-linear analysis deep in the postbuckling regime with a full
+  Newton-Raphson method, verifying the quadratic convergence
+  (<span class="sb">`tests/tests_shell/test_nonlinear.py`</span>).
+<span class="k">-</span><span class="w"> </span>Snap-through of a hinged cylindrical shell (Sabir and Lock) traced with the
+  Riks method of <span class="sb">`structsolve`</span>
+  (<span class="sb">`tests/tests_shell/test_nonlinear_riks.py`</span>).
+<span class="k">-</span><span class="w"> </span>Partial-domain integration of <span class="sb">`calc_kC`</span>, <span class="sb">`calc_kG`</span> and <span class="sb">`calc_kM`</span>, checking
+  that adjacent strips sum to the full-domain matrices
+  (<span class="sb">`tests/tests_shell/test_partial_domain_integration.py`</span>).
+<span class="k">-</span><span class="w"> </span><span class="sb">`StiffPanelBay`</span> with blade stiffeners modelled by the 1D flange formulation
+  (<span class="sb">`tests/tests_stiffpanelbay/test_stiffpanelbay_lb.py`</span>).
+<span class="k">-</span><span class="w"> </span>Buckling loads of the laminated stiffened plates of Stamatelos and Labeas
+  (Computation 2023, 11, 110), with the published reference values kept in a
+  dictionary (<span class="sb">`tests/tests_stiffpanelbay/test_stamatelos_labeas_2023.py`</span>).
+<span class="k">-</span><span class="w"> </span>Argument handling of the stiffness API
+  (<span class="sb">`tests/tests_shell/test_argument_validation.py`</span>): the defaults for <span class="sb">`c`</span> and
+  <span class="sb">`c_cte`</span>, the size checks of <span class="sb">`calc_fint`</span>, the radius validation, the
+  convergence of the cylindrical kernels to the plate kernels as
+  <span class="sb">`r -&gt; infinity`</span>, and the removal of the <span class="sb">`NLgeom`</span> argument of <span class="sb">`fkG_num`</span> and
+  of the legacy model names.
+<span class="k">-</span><span class="w"> </span><span class="sb">`tests/multidomain/test_stamatelos_labeas_2023_multidomain.py`</span>, the
+  <span class="sb">`MultiDomain`</span> counterpart of the Stamatelos and Labeas (2023) test, with
+  plate domains only and every connection strategy: <span class="sb">`SSycte`</span> and <span class="sb">`SSxcte`</span>
+  (skin strips), <span class="sb">`BFycte`</span> (blades as plate domains, at a strip edge and along
+  an interior line, Tables 4 and 5 and Figure 7), <span class="sb">`BFxcte`</span> (the same model
+  rotated by 90 degrees, equal to machine precision) and <span class="sb">`SB`</span> and <span class="sb">`SB_TSL`</span>
+  (the unsymmetric skin split in two bonded sub-laminates).
+<span class="k">-</span><span class="w"> </span><span class="sb">`tests/multidomain/test_conn_kCBFxcte.py`</span> compared the <span class="sb">`BFycte`</span> eigenvalue
+  with itself; it now compares it with the <span class="sb">`BFxcte`</span> one.
+<span class="k">-</span><span class="w"> </span><span class="sb">`tests/tests_shell/test_partial_domain_limits.py`</span> and
+  <span class="sb">`test_stiffpanelbay_lb.py::test_panel_edge_at_one_meter`</span> cover the
+  integration limits.
+<span class="k">-</span><span class="w"> </span>New tests for <span class="sb">`Shell`</span> (<span class="sb">`tests/tests_shell/test_shell_api.py`</span>),
+  <span class="sb">`plot_shell`</span> (<span class="sb">`tests/tests_shell/test_plot_shell.py`</span>), <span class="sb">`StiffPanelBay`</span> with
+  <span class="sb">`BladeStiff1D`</span> and <span class="sb">`BladeStiff2D`</span>
+  (<span class="sb">`tests/tests_stiffpanelbay/test_stiffpanelbay_api.py`</span>) and the
+  post-processing of <span class="sb">`MultiDomain`</span>
+  (<span class="sb">`tests/multidomain/test_multidomain_postprocessing.py`</span>), raising the line
+  coverage of the Python modules from 67 % to 92 %.
+
+<span class="gu">## 0.5.4 (2026-04-09)</span>
+
+<span class="k">-</span><span class="w"> </span>Last version before this changelog, see the git history for details.
+</pre></div>
+</div>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="dev.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Development tools (<code class="xref py py-mod docutils literal notranslate"><span class="pre">panels.dev</span></code>)</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="ref.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">References</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="_sources/changelog.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2012-2026, Saullo G. P. Castro, Nathan D&#39;Souza.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.2.0.
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.23.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

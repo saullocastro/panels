@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Exact connections with the null-space method &#8212; panels 0.13.11 documentation</title>
+    <title>Exact connections with the null-space method &#8212; panels 0.14.0 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
 
-    <script src="_static/documentation_options.js?v=63942e21"></script>
+    <script src="_static/documentation_options.js?v=9e420a66"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
@@ -45,12 +45,12 @@
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Follower pressure loads: theory" href="follower_pressure.html" />
-    <link rel="prev" title="Bardell’s Hierarchical Functions" href="bardell.html" />
+    <link rel="next" title="Tangent stiffness matrix and its product by a vector" href="tangent_product.html" />
+    <link rel="prev" title="Third-order shear deformation theory with a laminate offset" href="tsdt_offset.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.13.11" />
+  <meta name="docsearch:version" content="0.14.0" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -118,7 +118,7 @@
   
   
   
-    <p class="title logo__title">panels 0.13.11 documentation</p>
+    <p class="title logo__title">panels 0.14.0 documentation</p>
   
 </a></div>
     
@@ -133,36 +133,36 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_linear_static.html">
-    Linear static analysis
+  <a class="nav-link nav-internal" href="shell_overview.html">
+    Plates and cylindrical shells
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_linear_buckling.html">
-    Linear buckling analysis
+  <a class="nav-link nav-internal" href="bardell.html">
+    Bardell’s hierarchical functions
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_frequency.html">
-    Frequency analysis
+  <a class="nav-link nav-internal" href="boundary_conditions.html">
+    Boundary conditions
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_flutter.html">
-    Panel flutter analysis
+  <a class="nav-link nav-internal" href="loads.html">
+    Loads
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="ex_newton_raphson.html">
-    Non-linear static analysis with the Newton-Raphson method
+  <a class="nav-link nav-internal" href="multidomain_overview.html">
+    Multi-domain assemblies
   </a>
 </li>
 
@@ -175,50 +175,22 @@
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_arc_length.html">
-    Non-linear static analysis with the arc-length methods
+  <a class="nav-link dropdown-item nav-internal" href="stiffened_panels.html">
+    Stiffened panels
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_follower_pressure.html">
-    Follower (hydrostatic) pressure
+  <a class="nav-link dropdown-item nav-internal" href="aeroelasticity.html">
+    Panel flutter with the piston theory
   </a>
 </li>
 
 
 <li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_cylinder.html">
-    Cylinders modeled as multi-domain assemblies
-  </a>
-</li>
-
-
-<li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_tstiff2d.html">
-    Panels with a T-stiffener modeled as multi-domain assemblies
-  </a>
-</li>
-
-
-<li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="api.html">
-    API reference
-  </a>
-</li>
-
-
-<li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="bardell.html">
-    Bardell’s Hierarchical Functions
-  </a>
-</li>
-
-
-<li class=" current active">
-  <a class="nav-link dropdown-item nav-internal" href="#" aria-current="page">
-    Exact connections with the null-space method
+  <a class="nav-link dropdown-item nav-internal" href="postprocessing.html">
+    Field outputs, plots and files
   </a>
 </li>
 
@@ -226,6 +198,20 @@
 <li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="follower_pressure.html">
     Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tsdt_offset.html">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class=" current active">
+  <a class="nav-link dropdown-item nav-internal" href="#" aria-current="page">
+    Exact connections with the null-space method
   </a>
 </li>
 
@@ -247,6 +233,104 @@
 <li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="cohesive_zone.html">
     Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_face_clamp.html">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="changelog.html">
+    Changelog
   </a>
 </li>
 
@@ -341,6 +425,104 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="shell_overview.html">
+    Plates and cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="bardell.html">
+    Bardell’s hierarchical functions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="boundary_conditions.html">
+    Boundary conditions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="loads.html">
+    Loads
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="multidomain_overview.html">
+    Multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="stiffened_panels.html">
+    Stiffened panels
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="aeroelasticity.html">
+    Panel flutter with the piston theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="postprocessing.html">
+    Field outputs, plots and files
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tsdt_offset.html">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#" aria-current="page">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tangent_product.html">
+    Tangent stiffness matrix and its product by a vector
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tabulation.html">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="ex_linear_static.html">
     Linear static analysis
   </a>
@@ -390,6 +572,20 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_face_clamp.html">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="ex_multidomain_cylinder.html">
     Cylinders modeled as multi-domain assemblies
   </a>
@@ -404,6 +600,13 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="api.html">
     API reference
   </a>
@@ -411,43 +614,8 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="bardell.html">
-    Bardell’s Hierarchical Functions
-  </a>
-</li>
-
-
-<li class="nav-item current active">
-  <a class="nav-link nav-internal" href="#" aria-current="page">
-    Exact connections with the null-space method
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="follower_pressure.html">
-    Follower pressure loads: theory
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="tangent_product.html">
-    Tangent stiffness matrix and its product by a vector
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="tabulation.html">
-    Approximation functions tabulated at the integration points
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="cohesive_zone.html">
-    Cohesive zone model of the multi-domain approach
+  <a class="nav-link nav-internal" href="changelog.html">
+    Changelog
   </a>
 </li>
 
@@ -591,15 +759,15 @@ and it keeps its penalty stiffness also with <code class="docutils literal notra
 <section id="theory">
 <h2>Theory<a class="headerlink" href="#theory" title="Link to this heading">#</a></h2>
 <p>The quantities <span class="math notranslate nohighlight">\(q_k\)</span> of Eq. <a class="reference internal" href="#equation-ns-penalty">(1)</a> are linear combinations of the
-Ritz constants <span class="math notranslate nohighlight">\(\{c\}\)</span> of the two domains. Since Bardell’s functions are
-polynomials, see <a class="reference internal" href="bardell.html#theory-func-bardell"><span class="std std-ref">Bardell’s Hierarchical Functions</span></a>, the difference <span class="math notranslate nohighlight">\(q_k^{(1)} -
+Ritz constants <span class="math notranslate nohighlight">\(\boldsymbol{c}\)</span> of the two domains. Since Bardell’s functions are
+polynomials, see <a class="reference internal" href="bardell.html#theory-func-bardell"><span class="std std-ref">Bardell’s hierarchical functions</span></a>, the difference <span class="math notranslate nohighlight">\(q_k^{(1)} -
 q_k^{(2)}\)</span> is a polynomial along the connection, of the natural coordinate
 <span class="math notranslate nohighlight">\(\xi\)</span> or <span class="math notranslate nohighlight">\(\eta\)</span> shared by the two domains. It vanishes everywhere when it
 vanishes at as many points as the number of its coefficients, and the
 connections become the homogeneous linear constraints:</p>
 <div class="math notranslate nohighlight" id="equation-ns-constraints">
-<span class="eqno">(2)<a class="headerlink" href="#equation-ns-constraints" title="Link to this equation">#</a></span>\[[B] \{c\} = \{0\}\]</div>
-<p>where each row of <span class="math notranslate nohighlight">\([B]\)</span> is <span class="math notranslate nohighlight">\(q_k^{(1)} - q_k^{(2)}\)</span> at one Gauss-Legendre
+<span class="eqno">(2)<a class="headerlink" href="#equation-ns-constraints" title="Link to this equation">#</a></span>\[\boldsymbol{B} \boldsymbol{c} = \boldsymbol{0}\]</div>
+<p>where each row of <span class="math notranslate nohighlight">\(\boldsymbol{B}\)</span> is <span class="math notranslate nohighlight">\(q_k^{(1)} - q_k^{(2)}\)</span> at one Gauss-Legendre
 point along the connection, or over the area of <code class="docutils literal notranslate"><span class="pre">'SB'</span></code>, see
 <code class="xref py py-func docutils literal notranslate"><span class="pre">nullspace.constraint_matrix()</span></code>. The first four functions of Bardell
 are cubic and the function <span class="math notranslate nohighlight">\(i \ge 4\)</span> has the order <span class="math notranslate nohighlight">\(i\)</span>, so that
@@ -610,12 +778,12 @@ are exactly those that satisfy the constraints, which is verified for every
 connection and model in <code class="docutils literal notranslate"><span class="pre">tests/multidomain/test_null_space.py</span></code>.</p>
 <section id="why-not-lagrange-multipliers">
 <h3>Why not Lagrange multipliers<a class="headerlink" href="#why-not-lagrange-multipliers" title="Link to this heading">#</a></h3>
-<p>The constraints could be imposed with Lagrange multipliers <span class="math notranslate nohighlight">\(\{\lambda\}\)</span>,
+<p>The constraints could be imposed with Lagrange multipliers <span class="math notranslate nohighlight">\(\boldsymbol{\lambda}\)</span>,
 which add one unknown per constraint and give the system:</p>
 <div class="math notranslate nohighlight">
-\[\begin{split}\begin{bmatrix} [K] &amp; [B]^T \\ [B] &amp; [0] \end{bmatrix}
-\begin{Bmatrix} \{c\} \\ \{\lambda\} \end{Bmatrix} =
-\begin{Bmatrix} \{f\} \\ \{0\} \end{Bmatrix}\end{split}\]</div>
+\[\begin{split}\begin{bmatrix} \boldsymbol{K} &amp; \boldsymbol{B}^\top \\ \boldsymbol{B} &amp; \boldsymbol{0} \end{bmatrix}
+\begin{Bmatrix} \boldsymbol{c} \\ \boldsymbol{\lambda} \end{Bmatrix} =
+\begin{Bmatrix} \boldsymbol{F} \\ \boldsymbol{0} \end{Bmatrix}\end{split}\]</div>
 <p>This matrix is indefinite. For the linear buckling and frequency analyses
 the geometric stiffness matrix and the mass matrix have zero rows and
 columns for the multipliers, giving infinite eigenvalues that the
@@ -626,53 +794,55 @@ solution.</p>
 <section id="elimination-of-the-constraints">
 <h3>Elimination of the constraints<a class="headerlink" href="#elimination-of-the-constraints" title="Link to this heading">#</a></h3>
 <p>All the vectors that satisfy Eq. <a class="reference internal" href="#equation-ns-constraints">(2)</a> are written with a
-basis <span class="math notranslate nohighlight">\([T]\)</span> of the null space of <span class="math notranslate nohighlight">\([B]\)</span>, <span class="math notranslate nohighlight">\([B] [T] = [0]\)</span>:</p>
-<div class="math notranslate nohighlight" id="equation-ns-t">
-<span class="eqno">(3)<a class="headerlink" href="#equation-ns-t" title="Link to this equation">#</a></span>\[\{c\} = [T] \{c_r\}\]</div>
-<p>where <span class="math notranslate nohighlight">\(\{c_r\}\)</span> are the independent Ritz constants. Substituting
-Eq. <a class="reference internal" href="#equation-ns-t">(3)</a> into the total potential energy gives the reduced system:</p>
+basis <span class="math notranslate nohighlight">\(\boldsymbol{Z}\)</span> of the null space of <span class="math notranslate nohighlight">\(\boldsymbol{B}\)</span>, <span class="math notranslate nohighlight">\(\boldsymbol{B} \boldsymbol{Z} = \boldsymbol{0}\)</span>:</p>
+<div class="math notranslate nohighlight" id="equation-ns-z">
+<span class="eqno">(3)<a class="headerlink" href="#equation-ns-z" title="Link to this equation">#</a></span>\[\boldsymbol{c} = \boldsymbol{Z} \boldsymbol{c}_r\]</div>
+<p>where <span class="math notranslate nohighlight">\(\boldsymbol{c}_r\)</span> are the independent Ritz constants. Substituting
+Eq. <a class="reference internal" href="#equation-ns-z">(3)</a> into the total potential energy gives the reduced system:</p>
 <div class="math notranslate nohighlight" id="equation-ns-reduced">
-<span class="eqno">(4)<a class="headerlink" href="#equation-ns-reduced" title="Link to this equation">#</a></span>\[[K_r] = [T]^T [K] [T], \qquad [K_{G r}] = [T]^T [K_G] [T], \qquad
-[M_r] = [T]^T [M] [T], \qquad \{f_r\} = [T]^T \{f\}\]</div>
-<p>where <span class="math notranslate nohighlight">\([K]\)</span>, <span class="math notranslate nohighlight">\([K_G]\)</span>, <span class="math notranslate nohighlight">\([M]\)</span> and <span class="math notranslate nohighlight">\(\{f\}\)</span> are the matrices and vectors of the
+<span class="eqno">(4)<a class="headerlink" href="#equation-ns-reduced" title="Link to this equation">#</a></span>\[\boldsymbol{K}_r = \boldsymbol{Z}^\top \boldsymbol{K} \boldsymbol{Z}, \qquad \boldsymbol{K}_{G r} = \boldsymbol{Z}^\top \boldsymbol{K}_G \boldsymbol{Z}, \qquad
+\boldsymbol{M}_r = \boldsymbol{Z}^\top \boldsymbol{M} \boldsymbol{Z}, \qquad \boldsymbol{F}_r = \boldsymbol{Z}^\top \boldsymbol{F}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\boldsymbol{K}\)</span>, <span class="math notranslate nohighlight">\(\boldsymbol{K}_G\)</span>, <span class="math notranslate nohighlight">\(\boldsymbol{M}\)</span> and <span class="math notranslate nohighlight">\(\boldsymbol{F}\)</span> are the matrices and vectors of the
 domains, which do not contain the connections imposed exactly. The reduced
 stiffness matrix is symmetric and positive definite whenever the connected
 assembly has no rigid-body motion, like the stiffness matrix of the penalty
 method, and the static, linear buckling, frequency and non-linear solvers of
-<code class="docutils literal notranslate"><span class="pre">structsolve</span></code> are used unchanged. The constraints are linear in <span class="math notranslate nohighlight">\(\{c\}\)</span>,
-therefore <span class="math notranslate nohighlight">\([T]\)</span> does not change during a non-linear analysis:</p>
+<code class="docutils literal notranslate"><span class="pre">structsolve</span></code> are used unchanged. The constraints are linear in <span class="math notranslate nohighlight">\(\boldsymbol{c}\)</span>,
+therefore <span class="math notranslate nohighlight">\(\boldsymbol{Z}\)</span> does not change during a non-linear analysis:</p>
 <div class="math notranslate nohighlight">
-\[\{f_{int, r}\} = [T]^T \{f_{int}\}([T] \{c_r\}), \qquad
-[K_{T r}] = [T]^T [K_T]([T] \{c_r\}) [T]\]</div>
-<p><span class="math notranslate nohighlight">\([T]\)</span> is built by <code class="xref py py-func docutils literal notranslate"><span class="pre">nullspace.null_space_basis()</span></code>, one connection at a
+\[\boldsymbol{F}_{int, r} = \boldsymbol{Z}^\top \boldsymbol{F}_{int}(\boldsymbol{Z} \boldsymbol{c}_r), \qquad
+\boldsymbol{K}_{T r} = \boldsymbol{Z}^\top \boldsymbol{K}_T(\boldsymbol{Z} \boldsymbol{c}_r) \boldsymbol{Z}\]</div>
+<p><span class="math notranslate nohighlight">\(\boldsymbol{Z}\)</span> is built by <code class="xref py py-func docutils literal notranslate"><span class="pre">nullspace.null_space_basis()</span></code>, one connection at a
 time:</p>
 <ol class="arabic simple">
-<li><p>the rows of <span class="math notranslate nohighlight">\([B]\)</span> of the connection are normalized to a unit norm and
+<li><p>the rows of <span class="math notranslate nohighlight">\(\boldsymbol{B}\)</span> of the connection are normalized to a unit norm and
 written in the independent Ritz constants of the connections already
-processed, <span class="math notranslate nohighlight">\([B] [T]\)</span>;</p></li>
+processed, <span class="math notranslate nohighlight">\(\boldsymbol{B} \boldsymbol{Z}\)</span>;</p></li>
 <li><p>the rank of the constraints is revealed with a QR decomposition with
-column pivoting, <span class="math notranslate nohighlight">\([B] [T] [P] = [Q] [R]\)</span>, and each pivot larger than the
-tolerance <code class="docutils literal notranslate"><span class="pre">tol</span></code> gives one independent constraint;</p></li>
-<li><p>the Ritz constants of the pivot columns are eliminated, <span class="math notranslate nohighlight">\(\{c_e\} =
--[R_{11}]^{-1} [R_{12}] \{c_k\}\)</span>, where <span class="math notranslate nohighlight">\(\{c_k\}\)</span> are the remaining
-constants, and <span class="math notranslate nohighlight">\([T]\)</span> is updated.</p></li>
+column pivoting, <span class="math notranslate nohighlight">\(\boldsymbol{B} \boldsymbol{Z} \boldsymbol{P} = \boldsymbol{Q} \boldsymbol{U}\)</span>, with the permutation <span class="math notranslate nohighlight">\(\boldsymbol{P}\)</span>,
+the orthogonal factor <span class="math notranslate nohighlight">\(\boldsymbol{Q}\)</span> and the upper triangular factor
+<span class="math notranslate nohighlight">\(\boldsymbol{U}\)</span>, and each pivot larger than the tolerance <code class="docutils literal notranslate"><span class="pre">tol</span></code>
+gives one independent constraint;</p></li>
+<li><p>the Ritz constants of the pivot columns are eliminated, <span class="math notranslate nohighlight">\(\boldsymbol{c}_e =
+-\boldsymbol{U}_{11}^{-1} \boldsymbol{U}_{12} \boldsymbol{c}_k\)</span>, where <span class="math notranslate nohighlight">\(\boldsymbol{c}_k\)</span> are the
+remaining constants, and <span class="math notranslate nohighlight">\(\boldsymbol{Z}\)</span> is updated.</p></li>
 </ol>
 <p>Redundant constraints are found in step 2 and dropped. They happen for
 instance at a corner shared by four domains, around a closed cylinder, or
 where a boundary condition flag already removes the term that a constraint
 would remove. Bardell’s functions of order 5 and higher vanish together with
 their slope at the ends of the domain, <span class="math notranslate nohighlight">\(\xi = \pm 1\)</span>, so the constraints of
-an edge involve only the first four functions across it, and <span class="math notranslate nohighlight">\([T]\)</span> has very
+an edge involve only the first four functions across it, and <span class="math notranslate nohighlight">\(\boldsymbol{Z}\)</span> has very
 few non-zero terms: the elimination is similar to the assembly of the
 hierarchical elements of the p-version of the finite element method. A
 connection along an interior line, e.g. <code class="docutils literal notranslate"><span class="pre">'BFycte'</span></code> at the middle of the
 base, involves all the functions across the line.</p>
 <p>The terms removed by the boundary condition flags are zero rows and columns
 of the matrices of the domains, as with the penalty method, and remain in
-<span class="math notranslate nohighlight">\(\{c_r\}\)</span> with zero rows and columns in the reduced matrices.</p>
-<p><span class="math notranslate nohighlight">\([T]\)</span> is stored in <code class="docutils literal notranslate"><span class="pre">MultiDomain.T</span></code> and reused while the connections, the
+<span class="math notranslate nohighlight">\(\boldsymbol{c}_r\)</span> with zero rows and columns in the reduced matrices.</p>
+<p><span class="math notranslate nohighlight">\(\boldsymbol{Z}\)</span> is stored in <code class="docutils literal notranslate"><span class="pre">MultiDomain.Z</span></code> and reused while the connections, the
 number of terms and the boundary condition flags do not change, see
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_T()</span></code>.</p>
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_Z()</span></code>.</p>
 </section>
 </section>
 <section id="quantities-imposed">
@@ -718,21 +888,35 @@ w_{2,y} - v_2/r_2\)</span>, see <code class="xref py py-mod docutils literal not
 <td><p><span class="math notranslate nohighlight">\(u_1 = w_2\)</span>, <span class="math notranslate nohighlight">\(v_1 = v_2\)</span>, <span class="math notranslate nohighlight">\(w_1 = -u_2\)</span>, <span class="math notranslate nohighlight">\(\phi_{x1} = \phi_{x2}\)</span></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">'SB'</span></code></p></td>
-<td><p><span class="math notranslate nohighlight">\(u_1 + d_{sb} w_{1,x} = u_2\)</span>, <span class="math notranslate nohighlight">\(v_1 + d_{sb} w_{1,y} = v_2\)</span>, <span class="math notranslate nohighlight">\(w_1 =
-w_2\)</span>, with <span class="math notranslate nohighlight">\(d_{sb} = h_1/2 + h_2/2\)</span>, see <code class="docutils literal notranslate"><span class="pre">kCSB.pyx</span></code></p></td>
-<td><p><span class="math notranslate nohighlight">\(u, v, w\)</span> at the interface, <span class="math notranslate nohighlight">\(z = -h_1/2\)</span> of <code class="docutils literal notranslate"><span class="pre">p1</span></code> and <span class="math notranslate nohighlight">\(z = h_2/2\)</span>
-of <code class="docutils literal notranslate"><span class="pre">p2</span></code>, see <code class="xref py py-func docutils literal notranslate"><span class="pre">fkCSB_sdt()</span></code>, and <span class="math notranslate nohighlight">\(\phi_x, \Phi_y\)</span> only when
-the key <code class="docutils literal notranslate"><span class="pre">'kr'</span></code> of the connection is given and not zero</p></td>
+<td><p><span class="math notranslate nohighlight">\(u_1(z_1) = u_2(z_2)\)</span>, <span class="math notranslate nohighlight">\(v_1(z_1) = v_2(z_2)\)</span>, <span class="math notranslate nohighlight">\(w_1 = w_2\)</span> at the
+interface, <span class="math notranslate nohighlight">\(z_1 = d_1 - h_1/2\)</span> of <code class="docutils literal notranslate"><span class="pre">p1</span></code> and <span class="math notranslate nohighlight">\(z_2 = d_2 + h_2/2\)</span> of
+<code class="docutils literal notranslate"><span class="pre">p2</span></code>, <span class="math notranslate nohighlight">\(d_1\)</span>, <span class="math notranslate nohighlight">\(d_2\)</span> being the offsets, with <span class="math notranslate nohighlight">\(u(z) = u - z w_{,x}\)</span>
+and <span class="math notranslate nohighlight">\(v(z) = (1 + z/r) v - z w_{,y}\)</span> of each panel, see
+<code class="xref py py-func docutils literal notranslate"><span class="pre">fkCSB()</span></code>; the rotations are not tied and the key <code class="docutils literal notranslate"><span class="pre">'kr'</span></code> is
+not used</p></td>
+<td><p><span class="math notranslate nohighlight">\(u, v, w\)</span> at the interface, <span class="math notranslate nohighlight">\(z = d_1 - h_1/2\)</span> of <code class="docutils literal notranslate"><span class="pre">p1</span></code> and <span class="math notranslate nohighlight">\(z = d_2
++ h_2/2\)</span> of <code class="docutils literal notranslate"><span class="pre">p2</span></code>, see <code class="xref py py-func docutils literal notranslate"><span class="pre">fkCSB()</span></code>, and <span class="math notranslate nohighlight">\(\phi_x, \Phi_y\)</span>
+(<span class="math notranslate nohighlight">\(\theta_x, \theta_y\)</span> of <a class="reference internal" href="tsdt_offset.html#equation-tsdt-offset-theta">(5)</a> for the TSDT with
+an offset) only when the key <code class="docutils literal notranslate"><span class="pre">'kr'</span></code> of the connection is given and
+not zero</p></td>
 </tr>
 </tbody>
 </table>
 </div>
 <p>where <span class="math notranslate nohighlight">\(\Phi_y = \phi_y + v/r\)</span> with the Sanders-Koiter kinematics and <span class="math notranslate nohighlight">\(\Phi_y
-= \phi_y\)</span> otherwise, and the terms <span class="math notranslate nohighlight">\(v/r\)</span> of the classical laminated plate
-theory are present only with the Sanders-Koiter kinematics. The keys
+= \phi_y\)</span> otherwise, and the terms <span class="math notranslate nohighlight">\(v/r\)</span> and <span class="math notranslate nohighlight">\(z/r\)</span> of the classical
+laminated plate theory are present only with the Sanders-Koiter kinematics.
+The quantities of <code class="docutils literal notranslate"><span class="pre">'SB'</span></code> are the same for all the models, the
+displacements of the faces in contact, see
+<code class="xref py py-func docutils literal notranslate"><span class="pre">kCsdt._sb_components()</span></code>. The keys
 <code class="docutils literal notranslate"><span class="pre">'kt'</span></code> and <code class="docutils literal notranslate"><span class="pre">'kr'</span></code> of the connections are not used, apart from <code class="docutils literal notranslate"><span class="pre">'kr'</span></code>
 of <code class="docutils literal notranslate"><span class="pre">'SB'</span></code> with the shear deformation theories, which tells whether the
-rotations are connected.</p>
+rotations are connected. The rotations of the classical laminated plate
+theory, <span class="math notranslate nohighlight">\(-w_{,x}\)</span> and <span class="math notranslate nohighlight">\(-w_{,y} + v/r\)</span>, follow from <span class="math notranslate nohighlight">\(w\)</span>, already tied by <span class="math notranslate nohighlight">\(w_1
+= w_2\)</span>: tying them too adds redundant constraints, or, with the
+Sanders-Koiter kinematics and distinct reference surfaces, the constraint
+<span class="math notranslate nohighlight">\((z_1 - z_2) w_{,y} = 0\)</span>, i.e. <span class="math notranslate nohighlight">\(w_{,y} = 0\)</span> over the whole area, see
+<code class="xref py py-func docutils literal notranslate"><span class="pre">kCsdt._sb_components()</span></code>.</p>
 </section>
 <section id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Link to this heading">#</a></h2>
@@ -743,7 +927,7 @@ with <code class="xref py py-meth docutils literal notranslate"><span class="pre
 all the Ritz constants with <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.expand()</span></code>, which are used by
 the post-processing methods, e.g. <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.uvw()</span></code>,
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.stress()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.plot()</span></code>. With
-<code class="docutils literal notranslate"><span class="pre">conn_method='penalty'</span></code>, <span class="math notranslate nohighlight">\([T]\)</span> is the identity matrix, so that the same
+<code class="docutils literal notranslate"><span class="pre">conn_method='penalty'</span></code>, <span class="math notranslate nohighlight">\(\boldsymbol{Z}\)</span> is the identity matrix, so that the same
 code runs with both methods.</p>
 <p>Linear static analysis:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">structsolve</span><span class="w"> </span><span class="kn">import</span> <span class="n">solve</span>
@@ -863,8 +1047,52 @@ result of the null-space method.</p>
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_distr_pd_fixed_x()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_distr_pd_fixed_y()</span></code>
 are imposed by default with the penalty method: their forces <span class="math notranslate nohighlight">\(k u_p\)</span> enter
 the external force vector and the penalty stiffnesses, e.g. of
-<code class="xref py py-func docutils literal notranslate"><span class="pre">fkCpd()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">fkCld_xcte()</span></code> and <code class="xref py py-func docutils literal notranslate"><span class="pre">fkCld_ycte()</span></code>, must be added to
-the stiffness matrix by the user. With <code class="docutils literal notranslate"><span class="pre">pd_method='null-space'</span></code> they are
+<code class="xref py py-func docutils literal notranslate"><span class="pre">fkCpd()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">fkCld_xcte()</span></code> and <code class="xref py py-func docutils literal notranslate"><span class="pre">fkCld_ycte()</span></code>, for the models
+with 3 and 5 degrees of freedom per term, must be added to the stiffness
+matrix by the user, symmetrized with
+<code class="xref py py-func docutils literal notranslate"><span class="pre">structsolve.sparseutils.finalize_symmetric_matrix()</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s1">'model'</span><span class="p">,</span> <span class="p">[</span><span class="s1">'plate_clpt_donnell'</span><span class="p">,</span> <span class="s1">'plate_fsdt_donnell'</span><span class="p">,</span>
+                                   <span class="s1">'plate_tsdt_donnell'</span><span class="p">])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_penalty_reaches_prescribed_values</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""A simply supported plate with `u, v, w` prescribed at a point, `w`</span>
+<span class="sd">    along a line `x = x_l` and `v` along a line `y = y_l`, imposed with the</span>
+<span class="sd">    penalty stiffnesses of the kernels and the forces of :func:`.shell_fext`,</span>
+<span class="sd">    reaches the prescribed values, as with the null-space method"""</span>
+    <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.3</span>
+    <span class="n">xp</span><span class="p">,</span> <span class="n">yp</span> <span class="o">=</span> <span class="mf">0.13</span><span class="p">,</span> <span class="mf">0.21</span>
+    <span class="n">xl</span><span class="p">,</span> <span class="n">yl</span> <span class="o">=</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.09</span>
+    <span class="n">up</span><span class="p">,</span> <span class="n">vp</span><span class="p">,</span> <span class="n">wp</span> <span class="o">=</span> <span class="mf">1e-5</span><span class="p">,</span> <span class="o">-</span><span class="mf">2e-5</span><span class="p">,</span> <span class="mf">1e-3</span>
+    <span class="n">wl</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="mf">2e-3</span><span class="o">*</span><span class="mi">4</span><span class="o">*</span><span class="n">y</span><span class="o">*</span><span class="p">(</span><span class="n">b</span> <span class="o">-</span> <span class="n">y</span><span class="p">)</span><span class="o">/</span><span class="n">b</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">vl</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="mf">3e-5</span><span class="o">*</span><span class="mi">4</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="p">(</span><span class="n">a</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span><span class="o">/</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span>
+    <span class="c1">#NOTE the error of the penalty method decreases with 1/k</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="mf">1e4</span><span class="o">*</span><span class="mf">70e9</span><span class="o">*</span><span class="mf">1e-3</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">plate</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_point_pd</span><span class="p">(</span><span class="n">xp</span><span class="p">,</span> <span class="n">yp</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">up</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">vp</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">wp</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_distr_pd_fixed_x</span><span class="p">(</span><span class="n">xl</span><span class="p">,</span> <span class="n">kw</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">funcw</span><span class="o">=</span><span class="n">wl</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_distr_pd_fixed_y</span><span class="p">(</span><span class="n">yl</span><span class="p">,</span> <span class="n">kv</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">funcv</span><span class="o">=</span><span class="n">vl</span><span class="p">)</span>
+
+    <span class="n">md</span> <span class="o">=</span> <span class="n">MultiDomain</span><span class="p">([</span><span class="n">p</span><span class="p">],</span> <span class="n">conn</span><span class="o">=</span><span class="p">[])</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">get_size</span><span class="p">()</span>
+    <span class="n">kCp</span> <span class="o">=</span> <span class="n">finalize_symmetric_matrix</span><span class="p">(</span>
+          <span class="n">fkCpd</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">xp</span><span class="p">,</span> <span class="n">yp</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">row_start</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">col_start</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">fkCld_xcte</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">xl</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">row_start</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">col_start</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">fkCld_ycte</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">yl</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">row_start</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">col_start</span><span class="p">))</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">solve</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">calc_kC</span><span class="p">()</span> <span class="o">+</span> <span class="n">kCp</span><span class="p">,</span> <span class="n">md</span><span class="o">.</span><span class="n">calc_fext</span><span class="p">(),</span> <span class="n">silent</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">c_ns</span> <span class="o">=</span> <span class="n">MultiDomain</span><span class="p">([</span><span class="n">p</span><span class="p">],</span> <span class="n">conn</span><span class="o">=</span><span class="p">[],</span> <span class="n">pd_method</span><span class="o">=</span><span class="s1">'null-space'</span><span class="p">)</span><span class="o">.</span><span class="n">linear_static</span><span class="p">()</span>
+
+    <span class="n">ys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+    <span class="n">xs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">ci</span><span class="p">,</span> <span class="n">tol</span> <span class="ow">in</span> <span class="p">((</span><span class="n">c_ns</span><span class="p">,</span> <span class="mf">1e-10</span><span class="p">),</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="mf">1e-2</span><span class="p">)):</span>
+        <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">w</span> <span class="o">=</span> <span class="n">displacements</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">ci</span><span class="p">,</span> <span class="p">[</span><span class="n">xp</span><span class="p">],</span> <span class="p">[</span><span class="n">yp</span><span class="p">])</span>
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">([</span><span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="p">[</span><span class="n">up</span><span class="p">,</span> <span class="n">vp</span><span class="p">,</span> <span class="n">wp</span><span class="p">],</span> <span class="n">rtol</span><span class="o">=</span><span class="n">tol</span><span class="p">)</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">displacements</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">ci</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">full_like</span><span class="p">(</span><span class="n">ys</span><span class="p">,</span> <span class="n">xl</span><span class="p">),</span> <span class="n">ys</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">wl</span><span class="p">(</span><span class="n">ys</span><span class="p">),</span> <span class="n">rtol</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="n">tol</span><span class="o">*</span><span class="mf">2e-3</span><span class="p">)</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">displacements</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">ci</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">full_like</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">yl</span><span class="p">))[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">vl</span><span class="p">(</span><span class="n">xs</span><span class="p">),</span> <span class="n">rtol</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="n">tol</span><span class="o">*</span><span class="mf">3e-5</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">c</span> <span class="o">-</span> <span class="n">c_ns</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">c_ns</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>With <code class="docutils literal notranslate"><span class="pre">pd_method='null-space'</span></code> they are
 imposed exactly, as inhomogeneous linear constraints eliminated together
 with the connections, without any penalty constant:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">md</span> <span class="o">=</span> <span class="n">MultiDomain</span><span class="p">(</span><span class="n">panels</span><span class="p">,</span> <span class="n">conn</span><span class="p">,</span> <span class="n">pd_method</span><span class="o">=</span><span class="s1">'null-space'</span><span class="p">)</span>
@@ -874,16 +1102,26 @@ with the connections, without any penalty constant:</p>
 <code class="docutils literal notranslate"><span class="pre">MultiDomain([shell],</span> <span class="pre">conn=[],</span> <span class="pre">pd_method='null-space')</span></code>. Both settings are
 independent: the connections may be imposed with either <code class="docutils literal notranslate"><span class="pre">conn_method</span></code>.
 The default <code class="docutils literal notranslate"><span class="pre">pd_method='penalty'</span></code> keeps the previous behaviour.</p>
-<p>The same methods of <code class="xref py py-class docutils literal notranslate"><span class="pre">Shell</span></code> define the prescribed displacements.
+<p>The same methods of <code class="xref py py-class docutils literal notranslate"><span class="pre">Shell</span></code> define the prescribed displacements,
+the in-plane ones at the reference surface or at the thickness coordinate
+of the keyword <code class="docutils literal notranslate"><span class="pre">z</span></code>, e.g. at the faces of a face-clamped edge, see
+<a class="reference internal" href="boundary_conditions.html#boundary-conditions-face-clamp"><span class="std std-ref">Face-clamped edges</span></a>.
 With <code class="docutils literal notranslate"><span class="pre">pd_method='null-space'</span></code> the values of the penalty constants are not
 used: a component is prescribed when its penalty constant is neither
 <code class="docutils literal notranslate"><span class="pre">None</span></code> nor zero and its value is given, the same rule as for the penalty
 method, where a null penalty constant prescribes nothing. The rotations
-<span class="math notranslate nohighlight">\(\phi_x\)</span> and <span class="math notranslate nohighlight">\(\phi_y\)</span> of the approximation functions of the model, <span class="math notranslate nohighlight">\(-w_{,x}\)</span>
-and <span class="math notranslate nohighlight">\(-w_{,y}\)</span> for the classical laminated plate theory, the fields <span class="math notranslate nohighlight">\(\phi_x\)</span>
-and <span class="math notranslate nohighlight">\(\phi_y\)</span> for the shear deformation theories, plus <span class="math notranslate nohighlight">\(v/r\)</span> in <span class="math notranslate nohighlight">\(\phi_y\)</span> with
-the Sanders-Koiter kinematics, can also be prescribed, only with
-<code class="docutils literal notranslate"><span class="pre">pd_method='null-space'</span></code>, through the keyword arguments <code class="docutils literal notranslate"><span class="pre">kphix</span></code>,
+of the normal at the reference surface <span class="math notranslate nohighlight">\(z = 0\)</span> can also be prescribed:
+<span class="math notranslate nohighlight">\(-w_{,x}\)</span> and <span class="math notranslate nohighlight">\(-w_{,y}\)</span> for the classical laminated plate theory, and for
+the shear deformation theories <span class="math notranslate nohighlight">\(\theta_x\)</span> and <span class="math notranslate nohighlight">\(\theta_y\)</span> of Eq.
+<a class="reference internal" href="tsdt_offset.html#equation-tsdt-offset-theta">(5)</a>, the rotations also tied by the connections, which
+are the fields <span class="math notranslate nohighlight">\(\phi_x\)</span> and <span class="math notranslate nohighlight">\(\phi_y\)</span> for the FSDT and for the TSDT without
+offset; the rotation about <span class="math notranslate nohighlight">\(x\)</span> includes <span class="math notranslate nohighlight">\(v/r\)</span> with the Sanders-Koiter
+kinematics. With an offset <span class="math notranslate nohighlight">\(d\)</span>, the TSDT rotations <span class="math notranslate nohighlight">\(\phi_x\)</span> and <span class="math notranslate nohighlight">\(\phi_y\)</span>
+are those at the mid-surface, <span class="math notranslate nohighlight">\(z = d\)</span>, and the prescribed rotations at <span class="math notranslate nohighlight">\(z =
+0\)</span> include the transverse shear, <span class="math notranslate nohighlight">\(\theta_x = \phi_x - (4 d^2/h^2)(\phi_x +
+w_{,x})\)</span>, see <a class="reference internal" href="tsdt_offset.html#tsdt-offset-prescribed-rotations"><span class="std std-ref">Prescribed rotations</span></a>. The rotations are
+prescribed only with <code class="docutils literal notranslate"><span class="pre">pd_method='null-space'</span></code>, through the keyword
+arguments <code class="docutils literal notranslate"><span class="pre">kphix</span></code>,
 <code class="docutils literal notranslate"><span class="pre">phixp</span></code>, <code class="docutils literal notranslate"><span class="pre">kphiy</span></code> and <code class="docutils literal notranslate"><span class="pre">phiyp</span></code> of <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_point_pd()</span></code>, or
 <code class="docutils literal notranslate"><span class="pre">kphix</span></code>, <code class="docutils literal notranslate"><span class="pre">funcphix</span></code>, <code class="docutils literal notranslate"><span class="pre">kphiy</span></code> and <code class="docutils literal notranslate"><span class="pre">funcphiy</span></code> of the distributed ones.
 For example, a uniform end-shortening <span class="math notranslate nohighlight">\(\delta\)</span> of a plate, incremented with
@@ -895,14 +1133,14 @@ the load factor, with the lateral contraction free:</p>
 </div>
 <section id="id2">
 <h3>Theory<a class="headerlink" href="#id2" title="Link to this heading">#</a></h3>
-<p>The connections give the homogeneous constraints <span class="math notranslate nohighlight">\([B_h] \{c\} = \{0\}\)</span> of
+<p>The connections give the homogeneous constraints <span class="math notranslate nohighlight">\(\boldsymbol{B}_h \boldsymbol{c} = \boldsymbol{0}\)</span> of
 Eq. <a class="reference internal" href="#equation-ns-constraints">(2)</a>, and the prescribed displacements the
 inhomogeneous constraints:</p>
 <div class="math notranslate nohighlight" id="equation-ns-pd">
-<span class="eqno">(5)<a class="headerlink" href="#equation-ns-pd" title="Link to this equation">#</a></span>\[[B_d] \{c\} = \{d_0\} + \lambda \{d_1\}\]</div>
-<p>where <span class="math notranslate nohighlight">\(\{d_0\}\)</span> collects the constant prescribed values, <code class="docutils literal notranslate"><span class="pre">cte=True</span></code>, and
-<span class="math notranslate nohighlight">\(\{d_1\}\)</span> those scaled by the load factor <span class="math notranslate nohighlight">\(\lambda\)</span>, <code class="docutils literal notranslate"><span class="pre">cte=False</span></code>. Each row
-of <span class="math notranslate nohighlight">\([B_d]\)</span> is the prescribed component at a point, or at a Gauss-Legendre
+<span class="eqno">(5)<a class="headerlink" href="#equation-ns-pd" title="Link to this equation">#</a></span>\[\boldsymbol{B}_d \boldsymbol{c} = \bar{\boldsymbol{d}}_0 + \lambda \bar{\boldsymbol{d}}_1\]</div>
+<p>where <span class="math notranslate nohighlight">\(\bar{\boldsymbol{d}}_0\)</span> collects the constant prescribed values, <code class="docutils literal notranslate"><span class="pre">cte=True</span></code>, and
+<span class="math notranslate nohighlight">\(\bar{\boldsymbol{d}}_1\)</span> those scaled by the load factor <span class="math notranslate nohighlight">\(\lambda\)</span>, <code class="docutils literal notranslate"><span class="pre">cte=False</span></code>. Each row
+of <span class="math notranslate nohighlight">\(\boldsymbol{B}_d\)</span> is the prescribed component at a point, or at a Gauss-Legendre
 point along a prescribed line, with <code class="docutils literal notranslate"><span class="pre">max(n,</span> <span class="pre">4)</span></code> points along <span class="math notranslate nohighlight">\(y\)</span> for the
 lines <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">cte</span></code> and <code class="docutils literal notranslate"><span class="pre">max(m,</span> <span class="pre">4)</span></code> along <span class="math notranslate nohighlight">\(x\)</span> for the lines <code class="docutils literal notranslate"><span class="pre">y</span> <span class="pre">=</span> <span class="pre">cte</span></code>, see
 <code class="xref py py-func docutils literal notranslate"><span class="pre">nullspace.pd_constraint_matrix()</span></code>. As for the connections, the
@@ -911,52 +1149,58 @@ constraint holds along the whole line when the prescribed function is a
 polynomial of degree up to <code class="docutils literal notranslate"><span class="pre">max(n,</span> <span class="pre">4)</span> <span class="pre">-</span> <span class="pre">1</span></code>, e.g. a uniform or a linear
 end-shortening; otherwise it holds at the Gauss-Legendre points, the
 prescribed function being interpolated by the approximation functions.</p>
-<p>With <span class="math notranslate nohighlight">\([B] = [B_h; B_d]\)</span>, every admissible configuration is</p>
+<p>With <span class="math notranslate nohighlight">\(\boldsymbol{B} = [\boldsymbol{B}_h; \boldsymbol{B}_d]\)</span>, every admissible configuration is</p>
 <div class="math notranslate nohighlight" id="equation-ns-pd-c">
-<span class="eqno">(6)<a class="headerlink" href="#equation-ns-pd-c" title="Link to this equation">#</a></span>\[\{c\} = [T] \{c_r\} + \{c_{p0}\} + \lambda \{c_{p1}\}\]</div>
-<p>where <span class="math notranslate nohighlight">\([T]\)</span> spans the null space of <span class="math notranslate nohighlight">\([B]\)</span> and <span class="math notranslate nohighlight">\(\{c_{p0}\}\)</span>, <span class="math notranslate nohighlight">\(\{c_{p1}\}\)</span>
-are particular solutions, <span class="math notranslate nohighlight">\([B] \{c_{p0}\} = \{0; d_0\}\)</span> and <span class="math notranslate nohighlight">\([B]
-\{c_{p1}\} = \{0; d_1\}\)</span>, see <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_cp()</span></code>. They are
-obtained in the same elimination as <span class="math notranslate nohighlight">\([T]\)</span>, see
+<span class="eqno">(6)<a class="headerlink" href="#equation-ns-pd-c" title="Link to this equation">#</a></span>\[\boldsymbol{c} = \boldsymbol{Z} \boldsymbol{c}_r + \boldsymbol{c}_{p0} + \lambda \boldsymbol{c}_{p1}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\boldsymbol{Z}\)</span> spans the null space of <span class="math notranslate nohighlight">\(\boldsymbol{B}\)</span> and <span class="math notranslate nohighlight">\(\boldsymbol{c}_{p0}\)</span>, <span class="math notranslate nohighlight">\(\boldsymbol{c}_{p1}\)</span>
+are particular solutions, <span class="math notranslate nohighlight">\(\boldsymbol{B} \boldsymbol{c}_{p0} = \{\boldsymbol{0}; \bar{\boldsymbol{d}}_0\}\)</span> and <span class="math notranslate nohighlight">\(\boldsymbol{B}
+\boldsymbol{c}_{p1} = \{\boldsymbol{0}; \bar{\boldsymbol{d}}_1\}\)</span>, see <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_cp()</span></code>. They are
+obtained in the same elimination as <span class="math notranslate nohighlight">\(\boldsymbol{Z}\)</span>, see
 <code class="xref py py-class docutils literal notranslate"><span class="pre">nullspace.Elimination</span></code>: the constraints are eliminated one block
 at a time, the connections first, each block written in the independent
-Ritz constants left by the previous ones, <span class="math notranslate nohighlight">\([B] ([T] \{c_r\} + \{c_p\}) =
-\{d\}\)</span>, and decomposed with a QR decomposition with column pivoting, which
-gives both the new <span class="math notranslate nohighlight">\([T]\)</span> and the correction of <span class="math notranslate nohighlight">\(\{c_p\}\)</span> for the
-right-hand side <span class="math notranslate nohighlight">\(\{d\} - [B] \{c_p\}\)</span>. The data of the decompositions are
-kept, such that <span class="math notranslate nohighlight">\(\{c_{p0}\}\)</span> and <span class="math notranslate nohighlight">\(\{c_{p1}\}\)</span> are computed again without
+Ritz constants left by the previous ones, <span class="math notranslate nohighlight">\(\boldsymbol{B} (\boldsymbol{Z} \boldsymbol{c}_r + \boldsymbol{c}_p) =
+\boldsymbol{b}\)</span>, with the right-hand side <span class="math notranslate nohighlight">\(\boldsymbol{b}\)</span> of the block, and
+decomposed with a QR decomposition with column pivoting, which
+gives both the new <span class="math notranslate nohighlight">\(\boldsymbol{Z}\)</span> and the correction of <span class="math notranslate nohighlight">\(\boldsymbol{c}_p\)</span> for the
+right-hand side <span class="math notranslate nohighlight">\(\boldsymbol{b} - \boldsymbol{B} \boldsymbol{c}_p\)</span>. The data of the decompositions are
+kept, such that <span class="math notranslate nohighlight">\(\boldsymbol{c}_{p0}\)</span> and <span class="math notranslate nohighlight">\(\boldsymbol{c}_{p1}\)</span> are computed again without
 any decomposition when only the prescribed values change, e.g. in a loop
-over the end-shortening; <span class="math notranslate nohighlight">\([T]\)</span> changes only with the positions and the
+over the end-shortening; <span class="math notranslate nohighlight">\(\boldsymbol{Z}\)</span> changes only with the positions and the
 components prescribed.</p>
 <p>Substituting Eq. <a class="reference internal" href="#equation-ns-pd-c">(6)</a> into the residual of the unconstrained
-system, <span class="math notranslate nohighlight">\(\{R(c, \lambda)\} = \lambda \{F_{ext}\} - \{F_{int}(c, \lambda)\}\)</span>,
-and projecting it with <span class="math notranslate nohighlight">\([T]^T\)</span> gives the reduced problem solved by
+system, <span class="math notranslate nohighlight">\(\boldsymbol{R}(\boldsymbol{c}, \lambda) = \boldsymbol{F}_{int}(\boldsymbol{c}, \lambda) - \lambda \boldsymbol{F}_{ext}\)</span>,
+and projecting it with <span class="math notranslate nohighlight">\(\boldsymbol{Z}^\top\)</span> gives the reduced problem solved by
 <code class="docutils literal notranslate"><span class="pre">structsolve</span></code>:</p>
 <div class="math notranslate nohighlight" id="equation-ns-pd-reduced">
-<span class="eqno">(7)<a class="headerlink" href="#equation-ns-pd-reduced" title="Link to this equation">#</a></span>\[\begin{split}\{F_{int, r}(c_r, \lambda)\} &amp;= [T]^T \{F_{int}(c)\} \\
-[K_{T, r}] &amp;= [T]^T [K_T(c)] [T] = -\frac{\partial R_r}{\partial c_r} \\
-\frac{\partial R_r}{\partial \lambda} &amp;= [T]^T \left(\{F_{ext}\} -
-    [K_T(c)] \{c_{p1}\}\right)\end{split}\]</div>
-<p><span class="math notranslate nohighlight">\([K_{T, r}]\)</span> is the exact Jacobian, and <span class="math notranslate nohighlight">\(\partial R_r/\partial \lambda\)</span>
+<span class="eqno">(7)<a class="headerlink" href="#equation-ns-pd-reduced" title="Link to this equation">#</a></span>\[\begin{split}\boldsymbol{F}_{int, r}(\boldsymbol{c}_r, \lambda) &amp;= \boldsymbol{Z}^\top \boldsymbol{F}_{int}(\boldsymbol{c}) \\
+\boldsymbol{K}_{T, r} &amp;= \boldsymbol{Z}^\top \boldsymbol{K}_T(\boldsymbol{c}) \boldsymbol{Z} = \frac{\partial \boldsymbol{R}_r}{\partial \boldsymbol{c}_r} \\
+-\frac{\partial \boldsymbol{R}_r}{\partial \lambda} &amp;= \boldsymbol{Z}^\top \left(\boldsymbol{F}_{ext} -
+    \boldsymbol{K}_T(\boldsymbol{c}) \boldsymbol{c}_{p1}\right)\end{split}\]</div>
+<p><span class="math notranslate nohighlight">\(\boldsymbol{K}_{T, r}\)</span> is the exact Jacobian, and <span class="math notranslate nohighlight">\(-\partial \boldsymbol{R}_r/\partial \lambda\)</span>
 depends on the configuration and on the load factor. <code class="docutils literal notranslate"><span class="pre">structsolve</span></code> 0.7.0
 passes the load factor to <code class="docutils literal notranslate"><span class="pre">calc_fext</span></code> when it declares the keyword
-argument <code class="docutils literal notranslate"><span class="pre">lbd</span></code>, and uses <span class="math notranslate nohighlight">\(\partial R_r/\partial \lambda\)</span> in the predictors
-and in the constraint of the arc-length methods, and as a reference of the
-relative convergence criterion, since under a prescribed displacement alone
-both <span class="math notranslate nohighlight">\([T]^T \{F_{ext}\}\)</span> and <span class="math notranslate nohighlight">\([T]^T \{F_{int}\}\)</span> vanish at equilibrium, see
+argument <code class="docutils literal notranslate"><span class="pre">lbd</span></code>, and uses <span class="math notranslate nohighlight">\(-\partial \boldsymbol{R}_r/\partial \lambda\)</span> in the predictors
+and in the constraint of the arc-length methods, and <span class="math notranslate nohighlight">\(\lambda \partial
+\boldsymbol{R}_r/\partial \lambda\)</span> as a reference of the convergence criteria, the
+relative one and Crisfield’s, the default since <code class="docutils literal notranslate"><span class="pre">structsolve</span></code> 0.9.0,
+because under a prescribed displacement alone both <span class="math notranslate nohighlight">\(\boldsymbol{Z}^\top \boldsymbol{F}_{ext}\)</span> and
+<span class="math notranslate nohighlight">\(\boldsymbol{Z}^\top \boldsymbol{F}_{int}\)</span> vanish at equilibrium, see
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_reduced_functions()</span></code>.</p>
 <p>The linear static analysis solves</p>
 <div class="math notranslate nohighlight">
-\[[K_r] \{c_r\} = [T]^T \left(\lambda \{F_{ext}\} - [K] (\{c_{p0}\} +
-\lambda \{c_{p1}\})\right)\]</div>
+\[\boldsymbol{K}_r \boldsymbol{c}_r = \boldsymbol{Z}^\top \left(\lambda \boldsymbol{F}_{ext} - \boldsymbol{K} (\boldsymbol{c}_{p0} +
+\lambda \boldsymbol{c}_{p1})\right)\]</div>
 <p>see <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.linear_static()</span></code>, the loads of <code class="docutils literal notranslate"><span class="pre">calc_fext(inc=1.)</span></code>
 being scaled by <span class="math notranslate nohighlight">\(\lambda\)</span> as in the analyses of <code class="docutils literal notranslate"><span class="pre">structsolve</span></code>. The linear
-buckling analysis about the pre-buckling state <span class="math notranslate nohighlight">\(\{c(\lambda)\} = \{c_0\} +
-\lambda \{c_1\}\)</span>, with <span class="math notranslate nohighlight">\(\{c_0\}\)</span> due to the constant prescribed
-displacements and <span class="math notranslate nohighlight">\(\{c_1\}\)</span> due to the load and the incremented ones,
-solves <span class="math notranslate nohighlight">\(([K_r] + [K_{G, r}(c_0)] + \lambda [K_{G, r}(c_1)]) \{\phi_r\} =
-\{0\}\)</span>, see <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.linear_buckling()</span></code>. The modes satisfy the
-homogeneous constraints, <span class="math notranslate nohighlight">\(\{\phi\} = [T] \{\phi_r\}\)</span>: under displacement
+buckling analysis about the pre-buckling state <span class="math notranslate nohighlight">\(\hat{\boldsymbol{c}}(\lambda) =
+\hat{\boldsymbol{c}}_0 + \lambda \hat{\boldsymbol{c}}_1\)</span>, with <span class="math notranslate nohighlight">\(\hat{\boldsymbol{c}}_0\)</span> due to the
+constant prescribed displacements and <span class="math notranslate nohighlight">\(\hat{\boldsymbol{c}}_1\)</span> due to the load and
+the incremented ones, solves <span class="math notranslate nohighlight">\((\boldsymbol{K}_r + \boldsymbol{K}_{G, r}(\hat{\boldsymbol{c}}_0) + \lambda
+\boldsymbol{K}_{G, r}(\hat{\boldsymbol{c}}_1)) \boldsymbol{\phi}_r = \boldsymbol{0}\)</span>, see
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.linear_buckling()</span></code>; the constant stress resultants
+<code class="docutils literal notranslate"><span class="pre">Nxx</span></code>, <code class="docutils literal notranslate"><span class="pre">Nyy</span></code> and <code class="docutils literal notranslate"><span class="pre">Nxy</span></code> of the panels are part of the constant state,
+in <span class="math notranslate nohighlight">\(\boldsymbol{K}_{G, r}(\hat{\boldsymbol{c}}_0)\)</span> only. The modes satisfy the
+homogeneous constraints, <span class="math notranslate nohighlight">\(\boldsymbol{\phi} = \boldsymbol{Z} \boldsymbol{\phi}_r\)</span>: under displacement
 control the prescribed components of the modes are zero, whereas under the
 equivalent load they are free. For a flat plate the modes of the linear
 buckling analysis are out of plane and both critical loads are equal, for a
@@ -966,22 +1210,22 @@ end-shortening of the critical axial load with <code class="docutils literal not
 </section>
 <section id="reactions">
 <h3>Reactions<a class="headerlink" href="#reactions" title="Link to this heading">#</a></h3>
-<p>With <span class="math notranslate nohighlight">\(\{r(c, \lambda)\} = \{F_{int}(c)\} - \lambda \{F_{ext}\}\)</span> the residual
+<p>With <span class="math notranslate nohighlight">\(\boldsymbol{r}(\boldsymbol{c}, \lambda) = \boldsymbol{F}_{int}(\boldsymbol{c}) - \lambda \boldsymbol{F}_{ext}\)</span> the residual
 of the unconstrained system, the force applied by the supports on the
 structure, the generalized reaction work-conjugate to the set <span class="math notranslate nohighlight">\(j\)</span> of
 prescribed displacements, the constant or the incremented ones, is</p>
 <div class="math notranslate nohighlight" id="equation-ns-pd-reaction">
-<span class="eqno">(8)<a class="headerlink" href="#equation-ns-pd-reaction" title="Link to this equation">#</a></span>\[P_j = \{c_{pj}\}^T \{r(c, \lambda)\}\]</div>
+<span class="eqno">(8)<a class="headerlink" href="#equation-ns-pd-reaction" title="Link to this equation">#</a></span>\[P_j = \boldsymbol{c}_{pj}^\top \boldsymbol{r}(\boldsymbol{c}, \lambda)\]</div>
 <p>see <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.reaction_pd()</span></code>. It does not depend on the choice of
-the particular solution, since <span class="math notranslate nohighlight">\([T]^T \{r\} = \{0\}\)</span> at equilibrium.
+the particular solution, since <span class="math notranslate nohighlight">\(\boldsymbol{Z}^\top \boldsymbol{r} = \boldsymbol{0}\)</span> at equilibrium.
 <span class="math notranslate nohighlight">\(P_j \delta\)</span> is the work of the reactions for the prescribed values
 multiplied by <span class="math notranslate nohighlight">\(\delta\)</span>: for a uniform end-shortening <span class="math notranslate nohighlight">\(\delta\)</span> of an edge
 with the total axial reaction <span class="math notranslate nohighlight">\(N\)</span>, <span class="math notranslate nohighlight">\(P_1 = N \delta\)</span>, and <span class="math notranslate nohighlight">\(P_1 = \partial
 U/\partial \lambda\)</span> is the force conjugate to the load factor of a
 displacement-controlled analysis.</p>
 <p>The resultant of the reactions along selected prescribed lines or points,
-in the direction <span class="math notranslate nohighlight">\(u\)</span>, <span class="math notranslate nohighlight">\(v\)</span> or <span class="math notranslate nohighlight">\(w\)</span> of the panels, is <span class="math notranslate nohighlight">\(F_u = \{c_u\}^T \{r\}\)</span>,
-with <span class="math notranslate nohighlight">\(\{c_u\}\)</span> a solution of the constraints for a unit translation <span class="math notranslate nohighlight">\(u = 1\)</span>
+in the direction <span class="math notranslate nohighlight">\(u\)</span>, <span class="math notranslate nohighlight">\(v\)</span> or <span class="math notranslate nohighlight">\(w\)</span> of the panels, is <span class="math notranslate nohighlight">\(F_u = \boldsymbol{c}_u^\top \boldsymbol{r}\)</span>,
+with <span class="math notranslate nohighlight">\(\boldsymbol{c}_u\)</span> a solution of the constraints for a unit translation <span class="math notranslate nohighlight">\(u = 1\)</span>
 of the selected prescriptions that prescribe <span class="math notranslate nohighlight">\(u\)</span>, all the other prescribed
 values being zero, see <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.reaction_resultant()</span></code>. A line whose
 ends are shared with a prescription that is not selected, directly or
@@ -998,7 +1242,7 @@ previous ones is redundant and dropped, e.g. at the corner where a
 prescribed edge meets a connection or another prescribed edge, or on a term
 already removed by a boundary condition flag. A redundant constraint is
 dropped only when its right-hand side is consistent, i.e. satisfied by the
-particular solution within <code class="docutils literal notranslate"><span class="pre">rhs_tol</span></code> of <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_T()</span></code>,
+particular solution within <code class="docutils literal notranslate"><span class="pre">rhs_tol</span></code> of <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_Z()</span></code>,
 <span class="math notranslate nohighlight">\(10^{-8}\)</span> by default, relative to the largest prescribed value. Otherwise
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_cp()</span></code> raises a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> that names the
 prescription, the panel, the boundary condition flags that restrain it, and
@@ -1023,12 +1267,12 @@ which may exceed <code class="docutils literal notranslate"><span class="pre">rh
 <h3>API<a class="headerlink" href="#api" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">MultiDomain(...,</span> <span class="pre">pd_method='null-space')</span></code></p></li>
-<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_T()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_cp()</span></code>: <span class="math notranslate nohighlight">\([T]\)</span>,
-<span class="math notranslate nohighlight">\(\{c_{p0}\}\)</span> and <span class="math notranslate nohighlight">\(\{c_{p1}\}\)</span>, also in the attributes <code class="docutils literal notranslate"><span class="pre">T</span></code>, <code class="docutils literal notranslate"><span class="pre">c_p0</span></code>
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_Z()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_cp()</span></code>: <span class="math notranslate nohighlight">\(\boldsymbol{Z}\)</span>,
+<span class="math notranslate nohighlight">\(\boldsymbol{c}_{p0}\)</span> and <span class="math notranslate nohighlight">\(\boldsymbol{c}_{p1}\)</span>, also in the attributes <code class="docutils literal notranslate"><span class="pre">Z</span></code>, <code class="docutils literal notranslate"><span class="pre">c_p0</span></code>
 and <code class="docutils literal notranslate"><span class="pre">c_p1</span></code></p></li>
 <li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.expand()</span></code>: <code class="docutils literal notranslate"><span class="pre">expand(c_r,</span> <span class="pre">lbd)</span></code> returns the
-configuration of Eq. <a class="reference internal" href="#equation-ns-pd-c">(6)</a>, <code class="docutils literal notranslate"><span class="pre">expand(c_r)</span></code> returns <span class="math notranslate nohighlight">\([T]
-\{c_r\}\)</span>, e.g. for the modes</p></li>
+configuration of Eq. <a class="reference internal" href="#equation-ns-pd-c">(6)</a>, <code class="docutils literal notranslate"><span class="pre">expand(c_r)</span></code> returns <span class="math notranslate nohighlight">\(\boldsymbol{Z}
+\boldsymbol{c}_r\)</span>, e.g. for the modes</p></li>
 <li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_reduced_functions()</span></code>: the callables of
 <code class="docutils literal notranslate"><span class="pre">structsolve.Analysis</span></code> for the non-linear analyses, Newton-Raphson and
 the arc-length methods, requiring <code class="docutils literal notranslate"><span class="pre">structsolve&gt;=0.7.0</span></code>. The linear
@@ -1131,7 +1375,7 @@ more examples, among them:</p>
                                     <span class="s1">'arc_length_crisfield'</span><span class="p">])</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">test_nonlinear_displacement_control</span><span class="p">(</span><span class="n">method</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Post-buckling under displacement control: every converged increment</span>
-<span class="sd">    satisfies `\|[T]^T r\| \leq` ``relTOL`` `\|\lambda \partial R_r/\partial</span>
+<span class="sd">    satisfies `\|\boldsymbol{Z}^\top \boldsymbol{r}\| \leq` ``relTOL`` `\|\lambda \partial \boldsymbol{R}_r/\partial</span>
 <span class="sd">    \lambda\|`, the methods agree, and the reaction is below the linear one"""</span>
     <span class="n">md</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">delta</span> <span class="o">=</span> <span class="n">plate_postbuckling</span><span class="p">()</span>
     <span class="n">an</span> <span class="o">=</span> <span class="n">Analysis</span><span class="p">(</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">get_reduced_functions</span><span class="p">())</span>
@@ -1143,12 +1387,12 @@ more examples, among them:</p>
     <span class="n">an</span><span class="o">.</span><span class="n">static</span><span class="p">(</span><span class="n">NLgeom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">silent</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">an</span><span class="o">.</span><span class="n">increments</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="mf">1.</span><span class="p">)</span>
     <span class="n">fext</span><span class="p">,</span> <span class="n">fint</span><span class="p">,</span> <span class="n">kC</span><span class="p">,</span> <span class="n">kG</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">get_reduced_functions</span><span class="p">()</span>
-    <span class="n">T</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">get_T</span><span class="p">()</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">get_Z</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">c_r</span><span class="p">,</span> <span class="n">lbd</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">an</span><span class="o">.</span><span class="n">cs</span><span class="p">,</span> <span class="n">an</span><span class="o">.</span><span class="n">increments</span><span class="p">):</span>
         <span class="n">c</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">c_r</span><span class="p">,</span> <span class="n">lbd</span><span class="p">)</span>
         <span class="n">r</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">_reaction_residual</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">lbd</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
         <span class="n">q</span> <span class="o">=</span> <span class="n">fext</span><span class="p">(</span><span class="n">inc</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">c_r</span><span class="p">,</span> <span class="n">lbd</span><span class="o">=</span><span class="n">lbd</span><span class="p">)</span>
-        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">r</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">1.01e-6</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">lbd</span><span class="o">*</span><span class="n">q</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">Z</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">r</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">1.01e-6</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">lbd</span><span class="o">*</span><span class="n">q</span><span class="p">)</span>
     <span class="n">P</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">reaction_pd</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)[</span><span class="s1">'inc'</span><span class="p">]</span><span class="o">/</span><span class="n">delta</span>
     <span class="n">N_lin</span> <span class="o">=</span> <span class="n">E</span><span class="o">*</span><span class="n">p</span><span class="o">.</span><span class="n">plyt</span><span class="o">*</span><span class="n">p</span><span class="o">.</span><span class="n">b</span><span class="o">*</span><span class="n">delta</span><span class="o">/</span><span class="n">p</span><span class="o">.</span><span class="n">a</span>
     <span class="k">assert</span> <span class="mf">0.5</span> <span class="o">&lt;</span> <span class="n">P</span><span class="o">/</span><span class="n">N_lin</span> <span class="o">&lt;</span> <span class="mf">0.7</span>
@@ -1186,92 +1430,139 @@ null-space method has the condition number <span class="math notranslate nohighl
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p>error of <span class="math notranslate nohighlight">\(\{c\}\)</span></p></td>
+<tr class="row-even"><td><p>error of <span class="math notranslate nohighlight">\(\boldsymbol{c}\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(1.6 \times 10^{-1}\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(2.0 \times 10^{-2}\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(2.0 \times 10^{-4}\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(2.0 \times 10^{-6}\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(2.0 \times 10^{-8}\)</span></p></td>
-<td><p><span class="math notranslate nohighlight">\(3.1 \times 10^{-9}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(3.2 \times 10^{-9}\)</span></p></td>
 </tr>
 <tr class="row-odd"><td><p>error of the reaction</p></td>
 <td><p><span class="math notranslate nohighlight">\(-1.8 \times 10^{-1}\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(-2.2 \times 10^{-2}\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(-2.2 \times 10^{-4}\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(-2.2 \times 10^{-6}\)</span></p></td>
-<td><p><span class="math notranslate nohighlight">\(-2.2 \times 10^{-8}\)</span></p></td>
-<td><p><span class="math notranslate nohighlight">\(-1.2 \times 10^{-6}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(4.4 \times 10^{-9}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(-2.3 \times 10^{-6}\)</span></p></td>
 </tr>
 <tr class="row-even"><td><p>condition number</p></td>
 <td><p><span class="math notranslate nohighlight">\(2.5 \times 10^{12}\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(2.0 \times 10^{13}\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(2.0 \times 10^{15}\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(2.0 \times 10^{17}\)</span></p></td>
-<td><p><span class="math notranslate nohighlight">\(1.8 \times 10^{19}\)</span></p></td>
-<td><p><span class="math notranslate nohighlight">\(1.8 \times 10^{21}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(2.0 \times 10^{19}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.9 \times 10^{21}\)</span></p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>The reaction of the penalty method, <span class="math notranslate nohighlight">\(k \int (u_p - u)\)</span>, is the product of a
-large constant and a small difference, and loses accuracy by cancellation
-for the highest constants.</p>
+<p>The reaction of the penalty method, <span class="math notranslate nohighlight">\(k \int (u_p - u)\)</span>, here integrated with
+40 Gauss-Legendre points along <span class="math notranslate nohighlight">\(x = a\)</span>, is the product of a large constant
+and a small difference, and loses accuracy by cancellation for the highest
+constants: from <span class="math notranslate nohighlight">\(k/(E h) = 10^8\)</span> its error no longer decreases as <span class="math notranslate nohighlight">\(1/k\)</span>, and
+depends on the round-off, e.g. on the number of integration points.</p>
 <p><strong>Linear buckling.</strong> Cylinder of 5 panels under a uniform end-shortening,
 see <code class="docutils literal notranslate"><span class="pre">test_cylinder_end_shortening</span></code>. The error of the critical
 end-shortening of the penalty method is <span class="math notranslate nohighlight">\(1.4 \times 10^{-1}\)</span>, <span class="math notranslate nohighlight">\(1.3 \times
 10^{-2}\)</span>, <span class="math notranslate nohighlight">\(1.3 \times 10^{-3}\)</span>, <span class="math notranslate nohighlight">\(1.3 \times 10^{-4}\)</span> and <span class="math notranslate nohighlight">\(1.3 \times
 10^{-6}\)</span> for <span class="math notranslate nohighlight">\(k/A_{11} = 10, 10^2, 10^3, 10^4, 10^6\)</span>, from above, since the
 penalty springs shorten the cylinder less than the prescribed value. Both
-methods take about 3.8 s. With <span class="math notranslate nohighlight">\(k/A_{11} = 10^6\)</span> the sparse eigenvalue
-solver of <code class="docutils literal notranslate"><span class="pre">structsolve</span></code> fails its verification of the residuals of the
-eigenpairs, because of the conditioning, and <code class="docutils literal notranslate"><span class="pre">structsolve.lb</span></code> falls back to
-the dense solver with a <code class="docutils literal notranslate"><span class="pre">DenseFallbackWarning</span></code>.</p>
+methods take about 0.5 s, from the creation of the model to the critical
+end-shortening. With <span class="math notranslate nohighlight">\(k/A_{11} = 10^6\)</span> the sparse eigenvalue solver of
+<code class="docutils literal notranslate"><span class="pre">structsolve</span></code> 0.8.0 failed its verification of the residuals of the
+eigenpairs, because of the conditioning, and <code class="docutils literal notranslate"><span class="pre">structsolve.lb</span></code> fell back to
+the dense solver with a <code class="docutils literal notranslate"><span class="pre">DenseFallbackWarning</span></code>. Since <code class="docutils literal notranslate"><span class="pre">structsolve</span></code>
+0.9.0 the relative residual of the verification is at least
+<code class="docutils literal notranslate"><span class="pre">RESIDUAL_FLOOR</span> <span class="pre">=</span> <span class="pre">1e-8</span></code> times a scale of the norms of the matrices, and
+the eigenpairs of the sparse solver are accepted.</p>
 <p><strong>Non-linear analysis.</strong> Post-buckling of the plate at twice the critical
-end-shortening, <code class="docutils literal notranslate"><span class="pre">m</span> <span class="pre">=</span> <span class="pre">n</span> <span class="pre">=</span> <span class="pre">8</span></code>, Newton-Raphson with 8 increments; error of
-the axial reaction of the penalty method with the default convergence
-tolerance <code class="docutils literal notranslate"><span class="pre">relTOL</span> <span class="pre">=</span> <span class="pre">1e-6</span></code> and with <code class="docutils literal notranslate"><span class="pre">relTOL</span> <span class="pre">=</span> <span class="pre">1e-10</span></code>:</p>
+end-shortening, <code class="docutils literal notranslate"><span class="pre">m</span> <span class="pre">=</span> <span class="pre">n</span> <span class="pre">=</span> <span class="pre">8</span></code>, with a lateral point load of 30 N at the
+centre as imperfection, as in <code class="docutils literal notranslate"><span class="pre">test_nonlinear_reaction_matches_penalty</span></code>,
+Newton-Raphson with 8 increments. Error of the axial reaction of the penalty
+method, relative to that of the null-space method, with Crisfield’s
+convergence criterion, <code class="docutils literal notranslate"><span class="pre">Analysis.convergence</span> <span class="pre">=</span> <span class="pre">'crisfield'</span></code>, the default of
+<code class="docutils literal notranslate"><span class="pre">structsolve</span></code> 0.9.0 with <code class="docutils literal notranslate"><span class="pre">relTOL</span> <span class="pre">=</span> <span class="pre">1e-9</span></code>, and with the relative
+criterion, <code class="docutils literal notranslate"><span class="pre">'relative'</span></code>, the only one up to <code class="docutils literal notranslate"><span class="pre">structsolve</span></code> 0.8.0, whose
+default was <code class="docutils literal notranslate"><span class="pre">relTOL</span> <span class="pre">=</span> <span class="pre">1e-6</span></code>:</p>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
-<tr class="row-odd"><th class="head"><p><span class="math notranslate nohighlight">\(k / (E h)\)</span></p></th>
+<tr class="row-odd"><th class="head"><p>criterion, <span class="math notranslate nohighlight">\(k / (E h)\)</span></p></th>
 <th class="head"><p><span class="math notranslate nohighlight">\(10^2\)</span></p></th>
 <th class="head"><p><span class="math notranslate nohighlight">\(10^4\)</span></p></th>
 <th class="head"><p><span class="math notranslate nohighlight">\(10^6\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(10^8\)</span></p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">relTOL</span> <span class="pre">=</span> <span class="pre">1e-6</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">'crisfield'</span></code>, <code class="docutils literal notranslate"><span class="pre">relTOL</span> <span class="pre">=</span> <span class="pre">1e-9</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(-3.6 \times 10^{-2}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(-3.8 \times 10^{-4}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(-3.8 \times 10^{-6}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(-5.6 \times 10^{-8}\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">'crisfield'</span></code>, <code class="docutils literal notranslate"><span class="pre">relTOL</span> <span class="pre">=</span> <span class="pre">1e-6</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(-3.6 \times 10^{-2}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(-4.0 \times 10^{-4}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(-1.9 \times 10^{-5}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(-1.5 \times 10^{-5}\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">'relative'</span></code>, <code class="docutils literal notranslate"><span class="pre">relTOL</span> <span class="pre">=</span> <span class="pre">1e-6</span></code></p></td>
 <td><p><span class="math notranslate nohighlight">\(-3.6 \times 10^{-2}\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(-5.5 \times 10^{-4}\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(-2.1 \times 10^{-1}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(1.1\)</span></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">relTOL</span> <span class="pre">=</span> <span class="pre">1e-10</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">'relative'</span></code>, <code class="docutils literal notranslate"><span class="pre">relTOL</span> <span class="pre">=</span> <span class="pre">1e-10</span></code></p></td>
 <td><p><span class="math notranslate nohighlight">\(-3.6 \times 10^{-2}\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(-3.8 \times 10^{-4}\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(-1.9 \times 10^{-5}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(-1.7 \times 10^{-4}\)</span></p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>The relative convergence criterion of the penalty method is relative to the
-penalty forces <span class="math notranslate nohighlight">\(k u_p\)</span>, which grow with <span class="math notranslate nohighlight">\(k\)</span>: with the default tolerance, the
-highest penalty constant gives the largest error, 21%, after converging in
-fewer iterations. The null-space method has no such trade-off, its
-reference being <span class="math notranslate nohighlight">\(\lambda \partial R_r/\partial \lambda\)</span>, see
-<a class="reference internal" href="#null-space-pd"><span class="std std-ref">Prescribed displacements imposed exactly</span></a>.</p>
+<p>Both criteria compare the norm of the residual with the largest norm of the
+references <span class="math notranslate nohighlight">\(\lambda \boldsymbol{F}_{ext}\)</span>, <span class="math notranslate nohighlight">\(\boldsymbol{F}_{int}\)</span> and, when they apply, the
+external force vector of the increment of the arc-length methods and
+<span class="math notranslate nohighlight">\(\lambda \partial \boldsymbol{R}/\partial \lambda\)</span>, see <code class="docutils literal notranslate"><span class="pre">structsolve.convergence</span></code>. For
+the penalty method <span class="math notranslate nohighlight">\(\lambda \boldsymbol{F}_{ext}\)</span> and <span class="math notranslate nohighlight">\(\boldsymbol{F}_{int}\)</span> contain the
+penalty forces <span class="math notranslate nohighlight">\(k u_p\)</span>. The relative criterion measures them with the
+Euclidean norm over all the degrees of freedom, which grows with <span class="math notranslate nohighlight">\(k\)</span>: with
+<code class="docutils literal notranslate"><span class="pre">relTOL</span> <span class="pre">=</span> <span class="pre">1e-6</span></code> the highest penalty constants give the largest errors,
+21% and 110%, after 12 and 8 evaluations of the internal force vector in
+the 8 increments, against 28 for <span class="math notranslate nohighlight">\(k/(E h) = 10^2\)</span>, and even with <code class="docutils literal notranslate"><span class="pre">relTOL</span> <span class="pre">=</span>
+<span class="pre">1e-10</span></code> the error grows again from <span class="math notranslate nohighlight">\(k/(E h) = 10^6\)</span> to <span class="math notranslate nohighlight">\(10^8\)</span>. Crisfield’s
+criterion uses the norm <span class="math notranslate nohighlight">\(\|\boldsymbol{v}\|_{\boldsymbol{d}} = (\sum_j v_j^2/|d_j|)^{1/2}\)</span>
+over the free degrees of freedom, the entries <span class="math notranslate nohighlight">\(d_j\)</span> of the diagonal scaling
+vector <span class="math notranslate nohighlight">\(\boldsymbol{d}\)</span> being the diagonal of the linear stiffness matrix
+<code class="docutils literal notranslate"><span class="pre">calc_kC()</span></code>, which contains the penalty stiffness, such that the scaled
+norm of the penalty forces grows with <span class="math notranslate nohighlight">\(\sqrt{k}\)</span>, by a factor of 10 for
+each factor of 100 of <span class="math notranslate nohighlight">\(k\)</span> in this case: with <code class="docutils literal notranslate"><span class="pre">relTOL</span> <span class="pre">=</span> <span class="pre">1e-9</span></code> the error
+decreases as <span class="math notranslate nohighlight">\(1/k\)</span> up to <span class="math notranslate nohighlight">\(k/(E h) = 10^8\)</span>, whereas with <code class="docutils literal notranslate"><span class="pre">relTOL</span> <span class="pre">=</span> <span class="pre">1e-6</span></code> it
+stops decreasing at about <span class="math notranslate nohighlight">\(2 \times 10^{-5}\)</span>. The null-space method has no
+such trade-off, its reference being <span class="math notranslate nohighlight">\(\lambda \partial \boldsymbol{R}_r/\partial \lambda\)</span>,
+see <a class="reference internal" href="#null-space-pd"><span class="std std-ref">Prescribed displacements imposed exactly</span></a>: its reaction is the same to <span class="math notranslate nohighlight">\(3 \times 10^{-10}\)</span>
+with the four combinations of the table.</p>
 <p><strong>Run time.</strong> For the linear analyses both methods have the same cost: the
 elimination of the constraints is a small fraction of the assembly. For the
 non-linear analysis above the run time is dominated by the assembly of the
-tangent stiffness matrix: 0.96 s and 1.29 s with the null-space method for
-<code class="docutils literal notranslate"><span class="pre">relTOL</span> <span class="pre">=</span> <span class="pre">1e-6</span></code> and <code class="docutils literal notranslate"><span class="pre">1e-10</span></code>, against 0.44 s and 0.90 s with the penalty
-method and <span class="math notranslate nohighlight">\(k/(E h) = 10^4\)</span>. The null-space method converges to a much
-smaller residual in absolute terms. Its <span class="math notranslate nohighlight">\(\partial R_r/\partial \lambda\)</span>
-requires the product <span class="math notranslate nohighlight">\([K_T] \{c_{p1}\}\)</span>, computed without assembling
-<span class="math notranslate nohighlight">\([K_T]\)</span>, see <a class="reference internal" href="tangent_product.html#tangent-product"><span class="std std-ref">Tangent stiffness matrix and its product by a vector</span></a>, at the cost of one evaluation of the
-internal force vector, and <code class="docutils literal notranslate"><span class="pre">structsolve</span></code> 0.8.0 evaluates it only together
-with the tangent stiffness matrix. With <code class="docutils literal notranslate"><span class="pre">panels</span></code> 0.12.0 before these two
-improvements and the tabulation of the approximation functions, see
-<a class="reference internal" href="tabulation.html#tabulation"><span class="std std-ref">Approximation functions tabulated at the integration points</span></a>, the same analyses took 12.6 s and 15.8 s against 4.4 s
-and 9.2 s.</p>
+tangent stiffness matrix. With <code class="docutils literal notranslate"><span class="pre">panels</span></code> 0.14.0 and <code class="docutils literal notranslate"><span class="pre">structsolve</span></code> 0.9.0,
+on the same machine, medians of 15 runs of <code class="docutils literal notranslate"><span class="pre">Analysis.static</span></code>: 0.60 s with
+the null-space method and Crisfield’s criterion with <code class="docutils literal notranslate"><span class="pre">relTOL</span> <span class="pre">=</span> <span class="pre">1e-9</span></code>, and
+0.50 s and 0.66 s with the relative criterion with <code class="docutils literal notranslate"><span class="pre">relTOL</span> <span class="pre">=</span> <span class="pre">1e-6</span></code> and
+<code class="docutils literal notranslate"><span class="pre">1e-10</span></code>, against 0.46 s, 0.24 s and 0.45 s with the penalty method and
+<span class="math notranslate nohighlight">\(k/(E h) = 10^4\)</span>. With
+Crisfield’s criterion the null-space method factorizes the tangent stiffness
+matrix 29 times, against 25 for the penalty method. Its <span class="math notranslate nohighlight">\(\partial
+\boldsymbol{R}_r/\partial \lambda\)</span> requires the product <span class="math notranslate nohighlight">\(\boldsymbol{K}_T \boldsymbol{c}_{p1}\)</span>, computed
+without assembling <span class="math notranslate nohighlight">\(\boldsymbol{K}_T\)</span>, see <a class="reference internal" href="tangent_product.html#tangent-product"><span class="std std-ref">Tangent stiffness matrix and its product by a vector</span></a>, at the cost of one
+evaluation of the internal force vector, and <code class="docutils literal notranslate"><span class="pre">structsolve</span></code>, since 0.8.0,
+evaluates it only together with the tangent stiffness matrix. With
+<code class="docutils literal notranslate"><span class="pre">panels</span></code> 0.12.0 before these two improvements and the tabulation of the
+approximation functions, see <a class="reference internal" href="tabulation.html#tabulation"><span class="std std-ref">Approximation functions tabulated at the integration points</span></a>, the same analyses with the
+relative criterion and <code class="docutils literal notranslate"><span class="pre">relTOL</span> <span class="pre">=</span> <span class="pre">1e-6</span></code> and <code class="docutils literal notranslate"><span class="pre">1e-10</span></code> took 12.6 s and
+15.8 s against 4.4 s and 9.2 s.</p>
 <p><strong>When to use each method.</strong> The null-space method is exact, needs no
 penalty constant, keeps the conditioning of the model, and gives reactions
 that do not depend on any constant; it is recommended for displacement
@@ -1295,11 +1586,16 @@ connection, the terms of the trace of the richer domain that the other
 domain cannot represent are forced to vanish.</p></li>
 <li><p>The boundary condition flags at the ends of an edge of one domain are
 imposed on the other domain.</p></li>
-<li><p>With <code class="docutils literal notranslate"><span class="pre">'SB'</span></code> and the classical laminated plate theory, <span class="math notranslate nohighlight">\(u_1 = u_2 - d_{sb}
-w_{,x}\)</span>. Restraining the normal in-plane displacement of an edge in both
-domains, e.g. <span class="math notranslate nohighlight">\(u = 0\)</span> at <span class="math notranslate nohighlight">\(x = 0\)</span>, also restrains the rotation <span class="math notranslate nohighlight">\(w_{,x}\)</span> at
-that edge, which is clamped. The in-plane displacements of the bonded
-laminates must be restrained consistently with the single laminate that
+<li><p>With <code class="docutils literal notranslate"><span class="pre">'SB'</span></code> and the classical laminated plate theory, <span class="math notranslate nohighlight">\(u_1 - z_1 w_{,x}
+= u_2 - z_2 w_{,x}\)</span>, <span class="math notranslate nohighlight">\(z_1\)</span> and <span class="math notranslate nohighlight">\(z_2\)</span> being the faces in contact measured
+from the reference surface of each domain. When the reference surfaces of
+the two domains are apart, <span class="math notranslate nohighlight">\(z_1 \ne z_2\)</span>, e.g. without offsets,
+restraining the normal in-plane displacement of an edge in both domains,
+e.g. <span class="math notranslate nohighlight">\(u = 0\)</span> at <span class="math notranslate nohighlight">\(x = 0\)</span>, also restrains the rotation <span class="math notranslate nohighlight">\(w_{,x}\)</span> at that
+edge, which is clamped. With offsets that place both reference surfaces at
+the same height, <span class="math notranslate nohighlight">\(z_1 = z_2\)</span> and <span class="math notranslate nohighlight">\(u_1 = u_2\)</span>.
+The in-plane displacements of the bonded laminates must be restrained
+consistently with the single laminate that
 they represent, e.g. restraining only the tangential displacement of the
 edges, as in <code class="docutils literal notranslate"><span class="pre">test_skin_base_nonlinear_equals_single_laminate</span></code>.</p></li>
 </ul>
@@ -1309,7 +1605,7 @@ remain penalty stiffnesses by default, and are imposed exactly with
 <code class="docutils literal notranslate"><span class="pre">pd_method='null-space'</span></code>, see <a class="reference internal" href="#null-space-pd"><span class="std std-ref">Prescribed displacements imposed exactly</span></a>. The
 traction-separation law of <code class="docutils literal notranslate"><span class="pre">'SB_TSL'</span></code> remains a penalty stiffness.</p>
 <p>The rank of the constraints is found with the tolerance <code class="docutils literal notranslate"><span class="pre">tol</span></code> of
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_T()</span></code>, <code class="docutils literal notranslate"><span class="pre">1e-9</span></code> by default, which applies to the
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_Z()</span></code>, <code class="docutils literal notranslate"><span class="pre">1e-9</span></code> by default, which applies to the
 constraints normalized to a unit norm. The independent constraints have
 pivots many orders of magnitude above the round-off errors of the redundant
 ones, and a warning is issued when this gap is smaller than <span class="math notranslate nohighlight">\(10^4\)</span>.</p>
@@ -1317,7 +1613,7 @@ ones, and a warning is issued when this gap is smaller than <span class="math no
 <section id="id3">
 <h2>API<a class="headerlink" href="#id3" title="Link to this heading">#</a></h2>
 <p>The methods of <code class="xref py py-class docutils literal notranslate"><span class="pre">MultiDomain</span></code> for the null-space method are
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_T()</span></code>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.reduce()</span></code>,
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_Z()</span></code>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.reduce()</span></code>,
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.expand()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_reduced_functions()</span></code>,
 and for the prescribed displacements <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.get_cp()</span></code>,
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.linear_static()</span></code>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.linear_buckling()</span></code>,
@@ -1337,20 +1633,20 @@ see <a class="reference internal" href="#null-space-pd"><span class="std std-ref
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="bardell.html"
+       href="tsdt_offset.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Bardell’s Hierarchical Functions</p>
+        <p class="prev-next-title">Third-order shear deformation theory with a laminate offset</p>
       </div>
     </a>
     <a class="right-next"
-       href="follower_pressure.html"
+       href="tangent_product.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Follower pressure loads: theory</p>
+        <p class="prev-next-title">Tangent stiffness matrix and its product by a vector</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -1438,7 +1734,7 @@ see <a class="reference internal" href="#null-space-pd"><span class="std std-ref
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.2.0.
   </p>
 </div>
       

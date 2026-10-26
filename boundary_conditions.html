@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Boundary conditions &#8212; panels 0.14.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="_static/scripts/fontawesome.js?digest=18bd87630a240e9c25be"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
+
+    <script src="_static/documentation_options.js?v=9e420a66"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'boundary_conditions';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Loads" href="loads.html" />
+    <link rel="prev" title="Bardell’s hierarchical functions" href="bardell.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.14.0" />
+  
+    
+    <script src="_static/searchtools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">panels 0.14.0 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="shell_overview.html">
+    Plates and cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="bardell.html">
+    Bardell’s hierarchical functions
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#" aria-current="page">
+    Boundary conditions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="loads.html">
+    Loads
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="multidomain_overview.html">
+    Multi-domain assemblies
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="stiffened_panels.html">
+    Stiffened panels
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="aeroelasticity.html">
+    Panel flutter with the piston theory
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="postprocessing.html">
+    Field outputs, plots and files
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tsdt_offset.html">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tangent_product.html">
+    Tangent stiffness matrix and its product by a vector
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="tabulation.html">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_face_clamp.html">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="ref.html">
+    References
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="shell_overview.html">
+    Plates and cylindrical shells
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="bardell.html">
+    Bardell’s hierarchical functions
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#" aria-current="page">
+    Boundary conditions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="loads.html">
+    Loads
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="multidomain_overview.html">
+    Multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="stiffened_panels.html">
+    Stiffened panels
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="aeroelasticity.html">
+    Panel flutter with the piston theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="postprocessing.html">
+    Field outputs, plots and files
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="follower_pressure.html">
+    Follower pressure loads: theory
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tsdt_offset.html">
+    Third-order shear deformation theory with a laminate offset
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="multidomain_null_space.html">
+    Exact connections with the null-space method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tangent_product.html">
+    Tangent stiffness matrix and its product by a vector
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tabulation.html">
+    Approximation functions tabulated at the integration points
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cohesive_zone.html">
+    Cohesive zone model of the multi-domain approach
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_static.html">
+    Linear static analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_linear_buckling.html">
+    Linear buckling analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_frequency.html">
+    Frequency analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_flutter.html">
+    Panel flutter analysis
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_newton_raphson.html">
+    Non-linear static analysis with the Newton-Raphson method
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_arc_length.html">
+    Non-linear static analysis with the arc-length methods
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_follower_pressure.html">
+    Follower (hydrostatic) pressure
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_prescribed_displacements.html">
+    Prescribed displacements
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_face_clamp.html">
+    Clamped and face-clamped edges
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_cylinder.html">
+    Cylinders modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_multidomain_tstiff2d.html">
+    Panels with a T-stiffener modeled as multi-domain assemblies
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ex_stiffpanelbay.html">
+    Stiffened panel bays
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="ref.html">
+    References
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button type="button" id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Boundary conditions</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="boundary-conditions">
+<span id="id1"></span><h1>Boundary conditions<a class="headerlink" href="#boundary-conditions" title="Link to this heading">#</a></h1>
+<p>The boundary conditions of a domain are imposed in three ways, from the most
+to the least common:</p>
+<ul class="simple">
+<li><p>on whole edges, exactly, with the flags of the approximation functions,
+attributes of <code class="xref py py-class docutils literal notranslate"><span class="pre">Shell</span></code>, see <a class="reference internal" href="bardell.html#theory-func-bardell"><span class="std std-ref">Bardell’s hierarchical functions</span></a>;</p></li>
+<li><p>at points or along lines, as prescribed displacements, with the
+null-space or the penalty method of a <code class="xref py py-class docutils literal notranslate"><span class="pre">MultiDomain</span></code>, see
+<a class="reference internal" href="multidomain_null_space.html#null-space-pd"><span class="std std-ref">Prescribed displacements imposed exactly</span></a>, or as penalty springs at points of a single shell,
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_stiffness_point_constraint()</span></code>;</p></li>
+<li><p>between domains, with the connections of a <code class="xref py py-class docutils literal notranslate"><span class="pre">MultiDomain</span></code>, see
+<a class="reference internal" href="multidomain_overview.html#multidomain-overview"><span class="std std-ref">Multi-domain assemblies</span></a>.</p></li>
+</ul>
+<section id="flags-of-the-edges">
+<h2>Flags of the edges<a class="headerlink" href="#flags-of-the-edges" title="Link to this heading">#</a></h2>
+<p>A flag <code class="docutils literal notranslate"><span class="pre">0</span></code> removes the value (e.g. <code class="docutils literal notranslate"><span class="pre">x1w</span></code>) or the slope normal to the
+edge (e.g. <code class="docutils literal notranslate"><span class="pre">x1wr</span></code>, the derivative with respect to <span class="math notranslate nohighlight">\(x\)</span> at <span class="math notranslate nohighlight">\(x = 0\)</span>) of a
+field on the whole edge, and a flag <code class="docutils literal notranslate"><span class="pre">1</span></code> leaves it free, the natural
+boundary condition following from the energy. The edges are <span class="math notranslate nohighlight">\(x = 0\)</span>
+(<code class="docutils literal notranslate"><span class="pre">x1</span></code>), <span class="math notranslate nohighlight">\(x = a\)</span> (<code class="docutils literal notranslate"><span class="pre">x2</span></code>), <span class="math notranslate nohighlight">\(y = 0\)</span> (<code class="docutils literal notranslate"><span class="pre">y1</span></code>) and <span class="math notranslate nohighlight">\(y = b\)</span> (<code class="docutils literal notranslate"><span class="pre">y2</span></code>). For the
+models based on the classical laminated plate theory (CLPT), on the edge <span class="math notranslate nohighlight">\(x
+= 0\)</span>, with <span class="math notranslate nohighlight">\(v\)</span> the displacement tangential to the edge and <span class="math notranslate nohighlight">\(u\)</span> the normal
+one:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>condition</p></th>
+<th class="head"><p>flags equal to <code class="docutils literal notranslate"><span class="pre">0</span></code>, the others <code class="docutils literal notranslate"><span class="pre">1</span></code></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>simply supported, <span class="math notranslate nohighlight">\(u\)</span> and <span class="math notranslate nohighlight">\(v\)</span> restrained</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">x1u</span></code>, <code class="docutils literal notranslate"><span class="pre">x1v</span></code>, <code class="docutils literal notranslate"><span class="pre">x1w</span></code> (default)</p></td>
+</tr>
+<tr class="row-odd"><td><p>simply supported, <span class="math notranslate nohighlight">\(u\)</span> free</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">x1v</span></code>, <code class="docutils literal notranslate"><span class="pre">x1w</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>clamped</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">x1u</span></code>, <code class="docutils literal notranslate"><span class="pre">x1v</span></code>, <code class="docutils literal notranslate"><span class="pre">x1w</span></code>, <code class="docutils literal notranslate"><span class="pre">x1wr</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>free</p></td>
+<td><p>none</p></td>
+</tr>
+<tr class="row-even"><td><p>symmetry plane</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">x1u</span></code>, <code class="docutils literal notranslate"><span class="pre">x1vr</span></code>, <code class="docutils literal notranslate"><span class="pre">x1wr</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>and likewise on the other edges, with the roles of <span class="math notranslate nohighlight">\(u\)</span> and <span class="math notranslate nohighlight">\(v\)</span> exchanged on
+the edges <span class="math notranslate nohighlight">\(y = const\)</span>. With the default flags, a <code class="xref py py-class docutils literal notranslate"><span class="pre">Shell</span></code> is simply
+supported on its four edges with the in-plane displacements restrained.</p>
+<p>The models based on shear deformation theories, FSDT and TSDT, have the
+rotations <span class="math notranslate nohighlight">\(\phi_x\)</span> and <span class="math notranslate nohighlight">\(\phi_y\)</span> as independent fields, with the flags
+<code class="docutils literal notranslate"><span class="pre">x1phix</span></code>, <code class="docutils literal notranslate"><span class="pre">x1phixr</span></code>, …, <code class="docutils literal notranslate"><span class="pre">y2phiyr</span></code>. By default only the rotation
+tangential to each edge is removed, <code class="docutils literal notranslate"><span class="pre">x1phiy</span> <span class="pre">=</span> <span class="pre">x2phiy</span> <span class="pre">=</span> <span class="pre">0</span></code> and <code class="docutils literal notranslate"><span class="pre">y1phix</span> <span class="pre">=</span>
+<span class="pre">y2phix</span> <span class="pre">=</span> <span class="pre">0</span></code>, the hard simply supported condition. A clamped edge keeps
+the cross-section planar and unrotated, <span class="math notranslate nohighlight">\(u(z) = v(z) = 0\)</span> through the
+thickness, which removes on the edge <span class="math notranslate nohighlight">\(x = 0\)</span>:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>model</p></th>
+<th class="head"><p>flags of the clamped edge <span class="math notranslate nohighlight">\(x = 0\)</span> equal to <code class="docutils literal notranslate"><span class="pre">0</span></code></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>CLPT</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">x1u</span></code>, <code class="docutils literal notranslate"><span class="pre">x1v</span></code>, <code class="docutils literal notranslate"><span class="pre">x1w</span></code>, <code class="docutils literal notranslate"><span class="pre">x1wr</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>FSDT</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">x1u</span></code>, <code class="docutils literal notranslate"><span class="pre">x1v</span></code>, <code class="docutils literal notranslate"><span class="pre">x1w</span></code>, <code class="docutils literal notranslate"><span class="pre">x1phix</span></code>, <code class="docutils literal notranslate"><span class="pre">x1phiy</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>TSDT</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">x1u</span></code>, <code class="docutils literal notranslate"><span class="pre">x1v</span></code>, <code class="docutils literal notranslate"><span class="pre">x1w</span></code>, <code class="docutils literal notranslate"><span class="pre">x1phix</span></code>, <code class="docutils literal notranslate"><span class="pre">x1phiy</span></code>, <code class="docutils literal notranslate"><span class="pre">x1wr</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The rotation of the FSDT is constant through the thickness, and its slope
+of <span class="math notranslate nohighlight">\(w\)</span> stays free. The in-plane displacement of the TSDT, <span class="math notranslate nohighlight">\(u(z) = u + z
+\phi_x + p(z) (\phi_x + w_{,x})\)</span> with the cubic <span class="math notranslate nohighlight">\(p(z)\)</span> of Eq.
+<a class="reference internal" href="tsdt_offset.html#equation-tsdt-offset-p">(3)</a>, also contains the slope <span class="math notranslate nohighlight">\(w_{,x}\)</span>, which must be
+removed for <span class="math notranslate nohighlight">\(u(z)\)</span> to vanish at every <span class="math notranslate nohighlight">\(z\)</span>; the rotation at the reference
+surface, <span class="math notranslate nohighlight">\(\theta_x\)</span> of Eq. <a class="reference internal" href="tsdt_offset.html#equation-tsdt-offset-theta">(5)</a>, is then zero for any
+offset. The meaning of the default flags is described in <code class="xref py py-class docutils literal notranslate"><span class="pre">Shell</span></code>.</p>
+<p>The function <code class="docutils literal notranslate"><span class="pre">set_edge</span></code> of the tests sets the simply supported (with the
+normal displacement free), clamped and free edges of the three plate models
+in this way:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">set_edge</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">kind</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Boundary condition of one edge</span>
+
+<span class="sd">    ``kind`` is ``'S'`` for simply supported (SS-1), ``'C'`` for clamped or</span>
+<span class="sd">    ``'F'`` for free. The tangential displacement and rotation of an edge of</span>
+<span class="sd">    constant `x` are `v` and `\phi_y`, and of constant `y`, `u` and</span>
+<span class="sd">    `\phi_x`. The clamped edge removes `u, v, w`, the slope of `w` normal</span>
+<span class="sd">    to the edge for the CLPT, the rotations for the FSDT, and both the</span>
+<span class="sd">    rotations and the slope for the TSDT.</span>
+<span class="sd">    """</span>
+    <span class="n">tangential</span><span class="p">,</span> <span class="n">normal</span> <span class="o">=</span> <span class="p">(</span><span class="s1">'v'</span><span class="p">,</span> <span class="s1">'u'</span><span class="p">)</span> <span class="k">if</span> <span class="n">edge</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">'x'</span><span class="p">)</span> <span class="k">else</span> <span class="p">(</span><span class="s1">'u'</span><span class="p">,</span> <span class="s1">'v'</span><span class="p">)</span>
+    <span class="n">rot_tangential</span><span class="p">,</span> <span class="n">rot_normal</span> <span class="o">=</span> <span class="p">((</span><span class="s1">'phiy'</span><span class="p">,</span> <span class="s1">'phix'</span><span class="p">)</span> <span class="k">if</span> <span class="n">edge</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">'x'</span><span class="p">)</span>
+                                  <span class="k">else</span> <span class="p">(</span><span class="s1">'phix'</span><span class="p">,</span> <span class="s1">'phiy'</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'u'</span><span class="p">,</span> <span class="s1">'v'</span><span class="p">,</span> <span class="s1">'w'</span><span class="p">,</span> <span class="s1">'phix'</span><span class="p">,</span> <span class="s1">'phiy'</span><span class="p">):</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">edge</span> <span class="o">+</span> <span class="n">field</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">edge</span> <span class="o">+</span> <span class="n">field</span> <span class="o">+</span> <span class="s1">'r'</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s1">'S'</span><span class="p">:</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">edge</span> <span class="o">+</span> <span class="n">tangential</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">edge</span> <span class="o">+</span> <span class="s1">'w'</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">edge</span> <span class="o">+</span> <span class="n">rot_tangential</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="s1">'C'</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'u'</span><span class="p">,</span> <span class="s1">'v'</span><span class="p">,</span> <span class="s1">'w'</span><span class="p">,</span> <span class="s1">'phix'</span><span class="p">,</span> <span class="s1">'phiy'</span><span class="p">):</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">edge</span> <span class="o">+</span> <span class="n">field</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+        <span class="c1"># the classical plate theory clamps the slope of w and the FSDT the</span>
+        <span class="c1"># rotations, with the slope free; the TSDT clamps both, such that</span>
+        <span class="c1"># the warping term p(z) (phi + w,n) of u(z) and v(z) vanishes too</span>
+        <span class="c1"># and the section stays planar and unrotated</span>
+        <span class="k">if</span> <span class="s1">'clpt'</span> <span class="ow">in</span> <span class="n">s</span><span class="o">.</span><span class="n">model</span> <span class="ow">or</span> <span class="s1">'tsdt'</span> <span class="ow">in</span> <span class="n">s</span><span class="o">.</span><span class="n">model</span><span class="p">:</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">edge</span> <span class="o">+</span> <span class="s1">'wr'</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">kind</span> <span class="o">!=</span> <span class="s1">'F'</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">kind</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>and the natural frequencies of thin isotropic square plates with
+combinations of these edges agree with the reference values of Leissa
+(1973) given in the test, for the three models:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s1">'model'</span><span class="p">,</span> <span class="p">[</span><span class="n">CLPT</span><span class="p">,</span> <span class="n">FSDT</span><span class="p">,</span> <span class="n">TSDT</span><span class="p">])</span>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s1">'bcs'</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">LEISSA_PLATES</span><span class="p">))</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_frequency_thin_isotropic_plate_leissa</span><span class="p">(</span><span class="n">bcs</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Leissa (1973), square plates, `\lambda = \omega a^2 \sqrt{\rho h/D}`</span>
+
+<span class="sd">    For a thin plate, `h/a = 0.001`, the shear deformation theories must</span>
+<span class="sd">    recover the classical plate theory for any boundary condition.</span>
+<span class="sd">    """</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="mf">1.</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="mf">0.001</span><span class="o">*</span><span class="n">a</span>
+    <span class="n">E</span> <span class="o">=</span> <span class="mf">70.e9</span>
+    <span class="n">nu</span> <span class="o">=</span> <span class="mf">0.3</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">make_plate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">nu</span><span class="p">),</span> <span class="n">bcs</span><span class="o">=</span><span class="n">bcs</span><span class="p">)</span>
+    <span class="c1"># removing the in-plane rigid-body motions, which do not change the</span>
+    <span class="c1"># flexural modes of the isotropic plate</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">x1u</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">x2u</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="n">E</span><span class="o">*</span><span class="n">h</span><span class="o">**</span><span class="mi">3</span><span class="o">/</span><span class="p">(</span><span class="mi">12</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">nu</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">omega</span> <span class="o">=</span> <span class="n">lowest_frequencies</span><span class="p">(</span><span class="n">s</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="c1"># the references are given with 5 significant digits</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">omega</span><span class="o">*</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">RHO</span><span class="o">*</span><span class="n">h</span><span class="o">/</span><span class="n">D</span><span class="p">),</span> <span class="n">LEISSA_PLATES</span><span class="p">[</span><span class="n">bcs</span><span class="p">],</span>
+                      <span class="n">rtol</span><span class="o">=</span><span class="mf">5e-5</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For these thin plates the slope <span class="math notranslate nohighlight">\(w_{,x}\)</span> of a TSDT clamped edge changes the
+frequencies by less than <span class="math notranslate nohighlight">\(1.2 \times 10^{-5}\)</span>, e.g. 28.95027 with the slope
+free and 28.95059 with <code class="docutils literal notranslate"><span class="pre">x1wr</span> <span class="pre">=</span> <span class="pre">0</span></code> for the plate <code class="docutils literal notranslate"><span class="pre">'SCSC'</span></code>, against 28.951
+of Leissa. For thick plates the difference is large: for the square
+isotropic plate with <span class="math notranslate nohighlight">\(h/a = 0.1\)</span> clamped on four edges, the first frequency
+<span class="math notranslate nohighlight">\(\omega a^2 \sqrt{\rho h/D}\)</span> of the TSDT is 30.18 with the slope free and
+32.64 with the slope clamped, close to the 32.62 of the FSDT.</p>
+<p>The removed terms leave null rows and columns in the matrices, which the
+solvers of <a class="reference external" href="https://github.com/saullocastro/structsolve">structsolve</a>
+remove before solving. A free domain, all flags <code class="docutils literal notranslate"><span class="pre">1</span></code>, has rigid-body
+modes, and its stiffness matrix is singular.</p>
+</section>
+<section id="prescribed-displacements">
+<h2>Prescribed displacements<a class="headerlink" href="#prescribed-displacements" title="Link to this heading">#</a></h2>
+<p>Displacements different from zero, or zero displacements at points or
+along lines inside the domain, are prescribed with
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_point_pd()</span></code>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_distr_pd_fixed_x()</span></code> and
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_distr_pd_fixed_y()</span></code>, constant (<code class="docutils literal notranslate"><span class="pre">cte=True</span></code>) or proportional
+to the load factor (<code class="docutils literal notranslate"><span class="pre">cte=False</span></code>). They are imposed by the
+<code class="xref py py-class docutils literal notranslate"><span class="pre">MultiDomain</span></code> that contains the shell, also an assembly of one shell
+without connections, with <code class="docutils literal notranslate"><span class="pre">pd_method</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'null-space'</span></code>: exactly, as linear constraints eliminated together with
+the connections, the solution being <span class="math notranslate nohighlight">\(\boldsymbol{c} = \boldsymbol{Z}\boldsymbol{c}_r + \boldsymbol{c}_{p0} +
+\lambda \boldsymbol{c}_{p1}\)</span>, with the reactions of <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.reaction_pd()</span></code>
+and <code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.reaction_resultant()</span></code>, see <a class="reference internal" href="multidomain_null_space.html#null-space-pd"><span class="std std-ref">Prescribed displacements imposed exactly</span></a>;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'penalty'</span></code>, the default: with springs between the structure and the
+support, whose stiffness the user adds to the stiffness matrix, e.g. with
+<code class="xref py py-func docutils literal notranslate"><span class="pre">fkCpd()</span></code>, and whose forces enter the external force vector,
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDomain.calc_fext()</span></code>.</p></li>
+</ul>
+<p>A single <code class="xref py py-class docutils literal notranslate"><span class="pre">Shell</span></code> can be supported at a point by the penalty springs
+of <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.calc_stiffness_point_constraint()</span></code>, added by the user to the
+constitutive stiffness matrix.</p>
+<p>The in-plane displacements <span class="math notranslate nohighlight">\(u\)</span> and <span class="math notranslate nohighlight">\(v\)</span> are prescribed at the reference
+surface, <span class="math notranslate nohighlight">\(z = 0\)</span>, or at the thickness coordinate given by the keyword <code class="docutils literal notranslate"><span class="pre">z</span></code>
+of these methods, with the same <code class="docutils literal notranslate"><span class="pre">z</span></code> given to the penalty kernels.</p>
+<p>The example below prescribes a uniform end shortening of a simply supported
+plate with the null-space method, and verifies that it gives the same
+critical state as the equivalent applied load:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_linear_buckling_plate_end_shortening_equals_load</span><span class="p">():</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Simply supported plate, the lateral edges free in-plane: a uniform</span>
+<span class="sd">    end-shortening `\delta` and the equivalent load `N_x = E h \delta/a`</span>
+<span class="sd">    give the same membrane state and the same critical load"""</span>
+    <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">1e-3</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">plate</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">end_shortening</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_point_pd</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">md</span> <span class="o">=</span> <span class="n">MultiDomain</span><span class="p">([</span><span class="n">p</span><span class="p">],</span> <span class="n">conn</span><span class="o">=</span><span class="p">[],</span> <span class="n">pd_method</span><span class="o">=</span><span class="s1">'null-space'</span><span class="p">)</span>
+    <span class="n">eigvals</span><span class="p">,</span> <span class="n">eigvecs</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">linear_buckling</span><span class="p">(</span><span class="n">num_eigvalues</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">eigvecs</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">get_size</span><span class="p">(),</span> <span class="mi">3</span><span class="p">)</span>
+
+    <span class="n">q</span> <span class="o">=</span> <span class="n">plate</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">q</span><span class="o">.</span><span class="n">x1u</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="n">q</span><span class="o">.</span><span class="n">add_point_pd</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">q</span><span class="o">.</span><span class="n">add_distr_load_fixed_x</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">funcx</span><span class="o">=</span><span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="o">-</span><span class="n">E</span><span class="o">*</span><span class="n">h</span><span class="o">/</span><span class="n">a</span><span class="p">)</span>
+    <span class="n">mdq</span> <span class="o">=</span> <span class="n">MultiDomain</span><span class="p">([</span><span class="n">q</span><span class="p">],</span> <span class="n">conn</span><span class="o">=</span><span class="p">[],</span> <span class="n">pd_method</span><span class="o">=</span><span class="s1">'null-space'</span><span class="p">)</span>
+    <span class="n">eigvals_N</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">mdq</span><span class="o">.</span><span class="n">linear_buckling</span><span class="p">(</span><span class="n">num_eigvalues</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">eigvals</span><span class="p">,</span> <span class="n">eigvals_N</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1e-9</span><span class="p">)</span>
+    <span class="c1"># a constant end-shortening delta0 at x = a and an incremented one</span>
+    <span class="c1"># lbd*delta1 at x = 0 give the same uniform state when delta0 + lbd*delta1</span>
+    <span class="c1"># is the critical one</span>
+    <span class="n">dcr</span> <span class="o">=</span> <span class="n">eigvals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">clear_disps</span><span class="p">()</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_distr_pd_fixed_x</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="n">ku</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">funcu</span><span class="o">=</span><span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="n">dcr</span><span class="p">,</span> <span class="n">cte</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_distr_pd_fixed_x</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">ku</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">funcu</span><span class="o">=</span><span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">dcr</span><span class="p">,</span> <span class="n">cte</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_point_pd</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">eigvals_mixed</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">linear_buckling</span><span class="p">(</span><span class="n">num_eigvalues</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">eigvals_mixed</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">)</span>
+    <span class="c1"># the same end-shortening, constant and incremented at the same line,</span>
+    <span class="c1"># is a conflict: the line has a single prescribed value</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">clear_disps</span><span class="p">()</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_distr_pd_fixed_x</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">ku</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">funcu</span><span class="o">=</span><span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">dcr</span><span class="p">,</span> <span class="n">cte</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_distr_pd_fixed_x</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">ku</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">funcu</span><span class="o">=</span><span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="o">-</span><span class="n">dcr</span><span class="p">,</span> <span class="n">cte</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="n">match</span><span class="o">=</span><span class="s1">'each set must be consistent'</span><span class="p">):</span>
+        <span class="n">md</span><span class="o">.</span><span class="n">get_cp</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>More examples are given in <a class="reference internal" href="ex_prescribed_displacements.html#ex-prescribed-displacements"><span class="std std-ref">Prescribed displacements</span></a>.</p>
+</section>
+<section id="face-clamped-edges">
+<span id="boundary-conditions-face-clamp"></span><h2>Face-clamped edges<a class="headerlink" href="#face-clamped-edges" title="Link to this heading">#</a></h2>
+<p>In tests, an edge is clamped by restraining the displacements of the bottom
+and top faces of the laminate, <span class="math notranslate nohighlight">\(z = d \mp h/2\)</span>, the section being free to
+deform in between. This face clamp, <span class="math notranslate nohighlight">\(u = v = 0\)</span> at both faces and <span class="math notranslate nohighlight">\(w = 0\)</span>,
+is prescribed with the keyword <code class="docutils literal notranslate"><span class="pre">z</span></code> of <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_distr_pd_fixed_x()</span></code>
+and <code class="xref py py-meth docutils literal notranslate"><span class="pre">Shell.add_distr_pd_fixed_y()</span></code>; the flags of the edge are left
+free, <code class="docutils literal notranslate"><span class="pre">1</span></code>. With the in-plane displacement at <span class="math notranslate nohighlight">\(z\)</span>, see
+<code class="xref py py-func docutils literal notranslate"><span class="pre">nullspace.pd_constraint_matrix()</span></code>,</p>
+<div class="math notranslate nohighlight">
+\[u(z) = u + \left(z - c_1 g(z)\right) \phi_x - c_1 g(z) w_{,x}, \qquad
+g(z) = (z - d)^3 + d^3\]</div>
+<p>with <span class="math notranslate nohighlight">\(c_1 = 4/(3 h^2)\)</span> for the TSDT and <span class="math notranslate nohighlight">\(c_1 = 0\)</span> for the FSDT, the two
+faces give <span class="math notranslate nohighlight">\(u = \phi_x = 0\)</span> for the FSDT, and <span class="math notranslate nohighlight">\(u = w_{,x} = 0\)</span> for the CLPT,
+<span class="math notranslate nohighlight">\(u(z) = u - z w_{,x}\)</span>: the face clamp is the clamp of the flags. For the TSDT
+the difference of the two faces gives <span class="math notranslate nohighlight">\((h/3)(2 \phi_x - w_{,x}) = 0\)</span> and
+their sum <span class="math notranslate nohighlight">\(u = -(d/2)(1 - 4 d^2/h^2) w_{,x}\)</span>, two conditions instead of the
+three of the planar clamp; the section warps,</p>
+<div class="math notranslate nohighlight">
+\[u(z) = \frac{w_{,x}}{2} \zeta \left(1 - \frac{4 \zeta^2}{h^2}\right),
+\qquad \zeta = z - d\]</div>
+<p>which no combination of flags can express. Along the edge <span class="math notranslate nohighlight">\(w = 0\)</span> gives
+<span class="math notranslate nohighlight">\(w_{,y} = 0\)</span>, and the two faces then give <span class="math notranslate nohighlight">\(v = \phi_y = 0\)</span>. The edge is
+softer than the planar clamp and stiffer than the simple support, and,
+being defined by the physical faces, it does not depend on the reference
+surface. See the example <a class="reference internal" href="ex_face_clamp.html#ex-face-clamp"><span class="std std-ref">Clamped and face-clamped edges</span></a>.</p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="bardell.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Bardell’s hierarchical functions</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="loads.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Loads</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flags-of-the-edges">Flags of the edges</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prescribed-displacements">Prescribed displacements</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#face-clamped-edges">Face-clamped edges</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="_sources/boundary_conditions.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2012-2026, Saullo G. P. Castro, Nathan D&#39;Souza.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.2.0.
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.23.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
