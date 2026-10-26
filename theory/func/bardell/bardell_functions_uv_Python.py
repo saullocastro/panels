@@ -33,7 +33,7 @@ with open('./output_bardell_functions_uv.py', 'w') as f:
         f.write('        return %s\n' % (pycode(u[i])))
     f.write('\n')
     f.write('\n\n')
-    f.write('def fduv_dxi(xi, i, xi1t, xi2t):\n')
+    f.write('def fuv_xi(xi, i, xi1t, xi2t):\n')
     f.write('    if i == 0:\n')
     f.write('        return xi1t*(%s)\n' % pycode(diff(u[0], xi)))
     f.write('    elif i == 1:\n')

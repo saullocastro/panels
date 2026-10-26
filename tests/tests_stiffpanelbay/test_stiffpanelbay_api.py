@@ -400,7 +400,12 @@ def test_calc_fext_flange_point_load():
 
 @pytest.mark.parametrize('flow', ['x', 'y'])
 def test_calc_kA_matches_single_shell(flow):
-    """Splitting the skin into panels must not change kA"""
+    r"""Splitting the skin into panels must not change kA
+
+    With `w = 0` along the four edges the boundary terms of `\int N_i
+    N_{k,x} dx` vanish and the matrix is skew-symmetric.
+
+    """
     bay = _bay()
     bay.flow = flow
     bay.beta = 1.3
@@ -410,11 +415,69 @@ def test_calc_kA_matches_single_shell(flow):
     s.beta = 1.3
     s.gamma = 0.
     kA_s = s.calc_kA(finalize=False)
-    from structsolve.sparseutils import make_skew_symmetric
-    kA_s = make_skew_symmetric(kA_s)
     assert kA.shape == (bay.get_size(), bay.get_size())
     assert abs(kA - kA_s).max() <= 1e-8*abs(kA_s).max()
     assert abs(kA + kA.T).max() <= 1e-12*abs(kA).max()
+
+
+def _free_edge_bay():
+    """One-panel bay with the edge x = a free"""
+    bay = StiffPanelBay()
+    bay.a = 2*b
+    bay.b = b
+    bay.r = None
+    bay.model = 'plate_clpt_donnell'
+    bay.stack = stack
+    bay.plyt = plyt
+    bay.laminaprop = laminaprop
+    bay.rho = 1600.
+    bay.m = bay.n = 8
+    for d in 'uvw':
+        setattr(bay, 'x2' + d, 1.)
+        setattr(bay, 'x2' + d + 'r', 1.)
+    bay.add_panel(0, b)
+    return bay
+
+
+def _cylinder_bay():
+    r"""One-panel bay of a cylindrical panel, `\gamma \neq 0`"""
+    bay = StiffPanelBay()
+    bay.a = 2*b
+    bay.b = b
+    bay.r = 2*b
+    bay.model = 'cylshell_clpt_donnell'
+    bay.stack = stack
+    bay.plyt = plyt
+    bay.laminaprop = laminaprop
+    bay.rho = 1600.
+    bay.m = bay.n = 8
+    bay.add_panel(0, b)
+    return bay
+
+
+@pytest.mark.parametrize('case', ['free_edge', 'cylinder'])
+def test_calc_kA_is_the_sum_of_the_panels(case):
+    r"""The aerodynamic matrix of a one-panel bay is that of the panel
+
+    The virtual work of the load `\beta w_{,x} + \gamma w` of the piston
+    theory gives the matrix of :meth:`.Shell.calc_kA`, which is not
+    skew-symmetric when `w \neq 0` along an edge normal to the flow, or
+    with the symmetric term in `\gamma` of a cylinder.
+
+    """
+    bay = _free_edge_bay() if case == 'free_edge' else _cylinder_bay()
+    bay.flow = 'x'
+    bay.beta = 1.3
+    bay.gamma = 0.7 if case == 'cylinder' else None
+    kA = bay.calc_kA(silent=True)
+    s = _shell(bay)
+    s.flow = 'x'
+    s.beta = 1.3
+    s.gamma = bay.gamma
+    kA_s = s.calc_kA(finalize=False)
+    assert abs(kA_s + kA_s.T).max() > 1e-3*abs(kA_s).max()
+    assert kA.shape == kA_s.shape
+    assert abs(kA - kA_s).max() <= 1e-12*abs(kA_s).max()
 
 
 def test_calc_kA_from_Mach():
@@ -445,3 +508,33 @@ def test_calc_cA_matches_single_shell():
     cA_s = _shell(bay).calc_cA(2.5, size=bay.get_size())
     assert abs(cA - cA_s).max() == 0
     assert abs(cA).max() > 0
+
+
+def test_bladestiff1d_without_flange_is_bladestiff2d_padup():
+    """A base-only BladeStiff1D needs no flange width ``bf``
+
+    Without flange both blade formulations reduce to the same base, a
+    :class:`.Shell` offset below the skin over the width ``bb``, so their
+    matrices must be identical.
+
+    """
+    bay1d = _bay()
+    bay1d.add_bladestiff1d(ys=b/2, bb=10*tskin, bstack=stack, bplyt=plyt,
+                           blaminaprop=laminaprop)
+    s = bay1d.bladestiff1ds[0]
+    assert s.flam is None
+    assert s.dbf is None and s.Iyy is None and s.Jxx is None
+    bay2d = _padup_bay()
+    assert bay1d.get_size() == bay2d.get_size()
+    for name in ('calc_kC', 'calc_kG', 'calc_kM'):
+        k1d = getattr(bay1d, name)(silent=True)
+        k2d = getattr(bay2d, name)(silent=True)
+        assert abs(k1d - k2d).max() <= 1e-12*abs(k2d).max(), name
+    assert abs(bay1d.calc_kC(silent=True) - _bay().calc_kC(silent=True)).max() > 0
+
+
+def test_bladestiff1d_flange_requires_bf():
+    bay = _bay()
+    with pytest.raises(ValueError, match='bf'):
+        bay.add_bladestiff1d(ys=b/2, fstack=stack, fplyt=plyt,
+                             flaminaprop=laminaprop)

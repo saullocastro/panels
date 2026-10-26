@@ -46,7 +46,7 @@ def fkCf(double ys, double a, double b, double bf, double df, double E1, double 
     cdef double fAuxifBuxi, fAuxifBwxixi, fAuxifBwxi, fAwxixifBuxi
     cdef double fAwxifBuxi, fAwxifBwxi, fAwxifBwxixi, fAwxixifBwxi
     cdef double fAwxixifBwxixi
-    cdef double gAu, gBu, gAw, gBw, gAweta, gBweta
+    cdef double gAu, gBu, gAw, gBw, gAw_eta, gBw_eta
 
     cdef long [:] k0fr, k0fc
     cdef double [:] k0fv
@@ -85,7 +85,7 @@ def fkCf(double ys, double a, double b, double bf, double df, double E1, double 
                 for j in range(n):
                     gAu = gtab[0, j]
                     gAw = gtab[1, j]
-                    gAweta = gtab[2, j]
+                    gAw_eta = gtab[2, j]
 
                     for l in range(n):
 
@@ -98,7 +98,7 @@ def fkCf(double ys, double a, double b, double bf, double df, double E1, double 
 
                         gBu = gtab[0, l]
                         gBw = gtab[1, l]
-                        gBweta = gtab[2, l]
+                        gBw_eta = gtab[2, l]
 
                         c += 1
                         k0fr[c] = row+0
@@ -107,15 +107,15 @@ def fkCf(double ys, double a, double b, double bf, double df, double E1, double 
                         c += 1
                         k0fr[c] = row+0
                         k0fc[c] = col+2
-                        k0fv[c] += 0.5*a*bf*(8*E1*df*fAuxifBwxixi*gAu*gBw/(a*a*a) - 8*S1*fAuxifBwxi*gAu*gBweta/((a*a)*b))
+                        k0fv[c] += 0.5*a*bf*(8*E1*df*fAuxifBwxixi*gAu*gBw/(a*a*a) - 8*S1*fAuxifBwxi*gAu*gBw_eta/((a*a)*b))
                         c += 1
                         k0fr[c] = row+2
                         k0fc[c] = col+0
-                        k0fv[c] += bf*gBu*(4*E1*df*fAwxixifBuxi*gAw/(a*a) - 4*S1*fAwxifBuxi*gAweta/(a*b))
+                        k0fv[c] += bf*gBu*(4*E1*df*fAwxixifBuxi*gAw/(a*a) - 4*S1*fAwxifBuxi*gAw_eta/(a*b))
                         c += 1
                         k0fr[c] = row+2
                         k0fc[c] = col+2
-                        k0fv[c] += 0.5*a*bf*(-4*gBweta*(-4*Jxx*fAwxifBwxi*gAweta/(a*b) + 4*S1*df*fAwxixifBwxi*gAw/(a*a))/(a*b) - 4*gBw*(4*S1*df*fAwxifBwxixi*gAweta/(a*b) + fAwxixifBwxixi*gAw*(-4*E1*(df*df) - 4*F1)/(a*a))/(a*a))
+                        k0fv[c] += 0.5*a*bf*(-4*gBw_eta*(-4*Jxx*fAwxifBwxi*gAw_eta/(a*b) + 4*S1*df*fAwxixifBwxi*gAw/(a*a))/(a*b) - 4*gBw*(4*S1*df*fAwxifBwxixi*gAw_eta/(a*b) + fAwxixifBwxixi*gAw*(-4*E1*(df*df) - 4*F1)/(a*a))/(a*a))
 
     k0f = coo_matrix((k0fv, (k0fr, k0fc)), shape=(size, size))
 
@@ -199,12 +199,12 @@ def fkMf(double ys, double rho, double h, double hb, double hf, double a,
     mass matrix is:
 
     .. math::
-        [M_{sf}] = \rho h_f b_f \int_x [S(x, y_s)]^T [k_{mf}] [S(x, y_s)] dx
+        \boldsymbol{M}_{sf} = \rho h_f b_f \int_x \boldsymbol{S}(x, y_s)^\top \boldsymbol{k}_{mf} \boldsymbol{S}(x, y_s) dx
 
-    where `[S]` gives `\{u, v, w, \phi_x, \phi_y\}^T` and
+    where `\boldsymbol{S}` gives `\{u, v, w, \phi_x, \phi_y\}^\top` and
 
     .. math::
-        [k_{mf}] = \begin{bmatrix}
+        \boldsymbol{k}_{mf} = \begin{bmatrix}
                    1 & 0 & 0 & -d_f & 0 \\
                    0 & 1 & 0 & 0 & -d_f \\
                    0 & 0 & 1 & 0 & 0 \\
@@ -220,13 +220,13 @@ def fkMf(double ys, double rho, double h, double hb, double hf, double a,
     ``theory/multidomain_panels/bladestiff1d_clt_donnell/``.
 
     .. note:: Correction with respect to Eq. (26) of Castro et al. (2016)
-              [castro2016FlutterPanel]_, whose matrix `[k_{mf}]` has `-2
+              [castro2016FlutterPanel]_, whose matrix `\boldsymbol{k}_{mf}` has `-2
               d_f` in the terms coupling the displacements `u, v` and the
               rotations `\phi_x, \phi_y`. The in-plane displacements of the
               flange at its centroid are `u - d_f \phi_x` and `v - d_f
               \phi_y`, and the term `-2 d_f u \phi_x` of `(u - d_f
               \phi_x)^2` is shared by the two symmetric entries `(1, 4)` and
-              `(4, 1)` of `[k_{mf}]`, which are then `-d_f`, consistent with
+              `(4, 1)` of `\boldsymbol{k}_{mf}`, which are then `-d_f`, consistent with
               the term `d_f^2` of `k_{mf44}` and with the offset of the mass
               matrix of the shells. Up to version 0.7.1 this kernel used `-2
               d_f`, doubling the inertial coupling between the flange and the
@@ -265,7 +265,7 @@ def fkMf(double ys, double rho, double h, double hb, double hf, double a,
     cdef double [:, ::1] gtab
     cdef double fAufBu, fAufBwxi, fAvfBv, fAvfBw, fAwxifBu, fAwfBv, fAwfBw
     cdef double fAwxifBwxi
-    cdef double gAu, gBu, gAv, gBv, gAw, gBw, gAweta, gBweta
+    cdef double gAu, gBu, gAv, gBv, gAw, gBw, gAw_eta, gBw_eta
 
     cdef int i, k, j, l, c, row, col
     cdef double eta
@@ -310,7 +310,7 @@ def fkMf(double ys, double rho, double h, double hb, double hf, double a,
                     gAu = gtab[0, j]
                     gAv = gtab[1, j]
                     gAw = gtab[2, j]
-                    gAweta = gtab[3, j]
+                    gAw_eta = gtab[3, j]
 
                     for l in range(n):
 
@@ -324,7 +324,7 @@ def fkMf(double ys, double rho, double h, double hb, double hf, double a,
                         gBu = gtab[0, l]
                         gBv = gtab[1, l]
                         gBw = gtab[2, l]
-                        gBweta = gtab[3, l]
+                        gBw_eta = gtab[3, l]
 
                         c += 1
                         kMfr[c] = row+0
@@ -341,7 +341,7 @@ def fkMf(double ys, double rho, double h, double hb, double hf, double a,
                         c += 1
                         kMfr[c] = row+1
                         kMfc[c] = col+2
-                        kMfv[c] += a*bf*df*fAvfBw*gAv*gBweta*hf*rho/b
+                        kMfv[c] += a*bf*df*fAvfBw*gAv*gBw_eta*hf*rho/b
                         c += 1
                         kMfr[c] = row+2
                         kMfc[c] = col+0
@@ -349,11 +349,11 @@ def fkMf(double ys, double rho, double h, double hb, double hf, double a,
                         c += 1
                         kMfr[c] = row+2
                         kMfc[c] = col+1
-                        kMfv[c] += a*bf*df*fAwfBv*gAweta*gBv*hf*rho/b
+                        kMfv[c] += a*bf*df*fAwfBv*gAw_eta*gBv*hf*rho/b
                         c += 1
                         kMfr[c] = row+2
                         kMfc[c] = col+2
-                        kMfv[c] += 0.166666666666667*bf*hf*rho*((a*a)*fAwfBw*(3*(b*b)*gAw*gBw + gAweta*gBweta*(4*(bf*bf) + 6*bf*(h + 2*hb) + 3*(h + 2*hb)**2)) + (b*b)*fAwxifBwxi*gAw*gBw*(4*(bf*bf) + 6*bf*(h + 2*hb) + 3*(h + 2*hb)**2))/(a*(b*b))
+                        kMfv[c] += 0.166666666666667*bf*hf*rho*((a*a)*fAwfBw*(3*(b*b)*gAw*gBw + gAw_eta*gBw_eta*(4*(bf*bf) + 6*bf*(h + 2*hb) + 3*(h + 2*hb)**2)) + (b*b)*fAwxifBwxi*gAw*gBw*(4*(bf*bf) + 6*bf*(h + 2*hb) + 3*(h + 2*hb)**2))/(a*(b*b))
 
     kMf = coo_matrix((kMfv, (kMfr, kMfc)), shape=(size, size))
 

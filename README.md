@@ -29,7 +29,7 @@ The structural matrices are solved with
 Citing this library
 ===================
 
-Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.13.11). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
+Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.14.0). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
 
 
 Documentation
@@ -117,6 +117,12 @@ History
 =======
 
 See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
+* version 0.14.0 (2026-10-26)
+    - BUG: the mass matrices used `shell.rho` in the closed-form kernels and the opposite sign of the laminate offset; they now use the moments of the density of the laminate, exact for per-ply densities
+    - BUG: TSDT with a laminate offset, the transverse shear vanishes at the faces of the laminate, and the connections tie the rotations at the common reference surface
+    - BUG: `BladeStiff1D` torsion with `GJ = 4 bf D66` and coupling `S1` with the condensed stiffness about the mid-plane of the flange; `StiffPanelBay.calc_kA` no longer skew-symmetrizes; one load per panel in the cylinder assembly functions; `MultiDomain.force_out_plane` and `MultiDomain.plot` fixed
+    - Documentation of the theory in the docstrings, new page on the TSDT with an offset, validation notebook of the snap-through of a shallow circular arch (Fung and Kaplan, 1952)
+    - Requires `composites>=0.10.0` and `structsolve>=0.9.3`, whose residual is `R = F_int - F_ext`, as in the documentation of `panels`, and whose arc-length steps no longer double back along the path (since 0.9.2)
 * version 0.13.11 (2026-10-16)
     - BUG: the analytical constitutive stiffness matrix of the CLPT models ignored `force_orthotropic_laminate`, inconsistently with the internal forces and the numerical matrices
     - `Shell.ABD` is calculated from the laminate and read-only; new attribute `Shell.ABDnxny` for a stiffness that is not that of the laminate, constant or one matrix per integration point, used by all the kernels, also within a `MultiDomain`, and by `Shell.stress()`, and checked to have symmetric blocks as any laminate; new `Shell.integration_points()`
@@ -129,7 +135,7 @@ See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
     - Maintenance: `.gitignore` without the runs of `thesis_timing.py`
     - Requires `structsolve>=0.8.0`
 * version 0.12.0 (2026-10-14)
-    - Prescribed displacements imposed exactly with the null-space method, `MultiDomain(..., pd_method='null-space')`, as inhomogeneous linear constraints `c = T c_r + c_p0 + lbd*c_p1`: linear static, linear buckling, Newton-Raphson and arc-length analyses under displacement control, reactions `MultiDomain.reaction_pd()` and `MultiDomain.reaction_resultant()`, also for a single `Shell`; prescribed rotations; the penalty method remains the default
+    - Prescribed displacements imposed exactly with the null-space method, `MultiDomain(..., pd_method='null-space')`, as inhomogeneous linear constraints `c = Z c_r + c_p0 + lbd*c_p1`: linear static, linear buckling, Newton-Raphson and arc-length analyses under displacement control, reactions `MultiDomain.reaction_pd()` and `MultiDomain.reaction_resultant()`, also for a single `Shell`; prescribed rotations; the penalty method remains the default
     - BUG: `fkCld_xcte` and `fkCld_ycte` placed the penalty stiffnesses of `ku` and `kv` at the rows and columns of `w`
     - Requires `structsolve>=0.7.0`
 * version 0.11.1 (2026-10-08)

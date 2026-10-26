@@ -6,15 +6,15 @@ Tangent stiffness matrix and its product by a vector
 This page documents how the internal force vector and its exact Jacobian,
 the tangent stiffness matrix, are implemented:
 
-- :ref:`tangent_clpt_donnell` derives `\{F_{int}\}` and `[K_T]` of the
+- :ref:`tangent_clpt_donnell` derives `\boldsymbol{F}_{int}` and `\boldsymbol{K}_T` of the
   models ``plate_clpt_donnell`` and ``cylshell_clpt_donnell`` and relates
   every term to the function of the implementation that evaluates it,
   including the two integration paths, the grouping of the terms between
   :meth:`.Shell.calc_kC` and :meth:`.Shell.calc_kG`, and the multi-domain
   assembly;
-- :ref:`tangent_kTv` derives the product `[K_T(c)] \{v\}` for all the
+- :ref:`tangent_kTv` derives the product `\boldsymbol{K}_T(\boldsymbol{c}) \boldsymbol{v}` for all the
   geometrically non-linear models, :meth:`.Shell.calc_kTv`, evaluated without
-  assembling `[K_T]`.
+  assembling `\boldsymbol{K}_T`.
 
 .. _tangent_clpt_donnell:
 
@@ -34,26 +34,25 @@ force vector,
 .. math::
     :label: donnell-KT-definition
 
-    \boldsymbol{K}_T(\bar{\boldsymbol{c}}) = \frac{\partial
-    \boldsymbol{F}_{int}}{\partial \bar{\boldsymbol{c}}}
+    \boldsymbol{K}_T(\boldsymbol{c}) = \frac{\partial
+    \boldsymbol{F}_{int}}{\partial \boldsymbol{c}}
 
 which is what delivers the quadratic convergence of the Newton-Raphson
-iterations `\boldsymbol{K}_T(\bar{\boldsymbol{c}}_k) \Delta
-\bar{\boldsymbol{c}} = \boldsymbol{F}_{ext} -
-\boldsymbol{F}_{int}(\bar{\boldsymbol{c}}_k)`, see
-:doc:`ex_newton_raphson`. In the notation of
-:ref:`tangent_kTv`, `[B(\beta)] = \boldsymbol{B}_L +
-\boldsymbol{B}_{NL}`, `[G] = \boldsymbol{G}` and `[F] = \boldsymbol{C}`.
+iterations `\boldsymbol{K}_T(\boldsymbol{c}_k) \Delta
+\boldsymbol{c} = \boldsymbol{F}_{ext} -
+\boldsymbol{F}_{int}(\boldsymbol{c}_k)`, see
+:doc:`ex_newton_raphson`. :ref:`tangent_kTv` uses the same notation, with
+the membrane stresses `\tilde{\boldsymbol{N}}` of :eq:`donnell-KG`.
 
 The tangent stiffness matrix is classically decomposed as
 
 .. math::
     :label: donnell-KT-classical
 
-    \boldsymbol{K}_T = \boldsymbol{K}_0 + \boldsymbol{K}_{0L} +
+    \boldsymbol{K}_T = \boldsymbol{K}_{C0} + \boldsymbol{K}_{0L} +
     \boldsymbol{K}_{L0} + \boldsymbol{K}_{LL} + \boldsymbol{K}_G(\boldsymbol{N})
 
-with the constitutive matrices `\boldsymbol{K}_0` to `\boldsymbol{K}_{LL}`
+with the constitutive matrices `\boldsymbol{K}_{C0}` to `\boldsymbol{K}_{LL}`
 and the geometric stiffness `\boldsymbol{K}_G` of the membrane stress
 `\boldsymbol{N}`, see :eq:`donnell-K-groups` and :eq:`donnell-KG`. The
 implementation is organised around a three-way split:
@@ -61,11 +60,17 @@ implementation is organised around a three-way split:
 .. math::
     :label: donnell-KT-split
 
-    \boldsymbol{K}_T(\bar{\boldsymbol{c}}) = \boldsymbol{K}_{C0} +
-    \boldsymbol{K}_{CNL}(\bar{\boldsymbol{c}}) +
-    \boldsymbol{K}_G(\bar{\boldsymbol{c}})
+    \boldsymbol{K}_T(\boldsymbol{c}) = \boldsymbol{K}_{C0} +
+    \left( \boldsymbol{K}_{CNL}(\boldsymbol{c}) +
+    \boldsymbol{K}_{GNL}(\boldsymbol{c}) \right) +
+    \boldsymbol{K}_G(\boldsymbol{c})
 
-whose relation to the grouping of the implementation, stated in a comment
+with the non-linear constitutive stiffness matrix `\boldsymbol{K}_{CNL} =
+\boldsymbol{K}_{0L} + \boldsymbol{K}_{L0} + \boldsymbol{K}_{LL}`, the
+geometric stiffness `\boldsymbol{K}_{GNL}` of the membrane stress of the
+non-linear strains, see :eq:`donnell-KGNL`, and `\boldsymbol{K}_G(\boldsymbol{c})`
+that of the remaining membrane stress, see :eq:`donnell-grouping`. Its
+relation to the grouping of the implementation, stated in a comment
 of ``fkC_num`` in ``plate_clpt_donnell_num.pyx`` and in its cylindrical
 twin, is established in :ref:`tangent_clpt_donnell_grouping` and tabulated
 in :ref:`tangent_clpt_donnell_mapping`. The correspondence is not a
@@ -85,11 +90,11 @@ under the keys ``matrices`` and ``matrices_num``:
 - The **closed-form path**, ``matrices``, integrates the full domain
   analytically. The integrals of products of the approximation functions
   are evaluated in closed form, and the resulting matrices are constant
-  with respect to `\bar{\boldsymbol{c}}`. It provides ``fk0`` and
+  with respect to `\boldsymbol{c}`. It provides ``fk0`` and
   ``fkG0`` of ``plate_clpt_donnell.pyx`` and ``cylshell_clpt_donnell.pyx``.
 - The **numerically integrated path**, ``matrices_num``, applies a
   Gauss-Legendre rule over `n_x \times n_y` points, and is the only path
-  that can honour a displacement state `\bar{\boldsymbol{c}}`, a laminate
+  that can honour a displacement state `\boldsymbol{c}`, a laminate
   stiffness varying over the domain, or a partial integration domain. It
   provides ``fkC_num``, ``fkG_num`` and ``calc_fint`` of
   ``plate_clpt_donnell_num.pyx`` and ``cylshell_clpt_donnell_num.pyx``.
@@ -129,7 +134,7 @@ explicitly:
 - Conversely, the closed-form path is reached only for `\boldsymbol{K}_{C0}`
   and for `\boldsymbol{K}_G` evaluated at a uniform prescribed membrane
   stress state, i.e. for a linear static analysis and for the classical
-  linear buckling problem `(\boldsymbol{K}_0 + \lambda \boldsymbol{K}_G)
+  linear buckling problem `(\boldsymbol{K}_{C0} + \lambda \boldsymbol{K}_G)
   \boldsymbol{q} = \boldsymbol{0}`, over a full domain with a constant
   laminate.
 
@@ -182,22 +187,22 @@ notation:
 
 .. math::
 
-    u = \boldsymbol{S}^u \bar{\boldsymbol{c}} \qquad v = \boldsymbol{S}^v
-    \bar{\boldsymbol{c}} \qquad w = \boldsymbol{S}^w \bar{\boldsymbol{c}}
+    u = \boldsymbol{S}^u \boldsymbol{c} \qquad v = \boldsymbol{S}^v
+    \boldsymbol{c} \qquad w = \boldsymbol{S}^w \boldsymbol{c}
 
 with the alternated ordering of the degrees of freedom:
 
 .. math::
 
-    \bar{\boldsymbol{c}} = \left\{ c_{11}^u \quad c_{11}^v \quad c_{11}^w
+    \boldsymbol{c} = \left\{ c_{11}^u \quad c_{11}^v \quad c_{11}^w
     \quad c_{21}^u \quad c_{21}^v \quad c_{21}^w \quad \cdots \quad
     c_{mn}^u \quad c_{mn}^v \quad c_{mn}^w \right\}^\top
 
 such that, using zero-based indices `i` and `j`, the coefficients
 `c_{ij}^u`, `c_{ij}^v` and `c_{ij}^w` occupy the positions `3(jm+i)`,
-`3(jm+i)+1` and `3(jm+i)+2` of `\bar{\boldsymbol{c}}`. This is the mapping
+`3(jm+i)+1` and `3(jm+i)+2` of `\boldsymbol{c}`. This is the mapping
 ``col = col0 + DOF*(j*m + i)`` with ``DOF = 3`` of the kernels, and the
-size of `\bar{\boldsymbol{c}}` is `3mn`, see :meth:`.Shell.get_size`. The
+size of `\boldsymbol{c}` is `3mn`, see :meth:`.Shell.get_size`. The
 only non-zero components of `\boldsymbol{S}^u`, `\boldsymbol{S}^v` and
 `\boldsymbol{S}^w` are:
 
@@ -217,7 +222,7 @@ and, for instance:
 
 Throughout the kernels, the pair of indices `(i,j)` names the row term,
 denoted `A`, and `(k,l)` names the column term, denoted `B`; the variables
-``fAw``, ``gAweta``, ``fBwxi`` and so forth follow that convention, read
+``fAw``, ``gAw_eta``, ``fBw_xi`` and so forth follow that convention, read
 from the tables of the approximation functions evaluated once per
 integration point, see :ref:`tabulation`. Only the upper triangle is
 assembled, the lower one being recovered by ``finalize_symmetric_matrix``
@@ -251,7 +256,7 @@ the plate kinematics of von Kármán are recovered by making `1/r = 0`:
 :eq:`donnell-strains` is the strain state assembled term by term in
 ``calc_fint`` of ``cylshell_clpt_donnell_num.pyx``, where the hoop term
 appears as ``1./r*cs[col+2]*fAw*gAw`` and the von Kármán contributions as
-the products with ``wxi`` and ``weta``. The plate, ``calc_fint`` of
+the products with ``w_xi`` and ``w_eta``. The plate, ``calc_fint`` of
 ``plate_clpt_donnell_num.pyx``, differs from it in exactly one place, the
 absence of that hoop term in ``eyy``; the five remaining strain components
 are character for character identical. The same single-term difference
@@ -296,11 +301,11 @@ normalised to zero, the value the remaining code compares against. There
 Numerically, the convergence of the cylinder towards the plate is first
 order in `1/r`, as expected from :eq:`donnell-strains`, where the hoop term
 enters linearly. Comparing the two implementations on the same
-`\bar{\boldsymbol{c}}`, with `a = 0.3` m, `b = 0.2` m, `m = n = 4` and an
+`\boldsymbol{c}`, with `a = 0.3` m, `b = 0.2` m, `m = n = 4` and an
 unsymmetric laminate, gives the relative differences:
 
 .. list-table:: Relative difference between the cylindrical and the plate
-                kernels as the radius grows, at a fixed `\bar{\boldsymbol{c}}`
+                kernels as the radius grows, at a fixed `\boldsymbol{c}`
     :header-rows: 1
 
     * - `r` [m]
@@ -366,7 +371,7 @@ Linear and non-linear differentiation operators
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The linear part of :eq:`donnell-strains` is written as
-`\hat{\boldsymbol{\varepsilon}}_L = \boldsymbol{B}_L \bar{\boldsymbol{c}}`,
+`\hat{\boldsymbol{\varepsilon}}_L = \boldsymbol{B}_L \boldsymbol{c}`,
 with:
 
 .. math::
@@ -395,9 +400,9 @@ For the non-linear part, it is convenient to define the operator
     \end{bmatrix} = \begin{bmatrix} \boldsymbol{S}^w_{,x} \\
     \boldsymbol{S}^w_{,y} \end{bmatrix}
     \qquad
-    w_{,x} = \boldsymbol{G}_1 \bar{\boldsymbol{c}}
+    w_{,x} = \boldsymbol{G}_1 \boldsymbol{c}
     \qquad
-    w_{,y} = \boldsymbol{G}_2 \bar{\boldsymbol{c}}
+    w_{,y} = \boldsymbol{G}_2 \boldsymbol{c}
 
 :eq:`donnell-G` is the Donnell-Mushtari-Vlasov specialisation of the
 rotation operators: the Sanders-Koiter kinematics add the terms
@@ -411,18 +416,18 @@ the `1/r` term present in `\boldsymbol{B}_L` has no counterpart in
 `\boldsymbol{G}`.
 
 In the kernels, the slopes are accumulated in the natural coordinates as
-``wxi`` and ``weta``, in ``fkC_num`` and in ``calc_fint``, and converted as:
+``w_xi`` and ``w_eta``, in ``fkC_num`` and in ``calc_fint``, and converted as:
 
 .. math::
 
-    w_{,x} = \frac{2}{a}\,\texttt{wxi} \qquad w_{,y} = \frac{2}{b}\,\texttt{weta}
+    w_{,x} = \frac{2}{a}\,\texttt{w_xi} \qquad w_{,y} = \frac{2}{b}\,\texttt{w_eta}
 
 With :eq:`donnell-G`, the non-linear differentiation operator becomes:
 
 .. math::
     :label: donnell-BNL
 
-    \boldsymbol{B}_{NL}(\bar{\boldsymbol{c}}) = \begin{bmatrix}
+    \boldsymbol{B}_{NL}(\boldsymbol{c}) = \begin{bmatrix}
         w_{,x} \boldsymbol{G}_1 \\
         w_{,y} \boldsymbol{G}_2 \\
         w_{,y} \boldsymbol{G}_1 + w_{,x} \boldsymbol{G}_2 \\
@@ -434,23 +439,23 @@ which gives the strain and its variation:
 .. math::
     :label: donnell-strain-BNL
 
-    \hat{\boldsymbol{\varepsilon}} = \left( \boldsymbol{B}_L + \frac{1}{2}\boldsymbol{B}_{NL} \right) \bar{\boldsymbol{c}}
+    \hat{\boldsymbol{\varepsilon}} = \left( \boldsymbol{B}_L + \frac{1}{2}\boldsymbol{B}_{NL} \right) \boldsymbol{c}
     \qquad
-    \hat{\boldsymbol{\varepsilon}}_{NL} = \frac{1}{2}\boldsymbol{B}_{NL}\bar{\boldsymbol{c}} = \left\{ \begin{matrix}
+    \hat{\boldsymbol{\varepsilon}}_{NL} = \frac{1}{2}\boldsymbol{B}_{NL}\boldsymbol{c} = \left\{ \begin{matrix}
         \frac{1}{2} w_{,x}^2 \\[2pt] \frac{1}{2} w_{,y}^2 \\[2pt] w_{,x} w_{,y} \\[2pt] 0 \\ 0 \\ 0
     \end{matrix} \right\}
     \qquad
-    \delta \hat{\boldsymbol{\varepsilon}} = (\boldsymbol{B}_L + \boldsymbol{B}_{NL}) \delta\bar{\boldsymbol{c}}
+    \delta \hat{\boldsymbol{\varepsilon}} = (\boldsymbol{B}_L + \boldsymbol{B}_{NL}) \delta\boldsymbol{c}
 
 The factor `\frac{1}{2}` of :eq:`donnell-strain-BNL` applies to the shear
 row as well, and this is visible in the code as an asymmetry that is easy
 to mistake for an error: in the strains of ``calc_fint`` the two normal
 strains carry an explicit ``0.5`` whereas the shear strain does not. The
 reason is that the shear row of `\boldsymbol{B}_{NL}` already contains two
-terms, so `\frac{1}{2}\boldsymbol{B}_{NL}\bar{\boldsymbol{c}}` evaluates to
+terms, so `\frac{1}{2}\boldsymbol{B}_{NL}\boldsymbol{c}` evaluates to
 `\frac{1}{2}(2 w_{,x} w_{,y}) = w_{,x}w_{,y}`, which is what the single
 unscaled product in the code produces. Evaluating the non-linear shear
-strain as `\boldsymbol{B}_{NL}\bar{\boldsymbol{c}}` instead would give `2
+strain as `\boldsymbol{B}_{NL}\boldsymbol{c}` instead would give `2
 w_{,x} w_{,y}`. That error does not show in `\boldsymbol{B}_{NL}` itself,
 but it corrupts the stress state, and therefore the internal force vector
 and the geometric stiffness matrix, leaving a tangent stiffness matrix that
@@ -464,14 +469,14 @@ Internal force vector
 The internal force vector is the derivative of the strain energy, `U =
 \frac{1}{2} \int_{\mathcal{A}} \hat{\boldsymbol{\varepsilon}}^\top
 \boldsymbol{C} \hat{\boldsymbol{\varepsilon}} \, d\mathcal{A}`, integrated
-over the mid-surface, with respect to `\bar{\boldsymbol{c}}`:
+over the mid-surface, with respect to `\boldsymbol{c}`:
 
 .. math::
     :label: donnell-fint
 
-    \boldsymbol{F}_{int}(\bar{\boldsymbol{c}}) = \int_{\mathcal{A}} \left(
-    \boldsymbol{B}_L + \boldsymbol{B}_{NL}(\bar{\boldsymbol{c}})
-    \right)^\top \hat{\boldsymbol{\sigma}}(\bar{\boldsymbol{c}}) \,
+    \boldsymbol{F}_{int}(\boldsymbol{c}) = \int_{\mathcal{A}} \left(
+    \boldsymbol{B}_L + \boldsymbol{B}_{NL}(\boldsymbol{c})
+    \right)^\top \hat{\boldsymbol{\sigma}}(\boldsymbol{c}) \,
     d\mathcal{A}
 
 which gives, for the three degrees of freedom associated with the term
@@ -500,23 +505,23 @@ contribution from `\boldsymbol{B}_{NL}`, which is why they contain only
 Tangent stiffness matrix
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Differentiating :eq:`donnell-fint` with respect to `\bar{\boldsymbol{c}}`,
+Differentiating :eq:`donnell-fint` with respect to `\boldsymbol{c}`,
 :eq:`donnell-KT-definition`:
 
 .. math::
     :label: donnell-KT
 
-    \boldsymbol{K}_T = \frac{\partial \boldsymbol{F}_{int}}{\partial \bar{\boldsymbol{c}}}
-    = \underbrace{\int_{\mathcal{A}} (\boldsymbol{B}_L + \boldsymbol{B}_{NL})^\top \boldsymbol{C} (\boldsymbol{B}_L + \boldsymbol{B}_{NL}) \, d\mathcal{A}}_{\text{from } \partial \hat{\boldsymbol{\sigma}} / \partial \bar{\boldsymbol{c}}}
-    + \underbrace{\int_{\mathcal{A}} \frac{\partial \boldsymbol{B}_{NL}^\top}{\partial \bar{\boldsymbol{c}}} \hat{\boldsymbol{\sigma}} \, d\mathcal{A}}_{\text{from } \partial \boldsymbol{B}_{NL} / \partial \bar{\boldsymbol{c}}}
+    \boldsymbol{K}_T = \frac{\partial \boldsymbol{F}_{int}}{\partial \boldsymbol{c}}
+    = \underbrace{\int_{\mathcal{A}} (\boldsymbol{B}_L + \boldsymbol{B}_{NL})^\top \boldsymbol{C} (\boldsymbol{B}_L + \boldsymbol{B}_{NL}) \, d\mathcal{A}}_{\text{from } \partial \hat{\boldsymbol{\sigma}} / \partial \boldsymbol{c}}
+    + \underbrace{\int_{\mathcal{A}} \frac{\partial \boldsymbol{B}_{NL}^\top}{\partial \boldsymbol{c}} \hat{\boldsymbol{\sigma}} \, d\mathcal{A}}_{\text{from } \partial \boldsymbol{B}_{NL} / \partial \boldsymbol{c}}
 
 The first integral uses `\partial \hat{\boldsymbol{\sigma}} / \partial
-\bar{\boldsymbol{c}} = \boldsymbol{C}\,(\boldsymbol{B}_L +
+\boldsymbol{c} = \boldsymbol{C}\,(\boldsymbol{B}_L +
 \boldsymbol{B}_{NL})`, which follows from :eq:`donnell-strain-BNL` together
-with `\partial (\boldsymbol{B}_{NL}\bar{\boldsymbol{c}}) / \partial
-\bar{\boldsymbol{c}} = 2\boldsymbol{B}_{NL}`, itself a consequence of
+with `\partial (\boldsymbol{B}_{NL}\boldsymbol{c}) / \partial
+\boldsymbol{c} = 2\boldsymbol{B}_{NL}`, itself a consequence of
 `\boldsymbol{B}_{NL}` being homogeneous of degree one in
-`\bar{\boldsymbol{c}}`. The second integral is evaluated by writing
+`\boldsymbol{c}`. The second integral is evaluated by writing
 `\boldsymbol{B}_{NL}^\top \hat{\boldsymbol{\sigma}}` explicitly with
 :eq:`donnell-BNL`:
 
@@ -526,7 +531,7 @@ with `\partial (\boldsymbol{B}_{NL}\bar{\boldsymbol{c}}) / \partial
     \left( N_{xx} w_{,x} + N_{xy} w_{,y} \right) + \boldsymbol{G}_2^\top
     \left( N_{xy} w_{,x} + N_{yy} w_{,y} \right)
 
-and differentiating with respect to `\bar{\boldsymbol{c}}` at a fixed stress
+and differentiating with respect to `\boldsymbol{c}` at a fixed stress
 state, using :eq:`donnell-G`:
 
 .. math::
@@ -566,7 +571,7 @@ groups of :eq:`donnell-KT-classical`:
 .. math::
     :label: donnell-K-groups
 
-    \boldsymbol{K}_0 = \int_{\mathcal{A}} \boldsymbol{B}_L^\top \boldsymbol{C} \boldsymbol{B}_L \, d\mathcal{A} \qquad
+    \boldsymbol{K}_{C0} = \int_{\mathcal{A}} \boldsymbol{B}_L^\top \boldsymbol{C} \boldsymbol{B}_L \, d\mathcal{A} \qquad
     \boldsymbol{K}_{0L} = \int_{\mathcal{A}} \boldsymbol{B}_L^\top \boldsymbol{C} \boldsymbol{B}_{NL} \, d\mathcal{A} \qquad
     \boldsymbol{K}_{L0} = \boldsymbol{K}_{0L}^\top \qquad
     \boldsymbol{K}_{LL} = \int_{\mathcal{A}} \boldsymbol{B}_{NL}^\top \boldsymbol{C} \boldsymbol{B}_{NL} \, d\mathcal{A}
@@ -577,7 +582,7 @@ strain that produces it:
 .. math::
     :label: donnell-N-split
 
-    \boldsymbol{N} = \boldsymbol{N}^0 + \boldsymbol{N}_L + \boldsymbol{N}_{NL}
+    \boldsymbol{N} = \bar{\boldsymbol{N}} + \boldsymbol{N}_L + \boldsymbol{N}_{NL}
     \qquad
     \boldsymbol{N}_L = \boldsymbol{A}\boldsymbol{\varepsilon}^{(0)}_L + \boldsymbol{B}\boldsymbol{\varepsilon}^{(1)}
     \qquad
@@ -585,11 +590,11 @@ strain that produces it:
     w_{,x}^2 \\[2pt] \frac{1}{2} w_{,y}^2 \\[2pt] w_{,x} w_{,y} \end{matrix}
     \right\}
 
-where `\boldsymbol{N}^0` is an optional prescribed pre-stress, used for
+where `\bar{\boldsymbol{N}}` is an optional prescribed pre-stress, used for
 instance to superpose combined load cases, see ``c_cte`` and ``Nxx_cte``,
 ``Nyy_cte``, ``Nxy_cte`` in :meth:`.Shell.calc_kC`, and `\boldsymbol{B}` does
 not contribute to `\boldsymbol{N}_{NL}` because `\boldsymbol{\varepsilon}^{(1)}`
-is linear for the CLPT. In the code, `\boldsymbol{N}^0 + \boldsymbol{N}_L`
+is linear for the CLPT. In the code, `\bar{\boldsymbol{N}} + \boldsymbol{N}_L`
 is computed in ``fkG_num``, from the arguments ``Nxx0, Nyy0, Nxy0`` and from
 the linear strains of :eq:`donnell-BL`; and `\boldsymbol{N}_{NL}` is
 computed separately, in ``fkC_num``, as ``NxxNL, NyyNL, NxyNL``, where the
@@ -599,12 +604,12 @@ computed separately, in ``fkC_num``, as ``NxxNL, NyyNL, NxyNL``, where the
 .. math::
     :label: donnell-KGNL
 
-    \boldsymbol{K}_G(\boldsymbol{N}) = \boldsymbol{K}_G(\boldsymbol{N}^0 +
+    \boldsymbol{K}_G(\boldsymbol{N}) = \boldsymbol{K}_G(\bar{\boldsymbol{N}} +
     \boldsymbol{N}_L) + \boldsymbol{K}_{GNL}
     \qquad \text{with} \qquad
     \boldsymbol{K}_{GNL} = \boldsymbol{K}_G(\boldsymbol{N}_{NL})
 
-With respect to `\bar{\boldsymbol{c}}`: `\boldsymbol{K}_0` is constant;
+With respect to `\boldsymbol{c}`: `\boldsymbol{K}_{C0}` is constant;
 `\boldsymbol{K}_{0L}`, `\boldsymbol{K}_{L0}` and
 `\boldsymbol{K}_G(\boldsymbol{N}_L)` are homogeneous of degree one; and
 `\boldsymbol{K}_{LL}` and `\boldsymbol{K}_{GNL}` are homogeneous of degree
@@ -614,14 +619,14 @@ two. The implementation groups them as:
     :label: donnell-grouping
 
     \begin{aligned}
-        \texttt{fkC_num} \;\rightarrow\; \boldsymbol{K}_C(\bar{\boldsymbol{c}}) &= \boldsymbol{K}_0 + \boldsymbol{K}_{0L} + \boldsymbol{K}_{L0} + \boldsymbol{K}_{LL} + \boldsymbol{K}_{GNL} \\
-        \texttt{fkG_num} \;\rightarrow\; \boldsymbol{K}_G(\bar{\boldsymbol{c}}) &= \boldsymbol{K}_G(\boldsymbol{N}^0 + \boldsymbol{N}_L) \\
-        \texttt{calc_kT} \;\rightarrow\; \boldsymbol{K}_T(\bar{\boldsymbol{c}}) &= \boldsymbol{K}_C(\bar{\boldsymbol{c}}) + \boldsymbol{K}_G(\bar{\boldsymbol{c}})
+        \texttt{fkC_num} \;\rightarrow\; \boldsymbol{K}_{C0} + \boldsymbol{K}_{CNL}(\boldsymbol{c}) + \boldsymbol{K}_{GNL}(\boldsymbol{c}) &= \boldsymbol{K}_{C0} + \boldsymbol{K}_{0L} + \boldsymbol{K}_{L0} + \boldsymbol{K}_{LL} + \boldsymbol{K}_{GNL} \\
+        \texttt{fkG_num} \;\rightarrow\; \boldsymbol{K}_G(\boldsymbol{c}) &= \boldsymbol{K}_G(\bar{\boldsymbol{N}} + \boldsymbol{N}_L) \\
+        \texttt{calc_kT} \;\rightarrow\; \boldsymbol{K}_T(\boldsymbol{c}) &= \boldsymbol{K}_{C0} + \boldsymbol{K}_{CNL}(\boldsymbol{c}) + \boldsymbol{K}_{GNL}(\boldsymbol{c}) + \boldsymbol{K}_G(\boldsymbol{c})
     \end{aligned}
 
 :eq:`donnell-grouping` is the statement written as a comment in ``fkC_num``
-of both models, and the summation `\boldsymbol{K}_T = \boldsymbol{K}_C +
-\boldsymbol{K}_G` happens in :meth:`.Shell.calc_kT`. The four constitutive
+of both models, and the summation of the two matrices happens in
+:meth:`.Shell.calc_kT`. The four constitutive
 groups of :eq:`donnell-K-groups` are not assembled separately: the kernel
 evaluates the whole product `(\boldsymbol{B}_L + \boldsymbol{B}_{NL})^\top
 \boldsymbol{C} (\boldsymbol{B}_L + \boldsymbol{B}_{NL})` in expanded
@@ -633,17 +638,17 @@ under the comment ``# KGNL``.
 `\boldsymbol{K}_{GNL}` is geometric in nature, being a
 `\boldsymbol{G}^\top \tilde{\boldsymbol{N}} \boldsymbol{G}` product, it is
 deliberately collected together with the constitutive terms so that
-`\boldsymbol{K}_G(\bar{\boldsymbol{c}})` stays homogeneous of degree one:
+`\boldsymbol{K}_G(\boldsymbol{c})` stays homogeneous of degree one:
 
 .. math::
 
-    \boldsymbol{K}_G(\lambda\bar{\boldsymbol{c}}) = \lambda\,\boldsymbol{K}_G(\bar{\boldsymbol{c}})
+    \boldsymbol{K}_G(\lambda\boldsymbol{c}) = \lambda\,\boldsymbol{K}_G(\boldsymbol{c})
 
-The linear buckling problem `(\boldsymbol{K}_0 + \lambda
-\boldsymbol{K}_G(\bar{\boldsymbol{c}}_0)) \boldsymbol{q} = \boldsymbol{0}`
+The linear buckling problem `(\boldsymbol{K}_{C0} + \lambda
+\boldsymbol{K}_G(\boldsymbol{c}_0)) \boldsymbol{q} = \boldsymbol{0}`
 needs this property, because there the load multiplier `\lambda` scales a
 stress state obtained from a linear fundamental state
-`\bar{\boldsymbol{c}}_0`, and a `\boldsymbol{K}_G` containing a degree-two
+`\boldsymbol{c}_0`, and a `\boldsymbol{K}_G` containing a degree-two
 term would make `\lambda` scale that state non-linearly, such that the
 problem would no longer be a linear eigenvalue problem. With the grouping of
 :eq:`donnell-grouping`, both requirements are met at once:
@@ -666,34 +671,38 @@ With :eq:`donnell-grouping` established, the three-way split of
     :label: donnell-three-way
 
     \begin{aligned}
-        \boldsymbol{K}_{C0} &= \boldsymbol{K}_0 \\
-        \boldsymbol{K}_{CNL}(\bar{\boldsymbol{c}}) &= \boldsymbol{K}_{0L} + \boldsymbol{K}_{L0} + \boldsymbol{K}_{LL} + \boldsymbol{K}_{GNL} \\
-        \boldsymbol{K}_G(\bar{\boldsymbol{c}}) &= \boldsymbol{K}_G(\boldsymbol{N}^0 + \boldsymbol{N}_L)
+        \boldsymbol{K}_{C0} &= \int_{\mathcal{A}} \boldsymbol{B}_L^\top \boldsymbol{C} \boldsymbol{B}_L \, d\mathcal{A} \\
+        \boldsymbol{K}_{CNL}(\boldsymbol{c}) + \boldsymbol{K}_{GNL}(\boldsymbol{c}) &= \boldsymbol{K}_{0L} + \boldsymbol{K}_{L0} + \boldsymbol{K}_{LL} + \boldsymbol{K}_G(\boldsymbol{N}_{NL}) \\
+        \boldsymbol{K}_G(\boldsymbol{c}) &= \boldsymbol{K}_G(\bar{\boldsymbol{N}} + \boldsymbol{N}_L)
     \end{aligned}
 
 i.e. `\boldsymbol{K}_{C0}` is everything that ``fkC_num`` produces at
-`\bar{\boldsymbol{c}} = \boldsymbol{0}`, `\boldsymbol{K}_{CNL}` is
-everything else that ``fkC_num`` produces, and `\boldsymbol{K}_G` is what
-``fkG_num`` produces. The partition is clean, but only under that reading of
-`\boldsymbol{K}_{CNL}`, which is not the obvious one;
-:ref:`tangent_clpt_donnell_discrepancies` states the caveat.
+`\boldsymbol{c} = \boldsymbol{0}`, `\boldsymbol{K}_{CNL} +
+\boldsymbol{K}_{GNL}` is everything else that ``fkC_num`` produces, and
+`\boldsymbol{K}_G(\boldsymbol{c})` is what ``fkG_num`` produces. The
+partition is clean, with the non-linear constitutive stiffness matrix
+`\boldsymbol{K}_{CNL}` restricted to the terms of `\boldsymbol{B}_{NL}` of
+:eq:`donnell-K-groups` and the geometric term `\boldsymbol{K}_{GNL}` written
+next to it; :ref:`tangent_clpt_donnell_discrepancies` states the
+consequence.
 
-There is no separate code path for `\boldsymbol{K}_{C0}` and
-`\boldsymbol{K}_{CNL}`: ``fkC_num`` returns their sum. `\boldsymbol{K}_{C0}`
+There is no separate code path for `\boldsymbol{K}_{C0}`,
+`\boldsymbol{K}_{CNL}` and `\boldsymbol{K}_{GNL}`: ``fkC_num`` returns their
+sum. `\boldsymbol{K}_{C0}`
 alone is obtained either from the closed-form ``fk0`` or by calling
-``fkC_num`` with `\bar{\boldsymbol{c}} = \boldsymbol{0}` or with
-``NLgeom=0``, both of which make ``wxi`` and ``weta`` vanish, since their
+``fkC_num`` with `\boldsymbol{c} = \boldsymbol{0}` or with
+``NLgeom=0``, both of which make ``w_xi`` and ``w_eta`` vanish, since their
 accumulation is guarded by ``if NLgeom == 1``. With `w_{,x} = w_{,y} = 0`
 one has `\boldsymbol{B}_{NL} = \boldsymbol{0}` and `\boldsymbol{N}_{NL} =
-\boldsymbol{0}`, so `\boldsymbol{K}_{CNL}` vanishes identically, as a
-comment in ``fkC_num`` notes.
+\boldsymbol{0}`, so `\boldsymbol{K}_{CNL}` and `\boldsymbol{K}_{GNL}` vanish
+identically, as a comment in ``fkC_num`` notes.
 
 .. _tangent_clpt_donnell_closed_form:
 
 The closed-form path
 ~~~~~~~~~~~~~~~~~~~~
 
-The closed-form kernels evaluate the same `\boldsymbol{K}_0` and
+The closed-form kernels evaluate the same `\boldsymbol{K}_{C0}` and
 `\boldsymbol{K}_G`, over the full domain and for a constant laminate, by
 separating the two directions. Every entry of :eq:`donnell-K-groups`
 restricted to `\boldsymbol{B}_L` is a sum of products of the form
@@ -717,7 +726,7 @@ loops, the `\xi` integrals inside the `i`, `k` loops and the `\eta`
 integrals inside the `j`, `l` loops, which is what makes this path cheap: no
 loop over integration points exists at all.
 
-As an example, the first entry of `\boldsymbol{K}_0` in ``fk0`` of
+As an example, the first entry of `\boldsymbol{K}_{C0}` in ``fk0`` of
 ``plate_clpt_donnell.pyx`` reads
 
 .. code-block:: cython
@@ -729,18 +738,18 @@ which is the `u`--`u` entry of `\int \boldsymbol{B}_L^\top \boldsymbol{C}
 \boldsymbol{B}_L \, d\mathcal{A}`, the factor `b/a` following from
 :eq:`donnell-separable` with `p = q = 1`. The corresponding cylindrical
 entry, in ``fk0`` of ``cylshell_clpt_donnell.pyx``, is identical, the two
-implementations of `\boldsymbol{K}_0` differing only by the five entries
+implementations of `\boldsymbol{K}_{C0}` differing only by the five entries
 carrying `1/r` and `1/r^2` that :eq:`donnell-BL` introduces through
 `\boldsymbol{S}^w/r`.
 
 Two properties of this path bound its use:
 
-- ``fk0`` takes no `\bar{\boldsymbol{c}}` and no constitutive matrix per
+- ``fk0`` takes no `\boldsymbol{c}` and no constitutive matrix per
   point; its signature is ``fk0(shell, size, row0, col0)``. It can only
   ever produce `\boldsymbol{K}_{C0}`.
 - ``fkG0`` takes the three membrane stress resultants as *scalars*,
   ``fkG0(Nxx, Nyy, Nxy, shell, size, row0, col0)``, so it evaluates
-  `\boldsymbol{K}_G(\boldsymbol{N}^0)` for a membrane state uniform over
+  `\boldsymbol{K}_G(\bar{\boldsymbol{N}})` for a membrane state uniform over
   the domain. The bodies of ``fkG0`` are identical for the plate and for the
   cylinder, consistent with `\boldsymbol{G}` of :eq:`donnell-G` carrying no
   `1/r`; the only entry assembled is character for character the same in
@@ -806,7 +815,7 @@ global vector, the assembly is:
     :label: donnell-assembly
 
     \begin{aligned}
-        \boldsymbol{F}_{int} &= \sum_{p} \boldsymbol{L}_p^\top \boldsymbol{F}_{int}^{(p)}(\boldsymbol{L}_p \bar{\boldsymbol{c}}) + \boldsymbol{K}_{C}^{conn} \bar{\boldsymbol{c}} \\
+        \boldsymbol{F}_{int} &= \sum_{p} \boldsymbol{L}_p^\top \boldsymbol{F}_{int}^{(p)}(\boldsymbol{L}_p \boldsymbol{c}) + \boldsymbol{K}_{C}^{conn} \boldsymbol{c} \\
         \boldsymbol{K}_T &= \sum_{p} \boldsymbol{L}_p^\top \left( \boldsymbol{K}_{C}^{(p)} + \boldsymbol{K}_{G}^{(p)} \right) \boldsymbol{L}_p + \boldsymbol{K}_{C}^{conn}
     \end{aligned}
 
@@ -824,12 +833,12 @@ global vector, the assembly is:
   :ref:`follower_pressure`.
 - The connection matrix `\boldsymbol{K}_{C}^{conn}` is added after the
   loop, to `\boldsymbol{K}_T` and, as `\boldsymbol{K}_{C}^{conn}
-  \bar{\boldsymbol{c}}`, to `\boldsymbol{F}_{int}`. Its own derivation is
+  \boldsymbol{c}`, to `\boldsymbol{F}_{int}`. Its own derivation is
   out of the scope of this section, see :ref:`null_space`; what matters here
   is that it is added consistently to both, so that the assembled
   `\boldsymbol{K}_T` remains the derivative of the assembled
   `\boldsymbol{F}_{int}` whenever `\boldsymbol{K}_{C}^{conn}` is
-  independent of `\bar{\boldsymbol{c}}`.
+  independent of `\boldsymbol{c}`.
 
 .. _tangent_clpt_donnell_mapping:
 
@@ -846,7 +855,7 @@ twins using the same names, and map the matrix terms.
     * - Symbol
       - Variable
       - Where
-    * - `\bar{\boldsymbol{c}}`
+    * - `\boldsymbol{c}`
       - ``cs``, ``c``
       - argument of the kernels
     * - `m`, `n`
@@ -856,10 +865,10 @@ twins using the same names, and map the matrix terms.
       - ``a``, ``b``, ``r``
       - attributes of :class:`.Shell`
     * - `P_i^u(\xi)`, `P_i^{u\prime}(\xi)`
-      - ``fAu``, ``fAuxi``
+      - ``fAu``, ``fAu_xi``
       - ``ftab`` of the kernels
     * - `P_j^w(\eta)`, `P_j^{w\prime}`, `P_j^{w\prime\prime}`
-      - ``gAw``, ``gAweta``, ``gAwetaeta``
+      - ``gAw``, ``gAw_eta``, ``gAw_etaeta``
       - ``gtab`` of the kernels
     * - `P_k^w(\xi)`, `P_l^w(\eta)` (term `B`)
       - ``fBw``, ``gBw``
@@ -868,10 +877,10 @@ twins using the same names, and map the matrix terms.
       - ``x1w``, ``x1wr``, ``x2w``, ``x2wr``
       - attributes of :class:`.Shell`
     * - `\partial w/\partial\xi`, `\partial w/\partial\eta`
-      - ``wxi``, ``weta``
+      - ``w_xi``, ``w_eta``
       - ``fkC_num``, ``calc_fint``
     * - `w_{,x}`, `w_{,y}`
-      - ``wx``, ``wy``
+      - ``w_x``, ``w_y``
       - ``fkC_num``
     * - `\boldsymbol{\varepsilon}^{(0)}`, `\boldsymbol{\varepsilon}^{(1)}`
       - ``exx, eyy, gxy``, ``kxx, kyy, kxy``
@@ -886,10 +895,10 @@ twins using the same names, and map the matrix terms.
     * - `\boldsymbol{N}_{NL}`
       - ``NxxNL``, ``NyyNL``, ``NxyNL``
       - ``fkC_num``
-    * - `\boldsymbol{N}^0`
+    * - `\bar{\boldsymbol{N}}`
       - ``Nxx0, Nyy0, Nxy0``; ``Shell.Nxx`` ...
       - arguments of ``fkG_num``
-    * - `\boldsymbol{N}^0 + \boldsymbol{N}_L`
+    * - `\bar{\boldsymbol{N}} + \boldsymbol{N}_L`
       - ``Nxx, Nyy, Nxy`` of ``fkG_num``
       - ``fkG_num``
     * - `x_2-x_1`, `y_2-y_1`
@@ -922,18 +931,19 @@ between the two namings.
       - Code name
       - Function
     * - `\boldsymbol{K}_{C0}`
-      - ``K0``
+      - ``KC0``
       - ``fk0``
     * - `\boldsymbol{K}_{C0}`
-      - ``K0``
+      - ``KC0``
       - ``fkC_num`` with ``NLgeom=0``
-    * - `\boldsymbol{K}_{CNL}`
-      - ``K0L + KL0 + KLL``
+    * - `\boldsymbol{K}_{CNL} = \boldsymbol{K}_{0L} + \boldsymbol{K}_{L0} +
+        \boldsymbol{K}_{LL}`
+      - ``KCNL``
       - ``fkC_num`` with ``NLgeom=1``
-    * - `\boldsymbol{K}_G`
-      - ``KG(N0 + N_L)``
+    * - `\boldsymbol{K}_G(\boldsymbol{c})`
+      - ``KG(Nbar + N_L)``
       - ``fkG_num``
-    * - `\boldsymbol{K}_G(\boldsymbol{N}^0)`
+    * - `\boldsymbol{K}_G(\bar{\boldsymbol{N}})`
       - ``KG0``
       - ``fkG0``
     * - `\boldsymbol{F}_{int}`
@@ -942,7 +952,7 @@ between the two namings.
     * - `\boldsymbol{K}_T`
       - ``kT``
       - :meth:`.Shell.calc_kT`
-    * - `\boldsymbol{K}_{CNL}`, part of
+    * - `\boldsymbol{K}_{GNL}`, next to `\boldsymbol{K}_{CNL}`
       - ``KGNL``
       - ``fkC_num``, under ``# KGNL``
     * - not in `\boldsymbol{K}_T`
@@ -963,18 +973,18 @@ using an unsymmetric, unbalanced laminate so that `\boldsymbol{B} \neq
 claim of :eq:`donnell-KT` directly:
 
 - ``test_tangent_is_derivative_of_fint`` is the directional Taylor test.
-  Given an arbitrary state `\bar{\boldsymbol{c}}` and direction
-  `\boldsymbol{d}`, `\boldsymbol{F}_{int}(\bar{\boldsymbol{c}} +
-  h\boldsymbol{d}) = \boldsymbol{F}_{int}(\bar{\boldsymbol{c}}) + h
-  \boldsymbol{K}_T(\bar{\boldsymbol{c}}) \boldsymbol{d} + O(h^2)`, so the
+  Given an arbitrary state `\boldsymbol{c}` and direction
+  `\boldsymbol{v}`, `\boldsymbol{F}_{int}(\boldsymbol{c} +
+  h\boldsymbol{v}) = \boldsymbol{F}_{int}(\boldsymbol{c}) + h
+  \boldsymbol{K}_T(\boldsymbol{c}) \boldsymbol{v} + O(h^2)`, so the
   relative error
 
   .. math::
 
-      e(h) = \frac{\left\| \boldsymbol{F}_{int}(\bar{\boldsymbol{c}} +
-      h\boldsymbol{d}) - \boldsymbol{F}_{int}(\bar{\boldsymbol{c}}) - h
-      \boldsymbol{K}_T \boldsymbol{d} \right\|}{\left\| h \boldsymbol{K}_T
-      \boldsymbol{d} \right\|}
+      e(h) = \frac{\left\| \boldsymbol{F}_{int}(\boldsymbol{c} +
+      h\boldsymbol{v}) - \boldsymbol{F}_{int}(\boldsymbol{c}) - h
+      \boldsymbol{K}_T \boldsymbol{v} \right\|}{\left\| h \boldsymbol{K}_T
+      \boldsymbol{v} \right\|}
 
   must fall proportionally to `h`. The test asserts a factor of at least
   five per decade over `h \in [10^{-6}, 10^{-2}]`, and that `e(h)/h` does
@@ -984,14 +994,14 @@ claim of :eq:`donnell-KT` directly:
   of `\boldsymbol{K}_T` against a central finite-difference Jacobian of
   `\boldsymbol{F}_{int}`.
 - ``test_kG_is_homogeneous_of_degree_one`` asserts
-  `\boldsymbol{K}_G(2\bar{\boldsymbol{c}}) =
-  2\boldsymbol{K}_G(\bar{\boldsymbol{c}})`, which is the property that the
+  `\boldsymbol{K}_G(2\boldsymbol{c}) =
+  2\boldsymbol{K}_G(\boldsymbol{c})`, which is the property that the
   placement of `\boldsymbol{K}_{GNL}` in :eq:`donnell-grouping` exists to
   preserve.
 - ``test_fint_and_tangent_in_the_undeformed_state`` asserts
   `\boldsymbol{F}_{int}(\boldsymbol{0}) = \boldsymbol{0}` and
   `\boldsymbol{K}_T(\boldsymbol{0}) = \boldsymbol{K}_{C0}`, which is
-  :eq:`donnell-three-way` at `\bar{\boldsymbol{c}} = \boldsymbol{0}`.
+  :eq:`donnell-three-way` at `\boldsymbol{c} = \boldsymbol{0}`.
 - ``test_newton_raphson_converges_quadratically`` manufactures an
   equilibrium state and checks that the error is squared at each iteration.
 
@@ -1009,7 +1019,7 @@ around these matrices, and with it three claims of this section:
   two matrices of :eq:`donnell-grouping`.
 - ``test_NLgeom_and_not_c_selects_the_large_displacement_matrix`` asserts
   that ``fkC_num`` returns `\boldsymbol{K}_{C0}` whenever ``NLgeom=0``,
-  whatever `\bar{\boldsymbol{c}}`, and that the result then matches the
+  whatever `\boldsymbol{c}`, and that the result then matches the
   closed-form ``fk0``, as stated when mapping the code onto
   :eq:`donnell-three-way`.
 - ``test_cylshell_approaches_plate_as_radius_grows`` asserts the monotonic
@@ -1028,7 +1038,7 @@ preparing this section, by rebuilding `\boldsymbol{B}_L`,
 :eq:`donnell-BNL` and :eq:`donnell-G` at the Gauss points and comparing
 against the compiled kernels, with the following results, for both models,
 `m = n = 4`, `n_x = n_y = 10`, an unsymmetric laminate and a random
-`\bar{\boldsymbol{c}}` with deflections of twenty thicknesses.
+`\boldsymbol{c}` with deflections of twenty thicknesses.
 
 .. list-table:: Relative difference between the compiled kernels and the
                 equations of this section, rebuilt independently
@@ -1044,7 +1054,7 @@ against the compiled kernels, with the following results, for both models,
       - `4.0 \times 10^{-16}`
       - `2.3 \times 10^{-16}`
     * - ``fkG_num``
-      - `\boldsymbol{K}_G(\boldsymbol{N}^0 + \boldsymbol{N}_L)`,
+      - `\boldsymbol{K}_G(\bar{\boldsymbol{N}} + \boldsymbol{N}_L)`,
         :eq:`donnell-KG`
       - `5.7 \times 10^{-16}`
       - `4.9 \times 10^{-16}`
@@ -1054,12 +1064,12 @@ against the compiled kernels, with the following results, for both models,
       - `2.2 \times 10^{-16}`
       - `2.2 \times 10^{-16}`
     * - ``fk0``
-      - ``fkC_num`` at `\bar{\boldsymbol{c}} = \boldsymbol{0}`, `n_x = n_y
+      - ``fkC_num`` at `\boldsymbol{c} = \boldsymbol{0}`, `n_x = n_y
         = 30`
       - `4.7 \times 10^{-15}`
       - `4.6 \times 10^{-15}`
     * - ``fkG0``
-      - ``fkG_num`` at `\bar{\boldsymbol{c}} = \boldsymbol{0}`, `n_x = n_y
+      - ``fkG_num`` at `\boldsymbol{c} = \boldsymbol{0}`, `n_x = n_y
         = 30`
       - `8.6 \times 10^{-15}`
       - `8.8 \times 10^{-15}`
@@ -1087,33 +1097,33 @@ first and the second integral of :eq:`donnell-KT`:
 .. math::
     :label: donnell-boundary
 
-    \boldsymbol{K}_{C0} + \boldsymbol{K}_{CNL} = \boldsymbol{K}_C +
-    \boldsymbol{K}_{GNL}
+    \boldsymbol{K}_{C0} + \boldsymbol{K}_{CNL} + \boldsymbol{K}_{GNL} =
+    \boldsymbol{K}_C + \boldsymbol{K}_{GNL}
     \qquad
-    \boldsymbol{K}_G^{\text{herein}} = \boldsymbol{K}_G - \boldsymbol{K}_{GNL}
+    \boldsymbol{K}_G(\boldsymbol{c}) = \boldsymbol{K}_G - \boldsymbol{K}_{GNL}
 
-The term `\boldsymbol{K}_{GNL}` is geometric by construction, being `\int
-\boldsymbol{G}^\top \tilde{\boldsymbol{N}}_{NL} \boldsymbol{G} \,
-d\mathcal{A}`, yet under the naming of :eq:`donnell-KT-split` it belongs to
-`\boldsymbol{K}_{CNL}`. The three-way split therefore partitions the five
-terms of the code cleanly, but only if `\boldsymbol{K}_{CNL}` is defined
-operationally, as *everything* ``fkC_num`` *adds beyond*
-`\bar{\boldsymbol{c}} = \boldsymbol{0}`, and not semantically, as *the
-non-linear constitutive terms*. Under the semantic reading,
-`\boldsymbol{K}_{GNL}` has no home in any of the three symbols and the
-partition fails. This section adopts the operational reading, and
-:eq:`donnell-three-way` states it.
+where the left-hand sides are the matrices returned by ``fkC_num`` and
+``fkG_num``. The term `\boldsymbol{K}_{GNL}` is geometric by construction,
+being `\int \boldsymbol{G}^\top \tilde{\boldsymbol{N}}_{NL} \boldsymbol{G} \,
+d\mathcal{A}`, yet the implementation adds it to the constitutive terms
+`\boldsymbol{K}_{C0} + \boldsymbol{K}_{CNL}`. What ``fkC_num`` *adds beyond*
+`\boldsymbol{c} = \boldsymbol{0}` is therefore the sum `\boldsymbol{K}_{CNL}
++ \boldsymbol{K}_{GNL}`, and not `\boldsymbol{K}_{CNL}` alone, which keeps
+its meaning of *the non-linear constitutive terms* of
+:eq:`donnell-K-groups`. This section writes the sum explicitly wherever the
+matrix of ``fkC_num`` is meant, as in :eq:`donnell-KT-split` and
+:eq:`donnell-three-way`.
 
 :meth:`.Shell.calc_kC` **does not always return** `\boldsymbol{K}_{C0} +
-\boldsymbol{K}_{CNL}`. If ``c_cte`` is given or any of ``Nxx_cte``,
+\boldsymbol{K}_{CNL} + \boldsymbol{K}_{GNL}`. If ``c_cte`` is given or any of ``Nxx_cte``,
 ``Nyy_cte``, ``Nxy_cte`` is non-zero, a geometric block is added into the
 matrix returned as ``kC``, either `\boldsymbol{K}_G(\boldsymbol{N}^{cte})`
 through ``fkG0`` or `\boldsymbol{K}_G` evaluated at ``c_cte`` through
 ``fkG_num``. This is the superposition device of combined load cases, which
 keeps a part of the stress state out of reach of the load multiplier
 `\lambda`. With ``NLgeom=True`` and follower pressure loads, their load
-stiffness :meth:`.Shell.calc_kCfollower` is added as well. The symbol
-`\boldsymbol{K}_{C0} + \boldsymbol{K}_{CNL}` therefore describes the return
+stiffness :meth:`.Shell.calc_kCfollower` is added as well. The sum
+`\boldsymbol{K}_{C0} + \boldsymbol{K}_{CNL} + \boldsymbol{K}_{GNL}` therefore describes the return
 value of :meth:`.Shell.calc_kC` only when no constant pre-stress and no
 follower load is declared. The two modules of
 :ref:`tangent_clpt_donnell_verification` that verify the Jacobian set the
@@ -1127,13 +1137,14 @@ Note on symbols
 Three groups of symbols are introduced here because the implementation
 distinguishes quantities that the classical treatment does not:
 
-- `\boldsymbol{K}_{C0}` and `\boldsymbol{K}_{CNL}`, for the constant and the
-  state-dependent parts of the matrix returned by ``fkC_num``. The classical
-  symbol for the first of them is `\boldsymbol{K}_0`, also used here, in
-  :eq:`donnell-K-groups`; `\boldsymbol{K}_{C0}` is kept in
-  :eq:`donnell-KT-split` because the three-way split it belongs to is the
-  one the implementation is organised around.
-- `\boldsymbol{N}^0`, `\boldsymbol{N}_L` and `\boldsymbol{N}_{NL}`, for the
+- `\boldsymbol{K}_{C0}`, `\boldsymbol{K}_{CNL}` and `\boldsymbol{K}_{GNL}`,
+  for the constant constitutive part, the state-dependent constitutive part
+  and the geometric part of the matrix returned by ``fkC_num``. The
+  classical symbol for the first of them is `\boldsymbol{K}_0`;
+  `\boldsymbol{K}_{C0}`, the linear constitutive stiffness matrix, is used
+  throughout, in :eq:`donnell-K-groups` and in the three-way split of
+  :eq:`donnell-KT-split`, which the implementation is organised around.
+- `\bar{\boldsymbol{N}}`, `\boldsymbol{N}_L` and `\boldsymbol{N}_{NL}`, for the
   three contributions to the membrane stress entering :eq:`donnell-KG`. The
   decomposition is needed here because the implementation evaluates the
   third one separately, and places it on the other side of the
@@ -1149,17 +1160,17 @@ Product of the tangent stiffness matrix by a vector
 ---------------------------------------------------
 
 :meth:`.Shell.calc_kTv` and :meth:`.MultiDomain.calc_kTv` return the
-product `[K_T(c)] \{v\}` of the tangent stiffness matrix of
-:meth:`.Shell.calc_kT` by a vector, without assembling `[K_T]`, for all the
-geometrically non-linear models. Its cost is that of one evaluation of the
-internal force vector, instead of the assembly of `[K_T]`, whose cost grows
+product `\boldsymbol{K}_T(\boldsymbol{c}) \boldsymbol{v}` of the tangent stiffness matrix of
+:meth:`.Shell.calc_kT` by a vector, without assembling `\boldsymbol{K}_T`, for all the
+geometrically non-linear models. Its cost is about that of one evaluation of
+the internal force vector, instead of the assembly of `\boldsymbol{K}_T`, whose cost grows
 with the square of the number of terms of the approximation. It is the
 exact product, to round-off, and the exact directional derivative of
 :meth:`.Shell.calc_fint`.
 
 The product is what the prescribed displacements imposed exactly need at
-each configuration, `\partial R_r/\partial \lambda = [T]^T (\{F_{ext}\} -
-[K_T(c)] \{c_{p1}\})`, see :ref:`null_space_pd`, and what matrix-free
+each configuration, `-\partial \boldsymbol{R}_r/\partial \lambda = \boldsymbol{Z}^\top (\boldsymbol{F}_{ext} -
+\boldsymbol{K}_T(\boldsymbol{c}) \boldsymbol{c}_{p1})`, see :ref:`null_space_pd`, and what matrix-free
 iterative solvers and directional checks of the tangent need.
 
 Derivation
@@ -1171,58 +1182,60 @@ the generalized strains
 
 .. math::
 
-    \{\varepsilon(c)\} = [B(\beta/2)] \{c\}, \qquad \{\beta\} = [G] \{c\}
+    \boldsymbol{\varepsilon}(\boldsymbol{c}) = \left( \boldsymbol{B}_L + \tfrac{1}{2} \boldsymbol{B}_{NL} \right) \boldsymbol{c},
+    \qquad \boldsymbol{\beta} = \boldsymbol{G} \boldsymbol{c}
 
-where `\{\beta\}` are the two rotations of the von Kármán terms, `w_{,x}`
+where `\boldsymbol{\beta}` are the two rotations of the von Kármán terms, `w_{,x}`
 and `w_{,y}` for the Donnell kinematics, `w_{,y} - v/r` replacing `w_{,y}`
-for Sanders, and `[B(\beta)]` is the strain operator, linear in
-`\{\beta\}`, which enters only its membrane rows:
+for Sanders, `\boldsymbol{B}_L` is the linear strain operator and `\boldsymbol{B}_{NL}`, linear in
+`\boldsymbol{\beta}`, enters only the membrane rows:
 
 .. math::
 
-    \frac{\partial [B]}{\partial \beta_x} = \begin{bmatrix} [G_x] \\ 0 \\
-    [G_y] \\ 0 \end{bmatrix}, \qquad
-    \frac{\partial [B]}{\partial \beta_y} = \begin{bmatrix} 0 \\ [G_y] \\
-    [G_x] \\ 0 \end{bmatrix}
+    \frac{\partial \boldsymbol{B}_{NL}}{\partial \beta_x} = \begin{bmatrix} \boldsymbol{G}_x \\ 0
+    \\ \boldsymbol{G}_y \\ 0 \end{bmatrix}, \qquad
+    \frac{\partial \boldsymbol{B}_{NL}}{\partial \beta_y} = \begin{bmatrix} 0 \\ \boldsymbol{G}_y
+    \\ \boldsymbol{G}_x \\ 0 \end{bmatrix}
 
-Half the rotations in `[B]` give the quadratic terms `\beta_x^2/2`,
-`\beta_y^2/2` and `\beta_x \beta_y`. The internal force vector is
-`\{F_{int}\} = \int [B(\beta)]^T [F] \{\varepsilon(c)\} dA`, and its
-directional derivative along `\{v\}` is
+The factor `1/2` of `\boldsymbol{B}_{NL}` gives the quadratic terms `\beta_x^2/2`,
+`\beta_y^2/2` and `\beta_x \beta_y`. With the constitutive matrix `\boldsymbol{C}` of
+``ABDnxny``, the internal force vector is `\boldsymbol{F}_{int} = \int (\boldsymbol{B}_L +
+\boldsymbol{B}_{NL})^\top \boldsymbol{C} \boldsymbol{\varepsilon}(\boldsymbol{c}) dA`, and its directional derivative
+along `\boldsymbol{v}` is
 
 .. math::
     :label: kTv
 
-    [K_T] \{v\} = \frac{d}{dt} \{F_{int}(c + t v)\} \Big|_{t=0} =
-    \int \left( [B(\beta)]^T [F] [B(\beta)] \{v\} + [G]^T [N] [G] \{v\}
-    \right) dA
+    \boldsymbol{K}_T \boldsymbol{v} = \frac{d}{dt} \boldsymbol{F}_{int}(\boldsymbol{c} + t \boldsymbol{v}) \Big|_{t=0} =
+    \int \left( (\boldsymbol{B}_L + \boldsymbol{B}_{NL})^\top \boldsymbol{C} (\boldsymbol{B}_L + \boldsymbol{B}_{NL}) \boldsymbol{v} + \boldsymbol{G}^\top
+    \tilde{\boldsymbol{N}} \boldsymbol{G} \boldsymbol{v} \right) dA
 
-because the strains are a quadratic form whose bilinear form is
-`[B(\beta)]`, such that `\frac{d}{dt} \{\varepsilon(c + t v)\} =
-[B(\beta)] \{v\}`, and `\frac{d}{dt} [B]^T \{\sigma\} = [G]^T [N] [G]
-\{v\}` from the derivatives of `[B]` above, with `[N]` the membrane
+because the strains are a quadratic form whose bilinear form is `\boldsymbol{B}_L +
+\boldsymbol{B}_{NL}`, such that `\frac{d}{dt} \boldsymbol{\varepsilon}(\boldsymbol{c} + t \boldsymbol{v}) = (\boldsymbol{B}_L +
+\boldsymbol{B}_{NL}) \boldsymbol{v}`, and `\frac{d}{dt} \boldsymbol{B}_{NL}^\top \boldsymbol{\sigma} = \boldsymbol{G}^\top \tilde{\boldsymbol{N}} \boldsymbol{G}
+\boldsymbol{v}` from the derivatives of `\boldsymbol{B}_{NL}` above, with `\tilde{\boldsymbol{N}}` the membrane
 stresses. The two terms are those assembled by ``fkC_num`` and ``fkG_num``
 of each model. The constant membrane stresses ``Nxx_cte``, ``Nyy_cte`` and
 ``Nxy_cte``, whose geometric stiffness :meth:`.Shell.calc_kC` adds to the
-tangent stiffness matrix, are added to `[N]`.
+tangent stiffness matrix, are added to `\tilde{\boldsymbol{N}}`.
 
 At each integration point, with the approximation functions tabulated once,
 the kernels ``calc_kTv`` of ``panels/models/<model>_num.pyx`` compute
 
-1. `\{\beta\} = [G] \{c\}` and `[G] \{v\}`;
-2. `\{\varepsilon\} = [B(\beta/2)] \{c\}` and `\{\delta \varepsilon\} =
-   [B(\beta)] \{v\}`;
-3. the stresses `[F] \{\varepsilon\}`, of which `[N]`, and `[F] \{\delta
-   \varepsilon\}`;
+1. `\boldsymbol{\beta} = \boldsymbol{G} \boldsymbol{c}` and `\boldsymbol{G} \boldsymbol{v}`;
+2. `\boldsymbol{\varepsilon} = (\boldsymbol{B}_L + \tfrac{1}{2} \boldsymbol{B}_{NL}) \boldsymbol{c}` and
+   `\delta \boldsymbol{\varepsilon} = (\boldsymbol{B}_L + \boldsymbol{B}_{NL}) \boldsymbol{v}`;
+3. the stresses `\boldsymbol{C} \boldsymbol{\varepsilon}`, of which `\tilde{\boldsymbol{N}}`, and `\boldsymbol{C}
+   \delta \boldsymbol{\varepsilon}`;
 4. the sum of :eq:`kTv` over the terms.
 
 Each step is a loop over the `m n` terms, against a loop over the `m^2
-n^2` pairs of terms for the assembly of `[K_T]`.
+n^2` pairs of terms for the assembly of `\boldsymbol{K}_T`.
 
-The expressions are generated by ``theory/shells/tangent_product``, which
-also verifies with SymPy, for every model, that :eq:`kTv` is the derivative
+The expressions are generated with SymPy, which also verifies, for every
+model, that :eq:`kTv` is the derivative
 of the internal force vector of one term, with a symbolic constitutive
-matrix; `[B]` and `[G]` being linear in the degrees of freedom, the
+matrix; `\boldsymbol{B}_{NL}` and `\boldsymbol{G}` being linear in the degrees of freedom, the
 identity extends to any number of terms.
 
 Follower pressure loads
@@ -1234,12 +1247,12 @@ difference
 
 .. math::
 
-    -\frac{\partial \{F_p\}}{\partial \{c\}} \{v\} = -\frac{\{F_p(c + t v)\}
-    - \{F_p(c - t v)\}}{2 t}
+    -\frac{\partial \boldsymbol{F}_p}{\partial \boldsymbol{c}} \boldsymbol{v} = -\frac{\boldsymbol{F}_p(\boldsymbol{c} + t \boldsymbol{v})
+    - \boldsymbol{F}_p(\boldsymbol{c} - t \boldsymbol{v})}{2 t}
 
-which is exact for any `t`, the force vector `\{F_p(c)\}` being affine in
-`\{c\}` for ``follower='linear'`` and quadratic for
-``follower='quadratic'``, see :ref:`follower_pressure`. `t = \max(\|c\|/\|v\|,
+which is exact for any `t`, the force vector `\boldsymbol{F}_p(\boldsymbol{c})` being affine in
+`\boldsymbol{c}` for ``follower='linear'`` and quadratic for
+``follower='quadratic'``, see :ref:`follower_pressure`. `t = \max(\|\boldsymbol{c}\|/\|\boldsymbol{v}\|,
 1)` avoids the cancellation of large and small terms.
 
 Verification
@@ -1258,7 +1271,7 @@ product, for all 9 models, in ``tests/tests_shell/test_tangent_product.py``:
   falls as `O(h^2)`;
 - the matrix built column by column from the product against the central
   difference of :meth:`.Shell.calc_fint`;
-- in the undeformed state the product is `[K_0] \{v\}`;
+- in the undeformed state the product is `\boldsymbol{K}_{C0} \boldsymbol{v}`;
 - Newton-Raphson with the tangent built from the product converges
   quadratically:
 
@@ -1267,15 +1280,23 @@ product, for all 9 models, in ``tests/tests_shell/test_tangent_product.py``:
 
 ``tests/multidomain/test_tangent_product_multidomain.py`` checks
 :meth:`.MultiDomain.calc_kTv` with penalty connections and follower loads,
-and `\partial R_r/\partial \lambda` of the prescribed displacements against
+and `\partial \boldsymbol{R}_r/\partial \lambda` of the prescribed displacements against
 the assembled tangent stiffness matrix.
 
 Performance
 ~~~~~~~~~~~
 
-Single shell, laminate ``[0, 45, -45, 90]``, ``nx = 2m``, ``ny = 2n``
-integration points, one core; :meth:`.Shell.calc_kT` with the tabulated
-kernels, see :ref:`tabulation`:
+Single shell, laminate ``[0, 45, -45, 90]``, the default integration points
+of :func:`panels.shell.gauss_points`, `\max(2m - 1, 7)` by `\max(2n - 1,
+7)`, one core; :meth:`.Shell.calc_kT` with the tabulated kernels, see
+:ref:`tabulation`; the state `\boldsymbol{c}` and the vector `\boldsymbol{v}` of
+``random_state`` of ``tests/tests_shell/test_tangent_consistency.py``. With
+``panels`` 0.14.0, medians of 9 samples, 3 in each of 3 processes,
+interleaved, after a warm-up; ratio: of ``calc_kT`` to ``calc_kTv``;
+difference: relative difference between the product and ``calc_kT(c) @ v``,
+the largest of the three sizes. With the former default, ``nx = 2m``,
+``ny = 2n``, one point more in each direction, the times measured in the
+same session, interleaved, are 3 to 16% longer:
 
 .. list-table::
     :header-rows: 1
@@ -1291,71 +1312,119 @@ kernels, see :ref:`tabulation`:
     * - ``plate_clpt_donnell``
       - 8 / 12 / 16
       - 192 / 432 / 768
-      - 0.035 / 0.35 / 1.9 s
-      - 1.5 / 8.1 / 28 ms
-      - 1.8 / 9.6 / 32 ms
-      - 20 / 37 / 59
-      - `2 \times 10^{-15}`
+      - 0.013 / 0.11 / 0.59 s
+      - 0.80 / 3.5 / 11 ms
+      - 1.1 / 5.0 / 16 ms
+      - 12 / 23 / 37
+      - `1.0 \times 10^{-15}`
     * - ``cylshell_fsdt_sanders``
       - 8 / 12 / 16
       - 320 / 720 / 1280
-      - 0.16 / 1.7 / 9.1 s
-      - 2.6 / 14 / 47 ms
-      - 2.9 / 15 / 51 ms
-      - 54 / 109 / 180
-      - `2 \times 10^{-15}`
+      - 0.10 / 1.1 / 6.0 s
+      - 1.5 / 6.7 / 22 ms
+      - 1.7 / 8.2 / 26 ms
+      - 61 / 132 / 234
+      - `9.1 \times 10^{-16}`
     * - ``plate_tsdt_donnell``
       - 8 / 12 / 16
       - 320 / 720 / 1280
-      - 0.28 / 3.0 / 17 s
-      - 2.8 / 15 / 50 ms
-      - 3.1 / 16 / 55 ms
-      - 91 / 184 / 304
-      - `2 \times 10^{-15}`
+      - 0.19 / 2.1 / 12 s
+      - 1.6 / 7.6 / 24 ms
+      - 1.7 / 8.7 / 27 ms
+      - 110 / 246 / 441
+      - `1.4 \times 10^{-15}`
 
-The product costs about one :meth:`.Shell.calc_fint`, and the ratio grows
-with the number of terms. With the previous kernels, whose approximation
-functions were evaluated in the innermost loops, ``calc_kT`` took 7.0, 10.9
-and 11.9 s for `m = n = 12`, i.e. 700 times the product.
+The product costs 1.1 to 1.5 times :meth:`.Shell.calc_fint`, and the ratio
+grows with the number of terms. With the previous kernels of ``panels``
+0.12.0, whose approximation functions were evaluated in the innermost loops,
+``calc_kT`` takes 2.8, 4.7 and 5.8 s for `m = n = 12`, measured in the same
+way with the former default ``nx = 2m``, ``ny = 2n``, i.e. 500 to 610 times
+the product with the same points. The times published with ``panels``
+0.13.0 were longer, 7.0, 10.9 and 11.9 s with the previous kernels, 700
+times the product of then.
 
 Displacement-controlled post-buckling of the plate of
-``tests/multidomain/test_null_space_pd.py`` with `m = n = 12` (407 reduced
-degrees of freedom), prescribed displacements imposed exactly, the four
-combinations of ``panels`` before (0.12.0, with the previous
-kernels and the assembly of `[K_T]` for `\partial R_r/\partial \lambda`)
-and after these developments with ``structsolve`` 0.7.0 and 0.8.0. The
-reactions at `\lambda = 1` agree to all the digits printed:
+``tests/multidomain/test_null_space_pd.py``, the model of
+``test_nonlinear_displacement_control`` with `m = n = 12` (407 reduced
+degrees of freedom), prescribed displacements imposed exactly. Run time of
+``Analysis.static``, on the same machine, medians of 3 runs in separate
+processes, interleaved, after a warm-up, of ``panels`` before these
+developments (0.12.0, with the previous kernels and the assembly of `\boldsymbol{K}_T`
+for `\partial \boldsymbol{R}_r/\partial \lambda`), after them (0.13.0) and 0.14.0, with
+``structsolve`` 0.7.0, 0.8.0 and 0.9.0. Before 0.9.0 the convergence was
+checked with the relative criterion, ``relTOL = 1e-6`` by default;
+``structsolve`` 0.9.0 checks with Crisfield's criterion, ``relTOL = 1e-9``
+by default, and keeps the former with ``Analysis.convergence = 'relative'``.
+The rows of 0.12.0 and 0.13.0 were measured with the integration points of
+then, ``nx = 2m``, ``ny = 2n``, i.e. `24 \times 24`; those of 0.14.0 with
+the default of :func:`panels.shell.gauss_points`, `23 \times 23`, in a later
+session in which `24 \times 24` points, interleaved, gave times 1 to 6%
+shorter than in the first one:
 
 .. list-table::
     :header-rows: 1
 
     * - ``panels``
       - ``structsolve``
+      - criterion
       - Newton-Raphson
       - modified Newton-Raphson
       - Riks
-    * - before
+    * - 0.12.0
       - 0.7.0
-      - 285 s
-      - 705 s
-      - 363 s
-    * - before
+      - relative, ``1e-6``
+      - 116 s
+      - 279 s
+      - 149 s
+    * - 0.12.0
       - 0.8.0
-      - 229 s
-      - 158 s
-      - 350 s
-    * - after
+      - relative, ``1e-6``
+      - 92.7 s
+      - 73.8 s
+      - 141 s
+    * - 0.13.0
       - 0.7.0
-      - 11.9 s
-      - 9.1 s
-      - 18.7 s
-    * - after
+      - relative, ``1e-6``
+      - 4.84 s
+      - 4.24 s
+      - 7.71 s
+    * - 0.13.0
       - 0.8.0
-      - 11.8 s
-      - 7.8 s
-      - 18.4 s
+      - relative, ``1e-6``
+      - 4.76 s
+      - 3.40 s
+      - 7.60 s
+    * - 0.14.0
+      - 0.9.0
+      - relative, ``1e-6``
+      - 4.36 s
+      - 2.94 s
+      - 6.86 s
+    * - 0.14.0
+      - 0.9.0
+      - Crisfield, ``1e-9``
+      - 5.33 s
+      - 5.36 s
+      - 8.41 s
 
-Before, almost all the time was in the assembly of `[K_T]` inside
-``calc_fext``, for `\partial R_r/\partial \lambda`; after, it is in the
-assembly of `[K_T]` for the Newton iterations, 32, 20 and 50 assemblies,
-the products costing 0.2 to 0.5 s in total.
+The reactions at `\lambda = 1` agree within a relative `4 \times 10^{-6}`
+with the relative criterion, and to ten significant digits with Crisfield's
+criterion. Before, almost all the time was in the assembly of `\boldsymbol{K}_T`, about
+3 s each with the previous kernels: with ``structsolve`` 0.7.0 inside
+``calc_fext``, for `\partial \boldsymbol{R}_r/\partial \lambda`, at every iterate where
+`\boldsymbol{K}_T` was not cached, e.g. at each iteration of the modified
+Newton-Raphson method, whereas ``structsolve`` 0.8.0 evaluates `\partial
+\boldsymbol{R}_r/\partial \lambda` only together with `\boldsymbol{K}_T`. After, with Crisfield's
+criterion, 80 to 87% of the time is in the 37, 35 and 60 assemblies of
+`\boldsymbol{K}_T` for the Newton iterations (31, 19 and 49 with the relative
+criterion), and the products cost 0.19 to 0.32 s in total. The modified
+Newton-Raphson method with Crisfield's criterion takes 16 increments and 35
+assemblies with `23 \times 23` points, but 11 increments and 25 assemblies,
+4.12 s, with `24 \times 24` points in the same session, whereas both
+numbers of points integrate the matrices exactly: its iterations depend on
+the round-off. The times
+published with ``panels`` 0.13.0 for the first four rows were 2.1 to 2.5
+times longer, e.g. 229 s and 11.8 s with ``structsolve`` 0.8.0 and the
+Newton-Raphson method; the speed-ups from 0.12.0 to 0.13.0 are the same
+within 7%, except with the modified Newton-Raphson method and
+``structsolve`` 0.7.0, 77 then and 66 now.

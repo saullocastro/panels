@@ -22,10 +22,9 @@ deflected surface during the buckling process".
 This section derives the force vector of the follower pressure, its
 contribution to the internal force vector and its load stiffness matrix
 :meth:`.Shell.calc_kCfollower`, and discusses when this matrix is symmetric.
-The derivation is implemented with sympy in
-``theory/shells/follower_pressure/follower_pressure.py``, which also
-generates the kernels ``calc_fext_follower`` and ``fkCfollower_num`` of every
-model, see :ref:`follower_pressure_implementation`.
+The kernels ``calc_fext_follower`` and ``fkCfollower_num`` of every model
+are generated with SymPy from this derivation, see
+:ref:`follower_pressure_implementation`.
 
 
 Virtual work of the pressure
@@ -35,24 +34,26 @@ Let `x` and `y` be the coordinates of the undeformed mid-surface, `y` being
 the arc length for the cylindrical shells, and `\{e_x, e_y, e_z\}` the local
 basis of the undeformed mid-surface, with `e_z` the normal, positive outwards
 for the cylinders of radius `r`, such that `e_{y,y} = -e_z/r` and
-`e_{z,y} = e_y/r`. The displacement of the mid-surface is `\mathbf{u} = u
-e_x + v e_y + w e_z`, and the position of the deformed mid-surface is
-`\mathbf{X} = \mathbf{X}_0 + \mathbf{u}`. A pressure `p`, positive along
-`+e_z` as the force ``fz`` of :meth:`.Shell.add_point_load` (an external
+`e_{z,y} = e_y/r`. The displacement of the mid-surface is
+`\boldsymbol{u} = u e_x + v e_y + w e_z`, and the position of the deformed
+mid-surface is `\boldsymbol{X} = \boldsymbol{X}_0 + \boldsymbol{u}`. A
+pressure `p`, positive along `+e_z` as the force ``fz`` of
+:meth:`.Shell.add_point_load` (an external
 pressure on a cylinder is negative), acting normal to the deformed
 mid-surface and on its deformed area, does the virtual work:
 
 .. math::
     :label: fp-virtual-work
 
-    \delta W_p = \int_{A} p \, \mathbf{n} \cdot \delta\mathbf{u} \, dA
-               = \int_{A_0} p \, \mathbf{a} \cdot \delta\mathbf{u}
-                 \, dx \, dy,
+    \delta W_p = \int_{A} p \, \boldsymbol{n} \cdot \delta\boldsymbol{u}
+                 \, dA = \int_{A_0} p \, \boldsymbol{a} \cdot
+                 \delta\boldsymbol{u} \, dx \, dy,
     \qquad
-    \mathbf{a} = \mathbf{X}_{,x} \times \mathbf{X}_{,y}
+    \boldsymbol{a} = \boldsymbol{X}_{,x} \times \boldsymbol{X}_{,y}
 
-where `\mathbf{a}` is the area vector of the deformed mid-surface per unit
-undeformed area, `\mathbf{n} \, dA = \mathbf{a} \, dx \, dy`. For the models
+where `\boldsymbol{a}` is the area vector of the deformed mid-surface per
+unit undeformed area, `\boldsymbol{n} \, dA = \boldsymbol{a} \, dx \, dy`.
+For the models
 based on the shear deformation theories, FSDT and TSDT, the pressure acts on
 the mid-surface, such that only `u`, `v` and `w` enter Eq.
 :eq:`fp-virtual-work`, never the rotations `\phi_x` and `\phi_y`.
@@ -62,12 +63,12 @@ In the local basis:
 .. math::
     :label: fp-tangents
 
-    \mathbf{X}_{,x} = \mathbf{A} = \begin{Bmatrix} 1 + u_{,x} \\ v_{,x} \\
-                                   w_{,x} \end{Bmatrix},
+    \boldsymbol{X}_{,x} = \begin{Bmatrix} 1 + u_{,x} \\ v_{,x} \\
+                          w_{,x} \end{Bmatrix},
     \qquad
-    \mathbf{X}_{,y} = \mathbf{B} = \begin{Bmatrix} u_{,y} \\
-                                   1 + v_{,y} + k_w w \\
-                                   w_{,y} - k_v v \end{Bmatrix}
+    \boldsymbol{X}_{,y} = \begin{Bmatrix} u_{,y} \\
+                          1 + v_{,y} + k_w w \\
+                          w_{,y} - k_v v \end{Bmatrix}
 
 with the factors of the kinematics of each model:
 
@@ -81,34 +82,34 @@ cylinder, Sanders           `1/r`     `1/r`
 
 For the plates and the Sanders cylinders Eq. :eq:`fp-tangents` is the exact
 geometry, and `w_{,y} - v/r` is the rotation of the Sanders kinematics,
-`\phi_y = -w_{,y} + v/r`, see ``theory/shells/cylshell_clpt_sanders`` and
-``theory/shells/fsdt_tsdt``. The Donnell cylinders neglect `v/r`
-in the rotation, as their strains do. The area vector `\mathbf{a} =
-\mathbf{A} \times \mathbf{B}` is bilinear in the displacement gradients:
+`\phi_y = -w_{,y} + v/r`, see :mod:`panels.models`. The Donnell cylinders
+neglect `v/r` in the rotation, as their strains do. The area vector
+`\boldsymbol{a} = \boldsymbol{X}_{,x} \times \boldsymbol{X}_{,y}` is
+bilinear in the displacement gradients:
 
 .. math::
     :label: fp-area-vector
 
-    \mathbf{a} = \mathbf{a}_0 + \mathbf{a}_1 + \mathbf{a}_2,
+    \boldsymbol{a} = \boldsymbol{a}_0 + \boldsymbol{a}_1 + \boldsymbol{a}_2,
     \qquad
-    \mathbf{a}_0 = \begin{Bmatrix} 0 \\ 0 \\ 1 \end{Bmatrix},
+    \boldsymbol{a}_0 = \begin{Bmatrix} 0 \\ 0 \\ 1 \end{Bmatrix},
     \qquad
-    \mathbf{a}_1 = \begin{Bmatrix} -w_{,x} \\ -w_{,y} + k_v v \\
+    \boldsymbol{a}_1 = \begin{Bmatrix} -w_{,x} \\ -w_{,y} + k_v v \\
                    u_{,x} + v_{,y} + k_w w \end{Bmatrix},
 
 .. math::
     :label: fp-area-vector-2
 
-    \mathbf{a}_2 = \begin{Bmatrix}
+    \boldsymbol{a}_2 = \begin{Bmatrix}
         v_{,x} (w_{,y} - k_v v) - w_{,x} (v_{,y} + k_w w) \\
         w_{,x} u_{,y} - u_{,x} (w_{,y} - k_v v) \\
         u_{,x} (v_{,y} + k_w w) - v_{,x} u_{,y}
     \end{Bmatrix}
 
-The dead part `\mathbf{a}_0` is the dead load. The first-order part
-`\mathbf{a}_1` contains the rotation of the normal, `(-w_{,x}, -w_{,y} + k_v
-v)`, and the change of area, `u_{,x} + v_{,y} + k_w w`, which is the sum of
-the linear membrane strains `\varepsilon_{xx} + \varepsilon_{yy}`.
+The dead part `\boldsymbol{a}_0` is the dead load. The first-order part
+`\boldsymbol{a}_1` contains the rotation of the normal, `(-w_{,x}, -w_{,y} +
+k_v v)`, and the change of area, `u_{,x} + v_{,y} + k_w w`, which is the sum
+of the linear membrane strains `\varepsilon_{xx} + \varepsilon_{yy}`.
 
 
 Truncation consistent with the strains
@@ -121,10 +122,10 @@ ordered alike, `\delta u \sim \varepsilon^{1/2} \delta w`, such that the
 integrand of Eq. :eq:`fp-virtual-work`, `p (a_z \delta w + a_x \delta u +
 a_y \delta v)`, has:
 
-- from `\mathbf{a}_0 + \mathbf{a}_1`: the terms `p \, \delta w` and `p \,
-  O(\varepsilon) \, \delta w`;
-- from `\mathbf{a}_2`: the terms `p \, O(\varepsilon^2) \, \delta w`, of the
-  order of the terms neglected by the strains themselves.
+- from `\boldsymbol{a}_0 + \boldsymbol{a}_1`: the terms `p \, \delta w` and
+  `p \, O(\varepsilon) \, \delta w`;
+- from `\boldsymbol{a}_2`: the terms `p \, O(\varepsilon^2) \, \delta w`, of
+  the order of the terms neglected by the strains themselves.
 
 The consistent truncation is therefore the first-order area vector,
 ``follower=True`` or ``'linear'``:
@@ -132,7 +133,7 @@ The consistent truncation is therefore the first-order area vector,
 .. math::
     :label: fp-truncation
 
-    \mathbf{a} \approx \mathbf{a}_0 + \mathbf{a}_1
+    \boldsymbol{a} \approx \boldsymbol{a}_0 + \boldsymbol{a}_1
 
 With ``follower='quadratic'`` the complete area vector of Eq.
 :eq:`fp-area-vector` is used instead, which is useful to check the
@@ -142,98 +143,99 @@ sensitivity of a result to the truncation.
 Force vector
 ------------
 
-With the approximation of the displacements by the Ritz constants `\{c\}`,
-see :ref:`theory_func_bardell`,
+With the approximation of the displacements by the Ritz constants
+`\boldsymbol{c}`, see :ref:`theory_func_bardell`,
 
 .. math::
     :label: fp-ritz
 
-    u = \{N_u\}^T \{c\}, \qquad v = \{N_v\}^T \{c\}, \qquad
-    w = \{N_w\}^T \{c\}
+    u = \boldsymbol{S}^u \boldsymbol{c}, \qquad v = \boldsymbol{S}^v
+    \boldsymbol{c}, \qquad w = \boldsymbol{S}^w \boldsymbol{c}
 
-where `\{N_u\}`, `\{N_v\}` and `\{N_w\}` are the vectors of the approximation
-functions of each field, null at the positions of the other degrees of
-freedom, Eq. :eq:`fp-virtual-work` gives the force vector of the follower
-pressure:
+where `\boldsymbol{S}^u`, `\boldsymbol{S}^v` and `\boldsymbol{S}^w` are the
+rows of the approximation functions of each field, null at the positions of
+the other degrees of freedom, Eq. :eq:`fp-virtual-work` gives the force
+vector of the follower pressure:
 
 .. math::
     :label: fp-force
 
-    \{F_p(c)\} = \int_{A_0} p \left( \{N_u\} a_x + \{N_v\} a_y + \{N_w\} a_z
-                 \right) dx \, dy
+    \boldsymbol{F}_p(\boldsymbol{c}) = \int_{A_0} p \left( (\boldsymbol{S}^u)^\top a_x +
+    (\boldsymbol{S}^v)^\top a_y + (\boldsymbol{S}^w)^\top a_z \right) dx \,
+    dy
 
-where `\mathbf{a}` is evaluated at `\{c\}` with Eq. :eq:`fp-truncation`, or
-Eq. :eq:`fp-area-vector` for ``'quadratic'``. In the undeformed state,
-`\mathbf{a} = \mathbf{a}_0` and the follower load equals the dead load:
+where `\boldsymbol{a}` is evaluated at `\boldsymbol{c}` with Eq.
+:eq:`fp-truncation`, or Eq. :eq:`fp-area-vector` for ``'quadratic'``. In
+the undeformed state, `\boldsymbol{a} = \boldsymbol{a}_0` and the follower
+load equals the dead load:
 
 .. math::
     :label: fp-force-reference
 
-    \{F_p(0)\} = \int_{A_0} p \{N_w\} \, dx \, dy
+    \boldsymbol{F}_p(0) = \int_{A_0} p \, (\boldsymbol{S}^w)^\top \, dx \, dy
 
 which is the reference force vector returned by :meth:`.Shell.calc_fext`,
-see :func:`.shell_fext`. For the first-order area vector `\{F_p\}` is affine
-in `\{c\}`:
+see :func:`.shell_fext`. For the first-order area vector `\boldsymbol{F}_p` is affine
+in `\boldsymbol{c}`:
 
 .. math::
     :label: fp-force-affine
 
-    \{F_p(c)\} = \{F_p(0)\} + [K_p] \{c\}
+    \boldsymbol{F}_p(\boldsymbol{c}) = \boldsymbol{F}_p(0) - \boldsymbol{K}_F \boldsymbol{c}
+
+with the load stiffness matrix `\boldsymbol{K}_F` of Eq. :eq:`fp-jacobian`.
 
 
 Load stiffness matrix
 ---------------------
 
-The Jacobian of the force vector, the load stiffness, is:
+The load stiffness matrix, returned by :meth:`.Shell.calc_kCfollower`, is
+the Jacobian of the force vector with the sign of a stiffness, such that
+all the stiffness matrices are additive, see Eq. :eq:`fp-tangent`:
 
 .. math::
     :label: fp-jacobian
 
-    [K_p] = \frac{\partial \{F_p\}}{\partial \{c\}}, \qquad
-    K_{p_{ij}} = \int_{A_0} p \, \mathbf{N}_i \cdot
-                 \frac{\partial \mathbf{a}}{\partial c_j} \, dx \, dy
+    \boldsymbol{K}_F = - \frac{\partial \boldsymbol{F}_p}{\partial \boldsymbol{c}}, \qquad
+    K_{F_{ij}} = - \int_{A_0} p \, \boldsymbol{S}_i \cdot \frac{\partial
+    \boldsymbol{a}}{\partial c_j} \, dx \, dy
 
-with `\mathbf{N}_i = (N_{u_i}, N_{v_i}, N_{w_i})` and, from `\mathbf{a} =
-\mathbf{A} \times \mathbf{B}`:
+with `\boldsymbol{S}_i = (S^u_i, S^v_i, S^w_i)` the functions of the degree
+of freedom `i` and, from `\boldsymbol{a} = \boldsymbol{X}_{,x} \times
+\boldsymbol{X}_{,y}`:
 
 .. math::
     :label: fp-da-dc
 
-    \frac{\partial \mathbf{a}}{\partial c_j} =
-        \frac{\partial \mathbf{A}}{\partial c_j} \times \mathbf{B}
-        + \mathbf{A} \times \frac{\partial \mathbf{B}}{\partial c_j}
+    \frac{\partial \boldsymbol{a}}{\partial c_j} =
+        \frac{\partial \boldsymbol{X}_{,x}}{\partial c_j} \times
+        \boldsymbol{X}_{,y} + \boldsymbol{X}_{,x} \times \frac{\partial
+        \boldsymbol{X}_{,y}}{\partial c_j}
 
-where `\partial \mathbf{A}/\partial c_j = (N_{u_j,x}, N_{v_j,x},
-N_{w_j,x})` and `\partial \mathbf{B}/\partial c_j = (N_{u_j,y}, N_{v_j,y} +
-k_w N_{w_j}, N_{w_j,y} - k_v N_{v_j})`. For the first-order area vector,
-`\mathbf{A}` and `\mathbf{B}` are replaced by `\mathbf{A}_0 = e_x` and
-`\mathbf{B}_0 = e_y` in Eq. :eq:`fp-da-dc`, `[K_p]` does not depend on
-`\{c\}`, and its blocks between the fields of the rows (`\delta u, \delta v,
-\delta w`) and of the columns (`u, v, w`) are:
+where `\partial \boldsymbol{X}_{,x}/\partial c_j = (S^u_{j,x},
+S^v_{j,x}, S^w_{j,x})` and `\partial \boldsymbol{X}_{,y}/\partial c_j
+= (S^u_{j,y}, S^v_{j,y} + k_w S^w_j, S^w_{j,y} - k_v S^v_j)`. For the
+first-order area vector, `\boldsymbol{X}_{,x}` and `\boldsymbol{X}_{,y}`
+are replaced by `e_x` and `e_y` in Eq. :eq:`fp-da-dc`, `\boldsymbol{K}_F` does not
+depend on `\boldsymbol{c}`, and its blocks between the fields of the rows
+(`\delta u, \delta v, \delta w`) and of the columns (`u, v, w`) are:
 
 .. math::
     :label: fp-blocks
 
-    [K_p] = \int_{A_0} p \begin{bmatrix}
-        0 & 0 & -\{N_u\}\{N_{w,x}\}^T \\
-        0 & k_v \{N_v\}\{N_v\}^T & -\{N_v\}\{N_{w,y}\}^T \\
-        \{N_w\}\{N_{u,x}\}^T & \{N_w\}\{N_{v,y}\}^T &
-            k_w \{N_w\}\{N_w\}^T
+    \boldsymbol{K}_F = \int_{A_0} p \begin{bmatrix}
+        0 & 0 & (\boldsymbol{S}^u)^\top \boldsymbol{S}^w_{,x} \\
+        0 & -k_v (\boldsymbol{S}^v)^\top \boldsymbol{S}^v &
+            (\boldsymbol{S}^v)^\top \boldsymbol{S}^w_{,y} \\
+        -(\boldsymbol{S}^w)^\top \boldsymbol{S}^u_{,x} &
+            -(\boldsymbol{S}^w)^\top \boldsymbol{S}^v_{,y} &
+            -k_w (\boldsymbol{S}^w)^\top \boldsymbol{S}^w
     \end{bmatrix} dx \, dy
 
-The matrix returned by :meth:`.Shell.calc_kCfollower` is the contribution to
-the tangent stiffness matrix:
-
-.. math::
-    :label: fp-kcfollower
-
-    [K_{C_{follower}}] = - \frac{\partial \{F_p\}}{\partial \{c\}} = -[K_p]
-
-such that all the stiffness matrices are additive, see Eq.
-:eq:`fp-tangent`. For an external pressure on a cylinder with Sanders' kinematics, `p < 0`,
-the block `-k_v p \{N_v\}\{N_v\}^T` of `[K_{C_{follower}}]` is positive
-definite, the stiffening that cancels the destabilizing hoop prestress of the
-rigid rotation, see :ref:`follower_pressure_ring`.
+For an external pressure on a cylinder with Sanders' kinematics, `p < 0`,
+the block `-k_v p (\boldsymbol{S}^v)^\top \boldsymbol{S}^v` of `\boldsymbol{K}_F` is
+positive definite, the stiffening that cancels the destabilizing hoop
+prestress of the rigid rotation, see :ref:`follower_pressure_ring`.
 
 
 Internal force vector, residual and tangent stiffness
@@ -241,47 +243,46 @@ Internal force vector, residual and tangent stiffness
 
 The pressures of the loads added with ``cte=False`` are multiplied by the
 load factor `\lambda`, ``inc``, and those with ``cte=True`` are constant.
-Writing `\{F_p(c)\}` for the sum over the follower loads with their
+Writing `\boldsymbol{F}_p(\boldsymbol{c})` for the sum over the follower loads with their
 multipliers, the residual of the equilibrium is:
 
 .. math::
     :label: fp-residual
 
-    \{R(c, \lambda)\} = \{F_{ext}(\lambda)\} + \left( \{F_p(c)\} -
-                        \{F_p(0)\} \right) - \{F_{int}^e(c)\}
+    \boldsymbol{R}(\boldsymbol{c}, \lambda) = \boldsymbol{F}_{int}^e(\boldsymbol{c}) - \left(
+    \boldsymbol{F}_p(\boldsymbol{c}) - \boldsymbol{F}_p(0) \right) - \boldsymbol{F}_{ext}(\lambda)
 
-where `\{F_{ext}(\lambda)\}` is :meth:`.Shell.calc_fext`, which includes the
-reference part `\{F_p(0)\}` of the follower loads, and `\{F_{int}^e(c)\}` is
-the internal force vector of the strains. :meth:`.Shell.calc_fint` returns
-the internal force vector with the configuration-dependent part of the
-follower loads:
+where `\boldsymbol{F}_{ext}(\lambda)` is :meth:`.Shell.calc_fext`, which includes the
+reference part `\boldsymbol{F}_p(0)` of the follower loads, and
+`\boldsymbol{F}_{int}^e(\boldsymbol{c})` is the internal force vector of the strains.
+:meth:`.Shell.calc_fint` returns the internal force vector with the
+configuration-dependent part of the follower loads:
 
 .. math::
     :label: fp-fint
 
-    \{F_{int}(c, \lambda)\} = \{F_{int}^e(c)\} - \left( \{F_p(c)\} -
-                              \{F_p(0)\} \right)
+    \boldsymbol{F}_{int}(\boldsymbol{c}, \lambda) = \boldsymbol{F}_{int}^e(\boldsymbol{c}) - \left(
+    \boldsymbol{F}_p(\boldsymbol{c}) - \boldsymbol{F}_p(0) \right)
 
-such that `\{R\} = \{F_{ext}(\lambda)\} - \{F_{int}(c, \lambda)\}`, the form
-used by :class:`structsolve.Analysis`. The tangent stiffness matrix,
-:meth:`.Shell.calc_kT`, is its exact Jacobian:
+such that `\boldsymbol{R} = \boldsymbol{F}_{int}(\boldsymbol{c}, \lambda) - \boldsymbol{F}_{ext}(\lambda)`,
+the form used by :class:`structsolve.Analysis`. The tangent stiffness
+matrix, :meth:`.Shell.calc_kT`, is its exact Jacobian, `\partial \boldsymbol{R}/\partial \boldsymbol{c}`:
 
 .. math::
     :label: fp-tangent
 
-    [K_T] = \frac{\partial \{F_{int}\}}{\partial \{c\}}
-          = [K_0] + [K_{0L}] + [K_{L0}] + [K_{LL}] + [K_{G_{NL}}]
-            + [K_G(N_0 + N_L)] + [K_{C_{follower}}]
+    \boldsymbol{K}_T = \frac{\partial \boldsymbol{F}_{int}}{\partial \boldsymbol{c}}
+          = \boldsymbol{K}_{C0} + \boldsymbol{K}_{CNL} + \boldsymbol{K}_{GNL} + \boldsymbol{K}_G(\bar{\boldsymbol{N}} + \boldsymbol{N}_L) + \boldsymbol{K}_F
 
-and the derivative of the residual with respect to the load factor, used by
+and minus the derivative of the residual with respect to the load factor, used by
 the arc-length methods, is the load vector of the current configuration,
 ``calc_fext(inc=1., c=c)`` for the loads proportional to `\lambda`:
 
 .. math::
     :label: fp-dr-dlambda
 
-    \frac{\partial \{R\}}{\partial \lambda} = \{F_{ext}(1)\} + \{F_p(c)\} -
-                                             \{F_p(0)\}
+    -\frac{\partial \boldsymbol{R}}{\partial \lambda} = \boldsymbol{F}_{ext}(1) +
+    \boldsymbol{F}_p(\boldsymbol{c}) - \boldsymbol{F}_p(0)
 
 From version 0.5.0, ``structsolve`` passes the load factor to the callables
 that accept the keyword argument ``inc`` and uses Eq. :eq:`fp-dr-dlambda` in
@@ -293,82 +294,123 @@ Linear analyses
 
 **Linear static analysis.** A geometrically linear structure under a
 follower load with the first-order area vector is in equilibrium when
-`[K_0]\{c\} = \{F_p(c)\}`, i.e., from Eqs. :eq:`fp-force-affine` and
-:eq:`fp-kcfollower`:
+`\boldsymbol{K}_{C0}\boldsymbol{c} = \boldsymbol{F}_p(\boldsymbol{c})`, i.e., from Eq.
+:eq:`fp-force-affine`:
 
 .. math::
     :label: fp-linear-static
 
-    \left( [K_0] + [K_{C_{follower}}] \right) \{c\} = \{F_p(0)\}
+    \left( \boldsymbol{K}_{C0} + \boldsymbol{K}_F \right) \boldsymbol{c} = \boldsymbol{F}_p(0)
 
 an unsymmetric linear system in general, solved by
 ``structsolve.Analysis.static(NLgeom=False)`` when ``calc_fext`` accepts the
 configuration ``c``.
 
-**Linear buckling, static criterion.** With the prestate `\{c_0\}` of the
-reference load, the geometric stiffness `[K_G(c_0)]` and the load stiffness
-both scale with the load factor:
+**Linear buckling, static criterion.** With the pre-buckling state
+`\hat{\boldsymbol{c}}` of the reference load, the geometric stiffness
+`\boldsymbol{K}_G(\hat{\boldsymbol{c}})` and the load stiffness both scale with the load factor:
 
 .. math::
     :label: fp-lb
 
-    \left( [K_0] + \lambda \left( [K_G(c_0)] + [K_{C_{follower}}] \right)
-    \right) \{c\} = \{0\}
+    \left( \boldsymbol{K}_{C0} + \lambda \left( \boldsymbol{K}_G(\hat{\boldsymbol{c}}) + \boldsymbol{K}_F \right)
+    \right) \boldsymbol{c} = \boldsymbol{0}
 
 solved by ``structsolve.lb(kC0, kG + kCfollower)``, which uses the solvers
 of unsymmetric matrices when needed.
 
 **Kinetic criterion.** A non-conservative system may lose stability by
-flutter, which Eq. :eq:`fp-lb` does not detect: the eigenvalues
-`\lambda^2 = -\omega^2` of `([K_T] + \lambda^2 [M])\{c\} = \{0\}`, with the
-load stiffness in `[K_T]`, are real below the critical load and become
-complex conjugate pairs at a flutter load, ``structsolve.freq``.
+flutter, which Eq. :eq:`fp-lb` does not detect: the eigenvalues `\lambda^2
+= -\omega^2` of `(\boldsymbol{K}_T + \lambda^2 \boldsymbol{M})\boldsymbol{c} = \boldsymbol{0}`, with the load
+stiffness in `\boldsymbol{K}_T`, are real below the critical load and become complex
+conjugate pairs at a flutter load, ``structsolve.freq``.
 
 
 Symmetry of the load stiffness matrix
 -------------------------------------
 
-For the first-order area vector, `[K_p]` is the matrix of the bilinear form
+For the first-order area vector, the block of the rows `\delta u` and of the
+columns `w` of Eq. :eq:`fp-blocks` is `(\boldsymbol{S}^u)^\top
+\boldsymbol{S}^w_{,x}`. A symmetric matrix would have its transpose,
+`(\boldsymbol{S}^w_{,x})^\top \boldsymbol{S}^u`, as the block of the rows
+`\delta w` and of the columns `u`, which is instead
+`-(\boldsymbol{S}^w)^\top \boldsymbol{S}^u_{,x}`, and similarly for the
+coupling of `v` and `w`. The difference between the first block and the
+transpose of the second one is a derivative,
 
 .. math::
-    :label: fp-bilinear
+    :label: fp-skew-block
 
-    P(\delta, \Delta) = \int_{A_0} p \, \delta\mathbf{u} \cdot
-                        \mathbf{a}_1(\Delta\mathbf{u}) \, dx \, dy
+    (\boldsymbol{S}^u)^\top \boldsymbol{S}^w_{,x} +
+    (\boldsymbol{S}^u_{,x})^\top \boldsymbol{S}^w = \left(
+    (\boldsymbol{S}^u)^\top \boldsymbol{S}^w \right)_{,x}
 
-and integrating by parts, the skew part is (verified symbolically by
-``check_symmetry`` of ``follower_pressure.py``):
+whereas the blocks of the curvature, `-k_v (\boldsymbol{S}^v)^\top
+\boldsymbol{S}^v` and `-k_w (\boldsymbol{S}^w)^\top \boldsymbol{S}^w`, are
+symmetric. Integrating by parts over the loaded region `A_p`, whose contour
+`\partial A_p` has the outward normal `\{n_x, n_y\}`, the skew part of the
+load stiffness matrix of Eq. :eq:`fp-blocks` is:
 
 .. math::
     :label: fp-skew
 
-    P(\delta, \Delta) - P(\Delta, \delta) =
-    - \oint_{\partial A_p} p \left[ (\delta u \, \Delta w - \delta w \,
-      \Delta u) n_x + (\delta v \, \Delta w - \delta w \, \Delta v) n_y
-      \right] ds
-    + \int_{A_p} \left[ p_{,x} (\delta u \, \Delta w - \delta w \, \Delta u)
-      + p_{,y} (\delta v \, \Delta w - \delta w \, \Delta v) \right]
-      dx \, dy
+    \begin{aligned}
+    \boldsymbol{K}_F - \boldsymbol{K}_F^\top = {} &
+    \oint_{\partial A_p} p \left[ \left( (\boldsymbol{S}^u)^\top
+    \boldsymbol{S}^w - (\boldsymbol{S}^w)^\top \boldsymbol{S}^u \right) n_x
+    + \left( (\boldsymbol{S}^v)^\top \boldsymbol{S}^w -
+    (\boldsymbol{S}^w)^\top \boldsymbol{S}^v \right) n_y \right] ds \\
+    & - \int_{A_p} \left[ p_{,x} \left( (\boldsymbol{S}^u)^\top
+    \boldsymbol{S}^w - (\boldsymbol{S}^w)^\top \boldsymbol{S}^u \right) +
+    p_{,y} \left( (\boldsymbol{S}^v)^\top \boldsymbol{S}^w -
+    (\boldsymbol{S}^w)^\top \boldsymbol{S}^v \right) \right] dx \, dy
+    \end{aligned}
 
-over the loaded region `A_p`, independently of `k_w` and `k_v`. Therefore
-`[K_{C_{follower}}]` is symmetric if and only if `p` is uniform over the
-whole integration domain and, on each edge, either `w = 0` or the
-displacement normal to the edge is zero, `u` on the edges `x = const` and
-`v` on the edges `y = const`. This is the case of simply supported or
-clamped panels, of symmetry planes and of closed rings. Free or partially
-restrained edges, patches, whose edges are inside the shell, and a
-non-uniform `p(x, y)` give an unsymmetric load stiffness, a non-conservative
-load. This is Table 2 of [schweizerhof1984Pressure]_ for body-attached
-loads, see also [hibbitt1979Follower]_. When it is symmetric the load is
-conservative, with the potential
+The curvature terms having cancelled, Eq. :eq:`fp-skew` holds for the
+plates and for the Donnell and Sanders cylinders alike. Hence, `\boldsymbol{K}_F` is
+symmetric, and the follower pressure conservative, if and only if:
+
+- `p` is uniform over the loaded region, such that the area integral
+  vanishes; and
+- at each point of the contour of the loaded region, either `w = 0` or the
+  in-plane displacement normal to the contour is zero, i.e. `u = 0` on the
+  edges `x = const` and `v = 0` on the edges `y = const`, such that the
+  contour integral vanishes.
+
+For a load over the whole domain, the second condition is met on the edge
+`x = 0` with the flag ``x1w = 0`` or ``x1u = 0`` of :class:`.Shell`, see
+:ref:`theory_func_bardell`, and likewise on the other edges. These
+conditions are met by simply supported and clamped edges, by symmetry
+planes, and by closed surfaces such as complete rings and cylinders, for
+which no boundary exists; in these cases the load potential is the pressure
+times the change of the enclosed volume. Conversely, `\boldsymbol{K}_F`
+is unsymmetric for free or partially restrained edges, for a pressure
+applied on a patch whose edges lie inside the shell, and for a pressure that
+varies over the surface. This agrees with [hibbitt1979Follower]_, p. 938,
+for whom a uniform pressure on a fully enclosed volume, or on a surface
+whose boundaries have prescribed displacements, gives a symmetric load
+stiffness, unlike free edges and a non-uniform pressure, p. 939, and, for
+body-attached loads, with Table 2 of [schweizerhof1984Pressure]_, whose
+boundary terms vanish under the conditions of their Sec. 3.2.1, Eqs.
+(32)-(35), e.g. when at least two displacement components are prescribed
+at the edge, or when the edge is restrained normal to a continuous
+surface, such as the undeformed surface of the shell, `w = 0`.
+
+A closed cylinder of ``panels`` is an assembly of domains, see
+:func:`.create_cylinder`, whose load stiffness matrices are each
+unsymmetric: the contour integrals along a connected edge cancel only when
+the displacements of the two sides are equal, which holds for the matrices
+reduced by the null-space method, symmetric to round-off, but not for the
+assembled matrix of the penalty method, which remains unsymmetric. When it
+is symmetric the load is conservative, with the potential
 
 .. math::
     :label: fp-potential
 
-    \Pi_p = - \lambda \left( \{F_p(0)\}^T \{c\} + \frac{1}{2} \{c\}^T [K_p]
-            \{c\} \right)
+    \Pi_p = - \lambda \left( \boldsymbol{F}_p(0)^\top \boldsymbol{c} - \frac{1}{2}
+            \boldsymbol{c}^\top \boldsymbol{K}_F \boldsymbol{c} \right)
 
-For the quadratic area vector `[K_p]` depends on `\{c\}` and is not
+For the quadratic area vector `\boldsymbol{K}_F` depends on `\boldsymbol{c}` and is not
 symmetric in general. A hydrostatic head, a pressure that depends on the
 current position, would add a further term, not implemented.
 
@@ -407,11 +449,11 @@ second variation of the total potential is
     :label: fp-ring
 
     U_2 = \frac{1}{2} \oint \left( A \varepsilon_{yy}^2 + D \kappa_{yy}^2 +
-          N_{yy} \beta_y^2 \right) dy - \frac{1}{2} \oint p \, \mathbf{u}
-          \cdot \mathbf{a}_1(\mathbf{u}) \, dy
+          N_{yy} \beta_y^2 \right) dy - \frac{1}{2} \oint p \, \boldsymbol{u}
+          \cdot \boldsymbol{a}_1(\boldsymbol{u}) \, dy
 
 with `\beta_y = w_{,y} - k_v v`. In the inextensional limit its singularity
-gives `p_{cr} r^3/D` (``ring_buckling`` in ``follower_pressure.py``):
+gives `p_{cr} r^3/D`, derived with SymPy:
 
 ======================= =============== =============== ==================
 kinematics               follower         dead             centrally
@@ -422,9 +464,11 @@ Sanders                  `-3`             `-4`             `-9/2`
 Donnell                  `-16/5`          `-4`             `-64/15`
 ======================= =============== =============== ==================
 
-The Sanders values are the classical ones, see [timoshenko1961Stability]_,
-[brush1975Buckling]_ and Table 3 of [schweizerhof1984Pressure]_, and the
-follower value is the hydrostatic
+The Sanders values are the classical ones, see [timoshenko1961Stability]_
+and [brush1975Buckling]_. For a ring, with `D` replaced by the bending
+stiffness `EI` of the ring, they are the analytical values `3`, `4` and
+`4.5` that Table 3 of [schweizerhof1984Pressure]_ lists as reference for
+their finite element results. The follower value is also the hydrostatic
 critical pressure `3D/r^3` of the long cylinders, Eq. (66) of
 [nasa2020SP8007]_. With the FSDT and the transverse shear stiffness `S`, the
 follower load gives `p_{cr} = 3D/(r^3 (1 + 4D/(S r^2)))`, the shell formula
@@ -442,13 +486,12 @@ whenever `v` is free at an edge. The follower load stiffness adds `-\oint p
 Implementation and verification
 -------------------------------
 
-- ``theory/shells/follower_pressure/follower_pressure.py``: the sympy
-  derivation of Eqs. :eq:`fp-area-vector`, :eq:`fp-force` and
-  :eq:`fp-jacobian` in the notation of the kernels, the symmetry identity
-  Eq. :eq:`fp-skew` and the ring closed forms; ``write_pyx.py`` writes the
-  kernels ``calc_fext_follower`` (Eq. :eq:`fp-force`) and
-  ``fkCfollower_num`` (Eq. :eq:`fp-kcfollower`, assembled in full, not as an
-  upper triangle) into every ``panels/models/<model>_num.pyx``, integrated
+- Eqs. :eq:`fp-area-vector`, :eq:`fp-force` and :eq:`fp-jacobian` are
+  derived with SymPy in the notation of the kernels, which also verifies the
+  symmetry identity Eq. :eq:`fp-skew` and the ring closed forms, and writes
+  the kernels ``calc_fext_follower`` (Eq. :eq:`fp-force`) and
+  ``fkCfollower_num`` (Eq. :eq:`fp-jacobian`, assembled in full, not as an
+  upper triangle) of the modules ``panels.models.<model>_num``, integrated
   with ``nx*ny`` Gauss-Legendre points over each loaded patch, the same
   points as Eq. :eq:`fp-force-reference` in :func:`.shell_fext`.
 - ``tests/tests_shell/test_follower_pressure.py``: Eq.
@@ -457,6 +500,9 @@ Implementation and verification
   Eq. :eq:`fp-tangent`, quadratic convergence of Newton-Raphson and Riks,
   the symmetry conditions of Eq. :eq:`fp-skew` and Eq.
   :eq:`fp-linear-static`.
+- ``tests/multidomain/test_follower_pressure_multidomain.py``: the
+  follower loads in a :class:`.MultiDomain` assembly, and the symmetry of
+  the load stiffness of a closed cylinder reduced by the null-space method.
 - ``tests/tests_shell/test_follower_pressure_validation.py`` and the
   notebooks of :ref:`ex_follower_pressure`: the ring closed forms, finite
   cylinders, [nasa2020SP8007]_, [kardomateas1993Orthotropic]_,

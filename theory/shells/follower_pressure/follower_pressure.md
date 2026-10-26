@@ -24,8 +24,8 @@ writes `calc_fext_follower` and `fkCfollower_num` at the end of every
 
     dW_p = int p n.du dA = int p a.du dx dy,    a = X,x × X,y,   X = X0 + u
 
-    A = X,x = (1 + u,x,  v,x,  w,x)
-    B = X,y = (u,y,  1 + v,y + kw w,  w,y - kv v)
+    X,x = (1 + u,x,  v,x,  w,x)
+    X,y = (u,y,  1 + v,y + kw w,  w,y - kv v)
 
 | model              | `kw`  | `kv`  |
 |--------------------|-------|-------|
@@ -33,7 +33,7 @@ writes `calc_fext_follower` and `fkCfollower_num` at the end of every
 | Donnell cylinder   | `1/r` | 0     |
 | Sanders cylinder   | `1/r` | `1/r` |
 
-For the plate and the Sanders cylinder `A × B` is the exact area vector; the
+For the plate and the Sanders cylinder `X,x × X,y` is the exact area vector; the
 Donnell cylinder neglects `v/r` in the rotation, as its strains do. With
 `a = a0 + a1 + a2` (orders 0, 1, 2 in the displacement gradients):
 
@@ -51,31 +51,34 @@ term up to `O(eps) p dw` with `a0 + a1`, and `a2` contributes `O(eps^2) p dw`,
 the order of what the von Kármán, Donnell and Sanders strains neglect.
 
 - `follower=True` / `'linear'` (default follower): `a = a0 + a1`, the
-  consistent truncation. `F_p(c)` is affine, `K_p` constant.
+  consistent truncation. `F_p(c)` is affine, `K_F` constant.
 - `follower='quadratic'`: `a = a0 + a1 + a2`, the complete area vector of the
-  kinematics, for sensitivity checks of the truncation; `K_p` depends on `c`.
+  kinematics, for sensitivity checks of the truncation; `K_F` depends on `c`.
 
 ## Force vector and load stiffness
 
-    F_p(c) = int p (Nu a_x + Nv a_y + Nw a_z) dx dy
+    F_p(c) = int p (Su^T a_x + Sv^T a_y + Sw^T a_z) dx dy
 
-    kCfollower = -dF_p/dc
+    K_F = kCfollower = -dF_p/dc
 
-    kCfollower[i, j] = -int p N_i . (da/dq_k) (dq_k/dc_j) dx dy
+    K_F[i, j] = -int p S_i . (da/dq_k) (dq_k/dc_j) dx dy
 
 with the generated blocks (per unit `p`, linear part; `'quadratic'` adds the
 terms in `qf`, see `output_expressions_python/`):
 
-    [u, w] = +Nu Nw,x          [v, w] = +Nv Nw,y          [v, v] = -kv Nv Nv
-    [w, u] = -Nw Nu,x          [w, v] = -Nw Nv,y          [w, w] = -kw Nw Nw
+    [u, w] = +Su^T Sw,x     [v, w] = +Sv^T Sw,y     [v, v] = -kv Sv^T Sv
+    [w, u] = -Sw^T Su,x     [w, v] = -Sw^T Sv,y     [w, w] = -kw Sw^T Sw
+
+with `Su`, `Sv`, `Sw` the rows of the approximation functions of `u`, `v`,
+`w`, `S_i = (Su_i, Sv_i, Sw_i)`
 
 Residual and tangent, `mult = inc` for `cte=False` and `1` for `cte=True`:
 
-    R(c, inc) = fext(inc) - fint(c, inc)
+    R(c, inc) = fint(c, inc) - fext(inc)
     fint(c, inc) = fint_elastic(c) - sum mult (F_p(c) - F_p(0))
     K_T(c, inc) = kC(c, NLgeom=True, inc) + kG(c, NLgeom=True)
                 = ... + kCfollower(c, inc)
-    dR/dinc = fext(inc=1., c=c)        (Shell.calc_fext with c)
+    -dR/dinc = fext(inc=1., c=c)       (Shell.calc_fext with c)
 
 At `c = 0` the follower load equals the dead load: `calc_fext` returns
 `F_p(0)` as for `follower=False`.
@@ -93,16 +96,21 @@ symbolically by `check_symmetry`)
     P(d, D) - P(D, d) = - oint p [(du Dw - dw Du) nx + (dv Dw - dw Dv) ny] ds
                         + int [p,x (du Dw - dw Du) + p,y (dv Dw - dw Dv)] dA
 
-over the loaded region, independently of `kw` and `kv`. Hence `K_p` is
+over the loaded region, independently of `kw` and `kv`. Hence `K_F` is
 symmetric if and only if (for all admissible fields) `p` is uniform over the
 whole integration domain and on each edge `w = 0` or the normal displacement
 is zero (`u` on `x = const`, `v` on `y = const`): simply supported or clamped
 panels, symmetry planes, closed rings. It is unsymmetric (non-conservative
 load) for free or partially restrained edges, for patches (their edges are
-inside the shell) and for a varying `p(x, y)`. This is the result of Hibbitt
-(1979) and Schweizerhof and Ramm (1984) for a pressure depending on the
-reference coordinates: symmetric for closed surfaces or a fixed boundary of
-the loaded surface. A hydrostatic head `p(X)` of the current position is
+inside the shell) and for a varying `p(x, y)`. This agrees with Hibbitt
+(1979), p. 938 (uniform pressure on a fully enclosed volume, or with
+prescribed displacements on the boundaries of the loaded surface:
+symmetric) and p. 939 (free edges, non-uniform pressure: unsymmetric), and,
+for a pressure depending on the reference coordinates, with Schweizerhof and
+Ramm (1984), Table 2 and Sec. 3.2.1, Eqs. (32)-(35) (the boundary terms
+vanish e.g. when at least two displacement components are prescribed at the
+edge, or when the edge is restrained normal to a continuous surface, such as
+the undeformed surface, `w = 0`). A hydrostatic head `p(X)` of the current position is
 not implemented. For `'quadratic'` the load stiffness at `c != 0` is not
 symmetric in general.
 
@@ -126,8 +134,10 @@ Inextensional limit, `p r^3/D`:
 | Sanders    | -3                     | -4                        | -9/2               |
 | Donnell    | -16/5                  | -4                        | -64/15             |
 
-The Sanders values are the analytical values of Schweizerhof and Ramm (1984),
-Table 3 (hydrostatic 3, constant directional 4, centrally directed 4.5).
+For a ring, with `D` replaced by the bending stiffness `EI` of the ring, the
+Sanders values are the analytical values listed by Schweizerhof and Ramm
+(1984), Table 3 (hydrostatic 3, constant directional 4, centrally directed
+4.5), as reference for their finite element results of a ring.
 
 FSDT, Sanders, follower, inextensional: `p = -3 D/(r^3 (1 + 4 D/(S r^2)))`,
 `S` the transverse shear stiffness, which is the shell formula of Han,

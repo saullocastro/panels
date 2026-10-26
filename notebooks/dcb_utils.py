@@ -263,14 +263,14 @@ def solve_dcb(case, openings, kw=1.e6, epsilon=1.e-4, NR_kT_update=3,
     k_o, tau_o, G1c = case['k_o'], case['tau_o'], case['G1c']
 
     #NOTE with the null-space method the Newton-Raphson iterations solve the
-    #     problem reduced to the independent Ritz constants, c = T c_r, and
+    #     problem reduced to the independent Ritz constants, c = Z c_r, and
     #     the convergence criterion uses the reduced vectors. The operators
     #     are the identity with the penalty method
     if assy.conn_method == 'null-space':
-        T = assy.get_T()
-        red = lambda v: T.T @ v
-        red_mat = lambda K: csr_matrix(T.T @ K @ T)
-        expand = lambda v: T @ v
+        Z = assy.get_Z()
+        red = lambda v: Z.T @ v
+        red_mat = lambda K: csr_matrix(Z.T @ K @ Z)
+        expand = lambda v: Z @ v
     else:
         red = red_mat = expand = lambda x: x
 

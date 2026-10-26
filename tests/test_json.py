@@ -285,9 +285,9 @@ def test_multidomain(conn_method):
     md.fext = md.calc_fext()
     md.update_TSL_history(np.linspace(0., 0.5, 12).reshape(3, 4))
     data = _save(md)
-    assert md.T is not None or conn_method == 'penalty'
+    assert md.Z is not None or conn_method == 'penalty'
     md3 = load_md(io.BytesIO(data))
-    assert md3.T is None
+    assert md3.Z is None
     assert_array_equal(md3.dmg_index, md.dmg_index)
     assert_array_equal(md3.fext, md.fext)
     for connecti, connecti3 in zip(md.conn, md3.conn):
@@ -312,6 +312,19 @@ def test_multidomain_conn_used():
     assert md2.conn is None
     assert len(md2._conn_used) == len(conn)
     _assert_same_matrices(md2.calc_kC(), md.calc_kC())
+
+
+def test_multidomain_T_tol_of_older_files():
+    r"""The tolerance of the null-space basis saved as ``'T_tol'`` by panels
+    0.13.11 is read into ``MultiDomain._Z_tol``"""
+    md = _multidomain('null-space')
+    md.get_Z(tol=1.e-8)
+    data = _save(md)
+    model = _model_json(data)
+    assert model['data']['Z_tol'] == 1.e-8
+    model['data']['T_tol'] = model['data'].pop('Z_tol')
+    md2 = load_md(_rewrite(data, model=model))
+    assert md2._Z_tol == 1.e-8
 
 
 def test_multidomain_panel_not_in_assembly():

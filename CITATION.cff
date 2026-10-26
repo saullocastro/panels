@@ -5,7 +5,9 @@ type: software
 abstract: >-
   The `panels` module provides semi-analytical (Ritz) models for plates,
   cylindrical shells and stiffened panels, single or multi-domain, using
-  Bardell's hierarchical functions as approximation functions. Usually, this
+  Bardell's hierarchical functions as approximation functions, with the
+  classical, first-order and third-order shear deformation theories and
+  laminates offset from the reference surface. Usually, this
   module is used for:
 
   * Linear static analyses
@@ -21,7 +23,7 @@ abstract: >-
     debonding defects
 message: >-
   Please, cite this software using:
-  Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.13.11). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
+  Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.14.0). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
 authors:
   - family-names: Castro
     given-names: Saullo G. P.
@@ -49,5 +51,5 @@ keywords:
   - vibration
   - panel flutter
   - multi-domain
-version: 0.13.11
-date-released: '2026-10-16'
+version: 0.14.0
+date-released: '2026-10-26'

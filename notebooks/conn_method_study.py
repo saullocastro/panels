@@ -24,11 +24,6 @@ Usage, from the root of the repository::
     python notebooks/conn_method_study.py stamatelos
     python notebooks/conn_method_study.py profile [--only NAME ...]
 
-The penalty results of the DCB cases are those stored by the notebooks in
-``notebooks/results/*.npz``: the penalty runs repeated with the current code
-reproduce them to the round-off, so that ``conn_method_comparison.ipynb``
-only needs ``run --methods null-space``.
-
 ``run`` solves the DCB cases, in parallel, longest first, writing
 ``notebooks/results/conn_methods/<method>/<NAME>.npz`` and the log
 ``<NAME>.log``, where ``<NAME>`` is the name of the results file of the
@@ -38,10 +33,38 @@ and ``stamatelos`` runs ``stamatelos_labeas_2023_multidomain.ipynb`` with
 both methods, saving ``compliance.json`` and ``stamatelos.json`` in the same
 folder. ``profile`` times, for each DCB case and each method, the
 components of one Newton-Raphson iteration of ``dcb_utils.solve_dcb`` at the
-opening of the stored peak load, and the tangent stiffness of each panel,
-updating ``profile.json``; with the iteration counts of the runs, these give
-the distribution of the cost of the runs, see ``predicted_cost``. The
-results are compared in ``conn_method_comparison.ipynb``.
+opening of the peak load of ``notebooks/results/<NAME>.npz``, and the
+tangent stiffness of each panel, updating the entries of the cases in
+``profile.json``; with the iteration counts of the runs, these give the
+distribution of the cost of the runs, see ``predicted_cost``.
+
+``conn_method_comparison.ipynb`` takes the DCB cases from :func:`collect`
+and reads:
+
+- penalty: the results of the DCB notebooks, ``notebooks/results/<NAME>.npz``,
+  computed by the notebooks or by ``dcb_mode_I_validation_rerun.py``; the
+  penalty runs of ``run --methods penalty`` are the same runs and are not
+  read
+- null-space: ``notebooks/results/conn_methods/null_space/<NAME>.npz``
+- ``compliance.json``, ``profile.json`` and ``stamatelos.json`` of
+  ``notebooks/results/conn_methods/``
+
+To compute them again with the current code, after the results of the DCB
+notebooks (``python notebooks/dcb_mode_I_validation_rerun.py run``), delete
+``notebooks/results/conn_methods/null_space/*.npz`` and ``profile.json``,
+otherwise complete runs are kept and entries of cases no longer in the
+notebooks remain, and run::
+
+    python notebooks/conn_method_study.py run --methods null-space
+    python notebooks/conn_method_study.py compliance
+    python notebooks/conn_method_study.py profile
+    python notebooks/conn_method_study.py stamatelos
+
+The run times compared by the notebook were measured with ``run --jobs 1``
+and both methods, one run at a time on an idle machine, the two methods of
+each case one after the other; the times of the penalty runs, which
+reproduce the results of the DCB notebooks, were written into
+``notebooks/results/<NAME>.npz``, see their key ``time_note``.
 
 """
 import argparse
@@ -314,8 +337,8 @@ def profile_case(job, method):
     - ``kC_conn`` and ``fint``: the residual, ``get_kC_conn`` and
       ``calc_fint``
     - ``kT_TSL``: damage-rate stiffness of the cohesive zone
-    - ``sum``, ``reduce``, ``vec``: sum of the matrices, `T^T K T` and the
-      products of the vectors by `T` (null-space only)
+    - ``sum``, ``reduce``, ``vec``: sum of the matrices, `\boldsymbol{Z}^\top \boldsymbol{K} \boldsymbol{Z}` and the
+      products of the vectors by `\boldsymbol{Z}` (null-space only)
     - ``solve``: ``structsolve.solve``
     - ``accept`` and ``output``: damage update and reactions of an opening
 
@@ -325,7 +348,7 @@ def profile_case(job, method):
     Returns
     -------
     out : dict
-        Timings in ``'t'``, the setup times ``t_build``, ``t_T`` and
+        Timings in ``'t'``, the setup times ``t_build``, ``t_Z`` and
         ``t_prescribe``, the sizes and the ``cProfile`` statistics of one
         iteration without ``kT_pan``.
 
@@ -350,15 +373,15 @@ def profile_case(job, method):
     out['size'] = size
     if method == 'null-space':
         t = time.perf_counter()
-        T = assy.get_T()
-        out['t_T'] = time.perf_counter() - t
-        out['size_r'] = T.shape[1]
-        out['nnz_T'] = T.nnz
-        red = lambda v: T.T @ v
-        red_mat = lambda K: csr_matrix(T.T @ K @ T)
-        expand = lambda v: T @ v
+        Z = assy.get_Z()
+        out['t_Z'] = time.perf_counter() - t
+        out['size_r'] = Z.shape[1]
+        out['nnz_Z'] = Z.nnz
+        red = lambda v: Z.T @ v
+        red_mat = lambda K: csr_matrix(Z.T @ K @ Z)
+        expand = lambda v: Z @ v
     else:
-        out['t_T'] = 0.
+        out['t_Z'] = 0.
         out['size_r'] = size
         red = red_mat = expand = lambda x: x
 
@@ -528,7 +551,7 @@ def predicted_cost(prof, n, kT_pan=None):
     t = prof['t']
     kT = t['kT_pan'] if kT_pan is None else kT_pan
     return dict(
-        setup=prof['t_build'] + prof['t_T'],
+        setup=prof['t_build'] + prof['t_Z'],
         kT_pan=n['kT_pan']*kT,
         residual=n['residual']*(t['kC_conn'] + t['fint']),
         kT_TSL=n['iter']*t['kT_TSL'],

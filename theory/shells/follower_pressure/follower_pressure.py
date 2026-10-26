@@ -60,7 +60,7 @@ For the first-order area vector the load stiffness, as a bilinear form
         - oint p [(du Dw - dw Du) nx + (dv Dw - dw Dv) ny] ds
         + int [p,x (du Dw - dw Du) + p,y (dv Dw - dw Dv)] dA
 
-over the loaded region. ``K_p`` is therefore symmetric when ``p`` is uniform
+over the loaded region. ``K_F`` is therefore symmetric when ``p`` is uniform
 over the whole integration domain and, on each edge, either ``w = 0`` or the
 displacement normal to the edge is zero (``u`` on the edges ``x = const``,
 ``v`` on ``y = const``), e.g. simply supported or clamped panels, or the
@@ -113,20 +113,21 @@ a, b, r = symbols('a, b, r', positive=True)
 #: part a0, both are 0. or 1. in the kernels
 qf, ref = symbols('qf, ref')
 #: displacement gradients at an integration point, in physical coordinates
-ux, uy, vx, vy, vv, ww, wx, wy = symbols('ux, uy, vx, vy, vv, ww, wx, wy')
-POINT = (ux, uy, vx, vy, vv, ww, wx, wy)
+u_x, u_y, v_x, v_y, vv, ww, w_x, w_y = symbols(
+    'u_x, u_y, v_x, v_y, vv, ww, w_x, w_y')
+POINT = (u_x, u_y, v_x, v_y, vv, ww, w_x, w_y)
 #: how each point quantity is accumulated from the Ritz constants, with the
 #: field index (0 = u, 1 = v, 2 = w) and the basis functions in the
 #: notation of the kernels
 POINT_SUM = {
-    'ux': (0, '(2/a)*fAuxi*gAu'),
-    'uy': (0, '(2/b)*fAu*gAueta'),
-    'vx': (1, '(2/a)*fAvxi*gAv'),
-    'vy': (1, '(2/b)*fAv*gAveta'),
+    'u_x': (0, '(2/a)*fAu_xi*gAu'),
+    'u_y': (0, '(2/b)*fAu*gAu_eta'),
+    'v_x': (1, '(2/a)*fAv_xi*gAv'),
+    'v_y': (1, '(2/b)*fAv*gAv_eta'),
     'vv': (1, 'fAv*gAv'),
     'ww': (2, 'fAw*gAw'),
-    'wx': (2, '(2/a)*fAwxi*gAw'),
-    'wy': (2, '(2/b)*fAw*gAweta'),
+    'w_x': (2, '(2/a)*fAw_xi*gAw'),
+    'w_y': (2, '(2/b)*fAw*gAw_eta'),
 }
 FIELDS = ('u', 'v', 'w')
 
@@ -147,8 +148,8 @@ def area_vector(geometry, kinematics):
     r"""Complete area vector ``a = A x B`` of the kinematics, and its parts
     ``a0, a1, a2`` of order 0, 1 and 2 in the displacement gradients"""
     kw, kv = kinematic_factors(geometry, kinematics)
-    A = Matrix([1 + ux, vx, wx])
-    B = Matrix([uy, 1 + vy + kw*ww, wy - kv*vv])
+    A = Matrix([1 + u_x, v_x, w_x])
+    B = Matrix([u_y, 1 + v_y + kw*ww, w_y - kv*vv])
     acomp = A.cross(B)
     t = Symbol('t')
     scaled = acomp.subs({q: t*q for q in POINT}, simultaneous=True)
@@ -170,13 +171,13 @@ def kernel_area_vector(geometry, kinematics):
 def trial_derivatives():
     r"""Derivative of each point quantity with respect to a Ritz constant of
     each field, in the notation of the kernels (side ``B``)"""
-    fBu, fBuxi, gBu, gBueta = symbols('fBu, fBuxi, gBu, gBueta')
-    fBv, fBvxi, gBv, gBveta = symbols('fBv, fBvxi, gBv, gBveta')
-    fBw, fBwxi, gBw, gBweta = symbols('fBw, fBwxi, gBw, gBweta')
+    fBu, fBu_xi, gBu, gBu_eta = symbols('fBu, fBu_xi, gBu, gBu_eta')
+    fBv, fBv_xi, gBv, gBv_eta = symbols('fBv, fBv_xi, gBv, gBv_eta')
+    fBw, fBw_xi, gBw, gBw_eta = symbols('fBw, fBw_xi, gBw, gBw_eta')
     zero = {q: 0 for q in POINT}
-    du = {**zero, ux: (2/a)*fBuxi*gBu, uy: (2/b)*fBu*gBueta}
-    dv = {**zero, vx: (2/a)*fBvxi*gBv, vy: (2/b)*fBv*gBveta, vv: fBv*gBv}
-    dw = {**zero, ww: fBw*gBw, wx: (2/a)*fBwxi*gBw, wy: (2/b)*fBw*gBweta}
+    du = {**zero, u_x: (2/a)*fBu_xi*gBu, u_y: (2/b)*fBu*gBu_eta}
+    dv = {**zero, v_x: (2/a)*fBv_xi*gBv, v_y: (2/b)*fBv*gBv_eta, vv: fBv*gBv}
+    dw = {**zero, ww: fBw*gBw, w_x: (2/a)*fBw_xi*gBw, w_y: (2/b)*fBw*gBw_eta}
     return du, dv, dw
 
 
@@ -193,9 +194,11 @@ def kernel_expressions(geometry, kinematics):
     -------
     acode : list
         ``[ax, ay, az]``, the area vector at the integration point, with
-        ``F_p = int p (Nu ax + Nv ay + Nw az) dA``.
+        ``F_p = int p (Su^T ax + Sv^T ay + Sw^T az) dA``, with the rows
+        ``Su``, ``Sv``, ``Sw`` of the approximation functions.
     kblocks : dict
-        ``{(row_field, col_field): expr}`` of the load stiffness ``-dF_p/dc``,
+        ``{(row_field, col_field): expr}`` of the load stiffness ``K_F =
+        -dF_p/dc``,
         only the blocks that are not identically zero.
 
     """
@@ -225,8 +228,9 @@ def check_symmetry():
 
     def a1_of(f, kw, kv):
         u, v, w = f
-        vals = {ux: diff(u, x), uy: diff(u, y), vx: diff(v, x),
-                vy: diff(v, y), vv: v, ww: w, wx: diff(w, x), wy: diff(w, y)}
+        vals = {u_x: diff(u, x), u_y: diff(u, y), v_x: diff(v, x),
+                v_y: diff(v, y), vv: v, ww: w, w_x: diff(w, x),
+                w_y: diff(w, y)}
         return [e.subs(vals) for e in a1]
 
     for geometry, kinematics in (('plate', 'donnell'), ('cylshell', 'donnell'),

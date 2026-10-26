@@ -49,7 +49,7 @@ def _field(p, c, xs, ys):
                                         'cylshell_clpt_donnell',
                                         'cylshell_clpt_sanders'])
 def test_energy(base_model):
-    r"""`\{c\}^T [K] \{c\}` against the line integral of `k_t [(u_1 -
+    r"""`\boldsymbol{c}^\top \boldsymbol{K} \boldsymbol{c}` against the line integral of `k_t [(u_1 -
     u_2)^2 + (v_1 - w_2)^2 + (w_1 + v_2)^2] + k_r (\omega_1 - \omega_2)^2`,
     with `\omega = -\phi_y` evaluated from the displacement field"""
     base, flange = _panels(base_model, seed=3)

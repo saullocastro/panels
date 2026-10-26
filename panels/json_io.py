@@ -36,7 +36,7 @@ The file is a zip archive, compressed with ``ZIP_DEFLATED``, containing:
       {
         "type": "Shell",
         "format_version": 1,
-        "panels_version": "0.13.11",
+        "panels_version": "0.14.0",
         "data": {...}
       }
 
@@ -57,7 +57,7 @@ value is not supported raises ``TypeError``, e.g. the functions of the
 distributed loads :meth:`.Shell.add_distr_load_fixed_x` or of a pressure
 ``p(x, y)``. The following are not stored and are recomputed on demand: the
 structural matrices (``Shell.matrices``, ``StiffPanelBay.kC``,
-``MultiDomain.kC``, ``MultiDomain.T``, ...), the number of threads
+``MultiDomain.kC``, ``MultiDomain.Z``, ...), the number of threads
 ``out_num_cores``, which takes the default of the machine that loads the
 file, and the attributes of Python subclasses, the loaded object having the
 type of the base class.
@@ -141,7 +141,7 @@ _STIFFPANELBAY_ATTRS = (
 _BLADESTIFF1D_ATTRS = (
     'model', 'rho', 'ys', 'bb', 'hb', 'bf', 'hf',
     'bstack', 'bplyts', 'blaminaprops', 'fstack', 'fplyts', 'flaminaprops',
-    'As', 'Asb', 'Asf', 'Jxx', 'Iyy', 'Fx', 'dbf', 'E1', 'S1', 'F1',
+    'As', 'Asb', 'Asf', 'Jxx', 'Iyy', 'Fx', 'dbf', 'E1', 'S1', 'F1', 'GJ',
     )
 _BLADESTIFF2D_ATTRS = (
     'rho', 'ys', 'bb', 'forces_flange', 'bstack', 'bplyts', 'blaminaprops',
@@ -353,14 +353,41 @@ def _list(data, name):
 def _shell_to_data(s, path, w):
     data = _encode_attrs(s, _SHELL_ATTRS, path, w)
     data['lam'] = _encode_lam(s.lam, path + '.lam')
+    # NOTE the per-ply lists filled by Shell._rebuild(), not by the user,
+    #      and the numbers of integration points nx and ny that follow m and
+    #      n, saved with their current value, which older versions read
+    data['derived_lists'] = [name for name in ('plyts', 'laminaprops', 'rhos')
+                             if getattr(s, name) and s._is_derived(name)]
+    data['derived_lists'] += [name for name in ('nx', 'ny')
+                              if getattr(s, '_' + name) is None]
     return data
 
 
 def _shell_from_data(data, r):
     from .shell import Shell
-    _check_keys(data, _SHELL_ATTRS + _SHELL_LEGACY_ATTRS + ('lam', ), 'Shell')
+    _check_keys(data, _SHELL_ATTRS + _SHELL_LEGACY_ATTRS
+                + ('lam', 'derived_lists'), 'Shell')
     s = Shell()
     _decode_attrs(s, data, _SHELL_ATTRS, r)
+    # NOTE files of panels < 0.13.12 have no 'derived_lists', their lists
+    #      are then kept as given by the user
+    for name in data.get('derived_lists', []):
+        if name in ('plyts', 'laminaprops', 'rhos') and getattr(s, name):
+            s._set_derived(name, getattr(s, name))
+        # NOTE nx and ny follow m and n again; those of files without this
+        #      entry, e.g. of panels < 0.14.0, are kept as assigned values
+        if name in ('nx', 'ny'):
+            setattr(s, name, None)
+    # NOTE files of panels < 0.14.0 have no thickness coordinate z in the
+    #      prescribed displacements, their u and v are those of the
+    #      reference surface, z = 0
+    for name, length in (('point_pds', 6), ('point_pds_inc', 6),
+                         ('distr_pds', 6), ('distr_pds_inc', 6),
+                         ('point_pds_values', 8), ('point_pds_values_inc', 8),
+                         ('distr_pds_values', 8), ('distr_pds_values_inc', 8)):
+        for pd in getattr(s, name):
+            if len(pd) == length - 1:
+                pd.append(0.)
     for name in _SHELL_LEGACY_ATTRS:
         if name in data:
             _decode(data[name], r)
@@ -525,7 +552,7 @@ def _multidomain_to_data(md, path, w):
     if md.conn is None and md._conn_used is not None:
         data['conn_used'] = _conn_to_data(md._conn_used, md,
                                           path + '._conn_used', w)
-    data['T_tol'] = _encode(md._T_tol, path + '._T_tol', w)
+    data['Z_tol'] = _encode(md._Z_tol, path + '._Z_tol', w)
     data['rhs_tol'] = _encode(md._rhs_tol, path + '._rhs_tol', w)
     return data
 
@@ -533,7 +560,7 @@ def _multidomain_to_data(md, path, w):
 def _multidomain_from_data(data, r):
     from .multidomain import MultiDomain
     _check_keys(data, _MULTIDOMAIN_ATTRS + ('panels', 'conn', 'conn_used',
-                'T_tol', 'rhs_tol'), 'MultiDomain')
+                'Z_tol', 'T_tol', 'rhs_tol'), 'MultiDomain')
     panels = [_shell_from_data(p, r) for p in _list(data, 'panels')]
     conn = _conn_from_data(data.get('conn'), panels, r)
     conn_method = data.get('conn_method', 'null-space')
@@ -546,8 +573,12 @@ def _multidomain_from_data(data, r):
                      pd_method=pd_method)
     _decode_attrs(md, data, _MULTIDOMAIN_ATTRS, r)
     md._conn_used = _conn_from_data(data.get('conn_used'), panels, r)
-    if 'T_tol' in data:
-        md._T_tol = _decode(data['T_tol'], r)
+    # NOTE 'T_tol' is the key of the files written by panels 0.13.11, before
+    #      the null-space basis was renamed Z
+    for key in ('Z_tol', 'T_tol'):
+        if key in data:
+            md._Z_tol = _decode(data[key], r)
+            break
     if 'rhs_tol' in data:
         md._rhs_tol = _decode(data['rhs_tol'], r)
     return md
@@ -579,6 +610,12 @@ def _reject_constant(name):
 
 def save(obj, fname):
     r"""Save an object to a zip file
+
+    The object is encoded completely before the file is opened, such that
+    an error does not leave a partial file. The zip file, compressed with
+    ``ZIP_DEFLATED``, contains ``model.json`` and one ``arrays/<key>.npy``
+    member per array, see the module docstring. An existing file is
+    overwritten.
 
     Parameters
     ----------
@@ -686,6 +723,13 @@ def _load(fname, suffixes=(), max_size=MAX_SIZE):
 
 def load(fname, max_size=MAX_SIZE):
     r"""Load an object from a zip file created by :func:`.save`
+
+    The type of the object, :class:`.Shell`, :class:`.StiffPanelBay` or
+    :class:`.MultiDomain`, is the one stored in ``model.json``. Unlike the
+    functions ``load`` of :mod:`panels.shell`, :mod:`panels.stiffpanelbay`
+    and :mod:`panels.multidomain`, a file name is used as given, without
+    adding an extension. The members are read in memory, the file is not
+    extracted.
 
     Parameters
     ----------

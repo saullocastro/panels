@@ -39,11 +39,20 @@ import time
 
 # Modified Newton-Raphson method
 def scaling(vec, D):
-    """
-        A. Peano and R. Riccioni, Automated discretisatton error
-        control in finite element analysis. In Finite Elements m
-        the Commercial Enviror&ent (Editei by J. 26.  Robinson),
-        pp. 368-387. Robinson & Assoc., Verwood.  England (1978)
+    """Norm of ``vec`` scaled by the diagonal ``D``, over its non-null entries
+
+    ``sqrt(sum(vec_j**2/|D_j|))``, the scaling that Crisfield (1981, p. 58,
+    Eqs. 27 and 28) attributes to Peano and Riccioni (1978) and uses in the
+    convergence test of his arc-length procedure.
+
+    Crisfield, M. A., A fast incremental/iterative solution procedure that
+    handles "snap-through", Computers & Structures, 13(1-3), 55-62, 1981.
+    https://doi.org/10.1016/0045-7949(81)90108-5
+
+    Peano, A. and Riccioni, R., Automated discretisation error control in
+    finite element analysis, in: Robinson, J. (ed.), Finite Elements in the
+    Commercial Environment, Robinson and Associates, Verwood, 368-387, 1978.
+
     """
     non_nulls = ~np.isclose(D, 0)
     vec = vec[non_nulls]
@@ -115,37 +124,39 @@ def dcb_damage_prop_no_f_kcrack(phy_dim, nr_terms, k_i=None, tau_o=None, nr_x_ga
 
         .. math::
 
-            \{R\} = \{f_{int}\}_{panels} + [K^{conn}_{dmg}(d)]\{c\}
-                    + [K^{pen}_{PD}]\{c\} - \{f_{ext}\}
+            \boldsymbol{R} = \boldsymbol{F}^{panels}_{int} + \boldsymbol{K}^{conn}_{dmg}(d)\boldsymbol{c}
+                    + \boldsymbol{K}^{pen}_{PD}\boldsymbol{c} - \boldsymbol{F}_{ext}
 
         without the term `U_{crack}` of the thesis of D'Souza (2024)
         [nathan2024MSc]_, which counts the dissipated energy twice. The
-        secant stiffness of the cohesive zone `[K^{conn}_{dmg}]` is part of
+        secant stiffness of the cohesive zone `\boldsymbol{K}^{conn}_{dmg}` is part of
         the internal force vector and is evaluated at every iteration, like
-        its damage-rate part `[K^{conn}_{\dot d}]`, while the tangent
-        stiffness of the panels `[K_C] + [K_G]` is refreshed every
+        its damage-rate part `\boldsymbol{K}^{conn}_{\dot d}`, while the tangent
+        stiffness of the panels `\boldsymbol{K}_C + \boldsymbol{K}_G` is refreshed every
         ``NR_kT_update = 3`` iterations (modified Newton-Raphson). The
-        iteration matrix is `[K_C] + [K_G] + [K^{conn}_{dmg}] +
-        [K^{conn}_{\dot d}] + [K^{pen}_{PD}]`.
+        iteration matrix is `\boldsymbol{K}_C + \boldsymbol{K}_G + \boldsymbol{K}^{conn}_{dmg} +
+        \boldsymbol{K}^{conn}_{\dot d} + \boldsymbol{K}^{pen}_{PD}`.
 
         With ``predictor=True`` the increment `n` starts from
-        `\{c\}_{n-1} + \frac{w_{p,n} - w_{p,n-1}}{w_{p,n-1} - w_{p,n-2}}
-        (\{c\}_{n-1} - \{c\}_{n-2})`, with the state `w_p = 0`, `\{c\} = 0`
+        `\boldsymbol{c}_{n-1} + \frac{w_{p,n} - w_{p,n-1}}{w_{p,n-1} - w_{p,n-2}}
+        (\boldsymbol{c}_{n-1} - \boldsymbol{c}_{n-2})`, with the state `w_p = 0`, `\boldsymbol{c} = \boldsymbol{0}`
         used for the second increment. The line search takes the first step
-        `s = 1, 1/2, \dots, 2^{-n_{ls}}` with `\|R(c_i + s \delta c)\|_D \le
-        (1 - 10^{-4} s) \|R(c_i)\|_D`, or the trial with the smallest norm,
-        a trial whose residual is not finite counting as an infinite norm,
-        where `\|v\|_D = \sqrt{v^T D^{-1} v}` and `D` holds the absolute
-        values of the diagonal of the iteration matrix at the start of the
-        increment. The convergence criterion is:
+        `s = 1, 1/2, \dots, 2^{-n_{ls}}` with `\|\boldsymbol{R}(\boldsymbol{c}_i + s \delta \boldsymbol{c})\|_{\boldsymbol{d}} \le (1 - 10^{-4} s) \|\boldsymbol{R}(\boldsymbol{c}_i)\|_{\boldsymbol{d}}`,
+        or the trial with the smallest norm, a trial whose residual is not
+        finite counting as an infinite norm, where `\|\boldsymbol{v}\|_{\boldsymbol{d}} =
+        \sqrt{\boldsymbol{v}^\top \mathrm{diag}(|\boldsymbol{d}|)^{-1} \boldsymbol{v}}` and the diagonal
+        scaling vector `\boldsymbol{d}` holds the diagonal of the iteration
+        matrix at the start of the increment. The convergence criterion
+        is:
 
         .. math::
 
-            \frac{\|R\|_D}{\max\left( \|f_{int}\|_D,
-            \|[K^{pen}_{PD}]\{c\} - \{f_{ext}\}\|_D \right)} < 10^{-4}
+            \frac{\|\boldsymbol{R}\|_{\boldsymbol{d}}}{\max\left(
+            \|\boldsymbol{F}_{int}\|_{\boldsymbol{d}}, \|\boldsymbol{K}^{pen}_{PD}\boldsymbol{c} -
+            \boldsymbol{F}_{ext}\|_{\boldsymbol{d}} \right)} < 10^{-4}
 
         with the reaction of the prescribed displacement in place of
-        `\{f_{ext}\}`, which is dominated by the penalty `k_w`. An increment
+        `\boldsymbol{F}_{ext}`, which is dominated by the penalty `k_w`. An increment
         whose ratio is not finite or exceeds `10^3`, or that does not
         converge in ``max_NR_iter`` iterations, is discarded and bisected; the
         damage history is only updated with converged states. A sub-increment

@@ -43,7 +43,7 @@ def simp(e, vars=ABD):
     return collect(e, vars, func=factor)
 
 
-BASIS = re.compile(r'^([fg])([AB])([uvw])((?:xi|eta)*)$')
+BASIS = re.compile(r'^([fg])([AB])([uvw])((?:_(?:xi|eta)+)?)$')
 
 
 def basis_info(name):
@@ -279,8 +279,8 @@ def main():
                    BC_BLOCK]),
         'kG0', kG)
     out['kM'] = analytical_function(
-        'def fkM(object shell, double d, int size, int row0, int col0):',
-        '\n'.join(['    cdef double a, b, r, rho, h',
+        'def fkM(object shell, int size, int row0, int col0):',
+        '\n'.join(['    cdef double a, b, r, I0, I1, I2',
                    '    cdef int m, n',
                    BC_CDEF, '',
                    '    cdef int i, k, j, l, c, row, col']),
@@ -289,8 +289,9 @@ def main():
                    '    a = shell.a',
                    '    b = shell.b',
                    '    r = shell.r',
-                   '    rho = shell.rho',
-                   '    h = sum(shell.plyts)',
+                   '    I0 = shell.lam.intrho',
+                   '    I1 = shell.lam.intrhoz',
+                   '    I2 = shell.lam.intrhoz2',
                    '    m = shell.m',
                    '    n = shell.n',
                    BC_BLOCK]),

@@ -21,12 +21,13 @@ sys.path.insert(0, os.path.abspath('../..'))
 project = 'panels'
 author = "Saullo G. P. Castro, Nathan D'Souza"
 
-# The full version, including alpha/beta/rc tags, read from setup.py
+# The full version, including alpha/beta/rc tags, read from pyproject.toml
+with open(os.path.join(os.path.dirname(__file__), '../../pyproject.toml')) as f:
+    release = re.search(r'^version\s*=\s*"(.+)"', f.read(), re.M).group(1)
+version = release
+# The year of the copyright, read from setup.py
 with open(os.path.join(os.path.dirname(__file__), '../../setup.py')) as f:
     setup_py = f.read()
-release = '.'.join(re.search(r'^%s\s*=\s*(\d+)' % name, setup_py, re.M).group(1)
-                   for name in ('MAJOR', 'MINOR', 'MICRO'))
-version = release
 year = re.search(r"^YEAR\s*=\s*'(\d+)'", setup_py, re.M).group(1)
 copyright = '2012-%s, %s' % (year, author)
 

@@ -62,8 +62,8 @@ class BardellCodePrinter(C99CodePrinter):
 
 printer = BardellCodePrinter()
 
-# (name in the C++ code, name of the header guard, derivative order of f_i,
-#  derivative order of f_j)
+# (name in the C++ code, name of the header guard, derivative order of P_i,
+#  derivative order of P_j)
 integrals = [('ff', 'ff', 0, 0),
              ('ffp', 'ffxi', 0, 1),
              ('ffpp', 'ffxixi', 0, 2),

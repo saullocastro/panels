@@ -4,18 +4,18 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 import numpy as np
 from sympy import Matrix as M, Symbol, init_printing, var
 
-var('a, b, r, h, d, intx, inty, rho, aeromu, beta, gamma, wxi, wxi_o, weta, weta_o')
+var('a, b, r, h, d, intx, inty, rho, aeromu, beta, gamma, w_xi, w_xi_o, w_eta, w_eta_o')
 var('A11, A12, A16, A22, A26, A66')
 var('B11, B12, B16, B22, B26, B66')
 var('D11, D12, D16, D22, D26, D66')
 var('Nxx, Nyy, Nxy, Mxx, Myy, Mxy')
 var('Nxx_o, Nyy_o, Nxy_o, Mxx_o, Myy_o, Mxy_o')
 
-var('fAu, gAu, fAv, gAv, fAw, gAw, fAuxi, fAvxi, fAwxi, gAueta, gAveta, gAweta, fAwxixi, gAwetaeta')
-var('fBu, gBu, fBv, gBv, fBw, gBw, fBuxi, fBvxi, fBwxi, gBueta, gBveta, gBweta, fBwxixi, gBwetaeta')
+var('fAu, gAu, fAv, gAv, fAw, gAw, fAu_xi, fAv_xi, fAw_xi, gAu_eta, gAv_eta, gAw_eta, fAw_xixi, gAw_etaeta')
+var('fBu, gBu, fBv, gBv, fBw, gBw, fBu_xi, fBv_xi, fBw_xi, gBu_eta, gBv_eta, gBw_eta, fBw_xixi, gBw_etaeta')
 
-var('uA, vA, wA, uAxi, vAxi, wAxi, uAeta, vAeta, wAeta, wAxixi, wAxieta, wAetaeta')
-var('uB, vB, wB, uBxi, vBxi, wBxi, uBeta, vBeta, wBeta, wBxixi, wBxieta, wBetaeta')
+var('uA, vA, wA, uA_xi, vA_xi, wA_xi, uA_eta, vA_eta, wA_eta, wA_xixi, wA_xieta, wA_etaeta')
+var('uB, vB, wB, uB_xi, vB_xi, wB_xi, uB_eta, vB_eta, wB_eta, wB_xixi, wB_xieta, wB_etaeta')
 
 F = M([[A11, A12, A16, B11, B12, B16],
        [A12, A22, A26, B12, B22, B26],
@@ -28,51 +28,53 @@ suA = M([[fAu*gAu, 0, 0]])
 svA = M([[0, fAv*gAv, 0]])
 swA = M([[0, 0, fAw*gAw]])
 
-suAxi = M([[fAuxi*gAu, 0, 0]])
-svAxi = M([[0, fAvxi*gAv, 0]])
-swAxi = M([[0, 0, fAwxi*gAw]])
+suA_xi = M([[fAu_xi*gAu, 0, 0]])
+svA_xi = M([[0, fAv_xi*gAv, 0]])
+swA_xi = M([[0, 0, fAw_xi*gAw]])
 
-suAeta = M([[fAu*gAueta, 0, 0]])
-svAeta = M([[0, fAv*gAveta, 0]])
-swAeta = M([[0, 0, fAw*gAweta]])
+suA_eta = M([[fAu*gAu_eta, 0, 0]])
+svA_eta = M([[0, fAv*gAv_eta, 0]])
+swA_eta = M([[0, 0, fAw*gAw_eta]])
 
-swAxixi = M([[0, 0, fAwxixi*gAw]])
-swAxieta = M([[0, 0, fAwxi*gAweta]])
-swAetaeta = M([[0, 0, fAw*gAwetaeta]])
+swA_xixi = M([[0, 0, fAw_xixi*gAw]])
+swA_xieta = M([[0, 0, fAw_xi*gAw_eta]])
+swA_etaeta = M([[0, 0, fAw*gAw_etaeta]])
 
 suB = M([[fBu*gBu, 0, 0]])
 svB = M([[0, fBv*gBv, 0]])
 swB = M([[0, 0, fBw*gBw]])
 
-suBxi = M([[fBuxi*gBu, 0, 0]])
-svBxi = M([[0, fBvxi*gBv, 0]])
-swBxi = M([[0, 0, fBwxi*gBw]])
+suB_xi = M([[fBu_xi*gBu, 0, 0]])
+svB_xi = M([[0, fBv_xi*gBv, 0]])
+swB_xi = M([[0, 0, fBw_xi*gBw]])
 
-suBeta = M([[fBu*gBueta, 0, 0]])
-svBeta = M([[0, fBv*gBveta, 0]])
-swBeta = M([[0, 0, fBw*gBweta]])
+suB_eta = M([[fBu*gBu_eta, 0, 0]])
+svB_eta = M([[0, fBv*gBv_eta, 0]])
+swB_eta = M([[0, 0, fBw*gBw_eta]])
 
-swBxixi = M([[0, 0, fBwxixi*gBw]])
-swBxieta = M([[0, 0, fBwxi*gBweta]])
-swBetaeta = M([[0, 0, fBw*gBwetaeta]])
+swB_xixi = M([[0, 0, fBw_xixi*gBw]])
+swB_xieta = M([[0, 0, fBw_xi*gBw_eta]])
+swB_etaeta = M([[0, 0, fBw*gBw_etaeta]])
 
-GA = M([(2/a)*swAxi, (2/b)*swAeta])
-BA = M([(2/a)*suAxi + (2/a)**2*swAxi*wxi,
-        (2/b)*svAeta + 1/r*swA + (2/b)**2*swAeta*weta,
-        (2/b)*suAeta + (2/a)*svAxi + (2/a)*(2/b)*(weta*swAxi + wxi*swAeta),
-       -(2/a)*(2/a)*swAxixi,
-       -(2/b)*(2/b)*swAetaeta,
-       -(2/a)*(2/b)*2*swAxieta])
-B0A = BA.subs({wxi.name:0, weta.name:0})
+GA = M([(2/a)*swA_xi, (2/b)*swA_eta])
+BA = M([(2/a)*suA_xi + (2/a)**2*swA_xi*w_xi,
+        (2/b)*svA_eta + 1/r*swA + (2/b)**2*swA_eta*w_eta,
+        (2/b)*suA_eta + (2/a)*svA_xi
+        + (2/a)*(2/b)*(w_eta*swA_xi + w_xi*swA_eta),
+       -(2/a)*(2/a)*swA_xixi,
+       -(2/b)*(2/b)*swA_etaeta,
+       -(2/a)*(2/b)*2*swA_xieta])
+B0A = BA.subs({w_xi.name:0, w_eta.name:0})
 
-GB = M([(2/a)*swBxi, (2/b)*swBeta])
-BB = M([(2/a)*suBxi + (2/a)**2*swBxi*wxi,
-        (2/b)*svBeta + 1/r*swB + (2/b)**2*swBeta*weta,
-        (2/b)*suBeta + (2/a)*svBxi + (2/a)*(2/b)*(weta*swBxi + wxi*swBeta),
-       -(2/a)*(2/a)*swBxixi,
-       -(2/b)*(2/b)*swBetaeta,
-       -(2/a)*(2/b)*2*swBxieta])
-B0B = BB.subs({wxi.name:0, weta.name:0})
+GB = M([(2/a)*swB_xi, (2/b)*swB_eta])
+BB = M([(2/a)*suB_xi + (2/a)**2*swB_xi*w_xi,
+        (2/b)*svB_eta + 1/r*swB + (2/b)**2*swB_eta*w_eta,
+        (2/b)*suB_eta + (2/a)*svB_xi
+        + (2/a)*(2/b)*(w_eta*swB_xi + w_xi*swB_eta),
+       -(2/a)*(2/a)*swB_xixi,
+       -(2/b)*(2/b)*swB_etaeta,
+       -(2/a)*(2/b)*2*swB_xieta])
+B0B = BB.subs({w_xi.name:0, w_eta.name:0})
 
 # Constitutive stiffness matrix
 kC = intx*inty/4*BA.T*F*BB
@@ -93,22 +95,27 @@ kG = intx*inty/4*GA.T*Nmat*GB
 
 # Mass matrix
 
-maux = M([[   1,   0,   0,  -d,  0],
-          [   0,   1,   0,   0, -d],
-          [   0,   0,   1,   0,  0],
-          [ -d,   0, 0, (h**2/12 + d**2), 0],
-          [    0, -d, 0, 0, (h**2/12 + d**2)]])
+# u(z) = u - z w,x, v(z) = v - z w,y and w, with z measured from the
+# reference surface, the laminate spanning -h/2 + d <= z <= h/2 + d, such
+# that the density enters through the moments I_n = int rho z^n dz of
+# composites.Laminate, intrho, intrhoz and intrhoz2
+var('I0, I1, I2')
+maux = M([[I0,  0,  0, I1,  0],
+          [ 0, I0,  0,  0, I1],
+          [ 0,  0, I0,  0,  0],
+          [I1,  0,  0, I2,  0],
+          [ 0, I1,  0,  0, I2]])
 
-gA5 = M([suA, svA, swA, -(2/a)*swAxi, -(2/b)*swAeta])
-gB5 = M([suB, svB, swB, -(2/a)*swBxi, -(2/b)*swBeta])
-kM = intx*inty/4*h*rho*gA5.T*maux*gB5
+gA5 = M([suA, svA, swA, -(2/a)*swA_xi, -(2/b)*swA_eta])
+gB5 = M([suB, svB, swB, -(2/a)*swB_xi, -(2/b)*swB_eta])
+kM = intx*inty/4*gA5.T*maux*gB5
 
 # Aerodynamic and damping matrix using piston's theory, with the aerodynamic
 # load q = beta*w,x + gamma*w along w and the curvature term gamma*w, see
 # Shell.calc_kA()
 
-kAx = -intx*inty/4 * (beta*(2/a)*swAxi.T*swB + gamma*swA.T*swB)
-kAy = -intx*inty/4 * beta*(2/b)*swAeta.T*swB
+kAx = -intx*inty/4 * (beta*(2/a)*swA_xi.T*swB + gamma*swA.T*swB)
+kAy = -intx*inty/4 * beta*(2/b)*swA_eta.T*swB
 
 cA = -intx*inty/4*aeromu*swA.T*swB
 

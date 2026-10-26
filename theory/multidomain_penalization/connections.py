@@ -21,7 +21,9 @@ Created on Sun Mar 10 13:07:49 2024
 # The kernels in panels/multidomain/connections/ that correspond to each
 # matrix are:
 #
-#   kCSSxcte, kCSSycte, kCBFycte, kCBFxcte, kCSB: kCSS*.pyx, kCBF*.pyx, kCSB.pyx
+#   kCSSxcte, kCSSycte, kCBFycte, kCBFxcte: kCSS*.pyx, kCBF*.pyx
+#   kCSB: skin_base.py (fkCSB), computed from the quantities of
+#   kCsdt._sb_components with the integrals of kCsdt._connection_matrix
 #   kCSSxcte_sdt, kCSSycte_sdt, kCSB_sdt: kCsdt.py, for the models based on
 #   shear deformation theories (FSDT and TSDT) with 5 DOFs per term
 #   kCBFycte_sdt, kCBFxcte_sdt: the functions *_sdt of kCBF*.pyx, for the
@@ -45,23 +47,23 @@ def piece_wise_simplify(m, vars):
     return m
 
 
-var('a1, b1, a2, b2, h, dsb, wxi, weta')
+var('a1, b1, a2, b2, h, dsb, w_xi, w_eta')
 var('kt, kr')
 
 # Displacements and rotations for panel 1 (or ith panel in eq 32 - http://dx.doi.org/10.1016/j.compstruct.2016.10.026)
-var('f1Au, g1Au, f1Av, g1Av, f1Aw, g1Aw, f1Auxi, f1Avxi, f1Awxi, g1Aueta, g1Aveta, g1Aweta, f1Awxixi, g1Awetaeta')
-var('f1Bu, g1Bu, f1Bv, g1Bv, f1Bw, g1Bw, f1Buxi, f1Bvxi, f1Bwxi, g1Bueta, g1Bveta, g1Bweta, f1Bwxixi, g1Bwetaeta')
+var('f1Au, g1Au, f1Av, g1Av, f1Aw, g1Aw, f1Au_xi, f1Av_xi, f1Aw_xi, g1Au_eta, g1Av_eta, g1Aw_eta, f1Aw_xixi, g1Aw_etaeta')
+var('f1Bu, g1Bu, f1Bv, g1Bv, f1Bw, g1Bw, f1Bu_xi, f1Bv_xi, f1Bw_xi, g1Bu_eta, g1Bv_eta, g1Bw_eta, f1Bw_xixi, g1Bw_etaeta')
     # A and B are when 2 of the same terms are present i.e. u^2 then it becomes uA*uB so that the matrix can be populated independently
 
-var('u1A, v1A, w1A, u1Axi, v1Axi, w1Axi, u1Aeta, v1Aeta, w1Aeta, w1Axixi, w1Axieta, w1Aetaeta')
-var('u1B, v1B, w1B, u1Bxi, v1Bxi, w1Bxi, u1Beta, v1Beta, w1Beta, w1Bxixi, w1Bxieta, w1Betaeta')
+var('u1A, v1A, w1A, u1A_xi, v1A_xi, w1A_xi, u1A_eta, v1A_eta, w1A_eta, w1A_xixi, w1A_xieta, w1A_etaeta')
+var('u1B, v1B, w1B, u1B_xi, v1B_xi, w1B_xi, u1B_eta, v1B_eta, w1B_eta, w1B_xixi, w1B_xieta, w1B_etaeta')
 
 # Displacements and rotations for panel 2 (or jth panel in eq 32 - http://dx.doi.org/10.1016/j.compstruct.2016.10.026)
-var('f2Au, g2Au, f2Av, g2Av, f2Aw, g2Aw, f2Auxi, f2Avxi, f2Awxi, g2Aueta, g2Aveta, g2Aweta, f2Awxixi, g2Awetaeta')
-var('f2Bu, g2Bu, f2Bv, g2Bv, f2Bw, g2Bw, f2Buxi, f2Bvxi, f2Bwxi, g2Bueta, g2Bveta, g2Bweta, f2Bwxixi, g2Bwetaeta')
+var('f2Au, g2Au, f2Av, g2Av, f2Aw, g2Aw, f2Au_xi, f2Av_xi, f2Aw_xi, g2Au_eta, g2Av_eta, g2Aw_eta, f2Aw_xixi, g2Aw_etaeta')
+var('f2Bu, g2Bu, f2Bv, g2Bv, f2Bw, g2Bw, f2Bu_xi, f2Bv_xi, f2Bw_xi, g2Bu_eta, g2Bv_eta, g2Bw_eta, f2Bw_xixi, g2Bw_etaeta')
 
-var('u2A, v2A, w2A, u2Axi, v2Axi, w2Axi, u2Aeta, v2Aeta, w2Aeta, w2Axixi, w2Axieta, w2Aetaeta')
-var('u2B, v2B, w2B, u2Bxi, v2Bxi, w2Bxi, u2Beta, v2Beta, w2Beta, w2Bxixi, w2Bxieta, w2Betaeta')
+var('u2A, v2A, w2A, u2A_xi, v2A_xi, w2A_xi, u2A_eta, v2A_eta, w2A_eta, w2A_xixi, w2A_xieta, w2A_etaeta')
+var('u2B, v2B, w2B, u2B_xi, v2B_xi, w2B_xi, u2B_eta, v2B_eta, w2B_eta, w2B_xixi, w2B_xieta, w2B_etaeta')
 
 ######## IMPORTANT ########################
 # All of this should be su1A NOT u1A - As it alreay has removed the c and del_c from the equations
@@ -74,23 +76,23 @@ u1A = M([[f1Au*g1Au, 0, 0]])
 v1A = M([[0, f1Av*g1Av, 0]])
 w1A = M([[0, 0, f1Aw*g1Aw]])
 
-# u1Axi is deri of suA wrt xi
-w1Axi = M([[0, 0, f1Awxi*g1Aw]])
-w1Aeta = M([[0, 0, f1Aw*g1Aweta]])
+# u1A_xi is deri of suA wrt xi
+w1A_xi = M([[0, 0, f1Aw_xi*g1Aw]])
+w1A_eta = M([[0, 0, f1Aw*g1Aw_eta]])
 
-w1Axixi = M([[0, 0, f1Awxixi*g1Aw]])
-w1Aetaeta = M([[0, 0, f1Aw*g1Awetaeta]])
+w1A_xixi = M([[0, 0, f1Aw_xixi*g1Aw]])
+w1A_etaeta = M([[0, 0, f1Aw*g1Aw_etaeta]])
 
 # PANEL 1 - B terms
 u1B = M([[f1Bu*g1Bu, 0, 0]])
 v1B = M([[0, f1Bv*g1Bv, 0]])
 w1B = M([[0, 0, f1Bw*g1Bw]])
 
-w1Bxi = M([[0, 0, f1Bwxi*g1Bw]])
-w1Beta = M([[0, 0, f1Bw*g1Bweta]])
+w1B_xi = M([[0, 0, f1Bw_xi*g1Bw]])
+w1B_eta = M([[0, 0, f1Bw*g1Bw_eta]])
 
-w1Bxixi = M([[0, 0, f1Bwxixi*g1Bw]])
-w1Betaeta = M([[0, 0, f1Bw*g1Bwetaeta]])
+w1B_xixi = M([[0, 0, f1Bw_xixi*g1Bw]])
+w1B_etaeta = M([[0, 0, f1Bw*g1Bw_etaeta]])
 
 
 # PANEL 2 - A terms
@@ -98,22 +100,22 @@ u2A = M([[f2Au*g2Au, 0, 0]])
 v2A = M([[0, f2Av*g2Av, 0]])
 w2A = M([[0, 0, f2Aw*g2Aw]])
 
-w2Axi = M([[0, 0, f2Awxi*g2Aw]])
-w2Aeta = M([[0, 0, f2Aw*g2Aweta]])
+w2A_xi = M([[0, 0, f2Aw_xi*g2Aw]])
+w2A_eta = M([[0, 0, f2Aw*g2Aw_eta]])
 
-w2Axixi = M([[0, 0, f2Awxixi*g2Aw]])
-w2Aetaeta = M([[0, 0, f2Aw*g2Awetaeta]])
+w2A_xixi = M([[0, 0, f2Aw_xixi*g2Aw]])
+w2A_etaeta = M([[0, 0, f2Aw*g2Aw_etaeta]])
 
 # PANEL 2 - B terms
 u2B = M([[f2Bu*g2Bu, 0, 0]])
 v2B = M([[0, f2Bv*g2Bv, 0]])
 w2B = M([[0, 0, f2Bw*g2Bw]])
 
-w2Bxi = M([[0, 0, f2Bwxi*g2Bw]])
-w2Beta = M([[0, 0, f2Bw*g2Bweta]])
+w2B_xi = M([[0, 0, f2Bw_xi*g2Bw]])
+w2B_eta = M([[0, 0, f2Bw*g2Bw_eta]])
 
-w2Bxixi = M([[0, 0, f2Bwxixi*g2Bw]])
-w2Betaeta = M([[0, 0, f2Bw*g2Bwetaeta]])
+w2B_xixi = M([[0, 0, f2Bw_xixi*g2Bw]])
+w2B_etaeta = M([[0, 0, f2Bw*g2Bw_etaeta]])
 
 
 ######## IMPORTANT ########################
@@ -129,18 +131,18 @@ w2Betaeta = M([[0, 0, f2Bw*g2Bwetaeta]])
 # XCTE Penalty Matrix
 #NOTE the curvature penalty kk*(w1,xx - w2,xx)^2 was removed from the
 #     kernels, see commit 6be356b, and is therefore not included here
-kCSSxcte11 =  (b1/2)*kt*(u1A.T*u1B + v1A.T*v1B + w1A.T*w1B + ((2/a1)*w1Axi.T) * ((2/a1)*w1Bxi)*(kr/kt))
-kCSSxcte12 = -(b1/2)*kt*(u1A.T*u2B + v1A.T*v2B + w1A.T*w2B + ((2/a1)*w1Axi.T) * ((2/a2)*w2Bxi)*(kr/kt))
-kCSSxcte22 =  (b1/2)*kt*(u2A.T*u2B + v2A.T*v2B + w2A.T*w2B + ((2/a2)*w2Axi.T) * ((2/a2)*w2Bxi)*(kr/kt))
+kCSSxcte11 =  (b1/2)*kt*(u1A.T*u1B + v1A.T*v1B + w1A.T*w1B + ((2/a1)*w1A_xi.T) * ((2/a1)*w1B_xi)*(kr/kt))
+kCSSxcte12 = -(b1/2)*kt*(u1A.T*u2B + v1A.T*v2B + w1A.T*w2B + ((2/a1)*w1A_xi.T) * ((2/a2)*w2B_xi)*(kr/kt))
+kCSSxcte22 =  (b1/2)*kt*(u2A.T*u2B + v2A.T*v2B + w2A.T*w2B + ((2/a2)*w2A_xi.T) * ((2/a2)*w2B_xi)*(kr/kt))
 
 piece_wise_simplify(kCSSxcte11, [])
 piece_wise_simplify(kCSSxcte12, [])
 piece_wise_simplify(kCSSxcte22, [])
 
 # YCTE Penalty Matrix 
-kCSSycte11 =  (a1/2)*kt*(u1A.T*u1B + v1A.T*v1B + w1A.T*w1B + ((2/b1)*w1Aeta.T) * ((2/b1)*w1Beta)*(kr/kt))
-kCSSycte12 = -(a1/2)*kt*(u1A.T*u2B + v1A.T*v2B + w1A.T*w2B + ((2/b1)*w1Aeta.T) * ((2/b2)*w2Beta)*(kr/kt))
-kCSSycte22 =  (a1/2)*kt*(u2A.T*u2B + v2A.T*v2B + w2A.T*w2B + ((2/b2)*w2Aeta.T) * ((2/b2)*w2Beta)*(kr/kt))
+kCSSycte11 =  (a1/2)*kt*(u1A.T*u1B + v1A.T*v1B + w1A.T*w1B + ((2/b1)*w1A_eta.T) * ((2/b1)*w1B_eta)*(kr/kt))
+kCSSycte12 = -(a1/2)*kt*(u1A.T*u2B + v1A.T*v2B + w1A.T*w2B + ((2/b1)*w1A_eta.T) * ((2/b2)*w2B_eta)*(kr/kt))
+kCSSycte22 =  (a1/2)*kt*(u2A.T*u2B + v2A.T*v2B + w2A.T*w2B + ((2/b2)*w2A_eta.T) * ((2/b2)*w2B_eta)*(kr/kt))
 
 piece_wise_simplify(kCSSycte11, [])
 piece_wise_simplify(kCSSycte12, [])
@@ -155,10 +157,10 @@ piece_wise_simplify(kCSSycte22, [])
 # 0. rinv1 and rinv2 are the arguments of the kernels of kCBFycte.pyx. For
 # the FSDT and TSDT omega = -phiy, see the section of these models below
 var('rinv1, rinv2')
-om1A = (2/b1)*w1Aeta - rinv1*v1A
-om1B = (2/b1)*w1Beta - rinv1*v1B
-om2A = (2/b2)*w2Aeta - rinv2*v2A
-om2B = (2/b2)*w2Beta - rinv2*v2B
+om1A = (2/b1)*w1A_eta - rinv1*v1A
+om1B = (2/b1)*w1B_eta - rinv1*v1B
+om2A = (2/b2)*w2A_eta - rinv2*v2A
+om2B = (2/b2)*w2B_eta - rinv2*v2B
 kCBFycte11=  (a1/2)*kt*(u1A.T*u1B + v1A.T*v1B + w1A.T*w1B + (kr/kt)*om1A.T*om1B)
 kCBFycte12 = -(a1/2)*kt*(u1A.T*u2B + v1A.T*w2B - w1A.T*v2B + (kr/kt)*om1A.T*om2B)
 kCBFycte22 =  (a1/2)*kt*(u2A.T*u2B + v2A.T*v2B + w2A.T*w2B + (kr/kt)*om2A.T*om2B)
@@ -173,9 +175,9 @@ piece_wise_simplify(kCBFycte22, [])
 # the local axes of the flange rotated by 90 degrees about y. For the CLPT
 # omega = phix = -w,x, also with the Sanders-Koiter kinematics. For the
 # FSDT and TSDT omega = phix, see the section of these models below
-kCBFxcte11 =  (b1/2)*kt*(u1A.T*u1B + v1A.T*v1B + w1A.T*w1B + (kr/kt)*((2/a1)*w1Axi.T) * ((2/a1)*w1Bxi))
-kCBFxcte12 = -(b1/2)*kt*(u1A.T*w2B + v1A.T*v2B - w1A.T*u2B + (kr/kt)*((2/a1)*w1Axi.T) * ((2/a2)*w2Bxi))
-kCBFxcte22 =  (b1/2)*kt*(u2A.T*u2B + v2A.T*v2B + w2A.T*w2B + (kr/kt)*((2/a2)*w2Axi.T) * ((2/a2)*w2Bxi))
+kCBFxcte11 =  (b1/2)*kt*(u1A.T*u1B + v1A.T*v1B + w1A.T*w1B + (kr/kt)*((2/a1)*w1A_xi.T) * ((2/a1)*w1B_xi))
+kCBFxcte12 = -(b1/2)*kt*(u1A.T*w2B + v1A.T*v2B - w1A.T*u2B + (kr/kt)*((2/a1)*w1A_xi.T) * ((2/a2)*w2B_xi))
+kCBFxcte22 =  (b1/2)*kt*(u2A.T*u2B + v2A.T*v2B + w2A.T*w2B + (kr/kt)*((2/a2)*w2A_xi.T) * ((2/a2)*w2B_xi))
 
 piece_wise_simplify(kCBFxcte11, [])
 piece_wise_simplify(kCBFxcte12, [])
@@ -184,17 +186,34 @@ piece_wise_simplify(kCBFxcte22, [])
 # Connection between panel skin and stiffener's base - SB CONNECTION
 # connection panel-base integrated over xi' and eta'
 # Panel (1) is on the positive side of the interface along the z axis common
-# to both panels, and panel (2) on the negative side. Panel (1) is
-# extrapolated to the mid-surface of panel (2), at a distance
-# dsb = h1/2 + h2/2 from the mid-surface of (1) along -z:
-#     u1 + dsb*w1,x = u2,  v1 + dsb*w1,y = v2,  w1 = w2
-kCSB11 = (a1*b1/4)*kt*(u1A.T*u1B + v1A.T*v1B + w1A.T*w1B + u1A.T*w1Bxi*(2*dsb/a1) + w1Axi.T*u1B*(2*dsb/a1) + v1A.T*w1Beta*(2*dsb/b1) + w1Aeta.T*v1B*(2*dsb/b1) + w1Axi.T*w1Bxi*(2*dsb/a1)*(2*dsb/a1) + w1Aeta.T*w1Beta*(2*dsb/b1)*(2*dsb/b1))
-    # Contains all squared terms - so all terms of (u + d..w,xi)^2 comes here and so on 
-                                    # thats split up: u^2 + u*d..w,xi + d..w,xi*u + (d..w,xi)^2
-############ THERE IS SOME EXTRA c1 HERE - removed ##############################
-kCSB12 = -(a1*b1/4)*kt*(u1A.T*u2B + v1A.T*v2B + w1A.T*w2B + w1Axi.T*u2B*(2*dsb/a1) + w1Aeta.T*v2B*(2*dsb/b1))
+# to both panels, and panel (2) on the negative side. The lower face of (1),
+# zi1 = d1 - h1/2, and the upper face of (2), zi2 = d2 + h2/2, each measured
+# from its own reference surface with the offsets d1, d2 (kCsdt._face), have
+# the same displacements:
+#     u1(zi1) = u2(zi2),  v1(zi1) = v2(zi2),  w1 = w2
+# with the Kirchhoff kinematics of each panel, with its own slope,
+#     u(z) = u - z w,x,  v(z) = (1 + z rinv) v - z w,y
+# rinv = 1/r for the Sanders-Koiter kinematics and rinv = 0 for the Donnell
+# kinematics and for plates (kCsdt._surface_terms). The same quantities are
+# used by all the models, see sdt_interface() below; the matrix is computed
+# by panels.multidomain.connections.skin_base.fkCSB, with the exact
+# integrals of kCsdt._connection_matrix, the blocks below being those of its
+# upper triangle. The form of the thesis of D'Souza (2024),
+#     u1 + dsb w1,x = u2,  dsb = h1/2 - d1 + h2/2 + d2
+# with the slope of (1) only, was used up to panels 0.13
+var('zi1, zi2')
+def clpt_interface(uA, vA, wxiA, wetaA, zi, rinv):
+    qu = uA - zi*(2/a1)*wxiA
+    qv = (1 + zi*rinv)*vA - zi*(2/b1)*wetaA
+    return qu, qv
+qu1A, qv1A = clpt_interface(u1A, v1A, w1A_xi, w1A_eta, zi1, rinv1)
+qu1B, qv1B = clpt_interface(u1B, v1B, w1B_xi, w1B_eta, zi1, rinv1)
+qu2A, qv2A = clpt_interface(u2A, v2A, w2A_xi, w2A_eta, zi2, rinv2)
+qu2B, qv2B = clpt_interface(u2B, v2B, w2B_xi, w2B_eta, zi2, rinv2)
+kCSB11 =  (a1*b1/4)*kt*(qu1A.T*qu1B + qv1A.T*qv1B + w1A.T*w1B)
 # Instead of 2ab only ab is presented in _12 as ba goes into _21 which is symmetric and is hence not added here
-kCSB22 =  (a1*b1/4)*kt*(u2A.T*u2B + v2A.T*v2B + w2A.T*w2B)
+kCSB12 = -(a1*b1/4)*kt*(qu1A.T*qu2B + qv1A.T*qv2B + w1A.T*w2B)
+kCSB22 =  (a1*b1/4)*kt*(qu2A.T*qu2B + qv2A.T*qv2B + w2A.T*w2B)
 
 piece_wise_simplify(kCSB11, [])
 piece_wise_simplify(kCSB12, [])
@@ -204,11 +223,12 @@ piece_wise_simplify(kCSB22, [])
 # MODELS BASED ON SHEAR DEFORMATION THEORIES (FSDT and TSDT)
 # 5 DOFs per term u, v, w, phix, phiy, with the displacement field
 #
-#     u(z) = u + z phix - c1 z^3 (phix + w,x)
-#     v(z) = v + z Phiy - c1 z^3 (phiy + w,y)
+#     u(z) = u + z phix - c1 [(z - d)^3 + d^3] (phix + w,x)
+#     v(z) = v + z Phiy - c1 [(z - d)^3 + d^3] (phiy + w,y)
 #     w(z) = w
 #
-# where c1 = 0 for the FSDT and c1 = 4/(3 h^2) for the TSDT, and Phiy =
+# with z measured from the reference surface and d the offset of the
+# laminate, where c1 = 0 for the FSDT and c1 = 4/(3 h^2) for the TSDT, and Phiy =
 # phiy + v/r is the rotation of the normal about x with the Sanders-Koiter
 # kinematics, see theory/shells/fsdt_tsdt, obtained with rinv1 = 1/r1 and
 # rinv2 = 1/r2 of each panel, and Phiy = phiy with rinv = 0 otherwise
@@ -224,8 +244,8 @@ def sdt_vectors(p, s):
         u=M([[f('u')*g('u'), 0, 0, 0, 0]]),
         v=M([[0, f('v')*g('v'), 0, 0, 0]]),
         w=M([[0, 0, f('w')*g('w'), 0, 0]]),
-        wxi=M([[0, 0, f('wxi')*g('w'), 0, 0]]),
-        weta=M([[0, 0, f('w')*g('weta'), 0, 0]]),
+        w_xi=M([[0, 0, f('w_xi')*g('w'), 0, 0]]),
+        w_eta=M([[0, 0, f('w')*g('w_eta'), 0, 0]]),
         phix=M([[0, 0, 0, f('phix')*g('phix'), 0]]),
         phiy=M([[0, 0, 0, 0, f('phiy')*g('phiy')]]),
         )
@@ -245,32 +265,33 @@ def sdt_edge(sA, pA, sB, pB, jac, normal, LA, LB):
               + kr*(sA['phix'].T*sB['phix'] + Phiy(sA, pA).T*Phiy(sB, pB))
               + krw*((2/LA)*sA[normal].T)*((2/LB)*sB[normal]))
 
-kCSSxcte_sdt11 =  sdt_edge(s1A, 1, s1B, 1, b1/2, 'wxi', a1, a1)
-kCSSxcte_sdt12 = -sdt_edge(s1A, 1, s2B, 2, b1/2, 'wxi', a1, a2)
-kCSSxcte_sdt22 =  sdt_edge(s2A, 2, s2B, 2, b1/2, 'wxi', a2, a2)
+kCSSxcte_sdt11 =  sdt_edge(s1A, 1, s1B, 1, b1/2, 'w_xi', a1, a1)
+kCSSxcte_sdt12 = -sdt_edge(s1A, 1, s2B, 2, b1/2, 'w_xi', a1, a2)
+kCSSxcte_sdt22 =  sdt_edge(s2A, 2, s2B, 2, b1/2, 'w_xi', a2, a2)
 
-kCSSycte_sdt11 =  sdt_edge(s1A, 1, s1B, 1, a1/2, 'weta', b1, b1)
-kCSSycte_sdt12 = -sdt_edge(s1A, 1, s2B, 2, a1/2, 'weta', b1, b2)
-kCSSycte_sdt22 =  sdt_edge(s2A, 2, s2B, 2, a1/2, 'weta', b2, b2)
+kCSSycte_sdt11 =  sdt_edge(s1A, 1, s1B, 1, a1/2, 'w_eta', b1, b1)
+kCSSycte_sdt12 = -sdt_edge(s1A, 1, s2B, 2, a1/2, 'w_eta', b1, b2)
+kCSSycte_sdt22 =  sdt_edge(s2A, 2, s2B, 2, a1/2, 'w_eta', b2, b2)
 
-# SB: penalty kt on the displacements at the interface, z = -h1/2 for panel
-# (1), on the positive side of the interface along z, and z = +h2/2 for panel
-# (2), on the negative side, and kr on the
+# SB: penalty kt on the displacements at the interface, z = d1 - h1/2 for
+# panel (1), on the positive side of the interface along z, and z = d2 + h2/2
+# for panel (2), on the negative side, with the offsets d1, d2, and kr on the
 # difference of rotations (kr = 0 connects only the interface)
 #
 #     u_p(z) = u_p + cphi_p phix_p + cw_p w_p,x
 #     v_p(z) = (1 + zi_p rinv_p) v_p + cphi_p phiy_p + cw_p w_p,y
 #
-# with zi_p the coordinate z of the interface in panel p, cphi_p = zi_p -
-# c1_p zi_p^3 and cw_p = -c1_p zi_p^3, which for the TSDT give cphi1 =
-# -h1/3, cw1 = h1/6, cphi2 = h2/3, cw2 = -h2/6 and for the FSDT cphi1 =
-# -h1/2, cphi2 = h2/2, cw1 = cw2 = 0, and zi1 = -h1/2, zi2 = h2/2
+# with zi_p the coordinate z of the interface in panel p, zi1 = d1 - h1/2,
+# zi2 = d2 + h2/2 (kCsdt._face), cphi_p = zi_p - c1_p g_p and cw_p = -c1_p g_p
+# with g_p = (zi_p - d_p)^3 + d_p^3 (kCsdt._surface_terms), which without
+# offsets give for the TSDT cphi1 = -h1/3, cw1 = h1/6, cphi2 = h2/3, cw2 =
+# -h2/6 and for the FSDT cphi1 = zi1, cphi2 = zi2, cw1 = cw2 = 0
 def sdt_interface(s, p):
     cphi, cw, zi, rinv = ((cphi1, cw1, zi1, rinv1) if p == 1 else
                           (cphi2, cw2, zi2, rinv2))
     L = dict(x=a1 if p == 1 else a2, y=b1 if p == 1 else b2)
-    qu = s['u'] + cphi*s['phix'] + cw*(2/L['x'])*s['wxi']
-    qv = (1 + zi*rinv)*s['v'] + cphi*s['phiy'] + cw*(2/L['y'])*s['weta']
+    qu = s['u'] + cphi*s['phix'] + cw*(2/L['x'])*s['w_xi']
+    qv = (1 + zi*rinv)*s['v'] + cphi*s['phiy'] + cw*(2/L['y'])*s['w_eta']
     return qu, qv
 
 def sdt_sb(sA, pA, sB, pB):

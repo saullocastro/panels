@@ -1,3 +1,13 @@
+r"""Blade stiffener with a 2D flange (:class:`.BladeStiff2D`)
+
+The class :class:`.BladeStiff2D` computes the stiffness, geometric stiffness
+and mass matrices of a blade stiffener of a :class:`.StiffPanelBay`, whose
+base and flange are :class:`.Shell` objects. The base uses the Ritz
+constants of the skin of the bay, the flange has its own Ritz constants,
+connected to the base, or to the skin without base, with the penalty
+kernels of ``bladestiff2d_clt_donnell``, see :mod:`panels.stiffener.modelDB`.
+
+"""
 
 from composites import laminated_plate
 from structsolve.sparseutils import finalize_symmetric_matrix
@@ -25,6 +35,88 @@ class BladeStiff2D(object):
     offset.
 
     Each stiffener has a constant `y_s` coordinate.
+
+    When ``bstack`` is given, the base is the :class:`.Shell` ``base``
+    spanning ``ys - bb/2 <= y <= ys + bb/2``, with the dimensions, number of
+    terms and boundary conditions of ``bay`` and the offset ``-h/2 - hb/2``,
+    ``h`` being the mean of the thicknesses of ``panel1`` and ``panel2`` and
+    ``hb`` the thickness of the base. When ``fstack`` is given, the flange
+    is the :class:`.Shell` ``flange`` with the model
+    ``'plate_clpt_donnell'``, the length ``bay.a``, the width ``bf`` and
+    ``mf`` by ``nf`` terms, with the flags of the boundary conditions
+    ``x1u = x1ur = x2u = x2ur = 0``, ``x1v = x1vr = x2v = x2vr = 0``,
+    ``x1w = x2w = 0``, ``x1wr = x2wr = 1`` and all the flags of the edges
+    ``y1`` and ``y2`` equal to ``1``. The constructor then calls
+    ``_rebuild()``, which checks with ``assert`` that ``panel1`` and
+    ``panel2`` have the same ``model``, ``m``, ``n`` and ``r``, rebuilds the
+    laminates of the base and of the flange and sets the attribute ``dpb``,
+    ``h/2 + hb/2``, when there is a base. The attributes ``kC``, ``kG`` and
+    ``kM`` are ``None``, and ``forces_flange``, the point forces
+    ``(xf, yf, fx, fy, fz)`` applied to the flange and used by
+    :meth:`.StiffPanelBay.calc_fext`, is an empty list.
+
+    Parameters
+    ----------
+    bay : :class:`.StiffPanelBay`
+        Panel bay of the stiffener, whose ``a``, ``b``, ``r``, ``m``, ``n``
+        and boundary conditions are used.
+    rho : float
+        Material density of the base and of the flange, mass per unit
+        volume.
+    panel1, panel2 : :class:`.Shell`
+        Panels of the bay on each side of the stiffener.
+    ys : float
+        Coordinate `y` of the stiffener, length.
+    bb : float or None
+        Width of the base, length. Used only when ``bstack`` is given.
+    bf : float or None
+        Width (height) of the flange, length. Used only when ``fstack`` is
+        given.
+    bstack : list or None
+        Stacking sequence of the base, as ``stack`` of :class:`.Shell`.
+        ``None`` for a stiffener without base.
+    bplyts : list or None
+        Thickness of each ply of the base, length.
+    blaminaprops : list or None
+        Lamina properties of each ply of the base, as ``laminaprop`` of
+        :class:`.Shell`.
+    fstack : list or None
+        Stacking sequence of the flange, as ``stack`` of :class:`.Shell`.
+        ``None`` for a stiffener without flange.
+    fplyts : list or None
+        Thickness of each ply of the flange, length.
+    flaminaprops : list or None
+        Lamina properties of each ply of the flange, as ``laminaprop`` of
+        :class:`.Shell`.
+    mf : int, optional
+        Number of terms of the flange along `x`. Default ``14``.
+    nf : int, optional
+        Number of terms of the flange along its width. Default ``11``.
+
+    Notes
+    -----
+    The base is a :class:`.Shell` with the approximation functions and the
+    Ritz constants of the skin, whose laminate is offset by `-(h/2 +
+    h_b/2)`, i.e. the base is perfectly bonded below the skin and follows
+    its displacement field. The flange is a plate based on the classical
+    laminated plate theory, normal to the base, with its own approximation
+    functions and Ritz constants, simply supported at its ends `x = 0` and
+    `x = a`, where only the rotation `w_{,x}` is free, and free along its
+    two edges `y_f = 0` and `y_f = b_f`. Its edge `y_f = 0` is connected to
+    the skin along `y = y_s` with the penalty energy of :meth:`.calc_kC`,
+    such that the local buckling of the flange is represented, unlike with
+    :class:`.BladeStiff1D`. The base as a structural element follows [1]_,
+    Sec. 2, Eqs. (11) and (12), where the flange is a one-dimensional
+    Euler-Bernoulli beam, as in :class:`.BladeStiff1D`. The two-dimensional
+    flange and its connection to the skin are a model of this package, not
+    taken from a publication.
+
+    References
+    ----------
+    .. [1] Castro, S. G. P., Guimaraes, T. A. M., Rade, D. A., and Donadon,
+       M. V., Flutter of stiffened composite panels considering the
+       stiffener's base as a structural element, Composite Structures, 140,
+       36-43, 2016. https://doi.org/10.1016/j.compstruct.2015.12.056
 
     """
     def __init__(self, bay, rho, panel1, panel2, ys, bb, bf, bstack, bplyts,
@@ -101,7 +193,65 @@ class BladeStiff2D(object):
 
 
     def calc_kC(self, size=None, row0=0, col0=0, silent=False, finalize=True):
-        """Calculate the linear constitutive stiffness matrix
+        r"""Calculate the linear constitutive stiffness matrix
+
+        The stiffener is rebuilt, then the following matrices are summed:
+        that of the base, :meth:`.Shell.calc_kC`, at row and column ``0``,
+        the Ritz constants of the skin; that of the flange at ``row0`` and
+        ``col0``; and the connection between the flange and the base, or
+        the skin ``panel1`` without base, computed by the kernels ``fkCss``
+        (at row and column ``0``), ``fkCsf`` (at row ``0`` and column
+        ``col0``) and ``fkCff`` (at ``row0`` and ``col0``) with the penalty
+        constants of :func:`.calc_kt_kr` of type ``'ycte'``. The result is
+        stored in the attribute ``kC``; nothing is returned. Messages are
+        printed unless ``silent=True``.
+
+        Parameters
+        ----------
+        size : int or None, optional
+            Size of the assembly. Default ``None``, accepted only for a
+            stiffener without flange, the base then using its own size, see
+            :meth:`.Shell.calc_kC`; the connection kernels require an
+            integer.
+        row0, col0 : int, optional
+            Row and column of the assembly where the Ritz constants of the
+            flange start. Default ``0``.
+        silent : bool, optional
+            Whether the messages are suppressed. Default ``False``.
+        finalize : bool, optional
+            Whether the matrix is completed from its upper triangle with
+            :func:`structsolve.sparseutils.finalize_symmetric_matrix`; with
+            ``False`` the sum of the upper triangles is stored. Default
+            ``True``.
+
+        Notes
+        -----
+        The flange is normal to the base, its local axes being rotated by 90
+        degrees about the common axis `x`. The connection between the skin
+        at `y = y_s` and the edge `\eta_f = -1` of the flange adds the
+        penalty energy
+
+        .. math::
+
+            U = \frac{1}{2} \int_0^a k_t \left[ (u - u_f)^2 + (v - w_f)^2 +
+                (w + v_f)^2 \right] + k_r \left( w_{,y} - w_{f,y} \right)^2
+                dx
+
+        where `u, v, w` are the displacements of the skin and `u_f, v_f,
+        w_f` those of the flange in its own axes, and `w_{f,y}` the
+        derivative along the width of the flange, i.e. the rotations of the
+        normals of the skin and of the flange about `x` are the same. The
+        kernels ``fkCss``, ``fkCsf`` and ``fkCff`` give the blocks of the
+        skin, of the coupling and of the flange of this energy. The
+        penalty constants of :func:`.calc_kt_kr` of type ``'ycte'`` are
+        computed from the laminates of the base, or of ``panel1`` without
+        base, and of the flange.
+
+        The connection uses the approximation functions of the skin at `y =
+        y_s`: the edge of the flange follows the mid-surface of the skin, and
+        the offset of the base, `h/2 + h_b/2`, is not considered in the
+        position of the flange.
+
         """
         self._rebuild()
         msg('Calculating kC... ', level=2, silent=silent)
@@ -169,6 +319,41 @@ class BladeStiff2D(object):
     def calc_kG(self, size=None, row0=0, col0=0, silent=False, finalize=True,
             c=None, NLgeom=False):
         """Calculate the linear geometric stiffness matrix
+
+        The stiffener is rebuilt and only the flange contributes, with
+        :meth:`.Shell.calc_kG` at ``row0`` and ``col0`` and the stress state
+        given by the attributes ``Nxx``, ``Nyy`` and ``Nxy`` of the flange;
+        the base adds no term. The result is stored in the attribute ``kG``;
+        nothing is returned. Messages are printed unless ``silent=True``.
+
+        Parameters
+        ----------
+        size : int or None, optional
+            Size of the assembly. Default ``None``, the flange then using
+            its own size, see :meth:`.Shell.calc_kG`.
+        row0, col0 : int, optional
+            Row and column of the assembly where the Ritz constants of the
+            flange start. Default ``0``.
+        silent : bool, optional
+            Whether the messages are suppressed. Default ``False``.
+        finalize : bool, optional
+            Whether the matrix is completed from its upper triangle with
+            :func:`structsolve.sparseutils.finalize_symmetric_matrix`.
+            Default ``True``.
+        c : array-like or None, optional
+            Not used by this method. Default ``None``.
+        NLgeom : bool, optional
+            Passed to :meth:`.Shell.calc_kG` of the flange. Default
+            ``False``.
+
+        Notes
+        -----
+        The geometric stiffness is that of the flange for the membrane
+        forces ``Nxx``, ``Nyy`` and ``Nxy`` prescribed in its attributes,
+        see :meth:`.Shell.calc_kG`. The base and the skin under the
+        stiffener add no geometric stiffness here: the load carried by the
+        base is not considered.
+
         """
         self._rebuild()
         msg('Calculating kG... ', level=2, silent=silent)
@@ -190,6 +375,28 @@ class BladeStiff2D(object):
 
     def calc_kM(self, size=None, row0=0, col0=0, silent=False, finalize=True):
         """Calculate the mass matrix
+
+        The stiffener is rebuilt, then the mass matrix of the base,
+        :meth:`.Shell.calc_kM`, at row and column ``0``, the Ritz constants
+        of the skin, and that of the flange at ``row0`` and ``col0`` are
+        summed. The result is stored in the attribute ``kM``; nothing is
+        returned. Messages are printed unless ``silent=True``.
+
+        Parameters
+        ----------
+        size : int or None, optional
+            Size of the assembly. Default ``None``, each part then using its
+            own size, see :meth:`.Shell.calc_kM`.
+        row0, col0 : int, optional
+            Row and column of the assembly where the Ritz constants of the
+            flange start. Default ``0``.
+        silent : bool, optional
+            Whether the messages are suppressed. Default ``False``.
+        finalize : bool, optional
+            Whether the matrix is completed from its upper triangle with
+            :func:`structsolve.sparseutils.finalize_symmetric_matrix`.
+            Default ``True``.
+
         """
         self._rebuild()
         msg('Calculating kM... ', level=2, silent=silent)

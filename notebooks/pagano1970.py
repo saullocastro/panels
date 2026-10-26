@@ -30,9 +30,9 @@ from scipy.linalg import expm
 
 
 def orthotropic_C(E1, E2, E3, nu12, nu13, nu23, G12, G13, G23):
-    r"""3D stiffness `[C_{ij}]` of an orthotropic material in its axes
+    r"""3D stiffness `\boldsymbol{C}` of an orthotropic material in its axes
 
-    Voigt order `\{\sigma_1, \sigma_2, \sigma_3, \tau_{23}, \tau_{13},
+    Entries `C_{ij}` in the Voigt order `\{\sigma_1, \sigma_2, \sigma_3, \tau_{23}, \tau_{13},
     \tau_{12}\}`, with `\nu_{ij}` the strain in `j` under a stress in `i`.
     """
     S = np.zeros((6, 6))

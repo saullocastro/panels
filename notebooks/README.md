@@ -8,7 +8,16 @@ built in place with `python setup.py build_ext --inplace` and on the
 of the repository and put the repository first on `sys.path`.
 
 Most notebooks load stored results from `results/` and only run `panels`
-again with `RERUN = True` in their first cell.
+again with `RERUN = True` in their first cell. The stored results of the
+notebooks were computed with `panels` 0.14.0, `structsolve` 0.9.1 (0.9.2
+for `sze2004_hinged_roofs.ipynb`) and `composites` 0.10.0, those of
+`fk1952_shallow_arches.ipynb` with `panels` 0.14.0, `structsolve` 0.9.3
+and `composites` 0.10.1; the results
+computed again keep the run times of their first computation, except the
+DCB results, `results/*.npz`, and those of `conn_method_comparison.ipynb`,
+whose run times were measured again with `panels` 0.14.0 and `structsolve`
+0.9.2, one run at a time on an idle machine, with both connection methods
+under the same conditions.
 
 ## Mode I double cantilever beam (DCB), cohesive zone model
 
@@ -43,7 +52,7 @@ kept, in `results/`.
 | File | Content |
 |---|---|
 | `conn_method_comparison.ipynb` | The benchmark notebooks with the penalty and the null-space connections |
-| `conn_method_study.py` | Runs and timings of `conn_method_comparison.ipynb`, results in `results/conn_methods/` |
+| `conn_method_study.py` | Runs and timings of `conn_method_comparison.ipynb`: null-space runs of the DCB cases of the notebooks, elastic compliances, profile of the cost and Stamatelos and Labeas models with both methods, results in `results/conn_methods/`; the penalty results of the DCB cases are those of the DCB notebooks, `results/*.npz` |
 
 ## Shells and plates
 
@@ -57,20 +66,19 @@ kept, in `results/`.
 | `kardomateas2003_sandwich_rings.ipynb` | Kardomateas and Simitses (2003): long sandwich cylinders under hydrostatic pressure |
 | `han2004_sandwich_rings.ipynb` | Han, Kardomateas and Simitses (2004): long sandwich cylinders under hydrostatic pressure |
 | `nasa_sp8007_external_pressure.ipynb` | NASA/SP-8007-2020/REV 2: cylinders under lateral and hydrostatic pressure |
-| `talati2025_fgp_cylinders.ipynb` | Talati and Shaterzadeh (2025): functionally graded porous cylinders under lateral and hydrostatic pressure, critical pressures and post-buckling (Riks) with temperature-dependent moduli. There are no thermal loads, and the geometric imperfection is replaced by the equivalent load imperfection. Results in `results/talati2025_*.json` |
 | `schweizerhof1984_pressure_loads.ipynb` | Schweizerhof and Ramm (1984): displacement dependent pressure loads |
 | `sze2004_hinged_roofs.ipynb` | Sabir and Lock (1972), Sze et al. (2004): limit loads of hinged cylindrical roofs |
+| `fk1952_shallow_arches.ipynb` | Fung and Kaplan (1952), NACA TN 2840: snap-through of a hinged shallow circular arch under a sinusoidal load, Riks and Crisfield methods with both convergence criteria |
 | `stamatelos_labeas_2023.ipynb`, `stamatelos_labeas_2023_multidomain.ipynb` | Stamatelos and Labeas (2023): buckling of laminated stiffened plates, single domain and multidomain |
 | `follower_utils.py` | Utilities of the follower (hydrostatic) pressure notebooks |
 | `scf_validation_utils.py` | Utilities of the shear correction notebooks |
 
-## Legacy
+## Quadrature
 
 `test_quadrature_partial_integration_matrix.ipynb` and
 `test_quadrature_partial_integration_of_domain.ipynb` check the partial
-integration of polynomials with Gauss-Legendre rules. They import
-`panels.legendre_gauss_quadrature`, which was replaced by
-`scipy.special.roots_legendre`, and do not run with the current version.
+integration of polynomials with Gauss-Legendre rules, taking the points and
+weights from `scipy.special.roots_legendre`. They do not use `panels`.
 
 ## Results
 

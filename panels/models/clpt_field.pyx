@@ -6,6 +6,30 @@
 #cython: overflowcheck=False
 #cython: embedsignature=True
 #cython: infer_types=False
+r"""
+Field variables of the plate and cylindrical shell models using the
+classical laminated plate theory (CLPT)
+
+The degrees of freedom of each term of the approximation are ``u, v, w``.
+The functions of this module evaluate the displacements and rotations,
+:func:`.fuvw`, the generalized strains, :func:`.fstrain`, and the
+approximation functions at a point, :func:`.fg`, for the models
+``'plate_clpt_donnell'``, ``'cylshell_clpt_donnell'`` and
+``'cylshell_clpt_sanders'``, see :mod:`panels.modelDB`. The coordinates
+``x`` and ``y`` are physical, ``0 <= x <= a`` and ``0 <= y <= b``.
+
+Notes
+-----
+Each field `F` of `u, v, w`, of index `k = 0, 1, 2`, is the Ritz series of
+:class:`.Shell`, `F = \sum_{j} \sum_{i} c_{3(j m + i) + k} P_i^F(\xi)
+P_j^F(\eta)`, with `\xi = 2x/a - 1`, `\eta = 2y/b - 1` and Bardell's
+functions of the boundary flags of `F`, see :mod:`panels.bardell`; the
+derivatives are `F_{,x} = (2/a) F_{,\xi}` and `F_{,y} = (2/b) F_{,\eta}`.
+The rotations of the normal are those of the CLPT, `\phi_x = -w_{,x}` and
+`\phi_y = -w_{,y}`, plus `v/r` for the Sanders-Koiter kinematics, and the
+strains are those of the kinematics of :mod:`panels.models`.
+
+"""
 import numpy as np
 from libc.stdlib cimport malloc, free
 from cython.parallel import prange
@@ -28,10 +52,25 @@ cdef int DOF = 3
 def is_sanders(object s):
     r'''Tell whether the model of ``s`` uses Sanders-Koiter kinematics
 
+    The rotation ``phiy`` of :func:`.fuvw` and :func:`.fg` and the strains
+    of :func:`.fstrain` then include the terms of these kinematics, see
+    :mod:`panels.models.cylshell_clpt_sanders_num`.
+
+    Parameters
+    ----------
+    s : :class:`.Shell`
+        The shell, whose attribute ``model`` is read.
+
+    Returns
+    -------
+    sanders : int
+        ``1`` when ``'sanders'`` is in the name of the model, else ``0``.
+
+    Notes
+    -----
     With Sanders-Koiter kinematics the rotation of the normal about the `x`
     axis is `\phi_y = -w_{,y} + v/r`, instead of `-w_{,y}`, and the changes of
-    curvature receive terms in `u` and `v`, see
-    :mod:`panels.models.cylshell_clpt_sanders_num`.
+    curvature receive terms in `u` and `v`, see :mod:`panels.models`.
 
     '''
     return 1 if 'sanders' in s.model else 0
@@ -39,8 +78,34 @@ def is_sanders(object s):
 
 def fuvw(double [::1] c, object s, double [::1] xs, double [::1] ys,
         int num_cores=4):
-    '''
+    r'''
         Calculates the displacement field at all points in the provided grid
+
+        The points are split into ``num_cores`` chunks evaluated in
+        parallel with OpenMP threads. The rotations are ``phix = -w,x``
+        and ``phiy = -w,y``, plus ``v/r`` for the Sanders-Koiter kinematics,
+        see :func:`.is_sanders`.
+
+        Parameters
+        ----------
+        c : np.ndarray
+            Ritz constants of the shell ``s``, 1-D array of size
+            ``3*s.m*s.n``, see :meth:`.Shell.get_size`.
+        s : :class:`.Shell`
+            The shell, whose dimensions, numbers of terms, boundary
+            condition flags and, for the Sanders-Koiter kinematics, radius
+            are read.
+        xs, ys : np.ndarray
+            Coordinates `x` and `y` of the points, lengths, 1-D arrays of
+            the same size.
+        num_cores : int, optional
+            Number of threads. Default ``4``.
+
+        Returns
+        -------
+        us, vs, ws, phixs, phiys : np.ndarray
+            The displacements, lengths, and the rotations, dimensionless,
+            1-D arrays of the size of ``xs``.
     '''
     cdef double a, b, r
     cdef int m, n, sanders
@@ -97,12 +162,12 @@ def fuvw(double [::1] c, object s, double [::1] xs, double [::1] ys,
               y1v, y1vr, y2v, y2vr,
               y1w, y1wr, y2w, y2wr)
 
-        cfwx(&c[0], m, n, a, b, &xs_core[pti,0], &ys_core[pti,0],
+        cfw_x(&c[0], m, n, a, b, &xs_core[pti,0], &ys_core[pti,0],
              size_core, &phixs[pti,0],
              x1w, x1wr, x2w, x2wr,
              y1w, y1wr, y2w, y2wr)
 
-        cfwy(&c[0], m, n, a, b, &xs_core[pti,0], &ys_core[pti,0],
+        cfw_y(&c[0], m, n, a, b, &xs_core[pti,0], &ys_core[pti,0],
              size_core, &phiys[pti,0],
              x1w, x1wr, x2w, x2wr,
              y1w, y1wr, y2w, y2wr)
@@ -129,13 +194,43 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys, int
     #  [::1] means a contigious array
     
     '''
-    Calculates the strain field at all points in the provided grid 
-    
-        c : ritz coeffients of the whole system i.e. size = n_rows of K_global
-        
-        s : Shell obj
-        
-        xs and ys : contigious arrays of the grid divisions in the x and y direction
+    Calculates the strain field at all points in the provided grid
+
+    The points are split into ``num_cores`` chunks evaluated in parallel
+    with OpenMP threads. The strains are those of the Donnell kinematics,
+    or of the Sanders-Koiter kinematics when :func:`.is_sanders` returns
+    ``1``; the hoop strain ``w/r`` is included when ``s.r`` is not zero.
+
+    Parameters
+    ----------
+    c : np.ndarray
+        Ritz constants of the shell ``s``, 1-D array of size ``3*s.m*s.n``,
+        see :meth:`.Shell.get_size`; only these first entries are read.
+    s : :class:`.Shell`
+        Shell obj, whose dimensions, radius ``r`` (a float, ``0.`` for a
+        plate), numbers of terms and boundary condition flags are read.
+    xs, ys : np.ndarray
+        contigious arrays of the grid divisions in the x and y direction,
+        i.e. the coordinates `x` and `y` of the points, lengths, 1-D arrays
+        of the same size.
+    num_cores : int, optional
+        Number of threads. Default ``4``.
+    NLgeom : int, optional
+        ``1`` to include the non-linear terms of the membrane strains,
+        ``0`` otherwise. Default ``0``.
+
+    Returns
+    -------
+    exxs, eyys, gxys, kxxs, kyys, kxys : np.ndarray
+        The membrane strains, dimensionless, and the changes of curvature,
+        per unit length, 1-D arrays of the size of ``xs``.
+
+    Notes
+    -----
+    The strains are those of the Donnell or Sanders-Koiter kinematics given
+    in the notes of :mod:`panels.models`, with the quadratic terms of the
+    membrane strains multiplied by ``NLgeom``, and with ``r = 0`` standing
+    for the flat plate, whose hoop strain is zero.
     '''
     
     cdef double a, b, r
@@ -263,16 +358,16 @@ cdef void cfuvw(double *c, int m, int n, double a, double b, double *xs,
     free(gw)
 
 
-cdef void cfwx(double *c, int m, int n, double a, double b, double *xs,
-        double *ys, int size, double *wxs,
+cdef void cfw_x(double *c, int m, int n, double a, double b, double *xs,
+        double *ys, int size, double *w_xs,
         double x1w, double x1wr, double x2w, double x2wr,
         double y1w, double y1wr, double y2w, double y2wr) noexcept nogil:
     cdef int i, j, col, pti
-    cdef double x, y, wx, xi, eta
-    cdef double *fwxi
+    cdef double x, y, w_x, xi, eta
+    cdef double *fw_xi
     cdef double *gw
 
-    fwxi = <double *>malloc(NMAX * sizeof(double))
+    fw_xi = <double *>malloc(NMAX * sizeof(double))
     gw = <double *>malloc(NMAX * sizeof(double))
 
     for pti in range(size):
@@ -282,33 +377,33 @@ cdef void cfwx(double *c, int m, int n, double a, double b, double *xs,
         xi = 2*x/a - 1.
         eta = 2*y/b - 1.
 
-        vec_fp(fwxi, xi, x1w, x1wr, x2w, x2wr)
+        vec_fp(fw_xi, xi, x1w, x1wr, x2w, x2wr)
         vec_f(gw, eta, y1w, y1wr, y2w, y2wr)
 
-        wx = 0
+        w_x = 0
 
         for j in range(n):
             for i in range(m):
                 col = DOF*(j*m + i)
-                wx += (2/a)*c[col+2]*fwxi[i]*gw[j]
+                w_x += (2/a)*c[col+2]*fw_xi[i]*gw[j]
 
-        wxs[pti] = wx
+        w_xs[pti] = w_x
 
-    free(fwxi)
+    free(fw_xi)
     free(gw)
 
 
-cdef void cfwy(double *c, int m, int n, double a, double b, double *xs,
-        double *ys, int size, double *wys,
+cdef void cfw_y(double *c, int m, int n, double a, double b, double *xs,
+        double *ys, int size, double *w_ys,
         double x1w, double x1wr, double x2w, double x2wr,
         double y1w, double y1wr, double y2w, double y2wr) noexcept nogil:
     cdef int i, j, col, pti
-    cdef double x, y, wy, xi, eta
+    cdef double x, y, w_y, xi, eta
     cdef double *fw
-    cdef double *gweta
+    cdef double *gw_eta
 
     fw = <double *>malloc(NMAX * sizeof(double))
-    gweta = <double *>malloc(NMAX * sizeof(double))
+    gw_eta = <double *>malloc(NMAX * sizeof(double))
 
     for pti in range(size):
         x = xs[pti]
@@ -318,23 +413,50 @@ cdef void cfwy(double *c, int m, int n, double a, double b, double *xs,
         eta = 2*y/b - 1.
 
         vec_f(fw, xi, x1w, x1wr, x2w, x2wr)
-        vec_fp(gweta, eta, y1w, y1wr, y2w, y2wr)
+        vec_fp(gw_eta, eta, y1w, y1wr, y2w, y2wr)
 
-        wy = 0
+        w_y = 0
 
         for j in range(n):
             for i in range(m):
                 col = DOF*(j*m + i)
-                wy += (2/b)*c[col+2]*fw[i]*gweta[j]
+                w_y += (2/b)*c[col+2]*fw[i]*gw_eta[j]
 
-        wys[pti] = wy
+        w_ys[pti] = w_y
 
     free(fw)
-    free(gweta)
+    free(gw_eta)
 
 
 def fg(double[:, ::1] g, double x, double y, object s):
-    # Accessing the contiguous memory layout for C 
+    r'''Approximation functions of ``u, v, w, phix, phiy`` at ``(x, y)``
+
+    The functions are written in the rows of ``g``, in place: for each term
+    of column ``col = 3*(j*m + i)``, ``g[0, col]``, ``g[1, col+1]`` and
+    ``g[2, col+2]`` are those of ``u``, ``v`` and ``w``, ``g[3, col+2]``
+    that of ``phix = -w,x`` and ``g[4, col+2]`` that of ``phiy = -w,y``;
+    for the Sanders-Koiter kinematics ``g[4, col+1]`` adds ``v/r``. The
+    other entries are not written, so ``g`` is usually created with zeros.
+    Nothing is returned.
+
+    Parameters
+    ----------
+    g : np.ndarray
+        Output array of shape ``(5, size)``, with ``size`` at least
+        ``3*s.m*s.n``, see :meth:`.Shell.get_size`, C-contiguous.
+    x, y : float
+        Coordinates of the point, lengths.
+    s : :class:`.Shell`
+        The shell, whose dimensions, numbers of terms, boundary condition
+        flags and, for the Sanders-Koiter kinematics, radius are read.
+
+    Raises
+    ------
+    ValueError
+        If the class of ``s`` is not named ``'Shell'``.
+
+    '''
+    # Accessing the contiguous memory layout for C
     # ::1 at the 2nd position means that the elements in this 2nd dimension will be 1 element apart in memory.
     
     if s.__class__.__name__ != 'Shell':
@@ -436,43 +558,55 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
         double y1v, double y1vr, double y2v, double y2vr,
         double y1w, double y1wr, double y2w, double y2wr, int NLgeom,
         int sanders) noexcept nogil:
+    r'''Calculates the strain at every point in the provided grid
+
+    Kernel of :func:`.fstrain` for one chunk of ``size`` points: the
+    membrane strains and changes of curvature at ``(xs[k], ys[k])`` are
+    written to ``exxs[k]``, ``eyys[k]``, ``gxys[k]``, ``kxxs[k]``,
+    ``kyys[k]`` and ``kxys[k]``, for the ``m*n`` terms of the Ritz
+    constants ``c``, the boundary condition flags ``x1u, ..., y2wr``, the
+    non-linear terms when ``NLgeom == 1`` and the Sanders-Koiter
+    kinematics when ``sanders == 1``. For the Donnell kinematics the term
+    ``w/r`` is included when ``r`` is not zero.
+
+    '''
     cdef int i, j, col, pti
     cdef double x, y, xi, eta
     cdef double exx, eyy, gxy, kxx, kyy, kxy
     cdef int flagcyl
 
     cdef double *fu
-    cdef double *fuxi
+    cdef double *fu_xi
     cdef double *fv
-    cdef double *fvxi
+    cdef double *fv_xi
     cdef double *fw
-    cdef double *fwxi
-    cdef double *fwxixi
+    cdef double *fw_xi
+    cdef double *fw_xixi
 
     cdef double *gu
-    cdef double *gueta
+    cdef double *gu_eta
     cdef double *gv
-    cdef double *gveta
+    cdef double *gv_eta
     cdef double *gw
-    cdef double *gweta
-    cdef double *gwetaeta
+    cdef double *gw_eta
+    cdef double *gw_etaeta
 
-    cdef double wxi, weta, v, phix, phiy
+    cdef double w_xi, w_eta, v, phix, phiy
 
     fu = <double *>malloc(NMAX * sizeof(double))
-    fuxi = <double *>malloc(NMAX * sizeof(double))
+    fu_xi = <double *>malloc(NMAX * sizeof(double))
     gu = <double *>malloc(NMAX * sizeof(double))
-    gueta = <double *>malloc(NMAX * sizeof(double))
+    gu_eta = <double *>malloc(NMAX * sizeof(double))
     fv = <double *>malloc(NMAX * sizeof(double))
-    fvxi = <double *>malloc(NMAX * sizeof(double))
+    fv_xi = <double *>malloc(NMAX * sizeof(double))
     gv = <double *>malloc(NMAX * sizeof(double))
-    gveta = <double *>malloc(NMAX * sizeof(double))
+    gv_eta = <double *>malloc(NMAX * sizeof(double))
     fw = <double *>malloc(NMAX * sizeof(double))
-    fwxi = <double *>malloc(NMAX * sizeof(double))
-    fwxixi = <double *>malloc(NMAX * sizeof(double))
+    fw_xi = <double *>malloc(NMAX * sizeof(double))
+    fw_xixi = <double *>malloc(NMAX * sizeof(double))
     gw = <double *>malloc(NMAX * sizeof(double))
-    gweta = <double *>malloc(NMAX * sizeof(double))
-    gwetaeta = <double *>malloc(NMAX * sizeof(double))
+    gw_eta = <double *>malloc(NMAX * sizeof(double))
+    gw_etaeta = <double *>malloc(NMAX * sizeof(double))
 
     if r == 0:
         flagcyl = 0
@@ -489,32 +623,32 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
 
         # u functions at x and y (loop gets it through all points)
         vec_f(fu, xi, x1u, x1ur, x2u, x2ur)
-        vec_fp(fuxi, xi, x1u, x1ur, x2u, x2ur)
+        vec_fp(fu_xi, xi, x1u, x1ur, x2u, x2ur)
         vec_f(gu, eta, y1u, y1ur, y2u, y2ur)
-        vec_fp(gueta, eta, y1u, y1ur, y2u, y2ur)
+        vec_fp(gu_eta, eta, y1u, y1ur, y2u, y2ur)
         # v functions 
         vec_f(fv, xi, x1v, x1vr, x2v, x2vr)
-        vec_fp(fvxi, xi, x1v, x1vr, x2v, x2vr)
+        vec_fp(fv_xi, xi, x1v, x1vr, x2v, x2vr)
         vec_f(gv, eta, y1v, y1vr, y2v, y2vr)
-        vec_fp(gveta, eta, y1v, y1vr, y2v, y2vr)
+        vec_fp(gv_eta, eta, y1v, y1vr, y2v, y2vr)
         # w functions 
         vec_f(fw, xi, x1w, x1wr, x2w, x2wr)
-        vec_fp(fwxi, xi, x1w, x1wr, x2w, x2wr)
-        vec_fpp(fwxixi, xi, x1w, x1wr, x2w, x2wr)
+        vec_fp(fw_xi, xi, x1w, x1wr, x2w, x2wr)
+        vec_fpp(fw_xixi, xi, x1w, x1wr, x2w, x2wr)
         vec_f(gw, eta, y1w, y1wr, y2w, y2wr)
-        vec_fp(gweta, eta, y1w, y1wr, y2w, y2wr)
-        vec_fpp(gwetaeta, eta, y1w, y1wr, y2w, y2wr)
+        vec_fp(gw_eta, eta, y1w, y1wr, y2w, y2wr)
+        vec_fpp(gw_etaeta, eta, y1w, y1wr, y2w, y2wr)
 
-        wxi = 0
-        weta = 0
+        w_xi = 0
+        w_eta = 0
         v = 0
 
         # Sum through all m*n terms
         for j in range(n):
             for i in range(m):
                 col = DOF*(j*m + i)
-                wxi += c[col+2]*fwxi[i]*gw[j]
-                weta += c[col+2]*fw[i]*gweta[j]
+                w_xi += c[col+2]*fw_xi[i]*gw[j]
+                w_eta += c[col+2]*fw[i]*gw_eta[j]
                 v += c[col+1]*fv[i]*gv[j]
                 # +2 to get w (+0 is u, +1 is v)
 
@@ -522,8 +656,8 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
             # Sanders-Koiter kinematics, the non-linear strain is
             # {phix^2/2, phiy^2/2, phix*phiy}, with phix = -w,x and
             # phiy = -w,y + v/r
-            phix = -(2/a)*wxi
-            phiy = -(2/b)*weta + v/r
+            phix = -(2/a)*w_xi
+            phiy = -(2/b)*w_eta + v/r
 
             exx = 0
             eyy = 0
@@ -535,14 +669,14 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
             for j in range(n):
                 for i in range(m):
                     col = DOF*(j*m + i)
-                    exx += c[col+0]*fuxi[i]*gu[j]*(2/a)
-                    eyy += c[col+1]*fv[i]*gveta[j]*(2/b) + 1/r*c[col+2]*fw[i]*gw[j]
-                    gxy += c[col+0]*fu[i]*gueta[j]*(2/b) + c[col+1]*fvxi[i]*gv[j]*(2/a)
-                    kxx += -c[col+2]*fwxixi[i]*gw[j]*4/(a*a)
-                    kyy += -c[col+2]*fw[i]*gwetaeta[j]*4/(b*b) + 1/r*c[col+1]*fv[i]*gveta[j]*(2/b)
-                    kxy += (-2*c[col+2]*fwxi[i]*gweta[j]*4/(a*b)
-                            + 1.5/r*c[col+1]*fvxi[i]*gv[j]*(2/a)
-                            - 0.5/r*c[col+0]*fu[i]*gueta[j]*(2/b))
+                    exx += c[col+0]*fu_xi[i]*gu[j]*(2/a)
+                    eyy += c[col+1]*fv[i]*gv_eta[j]*(2/b) + 1/r*c[col+2]*fw[i]*gw[j]
+                    gxy += c[col+0]*fu[i]*gu_eta[j]*(2/b) + c[col+1]*fv_xi[i]*gv[j]*(2/a)
+                    kxx += -c[col+2]*fw_xixi[i]*gw[j]*4/(a*a)
+                    kyy += -c[col+2]*fw[i]*gw_etaeta[j]*4/(b*b) + 1/r*c[col+1]*fv[i]*gv_eta[j]*(2/b)
+                    kxy += (-2*c[col+2]*fw_xi[i]*gw_eta[j]*4/(a*b)
+                            + 1.5/r*c[col+1]*fv_xi[i]*gv[j]*(2/a)
+                            - 0.5/r*c[col+0]*fu[i]*gu_eta[j]*(2/b))
 
             exx += NLgeom*0.5*phix*phix
             eyy += NLgeom*0.5*phiy*phiy
@@ -566,17 +700,17 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
         for j in range(n):
             for i in range(m):
                 col = DOF*(j*m + i)
-                exx += c[col+0]*fuxi[i]*gu[j]*(2/a) + NLgeom*2/(a*a)*c[col+2]*fwxi[i]*gw[j]*wxi # same as wxi^2
+                exx += c[col+0]*fu_xi[i]*gu[j]*(2/a) + NLgeom*2/(a*a)*c[col+2]*fw_xi[i]*gw[j]*w_xi # same as w_xi^2
                 if flagcyl == 1:
-                    eyy += c[col+1]*fv[i]*gveta[j]*(2/b) + 1/r*c[col+2]*fw[i]*gw[j] + NLgeom*2/(b*b)*c[col+2]*fw[i]*gweta[j]*weta
+                    eyy += c[col+1]*fv[i]*gv_eta[j]*(2/b) + 1/r*c[col+2]*fw[i]*gw[j] + NLgeom*2/(b*b)*c[col+2]*fw[i]*gw_eta[j]*w_eta
                 else:
-                    eyy += c[col+1]*fv[i]*gveta[j]*(2/b) + NLgeom*2/(b*b)*c[col+2]*fw[i]*gweta[j]*weta
-                gxy += c[col+0]*fu[i]*gueta[j]*(2/b) + c[col+1]*fvxi[i]*gv[j]*(2/a) + NLgeom*2/(a*b)*( # same as w,x*w,y
-                                        c[col+2]*fwxi[i]*gw[j]*weta +
-                                        wxi*c[col+2]*fw[i]*gweta[j] )
-                kxx += -c[col+2]*fwxixi[i]*gw[j]*4/(a*a)
-                kyy += -c[col+2]*fw[i]*gwetaeta[j]*4/(b*b)
-                kxy += -2*c[col+2]*fwxi[i]*gweta[j]*4/(a*b)
+                    eyy += c[col+1]*fv[i]*gv_eta[j]*(2/b) + NLgeom*2/(b*b)*c[col+2]*fw[i]*gw_eta[j]*w_eta
+                gxy += c[col+0]*fu[i]*gu_eta[j]*(2/b) + c[col+1]*fv_xi[i]*gv[j]*(2/a) + NLgeom*2/(a*b)*( # same as w,x*w,y
+                                        c[col+2]*fw_xi[i]*gw[j]*w_eta +
+                                        w_xi*c[col+2]*fw[i]*gw_eta[j] )
+                kxx += -c[col+2]*fw_xixi[i]*gw[j]*4/(a*a)
+                kyy += -c[col+2]*fw[i]*gw_etaeta[j]*4/(b*b)
+                kxy += -2*c[col+2]*fw_xi[i]*gw_eta[j]*4/(a*b)
 
         # Strains and curvatures at each point in the grid 
         exxs[pti] = exx
@@ -588,17 +722,17 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
 
     # Frees up the allocated mem
     free(fu)
-    free(fuxi)
+    free(fu_xi)
     free(gu)
-    free(gueta)
+    free(gu_eta)
     free(fv)
-    free(fvxi)
+    free(fv_xi)
     free(gv)
-    free(gveta)
+    free(gv_eta)
     free(fw)
-    free(fwxi)
-    free(fwxixi)
+    free(fw_xi)
+    free(fw_xixi)
     free(gw)
-    free(gweta)
-    free(gwetaeta)
+    free(gw_eta)
+    free(gw_etaeta)
 

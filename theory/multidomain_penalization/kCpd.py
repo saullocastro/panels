@@ -9,48 +9,48 @@ sys.path.append(r'C:\Users\natha\Documents\GitHub\panels')
 import numpy as np
 from sympy import Matrix as M, Symbol, init_printing, var
 
-var('a, b, h, d, wxi, weta')
+var('a, b, h, d, w_xi, w_eta')
 var('ku, kv, kw')
 
-var('fAu, gAu, fAv, gAv, fAw, gAw, fAuxi, fAvxi, fAwxi, gAueta, gAveta, gAweta, fAwxixi, gAwetaeta')
-var('fBu, gBu, fBv, gBv, fBw, gBw, fBuxi, fBvxi, fBwxi, gBueta, gBveta, gBweta, fBwxixi, gBwetaeta')
+var('fAu, gAu, fAv, gAv, fAw, gAw, fAu_xi, fAv_xi, fAw_xi, gAu_eta, gAv_eta, gAw_eta, fAw_xixi, gAw_etaeta')
+var('fBu, gBu, fBv, gBv, fBw, gBw, fBu_xi, fBv_xi, fBw_xi, gBu_eta, gBv_eta, gBw_eta, fBw_xixi, gBw_etaeta')
 
-var('uA, vA, wA, uAxi, vAxi, wAxi, uAeta, vAeta, wAeta, wAxixi, wAxieta, wAetaeta')
-var('uB, vB, wB, uBxi, vBxi, wBxi, uBeta, vBeta, wBeta, wBxixi, wBxieta, wBetaeta')
+var('uA, vA, wA, uA_xi, vA_xi, wA_xi, uA_eta, vA_eta, wA_eta, wA_xixi, wA_xieta, wA_etaeta')
+var('uB, vB, wB, uB_xi, vB_xi, wB_xi, uB_eta, vB_eta, wB_eta, wB_xixi, wB_xieta, wB_etaeta')
 
 # SF already in terms of xi and eta
 suA = M([[fAu*gAu, 0, 0]])
 svA = M([[0, fAv*gAv, 0]])
 swA = M([[0, 0, fAw*gAw]])
 
-# suAxi is deri of suA wrt xi
-suAxi = M([[fAuxi*gAu, 0, 0]])
-svAxi = M([[0, fAvxi*gAv, 0]])
-swAxi = M([[0, 0, fAwxi*gAw]])
+# suA_xi is deri of suA wrt xi
+suA_xi = M([[fAu_xi*gAu, 0, 0]])
+svA_xi = M([[0, fAv_xi*gAv, 0]])
+swA_xi = M([[0, 0, fAw_xi*gAw]])
 
-suAeta = M([[fAu*gAueta, 0, 0]])
-svAeta = M([[0, fAv*gAveta, 0]])
-swAeta = M([[0, 0, fAw*gAweta]])
+suA_eta = M([[fAu*gAu_eta, 0, 0]])
+svA_eta = M([[0, fAv*gAv_eta, 0]])
+swA_eta = M([[0, 0, fAw*gAw_eta]])
 
-swAxixi = M([[0, 0, fAwxixi*gAw]])
-swAxieta = M([[0, 0, fAwxi*gAweta]])
-swAetaeta = M([[0, 0, fAw*gAwetaeta]])
+swA_xixi = M([[0, 0, fAw_xixi*gAw]])
+swA_xieta = M([[0, 0, fAw_xi*gAw_eta]])
+swA_etaeta = M([[0, 0, fAw*gAw_etaeta]])
 
 suB = M([[fBu*gBu, 0, 0]])
 svB = M([[0, fBv*gBv, 0]])
 swB = M([[0, 0, fBw*gBw]])
 
-suBxi = M([[fBuxi*gBu, 0, 0]])
-svBxi = M([[0, fBvxi*gBv, 0]])
-swBxi = M([[0, 0, fBwxi*gBw]])
+suB_xi = M([[fBu_xi*gBu, 0, 0]])
+svB_xi = M([[0, fBv_xi*gBv, 0]])
+swB_xi = M([[0, 0, fBw_xi*gBw]])
 
-suBeta = M([[fBu*gBueta, 0, 0]])
-svBeta = M([[0, fBv*gBveta, 0]])
-swBeta = M([[0, 0, fBw*gBweta]])
+suB_eta = M([[fBu*gBu_eta, 0, 0]])
+svB_eta = M([[0, fBv*gBv_eta, 0]])
+swB_eta = M([[0, 0, fBw*gBw_eta]])
 
-swBxixi = M([[0, 0, fBwxixi*gBw]])
-swBxieta = M([[0, 0, fBwxi*gBweta]])
-swBetaeta = M([[0, 0, fBw*gBwetaeta]])
+swB_xixi = M([[0, 0, fBw_xixi*gBw]])
+swB_xieta = M([[0, 0, fBw_xi*gBw_eta]])
+swB_etaeta = M([[0, 0, fBw*gBw_etaeta]])
 
 # Constitutive (penalty) stiffness matrix
     # All 3 disps stem from the same term so just club them into 1 stiffeness term

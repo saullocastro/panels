@@ -19,10 +19,10 @@ functions of Bardell, see :ref:`theory_func_bardell`, along `\xi` and `\eta`:
 
 .. math::
 
-    u(\xi, \eta) = \sum_{j=0}^{n-1} \sum_{i=0}^{m-1} c_{u, ij}\, f_i(\xi)\,
-    g_j(\eta)
+    u(\xi, \eta) = \sum_{j=0}^{n-1} \sum_{i=0}^{m-1} c_{u, ij}\, P_i(\xi)\,
+    P_j(\eta)
 
-where `f_i` and `g_j` depend on the boundary conditions of the field, i.e.
+where `P_i` and `P_j` depend on the boundary conditions of the field, i.e.
 the flags ``x1u, x1ur, x2u, x2ur`` along `x` and ``y1u, y1ur, y2u, y2ur``
 along `y`. The entry of a stiffness matrix between the terms `(i, j)` and
 `(k, l)` is the sum over the `n_x \times n_y` Gauss-Legendre points
@@ -30,7 +30,7 @@ along `y`. The entry of a stiffness matrix between the terms `(i, j)` and
 .. math::
 
     K_{(ij)(kl)} = \sum_{p=1}^{n_x} \sum_{q=1}^{n_y} w_p w_q\,
-    \mathcal{F}\left(f_i(\xi_p), f_k(\xi_p), g_j(\eta_q), g_l(\eta_q),
+    \mathcal{F}\left(P_i(\xi_p), P_k(\xi_p), P_j(\eta_q), P_l(\eta_q),
     \ldots\right)
 
 where `\mathcal{F}` combines the functions and their derivatives `f'`,
@@ -60,7 +60,7 @@ The kernels had the structure below, e.g. ``fkC_num`` of
                             ...                       # 7 functions of l
                             kCv[c] += weight*(...)    # the entries of (ij)(kl)
 
-The value of `g_l(\eta_q)` does not depend on `i`, `k` or `j`, but it was
+The value of `P_l(\eta_q)` does not depend on `i`, `k` or `j`, but it was
 computed again for each of them: per integration point, `7 m^2 n^2`
 evaluations in the innermost loop, `7 m^2 n` in the loop over `j`, and so
 on, for only `7 (m + n)` distinct values. Each evaluation is a polynomial
@@ -138,19 +138,19 @@ over the terms are tabulated:
 - the blade stiffeners, ``panels/stiffener/models``.
 
 The analytical kernels, which use closed-form integrals of the products of
-the functions, e.g. ``fk0`` or ``kCSB``, are not affected. The kernel
+the functions, e.g. ``fk0`` or :func:`.fkCSB` of the skin-base connection,
+are not affected. The kernel
 ``calc_kTv`` of the product of the tangent stiffness matrix by a vector,
 see :ref:`tangent_product`, is written with the tables from the start.
 
 Implementation
 --------------
 
-The rewriting is done by :mod:`panels.dev.tabulate`, applied by the
-generators of the modules, ``theory/shells/fsdt_tsdt/write_pyx.py``,
-``theory/shells/cylshell_clpt_sanders/write_pyx.py`` and
-``theory/shells/follower_pressure/write_pyx.py``, and with ``python -m
-panels.dev.tabulate <file.pyx> ...`` to the modules written by hand. For
-each kernel it
+The rewriting is done by :mod:`panels.dev.tabulate`, applied by the SymPy
+generators of the modules of the shear deformation theories, of the
+cylinders with the Sanders kinematics and of the follower pressure loads,
+and with ``python -m panels.dev.tabulate <file.pyx> ...`` to the modules
+written by hand. For each kernel it
 
 1. finds the calls ``NAME = f(IDX, COORD, x1F, x1Fr, x2F, x2Fr)``, with
    ``f``, ``fp`` or ``fpp``, the flags of the field ``F`` along `x` (or
@@ -187,9 +187,12 @@ Verification
 Performance
 -----------
 
-Single shell, laminate ``[0, 45, -45, 90]``, ``nx = 2m``, ``ny = 2n``
-integration points, a follower pressure, one core, times in seconds before
-and after the tabulation, with the speed-up:
+Single shell, laminate ``[0, 45, -45, 90]``, a follower pressure, one core,
+times in seconds before and after the tabulation, with the speed-up. The
+times were measured with ``nx = 2m``, ``ny = 2n`` integration points, the
+default before ``panels`` 0.14.0, one point more in each direction than the
+current default :func:`panels.shell.gauss_points`, `\max(2m - 1, 7)`, for
+these `m = n \ge 8`:
 
 .. list-table::
     :header-rows: 1
@@ -257,5 +260,6 @@ connection with damage integrated with `50 \times 25` points:
 The double cantilever beam with cohesive zone of
 ``tests/multidomain/test_dcb_damage.py`` runs in 2 min 45 s instead of
 7 min 28 s, its non-linear matrices of the panels and its connections
-being tabulated; its cohesive zone is assembled with cached operators by
+being tabulated, also measured with the default ``nx = 2m``, ``ny = 2n`` of
+the panels before ``panels`` 0.14.0; its cohesive zone is assembled with cached operators by
 default, or with ``kCSB_dmg`` with ``use_kernels=True``.

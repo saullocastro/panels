@@ -3,9 +3,9 @@ r"""Prescribed displacements imposed exactly with the null-space method
 With ``MultiDomain(..., pd_method='null-space')`` the prescribed
 displacements of :meth:`.Shell.add_point_pd`,
 :meth:`.Shell.add_distr_pd_fixed_x` and :meth:`.Shell.add_distr_pd_fixed_y`
-are the constraints `[B_d] \{c\} = \{d_0\} + \lambda \{d_1\}`, eliminated
-with the connections, `\{c\} = [T] \{c_r\} + \{c_{p0}\} + \lambda
-\{c_{p1}\}`, see ``doc/source/multidomain_null_space.rst``:
+are the constraints `\boldsymbol{B}_d \boldsymbol{c} = \bar{\boldsymbol{d}}_0 + \lambda \bar{\boldsymbol{d}}_1`, eliminated
+with the connections, `\boldsymbol{c} = \boldsymbol{Z} \boldsymbol{c}_r + \boldsymbol{c}_{p0} + \lambda
+\boldsymbol{c}_{p1}`, see ``doc/source/multidomain_null_space.rst``:
 
 - the membrane patch test is exact, for single and multiple domains, with
   the reaction `P = E A u/L`
@@ -13,7 +13,7 @@ with the connections, `\{c\} = [T] \{c_r\} + \{c_{p0}\} + \lambda
 - linear buckling under a prescribed end-shortening is the same as under the
   equivalent load
 - the geometrically non-linear analyses of ``structsolve`` converge under
-  displacement control, with the exact Jacobian and `\partial R/\partial
+  displacement control, with the exact Jacobian and `\partial \boldsymbol{R}/\partial
   \lambda`
 - redundant prescriptions are dropped, inconsistent ones raise errors that
   name the panels, the prescriptions and the flags involved
@@ -151,7 +151,7 @@ def test_membrane_patch_test_isotropic(layout, model):
 
 def test_membrane_patch_test_laminate():
     r"""The same for a quasi-isotropic laminate: `N = b \delta/(a
-    a_{11})`, `\nu_{xy} = -a_{12}/a_{11}`, with `[a] = [A]^{-1}`"""
+    a_{11})`, `\nu_{xy} = -a_{12}/a_{11}`, with `\boldsymbol{a} = \boldsymbol{A}^{-1}`"""
     a, b, delta = 0.5, 0.3, 1e-4
     stack = [0, 45, -45, 90, 90, -45, 45, 0]
     ps, conn = two_by_two(a, b, xs=0.2, ys=0.1, h=1e-3, stack=stack,
@@ -190,7 +190,7 @@ def test_single_shell_without_conn():
     X, Y, f = fields(p, c)
     assert np.allclose(f['u'], -1e-3*X, atol=1e-15)
     with pytest.raises(RuntimeError, match='No connectivity'):
-        MultiDomain([plate(1., 1.)], pd_method='null-space').get_T()
+        MultiDomain([plate(1., 1.)], pd_method='null-space').get_Z()
 
 
 def penalty_static(p, delta, k):
@@ -259,9 +259,9 @@ def test_penalty_unchanged_and_excluded_from_fext():
 
 
 def test_mixed_constant_and_incremented_linear():
-    r"""`c(\lambda) = c_0 + \lambda c_1`, with `c_0` due to the constant
-    prescribed displacements and `c_1` due to the load and the incremented
-    ones"""
+    r"""`\boldsymbol{c}(\lambda) = \boldsymbol{c}_0 + \lambda \boldsymbol{c}_1`, with `\boldsymbol{c}_0`
+    due to the constant prescribed displacements and `\boldsymbol{c}_1` due to the
+    load and the incremented ones"""
     p = plate(1., 0.6)
     p.add_distr_pd_fixed_x(0., ku=1., funcu=lambda y: 0.)
     p.add_distr_pd_fixed_x(1., ku=1., funcu=lambda y: -1e-3*(1 + y), cte=True)
@@ -278,30 +278,30 @@ def test_mixed_constant_and_incremented_linear():
     assert np.allclose(f['v'][-1, :], 2*2e-4*X[-1, :], atol=1e-14)
     # the work conjugate reactions are independent of the particular solution
     P = md.reaction_pd(c2, lbd=2., NLgeom=False)
-    T = md.get_T()
+    Z = md.get_Z()
     rng = np.random.default_rng(0)
     for name, cp in (('cte', c_p0), ('inc', c_p1)):
-        other = cp + T @ rng.normal(size=T.shape[1])
+        other = cp + Z @ rng.normal(size=Z.shape[1])
         r = md._reaction_residual(c2, 2., False)
         assert np.isclose(other @ r, P[name], rtol=1e-9)
 
 
 def test_values_are_read_again_and_T_reused():
-    r"""`[T]` depends on the positions and components only, the particular
+    r"""`\boldsymbol{Z}` depends on the positions and components only, the particular
     solutions on the values, which are read again from the panels"""
     p = plate(1., 0.6)
     end_shortening(p, 1e-3)
     p.add_point_pd(0., 0., 0, None, 1., 0., 0, None)
     md = MultiDomain([p], conn=[], pd_method='null-space')
     c1 = md.linear_static()
-    T = md.get_T()
+    Z = md.get_Z()
     p.clear_disps()
     end_shortening(p, 2e-3)
     p.add_point_pd(0., 0., 0, None, 1., 0., 0, None)
-    assert md.get_T() is T
+    assert md.get_Z() is Z
     assert np.allclose(md.linear_static(), 2*c1, rtol=1e-12)
     p.add_point_pd(0.5, 0.3, 0, None, 0, None, 1., 0.)
-    assert md.get_T() is not T
+    assert md.get_Z() is not Z
 
 
 def test_conflicting_prescriptions_name_panels():
@@ -345,8 +345,8 @@ def test_prescription_removed_by_flag():
     p = plate(1., 0.6, membrane_free=False)
     p.add_distr_pd_fixed_x(1., ku=1., funcu=lambda y: 0.)
     md = MultiDomain([p], conn=[], pd_method='null-space')
-    ref = MultiDomain([plate(1., 0.6, membrane_free=False)], conn=[]).get_T()
-    assert md.get_T().shape == ref.shape
+    ref = MultiDomain([plate(1., 0.6, membrane_free=False)], conn=[]).get_Z()
+    assert md.get_Z().shape == ref.shape
     assert not np.any(md.get_cp()[0])
     p.clear_disps()
     p.add_distr_pd_fixed_x(1., ku=1., funcu=lambda y: 1e-3)
@@ -430,6 +430,50 @@ def test_linear_buckling_plate_end_shortening_equals_load():
     p.add_distr_pd_fixed_x(a, ku=1., funcu=lambda y: -dcr, cte=False)
     with pytest.raises(ValueError, match='each set must be consistent'):
         md.get_cp()
+
+
+
+def test_linear_buckling_constant_stress_resultants_rigid_translation():
+    r"""The constant stress resultants ``Nxx`` of a panel are a pre-stress
+    of :meth:`.MultiDomain.linear_buckling`, counted once: a constant
+    prescribed rigid translation, which produces no stress, does not change
+    the critical load factor, and with the pre-stress `\bar{N}` and the
+    incremented uniform `N_{xx} = -1` the critical value is `\lambda_{cr} =
+    N_{cr} - \bar{N}`; before, ``Nxx`` entered the geometric stiffness of the
+    constant state and that of the incremented one, and the translation
+    lowered `\lambda_{cr}` by `\bar{N}`"""
+    a, b = 0.5, 0.3
+
+    def run(N0, u0):
+        p = plate(a, b, h=0.5e-3, m=8, n=8, stack=(0, 90, 90, 0),
+                  laminaprop=LAMINAPROP)
+        p.Nxx = -N0
+        # uniform N_xx = -1, self-equilibrated
+        p.add_distr_load_fixed_x(0., funcx=lambda y: 1.)
+        p.add_distr_load_fixed_x(a, funcx=lambda y: -1.)
+        # in-plane rigid motion, a constant translation u0
+        p.add_point_pd(0., 0., 1., u0, 1., 0., None, None, cte=True)
+        p.add_point_pd(0., b, 1., u0, None, None, None, None, cte=True)
+        md = MultiDomain([p], conn=[], pd_method='null-space')
+        eigvals, _ = md.linear_buckling(num_eigvalues=3)
+        assert p.Nxx == -N0
+        return eigvals[0]
+
+    Ncr = run(0., 0.)
+    assert np.isclose(Ncr, 161.93108924810818, rtol=1e-8)
+    for u0 in (0., 1e-6, 1e-3):
+        assert np.isclose(run(1., u0), Ncr - 1., rtol=1e-10)
+        assert np.isclose(run(0.5*Ncr, u0), 0.5*Ncr, rtol=1e-10)
+
+    # Nxx alone is not multiplied by the load factor
+    p = plate(a, b, h=0.5e-3, m=8, n=8, stack=(0, 90, 90, 0),
+              laminaprop=LAMINAPROP)
+    p.Nxx = -1.
+    p.add_point_pd(0., 0., 1., 0., 1., 0., None, None)
+    p.add_point_pd(0., b, 1., 0., None, None, None, None)
+    md = MultiDomain([p], conn=[], pd_method='null-space')
+    with pytest.raises(ValueError, match='no geometric stiffness'):
+        md.linear_buckling(num_eigvalues=3)
 
 
 def cylinder(pd_method, **kw):
@@ -517,7 +561,7 @@ def plate_postbuckling(delta_factor=3., m=8, n=8, P=2.):
                                     'arc_length_crisfield'])
 def test_nonlinear_displacement_control(method):
     r"""Post-buckling under displacement control: every converged increment
-    satisfies `\|[T]^T r\| \leq` ``relTOL`` `\|\lambda \partial R_r/\partial
+    satisfies `\|\boldsymbol{Z}^\top \boldsymbol{r}\| \leq` ``relTOL`` `\|\lambda \partial \boldsymbol{R}_r/\partial
     \lambda\|`, the methods agree, and the reaction is below the linear one"""
     md, p, delta = plate_postbuckling()
     an = Analysis(*md.get_reduced_functions())
@@ -529,12 +573,12 @@ def test_nonlinear_displacement_control(method):
     an.static(NLgeom=True, silent=True)
     assert np.isclose(an.increments[-1], 1.)
     fext, fint, kC, kG = md.get_reduced_functions()
-    T = md.get_T()
+    Z = md.get_Z()
     for c_r, lbd in zip(an.cs, an.increments):
         c = md.expand(c_r, lbd)
         r = md._reaction_residual(c, lbd, True)
         q = fext(inc=1., c=c_r, lbd=lbd)
-        assert np.linalg.norm(T.T @ r) <= 1.01e-6*np.linalg.norm(lbd*q)
+        assert np.linalg.norm(Z.T @ r) <= 1.01e-6*np.linalg.norm(lbd*q)
     P = md.reaction_pd(c, 1.)['inc']/delta
     N_lin = E*p.plyt*p.b*delta/p.a
     assert 0.5 < P/N_lin < 0.7
@@ -584,8 +628,8 @@ def test_nonlinear_reaction_matches_penalty():
 
 
 def test_finite_differences_of_reduced_functions():
-    r"""`[K_{T,r}]` is the Jacobian of ``calc_fint`` and ``calc_fext(c,
-    lbd)`` is `\partial R_r/\partial \lambda`, at a buckled configuration"""
+    r"""`\boldsymbol{K}_{T,r}` is the Jacobian of ``calc_fint`` and ``calc_fext(c,
+    lbd)`` is `-\partial \boldsymbol{R}_r/\partial \lambda`, at a buckled configuration"""
     md, p, delta = plate_postbuckling(delta_factor=2., m=6, n=6)
     p.add_distr_pd_fixed_y(p.b, kv=1., funcv=lambda x: 1e-3*delta*x,
                            cte=True)
@@ -603,11 +647,11 @@ def test_finite_differences_of_reduced_functions():
         assert np.linalg.norm(dF - K @ v) <= 1e-6*np.linalg.norm(K @ v)
 
     def R(lbd):
-        return lbd*fext(inc=1.) - fint(c_r, inc=lbd)
+        return fint(c_r, inc=lbd) - lbd*fext(inc=1.)
     h = 1e-5
     dR = (R(lbd + h) - R(lbd - h))/(2*h)
     q = fext(inc=1., c=c_r, lbd=lbd)
-    assert np.linalg.norm(dR - q) <= 1e-6*np.linalg.norm(q)
+    assert np.linalg.norm(dR + q) <= 1e-6*np.linalg.norm(q)
 
 
 def test_constant_end_shortening_with_load_parameter():
@@ -628,12 +672,12 @@ def test_constant_end_shortening_with_load_parameter():
         an.NL_method = method
         an.static(NLgeom=True, silent=True)
         assert np.isclose(an.increments[-1], 1.)
-        T = md.get_T()
+        Z = md.get_Z()
         for c_r, lbd in zip(an.cs, an.increments):
             c = md.expand(c_r, lbd)
             r = md._reaction_residual(c, lbd, True)
-            assert np.linalg.norm(T.T @ r) <= 1e-5*np.linalg.norm(
-                lbd*T.T @ md.calc_fext())
+            assert np.linalg.norm(Z.T @ r) <= 1e-5*np.linalg.norm(
+                lbd*Z.T @ md.calc_fext())
             X, Y, f = fields(p, c)
             assert np.allclose(f['u'][:, -1], -delta, atol=1e-12*delta)
     # without the incremented set, its reaction is null; at lbd = 0 the
@@ -657,16 +701,16 @@ def test_linear_static_through_analysis_raises():
 
 def test_without_prescriptions_unchanged():
     r"""Without prescribed displacements, ``pd_method='null-space'`` gives
-    the same `[T]` and the same reduced functions as the default"""
+    the same `\boldsymbol{Z}` and the same reduced functions as the default"""
     ps, conn = two_by_two()
     md1 = MultiDomain(ps, conn)
     md2 = MultiDomain(ps, conn, pd_method='null-space')
-    T1, T2 = md1.get_T(), md2.get_T()
-    assert (T1 != T2).nnz == 0
+    Z1, Z2 = md1.get_Z(), md2.get_Z()
+    assert (Z1 != Z2).nnz == 0
     for f1, f2 in zip(md1.get_reduced_functions(),
                       md2.get_reduced_functions()):
         assert f1.__code__.co_varnames == f2.__code__.co_varnames
-    c_r = np.random.default_rng(0).normal(size=T1.shape[1])
+    c_r = np.random.default_rng(0).normal(size=Z1.shape[1])
     assert np.array_equal(md1.expand(c_r), md2.expand(c_r, lbd=0.5))
 
 
@@ -675,7 +719,7 @@ def test_save_and_load():
     p.add_point_pd(0., 0., 0, None, 1., 0., 0, None)
     p.add_point_pd(1., 0.3, 1., -1e-3, 0, None, 0, None, cte=False)
     md = MultiDomain([p], conn=[], pd_method='null-space')
-    md.get_T(rhs_tol=1e-6)
+    md.get_Z(rhs_tol=1e-6)
     f = io.BytesIO()
     md.save(f)
     f.seek(0)

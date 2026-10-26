@@ -2,12 +2,12 @@ Non-linear static analysis with the Newton-Raphson method
 =========================================================
 
 The geometrically non-linear models, based on Donnell's equations, provide the
-internal force vector `\{F_{int}\}`, calculated with :meth:`.Shell.calc_fint`,
+internal force vector `\boldsymbol{F}_{int}`, calculated with :meth:`.Shell.calc_fint`,
 and the tangent stiffness matrix
 
 .. math::
 
-    [K_T] = [K_C] + [K_G]
+    \boldsymbol{K}_T = \boldsymbol{K}_C + \boldsymbol{K}_G
 
 calculated with :meth:`.Shell.calc_kT`, or with :meth:`.Shell.calc_kC` and
 :meth:`.Shell.calc_kG` using ``NLgeom=True``. The tangent stiffness matrix is
@@ -23,13 +23,13 @@ the linear solution, and verifies the order of convergence of the iterations:
 
 The consistency between the tangent stiffness matrix and the internal force
 vector is verified by a directional Taylor test, where the error of the linear
-approximation of `\{F_{int}\}` must decrease quadratically with the step size:
+approximation of `\boldsymbol{F}_{int}` must decrease quadratically with the step size:
 
 .. literalinclude:: ../../tests/tests_shell/test_tangent_consistency.py
     :pyobject: test_tangent_is_derivative_of_fint
 
-The product of the tangent stiffness matrix by a vector, `[K_T] \{v\}`, is
-available without assembling `[K_T]`, at the cost of one evaluation of the
+The product of the tangent stiffness matrix by a vector, `\boldsymbol{K}_T \boldsymbol{v}`, is
+available without assembling `\boldsymbol{K}_T`, at the cost of one evaluation of the
 internal force vector, with :meth:`.Shell.calc_kTv` and
 :meth:`.MultiDomain.calc_kTv`, see :ref:`tangent_product`.
 

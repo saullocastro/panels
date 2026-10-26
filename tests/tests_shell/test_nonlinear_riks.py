@@ -56,6 +56,11 @@ def test_riks_hinged_cylindrical_shell():
     an.NL_method = 'arc_length_riks'
     an.initialInc = 0.05
     an.maxArcLength = 50.
+    # the assertions below check the path between the converged increments,
+    # e.g. the minimum load after the snap-through; capping the increment
+    # samples the path finely enough for any convergence criterion, whose
+    # iteration counts drive the growth of the arc length
+    an.maxInc = 0.02
     increments, cs = an.static(NLgeom=True, silent=True)
 
     lbds = np.asarray(increments)
@@ -69,7 +74,7 @@ def test_riks_hinged_cylindrical_shell():
     fext = s.calc_fext()
     for lbd, c in zip(lbds, cs):
         fint = s.calc_fint(c=c)
-        R = lbd*fext - fint
+        R = fint - lbd*fext
         assert np.linalg.norm(R) <= 1.e-5*max(np.linalg.norm(lbd*fext),
                                               np.linalg.norm(fint))
 
@@ -80,7 +85,11 @@ def test_riks_hinged_cylindrical_shell():
     ilim = np.argmax(np.diff(lbds) < 0)
     assert 0 < ilim
     assert np.isclose(lbds[ilim]*Pref, 2280., rtol=0.02)
-    assert np.isclose(wc[ilim], -8.83, rtol=0.1)
+    # the load is nearly constant around the limit point, such that the
+    # deflection at the limit point is checked against the two converged
+    # increments that bracket it rather than against the one with the largest
+    # load, which depends on how the arc length samples the path
+    assert (1 + 0.1)*wc[ilim + 1] <= -8.83 <= (1 - 0.1)*wc[ilim]
 
     # snap-through: after the limit point the load drops to a fraction of the
     # limit load and then increases again, up to the reference load

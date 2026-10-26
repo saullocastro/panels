@@ -1,4 +1,5 @@
 r"""
+======================================================================
 3D plots of multi-domain assemblies (:mod:`panels.multidomain.plot3d`)
 ======================================================================
 
@@ -7,6 +8,11 @@ r"""
 Interactive 3D plots with `plotly <https://plotly.com/python/>`_, see
 :meth:`.MultiDomain.plot3d`. Each domain is placed in the global coordinate
 system with :meth:`.Shell.global_frame` and :meth:`.Shell.global_coords`.
+
+The function :func:`.plot3d` builds the figure, with one surface per
+domain colored by the selected output, and returns it with the JavaScript
+of the controls of the displacements. The module constants ``DISPLS``,
+``STRAINS`` and ``STRESSES`` list the names of the outputs.
 
 """
 import base64
@@ -220,7 +226,99 @@ def plot3d(md, c, group=None, vec='w', vecs=None, displ='uvw', scale=None,
            show=False, show_undeformed=True, include_plotlyjs=True,
            silent=True):
     r"""Interactive 3D plot of a multi-domain assembly, see
-    :meth:`.MultiDomain.plot3d`"""
+    :meth:`.MultiDomain.plot3d`
+
+    The function behind :meth:`.MultiDomain.plot3d`, which describes the
+    figure and its controls. For each selected panel the displacements are
+    computed with :meth:`.MultiDomain.uvw`, the strains with
+    :meth:`.MultiDomain.strain` when ``vecs`` is ``None`` or contains a
+    strain, and the stress resultants with :meth:`.MultiDomain.stress` when
+    ``vecs`` is ``None`` or contains a stress resultant, on a grid of
+    ``gridx`` by ``gridy`` points, and they are placed in the global coordinate
+    system with :meth:`.Shell.global_coords`. One surface per panel and one
+    line with the edges of the undeformed panels are added to the figure,
+    with a drop-down menu of the outputs. The figure is written to
+    ``filename`` and shown according to ``filename`` and ``show``; the
+    messages ``'Plotting 3D...'`` and ``'finished!'`` are printed unless
+    ``silent=True``.
+
+    Parameters
+    ----------
+    md : :class:`.MultiDomain`
+        The assembly.
+    c : np.ndarray
+        The Ritz constants of the assembly, 1-D array of size
+        ``md.get_size()``.
+    group : str, list of str or None, optional
+        The groups of the panels to plot, all the panels if ``None``, the
+        default.
+    vec : str, optional
+        The output initially shown, one of the names in the module
+        constants ``DISPLS``, ``STRAINS`` and ``STRESSES``. Default ``'w'``.
+    vecs : list of str or None, optional
+        The outputs that can be selected, ``vec`` being inserted first when
+        missing. If ``None``, the default, all those available for all the
+        plotted panels.
+    displ : str, optional
+        The displacements initially applied to the geometry, any
+        combination of ``'u'``, ``'v'`` and ``'w'``, or ``''``. Default
+        ``'uvw'``.
+    scale : float or None, optional
+        Scale factor of the displacements, dimensionless. If ``None``, the
+        default, the largest displacement is drawn with 10 % of the diagonal
+        of the box that contains the plotted panels, or ``1.`` when the
+        displacements or the box are zero.
+    gridx, gridy : int, optional
+        Number of points along the `x` and `y` axes of each panel. Default
+        ``30``.
+    colormap : str, optional
+        A colorscale of plotly. Default ``'jet'``.
+    title : str, optional
+        Title of the figure, none if ``''``, the default.
+    filename : str, optional
+        If not ``''``, the default, the figure is saved to this HTML file
+        with the JavaScript of the controls.
+    show : bool, optional
+        Show the figure with ``fig.show()`` and the JavaScript of the
+        controls. Default ``False``.
+    show_undeformed : bool, optional
+        If the edges of the undeformed panels are initially visible.
+        Default ``True``.
+    include_plotlyjs : bool or str, optional
+        Passed to ``fig.write_html``. Default ``True``.
+    silent : bool, optional
+        Do not print messages. Default ``True``.
+
+    Returns
+    -------
+    fig : plotly.graph_objects.Figure
+        The figure.
+    data : dict
+        With the keys ``'vecs'``, ``'vecmin'``, ``'vecmax'``, ``'scale'``
+        and ``'post_script'``, see :meth:`.MultiDomain.plot3d`.
+
+    Raises
+    ------
+    ImportError
+        When plotly is not installed.
+    ValueError
+        When no panel belongs to ``group``, when ``vec`` or an element of
+        ``vecs`` is not a valid output, when ``displ`` contains other
+        characters than ``'u'``, ``'v'`` and ``'w'``, or when an output of
+        ``vecs`` is not available for the model of a plotted panel.
+
+    Notes
+    -----
+    The deformed position of each point of the mid-surface is `\boldsymbol{X} + s
+    (u \boldsymbol{e}_x + v \boldsymbol{e}_y + w \boldsymbol{e}_z)`, with `s` the scale factor and
+    `\boldsymbol{e}_x`, `\boldsymbol{e}_y`, `\boldsymbol{e}_z` the local unit vectors of
+    :meth:`.Shell.global_coords` at the undeformed point, along which `u`,
+    `v` and `w` act; for a cylindrical shell `\boldsymbol{e}_y` is tangent to the
+    circumference and `\boldsymbol{e}_z` normal to it. The displacements are added
+    linearly, the rotations ``phix`` and ``phiy`` not being used, so that
+    the drawn geometry is that of small displacements, magnified by `s`.
+
+    """
     try:
         import plotly.graph_objects as go
     except ImportError:

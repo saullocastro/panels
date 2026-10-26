@@ -100,20 +100,20 @@ def kG_linear(p, N, phi, s0, s_total, size, direction='x', npts=80):
     m, n, a, b = p.m, p.n, p.a, p.b
     xi, wt = leggauss(npts)
     if direction == 'x':
-        dfx = np.array([bardell.calc_vec_fp(x, p.x1w, p.x1wr, p.x2w, p.x2wr)[:m]
+        f_xi = np.array([bardell.calc_vec_fp(x, p.x1w, p.x1wr, p.x2w, p.x2wr)[:m]
                         for x in xi])
         fy = np.array([bardell.calc_vec_f(e, p.y1w, p.y1wr, p.y2w, p.y2wr)[:n]
                        for e in xi])
-        Fx = (dfx.T*wt) @ dfx
+        Fx = (f_xi.T*wt) @ f_xi
         Fy = (fy.T*(wt*(1. - phi*(s0 + b*(1. + xi)/2.)/s_total))) @ fy
         scale = b/a
     elif direction == 'y':
         fx = np.array([bardell.calc_vec_f(x, p.x1w, p.x1wr, p.x2w, p.x2wr)[:m]
                        for x in xi])
-        dfy = np.array([bardell.calc_vec_fp(e, p.y1w, p.y1wr, p.y2w, p.y2wr)[:n]
+        g_eta = np.array([bardell.calc_vec_fp(e, p.y1w, p.y1wr, p.y2w, p.y2wr)[:n]
                         for e in xi])
         Fx = (fx.T*(wt*(1. - phi*(s0 + a*(1. + xi)/2.)/s_total))) @ fx
-        Fy = (dfy.T*wt) @ dfy
+        Fy = (g_eta.T*wt) @ g_eta
         scale = a/b
     else:
         raise ValueError('direction must be "x" or "y"')
@@ -466,7 +466,8 @@ def sb_monolithic():
 @pytest.mark.parametrize('order', ['top first', 'bottom first'])
 def test_bonded_sublaminates_recover_the_laminate(func, order):
     """The bending-extension coupling of ``[0/90/90/0/0]`` must be rebuilt
-    by the offset ``dsb`` of the connection, whichever domain comes first"""
+    by the connection of the faces in contact, whichever domain comes
+    first"""
     ref = sb_monolithic()
     eigvals = sb_split(func, order)
     assert np.allclose(eigvals[:3], ref[:3], rtol=1e-3)

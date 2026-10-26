@@ -266,7 +266,8 @@ def sb_plates(model, ah, stack_top, stack_bot, factor, kr_factor=None, m=10,
                      m=m, n=n)
     kt, _ = calc_kt_kr(top, bot, 'bot-top')
     conn = dict(p1=top, p2=bot, func='SB', kt=factor*kt)
-    if kr_factor is not None:
+    #NOTE 'kr' of 'SB' applies only to the FSDT and TSDT
+    if kr_factor is not None and 'clpt' not in model:
         h = a/ah
         conn['kr'] = kr_factor*factor*kt*h**2
     md = MultiDomain([top, bot], [conn], conn_method='penalty')
@@ -278,9 +279,9 @@ def sb_plates(model, ah, stack_top, stack_bot, factor, kr_factor=None, m=10,
 
 @pytest.mark.parametrize('model', [CLPT, FSDT])
 def test_skin_base_equals_single_laminate(model):
-    r"""The laminates `[0/90]` over `[0/90]`, with the rotations tied, give
-    the single laminate `[0/90]_2`, for the FSDT the plate of Noor (1973)
-    with `E_1/E_2 = 10` and `a/h = 5`"""
+    r"""The laminates `[0/90]` over `[0/90]`, with the rotations of the FSDT
+    tied, give the single laminate `[0/90]_2`, for the FSDT the plate of
+    Noor (1973) with `E_1/E_2 = 10` and `a/h = 5`"""
     ah = 5
     md, single = sb_plates(model, ah, [0, 90], [0, 90], factor=1.e5,
                            kr_factor=1.)

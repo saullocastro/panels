@@ -2,17 +2,17 @@ r"""
 Displacement field of the Ritz approximation (replaces fuvw.nb)
 
 The displacement field of every model is built with Bardell's functions
-`f_i(\xi)` along `x` and `g_j(\eta)` along `y`, with `\xi = 2x/a - 1` and
+`P_i(\xi)` along `x` and `P_j(\eta)` along `y`, with `\xi = 2x/a - 1` and
 `\eta = 2y/b - 1`, each field having its own boundary flags. With the Ritz
 constants of the term `(i, j)` stored at ``DOF*(j*m + i)``, the fields
 `\{u, v, w, \phi_x, \phi_y\}` at a point are
 
 .. math::
 
-    \{u, v, w, \phi_x, \phi_y\}^T = \sum_{j=0}^{n-1} \sum_{i=0}^{m-1}
-        [g_{ij}] \{c_{ij}\}
+    \{u, v, w, \phi_x, \phi_y\}^\top = \sum_{j=0}^{n-1} \sum_{i=0}^{m-1}
+        \boldsymbol{g}_{ij} \boldsymbol{c}_{ij}
 
-where the matrix `[g_{ij}]`, with 5 rows and ``DOF`` columns, is derived
+where the matrix `\boldsymbol{g}_{ij}`, with 5 rows and ``DOF`` columns, is derived
 below for:
 
 - ``'clpt_donnell'``: the classical laminated plate theory (CLPT) with
@@ -40,7 +40,7 @@ The displacements through the thickness of the last two are
 with `c_1 = 0` for the FSDT and `c_1 = 4/(3 h^2)` for the TSDT, and `\Phi_y =
 \phi_y` for ``'sdt'``.
 
-The matrices `[g_{ij}]` are those of the function ``fg`` of the field modules
+The matrices `\boldsymbol{g}_{ij}` are those of the function ``fg`` of the field modules
 :mod:`panels.models.clpt_field` and :mod:`panels.models.fsdt_tsdt_field`,
 whose function ``fuvw`` evaluates the sum above. Running this script prints
 and writes the expressions to ``./output_expressions_python/`` and checks
@@ -75,20 +75,20 @@ def bardell(nmax=30):
 
 
 def shape_function_matrix(model):
-    r"""Matrix `[g_{ij}]` in terms of the symbols ``f<field>``, ``g<field>``
+    r"""Matrix `\boldsymbol{g}_{ij}` in terms of the symbols ``f<field>``, ``g<field>``
     of the term `(i, j)` and of their derivatives ``f<field>xi``,
     ``g<field>eta``"""
     f = {k: Symbol('f' + k) for k in FIELDS}
     g = {k: Symbol('g' + k) for k in FIELDS}
-    fwxi = Symbol('fwxi')
-    gweta = Symbol('gweta')
+    fw_xi = Symbol('fw_xi')
+    gw_eta = Symbol('gw_eta')
     if model in ('clpt_donnell', 'clpt_sanders'):
         G = zeros(5, 3)
         G[0, 0] = f['u']*g['u']
         G[1, 1] = f['v']*g['v']
         G[2, 2] = f['w']*g['w']
-        G[3, 2] = -(2/a)*fwxi*g['w']
-        G[4, 2] = -(2/b)*f['w']*gweta
+        G[3, 2] = -(2/a)*fw_xi*g['w']
+        G[4, 2] = -(2/b)*f['w']*gw_eta
         if model == 'clpt_sanders':
             G[4, 1] = f['v']*g['v']/r
         return G
@@ -106,18 +106,18 @@ def through_thickness(G, sanders=False):
     r"""`u(z), v(z), w(z)` of the models based on shear deformation theories,
     per Ritz constant of the term `(i, j)`, where the row of ``phiy`` of
     ``G`` is `\Phi_y`"""
-    fwxi = Symbol('fwxi')
-    gweta = Symbol('gweta')
-    wx = M([[0, 0, (2/a)*fwxi*Symbol('gw'), 0, 0]])
-    wy = M([[0, 0, (2/b)*Symbol('fw')*gweta, 0, 0]])
+    fw_xi = Symbol('fw_xi')
+    gw_eta = Symbol('gw_eta')
+    w_x = M([[0, 0, (2/a)*fw_xi*Symbol('gw'), 0, 0]])
+    w_y = M([[0, 0, (2/b)*Symbol('fw')*gw_eta, 0, 0]])
     phiy = G[4, :] - G[1, :]/r if sanders else G[4, :]
-    uz = G[0, :] + z*G[3, :] - c1*z**3*(G[3, :] + wx)
-    vz = G[1, :] + z*G[4, :] - c1*z**3*(phiy + wy)
+    uz = G[0, :] + z*G[3, :] - c1*z**3*(G[3, :] + w_x)
+    vz = G[1, :] + z*G[4, :] - c1*z**3*(phiy + w_y)
     return M([uz, vz, G[2, :]])
 
 
 def check(model, panels_models, num_checks=3, seed=0):
-    r"""Compares `[g_{ij}]` with ``fg`` of the field module of panels"""
+    r"""Compares `\boldsymbol{g}_{ij}` with ``fg`` of the field module of panels"""
     from panels.shell import Shell
     from panels import modelDB
 
@@ -129,7 +129,7 @@ def check(model, panels_models, num_checks=3, seed=0):
     fpnum = [lambdify((xi,) + flags, diff(fi, xi)) for fi in f]
     Gnum = lambdify([Symbol(s) for s in
                      ['f' + k for k in FIELDS] + ['g' + k for k in FIELDS]
-                     + ['fwxi', 'gweta', 'a', 'b', 'r']], G)
+                     + ['fw_xi', 'gw_eta', 'a', 'b', 'r']], G)
     worst = 0.
     for name in panels_models:
         for _ in range(num_checks):
@@ -160,11 +160,11 @@ def check(model, panels_models, num_checks=3, seed=0):
                         vals['f' + k] = fnum[i](ksi, *bx)
                         vals['g' + k] = fnum[j](et, *by)
                         if k == 'w':
-                            vals['fwxi'] = fpnum[i](ksi, *bx)
-                            vals['gweta'] = fpnum[j](et, *by)
+                            vals['fw_xi'] = fpnum[i](ksi, *bx)
+                            vals['gw_eta'] = fpnum[j](et, *by)
                     args = ([vals['f' + k] for k in FIELDS]
                             + [vals['g' + k] for k in FIELDS]
-                            + [vals['fwxi'], vals['gweta'], s.a, s.b,
+                            + [vals['fw_xi'], vals['gw_eta'], s.a, s.b,
                                s.r if s.r else 1.])
                     col = dof*(j*s.m + i)
                     g_sympy[:, col:col + dof] = np.array(Gnum(*args), dtype=float)

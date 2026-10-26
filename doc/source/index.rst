@@ -51,16 +51,37 @@ the non-linear equations, see :mod:`panels.models`:
   Sanders-Koiter's kinematics
 
 
+How the models, the boundary conditions, the loads and the assemblies fit
+together is described in the user guide, starting with
+:ref:`shell_overview`.
+
+
 Code repository
 ---------------
 
 https://github.com/saullocastro/panels
 
 
-Citing this library
--------------------
+User guide
+----------
 
-Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.13.11). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
+.. toctree::
+    :maxdepth: 1
+
+    shell_overview.rst
+    bardell.rst
+    boundary_conditions.rst
+    loads.rst
+    multidomain_overview.rst
+    stiffened_panels.rst
+    aeroelasticity.rst
+    postprocessing.rst
+    follower_pressure.rst
+    tsdt_offset.rst
+    multidomain_null_space.rst
+    tangent_product.rst
+    tabulation.rst
+    cohesive_zone.rst
 
 
 Usage examples
@@ -76,8 +97,11 @@ Usage examples
     ex_newton_raphson.rst
     ex_arc_length.rst
     ex_follower_pressure.rst
+    ex_prescribed_displacements.rst
+    ex_face_clamp.rst
     ex_multidomain_cylinder.rst
     ex_multidomain_tstiff2d.rst
+    ex_stiffpanelbay.rst
 
 
 panels API
@@ -87,21 +111,6 @@ panels API
     :maxdepth: 2
 
     api.rst
-
-
-Theory
-------
-
-.. toctree::
-    :maxdepth: 1
-
-    bardell.rst
-    multidomain_null_space.rst
-    follower_pressure.rst
-    tangent_product.rst
-    tabulation.rst
-    cohesive_zone.rst
-    ref.rst
 
 
 Installing panels
@@ -161,7 +170,10 @@ In Pyodide the field outputs run serially, without OpenMP. See
 Changelog
 ---------
 
-https://github.com/saullocastro/panels/blob/main/CHANGELOG.md
+.. toctree::
+    :maxdepth: 1
+
+    changelog.rst
 
 
 License
@@ -169,6 +181,39 @@ License
 
 .. literalinclude:: ../../LICENSE
     :encoding: latin-1
+
+
+Citing this library
+-------------------
+
+Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.14.0). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
+
+In BibTeX:
+
+.. code-block:: bibtex
+
+    @misc{castro_panels,
+      author    = {Castro, Saullo G. P. and D'Souza, Nathan},
+      title     = {Semi-analytical methods for plates, shells and stiffened
+                   panels},
+      year      = {2026},
+      version   = {0.14.0},
+      publisher = {Zenodo},
+      doi       = {10.5281/zenodo.2541522},
+      url       = {https://doi.org/10.5281/zenodo.2541522}
+    }
+
+The DOI represents all the versions and resolves to the latest one. The
+repository also has a ``CITATION.cff`` file with the same data.
+
+
+References
+----------
+
+.. toctree::
+    :maxdepth: 1
+
+    ref.rst
 
 
 Indices and tables

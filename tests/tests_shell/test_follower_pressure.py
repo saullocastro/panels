@@ -2,22 +2,24 @@ r"""Verification of the follower pressure of :meth:`.Shell.add_pressure_load`
 
 A follower pressure stays normal to the deformed mid-surface and acts on its
 deformed area, see ``theory/shells/follower_pressure/follower_pressure.py``.
-Its force vector `F_p(c)` enters the residual through
-:meth:`.Shell.calc_fint`, and its load stiffness `-\partial F_p/\partial c`,
-:meth:`.Shell.calc_kCfollower`, enters :meth:`.Shell.calc_kT`, both at the
+Its force vector `\boldsymbol{F}_p(\boldsymbol{c})` enters the residual through
+:meth:`.Shell.calc_fint`, and its load stiffness `\boldsymbol{K}_F = -\partial
+\boldsymbol{F}_p/\partial \boldsymbol{c}`, :meth:`.Shell.calc_kCfollower`, enters
+:meth:`.Shell.calc_kT`, both at the
 load factor ``inc``.
 
 The checks, for all 9 models and for the first-order (``'linear'``) and
 complete (``'quadratic'``) area vectors:
 
 1. in the undeformed state the follower force equals the dead pressure force;
-2. directional Taylor test of `F_p`: the relative remainder of `F_p(c + h d) -
-   F_p(c) + h K_p d` is at round-off for the first-order area vector, for
-   which `F_p` is affine, and falls as `O(h)` for the quadratic one;
-3. finite-difference Jacobian of the total residual against `K_T`;
+2. directional Taylor test of `\boldsymbol{F}_p`: the relative remainder of
+   `\boldsymbol{F}_p(\boldsymbol{c} + h \boldsymbol{v}) - \boldsymbol{F}_p(\boldsymbol{c}) + h
+   \boldsymbol{K}_F \boldsymbol{v}` is at round-off for the first-order area vector, for
+   which `\boldsymbol{F}_p` is affine, and falls as `O(h)` for the quadratic one;
+3. finite-difference Jacobian of the total residual against `\boldsymbol{K}_T`;
 4. quadratic convergence of Newton-Raphson and of the Riks method of
    ``structsolve``, with the load factor passed to the callbacks;
-5. symmetry of `K_p` when the theory predicts it, and unsymmetry otherwise;
+5. symmetry of `\boldsymbol{K}_F` when the theory predicts it, and unsymmetry otherwise;
 6. the rigid rotation of a ring under a hoop prestress, a zero-energy mode
    only with the follower load stiffness (Sanders kinematics).
 """
@@ -54,7 +56,8 @@ def add_pressure(s, kind, follower, cte=False, scale=1.):
 
 def fext_follower_by_quadrature(s, func, follower, c, x1=None, x2=None,
                                 y1=None, y2=None):
-    r"""Independent integration of `\int p N.a(c) dA` with the shape functions
+    r"""Independent integration of `\int p \boldsymbol{S} \cdot
+    \boldsymbol{a}(\boldsymbol{c}) dA` with the shape functions
     of ``field.fg`` and finite differences of the displacements"""
     x1 = 0. if x1 is None else x1
     x2 = s.a if x2 is None else x2
@@ -80,16 +83,16 @@ def fext_follower_by_quadrature(s, func, follower, c, x1=None, x2=None,
         for eta, wy in zip(ptsy, wtsy):
             y = y1 + (eta + 1)*(y2 - y1)/2
             (u, v, w), N = uvw(x, y)
-            ux_, uy_ = [(uvw(x + e*s.a, y)[0] - uvw(x - e*s.a, y)[0])/(2*e*s.a),
+            uvw_x, uvw_y = [(uvw(x + e*s.a, y)[0] - uvw(x - e*s.a, y)[0])/(2*e*s.a),
                         (uvw(x, y + e*s.b)[0] - uvw(x, y - e*s.b)[0])/(2*e*s.b)]
-            ux, vx, wx_ = ux_
-            uy, vy, wy_ = uy_
-            A = np.array([1 + ux, vx, wx_])
-            B = np.array([uy, 1 + vy + kw*w, wy_ - kv*v])
+            u_x, v_x, w_x = uvw_x
+            u_y, v_y, w_y = uvw_y
+            A = np.array([1 + u_x, v_x, w_x])
+            B = np.array([u_y, 1 + v_y + kw*w, w_y - kv*v])
             if follower == 'quadratic':
                 a = np.cross(A, B)
             else:
-                a = np.array([-wx_, -wy_ + kv*v, 1 + ux + vy + kw*w])
+                a = np.array([-w_x, -w_y + kv*v, 1 + u_x + v_y + kw*w])
             out += wx*wy*(x2 - x1)/2*(y2 - y1)/2*func(x, y)*(a @ N)
     return out
 
@@ -157,8 +160,9 @@ def test_taylor_follower_force(model, follower, kind):
 @pytest.mark.parametrize('follower', TRUNCATIONS)
 @pytest.mark.parametrize('model', MODELS)
 def test_finite_difference_jacobian_of_residual(model, follower):
-    r"""`-dR/dc`, with `R = F_{ext}(inc) - F_{int}(c, inc)`, against
-    `K_T(c, inc)`, every entry"""
+    r"""`\partial \boldsymbol{R}/\partial \boldsymbol{c}`, with `\boldsymbol{R} =
+    \boldsymbol{F}_{int}(\boldsymbol{c}, inc) - \boldsymbol{F}_{ext}(inc)`, against
+    `\boldsymbol{K}_T(\boldsymbol{c}, inc)`, every entry"""
     s = make_shell(model)
     add_pressure(s, 'constant', follower=follower, scale=100.)
     add_pressure(s, 'patch', follower=follower, cte=True, scale=100.)
@@ -219,7 +223,7 @@ def follower_shell(model):
 class Recorder(object):
     r"""Wraps ``Shell.calc_fint`` recording the relative residual of each call
 
-    The residual is `R = inc F_{ext} - F_{int}(c, inc)`, as in
+    The residual is `\boldsymbol{R} = \boldsymbol{F}_{int}(\boldsymbol{c}, inc) - inc \, \boldsymbol{F}_{ext}`, as in
     ``structsolve``, with the load factor ``inc`` passed by the solver.
     """
     def __init__(self, s):
@@ -230,7 +234,7 @@ class Recorder(object):
 
     def calc_fint(self, c, inc=1., silent=True):
         fint = self.s.calc_fint(c, inc=inc)
-        R = inc*self.fext - fint
+        R = fint - inc*self.fext
         ref = max(np.linalg.norm(inc*self.fext), np.linalg.norm(fint))
         step = len(self.an.increments)
         self.calls.append((inc, np.linalg.norm(R)/ref, step))
@@ -304,7 +308,7 @@ def test_riks_with_follower_pressure(model):
     assert np.isclose(an.increments[-1], 1.)
     fext = s.calc_fext()
     for lbd, c in zip(an.increments, an.cs):
-        R = lbd*fext - s.calc_fint(c, inc=lbd)
+        R = s.calc_fint(c, inc=lbd) - lbd*fext
         assert np.linalg.norm(R) <= 1.e-10*np.linalg.norm(lbd*fext)
     # quadratic convergence of the bordered system in the steps of the arc
     # length method, the last increment is corrected by Newton-Raphson

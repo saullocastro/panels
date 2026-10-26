@@ -1,3 +1,12 @@
+r"""Flutter of a T-stiffened panel with a debonding defect
+(:mod:`panels.multidomain.tstiff2d_1stiff_flutter`)
+
+The function :func:`.tstiff2d_1stiff_flutter`, imported in
+:mod:`panels.multidomain`, builds the assembly of 15 domains of a panel
+with one T stiffener and runs its frequency analysis with the aerodynamic
+matrix of the linear piston theory of the skin.
+
+"""
 import numpy as np
 from scipy.sparse import csr_matrix
 
@@ -14,10 +23,6 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
         r=None, m=8, n=8, mb=None, nb=None, mf=None, nf=None,
         num_eigvalues=25, conn_method='null-space'):
     r"""Flutter of T-Stiffened Shell with possible defect at middle
-
-    For more details about each parameter and the aerodynamic formulation see
-    Ref. [castro2016FlutterPanel]_ .
-
 
     The panel assembly looks like::
 
@@ -55,67 +60,140 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
                   |_____|         |_____|
                loaded edge     loaded edge
 
+    The domains and their connections are those of
+    :func:`.tstiff2d_1stiff_compression` with ``run_static_case=True``: the
+    middle row of domains has the length ``defect_a*a`` of the defect, or
+    ``0.33*a`` when ``defect_a = 0``, and its base is not connected to the
+    skin when ``defect_a > 0``. The aerodynamic parameters are given to the
+    9 skin domains only, and the aerodynamic matrix is the sum of
+    :meth:`.Shell.calc_kA` of the skin domains.
+
+    With ``run_static_case=True`` and at least one of ``Nxx_skin``,
+    ``Nxx_base`` and ``Nxx_flange`` given, a distributed force along `x` is
+    added with :meth:`.Shell.add_distr_load_fixed_x` at the edge `x = 0` of
+    those of the domains ``p07``, ``p08``, ``p09``, ``p14`` and ``p15``
+    whose ``Nxx`` is not ``None``, and a linear static analysis with
+    ``structsolve.static`` gives the pre-buckling state ``c``. The attributes
+    ``Nxx`` of all the domains are then set to ``0`` and the geometric
+    stiffness matrix is computed at ``c``, or with ``c=None`` when no load
+    was given. The reduced matrices, see :meth:`.MultiDomain.reduce`, the sum
+    of the constitutive, geometric and aerodynamic stiffness matrices and
+    the mass matrix, are passed to ``structsolve.freq`` with ``tol=0`` and
+    ``sparse_solver=True``, and the eigenvectors are expanded with
+    :meth:`.MultiDomain.expand`.
+
     Parameters
     ----------
 
     a : float
-        Total length of the assembly (along `x`).
+        Total length of the assembly (along `x`), length.
     b : float
-        Total width of the assembly (along `y`).
+        Total width of the assembly (along `y`), length.
     ys : float
-        Position of the stiffener along `y`.
+        Position of the stiffener along `y`, length.
     bb : float
-        Stiffener's base width.
+        Stiffener's base width, length.
     bf : float
-        Stiffener's flange width.
+        Stiffener's flange width, length.
     defect_a : float
-        Debonding defect/assembly length ratio.
+        Debonding defect/assembly length ratio, dimensionless.
     rho : float
-        Material density.
+        Material density, mass per unit volume.
     plyt : float
-        Ply thickness.
+        Ply thickness, length.
     laminaprop : list or tuple
         Orthotropic lamina properties: `E_1, E_2, \nu_{12}, G_{12}, G_{13}, G_{23}`.
+        The moduli are forces per unit area, `\nu_{12}` is dimensionless.
     stack_skin : list or tuple
-        Stacking sequence for the skin.
+        Stacking sequence for the skin, the angle of each ply in degrees.
     stack_base : list or tuple
-        Stacking sequence for the stiffener's base.
+        Stacking sequence for the stiffener's base, the angles in degrees.
     stack_flange : list or tuple
-        Stacking sequence for the stiffener's flange.
-    air_speed : float
-        Airflow speed.
-    rho_air : float
-        Air density.
-    Mach : float
-        Mach number.
-    speed_sound : float
-        Speed of sound.
-    flow : "x" or "y"
-        Direction of airflow.
-    Nxx_skin : float
-        Skin load distributed at the assembly edge at `x=0`.
-    Nxx_base : float
-        Stiffener's base load distributed at the assembly edge at `x=0`.
-    Nxx_flange : float
-        Stiffener's flange load distributed at the assembly edge at `x=0`.
+        Stacking sequence for the stiffener's flange, the angles in degrees.
+    air_speed : float, optional
+        Airflow speed, length per unit time. Default ``None``.
+    rho_air : float, optional
+        Air density, mass per unit volume. Default ``None``.
+    Mach : float, optional
+        Mach number, dimensionless. Default ``None``; it must be given
+        and not lower than ``1``, see :meth:`.Shell.calc_kA`.
+    speed_sound : float, optional
+        Speed of sound, length per unit time, stored in the skin domains.
+        Default ``None``.
+    flow : "x" or "y", optional
+        Direction of airflow. Default ``'x'``.
+    Nxx_skin : float or None, optional
+        Skin load distributed at the assembly edge at `x=0`, force per unit
+        length. Default ``None``, no load.
+    Nxx_base : float or None, optional
+        Stiffener's base load distributed at the assembly edge at `x=0`,
+        force per unit length. Default ``None``, no load.
+    Nxx_flange : float or None, optional
+        Stiffener's flange load distributed at the assembly edge at `x=0`,
+        force per unit length. Default ``None``, no load.
     run_static_case : bool, optional
-        If True a static analysis is run before the linear buckling analysis
+        If True a static analysis is run before the frequency analysis
         to compute the real membrane stress state along the domain, otherwise
-        it is assumed constant values of `N_{xx}` for all components.
+        the geometric stiffness matrix is not included and ``Nxx_skin``,
+        ``Nxx_base`` and ``Nxx_flange`` are not used. Default ``True``.
     r : float or None, optional
-        Radius of the stiffened panel.
+        Radius of the stiffened panel, length. Default ``None``, a flat
+        panel.
     m, n : int, optional
-        Number of terms of the approximation function for the skin.
+        Number of terms of the approximation function for the skin. Default
+        ``8``.
     mb, nb : int, optional
         Number of terms of the approximation function for the stiffener's base.
+        ``None``, the default, uses ``m`` and ``n``.
     mf, nf : int, optional
         Number of terms of the approximation function for the stiffener's
-        flange.
-    num_eigvalues : int
-        Number of eigenvalues to be extracted.
+        flange. ``None``, the default, uses ``m`` and ``n``.
+    num_eigvalues : int, optional
+        Number of eigenvalues to be extracted. Default ``25``.
     conn_method : str, optional
         How the connections are imposed, ``'null-space'``, the default, or
         ``'penalty'``, see :class:`.MultiDomain`.
+
+    Returns
+    -------
+    assy, eigvals, eigvecs : tuple
+        The assembly, :class:`.MultiDomain`, the eigenvalues returned by
+        ``structsolve.freq``, see there, and the eigenvectors of the
+        assembly, one per column, with ``assy.get_size()`` rows.
+
+    Notes
+    -----
+    For more details about each parameter and the aerodynamic formulation see
+    Ref. [1]_ . The eigenvalue problem solved by ``structsolve.freq`` is
+
+    .. math::
+
+        \left(\boldsymbol{K}_r + \boldsymbol{K}_{G r} + \boldsymbol{K}_{A r} + \lambda^2 \boldsymbol{M}_r\right)
+        \boldsymbol{\phi}_r = \boldsymbol{0}
+
+    with the reduced constitutive, geometric and aerodynamic stiffness
+    matrices and the reduced mass matrix, see :meth:`.MultiDomain.reduce`.
+    `\boldsymbol{K}_A` is the matrix of the linear piston theory of
+    :meth:`.Shell.calc_kA`, of the skin domains only, since the stiffener is
+    not exposed to the flow; it is not symmetric, and the general
+    eigenvalue solver is used. The sign convention of `\boldsymbol{K}_A` is that of
+    :meth:`.Shell.calc_kA`: its term in `\beta` is the transpose of that of
+    Eq. (21) of [1]_, equivalent to reversing the flow direction, and the
+    term in `\gamma` of Eqs. (21) and (29) of [1]_ has the wrong sign, a
+    mistake of the paper, the correction of Krumhaar softening the shell. The flutter onset is found by increasing the
+    aerodynamic load, e.g. ``air_speed``, until two natural frequencies
+    coalesce and the eigenvalues become complex. With
+    ``run_static_case=True`` and loads, `\boldsymbol{K}_G` is computed from the
+    linear membrane stresses of the static solution, see
+    :func:`.tstiff2d_1stiff_compression` for the sign of the loads and the
+    model of the debonding defect.
+
+    References
+    ----------
+    .. [1] Castro, S. G. P., Guimarães, T. A. M., Rade, D. A., and Donadon,
+       M. V., Flutter of stiffened composite panels considering the
+       stiffener's base as a structural element, Composite Structures,
+       2016. https://doi.org/10.1016/j.compstruct.2015.12.056
 
     Examples
     --------

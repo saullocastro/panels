@@ -18,7 +18,7 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
 KERNEL = '''def fk(object p, int size, int nx, int ny):
     cdef int i, j, k, l, ptx, pty
-    cdef double xi, eta, fA, fB, gA, gBeta
+    cdef double xi, eta, fA, fB, gA, gB_eta
     cdef double [::1] xis, etas, weights_xi, weights_eta
     m = p.m
     n = p.n
@@ -34,8 +34,8 @@ KERNEL = '''def fk(object p, int size, int nx, int ny):
                         for j in range(n):
                             gA = f(j, eta, y1u, y1ur, y2u, y2ur)
                             for l in range(n):
-                                gBeta = fp(l, eta, y1w, y1wr, y2w, y2wr)
-                                out += fA*fB*gA*gBeta
+                                gB_eta = fp(l, eta, y1w, y1wr, y2w, y2wr)
+                                out += fA*fB*gA*gB_eta
 '''
 
 LINE_KERNEL = '''def fkline(object p1, double xcte1, int size):
@@ -58,7 +58,7 @@ def test_kernel_rewritten():
     assert '    ftab = np.zeros((2, m), dtype=DOUBLE)' in out
     assert '    gtab = np.zeros((2, n), dtype=DOUBLE)' in out
     for line in ('fA = ftab[0, i]', 'fB = ftab[1, k]', 'gA = gtab[0, j]',
-                 'gBeta = gtab[1, l]',
+                 'gB_eta = gtab[1, l]',
                  'ftab[1, i] = fp(i, xi, x1w, x1wr, x2w, x2wr)',
                  'gtab[1, j] = fp(j, eta, y1w, y1wr, y2w, y2wr)'):
         assert line in out, line
@@ -86,7 +86,7 @@ def test_unexpected_form_raises():
                                       'f(j, eta, y1u, y1ur, y2v, y2ur)'))
     # a coordinate changed after the tables are filled
     with pytest.raises(ValueError, match='assigned after'):
-        tabulate_basis(KERNEL.replace('out += fA*fB*gA*gBeta',
+        tabulate_basis(KERNEL.replace('out += fA*fB*gA*gB_eta',
                                       'xi = 0.'))
 
 

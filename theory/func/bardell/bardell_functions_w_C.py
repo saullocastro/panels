@@ -41,25 +41,25 @@ with open('../../../panels/core/src/bardell_functions_w.cpp', 'w') as f:
     f.write('}\n')
 
     f.write('\n\n')
-    f.write('EXPORTIT void vec_fw_x(double *fxi, double xi,\n' +
+    f.write('EXPORTIT void vec_fw_xi(double *f_xi, double xi,\n' +
             '           double xi1t, double xi1r, double xi2t, double xi2r) {\n')
     for i in range(len(u)):
         const = consts.get(i)
         if const is None:
-            f.write('    fxi[%d] = %s;\n' % (i, ccode(diff(u[i], xi))))
+            f.write('    f_xi[%d] = %s;\n' % (i, ccode(diff(u[i], xi))))
         else:
-            f.write('    fxi[%d] = %s*(%s);\n' % (i, const, ccode(diff(u[i], xi))))
+            f.write('    f_xi[%d] = %s*(%s);\n' % (i, const, ccode(diff(u[i], xi))))
     f.write('}\n')
 
     f.write('\n\n')
-    f.write('EXPORTIT void vec_fw_xx(double *fxixi, double xi,\n' +
+    f.write('EXPORTIT void vec_fw_xixi(double *f_xixi, double xi,\n' +
             '           double xi1t, double xi1r, double xi2t, double xi2r) {\n')
     for i in range(len(u)):
         const = consts.get(i)
         if const is None:
-            f.write('    fxixi[%d] = %s;\n' % (i, ccode(diff(u[i], xi, xi))))
+            f.write('    f_xixi[%d] = %s;\n' % (i, ccode(diff(u[i], xi, xi))))
         else:
-            f.write('    fxixi[%d] = %s*(%s);\n' % (i, const, ccode(diff(u[i], xi, xi))))
+            f.write('    f_xixi[%d] = %s*(%s);\n' % (i, const, ccode(diff(u[i], xi, xi))))
     f.write('}\n')
 
     f.write('\n\n')
@@ -122,10 +122,10 @@ with open('../../../panels/core/include/bardell_functions_w.h', 'w') as g:
     g.write('IMPORTIT void vec_fw(double *f, double xi,\n' +
             '        double xi1t, double xi1r,double xi2t, double xi2r);\n')
     g.write('\n')
-    g.write('IMPORTIT void vec_fw_x(double *fxi, double xi,\n' +
+    g.write('IMPORTIT void vec_fw_xi(double *f_xi, double xi,\n' +
             '        double xi1t, double xi1r,double xi2t, double xi2r);\n')
     g.write('\n')
-    g.write('IMPORTIT void vec_fw_xx(double *fxixi, double xi,\n' +
+    g.write('IMPORTIT void vec_fw_xixi(double *f_xixi, double xi,\n' +
             '        double xi1t, double xi1r,double xi2t, double xi2r);\n')
     g.write('\n')
     g.write('IMPORTIT double fw(int i, double xi,\n' +

@@ -43,6 +43,11 @@ _spec.loader.exec_module(_tangent)
 tangent_block = _tangent.pyx_block
 
 FIELDS = th.FIELDS
+#NOTE the moments of the density of composites.Laminate
+LAM_MOMENTS = dict(I0='intrho', I1='intrhoz', I2='intrhoz2', I3='intrhoz3',
+                   I4='intrhoz4', I6='intrhoz6',
+                   J0='intrho', J1='intrhoz', J2='intrhoz2', J3='intrhoz3',
+                   J4='intrhoz4', J6='intrhoz6')
 DOF = th.DOF
 FIELD_RE = '(u|v|w|phix|phiy)'
 
@@ -64,7 +69,7 @@ def simp(e, vars, do_factor=True):
     return collect(e, vars)
 
 
-BASIS = re.compile(r'^([fg])([AB])' + FIELD_RE + r'((?:xi|eta)*)$')
+BASIS = re.compile(r'^([fg])([AB])' + FIELD_RE + r'((?:_(?:xi|eta)+)?)$')
 
 
 def basis_info(name):
@@ -279,12 +284,12 @@ def analytical_function(signature, cdef_extra, prelude, name, m, symmetric,
 
 
 def field_names(fg):
-    d = 'xi' if fg == 'f' else 'eta'
+    d = '_xi' if fg == 'f' else '_eta'
     out = []
     for p in FIELDS:
         out += [p, p + d]
         if p == 'w':
-            out.append(p + d + d)
+            out.append(p + d + d[1:])
     return out
 
 
@@ -401,20 +406,20 @@ def nl_block(sanders, indent, cond):
     L += [t + 'for j in range(n):',
           t + '    #TODO put these in a lookup vector',
           t + '    gAw = f(j, eta, y1w, y1wr, y2w, y2wr)',
-          t + '    gAweta = fp(j, eta, y1w, y1wr, y2w, y2wr)']
+          t + '    gAw_eta = fp(j, eta, y1w, y1wr, y2w, y2wr)']
     if sanders:
         L.append(t + '    gAv = f(j, eta, y1v, y1vr, y2v, y2vr)')
     L += [t + '    for i in range(m):',
           t + '        #TODO put these in a lookup vector',
           t + '        fAw = f(i, xi, x1w, x1wr, x2w, x2wr)',
-          t + '        fAwxi = fp(i, xi, x1w, x1wr, x2w, x2wr)']
+          t + '        fAw_xi = fp(i, xi, x1w, x1wr, x2w, x2wr)']
     if sanders:
         L.append(t + '        fAv = f(i, xi, x1v, x1vr, x2v, x2vr)')
     L += ['',
           t + '        col = col0 + DOF*(j*m + i)',
           '',
-          t + '        bx += (2/a)*cs[col+2]*fAwxi*gAw',
-          t + '        by += (2/b)*cs[col+2]*fAw*gAweta']
+          t + '        bx += (2/a)*cs[col+2]*fAw_xi*gAw',
+          t + '        by += (2/b)*cs[col+2]*fAw*gAw_eta']
     if sanders:
         L.append(t + '        by -= cs[col+1]*fAv*gAv/r')
     return '\n'.join(L)
@@ -455,6 +460,12 @@ def generate(model):
     kC0 = mats['kC0'].applyfunc(lambda e: simp(area*e, cvars, do_factor))
     kG = mats['kG'].applyfunc(lambda e: simp(area*e, (th.Nxx, th.Nyy, th.Nxy)))
     kM = mats['kM'].applyfunc(lambda e: expand(area*e))
+    # the moments of the density through the thickness used by the theory,
+    # about the mid-surface for the TSDT, see fsdt_tsdt.py
+    moment_names = [s.name for s in th.MOMENTS + th.JMOMENTS
+                    if any(s in e.free_symbols for e in mats['kM'])]
+    assert moment_names == (['I0', 'I1', 'I2'] if theory == 'fsdt' else
+                            ['J0', 'J1', 'J2', 'J3', 'J4', 'J6']), moment_names
     kAx = mats['kAx'].applyfunc(lambda e: expand(area*e))
     kAy = mats['kAy'].applyfunc(lambda e: expand(area*e))
     cA = mats['cA'].applyfunc(lambda e: expand(area*e))
@@ -499,6 +510,10 @@ cdef extern from 'bardell.hpp':
                          '    cdef double [:, ::1] F',
                          '    cdef int m, n',
                          cdefs([v.name for v in cvars])])
+    #NOTE the kernels read the property Shell.ABD, and fkM calls
+    #     Shell._get_lam_mid, with C variables already set, which must not
+    #     call matrix-matrix BLAS products, see the note in
+    #     Shell._get_lam_ABD and tests/tests_shell/test_kernel_python_calls.py
     k0_pre = '\n'.join(['    F = shell.ABD', c1_read,
                         "    if F.shape[0] != NE or F.shape[1] != NE:",
                         "        raise ValueError('shell.ABD must be a %d x %d matrix' % (NE, NE))"])
@@ -511,9 +526,15 @@ cdef extern from 'bardell.hpp':
         '    cdef double a, b\n    cdef int m, n', '', 'kG0', kG, True))
     A.append('\n')
     A.append(analytical_function(
-        'def fkM(object shell, double d, int size, int row0, int col0):',
-        '    cdef double a, b, rho, h' + (', c1' if theory == 'tsdt' else '') + '\n    cdef int m, n',
-        '    rho = shell.rho\n    h = sum(shell.plyts)' + ('\n' + c1_line if theory == 'tsdt' else ''),
+        'def fkM(object shell, int size, int row0, int col0):',
+        '    cdef double a, b, ' + ', '.join(moment_names) + (', d, h, c1' if theory == 'tsdt' else '') + '\n    cdef int m, n',
+        ('    #NOTE the moments of the density about the mid-surface, those of\n'
+         '    #     the laminate with a zero offset, and the offset d\n'
+         '    lam_mid = shell._get_lam_mid()\n' if theory == 'tsdt' else '')
+        + '\n'.join('    {0} = {1}.{2}'.format(name, 'lam_mid' if theory == 'tsdt' else 'shell.lam',
+                                             LAM_MOMENTS[name])
+                    for name in moment_names)
+        + ('\n    d = shell.offset\n    h = shell.lam.h\n' + c1_line if theory == 'tsdt' else ''),
         'kM', kM, True))
     A.append('\n')
     A.append(analytical_function(
@@ -542,7 +563,7 @@ cdef extern from 'bardell.hpp':
     kGn = [(i, j, pstr(v)) for i, j, v in entries(mats['kG'].applyfunc(
         lambda e: simp(e, (th.Nxx, th.Nyy, th.Nxy))))]
     kMn = [(i, j, pstr(v)) for i, j, v in entries(mats['kM'].applyfunc(
-        lambda e: collect(expand(e), (sympy.Symbol('d'),))))]
+        lambda e: collect(expand(e), th.MOMENTS)))]
     kAxn = [(i, j, pstr(v)) for i, j, v in entries(mats['kAx'].applyfunc(expand))]
     kAyn = [(i, j, pstr(v)) for i, j, v in entries(mats['kAy'].applyfunc(expand))]
     snames = th.stress_names(theory)
@@ -658,7 +679,7 @@ def fkC_num(double [::1] cs, object Finput, object shell,
                 # Membrane stress carried by the nonlinear strain
                 # eps_NL = {{bx^2/2, by^2/2, bx*by}}. With it, KGNL = KG(N_NL)
                 # is collected in kC such that
-                #     KT = K0 + K0L + KL0 + KLL + KGNL (fkC_num) + KG(N0 + N_L) (fkG_num)
+                #     KT = KC0 + KCNL + KGNL (fkC_num) + KG(Nbar + N_L) (fkG_num)
                 # is the exact Jacobian of calc_fint, and fkG_num stays
                 # homogeneous of degree one in cs, as linear buckling requires.
                 # bx = by = 0 when NLgeom == 0, then KGNL vanishes
@@ -672,7 +693,7 @@ def fkC_num(double [::1] cs, object Finput, object shell,
 
     return kC
 '''.format(c1=c1n_cdef, BC_CDEF=BC_CDEF, cc=cdefs([v.name for v in cvars]),
-           basis=basis_cdefs(set(names) | {'fAw', 'fAwxi', 'gAw', 'gAweta'}
+           basis=basis_cdefs(set(names) | {'fAw', 'fAw_xi', 'gAw', 'gAw_eta'}
                              | ({'fAv', 'gAv'} if sanders else set())),
            FINPUT=finput(NE), c1read=c1n_read, LIMITS=LIMITS, BC_BLOCK=BC_BLOCK,
            nnz=len(kCn), MAPPING=MAPPING, POINT=POINT, nl=nl_block(sanders, 16, True),
@@ -700,8 +721,8 @@ def fkG_num(double [::1] cs, object Finput, object shell,
     strain here. That contribution, ``KGNL``, is collected by
     :func:`.fkC_num` instead, so that
 
-        KT = K0 + K0L + KL0 + KLL + KGNL   (fkC_num)
-             + KG(N0 + N_L)                (fkG_num)
+        KT = KC0 + KCNL + KGNL   (fkC_num)
+             + KG(Nbar + N_L)    (fkG_num)
 
     is the exact Jacobian of :func:`.calc_fint` while this function stays
     homogeneous of degree one in ``cs``.
@@ -794,14 +815,15 @@ def fkG_num(double [::1] cs, object Finput, object shell,
            MAPPING=MAPPING, POINT=POINT, gl='\n'.join(gl), fl='\n'.join(fl),
            strains='\n'.join(strain_lines(B0, 24)), loops=loops, NE=NE))
 
-    # fkM_num
+    # fkM_num, the thickness h of the TSDT gives c1 at each point
+    input_names = moment_names + (['h'] if theory == 'tsdt' else [])
     L = []
     for i, j, v in kMn:
         L += entry('kM', i, j, v)
     loops, names = basis_loops('kM', [v for _, _, v in kMn], L)
     NUM.append('''
 
-def fkM_num(object shell, double offset, object hrho_input, int size,
+def fkM_num(object shell, object I_input, int size,
         int row0, int col0, int nx, int ny):
     cdef double x1, x2, y1, y2, xinf, xsup, yinf, ysup
     cdef double a, b, intx, inty{c1}
@@ -819,27 +841,25 @@ def fkM_num(object shell, double offset, object hrho_input, int size,
 
     cdef double [::1] xis, etas, weights_xi, weights_eta
 
-    # hrho as 3-D matrix, must be [nx, ny, 2], when there is one pair (h, rho)
-    # for each of the nx * ny integration points
-    cdef double h, rho, d
-    cdef double [:, :, ::1] hrho_nxny
+    # moments of the density through the thickness, {inames}, as a 3-D
+    # matrix [nx, ny, {K}] with one set for each of the nx * ny integration
+    # points, or as a 1-D array [{K}] for the whole integration domain
+    cdef double {icdef}{dcdef}
+    cdef double [:, :, ::1] I_nxny
 
-    cdef int one_hrho_each_point = 0
+    cdef int one_set_each_point = 0
 
-    d = offset
-
-    hrho_input = np.asarray(hrho_input, dtype=DOUBLE)
-    if hrho_input.shape == (nx, ny, 2):
-        hrho_nxny = np.ascontiguousarray(hrho_input)
-        one_hrho_each_point = 1
-    elif hrho_input.shape == (2,):
+    I_input = np.asarray(I_input, dtype=DOUBLE)
+    if I_input.shape == (nx, ny, {K}):
+        I_nxny = np.ascontiguousarray(I_input)
+        one_set_each_point = 1
+    elif I_input.shape == ({K}, ):
         # creating dummy 3-D array that is not used
-        hrho_nxny = np.empty(shape=(0, 0, 0), dtype=DOUBLE)
-        # using a constant (h, rho) for all the integration domain
-        hrho_input = np.ascontiguousarray(hrho_input)
-        h, rho = hrho_input
+        I_nxny = np.empty(shape=(0, 0, 0), dtype=DOUBLE)
+        # using constant moments for all the integration domain
+        {icdef} = I_input
     else:
-        raise ValueError('Invalid shape for hrho_input!')
+        raise ValueError('Invalid shape for I_input, it must be (nx, ny, {K}) or ({K}, )')
 
     if not 'Shell' in shell.__class__.__name__:
         raise ValueError('a Shell object must be given as input')
@@ -847,7 +867,7 @@ def fkM_num(object shell, double offset, object hrho_input, int size,
     b = shell.b
     m = shell.m
     n = shell.n
-{LIMITS}
+{dread}{LIMITS}
 {BC_BLOCK}
 
     fdim = {nnz}*m*m*n*n
@@ -863,9 +883,8 @@ def fkM_num(object shell, double offset, object hrho_input, int size,
 
     with nogil:
 {POINT}
-                if one_hrho_each_point == 1:
-                    h = hrho_nxny[ptx, pty, 0]
-                    rho = hrho_nxny[ptx, pty, 1]
+                if one_set_each_point == 1:
+{iread}
 {c1pt}
 {loops}
 
@@ -875,6 +894,12 @@ def fkM_num(object shell, double offset, object hrho_input, int size,
 '''.format(c1=', c1' if theory == 'tsdt' else '', BC_CDEF=BC_CDEF,
            basis=basis_cdefs(set(names)), LIMITS=LIMITS, BC_BLOCK=BC_BLOCK,
            nnz=len(kMn), MAPPING=MAPPING, POINT=POINT, loops=loops,
+           K=len(input_names), inames=', '.join(input_names),
+           icdef=', '.join(input_names),
+           dcdef=(', d' if theory == 'tsdt' else ''),
+           dread=('    d = shell.offset\n' if theory == 'tsdt' else ''),
+           iread='\n'.join('                    {0} = I_nxny[ptx, pty, {1}]'.format(name, i)
+                           for i, name in enumerate(input_names)),
            c1pt=('                c1 = 4./(3.*h*h)\n' if theory == 'tsdt' else '')))
 
     # fkAx_num and fkAy_num

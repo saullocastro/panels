@@ -39,7 +39,7 @@ def fkCss(double kt, double kr, double ys, double a, double b, int m, int n,
     cdef double [:] kCssv
 
     cdef double fAufBu, fAvfBv, fAwfBw
-    cdef double gAu, gBu, gAv, gBv, gAw, gBw, gAweta, gBweta
+    cdef double gAu, gBu, gAv, gBv, gAw, gBw, gAw_eta, gBw_eta
 
     eta = 2*ys/b - 1.
 
@@ -71,7 +71,7 @@ def fkCss(double kt, double kr, double ys, double a, double b, int m, int n,
                     gAu = gtab[0, j]
                     gAv = gtab[1, j]
                     gAw = gtab[2, j]
-                    gAweta = gtab[3, j]
+                    gAw_eta = gtab[3, j]
 
                     for l in range(n):
                         row = row0 + DOF*(j*m + i)
@@ -84,7 +84,7 @@ def fkCss(double kt, double kr, double ys, double a, double b, int m, int n,
                         gBu = gtab[0, l]
                         gBv = gtab[1, l]
                         gBw = gtab[2, l]
-                        gBweta = gtab[3, l]
+                        gBw_eta = gtab[3, l]
 
                         c += 1
                         kCssr[c] = row+0
@@ -97,7 +97,7 @@ def fkCss(double kt, double kr, double ys, double a, double b, int m, int n,
                         c += 1
                         kCssr[c] = row+2
                         kCssc[c] = col+2
-                        kCssv[c] += 0.5*a*(fAwfBw*gAw*gBw*kt + 4*fAwfBw*gAweta*gBweta*kr/(b*b))
+                        kCssv[c] += 0.5*a*(fAwfBw*gAw*gBw*kt + 4*fAwfBw*gAw_eta*gBw_eta*kr/(b*b))
 
     kCss = coo_matrix((kCssv, (kCssr, kCssc)), shape=(size, size))
 
@@ -127,7 +127,7 @@ def fkCsf(double kt, double kr, double ys, double a, double b, double bf,
     cdef double [:] kCsfv
 
     cdef double fAurBu, fAvrBw, fAwrBv, fAwrBw
-    cdef double gAu, gAv, gAw, gAweta, sBu, sBv, sBw, sBweta
+    cdef double gAu, gAv, gAw, gAw_eta, sBu, sBv, sBw, sBw_eta
 
     eta = 2*ys/b - 1.
 
@@ -166,7 +166,7 @@ def fkCsf(double kt, double kr, double ys, double a, double b, double bf,
                     gAu = gtab[0, j]
                     gAv = gtab[1, j]
                     gAw = gtab[2, j]
-                    gAweta = gtab[3, j]
+                    gAw_eta = gtab[3, j]
 
                     for l1 in range(n1):
                         row = row0 + DOF1*(j*m + i)
@@ -179,7 +179,7 @@ def fkCsf(double kt, double kr, double ys, double a, double b, double bf,
                         sBu = gtabf[0, l1]
                         sBv = gtabf[1, l1]
                         sBw = gtabf[2, l1]
-                        sBweta = gtabf[3, l1]
+                        sBw_eta = gtabf[3, l1]
 
                         c += 1
                         kCsfr[c] = row+0
@@ -196,7 +196,7 @@ def fkCsf(double kt, double kr, double ys, double a, double b, double bf,
                         c += 1
                         kCsfr[c] = row+2
                         kCsfc[c] = col+2
-                        kCsfv[c] += -2*a*fAwrBw*gAweta*kr*sBweta/(b*bf)
+                        kCsfv[c] += -2*a*fAwrBw*gAw_eta*kr*sBw_eta/(b*bf)
 
     kCsf = coo_matrix((kCsfv, (kCsfr, kCsfc)), shape=(size, size))
 
@@ -218,7 +218,7 @@ def fkCff(double kt, double kr, double a, double bf, int m1, int n1,
     cdef double [:] kCffv
 
     cdef double rAurBu, rAvrBv, rAwrBw
-    cdef double sAu, sBu, sAv, sBv, sAw, sBw, sAweta, sBweta
+    cdef double sAu, sBu, sAv, sBv, sAw, sBw, sAw_eta, sBw_eta
 
     fdim = 3*m1*n1*m1*n1
 
@@ -249,7 +249,7 @@ def fkCff(double kt, double kr, double a, double bf, int m1, int n1,
                     sAu = gtabf[0, j1]
                     sAv = gtabf[1, j1]
                     sAw = gtabf[2, j1]
-                    sAweta = gtabf[3, j1]
+                    sAw_eta = gtabf[3, j1]
 
                     for l1 in range(n1):
                         row = row0 + DOF1*(j1*m1 + i1)
@@ -262,7 +262,7 @@ def fkCff(double kt, double kr, double a, double bf, int m1, int n1,
                         sBu = gtabf[0, l1]
                         sBv = gtabf[1, l1]
                         sBw = gtabf[2, l1]
-                        sBweta = gtabf[3, l1]
+                        sBw_eta = gtabf[3, l1]
 
                         c += 1
                         kCffr[c] = row+0
@@ -275,7 +275,7 @@ def fkCff(double kt, double kr, double a, double bf, int m1, int n1,
                         c += 1
                         kCffr[c] = row+2
                         kCffc[c] = col+2
-                        kCffv[c] += 0.5*a*(kt*rAwrBw*sAw*sBw + 4*kr*rAwrBw*sAweta*sBweta/(bf*bf))
+                        kCffv[c] += 0.5*a*(kt*rAwrBw*sAw*sBw + 4*kr*rAwrBw*sAw_eta*sBw_eta/(bf*bf))
 
     kCff = coo_matrix((kCffv, (kCffr, kCffc)), shape=(size, size))
 

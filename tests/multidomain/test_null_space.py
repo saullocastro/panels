@@ -1,11 +1,11 @@
 r"""Connections imposed exactly with the null-space method
 
 With ``MultiDomain(..., conn_method='null-space')`` the connections are the
-constraints `[B] \{c\} = \{0\}`, eliminated with a basis `[T]` of the null
-space of `[B]`, see :mod:`panels.multidomain.connections.nullspace`:
+constraints `\boldsymbol{B} \boldsymbol{c} = \boldsymbol{0}`, eliminated with a basis `\boldsymbol{Z}` of the null
+space of `\boldsymbol{B}`, see :mod:`panels.multidomain.connections.nullspace`:
 
 - the constraints are those of the penalty kernels: for every connection,
-  model and random boundary condition flags, the vectors `[T] \{c_r\}` have
+  model and random boundary condition flags, the vectors `\boldsymbol{Z} \boldsymbol{c}_r` have
   zero penalty energy, and they are all the vectors with zero penalty energy
 - the solution is the limit of the penalty method for penalty constants
   going to infinity
@@ -57,7 +57,10 @@ def _pair(model, func, seed):
     elif func == 'SB':
         p1 = Shell(a=0.4, b=0.3, m=6, n=6, **kw1)
         p2 = Shell(a=0.4, b=0.3, m=5, n=7, **kw2)
-        conn = dict(p1=p1, p2=p2, func=func, kr=1.)
+        conn = dict(p1=p1, p2=p2, func=func)
+        #NOTE 'kr' of 'SB' applies only to the FSDT and TSDT
+        if 'clpt' not in model:
+            conn['kr'] = 1.
     else:
         #NOTE a flat flange, with the base at an interior line
         kw2 = dict(kw, stack=[0, 90, 90, 0],
@@ -80,10 +83,10 @@ def _pair(model, func, seed):
 @pytest.mark.parametrize('func', FUNCS)
 @pytest.mark.parametrize('model', MODELS)
 def test_same_constraints_as_penalty(model, func, order):
-    r"""The null space of the penalty matrix is the span of `[T]`
+    r"""The null space of the penalty matrix is the span of `\boldsymbol{Z}`
 
-    The vectors `[T] \{c_r\}` have zero penalty energy, `[K_{pen}] [T] = 0`,
-    and the penalty matrix has as many zero eigenvalues as `[T]` has
+    The vectors `\boldsymbol{Z} \boldsymbol{c}_r` have zero penalty energy, `\boldsymbol{K}_{pen} \boldsymbol{Z} = \boldsymbol{0}`,
+    and the penalty matrix has as many zero eigenvalues as `\boldsymbol{Z}` has
     columns, with the boundary condition flags removing different terms of
     the two panels.
     """
@@ -92,16 +95,18 @@ def test_same_constraints_as_penalty(model, func, order):
         if order == 'p2 first':
             panels = panels[::-1]
         md = MultiDomain(panels, [conn], conn_method='null-space')
-        T = md.get_T()
-        assert T.shape[0] == md.get_size()
-        K = MultiDomain(panels, [dict(conn, kt=1., kr=1.)],
-                        conn_method='penalty').get_kC_conn()
+        Z = md.get_Z()
+        assert Z.shape[0] == md.get_size()
+        pen = dict(conn, kt=1., kr=1.)
+        if func == 'SB' and 'clpt' in model:
+            del pen['kr']
+        K = MultiDomain(panels, [pen], conn_method='penalty').get_kC_conn()
         K = K.toarray()
-        assert np.abs(K @ T).max() < 1e-12*np.abs(K).max()
+        assert np.abs(K @ Z).max() < 1e-12*np.abs(K).max()
         ev = eigh(K, eigvals_only=True)
         #NOTE the zero eigenvalues are at the round-off level, 1e-16, and
         #     the smallest penalized mode has 1e-13 in these cases
-        assert np.sum(ev < 1e-14*ev.max()) == T.shape[1]
+        assert np.sum(ev < 1e-14*ev.max()) == Z.shape[1]
 
 
 def _divided_plate_matrices(model, layout, conn_method):
@@ -114,12 +119,12 @@ def _divided_plate_matrices(model, layout, conn_method):
 
 
 def test_penalty_mode_is_unchanged():
-    r"""With ``conn_method='penalty'`` `[T]` is the identity and the
+    r"""With ``conn_method='penalty'`` `\boldsymbol{Z}` is the identity and the
     connections are in the stiffness matrix"""
     md, K, M = _divided_plate_matrices(FSDT, '2x2', 'penalty')
-    T = md.get_T()
-    assert T.shape == (md.get_size(),)*2
-    assert np.array_equal(T.toarray(), np.eye(md.get_size()))
+    Z = md.get_Z()
+    assert Z.shape == (md.get_size(),)*2
+    assert np.array_equal(Z.toarray(), np.eye(md.get_size()))
     assert md.get_kC_conn().nnz > 0
 
 
@@ -127,12 +132,12 @@ def test_connection_matrix_excludes_null_space_connections():
     md, K, M = _divided_plate_matrices(FSDT, '2x2', 'null-space')
     assert md.get_kC_conn().nnz == 0
     # the 4 domains of 5*10*10 terms, minus the independent constraints
-    T = md.get_T()
-    assert T.shape[0] == 2000
-    assert T.shape[1] < 2000
+    Z = md.get_Z()
+    assert Z.shape[0] == 2000
+    assert Z.shape[1] < 2000
     for connecti in md.conn:
         B = nullspace.constraint_matrix(connecti, md.get_size())
-        assert np.abs(B @ T).max() < 1e-12*np.abs(B).max()
+        assert np.abs(B @ Z).max() < 1e-12*np.abs(B).max()
 
 
 @pytest.mark.parametrize('layout', ['x', 'y', '2x2'])
@@ -195,8 +200,9 @@ def test_skin_base_nonlinear_equals_single_laminate():
 
     The in-plane displacements of the edges are only restrained in the
     tangential direction: restraining the normal one in both laminates would
-    also restrain the rotation of the edge, since `u_{top} = u_{bot} - d_{sb}
-    w_{,x}`.
+    also restrain the rotation of the edge, since `u_{top} - z_{top} w_{,x} =
+    u_{bot} - z_{bot} w_{,x}` at the faces in contact, `z_{top} \ne
+    z_{bot}`.
     """
     a = 1.
     h = a/50
@@ -270,7 +276,7 @@ def test_cylinder_redundant_constraints():
         laminaprop=LAMINAPROP, npanels=5, Nxxs=Nxxs, m=8, n=12,
         num_eigvalues=10, conn_method='null-space')
     assert eigvecs.shape[0] == md.get_size()
-    assert md.T.shape == (1440, 1315)
+    assert md.Z.shape == (1440, 1315)
     assert np.isclose(Nxxs[0]*eigvals[0], -47113.039, rtol=1e-5)
 
 
@@ -304,7 +310,7 @@ def test_tstiff2d_freq():
 
 
 def test_T_is_reused_and_rebuilt():
-    r"""`[T]` is rebuilt when a boundary condition flag changes
+    r"""`\boldsymbol{Z}` is rebuilt when a boundary condition flag changes
 
     The terms removed by the flags are zero columns of the matrices, and
     remain independent Ritz constants. Releasing `w` at the edge `y = 0` of
@@ -312,15 +318,15 @@ def test_T_is_reused_and_rebuilt():
     edge.
     """
     md, K, M = _divided_plate_matrices(FSDT, 'x', 'null-space')
-    T = md.get_T()
-    assert md.get_T() is T
+    Z = md.get_Z()
+    assert md.get_Z() is Z
     md.panels[0].y1w = 1.
-    T2 = md.get_T()
-    assert T2 is not T
-    assert T2.shape[1] == T.shape[1] - 1
+    Z2 = md.get_Z()
+    assert Z2 is not Z
+    assert Z2.shape[1] == Z.shape[1] - 1
     B = nullspace.constraint_matrix(md.conn[0], md.get_size())
-    assert np.abs(B @ T2).max() < 1e-12*np.abs(B).max()
-    assert np.abs(B @ T).max() > 1e-3*np.abs(B).max()
+    assert np.abs(B @ Z2).max() < 1e-12*np.abs(B).max()
+    assert np.abs(B @ Z).max() > 1e-3*np.abs(B).max()
 
 
 def test_default_is_null_space():
@@ -331,7 +337,7 @@ def test_default_is_null_space():
     md = MultiDomain(panels, conn)
     assert md.conn_method == 'null-space'
     assert md.get_kC_conn().nnz == 0
-    assert md.get_T().shape[1] < md.get_size()
+    assert md.get_Z().shape[1] < md.get_size()
 
 
 def test_invalid_conn_method():

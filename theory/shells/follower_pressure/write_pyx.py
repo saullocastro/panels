@@ -29,12 +29,12 @@ END = '# END follower pressure\n'
 
 BASIS = {
     # name: (f or g, field, derivative)
-    'fAu': ('f', 'u', 0), 'fAuxi': ('f', 'u', 1),
-    'fAv': ('f', 'v', 0), 'fAvxi': ('f', 'v', 1),
-    'fAw': ('f', 'w', 0), 'fAwxi': ('f', 'w', 1),
-    'gAu': ('g', 'u', 0), 'gAueta': ('g', 'u', 1),
-    'gAv': ('g', 'v', 0), 'gAveta': ('g', 'v', 1),
-    'gAw': ('g', 'w', 0), 'gAweta': ('g', 'w', 1),
+    'fAu': ('f', 'u', 0), 'fAu_xi': ('f', 'u', 1),
+    'fAv': ('f', 'v', 0), 'fAv_xi': ('f', 'v', 1),
+    'fAw': ('f', 'w', 0), 'fAw_xi': ('f', 'w', 1),
+    'gAu': ('g', 'u', 0), 'gAu_eta': ('g', 'u', 1),
+    'gAv': ('g', 'v', 0), 'gAv_eta': ('g', 'v', 1),
+    'gAw': ('g', 'w', 0), 'gAw_eta': ('g', 'w', 1),
 }
 FUNC = {0: 'f', 1: 'fp'}
 
@@ -153,8 +153,8 @@ def calc_fext_follower(double [::1] cs, double [:, ::1] pnxny,
                           for c, e in zip('xyz', acode)))]
     out.append(common_cdef)
     out.append('    cdef double ref, ax, ay, az\n')
-    out.append('    cdef double fAu, fAuxi, fAv, fAvxi, fAw, fAwxi\n')
-    out.append('    cdef double gAu, gAueta, gAv, gAveta, gAw, gAweta\n')
+    out.append('    cdef double fAu, fAu_xi, fAv, fAv_xi, fAw, fAw_xi\n')
+    out.append('    cdef double gAu, gAu_eta, gAv, gAv_eta, gAw, gAw_eta\n')
     out.append('    cdef double [::1] fext\n\n')
     out.append(common_read)
     out.append('''    ref = 1. if reference else 0.

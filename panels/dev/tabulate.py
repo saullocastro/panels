@@ -5,9 +5,9 @@ The numerically integrated kernels, e.g. ``fkC_num`` of
 ``panels/multidomain/connections/kCSB_dmg.pyx``, evaluate the approximation
 functions inside their loops over the terms, e.g. ``fBu = f(k, xi, x1u,
 x1ur, x2u, x2ur)`` in the innermost loop over the pairs of terms of a
-stiffness matrix, i.e. `m^2 n^2` times each per integration point.
-:func:`tabulate_basis` rewrites a kernel such that each function is evaluated
-once per integration point and term, in tables such as ``ftab[k, i]`` along
+stiffness matrix. :func:`tabulate_basis` rewrites a kernel such that each
+function is evaluated once per integration point and term, in tables such
+as ``ftab[k, i]`` along
 `x` and ``gtab[k, j]`` along `y`, filled at the start of the loop over the
 integration points and read in the loops over the terms. The arithmetic of
 the integrands is unchanged, so are the results, bit for bit.
@@ -23,11 +23,23 @@ e.g. along a line of constant `\xi` of the connections, the tables are filled
 once, before the outermost loop over the terms. A kernel is left unchanged when it has
 no such call, or when it is already tabulated. A call in another form raises a ``ValueError``.
 
-The generators of the modules, ``theory/shells/fsdt_tsdt/write_pyx.py``,
-``theory/shells/cylshell_clpt_sanders/write_pyx.py`` and
-``theory/shells/follower_pressure/write_pyx.py``, apply it to their output;
-``python -m panels.dev.tabulate <file.pyx> ...`` applies it to the modules
-written by hand.
+The scripts that generate the kernel modules from the symbolic integrands
+apply it to their output; ``python -m panels.dev.tabulate <file.pyx> ...``
+applies it to the modules written by hand.
+
+Notes
+-----
+An entry of a numerically integrated stiffness matrix between the terms
+`(i, j)` and `(k, l)` of the Ritz series is a sum over the Gauss-Legendre
+points of products of the approximation functions `P_i(\xi)`, `P_k(\xi)`,
+`P_j(\eta)` and `P_l(\eta)`, and of their derivatives, see
+:mod:`panels.bardell`. In the innermost loop over the pairs of terms each
+function is evaluated `m^2 n^2` times per integration point, although it
+depends on one index and one coordinate only. Tabulated, it is evaluated
+`m` (or `n`) times per point, and the cost of the functions becomes
+negligible against the `m^2 n^2` products of the assembly, see
+:ref:`tabulation`. Since only where the values are computed changes, and
+not the operations on them, the results are identical.
 
 """
 import re
@@ -189,7 +201,24 @@ def _tabulate_function(text):
 
 def tabulate_basis(source):
     r"""Tabulate the approximation functions of every kernel of the module
-    ``source``, see the module docstring"""
+    ``source``, see the module docstring
+
+    The source is split before each line starting with ``def``, ``cdef``
+    or ``cpdef``; only the parts that are ``def`` functions are rewritten,
+    the others are kept as they are. A ``ValueError`` is raised for a
+    kernel whose calls are not in the expected form.
+
+    Parameters
+    ----------
+    source : str
+        The text of a ``.pyx`` module.
+
+    Returns
+    -------
+    source : str
+        The rewritten text, equal to ``source`` when no kernel is changed.
+
+    """
     #NOTE the cdef functions are not rewritten, their arguments differ
     parts = re.split(r'(?=^(?:def|cdef|cpdef) )', source, flags=re.M)
     return ''.join(_tabulate_function(part) if part.startswith('def ')
