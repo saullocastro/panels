@@ -366,6 +366,18 @@
   `\vec`) and the transpose `^\top` (was `^T`). The API names, e.g.
   `calc_kCfollower`, the key `'kCfollower'` and the argument `c`, are
   unchanged.
+- New `notebooks/fk1952_shallow_arches.ipynb`: snap-through of a hinged
+  shallow circular arch, `lambda_1 = 2.2`, under a sinusoidal dead load,
+  a strip of `cylshell_clpt_sanders` with `nu = 0`, traced through both
+  limit points with the Riks and the Crisfield methods of `structsolve`,
+  each with the convergence criteria `'crisfield'` and `'relative'` at the
+  default tolerance, against the symmetric path of Eqs. (15) and (45) of
+  Fung and Kaplan, NACA TN 2840 (1952), solved in the notebook. The four
+  paths coincide; the maximum load is 4.9858 against 4.9822 (+0.074%) and
+  the minimum -0.5883 against -0.5822, differences of the order of
+  `theta^2 = 2.4e-3`, `theta` being the half-angle of the arc, the order of
+  the terms in which the model differs from the shallow-arch theory; results
+  stored in `notebooks/results/fk1952_shallow_arches.json`.
 
 ### Clean-up
 

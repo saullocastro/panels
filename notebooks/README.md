@@ -10,7 +10,9 @@ of the repository and put the repository first on `sys.path`.
 Most notebooks load stored results from `results/` and only run `panels`
 again with `RERUN = True` in their first cell. The stored results of the
 notebooks were computed with `panels` 0.14.0, `structsolve` 0.9.1 (0.9.2
-for `sze2004_hinged_roofs.ipynb`) and `composites` 0.10.0; the results
+for `sze2004_hinged_roofs.ipynb`) and `composites` 0.10.0, those of
+`fk1952_shallow_arches.ipynb` with `panels` 0.14.0, `structsolve` 0.9.3
+and `composites` 0.10.1; the results
 computed again keep the run times of their first computation, except the
 DCB results, `results/*.npz`, and those of `conn_method_comparison.ipynb`,
 whose run times were measured again with `panels` 0.14.0 and `structsolve`
@@ -66,6 +68,7 @@ kept, in `results/`.
 | `nasa_sp8007_external_pressure.ipynb` | NASA/SP-8007-2020/REV 2: cylinders under lateral and hydrostatic pressure |
 | `schweizerhof1984_pressure_loads.ipynb` | Schweizerhof and Ramm (1984): displacement dependent pressure loads |
 | `sze2004_hinged_roofs.ipynb` | Sabir and Lock (1972), Sze et al. (2004): limit loads of hinged cylindrical roofs |
+| `fk1952_shallow_arches.ipynb` | Fung and Kaplan (1952), NACA TN 2840: snap-through of a hinged shallow circular arch under a sinusoidal load, Riks and Crisfield methods with both convergence criteria |
 | `stamatelos_labeas_2023.ipynb`, `stamatelos_labeas_2023_multidomain.ipynb` | Stamatelos and Labeas (2023): buckling of laminated stiffened plates, single domain and multidomain |
 | `follower_utils.py` | Utilities of the follower (hydrostatic) pressure notebooks |
 | `scf_validation_utils.py` | Utilities of the shear correction notebooks |
