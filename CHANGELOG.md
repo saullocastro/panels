@@ -388,9 +388,12 @@
 ### Dependencies
 
 - Requires `composites>=0.10.0`, for `Laminate.intrhoz3`, `intrhoz4` and
-  `intrhoz6`, and `structsolve>=0.9.2`. The default convergence criterion
-  of `structsolve` is Crisfield's since 0.9.0. 0.9.2 fixes the arc-length
-  methods, which could accept a step that converged back to the point
+  `intrhoz6`, and `structsolve>=0.9.3`, whose residual is `R = F_int -
+  lambda F_ext`, with `K_T = dR/dc`, the convention of the documentation of
+  `panels` (was `lambda F_ext - F_int` up to 0.9.2). The default
+  convergence criterion of `structsolve` is Crisfield's since 0.9.0. 0.9.2
+  fixes the arc-length methods, which could accept a step that converged
+  back to the point
   before the last one and then trace the path backwards ("doubling back"):
   with 0.9.0 and 0.9.1 the Riks path of the `[90/0/90]` hinged roof with
   `h = 12.7` and the TSDT of `notebooks/sze2004_hinged_roofs.ipynb` turned
