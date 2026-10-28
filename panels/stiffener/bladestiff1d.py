@@ -338,7 +338,9 @@ class BladeStiff1D(object):
         skin about `x`, the rotation being `w_{,y}`, such that the torsion
         term is `\frac{1}{2} \int_0^a G J w_{,xy}^2 dx`, with the torsional
         stiffness `G J = 4 b_f D_{66}` of :class:`.BladeStiff1D`, passed to
-        the kernel ``fkCf`` as `G J/b_f`.
+        the kernel ``fkCf`` as its argument ``GJperbf`` `= G J/b_f`, not to be
+        confused with the attribute ``Jxx``, the polar moment of area of the
+        flange.
 
         """
         self._rebuild()

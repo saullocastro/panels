@@ -33,7 +33,7 @@ cdef extern from 'bardell_functions.hpp':
 
 
 def fkCf(double ys, double a, double b, double bf, double df, double E1, double F1,
-         double S1, double Jxx, int m, int n,
+         double S1, double GJperbf, int m, int n,
          double x1u, double x1ur, double x2u, double x2ur,
          double x1w, double x1wr, double x2w, double x2wr,
          double y1u, double y1ur, double y2u, double y2ur,
@@ -115,7 +115,7 @@ def fkCf(double ys, double a, double b, double bf, double df, double E1, double 
                         c += 1
                         k0fr[c] = row+2
                         k0fc[c] = col+2
-                        k0fv[c] += 0.5*a*bf*(-4*gBw_eta*(-4*Jxx*fAwxifBwxi*gAw_eta/(a*b) + 4*S1*df*fAwxixifBwxi*gAw/(a*a))/(a*b) - 4*gBw*(4*S1*df*fAwxifBwxixi*gAw_eta/(a*b) + fAwxixifBwxixi*gAw*(-4*E1*(df*df) - 4*F1)/(a*a))/(a*a))
+                        k0fv[c] += 0.5*a*bf*(-4*gBw_eta*(-4*GJperbf*fAwxifBwxi*gAw_eta/(a*b) + 4*S1*df*fAwxixifBwxi*gAw/(a*a))/(a*b) - 4*gBw*(4*S1*df*fAwxifBwxixi*gAw_eta/(a*b) + fAwxixifBwxixi*gAw*(-4*E1*(df*df) - 4*F1)/(a*a))/(a*a))
 
     k0f = coo_matrix((k0fv, (k0fr, k0fc)), shape=(size, size))
 
