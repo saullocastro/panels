@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Follower pressure loads: theory &#8212; panels 0.14.0 documentation</title>
+    <title>Follower pressure loads: theory &#8212; panels 0.14.1 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
 
-    <script src="_static/documentation_options.js?v=9e420a66"></script>
+    <script src="_static/documentation_options.js?v=3a3a8e7f"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
@@ -50,7 +50,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.14.0" />
+  <meta name="docsearch:version" content="0.14.1" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -118,7 +118,7 @@
   
   
   
-    <p class="title logo__title">panels 0.14.0 documentation</p>
+    <p class="title logo__title">panels 0.14.1 documentation</p>
   
 </a></div>
     
@@ -1072,7 +1072,7 @@ second variation of the total potential is</p>
 <span class="eqno">(23)<a class="headerlink" href="#equation-fp-ring" title="Link to this equation">#</a></span>\[U_2 = \frac{1}{2} \oint \left( A \varepsilon_{yy}^2 + D \kappa_{yy}^2 +
       N_{yy} \beta_y^2 \right) dy - \frac{1}{2} \oint p \, \boldsymbol{u}
       \cdot \boldsymbol{a}_1(\boldsymbol{u}) \, dy\]</div>
-<p>with <span class="math notranslate nohighlight">\(\beta_y = w_{,y} - k_v v\)</span>. In the inextensional limit its singularity
+<p>with <span class="math notranslate nohighlight">\(\beta_y = -w_{,y} + k_v v\)</span>. In the inextensional limit its singularity
 gives <span class="math notranslate nohighlight">\(p_{cr} r^3/D\)</span>, derived with SymPy:</p>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
@@ -1102,13 +1102,27 @@ directed</p></th>
 </div>
 <p>The Sanders values are the classical ones, see <a class="reference internal" href="ref.html#timoshenko1961stability" id="id12"><span>[timoshenko1961Stability]</span></a>
 and <a class="reference internal" href="ref.html#brush1975buckling" id="id13"><span>[brush1975Buckling]</span></a>. For a ring, with <span class="math notranslate nohighlight">\(D\)</span> replaced by the bending
-stiffness <span class="math notranslate nohighlight">\(EI\)</span> of the ring, they are the analytical values <span class="math notranslate nohighlight">\(3\)</span>, <span class="math notranslate nohighlight">\(4\)</span> and
-<span class="math notranslate nohighlight">\(4.5\)</span> that Table 3 of <a class="reference internal" href="ref.html#schweizerhof1984pressure" id="id14"><span>[schweizerhof1984Pressure]</span></a> lists as reference for
-their finite element results. The follower value is also the hydrostatic
-critical pressure <span class="math notranslate nohighlight">\(3D/r^3\)</span> of the long cylinders, Eq. (66) of
-<a class="reference internal" href="ref.html#nasa2020sp8007" id="id15"><span>[nasa2020SP8007]</span></a>. With the FSDT and the transverse shear stiffness <span class="math notranslate nohighlight">\(S\)</span>, the
-follower load gives <span class="math notranslate nohighlight">\(p_{cr} = 3D/(r^3 (1 + 4D/(S r^2)))\)</span>, the shell formula
-of <a class="reference internal" href="ref.html#han2004sandwichcylinder" id="id16"><span>[han2004SandwichCylinder]</span></a>.</p>
+stiffness <span class="math notranslate nohighlight">\(EI\)</span> of the ring and the extension of the ring axis neglected,
+they are the critical loads <span class="math notranslate nohighlight">\(3EI/r^3\)</span>, <span class="math notranslate nohighlight">\(4EI/r^3\)</span> and <span class="math notranslate nohighlight">\(4.5EI/r^3\)</span> of
+<a class="reference internal" href="ref.html#pflueger1975stability" id="id14"><span>[pflueger1975Stability]</span></a>, p. 403 (case I, D, b, 1 of the appendix), which
+Table 3 of <a class="reference internal" href="ref.html#schweizerhof1984pressure" id="id15"><span>[schweizerhof1984Pressure]</span></a> lists as reference for their finite
+element results. The follower value is also the hydrostatic critical
+pressure <span class="math notranslate nohighlight">\(3D/r^3\)</span> of the long cylinders, Eq. (66) of <a class="reference internal" href="ref.html#nasa2020sp8007" id="id16"><span>[nasa2020SP8007]</span></a> and
+Eq. (97b), p. 150, of <a class="reference internal" href="ref.html#pflueger1975stability" id="id17"><span>[pflueger1975Stability]</span></a>. With the FSDT and the
+transverse shear stiffness <span class="math notranslate nohighlight">\(S\)</span>, the follower load gives <span class="math notranslate nohighlight">\(p_{cr} = 3D/(r^3 (1
++ 4D/(S r^2)))\)</span>, the shell formula of <a class="reference internal" href="ref.html#han2004sandwichcylinder" id="id18"><span>[han2004SandwichCylinder]</span></a>.</p>
+<p>The Donnell values differ because the Donnell kinematics neglect <span class="math notranslate nohighlight">\(v/r\)</span> in
+the rotation <span class="math notranslate nohighlight">\(\beta_y\)</span>, in the change of curvature <span class="math notranslate nohighlight">\(\kappa_{yy}\)</span> and in the
+area vector, <span class="math notranslate nohighlight">\(k_v = 0\)</span>. <a class="reference internal" href="ref.html#kardomateas1993orthotropic" id="id19"><span>[kardomateas1993Orthotropic]</span></a> obtains the classical
+value <span class="math notranslate nohighlight">\((n^2 - 1) D/r^3\)</span>, i.e. <span class="math notranslate nohighlight">\(3D/r^3\)</span> for <span class="math notranslate nohighlight">\(n = 2\)</span>, Eq. (29a), p. 199, from
+the Donnell non-linear shell equations of <a class="reference internal" href="ref.html#brush1975buckling" id="id20"><span>[brush1975Buckling]</span></a>, but with a
+circumferential displacement that varies through the thickness with the
+slope <span class="math notranslate nohighlight">\((v - w_{,\theta})/r\)</span>, in the notation of panels, which is the rotation
+<span class="math notranslate nohighlight">\(\beta_y = -w_{,y} + v/r\)</span> of the Sanders kinematics.</p>
+<p>The centrally directed load has no kernel in panels: its column of the
+table is checked only with the load stiffness <code class="docutils literal notranslate"><span class="pre">central_load_stiffness</span></code>
+of <code class="docutils literal notranslate"><span class="pre">tests/tests_shell/test_follower_pressure_validation.py</span></code>, which is
+integrated independently of the kernels.</p>
 <p>With Sanders’ kinematics and a dead pressure, the rigid rotation <span class="math notranslate nohighlight">\(v =
 const\)</span>, <span class="math notranslate nohighlight">\(w = 0\)</span>, strain free, has the energy <span class="math notranslate nohighlight">\(\oint N_{yy} (v/r)^2 dy &lt; 0\)</span>
 under an external pressure, a spurious mode at a vanishing critical load
@@ -1137,9 +1151,9 @@ follower loads in a <code class="xref py py-class docutils literal notranslate">
 the load stiffness of a closed cylinder reduced by the null-space method.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">tests/tests_shell/test_follower_pressure_validation.py</span></code> and the
 notebooks of <a class="reference internal" href="ex_follower_pressure.html#ex-follower-pressure"><span class="std std-ref">Follower (hydrostatic) pressure</span></a>: the ring closed forms, finite
-cylinders, <a class="reference internal" href="ref.html#nasa2020sp8007" id="id17"><span>[nasa2020SP8007]</span></a>, <a class="reference internal" href="ref.html#kardomateas1993orthotropic" id="id18"><span>[kardomateas1993Orthotropic]</span></a>,
-<a class="reference internal" href="ref.html#han2004sandwichcylinder" id="id19"><span>[han2004SandwichCylinder]</span></a>, <a class="reference internal" href="ref.html#kardomateas2003sandwich" id="id20"><span>[kardomateas2003Sandwich]</span></a> and
-<a class="reference internal" href="ref.html#schweizerhof1984pressure" id="id21"><span>[schweizerhof1984Pressure]</span></a>.</p></li>
+cylinders, <a class="reference internal" href="ref.html#nasa2020sp8007" id="id21"><span>[nasa2020SP8007]</span></a>, <a class="reference internal" href="ref.html#kardomateas1993orthotropic" id="id22"><span>[kardomateas1993Orthotropic]</span></a>,
+<a class="reference internal" href="ref.html#han2004sandwichcylinder" id="id23"><span>[han2004SandwichCylinder]</span></a>, <a class="reference internal" href="ref.html#kardomateas2003sandwich" id="id24"><span>[kardomateas2003Sandwich]</span></a> and
+<a class="reference internal" href="ref.html#schweizerhof1984pressure" id="id25"><span>[schweizerhof1984Pressure]</span></a>.</p></li>
 </ul>
 </section>
 </section>

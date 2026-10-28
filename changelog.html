@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Changelog &#8212; panels 0.14.0 documentation</title>
+    <title>Changelog &#8212; panels 0.14.1 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
 
-    <script src="_static/documentation_options.js?v=9e420a66"></script>
+    <script src="_static/documentation_options.js?v=3a3a8e7f"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'changelog';</script>
@@ -49,7 +49,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.14.0" />
+  <meta name="docsearch:version" content="0.14.1" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -117,7 +117,7 @@
   
   
   
-    <p class="title logo__title">panels 0.14.0 documentation</p>
+    <p class="title logo__title">panels 0.14.1 documentation</p>
   
 </a></div>
     
@@ -729,7 +729,7 @@
 <a class="reference external" href="https://github.com/saullocastro/panels/blob/main/CHANGELOG.md">repository</a>:</p>
 <div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="gh"># Changelog</span>
 
-<span class="gu">## 0.14.0 (2026-10-26)</span>
+<span class="gu">## 0.14.1 (2026-10-28)</span>
 
 <span class="gu">### Python versions</span>
 
@@ -1107,6 +1107,29 @@
   <span class="sb">`theta^2 = 2.4e-3`</span>, <span class="sb">`theta`</span> being the half-angle of the arc, the order of
   the terms in which the model differs from the shallow-arch theory; results
   stored in <span class="sb">`notebooks/results/fk1952_shallow_arches.json`</span>.
+<span class="k">-</span><span class="w"> </span>The rotations of the von Karman terms of the FSDT and TSDT models,
+  <span class="sb">`beta_x = -w,x`</span> and <span class="sb">`beta_y = -w,y + v/r`</span> (Sanders), and of the tangent
+  product of the CLPT models with Donnell kinematics, <span class="sb">`beta_x = -w,x`</span>,
+  <span class="sb">`beta_y = -w,y`</span>, take the sign of the rotations of the normal, as
+  <span class="sb">`phi_x`</span>, <span class="sb">`phi_y`</span> of <span class="sb">`cylshell_clpt_sanders`</span> (were <span class="sb">`w,x`</span> and `w,y -
+  v/r`), in the generators in <span class="sb">`theory/shells/fsdt_tsdt`</span>, <span class="sb">`tangent_product`</span>
+  and <span class="sb">`follower_pressure`</span>, in the kernels <span class="sb">`&lt;model&gt;_num.pyx`</span> written by them,
+  in <span class="sb">`fsdt_tsdt_field.pyx`</span>, and in the docstrings of <span class="sb">`panels.models`</span>,
+  <span class="sb">`Shell.calc_kC`</span>, <span class="sb">`Shell.calc_kG`</span>, <span class="sb">`doc/source/tangent_product.rst`</span> and
+  <span class="sb">`follower_pressure.rst`</span>. They enter only squared or multiplied by the
+  operator <span class="sb">`G`</span> of the same sign, and the matrices, internal forces and
+  strains are unchanged, bit for bit.
+<span class="k">-</span><span class="w"> </span><span class="sb">`doc/source/follower_pressure.rst`</span>, ring under uniform pressure: the
+  ring values with the reference of Pflueger (1975), p. 403, and Eq. (97b),
+  p. 150, for the long cylinder; why the Donnell row differs from the
+  classical <span class="sb">`3D/r^3`</span>, which Kardomateas (1993), Eq. (29a), p. 199, obtains
+  from Donnell's equations with the rotation <span class="sb">`-w,y + v/r`</span> of Sanders; the
+  centrally directed load checked only with <span class="sb">`central_load_stiffness`</span> of
+  the tests; DOI of Kardomateas (1993) in <span class="sb">`ref.rst`</span>.
+<span class="k">-</span><span class="w"> </span><span class="sb">`theory/shells/fsdt_tsdt/fsdt_tsdt.py`</span>: the TSDT takes the third-order
+  displacement field of Reddy and Liu (1985), Eqs. (5)-(9), with Sanders'
+  corrections of the bending strains added, since Eq. (11) of Reddy and
+  Liu has no Sanders-Koiter terms.
 
 <span class="gu">### Clean-up</span>
 
@@ -1125,6 +1148,11 @@
   the names of the integrals of products (e.g. <span class="sb">`fAufBuxi`</span>) and
   the quadrature weights (<span class="sb">`wx`</span>, <span class="sb">`wxi`</span>, ...) are unchanged, and so are the
   results, bit for bit.
+<span class="k">-</span><span class="w"> </span>The argument of the kernel <span class="sb">`fkCf`</span> of
+  <span class="sb">`panels.stiffener.models.bladestiff1d_clt_donnell`</span> that receives <span class="sb">`GJ/bf`</span>
+  is <span class="sb">`GJperbf`</span> (was <span class="sb">`Jxx`</span>, the name of the polar moment of area of
+  <span class="sb">`BladeStiff1D`</span>), also in the generator in
+  <span class="sb">`theory/multidomain_panels/bladestiff1d_clt_donnell`</span>.
 
 <span class="gu">### Dependencies</span>
 
