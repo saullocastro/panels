@@ -466,13 +466,29 @@ Donnell                  `-16/5`          `-4`             `-64/15`
 
 The Sanders values are the classical ones, see [timoshenko1961Stability]_
 and [brush1975Buckling]_. For a ring, with `D` replaced by the bending
-stiffness `EI` of the ring, they are the analytical values `3`, `4` and
-`4.5` that Table 3 of [schweizerhof1984Pressure]_ lists as reference for
-their finite element results. The follower value is also the hydrostatic
-critical pressure `3D/r^3` of the long cylinders, Eq. (66) of
-[nasa2020SP8007]_. With the FSDT and the transverse shear stiffness `S`, the
-follower load gives `p_{cr} = 3D/(r^3 (1 + 4D/(S r^2)))`, the shell formula
-of [han2004SandwichCylinder]_.
+stiffness `EI` of the ring and the extension of the ring axis neglected,
+they are the critical loads `3EI/r^3`, `4EI/r^3` and `4.5EI/r^3` of
+[pflueger1975Stability]_, p. 403 (case I, D, b, 1 of the appendix), which
+Table 3 of [schweizerhof1984Pressure]_ lists as reference for their finite
+element results. The follower value is also the hydrostatic critical
+pressure `3D/r^3` of the long cylinders, Eq. (66) of [nasa2020SP8007]_ and
+Eq. (97b), p. 150, of [pflueger1975Stability]_. With the FSDT and the
+transverse shear stiffness `S`, the follower load gives `p_{cr} = 3D/(r^3 (1
++ 4D/(S r^2)))`, the shell formula of [han2004SandwichCylinder]_.
+
+The Donnell values differ because the Donnell kinematics neglect `v/r` in
+the rotation `\beta_y`, in the change of curvature `\kappa_{yy}` and in the
+area vector, `k_v = 0`. [kardomateas1993Orthotropic]_ obtains the classical
+value `(n^2 - 1) D/r^3`, i.e. `3D/r^3` for `n = 2`, Eq. (29a), p. 199, from
+the Donnell non-linear shell equations of [brush1975Buckling]_, but with a
+circumferential displacement that varies through the thickness with the
+slope `(v - w_{,\theta})/r`, in the notation of panels, which is the rotation
+`\beta_y = -w_{,y} + v/r` of the Sanders kinematics.
+
+The centrally directed load has no kernel in panels: its column of the
+table is checked only with the load stiffness ``central_load_stiffness``
+of ``tests/tests_shell/test_follower_pressure_validation.py``, which is
+integrated independently of the kernels.
 
 With Sanders' kinematics and a dead pressure, the rigid rotation `v =
 const`, `w = 0`, strain free, has the energy `\oint N_{yy} (v/r)^2 dy < 0`
