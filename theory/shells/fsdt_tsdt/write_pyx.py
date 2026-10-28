@@ -396,7 +396,7 @@ DESCRIPTION = {
 
 
 def nl_block(sanders, indent, cond):
-    r"""Rotations ``bx = w,x`` and ``by = w,y - v/r`` (Sanders) of the von
+    r"""Rotations ``bx = -w,x`` and ``by = -w,y + v/r`` (Sanders) of the von
     Karman terms at the integration point"""
     s = ' '*indent
     t = ' '*(indent + 4) if cond else s
@@ -418,10 +418,10 @@ def nl_block(sanders, indent, cond):
     L += ['',
           t + '        col = col0 + DOF*(j*m + i)',
           '',
-          t + '        bx += (2/a)*cs[col+2]*fAw_xi*gAw',
-          t + '        by += (2/b)*cs[col+2]*fAw*gAw_eta']
+          t + '        bx -= (2/a)*cs[col+2]*fAw_xi*gAw',
+          t + '        by -= (2/b)*cs[col+2]*fAw*gAw_eta']
     if sanders:
-        L.append(t + '        by -= cs[col+1]*fAv*gAv/r')
+        L.append(t + '        by += cs[col+1]*fAv*gAv/r')
     return '\n'.join(L)
 
 

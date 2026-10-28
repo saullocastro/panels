@@ -263,7 +263,7 @@ def ring_buckling(kinematics, load, n, A=None, D=None, As=None, R=None):
 
     with ``A``, ``D`` and ``As`` the plane-strain membrane, bending and
     transverse shear stiffnesses (``A22``, ``D22`` and ``A44`` of the
-    laminate; ``As = None`` for the CLPT), ``byy = w,y - kv v`` the rotation
+    laminate; ``As = None`` for the CLPT), ``byy = -w,y + kv v`` the rotation
     of the von Karman terms, and the linear strains of the kernels:
 
     - CLPT, Sanders: ``eyy = v,y + w/R``, ``kyy = -w,yy + v,y/R``;
@@ -303,7 +303,7 @@ def ring_buckling(kinematics, load, n, A=None, D=None, As=None, R=None):
         kyy = -diff(w, y, 2) + (diff(v, y)/Rs if sanders else 0)
         gyz = 0
         dofs = (W, V)
-    byy = diff(w, y) - kv*v
+    byy = -diff(w, y) + kv*v
     if load == 'follower':
         load_term = v*(-diff(w, y) + kv*v) + w*(diff(v, y) + w/Rs)
     elif load == 'dead':

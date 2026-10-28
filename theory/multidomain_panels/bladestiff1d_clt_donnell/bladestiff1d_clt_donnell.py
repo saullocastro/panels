@@ -19,7 +19,7 @@
 #     F1 = bf^2/12 E1
 #     S1 = -sum_k y_k h_k (Q16 - Q12 Q26/Q22), y_k of the mid-surface of
 #          each ply from the mid-plane of the flange laminate
-#     Jxx, the torsion entry of ksf, which receives GJ/bf, with the
+#     GJperbf = GJ/bf, the torsion entry of ksf, with the
 #          torsional stiffness GJ = 4 bf D66 of the flange laminate, a thin
 #          strip under Saint-Venant torsion
 #     df = bf/2 + hb + h/2, the distance between the mid-surface of the panel
@@ -47,7 +47,7 @@ import numpy as np
 from sympy import Matrix as M, var, collect, simplify
 
 var('a, b, h, hb, hf, bf, df, rho')
-var('E1, E2, E3, S1, S2, F1, Jxx, Fx')
+var('E1, E2, E3, S1, S2, F1, GJperbf, Fx')
 
 var('fAu, gAu, fAv, gAv, fAw, gAw, fAu_xi, fAv_xi, fAw_xi, gAu_eta, gAv_eta, gAw_eta, fAw_xixi, gAw_etaeta')
 var('fBu, gBu, fBv, gBv, fBw, gBw, fBu_xi, fBv_xi, fBw_xi, gBu_eta, gBv_eta, gBw_eta, fBw_xixi, gBw_etaeta')
@@ -97,7 +97,7 @@ ksf = M([[     E1,      E2,      E2,     -df*E1,      S1],
          [     E2,      E3,      E3,     -df*E2,      S2],
          [     E2,      E3,      E3,     -df*E2,      S2],
          [ -df*E1,  -df*E2,  -df*E2, F1 + df**2*E1, -df*S1],
-         [     S1,      S2,      S2,     -df*S1,     Jxx]])
+         [     S1,      S2,      S2,     -df*S1, GJperbf]])
 
 gAsf = M([(2/a)*suA_xi,
           (2/a)*swA_xi,
@@ -133,7 +133,7 @@ gB5 = M([suB, svB, swB, -(2/a)*swB_xi, -(2/b)*swB_eta])
 
 kMf = (a/2)*hf*bf*rho*gA5.T*msf*gB5
 
-piece_wise_simplify(k0f, (E1, E2, E3, S1, S2, F1, Jxx))
+piece_wise_simplify(k0f, (E1, E2, E3, S1, S2, F1, GJperbf))
 piece_wise_simplify(kG0f, (Fx, ))
 piece_wise_simplify(kMf, (rho, ))
 

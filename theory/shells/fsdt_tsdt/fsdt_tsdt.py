@@ -6,10 +6,11 @@ along the circumference, such that `\frac{1}{r} (\cdot)_{,\theta} =
 (\cdot)_{,y}`. The field variables are `u, v, w, \phi_x, \phi_y`, in this
 order, which are the 5 degrees of freedom of each term of the approximation.
 
-The kinematics of the cylinders follow Sanders (1959, 1963) for the FSDT and
-Reddy and Liu (1985) for the TSDT, specialised to a circular cylinder,
-adopting the shallow shell assumption `R(z) = r + z \approx r`, as in
-``theory/shells/cylshell_clpt_sanders`` for the CLPT.
+The kinematics of the cylinders follow Sanders (1959, 1963), and, for the
+TSDT, the third-order displacement field of Reddy and Liu (1985), Eqs.
+(5)-(9), with Sanders' corrections of the bending strains added, specialised
+to a circular cylinder, adopting the shallow shell assumption `R(z) = r + z
+\approx r`, as in ``theory/shells/cylshell_clpt_sanders`` for the CLPT.
 
 Displacement field, with `c_1 = 4/(3 h^2)` for the third-order shear
 deformation theory (TSDT) of Reddy (1984), and `c_1 = 0` for the first-order
@@ -44,8 +45,9 @@ connections tie the rotations at the reference surface, `\theta_x = \phi_x -
 The strains are, in Voigt notation, `\varepsilon = \varepsilon^{(0)} + z
 \varepsilon^{(1)} + \left[(z - d)^3 + d^3\right] \varepsilon^{(3)}` and
 `\gamma = \gamma^{(0)} + (z - d)^2 \gamma^{(2)}`, with the rotations
-`\beta_x = w_{,x}` and `\beta_y = w_{,y} - \boxed{v/r}` of the von Karman
-non-linear terms:
+`\beta_x = -w_{,x}` and `\beta_y = -w_{,y} + \boxed{v/r}` of the von Karman
+non-linear terms, which for the CLPT are the rotations `\phi_x` and `\phi_y`
+of ``theory/shells/cylshell_clpt_sanders``:
 
 .. math::
 
@@ -239,10 +241,10 @@ def shape_functions(side, theory, geometry='plate', kinematics='donnell'):
     phix_x, phix_y = (2/a)*sf('phix', 1), (2/b)*sf('phix', 0, 1)
     phiy_x, phiy_y = (2/a)*sf('phiy', 1), (2/b)*sf('phiy', 0, 1)
 
-    # variations of the rotations of the von Karman terms, beta_x = w,x and
-    # beta_y = w,y - v/r (Sanders)
-    dbx = wA_x
-    dby = wA_y - sk*rinv*v
+    # variations of the rotations of the von Karman terms, beta_x = -w,x and
+    # beta_y = -w,y + v/r (Sanders)
+    dbx = -wA_x
+    dby = -wA_y + sk*rinv*v
 
     eps0 = M([u_x + bx*dbx,
               v_y + rinv*w + by*dby,
