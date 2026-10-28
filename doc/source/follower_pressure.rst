@@ -452,7 +452,7 @@ second variation of the total potential is
           N_{yy} \beta_y^2 \right) dy - \frac{1}{2} \oint p \, \boldsymbol{u}
           \cdot \boldsymbol{a}_1(\boldsymbol{u}) \, dy
 
-with `\beta_y = w_{,y} - k_v v`. In the inextensional limit its singularity
+with `\beta_y = -w_{,y} + k_v v`. In the inextensional limit its singularity
 gives `p_{cr} r^3/D`, derived with SymPy:
 
 ======================= =============== =============== ==================

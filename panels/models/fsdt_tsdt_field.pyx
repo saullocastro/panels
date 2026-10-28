@@ -45,7 +45,7 @@ The generalized strains of :func:`.fstrain`, in the order of
 ``exx, eyy, gxy``, ``kxx, kyy, kxy`` and ``kxx3, kyy3, kxy3``, and `\gamma
 = \gamma^{(0)} + (z - d)^2 \gamma^{(2)}` for ``gyz, gxz`` and ``gyz2,
 gxz2``, with the rotations
-`\beta_x = w_{,x}` and `\beta_y = w_{,y} - s v/r` of the von Kármán
+`\beta_x = -w_{,x}` and `\beta_y = -w_{,y} + s v/r` of the von Kármán
 non-linear terms:
 
 .. math::
@@ -462,9 +462,10 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys,
             derivatives(&c[0], m, n, a, b, f, f_xi, f_xixi, g, g_eta, g_etaeta,
                         val, val_x, val_y, val_xx, val_yy, val_xy)
             # u, v, w, phix, phiy = 0, 1, 2, 3, 4
-            # rotations of the von Karman terms, beta_y = w,y - v/r (Sanders)
-            bx = val_x[2]
-            by = val_y[2] - sr*val[1]
+            # rotations of the von Karman terms, beta_x = -w,x and
+            # beta_y = -w,y + v/r (Sanders)
+            bx = -val_x[2]
+            by = -val_y[2] + sr*val[1]
             out[0, pti] = val_x[0] + NLgeom*0.5*bx*bx
             out[1, pti] = val_y[1] + ri*val[2] + NLgeom*0.5*by*by
             out[2, pti] = val_y[0] + val_x[1] + NLgeom*bx*by

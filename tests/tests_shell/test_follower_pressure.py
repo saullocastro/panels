@@ -413,7 +413,7 @@ def ring_shell(model, v_free=False):
                                    'cylshell_tsdt_sanders'])
 def test_rigid_rotation_of_ring_is_neutral_only_for_follower(model):
     r"""With Sanders' kinematics the hoop prestress `N_{yy} \beta_y^2`, with
-    `\beta_y = w_{,y} - v/r`, gives the rigid rotation `v = const` a negative
+    `\beta_y = -w_{,y} + v/r`, gives the rigid rotation `v = const` a negative
     energy under a dead external pressure, a spurious buckling mode at a
     vanishing load. The follower load stiffness cancels it exactly."""
     s = ring_shell(model, v_free=True)

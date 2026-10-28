@@ -9,9 +9,9 @@ generalized strains at a point are, see the theory of each model,
     \qquad \boldsymbol{\beta} = \boldsymbol{G} \boldsymbol{c}
 
 where `\boldsymbol{B}_{NL}` is linear in the rotations `\boldsymbol{\beta}` of the von Kármán
-terms, `\boldsymbol{\beta} = \{w_{,x}, w_{,y}\}` (Donnell, `\{\beta_x, \beta_y\}` with
-`\beta_y = w_{,y} - v/r` for Sanders, `\{\phi_x, \phi_y\}` with the sign
-convention of ``cylshell_clpt_sanders``), and enters only the membrane rows:
+terms, `\boldsymbol{\beta} = \{\beta_x, \beta_y\} = \{-w_{,x}, -w_{,y}\}` (Donnell, with
+`\beta_y = -w_{,y} + v/r` for Sanders, i.e. the rotations `\{\phi_x, \phi_y\}` of
+``cylshell_clpt_sanders`` for the CLPT), and enters only the membrane rows:
 
 .. math::
 
@@ -102,7 +102,7 @@ MODELS = {
 def _clpt_donnell(geometry):
     r"""`\boldsymbol{B}_L + \boldsymbol{B}_{NL}` and `\boldsymbol{G}` of the CLPT with Donnell kinematics, as in
     ``plate_clpt_donnell.py`` and ``cylshell_clpt_donnell.py`` with
-    `\beta_x = (2/a) w_{,\xi}`, `\beta_y = (2/b) w_{,\eta}`"""
+    `\beta_x = -(2/a) w_{,\xi}`, `\beta_y = -(2/b) w_{,\eta}`"""
     var = {}
 
     def s(name):
@@ -123,8 +123,8 @@ def _clpt_donnell(geometry):
     sw_xixi = row('w', 'fAw_xixi', 'gAw')
     sw_xieta = row('w', 'fAw_xi', 'gAw_eta')
     sw_etaeta = row('w', 'fAw', 'gAw_etaeta')
-    Gx = (2/a)*sw_xi
-    Gy = (2/b)*sw_eta
+    Gx = -(2/a)*sw_xi
+    Gy = -(2/b)*sw_eta
     B = M([(2/a)*su_xi + bx*Gx,
            (2/b)*sv_eta + rinv*sw + by*Gy,
            (2/b)*su_eta + (2/a)*sv_xi + bx*Gy + by*Gx,

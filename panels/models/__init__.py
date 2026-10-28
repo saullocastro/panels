@@ -154,7 +154,7 @@ hoop strain `w/r` and the curvature term of the piston theory, see
 :meth:`.Shell.calc_kA`. With the Sanders-Koiter kinematics, the rotation of
 the normal about `x` is `\phi_y + v/r`, which enters the displacement field,
 the changes of curvature and the mass matrix, the twist includes the
-rotation about the normal, and the non-linear terms use `\beta_y = w_{,y} -
+rotation about the normal, and the non-linear terms use `\beta_y = -w_{,y} +
 v/r`, such that all strains vanish for any small rigid-body motion. No
 Sanders-Koiter term appears in the third-order terms of the TSDT, and the
 transverse shear strains are those of the Donnell kinematics.

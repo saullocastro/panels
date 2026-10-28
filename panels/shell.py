@@ -1489,7 +1489,7 @@ class Shell(object):
         -----
         With the strain operator `\boldsymbol{B} = \boldsymbol{B}_L + \boldsymbol{B}_{NL}`, whose non-linear
         part `\boldsymbol{B}_{NL}` is linear in the rotations `\beta_x`, `\beta_y` of
-        the von Kármán terms, `w_{,x}` and `w_{,y}` (`w_{,y} - v/r` for the
+        the von Kármán terms, `-w_{,x}` and `-w_{,y}` (`-w_{,y} + v/r` for the
         Sanders-Koiter kinematics, see :mod:`panels.models`), and the
         constitutive matrix `\boldsymbol{C}` of ``ABDnxny``, the linear and the
         non-linear constitutive stiffness matrices are
@@ -1699,7 +1699,7 @@ class Shell(object):
         Notes
         -----
         With the rows `\boldsymbol{G}` of the approximation functions of the rotations
-        `\beta_x = w_{,x}` and `\beta_y = w_{,y}` (`w_{,y} - v/r` for the
+        `\beta_x = -w_{,x}` and `\beta_y = -w_{,y}` (`-w_{,y} + v/r` for the
         Sanders-Koiter kinematics) of the von Kármán terms, see
         :mod:`panels.models`, the geometric stiffness of the membrane
         stresses `\boldsymbol{N}` is

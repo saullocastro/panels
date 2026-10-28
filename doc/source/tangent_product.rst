@@ -1185,8 +1185,8 @@ the generalized strains
     \boldsymbol{\varepsilon}(\boldsymbol{c}) = \left( \boldsymbol{B}_L + \tfrac{1}{2} \boldsymbol{B}_{NL} \right) \boldsymbol{c},
     \qquad \boldsymbol{\beta} = \boldsymbol{G} \boldsymbol{c}
 
-where `\boldsymbol{\beta}` are the two rotations of the von Kármán terms, `w_{,x}`
-and `w_{,y}` for the Donnell kinematics, `w_{,y} - v/r` replacing `w_{,y}`
+where `\boldsymbol{\beta}` are the two rotations of the von Kármán terms, `-w_{,x}`
+and `-w_{,y}` for the Donnell kinematics, `-w_{,y} + v/r` replacing `-w_{,y}`
 for Sanders, `\boldsymbol{B}_L` is the linear strain operator and `\boldsymbol{B}_{NL}`, linear in
 `\boldsymbol{\beta}`, enters only the membrane rows:
 

@@ -1402,10 +1402,10 @@ def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
                         fAw = ftab[4, i]
                         fAw_xi = ftab[5, i]
                         col = col0 + DOF*(j*m + i)
-                        bx += 2*fAw_xi*gAw/a*cs[col+2]
-                        by += 2*fAw*gAw_eta/b*cs[col+2]
-                        dbx += 2*fAw_xi*gAw/a*vs[col+2]
-                        dby += 2*fAw*gAw_eta/b*vs[col+2]
+                        bx += -2*fAw_xi*gAw/a*cs[col+2]
+                        by += -2*fAw*gAw_eta/b*cs[col+2]
+                        dbx += -2*fAw_xi*gAw/a*vs[col+2]
+                        dby += -2*fAw*gAw_eta/b*vs[col+2]
 
                 # strains of cs, eps = ([B_L] + [B_NL]/2) cs, and strain
                 # increment, deps = ([B_L] + [B_NL]) vs
@@ -1429,15 +1429,15 @@ def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
                         fAw_xi = ftab[5, i]
                         fAw_xixi = ftab[6, i]
                         col = col0 + DOF*(j*m + i)
-                        e[0] += 2*fAu_xi*gAu/a*cs[col+0] + bx*fAw_xi*gAw/a*cs[col+2]
-                        e[1] += 2*fAv*gAv_eta/b*cs[col+1] + (fAw*gAw/r + by*fAw*gAw_eta/b)*cs[col+2]
-                        e[2] += 2*fAu*gAu_eta/b*cs[col+0] + 2*fAv_xi*gAv/a*cs[col+1] + (bx*fAw*gAw_eta/b + by*fAw_xi*gAw/a)*cs[col+2]
+                        e[0] += 2*fAu_xi*gAu/a*cs[col+0] - bx*fAw_xi*gAw/a*cs[col+2]
+                        e[1] += 2*fAv*gAv_eta/b*cs[col+1] + (fAw*gAw/r - by*fAw*gAw_eta/b)*cs[col+2]
+                        e[2] += 2*fAu*gAu_eta/b*cs[col+0] + 2*fAv_xi*gAv/a*cs[col+1] + (-bx*fAw*gAw_eta/b - by*fAw_xi*gAw/a)*cs[col+2]
                         e[3] += -4*fAw_xixi*gAw/(a*a)*cs[col+2]
                         e[4] += -4*fAw*gAw_etaeta/(b*b)*cs[col+2]
                         e[5] += -8*fAw_xi*gAw_eta/(a*b)*cs[col+2]
-                        de[0] += 2*fAu_xi*gAu/a*vs[col+0] + 2*bx*fAw_xi*gAw/a*vs[col+2]
-                        de[1] += 2*fAv*gAv_eta/b*vs[col+1] + (fAw*gAw/r + 2*by*fAw*gAw_eta/b)*vs[col+2]
-                        de[2] += 2*fAu*gAu_eta/b*vs[col+0] + 2*fAv_xi*gAv/a*vs[col+1] + (2*bx*fAw*gAw_eta/b + 2*by*fAw_xi*gAw/a)*vs[col+2]
+                        de[0] += 2*fAu_xi*gAu/a*vs[col+0] - 2*bx*fAw_xi*gAw/a*vs[col+2]
+                        de[1] += 2*fAv*gAv_eta/b*vs[col+1] + (fAw*gAw/r - 2*by*fAw*gAw_eta/b)*vs[col+2]
+                        de[2] += 2*fAu*gAu_eta/b*vs[col+0] + 2*fAv_xi*gAv/a*vs[col+1] + (-2*bx*fAw*gAw_eta/b - 2*by*fAw_xi*gAw/a)*vs[col+2]
                         de[3] += -4*fAw_xixi*gAw/(a*a)*vs[col+2]
                         de[4] += -4*fAw*gAw_etaeta/(b*b)*vs[col+2]
                         de[5] += -8*fAw_xi*gAw_eta/(a*b)*vs[col+2]
@@ -1473,7 +1473,7 @@ def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
                         col = col0 + DOF*(j*m + i)
                         kTv[col+0] += weight*(2*ds[2]*fAu*gAu_eta/b + 2*ds[0]*fAu_xi*gAu/a)
                         kTv[col+1] += weight*(2*ds[1]*fAv*gAv_eta/b + 2*ds[2]*fAv_xi*gAv/a)
-                        kTv[col+2] += weight*(2*Nxx*dbx*fAw_xi*gAw/a + Nxy*(2*dbx*fAw*gAw_eta/b + 2*dby*fAw_xi*gAw/a) + 2*Nyy*dby*fAw*gAw_eta/b + ds[1]*(fAw*gAw/r + 2*by*fAw*gAw_eta/b) + ds[2]*(2*bx*fAw*gAw_eta/b + 2*by*fAw_xi*gAw/a) - 4*ds[4]*fAw*gAw_etaeta/(b*b) + 2*bx*ds[0]*fAw_xi*gAw/a - 8*ds[5]*fAw_xi*gAw_eta/(a*b) - 4*ds[3]*fAw_xixi*gAw/(a*a))
+                        kTv[col+2] += weight*(-2*Nxx*dbx*fAw_xi*gAw/a + Nxy*(-2*dbx*fAw*gAw_eta/b - 2*dby*fAw_xi*gAw/a) - 2*Nyy*dby*fAw*gAw_eta/b + ds[1]*(fAw*gAw/r - 2*by*fAw*gAw_eta/b) + ds[2]*(-2*bx*fAw*gAw_eta/b - 2*by*fAw_xi*gAw/a) - 4*ds[4]*fAw*gAw_etaeta/(b*b) - 2*bx*ds[0]*fAw_xi*gAw/a - 8*ds[5]*fAw_xi*gAw_eta/(a*b) - 4*ds[3]*fAw_xixi*gAw/(a*a))
 
     return np.asarray(kTv)
 
