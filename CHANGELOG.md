@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.14.0 (2026-10-26)
+## 0.14.1 (unreleased)
 
 ### Python versions
 
@@ -378,6 +378,29 @@
   `theta^2 = 2.4e-3`, `theta` being the half-angle of the arc, the order of
   the terms in which the model differs from the shallow-arch theory; results
   stored in `notebooks/results/fk1952_shallow_arches.json`.
+- The rotations of the von Karman terms of the FSDT and TSDT models,
+  `beta_x = -w,x` and `beta_y = -w,y + v/r` (Sanders), and of the tangent
+  product of the CLPT models with Donnell kinematics, `beta_x = -w,x`,
+  `beta_y = -w,y`, take the sign of the rotations of the normal, as
+  `phi_x`, `phi_y` of `cylshell_clpt_sanders` (were `w,x` and `w,y -
+  v/r`), in the generators in `theory/shells/fsdt_tsdt`, `tangent_product`
+  and `follower_pressure`, in the kernels `<model>_num.pyx` written by them,
+  in `fsdt_tsdt_field.pyx`, and in the docstrings of `panels.models`,
+  `Shell.calc_kC`, `Shell.calc_kG`, `doc/source/tangent_product.rst` and
+  `follower_pressure.rst`. They enter only squared or multiplied by the
+  operator `G` of the same sign, and the matrices, internal forces and
+  strains are unchanged, bit for bit.
+- `doc/source/follower_pressure.rst`, ring under uniform pressure: the
+  ring values with the reference of Pflueger (1975), p. 403, and Eq. (97b),
+  p. 150, for the long cylinder; why the Donnell row differs from the
+  classical `3D/r^3`, which Kardomateas (1993), Eq. (29a), p. 199, obtains
+  from Donnell's equations with the rotation `-w,y + v/r` of Sanders; the
+  centrally directed load checked only with `central_load_stiffness` of
+  the tests; DOI of Kardomateas (1993) in `ref.rst`.
+- `theory/shells/fsdt_tsdt/fsdt_tsdt.py`: the TSDT takes the third-order
+  displacement field of Reddy and Liu (1985), Eqs. (5)-(9), with Sanders'
+  corrections of the bending strains added, since Eq. (11) of Reddy and
+  Liu has no Sanders-Koiter terms.
 
 ### Clean-up
 
@@ -396,6 +419,11 @@
   the names of the integrals of products (e.g. `fAufBuxi`) and
   the quadrature weights (`wx`, `wxi`, ...) are unchanged, and so are the
   results, bit for bit.
+- The argument of the kernel `fkCf` of
+  `panels.stiffener.models.bladestiff1d_clt_donnell` that receives `GJ/bf`
+  is `GJperbf` (was `Jxx`, the name of the polar moment of area of
+  `BladeStiff1D`), also in the generator in
+  `theory/multidomain_panels/bladestiff1d_clt_donnell`.
 
 ### Dependencies
 
