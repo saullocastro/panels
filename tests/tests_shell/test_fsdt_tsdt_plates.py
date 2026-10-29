@@ -455,6 +455,72 @@ def test_shear_correction_options():
     assert np.allclose(s.ABD[11:13, 11:13], s.lam.Fts)
 
 
+def _rounds_to(value, printed):
+    r"""Whether ``value`` rounds to the string ``printed``, i.e. agrees with
+    it within half a unit of its last printed digit"""
+    decimals = len(printed.split('.')[1])
+    return abs(value - float(printed)) <= 0.5*10.**(-decimals)*(1 + 1e-12)
+
+
+def test_shear_correction_published_values():
+    r"""Transverse shear stiffness of the FSDT, rows and columns 6 and 7 of
+    ``Shell.ABD``, the `yz` and `xz` components, against published values
+
+    - Rohwer, K., "Improved transverse shear stiffnesses for layered finite
+      elements", DFVLR-FB 88-32, 1988: the ``[0,90]_s`` laminate of four
+      plies of 0.25 mm, p. 18, of the CFRP of Table 1, p. 19, in kN/mm^2.
+      Table 2, p. 19, gives `\bar{H}_{11} = \bar{H}_{22} = 3.450` and the
+      improved `H_{11} = 2.313` kN/mm, with Rohwer's index 1 for `x`, i.e.
+      ``A55``, and p. 18 the reductions 0.75 and 0.82 of `H` with respect to
+      the constant-stress stiffness `\bar{\bar{H}}` in the `x` and `y`
+      directions, and "Coupling terms are zero". His `H_{22} = 2.521` is
+      not used: ``composites`` gives 2.5252, as an independent
+      implementation of his Eq. (43) does, and 2.5252/3.067 still rounds to
+      0.82, see ``tests/test_transverse_shear.py`` of ``composites``.
+    - Vlachoutsis, S., "Shear correction factors for plates and shells",
+      Int. J. Numer. Meth. Engng, 33(7), 1537-1552, 1992,
+      https://doi.org/10.1002/nme.1620330712: the isotropic sandwich with
+      ``c/h = 0.8``, ``E1/E2 = 5`` and ``nu = 0.3``, Table I, p. 1548, ``K =
+      0.5324``, for ``'rohwer'`` and ``'vlachoutsis'``, whereas ``'constant'``
+      and the float ``5/6`` overestimate it by 56.5 %.
+
+    All values must round to the printed digits. The order of the rows
+    ``(yz, xz)`` is checked by the different values of the two directions
+    of the cross-ply laminate.
+    """
+    cfrp = (138., 9.3, 0.3, 4.6, 4.6, 2.3)
+    s = make_plate(FSDT, a=100., h=1., stack=[0, 90, 90, 0], laminaprop=cfrp,
+                   m=4, n=4)
+    s.fsdt_shear_correction = 'rohwer'
+    s._rebuild()
+    lam = s.lam
+    assert _rounds_to(lam.Abar44, '3.450') and _rounds_to(lam.Abar55, '3.450')
+    assert _rounds_to(s.ABD[7, 7], '2.313')
+    assert _rounds_to(s.ABD[7, 7]/lam.Abarbar55, '0.75')
+    assert _rounds_to(s.ABD[6, 6]/lam.Abarbar44, '0.82')
+    assert abs(s.ABD[6, 7]) < 1e-14*s.ABD[7, 7]
+    assert abs(s.ABD[7, 6]) < 1e-14*s.ABD[7, 7]
+
+    E2_core = 1.
+    nu = 0.3
+    for k in ['rohwer', 'vlachoutsis', 'constant', 5/6]:
+        s = Shell()
+        s.model = FSDT
+        s.a = s.b = 100.
+        s.stack = [0, 0, 0]
+        s.plyts = [0.1, 0.8, 0.1]
+        s.laminaprops = [(5*E2_core, nu), (E2_core, nu), (5*E2_core, nu)]
+        s.rho = RHO
+        s.m = s.n = 4
+        s.fsdt_shear_correction = k
+        s._rebuild()
+        Abar = s.lam.Abar_ts
+        K = '0.5324' if isinstance(k, str) and k != 'constant' else '0.8333'
+        assert _rounds_to(s.ABD[6, 6]/Abar[0, 0], K)
+        assert _rounds_to(s.ABD[7, 7]/Abar[1, 1], K)
+        assert abs(s.ABD[6, 7]) < 1e-14*s.ABD[7, 7]
+
+
 @pytest.mark.parametrize('model', [FSDT, TSDT])
 def test_stiffpanelbay_rejects_5_dof_models(model):
     r"""The stiffener kernels assume the 3 DOFs of the classical laminated
