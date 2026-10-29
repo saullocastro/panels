@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased
+
+### Tests: transverse shear correction of the FSDT against published values
+
+- New `test_shear_correction_published_values` in
+  `tests/tests_shell/test_fsdt_tsdt_plates.py`: the transverse shear rows of
+  `Shell.ABD` of the FSDT, `(yz, xz)`, for the `[0,90]s` CFRP laminate of
+  Rohwer (1988), Table 2, p. 19, `A55 = 2.313` kN/mm and the reductions
+  0.75 and 0.82 of p. 18, and for the isotropic sandwich of Vlachoutsis
+  (1992), Table I, p. 1548, `K = 0.5324` with `'rohwer'` and
+  `'vlachoutsis'`, against `5/6` with `'constant'` and a float `5/6`, all to
+  half a unit of the last printed digit. Before, only the homogeneous plate,
+  `k = 5/6`, and the passing of `Shell.fsdt_shear_correction` to
+  `composites` were tested; the order of the two rows is now checked by the
+  different stiffnesses of the two directions of the cross-ply laminate.
+
 ## 0.14.1 (2026-10-28)
 
 ### Python versions
