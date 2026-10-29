@@ -25,6 +25,28 @@
   `composites` were tested; the order of the two rows is now checked by the
   different stiffnesses of the two directions of the cross-ply laminate.
 
+### CI
+
+- The coverage workflow, `.github/workflows/coverage.yml`, is one job that
+  runs the tests twice in the processes of `pytest-xdist`: every test with
+  the optimized build, which measures the Python code, then, with the
+  line-traced build, every test except those marked `slow`, which measures
+  the Cython code; `pytest-cov` combines both runs into one report, uploaded
+  once (`codecov.yml`). Before, the whole suite ran with the line-traced
+  build in three parallel jobs of 1.5 h to 3.1 h (5.7 h of runner time, of
+  which 2.3 h for `test_dcb_damage.py` alone), against about 10 min without
+  the tracing. The line-traced run now takes about 19 min locally (4
+  processes, Windows), against 3.1 h with all the tests, and covers the
+  same lines: the combined report has the same statements and misses, file
+  by file, as the line-traced run of every test (24023 statements, 1223
+  missed).
+- New pytest marker `slow`, registered in `pyproject.toml`: 109 tests that
+  take 40 s or more each with the line-traced build and cover no line of
+  the `.pyx` files that the other tests do not cover, measured per test with
+  `pytest --cov-context=test`. They are deselected with `-m "not slow"` in
+  the line-traced run of the coverage workflow only; every test still runs
+  by default and in the pytest workflow. The README describes the marker.
+
 ## 0.14.1 (2026-10-28)
 
 ### Python versions

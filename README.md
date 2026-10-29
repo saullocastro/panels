@@ -140,6 +140,7 @@ History
 See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
 * version 0.14.2 (2026-10-29)
     - Tests of the transverse shear correction of the FSDT against Rohwer (1988), Table 2, and Vlachoutsis (1992), Table I
+    - Coverage workflow in one job of two runs, the optimized build for the Python code and the line-traced build without the tests marked `slow` for the Cython code, with the same coverage as before
     - Requires `composites>=0.10.2`, whose `MatLamina` invariants are those of plane stress also for materials given with nine constants, and whose lamination-parameter route accounts for the offset of the laminate
 * version 0.14.1 (2026-10-28)
     - BUG: the mass matrices used `shell.rho` in the closed-form kernels and the opposite sign of the laminate offset; they now use the moments of the density of the laminate, exact for per-ply densities
