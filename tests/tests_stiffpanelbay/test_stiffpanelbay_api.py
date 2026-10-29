@@ -131,6 +131,7 @@ def test_rebuild_requires_dimensions():
         bay.calc_kC(silent=True)
 
 
+@pytest.mark.slow
 def test_bladestiff2d_increases_buckling_load():
     unstiffened, _ = _lb(_bay())
     flange, _ = _lb(_bay('2d'))
@@ -140,12 +141,14 @@ def test_bladestiff2d_increases_buckling_load():
     assert flange_base[0] > flange[0]
 
 
+@pytest.mark.slow
 def test_bladestiff1d_base_increases_buckling_load():
     flange, _ = _lb(_bay('1d'))
     flange_base, _ = _lb(_bay('1d_base'))
     assert flange_base[0] > flange[0]
 
 
+@pytest.mark.slow
 def test_bladestiff2d_close_to_bladestiff1d():
     """Both blade formulations model the same stiffener
 
@@ -165,6 +168,7 @@ def _padup_bay():
     return bay
 
 
+@pytest.mark.slow
 def test_bladestiff2d_without_flange():
     """A base-only BladeStiff2D is a pad-up on the skin"""
     bay = _padup_bay()
@@ -211,6 +215,7 @@ def test_calc_kM_bladestiff2d_flange_has_mass():
     assert abs(kM[3*8*8:, 3*8*8:]).max() > 0
 
 
+@pytest.mark.slow
 def test_calc_kM_bladestiff2d_base_adds_mass():
     """The base of a BladeStiff2D adds the mass of a strip of skin
 
@@ -339,6 +344,7 @@ def test_plot_skin_and_stiffener(tmp_path):
     plt.close('all')
 
 
+@pytest.mark.slow
 def test_save_and_load(tmp_path):
     bay = _bay('2d')
     eigvals, _ = _lb(bay)
@@ -510,6 +516,7 @@ def test_calc_cA_matches_single_shell():
     assert abs(cA).max() > 0
 
 
+@pytest.mark.slow
 def test_bladestiff1d_without_flange_is_bladestiff2d_padup():
     """A base-only BladeStiff1D needs no flange width ``bf``
 

@@ -1,6 +1,7 @@
 import sys
 sys.path.append('../..')
 
+import pytest
 import numpy as np
 
 from structsolve import lb
@@ -8,6 +9,7 @@ from panels.shell import Shell
 from panels.plot_shell import plot_shell
 
 
+@pytest.mark.slow
 def test_shell_lb():
     for model in ['plate_clpt_donnell',
                   'cylshell_clpt_donnell',

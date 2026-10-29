@@ -71,3 +71,8 @@ panels = [
     "core/src/*.cpp",
     "models/*.pyx", "models/*.pxd",
 ]
+
+[tool.pytest.ini_options]
+markers = [
+    "slow: 40 s or more per test with the line-traced build of the Cython code (measured on Windows, MSVC /O2 without OpenMP, 6 pytest-xdist processes, 2026-10-29), and covering no line of the .pyx files that the other tests do not cover (pytest --cov-context=test); deselected with -m \"not slow\" in the line-traced run of .github/workflows/coverage.yml only, run everywhere else",
+]

@@ -462,7 +462,8 @@ def sb_monolithic():
     return eigvals
 
 
-@pytest.mark.parametrize('func', ['SB', 'SB_TSL'])
+@pytest.mark.parametrize('func', [
+    'SB', pytest.param('SB_TSL', marks=pytest.mark.slow)])
 @pytest.mark.parametrize('order', ['top first', 'bottom first'])
 def test_bonded_sublaminates_recover_the_laminate(func, order):
     """The bending-extension coupling of ``[0/90/90/0/0]`` must be rebuilt

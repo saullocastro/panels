@@ -1,6 +1,7 @@
 import sys
 sys.path.append('../..')
 
+import pytest
 import numpy as np
 
 from structsolve import solve, lb
@@ -64,6 +65,7 @@ def test_panel_fkG_num():
         assert np.isclose(eigvals[0], 4.39212, atol=0.01, rtol=0)
 
 
+@pytest.mark.slow
 def test_panel_fkG_num_ABDnxny():
     for model in ['plate_clpt_donnell',
                   'cylshell_clpt_donnell',

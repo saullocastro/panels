@@ -16,12 +16,14 @@ Units: N, mm, MPa.
 import sys
 sys.path.append('../..')
 
+import pytest
 import numpy as np
 from structsolve import Analysis
 
 from panels.shell import Shell
 
 
+@pytest.mark.slow
 def test_riks_hinged_cylindrical_shell():
     s = Shell()
     s.model = 'cylshell_clpt_donnell'

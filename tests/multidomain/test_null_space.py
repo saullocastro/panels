@@ -194,6 +194,7 @@ def test_skin_base_equals_single_laminate(model):
     assert np.allclose(omegas, ref, rtol=1e-10)
 
 
+@pytest.mark.slow
 def test_skin_base_nonlinear_equals_single_laminate():
     r"""Large deflection of the laminates `[0/90]` over `[0/90]`, with the
     von Karman kinematics, with :meth:`.MultiDomain.get_reduced_functions`
@@ -280,6 +281,7 @@ def test_cylinder_redundant_constraints():
     assert np.isclose(Nxxs[0]*eigvals[0], -47113.039, rtol=1e-5)
 
 
+@pytest.mark.slow
 def test_cylinder_blade_stiffened_from_static():
     r"""The default penalty constants give -39993.838, 4% below the
     null-space method, see ``test_cylinder_blade_stiffened.py``, and 1000
