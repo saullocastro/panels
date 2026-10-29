@@ -1,6 +1,15 @@
 # Changelog
 
-## Unreleased
+## 0.14.2 (2026-10-29)
+
+### Packaging
+
+- Requires `composites>=0.10.2`. In `composites` 0.10.2 the invariants of
+  `MatLamina` are those of the plane-stress reduced stiffnesses also for a
+  material given with nine constants (`e3`, `nu13`, `nu23`), and the
+  laminate created from lamination parameters accounts for the offset of
+  the laminate; results of `panels` with laminates from `laminated_plate`
+  and a 2- or 6-entry `laminaprop` are unchanged.
 
 ### Tests: transverse shear correction of the FSDT against published values
 

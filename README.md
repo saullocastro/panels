@@ -29,7 +29,7 @@ The structural matrices are solved with
 Citing this library
 ===================
 
-Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.14.1). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
+Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.14.2). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
 
 
 Documentation
@@ -117,6 +117,9 @@ History
 =======
 
 See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
+* version 0.14.2 (2026-10-29)
+    - Tests of the transverse shear correction of the FSDT against Rohwer (1988), Table 2, and Vlachoutsis (1992), Table I
+    - Requires `composites>=0.10.2`, whose `MatLamina` invariants are those of plane stress also for materials given with nine constants, and whose lamination-parameter route accounts for the offset of the laminate
 * version 0.14.1 (2026-10-28)
     - BUG: the mass matrices used `shell.rho` in the closed-form kernels and the opposite sign of the laminate offset; they now use the moments of the density of the laminate, exact for per-ply densities
     - BUG: TSDT with a laminate offset, the transverse shear vanishes at the faces of the laminate, and the connections tie the rotations at the common reference surface

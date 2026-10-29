@@ -11,7 +11,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "panels"
-version = "0.14.1"
+version = "0.14.2"
 description = "Semi-analytical models for plates, shells and stiffened panels"
 readme = "README.md"
 license = "BSD-3-Clause"
@@ -52,7 +52,7 @@ dependencies = [
     "numpy",
     "scipy",
     "matplotlib",
-    "composites>=0.10.0",
+    "composites>=0.10.2",
     "structsolve>=0.9.3",
 ]
 

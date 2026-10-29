@@ -3,5 +3,5 @@ tomli; python_version < "3.11"
 numpy
 scipy
 matplotlib
-composites>=0.10.0
+composites>=0.10.2
 structsolve>=0.9.3
