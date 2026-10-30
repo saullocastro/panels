@@ -462,7 +462,7 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys,
             derivatives(&c[0], m, n, a, b, f, f_xi, f_xixi, g, g_eta, g_etaeta,
                         val, val_x, val_y, val_xx, val_yy, val_xy)
             # u, v, w, phix, phiy = 0, 1, 2, 3, 4
-            # rotations of the von Karman terms, beta_x = -w,x and
+            # rotations of the von Kármán terms, beta_x = -w,x and
             # beta_y = -w,y + v/r (Sanders)
             bx = -val_x[2]
             by = -val_y[2] + sr*val[1]

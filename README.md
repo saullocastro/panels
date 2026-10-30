@@ -146,7 +146,7 @@ See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
     - BUG: the mass matrices used `shell.rho` in the closed-form kernels and the opposite sign of the laminate offset; they now use the moments of the density of the laminate, exact for per-ply densities
     - BUG: TSDT with a laminate offset, the transverse shear vanishes at the faces of the laminate, and the connections tie the rotations at the common reference surface
     - BUG: `BladeStiff1D` torsion with `GJ = 4 bf D66` and coupling `S1` with the condensed stiffness about the mid-plane of the flange; `StiffPanelBay.calc_kA` no longer skew-symmetrizes; one load per panel in the cylinder assembly functions; `MultiDomain.force_out_plane` and `MultiDomain.plot` fixed
-    - Documentation of the theory in the docstrings, new page on the TSDT with an offset, validation notebook of the snap-through of a shallow circular arch (Fung and Kaplan, 1952); the rotations of the von Karman terms take the sign of the rotations of the normal, `beta_x = -w,x`, results unchanged
+    - Documentation of the theory in the docstrings, new page on the TSDT with an offset, validation notebook of the snap-through of a shallow circular arch (Fung and Kaplan, 1952); the rotations of the von Kármán terms take the sign of the rotations of the normal, `beta_x = -w,x`, results unchanged
     - Requires `composites>=0.10.0` and `structsolve>=0.9.3`, whose residual is `R = F_int - F_ext`, as in the documentation of `panels`, and whose arc-length steps no longer double back along the path (since 0.9.2)
 * version 0.13.11 (2026-10-16)
     - BUG: the analytical constitutive stiffness matrix of the CLPT models ignored `force_orthotropic_laminate`, inconsistently with the internal forces and the numerical matrices

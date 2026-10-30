@@ -47,6 +47,11 @@
   the line-traced run of the coverage workflow only; every test still runs
   by default and in the pytest workflow. The README describes the marker.
 
+### Documentation
+
+- The name is spelled von Kármán throughout the docstrings, comments,
+  documentation pages and derivation scripts; identifiers are unchanged.
+
 ## 0.14.1 (2026-10-28)
 
 ### Python versions
@@ -425,7 +430,7 @@
   `theta^2 = 2.4e-3`, `theta` being the half-angle of the arc, the order of
   the terms in which the model differs from the shallow-arch theory; results
   stored in `notebooks/results/fk1952_shallow_arches.json`.
-- The rotations of the von Karman terms of the FSDT and TSDT models,
+- The rotations of the von Kármán terms of the FSDT and TSDT models,
   `beta_x = -w,x` and `beta_y = -w,y + v/r` (Sanders), and of the tangent
   product of the CLPT models with Donnell kinematics, `beta_x = -w,x`,
   `beta_y = -w,y`, take the sign of the rotations of the normal, as
@@ -1241,7 +1246,7 @@ regression values of the multi-domain cylinders of
   `phiy = -w,y + v/r`, enters the non-linear strains, the geometric stiffness
   matrix, the mass matrix, the field outputs and the point constraints.
 - `'plate_fsdt_donnell'`: plates with the first-order shear deformation
-  theory (FSDT) and von Karman kinematics, with 5 DOFs `u, v, w, phix, phiy`
+  theory (FSDT) and von Kármán kinematics, with 5 DOFs `u, v, w, phix, phiy`
   per term. The shear correction is controlled by
   `Shell.fsdt_shear_correction`: `'rohwer'`, the default, `'vlachoutsis'`,
   `'constant'` or `None` select the method of
@@ -1251,7 +1256,7 @@ regression values of the multi-domain cylinders of
   accounts for the stacking sequence otherwise. The tests compared with
   references that use `k = 5/6` set it explicitly.
 - `'plate_tsdt_donnell'`: plates with the third-order shear deformation
-  theory of Reddy (1984) and von Karman kinematics, with 5 DOFs per term.
+  theory of Reddy (1984) and von Kármán kinematics, with 5 DOFs per term.
 - `'cylshell_fsdt_donnell'`, `'cylshell_tsdt_donnell'`: cylindrical shells
   with the FSDT and the TSDT and the Donnell kinematics, 5 DOFs per term.
 - `'cylshell_fsdt_sanders'`, `'cylshell_tsdt_sanders'`: cylindrical shells

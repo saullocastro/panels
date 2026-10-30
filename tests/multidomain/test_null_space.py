@@ -197,7 +197,7 @@ def test_skin_base_equals_single_laminate(model):
 @pytest.mark.slow
 def test_skin_base_nonlinear_equals_single_laminate():
     r"""Large deflection of the laminates `[0/90]` over `[0/90]`, with the
-    von Karman kinematics, with :meth:`.MultiDomain.get_reduced_functions`
+    von Kármán kinematics, with :meth:`.MultiDomain.get_reduced_functions`
 
     The in-plane displacements of the edges are only restrained in the
     tangential direction: restraining the normal one in both laminates would

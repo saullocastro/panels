@@ -8,7 +8,7 @@
 #cython: infer_types=False
 r"""
 Flat plates using the Reddy's third-order shear deformation theory (TSDT)
-with von Karman kinematics
+with von Kármán kinematics
 
 Numerically integrated matrices. See the kinematic equations in
 ``theory/shells/fsdt_tsdt/fsdt_tsdt.py``, from where the integrands herein
