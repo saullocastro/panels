@@ -50,6 +50,7 @@ def random_c(s, seed=0):
 
 @pytest.mark.parametrize('model, r', MODELS)
 @pytest.mark.parametrize('edge', ['x', 'y'])
+@pytest.mark.slow
 def test_limit_at_one_is_a_coordinate(model, r, edge):
     """``a = 2.0, x1 = 0.2, x2 = 1.0`` is a partial domain
 
@@ -79,6 +80,7 @@ def test_limit_at_one_is_a_coordinate(model, r, edge):
     (dict(y1=0.3), dict(y1=0.3, y2=1.3)),
     (dict(y2=0.9), dict(y1=0., y2=0.9)),
     ])
+@pytest.mark.slow
 def test_one_sided_limit(model, r, lim, explicit):
     """A single limit integrates up to the edge of the shell, and the two
     sides of the cut add up to the full domain"""
@@ -102,6 +104,7 @@ def test_one_sided_limit(model, r, lim, explicit):
 
 
 @pytest.mark.parametrize('model, r', MODELS)
+@pytest.mark.slow
 def test_full_domain_is_the_default(model, r):
     """``None`` and the explicit edges must give the very same matrices,
     through the numerical integration, and the analytical closed-form
@@ -118,6 +121,7 @@ def test_full_domain_is_the_default(model, r):
 
 
 @pytest.mark.parametrize('model, r', MODELS)
+@pytest.mark.slow
 def test_full_domain_numerical_matches_analytical(model, r):
     """With the default limits the numerical kernels integrate ``xi, eta``
     in ``[-1, +1]``, as the closed-form matrices do"""

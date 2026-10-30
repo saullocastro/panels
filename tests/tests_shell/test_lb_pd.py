@@ -1,6 +1,7 @@
 import sys
 sys.path.append('../..')
 
+import pytest
 import numpy as np
 from structsolve import solve, lb
 from structsolve.sparseutils import finalize_symmetric_matrix
@@ -11,6 +12,7 @@ from panels.multidomain.connections import fkCld_xcte, fkCld_ycte
 from panels.plot_shell import plot_shell
 
 
+@pytest.mark.slow
 def test_shell_pd_xcte():
     for model in ['plate_clpt_donnell',
                   'cylshell_clpt_donnell']:
@@ -62,6 +64,7 @@ def test_shell_pd_xcte():
         #assert np.isclose(eigvals[0], 4.39212, atol=0.01, rtol=0)
 
 
+@pytest.mark.slow
 def test_shell_pd_ycte():
     for model in ['plate_clpt_donnell',
                   'cylshell_clpt_donnell']:

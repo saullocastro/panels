@@ -178,6 +178,7 @@ def ritz_frequency(s, num_eigvalues=10):
 
 @pytest.mark.parametrize('n', [2, 3])
 @pytest.mark.parametrize('model', MODELS)
+@pytest.mark.slow
 def test_navier_thick_cross_ply(model, n):
     r"""Cross-ply `[0, 90, 0]`, `R/h = 10`, `L/R = 2`, `E_1/E_2 = 40`
 
@@ -201,6 +202,7 @@ def test_navier_thick_cross_ply(model, n):
 
 @pytest.mark.parametrize('Rh, LR, n, Omega_donnell, Omega_sanders, source',
                          LEISSA[:3])
+@pytest.mark.slow
 def test_frequency_leissa_3d_elasticity(Rh, LR, n, Omega_donnell,
                                         Omega_sanders, source):
     r"""Leissa Table 2.8, `R/h = 20`, 3D elasticity
@@ -228,6 +230,7 @@ def test_frequency_leissa_3d_elasticity(Rh, LR, n, Omega_donnell,
             assert abs(Omega_clpt/ref - 1) > 3*abs(Omega/ref - 1)
 
 
+@pytest.mark.slow
 def test_axial_buckling_thin_panel():
     r"""Half-cylinder panel, `R/h = 100`, `L/R = 2`, uniform `N_x`
 

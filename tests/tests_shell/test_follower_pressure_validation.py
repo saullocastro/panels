@@ -329,10 +329,13 @@ def cylinder_shell(model, L, R, h, m=8, n=25):
 
 
 @pytest.mark.parametrize('model,load,prestate', [
-    ('cylshell_clpt_sanders', 'follower', 'lateral'),
-    ('cylshell_clpt_sanders', 'follower', 'hydrostatic'),
+    pytest.param('cylshell_clpt_sanders', 'follower', 'lateral',
+                 marks=pytest.mark.slow),
+    pytest.param('cylshell_clpt_sanders', 'follower', 'hydrostatic',
+                 marks=pytest.mark.slow),
     ('cylshell_clpt_sanders', 'dead', 'hydrostatic'),
-    ('cylshell_clpt_donnell', 'follower', 'lateral'),
+    pytest.param('cylshell_clpt_donnell', 'follower', 'lateral',
+                 marks=pytest.mark.slow),
     ])
 def test_finite_cylinder_shear_diaphragm(model, load, prestate):
     r"""Finite cylinder, ``L/R = 1.5``, ``R/h = 500``, under a lateral
@@ -467,6 +470,7 @@ def test_han2004_formulas_reproduce_tables():
 
 
 @pytest.mark.parametrize('face', ['boron', 'graphite', 'kevlar'])
+@pytest.mark.slow
 def test_han2004_shell_formulas(face):
     r"""The FSDT ring reproduces the shell formulas of Table 2"""
     for i, ratio in enumerate(RATIOS):
@@ -506,6 +510,7 @@ def batdorf_lateral_pressure(L, R, t, E, nu, prestate):
 
 @pytest.mark.parametrize('LR,Rt,prestate', [(1., 100., 'lateral'),
                                             (3., 100., 'hydrostatic')])
+@pytest.mark.slow
 def test_nasa_sp8007_batdorf(LR, Rt, prestate):
     r"""The Donnell model with the dead load reproduces Batdorf's formula of
     NASA/SP-8007-2020/REV 2, the follower load lowers it, by 1.3% and 3.6%
@@ -561,6 +566,7 @@ def kardomateas1993_ring(kind, ratio, model='cylshell_clpt_sanders', zp=0.):
 
 
 @pytest.mark.parametrize('kind', ['ortho', 'iso'])
+@pytest.mark.slow
 def test_kardomateas1993_shell_formula(kind):
     r"""The CLPT ring against Eq. (29a), ``p = E2 (n**2 - 1) h**3/(12 (1 -
     nu23 nu32) R**3)``, which neglects the extensibility of the ring, of
@@ -579,6 +585,7 @@ def test_kardomateas1993_shell_formula(kind):
 @pytest.mark.parametrize('ratio,elast,classical', [(30, 1641360, 1675930),
                                                    (60, 208228, 209491),
                                                    (120, 26180, 26186)])
+@pytest.mark.slow
 def test_kardomateas2003_homogeneous_ring(ratio, elast, classical):
     r"""Homogeneous graphite/epoxy ring, ``h = 30.48 mm``, of Table 4 of
     Kardomateas and Simitses (2003): the FSDT and the TSDT with the pressure
@@ -677,6 +684,7 @@ def schweizerhof_k(s, follower):
 
 
 @pytest.mark.parametrize('case', SCHWEIZERHOF1984)
+@pytest.mark.slow
 def test_schweizerhof1984_cylinders(case):
     shell, LR, Rt, bc, n, k_c, k_f = case
     R = 100.
@@ -746,6 +754,7 @@ if __name__ == '__main__':
                                    100*(pt/elast - 1)))
 
 
+@pytest.mark.slow
 def test_kinetic_criterion_cantilever():
     r"""Kinetic criterion with :func:`structsolve.freq`, the general solver of
     unsymmetric matrices: the cantilever B1 of Schweizerhof and Ramm (1984),

@@ -32,6 +32,7 @@ def _state(assy, top, bot, nx, ny, max_separation, seed=1):
     return c*max_separation/np.max(rt['w'][0] - rb['w'][0])
 
 
+@pytest.mark.slow
 def test_more_than_304_gauss_points():
     """The Gauss-Legendre rules have no upper limit"""
     nx, ny = 320, 8

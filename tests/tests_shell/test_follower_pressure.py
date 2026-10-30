@@ -296,6 +296,7 @@ def test_newton_raphson_converges_quadratically(model):
 
 @pytest.mark.parametrize('model', ['plate_clpt_donnell',
                                    'cylshell_clpt_sanders'])
+@pytest.mark.slow
 def test_riks_with_follower_pressure(model):
     s = follower_shell(model)
     rec = Recorder(s)

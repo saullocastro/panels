@@ -1,6 +1,7 @@
 import sys
 sys.path.append('../..')
 
+import pytest
 import numpy as np
 from structsolve import lb
 import matplotlib
@@ -9,6 +10,7 @@ from panels.shell import Shell
 from panels.plot_shell import plot_shell
 
 
+@pytest.mark.slow
 def test_lb_orthotropic():
     #NOTE ssss boundary conditions by default
     s = Shell()

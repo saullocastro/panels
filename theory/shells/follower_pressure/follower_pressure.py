@@ -35,7 +35,7 @@ For the FSDT and TSDT models the pressure acts on the mid-surface, so only
 
 Truncation
 ----------
-With the moderate-rotation ordering of the von Karman, Donnell and Sanders
+With the moderate-rotation ordering of the von Kármán, Donnell and Sanders
 strains, ``u,x ~ eps`` and ``w,x ~ eps**(1/2)``, the virtual work is
 
     p a.du = p (a_z dw + a_x du + a_y dv),  du ~ eps**(1/2) dw
@@ -264,7 +264,7 @@ def ring_buckling(kinematics, load, n, A=None, D=None, As=None, R=None):
     with ``A``, ``D`` and ``As`` the plane-strain membrane, bending and
     transverse shear stiffnesses (``A22``, ``D22`` and ``A44`` of the
     laminate; ``As = None`` for the CLPT), ``byy = -w,y + kv v`` the rotation
-    of the von Karman terms, and the linear strains of the kernels:
+    of the von Kármán terms, and the linear strains of the kernels:
 
     - CLPT, Sanders: ``eyy = v,y + w/R``, ``kyy = -w,yy + v,y/R``;
     - CLPT, Donnell: ``eyy = v,y + w/R``, ``kyy = -w,yy``;

@@ -2,6 +2,7 @@ import sys
 sys.path.append('../..')
 import os
 
+import pytest
 import numpy as np
 from structsolve import solve
 from structsolve.sparseutils import finalize_symmetric_matrix, remove_null_cols
@@ -876,6 +877,7 @@ REF_FAILED = np.array([0., 0., 0., 0., 0., 0.1664, 0.384, 0.5408])
 REF_MAX_DMG = np.array([0., 0., 0., 0.3875, 0.7474, 1., 1., 1.])
 
 
+@pytest.mark.slow
 def test_dcb_damage_prop_no_f_kcrack(tmp_path, monkeypatch):
     # p3_70_25_m18_8_ki1e5_tauo67_nx60_ny30_wpts30_G1c112
     # the driver writes its results to the current directory

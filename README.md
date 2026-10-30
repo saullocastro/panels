@@ -29,7 +29,7 @@ The structural matrices are solved with
 Citing this library
 ===================
 
-Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.14.1). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
+Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.14.2). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
 
 
 Documentation
@@ -44,6 +44,27 @@ Installation
 To get the latest version:
 
     python -m pip install panels
+
+
+Running the tests
+=================
+
+From the root of the repository, with the Cython extensions built in place:
+
+    python -m pip install -r requirements.txt -r requirements_ci.txt
+    python setup.py build_ext --inplace
+    python -m pytest tests
+
+The tests marked `slow`, `@pytest.mark.slow`, registered in
+`pyproject.toml`, are those that are slow under the line tracing of the
+Cython code and cover no line of the `.pyx` files that the other tests do
+not cover. Every test runs by default; the coverage workflow,
+`.github/workflows/coverage.yml`, deselects them with `-m "not slow"` in
+its run with the line-traced build only, and runs them in its run with the
+optimized build, which measures the Python code. A new test that is slow
+under line tracing can be marked once the coverage of the other tests,
+measured with `pytest --cov --cov-context=test` on the line-traced build,
+is shown to include every line of the `.pyx` files that it covers.
 
 
 Running in the browser with Pyodide
@@ -117,11 +138,15 @@ History
 =======
 
 See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
+* version 0.14.2 (2026-10-29)
+    - Tests of the transverse shear correction of the FSDT against Rohwer (1988), Table 2, and Vlachoutsis (1992), Table I
+    - Coverage workflow in one job of two runs, the optimized build for the Python code and the line-traced build without the tests marked `slow` for the Cython code, with the same coverage as before
+    - Requires `composites>=0.10.2`, whose `MatLamina` invariants are those of plane stress also for materials given with nine constants, and whose lamination-parameter route accounts for the offset of the laminate
 * version 0.14.1 (2026-10-28)
     - BUG: the mass matrices used `shell.rho` in the closed-form kernels and the opposite sign of the laminate offset; they now use the moments of the density of the laminate, exact for per-ply densities
     - BUG: TSDT with a laminate offset, the transverse shear vanishes at the faces of the laminate, and the connections tie the rotations at the common reference surface
     - BUG: `BladeStiff1D` torsion with `GJ = 4 bf D66` and coupling `S1` with the condensed stiffness about the mid-plane of the flange; `StiffPanelBay.calc_kA` no longer skew-symmetrizes; one load per panel in the cylinder assembly functions; `MultiDomain.force_out_plane` and `MultiDomain.plot` fixed
-    - Documentation of the theory in the docstrings, new page on the TSDT with an offset, validation notebook of the snap-through of a shallow circular arch (Fung and Kaplan, 1952); the rotations of the von Karman terms take the sign of the rotations of the normal, `beta_x = -w,x`, results unchanged
+    - Documentation of the theory in the docstrings, new page on the TSDT with an offset, validation notebook of the snap-through of a shallow circular arch (Fung and Kaplan, 1952); the rotations of the von Kármán terms take the sign of the rotations of the normal, `beta_x = -w,x`, results unchanged
     - Requires `composites>=0.10.0` and `structsolve>=0.9.3`, whose residual is `R = F_int - F_ext`, as in the documentation of `panels`, and whose arc-length steps no longer double back along the path (since 0.9.2)
 * version 0.13.11 (2026-10-16)
     - BUG: the analytical constitutive stiffness matrix of the CLPT models ignored `force_orthotropic_laminate`, inconsistently with the internal forces and the numerical matrices

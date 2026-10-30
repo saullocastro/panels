@@ -1,5 +1,57 @@
 # Changelog
 
+## 0.14.2 (2026-10-29)
+
+### Packaging
+
+- Requires `composites>=0.10.2`. In `composites` 0.10.2 the invariants of
+  `MatLamina` are those of the plane-stress reduced stiffnesses also for a
+  material given with nine constants (`e3`, `nu13`, `nu23`), and the
+  laminate created from lamination parameters accounts for the offset of
+  the laminate; results of `panels` with laminates from `laminated_plate`
+  and a 2- or 6-entry `laminaprop` are unchanged.
+
+### Tests: transverse shear correction of the FSDT against published values
+
+- New `test_shear_correction_published_values` in
+  `tests/tests_shell/test_fsdt_tsdt_plates.py`: the transverse shear rows of
+  `Shell.ABD` of the FSDT, `(yz, xz)`, for the `[0,90]s` CFRP laminate of
+  Rohwer (1988), Table 2, p. 19, `A55 = 2.313` kN/mm and the reductions
+  0.75 and 0.82 of p. 18, and for the isotropic sandwich of Vlachoutsis
+  (1992), Table I, p. 1548, `K = 0.5324` with `'rohwer'` and
+  `'vlachoutsis'`, against `5/6` with `'constant'` and a float `5/6`, all to
+  half a unit of the last printed digit. Before, only the homogeneous plate,
+  `k = 5/6`, and the passing of `Shell.fsdt_shear_correction` to
+  `composites` were tested; the order of the two rows is now checked by the
+  different stiffnesses of the two directions of the cross-ply laminate.
+
+### CI
+
+- The coverage workflow, `.github/workflows/coverage.yml`, is one job that
+  runs the tests twice in the processes of `pytest-xdist`: every test with
+  the optimized build, which measures the Python code, then, with the
+  line-traced build, every test except those marked `slow`, which measures
+  the Cython code; `pytest-cov` combines both runs into one report, uploaded
+  once (`codecov.yml`). Before, the whole suite ran with the line-traced
+  build in three parallel jobs of 1.5 h to 3.1 h (5.7 h of runner time, of
+  which 2.3 h for `test_dcb_damage.py` alone), against about 10 min without
+  the tracing. The line-traced run now takes about 19 min locally (4
+  processes, Windows), against 3.1 h with all the tests, and covers the
+  same lines: the combined report has the same statements and misses, file
+  by file, as the line-traced run of every test (24023 statements, 1223
+  missed).
+- New pytest marker `slow`, registered in `pyproject.toml`: 109 tests that
+  take 40 s or more each with the line-traced build and cover no line of
+  the `.pyx` files that the other tests do not cover, measured per test with
+  `pytest --cov-context=test`. They are deselected with `-m "not slow"` in
+  the line-traced run of the coverage workflow only; every test still runs
+  by default and in the pytest workflow. The README describes the marker.
+
+### Documentation
+
+- The name is spelled von Kármán throughout the docstrings, comments,
+  documentation pages and derivation scripts; identifiers are unchanged.
+
 ## 0.14.1 (2026-10-28)
 
 ### Python versions
@@ -378,7 +430,7 @@
   `theta^2 = 2.4e-3`, `theta` being the half-angle of the arc, the order of
   the terms in which the model differs from the shallow-arch theory; results
   stored in `notebooks/results/fk1952_shallow_arches.json`.
-- The rotations of the von Karman terms of the FSDT and TSDT models,
+- The rotations of the von Kármán terms of the FSDT and TSDT models,
   `beta_x = -w,x` and `beta_y = -w,y + v/r` (Sanders), and of the tangent
   product of the CLPT models with Donnell kinematics, `beta_x = -w,x`,
   `beta_y = -w,y`, take the sign of the rotations of the normal, as
@@ -1194,7 +1246,7 @@ regression values of the multi-domain cylinders of
   `phiy = -w,y + v/r`, enters the non-linear strains, the geometric stiffness
   matrix, the mass matrix, the field outputs and the point constraints.
 - `'plate_fsdt_donnell'`: plates with the first-order shear deformation
-  theory (FSDT) and von Karman kinematics, with 5 DOFs `u, v, w, phix, phiy`
+  theory (FSDT) and von Kármán kinematics, with 5 DOFs `u, v, w, phix, phiy`
   per term. The shear correction is controlled by
   `Shell.fsdt_shear_correction`: `'rohwer'`, the default, `'vlachoutsis'`,
   `'constant'` or `None` select the method of
@@ -1204,7 +1256,7 @@ regression values of the multi-domain cylinders of
   accounts for the stacking sequence otherwise. The tests compared with
   references that use `k = 5/6` set it explicitly.
 - `'plate_tsdt_donnell'`: plates with the third-order shear deformation
-  theory of Reddy (1984) and von Karman kinematics, with 5 DOFs per term.
+  theory of Reddy (1984) and von Kármán kinematics, with 5 DOFs per term.
 - `'cylshell_fsdt_donnell'`, `'cylshell_tsdt_donnell'`: cylindrical shells
   with the FSDT and the TSDT and the Donnell kinematics, 5 DOFs per term.
 - `'cylshell_fsdt_sanders'`, `'cylshell_tsdt_sanders'`: cylindrical shells
