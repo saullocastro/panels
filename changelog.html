@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Changelog &#8212; panels 0.14.1 documentation</title>
+    <title>Changelog &#8212; panels 0.14.2 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
 
-    <script src="_static/documentation_options.js?v=3a3a8e7f"></script>
+    <script src="_static/documentation_options.js?v=0dc20415"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'changelog';</script>
@@ -49,7 +49,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.14.1" />
+  <meta name="docsearch:version" content="0.14.2" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -117,7 +117,7 @@
   
   
   
-    <p class="title logo__title">panels 0.14.1 documentation</p>
+    <p class="title logo__title">panels 0.14.2 documentation</p>
   
 </a></div>
     
@@ -729,6 +729,58 @@
 <a class="reference external" href="https://github.com/saullocastro/panels/blob/main/CHANGELOG.md">repository</a>:</p>
 <div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="gh"># Changelog</span>
 
+<span class="gu">## 0.14.2 (2026-11-01)</span>
+
+<span class="gu">### Packaging</span>
+
+<span class="k">-</span><span class="w"> </span>Requires <span class="sb">`composites&gt;=0.10.2`</span>. In <span class="sb">`composites`</span> 0.10.2 the invariants of
+  <span class="sb">`MatLamina`</span> are those of the plane-stress reduced stiffnesses also for a
+  material given with nine constants (<span class="sb">`e3`</span>, <span class="sb">`nu13`</span>, <span class="sb">`nu23`</span>), and the
+  laminate created from lamination parameters accounts for the offset of
+  the laminate; results of <span class="sb">`panels`</span> with laminates from <span class="sb">`laminated_plate`</span>
+  and a 2- or 6-entry <span class="sb">`laminaprop`</span> are unchanged.
+
+<span class="gu">### Tests: transverse shear correction of the FSDT against published values</span>
+
+<span class="k">-</span><span class="w"> </span>New <span class="sb">`test_shear_correction_published_values`</span> in
+  <span class="sb">`tests/tests_shell/test_fsdt_tsdt_plates.py`</span>: the transverse shear rows of
+  <span class="sb">`Shell.ABD`</span> of the FSDT, <span class="sb">`(yz, xz)`</span>, for the <span class="sb">`[0,90]s`</span> CFRP laminate of
+  Rohwer (1988), Table 2, p. 19, <span class="sb">`A55 = 2.313`</span> kN/mm and the reductions
+  0.75 and 0.82 of p. 18, and for the isotropic sandwich of Vlachoutsis
+  (1992), Table I, p. 1548, <span class="sb">`K = 0.5324`</span> with <span class="sb">`'rohwer'`</span> and
+  <span class="sb">`'vlachoutsis'`</span>, against <span class="sb">`5/6`</span> with <span class="sb">`'constant'`</span> and a float <span class="sb">`5/6`</span>, all to
+  half a unit of the last printed digit. Before, only the homogeneous plate,
+  <span class="sb">`k = 5/6`</span>, and the passing of <span class="sb">`Shell.fsdt_shear_correction`</span> to
+  <span class="sb">`composites`</span> were tested; the order of the two rows is now checked by the
+  different stiffnesses of the two directions of the cross-ply laminate.
+
+<span class="gu">### CI</span>
+
+<span class="k">-</span><span class="w"> </span>The coverage workflow, <span class="sb">`.github/workflows/coverage.yml`</span>, is one job that
+  runs the tests twice in the processes of <span class="sb">`pytest-xdist`</span>: every test with
+  the optimized build, which measures the Python code, then, with the
+  line-traced build, every test except those marked <span class="sb">`slow`</span>, which measures
+  the Cython code; <span class="sb">`pytest-cov`</span> combines both runs into one report, uploaded
+  once (<span class="sb">`codecov.yml`</span>). Before, the whole suite ran with the line-traced
+  build in three parallel jobs of 1.5 h to 3.1 h (5.7 h of runner time, of
+  which 2.3 h for <span class="sb">`test_dcb_damage.py`</span> alone), against about 10 min without
+  the tracing. The line-traced run now takes about 19 min locally (4
+  processes, Windows), against 3.1 h with all the tests, and covers the
+  same lines: the combined report has the same statements and misses, file
+  by file, as the line-traced run of every test (24023 statements, 1223
+  missed).
+<span class="k">-</span><span class="w"> </span>New pytest marker <span class="sb">`slow`</span>, registered in <span class="sb">`pyproject.toml`</span>: 109 tests that
+  take 40 s or more each with the line-traced build and cover no line of
+  the <span class="sb">`.pyx`</span> files that the other tests do not cover, measured per test with
+  <span class="sb">`pytest --cov-context=test`</span>. They are deselected with <span class="sb">`-m "not slow"`</span> in
+  the line-traced run of the coverage workflow only; every test still runs
+  by default and in the pytest workflow. The README describes the marker.
+
+<span class="gu">### Documentation</span>
+
+<span class="k">-</span><span class="w"> </span>The name is spelled von Kármán throughout the docstrings, comments,
+  documentation pages and derivation scripts; identifiers are unchanged.
+
 <span class="gu">## 0.14.1 (2026-10-28)</span>
 
 <span class="gu">### Python versions</span>
@@ -1107,7 +1159,7 @@
   <span class="sb">`theta^2 = 2.4e-3`</span>, <span class="sb">`theta`</span> being the half-angle of the arc, the order of
   the terms in which the model differs from the shallow-arch theory; results
   stored in <span class="sb">`notebooks/results/fk1952_shallow_arches.json`</span>.
-<span class="k">-</span><span class="w"> </span>The rotations of the von Karman terms of the FSDT and TSDT models,
+<span class="k">-</span><span class="w"> </span>The rotations of the von Kármán terms of the FSDT and TSDT models,
   <span class="sb">`beta_x = -w,x`</span> and <span class="sb">`beta_y = -w,y + v/r`</span> (Sanders), and of the tangent
   product of the CLPT models with Donnell kinematics, <span class="sb">`beta_x = -w,x`</span>,
   <span class="sb">`beta_y = -w,y`</span>, take the sign of the rotations of the normal, as
@@ -1923,7 +1975,7 @@ regression values of the multi-domain cylinders of
   <span class="sb">`phiy = -w,y + v/r`</span>, enters the non-linear strains, the geometric stiffness
   matrix, the mass matrix, the field outputs and the point constraints.
 <span class="k">-</span><span class="w"> </span><span class="sb">`'plate_fsdt_donnell'`</span>: plates with the first-order shear deformation
-  theory (FSDT) and von Karman kinematics, with 5 DOFs <span class="sb">`u, v, w, phix, phiy`</span>
+  theory (FSDT) and von Kármán kinematics, with 5 DOFs <span class="sb">`u, v, w, phix, phiy`</span>
   per term. The shear correction is controlled by
   <span class="sb">`Shell.fsdt_shear_correction`</span>: <span class="sb">`'rohwer'`</span>, the default, <span class="sb">`'vlachoutsis'`</span>,
   <span class="sb">`'constant'`</span> or <span class="sb">`None`</span> select the method of
@@ -1933,7 +1985,7 @@ regression values of the multi-domain cylinders of
   accounts for the stacking sequence otherwise. The tests compared with
   references that use <span class="sb">`k = 5/6`</span> set it explicitly.
 <span class="k">-</span><span class="w"> </span><span class="sb">`'plate_tsdt_donnell'`</span>: plates with the third-order shear deformation
-  theory of Reddy (1984) and von Karman kinematics, with 5 DOFs per term.
+  theory of Reddy (1984) and von Kármán kinematics, with 5 DOFs per term.
 <span class="k">-</span><span class="w"> </span><span class="sb">`'cylshell_fsdt_donnell'`</span>, <span class="sb">`'cylshell_tsdt_donnell'`</span>: cylindrical shells
   with the FSDT and the TSDT and the Donnell kinematics, 5 DOFs per term.
 <span class="k">-</span><span class="w"> </span><span class="sb">`'cylshell_fsdt_sanders'`</span>, <span class="sb">`'cylshell_tsdt_sanders'`</span>: cylindrical shells

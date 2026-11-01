@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Cylinders modeled as multi-domain assemblies &#8212; panels 0.14.1 documentation</title>
+    <title>Cylinders modeled as multi-domain assemblies &#8212; panels 0.14.2 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
 
-    <script src="_static/documentation_options.js?v=3a3a8e7f"></script>
+    <script src="_static/documentation_options.js?v=0dc20415"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'ex_multidomain_cylinder';</script>
@@ -49,7 +49,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.14.1" />
+  <meta name="docsearch:version" content="0.14.2" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -117,7 +117,7 @@
   
   
   
-    <p class="title logo__title">panels 0.14.1 documentation</p>
+    <p class="title logo__title">panels 0.14.2 documentation</p>
   
 </a></div>
     
@@ -764,7 +764,8 @@ calculated with <code class="xref py py-func docutils literal notranslate"><span
 </div>
 <p>Linear buckling with the pre-buckling stress state calculated from a static
 analysis, with <code class="xref py py-func docutils literal notranslate"><span class="pre">cylinder_compression_lb_Nxx_from_static()</span></code>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_cylinder_compression_lb_Nxx_from_static</span><span class="p">():</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">slow</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_cylinder_compression_lb_Nxx_from_static</span><span class="p">():</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">'Testing assembly function: cylinder_compression_lb_Nxx_from_static'</span><span class="p">)</span>
     <span class="n">height</span> <span class="o">=</span> <span class="mf">0.500</span>
     <span class="n">r</span> <span class="o">=</span> <span class="mf">0.250</span>
@@ -792,7 +793,8 @@ analysis, with <code class="xref py py-func docutils literal notranslate"><span 
 <p>Blade stiffeners can be added along the length of the cylinder, modeled as
 additional domains connected to the skin, see
 <code class="xref py py-func docutils literal notranslate"><span class="pre">create_cylinder_blade_stiffened()</span></code>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_cylinder_blade_stiffened_compression_lb_Nxx_from_static</span><span class="p">():</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">slow</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_cylinder_blade_stiffened_compression_lb_Nxx_from_static</span><span class="p">():</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">'Testing assembly function: cylinder_blade_stiffened_compression_lb_Nxx_from_static'</span><span class="p">)</span>
     <span class="n">height</span> <span class="o">=</span> <span class="mf">0.500</span>
     <span class="n">r</span> <span class="o">=</span> <span class="mf">0.250</span>

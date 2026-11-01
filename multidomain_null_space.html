@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Exact connections with the null-space method &#8212; panels 0.14.1 documentation</title>
+    <title>Exact connections with the null-space method &#8212; panels 0.14.2 documentation</title>
   
   
   
@@ -37,7 +37,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
 
-    <script src="_static/documentation_options.js?v=3a3a8e7f"></script>
+    <script src="_static/documentation_options.js?v=0dc20415"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
@@ -50,7 +50,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.14.1" />
+  <meta name="docsearch:version" content="0.14.2" />
   
     
     <script src="_static/searchtools.js"></script>
@@ -118,7 +118,7 @@
   
   
   
-    <p class="title logo__title">panels 0.14.1 documentation</p>
+    <p class="title logo__title">panels 0.14.2 documentation</p>
   
 </a></div>
     
@@ -1013,7 +1013,7 @@ frequencies with respect to <span class="math notranslate nohighlight">\([0/90]_
 <td><p><span class="math notranslate nohighlight">\(8 \times 10^{-6}\)</span> (<span class="math notranslate nohighlight">\(10^5\)</span> times)</p></td>
 <td><p><span class="math notranslate nohighlight">\(6 \times 10^{-13}\)</span></p></td>
 </tr>
-<tr class="row-even"><td><p>Same, large deflection with the von Karman kinematics</p></td>
+<tr class="row-even"><td><p>Same, large deflection with the von Kármán kinematics</p></td>
 <td></td>
 <td></td>
 <td><p><span class="math notranslate nohighlight">\(10^{-15}\)</span></p></td>
@@ -1373,6 +1373,7 @@ more examples, among them:</p>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s1">'method'</span><span class="p">,</span> <span class="p">[</span><span class="s1">'NR'</span><span class="p">,</span> <span class="s1">'arc_length_riks'</span><span class="p">,</span>
                                     <span class="s1">'arc_length_crisfield'</span><span class="p">])</span>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">slow</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">test_nonlinear_displacement_control</span><span class="p">(</span><span class="n">method</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Post-buckling under displacement control: every converged increment</span>
 <span class="sd">    satisfies `\|\boldsymbol{Z}^\top \boldsymbol{r}\| \leq` ``relTOL`` `\|\lambda \partial \boldsymbol{R}_r/\partial</span>

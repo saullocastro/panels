@@ -312,7 +312,7 @@ the stiffness matrix of the penalty method with the default constants, and
       -
       - `8 \times 10^{-6}` (`10^5` times)
       - `6 \times 10^{-13}`
-    * - Same, large deflection with the von Karman kinematics
+    * - Same, large deflection with the von Kármán kinematics
       -
       -
       - `10^{-15}`
