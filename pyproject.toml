@@ -11,7 +11,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "panels"
-version = "0.14.1"
+version = "0.14.2"
 description = "Semi-analytical models for plates, shells and stiffened panels"
 readme = "README.md"
 license = "BSD-3-Clause"
@@ -52,7 +52,7 @@ dependencies = [
     "numpy",
     "scipy",
     "matplotlib",
-    "composites>=0.10.0",
+    "composites>=0.10.2",
     "structsolve>=0.9.3",
 ]
 
@@ -70,4 +70,9 @@ panels = [
     "core/include/*.hpp",
     "core/src/*.cpp",
     "models/*.pyx", "models/*.pxd",
+]
+
+[tool.pytest.ini_options]
+markers = [
+    "slow: 40 s or more per test with the line-traced build of the Cython code (measured on Windows, MSVC /O2 without OpenMP, 6 pytest-xdist processes, 2026-10-29), and covering no line of the .pyx files that the other tests do not cover (pytest --cov-context=test); deselected with -m \"not slow\" in the line-traced run of .github/workflows/coverage.yml only, run everywhere else",
 ]

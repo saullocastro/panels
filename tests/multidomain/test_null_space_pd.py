@@ -394,6 +394,7 @@ def test_prescribed_rotation(model):
     assert np.allclose(tip(False), tip(True), rtol=1e-9, atol=0)
 
 
+@pytest.mark.slow
 def test_linear_buckling_plate_end_shortening_equals_load():
     r"""Simply supported plate, the lateral edges free in-plane: a uniform
     end-shortening `\delta` and the equivalent load `N_x = E h \delta/a`
@@ -486,6 +487,7 @@ def cylinder(pd_method, **kw):
     return md
 
 
+@pytest.mark.slow
 def test_cylinder_end_shortening():
     r"""Cylinder of 5 panels, simply supported, compressed by a uniform
     end-shortening, see ``test_cylinder_compression_lb_Nxx_from_static``
@@ -559,6 +561,7 @@ def plate_postbuckling(delta_factor=3., m=8, n=8, P=2.):
 
 @pytest.mark.parametrize('method', ['NR', 'arc_length_riks',
                                     'arc_length_crisfield'])
+@pytest.mark.slow
 def test_nonlinear_displacement_control(method):
     r"""Post-buckling under displacement control: every converged increment
     satisfies `\|\boldsymbol{Z}^\top \boldsymbol{r}\| \leq` ``relTOL`` `\|\lambda \partial \boldsymbol{R}_r/\partial
@@ -585,6 +588,7 @@ def test_nonlinear_displacement_control(method):
     assert np.isclose(P, 2420., rtol=2e-3)
 
 
+@pytest.mark.slow
 def test_nonlinear_reaction_matches_penalty():
     r"""The reaction of the null-space method is the limit of the reaction
     `\int k (u_p - u) dy` of the penalty method, with an imperfection large
@@ -627,6 +631,7 @@ def test_nonlinear_reaction_matches_penalty():
     assert not np.isclose(F_pen, F_ns, rtol=1e-5)
 
 
+@pytest.mark.slow
 def test_finite_differences_of_reduced_functions():
     r"""`\boldsymbol{K}_{T,r}` is the Jacobian of ``calc_fint`` and ``calc_fext(c,
     lbd)`` is `-\partial \boldsymbol{R}_r/\partial \lambda`, at a buckled configuration"""
@@ -654,6 +659,7 @@ def test_finite_differences_of_reduced_functions():
     assert np.linalg.norm(dR + q) <= 1e-6*np.linalg.norm(q)
 
 
+@pytest.mark.slow
 def test_constant_end_shortening_with_load_parameter():
     r"""A constant end-shortening, held during the analysis, with a lateral
     load as the load parameter: at `\lambda = 0` the solution is the linear

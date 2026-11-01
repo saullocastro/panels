@@ -28,7 +28,7 @@ THEORY refers to:
 EQUATION refers to which type of nonlinear equation is being used:
 
 - donnell - kinematic equations using Donnell's equations, which for flat
-  plates are the von Karman equations
+  plates are the von Kármán equations
 - sanders - kinematic equations using Sanders-Koiter's equations
 
 SUFIX used to indicate additional information
@@ -45,7 +45,7 @@ Available models
 The available models, which are selected with ``Shell.model``, are:
 
 - ``'plate_clpt_donnell'``: flat plates, classical laminated plate theory
-  (CLPT) with von Karman non-linear kinematics, 3 DOFs ``u, v, w``.
+  (CLPT) with von Kármán non-linear kinematics, 3 DOFs ``u, v, w``.
 
 - ``'cylshell_clpt_donnell'``: cylindrical shells, CLPT with the
   Donnell-Mushtari-Vlasov (shallow shell) kinematics, 3 DOFs ``u, v, w``.
@@ -55,12 +55,12 @@ The available models, which are selected with ``Shell.model``, are:
   of a :class:`.Shell` with a radius ``r``.
 
 - ``'plate_fsdt_donnell'``: flat plates, first-order shear deformation
-  theory (FSDT, Reissner-Mindlin) with von Karman non-linear kinematics, 5
+  theory (FSDT, Reissner-Mindlin) with von Kármán non-linear kinematics, 5
   DOFs ``u, v, w, phix, phiy``. The transverse shear stiffness is controlled
   by ``Shell.fsdt_shear_correction``, ``'rohwer'`` by default.
 
 - ``'plate_tsdt_donnell'``: flat plates, third-order shear deformation
-  theory of Reddy with von Karman non-linear kinematics, 5 DOFs ``u, v, w,
+  theory of Reddy with von Kármán non-linear kinematics, 5 DOFs ``u, v, w,
   phix, phiy``, without shear correction.
 
 - ``'cylshell_fsdt_donnell'``, ``'cylshell_tsdt_donnell'``: cylindrical

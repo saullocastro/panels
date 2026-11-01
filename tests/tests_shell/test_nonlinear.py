@@ -15,6 +15,7 @@ stiffness matrix is the exact derivative of the internal force vector.
 import sys
 sys.path.append('../..')
 
+import pytest
 import numpy as np
 from structsolve import solve
 
@@ -43,6 +44,7 @@ def scaling(vec, D):
     return np.sqrt((vec*np.abs(1/D))@vec)
 
 
+@pytest.mark.slow
 def test_nonlinear():
     m = 6
     n = 6

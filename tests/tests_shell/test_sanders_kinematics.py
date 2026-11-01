@@ -192,6 +192,7 @@ def test_navier_reproduces_the_references(Rh, LR, n, Omega_donnell,
 
 @pytest.mark.parametrize('Rh, LR, n, Omega_donnell, Omega_sanders, source',
                          LEISSA)
+@pytest.mark.slow
 def test_frequency_sd_panel(Rh, LR, n, Omega_donnell, Omega_sanders, source):
     """Leissa's panel of angle pi/n against the closed shell with n waves"""
     R = 1.
@@ -207,6 +208,7 @@ def test_frequency_sd_panel(Rh, LR, n, Omega_donnell, Omega_sanders, source):
     assert np.isclose(Omegas['cylshell_clpt_sanders'], Omega_sanders, rtol=1e-4)
 
 
+@pytest.mark.slow
 def test_frequency_deep_open_panel():
     r"""Leissa Table 2.46: `R/h = 20`, `\theta_0 = 270^\circ`, `L/R = 100`
 
@@ -231,6 +233,7 @@ def test_frequency_deep_open_panel():
     (2, 0.197278, 0.196963),
     (4, 0.111525, 0.108761),
     ])
+@pytest.mark.slow
 def test_frequency_laminated_sd_panel(n, Omega_donnell, Omega_sanders):
     r"""Cross-ply `[0, 90, 0]` panel, `R/h = 100`, `L/R = 5`
 
@@ -396,6 +399,7 @@ def test_rigid_translation_strain_energy():
     assert abs(energies['cylshell_clpt_sanders']) < 1e-8*U_D
 
 
+@pytest.mark.slow
 def test_sanders_approaches_donnell_for_short_waves():
     r"""Donnell's kinematics are accurate for short wavelengths
 

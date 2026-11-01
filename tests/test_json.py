@@ -211,6 +211,7 @@ def _bay_lb(bay):
 
 
 @pytest.mark.parametrize('stiffener', ['1d', '2d', 'both'])
+@pytest.mark.slow
 def test_stiffpanelbay(stiffener):
     bay = _bay(stiffener)
     bay2 = load_bay(io.BytesIO(_save(bay)))

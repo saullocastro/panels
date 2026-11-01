@@ -56,6 +56,7 @@ def test_add_panel():
     assert p.rho == 1600.
 
 
+@pytest.mark.slow
 def test_unstiffened_bay_matches_single_shell():
     """Splitting the skin into panels must not change the buckling load"""
     bay = _bay(nstiff=0)
@@ -79,6 +80,7 @@ def test_unstiffened_bay_matches_single_shell():
 
 @pytest.mark.parametrize('b, edges', [(1.0, [0., 1/3, 2/3, 1.0]),
                                       (1.5, [0., 1.0, 1.5])])
+@pytest.mark.slow
 def test_panel_edge_at_one_meter(b, edges):
     """A panel edge at ``y = 1.0`` is a coordinate like any other
 
@@ -115,6 +117,7 @@ def test_panel_edge_at_one_meter(b, edges):
     assert np.allclose(eigvals_bay[:3], eigvals_shell[:3], rtol=1e-6)
 
 
+@pytest.mark.slow
 def test_bladestiff1d_increases_buckling_load():
     unstiffened, _ = lb(_bay(0).calc_kC(silent=True),
                         _bay(0).calc_kG(silent=True),

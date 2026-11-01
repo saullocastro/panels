@@ -35,6 +35,7 @@ def panel(model, a, b, m, n):
 
 @pytest.mark.parametrize('model', ['plate_clpt_donnell',
                                    'cylshell_fsdt_sanders'])
+@pytest.mark.slow
 def test_single_panel_assembly_equals_shell(model):
     s = panel(model, 0.4, 0.3, 6, 6)
     s.add_pressure_load(-3.e3, follower='quadratic', cte=False)

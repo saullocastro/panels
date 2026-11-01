@@ -387,7 +387,7 @@ def strain_lines(B0, indent):
 
 
 DESCRIPTION = {
-    ('plate', 'donnell'): 'flat plates using the {title} with von Karman kinematics',
+    ('plate', 'donnell'): 'flat plates using the {title} with von Kármán kinematics',
     ('cylshell', 'donnell'): ('cylindrical shells using the {title} with the '
                               'Donnell kinematics'),
     ('cylshell', 'sanders'): ('cylindrical shells using the {title} with the '

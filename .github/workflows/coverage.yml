@@ -2,30 +2,33 @@ name: coverage
 
 on: [push]
 
+# NOTE the coverage of the Cython code needs a build with line tracing, see
+#      setup.py, in which every line executed in a .pyx file calls the
+#      tracer of coverage.py, with the GIL taken for each line of the nogil
+#      loops of the kernels: the whole suite took about 5.7 h with it, in
+#      three parallel jobs of 1.5 h to 3.1 h, against about 10 min of
+#      pytest without it (2026-10-28). The job therefore runs the tests
+#      twice, in the processes of pytest-xdist:
+#      1. every test, with the optimized build, which measures the Python
+#         code at little cost;
+#      2. with the line-traced build, every test except those marked slow,
+#         -m "not slow", the slowest ones under line tracing, none of which
+#         covers a line of the .pyx files that the other tests do not cover,
+#         see the marker in pyproject.toml, which measures the Cython code.
+#      pytest-cov combines both runs and the processes into .coverage.
+# NOTE OMP_NUM_THREADS=1, one thread of OpenMP and of the BLAS per process
+#      of pytest-xdist, which already uses every core
+
 jobs:
   build:
-    # NOTE the line tracing of the Cython modules makes the tests about 20
-    #      times slower, the suite is split in parts that run in parallel,
-    #      each uploading its report, merged by Codecov, see codecov.yml,
-    #      such that every part stays well within the limit of 6 h of the
-    #      GitHub-hosted runners. The parts take about 10, 6 and 8 min without
-    #      the tracing
+
     strategy:
-      fail-fast: false
       matrix:
         runs-on: [ubuntu-latest]
         python-version: ['3.13']
-        part:
-          - name: shell
-            pytest-args: tests/tests_shell
-          - name: multidomain-stiffpanelbay
-            pytest-args: >-
-              tests --ignore=tests/tests_shell
-              --ignore=tests/multidomain/test_dcb_damage.py
-          - name: dcb_damage
-            pytest-args: tests/multidomain/test_dcb_damage.py
-    name: build (${{ matrix.part.name }})
     runs-on: ${{ matrix.runs-on }}
+    env:
+      OMP_NUM_THREADS: 1
 
     steps:
     - uses: actions/checkout@v7
@@ -39,18 +42,21 @@ jobs:
         python -m pip install --upgrade setuptools wheel
         python -m pip install --upgrade -r requirements.txt
         python -m pip install --upgrade -r requirements_ci.txt
+        python -m pip install pytest-xdist
     - name: Install module
       run: |
-        export CYTHON_TRACE_NOGIL=1
-        python setup.py build_ext --inplace --define CYTHON_TRACE_NOGIL
+        python setup.py build_ext --inplace
     - name: Test with pytest and coverage report
       run: |
-        coverage run -m pytest ${{ matrix.part.pytest-args }}
+        python -m pytest tests -n auto --cov --cov-report=
+        export CYTHON_TRACE_NOGIL=1
+        python setup.py build_ext --inplace --define CYTHON_TRACE_NOGIL
+        python -m pytest tests -n auto --cov --cov-append --cov-report= \
+            -m "not slow"
         coverage report
     - name: "Upload coverage to Codecov"
       uses: codecov/codecov-action@v7
       with:
         token: ${{ secrets.CODECOV_UPLOAD_TOKEN }}
-        name: ${{ matrix.part.name }}
         fail_ci_if_error: true
         verbose: true

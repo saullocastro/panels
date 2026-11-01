@@ -1,6 +1,7 @@
 import sys
 sys.path.append('../..')
 
+import pytest
 import numpy as np
 
 from panels.multidomain import (cylinder_blade_stiffened_compression_lb_Nxx_cte,
@@ -36,6 +37,7 @@ def test_cylinder_blade_stiffened_compression_lb_Nxx_cte():
     assert np.isclose(Nxxs[0]*eigvals[0], -51606.918, atol=0.01, rtol=0.001)
 
 
+@pytest.mark.slow
 def test_cylinder_blade_stiffened_compression_lb_Nxx_from_static():
     print('Testing assembly function: cylinder_blade_stiffened_compression_lb_Nxx_from_static')
     height = 0.500
@@ -68,6 +70,7 @@ def test_cylinder_blade_stiffened_compression_lb_Nxx_from_static():
     assert np.isclose(Nxxs[0]*eigvals[0], -39993.838, atol=0.01, rtol=0.001)
 
 
+@pytest.mark.slow
 def test_cylinder_blade_stiffened_compression_lb_pd_from_static():
     print('Testing assembly function: cylinder_blade_stiffened_compression_lb_pd_from_static')
     height = 0.500

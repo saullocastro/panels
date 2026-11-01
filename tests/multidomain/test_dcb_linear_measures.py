@@ -4,6 +4,7 @@ Values of the tables of the sections "Load measured at the loaded edge" and
 "Penalty stiffness of the edge connections" of doc/source/cohesive_zone.rst.
 
 """
+import pytest
 import numpy as np
 from scipy.special import roots_legendre
 from structsolve import solve
@@ -109,6 +110,7 @@ def dcb_thesis_linear(k_o, edge_penalty_factor=1., a2=0.015, wp=0.5,
 
 
 
+@pytest.mark.slow
 def test_load_measures():
     # tip displacement of 1 mm, default edge penalties; columns: k_o (N/mm^3),
     # reaction, int k Delta dA, int k Delta^corr dA, int Q_x dy (N)
@@ -141,6 +143,7 @@ def test_load_measures():
     assert res['del_max'] > res['del_o']
 
 
+@pytest.mark.slow
 def test_edge_penalty_factor():
     # k_o = 2e5 N/mm^3; columns: factor on the default edge penalties,
     # P/delta (N/mm), Delta_max/delta; P is the reaction, with the round-off

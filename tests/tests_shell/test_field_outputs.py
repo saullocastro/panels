@@ -1,12 +1,14 @@
 import sys
 sys.path.append('../../..')
 
+import pytest
 import numpy as np
 
 from structsolve import static
 from panels.shell import Shell
 
 
+@pytest.mark.slow
 def test_panel_field_outputs():
     m = 7
     n = 6

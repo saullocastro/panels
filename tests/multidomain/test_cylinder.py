@@ -1,6 +1,7 @@
 import sys
 sys.path.append('../..')
 
+import pytest
 import numpy as np
 
 from panels.multidomain import (cylinder_compression_lb_Nxx_cte,
@@ -31,6 +32,7 @@ def test_cylinder_compression_lb_Nxx_cte():
     assert np.isclose(Nxxs[0]*eigvals[0], -47055.984, atol=0.01, rtol=0.001)
 
 
+@pytest.mark.slow
 def test_cylinder_compression_lb_Nxx_from_static():
     print('Testing assembly function: cylinder_compression_lb_Nxx_from_static')
     height = 0.500

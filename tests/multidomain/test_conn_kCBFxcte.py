@@ -240,6 +240,7 @@ def eig_value_panel_BFxcte():
     return eigvals[0]
 
 
+@pytest.mark.slow
 def test_kCBFxte(eig_value_panel_BFycte, eig_value_panel_BFxcte):
     '''
     This test compare the first eigenvalue of the assemblies.

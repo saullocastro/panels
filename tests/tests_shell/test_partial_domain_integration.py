@@ -41,12 +41,13 @@ def test_partial_domain_integration():
     assert np.allclose(kCfull.toarray(), (kC_1 + kC_2).toarray())
 
 
-@pytest.mark.parametrize('model', ['plate_clpt_donnell',
-                                   'cylshell_clpt_sanders',
-                                   'plate_fsdt_donnell',
-                                   'plate_tsdt_donnell',
-                                   'cylshell_fsdt_sanders',
-                                   'cylshell_tsdt_donnell'])
+@pytest.mark.parametrize('model', [
+    pytest.param('plate_clpt_donnell', marks=pytest.mark.slow),
+    'cylshell_clpt_sanders',
+    'plate_fsdt_donnell',
+    'plate_tsdt_donnell',
+    pytest.param('cylshell_fsdt_sanders', marks=pytest.mark.slow),
+    pytest.param('cylshell_tsdt_donnell', marks=pytest.mark.slow)])
 def test_partial_domain_calc_matrices(model):
     """Shell.calc_kC/kG/kM must honour (x1, x2, y1, y2)
 

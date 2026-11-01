@@ -90,6 +90,7 @@ def test_unexpected_form_raises():
                                       'xi = 0.'))
 
 
+@pytest.mark.slow
 def test_no_kernel_evaluates_the_functions_in_its_loops():
     """Every call of an approximation function of the package fills a
     table, except in the field outputs, which evaluate the fields once per
