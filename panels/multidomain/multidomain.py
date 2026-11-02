@@ -9,7 +9,9 @@ assembly saved with :meth:`.MultiDomain.save`. Both are imported in
 :mod:`panels.multidomain`.
 
 """
+from functools import lru_cache
 import platform
+import warnings
 
 import numpy as np
 from numpy import linspace, reshape
@@ -168,6 +170,68 @@ def _dofs(p):
     return modelDB.db[p.model]['dofs']
 
 
+class ConnectionTermsWarning(UserWarning):
+    r"""Too few terms across an edge connection, see
+    :meth:`.MultiDomain.check_conn_terms`"""
+
+
+#NOTE Hermite coefficients of the fields 1 and xi in the first four terms of
+#     Bardell's functions with unit flags, 1 = P0 + P2 and
+#     xi = -P0 + 2 P1 + P2 + 2 P3, see panels.bardell
+_HERMITE_LINEAR = np.array([[1., 0., 1., 0.],
+                            [-1., 2., 1., 2.]])
+
+#NOTE edge connections: the attribute with the number of terms along the
+#     coordinate normal to the joint, and the letter of that coordinate in
+#     the flags
+_EDGE_CONN = {'SSxcte': ('m', 'x'), 'BFxcte': ('m', 'x'),
+              'SSycte': ('n', 'y'), 'BFycte': ('n', 'y')}
+
+
+@lru_cache(maxsize=None)
+def _terms_linear(flags):
+    r"""Terms needed to represent the linear fields admitted by the flags
+
+    Parameters
+    ----------
+    flags : tuple of 4 bools
+        Whether the flags ``x1t, x1r, x2t, x2r`` of one field along one
+        coordinate, e.g. ``y1u, y1ur, y2u, y2ur``, are different from zero.
+
+    Returns
+    -------
+    terms : int
+        The smallest number of terms of Bardell's functions whose span
+        contains every linear field `a + b \xi` that the flags admit: 4 when
+        the flags admit a non-constant linear field, 3 when they admit only
+        the constant, 0 when they admit none.
+
+    Notes
+    -----
+    Only the first four terms, the cubic Hermite polynomials, have a value
+    or a first derivative different from zero at `\xi = \pm 1`, and the
+    higher ones vanish together with their first derivative at both ends,
+    see :mod:`panels.bardell`. A linear field is therefore represented only
+    by its cubic Hermite interpolation, `1 = P_0 + P_2` and `\xi = -P_0 + 2
+    P_1 + P_2 + 2 P_3`, and the flags admit it when its coefficients of the
+    terms whose flag is zero vanish: the constant needs ``x1t`` and ``x2t``
+    and 3 terms; a non-constant linear field needs ``x1r``, ``x2r`` and one
+    of ``x1t``, ``x2t``, and 4 terms, since the first 3 terms all have a
+    zero derivative at `\xi = +1`.
+
+    """
+    zero = [i for i in range(4) if not flags[i]]
+
+    def rank(cols):
+        return np.linalg.matrix_rank(_HERMITE_LINEAR[:, cols]) if cols else 0
+
+    r0 = rank(zero)
+    for k in range(4):
+        if rank(sorted(set(zero) | set(range(k, 4)))) == r0:
+            return k
+    return 4
+
+
 def default_field(panel, gridx, gridy):
     r"""Grid of points over the domain of a panel
 
@@ -314,6 +378,46 @@ class MultiDomain(object):
     :meth:`.calc_k_dmg`, and not a continuity condition, therefore it keeps
     its penalty stiffness with both methods, see :meth:`._null_space`.
 
+    Each domain of an edge connection needs at least 4 terms across the
+    joint, ``n`` for ``'SSycte'`` and ``'BFycte'``, ``m`` for
+    ``'SSxcte'`` and ``'BFxcte'``, for both ``p1`` and ``p2``, when the
+    flags of its two edges parallel to the joint admit a linear field, as
+    for a blade flange with a free edge or a web between two joints, whose
+    connected edges are released (flags ``1``). Only the first four of
+    Bardell's functions have a value or a first derivative different from
+    zero at the ends, see :mod:`panels.bardell`, and a linear field across
+    the joint is their cubic Hermite interpolation, `\eta = -P_0 + 2 P_1 +
+    P_2 + 2 P_3`. With 3 terms, `P_0, P_1, P_2`, every function has a zero
+    derivative at `\eta = +1`, at the free edge or at the joint, and no
+    linear field across the joint is represented, whatever the connection
+    and the method of imposing it:
+
+    - for `u`, along the joint: neither the rigid rotation of the domain in
+      its plane nor a linear distribution of the axial strain across the
+      joint, as in the bending of a blade stiffener, or of a wing-box, about
+      the normal of the flange; the domain resists it by in-plane shear,
+      and the stiffness is too high by a factor that grows with the square
+      of the slenderness, as in shear locking;
+    - for `w`: no rigid rotation about the joint, which locks the twist of
+      an open section and the rotation of the base along the joint;
+    - for `v`, normal to the joint in the plane: no uniform strain across
+      the joint, a milder stiffening by the Poisson effect.
+
+    The fields `\phi_x` and `\phi_y` of the shear deformation theories are
+    treated likewise. With 2 terms or fewer even the constant, `P_0 +
+    P_2`, is missing. A flag ``0`` that already excludes the linear field,
+    e.g. ``y2ur = 0``, removes the need for the fourth term, and the
+    default flags, with `u = v = w = 0` at the edges, admit no linear
+    field. The exact rule per field is :func:`._terms_linear`, checked by
+    :meth:`.check_conn_terms`, which issues a
+    :class:`.ConnectionTermsWarning`. For a cantilever T-beam, a skin of
+    40 x 1 and a blade of 10 x 1.5 of aluminium joined with ``'BFycte'``,
+    0.5 long, the tip deflection under a tip force is 0.0073 of the one of
+    Euler-Bernoulli with 3 terms across the blade, i.e. 137 times too
+    stiff, and 0.9978 with 4, 5 or 6 terms, for both ``conn_method``; the
+    twist under a tip torque is 0.054 of the converged value with 3 terms,
+    see ``tests/multidomain/test_conn_terms.py``.
+
     With ``pd_method='null-space'`` the prescribed displacements are the
     inhomogeneous linear constraints `\boldsymbol{B}_d \boldsymbol{c} = \bar{\boldsymbol{d}}_0 + \lambda
     \bar{\boldsymbol{d}}_1`, and every admissible configuration is `\boldsymbol{c} = \boldsymbol{Z} \boldsymbol{c}_r +
@@ -453,6 +557,7 @@ class MultiDomain(object):
         self.c_p0 = None
         self.c_p1 = None
         self._conn_used = None
+        self._conn_terms_warned = None
         self.panels = panels
         self.size = None
         self.out_num_cores = 4
@@ -469,6 +574,8 @@ class MultiDomain(object):
             col0 += _dofs(p)*p.m*p.n
             p.row_end = row0 # This is now the start for the next panel to be assembled
             p.col_end = col0
+        if conn is not None:
+            self.check_conn_terms(conn)
 
 
     def save(self, fname=None):
@@ -523,6 +630,102 @@ class MultiDomain(object):
         if self._conn_used is not None:
             return self._conn_used
         raise RuntimeError('No connectivity dictionary defined!')
+
+
+    def check_conn_terms(self, conn=None, warn=True):
+        r"""Domains with too few terms across their edge connections
+
+        For each domain of the edge connections ``'SSxcte'``, ``'SSycte'``,
+        ``'BFxcte'`` and ``'BFycte'``, and for each of its fields, `u, v, w`,
+        and `\phi_x, \phi_y` for the shear deformation theories, compares
+        the number of terms along the coordinate normal to the joint, ``m``
+        for the connections at constant `x`, ``n`` at constant `y`, with
+        the number needed to represent the linear fields across the joint
+        that the boundary condition flags of the domain admit, see the
+        Notes of :class:`.MultiDomain`.
+
+        Parameters
+        ----------
+        conn : list of dict or None, optional
+            The connections, by default those of the assembly, see
+            :meth:`.get_kC_conn`.
+        warn : bool, optional
+            Whether to issue a :class:`.ConnectionTermsWarning` when a
+            domain has too few terms.
+
+        Returns
+        -------
+        issues : list of tuple
+            One tuple ``(panel, func, terms, needed, fields)`` per domain and
+            connection with too few terms: the :class:`.Shell`, the function
+            of the connection, the number of terms across the joint, the
+            number needed, and the names of the fields that miss a linear
+            field across the joint.
+
+        Notes
+        -----
+        The check is done when the assembly is created with ``conn``, and
+        by :meth:`.get_Z` and :meth:`.get_kC_conn` when the connections or
+        the terms and flags of their domains change, the warning being
+        issued once for each set of issues. The connections over an area,
+        ``'SB'`` and ``'SB_TSL'``, are not checked.
+
+        """
+        conn = self._resolve_conn(conn)
+        issues = []
+        for ci in conn:
+            if ci.get('func') not in _EDGE_CONN:
+                continue
+            attr, d = _EDGE_CONN[ci['func']]
+            for key in ('p1', 'p2'):
+                p = ci[key]
+                terms = getattr(p, attr)
+                needed = 0
+                fields = []
+                for f in nullspace.FIELDS[:_dofs(p)]:
+                    flags = tuple(float(getattr(p, d + e + f + r)) != 0
+                                  for e in '12' for r in ('', 'r'))
+                    k = _terms_linear(flags)
+                    if terms < k:
+                        fields.append(f)
+                        needed = max(needed, k)
+                if fields:
+                    issues.append((p, ci['func'], terms, needed,
+                                   tuple(fields)))
+        if warn and issues:
+            self._warn_conn_terms(issues)
+        return issues
+
+
+    def _warn_conn_terms(self, issues, stacklevel=4):
+        r"""Issues the :class:`.ConnectionTermsWarning` of
+        :meth:`.check_conn_terms`, once for each set of issues"""
+        key = tuple((id(p), func, terms, fields)
+                    for p, func, terms, needed, fields in issues)
+        if key == self._conn_terms_warned:
+            return
+        self._conn_terms_warned = key
+        lines = []
+        for p, func, terms, needed, fields in issues[:3]:
+            attr = _EDGE_CONN[func][0]
+            if any(pj is p for pj in self.panels):
+                label = self._panel_label(p)
+            else:
+                label = "panel (name '{0}', group '{1}')".format(p.name,
+                                                                 p.group)
+            lines.append("{0} of '{1}': {2} = {3} < {4} for {5}".format(
+                label, func, attr, terms, needed, ', '.join(fields)))
+        if len(issues) > 3:
+            lines.append('and {0} more'.format(len(issues) - 3))
+        ndomains = len({id(issue[0]) for issue in issues})
+        warnings.warn('{0} domain(s) of edge connections have too few terms '
+                      'across the joint to represent the linear fields that '
+                      'their flags admit, e.g. a rigid rotation, and the '
+                      'assembly locks (with 3 terms across a blade flange the '
+                      'bending stiffness of a T-beam is 137 times too high): '
+                      '{1}. See the Notes of MultiDomain.'.format(
+                          ndomains, '; '.join(lines)),
+                      ConnectionTermsWarning, stacklevel=stacklevel)
 
 
     def _null_space(self, connecti):
@@ -694,6 +897,7 @@ class MultiDomain(object):
         """
         size = self.get_size()
         conn = self._resolve_conn(conn)
+        self.check_conn_terms(conn)
         if tol is not None:
             self._Z_tol = tol
         tol = self._Z_tol
@@ -3142,6 +3346,7 @@ class MultiDomain(object):
         """
         conn = self._resolve_conn(conn)
         self._conn_used = conn
+        self.check_conn_terms(conn)
 
         size = self.get_size()
 

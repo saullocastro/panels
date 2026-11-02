@@ -20,7 +20,7 @@ that build and analyse example assemblies of
 
 
 """
-from . multidomain import MultiDomain, load
+from . multidomain import MultiDomain, load, ConnectionTermsWarning
 from . tstiff2d_1stiff_freq import *
 from . tstiff2d_1stiff_compression import *
 from . tstiff2d_1stiff_flutter import *
