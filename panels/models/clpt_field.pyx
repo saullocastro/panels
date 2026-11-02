@@ -14,8 +14,9 @@ The degrees of freedom of each term of the approximation are ``u, v, w``.
 The functions of this module evaluate the displacements and rotations,
 :func:`.fuvw`, the generalized strains, :func:`.fstrain`, and the
 approximation functions at a point, :func:`.fg`, for the models
-``'plate_clpt_donnell'``, ``'plate_clpt_gl'``, ``'cylshell_clpt_donnell'``
-and ``'cylshell_clpt_sanders'``, see :mod:`panels.modelDB`. The coordinates
+``'plate_clpt_donnell'``, ``'plate_clpt_gl'``, ``'plate_clpt_tl'``,
+``'cylshell_clpt_donnell'`` and ``'cylshell_clpt_sanders'``, see
+:mod:`panels.modelDB`. The coordinates
 ``x`` and ``y`` are physical, ``0 <= x <= a`` and ``0 <= y <= b``.
 
 Notes
@@ -90,7 +91,8 @@ def is_gl(object s):
     Returns
     -------
     gl : int
-        ``1`` when the model is ``'plate_clpt_gl'``, else ``0``.
+        ``1`` when the model is ``'plate_clpt_gl'`` or ``'plate_clpt_tl'``,
+        else ``0``.
 
     Notes
     -----
@@ -100,7 +102,39 @@ def is_gl(object s):
     `\gamma_{xy}`, see :mod:`panels.models`.
 
     '''
-    return 1 if s.model == 'plate_clpt_gl' else 0
+    return 1 if s.model in ('plate_clpt_gl', 'plate_clpt_tl') else 0
+
+
+def is_tl(object s):
+    r'''Tell whether the model of ``s`` measures the changes of curvature
+    with the deformed normal
+
+    The changes of curvature of :func:`.fstrain` are then those of
+    :mod:`panels.models.plate_clpt_tl_num`.
+
+    Parameters
+    ----------
+    s : :class:`.Shell`
+        The shell, whose attribute ``model`` is read.
+
+    Returns
+    -------
+    tl : int
+        ``1`` when the model is ``'plate_clpt_tl'``, else ``0``.
+
+    Notes
+    -----
+    With the area vector of the deformed mid-surface `\boldsymbol{a} =
+    \boldsymbol{X}_{,x} \times \boldsymbol{X}_{,y}`, `\boldsymbol{X} = (x,
+    y, 0) + (u, v, w)`, the changes of curvature are `\kappa_{xx} =
+    -\boldsymbol{a} \cdot \boldsymbol{u}_{,xx}`, `\kappa_{yy} =
+    -\boldsymbol{a} \cdot \boldsymbol{u}_{,yy}` and `\kappa_{xy} =
+    -2 \boldsymbol{a} \cdot \boldsymbol{u}_{,xy}`, which are those of the
+    von Kármán plate for `\boldsymbol{a} = \boldsymbol{e}_z`, see
+    :mod:`panels.models`.
+
+    '''
+    return 1 if s.model == 'plate_clpt_tl' else 0
 
 
 def fuvw(double [::1] c, object s, double [::1] xs, double [::1] ys,
@@ -227,8 +261,9 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys, int
     with OpenMP threads. The strains are those of the Donnell kinematics,
     or of the Sanders-Koiter kinematics when :func:`.is_sanders` returns
     ``1``, or the Green-Lagrange membrane strains when :func:`.is_gl`
-    returns ``1``; the hoop strain ``w/r`` is included when ``s.r`` is not
-    zero.
+    returns ``1``, with the changes of curvature of the deformed normal when
+    :func:`.is_tl` returns ``1``; the hoop strain ``w/r`` is included when
+    ``s.r`` is not zero.
 
     Parameters
     ----------
@@ -258,12 +293,14 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys, int
     -----
     The strains are those of the Donnell, Sanders-Koiter or Green-Lagrange
     kinematics given in the notes of :mod:`panels.models`, with the
-    quadratic terms of the membrane strains multiplied by ``NLgeom``, and
-    with ``r = 0`` standing for the flat plate, whose hoop strain is zero.
+    quadratic terms of the membrane strains, and the non-linear terms of the
+    changes of curvature of ``'plate_clpt_tl'``, multiplied by ``NLgeom``,
+    and with ``r = 0`` standing for the flat plate, whose hoop strain is
+    zero.
     '''
     
     cdef double a, b, r
-    cdef int m, n, sanders, gl
+    cdef int m, n, sanders, gl, tl
     cdef double x1u, x1ur, x2u, x2ur
     cdef double x1v, x1vr, x2v, x2vr
     cdef double x1w, x1wr, x2w, x2wr
@@ -277,6 +314,7 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys, int
     n = s.n
     sanders = is_sanders(s)
     gl = is_gl(s)
+    tl = is_tl(s)
     x1u = s.x1u; x1ur = s.x1ur; x2u = s.x2u; x2ur = s.x2ur
     x1v = s.x1v; x1vr = s.x1vr; x2v = s.x2v; x2vr = s.x2vr
     x1w = s.x1w; x1wr = s.x1wr; x2w = s.x2w; x2wr = s.x2wr
@@ -321,7 +359,7 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys, int
               x1w, x1wr, x2w, x2wr,
               y1u, y1ur, y2u, y2ur,
               y1v, y1vr, y2v, y2vr,
-              y1w, y1wr, y2w, y2wr, NLgeom, sanders, gl)
+              y1w, y1wr, y2w, y2wr, NLgeom, sanders, gl, tl)
 
     return (np.ravel(exxs)[:size], np.ravel(eyys)[:size], np.ravel(gxys)[:size],
             np.ravel(kxxs)[:size], np.ravel(kyys)[:size], np.ravel(kxys)[:size])
@@ -587,7 +625,7 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
         double y1u, double y1ur, double y2u, double y2ur,
         double y1v, double y1vr, double y2v, double y2vr,
         double y1w, double y1wr, double y2w, double y2wr, int NLgeom,
-        int sanders, int gl) noexcept nogil:
+        int sanders, int gl, int tl) noexcept nogil:
     r'''Calculates the strain at every point in the provided grid
 
     Kernel of :func:`.fstrain` for one chunk of ``size`` points: the
@@ -596,8 +634,9 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
     ``kyys[k]`` and ``kxys[k]``, for the ``m*n`` terms of the Ritz
     constants ``c``, the boundary condition flags ``x1u, ..., y2wr``, the
     non-linear terms when ``NLgeom == 1``, the Sanders-Koiter
-    kinematics when ``sanders == 1`` and the Green-Lagrange membrane strains
-    of the plate when ``gl == 1``. For the Donnell kinematics the term
+    kinematics when ``sanders == 1``, the Green-Lagrange membrane strains
+    of the plate when ``gl == 1`` and the changes of curvature of the
+    deformed normal when ``tl == 1``. For the Donnell kinematics the term
     ``w/r`` is included when ``r`` is not zero.
 
     '''
@@ -624,6 +663,13 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
 
     cdef double w_xi, w_eta, v, phix, phiy
     cdef double u_x, u_y, v_x, v_y
+    cdef double u_xx, u_yy, u_xy, v_xx, v_yy, v_xy, w_xx, w_yy, w_xy
+    cdef double w_x, w_y, a1, a2, a3
+
+    cdef double *fu_xixi
+    cdef double *gu_etaeta
+    cdef double *fv_xixi
+    cdef double *gv_etaeta
 
     fu = <double *>malloc(NMAX * sizeof(double))
     fu_xi = <double *>malloc(NMAX * sizeof(double))
@@ -639,6 +685,10 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
     gw = <double *>malloc(NMAX * sizeof(double))
     gw_eta = <double *>malloc(NMAX * sizeof(double))
     gw_etaeta = <double *>malloc(NMAX * sizeof(double))
+    fu_xixi = <double *>malloc(NMAX * sizeof(double))
+    gu_etaeta = <double *>malloc(NMAX * sizeof(double))
+    fv_xixi = <double *>malloc(NMAX * sizeof(double))
+    gv_etaeta = <double *>malloc(NMAX * sizeof(double))
 
     if r == 0:
         flagcyl = 0
@@ -670,6 +720,11 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
         vec_f(gw, eta, y1w, y1wr, y2w, y2wr)
         vec_fp(gw_eta, eta, y1w, y1wr, y2w, y2wr)
         vec_fpp(gw_etaeta, eta, y1w, y1wr, y2w, y2wr)
+        if tl == 1:
+            vec_fpp(fu_xixi, xi, x1u, x1ur, x2u, x2ur)
+            vec_fpp(gu_etaeta, eta, y1u, y1ur, y2u, y2ur)
+            vec_fpp(fv_xixi, xi, x1v, x1vr, x2v, x2vr)
+            vec_fpp(gv_etaeta, eta, y1v, y1vr, y2v, y2vr)
 
         w_xi = 0
         w_eta = 0
@@ -678,6 +733,12 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
         u_y = 0
         v_x = 0
         v_y = 0
+        u_xx = 0
+        u_yy = 0
+        u_xy = 0
+        v_xx = 0
+        v_yy = 0
+        v_xy = 0
 
         # Sum through all m*n terms
         for j in range(n):
@@ -692,6 +753,13 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
                     u_y += c[col+0]*fu[i]*gu_eta[j]*(2/b)
                     v_x += c[col+1]*fv_xi[i]*gv[j]*(2/a)
                     v_y += c[col+1]*fv[i]*gv_eta[j]*(2/b)
+                if tl == 1:
+                    u_xx += c[col+0]*fu_xixi[i]*gu[j]*4/(a*a)
+                    u_yy += c[col+0]*fu[i]*gu_etaeta[j]*4/(b*b)
+                    u_xy += c[col+0]*fu_xi[i]*gu_eta[j]*4/(a*b)
+                    v_xx += c[col+1]*fv_xixi[i]*gv[j]*4/(a*a)
+                    v_yy += c[col+1]*fv[i]*gv_etaeta[j]*4/(b*b)
+                    v_xy += c[col+1]*fv_xi[i]*gv_eta[j]*4/(a*b)
 
         if sanders == 1:
             # Sanders-Koiter kinematics, the non-linear strain is
@@ -760,6 +828,21 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
             eyy += NLgeom*0.5*(u_y*u_y + v_y*v_y)
             gxy += NLgeom*(u_x*u_y + v_x*v_y)
 
+        if tl == 1:
+            # changes of curvature of the area vector a = X,x x X,y of the
+            # deformed mid-surface, e_z without NLgeom
+            w_xx = -kxx
+            w_yy = -kyy
+            w_xy = -kxy/2
+            w_x = (2/a)*w_xi
+            w_y = (2/b)*w_eta
+            a1 = NLgeom*(v_x*w_y - w_x*(1 + v_y))
+            a2 = NLgeom*(w_x*u_y - (1 + u_x)*w_y)
+            a3 = 1 + NLgeom*(u_x + v_y + u_x*v_y - v_x*u_y)
+            kxx = -(a1*u_xx + a2*v_xx + a3*w_xx)
+            kyy = -(a1*u_yy + a2*v_yy + a3*w_yy)
+            kxy = -2*(a1*u_xy + a2*v_xy + a3*w_xy)
+
         # Strains and curvatures at each point in the grid 
         exxs[pti] = exx
         eyys[pti] = eyy
@@ -783,4 +866,8 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
     free(gw)
     free(gw_eta)
     free(gw_etaeta)
+    free(fu_xixi)
+    free(gu_etaeta)
+    free(fv_xixi)
+    free(gv_etaeta)
 

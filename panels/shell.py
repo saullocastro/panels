@@ -85,19 +85,26 @@ def check_c(c, size):
         raise ValueError('"c" must have the same size as the global stiffness matrix')
 
 
-def gauss_points(num):
+def gauss_points(num, degree=(4, 0)):
     r"""Default number of Gauss-Legendre points along a direction
 
     Returns ``max(2*num - 1, 7)``, the smallest number of points that
     integrates exactly every integrand of the numerical kernels of
     :class:`.Shell` along a direction with ``num`` approximation terms and a
-    constant constitutive matrix, see :meth:`.Shell.integration_points`.
+    constant constitutive matrix, see :meth:`.Shell.integration_points`;
+    ``3*max(num - 1, 3)`` with ``degree=(6, -2)``, for the model
+    ``'plate_clpt_tl'``.
 
     Parameters
     ----------
     num : int
         Number of terms of the approximation functions along the direction,
         ``m`` along `x` or ``n`` along `y`.
+    degree : tuple, optional
+        ``(k, j)``: the integrands are polynomials of degree at most `k p +
+        j` along the direction, with `p` the degree of the approximation
+        functions. Default ``(4, 0)``; the key ``'integrand_degree'`` of
+        :mod:`panels.modelDB` gives it for each model.
 
     Returns
     -------
@@ -113,10 +120,15 @@ def gauss_points(num):
     geometrically non-linear strains are products of four of them, or of
     their derivatives, along each direction, of degree at most `4 p`, which
     the Gauss-Legendre rule of `n` points integrates exactly when `2 n - 1
-    \ge 4 p`, i.e. `n \ge 2 p + 1 = \max(2\,num - 1, 7)`.
+    \ge 4 p`, i.e. `n \ge 2 p + 1 = \max(2\,num - 1, 7)`. With the
+    curvatures of the deformed normal of ``'plate_clpt_tl'``, cubic in the
+    displacements, the integrands are of degree at most `6 p - 2` and `n \ge
+    3 p`. In general `n = \lceil (k p + j + 1)/2 \rceil`.
 
     """
-    return max(2*num - 1, 7)
+    k, j = degree
+    p = max(num - 1, 3)
+    return (k*p + j + 2)//2
 
 
 class Shell(object):
@@ -584,7 +596,7 @@ class Shell(object):
 
         """
         if self._nx is None:
-            return gauss_points(self.m)
+            return gauss_points(self.m, self._integrand_degree())
         return self._nx
 
     @nx.setter
@@ -602,12 +614,18 @@ class Shell(object):
 
         """
         if self._ny is None:
-            return gauss_points(self.n)
+            return gauss_points(self.n, self._integrand_degree())
         return self._ny
 
     @ny.setter
     def ny(self, value):
         self._ny = value
+
+    def _integrand_degree(self):
+        r"""``(k, j)`` of :func:`.gauss_points` for the model, from the key
+        ``'integrand_degree'`` of :mod:`panels.modelDB`, ``(4, 0)`` when
+        absent"""
+        return modelDB.db.get(self.model, {}).get('integrand_degree', (4, 0))
 
     def _rebuild(self):
         #NOTE only the values assigned by the user, the defaults being
@@ -848,7 +866,9 @@ class Shell(object):
         stiffness matrix and of the internal force vector with the
         geometrically non-linear strains of four, of degree at most `4 p`,
         which `n_x = 2 p + 1 = \max(2 m - 1, 7)` points integrate exactly,
-        and likewise along `y`. The terms in `1/r` of the cylinders, also
+        and likewise along `y`. The curvatures of ``'plate_clpt_tl'``, cubic
+        in the displacements, raise the degree to `6 p - 2`, and its default
+        is `n_x = 3 p`. The terms in `1/r` of the cylinders, also
         those in `v/r` of the Sanders-Koiter kinematics, only multiply these
         products by a constant, and the transverse shear strains and the
         higher-order terms of the TSDT are again products of the functions

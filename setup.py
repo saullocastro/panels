@@ -171,6 +171,14 @@ extensions = [
         include_dirs=include_dirs, extra_compile_args=compile_args,
               extra_link_args=link_args, define_macros=define_macros,
               language='c++'),
+    Extension('panels.models.plate_clpt_tl_num',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/plate_clpt_tl_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
     Extension('panels.models.fsdt_tsdt_field',
         sources=[
             './panels/core/src/bardell_functions.cpp',
