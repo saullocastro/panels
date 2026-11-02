@@ -24,6 +24,7 @@ References
 .. [pflueger1975Stability] A. Pflüger, "Stabilitätsprobleme der Elastostatik". 3rd ed., Springer-Verlag, Berlin, Heidelberg, New York, 1975. https://doi.org/10.1007/978-3-662-09994-0.
 .. [schweizerhof1984Pressure] K. Schweizerhof and E. Ramm, "Displacement dependent pressure loads in nonlinear finite element analyses". Computers & Structures, 18(6):1099-1114, 1984. https://doi.org/10.1016/0045-7949(84)90154-8.
 .. [simitses1976Stability] G. J. Simitses, "An Introduction to the Elastic Stability of Structures". Prentice-Hall, Englewood Cliffs, 1976.
+.. [sze2004Benchmarks] K. Y. Sze, X. H. Liu and S. H. Lo, "Popular benchmark problems for geometric nonlinear analysis of shells". Finite Elements in Analysis and Design, 40:1551-1569, 2004. https://doi.org/10.1016/j.finel.2003.11.001: Section 3.2, Fig. 3 and Table 3, pp. 1555-1557.
 .. [tijs2022Interlaminar] B. H. A. H. Tijs, S. Abdel-Monsef, J. Renart, A. Turon and C. Bisagni, "Characterization and analysis of the interlaminar behavior of thermoplastic composites considering fiber bridging and R-curve effects". Composites Part A, 162:107101, 2022. https://doi.org/10.1016/j.compositesa.2022.107101.
 .. [tijs2023PhD] B. H. A. H. Tijs, "Analysis of Thermoplastic Composites and Conduction Welded Joints". PhD thesis, Delft University of Technology, 2023. ISBN 978-94-6473-101-9.
 .. [timoshenko1961Stability] S. P. Timoshenko and J. M. Gere, "Theory of Elastic Stability". 2nd ed., McGraw-Hill, New York, 1961.
