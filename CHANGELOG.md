@@ -172,6 +172,70 @@
   0.893 mm/N, 1.3% to 1.5% below the Euler-Bernoulli beam of the box
   section, with the penalty and the null-space connections (0.2% apart).
 
+### New model `plate_clpt_gl`: plates with Green-Lagrange membrane strains
+
+- New model `'plate_clpt_gl'`, the CLPT plate with the complete
+  Green-Lagrange membrane strains, `exx = u,x + (u,x^2 + v,x^2 + w,x^2)/2`,
+  `eyy = v,y + (u,y^2 + v,y^2 + w,y^2)/2`, `gxy = u,y + v,x + u,x u,y +
+  v,x v,y + w,x w,y`, and the changes of curvature of
+  `'plate_clpt_donnell'`. Its membrane strains vanish for any rigid
+  rotation, in plane and out of plane, so that plates joined at an angle,
+  whose out-of-plane rotation is the in-plane rotation of their neighbour,
+  measure the same stretch. With the von Kármán strains a wing box bent
+  about a horizontal axis stretches its skins against its spars by `t^2/2`,
+  `t` the rotation, and stiffens once its tip deflection reaches its
+  height: the High-AR-t5 box of Elalfy, De Breuker and Castro (preprint,
+  Fig. 6, p. 10) under a follower tip force deflects 13.9 mm at 25 N and
+  54.7 mm at 500 N with `'plate_clpt_donnell'`, against 22.7 and 453.5 mm of
+  the linear solution. With `'plate_clpt_gl'` it deflects 22.68, 90.84,
+  184.37, 287.24, 393.59 and 499.83 mm at 25, 100, 200, 300, 400 and 500 N,
+  2.5 to 4.0 % below Abaqus (23.3, 93.2, 189.6, 298.9, 410.0 and 515.5 mm),
+  of which 2.7 % is the difference in the linear range; above the first
+  buckling load the top skin buckles between the ribs and both skins sag
+  towards the mid-plane, the bottom one by 1.4 mm (11 % of the height) at
+  the root at 500 N, so that, as in Abaqus, the box is softer than the
+  linear beam at 500 N. Under a dead tip force it deflects 428.30 mm at 500
+  N, 3.5 % below the 443.8 mm of Abaqus in their Fig. 5.
+- The derivation, `theory/shells/plate_clpt_gl/plate_clpt_gl.py` (SymPy),
+  checks the invariance under rigid rotations, the von Kármán limit and
+  that the tangent stiffness `[B]^T [ABD] [B] + [H(N)]` is the Jacobian of
+  the internal force vector; `write_pyx.py` generates
+  `panels/models/plate_clpt_gl.pyx` and `plate_clpt_gl_num.pyx`, with the
+  follower-pressure kernels and `calc_kTv`; `plate_clpt_gl.md` is the
+  derivation note. The kernels form the 9 x 9 matrix of the generalized
+  derivatives once per integration point, then 27 products per pair of
+  terms; the integration points are those of the other models.
+- The geometric stiffness matrices, `Shell.calc_kG` and the analytical one
+  of a constant stress state, have `u-u` and `v-v` blocks besides the `w-w`
+  block. The linear constitutive stiffness, the mass and the aerodynamic
+  kernels are those of `'plate_clpt_donnell'`: linear static solutions and
+  natural frequencies are identical, and linear buckling eigenvalues are
+  identical for symmetric laminates and within `1e-5` otherwise.
+- The changes of curvature are measured in the fixed local frame, so a
+  large rotation carried by plate bending keeps the bending energy of the
+  linear plate: a cantilever strip under a tip force of constant direction
+  follows the elastica to 0.15 % when bent in its plane (`PL^2/EI = 2`),
+  but the linear beam when bent out of plane (`w = L/3` at `PL^2/EI = 1`,
+  against `0.302 L`). In a box beam the global bending is carried by the
+  membrane strains. The connections of `MultiDomain` are unchanged, linear
+  in the displacements of the fixed local frames.
+- `theory/shells/tangent_product` accepts the six gradients of the
+  Green-Lagrange strains in place of the two rotations of the von Kármán
+  terms (the kernels of the other models are regenerated unchanged), and
+  `clpt_field.fstrain` returns the Green-Lagrange membrane strains of the
+  new model (`clpt_field.is_gl`). Follower pressures use the exact area
+  vector of the plate with `follower='quadratic'`.
+- Tests: `tests/tests_shell/test_plate_clpt_gl.py` (rigid rotations up to
+  1 rad about four axes, linear kernels and analyses against
+  `'plate_clpt_donnell'`, small deflections, cantilever strips against the
+  elastica); the model is added to the tangent, tangent-product,
+  follower-pressure and JSON tests; the slow
+  `tests/multidomain/test_wingbox_plate_clpt_gl.py` compares the wing box
+  with Fig. 6 (about 2 to 3 min).
+- Documentation: new page "Large rotations: plates with Green-Lagrange
+  membrane strains", `doc/source/plate_clpt_gl.rst`, and the model in
+  `panels.models`, `Shell`, the user guide and the index.
+
 ## 0.14.2 (2026-11-01)
 
 ### Packaging

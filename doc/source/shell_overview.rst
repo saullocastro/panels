@@ -19,7 +19,8 @@ Inputs
 (``None`` for a plate). The attribute ``model`` selects the kinematics and
 the non-linear equations, see :mod:`panels.models`; when it is not given, a
 plate gets ``'plate_clpt_donnell'`` and a cylinder
-``'cylshell_clpt_sanders'``. The models based on the classical laminated
+``'cylshell_clpt_sanders'``; plates with large rotations, e.g. the domains
+of a wing box, need ``'plate_clpt_gl'``, see :ref:`plate_clpt_gl`. The models based on the classical laminated
 plate theory (CLPT) have the 3 degrees of freedom `u, v, w` per term, those
 based on the shear deformation theories (FSDT, TSDT) the 5 degrees of
 freedom `u, v, w, \phi_x, \phi_y`.

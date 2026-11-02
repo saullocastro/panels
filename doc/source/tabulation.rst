@@ -129,7 +129,9 @@ over the terms are tabulated:
 
 - the 9 geometrically non-linear models, ``panels/models/<model>_num.pyx``:
   ``fkC_num``, ``fkG_num``, ``calc_fint``, ``fkM_num``, ``fkAx_num``,
-  ``fkAy_num``, ``calc_fext_follower`` and ``fkCfollower_num``;
+  ``fkAy_num``, ``calc_fext_follower`` and ``fkCfollower_num``; the kernels of
+  ``plate_clpt_gl_num.pyx``, see :ref:`plate_clpt_gl`, are generated with
+  the tables of the functions and of their derivatives in `x` and `y`;
 - the connections, ``panels/multidomain/connections``: ``kCSSxcte``,
   ``kCSSycte``, ``kCBFxcte``, ``kCBFycte`` (including the shear
   deformation theories), ``kCpd`` (prescribed displacements) and

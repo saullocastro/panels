@@ -24,7 +24,8 @@ displacement gradients, ``a = a0 + a1 + a2``:
 
 The kinematics of each model enter through ``B``:
 
-- plate: ``1/r = 0``;
+- plate: ``1/r = 0``, for the von Kármán (``plate_*_donnell``) and the
+  Green-Lagrange (``plate_clpt_gl``) strains alike;
 - Donnell cylinder: the plate rotations, ``B = (u,y, 1 + v,y + w/r, w,y)``,
   i.e. the ``v/r`` of the rotation is neglected as in the Donnell strains;
 - Sanders cylinder: ``B = (u,y, 1 + v,y + w/r, w,y - v/r)``, i.e. the exact
@@ -106,6 +107,9 @@ MODELS = {
     'cylshell_fsdt_sanders': (5, 'cylshell', 'sanders'),
     'cylshell_tsdt_donnell': (5, 'cylshell', 'donnell'),
     'cylshell_tsdt_sanders': (5, 'cylshell', 'sanders'),
+    #NOTE the plate geometry is exact whatever the strains, Green-Lagrange
+    #     here, see plate_clpt_gl/plate_clpt_gl.md
+    'plate_clpt_gl': (3, 'plate', 'gl'),
 }
 
 a, b, r = symbols('a, b, r', positive=True)

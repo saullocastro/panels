@@ -70,6 +70,21 @@ db = {
                     # the plate kernels never read r
                     'requires_r': False,
                     },
+    'plate_clpt_gl': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    'field': clpt_field,
+                    #NOTE fk0, fkM, fkAx, fkAy and fcA of plate_clpt_donnell,
+                    #     fkG0 with the in-plane blocks of the Green-Lagrange
+                    #     strains
+                    'matrices': plate_clpt_gl,
+                    'matrices_num': plate_clpt_gl_num,
+                    'dofs': 3,
+                    'e_num': 6,
+                    # the plate kernels never read r
+                    'requires_r': False,
+                    },
     'cylshell_fsdt_donnell': {
                     'linear static': True,
                     'linear buckling': True,

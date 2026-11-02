@@ -103,7 +103,7 @@ def _shell_static(s):
 
 
 SHELL_MODELS = ['plate_clpt_donnell', 'cylshell_clpt_sanders',
-                'plate_fsdt_donnell', 'cylshell_tsdt_donnell']
+                'plate_fsdt_donnell', 'cylshell_tsdt_donnell', 'plate_clpt_gl']
 
 
 @pytest.mark.parametrize('model', SHELL_MODELS)

@@ -127,7 +127,10 @@ class Shell(object):
     (radius): ``'plate_clpt_donnell'`` when ``r`` is ``None`` and
     ``'cylshell_clpt_sanders'`` otherwise. The Donnell kinematics of
     cylindrical shells remain available with ``model =
-    'cylshell_clpt_donnell'``, see :mod:`panels.models`.
+    'cylshell_clpt_donnell'``, see :mod:`panels.models`. For plates with
+    large rotations, e.g. the domains of a wing box, ``model =
+    'plate_clpt_gl'`` has the Green-Lagrange membrane strains, which vanish
+    for any rigid rotation, see :ref:`plate_clpt_gl`.
 
     The approximation functions for the displacement fields are built using
     :ref:`Bardell's functions <theory_func_bardell>`.
@@ -3020,8 +3023,9 @@ class Shell(object):
         follower : bool or str, optional
             ``False`` for a dead load, ``True`` or ``'linear'`` for a follower
             pressure with the first-order area vector, ``'quadratic'`` for the
-            complete area vector. ``None`` is taken as ``False``. Default
-            ``False``.
+            complete area vector, the one to use with the large rotations of
+            ``model='plate_clpt_gl'``. ``None`` is taken as ``False``.
+            Default ``False``.
         zp : float, optional
             Position along `z` of the surface on which the pressure acts,
             e.g. ``h/2`` for the outer face of a cylinder. For the cylindrical
