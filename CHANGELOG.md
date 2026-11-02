@@ -1,5 +1,27 @@
 # Changelog
 
+## Unreleased
+
+### Documentation and tests: null rows and columns in linear static solves
+
+- The docstring of `MultiDomain` describes the linear static workflow:
+  `calc_kC` and `calc_fext`, `reduce`, `structsolve.solve` (or
+  `structsolve.static`, `Analysis.static`, `MultiDomain.linear_static`),
+  `expand`, and why `structsolve.solve` and not a plain
+  `scipy.sparse.linalg.spsolve`: a boundary condition flag set to zero, e.g.
+  at a clamped edge, leaves null rows and columns in `kC`, which is then
+  exactly singular until `structsolve.sparseutils.remove_null_cols` removes
+  them. Every linear solve of the package, of its example assemblies, of the
+  tests included in the documentation and of the notebooks was checked: all
+  go through `structsolve.solve`, `static`, `Analysis.static` or `lb`, or
+  remove the null rows and columns explicitly; no code changed.
+- New `tests/multidomain/test_linear_static_null_dofs.py`: a cantilever
+  plate strip in two domains clamped at the root, with the penalty and the
+  null-space connections, has null rows and columns in `kC` with null loads,
+  `spsolve` of the full system fails, and `structsolve.solve` and
+  `MultiDomain.linear_static` give the same solution, whose tip deflection is
+  1.5% below the Euler-Bernoulli beam (16 null rows and columns of 192).
+
 ## 0.14.2 (2026-11-01)
 
 ### Packaging
