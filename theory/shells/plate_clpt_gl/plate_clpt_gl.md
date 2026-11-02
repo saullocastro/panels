@@ -111,7 +111,9 @@ strains.
 
 - The curvatures are measured in the fixed local frame: a bending deformation
   superposed on a rigid rotation `t` (e.g. a local buckle of a rotated skin) is
-  seen with the factor `cos t`, and its bending energy with `cos^2 t`.
+  seen with the factor `cos t`, and its bending energy with `cos^2 t`. The
+  model `plate_clpt_tl` (`../plate_clpt_tl`) measures them with the deformed
+  normal.
 - The connections of `MultiDomain` stay linear in the local displacements:
   displacement continuity is exact for any rotation, the rotation continuity
   `w,y` (penalty or null space) is that of small rotations, with a mismatch of
