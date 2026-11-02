@@ -55,6 +55,19 @@ have the same number of degrees of freedom per term; ``'SB_TSL'`` is
 available for the classical laminated plate theory only, see
 :ref:`cohesive_zone`.
 
+Each domain of an edge connection needs at least 4 terms across the joint
+(``n`` for the connections at constant `y`, ``m`` at constant `x`) when its
+connected edge and its opposite edge are released, as for a blade flange
+with a free edge: only the first four of Bardell's functions carry the
+values and the slopes at the edges, and with 3 terms all of them have a
+zero slope at `\eta = +1`, so that no field varies linearly across the
+joint. The rigid rotations of the flange in its plane (`u`) and about the
+joint (`w`) are then missing, and a cantilever T-beam with 3 terms across
+its blade is 137 times too stiff in bending, a wing-box with blade
+stringers about 100 times. :class:`.MultiDomain` issues a
+:class:`.ConnectionTermsWarning` in this case, see the Notes of
+:class:`.MultiDomain` and :meth:`.MultiDomain.check_conn_terms`.
+
 
 Imposing the connections
 ------------------------

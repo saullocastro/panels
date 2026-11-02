@@ -1,5 +1,43 @@
 # Changelog
 
+## Unreleased
+
+### Warning for too few terms across an edge connection
+
+- New `MultiDomain.check_conn_terms()` and `ConnectionTermsWarning`
+  (a `UserWarning`, importable from `panels.multidomain`): for each domain of
+  the edge connections `'SSxcte'`, `'SSycte'`, `'BFxcte'` and `'BFycte'`, and
+  for each field (`u, v, w`, and `phix, phiy` for the FSDT and TSDT), the
+  number of terms across the joint (`n` at constant `y`, `m` at constant `x`)
+  is compared with the number needed to represent the linear fields across
+  the joint that the flags of the two edges parallel to the joint admit,
+  `_terms_linear()`: 4 when both derivative flags (e.g. `y1ur`, `y2ur`) and
+  one value flag are non-zero, 3 when only the constant is admitted, 0
+  otherwise. The check runs when the assembly is created with `conn`, and in
+  `get_Z()` and `get_kC_conn()` when the connections, terms or flags change
+  (about 9 ms for the 225 domains of a wing-box); the warning is issued once
+  per set of issues. No result changes.
+- The reason: only the first four of Bardell's functions have a value or a
+  slope at the ends, a linear field is `xi = -P0 + 2 P1 + P2 + 2 P3`, and
+  with 3 terms every function has a zero slope at `xi = +1`. A blade flange
+  with 3 terms across its height then has neither its in-plane rigid
+  rotation (`u`) nor its rotation about the joint (`w`): a free flange has 4
+  zero-energy modes instead of 6. A cantilever T-beam (skin 40 x 1, blade 10
+  x 1.5, length 0.5, `'BFycte'`) has a tip deflection of 0.0073 of
+  Euler-Bernoulli with 3 terms across the blade (137 times too stiff) and
+  0.9978 with 4, 5 or 6, with both `conn_method` and either edge of the
+  blade joined; its twist is 0.054 of the converged value with 3 terms. With
+  4 terms and `y2ur = 0` the bending locks as with 3 terms, with `y2wr = 0`
+  the torsion, and `y2vr = 0` stiffens the bending by 3.7 % (Poisson). In
+  the High-AR-t5 wing-box with 4 blade stringers per skin (Elalfy, De
+  Breuker and Castro), the tip deflection under 500 N (linear static) is
+  3.72 mm with 8 x 3 terms in the stringers against 391.92 mm with 8 x 4 or
+  8 x 5 (`conn_method='penalty'`), 3.71 mm against 386.83 mm with the
+  null space, about 105 times too stiff; the warning is issued for the 72
+  stringers with 8 x 3 terms and not with the default 8 x 4.
+- Documented in the Notes of `MultiDomain` and in the multi-domain overview
+  page. New tests in `tests/multidomain/test_conn_terms.py`.
+
 ## 0.14.2 (2026-11-01)
 
 ### Packaging
