@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.15.0 (2026-11-03)
 
 ### Documentation and tests: null rows and columns in linear static solves
 
