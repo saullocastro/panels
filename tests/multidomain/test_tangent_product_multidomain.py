@@ -19,7 +19,7 @@ from test_follower_pressure_multidomain import panel
 MODELS = ['plate_clpt_donnell', 'cylshell_clpt_donnell',
           'cylshell_clpt_sanders', 'plate_fsdt_donnell', 'plate_tsdt_donnell',
           'cylshell_fsdt_donnell', 'cylshell_fsdt_sanders',
-          'cylshell_tsdt_donnell', 'cylshell_tsdt_sanders']
+          'cylshell_tsdt_donnell', 'cylshell_tsdt_sanders', 'plate_clpt_gl']
 
 
 def rel(a, b):
@@ -60,7 +60,7 @@ def test_product_equals_assembled_tangent(model, conn_method):
 
 
 @pytest.mark.parametrize('model', ['plate_clpt_donnell',
-                                   'cylshell_tsdt_sanders'])
+                                   'cylshell_tsdt_sanders', 'plate_clpt_gl'])
 def test_product_is_derivative_of_fint(model):
     md = two_panels(model, 'penalty')
     rng = np.random.default_rng(2)
