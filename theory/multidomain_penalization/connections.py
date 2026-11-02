@@ -22,6 +22,9 @@ Created on Sun Mar 10 13:07:49 2024
 # matrix are:
 #
 #   kCSSxcte, kCSSycte, kCBFycte, kCBFxcte: kCSS*.pyx, kCBF*.pyx
+#   kCBFxycte: the block 12 of kCBFxycte.pyx, computed from the quantities
+#   of kCBFxycte.xycte_components, the blocks 11 and 22 being those of
+#   kCBFxcte11 and kCBFycte22
 #   kCSB: skin_base.py (fkCSB), computed from the quantities of
 #   kCsdt._sb_components with the integrals of kCsdt._connection_matrix
 #   kCSSxcte_sdt, kCSSycte_sdt, kCSB_sdt: kCsdt.py, for the models based on
@@ -183,6 +186,29 @@ piece_wise_simplify(kCBFxcte11, [])
 piece_wise_simplify(kCBFxcte12, [])
 piece_wise_simplify(kCBFxcte22, [])
 
+# Connection between the edge x1 = xcte1 of (1), along y1, and the edge y2 =
+# ycte2 of (2), along x2, the same line with y1 = x2 and b1 = a2, see
+# kCBFxycte.pyx. The common axis is s = e_y1 = e_x2 and the angle theta from
+# the normal of (1) to that of (2) about s gives e_y2 = -cth e_x1 + sth e_z1
+# and e_z2 = sth e_x1 + cth e_z1, cth = cos(theta), sth = sin(theta), so
+# that u1 = -cth v2 + sth w2, v1 = u2, w1 = sth v2 + cth w2 (u1 = w2, v1 =
+# u2, w1 = v2 for theta = 90 degrees). The rotation about s is -w,x of (1),
+# as for BFxcte, and w,y - v/r of (2), as for the flange of BFycte, with
+# rinv2 = 1/r2 for the Sanders-Koiter kinematics. The blocks 11 and 22 are
+# therefore those of kCBFxcte11 and kCBFycte22, with the length b1 = a2 of
+# the edge, the matrix of the rotation being orthogonal; only the block 12
+# is new. The functions of (1) along y1 (g1) and of (2) along x2 (f2) are
+# integrated over the common natural coordinate eta1 = xi2
+var('cth, sth')
+kCBFxycte11 = kCBFxcte11
+kCBFxycte12 = -(b1/2)*kt*(u1A.T*(-cth*v2B + sth*w2B) + v1A.T*u2B
+                          + w1A.T*(sth*v2B + cth*w2B)
+                          + (kr/kt)*(-(2/a1)*w1A_xi.T)*om2B)
+kCBFxycte22 = (b1/2)*kt*(u2A.T*u2B + v2A.T*v2B + w2A.T*w2B + (kr/kt)*om2A.T*om2B)
+
+piece_wise_simplify(kCBFxycte12, [])
+piece_wise_simplify(kCBFxycte22, [])
+
 # Connection between panel skin and stiffener's base - SB CONNECTION
 # connection panel-base integrated over xi' and eta'
 # Panel (1) is on the positive side of the interface along the z axis common
@@ -329,6 +355,14 @@ kCBFxcte_sdt11 =  sdt_bfxcte(s1A, s1B, False)
 kCBFxcte_sdt12 = -sdt_bfxcte(s1A, s2B, True)
 kCBFxcte_sdt22 =  sdt_bfxcte(s2A, s2B, False)
 
+# BFxycte: the edge x1 = xcte1 of (1) and the edge y2 = ycte2 of (2), as
+# for the CLPT above, with the rotation about the common axis phix of (1)
+# and -Phiy of (2); the blocks 11 and 22 are those of BFxcte and BFycte
+kCBFxycte_sdt12 = -(b1/2)*(kt*(s1A['u'].T*(-cth*s2B['v'] + sth*s2B['w'])
+                              + s1A['v'].T*s2B['u']
+                              + s1A['w'].T*(sth*s2B['v'] + cth*s2B['w']))
+                           - kr*s1A['phix'].T*Phiy(s2B, 2))
+
 for m in (kCSSxcte_sdt11, kCSSxcte_sdt12, kCSSxcte_sdt22,
           kCSSycte_sdt11, kCSSycte_sdt12, kCSSycte_sdt22,
           kCSB_sdt11, kCSB_sdt12, kCSB_sdt22):
@@ -361,6 +395,9 @@ matrices = [
     [kCBFxcte12, 'kCBFxcte12'],
     [kCBFxcte22, 'kCBFxcte22'],
 
+    [kCBFxycte12, 'kCBFxycte12'],
+    [kCBFxycte22, 'kCBFxycte22'],
+
     [kCSB11, 'kCSB11'],
     [kCSB12, 'kCSB12'],
     [kCSB22, 'kCSB22'],
@@ -384,6 +421,8 @@ matrices = [
     [kCBFxcte_sdt11, 'kCBFxcte_sdt11'],
     [kCBFxcte_sdt12, 'kCBFxcte_sdt12'],
     [kCBFxcte_sdt22, 'kCBFxcte_sdt22'],
+
+    [kCBFxycte_sdt12, 'kCBFxycte_sdt12'],
 ]
 
 for m in matrices:

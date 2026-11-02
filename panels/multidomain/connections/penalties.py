@@ -194,7 +194,8 @@ def calc_kt_kr(p1, p2, connection_type):
             - 'ycte'
             - 'bot-top': ``'SB'``, ``p1`` and ``p2`` on the positive and
               negative sides of the interface along `z`
-            - 'xcte-ycte': to a 90° connection
+            - 'xcte-ycte': to a 90° connection, used by ``'BFxycte'``
+              with ``p1`` and ``p2`` of the connection
             - 'ycte-xcte': to a 90° connection
 
     Returns
