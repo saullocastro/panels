@@ -52,6 +52,11 @@ The available models, which are selected with ``Shell.model``, are:
   curvature of ``'plate_clpt_donnell'``, 3 DOFs ``u, v, w``. For assemblies
   of plates with large rotations, e.g. a wing box, see :ref:`plate_clpt_gl`.
 
+- ``'plate_clpt_tl'``: flat plates, total-Lagrangian Kirchhoff-Love: the
+  Green-Lagrange membrane strains of ``'plate_clpt_gl'`` and the changes of
+  curvature of the deformed normal, all invariant under rigid rotations,
+  3 DOFs ``u, v, w``, see :ref:`plate_clpt_tl`.
+
 - ``'cylshell_clpt_donnell'``: cylindrical shells, CLPT with the
   Donnell-Mushtari-Vlasov (shallow shell) kinematics, 3 DOFs ``u, v, w``.
 
@@ -121,6 +126,25 @@ DOFs have the strains of the CLPT:
   ``'plate_clpt_donnell'``. The changes of curvature are measured in the
   fixed frame of the plate, which limits the large rotations to those
   carried by the membrane strains, see :ref:`plate_clpt_gl`.
+
+- Total-Lagrangian Kirchhoff-Love, ``'plate_clpt_tl'``: the membrane strains
+  above and the changes of curvature of the deformed mid-surface
+  `\boldsymbol{X} = (x, y, 0) + (u, v, w)`, with its area vector
+  `\boldsymbol{a} = \boldsymbol{X}_{,x} \times \boldsymbol{X}_{,y}`:
+
+  .. math::
+
+      \kappa_{xx} = -\boldsymbol{a} \cdot \boldsymbol{u}_{,xx} \qquad
+      \kappa_{yy} = -\boldsymbol{a} \cdot \boldsymbol{u}_{,yy} \qquad
+      \kappa_{xy} = -2 \boldsymbol{a} \cdot \boldsymbol{u}_{,xy}
+
+  cubic in the displacements, `|\boldsymbol{a}| = 1` for rigid motions and
+  `1 + \varepsilon_{xx} + \varepsilon_{yy}` to first order otherwise. A
+  bending deformation keeps its energy through any rigid rotation, which
+  ``'plate_clpt_gl'`` multiplies by `\cos^2\theta`. The default
+  integration has `3p` points along a direction instead of `2p + 1`, see
+  :func:`panels.shell.gauss_points`, and the analytical kernels are those of
+  ``'plate_clpt_gl'``.
 
 - Sanders-Koiter kinematics, ``'cylshell_clpt_sanders'``, Sanders (1963)
   [1]_. With `y = r \theta` the arc length and `\phi_x =

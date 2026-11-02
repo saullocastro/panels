@@ -142,7 +142,9 @@ class Shell(object):
     'cylshell_clpt_donnell'``, see :mod:`panels.models`. For plates with
     large rotations, e.g. the domains of a wing box, ``model =
     'plate_clpt_gl'`` has the Green-Lagrange membrane strains, which vanish
-    for any rigid rotation, see :ref:`plate_clpt_gl`.
+    for any rigid rotation, see :ref:`plate_clpt_gl`, and ``model =
+    'plate_clpt_tl'`` also the changes of curvature of the deformed normal,
+    see :ref:`plate_clpt_tl`.
 
     The approximation functions for the displacement fields are built using
     :ref:`Bardell's functions <theory_func_bardell>`.
@@ -3044,7 +3046,8 @@ class Shell(object):
             ``False`` for a dead load, ``True`` or ``'linear'`` for a follower
             pressure with the first-order area vector, ``'quadratic'`` for the
             complete area vector, the one to use with the large rotations of
-            ``model='plate_clpt_gl'``. ``None`` is taken as ``False``.
+            ``model='plate_clpt_gl'`` or ``'plate_clpt_tl'``. ``None`` is
+            taken as ``False``.
             Default ``False``.
         zp : float, optional
             Position along `z` of the surface on which the pressure acts,
