@@ -163,6 +163,12 @@ def create_wingbox(nstr=0, hs=3.e-3, ts=1.5e-3, L=1.010, W=50.5e-3,
         ``'ribs'``, and ``'a'``, the length of a bay, ``'ws'``, the width of
         a skin strip, and ``'conn'``, the connections.
 
+    References
+    ----------
+    .. [1] Elalfy, M. H., De Breuker, R., and Castro, S. G. P., Beam-like
+       models for the post-buckling behaviour of wingbox structures,
+       preprint, Delft University of Technology.
+
     """
     terms = terms or {}
     ms, ns = terms.get('skin', (8, 4 if nstr else 8))
@@ -277,6 +283,12 @@ def wingbox_tip_force_lb(num_eigvalues=4, silent=True, **kwargs):
     N, with skins of 12 x 12 terms, spars of 12 x 7 and ribs of 6 x 8;
     with the default terms and penalty connections it is 172.78 N, and
     161.9 N converged, see :doc:`ex_multidomain_wingbox`.
+
+    References
+    ----------
+    .. [1] Elalfy, M. H., De Breuker, R., and Castro, S. G. P., Beam-like
+       models for the post-buckling behaviour of wingbox structures,
+       preprint, Delft University of Technology.
 
     Examples
     --------
