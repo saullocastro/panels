@@ -195,7 +195,7 @@ def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
     cdef int i, j, col, ptx, pty
     cdef double xi, eta, weight
     cdef double xi1, xi2, eta1, eta2
-    cdef double bx, by, dbx, dby, Nxx, Nyy, Nxy
+    cdef double {rots}, Nxx, Nyy, Nxy
     cdef double e[{NE}]
     cdef double de[{NE}]
     cdef double s[{NE}]
@@ -279,6 +279,7 @@ def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
                             F[i*{NE} + j] = Fnxny[ptx, pty, i, j]
 
 '''.format(extra=extra_cdef, bc=bc_cdef, NE=NE, NE2=NE*NE,
+           rots=', '.join(tp['names'] + tp['dnames']),
            fcdef=cdefs(fnames), gcdef=cdefs(gnames), extra_read=extra_read,
            bc_read=bc_read, NF=len(fnames), NG=len(gnames)))
 
@@ -292,13 +293,13 @@ def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
 
     # rotations
     body = []
-    for name, rows in zip(('bx', 'by'), tp['beta']):
+    for name, rows in zip(tp['names'], tp['beta']):
         body += sum_lines(name, rows, 'cs', 24)
-    for name, rows in zip(('dbx', 'dby'), tp['beta']):
+    for name, rows in zip(tp['dnames'], tp['beta']):
         body += sum_lines(name, rows, 'vs', 24)
     out.append('                # rotations of cs and vs\n')
-    out.append('                bx = 0.\n                by = 0.\n'
-               '                dbx = 0.\n                dby = 0.\n')
+    out.append(''.join('                {0} = 0.\n'.format(nm)
+                       for nm in tp['names'] + tp['dnames']))
     out.append('\n'.join(term_loops(basis_names(beta_exprs), fields, body))
                + '\n\n')
 
