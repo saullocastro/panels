@@ -244,8 +244,8 @@ class MultiDomain(object):
             - 'SB' : defines a skin-base connection over an area and calls the function :func:`.skin_base.fkCSB`, see :meth:`.get_kC_conn` for the roles of ``p1`` and ``p2``
             - 'BFycte': defines a base-flange connection and calls the following functions ``fkCBFycte11``, ``fkCBFycte12``, ``fkCBFycte22``
 
-        The connections ``'BFxcte'`` and ``'SB_TSL'`` are also available,
-        see :meth:`.get_kC_conn`.
+        The connections ``'BFxcte'``, ``'BFxycte'`` and ``'SB_TSL'`` are
+        also available, see :meth:`.get_kC_conn`.
 
         Explanations about the connetion functions are found in ``connections`` module.
     conn_method : str, optional
@@ -538,14 +538,15 @@ class MultiDomain(object):
         dimensions, the radius, the model and the offset of each panel, on
         its ply thicknesses, through the faces connected by ``'SB'``, and on
         its boundary condition flags, which remove terms
-        of the approximation functions. With ``pd_method='null-space'`` the
+        of the approximation functions, and on the key ``'angle'`` of
+        ``'BFxycte'``. With ``pd_method='null-space'`` the
         positions and the prescribed components of the prescribed
         displacements add rows to the constraints, whereas the prescribed
         values change only the right-hand sides, i.e. the particular
         solutions of :meth:`.get_cp`, and are not part of the signature.
 
         """
-        keys = ('func', 'xcte1', 'xcte2', 'ycte1', 'ycte2')
+        keys = ('func', 'xcte1', 'xcte2', 'ycte1', 'ycte2', 'angle')
         sig_conn = tuple((tuple(ci.get(k) for k in keys), id(ci['p1']),
                           id(ci['p2']), bool(ci.get('kr', 0.)))
                          for ci in conn if self._null_space(ci))
@@ -2956,6 +2957,13 @@ class MultiDomain(object):
               order in the assembly, see
               :mod:`panels.multidomain.connections.kCBFycte` and
               :mod:`panels.multidomain.connections.kCBFxcte`
+            - ``'BFxycte'``: between the edge `x_1 =` ``xcte1`` of ``p1``
+              and the edge `y_2 =` ``ycte2`` of ``p2``, the same straight
+              line with `y_1 = x_2`, ``p1.b == p2.a``, e.g. a spar ``p1``
+              joined to a rib ``p2``, whatever their order in the assembly;
+              the key ``'angle'``, default ``90``, is the angle in degrees
+              from the normal of ``p1`` to that of ``p2`` about the common
+              axis, see :mod:`panels.multidomain.connections.kCBFxycte`
             - ``'SB'``: between 2 skins connected over an area, e.g. the base
               of a stiffener bonded to a skin, a pad-up of a skin, or the
               arms of a double cantilever beam. The two panels share the
@@ -3009,10 +3017,11 @@ class MultiDomain(object):
             For the models based on shear deformation theories, e.g.
             ``'plate_fsdt_donnell'`` or ``'cylshell_tsdt_sanders'``,
             ``'SSxcte'``, ``'SSycte'`` and ``'SB'`` are available, see
-            :mod:`panels.multidomain.connections.kCsdt`, and ``'BFycte'`` and
-            ``'BFxcte'``, see the functions ``*_sdt`` of
-            :mod:`panels.multidomain.connections.kCBFycte` and
-            :mod:`panels.multidomain.connections.kCBFxcte`, and
+            :mod:`panels.multidomain.connections.kCsdt`, and ``'BFycte'``,
+            ``'BFxcte'`` and ``'BFxycte'``, see the functions ``*_sdt`` of
+            :mod:`panels.multidomain.connections.kCBFycte`,
+            :mod:`panels.multidomain.connections.kCBFxcte` and
+            :mod:`panels.multidomain.connections.kCBFxycte`, and
             :meth:`._kC_conn_sdt`. ``'SB_TSL'`` is not available for these
             models. The edge connections also connect the independent
             rotations with ``'kr'``, and the rotation flags of the connected
@@ -3075,7 +3084,12 @@ class MultiDomain(object):
         `w_{,y}` for ``'SSycte'``; for ``'BFycte'`` and ``'BFxcte'`` the
         displacements of the flange, rotated by 90 degrees about the axis of
         the connection, and the rotation about that axis, see
-        :func:`._rinv_sanders` and :func:`._bf_base_flange`. For ``'SB'``,
+        :func:`._rinv_sanders` and :func:`._bf_base_flange`; for
+        ``'BFxycte'`` the displacements of ``p2`` in the frame of ``p1`` and
+        the rotation about the common edge, `-w_{1,x}` of ``p1`` and
+        `w_{2,y}` (`w_{2,y} - v_2/r_2` with the Sanders-Koiter kinematics)
+        of ``p2``, with the penalty constants of :func:`.calc_kt_kr` for
+        ``'xcte-ycte'``. For ``'SB'``,
         for all the models, the quantities are the displacements of the
         faces in contact, `u_1(z_1)`, `v_1(z_1)` and `w_1` against
         `u_2(z_2)`, `v_2(z_2)` and `w_2`, with `z_1 = d_1 - h_1/2`, `z_2 =
@@ -3145,9 +3159,11 @@ class MultiDomain(object):
                 elif p1_temp.col_start > p2_temp.col_start:
                     pA = p2_temp
                     pB = p1_temp
-                    #NOTE the kernels of 'SB', 'SB_TSL', 'BFycte' and
-                    #     'BFxcte' distinguish p1 from p2, see _bf_base_flange()
-                    if connecti['func'] in ('SB', 'SB_TSL', 'BFycte', 'BFxcte'):
+                    #NOTE the kernels of 'SB', 'SB_TSL', 'BFycte',
+                    #     'BFxcte' and 'BFxycte' distinguish p1 from p2, see
+                    #     _bf_base_flange()
+                    if connecti['func'] in ('SB', 'SB_TSL', 'BFycte', 'BFxcte',
+                                            'BFxycte'):
                         pass
                     else:
                         if 'xcte1' in connecti.keys() and 'xcte2' in connecti.keys():
@@ -3233,6 +3249,25 @@ class MultiDomain(object):
                     kC_conn += connections.kCBFxcte.fkCBFxcte22(
                             kt, kr, pb, pf, connecti['xcte2'],
                             size, row0=pf.row_start, col0=pf.col_start)
+
+                elif connection_function == 'BFxycte':
+                    #NOTE p1 has the edge x = xcte1 and p2 the edge y =
+                    #     ycte2, whatever their order in the assembly, see
+                    #     kCBFxycte.pyx; the penalty constants use A11, D11
+                    #     of p1 and A22, D22 of p2
+                    p1, p2 = connecti['p1'], connecti['p2']
+                    mod = connections.kCBFxycte
+                    mod.check_xycte(p1, p2)
+                    kt, kr = _penalties(connecti, p1, p2, 'xcte-ycte')
+                    kC_conn += mod.fkCBFxycte11(kt, kr, p1, connecti['xcte1'],
+                            size, row0=p1.row_start, col0=p1.col_start)
+                    kC_conn += _upper_block(mod.fkCBFxycte12(kt, kr, p1, p2,
+                            connecti['xcte1'], connecti['ycte2'], size,
+                            row0=p1.row_start, col0=p2.col_start,
+                            angle=connecti.get('angle', 90.)), p1, p2)
+                    kC_conn += mod.fkCBFxycte22(kt, kr, p2, connecti['ycte2'],
+                            size, row0=p2.row_start, col0=p2.col_start,
+                            rinv2=_rinv_sanders(p2))
 
                 elif connection_function == 'SB':
                     #NOTE p1 is the panel on the positive side of the
@@ -3333,7 +3368,9 @@ class MultiDomain(object):
         for the third-order theory also the slope `w_{,x}` or `w_{,y}`. The
         rotation penalty of ``'BFycte'`` and ``'BFxcte'`` is on `\phi_y`
         (`\phi_y + v/r` with the Sanders-Koiter kinematics) and `\phi_x`
-        instead of `-w_{,y}` and `-w_{,x}`. ``'SB'`` penalizes the
+        instead of `-w_{,y}` and `-w_{,x}`, and that of ``'BFxycte'`` on
+        `\phi_x` of ``p1`` and `-\phi_y` of ``p2``, the rotations at the
+        reference surface with the offsets of the TSDT. ``'SB'`` penalizes the
         displacements `u, v, w` at the interface, `z = d_1 - h_1/2` of
         ``p1`` and `z = d_2 + h_2/2` of ``p2`` with the offsets `d_1`,
         `d_2`, as for the classical laminated plate theory, and the
@@ -3387,6 +3424,21 @@ class MultiDomain(object):
             k22 = getattr(mod, 'fkCBF%s22_sdt' % cte)(kt, kr, pb, pf, c2, size,
                     pf.row_start, pf.col_start, **kw2)
             return k11 + _upper_block(k12, pb, pf) + k22
+        elif func == 'BFxycte':
+            #NOTE the rotation about the common axis is theta_x of p1 and
+            #     -theta_y of p2, see kCBFxycte.pyx
+            p1, p2 = connecti['p1'], connecti['p2']
+            mod = connections.kCBFxycte
+            mod.check_xycte(p1, p2)
+            kt, kr = _penalties(connecti, p1, p2, 'xcte-ycte')
+            k11 = mod.fkCBFxycte11_sdt(kt, kr, p1, connecti['xcte1'], size,
+                    p1.row_start, p1.col_start)
+            k12 = mod.fkCBFxycte12(kt, kr, p1, p2, connecti['xcte1'],
+                    connecti['ycte2'], size, p1.row_start, p2.col_start,
+                    angle=connecti.get('angle', 90.))
+            k22 = mod.fkCBFxycte22_sdt(kt, kr, p2, connecti['ycte2'], size,
+                    p2.row_start, p2.col_start, rinv2=_rinv_sanders(p2))
+            return k11 + _upper_block(k12, p1, p2) + k22
         raise NotImplementedError(
             "Connection '{0}' is not implemented for the models based on "
             "shear deformation theories, got models '{1}' and '{2}'".format(

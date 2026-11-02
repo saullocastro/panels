@@ -81,10 +81,11 @@ from panels import DOUBLE
 from panels.bardell import calc_vec_f, calc_vec_fp
 from panels.logger import warn
 from . import kCsdt
+from . import kCBFxycte
 
 
 #: Connections that can be imposed with the null-space method
-NULL_SPACE_FUNCS = ('SSxcte', 'SSycte', 'BFxcte', 'BFycte', 'SB')
+NULL_SPACE_FUNCS = ('SSxcte', 'SSycte', 'BFxcte', 'BFycte', 'BFxycte', 'SB')
 
 U, V, W, PHIX, PHIY = range(5)
 FIELDS = ('u', 'v', 'w', 'phix', 'phiy')
@@ -292,7 +293,11 @@ def constraint_matrix(connecti, size):
     ``xcte1``, ``xcte2`` or ``ycte1``, ``ycte2`` across it and, along it,
     as many Gauss-Legendre points as the coefficients of the polynomials,
     ``max(m, 4)`` or ``max(n, 4)`` of the panel with the most terms; for
-    ``'SB'`` these points are used along both `x` and `y`. Each quantity
+    ``'SB'`` these points are used along both `x` and `y`. For
+    ``'BFxycte'`` the edge is along `y` in ``p1`` and along `x` in ``p2``,
+    at ``xcte1`` and ``ycte2``, with ``max(n1, m2, 4)`` points at the same
+    natural coordinate of both panels, `\eta_1 = \xi_2`, the quantities
+    being those of :func:`.kCBFxycte.xycte_components`. Each quantity
     gives one row per point, the terms of ``p1`` with a positive sign and
     those of ``p2`` with a negative sign, in the columns starting at
     ``col_start`` of each panel. The edge connections of the models with 3
@@ -311,7 +316,8 @@ def constraint_matrix(connecti, size):
         one of :data:`NULL_SPACE_FUNCS`. The coordinates of the connection,
         ``xcte1`` or ``ycte1``, refer to ``p1``, and ``xcte2`` or ``ycte2``
         to ``p2``. For ``'BFxcte'`` and ``'BFycte'``, ``p1`` is the base and
-        ``p2`` the flange; for ``'SB'``, ``p1`` is the panel on the
+        ``p2`` the flange; for ``'BFxycte'``, ``p1`` has the edge ``xcte1``
+        and ``p2`` the edge ``ycte2``, with the key ``'angle'``; for ``'SB'``, ``p1`` is the panel on the
         positive side of the interface along the `z` axis of both panels,
         and ``p2`` the one on the negative side, see
         :meth:`.MultiDomain.get_kC_conn`.
@@ -328,7 +334,8 @@ def constraint_matrix(connecti, size):
     ------
     ValueError
         When ``p1`` and ``p2`` are the same object; for ``'SB'``, when the
-        panels do not have the same dimensions ``a`` and ``b``.
+        panels do not have the same dimensions ``a`` and ``b``; for
+        ``'BFxycte'``, see :func:`.kCBFxycte.check_xycte`.
     NotImplementedError
         When the models of ``p1`` and ``p2`` have a different number of
         DOFs per term; when ``connecti['func']`` is not one of
@@ -368,6 +375,8 @@ def constraint_matrix(connecti, size):
         ctes = dict(x=(connecti['xcte1'], connecti['xcte2']), y=None)
     elif func in ('SSycte', 'BFycte'):
         ctes = dict(x=None, y=(connecti['ycte1'], connecti['ycte2']))
+    elif func == 'BFxycte':
+        kCBFxycte.check_xycte(p1, p2)
     elif func == 'SB':
         if not (np.isclose(p1.a, p2.a) and np.isclose(p1.b, p2.b)):
             raise ValueError('The panels of a "SB" connection must have the '
@@ -379,12 +388,21 @@ def constraint_matrix(connecti, size):
             "the available ones are {1}".format(func, NULL_SPACE_FUNCS))
     if func == 'SB':
         comps = _sb_components(p1, p2, connecti.get('kr', 0.))
+    elif func == 'BFxycte':
+        comps = [sides for _, sides in kCBFxycte.xycte_components(p1, p2,
+                 connecti.get('angle', 90.))]
     elif dofs1 == 3:
         comps = _clpt_components(func, p1, p2)
     else:
         comps = _sdt_components(func, p1, p2)
-    xis = _points(p1, p2, 'x', ctes['x'])
-    etas = _points(p1, p2, 'y', ctes['y'])
+    if func == 'BFxycte':
+        #NOTE the common natural coordinate along the edge, eta1 = xi2
+        s = leggauss(max(p1.n, p2.m, 4))[0]
+        xis = [np.array([2*connecti['xcte1']/p1.a - 1]), s]
+        etas = [s, np.array([2*connecti['ycte2']/p2.b - 1])]
+    else:
+        xis = _points(p1, p2, 'x', ctes['x'])
+        etas = _points(p1, p2, 'y', ctes['y'])
     npts = len(xis[0])*len(etas[0])
 
     rows, cols, vals = [], [], []

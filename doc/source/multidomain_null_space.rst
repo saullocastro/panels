@@ -34,7 +34,7 @@ and the penalty method is selected with::
 
 The connections that can be imposed with the null-space method are given in
 :data:`.nullspace.NULL_SPACE_FUNCS`: ``'SSxcte'``, ``'SSycte'``,
-``'BFxcte'``, ``'BFycte'`` and ``'SB'``, for all the models, see
+``'BFxcte'``, ``'BFycte'``, ``'BFxycte'`` and ``'SB'``, for all the models, see
 :ref:`null_space_quantities`. The damaged connection ``'SB_TSL'`` represents
 the physical stiffness of a cohesive interface, see :ref:`cohesive_zone`,
 and it keeps its penalty stiffness also with ``conn_method='null-space'``.
@@ -189,6 +189,13 @@ see :meth:`.MultiDomain.get_kC_conn`:
       - `u_1 = w_2`, `v_1 = v_2`, `w_1 = -u_2`, `w_{1,x} = w_{2,x}`, see
         :mod:`panels.multidomain.connections.kCBFxcte`
       - `u_1 = w_2`, `v_1 = v_2`, `w_1 = -u_2`, `\phi_{x1} = \phi_{x2}`
+    * - ``'BFxycte'``
+      - `u_1 = -\cos\theta \, v_2 + \sin\theta \, w_2`, `v_1 = u_2`, `w_1 =
+        \sin\theta \, v_2 + \cos\theta \, w_2`, `-w_{1,x} = w_{2,y} -
+        v_2/r_2`, with the angle `\theta` of the key ``'angle'``, `u_1 =
+        w_2`, `w_1 = v_2` for the default 90 degrees, see
+        :mod:`panels.multidomain.connections.kCBFxycte`
+      - the same displacements, `\phi_{x1} = -\Phi_{y2}`
     * - ``'SB'``
       - `u_1(z_1) = u_2(z_2)`, `v_1(z_1) = v_2(z_2)`, `w_1 = w_2` at the
         interface, `z_1 = d_1 - h_1/2` of ``p1`` and `z_2 = d_2 + h_2/2` of

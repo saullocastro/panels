@@ -1,5 +1,64 @@
 # Changelog
 
+## Unreleased
+
+### New connection `'BFxycte'`: an edge `x = const` joined to an edge `y = const`
+
+- New connection `'BFxycte'` between the edge `x1 = xcte1` of `p1`, along
+  `y1`, and the edge `y2 = ycte2` of `p2`, along `x2`, the same straight
+  line (`y1 = x2`, `p1.b == p2.a`), with the two domains at the angle of the
+  new key `'angle'` (default 90 degrees, from the normal of `p1` to that of
+  `p2` about the common axis). It joins, e.g., the spar of a wing-box bay,
+  whose edge at the end of the bay is `x = a`, to the rib there, whose edges
+  `y = 0` and `y = b` run along the height of the box, when the spar is
+  connected to the skins with `'BFycte'` (frame `(X, -Z, Y)`) and the rib
+  with `'BFxcte'` (frame `(-Z, Y, X)`); before, the ribs could not be
+  connected to the spars. The displacements of `p2` are written in the
+  frame of `p1`, `u1 = -cos(t) v2 + sin(t) w2`, `v1 = u2`, `w1 = sin(t) v2 +
+  cos(t) w2` (`u1 = w2`, `v1 = u2`, `w1 = v2` at 90 degrees), and the
+  rotations about the common axis are equal, `-w1,x = w2,y - v2/r2` for the
+  CLPT (the term `v2/r2` with the Sanders-Koiter kinematics of `p2`) and
+  `phix1 = -Phiy2` at the reference surfaces for the FSDT and TSDT. `p1`
+  must be flat; `p2` may be a cylindrical shell.
+- Imposed exactly with the default `conn_method='null-space'` (new entry of
+  `NULL_SPACE_FUNCS`, `max(n1, m2, 4)` Gauss-Legendre points along the
+  edge) and with penalties with `conn_method='penalty'`: new Cython module
+  `panels/multidomain/connections/kCBFxycte.pyx`, whose coupling block
+  `fkCBFxycte12` serves the models with 3 and 5 DOFs per term, the blocks of
+  each panel being those of `'BFxcte'` and `'BFycte'`
+  (`fkCBFxycte11(_sdt)`, `fkCBFxycte22(_sdt)`); the quantities are given by
+  `kCBFxycte.xycte_components`, used by both methods. The penalty constants
+  are those of `calc_kt_kr(p1, p2, 'xcte-ycte')`, `A11, D11` of `p1` and
+  `A22, D22` of `p2`. As for the other connections there is no geometric
+  stiffness. The derivation of the block 12 is in
+  `theory/multidomain_penalization/connections.py`.
+- Tests, `tests/multidomain/test_conn_BFxycte.py`: the penalty matrix
+  against the line integral of the penalty energy for the CLPT, FSDT, TSDT
+  and a Sanders-Koiter `p2`, for 90, 30, -120 and 180 degrees and both
+  orders of the panels; patch tests with the fields of a rigid-body motion
+  and of a homogeneous strain that keeps the angle, written in the frame of
+  each domain, which store no energy and satisfy the constraints, while a
+  strain that changes the angle, or the frame of the opposite angle, does
+  not; an L-joint pulled along the edge carries the constant strain exactly,
+  with both methods; a T-joint gives the natural frequencies of the same
+  structure built with `'BFxcte'` and the web rotated by 90 degrees in its
+  plane, to 2e-8 with the null-space method (the same Ritz space) and 1e-7
+  with the penalty method, for 6 to 12 terms, the frequencies decreasing
+  monotonically with the terms (44.77 Hz for the first one with 12 terms,
+  0.25% higher with 6), and the penalty method within 2.2%. In
+  `test_null_space.py` the null space of the penalty matrix is the basis
+  of the null-space method also for `'BFxycte'`.
+- The High-AR-t5 wing-box of Elalfy, De Breuker and Castro (9 bays, 45
+  domains, 6264 DOFs, `plate_clpt_donnell`), whose first linear buckling
+  load is 173.11 N with Abaqus (preprint, Table 3, p. 8): with the ribs
+  joined to the spars, the tip deflection for 500 N changes from 453.52 to
+  453.41 mm and the first buckling load from 172.77 to 172.78 N with the
+  penalty method, and from 447.54 to 447.39 mm and 190.46 to 190.41 N with
+  the null-space method (test marked `slow`, about 35 s and 21 s per model
+  with a single BLAS thread). The penalty constants of `calc_kt_kr` make
+  this box 10% more flexible in buckling than the exact connections, so the
+  agreement of the penalty model with Abaqus is partly fortuitous.
+
 ## 0.14.2 (2026-11-01)
 
 ### Packaging

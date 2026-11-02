@@ -43,6 +43,7 @@ each domain:
 ``'SSycte'``   two skins along an edge of constant `y`                       ``ycte1``, ``ycte2``
 ``'BFycte'``   base, or skin, ``p1`` and flange ``p2`` at constant `y`       ``ycte1``, ``ycte2``
 ``'BFxcte'``   base, or skin, ``p1`` and flange ``p2`` at constant `x`       ``xcte1``, ``xcte2``
+``'BFxycte'``  edge of constant `x` of ``p1`` and of constant `y` of ``p2``  ``xcte1``, ``ycte2``, ``'angle'``
 ``'SB'``       skin and base over their common area                          ``p1`` on the positive side of `z`
 ``'SB_TSL'``   ``'SB'`` with a cohesive traction-separation law              as ``'SB'``
 ============= ============================================================ ===================================
