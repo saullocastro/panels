@@ -202,6 +202,7 @@ from . import clpt_field
 from . import cylshell_clpt_donnell, cylshell_clpt_donnell_num
 from . import cylshell_clpt_sanders, cylshell_clpt_sanders_num
 from . import plate_clpt_donnell, plate_clpt_donnell_num
+from . import plate_clpt_gl, plate_clpt_gl_num
 from . import fsdt_tsdt_field
 from . import plate_fsdt_donnell, plate_fsdt_donnell_num
 from . import plate_tsdt_donnell, plate_tsdt_donnell_num

@@ -14,8 +14,8 @@ The degrees of freedom of each term of the approximation are ``u, v, w``.
 The functions of this module evaluate the displacements and rotations,
 :func:`.fuvw`, the generalized strains, :func:`.fstrain`, and the
 approximation functions at a point, :func:`.fg`, for the models
-``'plate_clpt_donnell'``, ``'cylshell_clpt_donnell'`` and
-``'cylshell_clpt_sanders'``, see :mod:`panels.modelDB`. The coordinates
+``'plate_clpt_donnell'``, ``'plate_clpt_gl'``, ``'cylshell_clpt_donnell'``
+and ``'cylshell_clpt_sanders'``, see :mod:`panels.modelDB`. The coordinates
 ``x`` and ``y`` are physical, ``0 <= x <= a`` and ``0 <= y <= b``.
 
 Notes
@@ -74,6 +74,33 @@ def is_sanders(object s):
 
     '''
     return 1 if 'sanders' in s.model else 0
+
+
+def is_gl(object s):
+    r'''Tell whether the model of ``s`` has Green-Lagrange membrane strains
+
+    The strains of :func:`.fstrain` then include the quadratic terms of the
+    in-plane gradients, see :mod:`panels.models.plate_clpt_gl_num`.
+
+    Parameters
+    ----------
+    s : :class:`.Shell`
+        The shell, whose attribute ``model`` is read.
+
+    Returns
+    -------
+    gl : int
+        ``1`` when the model is ``'plate_clpt_gl'``, else ``0``.
+
+    Notes
+    -----
+    The Green-Lagrange membrane strains add `(u_{,x}^2 + v_{,x}^2)/2`,
+    `(u_{,y}^2 + v_{,y}^2)/2` and `u_{,x} u_{,y} + v_{,x} v_{,y}` to the von
+    Kármán strains `\varepsilon_{xx}`, `\varepsilon_{yy}` and
+    `\gamma_{xy}`, see :mod:`panels.models`.
+
+    '''
+    return 1 if s.model == 'plate_clpt_gl' else 0
 
 
 def fuvw(double [::1] c, object s, double [::1] xs, double [::1] ys,
@@ -199,7 +226,9 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys, int
     The points are split into ``num_cores`` chunks evaluated in parallel
     with OpenMP threads. The strains are those of the Donnell kinematics,
     or of the Sanders-Koiter kinematics when :func:`.is_sanders` returns
-    ``1``; the hoop strain ``w/r`` is included when ``s.r`` is not zero.
+    ``1``, or the Green-Lagrange membrane strains when :func:`.is_gl`
+    returns ``1``; the hoop strain ``w/r`` is included when ``s.r`` is not
+    zero.
 
     Parameters
     ----------
@@ -227,14 +256,14 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys, int
 
     Notes
     -----
-    The strains are those of the Donnell or Sanders-Koiter kinematics given
-    in the notes of :mod:`panels.models`, with the quadratic terms of the
-    membrane strains multiplied by ``NLgeom``, and with ``r = 0`` standing
-    for the flat plate, whose hoop strain is zero.
+    The strains are those of the Donnell, Sanders-Koiter or Green-Lagrange
+    kinematics given in the notes of :mod:`panels.models`, with the
+    quadratic terms of the membrane strains multiplied by ``NLgeom``, and
+    with ``r = 0`` standing for the flat plate, whose hoop strain is zero.
     '''
     
     cdef double a, b, r
-    cdef int m, n, sanders
+    cdef int m, n, sanders, gl
     cdef double x1u, x1ur, x2u, x2ur
     cdef double x1v, x1vr, x2v, x2vr
     cdef double x1w, x1wr, x2w, x2wr
@@ -247,6 +276,7 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys, int
     m = s.m
     n = s.n
     sanders = is_sanders(s)
+    gl = is_gl(s)
     x1u = s.x1u; x1ur = s.x1ur; x2u = s.x2u; x2ur = s.x2ur
     x1v = s.x1v; x1vr = s.x1vr; x2v = s.x2v; x2vr = s.x2vr
     x1w = s.x1w; x1wr = s.x1wr; x2w = s.x2w; x2wr = s.x2wr
@@ -291,7 +321,7 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys, int
               x1w, x1wr, x2w, x2wr,
               y1u, y1ur, y2u, y2ur,
               y1v, y1vr, y2v, y2vr,
-              y1w, y1wr, y2w, y2wr, NLgeom, sanders)
+              y1w, y1wr, y2w, y2wr, NLgeom, sanders, gl)
 
     return (np.ravel(exxs)[:size], np.ravel(eyys)[:size], np.ravel(gxys)[:size],
             np.ravel(kxxs)[:size], np.ravel(kyys)[:size], np.ravel(kxys)[:size])
@@ -557,7 +587,7 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
         double y1u, double y1ur, double y2u, double y2ur,
         double y1v, double y1vr, double y2v, double y2vr,
         double y1w, double y1wr, double y2w, double y2wr, int NLgeom,
-        int sanders) noexcept nogil:
+        int sanders, int gl) noexcept nogil:
     r'''Calculates the strain at every point in the provided grid
 
     Kernel of :func:`.fstrain` for one chunk of ``size`` points: the
@@ -565,8 +595,9 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
     written to ``exxs[k]``, ``eyys[k]``, ``gxys[k]``, ``kxxs[k]``,
     ``kyys[k]`` and ``kxys[k]``, for the ``m*n`` terms of the Ritz
     constants ``c``, the boundary condition flags ``x1u, ..., y2wr``, the
-    non-linear terms when ``NLgeom == 1`` and the Sanders-Koiter
-    kinematics when ``sanders == 1``. For the Donnell kinematics the term
+    non-linear terms when ``NLgeom == 1``, the Sanders-Koiter
+    kinematics when ``sanders == 1`` and the Green-Lagrange membrane strains
+    of the plate when ``gl == 1``. For the Donnell kinematics the term
     ``w/r`` is included when ``r`` is not zero.
 
     '''
@@ -592,6 +623,7 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
     cdef double *gw_etaeta
 
     cdef double w_xi, w_eta, v, phix, phiy
+    cdef double u_x, u_y, v_x, v_y
 
     fu = <double *>malloc(NMAX * sizeof(double))
     fu_xi = <double *>malloc(NMAX * sizeof(double))
@@ -642,6 +674,10 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
         w_xi = 0
         w_eta = 0
         v = 0
+        u_x = 0
+        u_y = 0
+        v_x = 0
+        v_y = 0
 
         # Sum through all m*n terms
         for j in range(n):
@@ -651,6 +687,11 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
                 w_eta += c[col+2]*fw[i]*gw_eta[j]
                 v += c[col+1]*fv[i]*gv[j]
                 # +2 to get w (+0 is u, +1 is v)
+                if gl == 1:
+                    u_x += c[col+0]*fu_xi[i]*gu[j]*(2/a)
+                    u_y += c[col+0]*fu[i]*gu_eta[j]*(2/b)
+                    v_x += c[col+1]*fv_xi[i]*gv[j]*(2/a)
+                    v_y += c[col+1]*fv[i]*gv_eta[j]*(2/b)
 
         if sanders == 1:
             # Sanders-Koiter kinematics, the non-linear strain is
@@ -711,6 +752,13 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
                 kxx += -c[col+2]*fw_xixi[i]*gw[j]*4/(a*a)
                 kyy += -c[col+2]*fw[i]*gw_etaeta[j]*4/(b*b)
                 kxy += -2*c[col+2]*fw_xi[i]*gw_eta[j]*4/(a*b)
+
+        if gl == 1:
+            # Green-Lagrange membrane strains, the quadratic terms of the
+            # in-plane gradients
+            exx += NLgeom*0.5*(u_x*u_x + v_x*v_x)
+            eyy += NLgeom*0.5*(u_y*u_y + v_y*v_y)
+            gxy += NLgeom*(u_x*u_y + v_x*v_y)
 
         # Strains and curvatures at each point in the grid 
         exxs[pti] = exx
