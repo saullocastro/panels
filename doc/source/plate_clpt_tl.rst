@@ -159,6 +159,110 @@ Verification
   membrane strain.
 
 
+Cantilever strip rolled into a circle by an end moment
+------------------------------------------------------
+
+Benchmark 3.2 of [sze2004Benchmarks]_ (Fig. 3a, p. 1556): a strip clamped
+at one end, `L = 12`, `b = 1`, `h = 0.1`, `E = 1.2 \times 10^6`, `\nu =
+0`, under an end moment `M` up to `M_{max} = 2 \pi M_o`, `M_o = EI/L =
+25/3`, which rolls it into a full circle. The exact solution of the
+inextensible beam (p. 1555) is the arc of curvature `M/EI`, with the tip at
+
+.. math::
+
+    \frac{U}{L} = \frac{\sin\theta}{\theta} - 1, \qquad
+    \frac{W}{L} = \frac{1 - \cos\theta}{\theta}, \qquad
+    \theta = \frac{M L}{E I} = 2 \pi \frac{M}{M_{max}}
+
+tabulated as "Exact" in Table 3a (p. 1557). panels has no applied moments;
+``tests/tests_shell/test_plate_clpt_tl_end_moment.py`` applies the moment
+as a conservative load of potential `-M/b \int_0^b \theta(L, y)\, dy`,
+`\theta = \operatorname{atan2}(w_{,x}, 1 + u_{,x})`, with its
+configuration-dependent load vector and load stiffness passed to
+``structsolve.Analysis`` through ``calc_fext(c=c)``, ``calc_fint(c, inc)``
+and ``calc_kC(c, inc)``. With ``m = 12``, ``n = 4`` and 20 Newton-Raphson
+increments of `0.05 M_{max}` (4 s), the tip displacements, averaged over
+the width, are:
+
+.. list-table::
+    :header-rows: 1
+
+    * - `M/M_{max}`
+      - 0.05
+      - 0.25
+      - 0.5
+      - 0.75
+      - 1
+    * - `-U`, exact, Table 3a
+      - 0.196
+      - 4.361
+      - 12.000
+      - 14.546
+      - 12.000
+    * - `-U`, ``'plate_clpt_tl'``
+      - 0.1964
+      - 4.3619
+      - 12.0068
+      - 14.5425
+      - 11.9725
+    * - `-U`, ``'plate_clpt_gl'``
+      - 0.2260
+      - stops
+      - --
+      - --
+      - --
+    * - `-U`, ``'plate_clpt_donnell'``
+      - 0.2183
+      - 4.4238
+      - 7.6697
+      - 10.1090
+      - 12.1940
+    * - `W`, exact, Table 3a
+      - 1.870
+      - 7.639
+      - 7.639
+      - 2.546
+      - 0.000
+    * - `W`, ``'plate_clpt_tl'``
+      - 1.8695
+      - 7.6398
+      - 7.6342
+      - 2.5272
+      - 0.0002
+    * - `W`, ``'plate_clpt_gl'``
+      - 1.9994
+      - stops
+      - --
+      - --
+      - --
+    * - `W`, ``'plate_clpt_donnell'``
+      - 1.9821
+      - 8.9234
+      - 11.7495
+      - 13.4893
+      - 14.8152
+
+``'plate_clpt_tl'`` rolls the strip into the circle, within 2.3e-3 `L` of
+the exact solution (0.03 at the full circle). The difference is that of
+the model, not of the Ritz approximation: the curvature measured with the
+area vector, `\kappa_{xx} = \lambda^2 \mu\, \theta_{,x}` for the
+stretches `\lambda` and `\mu` along `x` and `y`, makes the bending moment
+shorten the strip and its width by `(\kappa h)^2/6` and `(\kappa h)^2/12`,
+and the curvature larger than `M/EI` by about `5 (\kappa h)^2/6`, 0.23 %
+at the full circle (`\kappa h = 0.052`). The uniform cylindrical solution
+of these equations, computed in the test, is reproduced to 4e-6 `L`; the
+largest difference with it over the five loads converges with the number
+of terms `m` along the length as 2.3e-2 `L` (`m = 8`), 2.8e-4 `L` (10),
+3.9e-6 `L` (12) and 3.7e-6 `L` (14 and 16), the angle `2 \pi` of the
+full circle requiring polynomials of degree 11 or more.
+``'plate_clpt_gl'``, whose curvatures `-w_{,xx}` are measured in the fixed
+frame, is 7 % more flexible in `W` already at `0.05 M_{max}` (a tip
+rotation of 0.31 rad), and its Newton-Raphson analysis stops at `0.079
+M_{max}` (0.50 rad, `W = 4.19` against 2.93); ``'plate_clpt_donnell'``,
+whose membrane strains are linear in `u`, never rolls the strip: `W` keeps
+increasing, to 14.8 at `M_{max}`.
+
+
 Wing box under a follower tip force
 -----------------------------------
 

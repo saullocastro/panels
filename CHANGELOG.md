@@ -251,6 +251,22 @@
   against 1.06 s), the analysis 2.0 times (288 against 146 s); with the
   integration points of `'plate_clpt_gl'` set on every domain the
   deflections are the same to 0.01 mm, in 138 s.
+- Cantilever strip rolled into a full circle by an end moment, benchmark
+  3.2 of Sze, Liu and Lo (2004), Finite Elements in Analysis and Design 40,
+  1551-1569 (`L = 12`, `b = 1`, `h = 0.1`, `E = 1.2e6`, `nu = 0`, `M_max =
+  2 pi EI/L`; exact arc `U/L = sin(t)/t - 1`, `W/L = (1 - cos(t))/t`, Table
+  3a): the moment is a conservative load of potential `-M/b int atan2(w,x,
+  1 + u,x) dy` at the tip with its load stiffness, in the test.
+  `'plate_clpt_tl'` (`m = 12`, 20 increments, 4 s) rolls the strip into
+  the circle within 2.3e-3 L of the exact solution (`-U = 11.9725`, `W =
+  0.0002` at `M_max`, against 12 and 0), the difference being that of the
+  area-vector curvature, `(kappa h)^2` (0.23 % more curvature at the full
+  circle), which the test reproduces to 4e-6 L with the cylindrical
+  solution of the model; `'plate_clpt_gl'` is 7 % too flexible at 0.05
+  `M_max` and stops at 0.079 `M_max`, and `'plate_clpt_donnell'` never
+  rolls (`W = 14.8` at `M_max`). Test:
+  `tests/tests_shell/test_plate_clpt_tl_end_moment.py`; documented in
+  `doc/source/plate_clpt_tl.rst`.
 - Tests: `tests/tests_shell/test_plate_clpt_tl.py` (31 tests, about 40 s);
   the model is added to the tangent, tangent-product, follower-pressure,
   multidomain and JSON tests and to the linear wing-box test. Documentation:
