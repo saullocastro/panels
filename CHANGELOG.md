@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+### Packaging
+
+- On Linux, `-static-libgcc` and `-static-libstdc++` are passed to the
+  linker only when the compiler finds `libgcc.a` and `libstdc++.a`
+  (`-print-file-name`); otherwise the flag is left out with a message, and
+  the extension modules link the shared runtime. The build from source
+  failed with the system GCC 4.8.5 of CentOS 7, which has no
+  `libstdc++.a` without the package `libstdc++-static`.
+  `PANELS_STATIC_RUNTIME=0` leaves both flags out, `PANELS_STATIC_RUNTIME=1`
+  keeps both without the check. The wheels, built with the manylinux
+  compilers, are unchanged.
+
 ## 0.14.2 (2026-11-01)
 
 ### Packaging
