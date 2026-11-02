@@ -10,7 +10,6 @@ listed in :mod:`panels.modelDB`. The function :func:`load` reads a shell
 saved by :meth:`.Shell.save`.
 
 """
-import gc
 import os
 
 import numpy as np
@@ -568,9 +567,6 @@ class Shell(object):
                 Nxx=None, Nyy=None, Nxy=None, Mxx=None, Myy=None, Mxy=None, Qy=None, Qx=None,
                 )
         self.plot_mesh = dict(Xs=None, Ys=None)
-
-        #NOTE memory cleanup
-        gc.collect()
 
 
     @property

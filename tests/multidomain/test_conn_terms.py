@@ -211,3 +211,39 @@ def test_check_conn_terms_BFxycte():
         md.check_conn_terms()
     issues = md.check_conn_terms(warn=False)
     assert [(p is p2, terms) for p, _, terms, _, _ in issues] == [(True, 3)]
+
+
+def test_check_conn_terms_along():
+    """Different numbers of terms along an edge connection imposed exactly:
+    n for an edge of constant x, m for an edge of constant y, n of p1 and m
+    of p2 for 'BFxycte'; not checked with the penalty method"""
+    a, b = 0.3, 0.1
+    p1 = Shell(a=a, b=b, stack=[0.], plyt=1e-3, laminaprop=(E, NU),
+               model='plate_clpt_donnell', m=6, n=8, name='skin')
+    p2 = Shell(a=a, b=b, stack=[0.], plyt=1e-3, laminaprop=(E, NU),
+               model='plate_clpt_donnell', m=6, n=6, name='web')
+    free(p1)
+    free(p2)
+    conn = [dict(p1=p1, p2=p2, func='SSxcte', xcte1=a, xcte2=0.)]
+    with warnings.catch_warnings():
+        warnings.simplefilter('error')
+        md = MultiDomain([p1, p2], conn)
+        md.get_Z()
+    assert md.check_conn_terms_along() == [('SSxcte', p1, 8, p2, 6)]
+    p2.n = 8
+    assert md.check_conn_terms_along() == []
+    # the terms across the joint may differ
+    p2.m = 4
+    assert md.check_conn_terms_along() == []
+    p1.n = 10
+    assert md.check_conn_terms_along() == [('SSxcte', p1, 10, p2, 8)]
+    assert MultiDomain([p1, p2], conn,
+                       conn_method='penalty').check_conn_terms_along() == []
+    p3 = Shell(a=b, b=a, stack=[0.], plyt=1e-3, laminaprop=(E, NU),
+               model='plate_clpt_donnell', m=8, n=6, name='rib')
+    free(p3)
+    md = MultiDomain([p1, p3], [dict(p1=p1, p2=p3, func='BFxycte', xcte1=a,
+                                     ycte2=0.)])
+    assert md.check_conn_terms_along() == [('BFxycte', p1, 10, p3, 8)]
+    p3.m = 10
+    assert md.check_conn_terms_along() == []

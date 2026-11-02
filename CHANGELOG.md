@@ -63,6 +63,16 @@
   `p1` and `y1`, `y2` of `p2`. The default wing-box of
   `panels.multidomain.wingbox`, whose ribs are joined to the spars with
   `'BFxycte'`, issues no warning.
+- New `MultiDomain.check_conn_terms_along()`, the edge connections imposed
+  exactly (null space) whose two domains have different numbers of terms
+  along the joint, `n` at constant `x`, `m` at constant `y`, whose extra
+  terms of the richer domain vanish along the joint (Limitations of the
+  null-space page). It is not called automatically and issues no warning,
+  since the effect is small: the default wing-box with
+  `conn_method='null-space'` has 36 such connections (skins with 8 terms
+  and spars with 5 joined to ribs with 6 and 4), and its compliance under
+  the tip force is 8.88229e-4 m/N against 8.88283e-4 m/N with as many terms
+  in the ribs as in the skins, 6e-5 apart.
 
 ### Packaging
 
@@ -75,6 +85,22 @@
   `PANELS_STATIC_RUNTIME=0` leaves both flags out, `PANELS_STATIC_RUNTIME=1`
   keeps both without the check. The wheels, built with the manylinux
   compilers, are unchanged.
+- The parallel build, `python setup.py build_ext --inplace -j 8`, failed on
+  Windows: the shared sources `panels/core/src/bardell.cpp` and
+  `bardell_functions.cpp`, listed by most extensions, were compiled to the
+  same object files by several extensions at once. Each extension now
+  compiles into its own temporary directory (`build_ext_separate_temp` in
+  `setup.py`), the same compilations as before; the 32 extensions build in
+  2.5 min with `-j 8` on Windows.
+
+### Performance
+
+- `Shell._clear_matrices()`, called by `Shell.__init__` and by
+  `StiffPanelBay` for each panel, no longer calls `gc.collect()`, which
+  walks every object of the process: creating a `Shell` took 0.19 s in a
+  process with a million live objects, and 0.0002 s without it. The
+  matrices are freed by reference counting, as in the calculations since
+  0.11.1.
 
 ### New connection `'BFxycte'`: an edge `x = const` joined to an edge `y = const`
 

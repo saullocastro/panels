@@ -738,6 +738,63 @@ class MultiDomain(object):
                       ConnectionTermsWarning, stacklevel=stacklevel)
 
 
+    def check_conn_terms_along(self, conn=None):
+        r"""Edge connections imposed exactly whose domains have different
+        numbers of terms along the joint
+
+        For each edge connection of :meth:`.check_conn_terms` imposed
+        exactly, see :meth:`._null_space`, compares the numbers of terms of
+        the two domains along the joint, ``n`` for an edge of constant `x`,
+        ``m`` for an edge of constant `y` (for ``'BFxycte'``, ``n`` of
+        ``p1`` and ``m`` of ``p2``).
+
+        Parameters
+        ----------
+        conn : list of dict or None, optional
+            The connections, by default those of the assembly, see
+            :meth:`.get_kC_conn`.
+
+        Returns
+        -------
+        issues : list of tuple
+            One tuple ``(func, p1, terms1, p2, terms2)`` per connection whose
+            domains have different numbers of terms along the joint: the
+            function of the connection, the two :class:`.Shell` and their
+            numbers of terms along the joint.
+
+        Notes
+        -----
+        The terms of the trace of the richer domain that the other domain
+        cannot represent are forced to vanish by the exact constraints, see
+        the Limitations of :ref:`null_space`, and the extra terms of the
+        richer domain do not refine the joint. The penalty method,
+        ``conn_method='penalty'``, only penalizes them and is not checked.
+        Unlike too few terms across the joint, see
+        :meth:`.check_conn_terms`, this is not checked automatically and
+        issues no warning: in the wing-box of
+        :func:`.wingbox.create_wingbox` with ``conn_method='null-space'``,
+        whose 36 rib-skin and rib-spar connections join 8 or 5 terms to 6
+        or 4, the compliance under the tip force is 8.88229e-4 m/N, against
+        8.88283e-4 m/N with as many terms in the ribs as in the skins, a
+        difference of 6e-5.
+
+        """
+        conn = self._resolve_conn(conn)
+        issues = []
+        along = {'m': 'n', 'n': 'm'}
+        for ci in conn:
+            if (ci.get('func') not in _EDGE_CONN
+                    or not self._null_space(ci)):
+                continue
+            (a1, _), (a2, _) = _EDGE_CONN[ci['func']]
+            terms1 = getattr(ci['p1'], along[a1])
+            terms2 = getattr(ci['p2'], along[a2])
+            if terms1 != terms2:
+                issues.append((ci['func'], ci['p1'], terms1, ci['p2'],
+                               terms2))
+        return issues
+
+
     def _null_space(self, connecti):
         r"""Whether the connection is imposed with the null-space method
 

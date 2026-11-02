@@ -6,6 +6,7 @@ extensions with their compiler flags per platform and the file
 ``panels/version.py``, written from the version of ``pyproject.toml``
 and read by ``panels.version`` and ``doc/source/conf.py``.
 """
+import copy
 import platform
 import os
 import re
@@ -15,6 +16,7 @@ import sys
 import sysconfig
 
 from setuptools import setup, Extension
+from setuptools.command.build_ext import build_ext
 from Cython.Build import cythonize
 
 if sys.version_info >= (3, 11):
@@ -458,6 +460,23 @@ ext_modules = cythonize(extensions,
                                   for ext in extensions),
                         )
 
+class build_ext_separate_temp(build_ext):
+    r"""``build_ext`` with a temporary directory per extension
+
+    The shared C++ sources, e.g. ``panels/core/src/bardell.cpp``, are
+    compiled by every extension that lists them, to the same object file
+    in the common temporary directory. With a parallel build, ``build_ext
+    -j N``, two extensions then wrote the same object file at once, which
+    failed on Windows with MSVC; each extension now compiles into its own
+    directory, the same compilations as before.
+    """
+    def build_extension(self, ext):
+        cmd = copy.copy(self)
+        cmd.build_temp = os.path.join(self.build_temp, ext.name)
+        return build_ext.build_extension(cmd, ext)
+
+
 setup(
     ext_modules=ext_modules,
+    cmdclass={'build_ext': build_ext_separate_temp},
 )
