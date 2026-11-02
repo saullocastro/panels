@@ -39,6 +39,9 @@ the non-linear equations, see :mod:`panels.models`:
 * ``'plate_clpt_gl'``: plates, CLPT with the Green-Lagrange membrane strains,
   which vanish for any rigid rotation, for assemblies with large rotations,
   see :ref:`plate_clpt_gl`
+* ``'plate_clpt_tl'``: plates, total-Lagrangian Kirchhoff-Love, with the
+  Green-Lagrange membrane strains and the curvatures of the deformed normal,
+  for plates bent through large rotations, see :ref:`plate_clpt_tl`
 * ``'plate_fsdt_donnell'``: plates, first-order shear deformation theory
 * ``'plate_tsdt_donnell'``: plates, third-order shear deformation theory of
   Reddy
@@ -81,6 +84,7 @@ User guide
     postprocessing.rst
     follower_pressure.rst
     plate_clpt_gl.rst
+    plate_clpt_tl.rst
     tsdt_offset.rst
     multidomain_null_space.rst
     tangent_product.rst

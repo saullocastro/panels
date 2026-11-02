@@ -159,10 +159,11 @@ def test_wingbox_linear_equals_von_karman():
     r"""Linear static solution of the box under the dead tip force: the same
     for both models, 22.68 mm at 25 N"""
     out = {}
-    for model in ('plate_clpt_gl', 'plate_clpt_donnell'):
+    for model in ('plate_clpt_gl', 'plate_clpt_tl', 'plate_clpt_donnell'):
         md, top = wingbox(model, 25., False)
         an = Analysis(md.calc_fext, md.calc_fint, md.calc_kC, md.calc_kG)
         an.static(NLgeom=False, silent=True)
         out[model] = 1e3*tip_w(md, top, an.cs[0])
     assert np.isclose(out['plate_clpt_gl'], out['plate_clpt_donnell'], rtol=1e-10)
+    assert np.isclose(out['plate_clpt_tl'], out['plate_clpt_donnell'], rtol=1e-10)
     assert np.isclose(out['plate_clpt_gl'], 22.68, atol=0.01)

@@ -119,7 +119,9 @@ Limitations
   bending is carried by the membrane strains of the skins and the in-plane
   bending of the spars, and the out-of-plane bending of the skins
   contributes little; a local buckle of a skin rotated by `\theta` is seen
-  with its bending energy times `\cos^2\theta`.
+  with its bending energy times `\cos^2\theta`. The model
+  ``'plate_clpt_tl'`` measures the curvatures with the deformed normal, see
+  :ref:`plate_clpt_tl`.
 - The connections of :class:`.MultiDomain` are unchanged: they are linear
   in the displacements in the fixed local frames, exact for the continuity
   of the displacements at any rotation, and the rotation continuity

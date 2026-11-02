@@ -27,6 +27,10 @@ approximation functions are tabulated once per integration point, with the
 derivatives already in the physical coordinates, ``(2/a) f'(xi)``,
 ``(2/a)^2 f''(xi)``, named ``fAu_x``, ``fAw_xx``, ``gAw_yy`` and so on.
 
+The helpers take a :class:`Spec`, the derivation of a model and the rows of
+its tables, ``SPEC`` (this model) by default; ``plate_clpt_tl/write_pyx.py``
+uses them with its own derivation.
+
 """
 import importlib.util
 import os
@@ -121,7 +125,7 @@ BC_BLOCK = '\n'.join('    {0}1{1} = shell.{0}1{1}; {0}1{1}r = shell.{0}1{1}r; '
                      '{0}2{1} = shell.{0}2{1}; {0}2{1}r = shell.{0}2{1}r'.format(xy, p)
                      for xy in 'xy' for p in FIELDS)
 
-FINPUT = """    # F as 4-D matrix, must be [nx, ny, 6, 6], when there is one ABD[6, 6] for
+FINPUT_TEMPLATE = """    # F as 4-D matrix, must be [nx, ny, 6, 6], when there is one ABD[6, 6] for
     # each of the nx * ny integration points
     cdef double F[6 * 6]
     cdef double [:, :, :, ::1] Fnxny
@@ -170,8 +174,8 @@ FINPUT = """    # F as 4-D matrix, must be [nx, ny, 6, 6], when there is one ABD
     intx = x2 - x1
     inty = y2 - y1
 
-    ftab = np.zeros((7, m), dtype=DOUBLE)
-    gtab = np.zeros((7, n), dtype=DOUBLE)"""
+    ftab = np.zeros((NF, m), dtype=DOUBLE)
+    gtab = np.zeros((NG, n), dtype=DOUBLE)"""
 
 COMMON_CDEF = """    cdef double x1, x2, y1, y2, xinf, xsup, yinf, ysup
     cdef double a, b, intx, inty
@@ -185,7 +189,7 @@ COMMON_CDEF = """    cdef double x1, x2, y1, y2, xinf, xsup, yinf, ysup
     cdef double [::1] xis, etas, weights_xi, weights_eta
 """
 
-POINT = """    with nogil:
+POINT_HEAD = """    with nogil:
         for ptx in range(nx):
             for pty in range(ny):
                 xi = xis[ptx]
@@ -202,70 +206,117 @@ POINT = """    with nogil:
                             F[i*6 + j] = Fnxny[ptx, pty, i, j]
 
                 # approximation functions and their derivatives in x and y
-                for i in range(m):
-                    ftab[0, i] = f(i, xi, x1u, x1ur, x2u, x2ur)
-                    ftab[1, i] = (2/a)*fp(i, xi, x1u, x1ur, x2u, x2ur)
-                    ftab[2, i] = f(i, xi, x1v, x1vr, x2v, x2vr)
-                    ftab[3, i] = (2/a)*fp(i, xi, x1v, x1vr, x2v, x2vr)
-                    ftab[4, i] = f(i, xi, x1w, x1wr, x2w, x2wr)
-                    ftab[5, i] = (2/a)*fp(i, xi, x1w, x1wr, x2w, x2wr)
-                    ftab[6, i] = (2/a)*(2/a)*fpp(i, xi, x1w, x1wr, x2w, x2wr)
-                for j in range(n):
-                    gtab[0, j] = f(j, eta, y1u, y1ur, y2u, y2ur)
-                    gtab[1, j] = (2/b)*fp(j, eta, y1u, y1ur, y2u, y2ur)
-                    gtab[2, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
-                    gtab[3, j] = (2/b)*fp(j, eta, y1v, y1vr, y2v, y2vr)
-                    gtab[4, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
-                    gtab[5, j] = (2/b)*fp(j, eta, y1w, y1wr, y2w, y2wr)
-                    gtab[6, j] = (2/b)*(2/b)*fpp(j, eta, y1w, y1wr, y2w, y2wr)
 """
 
 
-def basis_read(side, fg, indent):
-    sp = ' '*indent
-    rows = F_ROWS if fg == 'f' else G_ROWS
+class Spec(object):
+    r"""Derivation of a model and rows of the tables of the approximation
+    functions along ``x`` (``f_rows``) and ``y`` (``g_rows``), e.g.
+    ``'w_xx'`` for `(2/a)^2 f''(\xi)` of ``w``
+
+    ``th`` is the module of the derivation, with ``build()``, ``D``,
+    ``D_NAMES``, ``DOF`` and ``F``.
+
+    """
+    def __init__(self, th, f_rows, g_rows):
+        self.th = th
+        self.F_ROWS = list(f_rows)
+        self.G_ROWS = list(g_rows)
+        self.ND = len(th.D)
+        self.DOF = th.DOF
+        self.D_NAMES = th.D_NAMES
+        self.M = th.build()
+        self.PHI_A = self.M['PhiA'].applyfunc(physical)
+        self.PHI_B = self.M['PhiB'].applyfunc(physical)
+        #: the generalized derivatives of each degree of freedom
+        self.DSET = [[p for p in range(self.ND) if self.PHI_A[p, d] != 0]
+                     for d in range(self.DOF)]
+        self.DOF_OF = {p: d for d in range(self.DOF) for p in self.DSET[d]}
+
+
+def table_lines(sp):
+    r"""Tabulation of the rows of ``sp`` at the integration point"""
+    L = []
+    for fg, rows, idx, coord, ab in (('f', sp.F_ROWS, 'i', 'xi', 'a'),
+                                     ('g', sp.G_ROWS, 'j', 'eta', 'b')):
+        xy = 'x' if fg == 'f' else 'y'
+        L.append('                for {0} in range({1}):'.format(idx, 'm' if fg == 'f' else 'n'))
+        for k, row in enumerate(rows):
+            field = row[0]
+            order = row.count(xy) if '_' in row else 0
+            func = ('f', 'fp', 'fpp')[order]
+            L.append('                    {0}tab[{1}, {2}] = {3}{4}({2}, {5}, {6}1{7}, '
+                     '{6}1{7}r, {6}2{7}, {6}2{7}r)'.format(
+                         fg, k, idx, '(2/{0})*'.format(ab)*order, func, coord, xy, field))
+    return '\n'.join(L) + '\n'
+
+
+def finput(sp):
+    r"""Reading of the input and allocation of the tables of ``sp``"""
+    return FINPUT_TEMPLATE.replace('(NF, m)', '(%d, m)' % len(sp.F_ROWS)).replace(
+        '(NG, n)', '(%d, n)' % len(sp.G_ROWS))
+
+
+def point(sp):
+    r"""Loop over the integration points and tabulation of ``sp``"""
+    return POINT_HEAD + table_lines(sp)
+
+
+SPEC = Spec(th, F_ROWS, G_ROWS)
+M = SPEC.M
+PHI_A = SPEC.PHI_A
+PHI_B = SPEC.PHI_B
+DSET = SPEC.DSET
+DOF_OF = SPEC.DOF_OF
+D_NAMES = SPEC.D_NAMES
+FINPUT = finput(SPEC)
+POINT = point(SPEC)
+
+
+
+def basis_read(side, fg, indent, sp=None):
+    sp = SPEC if sp is None else sp
+    ind = ' '*indent
+    rows = sp.F_ROWS if fg == 'f' else sp.G_ROWS
     idx = {('A', 'f'): 'i', ('A', 'g'): 'j', ('B', 'f'): 'k', ('B', 'g'): 'l'}[(side, fg)]
     tab = 'ftab' if fg == 'f' else 'gtab'
-    return [sp + '{0}{1}{2} = {3}[{4}, {5}]'.format(fg, side, nm, tab, k, idx)
+    return [ind + '{0}{1}{2} = {3}[{4}, {5}]'.format(fg, side, nm, tab, k, idx)
             for k, nm in enumerate(rows)]
 
 
-def basis_cdef(sides='AB'):
+def basis_cdef(sides='AB', sp=None):
+    sp = SPEC if sp is None else sp
     names = []
     for side in sides:
-        names += ['f{0}{1}'.format(side, nm) for nm in F_ROWS]
-        names += ['g{0}{1}'.format(side, nm) for nm in G_ROWS]
+        names += ['f{0}{1}'.format(side, nm) for nm in sp.F_ROWS]
+        names += ['g{0}{1}'.format(side, nm) for nm in sp.G_ROWS]
     return '\n'.join('    cdef double ' + ', '.join(names[i:i + 7])
                      for i in range(0, len(names), 7))
 
 
-M = th.build()
-PHI_A = M['PhiA'].applyfunc(physical)
-PHI_B = M['PhiB'].applyfunc(physical)
-#: the generalized derivatives of each degree of freedom
-DSET = [[p for p in range(ND) if PHI_A[p, d] != 0] for d in range(DOF)]
-DOF_OF = {p: d for d in range(DOF) for p in DSET[d]}
-D_NAMES = th.D_NAMES
-
-
-def phi_lines(side, indent):
+def phi_lines(side, indent, sp=None):
     r"""``pA[p] = Phi_A[p, d]``, the derivative ``p`` of the term"""
-    P = PHI_A if side == 'A' else PHI_B
-    return ['{0}p{1}[{2}] = {3}'.format(' '*indent, side, p, pstr(P[p, DOF_OF[p]]))
-            for p in range(ND)]
+    sp = SPEC if sp is None else sp
+    P = sp.PHI_A if side == 'A' else sp.PHI_B
+    return ['{0}p{1}[{2}] = {3}'.format(' '*indent, side, p, pstr(P[p, sp.DOF_OF[p]]))
+            for p in range(sp.ND)]
 
 
-def derivative_lines(indent, names=None):
-    r"""``d[p] += Phi_A[p, d] cs[col+d]``, the derivatives at the point"""
-    names = range(ND) if names is None else names
-    return ['{0}{1} += {2}*cs[col+{3}]'.format(' '*indent, D_NAMES[p],
-            pstr(PHI_A[p, DOF_OF[p]]), DOF_OF[p]) for p in names]
+def derivative_lines(indent, names=None, sp=None, vec='cs', prefix=''):
+    r"""``d[p] += Phi_A[p, d] cs[col+d]``, the derivatives at the point, or
+    those of the vector ``vec``, named with ``prefix``"""
+    sp = SPEC if sp is None else sp
+    names = range(sp.ND) if names is None else names
+    return ['{0}{1}{2} += {3}*{4}[col+{5}]'.format(' '*indent, prefix, sp.D_NAMES[p],
+            pstr(sp.PHI_A[p, sp.DOF_OF[p]]), vec, sp.DOF_OF[p]) for p in names]
 
 
-def assembly(mname, pattern, blocks, symmetric=True):
+def assembly(mname, pattern, blocks, symmetric=True, sp=None):
     r"""Loops over the pairs of terms, ``mname`` the name of the matrix,
     ``pattern[p][q]`` the non-zero entries of ``K`` and ``blocks`` the pairs
     of degrees of freedom ``(d, e)`` of the matrix"""
+    sp = SPEC if sp is None else sp
+    DOF, ND, DSET = sp.DOF, sp.ND, sp.DSET
     T = {}
     for d in range(DOF):
         for q in range(ND):
@@ -274,26 +325,26 @@ def assembly(mname, pattern, blocks, symmetric=True):
                 T[(d, q)] = ' + '.join('pA[{0}]*K[{1}]'.format(p, p*ND + q) for p in ps)
     L = ['                c = -1',
          '                for j in range(n):']
-    L += basis_read('A', 'g', 20)
+    L += basis_read('A', 'g', 20, sp)
     L += ['                    for i in range(m):']
-    L += basis_read('A', 'f', 24)
+    L += basis_read('A', 'f', 24, sp)
     L += ['                        row = row0 + DOF*(j*m + i)']
-    L += phi_lines('A', 24)
+    L += phi_lines('A', 24, sp)
     L += ['                        # TA[d, q] = sum_p Phi_A[p, d] K[p, q]']
     used_d = sorted({d for d, e in blocks})
     for (d, q), expr in sorted(T.items()):
         if d in used_d:
             L.append('                        TA[{0}] = {1}'.format(d*ND + q, expr))
     L += ['                        for l in range(n):']
-    L += basis_read('B', 'g', 28)
+    L += basis_read('B', 'g', 28, sp)
     L += ['                            for k in range(m):',
           '                                col = col0 + DOF*(l*m + k)']
     if symmetric:
         L += ['                                #NOTE symmetry assumption True if no follower forces are used',
               '                                if row > col:',
               '                                    continue']
-    L += basis_read('B', 'f', 32)
-    L += phi_lines('B', 32)
+    L += basis_read('B', 'f', 32, sp)
+    L += phi_lines('B', 32, sp)
     for d, e in blocks:
         terms = ['TA[{0}]*pB[{1}]'.format(d*ND + q, q) for q in DSET[e] if (d, q) in T]
         if not terms:
@@ -330,14 +381,18 @@ def const_read(names, indent):
     return out
 
 
-def gradient_loop(indent, names):
-    sp = ' '*indent
-    L = [sp + 'for j in range(n):']
-    L += basis_read('A', 'g', indent + 4)
-    L += [sp + '    for i in range(m):']
-    L += basis_read('A', 'f', indent + 8)
-    L += [sp + '        col = col0 + DOF*(j*m + i)']
-    L += derivative_lines(indent + 8, names)
+def gradient_loop(indent, names, sp=None, extra=()):
+    r"""Loop over the terms summing the derivatives ``names`` at the point;
+    ``extra`` holds ``(vec, prefix)`` of further vectors to differentiate"""
+    ind = ' '*indent
+    L = [ind + 'for j in range(n):']
+    L += basis_read('A', 'g', indent + 4, sp)
+    L += [ind + '    for i in range(m):']
+    L += basis_read('A', 'f', indent + 8, sp)
+    L += [ind + '        col = col0 + DOF*(j*m + i)']
+    L += derivative_lines(indent + 8, names, sp)
+    for vec, prefix in extra:
+        L += derivative_lines(indent + 8, names, sp, vec, prefix)
     return L
 
 
@@ -555,13 +610,25 @@ def fkG_num(double [::1] cs, object Finput, object shell,
            Hlines='\n'.join(matrix_lines('K', H, 16)),
            loops=assembly('kG', Hpat, blocks_diag)))
 
-    # ------------------------------------------------------------- calc_fint
+    out.append(calc_fint_src())
+    text = ''.join(out)
+    #NOTE c, p, q, r, s, k, l and parts of the tables are not used in every
+    #     kernel, which is harmless
+    return text
+
+
+def calc_fint_src(sp=None):
+    r"""Source of ``calc_fint`` of ``sp``, ``int [Phi]^T [B]^T sigma dA``,
+    for any strains ``eps(d)`` of the CLPT"""
+    sp = SPEC if sp is None else sp
+    B, eps = sp.M['B'], sp.M['eps']
+    DOF, ND, D_NAMES, NE = sp.DOF, sp.ND, sp.D_NAMES, sp.th.NE
     S = (B.T*Matrix_s()).applyfunc(expand)
     fint_lines = []
     for d in range(DOF):
-        terms = ['pA[{0}]*S[{0}]'.format(p) for p in DSET[d]]
+        terms = ['pA[{0}]*S[{0}]'.format(p) for p in sp.DSET[d]]
         fint_lines.append('                        fint[col+{0}] += weight*({1})'.format(d, ' + '.join(terms)))
-    out.append('''
+    return '''
 
 def calc_fint(double [::1] cs, object Finput, object shell,
         int size, int col0, int nx, int ny):
@@ -608,17 +675,13 @@ def calc_fint(double [::1] cs, object Finput, object shell,
 
     return fint
 '''.format(COMMON=COMMON_CDEF, dn=', '.join(D_NAMES), ND=ND,
-           basis=basis_cdef('A'), FINPUT=FINPUT, POINT=POINT,
+           basis=basis_cdef('A', sp), FINPUT=finput(sp), POINT=point(sp),
            dzero='\n'.join('                {0} = 0.'.format(nm) for nm in D_NAMES),
-           dloop='\n'.join(gradient_loop(16, range(ND))),
+           dloop='\n'.join(gradient_loop(16, range(ND), sp)),
            elines='\n'.join('                e[{0}] = {1}'.format(k, pstr(eps[k])) for k in range(NE)),
            Slines='\n'.join('                S[{0}] = {1}'.format(p, pstr(S[p])) for p in range(ND)),
-           gA='\n'.join(basis_read('A', 'g', 20)), fA='\n'.join(basis_read('A', 'f', 24)),
-           pA='\n'.join(phi_lines('A', 24)), fint='\n'.join(fint_lines)))
-    text = ''.join(out)
-    #NOTE c, p, q, r, s, k, l and parts of the tables are not used in every
-    #     kernel, which is harmless
-    return text
+           gA='\n'.join(basis_read('A', 'g', 20, sp)), fA='\n'.join(basis_read('A', 'f', 24, sp)),
+           pA='\n'.join(phi_lines('A', 24, sp)), fint='\n'.join(fint_lines))
 
 
 def Matrix_s():

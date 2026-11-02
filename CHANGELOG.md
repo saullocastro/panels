@@ -204,6 +204,58 @@
   0.893 mm/N, 1.3% to 1.5% below the Euler-Bernoulli beam of the box
   section, with the penalty and the null-space connections (0.2% apart).
 
+### New model `plate_clpt_tl`: total-Lagrangian Kirchhoff-Love plates
+
+- New model `'plate_clpt_tl'`: the Green-Lagrange membrane strains of
+  `'plate_clpt_gl'` and the changes of curvature measured with the area
+  vector of the deformed mid-surface, `kxx = -a . u,xx`, `kyy = -a . u,yy`,
+  `kxy = -2 a . u,xy`, `a = X,x x X,y`, `X = (x, y, 0) + (u, v, w)`. All the
+  strains are invariant under a rigid rotation of any deformed state, which
+  removes the `cos^2(t)` factor that `'plate_clpt_gl'` applies to the
+  bending energy of a plate rotated by `t`: a bent plate rotated by 0.5 and
+  1 rad keeps its bending energy to 1e-8, against 0.77 and 0.29 of it with
+  `'plate_clpt_gl'`, and a cantilever strip bent out of plane follows the
+  inextensible elastica to 1e-4 at `PL^2/EI = 1` and `3` (tip rotations of
+  0.46 and 1.0 rad; `w = 0.30172 L` and `0.6033 L`), where
+  `'plate_clpt_gl'` follows the linear beam (`L/3` at `PL^2/EI = 1`).
+- The area vector is used rather than the unit normal: `|a|^2 = det(F^T F)`
+  is one for rigid motions and `1 + 2 (exx + eyy)` to first order
+  otherwise, so the bending stiffness is scaled by the order of the
+  membrane strain (a plate under pressure deflected by 11 thicknesses
+  deflects 0.13 % less than with `'plate_clpt_gl'`), while the strains stay
+  cubic polynomials and the Gauss-Legendre integration exact.
+- The integrands have the degree `6p - 2` along a direction instead of
+  `4p`; `gauss_points(num, degree)` and the new `modelDB` key
+  `'integrand_degree'` give this model `3p` points by default, 21 instead
+  of 15 for `m = 8`, and the other models `max(2*num - 1, 7)` as before.
+  With 15 points the internal forces of a state with gradients of order 0.5
+  differ by 3e-13.
+- The derivation, `theory/shells/plate_clpt_tl/plate_clpt_tl.py` (SymPy),
+  checks the invariance under rigid rotations, `|a|^2 = det(F^T F)`, that
+  `fkC_num + fkG_num` is the Jacobian of `calc_fint` with `fkG_num`
+  homogeneous of degree one, and the integrand degree; `write_pyx.py`
+  generates `panels/models/plate_clpt_tl_num.pyx` (`fkC_num`, `fkG_num`,
+  `calc_fint`, `calc_kTv`, follower pressures) with the helpers of
+  `plate_clpt_gl/write_pyx.py`, now parametrized by the derivation
+  (`plate_clpt_gl` regenerates byte-identical). The analytical kernels are
+  those of `'plate_clpt_gl'`; `Shell.calc_kG` has `u-w` and `v-w` blocks of
+  the moments of the linear strains, so linear buckling eigenvalues equal
+  those of `'plate_clpt_gl'` without prebuckling moments.
+  `clpt_field.fstrain` returns the new curvatures (`clpt_field.is_tl`).
+- High-AR-t5 wing box under the follower tip force (45 domains, 6264
+  DOFs, 20 Newton-Raphson increments): 22.68, 90.84, 184.32, 286.16, 388.84
+  and 488.73 mm at 25, 100, 200, 300, 400 and 500 N, against 499.83 mm of
+  `'plate_clpt_gl'` and 515.5 mm of Abaqus at 500 N; the two models agree
+  to 0.03 % up to 200 N, below the first buckling load. One tangent
+  (`calc_kC` + `calc_kG`) costs 2.2 times that of `'plate_clpt_gl'` (2.34
+  against 1.06 s), the analysis 2.0 times (288 against 146 s); with the
+  integration points of `'plate_clpt_gl'` set on every domain the
+  deflections are the same to 0.01 mm, in 138 s.
+- Tests: `tests/tests_shell/test_plate_clpt_tl.py` (31 tests, about 40 s);
+  the model is added to the tangent, tangent-product, follower-pressure,
+  multidomain and JSON tests and to the linear wing-box test. Documentation:
+  `doc/source/plate_clpt_tl.rst` and the model in `panels.models`.
+
 ### New model `plate_clpt_gl`: plates with Green-Lagrange membrane strains
 
 - New model `'plate_clpt_gl'`, the CLPT plate with the complete
