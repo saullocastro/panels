@@ -55,9 +55,14 @@
   453.41 mm and the first buckling load from 172.77 to 172.78 N with the
   penalty method, and from 447.54 to 447.39 mm and 190.46 to 190.41 N with
   the null-space method (test marked `slow`, about 35 s and 21 s per model
-  with a single BLAS thread). The penalty constants of `calc_kt_kr` make
-  this box 10% more flexible in buckling than the exact connections, so the
-  agreement of the penalty model with Abaqus is partly fortuitous.
+  with a single BLAS thread). The joints barely matter here: the first
+  modes are local buckling of the skins, and the ribs are thin. The
+  agreement of the penalty model with Abaqus is fortuitous: with more terms
+  (skins 12 x 12, spars 12 x 7, ribs 6 x 8, 13608 DOFs) the null-space
+  method converges from above to 176.44 N (+1.9%, with and without the
+  joints), whereas the penalty method drops to 161.84 N, the default
+  penalty constants of `calc_kt_kr` allowing more relative motion as the
+  number of terms grows.
 
 ## 0.14.2 (2026-11-01)
 

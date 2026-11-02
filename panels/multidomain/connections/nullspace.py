@@ -317,8 +317,9 @@ def constraint_matrix(connecti, size):
         ``xcte1`` or ``ycte1``, refer to ``p1``, and ``xcte2`` or ``ycte2``
         to ``p2``. For ``'BFxcte'`` and ``'BFycte'``, ``p1`` is the base and
         ``p2`` the flange; for ``'BFxycte'``, ``p1`` has the edge ``xcte1``
-        and ``p2`` the edge ``ycte2``, with the key ``'angle'``; for ``'SB'``, ``p1`` is the panel on the
-        positive side of the interface along the `z` axis of both panels,
+        and ``p2`` the edge ``ycte2``, with the key ``'angle'``; for
+        ``'SB'``, ``p1`` is the panel on the positive side of the interface
+        along the `z` axis of both panels,
         and ``p2`` the one on the negative side, see
         :meth:`.MultiDomain.get_kC_conn`.
     size : int

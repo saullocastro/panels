@@ -416,7 +416,11 @@ def test_wingbox_ribs_joined_to_spars(conn_method):
     spars changes the tip deflection by -0.03% and the buckling load by
     less than 0.03%: the local buckling of the skins is little affected by
     the thin ribs. The buckling load is not bound to increase with the
-    additional constraints, which also change the pre-buckling state.
+    additional constraints, which also change the pre-buckling state. With
+    skins of 12 x 12 terms, spars of 12 x 7 and ribs of 6 x 8 the
+    null-space method gives 176.44 N and the penalty method 161.84 N, with
+    and without the joints: the closeness of 172.77 N to Abaqus is
+    fortuitous.
     """
     for rib_spar, (w_ref, P_ref) in zip((False, True), WINGBOX[conn_method]):
         md, tip = _wingbox(rib_spar, conn_method)
