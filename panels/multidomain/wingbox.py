@@ -17,12 +17,10 @@ Table 3, p. 8.
 
 .. note::
 
-    The ribs are connected to the skins only. A connection between the edge
-    `x` = constant of a spar and the edge `y` = constant of a rib is not
-    available among the connections of :mod:`panels.multidomain.connections`
-    (``'BFxcte'`` and ``'BFycte'`` connect edges of the same direction), and
-    the stringers pass through the ribs without a connection. The ribs then
-    support the skins, which buckle first, but not the spars.
+    The ribs are connected to the skins with ``'BFxcte'`` and, by default,
+    to the spars with ``'BFxycte'``, which joins the edge `x` = constant of
+    a spar to the edge `y` = constant of a rib. The stringers pass through
+    the ribs without a connection.
 
 References
 ----------
@@ -63,7 +61,7 @@ def create_wingbox(nstr=0, hs=3.e-3, ts=1.5e-3, L=1.010, W=50.5e-3,
         H=12.12e-3, t_skin=1.e-3, t_spar=5.e-3, t_rib=1.e-3, nbays=9,
         E=73.e9, nu=0.33, rho=2795., terms=None, P=1., dx_load=10.e-3,
         follower=False, tip_rib=True, stringers=True, ribs=True,
-        conn_method='penalty'):
+        conn_method='penalty', rib_spar=True):
     r"""Create the multidomain assembly of a rectangular wing-box
 
     The defaults are the case High-AR-t5 of [1]_, see
@@ -83,9 +81,11 @@ def create_wingbox(nstr=0, hs=3.e-3, ts=1.5e-3, L=1.010, W=50.5e-3,
       ``'BFycte'``;
     - with ``ribs=True``, a rib of the group ``'rib'`` at the end of each bay,
       and with ``tip_rib=True`` also at the tip, `x = L`, split into strips
-      like the skins, connected to the skins with ``'BFxcte'``. The ribs are
-      not connected to the spars, see the note of
-      :mod:`panels.multidomain.wingbox`.
+      like the skins, connected to the skins with ``'BFxcte'`` and, with
+      ``rib_spar=True``, to the spars with ``'BFxycte'``, the edge `x = a`
+      of the spar to the edge `y = 0` of the first rib strip, or `y` equal
+      to the width of the strip for the last one. The stringers pass
+      through the ribs without a connection.
 
     The skins, spars and stringers of consecutive bays are connected with
     ``'SSxcte'``, and those of the first bay are clamped at the root, `x =
@@ -146,6 +146,9 @@ def create_wingbox(nstr=0, hs=3.e-3, ts=1.5e-3, L=1.010, W=50.5e-3,
         skins are still split into ``nstr + 1`` strips.
     ribs : bool, optional
         Whether the ribs are added.
+    rib_spar : bool, optional
+        Whether the ribs are connected to the spars with ``'BFxycte'``; with
+        ``False`` they are connected to the skins only.
     conn_method : str, optional
         How the connections are imposed, ``'penalty'``, the default, with
         the default stiffnesses of :func:`.calc_kt_kr`, or ``'null-space'``,
@@ -209,6 +212,11 @@ def create_wingbox(nstr=0, hs=3.e-3, ts=1.5e-3, L=1.010, W=50.5e-3,
                      for j, r in enumerate(bay_ribs)]
             conn += [dict(p1=bot[j], p2=r, func='BFxcte', xcte1=a, xcte2=H)
                      for j, r in enumerate(bay_ribs)]
+            if rib_spar:
+                conn += [dict(p1=spars[0], p2=bay_ribs[0], func='BFxycte',
+                              xcte1=a, ycte2=0.),
+                         dict(p1=spars[1], p2=bay_ribs[-1], func='BFxycte',
+                              xcte1=a, ycte2=ws)]
         bay = dict(top=top, bot=bot, spars=spars, st=st_top + st_bot,
                    ribs=bay_ribs)
         if i == 0:
@@ -264,7 +272,11 @@ def wingbox_tip_force_lb(num_eigvalues=4, silent=True, **kwargs):
     -----
     The first buckling mode of the wing-box without stringers is a local
     buckling of the upper skin in compression near the root, see [1]_,
-    whose Abaqus model gives 173.11 N (Table 3, p. 8).
+    whose Abaqus model gives 173.11 N (Table 3, p. 8). With
+    ``conn_method='null-space'`` the first buckling load converges to 176.4
+    N, with skins of 12 x 12 terms, spars of 12 x 7 and ribs of 6 x 8;
+    with the default terms and penalty connections it is 172.78 N, and
+    161.9 N converged, see :doc:`ex_multidomain_wingbox`.
 
     Examples
     --------

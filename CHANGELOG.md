@@ -76,20 +76,33 @@
   ribs and optionally `nstr` blade stringers per skin, all
   `plate_clpt_donnell` domains connected with penalty stiffnesses
   (`conn_method='null-space'` also accepted). The ribs are connected to the
-  skins only, not to the spars, since no connection joins an edge x =
-  constant of a spar to an edge y = constant of a rib.
+  skins with `'BFxcte'` and to the spars with the new `'BFxycte'` (option
+  `rib_spar`, default `True`); the stringers pass through the ribs without a
+  connection.
 - Linear buckling under a tip force, the pre-buckling state from the linear
-  static solution with `structsolve.solve` and `MultiDomain.calc_kG`: without
-  stringers (45 domains, 6264 Ritz constants) the first buckling load is
-  172.77 N, a local buckling of the upper skin of the root bay, 0.20% below
-  the 173.11 N of the Abaqus model of the paper (Table 3, p. 8); about 1 min,
-  test marked slow. With 4 stringers per skin (225 domains, 19872 Ritz
-  constants) it is 709.2 N, without a reference value.
-- New documentation pages `ex_multidomain_wingbox.rst` and
+  static solution with `structsolve.solve` and `MultiDomain.calc_kG`. Without
+  stringers (45 domains) the first mode is a local buckling of the upper
+  skin of the root bay. With the connections imposed exactly
+  (`conn_method='null-space'`) the first buckling load converges from above,
+  190.41, 177.74, 176.44, 176.48 and 176.47 N with 6264, 9585, 13608, 18333
+  and 23760 Ritz constants (skins of 8 x 8 to 16 x 16 terms), 1.9% above the
+  173.11 N of the Abaqus model of the paper (Table 3, p. 8); with the
+  default penalty connections it is 172.78, 162.75, 161.85, 161.86 and
+  161.85 N, 6.5% below Abaqus converged: the 0.19% of the default model
+  (8 x 8 terms, penalty) to Abaqus is a coincidence of the number of terms
+  and the default penalty constants of `calc_kt_kr`. The slow test uses the
+  null-space method with 13608 Ritz constants (11 s to 24 s with one BLAS
+  thread), against the converged 176.44 N to 0.1% and Abaqus to 3%; a fast
+  test checks the default model, 172.78 N (6 s), against itself. With 4
+  stringers per skin (225 domains, 19872 Ritz constants, default terms and
+  penalty connections) the first buckling load is 708.9 N, without a
+  reference value.
+- New documentation pages `ex_multidomain_wingbox.rst`, with the table of
+  convergence of the buckling load with the number of terms, and
   `multidomain_wingbox.rst`, and `tests/multidomain/test_wingbox.py`, which
   also checks the linear tip deflection of a 2-bay model of the same span,
-  0.893 mm/N, 1.5% below the Euler-Bernoulli beam of the box section, with
-  the penalty and the null-space connections (0.2% apart).
+  0.893 mm/N, 1.3% to 1.5% below the Euler-Bernoulli beam of the box
+  section, with the penalty and the null-space connections (0.2% apart).
 
 ## 0.14.2 (2026-11-01)
 

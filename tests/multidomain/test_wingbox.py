@@ -2,7 +2,8 @@ r"""Wing-box of :mod:`panels.multidomain.wingbox`
 
 Linear buckling under a tip force of the case High-AR-t5 of Elalfy, De
 Breuker and Castro, against their Abaqus result, 173.11 N (Table 3, p. 8 of
-the preprint).
+the preprint), with the null-space connections and enough terms for a
+converged load.
 
 """
 import sys
@@ -23,6 +24,11 @@ def test_create_wingbox():
     # per bay 2 skins, 2 spars and a rib, the last one at the tip
     assert len(md.panels) == 2*5
     assert np.isclose(info['a'], 1.010/2)
+    # each rib joined to the two spars with 'BFxycte'
+    funcs = [conn['func'] for conn in info['conn']]
+    assert funcs.count('BFxycte') == 2*2
+    md, info = create_wingbox(nbays=2, rib_spar=False)
+    assert 'BFxycte' not in [conn['func'] for conn in info['conn']]
     md, info = create_wingbox(nstr=2, nbays=2)
     # per bay 3 strips per skin, 2 spars, 2 stringers per skin, 3 rib strips
     assert len(md.panels) == 2*(2*3 + 2 + 2*2 + 3)
@@ -53,20 +59,36 @@ def test_wingbox_tip_deflection(conn_method):
     assert abs(w/w_beam - 1) < 0.03, w/w_beam
 
 
-@pytest.mark.slow
-def test_wingbox_tip_force_lb():
-    # case High-AR-t5 without stringers, 9 bays, 45 domains, 6264 Ritz
-    # constants, 1 N at the tip
+def test_wingbox_tip_force_lb_default():
+    # case High-AR-t5 without stringers, 9 bays, 45 domains, the default
+    # terms and penalty connections, 6264 Ritz constants, 1 N at the tip;
+    # regression value only, the model being not converged, see
+    # test_wingbox_tip_force_lb
     md, c, eigvals, eigvecs = wingbox_tip_force_lb(num_eigvalues=4)
-    Pcr = eigvals[0]
-    print('first buckling tip force: %.2f N, Abaqus %.2f N, error %.2f%%'
-          % (Pcr, ABAQUS_HIGH_AR_T5, 100*(Pcr/ABAQUS_HIGH_AR_T5 - 1)))
-    # 172.77 N, 0.20% below Abaqus
-    assert np.isclose(Pcr, 172.77, rtol=1e-3)
-    assert abs(Pcr/ABAQUS_HIGH_AR_T5 - 1) < 0.005
+    assert np.isclose(eigvals[0], 172.78, rtol=1e-3)
     # the mode is a local buckling of the upper skin of the root bay, in
     # compression
     root_top = md.panels[0]
     assert root_top.group == 'skin_top' and root_top.x0 == 0.
+    v = abs(eigvecs[:, 0])
+    assert v.argmax() in range(root_top.col_start, root_top.col_end)
+
+
+@pytest.mark.slow
+def test_wingbox_tip_force_lb():
+    # case High-AR-t5 without stringers, 9 bays, 45 domains, connections
+    # imposed with the null-space method, skins of 12 x 12 terms, spars of
+    # 12 x 7 and ribs of 6 x 8, 13608 Ritz constants, 1 N at the tip
+    terms = dict(skin=(12, 12), spar=(12, 7), rib=(6, 8))
+    md, c, eigvals, eigvecs = wingbox_tip_force_lb(num_eigvalues=4,
+            conn_method='null-space', terms=terms)
+    Pcr = eigvals[0]
+    print('first buckling tip force: %.2f N, Abaqus %.2f N, error %.2f%%'
+          % (Pcr, ABAQUS_HIGH_AR_T5, 100*(Pcr/ABAQUS_HIGH_AR_T5 - 1)))
+    # 176.44 N, converged to 0.03% (176.47 N with skins of 16 x 16 terms),
+    # 1.9% above Abaqus
+    assert np.isclose(Pcr, 176.44, rtol=1e-3)
+    assert abs(Pcr/ABAQUS_HIGH_AR_T5 - 1) < 0.03
+    root_top = md.panels[0]
     v = abs(eigvecs[:, 0])
     assert v.argmax() in range(root_top.col_start, root_top.col_end)
