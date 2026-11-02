@@ -22,7 +22,9 @@ plate gets ``'plate_clpt_donnell'`` and a cylinder
 ``'cylshell_clpt_sanders'``; plates with large rotations, e.g. the domains
 of a wing box, need ``'plate_clpt_gl'``, see :ref:`plate_clpt_gl`, or
 ``'plate_clpt_tl'`` when they also bend through large rotations, see
-:ref:`plate_clpt_tl`. The models based on the classical laminated
+:ref:`plate_clpt_tl`, whose exact integration by default costs about twice
+that of ``'plate_clpt_gl'``, and half with ``nx = gauss_points(m)``, ``ny =
+gauss_points(n)``, not exact but enough in practice. The models based on the classical laminated
 plate theory (CLPT) have the 3 degrees of freedom `u, v, w` per term, those
 based on the shear deformation theories (FSDT, TSDT) the 5 degrees of
 freedom `u, v, w, \phi_x, \phi_y`.

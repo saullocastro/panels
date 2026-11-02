@@ -41,7 +41,11 @@ the non-linear equations, see :mod:`panels.models`:
   see :ref:`plate_clpt_gl`
 * ``'plate_clpt_tl'``: plates, total-Lagrangian Kirchhoff-Love, with the
   Green-Lagrange membrane strains and the curvatures of the deformed normal,
-  for plates bent through large rotations, see :ref:`plate_clpt_tl`
+  for plates bent through large rotations, see :ref:`plate_clpt_tl`;
+  integrated exactly by default, at about twice the cost of
+  ``'plate_clpt_gl'``, or with the points of ``'plate_clpt_gl'``,
+  ``nx = gauss_points(m)``, ``ny = gauss_points(n)``, not exact but with the
+  same results in practice at about half the cost
 * ``'plate_fsdt_donnell'``: plates, first-order shear deformation theory
 * ``'plate_tsdt_donnell'``: plates, third-order shear deformation theory of
   Reddy

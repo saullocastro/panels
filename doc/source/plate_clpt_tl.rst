@@ -16,6 +16,30 @@ The derivation, with SymPy, is in
 :mod:`panels.models.plate_clpt_tl_num` with the helpers of the generator of
 ``'plate_clpt_gl'``.
 
+.. note::
+
+    **Integration points: exact by default, a faster option.** By default
+    the integrals of ``'plate_clpt_tl'`` are exact, with `3p` Gauss-Legendre
+    points along each direction, 21 for ``m = 8``, against the `2p + 1`, 15,
+    of ``'plate_clpt_gl'``, see `Internal forces and tangent stiffness`_. A
+    tangent stiffness matrix then costs about 2.2 times that of
+    ``'plate_clpt_gl'``. The points of ``'plate_clpt_gl'`` do not integrate
+    this model exactly but are enough in practice, at about half the cost:
+
+    .. code-block:: python
+
+        from panels.shell import gauss_points
+
+        for p in panels:  # every domain of model 'plate_clpt_tl'
+            p.nx = gauss_points(p.m)
+            p.ny = gauss_points(p.n)
+
+    With them, the internal forces of a plate with displacement gradients of
+    order 0.5 differ by 3e-13, and the tip deflections of the wing box under
+    a follower tip force by less than 0.01 mm up to 500 N, in 138 s against
+    288 s, see `Wing box under a follower tip force`_. Assigning ``None`` to
+    ``nx`` and ``ny`` restores the exact default.
+
 
 Kinematics
 ----------

@@ -142,9 +142,12 @@ DOFs have the strains of the CLPT:
   `1 + \varepsilon_{xx} + \varepsilon_{yy}` to first order otherwise. A
   bending deformation keeps its energy through any rigid rotation, which
   ``'plate_clpt_gl'`` multiplies by `\cos^2\theta`. The default
-  integration has `3p` points along a direction instead of `2p + 1`, see
-  :func:`panels.shell.gauss_points`, and the analytical kernels are those of
-  ``'plate_clpt_gl'``.
+  integration is exact, with `3p` points along a direction instead of `2p +
+  1`, see :func:`panels.shell.gauss_points`, about twice the cost of
+  ``'plate_clpt_gl'``; ``nx = gauss_points(m)``, ``ny = gauss_points(n)``
+  give the points of ``'plate_clpt_gl'``, not exact but with the same
+  results in practice at about half the cost, see :ref:`plate_clpt_tl`. The
+  analytical kernels are those of ``'plate_clpt_gl'``.
 
 - Sanders-Koiter kinematics, ``'cylshell_clpt_sanders'``, Sanders (1963)
   [1]_. With `y = r \theta` the arc length and `\phi_x =
