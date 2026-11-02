@@ -64,6 +64,33 @@
   penalty constants of `calc_kt_kr` allowing more relative motion as the
   number of terms grows.
 
+### New example: wing-box made of plate domains
+
+- New module `panels.multidomain.wingbox`, imported in `panels.multidomain`,
+  with `create_wingbox` and `wingbox_tip_force_lb`: the rectangular
+  untapered wing-box of Elalfy, De Breuker and Castro, "Beam-like models for
+  the post-buckling behaviour of wingbox structures" (preprint), case
+  High-AR-t5 (Table 1, p. 7: chord 50.5 mm, half-span 1010 mm, height
+  12.12 mm, 8 ribs, skins 1 mm, spars 5 mm; Table 2, p. 7: E = 73 GPa,
+  nu = 0.33, rho = 2795 kg/m3), clamped at the root, with skins, spars,
+  ribs and optionally `nstr` blade stringers per skin, all
+  `plate_clpt_donnell` domains connected with penalty stiffnesses
+  (`conn_method='null-space'` also accepted). The ribs are connected to the
+  skins only, not to the spars, since no connection joins an edge x =
+  constant of a spar to an edge y = constant of a rib.
+- Linear buckling under a tip force, the pre-buckling state from the linear
+  static solution with `structsolve.solve` and `MultiDomain.calc_kG`: without
+  stringers (45 domains, 6264 Ritz constants) the first buckling load is
+  172.77 N, a local buckling of the upper skin of the root bay, 0.20% below
+  the 173.11 N of the Abaqus model of the paper (Table 3, p. 8); about 1 min,
+  test marked slow. With 4 stringers per skin (225 domains, 19872 Ritz
+  constants) it is 709.2 N, without a reference value.
+- New documentation pages `ex_multidomain_wingbox.rst` and
+  `multidomain_wingbox.rst`, and `tests/multidomain/test_wingbox.py`, which
+  also checks the linear tip deflection of a 2-bay model of the same span,
+  0.893 mm/N, 1.5% below the Euler-Bernoulli beam of the box section, with
+  the penalty and the null-space connections (0.2% apart).
+
 ## 0.14.2 (2026-11-01)
 
 ### Packaging

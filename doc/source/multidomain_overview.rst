@@ -106,7 +106,10 @@ assemblies, and show how to build others:
   :mod:`panels.multidomain.tstiff2d_1stiff_compression`,
   :mod:`panels.multidomain.tstiff2d_1stiff_freq` and
   :mod:`panels.multidomain.tstiff2d_1stiff_flutter`, see
-  :doc:`ex_multidomain_tstiff2d`.
+  :doc:`ex_multidomain_tstiff2d`;
+- the rectangular wing-box of :mod:`panels.multidomain.wingbox`, with
+  skins, spars, ribs and optionally blade stringers, see
+  :doc:`ex_multidomain_wingbox`.
 
 
 Example

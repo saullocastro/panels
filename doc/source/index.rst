@@ -101,6 +101,7 @@ Usage examples
     ex_face_clamp.rst
     ex_multidomain_cylinder.rst
     ex_multidomain_tstiff2d.rst
+    ex_multidomain_wingbox.rst
     ex_stiffpanelbay.rst
 
 
