@@ -389,6 +389,32 @@ class MultiDomain(object):
     >>> incs, cs = static(md.calc_kC(), md.calc_fext(), silent=True)
     >>> c = cs[0]
 
+    The linear static workflow is therefore: assemble ``kC`` with
+    :meth:`.calc_kC` and ``fext`` with :meth:`.calc_fext`, reduce them with
+    :meth:`.reduce` (the identity with ``conn_method='penalty'``), solve
+    with ``structsolve.solve`` (or ``structsolve.static``, or
+    ``structsolve.Analysis.static``, which call it) and expand with
+    :meth:`.expand`; :meth:`.linear_static` does all of it, also with
+    prescribed displacements. ``structsolve.solve`` is needed, rather than
+    ``scipy.sparse.linalg.spsolve`` directly, because ``kC`` usually has
+    null rows and columns: a boundary condition flag set to zero, e.g.
+    ``x1u = x1v = x1w = x1wr = 0`` at a clamped edge, multiplies Ritz
+    functions by zero, so that their Ritz constants have no stiffness and
+    ``kC`` is exactly singular, whatever the connections.
+    ``structsolve.solve`` removes the rows and columns that are both null,
+    with ``structsolve.sparseutils.remove_null_cols``, solves the remaining
+    system and sets these Ritz constants to zero; their terms of ``fext``
+    are null as well, since the same Ritz functions vanish in the load
+    vector. A system still singular after this removal has a mechanism,
+    e.g. an assembly without enough supports. The linear buckling and
+    vibration solvers of ``structsolve``, ``lb`` and ``freq``, remove the
+    same rows and columns. See
+    ``tests/multidomain/test_linear_static_null_dofs.py``:
+
+    >>> from structsolve import solve
+    >>> c = md.expand(solve(md.reduce(md.calc_kC()),
+    ...                     md.reduce(md.calc_fext())))
+
     And plotting the results for the group named ``'skin'``.
 
     >>> md.plot(c, 'skin', filename='tmp_cylinder_compression_lb_Nxx_cte.png')
