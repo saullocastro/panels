@@ -183,3 +183,31 @@ def test_check_conn_terms():
         MultiDomain([p3, p4], [dict(p1=p3, p2=p4, func='SB')])
         MultiDomain([p3, p4], [dict(p1=p3, p2=p4, func='SSycte', ycte1=b,
                                     ycte2=0.)])
+
+
+def test_check_conn_terms_BFxycte():
+    """'BFxycte' joins the edge of constant x of p1 to the edge of constant y
+    of p2: the terms across the joint are m of p1 and n of p2"""
+    a, b = 0.3, 0.1
+    p1 = Shell(a=a, b=b, stack=[0.], plyt=1e-3, laminaprop=(E, NU),
+               model='plate_clpt_donnell', m=3, n=6, name='spar')
+    p2 = Shell(a=b, b=a, stack=[0.], plyt=1e-3, laminaprop=(E, NU),
+               model='plate_clpt_donnell', m=6, n=6, name='rib')
+    free(p1)
+    free(p2)
+    conn = [dict(p1=p1, p2=p2, func='BFxycte', xcte1=a, ycte2=0.)]
+    with pytest.warns(ConnectionTermsWarning, match=r"'spar'.*m = 3 < 4"):
+        md = MultiDomain([p1, p2], conn)
+    issues = md.check_conn_terms(warn=False)
+    assert len(issues) == 1
+    p, func, terms, needed, fields = issues[0]
+    assert p is p1 and func == 'BFxycte'
+    assert (terms, needed, fields) == (3, 4, ('u', 'v', 'w'))
+    # the terms along the joint, n of p1 and m of p2, are not checked
+    p1.m, p1.n, p2.m = 4, 3, 3
+    assert md.check_conn_terms(warn=False) == []
+    p2.n = 3
+    with pytest.warns(ConnectionTermsWarning, match=r"'rib'.*n = 3 < 4"):
+        md.check_conn_terms()
+    issues = md.check_conn_terms(warn=False)
+    assert [(p is p2, terms) for p, _, terms, _, _ in issues] == [(True, 3)]

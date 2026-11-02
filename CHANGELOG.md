@@ -57,6 +57,12 @@
   stringers with 8 x 3 terms and not with the default 8 x 4.
 - Documented in the Notes of `MultiDomain` and in the multi-domain overview
   page. New tests in `tests/multidomain/test_conn_terms.py`.
+- The check also covers the connection `'BFxycte'`, which joins an edge of
+  constant `x` of `p1` to an edge of constant `y` of `p2`: the terms across
+  the joint are `m` of `p1` and `n` of `p2`, with the flags `x1`, `x2` of
+  `p1` and `y1`, `y2` of `p2`. The default wing-box of
+  `panels.multidomain.wingbox`, whose ribs are joined to the spars with
+  `'BFxycte'`, issues no warning.
 
 ### Packaging
 

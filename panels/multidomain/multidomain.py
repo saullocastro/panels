@@ -181,11 +181,15 @@ class ConnectionTermsWarning(UserWarning):
 _HERMITE_LINEAR = np.array([[1., 0., 1., 0.],
                             [-1., 2., 1., 2.]])
 
-#NOTE edge connections: the attribute with the number of terms along the
-#     coordinate normal to the joint, and the letter of that coordinate in
-#     the flags
-_EDGE_CONN = {'SSxcte': ('m', 'x'), 'BFxcte': ('m', 'x'),
-              'SSycte': ('n', 'y'), 'BFycte': ('n', 'y')}
+#NOTE edge connections: for p1 and p2, the attribute with the number of
+#     terms along the coordinate normal to the joint, and the letter of that
+#     coordinate in the flags; 'BFxycte' joins an edge of constant x of p1
+#     to an edge of constant y of p2
+_EDGE_CONN = {'SSxcte': (('m', 'x'), ('m', 'x')),
+              'BFxcte': (('m', 'x'), ('m', 'x')),
+              'SSycte': (('n', 'y'), ('n', 'y')),
+              'BFycte': (('n', 'y'), ('n', 'y')),
+              'BFxycte': (('m', 'x'), ('n', 'y'))}
 
 
 @lru_cache(maxsize=None)
@@ -380,7 +384,8 @@ class MultiDomain(object):
 
     Each domain of an edge connection needs at least 4 terms across the
     joint, ``n`` for ``'SSycte'`` and ``'BFycte'``, ``m`` for
-    ``'SSxcte'`` and ``'BFxcte'``, for both ``p1`` and ``p2``, when the
+    ``'SSxcte'`` and ``'BFxcte'``, for both ``p1`` and ``p2``, ``m`` of
+    ``p1`` and ``n`` of ``p2`` for ``'BFxycte'``, when the
     flags of its two edges parallel to the joint admit a linear field, as
     for a blade flange with a free edge or a web between two joints, whose
     connected edges are released (flags ``1``). Only the first four of
@@ -636,10 +641,12 @@ class MultiDomain(object):
         r"""Domains with too few terms across their edge connections
 
         For each domain of the edge connections ``'SSxcte'``, ``'SSycte'``,
-        ``'BFxcte'`` and ``'BFycte'``, and for each of its fields, `u, v, w`,
-        and `\phi_x, \phi_y` for the shear deformation theories, compares
-        the number of terms along the coordinate normal to the joint, ``m``
-        for the connections at constant `x`, ``n`` at constant `y`, with
+        ``'BFxcte'``, ``'BFycte'`` and ``'BFxycte'``, and for each of its
+        fields, `u, v, w`, and `\phi_x, \phi_y` for the shear deformation
+        theories, compares the number of terms along the coordinate normal
+        to the joint, ``m`` for an edge of constant `x`, ``n`` for an edge
+        of constant `y` (for ``'BFxycte'``, ``m`` of ``p1`` and ``n`` of
+        ``p2``), with
         the number needed to represent the linear fields across the joint
         that the boundary condition flags of the domain admit, see the
         Notes of :class:`.MultiDomain`.
@@ -673,11 +680,11 @@ class MultiDomain(object):
         """
         conn = self._resolve_conn(conn)
         issues = []
+        attrs = []
         for ci in conn:
             if ci.get('func') not in _EDGE_CONN:
                 continue
-            attr, d = _EDGE_CONN[ci['func']]
-            for key in ('p1', 'p2'):
+            for key, (attr, d) in zip(('p1', 'p2'), _EDGE_CONN[ci['func']]):
                 p = ci[key]
                 terms = getattr(p, attr)
                 needed = 0
@@ -692,22 +699,25 @@ class MultiDomain(object):
                 if fields:
                     issues.append((p, ci['func'], terms, needed,
                                    tuple(fields)))
+                    attrs.append(attr)
         if warn and issues:
-            self._warn_conn_terms(issues)
+            self._warn_conn_terms(issues, attrs)
         return issues
 
 
-    def _warn_conn_terms(self, issues, stacklevel=4):
+    def _warn_conn_terms(self, issues, attrs, stacklevel=4):
         r"""Issues the :class:`.ConnectionTermsWarning` of
-        :meth:`.check_conn_terms`, once for each set of issues"""
+        :meth:`.check_conn_terms`, once for each set of issues; ``attrs``
+        are the names of the numbers of terms, ``'m'`` or ``'n'``, of the
+        issues"""
         key = tuple((id(p), func, terms, fields)
                     for p, func, terms, needed, fields in issues)
         if key == self._conn_terms_warned:
             return
         self._conn_terms_warned = key
         lines = []
-        for p, func, terms, needed, fields in issues[:3]:
-            attr = _EDGE_CONN[func][0]
+        for (p, func, terms, needed, fields), attr in zip(issues[:3],
+                                                         attrs):
             if any(pj is p for pj in self.panels):
                 label = self._panel_label(p)
             else:

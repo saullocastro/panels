@@ -57,7 +57,8 @@ available for the classical laminated plate theory only, see
 :ref:`cohesive_zone`.
 
 Each domain of an edge connection needs at least 4 terms across the joint
-(``n`` for the connections at constant `y`, ``m`` at constant `x`) when its
+(``n`` for an edge of constant `y`, ``m`` for an edge of constant `x`, thus
+``m`` of ``p1`` and ``n`` of ``p2`` for ``'BFxycte'``) when its
 connected edge and its opposite edge are released, as for a blade flange
 with a free edge: only the first four of Bardell's functions carry the
 values and the slopes at the edges, and with 3 terms all of them have a
