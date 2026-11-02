@@ -36,6 +36,9 @@ The models are identified by the type of structure, the kinematic theory and
 the non-linear equations, see :mod:`panels.models`:
 
 * ``'plate_clpt_donnell'``: plates, classical laminated plate theory (CLPT)
+* ``'plate_clpt_gl'``: plates, CLPT with the Green-Lagrange membrane strains,
+  which vanish for any rigid rotation, for assemblies with large rotations,
+  see :ref:`plate_clpt_gl`
 * ``'plate_fsdt_donnell'``: plates, first-order shear deformation theory
 * ``'plate_tsdt_donnell'``: plates, third-order shear deformation theory of
   Reddy
@@ -77,6 +80,7 @@ User guide
     aeroelasticity.rst
     postprocessing.rst
     follower_pressure.rst
+    plate_clpt_gl.rst
     tsdt_offset.rst
     multidomain_null_space.rst
     tangent_product.rst
