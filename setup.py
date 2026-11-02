@@ -9,6 +9,8 @@ and read by ``panels.version`` and ``doc/source/conf.py``.
 import platform
 import os
 import re
+import shlex
+import subprocess
 import sys
 import sysconfig
 
@@ -84,6 +86,40 @@ emscripten = (os.environ.get('PYODIDE') == '1'
 #      slow down the wheel and the tests in Pyodide
 trace = trace and not emscripten
 
+
+
+def static_runtime_flags():
+    r"""GCC link flags of the static runtime libraries that the compiler finds
+
+    The wheels link libgcc and libstdc++ statically, such that they do not
+    depend on the runtime of the build machine. A compiler without the static
+    archive, e.g. the system GCC 4.8.5 of CentOS 7 without
+    libstdc++-static, prints the bare name for ``-print-file-name``, and the
+    flag is then left out with a message. PANELS_STATIC_RUNTIME=0 leaves both
+    flags out, PANELS_STATIC_RUNTIME=1 keeps both without the check.
+    """
+    flags = {'libgcc.a': '-static-libgcc', 'libstdc++.a': '-static-libstdc++'}
+    env = os.environ.get('PANELS_STATIC_RUNTIME')
+    if env == '0':
+        return []
+    if env == '1':
+        return list(flags.values())
+    cxx = os.environ.get('CXX') or sysconfig.get_config_var('CXX') or 'g++'
+    out = []
+    for lib, flag in flags.items():
+        try:
+            path = subprocess.run(shlex.split(cxx)[:1] + ['-print-file-name=%s' % lib],
+                                  capture_output=True, text=True).stdout.strip()
+        except OSError:
+            path = ''
+        if os.path.isabs(path) and os.path.exists(path):
+            out.append(flag)
+        else:
+            print('panels setup.py: %s not found by %s, %s left out'
+                  % (lib, cxx, flag))
+    return out
+
+
 define_macros = []
 if emscripten:
     # NOTE Emscripten has no OpenMP, prange then runs serially, every OpenMP
@@ -96,7 +132,7 @@ elif platform.system() == 'Windows':
     link_args = []
 elif platform.system() == 'Linux':
     compile_args = ['-O3', '-fno-math-errno', '-fopenmp']
-    link_args = ['-fopenmp', '-static-libgcc', '-static-libstdc++']
+    link_args = ['-fopenmp'] + static_runtime_flags()
 else: # MAC-OS
     compile_args = ['-O3', '-fno-math-errno']
     link_args = []
