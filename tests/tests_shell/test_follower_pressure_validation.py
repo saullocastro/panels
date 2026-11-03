@@ -1,5 +1,32 @@
 r"""Validation of the follower pressure: rings and long sandwich cylinders
 
+The critical external pressure of rings and cylinders, by linear buckling
+with the load stiffness of the follower pressure, ``Shell.calc_kCfollower``,
+is checked against:
+
+1. closed forms of the ring in plane strain, :func:`ring_closed_form`, for
+   the follower, dead and centrally directed loads with Sanders' and
+   Donnell's kinematics, and the analytical values of Schweizerhof and Ramm
+   (1984), Table 3;
+2. the long sandwich cylinders of Han, Kardomateas and Simitses (2004),
+   Tables 1 to 4, their shell formulas, Eqs. (12) to (14), and their
+   elasticity solution;
+3. finite cylinders with shear-diaphragm ends under lateral or hydrostatic
+   pressure, against :func:`cylinder_closed_form`;
+4. the thick orthotropic and isotropic rings of Kardomateas (1993), Tables 1
+   and 2, Eq. (29a), and the homogeneous graphite/epoxy ring of Kardomateas
+   and Simitses (2003), Table 4;
+5. Batdorf's formula for simply supported cylinders under lateral and
+   hydrostatic pressure, NASA/SP-8007-2020/REV 2,
+   :func:`batdorf_lateral_pressure`;
+6. the cylinders of Schweizerhof and Ramm (1984), Table 4, hinged at both
+   ends or cantilevers with a free upper edge, B1 and B2.
+
+Running this module prints the comparison of item 2 with the elasticity
+solution, with the pressure on the outer surface. Units: N, m, Pa.
+
+Notes
+-----
 A long cylinder under a uniform pressure buckles as a ring, in generalized
 plane strain. It is modelled with a quarter of the circumference, ``b = pi
 r/2``, with symmetry planes at the straight edges (``v = 0``, ``w,y = 0``) and
@@ -13,47 +40,43 @@ with the pre-buckling state `\hat{\boldsymbol{c}}`, the linear static solution o
 external pressure, solved by
 :func:`structsolve.lb` with the unsymmetric solvers when needed.
 
-1. Closed forms for the ring, :func:`ring_closed_form`, the same as
-   ``ring_buckling`` of ``theory/shells/follower_pressure/follower_pressure.py``
-   (sympy): with Sanders' kinematics and ``n = 2``, ``p R**3/D = -3`` for the
-   follower (hydrostatic) pressure, ``-4`` for a pressure of constant
-   direction (dead load) and ``-4.5`` for a centrally directed load, in the
-   inextensional limit, the analytical values of Table 3 of Schweizerhof and
-   Ramm (1984), *Comput. Struct.* 18:1099-1114. With Donnell's kinematics the
-   follower pressure gives ``-16/5``, the known inaccuracy of Donnell's theory
-   for low ``n``.
+1. With Sanders' kinematics and ``n = 2``, the closed form of the ring gives
+   ``p R**3/D = -3`` for the follower (hydrostatic) pressure, ``-4`` for a
+   pressure of constant direction (dead load) and ``-4.5`` for a centrally
+   directed load, in the inextensional limit, the analytical values of Table
+   3 of [1]_. With Donnell's kinematics the follower pressure gives
+   ``-16/5``, the known inaccuracy of Donnell's theory for low ``n``.
 
-2. The long sandwich cylinders of Han, Kardomateas and Simitses (2004),
-   *Compos. B* 35:591-598, Table 1 materials, faces ``f = 0.1 in`` with the
-   fibres along the hoop direction, core ``c = 1 in``, ``R0/h = 15...120``.
-   The FSDT ring with the follower pressure is exactly their shell formula
-   ``p = 3 (EI)eq/(B R0**3 (1 + 4 ks))`` in the inextensional limit, with the
-   transverse shear stiffness ``C/B`` of the core only, Eq. (14a), or of the
-   effective modulus ``Gbar``, Eqs. (14b) and (14c), which is checked against
-   their Table 2. The comparison with their elasticity solution, with the
-   pressure on the outer surface (``zp = h/2``), is printed by running this
-   module.
+2. Sandwich cylinders of [2]_, Table 1 materials, faces ``f = 0.1 in`` with
+   the fibres along the hoop direction, core ``c = 1 in``, ``R0/h =
+   15...120``. The FSDT ring with the follower pressure is exactly their
+   shell formula ``p = 3 (EI)eq/(B R0**3 (1 + 4 ks))`` in the inextensional
+   limit, with the transverse shear stiffness ``C/B`` of the core only, Eq.
+   (14a), or of the effective modulus ``Gbar``, Eqs. (14b) and (14c), which
+   is checked against their Table 2. Their elasticity solution has the
+   pressure on the outer surface (``zp = h/2``).
 
-3. Finite cylinders with shear-diaphragm ends under lateral or hydrostatic
-   pressure, against the exact solution of the same Sanders or Donnell
-   strains with trigonometric modes, :func:`cylinder_closed_form`, whose
-   modes depend on ``x`` and test the terms of ``u`` of the follower load.
+3. The exact solution of the finite cylinders uses the same Sanders or
+   Donnell strains with trigonometric modes, whose modes depend on ``x`` and
+   test the terms of ``u`` of the follower load.
 
-4. Thick orthotropic and isotropic rings of Kardomateas (1993), *J. Appl.
-   Mech.* 60:195-202, Tables 1 and 2, and the homogeneous graphite/epoxy ring
-   of Kardomateas and Simitses (2003), Table 4, against their shell formulas
+4. The thick rings of [3]_ and [4]_ are compared with their shell formulas
    and 3D elasticity solutions.
 
-5. Batdorf's formula for simply supported cylinders under lateral and
-   hydrostatic pressure, NASA/SP-8007-2020/REV 2, the Donnell solution with a
-   pressure of constant direction, :func:`batdorf_lateral_pressure`.
+5. Batdorf's formula [5]_ is the Donnell solution with a pressure of
+   constant direction.
 
-6. The cylinders of Schweizerhof and Ramm (1984), Table 4, under a lateral
-   pressure of constant direction (``k_c``) or follower (``k_f``), hinged at
-   both ends or cantilevers with a free upper edge, B1 and B2, for which the
-   load stiffness is unsymmetric.
+6. The cylinders of [1]_, Table 4, are under a lateral pressure of constant
+   direction (``k_c``) or follower (``k_f``); for the cantilevers the load
+   stiffness is unsymmetric.
 
-Units: N, m, Pa.
+References
+----------
+.. [1] Schweizerhof, K. and Ramm, E., Comput. Struct., 18, 1099-1114, 1984.
+.. [2] Han, Kardomateas and Simitses, Compos. B, 35, 591-598, 2004.
+.. [3] Kardomateas, J. Appl. Mech., 60, 195-202, 1993.
+.. [4] Kardomateas and Simitses, 2003. TODO(author): full reference.
+.. [5] NASA/SP-8007-2020/REV 2, Eqs. (19)-(22).
 """
 import sys
 sys.path.append('../..')
@@ -71,12 +94,16 @@ from panels.shell import Shell
 def ring_closed_form(kinematics, load, n, A, D, R, S=None):
     r"""Buckling pressure of a ring in plane strain, mode ``cos(n y/R)``
 
-    Numerical version of ``ring_buckling`` in
-    ``theory/shells/follower_pressure/follower_pressure.py``: the second
-    variation of the total potential of the amplitudes ``(W, V)``, plus ``P``
-    of ``phiy`` for the FSDT (``S``, the transverse shear stiffness, not
-    ``None``), is ``H0 + p H1`` and the pressure of smallest modulus that
-    makes it singular is returned, negative for an external pressure.
+    Returns the critical pressure of smallest modulus, negative for an
+    external pressure; the FSDT is used when ``S``, the transverse shear
+    stiffness, is not ``None``.
+
+    Notes
+    -----
+    The second variation of the total potential of the amplitudes ``(W,
+    V)``, plus ``P`` of ``phiy`` for the FSDT, is ``H0 + p H1``; the
+    returned pressure is the root of smallest modulus that makes it
+    singular.
 
     """
     k = n/R
@@ -360,8 +387,8 @@ def test_finite_cylinder_shear_diaphragm(model, load, prestate):
     assert np.isclose(lam, ref, rtol=1e-4), (lam, ref)
 
 
-# Han, Kardomateas and Simitses (2004), Table 1, with 1 = r, 2 = theta and
-# 3 = z. As laminaprop of a ply with the fibres along the hoop direction
+# materials of Table 1 of the sandwich cylinders (item 2 of the module
+# docstring), with 1 = r, 2 = theta and 3 = z. As laminaprop of a ply with the fibres along the hoop direction
 # (90 deg): E11 = E2, E22 = E3, nu12 = nu23, G12 = G23 (theta-z),
 # G13 = G12 (r-theta, the transverse shear of the ring), G23 = G31
 GPa = 1.e9
@@ -483,7 +510,7 @@ def test_han2004_shell_formulas(face):
             closed = -ring_closed_form('sanders', 'follower', 2, s.ABD[1, 1],
                                        s.ABD[4, 4], s.r, S)
             assert np.isclose(p_cr, closed, rtol=1e-6)
-            # the shell formula of Han et al. uses (EI)eq with Ef, panels the
+            # the shell formula of the reference uses (EI)eq with Ef, panels the
             # plane-strain D22, E/(1 - nu12 nu21) is 0.5% larger for boron
             # and less for the other faces; the extensibility of the ring is
             # also neglected by the formula
@@ -536,7 +563,7 @@ def test_nasa_sp8007_batdorf(LR, Rt, prestate):
     assert 0.9*ref < lams[1] < 0.995*ref
 
 
-# Kardomateas (1993), 1 = r, 2 = theta, 3 = z: E1 = E3 = 14, E2 = 57,
+# thick rings (item 4 of the module docstring), 1 = r, 2 = theta, 3 = z: E1 = E3 = 14, E2 = 57,
 # G12 = G23 = 5.7, G31 = 5.0 GPa, nu23 = 0.277; as laminaprop of a ply with
 # the fibres along the hoop direction (90 deg): E11 = E2, E22 = E3, nu12 =
 # nu23, G12 = G23 (theta-z), G13 = G12 (r-theta), G23 = G31 (z-r)
@@ -606,7 +633,7 @@ def test_kardomateas2003_homogeneous_ring(ratio, elast, classical):
 
 SCHWEIZERHOF_E = 2.1e6
 SCHWEIZERHOF_NU = 0.3
-# Table 4 of Schweizerhof and Ramm (1984): (shell, L/R, R/t, boundary
+# Table 4 of the cylinders of item 6 of the module docstring: (shell, L/R, R/t, boundary
 # conditions, n, k_c, k_f), with p_cr = k E t**3/(12 (1 - nu**2) R**3); the
 # values of k_f of the cantilevers are those with the symmetrized load
 # stiffness of their Eq. (63), the circumferential wave number n is the one

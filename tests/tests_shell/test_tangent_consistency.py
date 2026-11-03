@@ -9,7 +9,7 @@ is what every Newton-Raphson built on the Shell class uses as the Jacobian of
 calc_fint. If the two drift apart, the analyses still converge, but linearly
 instead of quadratically.
 
-The main check is a directional Taylor test,
+The main check is a directional Taylor test::
 
     |fint(c + h d) - fint(c) - h KT d| / |h KT d|
 

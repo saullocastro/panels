@@ -2,18 +2,30 @@ r"""Post-buckling of an axially compressed cylinder traced with the Riks method
 
 Benchmark of Simo, Fox and Rifai (1990), Section 6.3.4, "Post-buckling
 analysis of a simply-supported cylinder; effect of initial imperfections",
-pp. 54-57, Fig. 6.3.4 on p. 56 [1]: R = 36, L = 100, t = 0.125, E = 1e7,
-nu = 0.3, axial compression. As in [1], an L/10 x 15 deg section is
-modelled, with symmetry conditions on the interior edges and a simple
+pp. 54-57, Fig. 6.3.4 on p. 56: R = 36, L = 100, t = 0.125, E = 1e7,
+nu = 0.3, axial compression. As in the reference, an L/10 x 15 deg section
+is modelled, with symmetry conditions on the interior edges and a simple
 support on the loaded edge, such that the lowest mode is the diamond mode of
 5 axial half-waves and 12 circumferential waves. The load factor is the load
 normalized by the linear buckling load and the abscissa the maximum axial
 deflection of the loaded edge, as in Fig. 6.3.4.
 
+The tests check the consistency of the internal forces and of the tangent
+stiffness matrix of the imperfect shell, and the limit loads, snap-back,
+bifurcation and post-buckling loads of Fig. 6.3.4 (a) and (d), for
+imperfections of 50 % and 10 % of the thickness in the shape of the w part
+of the lowest linear buckling mode, and for the perfect cylinder.
+
+The values of Fig. 6.3.4 were read on the page rendered at 300 dpi with a
+grid over the axes, precision about +-0.0003 in the deflection and +-0.01
+in the load.
+
+Notes
+-----
 The initial imperfection, the w part of the lowest linear buckling mode
 scaled to max|w0| = xi t, of Ritz vector c0, is added exactly for the
 Donnell kinematics, whose strains of the imperfect shell are eps(c + c0) -
-eps(c0):
+eps(c0)::
 
     fint_imp(c) = fint(c + c0) - fint(c0) - kG(N0) c
     kT_imp(c) = kT(c + c0) - kG(N0)
@@ -22,15 +34,12 @@ with kG(N0) the geometric stiffness of the membrane resultants N0, linear
 and non-linear parts, of the state c0. Shell.calc_kG(c=c0) has the linear
 part only, and kG(N0) is integrated here at the Gauss points.
 
-The values of Fig. 6.3.4 were read on the page rendered at 300 dpi with a
-grid over the axes, precision about +-0.0003 in the deflection and +-0.01
-in the load. See also notebooks/simo1990_cylinder_postbuckling.ipynb and the
-documentation page ex_cylinder_postbuckling of structsolve.
-
-[1] Simo, J.C., Fox, D.D., Rifai, M.S., On a stress resultant geometrically
-    exact shell model. Part III: Computational aspects of the nonlinear
-    theory, Computer Methods in Applied Mechanics and Engineering, 79(1),
-    21-70, 1990. https://doi.org/10.1016/0045-7825(90)90094-3
+References
+----------
+.. [1] Simo, J.C., Fox, D.D., Rifai, M.S., On a stress resultant
+   geometrically exact shell model. Part III: Computational aspects of the
+   nonlinear theory, Computer Methods in Applied Mechanics and Engineering,
+   79(1), 21-70, 1990. https://doi.org/10.1016/0045-7825(90)90094-3
 
 """
 import sys

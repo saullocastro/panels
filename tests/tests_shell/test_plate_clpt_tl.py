@@ -1,17 +1,7 @@
 r"""Verification of the total-Lagrangian Kirchhoff-Love plate, ``plate_clpt_tl``
 
-The model, ``theory/shells/plate_clpt_tl``, has the Green-Lagrange membrane
-strains of ``plate_clpt_gl`` and the changes of curvature of the deformed
-mid-surface, with the area vector `\boldsymbol{a} = \boldsymbol{X}_{,x}
-\times \boldsymbol{X}_{,y}`:
-
-.. math::
-
-    \kappa_{xx} = -\boldsymbol{a} \cdot \boldsymbol{u}_{,xx}, \quad
-    \kappa_{yy} = -\boldsymbol{a} \cdot \boldsymbol{u}_{,yy}, \quad
-    \kappa_{xy} = -2 \boldsymbol{a} \cdot \boldsymbol{u}_{,xy}
-
-The checks:
+The model has the Green-Lagrange membrane strains of ``plate_clpt_gl``
+and the changes of curvature of the deformed mid-surface. The checks:
 
 1. a rigid rotation of a free plate, in plane, out of plane or about an
    oblique axis, by up to 1 rad, gives zero strains, curvatures and internal
@@ -33,6 +23,18 @@ The checks:
 The tangent stiffness matrix, ``calc_kTv`` and the follower pressures are
 also checked with the other models in ``test_tangent_consistency.py``,
 ``test_tangent_product.py`` and ``test_follower_pressure.py``.
+
+Notes
+-----
+The changes of curvature are measured with the area vector
+`\boldsymbol{a} = \boldsymbol{X}_{,x} \times \boldsymbol{X}_{,y}` of the
+deformed mid-surface:
+
+.. math::
+
+    \kappa_{xx} = -\boldsymbol{a} \cdot \boldsymbol{u}_{,xx}, \quad
+    \kappa_{yy} = -\boldsymbol{a} \cdot \boldsymbol{u}_{,yy}, \quad
+    \kappa_{xy} = -2 \boldsymbol{a} \cdot \boldsymbol{u}_{,xy}
 
 """
 import sys

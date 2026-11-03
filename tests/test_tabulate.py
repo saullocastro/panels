@@ -1,6 +1,6 @@
 r"""The approximation functions of the numerical kernels are tabulated
 
-See :mod:`panels.dev.tabulate` and ``doc/source/tabulation.rst``. The
+See :mod:`panels.dev.tabulate`. The
 results of the tabulated kernels are those of the previous implementation,
 bit for bit; here the rewriting itself is checked, and that no kernel of
 the package evaluates the approximation functions in its loops over the

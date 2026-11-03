@@ -1,15 +1,25 @@
 r"""Pressure loads of :meth:`.Shell.add_pressure_load`
 
-References:
+The external force vector of uniform, function-defined and patch pressures
+against an independent quadrature, and the central deflections against
+Timoshenko and Woinowsky-Krieger (1959), Table 8, p. 120, for a simply
+supported square plate under a uniform pressure, and against Pagano (1970)
+for a sinusoidal pressure, as in ``test_fsdt_tsdt_plates.py``; also the
+load increment, the intersection with a partial integration domain, the
+sign of an external pressure on a cylinder and the argument checks.
 
-- Timoshenko, S. and Woinowsky-Krieger, S., "Theory of plates and shells",
-  2nd ed., McGraw-Hill, 1959, Table 8, p. 120: simply supported square plate
-  under a uniform pressure, central deflection `w = 0.00406 q a^4/D`, whose
-  Navier series is `0.00406235 q a^4/D`.
+Notes
+-----
+The central deflection of the simply supported square plate under a
+uniform pressure is `w = 0.00406 q a^4/D` in [1]_, whose Navier series is
+`0.00406235 q a^4/D`.
 
-- Pagano, N. J., "Exact solutions for rectangular bidirectional composites
-  and sandwich plates", J. Compos. Mater., 4, 20-34, 1970, as in
-  ``test_fsdt_tsdt_plates.py``.
+References
+----------
+.. [1] Timoshenko, S. and Woinowsky-Krieger, S., "Theory of plates and
+   shells", 2nd ed., McGraw-Hill, 1959.
+.. [2] Pagano, N. J., "Exact solutions for rectangular bidirectional
+   composites and sandwich plates", J. Compos. Mater., 4, 20-34, 1970.
 """
 import sys
 sys.path.append('../..')
