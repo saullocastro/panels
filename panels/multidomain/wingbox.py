@@ -2,18 +2,16 @@ r"""Rectangular wing-box made of plate domains
 (:mod:`panels.multidomain.wingbox`)
 
 :func:`.create_wingbox` builds the untapered wing-box of Elalfy, De Breuker
-and Castro [1]_, case High-AR-t5, with plate domains connected by penalty
+and Castro, case High-AR-t5, with plate domains connected by penalty
 stiffnesses, optionally with blade stringers, and
 :func:`.wingbox_tip_force_lb` runs its linear buckling analysis under a
 vertical tip force. Both are imported in :mod:`panels.multidomain`.
 
-The geometry and the material are those of [1]_, Table 1, p. 7, case
-High-AR-t5: chord ``W = 50.5`` mm, half-span ``L = 1010`` mm, height ``H =
-12.12`` mm, 8 ribs (9 bays), skins 1 mm thick, spars 5 mm thick; and Table 2,
-p. 7: ``E = 73`` GPa, ``G = 27.44`` GPa, i.e. ``nu = 0.33``, ``rho = 2795``
-kg/m\ :sup:`3`. The wing-box is clamped at the root and loaded by a vertical
-tip force. The first buckling load from Abaqus (S4R shells) is 173.11 N, [1]_,
-Table 3, p. 8.
+The defaults are those of the case High-AR-t5: chord ``W = 50.5`` mm,
+half-span ``L = 1010`` mm, height ``H = 12.12`` mm, 8 ribs (9 bays), skins
+1 mm thick, spars 5 mm thick, ``E = 73`` GPa, ``nu = 0.33``, ``rho = 2795``
+kg/m\ :sup:`3`. The wing-box is clamped at the root and loaded by a
+vertical tip force.
 
 .. note::
 
@@ -21,6 +19,13 @@ Table 3, p. 8.
     to the spars with ``'BFxycte'``, which joins the edge `x` = constant of
     a spar to the edge `y` = constant of a rib. The stringers pass through
     the ribs without a connection.
+
+Notes
+-----
+The geometry and the material are those of [1]_, Table 1, p. 7, case
+High-AR-t5, and Table 2, p. 7, with `E = 73` GPa and `G = 27.44` GPa, i.e.
+`\nu = 0.33`. The first buckling load from Abaqus (S4R shells) is 173.11 N,
+[1]_, Table 3, p. 8.
 
 References
 ----------
@@ -64,8 +69,8 @@ def create_wingbox(nstr=0, hs=3.e-3, ts=1.5e-3, L=1.010, W=50.5e-3,
         conn_method='penalty', rib_spar=True):
     r"""Create the multidomain assembly of a rectangular wing-box
 
-    The defaults are the case High-AR-t5 of [1]_, see
-    :mod:`panels.multidomain.wingbox`, without stringers. All the domains
+    The defaults are the case High-AR-t5 of Elalfy, De Breuker and Castro,
+    see :mod:`panels.multidomain.wingbox`, without stringers. All the domains
     are isotropic ``'plate_clpt_donnell'`` :class:`.Shell` objects:
 
     - per bay, ``nstr + 1`` strips of each skin, of the groups
@@ -98,8 +103,7 @@ def create_wingbox(nstr=0, hs=3.e-3, ts=1.5e-3, L=1.010, W=50.5e-3,
     The tip force ``P``, upwards, is a uniform pressure on the strips of the
     upper skin of the last bay over the last ``dx_load`` of the span, of
     resultant ``P``, added with :meth:`.Shell.add_pressure_load`, a follower
-    load with ``follower=True``. In [1]_ it is a concentrated force at the
-    tip.
+    load with ``follower=True``.
 
     The code of this function is illustrative of how it constructs the
     multidomain assembly:
@@ -120,8 +124,7 @@ def create_wingbox(nstr=0, hs=3.e-3, ts=1.5e-3, L=1.010, W=50.5e-3,
         (between the mid-surfaces of the skins), length.
     t_skin, t_spar, t_rib : float, optional
         Thicknesses of the skins, the spars and the ribs, length. The
-        thickness of the ribs is not given in [1]_, the default is that of
-        the skins.
+        default thickness of the ribs is that of the skins.
     nbays : int, optional
         Number of bays, ``nbays - 1`` ribs between the root and the tip.
     E, nu, rho : float, optional
@@ -162,6 +165,13 @@ def create_wingbox(nstr=0, hs=3.e-3, ts=1.5e-3, L=1.010, W=50.5e-3,
         domains ``'top'``, ``'bot'``, ``'spars'``, ``'st'`` (stringers) and
         ``'ribs'``, and ``'a'``, the length of a bay, ``'ws'``, the width of
         a skin strip, and ``'conn'``, the connections.
+
+    Notes
+    -----
+    The geometry and the material of the defaults are those of the case
+    High-AR-t5 of [1]_, Tables 1 and 2, p. 7. The thickness of the ribs is
+    not given in [1]_, and the tip force is there a concentrated force at
+    the tip, here distributed over the last ``dx_load`` of the upper skin.
 
     References
     ----------
@@ -282,7 +292,7 @@ def wingbox_tip_force_lb(num_eigvalues=4, silent=True, **kwargs):
     ``conn_method='null-space'`` the first buckling load converges to 176.4
     N, with skins of 12 x 12 terms, spars of 12 x 7 and ribs of 6 x 8;
     with the default terms and penalty connections it is 172.78 N, and
-    161.9 N converged, see :doc:`ex_multidomain_wingbox`.
+    161.9 N converged.
 
     References
     ----------
@@ -293,10 +303,12 @@ def wingbox_tip_force_lb(num_eigvalues=4, silent=True, **kwargs):
     Examples
     --------
 
-    The following example is one of the test cases:
+    First buckling load, force, of the default wing-box under a tip force:
 
-    .. literalinclude:: ../../tests/multidomain/test_wingbox.py
-        :pyobject: test_wingbox_tip_force_lb
+    >>> from panels.multidomain import wingbox_tip_force_lb
+    >>> md, c, eigvals, eigvecs = wingbox_tip_force_lb(num_eigvalues=4)
+    >>> round(float(eigvals[0]), 2)
+    172.78
 
     """
     md, info = create_wingbox(**kwargs)

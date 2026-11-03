@@ -198,10 +198,20 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
     Examples
     --------
 
-    The following example is one of the test cases:
+    First frequency, in rad/s, of a T-stiffened panel with a debonding
+    defect over 10 % of its length, at Mach 2:
 
-    .. literalinclude:: ../../tests/multidomain/test_tstiff2d_assembly.py
-        :pyobject: test_tstiff2d_1stiff_flutter
+    >>> from panels.multidomain import tstiff2d_1stiff_flutter
+    >>> laminaprop = (142.5e9, 8.7e9, 0.28, 5.1e9, 5.1e9, 5.1e9)
+    >>> md, eigvals, eigvecs = tstiff2d_1stiff_flutter(a=3., b=1.,
+    ...     ys=0.5, bb=0.2, bf=0.1, defect_a=0.1, rho=1.3e3, plyt=0.125e-3,
+    ...     laminaprop=laminaprop, stack_skin=[0, 45, -45, 90, -45, 45, 0],
+    ...     stack_base=[0, 90, 0]*4, stack_flange=[0, 90, 0]*8,
+    ...     air_speed=2*343., rho_air=1.2, Mach=2, speed_sound=343.,
+    ...     run_static_case=False, m=6, n=7, mb=5, nb=6, mf=6, nf=7,
+    ...     num_eigvalues=5)
+    >>> round(float((-eigvals[0].real)**0.5), 2)
+    448.57
 
     """
     defect = defect_a * a

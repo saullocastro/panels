@@ -268,10 +268,19 @@ def cylinder_blade_stiffened_compression_lb_Nxx_cte(height, r, stack, stack_blad
     Examples
     --------
 
-    The following example is one of the test cases:
+    Critical axial load of a cylinder of 5 panels, each with a blade, force per unit length:
 
-    .. literalinclude:: ../../tests/multidomain/test_cylinder_blade_stiffened.py
-        :pyobject: test_cylinder_blade_stiffened_compression_lb_Nxx_cte
+    >>> from panels.multidomain import (
+    ...     cylinder_blade_stiffened_compression_lb_Nxx_cte)
+    >>> laminaprop = (142.5e9, 8.7e9, 0.28, 5.1e9, 5.1e9, 5.1e9)
+    >>> Nxxs = [-100.]*5
+    >>> md, eigvals, eigvecs = cylinder_blade_stiffened_compression_lb_Nxx_cte(
+    ...     height=0.5, r=0.25, stack=[0, 45, -45, 90, -45, 45],
+    ...     stack_blades=[[0, 90, 0]*4]*5, width_blades=[0.02]*5,
+    ...     plyt=0.125e-3, laminaprop=laminaprop, npanels=5,
+    ...     Nxxs_skin=Nxxs, Nxxs_blade=Nxxs, m=8, n=12, num_eigvalues=5)
+    >>> round(float(Nxxs[0]*eigvals[0]))
+    -51664
 
     """
     md, conns = create_cylinder_blade_stiffened(height=height, r=r,
@@ -386,10 +395,19 @@ def cylinder_blade_stiffened_compression_lb_Nxx_from_static(height, r, stack,
     Examples
     --------
 
-    The following example is one of the test cases:
+    Critical axial load of a cylinder of 5 panels, each with a blade, force per unit length:
 
-    .. literalinclude:: ../../tests/multidomain/test_cylinder_blade_stiffened.py
-        :pyobject: test_cylinder_blade_stiffened_compression_lb_Nxx_from_static
+    >>> from panels.multidomain import (
+    ...     cylinder_blade_stiffened_compression_lb_Nxx_from_static)
+    >>> laminaprop = (142.5e9, 8.7e9, 0.28, 5.1e9, 5.1e9, 5.1e9)
+    >>> Nxxs = [-100.]*5
+    >>> md, c, eigvals, eigvecs = cylinder_blade_stiffened_compression_lb_Nxx_from_static(
+    ...     height=0.5, r=0.25, stack=[0, 45, -45, 90, -45, 45],
+    ...     stack_blades=[[0, 90, 0]*4]*5, width_blades=[0.02]*5,
+    ...     plyt=0.125e-3, laminaprop=laminaprop, npanels=5,
+    ...     Nxxs_skin=Nxxs, Nxxs_blade=Nxxs, m=8, n=12, num_eigvalues=5)
+    >>> round(float(Nxxs[0]*eigvals[0]))
+    -41697
 
     """
     md, conns = create_cylinder_blade_stiffened(height=height, r=r,
@@ -517,7 +535,7 @@ def cylinder_blade_stiffened_compression_lb_pd_from_static(height, r, stack,
     -----
     The prescribed displacements are the linear constraints `u(x = height,
     y) = \lambda u_p`, eliminated exactly together with the connections,
-    see :ref:`null_space_pd`: the pre-buckling state is `\hat{\boldsymbol{c}}(\lambda) =
+    see :meth:`.MultiDomain.get_cp`: the pre-buckling state is `\hat{\boldsymbol{c}}(\lambda) =
     \lambda \hat{\boldsymbol{c}}_1`, with `u = u_p` at `x = height` for `\lambda = 1`, and
     the critical end-shortening of each panel is ``eigvals[0]`` times its
     prescribed value. The modes have `u = 0` at `x = height`, the
@@ -527,10 +545,19 @@ def cylinder_blade_stiffened_compression_lb_pd_from_static(height, r, stack,
     Examples
     --------
 
-    The following example is one of the test cases:
+    Critical end-shortening of a cylinder of 5 panels, each with a blade, length:
 
-    .. literalinclude:: ../../tests/multidomain/test_cylinder_blade_stiffened.py
-        :pyobject: test_cylinder_blade_stiffened_compression_lb_pd_from_static
+    >>> from panels.multidomain import (
+    ...     cylinder_blade_stiffened_compression_lb_pd_from_static)
+    >>> laminaprop = (142.5e9, 8.7e9, 0.28, 5.1e9, 5.1e9, 5.1e9)
+    >>> pds = [-1.e-3]*5
+    >>> md, c, eigvals, eigvecs = cylinder_blade_stiffened_compression_lb_pd_from_static(
+    ...     height=0.5, r=0.25, stack=[0, 45, -45, 90, -45, 45],
+    ...     stack_blades=[[0, 90, 0]*4]*5, width_blades=[0.02]*5,
+    ...     plyt=0.125e-3, laminaprop=laminaprop, npanels=5,
+    ...     pds_skin=pds, pds_blade=pds, m=8, n=12, num_eigvalues=5)
+    >>> round(float(pds[0]*eigvals[0]), 7)
+    -0.0004994
 
     """
     md, conns = create_cylinder_blade_stiffened(height=height, r=r,

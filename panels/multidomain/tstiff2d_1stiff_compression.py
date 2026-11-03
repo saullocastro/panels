@@ -202,10 +202,20 @@ def tstiff2d_1stiff_compression(a, b, ys, bb, bf, defect_a, rho, plyt,
     Examples
     --------
 
-    The following example is one of the test cases:
+    Critical axial load multiplier of a T-stiffened panel with a
+    debonding defect over 60 % of its length, under a unit compressive
+    ``Nxx`` in the skin, base and flange:
 
-    .. literalinclude:: ../../tests/multidomain/test_tstiff2d_assembly.py
-        :pyobject: test_tstiff2d_1stiff_compression
+    >>> from panels.multidomain import tstiff2d_1stiff_compression
+    >>> laminaprop = (142.5e9, 8.7e9, 0.28, 5.1e9, 5.1e9, 5.1e9)
+    >>> md, c, eigvals, eigvecs = tstiff2d_1stiff_compression(a=3., b=1.,
+    ...     ys=0.5, bb=0.2, bf=0.1, defect_a=0.6, rho=1.3e3, plyt=0.125e-3,
+    ...     laminaprop=laminaprop, stack_skin=[0, 45, -45, 90, -45, 45, 0],
+    ...     stack_base=[0, 90, 0]*4, stack_flange=[0, 90, 0]*8,
+    ...     Nxx_skin=-1., Nxx_base=-1., Nxx_flange=-1.,
+    ...     m=8, n=7, mb=7, nb=6, mf=8, nf=6, num_eigvalues=5)
+    >>> round(float(eigvals[0]), 2)
+    115.64
 
     """
     defect = defect_a * a
