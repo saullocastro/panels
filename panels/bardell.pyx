@@ -120,6 +120,14 @@ def calc_f(int i, double xi, double x1t, double x1r, double x2t, double x2r):
     --------
     calc_vec_f
 
+    Notes
+    -----
+    The term `i` is `P_i(\xi)` of :mod:`panels.bardell`: for `i \le 3` a
+    cubic Hermite polynomial multiplied by its flag, ``x1t``, ``x1r``,
+    ``x2t`` or ``x2r``; for `i \ge 4` a Legendre-based polynomial that does
+    not depend on the flags and vanishes, with its first derivative, at
+    `\xi = \pm 1`.
+
     """
     return f(i, xi, x1t, x1r, x2t, x2r)
 def calc_fp(int i, double xi, double x1t, double x1r, double x2t, double x2r):
@@ -148,6 +156,12 @@ def calc_fp(int i, double xi, double x1t, double x1r, double x2t, double x2r):
     See Also
     --------
     calc_vec_fp
+
+    Notes
+    -----
+    The derivative `dP_i/d\xi` of the term `i` of :func:`calc_f`. With `x =
+    (\xi + 1) a/2` along a length `a`, the derivative with respect to `x`
+    is `dP_i/dx = (2/a) dP_i/d\xi`.
 
     """
     return fp(i, xi, x1t, x1r, x2t, x2r)
@@ -178,6 +192,12 @@ def calc_fpp(int i, double xi, double x1t, double x1r, double x2t, double x2r):
     --------
     calc_vec_fpp
 
+    Notes
+    -----
+    The derivative `d^2P_i/d\xi^2` of the term `i` of :func:`calc_f`. With
+    `x = (\xi + 1) a/2` along a length `a`, the derivative with respect to
+    `x` is `d^2P_i/dx^2 = (2/a)^2 d^2P_i/d\xi^2`.
+
     """
     return fpp(i, xi, x1t, x1r, x2t, x2r)
 def calc_vec_f(double xi, double x1t, double x1r, double x2t, double x2r):
@@ -199,6 +219,11 @@ def calc_vec_f(double xi, double x1t, double x1r, double x2t, double x2r):
     -------
     out : np.ndarray
         1-D array of size ``30``, the entry ``i`` being the term ``i``.
+
+    Notes
+    -----
+    The entry `i` is `P_i(\xi)` of :func:`calc_f`, all the terms being
+    evaluated in one call.
 
     """
     cdef double [::1] out = np.zeros(NUM, dtype=DOUBLE)
@@ -225,6 +250,11 @@ def calc_vec_fp(double xi, double x1t, double x1r, double x2t, double x2r):
     out : np.ndarray
         1-D array of size ``30``, the entry ``i`` being the term ``i``.
 
+    Notes
+    -----
+    The entry `i` is `dP_i/d\xi` of :func:`calc_fp`, all the terms being
+    evaluated in one call.
+
     """
     cdef double [::1] out = np.zeros(NUM, dtype=DOUBLE)
     vec_fp(&out[0], xi, x1t, x1r, x2t, x2r)
@@ -249,6 +279,11 @@ def calc_vec_fpp(double xi, double x1t, double x1r, double x2t, double x2r):
     -------
     out : np.ndarray
         1-D array of size ``30``, the entry ``i`` being the term ``i``.
+
+    Notes
+    -----
+    The entry `i` is `d^2P_i/d\xi^2` of :func:`calc_fpp`, all the terms
+    being evaluated in one call.
 
     """
     cdef double [::1] out = np.zeros(NUM, dtype=DOUBLE)
