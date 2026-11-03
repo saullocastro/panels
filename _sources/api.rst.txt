@@ -15,6 +15,7 @@ API reference
     multidomain_connections.rst
     multidomain_cylinder.rst
     multidomain_tstiff2d.rst
+    multidomain_wingbox.rst
     stiffener.rst
     stiffpanelbay.rst
     json_io.rst
