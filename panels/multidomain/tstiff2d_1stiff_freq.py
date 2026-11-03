@@ -145,10 +145,18 @@ def tstiff2d_1stiff_freq(a, b, ys, bb, bf, defect_a, rho, plyt, laminaprop,
     Examples
     --------
 
-    The following example is one of the test cases:
+    First natural frequency, in rad/s, of a T-stiffened panel with a
+    debonding defect over 10 % of its length:
 
-    .. literalinclude:: ../../tests/multidomain/test_tstiff2d_assembly.py
-        :pyobject: test_tstiff2d_1stiff_freq
+    >>> from panels.multidomain import tstiff2d_1stiff_freq
+    >>> laminaprop = (142.5e9, 8.7e9, 0.28, 5.1e9, 5.1e9, 5.1e9)
+    >>> md, eigvals, eigvecs = tstiff2d_1stiff_freq(a=3., b=1.,
+    ...     ys=0.5, bb=0.2, bf=0.1, defect_a=0.1, rho=1.3e3, plyt=0.125e-3,
+    ...     laminaprop=laminaprop, stack_skin=[0, 45, -45, 90, -45, 45, 0],
+    ...     stack_base=[0, 90, 0]*4, stack_flange=[0, 90, 0]*8,
+    ...     m=6, n=7, mb=5, nb=6, mf=6, nf=7, num_eigvalues=5)
+    >>> round(float((-eigvals[0].real)**0.5), 2)
+    48.39
 
     """
     defect = defect_a * a

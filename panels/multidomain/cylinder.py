@@ -141,8 +141,8 @@ def cylinder_compression_lb_Nxx_cte(height, r, stack, plyt, laminaprop,
     See :func:`.create_cylinder` for most parameters.
 
     The cylinder has the simply supported edges SS1 at the bottom, `x = 0`,
-    and SS2 at the top, `x = height`, in the notation of Almroth [1]_: the
-    top edge is free to move in the axial direction, see the notes.
+    and SS2 at the top, `x = height`, in the notation of Almroth: the top
+    edge is free to move in the axial direction, see the Notes.
 
     The assembly and its connections come from :func:`.create_cylinder`.
     The attribute ``Nxx`` of the ``i``-th panel is set to ``Nxxs[i]`` and
@@ -239,10 +239,17 @@ def cylinder_compression_lb_Nxx_cte(height, r, stack, plyt, laminaprop,
     Examples
     --------
 
-    The following example is one of the test cases:
+    Critical axial load of a cylinder of 5 panels, force per unit length:
 
-    .. literalinclude:: ../../tests/multidomain/test_cylinder.py
-        :pyobject: test_cylinder_compression_lb_Nxx_cte
+    >>> from panels.multidomain import cylinder_compression_lb_Nxx_cte
+    >>> laminaprop = (142.5e9, 8.7e9, 0.28, 5.1e9, 5.1e9, 5.1e9)
+    >>> Nxxs = [-100.]*5
+    >>> md, eigvals, eigvecs = cylinder_compression_lb_Nxx_cte(height=0.5,
+    ...     r=0.25, stack=[0, 45, -45, 90, -45, 45], plyt=0.125e-3,
+    ...     laminaprop=laminaprop, npanels=5, Nxxs=Nxxs, m=8, n=12,
+    ...     num_eigvalues=5)
+    >>> round(float(Nxxs[0]*eigvals[0]))
+    -47113
 
     """
     md, conns = create_cylinder(height=height, r=r, stack=stack, plyt=plyt,
@@ -347,10 +354,19 @@ def cylinder_compression_lb_Nxx_from_static(height, r, stack, plyt, laminaprop,
     Examples
     --------
 
-    The following example is one of the test cases:
+    Critical axial load of a cylinder of 5 panels, force per unit length:
 
-    .. literalinclude:: ../../tests/multidomain/test_cylinder.py
-        :pyobject: test_cylinder_compression_lb_Nxx_from_static
+    >>> from panels.multidomain import cylinder_compression_lb_Nxx_from_static
+    >>> laminaprop = (142.5e9, 8.7e9, 0.28, 5.1e9, 5.1e9, 5.1e9)
+    >>> Nxxs = [-100.]*5
+    >>> md, c, eigvals, eigvecs = cylinder_compression_lb_Nxx_from_static(height=0.5,
+    ...     r=0.25, stack=[0, 45, -45, 90, -45, 45], plyt=0.125e-3,
+    ...     laminaprop=laminaprop, npanels=5, Nxxs=Nxxs, m=8, n=12,
+    ...     num_eigvalues=5)  # doctest: +NORMALIZE_WHITESPACE, +ELLIPSIS
+            Calculating kG for assembly...
+            ...
+    >>> round(float(Nxxs[0]*eigvals[0]))
+    -47220
 
     """
     md, conns = create_cylinder(height=height, r=r, stack=stack, plyt=plyt,
