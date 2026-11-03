@@ -41,6 +41,43 @@
   bifurcation at 0.90; with 10 x 10 terms or more the switch fails also with
   the scaling.
 
+### New benchmark: cantilever cylinder under a follower pressure
+
+- New `tests/tests_shell/test_schweizerhof1984_cantilever_postbuckling.py`
+  and `notebooks/schweizerhof1984_cantilever_postbuckling.ipynb` (with
+  `notebooks/schweizerhof1984_utils.py`): the cantilever cylinders of
+  Schweizerhof and Ramm (1984), Section 6.4, Table 4 and Fig. 13, as the
+  half-wave sector of `schweizerhof_sector` with `cylshell_clpt_sanders`,
+  14 x 8 terms (within 0.1 % of 22 x 10 for `k_c` and `k_f`), the hydrostatic
+  pressure `follower=True` with its unsymmetric load stiffness. Linear
+  buckling with 22 x 8 terms, 0.2 % to 0.5 % below Table 4 for the
+  cantilevers B1 and B2 of the three shells (shell 1: `k_c` 10.87 and 9.09,
+  `k_f` 9.67 and 8.09, against 10.89, 9.11, 9.70 and 8.10).
+- The imperfection of 1 % of `t` in the shape of the buckling mode is added
+  exactly for the Sanders kinematics, as for the Donnell kinematics of the
+  Simo case, with the geometric stiffness of the resultants of `c0` built
+  from the rows of `phix = -w,x` and `phiy = -w,y + v/r`, and the follower
+  pressure acting on the imperfect geometry, `Fp(c + c0)`. The test checks
+  the tangent against central differences, its skew part against that of
+  the load stiffness, `calc_fext(c=c)` against the derivative of the
+  residual with respect to the load factor and the internal forces against
+  the gradient of the strain energy.
+- Riks method with `inertia=True`: the imperfect shell 1 has no limit point
+  and approaches `k_f` from below; its path under B1, the boundary
+  conditions stated in the text of the paper for Fig. 13, plateaus at
+  `K = 9.64` (`w/t = 3`), 20 % above the figure, whose perfect shell is at
+  `K = 8.04`, the `k_f` of B2; the B2 path is within 1.5 % of the curve read
+  from the figure from `w/t = 0.07` to 3. Fig. 13 is therefore taken as the
+  curve of B2.
+- The number of negative eigenvalues of the unsymmetric tangent stiffness
+  matrix by `inertia_num_eigvals` (ARPACK on the LU factorization) misses
+  the bifurcation of the perfect shell in the unknowns of the shell, the
+  negative eigenvalue being the 130th of 260 by magnitude, while the sign
+  of the determinant changes; with the unknowns scaled to a unit diagonal
+  of the linear stiffness it is the 9th, and the count of 20 eigenvalues
+  finds it. The fast tests take about 25 s, the plateaus of B1 and B2 up to
+  `w/t = 3`, about 120 s, are marked `slow`.
+
 ### Documentation and tests: null rows and columns in linear static solves
 
 - The docstring of `MultiDomain` describes the linear static workflow:

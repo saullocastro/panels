@@ -70,6 +70,7 @@ kept, in `results/`.
 | `sze2004_hinged_roofs.ipynb` | Sabir and Lock (1972), Sze et al. (2004): limit loads of hinged cylindrical roofs |
 | `fk1952_shallow_arches.ipynb` | Fung and Kaplan (1952), NACA TN 2840: snap-through of a hinged shallow circular arch under a sinusoidal load, Riks and Crisfield methods with both convergence criteria |
 | `simo1990_cylinder_postbuckling.ipynb` | Simo, Fox and Rifai (1990): post-buckling of an axially compressed cylinder with imperfections of 10 % and 50 % of the thickness and of the perfect one by branch switching, Riks method; runs `panels` at each execution (about 3 min), with `simo1990_utils.py` |
+| `schweizerhof1984_cantilever_postbuckling.ipynb` | Schweizerhof and Ramm (1984), Section 6.4: cantilever cylinders under a follower pressure, Table 4 (linear buckling, unsymmetric load stiffness) and Fig. 13 (imperfection of 1 % of the thickness, Riks method, inertia of the unsymmetric tangent stiffness matrix), Sanders kinematics; runs `panels` at each execution (about 6 min), with `schweizerhof1984_utils.py` |
 | `stamatelos_labeas_2023.ipynb`, `stamatelos_labeas_2023_multidomain.ipynb` | Stamatelos and Labeas (2023): buckling of laminated stiffened plates, single domain and multidomain |
 | `follower_utils.py` | Utilities of the follower (hydrostatic) pressure notebooks |
 | `scf_validation_utils.py` | Utilities of the shear correction notebooks |
