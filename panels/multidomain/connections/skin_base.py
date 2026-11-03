@@ -9,8 +9,23 @@ see :func:`.fkCSB`. The two panels share the axes `x, y, z`, `z` being
 normal to their reference surfaces; ``p_top``, the panel ``p1`` of the
 connection, is on the positive side of the interface along `z`, and
 ``p_bot``, the panel ``p2``, on the negative side, see
-:meth:`.MultiDomain.get_kC_conn`.
+:meth:`.MultiDomain.get_kC_conn`. The lower face of ``p_top`` is connected
+to the upper face of ``p_bot``, with the offsets of the laminates, see
+:func:`.kCsdt._face`, each panel with its own kinematics. The rotation
+penalty, the key ``'kr'`` of the connection, applies only to the FSDT and
+TSDT; a ``'kr'`` given to the CLPT is not used, with a ``UserWarning``.
 
+The same quantities, :func:`.kCsdt._sb_components`, give the constraints
+of the null-space method, :func:`.nullspace.constraint_matrix`, and the
+same displacement jump is the separation of the cohesive connection
+``'SB_TSL'``, see :meth:`.MultiDomain._tsl_operators`.
+
+The functions ``fkCSB11``, ``fkCSB12`` and ``fkCSB22`` of earlier versions
+are deprecated: they return the blocks of :func:`.fkCSB` and ignore their
+distance arguments.
+
+Notes
+-----
 The connection imposes, at the interface,
 
 .. math::
@@ -27,23 +42,26 @@ fields of the FSDT and TSDT with the rotations `\phi_x, \phi_y`, the term
 `z v/r` being present only with the Sanders-Koiter kinematics. For the FSDT
 and TSDT, with the key ``'kr'`` of the connection, the rotations of the
 normal at the reference surfaces, :func:`.kCsdt._rotation_x` and
-:func:`.kCsdt._rotation_y`, are also tied. The rotation penalty ``'kr'``
-applies only to the FSDT and TSDT: the rotations of the CLPT follow from
-`w`, tied by `w_1 = w_2`, and tying them too would be redundant or, with
-the Sanders-Koiter kinematics, would give `(z_1 - z_2) w_{,y} = 0`, an
-over-constrained connection, see :func:`.kCsdt._sb_components`. A ``'kr'``
-given to the CLPT is not used, with a ``UserWarning``.
+:func:`.kCsdt._rotation_y`, are also tied. The rotations of the CLPT follow
+from `w`, tied by `w_1 = w_2`, and tying them too would be redundant or,
+with the Sanders-Koiter kinematics, would give `(z_1 - z_2) w_{,y} = 0`, an
+over-constrained connection, see :func:`.kCsdt._sb_components`.
 
-The same quantities, :func:`.kCsdt._sb_components`, give the constraints
-of the null-space method, :func:`.nullspace.constraint_matrix`, and the
-same displacement jump is the separation of the cohesive connection
-``'SB_TSL'``, see :meth:`.MultiDomain._tsl_operators`.
+The deprecated kernels ``fkCSB11``, ``fkCSB12`` and ``fkCSB22`` were
+hand-written blocks of the CLPT matrix with the form `u_1 + d_{sb} w_{1,x} =
+u_2` of the thesis of D'Souza [2]_, which uses the slope of ``p1`` only.
+The approximation functions are the Legendre-based (Bardell) functions
+[1]_.
 
-The functions ``fkCSB11``, ``fkCSB12`` and ``fkCSB22`` of earlier versions,
-hand-written kernels of the blocks of the CLPT matrix with the form
-`u_1 + d_{sb} w_{1,x} = u_2` of the thesis of D'Souza (2024), which uses the
-slope of ``p1`` only, are deprecated: they return the blocks of
-:func:`.fkCSB` and ignore their distance arguments.
+References
+----------
+.. [1] Castro, S. G. P., and Donadon, M. V., Assembly of Semi-Analytical
+   models to Address Linear Buckling and Vibration of Stiffened Composite
+   Panels with Debonding Defect, Composite Structures, 160, 232-247, 2017.
+   https://doi.org/10.1016/j.compstruct.2016.10.026
+.. [2] D'Souza, N., Multi-Domain Semi-Analytical Cohesive Zone Approach,
+   MSc thesis, Delft University of Technology, 2024.
+   https://resolver.tudelft.nl/uuid:4709f888-c032-4d9f-97e3-402dfdd47cf1
 
 """
 import warnings
@@ -140,8 +158,42 @@ def fkCSB(kt, p_top, p_bot, size, kr=0.):
 
 
 def _block(kt, p_top, p_bot, iP, iQ, size, row0, col0, upper):
-    r"""Block ``(iP, iQ)`` of :func:`.fkCSB` placed at ``row0``, ``col0``,
-    ``iP`` and ``iQ`` being ``0`` for ``p_top`` and ``1`` for ``p_bot``"""
+    r"""
+    Block ``(iP, iQ)`` of :func:`.fkCSB` placed at ``row0``, ``col0``
+
+    Used by the deprecated kernels ``fkCSB11``, ``fkCSB12`` and ``fkCSB22``,
+    with the quantities of :func:`.kCsdt._sb_components` and the penalty
+    ``kt`` only.
+
+    Parameters
+    ----------
+    kt : float
+        Translation penalty stiffness, force/length**3.
+    p_top, p_bot : :class:`.Shell`
+        Panels on the positive and negative sides of the interface along `z`.
+    iP, iQ : int
+        Panels of the rows and of the columns, ``0`` for ``p_top`` and ``1``
+        for ``p_bot``.
+    size : int
+        Size of the stiffness matrix of the assembly.
+    row0, col0 : int
+        First row and first column of the block in the matrix of the assembly.
+    upper : bool
+        ``True`` to keep only the upper triangle.
+
+    Returns
+    -------
+    kC : scipy.sparse.coo_matrix
+        The block, shape ``(size, size)``.
+
+    Notes
+    -----
+    For each quantity `q` of :func:`.kCsdt._sb_components` the block is `\pm
+    k_t \int \boldsymbol{N}_{qP}^\top \boldsymbol{N}_{qQ} \, dA`, with the sign
+    `+` for ``iP == iQ`` and `-` otherwise, the integrals being the Kronecker
+    products of the factors along `x` and `y` of :func:`.kCsdt._factor`.
+
+    """
     rows, cols, vals = [], [], []
     for penalty, sides in kCsdt._sb_components(p_top, p_bot, kt):
         pP, termsP = sides[iP]
@@ -188,8 +240,10 @@ def fkCSB11(kt, dsb, p1, size, row0, col0, dt=0., rinv1=0.):
     ----------
     kt : float
         Translation penalty stiffness, force/length**3.
-    dsb, dt, rinv1 : float
+    dsb : float
         Ignored.
+    dt, rinv1 : float, optional
+        Ignored. Default ``0.``.
     p1 : :class:`.Shell`
         Panel on the positive side of the interface along `z`.
     size : int
@@ -220,8 +274,10 @@ def fkCSB12(kt, dsb, p1, p2, size, row0, col0, dt=0., db=0., rinv1=0.,
     ----------
     kt : float
         Translation penalty stiffness, force/length**3.
-    dsb, dt, db, rinv1, rinv2 : float
+    dsb : float
         Ignored.
+    dt, db, rinv1, rinv2 : float, optional
+        Ignored. Default ``0.``.
     p1, p2 : :class:`.Shell`
         Panels on the positive and negative sides of the interface along
         `z`.
@@ -255,8 +311,8 @@ def fkCSB22(kt, p1, p2, size, row0, col0, db=0., rinv2=0.):
     p1, p2 : :class:`.Shell`
         Panels on the positive and negative sides of the interface along
         `z`.
-    db, rinv2 : float
-        Ignored.
+    db, rinv2 : float, optional
+        Ignored. Default ``0.``.
     size : int
         Size of the assembly.
     row0, col0 : int

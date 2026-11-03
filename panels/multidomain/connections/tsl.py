@@ -7,12 +7,12 @@ of the two panels and the parameters of the traction-separation law:
 the cohesive zone, :func:`tsl_margin` the length of the cohesive domain
 needed ahead of the crack front, and :func:`tsl_discretization` the terms
 and points along `x`, with the factors ``terms_per_decay=1.25`` and
-``points_per_lcz=10.`` by default. See :ref:`cohesive_zone`.
+``points_per_lcz=10.`` by default.
 
 Notes
 -----
 The rules below come from the convergence study of the cohesive zone on a
-mode I double cantilever beam (DCB), see :ref:`cohesive_zone`. The opening
+mode I double cantilever beam (DCB). The opening
 ahead of the process zone decays as that of two beams connected by an elastic
 foundation of stiffness `k_o`: with the opening `\Delta = w_1 - w_2` and the
 bending stiffnesses `D_{11}^{(1)}`, `D_{11}^{(2)}` of the two panels,

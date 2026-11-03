@@ -2,8 +2,7 @@ r"""
 Null-space method for the connections
 
 Imposes the connections of a :class:`.MultiDomain` assembly exactly, with
-the default ``conn_method='null-space'``, see :ref:`null_space` for the
-usage and a comparison with the penalty method. The quantities penalized by
+the default ``conn_method='null-space'``. The quantities penalized by
 the kernels of :mod:`panels.multidomain.connections` become linear
 constraints on the Ritz constants, built by :func:`.constraint_matrix`, one
 row per quantity and point, and eliminated with a sparse basis of their null
@@ -14,15 +13,14 @@ problem is solved with the solvers of ``structsolve`` unchanged, see
 :meth:`.MultiDomain.expand` and :meth:`.MultiDomain.get_reduced_functions`.
 
 The quantities of each connection are those of its penalty kernel, see
-:ref:`null_space_quantities`. The connections available are listed in
+:func:`.constraint_matrix`. The connections available are listed in
 :data:`NULL_SPACE_FUNCS`, the damaged connection ``'SB_TSL'`` remains a
 penalty stiffness.
 
 With ``MultiDomain(..., pd_method='null-space')`` the prescribed
 displacements of the panels are constraints with a right-hand side, built
 by :func:`.pd_constraint_matrix` and eliminated after the connections by
-:class:`.Elimination`, which also gives the particular solutions, see
-:ref:`null_space_pd`.
+:class:`.Elimination`, which also gives the particular solutions.
 
 Notes
 -----
@@ -69,7 +67,7 @@ displacements of the panels are the inhomogeneous constraints `\boldsymbol{B}_d 
 = \bar{\boldsymbol{d}}_0 + \lambda \bar{\boldsymbol{d}}_1`, built by :func:`.pd_constraint_matrix` and
 eliminated after the connections by :class:`.Elimination`, which also gives
 the particular solutions `\boldsymbol{c} = \boldsymbol{Z} \boldsymbol{c}_r + \boldsymbol{c}_{p0} + \lambda
-\boldsymbol{c}_{p1}`, see :ref:`null_space_pd`.
+\boldsymbol{c}_{p1}`.
 
 """
 import numpy as np
@@ -526,6 +524,17 @@ def pd_rows(p, comp, xis, etas, z=0., col0=0, size=None):
     -------
     B : scipy.sparse.csr_matrix
         The rows, with the shape ``(len(xis)*len(etas), size)``.
+
+    Notes
+    -----
+    The component is a linear combination of terms `\alpha_t \partial_x^{d_x}
+    \partial_y^{d_y} q_t` of the fields `q_t` of the panel, see
+    :func:`._pd_terms`. With `q_t = \sum_{i,j} f_i(\xi) g_j(\eta)
+    c^{q_t}_{ij}`, the entry of the row of the point `(\xi_k, \eta_l)` for the
+    Ritz constant `c^{q_t}_{ij}` is `\alpha_t \, \partial_x^{d_x} f_i(\xi_k)
+    \, \partial_y^{d_y} g_j(\eta_l)`, with the derivatives of :func:`._eval`;
+    all the points are obtained at once as the Kronecker product of the
+    values along `\eta` and along `\xi`.
 
     """
     if size is None:
