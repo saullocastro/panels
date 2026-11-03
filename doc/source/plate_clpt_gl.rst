@@ -7,11 +7,9 @@ The model ``'plate_clpt_gl'`` is the classical laminated plate theory (CLPT)
 of ``'plate_clpt_donnell'`` with the complete Green-Lagrange membrane
 strains of the mid-surface, instead of the von Kármán strains. It is meant
 for assemblies of plates, e.g. a wing box with :class:`.MultiDomain`, that
-undergo large rigid rotations while their strains stay small. The derivation,
-with SymPy, is in ``theory/shells/plate_clpt_gl/plate_clpt_gl.py``, with the
-note ``plate_clpt_gl.md``, and ``write_pyx.py`` generates the kernels
+undergo large rigid rotations while their strains stay small. The kernels
 :mod:`panels.models.plate_clpt_gl` and :mod:`panels.models.plate_clpt_gl_num`
-from it.
+are generated from a symbolic derivation with SymPy of the strains below.
 
 
 Why the von Kármán strains fail in an assembly

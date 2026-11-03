@@ -441,10 +441,7 @@ the fourth digit, by `2.2\times10^{-4}`; the difference falls below
 `3\times10^{-7}` with a connecting domain of 0.15 mm and below
 `2\times10^{-9}` with 1.5 or 5 mm. The values are asserted by
 ``tests/multidomain/test_dcb_linear_measures.py``, whose function
-``dcb_thesis_linear`` builds and solves the model:
-
-.. literalinclude:: ../../tests/multidomain/test_dcb_linear_measures.py
-    :pyobject: test_load_measures
+``dcb_thesis_linear`` builds and solves the model.
 
 Earlier versions of this page gave, for this table and the table of the next
 section, values computed with the tangential separation of Eq. 4.62 of the thesis
@@ -519,10 +516,8 @@ the separation at the crack tip, and therefore the damage onset, lag the
 imposed displacement by 21%. This is independent of the 0.015 mm domain used
 between the cohesive domain and the free arm: replacing it by a 5 mm domain
 gives 26.94 N/mm with the default penalties and 32.85 N/mm with the factor
-100. These values are asserted by:
-
-.. literalinclude:: ../../tests/multidomain/test_dcb_linear_measures.py
-    :pyobject: test_edge_penalty_factor
+100. These values are asserted by
+``tests/multidomain/test_dcb_linear_measures.py``.
 
 The drivers multiply the
 default ``'SSxcte'`` penalties by ``edge_penalty_factor``, 100 by default. The

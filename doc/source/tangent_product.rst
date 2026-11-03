@@ -1279,11 +1279,11 @@ product, for all 11 models, in ``tests/tests_shell/test_tangent_product.py``:
 - the matrix built column by column from the product against the central
   difference of :meth:`.Shell.calc_fint`;
 - in the undeformed state the product is `\boldsymbol{K}_{C0} \boldsymbol{v}`;
-- Newton-Raphson with the tangent built from the product converges
-  quadratically:
-
-.. literalinclude:: ../../tests/tests_shell/test_tangent_product.py
-    :pyobject: test_newton_raphson_converges_quadratically
+- Newton-Raphson with the tangent built from the product, column `j` being
+  `\boldsymbol{K}_T \boldsymbol{e}_j`, converges quadratically from a
+  perturbation of `10^{-2}` of a regular equilibrium state, the measured
+  order of convergence `\ln(e_{k+1}/e_k)/\ln(e_k/e_{k-1})` exceeding 1.5,
+  in at most 6 iterations.
 
 ``tests/multidomain/test_tangent_product_multidomain.py`` checks
 :meth:`.MultiDomain.calc_kTv` with penalty connections and follower loads,

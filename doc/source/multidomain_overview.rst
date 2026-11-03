@@ -49,9 +49,27 @@ each domain:
 ============= ============================================================ ===================================
 
 The kernels and the conventions of each connection are described in
-:mod:`panels.multidomain.connections`. The connections of the models with
+:mod:`panels.multidomain.connections`. The penalty kernels of the models
+with 3 degrees of freedom per term are in one module per connection:
+
+============= ====================================================================
+``func``       penalty kernels
+============= ====================================================================
+``'SSxcte'``   :mod:`panels.multidomain.connections.kCSSxcte`, :func:`.fkCSSxcte11`, :func:`.fkCSSxcte12`, :func:`.fkCSSxcte22`
+``'SSycte'``   :mod:`panels.multidomain.connections.kCSSycte`, :func:`.fkCSSycte11`, :func:`.fkCSSycte12`, :func:`.fkCSSycte22`
+``'BFycte'``   :mod:`panels.multidomain.connections.kCBFycte`
+``'BFxcte'``   :mod:`panels.multidomain.connections.kCBFxcte`
+``'BFxycte'``  :mod:`panels.multidomain.connections.kCBFxycte`
+``'SB'``       :func:`.fkCSB` of :mod:`panels.multidomain.connections.skin_base`, all the models
+``'SB_TSL'``   :mod:`panels.multidomain.connections.kCSB_dmg`
+============= ====================================================================
+
+the suffixes ``11``, ``12`` and ``22`` giving the blocks of the domains
+``p1`` and ``p2``, e.g. `\boldsymbol{K}_{12}` couples the Ritz constants of
+``p1`` with those of ``p2``. The connections of the models with
 5 degrees of freedom per term, FSDT and TSDT, are those of
-:mod:`panels.multidomain.connections.kCsdt`, and two connected domains must
+:mod:`panels.multidomain.connections.kCsdt` and the kernels ``_sdt`` of the
+modules ``kCBF*``, and two connected domains must
 have the same number of degrees of freedom per term; ``'SB_TSL'`` is
 available for the classical laminated plate theory only, see
 :ref:`cohesive_zone`.
@@ -123,27 +141,21 @@ assemblies, and show how to build others:
   skins, spars, ribs and optionally blade stringers.
 
 
-Example
--------
+Boundary conditions of divided domains
+--------------------------------------
 
-A square plate divided in two or four domains, simply supported on the
-outer edges, with the connections ``'SSxcte'`` and ``'SSycte'``:
-
-.. literalinclude:: ../../tests/multidomain/test_multidomain_fsdt_tsdt.py
-    :pyobject: domains
-
-The deflection of the plate under a sinusoidal pressure, solved with the
-null-space method, reduced and expanded back, agrees with the solution of
-Pagano (1970) given in the test:
-
-.. literalinclude:: ../../tests/multidomain/test_null_space.py
-    :pyobject: test_bending_divided_plate_pagano
-
-Two plates in series under tension, connected with the penalty method, and
-the section force computed by :meth:`.MultiDomain.force`:
-
-.. literalinclude:: ../../tests/multidomain/test_multidomain_postprocessing.py
-    :pyobject: tension
-
-.. literalinclude:: ../../tests/multidomain/test_multidomain_postprocessing.py
-    :pyobject: test_force_equals_applied_load
+When a domain is divided, each part keeps the flags of the outer edges it
+shares with the original domain, and its connected edges are free, all
+their flags ``1``: the connections, not the flags, tie the fields across
+the joint. A square plate simply supported on its outer edges and divided
+along `x = x_s` into two domains, or along `x = x_s` and `y = y_s` into
+four domains with an interior corner, connected with ``'SSxcte'`` and
+``'SSycte'``, reproduces the undivided plate; with the null-space method
+and the FSDT or the TSDT, the deflection at the interior corner of a
+`[0/90/90/0]` plate, `h/a = 0.1`, under a sinusoidal pressure, the
+problem of Pagano (1970), agrees to `2 \times 10^{-4}` with the closed-form
+solutions of the same theories, see ``tests/multidomain/test_null_space.py``
+and ``tests/multidomain/test_multidomain_fsdt_tsdt.py``. For a uniform
+membrane state the section force of :meth:`.MultiDomain.force`, the
+integral of the stress resultants along a line, equals the applied load in
+every domain, also across a penalty connection.

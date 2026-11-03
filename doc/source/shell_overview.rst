@@ -9,7 +9,147 @@ length along the circumference. It holds the inputs of the model and
 calculates the structural matrices and force vectors, which are solved with
 `structsolve <https://github.com/saullocastro/structsolve>`_. The same
 class is the building block of the assemblies :class:`.MultiDomain` and
-:class:`.StiffPanelBay`.
+:class:`.StiffPanelBay`. The package :mod:`panels` gathers these classes;
+this page states the conventions shared by all of them, the kinematics of
+the models and how to choose one.
+
+
+.. _shell_conventions:
+
+Conventions
+-----------
+
+**Coordinates.** `x` runs along the edge of length `a` and, for a
+cylinder, along its axis; `y` along the edge of length `b`, the arc length
+`y = r \theta` for a cylinder; `z` is normal to the reference surface,
+`z = 0`, and `w` is the displacement along `z`, positive outwards for a
+cylinder. The shallow shell assumption `r + z \approx r` is adopted, and
+`1/r = 0` for the plates. The laminate spans `d - h/2 \le z \le d + h/2`,
+`d` being the offset ``offset``, `d = 0` when the reference surface is the
+mid-surface, the convention of :func:`composites.laminated_plate`. The
+natural coordinates of the approximation functions are `\xi = 2x/a - 1` and
+`\eta = 2y/b - 1`.
+
+**Ritz constants.** Each field `F` of `u, v, w` (and `\phi_x, \phi_y` for
+the shear deformation theories), of index `k`, is the series
+
+.. math::
+    :label: shell-ritz
+
+    F(x, y) = \sum_{j = 0}^{n - 1} \sum_{i = 0}^{m - 1}
+    c_{N_d (j m + i) + k} \, P_i^F(\xi) \, P_j^F(\eta)
+
+with the `N_d = 3` or 5 degrees of freedom per term in the order `u, v,
+w, \phi_x, \phi_y`, and Bardell's functions `P_i^F`, `P_j^F` with the
+boundary flags of `F` along `x` and `y`, see :ref:`theory_func_bardell`.
+The vector `\boldsymbol{c}` has the size `N_d \, m \, n`,
+:meth:`.Shell.get_size`, and every matrix and vector of a :class:`.Shell`
+has its rows and columns in this order. In an assembly, the constants of
+each domain start at its ``row_start``, see :ref:`multidomain_overview`.
+
+**Generalized strains and stresses.** The constitutive matrix
+``Shell.ABD`` relates the generalized stresses ``Nxx, Nyy, Nxy, Mxx, Myy,
+Mxy`` (and ``Qy, Qx``) to the generalized strains ``exx, eyy, gxy, kxx, kyy,
+kxy`` (and ``gyz, gxz``), in this order, with the higher-order terms of the
+TSDT appended, see :func:`.fsdt_tsdt_field.strain_names`. The changes of
+curvature carry the sign `\kappa_{xx} = -w_{,xx}`, and the engineering
+shear strains are used.
+
+**Units.** No unit system is assumed: lengths, forces and densities must be
+given in one consistent set of units, in which the results are returned.
+
+
+.. _shell_kinematics:
+
+Kinematics of the models
+------------------------
+
+The models of :mod:`panels.models`, selected with ``Shell.model``, differ
+in the displacement field through the thickness and in the non-linear
+terms of the strains. The integrands of their matrices are derived
+symbolically from these kinematics and coded in the modules of
+:mod:`panels.models`, see :ref:`shell_models_kernels`.
+
+**Classical laminated plate theory (CLPT)**, 3 degrees of freedom per
+term, `u(z) = u - z w_{,x}`, `v(z) = v - z w_{,y}` for the Donnell
+kinematics. With `s = 0` for the Donnell kinematics (the von Kármán
+strains for the plates) and `s = 1` for the Sanders-Koiter kinematics
+[sanders1963Nonlinear]_, and the rotations of the normal `\beta_x =
+-w_{,x}` and `\beta_y = -w_{,y} + s v/r`, the strains are
+
+.. math::
+    :label: shell-clpt-strains
+
+    \varepsilon_{xx} &= u_{,x} + \frac{1}{2} \beta_x^2, \qquad
+    \varepsilon_{yy} = v_{,y} + \frac{w}{r} + \frac{1}{2} \beta_y^2, \qquad
+    \gamma_{xy} = u_{,y} + v_{,x} + \beta_x \beta_y \\
+    \kappa_{xx} &= -w_{,xx}, \qquad
+    \kappa_{yy} = -w_{,yy} + s \frac{v_{,y}}{r}, \qquad
+    \kappa_{xy} = -2 w_{,xy} + \frac{s}{r} \left( \frac{3}{2} v_{,x}
+    - \frac{1}{2} u_{,y} \right)
+
+the changes of curvature of the Sanders-Koiter theory being those written
+by Amabili [amabili2008Nonlinear]_, Sec. 1.3.8. With `s = 1` all the
+strains vanish for any small rigid-body motion, which matters for long
+shells and for deformations of long wavelength, e.g. low circumferential
+wave numbers. The non-linear terms omit the rotation about the normal,
+`\frac{1}{2}(v_{,x} - u_{,y})`, a simplification of the Sanders-Koiter
+theory for small strains and moderately small rotations, which keeps the
+geometric stiffness of an axial load equal to that of the Donnell
+kinematics, see :mod:`panels.models`. The plate models ``'plate_clpt_gl'``
+and ``'plate_clpt_tl'`` replace the membrane strains by the Green-Lagrange
+strains, and the latter also the changes of curvature by those of the
+deformed normal, see :ref:`plate_clpt_gl` and :ref:`plate_clpt_tl`.
+
+**First-order (FSDT) and third-order (TSDT) shear deformation theories**,
+5 degrees of freedom per term, the rotations `\phi_x` and `\phi_y` being
+independent fields:
+
+.. math::
+    :label: shell-sdt-field
+
+    u(z) &= u + z \phi_x - c_1 \left[(z - d)^3 + d^3\right] (\phi_x + w_{,x}) \\
+    v(z) &= v + z \left(\phi_y + s \frac{v}{r}\right)
+            - c_1 \left[(z - d)^3 + d^3\right] (\phi_y + w_{,y}) \\
+    w(z) &= w
+
+with `c_1 = 0` for the FSDT and `c_1 = 4/(3 h^2)` for the TSDT of Reddy
+[reddy1984HigherOrder]_, whose transverse shear strains `(\phi_x +
+w_{,x})(1 - 4 (z - d)^2/h^2)` and `(\phi_y + w_{,y})(1 - 4 (z - d)^2/h^2)`
+vanish at both faces, such that the TSDT needs no shear correction. The
+FSDT uses a shear corrected transverse shear stiffness, by default that of
+Rohwer, see ``fsdt_shear_correction`` of :class:`.Shell`. The terms in `s`
+correct the cylinders with the Sanders-Koiter kinematics, as in the shell
+theory of Reddy and Liu [reddy1985Shells]_ with `r + z \approx r`; the
+strains are those of :mod:`panels.models.fsdt_tsdt_field`, and the TSDT
+with an offset is described in :ref:`tsdt_offset`.
+
+
+.. _shell_choosing:
+
+How to choose a model
+---------------------
+
+========================================= ===============================================================
+structure and behaviour                   model
+========================================= ===============================================================
+thin plate, moderate rotations            ``'plate_clpt_donnell'``, the default of the plates
+thin cylinder or cylindrical panel        ``'cylshell_clpt_sanders'``, the default of the cylinders;
+                                          ``'cylshell_clpt_donnell'`` for short wavelengths only
+plates of an assembly with large          ``'plate_clpt_gl'``; ``'plate_clpt_tl'`` when the plates also
+rotations, e.g. a wing box                bend through large rotations, see :ref:`plate_clpt_gl`
+moderately thick plates and shells,       ``'plate_fsdt_donnell'``, ``'cylshell_fsdt_sanders'``
+transverse shear flexibility              (or ``_donnell``)
+thick laminates, offset reference        ``'plate_tsdt_donnell'``, ``'cylshell_tsdt_sanders'``
+surface                                   (or ``_donnell``), see :ref:`tsdt_offset`
+========================================= ===============================================================
+
+The thin-plate limit of the FSDT and the TSDT is the CLPT, see
+:ref:`boundary_conditions`, at the cost of 5 instead of 3 degrees of
+freedom per term. The models with 5 degrees of freedom per term are
+supported by :class:`.MultiDomain`, but not by :class:`.StiffPanelBay`,
+whose stiffeners assume the 3 degrees of freedom of the CLPT, nor by the
+cohesive connection ``'SB_TSL'``, see :ref:`cohesive_zone`.
 
 
 Inputs

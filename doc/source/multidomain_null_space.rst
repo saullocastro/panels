@@ -354,10 +354,34 @@ the external force vector and the penalty stiffnesses, e.g. of
 :func:`.fkCpd`, :func:`.fkCld_xcte` and :func:`.fkCld_ycte`, for the models
 with 3 and 5 degrees of freedom per term, must be added to the stiffness
 matrix by the user, symmetrized with
-:func:`structsolve.sparseutils.finalize_symmetric_matrix`:
+:func:`structsolve.sparseutils.finalize_symmetric_matrix`. For a point
+`(x_p, y_p)` with the prescribed values `q_p` and a line `x = x_l` with
+the prescribed functions `q_l(y)`, `q = u, v, w`, and with
+`\boldsymbol{S}^q` the rows of the approximation functions of `q`, the
+penalty energies `\frac{1}{2} k_q (\boldsymbol{S}^q \boldsymbol{c} - q_p)^2`
+and `\frac{1}{2} \int_0^b k_q (\boldsymbol{S}^q \boldsymbol{c} - q_l)^2 dy`
+give the stiffness matrices and force vectors
 
-.. literalinclude:: ../../tests/multidomain/test_kCpd_kernels.py
-    :pyobject: test_penalty_reaches_prescribed_values
+.. math::
+    :label: ns-pd-penalty
+
+    \boldsymbol{K}_p = \sum_{q} k_q \left. (\boldsymbol{S}^q)^\top
+    \boldsymbol{S}^q \right|_{(x_p, y_p)}, \qquad
+    \boldsymbol{F}_p = \sum_{q} k_q q_p \left. (\boldsymbol{S}^q)^\top
+    \right|_{(x_p, y_p)}
+
+    \boldsymbol{K}_l = \sum_{q} k_q \int_0^b \left. (\boldsymbol{S}^q)^\top
+    \boldsymbol{S}^q \right|_{x = x_l} dy, \qquad
+    \boldsymbol{F}_l = \sum_{q} k_q \int_0^b q_l(y) \left.
+    (\boldsymbol{S}^q)^\top \right|_{x = x_l} dy
+
+of :func:`.fkCpd` and :func:`.fkCld_xcte` (:func:`.fkCld_ycte` along `y =
+y_l`), the forces being added by :meth:`.MultiDomain.calc_fext`; for a
+thickness coordinate ``z`` different from zero, the rows of `u` and `v`
+are those of `u(z)` and `v(z)`. The prescribed values are reached with an
+error of order `1/k`; with `k = 10^4 E h` the solution differs from that of
+the null-space method by less than 1%, see
+``tests/multidomain/test_kCpd_kernels.py``.
 
 With ``pd_method='null-space'`` they are
 imposed exactly, as inhomogeneous linear constraints eliminated together
@@ -577,59 +601,30 @@ API
 - :meth:`.MultiDomain.calc_fext` excludes the forces of the prescribed
   displacements with ``pd_method='null-space'``
 
-Example
-~~~~~~~
+Verification and displacement control
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A simply supported plate under a uniform end-shortening, with the lateral
-edges free in-plane: linear buckling, then the post-buckling path under
-displacement control, with a small lateral load as imperfection::
+The membrane patch test is exact: under the uniform end-shortening
+`\delta` of Eq. :eq:`bc-end-shortening`, for one domain or for 2x2
+connected domains, with the CLPT and the FSDT, the fields are `u = -\delta
+x/a` and `v = \nu \delta y/a` to the round-off, and the reactions are `P_1
+= N \delta`, Eq. :eq:`ns-pd-reaction`, and `F_u = -N` at the shortened
+end, with `N = E h b \delta/a`, see ``tests/multidomain/test_null_space_pd.py``.
 
-    import numpy as np
-    from structsolve import Analysis
-    from panels.shell import Shell
-    from panels.multidomain import MultiDomain
-
-    a, b, h = 0.3, 0.2, 1e-3
-    p = Shell(a=a, b=b, m=8, n=8, model='plate_clpt_donnell', stack=[0],
-              plyt=h, laminaprop=(70e9, 0.3))
-    for edge in ('x1', 'x2', 'y1', 'y2'):
-        setattr(p, edge + 'u', 1.)  # u and v free at the edges, w = 0
-        setattr(p, edge + 'v', 1.)
-    md = MultiDomain([p], conn=[], pd_method='null-space')
-
-    def prescribe(delta):
-        p.clear_disps()
-        p.add_distr_pd_fixed_x(0., ku=1., funcu=lambda y: 0.)
-        p.add_distr_pd_fixed_x(a, ku=1., funcu=lambda y: -delta, cte=False)
-        p.add_point_pd(0., 0., 0, None, 1., 0., 0, None)
-
-    # linear buckling: the eigenvalue is the critical end-shortening
-    prescribe(1.)
-    eigvals, modes = md.linear_buckling(num_eigvalues=3)
-    delta_cr = eigvals[0]
-
-    # post-buckling up to three times the critical end-shortening
-    prescribe(3*delta_cr)
-    p.add_point_load(a/2, b/2, 0., 0., 2.)
-    an = Analysis(*md.get_reduced_functions())
-    an.NL_method = 'arc_length_riks'
-    an.maxArcLength = 100.
-    an.static(NLgeom=True)
-    cs = [md.expand(c_r, lbd) for c_r, lbd in zip(an.cs, an.increments)]
-    N = [-md.reaction_resultant(c, [(p, 'x', a)], lbd)[0]
-         for c, lbd in zip(cs, an.increments)]
-
-The arc length of ``structsolve`` is scaled by the linear solution, which
-has no out-of-plane displacement under an end-shortening, therefore the
-post-buckling path is long in these units, and ``maxArcLength`` may need to
-be increased. The tests of ``tests/multidomain/test_null_space_pd.py`` give
-more examples, among them:
-
-.. literalinclude:: ../../tests/multidomain/test_null_space_pd.py
-    :pyobject: test_membrane_patch_test_isotropic
-
-.. literalinclude:: ../../tests/multidomain/test_null_space_pd.py
-    :pyobject: test_nonlinear_displacement_control
+Beyond the critical end-shortening `\delta_{cr}` of the linear buckling
+analysis, the post-buckling path is traced under displacement control with
+the reduced functions of :meth:`.MultiDomain.get_reduced_functions`, the
+end-shortening being incremented, ``cte=False``, and a small lateral load
+acting as an imperfection. Every converged increment of the Newton-Raphson
+and arc-length methods of ``structsolve`` satisfies `\|\boldsymbol{Z}^\top
+\boldsymbol{r}\| \le` ``relTOL`` `\|\lambda \, \partial
+\boldsymbol{R}_r/\partial \lambda\|`, the three methods reach the same
+state, and the axial reaction of a simply supported plate at `3
+\delta_{cr}` is 0.5 to 0.7 of the linear one, the loss of stiffness of the
+buckled plate. The arc length of ``structsolve`` is scaled by the linear
+solution, which has no out-of-plane displacement under an end-shortening:
+the post-buckling path is long in these units, and ``maxArcLength`` may
+need to be increased.
 
 .. _null_space_pd_penalty:
 

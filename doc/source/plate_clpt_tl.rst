@@ -10,11 +10,9 @@ local frame. All its strains are then invariant under any rigid rotation of
 any deformed state: a bending deformation carried through a large rotation,
 e.g. a local buckle of a skin of a wing box bent by a large rotation, keeps
 its bending energy, which ``'plate_clpt_gl'`` multiplies by `\cos^2\theta`.
-The derivation, with SymPy, is in
-``theory/shells/plate_clpt_tl/plate_clpt_tl.py``, with the note
-``plate_clpt_tl.md``, and ``write_pyx.py`` generates
-:mod:`panels.models.plate_clpt_tl_num` with the helpers of the generator of
-``'plate_clpt_gl'``.
+The kernels :mod:`panels.models.plate_clpt_tl_num` are generated from a
+symbolic derivation with SymPy of the strains below, with the helpers of
+the generator of ``'plate_clpt_gl'``.
 
 .. note::
 
