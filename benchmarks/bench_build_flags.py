@@ -3,8 +3,7 @@ r"""Computational cost of the Ritz matrices, to assess the build flags
 Times ``Shell.calc_kC()``, ``calc_kG()`` and ``calc_kM()``, integrated
 analytically, and ``calc_kC(c=c)``, ``calc_kG(c=c)`` and ``calc_fint(c)``,
 integrated numerically, for several models with ``m = n = 12``. It is used to
-assess the Cython directives and the compiler flags of ``setup.py``, see
-``CHANGELOG.md``.
+assess the Cython directives and the compiler flags of ``setup.py``.
 
 Run it against the build of panels to be assessed, e.g.::
 
