@@ -96,25 +96,67 @@ User guide
     cohesive_zone.rst
 
 
-Usage examples
---------------
+.. toctree::
+    :maxdepth: 1
+    :caption: Usage examples
+
+    notebooks/ex_linear_static.nblink
+    notebooks/ex_linear_buckling.nblink
+    notebooks/ex_frequency.nblink
+    notebooks/ex_flutter.nblink
+    notebooks/ex_newton_raphson.nblink
+    notebooks/ex_arc_length.nblink
+    notebooks/ex_follower_pressure.nblink
+    notebooks/ex_prescribed_displacements.nblink
+    notebooks/ex_face_clamp.nblink
+    notebooks/ex_multidomain_cylinder.nblink
+    notebooks/ex_multidomain_tstiff2d.nblink
+    notebooks/ex_multidomain_wingbox.nblink
+    notebooks/ex_stiffpanelbay.nblink
+
 
 .. toctree::
     :maxdepth: 1
+    :caption: Plates, shells and stiffened panels
 
-    ex_linear_static.rst
-    ex_linear_buckling.rst
-    ex_frequency.rst
-    ex_flutter.rst
-    ex_newton_raphson.rst
-    ex_arc_length.rst
-    ex_follower_pressure.rst
-    ex_prescribed_displacements.rst
-    ex_face_clamp.rst
-    ex_multidomain_cylinder.rst
-    ex_multidomain_tstiff2d.rst
-    ex_multidomain_wingbox.rst
-    ex_stiffpanelbay.rst
+    notebooks/pagano1970_plates.nblink
+    notebooks/varadan1991_cylinders.nblink
+    notebooks/noor1975_buckling.nblink
+    notebooks/kardomateas1993_thick_rings.nblink
+    notebooks/kardomateas1993b_1995_thick_cylinders.nblink
+    notebooks/kardomateas2003_sandwich_rings.nblink
+    notebooks/han2004_sandwich_rings.nblink
+    notebooks/nasa_sp8007_external_pressure.nblink
+    notebooks/schweizerhof1984_pressure_loads.nblink
+    notebooks/schweizerhof1984_cantilever_postbuckling.nblink
+    notebooks/sze2004_hinged_roofs.nblink
+    notebooks/fk1952_shallow_arches.nblink
+    notebooks/simo1990_cylinder_postbuckling.nblink
+    notebooks/stamatelos_labeas_2023.nblink
+    notebooks/stamatelos_labeas_2023_multidomain.nblink
+
+.. toctree::
+    :maxdepth: 1
+    :caption: Cohesive zone model and connections
+
+    notebooks/dcb_alfano2001.nblink
+    notebooks/dcb_camanho2003.nblink
+    notebooks/dcb_turon2007.nblink
+    notebooks/dcb_krueger2008.nblink
+    notebooks/dcb_tijs2022.nblink
+    notebooks/dcb_tijs2023_phd.nblink
+    notebooks/dcb_lecinana2023.nblink
+    notebooks/dcb_mode_I_validation_summary.nblink
+    notebooks/krueger2012_mmb_benchmark.nblink
+    notebooks/conn_method_comparison.nblink
+
+
+.. toctree::
+    :maxdepth: 1
+    :caption: Quadrature
+
+    notebooks/test_quadrature_partial_integration_matrix.nblink
+    notebooks/test_quadrature_partial_integration_of_domain.nblink
 
 
 panels API
