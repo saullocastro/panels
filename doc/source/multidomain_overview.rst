@@ -43,6 +43,7 @@ each domain:
 ``'SSycte'``   two skins along an edge of constant `y`                       ``ycte1``, ``ycte2``
 ``'BFycte'``   base, or skin, ``p1`` and flange ``p2`` at constant `y`       ``ycte1``, ``ycte2``
 ``'BFxcte'``   base, or skin, ``p1`` and flange ``p2`` at constant `x`       ``xcte1``, ``xcte2``
+``'BFxycte'`` edge of constant `x` of ``p1`` and of constant `y` of ``p2``   ``xcte1``, ``ycte2``, ``'angle'``
 ``'SB'``       skin and base over their common area                          ``p1`` on the positive side of `z`
 ``'SB_TSL'``   ``'SB'`` with a cohesive traction-separation law              as ``'SB'``
 ============= ============================================================ ===================================
@@ -54,6 +55,20 @@ The kernels and the conventions of each connection are described in
 have the same number of degrees of freedom per term; ``'SB_TSL'`` is
 available for the classical laminated plate theory only, see
 :ref:`cohesive_zone`.
+
+Each domain of an edge connection needs at least 4 terms across the joint
+(``n`` for an edge of constant `y`, ``m`` for an edge of constant `x`, thus
+``m`` of ``p1`` and ``n`` of ``p2`` for ``'BFxycte'``) when its
+connected edge and its opposite edge are released, as for a blade flange
+with a free edge: only the first four of Bardell's functions carry the
+values and the slopes at the edges, and with 3 terms all of them have a
+zero slope at `\eta = +1`, so that no field varies linearly across the
+joint. The rigid rotations of the flange in its plane (`u`) and about the
+joint (`w`) are then missing, and a cantilever T-beam with 3 terms across
+its blade is 137 times too stiff in bending, a wing-box with blade
+stringers about 100 times. :class:`.MultiDomain` issues a
+:class:`.ConnectionTermsWarning` in this case, see the Notes of
+:class:`.MultiDomain` and :meth:`.MultiDomain.check_conn_terms`.
 
 
 Imposing the connections
@@ -105,7 +120,10 @@ assemblies, and show how to build others:
   :mod:`panels.multidomain.tstiff2d_1stiff_compression`,
   :mod:`panels.multidomain.tstiff2d_1stiff_freq` and
   :mod:`panels.multidomain.tstiff2d_1stiff_flutter`, see
-  :doc:`ex_multidomain_tstiff2d`.
+  :doc:`ex_multidomain_tstiff2d`;
+- the rectangular wing-box of :mod:`panels.multidomain.wingbox`, with
+  skins, spars, ribs and optionally blade stringers, see
+  :doc:`ex_multidomain_wingbox`.
 
 
 Example

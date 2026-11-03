@@ -1198,7 +1198,15 @@ for Sanders, `\boldsymbol{B}_L` is the linear strain operator and `\boldsymbol{B
     \\ \boldsymbol{G}_x \\ 0 \end{bmatrix}
 
 The factor `1/2` of `\boldsymbol{B}_{NL}` gives the quadratic terms `\beta_x^2/2`,
-`\beta_y^2/2` and `\beta_x \beta_y`. With the constitutive matrix `\boldsymbol{C}` of
+`\beta_y^2/2` and `\beta_x \beta_y`. The plate with Green-Lagrange membrane
+strains, ``plate_clpt_gl``, has the same form with the six gradients `u_{,x},
+u_{,y}, v_{,x}, v_{,y}, w_{,x}, w_{,y}` in place of the two rotations and
+`\tilde{\boldsymbol{N}}` below with one block of the membrane stresses per
+displacement, see :ref:`plate_clpt_gl`. The curvatures of the
+total-Lagrangian plate ``plate_clpt_tl`` are cubic in the displacements and
+do not have this form; its ``calc_kTv`` evaluates the strain operator and
+the Hessian of the strains at each point, at the same cost, see
+:ref:`plate_clpt_tl`. With the constitutive matrix `\boldsymbol{C}` of
 ``ABDnxny``, the internal force vector is `\boldsymbol{F}_{int} = \int (\boldsymbol{B}_L +
 \boldsymbol{B}_{NL})^\top \boldsymbol{C} \boldsymbol{\varepsilon}(\boldsymbol{c}) dA`, and its directional derivative
 along `\boldsymbol{v}` is
@@ -1260,7 +1268,7 @@ Verification
 
 The checks of the tangent stiffness matrix of
 ``tests/tests_shell/test_tangent_consistency.py`` are repeated for the
-product, for all 9 models, in ``tests/tests_shell/test_tangent_product.py``:
+product, for all 11 models, in ``tests/tests_shell/test_tangent_product.py``:
 
 - the product equals ``calc_kT(c) @ v`` with a relative difference below
   `10^{-12}`, also with a constant membrane stress state, one constitutive

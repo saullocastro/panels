@@ -47,6 +47,16 @@ The available models, which are selected with ``Shell.model``, are:
 - ``'plate_clpt_donnell'``: flat plates, classical laminated plate theory
   (CLPT) with von Kármán non-linear kinematics, 3 DOFs ``u, v, w``.
 
+- ``'plate_clpt_gl'``: flat plates, CLPT with the Green-Lagrange membrane
+  strains, which vanish for any rigid rotation, and the changes of
+  curvature of ``'plate_clpt_donnell'``, 3 DOFs ``u, v, w``. For assemblies
+  of plates with large rotations, e.g. a wing box, see :ref:`plate_clpt_gl`.
+
+- ``'plate_clpt_tl'``: flat plates, total-Lagrangian Kirchhoff-Love: the
+  Green-Lagrange membrane strains of ``'plate_clpt_gl'`` and the changes of
+  curvature of the deformed normal, all invariant under rigid rotations,
+  3 DOFs ``u, v, w``, see :ref:`plate_clpt_tl`.
+
 - ``'cylshell_clpt_donnell'``: cylindrical shells, CLPT with the
   Donnell-Mushtari-Vlasov (shallow shell) kinematics, 3 DOFs ``u, v, w``.
 
@@ -97,6 +107,47 @@ DOFs have the strains of the CLPT:
       \kappa_{xx} = -w_{,xx} \qquad
       \kappa_{yy} = -w_{,yy} \qquad
       \kappa_{xy} = -2 w_{,xy}
+
+- Green-Lagrange membrane strains, ``'plate_clpt_gl'``, with the changes
+  of curvature above:
+
+  .. math::
+
+      \varepsilon_{xx} = u_{,x} + \frac{1}{2} (u_{,x}^2 + v_{,x}^2 + w_{,x}^2) \qquad
+      \varepsilon_{yy} = v_{,y} + \frac{1}{2} (u_{,y}^2 + v_{,y}^2 + w_{,y}^2)
+
+      \gamma_{xy} = u_{,y} + v_{,x} + u_{,x} u_{,y} + v_{,x} v_{,y} + w_{,x} w_{,y}
+
+  The membrane strains vanish for any rigid rotation, about the normal as
+  well as about an in-plane axis, such that plates joined at an angle, whose
+  out-of-plane rotations are in-plane rotations of their neighbours, measure
+  the same stretch. The geometric stiffness has ``u-u`` and ``v-v`` blocks
+  besides the ``w-w`` block, and the linear kernels are those of
+  ``'plate_clpt_donnell'``. The changes of curvature are measured in the
+  fixed frame of the plate, which limits the large rotations to those
+  carried by the membrane strains, see :ref:`plate_clpt_gl`.
+
+- Total-Lagrangian Kirchhoff-Love, ``'plate_clpt_tl'``: the membrane strains
+  above and the changes of curvature of the deformed mid-surface
+  `\boldsymbol{X} = (x, y, 0) + (u, v, w)`, with its area vector
+  `\boldsymbol{a} = \boldsymbol{X}_{,x} \times \boldsymbol{X}_{,y}`:
+
+  .. math::
+
+      \kappa_{xx} = -\boldsymbol{a} \cdot \boldsymbol{u}_{,xx} \qquad
+      \kappa_{yy} = -\boldsymbol{a} \cdot \boldsymbol{u}_{,yy} \qquad
+      \kappa_{xy} = -2 \boldsymbol{a} \cdot \boldsymbol{u}_{,xy}
+
+  cubic in the displacements, `|\boldsymbol{a}| = 1` for rigid motions and
+  `1 + \varepsilon_{xx} + \varepsilon_{yy}` to first order otherwise. A
+  bending deformation keeps its energy through any rigid rotation, which
+  ``'plate_clpt_gl'`` multiplies by `\cos^2\theta`. The default
+  integration is exact, with `3p` points along a direction instead of `2p +
+  1`, see :func:`panels.shell.gauss_points`, about twice the cost of
+  ``'plate_clpt_gl'``; ``nx = gauss_points(m)``, ``ny = gauss_points(n)``
+  give the points of ``'plate_clpt_gl'``, not exact but with the same
+  results in practice at about half the cost, see :ref:`plate_clpt_tl`. The
+  analytical kernels are those of ``'plate_clpt_gl'``.
 
 - Sanders-Koiter kinematics, ``'cylshell_clpt_sanders'``, Sanders (1963)
   [1]_. With `y = r \theta` the arc length and `\phi_x =
@@ -202,6 +253,8 @@ from . import clpt_field
 from . import cylshell_clpt_donnell, cylshell_clpt_donnell_num
 from . import cylshell_clpt_sanders, cylshell_clpt_sanders_num
 from . import plate_clpt_donnell, plate_clpt_donnell_num
+from . import plate_clpt_gl, plate_clpt_gl_num
+from . import plate_clpt_tl_num
 from . import fsdt_tsdt_field
 from . import plate_fsdt_donnell, plate_fsdt_donnell_num
 from . import plate_tsdt_donnell, plate_tsdt_donnell_num

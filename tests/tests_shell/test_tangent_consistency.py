@@ -29,7 +29,8 @@ from panels.shell import Shell
 MODELS = ['plate_clpt_donnell', 'cylshell_clpt_donnell',
           'cylshell_clpt_sanders', 'plate_fsdt_donnell', 'plate_tsdt_donnell',
           'cylshell_fsdt_donnell', 'cylshell_fsdt_sanders',
-          'cylshell_tsdt_donnell', 'cylshell_tsdt_sanders']
+          'cylshell_tsdt_donnell', 'cylshell_tsdt_sanders', 'plate_clpt_gl',
+          'plate_clpt_tl']
 
 
 def make_shell(model):

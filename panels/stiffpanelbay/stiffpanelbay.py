@@ -8,7 +8,6 @@ force vector and the displacement fields of the assembly. The function
 :func:`.load` reads a bay saved with :meth:`.StiffPanelBay.save`.
 
 """
-import gc
 import os
 
 import numpy as np
@@ -213,8 +212,6 @@ class StiffPanelBay(object):
                 s.base._clear_matrices()
             if s.flange is not None:
                 s.flange._clear_matrices()
-
-        gc.collect()
 
 
     def _rebuild(self):

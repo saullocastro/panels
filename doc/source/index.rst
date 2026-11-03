@@ -36,6 +36,16 @@ The models are identified by the type of structure, the kinematic theory and
 the non-linear equations, see :mod:`panels.models`:
 
 * ``'plate_clpt_donnell'``: plates, classical laminated plate theory (CLPT)
+* ``'plate_clpt_gl'``: plates, CLPT with the Green-Lagrange membrane strains,
+  which vanish for any rigid rotation, for assemblies with large rotations,
+  see :ref:`plate_clpt_gl`
+* ``'plate_clpt_tl'``: plates, total-Lagrangian Kirchhoff-Love, with the
+  Green-Lagrange membrane strains and the curvatures of the deformed normal,
+  for plates bent through large rotations, see :ref:`plate_clpt_tl`;
+  integrated exactly by default, at about twice the cost of
+  ``'plate_clpt_gl'``, or with the points of ``'plate_clpt_gl'``,
+  ``nx = gauss_points(m)``, ``ny = gauss_points(n)``, not exact but with the
+  same results in practice at about half the cost
 * ``'plate_fsdt_donnell'``: plates, first-order shear deformation theory
 * ``'plate_tsdt_donnell'``: plates, third-order shear deformation theory of
   Reddy
@@ -77,6 +87,8 @@ User guide
     aeroelasticity.rst
     postprocessing.rst
     follower_pressure.rst
+    plate_clpt_gl.rst
+    plate_clpt_tl.rst
     tsdt_offset.rst
     multidomain_null_space.rst
     tangent_product.rst
@@ -101,6 +113,7 @@ Usage examples
     ex_face_clamp.rst
     ex_multidomain_cylinder.rst
     ex_multidomain_tstiff2d.rst
+    ex_multidomain_wingbox.rst
     ex_stiffpanelbay.rst
 
 
@@ -186,7 +199,7 @@ License
 Citing this library
 -------------------
 
-Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.14.2). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
+Saullo G. P. Castro, Nathan D'Souza. (2026). Semi-analytical methods for plates, shells and stiffened panels (Version 0.15.0). Zenodo. DOI: https://doi.org/10.5281/zenodo.2541522.
 
 In BibTeX:
 
@@ -197,7 +210,7 @@ In BibTeX:
       title     = {Semi-analytical methods for plates, shells and stiffened
                    panels},
       year      = {2026},
-      version   = {0.14.2},
+      version   = {0.15.0},
       publisher = {Zenodo},
       doi       = {10.5281/zenodo.2541522},
       url       = {https://doi.org/10.5281/zenodo.2541522}

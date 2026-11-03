@@ -30,6 +30,35 @@ along `y`, is the same at a constant `x_1` and `x_2`, see
 :mod:`panels.multidomain.connections.kCBFxcte`. In both, ``p1`` is the base
 and ``p2`` the flange.
 
+kCBFxycte
+---------
+
+Connection of type, seen along the common edge, for the default angle of
+90 degrees::
+
+                     ^ z1 = y2
+                     |
+                     |  p2, e.g. a rib, edge y2 = 0
+                     |
+      ===============o     o: the common edge, y1 = x2 (into the page)
+      p1, e.g. a spar, edge x1 = a1       ---> x1 = z2
+
+between the edge `x_1 =` ``xcte1`` of ``p1`` and the edge `y_2 =`
+``ycte2`` of ``p2``, the same straight line, with `y_1 = x_2` and ``p1.b
+== p2.a``, the two domains at the angle ``'angle'``, by default 90
+degrees, measured from the normal of ``p1`` to that of ``p2`` about the
+common axis. It joins, for example, a spar ``p1``, whose edge at the end of
+a bay is `x_1 = a_1`, to a rib ``p2``, whose edges `y_2 = 0` or `y_2 =
+b_2` run along the height of a wing-box, when the spar is connected to the
+skins with ``'BFycte'`` and the rib with ``'BFxcte'``. The displacements of
+``p2`` are rotated to the frame of ``p1``, and the rotations about the
+common axis, `-w_{1,x}` of ``p1`` and `w_{2,y}` of ``p2``, are equal, see
+:mod:`panels.multidomain.connections.kCBFxycte`.
+
+.. automodule:: panels.multidomain.connections.kCBFxycte
+    :members: fkCBFxycte11, fkCBFxycte12, fkCBFxycte22, fkCBFxycte11_sdt,
+              fkCBFxycte22_sdt, xycte_components, check_xycte
+
 Skin-base, SB
 -------------
 
@@ -122,7 +151,10 @@ and TSDT, with the 5 DOFs `u, v, w, \phi_x, \phi_y`, are in
 matrix of :func:`.fkCSB` for these models, and the connections ``'BFycte'``
 and ``'BFxcte'`` of these models are the functions ``fkCBFycte*_sdt`` and
 ``fkCBFxcte*_sdt`` of :mod:`panels.multidomain.connections.kCBFycte` and
-:mod:`panels.multidomain.connections.kCBFxcte`.
+:mod:`panels.multidomain.connections.kCBFxcte`. The coupling block of
+``'BFxycte'``, :func:`.fkCBFxycte12`, serves the models with 3 and with 5
+DOFs, with the blocks :func:`.fkCBFxycte11_sdt` and
+:func:`.fkCBFxycte22_sdt` of each panel.
 
 .. automodule:: panels.multidomain.connections.kCsdt
     :members: fkCSSxcte_sdt, fkCSSycte_sdt, fkCSB_sdt
@@ -143,7 +175,8 @@ Exact connections: the null-space method
 
 With ``MultiDomain(..., conn_method='null-space')``, the default, the
 connections
-``'SSxcte'``, ``'SSycte'``, ``'BFxcte'``, ``'BFycte'`` and ``'SB'`` are not
+``'SSxcte'``, ``'SSycte'``, ``'BFxcte'``, ``'BFycte'``, ``'BFxycte'`` and
+``'SB'`` are not
 added as penalty stiffnesses, but imposed exactly: the quantities penalized
 by the kernels above become linear constraints on the Ritz constants, which
 are eliminated from them. No penalty constant is needed, see
@@ -210,7 +243,11 @@ laminated plate theory, including the term `v/r` for the Sanders-Koiter
 kinematics, and `\phi_y` for the FSDT and TSDT, see
 :mod:`panels.multidomain.connections.kCBFycte`; the connection ``'BFxcte'``
 penalizes `-w_{,x}` or `\phi_x`, see
-:mod:`panels.multidomain.connections.kCBFxcte`. The connection ``'SB'``
+:mod:`panels.multidomain.connections.kCBFxcte`. The connection
+``'BFxycte'`` penalizes `-w_{1,x}` of ``p1`` against `w_{2,y}` of ``p2``,
+with `-v_2/r_2` for the Sanders-Koiter kinematics, or `\theta_{x1}` against
+`-\theta_{y2}` for the FSDT and TSDT, the rotations about the common axis,
+see :mod:`panels.multidomain.connections.kCBFxycte`. The connection ``'SB'``
 penalizes the displacements `u(z), v(z), w` of the lower face of ``p1``
 and of the upper face of ``p2``, with the offsets of the laminates and the
 kinematics of each panel, with its slope and, with the Sanders-Koiter
@@ -249,6 +286,7 @@ from . skin_base import fkCSB, fkCSB11, fkCSB12, fkCSB22
 from . kCSSxcte import *
 from . kCSSycte import *
 from . kCBFxcte import *
+from . kCBFxycte import *
 from . kCpd import *
 from . kCSB_dmg import *
 from . penalties import *

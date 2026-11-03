@@ -1,5 +1,419 @@
 # Changelog
 
+## 0.15.0 (2026-11-03)
+
+### Requires structsolve 0.10.0
+
+- Requires `structsolve>=0.10.0` (`pyproject.toml`, `requirements.txt`),
+  for the stop criteria, `Analysis.final_load_factor = None`, the inertia
+  of the tangent stiffness matrix and the branch switching of the
+  arc-length methods used by the new test and notebook below.
+
+### New benchmark: post-buckling of an axially compressed cylinder
+
+- New `tests/tests_shell/test_simo1990_cylinder_postbuckling.py` and
+  `notebooks/simo1990_cylinder_postbuckling.ipynb` (with
+  `notebooks/simo1990_utils.py`): the cylinder of Simo, Fox and Rifai
+  (1990), Section 6.3.4, Fig. 6.3.4, `R = 36`, `L = 100`, `t = 0.125`, as an
+  `L/10 x 15 deg` section of `cylshell_clpt_donnell` with 8 x 8 terms,
+  traced with the Riks method of structsolve to twice the shortening of the
+  linear buckling load. The imperfection in the shape of the lowest linear
+  buckling mode is added exactly for the Donnell kinematics,
+  `fint_imp(c) = fint(c + c0) - fint(c0) - kG(N0) c` and `kT_imp(c) =
+  kT(c + c0) - kG(N0)`, with `kG(N0)` of the linear and non-linear membrane
+  resultants of `c0` integrated at the Gauss points: `Shell.calc_kG(c=c0)`
+  has the linear resultants only. The test checks `fint_imp(0) = 0`, the
+  tangent against central differences (1e-9) and the internal forces
+  against the gradient of the strain energy of `eps(c + c0) - eps(c0)`
+  (1e-7).
+- Limit loads, normalized by the linear buckling load (1.0047 `N_cl`):
+  0.728 for 10 % and 0.393 for 50 % of `t`, against 0.715 and 0.411 read
+  from Fig. 6.3.4 (a) and 0.717 and 0.402 for Stanley's 9-ANS points, with
+  the snap-back of the 10 % path to the shortening 0.0139 (0.0142 read) and
+  the plateau at 0.32 to 0.33. The perfect cylinder, switched at the first
+  bifurcation (`branch_switching`), bifurcates at 0.827 (0.833 read from
+  Fig. 6.3.4 (d)). The test of the 50 % imperfection takes 13 s; those of
+  10 % and of the perfect cylinder, 34 and 33 s here, are marked `slow`.
+- The perfect cylinder needs the unknowns scaled to a unit diagonal of the
+  linear stiffness and `linear_solver = 'splu'`: otherwise the critical
+  eigenvector of structsolve is one of weakly stiff in-plane Ritz terms and
+  the count of PARDISO, with about 20 perturbed pivots, finds the
+  bifurcation at 0.90; with 10 x 10 terms or more the switch fails also with
+  the scaling.
+
+### New benchmark: cantilever cylinder under a follower pressure
+
+- New `tests/tests_shell/test_schweizerhof1984_cantilever_postbuckling.py`
+  and `notebooks/schweizerhof1984_cantilever_postbuckling.ipynb` (with
+  `notebooks/schweizerhof1984_utils.py`): the cantilever cylinders of
+  Schweizerhof and Ramm (1984), Section 6.4, Table 4 and Fig. 13, as the
+  half-wave sector of `schweizerhof_sector` with `cylshell_clpt_sanders`,
+  14 x 8 terms (within 0.1 % of 22 x 10 for `k_c` and `k_f`), the hydrostatic
+  pressure `follower=True` with its unsymmetric load stiffness. Linear
+  buckling with 22 x 8 terms, 0.2 % to 0.5 % below Table 4 for the
+  cantilevers B1 and B2 of the three shells (shell 1: `k_c` 10.87 and 9.09,
+  `k_f` 9.67 and 8.09, against 10.89, 9.11, 9.70 and 8.10).
+- The imperfection of 1 % of `t` in the shape of the buckling mode is added
+  exactly for the Sanders kinematics, as for the Donnell kinematics of the
+  Simo case, with the geometric stiffness of the resultants of `c0` built
+  from the rows of `phix = -w,x` and `phiy = -w,y + v/r`, and the follower
+  pressure acting on the imperfect geometry, `Fp(c + c0)`. The test checks
+  the tangent against central differences, its skew part against that of
+  the load stiffness, `calc_fext(c=c)` against the derivative of the
+  residual with respect to the load factor and the internal forces against
+  the gradient of the strain energy.
+- Riks method with `inertia=True`: the imperfect shell 1 has no limit point
+  and approaches `k_f` from below; its path under B1, the boundary
+  conditions stated in the text of the paper for Fig. 13, plateaus at
+  `K = 9.64` (`w/t = 3`), 20 % above the figure, whose perfect shell is at
+  `K = 8.04`, the `k_f` of B2; the B2 path is within 1.5 % of the curve read
+  from the figure from `w/t = 0.07` to 3. Fig. 13 is therefore taken as the
+  curve of B2.
+- The number of negative eigenvalues of the unsymmetric tangent stiffness
+  matrix, `inertia_num_eigvals = 20` (ARPACK on the LU factorization),
+  finds the bifurcation of the perfect shell, as the sign of the
+  determinant does. It relies on the scaling of structsolve by
+  `|diag(K0)|^(-1/2)`: among the eigenvalues of `K_T` itself, in the
+  unknowns of the shell, the negative one is far from the smallest by
+  magnitude, the Ritz terms of smallest norm having many eigenvalues closer
+  to zero. The count costs about 0.01 s per increment. The fast tests take
+  about 25 s; the plateaus of B1 and B2 up to `w/t = 3`, about 3 min, are
+  marked `slow`.
+
+### Documentation and tests: null rows and columns in linear static solves
+
+- The docstring of `MultiDomain` describes the linear static workflow:
+  `calc_kC` and `calc_fext`, `reduce`, `structsolve.solve` (or
+  `structsolve.static`, `Analysis.static`, `MultiDomain.linear_static`),
+  `expand`, and why `structsolve.solve` and not a plain
+  `scipy.sparse.linalg.spsolve`: a boundary condition flag set to zero, e.g.
+  at a clamped edge, leaves null rows and columns in `kC`, which is then
+  exactly singular until `structsolve.sparseutils.remove_null_cols` removes
+  them. Every linear solve of the package, of its example assemblies, of the
+  tests included in the documentation and of the notebooks was checked: all
+  go through `structsolve.solve`, `static`, `Analysis.static` or `lb`, or
+  remove the null rows and columns explicitly; no code changed.
+- New `tests/multidomain/test_linear_static_null_dofs.py`: a cantilever
+  plate strip in two domains clamped at the root, with the penalty and the
+  null-space connections, has null rows and columns in `kC` with null loads,
+  `spsolve` of the full system fails, and `structsolve.solve` and
+  `MultiDomain.linear_static` give the same solution, whose tip deflection is
+  1.5% below the Euler-Bernoulli beam (16 null rows and columns of 192).
+
+### Warning for too few terms across an edge connection
+
+- New `MultiDomain.check_conn_terms()` and `ConnectionTermsWarning`
+  (a `UserWarning`, importable from `panels.multidomain`): for each domain of
+  the edge connections `'SSxcte'`, `'SSycte'`, `'BFxcte'` and `'BFycte'`, and
+  for each field (`u, v, w`, and `phix, phiy` for the FSDT and TSDT), the
+  number of terms across the joint (`n` at constant `y`, `m` at constant `x`)
+  is compared with the number needed to represent the linear fields across
+  the joint that the flags of the two edges parallel to the joint admit,
+  `_terms_linear()`: 4 when both derivative flags (e.g. `y1ur`, `y2ur`) and
+  one value flag are non-zero, 3 when only the constant is admitted, 0
+  otherwise. The check runs when the assembly is created with `conn`, and in
+  `get_Z()` and `get_kC_conn()` when the connections, terms or flags change
+  (about 9 ms for the 225 domains of a wing-box); the warning is issued once
+  per set of issues. No result changes.
+- The reason: only the first four of Bardell's functions have a value or a
+  slope at the ends, a linear field is `xi = -P0 + 2 P1 + P2 + 2 P3`, and
+  with 3 terms every function has a zero slope at `xi = +1`. A blade flange
+  with 3 terms across its height then has neither its in-plane rigid
+  rotation (`u`) nor its rotation about the joint (`w`): a free flange has 4
+  zero-energy modes instead of 6. A cantilever T-beam (skin 40 x 1, blade 10
+  x 1.5, length 0.5, `'BFycte'`) has a tip deflection of 0.0073 of
+  Euler-Bernoulli with 3 terms across the blade (137 times too stiff) and
+  0.9978 with 4, 5 or 6, with both `conn_method` and either edge of the
+  blade joined; its twist is 0.054 of the converged value with 3 terms. With
+  4 terms and `y2ur = 0` the bending locks as with 3 terms, with `y2wr = 0`
+  the torsion, and `y2vr = 0` stiffens the bending by 3.7 % (Poisson). In
+  the High-AR-t5 wing-box with 4 blade stringers per skin (Elalfy, De
+  Breuker and Castro), the tip deflection under 500 N (linear static) is
+  3.72 mm with 8 x 3 terms in the stringers against 391.92 mm with 8 x 4 or
+  8 x 5 (`conn_method='penalty'`), 3.71 mm against 386.83 mm with the
+  null space, about 105 times too stiff; the warning is issued for the 72
+  stringers with 8 x 3 terms and not with the default 8 x 4.
+- Documented in the Notes of `MultiDomain` and in the multi-domain overview
+  page. New tests in `tests/multidomain/test_conn_terms.py`.
+- The check also covers the connection `'BFxycte'`, which joins an edge of
+  constant `x` of `p1` to an edge of constant `y` of `p2`: the terms across
+  the joint are `m` of `p1` and `n` of `p2`, with the flags `x1`, `x2` of
+  `p1` and `y1`, `y2` of `p2`. The default wing-box of
+  `panels.multidomain.wingbox`, whose ribs are joined to the spars with
+  `'BFxycte'`, issues no warning.
+- New `MultiDomain.check_conn_terms_along()`, the edge connections imposed
+  exactly (null space) whose two domains have different numbers of terms
+  along the joint, `n` at constant `x`, `m` at constant `y`, whose extra
+  terms of the richer domain vanish along the joint (Limitations of the
+  null-space page). It is not called automatically and issues no warning,
+  since the effect is small: the default wing-box with
+  `conn_method='null-space'` has 36 such connections (skins with 8 terms
+  and spars with 5 joined to ribs with 6 and 4), and its compliance under
+  the tip force is 8.88229e-4 m/N against 8.88283e-4 m/N with as many terms
+  in the ribs as in the skins, 6e-5 apart.
+
+### Packaging
+
+- On Linux, `-static-libgcc` and `-static-libstdc++` are passed to the
+  linker only when the compiler finds `libgcc.a` and `libstdc++.a`
+  (`-print-file-name`); otherwise the flag is left out with a message, and
+  the extension modules link the shared runtime. The build from source
+  failed with the system GCC 4.8.5 of CentOS 7, which has no
+  `libstdc++.a` without the package `libstdc++-static`.
+  `PANELS_STATIC_RUNTIME=0` leaves both flags out, `PANELS_STATIC_RUNTIME=1`
+  keeps both without the check. The wheels, built with the manylinux
+  compilers, are unchanged.
+- The parallel build, `python setup.py build_ext --inplace -j 8`, failed on
+  Windows: the shared sources `panels/core/src/bardell.cpp` and
+  `bardell_functions.cpp`, listed by most extensions, were compiled to the
+  same object files by several extensions at once. Each extension now
+  compiles into its own temporary directory (`build_ext_separate_temp` in
+  `setup.py`), the same compilations as before; the 32 extensions build in
+  2.5 min with `-j 8` on Windows.
+
+### Performance
+
+- `Shell._clear_matrices()`, called by `Shell.__init__` and by
+  `StiffPanelBay` for each panel, no longer calls `gc.collect()`, which
+  walks every object of the process: creating a `Shell` took 0.19 s in a
+  process with a million live objects, and 0.0002 s without it. The
+  matrices are freed by reference counting, as in the calculations since
+  0.11.1.
+
+### New connection `'BFxycte'`: an edge `x = const` joined to an edge `y = const`
+
+- New connection `'BFxycte'` between the edge `x1 = xcte1` of `p1`, along
+  `y1`, and the edge `y2 = ycte2` of `p2`, along `x2`, the same straight
+  line (`y1 = x2`, `p1.b == p2.a`), with the two domains at the angle of the
+  new key `'angle'` (default 90 degrees, from the normal of `p1` to that of
+  `p2` about the common axis). It joins, e.g., the spar of a wing-box bay,
+  whose edge at the end of the bay is `x = a`, to the rib there, whose edges
+  `y = 0` and `y = b` run along the height of the box, when the spar is
+  connected to the skins with `'BFycte'` (frame `(X, -Z, Y)`) and the rib
+  with `'BFxcte'` (frame `(-Z, Y, X)`); before, the ribs could not be
+  connected to the spars. The displacements of `p2` are written in the
+  frame of `p1`, `u1 = -cos(t) v2 + sin(t) w2`, `v1 = u2`, `w1 = sin(t) v2 +
+  cos(t) w2` (`u1 = w2`, `v1 = u2`, `w1 = v2` at 90 degrees), and the
+  rotations about the common axis are equal, `-w1,x = w2,y - v2/r2` for the
+  CLPT (the term `v2/r2` with the Sanders-Koiter kinematics of `p2`) and
+  `phix1 = -Phiy2` at the reference surfaces for the FSDT and TSDT. `p1`
+  must be flat; `p2` may be a cylindrical shell.
+- Imposed exactly with the default `conn_method='null-space'` (new entry of
+  `NULL_SPACE_FUNCS`, `max(n1, m2, 4)` Gauss-Legendre points along the
+  edge) and with penalties with `conn_method='penalty'`: new Cython module
+  `panels/multidomain/connections/kCBFxycte.pyx`, whose coupling block
+  `fkCBFxycte12` serves the models with 3 and 5 DOFs per term, the blocks of
+  each panel being those of `'BFxcte'` and `'BFycte'`
+  (`fkCBFxycte11(_sdt)`, `fkCBFxycte22(_sdt)`); the quantities are given by
+  `kCBFxycte.xycte_components`, used by both methods. The penalty constants
+  are those of `calc_kt_kr(p1, p2, 'xcte-ycte')`, `A11, D11` of `p1` and
+  `A22, D22` of `p2`. As for the other connections there is no geometric
+  stiffness. The derivation of the block 12 is in
+  `theory/multidomain_penalization/connections.py`.
+- Tests, `tests/multidomain/test_conn_BFxycte.py`: the penalty matrix
+  against the line integral of the penalty energy for the CLPT, FSDT, TSDT
+  and a Sanders-Koiter `p2`, for 90, 30, -120 and 180 degrees and both
+  orders of the panels; patch tests with the fields of a rigid-body motion
+  and of a homogeneous strain that keeps the angle, written in the frame of
+  each domain, which store no energy and satisfy the constraints, while a
+  strain that changes the angle, or the frame of the opposite angle, does
+  not; an L-joint pulled along the edge carries the constant strain exactly,
+  with both methods; a T-joint gives the natural frequencies of the same
+  structure built with `'BFxcte'` and the web rotated by 90 degrees in its
+  plane, to 2e-8 with the null-space method (the same Ritz space) and 1e-7
+  with the penalty method, for 6 to 12 terms, the frequencies decreasing
+  monotonically with the terms (44.77 Hz for the first one with 12 terms,
+  0.25% higher with 6), and the penalty method within 2.2%. In
+  `test_null_space.py` the null space of the penalty matrix is the basis
+  of the null-space method also for `'BFxycte'`.
+- The High-AR-t5 wing-box of Elalfy, De Breuker and Castro (9 bays, 45
+  domains, 6264 DOFs, `plate_clpt_donnell`), whose first linear buckling
+  load is 173.11 N with Abaqus (preprint, Table 3, p. 8): with the ribs
+  joined to the spars, the tip deflection for 500 N changes from 453.52 to
+  453.41 mm and the first buckling load from 172.77 to 172.78 N with the
+  penalty method, and from 447.54 to 447.39 mm and 190.46 to 190.41 N with
+  the null-space method (test marked `slow`, about 35 s and 21 s per model
+  with a single BLAS thread). The joints barely matter here: the first
+  modes are local buckling of the skins, and the ribs are thin. The
+  agreement of the penalty model with Abaqus is fortuitous: with more terms
+  (skins 12 x 12, spars 12 x 7, ribs 6 x 8, 13608 DOFs) the null-space
+  method converges from above to 176.44 N (+1.9%, with and without the
+  joints), whereas the penalty method drops to 161.84 N, the default
+  penalty constants of `calc_kt_kr` allowing more relative motion as the
+  number of terms grows.
+
+### New example: wing-box made of plate domains
+
+- New module `panels.multidomain.wingbox`, imported in `panels.multidomain`,
+  with `create_wingbox` and `wingbox_tip_force_lb`: the rectangular
+  untapered wing-box of Elalfy, De Breuker and Castro, "Beam-like models for
+  the post-buckling behaviour of wingbox structures" (preprint), case
+  High-AR-t5 (Table 1, p. 7: chord 50.5 mm, half-span 1010 mm, height
+  12.12 mm, 8 ribs, skins 1 mm, spars 5 mm; Table 2, p. 7: E = 73 GPa,
+  nu = 0.33, rho = 2795 kg/m3), clamped at the root, with skins, spars,
+  ribs and optionally `nstr` blade stringers per skin, all
+  `plate_clpt_donnell` domains connected with penalty stiffnesses
+  (`conn_method='null-space'` also accepted). The ribs are connected to the
+  skins with `'BFxcte'` and to the spars with the new `'BFxycte'` (option
+  `rib_spar`, default `True`); the stringers pass through the ribs without a
+  connection.
+- Linear buckling under a tip force, the pre-buckling state from the linear
+  static solution with `structsolve.solve` and `MultiDomain.calc_kG`. Without
+  stringers (45 domains) the first mode is a local buckling of the upper
+  skin of the root bay. With the connections imposed exactly
+  (`conn_method='null-space'`) the first buckling load converges from above,
+  190.41, 177.74, 176.44, 176.48 and 176.47 N with 6264, 9585, 13608, 18333
+  and 23760 Ritz constants (skins of 8 x 8 to 16 x 16 terms), 1.9% above the
+  173.11 N of the Abaqus model of the paper (Table 3, p. 8); with the
+  default penalty connections it is 172.78, 162.75, 161.85, 161.86 and
+  161.85 N, 6.5% below Abaqus converged: the 0.19% of the default model
+  (8 x 8 terms, penalty) to Abaqus is a coincidence of the number of terms
+  and the default penalty constants of `calc_kt_kr`. The slow test uses the
+  null-space method with 13608 Ritz constants (11 s to 24 s with one BLAS
+  thread), against the converged 176.44 N to 0.1% and Abaqus to 3%; a fast
+  test checks the default model, 172.78 N (6 s), against itself. With 4
+  stringers per skin (225 domains, 19872 Ritz constants, default terms and
+  penalty connections) the first buckling load is 708.9 N, without a
+  reference value.
+- New documentation pages `ex_multidomain_wingbox.rst`, with the table of
+  convergence of the buckling load with the number of terms, and
+  `multidomain_wingbox.rst`, and `tests/multidomain/test_wingbox.py`, which
+  also checks the linear tip deflection of a 2-bay model of the same span,
+  0.893 mm/N, 1.3% to 1.5% below the Euler-Bernoulli beam of the box
+  section, with the penalty and the null-space connections (0.2% apart).
+
+### New model `plate_clpt_tl`: total-Lagrangian Kirchhoff-Love plates
+
+- New model `'plate_clpt_tl'`: the Green-Lagrange membrane strains of
+  `'plate_clpt_gl'` and the changes of curvature measured with the area
+  vector of the deformed mid-surface, `kxx = -a . u,xx`, `kyy = -a . u,yy`,
+  `kxy = -2 a . u,xy`, `a = X,x x X,y`, `X = (x, y, 0) + (u, v, w)`. All the
+  strains are invariant under a rigid rotation of any deformed state, which
+  removes the `cos^2(t)` factor that `'plate_clpt_gl'` applies to the
+  bending energy of a plate rotated by `t`: a bent plate rotated by 0.5 and
+  1 rad keeps its bending energy to 1e-8, against 0.77 and 0.29 of it with
+  `'plate_clpt_gl'`, and a cantilever strip bent out of plane follows the
+  inextensible elastica to 1e-4 at `PL^2/EI = 1` and `3` (tip rotations of
+  0.46 and 1.0 rad; `w = 0.30172 L` and `0.6033 L`), where
+  `'plate_clpt_gl'` follows the linear beam (`L/3` at `PL^2/EI = 1`).
+- The area vector is used rather than the unit normal: `|a|^2 = det(F^T F)`
+  is one for rigid motions and `1 + 2 (exx + eyy)` to first order
+  otherwise, so the bending stiffness is scaled by the order of the
+  membrane strain (a plate under pressure deflected by 11 thicknesses
+  deflects 0.13 % less than with `'plate_clpt_gl'`), while the strains stay
+  cubic polynomials and the Gauss-Legendre integration exact.
+- The integrands have the degree `6p - 2` along a direction instead of
+  `4p`; `gauss_points(num, degree)` and the new `modelDB` key
+  `'integrand_degree'` give this model `3p` points by default, 21 instead
+  of 15 for `m = 8`, and the other models `max(2*num - 1, 7)` as before.
+  With 15 points the internal forces of a state with gradients of order 0.5
+  differ by 3e-13.
+- The derivation, `theory/shells/plate_clpt_tl/plate_clpt_tl.py` (SymPy),
+  checks the invariance under rigid rotations, `|a|^2 = det(F^T F)`, that
+  `fkC_num + fkG_num` is the Jacobian of `calc_fint` with `fkG_num`
+  homogeneous of degree one, and the integrand degree; `write_pyx.py`
+  generates `panels/models/plate_clpt_tl_num.pyx` (`fkC_num`, `fkG_num`,
+  `calc_fint`, `calc_kTv`, follower pressures) with the helpers of
+  `plate_clpt_gl/write_pyx.py`, now parametrized by the derivation
+  (`plate_clpt_gl` regenerates byte-identical). The analytical kernels are
+  those of `'plate_clpt_gl'`; `Shell.calc_kG` has `u-w` and `v-w` blocks of
+  the moments of the linear strains, so linear buckling eigenvalues equal
+  those of `'plate_clpt_gl'` without prebuckling moments.
+  `clpt_field.fstrain` returns the new curvatures (`clpt_field.is_tl`).
+- High-AR-t5 wing box under the follower tip force (45 domains, 6264
+  DOFs, 20 Newton-Raphson increments): 22.68, 90.84, 184.32, 286.16, 388.84
+  and 488.73 mm at 25, 100, 200, 300, 400 and 500 N, against 499.83 mm of
+  `'plate_clpt_gl'` and 515.5 mm of Abaqus at 500 N; the two models agree
+  to 0.03 % up to 200 N, below the first buckling load. One tangent
+  (`calc_kC` + `calc_kG`) costs 2.2 times that of `'plate_clpt_gl'` (2.34
+  against 1.06 s), the analysis 2.0 times (288 against 146 s); with the
+  integration points of `'plate_clpt_gl'` set on every domain the
+  deflections are the same to 0.01 mm, in 138 s.
+- Cantilever strip rolled into a full circle by an end moment, benchmark
+  3.2 of Sze, Liu and Lo (2004), Finite Elements in Analysis and Design 40,
+  1551-1569 (`L = 12`, `b = 1`, `h = 0.1`, `E = 1.2e6`, `nu = 0`, `M_max =
+  2 pi EI/L`; exact arc `U/L = sin(t)/t - 1`, `W/L = (1 - cos(t))/t`, Table
+  3a): the moment is a conservative load of potential `-M/b int atan2(w,x,
+  1 + u,x) dy` at the tip with its load stiffness, in the test.
+  `'plate_clpt_tl'` (`m = 12`, 20 increments, 4 s) rolls the strip into
+  the circle within 2.3e-3 L of the exact solution (`-U = 11.9725`, `W =
+  0.0002` at `M_max`, against 12 and 0), the difference being that of the
+  area-vector curvature, `(kappa h)^2` (0.23 % more curvature at the full
+  circle), which the test reproduces to 4e-6 L with the cylindrical
+  solution of the model; `'plate_clpt_gl'` is 7 % too flexible at 0.05
+  `M_max` and stops at 0.079 `M_max`, and `'plate_clpt_donnell'` never
+  rolls (`W = 14.8` at `M_max`). Test:
+  `tests/tests_shell/test_plate_clpt_tl_end_moment.py`; documented in
+  `doc/source/plate_clpt_tl.rst`.
+- Tests: `tests/tests_shell/test_plate_clpt_tl.py` (31 tests, about 40 s);
+  the model is added to the tangent, tangent-product, follower-pressure,
+  multidomain and JSON tests and to the linear wing-box test. Documentation:
+  `doc/source/plate_clpt_tl.rst` and the model in `panels.models`.
+
+### New model `plate_clpt_gl`: plates with Green-Lagrange membrane strains
+
+- New model `'plate_clpt_gl'`, the CLPT plate with the complete
+  Green-Lagrange membrane strains, `exx = u,x + (u,x^2 + v,x^2 + w,x^2)/2`,
+  `eyy = v,y + (u,y^2 + v,y^2 + w,y^2)/2`, `gxy = u,y + v,x + u,x u,y +
+  v,x v,y + w,x w,y`, and the changes of curvature of
+  `'plate_clpt_donnell'`. Its membrane strains vanish for any rigid
+  rotation, in plane and out of plane, so that plates joined at an angle,
+  whose out-of-plane rotation is the in-plane rotation of their neighbour,
+  measure the same stretch. With the von Kármán strains a wing box bent
+  about a horizontal axis stretches its skins against its spars by `t^2/2`,
+  `t` the rotation, and stiffens once its tip deflection reaches its
+  height: the High-AR-t5 box of Elalfy, De Breuker and Castro (preprint,
+  Fig. 6, p. 10) under a follower tip force deflects 13.9 mm at 25 N and
+  54.7 mm at 500 N with `'plate_clpt_donnell'`, against 22.7 and 453.5 mm of
+  the linear solution. With `'plate_clpt_gl'` it deflects 22.68, 90.84,
+  184.37, 287.24, 393.59 and 499.83 mm at 25, 100, 200, 300, 400 and 500 N,
+  2.5 to 4.0 % below Abaqus (23.3, 93.2, 189.6, 298.9, 410.0 and 515.5 mm),
+  of which 2.7 % is the difference in the linear range; above the first
+  buckling load the top skin buckles between the ribs and both skins sag
+  towards the mid-plane, the bottom one by 1.4 mm (11 % of the height) at
+  the root at 500 N, so that, as in Abaqus, the box is softer than the
+  linear beam at 500 N. Under a dead tip force it deflects 428.30 mm at 500
+  N, 3.5 % below the 443.8 mm of Abaqus in their Fig. 5.
+- The derivation, `theory/shells/plate_clpt_gl/plate_clpt_gl.py` (SymPy),
+  checks the invariance under rigid rotations, the von Kármán limit and
+  that the tangent stiffness `[B]^T [ABD] [B] + [H(N)]` is the Jacobian of
+  the internal force vector; `write_pyx.py` generates
+  `panels/models/plate_clpt_gl.pyx` and `plate_clpt_gl_num.pyx`, with the
+  follower-pressure kernels and `calc_kTv`; `plate_clpt_gl.md` is the
+  derivation note. The kernels form the 9 x 9 matrix of the generalized
+  derivatives once per integration point, then 27 products per pair of
+  terms; the integration points are those of the other models.
+- The geometric stiffness matrices, `Shell.calc_kG` and the analytical one
+  of a constant stress state, have `u-u` and `v-v` blocks besides the `w-w`
+  block. The linear constitutive stiffness, the mass and the aerodynamic
+  kernels are those of `'plate_clpt_donnell'`: linear static solutions and
+  natural frequencies are identical, and linear buckling eigenvalues are
+  identical for symmetric laminates and within `1e-5` otherwise.
+- The changes of curvature are measured in the fixed local frame, so a
+  large rotation carried by plate bending keeps the bending energy of the
+  linear plate: a cantilever strip under a tip force of constant direction
+  follows the elastica to 0.15 % when bent in its plane (`PL^2/EI = 2`),
+  but the linear beam when bent out of plane (`w = L/3` at `PL^2/EI = 1`,
+  against `0.302 L`). In a box beam the global bending is carried by the
+  membrane strains. The connections of `MultiDomain` are unchanged, linear
+  in the displacements of the fixed local frames.
+- `theory/shells/tangent_product` accepts the six gradients of the
+  Green-Lagrange strains in place of the two rotations of the von Kármán
+  terms (the kernels of the other models are regenerated unchanged), and
+  `clpt_field.fstrain` returns the Green-Lagrange membrane strains of the
+  new model (`clpt_field.is_gl`). Follower pressures use the exact area
+  vector of the plate with `follower='quadratic'`.
+- Tests: `tests/tests_shell/test_plate_clpt_gl.py` (rigid rotations up to
+  1 rad about four axes, linear kernels and analyses against
+  `'plate_clpt_donnell'`, small deflections, cantilever strips against the
+  elastica); the model is added to the tangent, tangent-product,
+  follower-pressure and JSON tests; the slow
+  `tests/multidomain/test_wingbox_plate_clpt_gl.py` compares the wing box
+  with Fig. 6 (about 2 to 3 min).
+- Documentation: new page "Large rotations: plates with Green-Lagrange
+  membrane strains", `doc/source/plate_clpt_gl.rst`, and the model in
+  `panels.models`, `Shell`, the user guide and the index.
+
 ## 0.14.2 (2026-11-01)
 
 ### Packaging

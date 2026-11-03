@@ -36,7 +36,7 @@ from test_multidomain_fsdt_tsdt import (CLPT, FSDT, TSDT, NOOR_1973, RHO, E2,
 
 
 MODELS = [CLPT, 'cylshell_clpt_sanders', FSDT, TSDT, 'cylshell_fsdt_sanders']
-FUNCS = ['SSxcte', 'SSycte', 'BFycte', 'BFxcte', 'SB']
+FUNCS = ['SSxcte', 'SSycte', 'BFycte', 'BFxcte', 'BFxycte', 'SB']
 
 
 def _pair(model, func, seed):
@@ -61,6 +61,14 @@ def _pair(model, func, seed):
         #NOTE 'kr' of 'SB' applies only to the FSDT and TSDT
         if 'clpt' not in model:
             conn['kr'] = 1.
+    elif func == 'BFxycte':
+        #NOTE a flat p1, whose edge x1 = xcte1 is an interior line, and p2
+        #     with the model, its edge y2 = 0 along the axis of a cylinder
+        kwp = dict(kw, stack=[0, 45, -45, 90],
+                   model=model.replace('cylshell', 'plate').replace('sanders', 'donnell'))
+        p1 = Shell(a=0.3, b=0.6, m=7, n=6, **kwp)
+        p2 = Shell(a=0.6, b=0.2, m=5, n=6, **kw2)
+        conn = dict(p1=p1, p2=p2, func=func, xcte1=0.4*p1.a, ycte2=0.)
     else:
         #NOTE a flat flange, with the base at an interior line
         kw2 = dict(kw, stack=[0, 90, 90, 0],

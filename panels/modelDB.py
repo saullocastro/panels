@@ -15,6 +15,11 @@ The dictionary ``db`` maps the name of each model, the attribute
   approximation, ``3`` or ``5``;
 - ``'e_num'``: the number of generalized strains, ``6``, ``8`` or ``13``;
 - ``'requires_r'``: whether the kernels need a positive radius ``r``;
+- ``'integrand_degree'``, optional: ``(k, j)`` such that the integrands of
+  the numerical kernels are polynomials of degree at most ``k p + j`` along
+  a direction, for approximation functions of degree ``p``, from which
+  :func:`.gauss_points` gives the default number of integration points;
+  ``(4, 0)`` when absent;
 - ``'linear static'``, ``'linear buckling'``, ``'non-linear static'``: flags,
   ``True`` for every model.
 
@@ -69,6 +74,40 @@ db = {
                     'e_num': 6,
                     # the plate kernels never read r
                     'requires_r': False,
+                    },
+    'plate_clpt_gl': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    'field': clpt_field,
+                    #NOTE fk0, fkM, fkAx, fkAy and fcA of plate_clpt_donnell,
+                    #     fkG0 with the in-plane blocks of the Green-Lagrange
+                    #     strains
+                    'matrices': plate_clpt_gl,
+                    'matrices_num': plate_clpt_gl_num,
+                    'dofs': 3,
+                    'e_num': 6,
+                    # the plate kernels never read r
+                    'requires_r': False,
+                    },
+    'plate_clpt_tl': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    'field': clpt_field,
+                    #NOTE the analytical kernels of plate_clpt_gl: the linear
+                    #     strains are those of plate_clpt_donnell and the
+                    #     geometric stiffness of a constant membrane stress
+                    #     state that of the Green-Lagrange strains
+                    'matrices': plate_clpt_gl,
+                    'matrices_num': plate_clpt_tl_num,
+                    'dofs': 3,
+                    'e_num': 6,
+                    # the plate kernels never read r
+                    'requires_r': False,
+                    # curvatures cubic in the displacements: integrands of
+                    # degree 6p - 2, integrated exactly by 3p points
+                    'integrand_degree': (6, -2),
                     },
     'cylshell_fsdt_donnell': {
                     'linear static': True,

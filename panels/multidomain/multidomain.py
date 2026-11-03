@@ -9,7 +9,9 @@ assembly saved with :meth:`.MultiDomain.save`. Both are imported in
 :mod:`panels.multidomain`.
 
 """
+from functools import lru_cache
 import platform
+import warnings
 
 import numpy as np
 from numpy import linspace, reshape
@@ -168,6 +170,72 @@ def _dofs(p):
     return modelDB.db[p.model]['dofs']
 
 
+class ConnectionTermsWarning(UserWarning):
+    r"""Too few terms across an edge connection, see
+    :meth:`.MultiDomain.check_conn_terms`"""
+
+
+#NOTE Hermite coefficients of the fields 1 and xi in the first four terms of
+#     Bardell's functions with unit flags, 1 = P0 + P2 and
+#     xi = -P0 + 2 P1 + P2 + 2 P3, see panels.bardell
+_HERMITE_LINEAR = np.array([[1., 0., 1., 0.],
+                            [-1., 2., 1., 2.]])
+
+#NOTE edge connections: for p1 and p2, the attribute with the number of
+#     terms along the coordinate normal to the joint, and the letter of that
+#     coordinate in the flags; 'BFxycte' joins an edge of constant x of p1
+#     to an edge of constant y of p2
+_EDGE_CONN = {'SSxcte': (('m', 'x'), ('m', 'x')),
+              'BFxcte': (('m', 'x'), ('m', 'x')),
+              'SSycte': (('n', 'y'), ('n', 'y')),
+              'BFycte': (('n', 'y'), ('n', 'y')),
+              'BFxycte': (('m', 'x'), ('n', 'y'))}
+
+
+@lru_cache(maxsize=None)
+def _terms_linear(flags):
+    r"""Terms needed to represent the linear fields admitted by the flags
+
+    Parameters
+    ----------
+    flags : tuple of 4 bools
+        Whether the flags ``x1t, x1r, x2t, x2r`` of one field along one
+        coordinate, e.g. ``y1u, y1ur, y2u, y2ur``, are different from zero.
+
+    Returns
+    -------
+    terms : int
+        The smallest number of terms of Bardell's functions whose span
+        contains every linear field `a + b \xi` that the flags admit: 4 when
+        the flags admit a non-constant linear field, 3 when they admit only
+        the constant, 0 when they admit none.
+
+    Notes
+    -----
+    Only the first four terms, the cubic Hermite polynomials, have a value
+    or a first derivative different from zero at `\xi = \pm 1`, and the
+    higher ones vanish together with their first derivative at both ends,
+    see :mod:`panels.bardell`. A linear field is therefore represented only
+    by its cubic Hermite interpolation, `1 = P_0 + P_2` and `\xi = -P_0 + 2
+    P_1 + P_2 + 2 P_3`, and the flags admit it when its coefficients of the
+    terms whose flag is zero vanish: the constant needs ``x1t`` and ``x2t``
+    and 3 terms; a non-constant linear field needs ``x1r``, ``x2r`` and one
+    of ``x1t``, ``x2t``, and 4 terms, since the first 3 terms all have a
+    zero derivative at `\xi = +1`.
+
+    """
+    zero = [i for i in range(4) if not flags[i]]
+
+    def rank(cols):
+        return np.linalg.matrix_rank(_HERMITE_LINEAR[:, cols]) if cols else 0
+
+    r0 = rank(zero)
+    for k in range(4):
+        if rank(sorted(set(zero) | set(range(k, 4)))) == r0:
+            return k
+    return 4
+
+
 def default_field(panel, gridx, gridy):
     r"""Grid of points over the domain of a panel
 
@@ -244,8 +312,8 @@ class MultiDomain(object):
             - 'SB' : defines a skin-base connection over an area and calls the function :func:`.skin_base.fkCSB`, see :meth:`.get_kC_conn` for the roles of ``p1`` and ``p2``
             - 'BFycte': defines a base-flange connection and calls the following functions ``fkCBFycte11``, ``fkCBFycte12``, ``fkCBFycte22``
 
-        The connections ``'BFxcte'`` and ``'SB_TSL'`` are also available,
-        see :meth:`.get_kC_conn`.
+        The connections ``'BFxcte'``, ``'BFxycte'`` and ``'SB_TSL'`` are
+        also available, see :meth:`.get_kC_conn`.
 
         Explanations about the connetion functions are found in ``connections`` module.
     conn_method : str, optional
@@ -313,6 +381,47 @@ class MultiDomain(object):
     cohesive interface, which degrades with the damage, see
     :meth:`.calc_k_dmg`, and not a continuity condition, therefore it keeps
     its penalty stiffness with both methods, see :meth:`._null_space`.
+
+    Each domain of an edge connection needs at least 4 terms across the
+    joint, ``n`` for ``'SSycte'`` and ``'BFycte'``, ``m`` for
+    ``'SSxcte'`` and ``'BFxcte'``, for both ``p1`` and ``p2``, ``m`` of
+    ``p1`` and ``n`` of ``p2`` for ``'BFxycte'``, when the
+    flags of its two edges parallel to the joint admit a linear field, as
+    for a blade flange with a free edge or a web between two joints, whose
+    connected edges are released (flags ``1``). Only the first four of
+    Bardell's functions have a value or a first derivative different from
+    zero at the ends, see :mod:`panels.bardell`, and a linear field across
+    the joint is their cubic Hermite interpolation, `\eta = -P_0 + 2 P_1 +
+    P_2 + 2 P_3`. With 3 terms, `P_0, P_1, P_2`, every function has a zero
+    derivative at `\eta = +1`, at the free edge or at the joint, and no
+    linear field across the joint is represented, whatever the connection
+    and the method of imposing it:
+
+    - for `u`, along the joint: neither the rigid rotation of the domain in
+      its plane nor a linear distribution of the axial strain across the
+      joint, as in the bending of a blade stiffener, or of a wing-box, about
+      the normal of the flange; the domain resists it by in-plane shear,
+      and the stiffness is too high by a factor that grows with the square
+      of the slenderness, as in shear locking;
+    - for `w`: no rigid rotation about the joint, which locks the twist of
+      an open section and the rotation of the base along the joint;
+    - for `v`, normal to the joint in the plane: no uniform strain across
+      the joint, a milder stiffening by the Poisson effect.
+
+    The fields `\phi_x` and `\phi_y` of the shear deformation theories are
+    treated likewise. With 2 terms or fewer even the constant, `P_0 +
+    P_2`, is missing. A flag ``0`` that already excludes the linear field,
+    e.g. ``y2ur = 0``, removes the need for the fourth term, and the
+    default flags, with `u = v = w = 0` at the edges, admit no linear
+    field. The exact rule per field is :func:`._terms_linear`, checked by
+    :meth:`.check_conn_terms`, which issues a
+    :class:`.ConnectionTermsWarning`. For a cantilever T-beam, a skin of
+    40 x 1 and a blade of 10 x 1.5 of aluminium joined with ``'BFycte'``,
+    0.5 long, the tip deflection under a tip force is 0.0073 of the one of
+    Euler-Bernoulli with 3 terms across the blade, i.e. 137 times too
+    stiff, and 0.9978 with 4, 5 or 6 terms, for both ``conn_method``; the
+    twist under a tip torque is 0.054 of the converged value with 3 terms,
+    see ``tests/multidomain/test_conn_terms.py``.
 
     With ``pd_method='null-space'`` the prescribed displacements are the
     inhomogeneous linear constraints `\boldsymbol{B}_d \boldsymbol{c} = \bar{\boldsymbol{d}}_0 + \lambda
@@ -389,6 +498,32 @@ class MultiDomain(object):
     >>> incs, cs = static(md.calc_kC(), md.calc_fext(), silent=True)
     >>> c = cs[0]
 
+    The linear static workflow is therefore: assemble ``kC`` with
+    :meth:`.calc_kC` and ``fext`` with :meth:`.calc_fext`, reduce them with
+    :meth:`.reduce` (the identity with ``conn_method='penalty'``), solve
+    with ``structsolve.solve`` (or ``structsolve.static``, or
+    ``structsolve.Analysis.static``, which call it) and expand with
+    :meth:`.expand`; :meth:`.linear_static` does all of it, also with
+    prescribed displacements. ``structsolve.solve`` is needed, rather than
+    ``scipy.sparse.linalg.spsolve`` directly, because ``kC`` usually has
+    null rows and columns: a boundary condition flag set to zero, e.g.
+    ``x1u = x1v = x1w = x1wr = 0`` at a clamped edge, multiplies Ritz
+    functions by zero, so that their Ritz constants have no stiffness and
+    ``kC`` is exactly singular, whatever the connections.
+    ``structsolve.solve`` removes the rows and columns that are both null,
+    with ``structsolve.sparseutils.remove_null_cols``, solves the remaining
+    system and sets these Ritz constants to zero; their terms of ``fext``
+    are null as well, since the same Ritz functions vanish in the load
+    vector. A system still singular after this removal has a mechanism,
+    e.g. an assembly without enough supports. The linear buckling and
+    vibration solvers of ``structsolve``, ``lb`` and ``freq``, remove the
+    same rows and columns. See
+    ``tests/multidomain/test_linear_static_null_dofs.py``:
+
+    >>> from structsolve import solve
+    >>> c = md.expand(solve(md.reduce(md.calc_kC()),
+    ...                     md.reduce(md.calc_fext())))
+
     And plotting the results for the group named ``'skin'``.
 
     >>> md.plot(c, 'skin', filename='tmp_cylinder_compression_lb_Nxx_cte.png')
@@ -427,6 +562,7 @@ class MultiDomain(object):
         self.c_p0 = None
         self.c_p1 = None
         self._conn_used = None
+        self._conn_terms_warned = None
         self.panels = panels
         self.size = None
         self.out_num_cores = 4
@@ -443,6 +579,8 @@ class MultiDomain(object):
             col0 += _dofs(p)*p.m*p.n
             p.row_end = row0 # This is now the start for the next panel to be assembled
             p.col_end = col0
+        if conn is not None:
+            self.check_conn_terms(conn)
 
 
     def save(self, fname=None):
@@ -499,6 +637,164 @@ class MultiDomain(object):
         raise RuntimeError('No connectivity dictionary defined!')
 
 
+    def check_conn_terms(self, conn=None, warn=True):
+        r"""Domains with too few terms across their edge connections
+
+        For each domain of the edge connections ``'SSxcte'``, ``'SSycte'``,
+        ``'BFxcte'``, ``'BFycte'`` and ``'BFxycte'``, and for each of its
+        fields, `u, v, w`, and `\phi_x, \phi_y` for the shear deformation
+        theories, compares the number of terms along the coordinate normal
+        to the joint, ``m`` for an edge of constant `x`, ``n`` for an edge
+        of constant `y` (for ``'BFxycte'``, ``m`` of ``p1`` and ``n`` of
+        ``p2``), with
+        the number needed to represent the linear fields across the joint
+        that the boundary condition flags of the domain admit, see the
+        Notes of :class:`.MultiDomain`.
+
+        Parameters
+        ----------
+        conn : list of dict or None, optional
+            The connections, by default those of the assembly, see
+            :meth:`.get_kC_conn`.
+        warn : bool, optional
+            Whether to issue a :class:`.ConnectionTermsWarning` when a
+            domain has too few terms.
+
+        Returns
+        -------
+        issues : list of tuple
+            One tuple ``(panel, func, terms, needed, fields)`` per domain and
+            connection with too few terms: the :class:`.Shell`, the function
+            of the connection, the number of terms across the joint, the
+            number needed, and the names of the fields that miss a linear
+            field across the joint.
+
+        Notes
+        -----
+        The check is done when the assembly is created with ``conn``, and
+        by :meth:`.get_Z` and :meth:`.get_kC_conn` when the connections or
+        the terms and flags of their domains change, the warning being
+        issued once for each set of issues. The connections over an area,
+        ``'SB'`` and ``'SB_TSL'``, are not checked.
+
+        """
+        conn = self._resolve_conn(conn)
+        issues = []
+        attrs = []
+        for ci in conn:
+            if ci.get('func') not in _EDGE_CONN:
+                continue
+            for key, (attr, d) in zip(('p1', 'p2'), _EDGE_CONN[ci['func']]):
+                p = ci[key]
+                terms = getattr(p, attr)
+                needed = 0
+                fields = []
+                for f in nullspace.FIELDS[:_dofs(p)]:
+                    flags = tuple(float(getattr(p, d + e + f + r)) != 0
+                                  for e in '12' for r in ('', 'r'))
+                    k = _terms_linear(flags)
+                    if terms < k:
+                        fields.append(f)
+                        needed = max(needed, k)
+                if fields:
+                    issues.append((p, ci['func'], terms, needed,
+                                   tuple(fields)))
+                    attrs.append(attr)
+        if warn and issues:
+            self._warn_conn_terms(issues, attrs)
+        return issues
+
+
+    def _warn_conn_terms(self, issues, attrs, stacklevel=4):
+        r"""Issues the :class:`.ConnectionTermsWarning` of
+        :meth:`.check_conn_terms`, once for each set of issues; ``attrs``
+        are the names of the numbers of terms, ``'m'`` or ``'n'``, of the
+        issues"""
+        key = tuple((id(p), func, terms, fields)
+                    for p, func, terms, needed, fields in issues)
+        if key == self._conn_terms_warned:
+            return
+        self._conn_terms_warned = key
+        lines = []
+        for (p, func, terms, needed, fields), attr in zip(issues[:3],
+                                                         attrs):
+            if any(pj is p for pj in self.panels):
+                label = self._panel_label(p)
+            else:
+                label = "panel (name '{0}', group '{1}')".format(p.name,
+                                                                 p.group)
+            lines.append("{0} of '{1}': {2} = {3} < {4} for {5}".format(
+                label, func, attr, terms, needed, ', '.join(fields)))
+        if len(issues) > 3:
+            lines.append('and {0} more'.format(len(issues) - 3))
+        ndomains = len({id(issue[0]) for issue in issues})
+        warnings.warn('{0} domain(s) of edge connections have too few terms '
+                      'across the joint to represent the linear fields that '
+                      'their flags admit, e.g. a rigid rotation, and the '
+                      'assembly locks (with 3 terms across a blade flange the '
+                      'bending stiffness of a T-beam is 137 times too high): '
+                      '{1}. See the Notes of MultiDomain.'.format(
+                          ndomains, '; '.join(lines)),
+                      ConnectionTermsWarning, stacklevel=stacklevel)
+
+
+    def check_conn_terms_along(self, conn=None):
+        r"""Edge connections imposed exactly whose domains have different
+        numbers of terms along the joint
+
+        For each edge connection of :meth:`.check_conn_terms` imposed
+        exactly, see :meth:`._null_space`, compares the numbers of terms of
+        the two domains along the joint, ``n`` for an edge of constant `x`,
+        ``m`` for an edge of constant `y` (for ``'BFxycte'``, ``n`` of
+        ``p1`` and ``m`` of ``p2``).
+
+        Parameters
+        ----------
+        conn : list of dict or None, optional
+            The connections, by default those of the assembly, see
+            :meth:`.get_kC_conn`.
+
+        Returns
+        -------
+        issues : list of tuple
+            One tuple ``(func, p1, terms1, p2, terms2)`` per connection whose
+            domains have different numbers of terms along the joint: the
+            function of the connection, the two :class:`.Shell` and their
+            numbers of terms along the joint.
+
+        Notes
+        -----
+        The terms of the trace of the richer domain that the other domain
+        cannot represent are forced to vanish by the exact constraints, see
+        the Limitations of :ref:`null_space`, and the extra terms of the
+        richer domain do not refine the joint. The penalty method,
+        ``conn_method='penalty'``, only penalizes them and is not checked.
+        Unlike too few terms across the joint, see
+        :meth:`.check_conn_terms`, this is not checked automatically and
+        issues no warning: in the wing-box of
+        :func:`.wingbox.create_wingbox` with ``conn_method='null-space'``,
+        whose 36 rib-skin and rib-spar connections join 8 or 5 terms to 6
+        or 4, the compliance under the tip force is 8.88229e-4 m/N, against
+        8.88283e-4 m/N with as many terms in the ribs as in the skins, a
+        difference of 6e-5.
+
+        """
+        conn = self._resolve_conn(conn)
+        issues = []
+        along = {'m': 'n', 'n': 'm'}
+        for ci in conn:
+            if (ci.get('func') not in _EDGE_CONN
+                    or not self._null_space(ci)):
+                continue
+            (a1, _), (a2, _) = _EDGE_CONN[ci['func']]
+            terms1 = getattr(ci['p1'], along[a1])
+            terms2 = getattr(ci['p2'], along[a2])
+            if terms1 != terms2:
+                issues.append((ci['func'], ci['p1'], terms1, ci['p2'],
+                               terms2))
+        return issues
+
+
     def _null_space(self, connecti):
         r"""Whether the connection is imposed with the null-space method
 
@@ -538,14 +834,15 @@ class MultiDomain(object):
         dimensions, the radius, the model and the offset of each panel, on
         its ply thicknesses, through the faces connected by ``'SB'``, and on
         its boundary condition flags, which remove terms
-        of the approximation functions. With ``pd_method='null-space'`` the
+        of the approximation functions, and on the key ``'angle'`` of
+        ``'BFxycte'``. With ``pd_method='null-space'`` the
         positions and the prescribed components of the prescribed
         displacements add rows to the constraints, whereas the prescribed
         values change only the right-hand sides, i.e. the particular
         solutions of :meth:`.get_cp`, and are not part of the signature.
 
         """
-        keys = ('func', 'xcte1', 'xcte2', 'ycte1', 'ycte2')
+        keys = ('func', 'xcte1', 'xcte2', 'ycte1', 'ycte2', 'angle')
         sig_conn = tuple((tuple(ci.get(k) for k in keys), id(ci['p1']),
                           id(ci['p2']), bool(ci.get('kr', 0.)))
                          for ci in conn if self._null_space(ci))
@@ -668,6 +965,7 @@ class MultiDomain(object):
         """
         size = self.get_size()
         conn = self._resolve_conn(conn)
+        self.check_conn_terms(conn)
         if tol is not None:
             self._Z_tol = tol
         tol = self._Z_tol
@@ -2956,6 +3254,13 @@ class MultiDomain(object):
               order in the assembly, see
               :mod:`panels.multidomain.connections.kCBFycte` and
               :mod:`panels.multidomain.connections.kCBFxcte`
+            - ``'BFxycte'``: between the edge `x_1 =` ``xcte1`` of ``p1``
+              and the edge `y_2 =` ``ycte2`` of ``p2``, the same straight
+              line with `y_1 = x_2`, ``p1.b == p2.a``, e.g. a spar ``p1``
+              joined to a rib ``p2``, whatever their order in the assembly;
+              the key ``'angle'``, default ``90``, is the angle in degrees
+              from the normal of ``p1`` to that of ``p2`` about the common
+              axis, see :mod:`panels.multidomain.connections.kCBFxycte`
             - ``'SB'``: between 2 skins connected over an area, e.g. the base
               of a stiffener bonded to a skin, a pad-up of a skin, or the
               arms of a double cantilever beam. The two panels share the
@@ -3009,10 +3314,11 @@ class MultiDomain(object):
             For the models based on shear deformation theories, e.g.
             ``'plate_fsdt_donnell'`` or ``'cylshell_tsdt_sanders'``,
             ``'SSxcte'``, ``'SSycte'`` and ``'SB'`` are available, see
-            :mod:`panels.multidomain.connections.kCsdt`, and ``'BFycte'`` and
-            ``'BFxcte'``, see the functions ``*_sdt`` of
-            :mod:`panels.multidomain.connections.kCBFycte` and
-            :mod:`panels.multidomain.connections.kCBFxcte`, and
+            :mod:`panels.multidomain.connections.kCsdt`, and ``'BFycte'``,
+            ``'BFxcte'`` and ``'BFxycte'``, see the functions ``*_sdt`` of
+            :mod:`panels.multidomain.connections.kCBFycte`,
+            :mod:`panels.multidomain.connections.kCBFxcte` and
+            :mod:`panels.multidomain.connections.kCBFxycte`, and
             :meth:`._kC_conn_sdt`. ``'SB_TSL'`` is not available for these
             models. The edge connections also connect the independent
             rotations with ``'kr'``, and the rotation flags of the connected
@@ -3075,7 +3381,12 @@ class MultiDomain(object):
         `w_{,y}` for ``'SSycte'``; for ``'BFycte'`` and ``'BFxcte'`` the
         displacements of the flange, rotated by 90 degrees about the axis of
         the connection, and the rotation about that axis, see
-        :func:`._rinv_sanders` and :func:`._bf_base_flange`. For ``'SB'``,
+        :func:`._rinv_sanders` and :func:`._bf_base_flange`; for
+        ``'BFxycte'`` the displacements of ``p2`` in the frame of ``p1`` and
+        the rotation about the common edge, `-w_{1,x}` of ``p1`` and
+        `w_{2,y}` (`w_{2,y} - v_2/r_2` with the Sanders-Koiter kinematics)
+        of ``p2``, with the penalty constants of :func:`.calc_kt_kr` for
+        ``'xcte-ycte'``. For ``'SB'``,
         for all the models, the quantities are the displacements of the
         faces in contact, `u_1(z_1)`, `v_1(z_1)` and `w_1` against
         `u_2(z_2)`, `v_2(z_2)` and `w_2`, with `z_1 = d_1 - h_1/2`, `z_2 =
@@ -3116,6 +3427,7 @@ class MultiDomain(object):
         """
         conn = self._resolve_conn(conn)
         self._conn_used = conn
+        self.check_conn_terms(conn)
 
         size = self.get_size()
 
@@ -3145,9 +3457,11 @@ class MultiDomain(object):
                 elif p1_temp.col_start > p2_temp.col_start:
                     pA = p2_temp
                     pB = p1_temp
-                    #NOTE the kernels of 'SB', 'SB_TSL', 'BFycte' and
-                    #     'BFxcte' distinguish p1 from p2, see _bf_base_flange()
-                    if connecti['func'] in ('SB', 'SB_TSL', 'BFycte', 'BFxcte'):
+                    #NOTE the kernels of 'SB', 'SB_TSL', 'BFycte',
+                    #     'BFxcte' and 'BFxycte' distinguish p1 from p2, see
+                    #     _bf_base_flange()
+                    if connecti['func'] in ('SB', 'SB_TSL', 'BFycte', 'BFxcte',
+                                            'BFxycte'):
                         pass
                     else:
                         if 'xcte1' in connecti.keys() and 'xcte2' in connecti.keys():
@@ -3233,6 +3547,25 @@ class MultiDomain(object):
                     kC_conn += connections.kCBFxcte.fkCBFxcte22(
                             kt, kr, pb, pf, connecti['xcte2'],
                             size, row0=pf.row_start, col0=pf.col_start)
+
+                elif connection_function == 'BFxycte':
+                    #NOTE p1 has the edge x = xcte1 and p2 the edge y =
+                    #     ycte2, whatever their order in the assembly, see
+                    #     kCBFxycte.pyx; the penalty constants use A11, D11
+                    #     of p1 and A22, D22 of p2
+                    p1, p2 = connecti['p1'], connecti['p2']
+                    mod = connections.kCBFxycte
+                    mod.check_xycte(p1, p2)
+                    kt, kr = _penalties(connecti, p1, p2, 'xcte-ycte')
+                    kC_conn += mod.fkCBFxycte11(kt, kr, p1, connecti['xcte1'],
+                            size, row0=p1.row_start, col0=p1.col_start)
+                    kC_conn += _upper_block(mod.fkCBFxycte12(kt, kr, p1, p2,
+                            connecti['xcte1'], connecti['ycte2'], size,
+                            row0=p1.row_start, col0=p2.col_start,
+                            angle=connecti.get('angle', 90.)), p1, p2)
+                    kC_conn += mod.fkCBFxycte22(kt, kr, p2, connecti['ycte2'],
+                            size, row0=p2.row_start, col0=p2.col_start,
+                            rinv2=_rinv_sanders(p2))
 
                 elif connection_function == 'SB':
                     #NOTE p1 is the panel on the positive side of the
@@ -3333,7 +3666,9 @@ class MultiDomain(object):
         for the third-order theory also the slope `w_{,x}` or `w_{,y}`. The
         rotation penalty of ``'BFycte'`` and ``'BFxcte'`` is on `\phi_y`
         (`\phi_y + v/r` with the Sanders-Koiter kinematics) and `\phi_x`
-        instead of `-w_{,y}` and `-w_{,x}`. ``'SB'`` penalizes the
+        instead of `-w_{,y}` and `-w_{,x}`, and that of ``'BFxycte'`` on
+        `\phi_x` of ``p1`` and `-\phi_y` of ``p2``, the rotations at the
+        reference surface with the offsets of the TSDT. ``'SB'`` penalizes the
         displacements `u, v, w` at the interface, `z = d_1 - h_1/2` of
         ``p1`` and `z = d_2 + h_2/2` of ``p2`` with the offsets `d_1`,
         `d_2`, as for the classical laminated plate theory, and the
@@ -3387,6 +3722,21 @@ class MultiDomain(object):
             k22 = getattr(mod, 'fkCBF%s22_sdt' % cte)(kt, kr, pb, pf, c2, size,
                     pf.row_start, pf.col_start, **kw2)
             return k11 + _upper_block(k12, pb, pf) + k22
+        elif func == 'BFxycte':
+            #NOTE the rotation about the common axis is theta_x of p1 and
+            #     -theta_y of p2, see kCBFxycte.pyx
+            p1, p2 = connecti['p1'], connecti['p2']
+            mod = connections.kCBFxycte
+            mod.check_xycte(p1, p2)
+            kt, kr = _penalties(connecti, p1, p2, 'xcte-ycte')
+            k11 = mod.fkCBFxycte11_sdt(kt, kr, p1, connecti['xcte1'], size,
+                    p1.row_start, p1.col_start)
+            k12 = mod.fkCBFxycte12(kt, kr, p1, p2, connecti['xcte1'],
+                    connecti['ycte2'], size, p1.row_start, p2.col_start,
+                    angle=connecti.get('angle', 90.))
+            k22 = mod.fkCBFxycte22_sdt(kt, kr, p2, connecti['ycte2'], size,
+                    p2.row_start, p2.col_start, rinv2=_rinv_sanders(p2))
+            return k11 + _upper_block(k12, p1, p2) + k22
         raise NotImplementedError(
             "Connection '{0}' is not implemented for the models based on "
             "shear deformation theories, got models '{1}' and '{2}'".format(

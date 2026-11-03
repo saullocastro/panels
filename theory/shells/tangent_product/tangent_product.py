@@ -11,7 +11,10 @@ generalized strains at a point are, see the theory of each model,
 where `\boldsymbol{B}_{NL}` is linear in the rotations `\boldsymbol{\beta}` of the von Kármán
 terms, `\boldsymbol{\beta} = \{\beta_x, \beta_y\} = \{-w_{,x}, -w_{,y}\}` (Donnell, with
 `\beta_y = -w_{,y} + v/r` for Sanders, i.e. the rotations `\{\phi_x, \phi_y\}` of
-``cylshell_clpt_sanders`` for the CLPT), and enters only the membrane rows:
+``cylshell_clpt_sanders`` for the CLPT), and enters only the membrane rows
+(for ``plate_clpt_gl``, with the Green-Lagrange membrane strains,
+`\boldsymbol{\beta}` are the six gradients of `u, v, w` and `\boldsymbol{N}` below has
+one block per displacement, see :func:`operators`):
 
 .. math::
 
@@ -72,14 +75,16 @@ degrees of freedom. :mod:`write_pyx` writes the kernels ``calc_kTv``.
 import os
 import sys
 
-from sympy import Matrix as M, Rational, Symbol, diff, expand, symbols, zeros
+from sympy import Matrix as M, Rational, Symbol, diag, diff, expand, symbols, zeros
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, '..', 'fsdt_tsdt'))
 sys.path.insert(0, os.path.join(HERE, '..', 'cylshell_clpt_sanders'))
+sys.path.insert(0, os.path.join(HERE, '..', 'plate_clpt_gl'))
 
 import fsdt_tsdt
 import cylshell_clpt_sanders as clpt_sanders
+import plate_clpt_gl as clpt_gl
 
 a, b, r = symbols('a, b, r')
 bx, by = symbols('bx, by')
@@ -96,6 +101,7 @@ MODELS = {
     'cylshell_fsdt_sanders': ('fsdt', 'cylshell', 'sanders'),
     'cylshell_tsdt_donnell': ('tsdt', 'cylshell', 'donnell'),
     'cylshell_tsdt_sanders': ('tsdt', 'cylshell', 'sanders'),
+    'plate_clpt_gl': ('clpt', 'plate', 'gl'),
 }
 
 
@@ -134,11 +140,35 @@ def _clpt_donnell(geometry):
     return B, M([Gx, Gy])
 
 
+def _clpt_gl():
+    r"""`\boldsymbol{B}_L + \boldsymbol{B}_{NL}` and `\boldsymbol{G}` of the CLPT with Green-Lagrange
+    membrane strains, ``plate_clpt_gl.py``, whose `\boldsymbol{\beta}` are the six
+    gradients `u_{,x}, u_{,y}, v_{,x}, v_{,y}, w_{,x}, w_{,y}`"""
+    m = clpt_gl.build()
+    return m['BA'], m['GA']
+
+
 def operators(model):
-    r"""`\boldsymbol{B}_L + \boldsymbol{B}_{NL}`, `\boldsymbol{G}`, the rotation symbols `(\beta_x, \beta_y)`, the
-    fields and the number of generalized strains of ``model``"""
+    r"""`\boldsymbol{B}_L + \boldsymbol{B}_{NL}`, `\boldsymbol{G}`, the rotation symbols `\boldsymbol{\beta}`, the
+    membrane stress matrix `\boldsymbol{N}` of `\boldsymbol{G}^\top \boldsymbol{N} \boldsymbol{G}`, the
+    fields and the number of generalized strains of ``model``
+
+    `\boldsymbol{\beta}` has two rotations, `(\beta_x, \beta_y)`, and `\boldsymbol{N}` is
+    `[[N_{xx}, N_{xy}], [N_{xy}, N_{yy}]]`, except for ``'plate_clpt_gl'``,
+    whose `\boldsymbol{\beta}` are the six gradients ``plate_clpt_gl.GRAD`` and
+    `\boldsymbol{N}` the block-diagonal matrix with one such block per
+    displacement `u, v, w`.
+
+    """
     theory, geometry, kinematics = MODELS[model]
-    if theory == 'clpt' and kinematics == 'donnell':
+    N2 = M([[Nxx, Nxy], [Nxy, Nyy]])
+    Nmat = N2
+    if kinematics == 'gl':
+        B, G = _clpt_gl()
+        rot = clpt_gl.GRAD
+        fields = ('u', 'v', 'w')
+        Nmat = diag(N2, N2, N2)
+    elif theory == 'clpt' and kinematics == 'donnell':
         B, G = _clpt_donnell(geometry)
         rot = (bx, by)
         fields = ('u', 'v', 'w')
@@ -151,8 +181,17 @@ def operators(model):
         B, G = S['B'], S['G']
         rot = (fsdt_tsdt.bx, fsdt_tsdt.by)
         fields = fsdt_tsdt.FIELDS
-    return dict(B=B, G=G, rot=rot, fields=fields, NE=B.shape[0],
+    return dict(B=B, G=G, rot=rot, Nmat=Nmat, fields=fields, NE=B.shape[0],
                 DOF=len(fields), theory=theory, geometry=geometry)
+
+
+def rotation_names(model):
+    r"""Names of `\boldsymbol{\beta}` and `\delta \boldsymbol{\beta}` in the kernels, ``bx, by``
+    and ``dbx, dby`` for two rotations, else ``b0, b1, ...`` and ``db0,
+    db1, ...``"""
+    k = len(operators(model)['rot'])
+    names = ['bx', 'by'] if k == 2 else ['b%d' % i for i in range(k)]
+    return names, ['d' + nm for nm in names]
 
 
 def tangent_product(model):
@@ -160,7 +199,7 @@ def tangent_product(model):
 
     Returns a dict with, for each degree of freedom ``k`` of a term:
 
-    - ``'beta'``: the two rows of `\boldsymbol{G}`, giving the rotations from ``cs`` and
+    - ``'beta'``: the rows of `\boldsymbol{G}`, giving the rotations from ``cs`` and
       from ``vs``;
     - ``'eps'``: the columns ``k`` of `\boldsymbol{B}_L + \tfrac{1}{2} \boldsymbol{B}_{NL}`, the
       strains from ``cs``;
@@ -171,26 +210,27 @@ def tangent_product(model):
       `\delta \boldsymbol{\sigma}`, ``Nxx, Nyy, Nxy`` of `\boldsymbol{N}` and ``dbx, dby`` of
       `\delta \boldsymbol{\beta} = \boldsymbol{G} \boldsymbol{v}`;
 
-    with ``bx, by`` the rotations `\boldsymbol{\beta}` of ``cs``.
+    with ``bx, by`` the rotations `\boldsymbol{\beta}` of ``cs``, see
+    :func:`rotation_names` for the names of more than two rotations.
 
     """
     op = operators(model)
-    B, G, (rx, ry) = op['B'], op['G'], op['rot']
+    B, G = op['B'], op['G']
     NE, DOF = op['NE'], op['DOF']
-    rename = {rx: bx, ry: by}
-    B = B.xreplace(rename)
-    Bhalf = B.xreplace({bx: bx/2, by: by/2})
+    names, dnames = rotation_names(model)
+    beta = [Symbol(nm) for nm in names]
+    dbeta = [Symbol(nm) for nm in dnames]
+    B = B.xreplace(dict(zip(op['rot'], beta)))
+    Bhalf = B.xreplace({q: q/2 for q in beta})
     ds = M(symbols('ds0:%d' % NE))
-    dbx, dby = symbols('dbx, dby')
-    Nmat = M([[Nxx, Nxy], [Nxy, Nyy]])
-    kTv = B.T*ds + G.T*Nmat*M([dbx, dby])
-    return dict(beta=[[G[i, k] for k in range(DOF)] for i in range(2)],
+    kTv = B.T*ds + G.T*op['Nmat']*M(dbeta)
+    return dict(beta=[[G[i, k] for k in range(DOF)] for i in range(len(beta))],
                 eps=[[expand(Bhalf[i, k]) for k in range(DOF)]
                      for i in range(NE)],
                 deps=[[expand(B[i, k]) for k in range(DOF)]
                       for i in range(NE)],
                 kTv=[expand(kTv[k]) for k in range(DOF)],
-                op=op)
+                names=names, dnames=dnames, op=op)
 
 
 def check(model):
@@ -206,7 +246,9 @@ def check(model):
     tp = tangent_product(model)
     op = tp['op']
     NE, DOF = op['NE'], op['DOF']
-    B = op['B'].xreplace({op['rot'][0]: bx, op['rot'][1]: by})
+    beta_s = [Symbol(nm) for nm in tp['names']]
+    half = {q: q/2 for q in beta_s}
+    B = op['B'].xreplace(dict(zip(op['rot'], beta_s)))
     G = op['G']
     F = M(NE, NE, lambda i, j: Symbol('F%d_%d' % (min(i, j), max(i, j))))
     c = M(symbols('c0:%d' % DOF))
@@ -214,20 +256,20 @@ def check(model):
     t = Symbol('t')
     ct = c + t*v
     beta = G*ct
-    sub = {bx: beta[0], by: beta[1]}
-    eps = B.xreplace({bx: bx/2, by: by/2}).xreplace(sub)*ct
+    sub = dict(zip(beta_s, beta))
+    eps = B.xreplace(half).xreplace(sub)*ct
     fint = B.xreplace(sub).T*F*eps
     exact = fint.applyfunc(lambda e: diff(e, t).subs(t, 0))
 
     beta_c = G*c
-    sub_c = {bx: beta_c[0], by: beta_c[1]}
-    sigma = F*(B.xreplace({bx: bx/2, by: by/2}).xreplace(sub_c)*c)
+    sub_c = dict(zip(beta_s, beta_c))
+    sigma = F*(B.xreplace(half).xreplace(sub_c)*c)
     deps = B.xreplace(sub_c)*v
     ds = F*deps
     dbeta = G*v
     values = {Symbol('ds%d' % i): ds[i] for i in range(NE)}
-    values.update({Nxx: sigma[0], Nyy: sigma[1], Nxy: sigma[2],
-                   Symbol('dbx'): dbeta[0], Symbol('dby'): dbeta[1]})
+    values.update({Nxx: sigma[0], Nyy: sigma[1], Nxy: sigma[2]})
+    values.update({Symbol(nm): dbeta[i] for i, nm in enumerate(tp['dnames'])})
     values.update(sub_c)
     for k in range(DOF):
         got = tp['kTv'][k].xreplace(values)
