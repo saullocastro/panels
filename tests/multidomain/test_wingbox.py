@@ -1,9 +1,23 @@
 r"""Wing-box of :mod:`panels.multidomain.wingbox`
 
-Linear buckling under a tip force of the case High-AR-t5 of Elalfy, De
-Breuker and Castro, against their Abaqus result, 173.11 N (Table 3, p. 8 of
-the preprint), with the null-space connections and enough terms for a
-converged load.
+- ``test_create_wingbox``: the domains and connections created by
+  :func:`.create_wingbox`;
+- ``test_wingbox_tip_deflection``: linear static tip deflection of two bays,
+  with the penalty and the null-space connections, against the
+  Euler-Bernoulli beam with the box section between the mid-surfaces;
+- ``test_wingbox_tip_force_lb_default``: linear buckling with the default
+  terms and penalty connections, against a regression value (the model is
+  not converged);
+- ``test_wingbox_tip_force_lb`` (slow): linear buckling under a tip force of
+  the case High-AR-t5 of Elalfy, De Breuker and Castro, against their
+  Abaqus result, 173.11 N (Table 3, p. 8 of the preprint), with the
+  null-space connections and enough terms for a converged load.
+
+References
+----------
+.. [1] Elalfy, M. H., De Breuker, R. and Castro, S. G. P., "Beam-like models
+   for the post-buckling behaviour of wingbox structures", preprint, Delft
+   University of Technology.
 
 """
 import sys
@@ -15,7 +29,7 @@ import pytest
 from panels.multidomain import create_wingbox, wingbox_tip_force_lb
 
 
-ABAQUS_HIGH_AR_T5 = 173.11  # N, Elalfy et al., Table 3, p. 8
+ABAQUS_HIGH_AR_T5 = 173.11  # N, Abaqus result of the module docstring
 
 
 def test_create_wingbox():

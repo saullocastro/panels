@@ -1,6 +1,26 @@
 r"""Clamped edges of the TSDT: planar clamp by the flags and face clamp by
 prescribed displacements at the faces
 
+The face clamp, `u = v = 0` at the faces `z = d \mp h/2` and `w = 0`
+prescribed with :meth:`.Shell.add_distr_pd_fixed_x` and the keyword ``z``,
+is verified against the planar clamp of the boundary condition flags
+``x1u = x1v = x1w = x1phix = x1phiy = x1wr = 0``, with the CLPT, the FSDT
+and the TSDT:
+
+- the rows of the prescribed displacements at ``z`` give `u(z)`, `v(z)` of
+  the fields, and the penalty kernels at ``z`` their energy;
+- for the CLPT and the FSDT the face clamp is the clamp of the flags;
+- for the TSDT, `u = v = 0` at three coordinates `z` is the clamp of the
+  flags, whereas the face clamp is softer than the planar clamp and stiffer
+  than the simple support, against reference central deflections of a
+  square plate stored in the test, and leaves the section free to warp;
+- the face clamp does not depend on the reference surface;
+- the penalty method converges to the null-space method;
+- ``z`` is saved with the prescribed displacements, and files written
+  without it load with ``z = 0``.
+
+Notes
+-----
 The in-plane displacement of the third-order shear deformation theory
 (TSDT), with the laminate of thickness `h` at `d - h/2 \le z \le d + h/2`,
 
@@ -252,7 +272,7 @@ def test_face_clamp_tsdt_thick_plate():
     w_ss = center_w(ss, css)
     assert w_planar < 0.99*w_face
     assert w_face < 0.99*w_ss
-    # central deflections w D/(q a^4) of the documentation
+    # central deflections w D/(q a^4), reference values of this model
     D = E*H**3/(12*(1 - NU**2))
     for w, ref in ((w_planar, 0.002901), (w_face, 0.002953), (w_ss, 0.013459)):
         assert np.isclose(w*D/(Q*A**4), ref, rtol=2e-4)

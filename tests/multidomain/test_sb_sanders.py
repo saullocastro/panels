@@ -1,16 +1,24 @@
 r"""Skin-base connections of curved panels with Sanders-Koiter kinematics
 
+A rigid rotation about the axis of the cylinder of two bonded curved panels,
+whose radii are those of their reference surfaces, must give no separation
+and no energy in the connections ``'SB'``, with the penalty and the
+null-space methods (where the rotation is in the range of the basis of the
+null space), and ``'SB_TSL'``, with the matrix products and with the kernels
+of ``kCSB_dmg.pyx``; the kernels and the matrix products of ``'SB_TSL'`` must
+give the same matrices. With the Donnell kinematics a uniform `v` of two
+panels with the same radius has no separation.
+
+Notes
+-----
 With the Sanders-Koiter kinematics of a cylinder, `v(z) = v + z (v/r -
 w_{,y})` for the classical laminated plate theory and `v(z) = v + z (\phi_y +
 v/r)` for the FSDT, a rigid rotation about the axis of the cylinder, `v = r
 \Omega` at the reference surface of each panel, moves the lower face of
 ``p1`` and the upper face of ``p2`` together when the radius of each panel
-is that of its reference surface, `r_1 - d^t = r_2 + d^b`. The connections
-``'SB'``, with the penalty and the null-space methods, and ``'SB_TSL'``,
-with the matrix products and with the kernels of ``kCSB_dmg.pyx``, must then
-have no separation and no energy. With the Donnell kinematics the term `v/r`
-is neglected, and a uniform `v` of two panels with the same radius has no
-separation.
+is that of its reference surface, `r_1 - d^t = r_2 + d^b`. With the Donnell
+kinematics the term `v/r` is neglected.
+
 """
 import sys
 sys.path.append('../..')

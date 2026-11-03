@@ -1,3 +1,20 @@
+r"""Linear buckling of a blade-stiffened cylinder made of multiple domains
+
+The assembly functions :func:`.cylinder_blade_stiffened_compression_lb_Nxx_cte`,
+:func:`.cylinder_blade_stiffened_compression_lb_Nxx_from_static` (slow) and
+:func:`.cylinder_blade_stiffened_compression_lb_pd_from_static` (slow) build
+a laminated cylinder of 5 skin domains with 5 blades, under axial
+compression applied as loads or as prescribed end displacements, with the
+default Sanders kinematics and penalty connections. The tests verify:
+
+- the critical load ``Nxx*eigvals[0]``, or the critical eigenvalue that
+  multiplies the prescribed displacements, against reference values stored
+  in the tests (the comments give the values obtained with the Donnell
+  kinematics); TODO(author): source of the reference values;
+- with prescribed displacements, the end `x` = ``height`` of every domain
+  reaches `u` = ``pd`` exactly in the pre-buckling state.
+
+"""
 import sys
 sys.path.append('../..')
 

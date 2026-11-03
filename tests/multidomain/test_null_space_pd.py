@@ -5,7 +5,7 @@ displacements of :meth:`.Shell.add_point_pd`,
 :meth:`.Shell.add_distr_pd_fixed_x` and :meth:`.Shell.add_distr_pd_fixed_y`
 are the constraints `\boldsymbol{B}_d \boldsymbol{c} = \bar{\boldsymbol{d}}_0 + \lambda \bar{\boldsymbol{d}}_1`, eliminated
 with the connections, `\boldsymbol{c} = \boldsymbol{Z} \boldsymbol{c}_r + \boldsymbol{c}_{p0} + \lambda
-\boldsymbol{c}_{p1}`, see ``doc/source/multidomain_null_space.rst``:
+\boldsymbol{c}_{p1}`, see :mod:`panels.multidomain.connections.nullspace`:
 
 - the membrane patch test is exact, for single and multiple domains, with
   the reaction `P = E A u/L`

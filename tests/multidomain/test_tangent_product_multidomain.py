@@ -1,11 +1,20 @@
 r"""Product of the tangent stiffness matrix of a :class:`.MultiDomain` by a
 vector, :meth:`.MultiDomain.calc_kTv`, without assembly
 
-It must be the product of the assembled `\boldsymbol{K}_T`, ``calc_kC + calc_kG`` with
-``NLgeom=True``, including the penalty connections and the follower loads,
-and the derivative of :meth:`.MultiDomain.calc_fint`. With prescribed
-displacements imposed exactly, the reduced ``calc_fext(c, lbd)`` uses it for
-`-\partial \boldsymbol{R}_r/\partial \lambda = \boldsymbol{Z}^\top (\boldsymbol{F}_{ext} - \boldsymbol{K}_T \boldsymbol{c}_{p1})`.
+It must be the product of the assembled `\boldsymbol{K}_T`, ``calc_kC +
+calc_kG`` with ``NLgeom=True``, including the penalty connections and the
+follower loads, and the derivative of :meth:`.MultiDomain.calc_fint`. With
+prescribed displacements imposed exactly, the reduced ``calc_fext(c, lbd)``
+of :meth:`.MultiDomain.get_reduced_functions` is checked against its
+closed form.
+
+Notes
+-----
+With prescribed displacements imposed exactly, the reduced
+``calc_fext(c, lbd)`` uses the product for `-\partial
+\boldsymbol{R}_r/\partial \lambda = \boldsymbol{Z}^\top
+(\boldsymbol{F}_{ext} - \boldsymbol{K}_T \boldsymbol{c}_{p1})`.
+
 """
 import sys
 sys.path.append('../..')

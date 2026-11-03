@@ -10,35 +10,43 @@ verified against single-domain models and against the literature:
   single-domain references of ``tests/tests_shell/test_fsdt_tsdt_plates.py``.
 
 - ``'SB'``: two laminates connected over their area with the rotations tied
-  must behave like a single laminate with both stacking sequences, which for
-  the FSDT is exact. Without the rotations tied, the FSDT laminates rotate
-  independently like in a layerwise theory and the connected laminates are
-  more flexible than the single laminate. The TSDT enforces zero transverse
-  shear strains at the faces of each laminate, including the interface, and
-  the connected laminates are stiffer than the single laminate. In both cases
-  the difference vanishes with `(h/a)^2`.
+  must behave like a single laminate with both stacking sequences (exact for
+  the FSDT). Without the rotations tied, the FSDT laminates are more
+  flexible and the TSDT laminates stiffer than the single laminate, the
+  difference vanishing with `(h/a)^2`.
 
 The FSDT uses the shear correction factor `k = 5/6` of the references,
-instead of the default ``Shell.fsdt_shear_correction = 'rohwer'``.
-
-References:
-
-- Noor, A. K., "Free vibrations of multilayered composite plates", AIAA J.,
-  11(7), 1038-1039, 1973, with the FSDT (`k = 5/6`) and the TSDT of Reddy,
-  J. N., "A simple higher-order theory for laminated composite plates", J.
-  Appl. Mech., 51, 745-752, 1984, as reproduced in Table 3 of Adim, B.,
-  Daouadji, T. H. and Rabahi, A., Int. J. Adv. Struct. Eng., 8, 103-117,
-  2016.
-
-- Pagano, N. J., "Exact solutions for rectangular bidirectional composites
-  and sandwich plates", J. Compos. Mater., 4, 20-34, 1970, with the TSDT of
-  Reddy (1984) and the FSDT of Reddy and Chao (1981), as reproduced in Table
-  1 of Natarajan, S., Nguyen-Xuan, H., Ferreira, A. J. M. and Carrera, E.,
-  arXiv:1312.4032.
-
-The default penalty constants of :func:`.calc_kt_kr` give, for these thick
+instead of the default ``Shell.fsdt_shear_correction = 'rohwer'``. The
+default penalty constants of :func:`.calc_kt_kr` give, for these thick
 plates, errors of a few percent, as for the models based on the classical
 laminated plate theory, therefore the penalties are raised here.
+
+Notes
+-----
+Without the rotations tied by ``'SB'``, the FSDT laminates rotate
+independently like in a layerwise theory and the connected laminates are
+more flexible than the single laminate. The TSDT enforces zero transverse
+shear strains at the faces of each laminate, including the interface, and
+the connected laminates are stiffer than the single laminate.
+
+The reference values of Noor [1]_ with the FSDT (`k = 5/6`) and the TSDT of
+Reddy [2]_ are those reproduced in Table 3 of Adim et al. [3]_; those of
+Pagano [4]_ with the TSDT of Reddy [2]_ and the FSDT of Reddy and Chao
+(1981) are those reproduced in Table 1 of Natarajan et al. [5]_.
+
+References
+----------
+.. [1] Noor, A. K., "Free vibrations of multilayered composite plates",
+   AIAA J., 11(7), 1038-1039, 1973.
+.. [2] Reddy, J. N., "A simple higher-order theory for laminated composite
+   plates", J. Appl. Mech., 51, 745-752, 1984.
+.. [3] Adim, B., Daouadji, T. H. and Rabahi, A., Int. J. Adv. Struct. Eng.,
+   8, 103-117, 2016.
+.. [4] Pagano, N. J., "Exact solutions for rectangular bidirectional
+   composites and sandwich plates", J. Compos. Mater., 4, 20-34, 1970.
+.. [5] Natarajan, S., Nguyen-Xuan, H., Ferreira, A. J. M. and Carrera, E.,
+   arXiv:1312.4032.
+
 """
 import sys
 sys.path.append('../..')
@@ -178,7 +186,7 @@ def sinusoidal_load(s, q0, a, size):
     return fext
 
 
-# Noor (1973), [0/90]_2 with E1/E2 = 10 and a/h = 5, 3D elasticity 8.1445
+# frequency parameters of test_frequencies_divided_plate_noor
 NOOR_1973 = {TSDT: 8.1954, FSDT: 8.2246}
 
 
@@ -186,7 +194,12 @@ NOOR_1973 = {TSDT: 8.1954, FSDT: 8.2246}
 @pytest.mark.parametrize('model', [FSDT, TSDT])
 def test_frequencies_divided_plate_noor(model, layout):
     r"""Noor (1973), `\bar\omega = \omega a^2/h \sqrt{\rho/E_2}`, with the
-    first modes also compared with the single-domain plate"""
+    first modes also compared with the single-domain plate
+
+    Cross-ply 0/90/0/90 with `E_1/E_2 = 10` and `a/h = 5`: ``NOOR_1973``
+    holds the TSDT and FSDT values of the reference (3D elasticity:
+    8.1445).
+    """
     a = 1.
     h = a/5
     stack = [0, 90, 0, 90]
@@ -202,7 +215,7 @@ def test_frequencies_divided_plate_noor(model, layout):
     assert np.allclose(omegas, ref, rtol=1e-4)
 
 
-# Pagano (1970), [0/90/90/0] with a/h = 10, 3D elasticity 0.7430
+# deflection parameters of test_bending_divided_plate_pagano
 PAGANO = {TSDT: 0.7147, FSDT: 0.6628}
 
 
@@ -211,6 +224,9 @@ def test_bending_divided_plate_pagano(model):
     r"""Pagano (1970), sinusoidal pressure and `\bar{w} = 100 w E_2 h^3/(q_0
     a^4)` at the center of the plate, which is the interior corner of four
     domains
+
+    Cross-ply 0/90/90/0 with `a/h = 10`: ``PAGANO`` holds the TSDT and FSDT
+    values of the reference (3D elasticity: 0.7430).
 
     The stress resultants of the domains, including the transverse shear
     forces, are also compared with those of the single-domain plate.

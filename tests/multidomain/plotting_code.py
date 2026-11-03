@@ -1,5 +1,13 @@
 # -*- coding: utf-8 -*-
-"""
+r"""Plotting cells for the results of the DCB studies
+
+Script, not a test: cells (``# %%``) of an interactive session that plot
+the convergence of the DCB results with the number of terms, the Gauss
+points along `y` and the grid along `x`, the tip deflection and the effect
+of the penalty stiffness of the prescribed displacement, from variables
+(e.g. ``final_res_15``) that must already exist in the session. Not
+runnable on its own.
+
 Created on Thu Apr 11 16:08:21 2024
 
 @author: Nathan

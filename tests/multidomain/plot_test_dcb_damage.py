@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
-"""
+r"""Manual plotting code for the results of ``test_dcb_damage.py``
+
+Script, not a test: cells (``#%%``) that load the ``.npy`` results written
+by the driver of ``test_dcb_damage.py`` and FEM reference results from
+directories of the author's computer (``os.chdir``), and plot them. Does
+not run elsewhere.
+
 Created on Sat Jun 22 14:50:26 2024
 
 @author: Nathan
-
-MANUAL PLOTTING CODE FOR THE RESULTS test_dcb_damage
-
 """
 import numpy as np
 import os

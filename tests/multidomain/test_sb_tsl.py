@@ -1,3 +1,22 @@
+r"""Skin-base connection with a traction-separation law, ``'SB_TSL'``
+
+- ``test_kCSB_dmg_energy``: the matrix of the kernels of
+  :mod:`.kCSB_dmg`, with a stiffness that varies over the integration
+  points, gives the energy `\int k (\Delta_u^2 + \Delta_v^2 + \Delta_w^2) dA`
+  of the separations between the lower face of the top panel and the upper
+  face of the bottom panel, evaluated from the fields of both panels, for
+  random boundary condition flags;
+- ``test_kC_TSL_matrix_products_vs_kernels``: the connection matrix of the
+  Cython kernels is that of the matrix products, for both orders of the
+  panels and a damage history with pristine, softening and failed points;
+- ``test_calc_kT_TSL_finite_differences``: the secant matrix plus the
+  damage-rate part of :meth:`.MultiDomain.calc_kT_TSL` is the derivative of
+  the connection force, by central finite differences, whereas the secant
+  matrix alone is not;
+- ``test_panels_must_share_the_area``: an error is raised when the bottom
+  panel does not have the dimensions of the top panel.
+
+"""
 import numpy as np
 import pytest
 from scipy.special import roots_legendre

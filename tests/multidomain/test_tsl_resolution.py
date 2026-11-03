@@ -1,3 +1,26 @@
+r"""Resolution of the cohesive zone of ``'SB_TSL'`` and related checks
+
+- ``test_more_than_304_gauss_points`` (slow): Gauss-Legendre rules with 320
+  points along `x`; the results of :meth:`.MultiDomain.calc_results` are
+  those of :meth:`.MultiDomain.uvw`, the damage is evaluated at every point,
+  and the connection matrix of the Cython kernels is that of the matrix
+  products;
+- ``test_tsl_resolution_reference_dcb``: :func:`.tsl_resolution`,
+  :func:`.tsl_margin` and :func:`.tsl_discretization` for the arm of the
+  reference DCB of the convergence study, against the closed form of the
+  decay rate of a symmetric DCB and reference values stored in the test;
+- ``test_tsl_resolution_two_panels``: the decay rate of two different
+  panels against its closed form and against the limit of a panel on a
+  rigid foundation;
+- ``test_calc_kw_tsl_parameters``: the errors of :func:`.calc_kw_tsl` for
+  missing or unavailable parameters, and the damage and stiffness of the
+  bilinear law against their closed form;
+- ``test_resolution_warning``: the warning of an insufficient resolution,
+  printed once, when the first point is damaged;
+- ``test_penalties_of_the_connections_at_90_degrees``: the penalties of
+  :func:`.calc_kt_kr` for ``'xcte-ycte'`` and ``'ycte-xcte'``.
+
+"""
 import numpy as np
 import pytest
 
@@ -59,8 +82,8 @@ def test_more_than_304_gauss_points():
 
 
 def test_tsl_resolution_reference_dcb():
-    """Arm of the reference DCB of the convergence study, see
-    doc/source/cohesive_zone.rst"""
+    """Arm of the reference DCB of the convergence study of the resolution
+    of the cohesive zone"""
     lam = (133150., 10950., 0.316, 5190., 5190., 5190.)
     arm = Shell(group='top', x0=0, y0=0, a=24., b=25., m=25, n=10,
                 plyt=0.14, stack=[0]*15, laminaprop=lam)
@@ -86,9 +109,16 @@ def test_tsl_resolution_reference_dcb():
 
 
 def test_tsl_resolution_two_panels():
-    r"""`4 \lambda^4 = k_o (1/D_{11}^{(1)} + 1/D_{11}^{(2)})`, which tends to
+    r"""Decay rate `\lambda` of two panels of different stiffness, against
+    its closed form, and against the rate of one panel on a rigid foundation
+    when the other panel is much stiffer
+
+    Notes
+    -----
+    `4 \lambda^4 = k_o (1/D_{11}^{(1)} + 1/D_{11}^{(2)})`, which tends to
     the rate of one panel on a rigid foundation, `(k_o/(4 D_{11}))^{1/4}`,
-    when the other panel is much stiffer"""
+    when the other panel is much stiffer.
+    """
     lam = (133150., 10950., 0.316, 5190., 5190., 5190.)
     kw = dict(group='top', x0=0, y0=0, a=24., b=25., m=8, n=8, plyt=0.14,
               laminaprop=lam)

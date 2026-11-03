@@ -1,3 +1,14 @@
+r"""Linear buckling of a cylinder made of multiple domains
+
+The assembly functions :func:`.cylinder_compression_lb_Nxx_cte` and
+:func:`.cylinder_compression_lb_Nxx_from_static` (slow) build a laminated
+cylinder of 5 domains connected along the circumference, under axial
+compression, with the default Sanders kinematics and penalty connections.
+The tests verify the critical load ``Nxx*eigvals[0]`` against reference
+values stored in the tests (the comments give the values obtained with the
+Donnell kinematics). TODO(author): source of the reference values.
+
+"""
 import sys
 sys.path.append('../..')
 

@@ -1,5 +1,13 @@
 # -*- coding: utf-8 -*-
-"""
+r"""Scratch calculations and plots
+
+Script, not a test: cells (``# %%``) of an interactive session with
+percentage differences of run times and results, the load of a DCB from
+linear elastic fracture mechanics (as in ``plot_hashemi_1990_LEFM.py``) and
+plots of a normalized critical buckling load against the normalized defect
+length from variables ``x`` and ``y`` that must already exist in the
+session. Not runnable on its own.
+
 Created on Mon Sep  9 17:39:42 2024
 
 @author: Nathan
