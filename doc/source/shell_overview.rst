@@ -140,7 +140,7 @@ plates of an assembly with large          ``'plate_clpt_gl'``; ``'plate_clpt_tl'
 rotations, e.g. a wing box                bend through large rotations, see :ref:`plate_clpt_gl`
 moderately thick plates and shells,       ``'plate_fsdt_donnell'``, ``'cylshell_fsdt_sanders'``
 transverse shear flexibility              (or ``_donnell``)
-thick laminates, offset reference        ``'plate_tsdt_donnell'``, ``'cylshell_tsdt_sanders'``
+thick laminates, offset reference         ``'plate_tsdt_donnell'``, ``'cylshell_tsdt_sanders'``
 surface                                   (or ``_donnell``), see :ref:`tsdt_offset`
 ========================================= ===============================================================
 
