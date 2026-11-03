@@ -1,48 +1,59 @@
 r"""High-AR-t5 wing box under a follower tip force with ``plate_clpt_gl``
 
-Reference
----------
-M. H. Elalfy, R. De Breuker, S. G. P. Castro, *Beam-like models for the
-post-buckling behaviour of wingbox structures*, preprint. Geometry Table 1
-(p. 6): half-span ``L = 1010.0 mm``, chord ``W = 50.5 mm``, height ``H =
-12.12 mm``, 8 ribs (9 bays), skins 1.0 mm, spars 5.0 mm; material Table 2
-(p. 6): ``E = 73.00 GPa``, ``nu = 0.33``; clamped root, tip force (p. 7).
-The tip z-displacement of Abaqus (S4R, static Riks) with the follower tip
-force is the upper panel of Fig. 6 (p. 10), read from the vector paths of
-the figure, about +-1 mm: 23.3, 93.2, 189.6, 298.9, 410.0 and 515.5 mm at
-25, 100, 200, 300, 400 and 500 N.
+``test_wingbox_follower_tip_force_against_abaqus`` verifies the tip
+z-displacement of the wing box of Elalfy, De Breuker and Castro under a
+follower tip force against their Abaqus result (S4R, static Riks), the
+upper panel of Fig. 6 (p. 10) of the preprint, read from the vector paths
+of the figure, about +-1 mm: 23.3, 93.2, 189.6, 298.9, 410.0 and 515.5 mm
+at 25, 100, 200, 300, 400 and 500 N (within 5 %), and against the
+regression values below. ``test_wingbox_linear_equals_von_karman`` verifies
+that the linear static solution under the dead tip force is the same with
+``plate_clpt_gl``, ``plate_clpt_tl`` and ``plate_clpt_donnell``, 22.68 mm
+at 25 N.
 
-Model
------
-45 ``plate_clpt_gl`` domains, 6264 degrees of freedom: per bay two skins
-(8 x 8 terms) and two spars (8 x 5) at the mid-surfaces, a rib (4 x 6) at
-the end of each bay, including the tip; penalty connections with the
+Geometry Table 1 (p. 6) of the preprint: half-span ``L = 1010.0 mm``, chord
+``W = 50.5 mm``, height ``H = 12.12 mm``, 8 ribs (9 bays), skins 1.0 mm,
+spars 5.0 mm; material Table 2 (p. 6): ``E = 73.00 GPa``, ``nu = 0.33``;
+clamped root, tip force (p. 7).
+
+Model: 45 ``plate_clpt_gl`` domains, 6264 degrees of freedom: per bay two
+skins (8 x 8 terms) and two spars (8 x 5) at the mid-surfaces, a rib (4 x 6)
+at the end of each bay, including the tip; penalty connections with the
 default stiffnesses: ``'SSxcte'`` between bays, ``'BFycte'`` spars to
 skins, ``'BFxcte'`` ribs to skins (the ribs are not connected to the
 spars). The tip force is a follower pressure (``follower='quadratic'``, the
 complete area vector) on the upper skin over the last 10 mm of the span,
 incremented by 25 N with the Newton-Raphson method, without imperfection.
 
-Results
--------
-The linear tip deflection, identical for ``plate_clpt_donnell``, is 453.52
-mm at 500 N (22.68 mm at 25 N, the dead load). With ``plate_clpt_gl``:
-22.68, 90.84, 184.37, 287.24, 393.59 and 499.83 mm at 25, ..., 500 N,
-2.5 to 4.0 % below Abaqus; with the von Kármán strains of
+Results: the linear tip deflection, identical for ``plate_clpt_donnell``,
+is 453.52 mm at 500 N (22.68 mm at 25 N, the dead load). With
+``plate_clpt_gl``: 22.68, 90.84, 184.37, 287.24, 393.59 and 499.83 mm at
+25, ..., 500 N, 2.5 to 4.0 % below Abaqus; with the von Kármán strains of
 ``plate_clpt_donnell`` the box stiffens spuriously, 13.9 mm at 25 N and
-54.7 mm at 500 N. The model is already 2.7 % stiffer than Abaqus in the
-linear range, which explains most of the difference; the rest comes from
-the post-buckling of the top skin, here without imperfection and with the
-default penalties, after the first buckling load of 173.11 N of Abaqus
-(Table 3, p. 8): the top skin deflects in alternate directions from bay to
-bay, -2.4 mm in the second bay at 500 N, and both skins sag towards the
-mid-plane (Brazier), the bottom one by 1.4 mm in the root bay, about 11 %
-of ``H``, which makes the box softer than the linear beam at 500 N, as in
-Abaqus and unlike the elastica of the linear bending stiffness, 423.0 mm.
-The changes of curvature of the skins are measured in the fixed local
-frames and the rotation penalties of the connections are those of small
-rotations, both of which act at the order of ``1 - cos t`` of the local
-rotation ``t``, see ``theory/shells/plate_clpt_gl/plate_clpt_gl.md``.
+54.7 mm at 500 N. At 500 N the top skin deflects in alternate directions
+from bay to bay, -2.4 mm in the second bay, and both skins sag towards the
+mid-plane, the bottom one by 1.4 mm in the root bay, about 11 % of ``H``;
+the box is softer than the linear beam, as in Abaqus, whereas the elastica
+of the linear bending stiffness gives 423.0 mm.
+
+Notes
+-----
+The model is already 2.7 % stiffer than Abaqus in the linear range, which
+explains most of the difference; the rest comes from the post-buckling of
+the top skin, here without imperfection and with the default penalties,
+after the first buckling load of 173.11 N of Abaqus (Table 3, p. 8 of the
+preprint [1]_), and from the sagging of both skins towards the mid-plane
+(Brazier effect), which makes the box softer than the linear beam at
+500 N. The changes of curvature of the skins are measured in the fixed
+local frames and the rotation penalties of the connections are those of
+small rotations, both of which act at the order of ``1 - cos t`` of the
+local rotation ``t``.
+
+References
+----------
+.. [1] Elalfy, M. H., De Breuker, R. and Castro, S. G. P., "Beam-like models
+   for the post-buckling behaviour of wingbox structures", preprint, Delft
+   University of Technology.
 
 """
 import sys
@@ -62,7 +73,7 @@ T_SKIN, T_SPAR = 1.e-3, 5.e-3
 NBAYS = 9
 X_, Y_, Z_ = np.eye(3)
 
-#: Fig. 6 (p. 10), Abaqus, tip follower load [N] -> tip z-displacement [mm]
+#: Abaqus of the module docstring, tip follower load [N] -> tip z-displacement [mm]
 ABAQUS_FIG6 = {25: 23.3, 100: 93.2, 200: 189.6, 300: 298.9, 400: 410.0,
                500: 515.5}
 

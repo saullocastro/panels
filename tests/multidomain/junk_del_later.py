@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""
+r"""Leftover of an earlier version of ``test_dcb_damage.py``
+
+Not a test (pytest does not collect this file) and not runnable: it has no
+imports. It defines ``test_dcb_damage_prop_modified_k``, a DCB damage
+analysis with parameters, and cells that animate the damage results of an
+interactive session.
+
 Created on Tue Apr  9 16:57:33 2024
 
 @author: Nathan

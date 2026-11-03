@@ -1,3 +1,22 @@
+r"""Post-processing of a :class:`.MultiDomain`
+
+Two plates in series under a uniform tension ``N``, and a cantilever plate
+under a pressure, against the closed-form solutions of these cases:
+
+- :meth:`.MultiDomain.calc_results`, the strains and stress resultants per
+  panel, also at the Gauss-Legendre points and with more than 304 points:
+  uniform `N_{xx} = N`, `\varepsilon_{xx} = N/(E t)`,
+  `\varepsilon_{yy} = -\nu \varepsilon_{xx}`;
+- the section forces along `x` and `y` constant, the applied load,
+  independent of the number of integration points, also with a constant
+  ``ABDnxny``; the out-of-plane force across a line, which balances the
+  pressure of the cantilever and vanishes under in-plane loads;
+- :meth:`.MultiDomain.plot`, with its options;
+- the errors raised for invalid input, for an assembly without row and
+  column starts, for a panel connected to itself and for an unknown
+  connection function.
+
+"""
 import sys
 sys.path.append('../..')
 

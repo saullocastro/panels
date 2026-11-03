@@ -2,7 +2,7 @@ r"""Penalty kernels of the prescribed displacements
 
 The kernels of :mod:`panels.multidomain.connections.kCpd` are compared with
 the penalty stiffness `k \int \boldsymbol{g} \boldsymbol{g}^\top ds` integrated from the rows of
-``fg`` of the field module, see ``theory/multidomain_penalization/kCpd.py``,
+``fg`` of the field module,
 and with the penalty energy computed from the displacement field of
 :meth:`.Shell.uvw`, for the models with 3 and 5 degrees of freedom per term.
 A plate whose displacements are prescribed with these kernels and the forces

@@ -1,22 +1,14 @@
-'''
-Test description
-================
+r"""Connection ``'BFxcte'`` against ``'BFycte'``
 
-This test verifies the connection kCBFxcte.
-It is built two identical panels using different connections.
+Two equivalent closed-section models with a spar, built with ``'BFycte'``
+(fixture ``eig_value_panel_BFycte``) and with ``'BFxcte'`` (fixture
+``eig_value_panel_BFxcte``, with the loads, connections and boundary
+conditions along `x` = constant), must give the same first linear buckling
+eigenvalue within 1 %. Both models agree within 1 % with a NASTRAN model,
+``reference_model_BFxcte.dat``, which is not in the repository and not used
+by the test. TODO(author): add the NASTRAN model or remove this sentence.
 
-panel_BFycte:
-    Closed section using the existing BFycte connection.
-
-panel_BFxcte:
-    Closed section using the BFxcte connection.
-    This model is equivalent the "panel_BFycte", except it used loads, connections and BCs
-    in the xcte direction.
-
-The first eigen value of each model are compared in this test and a reference NASTRAN model
-"reference_model_BFxcte.dat" is used to double check the results. Compmech models presents an error
-less than 1% compared with NASTRAN.
-'''
+"""
 import sys
 sys.path.append('../..')
 

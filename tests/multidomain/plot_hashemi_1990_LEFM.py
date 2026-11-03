@@ -1,15 +1,41 @@
 # -*- coding: utf-8 -*-
-"""
+r"""Load-displacement curve of a DCB from linear elastic fracture mechanics
+
+Script, not a test: plots the load against the opening displacement of the
+DCB of ``test_dcb_damage.py`` (width 25 mm, arms of 2.1 mm, crack length
+48 mm, the same material) from the equations of Hashemi et al. (1990),
+with the crack length corrected by `\chi h`: the linear curve up to its
+intersection with the propagation curve for crack lengths of 30 to 80 mm.
+Prints the load and the displacement at
+the onset of propagation from the pre-crack.
+
 Created on Fri Sep 26 19:32:10 2024
 
 @author: Nathan
+
+Notes
+-----
+The equations are taken from Tijs et al. (2022) [1]_, the same as those of
+Hashemi et al. (1990) [2]_.
+
+References
+----------
+.. [1] Tijs, B. H. A. H., Abdel-Monsef, S., Renart, J., Turon, A. and
+   Bisagni, C., "Characterization and analysis of the interlaminar behavior
+   of thermoplastic composites considering fiber bridging and R-curve
+   effects", Composites Part A: Applied Science and Manufacturing, 162,
+   107101, 2022. https://doi.org/10.1016/j.compositesa.2022.107101
+.. [2] Hashemi, S., Kinloch, A. J. and Williams, J. M., "The analysis of
+   interlaminar fracture in uniaxial fibre-polymer composites", Proceedings
+   of the Royal Society of London A, 427(1872), 173-199, 1990.
+   https://doi.org/10.1098/rspa.1990.0007
+
 """
 
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Equations used from DOI: 10.1016/J.COMPOSITESA.2022.107101. as it was easier but theyre
-# the same as Hashemi 1990 10.1098/RSPA.1990.0007
+# Equations: see the Notes of the module docstring
 
 # Define variables
 G_Ic = 1.12  # Fracture toughness

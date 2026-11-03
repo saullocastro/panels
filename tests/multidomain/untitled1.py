@@ -1,5 +1,14 @@
 # -*- coding: utf-8 -*-
-"""
+r"""Drivers of DCB analyses run during an MSc thesis
+
+Script, not a test (pytest does not collect this file): defines
+``test_dcb_damage_pristine`` and ``test_dcb_damage_pristine_mult_pan``,
+earlier variants of the driver of ``test_dcb_damage.py``, and runs one of
+them in ``__main__``. With ``local_run = True`` it loads results from, and
+changes to, directories of the author's computer and does not run
+elsewhere; it also imports ``filelock``, which is not a dependency of the
+library.
+
 Created on Sat Sep 14 14:42:19 2024
 
 @author: Nathan

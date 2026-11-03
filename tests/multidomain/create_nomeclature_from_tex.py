@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
-"""
+r"""Nomenclature table from the inline math of a LaTeX file
+
+Script, not a test, unrelated to the library: extracts the inline math
+``\( ... \)`` of a LaTeX chapter, removes the duplicates and writes them as
+the sorted rows of a LaTeX table, through intermediate text files. It
+changes to a directory of the author's computer (``os.chdir``) and does not
+run elsewhere.
+
 Created on Fri Sep 13 23:25:59 2024
 
 @author: Nathan

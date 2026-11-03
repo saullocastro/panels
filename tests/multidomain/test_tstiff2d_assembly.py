@@ -1,3 +1,16 @@
+r"""Assembly functions of a panel with one T stiffener
+
+:func:`.tstiff2d_1stiff_freq`, :func:`.tstiff2d_1stiff_compression` (with
+and without the pre-buckling static case) and
+:func:`.tstiff2d_1stiff_flutter` build a skin, a stiffener base and a
+flange in domains, with a debonded region of length ``defect_a*a`` between
+skin and base, connected with penalties. The tests verify the first natural
+frequency, the first buckling eigenvalue and the first eigenvalue of the
+flutter analysis against reference values stored in the tests, results of
+the versions of 2024 of these functions (see the comment in
+``test_tstiff2d_1stiff_freq``).
+
+"""
 import sys
 sys.path.append('../..')
 
