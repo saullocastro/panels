@@ -114,7 +114,9 @@ def test_rigid_rotation_zero_membrane_energy(axis, angle):
     rel, energy, strain = out[GL]
     assert rel < 1e-9
     assert energy < 1e-18
-    assert strain < 1e-12
+    # round-off: sums of terms of the order of angle that cancel, up to
+    # 7.5e-13 at angle 1, and 1.07e-12 on Windows
+    assert strain < 1e-10
     # the von Karman strains of the same rotation, e.g. exx = cos t - 1 in
     # plane, are of the order of angle**2, or angle**4 out of plane
     assert out[VK][2] > 0.1*min(angle**2, angle**4/4)
