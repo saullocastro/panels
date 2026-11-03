@@ -54,8 +54,8 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
 
-# the notebooks of the folder notebooks are rendered with their stored
-# outputs, through the .nblink files of doc/source/notebooks
+# the notebooks are rendered with their stored outputs, linked by the
+# nblink files
 nbsphinx_execute = 'never'
 
 default_role = 'math'
