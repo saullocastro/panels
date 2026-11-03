@@ -8,7 +8,8 @@ Multidomain connections (:mod:`panels.multidomain.connections`)
 Connection between panel domains. Each panel domain has its own set of Bardell
 approximation functions. Below it is shown the connections currently supported.
 They are imposed exactly with the null-space method by default, see
-:ref:`null_space`, or with the penalty stiffnesses of the kernels below with
+:mod:`panels.multidomain.connections.nullspace`, or with the penalty
+stiffnesses of the kernels below with
 ``conn_method='penalty'``.
 
 kCBFycte
@@ -133,7 +134,8 @@ Damaged skin-base connection
 ----------------------------
 
 The connection ``'SB_TSL'``, with a traction-separation law at the
-interface, see :ref:`cohesive_zone`.
+interface, see :mod:`panels.multidomain.connections.kCSB_dmg` and
+:mod:`panels.multidomain.connections.tsl`.
 
 .. automodule:: panels.multidomain.connections.kCSB_dmg
     :members: fkCSB11_dmg, fkCSB12_dmg, fkCSB22_dmg
@@ -180,7 +182,7 @@ connections
 added as penalty stiffnesses, but imposed exactly: the quantities penalized
 by the kernels above become linear constraints on the Ritz constants, which
 are eliminated from them. No penalty constant is needed, see
-:ref:`null_space` and :mod:`panels.multidomain.connections.nullspace`.
+:mod:`panels.multidomain.connections.nullspace`.
 
 
 Prescribed displacements with penalties
@@ -196,7 +198,7 @@ external force vector of :func:`.shell_fext`. The in-plane displacements
 are those at the thickness coordinate ``z`` of the kernels, the one given to
 the methods of :class:`.Shell`, by default the reference surface. With
 ``pd_method='null-space'`` the prescribed displacements are imposed exactly,
-see :ref:`null_space_pd`.
+see :func:`.nullspace.pd_constraint_matrix`.
 
 .. autofunction:: panels.multidomain.connections.kCpd.fkCpd
 
@@ -211,7 +213,7 @@ Calculating Penalty Constants
 Function :func:`.calc_kt_kr` calculates the penalty constants for
 translation (``kt``) and rotation (``kr``) from the laminates of the two
 connected panels. The penalty constants are not used by the connections
-imposed with the null-space method, see :ref:`null_space`, apart from the
+imposed with the null-space method, apart from the
 key ``'kr'`` of ``'SB'``, which tells whether the rotations of the FSDT and
 TSDT are connected. For ``'SB'`` the function gives no ``kr``.
 
@@ -267,7 +269,7 @@ have penalty constants that are just high enough to produce the desired
 compatibility, but not too high such that numerical stability issues start
 to appear.
 
-Damaged connections were implemented by Nathan (2024) [2]_, with the
+Damaged connections were implemented by D'Souza [2]_, with the
 traction-separation law of :func:`.calc_kw_tsl`.
 
 References
