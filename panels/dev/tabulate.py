@@ -37,8 +37,7 @@ points of products of the approximation functions `P_i(\xi)`, `P_k(\xi)`,
 function is evaluated `m^2 n^2` times per integration point, although it
 depends on one index and one coordinate only. Tabulated, it is evaluated
 `m` (or `n`) times per point, and the cost of the functions becomes
-negligible against the `m^2 n^2` products of the assembly, see
-:ref:`tabulation`. Since only where the values are computed changes, and
+negligible against the `m^2 n^2` products of the assembly. Since only where the values are computed changes, and
 not the operations on them, the results are identical.
 
 """
