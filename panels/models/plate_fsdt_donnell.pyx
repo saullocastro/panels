@@ -8,12 +8,34 @@
 #cython: infer_types=False
 r"""
 Flat plates using the first-order shear deformation theory (FSDT) with von
-Karman kinematics
+Kármán kinematics
 
-Analytical matrices, integrated over the full domain. See the kinematic
-equations in ``theory/shells/fsdt_tsdt/fsdt_tsdt.py``, from where the
-integrands herein have been generated. The degrees of freedom of each term
-of the approximation are ``u, v, w, phix, phiy``.
+Matrices integrated analytically over the whole domain: the linear
+constitutive stiffness :func:`fk0`, the geometric stiffness :func:`fkG0`,
+the mass :func:`fkM`, the aerodynamic stiffness :func:`fkAx`, :func:`fkAy`
+and the aerodynamic damping :func:`fcA`, as
+:class:`scipy.sparse.coo_matrix`.
+The constitutive matrix ``shell.ABD`` is ``8 x 8``.
+
+The degrees of freedom of each term of the approximation are
+``u, v, w, phix, phiy``; the degree of freedom ``k`` of the term ``(i, j)``, ``0 <=
+i < m``, ``0 <= j < n``, is at the row ``row0 + 5*(j*m + i) + k``
+of the matrices.
+
+Notes
+-----
+The displacement field through the thickness and the generalized strains
+are those of :mod:`panels.models.fsdt_tsdt_field`, with `c_1 = 4/(3 h^2)`
+for the TSDT and `c_1 = 0` for the FSDT, `1/r = 0` for the plates, and the
+Sanders-Koiter terms only for the models ``*_sanders``. The rotations of
+the non-linear terms are `\beta_x = -w_{,x}` and `\beta_y = -w_{,y} + s
+v/r`, `s = 1` for the Sanders-Koiter and `s = 0` for the Donnell
+kinematics.
+
+The integrals over the whole domain are evaluated in closed form with the
+integrals of Bardell's functions and their derivatives along `\xi = 2x/a -
+1` and `\eta = 2y/b - 1`, which requires the constitutive matrix and the
+moments of the density to be constant over the domain.
 
 """
 from scipy.sparse import coo_matrix
@@ -42,6 +64,53 @@ cdef extern from 'bardell.hpp':
 
 
 def fk0(object shell, int size, int row0, int col0):
+    r"""Linear constitutive stiffness matrix, integrated analytically
+
+    Integrates the linear constitutive stiffness matrix of the shell over
+    its whole domain for the constitutive matrix ``shell.ABD``, constant
+    over the domain.
+
+    Parameters
+    ----------
+    shell : :class:`.Shell`
+        The shell, which gives the dimensions ``a`` and ``b``, the radius ``r``
+        of the cylinders, the numbers of terms ``m`` and ``n`` and the boundary
+        flags of the approximation functions of each field.
+    size : int
+        Number of rows and columns of the matrix, the number of degrees of
+        freedom of the assembly.
+    row0, col0 : int
+        Row and column of the matrix where the terms of this shell start.
+
+    Returns
+    -------
+    k0 : scipy.sparse.coo_matrix
+        Matrix of shape ``(size, size)``. Only the upper
+        triangle is assembled; the caller symmetrizes it.
+
+    Raises
+    ------
+    ValueError
+        If ``shell`` is not a :class:`.Shell` or ``shell.ABD`` is not a
+        ``NE x NE`` matrix.
+
+    Notes
+    -----
+    With the linear part `\boldsymbol{\varepsilon}_L =
+    \boldsymbol{B}_L \boldsymbol{c}` of the generalized strains of the kinematics of the module,
+    and the constitutive matrix `\boldsymbol{F}` (``shell.ABD``):
+
+    .. math::
+
+        \boldsymbol{K}_{C0} = \int_0^b \int_0^a \boldsymbol{B}_L^\top
+        \boldsymbol{F} \boldsymbol{B}_L \, dx \, dy
+
+    The integral over the whole domain is evaluated in closed form, each
+    entry being a sum of products of one-dimensional integrals of Bardell's
+    functions and their derivatives along `\xi` and `\eta`, with `x = a(\xi +
+    1)/2`, `y = b(\eta + 1)/2` and `dx\,dy = (ab/4)\,d\xi\,d\eta`.
+
+    """
     cdef double a, b
     cdef double [:, ::1] F
     cdef int m, n
@@ -410,6 +479,57 @@ def fk0(object shell, int size, int row0, int col0):
 
 def fkG0(double Nxx, double Nyy, double Nxy, object shell,
          int size, int row0, int col0):
+    r"""Geometric stiffness matrix of a constant membrane stress state
+
+    Integrates, analytically over the whole domain, the geometric
+    stiffness matrix of the membrane stress resultants ``Nxx``, ``Nyy``
+    and ``Nxy``, constant over the domain.
+
+    Parameters
+    ----------
+    Nxx, Nyy, Nxy : float
+        Membrane stress resultants, force per unit length, tension positive.
+    shell : :class:`.Shell`
+        The shell, which gives the dimensions ``a`` and ``b``, the radius ``r``
+        of the cylinders, the numbers of terms ``m`` and ``n`` and the boundary
+        flags of the approximation functions of each field.
+    size : int
+        Number of rows and columns of the matrix, the number of degrees of
+        freedom of the assembly.
+    row0, col0 : int
+        Row and column of the matrix where the terms of this shell start.
+
+    Returns
+    -------
+    kG0 : scipy.sparse.coo_matrix
+        Matrix of shape ``(size, size)``. Only the upper
+        triangle is assembled; the caller symmetrizes it.
+
+    Raises
+    ------
+    ValueError
+        If ``shell`` is not a :class:`.Shell`.
+
+    Notes
+    -----
+    With `\boldsymbol{N} = \begin{bmatrix} N_{xx} & N_{xy} \\ N_{xy} &
+    N_{yy} \end{bmatrix}` and `\boldsymbol{G} \boldsymbol{c} = \{\beta_x, \beta_y\}^\top` the
+    rotations of the non-linear terms of the membrane strains:
+
+    .. math::
+
+        \boldsymbol{K}_{G} = \int_0^b \int_0^a \boldsymbol{G}^\top
+        \boldsymbol{N} \boldsymbol{G} \, dx \, dy
+
+    which is the Hessian of the work of the constant stress resultants on
+    the non-linear part of the membrane strains of the kinematics of the module.
+
+    The integral over the whole domain is evaluated in closed form, each
+    entry being a sum of products of one-dimensional integrals of Bardell's
+    functions and their derivatives along `\xi` and `\eta`, with `x = a(\xi +
+    1)/2`, `y = b(\eta + 1)/2` and `dx\,dy = (ab/4)\,d\xi\,d\eta`.
+
+    """
     cdef double a, b
     cdef int m, n
     cdef double x1u, x1ur, x2u, x2ur
@@ -492,6 +612,58 @@ def fkG0(double Nxx, double Nyy, double Nxy, object shell,
 
 
 def fkM(object shell, int size, int row0, int col0):
+    r"""Mass matrix, integrated analytically
+
+    Integrates the consistent mass matrix of the shell over its whole
+    domain, with the moments of the density of the laminate
+    ``shell.lam``, constant over the domain.
+
+    Parameters
+    ----------
+    shell : :class:`.Shell`
+        The shell, which gives the dimensions ``a`` and ``b``, the radius ``r``
+        of the cylinders, the numbers of terms ``m`` and ``n`` and the boundary
+        flags of the approximation functions of each field.
+    size : int
+        Number of rows and columns of the matrix, the number of degrees of
+        freedom of the assembly.
+    row0, col0 : int
+        Row and column of the matrix where the terms of this shell start.
+
+    Returns
+    -------
+    kM : scipy.sparse.coo_matrix
+        Matrix of shape ``(size, size)``. Only the upper
+        triangle is assembled; the caller symmetrizes it.
+
+    Raises
+    ------
+    ValueError
+        If ``shell`` is not a :class:`.Shell`.
+
+    Notes
+    -----
+    With the displacement field through the thickness `\{u(z), v(z),
+    w(z)\}^\top = \boldsymbol{S}(z) \boldsymbol{c}` of the kinematics of the module, `z` measured
+    from the reference surface:
+
+    .. math::
+
+        \boldsymbol{M} = \int_0^b \int_0^a \int_{d - h/2}^{d + h/2} \rho \,
+        \boldsymbol{S}(z)^\top \boldsymbol{S}(z) \, dz \, dx \, dy
+
+    with the offset `d` (``shell.offset``). The integral through the
+    thickness gives the moments `I_n = \int \rho z^n dz`, `n = 0, 1, 2`, of
+    ``shell.lam`` for the FSDT, and for the TSDT the moments `J_n`, `n = 0,
+    1, 2, 3, 4, 6`, about the mid-surface, of :meth:`.Shell._get_lam_mid`,
+    with `d` and the thickness `h` of ``shell.lam``.
+
+    The integral over the whole domain is evaluated in closed form, each
+    entry being a sum of products of one-dimensional integrals of Bardell's
+    functions and their derivatives along `\xi` and `\eta`, with `x = a(\xi +
+    1)/2`, `y = b(\eta + 1)/2` and `dx\,dy = (ab/4)\,d\xi\,d\eta`.
+
+    """
     cdef double a, b, I0, I1, I2
     cdef int m, n
     cdef double x1u, x1ur, x2u, x2ur
@@ -621,6 +793,59 @@ def fkM(object shell, int size, int row0, int col0):
 
 def fkAx(double beta, double gamma, object shell,
          int size, int row0, int col0):
+    r"""Aerodynamic stiffness matrix of the piston theory, flow along x
+
+    Integrates, analytically over the whole domain, the aerodynamic
+    stiffness matrix of a supersonic flow along `x`.
+
+    Parameters
+    ----------
+    beta : float
+        Aerodynamic pressure parameter `\beta` of the piston theory, a
+        pressure, see :meth:`.Shell.calc_kA`.
+    gamma : float
+        Curvature correction `\gamma` of the piston theory for the
+        cylinders, a pressure per unit length; ignored by the flat plates.
+    shell : :class:`.Shell`
+        The shell, which gives the dimensions ``a`` and ``b``, the radius ``r``
+        of the cylinders, the numbers of terms ``m`` and ``n`` and the boundary
+        flags of the approximation functions of each field.
+    size : int
+        Number of rows and columns of the matrix, the number of degrees of
+        freedom of the assembly.
+    row0, col0 : int
+        Row and column of the matrix where the terms of this shell start.
+
+    Returns
+    -------
+    kAx : scipy.sparse.coo_matrix
+        Matrix of shape ``(size, size)``. The matrix is assembled in full.
+
+    Raises
+    ------
+    ValueError
+        If ``shell`` is not a :class:`.Shell`.
+
+    Notes
+    -----
+    With `\boldsymbol{S}^w` the row of the approximation functions of
+    `w`, `w = \boldsymbol{S}^w \boldsymbol{c}`:
+
+    .. math::
+
+        \boldsymbol{K}_{A_x} = -\int_0^b \int_0^a \left[\beta
+        (\boldsymbol{S}^w_{,x})^\top \boldsymbol{S}^w + \gamma
+        (\boldsymbol{S}^w)^\top \boldsymbol{S}^w\right] dx \, dy
+
+    added to the stiffness matrix, see :meth:`.Shell.calc_kA` for the
+    convention of signs; the matrix is not symmetric.
+
+    The integral over the whole domain is evaluated in closed form, each
+    entry being a sum of products of one-dimensional integrals of Bardell's
+    functions and their derivatives along `\xi` and `\eta`, with `x = a(\xi +
+    1)/2`, `y = b(\eta + 1)/2` and `dx\,dy = (ab/4)\,d\xi\,d\eta`.
+
+    """
     cdef double a, b
     cdef int m, n
     cdef double x1u, x1ur, x2u, x2ur
@@ -693,6 +918,55 @@ def fkAx(double beta, double gamma, object shell,
 
 
 def fkAy(double beta, object shell, int size, int row0, int col0):
+    r"""Aerodynamic stiffness matrix of the piston theory, flow along y
+
+    Integrates, analytically over the whole domain, the aerodynamic
+    stiffness matrix of a supersonic flow along `y`.
+
+    Parameters
+    ----------
+    beta : float
+        Aerodynamic pressure parameter `\beta` of the piston theory, a
+        pressure, see :meth:`.Shell.calc_kA`.
+    shell : :class:`.Shell`
+        The shell, which gives the dimensions ``a`` and ``b``, the radius ``r``
+        of the cylinders, the numbers of terms ``m`` and ``n`` and the boundary
+        flags of the approximation functions of each field.
+    size : int
+        Number of rows and columns of the matrix, the number of degrees of
+        freedom of the assembly.
+    row0, col0 : int
+        Row and column of the matrix where the terms of this shell start.
+
+    Returns
+    -------
+    kAy : scipy.sparse.coo_matrix
+        Matrix of shape ``(size, size)``. The matrix is assembled in full.
+
+    Raises
+    ------
+    ValueError
+        If ``shell`` is not a :class:`.Shell`.
+
+    Notes
+    -----
+    With `\boldsymbol{S}^w` the row of the approximation functions of
+    `w`, `w = \boldsymbol{S}^w \boldsymbol{c}`:
+
+    .. math::
+
+        \boldsymbol{K}_{A_y} = -\beta \int_0^b \int_0^a
+        (\boldsymbol{S}^w_{,y})^\top \boldsymbol{S}^w \, dx \, dy
+
+    added to the stiffness matrix, see :meth:`.Shell.calc_kA`; the matrix is
+    not symmetric.
+
+    The integral over the whole domain is evaluated in closed form, each
+    entry being a sum of products of one-dimensional integrals of Bardell's
+    functions and their derivatives along `\xi` and `\eta`, with `x = a(\xi +
+    1)/2`, `y = b(\eta + 1)/2` and `dx\,dy = (ab/4)\,d\xi\,d\eta`.
+
+    """
     cdef double a, b
     cdef int m, n
     cdef double x1u, x1ur, x2u, x2ur
@@ -765,6 +1039,54 @@ def fkAy(double beta, object shell, int size, int row0, int col0):
 
 
 def fcA(double aeromu, object shell, int size, int row0, int col0):
+    r"""Aerodynamic damping matrix of the piston theory
+
+    Integrates, analytically over the whole domain, the aerodynamic
+    damping matrix, without the factor `i` that
+    :meth:`.Shell.calc_cA` applies.
+
+    Parameters
+    ----------
+    aeromu : float
+        Aerodynamic damping coefficient `\mu` of the piston theory, a
+        pressure per unit velocity.
+    shell : :class:`.Shell`
+        The shell, which gives the dimensions ``a`` and ``b``, the radius ``r``
+        of the cylinders, the numbers of terms ``m`` and ``n`` and the boundary
+        flags of the approximation functions of each field.
+    size : int
+        Number of rows and columns of the matrix, the number of degrees of
+        freedom of the assembly.
+    row0, col0 : int
+        Row and column of the matrix where the terms of this shell start.
+
+    Returns
+    -------
+    cA : scipy.sparse.coo_matrix
+        Matrix of shape ``(size, size)``. Only the upper
+        triangle is assembled; the caller symmetrizes it.
+
+    Raises
+    ------
+    ValueError
+        If ``shell`` is not a :class:`.Shell`.
+
+    Notes
+    -----
+    With `\boldsymbol{S}^w` the row of the approximation functions of
+    `w`:
+
+    .. math::
+
+        \boldsymbol{C}_A = -\mu \int_0^b \int_0^a (\boldsymbol{S}^w)^\top
+        \boldsymbol{S}^w \, dx \, dy
+
+    The integral over the whole domain is evaluated in closed form, each
+    entry being a sum of products of one-dimensional integrals of Bardell's
+    functions and their derivatives along `\xi` and `\eta`, with `x = a(\xi +
+    1)/2`, `y = b(\eta + 1)/2` and `dx\,dy = (ab/4)\,d\xi\,d\eta`.
+
+    """
     cdef double a, b
     cdef int m, n
     cdef double x1u, x1ur, x2u, x2ur

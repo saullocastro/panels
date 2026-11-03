@@ -5,6 +5,24 @@
 #cython: initializedcheck=False
 #cython: profile=False
 #cython: infer_types=False
+r"""
+Kernels of the flange of the blade stiffener modelled as a beam
+
+Matrices of the flange of :class:`.BladeStiff1D`, a beam along `x` at `y =
+y_s` attached to the skin and described by the approximation functions of
+the skin: the constitutive stiffness :func:`fkCf`, the geometric stiffness
+:func:`fkGf` and the mass :func:`fkMf`, as :class:`scipy.sparse.coo_matrix`
+of which only the upper triangle is assembled. The degrees of freedom of
+each term of the skin are ``u, v, w``; the degree of freedom ``k`` of the
+term ``(i, j)`` is at the row ``row0 + 3*(j*m + i) + k``.
+
+Notes
+-----
+The flange follows the CLPT kinematics of the skin with the Donnell
+(von Kármán) assumptions; its energies are integrated along `x` at `y =
+y_s`, see the ``Notes`` of each kernel.
+
+"""
 from scipy.sparse import coo_matrix
 import numpy as np
 
@@ -39,6 +57,67 @@ def fkCf(double ys, double a, double b, double bf, double df, double E1, double 
          double y1u, double y1ur, double y2u, double y2ur,
          double y1w, double y1wr, double y2w, double y2wr,
          int size, int row0, int col0):
+    r"""Constitutive stiffness matrix of the flange modelled as a beam
+
+    Integrates, along `x` at `y = y_s`, the stiffness matrix of the
+    axial, bending and torsional energy of the flange, written with the
+    approximation functions of the skin.
+
+    Parameters
+    ----------
+    ys : float
+        Coordinate `y` of the stiffener on the skin, a length.
+    a, b : float
+        Dimensions of the skin along `x` and `y`, lengths.
+    bf, df : float
+        Height of the flange and distance `d_f` of its centroid to the
+        mid-surface of the skin, lengths.
+    E1, F1, S1 : float
+        Stiffness properties of the flange per unit height, ``E1``, ``F1``
+        and ``S1`` of :class:`.BladeStiff1D`.
+    GJperbf : float
+        Torsional stiffness `G J` of the flange divided by ``bf``.
+    m, n : int
+        Numbers of terms of the approximation of the skin along `x` and `y`.
+    x1u, x1ur, x2u, x2ur, x1w, x1wr, x2w, x2wr, y1u, y1ur, y2u, y2ur, y1w, y1wr, y2w, y2wr : float
+        Boundary flags of the approximation functions of the skin: the
+        translation (``t``) and rotation (``r``) flags at the edges ``1`` and
+        ``2`` along ``x`` and ``y`` of each field ``u``, ``v``, ``w`` used by
+        the kernel, see :class:`.Shell`.
+    size : int
+        Number of rows and columns of the matrix.
+    row0, col0 : int
+        Row and column of the matrix where the block starts.
+
+    Returns
+    -------
+    k0f : scipy.sparse.coo_matrix
+        Matrix of shape ``(size, size)``. Only the upper
+        triangle is assembled; the caller symmetrizes it.
+
+    Notes
+    -----
+    The strain energy of the flange is
+
+    .. math::
+
+        U_f = \frac{b_f}{2} \int_0^a \boldsymbol{\varepsilon}_f^\top
+        \boldsymbol{k}_{sf} \boldsymbol{\varepsilon}_f \, dx, \qquad
+        \boldsymbol{\varepsilon}_f = \begin{Bmatrix} u_{,x} \\ -w_{,xx} \\
+        -w_{,xy} \end{Bmatrix}, \qquad
+        \boldsymbol{k}_{sf} = \begin{bmatrix} E_1 & -d_f E_1 & S_1 \\
+        -d_f E_1 & F_1 + d_f^2 E_1 & -d_f S_1 \\ S_1 & -d_f S_1 & G J/b_f
+        \end{bmatrix}
+
+    at `y = y_s`, such that `u_{,x} + d_f w_{,xx}` is the axial strain at the
+    centroid of the flange and `-w_{,xy}` its twist rate. The matrix is the
+    Hessian of `U_f` with respect to the Ritz constants of the skin.
+
+    The integral along `x` is evaluated in closed form with the
+    integrals of Bardell's functions, `dx = (a/2) d\xi`, and the functions
+    along `y` of the skin are evaluated at `\eta_s = 2 y_s/b - 1`.
+
+    """
     cdef double [:, ::1] gtab
     cdef int i, k, j, l, c, row, col
     cdef double eta
@@ -126,6 +205,54 @@ def fkGf(double ys, double Fx, double a, double b, double bf, int m, int n,
           double x1w, double x1wr, double x2w, double x2wr,
           double y1w, double y1wr, double y2w, double y2wr,
           int size, int row0, int col0):
+    r"""Geometric stiffness matrix of the flange modelled as a beam
+
+    Integrates, along `x` at `y = y_s`, the geometric stiffness matrix of
+    the axial force of the flange.
+
+    Parameters
+    ----------
+    ys : float
+        Coordinate `y` of the stiffener on the skin, a length.
+    Fx : float
+        Axial force of the flange, tension positive.
+    a, b : float
+        Dimensions of the skin along `x` and `y`, lengths.
+    bf : float
+        Height of the flange, a length.
+    m, n : int
+        Numbers of terms of the approximation of the skin along `x` and `y`.
+    x1w, x1wr, x2w, x2wr, y1w, y1wr, y2w, y2wr : float
+        Boundary flags of the approximation functions of the skin: the
+        translation (``t``) and rotation (``r``) flags at the edges ``1`` and
+        ``2`` along ``x`` and ``y`` of each field ``u``, ``v``, ``w`` used by
+        the kernel, see :class:`.Shell`.
+    size : int
+        Number of rows and columns of the matrix.
+    row0, col0 : int
+        Row and column of the matrix where the block starts.
+
+    Returns
+    -------
+    kGf : scipy.sparse.coo_matrix
+        Matrix of shape ``(size, size)``. Only the upper
+        triangle is assembled; the caller symmetrizes it.
+
+    Notes
+    -----
+    The matrix is the Hessian of
+
+    .. math::
+
+        U_G = \frac{1}{2} \int_0^a F_x w_{,x}^2 \, dx
+
+    at `y = y_s`.
+
+    The integral along `x` is evaluated in closed form with the
+    integrals of Bardell's functions, `dx = (a/2) d\xi`, and the functions
+    along `y` of the skin are evaluated at `\eta_s = 2 y_s/b - 1`.
+
+    """
     cdef double [:, ::1] gtab
     cdef int i, k, j, l, c, row, col
     cdef double eta
@@ -189,14 +316,46 @@ def fkMf(double ys, double rho, double h, double hb, double hf, double a,
          double y1v, double y1vr, double y2v, double y2vr,
          double y1w, double y1wr, double y2w, double y2wr,
          int size, int row0, int col0):
-    r"""Mass matrix of the 1D flange of the blade stiffener
+    r"""Mass matrix of the flange of the blade stiffener modelled as a beam
 
     The flange, of height `b_f` and thickness `h_f`, is a beam along `x` at
-    `y = y_s`, below the panel, whose centroid is at the distance `d_f = b_f/2
-    + h_b + h/2` from the mid-surface of the panel, `h` being the thickness of
-    the panel and `h_b` the thickness of the stiffener's base. With the
-    rotations `\phi_x = -w_{,x}` and `\phi_y = -w_{,y}` of the panel, the
-    mass matrix is:
+    `y = y_s`, below the skin, whose centroid is at the distance `d_f = b_f/2
+    + h_b + h/2` from the mid-surface of the skin, `h` being the thickness of
+    the skin and `h_b` the thickness of the stiffener's base. The mass matrix
+    is integrated along `x` with the approximation functions of the skin.
+
+    Parameters
+    ----------
+    ys : float
+        Coordinate `y` of the stiffener.
+    rho : float
+        Density of the flange.
+    h : float
+        Thickness of the skin.
+    hb, hf : float
+        Thicknesses of the stiffener's base and of the flange.
+    a, b : float
+        Dimensions of the skin.
+    bf, df : float
+        Height of the flange and distance `d_f` of its centroid to the
+        mid-surface of the skin.
+    m, n : int
+        Number of terms along `x` and `y`.
+    x1u, x1ur, x2u, x2ur, x1v, x1vr, x2v, x2vr, x1w, x1wr, x2w, x2wr, y1u, y1ur, y2u, y2ur, y1v, y1vr, y2v, y2vr, y1w, y1wr, y2w, y2wr : float
+        Boundary flags of the approximation functions of the skin, see
+        :class:`.Shell`.
+    size, row0, col0 : int
+        Size of the global matrix and position of this matrix in it.
+
+    Returns
+    -------
+    kMf : :class:`scipy.sparse.coo_matrix`
+        Upper triangle of the mass matrix of the flange.
+
+    Notes
+    -----
+    With the rotations `\phi_x = -w_{,x}` and `\phi_y = -w_{,y}` of the
+    skin, the mass matrix is:
 
     .. math::
         \boldsymbol{M}_{sf} = \rho h_f b_f \int_x \boldsymbol{S}(x, y_s)^\top \boldsymbol{k}_{mf} \boldsymbol{S}(x, y_s) dx
@@ -216,50 +375,27 @@ def fkMf(double ys, double rho, double h, double hb, double hf, double a,
                    + \frac{(h + 2 h_b)^2}{4}
 
     obtained integrating the kinetic energy through the height of the
-    flange, see ``theory/stiffener/mass_matrix_1D_stiffeners.py`` and
-    ``theory/multidomain_panels/bladestiff1d_clt_donnell/``.
+    flange.
 
-    .. note:: Correction with respect to Eq. (26) of Castro et al. (2016)
-              [castro2016FlutterPanel]_, whose matrix `\boldsymbol{k}_{mf}` has `-2
-              d_f` in the terms coupling the displacements `u, v` and the
-              rotations `\phi_x, \phi_y`. The in-plane displacements of the
-              flange at its centroid are `u - d_f \phi_x` and `v - d_f
-              \phi_y`, and the term `-2 d_f u \phi_x` of `(u - d_f
-              \phi_x)^2` is shared by the two symmetric entries `(1, 4)` and
-              `(4, 1)` of `\boldsymbol{k}_{mf}`, which are then `-d_f`, consistent with
-              the term `d_f^2` of `k_{mf44}` and with the offset of the mass
-              matrix of the shells. Up to version 0.7.1 this kernel used `-2
-              d_f`, doubling the inertial coupling between the flange and the
-              panel. Eq. (27) of the same paper, for the stiffener's base, has
-              the same factor, `-2 d_b`, but the base is a :class:`.Shell`
-              with offset whose mass matrix uses `-d_b`.
+    This corrects Eq. (26) of Castro et al. [1]_, whose matrix
+    `\boldsymbol{k}_{mf}` has `-2 d_f` in the terms coupling the
+    displacements `u, v` and the rotations `\phi_x, \phi_y`. The in-plane
+    displacements of the flange at its centroid are `u - d_f \phi_x` and `v
+    - d_f \phi_y`, and the term `-2 d_f u \phi_x` of `(u - d_f \phi_x)^2` is
+    shared by the two symmetric entries `(1, 4)` and `(4, 1)` of
+    `\boldsymbol{k}_{mf}`, which are then `-d_f`, consistent with the term
+    `d_f^2` of `k_{mf44}` and with the offset of the mass matrix of the
+    shells. Up to version 0.7.1 this kernel used `-2 d_f`, doubling the
+    inertial coupling between the flange and the skin. Eq. (27) of the same
+    paper, for the stiffener's base, has the same factor, `-2 d_b`, but the
+    base is a :class:`.Shell` with offset whose mass matrix uses `-d_b`.
 
-    Parameters
+    References
     ----------
-    ys : float
-        Coordinate `y` of the stiffener.
-    rho : float
-        Density of the flange.
-    h : float
-        Thickness of the panel.
-    hb, hf : float
-        Thicknesses of the stiffener's base and of the flange.
-    a, b : float
-        Dimensions of the panel.
-    bf, df : float
-        Height of the flange and distance `d_f` of its centroid to the
-        mid-surface of the panel.
-    m, n : int
-        Number of terms along `x` and `y`.
-    x1u, ..., y2wr : float
-        Boundary conditions of the panel.
-    size, row0, col0 : int
-        Size of the global matrix and position of this matrix in it.
-
-    Returns
-    -------
-    kMf : :class:`scipy.sparse.coo_matrix`
-        Upper triangle of the mass matrix of the flange.
+    .. [1] Castro, S. G. P., Guimaraes, T. A. M., Rade, D. A., and Donadon,
+       M. V., "Flutter of stiffened composite panels considering the
+       stiffener's base as a structural element", Composite Structures,
+       140, 36-43, 2016. https://doi.org/10.1016/j.compstruct.2015.12.056
 
     """
     cdef double [:, ::1] gtab
