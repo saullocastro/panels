@@ -1,4 +1,5 @@
 r"""
+==========================================================================
 Saving and loading in a JSON + NumPy zip container (:mod:`panels.json_io`)
 ==========================================================================
 
@@ -8,8 +9,7 @@ The objects :class:`.Shell`, :class:`.StiffPanelBay`, with its stiffeners
 :class:`.BladeStiff1D` and :class:`.BladeStiff2D`, and :class:`.MultiDomain`
 are saved to and loaded from a zip file with::
 
-    from panels import Shell
-    from panels.shell import load
+    from panels.shell import Shell, load
 
     s = Shell(a=1., b=0.5, stack=[0, 90, 90, 0], plyt=1e-3,
               laminaprop=(71e9, 0.33), m=8, n=8)
@@ -631,6 +631,22 @@ def save(obj, fname):
         If ``obj`` is not one of the supported classes, or if one of its
         stored attributes has a value that cannot be saved, e.g. a function.
 
+    Examples
+    --------
+    Saving a :class:`.Shell` in memory and loading it back with
+    :func:`.load`:
+
+    >>> import io
+    >>> from panels.shell import Shell
+    >>> from panels import json_io
+    >>> s = Shell(a=1., b=0.5, stack=[0, 90, 90, 0], plyt=1e-3,
+    ...           laminaprop=(71e9, 0.33), m=8, n=8)
+    >>> buf = io.BytesIO()
+    >>> json_io.save(s, buf)
+    >>> s2 = json_io.load(buf)
+    >>> print(type(s2).__name__, s2.a, s2.b, s2.stack)
+    Shell 1.0 0.5 [0, 90, 90, 0]
+
     """
     for typename, cls, encode, _ in _classes():
         if isinstance(obj, cls):
@@ -753,6 +769,22 @@ def load(fname, max_size=MAX_SIZE):
         an older version, is not valid, has unknown keys, missing or extra
         members, exceeds ``max_size``, or was saved by a newer format
         version.
+
+    Examples
+    --------
+    Loading a :class:`.Shell` saved with :func:`.save` to a file; the type is
+    the one stored in the file:
+
+    >>> import os, tempfile
+    >>> from panels.shell import Shell
+    >>> from panels import json_io
+    >>> s = Shell(a=1., b=0.5, stack=[0, 90, 90, 0], plyt=1e-3,
+    ...           laminaprop=(71e9, 0.33), m=8, n=8)
+    >>> fname = os.path.join(tempfile.mkdtemp(), 'plate.shell.zip')
+    >>> json_io.save(s, fname)
+    >>> s2 = json_io.load(fname)
+    >>> print(type(s2).__name__, s2.model, s2.get_size())
+    Shell plate_clpt_donnell 192
 
     """
     return _load(fname, max_size=max_size)[1]

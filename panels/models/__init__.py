@@ -39,9 +39,6 @@ SUFIX used to indicate additional information
 - num - stiffness matrices integrated numerically
 
 
-Available models
-----------------
-
 The available models, which are selected with ``Shell.model``, are:
 
 - ``'plate_clpt_donnell'``: flat plates, classical laminated plate theory
@@ -50,12 +47,12 @@ The available models, which are selected with ``Shell.model``, are:
 - ``'plate_clpt_gl'``: flat plates, CLPT with the Green-Lagrange membrane
   strains, which vanish for any rigid rotation, and the changes of
   curvature of ``'plate_clpt_donnell'``, 3 DOFs ``u, v, w``. For assemblies
-  of plates with large rotations, e.g. a wing box, see :ref:`plate_clpt_gl`.
+  of plates with large rotations, e.g. a wing box.
 
 - ``'plate_clpt_tl'``: flat plates, total-Lagrangian Kirchhoff-Love: the
   Green-Lagrange membrane strains of ``'plate_clpt_gl'`` and the changes of
   curvature of the deformed normal, all invariant under rigid rotations,
-  3 DOFs ``u, v, w``, see :ref:`plate_clpt_tl`.
+  3 DOFs ``u, v, w``.
 
 - ``'cylshell_clpt_donnell'``: cylindrical shells, CLPT with the
   Donnell-Mushtari-Vlasov (shallow shell) kinematics, 3 DOFs ``u, v, w``.
@@ -125,7 +122,7 @@ DOFs have the strains of the CLPT:
   besides the ``w-w`` block, and the linear kernels are those of
   ``'plate_clpt_donnell'``. The changes of curvature are measured in the
   fixed frame of the plate, which limits the large rotations to those
-  carried by the membrane strains, see :ref:`plate_clpt_gl`.
+  carried by the membrane strains.
 
 - Total-Lagrangian Kirchhoff-Love, ``'plate_clpt_tl'``: the membrane strains
   above and the changes of curvature of the deformed mid-surface
@@ -146,8 +143,7 @@ DOFs have the strains of the CLPT:
   1`, see :func:`panels.shell.gauss_points`, about twice the cost of
   ``'plate_clpt_gl'``; ``nx = gauss_points(m)``, ``ny = gauss_points(n)``
   give the points of ``'plate_clpt_gl'``, not exact but with the same
-  results in practice at about half the cost, see :ref:`plate_clpt_tl`. The
-  analytical kernels are those of ``'plate_clpt_gl'``.
+  results in practice at about half the cost. The analytical kernels are those of ``'plate_clpt_gl'``.
 
 - Sanders-Koiter kinematics, ``'cylshell_clpt_sanders'``, Sanders (1963)
   [1]_. With `y = r \theta` the arc length and `\phi_x =
@@ -199,7 +195,7 @@ not an independent variable when `z = 0` is a face of the laminate,
 `d = \pm h/2`. Panels with different offsets are connected at their common
 reference surface, with the rotations `\theta_x = \phi_x - (4 d^2/h^2)
 (\phi_x + w_{,x})` at `z = 0`, see
-:mod:`panels.multidomain.connections.kCsdt` and :ref:`tsdt_offset`.
+:mod:`panels.multidomain.connections.kCsdt`.
 The cylinders with the Donnell kinematics are the plate models with the
 hoop strain `w/r` and the curvature term of the piston theory, see
 :meth:`.Shell.calc_kA`. With the Sanders-Koiter kinematics, the rotation of
