@@ -1,3 +1,12 @@
+"""Geometric stiffness matrix from a constant or a computed prestress
+
+Linear buckling of a laminated panel under compression for five models,
+with the geometric stiffness of a constant ``Nxx`` and with that of the
+pre-buckling static solution of a load distributed along ``x = a``
+(``calc_kG(c=c0)``), also when the laminate stiffness ``ABDnxny`` is given
+at the integration points; the first load multiplier is compared with
+regression values of the implementation.
+"""
 import sys
 sys.path.append('../..')
 

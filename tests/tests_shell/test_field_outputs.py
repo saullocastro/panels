@@ -1,3 +1,10 @@
+"""Field outputs of a static analysis
+
+``Shell.uvw``, ``Shell.stress`` and ``Shell.strain`` of a laminated panel
+under an in-plane load distributed along ``x = 0``, for five models: the
+maxima and minima of ``w``, ``Nxx`` and ``eyy`` against regression values
+of the implementation.
+"""
 import sys
 sys.path.append('../../..')
 

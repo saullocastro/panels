@@ -1,3 +1,10 @@
+"""Natural frequencies of a laminated panel, with and without prestress
+
+For nine plate and cylindrical-shell models with a large radius, the first
+natural frequency, with the geometric stiffness of ``Nxx = -60``, ``Nyy =
+-5`` added or not, against regression values of the implementation, the
+same for all models.
+"""
 import sys
 sys.path.append('../..')
 

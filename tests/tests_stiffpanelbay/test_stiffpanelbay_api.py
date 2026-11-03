@@ -1,3 +1,12 @@
+"""Interface of :class:`panels.stiffpanelbay.StiffPanelBay`
+
+Building a bay with panels and blade stiffeners (``BladeStiff1D`` and
+``BladeStiff2D``) and the errors for invalid input; the mass matrix; the
+external force vector of point loads on the skin and on a flange; the
+aerodynamic matrices ``calc_kA`` and ``calc_cA`` against those of a single
+shell over the bay; the effect of the stiffeners on the buckling load and on
+the mass; field outputs, plots, and saving and loading a bay.
+"""
 import sys
 sys.path.append('../..')
 

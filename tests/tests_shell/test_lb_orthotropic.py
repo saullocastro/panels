@@ -1,3 +1,10 @@
+"""Linear buckling of a laminated cylindrical panel under compression and
+shear
+
+``cylshell_clpt_donnell`` with the default simply supported edges, under
+``Nxx = -10`` and ``Nxy = 1``: the first load multiplier against a
+regression value of the implementation.
+"""
 import sys
 sys.path.append('../..')
 

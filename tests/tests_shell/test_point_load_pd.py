@@ -1,3 +1,10 @@
+"""Prescribed displacement at a point
+
+The deflection ``w`` of a point of the free edge ``x = a`` of a plate and of
+a cylindrical panel is prescribed with a penalty stiffness of the
+multi-domain connections, ``Shell.add_point_pd``; the maximum ``w`` of the
+linear static solution equals the prescribed value.
+"""
 import sys
 sys.path.append('../..')
 

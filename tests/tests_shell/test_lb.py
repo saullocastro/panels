@@ -1,3 +1,10 @@
+"""Linear buckling of simply supported and partially free panels
+
+The first load multiplier of a laminated panel under uniform ``Nxx`` or
+``Nyy``, simply supported (SSSS) or with one free edge, for the CLPT plate
+and the CLPT cylindrical shells with a large radius, against regression
+values of the implementation, the same for the three models.
+"""
 import sys
 sys.path.append('../..')
 

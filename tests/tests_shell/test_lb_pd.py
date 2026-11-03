@@ -1,3 +1,10 @@
+"""Linear buckling with the prestress of a prescribed edge displacement
+
+The displacement of the edge ``x = a`` (``u``) or ``y = b`` (``v``) is
+prescribed with a penalty stiffness of the multi-domain connections, the
+linear static solution gives the prestress and the buckling analysis runs;
+the load multipliers are printed and no value is checked.
+"""
 import sys
 sys.path.append('../..')
 

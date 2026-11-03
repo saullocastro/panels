@@ -1,3 +1,10 @@
+"""Linear buckling of an isotropic cylindrical panel under compression and
+shear
+
+Smoke test: the buckling analysis of ``cylshell_clpt_donnell`` with the
+default simply supported edges runs and its first mode is plotted; no value
+is checked.
+"""
 import sys
 sys.path.append('../..')
 

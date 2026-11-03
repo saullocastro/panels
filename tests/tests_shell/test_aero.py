@@ -1,3 +1,11 @@
+"""Flutter of a panel with the aerodynamic stiffness of the piston theory
+
+For each model, with and without the in-plane prestress ``Nxx = -60``,
+``Nyy = -5``, the aerodynamic pressure parameter ``beta`` is increased until
+the first complex natural frequency of ``kC + kG + kA``, with the mass
+matrix ``kM``, appears: the flutter onset. The ``beta`` of the onset is
+compared with regression values of the implementation, within 0.1.
+"""
 import sys
 sys.path.append('../..')
 
@@ -36,7 +44,7 @@ def test_aero():
                 s.Nxx = 0
                 s.Nyy = 0
 
-            # testing commong methodology based on betastar
+            # common methodology based on betastar
             if pre_stress:
                 betasstar = np.linspace(50, 350, 40)
             else:
