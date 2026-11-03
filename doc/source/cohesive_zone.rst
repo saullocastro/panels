@@ -25,8 +25,7 @@ The implementation is found in:
   :meth:`.MultiDomain.calc_k_dmg`, :meth:`.MultiDomain.correct_separation`,
   :meth:`.MultiDomain.calc_kT_TSL`, :meth:`.MultiDomain.reaction_line_pd_xcte`
   and :meth:`.MultiDomain.force_out_plane_damage`;
-- the nonlinear driver ``tests/multidomain/test_dcb_damage.py`` and its
-  counterpart for the validation notebooks, ``notebooks/dcb_utils.py``.
+- the nonlinear driver ``tests/multidomain/test_dcb_damage.py``.
 
 The model of the thesis is the DCB of its Section 7.3: `L = 65` mm, `b = 25`
 mm, `a_0 = 48` mm, arms `[0]_{15}` with ply thickness 0.14 mm of
@@ -34,8 +33,7 @@ AS4D/PEKK-FC, `G_{Ic} = 1.12` N/mm, three domains per arm, of which the first
 one, with length `a_1 = L - a_0 = 17` mm, carries the cohesive zone. It is
 the model of the sections below up to the solution procedure and of
 ``tests/multidomain/test_dcb_damage.py``. The convergence study and the
-validation use the model of ``notebooks/dcb_utils.py``, in which the
-cohesive domain is followed by a perfect bond, on the longer reference DCB
+validation use a model in which the cohesive domain is followed by a perfect bond, on the longer reference DCB
 of the convergence study.
 
 
@@ -536,8 +534,8 @@ library defaults are unchanged.
 Solution procedure
 ------------------
 
-The drivers, ``tests/multidomain/test_dcb_damage.py`` and
-``notebooks/dcb_utils.py``, solve Eq. :eq:`cz-residual` under displacement
+The driver of ``tests/multidomain/test_dcb_damage.py`` and that of the
+convergence study and of the validation solve Eq. :eq:`cz-residual` under displacement
 control with the modified Newton-Raphson method of Section 5.3 of the thesis.
 The changes described below modify the iterations but, except for the
 convergence criterion, not the equations being solved.
@@ -657,8 +655,8 @@ prescribed displacements itself does not change: sub-increments are only
 created when an increment fails.
 
 **Effect of the consistent tangent and of the safeguards.**
-``notebooks/dcb_mode_I_solver_study.py`` solves the reference DCB of the
-convergence study below, case A, with parts of the procedure switched off.
+The reference DCB of the convergence study below, case A, is solved with
+parts of the procedure switched off.
 On the
 reference discretisation (`m_{tsl} = 25`, `n_x = 180`) the full procedure
 takes 139 iterations in 38 increments, without bisection, and the consistent
@@ -677,7 +675,7 @@ converge in 8, 12 and 47 iterations, but at 6.4 mm the ratio stagnates at
 0.45--0.47 with steps of `2^{-6}` to `2^{-2}`. With the bisection as well,
 the analysis completes with 3 bisected increments and 384 iterations. The
 bisection is therefore the safeguard of the coarse discretisations, see the
-convergence study. In the 17 nonlinear runs of the validation notebooks, 980
+convergence study. In the 17 nonlinear runs of the validation, 980
 openings, every opening converged without bisection in 1 to 8 iterations,
 2.84 on average.
 
@@ -759,7 +757,8 @@ compressive moduli), `\nu_{12} = 0.316`, `G_{12} = 5.19` GPa, `G_{Ic} =
   conduction-welded joints of the same material by Tijs et al. (2022), Compos.
   Struct. 281, 114964.
 
-The model of ``notebooks/dcb_utils.py`` is used with ``conn_method='penalty'``
+The model, with the cohesive domain followed by a perfect bond, is used
+with ``conn_method='penalty'``
 and the driver described in :ref:`cohesive_zone_solution`. The cohesive
 domain is `L_{tsl} = 24` mm long, of the 52 mm ligament, and the opening goes
 up to `\delta = 8` mm in 38 increments: 23 equal increments up to 5 mm and
@@ -799,10 +798,7 @@ cohesive domain (`L_{tsl} = 24 \to 17` mm). The metrics are:
 - the number of bisected increments, the number of Newton-Raphson iterations
   and the wall time.
 
-The study is reproduced by ``notebooks/dcb_mode_I_convergence_study.py``, and
-the metrics and load curves of all runs are stored in
-``notebooks/results/dcb_mode_I_convergence_study.json``. The results are
-those of panels 0.14.0. The wall and CPU times are those of the first
+The results are those of panels 0.14.0. The wall and CPU times are those of the first
 computation, with panels 0.13.11, on a laptop with 16 threads, eight runs at a
 time with two threads each, so the wall times indicate the relative cost; the
 reference run takes 10 min in this setting and 4.5 min of wall time (17 min of
@@ -1584,14 +1580,7 @@ Krueger (2008) [krueger2008DCB]_, Tijs et al. (2022) [tijs2022Interlaminar]_,
 Leciñana et al. (2023) [lecinana2023Fatigue]_ and the PhD thesis of Tijs
 (2023) [tijs2023PhD]_, plus Krueger (2012) [krueger2012MMB]_, whose benchmarks
 are for the mixed-mode bending specimen and are only recorded, see below.
-Each reference has a notebook in ``notebooks/`` with a dictionary of the FE
-cases and one of the experimental tests, a comparison table, a plot and a
-discussion; the ``panels`` results are stored in ``notebooks/results/*.npz``
-and collected by ``notebooks/dcb_mode_I_validation_summary.ipynb``. The results were
-obtained with panels 0.14.0; the run times stored with them were measured again
-with panels 0.14.0 and structsolve 0.9.2, one run at a time, together with the
-null-space runs of ``notebooks/conn_method_comparison.ipynb``, as the key
-``time_note`` of each file states.
+The results were obtained with panels 0.14.0.
 
 The case of Camanho et al. (2003) is kept for reference, but it is not used
 to validate the model: the FE and experimental load-opening curves of the
@@ -1600,10 +1589,9 @@ than transverse shear and root rotation explain, and the reference does not
 give enough detail to find out why; the experimental peak, 147.1 N, is 6%
 above the corrected beam theory with the same `G_{Ic}`; and the FE model has
 about one decohesion element per cohesive zone length, which overpredicts the
-peak load [turon2007MeshSize]_. See the note in
-``notebooks/dcb_camanho2003.ipynb``.
+peak load [turon2007MeshSize]_.
 
-**Model.** ``notebooks/dcb_utils.py`` builds a symmetric DCB: CLPT arms, far
+**Model.** The model is a symmetric DCB: CLPT arms, far
 end clamped, arm tips opened to `\pm\delta/2` by prescribed displacements,
 the load being the reaction of the prescribed displacement. The bonded region
 is split into a cohesive domain (``'SB_TSL'``, bilinear law) of length
@@ -1634,7 +1622,7 @@ bending stiffness `D_{11} b` of the arm.
 in the table of peak loads below); curves were read from the figures by eye
 (`^{d}`), with an uncertainty of about 2--5 N, and `^{m}` marks the mean of
 the digitised peaks of several tests (full weld: 150 and 170 N; weld center:
-122--136 N). The notebooks state the assumptions needed where the references
+122--136 N). Assumptions are needed where the references
 are incomplete: the opening convention (Alfano and Crisfield plot the
 displacement of one arm, `\delta = 2u`), the crack length of one test of Tijs
 et al. (2022) inferred from its compliance, and the elastic properties and
@@ -1912,14 +1900,12 @@ corrected beam theory for the unidirectional specimen and 5.2% below it for
 the multidirectional one, whose cohesive zone (`l_{cz}` = 1.99 mm with
 `\tau_o` = 40 MPa) is not small compared with its 2.0 mm arms. Raising
 `\tau_o` from 40 to 60 MPa moves the peaks by 1.1 and 1.2% only, so the
-comparison does not rest on that choice. See
-``notebooks/dcb_krueger2008.ipynb``.
+comparison does not rest on that choice.
 
 **Krueger (2012).** NASA/CR-2012-217562 [krueger2012MMB]_ gives benchmarks
 for the mixed-mode bending specimen of IM7/8552 at `G_{II}/G_T` = 0.2, 0.5 and
 0.8, with the critical points (1.64 mm, 128.5 N), (1.34 mm, 385 N) and (1.65
-mm, 751 N). They are recorded in ``notebooks/krueger2012_mmb_benchmark.ipynb``
-but not simulated: the damage of ``'SB_TSL'`` is driven by the normal
+mm, 751 N). They are not simulated: the damage of ``'SB_TSL'`` is driven by the normal
 separation only, and the loading lever is not modelled.
 
 

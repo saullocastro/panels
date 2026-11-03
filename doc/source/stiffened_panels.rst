@@ -62,6 +62,3 @@ displacements of the skin and of the stiffeners are calculated with
 and plotted with :meth:`.StiffPanelBay.plot_skin` and
 :meth:`.StiffPanelBay.plot_stiffener`. The flutter of the bay with the
 piston theory is described in :ref:`aeroelasticity`.
-
-The construction of a bay and the linear buckling analyses are shown in
-:doc:`ex_stiffpanelbay`.

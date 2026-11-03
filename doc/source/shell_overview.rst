@@ -96,17 +96,14 @@ Analyses
 The methods above have the signatures expected by the solvers of
 ``structsolve``:
 
-- linear static: ``solve(kC, fext)``, see :doc:`ex_linear_static`;
+- linear static: ``solve(kC, fext)``;
 - linear buckling: ``lb(kC, kG)``, with `\boldsymbol{K}_G` of the constant stress
-  resultants ``Nxx``, ``Nyy``, ``Nxy`` or of a static solution ``c``, see
-  :doc:`ex_linear_buckling`;
-- frequency: ``freq(kC, kM)``, with an optional prestress `\boldsymbol{K}_G`, see
-  :doc:`ex_frequency`;
+  resultants ``Nxx``, ``Nyy``, ``Nxy`` or of a static solution ``c``;
+- frequency: ``freq(kC, kM)``, with an optional prestress `\boldsymbol{K}_G`;
 - panel flutter: ``freq(kC + kG + kA, kM)``, see :ref:`aeroelasticity`;
 - non-linear static: :class:`structsolve.Analysis` with ``calc_fext``,
   ``calc_fint``, ``calc_kC`` and ``calc_kG``, with the Newton-Raphson or
-  the arc-length methods, see :doc:`ex_newton_raphson` and
-  :doc:`ex_arc_length`;
+  the arc-length methods;
 - follower pressures, in all the analyses above, see
   :ref:`follower_pressure`.
 

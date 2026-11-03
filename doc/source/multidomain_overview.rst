@@ -114,16 +114,13 @@ assemblies, and show how to build others:
 
 - :func:`.create_cylinder`, :func:`.create_cylinder_blade_stiffened` and
   the analyses of :mod:`panels.multidomain.cylinder` and
-  :mod:`panels.multidomain.cylinder_blade_stiffened`, see
-  :doc:`ex_multidomain_cylinder`;
+  :mod:`panels.multidomain.cylinder_blade_stiffened`;
 - the panel with one T-stiffener of
   :mod:`panels.multidomain.tstiff2d_1stiff_compression`,
   :mod:`panels.multidomain.tstiff2d_1stiff_freq` and
-  :mod:`panels.multidomain.tstiff2d_1stiff_flutter`, see
-  :doc:`ex_multidomain_tstiff2d`;
+  :mod:`panels.multidomain.tstiff2d_1stiff_flutter`;
 - the rectangular wing-box of :mod:`panels.multidomain.wingbox`, with
-  skins, spars, ribs and optionally blade stringers, see
-  :doc:`ex_multidomain_wingbox`.
+  skins, spars, ribs and optionally blade stringers.
 
 
 Example

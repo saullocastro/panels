@@ -519,8 +519,8 @@ Implementation and verification
 - ``tests/multidomain/test_follower_pressure_multidomain.py``: the
   follower loads in a :class:`.MultiDomain` assembly, and the symmetry of
   the load stiffness of a closed cylinder reduced by the null-space method.
-- ``tests/tests_shell/test_follower_pressure_validation.py`` and the
-  notebooks of :ref:`ex_follower_pressure`: the ring closed forms, finite
+- ``tests/tests_shell/test_follower_pressure_validation.py``: the ring
+  closed forms, finite
   cylinders, [nasa2020SP8007]_, [kardomateas1993Orthotropic]_,
   [han2004SandwichCylinder]_, [kardomateas2003Sandwich]_ and
   [schweizerhof1984Pressure]_.

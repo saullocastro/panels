@@ -40,8 +40,7 @@ force vector,
 which is what delivers the quadratic convergence of the Newton-Raphson
 iterations `\boldsymbol{K}_T(\boldsymbol{c}_k) \Delta
 \boldsymbol{c} = \boldsymbol{F}_{ext} -
-\boldsymbol{F}_{int}(\boldsymbol{c}_k)`, see
-:doc:`ex_newton_raphson`. :ref:`tangent_kTv` uses the same notation, with
+\boldsymbol{F}_{int}(\boldsymbol{c}_k)`. :ref:`tangent_kTv` uses the same notation, with
 the membrane stresses `\tilde{\boldsymbol{N}}` of :eq:`donnell-KG`.
 
 The tangent stiffness matrix is classically decomposed as

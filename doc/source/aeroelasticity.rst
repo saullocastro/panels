@@ -48,9 +48,9 @@ approach each other and coalesce at the flutter onset, where the
 eigenvalues become complex. The sign conventions of `\boldsymbol{K}_A` and the
 damping are given in :meth:`.Shell.calc_kA` and :meth:`.Shell.calc_cA`.
 
-The examples are :doc:`ex_flutter`, for one domain with and without
-prestress, and the panel with a T-stiffener of
-:doc:`ex_multidomain_tstiff2d`. The aerodynamic matrix of a
+The flutter analysis applies to one domain, with and without prestress,
+and to assemblies such as the panel with a T-stiffener of
+:func:`.tstiff2d_1stiff_flutter`. The aerodynamic matrix of a
 :class:`.StiffPanelBay` is the sum of those of its panels, and does not
 change when the skin is divided into panels:
 
