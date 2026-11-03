@@ -198,7 +198,7 @@ History
     - The kernels `fkCSB11_dmg`, `fkCSB12_dmg` and `fkCSB22_dmg` take the
       distances `dt` and `db` from each mid-surface to the interface
     - Validation of the cohesive zone against mode I DCB results in the
-      literature, in `notebooks/`, with a convergence study
+      literature, in notebooks, with a convergence study
     - Fixed `StiffPanelBay.save()` with `composites>=0.9.0`
 * version 0.6.21 (2026-09-18)
     - Fixed the mass of the base of `BladeStiff2D`, which was missing, and the
@@ -226,7 +226,7 @@ History
       `c_cte` no longer reaches the nogil kernels, and a model that needs a
       radius raises instead of computing with `r = 0`
     - Reproduction of Stamatelos and Labeas (Computation 2023, 11, 110) in
-      `notebooks/stamatelos_labeas_2023.ipynb`
+      a notebook
     - Tangent stiffness matrix that is the exact derivative of the internal
       force vector, giving quadratic convergence to the Newton-Raphson method
     - `Shell` and `MultiDomain` can be passed directly to
