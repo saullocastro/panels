@@ -5,6 +5,33 @@
 #cython: initializedcheck=False
 #cython: profile=False
 #cython: infer_types=False
+r"""
+Kernels of the connection between the skin and the flange of the blade
+stiffener modelled as a plate
+
+Penalty stiffness matrices of the connection between the skin (or the base)
+at `y = y_s` and the edge `\eta_f = -1` of the flange of
+:class:`.BladeStiff2D`, a plate normal to the skin: the block of the skin
+:func:`fkCss`, the coupling block :func:`fkCsf` and the block of the flange
+:func:`fkCff`, as :class:`scipy.sparse.coo_matrix`. The degrees of freedom
+of each term are ``u, v, w`` of the skin and ``u_f, v_f, w_f`` of the
+flange, in its own axes.
+
+Notes
+-----
+The penalty energy of the connection is
+
+.. math::
+
+    U = \frac{1}{2} \int_0^a k_t \left[(u - u_f)^2 + (v - w_f)^2 + (w +
+    v_f)^2\right] + k_r (w_{,y} - w_{f,y})^2 \, dx
+
+with `u, v, w` and `w_{,y}` of the skin at `y = y_s`, and `u_f, v_f, w_f`
+and `w_{f,y}` of the flange at its edge `\eta_f = -1`, the local axes of
+the flange being rotated by 90 degrees about `x`. Each kernel gives the
+Hessian of one part of `U`.
+
+"""
 from scipy.sparse import coo_matrix
 import numpy as np
 
@@ -31,6 +58,59 @@ def fkCss(double kt, double kr, double ys, double a, double b, int m, int n,
           double y1v, double y1vr, double y2v, double y2vr,
           double y1w, double y1wr, double y2w, double y2wr,
           int size, int row0, int col0):
+    r"""Penalty stiffness matrix of the connection, block of the skin
+
+    Block of the Ritz constants of the skin of the penalty stiffness
+    matrix that connects the skin at `y = y_s` to the flange.
+
+    Parameters
+    ----------
+    kt, kr : float
+        Translational and rotational penalty constants of the connection,
+        force per unit area and force per unit length, see
+        :func:`.calc_kt_kr`.
+    ys : float
+        Coordinate `y` of the stiffener on the skin, a length.
+    a, b : float
+        Dimensions of the skin along `x` and `y`, lengths.
+    m, n : int
+        Numbers of terms of the approximation of the skin along `x` and `y`.
+    x1u, x1ur, x2u, x2ur, ..., y1w, y1wr, y2w, y2wr : float
+        Boundary flags of the approximation functions of the skin: the
+        translation (``t``) and rotation (``r``) flags at the edges ``1`` and
+        ``2`` along ``x`` and ``y`` of each field ``u``, ``v``, ``w`` used by
+        the kernel, see :class:`.Shell`.
+    size : int
+        Number of rows and columns of the matrix.
+    row0, col0 : int
+        Row and column of the matrix where the block starts.
+
+    Returns
+    -------
+    kCss : scipy.sparse.coo_matrix
+        Matrix of shape ``(size, size)``. Only the upper
+        triangle is assembled; the caller symmetrizes it.
+
+    Notes
+    -----
+    Hessian of the penalty energy of the module with respect to the
+    Ritz constants of the skin:
+
+    .. math::
+
+        \boldsymbol{K}_{ss} = \int_0^a k_t \left[(\boldsymbol{S}^u)^\top
+        \boldsymbol{S}^u + (\boldsymbol{S}^v)^\top \boldsymbol{S}^v +
+        (\boldsymbol{S}^w)^\top \boldsymbol{S}^w\right] + k_r
+        (\boldsymbol{S}^w_{,y})^\top \boldsymbol{S}^w_{,y} \, dx
+
+    with the rows `\boldsymbol{S}` of the approximation functions of the skin
+    at `y = y_s`.
+
+    The integral along `x` is evaluated in closed form with the
+    integrals of Bardell's functions, `dx = (a/2) d\xi`, and the functions
+    along `y` of the skin are evaluated at `\eta_s = 2 y_s/b - 1`.
+
+    """
     cdef double [:, ::1] gtab
     cdef int i, k, j, l, c, row, col
     cdef double eta
@@ -119,6 +199,65 @@ def fkCsf(double kt, double kr, double ys, double a, double b, double bf,
           double y1vf, double y1vrf, double y2vf, double y2vrf,
           double y1wf, double y1wrf, double y2wf, double y2wrf,
           int size, int row0, int col0):
+    r"""Penalty stiffness matrix of the connection, coupling block
+
+    Block coupling the Ritz constants of the skin (rows) and of the
+    flange (columns) of the penalty stiffness matrix of the connection,
+    assembled in full.
+
+    Parameters
+    ----------
+    kt, kr : float
+        Translational and rotational penalty constants of the connection,
+        force per unit area and force per unit length, see
+        :func:`.calc_kt_kr`.
+    ys : float
+        Coordinate `y` of the stiffener on the skin, a length.
+    a, b : float
+        Dimensions of the skin along `x` and `y`, lengths.
+    bf : float
+        Height of the flange, its width `b_f` along its own `y`, a length.
+    m, n : int
+        Numbers of terms of the approximation of the skin along `x` and `y`.
+    m1, n1 : int
+        Numbers of terms of the approximation of the flange.
+    x1u, x1ur, x2u, x2ur, ..., y1w, y1wr, y2w, y2wr : float
+        Boundary flags of the approximation functions of the skin: the
+        translation (``t``) and rotation (``r``) flags at the edges ``1`` and
+        ``2`` along ``x`` and ``y`` of each field ``u``, ``v``, ``w`` used by
+        the kernel, see :class:`.Shell`.
+    x1uf, x1urf, ..., y2wf, y2wrf : float
+        Boundary flags of the approximation functions of the flange, in the
+        same order as those of the skin.
+    size : int
+        Number of rows and columns of the matrix.
+    row0, col0 : int
+        Row and column of the matrix where the block starts.
+
+    Returns
+    -------
+    kCsf : scipy.sparse.coo_matrix
+        Matrix of shape ``(size, size)``. The block is assembled in full.
+
+    Notes
+    -----
+    Mixed second derivative of the penalty energy of the module:
+
+    .. math::
+
+        \boldsymbol{K}_{sf} = -\int_0^a k_t \left[(\boldsymbol{S}^u)^\top
+        \boldsymbol{S}^{u_f} + (\boldsymbol{S}^v)^\top \boldsymbol{S}^{w_f} -
+        (\boldsymbol{S}^w)^\top \boldsymbol{S}^{v_f}\right] + k_r
+        (\boldsymbol{S}^w_{,y})^\top \boldsymbol{S}^{w_f}_{,y} \, dx
+
+    with the rows `\boldsymbol{S}` of the approximation functions of the skin
+    at `y = y_s` and those of the flange at its edge `\eta_f = -1`.
+
+    The integral along `x` is evaluated in closed form with the
+    integrals of Bardell's functions, `dx = (a/2) d\xi`, and the functions
+    along `y` of the skin are evaluated at `\eta_s = 2 y_s/b - 1`.
+
+    """
     cdef double [:, ::1] gtab, gtabf
     cdef int i, j, k1, l1, c, row, col
     cdef double eta
@@ -211,6 +350,56 @@ def fkCff(double kt, double kr, double a, double bf, int m1, int n1,
           double y1vf, double y1vrf, double y2vf, double y2vrf,
           double y1wf, double y1wrf, double y2wf, double y2wrf,
           int size, int row0, int col0):
+    r"""Penalty stiffness matrix of the connection, block of the flange
+
+    Block of the Ritz constants of the flange of the penalty stiffness
+    matrix that connects its edge `\eta_f = -1` to the skin.
+
+    Parameters
+    ----------
+    kt, kr : float
+        Translational and rotational penalty constants of the connection,
+        force per unit area and force per unit length, see
+        :func:`.calc_kt_kr`.
+    a : float
+        Length of the skin and of the flange along `x`.
+    bf : float
+        Height of the flange, its width `b_f` along its own `y`, a length.
+    m1, n1 : int
+        Numbers of terms of the approximation of the flange.
+    x1uf, x1urf, ..., y2wf, y2wrf : float
+        Boundary flags of the approximation functions of the flange, in the
+        same order as those of the skin.
+    size : int
+        Number of rows and columns of the matrix.
+    row0, col0 : int
+        Row and column of the matrix where the block starts.
+
+    Returns
+    -------
+    kCff : scipy.sparse.coo_matrix
+        Matrix of shape ``(size, size)``. Only the upper
+        triangle is assembled; the caller symmetrizes it.
+
+    Notes
+    -----
+    Hessian of the penalty energy of the module with respect to the
+    Ritz constants of the flange:
+
+    .. math::
+
+        \boldsymbol{K}_{ff} = \int_0^a k_t \left[(\boldsymbol{S}^{u_f})^\top
+        \boldsymbol{S}^{u_f} + (\boldsymbol{S}^{v_f})^\top \boldsymbol{S}^{v_f}
+        + (\boldsymbol{S}^{w_f})^\top \boldsymbol{S}^{w_f}\right] + k_r
+        (\boldsymbol{S}^{w_f}_{,y})^\top \boldsymbol{S}^{w_f}_{,y} \, dx
+
+    with the rows `\boldsymbol{S}` of the approximation functions of the flange
+    at its edge `\eta_f = -1`, `w_{f,y} = (2/b_f) w_{f,\eta}`.
+
+    The integral along `x` is evaluated in closed form with the
+    integrals of Bardell's functions, `dx = (a/2) d\xi`, with `a` the length of the flange.
+
+    """
     cdef double [:, ::1] gtabf
     cdef int i1, k1, j1, l1, c, row, col
 
