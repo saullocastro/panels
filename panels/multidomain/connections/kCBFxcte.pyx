@@ -9,38 +9,76 @@
 r"""
 Kernels of the base-flange connection ``'BFxcte'``
 
-Connection along `y` between the edge `x_1 =` ``xcte1`` of the stiffener's
-base, or skin, ``p1``, and the edge `x_2 =` ``xcte2`` of the flange ``p2``,
-normal to ``p1``. With the local axes of the flange rotated by 90 degrees
-about the common axis `y`, the penalty energy is:
+Penalty stiffness matrices of the connection along `y` between the edge
+`x_1 =` ``xcte1`` of the stiffener's base, or skin, ``p1``, and the
+edge `x_2 =` ``xcte2`` of the flange ``p2``, normal to ``p1``, the
+local axes of the flange being those of ``p1`` rotated by 90 degrees about
+the common axis `y`. For the models based on the classical laminated
+plate theory (CLPT), with 3 DOFs `u, v, w` per term, :func:`.fkCBFxcte11`
+gives the block of the base, :func:`.fkCBFxcte12` the coupling block,
+rows of the base and columns of the flange, and :func:`.fkCBFxcte22` the
+block of the flange. For the models based on shear deformation theories,
+e.g. ``'plate_fsdt_donnell'`` or ``'cylshell_tsdt_sanders'``, with 5 DOFs
+`u, v, w, \phi_x, \phi_y` per term, the same blocks are given by
+:func:`.fkCBFxcte11_sdt`, :func:`.fkCBFxcte12_sdt` and
+:func:`.fkCBFxcte22_sdt`. The blocks of a single panel are returned as
+their upper triangle. With the default ``conn_method='null-space'`` of
+:class:`.MultiDomain` the same quantities are imposed exactly, see
+:mod:`panels.multidomain.connections.nullspace`.
+
+Notes
+-----
+With the local axes of the flange rotated by 90 degrees about the common
+axis `y`, the penalty energy is:
 
 .. math::
 
-    U = \frac{1}{2} \int_y k_t \left[ (u_1 - w_2)^2 + (v_1 - v_2)^2 +
+    U = \frac{1}{2} \int_0^{b_1} k_t \left[ (u_1 - w_2)^2 + (v_1 - v_2)^2 +
         (w_1 + u_2)^2 \right] + k_r \left( \omega_1 - \omega_2 \right)^2 dy
 
 where `\omega_i` is the rotation of the normal of each panel about `y`,
 positive with the right-hand rule in its own local axes. For the models
-based on the classical laminated plate theory (CLPT), with 3 DOFs `u, v, w`
-per term, `\omega_i = -w_{i,x}`, also with the kinematics of Sanders-Koiter,
-whose rotation about `y` has no term of the curvature, see
-:func:`.fkCBFxcte11`, :func:`.fkCBFxcte12` and :func:`.fkCBFxcte22`.
+based on the CLPT, `\omega_i = -w_{i,x}`, also with the kinematics of
+Sanders-Koiter, whose rotation about `y` has no term of the curvature.
 
-For the models based on shear deformation theories, e.g.
-``'plate_fsdt_donnell'`` or ``'cylshell_tsdt_sanders'``, with 5 DOFs `u, v,
-w, \phi_x, \phi_y` per term, `\omega_i = \theta_{x,i}`, the rotation at the
-reference surface, `z = 0`, `\theta_x = \phi_x - (4 d^2/h^2)(\phi_x +
-w_{,x})` with the offset `d` and the thickness `h` of each panel for the
-TSDT, `\theta_x = \phi_x` otherwise, also with the kinematics of
-Sanders-Koiter, see :func:`.kCsdt._rotation_x`, and the rotation penalty is
-`k_r (\theta_{x,1} - \theta_{x,2})^2`, see :func:`.fkCBFxcte11_sdt`,
-:func:`.fkCBFxcte12_sdt` and :func:`.fkCBFxcte22_sdt`. For the TSDT, the
-derivative `w_{,x}` is not penalized on its own: at a T-joint only the
-rotation of the normals is common to the two panels. The rotation `\phi_y`
-of each panel is a drilling rotation of the other and is not penalized
-either.
+For the models based on shear deformation theories, `\omega_i =
+\theta_{x,i}`, the rotation at the reference surface, `z = 0`, `\theta_x =
+\phi_x - (4 d^2/h^2)(\phi_x + w_{,x})` with the offset `d` and the
+thickness `h` of each panel for the TSDT, `\theta_x = \phi_x` otherwise,
+also with the kinematics of Sanders-Koiter, see :func:`.kCsdt._rotation_x`,
+and the rotation penalty is `k_r (\theta_{x,1} - \theta_{x,2})^2`. For the
+TSDT, the derivative `w_{,x}` is not penalized on its own: at a T-joint
+only the rotation of the normals is common to the two panels. The rotation
+`\phi_y` of each panel is a drilling rotation of the other and is not
+penalized either.
 
-The terms are derived in ``theory/multidomain_penalization/connections.py``.
+Each field of a panel is approximated as `q = \boldsymbol{N}_q
+\boldsymbol{c}`, `q = u, v, w`, with `\boldsymbol{N}_q` the products `f_i(\xi)
+g_j(\eta)` of the Legendre-based (Bardell) approximation functions of the
+field, with its boundary flags, along `\xi = 2x/a - 1` and `\eta = 2y/b -
+1` [1]_, and `\boldsymbol{c}` the Ritz constants of the panel, those of the
+term `(i, j)` at ``3*(j*m + i)`` plus ``0``, ``1``, ``2`` for `u, v, w`. The
+blocks of the connection matrix are the second derivatives of `U` with
+respect to the Ritz constants of the two panels, `\boldsymbol{K}_{11}`,
+`\boldsymbol{K}_{12}` and `\boldsymbol{K}_{22}`; `\boldsymbol{K}_{21} =
+\boldsymbol{K}_{12}^\top` is not computed and the blocks of a single panel
+are returned as their upper triangle, the matrix of the assembly being
+symmetrized afterwards. Along the connection `\int_0^{b_1} dy = (b_1/2)
+\int_{-1}^{1} d\eta`, computed with the closed-form integrals of the products
+of Bardell's functions, the two edges sharing the natural coordinate `\eta`;
+across it the functions are evaluated at the natural coordinate of the
+connection in each panel, and `\partial/\partial x = (2/a)
+\partial/\partial \xi`. For the models with 5 DOFs per term the
+Ritz constants of the term `(i, j)` are at ``5*(j*m + i)`` plus ``0`` to
+``4`` for `u, v, w, \phi_x, \phi_y`. The expressions of the kernels were derived
+symbolically with SymPy.
+
+References
+----------
+.. [1] Castro, S. G. P., and Donadon, M. V., Assembly of Semi-Analytical
+   models to Address Linear Buckling and Vibration of Stiffened Composite
+   Panels with Debonding Defect, Composite Structures, 160, 232-247, 2017.
+   https://doi.org/10.1016/j.compstruct.2016.10.026
 
 """
 from scipy.sparse import coo_matrix
@@ -64,32 +102,54 @@ cdef extern from 'bardell_functions.hpp':
 def fkCBFxcte11(double kt, double kr, object p1, double xcte1,
           int size, int row0, int col0):
     r"""
-    Penalty approach calculation to base-flange xcte panel 1 position.
+    Block of the base ``p1`` of the base-flange connection ``'BFxcte'``
+
+    The penalty terms of the connection that involve only the base, or skin, ``p1``, for the
+    models with 3 DOFs per term: the products of the approximation functions of
+    ``p1`` are integrated along `y` over the length of the edge of ``p1``
+    and evaluated at ``xcte1`` across it.
 
     Parameters
     ----------
     kt : float
-        Translation penalty stiffness.
+        Translation penalty stiffness, force per unit area.
     kr : float
-        Rotation penalty stiffness.
-    p1 : Shell
-        Shell() object
+        Rotation penalty stiffness, force.
+    p1 : :class:`.Shell`
+        Base, or skin.
     xcte1 : float
-        Dimension value that determines the flag value xi.
-        If xcte1 = 0 => xi = -1, if xcte1 = p1.a => xi = 1.
-        Where xi=-1 stands for boundary 1 and xi=1 stands for boundary 2.
+        Coordinate `x_1` of the connection in ``p1``, length, between ``0``
+        and ``p1.a``.
     size : int
-        Size of assembly stiffness matrix, which are calculated by sum([3*p.m*p.n for p in self.panels]).
-        The size of the assembly can be calculated calling the MultiDomain.get_size() method.
+        Size of the stiffness matrix of the assembly, see
+        :meth:`.MultiDomain.get_size`.
     row0 : int
-        Row position of constitutive matrix being calculated.
+        First row of the block in the matrix of the assembly, the
+        ``row_start`` of the panel of the rows.
     col0 : int
-        Column position of constitutive matrix being calculated.
+        First column of the block in the matrix of the assembly, the
+        ``col_start`` of the panel of the columns.
 
     Returns
     -------
     kCBFxcte11 : scipy.sparse.coo_matrix
-        A sparse matrix that adds the penalty stiffness to xcte of panel p1 position.
+        Upper triangle of the block of ``p1``, shape ``(size, size)``.
+
+    Notes
+    -----
+    The block of the penalty energy of
+    :mod:`panels.multidomain.connections.kCBFxcte`, see its Notes:
+
+    .. math::
+
+        \boldsymbol{K}_{11} = \frac{b_1}{2} \int_{-1}^{1} k_t
+        \sum_{q = u, v, w} \boldsymbol{N}_{q1}^\top \boldsymbol{N}_{q1}
+        + k_r \boldsymbol{N}_{\omega 1}^\top \boldsymbol{N}_{\omega 1} \, d\eta
+
+    with the functions of ``p1`` at `\xi_1 = 2 x_{cte1}/a_1 - 1`,
+    and
+    `\boldsymbol{N}_{\omega 1} = -(2/a_1) \boldsymbol{N}_{w1,\xi}`, the rotation
+    `\omega_1 = -w_{1,x}` about `y`.
 
     """
     cdef double [:, ::1] ftab1
@@ -187,38 +247,62 @@ def fkCBFxcte12(double kt, double kr, object p1, object p2,
           double xcte1, double xcte2,
           int size, int row0, int col0):
     r"""
-    Penalty approach calculation to base-flange xcte panel 1 and panel 2 coupling position.
+    Coupling block of the base-flange connection ``'BFxcte'``
+
+    The penalty terms of the connection that couple the base ``p1``
+    (rows) and the flange ``p2`` (columns), for the models with 3 DOFs per term:
+    the products of the approximation functions are integrated along `y`
+    over the length of the edge of ``p1`` and evaluated at ``xcte1`` in
+    ``p1`` and ``xcte2`` in ``p2`` across it. The whole block is
+    returned.
 
     Parameters
     ----------
     kt : float
-        Translation penalty stiffness.
+        Translation penalty stiffness, force per unit area.
     kr : float
-        Rotation penalty stiffness.
-    p1 : Shell
-        First Shell object
-    p2 : Shell
-        Second Shell object
+        Rotation penalty stiffness, force.
+    p1 : :class:`.Shell`
+        Base, or skin.
+    p2 : :class:`.Shell`
+        Flange, whose edge has the length of the edge of ``p1``.
     xcte1 : float
-        Dimension value that determines the flag value xi.
-        If xcte1 = 0 => xi = -1, if xcte1 = p1.a => xi = 1.
-        Where xi=-1 stands for boundary 1 and xi=1 stands for boundary 2.
+        Coordinate `x_1` of the connection in ``p1``, length, between ``0``
+        and ``p1.a``.
     xcte2 : float
-        Dimension value that determines the flag value xi.
-        If xcte1 = 0 => xi = -1, if xcte1 = p1.a => xi = 1.
-        Where xi=-1 stands for boundary 1 and xi=1 stands for boundary 2.
+        Coordinate `x_2` of the connection in ``p2``, length, between ``0``
+        and ``p2.a``.
     size : int
-        Size of assembly stiffness matrix, which are calculated by sum([3*p.m*p.n for p in self.panels]).
-        The size of the assembly can be calculated calling the MultiDomain.get_size() method.
+        Size of the stiffness matrix of the assembly, see
+        :meth:`.MultiDomain.get_size`.
     row0 : int
-        Row position of constitutive matrix being calculated.
+        First row of the block in the matrix of the assembly, the
+        ``row_start`` of the panel of the rows.
     col0 : int
-        Column position of constitutive matrix being calculated.
+        First column of the block in the matrix of the assembly, the
+        ``col_start`` of the panel of the columns.
 
     Returns
     -------
     kCBFxcte12 : scipy.sparse.coo_matrix
-        A sparse matrix that adds the penalty stiffness to xcte of panel 1 and panel 2 coupling position.
+        Coupling block, rows of ``p1`` and columns of ``p2``, shape ``(size, size)``.
+
+    Notes
+    -----
+    The block of the penalty energy of
+    :mod:`panels.multidomain.connections.kCBFxcte`, see its Notes:
+
+    .. math::
+
+        \boldsymbol{K}_{12} = -\frac{b_1}{2} \int_{-1}^{1} k_t \left(
+        \boldsymbol{N}_{u1}^\top \boldsymbol{N}_{w2} + \boldsymbol{N}_{v1}^\top \boldsymbol{N}_{v2}
+        - \boldsymbol{N}_{w1}^\top \boldsymbol{N}_{u2} \right)
+        + k_r \boldsymbol{N}_{\omega 1}^\top \boldsymbol{N}_{\omega 2} \, d\eta
+
+    with the functions of ``p1`` at `\xi_1 = 2 x_{cte1}/a_1 - 1` and
+    those of ``p2`` at `\xi_2 = 2 x_{cte2}/a_2 - 1`, and
+    `\boldsymbol{N}_{\omega p} = -(2/a_p) \boldsymbol{N}_{wp,\xi}`, the
+    rotation `\omega_p = -w_{p,x}` of each panel about `y`.
 
     """
     cdef double [:, ::1] ftab1, ftab2
@@ -338,34 +422,56 @@ def fkCBFxcte12(double kt, double kr, object p1, object p2,
 def fkCBFxcte22(double kt, double kr, object p1, object p2, double xcte2,
           int size, int row0, int col0):
     r"""
-    Penalty approach calculation to base-flange xcte panel 2 position.
+    Block of the flange ``p2`` of the base-flange connection ``'BFxcte'``
+
+    The penalty terms of the connection that involve only the flange ``p2``, for the
+    models with 3 DOFs per term: the products of the approximation functions of
+    ``p2`` are integrated along `y` over the length of the edge of ``p1``
+    and evaluated at ``xcte2`` across it.
 
     Parameters
     ----------
     kt : float
-        Translation penalty stiffness.
+        Translation penalty stiffness, force per unit area.
     kr : float
-        Rotation penalty stiffness.
-    p1 : Shell
-        First Shell object
-    p2 : Shell
-        Second Shell object
+        Rotation penalty stiffness, force.
+    p1 : :class:`.Shell`
+        Base, or skin, which gives the length of the edge.
+    p2 : :class:`.Shell`
+        Flange.
     xcte2 : float
-        Dimension value that determines the flag value xi.
-        If xcte1 = 0 => xi = -1, if xcte1 = p1.a => xi = 1.
-        Where xi=-1 stands for boundary 1 and xi=1 stands for boundary 2.
+        Coordinate `x_2` of the connection in ``p2``, length, between ``0``
+        and ``p2.a``.
     size : int
-        Size of assembly stiffness matrix, which are calculated by sum([3*p.m*p.n for p in self.panels]).
-        The size of the assembly can be calculated calling the MultiDomain.get_size() method.
+        Size of the stiffness matrix of the assembly, see
+        :meth:`.MultiDomain.get_size`.
     row0 : int
-        Row position of constitutive matrix being calculated.
+        First row of the block in the matrix of the assembly, the
+        ``row_start`` of the panel of the rows.
     col0 : int
-        Column position of constitutive matrix being calculated.
+        First column of the block in the matrix of the assembly, the
+        ``col_start`` of the panel of the columns.
 
     Returns
     -------
     kCBFxcte22 : scipy.sparse.coo_matrix
-        A sparse matrix that adds the penalty stiffness to xcte of panel p2 position.
+        Upper triangle of the block of ``p2``, shape ``(size, size)``.
+
+    Notes
+    -----
+    The block of the penalty energy of
+    :mod:`panels.multidomain.connections.kCBFxcte`, see its Notes:
+
+    .. math::
+
+        \boldsymbol{K}_{22} = \frac{b_1}{2} \int_{-1}^{1} k_t
+        \sum_{q = u, v, w} \boldsymbol{N}_{q2}^\top \boldsymbol{N}_{q2}
+        + k_r \boldsymbol{N}_{\omega 2}^\top \boldsymbol{N}_{\omega 2} \, d\eta
+
+    with the functions of ``p2`` at `\xi_2 = 2 x_{cte2}/a_2 - 1`,
+    and
+    `\boldsymbol{N}_{\omega 2} = -(2/a_2) \boldsymbol{N}_{w2,\xi}`, the rotation
+    `\omega_2 = -w_{2,x}` about `y`.
 
     """
     cdef double [:, ::1] ftab2
@@ -468,6 +574,21 @@ FIELDS_SDT = ('u', 'v', 'w', 'phix', 'phiy')
 
 
 def _check_sdt(*panels):
+    r"""
+    Check that the panels are models based on the FSDT or TSDT
+
+    Parameters
+    ----------
+    *panels : :class:`.Shell`
+        Panels whose attribute ``model`` is checked.
+
+    Raises
+    ------
+    ValueError
+        When the model of a panel is ``None`` or contains neither ``'fsdt'``
+        nor ``'tsdt'``.
+
+    """
     for p in panels:
         if p.model is None or not ('fsdt' in p.model or 'tsdt' in p.model):
             raise ValueError("Expected a model based on shear deformation "
@@ -475,26 +596,89 @@ def _check_sdt(*panels):
 
 
 def _alpha(object p):
-    r"""`4 d^2/h^2` of a TSDT panel, with its offset `d` and thickness `h`,
-    zero for the FSDT, see :func:`.kCsdt._rotation_x`"""
+    r"""
+    Factor `\alpha = 4 d^2/h^2` of the rotation at the reference surface
+
+    Parameters
+    ----------
+    p : :class:`.Shell`
+        Panel of a model based on the FSDT or TSDT, with its ``offset`` and
+        ply thicknesses ``plyts``.
+
+    Returns
+    -------
+    alpha : float
+        `4 d^2/h^2` for a TSDT model, with the offset `d` and the thickness
+        `h`, the sum of the ply thicknesses; ``0.`` for the FSDT.
+
+    Notes
+    -----
+    With the TSDT field of :mod:`panels.multidomain.connections.kCsdt`, the
+    rotation of the normal at the reference surface `z = 0` is `\theta_x =
+    \phi_x - 3 c_1 d^2 (\phi_x + w_{,x}) = (1 - \alpha) \phi_x - \alpha
+    w_{,x}`, with `c_1 = 4/(3 h^2)`, see :func:`.kCsdt._rotation_x`.
+
+    """
     if 'tsdt' not in p.model:
         return 0.
     return 4.*p.offset**2/sum(p.plyts)**2
 
 
 def _product_terms(double coeff, tA, tB):
-    r"""Terms ``(dofA, dofB, coeff, derA, derB)`` of `coeff q_A q_B`, with
-    `q = \sum_t a_t \partial^{der_t} q_t` given by the lists ``(dof, der,
-    a)`` ``tA`` and ``tB``, the derivative being across the connection"""
+    r"""
+    Penalty terms of the product of two quantities
+
+    Parameters
+    ----------
+    coeff : float
+        Factor of the product, e.g. ``kr`` or ``-kr``.
+    tA, tB : list
+        Quantities `q_A` and `q_B` as lists of ``(dof, der, a)``, the DOF
+        numbered ``0`` to ``4`` for `u, v, w, \phi_x, \phi_y`, ``der`` the order
+        of the derivative across the connection, ``0`` or ``1``, and ``a`` the
+        factor.
+
+    Returns
+    -------
+    terms : list
+        One ``(dofA, dofB, coeff*aA*aB, derA, derB)`` per pair of terms, as
+        read by :func:`._block_sdt`.
+
+    Notes
+    -----
+    With `q_A = \sum_s a_s \partial^{d_s} q_s` and `q_B = \sum_t a_t
+    \partial^{d_t} q_t`, the product `\mathrm{coeff} \, q_A q_B` expands into
+    the terms `\mathrm{coeff} \, a_s a_t \, \partial^{d_s} q_s \, \partial^{d_t}
+    q_t`, each integrated by :func:`._block_sdt`.
+
+    """
     return [(dA, dB, coeff*cA*cB, derA, derB)
             for dA, derA, cA in tA for dB, derB, cB in tB]
 
 
 def _rotation_ref(object p):
-    r"""Rotation of the normal about `y` at the reference surface, `\theta_x
-    = (1 - \alpha) \phi_x - \alpha w_{,x}`, as ``(dof, der, a)``, see
-    :func:`.kCsdt._rotation_x`; `w_{,x}` is the derivative across the
-    connection"""
+    r"""
+    Rotation of the normal about `y` at the reference surface
+
+    Parameters
+    ----------
+    p : :class:`.Shell`
+        Panel of a model based on the FSDT or TSDT.
+
+    Returns
+    -------
+    terms : list
+        The rotation as a list of ``(dof, der, a)``, see
+        :func:`._product_terms`: `\phi_x` and, for a TSDT panel with an offset,
+        the derivative of `w` across the connection.
+
+    Notes
+    -----
+    `\theta_x = (1 - \alpha) \phi_x - \alpha w_{,x}`, with `\alpha` of
+    :func:`._alpha`, see :func:`.kCsdt._rotation_x`; `w_{,x}` is the derivative
+    across the connection.
+
+    """
     a = _alpha(p)
     terms = [(PHIX, 0, 1. - a)]
     if a != 0:
@@ -503,8 +687,26 @@ def _rotation_ref(object p):
 
 
 def _flags_sdt(object p, fields, str direction):
-    r"""Boundary flags ``(1t, 1r, 2t, 2r)`` along ``direction`` of each field
-    of ``fields``"""
+    r"""
+    Boundary flags of the approximation functions of some fields
+
+    Parameters
+    ----------
+    p : :class:`.Shell`
+        Panel.
+    fields : list of int
+        Fields, numbered ``0`` to ``4`` for `u, v, w, \phi_x, \phi_y`.
+    direction : str
+        ``'x'`` or ``'y'``.
+
+    Returns
+    -------
+    flags : np.ndarray
+        Shape ``(len(fields), 4)``, for each field the flags ``(1t, 1r, 2t,
+        2r)`` of the edges 1 and 2 along ``direction``, e.g. ``p.x1u``,
+        ``p.x1ur``, ``p.x2u``, ``p.x2ur`` for ``'x'`` and `u`.
+
+    """
     out = np.zeros((len(fields), 4), dtype=DOUBLE)
     for t, field in enumerate(fields):
         name = FIELDS_SDT[field]
@@ -571,20 +773,68 @@ cdef void _terms_sdt(int nt, long [::1] dofA, long [::1] dofB,
 
 def _block_sdt(terms, object pA, object pB, double cteA, double cteB,
         str along, int upper, int size, int row0, int col0):
-    r"""Block of the connection matrix between ``pA`` and ``pB``
+    r"""
+    Block of the connection matrix between ``pA`` and ``pB``
 
     Each element ``(dofA, dofB, coeff)`` or ``(dofA, dofB, coeff, derA,
-    derB)`` of ``terms`` adds the penalty term `coeff \int q_A q_B`, where
-    `q_A` is the field ``dofA`` of ``pA``, or its first derivative across
-    the connection when ``derA`` is ``1``, and `q_B` the field ``dofB`` of
-    ``pB``, or its derivative when ``derB`` is ``1``, with the DOFs `u, v,
-    w, \phi_x, \phi_y` numbered from 0 to 4. The approximation functions along the
-    connection, ``along`` being ``'x'`` or ``'y'``, are integrated with the
-    integrals of Bardell's functions over the length of ``pA``, and those
-    across it are evaluated at the natural coordinates ``cteA`` and
-    ``cteB``. The term `(i, j)` of a panel, with `i` along `x` and `j`
-    along `y`, has its Ritz constants at ``5*(j*m + i)``. With ``upper = 1``
-    only the upper triangle is kept, for the blocks of a single panel.
+    derB)`` of ``terms`` adds the penalty term ``coeff`` times the integral of
+    the product of the field ``dofA`` of ``pA``, or its first derivative across
+    the connection when ``derA`` is ``1``, and the field ``dofB`` of ``pB``, or
+    its derivative when ``derB`` is ``1``, with the DOFs `u, v, w, \phi_x,
+    \phi_y` numbered from 0 to 4. The approximation functions along the
+    connection are integrated over the length of ``pA``, and those across it
+    are evaluated at the natural coordinates ``cteA`` and ``cteB``. The term
+    `(i, j)` of a panel, with `i` along `x` and `j` along `y`, has its Ritz
+    constants at ``5*(j*m + i)``.
+
+    Parameters
+    ----------
+    terms : list of tuple
+        Penalty terms, see above and :func:`._product_terms`.
+    pA, pB : :class:`.Shell`
+        Panels of the rows and of the columns, models with 5 DOFs per term.
+    cteA, cteB : float
+        Natural coordinates of the connection across it, in ``pA`` and
+        ``pB``, between ``-1`` and ``1``.
+    along : str
+        Direction of the connection, ``'x'`` or ``'y'``.
+    upper : int
+        ``1`` to keep only the upper triangle, for the blocks of a single
+        panel, ``0`` to keep the whole block.
+    size : int
+        Size of the stiffness matrix of the assembly.
+    row0, col0 : int
+        First row and first column of the block in the matrix of the assembly.
+
+    Returns
+    -------
+    kC : scipy.sparse.coo_matrix
+        The block, shape ``(size, size)``.
+
+    Notes
+    -----
+    For a connection along `x`, each term adds
+
+    .. math::
+
+        \mathrm{coeff} \left(\frac{2}{b_A}\right)^{d_A}
+        \left(\frac{2}{b_B}\right)^{d_B} \frac{a_A}{2} \int_{-1}^{1}
+        f^A_i(\xi) f^B_k(\xi) \, d\xi \; \partial_\eta^{d_A} g^A_j(\eta_A) \,
+        \partial_\eta^{d_B} g^B_l(\eta_B)
+
+    to the entry of the Ritz constants `(i, j)` of ``pA`` and `(k, l)` of
+    ``pB``, with `\eta_A`, `\eta_B` given by ``cteA``, ``cteB``, `d_A`, `d_B`
+    the orders of the derivatives across the connection and `f`, `g` the
+    Legendre-based (Bardell) functions of each field with its boundary flags
+    [1]_; the integral along the connection is computed in closed form. For a
+    connection along `y` the roles of `x` and `y` are exchanged.
+
+    References
+    ----------
+    .. [1] Castro, S. G. P., and Donadon, M. V., Assembly of Semi-Analytical
+       models to Address Linear Buckling and Vibration of Stiffened Composite
+       Panels with Debonding Defect, Composite Structures, 160, 232-247, 2017.
+       https://doi.org/10.1016/j.compstruct.2016.10.026
 
     """
     cdef int nt, nalA, nalB, nacA, nacB, n
@@ -632,33 +882,63 @@ def _block_sdt(terms, object pA, object pB, double cteA, double cteB,
 def fkCBFxcte11_sdt(double kt, double kr, object p1, double xcte1,
           int size, int row0, int col0):
     r"""
-    Base-flange xcte connection for the models based on shear deformation
-    theories, block of the base
+    Block of the base of ``'BFxcte'``, models with 5 DOFs per term
 
-    The rotation penalty is on `\phi_x`, see the module docstring of
-    :mod:`panels.multidomain.connections.kCBFxcte`.
+    The penalty terms of the connection that involve only the base ``p1``,
+    for the models based on the FSDT and TSDT: the differences of `u, v, w` with ``kt`` and the rotation of
+    the normal about `y` at the reference surface with ``kr``, see
+    :func:`._rotation_ref`. The products of the approximation functions are
+    integrated along `y` over the length of the edge of ``p1`` and evaluated at
+    ``xcte1`` across it.
 
     Parameters
     ----------
     kt : float
-        Translation penalty stiffness.
+        Translation penalty stiffness, force per unit area.
     kr : float
-        Rotation penalty stiffness.
-    p1 : Panel
+        Rotation penalty stiffness, force.
+    p1 : :class:`.Shell`
         Base, or skin.
     xcte1 : float
-        Coordinate `x_1` of the connection in ``p1``.
+        Coordinate `x_1` of the connection in ``p1``, length, between ``0``
+        and ``p1.a``.
     size : int
-        Size of the assembly.
+        Size of the stiffness matrix of the assembly, see
+        :meth:`.MultiDomain.get_size`.
     row0 : int
-        Row position of the block in the assembly.
+        First row of the block in the matrix of the assembly, the
+        ``row_start`` of the panel of the rows.
     col0 : int
-        Column position of the block in the assembly.
+        First column of the block in the matrix of the assembly, the
+        ``col_start`` of the panel of the columns.
 
     Returns
     -------
     kCBFxcte11_sdt : scipy.sparse.coo_matrix
-        Upper triangle of the block of the base.
+        Upper triangle of the block of ``p1``, shape ``(size, size)``.
+
+    Raises
+    ------
+    ValueError
+        When a panel is not a model based on the FSDT or TSDT.
+
+    Notes
+    -----
+    The block of the penalty energy of
+    :mod:`panels.multidomain.connections.kCBFxcte`, see its Notes:
+
+    .. math::
+
+        \boldsymbol{K}_{11} = \frac{b_1}{2} \int_{-1}^{1} k_t
+        \sum_{q = u, v, w} \boldsymbol{N}_{q1}^\top \boldsymbol{N}_{q1}
+        + k_r \boldsymbol{N}_{\theta 1}^\top \boldsymbol{N}_{\theta 1} \, d\eta
+
+    with the functions of ``p1`` at `\xi_1 = 2 x_{cte1}/a_1 - 1`,
+    and
+    `\boldsymbol{N}_{\theta 1} = (1 - \alpha_1) \boldsymbol{N}_{\phi_x 1} - \alpha_1
+    (2/a_1) \boldsymbol{N}_{w1,\xi}`, the rotation `\theta_x` of the panel at the reference
+    surface, with `\alpha` of :func:`._alpha`.
+    The Ritz constants of the term `(i, j)` are at ``5*(j*m + i)``.
 
     """
     _check_sdt(p1)
@@ -672,35 +952,69 @@ def fkCBFxcte12_sdt(double kt, double kr, object p1, object p2,
           double xcte1, double xcte2,
           int size, int row0, int col0):
     r"""
-    Base-flange xcte connection for the models based on shear deformation
-    theories, block of the base and the flange
+    Coupling block of ``'BFxcte'``, models with 5 DOFs per term
 
-    The rotation penalty is on `\phi_x`, see the module docstring of
-    :mod:`panels.multidomain.connections.kCBFxcte`.
+    The penalty terms of the connection that couple the base ``p1`` (rows) and the flange ``p2`` (columns),
+    for the models based on the FSDT and TSDT: the differences of `u, v, w` with ``kt`` and the rotation of
+    the normal about `y` at the reference surface with ``kr``, see
+    :func:`._rotation_ref`. The products of the approximation functions are
+    integrated along `y` over the length of the edge of ``p1`` and evaluated at
+    ``xcte1`` in ``p1`` and ``xcte2`` in ``p2`` across it. The whole block is returned.
 
     Parameters
     ----------
     kt : float
-        Translation penalty stiffness.
+        Translation penalty stiffness, force per unit area.
     kr : float
-        Rotation penalty stiffness.
-    p1 : Panel
+        Rotation penalty stiffness, force.
+    p1 : :class:`.Shell`
         Base, or skin.
-    p2 : Panel
+    p2 : :class:`.Shell`
         Flange.
-    xcte1, xcte2 : float
-        Coordinates `x_1` and `x_2` of the connection in ``p1`` and ``p2``.
+    xcte1 : float
+        Coordinate `x_1` of the connection in ``p1``, length, between ``0``
+        and ``p1.a``.
+    xcte2 : float
+        Coordinate `x_2` of the connection in ``p2``, length, between ``0``
+        and ``p2.a``.
     size : int
-        Size of the assembly.
+        Size of the stiffness matrix of the assembly, see
+        :meth:`.MultiDomain.get_size`.
     row0 : int
-        Row position of the block in the assembly.
+        First row of the block in the matrix of the assembly, the
+        ``row_start`` of the panel of the rows.
     col0 : int
-        Column position of the block in the assembly.
+        First column of the block in the matrix of the assembly, the
+        ``col_start`` of the panel of the columns.
 
     Returns
     -------
     kCBFxcte12_sdt : scipy.sparse.coo_matrix
-        Coupling block, rows of the base and columns of the flange.
+        Coupling block, rows of ``p1`` and columns of ``p2``, shape ``(size, size)``.
+
+    Raises
+    ------
+    ValueError
+        When a panel is not a model based on the FSDT or TSDT.
+
+    Notes
+    -----
+    The block of the penalty energy of
+    :mod:`panels.multidomain.connections.kCBFxcte`, see its Notes:
+
+    .. math::
+
+        \boldsymbol{K}_{12} = -\frac{b_1}{2} \int_{-1}^{1} k_t \left(
+        \boldsymbol{N}_{u1}^\top \boldsymbol{N}_{w2} + \boldsymbol{N}_{v1}^\top \boldsymbol{N}_{v2}
+        - \boldsymbol{N}_{w1}^\top \boldsymbol{N}_{u2} \right)
+        + k_r \boldsymbol{N}_{\theta 1}^\top \boldsymbol{N}_{\theta 2} \, d\eta
+
+    with the functions of ``p1`` at `\xi_1 = 2 x_{cte1}/a_1 - 1` and
+    those of ``p2`` at `\xi_2 = 2 x_{cte2}/a_2 - 1`, and
+    `\boldsymbol{N}_{\theta p} = (1 - \alpha_p) \boldsymbol{N}_{\phi_x p} - \alpha_p
+    (2/a_p) \boldsymbol{N}_{wp,\xi}`, the rotation `\theta_x` of each panel at the reference
+    surface, with `\alpha` of :func:`._alpha`.
+    The Ritz constants of the term `(i, j)` are at ``5*(j*m + i)``.
 
     """
     _check_sdt(p1, p2)
@@ -715,35 +1029,65 @@ def fkCBFxcte22_sdt(double kt, double kr, object p1, object p2,
           double xcte2,
           int size, int row0, int col0):
     r"""
-    Base-flange xcte connection for the models based on shear deformation
-    theories, block of the flange
+    Block of the flange of ``'BFxcte'``, models with 5 DOFs per term
 
-    The rotation penalty is on `\phi_x`, see the module docstring of
-    :mod:`panels.multidomain.connections.kCBFxcte`.
+    The penalty terms of the connection that involve only the flange ``p2``,
+    for the models based on the FSDT and TSDT: the differences of `u, v, w` with ``kt`` and the rotation of
+    the normal about `y` at the reference surface with ``kr``, see
+    :func:`._rotation_ref`. The products of the approximation functions are
+    integrated along `y` over the length of the edge of ``p2`` and evaluated at
+    ``xcte2`` across it.
 
     Parameters
     ----------
     kt : float
-        Translation penalty stiffness.
+        Translation penalty stiffness, force per unit area.
     kr : float
-        Rotation penalty stiffness.
-    p1 : Panel
+        Rotation penalty stiffness, force.
+    p1 : :class:`.Shell`
         Base, or skin.
-    p2 : Panel
+    p2 : :class:`.Shell`
         Flange.
     xcte2 : float
-        Coordinate `x_2` of the connection in ``p2``.
+        Coordinate `x_2` of the connection in ``p2``, length, between ``0``
+        and ``p2.a``.
     size : int
-        Size of the assembly.
+        Size of the stiffness matrix of the assembly, see
+        :meth:`.MultiDomain.get_size`.
     row0 : int
-        Row position of the block in the assembly.
+        First row of the block in the matrix of the assembly, the
+        ``row_start`` of the panel of the rows.
     col0 : int
-        Column position of the block in the assembly.
+        First column of the block in the matrix of the assembly, the
+        ``col_start`` of the panel of the columns.
 
     Returns
     -------
     kCBFxcte22_sdt : scipy.sparse.coo_matrix
-        Upper triangle of the block of the flange.
+        Upper triangle of the block of ``p2``, shape ``(size, size)``.
+
+    Raises
+    ------
+    ValueError
+        When a panel is not a model based on the FSDT or TSDT.
+
+    Notes
+    -----
+    The block of the penalty energy of
+    :mod:`panels.multidomain.connections.kCBFxcte`, see its Notes:
+
+    .. math::
+
+        \boldsymbol{K}_{22} = \frac{b_2}{2} \int_{-1}^{1} k_t
+        \sum_{q = u, v, w} \boldsymbol{N}_{q2}^\top \boldsymbol{N}_{q2}
+        + k_r \boldsymbol{N}_{\theta 2}^\top \boldsymbol{N}_{\theta 2} \, d\eta
+
+    with the functions of ``p2`` at `\xi_2 = 2 x_{cte2}/a_2 - 1`,
+    and
+    `\boldsymbol{N}_{\theta 2} = (1 - \alpha_2) \boldsymbol{N}_{\phi_x 2} - \alpha_2
+    (2/a_2) \boldsymbol{N}_{w2,\xi}`, the rotation `\theta_x` of the panel at the reference
+    surface, with `\alpha` of :func:`._alpha`.
+    The Ritz constants of the term `(i, j)` are at ``5*(j*m + i)``.
 
     """
     _check_sdt(p1, p2)
