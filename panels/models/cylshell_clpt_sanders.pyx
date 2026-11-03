@@ -673,45 +673,127 @@ def fkM(object shell, int size, int row0, int col0):
 #     for the Donnell kinematics
 def fkAx(double beta, double gamma, object shell,
          int size, int row0, int col0):
-    The aerodynamic stiffness matrix of the flow along x, those of the Donnell kinematics
+    r"""The aerodynamic stiffness matrix of the flow along x, those of the Donnell kinematics
 
-    The aerodynamic matrices depend only on `w` and are the same as for the
-    Donnell kinematics: this function calls and returns
-    :func:`panels.models.cylshell_clpt_donnell.fkAx`, with the same parameters.
+    The aerodynamic matrices depend only on `w` and are the same as for
+    the Donnell kinematics: this function returns
+    :func:`panels.models.cylshell_clpt_donnell.fkAx` with the same parameters.
+
+    Parameters
+    ----------
+    beta : float
+        Aerodynamic pressure parameter `\beta` of the piston theory, a
+        pressure, see :meth:`.Shell.calc_kA`.
+    gamma : float
+        Curvature correction `\gamma` of the piston theory, a pressure per
+        unit length.
+    shell : :class:`.Shell`
+        The shell, which gives the dimensions ``a`` and ``b``, the radius ``r``
+        of the cylinders, the numbers of terms ``m`` and ``n`` and the boundary
+        flags of the approximation functions of each field.
+    size : int
+        Number of rows and columns of the matrix, the number of degrees of
+        freedom of the assembly.
+    row0, col0 : int
+        Row and column of the matrix where the terms of this shell start.
+
+    Returns
+    -------
+    kAx : scipy.sparse.coo_matrix
+        Matrix of shape ``(size, size)``. The matrix is assembled in full.
+
+    Raises
+    ------
+    ValueError
+        If ``shell`` is not a :class:`.Shell`.
 
     Notes
     -----
     See :func:`panels.models.cylshell_clpt_donnell.fkAx` for the integral.
 
+    """
     from .cylshell_clpt_donnell import fkAx as donnell_fkAx
     return donnell_fkAx(beta, gamma, shell, size, row0, col0)
 
 
 def fkAy(double beta, object shell, int size, int row0, int col0):
-    The aerodynamic stiffness matrix of the flow along y, those of the Donnell kinematics
+    r"""The aerodynamic stiffness matrix of the flow along y, those of the Donnell kinematics
 
-    The aerodynamic matrices depend only on `w` and are the same as for the
-    Donnell kinematics: this function calls and returns
-    :func:`panels.models.cylshell_clpt_donnell.fkAy`, with the same parameters.
+    The aerodynamic matrices depend only on `w` and are the same as for
+    the Donnell kinematics: this function returns
+    :func:`panels.models.cylshell_clpt_donnell.fkAy` with the same parameters.
+
+    Parameters
+    ----------
+    beta : float
+        Aerodynamic pressure parameter `\beta` of the piston theory, a
+        pressure, see :meth:`.Shell.calc_kA`.
+    shell : :class:`.Shell`
+        The shell, which gives the dimensions ``a`` and ``b``, the radius ``r``
+        of the cylinders, the numbers of terms ``m`` and ``n`` and the boundary
+        flags of the approximation functions of each field.
+    size : int
+        Number of rows and columns of the matrix, the number of degrees of
+        freedom of the assembly.
+    row0, col0 : int
+        Row and column of the matrix where the terms of this shell start.
+
+    Returns
+    -------
+    kAy : scipy.sparse.coo_matrix
+        Matrix of shape ``(size, size)``. The matrix is assembled in full.
+
+    Raises
+    ------
+    ValueError
+        If ``shell`` is not a :class:`.Shell`.
 
     Notes
     -----
     See :func:`panels.models.cylshell_clpt_donnell.fkAy` for the integral.
 
+    """
     from .cylshell_clpt_donnell import fkAy as donnell_fkAy
     return donnell_fkAy(beta, shell, size, row0, col0)
 
 
 def fcA(double aeromu, object shell, int size, int row0, int col0):
-    The aerodynamic damping matrix, those of the Donnell kinematics
+    r"""The aerodynamic damping matrix, those of the Donnell kinematics
 
-    The aerodynamic matrices depend only on `w` and are the same as for the
-    Donnell kinematics: this function calls and returns
-    :func:`panels.models.cylshell_clpt_donnell.fcA`, with the same parameters.
+    The aerodynamic matrices depend only on `w` and are the same as for
+    the Donnell kinematics: this function returns
+    :func:`panels.models.cylshell_clpt_donnell.fcA` with the same parameters.
+
+    Parameters
+    ----------
+    aeromu : float
+        Aerodynamic damping coefficient `\mu` of the piston theory, a
+        pressure per unit velocity.
+    shell : :class:`.Shell`
+        The shell, which gives the dimensions ``a`` and ``b``, the radius ``r``
+        of the cylinders, the numbers of terms ``m`` and ``n`` and the boundary
+        flags of the approximation functions of each field.
+    size : int
+        Number of rows and columns of the matrix, the number of degrees of
+        freedom of the assembly.
+    row0, col0 : int
+        Row and column of the matrix where the terms of this shell start.
+
+    Returns
+    -------
+    cA : scipy.sparse.coo_matrix
+        Matrix of shape ``(size, size)``. Only the upper
+        triangle is assembled; the caller symmetrizes it.
+
+    Raises
+    ------
+    ValueError
+        If ``shell`` is not a :class:`.Shell`.
 
     Notes
     -----
     See :func:`panels.models.cylshell_clpt_donnell.fcA` for the integral.
 
+    """
     from .cylshell_clpt_donnell import fcA as donnell_fcA
     return donnell_fcA(aeromu, shell, size, row0, col0)

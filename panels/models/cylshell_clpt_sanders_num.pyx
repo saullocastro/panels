@@ -980,31 +980,81 @@ def fkM_num(object shell, object I_input, int size,
 #NOTE the aerodynamic matrices depend only on w and are therefore the same as
 #     for the Donnell kinematics
 def fkAx_num(object shell, int size, int row0, int col0, int nx, int ny):
-    The aerodynamic stiffness matrix of the flow along x, those of the Donnell kinematics
+    r"""The aerodynamic stiffness matrix of the flow along x, those of the Donnell kinematics
 
-    The aerodynamic matrices depend only on `w` and are the same as for the
-    Donnell kinematics: this function calls and returns
-    :func:`panels.models.cylshell_clpt_donnell_num.fkAx_num`, with the same parameters.
+    The aerodynamic matrices depend only on `w` and are the same as for
+    the Donnell kinematics: this function returns
+    :func:`panels.models.cylshell_clpt_donnell_num.fkAx_num` with the same parameters.
+
+    Parameters
+    ----------
+    shell : :class:`.Shell`
+        The shell, which gives the dimensions ``a`` and ``b``, the radius ``r``
+        of the cylinders, the numbers of terms ``m`` and ``n`` and the boundary
+        flags of the approximation functions of each field.
+    size : int
+        Number of rows and columns of the matrix, the number of degrees of
+        freedom of the assembly.
+    row0, col0 : int
+        Row and column of the matrix where the terms of this shell start.
+    nx, ny : int
+        Number of Gauss-Legendre points along `x` and `y`.
+
+    Returns
+    -------
+    kA : scipy.sparse.coo_matrix
+        Matrix of shape ``(size, size)``. The matrix is assembled in full.
+
+    Raises
+    ------
+    ValueError
+        If ``shell`` is not a :class:`.Shell`.
 
     Notes
     -----
     See :func:`panels.models.cylshell_clpt_donnell_num.fkAx_num` for the integral.
 
+    """
     from .cylshell_clpt_donnell_num import fkAx_num as donnell_fkAx_num
     return donnell_fkAx_num(shell, size, row0, col0, nx, ny)
 
 
 def fkAy_num(object shell, int size, int row0, int col0, int nx, int ny):
-    The aerodynamic stiffness matrix of the flow along y, those of the Donnell kinematics
+    r"""The aerodynamic stiffness matrix of the flow along y, those of the Donnell kinematics
 
-    The aerodynamic matrices depend only on `w` and are the same as for the
-    Donnell kinematics: this function calls and returns
-    :func:`panels.models.cylshell_clpt_donnell_num.fkAy_num`, with the same parameters.
+    The aerodynamic matrices depend only on `w` and are the same as for
+    the Donnell kinematics: this function returns
+    :func:`panels.models.cylshell_clpt_donnell_num.fkAy_num` with the same parameters.
+
+    Parameters
+    ----------
+    shell : :class:`.Shell`
+        The shell, which gives the dimensions ``a`` and ``b``, the radius ``r``
+        of the cylinders, the numbers of terms ``m`` and ``n`` and the boundary
+        flags of the approximation functions of each field.
+    size : int
+        Number of rows and columns of the matrix, the number of degrees of
+        freedom of the assembly.
+    row0, col0 : int
+        Row and column of the matrix where the terms of this shell start.
+    nx, ny : int
+        Number of Gauss-Legendre points along `x` and `y`.
+
+    Returns
+    -------
+    kA : scipy.sparse.coo_matrix
+        Matrix of shape ``(size, size)``. The matrix is assembled in full.
+
+    Raises
+    ------
+    ValueError
+        If ``shell`` is not a :class:`.Shell`.
 
     Notes
     -----
     See :func:`panels.models.cylshell_clpt_donnell_num.fkAy_num` for the integral.
 
+    """
     from .cylshell_clpt_donnell_num import fkAy_num as donnell_fkAy_num
     return donnell_fkAy_num(shell, size, row0, col0, nx, ny)
 
