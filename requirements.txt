@@ -4,4 +4,4 @@ numpy
 scipy
 matplotlib
 composites>=0.10.2
-structsolve>=0.9.3
+structsolve>=0.10.0

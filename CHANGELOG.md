@@ -2,6 +2,45 @@
 
 ## 0.15.0 (2026-11-03)
 
+### Requires structsolve 0.10.0
+
+- Requires `structsolve>=0.10.0` (`pyproject.toml`, `requirements.txt`),
+  for the stop criteria, `Analysis.final_load_factor = None`, the inertia
+  of the tangent stiffness matrix and the branch switching of the
+  arc-length methods used by the new test and notebook below.
+
+### New benchmark: post-buckling of an axially compressed cylinder
+
+- New `tests/tests_shell/test_simo1990_cylinder_postbuckling.py` and
+  `notebooks/simo1990_cylinder_postbuckling.ipynb` (with
+  `notebooks/simo1990_utils.py`): the cylinder of Simo, Fox and Rifai
+  (1990), Section 6.3.4, Fig. 6.3.4, `R = 36`, `L = 100`, `t = 0.125`, as an
+  `L/10 x 15 deg` section of `cylshell_clpt_donnell` with 8 x 8 terms,
+  traced with the Riks method of structsolve to twice the shortening of the
+  linear buckling load. The imperfection in the shape of the lowest linear
+  buckling mode is added exactly for the Donnell kinematics,
+  `fint_imp(c) = fint(c + c0) - fint(c0) - kG(N0) c` and `kT_imp(c) =
+  kT(c + c0) - kG(N0)`, with `kG(N0)` of the linear and non-linear membrane
+  resultants of `c0` integrated at the Gauss points: `Shell.calc_kG(c=c0)`
+  has the linear resultants only. The test checks `fint_imp(0) = 0`, the
+  tangent against central differences (1e-9) and the internal forces
+  against the gradient of the strain energy of `eps(c + c0) - eps(c0)`
+  (1e-7).
+- Limit loads, normalized by the linear buckling load (1.0047 `N_cl`):
+  0.728 for 10 % and 0.393 for 50 % of `t`, against 0.715 and 0.411 read
+  from Fig. 6.3.4 (a) and 0.717 and 0.402 for Stanley's 9-ANS points, with
+  the snap-back of the 10 % path to the shortening 0.0139 (0.0142 read) and
+  the plateau at 0.32 to 0.33. The perfect cylinder, switched at the first
+  bifurcation (`branch_switching`), bifurcates at 0.827 (0.833 read from
+  Fig. 6.3.4 (d)). The test of the 50 % imperfection takes 13 s; those of
+  10 % and of the perfect cylinder, 34 and 33 s here, are marked `slow`.
+- The perfect cylinder needs the unknowns scaled to a unit diagonal of the
+  linear stiffness and `linear_solver = 'splu'`: otherwise the critical
+  eigenvector of structsolve is one of weakly stiff in-plane Ritz terms and
+  the count of PARDISO, with about 20 perturbed pivots, finds the
+  bifurcation at 0.90; with 10 x 10 terms or more the switch fails also with
+  the scaling.
+
 ### Documentation and tests: null rows and columns in linear static solves
 
 - The docstring of `MultiDomain` describes the linear static workflow:
