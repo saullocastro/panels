@@ -98,6 +98,33 @@ class StiffPanelBay(object):
        stiffener's base as a structural element, Composite Structures, 140,
        36-43, 2016. https://doi.org/10.1016/j.compstruct.2015.12.056
 
+    Examples
+    --------
+    Linear buckling of a bay with two skin panels and a blade stiffener
+    between them, under the compressive load ``Nxx`` of the panels, with
+    :func:`structsolve.lb`:
+
+    >>> from structsolve import lb
+    >>> from panels.stiffpanelbay import StiffPanelBay
+    >>> laminaprop = (142.5e9, 8.7e9, 0.28, 5.1e9, 5.1e9, 5.1e9)
+    >>> bay = StiffPanelBay()
+    >>> bay.a, bay.b, bay.r = 0.4, 0.3, None
+    >>> bay.stack = [0, 90, 90, 0]
+    >>> bay.plyt, bay.laminaprop = 0.125e-3, laminaprop
+    >>> bay.m, bay.n, bay.rho = 8, 8, 1600.
+    >>> bay.model = 'plate_clpt_donnell'
+    >>> p1 = bay.add_panel(y1=0., y2=0.15, Nxx=-1.)
+    >>> p2 = bay.add_panel(y1=0.15, y2=0.3, Nxx=-1.)
+    >>> s = bay.add_bladestiff1d(ys=0.15, bf=0.02, fstack=[0, 90, 90, 0],
+    ...                          fplyt=0.125e-3, flaminaprop=laminaprop)
+    >>> eigvals, eigvecs = lb(bay.calc_kC(silent=True),
+    ...                       bay.calc_kG(silent=True),
+    ...                       silent=True, num_eigvalues=1)
+    >>> print(bay.get_size())
+    192
+    >>> print('%.1f' % eigvals[0])
+    660.2
+
     """
     def __init__(self):
         self.name = ''
