@@ -40,7 +40,7 @@ sys.path.append('../..')
 
 import numpy as np
 import pytest
-from scipy.sparse import csr_matrix, diags
+from scipy.sparse import csr_matrix
 from structsolve import Analysis, lb, solve
 from structsolve.stopping import value_reached
 
@@ -192,35 +192,6 @@ class ImperfectShell(object):
         return csr_matrix(self.kT0.shape)
 
 
-class ScaledModel(object):
-    r"""The callables of ``model`` in the unknowns c = S cs, S =
-    diag(1/sqrt(K_ii)) of the diagonal of its linear stiffness matrix, such
-    that the eigenvalues of smallest magnitude of the tangent stiffness
-    matrix are those of the softest deformations rather than those of the
-    Ritz terms of smallest norm, see :func:`test_riks_perfect_shell_inertia`"""
-    def __init__(self, model):
-        self.model = model
-        d = model.calc_kC().diagonal()
-        self.S = np.ones_like(d)
-        self.S[d > 0] = 1/np.sqrt(d[d > 0])
-        self.Sm = diags(self.S)
-
-    def calc_fext(self, inc=1., silent=True, c=None):
-        c = None if c is None else self.S*c
-        return self.S*self.model.calc_fext(inc=inc, silent=silent, c=c)
-
-    def calc_fint(self, c, silent=True, inc=1.):
-        return self.S*self.model.calc_fint(self.S*c, inc=inc)
-
-    def calc_kC(self, c=None, NLgeom=False, silent=True, inc=1.):
-        c = None if c is None else self.S*c
-        return csr_matrix(self.Sm @ self.model.calc_kC(c=c, NLgeom=NLgeom,
-                                                       inc=inc) @ self.Sm)
-
-    def calc_kG(self, c=None, NLgeom=False, silent=True, inc=1.):
-        return csr_matrix(self.Sm.shape)
-
-
 def riks(model, stop, inc, max_inc=None, num_eigvals=20):
     r"""Riks analysis of ``model``, the load factor being ``K``, with the
     inertia of the unsymmetric tangent stiffness matrix at every converged
@@ -337,15 +308,14 @@ def test_linear_buckling_shell1():
 
 def test_riks_perfect_shell_inertia():
     # the fundamental path of the perfect shell B1 beyond its bifurcation,
-    # at K_f: one negative eigenvalue after it. In the unknowns of the shell
-    # the negative eigenvalue at K = 10 is the 129th of 260 by magnitude,
-    # those of the Ritz terms of smallest norm being smaller, and the count
-    # among the 20 of smallest magnitude misses it, while the sign of the
-    # determinant changes: the unknowns are scaled to a unit diagonal of
-    # the linear stiffness, where it is the 9th
+    # at K_f: one negative eigenvalue after it. structsolve counts the
+    # eigenvalues of S K_T S, S = |diag(K0)|^(-1/2), with K0 the linear
+    # stiffness: in the unknowns of the shell the negative eigenvalue is far
+    # from the smallest ones by magnitude (about the 130th), those of the
+    # Ritz terms of smallest norm being closer to zero
     s, kP = build_shell('B1')
     K_f = buckling_K(s, kP)[0]
-    model = ScaledModel(ImperfectShell(s, np.zeros(s.get_size()), kP))
+    model = ImperfectShell(s, np.zeros(s.get_size()), kP)
     an, Ks = riks(model, lambda an: an.increments[-1] >= 10.5, inc=2.)
     nneg = np.asarray(an.num_negative_eigvals)
     det = np.asarray(an.det_signs)

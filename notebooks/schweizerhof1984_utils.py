@@ -23,8 +23,8 @@ if TESTS not in sys.path:
     sys.path.insert(0, TESTS)
 
 from test_schweizerhof1984_cantilever_postbuckling import (  # noqa: E402
-        build_shell, buckling_K, imperfection, ImperfectShell, ScaledModel,
-        w_max, R, t, E, NU)
+        build_shell, buckling_K, imperfection, ImperfectShell, w_max, R, t,
+        E, NU)
 
 #: Table 4 of [1], p. 1111, read on the page: (shell, L/R, R/t, n), then
 #: (k_c, k_f) of B1 and of B2 (k_f with the symmetrization of Eq. (63));
@@ -54,7 +54,7 @@ FIG13_PERFECT_K = 8.04
 
 
 def riks(bc='B1', xi=0.01, wstop=3., m=14, nt=8, inc=1., max_inc=None,
-         num_eigvals=6, max_steps=None, scale=False):
+         num_eigvals=6, max_steps=None):
     r"""Riks analysis of the cantilever under the follower pressure, the
     load factor being ``K`` of Eq. (60), up to ``w_max/t = wstop``
 
@@ -66,7 +66,8 @@ def riks(bc='B1', xi=0.01, wstop=3., m=14, nt=8, inc=1., max_inc=None,
     of negative real eigenvalues of the unsymmetric tangent stiffness matrix
     among the ``num_eigvals`` of smallest magnitude, by ARPACK on its LU
     factorization, and the sign of its determinant, at every converged
-    increment, in the unknowns of ``ScaledModel`` of the test with ``scale=True``.
+    increment; structsolve counts the eigenvalues of ``S K_T S``, ``S =
+    |diag(K0)|^(-1/2)`` of the linear stiffness matrix.
 
     Returns a dict with the load factors ``K``, the maximum displacement
     ``w`` (``|w|``, without the imperfection) over ``t``, the counts
@@ -79,10 +80,6 @@ def riks(bc='B1', xi=0.01, wstop=3., m=14, nt=8, inc=1., max_inc=None,
     K_f, mode = buckling_K(s, kP)
     c0 = imperfection(s, mode, xi) if xi > 0 else np.zeros_like(mode)
     sm = ImperfectShell(s, c0, kP)
-    unscale = lambda c: c
-    if scale:
-        sm = ScaledModel(sm)
-        unscale = lambda c: sm.S*c
     an = Analysis(sm.calc_fext, sm.calc_fint, sm.calc_kC, sm.calc_kG)
     an.NL_method = 'arc_length_riks'
     an.final_load_factor = None
@@ -92,7 +89,7 @@ def riks(bc='B1', xi=0.01, wstop=3., m=14, nt=8, inc=1., max_inc=None,
     an.inertia = True
     an.inertia_num_eigvals = num_eigvals
     if xi > 0:
-        an.stop_criterion = value_reached(lambda c: w_max(s, unscale(c))/t,
+        an.stop_criterion = value_reached(lambda c: w_max(s, c)/t,
                                           wstop)
     else:
         an.stop_criterion = lambda an: an.increments[-1] >= wstop
@@ -106,7 +103,7 @@ def riks(bc='B1', xi=0.01, wstop=3., m=14, nt=8, inc=1., max_inc=None,
                              - lbd*sm.calc_fext(inc=1.))
               / np.linalg.norm(sm.calc_fext(inc=1.))
               for lbd, c in zip(an.increments, an.cs))
-    w = [w_max(s, unscale(c))/t for c in an.cs]
+    w = [w_max(s, c)/t for c in an.cs]
     return dict(K=list(map(float, an.increments)), w=list(map(float, w)),
                 nneg=list(an.num_negative_eigvals), det=list(an.det_signs),
                 K_f=float(K_f), time=elapsed, max_residual=float(res))

@@ -70,13 +70,15 @@
   from the figure from `w/t = 0.07` to 3. Fig. 13 is therefore taken as the
   curve of B2.
 - The number of negative eigenvalues of the unsymmetric tangent stiffness
-  matrix by `inertia_num_eigvals` (ARPACK on the LU factorization) misses
-  the bifurcation of the perfect shell in the unknowns of the shell, the
-  negative eigenvalue being the 130th of 260 by magnitude, while the sign
-  of the determinant changes; with the unknowns scaled to a unit diagonal
-  of the linear stiffness it is the 9th, and the count of 20 eigenvalues
-  finds it. The fast tests take about 25 s, the plateaus of B1 and B2 up to
-  `w/t = 3`, about 120 s, are marked `slow`.
+  matrix, `inertia_num_eigvals = 20` (ARPACK on the LU factorization),
+  finds the bifurcation of the perfect shell, as the sign of the
+  determinant does. It relies on the scaling of structsolve by
+  `|diag(K0)|^(-1/2)`: among the eigenvalues of `K_T` itself, in the
+  unknowns of the shell, the negative one is far from the smallest by
+  magnitude, the Ritz terms of smallest norm having many eigenvalues closer
+  to zero. The fast tests take about 25 s, the plateaus of B1 and B2 up to
+  `w/t = 3`, 480 s with the scaled count (120 s before it), are marked
+  `slow`.
 
 ### Documentation and tests: null rows and columns in linear static solves
 
