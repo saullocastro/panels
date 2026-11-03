@@ -129,8 +129,6 @@ critical state as the equivalent applied load:
 .. literalinclude:: ../../tests/multidomain/test_null_space_pd.py
     :pyobject: test_linear_buckling_plate_end_shortening_equals_load
 
-More examples are given in :ref:`ex_prescribed_displacements`.
-
 
 .. _boundary_conditions_face_clamp:
 
@@ -166,4 +164,4 @@ which no combination of flags can express. Along the edge `w = 0` gives
 `w_{,y} = 0`, and the two faces then give `v = \phi_y = 0`. The edge is
 softer than the planar clamp and stiffer than the simple support, and,
 being defined by the physical faces, it does not depend on the reference
-surface. See the example :ref:`ex_face_clamp`.
+surface.

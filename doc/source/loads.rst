@@ -62,7 +62,7 @@ matrix being then integrated numerically. The attributes ``Nxx_cte``,
 ``Nyy_cte`` and ``Nxy_cte`` give instead a constant prestress, whose
 geometric stiffness is added to the constitutive stiffness by
 :meth:`.Shell.calc_kC` and is therefore not multiplied by the eigenvalue of
-``lb(kC, kG)``. See :doc:`ex_linear_buckling`.
+``lb(kC, kG)``.
 
 
 Example
