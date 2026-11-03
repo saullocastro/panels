@@ -79,7 +79,7 @@ def fkCf(double ys, double a, double b, double bf, double df, double E1, double 
         Torsional stiffness `G J` of the flange divided by ``bf``.
     m, n : int
         Numbers of terms of the approximation of the skin along `x` and `y`.
-    x1u, x1ur, x2u, x2ur, ..., y1w, y1wr, y2w, y2wr : float
+    x1u, x1ur, x2u, x2ur, x1w, x1wr, x2w, x2wr, y1u, y1ur, y2u, y2ur, y1w, y1wr, y2w, y2wr : float
         Boundary flags of the approximation functions of the skin: the
         translation (``t``) and rotation (``r``) flags at the edges ``1`` and
         ``2`` along ``x`` and ``y`` of each field ``u``, ``v``, ``w`` used by
@@ -222,7 +222,7 @@ def fkGf(double ys, double Fx, double a, double b, double bf, int m, int n,
         Height of the flange, a length.
     m, n : int
         Numbers of terms of the approximation of the skin along `x` and `y`.
-    x1u, x1ur, x2u, x2ur, ..., y1w, y1wr, y2w, y2wr : float
+    x1w, x1wr, x2w, x2wr, y1w, y1wr, y2w, y2wr : float
         Boundary flags of the approximation functions of the skin: the
         translation (``t``) and rotation (``r``) flags at the edges ``1`` and
         ``2`` along ``x`` and ``y`` of each field ``u``, ``v``, ``w`` used by
@@ -341,7 +341,7 @@ def fkMf(double ys, double rho, double h, double hb, double hf, double a,
         mid-surface of the skin.
     m, n : int
         Number of terms along `x` and `y`.
-    x1u, x1ur, x2u, x2ur, ..., y1w, y1wr, y2w, y2wr : float
+    x1u, x1ur, x2u, x2ur, x1v, x1vr, x2v, x2vr, x1w, x1wr, x2w, x2wr, y1u, y1ur, y2u, y2ur, y1v, y1vr, y2v, y2vr, y1w, y1wr, y2w, y2wr : float
         Boundary flags of the approximation functions of the skin, see
         :class:`.Shell`.
     size, row0, col0 : int

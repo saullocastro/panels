@@ -75,7 +75,7 @@ def fkCss(double kt, double kr, double ys, double a, double b, int m, int n,
         Dimensions of the skin along `x` and `y`, lengths.
     m, n : int
         Numbers of terms of the approximation of the skin along `x` and `y`.
-    x1u, x1ur, x2u, x2ur, ..., y1w, y1wr, y2w, y2wr : float
+    x1u, x1ur, x2u, x2ur, x1v, x1vr, x2v, x2vr, x1w, x1wr, x2w, x2wr, y1u, y1ur, y2u, y2ur, y1v, y1vr, y2v, y2vr, y1w, y1wr, y2w, y2wr : float
         Boundary flags of the approximation functions of the skin: the
         translation (``t``) and rotation (``r``) flags at the edges ``1`` and
         ``2`` along ``x`` and ``y`` of each field ``u``, ``v``, ``w`` used by
@@ -221,12 +221,12 @@ def fkCsf(double kt, double kr, double ys, double a, double b, double bf,
         Numbers of terms of the approximation of the skin along `x` and `y`.
     m1, n1 : int
         Numbers of terms of the approximation of the flange.
-    x1u, x1ur, x2u, x2ur, ..., y1w, y1wr, y2w, y2wr : float
+    x1u, x1ur, x2u, x2ur, x1v, x1vr, x2v, x2vr, x1w, x1wr, x2w, x2wr, y1u, y1ur, y2u, y2ur, y1v, y1vr, y2v, y2vr, y1w, y1wr, y2w, y2wr : float
         Boundary flags of the approximation functions of the skin: the
         translation (``t``) and rotation (``r``) flags at the edges ``1`` and
         ``2`` along ``x`` and ``y`` of each field ``u``, ``v``, ``w`` used by
         the kernel, see :class:`.Shell`.
-    x1uf, x1urf, ..., y2wf, y2wrf : float
+    x1uf, x1urf, x2uf, x2urf, x1vf, x1vrf, x2vf, x2vrf, x1wf, x1wrf, x2wf, x2wrf, y1uf, y1urf, y2uf, y2urf, y1vf, y1vrf, y2vf, y2vrf, y1wf, y1wrf, y2wf, y2wrf : float
         Boundary flags of the approximation functions of the flange, in the
         same order as those of the skin.
     size : int
@@ -367,7 +367,7 @@ def fkCff(double kt, double kr, double a, double bf, int m1, int n1,
         Height of the flange, its width `b_f` along its own `y`, a length.
     m1, n1 : int
         Numbers of terms of the approximation of the flange.
-    x1uf, x1urf, ..., y2wf, y2wrf : float
+    x1uf, x1urf, x2uf, x2urf, x1vf, x1vrf, x2vf, x2vrf, x1wf, x1wrf, x2wf, x2wrf, y1uf, y1urf, y2uf, y2urf, y1vf, y1vrf, y2vf, y2vrf, y1wf, y1wrf, y2wf, y2wrf : float
         Boundary flags of the approximation functions of the flange, in the
         same order as those of the skin.
     size : int
@@ -397,7 +397,8 @@ def fkCff(double kt, double kr, double a, double bf, int m1, int n1,
     at its edge `\eta_f = -1`, `w_{f,y} = (2/b_f) w_{f,\eta}`.
 
     The integral along `x` is evaluated in closed form with the
-    integrals of Bardell's functions, `dx = (a/2) d\xi`, with `a` the length of the flange.
+    integrals of Bardell's functions, `dx = (a/2) d\xi`,
+    with `a` the length of the flange.
 
     """
     cdef double [:, ::1] gtabf
