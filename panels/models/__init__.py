@@ -39,9 +39,6 @@ SUFIX used to indicate additional information
 - num - stiffness matrices integrated numerically
 
 
-Available models
-----------------
-
 The available models, which are selected with ``Shell.model``, are:
 
 - ``'plate_clpt_donnell'``: flat plates, classical laminated plate theory
