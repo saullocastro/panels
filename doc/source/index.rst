@@ -172,7 +172,7 @@ extensions, using::
 
 In the browser, with `Pyodide <https://pyodide.org>`_ 314 (CPython 3.14),
 the WebAssembly wheel published on PyPI is installed with ``micropip``, see
-:ref:`pyodide`.
+:ref:`pyodide_page`.
 
 
 .. toctree::

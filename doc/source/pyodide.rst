@@ -1,4 +1,4 @@
-.. _pyodide:
+.. _pyodide_page:
 
 Running in the browser with Pyodide
 ===================================
