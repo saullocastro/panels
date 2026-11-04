@@ -1,0 +1,6 @@
+{
+    "path": "../../../notebooks/sewall1968_blade_cylinder_vibration.ipynb",
+    "extra-media": [
+        "../../../notebooks/blade_cylinder_utils.py"
+    ]
+}
