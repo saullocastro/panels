@@ -663,5 +663,5 @@ Tijs (2023) [tijs2023PhD]_, and with the mixed-mode benchmarks of Krueger
 damage is driven by the normal separation only. For the unidirectional
 specimens the peak loads are within 2.6% of the corrected beam theory or of
 a cohesive finite element model with the same law, while the initial
-compliance is up to about 20% lower than that of the corrected beam theory,
+compliance is 15-21% lower than that of the corrected beam theory,
 because the CLPT arms have no transverse shear deformation.

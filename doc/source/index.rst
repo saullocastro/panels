@@ -144,6 +144,9 @@ User guide
     notebooks/dcb_tijs2023_phd.nblink
     notebooks/dcb_lecinana2023.nblink
     notebooks/dcb_mode_I_validation_summary.nblink
+    notebooks/dcb_mode_I_convergence_study.nblink
+    notebooks/dcb_mode_I_solver_study.nblink
+    notebooks/cohesive_zone_verification.nblink
     notebooks/krueger2012_mmb_benchmark.nblink
     notebooks/conn_method_comparison.nblink
     notebooks/test_quadrature_partial_integration_matrix.nblink
