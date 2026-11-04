@@ -277,7 +277,8 @@ def test_cylinder_redundant_constraints():
     r"""Closed cylinder, the constraints at the ends of the edges, where the
     boundary conditions already remove the terms, are redundant
 
-    The value of the penalty method is -47055.984, see ``test_cylinder.py``.
+    The penalty method gives -47055.984 for the same model, with the default
+    penalty constants (regression value).
     """
     Nxxs = [-100.]*5
     md, eigvals, eigvecs = cylinder_compression_lb_Nxx_cte(height=0.5,

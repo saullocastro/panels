@@ -365,20 +365,24 @@ def test_higher_modes_isotropic_thick_plate():
 
     With `\bar\omega = \omega h \sqrt{\rho/G}`, for the modes `(1, 1)`,
     `(1, 2)`, `(2, 1)`, `(2, 2)`, `(1, 3)` and `(3, 1)`, the FSDT with `k =
-    5/6` gives 0.0930, 0.2219, 0.2219, 0.3406, 0.4149 and 0.4149, as
-    reproduced for the isotropic plate in Table 1 of an article of the
-    Algerian Journal of Research and Technology.
+    5/6` gives 0.0930, 0.2219, 0.2219, 0.3406, 0.4149 and 0.4149, the
+    FSDPT values of the non-porous isotropic plate of Merdaci et al. (2020),
+    Table 1.
 
     Notes
     -----
-    The 3D elasticity solution of Srinivas, Rao and Rao (1970) is about
-    0.0932, 0.2226, 0.3421 and 0.4171 for the distinct modes.
+    Table 1 of [1]_ (p. 19), `a/b = 1`, `a/h = 10`, porosity coefficient 0,
+    column FSDPT: 0.0930, 0.2219, 0.3406 and 0.4149 for the modes `(1, 1)`,
+    `(1, 2)`, `(2, 2)` and `(1, 3)`. The 3D elasticity solution of Srinivas,
+    Rao and Rao (1970) is about 0.0932, 0.2226, 0.3421 and 0.4171 for the
+    distinct modes.
 
     References
     ----------
-    .. [1] "Free vibration analysis of advanced composite plates with
-       porosities", Algerian Journal of Research and Technology (ajrt.dz).
-       TODO(author): authors, year, volume and pages.
+    .. [1] Merdaci, S., Belghoul, H., Hadj Mostefa, A., Merazi, M.,
+       Hellal, H., Boutaleb, S., Free vibration analysis of advanced
+       composite plates with porosities, Algerian Journal of Research and
+       Technology 4(2) (2020) 13-23. https://doi.org/10.58681/ajrt.20040202
     """
     a = 1.
     h = 0.1*a

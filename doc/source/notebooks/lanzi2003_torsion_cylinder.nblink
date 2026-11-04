@@ -1,0 +1,6 @@
+{
+    "path": "../../../notebooks/lanzi2003_torsion_cylinder.ipynb",
+    "extra-media": [
+        "../../../notebooks/posicoss_utils.py"
+    ]
+}

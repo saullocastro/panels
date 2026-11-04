@@ -132,10 +132,17 @@ User guide
     notebooks/schweizerhof1984_cantilever_postbuckling.nblink
     notebooks/sze2004_hinged_roofs.nblink
     notebooks/large_rotation_plates.nblink
+    notebooks/null_space_vs_penalty.nblink
+    notebooks/tangent_stiffness_product.nblink
+    notebooks/tsdt_offset_connections.nblink
     notebooks/fk1952_shallow_arches.nblink
     notebooks/simo1990_cylinder_postbuckling.nblink
     notebooks/stamatelos_labeas_2023.nblink
     notebooks/stamatelos_labeas_2023_multidomain.nblink
+    notebooks/sewall1968_blade_cylinder_vibration.nblink
+    notebooks/card1966_blade_cylinder_buckling.nblink
+    notebooks/abramovich2009_blade_panels.nblink
+    notebooks/lanzi2003_torsion_cylinder.nblink
     notebooks/dcb_alfano2001.nblink
     notebooks/dcb_camanho2003.nblink
     notebooks/dcb_turon2007.nblink
