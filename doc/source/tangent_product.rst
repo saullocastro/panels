@@ -1190,7 +1190,7 @@ each integration point, the internal force vector and the product over the
 `m n` terms: the product costs about as much as :meth:`.Shell.calc_fint`,
 and the ratio of the cost of the assembly to that of the product grows with
 the number of terms and with the number of degrees of freedom per term, from
-about ten for the CLPT with `m = n = 8` to several hundred for the TSDT with
+ten to twenty for the CLPT with `m = n = 8` to a few hundred for the TSDT with
 `m = n = 16`. In a displacement-controlled non-linear analysis with the
 prescribed displacements imposed exactly, most of the time is spent in the
 assemblies of `\boldsymbol{K}_T` for the Newton iterations, the products for
