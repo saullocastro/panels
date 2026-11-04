@@ -93,6 +93,24 @@ def test_calc_fint_rejects_wrongly_sized_c():
         s.calc_fint(c=None)
 
 
+def test_m_n_above_30_raise():
+    """``m > 30`` or ``n > 30`` raises the same ``ValueError`` in the
+    constructor and when assigned to an existing shell."""
+    msg = 'Bardell functions of the order 31 and above are not coded'
+    with pytest.raises(ValueError, match=msg):
+        Shell(m=31)
+    with pytest.raises(ValueError, match=msg):
+        Shell(n=31)
+    s = Shell(m=30, n=30)
+    with pytest.raises(ValueError, match=msg):
+        s.m = 31
+    with pytest.raises(ValueError, match=msg):
+        s.n = 31
+    assert (s.m, s.n) == (30, 30)
+    s.m, s.n = 5, 7
+    assert (s.m, s.n) == (5, 7)
+
+
 @pytest.mark.parametrize('model', ['cylshell_clpt_donnell',
                                    'cylshell_clpt_sanders',
                                    'cylshell_fsdt_donnell',

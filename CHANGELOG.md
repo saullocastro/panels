@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- `Shell.m` and `Shell.n` are properties whose setters raise the
+  `ValueError` of the constructor for values above 30 (the Bardell
+  functions of the order 31 and above are not coded); assigning them after
+  the construction was not checked and silently capped the number of terms
+  at 30. New test `test_m_n_above_30_raise` in
+  `tests/tests_shell/test_argument_validation.py`.
+
 ## 0.15.0 (2026-11-03)
 
 ### Requires structsolve 0.10.0
