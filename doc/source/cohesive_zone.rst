@@ -299,8 +299,7 @@ panels and over the integration points, where the approximation functions are
 evaluated inside the loops, ``kCSB_dmg.pyx``. Because `\boldsymbol{K}^{conn}_{dmg}` is
 part of the internal force vector, it is needed at every iteration (see
 :ref:`cohesive_zone_solution`), and with `60 \times 30` integration points and `10 \times 10`, `8 \times 8` terms these
-loops take 6.5 s per assembly with the code of the thesis (panels 0.6.21), 67%
-of the run time in the elastic range.
+loops dominate the run time in the elastic range.
 The implementation now writes the same Gauss-Legendre rule as matrix products.
 Let `g = 1, \dots, n_g` be the integration points, with weights `w_g = w_{\xi}
 w_{\eta} \, ab/4`, and `\boldsymbol{c}_{tb}` the Ritz constants of the top panel
@@ -363,23 +362,9 @@ coordinates of the top panel, therefore the two panels must have the same
 dimensions `a`, `b`, which :class:`.MultiDomain` checks for the connections
 ``'SB'`` and ``'SB_TSL'``, raising a ``ValueError`` otherwise.
 
-The cost was measured on the DCB model of the thesis
-(``tests/multidomain/test_dcb_damage.py``, `60 \times 30` integration
-points, `10 \times 10` and `8 \times 8` terms), on a laptop with 16 threads,
-by timing :meth:`.MultiDomain.get_kC_conn` in the driver of the thesis
-(panels 0.6.21) and in the current driver (panels 0.13.11), as the medians
-of three runs, between which the times varied by up to 50%. One assembly of `\boldsymbol{K}^{conn}_{dmg}` takes 6.5 s with the loops of
-the thesis (panels 0.6.21) at any damage state, 0.42 s with the
-current kernels, and 0.035 s with the matrix products for the pristine
-interface and 0.05--0.08 s with 20--100% of the points damaged, 85--190
-times faster than the loops of the thesis. Eight displacement increments in
-the elastic range take 218 s with the code of the thesis and 6.4 s with
-panels 0.13.11, the matrix products and the update of Eq. :eq:`cz-K-update`
-together with the changes of the driver described in
-:ref:`cohesive_zone_solution`; with the current kernels and without the
-predictor and the reuse of the tangent stiffness they take 29 s, with the
-same loads to a relative `3.2 \times 10^{-8}`, the order of the convergence
-tolerance.
+Written as matrix products, one assembly of `\boldsymbol{K}^{conn}_{dmg}` on the DCB model
+of the thesis is one to two orders of magnitude faster than with the loops over
+the terms and the integration points.
 
 
 .. _cohesive_zone_load:
@@ -442,13 +427,6 @@ the fourth digit, by `2.2\times10^{-4}`; the difference falls below
 `2\times10^{-9}` with 1.5 or 5 mm. The values are asserted by
 ``tests/multidomain/test_dcb_linear_measures.py``, whose function
 ``dcb_thesis_linear`` builds and solves the model.
-
-Earlier versions of this page gave, for this table and the table of the next
-section, values computed with the tangential separation of Eq. 4.62 of the thesis
-[nathan2024MSc]_, Eq. :eq:`cz-thesis-jump`, before its correction to
-Eq. :eq:`cz-jump`; restoring Eq. :eq:`cz-thesis-jump` in the current code
-reproduces them, and with Eq. :eq:`cz-jump` the reactions are 1.0--1.2% lower
-and `\Delta_{max}/\delta` of the next section is 20% higher.
 
 The ratio between the corrected integral and the reaction, 15.5 to 31.8,
 depends on `k_o` and on the damage state, such that a scaling factor fixed at
@@ -793,21 +771,15 @@ cohesive domain (`L_{tsl} = 24 \to 17` mm). The metrics are:
 - the number of bisected increments, the number of Newton-Raphson iterations
   and the wall time.
 
-The results are those of panels 0.14.0. The wall and CPU times are those of the first
-computation, with panels 0.13.11, on a laptop with 16 threads, eight runs at a
+The wall and CPU times were measured on a laptop with 16 threads, eight runs at a
 time with two threads each, so the wall times indicate the relative cost; the
 reference run takes 10 min in this setting and 4.5 min of wall time (17 min of
-CPU time) when run alone. The runs A and B with `m_{tsl} = 10` and `n_x =
-120` changed with panels 0.14.0: their times are those of the runs of 0.13.11,
-with 129 and 119 iterations, which stopped at `\delta = 7.2` and 7.4 mm, as
-the field ``time_note`` of the two runs states.
+CPU time) when run alone.
 
 .. list-table:: Convergence study, terms `m_{tsl}` and Gauss points `n_x`
                 along `x` of the cohesive domain, `L_{tsl} = 24` mm. Loads
                 in N, openings in mm, `e_P` and `e_{eq}` in %, wall time in
-                min, of panels 0.13.11 (for A and B with `m_{tsl} = 10`,
-                `n_x = 120`, of the runs of 0.13.11 with 129 and 119
-                iterations). The runs with `m_{tsl} = 10` stopped at
+                min. The runs with `m_{tsl} = 10` stopped at
                 `\delta = 6.2` mm (`n_x = 60`) and 7.2 mm (`n_x = 120`) in
                 case A and 7.4 mm (`n_x = 60`) in case B, and the run B with
                 `m_{tsl} = 15`, `n_x = 60` at 7.8 mm, when an increment did
@@ -1254,7 +1226,7 @@ the field ``time_note`` of the two runs states.
                 from the reference discretisation `L_{tsl} = 24` mm,
                 `m_{tsl} = 25`, `n_x = 180`, `n_{tsl} = 10`, `n_y = 30`,
                 `m = n = 8`. Same quantities and units as above, wall time
-                of panels 0.13.11. The halved
+                in min. The halved
                 increment gives 53 openings instead of 38.
     :header-rows: 1
 
@@ -1536,11 +1508,7 @@ with `\Delta a` the crack growth up to the last opening, `m_{tsl} \leq 25`,
 :func:`.tsl_resolution`, :func:`.tsl_margin` and :func:`.tsl_discretization`,
 and :meth:`.MultiDomain.calc_k_dmg` prints a warning, the first time a point
 is damaged, when `m_{tsl} < 1.0\,\lambda L_{tsl}` or `n_x < 7\,L_{tsl}/l_{cz}`.
-Before version 0.13.11 the rate was `(k_o/4D_{11})^{1/4}`, that of one arm on
-a rigid foundation, `2^{-1/4}` times the rate of the symmetric DCB, and the
-factors of the rules were 1.5 and 1.2 instead of 1.25 and 1.0. The margin
-was `2\pi/\lambda + 3 l_{cz}`, i.e. `7.47/\lambda + 3 l_{cz}` with the
-corrected rate; `2\pi/\lambda + 3 l_{cz}` with the corrected rate lets the
+A margin of `2\pi/\lambda + 3 l_{cz}`, i.e. `7.47/\lambda + 3 l_{cz}`, lets the
 tractions reach the perfect bond in the last openings of the validation runs,
 with `e_{eq}` up to 10%, against 0.25% at most with `3 l_{cz} + 8/\lambda`.
 The Gauss-Legendre points and weights are computed by
@@ -1575,7 +1543,6 @@ Krueger (2008) [krueger2008DCB]_, Tijs et al. (2022) [tijs2022Interlaminar]_,
 Leciñana et al. (2023) [lecinana2023Fatigue]_ and the PhD thesis of Tijs
 (2023) [tijs2023PhD]_, plus Krueger (2012) [krueger2012MMB]_, whose benchmarks
 are for the mixed-mode bending specimen and are only recorded, see below.
-The results were obtained with panels 0.14.0.
 
 The case of Camanho et al. (2003) is kept for reference, but it is not used
 to validate the model: the FE and experimental load-opening curves of the
