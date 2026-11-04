@@ -15,7 +15,7 @@ is checked against:
    pressure, against :func:`cylinder_closed_form`;
 4. the thick orthotropic and isotropic rings of Kardomateas (1993), Tables 1
    and 2, Eq. (29a), and the homogeneous graphite/epoxy ring of Kardomateas
-   and Simitses (2003), Table 4;
+   and Simitses (2005), Table 4;
 5. Batdorf's formula for simply supported cylinders under lateral and
    hydrostatic pressure, NASA/SP-8007-2020/REV 2,
    :func:`batdorf_lateral_pressure`;
@@ -75,7 +75,9 @@ References
 .. [1] Schweizerhof, K. and Ramm, E., Comput. Struct., 18, 1099-1114, 1984.
 .. [2] Han, Kardomateas and Simitses, Compos. B, 35, 591-598, 2004.
 .. [3] Kardomateas, J. Appl. Mech., 60, 195-202, 1993.
-.. [4] Kardomateas and Simitses, 2003. TODO(author): full reference.
+.. [4] Kardomateas, G. A. and Simitses, G. J., Buckling of long sandwich
+   cylindrical shells under external pressure, J. Appl. Mech., 72(4),
+   493-499, 2005. https://doi.org/10.1115/1.1934513
 .. [5] NASA/SP-8007-2020/REV 2, Eqs. (19)-(22).
 """
 import sys
@@ -615,7 +617,7 @@ def test_kardomateas1993_shell_formula(kind):
 @pytest.mark.slow
 def test_kardomateas2003_homogeneous_ring(ratio, elast, classical):
     r"""Homogeneous graphite/epoxy ring, ``h = 30.48 mm``, of Table 4 of
-    Kardomateas and Simitses (2003): the FSDT and the TSDT with the pressure
+    Kardomateas and Simitses (2005): the FSDT and the TSDT with the pressure
     on the outer surface agree with the elasticity solution within 0.3%,
     and the CLPT with the classical formula ``3 E2 h**3/(12 R**3)`` within the
     plane-strain factor ``1/(1 - nu12 nu21)``"""
