@@ -4,9 +4,7 @@ Two equivalent closed-section models with a spar, built with ``'BFycte'``
 (fixture ``eig_value_panel_BFycte``) and with ``'BFxcte'`` (fixture
 ``eig_value_panel_BFxcte``, with the loads, connections and boundary
 conditions along `x` = constant), must give the same first linear buckling
-eigenvalue within 1 %. Both models agree within 1 % with a NASTRAN model,
-``reference_model_BFxcte.dat``, which is not in the repository and not used
-by the test. TODO(author): add the NASTRAN model or remove this sentence.
+eigenvalue within 1 %.
 
 """
 import sys

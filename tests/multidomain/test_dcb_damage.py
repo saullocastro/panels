@@ -259,9 +259,8 @@ def dcb_damage_prop_no_f_kcrack(phy_dim, nr_terms, k_i=None, tau_o=None, nr_x_ga
 
     The material properties of the active branch are labelled "Bas's paper
     (TP - 65,25,48)" in the code, those of an inactive branch "Theodores
-    thesis". TODO(author): full references of these two sources (the
-    properties of the active branch are those of ``plot_hashemi_1990_LEFM.py``,
-    which cites Tijs et al., 2022).
+    thesis". TODO(author): full references of these two sources (candidate
+    for the active branch: Tijs et al., 2022, Composites Part A 162, 107101).
 
     References
     ----------
@@ -979,7 +978,8 @@ REF_MAX_DMG = np.array([0., 0., 0., 0.3875, 0.7474, 1., 1., 1.])
 
 @pytest.mark.slow
 def test_dcb_damage_prop_no_f_kcrack(tmp_path, monkeypatch):
-    # p3_70_25_m18_8_ki1e5_tauo67_nx60_ny30_wpts30_G1c112
+    # 3 domains per arm, 65 x 25 mm, pre-crack 48 mm, k_i = 1e4 N/mm^3,
+    # tau_o = 87 MPa, 50 x 25 Gauss points, 8 increments up to 8 mm
     # the driver writes its results to the current directory
     monkeypatch.chdir(tmp_path)
     dmg_index, del_d, kw_tsl, force_intgn, c_all = dcb_damage_prop_no_f_kcrack(phy_dim=[3,65,25,48],

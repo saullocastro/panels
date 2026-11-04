@@ -132,8 +132,9 @@ def dcb_thesis_linear(k_o, edge_penalty_factor=1., a2=0.015, wp=0.5,
 
 @pytest.mark.slow
 def test_load_measures():
-    # tip displacement of 1 mm, default edge penalties; columns: k_o (N/mm^3),
-    # reaction, int k Delta dA, int k Delta^corr dA, int Q_x dy (N)
+    # solution at a tip displacement wp = 0.5 mm, per mm of wp, default edge
+    # penalties; columns: k_o (N/mm^3), reaction, int k Delta dA,
+    # int k Delta^corr dA, int Q_x dy (N/mm)
     table = [
         (1e4, 24.9847, 24.9902, 388.113, 24.4146),
         (5e4, 25.8676, 25.8731, 593.064, 25.2804),
