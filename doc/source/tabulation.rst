@@ -6,10 +6,9 @@ Approximation functions tabulated at the integration points
 The numerically integrated matrices and vectors of ``panels`` are sums over
 the integration points of products of the approximation functions of the
 Ritz method. This page describes how the kernels evaluate these functions:
-before version 0.13.0 they were evaluated again in every loop over the terms
-of the matrix, the innermost loop included; they are now evaluated once per
-integration point and term, in tables. The results are the same, bit for
-bit, and the assembly is several times faster.
+once per integration point and term, in tables, instead of again in every
+loop over the terms of the matrix, the innermost loop included. The results
+are the same, bit for bit, and the assembly is several times faster.
 
 Integrands
 ----------
