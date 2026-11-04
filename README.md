@@ -129,14 +129,15 @@ s.save()              # writes plate.shell.zip
 s2 = load('plate')
 ```
 
-The pickle files saved by older versions are no longer loaded, since a pickle
-file can execute arbitrary code; one from a trusted source can be converted
-by loading it with `pickle.load()` and saving the object again.
+Pickle files are not loaded, since a pickle file can execute arbitrary code;
+one from a trusted source can be converted by loading it with `pickle.load()`
+and saving the object again.
 
 
 History
 =======
 
+See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
 * version 0.15.0 (2026-11-03)
     - New model `plate_clpt_gl`, plates with full Green-Lagrange membrane strains, for large rotations, e.g. of wing boxes
     - New connection `'BFxycte'`, an edge `x = const` joined to an edge `y = const`, and the wing-box example `panels.multidomain.wingbox` (High-AR-t5) built with it
