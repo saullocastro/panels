@@ -269,8 +269,7 @@ def dcb_damage_prop_no_f_kcrack(phy_dim, nr_terms, k_i=None, tau_o=None, nr_x_ga
     Table 1 (p. 3): `E_1` and `E_2` are the averages of the tensile and
     compressive moduli (138 300 and 128 000 MPa, 10 400 and 11 500 MPa), as
     in their analytical solution (Section 2.3), `G_{12} = 5190` MPa and
-    `
-u_{12} = 0.316`; the ply thickness of 0.14 mm is that of Section 2.1
+    `\nu_{12} = 0.316`; the ply thickness of 0.14 mm is that of Section 2.1
     (p. 2), the 15 plies per arm are half of their 30-ply specimen (Section
     2.2) and the traction at damage onset ``tau_o = 87`` MPa of the test is
     their matrix tensile strength (Table 1). The pre-crack length of 48 mm
@@ -278,8 +277,7 @@ u_{12} = 0.316`; the ply thickness of 0.14 mm is that of Section 2.1
     solution of the DCB (Section 3.1, p. 8). The second, inactive, material
     is the APC (PEKK-FC UD) lamina of the MSc thesis of Baciu (2020) [3]_,
     Table 3.1 (p. 17): `E_1 = 126.1` GPa, `E_2 = 11.2` GPa (compressive
-    moduli), `G_{12} = 5.46` GPa, `
-u_{12} = 0.319`.
+    moduli), `G_{12} = 5.46` GPa, `\nu_{12} = 0.319`.
 
     References
     ----------
