@@ -1,10 +1,10 @@
 r"""Stringer-stiffened composite shells of the POSICOSS project with
 :class:`panels.multidomain.MultiDomain`
 
-Builders and post-processing shared by the notebooks
-``abramovich2009_blade_panels.ipynb`` (blade-stiffened curved panels under
-axial compression) and ``lanzi2003_torsion_cylinder.ipynb`` (cylinder with
-L-shaped stringers under axial compression and torsion).
+Builders and post-processing shared by the notebooks of the
+blade-stiffened curved panels of Abramovich and Weller (2009), under axial
+compression, and of the cylinder with L-shaped stringers of Lanzi, Bisagni
+and Cordisco (2003), under axial compression and torsion.
 
 Every part of a stiffener is a :class:`panels.shell.Shell` domain: the skin
 is split into strips along the circumference, each foot is a curved domain
