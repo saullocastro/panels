@@ -131,6 +131,7 @@ User guide
     notebooks/schweizerhof1984_pressure_loads.nblink
     notebooks/schweizerhof1984_cantilever_postbuckling.nblink
     notebooks/sze2004_hinged_roofs.nblink
+    notebooks/large_rotation_plates.nblink
     notebooks/fk1952_shallow_arches.nblink
     notebooks/simo1990_cylinder_postbuckling.nblink
     notebooks/stamatelos_labeas_2023.nblink
