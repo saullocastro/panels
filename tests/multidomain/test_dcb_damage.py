@@ -1,7 +1,9 @@
 r"""Damage propagation in a double cantilever beam (DCB) with a cohesive zone
 
 The DCB of the thesis of D'Souza (2024), 65 mm long, 25 mm wide, with a
-pre-crack of 48 mm and arms of 15 plies at 0 degrees, is opened under
+pre-crack of 48 mm and arms of 15 plies at 0 degrees, with the AS4D/PEKK-FC
+ply properties, mode I fracture toughness and interlaminar strength of Tijs
+et al. (2022, Table 1 and Section 3.1), is opened under
 displacement control by :func:`dcb_damage_prop_no_f_kcrack`. Each arm has
 three domains connected by ``'SSxcte'``, and the arms are bonded over the
 uncracked length by ``'SB_TSL'`` with a bilinear traction-separation law.
@@ -22,6 +24,11 @@ References
 .. [1] D'Souza, N., "Multi-Domain Semi-Analytical Cohesive Zone Approach",
    MSc thesis, Delft University of Technology, 2024.
    https://resolver.tudelft.nl/uuid:4709f888-c032-4d9f-97e3-402dfdd47cf1
+.. [2] Tijs, B. H. A. H., Abdel-Monsef, S., Renart, J., Turon, A., Bisagni,
+   C., Characterization and analysis of the interlaminar behavior of
+   thermoplastic composites considering fiber bridging and R-curve effects.
+   Composites Part A: Applied Science and Manufacturing 162 (2022) 107101.
+   https://doi.org/10.1016/j.compositesa.2022.107101
 
 """
 import sys
@@ -257,16 +264,35 @@ def dcb_damage_prop_no_f_kcrack(phy_dim, nr_terms, k_i=None, tau_o=None, nr_x_ga
     the traction, :meth:`.MultiDomain.force_out_plane_damage`, must match
     it.
 
-    The material properties of the active branch are labelled "Bas's paper
-    (TP - 65,25,48)" in the code, those of an inactive branch "Theodores
-    thesis". TODO(author): full references of these two sources (candidate
-    for the active branch: Tijs et al., 2022, Composites Part A 162, 107101).
+    The ply properties of the active branch (``TP - 65,25,48``) are those of
+    the AS4D/PEKK-FC thermoplastic composite of Tijs et al. (2022) [2]_,
+    Table 1 (p. 3): `E_1` and `E_2` are the averages of the tensile and
+    compressive moduli (138 300 and 128 000 MPa, 10 400 and 11 500 MPa), as
+    in their analytical solution (Section 2.3), `G_{12} = 5190` MPa and
+    `\nu_{12} = 0.316`; the ply thickness of 0.14 mm is that of Section 2.1
+    (p. 2), the 15 plies per arm are half of their 30-ply specimen (Section
+    2.2) and the traction at damage onset ``tau_o = 87`` MPa of the test is
+    their matrix tensile strength (Table 1). The pre-crack length of 48 mm
+    and ``G1c = 1.12`` N/mm of the test are those of their analytical
+    solution of the DCB (Section 3.1, p. 8). The second, inactive, material
+    is the APC (PEKK-FC UD) lamina of the MSc thesis of Baciu (2020) [3]_,
+    Table 3.1 (p. 17): `E_1 = 126.1` GPa, `E_2 = 11.2` GPa (compressive
+    moduli), `G_{12} = 5.46` GPa, `\nu_{12} = 0.319`.
 
     References
     ----------
     .. [1] D'Souza, N., "Multi-Domain Semi-Analytical Cohesive Zone
        Approach", MSc thesis, Delft University of Technology, 2024.
        https://resolver.tudelft.nl/uuid:4709f888-c032-4d9f-97e3-402dfdd47cf1
+    .. [2] Tijs, B. H. A. H., Abdel-Monsef, S., Renart, J., Turon, A.,
+       Bisagni, C., Characterization and analysis of the interlaminar
+       behavior of thermoplastic composites considering fiber bridging and
+       R-curve effects. Composites Part A: Applied Science and Manufacturing
+       162 (2022) 107101. https://doi.org/10.1016/j.compositesa.2022.107101
+    .. [3] Baciu, T. D., "Numerical and experimental study on post-buckling
+       skin-stringer separation in butt-joined stiffened thermoplastic
+       panels", MSc thesis, Delft University of Technology, 2020.
+       https://repository.tudelft.nl/record/uuid:e032a959-de73-4d32-ad68-f342167ba090
 
     """
     filename=name[0]
