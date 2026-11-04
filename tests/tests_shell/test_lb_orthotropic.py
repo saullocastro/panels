@@ -25,13 +25,15 @@ give 31.73 (``cylshell_clpt_donnell``, `-0.56 \%`) and 31.25
 (``cylshell_clpt_sanders``, `+1.5 \%`), after 32.02 and 31.35 with ``m = n =
 18``; the tolerance is 2 %.
 
-TODO(author): the other rows of Tables 2 and 3 of [1]_ are not reproduced
-within 2 % with the same model and boundary conditions (``m = n = 30``):
-``R = 6 in``, ``t = 0.06 in``: Donnell +7.7 %, Sanders-Koiter +20 %
-(isotropic: +2.3 %, +5.4 %); ``R = 24 in``, ``t = 0.24 in``: -3.1 %,
+Only this row of Tables 2 and 3 of [1]_ is used. The other rows are not
+reproduced within 2 % with the same model and boundary conditions (``m = n
+= 30``): ``R = 6 in``, ``t = 0.06 in``: Donnell +7.7 %, Sanders-Koiter
++20 % (isotropic: +2.3 %, +5.4 %); ``R = 24 in``, ``t = 0.24 in``: -3.1 %,
 -0.5 % (isotropic: +1.0 %, +0.6 %); ``R = 48 in``, ``t = 0.24 in``: -7.9 %
-both. The Donnell model reproduces the exact solution of [2]_ to `10^{-12}`,
-see ``test_lb_isotropic.py``. Is this the right case to keep?
+both. For isotropic panels the Donnell model of panels reproduces the exact
+solution of Batdorf [2]_ to `10^{-12}` (``test_lb_isotropic.py``), so the
+deviations come either from the solutions of [1]_ or from the reading of
+their boundary conditions, and these rows are not used as reference values.
 
 References
 ----------
