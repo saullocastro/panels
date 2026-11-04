@@ -57,7 +57,7 @@ nu = 0.3
 thickness = 2e-3
 height = 0.2
 r = 0.25
-# classical buckling load, Batdorf (1947), eq. (1)
+# classical buckling load of the cylinder (Notes)
 Ncl = E*thickness**2/(r*np.sqrt(3*(1 - nu**2)))
 
 
