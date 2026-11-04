@@ -963,121 +963,33 @@ between the two namings.
 Verification
 ~~~~~~~~~~~~
 
-Three test modules pin the claims of this section. The first two are
-parametrised over ``plate_clpt_donnell`` and ``cylshell_clpt_donnell``, both
-using an unsymmetric, unbalanced laminate so that `\boldsymbol{B} \neq
-\boldsymbol{0}` and `A_{16}, A_{26} \neq 0`.
+The Jacobian claim of :eq:`donnell-KT` is checked with the directional
+Taylor test. Given an arbitrary state `\boldsymbol{c}` and direction
+`\boldsymbol{v}`, `\boldsymbol{F}_{int}(\boldsymbol{c} + h\boldsymbol{v}) =
+\boldsymbol{F}_{int}(\boldsymbol{c}) + h \boldsymbol{K}_T(\boldsymbol{c})
+\boldsymbol{v} + O(h^2)`, so the relative error
 
-``tests/tests_shell/test_tangent_consistency.py`` verifies the Jacobian
-claim of :eq:`donnell-KT` directly:
+.. math::
 
-- ``test_tangent_is_derivative_of_fint`` is the directional Taylor test.
-  Given an arbitrary state `\boldsymbol{c}` and direction
-  `\boldsymbol{v}`, `\boldsymbol{F}_{int}(\boldsymbol{c} +
-  h\boldsymbol{v}) = \boldsymbol{F}_{int}(\boldsymbol{c}) + h
-  \boldsymbol{K}_T(\boldsymbol{c}) \boldsymbol{v} + O(h^2)`, so the
-  relative error
+    e(h) = \frac{\left\| \boldsymbol{F}_{int}(\boldsymbol{c} +
+    h\boldsymbol{v}) - \boldsymbol{F}_{int}(\boldsymbol{c}) - h
+    \boldsymbol{K}_T \boldsymbol{v} \right\|}{\left\| h \boldsymbol{K}_T
+    \boldsymbol{v} \right\|}
 
-  .. math::
-
-      e(h) = \frac{\left\| \boldsymbol{F}_{int}(\boldsymbol{c} +
-      h\boldsymbol{v}) - \boldsymbol{F}_{int}(\boldsymbol{c}) - h
-      \boldsymbol{K}_T \boldsymbol{v} \right\|}{\left\| h \boldsymbol{K}_T
-      \boldsymbol{v} \right\|}
-
-  must fall proportionally to `h`. The test asserts a factor of at least
-  five per decade over `h \in [10^{-6}, 10^{-2}]`, and that `e(h)/h` does
-  not drift by more than a factor of two. An inconsistent tangent leaves a
-  remainder of order `h` and `e(h)` plateaus instead.
-- ``test_tangent_matches_finite_difference_jacobian`` compares every entry
-  of `\boldsymbol{K}_T` against a central finite-difference Jacobian of
-  `\boldsymbol{F}_{int}`.
-- ``test_kG_is_homogeneous_of_degree_one`` asserts
-  `\boldsymbol{K}_G(2\boldsymbol{c}) =
-  2\boldsymbol{K}_G(\boldsymbol{c})`, which is the property that the
-  placement of `\boldsymbol{K}_{GNL}` in :eq:`donnell-grouping` exists to
-  preserve.
-- ``test_fint_and_tangent_in_the_undeformed_state`` asserts
-  `\boldsymbol{F}_{int}(\boldsymbol{0}) = \boldsymbol{0}` and
-  `\boldsymbol{K}_T(\boldsymbol{0}) = \boldsymbol{K}_{C0}`, which is
-  :eq:`donnell-three-way` at `\boldsymbol{c} = \boldsymbol{0}`.
-- ``test_newton_raphson_converges_quadratically`` manufactures an
-  equilibrium state and checks that the error is squared at each iteration.
-
-``tests/tests_shell/test_nonlinear.py`` exercises the same tangent in a full
-Newton-Raphson solution, deep in the postbuckling regime at about 37 times
-the first linear buckling load, and asserts both the converged deflection
-and a convergence order above `1.6`.
-
-``tests/tests_shell/test_argument_validation.py`` pins the argument handling
-around these matrices, and with it three claims of this section:
-
-- ``test_KGNL_is_in_calc_kC_and_not_in_calc_kG`` asserts that
-  `\boldsymbol{K}_G` is homogeneous of degree one, that ``NLgeom`` does not
-  change its value, and that `\boldsymbol{K}_T` is exactly the sum of the
-  two matrices of :eq:`donnell-grouping`.
-- ``test_NLgeom_and_not_c_selects_the_large_displacement_matrix`` asserts
-  that ``fkC_num`` returns `\boldsymbol{K}_{C0}` whenever ``NLgeom=0``,
-  whatever `\boldsymbol{c}`, and that the result then matches the
-  closed-form ``fk0``, as stated when mapping the code onto
-  :eq:`donnell-three-way`.
-- ``test_cylshell_approaches_plate_as_radius_grows`` asserts the monotonic
-  convergence of :ref:`tangent_clpt_donnell_limit`, and
-  ``test_cylshell_requires_positive_radius`` that `r = 0`, a negative `r`
-  and an unset `r` are all rejected for the cylinder.
-
-Together the first two modules support every claim made here about
-`\boldsymbol{K}_T` being the exact Jacobian, about `\boldsymbol{K}_G` being
-homogeneous of degree one, and about `\boldsymbol{K}_T(\boldsymbol{0}) =
-\boldsymbol{K}_{C0}`. They do not separately test the decomposition of
-:eq:`donnell-grouping` term by term, nor the closed-form path against the
-numerically integrated one; those were verified independently while
-preparing this section, by rebuilding `\boldsymbol{B}_L`,
-`\boldsymbol{B}_{NL}` and `\boldsymbol{G}` from :eq:`donnell-BL`,
-:eq:`donnell-BNL` and :eq:`donnell-G` at the Gauss points and comparing
-against the compiled kernels, with the following results, for both models,
-`m = n = 4`, `n_x = n_y = 10`, an unsymmetric laminate and a random
-`\boldsymbol{c}` with deflections of twenty thicknesses.
-
-.. list-table:: Relative difference between the compiled kernels and the
-                equations of this section, rebuilt independently
-    :header-rows: 1
-
-    * - Kernel
-      - Equation
-      - Plate
-      - Cylinder
-    * - ``fkC_num``
-      - `\int (\boldsymbol{B}_L + \boldsymbol{B}_{NL})^\top \boldsymbol{C}
-        (\boldsymbol{B}_L + \boldsymbol{B}_{NL}) + \boldsymbol{K}_{GNL}`
-      - `4.0 \times 10^{-16}`
-      - `2.3 \times 10^{-16}`
-    * - ``fkG_num``
-      - `\boldsymbol{K}_G(\bar{\boldsymbol{N}} + \boldsymbol{N}_L)`,
-        :eq:`donnell-KG`
-      - `5.7 \times 10^{-16}`
-      - `4.9 \times 10^{-16}`
-    * - ``calc_fint``
-      - `\int (\boldsymbol{B}_L + \boldsymbol{B}_{NL})^\top
-        \hat{\boldsymbol{\sigma}}`, :eq:`donnell-fint`
-      - `2.2 \times 10^{-16}`
-      - `2.2 \times 10^{-16}`
-    * - ``fk0``
-      - ``fkC_num`` at `\boldsymbol{c} = \boldsymbol{0}`, `n_x = n_y
-        = 30`
-      - `4.7 \times 10^{-15}`
-      - `4.6 \times 10^{-15}`
-    * - ``fkG0``
-      - ``fkG_num`` at `\boldsymbol{c} = \boldsymbol{0}`, `n_x = n_y
-        = 30`
-      - `8.6 \times 10^{-15}`
-      - `8.8 \times 10^{-15}`
-
-The last two rows also establish that the closed-form and the numerically
-integrated paths agree to round-off once the quadrature is fine enough to
-integrate the polynomials exactly, so the choice between them of
-:ref:`tangent_clpt_donnell_paths` is a matter of cost and of capability,
-not of accuracy.
+falls proportionally to `h`, whereas an inconsistent tangent leaves a
+remainder of order `h` and `e(h)` plateaus. The other properties used in this
+section are `\boldsymbol{K}_G(2\boldsymbol{c}) = 2\boldsymbol{K}_G(\boldsymbol{c})`,
+which the placement of `\boldsymbol{K}_{GNL}` in :eq:`donnell-grouping`
+preserves, and `\boldsymbol{F}_{int}(\boldsymbol{0}) = \boldsymbol{0}`,
+`\boldsymbol{K}_T(\boldsymbol{0}) = \boldsymbol{K}_{C0}`, which is
+:eq:`donnell-three-way` at `\boldsymbol{c} = \boldsymbol{0}`. The compiled
+kernels reproduce `\boldsymbol{K}_T`, `\boldsymbol{K}_G` and
+`\boldsymbol{F}_{int}` rebuilt from :eq:`donnell-BL`, :eq:`donnell-BNL` and
+:eq:`donnell-G` to round-off, and the closed-form and the numerically
+integrated paths agree to round-off once the quadrature integrates the
+polynomials exactly, so the choice between them of
+:ref:`tangent_clpt_donnell_paths` is a matter of cost and of capability, not
+of accuracy.
 
 .. _tangent_clpt_donnell_discrepancies:
 
@@ -1124,11 +1036,8 @@ keeps a part of the stress state out of reach of the load multiplier
 stiffness :meth:`.Shell.calc_kCfollower` is added as well. The sum
 `\boldsymbol{K}_{C0} + \boldsymbol{K}_{CNL} + \boldsymbol{K}_{GNL}` therefore describes the return
 value of :meth:`.Shell.calc_kC` only when no constant pre-stress and no
-follower load is declared. The two modules of
-:ref:`tangent_clpt_donnell_verification` that verify the Jacobian set the
-constant stresses to zero and do not exercise this branch; the third module
-does, but only to check that it is reached safely, not the value of the
-block.
+follower load is declared. The checks of
+:ref:`tangent_clpt_donnell_verification` set the constant stresses to zero.
 
 Note on symbols
 ~~~~~~~~~~~~~~~
@@ -1266,172 +1175,23 @@ Verification
 ~~~~~~~~~~~~
 
 The checks of the tangent stiffness matrix of
-``tests/tests_shell/test_tangent_consistency.py`` are repeated for the
-product, for all 11 models, in ``tests/tests_shell/test_tangent_product.py``:
-
-- the product equals ``calc_kT(c) @ v`` with a relative difference below
-  `10^{-12}`, also with a constant membrane stress state, one constitutive
-  matrix per integration point, a partial integration domain, an offset in
-  a larger vector, and dead and follower pressure loads at a load factor
-  ``inc``;
-- the directional Taylor test of :meth:`.Shell.calc_fint`, whose remainder
-  falls as `O(h^2)`;
-- the matrix built column by column from the product against the central
-  difference of :meth:`.Shell.calc_fint`;
-- in the undeformed state the product is `\boldsymbol{K}_{C0} \boldsymbol{v}`;
-- Newton-Raphson with the tangent built from the product, column `j` being
-  `\boldsymbol{K}_T \boldsymbol{e}_j`, converges quadratically from a
-  perturbation of `10^{-2}` of a regular equilibrium state, the measured
-  order of convergence `\ln(e_{k+1}/e_k)/\ln(e_k/e_{k-1})` exceeding 1.5,
-  in at most 6 iterations.
-
-``tests/multidomain/test_tangent_product_multidomain.py`` checks
-:meth:`.MultiDomain.calc_kTv` with penalty connections and follower loads,
-and `\partial \boldsymbol{R}_r/\partial \lambda` of the prescribed displacements against
-the assembled tangent stiffness matrix.
+:ref:`tangent_clpt_donnell_verification` apply to the product: it equals the
+product of the assembled matrix of :meth:`.Shell.calc_kT` by the vector to
+round-off, also with a constant membrane stress state, one constitutive
+matrix per integration point, a partial integration domain and pressure
+loads, and its directional Taylor test of :meth:`.Shell.calc_fint` falls as
+`O(h^2)` for every model.
 
 Performance
 ~~~~~~~~~~~
 
-Single shell, laminate ``[0, 45, -45, 90]``, the default integration points
-of :func:`panels.shell.gauss_points`, `\max(2m - 1, 7)` by `\max(2n - 1,
-7)`, one core; :meth:`.Shell.calc_kT` with the tabulated kernels, see
-:ref:`tabulation`; the state `\boldsymbol{c}` and the vector `\boldsymbol{v}` of
-``random_state`` of ``tests/tests_shell/test_tangent_consistency.py``. With
-``panels`` 0.14.0, medians of 9 samples, 3 in each of 3 processes,
-interleaved, after a warm-up; ratio: of ``calc_kT`` to ``calc_kTv``;
-difference: relative difference between the product and ``calc_kT(c) @ v``,
-the largest of the three sizes. With the former default, ``nx = 2m``,
-``ny = 2n``, one point more in each direction, the times measured in the
-same session, interleaved, are 3 to 16% longer:
-
-.. list-table::
-    :header-rows: 1
-
-    * - model
-      - `m = n`
-      - size
-      - ``calc_kT``
-      - ``calc_fint``
-      - ``calc_kTv``
-      - ratio
-      - difference
-    * - ``plate_clpt_donnell``
-      - 8 / 12 / 16
-      - 192 / 432 / 768
-      - 0.013 / 0.11 / 0.59 s
-      - 0.80 / 3.5 / 11 ms
-      - 1.1 / 5.0 / 16 ms
-      - 12 / 23 / 37
-      - `1.0 \times 10^{-15}`
-    * - ``cylshell_fsdt_sanders``
-      - 8 / 12 / 16
-      - 320 / 720 / 1280
-      - 0.10 / 1.1 / 6.0 s
-      - 1.5 / 6.7 / 22 ms
-      - 1.7 / 8.2 / 26 ms
-      - 61 / 132 / 234
-      - `9.1 \times 10^{-16}`
-    * - ``plate_tsdt_donnell``
-      - 8 / 12 / 16
-      - 320 / 720 / 1280
-      - 0.19 / 2.1 / 12 s
-      - 1.6 / 7.6 / 24 ms
-      - 1.7 / 8.7 / 27 ms
-      - 110 / 246 / 441
-      - `1.4 \times 10^{-15}`
-
-The product costs 1.1 to 1.5 times :meth:`.Shell.calc_fint`, and the ratio
-grows with the number of terms. With the previous kernels of ``panels``
-0.12.0, whose approximation functions were evaluated in the innermost loops,
-``calc_kT`` takes 2.8, 4.7 and 5.8 s for `m = n = 12`, measured in the same
-way with the former default ``nx = 2m``, ``ny = 2n``, i.e. 500 to 610 times
-the product with the same points. The times published with ``panels``
-0.13.0 were longer, 7.0, 10.9 and 11.9 s with the previous kernels, 700
-times the product of then.
-
-Displacement-controlled post-buckling of the plate of
-``tests/multidomain/test_null_space_pd.py``, the model of
-``test_nonlinear_displacement_control`` with `m = n = 12` (407 reduced
-degrees of freedom), prescribed displacements imposed exactly. Run time of
-``Analysis.static``, on the same machine, medians of 3 runs in separate
-processes, interleaved, after a warm-up, of ``panels`` before these
-developments (0.12.0, with the previous kernels and the assembly of `\boldsymbol{K}_T`
-for `\partial \boldsymbol{R}_r/\partial \lambda`), after them (0.13.0) and 0.14.0, with
-``structsolve`` 0.7.0, 0.8.0 and 0.9.0. Before 0.9.0 the convergence was
-checked with the relative criterion, ``relTOL = 1e-6`` by default;
-``structsolve`` 0.9.0 checks with Crisfield's criterion, ``relTOL = 1e-9``
-by default, and keeps the former with ``Analysis.convergence = 'relative'``.
-The rows of 0.12.0 and 0.13.0 were measured with the integration points of
-then, ``nx = 2m``, ``ny = 2n``, i.e. `24 \times 24`; those of 0.14.0 with
-the default of :func:`panels.shell.gauss_points`, `23 \times 23`, in a later
-session in which `24 \times 24` points, interleaved, gave times 1 to 6%
-shorter than in the first one:
-
-.. list-table::
-    :header-rows: 1
-
-    * - ``panels``
-      - ``structsolve``
-      - criterion
-      - Newton-Raphson
-      - modified Newton-Raphson
-      - Riks
-    * - 0.12.0
-      - 0.7.0
-      - relative, ``1e-6``
-      - 116 s
-      - 279 s
-      - 149 s
-    * - 0.12.0
-      - 0.8.0
-      - relative, ``1e-6``
-      - 92.7 s
-      - 73.8 s
-      - 141 s
-    * - 0.13.0
-      - 0.7.0
-      - relative, ``1e-6``
-      - 4.84 s
-      - 4.24 s
-      - 7.71 s
-    * - 0.13.0
-      - 0.8.0
-      - relative, ``1e-6``
-      - 4.76 s
-      - 3.40 s
-      - 7.60 s
-    * - 0.14.0
-      - 0.9.0
-      - relative, ``1e-6``
-      - 4.36 s
-      - 2.94 s
-      - 6.86 s
-    * - 0.14.0
-      - 0.9.0
-      - Crisfield, ``1e-9``
-      - 5.33 s
-      - 5.36 s
-      - 8.41 s
-
-The reactions at `\lambda = 1` agree within a relative `4 \times 10^{-6}`
-with the relative criterion, and to ten significant digits with Crisfield's
-criterion. Before, almost all the time was in the assembly of `\boldsymbol{K}_T`, about
-3 s each with the previous kernels: with ``structsolve`` 0.7.0 inside
-``calc_fext``, for `\partial \boldsymbol{R}_r/\partial \lambda`, at every iterate where
-`\boldsymbol{K}_T` was not cached, e.g. at each iteration of the modified
-Newton-Raphson method, whereas ``structsolve`` 0.8.0 evaluates `\partial
-\boldsymbol{R}_r/\partial \lambda` only together with `\boldsymbol{K}_T`. After, with Crisfield's
-criterion, 80 to 87% of the time is in the 37, 35 and 60 assemblies of
-`\boldsymbol{K}_T` for the Newton iterations (31, 19 and 49 with the relative
-criterion), and the products cost 0.19 to 0.32 s in total. The modified
-Newton-Raphson method with Crisfield's criterion takes 16 increments and 35
-assemblies with `23 \times 23` points, but 11 increments and 25 assemblies,
-4.12 s, with `24 \times 24` points in the same session, whereas both
-numbers of points integrate the matrices exactly: its iterations depend on
-the round-off. The times
-published with ``panels`` 0.13.0 for the first four rows were 2.1 to 2.5
-times longer, e.g. 229 s and 11.8 s with ``structsolve`` 0.8.0 and the
-Newton-Raphson method; the speed-ups from 0.12.0 to 0.13.0 are the same
-within 7%, except with the modified Newton-Raphson method and
-``structsolve`` 0.7.0, 77 then and 66 now.
+The assembly of `\boldsymbol{K}_T` loops over the `m^2 n^2` pairs of terms at
+each integration point, the internal force vector and the product over the
+`m n` terms: the product costs about as much as :meth:`.Shell.calc_fint`,
+and the ratio of the cost of the assembly to that of the product grows with
+the number of terms and with the number of degrees of freedom per term, from
+ten to twenty for the CLPT with `m = n = 8` to a few hundred for the TSDT with
+`m = n = 16`. In a displacement-controlled non-linear analysis with the
+prescribed displacements imposed exactly, most of the time is spent in the
+assemblies of `\boldsymbol{K}_T` for the Newton iterations, the products for
+`\partial \boldsymbol{R}_r/\partial \lambda` being a small fraction of it.
