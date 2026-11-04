@@ -160,9 +160,8 @@ and `\Phi_y`, as before. The penalty method,
 pressure with an offset, `d = 0.3 h`, `-0.4 h` or `0.5 h`, and a rotation
 prescribed at a point or along an edge, the rotation at the reference
 surface evaluated from the fields equals the prescribed value to
-`10^{-8}`, whereas the rotation at the mid-surface differs from it by the
-transverse shear term, see
-``tests/multidomain/test_tsdt_prescribed_rotations.py``.
+`10^{-8}`, whereas the rotation at the mid-surface differs from it by the transverse
+shear term.
 
 .. _tsdt_offset_clamped_edges:
 
@@ -181,24 +180,17 @@ mid-surface and `\hat{\gamma}_{xz} = 3 w_{,x}/2`, leaving the section free
 to warp, see :ref:`boundary_conditions_face_clamp`. Both clamps are
 properties of the physical section and do not depend on the offset: the
 deflections of a homogeneous plate clamped either way on two opposite
-edges are the same, to `10^{-7}`, for `d = 0`, `0.3 h` and `h/2`, and the
-planar clamp is the stiffer one, see ``tests/multidomain/test_face_clamp.py``.
+edges do not depend on the offset, and the planar clamp is the stiffer one.
 
 .. _tsdt_offset_example:
 
 Verification
 ------------
 
-Two simply supported plates with the offsets `d_1 = 0` and `d_2 = 0.3 h`,
-`h/2` or `-h/2`, connected along `x = x_s` with the null-space method and
-loaded by a pressure, have the rotations at the common reference surface,
-`\theta_x` and `\theta_y` of Eq. :eq:`tsdt-offset-theta`, continuous across
-the connection to `10^{-9}`, whereas the rotations at the mid-surfaces,
-`\phi_x`, jump by the transverse shear term. Two plates with the same
-offset reproduce the natural frequencies of the single plate to
-`10^{-4}`, with both connection methods, see
-``tests/multidomain/test_tsdt_offset_connections.py``. For a free
-homogeneous plate the choice of the reference surface does not change the
-structure, the Ritz spaces of the different offsets coinciding for free
-edges: the natural frequencies do not depend on the offset, to `10^{-7}`,
-see ``tests/tests_shell/test_tsdt_offset.py``.
+Panels with different offsets connected with the null-space method have
+the rotations at the common reference surface, `\theta_x` and `\theta_y` of
+Eq. :eq:`tsdt-offset-theta`, continuous across the connection to round-off,
+whereas the rotations at the mid-surfaces, `\phi_x`, jump by the transverse
+shear term. For a free homogeneous plate the choice of the reference surface
+does not change the structure, the Ritz spaces of the different offsets
+coinciding for free edges, and neither do its natural frequencies.

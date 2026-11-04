@@ -132,6 +132,9 @@ User guide
     notebooks/schweizerhof1984_cantilever_postbuckling.nblink
     notebooks/sze2004_hinged_roofs.nblink
     notebooks/large_rotation_plates.nblink
+    notebooks/null_space_vs_penalty.nblink
+    notebooks/tangent_stiffness_product.nblink
+    notebooks/tsdt_offset_connections.nblink
     notebooks/fk1952_shallow_arches.nblink
     notebooks/simo1990_cylinder_postbuckling.nblink
     notebooks/stamatelos_labeas_2023.nblink

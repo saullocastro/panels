@@ -486,9 +486,8 @@ slope `(v - w_{,\theta})/r`, in the notation of panels, which is the rotation
 `\beta_y = -w_{,y} + v/r` of the Sanders kinematics.
 
 The centrally directed load has no kernel in panels: its column of the
-table is checked only with the load stiffness ``central_load_stiffness``
-of ``tests/tests_shell/test_follower_pressure_validation.py``, which is
-integrated independently of the kernels.
+table is checked only with a load stiffness integrated independently of
+the kernels.
 
 With Sanders' kinematics and a dead pressure, the rigid rotation `v =
 const`, `w = 0`, strain free, has the energy `\oint N_{yy} (v/r)^2 dy < 0`
@@ -510,17 +509,10 @@ Implementation and verification
   upper triangle) of the modules ``panels.models.<model>_num``, integrated
   with ``nx*ny`` Gauss-Legendre points over each loaded patch, the same
   points as Eq. :eq:`fp-force-reference` in :func:`.shell_fext`.
-- ``tests/tests_shell/test_follower_pressure.py``: Eq.
-  :eq:`fp-force-reference`, Taylor tests of Eq. :eq:`fp-force` against Eq.
-  :eq:`fp-jacobian`, finite-difference Jacobian of Eq. :eq:`fp-fint` against
-  Eq. :eq:`fp-tangent`, quadratic convergence of Newton-Raphson and Riks,
-  the symmetry conditions of Eq. :eq:`fp-skew` and Eq.
-  :eq:`fp-linear-static`.
-- ``tests/multidomain/test_follower_pressure_multidomain.py``: the
-  follower loads in a :class:`.MultiDomain` assembly, and the symmetry of
-  the load stiffness of a closed cylinder reduced by the null-space method.
-- ``tests/tests_shell/test_follower_pressure_validation.py``: the ring
-  closed forms, finite
-  cylinders, [nasa2020SP8007]_, [kardomateas1993Orthotropic]_,
+- Eq. :eq:`fp-jacobian` is the exact derivative of Eq. :eq:`fp-force`, and
+  Eq. :eq:`fp-tangent` of Eq. :eq:`fp-fint`, to round-off, also in a
+  :class:`.MultiDomain` assembly; the critical pressures agree with the ring
+  closed forms above and are compared, for rings and cylinders, with
+  [nasa2020SP8007]_, [kardomateas1993Orthotropic]_,
   [han2004SandwichCylinder]_, [kardomateas2003Sandwich]_ and
   [schweizerhof1984Pressure]_.
