@@ -41,10 +41,6 @@ is 0.1-0.2%, and with fewer points the error has a floor of about 0.6-0.9%
 and the solution needs bisections. The recommended values are
 `m = 1.25 \lambda L_{tsl}` and `n_x = 10 L_{tsl}/l_{cz}`.
 
-Before version 0.13.11 the rate was `(k_o/4 D_{11})^{1/4}`, that of one beam
-on a rigid foundation, `2^{-1/4}` times the rate of the symmetric DCB, and
-the factors of the rules were 1.2 and 1.5 instead of 1.0 and 1.25.
-
 References
 ----------
 .. [1] Turon, A., Davila, C. G., Camanho, P. P., and Costa, J., An

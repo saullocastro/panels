@@ -385,9 +385,8 @@ def fkMf(double ys, double rho, double h, double hb, double hf, double a,
     shared by the two symmetric entries `(1, 4)` and `(4, 1)` of
     `\boldsymbol{k}_{mf}`, which are then `-d_f`, consistent with the term
     `d_f^2` of `k_{mf44}` and with the offset of the mass matrix of the
-    shells. Up to version 0.7.1 this kernel used `-2 d_f`, doubling the
-    inertial coupling between the flange and the skin. Eq. (27) of the same
-    paper, for the stiffener's base, has the same factor, `-2 d_b`, but the
+    shells. Eq. (27) of the same paper, for the stiffener's base, has the
+    same factor, `-2 d_b`, but the
     base is a :class:`.Shell` with offset whose mass matrix uses `-d_b`.
 
     References

@@ -69,9 +69,9 @@ after checking that their uncompressed sizes do not exceed ``max_size`` in
 total, and unknown keys, missing or extra members and newer format versions
 raise ``ValueError``.
 
-The pickle files written by older versions of panels are not loaded, since a
-pickle file can execute arbitrary code. One from a trusted source can be
-converted by loading it with :func:`pickle.load` and saving the object again.
+Pickle files are not loaded, since a pickle file can execute arbitrary code.
+One from a trusted source can be converted by loading it with
+:func:`pickle.load` and saving the object again.
 
 """
 import io
@@ -126,9 +126,8 @@ _SHELL_ATTRS = (
     'num_eigvalues', 'num_eigvalues_print',
     'increments', 'results', 'fields', 'plot_mesh',
     )
-#NOTE saved by panels < 0.13.9, when Shell.ABD was an attribute; it is now
-#     calculated from Shell.lam, so it is read, for the checks of the arrays,
-#     and discarded
+#NOTE in the files of panels < 0.13.9; Shell.ABD is calculated from
+#     Shell.lam, so it is read, for the checks of the arrays, and discarded
 _SHELL_LEGACY_ATTRS = ('ABD', )
 _STIFFPANELBAY_ATTRS = (
     'name', 'forces_skin', 'flow', 'bc', 'model',
@@ -355,7 +354,7 @@ def _shell_to_data(s, path, w):
     data['lam'] = _encode_lam(s.lam, path + '.lam')
     # NOTE the per-ply lists filled by Shell._rebuild(), not by the user,
     #      and the numbers of integration points nx and ny that follow m and
-    #      n, saved with their current value, which older versions read
+    #      n, saved with their current value
     data['derived_lists'] = [name for name in ('plyts', 'laminaprops', 'rhos')
                              if getattr(s, name) and s._is_derived(name)]
     data['derived_lists'] += [name for name in ('nx', 'ny')
@@ -573,8 +572,8 @@ def _multidomain_from_data(data, r):
                      pd_method=pd_method)
     _decode_attrs(md, data, _MULTIDOMAIN_ATTRS, r)
     md._conn_used = _conn_from_data(data.get('conn_used'), panels, r)
-    # NOTE 'T_tol' is the key of the files written by panels 0.13.11, before
-    #      the null-space basis was renamed Z
+    # NOTE 'T_tol' is the key of the tolerance of the null-space basis Z in
+    #      the files written by panels 0.13.11
     for key in ('Z_tol', 'T_tol'):
         if key in data:
             md._Z_tol = _decode(data[key], r)
@@ -765,8 +764,8 @@ def load(fname, max_size=MAX_SIZE):
     Raises
     ------
     ValueError
-        If the file is not a zip file saved by panels, e.g. a pickle file of
-        an older version, is not valid, has unknown keys, missing or extra
+        If the file is not a zip file saved by panels, e.g. a pickle file,
+        is not valid, has unknown keys, missing or extra
         members, exceeds ``max_size``, or was saved by a newer format
         version.
 

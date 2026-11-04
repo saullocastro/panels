@@ -46,8 +46,8 @@ arguments ``rinv1`` and ``rinv2`` are `1/r_1` and `1/r_2` for panels with
 the kinematics of Sanders-Koiter and zero otherwise, see
 :meth:`.MultiDomain.get_kC_conn`.
 
-Without the term `v_1/r_1`, as up to version 0.7.1, a rigid-body rotation of
-a stiffened cylinder about its axis, `v_1 = r_1 \theta`, is penalized by the
+Without the term `v_1/r_1`, a rigid-body rotation of a stiffened cylinder
+about its axis, `v_1 = r_1 \theta`, is penalized by the
 rotation penalty, since the Sanders-Koiter skin rotates by `\theta` while the
 flange must follow with `w_{2,y} = \theta`. With the Donnell kinematics the
 term `v/r` is neglected in the rotations and in the curvatures of the shell

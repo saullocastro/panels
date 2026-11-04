@@ -1229,8 +1229,7 @@ class MultiDomain(object):
             column.
         lbd : float or None, optional
             Load factor of a configuration. With ``None``, the default,
-            ``Z @ c_r`` is returned, unchanged with respect to the
-            previous versions.
+            ``Z @ c_r`` is returned.
 
         Returns
         -------
