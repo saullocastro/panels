@@ -136,6 +136,8 @@ User guide
     notebooks/simo1990_cylinder_postbuckling.nblink
     notebooks/stamatelos_labeas_2023.nblink
     notebooks/stamatelos_labeas_2023_multidomain.nblink
+    notebooks/abramovich2009_blade_panels.nblink
+    notebooks/lanzi2003_torsion_cylinder.nblink
     notebooks/dcb_alfano2001.nblink
     notebooks/dcb_camanho2003.nblink
     notebooks/dcb_turon2007.nblink
