@@ -225,30 +225,42 @@ def classify(x, th, w, bc, nmax=40):
     return m, n
 
 
-def frequencies(md, skin, R, bc, num_eigvalues=80, fmin=1.):
+def frequencies(md, skin, R, bc, num_eigvalues=80, fmin=1., check_rtol=1.e-2):
     r"""Natural frequencies of the assembly with their ``(m, n)``
 
     Returns a list of tuples ``(f, m, n, c)``, the frequency in Hz, the wave
     numbers of :func:`classify` and the mode, in increasing frequency, the
-    rigid-body modes (``f < fmin``) excluded, and the run time, s.
+    rigid-body modes (``f < fmin``) excluded, the run time, s, and the
+    largest relative residual `\|(\boldsymbol{K} - \omega^2
+    \boldsymbol{M}) \boldsymbol{\phi}\| / \|\boldsymbol{K}
+    \boldsymbol{\phi}\|` of the returned modes. ``check_rtol`` is the
+    tolerance of the relative residual in ``structsolve.freq``: the residual
+    of the lowest modes of the free-free shells, whose spectrum starts at
+    the rigid-body modes, exceeds ``1e-6`` with backward errors of the order
+    of ``1e-14``, so the residual is checked here instead and returned.
     """
     t0 = time.time()
     K = md.reduce(md.calc_kC(silent=True))
     M = md.reduce(md.calc_kM(silent=True))
     eigvals, eigvecs = freq(K, M, tol=0, sparse_solver=True, silent=True,
-                            num_eigvalues=num_eigvalues, symmetric=True)
+                            num_eigvalues=num_eigvalues, symmetric=True,
+                            check_rtol=check_rtol)
     omegas = np.sqrt(np.abs(eigvals.real))
-    eigvecs = md.expand(eigvecs.real)
     out = []
+    rres = 0.
     for k in np.argsort(omegas):
         f = omegas[k]/(2*np.pi)
         if f < fmin:
             continue
-        c = eigvecs[:, k]
+        phi = eigvecs[:, k].real
+        Kphi = K @ phi
+        rres = max(rres, np.linalg.norm(Kphi - omegas[k]**2*(M @ phi))
+                   /np.linalg.norm(Kphi))
+        c = md.expand(phi)
         x, th, w = skin_w(md, c, skin, R)
         m, n = classify(x, th, w, bc)
         out.append((f, m, n, c))
-    return out, time.time() - t0
+    return out, time.time() - t0, rres
 
 
 def lowest_by_mn(modes):
