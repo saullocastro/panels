@@ -71,7 +71,10 @@ def record():
                 continue
             try:
                 with contextlib.redirect_stdout(io.StringIO()):
-                    exec(compile(''.join(cell['source']), name, 'exec'), ns)
+                    # IPython magics, e.g. %matplotlib inline, are dropped
+                    src = ''.join(line for line in ''.join(cell['source']).splitlines(True)
+                                  if not line.lstrip().startswith('%'))
+                    exec(compile(src, name, 'exec'), ns)
             except Exception as e:
                 print(f'{name}, cell {i}: {type(e).__name__}: {e}')
             plt.close('all')

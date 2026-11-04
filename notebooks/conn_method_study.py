@@ -100,7 +100,10 @@ def method_dir(method):
 def _code_cells(notebook):
     with open(os.path.join(HERE, notebook), encoding='utf-8') as fid:
         nb = json.load(fid)
-    return [''.join(c['source']) for c in nb['cells'] if c['cell_type'] == 'code']
+    # IPython magics, e.g. %matplotlib inline, are not Python: dropped
+    return [''.join(line for line in ''.join(c['source']).splitlines(True)
+                    if not line.lstrip().startswith('%'))
+            for c in nb['cells'] if c['cell_type'] == 'code']
 
 
 def _exec_notebook(notebook, ns=None, after=None, quiet=True):
