@@ -105,12 +105,6 @@ def create_wingbox(nstr=0, hs=3.e-3, ts=1.5e-3, L=1.010, W=50.5e-3,
     resultant ``P``, added with :meth:`.Shell.add_pressure_load`, a follower
     load with ``follower=True``.
 
-    The code of this function is illustrative of how it constructs the
-    multidomain assembly:
-
-    .. literalinclude:: ../../panels/multidomain/wingbox.py
-        :pyobject: create_wingbox
-
     Parameters
     ----------
     nstr : int, optional
@@ -178,6 +172,20 @@ def create_wingbox(nstr=0, hs=3.e-3, ts=1.5e-3, L=1.010, W=50.5e-3,
     .. [1] Elalfy, M. H., De Breuker, R., and Castro, S. G. P., Beam-like
        models for the post-buckling behaviour of wingbox structures,
        preprint, Delft University of Technology.
+
+    Examples
+    --------
+    The default wing box with 3 bays: the number of domains and of bays, the
+    length of a bay, the groups of the domains and the connections:
+
+    >>> from panels.multidomain import create_wingbox
+    >>> md, info = create_wingbox(nbays=3)
+    >>> print(len(md.panels), len(info['bays']), round(info['a'], 4))
+    15 3 0.3367
+    >>> print(sorted(set(p.group for p in md.panels)))
+    ['rib', 'skin_bot', 'skin_top', 'spar']
+    >>> print(sorted(set(c['func'] for c in info['conn'])))
+    ['BFxcte', 'BFxycte', 'BFycte', 'SSxcte']
 
     """
     terms = terms or {}

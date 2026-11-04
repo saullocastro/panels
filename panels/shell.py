@@ -378,6 +378,31 @@ class Shell(object):
     >>> print('%.1f' % eigvals[0])
     162.0
 
+    Contour plot of the buckling mode with :func:`.plot_shell`, which prints
+    log messages and returns the axes, here saved to a temporary file:
+
+    >>> import os, tempfile
+    >>> import matplotlib
+    >>> matplotlib.use('Agg')
+    >>> from panels.plot_shell import plot_shell
+    >>> ax = plot_shell(s, eigvecs[:, 0], vec='w', save=False, colorbar=True)
+    Plotting contour...
+        Computing field variables...
+        Finished!
+    finished!
+    >>> ax.figure.savefig(os.path.join(tempfile.mkdtemp(), 'mode1.png'))
+
+    Interactive 3D plot of the same mode with plotly, through a
+    :class:`.MultiDomain` of one domain, see :meth:`.MultiDomain.plot3d`:
+
+    >>> from panels.multidomain import MultiDomain
+    >>> fig, data = MultiDomain([s]).plot3d(eigvecs[:, 0], vec='w',
+    ...                                     vecs=['w', 'Mxx'])
+    >>> print(data['vecs'])
+    ['w', 'Mxx']
+    >>> fig.write_html(os.path.join(tempfile.mkdtemp(), 'mode1.html'),
+    ...                post_script=data['post_script'])
+
     """
     # Declare all the variables/attributes here to preallocate mem, speed it up. Var not declared here cant be used
     __slots__ = [ 'a', 'x1', 'x2', 'b', 'y1', 'y2', 'r',

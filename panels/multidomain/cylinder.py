@@ -49,13 +49,6 @@ def create_cylinder(height, r, stack, plyt, laminaprop,
     connections are returned and not stored in the assembly, which is
     created with ``conn=None``: pass them to :meth:`.MultiDomain.calc_kC`.
 
-    The code of this function is illustrative of how it constructs the
-    multidomain assembly:
-
-    .. literalinclude:: ../../panels/multidomain/cylinder.py
-        :pyobject: create_cylinder
-
-
     Parameters
     ----------
 
@@ -100,6 +93,23 @@ def create_cylinder(height, r, stack, plyt, laminaprop,
     connections around the circumference; the null-space method finds
     these redundant constraints and drops them, see
     :meth:`.MultiDomain.get_Z`.
+
+    Examples
+    --------
+    A cylinder of 4 panels, its number of degrees of freedom and its
+    constitutive stiffness matrix with the connections:
+
+    >>> from panels.multidomain import create_cylinder
+    >>> laminaprop = (142.5e9, 8.7e9, 0.28, 5.1e9, 5.1e9, 5.1e9)
+    >>> md, conns = create_cylinder(height=0.5, r=0.25, stack=[0, 90, 0],
+    ...     plyt=0.125e-3, laminaprop=laminaprop, npanels=4, m=8, n=8)
+    >>> print(len(md.panels), md.get_size())
+    4 768
+    >>> print([c['func'] for c in conns])
+    ['SSycte', 'SSycte', 'SSycte', 'SSycte']
+    >>> kC = md.calc_kC(conns, silent=True)
+    >>> print(kC.shape)
+    (768, 768)
 
     """
     if npanels < 2:

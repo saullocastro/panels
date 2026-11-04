@@ -69,13 +69,6 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
     connections are returned and not stored in the assembly, which is
     created with ``conn=None``: pass them to :meth:`.MultiDomain.calc_kC`.
 
-    The code of this function is illustrative of how it constructs the
-    multidomain assembly:
-
-    .. literalinclude:: ../../panels/multidomain/cylinder_blade_stiffened.py
-        :pyobject: create_cylinder_blade_stiffened
-
-
     Parameters
     ----------
 
@@ -125,6 +118,22 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
     see :meth:`.MultiDomain.get_kC_conn`. The boundary conditions and the
     redundant constraints of the closed skin are those of
     :func:`.create_cylinder`.
+
+    Examples
+    --------
+    A cylinder of 4 skin panels with 4 blades of 20 mm, the groups of the
+    domains and the connections:
+
+    >>> from panels.multidomain import create_cylinder_blade_stiffened
+    >>> laminaprop = (142.5e9, 8.7e9, 0.28, 5.1e9, 5.1e9, 5.1e9)
+    >>> md, conns = create_cylinder_blade_stiffened(height=0.5, r=0.25,
+    ...     stack=[0, 90, 0], stack_blades=[[0, 90, 0]]*4,
+    ...     width_blades=[0.02]*4, plyt=0.125e-3, laminaprop=laminaprop,
+    ...     npanels=4)
+    >>> print([p.group for p in md.panels])
+    ['skin', 'skin', 'skin', 'skin', 'blade_00', 'blade_01', 'blade_02', 'blade_03']
+    >>> print(sorted(set(c['func'] for c in conns)), len(conns))
+    ['BFycte', 'SSycte'] 8
 
     """
     if npanels < 2:

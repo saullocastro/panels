@@ -1929,6 +1929,32 @@ class MultiDomain(object):
             When both ``c`` and ``res`` are ``None``, or when ``ax`` is not a
             :class:`matplotlib.axes.Axes`.
 
+        Examples
+        --------
+        Deflection of the simply supported plate of two domains of
+        :class:`.MultiDomain` under a central point load; the largest
+        deflection, in mm, and the figure saved to a temporary file:
+
+        >>> import os, tempfile
+        >>> import matplotlib
+        >>> matplotlib.use('Agg')
+        >>> from panels.shell import Shell
+        >>> from panels.multidomain import MultiDomain
+        >>> prop = dict(a=1., b=0.5, m=8, n=8, stack=[0.], plyt=0.01,
+        ...             laminaprop=(70e9, 0.33), group='plate')
+        >>> p1 = Shell(x0=0., y0=0., **prop)
+        >>> p2 = Shell(x0=0., y0=0.5, **prop)
+        >>> p1.y2u = p1.y2v = p1.y2w = p2.y1u = p2.y1v = p2.y1w = 1.
+        >>> conn = [dict(p1=p1, p2=p2, func='SSycte', ycte1=p1.b, ycte2=0.)]
+        >>> md = MultiDomain([p1, p2], conn)
+        >>> p1.add_point_load(0.5, 0.5, 0., 0., 1000.)
+        >>> c = md.linear_static()
+        >>> ax, data = md.plot(c, group='plate', vec='w', save=False,
+        ...                    colorbar=True)
+        >>> print('%.3f' % (data['vecmax']*1000))
+        1.726
+        >>> ax.figure.savefig(os.path.join(tempfile.mkdtemp(), 'w.png'))
+
         """
         msg('Plotting contour.../../panels/multidomain/connections/penalties.py..', silent=True)
 
@@ -2172,6 +2198,30 @@ class MultiDomain(object):
         --------
         panels.multidomain.plot3d.plot3d : The function called.
         plot : Contour plot of a group of coplanar panels.
+
+        Examples
+        --------
+        The plate of two domains of :meth:`.plot`, with three selectable
+        outputs, saved to a temporary HTML file with the controls of the
+        displacements:
+
+        >>> import os, tempfile
+        >>> from panels.shell import Shell
+        >>> from panels.multidomain import MultiDomain
+        >>> prop = dict(a=1., b=0.5, m=8, n=8, stack=[0.], plyt=0.01,
+        ...             laminaprop=(70e9, 0.33), group='plate')
+        >>> p1 = Shell(x0=0., y0=0., **prop)
+        >>> p2 = Shell(x0=0., y0=0.5, **prop)
+        >>> p1.y2u = p1.y2v = p1.y2w = p2.y1u = p2.y1v = p2.y1w = 1.
+        >>> conn = [dict(p1=p1, p2=p2, func='SSycte', ycte1=p1.b, ycte2=0.)]
+        >>> md = MultiDomain([p1, p2], conn)
+        >>> p1.add_point_load(0.5, 0.5, 0., 0., 1000.)
+        >>> c = md.linear_static()
+        >>> fig, data = md.plot3d(c, vec='w', vecs=['w', 'Mxx', 'Myy'])
+        >>> print(data['vecs'])
+        ['w', 'Mxx', 'Myy']
+        >>> fig.write_html(os.path.join(tempfile.mkdtemp(), 'plate.html'),
+        ...                post_script=data['post_script'])
 
         """
         from panels.multidomain.plot3d import plot3d
