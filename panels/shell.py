@@ -271,8 +271,8 @@ class Shell(object):
     Raises
     ------
     ValueError
-        If ``m > 30`` or ``n > 30``, the Bardell functions of the order 31
-        and above not being coded.
+        If ``m > 30`` or ``n > 30``, given here or assigned later, the
+        Bardell functions of the order 31 and above not being coded.
 
     Notes
     -----
@@ -411,7 +411,7 @@ class Shell(object):
         'row_start', 'col_start', 'row_end', 'col_end',
         'name', 'bay', 'model',
         'fsdt_shear_correction',
-        'm', 'n', '_nx', '_ny', 'size',
+        '_m', '_n', '_nx', '_ny', 'size',
         'point_loads', 'point_loads_inc', 'distr_loads', 'distr_loads_inc',
         'pressure_loads', 'pressure_loads_inc',
         'point_pds', 'point_pds_inc', 'distr_pds', 'distr_pds_inc',
@@ -472,10 +472,8 @@ class Shell(object):
         self.fsdt_shear_correction = 'rohwer' # in case of First-order Shear Deformation Theory
 
         # approximation series - no of terms in SFs
-        self.m = m
+        self.m = m # the setters raise if m > 30 or n > 30
         self.n = n
-        if m > 30 or n > 30:
-            raise ValueError('Bardell functions of the order 31 and above are not coded')
         self.size = None
 
         # numerical integration - no of points, None follows m and n, see
@@ -625,6 +623,38 @@ class Shell(object):
                 )
         self.plot_mesh = dict(Xs=None, Ys=None)
 
+
+    @property
+    def m(self):
+        r"""Number of terms of the approximation functions along `x`
+
+        At most ``30``; assigning a larger value raises a ``ValueError``, the
+        Bardell functions of the order 31 and above not being coded.
+
+        """
+        return self._m
+
+    @m.setter
+    def m(self, value):
+        if value is not None and value > 30:
+            raise ValueError('Bardell functions of the order 31 and above are not coded')
+        self._m = value
+
+    @property
+    def n(self):
+        r"""Number of terms of the approximation functions along `y`
+
+        At most ``30``; assigning a larger value raises a ``ValueError``, the
+        Bardell functions of the order 31 and above not being coded.
+
+        """
+        return self._n
+
+    @n.setter
+    def n(self, value):
+        if value is not None and value > 30:
+            raise ValueError('Bardell functions of the order 31 and above are not coded')
+        self._n = value
 
     @property
     def nx(self):
