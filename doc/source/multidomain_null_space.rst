@@ -3,10 +3,10 @@
 Exact connections with the null-space method
 ============================================
 
-The domains of a :class:`.MultiDomain` assembly were originally connected
-with penalty stiffnesses, see :meth:`.MultiDomain.get_kC_conn` and
-[castro2017Multidomain]_, still available with ``conn_method='penalty'``.
-The penalty method adds, for each quantity `q_k`
+The domains of a :class:`.MultiDomain` assembly can be connected with
+penalty stiffnesses, ``conn_method='penalty'``, see
+:meth:`.MultiDomain.get_kC_conn` and [castro2017Multidomain]_. The penalty
+method adds, for each quantity `q_k`
 that must be continuous across a connection, the energy:
 
 .. math::
@@ -63,8 +63,7 @@ are cubic and the function `i \ge 4` has the order `i`, so that
 `\max(m_1, m_2, 4)` points are used along `x` and `\max(n_1, n_2, 4)` along
 `y`. The zero energy of Eq. :eq:`ns-penalty` and the constraints of
 Eq. :eq:`ns-constraints` are equivalent: the vectors with zero penalty energy
-are exactly those that satisfy the constraints, which is verified for every
-connection and model in ``tests/multidomain/test_null_space.py``.
+are exactly those that satisfy the constraints.
 
 Why not Lagrange multipliers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -287,59 +286,17 @@ The functions :func:`.create_cylinder`,
 Comparison with the penalty method
 ----------------------------------
 
-The results below are verified in ``tests/multidomain/test_null_space.py``.
-
-The penalty method is more flexible than the exact connections, and its
-error decreases with the inverse of the penalty constants. For a thin plate
-divided in 2x2 domains, with the classical laminated plate theory, the error
-of the first frequencies is 1.3% with the default constants of
-:func:`.calc_kt_kr`, and it becomes 0.13%, 0.013% and 0.0013% with 10, 100 and
-1000 times higher constants. The condition number of the stiffness matrix
-grows with the penalty constants: for the 4-domain plate of
-``tests/multidomain/test_conn_4panels_kt_kr.py``, the reduced stiffness matrix
-of the null-space method has a condition number about 600 times lower than
-the stiffness matrix of the penalty method with the default constants, and
-`6 \times 10^4` times lower than with 100 times higher constants.
-
-.. list-table::
-    :header-rows: 1
-    :widths: 40 20 20 20
-
-    * - Case
-      - Penalty, default constants
-      - Penalty, higher constants
-      - Null-space
-    * - Frequencies of a thick plate divided in 2x2 domains, FSDT, error
-        with respect to the single domain (Noor 1973)
-      - `7.8 \times 10^{-2}`
-      - `9.5 \times 10^{-5}` (1000 times)
-      - `3 \times 10^{-12}`
-    * - Laminates `[0/90]` over `[0/90]` with ``'SB'``, error of the
-        frequencies with respect to `[0/90]_2`, CLPT
-      -
-      - `8 \times 10^{-6}` (`10^5` times)
-      - `6 \times 10^{-13}`
-    * - Same, large deflection with the von Kármán kinematics
-      -
-      -
-      - `10^{-15}`
-    * - Blade-stiffened cylinder, buckling load with the pre-buckling state
-        of a static analysis, `N_{xx}` (N/m)
-      - -39993.8
-      - -41694.9 (1000 times)
-      - -41696.7
-    * - Closed cylinder, buckling load `N_{xx}` (N/m)
-      - -47056.0
-      -
-      - -47113.0
-    * - T-stiffened panel, first frequency (rad/s)
-      - 48.2733
-      - 48.3858 (100 times)
-      - 48.3875
-
-The default penalty constants underestimate the buckling load of the
-blade-stiffened cylinder by 4%, whereas the higher constants converge to the
-result of the null-space method.
+The penalty energy of Eq. :eq:`ns-penalty` is non-negative: the penalty
+method is more flexible than the exact connections, its stiffness and its
+natural frequencies are lower, and its error decreases with the inverse of
+the penalty constants. The condition number of the stiffness matrix grows
+with the penalty constants, whereas the reduced stiffness matrix
+`\boldsymbol{Z}^\top \boldsymbol{K} \boldsymbol{Z}` of the null-space method
+does not depend on any constant. With the default constants of
+:func:`.calc_kt_kr` the error of the penalty method is of the order of 1% for
+thin plates and reaches several percent for thick plates and stiffened
+shells, whereas the null-space method reproduces a single domain, or a single
+laminate with ``'SB'``, to the convergence of the approximation.
 
 
 .. _null_space_pd:
@@ -379,9 +336,7 @@ of :func:`.fkCpd` and :func:`.fkCld_xcte` (:func:`.fkCld_ycte` along `y =
 y_l`), the forces being added by :meth:`.MultiDomain.calc_fext`; for a
 thickness coordinate ``z`` different from zero, the rows of `u` and `v`
 are those of `u(z)` and `v(z)`. The prescribed values are reached with an
-error of order `1/k`; with `k = 10^4 E h` the solution differs from that of
-the null-space method by less than 1%, see
-``tests/multidomain/test_kCpd_kernels.py``.
+error of order `1/k`.
 
 With ``pd_method='null-space'`` they are
 imposed exactly, as inhomogeneous linear constraints eliminated together
@@ -484,12 +439,12 @@ and projecting it with `\boldsymbol{Z}^\top` gives the reduced problem solved by
         \boldsymbol{K}_T(\boldsymbol{c}) \boldsymbol{c}_{p1}\right)
 
 `\boldsymbol{K}_{T, r}` is the exact Jacobian, and `-\partial \boldsymbol{R}_r/\partial \lambda`
-depends on the configuration and on the load factor. ``structsolve`` 0.7.0
+depends on the configuration and on the load factor. ``structsolve``
 passes the load factor to ``calc_fext`` when it declares the keyword
 argument ``lbd``, and uses `-\partial \boldsymbol{R}_r/\partial \lambda` in the predictors
 and in the constraint of the arc-length methods, and `\lambda \partial
-\boldsymbol{R}_r/\partial \lambda` as a reference of the convergence criteria, the
-relative one and Crisfield's, the default since ``structsolve`` 0.9.0,
+\boldsymbol{R}_r/\partial \lambda` as a reference of the convergence criteria,
+Crisfield's, the default, and the relative one,
 because under a prescribed displacement alone both `\boldsymbol{Z}^\top \boldsymbol{F}_{ext}` and
 `\boldsymbol{Z}^\top \boldsymbol{F}_{int}` vanish at equilibrium, see
 :meth:`.MultiDomain.get_reduced_functions`.
@@ -514,10 +469,10 @@ in `\boldsymbol{K}_{G, r}(\hat{\boldsymbol{c}}_0)` only. The modes satisfy the
 homogeneous constraints, `\boldsymbol{\phi} = \boldsymbol{Z} \boldsymbol{\phi}_r`: under displacement
 control the prescribed components of the modes are zero, whereas under the
 equivalent load they are free. For a flat plate the modes of the linear
-buckling analysis are out of plane and both critical loads are equal, for a
+buckling analysis are out of plane and both critical loads are equal; for a
 cylinder, whose modes couple the membrane and bending displacements, the
-critical end-shortening of a cylinder of 5 panels is 3.8% higher than the
-end-shortening of the critical axial load with ``x2u=1``.
+critical end-shortening is higher than the end-shortening of the critical
+axial load with ``x2u=1``.
 
 Reactions
 ~~~~~~~~~
@@ -592,7 +547,7 @@ API
   \boldsymbol{c}_r`, e.g. for the modes
 - :meth:`.MultiDomain.get_reduced_functions`: the callables of
   ``structsolve.Analysis`` for the non-linear analyses, Newton-Raphson and
-  the arc-length methods, requiring ``structsolve>=0.7.0``. The linear
+  the arc-length methods. The linear
   static analysis of ``Analysis.static(NLgeom=False)`` cannot contain the
   constant prescribed displacements and raises an error, see
   :meth:`.MultiDomain.linear_static`
@@ -601,15 +556,14 @@ API
 - :meth:`.MultiDomain.calc_fext` excludes the forces of the prescribed
   displacements with ``pd_method='null-space'``
 
-Verification and displacement control
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Displacement control
+~~~~~~~~~~~~~~~~~~~~
 
-The membrane patch test is exact: under the uniform end-shortening
-`\delta` of Eq. :eq:`bc-end-shortening`, for one domain or for 2x2
-connected domains, with the CLPT and the FSDT, the fields are `u = -\delta
-x/a` and `v = \nu \delta y/a` to the round-off, and the reactions are `P_1
-= N \delta`, Eq. :eq:`ns-pd-reaction`, and `F_u = -N` at the shortened
-end, with `N = E h b \delta/a`, see ``tests/multidomain/test_null_space_pd.py``.
+Under the uniform end-shortening `\delta` of Eq. :eq:`bc-end-shortening`,
+the membrane patch test is passed exactly, for one domain or for connected
+domains: the fields are `u = -\delta x/a` and `v = \nu \delta y/a` to the
+round-off, and the reactions are `P_1 = N \delta`, Eq. :eq:`ns-pd-reaction`,
+and `F_u = -N` at the shortened end, with `N = E h b \delta/a`.
 
 Beyond the critical end-shortening `\delta_{cr}` of the linear buckling
 analysis, the post-buckling path is traced under displacement control with
@@ -618,13 +572,10 @@ end-shortening being incremented, ``cte=False``, and a small lateral load
 acting as an imperfection. Every converged increment of the Newton-Raphson
 and arc-length methods of ``structsolve`` satisfies `\|\boldsymbol{Z}^\top
 \boldsymbol{r}\| \le` ``relTOL`` `\|\lambda \, \partial
-\boldsymbol{R}_r/\partial \lambda\|`, the three methods reach the same
-state, and the axial reaction of a simply supported plate at `3
-\delta_{cr}` is 0.5 to 0.7 of the linear one, the loss of stiffness of the
-buckled plate. The arc length of ``structsolve`` is scaled by the linear
-solution, which has no out-of-plane displacement under an end-shortening:
-the post-buckling path is long in these units, and ``maxArcLength`` may
-need to be increased.
+\boldsymbol{R}_r/\partial \lambda\|`. The arc length of ``structsolve`` is
+scaled by the linear solution, which has no out-of-plane displacement under
+an end-shortening: the post-buckling path is long in these units, and
+``maxArcLength`` may need to be increased.
 
 .. _null_space_pd_penalty:
 
@@ -633,163 +584,39 @@ Penalty vs null-space displacement control
 
 The penalty method imposes a prescribed displacement `u_p` with the energy
 `\frac{1}{2} k \int (u - u_p)^2`, i.e. a spring of stiffness `k` between the
-structure and the support: the structure is more flexible, the prescribed
-value is not reached, and the error decreases with `1/k`, while the
-condition number of the stiffness matrix grows with `k`. The null-space
-method has no penalty constant. The cases below were run with the models of
-``tests/multidomain/test_null_space_pd.py``, the penalty stiffnesses being
-those of :func:`.fkCld_xcte` and :func:`.fkCpd`; `E h` is the membrane
-stiffness of the isotropic plate and `A_{11}` that of the laminate of the
-cylinder.
+structure and the support, see :func:`.fkCld_xcte` and :func:`.fkCpd`: the
+structure is more flexible, the prescribed value is not reached, and the
+error decreases with `1/k`, while the condition number of the stiffness
+matrix grows with `k`. The null-space method has no penalty constant.
 
-**Accuracy and conditioning, linear static.** Plate under a uniform
-end-shortening with the lateral contraction restrained along `y = 0, b`,
-``m = n = 10``, 300 Ritz constants, 280 independent ones with the null-space
-method. Errors of the Ritz constants and of the axial reaction, and condition
-number of the stiffness matrix; the reduced stiffness matrix of the
-null-space method has the condition number `1.4 \times 10^{11}`:
-
-.. list-table::
-    :header-rows: 1
-
-    * - `k / (E h)`
-      - `10`
-      - `10^2`
-      - `10^4`
-      - `10^6`
-      - `10^8`
-      - `10^{10}`
-    * - error of `\boldsymbol{c}`
-      - `1.6 \times 10^{-1}`
-      - `2.0 \times 10^{-2}`
-      - `2.0 \times 10^{-4}`
-      - `2.0 \times 10^{-6}`
-      - `2.0 \times 10^{-8}`
-      - `3.2 \times 10^{-9}`
-    * - error of the reaction
-      - `-1.8 \times 10^{-1}`
-      - `-2.2 \times 10^{-2}`
-      - `-2.2 \times 10^{-4}`
-      - `-2.2 \times 10^{-6}`
-      - `4.4 \times 10^{-9}`
-      - `-2.3 \times 10^{-6}`
-    * - condition number
-      - `2.5 \times 10^{12}`
-      - `2.0 \times 10^{13}`
-      - `2.0 \times 10^{15}`
-      - `2.0 \times 10^{17}`
-      - `2.0 \times 10^{19}`
-      - `1.9 \times 10^{21}`
-
-The reaction of the penalty method, `k \int (u_p - u)`, here integrated with
-40 Gauss-Legendre points along `x = a`, is the product of a large constant
-and a small difference, and loses accuracy by cancellation for the highest
-constants: from `k/(E h) = 10^8` its error no longer decreases as `1/k`, and
-depends on the round-off, e.g. on the number of integration points.
-
-**Linear buckling.** Cylinder of 5 panels under a uniform end-shortening,
-see ``test_cylinder_end_shortening``. The error of the critical
-end-shortening of the penalty method is `1.4 \times 10^{-1}`, `1.3 \times
-10^{-2}`, `1.3 \times 10^{-3}`, `1.3 \times 10^{-4}` and `1.3 \times
-10^{-6}` for `k/A_{11} = 10, 10^2, 10^3, 10^4, 10^6`, from above, since the
-penalty springs shorten the cylinder less than the prescribed value. Both
-methods take about 0.5 s, from the creation of the model to the critical
-end-shortening. With `k/A_{11} = 10^6` the sparse eigenvalue solver of
-``structsolve`` 0.8.0 failed its verification of the residuals of the
-eigenpairs, because of the conditioning, and ``structsolve.lb`` fell back to
-the dense solver with a ``DenseFallbackWarning``. Since ``structsolve``
-0.9.0 the relative residual of the verification is at least
-``RESIDUAL_FLOOR = 1e-8`` times a scale of the norms of the matrices, and
-the eigenpairs of the sparse solver are accepted.
-
-**Non-linear analysis.** Post-buckling of the plate at twice the critical
-end-shortening, ``m = n = 8``, with a lateral point load of 30 N at the
-centre as imperfection, as in ``test_nonlinear_reaction_matches_penalty``,
-Newton-Raphson with 8 increments. Error of the axial reaction of the penalty
-method, relative to that of the null-space method, with Crisfield's
-convergence criterion, ``Analysis.convergence = 'crisfield'``, the default of
-``structsolve`` 0.9.0 with ``relTOL = 1e-9``, and with the relative
-criterion, ``'relative'``, the only one up to ``structsolve`` 0.8.0, whose
-default was ``relTOL = 1e-6``:
-
-.. list-table::
-    :header-rows: 1
-
-    * - criterion, `k / (E h)`
-      - `10^2`
-      - `10^4`
-      - `10^6`
-      - `10^8`
-    * - ``'crisfield'``, ``relTOL = 1e-9``
-      - `-3.6 \times 10^{-2}`
-      - `-3.8 \times 10^{-4}`
-      - `-3.8 \times 10^{-6}`
-      - `-5.6 \times 10^{-8}`
-    * - ``'crisfield'``, ``relTOL = 1e-6``
-      - `-3.6 \times 10^{-2}`
-      - `-4.0 \times 10^{-4}`
-      - `-1.9 \times 10^{-5}`
-      - `-1.5 \times 10^{-5}`
-    * - ``'relative'``, ``relTOL = 1e-6``
-      - `-3.6 \times 10^{-2}`
-      - `-5.5 \times 10^{-4}`
-      - `-2.1 \times 10^{-1}`
-      - `1.1`
-    * - ``'relative'``, ``relTOL = 1e-10``
-      - `-3.6 \times 10^{-2}`
-      - `-3.8 \times 10^{-4}`
-      - `-1.9 \times 10^{-5}`
-      - `-1.7 \times 10^{-4}`
-
-Both criteria compare the norm of the residual with the largest norm of the
-references `\lambda \boldsymbol{F}_{ext}`, `\boldsymbol{F}_{int}` and, when they apply, the
-external force vector of the increment of the arc-length methods and
-`\lambda \partial \boldsymbol{R}/\partial \lambda`, see ``structsolve.convergence``. For
-the penalty method `\lambda \boldsymbol{F}_{ext}` and `\boldsymbol{F}_{int}` contain the
-penalty forces `k u_p`. The relative criterion measures them with the
-Euclidean norm over all the degrees of freedom, which grows with `k`: with
-``relTOL = 1e-6`` the highest penalty constants give the largest errors,
-21% and 110%, after 12 and 8 evaluations of the internal force vector in
-the 8 increments, against 28 for `k/(E h) = 10^2`, and even with ``relTOL =
-1e-10`` the error grows again from `k/(E h) = 10^6` to `10^8`. Crisfield's
-criterion uses the norm `\|\boldsymbol{v}\|_{\boldsymbol{d}} = (\sum_j v_j^2/|d_j|)^{1/2}`
-over the free degrees of freedom, the entries `d_j` of the diagonal scaling
-vector `\boldsymbol{d}` being the diagonal of the linear stiffness matrix
-``calc_kC()``, which contains the penalty stiffness, such that the scaled
-norm of the penalty forces grows with `\sqrt{k}`, by a factor of 10 for
-each factor of 100 of `k` in this case: with ``relTOL = 1e-9`` the error
-decreases as `1/k` up to `k/(E h) = 10^8`, whereas with ``relTOL = 1e-6`` it
-stops decreasing at about `2 \times 10^{-5}`. The null-space method has no
-such trade-off, its reference being `\lambda \partial \boldsymbol{R}_r/\partial \lambda`,
-see :ref:`null_space_pd`: its reaction is the same to `3 \times 10^{-10}`
-with the four combinations of the table.
-
-**Run time.** For the linear analyses both methods have the same cost: the
-elimination of the constraints is a small fraction of the assembly. For the
-non-linear analysis above the run time is dominated by the assembly of the
-tangent stiffness matrix. With ``panels`` 0.14.0 and ``structsolve`` 0.9.0,
-on the same machine, medians of 15 runs of ``Analysis.static``: 0.60 s with
-the null-space method and Crisfield's criterion with ``relTOL = 1e-9``, and
-0.50 s and 0.66 s with the relative criterion with ``relTOL = 1e-6`` and
-``1e-10``, against 0.46 s, 0.24 s and 0.45 s with the penalty method and
-`k/(E h) = 10^4`. With
-Crisfield's criterion the null-space method factorizes the tangent stiffness
-matrix 29 times, against 25 for the penalty method. Its `\partial
-\boldsymbol{R}_r/\partial \lambda` requires the product `\boldsymbol{K}_T \boldsymbol{c}_{p1}`, computed
-without assembling `\boldsymbol{K}_T`, see :ref:`tangent_product`, at the cost of one
-evaluation of the internal force vector, and ``structsolve``, since 0.8.0,
-evaluates it only together with the tangent stiffness matrix. With
-``panels`` 0.12.0 before these two improvements and the tabulation of the
-approximation functions, see :ref:`tabulation`, the same analyses with the
-relative criterion and ``relTOL = 1e-6`` and ``1e-10`` took 12.6 s and
-15.8 s against 4.4 s and 9.2 s.
+The reaction of the penalty method, `k \int (u_p - u)`, is the product of a
+large constant and a small difference, and loses accuracy by cancellation
+for the highest constants. In a geometrically non-linear analysis the
+penalty forces `k u_p` are part of `\lambda \boldsymbol{F}_{ext}` and
+`\boldsymbol{F}_{int}`, the references of the convergence criteria of
+``structsolve``: the relative criterion measures them with the Euclidean
+norm over all the degrees of freedom, which grows with `k`, Crisfield's
+criterion with the norm `\|\boldsymbol{v}\|_{\boldsymbol{d}} = (\sum_j
+v_j^2/|d_j|)^{1/2}` scaled by the diagonal `\boldsymbol{d}` of the linear
+stiffness matrix, which contains the penalty stiffness, such that the scaled
+norm of the penalty forces grows only with `\sqrt{k}`. Once the tolerance
+dominates, the error of the penalty method stops decreasing with `1/k`,
+earlier with the relative criterion. The null-space method has no such
+trade-off, its reference being `\lambda \partial \boldsymbol{R}_r/\partial
+\lambda`, see :ref:`null_space_pd`. Its `\partial \boldsymbol{R}_r/\partial
+\lambda` requires the product `\boldsymbol{K}_T \boldsymbol{c}_{p1}`,
+computed without assembling `\boldsymbol{K}_T`, see :ref:`tangent_product`,
+at the cost of one evaluation of the internal force vector; the linear
+analyses cost the same with both methods. With `k = 10^4 E h` the penalty
+method is within `10^{-3}` of the null-space method for the linear and
+non-linear analyses of a plate under end-shortening.
 
 **When to use each method.** The null-space method is exact, needs no
 penalty constant, keeps the conditioning of the model, and gives reactions
 that do not depend on any constant; it is recommended for displacement
 control, e.g. the end-shortening of panels and shells, and for linear
-buckling under prescribed displacements. The penalty method remains the
-default for backward compatibility, and it is needed when the prescribed
+buckling under prescribed displacements. The penalty method is
+the default of the prescribed displacements, ``pd_method='penalty'``, and it is needed when the prescribed
 displacement represents a physical stiffness, e.g. a load cell or a loading
 fixture, or for models that rely on the penalty forms, e.g. the cohesive zone
 examples of :ref:`cohesive_zone`, whose reaction is given by
@@ -821,7 +648,7 @@ approximation more than the penalty method with the default constants does:
   The in-plane displacements of the bonded laminates must be restrained
   consistently with the single laminate that
   they represent, e.g. restraining only the tangential displacement of the
-  edges, as in ``test_skin_base_nonlinear_equals_single_laminate``.
+  edges.
 
 The prescribed displacements of :meth:`.Shell.add_point_pd`,
 :meth:`.Shell.add_distr_pd_fixed_x` and :meth:`.Shell.add_distr_pd_fixed_y`
