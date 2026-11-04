@@ -33,9 +33,9 @@ the generator of ``'plate_clpt_gl'``.
             p.ny = gauss_points(p.n)
 
     With them, the internal forces of a plate with displacement gradients of
-    order 0.5 differ by 3e-13, and the tip deflections of the wing box under
-    a follower tip force by less than 0.01 mm up to 500 N, in 138 s against
-    288 s, see `Wing box under a follower tip force`_. Assigning ``None`` to
+    order 0.5 differ by 3e-13, and the tip deflections of the wing box of
+    :ref:`plate_clpt_gl` under a follower tip force by less than 0.01 mm up
+    to 500 N. Assigning ``None`` to
     ``nx`` and ``ny`` restores the exact default.
 
 
