@@ -68,7 +68,8 @@ def _set_end(p, end, flags):
 
 def build_cylinder(R, h, L, E, nu, rho=0., nstiff=60, tb=None, hb=None,
         side='external', bc='SS', mx=12, ny=6, nyb=4, full=False,
-        pd_method='penalty', blade_model='plate_clpt_gl'):
+        pd_method='penalty', blade_model='plate_clpt_gl', Dy_factor=1.,
+        D12_factor=1.):
     r"""Cylinder with ``nstiff`` equally spaced blade stringers
 
     The skin is divided at the stringers into curved panels. With
@@ -89,6 +90,15 @@ def build_cylinder(R, h, L, E, nu, rho=0., nstiff=60, tb=None, hb=None,
     0`` the blade stands on the inner side of the skin (``side='internal'``)
     and with ``ycte2 = hb`` on the outer side (``side='external'``). Without
     ``tb`` the cylinder is unstiffened, divided in the same panels.
+
+    ``Dy_factor`` multiplies the circumferential bending stiffness `D_{22}`
+    of every skin panel, `D_y/D` of Sewall and Naumann (1968), Appendix A,
+    and ``D12_factor`` its coupling term `D_{12}`: the modified constant
+    ``ABD`` matrix of the laminate is given to the panel as its attribute
+    ``ABDnxny`` (see :class:`panels.shell.Shell`), with which the stiffness
+    matrix is integrated numerically; the mass still comes from the
+    laminate. With both factors equal to 1 (default) the attribute is not
+    set.
 
     Parameters
     ----------
@@ -112,6 +122,10 @@ def build_cylinder(R, h, L, E, nu, rho=0., nstiff=60, tb=None, hb=None,
         Whole cylinder instead of the half.
     pd_method : str
         See :class:`panels.multidomain.MultiDomain`.
+    blade_model : str
+        Model of the blades.
+    Dy_factor, D12_factor : float
+        Factors of `D_{22}` and `D_{12}` of the skin.
 
     Returns
     -------
@@ -143,6 +157,13 @@ def build_cylinder(R, h, L, E, nu, rho=0., nstiff=60, tb=None, hb=None,
         _set_end(p, 'x2', sk2)
         _set_end(p, 'y1', _FREE)
         _set_end(p, 'y2', _FREE)
+        if Dy_factor != 1. or D12_factor != 1.:
+            # ABD order: (A, B, D) of (xx, yy, xy); D22 = [4, 4], D12 = [3, 4]
+            ABD = np.array(p.ABD, dtype=float)
+            ABD[4, 4] *= Dy_factor
+            ABD[3, 4] *= D12_factor
+            ABD[4, 3] *= D12_factor
+            p.ABDnxny = ABD
         skin.append(p)
     if not full:
         # symmetry planes
