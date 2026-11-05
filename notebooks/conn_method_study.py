@@ -72,6 +72,7 @@ import contextlib
 import io
 import json
 import os
+import re
 import sys
 import time
 
@@ -100,9 +101,10 @@ def method_dir(method):
 def _code_cells(notebook):
     with open(os.path.join(HERE, notebook), encoding='utf-8') as fid:
         nb = json.load(fid)
-    # IPython magics, e.g. %matplotlib inline, are not Python: dropped
+    # IPython magics, e.g. %matplotlib inline, are not Python: dropped; a
+    # continuation line such as "% value)" is kept
     return [''.join(line for line in ''.join(c['source']).splitlines(True)
-                    if not line.lstrip().startswith('%'))
+                    if not re.match(r'\s*%+[A-Za-z]', line))
             for c in nb['cells'] if c['cell_type'] == 'code']
 
 
