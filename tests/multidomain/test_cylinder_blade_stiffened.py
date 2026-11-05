@@ -186,11 +186,11 @@ def test_smeared_card1966_ns():
         assert abs(Nx/Ns - 1) < 0.002, (side, t, L_)
 
 
-def _half_cylinder(blade_model):
+def _half_cylinder(blade_model, model='cylshell_clpt_sanders', m=8, n=6):
     md, conns = create_cylinder_blade_stiffened(height=L/2, r=R,
             stack=[0]*28, stack_blades=[[0]*97]*NSTIFF,
             width_blades=[HB]*NSTIFF, plyt=PLYT, laminaprop=(E, NU),
-            npanels=NSTIFF, m=8, n=6)
+            npanels=NSTIFF, m=m, n=n, model=model)
     for p in md.panels:
         # x = 0: simply supported, u free; x = L/2: symmetry
         p.x1u = 1
@@ -270,3 +270,40 @@ def test_cylinder_blade_stiffened_compression_lb_pd_from_static():
     N = nbar(1.e-3*eigvals[0])
     print('pd_from_static: %.1f N/m, %.4f x smeared' % (N, N/Ns))
     assert np.isclose(N, REF['pd_from_static'], rtol=1e-4)
+
+
+def test_discrete_gl_skin():
+    r"""Cylinder 4 of Card and Jones (1966) with skin panels of
+    ``'cylshell_clpt_gl'``, otherwise the set-up of
+    ``test_discrete_vs_smeared``
+
+    The load is compared with `\bar{N}_s` of Card and Jones (1966), Table I,
+    and with the discrete load of the Sanders skin, ``REF['half_gl']``. It
+    must be below the latter, and by at most 2.5 %.
+
+    Notes
+    -----
+    Both skin models have the same linear stiffness. The geometric
+    stiffness of ``'cylshell_clpt_gl'`` adds to the Sanders one the work
+    `\frac{1}{2} N_{xx} (u_{,x}^2 + v_{,x}^2)` of the skin load, which is
+    destabilizing under compression, so that the load cannot be higher
+    than with the Sanders skin. Its size is estimated from the critical mode,
+    one axial half-wave and `n = 6` circumferential waves: an inextensional
+    mode, `v_{,y} + w/r = 0`, has `v_{,x}^2 / w_{,x}^2 \approx 1/n^2 = 2.8`
+    %, and the skin carries `t/(t + A_s/d) = 48` % of the load, so the load
+    should drop by about `0.48 \times 2.8 = 1.3` %. The computed drop is
+    1.33 % (124455.2 against 126130.9 N/m, the same for 6 x 6 and 10 x 8
+    terms), and the GL load is 1.6 % below `\bar{N}_s`. The bounds, 0 and
+    -2.5 %, are the sign of the term and about twice the estimate; the
+    agreement with `\bar{N}_s` is checked within the 5 % of
+    ``test_discrete_vs_smeared``, and the load against a regression value
+    with ``rtol=1e-4``.
+
+    """
+    N = _half_cylinder('plate_clpt_gl', model='cylshell_clpt_gl')
+    print('discrete, GL skin %.1f N/m, %+.2f%% vs Sanders skin; %.1f lb/in, '
+          'Card N_s %+.2f%%' % (N, 100*(N/REF['half_gl'] - 1), N/(LBF/IN),
+                                100*(N/(LBF/IN)/NS_CARD - 1)))
+    assert -0.025 < N/REF['half_gl'] - 1 < 0.
+    assert abs(N/(LBF/IN)/NS_CARD - 1) < 0.05
+    assert np.isclose(N, 124455.2, rtol=1e-4)
