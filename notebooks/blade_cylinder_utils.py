@@ -246,7 +246,8 @@ def classify(x, th, w, bc, nmax=40):
     return m, n
 
 
-def frequencies(md, skin, R, bc, num_eigvalues=80, fmin=1., check_rtol=1.e-2):
+def frequencies(md, skin, R, bc, num_eigvalues=80, fmin=1., check_rtol=1.e-2,
+        no_skin_inplane_inertia=False):
     r"""Natural frequencies of the assembly with their ``(m, n)``
 
     Returns a list of tuples ``(f, m, n, c)``, the frequency in Hz, the wave
@@ -259,10 +260,31 @@ def frequencies(md, skin, R, bc, num_eigvalues=80, fmin=1., check_rtol=1.e-2):
     of the lowest modes of the free-free shells, whose spectrum starts at
     the rigid-body modes, exceeds ``1e-6`` with backward errors of the order
     of ``1e-14``, so the residual is checked here instead and returned.
+
+    With ``no_skin_inplane_inertia=True`` the rows and columns of the
+    in-surface DOFs `u, v` of the skin panels in the mass matrix (3 DOFs per
+    term, ordered `u, v, w`, from the row ``row_start`` of each panel) are
+    multiplied by `10^{-3}`, which scales the in-surface inertia of the
+    skin by `10^{-6}`, the simplification of the numerical results of Egle
+    and Sewall (1968, p. 522); the inertia of the blades is kept.
     """
     t0 = time.time()
     K = md.reduce(md.calc_kC(silent=True))
-    M = md.reduce(md.calc_kM(silent=True))
+    Mfull = md.calc_kM(silent=True)
+    if no_skin_inplane_inertia:
+        from scipy.sparse import csr_matrix, diags
+        keep = np.ones(Mfull.shape[0])
+        Mskin = None
+        for p in skin:
+            base = p.row_start + 3*np.arange(p.m*p.n)
+            keep[base] = 1.e-3
+            keep[base + 1] = 1.e-3
+            Mp = p.calc_kM(size=md.get_size(), row0=p.row_start,
+                           col0=p.col_start, silent=True)
+            Mskin = Mp if Mskin is None else Mskin + Mp
+        D = diags(keep)
+        Mfull = csr_matrix(Mfull - Mskin + D @ Mskin @ D)
+    M = md.reduce(Mfull)
     eigvals, eigvecs = freq(K, M, tol=0, sparse_solver=True, silent=True,
                             num_eigvalues=num_eigvalues, symmetric=True,
                             check_rtol=check_rtol)
