@@ -4566,11 +4566,11 @@ class MultiDomain(object):
             A_i = \arg\max_j \Delta_{i,j}
 
         with `i` the row and `j` the column of the grid of integration
-        points, `j` increasing with `x`. A previous implementation set to
-        zero everything from ``x=0`` up to the *last* non-positive
-        separation of the row, which removed the whole fracture process zone
-        when the approximation functions gave a non-positive value between
-        `A` and the edge of the domain. The negative separations are
+        points, `j` increasing with `x`. Setting to zero everything from
+        ``x=0`` up to the *last* non-positive separation of the row instead
+        would remove the whole fracture process zone whenever the
+        approximation functions give a non-positive value between `A` and
+        the edge of the domain. The negative separations are
         physical: for a beam on an elastic foundation the separation behind
         the crack front oscillates with a decaying amplitude. The tractions,
         the internal force vector and the stiffness matrices use the full
