@@ -131,6 +131,7 @@ User guide
     notebooks/schweizerhof1984_pressure_loads.nblink
     notebooks/schweizerhof1984_cantilever_postbuckling.nblink
     notebooks/sze2004_hinged_roofs.nblink
+    notebooks/sabir1972_roof_snap_back.nblink
     notebooks/large_rotation_plates.nblink
     notebooks/null_space_vs_penalty.nblink
     notebooks/tangent_stiffness_product.nblink
