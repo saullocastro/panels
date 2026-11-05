@@ -39,7 +39,7 @@
 #     theory/stiffener/mass_matrix_1D_stiffeners.py, and as used for the
 #     offset d of the shells, see theory/shells/plate_clpt_donnell. Eq. (26)
 #     of Castro et al. (2016), https://doi.org/10.1016/j.compstruct.2015.12.056,
-#     and the kernel fkMf up to version 0.7.1 had -2*df
+#     has -2*df
 import os
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
