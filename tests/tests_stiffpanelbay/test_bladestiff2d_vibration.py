@@ -66,6 +66,7 @@ def test_flange_edges_free():
     bay.stack = [0.]
     bay.plyt = 1.e-3
     bay.laminaprop = _isotropic(70.e9, 0.3)
+    bay.rho = 2700.
     bay.m, bay.n = 6, 6
     bay.add_panel(0, 0.1)
     bay.add_panel(0.1, 0.2)
@@ -182,10 +183,14 @@ def test_sewall1968_internally_stiffened_sector():
 def test_flat_bay_deep_blade_against_multidomain():
     r"""Lowest frequency of a flat bay with one deep blade
 
-    A simply supported aluminium bay, 0.6 x 0.3 m, 2 mm thick, with a blade
-    of 18 x 2 mm at mid-width as a :class:`.BladeStiff2D` flange, against the
+    A simply supported aluminium bay, 0.6 x 0.3 m, 2 mm thick, `w = 0` and
+    the in-plane displacements free at its edges, with a blade of 18 x 2 mm
+    at mid-width as a :class:`.BladeStiff2D` flange whose ends have only
+    `v_f = 0` (normal to the skin), against the
     :class:`.MultiDomain` assembly of two skin plates and a plate blade
-    connected with ``'BFycte'``, within 0.5 %.
+    connected with ``'BFycte'``, within 0.5 %: 96.57 and 96.40 Hz with
+    these terms (216.5 Hz for the bay with the flags ``0`` of `u_{f,y}` and
+    `v_{f,y}` at the edges of the flange).
 
     """
     a, b, h, bf, tf = 0.6, 0.3, 2.e-3, 18.e-3, 2.e-3
@@ -199,24 +204,24 @@ def test_flat_bay_deep_blade_against_multidomain():
     bay.plyt = h
     bay.laminaprop = lam
     bay.rho = rho
-    bay.m, bay.n = 12, 12
+    bay.m, bay.n = 10, 10
     _flags(bay, ('x1', 'x2', 'y1', 'y2'), skin_flags)
     bay.add_panel(0, b/2)
     bay.add_panel(b/2, b)
     s = bay.add_bladestiff2d(ys=b/2, bf=bf, fstack=[0.], fplyt=tf,
-                             flaminaprop=lam, mf=12, nf=8)
+                             flaminaprop=lam, mf=10, nf=6)
     _flags(s.flange, ('x1', 'x2'), blade_x)
     f_bay = _f1(bay.calc_kC(silent=True), bay.calc_kM(silent=True))
 
-    p1 = Shell(group='skin', x0=0, y0=0, a=a, b=b/2, m=12, n=10, plyt=h,
+    p1 = Shell(group='skin', x0=0, y0=0, a=a, b=b/2, m=10, n=8, plyt=h,
                stack=[0.], laminaprop=lam, rho=rho, model='plate_clpt_donnell')
-    p2 = Shell(group='skin', x0=0, y0=b/2, a=a, b=b/2, m=12, n=10, plyt=h,
+    p2 = Shell(group='skin', x0=0, y0=b/2, a=a, b=b/2, m=10, n=8, plyt=h,
                stack=[0.], laminaprop=lam, rho=rho, model='plate_clpt_donnell')
     _flags(p1, ('x1', 'x2', 'y1'), skin_flags)
     _flags(p1, ('y2',), (1.,)*6)
     _flags(p2, ('x1', 'x2', 'y2'), skin_flags)
     _flags(p2, ('y1',), (1.,)*6)
-    bl = Shell(group='blade', x0=0, y0=b/2, a=a, b=bf, m=12, n=8, plyt=tf,
+    bl = Shell(group='blade', x0=0, y0=b/2, a=a, b=bf, m=10, n=6, plyt=tf,
                stack=[0.], laminaprop=lam, rho=rho, model='plate_clpt_donnell')
     _flags(bl, ('x1', 'x2'), blade_x)
     _flags(bl, ('y1', 'y2'), (1.,)*6)
