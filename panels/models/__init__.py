@@ -77,8 +77,8 @@ The available models, which are selected with ``Shell.model``, are:
   ``'cylshell_clpt_gl'`` and the changes of curvature of the deformed
   normal, whose linear part is that of ``'cylshell_clpt_sanders'``, all
   invariant under rigid rotations, 3 DOFs ``u, v, w``. For curved panels
-  and cylinders bent through large rotations, e.g. the snap-through and
-  snap-back of shallow panels under point loads.
+  and cylinders bent through large rotations, e.g. a panel whose cap
+  inverts under a point load.
 
 - ``'plate_fsdt_donnell'``: flat plates, first-order shear deformation
   theory (FSDT, Reissner-Mindlin) with von Kármán non-linear kinematics, 5

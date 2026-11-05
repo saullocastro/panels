@@ -2,6 +2,49 @@
 
 ## Unreleased
 
+### New model `cylshell_clpt_tl`: total-Lagrangian Kirchhoff-Love cylinders
+
+- Cylindrical shells, CLPT, with the Green-Lagrange membrane strains of
+  `cylshell_clpt_gl` and the changes of curvature measured with the area
+  vector `a = X,x x X,y` of the deformed mid-surface: `kxx = -a.X,xx`,
+  `kyy = -a.X,yy - 1/r - (exx + 2 eyy)/r`, `kxy = -2 a.X,xy - gxy/(2r)`, the
+  second derivatives of the position including those of the local basis.
+  The first terms are the change of the second fundamental form times the
+  area stretch; the terms `-eyy/r` and `-gxy/(2r)` make the linear part the
+  Sanders changes of curvature (Koiter's form, van der Heijden 2008, Eq.
+  3.16.8), a change of the order of the membrane strain divided by the
+  radius (p. 202). All six strains are invariant under any rigid rotation of
+  any deformed state. The analytical kernels are those of
+  `cylshell_clpt_gl`; the curvatures are cubic in the displacements and
+  the default integration is exact with `3p + 1` points (`modelDB` key
+  `'integrand_degree': (6, 0)`).
+- Generated from `theory/shells/cylshell_clpt_tl/` (derivation with symbolic
+  checks, among them the term-by-term comparison with the non-linear
+  curvatures of Novozhilov's theory of Amabili 2008, Eqs. 1.130-1.132,
+  `write_pyx.py`, `cylshell_clpt_tl.md`): `panels/models/cylshell_clpt_tl_num.pyx`
+  (`fkC_num`, `fkG_num`, `calc_fint`, `calc_kTv`, follower pressure;
+  `fkM_num`, `fkAx_num`, `fkAy_num` of `cylshell_clpt_sanders_num`).
+- Registered in `panels.modelDB` and `setup.py`; `clpt_field.is_sanders`,
+  `is_gl` and `is_tl` return 1 for it (`Shell.strain` gives its
+  curvatures with `NLgeom=True`), and the connections of `MultiDomain`
+  include the `v/r` of its rotation, as for `cylshell_clpt_sanders`.
+- New `tests/tests_shell/test_cylshell_clpt_tl.py`: zero strains and
+  internal forces for finite rigid rotations of a free panel, strains of a
+  bent panel unchanged by a rigid rotation, linear kernels equal to those of
+  `cylshell_clpt_sanders`, and the hinged roof of Sabir and Lock (Sze, Liu
+  and Lo 2004, Sec. 3.8, Tables 9a and 9d) under a prescribed central
+  deflection traced with the Riks method (quarter, 8 x 8 terms): limit load
+  of the thick roof -0.28 % from the S4R path, and the thin roof followed
+  through its snap-back, the turns of the central deflection 17.005 and
+  14.486 against 17.008 and 14.451. The model is added to the tangent,
+  tangent product and follower-pressure tests (`test_tangent_consistency.py`)
+  and to the connection tests of `tests/multidomain/test_bf_sanders.py`.
+- New notebook `notebooks/sabir1972_roof_snap_back.ipynb`: snap-through and
+  snap-back of the hinged roof with `cylshell_clpt_donnell`, `_sanders`,
+  `_gl` and `_tl` against the paths of Sze et al. (2004), prescribed central
+  deflection, reaction tracked with the Riks method, convergence with
+  6 to 14 terms; the test module provides `hinged_roof` and `roof_path`.
+
 ### New model `cylshell_clpt_gl`
 
 - Cylindrical shells, CLPT, with the complete Green-Lagrange membrane
