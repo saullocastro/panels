@@ -66,10 +66,9 @@ def line_penalty(p, comp, x, y, k, size):
 @pytest.mark.parametrize('comp', [0, 1, 2])
 def test_line_penalty_kernels(line, comp, model):
     r"""The kernels of the line prescribed displacements, :func:`.fkCld_xcte`
-    and :func:`.fkCld_ycte`, are `k \int g_i g_j ds` of the component; the
-    stiffnesses of ``ku`` and ``kv`` were placed at the rows and columns of
-    ``w`` up to version 0.11.1, and those of the models with 5 DOFs per term
-    with a stride of 3 DOFs per term up to version 0.13.20"""
+    and :func:`.fkCld_ycte`, are `k \int g_i g_j ds` of the component, at the
+    rows and columns of that component, also for the models with 5 DOFs per
+    term"""
     rng = np.random.default_rng(comp)
     p = plate(0.4, 0.3, m=7, n=6, model=model)
     random_bcs(p, rng)

@@ -168,7 +168,7 @@ def test_prescribed_rotation_with_offset(model, kind, comp, offset):
 @pytest.mark.parametrize('comp', [PHIX, PHIY])
 def test_prescribed_rotation_without_offset_is_phi(model, kind, comp):
     r"""For the TSDT with `d = 0` and for the FSDT with any offset the
-    prescribed rotation is `\phi`, as in the previous versions"""
+    prescribed rotation is `\phi`"""
     offset = 0. if 'tsdt' in model else 0.3*H
     p = _shell(model, offset)
     p.add_pressure_load(-2.e5)

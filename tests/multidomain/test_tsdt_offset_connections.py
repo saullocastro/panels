@@ -145,7 +145,8 @@ def test_reference_rotation_at_a_face():
 
 
 def test_offset_zero_unchanged():
-    r"""Without offset `\theta = \phi`, the connection of previous versions"""
+    r"""Without offset `\theta = \phi`: the connection ties `\phi_x` and
+    `\phi_y`"""
     p = _plate(0.4, 1., 0., 'SSSS')
     assert kCsdt._rotation_x(p) == [(3, 0, 0, 1.)]
     assert kCsdt._rotation_y(p) == [(4, 0, 0, 1.)]
