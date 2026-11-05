@@ -63,6 +63,21 @@ db = {
                     # the kernels divide by r and r*r, a radius is mandatory
                     'requires_r': True,
                     },
+    'cylshell_clpt_gl': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    'field': clpt_field,
+                    #NOTE fk0, fkM, fkAx, fkAy and fcA of
+                    #     cylshell_clpt_sanders, fkG0 with the in-plane
+                    #     blocks of the Green-Lagrange strains
+                    'matrices': cylshell_clpt_gl,
+                    'matrices_num': cylshell_clpt_gl_num,
+                    'dofs': 3,
+                    'e_num': 6,
+                    # the kernels divide by r and r*r, a radius is mandatory
+                    'requires_r': True,
+                    },
     'plate_clpt_donnell': {
                     'linear static': True,
                     'linear buckling': True,

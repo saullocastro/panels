@@ -30,6 +30,8 @@ EQUATION refers to which type of nonlinear equation is being used:
 - donnell - kinematic equations using Donnell's equations, which for flat
   plates are the von Kármán equations
 - sanders - kinematic equations using Sanders-Koiter's equations
+- gl - Green-Lagrange membrane strains, complete in the displacement
+  gradients
 
 SUFIX used to indicate additional information
 
@@ -60,6 +62,13 @@ The available models, which are selected with ``Shell.model``, are:
 - ``'cylshell_clpt_sanders'``: cylindrical shells, CLPT with the
   Sanders-Koiter kinematics, 3 DOFs ``u, v, w``. This is the default model
   of a :class:`.Shell` with a radius ``r``.
+
+- ``'cylshell_clpt_gl'``: cylindrical shells, CLPT with the Green-Lagrange
+  membrane strains, which vanish for any rigid motion, and the changes of
+  curvature of ``'cylshell_clpt_sanders'``, 3 DOFs ``u, v, w``. For the
+  bending of long cylinders as beams (column buckling of tubes, low
+  circumferential wave numbers) and for curved panels loaded in their own
+  plane.
 
 - ``'plate_fsdt_donnell'``: flat plates, first-order shear deformation
   theory (FSDT, Reissner-Mindlin) with von Kármán non-linear kinematics, 5
@@ -177,6 +186,40 @@ DOFs have the strains of the CLPT:
   rotation `\phi_y` also enters the mass matrix and the point constraints
   of the rotation about `x`.
 
+- Green-Lagrange membrane strains of the cylinder, ``'cylshell_clpt_gl'``,
+  with the changes of curvature of ``'cylshell_clpt_sanders'``: the
+  complete strains `(\boldsymbol{F}^\top \boldsymbol{F} -
+  \boldsymbol{I})/2` of the mid-surface, `\boldsymbol{F}` having the
+  columns `(1 + u_{,x}, v_{,x}, w_{,x})` and `(u_{,y}, 1 + v_{,y} + w/r,
+  w_{,y} - v/r)` in the local basis:
+
+  .. math::
+
+      \varepsilon_{xx} = u_{,x} + \frac{1}{2} (u_{,x}^2 + v_{,x}^2 + w_{,x}^2)
+
+      \varepsilon_{yy} = v_{,y} + \frac{w}{r} + \frac{1}{2} \left(u_{,y}^2
+      + \left(v_{,y} + \frac{w}{r}\right)^2 + \phi_y^2\right)
+
+      \gamma_{xy} = u_{,y} + v_{,x} + u_{,x} u_{,y} + v_{,x} \left(v_{,y} +
+      \frac{w}{r}\right) + \phi_x \phi_y
+
+  the membrane strains of the Flügge-Lur'e-Byrne non-linear theory as
+  given by Amabili (2008) [4]_, Sec. 1.3.6, Eqs. (1.118)-(1.120). They vanish for any rigid motion, of any
+  angle, and contain the rotation about the normal that
+  ``'cylshell_clpt_sanders'`` omits: under an axial load `N_{xx}` the
+  geometric stiffness is `N_{xx} (u_{,x}^2 + v_{,x}^2 + w_{,x}^2)` instead
+  of `N_{xx} w_{,x}^2`. For the bending of a long tube as a beam, `w =
+  W(x) \cos\theta`, `v = -W(x) \sin\theta`, the term `v_{,x}^2` doubles the
+  work of the axial load, such that ``'cylshell_clpt_sanders'`` gives about
+  twice the Euler load and ``'cylshell_clpt_gl'`` the Euler load. For
+  shell-like modes the difference decreases as the circumferential waves
+  shorten: for axially compressed panels with `R/h = 100` and `L/R = 2`
+  supported by shear diaphragms, ``'cylshell_clpt_gl'`` is 4.2 % below
+  ``'cylshell_clpt_sanders'`` for a panel of 180 degrees and 1.0 % below
+  for a panel of 40 degrees. The linear kernels are those of ``'cylshell_clpt_sanders'``, and the changes
+  of curvature are linear, measured in the fixed local basis, exact for
+  small rigid rotations only.
+
 The models with 5 DOFs have the rotations `\phi_x` and `\phi_y` as
 independent fields, with the displacement field and the strains of
 :mod:`panels.models.fsdt_tsdt_field`. The FSDT uses the shear corrected
@@ -248,6 +291,7 @@ References
 from . import clpt_field
 from . import cylshell_clpt_donnell, cylshell_clpt_donnell_num
 from . import cylshell_clpt_sanders, cylshell_clpt_sanders_num
+from . import cylshell_clpt_gl, cylshell_clpt_gl_num
 from . import plate_clpt_donnell, plate_clpt_donnell_num
 from . import plate_clpt_gl, plate_clpt_gl_num
 from . import plate_clpt_tl_num
