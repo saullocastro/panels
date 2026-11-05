@@ -1,0 +1,260 @@
+# Egle, D. M. and Sewall, J. L., 'An analysis of free vibration of orthogonally stiffened cylindrical shells
+# with stiffeners treated as discrete elements', AIAA J. 6(3), 518-526, 1968 (Eagle1968.pdf).
+# source=table3: Table 3 p. 524 (PDF p. 7), typed from the 400 dpi page image and checked against the PDF text
+#   layer (all 120 values agree); a = stiffened symmetric (stringers 4, sym), b = stiffened antisymmetric
+#   (stringers 4, antisym), c = unstiffened (stringers 0, symmetry none). Calculated values, kind=theory.
+# source=fig3: Fig. 3 p. 523 (PDF p. 6, right column), four stringers; kind=theory: symmetric (solid) and
+#   antisymmetric (dashed) curves read at integer n from the dark runs crossing the column x(n); where the line
+#   is hidden by a test symbol at x(n) the value is left out (Table 3 gives it). The run nearest to the
+#   Table 3 a (b) value within +-10 Hz was taken as the solid (dashed) line, so the sym/antisym assignment of the
+#   Fig. 3 theory rows is guided by Table 3; at odd n the two lines coincide (one run, given to both).
+#   kind=test: 'Experiment (Ref. 8)' symbols (circle m=1, square m=2, diamond m=3, triangle m=4), symmetry '-'.
+# source=fig4: Fig. 4 p. 523, eight stringers; theory = symmetric modes (solid, the only theory curves), traced
+#   and read as in sewall1968_analysis_curves.csv; tests as for Fig. 3.
+# No calculated-point markers are drawn on the theory curves of Figs. 3 and 4 (only the test symbols, which sit
+#   at integer n on or near the curves); the curves are smooth but wavy between integer n.
+# Precision: Fig. 3 0.997 Hz/px, Fig. 4 0.999 Hz/px; about 50 px per unit n; line width
+#   about 2.0 px = 2.0 Hz (Fig. 4 solid), 2-4 px in Fig. 3; theory +-2 Hz where flat (more where
+#   steep, see note); test symbol centres +-1.5 Hz (+-3 Hz where two symbols overlap). f_Hz in Hz (= cps).
+source,stringers,kind,symmetry,m,n,f_Hz,note
+table3,4,theory,antisym,1,3,169,
+table3,4,theory,antisym,1,4,108,
+table3,4,theory,antisym,1,5,94.7,
+table3,4,theory,antisym,1,6,116,
+table3,4,theory,antisym,1,7,145,
+table3,4,theory,antisym,1,8,192,
+table3,4,theory,antisym,1,9,236,
+table3,4,theory,antisym,1,10,297,
+table3,4,theory,antisym,1,11,350,
+table3,4,theory,antisym,1,12,425,
+table3,4,theory,antisym,2,3,591,
+table3,4,theory,antisym,2,4,365,
+table3,4,theory,antisym,2,5,241,
+table3,4,theory,antisym,2,6,202,
+table3,4,theory,antisym,2,7,191,
+table3,4,theory,antisym,2,8,217,
+table3,4,theory,antisym,2,9,256,
+table3,4,theory,antisym,2,10,306,
+table3,4,theory,antisym,2,11,358,
+table3,4,theory,antisym,2,12,430,
+table3,4,theory,antisym,3,3,1137,
+table3,4,theory,antisym,3,4,733,
+table3,4,theory,antisym,3,5,490,
+table3,4,theory,antisym,3,6,379,
+table3,4,theory,antisym,3,7,313,
+table3,4,theory,antisym,3,8,290,
+table3,4,theory,antisym,3,9,304,
+table3,4,theory,antisym,3,10,334,
+table3,4,theory,antisym,3,11,386,
+table3,4,theory,antisym,3,12,444,
+table3,4,theory,antisym,4,3,1643,
+table3,4,theory,antisym,4,4,1144,
+table3,4,theory,antisym,4,5,801,
+table3,4,theory,antisym,4,6,615,
+table3,4,theory,antisym,4,7,491,
+table3,4,theory,antisym,4,8,415,
+table3,4,theory,antisym,4,9,396,
+table3,4,theory,antisym,4,10,393,
+table3,4,theory,antisym,4,11,444,
+table3,4,theory,antisym,4,12,472,
+table3,0,theory,none,1,3,171,"unstiffened"
+table3,0,theory,none,1,4,108,"unstiffened"
+table3,0,theory,none,1,5,98.1,"unstiffened"
+table3,0,theory,none,1,6,117,"unstiffened"
+table3,0,theory,none,1,7,151,"unstiffened"
+table3,0,theory,none,1,8,194,"unstiffened"
+table3,0,theory,none,1,9,243,"unstiffened"
+table3,0,theory,none,1,10,300,"unstiffened"
+table3,0,theory,none,1,11,362,"unstiffened"
+table3,0,theory,none,1,12,431,"unstiffened"
+table3,0,theory,none,2,3,602,"unstiffened"
+table3,0,theory,none,2,4,365,"unstiffened"
+table3,0,theory,none,2,5,251,"unstiffened"
+table3,0,theory,none,2,6,203,"unstiffened"
+table3,0,theory,none,2,7,196,"unstiffened"
+table3,0,theory,none,2,8,218,"unstiffened"
+table3,0,theory,none,2,9,258,"unstiffened"
+table3,0,theory,none,2,10,309,"unstiffened"
+table3,0,theory,none,2,11,369,"unstiffened"
+table3,0,theory,none,2,12,436,"unstiffened"
+table3,0,theory,none,3,3,1146,"unstiffened"
+table3,0,theory,none,3,4,735,"unstiffened"
+table3,0,theory,none,3,5,508,"unstiffened"
+table3,0,theory,none,3,6,380,"unstiffened"
+table3,0,theory,none,3,7,314,"unstiffened"
+table3,0,theory,none,3,8,292,"unstiffened"
+table3,0,theory,none,3,9,303,"unstiffened"
+table3,0,theory,none,3,10,338,"unstiffened"
+table3,0,theory,none,3,11,388,"unstiffened"
+table3,0,theory,none,3,12,450,"unstiffened"
+table3,0,theory,none,4,3,1675,"unstiffened"
+table3,0,theory,none,4,4,1147,"unstiffened"
+table3,0,theory,none,4,5,819,"unstiffened"
+table3,0,theory,none,4,6,615,"unstiffened"
+table3,0,theory,none,4,7,488,"unstiffened"
+table3,0,theory,none,4,8,418,"unstiffened"
+table3,0,theory,none,4,9,390,"unstiffened"
+table3,0,theory,none,4,10,396,"unstiffened"
+table3,0,theory,none,4,11,428,"unstiffened"
+table3,0,theory,none,4,12,478,"unstiffened"
+table3,4,theory,sym,1,3,169,
+table3,4,theory,sym,1,4,103,
+table3,4,theory,sym,1,5,94.7,
+table3,4,theory,sym,1,6,109,
+table3,4,theory,sym,1,7,145,
+table3,4,theory,sym,1,8,183,
+table3,4,theory,sym,1,9,236,
+table3,4,theory,sym,1,10,278,
+table3,4,theory,sym,1,11,350,
+table3,4,theory,sym,1,12,408,
+table3,4,theory,sym,2,3,591,
+table3,4,theory,sym,2,4,346,
+table3,4,theory,sym,2,5,241,
+table3,4,theory,sym,2,6,194,
+table3,4,theory,sym,2,7,191,
+table3,4,theory,sym,2,8,209,
+table3,4,theory,sym,2,9,256,
+table3,4,theory,sym,2,10,297,
+table3,4,theory,sym,2,11,358,
+table3,4,theory,sym,2,12,424,
+table3,4,theory,sym,3,3,1137,
+table3,4,theory,sym,3,4,688,
+table3,4,theory,sym,3,5,490,
+table3,4,theory,sym,3,6,371,
+table3,4,theory,sym,3,7,313,
+table3,4,theory,sym,3,8,297,
+table3,4,theory,sym,3,9,304,
+table3,4,theory,sym,3,10,341,
+table3,4,theory,sym,3,11,386,
+table3,4,theory,sym,3,12,443,
+table3,4,theory,sym,4,3,1643,
+table3,4,theory,sym,4,4,1089,
+table3,4,theory,sym,4,5,801,
+table3,4,theory,sym,4,6,604,
+table3,4,theory,sym,4,7,491,
+table3,4,theory,sym,4,8,432,
+table3,4,theory,sym,4,9,396,
+table3,4,theory,sym,4,10,428,
+table3,4,theory,sym,4,11,444,
+table3,4,theory,sym,4,12,513,
+fig3,4,test,-,1,4,104.1,
+fig3,4,test,-,1,5,91.4,
+fig3,4,test,-,1,6,105.6,
+fig3,4,test,-,1,7,139.8,
+fig3,4,test,-,1,8,178.0,
+fig3,4,test,-,1,9,228.2,
+fig3,4,test,-,1,10,268.3,
+fig3,4,test,-,1,12,401.5,"overlaps the m=2 square; +-3 Hz"
+fig3,4,test,-,2,4,338.3,
+fig3,4,test,-,2,5,230.9,
+fig3,4,test,-,2,6,197.4,
+fig3,4,test,-,2,7,191.7,
+fig3,4,test,-,2,8,209.9,
+fig3,4,test,-,2,9,242.1,
+fig3,4,test,-,2,10,288.3,
+fig3,4,test,-,2,11,340.4,
+fig3,4,test,-,2,12,405.0,"overlaps the m=1 circle; +-3 Hz"
+fig3,4,test,-,3,6,374.8,
+fig3,4,test,-,3,7,307.3,
+fig3,4,test,-,3,9,299.9,
+fig3,4,test,-,3,10,332.1,
+fig3,4,test,-,3,11,376.3,
+fig3,4,test,-,3,12,426.4,
+fig3,4,test,-,4,9,387.7,
+fig3,4,test,-,4,10,395.9,
+fig3,4,test,-,4,11,428.1,
+fig3,4,test,-,4,12,512.2,
+fig3,4,theory,antisym,1,3,169.0,"solid and dashed lines coincide here (one run); Table 3 value 169"
+fig3,4,theory,antisym,1,6,119.1,"Table 3 value 116"
+fig3,4,theory,antisym,1,8,195.0,"Table 3 value 192"
+fig3,4,theory,antisym,2,3,586.7,"solid and dashed lines coincide here (one run); steep part of the curve; +-4 Hz; Table 3 value 591"
+fig3,4,theory,antisym,2,4,369.7,"Table 3 value 365"
+fig3,4,theory,antisym,2,9,255.6,"solid and dashed lines coincide here (one run); Table 3 value 256"
+fig3,4,theory,antisym,2,10,308.7,"Table 3 value 306"
+fig3,4,theory,antisym,3,4,731.5,"steep part of the curve; +-4 Hz; Table 3 value 733"
+fig3,4,theory,antisym,3,5,489.1,"solid and dashed lines coincide here (one run); steep part of the curve; +-4 Hz; Table 3 value 490"
+fig3,4,theory,antisym,3,12,441.4,"solid and dashed lines coincide here (one run); Table 3 value 444"
+fig3,4,theory,antisym,4,5,800.1,"solid and dashed lines coincide here (one run); Table 3 value 801"
+fig3,4,theory,antisym,4,6,616.5,"Table 3 value 615"
+fig3,4,theory,antisym,4,7,488.7,"solid and dashed lines coincide here (one run); Table 3 value 491"
+fig3,4,theory,antisym,4,8,421.2,"thin run (dash end); +-3 Hz; Table 3 value 415"
+fig3,4,theory,antisym,4,9,395.6,"solid and dashed lines coincide here (one run); Table 3 value 396"
+fig3,4,theory,antisym,4,10,391.9,"thin run (dash end); +-3 Hz; Table 3 value 393"
+fig3,4,theory,antisym,4,11,443.1,"solid and dashed lines coincide here (one run); Table 3 value 444"
+fig3,4,theory,antisym,4,12,472.8,"Table 3 value 472"
+fig3,4,theory,sym,1,3,169.0,"solid and dashed lines coincide here (one run); Table 3 value 169"
+fig3,4,theory,sym,1,12,406.0,"Table 3 value 408"
+fig3,4,theory,sym,2,3,586.7,"solid and dashed lines coincide here (one run); steep part of the curve; +-4 Hz; Table 3 value 591"
+fig3,4,theory,sym,2,9,255.6,"solid and dashed lines coincide here (one run); Table 3 value 256"
+fig3,4,theory,sym,3,4,685.7,"steep part of the curve; +-4 Hz; Table 3 value 688"
+fig3,4,theory,sym,3,5,489.1,"solid and dashed lines coincide here (one run); steep part of the curve; +-4 Hz; Table 3 value 490"
+fig3,4,theory,sym,3,8,297.1,"solid and dashed lines coincide here (one run); Table 3 value 297"
+fig3,4,theory,sym,3,12,441.4,"solid and dashed lines coincide here (one run); Table 3 value 443"
+fig3,4,theory,sym,4,5,800.1,"solid and dashed lines coincide here (one run); Table 3 value 801"
+fig3,4,theory,sym,4,6,601.5,"Table 3 value 604"
+fig3,4,theory,sym,4,7,488.7,"solid and dashed lines coincide here (one run); Table 3 value 491"
+fig3,4,theory,sym,4,8,434.2,"Table 3 value 432"
+fig3,4,theory,sym,4,9,395.6,"solid and dashed lines coincide here (one run); Table 3 value 396"
+fig3,4,theory,sym,4,10,427.3,"Table 3 value 428"
+fig3,4,theory,sym,4,11,443.1,"solid and dashed lines coincide here (one run); Table 3 value 444"
+fig4,8,test,-,1,4,98.0,
+fig4,8,test,-,1,5,87.3,
+fig4,8,test,-,1,6,103.6,
+fig4,8,test,-,1,7,132.9,
+fig4,8,test,-,1,8,167.2,
+fig4,8,test,-,1,9,219.5,
+fig4,8,test,-,1,10,261.7,
+fig4,8,test,-,1,11,322.5,"overlaps the m=2 square; +-2 Hz"
+fig4,8,test,-,2,5,237.2,
+fig4,8,test,-,2,6,193.5,
+fig4,8,test,-,2,7,183.9,
+fig4,8,test,-,2,8,200.2,
+fig4,8,test,-,2,9,234.4,
+fig4,8,test,-,2,10,282.7,
+fig4,8,test,-,2,11,336.0,"overlaps the m=1 circle; +-2 Hz"
+fig4,8,test,-,3,6,368.4,
+fig4,8,test,-,3,7,311.8,
+fig4,8,test,-,3,9,300.4,
+fig4,8,test,-,3,10,322.7,
+fig4,8,test,-,3,11,371.9,
+fig4,8,test,-,3,12,427.2,
+fig4,8,test,-,4,7,497.6,
+fig4,8,test,-,4,9,400.3,
+fig4,8,test,-,4,10,417.6,"theory line passes through the symbol top"
+fig4,8,test,-,4,11,436.9,
+fig4,8,theory,sym,1,2,351.6,"at the end of the drawn curve (traced to n = 1.97); steep (about -299 Hz per unit n): +-9 Hz"
+fig4,8,theory,sym,1,3,161.5,"steep (about -93 Hz per unit n): +-3 Hz"
+fig4,8,theory,sym,1,4,101.4,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.36 n"
+fig4,8,theory,sym,1,5,93.5,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.36 n"
+fig4,8,theory,sym,1,6,108.3,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.36 n"
+fig4,8,theory,sym,1,7,140.6,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.36 n"
+fig4,8,theory,sym,1,8,171.4,
+fig4,8,theory,sym,1,9,227.9,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.36 n"
+fig4,8,theory,sym,1,10,275.5,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.36 n; steep (about 57 Hz per unit n): +-3 Hz"
+fig4,8,theory,sym,1,11,347.5,"lines overlap/touch within about one line width with theory_m2 (+1.9 Hz); assignment uncertain"
+fig4,8,theory,sym,2,3,578.9,"at the end of the drawn curve (traced to n = 2.96); steep (about -491 Hz per unit n): +-15 Hz"
+fig4,8,theory,sym,2,4,316.6,"steep (about -121 Hz per unit n): +-4 Hz"
+fig4,8,theory,sym,2,5,234.8,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.36 n; steep (about -56 Hz per unit n): +-3 Hz"
+fig4,8,theory,sym,2,6,194.3,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.36 n"
+fig4,8,theory,sym,2,7,189.4,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.36 n"
+fig4,8,theory,sym,2,8,204.2,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.36 n"
+fig4,8,theory,sym,2,9,248.9,
+fig4,8,theory,sym,2,10,295.0,
+fig4,8,theory,sym,2,11,349.4,"lines overlap/touch within about one line width with theory_m1 (-1.9 Hz); assignment uncertain"
+fig4,8,theory,sym,2,12,390.8,
+fig4,8,theory,sym,3,4,684.6,"at the end of the drawn curve (traced to n = 3.96); steep (about -242 Hz per unit n): +-7 Hz"
+fig4,8,theory,sym,3,5,473.3,"steep (about -148 Hz per unit n): +-5 Hz"
+fig4,8,theory,sym,3,6,367.1,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.24 n; steep (about -78 Hz per unit n): +-3 Hz"
+fig4,8,theory,sym,3,7,314.4,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.36 n"
+fig4,8,theory,sym,3,8,300.0,
+fig4,8,theory,sym,3,9,304.9,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.36 n"
+fig4,8,theory,sym,3,10,333.3,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.36 n"
+fig4,8,theory,sym,3,11,380.4,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.36 n"
+fig4,8,theory,sym,4,5,787.4,"at the end of the drawn curve (traced to n = 4.96); steep (about -166 Hz per unit n): +-5 Hz"
+fig4,8,theory,sym,4,6,600.4,"steep (about -148 Hz per unit n): +-5 Hz"
+fig4,8,theory,sym,4,7,497.6,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.36 n; steep (about -64 Hz per unit n): +-3 Hz"
+fig4,8,theory,sym,4,8,460.8,
+fig4,8,theory,sym,4,9,413.2,
+fig4,8,theory,sym,4,10,420.3,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.36 n"
+fig4,8,theory,sym,4,11,444.3,"line hidden at x(n) (test symbol or dash gap); value from a local fit of the traced line over +-0.36 n"
+fig4,8,theory,sym,4,12,529.8,"at the end of the drawn curve (traced to n = 12.04); steep (about 115 Hz per unit n): +-4 Hz"

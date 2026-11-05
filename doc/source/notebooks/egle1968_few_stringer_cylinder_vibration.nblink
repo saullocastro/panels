@@ -1,0 +1,6 @@
+{
+    "path": "../../../notebooks/egle1968_few_stringer_cylinder_vibration.ipynb",
+    "extra-media": [
+        "../../../notebooks/few_stringer_cylinder_utils.py"
+    ]
+}
