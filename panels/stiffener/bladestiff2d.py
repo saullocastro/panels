@@ -230,8 +230,8 @@ class BladeStiff2D(object):
                     x1u=0., x1ur=0., x2u=0., x2ur=0.,
                     x1v=0., x1vr=0., x2v=0., x2vr=0.,
                     x1w=0., x1wr=1., x2w=0., x2wr=1.,
-                    y1u=1., y1ur=0., y2u=1., y2ur=0.,
-                    y1v=1., y1vr=0., y2v=1., y2vr=0.,
+                    y1u=1., y1ur=1., y2u=1., y2ur=1.,
+                    y1v=1., y1vr=1., y2v=1., y2vr=1.,
                     y1w=1., y1wr=1., y2w=1., y2wr=1.)
 
         self._rebuild()

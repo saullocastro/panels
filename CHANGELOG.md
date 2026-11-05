@@ -86,6 +86,20 @@
   the construction was not checked and silently capped the number of terms
   at 30. New test `test_m_n_above_30_raise` in
   `tests/tests_shell/test_argument_validation.py`.
+- The flange of `BladeStiff2D` has free edges `y_f = 0` and `y_f = b_f`,
+  as documented: the flags `y1ur`, `y2ur`, `y1vr`, `y2vr` of the flange
+  were `0`, which imposed `u_f,y = v_f,y = 0` at the root and at the tip
+  of the blade and made the in-plane bending of a deep blade converge very
+  slowly with the number of terms (lowest frequency of a sector of the
+  internally stiffened cylinder of Sewall and Naumann 1968, simply
+  supported: 746 Hz with 10 by 8 terms of the skin and 10 by 5 of each
+  flange, 484 Hz with 14 by 12 and 14 by 7; now 138.0 and 137.96 Hz,
+  measured 137.0 and 147.0 Hz). Results of bays with shallow flanges change
+  little (the example of `BladeStiff2D` keeps its buckling load 662.5).
+  New tests in `tests/tests_stiffpanelbay/test_bladestiff2d_vibration.py`:
+  the Sewall and Naumann sector against their Table II and against the
+  `MultiDomain` sector with plate blades (`'BFycte'`), a flat bay with one
+  blade against the `MultiDomain` assembly, and the flags of the flange.
 
 ### Changed: blades and flanges of the ready-made assemblies use `plate_clpt_gl`
 
