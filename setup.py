@@ -396,6 +396,15 @@ extensions = [
         include_dirs=include_dirs, extra_compile_args=compile_args,
               extra_link_args=link_args, define_macros=define_macros,
               language='c++'),
+    Extension('panels.stiffener.models.bladestiff2d_clt_sanders',
+        sources=[
+            './panels/core/src/bardell.cpp',
+            './panels/core/src/bardell_functions.cpp',
+            './panels/stiffener/models/bladestiff2d_clt_sanders.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
 
 # multi-domain connections
     Extension('panels.multidomain.connections.kCBFxcte',

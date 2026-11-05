@@ -69,8 +69,16 @@ with the Donnell skin (cylinders 1 and 3 have external stringers; runs
 made when this test was written). The remainder comes from the
 discreteness of the blades, plate strips that deform in their
 cross-section, whereas the smeared theory treats the stringer as a beam
-that rotates with the skin and averages it over the circumference. The
-test accepts a discrete load between 10 % below the smeared value, beyond
+that rotates with the skin and averages it over the circumference.
+Almroth [3]_ shows for unstiffened cylinders (Donnell equations) that, with
+the membrane pre-buckling state, simple supports with `v = 0` and either
+`u = 0` or `N_x = 0` give a load equal to or insignificantly higher than the
+classical one (p. 138), and only edges free circumferentially, `N_{xy} =
+0`, lower it, to about one half (Table 2, p. 137); the discrete model and
+the smeared theory share `w = v = N_x = M_x = 0` and the membrane state, so
+the edge conditions of the skin do not contribute to their difference. The
+paper treats no stiffeners and gives no value for the part due to the
+discreteness. The test accepts a discrete load between 10 % below the smeared value, beyond
 the largest difference of the four cylinders, and the smeared value, and
 within 5 % of
 `\bar{N}_s` of Card and Jones, whose section differs from the blade by the
@@ -98,6 +106,9 @@ References
 .. [2] Card, M. F., and Jones, R. M., "Experimental and Theoretical Results
    for Buckling of Eccentrically Stiffened Cylinders", NASA TN D-3639,
    1966.
+.. [3] Almroth, B. O., "Influence of Edge Conditions on the Stability of
+   Axially Compressed Cylindrical Shells", AIAA Journal, Vol. 4, No. 1,
+   1966, pp. 134-140. https://doi.org/10.2514/3.3396
 
 """
 import sys

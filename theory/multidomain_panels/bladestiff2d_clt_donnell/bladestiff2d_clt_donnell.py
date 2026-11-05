@@ -14,7 +14,9 @@
 # (with intx = a, inty = b or bf), and are calculated by the Shell objects
 # BladeStiff2D.base and BladeStiff2D.flange, using the kernels in
 # panels/models/cylshell_clpt_donnell.pyx (or plate_clpt_donnell.pyx for a
-# flat panel, r -> infinity) and panels/models/plate_clpt_donnell.pyx:
+# flat panel, r -> infinity) and panels/models/plate_clpt_donnell.pyx (a
+# curved bay with the Sanders kinematics, the default, uses
+# ../bladestiff2d_clt_sanders):
 #
 #     k0y1y2, k0f: fk0
 #     kG0y1y2, kG0f: fkG0
