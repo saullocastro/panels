@@ -122,7 +122,7 @@ def test_wingbox_tip_force_lb():
     Pcr = eigvals[0]
     print('first buckling tip force: %.2f N, Abaqus %.2f N, error %.2f%%'
           % (Pcr, ABAQUS_HIGH_AR_T5, 100*(Pcr/ABAQUS_HIGH_AR_T5 - 1)))
-    # 176.44 N, converged to 0.03% (176.47 N with skins of 16 x 16 terms),
+    # 176.44 N, converged to 0.02% (176.465 N with skins of 16 x 16 terms),
     # 1.9% above Abaqus
     assert np.isclose(Pcr, 176.44, rtol=1e-3)
     assert abs(Pcr/ABAQUS_HIGH_AR_T5 - 1) < 0.03
