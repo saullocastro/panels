@@ -160,9 +160,9 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
 
     The skin models differ in the geometric stiffness only. Under an axial
     load the Sanders skin, ``'cylshell_clpt_sanders'``, keeps the term
-    `rac{1}{2} N_{xx} w_{,x}^2`, as the Donnell skin, whereas
+    `\frac{1}{2} N_{xx} w_{,x}^2`, as the Donnell skin, whereas
     ``'cylshell_clpt_gl'`` has the complete Green-Lagrange membrane
-    strains, with `rac{1}{2} N_{xx} (u_{,x}^2 + v_{,x}^2 + w_{,x}^2)`,
+    strains, with `\frac{1}{2} N_{xx} (u_{,x}^2 + v_{,x}^2 + w_{,x}^2)`,
     see :mod:`panels.models`. The term `v_{,x}^2` relative to `w_{,x}^2`
     is of the order `1/n^2` for a mode of `n` circumferential waves, so that
     the choice matters for general instability modes with few waves and for
@@ -173,7 +173,7 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
     mode of one axial half-wave and 6 circumferential waves, the load with
     the skin ``'cylshell_clpt_gl'`` is 1.3 % below that with
     ``'cylshell_clpt_sanders'`` and 1.6 % below their smeared-stringer
-    load `ar{N}_s` (Table I), and 2.5 % higher with
+    load `\bar{N}_s` (Table I), and 2.5 % higher with
     ``'cylshell_clpt_donnell'``.
 
     References
