@@ -117,6 +117,8 @@ MODELS = {
     #NOTE likewise with the curvatures of the deformed normal, see
     #     plate_clpt_tl/plate_clpt_tl.py
     'plate_clpt_tl': (3, 'plate', 'tl'),
+    #NOTE likewise for the cylinder, see cylshell_clpt_tl/cylshell_clpt_tl.py
+    'cylshell_clpt_tl': (3, 'cylshell', 'sanders'),
 }
 
 a, b, r = symbols('a, b, r', positive=True)
