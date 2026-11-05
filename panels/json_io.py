@@ -143,8 +143,8 @@ _BLADESTIFF1D_ATTRS = (
     'As', 'Asb', 'Asf', 'Jxx', 'Iyy', 'Fx', 'dbf', 'E1', 'S1', 'F1', 'GJ',
     )
 _BLADESTIFF2D_ATTRS = (
-    'rho', 'ys', 'bb', 'forces_flange', 'bstack', 'bplyts', 'blaminaprops',
-    'dpb',
+    'model', 'rho', 'ys', 'bb', 'forces_flange', 'bstack', 'bplyts',
+    'blaminaprops', 'dpb',
     )
 _MULTIDOMAIN_ATTRS = ('name', 'conn_method', 'pd_method', 'size', 'dmg_index',
                       'fint', 'fext')
@@ -448,6 +448,8 @@ def _bladestiff2d_from_data(data, bay, r):
     s.kC = s.kM = s.kG = None
     s.base = s.flange = None
     s.forces_flange = []
+    #NOTE without the key 'model' the model is selected from the skin
+    s.model = None
     _decode_attrs(s, data, _BLADESTIFF2D_ATTRS, r)
     for name in ('base', 'flange'):
         if data.get(name) is not None:

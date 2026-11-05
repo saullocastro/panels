@@ -50,7 +50,10 @@ constants of the skin, and a flange:
 - :class:`.BladeStiff2D`: the flange is a plate with its own ``mf`` by
   ``nf`` terms, connected to the base, or to the skin, by penalty
   stiffnesses, which represents its local buckling, see
-  :meth:`.StiffPanelBay.get_size`.
+  :meth:`.StiffPanelBay.get_size`. On a curved bay the base is a
+  cylindrical shell and the connection follows the rotation of the normal
+  of the skin with the kinematics of the skin, Sanders' (the default) or
+  Donnell's.
 
 The matrices :meth:`.StiffPanelBay.calc_kC`,
 :meth:`.StiffPanelBay.calc_kG`, :meth:`.StiffPanelBay.calc_kM`,

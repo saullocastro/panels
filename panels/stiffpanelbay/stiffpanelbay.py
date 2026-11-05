@@ -465,7 +465,7 @@ class StiffPanelBay(object):
     def add_bladestiff2d(self, ys, rho=None, bb=None, bstack=None,
             bplyts=None, bplyt=None, blaminaprops=None, blaminaprop=None,
             bf=None, fstack=None, fplyts=None, fplyt=None, flaminaprops=None,
-            flaminaprop=None, mf=14, nf=11, **kwargs):
+            flaminaprop=None, mf=14, nf=11, model=None, **kwargs):
         r"""Add a new BladeStiff2D to the current panel bay
 
         The panels must be added before. The panel ``panel1`` of the
@@ -522,6 +522,12 @@ class StiffPanelBay(object):
         nf : int, optional
             Number of approximation terms for flange, along `y`. Default
             ``11``.
+        model : str or None, optional
+            Stiffener model, ``'bladestiff2d_clt_donnell'`` or
+            ``'bladestiff2d_clt_sanders'``, see :class:`.BladeStiff2D`.
+            Default ``None``, ``'bladestiff2d_clt_sanders'`` on a curved
+            skin whose model is not ``'cylshell_clpt_donnell'``,
+            ``'bladestiff2d_clt_donnell'`` otherwise.
         **kwargs : dict, optional
             Additional parameters, set as attributes of the new stiffener
             after it is created.
@@ -537,7 +543,9 @@ class StiffPanelBay(object):
             is given without ``bplyts`` or ``bplyt``, or without
             ``blaminaprops`` or ``blaminaprop``; when ``fstack`` is given
             without ``fplyts`` or ``fplyt``, or without ``flaminaprops`` or
-            ``flaminaprop``.
+            ``flaminaprop``; when ``model`` is not a model of
+            :class:`.BladeStiff2D`, or is ``'bladestiff2d_clt_sanders'`` on
+            a flat bay.
         RuntimeError
             When no panel was added; when ``panel1`` or ``panel2`` is not
             found.
@@ -598,7 +606,7 @@ class StiffPanelBay(object):
         s = BladeStiff2D(bay=self, rho=rho, panel1=panel1, panel2=panel2, ys=ys,
                 bb=bb, bf=bf, bstack=bstack, bplyts=bplyts,
                 blaminaprops=blaminaprops, fstack=fstack, fplyts=fplyts,
-                flaminaprops=flaminaprops, mf=mf, nf=nf)
+                flaminaprops=flaminaprops, mf=mf, nf=nf, model=model)
 
         for k, v in kwargs.items():
             setattr(s, k, v)
