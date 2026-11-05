@@ -504,3 +504,107 @@ def donnell_ss(R, h, L, E, nu, rho, m, n, inplane_inertia=True):
     else:
         delta = A[2, 2] - A[2, :2] @ np.linalg.solve(A[:2, :2], A[:2, 2])
     return np.sqrt(delta*E/(rho*(1 - nu**2)*R**2))/(2*np.pi)
+
+
+def egle_sewall(R, h, L, E, nu, rho, nstiff, As, zs, ds, ps, GJs, m, n,
+        symmetry='sym', nterms=20, shell_inplane_inertia=False,
+        stringer_inplane_inertia=True):
+    r"""Frequency, Hz, of the discrete-stringer analysis of Egle and Sewall
+
+    The freely supported shell with ``nstiff`` equally spaced stringers
+    (the first at `\theta = 0`), energies of Egle and Sewall (1968): the
+    Donnell shell, Eqs. (1), (2) and (6) with `D_x/D = D_y/D = 1`, and
+    the stringers as beams, Eqs. (5) and (8),
+
+    .. math::
+
+        U_s = \frac{1}{2} \sum_l \int_0^L \left[E A_s (u_{,x}^2 -
+        2 \bar{z}_s u_{,x} w_{,xx} + d_s'^2 w_{,xx}^2) + (GJ)_s
+        w_{,xy}^2\right] dx,
+
+        T_s = \frac{1}{2} \sum_l \rho A_s \int_0^L \left[(\dot{u} -
+        \bar{z}_s \dot{w}_{,x})^2 + (\dot{v} - \bar{z}_s \dot{w}_{,y})^2 +
+        \dot{w}^2 + d_s'^2 \dot{w}_{,x}^2 + p_s'^2 \dot{w}_{,y}^2\right] dx,
+
+    evaluated at the stringers `\theta_l = 2\pi l/` ``nstiff``. The
+    displacements are their Eq. (9) with the beam functions of the freely
+    supported ends, for ``symmetry='sym'`` `u = \sum_j U_j \cos j\theta
+    \cos(m\pi x/L)`, `v = \sum_j V_j \sin j\theta \sin(m\pi x/L)`, `w =
+    \sum_j W_j \cos j\theta \sin(m\pi x/L)` (sines and cosines of `\theta`
+    exchanged, and `v` of opposite sign, for ``'antisym'``), with the
+    ``nterms`` harmonics `j` coupled with `n` by the stringers, `j \pm n` a
+    multiple of ``nstiff`` (their Eq. (13)). ``shell_inplane_inertia=False``
+    neglects `\dot{u}` and `\dot{v}` in the kinetic energy of the shell, as
+    Egle and Sewall do for their numerical results (p. 522);
+    ``stringer_inplane_inertia=False`` neglects them also in `T_s`. The
+    returned frequency is the lowest of the modes whose largest coefficient
+    `|W_j|` is that of `j = n`.
+
+    Consistent units are assumed (e.g. in, lbf, s: the density in
+    lb-s^2/in^4).
+    """
+    from scipy.linalg import eig
+    s = m*np.pi/L
+    js = sorted({abs(n + q*nstiff) for q in range(-2*nterms, 2*nterms + 1)})
+    js = js[:nterms]
+    nd = 3*len(js)
+    C = E*h/(1 - nu**2)
+    D = E*h**3/(12*(1 - nu**2))
+    K = np.zeros((nd, nd))
+    M = np.zeros((nd, nd))
+    xw = L/2
+    sym = symmetry == 'sym'
+    for i, j in enumerate(js):
+        iu, iv, iw = 3*i, 3*i + 1, 3*i + 2
+        k = j/R
+        # angular weights of cos^2 and sin^2 over the circumference
+        wc = 2*np.pi*R if j == 0 else np.pi*R
+        ws = 0. if j == 0 else np.pi*R
+        wn, wt = (wc, ws) if sym else (ws, wc)  # normal / shear-type terms
+        ex = np.zeros(nd); ex[iu] = -s
+        ey = np.zeros(nd); ey[iv] = k; ey[iw] = 1/R
+        gm = np.zeros(nd); gm[iv] = s; gm[iu] = -k
+        wxx = np.zeros(nd); wxx[iw] = -s**2
+        wyy = np.zeros(nd); wyy[iw] = -k**2
+        wxy = np.zeros(nd); wxy[iw] = s*k
+        o = np.outer
+        K += xw*wn*(C*(o(ex, ex) + o(ey, ey) + nu*(o(ex, ey) + o(ey, ex)))
+                    + D*(o(wxx, wxx) + o(wyy, wyy) + nu*(o(wxx, wyy) + o(wyy, wxx))))
+        K += xw*wt*(C*(1 - nu)/2*o(gm, gm) + 2*D*(1 - nu)*o(wxy, wxy))
+        mu = rho*h*xw
+        M[iw, iw] += mu*wn
+        if shell_inplane_inertia:
+            M[iu, iu] += mu*wn
+            M[iv, iv] += mu*wt
+    for l in range(nstiff):
+        th = 2*np.pi*l/nstiff
+        fu_ = np.zeros(nd); fv = np.zeros(nd); fw = np.zeros(nd); fwy = np.zeros(nd)
+        for i, j in enumerate(js):
+            c, sn = np.cos(j*th), np.sin(j*th)
+            if sym:
+                fu_[3*i], fv[3*i + 1], fw[3*i + 2], fwy[3*i + 2] = c, sn, c, -j*sn/R
+            else:
+                fu_[3*i], fv[3*i + 1], fw[3*i + 2], fwy[3*i + 2] = sn, -c, sn, j*c/R
+        ux, wxx, wxy, wx = -s*fu_, -s**2*fw, s*fwy, s*fw
+        o = np.outer
+        K += xw*E*As*(o(ux, ux) - zs*(o(ux, wxx) + o(wxx, ux)) + ds**2*o(wxx, wxx))
+        K += xw*GJs*o(wxy, wxy)
+        a1 = (fu_ if stringer_inplane_inertia else 0.) - zs*wx
+        a2 = (fv if stringer_inplane_inertia else 0.) - zs*fwy
+        M += rho*As*xw*(o(a1, a1) + o(a2, a2) + o(fw, fw) + ds**2*o(wx, wx)
+                        + ps**2*o(fwy, fwy))
+    # drop the DOFs without stiffness (v_0 of 'sym', u_0 and w_0 of 'antisym')
+    keep = np.diag(K) > 0
+    K, M = K[np.ix_(keep, keep)], M[np.ix_(keep, keep)]
+    idx = np.arange(nd)[keep]
+    lam, vec = eig(K, M)
+    out = []
+    for q in range(len(lam)):
+        if not np.isfinite(lam[q]) or lam[q].real <= 0:
+            continue
+        W = np.zeros(nd)
+        W[idx] = np.abs(vec[:, q])
+        Wn = W[2::3]
+        if js[int(np.argmax(Wn))] == n:
+            out.append(np.sqrt(lam[q].real)/(2*np.pi))
+    return min(out) if out else np.nan
