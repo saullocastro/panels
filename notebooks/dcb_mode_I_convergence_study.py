@@ -31,10 +31,9 @@ optionally stores them in a ``.json`` file, with the wall time ``wall_min``
 and the CPU time ``cpu_min`` of each run, in minutes.
 
 The results in ``notebooks/results/dcb_mode_I_convergence_study.json`` were
-stored by ``collect --json``. Their ``wall_min`` and ``cpu_min`` come from a
-first computation of the runs with ``run --jobs 8 --longest-first`` on a
-machine with 16 threads, eight runs at a time, and indicate the relative
-cost of the runs. They are discussed
+stored by ``collect --json``. Their ``wall_min`` and ``cpu_min`` come from
+``run --jobs 8 --longest-first`` on eight cores, eight runs at a time with
+one thread each, and indicate the relative cost of the runs. They are discussed
 in the notebook ``dcb_mode_I_convergence_study.ipynb``. The folder of the
 runs, ``dcb_mode_I_convergence_study_runs``, is not part of the
 repository.
