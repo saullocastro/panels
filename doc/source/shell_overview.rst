@@ -101,6 +101,34 @@ and ``'plate_clpt_tl'`` replace the membrane strains by the Green-Lagrange
 strains, and the latter also the changes of curvature by those of the
 deformed normal, see :ref:`plate_clpt_gl` and :ref:`plate_clpt_tl`.
 
+The cylinder ``'cylshell_clpt_gl'`` keeps the changes of curvature of the
+Sanders-Koiter kinematics and replaces the membrane strains by the complete
+Green-Lagrange strains `\frac{1}{2}(\boldsymbol{F}^\top \boldsymbol{F} -
+\boldsymbol{I})` of the mid-surface, with the deformation gradient in the
+local basis
+
+.. math::
+    :label: shell-cyl-gl-F
+
+    \boldsymbol{F} = \begin{bmatrix} 1 + u_{,x} & u_{,y} \\ v_{,x} & 1 +
+    v_{,y} + w/r \\ w_{,x} & w_{,y} - v/r \end{bmatrix}
+
+the strains of the Flügge-Lur'e-Byrne non-linear theory as given by Amabili
+[amabili2008Nonlinear]_, Sec. 1.3.6. They vanish for any rigid motion and
+contain the rotation about the normal: an axial load `N_{xx}` has the
+geometric stiffness `N_{xx} (u_{,x}^2 + v_{,x}^2 + w_{,x}^2)`, instead of
+`N_{xx} w_{,x}^2` with Eq. :eq:`shell-clpt-strains`. The difference matters
+when `v_{,x}` is of the order of `w_{,x}`: when a long cylinder bends as a
+beam, `w = W(x) \cos\theta`, `v = -W(x) \sin\theta`, the work of the axial
+load on `v_{,x}^2` equals that on `w_{,x}^2`, and the Sanders-Koiter
+kinematics give about twice the Euler load of a pinned tube. For
+shell-like modes the difference decreases as the circumferential waves
+shorten: for axially compressed panels with `R/h = 100` and `L/R = 2`
+supported by shear diaphragms, the Green-Lagrange strains give a buckling
+load 4.2 % below that of the Sanders-Koiter kinematics for a panel of 180
+degrees and 1.0 % below for a panel of 40 degrees. Linear analyses, static
+and natural frequencies, are those of ``'cylshell_clpt_sanders'``.
+
 **First-order (FSDT) and third-order (TSDT) shear deformation theories**,
 5 degrees of freedom per term, the rotations `\phi_x` and `\phi_y` being
 independent fields:
@@ -136,6 +164,9 @@ structure and behaviour                   model
 thin plate, moderate rotations            ``'plate_clpt_donnell'``, the default of the plates
 thin cylinder or cylindrical panel        ``'cylshell_clpt_sanders'``, the default of the cylinders;
                                           ``'cylshell_clpt_donnell'`` for short wavelengths only
+long cylinder bending as a beam, e.g. a   ``'cylshell_clpt_gl'``, also for low circumferential wave
+tube in column buckling; curved panels    numbers and for curved panels and stiffener blades
+or blades loaded in their own plane       loaded in their own plane
 plates of an assembly with large          ``'plate_clpt_gl'``; ``'plate_clpt_tl'`` when the plates also
 rotations, e.g. a wing box                bend through large rotations, see :ref:`plate_clpt_gl`
 plates loaded in their own plane that     ``'plate_clpt_gl'``, see below

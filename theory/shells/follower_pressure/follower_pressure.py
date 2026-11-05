@@ -111,6 +111,9 @@ MODELS = {
     #NOTE the plate geometry is exact whatever the strains, Green-Lagrange
     #     here, see plate_clpt_gl/plate_clpt_gl.md
     'plate_clpt_gl': (3, 'plate', 'gl'),
+    #NOTE the area vector of the Sanders cylinder is the exact geometry of
+    #     the deformed mid-surface, see cylshell_clpt_gl/cylshell_clpt_gl.md
+    'cylshell_clpt_gl': (3, 'cylshell', 'sanders'),
     #NOTE likewise with the curvatures of the deformed normal, see
     #     plate_clpt_tl/plate_clpt_tl.py
     'plate_clpt_tl': (3, 'plate', 'tl'),

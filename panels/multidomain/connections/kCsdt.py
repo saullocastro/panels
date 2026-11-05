@@ -151,8 +151,22 @@ def _check_sdt(*panels):
 
 
 def _rinv_sanders(p):
-    r"""`1/r` of a panel with the Sanders-Koiter kinematics, zero otherwise"""
-    if p.model is not None and 'sanders' in p.model:
+    r"""`1/r` of a panel with the Sanders-Koiter kinematics, zero otherwise
+
+    The models with these kinematics have ``'sanders'`` in their name, and
+    ``'cylshell_clpt_gl'`` has the same rotations of the normal.
+
+    Notes
+    -----
+    With the Sanders-Koiter kinematics the rotation of the normal about `x`
+    includes the rigid-body rotation `v/r` of the cross-section, `\phi_y =
+    -w_{,y} + v/r` for the classical laminated plate theory, which the
+    rotation continuity of the connections must include; the Donnell
+    kinematics neglect it, hence the zero, see :func:`_rotation_y`.
+
+    """
+    if p.model is not None and ('sanders' in p.model
+                                or p.model == 'cylshell_clpt_gl'):
         return 1./p.r
     return 0.
 

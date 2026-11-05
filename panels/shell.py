@@ -142,7 +142,11 @@ class Shell(object):
     large rotations, e.g. the domains of a wing box, ``model =
     'plate_clpt_gl'`` has the Green-Lagrange membrane strains, which vanish
     for any rigid rotation, and ``model = 'plate_clpt_tl'`` also the
-    changes of curvature of the deformed normal.
+    changes of curvature of the deformed normal. For cylinders bent as
+    beams, e.g. the column buckling of a long tube, and curved panels loaded
+    in their own plane, ``model = 'cylshell_clpt_gl'`` has the
+    Green-Lagrange membrane strains with the Sanders-Koiter changes of
+    curvature.
 
     The approximation functions for the displacement fields are built using
     Bardell's functions, see :mod:`panels.bardell`.
@@ -3148,8 +3152,8 @@ class Shell(object):
             ``False`` for a dead load, ``True`` or ``'linear'`` for a follower
             pressure with the first-order area vector, ``'quadratic'`` for the
             complete area vector, the one to use with the large rotations of
-            ``model='plate_clpt_gl'`` or ``'plate_clpt_tl'``. ``None`` is
-            taken as ``False``.
+            ``model='plate_clpt_gl'``, ``'plate_clpt_tl'`` or
+            ``'cylshell_clpt_gl'``. ``None`` is taken as ``False``.
             Default ``False``.
         zp : float, optional
             Position along `z` of the surface on which the pressure acts,
