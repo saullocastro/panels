@@ -38,6 +38,13 @@
   `cylshell_clpt_sanders`. The model is added to the tangent, tangent
   product and follower-pressure tests (`test_tangent_consistency.py`) and to
   the connection tests of `tests/multidomain/test_bf_sanders.py`.
+- `create_cylinder_blade_stiffened` and the three
+  `cylinder_blade_stiffened_compression_lb_*` analyses take the argument
+  `model` of the skin panels: `cylshell_clpt_sanders` (the default, results
+  unchanged), `cylshell_clpt_gl` or `cylshell_clpt_donnell`; other values
+  raise `ValueError`. For cylinder 4 of Card and Jones (1966), the GL skin
+  lowers the discrete load by 1.3 %, to 1.6 % below `N_s`; new test
+  `test_discrete_gl_skin` in `tests/multidomain/test_cylinder_blade_stiffened.py`.
 
 ### Fixed
 
