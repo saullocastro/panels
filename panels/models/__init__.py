@@ -211,9 +211,12 @@ DOFs have the strains of the CLPT:
   of `N_{xx} w_{,x}^2`. For the bending of a long tube as a beam, `w =
   W(x) \cos\theta`, `v = -W(x) \sin\theta`, the term `v_{,x}^2` doubles the
   work of the axial load, such that ``'cylshell_clpt_sanders'`` gives about
-  twice the Euler load and ``'cylshell_clpt_gl'`` the Euler load; at
-  circumferential wave numbers `n \ge 5` the two differ by about 1 %. The
-  linear kernels are those of ``'cylshell_clpt_sanders'``, and the changes
+  twice the Euler load and ``'cylshell_clpt_gl'`` the Euler load. For
+  shell-like modes the difference decreases as the circumferential waves
+  shorten: for axially compressed panels with `R/h = 100` and `L/R = 2`
+  supported by shear diaphragms, ``'cylshell_clpt_gl'`` is 4.2 % below
+  ``'cylshell_clpt_sanders'`` for a panel of 180 degrees and 1.0 % below
+  for a panel of 40 degrees. The linear kernels are those of ``'cylshell_clpt_sanders'``, and the changes
   of curvature are linear, measured in the fixed local basis, exact for
   small rigid rotations only.
 

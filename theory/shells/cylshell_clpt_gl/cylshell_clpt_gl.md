@@ -18,8 +18,14 @@ kinematics. When a long tube bends as a beam, `w = W(x) cos(theta)`, `v =
 as large as `Nxx w,x^2`: without it the work of the axial load is halved and
 the Euler load of a pinned tube comes out about twice `pi^2 E I/L^2`. The
 same holds for any deformation where `v,x` is of the order of `w,x`: low
-circumferential wave numbers (`n = 1` to `3`), and curved panels or blades
-loaded in their own plane. At `n >= 5` the difference is about 1 %.
+circumferential wave numbers, and curved panels or blades loaded in their
+own plane. For shell-like modes the difference decreases as the
+circumferential waves shorten: axially compressed panels with `R/h = 100`,
+`L/R = 2`, supported by shear diaphragms, buckle 4.2 % below
+`cylshell_clpt_sanders` for a panel of 180 degrees and 1.0 % below for a
+panel of 40 degrees (`tests/tests_shell/test_cylshell_clpt_gl.py`); the
+pinned tube with `R/h = 100`, `L/R = 50` buckles at 0.989 `N_E`, 1.984 `N_E`
+with `cylshell_clpt_sanders`.
 
 The Green-Lagrange membrane strains treat the three rotations alike and
 vanish for any rigid motion.
