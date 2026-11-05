@@ -32,6 +32,8 @@ EQUATION refers to which type of nonlinear equation is being used:
 - sanders - kinematic equations using Sanders-Koiter's equations
 - gl - Green-Lagrange membrane strains, complete in the displacement
   gradients
+- tl - total Lagrangian: the Green-Lagrange membrane strains and the
+  changes of curvature measured with the deformed normal
 
 SUFIX used to indicate additional information
 
@@ -69,6 +71,14 @@ The available models, which are selected with ``Shell.model``, are:
   bending of long cylinders as beams (column buckling of tubes, low
   circumferential wave numbers) and for curved panels loaded in their own
   plane.
+
+- ``'cylshell_clpt_tl'``: cylindrical shells, total-Lagrangian
+  Kirchhoff-Love: the Green-Lagrange membrane strains of
+  ``'cylshell_clpt_gl'`` and the changes of curvature of the deformed
+  normal, whose linear part is that of ``'cylshell_clpt_sanders'``, all
+  invariant under rigid rotations, 3 DOFs ``u, v, w``. For curved panels
+  and cylinders bent through large rotations, e.g. the snap-through and
+  snap-back of shallow panels under point loads.
 
 - ``'plate_fsdt_donnell'``: flat plates, first-order shear deformation
   theory (FSDT, Reissner-Mindlin) with von Kármán non-linear kinematics, 5
@@ -220,6 +230,40 @@ DOFs have the strains of the CLPT:
   of curvature are linear, measured in the fixed local basis, exact for
   small rigid rotations only.
 
+- Total-Lagrangian Kirchhoff-Love cylinder, ``'cylshell_clpt_tl'``: the
+  membrane strains of ``'cylshell_clpt_gl'`` and the changes of curvature
+  of the deformed mid-surface `\boldsymbol{X}`, with its area vector
+  `\boldsymbol{a} = \boldsymbol{X}_{,x} \times \boldsymbol{X}_{,y}`:
+
+  .. math::
+
+      \kappa_{xx} = -\boldsymbol{a} \cdot \boldsymbol{X}_{,xx} \qquad
+      \kappa_{yy} = -\boldsymbol{a} \cdot \boldsymbol{X}_{,yy} - \frac{1}{r}
+      - \frac{\varepsilon_{xx} + 2 \varepsilon_{yy}}{r} \qquad
+      \kappa_{xy} = -2 \boldsymbol{a} \cdot \boldsymbol{X}_{,xy} -
+      \frac{\gamma_{xy}}{2 r}
+
+  with, in the local basis, `\boldsymbol{X}_{,xx} = (u_{,xx}, v_{,xx},
+  w_{,xx})`, `\boldsymbol{X}_{,xy} = (u_{,xy}, v_{,xy} + w_{,x}/r, w_{,xy}
+  - v_{,x}/r)` and `\boldsymbol{X}_{,yy} = (u_{,yy}, v_{,yy} + 2 w_{,y}/r -
+  v/r^2, w_{,yy} - 2 v_{,y}/r - w/r^2 - 1/r)`. The first terms are the
+  change of the second fundamental form `\boldsymbol{n} \cdot
+  \boldsymbol{X}_{,\alpha\beta}` [5]_, Sec. 3.16, times the area stretch
+  `|\boldsymbol{a}| = 1 + \varepsilon_{xx} + \varepsilon_{yy} + \ldots`;
+  the terms `-\varepsilon_{yy}/r` and `-\gamma_{xy}/(2r)` make the linear
+  part that of ``'cylshell_clpt_sanders'``, a change of the order of the
+  membrane strain divided by the radius, which leaves the accuracy of the
+  classical theory of thin shells unchanged [5]_, p. 202. All six strains
+  are invariant under any rigid rotation of any deformed state, and cubic
+  in the displacements. Up to the quadratic terms, the curvatures differ
+  from the non-linear changes of curvature of Novozhilov's theory as given
+  by Amabili [4]_, Sec. 1.3.7, Eqs. (1.130)-(1.132), by terms of the order
+  of the membrane strain divided by the radius or times the curvature, and
+  by terms of the rotation about the normal, which those equations do not
+  treat exactly. The analytical kernels are those of
+  ``'cylshell_clpt_gl'``; the default integration is exact, with `3p + 1`
+  points along each direction, see :func:`panels.shell.gauss_points`.
+
 The models with 5 DOFs have the rotations `\phi_x` and `\phi_y` as
 independent fields, with the displacement field and the strains of
 :mod:`panels.models.fsdt_tsdt_field`. The FSDT uses the shear corrected
@@ -286,12 +330,16 @@ References
 .. [4] Amabili, M., "Nonlinear Vibrations and Stability of Shells and
    Plates", Cambridge University Press, 2008.
    https://doi.org/10.1017/CBO9780511619694
+.. [5] van der Heijden, A. M. A. (ed.), "W. T. Koiter's Elastic Stability
+   of Solids and Structures", Cambridge University Press, 2008.
+   https://doi.org/10.1017/CBO9780511546174
 
 """
 from . import clpt_field
 from . import cylshell_clpt_donnell, cylshell_clpt_donnell_num
 from . import cylshell_clpt_sanders, cylshell_clpt_sanders_num
 from . import cylshell_clpt_gl, cylshell_clpt_gl_num
+from . import cylshell_clpt_tl_num
 from . import plate_clpt_donnell, plate_clpt_donnell_num
 from . import plate_clpt_gl, plate_clpt_gl_num
 from . import plate_clpt_tl_num
