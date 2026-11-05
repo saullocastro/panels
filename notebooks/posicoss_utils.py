@@ -7,9 +7,13 @@ compression, and of the cylinder with L-shaped stringers of Lanzi, Bisagni
 and Cordisco (2003), under axial compression and torsion.
 
 Every part of a stiffener is a :class:`panels.shell.Shell` domain: the skin
-is split into strips along the circumference, each foot is a curved domain
-bonded to the skin strip under it with the connection ``'SB'``, and each
-blade is a flat domain standing on the edge of a foot with ``'BFycte'``.
+is split into strips along the circumference, each foot is a cylindrical
+shell (``'cylshell_clpt_sanders'``) with its own laminate and offset, bonded
+to the skin strip under it with the connection ``'SB'``, and each blade is a
+flat plate standing on the edge of a foot with ``'BFycte'``. A blade is
+loaded in its own plane, so its geometric stiffness needs the term `N_{xx}
+v_{,x}^2` of the Green-Lagrange strains: the blades are
+``'plate_clpt_gl'`` plates.
 The connections and the prescribed displacements of the loaded ends are
 imposed exactly (``conn_method='null-space'``, ``pd_method='null-space'``).
 Lengths are in mm, forces in N and moduli in N/mm^2.
@@ -23,18 +27,20 @@ from panels.shell import Shell
 from panels.multidomain import MultiDomain
 
 CURVED_MODEL = 'cylshell_clpt_sanders'
-FLAT_MODEL = 'plate_clpt_donnell'
+FLAT_MODEL = 'plate_clpt_gl'
 
 
 def make_shell(a, b, r, stack, plyt, laminaprop, m, n, group, y0=0.,
-               offset=0.):
+               offset=0., model=None):
     """Shell domain with all the edges free
 
     The flags of the loaded ends are set afterwards with :func:`set_end`.
-    ``r=None`` gives a flat domain.
+    ``r=None`` gives a flat domain, of the model ``FLAT_MODEL`` unless
+    ``model`` is given.
 
     """
-    model = FLAT_MODEL if r is None else CURVED_MODEL
+    if model is None:
+        model = FLAT_MODEL if r is None else CURVED_MODEL
     s = Shell(a=a, b=b, r=r, stack=list(stack), plyt=plyt,
               laminaprop=laminaprop, m=m, n=n, offset=offset, model=model,
               group=group, x0=0., y0=y0)
@@ -64,7 +70,8 @@ def _n_terms(width, n_per_mm, n_min=4, n_max=30):
 
 def blade_panel(R, L, arc, y_stringers, skin_stack, blade_stack, blade_width,
                 foot_steps, plyt, laminaprop, m, n_bay, n_strip=4,
-                n_blade=6, unloaded='ss'):
+                n_blade=6, unloaded='ss', foot_reference='foot',
+                blade_model=None):
     r"""Curved panel stiffened by blade stringers with stepped feet
 
     Parameters
@@ -77,8 +84,8 @@ def blade_panel(R, L, arc, y_stringers, skin_stack, blade_stack, blade_width,
     skin_stack, blade_stack : list of float
         Ply angles from the inner (`-z`) to the outer (`+z`) face.
     blade_width : float
-        Width of the blade domain, from the mid-surface of the foot (of the
-        skin without feet) to the blade tip.
+        Width of the blade domain, from the reference surface of the feet
+        (of the skin without feet) to the blade tip.
     foot_steps : list of (float, list)
         From the blade outwards, the width of each step of each half of the
         foot and its ply angles from the inner face of the foot to the face
@@ -95,6 +102,15 @@ def blade_panel(R, L, arc, y_stringers, skin_stack, blade_stack, blade_width,
     unloaded : str
         ``'ss'``: the unloaded edges have `w = 0`, `u`, `v` and the
         rotation free; ``'clamped'``: also `w_{,y} = 0`.
+    foot_reference : str
+        Reference surface of all the foot domains, each with the offset that
+        puts its plies on the inner face of the skin: ``'foot'``, the
+        mid-surface of the thickest (central) step; ``'skin'``, the
+        mid-surface of the skin, as a foot whose elements share the nodes
+        of the skin. The steps are not connected to each other: each one
+        follows the skin through ``'SB'``, which makes them continuous.
+    blade_model : str or None
+        Model of the blades, ``FLAT_MODEL`` when ``None``.
 
     Returns
     -------
@@ -126,8 +142,9 @@ def blade_panel(R, L, arc, y_stringers, skin_stack, blade_stack, blade_width,
         strips.append((y1, y2, stack, k))
     bay_max = max(y2 - y1 for (y1, y2, st, k) in strips if st is None)
 
+    t_skin = len(skin_stack)*plyt
+    t_ref = max([len(st) for _, st in foot_steps], default=0)*plyt
     skins, feet, blades, conn = [], [], [], []
-    prev_foot = None
     for i, (y1, y2, stack, k) in enumerate(strips):
         b = y2 - y1
         if stack is None:
@@ -146,24 +163,28 @@ def blade_panel(R, L, arc, y_stringers, skin_stack, blade_stack, blade_width,
         base = sk
         foot = None
         if stack is not None:
+            # offset of the foot: its face z = d + t/2 on the inner face of
+            # the skin, at z = t_ref/2 ('foot') or -t_skin/2 ('skin')
+            t = len(stack)*plyt
+            if foot_reference == 'foot':
+                d = (t_ref - t)/2.
+            else:
+                d = -(t_skin + t)/2.
             foot = make_shell(L, b, R, stack, plyt, laminaprop, m, n,
-                              group='foot_%02d' % k, y0=y1)
+                              group='foot_%02d' % k, y0=y1, offset=d)
             set_end(foot, 'x1')
             set_end(foot, 'x2', u=1)
             # the skin is on the +z side of the foot
             conn.append(dict(p1=sk, p2=foot, func='SB'))
-            if prev_foot is not None and prev_foot.group == foot.group:
-                conn.append(dict(p1=prev_foot, p2=foot, func='SSycte',
-                                 ycte1=prev_foot.b, ycte2=0.))
             feet.append(foot)
             base = foot
-        prev_foot = foot
         on_stringer = [j for j, ys in enumerate(y_stringers)
                        if abs(y1 - ys) < 1e-9]
         if on_stringer:
             blade = make_shell(L, blade_width, None, blade_stack, plyt,
                                laminaprop, m, n_blade,
-                               group='blade_%02d' % on_stringer[0], y0=0.)
+                               group='blade_%02d' % on_stringer[0], y0=0.,
+                               model=blade_model)
             set_end(blade, 'x1')
             set_end(blade, 'x2', u=1)
             blade.add_distr_pd_fixed_x(L, ku=1., funcu=lambda y: -1.,
@@ -193,7 +214,7 @@ def l_cylinder(R, L, nstringers, skin_stack, reinf_stack, reinf_width,
                reinf_left, foot_stack, foot_width, blade_stack, blade_width,
                plyt, laminaprop, m, n_bay, n_reinf=4, n_foot=6, n_blade=6,
                load='torsion', bottom='pinned', blade_side='y1',
-               theta=1.e-3):
+               theta=1.e-3, foot_reference='foot', blade_model=None):
     r"""Closed cylinder stiffened by L-shaped stringers
 
     Each stringer pitch, starting at the stringer, is split into a
@@ -214,6 +235,13 @@ def l_cylinder(R, L, nstringers, skin_stack, reinf_stack, reinf_width,
     the sense of positive `v`, with `u = 0`. Under torsion the blade follows the rigid rotation
     through `w`, the displacement normal to its plane.
 
+    The reference surface of the foot is its mid-surface
+    (``foot_reference='foot'``) or, with an offset laminate, the mid-surface
+    of the skin (``'skin'``, as a foot whose elements share the nodes of the
+    skin); the blade stands on it, ``blade_width`` being measured from it.
+    The blades are of the model ``blade_model``, ``FLAT_MODEL`` when
+    ``None``.
+
     Returns
     -------
     md, parts : as in :func:`blade_panel`; ``parts`` also has ``'theta'``,
@@ -230,9 +258,13 @@ def l_cylinder(R, L, nstringers, skin_stack, reinf_stack, reinf_width,
     t_foot = len(foot_stack)*plyt
     # Sanders kinematics of 'SB': v(z) = (1 + z/r) v - z w,y; on the rigid end
     # w = 0, so the foot (reference radius R in the model) has
-    # v_f (1 + z2/R) = v_s (1 + z1/R)
+    # v_f (1 + z2/R) = v_s (1 + z1/R), z1 and z2 being the faces in contact
     z1 = offset_reinf - t_reinf/2.
-    z2 = t_foot/2.
+    if foot_reference == 'foot':
+        offset_foot = 0.
+    else:
+        offset_foot = z1 - t_foot/2.
+    z2 = offset_foot + t_foot/2.
     v_skin = theta*R
     v_foot = v_skin*(1 + z1/R)/(1 + z2/R)
 
@@ -263,12 +295,14 @@ def l_cylinder(R, L, nstringers, skin_stack, reinf_stack, reinf_width,
             skins.append(sk)
             if kind == 'foot':
                 foot = make_shell(L, b, R, foot_stack, plyt, laminaprop, m, n,
-                                  group='foot_%02d' % k, y0=y)
+                                  group='foot_%02d' % k, y0=y,
+                                  offset=offset_foot)
                 conn.append(dict(p1=sk, p2=foot, func='SB'))
                 feet.append(foot)
                 blade = make_shell(L, blade_width, None, blade_stack, plyt,
                                    laminaprop, m, n_blade,
-                                   group='blade_%02d' % k, y0=0.)
+                                   group='blade_%02d' % k, y0=0.,
+                                   model=blade_model)
                 set_end(blade, 'x1', wr=0 if bottom == 'clamped' else 1)
                 if load == 'axial':
                     set_end(blade, 'x2', u=1)

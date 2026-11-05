@@ -15,7 +15,8 @@ The functions of this module evaluate the displacements and rotations,
 :func:`.fuvw`, the generalized strains, :func:`.fstrain`, and the
 approximation functions at a point, :func:`.fg`, for the models
 ``'plate_clpt_donnell'``, ``'plate_clpt_gl'``, ``'plate_clpt_tl'``,
-``'cylshell_clpt_donnell'`` and ``'cylshell_clpt_sanders'``, see
+``'cylshell_clpt_donnell'``, ``'cylshell_clpt_sanders'`` and
+``'cylshell_clpt_gl'``, see
 :mod:`panels.modelDB`. The coordinates
 ``x`` and ``y`` are physical, ``0 <= x <= a`` and ``0 <= y <= b``.
 
@@ -65,16 +66,19 @@ def is_sanders(object s):
     Returns
     -------
     sanders : int
-        ``1`` when ``'sanders'`` is in the name of the model, else ``0``.
+        ``1`` when ``'sanders'`` is in the name of the model or the model is
+        ``'cylshell_clpt_gl'``, else ``0``.
 
     Notes
     -----
     With Sanders-Koiter kinematics the rotation of the normal about the `x`
     axis is `\phi_y = -w_{,y} + v/r`, instead of `-w_{,y}`, and the changes of
-    curvature receive terms in `u` and `v`, see :mod:`panels.models`.
+    curvature receive terms in `u` and `v`, see :mod:`panels.models`. The
+    model ``'cylshell_clpt_gl'`` has the same rotations and changes of
+    curvature, with the Green-Lagrange membrane strains.
 
     '''
-    return 1 if 'sanders' in s.model else 0
+    return 1 if ('sanders' in s.model or s.model == 'cylshell_clpt_gl') else 0
 
 
 def is_gl(object s):
@@ -91,18 +95,20 @@ def is_gl(object s):
     Returns
     -------
     gl : int
-        ``1`` when the model is ``'plate_clpt_gl'`` or ``'plate_clpt_tl'``,
-        else ``0``.
+        ``1`` when the model is ``'plate_clpt_gl'``, ``'plate_clpt_tl'`` or
+        ``'cylshell_clpt_gl'``, else ``0``.
 
     Notes
     -----
     The Green-Lagrange membrane strains add `(u_{,x}^2 + v_{,x}^2)/2`,
     `(u_{,y}^2 + v_{,y}^2)/2` and `u_{,x} u_{,y} + v_{,x} v_{,y}` to the von
     Kármán strains `\varepsilon_{xx}`, `\varepsilon_{yy}` and
-    `\gamma_{xy}`, see :mod:`panels.models`.
+    `\gamma_{xy}`, and, for the cylinder, with `v_{,y} + w/r` in place of
+    `v_{,y}`, to the Sanders-Koiter strains, see :mod:`panels.models`.
 
     '''
-    return 1 if s.model in ('plate_clpt_gl', 'plate_clpt_tl') else 0
+    return 1 if s.model in ('plate_clpt_gl', 'plate_clpt_tl',
+                            'cylshell_clpt_gl') else 0
 
 
 def is_tl(object s):
@@ -661,7 +667,7 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
     cdef double *gw_eta
     cdef double *gw_etaeta
 
-    cdef double w_xi, w_eta, v, phix, phiy
+    cdef double w_xi, w_eta, v, phix, phiy, ww, ty
     cdef double u_x, u_y, v_x, v_y
     cdef double u_xx, u_yy, u_xy, v_xx, v_yy, v_xy, w_xx, w_yy, w_xy
     cdef double w_x, w_y, a1, a2, a3
@@ -729,6 +735,7 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
         w_xi = 0
         w_eta = 0
         v = 0
+        ww = 0
         u_x = 0
         u_y = 0
         v_x = 0
@@ -747,6 +754,7 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
                 w_xi += c[col+2]*fw_xi[i]*gw[j]
                 w_eta += c[col+2]*fw[i]*gw_eta[j]
                 v += c[col+1]*fv[i]*gv[j]
+                ww += c[col+2]*fw[i]*gw[j]
                 # +2 to get w (+0 is u, +1 is v)
                 if gl == 1:
                     u_x += c[col+0]*fu_xi[i]*gu[j]*(2/a)
@@ -790,6 +798,13 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
             exx += NLgeom*0.5*phix*phix
             eyy += NLgeom*0.5*phiy*phiy
             gxy += NLgeom*phix*phiy
+            if gl == 1:
+                # Green-Lagrange membrane strains of the cylinder,
+                # cylshell_clpt_gl
+                ty = v_y + ww/r
+                exx += NLgeom*0.5*(u_x*u_x + v_x*v_x)
+                eyy += NLgeom*0.5*(u_y*u_y + ty*ty)
+                gxy += NLgeom*(u_x*u_y + v_x*ty)
 
             exxs[pti] = exx
             eyys[pti] = eyy
