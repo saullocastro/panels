@@ -447,7 +447,8 @@ def profile_case(job, method):
     dc = expand(solve(k0, -red(fint - fext + kCp*c), silent=True))
     pr.disable()
     s = io.StringIO()
-    pstats.Stats(pr, stream=s).sort_stats('tottime').print_stats(12)
+    # file names without their folders, as the paths depend on the machine
+    pstats.Stats(pr, stream=s).strip_dirs().sort_stats('tottime').print_stats(12)
     out['cprofile'] = s.getvalue()
     return out
 
