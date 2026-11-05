@@ -20,9 +20,12 @@ Blade stiffener of a `StiffPanelBay` along `x` at `y = ys`, below the skin:
   boundary conditions of the bay, integrated over `y1 = ys - bb/2 <= y <=
   y2 = ys + bb/2` (matrices `*y1y2`) with the offset `-(h/2 + hb/2)`:
   perfectly bonded below the skin, it follows the skin's displacement
-  field. It is built without a `model`, i.e. with the default model of
-  `Shell`: `plate_clpt_donnell` for a flat bay, `cylshell_clpt_sanders`
-  for a bay with a radius.
+  field. Its model is `plate_clpt_donnell` for a flat bay and
+  `cylshell_clpt_donnell` for a bay with a radius
+  (`panels.stiffener.modelDB.db['bladestiff2d_clt_donnell']['base
+  models']`). On a curved bay this model is selected for a skin
+  `cylshell_clpt_donnell` or with `model='bladestiff2d_clt_donnell'`;
+  otherwise a curved bay uses `../bladestiff2d_clt_sanders`.
 - Flange: a `Shell` with the model `'plate_clpt_donnell'`, length `a`,
   width `bf`, its own approximation functions (`r` along `x`, `s` along the
   width) and Ritz constants, `mf x nf` terms (default `14 x 11`). It is
@@ -72,10 +75,14 @@ and its connection are a model of this package.
 
 ## Selection in panels
 
-`StiffPanelBay.add_bladestiff2d(ys, ...)` creates a `BladeStiff2D`;
-`panels.stiffener.modelDB.db['bladestiff2d_clt_donnell']`: key
-`'connections'`, linear static and linear buckling analyses (no non-linear
-static analysis). The skin must use a model with 3 DOFs.
+`StiffPanelBay.add_bladestiff2d(ys, ..., model=None)` creates a
+`BladeStiff2D`; the default `model=None` selects
+`'bladestiff2d_clt_donnell'` for a flat bay and for a skin
+`cylshell_clpt_donnell`.
+`panels.stiffener.modelDB.db['bladestiff2d_clt_donnell']`: keys
+`'connections'` and `'base models'`, linear static and linear buckling
+analyses (no non-linear static analysis). The skin must use a model with 3
+DOFs.
 
 ## References
 

@@ -59,9 +59,14 @@ model                      closed form                                          
 ========================== ============================================================ ===================================================================
 
 The stiffeners of a :class:`.StiffPanelBay` have their own kernels, for
-the classical laminated plate theory with the Donnell kinematics:
+the classical laminated plate theory:
 :mod:`panels.stiffener.models.bladestiff1d_clt_donnell`, the flange of a
 :class:`.BladeStiff1D` as a beam along `x` following the skin at `y =
-y_s`, and :mod:`panels.stiffener.models.bladestiff2d_clt_donnell`, the
-flange of a :class:`.BladeStiff2D` as a plate connected by penalties, see
-:ref:`stiffened_panels` and :mod:`panels.stiffener.models`.
+y_s`, and :mod:`panels.stiffener.models.bladestiff2d_clt_donnell` and
+:mod:`panels.stiffener.models.bladestiff2d_clt_sanders`, the flange of a
+:class:`.BladeStiff2D` as a plate connected by penalties to a skin with the
+Donnell or the Sanders kinematics, see :ref:`stiffened_panels` and
+:mod:`panels.stiffener.models`. On a curved bay the two differ in the
+rotation of the normal of the skin about `x` that the flange follows,
+`w_{,y} - v/r` with Sanders' kinematics and `w_{,y}` with Donnell's; the
+base of the stiffener has the kinematics of its skin.
