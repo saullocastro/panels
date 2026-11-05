@@ -151,8 +151,14 @@ def _check_sdt(*panels):
 
 
 def _rinv_sanders(p):
-    r"""`1/r` of a panel with the Sanders-Koiter kinematics, zero otherwise"""
-    if p.model is not None and 'sanders' in p.model:
+    r"""`1/r` of a panel with the Sanders-Koiter kinematics, zero otherwise
+
+    The models with these kinematics have ``'sanders'`` in their name, and
+    ``'cylshell_clpt_gl'`` has the same rotations of the normal.
+
+    """
+    if p.model is not None and ('sanders' in p.model
+                                or p.model == 'cylshell_clpt_gl'):
         return 1./p.r
     return 0.
 

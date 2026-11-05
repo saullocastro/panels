@@ -149,10 +149,13 @@ def _rinv_sanders(p):
     the `x` axis includes the term `v/r`, `\phi_y = -w_{,y} + v/r`, which
     enters the rotation penalty of the connection ``'BFycte'``, see
     :mod:`panels.multidomain.connections.kCBFycte`. The kinematics of
-    Donnell neglect this term, hence the zero.
+    Donnell neglect this term, hence the zero. The models with the
+    kinematics of Sanders-Koiter have ``'sanders'`` in their name, and
+    ``'cylshell_clpt_gl'`` has the same rotations of the normal.
 
     """
-    if p.model is not None and 'sanders' in p.model:
+    if p.model is not None and ('sanders' in p.model
+                                or p.model == 'cylshell_clpt_gl'):
         return 1./p.r
     return 0.
 
