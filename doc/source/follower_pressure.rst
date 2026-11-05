@@ -284,9 +284,9 @@ the arc-length methods, is the load vector of the current configuration,
     -\frac{\partial \boldsymbol{R}}{\partial \lambda} = \boldsymbol{F}_{ext}(1) +
     \boldsymbol{F}_p(\boldsymbol{c}) - \boldsymbol{F}_p(0)
 
-From version 0.5.0, ``structsolve`` passes the load factor to the callables
-that accept the keyword argument ``inc`` and uses Eq. :eq:`fp-dr-dlambda` in
-the arc-length methods.
+``structsolve`` passes the load factor to the callables that accept the
+keyword argument ``inc`` and uses Eq. :eq:`fp-dr-dlambda` in the arc-length
+methods.
 
 
 Linear analyses

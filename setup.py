@@ -39,9 +39,9 @@ YEAR = '2026'
 
 
 def write_version_py(version):
-    """Write ``panels/version.py``, with the fields of the former scheme
-    (``short_version``, ``version``, ``full_version``, ``svn_revision``,
-    ``isreleased``, ``__year__``, ``__version__``), all from the version
+    """Write ``panels/version.py``, with the fields ``short_version``,
+    ``version``, ``full_version``, ``svn_revision``, ``isreleased``,
+    ``__year__`` and ``__version__``, all from the version
     of ``pyproject.toml``"""
     cnt = """# This file is generated automatically by the setup.py
 short_version = '%(version)s'
