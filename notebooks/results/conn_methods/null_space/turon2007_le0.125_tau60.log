@@ -61,3 +61,66 @@ delta=5.8399 P=54.523 Ptrac=54.747 a=65.56 dmax=1.000 it=5
 delta=5.9389 P=54.053 Ptrac=54.896 a=66.15 dmax=1.000 it=6
 Equilibrium check: |P_traction/P - 1| = 1.56e-02 at most, above 0.01 from delta = 5.939 on (1 of 60 openings): the cohesive domain is too short or its basis too coarse, see dcb_utils.equilibrium_check
 finished Sat Oct 24 08:37:10 2026, 1489 s, 60 openings, aborted False
+turon2007_le0.125_tau60 null-space, dcb_turon2007.ipynb, started Wed Nov  4 21:21:46 2026
+delta=0.0990 P=1.628 Ptrac=1.628 a=55.00 dmax=-0.000 it=5
+delta=0.1980 P=3.257 Ptrac=3.257 a=55.00 dmax=-0.000 it=4
+delta=0.2969 P=4.885 Ptrac=4.885 a=55.00 dmax=-0.000 it=4
+delta=0.3959 P=6.514 Ptrac=6.514 a=55.00 dmax=-0.000 it=5
+delta=0.4949 P=8.142 Ptrac=8.142 a=55.00 dmax=-0.000 it=3
+delta=0.5939 P=9.771 Ptrac=9.771 a=55.00 dmax=-0.000 it=4
+delta=0.6929 P=11.399 Ptrac=11.399 a=55.00 dmax=-0.000 it=5
+delta=0.7919 P=13.027 Ptrac=13.027 a=55.00 dmax=-0.000 it=3
+delta=0.8908 P=14.656 Ptrac=14.656 a=55.00 dmax=0.019 it=4
+delta=0.9898 P=16.282 Ptrac=16.282 a=55.00 dmax=0.129 it=2
+delta=1.0888 P=17.902 Ptrac=17.902 a=55.00 dmax=0.226 it=2
+delta=1.1878 P=19.516 Ptrac=19.516 a=55.00 dmax=0.312 it=2
+delta=1.2868 P=21.126 Ptrac=21.126 a=55.00 dmax=0.388 it=1
+delta=1.3858 P=22.730 Ptrac=22.728 a=55.00 dmax=0.454 it=1
+delta=1.4847 P=24.328 Ptrac=24.328 a=55.00 dmax=0.512 it=2
+delta=1.5837 P=25.922 Ptrac=25.920 a=55.00 dmax=0.564 it=1
+delta=1.6827 P=27.510 Ptrac=27.510 a=55.00 dmax=0.609 it=2
+delta=1.7817 P=29.093 Ptrac=29.093 a=55.00 dmax=0.649 it=2
+delta=1.8807 P=30.671 Ptrac=30.671 a=55.00 dmax=0.684 it=2
+delta=1.9796 P=32.244 Ptrac=32.242 a=55.00 dmax=0.716 it=1
+delta=2.0786 P=33.811 Ptrac=33.811 a=55.00 dmax=0.744 it=2
+delta=2.1776 P=35.373 Ptrac=35.373 a=55.00 dmax=0.770 it=2
+delta=2.2766 P=36.929 Ptrac=36.929 a=55.00 dmax=0.792 it=2
+delta=2.3756 P=38.480 Ptrac=38.480 a=55.00 dmax=0.813 it=2
+delta=2.4746 P=40.025 Ptrac=40.025 a=55.00 dmax=0.831 it=2
+delta=2.5735 P=41.563 Ptrac=41.558 a=55.00 dmax=0.848 it=1
+delta=2.6725 P=43.095 Ptrac=43.095 a=55.00 dmax=0.863 it=2
+delta=2.7715 P=44.620 Ptrac=44.620 a=55.00 dmax=0.877 it=2
+delta=2.8705 P=46.138 Ptrac=46.138 a=55.00 dmax=0.890 it=2
+delta=2.9695 P=47.648 Ptrac=47.648 a=55.00 dmax=0.902 it=2
+delta=3.0684 P=49.150 Ptrac=49.150 a=55.00 dmax=0.913 it=2
+delta=3.1674 P=50.642 Ptrac=50.642 a=55.00 dmax=0.923 it=2
+delta=3.2664 P=52.124 Ptrac=52.124 a=55.00 dmax=0.932 it=2
+delta=3.3654 P=53.594 Ptrac=53.594 a=55.00 dmax=0.941 it=2
+delta=3.4644 P=55.051 Ptrac=55.051 a=55.00 dmax=0.949 it=2
+delta=3.5634 P=56.492 Ptrac=56.492 a=55.00 dmax=0.957 it=2
+delta=3.6623 P=57.914 Ptrac=57.914 a=55.00 dmax=0.964 it=2
+delta=3.7613 P=59.310 Ptrac=59.310 a=55.00 dmax=0.971 it=2
+delta=3.8603 P=60.673 Ptrac=60.673 a=55.00 dmax=0.978 it=2
+delta=3.9593 P=61.984 Ptrac=61.982 a=55.00 dmax=0.985 it=2
+delta=4.0583 P=63.201 Ptrac=63.201 a=55.00 dmax=0.993 it=2
+delta=4.1573 P=64.036 Ptrac=64.036 a=55.11 dmax=1.000 it=4
+delta=4.2562 P=63.845 Ptrac=63.845 a=55.66 dmax=1.000 it=5
+delta=4.3552 P=63.126 Ptrac=63.128 a=56.30 dmax=1.000 it=5
+delta=4.4542 P=62.415 Ptrac=62.415 a=56.97 dmax=1.000 it=6
+delta=4.5532 P=61.759 Ptrac=61.759 a=57.58 dmax=1.000 it=6
+delta=4.6522 P=61.078 Ptrac=61.078 a=58.27 dmax=1.000 it=5
+delta=4.7511 P=60.429 Ptrac=60.432 a=58.90 dmax=1.000 it=5
+delta=4.8501 P=59.834 Ptrac=59.838 a=59.47 dmax=1.000 it=6
+delta=4.9491 P=59.214 Ptrac=59.221 a=60.19 dmax=1.000 it=5
+delta=5.0481 P=58.624 Ptrac=58.631 a=60.81 dmax=1.000 it=5
+delta=5.1471 P=58.062 Ptrac=58.063 a=61.33 dmax=1.000 it=6
+delta=5.2461 P=57.527 Ptrac=57.511 a=62.00 dmax=1.000 it=5
+delta=5.3450 P=57.011 Ptrac=56.962 a=62.54 dmax=1.000 it=6
+delta=5.4440 P=56.426 Ptrac=56.326 a=63.24 dmax=1.000 it=6
+delta=5.5430 P=55.943 Ptrac=55.793 a=63.81 dmax=1.000 it=5
+delta=5.6420 P=55.451 Ptrac=55.288 a=64.39 dmax=1.000 it=5
+delta=5.7410 P=54.960 Ptrac=54.890 a=64.97 dmax=1.000 it=5
+delta=5.8399 P=54.523 Ptrac=54.747 a=65.56 dmax=1.000 it=5
+delta=5.9389 P=54.053 Ptrac=54.896 a=66.15 dmax=1.000 it=6
+Equilibrium check: |P_traction/P - 1| = 1.56e-02 at most, above 0.01 from delta = 5.939 on (1 of 60 openings): the cohesive domain is too short or its basis too coarse, see dcb_utils.equilibrium_check
+finished Wed Nov  4 21:39:25 2026, 1059 s, 60 openings, aborted False
