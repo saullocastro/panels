@@ -64,6 +64,9 @@ def tstiff2d_1stiff_freq(a, b, ys, bb, bf, defect_a, rho, plyt, laminaprop,
     ``tol=0`` and ``sparse_solver=True``, and the eigenvectors are expanded
     with :meth:`.MultiDomain.expand`.
 
+    The domains of the flange use the model ``'plate_clpt_gl'``, the
+    others the default model of :class:`.Shell` (see Notes).
+
     Parameters
     ----------
 
@@ -135,6 +138,11 @@ def tstiff2d_1stiff_freq(a, b, ys, bb, bf, defect_a, rho, plyt, laminaprop,
     plates connected only at the ends of the defect, without any contact
     between them.
 
+    The flange uses ``'plate_clpt_gl'`` as in
+    :func:`.tstiff2d_1stiff_compression`, where its geometric stiffness
+    matters; the constitutive stiffness and the mass matrices, the only
+    ones of this analysis, are those of ``'plate_clpt_donnell'``.
+
     References
     ----------
     .. [1] Castro, S. G. P., and Donadon, M. V., Assembly of Semi-Analytical
@@ -185,13 +193,13 @@ def tstiff2d_1stiff_freq(a, b, ys, bb, bf, defect_a, rho, plyt, laminaprop,
 
     # stiffeners
     p10 = Shell(group='base', x0=alow+defect, y0=ys-bb/2., a=aup, b=bb, r=r, m=mb, n=nb, plyt=plyt, stack=stack_base, laminaprop=laminaprop, rho=rho)
-    p11 = Shell(group='flange', x0=alow+defect, y0=0, a=aup, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, rho=rho)
+    p11 = Shell(group='flange', model='plate_clpt_gl', x0=alow+defect, y0=0, a=aup, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, rho=rho)
     # defect
     p12 = Shell(group='base', x0=alow, y0=ys-bb/2., a=defect, b=bb, r=r, m=mb, n=nb, plyt=plyt, stack=stack_base, laminaprop=laminaprop, rho=rho)
-    p13 = Shell(group='flange', x0=alow, y0=0, a=defect, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, rho=rho)
+    p13 = Shell(group='flange', model='plate_clpt_gl', x0=alow, y0=0, a=defect, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, rho=rho)
     #
     p14 = Shell(group='base', x0=0, y0=ys-bb/2., a=alow, b=bb, r=r, m=mb, n=nb, plyt=plyt, stack=stack_base, laminaprop=laminaprop, rho=rho)
-    p15 = Shell(group='flange', x0=0, y0=0, a=alow, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, rho=rho)
+    p15 = Shell(group='flange', model='plate_clpt_gl', x0=0, y0=0, a=alow, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, rho=rho)
 
     # boundary conditions
     p01.x1u = 1 ; p01.x1ur = 1 ; p01.x2u = 0 ; p01.x2ur = 1

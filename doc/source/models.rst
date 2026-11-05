@@ -34,8 +34,9 @@ also give the matrices that depend on the Ritz constants: ``fkC_num``,
 vector ``calc_fint``, the product ``calc_kTv`` of the tangent stiffness by
 a vector, see :ref:`tangent_product`, and the follower pressure
 ``calc_fext_follower`` with its load stiffness ``fkCfollower_num``, see
-:ref:`follower_pressure`; ``plate_clpt_gl_num`` and ``plate_clpt_tl_num``
-have no mass and aerodynamic kernels. The rows and columns are those of the Ritz
+:ref:`follower_pressure`; ``plate_clpt_gl_num``, ``plate_clpt_tl_num`` and
+``cylshell_clpt_gl_num`` import the mass and aerodynamic kernels of the
+model with the same linear strains. The rows and columns are those of the Ritz
 constants of Eq. :eq:`shell-ritz`.
 
 ========================== ============================================================ ===================================================================
@@ -49,6 +50,8 @@ model                      closed form                                          
 ``plate_tsdt_donnell``     :mod:`panels.models.plate_tsdt_donnell`                      :mod:`panels.models.plate_tsdt_donnell_num`
 ``cylshell_clpt_donnell``  :mod:`panels.models.cylshell_clpt_donnell`                   :mod:`panels.models.cylshell_clpt_donnell_num`
 ``cylshell_clpt_sanders``  :mod:`panels.models.cylshell_clpt_sanders`                   :mod:`panels.models.cylshell_clpt_sanders_num`
+``cylshell_clpt_gl``       :mod:`panels.models.cylshell_clpt_gl`, the linear kernels    :mod:`panels.models.cylshell_clpt_gl_num`
+                           of ``cylshell_clpt_sanders``
 ``cylshell_fsdt_donnell``  :mod:`panels.models.cylshell_fsdt_donnell`                   :mod:`panels.models.cylshell_fsdt_donnell_num`
 ``cylshell_fsdt_sanders``  :mod:`panels.models.cylshell_fsdt_sanders`                   :mod:`panels.models.cylshell_fsdt_sanders_num`
 ``cylshell_tsdt_donnell``  :mod:`panels.models.cylshell_tsdt_donnell`                   :mod:`panels.models.cylshell_tsdt_donnell_num`

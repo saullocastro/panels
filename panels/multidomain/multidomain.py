@@ -149,10 +149,13 @@ def _rinv_sanders(p):
     the `x` axis includes the term `v/r`, `\phi_y = -w_{,y} + v/r`, which
     enters the rotation penalty of the connection ``'BFycte'``, see
     :mod:`panels.multidomain.connections.kCBFycte`. The kinematics of
-    Donnell neglect this term, hence the zero.
+    Donnell neglect this term, hence the zero. The models with the
+    kinematics of Sanders-Koiter have ``'sanders'`` in their name, and
+    ``'cylshell_clpt_gl'`` has the same rotations of the normal.
 
     """
-    if p.model is not None and 'sanders' in p.model:
+    if p.model is not None and ('sanders' in p.model
+                                or p.model == 'cylshell_clpt_gl'):
         return 1./p.r
     return 0.
 
@@ -4563,11 +4566,11 @@ class MultiDomain(object):
             A_i = \arg\max_j \Delta_{i,j}
 
         with `i` the row and `j` the column of the grid of integration
-        points, `j` increasing with `x`. A previous implementation set to
-        zero everything from ``x=0`` up to the *last* non-positive
-        separation of the row, which removed the whole fracture process zone
-        when the approximation functions gave a non-positive value between
-        `A` and the edge of the domain. The negative separations are
+        points, `j` increasing with `x`. Setting to zero everything from
+        ``x=0`` up to the *last* non-positive separation of the row instead
+        would remove the whole fracture process zone whenever the
+        approximation functions give a non-positive value between `A` and
+        the edge of the domain. The negative separations are
         physical: for a beam on an elastic foundation the separation behind
         the crack front oscillates with a decaying amplitude. The tractions,
         the internal force vector and the stiffness matrices use the full

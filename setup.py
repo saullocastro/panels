@@ -353,6 +353,22 @@ extensions = [
         include_dirs=include_dirs, extra_compile_args=compile_args,
               extra_link_args=link_args, define_macros=define_macros,
               language='c++'),
+    Extension('panels.models.cylshell_clpt_gl',
+        sources=[
+            './panels/core/src/bardell.cpp',
+            './panels/models/cylshell_clpt_gl.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.cylshell_clpt_gl_num',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/cylshell_clpt_gl_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
 # stiffener models
     Extension('panels.stiffener.models.bladestiff1d_clt_donnell',
         sources=[
