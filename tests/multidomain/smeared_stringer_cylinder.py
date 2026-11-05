@@ -71,6 +71,7 @@ References
 ----------
 .. [block1965] Block, D. L., Card, M. F., and Mikulas, M. M., Jr., "Buckling
    of Eccentrically Stiffened Orthotropic Cylinders", NASA TN D-2960, 1965.
+   https://ntrs.nasa.gov/citations/19650021133
 
 """
 import numpy as np

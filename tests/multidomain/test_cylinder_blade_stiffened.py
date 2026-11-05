@@ -48,8 +48,11 @@ lb/in although headed kips/in.) are reproduced within 0.2 %.
 **Discrete model.** The blade is a plate strip from the middle surface of
 the skin to the stringer tip, `h_b = 0.33 - t/2` in, 0.097 in thick, and the
 smeared reference is Eq. (15) for this rectangle standing on the middle
-surface (``blade_stringer``), so that both count the same material. The
-simply supported ends are represented exactly by half of the cylinder, `0
+surface (``blade_stringer``), so that both count the same material and the
+same twisting stiffness, that of the Kirchhoff plate strip, `G h_b
+t_b^3/3`: 771 lb/in, 6.8 % above `\bar{N}_s` of Card and Jones (742 lb/in
+with their torsion constant of a rectangle, 723 lb/in with their section).
+The simply supported ends are represented exactly by half of the cylinder, `0
 \le x \le L/2`, with `u` free at `x = 0` and the symmetry conditions `u =
 v_{,x} = w_{,x} = 0` at `x = L/2`, which contain the critical mode of one
 axial half-wave; the axial load is a constant `N_{xx}` in every domain,
@@ -71,7 +74,7 @@ test accepts a discrete load between 10 % below the smeared value, beyond
 the largest difference of the four cylinders, and the smeared value, and
 within 5 % of
 `\bar{N}_s` of Card and Jones, whose section differs from the blade by the
-overlap with the skin. With ``'plate_clpt_donnell'`` blades the geometric
+overlap with the skin and the torsion constant. With ``'plate_clpt_donnell'`` blades the geometric
 stiffness lacks the work of the blade load on the in-plane (radial)
 bending of the blade, `N_{xx} v_{,x}^2`, see the Notes of
 :func:`.create_cylinder_blade_stiffened`, and the load is about twice the
@@ -91,6 +94,7 @@ References
 ----------
 .. [1] Block, D. L., Card, M. F., and Mikulas, M. M., Jr., "Buckling of
    Eccentrically Stiffened Orthotropic Cylinders", NASA TN D-2960, 1965.
+   https://ntrs.nasa.gov/citations/19650021133
 .. [2] Card, M. F., and Jones, R. M., "Experimental and Theoretical Results
    for Buckling of Eccentrically Stiffened Cylinders", NASA TN D-3639,
    1966.

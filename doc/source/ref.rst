@@ -5,7 +5,7 @@ References
 .. [alfano2001Interface] G. Alfano and M. A. Crisfield, "Finite element interface models for the delamination analysis of laminated composites: mechanical and computational issues". International Journal for Numerical Methods in Engineering, 50:1701-1736, 2001.
 .. [amabili2008Nonlinear] M. Amabili, "Nonlinear Vibrations and Stability of Shells and Plates". Cambridge University Press, Cambridge, 2008. https://doi.org/10.1017/CBO9780511619694.
 .. [bardell1991] N .S. Bardell, "Free vibration analysis of a flat plate using the hierarchical finite element method". Journal of Sound and Vibration, 151(2):263-289, 1991. https://doi.org/10.1016/0022-460X(91)90855-E.
-.. [block1965Stiffened] D. L. Block, M. F. Card and M. M. Mikulas, Jr., "Buckling of Eccentrically Stiffened Orthotropic Cylinders". NASA TN D-2960, NASA Langley Research Center, 1965.
+.. [block1965Stiffened] D. L. Block, M. F. Card and M. M. Mikulas, Jr., "Buckling of Eccentrically Stiffened Orthotropic Cylinders". NASA TN D-2960, NASA Langley Research Center, 1965. https://ntrs.nasa.gov/citations/19650021133.
 .. [brush1975Buckling] D. O. Brush and B. O. Almroth, "Buckling of Bars, Plates, and Shells". McGraw-Hill, New York, 1975.
 .. [camanho2003Delamination] P. P. Camanho, C. G. Dávila and M. F. de Moura, "Numerical simulation of mixed-mode progressive delamination in composite materials". Journal of Composite Materials, 37(16):1415-1438, 2003.
 .. [castro2016FlutterPanel] S. G. P. Castro, T. A. M. Guimarães, D. A. Rade and M. V. Donadon, "Flutter of stiffened composite panels considering the stiffener’s base as a structural element". Composite Structures, 140:36-43, 2016. https://doi.org/10.1016/j.compstruct.2015.12.056.
