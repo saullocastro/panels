@@ -119,7 +119,7 @@ from smeared_stringer_cylinder import (blade_stringer, isotropic_skin,
 IN = 0.0254
 PSI = 6894.757293168
 LBF = 4.4482216152605
-# Card and Jones (1966), Table I, cylinder 4, and Fig. 2(b), in SI units
+# cylinder 4 of Table I and the stringer of Fig. 2(b) of [2]_, in SI units
 E = 10.5e6*PSI
 NU = 0.32
 R = 9.55*IN
