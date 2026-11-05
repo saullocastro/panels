@@ -11,7 +11,7 @@ originates from the MSc thesis of D'Souza (2024) [nathan2024MSc]_,
 model as implemented and documents where the implementation departs from the
 thesis. Equation numbers of the form "Eq. 5.12" refer to the thesis. Each
 deviation states the problem, its consequence on the load-displacement curve
-of the double cantilever beam (DCB), and what the implementation does now.
+of the double cantilever beam (DCB), and what the implementation does instead.
 
 The implementation is found in:
 
@@ -665,3 +665,42 @@ specimens the peak loads are within 2.6% of the corrected beam theory or of
 a cohesive finite element model with the same law, while the initial
 compliance is 15-21% lower than that of the corrected beam theory,
 because the CLPT arms have no transverse shear deformation.
+
+
+.. _cohesive_zone_limits:
+
+Limits of validity
+------------------
+
+The following limits come from the model itself, not from its
+discretisation:
+
+- **Bilinear law driven by the normal separation.** The law is bilinear,
+  :func:`.calc_kw_tsl` accepts no other ``tsl_type``, and the damage of
+  Eq. :eq:`cz-damage` is computed from the corrected normal separation
+  `\bar\Delta_w` only; the tangential separations are degraded by the same
+  damage but do not drive it. Mixed-mode delamination and laws with more
+  than one softening branch, such as those that represent an R-curve from
+  fibre bridging, are not represented.
+- **No interpenetration stiffness.** The stiffness is `k_o (1 - d)` for
+  separations of either sign. The interpenetration stiffness of Eq. 5.12 of
+  the thesis is not implemented, so a fully damaged point offers no
+  resistance when the faces of the crack close. Under an increasing opening
+  the damaged points of a DCB have a positive separation and this does not
+  matter; it does when the faces of a damaged region come into contact.
+- **One cohesive interface per assembly.** The damage history `d^h` is
+  stored once per assembly, in ``MultiDomain.dmg_index``, and is read by
+  every ``'SB_TSL'`` connection, which restricts an assembly to one
+  ``'SB_TSL'`` connection.
+- **One crack front along** `-x`. The correction of the separation,
+  Eq. :eq:`cz-correction`, assumes in each row `y =` cte a single crack front
+  that advances along `-x`.
+- **Classical laminated plate theory.** ``'SB_TSL'`` is available only for
+  the models of the classical laminated plate theory; the models based on
+  shear deformation theories raise a ``NotImplementedError``. The arms have
+  no transverse shear deformation, so the compliance of arms with a low
+  transverse shear stiffness is underestimated, while the peak loads,
+  controlled by the fracture toughness, are affected much less.
+- **Matching domains.** The two panels of the connection must have the
+  same dimensions `a`, `b`, since the separations are evaluated at the
+  integration points of the domain of the top panel.
