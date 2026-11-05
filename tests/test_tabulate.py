@@ -1,10 +1,8 @@
 r"""The approximation functions of the numerical kernels are tabulated
 
-See :mod:`panels.dev.tabulate`. The
-results of the tabulated kernels are those of the previous implementation,
-bit for bit; here the rewriting itself is checked, and that no kernel of
-the package evaluates the approximation functions in its loops over the
-terms any more.
+See :mod:`panels.dev.tabulate`. Here the rewriting itself is checked, and
+that no kernel of the package evaluates the approximation functions in its
+loops over the terms.
 """
 import os
 import re

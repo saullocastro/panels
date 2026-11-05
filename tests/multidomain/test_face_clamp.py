@@ -281,7 +281,7 @@ def test_planar_clamp_is_u_zero_at_three_coordinates(offset):
     ft = fields(t, ct, xs.ravel(), ys.ravel())
     for k in FIELDS:
         assert np.allclose(f[k], ft[k], rtol=0, atol=1e-8*np.abs(ft['w']).max())
-    # the former clamp of the shear deformation theories, with w,x free
+    # without x1wr = 0, with w,x free, the edge is softer
     t.x1wr = t.x2wr = 1.
     _, cf = static(t)
     assert center_w(t, cf) > 1.05*center_w(t, ct)

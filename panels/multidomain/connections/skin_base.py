@@ -20,9 +20,9 @@ of the null-space method, :func:`.nullspace.constraint_matrix`, and the
 same displacement jump is the separation of the cohesive connection
 ``'SB_TSL'``, see :meth:`.MultiDomain._tsl_operators`.
 
-The functions ``fkCSB11``, ``fkCSB12`` and ``fkCSB22`` of earlier versions
-are deprecated: they return the blocks of :func:`.fkCSB` and ignore their
-distance arguments.
+The functions ``fkCSB11``, ``fkCSB12`` and ``fkCSB22`` are deprecated:
+they return the blocks of :func:`.fkCSB` and ignore their distance
+arguments.
 
 Notes
 -----
