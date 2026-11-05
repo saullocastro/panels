@@ -409,10 +409,15 @@ def numerical_module():
     full = [[True]*ND for _ in range(ND)]
     Hpat = [[H[p, q] != 0 for q in range(ND)] for p in range(ND)]
     blocks_all = [(d, e) for d in range(DOF) for e in range(DOF)]
-    blocks_diag = [(d, d) for d in range(DOF)]
+    #NOTE the pairs of degrees of freedom coupled by [H(N)], the diagonal
+    #     ones u-u, v-v, w-w for the plate
+    blocks_G = [(d, e) for d in range(DOF) for e in range(DOF)
+                if any(Hpat[p][q] for p in DSET[d] for q in DSET[e])]
     NxxNL, NyyNL, NxyNL = sympy.symbols('NxxNL, NyyNL, NxyNL')
     H_NL = H.xreplace({th.Nxx: NxxNL, th.Nyy: NyyNL, th.Nxy: NxyNL})
-    grads = list(range(6))
+    #NOTE the derivatives of the non-linear terms of the strains, the six
+    #     gradients for the plate
+    grads = [D_NAMES.index(g.name) for g in th.GRAD]
     sym_names = ', '.join(D_NAMES)
 
     out = [HEADER + 'r"""\n' + textwrap.fill(DESC, 76) + '''
@@ -609,7 +614,7 @@ def fkC_num(double [::1] cs, object Finput, object shell,
     kC = coo_matrix((kCv, (kCr, kCc)), shape=(size, size))
 
     return kC
-'''.format(COMMON=COMMON_CDEF, gr=', '.join(D_NAMES[:6]), basis=basis_cdef(),
+'''.format(COMMON=COMMON_CDEF, gr=', '.join(D_NAMES[p] for p in grads), basis=basis_cdef(),
            NB=NE*ND, NK=ND*ND, NT=DOF*ND, ND=ND, FINPUT=FINPUT, POINT=POINT,
            gzero='\n'.join('                {0} = 0.'.format(D_NAMES[p]) for p in grads),
            gloop='\n'.join(gradient_loop(20, grads)),
@@ -714,7 +719,7 @@ def fkG_num(double [::1] cs, object Finput, object shell,
 
 {FINPUT}
 
-    fdim = 3*m*m*n*n
+    fdim = {NG}*m*m*n*n
     kGr = np.zeros((fdim,), dtype=INT)
     kGc = np.zeros((fdim,), dtype=INT)
     kGv = np.zeros((fdim,), dtype=DOUBLE)
@@ -748,7 +753,7 @@ def fkG_num(double [::1] cs, object Finput, object shell,
            dloop='\n'.join(gradient_loop(16, range(ND))),
            elines='\n'.join('                e[{0}] = {1}'.format(k, pstr(eps_L[k])) for k in range(NE)),
            Hlines='\n'.join(matrix_lines('K', H, 16)),
-           loops=assembly('kG', Hpat, blocks_diag)))
+           NG=len(blocks_G), loops=assembly('kG', Hpat, blocks_G)))
 
     out.append(calc_fint_src())
     text = ''.join(out)
