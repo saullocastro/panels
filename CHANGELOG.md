@@ -11,6 +11,40 @@
   at 30. New test `test_m_n_above_30_raise` in
   `tests/tests_shell/test_argument_validation.py`.
 
+### Changed: blades and flanges of the ready-made assemblies use `plate_clpt_gl`
+
+- The blades of `create_cylinder_blade_stiffened` (and of the three
+  `cylinder_blade_stiffened_compression_lb_*` analyses), the stringers of
+  `create_wingbox` and the flanges of `tstiff2d_1stiff_compression`,
+  `tstiff2d_1stiff_flutter` and `tstiff2d_1stiff_freq` are
+  `plate_clpt_gl` instead of `plate_clpt_donnell`. These plates carry axial
+  load in their own plane and bend in their plane when the stiffened
+  structure buckles; the von Kármán geometric stiffness has no
+  `N_xx v_,x^2` term, so the load of a blade did not destabilize its
+  in-plane (for a stringer, radial) bending, and general instability loads
+  came out about twice too high. The linear stiffness, mass and
+  aerodynamic matrices are unchanged. Effects: cylinder 4 of Card and
+  Jones (1966), 60 internal blades, simply supported, 1.95 times the
+  smeared-stringer load with `plate_clpt_donnell` blades, 6.6 % below it
+  with `plate_clpt_gl`; the wing box with `nstr=2` stringers, first
+  buckling tip force from 536.0 to 436.1 N (default terms); the stored
+  values of the
+  T-stiffened panel tests and of the wing box without stringers change by
+  less than 1e-5; the laminated examples of the blade-stiffened cylinder by
+  less than 0.01 %.
+- `tests/multidomain/test_cylinder_blade_stiffened.py` is anchored in the
+  literature: the cylinder 4 of Card and Jones (1966, NASA TN D-3639)
+  against the smeared-stringer theory of Block, Card and Mikulas (1965,
+  NASA TN D-2960, Eq. (15)), implemented in the new model module
+  `tests/multidomain/smeared_stringer_cylinder.py` and checked against the
+  16 values of their Table I(c) and the four `N_s` of Card and Jones; the
+  discrete model with simply supported ends is 6.6 % below the smeared
+  load and 0.25 % below `N_s`. The three analysis functions keep regression
+  values for this cylinder; `test_null_space.py` has the new value of its
+  laminated blade-stiffened case.
+- Documentation: "How to choose a model" of the shell overview explains
+  when plates loaded in their own plane need `plate_clpt_gl`.
+
 ## 0.15.0 (2026-11-03)
 
 ### Requires structsolve 0.10.0

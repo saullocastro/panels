@@ -71,7 +71,8 @@ def create_wingbox(nstr=0, hs=3.e-3, ts=1.5e-3, L=1.010, W=50.5e-3,
 
     The defaults are the case High-AR-t5 of Elalfy, De Breuker and Castro,
     see :mod:`panels.multidomain.wingbox`, without stringers. All the domains
-    are isotropic ``'plate_clpt_donnell'`` :class:`.Shell` objects:
+    are isotropic ``'plate_clpt_donnell'`` :class:`.Shell` objects, except
+    the stringers, ``'plate_clpt_gl'`` (see Notes):
 
     - per bay, ``nstr + 1`` strips of each skin, of the groups
       ``'skin_top'`` and ``'skin_bot'``, at `z = \pm H/2`, connected to each
@@ -167,6 +168,16 @@ def create_wingbox(nstr=0, hs=3.e-3, ts=1.5e-3, L=1.010, W=50.5e-3,
     not given in [1]_, and the tip force is there a concentrated force at
     the tip, here distributed over the last ``dx_load`` of the upper skin.
 
+    The stringers carry part of the bending load of the skin as the
+    membrane stress resultant `N_{xx}` of the plate, and bend in their own
+    plane when the skin buckles across them: the displacement `w` of the
+    skin at the joint is the in-plane displacement `v` of the stringer. The
+    geometric stiffness of the Green-Lagrange strains of ``'plate_clpt_gl'``
+    contains the work of `N_{xx}` on this bending, `\frac{1}{2} N_{xx}
+    v_{,x}^2`, which the von Kármán strains of ``'plate_clpt_donnell'``
+    omit; the linear stiffness of both models is the same. Skins, spars and
+    ribs keep ``'plate_clpt_donnell'``.
+
     References
     ----------
     .. [1] Elalfy, M. H., De Breuker, R., and Castro, S. G. P., Beam-like
@@ -214,6 +225,8 @@ def create_wingbox(nstr=0, hs=3.e-3, ts=1.5e-3, L=1.010, W=50.5e-3,
             st_bot = [_plate(a, hb, ts, mst, nst, 'stringer',
                              (x0, (j + 1)*ws, -H/2 + hb), _X, -_Z, **mat)
                       for j in range(nstr)]
+            for st in st_top + st_bot:
+                st.model = 'plate_clpt_gl'
         for skin in (top, bot):
             conn += [dict(p1=p1, p2=p2, func='SSycte', ycte1=ws, ycte2=0.)
                      for p1, p2 in zip(skin[:-1], skin[1:])]
