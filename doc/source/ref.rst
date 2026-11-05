@@ -36,3 +36,4 @@ References
 .. [tijs2023PhD] B. H. A. H. Tijs, "Analysis of Thermoplastic Composites and Conduction Welded Joints". PhD thesis, Delft University of Technology, 2023. ISBN 978-94-6473-101-9.
 .. [timoshenko1961Stability] S. P. Timoshenko and J. M. Gere, "Theory of Elastic Stability". 2nd ed., McGraw-Hill, New York, 1961.
 .. [turon2007MeshSize] A. Turon, C. G. Dávila, P. P. Camanho and J. Costa, "An engineering solution for mesh size effects in the simulation of delamination using cohesive zone models". Engineering Fracture Mechanics, 74:1665-1682, 2007.
+.. [vanderheijden2008Koiter] A. M. A. van der Heijden (ed.), "W. T. Koiter's Elastic Stability of Solids and Structures". Cambridge University Press, Cambridge, 2008. https://doi.org/10.1017/CBO9780511546174.

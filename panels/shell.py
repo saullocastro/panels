@@ -92,7 +92,8 @@ def gauss_points(num, degree=(4, 0)):
     :class:`.Shell` along a direction with ``num`` approximation terms and a
     constant constitutive matrix, see :meth:`.Shell.integration_points`;
     ``3*max(num - 1, 3)`` with ``degree=(6, -2)``, for the model
-    ``'plate_clpt_tl'``.
+    ``'plate_clpt_tl'``, and ``3*max(num - 1, 3) + 1`` with ``degree=(6,
+    0)``, for ``'cylshell_clpt_tl'``.
 
     Parameters
     ----------
@@ -122,7 +123,9 @@ def gauss_points(num, degree=(4, 0)):
     \ge 4 p`, i.e. `n \ge 2 p + 1 = \max(2\,num - 1, 7)`. With the
     curvatures of the deformed normal of ``'plate_clpt_tl'``, cubic in the
     displacements, the integrands are of degree at most `6 p - 2` and `n \ge
-    3 p`. In general `n = \lceil (k p + j + 1)/2 \rceil`.
+    3 p`; with those of ``'cylshell_clpt_tl'``, `6 p - 2` along `x` and `6
+    p` along `y`, where `v` and `w` enter without derivative, and the
+    default is `n \ge 3 p + 1` along both. In general `n = \lceil (k p + j + 1)/2 \rceil`.
 
     """
     k, j = degree
@@ -146,7 +149,9 @@ class Shell(object):
     beams, e.g. the column buckling of a long tube, and curved panels loaded
     in their own plane, ``model = 'cylshell_clpt_gl'`` has the
     Green-Lagrange membrane strains with the Sanders-Koiter changes of
-    curvature.
+    curvature, and ``model = 'cylshell_clpt_tl'`` also the changes of
+    curvature of the deformed normal, for cylindrical panels and cylinders
+    bent through large rotations.
 
     The approximation functions for the displacement fields are built using
     Bardell's functions, see :mod:`panels.bardell`.
@@ -967,7 +972,8 @@ class Shell(object):
         which `n_x = 2 p + 1 = \max(2 m - 1, 7)` points integrate exactly,
         and likewise along `y`. The curvatures of ``'plate_clpt_tl'``, cubic
         in the displacements, raise the degree to `6 p - 2`, and its default
-        is `n_x = 3 p`. The terms in `1/r` of the cylinders, also
+        is `n_x = 3 p`; those of ``'cylshell_clpt_tl'`` to `6 p`, with `n_x
+        = 3 p + 1`. The terms in `1/r` of the cylinders, also
         those in `v/r` of the Sanders-Koiter kinematics, only multiply these
         products by a constant, and the transverse shear strains and the
         higher-order terms of the TSDT are again products of the functions
@@ -3152,8 +3158,9 @@ class Shell(object):
             ``False`` for a dead load, ``True`` or ``'linear'`` for a follower
             pressure with the first-order area vector, ``'quadratic'`` for the
             complete area vector, the one to use with the large rotations of
-            ``model='plate_clpt_gl'``, ``'plate_clpt_tl'`` or
-            ``'cylshell_clpt_gl'``. ``None`` is taken as ``False``.
+            ``model='plate_clpt_gl'``, ``'plate_clpt_tl'``,
+            ``'cylshell_clpt_gl'`` or ``'cylshell_clpt_tl'``. ``None`` is
+            taken as ``False``.
             Default ``False``.
         zp : float, optional
             Position along `z` of the surface on which the pressure acts,

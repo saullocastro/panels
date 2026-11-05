@@ -15,8 +15,8 @@ The functions of this module evaluate the displacements and rotations,
 :func:`.fuvw`, the generalized strains, :func:`.fstrain`, and the
 approximation functions at a point, :func:`.fg`, for the models
 ``'plate_clpt_donnell'``, ``'plate_clpt_gl'``, ``'plate_clpt_tl'``,
-``'cylshell_clpt_donnell'``, ``'cylshell_clpt_sanders'`` and
-``'cylshell_clpt_gl'``, see
+``'cylshell_clpt_donnell'``, ``'cylshell_clpt_sanders'``,
+``'cylshell_clpt_gl'`` and ``'cylshell_clpt_tl'``, see
 :mod:`panels.modelDB`. The coordinates
 ``x`` and ``y`` are physical, ``0 <= x <= a`` and ``0 <= y <= b``.
 
@@ -67,7 +67,7 @@ def is_sanders(object s):
     -------
     sanders : int
         ``1`` when ``'sanders'`` is in the name of the model or the model is
-        ``'cylshell_clpt_gl'``, else ``0``.
+        ``'cylshell_clpt_gl'`` or ``'cylshell_clpt_tl'``, else ``0``.
 
     Notes
     -----
@@ -75,10 +75,13 @@ def is_sanders(object s):
     axis is `\phi_y = -w_{,y} + v/r`, instead of `-w_{,y}`, and the changes of
     curvature receive terms in `u` and `v`, see :mod:`panels.models`. The
     model ``'cylshell_clpt_gl'`` has the same rotations and changes of
-    curvature, with the Green-Lagrange membrane strains.
+    curvature, with the Green-Lagrange membrane strains, and
+    ``'cylshell_clpt_tl'`` the same rotations and linear changes of
+    curvature.
 
     '''
-    return 1 if ('sanders' in s.model or s.model == 'cylshell_clpt_gl') else 0
+    return 1 if ('sanders' in s.model
+                 or s.model in ('cylshell_clpt_gl', 'cylshell_clpt_tl')) else 0
 
 
 def is_gl(object s):
@@ -95,8 +98,8 @@ def is_gl(object s):
     Returns
     -------
     gl : int
-        ``1`` when the model is ``'plate_clpt_gl'``, ``'plate_clpt_tl'`` or
-        ``'cylshell_clpt_gl'``, else ``0``.
+        ``1`` when the model is ``'plate_clpt_gl'``, ``'plate_clpt_tl'``,
+        ``'cylshell_clpt_gl'`` or ``'cylshell_clpt_tl'``, else ``0``.
 
     Notes
     -----
@@ -108,7 +111,7 @@ def is_gl(object s):
 
     '''
     return 1 if s.model in ('plate_clpt_gl', 'plate_clpt_tl',
-                            'cylshell_clpt_gl') else 0
+                            'cylshell_clpt_gl', 'cylshell_clpt_tl') else 0
 
 
 def is_tl(object s):
@@ -116,7 +119,8 @@ def is_tl(object s):
     with the deformed normal
 
     The changes of curvature of :func:`.fstrain` are then those of
-    :mod:`panels.models.plate_clpt_tl_num`.
+    :mod:`panels.models.plate_clpt_tl_num` or
+    :mod:`panels.models.cylshell_clpt_tl_num`.
 
     Parameters
     ----------
@@ -126,7 +130,8 @@ def is_tl(object s):
     Returns
     -------
     tl : int
-        ``1`` when the model is ``'plate_clpt_tl'``, else ``0``.
+        ``1`` when the model is ``'plate_clpt_tl'`` or ``'cylshell_clpt_tl'``,
+        else ``0``.
 
     Notes
     -----
@@ -136,11 +141,15 @@ def is_tl(object s):
     -\boldsymbol{a} \cdot \boldsymbol{u}_{,xx}`, `\kappa_{yy} =
     -\boldsymbol{a} \cdot \boldsymbol{u}_{,yy}` and `\kappa_{xy} =
     -2 \boldsymbol{a} \cdot \boldsymbol{u}_{,xy}`, which are those of the
-    von Kármán plate for `\boldsymbol{a} = \boldsymbol{e}_z`, see
+    von Kármán plate for `\boldsymbol{a} = \boldsymbol{e}_z`. For the
+    cylinder, ``'cylshell_clpt_tl'``, `\boldsymbol{X}_{,\alpha\beta}`
+    includes the derivatives of the local basis, and `\kappa_{yy}` and
+    `\kappa_{xy}` terms of the membrane strains divided by `r`, which make
+    their linear part that of the Sanders-Koiter kinematics, see
     :mod:`panels.models`.
 
     '''
-    return 1 if s.model == 'plate_clpt_tl' else 0
+    return 1 if s.model in ('plate_clpt_tl', 'cylshell_clpt_tl') else 0
 
 
 def fuvw(double [::1] c, object s, double [::1] xs, double [::1] ys,
@@ -300,7 +309,8 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys, int
     The strains are those of the Donnell, Sanders-Koiter or Green-Lagrange
     kinematics given in the notes of :mod:`panels.models`, with the
     quadratic terms of the membrane strains, and the non-linear terms of the
-    changes of curvature of ``'plate_clpt_tl'``, multiplied by ``NLgeom``,
+    changes of curvature of ``'plate_clpt_tl'`` and ``'cylshell_clpt_tl'``,
+    multiplied by ``NLgeom``,
     and with ``r = 0`` standing for the flat plate, whose hoop strain is
     zero.
     '''
@@ -641,8 +651,8 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
     constants ``c``, the boundary condition flags ``x1u, ..., y2wr``, the
     non-linear terms when ``NLgeom == 1``, the Sanders-Koiter
     kinematics when ``sanders == 1``, the Green-Lagrange membrane strains
-    of the plate when ``gl == 1`` and the changes of curvature of the
-    deformed normal when ``tl == 1``. For the Donnell kinematics the term
+    when ``gl == 1`` and the changes of curvature of the deformed normal
+    when ``tl == 1``. For the Donnell kinematics the term
     ``w/r`` is included when ``r`` is not zero.
 
     '''
@@ -667,7 +677,7 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
     cdef double *gw_eta
     cdef double *gw_etaeta
 
-    cdef double w_xi, w_eta, v, phix, phiy, ww, ty
+    cdef double w_xi, w_eta, v, phix, phiy, ww, ty, py
     cdef double u_x, u_y, v_x, v_y
     cdef double u_xx, u_yy, u_xy, v_xx, v_yy, v_xy, w_xx, w_yy, w_xy
     cdef double w_x, w_y, a1, a2, a3
@@ -805,6 +815,33 @@ cdef void cfstrain(double *c, int m, int n, double a, double b,
                 exx += NLgeom*0.5*(u_x*u_x + v_x*v_x)
                 eyy += NLgeom*0.5*(u_y*u_y + ty*ty)
                 gxy += NLgeom*(u_x*u_y + v_x*ty)
+
+            if tl == 1 and NLgeom == 1:
+                # changes of curvature of the area vector a = X,x x X,y of
+                # the deformed mid-surface, cylshell_clpt_tl, whose linear
+                # part is the Sanders-Koiter one above
+                w_xx = 0
+                w_yy = 0
+                w_xy = 0
+                for j in range(n):
+                    for i in range(m):
+                        col = DOF*(j*m + i)
+                        w_xx += c[col+2]*fw_xixi[i]*gw[j]*4/(a*a)
+                        w_yy += c[col+2]*fw[i]*gw_etaeta[j]*4/(b*b)
+                        w_xy += c[col+2]*fw_xi[i]*gw_eta[j]*4/(a*b)
+                w_x = (2/a)*w_xi
+                w_y = (2/b)*w_eta
+                ty = v_y + ww/r
+                py = w_y - v/r
+                a1 = v_x*py - w_x*(1 + ty)
+                a2 = w_x*u_y - (1 + u_x)*py
+                a3 = (1 + u_x)*(1 + ty) - v_x*u_y
+                kxx = -(a1*u_xx + a2*v_xx + a3*w_xx)
+                kyy = (-(a1*u_yy + a2*(v_yy + 2*w_y/r - v/(r*r))
+                         + a3*(w_yy - 2*v_y/r - ww/(r*r) - 1/r))
+                       - 1/r - (exx + 2*eyy)/r)
+                kxy = (-2*(a1*u_xy + a2*(v_xy + w_x/r) + a3*(w_xy - v_x/r))
+                       - gxy/(2*r))
 
             exxs[pti] = exx
             eyys[pti] = eyy

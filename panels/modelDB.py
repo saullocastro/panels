@@ -78,6 +78,26 @@ db = {
                     # the kernels divide by r and r*r, a radius is mandatory
                     'requires_r': True,
                     },
+    'cylshell_clpt_tl': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    'field': clpt_field,
+                    #NOTE the analytical kernels of cylshell_clpt_gl: the
+                    #     linear strains are those of cylshell_clpt_sanders
+                    #     and the geometric stiffness of a constant membrane
+                    #     stress state that of the Green-Lagrange strains
+                    'matrices': cylshell_clpt_gl,
+                    'matrices_num': cylshell_clpt_tl_num,
+                    'dofs': 3,
+                    'e_num': 6,
+                    # the kernels divide by r and r*r, a radius is mandatory
+                    'requires_r': True,
+                    # curvatures cubic in the displacements: integrands of
+                    # degree 6p - 2 along x and 6p along y, integrated
+                    # exactly by 3p + 1 points
+                    'integrand_degree': (6, 0),
+                    },
     'plate_clpt_donnell': {
                     'linear static': True,
                     'linear buckling': True,
