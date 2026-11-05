@@ -2,6 +2,43 @@
 
 ## Unreleased
 
+### New model `cylshell_clpt_gl`
+
+- Cylindrical shells, CLPT, with the complete Green-Lagrange membrane
+  strains of the mid-surface (the Flügge-Lur'e-Byrne strains of Amabili
+  2008, Eqs. 1.118-1.120) and the changes of curvature of
+  `cylshell_clpt_sanders`. The membrane strains vanish for any rigid
+  motion and contain the rotation about the normal that
+  `cylshell_clpt_sanders` omits: under an axial load the geometric
+  stiffness has `N_xx v,x^2` besides `N_xx w,x^2`. For a pinned tube bending
+  as a beam (`R/h = 100`, `L/R = 50` and `80`) `cylshell_clpt_gl` buckles at
+  0.989 and 0.996 times the Euler load, `cylshell_clpt_sanders` at 1.984 and
+  1.994 times it. Use it for long cylinders bending as beams, low
+  circumferential wave numbers, and curved panels or stiffener blades loaded
+  in their own plane.
+- Generated from `theory/shells/cylshell_clpt_gl/` (derivation with
+  symbolic checks, `write_pyx.py`, `cylshell_clpt_gl.md`) with the kernel
+  templates of `plate_clpt_gl`: `panels/models/cylshell_clpt_gl.pyx`
+  (`fkG0`; `fk0`, `fkM`, `fkAx`, `fkAy`, `fcA` of `cylshell_clpt_sanders`)
+  and `cylshell_clpt_gl_num.pyx` (`fkC_num`, `fkG_num`, `calc_fint`,
+  `calc_kTv`, follower pressure; `fkM_num`, `fkAx_num`, `fkAy_num` of
+  `cylshell_clpt_sanders_num`). `theory/shells/plate_clpt_gl/write_pyx.py`
+  takes the non-linear derivatives and the blocks of the geometric
+  stiffness from the derivation (the plate kernels are unchanged).
+- Registered in `panels.modelDB` and `setup.py`; `clpt_field.is_sanders`
+  and `is_gl` return 1 for it (rotation `phiy = -w,y + v/r`, strains of
+  `Shell.strain`), and the connections of `MultiDomain` include the `v/r`
+  of its rotation (`_rinv_sanders` of `multidomain.py` and
+  `connections/kCsdt.py`), as for `cylshell_clpt_sanders`.
+- New `tests/tests_shell/test_cylshell_clpt_gl.py`: Euler load of the
+  pinned tube, axial buckling of shear-diaphragm panels against Batdorf
+  (1947) and `cylshell_clpt_sanders` (4.2 % below it for a panel of 180
+  degrees, 1.0 % for 40 degrees, `R/h = 100`, `L/R = 2`), zero membrane
+  strains for finite rigid rotations, linear kernels equal to those of
+  `cylshell_clpt_sanders`. The model is added to the tangent, tangent
+  product and follower-pressure tests (`test_tangent_consistency.py`) and to
+  the connection tests of `tests/multidomain/test_bf_sanders.py`.
+
 ### Fixed
 
 - `Shell.m` and `Shell.n` are properties whose setters raise the
