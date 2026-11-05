@@ -58,7 +58,11 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
     ``x0 = 0`` and ``y0`` equal to ``i`` times the width for the ``i``-th
     panel. The ``i``-th blade is a flat :class:`.Shell` (no radius) of the
     group ``'blade_%02d' % i``, with length ``height``, width
-    ``width_blades[i]`` and stacking sequence ``stack_blades[i]``. All the
+    ``width_blades[i]``, stacking sequence ``stack_blades[i]`` and the
+    model ``'plate_clpt_gl'``, whose geometric stiffness contains the work
+    of the axial load of the blade on its bending in its own plane, the
+    radial bending of the stringer (see Notes); the skin panels have the
+    default model of a cylinder, ``'cylshell_clpt_sanders'``. All the
     panels have the boundary condition flags that remove `u`, `v` and `w`
     at the edges `x = 0` and `x = height` (``x1u = x2u = x1v = x2v = x1w =
     x2w = 0``) and keep all the other ones. Consecutive skin panels are
@@ -117,7 +121,38 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
     `y = 0` of the skin panel, where the blade stands normal to the skin,
     see :meth:`.MultiDomain.get_kC_conn`. The boundary conditions and the
     redundant constraints of the closed skin are those of
-    :func:`.create_cylinder`.
+    :func:`.create_cylinder`. With ``ycte2 = 0`` the blade stands on the
+    inner side of the skin, its local `y` axis pointing towards the axis of
+    the cylinder (`v_2 = -w_1` along the joint).
+
+    The blades carry their share of the axial load as the membrane stress
+    resultant `N_{xx}` of the plate, and the general instability of the
+    stiffened cylinder bends them in their own plane: the radial
+    displacement `w` of the skin at the joint is the in-plane displacement
+    `v` of the blade. The work of `N_{xx}` on this deflection is the term
+    `\frac{1}{2} N_{xx} v_{,x}^2` of the Green-Lagrange membrane strain
+
+    .. math::
+
+        \varepsilon_{xx} = u_{,x} + \frac{1}{2} \left( u_{,x}^2 + v_{,x}^2
+            + w_{,x}^2 \right)
+
+    of the model ``'plate_clpt_gl'``, whose geometric stiffness matrix has
+    the blocks `u`-`u` and `v`-`v` besides the block `w`-`w`. The von
+    Kármán strains of ``'plate_clpt_donnell'`` keep `w_{,x}^2/2` only: a
+    blade of that model is loaded without destabilizing the radial bending
+    of the stringer, and the general instability loads come out too high,
+    whereas in the smeared-stiffener theory of Block, Card and Mikulas [1]_
+    the total load of the skin and of the stringers, `\bar{N}_x`, enters the
+    potential energy of the external forces through `\bar{N}_x w_{,x}^2`
+    (their Eq. (9), p. 8). Both models have the same linear constitutive
+    stiffness, mass and aerodynamic matrices, so that linear static and
+    frequency analyses do not depend on this choice.
+
+    References
+    ----------
+    .. [1] Block, D. L., Card, M. F., and Mikulas, M. M., Jr., "Buckling of
+       Eccentrically Stiffened Orthotropic Cylinders", NASA TN D-2960, 1965.
 
     Examples
     --------
@@ -162,7 +197,7 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
         y0 = i*b_skin
         blade_name = 'blade_%02d' % i
         blade = Shell(group=blade_name, x0=0, y0=y0, a=height, b=width_blades[i],
-                      m=m, n=n, plyt=plyt,
+                      model='plate_clpt_gl', m=m, n=n, plyt=plyt,
                       stack=stack_blades[i], laminaprop=laminaprop,
                       x1u=0, x1ur=1, x2u=0, x2ur=1,
                       x1v=0, x1vr=1, x2v=0, x2vr=1,
@@ -289,7 +324,7 @@ def cylinder_blade_stiffened_compression_lb_Nxx_cte(height, r, stack, stack_blad
     ...     plyt=0.125e-3, laminaprop=laminaprop, npanels=5,
     ...     Nxxs_skin=Nxxs, Nxxs_blade=Nxxs, m=8, n=12, num_eigvalues=5)
     >>> round(float(Nxxs[0]*eigvals[0]))
-    -51664
+    -51659
 
     """
     md, conns = create_cylinder_blade_stiffened(height=height, r=r,
@@ -416,7 +451,7 @@ def cylinder_blade_stiffened_compression_lb_Nxx_from_static(height, r, stack,
     ...     plyt=0.125e-3, laminaprop=laminaprop, npanels=5,
     ...     Nxxs_skin=Nxxs, Nxxs_blade=Nxxs, m=8, n=12, num_eigvalues=5)
     >>> round(float(Nxxs[0]*eigvals[0]))
-    -41697
+    -41695
 
     """
     md, conns = create_cylinder_blade_stiffened(height=height, r=r,

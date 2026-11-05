@@ -138,11 +138,46 @@ thin cylinder or cylindrical panel        ``'cylshell_clpt_sanders'``, the defau
                                           ``'cylshell_clpt_donnell'`` for short wavelengths only
 plates of an assembly with large          ``'plate_clpt_gl'``; ``'plate_clpt_tl'`` when the plates also
 rotations, e.g. a wing box                bend through large rotations, see :ref:`plate_clpt_gl`
+plates loaded in their own plane that     ``'plate_clpt_gl'``, see below
+bend in their plane when they buckle,
+e.g. blade stringers of a stiffened shell
 moderately thick plates and shells,       ``'plate_fsdt_donnell'``, ``'cylshell_fsdt_sanders'``
 transverse shear flexibility              (or ``_donnell``)
 thick laminates, offset reference         ``'plate_tsdt_donnell'``, ``'cylshell_tsdt_sanders'``
 surface                                   (or ``_donnell``), see :ref:`tsdt_offset`
 ========================================= ===============================================================
+
+**Plates bent in their own plane.** A blade stringer modelled as a plate
+strip normal to the skin, or the web of a stiffener, carries its share of
+the axial load as a membrane stress resultant `N_{xx}` of the plate, and
+in a general instability of the stiffened structure it bends in its own
+plane: the out-of-plane displacement of the skin at the joint is the
+in-plane displacement `v` of the blade. The geometric stiffness is the
+second variation of the work of the pre-buckling stresses on the quadratic
+part of the membrane strains,
+
+.. math::
+
+    \delta^2 U_G = \int N_{xx} \left( \delta u_{,x}^2 + \delta v_{,x}^2
+        + \delta w_{,x}^2 \right) dA
+
+for a pre-buckling state `N_{xx}` alone,
+
+with the Green-Lagrange strains of ``'plate_clpt_gl'``, whereas the von
+Kármán strains of ``'plate_clpt_donnell'`` keep only `\delta w_{,x}^2`. A
+blade of the von Kármán plate model is therefore loaded without
+destabilizing its in-plane (for a stringer, radial) bending: the stringer
+behaves as a column whose load does no work on its lateral deflection, and
+the general instability load is overestimated, by a factor of two or more
+when the stringers carry about half of the load. In the smeared
+stiffener theories the total load of the skin and of the stringers enters
+the term `\bar{N}_x w_{,x}^2` of the skin [block1965Stiffened]_, which is what
+``'plate_clpt_gl'`` recovers for discrete blades. The two models have the
+same linear stiffness, mass and aerodynamic matrices, so that linear static
+and frequency analyses do not change, and the analytical geometric
+stiffness of a constant `N_{xx}` costs the same. Skins and plates that
+buckle out of their plane only, e.g. the skin between the stringers, are
+not affected.
 
 The thin-plate limit of the FSDT and the TSDT is the CLPT, see
 :ref:`boundary_conditions`, at the cost of 5 instead of 3 degrees of
