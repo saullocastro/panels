@@ -76,6 +76,19 @@
   T-stiffened panel tests and of the wing box without stringers change by
   less than 1e-5; the laminated examples of the blade-stiffened cylinder by
   less than 0.01 %.
+- The spars of `create_wingbox` are also `plate_clpt_gl`, selected by the
+  new argument `spar_model` (`plate_clpt_gl`, the default, or
+  `plate_clpt_donnell`; other values raise `ValueError`), which
+  `wingbox_tip_force_lb` passes on. The spar webs carry the bending
+  stresses of the box in their own plane, but these vary linearly over the
+  height with a zero resultant and do almost no work on the vertical
+  deflection of the spars: the first buckling tip force changes by less
+  than 3e-5 (172.7828 to 172.7826 N without stringers, 436.0593 to
+  436.0549 N with `nstr=2`, 518.0477 to 518.0323 N with `nstr=4`, default
+  terms; the first modes are local modes of the upper skin); the static
+  deflection is unchanged. New test `test_wingbox_spar_model` in
+  `tests/multidomain/test_wingbox.py`; the example
+  `ex_multidomain_wingbox.ipynb` compares the two spar models.
 - `tests/multidomain/test_cylinder_blade_stiffened.py` is anchored in the
   literature: the cylinder 4 of Card and Jones (1966, NASA TN D-3639)
   against the smeared-stringer theory of Block, Card and Mikulas (1965,

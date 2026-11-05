@@ -66,13 +66,14 @@ def create_wingbox(nstr=0, hs=3.e-3, ts=1.5e-3, L=1.010, W=50.5e-3,
         H=12.12e-3, t_skin=1.e-3, t_spar=5.e-3, t_rib=1.e-3, nbays=9,
         E=73.e9, nu=0.33, rho=2795., terms=None, P=1., dx_load=10.e-3,
         follower=False, tip_rib=True, stringers=True, ribs=True,
-        conn_method='penalty', rib_spar=True):
+        conn_method='penalty', rib_spar=True, spar_model='plate_clpt_gl'):
     r"""Create the multidomain assembly of a rectangular wing-box
 
     The defaults are the case High-AR-t5 of Elalfy, De Breuker and Castro,
     see :mod:`panels.multidomain.wingbox`, without stringers. All the domains
-    are isotropic ``'plate_clpt_donnell'`` :class:`.Shell` objects, except
-    the stringers, ``'plate_clpt_gl'`` (see Notes):
+    are isotropic :class:`.Shell` objects: the skins and the ribs
+    ``'plate_clpt_donnell'``, the stringers ``'plate_clpt_gl'`` and the spars
+    of the model ``spar_model``, by default ``'plate_clpt_gl'`` (see Notes):
 
     - per bay, ``nstr + 1`` strips of each skin, of the groups
       ``'skin_top'`` and ``'skin_bot'``, at `z = \pm H/2`, connected to each
@@ -151,6 +152,9 @@ def create_wingbox(nstr=0, hs=3.e-3, ts=1.5e-3, L=1.010, W=50.5e-3,
         How the connections are imposed, ``'penalty'``, the default, with
         the default stiffnesses of :func:`.calc_kt_kr`, or ``'null-space'``,
         see :class:`.MultiDomain`.
+    spar_model : str, optional
+        Model of the spars, ``'plate_clpt_gl'``, the default, or
+        ``'plate_clpt_donnell'``.
 
     Returns
     -------
@@ -160,6 +164,12 @@ def create_wingbox(nstr=0, hs=3.e-3, ts=1.5e-3, L=1.010, W=50.5e-3,
         domains ``'top'``, ``'bot'``, ``'spars'``, ``'st'`` (stringers) and
         ``'ribs'``, and ``'a'``, the length of a bay, ``'ws'``, the width of
         a skin strip, and ``'conn'``, the connections.
+
+    Raises
+    ------
+    ValueError
+        If ``spar_model`` is neither ``'plate_clpt_gl'`` nor
+        ``'plate_clpt_donnell'``.
 
     Notes
     -----
@@ -175,8 +185,27 @@ def create_wingbox(nstr=0, hs=3.e-3, ts=1.5e-3, L=1.010, W=50.5e-3,
     geometric stiffness of the Green-Lagrange strains of ``'plate_clpt_gl'``
     contains the work of `N_{xx}` on this bending, `\frac{1}{2} N_{xx}
     v_{,x}^2`, which the von Kármán strains of ``'plate_clpt_donnell'``
-    omit; the linear stiffness of both models is the same. Skins, spars and
-    ribs keep ``'plate_clpt_donnell'``.
+    omit; the linear stiffness of both models is the same.
+
+    The spars are also plates loaded in their own plane: the bending of the
+    box gives their webs a membrane stress resultant `N_{xx}` that varies
+    linearly over the height, from tension in the upper half to
+    compression in the lower half under an upward tip force, and their
+    in-plane displacement `v` is the vertical deflection of the box. The
+    term `\frac{1}{2} N_{xx} v_{,x}^2` is then in the geometric stiffness of
+    ``'plate_clpt_gl'`` only. Its work on a deflection `v` uniform over the
+    height of a spar is the resultant of `N_{xx}` over the height, which is
+    zero in pure bending; only the part of `v` that varies over the height
+    contributes. With the default terms the first buckling tip force of
+    ``'plate_clpt_gl'`` spars is below that of ``'plate_clpt_donnell'``
+    spars by 1.1e-6 (relative) without stringers, 1.0e-5 with ``nstr=2``
+    and 3.0e-5 with ``nstr=4``. Without stringers and with ``nstr=2`` the
+    first mode is a local buckling of the upper skin, with its stringers,
+    and the spars hardly move; with ``nstr=4`` it has a vertical deflection
+    of the box, `v` of the spars up to 0.8 times the largest `w` of the
+    upper skin, but nearly uniform over the height of the spars. The linear stiffness, and so the static
+    deflection, is the same with both models. Skins and ribs keep
+    ``'plate_clpt_donnell'``.
 
     References
     ----------
@@ -199,6 +228,9 @@ def create_wingbox(nstr=0, hs=3.e-3, ts=1.5e-3, L=1.010, W=50.5e-3,
     ['BFxcte', 'BFxycte', 'BFycte', 'SSxcte']
 
     """
+    if spar_model not in ('plate_clpt_gl', 'plate_clpt_donnell'):
+        raise ValueError("spar_model must be 'plate_clpt_gl' or "
+                         "'plate_clpt_donnell', got %r" % (spar_model,))
     terms = terms or {}
     ms, ns = terms.get('skin', (8, 4 if nstr else 8))
     msp, nsp = terms.get('spar', (8, 5))
@@ -217,6 +249,8 @@ def create_wingbox(nstr=0, hs=3.e-3, ts=1.5e-3, L=1.010, W=50.5e-3,
                       _X, _Y, **mat) for j in range(nstr + 1)]
         spars = [_plate(a, H, t_spar, msp, nsp, 'spar', (x0, y, H/2), _X,
                         -_Z, **mat) for y in (0., W)]
+        for sp in spars:
+            sp.model = spar_model
         st_top, st_bot = [], []
         if stringers:
             st_top = [_plate(a, hb, ts, mst, nst, 'stringer',
