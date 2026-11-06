@@ -12,8 +12,8 @@
   The first terms are the change of the second fundamental form times the
   area stretch; the terms `-eyy/r` and `-gxy/(2r)` make the linear part the
   Sanders changes of curvature (Koiter's form, van der Heijden 2008, Eq.
-  3.16.8), a change of the order of the membrane strain divided by the
-  radius (p. 202). All six strains are invariant under any rigid rotation of
+  3.16.8, p. 183, and Eq. 3.17.3, p. 202), a change of the order of the
+  membrane strain divided by the radius (p. 202). All six strains are invariant under any rigid rotation of
   any deformed state. The analytical kernels are those of
   `cylshell_clpt_gl`; the curvatures are cubic in the displacements and
   the default integration is exact with `3p + 1` points (`modelDB` key
@@ -21,13 +21,18 @@
 - Generated from `theory/shells/cylshell_clpt_tl/` (derivation with symbolic
   checks, among them the term-by-term comparison with the non-linear
   curvatures of Novozhilov's theory of Amabili 2008, Eqs. 1.130-1.132,
-  `write_pyx.py`, `cylshell_clpt_tl.md`): `panels/models/cylshell_clpt_tl_num.pyx`
+  `write_pyx.py`, self-contained, `cylshell_clpt_tl.md`, and
+  `sanders_linear_part.py`, which checks step by step why the linear part of
+  the curvatures is Sanders'): `panels/models/cylshell_clpt_tl_num.pyx`
   (`fkC_num`, `fkG_num`, `calc_fint`, `calc_kTv`, follower pressure;
   `fkM_num`, `fkAx_num`, `fkAy_num` of `cylshell_clpt_sanders_num`).
 - Registered in `panels.modelDB` and `setup.py`; `clpt_field.is_sanders`,
   `is_gl` and `is_tl` return 1 for it (`Shell.strain` gives its
   curvatures with `NLgeom=True`), and the connections of `MultiDomain`
   include the `v/r` of its rotation, as for `cylshell_clpt_sanders`.
+- Documentation page `cylshell_clpt_tl.rst`: the derivation of the changes
+  of curvature from the position of the deformed mid-surface, and why their
+  linear part is exactly Sanders'.
 - New `tests/tests_shell/test_cylshell_clpt_tl.py`: zero strains and
   internal forces for finite rigid rotations of a free panel, strains of a
   bent panel unchanged by a rigid rotation, linear kernels equal to those of

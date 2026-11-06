@@ -148,29 +148,27 @@ length is the area stretch `1 + \varepsilon_{xx} + \varepsilon_{yy} +
 
 where the second derivatives of the position include those of the local
 basis, e.g. the component of `\boldsymbol{X}_{,yy}` along the normal is
-`w_{,yy} - 2 v_{,y}/r - w/r^2 - 1/r`. The terms `-\boldsymbol{a} \cdot
+`w_{,yy} - 2 v_{,y}/r - w/r^2 - 1/r`. Linearized, `-\boldsymbol{a} \cdot
 \boldsymbol{X}_{,\alpha\beta} + (1 + \varepsilon_{xx} + \varepsilon_{yy})
 b^0_{\alpha\beta}`, with `b^0_{yy} = -1/r` the only non-zero component of
-the second fundamental form `\boldsymbol{n} \cdot
-\boldsymbol{X}_{,\alpha\beta}` of the undeformed cylinder, are the changes
-of the second fundamental form [vanderheijden2008Koiter]_, Sec. 3.16,
-times the area stretch; the terms `-\varepsilon_{yy}/r` and
-`-\gamma_{xy}/(2r)` replace, in the linear part, the membrane strains by
-the rotation about the normal, which gives the linear changes of curvature
-of the Sanders-Koiter kinematics of Eq. :eq:`shell-clpt-strains`
-[vanderheijden2008Koiter]_, Eq. (3.16.8). Changes of curvature that differ
-by terms of the order of the membrane strain divided by the radius are
-equivalent within the accuracy of the classical theory of thin shells
-[vanderheijden2008Koiter]_, p. 202. All six strains are invariant under
+the second fundamental form `b_{\alpha\beta} = \boldsymbol{n} \cdot
+\boldsymbol{X}_{,\alpha\beta}` of the undeformed cylinder, is the change of
+the second fundamental form `-(b_{\alpha\beta} - b^0_{\alpha\beta})`
+[vanderheijden2008Koiter]_, Sec. 3.16, whose linear part differs from
+Sanders' by `\varepsilon_{yy}/r` in `\kappa_{yy}` and `\gamma_{xy}/(2r)` in
+`\kappa_{xy}`. The terms `-\varepsilon_{yy}/r` and `-\gamma_{xy}/(2r)`
+remove them, so that the linear part is exactly that of the Sanders-Koiter
+kinematics of Eq. :eq:`shell-clpt-strains`, Koiter's linear changes of
+curvature [vanderheijden2008Koiter]_, Eq. (3.16.8), p. 183, and Eq.
+(3.17.3), p. 202; a change of the order of the membrane strain divided by
+the radius leaves the accuracy of the classical theory of thin shells
+unchanged [vanderheijden2008Koiter]_, p. 202. The derivation is given step
+by step in :ref:`cylshell_clpt_tl`. All six strains are invariant under
 any rigid rotation of any deformed state, whereas the linear changes of
-curvature of ``'cylshell_clpt_gl'`` are exact for small rotations only:
-the difference matters where a part of the shell rotates through a large
-angle while it bends, e.g. a shallow panel under a point load that snaps
-through and inverts its curvature. Up to the quadratic terms, the changes
-of curvature differ from those of Novozhilov's theory as given by Amabili
-[amabili2008Nonlinear]_, Sec. 1.3.7, by terms of the order of the membrane
-strain divided by the radius or times the curvature, and by terms of the
-rotation about the normal. The linear analyses and the linear buckling
+curvature of ``'cylshell_clpt_gl'`` are exact for small rotations only: the
+difference matters where a part of the shell rotates through a large angle
+while it bends, e.g. a shallow panel under a point load that snaps through
+and inverts its curvature. The linear analyses and the linear buckling
 analyses with a membrane prebuckling state are those of
 ``'cylshell_clpt_gl'``. The curvatures are cubic in the displacements, and
 the exact integration takes `3p + 1` Gauss-Legendre points along each
@@ -214,7 +212,7 @@ thin cylinder or cylindrical panel        ``'cylshell_clpt_sanders'``, the defau
 long cylinder bending as a beam, e.g. a   ``'cylshell_clpt_gl'``, also for low circumferential wave
 tube in column buckling; curved panels    numbers and for curved panels and stiffener blades
 or blades loaded in their own plane       loaded in their own plane
-cylindrical panels or cylinders bent      ``'cylshell_clpt_tl'``, see below
+cylindrical panels or cylinders bent      ``'cylshell_clpt_tl'``, see :ref:`cylshell_clpt_tl`
 through large rotations, e.g. shallow
 panels snapping under point loads
 plates of an assembly with large          ``'plate_clpt_gl'``; ``'plate_clpt_tl'`` when the plates also

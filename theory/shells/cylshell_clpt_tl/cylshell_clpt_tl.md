@@ -44,22 +44,84 @@ Changes of curvature, with the area vector `a = X,x x X,y`:
     kxy = -2 a . X,xy - gxy/(2 r)
 
 - `-(a . X,ab - (1 + exx + eyy) b0_ab)` is the change of the second
-  fundamental form `b_ab = n . X,ab` (notation of van der Heijden 2008, Sec.
-  3.16), `b0_yy = -1/r` the only non-zero component of the undeformed
+  fundamental form `b_ab = n . X,ab` (van der Heijden 2008, Sec. 3.16,
+  p. 182), `b0_yy = -1/r` the only non-zero component of the undeformed
   cylinder, times the area stretch `|a| = 1 + exx + eyy + O(eps^2)`
   (`check_area_vector_norm`), with `|a|` replaced by its first-order part in
   the reference term: the strains stay cubic polynomials in the displacement
   derivatives and the Gauss-Legendre rule is exact.
 - `-eyy/r` in `kyy` and `-gxy/(2 r)` in `kxy` make the linear part Sanders'
-  linear changes of curvature (`check_linear_part`):
+  linear changes of curvature (`check_linear_part`), derived step by step
+  below.
 
-      kxx = -w,xx,   kyy = -w,yy + v,y/r,   kxy = -2 w,xy + (3/2) v,x/r - (1/2) u,y/r
+## Why the linear part is Sanders'
 
-  Koiter's form of these, van der Heijden (2008), Eq. (3.16.8), has the
-  rotation about the normal where the linearized second fundamental form has
-  the membrane strains; terms of the order of the membrane strain divided by
-  the radius do not change the accuracy of the classical theory (van der
-  Heijden 2008, p. 202).
+Every equation of this section is checked by `sanders_linear_part.py`
+(sympy, about ten seconds; labels `cyl-tl-*` of
+`doc/source/cylshell_clpt_tl.rst`, where the derivation is written out).
+Koiter's quantities, van der Heijden (2008), Eqs. (3.16.5)-(3.16.8), p.
+183, for the cylinder Eq. (3.17.3), p. 202 (there in the coordinates `x/R`,
+`y/R`, outward normal):
+
+    theta_xx = u,x   theta_yy = v,y + w/r   theta_xy = (u,y + v,x)/2
+    omega_xy = (v,x - u,y)/2   phi_x = w,x   phi_y = w,y - v/r
+
+1. Area vector (exact, `cyl-tl-a`):
+
+       a = (v,x (w,y - v/r) - w,x (1 + v,y + w/r),
+            w,x u,y - (1 + u,x)(w,y - v/r),
+            (1 + u,x)(1 + v,y + w/r) - v,x u,y)
+
+   `|a|^2 = (1 + 2 exx)(1 + 2 eyy) - gxy^2`, and to first order
+   `a = (1 + theta_xx + theta_yy) e_z - phi_x e_x - phi_y e_y`.
+2. Linearization, `a . X,ab ~ e_z . X0,ab + da . X0,ab + e_z . dX,ab`; only
+   `X0,yy = -e_z/r` is not zero, normal to the surface:
+
+       a . X,xx ~ w,xx
+       a . X,xy ~ w,xy - v,x/r
+       a . X,yy ~ -1/r - (theta_xx + theta_yy)/r + w,yy - 2 v,y/r - w/r^2
+
+3. Dividing by `|a| ~ 1 + theta_xx + theta_yy` removes the stretch term
+   `-(theta_xx + theta_yy)/r` and leaves the linear changes of the second
+   fundamental form:
+
+       db_xx = w,xx   db_xy = w,xy - v,x/r   db_yy = w,yy - 2 v,y/r - w/r^2
+
+4. Koiter's Eq. (3.16.8) for the cylinder (`b^y_y = -1/r`, Cartesian
+   surface coordinates):
+
+       rho_xx = phi_x,x = w,xx
+       rho_yy = phi_y,y = w,yy - v,y/r
+       rho_xy = (phi_x,y + phi_y,x)/2 - omega_xy/(2r)
+              = w,xy - (3/4) v,x/r + (1/4) u,y/r
+
+   and `(kxx, kyy, kxy) = (-rho_xx, -rho_yy, -2 rho_xy)` are Sanders' linear
+   changes of curvature of `cylshell_clpt_sanders`:
+
+       kxx = -w,xx,   kyy = -w,yy + v,y/r,   kxy = -2 w,xy + (3/2) v,x/r - (1/2) u,y/r
+
+5. The plain change of the second fundamental form is not Sanders':
+   `db_yy = rho_yy - theta_yy/r`, `db_xy = rho_xy - theta_xy/(2r)` (with
+   `v,x = theta_xy + omega_xy`, the second fundamental form sees the strain
+   and the rotation about the normal), i.e. in the engineering components of
+   panels `kb = kS + (0, eyy/r, gxy/(2r))`. For a uniform radial
+   displacement `w0`, `kb_yy = w0/r^2`, whereas Sanders' and this model's
+   `kyy` are exactly zero (`cyl-tl-expansion`). Both measures are equally
+   accurate (Koiter, van der Heijden 2008, p. 202); only the second has the
+   linear part of `cylshell_clpt_sanders`.
+6. The model, term by term (`cyl-tl-k-lin`): in `kyy`, the `1/r` of `-a .
+   X,yy` cancels with `-1/r`; its stretch term `(theta_xx + theta_yy)/r`
+   cancels with the linear part of `-(exx + eyy)/r` (the stretch put on the
+   reference term); `-eyy/r` cancels `w/r^2` and half of `2 v,y/r`. In
+   `kxy`, `-gxy/(2r) = -(u,y + v,x)/(2r)` turns `2 v,x/r` into `(3/2) v,x/r
+   - (1/2) u,y/r`. Without the stretch on the reference term, `-a . X,yy -
+   1/r - eyy/r` would keep the further linear term `(theta_xx +
+   theta_yy)/r`.
+7. Invariance (`cyl-tl-invariance`): the model's curvatures and the plain
+   change of the second fundamental form do not change under a rigid
+   rotation of a deformed state; Sanders' linear curvatures (those of
+   `cylshell_clpt_gl`) do. The model has both properties: invariant, with
+   Sanders' linear part.
 
 Every term is built from `a`, `X,ab` and the Green-Lagrange strains, which do
 not change under a rigid rotation `X -> R X` of a deformed state: the six

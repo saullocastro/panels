@@ -47,7 +47,8 @@ given by Amabili (2008), Eqs. (1.118)-(1.120), those of
 Changes of curvature
 --------------------
 The second fundamental form of a surface is ``b_ab = n . X,ab``, ``n`` its
-unit normal (Koiter's notation, van der Heijden 2008, Sec. 3.16); for the
+unit normal (Koiter's notation, van der Heijden 2008, Sec. 3.16, p. 182);
+for the
 undeformed cylinder ``b0_xx = b0_xy = 0``, ``b0_yy = e_z . X0,yy = -1/r``.
 With the area vector ``a = X,x x X,y = |a| n``, ``|a| = 1 + exx + eyy +
 O(eps^2)`` (:func:`check_area_vector_norm`), the changes of curvature are::
@@ -65,11 +66,14 @@ O(eps^2)`` (:func:`check_area_vector_norm`), the changes of curvature are::
   curvatures of ``plate_clpt_tl``;
 - ``-eyy/r`` and ``-gxy/(2 r)`` turn the linear part into Sanders' linear
   changes of curvature (Sanders 1963; Koiter's form, van der Heijden 2008,
-  Eq. (3.16.8)), which contain the rotation about the normal instead of the
-  membrane strains; changes of curvature that differ by terms of the order
-  of the membrane strain divided by the radius are equivalent within the
-  accuracy of the classical theory of thin shells (a result of Koiter, as
-  given by van der Heijden 2008, p. 202).
+  Eq. (3.16.8), p. 183, for the cylinder Eq. (3.17.3), p. 202), which
+  contain the rotation about the normal instead of the membrane strains;
+  changes of curvature that differ by terms of the order of the membrane
+  strain divided by the radius are equivalent within the accuracy of the
+  classical theory of thin shells (a result of Koiter, as given by van der
+  Heijden 2008, p. 202). The derivation, step by step from the position of
+  the deformed mid-surface, is checked equation by equation in
+  ``sanders_linear_part.py``.
 
 The linear part is (:func:`check_linear_part`)::
 
@@ -381,7 +385,8 @@ def check_membrane():
 def check_linear_part():
     r"""The linear strains are those of ``cylshell_clpt_sanders`` (and of
     ``cylshell_clpt_gl``), Sanders' linear changes of curvature as in
-    Koiter's form, van der Heijden (2008), Eqs. (3.16.5)-(3.16.8)"""
+    Koiter's form, van der Heijden (2008), Eqs. (3.16.5)-(3.16.8), p. 183,
+    and Eq. (3.17.3), p. 202, step by step in ``sanders_linear_part.py``"""
     assert (strains(nonlinear=False) - strains_sanders_linear()).applyfunc(
         expand) == zeros(6, 1)
     # without the terms -eyy/r and -gxy/(2r), the linear part is the

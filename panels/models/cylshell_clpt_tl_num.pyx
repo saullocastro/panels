@@ -82,15 +82,44 @@ with, in the local basis `(\boldsymbol{e}_x, \boldsymbol{e}_y,
 + \varepsilon_{yy}) b^0_{\alpha\beta}`, with `b^0_{yy} = -1/r` the only
 non-zero component of the second fundamental form of the undeformed
 cylinder, is the change of the second fundamental form `b_{\alpha\beta} =
-\boldsymbol{n} \cdot \boldsymbol{X}_{,\alpha\beta}` [3]_, Sec. 3.16, times
-the area stretch, to first order in the reference term. The terms
-`-\varepsilon_{yy}/r` and `-\gamma_{xy}/(2 r)` make the linear part the
-linear changes of curvature of Sanders [2]_, those of
-:mod:`panels.models.cylshell_clpt_sanders`, with the rotation about the
-normal (Koiter's form, [3]_, Eq. (3.16.8)); changes of curvature that
-differ by terms of the order of the membrane strain divided by the radius
-are equivalent within the accuracy of the classical theory of thin shells
-([3]_, p. 202). The six strains are invariant under any rigid rotation of
+\boldsymbol{n} \cdot \boldsymbol{X}_{,\alpha\beta}` [3]_, Sec. 3.16, p.
+182, times the area stretch, to first order in the reference term. To first
+order, the area vector is `(1 + \theta_{xx} + \theta_{yy}) \boldsymbol{e}_z
+- \varphi_x \boldsymbol{e}_x - \varphi_y \boldsymbol{e}_y`, with the linear
+membrane strains `\theta_{xx} = u_{,x}`, `\theta_{yy} = v_{,y} + w/r`,
+`\theta_{xy} = (u_{,y} + v_{,x})/2` and the rotations of the normal
+`\varphi_x = w_{,x}`, `\varphi_y = w_{,y} - v/r`; the stretch cancels with
+that of the reference term, and the linear changes of the second
+fundamental form are
+
+.. math::
+
+    \delta b_{xx} = w_{,xx} \qquad
+    \delta b_{xy} = w_{,xy} - \frac{v_{,x}}{r} \qquad
+    \delta b_{yy} = w_{,yy} - \frac{2 v_{,y}}{r} - \frac{w}{r^2}
+
+whereas Koiter's linear changes of curvature [3]_, Eq. (3.16.8), p. 183,
+are for the cylinder ([3]_, Eq. (3.17.3), p. 202)
+
+.. math::
+
+    \rho_{xx} = w_{,xx} \qquad
+    \rho_{xy} = w_{,xy} - \frac{3}{4} \frac{v_{,x}}{r} + \frac{1}{4}
+    \frac{u_{,y}}{r} \qquad
+    \rho_{yy} = w_{,yy} - \frac{v_{,y}}{r}
+
+so that `\delta b_{yy} = \rho_{yy} - \theta_{yy}/r` and `\delta b_{xy} =
+\rho_{xy} - \theta_{xy}/(2 r)`: the second fundamental form sees the strain
+part of `v_{,x}` and the circumferential strain, where `\rho_{\alpha\beta}`
+keeps only the rotation about the normal. The terms
+`-\varepsilon_{yy}/r` and `-\gamma_{xy}/(2 r)` remove these differences, so
+that the linear part is `\kappa_{xx} = -\rho_{xx}`, `\kappa_{yy} =
+-\rho_{yy}`, `\kappa_{xy} = -2 \rho_{xy}`, the linear changes of curvature
+of Sanders [2]_, those of :mod:`panels.models.cylshell_clpt_sanders`;
+changes of curvature that differ by terms of the order of the membrane
+strain divided by the radius are equivalent within the accuracy of the
+classical theory of thin shells ([3]_, p. 202). The six strains are
+invariant under any rigid rotation of
 any deformed state, cubic polynomials in the displacements, see
 :mod:`panels.models`. The integrands are polynomials of degree `6p - 2`
 along `x` and `6p` along `y` for approximation functions of degree `p`,

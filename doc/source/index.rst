@@ -89,6 +89,7 @@ User guide
     follower_pressure.rst
     plate_clpt_gl.rst
     plate_clpt_tl.rst
+    cylshell_clpt_tl.rst
     tsdt_offset.rst
     multidomain_null_space.rst
     tangent_product.rst

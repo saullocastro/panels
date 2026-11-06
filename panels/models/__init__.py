@@ -248,12 +248,16 @@ DOFs have the strains of the CLPT:
   - v_{,x}/r)` and `\boldsymbol{X}_{,yy} = (u_{,yy}, v_{,yy} + 2 w_{,y}/r -
   v/r^2, w_{,yy} - 2 v_{,y}/r - w/r^2 - 1/r)`. The first terms are the
   change of the second fundamental form `\boldsymbol{n} \cdot
-  \boldsymbol{X}_{,\alpha\beta}` [5]_, Sec. 3.16, times the area stretch
-  `|\boldsymbol{a}| = 1 + \varepsilon_{xx} + \varepsilon_{yy} + \ldots`;
-  the terms `-\varepsilon_{yy}/r` and `-\gamma_{xy}/(2r)` make the linear
-  part that of ``'cylshell_clpt_sanders'``, a change of the order of the
-  membrane strain divided by the radius, which leaves the accuracy of the
-  classical theory of thin shells unchanged [5]_, p. 202. All six strains
+  \boldsymbol{X}_{,\alpha\beta}` [5]_, Sec. 3.16, p. 182, times the area
+  stretch `|\boldsymbol{a}| = 1 + \varepsilon_{xx} + \varepsilon_{yy} +
+  \ldots`. Its linear part differs from Koiter's linear changes of
+  curvature [5]_, Eq. (3.16.8), p. 183, Eq. (3.17.3), p. 202, by
+  `\varepsilon_{yy}/r` in `\kappa_{yy}` and `\gamma_{xy}/(2r)` in
+  `\kappa_{xy}`; the terms `-\varepsilon_{yy}/r` and `-\gamma_{xy}/(2r)`
+  remove them and make the linear part that of
+  ``'cylshell_clpt_sanders'``, a change of the order of the membrane strain
+  divided by the radius, which leaves the accuracy of the classical theory
+  of thin shells unchanged [5]_, p. 202. All six strains
   are invariant under any rigid rotation of any deformed state, and cubic
   in the displacements. Up to the quadratic terms, the curvatures differ
   from the non-linear changes of curvature of Novozhilov's theory as given
