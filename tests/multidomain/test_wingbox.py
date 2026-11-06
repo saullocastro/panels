@@ -1,7 +1,7 @@
 r"""Wing-box of :mod:`panels.multidomain.wingbox`
 
-- ``test_create_wingbox``: the domains and connections created by
-  :func:`.create_wingbox`;
+- ``test_create_wingbox``: the domains, connections and models created by
+  :func:`.create_wingbox`, and the errors of ``models``;
 - ``test_wingbox_tip_deflection``: linear static tip deflection of two bays,
   with the penalty and the null-space connections, against the
   Euler-Bernoulli beam with the box section between the mid-surfaces;
@@ -12,9 +12,11 @@ r"""Wing-box of :mod:`panels.multidomain.wingbox`
   the case High-AR-t5 of Elalfy, De Breuker and Castro, against their
   Abaqus result, 173.11 N (Table 3, p. 8 of the preprint), with the
   null-space connections and enough terms for a converged load;
-- ``test_wingbox_spar_model``: the spars of the model ``'plate_clpt_gl'``,
-  the default, against ``'plate_clpt_donnell'``, with 2 stringers per skin
-  and the default terms, against regression values.
+- ``test_wingbox_models``: the spars of the model ``'plate_clpt_gl'``,
+  the default, against ``'plate_clpt_donnell'``, selected with
+  ``models``, with 2 stringers per skin and the default terms, and all
+  the groups ``'plate_clpt_gl'`` against all ``'plate_clpt_tl'`` without
+  stringers, against regression values.
 
 The spars are ``'plate_clpt_gl'`` by default: the geometric stiffness of
 their Green-Lagrange strains contains the work of the bending stresses of
@@ -67,11 +69,27 @@ def test_create_wingbox():
     assert np.isclose(info['ws'], 50.5e-3/3)
     md, info = create_wingbox(nstr=2, nbays=2, stringers=False, ribs=False)
     assert len(md.panels) == 2*(2*3 + 2)
-    # the models of the domains
-    bay = create_wingbox(nstr=2, nbays=2)[1]['bays'][0]
-    assert all(p.model == 'plate_clpt_gl' for p in bay['spars'] + bay['st'])
-    assert all(p.model == 'plate_clpt_donnell'
-               for p in bay['top'] + bay['bot'] + bay['ribs'])
+    # the models of the domains, by default and from models
+    defaults = dict(skin='plate_clpt_donnell', spar='plate_clpt_gl',
+                    stringer='plate_clpt_gl', rib='plate_clpt_donnell')
+    groups = dict(skin=('top', 'bot'), spar=('spars', ), stringer=('st', ),
+                  rib=('ribs', ))
+    for models, expected in ((None, defaults),
+            (dict(skin='plate_clpt_tl', rib='plate_clpt_gl'),
+             dict(defaults, skin='plate_clpt_tl', rib='plate_clpt_gl'))):
+        info_m = create_wingbox(nstr=2, nbays=2, models=models)[1]
+        assert info_m['models'] == expected
+        bay = info_m['bays'][0]
+        for group, keys in groups.items():
+            assert all(p.model == expected[group]
+                       for k in keys for p in bay[k])
+    # unknown keys and models outside the plates of the classical
+    # laminated plate theory
+    for models in (dict(spars='plate_clpt_gl'),
+                   dict(spar='plate_fsdt_donnell'),
+                   dict(skin='cylshell_clpt_sanders')):
+        with pytest.raises(ValueError):
+            create_wingbox(nbays=2, models=models)
     # the clamped root
     for k in ('top', 'bot', 'spars'):
         for p in info['bays'][0][k]:
@@ -131,14 +149,14 @@ def test_wingbox_tip_force_lb():
     assert v.argmax() in range(root_top.col_start, root_top.col_end)
 
 
-def test_wingbox_spar_model():
+def test_wingbox_models():
     # 2 stringers per skin, 9 bays, the default terms and penalty
     # connections, 12096 Ritz constants, 1 N at the tip; regression values
     # of the first buckling tip force with the two models of the spars
     ev = {}
     for spar_model in ('plate_clpt_gl', 'plate_clpt_donnell'):
         md, c, eigvals, eigvecs = wingbox_tip_force_lb(num_eigvalues=4,
-                nstr=2, spar_model=spar_model)
+                nstr=2, models=dict(spar=spar_model))
         assert all(p.model == spar_model for p in md.panels
                    if p.group == 'spar')
         ev[spar_model] = eigvals[0]
@@ -146,5 +164,14 @@ def test_wingbox_spar_model():
     assert np.isclose(ev['plate_clpt_donnell'], 436.0593, rtol=1e-5)
     # the 'plate_clpt_gl' spars lower the load by 1.0e-5 (relative)
     assert -2e-5 < ev['plate_clpt_gl']/ev['plate_clpt_donnell'] - 1 < 0
-    with pytest.raises(ValueError):
-        create_wingbox(nbays=2, spar_model='plate_clpt_tl')
+    # without stringers, all the groups 'plate_clpt_gl' or 'plate_clpt_tl':
+    # the TL curvatures add the work of the pre-buckling bending moments,
+    # -2.7e-6 (relative)
+    for model in ('plate_clpt_gl', 'plate_clpt_tl'):
+        models = dict(skin=model, spar=model, stringer=model, rib=model)
+        md, c, eigvals, eigvecs = wingbox_tip_force_lb(num_eigvalues=4,
+                                                       models=models)
+        ev[model + ' all'] = eigvals[0]
+    assert np.isclose(ev['plate_clpt_gl all'], 172.78252, rtol=1e-6)
+    assert np.isclose(ev['plate_clpt_tl all'], 172.78206, rtol=1e-6)
+    assert -1e-5 < ev['plate_clpt_tl all']/ev['plate_clpt_gl all'] - 1 < 0
