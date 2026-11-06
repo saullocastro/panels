@@ -144,6 +144,22 @@ db = {
                     # degree 6p - 2, integrated exactly by 3p points
                     'integrand_degree': (6, -2),
                     },
+    'frame_web_clpt_donnell': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    #NOTE the strains in polar coordinates of the web of a
+                    #     ring frame need their own fields
+                    'field': frame_web_clpt_donnell_num,
+                    #NOTE the matrices of the whole domain are integrated
+                    #     numerically, the strains having terms in 1/rho
+                    'matrices': frame_web_clpt_donnell,
+                    'matrices_num': frame_web_clpt_donnell_num,
+                    'dofs': 3,
+                    'e_num': 6,
+                    # outer radius of the web, the kernels divide by r - x
+                    'requires_r': True,
+                    },
     'cylshell_fsdt_donnell': {
                     'linear static': True,
                     'linear buckling': True,

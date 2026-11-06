@@ -47,6 +47,8 @@ model                      closed form                                          
 ``plate_clpt_gl``          :mod:`panels.models.plate_clpt_gl`, the linear kernels of    :mod:`panels.models.plate_clpt_gl_num`
                            ``plate_clpt_donnell``
 ``plate_clpt_tl``          :mod:`panels.models.plate_clpt_gl`                           :mod:`panels.models.plate_clpt_tl_num`
+``frame_web_clpt_donnell`` :mod:`panels.models.frame_web_clpt_donnell`, numerical       :mod:`panels.models.frame_web_clpt_donnell_num`
+                           integration of the whole domain
 ``plate_fsdt_donnell``     :mod:`panels.models.plate_fsdt_donnell`                      :mod:`panels.models.plate_fsdt_donnell_num`
 ``plate_tsdt_donnell``     :mod:`panels.models.plate_tsdt_donnell`                      :mod:`panels.models.plate_tsdt_donnell_num`
 ``cylshell_clpt_donnell``  :mod:`panels.models.cylshell_clpt_donnell`                   :mod:`panels.models.cylshell_clpt_donnell_num`
