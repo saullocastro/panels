@@ -276,6 +276,21 @@
   `test_tstiff2d_1stiff_freq_castro_donadon_2017_table5` (Table 5,
   `m = n = 8`, within 0.6 %).
 
+### New test: Z-stiffened cylinders 1 and 2 of Peterson and Dow (1959)
+
+- New `tests/multidomain/test_cylinder_z_stiffened_peterson1959.py`, about
+  1 min, with its model module `tests/multidomain/z_stringer_cylinder.py`:
+  the whole cylinder with Z-section stringers made of three plates (the
+  attached flange in the laminate of the strip of skin under it, offset
+  from the middle surface of the skin, the web and the free flange as
+  `plate_clpt_gl` strips connected with `'BFycte'`), clamped ends and the
+  membrane pre-buckling state. Cylinders 1 and 2 of NASA Memo 2-12-59L
+  (120 internal stringers, `R` = 23.74 in) buckle at 2127.6 and 3194.0
+  lb/in with 12 and 13 circumferential waves; the measured loads, 270 and
+  413 kips, are 85.1 and 86.7 % of these (checked between 70 and 100 %).
+  The module is also used by the notebook
+  `peterson1959_blade_cylinder_buckling.ipynb`.
+
 ## 0.15.0 (2026-11-03)
 
 ### Requires structsolve 0.10.0
