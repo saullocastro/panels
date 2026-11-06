@@ -15,9 +15,13 @@ panels of the default Sanders kinematics, blades of the model
 - the discrete model, with the simply supported ends of the smeared theory
   (`w = v = N_x = M_x = 0`) and the membrane pre-buckling state of equal
   axial strains in the skin and in the blades, against the smeared theory
-  for the same stringer section, within the discrete-versus-smeared
+  for the same stringer section (Eq. (15) of Block, Card and Mikulas for
+  the blade as modelled, 771.2 lb/in), within the discrete-versus-smeared
   difference explained in the Notes, against `\bar{N}_s` of Card and Jones
-  and against a regression value; with blades of ``'plate_clpt_donnell'``
+  (722 lb/in; Eq. (15) for the stringer section drawn by Card and Jones
+  gives 722.8 lb/in) and against a regression value (720.2 lb/in, 6.6 %
+  below 771.2 lb/in and 0.4 % below 722.8 lb/in); with blades of
+  ``'plate_clpt_donnell'``
   the load is about twice the smeared one;
 - the analysis functions :func:`.cylinder_blade_stiffened_compression_lb_Nxx_cte`,
   :func:`.cylinder_blade_stiffened_compression_lb_Nxx_from_static` (slow)
