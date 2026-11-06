@@ -26,7 +26,11 @@ panels of the default Sanders kinematics, blades of the model
   against regression values, their ratios to the smeared theory being
   given in the Notes; with prescribed displacements, the end `x` =
   ``height`` of every domain reaches `u` = ``pd`` exactly in the
-  pre-buckling state.
+  pre-buckling state;
+- the skin ``'cylshell_clpt_tl'`` and the blades ``'plate_clpt_tl'``
+  (argument ``models``) against the GL models: equal loads with the
+  constant membrane state, within ``1e-6`` with the static pre-buckling
+  state (slow); the models of the groups and the errors of ``models``.
 
 Notes
 -----
@@ -66,10 +70,20 @@ discrete load is 2.5 % higher, 4.3 % below the smeared load; for the
 cylinders 1 to 3 of the same table, with the same model, the differences
 are -3.8, -7.8 and -2.7 % with the Sanders skin and -0.7, -4.4 and -1.1 %
 with the Donnell skin (cylinders 1 and 3 have external stringers; runs
-made when this test was written). The remainder comes from the
-discreteness of the blades, plate strips that deform in their
-cross-section, whereas the smeared theory treats the stringer as a beam
-that rotates with the skin and averages it over the circumference.
+made when this test was written). The remainder comes from the blades.
+Their axial load acts, through the geometric stiffness of
+``'plate_clpt_gl'``, also on their out-of-plane displacement, the
+circumferential displacement of the stringer section, whereas the load
+term of the smeared theory, Eq. (9) of [1]_ (p. 8), acts on the radial
+displacement only; and they twist as plate strips tied to the skin, whereas
+Eq. (6) of [1]_ (p. 7) adds the approximate twisting energy `G_s J_s
+w_{,xy}^2/d` of a stringer that twists with the shell. For the whole length
+of this cylinder with the Donnell skin (simply supported ends of the blades
+holding only their radial displacement), removing the first term from the
+geometric stiffness of the blades raises the discrete load by 3.7 %, to
+1.8 % below the smeared one, and removing also the twisting stiffness of
+the blades gives Eq. (15) with `J = 0` within 0.1 % (runs made when these
+Notes were written).
 Almroth [3]_ shows for unstiffened cylinders (Donnell equations) that, with
 the membrane pre-buckling state, simple supports with `v = 0` and either
 `u = 0` or `N_x = 0` give a load equal to or insignificantly higher than the
@@ -205,7 +219,8 @@ def _half_cylinder(blade_model, model='cylshell_clpt_sanders', m=8, n=6):
     md, conns = create_cylinder_blade_stiffened(height=L/2, r=R,
             stack=[0]*28, stack_blades=[[0]*97]*NSTIFF,
             width_blades=[HB]*NSTIFF, plyt=PLYT, laminaprop=(E, NU),
-            npanels=NSTIFF, m=m, n=n, model=model)
+            npanels=NSTIFF, m=m, n=n,
+            models=dict(skin=model, blade=blade_model))
     for p in md.panels:
         # x = 0: simply supported, u free; x = L/2: symmetry
         p.x1u = 1
@@ -215,7 +230,6 @@ def _half_cylinder(blade_model, model='cylshell_clpt_sanders', m=8, n=6):
         p.x2w = 1
         p.x2wr = 0
         if 'blade' in p.group:
-            p.model = blade_model
             p.Nxx = -E*TB
         else:
             p.Nxx = -E*T
@@ -322,3 +336,108 @@ def test_discrete_gl_skin():
     assert -0.025 < N/REF['half_gl'] - 1 < 0.
     assert abs(N/(LBF/IN)/NS_CARD - 1) < 0.05
     assert np.isclose(N, 124455.2, rtol=1e-4)
+
+
+def test_discrete_tl_skin():
+    r"""Cylinder 4 of Card and Jones (1966) with skin panels of
+    ``'cylshell_clpt_tl'``, with blades of ``'plate_clpt_gl'`` and of
+    ``'plate_clpt_tl'``, otherwise the set-up of ``test_discrete_vs_smeared``
+
+    Both loads must equal the load of ``test_discrete_gl_skin``, skin
+    ``'cylshell_clpt_gl'`` and blades ``'plate_clpt_gl'``, to rounding
+    (``rtol=1e-12``), and so lie within 5 % of `\bar{N}_s` of Card and
+    Jones (1966), Table I, and at the regression value ``124455.2`` N/m.
+
+    Notes
+    -----
+    The TL models have the membrane strains of the GL models and changes
+    of curvature measured with the deformed normal, whose linear part is
+    that of Sanders for the cylinder (van der Heijden [1]_, Eq. (3.16.8),
+    p. 202) and that of von Kármán for the plate. The geometric stiffness of
+    the constant membrane state `N_{xx}` used here is the second variation
+    of the membrane strains times `N_{xx}`, the same for both models: the
+    curvatures of the TL models enter it only through the bending moments,
+    zero in this state. The linear stiffness is the same too, so the
+    buckling loads must agree to rounding.
+
+    References
+    ----------
+    .. [1] van der Heijden, A. M. A. (ed.), "W. T. Koiter's Elastic
+       Stability of Solids and Structures", Cambridge University Press, 2008.
+       https://doi.org/10.1017/CBO9780511546174
+
+    """
+    N_gl = _half_cylinder('plate_clpt_gl', model='cylshell_clpt_gl')
+    for blade_model in ('plate_clpt_gl', 'plate_clpt_tl'):
+        N = _half_cylinder(blade_model, model='cylshell_clpt_tl')
+        print('discrete, TL skin, %s blades %.6f N/m, %+.1e vs GL'
+              % (blade_model, N, N/N_gl - 1))
+        assert np.isclose(N, N_gl, rtol=1e-12)
+        assert abs(N/(LBF/IN)/NS_CARD - 1) < 0.05
+        assert np.isclose(N, 124455.2, rtol=1e-4)
+
+
+@pytest.mark.slow
+def test_tl_skin_Nxx_from_static():
+    r"""Cylinder 4 of Card and Jones (1966) with the pre-buckling state of
+    a linear static analysis,
+    :func:`.cylinder_blade_stiffened_compression_lb_Nxx_from_static`, with
+    the skin ``'cylshell_clpt_tl'`` against ``'cylshell_clpt_gl'``, and
+    with the blades ``'plate_clpt_tl'`` too: the loads must agree within
+    ``1e-6`` (relative), and the GL skin is checked against the regression
+    value ``155419.52`` N/m.
+
+    Notes
+    -----
+    The static pre-buckling state bends the skin and the blades near the
+    ends, where `u = 0` at `x = 0` and the load is applied at `x = L`.
+    The numerical geometric stiffness of the TL models contains, besides
+    the terms of the GL models, the bending moments of this state times the
+    second variation of the quadratic part of the changes of curvature. The
+    moments are confined to the edge zones, and the critical mode has one
+    axial half-wave, so the difference is expected far below the
+    differences between the kinematic models (1.3 % between the GL and
+    Sanders skins); it is -6.6e-8 for both blade models, and the bound is
+    ``1e-6``.
+
+    """
+    loads = {}
+    for models in (dict(skin='cylshell_clpt_gl'),
+                   dict(skin='cylshell_clpt_tl'),
+                   dict(skin='cylshell_clpt_tl', blade='plate_clpt_tl')):
+        assy, c, eigvals, eigvecs = \
+            cylinder_blade_stiffened_compression_lb_Nxx_from_static(
+                Nxxs_skin=[-E*T]*NSTIFF, Nxxs_blade=[-E*TB]*NSTIFF,
+                models=models, **_common())
+        loads[tuple(sorted(models.values()))] = nbar(eigvals[0])
+    N_gl = loads[('cylshell_clpt_gl', )]
+    assert np.isclose(N_gl, 155419.52, rtol=1e-6)
+    for key, N in loads.items():
+        print('Nxx_from_static %s: %.6f N/m, %+.1e vs GL skin'
+              % (key, N, N/N_gl - 1))
+        assert abs(N/N_gl - 1) < 1e-6
+
+
+def test_models_argument():
+    # the models of the groups, by default and from models, and the errors
+    md, conns = create_cylinder_blade_stiffened(height=L/2, r=R,
+            stack=[0]*28, stack_blades=[[0]*97]*4, width_blades=[HB]*4,
+            plyt=PLYT, laminaprop=(E, NU), npanels=4, m=4, n=4)
+    assert {(p.group[:4], p.model) for p in md.panels} == {
+        ('skin', 'cylshell_clpt_sanders'), ('blad', 'plate_clpt_gl')}
+    md, conns = create_cylinder_blade_stiffened(height=L/2, r=R,
+            stack=[0]*28, stack_blades=[[0]*97]*4, width_blades=[HB]*4,
+            plyt=PLYT, laminaprop=(E, NU), npanels=4, m=4, n=4,
+            models=dict(skin='cylshell_clpt_tl'))
+    assert {(p.group[:4], p.model) for p in md.panels} == {
+        ('skin', 'cylshell_clpt_tl'), ('blad', 'plate_clpt_gl')}
+    for models in (dict(stringer='plate_clpt_gl'),
+                   dict(skin='cylshell_fsdt_sanders'),
+                   dict(blade='plate_fsdt_donnell'),
+                   dict(skin='plate_clpt_gl'),
+                   dict(blade='cylshell_clpt_sanders')):
+        with pytest.raises(ValueError):
+            create_cylinder_blade_stiffened(height=L/2, r=R, stack=[0]*28,
+                    stack_blades=[[0]*97]*4, width_blades=[HB]*4,
+                    plyt=PLYT, laminaprop=(E, NU), npanels=4,
+                    models=models)

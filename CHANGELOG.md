@@ -2,6 +2,40 @@
 
 ## Unreleased
 
+### New argument `models` of the wing box and of the blade-stiffened cylinder
+
+- `create_wingbox` takes `models`, a dict of the model of each group of
+  domains, keyed like `terms`: `'skin'` (default `plate_clpt_donnell`),
+  `'spar'` (`plate_clpt_gl`), `'stringer'` (`plate_clpt_gl`) and `'rib'`
+  (`plate_clpt_donnell`); `wingbox_tip_force_lb` passes it on, and
+  `info['models']` returns the models used. Each group accepts
+  `plate_clpt_donnell`, `plate_clpt_gl` and `plate_clpt_tl`.
+- `create_cylinder_blade_stiffened` and the three
+  `cylinder_blade_stiffened_compression_lb_*` analyses take `models` with
+  the keys `'skin'` (default `cylshell_clpt_sanders`; also
+  `cylshell_clpt_gl`, `cylshell_clpt_tl` and `cylshell_clpt_donnell`) and
+  `'blade'` (default `plate_clpt_gl`; also `plate_clpt_tl` and
+  `plate_clpt_donnell`).
+- A missing key takes its default, and the defaults give the results of
+  the assemblies unchanged (all the eigenvalues of the docstring examples
+  and of the wing box with 0, 2 and 4 stringers equal to the last digit);
+  an unknown key or a model not listed raises `ValueError`. The models of
+  the shear deformation theories are not accepted: their connections with
+  the classical models are not implemented, and the boundary condition
+  flags of these assemblies are those of the classical theory.
+- The TL models have the analytical kernels and, for a membrane
+  pre-buckling state, the geometric stiffness of the GL models: cylinder 4
+  of Card and Jones (1966) with a TL skin and TL blades buckles at the
+  load of the GL ones to the last digit; with the static pre-buckling
+  state the TL curvatures add the work of the bending moments, -6.6e-8
+  (relative) for that cylinder, -1.8e-4 for the laminated cylinder of the
+  examples, -2.7e-6 for the wing box of TL plates without stringers. New
+  tests `test_discrete_tl_skin`, `test_tl_skin_Nxx_from_static` (slow) and
+  `test_models_argument` in
+  `tests/multidomain/test_cylinder_blade_stiffened.py`; `test_create_wingbox`
+  and `test_wingbox_models` in `tests/multidomain/test_wingbox.py` check
+  the models of the wing box.
+
 ### New model `cylshell_clpt_tl`: total-Lagrangian Kirchhoff-Love cylinders
 
 - Cylindrical shells, CLPT, with the Green-Lagrange membrane strains of
@@ -118,12 +152,11 @@
   `cylshell_clpt_sanders`. The model is added to the tangent, tangent
   product and follower-pressure tests (`test_tangent_consistency.py`) and to
   the connection tests of `tests/multidomain/test_bf_sanders.py`.
-- `create_cylinder_blade_stiffened` and the three
-  `cylinder_blade_stiffened_compression_lb_*` analyses take the argument
-  `model` of the skin panels: `cylshell_clpt_sanders` (the default, results
-  unchanged), `cylshell_clpt_gl` or `cylshell_clpt_donnell`; other values
-  raise `ValueError`. For cylinder 4 of Card and Jones (1966), the GL skin
-  lowers the discrete load by 1.3 %, to 1.6 % below `N_s`; new test
+- The skin panels of `create_cylinder_blade_stiffened` and of the three
+  `cylinder_blade_stiffened_compression_lb_*` analyses may be
+  `cylshell_clpt_gl` (`models={'skin': 'cylshell_clpt_gl'}`, see the
+  argument `models` below). For cylinder 4 of Card and Jones (1966), the GL
+  skin lowers the discrete load by 1.3 %, to 1.6 % below `N_s`; new test
   `test_discrete_gl_skin` in `tests/multidomain/test_cylinder_blade_stiffened.py`.
 
 ### Fixed
@@ -170,17 +203,16 @@
   T-stiffened panel tests and of the wing box without stringers change by
   less than 1e-5; the laminated examples of the blade-stiffened cylinder by
   less than 0.01 %.
-- The spars of `create_wingbox` are also `plate_clpt_gl`, selected by the
-  new argument `spar_model` (`plate_clpt_gl`, the default, or
-  `plate_clpt_donnell`; other values raise `ValueError`), which
-  `wingbox_tip_force_lb` passes on. The spar webs carry the bending
+- The spars of `create_wingbox` are also `plate_clpt_gl` (the default of
+  the key `'spar'` of the argument `models` below; `plate_clpt_donnell`
+  with `models={'spar': 'plate_clpt_donnell'}`). The spar webs carry the bending
   stresses of the box in their own plane, but these vary linearly over the
   height with a zero resultant and do almost no work on the vertical
   deflection of the spars: the first buckling tip force changes by less
   than 3e-5 (172.7828 to 172.7826 N without stringers, 436.0593 to
   436.0549 N with `nstr=2`, 518.0477 to 518.0323 N with `nstr=4`, default
   terms; the first modes are local modes of the upper skin); the static
-  deflection is unchanged. New test `test_wingbox_spar_model` in
+  deflection is unchanged. New test `test_wingbox_models` in
   `tests/multidomain/test_wingbox.py`; the example
   `ex_multidomain_wingbox.ipynb` compares the two spar models.
 - `tests/multidomain/test_cylinder_blade_stiffened.py` is anchored in the
@@ -195,6 +227,29 @@
   laminated blade-stiffened case.
 - Documentation: "How to choose a model" of the shell overview explains
   when plates loaded in their own plane need `plate_clpt_gl`.
+
+### Changed: boundary conditions of `tstiff2d_1stiff_freq` and `tstiff2d_1stiff_flutter`
+
+- Both functions restrain `u = v = w = 0` at the four edges of the skin and
+  at both ends of the flange, the boundary conditions of the vibration
+  analysis of Castro and Donadon (2017), Fig. 8, p. 236, and of
+  `tstiff2d_1stiff_freq` of compmech 0.7.1. They had the conditions of the
+  compression analysis (Fig. 7), with `u` free at the edges `x = 0`,
+  `y = 0` and `y = b` of the skin and at the end `x = 0` of the flange (10
+  flags). The curved panel #1 of the paper (`r = 10` m, `m = n = 8`,
+  penalty) now gives 65.215 to 55.972 Hz for the six defect lengths of
+  Table 5, +0.01 % to +0.51 % from the paper's `m = n = 8` values (before:
+  62.618 to 53.705 Hz, 3.6 % to 4.0 % below).
+- `tstiff2d_1stiff_flutter`: with `u = 0` at `x = 0`, the edge loads
+  `Nxx_skin` and `Nxx_flange` of the static case give no pre-stress; only
+  `Nxx_base` loads the assembly.
+- Stored values: `test_tstiff2d_assembly.py`, first natural frequency
+  48.2733 to 48.4404 rad/s, flutter `sqrt(-lambda_1)` 446.12 to
+  503.06-139.60j (the first eigenvalue is now a complex pair);
+  `test_null_space.py::test_tstiff2d_freq` 48.3875 to 48.5631; `Examples`
+  48.39 to 48.56 and 448.57 to 487.42. New test
+  `test_tstiff2d_1stiff_freq_castro_donadon_2017_table5` (Table 5,
+  `m = n = 8`, within 0.6 %).
 
 ## 0.15.0 (2026-11-03)
 

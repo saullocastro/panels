@@ -64,7 +64,13 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
     :func:`.tstiff2d_1stiff_compression` with ``run_static_case=True``: the
     middle row of domains has the length ``defect_a*a`` of the defect, or
     ``0.33*a`` when ``defect_a = 0``, and its base is not connected to the
-    skin when ``defect_a > 0``. The aerodynamic parameters are given to the
+    skin when ``defect_a > 0``. The boundary conditions are those of the
+    vibration analysis of Castro and Donadon (2017), Fig. 8, p. 236:
+    `u = v = w = 0` at the four edges of the skin, `x = 0`, `x = a`,
+    `y = 0` and `y = b`, and at both ends of the flange, `x = 0` and
+    `x = a`; the edges of the base are free, the base being held by its
+    connections to the skin and to the flange, and the rotations are free
+    at every edge. The aerodynamic parameters are given to the
     9 skin domains only, and the aerodynamic matrix is the sum of
     :meth:`.Shell.calc_kA` of the skin domains.
 
@@ -76,7 +82,11 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
     ``structsolve.static`` gives the pre-buckling state ``c``. The attributes
     ``Nxx`` of all the domains are then set to ``0`` and the geometric
     stiffness matrix is computed at ``c``, or with ``c=None`` when no load
-    was given. The reduced matrices, see :meth:`.MultiDomain.reduce`, the sum
+    was given. Since `u = 0` at the edge `x = 0` of the skin and of the
+    flange, the forces of ``Nxx_skin`` and ``Nxx_flange`` act on restrained
+    displacements and give no pre-stress; only ``Nxx_base``, at the free
+    edge of ``p14``, loads the assembly. The reduced matrices, see
+    :meth:`.MultiDomain.reduce`, the sum
     of the constitutive, geometric and aerodynamic stiffness matrices and
     the mass matrix, are passed to ``structsolve.freq`` with ``tol=0`` and
     ``sparse_solver=True``, and the eigenvectors are expanded with
@@ -127,13 +137,15 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
         Direction of airflow. Default ``'x'``.
     Nxx_skin : float or None, optional
         Skin load distributed at the assembly edge at `x=0`, force per unit
-        length. Default ``None``, no load.
+        length. Default ``None``, no load. It acts on the restrained `u` of
+        that edge and gives no pre-stress.
     Nxx_base : float or None, optional
         Stiffener's base load distributed at the assembly edge at `x=0`,
         force per unit length. Default ``None``, no load.
     Nxx_flange : float or None, optional
         Stiffener's flange load distributed at the assembly edge at `x=0`,
-        force per unit length. Default ``None``, no load.
+        force per unit length. Default ``None``, no load. It acts on the
+        restrained `u` of that edge and gives no pre-stress.
     run_static_case : bool, optional
         If True a static analysis is run before the frequency analysis
         to compute the real membrane stress state along the domain, otherwise
@@ -189,7 +201,8 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
     ``run_static_case=True`` and loads, `\boldsymbol{K}_G` is computed from the
     linear membrane stresses of the static solution, see
     :func:`.tstiff2d_1stiff_compression` for the sign of the loads and the
-    model of the debonding defect.
+    model of the debonding defect. The boundary conditions are those of the
+    vibration analysis of the same assembly, Fig. 8 of [2]_, p. 236.
 
     The flange carries its share of the axial load as the membrane stress
     resultant `N_{xx}` of the plate, and bends in its own plane when the
@@ -207,12 +220,17 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
        M. V., Flutter of stiffened composite panels considering the
        stiffener's base as a structural element, Composite Structures,
        2016. https://doi.org/10.1016/j.compstruct.2015.12.056
+    .. [2] Castro, S. G. P., and Donadon, M. V., Assembly of Semi-Analytical
+       models to Address Linear Buckling and Vibration of Stiffened
+       Composite Panels with Debonding Defect, Composite Structures, 2017.
+       https://doi.org/10.1016/j.compstruct.2016.10.026
 
     Examples
     --------
 
-    First frequency, in rad/s, of a T-stiffened panel with a debonding
-    defect over 10 % of its length, at Mach 2:
+    Square root of minus the real part of the first eigenvalue, in rad/s,
+    of a T-stiffened panel with a debonding defect over 10 % of its
+    length, at Mach 2:
 
     >>> from panels.multidomain import tstiff2d_1stiff_flutter
     >>> laminaprop = (142.5e9, 8.7e9, 0.28, 5.1e9, 5.1e9, 5.1e9)
@@ -224,7 +242,7 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
     ...     run_static_case=False, m=6, n=7, mb=5, nb=6, mf=6, nf=7,
     ...     num_eigvalues=5)
     >>> round(float((-eigvals[0].real)**0.5), 2)
-    448.57
+    487.42
 
     """
     defect = defect_a * a
@@ -265,7 +283,7 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
     p01.x1u = 1 ; p01.x1ur = 1 ; p01.x2u = 0 ; p01.x2ur = 1
     p01.x1v = 1 ; p01.x1vr = 1 ; p01.x2v = 0 ; p01.x2vr = 1
     p01.x1w = 1 ; p01.x1wr = 1 ; p01.x2w = 0 ; p01.x2wr = 1
-    p01.y1u = 1 ; p01.y1ur = 1 ; p01.y2u = 1 ; p01.y2ur = 1
+    p01.y1u = 1 ; p01.y1ur = 1 ; p01.y2u = 0 ; p01.y2ur = 1
     p01.y1v = 1 ; p01.y1vr = 1 ; p01.y2v = 0 ; p01.y2vr = 1
     p01.y1w = 1 ; p01.y1wr = 1 ; p01.y2w = 0 ; p01.y2wr = 1
 
@@ -279,14 +297,14 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
     p03.x1u = 1 ; p03.x1ur = 1 ; p03.x2u = 0 ; p03.x2ur = 1
     p03.x1v = 1 ; p03.x1vr = 1 ; p03.x2v = 0 ; p03.x2vr = 1
     p03.x1w = 1 ; p03.x1wr = 1 ; p03.x2w = 0 ; p03.x2wr = 1
-    p03.y1u = 1 ; p03.y1ur = 1 ; p03.y2u = 1 ; p03.y2ur = 1
+    p03.y1u = 0 ; p03.y1ur = 1 ; p03.y2u = 1 ; p03.y2ur = 1
     p03.y1v = 0 ; p03.y1vr = 1 ; p03.y2v = 1 ; p03.y2vr = 1
     p03.y1w = 0 ; p03.y1wr = 1 ; p03.y2w = 1 ; p03.y2wr = 1
 
     p04.x1u = 1 ; p04.x1ur = 1 ; p04.x2u = 1 ; p04.x2ur = 1
     p04.x1v = 1 ; p04.x1vr = 1 ; p04.x2v = 1 ; p04.x2vr = 1
     p04.x1w = 1 ; p04.x1wr = 1 ; p04.x2w = 1 ; p04.x2wr = 1
-    p04.y1u = 1 ; p04.y1ur = 1 ; p04.y2u = 1 ; p04.y2ur = 1
+    p04.y1u = 1 ; p04.y1ur = 1 ; p04.y2u = 0 ; p04.y2ur = 1
     p04.y1v = 1 ; p04.y1vr = 1 ; p04.y2v = 0 ; p04.y2vr = 1
     p04.y1w = 1 ; p04.y1wr = 1 ; p04.y2w = 0 ; p04.y2wr = 1
 
@@ -300,28 +318,28 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
     p06.x1u = 1 ; p06.x1ur = 1 ; p06.x2u = 1 ; p06.x2ur = 1
     p06.x1v = 1 ; p06.x1vr = 1 ; p06.x2v = 1 ; p06.x2vr = 1
     p06.x1w = 1 ; p06.x1wr = 1 ; p06.x2w = 1 ; p06.x2wr = 1
-    p06.y1u = 1 ; p06.y1ur = 1 ; p06.y2u = 1 ; p06.y2ur = 1
+    p06.y1u = 0 ; p06.y1ur = 1 ; p06.y2u = 1 ; p06.y2ur = 1
     p06.y1v = 0 ; p06.y1vr = 1 ; p06.y2v = 1 ; p06.y2vr = 1
     p06.y1w = 0 ; p06.y1wr = 1 ; p06.y2w = 1 ; p06.y2wr = 1
 
-    p07.x1u = 1 ; p07.x1ur = 1 ; p07.x2u = 1 ; p07.x2ur = 1
+    p07.x1u = 0 ; p07.x1ur = 1 ; p07.x2u = 1 ; p07.x2ur = 1
     p07.x1v = 0 ; p07.x1vr = 1 ; p07.x2v = 1 ; p07.x2vr = 1
     p07.x1w = 0 ; p07.x1wr = 1 ; p07.x2w = 1 ; p07.x2wr = 1
-    p07.y1u = 1 ; p07.y1ur = 1 ; p07.y2u = 1 ; p07.y2ur = 1
+    p07.y1u = 1 ; p07.y1ur = 1 ; p07.y2u = 0 ; p07.y2ur = 1
     p07.y1v = 1 ; p07.y1vr = 1 ; p07.y2v = 0 ; p07.y2vr = 1
     p07.y1w = 1 ; p07.y1wr = 1 ; p07.y2w = 0 ; p07.y2wr = 1
 
-    p08.x1u = 1 ; p08.x1ur = 1 ; p08.x2u = 1 ; p08.x2ur = 1
+    p08.x1u = 0 ; p08.x1ur = 1 ; p08.x2u = 1 ; p08.x2ur = 1
     p08.x1v = 0 ; p08.x1vr = 1 ; p08.x2v = 1 ; p08.x2vr = 1
     p08.x1w = 0 ; p08.x1wr = 1 ; p08.x2w = 1 ; p08.x2wr = 1
     p08.y1u = 1 ; p08.y1ur = 1 ; p08.y2u = 1 ; p08.y2ur = 1
     p08.y1v = 1 ; p08.y1vr = 1 ; p08.y2v = 1 ; p08.y2vr = 1
     p08.y1w = 1 ; p08.y1wr = 1 ; p08.y2w = 1 ; p08.y2wr = 1
 
-    p09.x1u = 1 ; p09.x1ur = 1 ; p09.x2u = 1 ; p09.x2ur = 1
+    p09.x1u = 0 ; p09.x1ur = 1 ; p09.x2u = 1 ; p09.x2ur = 1
     p09.x1v = 0 ; p09.x1vr = 1 ; p09.x2v = 1 ; p09.x2vr = 1
     p09.x1w = 0 ; p09.x1wr = 1 ; p09.x2w = 1 ; p09.x2wr = 1
-    p09.y1u = 1 ; p09.y1ur = 1 ; p09.y2u = 1 ; p09.y2ur = 1
+    p09.y1u = 0 ; p09.y1ur = 1 ; p09.y2u = 1 ; p09.y2ur = 1
     p09.y1v = 0 ; p09.y1vr = 1 ; p09.y2v = 1 ; p09.y2vr = 1
     p09.y1w = 0 ; p09.y1wr = 1 ; p09.y2w = 1 ; p09.y2wr = 1
 
@@ -366,7 +384,7 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
     p14.y1w = 1 ; p14.y1wr = 1 ; p14.y2w = 1 ; p14.y2wr = 1
 
     # flange low
-    p15.x1u = 1 ; p15.x1ur = 1 ; p15.x2u = 1 ; p15.x2ur = 1
+    p15.x1u = 0 ; p15.x1ur = 1 ; p15.x2u = 1 ; p15.x2ur = 1
     p15.x1v = 0 ; p15.x1vr = 1 ; p15.x2v = 1 ; p15.x2vr = 1
     p15.x1w = 0 ; p15.x1wr = 1 ; p15.x2w = 1 ; p15.x2wr = 1
     p15.y1u = 1 ; p15.y1ur = 1 ; p15.y2u = 1 ; p15.y2ur = 1

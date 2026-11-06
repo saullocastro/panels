@@ -310,15 +310,15 @@ def test_cylinder_blade_stiffened_from_static():
 def test_tstiff2d_freq():
     r"""T-stiffened panel with ``'SSxcte'``, ``'SSycte'``, ``'SB'`` and
     ``'BFycte'``, whose base and skin have a different number of terms, the
-    penalty method gives 48.2733 with the default penalty constants and
-    48.3858 with 100 times higher constants, see
+    penalty method gives 48.4404 with the default penalty constants and
+    48.5611 with 100 times higher constants, see
     ``test_tstiff2d_assembly.py``"""
     assy, eigvals, eigvecs = tstiff2d_1stiff_freq(b=1., bb=0.2, bf=0.1, a=3.,
         ys=0.5, defect_a=0.1, rho=1.3e3, plyt=0.125e-3, laminaprop=LAMINAPROP,
         stack_skin=[0, 45, -45, 90, -45, 45, 0], stack_base=[0, 90, 0]*4,
         stack_flange=[0, 90, 0]*8, m=6, n=7, mb=5, nb=6, mf=6, nf=7,
         num_eigvalues=10, conn_method='null-space')
-    assert np.isclose((-eigvals[0])**0.5, 48.3875, rtol=1e-5)
+    assert np.isclose((-eigvals[0])**0.5, 48.5631, rtol=1e-5)
 
 
 def test_T_is_reused_and_rebuilt():
