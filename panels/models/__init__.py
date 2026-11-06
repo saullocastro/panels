@@ -58,6 +58,15 @@ The available models, which are selected with ``Shell.model``, are:
   curvature of the deformed normal, all invariant under rigid rotations,
   3 DOFs ``u, v, w``.
 
+- ``'frame_web_clpt_donnell'``: the web of a ring frame, an annular sector
+  of a flat plate in the plane normal to the axis of a cylinder, CLPT with
+  the von Kármán strains in polar coordinates, 3 DOFs ``u, v, w``.
+  ``a`` is the height of the web, ``b`` the arc length of its outer edge and
+  ``r`` its outer radius; `x = r - 
+ho` runs from the outer edge inwards and
+  `y = r 	heta` along the outer edge. It connects to a cylinder with
+  ``'BFxcte'``, see :mod:`panels.models.frame_web_clpt_donnell_num`.
+
 - ``'cylshell_clpt_donnell'``: cylindrical shells, CLPT with the
   Donnell-Mushtari-Vlasov (shallow shell) kinematics, 3 DOFs ``u, v, w``.
 
@@ -320,6 +329,26 @@ them from the laminate, and ``fkM_num(shell, I_input, size, row0, col0, nx,
 ny)`` receives them, with the thickness `h` of the TSDT, as one set for the
 whole domain or one set per integration point, see :meth:`.Shell.calc_kM`.
 
+The web of a ring frame, ``'frame_web_clpt_donnell'``, has the von Kármán
+strains of circular plates [4]_, Sec. 1.4.2, Eqs. (1.175)-(1.180), with
+`x = r - \rho`, `y = r \theta`, `s = r/\rho` and the local axes
+`\boldsymbol{e}_x = -\boldsymbol{e}_\rho`, `\boldsymbol{e}_y =
+\boldsymbol{e}_\theta`:
+
+.. math::
+
+    \varepsilon_{yy} = s v_{,y} - \frac{u}{\rho} + \frac{1}{2} s^2 w_{,y}^2
+    \qquad
+    \gamma_{xy} = s u_{,y} + v_{,x} + \frac{v}{\rho} + s w_{,x} w_{,y}
+
+    \kappa_{yy} = \frac{w_{,x}}{\rho} - s^2 w_{,yy} \qquad
+    \kappa_{xy} = -2 s \left(w_{,xy} + \frac{w_{,y}}{\rho}\right)
+
+and `\varepsilon_{xx}`, `\kappa_{xx}` of the flat plate. The coefficients
+in `1/\rho` make the integrands rational in `x`, and the matrices of the
+whole domain are also integrated numerically, see
+:mod:`panels.models.frame_web_clpt_donnell_num`.
+
 References
 ----------
 .. [1] Sanders, J. L., "Nonlinear theories for thin shells", Quarterly of
@@ -347,6 +376,7 @@ from . import cylshell_clpt_tl_num
 from . import plate_clpt_donnell, plate_clpt_donnell_num
 from . import plate_clpt_gl, plate_clpt_gl_num
 from . import plate_clpt_tl_num
+from . import frame_web_clpt_donnell_num, frame_web_clpt_donnell
 from . import fsdt_tsdt_field
 from . import plate_fsdt_donnell, plate_fsdt_donnell_num
 from . import plate_tsdt_donnell, plate_tsdt_donnell_num
