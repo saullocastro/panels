@@ -1,0 +1,7 @@
+{
+    "path": "../../../notebooks/peterson1959_blade_cylinder_buckling.ipynb",
+    "extra-media": [
+        "../../../notebooks/blade_cylinder_utils.py",
+        "../../../notebooks/stringer_cylinder_utils.py"
+    ]
+}

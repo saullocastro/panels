@@ -143,6 +143,8 @@ User guide
     notebooks/sewall1968_blade_cylinder_vibration.nblink
     notebooks/egle1968_few_stringer_cylinder_vibration.nblink
     notebooks/card1966_blade_cylinder_buckling.nblink
+    notebooks/weller1977_blade_cylinder_buckling.nblink
+    notebooks/peterson1959_blade_cylinder_buckling.nblink
     notebooks/abramovich2009_blade_panels.nblink
     notebooks/lanzi2003_torsion_cylinder.nblink
     notebooks/dcb_alfano2001.nblink
