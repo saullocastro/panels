@@ -121,6 +121,31 @@
   lowers the discrete load by 1.3 %, to 1.6 % below `N_s`; new test
   `test_discrete_gl_skin` in `tests/multidomain/test_cylinder_blade_stiffened.py`.
 
+### Changed: the ends of the `BladeStiff2D` flange follow the bay
+
+- The flags of the ends `x1` and `x2` of the flange of `BladeStiff2D` are
+  copied from those of the bay when the stiffener is created, through the
+  connection at the root of the blade (`u_f = u`, `v_f = -w`, `w_f = v`):
+  `x1u, x1ur` from the bay's `x1u, x1ur`, `x1v, x1vr` from `x1w, x1wr`,
+  `x1w, x1wr` from `x1v, x1vr`, likewise at `x2`. They were fixed
+  (`u_f = u_f,x = v_f = v_f,x = w_f = 0`, `w_f,x` free) whatever the bay.
+  For stiffeners not held by the ribs (ending at the bay, running through
+  mouse holes) the user changes the flags of `BladeStiff2D.flange` after
+  creating the stiffener (docstring example). With the default bay the
+  flange now has `v_f,x` free and `w_f,x = 0`: the example of
+  `BladeStiff2D` gives 707.3 instead of 662.5 (678.7 with `v_f`, `w_f`
+  free at the ends). With the simple supports of Sewall and Naumann (1968),
+  skin `u` free, the internally stiffened sector gives 140.0 Hz with 10 by
+  8 terms of the skin and 10 by 5 of each flange (139.98 Hz with 14 by 12
+  and 14 by 7; measured 137.0 and 147.0 Hz; `MultiDomain` sector with the
+  same blade flags 139.7 Hz) without changing the flange flags, against
+  234.2 Hz with the former fixed flags. Tests in
+  `tests/tests_stiffpanelbay/test_bladestiff2d_vibration.py`: the mapping
+  of the flags, and the Sewall and Naumann sector with the default flags
+  and with `w_f` freed. The example notebooks `ex_stiffpanelbay` (values
+  of the `BladeStiff2D` flange) and `sewall1968_blade_cylinder_vibration`
+  (new `BladeStiff2D` section) were re-executed.
+
 ### Fixed
 
 - `Shell.m` and `Shell.n` are properties whose setters raise the
@@ -138,7 +163,7 @@
   supported: 746 Hz with 10 by 8 terms of the skin and 10 by 5 of each
   flange, 484 Hz with 14 by 12 and 14 by 7; now 138.0 and 137.96 Hz,
   measured 137.0 and 147.0 Hz). Results of bays with shallow flanges change
-  little (the example of `BladeStiff2D` keeps its buckling load 662.5).
+  little.
   New tests in `tests/tests_stiffpanelbay/test_bladestiff2d_vibration.py`:
   the Sewall and Naumann sector against their Table II and against the
   `MultiDomain` sector with plate blades (`'BFycte'`), a flat bay with one
