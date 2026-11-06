@@ -119,6 +119,12 @@ MODELS = {
     'plate_clpt_tl': (3, 'plate', 'tl'),
     #NOTE likewise for the cylinder, see cylshell_clpt_tl/cylshell_clpt_tl.py
     'cylshell_clpt_tl': (3, 'cylshell', 'sanders'),
+    #NOTE the shear deformable models with Green-Lagrange membrane strains,
+    #     with the geometry of plate_clpt_gl and cylshell_clpt_gl
+    'plate_fsdt_gl': (5, 'plate', 'gl'),
+    'plate_tsdt_gl': (5, 'plate', 'gl'),
+    'cylshell_fsdt_gl': (5, 'cylshell', 'sanders'),
+    'cylshell_tsdt_gl': (5, 'cylshell', 'sanders'),
 }
 
 a, b, r = symbols('a, b, r', positive=True)

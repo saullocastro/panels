@@ -153,7 +153,35 @@ def is_sanders(object s):
         ``1`` when ``'sanders'`` is in the name of the model, else ``0``.
 
     '''
-    return 1 if 'sanders' in s.model else 0
+    return 1 if ('sanders' in s.model
+                 or s.model in ('cylshell_fsdt_gl', 'cylshell_tsdt_gl')) else 0
+
+
+def is_gl(object s):
+    r'''Tell whether the model of ``s`` has Green-Lagrange membrane strains
+
+    Parameters
+    ----------
+    s : :class:`.Shell`
+        The shell, whose attribute ``model`` is read.
+
+    Returns
+    -------
+    gl : int
+        ``1`` when the name of the model ends with ``'_gl'``, else ``0``.
+
+    Notes
+    -----
+    The membrane strains of these models are the Green-Lagrange strains of
+    the mid-surface, `\varepsilon_{xx} = u_{,x} + (u_{,x}^2 + v_{,x}^2 +
+    \beta_x^2)/2`, `\varepsilon_{yy} = v_{,y} + w/r + (u_{,y}^2 + (v_{,y} +
+    w/r)^2 + \beta_y^2)/2`, `\gamma_{xy} = u_{,y} + v_{,x} + u_{,x} u_{,y}
+    + v_{,x} (v_{,y} + w/r) + \beta_x \beta_y`, with `\beta_x = -w_{,x}`,
+    `\beta_y = -w_{,y} + v/r` and `1/r = 0` for the plates, see
+    :mod:`panels.models`.
+
+    '''
+    return 1 if s.model.endswith('_gl') else 0
 
 
 def rinv(object s):
@@ -415,9 +443,11 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys,
         The strains are those of the notes of
         :mod:`panels.models.fsdt_tsdt_field`, with `c_1 = 4/(3 h^2)` for the
         TSDT, and with the non-linear terms `\beta_x^2/2`, `\beta_y^2/2`
-        and `\beta_x \beta_y` multiplied by ``NLgeom``.
+        and `\beta_x \beta_y` multiplied by ``NLgeom``; for the models of
+        :func:`.is_gl` the membrane strains are the Green-Lagrange strains
+        given there, with their quadratic terms multiplied by ``NLgeom``.
     '''
-    cdef double a, b, h, c1, ri, sr, bx, by
+    cdef double a, b, h, c1, ri, sr, bx, by, gl, ux, uy, vx, vy
     cdef int m, n, pti, size, tsdt
     cdef double bcs[40]
     cdef double [:, ::1] out
@@ -446,6 +476,7 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys,
     #NOTE r is only read for the cylinders, a plate may have r = None
     ri = rinv(s)
     sr = ri*is_sanders(s)
+    gl = is_gl(s)
     read_bcs(s, bcs)
     size = xs.shape[0]
     out = np.zeros((13 if tsdt == 1 else 8, size), dtype=DOUBLE)
@@ -469,6 +500,15 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys,
             out[0, pti] = val_x[0] + NLgeom*0.5*bx*bx
             out[1, pti] = val_y[1] + ri*val[2] + NLgeom*0.5*by*by
             out[2, pti] = val_y[0] + val_x[1] + NLgeom*bx*by
+            # Green-Lagrange membrane strains: quadratic terms of the
+            # in-plane gradients u,x, u,y, v,x and v,y + w/r
+            ux = val_x[0]
+            uy = val_y[0]
+            vx = val_x[1]
+            vy = val_y[1] + ri*val[2]
+            out[0, pti] += gl*NLgeom*0.5*(ux*ux + vx*vx)
+            out[1, pti] += gl*NLgeom*0.5*(uy*uy + vy*vy)
+            out[2, pti] += gl*NLgeom*(ux*uy + vx*vy)
             out[3, pti] = val_x[3]
             out[4, pti] = val_y[4] + sr*val_y[1]
             out[5, pti] = (val_y[3] + val_x[4]

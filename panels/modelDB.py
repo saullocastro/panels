@@ -214,4 +214,60 @@ db = {
                     'e_num': 13,
                     'requires_r': False,
                     },
+    'plate_fsdt_gl': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    'field': fsdt_tsdt_field,
+                    #NOTE fk0, fkM, fkAx, fkAy and fcA of plate_fsdt_donnell, fkG0 with
+                    #     the in-plane blocks of the Green-Lagrange strains
+                    'matrices': plate_fsdt_gl,
+                    'matrices_num': plate_fsdt_gl_num,
+                    'dofs': 5,
+                    'e_num': 8,
+                    # the plate kernels never read r
+                    'requires_r': False,
+                    },
+    'plate_tsdt_gl': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    'field': fsdt_tsdt_field,
+                    #NOTE fk0, fkM, fkAx, fkAy and fcA of plate_tsdt_donnell, fkG0 with
+                    #     the in-plane blocks of the Green-Lagrange strains
+                    'matrices': plate_tsdt_gl,
+                    'matrices_num': plate_tsdt_gl_num,
+                    'dofs': 5,
+                    'e_num': 13,
+                    # the plate kernels never read r
+                    'requires_r': False,
+                    },
+    'cylshell_fsdt_gl': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    'field': fsdt_tsdt_field,
+                    #NOTE fk0, fkM, fkAx, fkAy and fcA of cylshell_fsdt_sanders, fkG0 with
+                    #     the in-plane blocks of the Green-Lagrange strains
+                    'matrices': cylshell_fsdt_gl,
+                    'matrices_num': cylshell_fsdt_gl_num,
+                    'dofs': 5,
+                    'e_num': 8,
+                    # the kernels divide by r, a radius is mandatory
+                    'requires_r': True,
+                    },
+    'cylshell_tsdt_gl': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    'field': fsdt_tsdt_field,
+                    #NOTE fk0, fkM, fkAx, fkAy and fcA of cylshell_tsdt_sanders, fkG0 with
+                    #     the in-plane blocks of the Green-Lagrange strains
+                    'matrices': cylshell_tsdt_gl,
+                    'matrices_num': cylshell_tsdt_gl_num,
+                    'dofs': 5,
+                    'e_num': 13,
+                    # the kernels divide by r, a radius is mandatory
+                    'requires_r': True,
+                    },
     }
