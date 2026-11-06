@@ -58,6 +58,9 @@ END_FLAGS = {
     'CL': (dict(_FREE, v=0, w=0, wr=0), dict(_FREE, v=0, vr=0, w=0, wr=0)),
     # simple support of Card and Jones, N_x = v = w = M_x = 0 (loaded end)
     'SL': (dict(_FREE, v=0, w=0), dict(_FREE, v=0)),
+    # as 'SL', with the blade also held circumferentially, w = 0 along its
+    # end edge (the simply supported stringer end of bfsccylinder's sector)
+    'SW': (dict(_FREE, v=0, w=0), dict(_FREE, v=0, w=0)),
 }
 
 
@@ -69,7 +72,8 @@ def _set_end(p, end, flags):
 def build_cylinder(R, h, L, E, nu, rho=0., nstiff=60, tb=None, hb=None,
         side='external', bc='SS', mx=12, ny=6, nyb=4, full=False,
         pd_method='penalty', blade_model='plate_clpt_gl', Dy_factor=1.,
-        D12_factor=1.):
+        D12_factor=1., skin_model='cylshell_clpt_sanders',
+        blade_D66_factor=1.):
     r"""Cylinder with ``nstiff`` equally spaced blade stringers
 
     The skin is divided at the stringers into curved panels. With
@@ -98,7 +102,9 @@ def build_cylinder(R, h, L, E, nu, rho=0., nstiff=60, tb=None, hb=None,
     ``ABDnxny`` (see :class:`panels.shell.Shell`), with which the stiffness
     matrix is integrated numerically; the mass still comes from the
     laminate. With both factors equal to 1 (default) the attribute is not
-    set.
+    set. ``blade_D66_factor`` multiplies in the same way the twisting
+    stiffness `D_{66}` of every blade, e.g. 0 to remove the twisting
+    stiffness `4 D_{66} h_b = G h_b t_b^3/3` of the blades.
 
     Parameters
     ----------
@@ -126,6 +132,11 @@ def build_cylinder(R, h, L, E, nu, rho=0., nstiff=60, tb=None, hb=None,
         Model of the blades.
     Dy_factor, D12_factor : float
         Factors of `D_{22}` and `D_{12}` of the skin.
+    skin_model : str
+        Model of the skin panels, ``'cylshell_clpt_sanders'`` (default) or
+        ``'cylshell_clpt_donnell'``.
+    blade_D66_factor : float
+        Factor of `D_{66}` of the blades.
 
     Returns
     -------
@@ -152,7 +163,7 @@ def build_cylinder(R, h, L, E, nu, rho=0., nstiff=60, tb=None, hb=None,
         p = Shell(group='skin', x0=0., y0=R*ths[i], a=L, b=R*(ths[i+1] - ths[i]),
                   r=R, m=mx, n=max(4, ny//2) if half_bay else ny, plyt=h,
                   stack=[0.], laminaprop=lam, rho=rho,
-                  model='cylshell_clpt_sanders')
+                  model=skin_model)
         _set_end(p, 'x1', sk1)
         _set_end(p, 'x2', sk2)
         _set_end(p, 'y1', _FREE)
@@ -184,6 +195,10 @@ def build_cylinder(R, h, L, E, nu, rho=0., nstiff=60, tb=None, hb=None,
             bl = Shell(group='blade', x0=0., y0=pskin.y0, a=L, b=hb, m=mx,
                        n=nyb, plyt=tb, stack=[0.], laminaprop=lam, rho=rho,
                        model=blade_model)
+            if blade_D66_factor != 1.:
+                ABD = np.array(bl.ABD, dtype=float)
+                ABD[5, 5] *= blade_D66_factor
+                bl.ABDnxny = ABD
             _set_end(bl, 'x1', bl1)
             _set_end(bl, 'x2', bl2)
             _set_end(bl, 'y1', _FREE)
@@ -399,7 +414,7 @@ def buckling_ss(R, h, L, E, nu, tb, hb, side, mx, ny, nyb, num_eigvalues=10,
 
 
 def buckling_membrane(R, h, L, E, nu, tb, hb, side, bc, mx, ny, nyb,
-        num_eigvalues=10, eps=1.e-4):
+        num_eigvalues=10, eps=1.e-4, blade_lateral_kG=True, **kwargs):
     r"""Axial buckling of the half cylinder about a membrane pre-buckling state
 
     The pre-buckling state is the uniform axial strain ``-eps`` without
@@ -408,7 +423,16 @@ def buckling_membrane(R, h, L, E, nu, tb, hb, side, bc, mx, ny, nyb,
     attribute ``Nxx`` of each panel), as in the theory of Card and Jones
     (1966). ``bc='CC'``: both ends clamped, `u = v = w = w_{,x} = 0`;
     ``bc='SS'``: both ends with `N_x = v = w = M_x = 0`, the rigid axial
-    translation removed by `u = 0` at the point `x = L/2`, `\theta = 0`.
+    translation removed by `u = 0` at the point `x = L/2`, `\theta = 0`;
+    ``bc='SSW'``: as ``'SS'``, with the blades also held circumferentially
+    along their end edges (``END_FLAGS['SW']``). ``kwargs`` go to :func:`build_cylinder` (e.g. ``nstiff``,
+    ``skin_model``, ``blade_D66_factor``). With
+    ``blade_lateral_kG=False`` the geometric stiffness of the blades loses
+    the term `N_{xx} w_{,x}^2` of their out-of-plane displacement `w` (the
+    circumferential displacement of the stringer section), the geometric
+    stiffness of the blades of ``'plate_clpt_donnell'`` with the same
+    `N_{xx}` being subtracted; the terms of the in-plane displacements
+    remain.
 
     Returns the critical axial load of the whole cylinder ``P``, N, the
     modes ``[(lambda, m, n, c), ...]`` with `\lambda > 0` in increasing
@@ -418,11 +442,12 @@ def buckling_membrane(R, h, L, E, nu, tb, hb, side, bc, mx, ny, nyb,
     t0 = time.time()
     if bc == 'CC':
         md, skin, blades = build_cylinder(R, h, L, E, nu, tb=tb, hb=hb,
-                side=side, bc='CC', mx=mx, ny=ny, nyb=nyb)
+                side=side, bc='CC', mx=mx, ny=ny, nyb=nyb, **kwargs)
     else:
+        end = 'SW' if bc == 'SSW' else 'SL'
         md, skin, blades = build_cylinder(R, h, L, E, nu, tb=tb, hb=hb,
-                side=side, bc=('SL', 'SL'), mx=mx, ny=ny, nyb=nyb,
-                pd_method='null-space')
+                side=side, bc=(end, end), mx=mx, ny=ny, nyb=nyb,
+                pd_method='null-space', **kwargs)
         skin[0].add_point_pd(L/2, 0., 1., 0., None, None, None, None)
     P1 = 0.
     for p in skin:
@@ -433,7 +458,15 @@ def buckling_membrane(R, h, L, E, nu, tb, hb, side, bc, mx, ny, nyb,
         P1 += E*tb*eps*p.b
     P1 *= 2
     K = md.reduce(md.calc_kC(silent=True))
-    KG = md.reduce(md.calc_kG(silent=True))
+    KGfull = md.calc_kG(silent=True)
+    if not blade_lateral_kG:
+        for bl in blades:
+            model = bl.model
+            bl.model = 'plate_clpt_donnell'
+            KGfull = KGfull - bl.calc_kG(size=md.get_size(),
+                    row0=bl.row_start, col0=bl.col_start, silent=True)
+            bl.model = model
+    KG = md.reduce(KGfull)
     eigvals, eigvecs = lb(K, KG, tol=0, sparse_solver=True, silent=True,
                           num_eigvalues=num_eigvalues)
     eigvecs = md.expand(eigvecs)
