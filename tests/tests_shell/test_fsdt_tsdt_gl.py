@@ -157,10 +157,11 @@ def test_linear_kernels_are_those_of_the_linear_model(model):
 
 def plate_rigid_rotation(s, axis, angle):
     r"""Ritz constants of ``u = (R - I) X`` with the constant rotations
-    ``phix = -w,x``, ``phiy = -w,y``, least squares on a grid (exact, the
-    approximation functions containing the linear ones)"""
-    xs = np.linspace(0, s.a, 9)
-    ys = np.linspace(0, s.b, 7)
+    ``phix = -w,x``, ``phiy = -w,y``, least squares on a grid of more points
+    than terms along each direction (exact, the approximation functions
+    containing the linear ones)"""
+    xs = np.linspace(0, s.a, 17)
+    ys = np.linspace(0, s.b, 17)
     X, Y = [np.ascontiguousarray(v.ravel()) for v in np.meshgrid(xs, ys)]
     size = s.get_size()
     A = np.zeros((5*X.size, size))
@@ -195,7 +196,14 @@ def test_plate_rigid_rotation_gives_zero_strains(model, axis, angle):
     s = panel(model, free=True)
     c = plate_rigid_rotation(s, AXES[axis], angle)
     _, fields = s.strain(c, gridx=7, gridy=7, NLgeom=True)
-    assert max(np.abs(f).max() for f in fields.values() if f is not None) < 1.e-10
+    # strains at the faces z = +-h/2: the curvatures times h/2, the third-
+    # order terms times (h/2)^3 and the second-order shear terms times
+    # (h/2)^2
+    h2 = sum(s.plyts)/2
+    scale = {'kxx': h2, 'kyy': h2, 'kxy': h2, 'kxx3': h2**3, 'kyy3': h2**3,
+             'kxy3': h2**3, 'gyz2': h2**2, 'gxz2': h2**2}
+    names = fsdt_tsdt_field.strain_names(s)
+    assert max(scale.get(k, 1.)*np.abs(fields[k]).max() for k in names) < 1.e-12
     fint = s.calc_fint(c)
     assert np.linalg.norm(fint) < 1.e-9*np.linalg.norm(s.calc_kC() @ c)
     sl = panel(LINEAR[model], free=True)
