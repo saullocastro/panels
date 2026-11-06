@@ -28,9 +28,12 @@ Blade stiffener of a `StiffPanelBay` along `x` at `y = ys`, below the skin:
   otherwise a curved bay uses `../bladestiff2d_clt_sanders`.
 - Flange: a `Shell` with the model `'plate_clpt_donnell'`, length `a`,
   width `bf`, its own approximation functions (`r` along `x`, `s` along the
-  width) and Ritz constants, `mf x nf` terms (default `14 x 11`). It is
-  simply supported at `x = 0` and `x = a`, where only `w,x` is free, and
-  free along its two edges.
+  width) and Ritz constants, `mf x nf` terms (default `14 x 11`). It is free along its two
+  edges. Its ends `x = 0` and `x = a` take the flags of the bay through the
+  connection at the root (`u_f = u`, `v_f = -w`, `w_f = v`): `x1u, x1ur`
+  from the bay's `x1u, x1ur`, `x1v, x1vr` from `x1w, x1wr`, `x1w, x1wr` from
+  `x1v, x1vr`, likewise at `x2`, copied when the stiffener is created; the
+  user may change them afterwards (stiffeners not held by the ribs).
 
 ## Kinematics, strains and constitutive law
 

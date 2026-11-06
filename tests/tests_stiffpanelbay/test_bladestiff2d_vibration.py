@@ -6,11 +6,14 @@ The tests verify:
   cylinder (shell IS) of Sewall and Naumann (1968), simply supported, against
   the two measured frequencies of the mode `(m, n) = (1, 6)` of their Table
   II and against the :class:`.MultiDomain` assembly of the same sector with
-  the blades as plate domains connected with ``'BFycte'``;
+  the blades as plate domains connected with ``'BFycte'``, with the default
+  end flags of the flanges and with the circumferential displacement of the
+  flange ends freed;
 - the lowest natural frequency of a flat bay with one deep blade against the
   :class:`.MultiDomain` assembly of the same bay;
 - the default flags of the flange of :class:`.BladeStiff2D`: free edges
-  `y_f = 0` and `y_f = b_f`.
+  `y_f = 0` and `y_f = b_f`, and ends `x = 0, a` with the flags of the bay
+  through the connection at the root, `u_f = u`, `v_f = -w`, `w_f = v`.
 
 Notes
 -----
@@ -77,9 +80,41 @@ def test_flange_edges_free():
             assert getattr(s.flange, e + k) == 1.
 
 
-def _sewall_sector(blades, m, n, mf, nf):
+def test_flange_end_flags_follow_bay():
+    """The end flags of the flange are those of the bay, `u_f` from `u`,
+    `v_f` from `w`, `w_f` from `v`, copied when the stiffener is created,
+    and a flag of the flange changed afterwards is kept"""
+    for bay_x1 in [(0., 0., 0., 0., 0., 1.), (1., 1., 0., 1., 0., 1.),
+                   (1., 0., 1., 0., 0., 0.)]:
+        bay = StiffPanelBay()
+        bay.a, bay.b, bay.r = 0.4, 0.2, None
+        bay.stack = [0.]
+        bay.plyt = 1.e-3
+        bay.laminaprop = _isotropic(70.e9, 0.3)
+        bay.rho = 2700.
+        bay.m, bay.n = 6, 6
+        _flags(bay, ('x1',), bay_x1)
+        _flags(bay, ('x2',), bay_x1[::-1])
+        bay.add_panel(0, 0.1)
+        bay.add_panel(0.1, 0.2)
+        s = bay.add_bladestiff2d(ys=0.1, bf=0.02, fstack=[0.], fplyt=1.e-3,
+                                 flaminaprop=bay.laminaprop, mf=4, nf=4)
+        for e in ('x1', 'x2'):
+            for kf, kb in (('u', 'u'), ('v', 'w'), ('w', 'v')):
+                for r in ('', 'r'):
+                    assert (getattr(s.flange, e + kf + r)
+                            == getattr(bay, e + kb + r))
+        s.flange.x1w = s.flange.x2w = 1.
+        bay.calc_kC(silent=True)
+        assert s.flange.x1w == s.flange.x2w == 1.
+
+
+def _sewall_sector(blades, m, n, mf, nf, blade_x=None):
     r"""Sector `0 \le \theta \le \pi/6` of the shell IS of Sewall and
-    Naumann (1968), simply supported, with its 5 stringers"""
+    Naumann (1968), simply supported, with its 5 stringers; ``blade_x``, the
+    end flags of the blades, is required for the :class:`.MultiDomain`
+    sector and replaces the default end flags of the :class:`.BladeStiff2D`
+    flanges"""
     R = 9.535*IN
     h = 0.0266*IN
     tb = 0.100*IN
@@ -90,7 +125,6 @@ def _sewall_sector(blades, m, n, mf, nf):
     b = R*np.pi/6
     ys = [(k + 0.5)*b/5 for k in range(5)]
     skin_x = (1., 1., 0., 1., 0., 1.)
-    blade_x = (1., 1., 0., 1., 1., 1.)
     if blades == 'BladeStiff2D':
         bay = StiffPanelBay()
         bay.a, bay.b, bay.r = L, b, R
@@ -107,7 +141,8 @@ def _sewall_sector(blades, m, n, mf, nf):
         for y in ys:
             s = bay.add_bladestiff2d(ys=y, bf=hb, fstack=[0.], fplyt=tb,
                                      flaminaprop=lam, mf=mf, nf=nf)
-            _flags(s.flange, ('x1', 'x2'), blade_x)
+            if blade_x is not None:
+                _flags(s.flange, ('x1', 'x2'), blade_x)
         return _f1(bay.calc_kC(silent=True), bay.calc_kM(silent=True))
     edges = [0.] + ys + [b]
     skin = []
@@ -144,7 +179,10 @@ def test_sewall1968_internally_stiffened_sector():
     against the measured frequencies of the mode `(1, 6)`, 137.0 and 147.0
     Hz (Sewall and Naumann 1968, Table II), and against the
     :class:`.MultiDomain` sector with skin panels between the stringers and
-    the blades as plate domains, ``'BFycte'``, within 1.5 %.
+    the blades as plate domains, ``'BFycte'``, with the same end flags of
+    the blades, within 1.5 %: with the default end flags of the flanges,
+    those of the bay, and with their circumferential displacement `w_f`
+    freed by the user.
 
     Notes
     -----
@@ -156,16 +194,24 @@ def test_sewall1968_internally_stiffened_sector():
     tip of the stringer, `h/2 + 0.2754` in, inside the skin. The planes of
     symmetry `\theta = 0` and `\pi/6` have `v = w_{,y} = 0`, which keeps the
     modes with `n` a multiple of 6. The ends `x = 0, L` of the skin have `v
-    = w = 0` with `u` free (knife-edge rings), those of the flanges only the
-    radial displacement `v_f = 0` (ring at the stringer tips). The table
+    = w = 0` with `u` free (knife-edge rings). The ends of the flanges take
+    by default the flags of the bay through the connection at the root,
+    `u_f` free and `v_f = w_f = 0`, the derivatives free: the ring at the
+    stringer tips holds them radially, `v_f = 0`, and the default also
+    circumferentially, `w_f = 0`; the second model frees `w_f`. The table
     gives the dual resonance of the mode `(1, 6)` as 137.0 and 147.0 Hz
-    (p. 31); the model, without the fillets, which stiffen the skin around
-    the circumference, lies between them: 138.0 Hz with the terms of the
-    test, 137.96 Hz with 14 by 12 terms of the skin and 14 by 7 of each
-    flange. The :class:`.MultiDomain` sector, whose connections are exact
-    (null space), gives 139.3 Hz with the terms of the test and 139.1 Hz
-    with 16 terms along `x`, 10 across a bay and 8 across a blade; the
-    penalty connection of :class:`.BladeStiff2D` is slightly softer.
+    (p. 31); the models, without the fillets, which stiffen the skin around
+    the circumference, lie between them. With the default flags: 140.0 Hz
+    with the terms of the test and 139.98 Hz with 14 by 12 terms of the
+    skin and 14 by 7 of each flange, against 139.7 Hz for the
+    :class:`.MultiDomain` sector with the same flags of the blades. With
+    `w_f` free: 138.0 Hz with the terms of the test and 137.96 Hz with 14
+    by 12 and 14 by 7, against 139.3 Hz for the :class:`.MultiDomain`
+    sector, whose connections are exact (null space), with the terms of the
+    test and 139.1 Hz with 16 terms along `x`, 10 across a bay and 8 across
+    a blade. With the end flags `u_f = u_{f,x} = v_f = v_{f,x} = w_f = 0`,
+    `w_{f,x}` free, which do not follow the bay, the :class:`.BladeStiff2D`
+    sector gives 234.2 Hz with the terms of the test.
 
     References
     ----------
@@ -174,8 +220,14 @@ def test_sewall1968_internally_stiffened_sector():
        without longitudinal stiffeners, NASA TN D-4705, 1968.
 
     """
+    blade_x = (1., 1., 0., 1., 0., 1.)
     f_bay = _sewall_sector('BladeStiff2D', 10, 8, 10, 5)
-    f_md = _sewall_sector('MultiDomain', 12, 6, 12, 4)
+    f_md = _sewall_sector('MultiDomain', 12, 6, 12, 4, blade_x)
+    assert 137.0 <= f_bay <= 147.0
+    assert abs(f_bay - f_md) <= 0.015*f_md
+    blade_x = (1., 1., 0., 1., 1., 1.)
+    f_bay = _sewall_sector('BladeStiff2D', 10, 8, 10, 5, blade_x)
+    f_md = _sewall_sector('MultiDomain', 12, 6, 12, 4, blade_x)
     assert 137.0 <= f_bay <= 147.0
     assert abs(f_bay - f_md) <= 0.015*f_md
 
@@ -186,7 +238,8 @@ def test_flat_bay_deep_blade_against_multidomain():
     A simply supported aluminium bay, 0.6 x 0.3 m, 2 mm thick, `w = 0` and
     the in-plane displacements free at its edges, with a blade of 18 x 2 mm
     at mid-width as a :class:`.BladeStiff2D` flange whose ends have only
-    `v_f = 0` (normal to the skin), against the
+    `v_f = 0` (normal to the skin), the default end flags of the flange on
+    this bay, against the
     :class:`.MultiDomain` assembly of two skin plates and a plate blade
     connected with ``'BFycte'``, within 0.5 %: 96.57 and 96.40 Hz with
     these terms (216.5 Hz for the bay with the flags ``0`` of `u_{f,y}` and
@@ -210,7 +263,8 @@ def test_flat_bay_deep_blade_against_multidomain():
     bay.add_panel(b/2, b)
     s = bay.add_bladestiff2d(ys=b/2, bf=bf, fstack=[0.], fplyt=tf,
                              flaminaprop=lam, mf=10, nf=6)
-    _flags(s.flange, ('x1', 'x2'), blade_x)
+    for e in ('x1', 'x2'):
+        assert tuple(getattr(s.flange, e + k) for k in KEYS) == blade_x
     f_bay = _f1(bay.calc_kC(silent=True), bay.calc_kM(silent=True))
 
     p1 = Shell(group='skin', x0=0, y0=0, a=a, b=b/2, m=10, n=8, plyt=h,
