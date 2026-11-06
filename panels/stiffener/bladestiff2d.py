@@ -45,10 +45,22 @@ class BladeStiff2D(object):
     the stiffener model, see ``model``. When ``fstack`` is given, the flange
     is the :class:`.Shell` ``flange`` with the model
     ``'plate_clpt_donnell'``, the length ``bay.a``, the width ``bf`` and
-    ``mf`` by ``nf`` terms, with the flags of the boundary conditions
-    ``x1u = x1ur = x2u = x2ur = 0``, ``x1v = x1vr = x2v = x2vr = 0``,
-    ``x1w = x2w = 0``, ``x1wr = x2wr = 1`` and all the flags of the edges
-    ``y1`` and ``y2`` equal to ``1``. The constructor then calls
+    ``mf`` by ``nf`` terms. The flags of the boundary conditions of its
+    ends ``x1`` and ``x2`` are copied from those of ``bay`` when the
+    stiffener is created, each displacement of the flange taking the flags
+    of the displacement of the skin it equals at the root of the blade:
+    ``x1u, x1ur`` from ``bay.x1u, bay.x1ur`` (axial displacement),
+    ``x1v, x1vr`` from ``bay.x1w, bay.x1wr`` (the in-plane displacement
+    `v_f` of the flange along its width, normal to the skin) and ``x1w,
+    x1wr`` from ``bay.x1v, bay.x1vr`` (the displacement `w_f` normal to the
+    flange, along `y` of the skin), and likewise at ``x2``; all the flags
+    of the edges ``y1`` and ``y2`` of the flange are ``1``, free. With the
+    default flags of :class:`.StiffPanelBay` the ends of the flange have
+    `u_f = u_{f,x} = v_f = w_f = w_{f,x} = 0`, `v_{f,x}` free. To give the
+    flange other end conditions, e.g. for a stiffener that ends at the
+    bay or runs through the mouse holes of the ribs, assign the flags of
+    the attribute ``flange`` after the stiffener is created, see Examples.
+    The constructor then calls
     ``_rebuild()``, which checks with ``assert`` that ``panel1`` and
     ``panel2`` have the same ``model``, ``m``, ``n`` and ``r``, sets the
     model of the base, rebuilds the
@@ -122,16 +134,33 @@ class BladeStiff2D(object):
     h_b/2)`, i.e. the base is perfectly bonded below the skin and follows
     its displacement field. The flange is a plate based on the classical
     laminated plate theory, normal to the base, with its own approximation
-    functions and Ritz constants, simply supported at its ends `x = 0` and
-    `x = a`, where only the rotation `w_{,x}` is free, and free along its
-    two edges `y_f = 0` and `y_f = b_f`. Its edge `y_f = 0` is connected to
-    the skin along `y = y_s` with the penalty energy of :meth:`.calc_kC`,
+    functions and Ritz constants, free along its two edges `y_f = 0` and
+    `y_f = b_f`. Its edge `y_f = 0` is connected to the skin along `y =
+    y_s` with the penalty energy of :meth:`.calc_kC`,
     such that the local buckling of the flange is represented, unlike with
     :class:`.BladeStiff1D`. The base as a structural element follows [1]_,
     Sec. 2, Eqs. (11) and (12), where the flange is a one-dimensional
     Euler-Bernoulli beam, as in :class:`.BladeStiff1D`. The two-dimensional
     flange and its connection to the skin are a model of this package, not
     taken from a publication.
+
+    The flange lies in the plane `x`-`z` of the skin, its width along `-z`
+    and its normal along `y`. The connection makes its displacements at
+    the root equal to those of the skin, `u_f = u`, `v_f = -w` and `w_f =
+    v` along `y = y_s`, and so also their derivatives along `x`: `u_{f,x} =
+    u_{,x}`, `v_{f,x} = -w_{,x}` and `w_{f,x} = v_{,x}`. The end flags of
+    the flange are those of the skin under this correspondence: a flag
+    ``0`` of the skin at an end constrains the root of the flange through
+    the connection anyway, and a flag ``1`` of the skin is not contradicted
+    by an end condition of the flange that its root would impose on the
+    skin, e.g. `v_{f,x} = 0` where the skin has `w_{,x}` free, or `u_f = 0`
+    where the skin has `u` free. The flags hold over the whole height of
+    the flange: the rib or support that holds the skin also holds the
+    blade. Where it does not, as for a stiffener that ends
+    at the bay without being attached to the rib, or one that runs
+    through a mouse hole of the rib, the flags of the displacements that
+    are not held are set to ``1`` by the analyst; the root of the flange
+    then still follows the skin through the connection.
 
     On a curved bay the base is a cylindrical shell with the kinematics of
     the skin, and the connection constrains the rotation of the normal of
@@ -180,7 +209,21 @@ class BladeStiff2D(object):
     ...                       bay.calc_kG(silent=True),
     ...                       silent=True, num_eigvalues=1)
     >>> print('%.1f' % eigvals[0])
-    662.5
+    707.3
+
+    The ends of the flange take the flags of the bay. For a stiffener that
+    runs through mouse holes of the ribs, which do not hold the blade over
+    its height, the displacements `v_f` and `w_f` of the ends of the flange
+    are freed:
+
+    >>> for end in ('x1', 'x2'):
+    ...     setattr(s.flange, end + 'v', 1.)
+    ...     setattr(s.flange, end + 'w', 1.)
+    >>> eigvals, eigvecs = lb(bay.calc_kC(silent=True),
+    ...                       bay.calc_kG(silent=True),
+    ...                       silent=True, num_eigvalues=1)
+    >>> print('%.1f' % eigvals[0])
+    678.7
 
     """
     def __init__(self, bay, rho, panel1, panel2, ys, bb, bf, bstack, bplyts,
@@ -227,9 +270,9 @@ class BladeStiff2D(object):
             self.flange = Shell(m=mf, n=nf, a=bay.a, b=bf, rho=rho,
                     stack=fstack, plyts=fplyts, laminaprops=flaminaprops,
                     model='plate_clpt_donnell',
-                    x1u=0., x1ur=0., x2u=0., x2ur=0.,
-                    x1v=0., x1vr=0., x2v=0., x2vr=0.,
-                    x1w=0., x1wr=1., x2w=0., x2wr=1.,
+                    x1u=bay.x1u, x1ur=bay.x1ur, x2u=bay.x2u, x2ur=bay.x2ur,
+                    x1v=bay.x1w, x1vr=bay.x1wr, x2v=bay.x2w, x2vr=bay.x2wr,
+                    x1w=bay.x1v, x1wr=bay.x1vr, x2w=bay.x2v, x2wr=bay.x2vr,
                     y1u=1., y1ur=1., y2u=1., y2ur=1.,
                     y1v=1., y1vr=1., y2v=1., y2vr=1.,
                     y1w=1., y1wr=1., y2w=1., y2wr=1.)

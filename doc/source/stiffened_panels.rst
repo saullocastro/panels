@@ -53,7 +53,13 @@ constants of the skin, and a flange:
   :meth:`.StiffPanelBay.get_size`. On a curved bay the base is a
   cylindrical shell and the connection follows the rotation of the normal
   of the skin with the kinematics of the skin, Sanders' (the default) or
-  Donnell's.
+  Donnell's. The ends of the flange take the boundary conditions of the
+  skin through the connection at its root, the displacement of the flange
+  normal to the skin following `w` and the displacement normal to the
+  flange following `v`, i.e. the rib that supports the skin also holds the
+  blade over its height; a stiffener that the rib does not hold, e.g.
+  ending at the bay or running through a mouse hole of the rib, gets free
+  end conditions of the flange where the rib does not hold it.
 
 The matrices :meth:`.StiffPanelBay.calc_kC`,
 :meth:`.StiffPanelBay.calc_kG`, :meth:`.StiffPanelBay.calc_kM`,

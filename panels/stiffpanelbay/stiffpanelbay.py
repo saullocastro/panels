@@ -473,9 +473,11 @@ class StiffPanelBay(object):
         ``panel2`` the one whose edge ``y1`` is equal to ``ys``; for ``ys``
         close to ``0`` or to the width ``b`` of the bay, both are the panel
         with that edge. When only ``bplyt``, ``blaminaprop``, ``fplyt`` or
-        ``flaminaprop`` is given, it is repeated for each ply. The new
-        stiffener is appended to the attributes ``bladestiff2ds`` and
-        ``stiffeners``.
+        ``flaminaprop`` is given, it is repeated for each ply. The base and
+        the ends of the flange take the boundary conditions of the bay
+        when the stiffener is created, see :class:`.BladeStiff2D`, so the
+        flags of the bay are set before. The new stiffener is appended to
+        the attributes ``bladestiff2ds`` and ``stiffeners``.
 
         Parameters
         ----------
