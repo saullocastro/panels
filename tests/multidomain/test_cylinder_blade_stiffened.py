@@ -66,10 +66,20 @@ discrete load is 2.5 % higher, 4.3 % below the smeared load; for the
 cylinders 1 to 3 of the same table, with the same model, the differences
 are -3.8, -7.8 and -2.7 % with the Sanders skin and -0.7, -4.4 and -1.1 %
 with the Donnell skin (cylinders 1 and 3 have external stringers; runs
-made when this test was written). The remainder comes from the
-discreteness of the blades, plate strips that deform in their
-cross-section, whereas the smeared theory treats the stringer as a beam
-that rotates with the skin and averages it over the circumference.
+made when this test was written). The remainder comes from the blades.
+Their axial load acts, through the geometric stiffness of
+``'plate_clpt_gl'``, also on their out-of-plane displacement, the
+circumferential displacement of the stringer section, whereas the load
+term of the smeared theory, Eq. (9) of [1]_ (p. 8), acts on the radial
+displacement only; and they twist as plate strips tied to the skin, whereas
+Eq. (6) of [1]_ (p. 7) adds the approximate twisting energy `G_s J_s
+w_{,xy}^2/d` of a stringer that twists with the shell. For the whole length
+of this cylinder with the Donnell skin (simply supported ends of the blades
+holding only their radial displacement), removing the first term from the
+geometric stiffness of the blades raises the discrete load by 3.7 %, to
+1.8 % below the smeared one, and removing also the twisting stiffness of
+the blades gives Eq. (15) with `J = 0` within 0.1 % (runs made when these
+Notes were written).
 Almroth [3]_ shows for unstiffened cylinders (Donnell equations) that, with
 the membrane pre-buckling state, simple supports with `v = 0` and either
 `u = 0` or `N_x = 0` give a load equal to or insignificantly higher than the
