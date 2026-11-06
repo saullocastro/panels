@@ -191,6 +191,29 @@
 - Documentation: "How to choose a model" of the shell overview explains
   when plates loaded in their own plane need `plate_clpt_gl`.
 
+### Changed: boundary conditions of `tstiff2d_1stiff_freq` and `tstiff2d_1stiff_flutter`
+
+- Both functions restrain `u = v = w = 0` at the four edges of the skin and
+  at both ends of the flange, the boundary conditions of the vibration
+  analysis of Castro and Donadon (2017), Fig. 8, p. 236, and of
+  `tstiff2d_1stiff_freq` of compmech 0.7.1. They had the conditions of the
+  compression analysis (Fig. 7), with `u` free at the edges `x = 0`,
+  `y = 0` and `y = b` of the skin and at the end `x = 0` of the flange (10
+  flags). The curved panel #1 of the paper (`r = 10` m, `m = n = 8`,
+  penalty) now gives 65.215 to 55.972 Hz for the six defect lengths of
+  Table 5, +0.01 % to +0.51 % from the paper's `m = n = 8` values (before:
+  62.618 to 53.705 Hz, 3.6 % to 4.0 % below).
+- `tstiff2d_1stiff_flutter`: with `u = 0` at `x = 0`, the edge loads
+  `Nxx_skin` and `Nxx_flange` of the static case give no pre-stress; only
+  `Nxx_base` loads the assembly.
+- Stored values: `test_tstiff2d_assembly.py`, first natural frequency
+  48.2733 to 48.4404 rad/s, flutter `sqrt(-lambda_1)` 446.12 to
+  503.06-139.60j (the first eigenvalue is now a complex pair);
+  `test_null_space.py::test_tstiff2d_freq` 48.3875 to 48.5631; `Examples`
+  48.39 to 48.56 and 448.57 to 487.42. New test
+  `test_tstiff2d_1stiff_freq_castro_donadon_2017_table5` (Table 5,
+  `m = n = 8`, within 0.6 %).
+
 ## 0.15.0 (2026-11-03)
 
 ### Requires structsolve 0.10.0
