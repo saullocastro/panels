@@ -35,8 +35,9 @@ vector ``calc_fint``, the product ``calc_kTv`` of the tangent stiffness by
 a vector, see :ref:`tangent_product`, and the follower pressure
 ``calc_fext_follower`` with its load stiffness ``fkCfollower_num``, see
 :ref:`follower_pressure`; ``plate_clpt_gl_num``, ``plate_clpt_tl_num``,
-``cylshell_clpt_gl_num`` and ``cylshell_clpt_tl_num`` import the mass and aerodynamic kernels of the
-model with the same linear strains. The rows and columns are those of the Ritz
+``cylshell_clpt_gl_num``, ``cylshell_clpt_tl_num`` and the ``_num`` modules of the
+four models ``*_fsdt_gl`` and ``*_tsdt_gl`` import the mass and aerodynamic kernels of
+the model with the same linear strains. The rows and columns are those of the Ritz
 constants of Eq. :eq:`shell-ritz`.
 
 ========================== ============================================================ ===================================================================
@@ -57,6 +58,14 @@ model                      closed form                                          
 ``cylshell_fsdt_sanders``  :mod:`panels.models.cylshell_fsdt_sanders`                   :mod:`panels.models.cylshell_fsdt_sanders_num`
 ``cylshell_tsdt_donnell``  :mod:`panels.models.cylshell_tsdt_donnell`                   :mod:`panels.models.cylshell_tsdt_donnell_num`
 ``cylshell_tsdt_sanders``  :mod:`panels.models.cylshell_tsdt_sanders`                   :mod:`panels.models.cylshell_tsdt_sanders_num`
+``plate_fsdt_gl``          :mod:`panels.models.plate_fsdt_gl`, the linear kernels of    :mod:`panels.models.plate_fsdt_gl_num`
+                           ``plate_fsdt_donnell``
+``plate_tsdt_gl``          :mod:`panels.models.plate_tsdt_gl`, the linear kernels of    :mod:`panels.models.plate_tsdt_gl_num`
+                           ``plate_tsdt_donnell``
+``cylshell_fsdt_gl``       :mod:`panels.models.cylshell_fsdt_gl`, the linear kernels of :mod:`panels.models.cylshell_fsdt_gl_num`
+                           ``cylshell_fsdt_sanders``
+``cylshell_tsdt_gl``       :mod:`panels.models.cylshell_tsdt_gl`, the linear kernels of :mod:`panels.models.cylshell_tsdt_gl_num`
+                           ``cylshell_tsdt_sanders``
 ========================== ============================================================ ===================================================================
 
 The stiffeners of a :class:`.StiffPanelBay` have their own kernels, for

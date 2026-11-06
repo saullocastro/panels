@@ -2,6 +2,33 @@
 
 ## Unreleased
 
+### New models `plate_fsdt_gl`, `plate_tsdt_gl`, `cylshell_fsdt_gl`, `cylshell_tsdt_gl`: shear deformation with Green-Lagrange membrane strains
+
+- The FSDT and TSDT of `plate_fsdt_donnell`, `plate_tsdt_donnell`,
+  `cylshell_fsdt_sanders` and `cylshell_tsdt_sanders` with the complete
+  Green-Lagrange membrane strains of `plate_clpt_gl` and `cylshell_clpt_gl`
+  (Amabili 2008, Eqs. (1.118)-(1.120) for the cylinder); bending and
+  transverse shear strains linear. The linear kernels are those of the
+  linear models (imported); `fkG0` has the `u-u`, `v-v` (and `v-w`) blocks.
+- Generators, one self-contained folder per model:
+  `theory/shells/{plate,cylshell}_{fsdt,tsdt}_gl/` (derivation with symbolic
+  checks: membrane strains `(F^T F - I)/2`, linear part equal to the
+  operators of `theory/shells/fsdt_tsdt`, zero strains for finite rigid
+  rotations, exact tangent, finite differences; `write_pyx.py`; notes).
+  New kernels `panels/models/*_{fsdt,tsdt}_gl.pyx` and `*_num.pyx`
+  (`fkG0`, `fkC_num`, `fkG_num`, `calc_fint`, `calc_kTv`,
+  `calc_fext_follower`, `fkCfollower_num`).
+- Registered in `modelDB`, `setup.py` and `panels.models`;
+  `fsdt_tsdt_field.is_gl` and the Green-Lagrange membrane strains in
+  `fsdt_tsdt_field.fstrain`; the cylinders are Sanders models for
+  `fsdt_tsdt_field.is_sanders` and the connections (`kCsdt._rinv_sanders`);
+  follower pressure of `plate_clpt_gl` and `cylshell_clpt_gl`
+  (`follower_pressure.MODELS`).
+- Tests `tests/tests_shell/test_fsdt_tsdt_gl.py` (linear kernels, rigid
+  rotations, in-plane cantilever strip against the elastica, Euler load of a
+  pinned tube, hinged roof of Sze, Liu and Lo 2004, Table 9a) and the four
+  models in `test_tangent_consistency.py`. Page `doc/source/fsdt_tsdt_gl.rst`.
+
 ### New argument `models` of the wing box and of the blade-stiffened cylinder
 
 - `create_wingbox` takes `models`, a dict of the model of each group of
