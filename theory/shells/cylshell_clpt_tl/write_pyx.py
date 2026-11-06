@@ -15,31 +15,36 @@ strains, the curvatures only adding terms of the moments. The mass and
 aerodynamic matrices of the numerical module, ``fkM_num``, ``fkAx_num`` and
 ``fkAy_num``, are imported from :mod:`panels.models.cylshell_clpt_sanders_num`.
 
-The kernels use the helpers of ``plate_clpt_gl/write_pyx.py`` (layout,
-tables, assembly of the pairs of terms, ``calc_fint``) with the seventeen
-generalized derivatives of this model, among which the second derivatives
-of ``u`` and ``v`` and the values ``v`` and ``w``, which enter the strains
-through the curvature of the reference surface: the tables of the
-approximation functions have nine rows along each direction. A private copy
-of that generator is loaded and the radius is added to its declarations and
-to the reading of the input, named ``radius`` in the kernels, ``r`` being
-one of their loop indices. ``fkC_num``, ``fkG_num`` and ``calc_kTv`` are
-written here, as in ``plate_clpt_tl/write_pyx.py``: ``[B]`` is quadratic in
-the derivatives and the Hessian of the curvatures linear in them, and
-``calc_kTv`` evaluates ``[B]^T [ABD] [B] v + [H(sigma, d)] v`` at each point,
-since the strains are not of the form assumed by
-``theory/shells/tangent_product``. The follower-pressure kernels are those
-of the Sanders cylinder, whose area vector is the exact one of the deformed
-mid-surface (``follower_pressure.MODELS``).
+The layout of the kernels (tables of the approximation functions, loops over
+the integration points and the pairs of terms, ``calc_fint``) is that of
+``plate_clpt_gl/write_pyx.py``, whose helpers are repeated here with the
+seventeen generalized derivatives of this model, among which the second
+derivatives of ``u`` and ``v`` and the values ``v`` and ``w``, which enter
+the strains through the curvature of the reference surface: the tables of
+the approximation functions have nine rows along each direction. The radius
+is added to the declarations and to the reading of the input, named
+``radius`` in the kernels, ``r`` being one of their loop indices.
+``fkC_num``, ``fkG_num`` and ``calc_kTv`` are written as in
+``plate_clpt_tl/write_pyx.py``: ``[B]`` is quadratic in the derivatives and
+the Hessian of the curvatures linear in them, and ``calc_kTv`` evaluates
+``[B]^T [ABD] [B] v + [H(sigma, d)] v`` at each point, since the strains are
+not of the form assumed by ``theory/shells/tangent_product``. The
+follower-pressure kernels are those of the Sanders cylinder, whose area
+vector is the exact one of the deformed mid-surface
+(``follower_pressure.MODELS``), written by
+``follower_pressure/write_pyx.py``.
 
 """
 import importlib.util
 import os
+import re
 import sys
 import textwrap
 import types
 
-from sympy import Matrix, Symbol, expand
+import sympy
+from sympy import Float, Matrix, Rational, Symbol, expand
+from sympy.printing.str import StrPrinter
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, '..', '..', '..'))
@@ -47,6 +52,7 @@ sys.path.insert(0, HERE)
 sys.path.insert(0, REPO)
 
 import cylshell_clpt_tl as th
+from panels.dev.matrixtools import pow2mult
 
 
 def _load(name, *path):
@@ -56,10 +62,15 @@ def _load(name, *path):
     return mod
 
 
+#NOTE the follower-pressure kernels, appended to the numerical module
+follower_block = _load('follower_write_pyx', '..', 'follower_pressure',
+                       'write_pyx.py').pyx_block
+
 MODEL = 'cylshell_clpt_tl'
 DOF = th.DOF
 NE = th.NE
 ND = len(th.D)
+FIELDS = th.FIELDS
 #: name of the radius in the kernels
 RADIUS = Symbol('radius')
 
@@ -71,35 +82,439 @@ DESC = ('Cylindrical shells using the classical laminated plate theory '
         '(CLPT), total Lagrangian: Green-Lagrange membrane strains and '
         'changes of curvature measured with the deformed normal')
 
-#NOTE a private copy of the generator of plate_clpt_gl, whose helpers write
-#     the tables, the assembly and calc_fint; the radius is added to its
-#     declarations and to the reading of the input
-gw = _load('plate_clpt_gl_write_pyx_for_cylshell_tl', '..', 'plate_clpt_gl',
-           'write_pyx.py')
-pstr = gw.pstr
-matrix_lines = gw.matrix_lines
+
+# Layout of the kernels
+# ---------------------
+# The helpers below are those of ``plate_clpt_gl/write_pyx.py``, repeated
+# here, with the radius added to the declarations (COMMON_CDEF) and to the
+# reading of the input (FINPUT_TEMPLATE), named ``radius`` in the kernels,
+# ``r`` being one of their loop indices.
+
+class Printer(StrPrinter):
+    def _print_Float(self, e):
+        return repr(float(e))
+
+
+def pstr(e):
+    reps = {q: Float(q) for q in e.atoms(Rational) if not q.is_Integer}
+    return pow2mult(Printer().doprint(e.xreplace(reps)))
+
+
+def physical(e):
+    r"""Expression of the basis functions in the physical derivatives,
+    ``(2/a) fAu_xi -> fAu_x``, ``(2/b)**2 gAw_etaeta -> gAw_yy``"""
+    rename = {}
+    for s in e.free_symbols:
+        mo = re.match(r'^([fg])([AB])(u|v|w)((?:_(?:xi|eta)+)?)$', s.name)
+        if mo is None:
+            continue
+        fg, side, field, der = mo.groups()
+        order = der.count('xi') + der.count('eta')
+        new = '{0}{1}{2}{3}'.format(fg, side, field,
+                                    '' if order == 0 else '_' + ('x' if fg == 'f' else 'y')*order)
+        rename[s] = Symbol(new)
+    out = e.xreplace(rename).subs({th.a: 2, th.b: 2})
+    return expand(out)
+
+
+HEADER = """#cython: boundscheck=False
+#cython: wraparound=False
+#cython: cdivision=True
+#cython: nonecheck=False
+#cython: initializedcheck=False
+#cython: overflowcheck=False
+#cython: embedsignature=True
+#cython: infer_types=False
+"""
+
+BC_CDEF = '\n'.join('    cdef double {0}1{1}, {0}1{1}r, {0}2{1}, {0}2{1}r'.format(xy, p)
+                    for xy in 'xy' for p in FIELDS)
+BC_BLOCK = '\n'.join('    {0}1{1} = shell.{0}1{1}; {0}1{1}r = shell.{0}1{1}r; '
+                     '{0}2{1} = shell.{0}2{1}; {0}2{1}r = shell.{0}2{1}r'.format(xy, p)
+                     for xy in 'xy' for p in FIELDS)
+
+FINPUT_TEMPLATE = """    # F as 4-D matrix, must be [nx, ny, 6, 6], when there is one ABD[6, 6] for
+    # each of the nx * ny integration points
+    cdef double F[6 * 6]
+    cdef double [:, :, :, ::1] Fnxny
+
+    cdef int one_F_each_point = 0
+
+    Finput = np.ascontiguousarray(Finput, dtype=DOUBLE)
+    if Finput.shape == (nx, ny, 6, 6):
+        Fnxny = Finput
+        one_F_each_point = 1
+    elif Finput.shape == (6, 6):
+        # creating dummy 4-D array that is not used
+        Fnxny = np.empty(shape=(0, 0, 0, 0), dtype=DOUBLE)
+        # using a constant F for all the integration domain
+        for i in range(6):
+            for j in range(6):
+                F[i*6 + j] = Finput[i, j]
+    else:
+        raise ValueError('Invalid shape for Finput!')
+
+    if not 'Shell' in shell.__class__.__name__:
+        raise ValueError('a Shell object must be given as input')
+    a = shell.a
+    b = shell.b
+    m = shell.m
+    n = shell.n
+    #NOTE physical limits of the integration domain, resolved and validated
+    #      by Shell.integration_limits(); for the full domain the mapping
+    #      below gives exactly xi1 = eta1 = -1 and xi2 = eta2 = +1
+    x1, x2, y1, y2 = shell.integration_limits()
+    radius = shell.r
+""" + BC_BLOCK + """
+
+    xis, weights_xi = roots_legendre(nx)
+    etas, weights_eta = roots_legendre(ny)
+
+    xinf = 0
+    xsup = shell.a
+    xi1 = (x1 - xinf)/(xsup - xinf)*2 - 1
+    xi2 = (x2 - xinf)/(xsup - xinf)*2 - 1
+
+    yinf = 0
+    ysup = shell.b
+    eta1 = (y1 - yinf)/(ysup - yinf)*2 - 1
+    eta2 = (y2 - yinf)/(ysup - yinf)*2 - 1
+
+    intx = x2 - x1
+    inty = y2 - y1
+
+    ftab = np.zeros((NF, m), dtype=DOUBLE)
+    gtab = np.zeros((NG, n), dtype=DOUBLE)"""
+
+COMMON_CDEF = """    cdef double x1, x2, y1, y2, xinf, xsup, yinf, ysup
+    cdef double a, b, intx, inty
+    cdef int m, n
+""" + BC_CDEF + """
+
+    cdef int i, j, k, l, c, p, q, r, s, row, col, ptx, pty
+    cdef double xi, eta, weight
+    cdef double xi1, xi2, eta1, eta2
+    cdef double [:, ::1] ftab, gtab
+    cdef double [::1] xis, etas, weights_xi, weights_eta
+    cdef double radius
+"""
+
+POINT_HEAD = """    with nogil:
+        for ptx in range(nx):
+            for pty in range(ny):
+                xi = xis[ptx]
+                eta = etas[pty]
+                xi = (xi - (-1))/2 * (xi2 - xi1) + xi1
+                eta = (eta - (-1))/2 * (eta2 - eta1) + eta1
+
+                # the integrands are per unit area of the natural domain
+                weight = weights_xi[ptx]*weights_eta[pty]*intx*inty/4
+
+                if one_F_each_point == 1:
+                    for i in range(6):
+                        for j in range(6):
+                            F[i*6 + j] = Fnxny[ptx, pty, i, j]
+
+                # approximation functions and their derivatives in x and y
+"""
+
+
+class Spec(object):
+    r"""Derivation of the model and rows of the tables of the approximation
+    functions along ``x`` (``f_rows``) and ``y`` (``g_rows``), e.g.
+    ``'w_xx'`` for `(2/a)^2 f''(\xi)` of ``w``
+
+    ``th`` gives ``build()``, ``D``, ``D_NAMES``, ``DOF``, ``NE`` and ``F``.
+
+    """
+    def __init__(self, th, f_rows, g_rows):
+        self.th = th
+        self.F_ROWS = list(f_rows)
+        self.G_ROWS = list(g_rows)
+        self.ND = len(th.D)
+        self.DOF = th.DOF
+        self.D_NAMES = th.D_NAMES
+        self.M = th.build()
+        self.PHI_A = self.M['PhiA'].applyfunc(physical)
+        self.PHI_B = self.M['PhiB'].applyfunc(physical)
+        #: the generalized derivatives of each degree of freedom
+        self.DSET = [[p for p in range(self.ND) if self.PHI_A[p, d] != 0]
+                     for d in range(self.DOF)]
+        self.DOF_OF = {p: d for d in range(self.DOF) for p in self.DSET[d]}
+
+
+def table_lines(sp):
+    r"""Tabulation of the rows of ``sp`` at the integration point"""
+    L = []
+    for fg, rows, idx, coord, ab in (('f', sp.F_ROWS, 'i', 'xi', 'a'),
+                                     ('g', sp.G_ROWS, 'j', 'eta', 'b')):
+        xy = 'x' if fg == 'f' else 'y'
+        L.append('                for {0} in range({1}):'.format(idx, 'm' if fg == 'f' else 'n'))
+        for k, row in enumerate(rows):
+            field = row[0]
+            order = row.count(xy) if '_' in row else 0
+            func = ('f', 'fp', 'fpp')[order]
+            L.append('                    {0}tab[{1}, {2}] = {3}{4}({2}, {5}, {6}1{7}, '
+                     '{6}1{7}r, {6}2{7}, {6}2{7}r)'.format(
+                         fg, k, idx, '(2/{0})*'.format(ab)*order, func, coord, xy, field))
+    return '\n'.join(L) + '\n'
+
+
+def finput(sp):
+    r"""Reading of the input and allocation of the tables of ``sp``"""
+    return FINPUT_TEMPLATE.replace('(NF, m)', '(%d, m)' % len(sp.F_ROWS)).replace(
+        '(NG, n)', '(%d, n)' % len(sp.G_ROWS))
+
+
+def point(sp):
+    r"""Loop over the integration points and tabulation of ``sp``"""
+    return POINT_HEAD + table_lines(sp)
+
+
+def basis_read(side, fg, indent, sp):
+    ind = ' '*indent
+    rows = sp.F_ROWS if fg == 'f' else sp.G_ROWS
+    idx = {('A', 'f'): 'i', ('A', 'g'): 'j', ('B', 'f'): 'k', ('B', 'g'): 'l'}[(side, fg)]
+    tab = 'ftab' if fg == 'f' else 'gtab'
+    return [ind + '{0}{1}{2} = {3}[{4}, {5}]'.format(fg, side, nm, tab, k, idx)
+            for k, nm in enumerate(rows)]
+
+
+def basis_cdef(sides, sp):
+    names = []
+    for side in sides:
+        names += ['f{0}{1}'.format(side, nm) for nm in sp.F_ROWS]
+        names += ['g{0}{1}'.format(side, nm) for nm in sp.G_ROWS]
+    return '\n'.join('    cdef double ' + ', '.join(names[i:i + 7])
+                     for i in range(0, len(names), 7))
+
+
+def phi_lines(side, indent, sp):
+    r"""``pA[p] = Phi_A[p, d]``, the derivative ``p`` of the term"""
+    P = sp.PHI_A if side == 'A' else sp.PHI_B
+    return ['{0}p{1}[{2}] = {3}'.format(' '*indent, side, p, pstr(P[p, sp.DOF_OF[p]]))
+            for p in range(sp.ND)]
+
+
+def derivative_lines(indent, names, sp, vec='cs', prefix=''):
+    r"""``d[p] += Phi_A[p, d] cs[col+d]``, the derivatives at the point, or
+    those of the vector ``vec``, named with ``prefix``"""
+    return ['{0}{1}{2} += {3}*{4}[col+{5}]'.format(' '*indent, prefix, sp.D_NAMES[p],
+            pstr(sp.PHI_A[p, sp.DOF_OF[p]]), vec, sp.DOF_OF[p]) for p in names]
+
+
+def assembly(mname, pattern, blocks, sp, symmetric=True):
+    r"""Loops over the pairs of terms, ``mname`` the name of the matrix,
+    ``pattern[p][q]`` the non-zero entries of ``K`` and ``blocks`` the pairs
+    of degrees of freedom ``(d, e)`` of the matrix"""
+    DOF, ND, DSET = sp.DOF, sp.ND, sp.DSET
+    T = {}
+    for d in range(DOF):
+        for q in range(ND):
+            ps = [p for p in DSET[d] if pattern[p][q]]
+            if ps:
+                T[(d, q)] = ' + '.join('pA[{0}]*K[{1}]'.format(p, p*ND + q) for p in ps)
+    L = ['                c = -1',
+         '                for j in range(n):']
+    L += basis_read('A', 'g', 20, sp)
+    L += ['                    for i in range(m):']
+    L += basis_read('A', 'f', 24, sp)
+    L += ['                        row = row0 + DOF*(j*m + i)']
+    L += phi_lines('A', 24, sp)
+    L += ['                        # TA[d, q] = sum_p Phi_A[p, d] K[p, q]']
+    used_d = sorted({d for d, e in blocks})
+    for (d, q), expr in sorted(T.items()):
+        if d in used_d:
+            L.append('                        TA[{0}] = {1}'.format(d*ND + q, expr))
+    L += ['                        for l in range(n):']
+    L += basis_read('B', 'g', 28, sp)
+    L += ['                            for k in range(m):',
+          '                                col = col0 + DOF*(l*m + k)']
+    if symmetric:
+        L += ['                                #NOTE symmetry assumption True if no follower forces are used',
+              '                                if row > col:',
+              '                                    continue']
+    L += basis_read('B', 'f', 32, sp)
+    L += phi_lines('B', 32, sp)
+    for d, e in blocks:
+        terms = ['TA[{0}]*pB[{1}]'.format(d*ND + q, q) for q in DSET[e] if (d, q) in T]
+        if not terms:
+            continue
+        L += ['                                c += 1',
+              '                                if ptx == 0 and pty == 0:',
+              '                                    {0}r[c] = row+{1}'.format(mname, d),
+              '                                    {0}c[c] = col+{1}'.format(mname, e),
+              '                                {0}v[c] += weight*({1})'.format(mname, ' + '.join(terms))]
+    return '\n'.join(L)
+
+
+def matrix_lines(name, Mx, indent, op='='):
+    sp = ' '*indent
+    out = []
+    rows, cols = Mx.shape
+    for p in range(rows):
+        for q in range(cols):
+            if Mx[p, q] != 0:
+                out.append('{0}{1}[{2}] {3} {4}'.format(sp, name, p*cols + q, op, pstr(Mx[p, q])))
+    return out
+
+
+def gradient_loop(indent, names, sp, extra=()):
+    r"""Loop over the terms summing the derivatives ``names`` at the point;
+    ``extra`` holds ``(vec, prefix)`` of further vectors to differentiate"""
+    ind = ' '*indent
+    L = [ind + 'for j in range(n):']
+    L += basis_read('A', 'g', indent + 4, sp)
+    L += [ind + '    for i in range(m):']
+    L += basis_read('A', 'f', indent + 8, sp)
+    L += [ind + '        col = col0 + DOF*(j*m + i)']
+    L += derivative_lines(indent + 8, names, sp)
+    for vec, prefix in extra:
+        L += derivative_lines(indent + 8, names, sp, vec, prefix)
+    return L
+
+
+def Matrix_s():
+    return sympy.Matrix(sympy.symbols('sg0:6')).xreplace(
+        {Symbol('sg%d' % k): Symbol('sg[%d]' % k) for k in range(6)})
+
+
+def calc_fint_src(sp):
+    r"""Source of ``calc_fint`` of ``sp``, ``int [Phi]^T [B]^T sigma dA``,
+    for any strains ``eps(d)`` of the CLPT"""
+    B, eps = sp.M['B'], sp.M['eps']
+    DOF, ND, D_NAMES, NE = sp.DOF, sp.ND, sp.D_NAMES, sp.th.NE
+    S = (B.T*Matrix_s()).applyfunc(expand)
+    fint_lines = []
+    for d in range(DOF):
+        terms = ['pA[{0}]*S[{0}]'.format(p) for p in sp.DSET[d]]
+        fint_lines.append('                        fint[col+{0}] += weight*({1})'.format(d, ' + '.join(terms)))
+    return CALC_FINT_TEMPLATE.format(
+        COMMON=COMMON_CDEF, dn=', '.join(D_NAMES), ND=ND,
+        basis=basis_cdef('A', sp), FINPUT=finput(sp), POINT=point(sp),
+        dzero='\n'.join('                {0} = 0.'.format(nm) for nm in D_NAMES),
+        dloop='\n'.join(gradient_loop(16, range(ND), sp)),
+        elines='\n'.join('                e[{0}] = {1}'.format(k, pstr(eps[k])) for k in range(NE)),
+        Slines='\n'.join('                S[{0}] = {1}'.format(p, pstr(S[p])) for p in range(ND)),
+        gA='\n'.join(basis_read('A', 'g', 20, sp)), fA='\n'.join(basis_read('A', 'f', 24, sp)),
+        pA='\n'.join(phi_lines('A', 24, sp)), fint='\n'.join(fint_lines))
 
 
 def _build():
     return {k: v.xreplace({th.r: RADIUS}) for k, v in th.build().items()}
 
 
+#: the derivation with the radius named ``radius``
 thc = types.SimpleNamespace(build=_build, D=th.D, D_NAMES=th.D_NAMES,
-                            GRAD=th.GRAD, DOF=th.DOF, NE=th.NE, F=th.F,
-                            Nxx=th.Nxx, Nyy=th.Nyy, Nxy=th.Nxy, a=th.a,
-                            b=th.b, FIELDS=th.FIELDS)
-gw.th = thc
-gw.COMMON_CDEF = gw.COMMON_CDEF + '    cdef double radius\n'
-_lim = '    x1, x2, y1, y2 = shell.integration_limits()\n'
-assert gw.FINPUT_TEMPLATE.count(_lim) == 1
-gw.FINPUT_TEMPLATE = gw.FINPUT_TEMPLATE.replace(
-    _lim, _lim + '    radius = shell.r\n')
+                            DOF=th.DOF, NE=th.NE, F=th.F)
 
-SP = gw.Spec(thc, F_ROWS, G_ROWS)
+SP = Spec(thc, F_ROWS, G_ROWS)
 D_NAMES = SP.D_NAMES
-FINPUT = gw.finput(SP)
-POINT = gw.point(SP)
-COMMON = gw.COMMON_CDEF
+FINPUT = finput(SP)
+POINT = point(SP)
+COMMON = COMMON_CDEF
+
+#: source of ``calc_fint``, filled by :func:`calc_fint_src`
+CALC_FINT_TEMPLATE = '''
+
+def calc_fint(double [::1] cs, object Finput, object shell,
+        int size, int col0, int nx, int ny):
+    r"""Internal force vector, integrated numerically
+
+    Evaluates the generalized strains and stress resultants at
+    ``cs`` at each integration point and integrates the internal force
+    vector, whose Jacobian is ``fkC_num(NLgeom=1) + fkG_num``.
+
+    Parameters
+    ----------
+    cs : array-like
+        Ritz constants of the configuration, 1-D of size ``size``, in the
+        units of the displacements (the rotations in radians).
+    Finput : array-like
+        Constitutive matrix of the generalized strains of the model, shape
+        ``(6, 6)`` for the whole domain, e.g. ``shell.ABD``, or ``(nx, ny,
+        6, 6)`` with one matrix per integration point.
+    shell : :class:`.Shell`
+        The shell, which gives the dimensions ``a`` and ``b``, the radius ``r``
+        of the cylinders, the numbers of terms ``m`` and ``n`` and the boundary
+        flags of the approximation functions of each field.
+    size : int
+        Size of the vector, the number of degrees of freedom of the assembly.
+    col0 : int
+        Position of the vector where the terms of this shell start.
+    nx, ny : int
+        Number of Gauss-Legendre points along `x` and `y`.
+
+    Returns
+    -------
+    fint : numpy.ndarray
+        Internal force vector of size ``size``.
+
+    Raises
+    ------
+    ValueError
+        If ``Finput`` has an invalid shape or ``shell`` is not a
+        :class:`.Shell`.
+
+    Notes
+    -----
+    With the generalized strains of the kinematics of the module,
+    `\\boldsymbol{{\\varepsilon}}(\\boldsymbol{{c}})`, their variation `\\delta
+    \\boldsymbol{{\\varepsilon}} = \\boldsymbol{{B}}(\\boldsymbol{{c}}) \\delta
+    \\boldsymbol{{c}}` and the stress resultants `\\boldsymbol{{\\sigma}} =
+    \\boldsymbol{{F}} \\boldsymbol{{\\varepsilon}}`:
+
+    .. math::
+
+        \\boldsymbol{{f}}_{{int}} = \\int \\boldsymbol{{B}}(\\boldsymbol{{c}})^\\top
+        \\boldsymbol{{\\sigma}} \\, dA
+
+    the gradient of the strain energy `\\frac{{1}}{{2}} \\int
+    \\boldsymbol{{\\varepsilon}}^\\top \\boldsymbol{{F}} \\boldsymbol{{\\varepsilon}}
+    \\, dA`.
+
+    The integrals are evaluated with ``nx x ny`` Gauss-Legendre points
+    over the integration domain `x_1 \\le x \\le x_2`, `y_1 \\le y \\le y_2` of
+    :meth:`.Shell.integration_limits`, the whole shell by default.
+
+    """
+{COMMON}
+    cdef double {dn}
+    cdef double e[6]
+    cdef double sg[6]
+    cdef double S[{ND}]
+    cdef double pA[{ND}]
+{basis}
+
+    cdef double [::1] fint
+
+{FINPUT}
+
+    fint = np.zeros(size, dtype=DOUBLE)
+
+{POINT}
+                # generalized derivatives at the point
+{dzero}
+{dloop}
+
+                # strains, stresses and S = [B]^T sigma
+{elines}
+                for r in range(6):
+                    sg[r] = 0.
+                    for s in range(6):
+                        sg[r] += F[r*6 + s]*e[s]
+{Slines}
+
+                for j in range(n):
+{gA}
+                    for i in range(m):
+{fA}
+                        col = col0 + DOF*(j*m + i)
+{pA}
+{fint}
+
+    return fint
+'''
 
 SG = [Symbol('sg[%d]' % r) for r in range(NE)]
 SGL = [Symbol('sgL[%d]' % r) for r in range(NE)]
@@ -216,7 +631,7 @@ def numerical_module():
     full = [[True]*ND for _ in range(ND)]
     blocks_all = [(d, e) for d in range(DOF) for e in range(DOF)]
 
-    out = [gw.HEADER + 'r"""\n' + textwrap.fill(DESC, 76) + '''
+    out = [HEADER + 'r"""\n' + textwrap.fill(DESC, 76) + '''
 
 Numerically integrated kernels of the model ``'cylshell_clpt_tl'``: the
 constitutive stiffness :func:`fkC_num`, the geometric stiffness
@@ -398,16 +813,16 @@ def fkC_num(double [::1] cs, object Finput, object shell,
     kC = coo_matrix((kCv, (kCr, kCc)), shape=(size, size))
 
     return kC
-'''.format(COMMON=COMMON, dcdef=cdefs(list(D_NAMES)), basis=gw.basis_cdef('AB', SP),
+'''.format(COMMON=COMMON, dcdef=cdefs(list(D_NAMES)), basis=basis_cdef('AB', SP),
            NB=NE*ND, NK=ND*ND, NT=DOF*ND, ND=ND, FINPUT=FINPUT, POINT=POINT,
            dzero=zero_lines(D_NAMES),
-           dloop='\n'.join(gw.gradient_loop(20, alld, SP)),
+           dloop='\n'.join(gradient_loop(20, alld, SP)),
            Blines='\n'.join(matrix_lines('Bm', B, 16)),
            elines='\n'.join('                e[{0}] = {1}'.format(k, pstr(eps[k])) for k in range(NE)),
            eLlines='\n'.join('                eL[{0}] = {1}'.format(k, pstr(eps_L[k])) for k in range(NE)),
            sg=stresses('e', 'sg'), sgL=stresses('eL', 'sgL'),
            Hlines='\n'.join(matrix_lines('K', Hd, 16, op='+=')),
-           loops=gw.assembly('kC', full, blocks_all, sp=SP)))
+           loops=assembly('kC', full, blocks_all, SP)))
 
     # ------------------------------------------------------------- fkG_num
     H0s = H0.xreplace(dict(zip(th.STRESSES, SG))).applyfunc(expand)
@@ -535,17 +950,17 @@ def fkG_num(double [::1] cs, object Finput, object shell,
 
     return kG
 '''.format(COMMON=COMMON, dcdef=cdefs([D_NAMES[p] for p in lin]),
-           basis=gw.basis_cdef('AB', SP), NK=ND*ND, NT=DOF*ND, ND=ND,
+           basis=basis_cdef('AB', SP), NK=ND*ND, NT=DOF*ND, ND=ND,
            FINPUT=FINPUT, POINT=POINT, NBLK=len(blocks),
            dzero=zero_lines([D_NAMES[p] for p in lin]),
-           dloop='\n'.join(gw.gradient_loop(16, lin, SP)),
+           dloop='\n'.join(gradient_loop(16, lin, SP)),
            elines='\n'.join('                e[{0}] = {1}'.format(k, pstr(eps_L[k])) for k in range(NE)),
            sg=stresses('e', 'sg'),
            Hlines='\n'.join(matrix_lines('K', H0s, 16)),
-           loops=gw.assembly('kG', H0pat, blocks, sp=SP)))
+           loops=assembly('kG', H0pat, blocks, SP)))
 
     # ------------------------------------------------------------- calc_fint
-    out.append(gw.calc_fint_src(SP))
+    out.append(calc_fint_src(SP))
 
     # ------------------------------------------------------------- calc_kTv
     out.append(calc_kTv_src())
@@ -691,22 +1106,22 @@ def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
     return np.asarray(kTv)
 '''.format(COMMON=COMMON, dcdef=cdefs(list(D_NAMES)),
            ddcdef=cdefs(['d' + nm for nm in D_NAMES]), ND=ND,
-           basis=gw.basis_cdef('A', SP), FINPUT=FINPUT, POINT=POINT,
+           basis=basis_cdef('A', SP), FINPUT=FINPUT, POINT=POINT,
            dzero=zero_lines(D_NAMES), ddzero=zero_lines(['d' + nm for nm in D_NAMES]),
-           dloop='\n'.join(gw.gradient_loop(16, alld, SP, extra=(('vs', 'd'),))),
+           dloop='\n'.join(gradient_loop(16, alld, SP, extra=(('vs', 'd'),))),
            elines='\n'.join('                e[{0}] = {1}'.format(k, pstr(eps[k])) for k in range(NE)),
            delines='\n'.join('                de[{0}] = {1}'.format(k, pstr(de[k])) for k in range(NE)),
            sg=stresses('e', 'sg'), dsg=stresses('de', 'dsg'),
            Slines='\n'.join('                S[{0}] = {1}'.format(p, pstr(S[p])) for p in range(ND)),
-           gA='\n'.join(gw.basis_read('A', 'g', 20, SP)),
-           fA='\n'.join(gw.basis_read('A', 'f', 24, SP)),
-           pA='\n'.join(gw.phi_lines('A', 24, SP)), kTv='\n'.join(kTv_lines))
+           gA='\n'.join(basis_read('A', 'g', 20, SP)),
+           fA='\n'.join(basis_read('A', 'f', 24, SP)),
+           pA='\n'.join(phi_lines('A', 24, SP)), kTv='\n'.join(kTv_lines))
 
 
 def generate():
     path = os.path.join(REPO, 'panels', 'models', MODEL + '_num.pyx')
     with open(path, 'w', encoding='utf-8', newline='\n') as f:
-        f.write(numerical_module() + '\n\n' + gw.follower_block(MODEL))
+        f.write(numerical_module() + '\n\n' + follower_block(MODEL))
     print(MODEL, 'numerical written')
 
 

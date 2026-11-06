@@ -2,9 +2,9 @@
 
 Derivation and symbolic checks: `cylshell_clpt_tl.py` (sympy, run
 `python cylshell_clpt_tl.py`, about three minutes). Kernels: `write_pyx.py`,
-which writes `panels/models/cylshell_clpt_tl_num.pyx` with the helpers of
-`../plate_clpt_gl/write_pyx.py`, as `../plate_clpt_tl/write_pyx.py` does for
-the plate.
+which writes `panels/models/cylshell_clpt_tl_num.pyx`, self-contained: the
+layout helpers of `../plate_clpt_gl/write_pyx.py` are repeated in it, with
+the radius added.
 
 ## Why
 
