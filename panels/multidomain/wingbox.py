@@ -47,11 +47,35 @@ __all__ = ['create_wingbox', 'wingbox_tip_force_lb']
 _X, _Y, _Z = np.eye(3)
 
 
-def _plate(a, b, t, m, n, group, origin, ax, axy, E, nu, rho):
-    r"""Isotropic plate domain with all the boundary condition flags free,
-    at ``origin`` with its local axes `x` and `y` along ``ax`` and ``axy``"""
+# default model of each group of domains
+_DEFAULT_MODELS = {'skin': 'plate_clpt_donnell', 'spar': 'plate_clpt_gl',
+                  'stringer': 'plate_clpt_gl', 'rib': 'plate_clpt_donnell'}
+# models accepted for every group
+_PLATE_MODELS = ('plate_clpt_donnell', 'plate_clpt_gl', 'plate_clpt_tl')
+
+
+def _models(models):
+    r"""The model of each group, ``models`` completed with
+    ``_DEFAULT_MODELS``, see :func:`.create_wingbox`"""
+    models = {} if models is None else dict(models)
+    unknown = sorted(set(models) - set(_DEFAULT_MODELS))
+    if unknown:
+        raise ValueError("unknown keys of models %s, the keys are %s"
+                         % (unknown, sorted(_DEFAULT_MODELS)))
+    out = dict(_DEFAULT_MODELS, **models)
+    for group, model in out.items():
+        if model not in _PLATE_MODELS:
+            raise ValueError("models[%r] must be one of %s, got %r"
+                             % (group, _PLATE_MODELS, model))
+    return out
+
+
+def _plate(a, b, t, m, n, group, origin, ax, axy, E, nu, rho, model):
+    r"""Isotropic plate domain of the model ``model`` with all the boundary
+    condition flags free, at ``origin`` with its local axes `x` and `y`
+    along ``ax`` and ``axy``"""
     p = Shell(a=a, b=b, r=None, stack=[0.], plyt=t, laminaprop=(E, nu),
-              rho=rho, model='plate_clpt_donnell', m=m, n=n, group=group)
+              rho=rho, model=model, m=m, n=n, group=group)
     for edge in ('x1', 'x2', 'y1', 'y2'):
         for dof in ('u', 'v', 'w', 'wr'):
             setattr(p, edge + dof, 1.)
@@ -66,14 +90,14 @@ def create_wingbox(nstr=0, hs=3.e-3, ts=1.5e-3, L=1.010, W=50.5e-3,
         H=12.12e-3, t_skin=1.e-3, t_spar=5.e-3, t_rib=1.e-3, nbays=9,
         E=73.e9, nu=0.33, rho=2795., terms=None, P=1., dx_load=10.e-3,
         follower=False, tip_rib=True, stringers=True, ribs=True,
-        conn_method='penalty', rib_spar=True, spar_model='plate_clpt_gl'):
+        conn_method='penalty', rib_spar=True, models=None):
     r"""Create the multidomain assembly of a rectangular wing-box
 
     The defaults are the case High-AR-t5 of Elalfy, De Breuker and Castro,
     see :mod:`panels.multidomain.wingbox`, without stringers. All the domains
-    are isotropic :class:`.Shell` objects: the skins and the ribs
-    ``'plate_clpt_donnell'``, the stringers ``'plate_clpt_gl'`` and the spars
-    of the model ``spar_model``, by default ``'plate_clpt_gl'`` (see Notes):
+    are isotropic :class:`.Shell` objects of the models ``models``, by
+    default the skins and the ribs ``'plate_clpt_donnell'``, the spars and
+    the stringers ``'plate_clpt_gl'`` (see Notes):
 
     - per bay, ``nstr + 1`` strips of each skin, of the groups
       ``'skin_top'`` and ``'skin_bot'``, at `z = \pm H/2`, connected to each
@@ -152,9 +176,14 @@ def create_wingbox(nstr=0, hs=3.e-3, ts=1.5e-3, L=1.010, W=50.5e-3,
         How the connections are imposed, ``'penalty'``, the default, with
         the default stiffnesses of :func:`.calc_kt_kr`, or ``'null-space'``,
         see :class:`.MultiDomain`.
-    spar_model : str, optional
-        Model of the spars, ``'plate_clpt_gl'``, the default, or
-        ``'plate_clpt_donnell'``.
+    models : dict, optional
+        Model of the domains of each group, by the keys of ``terms``:
+        ``'skin'`` (default ``'plate_clpt_donnell'``), ``'spar'``
+        (``'plate_clpt_gl'``), ``'stringer'`` (``'plate_clpt_gl'``) and
+        ``'rib'`` (``'plate_clpt_donnell'``); a missing key takes its
+        default. The models of every group are ``'plate_clpt_donnell'``,
+        ``'plate_clpt_gl'`` and ``'plate_clpt_tl'``, see
+        :mod:`panels.models` and the Notes.
 
     Returns
     -------
@@ -163,13 +192,16 @@ def create_wingbox(nstr=0, hs=3.e-3, ts=1.5e-3, L=1.010, W=50.5e-3,
         with ``'bays'``, a list with a dictionary per bay of the lists of
         domains ``'top'``, ``'bot'``, ``'spars'``, ``'st'`` (stringers) and
         ``'ribs'``, and ``'a'``, the length of a bay, ``'ws'``, the width of
-        a skin strip, and ``'conn'``, the connections.
+        a skin strip, ``'conn'``, the connections, and ``'models'``, the
+        model of each group, ``models`` completed with the defaults.
 
     Raises
     ------
     ValueError
-        If ``spar_model`` is neither ``'plate_clpt_gl'`` nor
-        ``'plate_clpt_donnell'``.
+        If ``models`` has a key other than ``'skin'``, ``'spar'``,
+        ``'stringer'`` and ``'rib'``, or a model other than
+        ``'plate_clpt_donnell'``, ``'plate_clpt_gl'`` and
+        ``'plate_clpt_tl'``.
 
     Notes
     -----
@@ -203,9 +235,33 @@ def create_wingbox(nstr=0, hs=3.e-3, ts=1.5e-3, L=1.010, W=50.5e-3,
     first mode is a local buckling of the upper skin, with its stringers,
     and the spars hardly move; with ``nstr=4`` it has a vertical deflection
     of the box, `v` of the spars up to 0.8 times the largest `w` of the
-    upper skin, but nearly uniform over the height of the spars. The linear stiffness, and so the static
-    deflection, is the same with both models. Skins and ribs keep
-    ``'plate_clpt_donnell'``.
+    upper skin, but nearly uniform over the height of the spars. The
+    linear stiffness, and so the static deflection, is the same with both
+    models.
+
+    Every group accepts the three plate models of the classical laminated
+    plate theory, ``'plate_clpt_donnell'``, ``'plate_clpt_gl'`` and
+    ``'plate_clpt_tl'``, see :mod:`panels.models`. They have the same
+    degrees of freedom `u, v, w` per term and the same linear stiffness, and
+    the connections ``'SSxcte'``, ``'SSycte'``, ``'BFycte'``, ``'BFxcte'``
+    and ``'BFxycte'`` join any two of them with the same kernels. The plates
+    of the shear deformation theories have the rotations `\phi_x, \phi_y`
+    as further degrees of freedom: a connection between one of them and a
+    plate of the classical theory is not implemented (a
+    ``NotImplementedError`` of :meth:`.MultiDomain.get_kC_conn`), and the
+    boundary condition flags set here, ``x1u`` to ``y2wr``, are those of the
+    classical theory only, so these models are not accepted.
+
+    ``'plate_clpt_tl'`` has the membrane strains of ``'plate_clpt_gl'`` and
+    measures the changes of curvature with the deformed normal; they are
+    quadratic and cubic in the displacements, and their second variation
+    adds to the geometric stiffness the work of the bending moments of the
+    pre-buckling state. With the default terms, all the groups of
+    ``'plate_clpt_tl'`` give a first buckling tip force below that of all
+    the groups of ``'plate_clpt_gl'`` by 2.7e-6 (relative) without
+    stringers and 4.3e-5 with ``nstr=2``. In the non-linear analyses, with
+    :meth:`.MultiDomain.calc_kT` and :meth:`.MultiDomain.calc_fint`, its
+    strains are invariant under finite rigid rotations of the domains.
 
     References
     ----------
@@ -228,9 +284,7 @@ def create_wingbox(nstr=0, hs=3.e-3, ts=1.5e-3, L=1.010, W=50.5e-3,
     ['BFxcte', 'BFxycte', 'BFycte', 'SSxcte']
 
     """
-    if spar_model not in ('plate_clpt_gl', 'plate_clpt_donnell'):
-        raise ValueError("spar_model must be 'plate_clpt_gl' or "
-                         "'plate_clpt_donnell', got %r" % (spar_model,))
+    models = _models(models)
     terms = terms or {}
     ms, ns = terms.get('skin', (8, 4 if nstr else 8))
     msp, nsp = terms.get('spar', (8, 5))
@@ -244,23 +298,23 @@ def create_wingbox(nstr=0, hs=3.e-3, ts=1.5e-3, L=1.010, W=50.5e-3,
     for i in range(nbays):
         x0 = i*a
         top = [_plate(a, ws, t_skin, ms, ns, 'skin_top', (x0, j*ws, H/2),
-                      _X, _Y, **mat) for j in range(nstr + 1)]
+                      _X, _Y, model=models['skin'], **mat)
+               for j in range(nstr + 1)]
         bot = [_plate(a, ws, t_skin, ms, ns, 'skin_bot', (x0, j*ws, -H/2),
-                      _X, _Y, **mat) for j in range(nstr + 1)]
+                      _X, _Y, model=models['skin'], **mat)
+               for j in range(nstr + 1)]
         spars = [_plate(a, H, t_spar, msp, nsp, 'spar', (x0, y, H/2), _X,
-                        -_Z, **mat) for y in (0., W)]
-        for sp in spars:
-            sp.model = spar_model
+                        -_Z, model=models['spar'], **mat) for y in (0., W)]
         st_top, st_bot = [], []
         if stringers:
             st_top = [_plate(a, hb, ts, mst, nst, 'stringer',
-                             (x0, (j + 1)*ws, H/2), _X, -_Z, **mat)
+                             (x0, (j + 1)*ws, H/2), _X, -_Z,
+                             model=models['stringer'], **mat)
                       for j in range(nstr)]
             st_bot = [_plate(a, hb, ts, mst, nst, 'stringer',
-                             (x0, (j + 1)*ws, -H/2 + hb), _X, -_Z, **mat)
+                             (x0, (j + 1)*ws, -H/2 + hb), _X, -_Z,
+                             model=models['stringer'], **mat)
                       for j in range(nstr)]
-            for st in st_top + st_bot:
-                st.model = 'plate_clpt_gl'
         for skin in (top, bot):
             conn += [dict(p1=p1, p2=p2, func='SSycte', ycte1=ws, ycte2=0.)
                      for p1, p2 in zip(skin[:-1], skin[1:])]
@@ -275,7 +329,8 @@ def create_wingbox(nstr=0, hs=3.e-3, ts=1.5e-3, L=1.010, W=50.5e-3,
         bay_ribs = []
         if ribs and (i < nbays - 1 or tip_rib):
             bay_ribs = [_plate(H, ws, t_rib, mr, nr, 'rib',
-                               (x0 + a, j*ws, H/2), -_Z, _Y, **mat)
+                               (x0 + a, j*ws, H/2), -_Z, _Y,
+                               model=models['rib'], **mat)
                         for j in range(nstr + 1)]
             conn += [dict(p1=p1, p2=p2, func='SSycte', ycte1=ws, ycte2=0.)
                      for p1, p2 in zip(bay_ribs[:-1], bay_ribs[1:])]
@@ -305,7 +360,7 @@ def create_wingbox(nstr=0, hs=3.e-3, ts=1.5e-3, L=1.010, W=50.5e-3,
         p.add_pressure_load(P/(W*dx_load), x1=a - dx_load, follower=follower,
                             cte=False)
     md = MultiDomain(doms, conn, conn_method=conn_method)
-    return md, dict(bays=bays, a=a, ws=ws, conn=conn)
+    return md, dict(bays=bays, a=a, ws=ws, conn=conn, models=models)
 
 
 def wingbox_tip_force_lb(num_eigvalues=4, silent=True, **kwargs):
@@ -328,7 +383,8 @@ def wingbox_tip_force_lb(num_eigvalues=4, silent=True, **kwargs):
     silent : bool, optional
         A boolean to tell whether the log messages should be printed.
     kwargs : keyword arguments, optional
-        Passed to :func:`.create_wingbox`.
+        Passed to :func:`.create_wingbox`, e.g. ``nstr``, ``terms``,
+        ``conn_method`` or ``models``, the model of each group of domains.
 
     Returns
     -------
