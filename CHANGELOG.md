@@ -276,6 +276,18 @@
   `test_tstiff2d_1stiff_freq_castro_donadon_2017_table5` (Table 5,
   `m = n = 8`, within 0.6 %).
 
+### Changed: the boundary-condition flags of `StiffPanelBay` are fixed once it has panels
+
+- The 24 flags `x1u, x1ur, ..., y2w, y2wr` of `StiffPanelBay` are
+  properties whose setters raise an `AttributeError` when the bay has
+  panels and the value differs from the current one. The panels and the
+  stiffeners copy the flags when they are created, whereas the connections
+  of `BladeStiff2D` read those of the bay at assembly, so a change after
+  `add_panel` gave an inconsistent model. Assigning the same value, and
+  loading a saved bay, are unaffected. New test
+  `test_boundary_flags_fixed_after_add_panel` in
+  `tests/tests_stiffpanelbay/test_stiffpanelbay_api.py`.
+
 ## 0.15.0 (2026-11-03)
 
 ### Requires structsolve 0.10.0

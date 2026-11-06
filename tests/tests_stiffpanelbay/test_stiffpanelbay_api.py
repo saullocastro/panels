@@ -1,7 +1,8 @@
 """Interface of :class:`panels.stiffpanelbay.StiffPanelBay`
 
 Building a bay with panels and blade stiffeners (``BladeStiff1D`` and
-``BladeStiff2D``) and the errors for invalid input; the mass matrix; the
+``BladeStiff2D``) and the errors for invalid input; the boundary-condition
+flags of the bay, which cannot change once it has panels; the mass matrix; the
 external force vector of point loads on the skin and on a flange; the
 aerodynamic matrices ``calc_kA`` and ``calc_cA`` against those of a single
 shell over the bay; the effect of the stiffeners on the buckling load and on
@@ -129,6 +130,40 @@ def test_panels_must_come_before_stiffeners(method):
     with pytest.raises(RuntimeError, match='panels must be added'):
         getattr(bay, method)(ys=b/2, bf=9*tskin, fstack=stack, fplyt=plyt,
                              flaminaprop=laminaprop)
+
+
+def test_boundary_flags_fixed_after_add_panel(tmp_path):
+    """The 24 boundary-condition flags of the bay can be set before the first
+    ``add_panel`` and are copied to the panel; afterwards assigning another
+    value raises an ``AttributeError`` and leaves the flag unchanged,
+    assigning the same value is accepted, and a saved bay is loaded with its
+    flags and the same restriction"""
+    names = [e + d + r for e in ('x1', 'x2', 'y1', 'y2') for d in 'uvw'
+             for r in ('', 'r')]
+    bay = StiffPanelBay()
+    bay.a, bay.b, bay.r = 2*b, b, None
+    bay.model = 'plate_clpt_donnell'
+    bay.stack, bay.plyt, bay.laminaprop = stack, plyt, laminaprop
+    bay.m = bay.n = 4
+    for name in names:
+        setattr(bay, name, 1. - getattr(bay, name))
+        setattr(bay, name, 1. - getattr(bay, name))
+    bay.x2w = 1.
+    p = bay.add_panel(0, b)
+    assert p.x2w == 1.
+    for name in names:
+        value = getattr(bay, name)
+        assert getattr(p, name) == value
+        setattr(bay, name, value)
+        with pytest.raises(AttributeError, match='add_panel'):
+            setattr(bay, name, 1. - value)
+        assert getattr(bay, name) == value
+    bay.name = str(tmp_path / 'bay')
+    bay.save()
+    bay2 = load(bay.name)
+    assert all(getattr(bay2, name) == getattr(bay, name) for name in names)
+    with pytest.raises(AttributeError, match='add_panel'):
+        bay2.x2w = 0.
 
 
 def test_rebuild_requires_dimensions():
