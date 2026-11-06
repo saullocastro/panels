@@ -80,15 +80,16 @@ w,x`, `v(z) = v - z s w,y`, `w(z) = w`.
 ## Kernels
 
 `frame_web_clpt_donnell_num.pyx`: `fkC_num`, `fkG_num`, `fkM_num`,
-`calc_fint` and the fields `fuvw`, `fstrain` (with `fg` of `clpt_field`),
+`calc_fint`, `calc_kTv` and the fields `fuvw`, `fstrain` (with `fg` of `clpt_field`),
 integrated with the Gauss-Legendre rule over the domain of
 `Shell.integration_limits`. `frame_web_clpt_donnell.pyx`: `fk0`, `fkG0`,
 `fkM` of the whole domain, which call the numerical kernels with
 `shell.nx`, `shell.ny`. The coefficients `1/rho` make the integrands
 rational in `x`: no rule is exact, and no closed form with the integrals
 of Bardell's functions exists. The piston-theory kernels raise
-`NotImplementedError`; `calc_kTv` and the follower pressure are not
-generated.
+`NotImplementedError`; the follower pressure is not generated.
+`calc_kTv` evaluates `[Phi]^T ([B]^T [ABD] [B] + [H(N + Nbar)]) [Phi] v` at
+each point, about the cost of `calc_fint`.
 
 ## Connection to a cylinder
 

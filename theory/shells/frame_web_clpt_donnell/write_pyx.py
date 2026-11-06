@@ -699,6 +699,123 @@ def calc_fint(double [::1] cs, object Finput, object shell,
            Bm=matrix_assign('Bm', Bm, 16, ND), dof=DOF,
            phiA=phi_lines('A', 'i', 'j', 24))
 
+KTV_DOC = r"""Product of the tangent stiffness matrix by a vector, without assembly
+
+    Returns ``KT(cs) vs``, with ``KT`` the tangent stiffness matrix
+    ``fkC_num(cs, ..., NLgeom=1) + fkG_num(cs, ...)`` at ``cs``, the exact
+    Jacobian of :func:`calc_fint`, plus the geometric stiffness matrix of
+    the constant membrane stress state ``Nxx_cte``, ``Nyy_cte`` and
+    ``Nxy_cte``.
+
+    Parameters
+    ----------
+    cs, vs : array-like
+        Ritz constants of the configuration and the vector, 1-D of size
+        ``size``.
+<<F>>
+<<shell>>
+    size, col0 : int
+        Size of the vectors and position where the terms of this web start.
+    nx, ny : int
+        Number of Gauss-Legendre points along `x` and `y`.
+    Nxx_cte, Nyy_cte, Nxy_cte : float, optional
+        Constant membrane stress resultants along the local axes, force per
+        unit length, default ``0``.
+
+    Returns
+    -------
+    kTv : numpy.ndarray
+        The product, of size ``size``.
+
+<<raises>>
+
+    Notes
+    -----
+    At each integration point, with `\boldsymbol{B} = \partial
+    \boldsymbol{\varepsilon}/\partial \boldsymbol{d}` at `\boldsymbol{d} =
+    \boldsymbol{\Phi} \boldsymbol{c}` and the membrane stress resultants
+    `\boldsymbol{N}` of `\boldsymbol{F} \boldsymbol{\varepsilon}`, plus the
+    constant ones:
+
+    .. math::
+
+        \boldsymbol{K}_T \boldsymbol{v} = \int \boldsymbol{\Phi}^\top \left(
+        \boldsymbol{B}^\top \boldsymbol{F} \boldsymbol{B} +
+        \boldsymbol{H}(\boldsymbol{N}) \right) \boldsymbol{\Phi}
+        \boldsymbol{v} \, dA
+
+    evaluated without forming `\boldsymbol{K}_T`, with
+    `\boldsymbol{H}(\boldsymbol{N})` of :func:`fkC_num`.
+"""
+KTV_DOC = fill(KTV_DOC, None)
+
+KTV = '''
+def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
+        int size, int col0, int nx, int ny, double Nxx_cte=0.,
+        double Nyy_cte=0., double Nxy_cte=0.):
+    r"""{doc}
+    """
+{common}    cdef double Bm[{nb}]
+    cdef double bs[{nd}]
+    cdef double dq[{nd}]
+    cdef double Bq[6]
+    cdef double FBq[6]
+    cdef double w_x, w_y, eps0, eps1, eps2, eps3, eps4, eps5
+    cdef double Nxx, Nyy, Nxy, Mxx, Myy, Mxy
+    cdef double [::1] kTv
+    cdef int row0 = col0
+{finput}    if cs.shape[0] != size or vs.shape[0] != size:
+        raise ValueError('cs and vs must have the size size')
+{setup}
+    kTv = np.zeros(size, dtype=DOUBLE)
+
+    with nogil:
+{point}
+{dq}
+{dv}
+                w_x = dv[7]
+                w_y = dv[8]
+{eps}
+{sig}
+                Nxx = Nxx + Nxx_cte
+                Nyy = Nyy + Nyy_cte
+                Nxy = Nxy + Nxy_cte
+                for p in range({nb}):
+                    Bm[p] = 0.
+{Bm}
+                for r in range(6):
+                    Bq[r] = 0.
+                    for p in range({nd}):
+                        Bq[r] += Bm[r*{nd} + p]*dq[p]
+                for r in range(6):
+                    FBq[r] = 0.
+                    for q in range(6):
+                        FBq[r] += F[r*6 + q]*Bq[q]
+                for p in range({nd}):
+                    bs[p] = 0.
+                    for r in range(6):
+                        bs[p] += Bm[r*{nd} + p]*FBq[r]
+{Hq}
+                for j in range(n):
+                    for i in range(m):
+                        row = row0 + {dof}*(j*m + i)
+{phiA}
+                        for e in range({dof}):
+                            for p in range(P0[e], P1[e]):
+                                kTv[row + e] += weight*pA[p]*bs[p]
+    return np.asarray(kTv)
+'''.format(doc=KTV_DOC, common=COMMON_CDEF, nb=6*ND, nd=ND, finput=FINPUT,
+           setup=SETUP, point=POINT.format(extra=F_POINT),
+           dq=dv_lines(16, 'vs').replace('dv[', 'dq['), dv=dv_lines(16, 'cs'),
+           eps=strain_lines(16, B['eps']),
+           sig=stress_lines(16, ('Nxx', 'Nyy', 'Nxy', 'Mxx', 'Myy', 'Mxy')),
+           Bm=matrix_assign('Bm', Bm, 16, ND), dof=DOF,
+           Hq='\n'.join(
+               '                bs[%d] += %s' % (i, pstr(sum(
+                   B['H'][i, j]*Symbol('dq[%d]' % j) for j in range(ND))))
+               for i in range(ND) if any(B['H'][i, j] != 0 for j in range(ND))),
+           phiA=phi_lines('A', 'i', 'j', 24))
+
 FIELD_PARAMS = """    c : np.ndarray
         Ritz constants of the web ``s``, 1-D array of size ``3*s.m*s.n``,
         see :meth:`.Shell.get_size`.
@@ -854,7 +971,7 @@ def {name}(*args, **kwargs):
 
 
 def numerical_module():
-    head = HEADER + 'r"""\nWeb of a ring frame, an annular-sector flat plate, using the classical\nlaminated plate theory (CLPT) with von Kármán strains in polar coordinates\n\nNumerically integrated kernels of the model ``\'frame_web_clpt_donnell\'``:\nthe constitutive stiffness :func:`fkC_num`, the geometric stiffness\n:func:`fkG_num`, the mass :func:`fkM_num`, the internal force vector\n:func:`calc_fint`, and the fields :func:`fuvw`, :func:`fstrain` and\n:func:`fg`, the last one that of :mod:`panels.models.clpt_field`. The\ndegree of freedom ``k`` of the term ``(i, j)``, ``0 <= i < m``, ``0 <= j <\nn``, is at the row ``row0 + 3*(j*m + i) + k`` of the matrices.\n' + MODULE_NOTES + '\n"""\n'
+    head = HEADER + 'r"""\nWeb of a ring frame, an annular-sector flat plate, using the classical\nlaminated plate theory (CLPT) with von Kármán strains in polar coordinates\n\nNumerically integrated kernels of the model ``\'frame_web_clpt_donnell\'``:\nthe constitutive stiffness :func:`fkC_num`, the geometric stiffness\n:func:`fkG_num`, the mass :func:`fkM_num`, the internal force vector\n:func:`calc_fint`, the product of the tangent stiffness by a vector\n:func:`calc_kTv`, and the fields :func:`fuvw`, :func:`fstrain` and\n:func:`fg`, the last one that of :mod:`panels.models.clpt_field`. The\ndegree of freedom ``k`` of the term ``(i, j)``, ``0 <= i < m``, ``0 <= j <\nn``, is at the row ``row0 + 3*(j*m + i) + k`` of the matrices.\n' + MODULE_NOTES + '\n"""\n'
     imports = '''from scipy.sparse import coo_matrix
 import numpy as np
 from scipy.special import roots_legendre
@@ -875,7 +992,7 @@ cdef int[3] P1 = [3, 6, 12]
 '''
     na = ''.join(NOT_IMPLEMENTED.format(name=nm, model=MODEL)
                  for nm in ('fkAx_num', 'fkAy_num'))
-    return head + imports + FKC + FKG + FKM + FINT + FIELDS + na
+    return head + imports + FKC + FKG + FKM + FINT + KTV + FIELDS + na
 
 
 ANALYTICAL = HEADER + '''r"""

@@ -13,7 +13,8 @@ laminated plate theory (CLPT) with von Kármán strains in polar coordinates
 Numerically integrated kernels of the model ``'frame_web_clpt_donnell'``:
 the constitutive stiffness :func:`fkC_num`, the geometric stiffness
 :func:`fkG_num`, the mass :func:`fkM_num`, the internal force vector
-:func:`calc_fint`, and the fields :func:`fuvw`, :func:`fstrain` and
+:func:`calc_fint`, the product of the tangent stiffness by a vector
+:func:`calc_kTv`, and the fields :func:`fuvw`, :func:`fstrain` and
 :func:`fg`, the last one that of :mod:`panels.models.clpt_field`. The
 degree of freedom ``k`` of the term ``(i, j)``, ``0 <= i < m``, ``0 <= j <
 n``, is at the row ``row0 + 3*(j*m + i) + k`` of the matrices.
@@ -1054,6 +1055,281 @@ def calc_fint(double [::1] cs, object Finput, object shell,
                             for p in range(P0[e], P1[e]):
                                 fint[row + e] += weight*pA[p]*bs[p]
     return np.asarray(fint)
+
+def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
+        int size, int col0, int nx, int ny, double Nxx_cte=0.,
+        double Nyy_cte=0., double Nxy_cte=0.):
+    r"""Product of the tangent stiffness matrix by a vector, without assembly
+
+    Returns ``KT(cs) vs``, with ``KT`` the tangent stiffness matrix
+    ``fkC_num(cs, ..., NLgeom=1) + fkG_num(cs, ...)`` at ``cs``, the exact
+    Jacobian of :func:`calc_fint`, plus the geometric stiffness matrix of
+    the constant membrane stress state ``Nxx_cte``, ``Nyy_cte`` and
+    ``Nxy_cte``.
+
+    Parameters
+    ----------
+    cs, vs : array-like
+        Ritz constants of the configuration and the vector, 1-D of size
+        ``size``.
+    Finput : array-like
+        Constitutive matrix ``ABD`` of the classical laminated plate theory,
+        shape ``(6, 6)`` for the whole domain, e.g. ``shell.ABD``, or ``(nx,
+        ny, 6, 6)`` with one matrix per integration point.
+    shell : :class:`.Shell`
+        The web, which gives the height ``a``, the arc length ``b`` of the
+        outer edge, the outer radius ``r``, the numbers of terms ``m`` and
+        ``n`` and the boundary flags of the approximation functions of each
+        field.
+    size, col0 : int
+        Size of the vectors and position where the terms of this web start.
+    nx, ny : int
+        Number of Gauss-Legendre points along `x` and `y`.
+    Nxx_cte, Nyy_cte, Nxy_cte : float, optional
+        Constant membrane stress resultants along the local axes, force per
+        unit length, default ``0``.
+
+    Returns
+    -------
+    kTv : numpy.ndarray
+        The product, of size ``size``.
+
+    Raises
+    ------
+    ValueError
+        If ``Finput`` has an invalid shape, ``shell`` is not a
+        :class:`.Shell` or its outer radius ``r`` is not larger than its
+        height ``a``.
+
+    Notes
+    -----
+    At each integration point, with `\boldsymbol{B} = \partial
+    \boldsymbol{\varepsilon}/\partial \boldsymbol{d}` at `\boldsymbol{d} =
+    \boldsymbol{\Phi} \boldsymbol{c}` and the membrane stress resultants
+    `\boldsymbol{N}` of `\boldsymbol{F} \boldsymbol{\varepsilon}`, plus the
+    constant ones:
+
+    .. math::
+
+        \boldsymbol{K}_T \boldsymbol{v} = \int \boldsymbol{\Phi}^\top \left(
+        \boldsymbol{B}^\top \boldsymbol{F} \boldsymbol{B} +
+        \boldsymbol{H}(\boldsymbol{N}) \right) \boldsymbol{\Phi}
+        \boldsymbol{v} \, dA
+
+    evaluated without forming `\boldsymbol{K}_T`, with
+    `\boldsymbol{H}(\boldsymbol{N})` of :func:`fkC_num`.
+
+    """
+    cdef double x1, x2, y1, y2, xi1, xi2, eta1, eta2
+    cdef double a, b, R, intx, inty, xi, eta, xp, rho, s, irho, weight
+    cdef int m, n, i, j, k, l, c, p, q, r, e, f2, row, col, ptx, pty
+    cdef double x1u, x1ur, x2u, x2ur
+    cdef double x1v, x1vr, x2v, x2vr
+    cdef double x1w, x1wr, x2w, x2wr
+    cdef double y1u, y1ur, y2u, y2ur
+    cdef double y1v, y1vr, y2v, y2vr
+    cdef double y1w, y1wr, y2w, y2wr
+    cdef double [:, ::1] ftab, gtab
+    cdef double [::1] xis, etas, weights_xi, weights_eta
+    cdef double pA[12]
+    cdef double pB[12]
+    cdef double dv[12]
+    cdef double K[144]
+    cdef double TA[36]
+    cdef double Bm[72]
+    cdef double bs[12]
+    cdef double dq[12]
+    cdef double Bq[6]
+    cdef double FBq[6]
+    cdef double w_x, w_y, eps0, eps1, eps2, eps3, eps4, eps5
+    cdef double Nxx, Nyy, Nxy, Mxx, Myy, Mxy
+    cdef double [::1] kTv
+    cdef int row0 = col0
+    cdef double F[36]
+    cdef double [:, :, :, ::1] Fnxny
+    cdef int one_F_each_point = 0
+    Finput = np.ascontiguousarray(Finput, dtype=DOUBLE)
+    if Finput.shape == (nx, ny, 6, 6):
+        Fnxny = Finput
+        one_F_each_point = 1
+    elif Finput.shape == (6, 6):
+        Fnxny = np.empty(shape=(0, 0, 0, 0), dtype=DOUBLE)
+        for i in range(6):
+            for j in range(6):
+                F[i*6 + j] = Finput[i, j]
+    else:
+        raise ValueError('Invalid shape for Finput!')
+    if cs.shape[0] != size or vs.shape[0] != size:
+        raise ValueError('cs and vs must have the size size')
+    if not 'Shell' in shell.__class__.__name__:
+        raise ValueError('a Shell object must be given as input')
+    a = shell.a
+    b = shell.b
+    R = shell.r
+    m = shell.m
+    n = shell.n
+    if not R > a:
+        raise ValueError('the outer radius r must be larger than the height a '
+                         'of the web, got r={0} and a={1}'.format(R, a))
+    #NOTE physical limits of the integration domain, resolved and validated
+    #     by Shell.integration_limits()
+    x1, x2, y1, y2 = shell.integration_limits()
+    x1u = shell.x1u; x1ur = shell.x1ur; x2u = shell.x2u; x2ur = shell.x2ur
+    x1v = shell.x1v; x1vr = shell.x1vr; x2v = shell.x2v; x2vr = shell.x2vr
+    x1w = shell.x1w; x1wr = shell.x1wr; x2w = shell.x2w; x2wr = shell.x2wr
+    y1u = shell.y1u; y1ur = shell.y1ur; y2u = shell.y2u; y2ur = shell.y2ur
+    y1v = shell.y1v; y1vr = shell.y1vr; y2v = shell.y2v; y2vr = shell.y2vr
+    y1w = shell.y1w; y1wr = shell.y1wr; y2w = shell.y2w; y2wr = shell.y2wr
+    xis, weights_xi = roots_legendre(nx)
+    etas, weights_eta = roots_legendre(ny)
+    xi1 = x1/a*2 - 1
+    xi2 = x2/a*2 - 1
+    eta1 = y1/b*2 - 1
+    eta2 = y2/b*2 - 1
+    intx = x2 - x1
+    inty = y2 - y1
+    ftab = np.zeros((7, m), dtype=DOUBLE)
+    gtab = np.zeros((7, n), dtype=DOUBLE)
+
+    kTv = np.zeros(size, dtype=DOUBLE)
+
+    with nogil:
+        for ptx in range(nx):
+            for pty in range(ny):
+                xi = (xis[ptx] + 1)/2*(xi2 - xi1) + xi1
+                eta = (etas[pty] + 1)/2*(eta2 - eta1) + eta1
+                xp = (xi + 1)*a/2
+                rho = R - xp
+                s = R/rho
+                irho = 1./rho
+                # per unit area of the natural domain, times dA/(dx dy)
+                weight = weights_xi[ptx]*weights_eta[pty]*intx*inty/4*rho/R
+                if one_F_each_point == 1:
+                    for i in range(6):
+                        for j in range(6):
+                            F[i*6 + j] = Fnxny[ptx, pty, i, j]
+                for i in range(m):
+                    ftab[0, i] = f(i, xi, x1u, x1ur, x2u, x2ur)
+                    ftab[1, i] = (2/a)*fp(i, xi, x1u, x1ur, x2u, x2ur)
+                    ftab[2, i] = f(i, xi, x1v, x1vr, x2v, x2vr)
+                    ftab[3, i] = (2/a)*fp(i, xi, x1v, x1vr, x2v, x2vr)
+                    ftab[4, i] = f(i, xi, x1w, x1wr, x2w, x2wr)
+                    ftab[5, i] = (2/a)*fp(i, xi, x1w, x1wr, x2w, x2wr)
+                    ftab[6, i] = (2/a)*(2/a)*fpp(i, xi, x1w, x1wr, x2w, x2wr)
+                for j in range(n):
+                    gtab[0, j] = f(j, eta, y1u, y1ur, y2u, y2ur)
+                    gtab[1, j] = (2/b)*fp(j, eta, y1u, y1ur, y2u, y2ur)
+                    gtab[2, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
+                    gtab[3, j] = (2/b)*fp(j, eta, y1v, y1vr, y2v, y2vr)
+                    gtab[4, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
+                    gtab[5, j] = (2/b)*fp(j, eta, y1w, y1wr, y2w, y2wr)
+                    gtab[6, j] = (2/b)*(2/b)*fpp(j, eta, y1w, y1wr, y2w, y2wr)
+
+                for p in range(12):
+                    dq[p] = 0.
+                for j in range(n):
+                    for i in range(m):
+                        col = col0 + 3*(j*m + i)
+                        pA[0] = ftab[0, i]*gtab[0, j]
+                        pA[1] = ftab[1, i]*gtab[0, j]
+                        pA[2] = ftab[0, i]*gtab[1, j]
+                        pA[3] = ftab[2, i]*gtab[2, j]
+                        pA[4] = ftab[3, i]*gtab[2, j]
+                        pA[5] = ftab[2, i]*gtab[3, j]
+                        pA[6] = ftab[4, i]*gtab[4, j]
+                        pA[7] = ftab[5, i]*gtab[4, j]
+                        pA[8] = ftab[4, i]*gtab[5, j]
+                        pA[9] = ftab[6, i]*gtab[4, j]
+                        pA[10] = ftab[4, i]*gtab[6, j]
+                        pA[11] = ftab[5, i]*gtab[5, j]
+                        for p in range(12):
+                            dq[p] += pA[p]*vs[col + (0 if p < 3 else (1 if p < 6 else 2))]
+                for p in range(12):
+                    dv[p] = 0.
+                for j in range(n):
+                    for i in range(m):
+                        col = col0 + 3*(j*m + i)
+                        pA[0] = ftab[0, i]*gtab[0, j]
+                        pA[1] = ftab[1, i]*gtab[0, j]
+                        pA[2] = ftab[0, i]*gtab[1, j]
+                        pA[3] = ftab[2, i]*gtab[2, j]
+                        pA[4] = ftab[3, i]*gtab[2, j]
+                        pA[5] = ftab[2, i]*gtab[3, j]
+                        pA[6] = ftab[4, i]*gtab[4, j]
+                        pA[7] = ftab[5, i]*gtab[4, j]
+                        pA[8] = ftab[4, i]*gtab[5, j]
+                        pA[9] = ftab[6, i]*gtab[4, j]
+                        pA[10] = ftab[4, i]*gtab[6, j]
+                        pA[11] = ftab[5, i]*gtab[5, j]
+                        for p in range(12):
+                            dv[p] += pA[p]*cs[col + (0 if p < 3 else (1 if p < 6 else 2))]
+                w_x = dv[7]
+                w_y = dv[8]
+                eps0 = dv[1] + (dv[7])*(dv[7])/2.
+                eps1 = -dv[0]*irho + dv[5]*s + (dv[8])*(dv[8])*(s)*(s)/2.
+                eps2 = dv[2]*s + dv[3]*irho + dv[4] + dv[7]*dv[8]*s
+                eps3 = -dv[9]
+                eps4 = -dv[10]*(s)*(s) + dv[7]*irho
+                eps5 = -2.*dv[11]*s - 2.*dv[8]*irho*s
+                Nxx = F[0]*eps0 + F[1]*eps1 + F[2]*eps2 + F[3]*eps3 + F[4]*eps4 + F[5]*eps5
+                Nyy = F[6]*eps0 + F[7]*eps1 + F[8]*eps2 + F[9]*eps3 + F[10]*eps4 + F[11]*eps5
+                Nxy = F[12]*eps0 + F[13]*eps1 + F[14]*eps2 + F[15]*eps3 + F[16]*eps4 + F[17]*eps5
+                Mxx = F[18]*eps0 + F[19]*eps1 + F[20]*eps2 + F[21]*eps3 + F[22]*eps4 + F[23]*eps5
+                Myy = F[24]*eps0 + F[25]*eps1 + F[26]*eps2 + F[27]*eps3 + F[28]*eps4 + F[29]*eps5
+                Mxy = F[30]*eps0 + F[31]*eps1 + F[32]*eps2 + F[33]*eps3 + F[34]*eps4 + F[35]*eps5
+                Nxx = Nxx + Nxx_cte
+                Nyy = Nyy + Nyy_cte
+                Nxy = Nxy + Nxy_cte
+                for p in range(72):
+                    Bm[p] = 0.
+                Bm[1] = 1.
+                Bm[7] = w_x
+                Bm[12] = -irho
+                Bm[17] = s
+                Bm[20] = (s)*(s)*w_y
+                Bm[26] = s
+                Bm[27] = irho
+                Bm[28] = 1.
+                Bm[31] = s*w_y
+                Bm[32] = s*w_x
+                Bm[45] = -1.
+                Bm[55] = irho
+                Bm[58] = -(s)*(s)
+                Bm[68] = -2.*irho*s
+                Bm[71] = -2.*s
+                for r in range(6):
+                    Bq[r] = 0.
+                    for p in range(12):
+                        Bq[r] += Bm[r*12 + p]*dq[p]
+                for r in range(6):
+                    FBq[r] = 0.
+                    for q in range(6):
+                        FBq[r] += F[r*6 + q]*Bq[q]
+                for p in range(12):
+                    bs[p] = 0.
+                    for r in range(6):
+                        bs[p] += Bm[r*12 + p]*FBq[r]
+                bs[7] += Nxx*dq[7] + Nxy*dq[8]*s
+                bs[8] += Nxy*dq[7]*s + Nyy*dq[8]*(s)*(s)
+                for j in range(n):
+                    for i in range(m):
+                        row = row0 + 3*(j*m + i)
+                        pA[0] = ftab[0, i]*gtab[0, j]
+                        pA[1] = ftab[1, i]*gtab[0, j]
+                        pA[2] = ftab[0, i]*gtab[1, j]
+                        pA[3] = ftab[2, i]*gtab[2, j]
+                        pA[4] = ftab[3, i]*gtab[2, j]
+                        pA[5] = ftab[2, i]*gtab[3, j]
+                        pA[6] = ftab[4, i]*gtab[4, j]
+                        pA[7] = ftab[5, i]*gtab[4, j]
+                        pA[8] = ftab[4, i]*gtab[5, j]
+                        pA[9] = ftab[6, i]*gtab[4, j]
+                        pA[10] = ftab[4, i]*gtab[6, j]
+                        pA[11] = ftab[5, i]*gtab[5, j]
+                        for e in range(3):
+                            for p in range(P0[e], P1[e]):
+                                kTv[row + e] += weight*pA[p]*bs[p]
+    return np.asarray(kTv)
 
 def _point_derivatives(double [::1] c, object shell, double xp, double yp):
     r"""Generalized derivatives `\boldsymbol{d}` of the web at a point
