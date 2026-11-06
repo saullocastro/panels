@@ -1,5 +1,6 @@
-r"""Utilities of the notebooks weller1977_blade_cylinder_buckling.ipynb and
-peterson1959_blade_cylinder_buckling.ipynb
+r"""Utilities of the notebooks weller1977_blade_cylinder_buckling.ipynb,
+peterson1959_blade_cylinder_buckling.ipynb and
+singer1971_blade_cylinder_buckling.ipynb
 
 Axial buckling, and buckling under external pressure, of cylinders with
 many closely spaced stringers, each stringer an equivalent blade (a flat
@@ -218,3 +219,66 @@ def smeared_ss_pressure(R, L, t, E, nu, d, A, z, Io, J, hydrostatic=False,
     q = (rhs - am**2*Nx0)/(hyd*am**2*R/2 + bn**2*R)
     i, j = np.unravel_index(np.argmin(q), q.shape)
     return q[i, j], (int(m[i, 0]), int(n[0, j]))
+
+
+def smeared_cc(R, L, t, E, nu, d, A, z, Io, J, nmax=40, nterms=12):
+    r"""Smeared-stiffener critical `\bar{N}_x` of the cylinder with clamped
+    ends, `u = v = w = w_{,x} = 0` (C-4), membrane pre-buckling state
+
+    The energy of the theory of Block, Card and Mikulas (1965) (the
+    stringers of :func:`smeared_ss` smeared over their spacing ``d``) with
+    the series of equation (A5) of Card and Jones (1966),
+
+    .. math::
+
+        u = \cos\frac{n y}{R} \sum_i a_i \sin\frac{i \pi x}{L}, \quad
+        v = \sin\frac{n y}{R} \sum_i b_i \sin\frac{i \pi x}{L}, \quad
+        w = \cos\frac{n y}{R} \sum_i c_i \left[\cos\frac{(i - 1) \pi x}{L}
+        - \cos\frac{(i + 1) \pi x}{L}\right]
+
+    whose functions satisfy the (geometric) clamped conditions, minimized
+    by the Rayleigh-Ritz method with ``nterms`` terms in each series
+    (Gauss-Legendre integration along `x`), and over `n = 1 \ldots`
+    ``nmax``. Returns `\bar{N}_x` and `n`.
+    """
+    from scipy.linalg import eigh
+    G = E/(2*(1 + nu))
+    C = E*t/(1 - nu**2)
+    D = E*t**3/(12*(1 - nu**2))
+    nq = 2*nterms + 8
+    xi, wi = np.polynomial.legendre.leggauss(nq)
+    x = L/2*(xi + 1)
+    wq = L/2*wi
+    i = np.arange(1, nterms + 1)[None, :]
+    k, km, kp = i*pi/L, (i - 1)*pi/L, (i + 1)*pi/L
+    U, Ux = np.sin(k*x[:, None]), k*np.cos(k*x[:, None])
+    Wf = np.cos(km*x[:, None]) - np.cos(kp*x[:, None])
+    Wx = -km*np.sin(km*x[:, None]) + kp*np.sin(kp*x[:, None])
+    Wxx = -km**2*np.cos(km*x[:, None]) + kp**2*np.cos(kp*x[:, None])
+    zero = np.zeros_like(U)
+
+    def q(a, b):
+        return (a*wq[:, None]).T @ b
+
+    best = None
+    for n in range(1, nmax + 1):
+        bn = n/R
+        ex = np.hstack([Ux, zero, zero])
+        ey = np.hstack([zero, bn*U, Wf/R])
+        gxy = np.hstack([-bn*U, Ux, zero])
+        kxx = np.hstack([zero, zero, Wxx])
+        kyy = np.hstack([zero, zero, -bn**2*Wf])
+        kxy = np.hstack([zero, zero, -bn*Wx])
+        wx = np.hstack([zero, zero, Wx])
+        K = (C*(q(ex, ex) + nu*(q(ex, ey) + q(ey, ex)) + q(ey, ey))
+             + G*t*q(gxy, gxy)
+             + D*(q(kxx, kxx) + nu*(q(kxx, kyy) + q(kyy, kxx)) + q(kyy, kyy)
+                  + 2*(1 - nu)*q(kxy, kxy))
+             + (E*A*q(ex, ex) - z*E*A*(q(ex, kxx) + q(kxx, ex))
+                + E*Io*q(kxx, kxx) + G*J*q(kxy, kxy))/d)
+        KG = q(wx, wx)
+        mu_ = eigh(KG, K, eigvals_only=True)
+        N = 1/mu_.max()
+        if best is None or N < best[0]:
+            best = (N, n)
+    return best
