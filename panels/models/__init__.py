@@ -99,6 +99,21 @@ The available models, which are selected with ``Shell.model``, are:
   :func:`.fsdt_tsdt_field.fuvw` and :func:`.fsdt_tsdt_field.fg` are the
   rotation of the normal ``phiy + v/r``.
 
+- ``'plate_fsdt_gl'``, ``'plate_tsdt_gl'``: flat plates, FSDT and TSDT with
+  the Green-Lagrange membrane strains of ``'plate_clpt_gl'`` and the linear
+  bending and transverse shear strains of ``'plate_fsdt_donnell'`` and
+  ``'plate_tsdt_donnell'``, 5 DOFs ``u, v, w, phix, phiy``. A finite rigid
+  rotation, with constant ``phix = -w,x`` and ``phiy = -w,y``, stores no
+  energy.
+
+- ``'cylshell_fsdt_gl'``, ``'cylshell_tsdt_gl'``: cylindrical shells, FSDT
+  and TSDT with the Green-Lagrange membrane strains of
+  ``'cylshell_clpt_gl'`` and the linear bending and transverse shear strains
+  of ``'cylshell_fsdt_sanders'`` and ``'cylshell_tsdt_sanders'``, 5 DOFs
+  ``u, v, w, phix, phiy``; the fields ``phiy`` of
+  :func:`.fsdt_tsdt_field.fuvw` and :func:`.fsdt_tsdt_field.fg` are the
+  rotation of the normal ``phiy + v/r``, as for the Sanders models.
+
 The models with 5 DOFs are supported by :class:`.MultiDomain` with the
 connections of :mod:`panels.multidomain.connections.kCsdt`, but not by
 :class:`.StiffPanelBay`, whose stiffeners assume the 3 DOFs of the CLPT.
@@ -354,3 +369,7 @@ from . import cylshell_fsdt_donnell, cylshell_fsdt_donnell_num
 from . import cylshell_fsdt_sanders, cylshell_fsdt_sanders_num
 from . import cylshell_tsdt_donnell, cylshell_tsdt_donnell_num
 from . import cylshell_tsdt_sanders, cylshell_tsdt_sanders_num
+from . import plate_fsdt_gl, plate_fsdt_gl_num
+from . import plate_tsdt_gl, plate_tsdt_gl_num
+from . import cylshell_fsdt_gl, cylshell_fsdt_gl_num
+from . import cylshell_tsdt_gl, cylshell_tsdt_gl_num
