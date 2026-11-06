@@ -266,8 +266,10 @@
   Table 5, +0.01 % to +0.51 % from the paper's `m = n = 8` values (before:
   62.618 to 53.705 Hz, 3.6 % to 4.0 % below).
 - `tstiff2d_1stiff_flutter`: with `u = 0` at `x = 0`, the edge loads
-  `Nxx_skin` and `Nxx_flange` of the static case give no pre-stress; only
-  `Nxx_base` loads the assembly.
+  `Nxx_skin` and `Nxx_flange` of the static case give no pre-stress, and
+  `Nxx_base`, carried by the connection of the base to the restrained edge
+  of the skin, almost none (first eigenvalue of the docstring example,
+  with the static case and `Nxx_base=-100.`, changed by 1.6e-5).
 - Stored values: `test_tstiff2d_assembly.py`, first natural frequency
   48.2733 to 48.4404 rad/s, flutter `sqrt(-lambda_1)` 446.12 to
   503.06-139.60j (the first eigenvalue is now a complex pair);
@@ -275,6 +277,11 @@
   48.39 to 48.56 and 448.57 to 487.42. New test
   `test_tstiff2d_1stiff_freq_castro_donadon_2017_table5` (Table 5,
   `m = n = 8`, within 0.6 %).
+- New test `test_tstiff2d_1stiff_freq_castro_donadon_2017_fig15_flat`: the
+  flat panel #1 (`a/b = 0.5`, `b/b_b = 5`) against the frequency ratios of
+  Fig. 15 of the paper, digitised (uncertainty about 0.004), for six
+  defect lengths from 0.407 to 0.907: 0.002 to 0.005 below the curve,
+  asserted within 0.01.
 
 ### Changed: the boundary-condition flags of `StiffPanelBay` are fixed once it has panels
 
