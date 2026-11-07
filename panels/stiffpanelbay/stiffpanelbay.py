@@ -57,6 +57,55 @@ def _first_not_none(*values):
     return None
 
 
+_BC_FLAGS = tuple(e + d + r for e in ('x1', 'x2', 'y1', 'y2')
+                  for d in 'uvw' for r in ('', 'r'))
+
+
+def _bc_flag_property(name):
+    r"""Property of the boundary-condition flag ``name`` of the bay
+
+    The value is stored in the attribute ``'_' + name``. The setter raises
+    an ``AttributeError`` when the bay has panels and the new value differs
+    from the current one.
+
+    Parameters
+    ----------
+    name : str
+        Name of the flag, e.g. ``'x1u'``.
+
+    Returns
+    -------
+    prop : property
+
+    """
+    attr = '_' + name
+
+    def fget(self):
+        return getattr(self, attr)
+
+    def fset(self, value):
+        if self.__dict__.get('panels') and value != getattr(self, attr):
+            raise AttributeError('StiffPanelBay.{0} cannot be changed after '
+                'add_panel(), set the boundary conditions of the bay before '
+                'adding its panels'.format(name))
+        setattr(self, attr, value)
+
+    edge, normal = {'x1': ('`x = 0`', 'x'), 'x2': ('`x = a`', 'x'),
+                    'y1': ('`y = 0`', 'y'), 'y2': ('`y = b`', 'y')}[name[:2]]
+    if len(name) == 3:
+        what = 'the value of `{0}`'.format(name[2])
+    else:
+        what = 'the derivative `{0}_{{,{1}}}`'.format(name[2], normal)
+    doc = ('Boundary-condition flag of the bay for {0} at the edge {1}\n\n'
+           '``0.`` removes and ``1.`` keeps that degree of freedom, as the '
+           'flag of the same name of :class:`.Shell`. The flag is copied to '
+           'every panel by :meth:`.StiffPanelBay.add_panel` and read by the '
+           'stiffeners, and can be changed only while the bay has no panels: '
+           'assigning another value afterwards raises an '
+           '``AttributeError``.\n').format(what, edge)
+    return property(fget, fset, doc=doc)
+
+
 class StiffPanelBay(object):
     r"""Stiffened Shell Bay
 
@@ -70,6 +119,14 @@ class StiffPanelBay(object):
       Controlled by the parameter ``flow``
     - ``bladestiff1ds`` contains the :class:`.BladeStiff1D` stiffeners
     - ``bladestiff2ds`` contains the :class:`.BladeStiff2D` stiffeners
+
+    The boundary-condition flags of the bay, ``x1u, x1ur, x2u, x2ur, ...,
+    y2w, y2wr``, with the meaning of the flags of the same name of
+    :class:`.Shell` and the defaults `u = v = w = 0`, `u_{,x} = v_{,x} = 0`
+    at `x = 0, a` and `u_{,y} = v_{,y} = 0` at `y = 0, b`, are copied to
+    each panel by :meth:`add_panel` and read by the stiffeners. They are set
+    before the first panel is added: once the bay has panels, assigning
+    another value to any of them raises an ``AttributeError``.
 
     Notes
     -----
@@ -97,6 +154,33 @@ class StiffPanelBay(object):
        M. V., Flutter of stiffened composite panels considering the
        stiffener's base as a structural element, Composite Structures, 140,
        36-43, 2016. https://doi.org/10.1016/j.compstruct.2015.12.056
+
+    Examples
+    --------
+    Linear buckling of a bay with two skin panels and a blade stiffener
+    between them, under the compressive load ``Nxx`` of the panels, with
+    :func:`structsolve.lb`:
+
+    >>> from structsolve import lb
+    >>> from panels.stiffpanelbay import StiffPanelBay
+    >>> laminaprop = (142.5e9, 8.7e9, 0.28, 5.1e9, 5.1e9, 5.1e9)
+    >>> bay = StiffPanelBay()
+    >>> bay.a, bay.b, bay.r = 0.4, 0.3, None
+    >>> bay.stack = [0, 90, 90, 0]
+    >>> bay.plyt, bay.laminaprop = 0.125e-3, laminaprop
+    >>> bay.m, bay.n, bay.rho = 8, 8, 1600.
+    >>> bay.model = 'plate_clpt_donnell'
+    >>> p1 = bay.add_panel(y1=0., y2=0.15, Nxx=-1.)
+    >>> p2 = bay.add_panel(y1=0.15, y2=0.3, Nxx=-1.)
+    >>> s = bay.add_bladestiff1d(ys=0.15, bf=0.02, fstack=[0, 90, 90, 0],
+    ...                          fplyt=0.125e-3, flaminaprop=laminaprop)
+    >>> eigvals, eigvecs = lb(bay.calc_kC(silent=True),
+    ...                       bay.calc_kG(silent=True),
+    ...                       silent=True, num_eigvalues=1)
+    >>> print(bay.get_size())
+    192
+    >>> print('%.1f' % eigvals[0])
+    660.2
 
     """
     def __init__(self):
@@ -438,7 +522,7 @@ class StiffPanelBay(object):
     def add_bladestiff2d(self, ys, rho=None, bb=None, bstack=None,
             bplyts=None, bplyt=None, blaminaprops=None, blaminaprop=None,
             bf=None, fstack=None, fplyts=None, fplyt=None, flaminaprops=None,
-            flaminaprop=None, mf=14, nf=11, **kwargs):
+            flaminaprop=None, mf=14, nf=11, model=None, **kwargs):
         r"""Add a new BladeStiff2D to the current panel bay
 
         The panels must be added before. The panel ``panel1`` of the
@@ -446,9 +530,11 @@ class StiffPanelBay(object):
         ``panel2`` the one whose edge ``y1`` is equal to ``ys``; for ``ys``
         close to ``0`` or to the width ``b`` of the bay, both are the panel
         with that edge. When only ``bplyt``, ``blaminaprop``, ``fplyt`` or
-        ``flaminaprop`` is given, it is repeated for each ply. The new
-        stiffener is appended to the attributes ``bladestiff2ds`` and
-        ``stiffeners``.
+        ``flaminaprop`` is given, it is repeated for each ply. The base and
+        the ends of the flange take the boundary conditions of the bay
+        when the stiffener is created, see :class:`.BladeStiff2D`, so the
+        flags of the bay are set before. The new stiffener is appended to
+        the attributes ``bladestiff2ds`` and ``stiffeners``.
 
         Parameters
         ----------
@@ -495,6 +581,12 @@ class StiffPanelBay(object):
         nf : int, optional
             Number of approximation terms for flange, along `y`. Default
             ``11``.
+        model : str or None, optional
+            Stiffener model, ``'bladestiff2d_clt_donnell'`` or
+            ``'bladestiff2d_clt_sanders'``, see :class:`.BladeStiff2D`.
+            Default ``None``, ``'bladestiff2d_clt_sanders'`` on a curved
+            skin whose model is not ``'cylshell_clpt_donnell'``,
+            ``'bladestiff2d_clt_donnell'`` otherwise.
         **kwargs : dict, optional
             Additional parameters, set as attributes of the new stiffener
             after it is created.
@@ -510,7 +602,9 @@ class StiffPanelBay(object):
             is given without ``bplyts`` or ``bplyt``, or without
             ``blaminaprops`` or ``blaminaprop``; when ``fstack`` is given
             without ``fplyts`` or ``fplyt``, or without ``flaminaprops`` or
-            ``flaminaprop``.
+            ``flaminaprop``; when ``model`` is not a model of
+            :class:`.BladeStiff2D`, or is ``'bladestiff2d_clt_sanders'`` on
+            a flat bay.
         RuntimeError
             When no panel was added; when ``panel1`` or ``panel2`` is not
             found.
@@ -571,7 +665,7 @@ class StiffPanelBay(object):
         s = BladeStiff2D(bay=self, rho=rho, panel1=panel1, panel2=panel2, ys=ys,
                 bb=bb, bf=bf, bstack=bstack, bplyts=bplyts,
                 blaminaprops=blaminaprops, fstack=fstack, fplyts=fplyts,
-                flaminaprops=flaminaprops, mf=mf, nf=nf)
+                flaminaprops=flaminaprops, mf=mf, nf=nf, model=model)
 
         for k, v in kwargs.items():
             setattr(s, k, v)
@@ -1873,3 +1967,8 @@ class StiffPanelBay(object):
         msg('finished!', level=2, silent=silent)
 
         return fext
+
+
+for _name in _BC_FLAGS:
+    setattr(StiffPanelBay, _name, _bc_flag_property(_name))
+del _name

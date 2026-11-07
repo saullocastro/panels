@@ -149,10 +149,15 @@ def _rinv_sanders(p):
     the `x` axis includes the term `v/r`, `\phi_y = -w_{,y} + v/r`, which
     enters the rotation penalty of the connection ``'BFycte'``, see
     :mod:`panels.multidomain.connections.kCBFycte`. The kinematics of
-    Donnell neglect this term, hence the zero.
+    Donnell neglect this term, hence the zero. The models with the
+    kinematics of Sanders-Koiter have ``'sanders'`` in their name, and
+    ``'cylshell_clpt_gl'`` and ``'cylshell_clpt_tl'`` have the same rotations of
+    the normal.
 
     """
-    if p.model is not None and 'sanders' in p.model:
+    if p.model is not None and ('sanders' in p.model
+                                or p.model in ('cylshell_clpt_gl',
+                                               'cylshell_clpt_tl')):
         return 1./p.r
     return 0.
 
@@ -171,8 +176,21 @@ def _dofs(p):
 
 
 class ConnectionTermsWarning(UserWarning):
-    r"""Too few terms across an edge connection, see
-    :meth:`.MultiDomain.check_conn_terms`"""
+    r"""Too few terms across an edge connection
+
+    Issued by :meth:`.MultiDomain.check_conn_terms`, once for each set of
+    issues, when a domain of an edge connection has fewer terms across the
+    joint than needed to represent the linear fields that its boundary
+    condition flags admit. The message names up to three domains, the
+    connection, the number of terms ``m`` or ``n`` and the number needed.
+    It is imported in :mod:`panels.multidomain` and can be filtered with
+    :func:`warnings.filterwarnings`.
+
+    See Also
+    --------
+    MultiDomain.check_conn_terms
+
+    """
 
 
 #NOTE Hermite coefficients of the fields 1 and xi in the first four terms of
@@ -290,6 +308,35 @@ class MultiDomain(object):
     without ``model``, and 5 for the models based on shear deformation
     theories. Creating another assembly with the same panels overwrites
     these attributes. No matrix is computed.
+
+    The loads and prescribed displacements are added to the panels, with
+    :meth:`.Shell.add_point_load`, :meth:`.Shell.add_distr_load_fixed_x`,
+    :meth:`.Shell.add_distr_load_fixed_y`, :meth:`.Shell.add_point_pd`,
+    :meth:`.Shell.add_distr_pd_fixed_x` or
+    :meth:`.Shell.add_distr_pd_fixed_y`. The linear static workflow is:
+    assemble the stiffness matrix with :meth:`.calc_kC` and the external
+    force vector with :meth:`.calc_fext`, which have the size of all the
+    Ritz constants, :meth:`.get_size`; reduce them with :meth:`.reduce`
+    (the identity with ``conn_method='penalty'``); solve with
+    ``structsolve.solve``, or ``structsolve.static`` or
+    ``structsolve.Analysis.static``, which call it; and expand the solution
+    with :meth:`.expand`. :meth:`.linear_static` does all of it, also with
+    prescribed displacements, and :meth:`.linear_buckling` the linear
+    buckling analysis. With the default ``conn_method='null-space'``,
+    solving ``kC`` and ``fext`` without :meth:`.reduce` would leave the
+    domains disconnected, since ``kC`` then contains no connection
+    stiffness. ``structsolve.solve`` is needed, rather than
+    ``scipy.sparse.linalg.spsolve``, because ``kC`` usually has null rows
+    and columns, e.g. those of the Ritz constants removed by a boundary
+    condition flag set to zero, see the Notes; the solvers ``lb`` and
+    ``freq`` of ``structsolve`` remove the same rows and columns.
+
+    The attribute ``group`` of each panel, given when the :class:`.Shell` is
+    created, selects the panels plotted together by :meth:`.plot`, which
+    places them by their attributes ``x0`` and ``y0``; :meth:`.plot3d`
+    places them in 3D. :func:`.create_cylinder`,
+    :func:`.create_cylinder_blade_stiffened` and :func:`.create_wingbox`
+    build larger assemblies.
 
 
     Parameters
@@ -426,14 +473,24 @@ class MultiDomain(object):
     With ``pd_method='null-space'`` the prescribed displacements are the
     inhomogeneous linear constraints `\boldsymbol{B}_d \boldsymbol{c} = \bar{\boldsymbol{d}}_0 + \lambda
     \bar{\boldsymbol{d}}_1`, and every admissible configuration is `\boldsymbol{c} = \boldsymbol{Z} \boldsymbol{c}_r +
-    \boldsymbol{c}_{p0} + \lambda \boldsymbol{c}_{p1}`, see :meth:`.get_cp` and
-    :ref:`null_space_pd`. With ``pd_method='penalty'`` a prescribed value
-    `u_p` is imposed with the energy `\frac{1}{2} k (u - u_p)^2`, integrated
+    \boldsymbol{c}_{p0} + \lambda \boldsymbol{c}_{p1}`, see :meth:`.get_cp`. With
+    ``pd_method='penalty'`` a prescribed value `u_p` is imposed with the energy `\frac{1}{2} k (u - u_p)^2`, integrated
     along the line for the distributed prescriptions, i.e. a spring of
     stiffness `k` between the structure and the support, whose force `k
     u_p` enters :meth:`.calc_fext`; the prescribed value is then reached
-    only approximately, with an error that decreases with `1/k`. See
-    :ref:`null_space`.
+    only approximately, with an error that decreases with `1/k`.
+
+    A boundary condition flag set to zero, e.g. ``x1u = x1v = x1w = x1wr =
+    0`` at a clamped edge, multiplies Ritz functions by zero, so that their
+    Ritz constants have no stiffness and ``kC`` is exactly singular,
+    whatever the connections. ``structsolve.solve`` removes the rows and
+    columns that are both null, with
+    ``structsolve.sparseutils.remove_null_cols``, solves the remaining
+    system and sets these Ritz constants to zero; their terms of ``fext``
+    are null as well, since the same Ritz functions vanish in the load
+    vector. A system still singular after this removal has a mechanism,
+    e.g. an assembly without enough supports, see
+    ``tests/multidomain/test_linear_static_null_dofs.py``.
 
     References
     ----------
@@ -445,96 +502,25 @@ class MultiDomain(object):
     Examples
     --------
 
-    >>> panel_1 = Shell(*args)
-    >>> panel_2 = Shell(*args)
-    >>> panel_3 = Shell(*args)
-    >>> panels = [panel_1, panel_2]
-    >>> conn = [
-            dict(p1=panel_1, p2=panel_2, func='SSxcte', xcte1=0, xcte2=panel_2.a),
-            dict(p1=panel_2, p2=panel_3, func='SSycte', ycte1=0, ycte2=panel_3.b)
-            ] # A list of dictionary that indicates two connections: (panel_1-panel_2) and (panel_2-panel_3)
+    A simply supported square plate made of two domains connected along
+    `y = 0.5` with ``'SSycte'``, under a point load at its center; the
+    maximum deflection, in mm:
 
-    xcte1 = location (x const) in panel 1 which connects to panel 2
-    xcte2 = ........................... 2 ....................... 2
-
-    >>> md = MultiDomain(panels, conn)
-
-    The connections are imposed exactly with the default
-    ``conn_method='null-space'``, see :meth:`.get_Z`.
-
-    Point or distributed forces or displacements can be easily added by using
-    one of the methods:
-
-        - :meth:`.Shell.add_point_load`
-        - :meth:`.Shell.add_distr_load_fixed_x`
-        - :meth:`.Shell.add_distr_load_fixed_y`
-        - :meth:`.Shell.add_point_pd`
-        - :meth:`.Shell.add_distr_pd_fixed_x`
-        - :meth:`.Shell.add_distr_pd_fixed_y`
-
-    With this, calculating the stiffness matrix and the external force
-    vector is straightforward:
-
-    >>> kC = md.calc_kC()
-    >>> fext = md.calc_fext()
-
-    These have the size of all the Ritz constants. With the default
-    ``conn_method='null-space'`` they are reduced to the independent Ritz
-    constants before solving, here with the Python module ``structsolve``,
-    and the solution is expanded back to all the Ritz constants:
-
-    >>> from structsolve import static
-    >>>
-    >>> incs, cs = static(md.reduce(kC), md.reduce(fext), silent=True)
-    >>> c = md.expand(cs[0])
-
-    Solving ``kC`` and ``fext`` directly would leave the domains
-    disconnected, since ``kC`` then contains no connection stiffness. With
-    ``conn_method='penalty'`` the matrices contain the penalty stiffnesses of
-    the connections and are solved directly, ``md.reduce()`` and
-    ``md.expand()`` being then the identity:
-
-    >>> md = MultiDomain(panels, conn, conn_method='penalty')
-    >>> incs, cs = static(md.calc_kC(), md.calc_fext(), silent=True)
-    >>> c = cs[0]
-
-    The linear static workflow is therefore: assemble ``kC`` with
-    :meth:`.calc_kC` and ``fext`` with :meth:`.calc_fext`, reduce them with
-    :meth:`.reduce` (the identity with ``conn_method='penalty'``), solve
-    with ``structsolve.solve`` (or ``structsolve.static``, or
-    ``structsolve.Analysis.static``, which call it) and expand with
-    :meth:`.expand`; :meth:`.linear_static` does all of it, also with
-    prescribed displacements. ``structsolve.solve`` is needed, rather than
-    ``scipy.sparse.linalg.spsolve`` directly, because ``kC`` usually has
-    null rows and columns: a boundary condition flag set to zero, e.g.
-    ``x1u = x1v = x1w = x1wr = 0`` at a clamped edge, multiplies Ritz
-    functions by zero, so that their Ritz constants have no stiffness and
-    ``kC`` is exactly singular, whatever the connections.
-    ``structsolve.solve`` removes the rows and columns that are both null,
-    with ``structsolve.sparseutils.remove_null_cols``, solves the remaining
-    system and sets these Ritz constants to zero; their terms of ``fext``
-    are null as well, since the same Ritz functions vanish in the load
-    vector. A system still singular after this removal has a mechanism,
-    e.g. an assembly without enough supports. The linear buckling and
-    vibration solvers of ``structsolve``, ``lb`` and ``freq``, remove the
-    same rows and columns. See
-    ``tests/multidomain/test_linear_static_null_dofs.py``:
-
-    >>> from structsolve import solve
-    >>> c = md.expand(solve(md.reduce(md.calc_kC()),
-    ...                     md.reduce(md.calc_fext())))
-
-    And plotting the results for the group named ``'skin'``.
-
-    >>> md.plot(c, 'skin', filename='tmp_cylinder_compression_lb_Nxx_cte.png')
-
-
-    The group name attribute belongs to each domain, and is passed while
-    instantiating the :class:``.Shell`` object. Furthermore, it is important to
-    pass the correct relative position of each domain within the group for
-    generating consistent plots. For examples on how to create complex
-    multidomains, see :func:`.create_cylinder` and
-    :func:`.create_cylinder_blade_stiffened`.
+    >>> import numpy as np
+    >>> from panels.shell import Shell
+    >>> from panels.multidomain import MultiDomain
+    >>> prop = dict(a=1., b=0.5, m=8, n=8, stack=[0.], plyt=0.01,
+    ...             laminaprop=(70e9, 0.33), group='plate')
+    >>> p1 = Shell(y0=0., **prop)
+    >>> p2 = Shell(y0=0.5, **prop)
+    >>> p1.y2u = p1.y2v = p1.y2w = p2.y1u = p2.y1v = p2.y1w = 1.
+    >>> conn = [dict(p1=p1, p2=p2, func='SSycte', ycte1=p1.b, ycte2=0.)]
+    >>> md = MultiDomain([p1, p2], conn)
+    >>> p1.add_point_load(0.5, 0.5, 0., 0., 1000.)
+    >>> c = md.linear_static()
+    >>> res = md.uvw(c, 'plate', gridx=21, gridy=11)
+    >>> round(float(np.max(res['w'])*1000), 3)
+    1.727
 
     """
     def __init__(self, panels, conn=None, conn_method='null-space',
@@ -571,7 +557,7 @@ class MultiDomain(object):
         for p in panels:
             assert isinstance(p, Shell) # Check if its Shell obj
             # This actually modifies the shell obj (i.e. passed panels)
-            p.row_start = row0 # 1st panel starts at 0,0. Rest start at end of last matrix  --- Assembly of Kp_i from the paper
+            p.row_start = row0 # 1st panel starts at 0,0. Rest start at end of last matrix
             p.col_start = col0
             #NOTE 3 DOFs u, v, w for the classical laminated plate theory and
             #     5 DOFs u, v, w, phix, phiy for the shear deformation theories
@@ -765,9 +751,8 @@ class MultiDomain(object):
         Notes
         -----
         The terms of the trace of the richer domain that the other domain
-        cannot represent are forced to vanish by the exact constraints, see
-        the Limitations of :ref:`null_space`, and the extra terms of the
-        richer domain do not refine the joint. The penalty method,
+        cannot represent are forced to vanish by the exact constraints, and
+        the extra terms of the richer domain do not refine the joint. The penalty method,
         ``conn_method='penalty'``, only penalizes them and is not checked.
         Unlike too few terms across the joint, see
         :meth:`.check_conn_terms`, this is not checked automatically and
@@ -933,7 +918,7 @@ class MultiDomain(object):
         :meth:`.reduce`. With ``pd_method='null-space'``, the prescribed
         displacements add the inhomogeneous constraints `\boldsymbol{B}_d \boldsymbol{c} =
         \bar{\boldsymbol{d}}_0 + \lambda \bar{\boldsymbol{d}}_1`, and `\boldsymbol{Z}` spans the null space of all
-        the constraints, see :meth:`.get_cp` and :ref:`null_space_pd`.
+        the constraints, see :meth:`.get_cp`.
 
         The blocks of constraints are eliminated one at a time, the
         connections first, by :func:`.nullspace.null_space_basis` or, with
@@ -960,7 +945,7 @@ class MultiDomain(object):
         multipliers, giving infinite eigenvalues. The null-space method
         removes unknowns instead of adding them, and gives the same solution.
         Since the constraints are linear in `\boldsymbol{c}`, `\boldsymbol{Z}` does not change
-        during a non-linear analysis. See :ref:`null_space`.
+        during a non-linear analysis.
 
         """
         size = self.get_size()
@@ -1136,7 +1121,7 @@ class MultiDomain(object):
 
         with `\boldsymbol{B} \boldsymbol{c}_{p0} = \{\boldsymbol{0}; \bar{\boldsymbol{d}}_0\}` and `\boldsymbol{B} \boldsymbol{c}_{p1} = \{\boldsymbol{0};
         \bar{\boldsymbol{d}}_1\}` for `\boldsymbol{B}` the constraints of the connections and of the
-        prescribed displacements, see :ref:`null_space_pd`. Each row of
+        prescribed displacements. Each row of
         `\boldsymbol{B}_d` is a prescribed component at a point, or at a Gauss-Legendre
         point of a prescribed line, see
         :func:`.nullspace.pd_constraint_matrix`, such that the constraint
@@ -1215,7 +1200,7 @@ class MultiDomain(object):
         whenever the connected assembly has no rigid-body motion. With
         prescribed displacements imposed exactly, the reduced force vector
         also contains the forces of the particular solutions, see
-        :meth:`.linear_static`. See :ref:`null_space`.
+        :meth:`.linear_static`.
 
         """
         Z = self.get_Z()
@@ -1249,8 +1234,7 @@ class MultiDomain(object):
             column.
         lbd : float or None, optional
             Load factor of a configuration. With ``None``, the default,
-            ``Z @ c_r`` is returned, unchanged with respect to the
-            previous versions.
+            ``Z @ c_r`` is returned.
 
         Returns
         -------
@@ -1359,7 +1343,7 @@ class MultiDomain(object):
         convergence criteria, Crisfield's scaled criterion, the default of
         ``structsolve`` 0.9.0, and the relative one, since under a prescribed
         displacement alone both `\boldsymbol{Z}^\top \boldsymbol{F}_{ext}` and `\boldsymbol{Z}^\top \boldsymbol{F}_{int}`
-        vanish at equilibrium. See :ref:`null_space_pd`.
+        vanish at equilibrium.
 
         """
         Z = self.get_Z()
@@ -1480,7 +1464,7 @@ class MultiDomain(object):
         ``calc_fext(inc=1.)``, scaled by `\lambda` as in the analyses of
         ``structsolve``, and `\boldsymbol{c}_{p0}`, `\boldsymbol{c}_{p1}` from
         :meth:`.get_cp`, and returns `\boldsymbol{c} = \boldsymbol{Z} \boldsymbol{c}_r + \boldsymbol{c}_{p0} +
-        \lambda \boldsymbol{c}_{p1}`. See :ref:`null_space_pd`.
+        \lambda \boldsymbol{c}_{p1}`.
 
         """
         c_p0, c_p1 = self.get_cp()
@@ -1569,8 +1553,7 @@ class MultiDomain(object):
         about the linear static solution for `\lambda = 1`. The modes
         satisfy the homogeneous constraints, `\boldsymbol{\phi} = \boldsymbol{Z} \boldsymbol{\phi}_r`:
         under displacement control the prescribed components of the modes
-        are zero, whereas under the equivalent load they are free. See
-        :ref:`null_space_pd`.
+        are zero, whereas under the equivalent load they are free.
 
         """
         Z = self.get_Z()
@@ -1683,8 +1666,7 @@ class MultiDomain(object):
         end-shortening `\delta` of an edge, `P_j = N \delta` with `N` the
         total axial reaction, see :meth:`.reaction_resultant`, and `P_1 =
         \partial W/\partial \lambda` is the force conjugate to the load
-        factor of a displacement-controlled analysis. See
-        :ref:`null_space_pd`.
+        factor of a displacement-controlled analysis.
 
         """
         if self.pd_method != 'null-space':
@@ -1756,7 +1738,7 @@ class MultiDomain(object):
         the force at the shared corner is undetermined. The sign is that of
         the force applied by the support on the structure, `F_u = -N` at the
         shortened end, with `N` the total axial reaction of
-        :meth:`.reaction_pd`. See :ref:`null_space_pd`.
+        :meth:`.reaction_pd`.
 
         """
         if self.pd_method != 'null-space':
@@ -1951,6 +1933,32 @@ class MultiDomain(object):
             When both ``c`` and ``res`` are ``None``, or when ``ax`` is not a
             :class:`matplotlib.axes.Axes`.
 
+        Examples
+        --------
+        Deflection of the simply supported plate of two domains of
+        :class:`.MultiDomain` under a central point load; the largest
+        deflection, in mm, and the figure saved to a temporary file:
+
+        >>> import os, tempfile
+        >>> import matplotlib
+        >>> matplotlib.use('Agg')
+        >>> from panels.shell import Shell
+        >>> from panels.multidomain import MultiDomain
+        >>> prop = dict(a=1., b=0.5, m=8, n=8, stack=[0.], plyt=0.01,
+        ...             laminaprop=(70e9, 0.33), group='plate')
+        >>> p1 = Shell(x0=0., y0=0., **prop)
+        >>> p2 = Shell(x0=0., y0=0.5, **prop)
+        >>> p1.y2u = p1.y2v = p1.y2w = p2.y1u = p2.y1v = p2.y1w = 1.
+        >>> conn = [dict(p1=p1, p2=p2, func='SSycte', ycte1=p1.b, ycte2=0.)]
+        >>> md = MultiDomain([p1, p2], conn)
+        >>> p1.add_point_load(0.5, 0.5, 0., 0., 1000.)
+        >>> c = md.linear_static()
+        >>> ax, data = md.plot(c, group='plate', vec='w', save=False,
+        ...                    colorbar=True)
+        >>> print('%.3f' % (data['vecmax']*1000))
+        1.726
+        >>> ax.figure.savefig(os.path.join(tempfile.mkdtemp(), 'w.png'))
+
         """
         msg('Plotting contour.../../panels/multidomain/connections/penalties.py..', silent=True)
 
@@ -2114,7 +2122,10 @@ class MultiDomain(object):
         Each domain is placed in the global coordinate system by its
         attributes ``x0, y0, z0``, the origin, ``point_x``, a point on its
         `x` axis, and ``point_xy``, a point on its `xy` plane, see
-        :meth:`.Shell.global_frame`. The cylindrical shells are drawn curved,
+        :meth:`.Shell.global_frame`; e.g. the flange of a T-stiffened panel
+        that stands along the global `z` axis above the line `y = y_s` of the
+        skin has ``x0, y0, z0 = 0, ys, 0``, ``point_x = (1, ys, 0)`` and
+        ``point_xy = (0, ys, 1)``. The cylindrical shells are drawn curved,
         see :meth:`.Shell.global_coords`. The domains are drawn deformed by
         the displacements `u`, `v` and `w` times a scale factor, and colored
         by one of the outputs, which is selected in a drop-down menu.
@@ -2187,16 +2198,34 @@ class MultiDomain(object):
             ``fig.show(post_script=data['post_script'])`` or
             ``fig.write_html(filename, post_script=data['post_script'])``.
 
+        See Also
+        --------
+        panels.multidomain.plot3d.plot3d : The function called.
+        plot : Contour plot of a group of coplanar panels.
+
         Examples
         --------
+        The plate of two domains of :meth:`.plot`, with three selectable
+        outputs, saved to a temporary HTML file with the controls of the
+        displacements:
 
-        A T-stiffened panel whose flange stands along the global `z` axis,
-        above the line `y = y_s` of the skin::
-
-            flange.x0, flange.y0, flange.z0 = 0., ys, 0.
-            flange.point_x = (1., ys, 0.)
-            flange.point_xy = (0., ys, 1.)
-            fig, data = md.plot3d(c, filename='tstiff.html')
+        >>> import os, tempfile
+        >>> from panels.shell import Shell
+        >>> from panels.multidomain import MultiDomain
+        >>> prop = dict(a=1., b=0.5, m=8, n=8, stack=[0.], plyt=0.01,
+        ...             laminaprop=(70e9, 0.33), group='plate')
+        >>> p1 = Shell(x0=0., y0=0., **prop)
+        >>> p2 = Shell(x0=0., y0=0.5, **prop)
+        >>> p1.y2u = p1.y2v = p1.y2w = p2.y1u = p2.y1v = p2.y1w = 1.
+        >>> conn = [dict(p1=p1, p2=p2, func='SSycte', ycte1=p1.b, ycte2=0.)]
+        >>> md = MultiDomain([p1, p2], conn)
+        >>> p1.add_point_load(0.5, 0.5, 0., 0., 1000.)
+        >>> c = md.linear_static()
+        >>> fig, data = md.plot3d(c, vec='w', vecs=['w', 'Mxx', 'Myy'])
+        >>> print(data['vecs'])
+        ['w', 'Mxx', 'Myy']
+        >>> fig.write_html(os.path.join(tempfile.mkdtemp(), 'plate.html'),
+        ...                post_script=data['post_script'])
 
         """
         from panels.multidomain.plot3d import plot3d
@@ -2922,8 +2951,7 @@ class MultiDomain(object):
             F = \int_0^b Q_x(x_c, y) \, dy \approx \frac{b}{2} \sum_k w_k
                 Q_x(x_c, y_k)
 
-        as in the line integral of `Q_x` of the cohesive zone page,
-        :ref:`cohesive_zone_load`, and likewise `F = \int_0^a Q_y(x, y_c)
+        and likewise `F = \int_0^a Q_y(x, y_c)
         \, dx` across the line `y = y_c`. For a free edge `y = 0` or `y = b`
         the condition of the classical theory is on the effective shear
         `Q_y + M_{xy,x}`, not on `M_{xy}`: the twisting moment at the ends of
@@ -3173,7 +3201,7 @@ class MultiDomain(object):
         increment. Computed with the full separation, `F` matches the
         reaction of the prescribed displacement,
         :meth:`.reaction_line_pd_xcte`, by equilibrium of the loaded arm, and
-        needs no scaling. See :ref:`cohesive_zone`.
+        needs no scaling.
 
         References
         ----------
@@ -3415,7 +3443,7 @@ class MultiDomain(object):
         kernels of :mod:`panels.multidomain.connections.kCSB_dmg`. The
         matrix is the secant stiffness of the interface, `\boldsymbol{F}^{coh}_{int}
         = \boldsymbol{K}^{conn}_{dmg} \boldsymbol{c}`; its consistent tangent also needs the
-        damage-rate part of :meth:`.calc_kT_TSL`. See :ref:`cohesive_zone`.
+        damage-rate part of :meth:`.calc_kT_TSL`.
 
         References
         ----------
@@ -3486,8 +3514,8 @@ class MultiDomain(object):
                     kt, kr = _penalties(connecti, pA, pB, 'ycte')
 
                     # ftn in panels/panels/multidomain/connections
-                    # Eq 32 MD paper - expanding squares gives i^2, ij, ji and j^2 which form
-                    #       the 11, 12, 21 and 22 terms of the kC_conn matrix
+                    # expanding the square of the penalty energy gives the
+                    # 11, 12, 21 and 22 blocks of kC_conn, see the Notes
                     # adds the penalty stiffness to ycte of panel pA position
                     kC_conn += connections.kCSSycte.fkCSSycte11(
                             kt, kr, pA, connecti['ycte1'],
@@ -3611,8 +3639,7 @@ class MultiDomain(object):
                     #NOTE the tangential separation uses the slope of each
                     #      panel, dt and db are the distances from each
                     #      mid-plane to the interface, see _tsl_operators(),
-                    #      the docstring of kCSB_dmg.pyx and
-                    #      doc/source/cohesive_zone.rst. The kernels and
+                    #      and the docstring of kCSB_dmg.pyx. The kernels and
                     #      the matrix products of _kC_TSL() give the same
                     #      matrix, both require panels of the same
                     #      dimensions, checked by _sb_top_bottom()
@@ -4035,8 +4062,7 @@ class MultiDomain(object):
         ``NLgeom=True`` at ``c``, the operator `\boldsymbol{L}_p` selecting its
         degrees of freedom, and `\boldsymbol{K}_C^{conn}` is the matrix of the
         connections, :meth:`.MultiDomain.get_kC_conn`, constant for the
-        penalty connections, whose energy is quadratic. See
-        :ref:`tangent_clpt_donnell_multidomain`. The secant stiffness of a
+        penalty connections, whose energy is quadratic. The secant stiffness of a
         damaged cohesive connection ``'SB_TSL'`` depends on ``c`` through
         the damage, and where the damage grows the exact Jacobian also
         contains the damage-rate part of :meth:`.calc_kT_TSL`, which is not
@@ -4179,7 +4205,7 @@ class MultiDomain(object):
         `\boldsymbol{L}_p` selects its degrees of freedom, and `\boldsymbol{K}_C^{conn}` is the
         matrix of the connections, :meth:`.get_kC_conn`, the penalty
         connections being linear in ``c``. :meth:`.MultiDomain.calc_kT` is
-        its exact Jacobian, see :ref:`tangent_clpt_donnell_multidomain`. For
+        its exact Jacobian. For
         a cohesive connection ``'SB_TSL'``, `\boldsymbol{K}_C^{conn}` is the secant
         stiffness at ``c``, which depends on ``c`` through the damage, see
         :meth:`.calc_kT_TSL`.
@@ -4410,7 +4436,7 @@ class MultiDomain(object):
         damage variable driven by the normal separation for the three
         components instead of one per mode. The
         stiffness of the interface is `k^w_{CZ} = k_o (1 - d)`, the same for
-        the three components of the traction, see :ref:`cohesive_zone`. It is
+        the three components of the traction. It is
         also used for negative separations: there is no additional stiffness
         against interpenetration, the interpenetration stiffness of Eq. 5.12
         of [1]_ is not implemented, which does not affect a monotonically
@@ -4480,7 +4506,7 @@ class MultiDomain(object):
         The limits of 1.0 terms per decay length `1/\lambda` and 7 points
         per `l_{cz}` are below the rules `m = 1.25 \lambda a` and `n_x = 10
         a/l_{cz}` of :func:`.tsl_discretization`, which the convergence
-        study of the double cantilever beam gave, see :ref:`cohesive_zone`.
+        study of the double cantilever beam gave.
 
         """
         checked = self.__dict__.setdefault('_tsl_resolution_checked', set())
@@ -4542,15 +4568,15 @@ class MultiDomain(object):
             A_i = \arg\max_j \Delta_{i,j}
 
         with `i` the row and `j` the column of the grid of integration
-        points, `j` increasing with `x`. A previous implementation set to
-        zero everything from ``x=0`` up to the *last* non-positive
-        separation of the row, which removed the whole fracture process zone
-        when the approximation functions gave a non-positive value between
-        `A` and the edge of the domain. The negative separations are
+        points, `j` increasing with `x`. Setting to zero everything from
+        ``x=0`` up to the *last* non-positive separation of the row instead
+        would remove the whole fracture process zone whenever the
+        approximation functions give a non-positive value between `A` and
+        the edge of the domain. The negative separations are
         physical: for a beam on an elastic foundation the separation behind
         the crack front oscillates with a decaying amplitude. The tractions,
         the internal force vector and the stiffness matrices use the full
-        separation. See :ref:`cohesive_zone_correction`.
+        separation.
 
         References
         ----------
@@ -4692,8 +4718,7 @@ class MultiDomain(object):
         Unlike the compatibility of the thesis of D'Souza (2024)
         [1]_, Eq. 4.62, which uses the slope of ``p1``
         only, this gives no spurious tangential separation in the fracture
-        process zone, where the two arms rotate in opposite directions. See
-        :ref:`cohesive_zone`. With `z_1 = -d^t` and `z_2 = d^b`, the rows of
+        process zone, where the two arms rotate in opposite directions. With `z_1 = -d^t` and `z_2 = d^b`, the rows of
         the operators are those of the quantities of ``'SB'``, `u_1(z_1) -
         u_2(z_2)`, `v_1(z_1) - v_2(z_2)` and `w_1 - w_2`, see
         :func:`.kCsdt._sb_components`, at the Gauss-Legendre points: a
@@ -4769,7 +4794,7 @@ class MultiDomain(object):
         region, not with the size of the whole interface. The operators
         `\boldsymbol{B}_\alpha` are those of :meth:`._tsl_operators`. The result agrees
         with the kernels of ``kCSB_dmg.pyx`` to a relative `10^{-12}`, see
-        ``tests/multidomain/test_sb_tsl.py``. See :ref:`cohesive_zone`.
+        ``tests/multidomain/test_sb_tsl.py``.
 
         """
         Bu, Bv, Bw, weights, dofs = self._tsl_operators(p_top, p_bot,
@@ -4844,7 +4869,7 @@ class MultiDomain(object):
         \Delta_n` is only non-zero at the points where the damage grows in
         the current state, i.e. where the damage computed from the current
         separation is larger than the damage history and `\Delta_o < \Delta_n <
-        \Delta_f`. The matrix is not symmetric. See :ref:`cohesive_zone`.
+        \Delta_f`. The matrix is not symmetric.
 
         For the bilinear law of :meth:`.calc_k_dmg`, `\tau_\alpha = k_o (1 -
         d) \Delta_\alpha` for `\alpha = u, v, w`, with the damage `d =
@@ -4992,8 +5017,7 @@ class MultiDomain(object):
         the force of the penalty spring between the structure and the
         support, which is the load measured by the load cell. It is exact for
         any state of damage of the structure, and it is used for the
-        load-displacement curves of the cohesive zone model, see
-        :ref:`cohesive_zone_load`.
+        load-displacement curves of the cohesive zone model.
 
         """
         if nr_y_gauss is None:
@@ -5071,7 +5095,7 @@ class MultiDomain(object):
         increment is consistent because `d^h` is only updated with converged
         states, and every converged sub-increment of a bisected increment
         updates it, so that the irreversible law follows the finer loading
-        path. See :ref:`cohesive_zone`.
+        path.
 
         """
         self.dmg_index = curr_max_dmg_index

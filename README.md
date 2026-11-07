@@ -129,9 +129,9 @@ s.save()              # writes plate.shell.zip
 s2 = load('plate')
 ```
 
-The pickle files saved by older versions are no longer loaded, since a pickle
-file can execute arbitrary code; one from a trusted source can be converted
-by loading it with `pickle.load()` and saving the object again.
+Pickle files are not loaded, since a pickle file can execute arbitrary code;
+one from a trusted source can be converted by loading it with `pickle.load()`
+and saving the object again.
 
 
 History
@@ -199,7 +199,7 @@ See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
     - The kernels `fkCSB11_dmg`, `fkCSB12_dmg` and `fkCSB22_dmg` take the
       distances `dt` and `db` from each mid-surface to the interface
     - Validation of the cohesive zone against mode I DCB results in the
-      literature, in `notebooks/`, with a convergence study
+      literature, in notebooks, with a convergence study
     - Fixed `StiffPanelBay.save()` with `composites>=0.9.0`
 * version 0.6.21 (2026-09-18)
     - Fixed the mass of the base of `BladeStiff2D`, which was missing, and the
@@ -227,7 +227,7 @@ See [CHANGELOG.md](CHANGELOG.md) for the details of each version.
       `c_cte` no longer reaches the nogil kernels, and a model that needs a
       radius raises instead of computing with `r = 0`
     - Reproduction of Stamatelos and Labeas (Computation 2023, 11, 110) in
-      `notebooks/stamatelos_labeas_2023.ipynb`
+      a notebook
     - Tangent stiffness matrix that is the exact derivative of the internal
       force vector, giving quadratic convergence to the Newton-Raphson method
     - `Shell` and `MultiDomain` can be passed directly to

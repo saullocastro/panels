@@ -7,11 +7,9 @@ The model ``'plate_clpt_gl'`` is the classical laminated plate theory (CLPT)
 of ``'plate_clpt_donnell'`` with the complete Green-Lagrange membrane
 strains of the mid-surface, instead of the von Kármán strains. It is meant
 for assemblies of plates, e.g. a wing box with :class:`.MultiDomain`, that
-undergo large rigid rotations while their strains stay small. The derivation,
-with SymPy, is in ``theory/shells/plate_clpt_gl/plate_clpt_gl.py``, with the
-note ``plate_clpt_gl.md``, and ``write_pyx.py`` generates the kernels
+undergo large rigid rotations while their strains stay small. The kernels
 :mod:`panels.models.plate_clpt_gl` and :mod:`panels.models.plate_clpt_gl_num`
-from it.
+are generated from a symbolic derivation with SymPy of the strains below.
 
 
 Why the von Kármán strains fail in an assembly
@@ -132,73 +130,12 @@ Limitations
   Green-Lagrange strains.
 
 
-Example: wing box under a follower tip force
----------------------------------------------
+Accuracy for box beams
+----------------------
 
-The High-AR-t5 wing box of Elalfy, De Breuker and Castro
-[elalfyWingboxPreprint]_, half-span 1010.0 mm, chord 50.5 mm, height
-12.12 mm, 9 bays, skins of 1.0 mm and spars of 5.0 mm, aluminium, clamped at
-the root, is modelled with 45 ``'plate_clpt_gl'`` domains (6264 degrees of
-freedom) connected with penalties, and loaded at the tip by a follower
-pressure on the upper skin (``follower='quadratic'``), incremented by 25 N
-with the Newton-Raphson method of ``structsolve``, without imperfection,
-``tests/multidomain/test_wingbox_plate_clpt_gl.py``. The Abaqus values are
-the upper panel of their Fig. 6 (p. 10), read from the vector paths of the
-figure (about 1 mm):
-
-.. list-table:: Tip z-displacement (mm)
-    :header-rows: 1
-
-    * - tip force (N)
-      - 25
-      - 100
-      - 200
-      - 300
-      - 400
-      - 500
-    * - Abaqus, Fig. 6
-      - 23.3
-      - 93.2
-      - 189.6
-      - 298.9
-      - 410.0
-      - 515.5
-    * - ``'plate_clpt_gl'``
-      - 22.68
-      - 90.84
-      - 184.37
-      - 287.24
-      - 393.59
-      - 499.83
-    * - ``'plate_clpt_donnell'``
-      - 13.9
-      -
-      -
-      -
-      -
-      - 54.7
-    * - linear
-      - 22.68
-      - 90.70
-      - 181.41
-      - 272.11
-      - 362.82
-      - 453.52
-
-The Green-Lagrange model is 2.5 to 4.0 % below Abaqus over the whole range,
-most of which is the 2.7 % of the linear range, where the panels model,
-whose domains are at the mid-surfaces and connected with penalties, is
-stiffer than the S4R shell model of Abaqus. Above the first buckling load,
-173.11 N in Abaqus (their Table 3, p. 8), the top skin buckles between the
-ribs, here without imperfection, deflecting in alternate directions from bay
-to bay (2.4 mm in the second bay at 500 N), and both skins sag towards the
-mid-plane, the bottom one by 1.4 mm in the root bay at 500 N, 11 % of the
-height: as in Abaqus, the box is softer at 500 N than the linear beam, and
-much softer than the elastica of the same bending stiffness, 423.0 mm with
-the follower force, which only accounts for the large rotations. One
-Newton-Raphson analysis of the 20 increments takes about 2 min on one core.
-
-Under a dead tip force, ``follower=False``, the same model deflects 22.66,
-90.23, 179.69, 270.70, 354.57 and 428.30 mm at 25, 100, 200, 300, 400 and
-500 N, against 23.0, 92.4, 184.8, 281.1, 369.0 and 443.8 mm of Abaqus in
-their Fig. 5 (p. 10), read in the same way, 1.5 to 3.9 % below.
+For a box beam whose global bending is carried by the membrane strains of
+the skins and the in-plane bending of the spars, the model follows the
+large rotations of the beam. For the High-AR-t5 wing box of Elalfy, De
+Breuker and Castro [elalfyWingboxPreprint]_ under a follower tip force,
+modelled with 45 connected domains, the tip deflection is within 4 % of
+their Abaqus shell model up to well beyond the buckling of the top skin.

@@ -58,11 +58,19 @@ def tstiff2d_1stiff_freq(a, b, ys, bb, bf, defect_a, rho, plyt, laminaprop,
     :func:`.tstiff2d_1stiff_compression`: the middle row of domains has the
     length ``defect_a*a`` of the defect, or ``0.33*a`` when ``defect_a =
     0``, and its base is not connected to the skin when ``defect_a > 0``.
-    The reduced constitutive stiffness matrix, :meth:`.MultiDomain.calc_kC`
+    The boundary conditions are those of the vibration analysis of Castro
+    and Donadon (2017), Fig. 8, p. 236: `u = v = w = 0` at the four edges
+    of the skin, `x = 0`, `x = a`, `y = 0` and `y = b`, and at both ends of
+    the flange, `x = 0` and `x = a`; the edges of the base are free, the
+    base being held by its connections to the skin and to the flange, and
+    the rotations are free at every edge. The reduced constitutive stiffness matrix, :meth:`.MultiDomain.calc_kC`
     with the connections, and the reduced mass matrix,
     :meth:`.MultiDomain.calc_kM`, are passed to ``structsolve.freq`` with
     ``tol=0`` and ``sparse_solver=True``, and the eigenvectors are expanded
     with :meth:`.MultiDomain.expand`.
+
+    The domains of the flange use the model ``'plate_clpt_gl'``, the
+    others the default model of :class:`.Shell` (see Notes).
 
     Parameters
     ----------
@@ -133,7 +141,18 @@ def tstiff2d_1stiff_freq(a, b, ys, bb, bf, defect_a, rho, plyt, laminaprop,
     modelled by removing the connection ``'SB'`` between the skin and the
     base over the middle row of domains, which are then two independent
     plates connected only at the ends of the defect, without any contact
-    between them.
+    between them. The boundary conditions are those of Fig. 8 and
+    Section 4 of [1]_, p. 236, with which the first natural frequencies of
+    their Table 5 were computed; the compression analysis,
+    :func:`.tstiff2d_1stiff_compression` with ``run_static_case=True``,
+    leaves `u` free at the edges
+    `x = 0`, `y = 0` and `y = b` of the skin and at the end `x = 0` of the
+    flange, Fig. 7 of [1]_.
+
+    The flange uses ``'plate_clpt_gl'`` as in
+    :func:`.tstiff2d_1stiff_compression`, where its geometric stiffness
+    matters; the constitutive stiffness and the mass matrices, the only
+    ones of this analysis, are those of ``'plate_clpt_donnell'``.
 
     References
     ----------
@@ -145,10 +164,18 @@ def tstiff2d_1stiff_freq(a, b, ys, bb, bf, defect_a, rho, plyt, laminaprop,
     Examples
     --------
 
-    The following example is one of the test cases:
+    First natural frequency, in rad/s, of a T-stiffened panel with a
+    debonding defect over 10 % of its length:
 
-    .. literalinclude:: ../../tests/multidomain/test_tstiff2d_assembly.py
-        :pyobject: test_tstiff2d_1stiff_freq
+    >>> from panels.multidomain import tstiff2d_1stiff_freq
+    >>> laminaprop = (142.5e9, 8.7e9, 0.28, 5.1e9, 5.1e9, 5.1e9)
+    >>> md, eigvals, eigvecs = tstiff2d_1stiff_freq(a=3., b=1.,
+    ...     ys=0.5, bb=0.2, bf=0.1, defect_a=0.1, rho=1.3e3, plyt=0.125e-3,
+    ...     laminaprop=laminaprop, stack_skin=[0, 45, -45, 90, -45, 45, 0],
+    ...     stack_base=[0, 90, 0]*4, stack_flange=[0, 90, 0]*8,
+    ...     m=6, n=7, mb=5, nb=6, mf=6, nf=7, num_eigvalues=5)
+    >>> round(float((-eigvals[0].real)**0.5), 2)
+    48.56
 
     """
     defect = defect_a * a
@@ -177,19 +204,19 @@ def tstiff2d_1stiff_freq(a, b, ys, bb, bf, defect_a, rho, plyt, laminaprop,
 
     # stiffeners
     p10 = Shell(group='base', x0=alow+defect, y0=ys-bb/2., a=aup, b=bb, r=r, m=mb, n=nb, plyt=plyt, stack=stack_base, laminaprop=laminaprop, rho=rho)
-    p11 = Shell(group='flange', x0=alow+defect, y0=0, a=aup, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, rho=rho)
+    p11 = Shell(group='flange', model='plate_clpt_gl', x0=alow+defect, y0=0, a=aup, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, rho=rho)
     # defect
     p12 = Shell(group='base', x0=alow, y0=ys-bb/2., a=defect, b=bb, r=r, m=mb, n=nb, plyt=plyt, stack=stack_base, laminaprop=laminaprop, rho=rho)
-    p13 = Shell(group='flange', x0=alow, y0=0, a=defect, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, rho=rho)
+    p13 = Shell(group='flange', model='plate_clpt_gl', x0=alow, y0=0, a=defect, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, rho=rho)
     #
     p14 = Shell(group='base', x0=0, y0=ys-bb/2., a=alow, b=bb, r=r, m=mb, n=nb, plyt=plyt, stack=stack_base, laminaprop=laminaprop, rho=rho)
-    p15 = Shell(group='flange', x0=0, y0=0, a=alow, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, rho=rho)
+    p15 = Shell(group='flange', model='plate_clpt_gl', x0=0, y0=0, a=alow, b=bf, m=mf, n=nf, plyt=plyt, stack=stack_flange, laminaprop=laminaprop, rho=rho)
 
     # boundary conditions
     p01.x1u = 1 ; p01.x1ur = 1 ; p01.x2u = 0 ; p01.x2ur = 1
     p01.x1v = 1 ; p01.x1vr = 1 ; p01.x2v = 0 ; p01.x2vr = 1
     p01.x1w = 1 ; p01.x1wr = 1 ; p01.x2w = 0 ; p01.x2wr = 1
-    p01.y1u = 1 ; p01.y1ur = 1 ; p01.y2u = 1 ; p01.y2ur = 1
+    p01.y1u = 1 ; p01.y1ur = 1 ; p01.y2u = 0 ; p01.y2ur = 1
     p01.y1v = 1 ; p01.y1vr = 1 ; p01.y2v = 0 ; p01.y2vr = 1
     p01.y1w = 1 ; p01.y1wr = 1 ; p01.y2w = 0 ; p01.y2wr = 1
 
@@ -203,14 +230,14 @@ def tstiff2d_1stiff_freq(a, b, ys, bb, bf, defect_a, rho, plyt, laminaprop,
     p03.x1u = 1 ; p03.x1ur = 1 ; p03.x2u = 0 ; p03.x2ur = 1
     p03.x1v = 1 ; p03.x1vr = 1 ; p03.x2v = 0 ; p03.x2vr = 1
     p03.x1w = 1 ; p03.x1wr = 1 ; p03.x2w = 0 ; p03.x2wr = 1
-    p03.y1u = 1 ; p03.y1ur = 1 ; p03.y2u = 1 ; p03.y2ur = 1
+    p03.y1u = 0 ; p03.y1ur = 1 ; p03.y2u = 1 ; p03.y2ur = 1
     p03.y1v = 0 ; p03.y1vr = 1 ; p03.y2v = 1 ; p03.y2vr = 1
     p03.y1w = 0 ; p03.y1wr = 1 ; p03.y2w = 1 ; p03.y2wr = 1
 
     p04.x1u = 1 ; p04.x1ur = 1 ; p04.x2u = 1 ; p04.x2ur = 1
     p04.x1v = 1 ; p04.x1vr = 1 ; p04.x2v = 1 ; p04.x2vr = 1
     p04.x1w = 1 ; p04.x1wr = 1 ; p04.x2w = 1 ; p04.x2wr = 1
-    p04.y1u = 1 ; p04.y1ur = 1 ; p04.y2u = 1 ; p04.y2ur = 1
+    p04.y1u = 1 ; p04.y1ur = 1 ; p04.y2u = 0 ; p04.y2ur = 1
     p04.y1v = 1 ; p04.y1vr = 1 ; p04.y2v = 0 ; p04.y2vr = 1
     p04.y1w = 1 ; p04.y1wr = 1 ; p04.y2w = 0 ; p04.y2wr = 1
 
@@ -224,28 +251,28 @@ def tstiff2d_1stiff_freq(a, b, ys, bb, bf, defect_a, rho, plyt, laminaprop,
     p06.x1u = 1 ; p06.x1ur = 1 ; p06.x2u = 1 ; p06.x2ur = 1
     p06.x1v = 1 ; p06.x1vr = 1 ; p06.x2v = 1 ; p06.x2vr = 1
     p06.x1w = 1 ; p06.x1wr = 1 ; p06.x2w = 1 ; p06.x2wr = 1
-    p06.y1u = 1 ; p06.y1ur = 1 ; p06.y2u = 1 ; p06.y2ur = 1
+    p06.y1u = 0 ; p06.y1ur = 1 ; p06.y2u = 1 ; p06.y2ur = 1
     p06.y1v = 0 ; p06.y1vr = 1 ; p06.y2v = 1 ; p06.y2vr = 1
     p06.y1w = 0 ; p06.y1wr = 1 ; p06.y2w = 1 ; p06.y2wr = 1
 
-    p07.x1u = 1 ; p07.x1ur = 1 ; p07.x2u = 1 ; p07.x2ur = 1
+    p07.x1u = 0 ; p07.x1ur = 1 ; p07.x2u = 1 ; p07.x2ur = 1
     p07.x1v = 0 ; p07.x1vr = 1 ; p07.x2v = 1 ; p07.x2vr = 1
     p07.x1w = 0 ; p07.x1wr = 1 ; p07.x2w = 1 ; p07.x2wr = 1
-    p07.y1u = 1 ; p07.y1ur = 1 ; p07.y2u = 1 ; p07.y2ur = 1
+    p07.y1u = 1 ; p07.y1ur = 1 ; p07.y2u = 0 ; p07.y2ur = 1
     p07.y1v = 1 ; p07.y1vr = 1 ; p07.y2v = 0 ; p07.y2vr = 1
     p07.y1w = 1 ; p07.y1wr = 1 ; p07.y2w = 0 ; p07.y2wr = 1
 
-    p08.x1u = 1 ; p08.x1ur = 1 ; p08.x2u = 1 ; p08.x2ur = 1
+    p08.x1u = 0 ; p08.x1ur = 1 ; p08.x2u = 1 ; p08.x2ur = 1
     p08.x1v = 0 ; p08.x1vr = 1 ; p08.x2v = 1 ; p08.x2vr = 1
     p08.x1w = 0 ; p08.x1wr = 1 ; p08.x2w = 1 ; p08.x2wr = 1
     p08.y1u = 1 ; p08.y1ur = 1 ; p08.y2u = 1 ; p08.y2ur = 1
     p08.y1v = 1 ; p08.y1vr = 1 ; p08.y2v = 1 ; p08.y2vr = 1
     p08.y1w = 1 ; p08.y1wr = 1 ; p08.y2w = 1 ; p08.y2wr = 1
 
-    p09.x1u = 1 ; p09.x1ur = 1 ; p09.x2u = 1 ; p09.x2ur = 1
+    p09.x1u = 0 ; p09.x1ur = 1 ; p09.x2u = 1 ; p09.x2ur = 1
     p09.x1v = 0 ; p09.x1vr = 1 ; p09.x2v = 1 ; p09.x2vr = 1
     p09.x1w = 0 ; p09.x1wr = 1 ; p09.x2w = 1 ; p09.x2wr = 1
-    p09.y1u = 1 ; p09.y1ur = 1 ; p09.y2u = 1 ; p09.y2ur = 1
+    p09.y1u = 0 ; p09.y1ur = 1 ; p09.y2u = 1 ; p09.y2ur = 1
     p09.y1v = 0 ; p09.y1vr = 1 ; p09.y2v = 1 ; p09.y2vr = 1
     p09.y1w = 0 ; p09.y1wr = 1 ; p09.y2w = 1 ; p09.y2wr = 1
 
@@ -290,7 +317,7 @@ def tstiff2d_1stiff_freq(a, b, ys, bb, bf, defect_a, rho, plyt, laminaprop,
     p14.y1w = 1 ; p14.y1wr = 1 ; p14.y2w = 1 ; p14.y2wr = 1
 
     # flange low
-    p15.x1u = 1 ; p15.x1ur = 1 ; p15.x2u = 1 ; p15.x2ur = 1
+    p15.x1u = 0 ; p15.x1ur = 1 ; p15.x2u = 1 ; p15.x2ur = 1
     p15.x1v = 0 ; p15.x1vr = 1 ; p15.x2v = 1 ; p15.x2vr = 1
     p15.x1w = 0 ; p15.x1wr = 1 ; p15.x2w = 1 ; p15.x2wr = 1
     p15.y1u = 1 ; p15.y1ur = 1 ; p15.y2u = 1 ; p15.y2ur = 1

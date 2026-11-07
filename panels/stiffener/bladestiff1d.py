@@ -178,6 +178,28 @@ class BladeStiff1D(object):
        stiffener's base as a structural element, Composite Structures, 2016.
        https://doi.org/10.1016/j.compstruct.2015.12.056
 
+    Examples
+    --------
+    A blade stiffener is created by :meth:`.StiffPanelBay.add_bladestiff1d`
+    between two panels of a bay; it adds no degrees of freedom:
+
+    >>> from panels.stiffpanelbay import StiffPanelBay
+    >>> laminaprop = (142.5e9, 8.7e9, 0.28, 5.1e9, 5.1e9, 5.1e9)
+    >>> bay = StiffPanelBay()
+    >>> bay.a, bay.b, bay.r = 0.4, 0.3, None
+    >>> bay.stack = [0, 90, 90, 0]
+    >>> bay.plyt, bay.laminaprop = 0.125e-3, laminaprop
+    >>> bay.m, bay.n, bay.rho = 8, 8, 1600.
+    >>> bay.model = 'plate_clpt_donnell'
+    >>> p1 = bay.add_panel(y1=0., y2=0.15, Nxx=-1.)
+    >>> p2 = bay.add_panel(y1=0.15, y2=0.3, Nxx=-1.)
+    >>> s = bay.add_bladestiff1d(ys=0.15, bf=0.02, fstack=[0, 90, 90, 0],
+    ...                          fplyt=0.125e-3, flaminaprop=laminaprop)
+    >>> print(type(s).__name__, s.model, bay.get_size())
+    BladeStiff1D bladestiff1d_clt_donnell 192
+    >>> print('%.3e %.3e' % (s.Asf, s.Iyy))
+    1.000e-05 3.333e-10
+
     """
     def __init__(self, bay, rho, panel1, panel2, ys, bb, bf, bstack, bplyts,
             blaminaprops, fstack, fplyts, flaminaprops):

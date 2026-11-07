@@ -10,11 +10,9 @@ local frame. All its strains are then invariant under any rigid rotation of
 any deformed state: a bending deformation carried through a large rotation,
 e.g. a local buckle of a skin of a wing box bent by a large rotation, keeps
 its bending energy, which ``'plate_clpt_gl'`` multiplies by `\cos^2\theta`.
-The derivation, with SymPy, is in
-``theory/shells/plate_clpt_tl/plate_clpt_tl.py``, with the note
-``plate_clpt_tl.md``, and ``write_pyx.py`` generates
-:mod:`panels.models.plate_clpt_tl_num` with the helpers of the generator of
-``'plate_clpt_gl'``.
+The kernels :mod:`panels.models.plate_clpt_tl_num` are generated from a
+symbolic derivation with SymPy of the strains below, with the helpers of
+the generator of ``'plate_clpt_gl'``.
 
 .. note::
 
@@ -35,9 +33,9 @@ The derivation, with SymPy, is in
             p.ny = gauss_points(p.n)
 
     With them, the internal forces of a plate with displacement gradients of
-    order 0.5 differ by 3e-13, and the tip deflections of the wing box under
-    a follower tip force by less than 0.01 mm up to 500 N, in 138 s against
-    288 s, see `Wing box under a follower tip force`_. Assigning ``None`` to
+    order 0.5 differ by 3e-13, and the tip deflections of the wing box of
+    :ref:`plate_clpt_gl` under a follower tip force by less than 0.01 mm up
+    to 500 N. Assigning ``None`` to
     ``nx`` and ``ny`` restores the exact default.
 
 
@@ -159,163 +157,26 @@ Verification
   membrane strain.
 
 
-Cantilever strip rolled into a circle by an end moment
-------------------------------------------------------
+Accuracy for large rotations
+----------------------------
 
-Benchmark 3.2 of [sze2004Benchmarks]_ (Fig. 3a, p. 1556): a strip clamped
-at one end, `L = 12`, `b = 1`, `h = 0.1`, `E = 1.2 \times 10^6`, `\nu =
-0`, under an end moment `M` up to `M_{max} = 2 \pi M_o`, `M_o = EI/L =
-25/3`, which rolls it into a full circle. The exact solution of the
-inextensible beam (p. 1555) is the arc of curvature `M/EI`, with the tip at
+Benchmark 3.2 of [sze2004Benchmarks]_, a cantilever strip rolled into a
+full circle by an end moment, has the exact solution of the inextensible
+beam, an arc of curvature `M/EI`. ``'plate_clpt_tl'`` rolls the strip into
+the circle within about `2 \times 10^{-3} L` of that solution; the
+difference is that of the model, not of the Ritz approximation: with the
+curvature measured by the area vector, `\kappa_{xx} = \lambda^2 \mu\,
+\theta_{,x}` for the stretches `\lambda` and `\mu` along `x` and `y`, the
+bending moment shortens the strip by terms of order `(\kappa h)^2`. The
+angle `2 \pi` of the full circle requires polynomials of degree 11 or more
+along the strip. ``'plate_clpt_gl'``, whose curvatures are measured in the
+fixed frame, is too flexible from tip rotations of about 0.3 rad, and
+``'plate_clpt_donnell'``, whose membrane strains are linear in `u`, never
+rolls the strip.
 
-.. math::
-
-    \frac{U}{L} = \frac{\sin\theta}{\theta} - 1, \qquad
-    \frac{W}{L} = \frac{1 - \cos\theta}{\theta}, \qquad
-    \theta = \frac{M L}{E I} = 2 \pi \frac{M}{M_{max}}
-
-tabulated as "Exact" in Table 3a (p. 1557). panels has no applied moments;
-``tests/tests_shell/test_plate_clpt_tl_end_moment.py`` applies the moment
-as a conservative load of potential `-M/b \int_0^b \theta(L, y)\, dy`,
-`\theta = \operatorname{atan2}(w_{,x}, 1 + u_{,x})`, with its
-configuration-dependent load vector and load stiffness passed to
-``structsolve.Analysis`` through ``calc_fext(c=c)``, ``calc_fint(c, inc)``
-and ``calc_kC(c, inc)``. With ``m = 12``, ``n = 4`` and 20 Newton-Raphson
-increments of `0.05 M_{max}` (4 s), the tip displacements, averaged over
-the width, are:
-
-.. list-table::
-    :header-rows: 1
-
-    * - `M/M_{max}`
-      - 0.05
-      - 0.25
-      - 0.5
-      - 0.75
-      - 1
-    * - `-U`, exact, Table 3a
-      - 0.196
-      - 4.361
-      - 12.000
-      - 14.546
-      - 12.000
-    * - `-U`, ``'plate_clpt_tl'``
-      - 0.1964
-      - 4.3619
-      - 12.0068
-      - 14.5425
-      - 11.9725
-    * - `-U`, ``'plate_clpt_gl'``
-      - 0.2260
-      - stops
-      - --
-      - --
-      - --
-    * - `-U`, ``'plate_clpt_donnell'``
-      - 0.2183
-      - 4.4238
-      - 7.6697
-      - 10.1090
-      - 12.1940
-    * - `W`, exact, Table 3a
-      - 1.870
-      - 7.639
-      - 7.639
-      - 2.546
-      - 0.000
-    * - `W`, ``'plate_clpt_tl'``
-      - 1.8695
-      - 7.6398
-      - 7.6342
-      - 2.5272
-      - 0.0002
-    * - `W`, ``'plate_clpt_gl'``
-      - 1.9994
-      - stops
-      - --
-      - --
-      - --
-    * - `W`, ``'plate_clpt_donnell'``
-      - 1.9821
-      - 8.9234
-      - 11.7495
-      - 13.4893
-      - 14.8152
-
-``'plate_clpt_tl'`` rolls the strip into the circle, within 2.3e-3 `L` of
-the exact solution (0.03 at the full circle). The difference is that of
-the model, not of the Ritz approximation: the curvature measured with the
-area vector, `\kappa_{xx} = \lambda^2 \mu\, \theta_{,x}` for the
-stretches `\lambda` and `\mu` along `x` and `y`, makes the bending moment
-shorten the strip and its width by `(\kappa h)^2/6` and `(\kappa h)^2/12`,
-and the curvature larger than `M/EI` by about `5 (\kappa h)^2/6`, 0.23 %
-at the full circle (`\kappa h = 0.052`). The uniform cylindrical solution
-of these equations, computed in the test, is reproduced to 4e-6 `L`; the
-largest difference with it over the five loads converges with the number
-of terms `m` along the length as 2.3e-2 `L` (`m = 8`), 2.8e-4 `L` (10),
-3.9e-6 `L` (12) and 3.7e-6 `L` (14 and 16), the angle `2 \pi` of the
-full circle requiring polynomials of degree 11 or more.
-``'plate_clpt_gl'``, whose curvatures `-w_{,xx}` are measured in the fixed
-frame, is 7 % more flexible in `W` already at `0.05 M_{max}` (a tip
-rotation of 0.31 rad), and its Newton-Raphson analysis stops at `0.079
-M_{max}` (0.50 rad, `W = 4.19` against 2.93); ``'plate_clpt_donnell'``,
-whose membrane strains are linear in `u`, never rolls the strip: `W` keeps
-increasing, to 14.8 at `M_{max}`.
-
-
-Wing box under a follower tip force
------------------------------------
-
-The High-AR-t5 wing box of :ref:`plate_clpt_gl`, with the same 45 domains
-(6264 degrees of freedom) and 20 Newton-Raphson increments, deflects at the
-tip (mm):
-
-.. list-table::
-    :header-rows: 1
-
-    * - tip force (N)
-      - 25
-      - 100
-      - 200
-      - 300
-      - 400
-      - 500
-    * - Abaqus, Fig. 6 [elalfyWingboxPreprint]_
-      - 23.3
-      - 93.2
-      - 189.6
-      - 298.9
-      - 410.0
-      - 515.5
-    * - ``'plate_clpt_tl'``
-      - 22.68
-      - 90.84
-      - 184.32
-      - 286.16
-      - 388.84
-      - 488.73
-    * - ``'plate_clpt_gl'``
-      - 22.68
-      - 90.84
-      - 184.37
-      - 287.24
-      - 393.59
-      - 499.83
-
-The two models agree to 0.03 % up to 200 N, below the first buckling load,
-where the box bends through the membrane strains of the skins and the
-in-plane bending of the spars. Above it, ``'plate_clpt_tl'`` is up to
-2.2 % stiffer, 5.2 % below Abaqus at 500 N against 3.0 %, which is
-consistent with the buckles of the top skin, rotated with the box, keeping
-their bending energy instead of losing the factor `\cos^2\theta`. The
-remaining difference with Abaqus includes the 2.7 % of the linear range
-(mid-surface domains, penalty connections), the perfect geometry and the
-rotation continuity of the connections, linear in the displacements of the
-fixed frames, which is exact only for small rotations of the joints.
-
-One analysis takes about twice as long as with ``'plate_clpt_gl'`` (288 s
-against 146 s on one core of a shared machine), from the 21 x 21
-integration points of the skins instead of 15 x 15. With the integration
-points of ``'plate_clpt_gl'``, setting ``nx = gauss_points(m)`` and ``ny =
-gauss_points(n)`` on every domain, the tip deflections are the same to
-0.01 mm at every load, in 138 s.
+In the wing box of :ref:`plate_clpt_gl`, below the buckling of the top skin,
+the box bends through the membrane strains of the skins and the in-plane
+bending of the spars, and ``'plate_clpt_tl'`` and ``'plate_clpt_gl'`` agree;
+above it, ``'plate_clpt_tl'`` is a few per cent stiffer, since the buckles
+of the top skin, rotated with the box, keep their bending energy instead of
+losing the factor `\cos^2\theta`.

@@ -1,4 +1,5 @@
 r"""
+==========================================================================
 Saving and loading in a JSON + NumPy zip container (:mod:`panels.json_io`)
 ==========================================================================
 
@@ -8,8 +9,7 @@ The objects :class:`.Shell`, :class:`.StiffPanelBay`, with its stiffeners
 :class:`.BladeStiff1D` and :class:`.BladeStiff2D`, and :class:`.MultiDomain`
 are saved to and loaded from a zip file with::
 
-    from panels import Shell
-    from panels.shell import load
+    from panels.shell import Shell, load
 
     s = Shell(a=1., b=0.5, stack=[0, 90, 90, 0], plyt=1e-3,
               laminaprop=(71e9, 0.33), m=8, n=8)
@@ -69,9 +69,9 @@ after checking that their uncompressed sizes do not exceed ``max_size`` in
 total, and unknown keys, missing or extra members and newer format versions
 raise ``ValueError``.
 
-The pickle files written by older versions of panels are not loaded, since a
-pickle file can execute arbitrary code. One from a trusted source can be
-converted by loading it with :func:`pickle.load` and saving the object again.
+Pickle files are not loaded, since a pickle file can execute arbitrary code.
+One from a trusted source can be converted by loading it with
+:func:`pickle.load` and saving the object again.
 
 """
 import io
@@ -126,9 +126,8 @@ _SHELL_ATTRS = (
     'num_eigvalues', 'num_eigvalues_print',
     'increments', 'results', 'fields', 'plot_mesh',
     )
-#NOTE saved by panels < 0.13.9, when Shell.ABD was an attribute; it is now
-#     calculated from Shell.lam, so it is read, for the checks of the arrays,
-#     and discarded
+#NOTE in the files of panels < 0.13.9; Shell.ABD is calculated from
+#     Shell.lam, so it is read, for the checks of the arrays, and discarded
 _SHELL_LEGACY_ATTRS = ('ABD', )
 _STIFFPANELBAY_ATTRS = (
     'name', 'forces_skin', 'flow', 'bc', 'model',
@@ -144,8 +143,8 @@ _BLADESTIFF1D_ATTRS = (
     'As', 'Asb', 'Asf', 'Jxx', 'Iyy', 'Fx', 'dbf', 'E1', 'S1', 'F1', 'GJ',
     )
 _BLADESTIFF2D_ATTRS = (
-    'rho', 'ys', 'bb', 'forces_flange', 'bstack', 'bplyts', 'blaminaprops',
-    'dpb',
+    'model', 'rho', 'ys', 'bb', 'forces_flange', 'bstack', 'bplyts',
+    'blaminaprops', 'dpb',
     )
 _MULTIDOMAIN_ATTRS = ('name', 'conn_method', 'pd_method', 'size', 'dmg_index',
                       'fint', 'fext')
@@ -355,7 +354,7 @@ def _shell_to_data(s, path, w):
     data['lam'] = _encode_lam(s.lam, path + '.lam')
     # NOTE the per-ply lists filled by Shell._rebuild(), not by the user,
     #      and the numbers of integration points nx and ny that follow m and
-    #      n, saved with their current value, which older versions read
+    #      n, saved with their current value
     data['derived_lists'] = [name for name in ('plyts', 'laminaprops', 'rhos')
                              if getattr(s, name) and s._is_derived(name)]
     data['derived_lists'] += [name for name in ('nx', 'ny')
@@ -449,6 +448,8 @@ def _bladestiff2d_from_data(data, bay, r):
     s.kC = s.kM = s.kG = None
     s.base = s.flange = None
     s.forces_flange = []
+    #NOTE without the key 'model' the model is selected from the skin
+    s.model = None
     _decode_attrs(s, data, _BLADESTIFF2D_ATTRS, r)
     for name in ('base', 'flange'):
         if data.get(name) is not None:
@@ -573,8 +574,8 @@ def _multidomain_from_data(data, r):
                      pd_method=pd_method)
     _decode_attrs(md, data, _MULTIDOMAIN_ATTRS, r)
     md._conn_used = _conn_from_data(data.get('conn_used'), panels, r)
-    # NOTE 'T_tol' is the key of the files written by panels 0.13.11, before
-    #      the null-space basis was renamed Z
+    # NOTE 'T_tol' is the key of the tolerance of the null-space basis Z in
+    #      the files written by panels 0.13.11
     for key in ('Z_tol', 'T_tol'):
         if key in data:
             md._Z_tol = _decode(data[key], r)
@@ -630,6 +631,22 @@ def save(obj, fname):
     TypeError
         If ``obj`` is not one of the supported classes, or if one of its
         stored attributes has a value that cannot be saved, e.g. a function.
+
+    Examples
+    --------
+    Saving a :class:`.Shell` in memory and loading it back with
+    :func:`.load`:
+
+    >>> import io
+    >>> from panels.shell import Shell
+    >>> from panels import json_io
+    >>> s = Shell(a=1., b=0.5, stack=[0, 90, 90, 0], plyt=1e-3,
+    ...           laminaprop=(71e9, 0.33), m=8, n=8)
+    >>> buf = io.BytesIO()
+    >>> json_io.save(s, buf)
+    >>> s2 = json_io.load(buf)
+    >>> print(type(s2).__name__, s2.a, s2.b, s2.stack)
+    Shell 1.0 0.5 [0, 90, 90, 0]
 
     """
     for typename, cls, encode, _ in _classes():
@@ -749,10 +766,26 @@ def load(fname, max_size=MAX_SIZE):
     Raises
     ------
     ValueError
-        If the file is not a zip file saved by panels, e.g. a pickle file of
-        an older version, is not valid, has unknown keys, missing or extra
+        If the file is not a zip file saved by panels, e.g. a pickle file,
+        is not valid, has unknown keys, missing or extra
         members, exceeds ``max_size``, or was saved by a newer format
         version.
+
+    Examples
+    --------
+    Loading a :class:`.Shell` saved with :func:`.save` to a file; the type is
+    the one stored in the file:
+
+    >>> import os, tempfile
+    >>> from panels.shell import Shell
+    >>> from panels import json_io
+    >>> s = Shell(a=1., b=0.5, stack=[0, 90, 90, 0], plyt=1e-3,
+    ...           laminaprop=(71e9, 0.33), m=8, n=8)
+    >>> fname = os.path.join(tempfile.mkdtemp(), 'plate.shell.zip')
+    >>> json_io.save(s, fname)
+    >>> s2 = json_io.load(fname)
+    >>> print(type(s2).__name__, s2.model, s2.get_size())
+    Shell plate_clpt_donnell 192
 
     """
     return _load(fname, max_size=max_size)[1]

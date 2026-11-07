@@ -1,3 +1,9 @@
+"""Linear buckling of a stiffened panel bay
+
+A bay split into panels without stiffeners has the buckling loads of a
+single shell, also with a panel edge at ``y = 1.0``; a blade stiffener at
+mid-width raises the buckling load more than three times.
+"""
 import sys
 sys.path.append('../..')
 

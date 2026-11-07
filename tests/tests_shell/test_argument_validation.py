@@ -93,6 +93,24 @@ def test_calc_fint_rejects_wrongly_sized_c():
         s.calc_fint(c=None)
 
 
+def test_m_n_above_30_raise():
+    """``m > 30`` or ``n > 30`` raises the same ``ValueError`` in the
+    constructor and when assigned to an existing shell."""
+    msg = 'Bardell functions of the order 31 and above are not coded'
+    with pytest.raises(ValueError, match=msg):
+        Shell(m=31)
+    with pytest.raises(ValueError, match=msg):
+        Shell(n=31)
+    s = Shell(m=30, n=30)
+    with pytest.raises(ValueError, match=msg):
+        s.m = 31
+    with pytest.raises(ValueError, match=msg):
+        s.n = 31
+    assert (s.m, s.n) == (30, 30)
+    s.m, s.n = 5, 7
+    assert (s.m, s.n) == (5, 7)
+
+
 @pytest.mark.parametrize('model', ['cylshell_clpt_donnell',
                                    'cylshell_clpt_sanders',
                                    'cylshell_fsdt_donnell',
@@ -165,10 +183,9 @@ def test_cylshell_approaches_plate_as_radius_grows(model, plate_model):
 def test_fkG_num_has_no_NLgeom_parameter():
     """fkG_num must not advertise an effect it does not have
 
-    It used to accept an NLgeom argument that it never read, because the
-    stress of the non-linear strain enters KT through KGNL in fkC_num. The
-    argument is gone, so a caller that still expects KG(Nbar + N_L + N_NL) now
-    fails loudly instead of silently getting KG(Nbar + N_L).
+    It has no NLgeom argument, because the stress of the non-linear strain
+    enters KT through KGNL in fkC_num, so a caller that expects KG(Nbar +
+    N_L + N_NL) fails loudly instead of silently getting KG(Nbar + N_L).
     """
     from panels import modelDB
     for model in modelDB.db:

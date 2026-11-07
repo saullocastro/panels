@@ -1,3 +1,11 @@
+"""Interface of :class:`panels.shell.Shell`
+
+Argument checks and errors, the orthotropic laminate option, distributed
+loads, clearing loads and prescribed displacements, the penalty stiffness of
+a point constraint, the aerodynamic matrices ``calc_kA`` and ``calc_cA``,
+field outputs independent of the radius of a plate and of the number of
+cores, and saving and loading a shell.
+"""
 import sys
 sys.path.append('../..')
 

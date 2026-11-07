@@ -1,6 +1,29 @@
 r"""Clamped edges of the TSDT: planar clamp by the flags and face clamp by
 prescribed displacements at the faces
 
+The face clamp, `u = v = 0` at the faces `z = d \mp h/2` and `w = 0`
+prescribed with :meth:`.Shell.add_distr_pd_fixed_x` and the keyword ``z``,
+is verified against the planar clamp of the boundary condition flags
+``x1u = x1v = x1w = x1phix = x1phiy = x1wr = 0``, with the CLPT, the FSDT
+and the TSDT:
+
+- the rows of the prescribed displacements at ``z`` give `u(z)`, `v(z)` of
+  the fields, and the penalty kernels at ``z`` their energy;
+- for the CLPT and the FSDT the face clamp is the clamp of the flags;
+- for the TSDT, `u = v = 0` at three coordinates `z` is the clamp of the
+  flags, whereas the face clamp is softer than the planar clamp and stiffer
+  than the simple support, against regression values of the central
+  deflection of a square plate with `m = 26` terms, and leaves the section
+  free to warp;
+- the simple support and the planar clamp of a thin plate against
+  Timoshenko and Woinowsky-Krieger (1959), Table 47 and Eq. (18);
+- the face clamp does not depend on the reference surface;
+- the penalty method converges to the null-space method;
+- ``z`` is saved with the prescribed displacements, and files written
+  without it load with ``z = 0``.
+
+Notes
+-----
 The in-plane displacement of the third-order shear deformation theory
 (TSDT), with the laminate of thickness `h` at `d - h/2 \le z \le d + h/2`,
 
@@ -24,6 +47,36 @@ which leave the section free to warp, `u(z) = \frac{w_{,x}}{2} \zeta (1 - 4
 \zeta^2/h^2)` with `\zeta = z - d`. For the FSDT, `u(z) = u + z \phi_x`, and
 for the CLPT, `u(z) = u - z w_{,x}`, the face clamp is the clamp of the
 flags.
+
+The thin plate, `h/a = 0.01`, is checked against the classical solutions
+of [1]_ for the square plate with `\nu = 0.3`, edges `x = 0, a` supported
+and `y = 0, b` free. Simple support, Table 47 (p. 219): `w = 0.01309 q
+a^4/D` at the center and `0.01509 q a^4/D` at the middle of the free edges.
+The TSDT gives `+0.06 \%` at the center: the four printed digits allow
+`\pm 0.04 \%` and the shear deformation adds about `+0.03 \%` (`2.8 \%` at
+`h/a = 0.1`, scaling with `(h/a)^2`), hence the tolerance of `0.1 \%`. At
+the free edge it gives `-0.46 \%` with `n = 10` and `-0.37 \%` with `n = 20`
+terms along `y`: tolerance `1 \%`. Clamped edges: [1]_ has no table; the
+reference is the cylindrical bending of a plate with built-in edges, Eq.
+(18) (p. 15) without axial force, `w_{max} = q a^4/(384 D)`. The square
+plate with free edges is not in cylindrical bending; Table 47 shows the
+size of this effect for the simple support, the center deflection
+differing from the cylindrical bending value `5/384` by `+0.5 \%` (`b/a =
+1`) and `-1.0 \%` (`b/a = 2`). The planar clamp gives `-1.6 \%`, with a
+tolerance of `2 \%`. The face clamp of the thin plate is not compared: its
+boundary layer is of the order of `h` and is not resolved with `m \le 30`.
+
+The thick plate, `h/a = 0.1`, has no published solution with free edges.
+Its central deflections are regression values of runs with `m = 26`, `n =
+10`; with `m = 30`, `n = 20` they change by `+0.01 \%` (face clamp, `w D/(q
+a^4) = 0.0030901`), `+0.01 \%` (planar clamp) and `+0.002 \%` (simple
+support), whereas with `m = 10` the face clamp is `4.4 \%` lower (the
+boundary layer of the warping section); tolerance `0.05 \%`.
+
+References
+----------
+.. [1] Timoshenko, S. and Woinowsky-Krieger, S., "Theory of plates and
+   shells", 2nd ed., McGraw-Hill, New York, 1959.
 
 """
 import sys
@@ -49,10 +102,10 @@ FIELDS = ('u', 'v', 'w', 'phix', 'phiy')
 U, V, W = nullspace.U, nullspace.V, nullspace.W
 
 
-def plate(model, offset=0., m=10, n=10):
-    r"""Square isotropic plate, `h/a = 0.1`, all the flags ``1``, under a
-    uniform pressure"""
-    s = Shell(model=model, a=A, b=B, stack=[0.], plyt=H, laminaprop=(E, NU),
+def plate(model, offset=0., m=10, n=10, h=H):
+    r"""Square isotropic plate, `h/a = 0.1` by default, all the flags ``1``,
+    under a uniform pressure"""
+    s = Shell(model=model, a=A, b=B, stack=[0.], plyt=h, laminaprop=(E, NU),
               offset=offset, m=m, n=n)
     for edge in ('x1', 'x2', 'y1', 'y2'):
         for field in FIELDS:
@@ -118,6 +171,13 @@ def uv_at(s, f, z, h):
 
 def center_w(s, c):
     return fields(s, c, A/2, B/2)['w'][0]
+
+
+def simple_support(s):
+    r"""Simple support of the edges `x = 0, a`: `u = v = w = \phi_y = 0`"""
+    for edge in ('x1', 'x2'):
+        for field in ('u', 'v', 'w', 'phiy'):
+            setattr(s, edge + field, 0.)
 
 
 @pytest.mark.parametrize('model', ['plate_clpt_donnell', 'plate_fsdt_donnell',
@@ -221,7 +281,7 @@ def test_planar_clamp_is_u_zero_at_three_coordinates(offset):
     ft = fields(t, ct, xs.ravel(), ys.ravel())
     for k in FIELDS:
         assert np.allclose(f[k], ft[k], rtol=0, atol=1e-8*np.abs(ft['w']).max())
-    # the former clamp of the shear deformation theories, with w,x free
+    # without x1wr = 0, with w,x free, the edge is softer
     t.x1wr = t.x2wr = 1.
     _, cf = static(t)
     assert center_w(t, cf) > 1.05*center_w(t, ct)
@@ -232,30 +292,32 @@ def test_face_clamp_tsdt_thick_plate():
     b`: the face clamp is softer than the planar clamp and stiffer than the
     simple support; `u` and `v` vanish at both faces along the clamped
     edges, whereas the section warps, `\phi_x = w_{,x}/2`, i.e. `\gamma_{xz}
-    = 3 \phi_x`, with `u(z) \neq 0` between the faces"""
+    = 3 \phi_x`, with `u(z) \neq 0` between the faces. The central
+    deflections are regression values with `m = 26` terms, converged within
+    `0.01 \%`"""
     model = 'plate_tsdt_donnell'
-    s = plate(model)
+    m = 26
+    s = plate(model, m=m)
     for x in (0., A):
         face_clamp(s, x, H)
     _, c = static(s)
-    planar = plate(model)
+    planar = plate(model, m=m)
     clamp_by_flags(planar, 'x1')
     clamp_by_flags(planar, 'x2')
     _, cpl = static(planar)
-    ss = plate(model)
-    for edge in ('x1', 'x2'):
-        for field in ('u', 'v', 'w', 'phiy'):
-            setattr(ss, edge + field, 0.)
+    ss = plate(model, m=m)
+    simple_support(ss)
     _, css = static(ss)
     w_face = center_w(s, c)
     w_planar = center_w(planar, cpl)
     w_ss = center_w(ss, css)
     assert w_planar < 0.99*w_face
     assert w_face < 0.99*w_ss
-    # central deflections w D/(q a^4) of the documentation
+    # central deflections w D/(q a^4), regression values of this model
     D = E*H**3/(12*(1 - NU**2))
-    for w, ref in ((w_planar, 0.002901), (w_face, 0.002953), (w_ss, 0.013459)):
-        assert np.isclose(w*D/(Q*A**4), ref, rtol=2e-4)
+    for w, ref in ((w_planar, 0.0029062), (w_face, 0.0030896),
+                   (w_ss, 0.0134590)):
+        assert np.isclose(w*D/(Q*A**4), ref, rtol=5e-4)
     ys = np.linspace(0, B, 11)
     for x in (0., A):
         f = fields(s, c, np.full_like(ys, x), ys)
@@ -273,6 +335,35 @@ def test_face_clamp_tsdt_thick_plate():
         assert np.abs(u).max() > 1e3*np.abs(uv_at(s, f, H/2, H)[0]).max()
         assert np.allclose(u, f['gxz']/3*H/4*(1 - 4*(H/4)**2/H**2),
                            rtol=1e-6, atol=0)
+
+
+def test_thin_plate_against_timoshenko():
+    r"""TSDT plate, `h/a = 0.01`, edges `x = 0, a` simply supported or
+    clamped by the flags, `y = 0, b` free: central and free-edge deflections
+    of the simple support against Timoshenko and Woinowsky-Krieger (1959),
+    Table 47, and central deflection of the planar clamp against the
+    cylindrical bending of a plate with built-in edges, their Eq. (18)
+
+    Notes
+    -----
+    The tolerances, `0.1 \%`, `1 \%` and `2 \%`, are justified in the
+    `Notes` of the module.
+
+    """
+    model = 'plate_tsdt_donnell'
+    h = H/10
+    D = E*h**3/(12*(1 - NU**2))
+    ss = plate(model, m=26, h=h)
+    simple_support(ss)
+    _, c = static(ss)
+    w = fields(ss, c, [A/2, A/2], [B/2, 0.])['w']*D/(Q*A**4)
+    assert np.isclose(w[0], 0.01309, rtol=1e-3)
+    assert np.isclose(w[1], 0.01509, rtol=1e-2)
+    planar = plate(model, m=26, h=h)
+    clamp_by_flags(planar, 'x1')
+    clamp_by_flags(planar, 'x2')
+    _, c = static(planar)
+    assert np.isclose(center_w(planar, c)*D/(Q*A**4), 1/384, rtol=2e-2)
 
 
 def test_face_clamp_does_not_depend_on_the_reference_surface():

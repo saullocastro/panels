@@ -2,7 +2,7 @@ r"""Penalty kernels of the prescribed displacements
 
 The kernels of :mod:`panels.multidomain.connections.kCpd` are compared with
 the penalty stiffness `k \int \boldsymbol{g} \boldsymbol{g}^\top ds` integrated from the rows of
-``fg`` of the field module, see ``theory/multidomain_penalization/kCpd.py``,
+``fg`` of the field module,
 and with the penalty energy computed from the displacement field of
 :meth:`.Shell.uvw`, for the models with 3 and 5 degrees of freedom per term.
 A plate whose displacements are prescribed with these kernels and the forces
@@ -66,10 +66,9 @@ def line_penalty(p, comp, x, y, k, size):
 @pytest.mark.parametrize('comp', [0, 1, 2])
 def test_line_penalty_kernels(line, comp, model):
     r"""The kernels of the line prescribed displacements, :func:`.fkCld_xcte`
-    and :func:`.fkCld_ycte`, are `k \int g_i g_j ds` of the component; the
-    stiffnesses of ``ku`` and ``kv`` were placed at the rows and columns of
-    ``w`` up to version 0.11.1, and those of the models with 5 DOFs per term
-    with a stride of 3 DOFs per term up to version 0.13.20"""
+    and :func:`.fkCld_ycte`, are `k \int g_i g_j ds` of the component, at the
+    rows and columns of that component, also for the models with 5 DOFs per
+    term"""
     rng = np.random.default_rng(comp)
     p = plate(0.4, 0.3, m=7, n=6, model=model)
     random_bcs(p, rng)

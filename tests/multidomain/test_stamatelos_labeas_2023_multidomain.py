@@ -1,11 +1,5 @@
 r"""Stamatelos and Labeas (2023) with multi-domain plate models only
 
-Reference
----------
-D. G. Stamatelos, G. N. Labeas, *Buckling Analysis of Laminated Stiffened
-Plates with Material Anisotropy Using the Rayleigh-Ritz Approach*,
-Computation 2023, 11, 110. https://doi.org/10.3390/computation11060110
-
 This is the :class:`.MultiDomain` counterpart of
 ``tests/tests_stiffpanelbay/test_stamatelos_labeas_2023.py``, whose published
 values, laminates and helpers are imported, so that both modules compare
@@ -31,6 +25,13 @@ the default rotation penalty is soft and leaves a converged error of about
 2 %, therefore the tests that check agreement to more digits raise the
 penalties by ``PENALTY_FACTOR`` through the keys ``'kt'`` and ``'kr'`` of
 the connection dictionaries.
+
+References
+----------
+.. [1] Stamatelos, D. G. and Labeas, G. N., "Buckling Analysis of Laminated
+   Stiffened Plates with Material Anisotropy Using the Rayleigh-Ritz
+   Approach", Computation, 11, 110, 2023.
+   https://doi.org/10.3390/computation11060110
 
 """
 import os

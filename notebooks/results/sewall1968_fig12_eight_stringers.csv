@@ -1,0 +1,80 @@
+# Sewall and Naumann 1968, NASA TN D-4705, Fig. 12 (report p. 52 = PDF p. 54): simply supported shell with
+# eight internal stringers. kind=present: 'Present paper' (solid); kind=ref13: 'Ref. 13 and app. B' (dashed).
+# Curves read at integer n inside their drawn range (method as in sewall1968_analysis_curves.csv).
+# Precision: 0.453 Hz/px, 112.0 px per unit n, line width 4.0 px = 1.8 Hz;
+# curves +-2 Hz where flat (more where steep, see note). f_Hz in Hz (= cps).
+kind,m,n,f_Hz,note
+present,1,2,324.0,"present (solid) and Ref. 13 (dashed) m=1 lines coincide (one line) for n < 2.9; value given to both; lines overlap/touch within about one line width with ref13_m1 (+0.0 Hz); assignment uncertain; steep (about -246 Hz per unit n): +-3 Hz"
+present,1,3,157.6,
+present,1,4,101.1,"line hidden at x(n) (plotted symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+present,1,5,89.0,"line hidden at x(n) (plotted symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+present,1,6,110.6,"lines overlap/touch within about one line width with ref13_m1 (+0.0 Hz); assignment uncertain"
+present,1,7,140.1,"line hidden at x(n) (plotted symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with ref13_m1 (+0.0 Hz); assignment uncertain"
+present,1,8,179.4,"lines overlap/touch within about one line width with ref13_m1 (+0.0 Hz); assignment uncertain"
+present,1,9,223.9,"line hidden at x(n) (plotted symbol or dash gap); value from a local fit of the traced line over +-0.36 n; lines overlap/touch within about one line width with ref13_m1 (+0.6 Hz); assignment uncertain"
+present,1,10,275.4,
+present,1,11,333.3,"line hidden at x(n) (plotted symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+present,1,12,394.2,"at the end of the drawn curve (traced to n = 12.03)"
+present,2,3,550.8,"at the end of the drawn curve (traced to n = 2.96); steep (about -283 Hz per unit n): +-4 Hz"
+present,2,4,347.0,
+present,2,5,241.2,"line hidden at x(n) (plotted symbol or dash gap); value from a local fit of the traced line over +-0.12 n"
+present,2,6,191.2,"line hidden at x(n) (plotted symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+present,2,7,186.7,"line hidden at x(n) (plotted symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+present,2,8,206.5,"line hidden at x(n) (plotted symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+present,2,9,242.8,
+present,2,10,290.8,"line hidden at x(n) (plotted symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+present,2,11,345.4,
+present,2,12,401.6,"lines overlap/touch within about one line width with ref13_m1 (+0.0 Hz); assignment uncertain"
+present,3,4,679.7,"at the end of the drawn curve (traced to n = 4.01); steep (about -240 Hz per unit n): +-3 Hz"
+present,3,5,486.4,
+present,3,6,361.8,
+present,3,7,309.2,"line hidden at x(n) (plotted symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+present,3,8,296.2,
+present,3,9,309.1,
+present,3,10,339.2,
+present,3,11,383.0,
+present,3,12,436.4,
+present,4,6,603.9,
+present,4,7,501.7,"line hidden at x(n) (plotted symbol or dash gap); value from a local fit of the traced line over +-0.12 n"
+present,4,8,446.0,
+present,4,9,426.5,
+present,4,10,437.3,
+present,4,11,466.1,
+present,4,12,509.3,"at the end of the drawn curve (traced to n = 12.02)"
+ref13,1,2,324.0,"present (solid) and Ref. 13 (dashed) m=1 lines coincide (one line) for n < 2.9; value given to both; lines overlap/touch within about one line width with present_m1 (+0.0 Hz); assignment uncertain; steep (about -246 Hz per unit n): +-3 Hz"
+ref13,1,3,166.1,
+ref13,1,4,106.2,
+ref13,1,5,94.6,"line hidden at x(n) (plotted symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+ref13,1,6,110.6,"lines overlap/touch within about one line width with present_m1 (+0.0 Hz); assignment uncertain"
+ref13,1,7,140.1,"line hidden at x(n) (plotted symbol or dash gap); value from a local fit of the traced line over +-0.24 n; lines overlap/touch within about one line width with present_m1 (+0.0 Hz); assignment uncertain"
+ref13,1,8,179.4,"lines overlap/touch within about one line width with present_m1 (+0.0 Hz); assignment uncertain"
+ref13,1,9,224.5,"line hidden at x(n) (plotted symbol or dash gap); value from a local fit of the traced line over +-0.36 n; lines overlap/touch within about one line width with present_m1 (-0.6 Hz); assignment uncertain"
+ref13,1,10,280.1,"line hidden at x(n) (plotted symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+ref13,1,11,338.5,"line hidden at x(n) (plotted symbol or dash gap); value from a local fit of the traced line over +-0.24 n"
+ref13,1,12,401.6,"lines overlap/touch within about one line width with present_m2 (+0.0 Hz); assignment uncertain"
+ref13,2,3,577.1,"at the end of the drawn curve (traced to n = 3.02); steep (about -283 Hz per unit n): +-4 Hz"
+ref13,2,4,364.1,
+ref13,2,5,257.5,
+ref13,2,6,207.2,
+ref13,2,7,201.3,
+ref13,2,8,217.0,
+ref13,2,9,253.0,
+ref13,2,10,301.0,
+ref13,2,11,354.5,
+ref13,2,12,412.1,"at the end of the drawn curve (traced to n = 12.03)"
+ref13,3,4,732.8,"at the end of the drawn curve (traced to n = 4.01); steep (about -309 Hz per unit n): +-4 Hz"
+ref13,3,5,520.3,
+ref13,3,6,405.8,
+ref13,3,7,346.7,
+ref13,3,8,324.4,
+ref13,3,9,332.8,
+ref13,3,10,359.6,
+ref13,3,11,399.8,
+ref13,3,12,452.5,"at the end of the drawn curve (traced to n = 12.03)"
+ref13,4,6,666.7,
+ref13,4,7,557.2,
+ref13,4,8,501.1,
+ref13,4,9,477.2,
+ref13,4,10,478.7,
+ref13,4,11,501.3,
+ref13,4,12,538.2,"at the end of the drawn curve (traced to n = 12.02)"

@@ -6,10 +6,9 @@ Approximation functions tabulated at the integration points
 The numerically integrated matrices and vectors of ``panels`` are sums over
 the integration points of products of the approximation functions of the
 Ritz method. This page describes how the kernels evaluate these functions:
-before version 0.13.0 they were evaluated again in every loop over the terms
-of the matrix, the innermost loop included; they are now evaluated once per
-integration point and term, in tables. The results are the same, bit for
-bit, and the assembly is several times faster.
+once per integration point and term, in tables, instead of again in every
+loop over the terms of the matrix, the innermost loop included. The results
+are the same, bit for bit, and the assembly is several times faster.
 
 Integrands
 ----------
@@ -37,10 +36,10 @@ where `\mathcal{F}` combines the functions and their derivatives `f'`,
 `f''`, `g'`, `g''` of each field with the constitutive matrix and, for the
 non-linear matrices, with the displacement gradients at the point.
 
-Previous implementation: functions in the innermost loop
---------------------------------------------------------
+Functions evaluated in the innermost loop
+-----------------------------------------
 
-The kernels had the structure below, e.g. ``fkC_num`` of
+A direct implementation has the structure below, e.g. ``fkC_num`` of
 ``plate_clpt_donnell_num.pyx``, with seven functions per side::
 
     for ptx in range(nx):
@@ -75,8 +74,8 @@ the functions evaluated again in each; the connections between panels and
 the stiffeners have the same nested structure, along a line or over an
 area.
 
-Current implementation: tables per integration point
-----------------------------------------------------
+Tables per integration point
+----------------------------
 
 The functions are evaluated once per integration point and term, at the
 start of the loop over the integration points, in a table along `x` and
@@ -114,7 +113,7 @@ Per integration point the number of evaluations falls from `O(m^2 n^2)` to
 terms keep only the arithmetic of the entries, which is unchanged. The
 functions read from the tables are the same numbers, combined in the same
 order, such that the matrices and vectors are identical, bit for bit, to
-those of the previous implementation.
+those of the direct implementation.
 
 The kernels that integrate along a line, e.g. the connections at a constant
 `\xi` or the prescribed displacements, evaluate the functions across the
@@ -144,7 +143,7 @@ The analytical kernels, which use closed-form integrals of the products of
 the functions, e.g. ``fk0`` or :func:`.fkCSB` of the skin-base connection,
 are not affected. The kernel
 ``calc_kTv`` of the product of the tangent stiffness matrix by a vector,
-see :ref:`tangent_product`, is written with the tables from the start.
+see :ref:`tangent_product`, is written with the tables.
 
 Implementation
 --------------
@@ -174,95 +173,17 @@ hand in the same way.
 Verification
 ------------
 
-- The matrices and vectors of every tabulated kernel were compared, bit for
-  bit, with those of the previous implementation, recording the output of
-  each call while running 20 test files of the models, of the follower
-  pressures, of the partial integration domains, of the aerodynamic
-  matrices, of the connections, of the cohesive zone and of the stiffened
-  panels: the 73946 calls of 92 kernels gave identical outputs.
-- ``tests/test_tabulate.py`` checks the rewriting and that no kernel of the
-  package evaluates the approximation functions in its loops any more.
-- The tests of the package, among which the consistency of the tangent
-  stiffness matrix with the internal force vector,
-  ``tests/tests_shell/test_tangent_consistency.py``, are unchanged and
-  pass.
+The matrices and vectors of the tabulated kernels are identical, bit for
+bit, to those of the direct implementation, the functions being the same
+numbers combined in the same order.
 
 Performance
 -----------
 
-Single shell, laminate ``[0, 45, -45, 90]``, a follower pressure, one core,
-times in seconds before and after the tabulation, with the speed-up. The
-times were measured with ``nx = 2m``, ``ny = 2n`` integration points, the
-default before ``panels`` 0.14.0, one point more in each direction than the
-current default :func:`panels.shell.gauss_points`, `\max(2m - 1, 7)`, for
-these `m = n \ge 8`:
-
-.. list-table::
-    :header-rows: 1
-
-    * - model, `m = n`
-      - ``fkC_num`` (``NLgeom``)
-      - ``fkG_num`` (``NLgeom``)
-      - ``calc_fint``
-      - ``fkCfollower_num``
-      - ``fkM_num``
-    * - ``plate_clpt_donnell``, 8
-      - 0.26 → 0.028 (9.5)
-      - 0.11 → 0.0039 (29)
-      - 0.020 → 0.0028 (7.2)
-      - 0.35 → 0.023 (15)
-      - 0.18 → 0.0085 (21)
-    * - ``plate_clpt_donnell``, 12
-      - 4.95 → 0.30 (17)
-      - 2.03 → 0.033 (62)
-      - 0.17 → 0.015 (11)
-      - 6.21 → 0.24 (26)
-      - 3.11 → 0.087 (36)
-    * - ``plate_clpt_donnell``, 16
-      - 39.6 → 1.65 (24)
-      - 16.1 → 0.17 (97)
-      - 0.76 → 0.051 (15)
-      - 49.0 → 1.33 (37)
-      - 24.0 → 0.48 (50)
-    * - ``cylshell_fsdt_sanders``, 12
-      - 8.48 → 1.54 (5.5)
-      - 2.34 → 0.074 (32)
-      - 0.23 → 0.021 (11)
-      - 6.26 → 0.38 (16)
-      - 4.05 → 0.12 (33)
-    * - ``plate_tsdt_donnell``, 12
-      - 10.3 → 2.92 (3.5)
-      - 1.53 → 0.040 (39)
-      - 0.23 → 0.022 (10)
-      - 6.20 → 0.24 (26)
-      - 5.01 → 0.54 (9.2)
-
-The speed-up grows with the number of terms. It is smaller for ``fkC_num``
-of the shear deformation theories, whose integrands have more arithmetic
-per pair of terms, which the tabulation does not change.
-
-Connections between two plates with `m = n = 8` and `12`, the skin-base
-connection with damage integrated with `50 \times 25` points:
-
-.. list-table::
-    :header-rows: 1
-
-    * - kernel
-      - `m = n = 8`
-      - `m = n = 12`
-    * - ``kCSSxcte`` (the three blocks)
-      - 1.5 → 0.32 ms (4.9)
-      - 9.8 → 0.66 ms (15)
-    * - ``kCSB_dmg`` (the three blocks)
-      - 3.60 → 0.106 s (34)
-      - 27.5 → 0.49 s (57)
-    * - ``kCpd``
-      - 0.19 → 0.057 ms (3.3)
-      - 1.1 → 0.16 ms (7.1)
-
-The double cantilever beam with cohesive zone of
-``tests/multidomain/test_dcb_damage.py`` runs in 2 min 45 s instead of
-7 min 28 s, its non-linear matrices of the panels and its connections
-being tabulated, also measured with the default ``nx = 2m``, ``ny = 2n`` of
-the panels before ``panels`` 0.14.0; its cohesive zone is assembled with cached operators by
-default, or with ``kCSB_dmg`` with ``use_kernels=True``.
+Per integration point the tabulation removes `O(m^2 n^2)` evaluations of
+polynomials of degree up to 29 and keeps only the arithmetic of the entries.
+The speed-up therefore grows with the number of terms, and it is smaller for
+the integrands with more arithmetic per pair of terms, e.g. the constitutive
+stiffness matrix ``fkC_num`` of the shear deformation theories: for
+`m = n = 12` it is about 30 to 60 for the geometric stiffness matrices and
+3.5 to 17 for the non-linear constitutive stiffness matrices.

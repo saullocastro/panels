@@ -10,18 +10,41 @@ r"""
 Cylindrical shells using the first-order shear deformation theory (FSDT)
 with the Donnell kinematics
 
-Numerically integrated matrices. See the kinematic equations in
-``theory/shells/fsdt_tsdt/fsdt_tsdt.py``, from where the integrands herein
-have been generated. The degrees of freedom of each term of the
-approximation are ``u, v, w, phix, phiy``, and the constitutive matrix
-``Finput`` must be ``8 x 8``, with the rows and columns in the order of
-the generalized strains::
+Matrices and vectors integrated numerically with the Gauss-Legendre
+quadrature: the constitutive stiffness :func:`fkC_num`, the geometric
+stiffness :func:`fkG_num`, the mass :func:`fkM_num`, the aerodynamic
+stiffness :func:`fkAx_num`, :func:`fkAy_num`, the internal force vector
+:func:`calc_fint`, the product of the tangent stiffness matrix by a vector
+:func:`calc_kTv`, and the force vector and load stiffness matrix of a
+follower pressure, :func:`calc_fext_follower` and :func:`fkCfollower_num`.
+The constitutive matrix ``Finput`` is ``8 x 8``, with the
+rows and columns in the order of the generalized strains::
 
     exx, eyy, gxy, kxx, kyy, kxy, gyz, gxz
 
 which is the order of the generalized stresses::
 
     Nxx, Nyy, Nxy, Mxx, Myy, Mxy, Qy, Qx
+
+The degrees of freedom of each term of the approximation are
+``u, v, w, phix, phiy``; the degree of freedom ``k`` of the term ``(i, j)``, ``0 <=
+i < m``, ``0 <= j < n``, is at the row ``row0 + 5*(j*m + i) + k``
+of the matrices.
+
+Notes
+-----
+The displacement field through the thickness and the generalized strains
+are those of :mod:`panels.models.fsdt_tsdt_field`, with `c_1 = 4/(3 h^2)`
+for the TSDT and `c_1 = 0` for the FSDT, `1/r = 0` for the plates, and the
+Sanders-Koiter terms only for the models ``*_sanders``. The rotations of
+the non-linear terms are `\beta_x = -w_{,x}` and `\beta_y = -w_{,y} + s
+v/r`, `s = 1` for the Sanders-Koiter and `s = 0` for the Donnell
+kinematics.
+
+The numerical integration over the domain of
+:meth:`.Shell.integration_limits` admits a constitutive matrix and moments
+of the density varying over the domain, a partial domain and the
+non-linear terms of the Ritz constants.
 
 """
 from scipy.sparse import coo_matrix
@@ -41,6 +64,76 @@ cdef int NE = 8
 
 def fkC_num(double [::1] cs, object Finput, object shell,
         int size, int row0, int col0, int nx, int ny, int NLgeom=0):
+    r"""Constitutive stiffness matrix, integrated numerically
+
+    With ``NLgeom=0``, the linear constitutive stiffness matrix
+    ``KC0``; with ``NLgeom=1``, the matrix ``KC0 + KCNL + KGNL`` at the
+    configuration ``cs``, which, added to :func:`fkG_num` at the same
+    ``cs``, gives the tangent stiffness matrix.
+
+    Parameters
+    ----------
+    cs : array-like
+        Ritz constants of the configuration, 1-D of size ``size``, in the
+        units of the displacements (the rotations in radians).
+    Finput : array-like
+        Constitutive matrix of the generalized strains of the model, shape
+        ``(NE, NE)`` for the whole domain, e.g. ``shell.ABD``, or ``(nx, ny,
+        NE, NE)`` with one matrix per integration point.
+    shell : :class:`.Shell`
+        The shell, which gives the dimensions ``a`` and ``b``, the radius ``r``
+        of the cylinders, the numbers of terms ``m`` and ``n`` and the boundary
+        flags of the approximation functions of each field.
+    size : int
+        Number of rows and columns of the matrix, the number of degrees of
+        freedom of the assembly.
+    row0, col0 : int
+        Row and column of the matrix where the terms of this shell start.
+    nx, ny : int
+        Number of Gauss-Legendre points along `x` and `y`.
+    NLgeom : int, optional
+        ``1`` to include the non-linear terms of ``cs``, default ``0``.
+
+    Returns
+    -------
+    kC : scipy.sparse.coo_matrix
+        Matrix of shape ``(size, size)``. Only the upper
+        triangle is assembled; the caller symmetrizes it.
+
+    Raises
+    ------
+    ValueError
+        If ``Finput`` has an invalid shape or ``shell`` is not a
+        :class:`.Shell`.
+
+    Notes
+    -----
+    With the generalized strains of the kinematics of the module,
+    `\boldsymbol{\varepsilon} = (\boldsymbol{B}_L + \frac{1}{2}
+    \boldsymbol{B}_{NL}(\boldsymbol{c})) \boldsymbol{c}`, their variation
+    `\delta \boldsymbol{\varepsilon} = \boldsymbol{B} \delta \boldsymbol{c}`,
+    `\boldsymbol{B} = \boldsymbol{B}_L + \boldsymbol{B}_{NL}(\boldsymbol{c})`,
+    and the constitutive matrix `\boldsymbol{F}`:
+
+    .. math::
+
+        \boldsymbol{K}_C = \int \boldsymbol{B}^\top \boldsymbol{F}
+        \boldsymbol{B} \, dA + \int \boldsymbol{G}^\top
+        \boldsymbol{N}_{NL} \boldsymbol{G} \, dA
+
+    with `\boldsymbol{G} \boldsymbol{c} = \{\beta_x, \beta_y\}^\top` the
+    rotations of the non-linear terms of the membrane strains, and `\boldsymbol{N}_{NL}` the membrane stress resultants of the
+    non-linear part of the strains, `\frac{1}{2} \boldsymbol{B}_{NL}
+    \boldsymbol{c}`. With ``NLgeom=0``, `\boldsymbol{B}_{NL} = \boldsymbol{0}`
+    and `\boldsymbol{K}_C = \boldsymbol{K}_{C0}`. The membrane stress of the
+    linear strains enters :func:`fkG_num`, such that ``fkC_num(NLgeom=1) +
+    fkG_num`` is the exact Jacobian of :func:`calc_fint`.
+
+    The integrals are evaluated with ``nx x ny`` Gauss-Legendre points
+    over the integration domain `x_1 \le x \le x_2`, `y_1 \le y \le y_2` of
+    :meth:`.Shell.integration_limits`, the whole shell by default.
+
+    """
     cdef double [:, ::1] gtab, ftab
     cdef double x1, x2, y1, y2, xinf, xsup, yinf, ysup
     cdef double r
@@ -432,22 +525,75 @@ def fkC_num(double [::1] cs, object Finput, object shell,
 def fkG_num(double [::1] cs, object Finput, object shell,
             int size, int row0, int col0, int nx, int ny,
             double Nxx0=0, double Nyy0=0, double Nxy0=0):
-    """Geometric stiffness matrix of the linear membrane stress state
+    r"""Geometric stiffness matrix of the linear membrane stress state
 
-    The membrane stress used here comes from the *linear* part of the strain
-    evaluated at ``cs``, superposed with the constant stress state
-    ``(Nxx0, Nyy0, Nxy0)``. The result is therefore homogeneous of degree one
-    in ``cs``, which is what the linear buckling eigenvalue problem requires.
+    Integrates numerically the geometric stiffness matrix of the membrane
+    stress resultants of the linear strains at ``cs``, superposed to
+    the constant state ``Nxx0``, ``Nyy0``, ``Nxy0``. The matrix is
+    homogeneous of degree one in ``cs``, as the linear buckling
+    eigenvalue problem requires; the stress of the non-linear strains
+    enters :func:`fkC_num`.
 
-    There is deliberately no switch to include the stress of the non-linear
-    strain here. That contribution, ``KGNL``, is collected by
-    :func:`.fkC_num` instead, so that
+    Parameters
+    ----------
+    cs : array-like
+        Ritz constants of the configuration, 1-D of size ``size``, in the
+        units of the displacements (the rotations in radians).
+    Finput : array-like
+        Constitutive matrix of the generalized strains of the model, shape
+        ``(NE, NE)`` for the whole domain, e.g. ``shell.ABD``, or ``(nx, ny,
+        NE, NE)`` with one matrix per integration point.
+    shell : :class:`.Shell`
+        The shell, which gives the dimensions ``a`` and ``b``, the radius ``r``
+        of the cylinders, the numbers of terms ``m`` and ``n`` and the boundary
+        flags of the approximation functions of each field.
+    size : int
+        Number of rows and columns of the matrix, the number of degrees of
+        freedom of the assembly.
+    row0, col0 : int
+        Row and column of the matrix where the terms of this shell start.
+    nx, ny : int
+        Number of Gauss-Legendre points along `x` and `y`.
+    Nxx0, Nyy0, Nxy0 : float, optional
+        Constant membrane stress resultants, force per unit length, default
+        ``0``.
 
-        KT = KC0 + KCNL + KGNL   (fkC_num)
-             + KG(Nbar + N_L)    (fkG_num)
+    Returns
+    -------
+    kG : scipy.sparse.coo_matrix
+        Matrix of shape ``(size, size)``. Only the upper
+        triangle is assembled; the caller symmetrizes it.
 
-    is the exact Jacobian of :func:`.calc_fint` while this function stays
-    homogeneous of degree one in ``cs``.
+    Raises
+    ------
+    ValueError
+        If ``Finput`` has an invalid shape or ``shell`` is not a
+        :class:`.Shell`.
+
+    Notes
+    -----
+    With `\boldsymbol{G} \boldsymbol{c} = \{\beta_x, \beta_y\}^\top` the
+    rotations of the non-linear terms of the membrane strains, and the membrane stress resultants
+    `\boldsymbol{N} = \boldsymbol{N}_0 + \boldsymbol{N}_L`,
+    `\boldsymbol{N}_L` those of `\boldsymbol{F} \boldsymbol{B}_L
+    \boldsymbol{c}`, the linear generalized strains of the kinematics of the module:
+
+    .. math::
+
+        \boldsymbol{K}_G = \int \boldsymbol{G}^\top \boldsymbol{N}
+        \boldsymbol{G} \, dA, \qquad \boldsymbol{N} = \begin{bmatrix} N_{xx}
+        & N_{xy} \\ N_{xy} & N_{yy} \end{bmatrix}
+
+    The tangent stiffness matrix `\boldsymbol{K}_{C0} +
+    \boldsymbol{K}_{CNL} + \boldsymbol{K}_{GNL} +
+    \boldsymbol{K}_G(\boldsymbol{N}_0 + \boldsymbol{N}_L)`, the first three terms from :func:`fkC_num` and the
+    last from this function, is
+    the exact Jacobian of :func:`calc_fint` when `\boldsymbol{N}_0 =
+    \boldsymbol{0}`.
+
+    The integrals are evaluated with ``nx x ny`` Gauss-Legendre points
+    over the integration domain `x_1 \le x \le x_2`, `y_1 \le y \le y_2` of
+    :meth:`.Shell.integration_limits`, the whole shell by default.
 
     """
     cdef double [:, ::1] gtab, ftab
@@ -689,6 +835,61 @@ def fkG_num(double [::1] cs, object Finput, object shell,
 
 def fkM_num(object shell, object I_input, int size,
         int row0, int col0, int nx, int ny):
+    r"""Mass matrix, integrated numerically
+
+    Integrates numerically the consistent mass matrix of the shell, with
+    the moments of the density given for the whole domain or at each
+    integration point, see :meth:`.Shell.calc_kM`.
+
+    Parameters
+    ----------
+    shell : :class:`.Shell`
+        The shell, which gives the dimensions ``a`` and ``b``, the radius ``r``
+        of the cylinders, the numbers of terms ``m`` and ``n`` and the boundary
+        flags of the approximation functions of each field.
+    I_input : array-like
+        Moments of the density through the thickness, and for the TSDT the
+        thickness ``h``, ``I0, I1, I2``, shape ``(3,)`` for the whole domain or ``(nx, ny, 3)`` with one set per
+        integration point.
+    size : int
+        Number of rows and columns of the matrix, the number of degrees of
+        freedom of the assembly.
+    row0, col0 : int
+        Row and column of the matrix where the terms of this shell start.
+    nx, ny : int
+        Number of Gauss-Legendre points along `x` and `y`.
+
+    Returns
+    -------
+    kM : scipy.sparse.coo_matrix
+        Matrix of shape ``(size, size)``. Only the upper
+        triangle is assembled; the caller symmetrizes it.
+
+    Raises
+    ------
+    ValueError
+        If ``I_input`` has an invalid shape or ``shell`` is not a
+        :class:`.Shell`.
+
+    Notes
+    -----
+    With the displacement field through the thickness `\{u(z), v(z),
+    w(z)\}^\top = \boldsymbol{S}(z) \boldsymbol{c}` of the kinematics of the module:
+
+    .. math::
+
+        \boldsymbol{M} = \int \int_{d - h/2}^{d + h/2} \rho \,
+        \boldsymbol{S}(z)^\top \boldsymbol{S}(z) \, dz \, dA
+
+    with the offset `d`, where the integral through the thickness gives the moments of ``I_input``, `I_n = \int \rho z^n dz`, `n = 0, 1,
+    2`, for the FSDT, and for the TSDT the moments `J_n`, `n = 0, 1, 2, 3, 4,
+    6`, about the mid-surface and the thickness `h`.
+
+    The integrals are evaluated with ``nx x ny`` Gauss-Legendre points
+    over the integration domain `x_1 \le x \le x_2`, `y_1 \le y \le y_2` of
+    :meth:`.Shell.integration_limits`, the whole shell by default.
+
+    """
     cdef double [:, ::1] ftab, gtab
     cdef double x1, x2, y1, y2, xinf, xsup, yinf, ysup
     cdef double r
@@ -905,6 +1106,56 @@ def fkM_num(object shell, object I_input, int size,
 
 
 def fkAx_num(object shell, int size, int row0, int col0, int nx, int ny):
+    r"""Aerodynamic stiffness matrix of the piston theory, integrated numerically
+
+    ``fkAx_num`` gives the matrix of the flow along `x` and ``fkAy_num``
+    that of the flow along `y`, with the parameters ``shell.beta`` and,
+    for the flow along `x`, ``shell.gamma`` of :meth:`.Shell.calc_kA`.
+
+    Parameters
+    ----------
+    shell : :class:`.Shell`
+        The shell, which gives the dimensions ``a`` and ``b``, the radius ``r``
+        of the cylinders, the numbers of terms ``m`` and ``n`` and the boundary
+        flags of the approximation functions of each field.
+    size : int
+        Number of rows and columns of the matrix, the number of degrees of
+        freedom of the assembly.
+    row0, col0 : int
+        Row and column of the matrix where the terms of this shell start.
+    nx, ny : int
+        Number of Gauss-Legendre points along `x` and `y`.
+
+    Returns
+    -------
+    kA : scipy.sparse.coo_matrix
+        Matrix of shape ``(size, size)``. The matrix is assembled in full.
+
+    Raises
+    ------
+    ValueError
+        If ``shell`` is not a :class:`.Shell`.
+
+    Notes
+    -----
+    With `\boldsymbol{S}^w` the row of the approximation functions of
+    `w`, the matrices added to the stiffness matrix are:
+
+    .. math::
+
+        \boldsymbol{K}_{A_x} = -\int \left[\beta (\boldsymbol{S}^w_{,x})^\top
+        \boldsymbol{S}^w + \gamma (\boldsymbol{S}^w)^\top
+        \boldsymbol{S}^w\right] dA \qquad
+        \boldsymbol{K}_{A_y} = -\beta \int (\boldsymbol{S}^w_{,y})^\top
+        \boldsymbol{S}^w \, dA
+
+    `\gamma = 0` for the flat plates; they are not symmetric.
+
+    The integrals are evaluated with ``nx x ny`` Gauss-Legendre points
+    over the integration domain `x_1 \le x \le x_2`, `y_1 \le y \le y_2` of
+    :meth:`.Shell.integration_limits`, the whole shell by default.
+
+    """
     cdef double [:, ::1] ftab, gtab
     cdef double x1, x2, y1, y2, xinf, xsup, yinf, ysup
     cdef double r
@@ -1032,6 +1283,56 @@ def fkAx_num(object shell, int size, int row0, int col0, int nx, int ny):
 
 
 def fkAy_num(object shell, int size, int row0, int col0, int nx, int ny):
+    r"""Aerodynamic stiffness matrix of the piston theory, integrated numerically
+
+    ``fkAx_num`` gives the matrix of the flow along `x` and ``fkAy_num``
+    that of the flow along `y`, with the parameters ``shell.beta`` and,
+    for the flow along `x`, ``shell.gamma`` of :meth:`.Shell.calc_kA`.
+
+    Parameters
+    ----------
+    shell : :class:`.Shell`
+        The shell, which gives the dimensions ``a`` and ``b``, the radius ``r``
+        of the cylinders, the numbers of terms ``m`` and ``n`` and the boundary
+        flags of the approximation functions of each field.
+    size : int
+        Number of rows and columns of the matrix, the number of degrees of
+        freedom of the assembly.
+    row0, col0 : int
+        Row and column of the matrix where the terms of this shell start.
+    nx, ny : int
+        Number of Gauss-Legendre points along `x` and `y`.
+
+    Returns
+    -------
+    kA : scipy.sparse.coo_matrix
+        Matrix of shape ``(size, size)``. The matrix is assembled in full.
+
+    Raises
+    ------
+    ValueError
+        If ``shell`` is not a :class:`.Shell`.
+
+    Notes
+    -----
+    With `\boldsymbol{S}^w` the row of the approximation functions of
+    `w`, the matrices added to the stiffness matrix are:
+
+    .. math::
+
+        \boldsymbol{K}_{A_x} = -\int \left[\beta (\boldsymbol{S}^w_{,x})^\top
+        \boldsymbol{S}^w + \gamma (\boldsymbol{S}^w)^\top
+        \boldsymbol{S}^w\right] dA \qquad
+        \boldsymbol{K}_{A_y} = -\beta \int (\boldsymbol{S}^w_{,y})^\top
+        \boldsymbol{S}^w \, dA
+
+    `\gamma = 0` for the flat plates; they are not symmetric.
+
+    The integrals are evaluated with ``nx x ny`` Gauss-Legendre points
+    over the integration domain `x_1 \le x \le x_2`, `y_1 \le y \le y_2` of
+    :meth:`.Shell.integration_limits`, the whole shell by default.
+
+    """
     cdef double [:, ::1] ftab, gtab
     cdef double x1, x2, y1, y2, xinf, xsup, yinf, ysup
     cdef double r
@@ -1158,6 +1459,65 @@ def fkAy_num(object shell, int size, int row0, int col0, int nx, int ny):
 
 def calc_fint(double [::1] cs, object Finput, object shell,
         int size, int col0, int nx, int ny):
+    r"""Internal force vector, integrated numerically
+
+    Evaluates the generalized strains and stress resultants at
+    ``cs`` at each integration point and integrates the internal force
+    vector, whose Jacobian is ``fkC_num(NLgeom=1) + fkG_num``.
+
+    Parameters
+    ----------
+    cs : array-like
+        Ritz constants of the configuration, 1-D of size ``size``, in the
+        units of the displacements (the rotations in radians).
+    Finput : array-like
+        Constitutive matrix of the generalized strains of the model, shape
+        ``(NE, NE)`` for the whole domain, e.g. ``shell.ABD``, or ``(nx, ny,
+        NE, NE)`` with one matrix per integration point.
+    shell : :class:`.Shell`
+        The shell, which gives the dimensions ``a`` and ``b``, the radius ``r``
+        of the cylinders, the numbers of terms ``m`` and ``n`` and the boundary
+        flags of the approximation functions of each field.
+    size : int
+        Size of the vector, the number of degrees of freedom of the assembly.
+    col0 : int
+        Position of the vector where the terms of this shell start.
+    nx, ny : int
+        Number of Gauss-Legendre points along `x` and `y`.
+
+    Returns
+    -------
+    fint : numpy.ndarray
+        Internal force vector of size ``size``.
+
+    Raises
+    ------
+    ValueError
+        If ``Finput`` has an invalid shape or ``shell`` is not a
+        :class:`.Shell`.
+
+    Notes
+    -----
+    With the generalized strains of the kinematics of the module,
+    `\boldsymbol{\varepsilon}(\boldsymbol{c})`, their variation `\delta
+    \boldsymbol{\varepsilon} = \boldsymbol{B}(\boldsymbol{c}) \delta
+    \boldsymbol{c}` and the stress resultants `\boldsymbol{\sigma} =
+    \boldsymbol{F} \boldsymbol{\varepsilon}`:
+
+    .. math::
+
+        \boldsymbol{f}_{int} = \int \boldsymbol{B}(\boldsymbol{c})^\top
+        \boldsymbol{\sigma} \, dA
+
+    the gradient of the strain energy `\frac{1}{2} \int
+    \boldsymbol{\varepsilon}^\top \boldsymbol{F} \boldsymbol{\varepsilon}
+    \, dA`.
+
+    The integrals are evaluated with ``nx x ny`` Gauss-Legendre points
+    over the integration domain `x_1 \le x \le x_2`, `y_1 \le y \le y_2` of
+    :meth:`.Shell.integration_limits`, the whole shell by default.
+
+    """
     cdef double [:, ::1] gtab, ftab
     cdef double x1, x2, y1, y2, xinf, xsup, yinf, ysup
     cdef double r
@@ -1417,20 +1777,77 @@ def calc_fext_follower(double [::1] cs, double [:, ::1] pnxny,
         int size, int col0, int quadratic=0, int reference=1):
     r"""Force vector of a follower pressure in the configuration ``cs``
 
-    Integrates ``F_p = int p (Nu ax + Nv ay + Nw az) dA`` over the patch
-    ``px1 <= x <= px2``, ``py1 <= y <= py2``, with ``nx x ny`` Gauss-Legendre
-    points, ``(nx, ny) = pnxny.shape``, being ``pnxny[ptx, pty]`` the pressure,
-    already multiplied by the load factor, at each point. The area vector
-    ``(ax, ay, az)`` of the deformed mid-surface is, see
-    ``theory/shells/follower_pressure``::
+    Integrates, over the patch ``px1 <= x <= px2``, ``py1 <= y <= py2``
+    with ``nx x ny`` Gauss-Legendre points, ``(nx, ny) = pnxny.shape``,
+    the force vector of a pressure that stays normal to the deformed
+    mid-surface and acts on its deformed area. Only ``u, v, w`` enter.
 
-        ax = qf*v_x*w_y - qf*v_y*w_x - qf*w_x*ww/r - w_x
+    Parameters
+    ----------
+    cs : array-like
+        Ritz constants of the configuration, 1-D of size ``size``, in the
+        units of the displacements (the rotations in radians).
+    pnxny : array-like
+        Pressure at each Gauss-Legendre point of the patch, already
+        multiplied by the load factor, shape ``(nx, ny)``, force per unit
+        area, positive along `z`.
+    px1, px2, py1, py2 : float
+        Limits of the loaded patch along `x` and `y`, lengths.
+    shell : :class:`.Shell`
+        The shell, which gives the dimensions ``a`` and ``b``, the radius ``r``
+        of the cylinders, the numbers of terms ``m`` and ``n`` and the boundary
+        flags of the approximation functions of each field.
+    size : int
+        Size of the vector, the number of degrees of freedom of the assembly.
+    col0 : int
+        Position of the vector where the terms of this shell start.
+    quadratic : int, optional
+        ``1`` keeps the part of the area vector quadratic in the
+        displacement gradients, default ``0``.
+    reference : int, optional
+        ``1`` includes the dead part ``F_p(0)``, the load in the undeformed
+        configuration, default ``1``.
+
+    Returns
+    -------
+    fext : numpy.ndarray
+        Force vector of size ``size``.
+
+    Raises
+    ------
+    ValueError
+        If ``shell`` is not a :class:`.Shell`.
+
+    Notes
+    -----
+    With `\boldsymbol{X} = \boldsymbol{X}_0 + \boldsymbol{u}` the
+    deformed mid-surface, the virtual work of the pressure `p` is `\delta W_p
+    = \int p \, \boldsymbol{a} \cdot \delta \boldsymbol{u} \, dx \, dy`, with
+    the area vector per unit undeformed area `\boldsymbol{a} =
+    \boldsymbol{X}_{,x} \times \boldsymbol{X}_{,y} = \boldsymbol{a}_0 +
+    \boldsymbol{a}_1 + \boldsymbol{a}_2`, of order 0, 1 and 2 in the
+    displacement gradients, in the local basis of the undeformed
+    mid-surface. The force vector is
+
+    .. math::
+
+        \boldsymbol{F}_p = \int p \left[(\boldsymbol{S}^u)^\top a_x +
+        (\boldsymbol{S}^v)^\top a_y + (\boldsymbol{S}^w)^\top a_z\right]
+        dx \, dy
+
+    with `\boldsymbol{S}^u`, `\boldsymbol{S}^v`, `\boldsymbol{S}^w` the rows
+    of the approximation functions of `u`, `v`, `w`, and the area vector
+    `r_{ef} \boldsymbol{a}_0 + \boldsymbol{a}_1 + q_f \boldsymbol{a}_2` of
+    the kinematics of the module::
+
+            ax = qf*v_x*w_y - qf*v_y*w_x - qf*w_x*ww/r - w_x
         ay = -qf*u_x*w_y + qf*u_y*w_x - w_y
         az = qf*u_x*v_y - qf*u_y*v_x + qf*u_x*ww/r + ref + u_x + v_y + ww/r
 
     with ``qf = 1`` for ``quadratic=1`` and ``qf = 0`` otherwise, and ``ref =
-    1`` for ``reference=1``, which includes the dead part ``F_p(0)``, and
-    ``ref = 0`` otherwise.
+    1`` for ``reference=1`` and ``ref = 0`` otherwise. The part
+    `\boldsymbol{a}_2` is of the order of the terms that the strains
+    neglect.
 
     """
     cdef double [:, ::1] gtab, ftab
@@ -1556,12 +1973,67 @@ def calc_fext_follower(double [::1] cs, double [:, ::1] pnxny,
 def fkCfollower_num(double [::1] cs, double [:, ::1] pnxny,
         double px1, double px2, double py1, double py2, object shell,
         int size, int row0, int col0, int quadratic=0):
-    r"""Load stiffness ``-dF_p/dc`` of a follower pressure
+    r"""Load stiffness matrix of a follower pressure
 
-    See :func:`.calc_fext_follower` for the parameters. The matrix is
-    unsymmetric in general, so it is assembled in full, not as an upper
-    triangle, and must not be symmetrized. With ``quadratic=0`` it does not
-    depend on ``cs``.
+    Returns ``-dF_p/dc`` at ``cs``, ``F_p`` the force vector of
+    :func:`calc_fext_follower`. The matrix is unsymmetric in general, so
+    it is assembled in full, not as an upper triangle, and must not be
+    symmetrized. With ``quadratic=0`` it does not depend on ``cs``.
+
+    Parameters
+    ----------
+    cs : array-like
+        Ritz constants of the configuration, 1-D of size ``size``, in the
+        units of the displacements (the rotations in radians).
+    pnxny : array-like
+        Pressure at each Gauss-Legendre point of the patch, already
+        multiplied by the load factor, shape ``(nx, ny)``, force per unit
+        area, positive along `z`.
+    px1, px2, py1, py2 : float
+        Limits of the loaded patch along `x` and `y`, lengths.
+    shell : :class:`.Shell`
+        The shell, which gives the dimensions ``a`` and ``b``, the radius ``r``
+        of the cylinders, the numbers of terms ``m`` and ``n`` and the boundary
+        flags of the approximation functions of each field.
+    size : int
+        Number of rows and columns of the matrix, the number of degrees of
+        freedom of the assembly.
+    row0, col0 : int
+        Row and column of the matrix where the terms of this shell start.
+    quadratic : int, optional
+        ``1`` keeps the part of the area vector quadratic in the
+        displacement gradients, default ``0``.
+
+    Returns
+    -------
+    kC : scipy.sparse.coo_matrix
+        Matrix of shape ``(size, size)``. The matrix is assembled in full.
+
+    Raises
+    ------
+    ValueError
+        If ``shell`` is not a :class:`.Shell`.
+
+    Notes
+    -----
+    With the area vector `\boldsymbol{a}(\boldsymbol{c})` of
+    :func:`calc_fext_follower`:
+
+    .. math::
+
+        \boldsymbol{K}_F = -\frac{\partial \boldsymbol{F}_p}{\partial
+        \boldsymbol{c}} = -\int p \left[(\boldsymbol{S}^u)^\top
+        \frac{\partial a_x}{\partial \boldsymbol{c}} + (\boldsymbol{S}^v)^\top
+        \frac{\partial a_y}{\partial \boldsymbol{c}} +
+        (\boldsymbol{S}^w)^\top \frac{\partial a_z}{\partial
+        \boldsymbol{c}}\right] dx \, dy
+
+    added to the tangent stiffness matrix. For the area vector of first
+    order, `\boldsymbol{K}_F` is symmetric when `p` is uniform over the whole
+    integration domain and, on each edge, either `w = 0` or the displacement
+    normal to the edge is zero; otherwise, e.g. for a free edge, a patch or a
+    varying `p`, the load is not conservative and `\boldsymbol{K}_F` is
+    unsymmetric.
 
     """
     cdef double [:, ::1] gtab, ftab
@@ -1749,39 +2221,66 @@ def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
         double Nyy_cte=0., double Nxy_cte=0.):
     r"""Product of the tangent stiffness matrix by a vector, without assembly
 
-    Returns `\boldsymbol{K}_T(\boldsymbol{c}) \boldsymbol{v}`, with `\boldsymbol{K}_T` the
-    tangent stiffness matrix ``fkC_num(cs, ..., NLgeom=1) + fkG_num(cs, ...)``
-    at ``cs``, i.e. the exact Jacobian of :func:`calc_fint`, plus the geometric
-    stiffness matrix of the constant membrane stress state ``Nxx_cte``,
-    ``Nyy_cte`` and ``Nxy_cte``, multiplied by ``vs``. At each integration
-    point, see ``theory/shells/tangent_product``::
-
-        beta = [G] cs,   eps = ([B_L] + [B_NL]/2) cs,   deps = ([B_L] + [B_NL]) vs
-        kTv += ([B_L] + [B_NL])^T [F] deps + [G]^T [N] [G] vs
-
-    with ``[N]`` the membrane stresses of ``[F] eps``, plus the constant
-    ones. The cost is about that of :func:`calc_fint`.
+    Returns ``KT(cs) vs``, with ``KT`` the tangent stiffness matrix
+    ``fkC_num(cs, ..., NLgeom=1) + fkG_num(cs, ...)`` at ``cs``, the exact
+    Jacobian of :func:`calc_fint`, plus the geometric stiffness matrix of
+    the constant membrane stress state ``Nxx_cte``, ``Nyy_cte`` and
+    ``Nxy_cte``. The cost is about that of :func:`calc_fint`.
 
     Parameters
     ----------
     cs, vs : array-like
-        Ritz constants of the configuration and the vector, of size ``size``.
+        Ritz constants of the configuration and the vector, 1-D of size
+        ``size``.
     Finput : array-like
-        Constitutive matrix ``(8, 8)``, or one for each integration
-        point ``(nx, ny, 8, 8)``.
+        Constitutive matrix of the generalized strains of the model, shape
+        ``(8, 8)`` for the whole domain, e.g. ``shell.ABD``, or ``(nx, ny,
+        8, 8)`` with one matrix per integration point.
     shell : :class:`.Shell`
-        The shell.
+        The shell, which gives the dimensions ``a`` and ``b``, the radius ``r``
+        of the cylinders, the numbers of terms ``m`` and ``n`` and the boundary
+        flags of the approximation functions of each field.
     size, col0 : int
-        Size of the vectors and offset of the shell in them.
+        Size of the vectors and position where the terms of this shell
+        start.
     nx, ny : int
-        Number of integration points.
+        Number of Gauss-Legendre points along `x` and `y`.
     Nxx_cte, Nyy_cte, Nxy_cte : float, optional
-        Constant membrane stress state.
+        Constant membrane stress resultants, force per unit length, default
+        ``0``.
 
     Returns
     -------
-    kTv : np.ndarray
+    kTv : numpy.ndarray
         The product, of size ``size``.
+
+    Raises
+    ------
+    ValueError
+        If ``cs`` or ``vs`` do not have the size ``size``, ``Finput`` has an
+        invalid shape or ``shell`` is not a :class:`.Shell`.
+
+    Notes
+    -----
+    At each integration point, with the gradients `\boldsymbol{G}
+    \boldsymbol{c}` of the non-linear terms of the strains, the strains
+    `\boldsymbol{\varepsilon} = (\boldsymbol{B}_L + \frac{1}{2}
+    \boldsymbol{B}_{NL}) \boldsymbol{c}` and the membrane stress resultants
+    `\boldsymbol{N}` of `\boldsymbol{F} \boldsymbol{\varepsilon}`, plus the
+    constant ones:
+
+    .. math::
+
+        \boldsymbol{K}_T \boldsymbol{v} = \int \left[(\boldsymbol{B}_L +
+        \boldsymbol{B}_{NL})^\top \boldsymbol{F} (\boldsymbol{B}_L +
+        \boldsymbol{B}_{NL}) \boldsymbol{v} + \boldsymbol{G}^\top
+        \boldsymbol{N} \boldsymbol{G} \boldsymbol{v}\right] dA
+
+    evaluated without forming `\boldsymbol{K}_T`.
+
+    The integrals are evaluated with ``nx x ny`` Gauss-Legendre points
+    over the integration domain `x_1 \le x \le x_2`, `y_1 \le y \le y_2` of
+    :meth:`.Shell.integration_limits`, the whole shell by default.
 
     """
     cdef double x1, x2, y1, y2, xinf, xsup, yinf, ysup

@@ -220,8 +220,8 @@ def calc_kt_kr(p1, p2, connection_type):
     connected, instead of using fixed high values, a common practice in the
     literature [1]_ .
 
-    For details on how to derive these equations, see [1]_ (MD paper eqn
-    34-40). With the stiffnesses `A^{(1)}, A^{(2)}` and `D^{(1)}, D^{(2)}`
+    For details on how to derive these equations, see [1]_, Eqs.
+    (34)-(40). With the stiffnesses `A^{(1)}, A^{(2)}` and `D^{(1)}, D^{(2)}`
     of ``p1`` and ``p2`` selected by ``connection_type``, e.g. `A_{11}` and
     `D_{11}` for ``'xcte'``, and the thicknesses `h_1, h_2`:
 

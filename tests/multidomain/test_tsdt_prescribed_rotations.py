@@ -4,7 +4,22 @@ The rotations ``phix`` and ``phiy`` prescribed with
 :meth:`.Shell.add_point_pd`, :meth:`.Shell.add_distr_pd_fixed_x` and
 :meth:`.Shell.add_distr_pd_fixed_y`, imposed with ``MultiDomain(...,
 pd_method='null-space')``, are the rotations of the normal at the reference
-surface `z = 0`,
+surface `z = 0`, `\theta_x` and `\theta_y`, the same rotations tied by the
+connections, see :mod:`panels.multidomain.connections.kCsdt`. Verified
+against `\theta_x`, `\theta_y` evaluated from the fields with
+:meth:`.Shell.uvw` and :meth:`.Shell.strain`:
+
+- the rows of the prescribed ``'phix'`` and ``'phiy'`` give `\theta_x` and
+  `\theta_y`;
+- a prescribed rotation, at a point or along an edge, of a pressure loaded
+  panel is reached by `\theta`, not by the rotation `\phi` at the
+  mid-surface;
+- for the FSDT, and for the TSDT with `d = 0`, the prescribed rotation is
+  `\phi`.
+
+Notes
+-----
+With the offset `d` and the thickness `h` of the panel,
 
 .. math::
 
@@ -13,8 +28,6 @@ surface `z = 0`,
     \theta_y = v_{,z}\big|_{z=0} = \Phi_y - \frac{4 d^2}{h^2} (\phi_y +
     w_{,y})
 
-with the offset `d` and the thickness `h` of the panel, the same rotations
-tied by the connections, see :mod:`panels.multidomain.connections.kCsdt`.
 `\phi_x, \phi_y` are the rotations at the mid-surface of the TSDT field
 `u(z) = u + z \phi_x - c_1 [(z - d)^3 + d^3] (\phi_x + w_{,x})`, and `\phi
 + w_{,x}` is the transverse shear strain ``gxz`` (or ``gyz``) of
@@ -155,7 +168,7 @@ def test_prescribed_rotation_with_offset(model, kind, comp, offset):
 @pytest.mark.parametrize('comp', [PHIX, PHIY])
 def test_prescribed_rotation_without_offset_is_phi(model, kind, comp):
     r"""For the TSDT with `d = 0` and for the FSDT with any offset the
-    prescribed rotation is `\phi`, as in the previous versions"""
+    prescribed rotation is `\phi`"""
     offset = 0. if 'tsdt' in model else 0.3*H
     p = _shell(model, offset)
     p.add_pressure_load(-2.e5)

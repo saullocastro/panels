@@ -1,3 +1,36 @@
+r"""Damage propagation in a double cantilever beam (DCB) with a cohesive zone
+
+The DCB of the thesis of D'Souza (2024), 65 mm long, 25 mm wide, with a
+pre-crack of 48 mm and arms of 15 plies at 0 degrees, with the AS4D/PEKK-FC
+ply properties, mode I fracture toughness and interlaminar strength of Tijs
+et al. (2022, Table 1 and Section 3.1), is opened under
+displacement control by :func:`dcb_damage_prop_no_f_kcrack`. Each arm has
+three domains connected by ``'SSxcte'``, and the arms are bonded over the
+uncracked length by ``'SB_TSL'`` with a bilinear traction-separation law.
+
+``test_dcb_damage_prop_no_f_kcrack`` (slow) verifies, at the end of each
+increment, against the results of a previous run of the same model stored in
+``REF_W``, ``REF_P``, ``REF_FAILED`` and ``REF_MAX_DMG``:
+
+- every increment converges (displacement of the loaded edge);
+- the reaction of the prescribed displacement equals the area integral of
+  the tractions of the cohesive zone;
+- the load-displacement curve, linear and then softening, with the peak
+  load at the sixth increment;
+- no damage up to 3 mm, then a growing fully damaged area.
+
+References
+----------
+.. [1] D'Souza, N., "Multi-Domain Semi-Analytical Cohesive Zone Approach",
+   MSc thesis, Delft University of Technology, 2024.
+   https://resolver.tudelft.nl/uuid:4709f888-c032-4d9f-97e3-402dfdd47cf1
+.. [2] Tijs, B. H. A. H., Abdel-Monsef, S., Renart, J., Turon, A., Bisagni,
+   C., Characterization and analysis of the interlaminar behavior of
+   thermoplastic composites considering fiber bridging and R-curve effects.
+   Composites Part A: Applied Science and Manufacturing 162 (2022) 107101.
+   https://doi.org/10.1016/j.compositesa.2022.107101
+
+"""
 import sys
 sys.path.append('../..')
 import os
@@ -42,17 +75,24 @@ import time
 def scaling(vec, D):
     """Norm of ``vec`` scaled by the diagonal ``D``, over its non-null entries
 
-    ``sqrt(sum(vec_j**2/|D_j|))``, the scaling that Crisfield (1981, p. 58,
-    Eqs. 27 and 28) attributes to Peano and Riccioni (1978) and uses in the
-    convergence test of his arc-length procedure.
+    Returns ``sqrt(sum(vec_j**2/|D_j|))`` over the entries ``j`` where ``D``
+    is not close to zero.
 
-    Crisfield, M. A., A fast incremental/iterative solution procedure that
-    handles "snap-through", Computers & Structures, 13(1-3), 55-62, 1981.
-    https://doi.org/10.1016/0045-7949(81)90108-5
+    Notes
+    -----
+    This is the scaling that Crisfield (1981, p. 58, Eqs. 27 and 28) [1]_
+    attributes to Peano and Riccioni (1978) [2]_ and uses in the convergence
+    test of his arc-length procedure.
 
-    Peano, A. and Riccioni, R., Automated discretisation error control in
-    finite element analysis, in: Robinson, J. (ed.), Finite Elements in the
-    Commercial Environment, Robinson and Associates, Verwood, 368-387, 1978.
+    References
+    ----------
+    .. [1] Crisfield, M. A., "A fast incremental/iterative solution procedure
+       that handles snap-through", Computers & Structures, 13(1-3), 55-62,
+       1981. https://doi.org/10.1016/0045-7949(81)90108-5
+    .. [2] Peano, A. and Riccioni, R., "Automated discretisation error
+       control in finite element analysis", in: Robinson, J. (ed.), Finite
+       Elements in the Commercial Environment, Robinson and Associates,
+       Verwood, 368-387, 1978.
 
     """
     non_nulls = ~np.isclose(D, 0)
@@ -62,8 +102,10 @@ def scaling(vec, D):
 
 
 def img_popup(filename, plot_no = None, title = None):
-    '''
-    plot_no = current plot no
+    '''Shows the image ``filename`` with matplotlib
+
+    ``plot_no`` is the position of the image in a subplot of 1 x 2 images
+    (``None``: a single image), ``title`` replaces ``filename`` as the title.
     '''
     image = img.imread(filename)
     if plot_no is None:
@@ -87,88 +129,171 @@ def dcb_damage_prop_no_f_kcrack(phy_dim, nr_terms, k_i=None, tau_o=None, nr_x_ga
                                 kT_pan_reuse_steps=5, line_search=True,
                                 line_search_max=6, max_NR_iter=50,
                                 max_bisections=6, use_kernels=False):
-    r"""Damage propagation from a DCB with a precrack
+    r"""Damage propagation from a DCB with a pre-crack
 
-        Code for 2 panels might not be right
+    Builds the DCB with ``phy_dim[0]`` domains per arm, bonds the arms over
+    the uncracked length with ``'SB_TSL'`` (bilinear traction-separation
+    law), prescribes the opening `w_p` along the loaded edge of the top arm,
+    with the bottom arm supported under it, and solves each increment with
+    the modified Newton-Raphson method. Writes ``<filename>.txt`` (log),
+    ``test_dcb_damage.png`` and the results as ``.npy`` files (``DI_``,
+    ``del_``, ``k_``, ``F_``, ``Fdmg_``, ``c_`` followed by ``filename``) to
+    the current directory. All units in MPa, N, mm.
 
-        All units in MPa, N, mm
+    Parameters
+    ----------
+    phy_dim : list
+        ``[nr_pan, a, b, precrack_len]``: number of domains per arm (3 or 4;
+        the branch for 2 domains is incomplete), length, width and pre-crack
+        length of the DCB (mm).
+    nr_terms : list
+        ``[m_tsl, n_tsl, m, n]``: terms of the domains of the cohesive zone
+        and of the other domains.
+    k_i : float
+        Initial penalty stiffness of the cohesive zone (N/mm^3).
+    tau_o : float
+        Traction at damage onset (MPa).
+    nr_x_gauss, nr_y_gauss : int, optional
+        Gauss-Legendre points of the cohesive zone along `x` and `y`
+        (default 60 and 30).
+    w_iter_info : list
+        ``[number of increments, maximum opening w_max (mm)]``; the
+        increments are denser between ``0.375*w_max`` and ``0.625*w_max``.
+    G1c : float
+        Mode I fracture toughness (N/mm).
+    name : list
+        ``[filename, foldername]``, ``filename`` names the output files.
+    edge_penalty_factor : float, optional
+        Multiplies the default penalties of :func:`.calc_kt_kr` for the
+        ``'SSxcte'`` connections. With the default penalties each connection
+        behaves as a hinge at the crack-tip moment, and the elastic stiffness
+        of this DCB drops by about 20 %.
+    load_reversal : bool, optional
+        Unloads and reloads the specimen close to the end.
+    consistent_tangent : bool, optional
+        Adds the damage-rate part of the tangent stiffness of the cohesive
+        zone, :meth:`.MultiDomain.calc_kT_TSL`, to the Jacobian. Without it
+        only the secant stiffness is used and the convergence is slow while
+        the crack grows.
+    predictor : bool, optional
+        Starts each increment from a linear extrapolation of the last two
+        converged states, instead of the last one.
+    kT_pan_reuse_steps : int, optional
+        While there is no damage, the tangent stiffness of the panels is
+        reused for up to this number of increments. The residual is always
+        exact, so the solution does not change. Use 0 to evaluate it at the
+        start of every increment.
+    line_search : bool, optional
+        Backtracking line search on the Newton-Raphson corrections, with at
+        most ``line_search_max`` halvings of the step.
+    line_search_max : int, optional
+        See ``line_search``.
+    max_NR_iter, max_bisections : int, optional
+        An increment that does not converge in ``max_NR_iter`` iterations, or
+        diverges, is bisected, and the analysis is aborted only when a
+        sub-increment of ``2**-max_bisections`` of the original increment
+        still does not converge.
+    use_kernels : bool, optional
+        Assembles the ``'SB_TSL'`` connection with the Cython kernels of
+        ``kCSB_dmg.pyx`` instead of the matrix products: slower, same
+        matrices.
 
-        edge_penalty_factor : multiplies the default penalties of
-            :func:`.calc_kt_kr` for the 'SSxcte' connections. With the default
-            penalties each connection behaves as a hinge at the crack-tip
-            moment, and the elastic stiffness of this DCB drops by about 20%.
-        load_reversal : unloads and reloads the specimen close to the end.
-        consistent_tangent : adds the damage-rate part of the tangent
-            stiffness of the cohesive zone, :meth:`.MultiDomain.calc_kT_TSL`,
-            to the Jacobian. Without it only the secant stiffness is used and
-            the convergence is slow while the crack grows.
-        predictor : starts each increment from a linear extrapolation of the
-            last two converged states, instead of the last one.
-        kT_pan_reuse_steps : while there is no damage, the tangent stiffness
-            of the panels is reused for up to this number of increments. The
-            residual is always exact, so the solution does not change. Use 0
-            to evaluate it at the start of every increment.
-        line_search : backtracking line search on the Newton-Raphson
-            corrections, with at most line_search_max halvings of the step.
-        max_NR_iter, max_bisections : an increment that does not converge in
-            max_NR_iter iterations, or diverges, is bisected, and the
-            analysis is aborted only when a sub-increment of
-            2**-max_bisections of the original increment still does not
-            converge.
-        use_kernels : assembles the 'SB_TSL' connection with the Cython
-            kernels of kCSB_dmg.pyx instead of the matrix products, slower,
-            same matrices.
+    Returns
+    -------
+    dmg_index, del_d, kw_tsl : ndarray
+        Damage index, separation and penalty stiffness of the cohesive zone
+        at its Gauss-Legendre points, as returned by
+        :meth:`.MultiDomain.calc_k_dmg`, shape ``(nr_y_gauss, nr_x_gauss,
+        number of increments)``.
+    force_intgn : ndarray
+        Shape ``(number of increments, 2)``: the largest displacement `w` of
+        the loaded domain (mm) and the reaction of the prescribed
+        displacement, :meth:`.MultiDomain.reaction_line_pd_xcte` (N).
+    c_all : ndarray
+        Ritz constants at the end of each increment, shape ``(size, number of
+        increments)``.
 
-        The DCB is loaded under displacement control, with the prescribed
-        displacement `w_p` imposed with the penalty `k_w = 10^6` along the
-        loaded edge of the top arm, and the residual is:
+    Notes
+    -----
+    The DCB is loaded under displacement control, with the prescribed
+    displacement `w_p` imposed with the penalty `k_w = 10^6` along the
+    loaded edge of the top arm, and the residual is:
 
-        .. math::
+    .. math::
 
-            \boldsymbol{R} = \boldsymbol{F}^{panels}_{int} + \boldsymbol{K}^{conn}_{dmg}(d)\boldsymbol{c}
-                    + \boldsymbol{K}^{pen}_{PD}\boldsymbol{c} - \boldsymbol{F}_{ext}
+        \boldsymbol{R} = \boldsymbol{F}^{panels}_{int} + \boldsymbol{K}^{conn}_{dmg}(d)\boldsymbol{c}
+                + \boldsymbol{K}^{pen}_{PD}\boldsymbol{c} - \boldsymbol{F}_{ext}
 
-        without the term `U_{crack}` of the thesis of D'Souza (2024)
-        [nathan2024MSc]_, which counts the dissipated energy twice. The
-        secant stiffness of the cohesive zone `\boldsymbol{K}^{conn}_{dmg}` is part of
-        the internal force vector and is evaluated at every iteration, like
-        its damage-rate part `\boldsymbol{K}^{conn}_{\dot d}`, while the tangent
-        stiffness of the panels `\boldsymbol{K}_C + \boldsymbol{K}_G` is refreshed every
-        ``NR_kT_update = 3`` iterations (modified Newton-Raphson). The
-        iteration matrix is `\boldsymbol{K}_C + \boldsymbol{K}_G + \boldsymbol{K}^{conn}_{dmg} +
-        \boldsymbol{K}^{conn}_{\dot d} + \boldsymbol{K}^{pen}_{PD}`.
+    without the term `U_{crack}` of the thesis of D'Souza (2024) [1]_, which
+    counts the dissipated energy twice. The secant stiffness of the cohesive
+    zone `\boldsymbol{K}^{conn}_{dmg}` is part of the internal force vector
+    and is evaluated at every iteration, like its damage-rate part
+    `\boldsymbol{K}^{conn}_{\dot d}`, while the tangent stiffness of the
+    panels `\boldsymbol{K}_C + \boldsymbol{K}_G` is refreshed every
+    ``NR_kT_update = 3`` iterations (modified Newton-Raphson). The iteration
+    matrix is `\boldsymbol{K}_C + \boldsymbol{K}_G + \boldsymbol{K}^{conn}_{dmg} +
+    \boldsymbol{K}^{conn}_{\dot d} + \boldsymbol{K}^{pen}_{PD}`.
 
-        With ``predictor=True`` the increment `n` starts from
-        `\boldsymbol{c}_{n-1} + \frac{w_{p,n} - w_{p,n-1}}{w_{p,n-1} - w_{p,n-2}}
-        (\boldsymbol{c}_{n-1} - \boldsymbol{c}_{n-2})`, with the state `w_p = 0`, `\boldsymbol{c} = \boldsymbol{0}`
-        used for the second increment. The line search takes the first step
-        `s = 1, 1/2, \dots, 2^{-n_{ls}}` with `\|\boldsymbol{R}(\boldsymbol{c}_i + s \delta \boldsymbol{c})\|_{\boldsymbol{d}} \le (1 - 10^{-4} s) \|\boldsymbol{R}(\boldsymbol{c}_i)\|_{\boldsymbol{d}}`,
-        or the trial with the smallest norm, a trial whose residual is not
-        finite counting as an infinite norm, where `\|\boldsymbol{v}\|_{\boldsymbol{d}} =
-        \sqrt{\boldsymbol{v}^\top \mathrm{diag}(|\boldsymbol{d}|)^{-1} \boldsymbol{v}}` and the diagonal
-        scaling vector `\boldsymbol{d}` holds the diagonal of the iteration
-        matrix at the start of the increment. The convergence criterion
-        is:
+    With ``predictor=True`` the increment `n` starts from
+    `\boldsymbol{c}_{n-1} + \frac{w_{p,n} - w_{p,n-1}}{w_{p,n-1} - w_{p,n-2}}
+    (\boldsymbol{c}_{n-1} - \boldsymbol{c}_{n-2})`, with the state `w_p = 0`, `\boldsymbol{c} = \boldsymbol{0}`
+    used for the second increment. The line search takes the first step
+    `s = 1, 1/2, \dots, 2^{-n_{ls}}` with `\|\boldsymbol{R}(\boldsymbol{c}_i + s \delta \boldsymbol{c})\|_{\boldsymbol{d}} \le (1 - 10^{-4} s) \|\boldsymbol{R}(\boldsymbol{c}_i)\|_{\boldsymbol{d}}`,
+    or the trial with the smallest norm, a trial whose residual is not
+    finite counting as an infinite norm, where `\|\boldsymbol{v}\|_{\boldsymbol{d}} =
+    \sqrt{\boldsymbol{v}^\top \mathrm{diag}(|\boldsymbol{d}|)^{-1} \boldsymbol{v}}` and the diagonal
+    scaling vector `\boldsymbol{d}` holds the diagonal of the iteration
+    matrix at the start of the increment. The convergence criterion
+    is:
 
-        .. math::
+    .. math::
 
-            \frac{\|\boldsymbol{R}\|_{\boldsymbol{d}}}{\max\left(
-            \|\boldsymbol{F}_{int}\|_{\boldsymbol{d}}, \|\boldsymbol{K}^{pen}_{PD}\boldsymbol{c} -
-            \boldsymbol{F}_{ext}\|_{\boldsymbol{d}} \right)} < 10^{-4}
+        \frac{\|\boldsymbol{R}\|_{\boldsymbol{d}}}{\max\left(
+        \|\boldsymbol{F}_{int}\|_{\boldsymbol{d}}, \|\boldsymbol{K}^{pen}_{PD}\boldsymbol{c} -
+        \boldsymbol{F}_{ext}\|_{\boldsymbol{d}} \right)} < 10^{-4}
 
-        with the reaction of the prescribed displacement in place of
-        `\boldsymbol{F}_{ext}`, which is dominated by the penalty `k_w`. An increment
-        whose ratio is not finite or exceeds `10^3`, or that does not
-        converge in ``max_NR_iter`` iterations, is discarded and bisected; the
-        damage history is only updated with converged states. A sub-increment
-        of `2^{-6}` of the original increment (``max_bisections``) that still
-        does not converge aborts the analysis. The load is
-        the reaction of the prescribed displacement,
-        :meth:`.MultiDomain.reaction_line_pd_xcte`, and the area integral of
-        the traction, :meth:`.MultiDomain.force_out_plane_damage`, must match
-        it.
+    with the reaction of the prescribed displacement in place of
+    `\boldsymbol{F}_{ext}`, which is dominated by the penalty `k_w`. An increment
+    whose ratio is not finite or exceeds `10^3`, or that does not
+    converge in ``max_NR_iter`` iterations, is discarded and bisected; the
+    damage history is only updated with converged states. A sub-increment
+    of `2^{-6}` of the original increment (``max_bisections``) that still
+    does not converge aborts the analysis. The load is
+    the reaction of the prescribed displacement,
+    :meth:`.MultiDomain.reaction_line_pd_xcte`, and the area integral of
+    the traction, :meth:`.MultiDomain.force_out_plane_damage`, must match
+    it.
 
-        See doc/source/cohesive_zone.rst
+    The ply properties of the active branch (``TP - 65,25,48``) are those of
+    the AS4D/PEKK-FC thermoplastic composite of Tijs et al. (2022) [2]_,
+    Table 1 (p. 3): `E_1` and `E_2` are the averages of the tensile and
+    compressive moduli (138 300 and 128 000 MPa, 10 400 and 11 500 MPa), as
+    in their analytical solution (Section 2.3), `G_{12} = 5190` MPa and
+    `\nu_{12} = 0.316`; the ply thickness of 0.14 mm is that of Section 2.1
+    (p. 2), the 15 plies per arm are half of their 30-ply specimen (Section
+    2.2) and the traction at damage onset ``tau_o = 87`` MPa of the test is
+    their matrix tensile strength (Table 1). The pre-crack length of 48 mm
+    and ``G1c = 1.12`` N/mm of the test are those of their analytical
+    solution of the DCB (Section 3.1, p. 8). The second, inactive, material
+    is the APC (PEKK-FC UD) lamina of the MSc thesis of Baciu (2020) [3]_,
+    Table 3.1 (p. 17): `E_1 = 126.1` GPa, `E_2 = 11.2` GPa (compressive
+    moduli), `G_{12} = 5.46` GPa, `\nu_{12} = 0.319`.
+
+    References
+    ----------
+    .. [1] D'Souza, N., "Multi-Domain Semi-Analytical Cohesive Zone
+       Approach", MSc thesis, Delft University of Technology, 2024.
+       https://resolver.tudelft.nl/uuid:4709f888-c032-4d9f-97e3-402dfdd47cf1
+    .. [2] Tijs, B. H. A. H., Abdel-Monsef, S., Renart, J., Turon, A.,
+       Bisagni, C., Characterization and analysis of the interlaminar
+       behavior of thermoplastic composites considering fiber bridging and
+       R-curve effects. Composites Part A: Applied Science and Manufacturing
+       162 (2022) 107101. https://doi.org/10.1016/j.compositesa.2022.107101
+    .. [3] Baciu, T. D., "Numerical and experimental study on post-buckling
+       skin-stringer separation in butt-joined stiffened thermoplastic
+       panels", MSc thesis, Delft University of Technology, 2020.
+       https://repository.tudelft.nl/record/uuid:e032a959-de73-4d32-ad68-f342167ba090
+
     """
     filename=name[0]
     foldername=name[1]
@@ -188,7 +313,7 @@ def dcb_damage_prop_no_f_kcrack(phy_dim, nr_terms, k_i=None, tau_o=None, nr_x_ga
     precrack_len = phy_dim[3]
 
     # Properties
-    if True: # Bas's paper (TP - 65,25,48)
+    if True: # TP - 65,25,48, source in the Notes
         E1 = (138300. + 128000.)/2. # MPa
         E2 = (10400. + 11500.)/2. # MPa
         G12 = 5190. # MPa
@@ -196,7 +321,7 @@ def dcb_damage_prop_no_f_kcrack(phy_dim, nr_terms, k_i=None, tau_o=None, nr_x_ga
         ply_thickness = 0.14 # mm
         plies = 15
         simple_layup = [0]*plies
-    if False: # Bas's paper with QI laminate
+    if False: # same material, QI laminate
         E1 = (138300. + 128000.)/2. # MPa
         E2 = (10400. + 11500.)/2. # MPa
         G12 = 5190. # MPa
@@ -204,7 +329,7 @@ def dcb_damage_prop_no_f_kcrack(phy_dim, nr_terms, k_i=None, tau_o=None, nr_x_ga
         ply_thickness = 0.2625 # mm
         simple_layup = [0,90,45,-45]
         simple_layup += simple_layup[::-1]
-    if False: # Theodores thesis
+    if False: # second material, source in the Notes
         E1 = 126100. # MPa
         E2 = 11200. # MPa
         G12 = 5460. # MPa
@@ -879,7 +1004,8 @@ REF_MAX_DMG = np.array([0., 0., 0., 0.3875, 0.7474, 1., 1., 1.])
 
 @pytest.mark.slow
 def test_dcb_damage_prop_no_f_kcrack(tmp_path, monkeypatch):
-    # p3_70_25_m18_8_ki1e5_tauo67_nx60_ny30_wpts30_G1c112
+    # 3 domains per arm, 65 x 25 mm, pre-crack 48 mm, k_i = 1e4 N/mm^3,
+    # tau_o = 87 MPa, 50 x 25 Gauss points, 8 increments up to 8 mm
     # the driver writes its results to the current directory
     monkeypatch.chdir(tmp_path)
     dmg_index, del_d, kw_tsl, force_intgn, c_all = dcb_damage_prop_no_f_kcrack(phy_dim=[3,65,25,48],

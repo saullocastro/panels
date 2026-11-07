@@ -1,13 +1,22 @@
 r"""Curvature term of the piston theory for cylindrical shells
 
 For a flow along `x` the aerodynamic load on the shell along `w` is `q =
-\beta w_{,x} + \gamma w`, see :meth:`.Shell.calc_kA`. The term `\gamma w`,
-with `\gamma = \beta/(2 r \sqrt{M^2 - 1})`, is Krumhaar's correction for the
-external flow over a cylinder with `w` positive outwards: an outward
-displacement lowers the pressure, pulling the shell outwards.
+\beta w_{,x} + \gamma w`, see :meth:`.Shell.calc_kA`. The curvature term
+`\gamma w` of Krumhaar (1963) is checked against the exact linear potential
+flow over a cylinder and against the numerical kernels; plates have no
+curvature term.
 
-Reference: Krumhaar, H., "The accuracy of linear piston theory when applied
-to cylindrical shells", AIAA J., 1(6), 1448-1449, 1963.
+Notes
+-----
+The term `\gamma w`, with `\gamma = \beta/(2 r \sqrt{M^2 - 1})`, is
+Krumhaar's correction [1]_ for the external flow over a cylinder with `w`
+positive outwards: an outward displacement lowers the pressure, pulling the
+shell outwards.
+
+References
+----------
+.. [1] Krumhaar, H., "The accuracy of linear piston theory when applied to
+   cylindrical shells", AIAA J., 1(6), 1448-1449, 1963.
 """
 import sys
 sys.path.append('../..')

@@ -62,25 +62,39 @@ matrix being then integrated numerically. The attributes ``Nxx_cte``,
 ``Nyy_cte`` and ``Nxy_cte`` give instead a constant prestress, whose
 geometric stiffness is added to the constitutive stiffness by
 :meth:`.Shell.calc_kC` and is therefore not multiplied by the eigenvalue of
-``lb(kC, kG)``. See :doc:`ex_linear_buckling`.
+``lb(kC, kG)``.
 
 
-Example
--------
+Virtual work and convergence
+----------------------------
 
-A simply supported isotropic square plate under a uniform pressure, whose
-central deflection is compared with the Navier series:
+With `\boldsymbol{S}^u`, `\boldsymbol{S}^v` and `\boldsymbol{S}^w` the rows of
+the approximation functions of `u`, `v` and `w`, the external force vector
+is the virtual work of the loads, e.g. for a pressure `p(x, y)` and a point
+force `(f_x, f_y, f_z)` at `(x_0, y_0)`:
 
-.. literalinclude:: ../../tests/tests_shell/test_pressure_load.py
-    :pyobject: make_shell
+.. math::
+    :label: loads-fext
 
-.. literalinclude:: ../../tests/tests_shell/test_pressure_load.py
-    :pyobject: central_deflection
+    \boldsymbol{F}_{ext} = \int_A (\boldsymbol{S}^w)^\top p \, dA
+    + \left. \left( (\boldsymbol{S}^u)^\top f_x + (\boldsymbol{S}^v)^\top f_y
+    + (\boldsymbol{S}^w)^\top f_z \right) \right|_{(x_0, y_0)}
 
-.. literalinclude:: ../../tests/tests_shell/test_pressure_load.py
-    :pyobject: test_uniform_pressure_timoshenko
+the pressure being integrated over its patch, see
+:func:`.pressure_patches`, and the line forces along their line, with
+``m`` Gauss-Legendre points along `x` or ``n`` along `y`, see
+:func:`.shell_fext`. The penalty forces `k u_p` of the prescribed
+displacements enter in the same way. For a uniform pressure `q` on a simply
+supported isotropic plate, the Ritz solution converges to the Navier series
+of the central deflection
 
-The constant and incremented parts of the external force vector:
+.. math::
+    :label: loads-navier
 
-.. literalinclude:: ../../tests/tests_shell/test_pressure_load.py
-    :pyobject: test_increment
+    w\left(\frac{a}{2}, \frac{b}{2}\right) = \frac{16 q}{\pi^6 D}
+    \sum_{i = 1, 3, \dots} \sum_{j = 1, 3, \dots}
+    \frac{(-1)^{(i + j)/2 - 1}}{i j \left(i^2/a^2 + j^2/b^2\right)^2}
+
+`D = E h^3/(12(1 - \nu^2))`, which is `0.00406235 \, q a^4/D` for the
+square plate, reached to `10^{-4}` with ``m = n = 15``, see
+``tests/tests_shell/test_pressure_load.py``.

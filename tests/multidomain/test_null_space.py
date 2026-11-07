@@ -277,7 +277,8 @@ def test_cylinder_redundant_constraints():
     r"""Closed cylinder, the constraints at the ends of the edges, where the
     boundary conditions already remove the terms, are redundant
 
-    The value of the penalty method is -47055.984, see ``test_cylinder.py``.
+    The penalty method gives -47055.984 for the same model, with the default
+    penalty constants (regression value).
     """
     Nxxs = [-100.]*5
     md, eigvals, eigvecs = cylinder_compression_lb_Nxx_cte(height=0.5,
@@ -291,9 +292,10 @@ def test_cylinder_redundant_constraints():
 
 @pytest.mark.slow
 def test_cylinder_blade_stiffened_from_static():
-    r"""The default penalty constants give -39993.838, 4% below the
-    null-space method, see ``test_cylinder_blade_stiffened.py``, and 1000
-    times higher constants give -41694.868"""
+    r"""Laminated cylinder of 5 skin domains with 5 blades of
+    ``'plate_clpt_gl'``, pre-buckling state from a static analysis; the
+    same model with the default penalty constants gives -39992.223, 4 %
+    below the null-space method (regression values)"""
     Nxxs = [-100.]*5
     md, c, eigvals, eigvecs = \
         cylinder_blade_stiffened_compression_lb_Nxx_from_static(height=0.5,
@@ -302,21 +304,21 @@ def test_cylinder_blade_stiffened_from_static():
         laminaprop=LAMINAPROP, npanels=5, Nxxs_skin=Nxxs, Nxxs_blade=Nxxs,
         m=8, n=12, num_eigvalues=10, conn_method='null-space')
     assert c.shape == (md.get_size(),)
-    assert np.isclose(Nxxs[0]*eigvals[0], -41696.682, rtol=1e-5)
+    assert np.isclose(Nxxs[0]*eigvals[0], -41694.725, rtol=1e-5)
 
 
 def test_tstiff2d_freq():
     r"""T-stiffened panel with ``'SSxcte'``, ``'SSycte'``, ``'SB'`` and
     ``'BFycte'``, whose base and skin have a different number of terms, the
-    penalty method gives 48.2733 with the default penalty constants and
-    48.3858 with 100 times higher constants, see
+    penalty method gives 48.4404 with the default penalty constants and
+    48.5611 with 100 times higher constants, see
     ``test_tstiff2d_assembly.py``"""
     assy, eigvals, eigvecs = tstiff2d_1stiff_freq(b=1., bb=0.2, bf=0.1, a=3.,
         ys=0.5, defect_a=0.1, rho=1.3e3, plyt=0.125e-3, laminaprop=LAMINAPROP,
         stack_skin=[0, 45, -45, 90, -45, 45, 0], stack_base=[0, 90, 0]*4,
         stack_flange=[0, 90, 0]*8, m=6, n=7, mb=5, nb=6, mf=6, nf=7,
         num_eigvalues=10, conn_method='null-space')
-    assert np.isclose((-eigvals[0])**0.5, 48.3875, rtol=1e-5)
+    assert np.isclose((-eigvals[0])**0.5, 48.5631, rtol=1e-5)
 
 
 def test_T_is_reused_and_rebuilt():

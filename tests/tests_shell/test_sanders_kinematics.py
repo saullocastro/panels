@@ -1,41 +1,57 @@
 r"""Cylindrical shells with Sanders-Koiter against Donnell kinematics
 
-The references are:
+The models ``cylshell_clpt_sanders`` and ``cylshell_clpt_donnell`` are
+compared on panels and closed shells supported by shear diaphragms (SD):
 
-- Sanders, J. L., "An improved first-approximation theory for thin shells",
-  NASA TR R-24, 1959: all strains of Sanders' theory vanish for rigid-body
-  motions, which is not the case for Love's or Donnell's theories.
-
-- Leissa, A. W., "Vibration of shells", NASA SP-288, 1973, with the
-  frequency parameter `\Omega = \omega R \sqrt{\rho (1 - \nu^2)/E}` of
-  circular cylindrical shells supported by shear diaphragms (SD). According
-  to Leissa (p. 158), an open panel of angle `\theta_0` supported on all
-  four edges by shear diaphragms has the same frequencies as the closed
-  shell with `n = \pi/\theta_0` circumferential waves.
-
-  - Table 2.8: frequencies of 3D elasticity, and Tables 2.6 and 2.7:
-    percent differences of each shell theory with respect to them.
-  - Tables 2.46 and 2.47: deep open shells, `\theta_0 > \pi`.
-
-- Loy, C. T., Lam, K. Y. and Shu, C., "Analysis of cylindrical shells using
-  generalized differential quadrature", Shock and Vibration, 4, 193-198,
-  1997, with Love's theory, as reproduced in Table 1 of Li, S.-R., Fu, X.-H.
-  and Batra, R. C., Mech. Res. Commun., 37, 577-580, 2010.
-
-- Batdorf, S. B., NACA TR 874, 1947, and NASA SP-8007-2020/REV 2, Sec.
-  4.1.1.1: axial buckling of cylindrical shells and panels with Donnell's
-  equations.
+- rigid-body motions, which leave all strains of Sanders' theory zero,
+  Sanders (1959), and the closed-form strain energy of Donnell's kinematics
+  for a rigid translation;
+- natural frequencies, with the frequency parameter `\Omega = \omega R
+  \sqrt{\rho (1 - \nu^2)/E}`, against Leissa (1973), Tables 2.6, 2.8 and
+  2.46, against Love's theory of Loy, Lam and Shu (1997), as reproduced in
+  Table 1 of Li, Fu and Batra (2010), and against the exact Navier solutions
+  of the Donnell and Sanders kinematics computed herein,
+  :func:`navier_frequency`;
+- axial buckling of a panel against Batdorf (1947) with Donnell's
+  equations, NASA SP-8007-2020/REV 2, Sec. 4.1.1.1.
 
 Leissa's values neglect the rotary inertia, which is included in the mass
-matrices of this package. The mass matrix without it is obtained exactly
-from two mass matrices, since the rotary inertia scales with `h^3` and the
-translational inertia with `h`: evaluating ``calc_kM()`` with ``(h, rho)``
-and ``(2 h, rho/2)`` gives `M_1 = M_t + M_r` and `M_2 = M_t + 4 M_r`, such
-that `M_t = (4 M_1 - M_2)/3`.
+matrices of this package; :func:`translational_mass` removes it.
 
-The exact solutions of the Donnell and Sanders kinematics are also computed
-herein, with the Navier solution of the SD-SD panel, which Leissa's tables
-confirm to the printed digits.
+Notes
+-----
+All strains of Sanders' theory vanish for rigid-body motions, which is not
+the case for Love's or Donnell's theories [1]_. According to Leissa [2]_
+(p. 158), an open panel of angle `\theta_0` supported on all four edges by
+shear diaphragms has the same frequencies as the closed shell with `n =
+\pi/\theta_0` circumferential waves. Table 2.8 of [2]_ gives the
+frequencies of 3D elasticity, and Tables 2.6 and 2.7 the percent
+differences of each shell theory with respect to them; Tables 2.46 and 2.47
+give deep open shells, `\theta_0 > \pi`. Love's theory is that of [3]_, as
+reproduced in [4]_; the axial buckling load is that of [5]_.
+
+The mass matrix without rotary inertia is obtained exactly from two mass
+matrices, since the rotary inertia scales with `h^3` and the translational
+inertia with `h`: evaluating ``calc_kM()`` with ``(h, rho)`` and ``(2 h,
+rho/2)`` gives `M_1 = M_t + M_r` and `M_2 = M_t + 4 M_r`, such that `M_t =
+(4 M_1 - M_2)/3`.
+
+The exact solutions of the Donnell and Sanders kinematics use the Navier
+solution of the SD-SD panel, which Leissa's tables confirm to the printed
+digits.
+
+References
+----------
+.. [1] Sanders, J. L., "An improved first-approximation theory for thin
+   shells", NASA TR R-24, 1959.
+.. [2] Leissa, A. W., "Vibration of shells", NASA SP-288, 1973.
+.. [3] Loy, C. T., Lam, K. Y. and Shu, C., "Analysis of cylindrical shells
+   using generalized differential quadrature", Shock and Vibration, 4,
+   193-198, 1997.
+.. [4] Li, S.-R., Fu, X.-H. and Batra, R. C., Mech. Res. Commun., 37,
+   577-580, 2010.
+.. [5] Batdorf, S. B., NACA TR 874, 1947, and NASA SP-8007-2020/REV 2, Sec.
+   4.1.1.1.
 """
 import sys
 sys.path.append('../..')
@@ -91,7 +107,7 @@ def make_panel(model, R, h, L, theta0, m=12, n=12, stack=None,
 
 
 def translational_mass(s):
-    """Mass matrix without rotary inertia, see the module docstring"""
+    """Mass matrix without rotary inertia, see the module notes"""
     h = s.lam.h
     rho = s.lam.intrho/h
     shape = (s.nx, s.ny)
@@ -172,7 +188,7 @@ LEISSA = [
     (20, 20, 1, 0.0191493, 0.0161029, 'Leissa T2.6/T2.8, 3D = 0.0161063'),
     # 3D elasticity gives 0.129881
     (20, 4, 3, 0.143327, 0.130244, 'Leissa T2.6/T2.8, 3D = 0.129881'),
-    # Love's theory by Loy et al. (1997) gives 0.009382
+    # Love's theory gives 0.009382
     (100, 20, 2, 0.011623, 0.009378, 'Loy et al. (1997), Love = 0.009382'),
 ]
 
@@ -346,9 +362,9 @@ def test_rigid_body_motions_are_strain_free(name):
     """Sanders (1959): all strains vanish for any rigid-body motion
 
     Donnell's changes of curvature do not vanish for the translations normal
-    to the axis, `kyy = A cos(theta)/R**2` (see the kinematics in the theory
-    folder), nor for the rotations about the axes normal to it, e.g. `kxy =
-    -2 w,xy` for the rotation about the z axis.
+    to the axis, `kyy = A cos(theta)/R**2`, nor for the rotations about the
+    axes normal to it, e.g. `kxy = -2 w,xy` for the rotation about the z
+    axis.
     """
     amplitude = 1.e-3
     maxima = {}
@@ -375,14 +391,16 @@ def test_rigid_translation_strain_energy():
     For a translation `d` along the radial direction at the center of the
     panel, `w = d \cos\theta`, `v = -d \sin\theta`, Donnell's change of
     curvature `\kappa_{\theta} = d \cos\theta/R^2` is the only non-zero
-    strain, such that
+    strain, whereas `U_S = 0` for Sanders' kinematics.
+
+    Notes
+    -----
+    The strain energy of Donnell's kinematics is
 
     .. math::
 
         U_D = \frac{D_{22} L d^2}{2 R^3}\left(\frac{\theta_0}{2}
               + \frac{\sin\theta_0}{2}\right)
-
-    whereas `U_S = 0` for Sanders' kinematics.
     """
     d = 1.e-3
     energies = {}

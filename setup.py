@@ -4,7 +4,7 @@ The package metadata, including the version, is in ``pyproject.toml``.
 This file keeps only what ``pyproject.toml`` cannot express: the Cython
 extensions with their compiler flags per platform and the file
 ``panels/version.py``, written from the version of ``pyproject.toml``
-and read by ``panels.version`` and ``doc/source/conf.py``.
+and read by ``panels.version`` and by the configuration of the documentation.
 """
 import copy
 import platform
@@ -33,15 +33,15 @@ def read_version():
         return tomllib.load(f)['project']['version']
 
 
-# NOTE the year of the copyright of the documentation, read by
-#      doc/source/conf.py
+# NOTE the year of the copyright of the documentation, read by its
+#      configuration
 YEAR = '2026'
 
 
 def write_version_py(version):
-    """Write ``panels/version.py``, with the fields of the former scheme
-    (``short_version``, ``version``, ``full_version``, ``svn_revision``,
-    ``isreleased``, ``__year__``, ``__version__``), all from the version
+    """Write ``panels/version.py``, with the fields ``short_version``,
+    ``version``, ``full_version``, ``svn_revision``, ``isreleased``,
+    ``__year__`` and ``__version__``, all from the version
     of ``pyproject.toml``"""
     cnt = """# This file is generated automatically by the setup.py
 short_version = '%(version)s'
@@ -209,6 +209,21 @@ extensions = [
         include_dirs=include_dirs, extra_compile_args=compile_args,
               extra_link_args=link_args, define_macros=define_macros,
               language='c++'),
+    Extension('panels.models.frame_web_clpt_donnell',
+        sources=[
+            './panels/models/frame_web_clpt_donnell.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.frame_web_clpt_donnell_num',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/frame_web_clpt_donnell_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
     Extension('panels.models.plate_clpt_tl_num',
         sources=[
             './panels/core/src/bardell_functions.cpp',
@@ -321,6 +336,70 @@ extensions = [
         include_dirs=include_dirs, extra_compile_args=compile_args,
               extra_link_args=link_args, define_macros=define_macros,
               language='c++'),
+    Extension('panels.models.plate_fsdt_gl',
+        sources=[
+            './panels/core/src/bardell.cpp',
+            './panels/models/plate_fsdt_gl.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.plate_fsdt_gl_num',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/plate_fsdt_gl_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.cylshell_fsdt_gl',
+        sources=[
+            './panels/core/src/bardell.cpp',
+            './panels/models/cylshell_fsdt_gl.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.cylshell_fsdt_gl_num',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/cylshell_fsdt_gl_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.plate_tsdt_gl',
+        sources=[
+            './panels/core/src/bardell.cpp',
+            './panels/models/plate_tsdt_gl.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.plate_tsdt_gl_num',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/plate_tsdt_gl_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.cylshell_tsdt_gl',
+        sources=[
+            './panels/core/src/bardell.cpp',
+            './panels/models/cylshell_tsdt_gl.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.cylshell_tsdt_gl_num',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/cylshell_tsdt_gl_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
     Extension('panels.models.cylshell_clpt_donnell',
         sources=[
             './panels/core/src/bardell.cpp',
@@ -353,6 +432,30 @@ extensions = [
         include_dirs=include_dirs, extra_compile_args=compile_args,
               extra_link_args=link_args, define_macros=define_macros,
               language='c++'),
+    Extension('panels.models.cylshell_clpt_gl',
+        sources=[
+            './panels/core/src/bardell.cpp',
+            './panels/models/cylshell_clpt_gl.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.cylshell_clpt_gl_num',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/cylshell_clpt_gl_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.cylshell_clpt_tl_num',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/cylshell_clpt_tl_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
 # stiffener models
     Extension('panels.stiffener.models.bladestiff1d_clt_donnell',
         sources=[
@@ -368,6 +471,15 @@ extensions = [
             './panels/core/src/bardell.cpp',
             './panels/core/src/bardell_functions.cpp',
             './panels/stiffener/models/bladestiff2d_clt_donnell.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.stiffener.models.bladestiff2d_clt_sanders',
+        sources=[
+            './panels/core/src/bardell.cpp',
+            './panels/core/src/bardell_functions.cpp',
+            './panels/stiffener/models/bladestiff2d_clt_sanders.pyx',
             ],
         include_dirs=include_dirs, extra_compile_args=compile_args,
               extra_link_args=link_args, define_macros=define_macros,

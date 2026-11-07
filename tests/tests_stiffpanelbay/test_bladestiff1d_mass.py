@@ -4,9 +4,9 @@ The kinetic energy of the flange, of height `b_f` and thickness `h_f`, below
 the panel with its centroid at `z = -d_f`, is obtained integrating
 `\rho (u_f^2 + v_f^2 + w^2)` with `u_f = u + z \phi_x` and `v_f = v + z
 \phi_y` over the height, exactly, and along `x` with Gauss-Legendre points.
-This checks the coupling terms `-d_f` of the kernel ``fkMf``, which were `-2
-d_f` up to version 0.7.1 as in Eq. (26) of Castro et al. (2016), and the
-thickness `h_b` of the base entering `d_f` and `k_{mf44}`.
+This checks the coupling terms `-d_f` of the kernel ``fkMf`` (Eq. (26) of
+Castro et al. (2016) has `-2 d_f`), and the thickness `h_b` of the base
+entering `d_f` and `k_{mf44}`.
 """
 import sys
 sys.path.append('../..')

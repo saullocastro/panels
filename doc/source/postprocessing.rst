@@ -59,24 +59,7 @@ arrays, e.g. the fields and the results, in NumPy's format, and
 :func:`panels.multidomain.load` read it back; the matrices are not stored
 and are calculated again. File objects, e.g. :class:`io.BytesIO`, are
 accepted in place of file names. The format and the attributes stored are
-described in :mod:`panels.json_io`.
-
-
-Examples
---------
-
-A shell saved after a linear buckling and a static analysis, with the
-eigenpairs, the Ritz constants and the stress resultants, gives the same
-matrices and results once loaded:
-
-.. literalinclude:: ../../tests/test_json.py
-    :pyobject: _shell
-
-.. literalinclude:: ../../tests/test_json.py
-    :pyobject: test_shell_after_analysis
-
-A contour plot of the bending moment ``Mxx`` of a :class:`.Shell` with the
-options of :func:`.plot_shell`:
-
-.. literalinclude:: ../../tests/tests_shell/test_plot_shell.py
-    :pyobject: test_plot_shell_options
+described in :mod:`panels.json_io`. Since the inputs are stored exactly,
+a model loaded back rebuilds the same laminate and the same matrices, and
+the stored eigenpairs, Ritz constants and fields are those saved, bit for
+bit, see ``tests/test_json.py``.

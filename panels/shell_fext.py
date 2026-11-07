@@ -74,7 +74,6 @@ def shell_fext(shell, inc, size, col0, include_pds=True):
     inc : float
         Since this function is called during the non-linear analysis,
         ``inc`` will multiply the terms `\boldsymbol{F}_{ext_\lambda}`.
-        col0 = starting col in the global matrix ?????
         Dimensionless.
     size : int, str or None
         The size of the force vector. Can be the size of the total internal
@@ -315,9 +314,19 @@ def shell_fext(shell, inc, size, col0, include_pds=True):
 
 
 def _uv_force(shell, fu, fv, x, y, z):
-    r"""Force vector `f_u \boldsymbol{g}_u(z) + f_v \boldsymbol{g}_v(z)` of the prescribed
-    in-plane displacements at the thickness coordinate ``z``, with the size
-    of the Ritz constants of ``shell``, see :func:`.nullspace.pd_rows`"""
+    r"""Force vector of the prescribed in-plane displacements at ``z``
+
+    The vector has the size of the Ritz constants of ``shell``; ``fu`` and
+    ``fv`` are the forces of the penalty method at the point ``(x, y)``.
+
+    Notes
+    -----
+    The vector is `f_u \boldsymbol{g}_u(z) + f_v \boldsymbol{g}_v(z)`, with
+    `\boldsymbol{g}_u(z)` and `\boldsymbol{g}_v(z)` the rows of the in-plane
+    displacements `u(z)` and `v(z)` at the thickness coordinate `z`, see
+    :func:`.nullspace.pd_rows`, and `f_u = k_u u_p`, `f_v = k_v v_p`.
+
+    """
     from .multidomain.connections import nullspace
     xis = np.array([2*x/shell.a - 1])
     etas = np.array([2*y/shell.b - 1])

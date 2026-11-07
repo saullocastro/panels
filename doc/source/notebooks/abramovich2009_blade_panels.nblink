@@ -1,0 +1,6 @@
+{
+    "path": "../../../notebooks/abramovich2009_blade_panels.ipynb",
+    "extra-media": [
+        "../../../notebooks/posicoss_utils.py"
+    ]
+}

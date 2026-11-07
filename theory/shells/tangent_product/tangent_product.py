@@ -12,9 +12,9 @@ where `\boldsymbol{B}_{NL}` is linear in the rotations `\boldsymbol{\beta}` of t
 terms, `\boldsymbol{\beta} = \{\beta_x, \beta_y\} = \{-w_{,x}, -w_{,y}\}` (Donnell, with
 `\beta_y = -w_{,y} + v/r` for Sanders, i.e. the rotations `\{\phi_x, \phi_y\}` of
 ``cylshell_clpt_sanders`` for the CLPT), and enters only the membrane rows
-(for ``plate_clpt_gl``, with the Green-Lagrange membrane strains,
-`\boldsymbol{\beta}` are the six gradients of `u, v, w` and `\boldsymbol{N}` below has
-one block per displacement, see :func:`operators`):
+(for ``plate_clpt_gl`` and ``cylshell_clpt_gl``, with the Green-Lagrange
+membrane strains, `\boldsymbol{\beta}` are the six gradients of `u, v, w` and
+`\boldsymbol{N}` below has one block per displacement, see :func:`operators`):
 
 .. math::
 
@@ -81,10 +81,12 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, '..', 'fsdt_tsdt'))
 sys.path.insert(0, os.path.join(HERE, '..', 'cylshell_clpt_sanders'))
 sys.path.insert(0, os.path.join(HERE, '..', 'plate_clpt_gl'))
+sys.path.insert(0, os.path.join(HERE, '..', 'cylshell_clpt_gl'))
 
 import fsdt_tsdt
 import cylshell_clpt_sanders as clpt_sanders
 import plate_clpt_gl as clpt_gl
+import cylshell_clpt_gl as cyl_gl
 
 a, b, r = symbols('a, b, r')
 bx, by = symbols('bx, by')
@@ -102,6 +104,7 @@ MODELS = {
     'cylshell_tsdt_donnell': ('tsdt', 'cylshell', 'donnell'),
     'cylshell_tsdt_sanders': ('tsdt', 'cylshell', 'sanders'),
     'plate_clpt_gl': ('clpt', 'plate', 'gl'),
+    'cylshell_clpt_gl': ('clpt', 'cylshell', 'gl'),
 }
 
 
@@ -140,12 +143,20 @@ def _clpt_donnell(geometry):
     return B, M([Gx, Gy])
 
 
-def _clpt_gl():
-    r"""`\boldsymbol{B}_L + \boldsymbol{B}_{NL}` and `\boldsymbol{G}` of the CLPT with Green-Lagrange
-    membrane strains, ``plate_clpt_gl.py``, whose `\boldsymbol{\beta}` are the six
-    gradients `u_{,x}, u_{,y}, v_{,x}, v_{,y}, w_{,x}, w_{,y}`"""
-    m = clpt_gl.build()
-    return m['BA'], m['GA']
+def _clpt_gl(geometry):
+    r"""`\boldsymbol{B}_L + \boldsymbol{B}_{NL}`, `\boldsymbol{G}` and the symbols of
+    `\boldsymbol{\beta}` of the CLPT with Green-Lagrange membrane strains,
+    ``plate_clpt_gl.py``, whose `\boldsymbol{\beta}` are the six gradients
+    `u_{,x}, u_{,y}, v_{,x}, v_{,y}, w_{,x}, w_{,y}`, or ``cylshell_clpt_gl.py``,
+    whose `\boldsymbol{\beta}` are the six local gradients `u_{,x}, u_{,y},
+    v_{,x}, v_{,y} + w/r, w_{,x}, w_{,y} - v/r`"""
+    if geometry == 'plate':
+        m = clpt_gl.build()
+        return m['BA'], m['GA'], clpt_gl.GRAD
+    m = cyl_gl.build()
+    #NOTE the radius of cylshell_clpt_gl.py is a positive symbol
+    rs = {cyl_gl.r: r}
+    return m['BA'].xreplace(rs), m['GA'].xreplace(rs), cyl_gl.BETA
 
 
 def operators(model):
@@ -154,18 +165,17 @@ def operators(model):
     fields and the number of generalized strains of ``model``
 
     `\boldsymbol{\beta}` has two rotations, `(\beta_x, \beta_y)`, and `\boldsymbol{N}` is
-    `[[N_{xx}, N_{xy}], [N_{xy}, N_{yy}]]`, except for ``'plate_clpt_gl'``,
-    whose `\boldsymbol{\beta}` are the six gradients ``plate_clpt_gl.GRAD`` and
-    `\boldsymbol{N}` the block-diagonal matrix with one such block per
-    displacement `u, v, w`.
+    `[[N_{xx}, N_{xy}], [N_{xy}, N_{yy}]]`, except for ``'plate_clpt_gl'`` and
+    ``'cylshell_clpt_gl'``, whose `\boldsymbol{\beta}` are the six gradients
+    ``plate_clpt_gl.GRAD`` or ``cylshell_clpt_gl.BETA`` and `\boldsymbol{N}` the
+    block-diagonal matrix with one such block per displacement `u, v, w`.
 
     """
     theory, geometry, kinematics = MODELS[model]
     N2 = M([[Nxx, Nxy], [Nxy, Nyy]])
     Nmat = N2
     if kinematics == 'gl':
-        B, G = _clpt_gl()
-        rot = clpt_gl.GRAD
+        B, G, rot = _clpt_gl(geometry)
         fields = ('u', 'v', 'w')
         Nmat = diag(N2, N2, N2)
     elif theory == 'clpt' and kinematics == 'donnell':

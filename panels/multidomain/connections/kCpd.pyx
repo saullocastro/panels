@@ -6,6 +6,45 @@
 #cython: overflowcheck=False
 #cython: embedsignature=True
 #cython: infer_types=False
+r"""
+Kernels of the prescribed displacements imposed with penalties
+
+Penalty stiffness matrices of a displacement prescribed at a point,
+:func:`.fkCpd`, or along a line of constant `x`, :func:`.fkCld_xcte`, or
+of constant `y`, :func:`.fkCld_ycte`, used with ``pd_method='penalty'`` of
+:class:`.MultiDomain`: a spring of stiffness ``ku``, ``kv`` or ``kw``
+between the panel and the support, for any model of :mod:`panels.modelDB`.
+The in-plane displacements are those at the thickness coordinate ``z`` given
+to :meth:`.Shell.add_point_pd`, :meth:`.Shell.add_distr_pd_fixed_x` or
+:meth:`.Shell.add_distr_pd_fixed_y`, by default the reference surface. The
+penalty constants may be computed with :func:`.calc_ku_kv_kw_point_pd`,
+:func:`.calc_ku_kv_kw_line_pd_xcte` and :func:`.calc_ku_kv_kw_line_pd_ycte`.
+The matrices are returned as their upper triangle.
+
+Notes
+-----
+The penalty energy of a component `q` of `u, v, w` prescribed to the value
+`\bar{q}` is `\frac{1}{2} k_q (q - \bar{q})^2` at a point, or its integral
+along a line, whose second derivative with respect to the Ritz constants
+`\boldsymbol{c}` gives the stiffness `k_q \boldsymbol{N}_q^\top
+\boldsymbol{N}_q`, with `q = \boldsymbol{N}_q \boldsymbol{c}`; the force
+`k_q \bar{q} \boldsymbol{N}_q^\top` is added to the external force vector,
+see :func:`.shell_fext`. `\boldsymbol{N}_q` holds the products `f_i(\xi)
+g_j(\eta)` of the Legendre-based (Bardell) approximation functions of the
+field [1]_. With ``z = 0`` the kernels compute the products in closed form,
+with the integrals of Bardell's functions along a line; otherwise the rows
+`\boldsymbol{N}_q` of `u(z)` and `v(z)` combine `u` or `v`, a rotation and
+a slope of `w`, see :func:`.nullspace.pd_rows`, and the line integrals are
+computed with Gauss-Legendre points, see :func:`._fkC_z`.
+
+References
+----------
+.. [1] Castro, S. G. P., and Donadon, M. V., Assembly of Semi-Analytical
+   models to Address Linear Buckling and Vibration of Stiffened Composite
+   Panels with Debonding Defect, Composite Structures, 160, 232-247, 2017.
+   https://doi.org/10.1016/j.compstruct.2016.10.026
+
+"""
 from scipy.sparse import coo_matrix
 import numpy as np
 
@@ -14,7 +53,8 @@ from panels import modelDB as _modelDB
 
 
 def _dofs(p):
-    r"""Number of degrees of freedom per term of the model of ``p``
+    r"""
+    Number of degrees of freedom per term of the model of ``p``
 
     Parameters
     ----------
@@ -43,17 +83,49 @@ def _dofs(p):
 
 
 def _fkC_z(ks, p, xp, yp, z, size, row0, col0):
-    r"""Penalty stiffness of the prescribed `u`, `v` and `w` at the
-    thickness coordinate ``z``, at the point ``(xp, yp)`` or along the line
-    ``xp`` (``yp=None``) or ``yp`` (``xp=None``)
+    r"""
+    Penalty stiffness of the prescribed `u`, `v` and `w` at a thickness
+    coordinate
 
-    The rows of each component are those of
-    :func:`.nullspace.pd_rows`, combinations of the fields, of the
-    rotations and of the slopes of `w` for ``z`` different from zero. Along
-    a line the integral is computed with ``max(num, 4)`` Gauss-Legendre
-    points, ``num`` the number of terms along the line, exact for the
-    products of the polynomials of Bardell's functions. Returns the upper
-    triangle, as the kernels with ``z = 0``.
+    The penalty stiffness at the point ``(xp, yp)``, or along the line ``xp``
+    (``yp=None``) or ``yp`` (``xp=None``), with the in-plane displacements at
+    the thickness coordinate ``z``. The rows of each component are those of
+    :func:`.nullspace.pd_rows`. A penalty equal to zero adds no term.
+
+    Parameters
+    ----------
+    ks : tuple of float
+        Penalty stiffnesses ``(ku, kv, kw)``.
+    p : :class:`.Shell`
+        Panel with the prescribed displacement.
+    xp, yp : float or None
+        Coordinates of the point, length; ``None`` for the coordinate along a
+        line.
+    z : float
+        Thickness coordinate of `u` and `v`, measured from the reference
+        surface, length.
+    size : int
+        Size of the stiffness matrix of the assembly.
+    row0, col0 : int
+        First row and first column of the panel in the matrix of the assembly.
+
+    Returns
+    -------
+    kC : scipy.sparse.coo_matrix
+        Upper triangle of the penalty stiffness, shape ``(size, size)``, as
+        the kernels with ``z = 0``.
+
+    Notes
+    -----
+    The stiffness is `\sum_q k_q \sum_k w_k \boldsymbol{N}_q^\top(s_k)
+    \boldsymbol{N}_q(s_k)`, with `\boldsymbol{N}_q` the row of the component
+    `q` of :func:`.nullspace.pd_rows`, a combination of the fields, of the
+    rotations and of the slopes of `w` for ``z`` different from zero. At a
+    point the sum has one term with `w_k = 1`; along a line the points `s_k`
+    and weights `w_k` are those of a Gauss-Legendre rule with ``max(num, 4)``
+    points, ``num`` the number of terms along the line, scaled by half the
+    length of the line, which is exact for the products of the polynomials of
+    Bardell's functions.
 
     """
     from numpy.polynomial.legendre import leggauss
@@ -102,14 +174,14 @@ def fkCpd(double ku, double kv, double kw, object p, double xp, double yp,
     Parameters
     ----------
     ku, kv, kw : float
-        Translation penalty stiffnesses.
-        Use this to specify which disp is being provided. The corresponding stiffness is non zero - rest are zero
+        Translation penalty stiffnesses of `u`, `v` and `w`, force per unit
+        length; a zero stiffness leaves the component free.
     p : :class:`.Shell`
         Panel with the prescribed displacement, of any model of
         :mod:`panels.modelDB`, the stride of its Ritz constants being the
         number of degrees of freedom per term of the model.
     xp, yp : float
-        Positions x and y of the prescribed displacement. This is in physical (x,y) coordinates
+        Coordinates `x` and `y` of the point, length.
     size : int
         Size of the stiffness matrix of the assembly, the sum of
         ``dofs*p.m*p.n`` of its panels, with ``dofs`` the number of degrees
@@ -189,7 +261,7 @@ def fkCpd(double ku, double kv, double kw, object p, double xp, double yp,
     y1v = p.y1v ; y1vr = p.y1vr ; y2v = p.y2v ; y2vr = p.y2vr
     y1w = p.y1w ; y1wr = p.y1wr ; y2w = p.y2w ; y2wr = p.y2wr
 
-    fdim = 3*m*n*m*n # 3 bec the matrix (from the sym expressions) has only 1 sparse term. Might be better to make it a var and then change it
+    fdim = 3*m*n*m*n # one entry per field u, v, w and pair of terms
 
     kCpdr = np.zeros((fdim,), dtype=INT)
     kCpdc = np.zeros((fdim,), dtype=INT)
@@ -202,7 +274,7 @@ def fkCpd(double ku, double kv, double kw, object p, double xp, double yp,
     # i,j controls f and g for A (so starting from the left term)
     # k,l ...  for B (... right)
     
-    # i, j are for the rows (see the line where the row is being updated) - check var_descr.py CHECK 
+    # i, j are for the rows
     # k, l are for the cols
     
     gtab = np.zeros((3, n), dtype=DOUBLE)
@@ -288,7 +360,7 @@ def fkCld_xcte(double ku, double kv, double kw, object p, double xp,
         :mod:`panels.modelDB`, the stride of its Ritz constants being the
         number of degrees of freedom per term of the model.
     xp : float
-        Position x of the prescribed line displacement. This is in physical (x,y) coordinates
+        Coordinate `x` of the line, length.
     size : int
         Size of the stiffness matrix of the assembly, the sum of
         ``dofs*p.m*p.n`` of its panels, with ``dofs`` the number of degrees
@@ -367,7 +439,7 @@ def fkCld_xcte(double ku, double kv, double kw, object p, double xp,
     y1v = p.y1v ; y1vr = p.y1vr ; y2v = p.y2v ; y2vr = p.y2vr
     y1w = p.y1w ; y1wr = p.y1wr ; y2w = p.y2w ; y2wr = p.y2wr
 
-    fdim = 3*m*n*m*n # 1 bec the matrix has only 1 sparse term. Might be better to make it a var and then change it
+    fdim = 3*m*n*m*n # one entry per field u, v, w and pair of terms
 
     kCld_xcter = np.zeros((fdim,), dtype=INT)
     kCld_xctec = np.zeros((fdim,), dtype=INT)
@@ -378,8 +450,8 @@ def fkCld_xcte(double ku, double kv, double kw, object p, double xp,
 
 
     # i,j controls f and g for A (so starting from the left term)
-    # l,m ...  for B (... right)
-    # i, j are for the rows (see the line where the row is being updated) - WHY THOUHG?? CHECK 
+    # k, l ...  for B (... right)
+    # i, j are for the rows
     # k, l are for the cols
     
     ftab = np.zeros((3, m), dtype=DOUBLE)
@@ -456,7 +528,7 @@ def fkCld_ycte(double ku, double kv, double kw, object p, double yp,
         :mod:`panels.modelDB`, the stride of its Ritz constants being the
         number of degrees of freedom per term of the model.
     yp : float
-        Position y of the prescribed line displacement. This is in physical (x,y) coordinates
+        Coordinate `y` of the line, length.
     size : int
         Size of the stiffness matrix of the assembly, the sum of
         ``dofs*p.m*p.n`` of its panels, with ``dofs`` the number of degrees
@@ -533,7 +605,7 @@ def fkCld_ycte(double ku, double kv, double kw, object p, double yp,
     y1v = p.y1v ; y1vr = p.y1vr ; y2v = p.y2v ; y2vr = p.y2vr
     y1w = p.y1w ; y1wr = p.y1wr ; y2w = p.y2w ; y2wr = p.y2wr
 
-    fdim = 3*m*n*m*n # 1 bec the matrix has only 1 sparse term. Might be better to make it a var and then change it
+    fdim = 3*m*n*m*n # one entry per field u, v, w and pair of terms
 
     kCld_ycter = np.zeros((fdim,), dtype=INT)
     kCld_yctec = np.zeros((fdim,), dtype=INT)
@@ -544,8 +616,8 @@ def fkCld_ycte(double ku, double kv, double kw, object p, double yp,
 
 
     # i,j controls f and g for A (so starting from the left term)
-    # l,m ...  for B (... right)
-    # i, j are for the rows (see the line where the row is being updated) - WHY THOUHG?? CHECK 
+    # k, l ...  for B (... right)
+    # i, j are for the rows
     # k, l are for the cols
     
     gtab = np.zeros((3, n), dtype=DOUBLE)

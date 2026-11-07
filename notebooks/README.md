@@ -1,23 +1,40 @@
 # Notebooks and scripts
 
-Validation notebooks of `panels` against results of the literature, the
-utilities they share, and the scripts of the studies of the cohesive zone
-model. The notebooks need `panels` (`pip install panels`, or the repository
+Usage examples and validation notebooks of `panels` against results of the
+literature, the utilities they share, and the scripts of the studies of the
+cohesive zone model. The documentation renders the notebooks with their
+stored outputs, through the files `doc/source/notebooks/*.nblink`. The
+notebooks need `panels` (`pip install panels`, or the repository
 built in place with `python setup.py build_ext --inplace` and on the
 `PYTHONPATH`) and are run from this folder. The scripts are run from the root
 of the repository and put the repository first on `sys.path`.
 
 Most notebooks load stored results from `results/` and only run `panels`
-again with `RERUN = True` in their first cell. The stored results of the
-notebooks were computed with `panels` 0.14.0, `structsolve` 0.9.1 (0.9.2
-for `sze2004_hinged_roofs.ipynb`) and `composites` 0.10.0, those of
-`fk1952_shallow_arches.ipynb` with `panels` 0.14.0, `structsolve` 0.9.3
-and `composites` 0.10.1; the results
-computed again keep the run times of their first computation, except the
-DCB results, `results/*.npz`, and those of `conn_method_comparison.ipynb`,
-whose run times were measured again with `panels` 0.14.0 and `structsolve`
-0.9.2, one run at a time on an idle machine, with both connection methods
-under the same conditions.
+again with `RERUN = True` in their first cell. The notebooks that report
+run times state how they were measured.
+
+## Usage examples
+
+The notebooks `ex_*.ipynb` show the analyses of `panels` with the code of
+its tests, defined and called in the notebook, such that each notebook runs
+on its own; each code cell names the test file it is taken from. They run
+`panels` at each execution, in less than a minute each.
+
+| File | Content |
+|---|---|
+| `ex_linear_static.ipynb` | Linear static analysis and field outputs |
+| `ex_linear_buckling.ipynb` | Linear buckling, constant pre-buckling stress resultants or a static solution |
+| `ex_frequency.ipynb` | Natural frequencies, with and without pre-stress |
+| `ex_flutter.ipynb` | Panel flutter with the piston theory |
+| `ex_newton_raphson.ipynb` | Non-linear static analysis with the Newton-Raphson method, consistency of the tangent stiffness matrix |
+| `ex_arc_length.ipynb` | Arc-length methods, snap-through of a hinged cylindrical panel |
+| `ex_follower_pressure.ipynb` | Follower (hydrostatic) pressure: linear buckling, non-linear analyses, kinetic criterion |
+| `ex_prescribed_displacements.ipynb` | Prescribed displacements imposed by a `MultiDomain` |
+| `ex_face_clamp.ipynb` | Clamped and face-clamped edges |
+| `ex_multidomain_cylinder.ipynb` | Cylinders, unstiffened and blade-stiffened, as multi-domain assemblies |
+| `ex_multidomain_tstiff2d.ipynb` | Panel with a T-stiffener: buckling, frequencies and flutter |
+| `ex_multidomain_wingbox.ipynb` | Wing-box: linear buckling under a tip force |
+| `ex_stiffpanelbay.ipynb` | Stiffened panel bays |
 
 ## Mode I double cantilever beam (DCB), cohesive zone model
 

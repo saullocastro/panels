@@ -1,3 +1,16 @@
+r"""Global frame of the panels and 3D plots of a :class:`.MultiDomain`
+
+- :meth:`.Shell.global_frame` and :meth:`.Shell.global_coords`: the origin
+  and axes defined by ``x0, y0, z0``, ``point_x`` and ``point_xy``, the
+  errors for invalid points, and the points of a curved panel on the
+  cylinder of radius `r`, with `w` along the outward normal;
+- :meth:`.MultiDomain.plot3d` (requires plotly) for a cylinder and for a
+  T-stiffened panel: the panels placed in the global frame meet at the
+  connections with the same global displacement vectors on both sides of
+  each joint; the traces, buttons, hover data, scale factor of the deformed
+  geometry and the HTML controls of the figure.
+
+"""
 import base64
 import json
 

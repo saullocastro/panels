@@ -1,7 +1,7 @@
 r"""Verification of the follower pressure of :meth:`.Shell.add_pressure_load`
 
 A follower pressure stays normal to the deformed mid-surface and acts on its
-deformed area, see ``theory/shells/follower_pressure/follower_pressure.py``.
+deformed area.
 Its force vector `\boldsymbol{F}_p(\boldsymbol{c})` enters the residual through
 :meth:`.Shell.calc_fint`, and its load stiffness `\boldsymbol{K}_F = -\partial
 \boldsymbol{F}_p/\partial \boldsymbol{c}`, :meth:`.Shell.calc_kCfollower`, enters

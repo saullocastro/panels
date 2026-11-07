@@ -6,6 +6,63 @@
 #cython: overflowcheck=False
 #cython: embedsignature=True
 #cython: infer_types=False
+r"""
+Kernels of the skin-skin connection ``'SSxcte'``
+
+Penalty stiffness matrices of the connection along `y` between the edge
+`x_1 =` ``xcte1`` of ``p1`` and the edge `x_2 =` ``xcte2`` of
+``p2``, two domains with the same axes, for the models based on the classical
+laminated plate theory (CLPT), with 3 DOFs `u, v, w` per term:
+:func:`.fkCSSxcte11` gives the block of ``p1``, :func:`.fkCSSxcte12` the
+coupling block, rows of ``p1`` and columns of ``p2``, and
+:func:`.fkCSSxcte22` the block of ``p2``. The two edges have the same
+length, that of the edge of ``p1``. The models based on shear deformation
+theories, with 5 DOFs per term, use :func:`.kCsdt.fkCSSxcte_sdt`. With the
+default ``conn_method='null-space'`` of :class:`.MultiDomain` the same
+quantities are imposed exactly, see
+:mod:`panels.multidomain.connections.nullspace`.
+
+Notes
+-----
+The penalty energy of the connection is
+
+.. math::
+
+    U = \frac{1}{2} \int_0^{b_1} k_t \left[ (u_1 - u_2)^2 + (v_1 - v_2)^2
+        + (w_1 - w_2)^2 \right] + k_r \left( w_{1,x} - w_{2,x}
+        \right)^2 dy
+
+with the fields of ``p1`` at `x_1 = x_{cte1}` and those of ``p2``
+at `x_2 = x_{cte2}`. The rotation penalty acts on the slope normal
+to the edge, the tangential slope `w_{,y}` being continuous when `w` is.
+
+Each field of a panel is approximated as `q = \boldsymbol{N}_q
+\boldsymbol{c}`, `q = u, v, w`, with `\boldsymbol{N}_q` the products `f_i(\xi)
+g_j(\eta)` of the Legendre-based (Bardell) approximation functions of the
+field, with its boundary flags, along `\xi = 2x/a - 1` and `\eta = 2y/b -
+1` [1]_, and `\boldsymbol{c}` the Ritz constants of the panel, those of the
+term `(i, j)` at ``3*(j*m + i)`` plus ``0``, ``1``, ``2`` for `u, v, w`. The
+blocks of the connection matrix are the second derivatives of `U` with
+respect to the Ritz constants of the two panels, `\boldsymbol{K}_{11}`,
+`\boldsymbol{K}_{12}` and `\boldsymbol{K}_{22}`; `\boldsymbol{K}_{21} =
+\boldsymbol{K}_{12}^\top` is not computed and the blocks of a single panel
+are returned as their upper triangle, the matrix of the assembly being
+symmetrized afterwards. Along the connection `\int_0^{b_1} dy = (b_1/2)
+\int_{-1}^{1} d\eta`, computed with the closed-form integrals of the products
+of Bardell's functions, the two edges sharing the natural coordinate `\eta`;
+across it the functions are evaluated at the natural coordinate of the
+connection in each panel, and `\partial/\partial x = (2/a)
+\partial/\partial \xi`. The expressions of the kernels were derived
+symbolically with SymPy.
+
+References
+----------
+.. [1] Castro, S. G. P., and Donadon, M. V., Assembly of Semi-Analytical
+   models to Address Linear Buckling and Vibration of Stiffened Composite
+   Panels with Debonding Defect, Composite Structures, 160, 232-247, 2017.
+   https://doi.org/10.1016/j.compstruct.2016.10.026
+
+"""
 from scipy.sparse import coo_matrix
 import numpy as np
 
@@ -28,32 +85,52 @@ cdef extern from 'bardell_functions.hpp':
 
 def fkCSSxcte11(double kt, double kr, object p1, double xcte1, int size, int row0, int col0):
     r"""
-    Penalty approach calculation to skin-skin xcte panel 1 position.
+    Block of ``p1`` of the skin-skin connection ``'SSxcte'``
+
+    The penalty terms of the connection that involve only ``p1``, for
+    the models with 3 DOFs per term: the products of the approximation functions
+    of ``p1`` are integrated along `y` over the length of its edge and
+    evaluated at ``xcte1`` across it.
 
     Parameters
     ----------
     kt : float
-        Translation penalty stiffness.
+        Translation penalty stiffness, force per unit area.
     kr : float
-        Rotation penalty stiffness.
-    p1 : Panel
-        Panel() object
+        Rotation penalty stiffness, force.
+    p1 : :class:`.Shell`
+        First panel of the connection.
     xcte1 : float
-        Dimension value that determines the flag value eta.
-        If ycte1 = 0 => eta = -1, if ycte1 = p1.b => eta = 1.
-        Where eta=-1 stands for boundary 1 and eta=1 stands for boundary 2.
+        Coordinate `x_1` of the connection in ``p1``, length, between ``0``
+        and ``p1.a``.
     size : int
-        Size of assembly stiffness matrix, which are calculated by sum([3*p.m*p.n for p in self.panels]).
-        The size of the assembly can be calculated calling the PanelAssemly.get_size() method.
+        Size of the stiffness matrix of the assembly, see
+        :meth:`.MultiDomain.get_size`.
     row0 : int
-        Row position of constitutive matrix being calculated.
+        First row of the block in the matrix of the assembly, the
+        ``row_start`` of the panel of the rows.
     col0 : int
-        Column position of constitutive matrix being calculated.
+        First column of the block in the matrix of the assembly, the
+        ``col_start`` of the panel of the columns.
 
     Returns
     -------
     kCSSxcte11 : scipy.sparse.coo_matrix
-        A sparse matrix that adds the penalty stiffness to xcte of panel p1 position.
+        Upper triangle of the block of ``p11``, shape ``(size, size)``.
+
+    Notes
+    -----
+    The block of the penalty energy of
+    :mod:`panels.multidomain.connections.kCSSxcte`, see its Notes:
+
+    .. math::
+
+        \boldsymbol{K}_{11} = \frac{b_1}{2} \int_{-1}^{1} k_t
+        \sum_{q = u, v, w} \boldsymbol{N}_{q1}^\top \boldsymbol{N}_{q1}
+        + k_r \frac{4}{a_1^2} \boldsymbol{N}_{w1,\xi}^\top \boldsymbol{N}_{w1,\xi}
+        \, d\eta
+
+    with the functions of ``p1`` at `\xi_1 = 2 x_{cte1}/a_1 - 1`.
 
     """
     cdef double [:, ::1] ftab1
@@ -152,38 +229,60 @@ def fkCSSxcte12(double kt, double kr, object p1, object p2,
                 double xcte1, double xcte2,
                 int size, int row0, int col0):
     r"""
-    Penalty approach calculation to skin-skin xcte panel 1 and panel 2 coupling position.
+    Coupling block of the skin-skin connection ``'SSxcte'``
+
+    The penalty terms of the connection that couple ``p1`` (rows) and
+    ``p2`` (columns), for the models with 3 DOFs per term: the products of the
+    approximation functions are integrated along `y` over the length of the
+    edge of ``p1`` and evaluated at ``xcte1`` in ``p1`` and ``xcte2`` in
+    ``p2`` across it. The whole block is returned.
 
     Parameters
     ----------
     kt : float
-        Translation penalty stiffness.
+        Translation penalty stiffness, force per unit area.
     kr : float
-        Rotation penalty stiffness.
-    p1 : Panel
-        First Panel object
-    p2 : Panel
-        Second Panel object
+        Rotation penalty stiffness, force.
+    p1 : :class:`.Shell`
+        First panel of the connection.
+    p2 : :class:`.Shell`
+        Second panel of the connection, whose edge has the length of the
+        edge of ``p1``.
     xcte1 : float
-        Dimension value that determines the flag value eta.
-        If ycte1 = 0 => eta = -1, if ycte1 = p1.b => eta = 1.
-        Where eta=-1 stands for boundary 1 and eta=1 stands for boundary 2.
+        Coordinate `x_1` of the connection in ``p1``, length, between ``0``
+        and ``p1.a``.
     xcte2 : float
-        Dimension value that determines the flag value eta.
-        If ycte1 = 0 => eta = -1, if ycte1 = p1.b => eta = 1.
-        Where eta=-1 stands for boundary 1 and eta=1 stands for boundary 2.
+        Coordinate `x_2` of the connection in ``p2``, length, between ``0``
+        and ``p2.a``.
     size : int
-        Size of assembly stiffness matrix, which are calculated by sum([3*p.m*p.n for p in self.panels]).
-        The size of the assembly can be calculated calling the PanelAssemly.get_size() method.
+        Size of the stiffness matrix of the assembly, see
+        :meth:`.MultiDomain.get_size`.
     row0 : int
-        Row position of constitutive matrix being calculated.
+        First row of the block in the matrix of the assembly, the
+        ``row_start`` of the panel of the rows.
     col0 : int
-        Column position of constitutive matrix being calculated.
+        First column of the block in the matrix of the assembly, the
+        ``col_start`` of the panel of the columns.
 
     Returns
     -------
     kCSSxcte12 : scipy.sparse.coo_matrix
-        A sparse matrix that adds the penalty stiffness to xcte of panel 1 and panel 2 coupling position.
+        Coupling block, rows of ``p1`` and columns of ``p2``, shape ``(size, size)``.
+
+    Notes
+    -----
+    The block of the penalty energy of
+    :mod:`panels.multidomain.connections.kCSSxcte`, see its Notes:
+
+    .. math::
+
+        \boldsymbol{K}_{12} = -\frac{b_1}{2} \int_{-1}^{1} k_t
+        \sum_{q = u, v, w} \boldsymbol{N}_{q1}^\top \boldsymbol{N}_{q2}
+        + k_r \frac{4}{a_1 a_2} \boldsymbol{N}_{w1,\xi}^\top \boldsymbol{N}_{w2,\xi}
+        \, d\eta
+
+    with the functions of ``p1`` at `\xi_1 = 2 x_{cte1}/a_1 - 1` and
+    those of ``p2`` at `\xi_2 = 2 x_{cte2}/a_2 - 1`.
 
     """
     cdef double [:, ::1] ftab1, ftab2
@@ -299,34 +398,54 @@ def fkCSSxcte22(double kt, double kr, object p1, object p2,
                 double xcte2,
                 int size, int row0, int col0):
     r"""
-    Penalty approach calculation to skin-skin ycte panel 2 position.
+    Block of ``p2`` of the skin-skin connection ``'SSxcte'``
+
+    The penalty terms of the connection that involve only ``p2``, for
+    the models with 3 DOFs per term: the products of the approximation functions
+    of ``p2`` are integrated along `y` over the length of the edge of ``p1``
+    and evaluated at ``xcte2`` across it.
 
     Parameters
     ----------
     kt : float
-        Translation penalty stiffness.
+        Translation penalty stiffness, force per unit area.
     kr : float
-        Rotation penalty stiffness.
-    p1 : Panel
-        First Panel object
-    p2 : Panel
-        Second Panel object
+        Rotation penalty stiffness, force.
+    p1 : :class:`.Shell`
+        First panel of the connection, which gives the length of the edge.
+    p2 : :class:`.Shell`
+        Second panel of the connection.
     xcte2 : float
-        Dimension value that determines the flag value eta.
-        If ycte1 = 0 => eta = -1, if ycte1 = p1.b => eta = 1.
-        Where eta=-1 stands for boundary 1 and eta=1 stands for boundary 2.
+        Coordinate `x_2` of the connection in ``p2``, length, between ``0``
+        and ``p2.a``.
     size : int
-        Size of assembly stiffness matrix, which are calculated by sum([3*p.m*p.n for p in self.panels]).
-        The size of the assembly can be calculated calling the PanelAssemly.get_size() method.
+        Size of the stiffness matrix of the assembly, see
+        :meth:`.MultiDomain.get_size`.
     row0 : int
-        Row position of constitutive matrix being calculated.
+        First row of the block in the matrix of the assembly, the
+        ``row_start`` of the panel of the rows.
     col0 : int
-        Column position of constitutive matrix being calculated.
+        First column of the block in the matrix of the assembly, the
+        ``col_start`` of the panel of the columns.
 
     Returns
     -------
     kCSSxcte22 : scipy.sparse.coo_matrix
-        A sparse matrix that adds the penalty stiffness to xcte of panel p2 position.
+        Upper triangle of the block of ``p22``, shape ``(size, size)``.
+
+    Notes
+    -----
+    The block of the penalty energy of
+    :mod:`panels.multidomain.connections.kCSSxcte`, see its Notes:
+
+    .. math::
+
+        \boldsymbol{K}_{22} = \frac{b_1}{2} \int_{-1}^{1} k_t
+        \sum_{q = u, v, w} \boldsymbol{N}_{q2}^\top \boldsymbol{N}_{q2}
+        + k_r \frac{4}{a_2^2} \boldsymbol{N}_{w2,\xi}^\top \boldsymbol{N}_{w2,\xi}
+        \, d\eta
+
+    with the functions of ``p2`` at `\xi_2 = 2 x_{cte2}/a_2 - 1`.
 
     """
     cdef double [:, ::1] ftab2

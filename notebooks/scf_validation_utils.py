@@ -450,8 +450,7 @@ def stats_table(columns, label='model'):
 
 # Reference data
 # --------------
-# Copied from the scripts of the studies of the paper and from
-# REFERENCE_DATA.md, which were checked against the papers
+# Transcribed from the tables of the papers cited with each value
 
 #: Pagano (1970), Table 1, square [0/90/0], as printed: S: (sigma_x(a/2, b/2,
 #: 1/2), tau_xz(0, b/2, 0), tau_yz(a/2, 0, 0))
@@ -574,8 +573,7 @@ KARDOMATEAS_1995 = {
 #: Kardomateas and Philobos (1995), Tables 1 and 2, critical pbar and (n, m)
 #: of the nonshallow Donnell and of the Timoshenko shell theories:
 #: {(material, S): {b/a: ((Donnell pbar, (n, m)), (Timoshenko pbar, (n, m)))}}
-#: NOTE transcribed from the tables of the paper for these notebooks, they
-#:      are not in REFERENCE_DATA.md of the paper study; each value is
+#: NOTE transcribed from the tables of the paper; each value is
 #:      consistent with the "% increase" over the elasticity value printed
 #:      below it in the paper
 KP1995_SHELLS = {

@@ -1,12 +1,12 @@
 r"""Cantilever cylinder under a follower pressure traced with the Riks method
 
 Benchmark of Schweizerhof and Ramm (1984), Section 6.4, "Cylindrical
-cantilever shell under uniform pressure", Fig. 12, Table 4 and Fig. 13 [1]:
+cantilever shell under uniform pressure", Fig. 12, Table 4 and Fig. 13:
 E = 2.1e6, mu = 0.3, R = 100, shell 1 with L/R = 6 and R/t = 100, the upper
 edge free and the lower edge hinged, either with the warping completely
 restrained, B1, v = w = u = 0, or partially restrained, B2, v = w = 0 and u
-fixed at one point only. As in [1], a half wave of the circumference, b =
-pi R/n with n = 3, is modelled, with symmetry conditions on the straight
+fixed at one point only. As in the reference, a half wave of the
+circumference, b = pi R/n with n = 3, is modelled, with symmetry conditions on the straight
 edges, see ``test_follower_pressure_validation.schweizerhof_sector``, with
 the CLPT and the kinematics of Sanders, ``cylshell_clpt_sanders``: Donnell's
 kinematics are not accurate for n = 3 circumferential waves. The load is
@@ -14,12 +14,21 @@ p = K E/(12(1 - mu**2)) (t/R)**3, Eq. (60), the hydrostatic (follower)
 pressure with its unsymmetric load stiffness, ``follower=True``, the free
 edge making the load nonconservative.
 
-The geometric imperfection of 1 % of t in the shape of the lowest linear
-buckling mode of the follower load, the w part of the mode, of Ritz vector
-c0, is added exactly as in ``test_simo1990_cylinder_postbuckling.py``, here
-for the Sanders kinematics, whose non-linear strains are quadratic forms of
-the rotations phix = -w,x and phiy = -w,y + v/r, linear in c: the strains of
-the imperfect shell are eps(c + c0) - eps(c0), whence
+The tests check the linear buckling factors of Table 4, the consistency of
+the internal forces and of the tangent stiffness matrix of the imperfect
+shell, the inertia of the tangent stiffness matrix along the fundamental
+path of the perfect shell beyond its bifurcation, and the load-deflection
+path of Fig. 13 traced with the Riks method,
+with a geometric imperfection of 1 % of t in the shape of the w part of the
+lowest linear buckling mode of the follower load, added as in
+``test_simo1990_cylinder_postbuckling.py``.
+
+Notes
+-----
+The imperfection, of Ritz vector c0, is added exactly for the Sanders
+kinematics, whose non-linear strains are quadratic forms of the rotations
+phix = -w,x and phiy = -w,y + v/r, linear in c: the strains of the
+imperfect shell are eps(c + c0) - eps(c0), whence::
 
     fint_imp(c) = fint(c + c0) - fint(c0) - kG(N0) c
     kT_imp(c) = kT(c + c0) - kG(N0)
@@ -30,9 +39,11 @@ the rotations phix and phiy, see :func:`calc_kG_N`. The follower pressure
 acts on the imperfect geometry, its force vector at c being Fp(c + c0) and
 its load stiffness that of c + c0.
 
-[1] Schweizerhof, K., Ramm, E., Displacement dependent pressure loads in
-    nonlinear finite element analyses, Computers & Structures, 18(6),
-    1099-1114, 1984. https://doi.org/10.1016/0045-7949(84)90154-8
+References
+----------
+.. [1] Schweizerhof, K., Ramm, E., Displacement dependent pressure loads in
+   nonlinear finite element analyses, Computers & Structures, 18(6),
+   1099-1114, 1984. https://doi.org/10.1016/0045-7949(84)90154-8
 
 """
 import sys
@@ -139,12 +150,12 @@ def membrane_stresses(s, c, NLgeom=True):
 
 
 def w_max(s, c, grid=21):
-    r"""Maximum |w| over the sector"""
+    r"""Maximum ``|w|`` over the sector"""
     return np.abs(s.uvw(c, gridx=grid, gridy=grid)[1]['w']).max()
 
 
 def imperfection(s, mode, xi):
-    r"""The w part of ``mode`` scaled to a maximum |w0| of ``xi*t``"""
+    r"""The w part of ``mode`` scaled to a maximum ``|w0|`` of ``xi*t``"""
     c0 = np.zeros_like(mode)
     c0[2::3] = mode[2::3]
     w = np.ravel(s.uvw(c0, gridx=51, gridy=51)[1]['w'])

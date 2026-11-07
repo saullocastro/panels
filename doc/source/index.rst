@@ -49,6 +49,9 @@ the non-linear equations, see :mod:`panels.models`:
 * ``'plate_fsdt_donnell'``: plates, first-order shear deformation theory
 * ``'plate_tsdt_donnell'``: plates, third-order shear deformation theory of
   Reddy
+* ``'plate_fsdt_gl'``, ``'plate_tsdt_gl'``, ``'cylshell_fsdt_gl'``,
+  ``'cylshell_tsdt_gl'``: FSDT and TSDT with the Green-Lagrange membrane
+  strains, see :ref:`fsdt_tsdt_gl`
 * ``'cylshell_clpt_donnell'``: cylindrical shells, CLPT with Donnell's
   kinematics
 * ``'cylshell_clpt_sanders'``: cylindrical shells, CLPT with Sanders-Koiter's
@@ -59,6 +62,9 @@ the non-linear equations, see :mod:`panels.models`:
 * ``'cylshell_fsdt_sanders'``, ``'cylshell_tsdt_sanders'``: cylindrical
   shells, first-order and third-order shear deformation theories with
   Sanders-Koiter's kinematics
+* ``'frame_web_clpt_donnell'``: the web of a ring frame, an annular-sector
+  plate, CLPT with the von Kármán strains in polar coordinates, connected to
+  a cylinder with ``'BFxcte'``, see :ref:`frame_web_clpt_donnell`
 
 
 How the models, the boundary conditions, the loads and the assemblies fit
@@ -89,32 +95,83 @@ User guide
     follower_pressure.rst
     plate_clpt_gl.rst
     plate_clpt_tl.rst
+    cylshell_clpt_tl.rst
+    fsdt_tsdt_gl.rst
+    frame_web_clpt_donnell.rst
     tsdt_offset.rst
     multidomain_null_space.rst
     tangent_product.rst
     tabulation.rst
     cohesive_zone.rst
+    pyodide.rst
 
-
-Usage examples
---------------
 
 .. toctree::
     :maxdepth: 1
+    :caption: Worked examples
 
-    ex_linear_static.rst
-    ex_linear_buckling.rst
-    ex_frequency.rst
-    ex_flutter.rst
-    ex_newton_raphson.rst
-    ex_arc_length.rst
-    ex_follower_pressure.rst
-    ex_prescribed_displacements.rst
-    ex_face_clamp.rst
-    ex_multidomain_cylinder.rst
-    ex_multidomain_tstiff2d.rst
-    ex_multidomain_wingbox.rst
-    ex_stiffpanelbay.rst
+    notebooks/ex_linear_static.nblink
+    notebooks/ex_linear_buckling.nblink
+    notebooks/ex_frequency.nblink
+    notebooks/ex_flutter.nblink
+    notebooks/ex_newton_raphson.nblink
+    notebooks/ex_arc_length.nblink
+    notebooks/ex_follower_pressure.nblink
+    notebooks/ex_prescribed_displacements.nblink
+    notebooks/ex_face_clamp.nblink
+    notebooks/ex_multidomain_cylinder.nblink
+    notebooks/ex_multidomain_tstiff2d.nblink
+    notebooks/ex_multidomain_wingbox.nblink
+    notebooks/ex_stiffpanelbay.nblink
+
+
+.. toctree::
+    :maxdepth: 1
+    :caption: Tutorials
+
+    notebooks/pagano1970_plates.nblink
+    notebooks/varadan1991_cylinders.nblink
+    notebooks/noor1975_buckling.nblink
+    notebooks/kardomateas1993_thick_rings.nblink
+    notebooks/kardomateas1993b_1995_thick_cylinders.nblink
+    notebooks/kardomateas2003_sandwich_rings.nblink
+    notebooks/han2004_sandwich_rings.nblink
+    notebooks/nasa_sp8007_external_pressure.nblink
+    notebooks/schweizerhof1984_pressure_loads.nblink
+    notebooks/schweizerhof1984_cantilever_postbuckling.nblink
+    notebooks/sze2004_hinged_roofs.nblink
+    notebooks/sabir1972_roof_snap_back.nblink
+    notebooks/large_rotation_plates.nblink
+    notebooks/null_space_vs_penalty.nblink
+    notebooks/tangent_stiffness_product.nblink
+    notebooks/tsdt_offset_connections.nblink
+    notebooks/fk1952_shallow_arches.nblink
+    notebooks/simo1990_cylinder_postbuckling.nblink
+    notebooks/stamatelos_labeas_2023.nblink
+    notebooks/stamatelos_labeas_2023_multidomain.nblink
+    notebooks/sewall1968_blade_cylinder_vibration.nblink
+    notebooks/egle1968_few_stringer_cylinder_vibration.nblink
+    notebooks/card1966_blade_cylinder_buckling.nblink
+    notebooks/weller1977_blade_cylinder_buckling.nblink
+    notebooks/peterson1959_blade_cylinder_buckling.nblink
+    notebooks/singer1971_blade_cylinder_buckling.nblink
+    notebooks/abramovich2009_blade_panels.nblink
+    notebooks/lanzi2003_torsion_cylinder.nblink
+    notebooks/dcb_alfano2001.nblink
+    notebooks/dcb_camanho2003.nblink
+    notebooks/dcb_turon2007.nblink
+    notebooks/dcb_krueger2008.nblink
+    notebooks/dcb_tijs2022.nblink
+    notebooks/dcb_tijs2023_phd.nblink
+    notebooks/dcb_lecinana2023.nblink
+    notebooks/dcb_mode_I_validation_summary.nblink
+    notebooks/dcb_mode_I_convergence_study.nblink
+    notebooks/dcb_mode_I_solver_study.nblink
+    notebooks/cohesive_zone_verification.nblink
+    notebooks/krueger2012_mmb_benchmark.nblink
+    notebooks/conn_method_comparison.nblink
+    notebooks/test_quadrature_partial_integration_matrix.nblink
+    notebooks/test_quadrature_partial_integration_of_domain.nblink
 
 
 panels API
@@ -139,54 +196,22 @@ extensions, using::
     python -m pip install .
 
 In the browser, with `Pyodide <https://pyodide.org>`_ 314 (CPython 3.14),
-which already distributes NumPy, SciPy and matplotlib, the WebAssembly wheel
-published on PyPI is installed with ``micropip``, together with
-``composites`` and ``structsolve``::
+the WebAssembly wheel published on PyPI is installed with ``micropip``, see
+:ref:`pyodide_page`.
 
-    import micropip
-    await micropip.install("panels")
-
-    import io
-    from structsolve import lb
-    from panels.shell import Shell, load
-
-    s = Shell(a=0.6, b=0.4, stack=[0, 45, -45, 90], plyt=0.125e-3,
-              laminaprop=(142.5e9, 8.7e9, 0.28, 5.1e9, 5.1e9, 3.0e9),
-              m=10, n=10)
-    s.Nxx = -1.
-    eigvals, eigvecs = lb(s.calc_kC(), s.calc_kG(), silent=True)
-    s.results['eigvals'] = eigvals
-    s.results['eigvecs'] = eigvecs
-
-    # saving to memory, since a web page has no file system
-    buf = io.BytesIO()
-    s.save(buf)
-    data = buf.getvalue()
-
-    # offering the file for download
-    from js import Blob, Object, URL, document
-    from pyodide.ffi import to_js
-    blob = Blob.new(to_js([data]), to_js({'type': 'application/zip'},
-                                         dict_converter=Object.fromEntries))
-    link = document.createElement('a')
-    link.href = URL.createObjectURL(blob)
-    link.download = 'plate.shell.zip'
-    link.click()
-
-    # loading the bytes back, e.g. from a file uploaded by the user
-    s2 = load(io.BytesIO(data))
-
-In Pyodide the field outputs run serially, without OpenMP. See
-:mod:`panels.json_io` for the format of the saved files.
-
-
-Changelog
----------
 
 .. toctree::
     :maxdepth: 1
+    :caption: Changelog
 
     changelog.rst
+
+
+.. toctree::
+    :maxdepth: 1
+    :caption: About this documentation
+
+    documentation_levels.rst
 
 
 License

@@ -1,14 +1,7 @@
 r"""Verification of the plate with Green-Lagrange membrane strains, ``plate_clpt_gl``
 
-The model, ``theory/shells/plate_clpt_gl``, has the membrane strains
-
-.. math::
-
-    \varepsilon_{xx} = u_{,x} + \tfrac{1}{2}(u_{,x}^2 + v_{,x}^2 + w_{,x}^2), \quad
-    \varepsilon_{yy} = v_{,y} + \tfrac{1}{2}(u_{,y}^2 + v_{,y}^2 + w_{,y}^2), \quad
-    \gamma_{xy} = u_{,y} + v_{,x} + u_{,x} u_{,y} + v_{,x} v_{,y} + w_{,x} w_{,y}
-
-and the changes of curvature of ``plate_clpt_donnell``. The checks:
+The model has the Green-Lagrange membrane strains and the changes of
+curvature of ``plate_clpt_donnell``. The checks:
 
 1. a rigid rotation of a free plate, in plane, out of plane or about an
    oblique axis, by up to 1 rad, gives zero strains, internal forces and
@@ -29,6 +22,16 @@ The consistency of the tangent stiffness matrix with the internal force
 vector, of ``calc_kTv`` and of the follower pressure are checked with the
 other models in ``test_tangent_consistency.py``, ``test_tangent_product.py``
 and ``test_follower_pressure.py``.
+
+Notes
+-----
+The membrane strains of the model are
+
+.. math::
+
+    \varepsilon_{xx} = u_{,x} + \tfrac{1}{2}(u_{,x}^2 + v_{,x}^2 + w_{,x}^2), \quad
+    \varepsilon_{yy} = v_{,y} + \tfrac{1}{2}(u_{,y}^2 + v_{,y}^2 + w_{,y}^2), \quad
+    \gamma_{xy} = u_{,y} + v_{,x} + u_{,x} u_{,y} + v_{,x} v_{,y} + w_{,x} w_{,y}
 
 """
 import sys
@@ -292,8 +295,7 @@ def test_cantilever_strip_out_of_plane_follows_the_linear_curvature():
     zero by the shortening ``u``. The deflection is then that of the linear
     beam, ``w = alpha/3 L``, with ``u = -int (1 - sqrt(1 - w,x^2)) dx``,
     instead of ``w = 0.3017 L``, ``u = -0.0564 L`` of the elastica: the
-    limitation of the model for large rotations carried by plate bending,
-    see ``theory/shells/plate_clpt_gl/plate_clpt_gl.md``"""
+    limitation of the model for large rotations carried by plate bending"""
     alpha = 1.
     x = np.linspace(0, 1, 20001)
     w_x = alpha*(x - x**2/2)
