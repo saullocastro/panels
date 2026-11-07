@@ -62,9 +62,8 @@ The available models, which are selected with ``Shell.model``, are:
   of a flat plate in the plane normal to the axis of a cylinder, CLPT with
   the von Kármán strains in polar coordinates, 3 DOFs ``u, v, w``.
   ``a`` is the height of the web, ``b`` the arc length of its outer edge and
-  ``r`` its outer radius; `x = r - 
-ho` runs from the outer edge inwards and
-  `y = r 	heta` along the outer edge. It connects to a cylinder with
+  ``r`` its outer radius; `x = r - \rho` runs from the outer edge inwards and
+  `y = r \theta` along the outer edge. It connects to a cylinder with
   ``'BFxcte'``, see :mod:`panels.models.frame_web_clpt_donnell_num`.
 
 - ``'cylshell_clpt_donnell'``: cylindrical shells, CLPT with the
