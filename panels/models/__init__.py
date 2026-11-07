@@ -58,6 +58,15 @@ The available models, which are selected with ``Shell.model``, are:
   curvature of the deformed normal, all invariant under rigid rotations,
   3 DOFs ``u, v, w``.
 
+- ``'frame_web_clpt_donnell'``: the web of a ring frame, an annular sector
+  of a flat plate in the plane normal to the axis of a cylinder, CLPT with
+  the von Kármán strains in polar coordinates, 3 DOFs ``u, v, w``.
+  ``a`` is the height of the web, ``b`` the arc length of its outer edge and
+  ``r`` its outer radius; `x = r - 
+ho` runs from the outer edge inwards and
+  `y = r 	heta` along the outer edge. It connects to a cylinder with
+  ``'BFxcte'``, see :mod:`panels.models.frame_web_clpt_donnell_num`.
+
 - ``'cylshell_clpt_donnell'``: cylindrical shells, CLPT with the
   Donnell-Mushtari-Vlasov (shallow shell) kinematics, 3 DOFs ``u, v, w``.
 
@@ -98,6 +107,21 @@ The available models, which are selected with ``Shell.model``, are:
   w, phix, phiy``. For these models the fields ``phiy`` of
   :func:`.fsdt_tsdt_field.fuvw` and :func:`.fsdt_tsdt_field.fg` are the
   rotation of the normal ``phiy + v/r``.
+
+- ``'plate_fsdt_gl'``, ``'plate_tsdt_gl'``: flat plates, FSDT and TSDT with
+  the Green-Lagrange membrane strains of ``'plate_clpt_gl'`` and the linear
+  bending and transverse shear strains of ``'plate_fsdt_donnell'`` and
+  ``'plate_tsdt_donnell'``, 5 DOFs ``u, v, w, phix, phiy``. A finite rigid
+  rotation, with constant ``phix = -w,x`` and ``phiy = -w,y``, stores no
+  energy.
+
+- ``'cylshell_fsdt_gl'``, ``'cylshell_tsdt_gl'``: cylindrical shells, FSDT
+  and TSDT with the Green-Lagrange membrane strains of
+  ``'cylshell_clpt_gl'`` and the linear bending and transverse shear strains
+  of ``'cylshell_fsdt_sanders'`` and ``'cylshell_tsdt_sanders'``, 5 DOFs
+  ``u, v, w, phix, phiy``; the fields ``phiy`` of
+  :func:`.fsdt_tsdt_field.fuvw` and :func:`.fsdt_tsdt_field.fg` are the
+  rotation of the normal ``phiy + v/r``, as for the Sanders models.
 
 The models with 5 DOFs are supported by :class:`.MultiDomain` with the
 connections of :mod:`panels.multidomain.connections.kCsdt`, but not by
@@ -320,6 +344,26 @@ them from the laminate, and ``fkM_num(shell, I_input, size, row0, col0, nx,
 ny)`` receives them, with the thickness `h` of the TSDT, as one set for the
 whole domain or one set per integration point, see :meth:`.Shell.calc_kM`.
 
+The web of a ring frame, ``'frame_web_clpt_donnell'``, has the von Kármán
+strains of circular plates [4]_, Sec. 1.4.2, Eqs. (1.175)-(1.180), with
+`x = r - \rho`, `y = r \theta`, `s = r/\rho` and the local axes
+`\boldsymbol{e}_x = -\boldsymbol{e}_\rho`, `\boldsymbol{e}_y =
+\boldsymbol{e}_\theta`:
+
+.. math::
+
+    \varepsilon_{yy} = s v_{,y} - \frac{u}{\rho} + \frac{1}{2} s^2 w_{,y}^2
+    \qquad
+    \gamma_{xy} = s u_{,y} + v_{,x} + \frac{v}{\rho} + s w_{,x} w_{,y}
+
+    \kappa_{yy} = \frac{w_{,x}}{\rho} - s^2 w_{,yy} \qquad
+    \kappa_{xy} = -2 s \left(w_{,xy} + \frac{w_{,y}}{\rho}\right)
+
+and `\varepsilon_{xx}`, `\kappa_{xx}` of the flat plate. The coefficients
+in `1/\rho` make the integrands rational in `x`, and the matrices of the
+whole domain are also integrated numerically, see
+:mod:`panels.models.frame_web_clpt_donnell_num`.
+
 References
 ----------
 .. [1] Sanders, J. L., "Nonlinear theories for thin shells", Quarterly of
@@ -347,6 +391,7 @@ from . import cylshell_clpt_tl_num
 from . import plate_clpt_donnell, plate_clpt_donnell_num
 from . import plate_clpt_gl, plate_clpt_gl_num
 from . import plate_clpt_tl_num
+from . import frame_web_clpt_donnell_num, frame_web_clpt_donnell
 from . import fsdt_tsdt_field
 from . import plate_fsdt_donnell, plate_fsdt_donnell_num
 from . import plate_tsdt_donnell, plate_tsdt_donnell_num
@@ -354,3 +399,7 @@ from . import cylshell_fsdt_donnell, cylshell_fsdt_donnell_num
 from . import cylshell_fsdt_sanders, cylshell_fsdt_sanders_num
 from . import cylshell_tsdt_donnell, cylshell_tsdt_donnell_num
 from . import cylshell_tsdt_sanders, cylshell_tsdt_sanders_num
+from . import plate_fsdt_gl, plate_fsdt_gl_num
+from . import plate_tsdt_gl, plate_tsdt_gl_num
+from . import cylshell_fsdt_gl, cylshell_fsdt_gl_num
+from . import cylshell_tsdt_gl, cylshell_tsdt_gl_num

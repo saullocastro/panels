@@ -2,6 +2,65 @@
 
 ## Unreleased
 
+### New models `plate_fsdt_gl`, `plate_tsdt_gl`, `cylshell_fsdt_gl`, `cylshell_tsdt_gl`: shear deformation with Green-Lagrange membrane strains
+
+- The FSDT and TSDT of `plate_fsdt_donnell`, `plate_tsdt_donnell`,
+  `cylshell_fsdt_sanders` and `cylshell_tsdt_sanders` with the complete
+  Green-Lagrange membrane strains of `plate_clpt_gl` and `cylshell_clpt_gl`
+  (Amabili 2008, Eqs. (1.118)-(1.120) for the cylinder); bending and
+  transverse shear strains linear. The linear kernels are those of the
+  linear models (imported); `fkG0` has the `u-u`, `v-v` (and `v-w`) blocks.
+- Generators, one self-contained folder per model:
+  `theory/shells/{plate,cylshell}_{fsdt,tsdt}_gl/` (derivation with symbolic
+  checks: membrane strains `(F^T F - I)/2`, linear part equal to the
+  operators of `theory/shells/fsdt_tsdt`, zero strains for finite rigid
+  rotations, exact tangent, finite differences; `write_pyx.py`; notes).
+  New kernels `panels/models/*_{fsdt,tsdt}_gl.pyx` and `*_num.pyx`
+  (`fkG0`, `fkC_num`, `fkG_num`, `calc_fint`, `calc_kTv`,
+  `calc_fext_follower`, `fkCfollower_num`).
+- Registered in `modelDB`, `setup.py` and `panels.models`;
+  `fsdt_tsdt_field.is_gl` and the Green-Lagrange membrane strains in
+  `fsdt_tsdt_field.fstrain`; the cylinders are Sanders models for
+  `fsdt_tsdt_field.is_sanders` and the connections (`kCsdt._rinv_sanders`);
+  follower pressure of `plate_clpt_gl` and `cylshell_clpt_gl`
+  (`follower_pressure.MODELS`).
+- Tests `tests/tests_shell/test_fsdt_tsdt_gl.py` (linear kernels, rigid
+  rotations, in-plane cantilever strip against the elastica, Euler load of a
+  pinned tube, hinged roof of Sze, Liu and Lo 2004, Table 9a) and the four
+  models in `test_tangent_consistency.py`. Page `doc/source/fsdt_tsdt_gl.rst`.
+
+### New model `frame_web_clpt_donnell`: the web of a ring frame
+
+- The web of a ring frame of a stiffened cylinder, an annular sector of a
+  flat plate in the plane normal to the axis, CLPT with the von Kármán
+  strains of circular plates in polar coordinates (Amabili 2008, Sec.
+  1.4.2, Eqs. 1.175-1.180), the convention of `plate_clpt_donnell` for the
+  von Kármán flat plate. `Shell(model='frame_web_clpt_donnell', a=height,
+  b=arc length of the outer edge, r=outer radius)`; `x = r - rho` runs from
+  the outer edge inwards, `y = r theta` along it, and `u, v, w` are measured
+  along `e_x = -e_rho`, `e_y = e_theta`, `e_z = e_x x e_y`.
+- These are the local axes of the flange of `'BFxcte'`: a web connects to a
+  cylinder of the same radius at the station `x_f` with
+  `dict(p1=cylinder, p2=web, func='BFxcte', xcte1=x_f, xcte2=0)`, with the
+  penalty or the null-space method, and a closed ring is made of webs
+  joined with `'SSycte'`.
+- Generated from `theory/shells/frame_web_clpt_donnell/` (derivation with
+  symbolic checks against Amabili's Eqs. 1.166-1.168 and 1.175-1.180, the
+  three-dimensional Kirchhoff field, the six rigid-body motions and the
+  flat-plate limit; self-contained `write_pyx.py`):
+  `panels/models/frame_web_clpt_donnell_num.pyx` (`fkC_num`, `fkG_num`,
+  `fkM_num`, `calc_fint`, `calc_kTv`, `fuvw`, `fstrain`) and
+  `panels/models/frame_web_clpt_donnell.pyx` (`fk0`, `fkG0`, `fkM`). The
+  coefficients `1/rho` make the integrands rational: every matrix is
+  integrated with the Gauss-Legendre rule. The piston-theory kernels raise
+  `NotImplementedError`; the follower pressure is not available for this
+  model.
+- Tests against Leissa (1969), Table 2.21 (annulus clamped outside and
+  free inside, alone and clamped through `'BFxcte'` by the clamped end of a
+  cylinder), against `4 pi^2 D/b^2` in the flat-plate limit, and of the
+  tangent stiffness against the derivative of the internal force vector.
+  New page "Ring frames: the web as an annular-sector plate".
+
 ### New argument `models` of the wing box and of the blade-stiffened cylinder
 
 - `create_wingbox` takes `models`, a dict of the model of each group of
@@ -266,8 +325,10 @@
   Table 5, +0.01 % to +0.51 % from the paper's `m = n = 8` values (before:
   62.618 to 53.705 Hz, 3.6 % to 4.0 % below).
 - `tstiff2d_1stiff_flutter`: with `u = 0` at `x = 0`, the edge loads
-  `Nxx_skin` and `Nxx_flange` of the static case give no pre-stress; only
-  `Nxx_base` loads the assembly.
+  `Nxx_skin` and `Nxx_flange` of the static case give no pre-stress, and
+  `Nxx_base`, carried by the connection of the base to the restrained edge
+  of the skin, almost none (first eigenvalue of the docstring example,
+  with the static case and `Nxx_base=-100.`, changed by 1.6e-5).
 - Stored values: `test_tstiff2d_assembly.py`, first natural frequency
   48.2733 to 48.4404 rad/s, flutter `sqrt(-lambda_1)` 446.12 to
   503.06-139.60j (the first eigenvalue is now a complex pair);
@@ -275,6 +336,23 @@
   48.39 to 48.56 and 448.57 to 487.42. New test
   `test_tstiff2d_1stiff_freq_castro_donadon_2017_table5` (Table 5,
   `m = n = 8`, within 0.6 %).
+- New test `test_tstiff2d_1stiff_freq_castro_donadon_2017_fig15_flat`: the
+  flat panel #1 (`a/b = 0.5`, `b/b_b = 5`) against the frequency ratios of
+  Fig. 15 of the paper, digitised (uncertainty about 0.004), for six
+  defect lengths from 0.407 to 0.907: 0.002 to 0.005 below the curve,
+  asserted within 0.01.
+
+### Changed: the boundary-condition flags of `StiffPanelBay` are fixed once it has panels
+
+- The 24 flags `x1u, x1ur, ..., y2w, y2wr` of `StiffPanelBay` are
+  properties whose setters raise an `AttributeError` when the bay has
+  panels and the value differs from the current one. The panels and the
+  stiffeners copy the flags when they are created, whereas the connections
+  of `BladeStiff2D` read those of the bay at assembly, so a change after
+  `add_panel` gave an inconsistent model. Assigning the same value, and
+  loading a saved bay, are unaffected. New test
+  `test_boundary_flags_fixed_after_add_panel` in
+  `tests/tests_stiffpanelbay/test_stiffpanelbay_api.py`.
 
 ## 0.15.0 (2026-11-03)
 

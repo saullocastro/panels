@@ -57,6 +57,55 @@ def _first_not_none(*values):
     return None
 
 
+_BC_FLAGS = tuple(e + d + r for e in ('x1', 'x2', 'y1', 'y2')
+                  for d in 'uvw' for r in ('', 'r'))
+
+
+def _bc_flag_property(name):
+    r"""Property of the boundary-condition flag ``name`` of the bay
+
+    The value is stored in the attribute ``'_' + name``. The setter raises
+    an ``AttributeError`` when the bay has panels and the new value differs
+    from the current one.
+
+    Parameters
+    ----------
+    name : str
+        Name of the flag, e.g. ``'x1u'``.
+
+    Returns
+    -------
+    prop : property
+
+    """
+    attr = '_' + name
+
+    def fget(self):
+        return getattr(self, attr)
+
+    def fset(self, value):
+        if self.__dict__.get('panels') and value != getattr(self, attr):
+            raise AttributeError('StiffPanelBay.{0} cannot be changed after '
+                'add_panel(), set the boundary conditions of the bay before '
+                'adding its panels'.format(name))
+        setattr(self, attr, value)
+
+    edge, normal = {'x1': ('`x = 0`', 'x'), 'x2': ('`x = a`', 'x'),
+                    'y1': ('`y = 0`', 'y'), 'y2': ('`y = b`', 'y')}[name[:2]]
+    if len(name) == 3:
+        what = 'the value of `{0}`'.format(name[2])
+    else:
+        what = 'the derivative `{0}_{{,{1}}}`'.format(name[2], normal)
+    doc = ('Boundary-condition flag of the bay for {0} at the edge {1}\n\n'
+           '``0.`` removes and ``1.`` keeps that degree of freedom, as the '
+           'flag of the same name of :class:`.Shell`. The flag is copied to '
+           'every panel by :meth:`.StiffPanelBay.add_panel` and read by the '
+           'stiffeners, and can be changed only while the bay has no panels: '
+           'assigning another value afterwards raises an '
+           '``AttributeError``.\n').format(what, edge)
+    return property(fget, fset, doc=doc)
+
+
 class StiffPanelBay(object):
     r"""Stiffened Shell Bay
 
@@ -70,6 +119,14 @@ class StiffPanelBay(object):
       Controlled by the parameter ``flow``
     - ``bladestiff1ds`` contains the :class:`.BladeStiff1D` stiffeners
     - ``bladestiff2ds`` contains the :class:`.BladeStiff2D` stiffeners
+
+    The boundary-condition flags of the bay, ``x1u, x1ur, x2u, x2ur, ...,
+    y2w, y2wr``, with the meaning of the flags of the same name of
+    :class:`.Shell` and the defaults `u = v = w = 0`, `u_{,x} = v_{,x} = 0`
+    at `x = 0, a` and `u_{,y} = v_{,y} = 0` at `y = 0, b`, are copied to
+    each panel by :meth:`add_panel` and read by the stiffeners. They are set
+    before the first panel is added: once the bay has panels, assigning
+    another value to any of them raises an ``AttributeError``.
 
     Notes
     -----
@@ -1910,3 +1967,8 @@ class StiffPanelBay(object):
         msg('finished!', level=2, silent=silent)
 
         return fext
+
+
+for _name in _BC_FLAGS:
+    setattr(StiffPanelBay, _name, _bc_flag_property(_name))
+del _name

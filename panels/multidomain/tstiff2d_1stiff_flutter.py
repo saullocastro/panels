@@ -82,10 +82,15 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
     ``structsolve.static`` gives the pre-buckling state ``c``. The attributes
     ``Nxx`` of all the domains are then set to ``0`` and the geometric
     stiffness matrix is computed at ``c``, or with ``c=None`` when no load
-    was given. Since `u = 0` at the edge `x = 0` of the skin and of the
-    flange, the forces of ``Nxx_skin`` and ``Nxx_flange`` act on restrained
-    displacements and give no pre-stress; only ``Nxx_base``, at the free
-    edge of ``p14``, loads the assembly. The reduced matrices, see
+    was given. The loads do not enter the geometric stiffness matrix as
+    constant stress states. Since `u = 0` at the edge `x = 0` of the skin
+    and of the flange, the forces of ``Nxx_skin`` and ``Nxx_flange`` act on
+    restrained displacements and give no pre-stress; the force of
+    ``Nxx_base``, at the edge `x = 0` of ``p14``, is transmitted by the
+    connection of the base to the skin, whose edge is restrained, and gives
+    almost none (for the panel of the Examples with
+    ``run_static_case=True`` and ``Nxx_base=-100.``, the first eigenvalue
+    changes by 1.6e-5, relatively). The reduced matrices, see
     :meth:`.MultiDomain.reduce`, the sum
     of the constitutive, geometric and aerodynamic stiffness matrices and
     the mass matrix, are passed to ``structsolve.freq`` with ``tol=0`` and
@@ -141,7 +146,9 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
         that edge and gives no pre-stress.
     Nxx_base : float or None, optional
         Stiffener's base load distributed at the assembly edge at `x=0`,
-        force per unit length. Default ``None``, no load.
+        force per unit length. Default ``None``, no load. It is carried by
+        the connection to the restrained edge of the skin and gives almost
+        no pre-stress.
     Nxx_flange : float or None, optional
         Stiffener's flange load distributed at the assembly edge at `x=0`,
         force per unit length. Default ``None``, no load. It acts on the

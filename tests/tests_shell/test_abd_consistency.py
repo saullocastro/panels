@@ -223,8 +223,10 @@ def _partial(s):
 def test_ABDnxny_point_indexing(model, partial):
     r"""`\boldsymbol{v}^\top \boldsymbol{K}_{C0}(\boldsymbol{C}) \boldsymbol{c}` against the sum of `w_x w_y
     \boldsymbol{\varepsilon}(\boldsymbol{v})^\top \boldsymbol{C} \boldsymbol{\varepsilon}(\boldsymbol{c})` over the points of
-    :meth:`.Shell.integration_points`, with `nx \neq ny` taken from the shape
-    of ``ABDnxny``; the reversed field must give another result"""
+    :meth:`.Shell.integration_points`, times `\rho/r` for the web of a ring
+    frame, whose element of area is `(\rho/r) dx dy`, with `nx \neq ny`
+    taken from the shape of ``ABDnxny``; the reversed field must give
+    another result"""
     s = _shell(model)
     if partial:
         _partial(s)
@@ -246,6 +248,9 @@ def test_ABDnxny_point_indexing(model, partial):
         return np.stack([fields[name] for name in names], axis=-1)
 
     W = np.outer(wxs, wys)
+    if model.startswith('frame_web'):
+        # element of area of the annular sector, (rho/r) dx dy
+        W = W*(s.r - X)/s.r
     ref = np.einsum('ij,ijk,ijkl,ijl', W, eps(v), F, eps(c))
     #NOTE the round-off is relative to the terms of the sum, not to the sum
     scale = np.einsum('ij,ijk,ijkl,ijl', W, abs(eps(v)), abs(F), abs(eps(c)))
