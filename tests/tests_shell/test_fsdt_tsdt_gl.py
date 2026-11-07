@@ -40,7 +40,7 @@ TSDT contain `w_{,xx}`, `w_{,yy}`, `w_{,xy}`, zero as well.
 
 The in-plane cantilever strip, `\alpha = P L^2/EI = 2`, has the tip
 deflection `v = 0.4935 L` and shortening `u = -0.1606 L` of the elastica,
-`	heta'' = -lpha \cos	heta`; the bending in the plane of the strip is carried by the membrane
+`\theta'' = -\alpha \cos\theta`; the bending in the plane of the strip is carried by the membrane
 strains, so that the shear deformation of the FSDT does not enter.
 
 The Euler load of a pinned tube of radius `R`, wall thickness `h` and

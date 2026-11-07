@@ -20,7 +20,7 @@ Bessel-function solution of Leissa [1]_, Eq. (1.17), with the edge
 conditions of his Eqs. (1.11)-(1.13), computed with SciPy (see
 ``tests/tests_shell/test_frame_web_clpt_donnell.py``): 13.5004, 19.3892 and
 31.3384 for `n = 0, 1, 2`, `
-u = 1/3`, `eta = 0.4`; Leissa's Table 2.21
+u = 1/3`, `\beta = 0.4`; Leissa's Table 2.21
 gives 13.54, 19.80 and 31.34. The null-space connection reproduces them to
 the digits given; the penalty connection, with the default penalty
 constants, gives values 0.3 % lower. The cylinder, two
