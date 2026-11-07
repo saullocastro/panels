@@ -332,7 +332,7 @@ def lowest_by_mn(modes):
 
 
 def buckling_clamped(R, h, L, E, nu, tb, hb, side, mx, ny, nyb,
-        num_eigvalues=10, delta=1.e-4):
+        num_eigvalues=10, delta=1.e-4, **kwargs):
     r"""Axial buckling of the half cylinder with clamped ends
 
     The end `x = 0` is clamped, `u = v = w = w_{,x} = 0`, and the end `x =
@@ -340,7 +340,8 @@ def buckling_clamped(R, h, L, E, nu, tb, hb, side, mx, ny, nyb,
     prescribed exactly (``pd_method='null-space'``) on the skin and on the
     blades, as between the platens of a testing machine. The pre-buckling
     state is the linear static solution, see
-    :meth:`panels.multidomain.MultiDomain.linear_buckling`.
+    :meth:`panels.multidomain.MultiDomain.linear_buckling`. ``kwargs`` go
+    to :func:`build_cylinder` (e.g. ``nstiff``, ``blade_D66_factor``).
 
     Returns the critical axial load of the whole cylinder ``P``, N, the
     modes ``[(lambda, m, n, c), ...]`` with `\lambda > 0` in increasing
@@ -349,7 +350,7 @@ def buckling_clamped(R, h, L, E, nu, tb, hb, side, mx, ny, nyb,
     t0 = time.time()
     md, skin, blades = build_cylinder(R, h, L, E, nu, tb=tb, hb=hb,
             side=side, bc=('C', 'CL'), mx=mx, ny=ny, nyb=nyb,
-            pd_method='null-space')
+            pd_method='null-space', **kwargs)
     for p in md.panels:
         p.add_distr_pd_fixed_x(L, ku=1., funcu=lambda y: -delta, cte=False)
     eigvals, eigvecs = md.linear_buckling(num_eigvalues=num_eigvalues,
