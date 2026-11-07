@@ -2,7 +2,7 @@ r"""Utilities of the notebooks weller1977_blade_cylinder_buckling.ipynb,
 peterson1959_blade_cylinder_buckling.ipynb and
 singer1971_blade_cylinder_buckling.ipynb
 
-Axial buckling, and buckling under external pressure, of cylinders with
+Axial buckling, and buckling under external dead or follower pressure, of cylinders with
 many closely spaced stringers, each stringer an equivalent blade (a flat
 plate strip normal to the skin), with
 the membrane pre-buckling state of the smeared-stiffener theory of Block,
@@ -22,6 +22,7 @@ import time
 
 import numpy as np
 from numpy import pi
+from scipy.sparse import csr_matrix
 from structsolve import lb
 
 from blade_cylinder_utils import build_cylinder, skin_w, classify
@@ -124,8 +125,32 @@ def smeared_ss(R, L, t, E, nu, d, A, z, Io, J, mmax=12, nmax=60):
     return N[i, j], (int(m[i, 0]), int(n[0, j]))
 
 
+def follower_stiffness(md, skin):
+    r"""Reduced load stiffness of a unit external follower pressure on the
+    skin panels
+
+    A uniform pressure `p = -1` (external, `w` positive outwards) is added
+    with ``follower=True`` (first-order area vector, see
+    :meth:`panels.shell.Shell.add_pressure_load`) to every skin panel that
+    has no follower load yet, the load stiffness
+    matrices :meth:`panels.shell.Shell.calc_kCfollower` are assembled at
+    the offsets of the panels in ``md`` and reduced with
+    :meth:`panels.multidomain.MultiDomain.reduce`. Returns the reduced
+    matrix, unsymmetric in general, never symmetrized.
+    """
+    size = md.get_size()
+    KF = csr_matrix((size, size))
+    for p in skin:
+        if not p.has_follower_loads():
+            p.add_pressure_load(-1., follower=True)
+        KF = KF + p.calc_kCfollower(size=size, row0=p.row_start,
+                                    col0=p.col_start)
+    return md.reduce(KF)
+
+
 def buckling_pressure(R, h, L, E, nu, tb, hb, side, nstiff, mx, ny, nyb,
-        D66_factor=1., hydrostatic=False, Nx0=0., num_eigvalues=10):
+        D66_factor=1., hydrostatic=False, Nx0=0., num_eigvalues=10,
+        follower=False):
     r"""Buckling under uniform external pressure `q` about the membrane
     pre-buckling state, simply supported (SS3) ends
 
@@ -139,6 +164,15 @@ def buckling_pressure(R, h, L, E, nu, tb, hb, side, nstiff, mx, ny, nyb,
     circumference (positive in compression), distributed in the same way
     and added to the constitutive stiffness through the attributes
     ``Nxx_cte`` of the panels, so that the eigenvalue is the pressure.
+
+    With ``follower=False`` the pressure is a dead load. With
+    ``follower=True`` it is a live (follower) pressure on the skin: the
+    load stiffness of :func:`follower_stiffness` is added to the geometric
+    stiffness of the unit pressure, and the eigenvalue problem, unsymmetric
+    in general, is solved with ``structsolve.lb(..., symmetric=False)``,
+    the shift search of :func:`scipy.sparse.linalg.eigs` for the lowest
+    positive real load multiplier. The end load of the hydrostatic
+    pressure stays a dead axial load (rigid end plates).
 
     Returns the critical pressure `q`, the modes ``[(q, m, n, c), ...]``
     with `q > 0` in increasing order, the assembly, the skin panels, the
@@ -168,11 +202,18 @@ def buckling_pressure(R, h, L, E, nu, tb, hb, side, nstiff, mx, ny, nyb,
         p.Nxx_cte = -E*tb*eps1*Nx0
     K = md.reduce(md.calc_kC(silent=True))
     KG = md.reduce(md.calc_kG(silent=True))
-    eigvals, eigvecs = lb(K, KG, tol=0, sparse_solver=True, silent=True,
-                          num_eigvalues=num_eigvalues)
+    if follower:
+        KG = KG + follower_stiffness(md, skin)
+        eigvals, eigvecs = lb(K, KG, tol=0, sparse_solver=True, silent=True,
+                              num_eigvalues=num_eigvalues, symmetric=False)
+    else:
+        eigvals, eigvecs = lb(K, KG, tol=0, sparse_solver=True, silent=True,
+                              num_eigvalues=num_eigvalues)
     eigvecs = md.expand(eigvecs)
     modes = []
     for k in range(len(eigvals)):
+        if np.imag(eigvals[k]) != 0:
+            continue
         c = eigvecs[:, k].real
         x, th, w = skin_w(md, c, skin, R)
         m, n = classify(x, th, w, 'SS', nmax=max(40, nstiff))
