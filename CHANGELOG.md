@@ -145,6 +145,13 @@
   cylinder), against `4 pi^2 D/b^2` and the plate models with a laminate
   offset in the flat-plate limit, and of the tangent stiffness against the derivative of the
   internal force vector. New page "Annular-sector plates".
+- Tests of annuli under a uniform compression on both edges against Yamaki
+  (1958), Table 1, and the roots of his stability conditions (twelve
+  combinations of clamped, simply supported, free and movable edges), and
+  under a torque, with the pre-buckling state of a linear static case,
+  against Irie, Yamada and Tsujino (1983), Table 1. New notebooks
+  `hamada1986_annular_torsion` (experiments of Hamada and Harima 1986) and
+  `majumdar1971_annular_compression` (experiments of Majumdar 1971).
 
 ### New key `'face'` of the connection `'BFxcte'`: flanges and ring-frame webs on a face of the base
 
