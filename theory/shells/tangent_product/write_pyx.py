@@ -7,9 +7,8 @@ version::
 
     python write_pyx.py [model ...]
 
-The generators of whole modules, ``fsdt_tsdt/write_pyx.py`` and
-``cylshell_clpt_sanders/write_pyx.py``, append the same block through
-:func:`pyx_block`.
+The generator of the whole module, ``cylshell_clpt_sanders/write_pyx.py``,
+appends the same block through :func:`pyx_block`.
 
 """
 import os
@@ -110,7 +109,6 @@ def pyx_block(model):
     op = tp['op']
     fields, NE, DOF = op['fields'], op['NE'], op['DOF']
     cyl = op['geometry'] == 'cylshell'
-    tsdt = op['theory'] == 'tsdt'
     ds = {Symbol('ds%d' % i): Symbol('ds[%d]' % i) for i in range(NE)}
     kTv = [collect(e.xreplace(ds), list(ds.values()) + [th.Nxx, th.Nyy,
                    th.Nxy]) for e in tp['kTv']]
@@ -131,14 +129,10 @@ def pyx_block(model):
         '    {0}1{1} = shell.{0}1{1}; {0}1{1}r = shell.{0}1{1}r; '
         '{0}2{1} = shell.{0}2{1}; {0}2{1}r = shell.{0}2{1}r'.format(d, f)
         for d in 'xy' for f in fields)
-    extra_cdef = ''.join([', r' if cyl else '', ', h, c1' if tsdt else ''])
+    extra_cdef = ', r' if cyl else ''
     extra_read = ''
     if cyl:
         extra_read += '    r = shell.r\n'
-    if tsdt:
-        extra_read += ('    #NOTE the traction-free faces are assumed at z = +-h/2\n'
-                       '    h = shell.lam.h\n'
-                       '    c1 = 4./(3.*h*h)\n')
 
     def cdefs(names, per_line=6):
         return '\n'.join('    cdef double ' + ', '.join(names[i:i + per_line])

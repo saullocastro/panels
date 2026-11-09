@@ -256,7 +256,8 @@ piece_wise_simplify(kCSB22, [])
 # with z measured from the reference surface and d the offset of the
 # laminate, where c1 = 0 for the FSDT and c1 = 4/(3 h^2) for the TSDT, and Phiy =
 # phiy + v/r is the rotation of the normal about x with the Sanders-Koiter
-# kinematics, see theory/shells/fsdt_tsdt, obtained with rinv1 = 1/r1 and
+# kinematics, see theory/shells/cylshell_fsdt_sanders and
+# theory/shells/cylshell_tsdt_sanders, obtained with rinv1 = 1/r1 and
 # rinv2 = 1/r2 of each panel, and Phiy = phiy with rinv = 0 otherwise
 var('krw, cphi1, cw1, cphi2, cw2, zi1, zi2')
 var('f1Aphix, g1Aphix, f1Aphiy, g1Aphiy, f1Bphix, g1Bphix, f1Bphiy, g1Bphiy')

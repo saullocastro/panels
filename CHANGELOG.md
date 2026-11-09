@@ -32,6 +32,29 @@
   `test_tstiff2d_1stiff_flutter_static_edge_loads`; the notebook
   `ex_multidomain_tstiff2d` runs the flutter case with both kinds of load.
 
+### Generators of `plate_fsdt_donnell`, `plate_tsdt_donnell`, `cylshell_fsdt_donnell`, `cylshell_fsdt_sanders`, `cylshell_tsdt_donnell`, `cylshell_tsdt_sanders`: one folder per model
+
+- `theory/shells/fsdt_tsdt/`, which derived the six models from one
+  parametrized script, is split into one self-contained folder per model,
+  `theory/shells/<model>/` (`<model>.py`, derivation with symbolic checks:
+  linear part, exact tangent, finite differences and, for the TSDT, the
+  offset cubic; `write_pyx.py`; `<model>.md`), in the layout of the folders
+  of the `*_gl` models.
+- The non-linear kernels `fkC_num`, `fkG_num`, `calc_fint` and `calc_kTv`
+  are written in the layout of the `*_gl` models: the generalized
+  derivatives `d = [Phi] c`, `[B] = d eps/d d` and `[B]^T [F] [B] + [H]` at
+  each integration point. Same results to round-off (largest relative
+  difference 1.2e-15 on random states with the laminate `ABD`); a
+  Newton-Raphson analysis with `m = n = 12` runs 70 % (plate FSDT) to 91 %
+  (Sanders cylinder TSDT) faster, `calc_kTv` 9 % to 20 % faster. With a
+  constitutive matrix per integration point, `fkC_num` uses all its entries,
+  as `calc_fint` does, instead of assuming the symmetric blocks of a
+  laminate. The other kernels, `fk0`, `fkG0`, `fkM`, `fkAx`, `fkAy`, `fcA`,
+  `fkM_num`, `fkAx_num`, `fkAy_num` and the follower-pressure kernels, are
+  unchanged, character for character.
+- `theory/shells/tangent_product` no longer writes `calc_kTv` of these six
+  models.
+
 ### New models `plate_fsdt_gl`, `plate_tsdt_gl`, `cylshell_fsdt_gl`, `cylshell_tsdt_gl`: shear deformation with Green-Lagrange membrane strains
 
 - The FSDT and TSDT of `plate_fsdt_donnell`, `plate_tsdt_donnell`,

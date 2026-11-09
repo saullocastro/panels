@@ -80,7 +80,8 @@ rule, `max(2m - 1, 7)` points along `x` by default.
   low circumferential wave numbers; see `cylshell_clpt_sanders`
   (`../cylshell_clpt_sanders`).
 - No transverse shear deformation; see `cylshell_fsdt_donnell` and
-  `cylshell_tsdt_donnell` (`../fsdt_tsdt`).
+  `cylshell_tsdt_donnell` (`../cylshell_fsdt_donnell`,
+  `../cylshell_tsdt_donnell`).
 
 ## References
 

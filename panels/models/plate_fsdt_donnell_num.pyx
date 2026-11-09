@@ -10,14 +10,15 @@ r"""
 Flat plates using the first-order shear deformation theory (FSDT) with von
 Kármán kinematics
 
-Matrices and vectors integrated numerically with the Gauss-Legendre
-quadrature: the constitutive stiffness :func:`fkC_num`, the geometric
-stiffness :func:`fkG_num`, the mass :func:`fkM_num`, the aerodynamic
-stiffness :func:`fkAx_num`, :func:`fkAy_num`, the internal force vector
-:func:`calc_fint`, the product of the tangent stiffness matrix by a vector
-:func:`calc_kTv`, and the force vector and load stiffness matrix of a
-follower pressure, :func:`calc_fext_follower` and :func:`fkCfollower_num`.
-The constitutive matrix ``Finput`` is ``8 x 8``, with the
+Numerically integrated kernels of the model ``'plate_fsdt_donnell'``: the
+constitutive stiffness :func:`fkC_num`, the geometric stiffness
+:func:`fkG_num`, the internal force vector :func:`calc_fint`, the product
+of the tangent stiffness matrix by a vector :func:`calc_kTv`, the mass
+:func:`fkM_num`, the aerodynamic stiffness :func:`fkAx_num` and
+:func:`fkAy_num`, and the force vector and load stiffness matrix of a
+follower pressure, :func:`calc_fext_follower` and
+:func:`fkCfollower_num`. The constitutive matrix ``Finput`` is the
+``8 x 8`` matrix ``ABD`` of :class:`.Shell` for this model, with the
 rows and columns in the order of the generalized strains::
 
     exx, eyy, gxy, kxx, kyy, kxy, gyz, gxz
@@ -27,24 +28,40 @@ which is the order of the generalized stresses::
     Nxx, Nyy, Nxy, Mxx, Myy, Mxy, Qy, Qx
 
 The degrees of freedom of each term of the approximation are
-``u, v, w, phix, phiy``; the degree of freedom ``k`` of the term ``(i, j)``, ``0 <=
-i < m``, ``0 <= j < n``, is at the row ``row0 + 5*(j*m + i) + k``
+``u, v, w, phix, phiy``; the degree of freedom ``k`` of the term ``(i, j)``,
+``0 <= i < m``, ``0 <= j < n``, is at the row ``row0 + 5*(j*m + i) + k``
 of the matrices.
 
 Notes
 -----
-The displacement field through the thickness and the generalized strains
-are those of :mod:`panels.models.fsdt_tsdt_field`, with `c_1 = 4/(3 h^2)`
-for the TSDT and `c_1 = 0` for the FSDT, `1/r = 0` for the plates, and the
-Sanders-Koiter terms only for the models ``*_sanders``. The rotations of
-the non-linear terms are `\beta_x = -w_{,x}` and `\beta_y = -w_{,y} + s
-v/r`, `s = 1` for the Sanders-Koiter and `s = 0` for the Donnell
-kinematics.
+The generalized strains are, with the rotations `\beta_x = -w_{,x}`
+and `\beta_y = -w_{,y}` of the non-linear terms of von Kármán:
+
+.. math::
+
+    \varepsilon_{xx} = u_{,x} + \frac{1}{2} \beta_x^2 \qquad
+    \varepsilon_{yy} = v_{,y} + \frac{1}{2} \beta_y^2 \qquad
+    \gamma_{xy} = u_{,y} + v_{,x} + \beta_x \beta_y
+
+    \kappa_{xx} = \phi_{x,x} \qquad \kappa_{yy} = \phi_{y,y} \qquad
+    \kappa_{xy} = \phi_{x,y} + \phi_{y,x}
+
+    \gamma_{yz} = \phi_y + w_{,y} \qquad \gamma_{xz} = \phi_x + w_{,x}
+
+The bending and transverse shear strains are those of the first-order shear
+deformation theory (FSDT) [1]_, the in-plane strains being
+`\varepsilon^{(0)} + z \kappa`.
 
 The numerical integration over the domain of
 :meth:`.Shell.integration_limits` admits a constitutive matrix and moments
 of the density varying over the domain, a partial domain and the
 non-linear terms of the Ritz constants.
+
+References
+----------
+.. [1] Reddy, J. N., "Mechanics of Laminated Composite Plates and Shells:
+   Theory and Analysis", 2nd ed., CRC Press, 2003.
+   https://doi.org/10.1201/b12409
 
 """
 from scipy.sparse import coo_matrix
@@ -62,6 +79,7 @@ cdef extern from 'bardell_functions.hpp':
 cdef int DOF = 5
 cdef int NE = 8
 
+
 def fkC_num(double [::1] cs, object Finput, object shell,
         int size, int row0, int col0, int nx, int ny, int NLgeom=0):
     r"""Constitutive stiffness matrix, integrated numerically
@@ -78,8 +96,8 @@ def fkC_num(double [::1] cs, object Finput, object shell,
         units of the displacements (the rotations in radians).
     Finput : array-like
         Constitutive matrix of the generalized strains of the model, shape
-        ``(NE, NE)`` for the whole domain, e.g. ``shell.ABD``, or ``(nx, ny,
-        NE, NE)`` with one matrix per integration point.
+        ``(8, 8)`` for the whole domain, e.g. ``shell.ABD``, or ``(nx,
+        ny, 8, 8)`` with one matrix per integration point.
     shell : :class:`.Shell`
         The shell, which gives the dimensions ``a`` and ``b``, the radius ``r``
         of the cylinders, the numbers of terms ``m`` and ``n`` and the boundary
@@ -108,33 +126,32 @@ def fkC_num(double [::1] cs, object Finput, object shell,
 
     Notes
     -----
-    With the generalized strains of the kinematics of the module,
-    `\boldsymbol{\varepsilon} = (\boldsymbol{B}_L + \frac{1}{2}
-    \boldsymbol{B}_{NL}(\boldsymbol{c})) \boldsymbol{c}`, their variation
-    `\delta \boldsymbol{\varepsilon} = \boldsymbol{B} \delta \boldsymbol{c}`,
-    `\boldsymbol{B} = \boldsymbol{B}_L + \boldsymbol{B}_{NL}(\boldsymbol{c})`,
-    and the constitutive matrix `\boldsymbol{F}`:
+    With the generalized derivatives at the integration point `\boldsymbol{d}
+    = \boldsymbol{\Phi} \boldsymbol{c}` (the gradients of `u`, `v`, `w`, the rotations and their gradients), the strains
+    `\boldsymbol{\varepsilon}(\boldsymbol{d})`, `\boldsymbol{B} =
+    \partial \boldsymbol{\varepsilon} / \partial \boldsymbol{d}`, the
+    stresses `\boldsymbol{\sigma} = \boldsymbol{F}
+    \boldsymbol{\varepsilon}` and `\boldsymbol{H}(\boldsymbol{\sigma}) =
+    \sum_r \sigma_r \, \partial^2 \varepsilon_r / \partial
+    \boldsymbol{d}^2`, which involves only the membrane stresses and is
+    independent of `\boldsymbol{d}`, the membrane strains being quadratic:
 
     .. math::
 
-        \boldsymbol{K}_C = \int \boldsymbol{B}^\top \boldsymbol{F}
-        \boldsymbol{B} \, dA + \int \boldsymbol{G}^\top
-        \boldsymbol{N}_{NL} \boldsymbol{G} \, dA
+        \boldsymbol{K}_C = \int \boldsymbol{\Phi}^\top \left[\boldsymbol{B}^\top
+        \boldsymbol{F} \boldsymbol{B} + \boldsymbol{H}(\boldsymbol{\sigma} -
+        \boldsymbol{\sigma}_L)\right] \boldsymbol{\Phi} \, dA
 
-    with `\boldsymbol{G} \boldsymbol{c} = \{\beta_x, \beta_y\}^\top` the
-    rotations of the non-linear terms of the membrane strains, and `\boldsymbol{N}_{NL}` the membrane stress resultants of the
-    non-linear part of the strains, `\frac{1}{2} \boldsymbol{B}_{NL}
-    \boldsymbol{c}`. With ``NLgeom=0``, `\boldsymbol{B}_{NL} = \boldsymbol{0}`
-    and `\boldsymbol{K}_C = \boldsymbol{K}_{C0}`. The membrane stress of the
-    linear strains enters :func:`fkG_num`, such that ``fkC_num(NLgeom=1) +
-    fkG_num`` is the exact Jacobian of :func:`calc_fint`.
+    with `\boldsymbol{\sigma}_L` the stresses of the linear strains, whose
+    term `\boldsymbol{H}(\boldsymbol{\sigma}_L)` is assembled by
+    :func:`fkG_num`, such that ``fkC_num(NLgeom=1) + fkG_num`` is the exact
+    Jacobian of :func:`calc_fint`.
 
     The integrals are evaluated with ``nx x ny`` Gauss-Legendre points
     over the integration domain `x_1 \le x \le x_2`, `y_1 \le y \le y_2` of
     :meth:`.Shell.integration_limits`, the whole shell by default.
 
     """
-    cdef double [:, ::1] gtab, ftab
     cdef double x1, x2, y1, y2, xinf, xsup, yinf, ysup
     cdef double a, b, intx, inty
     cdef int m, n
@@ -149,33 +166,37 @@ def fkC_num(double [::1] cs, object Finput, object shell,
     cdef double y1phix, y1phixr, y2phix, y2phixr
     cdef double y1phiy, y1phiyr, y2phiy, y2phiyr
 
-    cdef int i, j, k, l, c, row, col, ptx, pty
-    cdef double A11, A12, A16, B11, B12
-    cdef double B16, A22, A26, B22, B26
-    cdef double A66, B66, D11, D12, D16
-    cdef double D22, D26, D66, A44, A45
-    cdef double A55
+    cdef int i, j, k, l, c, p, q, r, s, row, col, ptx, pty
+    cdef double xi, eta, weight
+    cdef double xi1, xi2, eta1, eta2
+    cdef double [:, ::1] ftab, gtab
+    cdef double [::1] xis, etas, weights_xi, weights_eta
+
+    cdef double u_x, u_y, v_x, v_y, w_x, w_y, phix, phiy
+    cdef double phix_x, phix_y, phiy_x, phiy_y
+    cdef double e[8]
+    cdef double eL[8]
+    cdef double sg[8]
+    cdef double sgL[8]
+    cdef double fAu, fAu_x, fAv, fAv_x, fAw, fAw_x, fAphix
+    cdef double fAphix_x, fAphiy, fAphiy_x, gAu, gAu_y, gAv, gAv_y
+    cdef double gAw, gAw_y, gAphix, gAphix_y, gAphiy, gAphiy_y, fBu
+    cdef double fBu_x, fBv, fBv_x, fBw, fBw_x, fBphix, fBphix_x
+    cdef double fBphiy, fBphiy_x, gBu, gBu_y, gBv, gBv_y, gBw
+    cdef double gBw_y, gBphix, gBphix_y, gBphiy, gBphiy_y
+    cdef double Bm[96]
+    cdef double FB[96]
+    cdef double K[144]
+    cdef double TA[60]
+    cdef double pA[12]
+    cdef double pB[12]
 
     cdef long [::1] kCr, kCc
     cdef double [::1] kCv
 
-    cdef double fAu, fAu_xi, fAv, fAv_xi, fAw
-    cdef double fAw_xi, fAphix, fAphix_xi, fAphiy, fAphiy_xi
-    cdef double fBu, fBu_xi, fBv, fBv_xi, fBw
-    cdef double fBw_xi, fBphix, fBphix_xi, fBphiy, fBphiy_xi
-    cdef double gAu, gAu_eta, gAv, gAv_eta, gAw
-    cdef double gAw_eta, gAphix, gAphix_eta, gAphiy, gAphiy_eta
-    cdef double gBu, gBu_eta, gBv, gBv_eta, gBw
-    cdef double gBw_eta, gBphix, gBphix_eta, gBphiy, gBphiy_eta
-    cdef double xi, eta, weight
-    cdef double xi1, xi2, eta1, eta2
-    cdef double bx, by, NxxNL, NyyNL, NxyNL
-
-    cdef double [::1] xis, etas, weights_xi, weights_eta
-
-    # F as 4-D matrix, must be [nx, ny, 8, 8], when there is one
-    # constitutive matrix [8, 8] for each of the nx * ny integration points
-    cdef double F[64]
+    # F as 4-D matrix, must be [nx, ny, NE, NE], when there is one F[NE, NE]
+    # for each of the nx * ny integration points
+    cdef double F[8 * 8]
     cdef double [:, :, :, ::1] Fnxny
 
     cdef int one_F_each_point = 0
@@ -200,7 +221,6 @@ def fkC_num(double [::1] cs, object Finput, object shell,
     b = shell.b
     m = shell.m
     n = shell.n
-
     #NOTE physical limits of the integration domain, resolved and validated
     #      by Shell.integration_limits(); for the full domain the mapping
     #      below gives exactly xi1 = eta1 = -1 and xi2 = eta2 = +1
@@ -216,14 +236,8 @@ def fkC_num(double [::1] cs, object Finput, object shell,
     y1phix = shell.y1phix; y1phixr = shell.y1phixr; y2phix = shell.y2phix; y2phixr = shell.y2phixr
     y1phiy = shell.y1phiy; y1phiyr = shell.y1phiyr; y2phiy = shell.y2phiy; y2phiyr = shell.y2phiyr
 
-    fdim = 25*m*m*n*n
-
     xis, weights_xi = roots_legendre(nx)
     etas, weights_eta = roots_legendre(ny)
-
-    kCr = np.zeros((fdim,), dtype=INT)
-    kCc = np.zeros((fdim,), dtype=INT)
-    kCv = np.zeros((fdim,), dtype=DOUBLE)
 
     xinf = 0
     xsup = shell.a
@@ -238,8 +252,13 @@ def fkC_num(double [::1] cs, object Finput, object shell,
     intx = x2 - x1
     inty = y2 - y1
 
-    gtab = np.zeros((10, n), dtype=DOUBLE)
     ftab = np.zeros((10, m), dtype=DOUBLE)
+    gtab = np.zeros((10, n), dtype=DOUBLE)
+
+    fdim = 25*m*m*n*n
+    kCr = np.zeros((fdim,), dtype=INT)
+    kCc = np.zeros((fdim,), dtype=INT)
+    kCv = np.zeros((fdim,), dtype=DOUBLE)
 
     with nogil:
         for ptx in range(nx):
@@ -249,271 +268,413 @@ def fkC_num(double [::1] cs, object Finput, object shell,
                 xi = (xi - (-1))/2 * (xi2 - xi1) + xi1
                 eta = (eta - (-1))/2 * (eta2 - eta1) + eta1
 
-                weight = weights_xi[ptx] * weights_eta[pty]
-
-                bx = 0
-                by = 0
-                # approximation functions evaluated once, see panels/dev/tabulate.py
-                for j in range(n):
-                    gtab[0, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
-                    gtab[1, j] = fp(j, eta, y1w, y1wr, y2w, y2wr)
-                    gtab[2, j] = f(j, eta, y1u, y1ur, y2u, y2ur)
-                    gtab[3, j] = fp(j, eta, y1u, y1ur, y2u, y2ur)
-                    gtab[4, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
-                    gtab[5, j] = fp(j, eta, y1v, y1vr, y2v, y2vr)
-                    gtab[6, j] = f(j, eta, y1phix, y1phixr, y2phix, y2phixr)
-                    gtab[7, j] = fp(j, eta, y1phix, y1phixr, y2phix, y2phixr)
-                    gtab[8, j] = f(j, eta, y1phiy, y1phiyr, y2phiy, y2phiyr)
-                    gtab[9, j] = fp(j, eta, y1phiy, y1phiyr, y2phiy, y2phiyr)
-                for i in range(m):
-                    ftab[0, i] = f(i, xi, x1w, x1wr, x2w, x2wr)
-                    ftab[1, i] = fp(i, xi, x1w, x1wr, x2w, x2wr)
-                    ftab[2, i] = f(i, xi, x1u, x1ur, x2u, x2ur)
-                    ftab[3, i] = fp(i, xi, x1u, x1ur, x2u, x2ur)
-                    ftab[4, i] = f(i, xi, x1v, x1vr, x2v, x2vr)
-                    ftab[5, i] = fp(i, xi, x1v, x1vr, x2v, x2vr)
-                    ftab[6, i] = f(i, xi, x1phix, x1phixr, x2phix, x2phixr)
-                    ftab[7, i] = fp(i, xi, x1phix, x1phixr, x2phix, x2phixr)
-                    ftab[8, i] = f(i, xi, x1phiy, x1phiyr, x2phiy, x2phiyr)
-                    ftab[9, i] = fp(i, xi, x1phiy, x1phiyr, x2phiy, x2phiyr)
-
-                if NLgeom == 1:
-                    for j in range(n):
-                        gAw = gtab[0, j]
-                        gAw_eta = gtab[1, j]
-                        for i in range(m):
-                            fAw = ftab[0, i]
-                            fAw_xi = ftab[1, i]
-
-                            col = col0 + DOF*(j*m + i)
-
-                            bx -= (2/a)*cs[col+2]*fAw_xi*gAw
-                            by -= (2/b)*cs[col+2]*fAw*gAw_eta
+                # the integrands are per unit area of the natural domain
+                weight = weights_xi[ptx]*weights_eta[pty]*intx*inty/4
 
                 if one_F_each_point == 1:
                     for i in range(NE):
                         for j in range(NE):
-                            #TODO could assume symmetry
                             F[i*NE + j] = Fnxny[ptx, pty, i, j]
 
-                A11 = F[0*NE + 0]
-                A12 = F[0*NE + 1]
-                A16 = F[0*NE + 2]
-                B11 = F[0*NE + 3]
-                B12 = F[0*NE + 4]
-                B16 = F[0*NE + 5]
-                A22 = F[1*NE + 1]
-                A26 = F[1*NE + 2]
-                B22 = F[1*NE + 4]
-                B26 = F[1*NE + 5]
-                A66 = F[2*NE + 2]
-                B66 = F[2*NE + 5]
-                D11 = F[3*NE + 3]
-                D12 = F[3*NE + 4]
-                D16 = F[3*NE + 5]
-                D22 = F[4*NE + 4]
-                D26 = F[4*NE + 5]
-                D66 = F[5*NE + 5]
-                A44 = F[6*NE + 6]
-                A45 = F[6*NE + 7]
-                A55 = F[7*NE + 7]
-
-                # Membrane stress carried by the nonlinear strain
-                # eps_NL = {bx^2/2, by^2/2, bx*by}. With it, KGNL = KG(N_NL)
-                # is collected in kC such that
-                #     KT = KC0 + KCNL + KGNL (fkC_num) + KG(Nbar + N_L) (fkG_num)
-                # is the exact Jacobian of calc_fint, and fkG_num stays
-                # homogeneous of degree one in cs, as linear buckling requires.
-                # bx = by = 0 when NLgeom == 0, then KGNL vanishes
-                NxxNL = A11*0.5*bx*bx + A12*0.5*by*by + A16*bx*by
-                NyyNL = A12*0.5*bx*bx + A22*0.5*by*by + A26*bx*by
-                NxyNL = A16*0.5*bx*bx + A26*0.5*by*by + A66*bx*by
-
-                # kC
-                c = -1
+                # approximation functions and their derivatives in x and y
                 for i in range(m):
-                    fAu = ftab[2, i]
-                    fAu_xi = ftab[3, i]
-                    fAv = ftab[4, i]
-                    fAv_xi = ftab[5, i]
-                    fAw = ftab[0, i]
-                    fAw_xi = ftab[1, i]
-                    fAphix = ftab[6, i]
-                    fAphix_xi = ftab[7, i]
-                    fAphiy = ftab[8, i]
-                    fAphiy_xi = ftab[9, i]
+                    ftab[0, i] = f(i, xi, x1u, x1ur, x2u, x2ur)
+                    ftab[1, i] = (2/a)*fp(i, xi, x1u, x1ur, x2u, x2ur)
+                    ftab[2, i] = f(i, xi, x1v, x1vr, x2v, x2vr)
+                    ftab[3, i] = (2/a)*fp(i, xi, x1v, x1vr, x2v, x2vr)
+                    ftab[4, i] = f(i, xi, x1w, x1wr, x2w, x2wr)
+                    ftab[5, i] = (2/a)*fp(i, xi, x1w, x1wr, x2w, x2wr)
+                    ftab[6, i] = f(i, xi, x1phix, x1phixr, x2phix, x2phixr)
+                    ftab[7, i] = (2/a)*fp(i, xi, x1phix, x1phixr, x2phix, x2phixr)
+                    ftab[8, i] = f(i, xi, x1phiy, x1phiyr, x2phiy, x2phiyr)
+                    ftab[9, i] = (2/a)*fp(i, xi, x1phiy, x1phiyr, x2phiy, x2phiyr)
+                for j in range(n):
+                    gtab[0, j] = f(j, eta, y1u, y1ur, y2u, y2ur)
+                    gtab[1, j] = (2/b)*fp(j, eta, y1u, y1ur, y2u, y2ur)
+                    gtab[2, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
+                    gtab[3, j] = (2/b)*fp(j, eta, y1v, y1vr, y2v, y2vr)
+                    gtab[4, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
+                    gtab[5, j] = (2/b)*fp(j, eta, y1w, y1wr, y2w, y2wr)
+                    gtab[6, j] = f(j, eta, y1phix, y1phixr, y2phix, y2phixr)
+                    gtab[7, j] = (2/b)*fp(j, eta, y1phix, y1phixr, y2phix, y2phixr)
+                    gtab[8, j] = f(j, eta, y1phiy, y1phiyr, y2phiy, y2phiyr)
+                    gtab[9, j] = (2/b)*fp(j, eta, y1phiy, y1phiyr, y2phiy, y2phiyr)
 
-                    for k in range(m):
-                        fBu = ftab[2, k]
-                        fBu_xi = ftab[3, k]
-                        fBv = ftab[4, k]
-                        fBv_xi = ftab[5, k]
-                        fBw = ftab[0, k]
-                        fBw_xi = ftab[1, k]
-                        fBphix = ftab[6, k]
-                        fBphix_xi = ftab[7, k]
-                        fBphiy = ftab[8, k]
-                        fBphiy_xi = ftab[9, k]
+                # generalized derivatives at the point, zero when NLgeom == 0
+                u_x = 0.
+                u_y = 0.
+                v_x = 0.
+                v_y = 0.
+                w_x = 0.
+                w_y = 0.
+                phix = 0.
+                phiy = 0.
+                phix_x = 0.
+                phix_y = 0.
+                phiy_x = 0.
+                phiy_y = 0.
+                if NLgeom == 1:
+                    for j in range(n):
+                        gAu = gtab[0, j]
+                        gAu_y = gtab[1, j]
+                        gAv = gtab[2, j]
+                        gAv_y = gtab[3, j]
+                        gAw = gtab[4, j]
+                        gAw_y = gtab[5, j]
+                        gAphix = gtab[6, j]
+                        gAphix_y = gtab[7, j]
+                        gAphiy = gtab[8, j]
+                        gAphiy_y = gtab[9, j]
+                        for i in range(m):
+                            fAu = ftab[0, i]
+                            fAu_x = ftab[1, i]
+                            fAv = ftab[2, i]
+                            fAv_x = ftab[3, i]
+                            fAw = ftab[4, i]
+                            fAw_x = ftab[5, i]
+                            fAphix = ftab[6, i]
+                            fAphix_x = ftab[7, i]
+                            fAphiy = ftab[8, i]
+                            fAphiy_x = ftab[9, i]
+                            col = col0 + DOF*(j*m + i)
+                            u_x += fAu_x*gAu*cs[col+0]
+                            u_y += fAu*gAu_y*cs[col+0]
+                            v_x += fAv_x*gAv*cs[col+1]
+                            v_y += fAv*gAv_y*cs[col+1]
+                            w_x += fAw_x*gAw*cs[col+2]
+                            w_y += fAw*gAw_y*cs[col+2]
+                            phix += fAphix*gAphix*cs[col+3]
+                            phiy += fAphiy*gAphiy*cs[col+4]
+                            phix_x += fAphix_x*gAphix*cs[col+3]
+                            phix_y += fAphix*gAphix_y*cs[col+3]
+                            phiy_x += fAphiy_x*gAphiy*cs[col+4]
+                            phiy_y += fAphiy*gAphiy_y*cs[col+4]
 
-                        for j in range(n):
-                            gAu = gtab[2, j]
-                            gAu_eta = gtab[3, j]
-                            gAv = gtab[4, j]
-                            gAv_eta = gtab[5, j]
-                            gAw = gtab[0, j]
-                            gAw_eta = gtab[1, j]
-                            gAphix = gtab[6, j]
-                            gAphix_eta = gtab[7, j]
-                            gAphiy = gtab[8, j]
-                            gAphiy_eta = gtab[9, j]
+                # [B] = d eps/d d at the point
+                for p in range(96):
+                    Bm[p] = 0.
+                Bm[0] = 1
+                Bm[4] = w_x
+                Bm[15] = 1
+                Bm[17] = w_y
+                Bm[25] = 1
+                Bm[26] = 1
+                Bm[28] = w_y
+                Bm[29] = w_x
+                Bm[44] = 1
+                Bm[59] = 1
+                Bm[69] = 1
+                Bm[70] = 1
+                Bm[77] = 1
+                Bm[79] = 1
+                Bm[88] = 1
+                Bm[90] = 1
 
-                            for l in range(n):
+                # K = [B]^T [F] [B]
+                for r in range(NE):
+                    for q in range(12):
+                        FB[r*12 + q] = 0.
+                        for s in range(NE):
+                            FB[r*12 + q] += F[r*NE + s]*Bm[s*12 + q]
+                for p in range(12):
+                    for q in range(12):
+                        K[p*12 + q] = 0.
+                        for r in range(NE):
+                            K[p*12 + q] += Bm[r*12 + p]*FB[r*12 + q]
 
-                                row = row0 + DOF*(j*m + i)
+                # stresses of the strains and of the linear strains
+                e[0] = u_x + 0.5*(w_x*w_x)
+                e[1] = v_y + 0.5*(w_y*w_y)
+                e[2] = u_y + v_x + w_x*w_y
+                e[3] = phix_x
+                e[4] = phiy_y
+                e[5] = phix_y + phiy_x
+                e[6] = phiy + w_y
+                e[7] = phix + w_x
+                eL[0] = u_x
+                eL[1] = v_y
+                eL[2] = u_y + v_x
+                eL[3] = phix_x
+                eL[4] = phiy_y
+                eL[5] = phix_y + phiy_x
+                eL[6] = phiy + w_y
+                eL[7] = phix + w_x
+                for r in range(NE):
+                    sg[r] = 0.
+                    for s in range(NE):
+                        sg[r] += F[r*NE + s]*e[s]
+                for r in range(NE):
+                    sgL[r] = 0.
+                    for s in range(NE):
+                        sgL[r] += F[r*NE + s]*eL[s]
+                # K += [H(sigma - sigma_L)], [H(sigma_L)] being assembled by
+                # fkG_num, which is homogeneous of degree one in cs as linear
+                # buckling requires
+                K[52] += -sgL[0] + sg[0]
+                K[53] += -sgL[2] + sg[2]
+                K[64] += -sgL[2] + sg[2]
+                K[65] += -sgL[1] + sg[1]
+
+                c = -1
+                for j in range(n):
+                    gAu = gtab[0, j]
+                    gAu_y = gtab[1, j]
+                    gAv = gtab[2, j]
+                    gAv_y = gtab[3, j]
+                    gAw = gtab[4, j]
+                    gAw_y = gtab[5, j]
+                    gAphix = gtab[6, j]
+                    gAphix_y = gtab[7, j]
+                    gAphiy = gtab[8, j]
+                    gAphiy_y = gtab[9, j]
+                    for i in range(m):
+                        fAu = ftab[0, i]
+                        fAu_x = ftab[1, i]
+                        fAv = ftab[2, i]
+                        fAv_x = ftab[3, i]
+                        fAw = ftab[4, i]
+                        fAw_x = ftab[5, i]
+                        fAphix = ftab[6, i]
+                        fAphix_x = ftab[7, i]
+                        fAphiy = ftab[8, i]
+                        fAphiy_x = ftab[9, i]
+                        row = row0 + DOF*(j*m + i)
+                        pA[0] = fAu_x*gAu
+                        pA[1] = fAu*gAu_y
+                        pA[2] = fAv_x*gAv
+                        pA[3] = fAv*gAv_y
+                        pA[4] = fAw_x*gAw
+                        pA[5] = fAw*gAw_y
+                        pA[6] = fAphix*gAphix
+                        pA[7] = fAphiy*gAphiy
+                        pA[8] = fAphix_x*gAphix
+                        pA[9] = fAphix*gAphix_y
+                        pA[10] = fAphiy_x*gAphiy
+                        pA[11] = fAphiy*gAphiy_y
+                        # TA[d, q] = sum_p Phi_A[p, d] K[p, q]
+                        TA[0] = pA[0]*K[0] + pA[1]*K[12]
+                        TA[1] = pA[0]*K[1] + pA[1]*K[13]
+                        TA[2] = pA[0]*K[2] + pA[1]*K[14]
+                        TA[3] = pA[0]*K[3] + pA[1]*K[15]
+                        TA[4] = pA[0]*K[4] + pA[1]*K[16]
+                        TA[5] = pA[0]*K[5] + pA[1]*K[17]
+                        TA[6] = pA[0]*K[6] + pA[1]*K[18]
+                        TA[7] = pA[0]*K[7] + pA[1]*K[19]
+                        TA[8] = pA[0]*K[8] + pA[1]*K[20]
+                        TA[9] = pA[0]*K[9] + pA[1]*K[21]
+                        TA[10] = pA[0]*K[10] + pA[1]*K[22]
+                        TA[11] = pA[0]*K[11] + pA[1]*K[23]
+                        TA[12] = pA[2]*K[24] + pA[3]*K[36]
+                        TA[13] = pA[2]*K[25] + pA[3]*K[37]
+                        TA[14] = pA[2]*K[26] + pA[3]*K[38]
+                        TA[15] = pA[2]*K[27] + pA[3]*K[39]
+                        TA[16] = pA[2]*K[28] + pA[3]*K[40]
+                        TA[17] = pA[2]*K[29] + pA[3]*K[41]
+                        TA[18] = pA[2]*K[30] + pA[3]*K[42]
+                        TA[19] = pA[2]*K[31] + pA[3]*K[43]
+                        TA[20] = pA[2]*K[32] + pA[3]*K[44]
+                        TA[21] = pA[2]*K[33] + pA[3]*K[45]
+                        TA[22] = pA[2]*K[34] + pA[3]*K[46]
+                        TA[23] = pA[2]*K[35] + pA[3]*K[47]
+                        TA[24] = pA[4]*K[48] + pA[5]*K[60]
+                        TA[25] = pA[4]*K[49] + pA[5]*K[61]
+                        TA[26] = pA[4]*K[50] + pA[5]*K[62]
+                        TA[27] = pA[4]*K[51] + pA[5]*K[63]
+                        TA[28] = pA[4]*K[52] + pA[5]*K[64]
+                        TA[29] = pA[4]*K[53] + pA[5]*K[65]
+                        TA[30] = pA[4]*K[54] + pA[5]*K[66]
+                        TA[31] = pA[4]*K[55] + pA[5]*K[67]
+                        TA[32] = pA[4]*K[56] + pA[5]*K[68]
+                        TA[33] = pA[4]*K[57] + pA[5]*K[69]
+                        TA[34] = pA[4]*K[58] + pA[5]*K[70]
+                        TA[35] = pA[4]*K[59] + pA[5]*K[71]
+                        TA[36] = pA[6]*K[72] + pA[8]*K[96] + pA[9]*K[108]
+                        TA[37] = pA[6]*K[73] + pA[8]*K[97] + pA[9]*K[109]
+                        TA[38] = pA[6]*K[74] + pA[8]*K[98] + pA[9]*K[110]
+                        TA[39] = pA[6]*K[75] + pA[8]*K[99] + pA[9]*K[111]
+                        TA[40] = pA[6]*K[76] + pA[8]*K[100] + pA[9]*K[112]
+                        TA[41] = pA[6]*K[77] + pA[8]*K[101] + pA[9]*K[113]
+                        TA[42] = pA[6]*K[78] + pA[8]*K[102] + pA[9]*K[114]
+                        TA[43] = pA[6]*K[79] + pA[8]*K[103] + pA[9]*K[115]
+                        TA[44] = pA[6]*K[80] + pA[8]*K[104] + pA[9]*K[116]
+                        TA[45] = pA[6]*K[81] + pA[8]*K[105] + pA[9]*K[117]
+                        TA[46] = pA[6]*K[82] + pA[8]*K[106] + pA[9]*K[118]
+                        TA[47] = pA[6]*K[83] + pA[8]*K[107] + pA[9]*K[119]
+                        TA[48] = pA[7]*K[84] + pA[10]*K[120] + pA[11]*K[132]
+                        TA[49] = pA[7]*K[85] + pA[10]*K[121] + pA[11]*K[133]
+                        TA[50] = pA[7]*K[86] + pA[10]*K[122] + pA[11]*K[134]
+                        TA[51] = pA[7]*K[87] + pA[10]*K[123] + pA[11]*K[135]
+                        TA[52] = pA[7]*K[88] + pA[10]*K[124] + pA[11]*K[136]
+                        TA[53] = pA[7]*K[89] + pA[10]*K[125] + pA[11]*K[137]
+                        TA[54] = pA[7]*K[90] + pA[10]*K[126] + pA[11]*K[138]
+                        TA[55] = pA[7]*K[91] + pA[10]*K[127] + pA[11]*K[139]
+                        TA[56] = pA[7]*K[92] + pA[10]*K[128] + pA[11]*K[140]
+                        TA[57] = pA[7]*K[93] + pA[10]*K[129] + pA[11]*K[141]
+                        TA[58] = pA[7]*K[94] + pA[10]*K[130] + pA[11]*K[142]
+                        TA[59] = pA[7]*K[95] + pA[10]*K[131] + pA[11]*K[143]
+                        for l in range(n):
+                            gBu = gtab[0, l]
+                            gBu_y = gtab[1, l]
+                            gBv = gtab[2, l]
+                            gBv_y = gtab[3, l]
+                            gBw = gtab[4, l]
+                            gBw_y = gtab[5, l]
+                            gBphix = gtab[6, l]
+                            gBphix_y = gtab[7, l]
+                            gBphiy = gtab[8, l]
+                            gBphiy_y = gtab[9, l]
+                            for k in range(m):
                                 col = col0 + DOF*(l*m + k)
-
                                 #NOTE symmetry assumption True if no follower forces are used
                                 if row > col:
                                     continue
-
-                                gBu = gtab[2, l]
-                                gBu_eta = gtab[3, l]
-                                gBv = gtab[4, l]
-                                gBv_eta = gtab[5, l]
-                                gBw = gtab[0, l]
-                                gBw_eta = gtab[1, l]
-                                gBphix = gtab[6, l]
-                                gBphix_eta = gtab[7, l]
-                                gBphiy = gtab[8, l]
-                                gBphiy_eta = gtab[9, l]
-
+                                fBu = ftab[0, k]
+                                fBu_x = ftab[1, k]
+                                fBv = ftab[2, k]
+                                fBv_x = ftab[3, k]
+                                fBw = ftab[4, k]
+                                fBw_x = ftab[5, k]
+                                fBphix = ftab[6, k]
+                                fBphix_x = ftab[7, k]
+                                fBphiy = ftab[8, k]
+                                fBphiy_x = ftab[9, k]
+                                pB[0] = fBu_x*gBu
+                                pB[1] = fBu*gBu_y
+                                pB[2] = fBv_x*gBv
+                                pB[3] = fBv*gBv_y
+                                pB[4] = fBw_x*gBw
+                                pB[5] = fBw*gBw_y
+                                pB[6] = fBphix*gBphix
+                                pB[7] = fBphiy*gBphiy
+                                pB[8] = fBphix_x*gBphix
+                                pB[9] = fBphix*gBphix_y
+                                pB[10] = fBphiy_x*gBphiy
+                                pB[11] = fBphiy*gBphiy_y
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+0
                                     kCc[c] = col+0
-                                kCv[c] += weight*(intx*inty/4)*( 4*A11*fAu_xi*fBu_xi*gAu*gBu/(a*a) + 4*A16*(fAu*fBu_xi*gAu_eta*gBu + fAu_xi*fBu*gAu*gBu_eta)/(a*b) + 4*A66*fAu*fBu*gAu_eta*gBu_eta/(b*b) )
+                                kCv[c] += weight*(TA[0]*pB[0] + TA[1]*pB[1])
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+0
                                     kCc[c] = col+1
-                                kCv[c] += weight*(intx*inty/4)*( 4*A12*fAu_xi*fBv*gAu*gBv_eta/(a*b) + 4*A16*fAu_xi*fBv_xi*gAu*gBv/(a*a) + 4*A26*fAu*fBv*gAu_eta*gBv_eta/(b*b) + 4*A66*fAu*fBv_xi*gAu_eta*gBv/(a*b) )
+                                kCv[c] += weight*(TA[2]*pB[2] + TA[3]*pB[3])
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+0
                                     kCc[c] = col+2
-                                kCv[c] += weight*(intx*inty/4)*( -4*A11*bx*fAu_xi*fBw_xi*gAu*gBw/(a*a) - 4*A12*by*fAu_xi*fBw*gAu*gBw_eta/(a*b) - 4*A16*(a*bx*fAu*fBw_xi*gAu_eta*gBw + a*bx*fAu_xi*fBw*gAu*gBw_eta + b*by*fAu_xi*fBw_xi*gAu*gBw)/((a*a)*b) - 4*A26*by*fAu*fBw*gAu_eta*gBw_eta/(b*b) - 4*A66*fAu*gAu_eta*(a*bx*fBw*gBw_eta + b*by*fBw_xi*gBw)/(a*(b*b)) )
+                                kCv[c] += weight*(TA[4]*pB[4] + TA[5]*pB[5])
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+0
                                     kCc[c] = col+3
-                                kCv[c] += weight*(intx*inty/4)*( 4*B11*fAu_xi*fBphix_xi*gAu*gBphix/(a*a) + 4*B16*(fAu*fBphix_xi*gAu_eta*gBphix + fAu_xi*fBphix*gAu*gBphix_eta)/(a*b) + 4*B66*fAu*fBphix*gAu_eta*gBphix_eta/(b*b) )
+                                kCv[c] += weight*(TA[6]*pB[6] + TA[8]*pB[8] + TA[9]*pB[9])
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+0
                                     kCc[c] = col+4
-                                kCv[c] += weight*(intx*inty/4)*( 4*B12*fAu_xi*fBphiy*gAu*gBphiy_eta/(a*b) + 4*B16*fAu_xi*fBphiy_xi*gAu*gBphiy/(a*a) + 4*B26*fAu*fBphiy*gAu_eta*gBphiy_eta/(b*b) + 4*B66*fAu*fBphiy_xi*gAu_eta*gBphiy/(a*b) )
+                                kCv[c] += weight*(TA[7]*pB[7] + TA[10]*pB[10] + TA[11]*pB[11])
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+1
                                     kCc[c] = col+0
-                                kCv[c] += weight*(intx*inty/4)*( 4*A12*fAv*fBu_xi*gAv_eta*gBu/(a*b) + 4*A16*fAv_xi*fBu_xi*gAv*gBu/(a*a) + 4*A26*fAv*fBu*gAv_eta*gBu_eta/(b*b) + 4*A66*fAv_xi*fBu*gAv*gBu_eta/(a*b) )
+                                kCv[c] += weight*(TA[12]*pB[0] + TA[13]*pB[1])
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+1
                                     kCc[c] = col+1
-                                kCv[c] += weight*(intx*inty/4)*( 4*A22*fAv*fBv*gAv_eta*gBv_eta/(b*b) + 4*A26*(fAv*fBv_xi*gAv_eta*gBv + fAv_xi*fBv*gAv*gBv_eta)/(a*b) + 4*A66*fAv_xi*fBv_xi*gAv*gBv/(a*a) )
+                                kCv[c] += weight*(TA[14]*pB[2] + TA[15]*pB[3])
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+1
                                     kCc[c] = col+2
-                                kCv[c] += weight*(intx*inty/4)*( -4*A12*bx*fAv*fBw_xi*gAv_eta*gBw/(a*b) - 4*A16*bx*fAv_xi*fBw_xi*gAv*gBw/(a*a) - 4*A22*by*fAv*fBw*gAv_eta*gBw_eta/(b*b) - 4*A26*(a*bx*fAv*fBw*gAv_eta*gBw_eta + b*by*fAv*fBw_xi*gAv_eta*gBw + b*by*fAv_xi*fBw*gAv*gBw_eta)/(a*(b*b)) - 4*A66*fAv_xi*gAv*(a*bx*fBw*gBw_eta + b*by*fBw_xi*gBw)/((a*a)*b) )
+                                kCv[c] += weight*(TA[16]*pB[4] + TA[17]*pB[5])
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+1
                                     kCc[c] = col+3
-                                kCv[c] += weight*(intx*inty/4)*( 4*B12*fAv*fBphix_xi*gAv_eta*gBphix/(a*b) + 4*B16*fAv_xi*fBphix_xi*gAv*gBphix/(a*a) + 4*B26*fAv*fBphix*gAv_eta*gBphix_eta/(b*b) + 4*B66*fAv_xi*fBphix*gAv*gBphix_eta/(a*b) )
+                                kCv[c] += weight*(TA[18]*pB[6] + TA[20]*pB[8] + TA[21]*pB[9])
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+1
                                     kCc[c] = col+4
-                                kCv[c] += weight*(intx*inty/4)*( 4*B22*fAv*fBphiy*gAv_eta*gBphiy_eta/(b*b) + 4*B26*(fAv*fBphiy_xi*gAv_eta*gBphiy + fAv_xi*fBphiy*gAv*gBphiy_eta)/(a*b) + 4*B66*fAv_xi*fBphiy_xi*gAv*gBphiy/(a*a) )
+                                kCv[c] += weight*(TA[19]*pB[7] + TA[22]*pB[10] + TA[23]*pB[11])
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+2
                                     kCc[c] = col+0
-                                kCv[c] += weight*(intx*inty/4)*( -4*A11*bx*fAw_xi*fBu_xi*gAw*gBu/(a*a) - 4*A12*by*fAw*fBu_xi*gAw_eta*gBu/(a*b) - 4*A16*(a*bx*fAw*fBu_xi*gAw_eta*gBu + a*bx*fAw_xi*fBu*gAw*gBu_eta + b*by*fAw_xi*fBu_xi*gAw*gBu)/((a*a)*b) - 4*A26*by*fAw*fBu*gAw_eta*gBu_eta/(b*b) - 4*A66*fBu*gBu_eta*(a*bx*fAw*gAw_eta + b*by*fAw_xi*gAw)/(a*(b*b)) )
+                                kCv[c] += weight*(TA[24]*pB[0] + TA[25]*pB[1])
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+2
                                     kCc[c] = col+1
-                                kCv[c] += weight*(intx*inty/4)*( -4*A12*bx*fAw_xi*fBv*gAw*gBv_eta/(a*b) - 4*A16*bx*fAw_xi*fBv_xi*gAw*gBv/(a*a) - 4*A22*by*fAw*fBv*gAw_eta*gBv_eta/(b*b) - 4*A26*(a*bx*fAw*fBv*gAw_eta*gBv_eta + b*by*fAw*fBv_xi*gAw_eta*gBv + b*by*fAw_xi*fBv*gAw*gBv_eta)/(a*(b*b)) - 4*A66*fBv_xi*gBv*(a*bx*fAw*gAw_eta + b*by*fAw_xi*gAw)/((a*a)*b) )
+                                kCv[c] += weight*(TA[26]*pB[2] + TA[27]*pB[3])
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+2
                                     kCc[c] = col+2
-                                kCv[c] += weight*(intx*inty/4)*( 4*A11*(bx*bx)*fAw_xi*fBw_xi*gAw*gBw/(a*a) + 4*A12*bx*by*(fAw*fBw_xi*gAw_eta*gBw + fAw_xi*fBw*gAw*gBw_eta)/(a*b) + 4*A16*bx*(a*bx*fAw*fBw_xi*gAw_eta*gBw + a*bx*fAw_xi*fBw*gAw*gBw_eta + 2*b*by*fAw_xi*fBw_xi*gAw*gBw)/((a*a)*b) + 4*A22*(by*by)*fAw*fBw*gAw_eta*gBw_eta/(b*b) + 4*A26*by*(2*a*bx*fAw*fBw*gAw_eta*gBw_eta + b*by*fAw*fBw_xi*gAw_eta*gBw + b*by*fAw_xi*fBw*gAw*gBw_eta)/(a*(b*b)) + 4*A44*fAw*fBw*gAw_eta*gBw_eta/(b*b) + 4*A45*(fAw*fBw_xi*gAw_eta*gBw + fAw_xi*fBw*gAw*gBw_eta)/(a*b) + 4*A55*fAw_xi*fBw_xi*gAw*gBw/(a*a) + 4*A66*(a*bx*fAw*gAw_eta + b*by*fAw_xi*gAw)*(a*bx*fBw*gBw_eta + b*by*fBw_xi*gBw)/((a*a)*(b*b)) )
-                                # KGNL
-                                kCv[c] += weight*(intx*inty/4)*( 4*NxxNL*fAw_xi*fBw_xi*gAw*gBw/(a*a) + 4*NxyNL*(fAw*fBw_xi*gAw_eta*gBw + fAw_xi*fBw*gAw*gBw_eta)/(a*b) + 4*NyyNL*fAw*fBw*gAw_eta*gBw_eta/(b*b) )
+                                kCv[c] += weight*(TA[28]*pB[4] + TA[29]*pB[5])
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+2
                                     kCc[c] = col+3
-                                kCv[c] += weight*(intx*inty/4)*( 2*A45*fAw*fBphix*gAw_eta*gBphix/b + 2*A55*fAw_xi*fBphix*gAw*gBphix/a - 4*B11*bx*fAw_xi*fBphix_xi*gAw*gBphix/(a*a) - 4*B12*by*fAw*fBphix_xi*gAw_eta*gBphix/(a*b) - 4*B16*(a*bx*fAw*fBphix_xi*gAw_eta*gBphix + a*bx*fAw_xi*fBphix*gAw*gBphix_eta + b*by*fAw_xi*fBphix_xi*gAw*gBphix)/((a*a)*b) - 4*B26*by*fAw*fBphix*gAw_eta*gBphix_eta/(b*b) - 4*B66*fBphix*gBphix_eta*(a*bx*fAw*gAw_eta + b*by*fAw_xi*gAw)/(a*(b*b)) )
+                                kCv[c] += weight*(TA[30]*pB[6] + TA[32]*pB[8] + TA[33]*pB[9])
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+2
                                     kCc[c] = col+4
-                                kCv[c] += weight*(intx*inty/4)*( 2*A44*fAw*fBphiy*gAw_eta*gBphiy/b + 2*A45*fAw_xi*fBphiy*gAw*gBphiy/a - 4*B12*bx*fAw_xi*fBphiy*gAw*gBphiy_eta/(a*b) - 4*B16*bx*fAw_xi*fBphiy_xi*gAw*gBphiy/(a*a) - 4*B22*by*fAw*fBphiy*gAw_eta*gBphiy_eta/(b*b) - 4*B26*(a*bx*fAw*fBphiy*gAw_eta*gBphiy_eta + b*by*fAw*fBphiy_xi*gAw_eta*gBphiy + b*by*fAw_xi*fBphiy*gAw*gBphiy_eta)/(a*(b*b)) - 4*B66*fBphiy_xi*gBphiy*(a*bx*fAw*gAw_eta + b*by*fAw_xi*gAw)/((a*a)*b) )
+                                kCv[c] += weight*(TA[31]*pB[7] + TA[34]*pB[10] + TA[35]*pB[11])
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+3
                                     kCc[c] = col+0
-                                kCv[c] += weight*(intx*inty/4)*( 4*B11*fAphix_xi*fBu_xi*gAphix*gBu/(a*a) + 4*B16*(fAphix*fBu_xi*gAphix_eta*gBu + fAphix_xi*fBu*gAphix*gBu_eta)/(a*b) + 4*B66*fAphix*fBu*gAphix_eta*gBu_eta/(b*b) )
+                                kCv[c] += weight*(TA[36]*pB[0] + TA[37]*pB[1])
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+3
                                     kCc[c] = col+1
-                                kCv[c] += weight*(intx*inty/4)*( 4*B12*fAphix_xi*fBv*gAphix*gBv_eta/(a*b) + 4*B16*fAphix_xi*fBv_xi*gAphix*gBv/(a*a) + 4*B26*fAphix*fBv*gAphix_eta*gBv_eta/(b*b) + 4*B66*fAphix*fBv_xi*gAphix_eta*gBv/(a*b) )
+                                kCv[c] += weight*(TA[38]*pB[2] + TA[39]*pB[3])
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+3
                                     kCc[c] = col+2
-                                kCv[c] += weight*(intx*inty/4)*( 2*A45*fAphix*fBw*gAphix*gBw_eta/b + 2*A55*fAphix*fBw_xi*gAphix*gBw/a - 4*B11*bx*fAphix_xi*fBw_xi*gAphix*gBw/(a*a) - 4*B12*by*fAphix_xi*fBw*gAphix*gBw_eta/(a*b) - 4*B16*(a*bx*fAphix*fBw_xi*gAphix_eta*gBw + a*bx*fAphix_xi*fBw*gAphix*gBw_eta + b*by*fAphix_xi*fBw_xi*gAphix*gBw)/((a*a)*b) - 4*B26*by*fAphix*fBw*gAphix_eta*gBw_eta/(b*b) - 4*B66*fAphix*gAphix_eta*(a*bx*fBw*gBw_eta + b*by*fBw_xi*gBw)/(a*(b*b)) )
+                                kCv[c] += weight*(TA[40]*pB[4] + TA[41]*pB[5])
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+3
                                     kCc[c] = col+3
-                                kCv[c] += weight*(intx*inty/4)*( A55*fAphix*fBphix*gAphix*gBphix + 4*D11*fAphix_xi*fBphix_xi*gAphix*gBphix/(a*a) + 4*D16*(fAphix*fBphix_xi*gAphix_eta*gBphix + fAphix_xi*fBphix*gAphix*gBphix_eta)/(a*b) + 4*D66*fAphix*fBphix*gAphix_eta*gBphix_eta/(b*b) )
+                                kCv[c] += weight*(TA[42]*pB[6] + TA[44]*pB[8] + TA[45]*pB[9])
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+3
                                     kCc[c] = col+4
-                                kCv[c] += weight*(intx*inty/4)*( A45*fAphix*fBphiy*gAphix*gBphiy + 4*D12*fAphix_xi*fBphiy*gAphix*gBphiy_eta/(a*b) + 4*D16*fAphix_xi*fBphiy_xi*gAphix*gBphiy/(a*a) + 4*D26*fAphix*fBphiy*gAphix_eta*gBphiy_eta/(b*b) + 4*D66*fAphix*fBphiy_xi*gAphix_eta*gBphiy/(a*b) )
+                                kCv[c] += weight*(TA[43]*pB[7] + TA[46]*pB[10] + TA[47]*pB[11])
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+4
                                     kCc[c] = col+0
-                                kCv[c] += weight*(intx*inty/4)*( 4*B12*fAphiy*fBu_xi*gAphiy_eta*gBu/(a*b) + 4*B16*fAphiy_xi*fBu_xi*gAphiy*gBu/(a*a) + 4*B26*fAphiy*fBu*gAphiy_eta*gBu_eta/(b*b) + 4*B66*fAphiy_xi*fBu*gAphiy*gBu_eta/(a*b) )
+                                kCv[c] += weight*(TA[48]*pB[0] + TA[49]*pB[1])
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+4
                                     kCc[c] = col+1
-                                kCv[c] += weight*(intx*inty/4)*( 4*B22*fAphiy*fBv*gAphiy_eta*gBv_eta/(b*b) + 4*B26*(fAphiy*fBv_xi*gAphiy_eta*gBv + fAphiy_xi*fBv*gAphiy*gBv_eta)/(a*b) + 4*B66*fAphiy_xi*fBv_xi*gAphiy*gBv/(a*a) )
+                                kCv[c] += weight*(TA[50]*pB[2] + TA[51]*pB[3])
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+4
                                     kCc[c] = col+2
-                                kCv[c] += weight*(intx*inty/4)*( 2*A44*fAphiy*fBw*gAphiy*gBw_eta/b + 2*A45*fAphiy*fBw_xi*gAphiy*gBw/a - 4*B12*bx*fAphiy*fBw_xi*gAphiy_eta*gBw/(a*b) - 4*B16*bx*fAphiy_xi*fBw_xi*gAphiy*gBw/(a*a) - 4*B22*by*fAphiy*fBw*gAphiy_eta*gBw_eta/(b*b) - 4*B26*(a*bx*fAphiy*fBw*gAphiy_eta*gBw_eta + b*by*fAphiy*fBw_xi*gAphiy_eta*gBw + b*by*fAphiy_xi*fBw*gAphiy*gBw_eta)/(a*(b*b)) - 4*B66*fAphiy_xi*gAphiy*(a*bx*fBw*gBw_eta + b*by*fBw_xi*gBw)/((a*a)*b) )
+                                kCv[c] += weight*(TA[52]*pB[4] + TA[53]*pB[5])
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+4
                                     kCc[c] = col+3
-                                kCv[c] += weight*(intx*inty/4)*( A45*fAphiy*fBphix*gAphiy*gBphix + 4*D12*fAphiy*fBphix_xi*gAphiy_eta*gBphix/(a*b) + 4*D16*fAphiy_xi*fBphix_xi*gAphiy*gBphix/(a*a) + 4*D26*fAphiy*fBphix*gAphiy_eta*gBphix_eta/(b*b) + 4*D66*fAphiy_xi*fBphix*gAphiy*gBphix_eta/(a*b) )
+                                kCv[c] += weight*(TA[54]*pB[6] + TA[56]*pB[8] + TA[57]*pB[9])
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kCr[c] = row+4
                                     kCc[c] = col+4
-                                kCv[c] += weight*(intx*inty/4)*( A44*fAphiy*fBphiy*gAphiy*gBphiy + 4*D22*fAphiy*fBphiy*gAphiy_eta*gBphiy_eta/(b*b) + 4*D26*(fAphiy*fBphiy_xi*gAphiy_eta*gBphiy + fAphiy_xi*fBphiy*gAphiy*gBphiy_eta)/(a*b) + 4*D66*fAphiy_xi*fBphiy_xi*gAphiy*gBphiy/(a*a) )
+                                kCv[c] += weight*(TA[55]*pB[7] + TA[58]*pB[10] + TA[59]*pB[11])
 
     kC = coo_matrix((kCv, (kCr, kCc)), shape=(size, size))
 
@@ -523,14 +684,14 @@ def fkC_num(double [::1] cs, object Finput, object shell,
 def fkG_num(double [::1] cs, object Finput, object shell,
             int size, int row0, int col0, int nx, int ny,
             double Nxx0=0, double Nyy0=0, double Nxy0=0):
-    r"""Geometric stiffness matrix of the linear membrane stress state
+    r"""Geometric stiffness matrix of the linear stress state
 
     Integrates numerically the geometric stiffness matrix of the membrane
-    stress resultants of the linear strains at ``cs``, superposed to
-    the constant state ``Nxx0``, ``Nyy0``, ``Nxy0``. The matrix is
-    homogeneous of degree one in ``cs``, as the linear buckling
-    eigenvalue problem requires; the stress of the non-linear strains
-    enters :func:`fkC_num`.
+    stresses of the linear strains at ``cs``, superposed to the constant
+    membrane state ``Nxx0``, ``Nyy0``, ``Nxy0``, with the rotations
+    `\beta_x` and `\beta_y` of the non-linear terms of the membrane
+    strains. The matrix is homogeneous of degree one in ``cs``, as the
+    linear buckling eigenvalue problem requires.
 
     Parameters
     ----------
@@ -539,8 +700,8 @@ def fkG_num(double [::1] cs, object Finput, object shell,
         units of the displacements (the rotations in radians).
     Finput : array-like
         Constitutive matrix of the generalized strains of the model, shape
-        ``(NE, NE)`` for the whole domain, e.g. ``shell.ABD``, or ``(nx, ny,
-        NE, NE)`` with one matrix per integration point.
+        ``(8, 8)`` for the whole domain, e.g. ``shell.ABD``, or ``(nx,
+        ny, 8, 8)`` with one matrix per integration point.
     shell : :class:`.Shell`
         The shell, which gives the dimensions ``a`` and ``b``, the radius ``r``
         of the cylinders, the numbers of terms ``m`` and ``n`` and the boundary
@@ -570,31 +731,31 @@ def fkG_num(double [::1] cs, object Finput, object shell,
 
     Notes
     -----
-    With `\boldsymbol{G} \boldsymbol{c} = \{\beta_x, \beta_y\}^\top` the
-    rotations of the non-linear terms of the membrane strains, and the membrane stress resultants
-    `\boldsymbol{N} = \boldsymbol{N}_0 + \boldsymbol{N}_L`,
-    `\boldsymbol{N}_L` those of `\boldsymbol{F} \boldsymbol{B}_L
-    \boldsymbol{c}`, the linear generalized strains of the kinematics of the module:
+    With the generalized derivatives at the integration point `\boldsymbol{d}
+    = \boldsymbol{\Phi} \boldsymbol{c}` (the gradients of `u`, `v`, `w`, the rotations and their gradients), the strains
+    `\boldsymbol{\varepsilon}(\boldsymbol{d})`, `\boldsymbol{B} =
+    \partial \boldsymbol{\varepsilon} / \partial \boldsymbol{d}`, the
+    stresses `\boldsymbol{\sigma} = \boldsymbol{F}
+    \boldsymbol{\varepsilon}` and `\boldsymbol{H}(\boldsymbol{\sigma}) =
+    \sum_r \sigma_r \, \partial^2 \varepsilon_r / \partial
+    \boldsymbol{d}^2`, which involves only the membrane stresses and is
+    independent of `\boldsymbol{d}`, the membrane strains being quadratic:
 
     .. math::
 
-        \boldsymbol{K}_G = \int \boldsymbol{G}^\top \boldsymbol{N}
-        \boldsymbol{G} \, dA, \qquad \boldsymbol{N} = \begin{bmatrix} N_{xx}
-        & N_{xy} \\ N_{xy} & N_{yy} \end{bmatrix}
+        \boldsymbol{K}_G = \int \boldsymbol{\Phi}^\top
+        \boldsymbol{H}(\boldsymbol{\sigma}) \boldsymbol{\Phi} \, dA
 
-    The tangent stiffness matrix `\boldsymbol{K}_{C0} +
-    \boldsymbol{K}_{CNL} + \boldsymbol{K}_{GNL} +
-    \boldsymbol{K}_G(\boldsymbol{N}_0 + \boldsymbol{N}_L)`, the first three terms from :func:`fkC_num` and the
-    last from this function, is
-    the exact Jacobian of :func:`calc_fint` when `\boldsymbol{N}_0 =
-    \boldsymbol{0}`.
+    with `\boldsymbol{\sigma} = \{N_{xx0}, N_{yy0}, N_{xy0}, 0, \ldots\}^\top +
+    \boldsymbol{\sigma}_L`, `\boldsymbol{\sigma}_L` the stresses of the
+    linear strains at ``cs``. The rest of the tangent stiffness matrix is
+    assembled by :func:`fkC_num`.
 
     The integrals are evaluated with ``nx x ny`` Gauss-Legendre points
     over the integration domain `x_1 \le x \le x_2`, `y_1 \le y \le y_2` of
     :meth:`.Shell.integration_limits`, the whole shell by default.
 
     """
-    cdef double [:, ::1] gtab, ftab
     cdef double x1, x2, y1, y2, xinf, xsup, yinf, ysup
     cdef double a, b, intx, inty
     cdef int m, n
@@ -609,30 +770,33 @@ def fkG_num(double [::1] cs, object Finput, object shell,
     cdef double y1phix, y1phixr, y2phix, y2phixr
     cdef double y1phiy, y1phiyr, y2phiy, y2phiyr
 
-    cdef int i, j, k, l, c, row, col, ptx, pty
+    cdef int i, j, k, l, c, p, q, r, s, row, col, ptx, pty
     cdef double xi, eta, weight
     cdef double xi1, xi2, eta1, eta2
+    cdef double [:, ::1] ftab, gtab
+    cdef double [::1] xis, etas, weights_xi, weights_eta
+
+    cdef double u_x, u_y, v_x, v_y, w_x, w_y, phix, phiy
+    cdef double phix_x, phix_y, phiy_x, phiy_y
+    cdef double e[8]
+    cdef double sg[8]
+    cdef double fAu, fAu_x, fAv, fAv_x, fAw, fAw_x, fAphix
+    cdef double fAphix_x, fAphiy, fAphiy_x, gAu, gAu_y, gAv, gAv_y
+    cdef double gAw, gAw_y, gAphix, gAphix_y, gAphiy, gAphiy_y, fBu
+    cdef double fBu_x, fBv, fBv_x, fBw, fBw_x, fBphix, fBphix_x
+    cdef double fBphiy, fBphiy_x, gBu, gBu_y, gBv, gBv_y, gBw
+    cdef double gBw_y, gBphix, gBphix_y, gBphiy, gBphiy_y
+    cdef double K[144]
+    cdef double TA[60]
+    cdef double pA[12]
+    cdef double pB[12]
 
     cdef long [::1] kGr, kGc
     cdef double [::1] kGv
 
-    cdef double fAu, fAu_xi, fAv, fAv_xi, fAw
-    cdef double fAw_xi, fAw_xixi, fAphix, fAphix_xi, fAphiy
-    cdef double fAphiy_xi
-    cdef double fBw, fBw_xi
-    cdef double gAu, gAu_eta, gAv, gAv_eta, gAw
-    cdef double gAw_eta, gAw_etaeta, gAphix, gAphix_eta, gAphiy
-    cdef double gAphiy_eta
-    cdef double gBw, gBw_eta
-
-    cdef double e[8]
-    cdef double Nxx, Nyy, Nxy
-
-    cdef double [::1] xis, etas, weights_xi, weights_eta
-
-    # F as 4-D matrix, must be [nx, ny, 8, 8], when there is one
-    # constitutive matrix [8, 8] for each of the nx * ny integration points
-    cdef double F[64]
+    # F as 4-D matrix, must be [nx, ny, NE, NE], when there is one F[NE, NE]
+    # for each of the nx * ny integration points
+    cdef double F[8 * 8]
     cdef double [:, :, :, ::1] Fnxny
 
     cdef int one_F_each_point = 0
@@ -657,7 +821,6 @@ def fkG_num(double [::1] cs, object Finput, object shell,
     b = shell.b
     m = shell.m
     n = shell.n
-
     #NOTE physical limits of the integration domain, resolved and validated
     #      by Shell.integration_limits(); for the full domain the mapping
     #      below gives exactly xi1 = eta1 = -1 and xi2 = eta2 = +1
@@ -673,14 +836,8 @@ def fkG_num(double [::1] cs, object Finput, object shell,
     y1phix = shell.y1phix; y1phixr = shell.y1phixr; y2phix = shell.y2phix; y2phixr = shell.y2phixr
     y1phiy = shell.y1phiy; y1phiyr = shell.y1phiyr; y2phiy = shell.y2phiy; y2phiyr = shell.y2phiyr
 
-    fdim = 1*m*m*n*n
-
     xis, weights_xi = roots_legendre(nx)
     etas, weights_eta = roots_legendre(ny)
-
-    kGr = np.zeros((fdim,), dtype=INT)
-    kGc = np.zeros((fdim,), dtype=INT)
-    kGv = np.zeros((fdim,), dtype=DOUBLE)
 
     xinf = 0
     xsup = shell.a
@@ -695,8 +852,13 @@ def fkG_num(double [::1] cs, object Finput, object shell,
     intx = x2 - x1
     inty = y2 - y1
 
-    gtab = np.zeros((11, n), dtype=DOUBLE)
-    ftab = np.zeros((11, m), dtype=DOUBLE)
+    ftab = np.zeros((10, m), dtype=DOUBLE)
+    gtab = np.zeros((10, n), dtype=DOUBLE)
+
+    fdim = 1*m*m*n*n
+    kGr = np.zeros((fdim,), dtype=INT)
+    kGc = np.zeros((fdim,), dtype=INT)
+    kGv = np.zeros((fdim,), dtype=DOUBLE)
 
     with nogil:
         for ptx in range(nx):
@@ -706,127 +868,886 @@ def fkG_num(double [::1] cs, object Finput, object shell,
                 xi = (xi - (-1))/2 * (xi2 - xi1) + xi1
                 eta = (eta - (-1))/2 * (eta2 - eta1) + eta1
 
-                weight = weights_xi[ptx] * weights_eta[pty]
+                # the integrands are per unit area of the natural domain
+                weight = weights_xi[ptx]*weights_eta[pty]*intx*inty/4
 
-                # Reading laminate constitutive data
                 if one_F_each_point == 1:
                     for i in range(NE):
                         for j in range(NE):
-                            #TODO could assume symmetry
                             F[i*NE + j] = Fnxny[ptx, pty, i, j]
 
-                # Calculating the linear generalized strains. The stress of
-                # the nonlinear strain enters KT through KGNL in fkC_num, such
-                # that kG is homogeneous of degree one in cs
-                for i in range(NE):
-                    e[i] = 0.
-                # approximation functions evaluated once, see panels/dev/tabulate.py
-                for j in range(n):
-                    gtab[0, j] = f(j, eta, y1u, y1ur, y2u, y2ur)
-                    gtab[1, j] = fp(j, eta, y1u, y1ur, y2u, y2ur)
-                    gtab[2, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
-                    gtab[3, j] = fp(j, eta, y1v, y1vr, y2v, y2vr)
-                    gtab[4, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
-                    gtab[5, j] = fp(j, eta, y1w, y1wr, y2w, y2wr)
-                    gtab[6, j] = fpp(j, eta, y1w, y1wr, y2w, y2wr)
-                    gtab[7, j] = f(j, eta, y1phix, y1phixr, y2phix, y2phixr)
-                    gtab[8, j] = fp(j, eta, y1phix, y1phixr, y2phix, y2phixr)
-                    gtab[9, j] = f(j, eta, y1phiy, y1phiyr, y2phiy, y2phiyr)
-                    gtab[10, j] = fp(j, eta, y1phiy, y1phiyr, y2phiy, y2phiyr)
+                # approximation functions and their derivatives in x and y
                 for i in range(m):
                     ftab[0, i] = f(i, xi, x1u, x1ur, x2u, x2ur)
-                    ftab[1, i] = fp(i, xi, x1u, x1ur, x2u, x2ur)
+                    ftab[1, i] = (2/a)*fp(i, xi, x1u, x1ur, x2u, x2ur)
                     ftab[2, i] = f(i, xi, x1v, x1vr, x2v, x2vr)
-                    ftab[3, i] = fp(i, xi, x1v, x1vr, x2v, x2vr)
+                    ftab[3, i] = (2/a)*fp(i, xi, x1v, x1vr, x2v, x2vr)
                     ftab[4, i] = f(i, xi, x1w, x1wr, x2w, x2wr)
-                    ftab[5, i] = fp(i, xi, x1w, x1wr, x2w, x2wr)
-                    ftab[6, i] = fpp(i, xi, x1w, x1wr, x2w, x2wr)
-                    ftab[7, i] = f(i, xi, x1phix, x1phixr, x2phix, x2phixr)
-                    ftab[8, i] = fp(i, xi, x1phix, x1phixr, x2phix, x2phixr)
-                    ftab[9, i] = f(i, xi, x1phiy, x1phiyr, x2phiy, x2phiyr)
-                    ftab[10, i] = fp(i, xi, x1phiy, x1phiyr, x2phiy, x2phiyr)
+                    ftab[5, i] = (2/a)*fp(i, xi, x1w, x1wr, x2w, x2wr)
+                    ftab[6, i] = f(i, xi, x1phix, x1phixr, x2phix, x2phixr)
+                    ftab[7, i] = (2/a)*fp(i, xi, x1phix, x1phixr, x2phix, x2phixr)
+                    ftab[8, i] = f(i, xi, x1phiy, x1phiyr, x2phiy, x2phiyr)
+                    ftab[9, i] = (2/a)*fp(i, xi, x1phiy, x1phiyr, x2phiy, x2phiyr)
+                for j in range(n):
+                    gtab[0, j] = f(j, eta, y1u, y1ur, y2u, y2ur)
+                    gtab[1, j] = (2/b)*fp(j, eta, y1u, y1ur, y2u, y2ur)
+                    gtab[2, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
+                    gtab[3, j] = (2/b)*fp(j, eta, y1v, y1vr, y2v, y2vr)
+                    gtab[4, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
+                    gtab[5, j] = (2/b)*fp(j, eta, y1w, y1wr, y2w, y2wr)
+                    gtab[6, j] = f(j, eta, y1phix, y1phixr, y2phix, y2phixr)
+                    gtab[7, j] = (2/b)*fp(j, eta, y1phix, y1phixr, y2phix, y2phixr)
+                    gtab[8, j] = f(j, eta, y1phiy, y1phiyr, y2phiy, y2phiyr)
+                    gtab[9, j] = (2/b)*fp(j, eta, y1phiy, y1phiyr, y2phiy, y2phiyr)
 
+                # derivatives of the linear strains at the point
+                u_x = 0.
+                u_y = 0.
+                v_x = 0.
+                v_y = 0.
+                w_x = 0.
+                w_y = 0.
+                phix = 0.
+                phiy = 0.
+                phix_x = 0.
+                phix_y = 0.
+                phiy_x = 0.
+                phiy_y = 0.
                 for j in range(n):
                     gAu = gtab[0, j]
-                    gAu_eta = gtab[1, j]
+                    gAu_y = gtab[1, j]
                     gAv = gtab[2, j]
-                    gAv_eta = gtab[3, j]
+                    gAv_y = gtab[3, j]
                     gAw = gtab[4, j]
-                    gAw_eta = gtab[5, j]
-                    gAw_etaeta = gtab[6, j]
-                    gAphix = gtab[7, j]
-                    gAphix_eta = gtab[8, j]
-                    gAphiy = gtab[9, j]
-                    gAphiy_eta = gtab[10, j]
-
+                    gAw_y = gtab[5, j]
+                    gAphix = gtab[6, j]
+                    gAphix_y = gtab[7, j]
+                    gAphiy = gtab[8, j]
+                    gAphiy_y = gtab[9, j]
                     for i in range(m):
                         fAu = ftab[0, i]
-                        fAu_xi = ftab[1, i]
+                        fAu_x = ftab[1, i]
                         fAv = ftab[2, i]
-                        fAv_xi = ftab[3, i]
+                        fAv_x = ftab[3, i]
                         fAw = ftab[4, i]
-                        fAw_xi = ftab[5, i]
-                        fAw_xixi = ftab[6, i]
-                        fAphix = ftab[7, i]
-                        fAphix_xi = ftab[8, i]
-                        fAphiy = ftab[9, i]
-                        fAphiy_xi = ftab[10, i]
-
+                        fAw_x = ftab[5, i]
+                        fAphix = ftab[6, i]
+                        fAphix_x = ftab[7, i]
+                        fAphiy = ftab[8, i]
+                        fAphiy_x = ftab[9, i]
                         col = col0 + DOF*(j*m + i)
+                        u_x += fAu_x*gAu*cs[col+0]
+                        u_y += fAu*gAu_y*cs[col+0]
+                        v_x += fAv_x*gAv*cs[col+1]
+                        v_y += fAv*gAv_y*cs[col+1]
+                        w_x += fAw_x*gAw*cs[col+2]
+                        w_y += fAw*gAw_y*cs[col+2]
+                        phix += fAphix*gAphix*cs[col+3]
+                        phiy += fAphiy*gAphiy*cs[col+4]
+                        phix_x += fAphix_x*gAphix*cs[col+3]
+                        phix_y += fAphix*gAphix_y*cs[col+3]
+                        phiy_x += fAphiy_x*gAphiy*cs[col+4]
+                        phiy_y += fAphiy*gAphiy_y*cs[col+4]
 
-                        e[0] += 2*cs[col+0]*fAu_xi*gAu/a
-                        e[1] += 2*cs[col+1]*fAv*gAv_eta/b
-                        e[2] += 2*cs[col+0]*fAu*gAu_eta/b + 2*cs[col+1]*fAv_xi*gAv/a
-                        e[3] += 2*cs[col+3]*fAphix_xi*gAphix/a
-                        e[4] += 2*cs[col+4]*fAphiy*gAphiy_eta/b
-                        e[5] += 2*cs[col+3]*fAphix*gAphix_eta/b + 2*cs[col+4]*fAphiy_xi*gAphiy/a
-                        e[6] += cs[col+4]*fAphiy*gAphiy + 2*cs[col+2]*fAw*gAw_eta/b
-                        e[7] += cs[col+3]*fAphix*gAphix + 2*cs[col+2]*fAw_xi*gAw/a
+                # linear strains and stresses
+                e[0] = u_x
+                e[1] = v_y
+                e[2] = u_y + v_x
+                e[3] = phix_x
+                e[4] = phiy_y
+                e[5] = phix_y + phiy_x
+                e[6] = phiy + w_y
+                e[7] = phix + w_x
+                for r in range(NE):
+                    sg[r] = 0.
+                    for s in range(NE):
+                        sg[r] += F[r*NE + s]*e[s]
+                sg[0] += Nxx0
+                sg[1] += Nyy0
+                sg[2] += Nxy0
 
-                # Calculating membrane stress components
-                Nxx = Nxx0
-                Nyy = Nyy0
-                Nxy = Nxy0
-                for i in range(NE):
-                    Nxx += F[0*NE + i]*e[i]
-                    Nyy += F[1*NE + i]*e[i]
-                    Nxy += F[2*NE + i]*e[i]
+                # K = [H(sigma)]
+                for p in range(144):
+                    K[p] = 0.
+                K[52] = sg[0]
+                K[53] = sg[2]
+                K[64] = sg[2]
+                K[65] = sg[1]
 
-                # kG
                 c = -1
-                for i in range(m):
-                    fAw = ftab[4, i]
-                    fAw_xi = ftab[5, i]
-
-                    for k in range(m):
-                        fBw = ftab[4, k]
-                        fBw_xi = ftab[5, k]
-
-                        for j in range(n):
-                            gAw = gtab[4, j]
-                            gAw_eta = gtab[5, j]
-
-                            for l in range(n):
-
-                                row = row0 + DOF*(j*m + i)
+                for j in range(n):
+                    gAu = gtab[0, j]
+                    gAu_y = gtab[1, j]
+                    gAv = gtab[2, j]
+                    gAv_y = gtab[3, j]
+                    gAw = gtab[4, j]
+                    gAw_y = gtab[5, j]
+                    gAphix = gtab[6, j]
+                    gAphix_y = gtab[7, j]
+                    gAphiy = gtab[8, j]
+                    gAphiy_y = gtab[9, j]
+                    for i in range(m):
+                        fAu = ftab[0, i]
+                        fAu_x = ftab[1, i]
+                        fAv = ftab[2, i]
+                        fAv_x = ftab[3, i]
+                        fAw = ftab[4, i]
+                        fAw_x = ftab[5, i]
+                        fAphix = ftab[6, i]
+                        fAphix_x = ftab[7, i]
+                        fAphiy = ftab[8, i]
+                        fAphiy_x = ftab[9, i]
+                        row = row0 + DOF*(j*m + i)
+                        pA[0] = fAu_x*gAu
+                        pA[1] = fAu*gAu_y
+                        pA[2] = fAv_x*gAv
+                        pA[3] = fAv*gAv_y
+                        pA[4] = fAw_x*gAw
+                        pA[5] = fAw*gAw_y
+                        pA[6] = fAphix*gAphix
+                        pA[7] = fAphiy*gAphiy
+                        pA[8] = fAphix_x*gAphix
+                        pA[9] = fAphix*gAphix_y
+                        pA[10] = fAphiy_x*gAphiy
+                        pA[11] = fAphiy*gAphiy_y
+                        # TA[d, q] = sum_p Phi_A[p, d] K[p, q]
+                        TA[28] = pA[4]*K[52] + pA[5]*K[64]
+                        TA[29] = pA[4]*K[53] + pA[5]*K[65]
+                        for l in range(n):
+                            gBu = gtab[0, l]
+                            gBu_y = gtab[1, l]
+                            gBv = gtab[2, l]
+                            gBv_y = gtab[3, l]
+                            gBw = gtab[4, l]
+                            gBw_y = gtab[5, l]
+                            gBphix = gtab[6, l]
+                            gBphix_y = gtab[7, l]
+                            gBphiy = gtab[8, l]
+                            gBphiy_y = gtab[9, l]
+                            for k in range(m):
                                 col = col0 + DOF*(l*m + k)
-
                                 #NOTE symmetry assumption True if no follower forces are used
                                 if row > col:
                                     continue
-
-                                gBw = gtab[4, l]
-                                gBw_eta = gtab[5, l]
-
+                                fBu = ftab[0, k]
+                                fBu_x = ftab[1, k]
+                                fBv = ftab[2, k]
+                                fBv_x = ftab[3, k]
+                                fBw = ftab[4, k]
+                                fBw_x = ftab[5, k]
+                                fBphix = ftab[6, k]
+                                fBphix_x = ftab[7, k]
+                                fBphiy = ftab[8, k]
+                                fBphiy_x = ftab[9, k]
+                                pB[0] = fBu_x*gBu
+                                pB[1] = fBu*gBu_y
+                                pB[2] = fBv_x*gBv
+                                pB[3] = fBv*gBv_y
+                                pB[4] = fBw_x*gBw
+                                pB[5] = fBw*gBw_y
+                                pB[6] = fBphix*gBphix
+                                pB[7] = fBphiy*gBphiy
+                                pB[8] = fBphix_x*gBphix
+                                pB[9] = fBphix*gBphix_y
+                                pB[10] = fBphiy_x*gBphiy
+                                pB[11] = fBphiy*gBphiy_y
                                 c += 1
                                 if ptx == 0 and pty == 0:
                                     kGr[c] = row+2
                                     kGc[c] = col+2
-                                kGv[c] += weight*(intx*inty/4)*( 4*Nxx*fAw_xi*fBw_xi*gAw*gBw/(a*a) + 4*Nxy*(fAw*fBw_xi*gAw_eta*gBw + fAw_xi*fBw*gAw*gBw_eta)/(a*b) + 4*Nyy*fAw*fBw*gAw_eta*gBw_eta/(b*b) )
+                                kGv[c] += weight*(TA[28]*pB[4] + TA[29]*pB[5])
 
     kG = coo_matrix((kGv, (kGr, kGc)), shape=(size, size))
 
     return kG
+
+
+def calc_fint(double [::1] cs, object Finput, object shell,
+        int size, int col0, int nx, int ny):
+    r"""Internal force vector, integrated numerically
+
+    Evaluates the generalized strains and stress resultants at
+    ``cs`` at each integration point and integrates the internal force
+    vector, whose Jacobian is ``fkC_num(NLgeom=1) + fkG_num``.
+
+    Parameters
+    ----------
+    cs : array-like
+        Ritz constants of the configuration, 1-D of size ``size``, in the
+        units of the displacements (the rotations in radians).
+    Finput : array-like
+        Constitutive matrix of the generalized strains of the model, shape
+        ``(8, 8)`` for the whole domain, e.g. ``shell.ABD``, or ``(nx,
+        ny, 8, 8)`` with one matrix per integration point.
+    shell : :class:`.Shell`
+        The shell, which gives the dimensions ``a`` and ``b``, the radius ``r``
+        of the cylinders, the numbers of terms ``m`` and ``n`` and the boundary
+        flags of the approximation functions of each field.
+    size : int
+        Size of the vector, the number of degrees of freedom of the assembly.
+    col0 : int
+        Position of the vector where the terms of this shell start.
+    nx, ny : int
+        Number of Gauss-Legendre points along `x` and `y`.
+
+    Returns
+    -------
+    fint : numpy.ndarray
+        Internal force vector of size ``size``.
+
+    Raises
+    ------
+    ValueError
+        If ``Finput`` has an invalid shape or ``shell`` is not a
+        :class:`.Shell`.
+
+    Notes
+    -----
+    With the generalized strains of the kinematics of the module,
+    `\boldsymbol{\varepsilon}(\boldsymbol{c})`, their variation `\delta
+    \boldsymbol{\varepsilon} = \boldsymbol{B}(\boldsymbol{c}) \delta
+    \boldsymbol{c}` and the stress resultants `\boldsymbol{\sigma} =
+    \boldsymbol{F} \boldsymbol{\varepsilon}`:
+
+    .. math::
+
+        \boldsymbol{f}_{int} = \int \boldsymbol{B}(\boldsymbol{c})^\top
+        \boldsymbol{\sigma} \, dA
+
+    the gradient of the strain energy `\frac{1}{2} \int
+    \boldsymbol{\varepsilon}^\top \boldsymbol{F} \boldsymbol{\varepsilon}
+    \, dA`.
+
+    The integrals are evaluated with ``nx x ny`` Gauss-Legendre points
+    over the integration domain `x_1 \le x \le x_2`, `y_1 \le y \le y_2` of
+    :meth:`.Shell.integration_limits`, the whole shell by default.
+
+    """
+    cdef double x1, x2, y1, y2, xinf, xsup, yinf, ysup
+    cdef double a, b, intx, inty
+    cdef int m, n
+    cdef double x1u, x1ur, x2u, x2ur
+    cdef double x1v, x1vr, x2v, x2vr
+    cdef double x1w, x1wr, x2w, x2wr
+    cdef double x1phix, x1phixr, x2phix, x2phixr
+    cdef double x1phiy, x1phiyr, x2phiy, x2phiyr
+    cdef double y1u, y1ur, y2u, y2ur
+    cdef double y1v, y1vr, y2v, y2vr
+    cdef double y1w, y1wr, y2w, y2wr
+    cdef double y1phix, y1phixr, y2phix, y2phixr
+    cdef double y1phiy, y1phiyr, y2phiy, y2phiyr
+
+    cdef int i, j, k, l, c, p, q, r, s, row, col, ptx, pty
+    cdef double xi, eta, weight
+    cdef double xi1, xi2, eta1, eta2
+    cdef double [:, ::1] ftab, gtab
+    cdef double [::1] xis, etas, weights_xi, weights_eta
+
+    cdef double u_x, u_y, v_x, v_y, w_x, w_y, phix, phiy
+    cdef double phix_x, phix_y, phiy_x, phiy_y
+    cdef double e[8]
+    cdef double sg[8]
+    cdef double S[12]
+    cdef double pA[12]
+    cdef double fAu, fAu_x, fAv, fAv_x, fAw, fAw_x, fAphix
+    cdef double fAphix_x, fAphiy, fAphiy_x, gAu, gAu_y, gAv, gAv_y
+    cdef double gAw, gAw_y, gAphix, gAphix_y, gAphiy, gAphiy_y
+
+    cdef double [::1] fint
+
+    # F as 4-D matrix, must be [nx, ny, NE, NE], when there is one F[NE, NE]
+    # for each of the nx * ny integration points
+    cdef double F[8 * 8]
+    cdef double [:, :, :, ::1] Fnxny
+
+    cdef int one_F_each_point = 0
+
+    Finput = np.ascontiguousarray(Finput, dtype=DOUBLE)
+    if Finput.shape == (nx, ny, NE, NE):
+        Fnxny = Finput
+        one_F_each_point = 1
+    elif Finput.shape == (NE, NE):
+        # creating dummy 4-D array that is not used
+        Fnxny = np.empty(shape=(0, 0, 0, 0), dtype=DOUBLE)
+        # using a constant F for all the integration domain
+        for i in range(NE):
+            for j in range(NE):
+                F[i*NE + j] = Finput[i, j]
+    else:
+        raise ValueError('Invalid shape for Finput!')
+
+    if not 'Shell' in shell.__class__.__name__:
+        raise ValueError('a Shell object must be given as input')
+    a = shell.a
+    b = shell.b
+    m = shell.m
+    n = shell.n
+    #NOTE physical limits of the integration domain, resolved and validated
+    #      by Shell.integration_limits(); for the full domain the mapping
+    #      below gives exactly xi1 = eta1 = -1 and xi2 = eta2 = +1
+    x1, x2, y1, y2 = shell.integration_limits()
+    x1u = shell.x1u; x1ur = shell.x1ur; x2u = shell.x2u; x2ur = shell.x2ur
+    x1v = shell.x1v; x1vr = shell.x1vr; x2v = shell.x2v; x2vr = shell.x2vr
+    x1w = shell.x1w; x1wr = shell.x1wr; x2w = shell.x2w; x2wr = shell.x2wr
+    x1phix = shell.x1phix; x1phixr = shell.x1phixr; x2phix = shell.x2phix; x2phixr = shell.x2phixr
+    x1phiy = shell.x1phiy; x1phiyr = shell.x1phiyr; x2phiy = shell.x2phiy; x2phiyr = shell.x2phiyr
+    y1u = shell.y1u; y1ur = shell.y1ur; y2u = shell.y2u; y2ur = shell.y2ur
+    y1v = shell.y1v; y1vr = shell.y1vr; y2v = shell.y2v; y2vr = shell.y2vr
+    y1w = shell.y1w; y1wr = shell.y1wr; y2w = shell.y2w; y2wr = shell.y2wr
+    y1phix = shell.y1phix; y1phixr = shell.y1phixr; y2phix = shell.y2phix; y2phixr = shell.y2phixr
+    y1phiy = shell.y1phiy; y1phiyr = shell.y1phiyr; y2phiy = shell.y2phiy; y2phiyr = shell.y2phiyr
+
+    xis, weights_xi = roots_legendre(nx)
+    etas, weights_eta = roots_legendre(ny)
+
+    xinf = 0
+    xsup = shell.a
+    xi1 = (x1 - xinf)/(xsup - xinf)*2 - 1
+    xi2 = (x2 - xinf)/(xsup - xinf)*2 - 1
+
+    yinf = 0
+    ysup = shell.b
+    eta1 = (y1 - yinf)/(ysup - yinf)*2 - 1
+    eta2 = (y2 - yinf)/(ysup - yinf)*2 - 1
+
+    intx = x2 - x1
+    inty = y2 - y1
+
+    ftab = np.zeros((10, m), dtype=DOUBLE)
+    gtab = np.zeros((10, n), dtype=DOUBLE)
+
+    fint = np.zeros(size, dtype=DOUBLE)
+
+    with nogil:
+        for ptx in range(nx):
+            for pty in range(ny):
+                xi = xis[ptx]
+                eta = etas[pty]
+                xi = (xi - (-1))/2 * (xi2 - xi1) + xi1
+                eta = (eta - (-1))/2 * (eta2 - eta1) + eta1
+
+                # the integrands are per unit area of the natural domain
+                weight = weights_xi[ptx]*weights_eta[pty]*intx*inty/4
+
+                if one_F_each_point == 1:
+                    for i in range(NE):
+                        for j in range(NE):
+                            F[i*NE + j] = Fnxny[ptx, pty, i, j]
+
+                # approximation functions and their derivatives in x and y
+                for i in range(m):
+                    ftab[0, i] = f(i, xi, x1u, x1ur, x2u, x2ur)
+                    ftab[1, i] = (2/a)*fp(i, xi, x1u, x1ur, x2u, x2ur)
+                    ftab[2, i] = f(i, xi, x1v, x1vr, x2v, x2vr)
+                    ftab[3, i] = (2/a)*fp(i, xi, x1v, x1vr, x2v, x2vr)
+                    ftab[4, i] = f(i, xi, x1w, x1wr, x2w, x2wr)
+                    ftab[5, i] = (2/a)*fp(i, xi, x1w, x1wr, x2w, x2wr)
+                    ftab[6, i] = f(i, xi, x1phix, x1phixr, x2phix, x2phixr)
+                    ftab[7, i] = (2/a)*fp(i, xi, x1phix, x1phixr, x2phix, x2phixr)
+                    ftab[8, i] = f(i, xi, x1phiy, x1phiyr, x2phiy, x2phiyr)
+                    ftab[9, i] = (2/a)*fp(i, xi, x1phiy, x1phiyr, x2phiy, x2phiyr)
+                for j in range(n):
+                    gtab[0, j] = f(j, eta, y1u, y1ur, y2u, y2ur)
+                    gtab[1, j] = (2/b)*fp(j, eta, y1u, y1ur, y2u, y2ur)
+                    gtab[2, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
+                    gtab[3, j] = (2/b)*fp(j, eta, y1v, y1vr, y2v, y2vr)
+                    gtab[4, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
+                    gtab[5, j] = (2/b)*fp(j, eta, y1w, y1wr, y2w, y2wr)
+                    gtab[6, j] = f(j, eta, y1phix, y1phixr, y2phix, y2phixr)
+                    gtab[7, j] = (2/b)*fp(j, eta, y1phix, y1phixr, y2phix, y2phixr)
+                    gtab[8, j] = f(j, eta, y1phiy, y1phiyr, y2phiy, y2phiyr)
+                    gtab[9, j] = (2/b)*fp(j, eta, y1phiy, y1phiyr, y2phiy, y2phiyr)
+
+                # generalized derivatives at the point
+                u_x = 0.
+                u_y = 0.
+                v_x = 0.
+                v_y = 0.
+                w_x = 0.
+                w_y = 0.
+                phix = 0.
+                phiy = 0.
+                phix_x = 0.
+                phix_y = 0.
+                phiy_x = 0.
+                phiy_y = 0.
+                for j in range(n):
+                    gAu = gtab[0, j]
+                    gAu_y = gtab[1, j]
+                    gAv = gtab[2, j]
+                    gAv_y = gtab[3, j]
+                    gAw = gtab[4, j]
+                    gAw_y = gtab[5, j]
+                    gAphix = gtab[6, j]
+                    gAphix_y = gtab[7, j]
+                    gAphiy = gtab[8, j]
+                    gAphiy_y = gtab[9, j]
+                    for i in range(m):
+                        fAu = ftab[0, i]
+                        fAu_x = ftab[1, i]
+                        fAv = ftab[2, i]
+                        fAv_x = ftab[3, i]
+                        fAw = ftab[4, i]
+                        fAw_x = ftab[5, i]
+                        fAphix = ftab[6, i]
+                        fAphix_x = ftab[7, i]
+                        fAphiy = ftab[8, i]
+                        fAphiy_x = ftab[9, i]
+                        col = col0 + DOF*(j*m + i)
+                        u_x += fAu_x*gAu*cs[col+0]
+                        u_y += fAu*gAu_y*cs[col+0]
+                        v_x += fAv_x*gAv*cs[col+1]
+                        v_y += fAv*gAv_y*cs[col+1]
+                        w_x += fAw_x*gAw*cs[col+2]
+                        w_y += fAw*gAw_y*cs[col+2]
+                        phix += fAphix*gAphix*cs[col+3]
+                        phiy += fAphiy*gAphiy*cs[col+4]
+                        phix_x += fAphix_x*gAphix*cs[col+3]
+                        phix_y += fAphix*gAphix_y*cs[col+3]
+                        phiy_x += fAphiy_x*gAphiy*cs[col+4]
+                        phiy_y += fAphiy*gAphiy_y*cs[col+4]
+
+                # strains, stresses and S = [B]^T sigma
+                e[0] = u_x + 0.5*(w_x*w_x)
+                e[1] = v_y + 0.5*(w_y*w_y)
+                e[2] = u_y + v_x + w_x*w_y
+                e[3] = phix_x
+                e[4] = phiy_y
+                e[5] = phix_y + phiy_x
+                e[6] = phiy + w_y
+                e[7] = phix + w_x
+                for r in range(NE):
+                    sg[r] = 0.
+                    for s in range(NE):
+                        sg[r] += F[r*NE + s]*e[s]
+                S[0] = sg[0]
+                S[1] = sg[2]
+                S[2] = sg[2]
+                S[3] = sg[1]
+                S[4] = sg[0]*w_x + sg[2]*w_y + sg[7]
+                S[5] = sg[1]*w_y + sg[2]*w_x + sg[6]
+                S[6] = sg[7]
+                S[7] = sg[6]
+                S[8] = sg[3]
+                S[9] = sg[5]
+                S[10] = sg[5]
+                S[11] = sg[4]
+
+                for j in range(n):
+                    gAu = gtab[0, j]
+                    gAu_y = gtab[1, j]
+                    gAv = gtab[2, j]
+                    gAv_y = gtab[3, j]
+                    gAw = gtab[4, j]
+                    gAw_y = gtab[5, j]
+                    gAphix = gtab[6, j]
+                    gAphix_y = gtab[7, j]
+                    gAphiy = gtab[8, j]
+                    gAphiy_y = gtab[9, j]
+                    for i in range(m):
+                        fAu = ftab[0, i]
+                        fAu_x = ftab[1, i]
+                        fAv = ftab[2, i]
+                        fAv_x = ftab[3, i]
+                        fAw = ftab[4, i]
+                        fAw_x = ftab[5, i]
+                        fAphix = ftab[6, i]
+                        fAphix_x = ftab[7, i]
+                        fAphiy = ftab[8, i]
+                        fAphiy_x = ftab[9, i]
+                        col = col0 + DOF*(j*m + i)
+                        pA[0] = fAu_x*gAu
+                        pA[1] = fAu*gAu_y
+                        pA[2] = fAv_x*gAv
+                        pA[3] = fAv*gAv_y
+                        pA[4] = fAw_x*gAw
+                        pA[5] = fAw*gAw_y
+                        pA[6] = fAphix*gAphix
+                        pA[7] = fAphiy*gAphiy
+                        pA[8] = fAphix_x*gAphix
+                        pA[9] = fAphix*gAphix_y
+                        pA[10] = fAphiy_x*gAphiy
+                        pA[11] = fAphiy*gAphiy_y
+                        fint[col+0] += weight*(pA[0]*S[0] + pA[1]*S[1])
+                        fint[col+1] += weight*(pA[2]*S[2] + pA[3]*S[3])
+                        fint[col+2] += weight*(pA[4]*S[4] + pA[5]*S[5])
+                        fint[col+3] += weight*(pA[6]*S[6] + pA[8]*S[8] + pA[9]*S[9])
+                        fint[col+4] += weight*(pA[7]*S[7] + pA[10]*S[10] + pA[11]*S[11])
+
+    return np.asarray(fint)
+
+
+def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
+        int size, int col0, int nx, int ny, double Nxx_cte=0.,
+        double Nyy_cte=0., double Nxy_cte=0.):
+    r"""Product of the tangent stiffness matrix by a vector, without assembly
+
+    Returns ``KT(cs) vs``, with ``KT`` the tangent stiffness matrix
+    ``fkC_num(cs, ..., NLgeom=1) + fkG_num(cs, ...)`` at ``cs``, the exact
+    Jacobian of :func:`calc_fint`, plus the geometric stiffness matrix of
+    the constant membrane stress state ``Nxx_cte``, ``Nyy_cte`` and
+    ``Nxy_cte``. The cost is about that of :func:`calc_fint`.
+
+    Parameters
+    ----------
+    cs, vs : array-like
+        Ritz constants of the configuration and the vector, 1-D of size
+        ``size``.
+    Finput : array-like
+        Constitutive matrix of the generalized strains of the model, shape
+        ``(8, 8)`` for the whole domain, e.g. ``shell.ABD``, or ``(nx,
+        ny, 8, 8)`` with one matrix per integration point.
+    shell : :class:`.Shell`
+        The shell, which gives the dimensions ``a`` and ``b``, the radius ``r``
+        of the cylinders, the numbers of terms ``m`` and ``n`` and the boundary
+        flags of the approximation functions of each field.
+    size, col0 : int
+        Size of the vectors and position where the terms of this shell
+        start.
+    nx, ny : int
+        Number of Gauss-Legendre points along `x` and `y`.
+    Nxx_cte, Nyy_cte, Nxy_cte : float, optional
+        Constant membrane stress resultants, force per unit length, default
+        ``0``.
+
+    Returns
+    -------
+    kTv : numpy.ndarray
+        The product, of size ``size``.
+
+    Raises
+    ------
+    ValueError
+        If ``cs`` or ``vs`` do not have the size ``size``, ``Finput`` has an
+        invalid shape or ``shell`` is not a :class:`.Shell`.
+
+    Notes
+    -----
+    With the generalized derivatives at the integration point `\boldsymbol{d}
+    = \boldsymbol{\Phi} \boldsymbol{c}` (the gradients of `u`, `v`, `w`, the rotations and their gradients), the strains
+    `\boldsymbol{\varepsilon}(\boldsymbol{d})`, `\boldsymbol{B} =
+    \partial \boldsymbol{\varepsilon} / \partial \boldsymbol{d}`, the
+    stresses `\boldsymbol{\sigma} = \boldsymbol{F}
+    \boldsymbol{\varepsilon}` and `\boldsymbol{H}(\boldsymbol{\sigma}) =
+    \sum_r \sigma_r \, \partial^2 \varepsilon_r / \partial
+    \boldsymbol{d}^2`, which involves only the membrane stresses and is
+    independent of `\boldsymbol{d}`, the membrane strains being quadratic:
+
+    .. math::
+
+        \boldsymbol{K}_T \boldsymbol{v} = \int \boldsymbol{\Phi}^\top
+        \left[\boldsymbol{B}^\top \boldsymbol{F} \boldsymbol{B} +
+        \boldsymbol{H}(\boldsymbol{\sigma} + \bar{\boldsymbol{\sigma}})
+        \right] \boldsymbol{\Phi} \boldsymbol{v} \, dA
+
+    with `\bar{\boldsymbol{\sigma}}` the constant membrane stresses,
+    evaluated without forming `\boldsymbol{K}_T`.
+
+    The integrals are evaluated with ``nx x ny`` Gauss-Legendre points
+    over the integration domain `x_1 \le x \le x_2`, `y_1 \le y \le y_2` of
+    :meth:`.Shell.integration_limits`, the whole shell by default.
+
+    """
+    cdef double x1, x2, y1, y2, xinf, xsup, yinf, ysup
+    cdef double a, b, intx, inty
+    cdef int m, n
+    cdef double x1u, x1ur, x2u, x2ur
+    cdef double x1v, x1vr, x2v, x2vr
+    cdef double x1w, x1wr, x2w, x2wr
+    cdef double x1phix, x1phixr, x2phix, x2phixr
+    cdef double x1phiy, x1phiyr, x2phiy, x2phiyr
+    cdef double y1u, y1ur, y2u, y2ur
+    cdef double y1v, y1vr, y2v, y2vr
+    cdef double y1w, y1wr, y2w, y2wr
+    cdef double y1phix, y1phixr, y2phix, y2phixr
+    cdef double y1phiy, y1phiyr, y2phiy, y2phiyr
+
+    cdef int i, j, k, l, c, p, q, r, s, row, col, ptx, pty
+    cdef double xi, eta, weight
+    cdef double xi1, xi2, eta1, eta2
+    cdef double [:, ::1] ftab, gtab
+    cdef double [::1] xis, etas, weights_xi, weights_eta
+
+    cdef double u_x, u_y, v_x, v_y, w_x, w_y, phix, phiy
+    cdef double phix_x, phix_y, phiy_x, phiy_y
+    cdef double du_x, du_y, dv_x, dv_y, dw_x, dw_y, dphix, dphiy
+    cdef double dphix_x, dphix_y, dphiy_x, dphiy_y
+    cdef double e[8]
+    cdef double de[8]
+    cdef double sg[8]
+    cdef double dsg[8]
+    cdef double S[12]
+    cdef double pA[12]
+    cdef double fAu, fAu_x, fAv, fAv_x, fAw, fAw_x, fAphix
+    cdef double fAphix_x, fAphiy, fAphiy_x, gAu, gAu_y, gAv, gAv_y
+    cdef double gAw, gAw_y, gAphix, gAphix_y, gAphiy, gAphiy_y
+
+    cdef double [::1] kTv
+
+    if cs.shape[0] != size or vs.shape[0] != size:
+        raise ValueError('cs and vs must have the size %d' % size)
+
+    # F as 4-D matrix, must be [nx, ny, NE, NE], when there is one F[NE, NE]
+    # for each of the nx * ny integration points
+    cdef double F[8 * 8]
+    cdef double [:, :, :, ::1] Fnxny
+
+    cdef int one_F_each_point = 0
+
+    Finput = np.ascontiguousarray(Finput, dtype=DOUBLE)
+    if Finput.shape == (nx, ny, NE, NE):
+        Fnxny = Finput
+        one_F_each_point = 1
+    elif Finput.shape == (NE, NE):
+        # creating dummy 4-D array that is not used
+        Fnxny = np.empty(shape=(0, 0, 0, 0), dtype=DOUBLE)
+        # using a constant F for all the integration domain
+        for i in range(NE):
+            for j in range(NE):
+                F[i*NE + j] = Finput[i, j]
+    else:
+        raise ValueError('Invalid shape for Finput!')
+
+    if not 'Shell' in shell.__class__.__name__:
+        raise ValueError('a Shell object must be given as input')
+    a = shell.a
+    b = shell.b
+    m = shell.m
+    n = shell.n
+    #NOTE physical limits of the integration domain, resolved and validated
+    #      by Shell.integration_limits(); for the full domain the mapping
+    #      below gives exactly xi1 = eta1 = -1 and xi2 = eta2 = +1
+    x1, x2, y1, y2 = shell.integration_limits()
+    x1u = shell.x1u; x1ur = shell.x1ur; x2u = shell.x2u; x2ur = shell.x2ur
+    x1v = shell.x1v; x1vr = shell.x1vr; x2v = shell.x2v; x2vr = shell.x2vr
+    x1w = shell.x1w; x1wr = shell.x1wr; x2w = shell.x2w; x2wr = shell.x2wr
+    x1phix = shell.x1phix; x1phixr = shell.x1phixr; x2phix = shell.x2phix; x2phixr = shell.x2phixr
+    x1phiy = shell.x1phiy; x1phiyr = shell.x1phiyr; x2phiy = shell.x2phiy; x2phiyr = shell.x2phiyr
+    y1u = shell.y1u; y1ur = shell.y1ur; y2u = shell.y2u; y2ur = shell.y2ur
+    y1v = shell.y1v; y1vr = shell.y1vr; y2v = shell.y2v; y2vr = shell.y2vr
+    y1w = shell.y1w; y1wr = shell.y1wr; y2w = shell.y2w; y2wr = shell.y2wr
+    y1phix = shell.y1phix; y1phixr = shell.y1phixr; y2phix = shell.y2phix; y2phixr = shell.y2phixr
+    y1phiy = shell.y1phiy; y1phiyr = shell.y1phiyr; y2phiy = shell.y2phiy; y2phiyr = shell.y2phiyr
+
+    xis, weights_xi = roots_legendre(nx)
+    etas, weights_eta = roots_legendre(ny)
+
+    xinf = 0
+    xsup = shell.a
+    xi1 = (x1 - xinf)/(xsup - xinf)*2 - 1
+    xi2 = (x2 - xinf)/(xsup - xinf)*2 - 1
+
+    yinf = 0
+    ysup = shell.b
+    eta1 = (y1 - yinf)/(ysup - yinf)*2 - 1
+    eta2 = (y2 - yinf)/(ysup - yinf)*2 - 1
+
+    intx = x2 - x1
+    inty = y2 - y1
+
+    ftab = np.zeros((10, m), dtype=DOUBLE)
+    gtab = np.zeros((10, n), dtype=DOUBLE)
+
+    kTv = np.zeros(size, dtype=DOUBLE)
+
+    with nogil:
+        for ptx in range(nx):
+            for pty in range(ny):
+                xi = xis[ptx]
+                eta = etas[pty]
+                xi = (xi - (-1))/2 * (xi2 - xi1) + xi1
+                eta = (eta - (-1))/2 * (eta2 - eta1) + eta1
+
+                # the integrands are per unit area of the natural domain
+                weight = weights_xi[ptx]*weights_eta[pty]*intx*inty/4
+
+                if one_F_each_point == 1:
+                    for i in range(NE):
+                        for j in range(NE):
+                            F[i*NE + j] = Fnxny[ptx, pty, i, j]
+
+                # approximation functions and their derivatives in x and y
+                for i in range(m):
+                    ftab[0, i] = f(i, xi, x1u, x1ur, x2u, x2ur)
+                    ftab[1, i] = (2/a)*fp(i, xi, x1u, x1ur, x2u, x2ur)
+                    ftab[2, i] = f(i, xi, x1v, x1vr, x2v, x2vr)
+                    ftab[3, i] = (2/a)*fp(i, xi, x1v, x1vr, x2v, x2vr)
+                    ftab[4, i] = f(i, xi, x1w, x1wr, x2w, x2wr)
+                    ftab[5, i] = (2/a)*fp(i, xi, x1w, x1wr, x2w, x2wr)
+                    ftab[6, i] = f(i, xi, x1phix, x1phixr, x2phix, x2phixr)
+                    ftab[7, i] = (2/a)*fp(i, xi, x1phix, x1phixr, x2phix, x2phixr)
+                    ftab[8, i] = f(i, xi, x1phiy, x1phiyr, x2phiy, x2phiyr)
+                    ftab[9, i] = (2/a)*fp(i, xi, x1phiy, x1phiyr, x2phiy, x2phiyr)
+                for j in range(n):
+                    gtab[0, j] = f(j, eta, y1u, y1ur, y2u, y2ur)
+                    gtab[1, j] = (2/b)*fp(j, eta, y1u, y1ur, y2u, y2ur)
+                    gtab[2, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
+                    gtab[3, j] = (2/b)*fp(j, eta, y1v, y1vr, y2v, y2vr)
+                    gtab[4, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
+                    gtab[5, j] = (2/b)*fp(j, eta, y1w, y1wr, y2w, y2wr)
+                    gtab[6, j] = f(j, eta, y1phix, y1phixr, y2phix, y2phixr)
+                    gtab[7, j] = (2/b)*fp(j, eta, y1phix, y1phixr, y2phix, y2phixr)
+                    gtab[8, j] = f(j, eta, y1phiy, y1phiyr, y2phiy, y2phiyr)
+                    gtab[9, j] = (2/b)*fp(j, eta, y1phiy, y1phiyr, y2phiy, y2phiyr)
+
+                # generalized derivatives of cs and vs at the point
+                u_x = 0.
+                u_y = 0.
+                v_x = 0.
+                v_y = 0.
+                w_x = 0.
+                w_y = 0.
+                phix = 0.
+                phiy = 0.
+                phix_x = 0.
+                phix_y = 0.
+                phiy_x = 0.
+                phiy_y = 0.
+                du_x = 0.
+                du_y = 0.
+                dv_x = 0.
+                dv_y = 0.
+                dw_x = 0.
+                dw_y = 0.
+                dphix = 0.
+                dphiy = 0.
+                dphix_x = 0.
+                dphix_y = 0.
+                dphiy_x = 0.
+                dphiy_y = 0.
+                for j in range(n):
+                    gAu = gtab[0, j]
+                    gAu_y = gtab[1, j]
+                    gAv = gtab[2, j]
+                    gAv_y = gtab[3, j]
+                    gAw = gtab[4, j]
+                    gAw_y = gtab[5, j]
+                    gAphix = gtab[6, j]
+                    gAphix_y = gtab[7, j]
+                    gAphiy = gtab[8, j]
+                    gAphiy_y = gtab[9, j]
+                    for i in range(m):
+                        fAu = ftab[0, i]
+                        fAu_x = ftab[1, i]
+                        fAv = ftab[2, i]
+                        fAv_x = ftab[3, i]
+                        fAw = ftab[4, i]
+                        fAw_x = ftab[5, i]
+                        fAphix = ftab[6, i]
+                        fAphix_x = ftab[7, i]
+                        fAphiy = ftab[8, i]
+                        fAphiy_x = ftab[9, i]
+                        col = col0 + DOF*(j*m + i)
+                        u_x += fAu_x*gAu*cs[col+0]
+                        u_y += fAu*gAu_y*cs[col+0]
+                        v_x += fAv_x*gAv*cs[col+1]
+                        v_y += fAv*gAv_y*cs[col+1]
+                        w_x += fAw_x*gAw*cs[col+2]
+                        w_y += fAw*gAw_y*cs[col+2]
+                        phix += fAphix*gAphix*cs[col+3]
+                        phiy += fAphiy*gAphiy*cs[col+4]
+                        phix_x += fAphix_x*gAphix*cs[col+3]
+                        phix_y += fAphix*gAphix_y*cs[col+3]
+                        phiy_x += fAphiy_x*gAphiy*cs[col+4]
+                        phiy_y += fAphiy*gAphiy_y*cs[col+4]
+                        du_x += fAu_x*gAu*vs[col+0]
+                        du_y += fAu*gAu_y*vs[col+0]
+                        dv_x += fAv_x*gAv*vs[col+1]
+                        dv_y += fAv*gAv_y*vs[col+1]
+                        dw_x += fAw_x*gAw*vs[col+2]
+                        dw_y += fAw*gAw_y*vs[col+2]
+                        dphix += fAphix*gAphix*vs[col+3]
+                        dphiy += fAphiy*gAphiy*vs[col+4]
+                        dphix_x += fAphix_x*gAphix*vs[col+3]
+                        dphix_y += fAphix*gAphix_y*vs[col+3]
+                        dphiy_x += fAphiy_x*gAphiy*vs[col+4]
+                        dphiy_y += fAphiy*gAphiy_y*vs[col+4]
+
+                # strains, strain increments, stresses
+                e[0] = u_x + 0.5*(w_x*w_x)
+                e[1] = v_y + 0.5*(w_y*w_y)
+                e[2] = u_y + v_x + w_x*w_y
+                e[3] = phix_x
+                e[4] = phiy_y
+                e[5] = phix_y + phiy_x
+                e[6] = phiy + w_y
+                e[7] = phix + w_x
+                de[0] = du_x + dw_x*w_x
+                de[1] = dv_y + dw_y*w_y
+                de[2] = du_y + dv_x + dw_x*w_y + dw_y*w_x
+                de[3] = dphix_x
+                de[4] = dphiy_y
+                de[5] = dphix_y + dphiy_x
+                de[6] = dphiy + dw_y
+                de[7] = dphix + dw_x
+                for r in range(NE):
+                    sg[r] = 0.
+                    for s in range(NE):
+                        sg[r] += F[r*NE + s]*e[s]
+                for r in range(NE):
+                    dsg[r] = 0.
+                    for s in range(NE):
+                        dsg[r] += F[r*NE + s]*de[s]
+                sg[0] += Nxx_cte
+                sg[1] += Nyy_cte
+                sg[2] += Nxy_cte
+
+                # S = [B]^T dsigma + [H(sigma)] dv
+                S[0] = dsg[0]
+                S[1] = dsg[2]
+                S[2] = dsg[2]
+                S[3] = dsg[1]
+                S[4] = dsg[0]*w_x + dsg[2]*w_y + dsg[7] + dw_x*sg[0] + dw_y*sg[2]
+                S[5] = dsg[1]*w_y + dsg[2]*w_x + dsg[6] + dw_x*sg[2] + dw_y*sg[1]
+                S[6] = dsg[7]
+                S[7] = dsg[6]
+                S[8] = dsg[3]
+                S[9] = dsg[5]
+                S[10] = dsg[5]
+                S[11] = dsg[4]
+
+                for j in range(n):
+                    gAu = gtab[0, j]
+                    gAu_y = gtab[1, j]
+                    gAv = gtab[2, j]
+                    gAv_y = gtab[3, j]
+                    gAw = gtab[4, j]
+                    gAw_y = gtab[5, j]
+                    gAphix = gtab[6, j]
+                    gAphix_y = gtab[7, j]
+                    gAphiy = gtab[8, j]
+                    gAphiy_y = gtab[9, j]
+                    for i in range(m):
+                        fAu = ftab[0, i]
+                        fAu_x = ftab[1, i]
+                        fAv = ftab[2, i]
+                        fAv_x = ftab[3, i]
+                        fAw = ftab[4, i]
+                        fAw_x = ftab[5, i]
+                        fAphix = ftab[6, i]
+                        fAphix_x = ftab[7, i]
+                        fAphiy = ftab[8, i]
+                        fAphiy_x = ftab[9, i]
+                        col = col0 + DOF*(j*m + i)
+                        pA[0] = fAu_x*gAu
+                        pA[1] = fAu*gAu_y
+                        pA[2] = fAv_x*gAv
+                        pA[3] = fAv*gAv_y
+                        pA[4] = fAw_x*gAw
+                        pA[5] = fAw*gAw_y
+                        pA[6] = fAphix*gAphix
+                        pA[7] = fAphiy*gAphiy
+                        pA[8] = fAphix_x*gAphix
+                        pA[9] = fAphix*gAphix_y
+                        pA[10] = fAphiy_x*gAphiy
+                        pA[11] = fAphiy*gAphiy_y
+                        kTv[col+0] += weight*(pA[0]*S[0] + pA[1]*S[1])
+                        kTv[col+1] += weight*(pA[2]*S[2] + pA[3]*S[3])
+                        kTv[col+2] += weight*(pA[4]*S[4] + pA[5]*S[5])
+                        kTv[col+3] += weight*(pA[6]*S[6] + pA[8]*S[8] + pA[9]*S[9])
+                        kTv[col+4] += weight*(pA[7]*S[7] + pA[10]*S[10] + pA[11]*S[11])
+
+    return np.asarray(kTv)
 
 
 def fkM_num(object shell, object I_input, int size,
@@ -1445,316 +2366,6 @@ def fkAy_num(object shell, int size, int row0, int col0, int nx, int ny):
     return kA
 
 
-def calc_fint(double [::1] cs, object Finput, object shell,
-        int size, int col0, int nx, int ny):
-    r"""Internal force vector, integrated numerically
-
-    Evaluates the generalized strains and stress resultants at
-    ``cs`` at each integration point and integrates the internal force
-    vector, whose Jacobian is ``fkC_num(NLgeom=1) + fkG_num``.
-
-    Parameters
-    ----------
-    cs : array-like
-        Ritz constants of the configuration, 1-D of size ``size``, in the
-        units of the displacements (the rotations in radians).
-    Finput : array-like
-        Constitutive matrix of the generalized strains of the model, shape
-        ``(NE, NE)`` for the whole domain, e.g. ``shell.ABD``, or ``(nx, ny,
-        NE, NE)`` with one matrix per integration point.
-    shell : :class:`.Shell`
-        The shell, which gives the dimensions ``a`` and ``b``, the radius ``r``
-        of the cylinders, the numbers of terms ``m`` and ``n`` and the boundary
-        flags of the approximation functions of each field.
-    size : int
-        Size of the vector, the number of degrees of freedom of the assembly.
-    col0 : int
-        Position of the vector where the terms of this shell start.
-    nx, ny : int
-        Number of Gauss-Legendre points along `x` and `y`.
-
-    Returns
-    -------
-    fint : numpy.ndarray
-        Internal force vector of size ``size``.
-
-    Raises
-    ------
-    ValueError
-        If ``Finput`` has an invalid shape or ``shell`` is not a
-        :class:`.Shell`.
-
-    Notes
-    -----
-    With the generalized strains of the kinematics of the module,
-    `\boldsymbol{\varepsilon}(\boldsymbol{c})`, their variation `\delta
-    \boldsymbol{\varepsilon} = \boldsymbol{B}(\boldsymbol{c}) \delta
-    \boldsymbol{c}` and the stress resultants `\boldsymbol{\sigma} =
-    \boldsymbol{F} \boldsymbol{\varepsilon}`:
-
-    .. math::
-
-        \boldsymbol{f}_{int} = \int \boldsymbol{B}(\boldsymbol{c})^\top
-        \boldsymbol{\sigma} \, dA
-
-    the gradient of the strain energy `\frac{1}{2} \int
-    \boldsymbol{\varepsilon}^\top \boldsymbol{F} \boldsymbol{\varepsilon}
-    \, dA`.
-
-    The integrals are evaluated with ``nx x ny`` Gauss-Legendre points
-    over the integration domain `x_1 \le x \le x_2`, `y_1 \le y \le y_2` of
-    :meth:`.Shell.integration_limits`, the whole shell by default.
-
-    """
-    cdef double [:, ::1] gtab, ftab
-    cdef double x1, x2, y1, y2, xinf, xsup, yinf, ysup
-    cdef double a, b, intx, inty
-    cdef int m, n
-    cdef double x1u, x1ur, x2u, x2ur
-    cdef double x1v, x1vr, x2v, x2vr
-    cdef double x1w, x1wr, x2w, x2wr
-    cdef double x1phix, x1phixr, x2phix, x2phixr
-    cdef double x1phiy, x1phiyr, x2phiy, x2phiyr
-    cdef double y1u, y1ur, y2u, y2ur
-    cdef double y1v, y1vr, y2v, y2vr
-    cdef double y1w, y1wr, y2w, y2wr
-    cdef double y1phix, y1phixr, y2phix, y2phixr
-    cdef double y1phiy, y1phiyr, y2phiy, y2phiyr
-
-    cdef int i, j, c, col, ptx, pty
-    cdef double e[8]
-    cdef double s[8]
-    cdef double Nxx, Nyy, Nxy, Mxx, Myy
-    cdef double Mxy, Qy, Qx
-
-    cdef double xi, eta, weight
-    cdef double xi1, xi2, eta1, eta2
-    cdef double bx, by
-
-    cdef double fAu, fAu_xi, fAv, fAv_xi, fAw
-    cdef double fAw_xi, fAw_xixi, fAphix, fAphix_xi, fAphiy
-    cdef double fAphiy_xi
-    cdef double gAu, gAu_eta, gAv, gAv_eta, gAw
-    cdef double gAw_eta, gAw_etaeta, gAphix, gAphix_eta, gAphiy
-    cdef double gAphiy_eta
-
-    cdef double [::1] xis, etas, weights_xi, weights_eta, fint
-
-    # F as 4-D matrix, must be [nx, ny, 8, 8], when there is one
-    # constitutive matrix [8, 8] for each of the nx * ny integration points
-    cdef double F[64]
-    cdef double [:, :, :, ::1] Fnxny
-
-    cdef int one_F_each_point = 0
-
-    Finput = np.ascontiguousarray(Finput, dtype=DOUBLE)
-    if Finput.shape == (nx, ny, NE, NE):
-        Fnxny = Finput
-        one_F_each_point = 1
-    elif Finput.shape == (NE, NE):
-        # creating dummy 4-D array that is not used
-        Fnxny = np.empty(shape=(0, 0, 0, 0), dtype=DOUBLE)
-        # using a constant F for all the integration domain
-        for i in range(NE):
-            for j in range(NE):
-                F[i*NE + j] = Finput[i, j]
-    else:
-        raise ValueError('Invalid shape for Finput!')
-
-    if not 'Shell' in shell.__class__.__name__:
-        raise ValueError('a Shell object must be given as input')
-    a = shell.a
-    b = shell.b
-    m = shell.m
-    n = shell.n
-
-    #NOTE physical limits of the integration domain, resolved and validated
-    #      by Shell.integration_limits(); for the full domain the mapping
-    #      below gives exactly xi1 = eta1 = -1 and xi2 = eta2 = +1
-    x1, x2, y1, y2 = shell.integration_limits()
-    x1u = shell.x1u; x1ur = shell.x1ur; x2u = shell.x2u; x2ur = shell.x2ur
-    x1v = shell.x1v; x1vr = shell.x1vr; x2v = shell.x2v; x2vr = shell.x2vr
-    x1w = shell.x1w; x1wr = shell.x1wr; x2w = shell.x2w; x2wr = shell.x2wr
-    x1phix = shell.x1phix; x1phixr = shell.x1phixr; x2phix = shell.x2phix; x2phixr = shell.x2phixr
-    x1phiy = shell.x1phiy; x1phiyr = shell.x1phiyr; x2phiy = shell.x2phiy; x2phiyr = shell.x2phiyr
-    y1u = shell.y1u; y1ur = shell.y1ur; y2u = shell.y2u; y2ur = shell.y2ur
-    y1v = shell.y1v; y1vr = shell.y1vr; y2v = shell.y2v; y2vr = shell.y2vr
-    y1w = shell.y1w; y1wr = shell.y1wr; y2w = shell.y2w; y2wr = shell.y2wr
-    y1phix = shell.y1phix; y1phixr = shell.y1phixr; y2phix = shell.y2phix; y2phixr = shell.y2phixr
-    y1phiy = shell.y1phiy; y1phiyr = shell.y1phiyr; y2phiy = shell.y2phiy; y2phiyr = shell.y2phiyr
-
-    xis, weights_xi = roots_legendre(nx)
-    etas, weights_eta = roots_legendre(ny)
-
-    fint = np.zeros(size, dtype=DOUBLE)
-
-    xinf = 0
-    xsup = shell.a
-    xi1 = (x1 - xinf)/(xsup - xinf)*2 - 1
-    xi2 = (x2 - xinf)/(xsup - xinf)*2 - 1
-
-    yinf = 0
-    ysup = shell.b
-    eta1 = (y1 - yinf)/(ysup - yinf)*2 - 1
-    eta2 = (y2 - yinf)/(ysup - yinf)*2 - 1
-
-    intx = x2 - x1
-    inty = y2 - y1
-
-    gtab = np.zeros((11, n), dtype=DOUBLE)
-    ftab = np.zeros((11, m), dtype=DOUBLE)
-
-    with nogil:
-        for ptx in range(nx):
-            for pty in range(ny):
-                xi = xis[ptx]
-                eta = etas[pty]
-                xi = (xi - (-1))/2 * (xi2 - xi1) + xi1
-                eta = (eta - (-1))/2 * (eta2 - eta1) + eta1
-
-                weight = weights_xi[ptx] * weights_eta[pty]
-
-                if one_F_each_point == 1:
-                    for i in range(NE):
-                        for j in range(NE):
-                            #TODO could assume symmetry
-                            F[i*NE + j] = Fnxny[ptx, pty, i, j]
-
-                bx = 0
-                by = 0
-                # approximation functions evaluated once, see panels/dev/tabulate.py
-                for j in range(n):
-                    gtab[0, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
-                    gtab[1, j] = fp(j, eta, y1w, y1wr, y2w, y2wr)
-                    gtab[2, j] = f(j, eta, y1u, y1ur, y2u, y2ur)
-                    gtab[3, j] = fp(j, eta, y1u, y1ur, y2u, y2ur)
-                    gtab[4, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
-                    gtab[5, j] = fp(j, eta, y1v, y1vr, y2v, y2vr)
-                    gtab[6, j] = fpp(j, eta, y1w, y1wr, y2w, y2wr)
-                    gtab[7, j] = f(j, eta, y1phix, y1phixr, y2phix, y2phixr)
-                    gtab[8, j] = fp(j, eta, y1phix, y1phixr, y2phix, y2phixr)
-                    gtab[9, j] = f(j, eta, y1phiy, y1phiyr, y2phiy, y2phiyr)
-                    gtab[10, j] = fp(j, eta, y1phiy, y1phiyr, y2phiy, y2phiyr)
-                for i in range(m):
-                    ftab[0, i] = f(i, xi, x1w, x1wr, x2w, x2wr)
-                    ftab[1, i] = fp(i, xi, x1w, x1wr, x2w, x2wr)
-                    ftab[2, i] = f(i, xi, x1u, x1ur, x2u, x2ur)
-                    ftab[3, i] = fp(i, xi, x1u, x1ur, x2u, x2ur)
-                    ftab[4, i] = f(i, xi, x1v, x1vr, x2v, x2vr)
-                    ftab[5, i] = fp(i, xi, x1v, x1vr, x2v, x2vr)
-                    ftab[6, i] = fpp(i, xi, x1w, x1wr, x2w, x2wr)
-                    ftab[7, i] = f(i, xi, x1phix, x1phixr, x2phix, x2phixr)
-                    ftab[8, i] = fp(i, xi, x1phix, x1phixr, x2phix, x2phixr)
-                    ftab[9, i] = f(i, xi, x1phiy, x1phiyr, x2phiy, x2phiyr)
-                    ftab[10, i] = fp(i, xi, x1phiy, x1phiyr, x2phiy, x2phiyr)
-
-                for j in range(n):
-                    gAw = gtab[0, j]
-                    gAw_eta = gtab[1, j]
-                    for i in range(m):
-                        fAw = ftab[0, i]
-                        fAw_xi = ftab[1, i]
-
-                        col = col0 + DOF*(j*m + i)
-
-                        bx -= (2/a)*cs[col+2]*fAw_xi*gAw
-                        by -= (2/b)*cs[col+2]*fAw*gAw_eta
-
-                # current generalized strain state
-                for i in range(NE):
-                    e[i] = 0.
-                for j in range(n):
-                    gAu = gtab[2, j]
-                    gAu_eta = gtab[3, j]
-                    gAv = gtab[4, j]
-                    gAv_eta = gtab[5, j]
-                    gAw = gtab[0, j]
-                    gAw_eta = gtab[1, j]
-                    gAw_etaeta = gtab[6, j]
-                    gAphix = gtab[7, j]
-                    gAphix_eta = gtab[8, j]
-                    gAphiy = gtab[9, j]
-                    gAphiy_eta = gtab[10, j]
-
-                    for i in range(m):
-                        fAu = ftab[2, i]
-                        fAu_xi = ftab[3, i]
-                        fAv = ftab[4, i]
-                        fAv_xi = ftab[5, i]
-                        fAw = ftab[0, i]
-                        fAw_xi = ftab[1, i]
-                        fAw_xixi = ftab[6, i]
-                        fAphix = ftab[7, i]
-                        fAphix_xi = ftab[8, i]
-                        fAphiy = ftab[9, i]
-                        fAphiy_xi = ftab[10, i]
-
-                        col = col0 + DOF*(j*m + i)
-
-                        e[0] += 2*cs[col+0]*fAu_xi*gAu/a
-                        e[1] += 2*cs[col+1]*fAv*gAv_eta/b
-                        e[2] += 2*cs[col+0]*fAu*gAu_eta/b + 2*cs[col+1]*fAv_xi*gAv/a
-                        e[3] += 2*cs[col+3]*fAphix_xi*gAphix/a
-                        e[4] += 2*cs[col+4]*fAphiy*gAphiy_eta/b
-                        e[5] += 2*cs[col+3]*fAphix*gAphix_eta/b + 2*cs[col+4]*fAphiy_xi*gAphiy/a
-                        e[6] += cs[col+4]*fAphiy*gAphiy + 2*cs[col+2]*fAw*gAw_eta/b
-                        e[7] += cs[col+3]*fAphix*gAphix + 2*cs[col+2]*fAw_xi*gAw/a
-
-                # nonlinear strain eps_NL = {bx^2/2, by^2/2, bx*by}
-                e[0] += 0.5*bx*bx
-                e[1] += 0.5*by*by
-                e[2] += bx*by
-
-                # current generalized stress state
-                for i in range(NE):
-                    s[i] = 0.
-                    for j in range(NE):
-                        s[i] += F[i*NE + j]*e[j]
-                Nxx = s[0]
-                Nyy = s[1]
-                Nxy = s[2]
-                Mxx = s[3]
-                Myy = s[4]
-                Mxy = s[5]
-                Qy = s[6]
-                Qx = s[7]
-
-                for j in range(n):
-                    gAu = gtab[2, j]
-                    gAu_eta = gtab[3, j]
-                    gAv = gtab[4, j]
-                    gAv_eta = gtab[5, j]
-                    gAw = gtab[0, j]
-                    gAw_eta = gtab[1, j]
-                    gAw_etaeta = gtab[6, j]
-                    gAphix = gtab[7, j]
-                    gAphix_eta = gtab[8, j]
-                    gAphiy = gtab[9, j]
-                    gAphiy_eta = gtab[10, j]
-                    for i in range(m):
-                        fAu = ftab[2, i]
-                        fAu_xi = ftab[3, i]
-                        fAv = ftab[4, i]
-                        fAv_xi = ftab[5, i]
-                        fAw = ftab[0, i]
-                        fAw_xi = ftab[1, i]
-                        fAw_xixi = ftab[6, i]
-                        fAphix = ftab[7, i]
-                        fAphix_xi = ftab[8, i]
-                        fAphiy = ftab[9, i]
-                        fAphiy_xi = ftab[10, i]
-
-                        col = col0 + DOF*(j*m + i)
-
-                        fint[col+0] += weight*(intx*inty/4)*( 2*Nxx*fAu_xi*gAu/a + 2*Nxy*fAu*gAu_eta/b )
-                        fint[col+1] += weight*(intx*inty/4)*( 2*Nxy*fAv_xi*gAv/a + 2*Nyy*fAv*gAv_eta/b )
-                        fint[col+2] += weight*(intx*inty/4)*( -2*Nxx*bx*fAw_xi*gAw/a - 2*Nxy*(a*bx*fAw*gAw_eta + b*by*fAw_xi*gAw)/(a*b) - 2*Nyy*by*fAw*gAw_eta/b + 2*Qx*fAw_xi*gAw/a + 2*Qy*fAw*gAw_eta/b )
-                        fint[col+3] += weight*(intx*inty/4)*( 2*Mxx*fAphix_xi*gAphix/a + 2*Mxy*fAphix*gAphix_eta/b + Qx*fAphix*gAphix )
-                        fint[col+4] += weight*(intx*inty/4)*( 2*Mxy*fAphiy_xi*gAphiy/a + 2*Myy*fAphiy*gAphiy_eta/b + Qy*fAphiy*gAphiy )
-
-    return fint
-
-
 # BEGIN follower pressure, generated by theory/shells/follower_pressure/write_pyx.py
 
 
@@ -2186,315 +2797,3 @@ def fkCfollower_num(double [::1] cs, double [:, ::1] pnxny,
 
     return kC
 # END follower pressure
-
-
-# BEGIN tangent stiffness product, generated by theory/shells/tangent_product/write_pyx.py
-
-
-def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
-        int size, int col0, int nx, int ny, double Nxx_cte=0.,
-        double Nyy_cte=0., double Nxy_cte=0.):
-    r"""Product of the tangent stiffness matrix by a vector, without assembly
-
-    Returns ``KT(cs) vs``, with ``KT`` the tangent stiffness matrix
-    ``fkC_num(cs, ..., NLgeom=1) + fkG_num(cs, ...)`` at ``cs``, the exact
-    Jacobian of :func:`calc_fint`, plus the geometric stiffness matrix of
-    the constant membrane stress state ``Nxx_cte``, ``Nyy_cte`` and
-    ``Nxy_cte``. The cost is about that of :func:`calc_fint`.
-
-    Parameters
-    ----------
-    cs, vs : array-like
-        Ritz constants of the configuration and the vector, 1-D of size
-        ``size``.
-    Finput : array-like
-        Constitutive matrix of the generalized strains of the model, shape
-        ``(8, 8)`` for the whole domain, e.g. ``shell.ABD``, or ``(nx, ny,
-        8, 8)`` with one matrix per integration point.
-    shell : :class:`.Shell`
-        The shell, which gives the dimensions ``a`` and ``b``, the radius ``r``
-        of the cylinders, the numbers of terms ``m`` and ``n`` and the boundary
-        flags of the approximation functions of each field.
-    size, col0 : int
-        Size of the vectors and position where the terms of this shell
-        start.
-    nx, ny : int
-        Number of Gauss-Legendre points along `x` and `y`.
-    Nxx_cte, Nyy_cte, Nxy_cte : float, optional
-        Constant membrane stress resultants, force per unit length, default
-        ``0``.
-
-    Returns
-    -------
-    kTv : numpy.ndarray
-        The product, of size ``size``.
-
-    Raises
-    ------
-    ValueError
-        If ``cs`` or ``vs`` do not have the size ``size``, ``Finput`` has an
-        invalid shape or ``shell`` is not a :class:`.Shell`.
-
-    Notes
-    -----
-    At each integration point, with the gradients `\boldsymbol{G}
-    \boldsymbol{c}` of the non-linear terms of the strains, the strains
-    `\boldsymbol{\varepsilon} = (\boldsymbol{B}_L + \frac{1}{2}
-    \boldsymbol{B}_{NL}) \boldsymbol{c}` and the membrane stress resultants
-    `\boldsymbol{N}` of `\boldsymbol{F} \boldsymbol{\varepsilon}`, plus the
-    constant ones:
-
-    .. math::
-
-        \boldsymbol{K}_T \boldsymbol{v} = \int \left[(\boldsymbol{B}_L +
-        \boldsymbol{B}_{NL})^\top \boldsymbol{F} (\boldsymbol{B}_L +
-        \boldsymbol{B}_{NL}) \boldsymbol{v} + \boldsymbol{G}^\top
-        \boldsymbol{N} \boldsymbol{G} \boldsymbol{v}\right] dA
-
-    evaluated without forming `\boldsymbol{K}_T`.
-
-    The integrals are evaluated with ``nx x ny`` Gauss-Legendre points
-    over the integration domain `x_1 \le x \le x_2`, `y_1 \le y \le y_2` of
-    :meth:`.Shell.integration_limits`, the whole shell by default.
-
-    """
-    cdef double x1, x2, y1, y2, xinf, xsup, yinf, ysup
-    cdef double a, b, intx, inty
-    cdef int m, n
-    cdef double x1u, x1ur, x2u, x2ur
-    cdef double x1v, x1vr, x2v, x2vr
-    cdef double x1w, x1wr, x2w, x2wr
-    cdef double x1phix, x1phixr, x2phix, x2phixr
-    cdef double x1phiy, x1phiyr, x2phiy, x2phiyr
-    cdef double y1u, y1ur, y2u, y2ur
-    cdef double y1v, y1vr, y2v, y2vr
-    cdef double y1w, y1wr, y2w, y2wr
-    cdef double y1phix, y1phixr, y2phix, y2phixr
-    cdef double y1phiy, y1phiyr, y2phiy, y2phiyr
-
-    cdef int i, j, col, ptx, pty
-    cdef double xi, eta, weight
-    cdef double xi1, xi2, eta1, eta2
-    cdef double bx, by, dbx, dby, Nxx, Nyy, Nxy
-    cdef double e[8]
-    cdef double de[8]
-    cdef double s[8]
-    cdef double ds[8]
-    cdef double fAu, fAu_xi, fAv, fAv_xi, fAw, fAw_xi
-    cdef double fAphix, fAphix_xi, fAphiy, fAphiy_xi
-    cdef double gAu, gAu_eta, gAv, gAv_eta, gAw, gAw_eta
-    cdef double gAphix, gAphix_eta, gAphiy, gAphiy_eta
-
-    cdef double [:, ::1] ftab, gtab
-    cdef double [::1] xis, etas, weights_xi, weights_eta, kTv
-
-    # F as 4-D matrix, must be [nx, ny, 8, 8], when there is one
-    # constitutive matrix [8, 8] for each of the nx * ny integration points
-    cdef double F[64]
-    cdef double [:, :, :, ::1] Fnxny
-
-    cdef int one_F_each_point = 0
-
-    if cs.shape[0] != size or vs.shape[0] != size:
-        raise ValueError('cs and vs must have the size %d' % size)
-    Finput = np.ascontiguousarray(Finput, dtype=DOUBLE)
-    if Finput.shape == (nx, ny, 8, 8):
-        Fnxny = Finput
-        one_F_each_point = 1
-    elif Finput.shape == (8, 8):
-        # creating dummy 4-D array that is not used
-        Fnxny = np.empty(shape=(0, 0, 0, 0), dtype=DOUBLE)
-        # using a constant F for all the integration domain
-        for i in range(8):
-            for j in range(8):
-                F[i*8 + j] = Finput[i, j]
-    else:
-        raise ValueError('Invalid shape for Finput!')
-
-    if not 'Shell' in shell.__class__.__name__:
-        raise ValueError('a Shell object must be given as input')
-    a = shell.a
-    b = shell.b
-    m = shell.m
-    n = shell.n
-    #NOTE physical limits of the integration domain, resolved and validated
-    #      by Shell.integration_limits(); for the full domain the mapping
-    #      below gives exactly xi1 = eta1 = -1 and xi2 = eta2 = +1
-    x1, x2, y1, y2 = shell.integration_limits()
-    x1u = shell.x1u; x1ur = shell.x1ur; x2u = shell.x2u; x2ur = shell.x2ur
-    x1v = shell.x1v; x1vr = shell.x1vr; x2v = shell.x2v; x2vr = shell.x2vr
-    x1w = shell.x1w; x1wr = shell.x1wr; x2w = shell.x2w; x2wr = shell.x2wr
-    x1phix = shell.x1phix; x1phixr = shell.x1phixr; x2phix = shell.x2phix; x2phixr = shell.x2phixr
-    x1phiy = shell.x1phiy; x1phiyr = shell.x1phiyr; x2phiy = shell.x2phiy; x2phiyr = shell.x2phiyr
-    y1u = shell.y1u; y1ur = shell.y1ur; y2u = shell.y2u; y2ur = shell.y2ur
-    y1v = shell.y1v; y1vr = shell.y1vr; y2v = shell.y2v; y2vr = shell.y2vr
-    y1w = shell.y1w; y1wr = shell.y1wr; y2w = shell.y2w; y2wr = shell.y2wr
-    y1phix = shell.y1phix; y1phixr = shell.y1phixr; y2phix = shell.y2phix; y2phixr = shell.y2phixr
-    y1phiy = shell.y1phiy; y1phiyr = shell.y1phiyr; y2phiy = shell.y2phiy; y2phiyr = shell.y2phiyr
-
-    xis, weights_xi = roots_legendre(nx)
-    etas, weights_eta = roots_legendre(ny)
-
-    kTv = np.zeros(size, dtype=DOUBLE)
-    # basis functions at the integration point
-    ftab = np.zeros((10, m), dtype=DOUBLE)
-    gtab = np.zeros((10, n), dtype=DOUBLE)
-
-    xinf = 0
-    xsup = shell.a
-    xi1 = (x1 - xinf)/(xsup - xinf)*2 - 1
-    xi2 = (x2 - xinf)/(xsup - xinf)*2 - 1
-
-    yinf = 0
-    ysup = shell.b
-    eta1 = (y1 - yinf)/(ysup - yinf)*2 - 1
-    eta2 = (y2 - yinf)/(ysup - yinf)*2 - 1
-
-    intx = x2 - x1
-    inty = y2 - y1
-
-    with nogil:
-        for ptx in range(nx):
-            for pty in range(ny):
-                xi = xis[ptx]
-                eta = etas[pty]
-                xi = (xi - (-1))/2 * (xi2 - xi1) + xi1
-                eta = (eta - (-1))/2 * (eta2 - eta1) + eta1
-
-                # the integrands are per unit area of the natural domain
-                weight = weights_xi[ptx]*weights_eta[pty]*intx*inty/4
-
-                if one_F_each_point == 1:
-                    for i in range(8):
-                        for j in range(8):
-                            F[i*8 + j] = Fnxny[ptx, pty, i, j]
-
-                for i in range(m):
-                    ftab[0, i] = f(i, xi, x1u, x1ur, x2u, x2ur)
-                    ftab[1, i] = fp(i, xi, x1u, x1ur, x2u, x2ur)
-                    ftab[2, i] = f(i, xi, x1v, x1vr, x2v, x2vr)
-                    ftab[3, i] = fp(i, xi, x1v, x1vr, x2v, x2vr)
-                    ftab[4, i] = f(i, xi, x1w, x1wr, x2w, x2wr)
-                    ftab[5, i] = fp(i, xi, x1w, x1wr, x2w, x2wr)
-                    ftab[6, i] = f(i, xi, x1phix, x1phixr, x2phix, x2phixr)
-                    ftab[7, i] = fp(i, xi, x1phix, x1phixr, x2phix, x2phixr)
-                    ftab[8, i] = f(i, xi, x1phiy, x1phiyr, x2phiy, x2phiyr)
-                    ftab[9, i] = fp(i, xi, x1phiy, x1phiyr, x2phiy, x2phiyr)
-                for j in range(n):
-                    gtab[0, j] = f(j, eta, y1u, y1ur, y2u, y2ur)
-                    gtab[1, j] = fp(j, eta, y1u, y1ur, y2u, y2ur)
-                    gtab[2, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
-                    gtab[3, j] = fp(j, eta, y1v, y1vr, y2v, y2vr)
-                    gtab[4, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
-                    gtab[5, j] = fp(j, eta, y1w, y1wr, y2w, y2wr)
-                    gtab[6, j] = f(j, eta, y1phix, y1phixr, y2phix, y2phixr)
-                    gtab[7, j] = fp(j, eta, y1phix, y1phixr, y2phix, y2phixr)
-                    gtab[8, j] = f(j, eta, y1phiy, y1phiyr, y2phiy, y2phiyr)
-                    gtab[9, j] = fp(j, eta, y1phiy, y1phiyr, y2phiy, y2phiyr)
-
-                # rotations of cs and vs
-                bx = 0.
-                by = 0.
-                dbx = 0.
-                dby = 0.
-                for j in range(n):
-                    gAw = gtab[4, j]
-                    gAw_eta = gtab[5, j]
-                    for i in range(m):
-                        fAw = ftab[4, i]
-                        fAw_xi = ftab[5, i]
-                        col = col0 + DOF*(j*m + i)
-                        bx += -2*fAw_xi*gAw/a*cs[col+2]
-                        by += -2*fAw*gAw_eta/b*cs[col+2]
-                        dbx += -2*fAw_xi*gAw/a*vs[col+2]
-                        dby += -2*fAw*gAw_eta/b*vs[col+2]
-
-                # strains of cs, eps = ([B_L] + [B_NL]/2) cs, and strain
-                # increment, deps = ([B_L] + [B_NL]) vs
-                for i in range(8):
-                    e[i] = 0.
-                    de[i] = 0.
-                for j in range(n):
-                    gAu = gtab[0, j]
-                    gAu_eta = gtab[1, j]
-                    gAv = gtab[2, j]
-                    gAv_eta = gtab[3, j]
-                    gAw = gtab[4, j]
-                    gAw_eta = gtab[5, j]
-                    gAphix = gtab[6, j]
-                    gAphix_eta = gtab[7, j]
-                    gAphiy = gtab[8, j]
-                    gAphiy_eta = gtab[9, j]
-                    for i in range(m):
-                        fAu = ftab[0, i]
-                        fAu_xi = ftab[1, i]
-                        fAv = ftab[2, i]
-                        fAv_xi = ftab[3, i]
-                        fAw = ftab[4, i]
-                        fAw_xi = ftab[5, i]
-                        fAphix = ftab[6, i]
-                        fAphix_xi = ftab[7, i]
-                        fAphiy = ftab[8, i]
-                        fAphiy_xi = ftab[9, i]
-                        col = col0 + DOF*(j*m + i)
-                        e[0] += 2*fAu_xi*gAu/a*cs[col+0] - bx*fAw_xi*gAw/a*cs[col+2]
-                        e[1] += 2*fAv*gAv_eta/b*cs[col+1] - by*fAw*gAw_eta/b*cs[col+2]
-                        e[2] += 2*fAu*gAu_eta/b*cs[col+0] + 2*fAv_xi*gAv/a*cs[col+1] + (-bx*fAw*gAw_eta/b - by*fAw_xi*gAw/a)*cs[col+2]
-                        e[3] += 2*fAphix_xi*gAphix/a*cs[col+3]
-                        e[4] += 2*fAphiy*gAphiy_eta/b*cs[col+4]
-                        e[5] += 2*fAphix*gAphix_eta/b*cs[col+3] + 2*fAphiy_xi*gAphiy/a*cs[col+4]
-                        e[6] += 2*fAw*gAw_eta/b*cs[col+2] + fAphiy*gAphiy*cs[col+4]
-                        e[7] += 2*fAw_xi*gAw/a*cs[col+2] + fAphix*gAphix*cs[col+3]
-                        de[0] += 2*fAu_xi*gAu/a*vs[col+0] - 2*bx*fAw_xi*gAw/a*vs[col+2]
-                        de[1] += 2*fAv*gAv_eta/b*vs[col+1] - 2*by*fAw*gAw_eta/b*vs[col+2]
-                        de[2] += 2*fAu*gAu_eta/b*vs[col+0] + 2*fAv_xi*gAv/a*vs[col+1] + (-2*bx*fAw*gAw_eta/b - 2*by*fAw_xi*gAw/a)*vs[col+2]
-                        de[3] += 2*fAphix_xi*gAphix/a*vs[col+3]
-                        de[4] += 2*fAphiy*gAphiy_eta/b*vs[col+4]
-                        de[5] += 2*fAphix*gAphix_eta/b*vs[col+3] + 2*fAphiy_xi*gAphiy/a*vs[col+4]
-                        de[6] += 2*fAw*gAw_eta/b*vs[col+2] + fAphiy*gAphiy*vs[col+4]
-                        de[7] += 2*fAw_xi*gAw/a*vs[col+2] + fAphix*gAphix*vs[col+3]
-
-                # stresses
-                for i in range(8):
-                    s[i] = 0.
-                    ds[i] = 0.
-                    for j in range(8):
-                        s[i] += F[i*8 + j]*e[j]
-                        ds[i] += F[i*8 + j]*de[j]
-                Nxx = s[0] + Nxx_cte
-                Nyy = s[1] + Nyy_cte
-                Nxy = s[2] + Nxy_cte
-
-                # ([B_L] + [B_NL])^T ds + [G]^T [N] [G] vs
-                for j in range(n):
-                    gAu = gtab[0, j]
-                    gAu_eta = gtab[1, j]
-                    gAv = gtab[2, j]
-                    gAv_eta = gtab[3, j]
-                    gAw = gtab[4, j]
-                    gAw_eta = gtab[5, j]
-                    gAphix = gtab[6, j]
-                    gAphix_eta = gtab[7, j]
-                    gAphiy = gtab[8, j]
-                    gAphiy_eta = gtab[9, j]
-                    for i in range(m):
-                        fAu = ftab[0, i]
-                        fAu_xi = ftab[1, i]
-                        fAv = ftab[2, i]
-                        fAv_xi = ftab[3, i]
-                        fAw = ftab[4, i]
-                        fAw_xi = ftab[5, i]
-                        fAphix = ftab[6, i]
-                        fAphix_xi = ftab[7, i]
-                        fAphiy = ftab[8, i]
-                        fAphiy_xi = ftab[9, i]
-                        col = col0 + DOF*(j*m + i)
-                        kTv[col+0] += weight*(2*ds[2]*fAu*gAu_eta/b + 2*ds[0]*fAu_xi*gAu/a)
-                        kTv[col+1] += weight*(2*ds[1]*fAv*gAv_eta/b + 2*ds[2]*fAv_xi*gAv/a)
-                        kTv[col+2] += weight*(-2*Nxx*dbx*fAw_xi*gAw/a + Nxy*(-2*dbx*fAw*gAw_eta/b - 2*dby*fAw_xi*gAw/a) - 2*Nyy*dby*fAw*gAw_eta/b + ds[2]*(-2*bx*fAw*gAw_eta/b - 2*by*fAw_xi*gAw/a) - 2*by*ds[1]*fAw*gAw_eta/b + 2*ds[6]*fAw*gAw_eta/b - 2*bx*ds[0]*fAw_xi*gAw/a + 2*ds[7]*fAw_xi*gAw/a)
-                        kTv[col+3] += weight*(ds[7]*fAphix*gAphix + 2*ds[5]*fAphix*gAphix_eta/b + 2*ds[3]*fAphix_xi*gAphix/a)
-                        kTv[col+4] += weight*(ds[6]*fAphiy*gAphiy + 2*ds[4]*fAphiy*gAphiy_eta/b + 2*ds[5]*fAphiy_xi*gAphiy/a)
-
-    return np.asarray(kTv)
-
-# END tangent stiffness product
