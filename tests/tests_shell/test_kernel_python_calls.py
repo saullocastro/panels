@@ -25,7 +25,7 @@ did not (AMD processor, Windows 11).
 
 The analytical kernels must be finite and agree with the numerically
 integrated ones, for every model and with and without a laminate offset.
-The kernels of the whole domain of ``'frame_web_clpt_donnell'`` are
+The kernels of the whole domain of ``'annular_clpt_donnell'`` are
 themselves numerical, with ``shell.nx`` and ``shell.ny`` points, its
 integrands being rational in `x`: they are compared with the numerical
 kernels at the same points.
@@ -63,7 +63,7 @@ def test_analytical_kernels_finite_and_equal_numerical(model, offset):
     mats = modelDB.db[model]['matrices']
     num = modelDB.db[model]['matrices_num']
     nx, ny = 2*s.m + 4, 2*s.n + 4
-    if model.startswith('frame_web'):
+    if model.startswith('annular'):
         nx, ny = s.nx, s.ny
     k0 = mats.fk0(s, size, 0, 0)
     assert np.isfinite(k0.data).all()

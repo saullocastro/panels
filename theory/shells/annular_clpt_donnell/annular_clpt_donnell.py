@@ -1,38 +1,43 @@
-r"""Web of a ring frame, an annular-sector flat plate, CLPT with von Kármán
-strains in polar coordinates (``frame_web_clpt_donnell``)
+r"""Annular-sector flat plate, CLPT with von Kármán strains in polar
+coordinates (the model named after this file)
 
 Geometry and coordinates
 ------------------------
-The web lies in a plane normal to the axis of a cylinder, between the outer
-radius ``R`` and the inner radius ``R - a``; ``a`` is the height of the web
-and ``b`` the arc length of its outer edge, ``b = R theta_b``. With the
-polar coordinates ``(rho, theta)`` of the plane, the coordinates of the
-model are
+The annular sector lies in a plane between the outer radius ``R`` and the
+inner radius ``R - a``; ``a`` is its radial width and ``b`` the arc length
+of its outer edge, ``b = R theta_b``. With the polar coordinates ``(rho,
+theta)`` of the plane, the coordinates of the model are
 
     x = R - rho,   0 <= x <= a      (from the outer edge inwards)
     y = R theta,   0 <= y <= b      (arc length along the outer edge)
 
 and the Ritz series is that of the other models, ``u = sum c f_i(xi)
-g_j(eta)``, ``xi = 2x/a - 1``, ``eta = 2y/b - 1``. The local basis of the
-web at a point is
+g_j(eta)``, ``xi = 2x/a - 1``, ``eta = 2y/b - 1``. The local basis at a
+point is
 
     e_x = -e_rho,   e_y = e_theta,   e_z = e_x x e_y = -e_axis
 
 with ``e_axis = e_rho x e_theta``, and ``u, v, w`` are the displacements of
-the mid-surface along ``e_x, e_y, e_z``. In the polar notation of Amabili
-(2008, Sec. 1.4, Fig. 1.14), with the radial, circumferential and normal
-displacements ``u1, u2, u3`` and the normal ``e_axis``:
+the reference plane along ``e_x, e_y, e_z``. In the polar notation of
+Amabili (2008, Sec. 1.4, Fig. 1.14), with the radial, circumferential and
+normal displacements ``u1, u2, u3`` and the normal ``e_axis``:
 
     u1 = -u,   u2 = v,   u3 = -w,   d/drho = -d/dx,   d/dtheta = R d/dy
 
 This is the orientation of the flange of the connection ``'BFxcte'`` of
 ``panels`` (the local axes of the flange are those of the base rotated by 90
-degrees about the common axis ``y``): the web connects to a cylinder of
-radius ``R`` along its edge ``x = 0`` with ``'BFxcte'``, the cylinder being
-the base, see ``frame_web_clpt_donnell.md``.
+degrees about the common axis ``y``). The web of a ring frame of a
+stiffened cylinder is an application: ``a`` is the height of the web, ``b``
+the arc length of its outer edge and ``R`` its outer radius; it connects to
+a cylinder of radius ``R`` along its edge ``x = 0`` with ``'BFxcte'``, the
+cylinder being the base, see the ``.md`` file of this folder.
 
 The scale factor of the arc length is ``s = R/rho``: ``d/ds_theta = (1/rho)
 d/dtheta = s d/dy``, and the element of area is ``dA = (rho/R) dx dy``.
+The laminate spans ``d - h/2 <= z <= d + h/2`` with the offset ``d``
+(``Shell.offset``); ``z`` enters the stiffness only through the matrix
+``ABD`` and the mass through the moments ``I0, I1, I2`` of the density, the
+reference plane being flat.
 
 Kinematics
 ----------
@@ -51,7 +56,7 @@ above):
     kyy = w,x/rho - s^2 w,yy
     kxy = -2 s (w,xy + w,y/rho)
 
-Checks (run ``python frame_web_clpt_donnell.py``):
+Checks (run this file):
 
 - :func:`check_linear_strains`: the linear strains and changes of curvature
   follow from the linear strains of the three-dimensional Kirchhoff
@@ -69,8 +74,8 @@ Checks (run ``python frame_web_clpt_donnell.py``):
 
 Kernels
 -------
-``write_pyx.py`` writes ``panels/models/frame_web_clpt_donnell.pyx`` and
-``panels/models/frame_web_clpt_donnell_num.pyx`` from :func:`build`. At each
+``write_pyx.py`` writes ``panels/models/<model>.pyx`` and
+``panels/models/<model>_num.pyx`` from :func:`build`. At each
 integration point the twelve generalized derivatives
 
     d = (u, u,x, u,y, v, v,x, v,y, w, w,x, w,y, w,xx, w,yy, w,xy) = [Phi] c
@@ -94,6 +99,8 @@ import sympy
 from sympy import Function, Matrix as M, Rational, cos, diff, simplify, sin, symbols
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+#: name of the model, that of this file
+MODEL = os.path.splitext(os.path.basename(__file__))[0]
 
 x, y, z, R = symbols('x, y, z, R', real=True)
 rho = symbols('rho', positive=True)
@@ -156,14 +163,54 @@ def hessian_stress(sig):
 
 
 def build():
-    """Expressions used by ``write_pyx.py``"""
+    """Expressions used by ``write_pyx.py``: the strains ``eps`` and their
+    linear part ``epsL``, ``[B] = d eps/d d``, ``[H(sigma, d)]`` and
+    ``[H(sigma, 0)]`` with the symbols ``Nxx, ..., Mxy``, and the map ``J``
+    of the mass matrix"""
     eps = strains()
     epsL = strains(nonlinear=False)
-    epsNL = eps - epsL
     B = eps.jacobian(M(D))
-    return dict(eps=eps, epsL=epsL, epsNL=epsNL, B=B,
-                BL=B.subs({w_x: 0, w_y: 0}),
-                H=hessian_stress(STRESSES), J=mass_map())
+    H = hessian_stress(STRESSES)
+    return dict(eps=eps, epsL=epsL, B=B, H=H,
+                H0=H.subs({d: 0 for d in D}, simultaneous=True),
+                J=mass_map())
+
+
+#: first lines of the docstrings of the generated modules
+TITLE = ('Annular-sector flat plate, using the classical laminated plate '
+         'theory\n(CLPT) with von Kármán strains in polar coordinates')
+
+#: notes of the generated modules, the strains
+STRAIN_NOTES = r"""With `s = r/\rho`, the von Kármán strains in polar coordinates of Amabili
+[1]_, Eqs. (1.175)-(1.180), are, in these coordinates:
+
+.. math::
+
+    \varepsilon_{xx} = u_{,x} + \frac{1}{2} w_{,x}^2 \qquad
+    \varepsilon_{yy} = s v_{,y} - \frac{u}{\rho} + \frac{1}{2} s^2 w_{,y}^2
+
+    \gamma_{xy} = s u_{,y} + v_{,x} + \frac{v}{\rho} + s w_{,x} w_{,y}
+
+    \kappa_{xx} = -w_{,xx} \qquad
+    \kappa_{yy} = \frac{w_{,x}}{\rho} - s^2 w_{,yy} \qquad
+    \kappa_{xy} = -2 s \left(w_{,xy} + \frac{w_{,y}}{\rho}\right)
+
+For `r \to \infty` they are the strains of ``plate_clpt_donnell``. The
+second derivatives of the strains with respect to the generalized
+derivatives are constant and only on `(w_{,x}, w_{,y})`.
+"""
+
+#: references of the generated modules
+REFERENCES = r""".. [1] Amabili, M., Nonlinear Vibrations and Stability of Shells and Plates,
+   Cambridge University Press, 2008, Sec. 1.4.
+   https://doi.org/10.1017/CBO9780511619694
+"""
+
+#: references of the generated modules
+REFERENCES = r""".. [1] Amabili, M., Nonlinear Vibrations and Stability of Shells and Plates,
+   Cambridge University Press, 2008, Sec. 1.4.
+   https://doi.org/10.1017/CBO9780511619694
+"""
 
 
 # ---------------------------------------------------------------------------

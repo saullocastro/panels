@@ -1,52 +1,60 @@
-"""Generate the kernels of the model ``frame_web_clpt_donnell``
+"""Generate the kernels of an annular-sector model of this folder
 
-Writes ``panels/models/frame_web_clpt_donnell_num.pyx`` (numerically
-integrated matrices, internal force vector and fields) and
-``panels/models/frame_web_clpt_donnell.pyx`` (the matrices of the whole
-domain called by :class:`.Shell` for the default integration) from the
-derivation of ``frame_web_clpt_donnell.py``::
+Writes ``panels/models/<model>_num.pyx`` (numerically integrated matrices,
+internal force vector and fields) and ``panels/models/<model>.pyx`` (the
+matrices of the whole domain called by :class:`.Shell` for the default
+integration) from the derivation of ``<model>.py``, ``<model>`` being the
+name of this folder::
 
     python write_pyx.py [output folder]
 
 Kernel layout
 -------------
-At each integration point the twelve generalized derivatives ``d = [Phi] c``
-(``frame_web_clpt_donnell.D``), the 6 x 12 matrix ``[B] = d eps/d d`` and
-the 12 x 12 matrix ``K`` of the kernel (``[B]^T [ABD] [B] + [H(N_NL)]`` for
-``fkC_num``, ``[H(N_L + Nbar)]`` for ``fkG_num``, ``[J]^T [I] [J]`` for
-``fkM_num``) are evaluated once. The entry of the pair of terms ``A = (i,
-j)``, ``B = (k, l)`` and the degrees of freedom ``e``, ``f`` is ``sum_pq
-Phi_A[p, e] K[p, q] Phi_B[q, f]``, computed as ``TA[e, q] = sum_p Phi_A[p,
-e] K[p, q]`` in the loop over the terms ``A`` and ``sum_q TA[e, q] Phi_B[q,
-f]`` in the loop over the terms ``B``; ``Phi_A[p, e]`` is zero unless the
-generalized derivative ``p`` belongs to the degree of freedom ``e``. The
-coefficients of the strains depend on the radius ``rho = R - x`` of the
-point, so that the integrands are rational functions of ``x``, integrated
-with the Gauss-Legendre rule.
+At each integration point the generalized derivatives ``d = [Phi] c``
+(``<model>.D``), the 6 x ND matrix ``[B] = d eps/d d`` at ``d`` and the ND x
+ND matrix ``K`` of the kernel (``[B]^T [ABD] [B] + [H(sigma, d)] -
+[H(sigma_L, 0)]`` for ``fkC_num``, ``[H(sigma_L + Nbar, 0)]`` for
+``fkG_num``, ``[J]^T [I] [J]`` for ``fkM_num``) are evaluated once, with
+``[H(sigma, d)] = sum_r sigma_r d^2 eps_r/d d^2``. The entry of the pair of
+terms ``A = (i, j)``, ``B = (k, l)`` and the degrees of freedom ``e``,
+``f`` is ``sum_pq Phi_A[p, e] K[p, q] Phi_B[q, f]``, computed as ``TA[e, q]
+= sum_p Phi_A[p, e] K[p, q]`` in the loop over the terms ``A`` and ``sum_q
+TA[e, q] Phi_B[q, f]`` in the loop over the terms ``B``; ``Phi_A[p, e]`` is
+zero unless the generalized derivative ``p`` belongs to the degree of
+freedom ``e``. The coefficients of the strains depend on the radius ``rho =
+R - x`` of the point, so that the integrands are rational functions of
+``x``, integrated with the Gauss-Legendre rule.
 
-The script is self-contained: the templates repeat those of
-``../plate_clpt_gl/write_pyx.py`` where they apply.
+The script is self-contained and the same in every folder
+``annular_clpt_*``: the model, its strains and the text describing them
+come from ``<model>.py``.
 
 """
+import importlib
 import os
 import sys
 
 import sympy
-from sympy import Rational, Symbol
+from sympy import Symbol
 from sympy.printing.str import StrPrinter
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, '..', '..', '..'))
 sys.path.insert(0, HERE)
 
-import frame_web_clpt_donnell as th
+MODEL = os.path.basename(HERE)
+th = importlib.import_module(MODEL)
 
-MODEL = 'frame_web_clpt_donnell'
 ND = len(th.D)
 DOF = th.DOF
+#: field index of each generalized derivative
+FLD = [th.FIELDS.index(th.D_OF[d.name][0]) for d in th.D]
+assert FLD == sorted(FLD), 'the generalized derivatives must be grouped by field'
 #: first and last + 1 generalized derivative of each degree of freedom
-P0 = (0, 3, 6)
-P1 = (3, 6, 12)
+P0 = tuple(FLD.index(e) for e in range(DOF))
+P1 = tuple(len(FLD) - FLD[::-1].index(e) for e in range(DOF))
+#: index of a generalized derivative by name
+IDX = {d.name: k for k, d in enumerate(th.D)}
 
 S_ = Symbol('s')
 IRHO = Symbol('irho')
@@ -66,14 +74,22 @@ class _Printer(StrPrinter):
         return StrPrinter._print_Pow(self, e, rational)
 
 
-def pstr(e):
-    """Cython expression, ``R/rho`` and ``1/rho`` as ``s`` and ``irho``"""
+def pstr(e, sname='s'):
+    """Cython expression, ``R/rho`` and ``1/rho`` as ``s`` (or ``sname``)
+    and ``irho``"""
     e = sympy.expand(sympy.sympify(e).subs(th.R, S_*th.rho)
                      .subs(th.rho, 1/IRHO))
+    if sname != 's':
+        e = e.subs(S_, Symbol(sname))
     return _Printer().doprint(e)
 
 
 B = th.build()
+#: the generalized derivatives as the entries of the array ``dv``
+DV = {d: Symbol('dv[%d]' % k) for k, d in enumerate(th.D)}
+#: the stresses of the configuration and of its linear strains
+SIG = [Symbol(n) for n in ('Nxx', 'Nyy', 'Nxy', 'Mxx', 'Myy', 'Mxy')]
+SIGL = [Symbol(n + 'L') for n in ('Nxx', 'Nyy', 'Nxy', 'Mxx', 'Myy', 'Mxy')]
 
 HEADER = """#cython: boundscheck=False
 #cython: wraparound=False
@@ -85,58 +101,39 @@ HEADER = """#cython: boundscheck=False
 #cython: infer_types=False
 """
 
-REFERENCES = r"""
-    References
-    ----------
-    .. [1] Amabili, M., Nonlinear Vibrations and Stability of Shells and
-       Plates, Cambridge University Press, 2008, Sec. 1.4.
-       https://doi.org/10.1017/CBO9780511619694
-"""
-
 MODULE_NOTES = r"""
-The web lies in the plane normal to the axis of a cylinder of radius ``r``,
-``shell.r``, the outer radius of the web, between the radii ``r`` and ``r -
-a``: ``a``, ``shell.a``, is the height of the web and ``b``, ``shell.b``,
-the arc length of its outer edge. The coordinate `x = r - \rho` runs from the
-outer edge inwards, `y = r \theta` along the outer edge, with the polar
-coordinates `(\rho, \theta)` of the plane; ``u``, ``v``, ``w`` are the
-displacements along `\boldsymbol{e}_x = -\boldsymbol{e}_\rho`,
-`\boldsymbol{e}_y = \boldsymbol{e}_\theta` and `\boldsymbol{e}_z =
-\boldsymbol{e}_x \times \boldsymbol{e}_y`, the local axes of the flange of
-the connection ``'BFxcte'`` whose base is the cylinder.
+The annular sector lies in a plane, between the outer radius ``r``,
+``shell.r``, and the inner radius ``r - a``: ``a``, ``shell.a``, is its
+radial width and ``b``, ``shell.b``, the arc length of its outer edge. The
+coordinate `x = r - \rho` runs from the outer edge inwards, `y = r \theta`
+along the outer edge, with the polar coordinates `(\rho, \theta)` of the
+plane; ``u``, ``v``, ``w`` are the displacements along
+`\boldsymbol{e}_x = -\boldsymbol{e}_\rho`, `\boldsymbol{e}_y =
+\boldsymbol{e}_\theta` and `\boldsymbol{e}_z = \boldsymbol{e}_x \times
+\boldsymbol{e}_y`. These are the local axes of the flange of the connection
+``'BFxcte'`` whose base is a cylinder of radius ``r``: the web of a ring
+frame of a stiffened cylinder is an application, with ``a`` the height of
+the web, ``b`` the arc length of its outer edge and ``r`` its outer radius.
+The laminate spans `d - h/2 \le z \le d + h/2` about the reference plane,
+`d` being the offset ``shell.offset``, which enters through the matrix
+``ABD`` and the moments of the density.
 
 Notes
 -----
-With `s = r/\rho`, the von Kármán strains in polar coordinates of Amabili
-[1]_, Eqs. (1.175)-(1.180), are, in these coordinates:
-
-.. math::
-
-    \varepsilon_{xx} = u_{,x} + \frac{1}{2} w_{,x}^2 \qquad
-    \varepsilon_{yy} = s v_{,y} - \frac{u}{\rho} + \frac{1}{2} s^2 w_{,y}^2
-
-    \gamma_{xy} = s u_{,y} + v_{,x} + \frac{v}{\rho} + s w_{,x} w_{,y}
-
-    \kappa_{xx} = -w_{,xx} \qquad
-    \kappa_{yy} = \frac{w_{,x}}{\rho} - s^2 w_{,yy} \qquad
-    \kappa_{xy} = -2 s \left(w_{,xy} + \frac{w_{,y}}{\rho}\right)
-
-and the element of area is `dA = (\rho/r)\, dx\, dy`. The integrands are
+""" + th.STRAIN_NOTES + r"""
+The element of area is `dA = (\rho/r)\, dx\, dy`. The integrands are
 rational functions of `x`, integrated with the Gauss-Legendre rule over the
 domain of :meth:`.Shell.integration_limits`.
 
 References
 ----------
-.. [1] Amabili, M., Nonlinear Vibrations and Stability of Shells and Plates,
-   Cambridge University Press, 2008, Sec. 1.4.
-   https://doi.org/10.1017/CBO9780511619694
-"""
+""" + th.REFERENCES
 
 SHELL_PARAM = """    shell : :class:`.Shell`
-        The web, which gives the height ``a``, the arc length ``b`` of the
-        outer edge, the outer radius ``r``, the numbers of terms ``m`` and
-        ``n`` and the boundary flags of the approximation functions of each
-        field."""
+        The annular sector, which gives the radial width ``a``, the arc
+        length ``b`` of the outer edge, the outer radius ``r``, the numbers
+        of terms ``m`` and ``n`` and the boundary flags of the approximation
+        functions of each field."""
 
 BC_NAMES = ['%s%s%s%s' % (xy, k, f, r) for xy in 'xy' for k in '12'
             for f in 'uvw' for r in ('', 'r')]
@@ -168,8 +165,8 @@ SETUP = """    if not 'Shell' in shell.__class__.__name__:
     m = shell.m
     n = shell.n
     if not R > a:
-        raise ValueError('the outer radius r must be larger than the height a '
-                         'of the web, got r={{0}} and a={{1}}'.format(R, a))
+        raise ValueError('the outer radius r must be larger than the radial '
+                         'width a, got r={{0}} and a={{1}}'.format(R, a))
     #NOTE physical limits of the integration domain, resolved and validated
     #     by Shell.integration_limits()
     x1, x2, y1, y2 = shell.integration_limits()
@@ -182,9 +179,28 @@ SETUP = """    if not 'Shell' in shell.__class__.__name__:
     eta2 = y2/b*2 - 1
     intx = x2 - x1
     inty = y2 - y1
-    ftab = np.zeros((7, m), dtype=DOUBLE)
-    gtab = np.zeros((7, n), dtype=DOUBLE)
+    ftab = np.zeros((9, m), dtype=DOUBLE)
+    gtab = np.zeros((9, n), dtype=DOUBLE)
 """.format(bc=BC_READ)
+
+
+def tab_lines(indent, tab, k, coord, L, s1, s2):
+    """Rows ``3*field + order`` of the table of the functions of ``coord``"""
+    t = ' '*indent
+    out = []
+    for fi, fld in enumerate(th.FIELDS):
+        flags = '%s, %s1%sr, %s2%s, %s2%sr' % (
+            '%s1%s' % (s1, fld), s1, fld, s1, fld, s1, fld)
+        out.append('%s%s[%d, %s] = f(%s, %s, %s)' % (t, tab, 3*fi, k, k, coord, flags))
+        out.append('%s%s[%d, %s] = (2/%s)*fp(%s, %s, %s)' % (t, tab, 3*fi + 1, k, L, k, coord, flags))
+        out.append('%s%s[%d, %s] = (2/%s)*(2/%s)*fpp(%s, %s, %s)' % (
+            t, tab, 3*fi + 2, k, L, L, k, coord, flags))
+    return '\n'.join(out)
+
+
+TABS = lambda indent: ('%sfor i in range(m):\n%s\n%sfor j in range(n):\n%s' % (
+    ' '*indent, tab_lines(indent + 4, 'ftab', 'i', 'xi', 'a', 'x', 'x'),
+    ' '*indent, tab_lines(indent + 4, 'gtab', 'j', 'eta', 'b', 'y', 'y')))
 
 POINT = """        for ptx in range(nx):
             for pty in range(ny):
@@ -197,34 +213,19 @@ POINT = """        for ptx in range(nx):
                 # per unit area of the natural domain, times dA/(dx dy)
                 weight = weights_xi[ptx]*weights_eta[pty]*intx*inty/4*rho/R
 {extra}
-                for i in range(m):
-                    ftab[0, i] = f(i, xi, x1u, x1ur, x2u, x2ur)
-                    ftab[1, i] = (2/a)*fp(i, xi, x1u, x1ur, x2u, x2ur)
-                    ftab[2, i] = f(i, xi, x1v, x1vr, x2v, x2vr)
-                    ftab[3, i] = (2/a)*fp(i, xi, x1v, x1vr, x2v, x2vr)
-                    ftab[4, i] = f(i, xi, x1w, x1wr, x2w, x2wr)
-                    ftab[5, i] = (2/a)*fp(i, xi, x1w, x1wr, x2w, x2wr)
-                    ftab[6, i] = (2/a)*(2/a)*fpp(i, xi, x1w, x1wr, x2w, x2wr)
-                for j in range(n):
-                    gtab[0, j] = f(j, eta, y1u, y1ur, y2u, y2ur)
-                    gtab[1, j] = (2/b)*fp(j, eta, y1u, y1ur, y2u, y2ur)
-                    gtab[2, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
-                    gtab[3, j] = (2/b)*fp(j, eta, y1v, y1vr, y2v, y2vr)
-                    gtab[4, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
-                    gtab[5, j] = (2/b)*fp(j, eta, y1w, y1wr, y2w, y2wr)
-                    gtab[6, j] = (2/b)*(2/b)*fpp(j, eta, y1w, y1wr, y2w, y2wr)
-"""
+""" + TABS(16) + '\n'
 
 
 def phi_lines(side, ii, jj, indent):
-    """``Phi`` of the term ``(ii, jj)``, the twelve generalized derivatives"""
+    """``Phi`` of the term ``(ii, jj)``, the generalized derivatives"""
     t = ' '*indent
-    rows = [('0', '0'), ('1', '0'), ('0', '1'), ('2', '2'), ('3', '2'),
-            ('2', '3'), ('4', '4'), ('5', '4'), ('4', '5'), ('6', '4'),
-            ('4', '6'), ('5', '5')]
-    return '\n'.join('%sp%s[%d] = ftab[%s, %s]*gtab[%s, %s]'
-                     % (t, side, k, fr, ii, gr, jj)
-                     for k, (fr, gr) in enumerate(rows))
+    out = []
+    for k, d in enumerate(th.D):
+        fld, ox, oy = th.D_OF[d.name]
+        fi = th.FIELDS.index(fld)
+        out.append('%sp%s[%d] = ftab[%d, %s]*gtab[%d, %s]'
+                   % (t, side, k, 3*fi + ox, ii, 3*fi + oy, jj))
+    return '\n'.join(out)
 
 
 def dv_lines(indent, vec='cs'):
@@ -238,7 +239,7 @@ def dv_lines(indent, vec='cs'):
         t + '        col = col0 + %d*(j*m + i)' % DOF,
         phi_lines('A', 'i', 'j', indent + 8),
         t + '        for p in range(%d):' % ND,
-        t + '            dv[p] += pA[p]*%s[col + (0 if p < 3 else (1 if p < 6 else 2))]' % vec,
+        t + '            dv[p] += pA[p]*%s[col + FLD[p]]' % vec,
     ])
 
 
@@ -274,15 +275,16 @@ ASSEMBLY = """                c = -1
 
 def matrix_assign(name, Mx, indent, ncols):
     t = ' '*indent
-    return '\n'.join('%s%s[%d] = %s' % (t, name, i*ncols + j, pstr(Mx[i, j]))
+    return '\n'.join('%s%s[%d] = %s' % (t, name, i*ncols + j,
+                                        pstr(Mx[i, j].subs(DV, simultaneous=True)))
                      for i in range(Mx.shape[0]) for j in range(Mx.shape[1])
                      if Mx[i, j] != 0)
 
 
 def strain_lines(indent, eps, prefix='eps'):
     t = ' '*indent
-    rep = {d: Symbol('dv[%d]' % k) for k, d in enumerate(th.D)}
-    return '\n'.join('%s%s%d = %s' % (t, prefix, r, pstr(eps[r].subs(rep)))
+    return '\n'.join('%s%s%d = %s' % (t, prefix, r,
+                                      pstr(eps[r].subs(DV, simultaneous=True)))
                      for r in range(6))
 
 
@@ -293,16 +295,16 @@ def stress_lines(indent, names, eps_prefix='eps', rows=range(6)):
         for r in rows)
 
 
-def H_lines(indent, Nnames, op='+='):
-    """Block of ``[H]`` on ``(w,x, w,y)`` for the membrane stresses"""
+def H_lines(indent, Hm, names, op='+='):
+    """Entries of ``[H]`` for the stresses ``names`` at ``dv``"""
     t = ' '*indent
-    Hs = B['H'].subs({th.Nxx: Symbol(Nnames[0]), th.Nyy: Symbol(Nnames[1]),
-                      th.Nxy: Symbol(Nnames[2])})
+    Hs = Hm.subs(dict(zip(th.STRESSES, names)), simultaneous=True)
     out = []
     for i in range(ND):
         for j in range(ND):
             if Hs[i, j] != 0:
-                out.append('%sK[%d] %s %s' % (t, i*ND + j, op, pstr(Hs[i, j])))
+                out.append('%sK[%d] %s %s' % (t, i*ND + j, op,
+                           pstr(Hs[i, j].subs(DV, simultaneous=True))))
     return '\n'.join(out)
 
 
@@ -331,7 +333,7 @@ PARAMS_COMMON = """    size : int
         Number of rows and columns of the matrix, the number of degrees of
         freedom of the assembly.
     row0, col0 : int
-        Row and column of the matrix where the terms of this web start.
+        Row and column of the matrix where the terms of this panel start.
     nx, ny : int
         Number of Gauss-Legendre points along `x` and `y`."""
 
@@ -349,7 +351,7 @@ RAISES = """    Raises
     ValueError
         If ``Finput`` has an invalid shape, ``shell`` is not a
         :class:`.Shell` or its outer radius ``r`` is not larger than its
-        height ``a``."""
+        radial width ``a``."""
 
 RETURNS = """    Returns
     -------
@@ -392,7 +394,7 @@ def {name}({signature}):
 
 
 Bm = B['B']
-BL = B['BL']
+H0 = B['H0']
 
 FKC_DOC = r"""Constitutive stiffness matrix, integrated numerically
 
@@ -418,33 +420,37 @@ FKC_DOC = r"""Constitutive stiffness matrix, integrated numerically
     -----
     With the generalized derivatives `\boldsymbol{d} = \boldsymbol{\Phi}
     \boldsymbol{c}` of the module, `\boldsymbol{B} = \partial
-    \boldsymbol{\varepsilon}/\partial \boldsymbol{d}` and the membrane
-    stress resultants `\boldsymbol{N}_{NL}` of the quadratic part of the
+    \boldsymbol{\varepsilon}/\partial \boldsymbol{d}` at `\boldsymbol{d}`,
+    the stress resultants `\boldsymbol{\sigma} = \boldsymbol{F}
+    \boldsymbol{\varepsilon}` and `\boldsymbol{\sigma}_L` of the linear
     strains:
 
     .. math::
 
         \boldsymbol{K}_C = \int \boldsymbol{\Phi}^\top \left(
         \boldsymbol{B}^\top \boldsymbol{F} \boldsymbol{B} +
-        \boldsymbol{H}(\boldsymbol{N}_{NL}) \right) \boldsymbol{\Phi} \, dA
+        \boldsymbol{H}(\boldsymbol{\sigma}, \boldsymbol{d}) -
+        \boldsymbol{H}(\boldsymbol{\sigma}_L, \boldsymbol{0}) \right)
+        \boldsymbol{\Phi} \, dA, \qquad
+        \boldsymbol{H}(\boldsymbol{\sigma}, \boldsymbol{d}) = \sum_r
+        \sigma_r \frac{\partial^2 \varepsilon_r}{\partial \boldsymbol{d}
+        \partial \boldsymbol{d}}
 
-    with `\boldsymbol{H}(\boldsymbol{N}) = \boldsymbol{G}^\top
-    \boldsymbol{N} \boldsymbol{G}`, `\boldsymbol{G} \boldsymbol{d} =
-    \{w_{,x}, s w_{,y}\}^\top`, `dA = (\rho/r)\, dx\, dy`, see the notes of
-    the module.
+    with `dA = (\rho/r)\, dx\, dy`, see the notes of the module. With
+    ``NLgeom=0``, `\boldsymbol{d} = \boldsymbol{0}` and the matrix is
+    `\int \boldsymbol{\Phi}^\top \boldsymbol{B}_0^\top \boldsymbol{F}
+    \boldsymbol{B}_0 \boldsymbol{\Phi} \, dA`.
 """
 FKC_DOC = fill(FKC_DOC, 'kC')
 
-FKC_FORM = """                for p in range({nb}):
+FKC_FORM = """                for p in range({nd6}):
                     Bm[p] = 0.
-                w_x = 0.
-                w_y = 0.
+                for p in range({nd}):
+                    dv[p] = 0.
                 if NLgeom == 1:
 {dv}
-                    w_x = dv[7]
-                    w_y = dv[8]
 {Bm}
-                # K = [B]^T [ABD] [B] + [H(N_NL)]
+                # K = [B]^T [ABD] [B]
                 for p in range(6):
                     for q in range({nd}):
                         FB[p*{nd} + q] = 0.
@@ -455,32 +461,41 @@ FKC_FORM = """                for p in range({nb}):
                         K[p*{nd} + q] = 0.
                         for r in range(6):
                             K[p*{nd} + q] += Bm[r*{nd} + p]*FB[r*{nd} + q]
-                eps0 = 0.5*w_x*w_x
-                eps1 = 0.5*s*s*w_y*w_y
-                eps2 = s*w_x*w_y
-                NxxNL = F[0]*eps0 + F[1]*eps1 + F[2]*eps2
-                NyyNL = F[6]*eps0 + F[7]*eps1 + F[8]*eps2
-                NxyNL = F[12]*eps0 + F[13]*eps1 + F[14]*eps2
-{H}""".format(nb=6*ND, nd=ND, dv=dv_lines(20, 'cs').replace('col0 +', 'col0 +'),
-              Bm=matrix_assign('Bm', Bm, 16, ND),
-              H=H_lines(16, ('NxxNL', 'NyyNL', 'NxyNL')))
+                if NLgeom == 1:
+                    # + [H(sigma, d)] - [H(sigma_L, 0)]
+{eps}
+{epsL}
+{sig}
+{sigL}
+{H}
+{H0}""".format(nd=ND, nd6=6*ND, dv=dv_lines(20, 'cs'),
+               Bm=matrix_assign('Bm', Bm, 16, ND),
+               eps=strain_lines(20, B['eps']),
+               epsL=strain_lines(20, B['epsL'], 'epsL'),
+               sig=stress_lines(20, [s.name for s in SIG]),
+               sigL=stress_lines(20, [s.name for s in SIGL], 'epsL'),
+               H=H_lines(20, B['H'], SIG),
+               H0=H_lines(20, H0, SIGL, '-='))
 
-# the derivatives of cs are read with the column of the term, col0 of the web
 FKC = kernel('fkC_num',
              'double [::1] cs, object Finput, object shell,\n'
              '        int size, int row0, int col0, int nx, int ny, int NLgeom=0',
              FKC_DOC,
              '    cdef double Bm[%d]\n    cdef double FB[%d]\n'
-             '    cdef double w_x, w_y, eps0, eps1, eps2, NxxNL, NyyNL, NxyNL\n'
+             '    cdef double eps0, eps1, eps2, eps3, eps4, eps5\n'
+             '    cdef double epsL0, epsL1, epsL2, epsL3, epsL4, epsL5\n'
+             '    cdef double Nxx, Nyy, Nxy, Mxx, Myy, Mxy\n'
+             '    cdef double NxxL, NyyL, NxyL, MxxL, MyyL, MxyL\n'
              % (6*ND, 6*ND), FINPUT, F_POINT, FKC_FORM)
 
-FKG_DOC = r"""Geometric stiffness matrix of the linear membrane stress state
+FKG_DOC = r"""Geometric stiffness matrix of the linear stress state
 
-    Integrates numerically the geometric stiffness matrix of the membrane
-    stress resultants of the linear strains at ``cs``, superposed to the
-    constant state ``Nxx0``, ``Nyy0``, ``Nxy0``. The matrix is homogeneous
+    Integrates numerically the geometric stiffness matrix of the stress
+    resultants of the linear strains at ``cs``, superposed to the constant
+    membrane state ``Nxx0``, ``Nyy0``, ``Nxy0``. The matrix is homogeneous
     of degree one in ``cs``, as the linear buckling eigenvalue problem
-    requires; the stress of the non-linear strains enters :func:`fkC_num`.
+    requires; the remaining terms of the tangent stiffness enter
+    :func:`fkC_num`.
 
     Parameters
     ----------
@@ -499,40 +514,42 @@ FKG_DOC = r"""Geometric stiffness matrix of the linear membrane stress state
 
     Notes
     -----
-    With `\boldsymbol{N} = \boldsymbol{N}_0 + \boldsymbol{N}_L`,
-    `\boldsymbol{N}_L` the membrane stress resultants of the linear strains
-    of ``cs``:
+    With `\boldsymbol{\sigma} = \boldsymbol{\sigma}_L +
+    \boldsymbol{\sigma}_0`, `\boldsymbol{\sigma}_L` the stress resultants
+    of the linear strains of ``cs`` and `\boldsymbol{\sigma}_0 = \{N_{xx0},
+    N_{yy0}, N_{xy0}, 0, 0, 0\}^\top`:
 
     .. math::
 
-        \boldsymbol{K}_G = \int \boldsymbol{\Phi}^\top \boldsymbol{G}^\top
-        \begin{bmatrix} N_{xx} & N_{xy} \\ N_{xy} & N_{yy}
-        \end{bmatrix} \boldsymbol{G} \boldsymbol{\Phi} \, dA, \qquad
-        \boldsymbol{G} \boldsymbol{d} = \{w_{,x}, s w_{,y}\}^\top
+        \boldsymbol{K}_G = \int \boldsymbol{\Phi}^\top
+        \boldsymbol{H}(\boldsymbol{\sigma}, \boldsymbol{0})
+        \boldsymbol{\Phi} \, dA
 
-    the variation of the work of the membrane stresses on the quadratic
-    terms of the von Kármán strains, see the notes of the module.
+    with `\boldsymbol{H}` of :func:`fkC_num`, the variation of the work of
+    the stresses on the second-order terms of the strains, see the notes of
+    the module.
 """
 FKG_DOC = fill(FKG_DOC, 'kG')
 
 FKG_FORM = """{dv}
 {epsL}
-{N}
-                Nxx = Nxx + Nxx0
-                Nyy = Nyy + Nyy0
-                Nxy = Nxy + Nxy0
+{sigL}
+                NxxL = NxxL + Nxx0
+                NyyL = NyyL + Nyy0
+                NxyL = NxyL + Nxy0
                 for p in range({nd2}):
                     K[p] = 0.
-{H}""".format(dv=dv_lines(16, 'cs'), epsL=strain_lines(16, B['epsL']),
-              N=stress_lines(16, ('Nxx', 'Nyy', 'Nxy'), rows=range(3)),
-              nd2=ND*ND, H=H_lines(16, ('Nxx', 'Nyy', 'Nxy')))
+{H}""".format(dv=dv_lines(16, 'cs'), epsL=strain_lines(16, B['epsL'], 'epsL'),
+              sigL=stress_lines(16, [s.name for s in SIGL], 'epsL'),
+              nd2=ND*ND, H=H_lines(16, H0, SIGL))
 
 FKG = kernel('fkG_num',
              'double [::1] cs, object Finput, object shell,\n'
              '        int size, int row0, int col0, int nx, int ny,\n'
              '        double Nxx0=0, double Nyy0=0, double Nxy0=0',
              FKG_DOC,
-             '    cdef double eps0, eps1, eps2, eps3, eps4, eps5, Nxx, Nyy, Nxy\n',
+             '    cdef double epsL0, epsL1, epsL2, epsL3, epsL4, epsL5\n'
+             '    cdef double NxxL, NyyL, NxyL, MxxL, MyyL, MxyL\n',
              FINPUT, F_POINT, FKG_FORM)
 
 J = B['J']
@@ -566,14 +583,15 @@ FKM_DOC = r"""Mass matrix, integrated numerically
     ValueError
         If ``I_input`` has an invalid shape, ``shell`` is not a
         :class:`.Shell` or its outer radius ``r`` is not larger than its
-        height ``a``.
+        radial width ``a``.
 
     Notes
     -----
     With the displacement through the thickness of the Kirchhoff-Love
     kinematics, `u(z) = u - z w_{,x}`, `v(z) = v - z s w_{,y}`, `w(z) =
-    w`, and the moments `I_n = \int \rho_m z^n dz`, `n = 0, 1, 2`, of the
-    density `\rho_m`:
+    w`, `z` measured from the reference plane, and the moments `I_n = \int
+    \rho_m z^n dz`, `n = 0, 1, 2`, of the density `\rho_m` over `d - h/2
+    \le z \le d + h/2`, with the offset `d` (``shell.offset``):
 
     .. math::
 
@@ -630,7 +648,7 @@ FINT_DOC = r"""Internal force vector, integrated numerically
         Size of the vector, the number of degrees of freedom of the
         assembly.
     col0 : int
-        Entry of the vector where the terms of this web start.
+        Entry of the vector where the terms of this panel start.
     nx, ny : int
         Number of Gauss-Legendre points along `x` and `y`.
 
@@ -643,8 +661,8 @@ FINT_DOC = r"""Internal force vector, integrated numerically
 
     Notes
     -----
-    With the von Kármán strains `\boldsymbol{\varepsilon}(\boldsymbol{d})`
-    of the module, `\boldsymbol{\sigma} = \boldsymbol{F}
+    With the strains `\boldsymbol{\varepsilon}(\boldsymbol{d})` of the
+    module, `\boldsymbol{\sigma} = \boldsymbol{F}
     \boldsymbol{\varepsilon}` and `\boldsymbol{B} = \partial
     \boldsymbol{\varepsilon}/\partial \boldsymbol{d}`:
 
@@ -662,7 +680,7 @@ def calc_fint(double [::1] cs, object Finput, object shell,
     """
 {common}    cdef double Bm[{nb}]
     cdef double bs[{nd}]
-    cdef double w_x, w_y, eps0, eps1, eps2, eps3, eps4, eps5
+    cdef double eps0, eps1, eps2, eps3, eps4, eps5
     cdef double Nxx, Nyy, Nxy, Mxx, Myy, Mxy
     cdef double [::1] fint
     cdef int row0 = col0
@@ -672,12 +690,8 @@ def calc_fint(double [::1] cs, object Finput, object shell,
     with nogil:
 {point}
 {dv}
-                w_x = dv[7]
-                w_y = dv[8]
 {eps}
 {sig}
-                for p in range({nb}):
-                    Bm[p] = 0.
 {Bm}
                 for p in range({nd}):
                     bs[p] = (Bm[p]*Nxx + Bm[{nd} + p]*Nyy + Bm[{nd2} + p]*Nxy
@@ -696,8 +710,10 @@ def calc_fint(double [::1] cs, object Finput, object shell,
            point=POINT.format(extra=F_POINT), dv=dv_lines(16, 'cs'),
            eps=strain_lines(16, B['eps']),
            sig=stress_lines(16, ('Nxx', 'Nyy', 'Nxy', 'Mxx', 'Myy', 'Mxy')),
-           Bm=matrix_assign('Bm', Bm, 16, ND), dof=DOF,
-           phiA=phi_lines('A', 'i', 'j', 24))
+           Bm='\n'.join(['                for p in range(%d):' % (6*ND),
+                         '                    Bm[p] = 0.',
+                         matrix_assign('Bm', Bm, 16, ND)]),
+           dof=DOF, phiA=phi_lines('A', 'i', 'j', 24))
 
 KTV_DOC = r"""Product of the tangent stiffness matrix by a vector, without assembly
 
@@ -715,7 +731,8 @@ KTV_DOC = r"""Product of the tangent stiffness matrix by a vector, without assem
 <<F>>
 <<shell>>
     size, col0 : int
-        Size of the vectors and position where the terms of this web start.
+        Size of the vectors and position where the terms of this panel
+        start.
     nx, ny : int
         Number of Gauss-Legendre points along `x` and `y`.
     Nxx_cte, Nyy_cte, Nxy_cte : float, optional
@@ -733,21 +750,37 @@ KTV_DOC = r"""Product of the tangent stiffness matrix by a vector, without assem
     -----
     At each integration point, with `\boldsymbol{B} = \partial
     \boldsymbol{\varepsilon}/\partial \boldsymbol{d}` at `\boldsymbol{d} =
-    \boldsymbol{\Phi} \boldsymbol{c}` and the membrane stress resultants
-    `\boldsymbol{N}` of `\boldsymbol{F} \boldsymbol{\varepsilon}`, plus the
-    constant ones:
+    \boldsymbol{\Phi} \boldsymbol{c}` and the stress resultants
+    `\boldsymbol{\sigma}` of `\boldsymbol{F} \boldsymbol{\varepsilon}`,
+    plus the constant membrane ones `\boldsymbol{\sigma}_0`:
 
     .. math::
 
         \boldsymbol{K}_T \boldsymbol{v} = \int \boldsymbol{\Phi}^\top \left(
         \boldsymbol{B}^\top \boldsymbol{F} \boldsymbol{B} +
-        \boldsymbol{H}(\boldsymbol{N}) \right) \boldsymbol{\Phi}
-        \boldsymbol{v} \, dA
+        \boldsymbol{H}(\boldsymbol{\sigma}, \boldsymbol{d}) +
+        \boldsymbol{H}(\boldsymbol{\sigma}_0, \boldsymbol{0}) \right)
+        \boldsymbol{\Phi} \boldsymbol{v} \, dA
 
     evaluated without forming `\boldsymbol{K}_T`, with
-    `\boldsymbol{H}(\boldsymbol{N})` of :func:`fkC_num`.
+    `\boldsymbol{H}` of :func:`fkC_num`.
 """
 KTV_DOC = fill(KTV_DOC, None)
+
+
+def _Hq_lines(indent):
+    t = ' '*indent
+    Hs = (B['H'].subs(DV, simultaneous=True)
+          + H0.subs(dict(zip(th.STRESSES, [Symbol('Nxx_cte'), Symbol('Nyy_cte'),
+                                           Symbol('Nxy_cte'), 0, 0, 0])),
+                    simultaneous=True))
+    out = []
+    for i in range(ND):
+        e = sum(Hs[i, j]*Symbol('dq[%d]' % j) for j in range(ND))
+        if e != 0:
+            out.append('%sbs[%d] += %s' % (t, i, pstr(e)))
+    return '\n'.join(out)
+
 
 KTV = '''
 def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
@@ -760,7 +793,7 @@ def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
     cdef double dq[{nd}]
     cdef double Bq[6]
     cdef double FBq[6]
-    cdef double w_x, w_y, eps0, eps1, eps2, eps3, eps4, eps5
+    cdef double eps0, eps1, eps2, eps3, eps4, eps5
     cdef double Nxx, Nyy, Nxy, Mxx, Myy, Mxy
     cdef double [::1] kTv
     cdef int row0 = col0
@@ -773,15 +806,8 @@ def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
 {point}
 {dq}
 {dv}
-                w_x = dv[7]
-                w_y = dv[8]
 {eps}
 {sig}
-                Nxx = Nxx + Nxx_cte
-                Nyy = Nyy + Nyy_cte
-                Nxy = Nxy + Nxy_cte
-                for p in range({nb}):
-                    Bm[p] = 0.
 {Bm}
                 for r in range(6):
                     Bq[r] = 0.
@@ -809,19 +835,17 @@ def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
            dq=dv_lines(16, 'vs').replace('dv[', 'dq['), dv=dv_lines(16, 'cs'),
            eps=strain_lines(16, B['eps']),
            sig=stress_lines(16, ('Nxx', 'Nyy', 'Nxy', 'Mxx', 'Myy', 'Mxy')),
-           Bm=matrix_assign('Bm', Bm, 16, ND), dof=DOF,
-           Hq='\n'.join(
-               '                bs[%d] += %s' % (i, pstr(sum(
-                   B['H'][i, j]*Symbol('dq[%d]' % j) for j in range(ND))))
-               for i in range(ND) if any(B['H'][i, j] != 0 for j in range(ND))),
-           phiA=phi_lines('A', 'i', 'j', 24))
+           Bm='\n'.join(['                for p in range(%d):' % (6*ND),
+                         '                    Bm[p] = 0.',
+                         matrix_assign('Bm', Bm, 16, ND)]),
+           dof=DOF, Hq=_Hq_lines(16), phiA=phi_lines('A', 'i', 'j', 24))
 
 FIELD_PARAMS = """    c : np.ndarray
-        Ritz constants of the web ``s``, 1-D array of size ``3*s.m*s.n``,
+        Ritz constants of the panel ``s``, 1-D array of size ``3*s.m*s.n``,
         see :meth:`.Shell.get_size`.
     s : :class:`.Shell`
-        The web, whose dimensions, outer radius, numbers of terms and
-        boundary flags are read.
+        The annular sector, whose dimensions, outer radius, numbers of terms
+        and boundary flags are read.
     xs, ys : np.ndarray
         Coordinates `x` and `y` of the points, lengths, 1-D arrays of the
         same size.
@@ -829,24 +853,37 @@ FIELD_PARAMS = """    c : np.ndarray
         Not used, the points are evaluated serially; kept for the interface
         of :mod:`panels.models.clpt_field`."""
 
+
+def _fstrain_lines(indent):
+    t = ' '*indent
+    out = []
+    for r in range(6):
+        lin = pstr(B['epsL'][r].subs(DV, simultaneous=True), 's_')
+        nl = B['eps'][r] - B['epsL'][r]
+        line = '%sout[%d, k] = %s' % (t, r, lin)
+        if sympy.expand(nl) != 0:
+            line += ' + NLgeom*(%s)' % pstr(nl.subs(DV, simultaneous=True), 's_')
+        out.append(line)
+    return '\n'.join(out)
+
+
 FIELDS = '''
 def _point_derivatives(double [::1] c, object shell, double xp, double yp):
-    r"""Generalized derivatives `\\boldsymbol{{d}}` of the web at a point
+    r"""Generalized derivatives `\\boldsymbol{{d}}` of the panel at a point
 
     Parameters
     ----------
     c : np.ndarray
-        Ritz constants of the web, 1-D array of size ``3*m*n``.
+        Ritz constants of the panel, 1-D array of size ``3*m*n``.
     shell : :class:`.Shell`
-        The web.
+        The annular sector.
     xp, yp : float
         Coordinates `x` and `y` of the point, lengths.
 
     Returns
     -------
     d : np.ndarray
-        ``(u, u_x, u_y, v, v_x, v_y, w, w_x, w_y, w_xx, w_yy, w_xy)``, 1-D
-        array of size 12.
+        ``({dnames})``, 1-D array of size {nd}.
 
     """
     cdef int m, n, i, j, col, p, col0 = 0
@@ -862,31 +899,16 @@ def _point_derivatives(double [::1] c, object shell, double xp, double yp):
 {bcread}
     xi = 2*xp/a - 1
     eta = 2*yp/b - 1
-    ftab = np.zeros((7, m), dtype=DOUBLE)
-    gtab = np.zeros((7, n), dtype=DOUBLE)
-    for i in range(m):
-        ftab[0, i] = f(i, xi, x1u, x1ur, x2u, x2ur)
-        ftab[1, i] = (2/a)*fp(i, xi, x1u, x1ur, x2u, x2ur)
-        ftab[2, i] = f(i, xi, x1v, x1vr, x2v, x2vr)
-        ftab[3, i] = (2/a)*fp(i, xi, x1v, x1vr, x2v, x2vr)
-        ftab[4, i] = f(i, xi, x1w, x1wr, x2w, x2wr)
-        ftab[5, i] = (2/a)*fp(i, xi, x1w, x1wr, x2w, x2wr)
-        ftab[6, i] = (2/a)*(2/a)*fpp(i, xi, x1w, x1wr, x2w, x2wr)
-    for j in range(n):
-        gtab[0, j] = f(j, eta, y1u, y1ur, y2u, y2ur)
-        gtab[1, j] = (2/b)*fp(j, eta, y1u, y1ur, y2u, y2ur)
-        gtab[2, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
-        gtab[3, j] = (2/b)*fp(j, eta, y1v, y1vr, y2v, y2vr)
-        gtab[4, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
-        gtab[5, j] = (2/b)*fp(j, eta, y1w, y1wr, y2w, y2wr)
-        gtab[6, j] = (2/b)*(2/b)*fpp(j, eta, y1w, y1wr, y2w, y2wr)
+    ftab = np.zeros((9, m), dtype=DOUBLE)
+    gtab = np.zeros((9, n), dtype=DOUBLE)
+{tabs}
 {dv}
     return np.array([dv[p] for p in range({nd})])
 
 
 def fuvw(double [::1] c, object s, double [::1] xs, double [::1] ys,
          int num_cores=4):
-    r"""Displacements and rotations of the web at the points ``xs``, ``ys``
+    r"""Displacements and rotations of the panel at the points ``xs``, ``ys``
 
     Parameters
     ----------
@@ -908,19 +930,19 @@ def fuvw(double [::1] c, object s, double [::1] xs, double [::1] ys,
     out = np.zeros((5, xs.shape[0]), dtype=DOUBLE)
     for k in range(xs.shape[0]):
         d = _point_derivatives(c, s, xs[k], ys[k])
-        out[:, k] = (d[0], d[3], d[6], -d[7], -s.r/(s.r - xs[k])*d[8])
+        out[:, k] = (d[{iu}], d[{iv}], d[{iw}], -d[{iwx}], -s.r/(s.r - xs[k])*d[{iwy}])
     return tuple(out)
 
 
 def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys,
             int num_cores=4, int NLgeom=0):
-    r"""Generalized strains of the web at the points ``xs``, ``ys``
+    r"""Generalized strains of the panel at the points ``xs``, ``ys``
 
     Parameters
     ----------
 {params}
     NLgeom : int, optional
-        ``1`` to include the quadratic terms of the membrane strains, ``0``
+        ``1`` to include the non-linear terms of the strains, ``0``
         otherwise. Default ``0``.
 
     Returns
@@ -932,32 +954,28 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys,
 
     Notes
     -----
-    The von Kármán strains in polar coordinates given in the notes of the
-    module, with the quadratic terms multiplied by ``NLgeom``.
+    The strains given in the notes of the module, with the non-linear terms
+    multiplied by ``NLgeom``.
 
     """
-    cdef double rho, s_, R
+    cdef double R, s_, irho
     R = s.r
     out = np.zeros((6, xs.shape[0]), dtype=DOUBLE)
     for k in range(xs.shape[0]):
-        d = _point_derivatives(c, s, xs[k], ys[k])
-        rho = R - xs[k]
-        s_ = R/rho
-        u, u_x, u_y, v, v_x, v_y, w, w_x, w_y, w_xx, w_yy, w_xy = d
-        out[0, k] = u_x + NLgeom*0.5*w_x*w_x
-        out[1, k] = s_*v_y - u/rho + NLgeom*0.5*s_*s_*w_y*w_y
-        out[2, k] = s_*u_y + v_x + v/rho + NLgeom*s_*w_x*w_y
-        out[3, k] = -w_xx
-        out[4, k] = w_x/rho - s_*s_*w_yy
-        out[5, k] = -2*s_*(w_xy + w_y/rho)
+        dv = _point_derivatives(c, s, xs[k], ys[k])
+        irho = 1./(R - xs[k])
+        s_ = R*irho
+{fstrain}
     return tuple(out)
-'''.format(bc=BC_CDEF, bcread=BC_READ.replace('shell.', 'shell.'), nd=ND,
-           dv=dv_lines(4, 'c').replace('            dv[p] +=', '            dv[p] +='),
-           params=FIELD_PARAMS)
+'''.format(bc=BC_CDEF, bcread=BC_READ, nd=ND, tabs=TABS(4),
+           dnames=', '.join(d.name for d in th.D),
+           dv=dv_lines(4, 'c'), params=FIELD_PARAMS,
+           iu=IDX['u'], iv=IDX['v'], iw=IDX['w'], iwx=IDX['w_x'], iwy=IDX['w_y'],
+           fstrain=_fstrain_lines(8))
 
 NOT_IMPLEMENTED = '''
 def {name}(*args, **kwargs):
-    r"""Not available for the web of a ring frame
+    r"""Not available for the annular sector
 
     Raises
     ------
@@ -971,7 +989,16 @@ def {name}(*args, **kwargs):
 
 
 def numerical_module():
-    head = HEADER + 'r"""\nWeb of a ring frame, an annular-sector flat plate, using the classical\nlaminated plate theory (CLPT) with von Kármán strains in polar coordinates\n\nNumerically integrated kernels of the model ``\'frame_web_clpt_donnell\'``:\nthe constitutive stiffness :func:`fkC_num`, the geometric stiffness\n:func:`fkG_num`, the mass :func:`fkM_num`, the internal force vector\n:func:`calc_fint`, the product of the tangent stiffness by a vector\n:func:`calc_kTv`, and the fields :func:`fuvw`, :func:`fstrain` and\n:func:`fg`, the last one that of :mod:`panels.models.clpt_field`. The\ndegree of freedom ``k`` of the term ``(i, j)``, ``0 <= i < m``, ``0 <= j <\nn``, is at the row ``row0 + 3*(j*m + i) + k`` of the matrices.\n' + MODULE_NOTES + '\n"""\n'
+    head = (HEADER + 'r"""\n' + th.TITLE + '\n\nNumerically integrated kernels '
+            'of the model ``\'' + MODEL + '\'``:\nthe constitutive stiffness '
+            ':func:`fkC_num`, the geometric stiffness\n:func:`fkG_num`, the '
+            'mass :func:`fkM_num`, the internal force vector\n:func:`calc_fint`, '
+            'the product of the tangent stiffness by a vector\n:func:`calc_kTv`, '
+            'and the fields :func:`fuvw`, :func:`fstrain` and\n:func:`fg`, the '
+            'last one that of :mod:`panels.models.clpt_field`. The\ndegree of '
+            'freedom ``k`` of the term ``(i, j)``, ``0 <= i < m``, ``0 <= j <\n'
+            'n``, is at the row ``row0 + 3*(j*m + i) + k`` of the matrices.\n'
+            + MODULE_NOTES + '\n"""\n')
     imports = '''from scipy.sparse import coo_matrix
 import numpy as np
 from scipy.special import roots_legendre
@@ -986,51 +1013,53 @@ cdef extern from 'bardell_functions.hpp':
     double fpp(int i, double xi, double xi1t, double xi1r, double xi2t, double xi2r) nogil
 
 cdef int DOF = 3
-cdef int[3] P0 = [0, 3, 6]
-cdef int[3] P1 = [3, 6, 12]
+cdef int[3] P0 = [%s]
+cdef int[3] P1 = [%s]
+#: degree of freedom of each generalized derivative
+cdef int[%d] FLD = [%s]
 
-'''
+''' % (', '.join(map(str, P0)), ', '.join(map(str, P1)), ND,
+       ', '.join(map(str, FLD)))
     na = ''.join(NOT_IMPLEMENTED.format(name=nm, model=MODEL)
                  for nm in ('fkAx_num', 'fkAy_num'))
     return head + imports + FKC + FKG + FKM + FINT + KTV + FIELDS + na
 
 
 ANALYTICAL = HEADER + '''r"""
-Web of a ring frame, an annular-sector flat plate, using the classical
-laminated plate theory (CLPT) with von Kármán strains in polar coordinates
+{title}
 
-Matrices of the whole domain of the model ``'frame_web_clpt_donnell'``,
+Matrices of the whole domain of the model ``'{model}'``,
 called by :class:`.Shell` when the constitutive matrix and the density are
 constant: :func:`fk0`, :func:`fkG0` and :func:`fkM`. The strains have
 coefficients in `1/\\rho`, with `\\rho = r - x` the radius of the point, and
 the matrices are integrated with the Gauss-Legendre rule of
-:mod:`panels.models.frame_web_clpt_donnell_num`, with ``shell.nx`` and
+:mod:`panels.models.{model}_num`, with ``shell.nx`` and
 ``shell.ny`` points; the piston-theory matrices ``fkAx``, ``fkAy`` and
 ``fcA`` are not available.
 
 Notes
 -----
-See :mod:`panels.models.frame_web_clpt_donnell_num`.
+See :mod:`panels.models.{model}_num`.
 
 """
 import numpy as np
 
 from panels import DOUBLE
-from .frame_web_clpt_donnell_num import fkC_num, fkG_num, fkM_num
+from .{model}_num import fkC_num, fkG_num, fkM_num
 
 
 def fk0(object shell, int size, int row0, int col0):
-    r"""Linear constitutive stiffness matrix of the whole web
+    r"""Linear constitutive stiffness matrix of the whole panel
 
     Parameters
     ----------
     shell : :class:`.Shell`
-        The web, with its constitutive matrix ``shell.ABD`` and its numbers
-        of integration points ``shell.nx`` and ``shell.ny``.
+        The annular sector, with its constitutive matrix ``shell.ABD`` and
+        its numbers of integration points ``shell.nx`` and ``shell.ny``.
     size : int
         Number of rows and columns of the matrix.
     row0, col0 : int
-        Row and column of the matrix where the terms of this web start.
+        Row and column of the matrix where the terms of this panel start.
 
     Returns
     -------
@@ -1039,7 +1068,7 @@ def fk0(object shell, int size, int row0, int col0):
 
     Notes
     -----
-    :func:`.frame_web_clpt_donnell_num.fkC_num` with ``NLgeom=0``.
+    :func:`.{model}_num.fkC_num` with ``NLgeom=0``.
 
     """
     return fkC_num(np.zeros(size, dtype=DOUBLE), shell.ABD, shell, size,
@@ -1053,16 +1082,16 @@ def fkG0(double Nxx, double Nyy, double Nxy, object shell,
     Parameters
     ----------
     Nxx, Nyy, Nxy : float
-        Membrane stress resultants along the local axes, `N_{xx} =
-        N_{\\rho\\rho}`, `N_{yy} = N_{\\theta\\theta}`, `N_{xy} =
-        -N_{\\rho\\theta}`, force per unit length.
+        Membrane stress resultants along the local axes, `N_{{xx}} =
+        N_{{\\rho\\rho}}`, `N_{{yy}} = N_{{\\theta\\theta}}`, `N_{{xy}} =
+        -N_{{\\rho\\theta}}`, force per unit length.
     shell : :class:`.Shell`
-        The web, with its numbers of integration points ``shell.nx`` and
-        ``shell.ny``.
+        The annular sector, with its numbers of integration points
+        ``shell.nx`` and ``shell.ny``.
     size : int
         Number of rows and columns of the matrix.
     row0, col0 : int
-        Row and column of the matrix where the terms of this web start.
+        Row and column of the matrix where the terms of this panel start.
 
     Returns
     -------
@@ -1071,7 +1100,7 @@ def fkG0(double Nxx, double Nyy, double Nxy, object shell,
 
     Notes
     -----
-    :func:`.frame_web_clpt_donnell_num.fkG_num` with zero Ritz constants.
+    :func:`.{model}_num.fkG_num` with zero Ritz constants.
 
     """
     return fkG_num(np.zeros(size, dtype=DOUBLE), shell.ABD, shell, size,
@@ -1079,17 +1108,17 @@ def fkG0(double Nxx, double Nyy, double Nxy, object shell,
 
 
 def fkM(object shell, int size, int row0, int col0):
-    r"""Mass matrix of the whole web
+    r"""Mass matrix of the whole panel
 
     Parameters
     ----------
     shell : :class:`.Shell`
-        The web, with its laminate ``shell.lam`` and its numbers of
-        integration points ``shell.nx`` and ``shell.ny``.
+        The annular sector, with its laminate ``shell.lam`` and its numbers
+        of integration points ``shell.nx`` and ``shell.ny``.
     size : int
         Number of rows and columns of the matrix.
     row0, col0 : int
-        Row and column of the matrix where the terms of this web start.
+        Row and column of the matrix where the terms of this panel start.
 
     Returns
     -------
@@ -1098,15 +1127,16 @@ def fkM(object shell, int size, int row0, int col0):
 
     Notes
     -----
-    :func:`.frame_web_clpt_donnell_num.fkM_num` with the moments
-    ``intrho``, ``intrhoz``, ``intrhoz2`` of ``shell.lam``.
+    :func:`.{model}_num.fkM_num` with the moments
+    ``intrho``, ``intrhoz``, ``intrhoz2`` of ``shell.lam``, which include
+    the offset ``shell.offset``.
 
     """
     lam = shell.lam
     I_input = np.array([lam.intrho, lam.intrhoz, lam.intrhoz2], dtype=DOUBLE)
     return fkM_num(shell, I_input, size, row0, col0, shell.nx, shell.ny)
-''' + ''.join(NOT_IMPLEMENTED.format(name=nm, model=MODEL)
-              for nm in ('fkAx', 'fkAy', 'fcA'))
+'''.format(title=th.TITLE, model=MODEL) + ''.join(
+    NOT_IMPLEMENTED.format(name=nm, model=MODEL) for nm in ('fkAx', 'fkAy', 'fcA'))
 
 
 def generate(outdir=None):

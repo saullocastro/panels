@@ -144,21 +144,56 @@ db = {
                     # degree 6p - 2, integrated exactly by 3p points
                     'integrand_degree': (6, -2),
                     },
-    'frame_web_clpt_donnell': {
+    'annular_clpt_donnell': {
                     'linear static': True,
                     'linear buckling': True,
                     'non-linear static': True,
-                    #NOTE the strains in polar coordinates of the web of a
-                    #     ring frame need their own fields
-                    'field': frame_web_clpt_donnell_num,
+                    #NOTE the strains in polar coordinates of the annular
+                    #     sector need their own fields
+                    'field': annular_clpt_donnell_num,
                     #NOTE the matrices of the whole domain are integrated
                     #     numerically, the strains having terms in 1/rho
-                    'matrices': frame_web_clpt_donnell,
-                    'matrices_num': frame_web_clpt_donnell_num,
+                    'matrices': annular_clpt_donnell,
+                    'matrices_num': annular_clpt_donnell_num,
                     'dofs': 3,
                     'e_num': 6,
-                    # outer radius of the web, the kernels divide by r - x
+                    # outer radius, the kernels divide by r - x
                     'requires_r': True,
+                    },
+    'annular_clpt_gl': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    #NOTE the strains in polar coordinates of the annular
+                    #     sector need their own fields
+                    'field': annular_clpt_gl_num,
+                    #NOTE the matrices of the whole domain are integrated
+                    #     numerically, the strains having terms in 1/rho
+                    'matrices': annular_clpt_gl,
+                    'matrices_num': annular_clpt_gl_num,
+                    'dofs': 3,
+                    'e_num': 6,
+                    # outer radius, the kernels divide by r - x
+                    'requires_r': True,
+                    },
+    'annular_clpt_tl': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    #NOTE the strains in polar coordinates of the annular
+                    #     sector need their own fields
+                    'field': annular_clpt_tl_num,
+                    #NOTE the matrices of the whole domain are integrated
+                    #     numerically, the strains having terms in 1/rho
+                    'matrices': annular_clpt_tl,
+                    'matrices_num': annular_clpt_tl_num,
+                    'dofs': 3,
+                    'e_num': 6,
+                    # outer radius, the kernels divide by r - x
+                    'requires_r': True,
+                    # curvatures cubic in the displacements, as those of
+                    # cylshell_clpt_tl: more integration points
+                    'integrand_degree': (6, 0),
                     },
     'cylshell_fsdt_donnell': {
                     'linear static': True,

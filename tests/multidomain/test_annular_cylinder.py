@@ -1,6 +1,6 @@
 r"""Web of a ring frame connected to a cylinder with ``'BFxcte'``
 
-An annular web, model ``'frame_web_clpt_donnell'``, connected at the end
+An annular-sector web, model ``'annular_clpt_donnell'``, connected at the end
 `x = 0` of a cylinder clamped there: the connection clamps the outer edge of
 the web, whose frequencies must be those of the annulus clamped outside and
 free inside, from the frequency equation of Leissa (1969), with the penalty
@@ -12,13 +12,13 @@ With ``dict(p1=cylinder, p2=web, func='BFxcte', xcte1=x_f, xcte2=0)`` the
 connection imposes `u_{cyl} = w_{web}`, `v_{cyl} = v_{web}`, `w_{cyl} =
 -u_{web}` and the continuity of the rotation about the circumferential
 axis, `w_{cyl,x} = w_{web,x}`, at the station `x_f`, see
-:mod:`panels.models.frame_web_clpt_donnell_num`. At a clamped end of the
+:mod:`panels.models.annular_clpt_donnell_num`. At a clamped end of the
 cylinder all of them vanish, which clamps the outer edge of the web through
 the connection alone (the web itself has free edges). The reference values
 are the roots of the frequency equation of the annulus, from the
 Bessel-function solution of Leissa [1]_, Eq. (1.17), with the edge
 conditions of his Eqs. (1.11)-(1.13), computed with SciPy (see
-``tests/tests_shell/test_frame_web_clpt_donnell.py``): 13.5004, 19.3892 and
+``tests/tests_shell/test_annular_clpt.py``): 13.5004, 19.3892 and
 31.3384 for `n = 0, 1, 2`, `\nu = 1/3`, `\beta = 0.4`; Leissa's Table 2.21
 gives 13.54, 19.80 and 31.34. The null-space connection reproduces them to
 the digits given; the penalty connection, with the default penalty
@@ -61,7 +61,7 @@ def test_web_clamped_by_cylinder_end(conn_method):
     for k in range(2):
         c = Shell(model='cylshell_clpt_sanders', a=0.5*R, b=np.pi*R, r=R,
                   m=8, n=12, plyt=H, stack=[0], laminaprop=(E, NU), rho=RHO)
-        w = Shell(model='frame_web_clpt_donnell', a=R*(1 - beta), b=np.pi*R,
+        w = Shell(model='annular_clpt_donnell', a=R*(1 - beta), b=np.pi*R,
                   r=R, m=10, n=12, plyt=H, stack=[0], laminaprop=(E, NU),
                   rho=RHO)
         for f in 'uvw':

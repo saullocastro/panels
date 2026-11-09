@@ -62,9 +62,9 @@ the non-linear equations, see :mod:`panels.models`:
 * ``'cylshell_fsdt_sanders'``, ``'cylshell_tsdt_sanders'``: cylindrical
   shells, first-order and third-order shear deformation theories with
   Sanders-Koiter's kinematics
-* ``'frame_web_clpt_donnell'``: the web of a ring frame, an annular-sector
+* ``'annular_clpt_donnell'``: the web of a ring frame, an annular-sector
   plate, CLPT with the von Kármán strains in polar coordinates, connected to
-  a cylinder with ``'BFxcte'``, see :ref:`frame_web_clpt_donnell`
+  a cylinder with ``'BFxcte'``, see :ref:`annular_clpt_donnell`
 
 
 How the models, the boundary conditions, the loads and the assemblies fit
@@ -97,7 +97,7 @@ User guide
     plate_clpt_tl.rst
     cylshell_clpt_tl.rst
     fsdt_tsdt_gl.rst
-    frame_web_clpt_donnell.rst
+    annular_clpt_donnell.rst
     tsdt_offset.rst
     multidomain_null_space.rst
     tangent_product.rst

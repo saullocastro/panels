@@ -248,7 +248,7 @@ def test_ABDnxny_point_indexing(model, partial):
         return np.stack([fields[name] for name in names], axis=-1)
 
     W = np.outer(wxs, wys)
-    if model.startswith('frame_web'):
+    if model.startswith('annular'):
         # element of area of the annular sector, (rho/r) dx dy
         W = W*(s.r - X)/s.r
     ref = np.einsum('ij,ijk,ijkl,ijl', W, eps(v), F, eps(c))

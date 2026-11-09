@@ -1,9 +1,9 @@
-# Web of a ring frame, CLPT with von Kármán strains in polar coordinates (`frame_web_clpt_donnell`)
+# Web of a ring frame, CLPT with von Kármán strains in polar coordinates (`annular_clpt_donnell`)
 
-Derivation and symbolic checks: `frame_web_clpt_donnell.py` (sympy, run
-`python frame_web_clpt_donnell.py`, a few seconds). Kernels: `write_pyx.py`,
-which writes `panels/models/frame_web_clpt_donnell_num.pyx` and
-`panels/models/frame_web_clpt_donnell.pyx` (`python write_pyx.py [folder]`).
+Derivation and symbolic checks: `annular_clpt_donnell.py` (sympy, run
+`python annular_clpt_donnell.py`, a few seconds). Kernels: `write_pyx.py`,
+which writes `panels/models/annular_clpt_donnell_num.pyx` and
+`panels/models/annular_clpt_donnell.pyx` (`python write_pyx.py [folder]`).
 
 ## Why
 
@@ -29,14 +29,14 @@ curvature terms of the shell (Amabili 2008, p. 42, comparing Eqs.
 (1.160)-(1.161) with (1.72)-(1.73)); a flat plate has no curvature, and
 the literature calls the circular-plate strains "von Kármán". `panels`
 names the von Kármán flat plate `plate_clpt_donnell`; the web follows that
-convention: `frame_web_clpt_donnell` has the von Kármán strains in polar
+convention: `annular_clpt_donnell` has the von Kármán strains in polar
 coordinates. The variants `frame_web_clpt_gl` (Eqs. (1.166)-(1.168) for the
 membrane strains) and `frame_web_clpt_tl` (curvatures of the deformed
 normal) would follow `plate_clpt_gl` and `plate_clpt_tl`.
 
 ## Coordinates and degrees of freedom
 
-`Shell(model='frame_web_clpt_donnell', a=height, b=arc length of the outer
+`Shell(model='annular_clpt_donnell', a=height, b=arc length of the outer
 edge, r=outer radius)`:
 
     x = R - rho   (0 at the outer edge, a at the inner edge)
@@ -60,7 +60,7 @@ and `dA = (rho/R) dx dy`. For `R -> infinity` these are the strains of
 `plate_clpt_donnell`. Displacement through the thickness: `u(z) = u - z
 w,x`, `v(z) = v - z s w,y`, `w(z) = w`.
 
-## Checks of `frame_web_clpt_donnell.py`
+## Checks of `annular_clpt_donnell.py`
 
 - `check_linear_strains`: the linear strains and curvatures above are the
   linear strains, and their derivatives in `z`, of the three-dimensional
@@ -79,10 +79,10 @@ w,x`, `v(z) = v - z s w,y`, `w(z) = w`.
 
 ## Kernels
 
-`frame_web_clpt_donnell_num.pyx`: `fkC_num`, `fkG_num`, `fkM_num`,
+`annular_clpt_donnell_num.pyx`: `fkC_num`, `fkG_num`, `fkM_num`,
 `calc_fint`, `calc_kTv` and the fields `fuvw`, `fstrain` (with `fg` of `clpt_field`),
 integrated with the Gauss-Legendre rule over the domain of
-`Shell.integration_limits`. `frame_web_clpt_donnell.pyx`: `fk0`, `fkG0`,
+`Shell.integration_limits`. `annular_clpt_donnell.pyx`: `fk0`, `fkG0`,
 `fkM` of the whole domain, which call the numerical kernels with
 `shell.nx`, `shell.ny`. The coefficients `1/rho` make the integrands
 rational in `x`: no rule is exact, and no closed form with the integrals

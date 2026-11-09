@@ -1,15 +1,15 @@
-.. _frame_web_clpt_donnell:
+.. _annular_clpt_donnell:
 
 Ring frames: the web as an annular-sector plate
 ===============================================
 
-The model ``'frame_web_clpt_donnell'`` is the web of a ring frame of a
+The model ``'annular_clpt_donnell'`` is the web of a ring frame of a
 stiffened cylinder: a flat annular sector in the plane normal to the axis of
 the cylinder, between the outer radius `r`, where it meets the skin, and the
 inner radius `r - a`. It uses the classical laminated plate theory (CLPT)
 with the von Kármán strains of circular plates [amabili2008Nonlinear]_, Sec.
-1.4.2. The kernels :mod:`panels.models.frame_web_clpt_donnell` and
-:mod:`panels.models.frame_web_clpt_donnell_num` are generated from a symbolic
+1.4.2. The kernels :mod:`panels.models.annular_clpt_donnell` and
+:mod:`panels.models.annular_clpt_donnell_num` are generated from a symbolic
 derivation with SymPy of the strains below.
 
 
@@ -131,7 +131,7 @@ circumferential axis, with penalties or with the null space of
 Variants
 --------
 
-``'frame_web_clpt_donnell'`` follows the convention of
+``'annular_clpt_donnell'`` follows the convention of
 ``'plate_clpt_donnell'``, the von Kármán flat plate: a flat plate has no
 curvature term, and Donnell's shallow-shell strains reduce to von Kármán's
 [amabili2008Nonlinear]_, Sec. 1.3.10. The complete Green-Lagrange strains in

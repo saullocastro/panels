@@ -58,13 +58,21 @@ The available models, which are selected with ``Shell.model``, are:
   curvature of the deformed normal, all invariant under rigid rotations,
   3 DOFs ``u, v, w``.
 
-- ``'frame_web_clpt_donnell'``: the web of a ring frame, an annular sector
-  of a flat plate in the plane normal to the axis of a cylinder, CLPT with
-  the von Kármán strains in polar coordinates, 3 DOFs ``u, v, w``.
-  ``a`` is the height of the web, ``b`` the arc length of its outer edge and
-  ``r`` its outer radius; `x = r - \rho` runs from the outer edge inwards and
-  `y = r \theta` along the outer edge. It connects to a cylinder with
-  ``'BFxcte'``, see :mod:`panels.models.frame_web_clpt_donnell_num`.
+- ``'annular_clpt_donnell'``: annular sectors of flat plates, CLPT with
+  the von Kármán strains in polar coordinates, 3 DOFs ``u, v, w``. ``a`` is
+  the radial width, ``b`` the arc length of the outer edge and ``r`` the
+  outer radius; `x = r - \rho` runs from the outer edge inwards and `y = r
+  \theta` along the outer edge. The web of a ring frame is an application,
+  with ``a`` the height of the web; it connects to a cylinder with
+  ``'BFxcte'``, see :mod:`panels.models.annular_clpt_donnell_num`.
+
+- ``'annular_clpt_gl'``: as ``'annular_clpt_donnell'``, with the complete
+  Green-Lagrange membrane strains in polar coordinates, invariant under
+  rigid rotations, 3 DOFs ``u, v, w``.
+
+- ``'annular_clpt_tl'``: as ``'annular_clpt_gl'``, with the changes of
+  curvature of the deformed normal, all strains invariant under rigid
+  rotations, 3 DOFs ``u, v, w``.
 
 - ``'cylshell_clpt_donnell'``: cylindrical shells, CLPT with the
   Donnell-Mushtari-Vlasov (shallow shell) kinematics, 3 DOFs ``u, v, w``.
@@ -343,7 +351,7 @@ them from the laminate, and ``fkM_num(shell, I_input, size, row0, col0, nx,
 ny)`` receives them, with the thickness `h` of the TSDT, as one set for the
 whole domain or one set per integration point, see :meth:`.Shell.calc_kM`.
 
-The web of a ring frame, ``'frame_web_clpt_donnell'``, has the von Kármán
+The annular sector, ``'annular_clpt_donnell'``, has the von Kármán
 strains of circular plates [4]_, Sec. 1.4.2, Eqs. (1.175)-(1.180), with
 `x = r - \rho`, `y = r \theta`, `s = r/\rho` and the local axes
 `\boldsymbol{e}_x = -\boldsymbol{e}_\rho`, `\boldsymbol{e}_y =
@@ -361,7 +369,12 @@ strains of circular plates [4]_, Sec. 1.4.2, Eqs. (1.175)-(1.180), with
 and `\varepsilon_{xx}`, `\kappa_{xx}` of the flat plate. The coefficients
 in `1/\rho` make the integrands rational in `x`, and the matrices of the
 whole domain are also integrated numerically, see
-:mod:`panels.models.frame_web_clpt_donnell_num`.
+:mod:`panels.models.annular_clpt_donnell_num`. ``'annular_clpt_gl'`` has the
+Green-Lagrange membrane strains of [4]_, Sec. 1.4.1, Eqs. (1.166)-(1.168),
+and ``'annular_clpt_tl'`` also the changes of curvature of the deformed
+normal, see :mod:`panels.models.annular_clpt_gl_num` and
+:mod:`panels.models.annular_clpt_tl_num`. The offset ``Shell.offset``
+enters the three through ``Shell.ABD`` and the moments of the density.
 
 References
 ----------
@@ -390,7 +403,9 @@ from . import cylshell_clpt_tl_num
 from . import plate_clpt_donnell, plate_clpt_donnell_num
 from . import plate_clpt_gl, plate_clpt_gl_num
 from . import plate_clpt_tl_num
-from . import frame_web_clpt_donnell_num, frame_web_clpt_donnell
+from . import annular_clpt_donnell_num, annular_clpt_donnell
+from . import annular_clpt_gl_num, annular_clpt_gl
+from . import annular_clpt_tl_num, annular_clpt_tl
 from . import fsdt_tsdt_field
 from . import plate_fsdt_donnell, plate_fsdt_donnell_num
 from . import plate_tsdt_donnell, plate_tsdt_donnell_num

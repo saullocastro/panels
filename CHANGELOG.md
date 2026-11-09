@@ -29,13 +29,13 @@
   pinned tube, hinged roof of Sze, Liu and Lo 2004, Table 9a) and the four
   models in `test_tangent_consistency.py`. Page `doc/source/fsdt_tsdt_gl.rst`.
 
-### New model `frame_web_clpt_donnell`: the web of a ring frame
+### New model `annular_clpt_donnell`: the web of a ring frame
 
 - The web of a ring frame of a stiffened cylinder, an annular sector of a
   flat plate in the plane normal to the axis, CLPT with the von Kármán
   strains of circular plates in polar coordinates (Amabili 2008, Sec.
   1.4.2, Eqs. 1.175-1.180), the convention of `plate_clpt_donnell` for the
-  von Kármán flat plate. `Shell(model='frame_web_clpt_donnell', a=height,
+  von Kármán flat plate. `Shell(model='annular_clpt_donnell', a=height,
   b=arc length of the outer edge, r=outer radius)`; `x = r - rho` runs from
   the outer edge inwards, `y = r theta` along it, and `u, v, w` are measured
   along `e_x = -e_rho`, `e_y = e_theta`, `e_z = e_x x e_y`.
@@ -44,13 +44,13 @@
   `dict(p1=cylinder, p2=web, func='BFxcte', xcte1=x_f, xcte2=0)`, with the
   penalty or the null-space method, and a closed ring is made of webs
   joined with `'SSycte'`.
-- Generated from `theory/shells/frame_web_clpt_donnell/` (derivation with
+- Generated from `theory/shells/annular_clpt_donnell/` (derivation with
   symbolic checks against Amabili's Eqs. 1.166-1.168 and 1.175-1.180, the
   three-dimensional Kirchhoff field, the six rigid-body motions and the
   flat-plate limit; self-contained `write_pyx.py`):
-  `panels/models/frame_web_clpt_donnell_num.pyx` (`fkC_num`, `fkG_num`,
+  `panels/models/annular_clpt_donnell_num.pyx` (`fkC_num`, `fkG_num`,
   `fkM_num`, `calc_fint`, `calc_kTv`, `fuvw`, `fstrain`) and
-  `panels/models/frame_web_clpt_donnell.pyx` (`fk0`, `fkG0`, `fkM`). The
+  `panels/models/annular_clpt_donnell.pyx` (`fk0`, `fkG0`, `fkM`). The
   coefficients `1/rho` make the integrands rational: every matrix is
   integrated with the Gauss-Legendre rule. The piston-theory kernels raise
   `NotImplementedError`; the follower pressure is not available for this
