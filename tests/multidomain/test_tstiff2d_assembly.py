@@ -11,14 +11,16 @@ first natural frequencies of the curved panel against Castro and Donadon
 (2017), Table 5, and the ratios of the first natural frequency of the flat
 panel with a defect to that without against their Fig. 15, digitised. The
 in-plane loads of :func:`.tstiff2d_1stiff_flutter` are checked as constant
-stress states and as edge loads of a static case, with the boundary
-conditions of their Fig. 8.
+stress states, with the boundary conditions of their Fig. 8, and as edge
+loads of a static case, with the loaded edge free in `u` as in their Fig. 7
+and in `v`.
 
 """
 import sys
 sys.path.append('../..')
 
 import numpy as np
+import pytest
 
 from panels.multidomain import (
         tstiff2d_1stiff_freq,
@@ -320,37 +322,45 @@ def test_tstiff2d_1stiff_flutter_constant_prestress():
     assert not np.isclose(ws, w0, rtol=1e-6)
 
 
-def test_tstiff2d_1stiff_flutter_static_edge_loads_fig8():
+def test_tstiff2d_1stiff_flutter_static_edge_loads():
     r"""In-plane loads of :func:`.tstiff2d_1stiff_flutter` as edge loads
     of a static case, ``run_static_case=True``
 
     The panel of the function's Examples, with the boundary conditions of
-    Castro and Donadon (2017), Fig. 8: `u = v = w = 0` at the edges of the
-    skin and at the ends of the flange. The test verifies that without
-    loads `\sqrt{-\lambda_1}` is that of the Examples; that the edge loads
-    ``Nxx`` and ``Nxy`` of the skin and of the flange, which act on these
-    restrained displacements, leave it unchanged (``rtol=1e-10``); that
-    ``Nyy`` is not used; and that the edge loads of the base, whose edges
-    are free, reach the restrained skin through the connection between
-    base and skin and change it by less than 1e-4, relatively, for 100 N/m
-    (regression value of ``Nxx_base`` stored in the test, 487.4215 rad/s;
-    with null-space connections the shear load of the base leaves it
-    unchanged to the digits printed).
+    Castro and Donadon (2017), Fig. 8, except at the loaded edge `x = 0` of
+    the skin and of the flange, free in `u` as in their Fig. 7 and in `v`. The
+    paper gives no frequency of a loaded panel; the test verifies:
+
+    - ``Nyy_*`` given with ``run_static_case=True`` raises ``ValueError``;
+    - without loads, `\sqrt{-\mathrm{Re}(\lambda_1)}` is 453.7141 rad/s
+      (regression value; 487.4174 with ``run_static_case=False``, where
+      `u = v = 0` at `x = 0`);
+    - the edge loads act: `N_{xx} = -100` N/m in the three parts lowers it
+      to 453.6788 rad/s (regression value), `N_{xx} = +100` N/m raises it;
+    - the change of `\omega^2 = -\mathrm{Re}(\lambda_1)` is linear in the
+      load to first order: for `N_{xx} = +100` and `-1000` N/m it is `-1`
+      and `10` times that for `-100` N/m, within 5 % (computed: -1.004 and
+      9.82);
+    - the shear load `N_{xy} = -100` N/m of the skin alone lowers it by
+      more than 2e-4 rad/s (computed: 5.4e-4 rad/s).
 
     """
+    with pytest.raises(ValueError):
+        tstiff2d_1stiff_flutter(run_static_case=True, Nyy_skin=-100.,
+                                **FLUTTER_PANEL)
     assy, w0 = _flutter_omega1(run_static_case=True)
-    assert np.isclose(w0, W0, rtol=1e-6)
-    restrained = dict(Nxx_skin=-100., Nxx_flange=-100.,
-                      Nxy_skin=-100., Nxy_flange=-100.)
-    assert np.isclose(_flutter_omega1(run_static_case=True, **restrained)[1],
-                      w0, rtol=1e-10)
-    nyy = {'Nyy_%s' % p: -100. for p in PARTS}
-    assert np.isclose(_flutter_omega1(run_static_case=True, **nyy)[1], w0,
-                      rtol=1e-10)
-    w = _flutter_omega1(run_static_case=True, Nxx_base=-100.)[1]
-    assert np.isclose(w, 487.4215, rtol=1e-6)
-    w = _flutter_omega1(run_static_case=True, Nxy_base=-100.)[1]
-    assert abs(w - w0)/w0 < 1e-4
+    assert np.isclose(w0, 453.7141, rtol=1e-6)
+    all_ = lambda N: {'Nxx_%s' % p: N for p in PARTS}
+    wm = _flutter_omega1(run_static_case=True, **all_(-100.))[1]
+    assert np.isclose(wm, 453.6788, rtol=1e-6)
+    wp = _flutter_omega1(run_static_case=True, **all_(100.))[1]
+    wk = _flutter_omega1(run_static_case=True, **all_(-1000.))[1]
+    assert wm < w0 < wp
+    dm = wm**2 - w0**2
+    assert np.isclose((wp**2 - w0**2)/dm, -1., rtol=0.05)
+    assert np.isclose((wk**2 - w0**2)/dm, 10., rtol=0.05)
+    ws = _flutter_omega1(run_static_case=True, Nxy_skin=-100.)[1]
+    assert w0 - ws > 2e-4
 
 
 if __name__ == '__main__':

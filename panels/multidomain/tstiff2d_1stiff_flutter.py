@@ -72,7 +72,11 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
     `y = 0` and `y = b`, and at both ends of the flange, `x = 0` and
     `x = a`; the edges of the base are free, the base being held by its
     connections to the skin and to the flange, and the rotations are free
-    at every edge. The aerodynamic parameters are given to the
+    at every edge. With ``run_static_case=True`` the loaded edge `x = 0`
+    of the skin (``p07``, ``p08``, ``p09``) and of the flange (``p15``) is
+    free in `u`, as the loaded edge of the compression analysis of Castro
+    and Donadon (2017), Fig. 7, and also in `v`, such that the axial and
+    shear edge loads act on the panel; `w = 0` remains. The aerodynamic parameters are given to the
     9 skin domains only, and the aerodynamic matrix is the sum of
     :meth:`.Shell.calc_kA` of the skin domains.
 
@@ -96,16 +100,10 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
       gives the pre-buckling state ``c``, generally not a constant stress
       state, and the geometric stiffness matrix is computed at ``c``, with
       the attributes ``Nxx``, ``Nyy`` and ``Nxy`` of every domain equal to
-      ``0``. ``Nyy_skin``, ``Nyy_base`` and ``Nyy_flange`` are not used.
-      Without any edge load the geometric stiffness matrix is not
-      included. Since `u = v = 0` at the edge `x = 0` of the skin and of
-      the flange, the forces of ``Nxx_skin``, ``Nxy_skin``, ``Nxx_flange``
-      and ``Nxy_flange`` act on restrained displacements and give no
-      pre-stress; the forces at the edge `x = 0` of ``p14``, whose edges
-      are free, are transmitted by the connection of the base to the skin,
-      whose edges are restrained, and give almost none (for the panel of
-      the Examples with ``Nxx_base=-100.``, the first eigenvalue changes by
-      1.6e-5, relatively).
+      ``0``. ``Nyy_skin``, ``Nyy_base`` and ``Nyy_flange`` must be
+      ``None``: this function has no edge load along `y`. Without any edge
+      load the geometric stiffness matrix is not included, but the edge
+      `x = 0` is free in `u` and `v` all the same.
 
     The reduced matrices, see :meth:`.MultiDomain.reduce`, the sum
     of the constitutive, geometric and aerodynamic stiffness matrices and
@@ -166,8 +164,8 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
         Membrane stress resultant `N_{yy}` of the skin, of the base and of
         the flange, force per unit length, negative in compression,
         constant in each domain of that part with
-        ``run_static_case=False``; not used with ``run_static_case=True``.
-        Default ``None``, no load.
+        ``run_static_case=False``; must be ``None`` with
+        ``run_static_case=True``. Default ``None``, no load.
     Nxy_skin, Nxy_base, Nxy_flange : float or None, optional
         Membrane stress resultant `N_{xy}` of the skin, of the base and of
         the flange, force per unit length: constant in each domain of that
@@ -175,10 +173,13 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
         edge `x = 0` with ``run_static_case=True``. Default ``None``, no
         load.
     run_static_case : bool, optional
-        If True, the loads ``Nxx_*`` and ``Nxy_*`` are applied at the edge
-        `x = 0` and the geometric stiffness matrix is computed from the
+        If True, the edge `x = 0` of the skin and of the flange is free in
+        `u` and `v`, the loads ``Nxx_*`` and ``Nxy_*`` are applied at the
+        edge `x = 0` and the geometric stiffness matrix is computed from the
         membrane stresses of a linear static analysis; if False, from the
-        constant loads ``Nxx_*``, ``Nyy_*`` and ``Nxy_*``. Default ``True``.
+        constant loads ``Nxx_*``, ``Nyy_*`` and ``Nxy_*``, with the
+        boundary conditions of Fig. 8. Default ``True``.
+
     r : float or None, optional
         Radius of the stiffened panel, length. Default ``None``, a flat
         panel.
@@ -204,6 +205,12 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
         ``structsolve.freq``, see there, and the eigenvectors of the
         assembly, one per column, with ``assy.get_size()`` rows.
 
+    Raises
+    ------
+    ValueError
+        If ``run_static_case=True`` and any of ``Nyy_skin``, ``Nyy_base``
+        and ``Nyy_flange`` is not ``None``.
+
     Notes
     -----
     For more details about each parameter and the aerodynamic formulation see
@@ -227,7 +234,11 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
     aerodynamic load, e.g. ``air_speed``, until two natural frequencies
     coalesce and the eigenvalues become complex. The boundary conditions are
     those of the vibration analysis of the same assembly, Fig. 8 of [2]_,
-    p. 236, and the debonding defect is modelled as in
+    p. 236, with the loaded edge free in `u`, as in the compression
+    analysis, Fig. 7 of [2]_, and in `v` when ``run_static_case=True``;
+    with `u = v = 0` there, the edge loads would act on restrained displacements and
+    load the panel only through the free edges of the base. The debonding
+    defect is modelled as in
     :func:`.tstiff2d_1stiff_compression`.
 
     `\boldsymbol{K}_G = \boldsymbol{K}_G(\boldsymbol{N})` is the geometric
@@ -253,8 +264,8 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
     the membrane strains, which varies over each domain and redistributes
     the loads between the skin and the stiffener according to the
     boundary conditions and the stiffnesses. A load `N_{yy}` would have to
-    act at the edges `y = 0` and `y = b` of the skin; it has no edge load
-    in this function.
+    act at the edges `y = 0` and `y = b` of the skin, which are restrained;
+    the function raises an error instead of ignoring it.
 
     The flange carries its share of the axial load as the membrane stress
     resultant `N_{xx}` of the plate, and bends in its own plane when the
@@ -297,6 +308,10 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
     487.42
 
     """
+    if run_static_case and not (Nyy_skin is None and Nyy_base is None
+                                and Nyy_flange is None):
+        raise ValueError('Nyy_skin, Nyy_base and Nyy_flange must be None '
+                         'with run_static_case=True')
     defect = defect_a * a
     has_defect = True if defect > 0 else False
     defect = 0.33*a if defect == 0 else defect # to avoid weird domains
@@ -443,6 +458,12 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
     p15.y1v = 1 ; p15.y1vr = 1 ; p15.y2v = 1 ; p15.y2vr = 1
     p15.y1w = 1 ; p15.y1wr = 1 ; p15.y2w = 1 ; p15.y2wr = 1
 
+    if run_static_case:
+        # loaded edge x = 0 free in u and v
+        for p in [p07, p08, p09, p15]:
+            p.x1u = 1
+            p.x1v = 1
+
     conn = [
         # skin-skin
         dict(p1=p01, p2=p02, func='SSycte', ycte1=0, ycte2=p02.b),
@@ -503,9 +524,7 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
     c = None
     kG = 0.
     if run_static_case:
-        # Nxx and Nxy are edge loads at x = 0; Nyy is not used
-        # TODO(author): Nyy_skin, Nyy_base and Nyy_flange are ignored with
-        # run_static_case=True; unused, a warning or an error?
+        # Nxx and Nxy are edge loads at x = 0
         edge = [p for p in [p07, p08, p09, p14, p15]
                 if not (loads[p.group][0] is None and loads[p.group][2] is None)]
         if len(edge) > 0:
