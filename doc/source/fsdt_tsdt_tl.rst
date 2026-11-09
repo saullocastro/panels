@@ -108,12 +108,64 @@ Without the terms `-\varepsilon_{yy}/r` and `-\gamma_{xy}/(2r)` these are
 the coefficients of `z^0` and `z` of the Green-Lagrange strains of the
 field `\mathbf{X} + z \mathbf{d}`, with the reference vectors
 `\mathbf{e}_x` and `(1 + z/r) \mathbf{e}_y`, and the transverse components
-at the mid-surface. Their linear part is that of Sanders plus `(0,
-\varepsilon_{yy}/r, \gamma_{xy}/(2r))`; the two terms, Koiter's
-modification of the changes of curvature [vanderheijden2008Koiter]_, p.
-202, also used by ``'cylshell_clpt_tl'`` (see :ref:`cylshell_clpt_tl`),
-make the linear part exactly that of ``'cylshell_fsdt_sanders'``. For the
-plate the linear part is that of ``'plate_fsdt_donnell'``. As in every FSDT
+at the mid-surface. The two terms, Koiter's modification of the changes of
+curvature [vanderheijden2008Koiter]_, p. 202, also used by
+``'cylshell_clpt_tl'`` (see :ref:`cylshell_clpt_tl`), make the linear part
+exactly that of ``'cylshell_fsdt_sanders'``, as follows.
+
+Linear part
+-----------
+
+With `\psi_y = \phi_y + v/r`, `\psi_z = 1 + O(\psi^2)`, and keeping the
+terms linear in the displacements and rotations, the dot products of
+:eq:`fsdt-tl-strains` are
+
+.. math::
+
+    \mathbf{X}_{,x} \cdot \mathbf{d}_{,x} \approx \phi_{x,x} \qquad
+    \mathbf{X}_{,y} \cdot \mathbf{d}_{,y} - \frac{1}{r} \approx
+    \psi_{y,y} + \frac{1}{r}\left(v_{,y} + \frac{w}{r}\right) =
+    \phi_{y,y} + \frac{v_{,y}}{r} + \frac{\varepsilon^L_{yy}}{r}
+
+    \mathbf{X}_{,x} \cdot \mathbf{d}_{,y} \approx \phi_{x,y} +
+    \frac{v_{,x}}{r} \qquad
+    \mathbf{X}_{,y} \cdot \mathbf{d}_{,x} \approx \psi_{y,x} = \phi_{y,x} +
+    \frac{v_{,x}}{r}
+
+    \mathbf{X}_{,y} \cdot \mathbf{d} \approx \psi_y + w_{,y} - \frac{v}{r}
+    = \phi_y + w_{,y} \qquad
+    \mathbf{X}_{,x} \cdot \mathbf{d} \approx \phi_x + w_{,x}
+
+with `\varepsilon^L_{yy} = v_{,y} + w/r` and `\gamma^L_{xy} = u_{,y} +
+v_{,x}` the linear membrane strains. In `\mathbf{X}_{,y} \cdot
+\mathbf{d}_{,y}` the reference `1/r` and the hoop strain come from `(1 +
+v_{,y} + w/r) \psi_z/r`; in `\mathbf{X}_{,x} \cdot \mathbf{d}_{,y}` the term
+`v_{,x}/r` comes from `v_{,x} \psi_z/r`. Without the two Koiter terms the
+linear curvatures are those of Sanders plus `(0, \varepsilon^L_{yy}/r,
+\gamma^L_{xy}/(2r))`; with them
+
+.. math::
+
+    \kappa^L_{xx} = \phi_{x,x} \qquad
+    \kappa^L_{yy} = \phi_{y,y} + \frac{v_{,y}}{r} \qquad
+    \kappa^L_{xy} = \phi_{x,y} + \phi_{y,x} + \frac{3}{2} \frac{v_{,x}}{r}
+    - \frac{1}{2} \frac{u_{,y}}{r}
+
+    \gamma^L_{yz} = \phi_y + w_{,y} \qquad \gamma^L_{xz} = \phi_x + w_{,x}
+
+the linear strains of ``'cylshell_fsdt_sanders'``, whose twist contains the
+rotation about the normal, `(v_{,x} - u_{,y})/(2r)`. The symbolic check
+``check_linear_part`` of the generator of ``'cylshell_fsdt_tl'`` verifies
+each of these steps and the equality of the linear strain-displacement
+operator with that of ``'cylshell_fsdt_sanders'``. The Koiter terms use the
+complete Green-Lagrange strains, which a rigid rotation does not change.
+For the plate, `1/r = 0`, the linear part is that of
+``'plate_fsdt_donnell'`` (``check_linear_part`` of ``'plate_fsdt_tl'``).
+
+Dropped terms
+-------------
+
+As in every FSDT
 model of panels, the coefficient of `z^2` of the in-plane strains is
 dropped, and so is the coefficient of `z` of the transverse shear strains,
 `\mathbf{d}_{,\alpha} \cdot \mathbf{d} = (\psi_x^2 + \psi_y^2)(\psi_x

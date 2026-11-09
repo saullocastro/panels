@@ -340,9 +340,13 @@ def check_palmerio():
 
 def check_linear_part():
     r"""``[B(0)] [Phi]`` equal to the linear operator ``B0`` of
-    ``cylshell_fsdt_sanders`` in ``theory/shells/fsdt_tsdt``, and the linear
+    ``cylshell_fsdt_sanders`` in ``theory/shells/fsdt_tsdt``, the linear
     strains and the membrane strains equal to those of
-    ``cylshell_fsdt_gl``"""
+    ``cylshell_fsdt_gl``, and the derivation step by step: the linear parts
+    ``X,y . d,y - 1/r = phiy,y + v,y/r + eyy/r``, ``X,x . d,y = phix,y +
+    v,x/r``, ``X,y . d,x = phiy,x + v,x/r``, ``X,x . d,x = phix,x``, ``X,y . d
+    = phiy + w,y``, ``X,x . d = phix + w,x``, which with the Koiter terms
+    ``-eyy/r`` and ``-gxy/(2r)`` give Sanders' FSDT"""
     ft = _load('fsdt_tsdt', '..', 'fsdt_tsdt', 'fsdt_tsdt.py')
     m = build()
     BL = m['B'].subs({s: 0 for s in D})
@@ -355,6 +359,24 @@ def check_linear_part():
     assert (epsL_gl - m['eps_L']).applyfunc(expand) == zeros(NE, 1)
     eps_gl = gl.strains()
     assert (eps_gl[:3, :] - m['eps'][:3, :]).applyfunc(expand) == zeros(3, 1)
+    # the derivation step by step: linear parts of the dot products, the
+    # Koiter terms, and Sanders' FSDT
+    t = Symbol('t')
+    lin = lambda e: expand(expand(e.subs({s: t*s for s in D},
+                                         simultaneous=True)).coeff(t, 1))
+    Xx, Xy = tangents()
+    d, d_x, d_y = director()
+    eyy_L, gxy_L = v_y + w/r, u_y + v_x
+    assert lin(Xy.dot(d_y) - 1/r) == expand(phiy_y + v_y/r + eyy_L/r)
+    assert lin(Xx.dot(d_y)) == expand(phix_y + v_x/r)
+    assert lin(Xy.dot(d_x)) == expand(phiy_x + v_x/r)
+    assert lin(Xx.dot(d_x)) == phix_x
+    assert lin(Xy.dot(d)) == expand(phiy + w_y)
+    assert lin(Xx.dot(d)) == expand(phix + w_x)
+    sanders = M([u_x, eyy_L, gxy_L, phix_x, phiy_y + v_y/r,
+                 phix_y + phiy_x + sympy.Rational(3, 2)*v_x/r
+                 - sympy.Rational(1, 2)*u_y/r, phiy + w_y, phix + w_x])
+    assert (m['eps_L'] - sanders).applyfunc(expand) == zeros(NE, 1)
     return True
 
 

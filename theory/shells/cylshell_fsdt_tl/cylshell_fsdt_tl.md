@@ -43,6 +43,33 @@ Strains:
     kxy = X,x . d,y + X,y . d,x - gxy/(2r)
     gyz = X,y . d      gxz = X,x . d
 
+## Linear part: Sanders' FSDT (`check_linear_part`)
+
+Linear parts of the dot products (`psiz = 1 + O(psi^2)`, `eyyL = v,y + w/r`,
+`gxyL = u,y + v,x`), each asserted in `check_linear_part`:
+
+    X,x . d,x       = phix,x
+    X,y . d,y - 1/r = psiy,y + (v,y + w/r)/r = phiy,y + v,y/r + eyyL/r
+                      (the 1/r and the hoop term from (1 + v,y + w/r) psiz/r)
+    X,x . d,y       = phix,y + v,x/r            (from v,x psiz/r)
+    X,y . d,x       = psiy,x = phiy,x + v,x/r
+    X,y . d         = psiy + w,y - v/r = phiy + w,y
+    X,x . d         = phix + w,x
+
+so without the Koiter terms the linear curvatures are Sanders' plus
+`(0, eyyL/r, gxyL/(2r))`; with `-eyy/r` and `-gxy/(2r)`:
+
+    kxx = phix,x
+    kyy = phiy,y + v,y/r
+    kxy = phix,y + phiy,x + 2 v,x/r - (u,y + v,x)/(2r)
+        = phix,y + phiy,x + (3/2) v,x/r - (1/2) u,y/r
+    gyz = phiy + w,y,   gxz = phix + w,x
+
+the linear strains of `cylshell_fsdt_sanders`; `check_linear_part` also
+asserts `[B(0)] [Phi] = B0` of that model (`../fsdt_tsdt/fsdt_tsdt.py`).
+The Koiter terms use the complete Green-Lagrange `eyy`, `gxy`, so they do
+not spoil the invariance of the strains.
+
 `check_strain_measures`: without `-eyy/r`, `-gxy/(2r)` these are the
 coefficients of `z^0`, `z` of the Green-Lagrange strains of `X + z d` with
 the reference vectors `e_x`, `(1 + z/r) e_y`. Their linear part is Sanders'
