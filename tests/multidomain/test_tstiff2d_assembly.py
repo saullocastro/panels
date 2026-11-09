@@ -9,13 +9,18 @@ frequency, the first buckling eigenvalue and the first eigenvalue of the
 flutter analysis against regression values stored in the tests, and the
 first natural frequencies of the curved panel against Castro and Donadon
 (2017), Table 5, and the ratios of the first natural frequency of the flat
-panel with a defect to that without against their Fig. 15, digitised.
+panel with a defect to that without against their Fig. 15, digitised. The
+in-plane loads of :func:`.tstiff2d_1stiff_flutter` are checked as constant
+stress states, with the boundary conditions of their Fig. 8, and as edge
+loads of a static case, with the loaded edge free in `u` as in their Fig. 7
+and in `v`.
 
 """
 import sys
 sys.path.append('../..')
 
 import numpy as np
+import pytest
 
 from panels.multidomain import (
         tstiff2d_1stiff_freq,
@@ -250,6 +255,113 @@ def test_tstiff2d_1stiff_flutter():
     omegan = (-eigvals[0])**0.5
     print(eigvals)
     assert np.isclose(omegan, 503.06-139.60j, rtol=0.001)
+
+
+FLUTTER_PANEL = dict(a=3., b=1., ys=0.5, bb=0.2, bf=0.1, defect_a=0.1,
+        rho=1.3e3, plyt=0.125e-3,
+        laminaprop=(142.5e9, 8.7e9, 0.28, 5.1e9, 5.1e9, 5.1e9),
+        stack_skin=[0, 45, -45, 90, -45, 45, 0],
+        stack_base=[0, 90, 0]*4, stack_flange=[0, 90, 0]*8,
+        air_speed=2*343., rho_air=1.2, Mach=2, speed_sound=343.,
+        m=6, n=7, mb=5, nb=6, mf=6, nf=7, num_eigvalues=5)
+PARTS = ('skin', 'base', 'flange')
+# sqrt(-Re lambda_1), rad/s, of the panel without loads
+W0 = 487.4174
+
+
+def _flutter_omega1(**kwargs):
+    assy, eigvals, eigvecs = tstiff2d_1stiff_flutter(**FLUTTER_PANEL,
+                                                     **kwargs)
+    return assy, float(np.sqrt(-eigvals[0].real))
+
+
+def test_tstiff2d_1stiff_flutter_constant_prestress():
+    r"""In-plane loads of :func:`.tstiff2d_1stiff_flutter` as constant
+    stress states, ``run_static_case=False``
+
+    The panel of the function's Examples (null-space connections, the
+    boundary conditions of Castro and Donadon 2017, Fig. 8). The test
+    verifies that every domain of the skin, the base and the flange gets
+    the ``Nxx``, ``Nyy`` and ``Nxy`` of its part; that
+    `\sqrt{-\mathrm{Re}(\lambda_1)}` without loads is that of the Examples;
+    that with `N_{xx} = -100` N/m in the three parts, and in each part
+    alone, it equals the values obtained for these constant stress states
+    by a separate script that sets the
+    attributes ``Nxx`` of the domains of the assembly and calls
+    :meth:`.MultiDomain.calc_kG` without ``c`` (486.3599, 486.6128,
+    487.2331 and 487.3477 rad/s), within ``rtol=1e-6``; and that
+    compression lowers and tension raises it, for `N_{xx}` and `N_{yy}`,
+    and that `N_{xy}` changes it.
+
+    """
+    assy, w0 = _flutter_omega1(run_static_case=False)
+    assert np.isclose(w0, W0, rtol=1e-6)
+
+    loads = dict(Nxx_skin=-100., Nxx_base=-90., Nxx_flange=-80.,
+                 Nyy_skin=-10., Nyy_base=-9., Nyy_flange=-8.,
+                 Nxy_skin=5., Nxy_base=4., Nxy_flange=3.)
+    assy, w = _flutter_omega1(run_static_case=False, **loads)
+    for p in assy.panels:
+        for comp in ('Nxx', 'Nyy', 'Nxy'):
+            assert getattr(p, comp) == loads['%s_%s' % (comp, p.group)]
+
+    for parts, ref in ((PARTS, 486.3599), (('skin',), 486.6128),
+                       (('base',), 487.2331), (('flange',), 487.3477)):
+        assy, w = _flutter_omega1(run_static_case=False,
+                                  **{'Nxx_%s' % p: -100. for p in parts})
+        assert np.isclose(w, ref, rtol=1e-6)
+
+    for comp in ('Nxx', 'Nyy'):
+        wc = _flutter_omega1(run_static_case=False,
+                             **{'%s_%s' % (comp, p): -100. for p in PARTS})[1]
+        wt = _flutter_omega1(run_static_case=False,
+                             **{'%s_%s' % (comp, p): 100. for p in PARTS})[1]
+        assert wc < w0 < wt
+    ws = _flutter_omega1(run_static_case=False,
+                         **{'Nxy_%s' % p: -100. for p in PARTS})[1]
+    assert not np.isclose(ws, w0, rtol=1e-6)
+
+
+def test_tstiff2d_1stiff_flutter_static_edge_loads():
+    r"""In-plane loads of :func:`.tstiff2d_1stiff_flutter` as edge loads
+    of a static case, ``run_static_case=True``
+
+    The panel of the function's Examples, with the boundary conditions of
+    Castro and Donadon (2017), Fig. 8, except at the loaded edge `x = 0` of
+    the skin and of the flange, free in `u` as in their Fig. 7 and in `v`. The
+    paper gives no frequency of a loaded panel; the test verifies:
+
+    - ``Nyy_*`` given with ``run_static_case=True`` raises ``ValueError``;
+    - without loads, `\sqrt{-\mathrm{Re}(\lambda_1)}` is 453.7141 rad/s
+      (regression value; 487.4174 with ``run_static_case=False``, where
+      `u = v = 0` at `x = 0`);
+    - the edge loads act: `N_{xx} = -100` N/m in the three parts lowers it
+      to 453.6788 rad/s (regression value), `N_{xx} = +100` N/m raises it;
+    - the change of `\omega^2 = -\mathrm{Re}(\lambda_1)` is linear in the
+      load to first order: for `N_{xx} = +100` and `-1000` N/m it is `-1`
+      and `10` times that for `-100` N/m, within 5 % (computed: -1.004 and
+      9.82);
+    - the shear load `N_{xy} = -100` N/m of the skin alone lowers it by
+      more than 2e-4 rad/s (computed: 5.4e-4 rad/s).
+
+    """
+    with pytest.raises(ValueError):
+        tstiff2d_1stiff_flutter(run_static_case=True, Nyy_skin=-100.,
+                                **FLUTTER_PANEL)
+    assy, w0 = _flutter_omega1(run_static_case=True)
+    assert np.isclose(w0, 453.7141, rtol=1e-6)
+    all_ = lambda N: {'Nxx_%s' % p: N for p in PARTS}
+    wm = _flutter_omega1(run_static_case=True, **all_(-100.))[1]
+    assert np.isclose(wm, 453.6788, rtol=1e-6)
+    wp = _flutter_omega1(run_static_case=True, **all_(100.))[1]
+    wk = _flutter_omega1(run_static_case=True, **all_(-1000.))[1]
+    assert wm < w0 < wp
+    dm = wm**2 - w0**2
+    assert np.isclose((wp**2 - w0**2)/dm, -1., rtol=0.05)
+    assert np.isclose((wk**2 - w0**2)/dm, 10., rtol=0.05)
+    ws = _flutter_omega1(run_static_case=True, Nxy_skin=-100.)[1]
+    assert w0 - ws > 2e-4
+
 
 if __name__ == '__main__':
     test_tstiff2d_1stiff_freq()
