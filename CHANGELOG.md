@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+### New models `plate_fsdt_tl`, `cylshell_fsdt_tl`: total-Lagrangian FSDT
+
+- The FSDT with the Green-Lagrange membrane strains of `plate_fsdt_gl` and
+  `cylshell_fsdt_gl` and the curvatures and transverse shear strains of the
+  second-order director `d = (psix, psiy, 1 - (psix^2 + psiy^2)/2)`,
+  `psix = phix`, `psiy = phiy + v/r`: the displacement field of the
+  moderate rotation theory of Schmidt and Reddy (1988), Eq. (16), with the
+  transverse normal strain of Palmerio, Reddy and Schmidt (1990, Part 1),
+  Eq. (20), set to zero. Strains cubic; Palmerio's Eq. (20) to
+  `O(eps^3)`; for the cylinder the Koiter terms `-eyy/r`, `-gxy/(2r)` of
+  `cylshell_clpt_tl`, so that the linear part is that of
+  `cylshell_fsdt_sanders` (`plate_fsdt_donnell` for the plate).
+- Generators `theory/shells/{plate,cylshell}_fsdt_tl/` (derivation with
+  symbolic checks; `write_pyx.py`; notes) and kernels
+  `panels/models/{plate,cylshell}_fsdt_tl_num.pyx`; the analytical kernels
+  are those of the GL models.
+- Registered in `modelDB` (integrand degree `6p`, `3p + 1` points),
+  `setup.py`, `panels.models`; `fsdt_tsdt_field.is_tl` and the strains in
+  `fsdt_tsdt_field.fstrain`; the cylinder is a Sanders model for
+  `fsdt_tsdt_field.is_sanders` and `kCsdt._rinv_sanders`; follower pressure
+  (`follower_pressure.MODELS`).
+- Tests `tests/tests_shell/test_fsdt_tl.py` and the two models in
+  `test_tangent_consistency.py`. Page `doc/source/fsdt_tsdt_tl.rst`.
+
 ### New models `plate_fsdt_gl`, `plate_tsdt_gl`, `cylshell_fsdt_gl`, `cylshell_tsdt_gl`: shear deformation with Green-Lagrange membrane strains
 
 - The FSDT and TSDT of `plate_fsdt_donnell`, `plate_tsdt_donnell`,

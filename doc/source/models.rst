@@ -68,6 +68,8 @@ model                      closed form                                          
                            ``cylshell_fsdt_sanders``
 ``cylshell_tsdt_gl``       :mod:`panels.models.cylshell_tsdt_gl`, the linear kernels of :mod:`panels.models.cylshell_tsdt_gl_num`
                            ``cylshell_tsdt_sanders``
+``plate_fsdt_tl``          :mod:`panels.models.plate_fsdt_gl`                           :mod:`panels.models.plate_fsdt_tl_num`
+``cylshell_fsdt_tl``       :mod:`panels.models.cylshell_fsdt_gl`                        :mod:`panels.models.cylshell_fsdt_tl_num`
 ========================== ============================================================ ===================================================================
 
 The stiffeners of a :class:`.StiffPanelBay` have their own kernels, for

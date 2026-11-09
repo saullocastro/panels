@@ -52,6 +52,9 @@ the non-linear equations, see :mod:`panels.models`:
 * ``'plate_fsdt_gl'``, ``'plate_tsdt_gl'``, ``'cylshell_fsdt_gl'``,
   ``'cylshell_tsdt_gl'``: FSDT and TSDT with the Green-Lagrange membrane
   strains, see :ref:`fsdt_tsdt_gl`
+* ``'plate_fsdt_tl'``, ``'cylshell_fsdt_tl'``: total-Lagrangian FSDT with
+  the second-order director of the moderate rotation theory, see
+  :ref:`fsdt_tsdt_tl`
 * ``'cylshell_clpt_donnell'``: cylindrical shells, CLPT with Donnell's
   kinematics
 * ``'cylshell_clpt_sanders'``: cylindrical shells, CLPT with Sanders-Koiter's
@@ -97,6 +100,7 @@ User guide
     plate_clpt_tl.rst
     cylshell_clpt_tl.rst
     fsdt_tsdt_gl.rst
+    fsdt_tsdt_tl.rst
     frame_web_clpt_donnell.rst
     tsdt_offset.rst
     multidomain_null_space.rst

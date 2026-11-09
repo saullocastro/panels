@@ -26,10 +26,12 @@ References
 .. [leissa1973Plates] A. W. Leissa, "The free vibration of rectangular plates". Journal of Sound and Vibration, 31(3):257-293, 1973. https://doi.org/10.1016/S0022-460X(73)80371-2.
 .. [nasa2020SP8007] NASA, "Buckling of thin-walled circular cylinders". NASA/SP-8007-2020/REV 2, NASA Langley Research Center, 2020. https://ntrs.nasa.gov/citations/20205011530.
 .. [nathan2024MSc] N. D'Souza, "Multi-Domain Semi-Analytical Cohesive Zone Approach". Delft University of Technology, 2024. https://resolver.tudelft.nl/uuid:4709f888-c032-4d9f-97e3-402dfdd47cf1.
+.. [palmerio1990Moderate] A. F. Palmerio, J. N. Reddy and R. Schmidt, "On a moderate rotation theory of laminated anisotropic shells - Part 1. Theory". International Journal of Non-Linear Mechanics, 25(6), 687-700, 1990. https://doi.org/10.1016/0020-7462(90)90007-V.
 .. [pflueger1975Stability] A. Pflüger, "Stabilitätsprobleme der Elastostatik". 3rd ed., Springer-Verlag, Berlin, Heidelberg, New York, 1975. https://doi.org/10.1007/978-3-662-09994-0.
 .. [reddy1984HigherOrder] J. N. Reddy, "A simple higher-order theory for laminated composite plates". Journal of Applied Mechanics, 51(4):745-752, 1984. https://doi.org/10.1115/1.3167719.
 .. [reddy1985Shells] J. N. Reddy and C. F. Liu, "A higher-order shear deformation theory of laminated elastic shells". International Journal of Engineering Science, 23(3):319-330, 1985. https://doi.org/10.1016/0020-7225(85)90051-5.
 .. [sanders1963Nonlinear] J. L. Sanders, "Nonlinear theories for thin shells". Quarterly of Applied Mathematics, 21(1):21-36, 1963. https://doi.org/10.1090/qam/147023.
+.. [schmidt1988Refined] R. Schmidt and J. N. Reddy, "A Refined Small Strain and Moderate Rotation Theory of Elastic Anisotropic Shells". Journal of Applied Mechanics, 55(3), 611-617, 1988. https://doi.org/10.1115/1.3125837.
 .. [schweizerhof1984Pressure] K. Schweizerhof and E. Ramm, "Displacement dependent pressure loads in nonlinear finite element analyses". Computers & Structures, 18(6):1099-1114, 1984. https://doi.org/10.1016/0045-7949(84)90154-8.
 .. [simitses1976Stability] G. J. Simitses, "An Introduction to the Elastic Stability of Structures". Prentice-Hall, Englewood Cliffs, 1976.
 .. [sze2004Benchmarks] K. Y. Sze, X. H. Liu and S. H. Lo, "Popular benchmark problems for geometric nonlinear analysis of shells". Finite Elements in Analysis and Design, 40:1551-1569, 2004. https://doi.org/10.1016/j.finel.2003.11.001: Section 3.2, Fig. 3 and Table 3, pp. 1555-1557.
