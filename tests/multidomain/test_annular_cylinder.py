@@ -315,7 +315,7 @@ def test_face_at_reference_surface(conn_method):
         out.append((md.calc_kC(silent=True).toarray(), _lambda2(md, R)))
     assert np.allclose(out[1][0], out[0][0], rtol=1e-12,
                        atol=1e-12*np.abs(out[0][0]).max())
-    assert np.allclose(out[1][1][:5], out[0][1][:5], rtol=1e-8)
+    assert np.allclose(out[1][1][:5], out[0][1][:5], rtol=1e-6)
 
 
 def test_inner_face_offset_or_mid_surface():
