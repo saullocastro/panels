@@ -90,7 +90,8 @@
 - Generators, one self-contained folder per model:
   `theory/shells/{plate,cylshell}_{fsdt,tsdt}_gl/` (derivation with symbolic
   checks: membrane strains `(F^T F - I)/2`, linear part equal to the
-  operators of `theory/shells/fsdt_tsdt`, zero strains for finite rigid
+  operators of the matching linear model folder (`plate_fsdt_donnell`,
+  `cylshell_fsdt_sanders`, ...), zero strains for finite rigid
   rotations, exact tangent, finite differences; `write_pyx.py`; notes).
   New kernels `panels/models/*_{fsdt,tsdt}_gl.pyx` and `*_num.pyx`
   (`fkG0`, `fkC_num`, `fkG_num`, `calc_fint`, `calc_kTv`,
