@@ -3,8 +3,9 @@ Arbocz and Babcock (1971)
 
 The shell AS-2 of Singer, Arbocz and Babcock (1971), Table 1: an aluminium
 cylinder with 80 flat integral stringers outside the skin, built with
-:func:`.create_cylinder_blade_stiffened` (skin panels of the default Sanders
-kinematics, one blade of the model ``'plate_clpt_gl'`` per stringer), with
+:func:`.create_cylinder_blade_stiffened` with ``side='external'`` (skin
+panels of the default Sanders kinematics, one blade of the model
+``'plate_clpt_gl'`` per stringer), with
 clamped ends, `u = v = w = w_{,x} = 0` (their C-4), and the membrane
 pre-buckling state of equal axial strains in the skin and in the blades. The
 test verifies the critical load against the C-4 buckling load of their Table
@@ -26,9 +27,9 @@ strip has the twisting stiffness `4 D_{66} H_s = G H_s t_s^3/3`, 18 times
 `G J_r`, with `J_r` the Saint-Venant constant of the rectangle `t_s \times
 h_s`; `D_{66}` of the blades is scaled to `G J_r` through the attribute
 ``ABDnxny``, which also gives the blades their thickness `t_s` (the plies of
-the assembly have the skin thickness). The assembly connects the blades
-inside the skin; the connections ``'BFycte'`` are changed to the edge `y =
-H_s` of the blade, which stands it outside, as in the shell.
+the assembly have the skin thickness). With ``side='external'`` the
+assembly connects each blade along its edge `y = H_s`, which stands it
+outside, as in the shell.
 
 The C-4 values of [1]_ come from a smeared-stiffener analysis (Table 2;
 the program is not named). The smeared theory of Block, Card and Mikulas
@@ -94,14 +95,10 @@ def section():
 
 def clamped_membrane(m, n):
     d, ts, hs, Hs, Jr = section()
-    md, conns = create_cylinder_blade_stiffened(height=L, r=R, stack=[0],
-            stack_blades=[[0]]*NSTIFF, width_blades=[Hs]*NSTIFF, plyt=T,
-            laminaprop=(E, NU), npanels=NSTIFF, m=m, n=n)
-    # the assembly stands the blades inside (ycte2 = 0): outside, the blade
-    # is connected along its edge y = H_s
-    for conn in conns:
-        if conn['func'] == 'BFycte':
-            conn['ycte2'] = Hs
+    md, conns, info = create_cylinder_blade_stiffened(height=L, r=R,
+            stack=[0], stack_blades=[[0]]*NSTIFF, width_blades=[Hs]*NSTIFF,
+            plyt=T, laminaprop=(E, NU), npanels=NSTIFF, m=m, n=n,
+            side='external')
     ABD = np.array(isotropic_plate(thickness=ts, E=E, nu=NU).ABD, dtype=float)
     ABD[5, 5] *= Jr/(Hs*ts**3/3)
     for p in md.panels:
