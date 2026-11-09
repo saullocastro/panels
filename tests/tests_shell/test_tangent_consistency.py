@@ -32,7 +32,7 @@ MODELS = ['plate_clpt_donnell', 'cylshell_clpt_donnell',
           'cylshell_tsdt_donnell', 'cylshell_tsdt_sanders', 'plate_clpt_gl',
           'plate_clpt_tl', 'cylshell_clpt_gl', 'cylshell_clpt_tl',
           'plate_fsdt_gl', 'plate_tsdt_gl', 'cylshell_fsdt_gl',
-          'cylshell_tsdt_gl']
+          'cylshell_tsdt_gl', 'plate_fsdt_tl', 'cylshell_fsdt_tl']
 
 
 def make_shell(model):

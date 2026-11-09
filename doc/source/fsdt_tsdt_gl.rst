@@ -126,5 +126,6 @@ shell elements the director is a unit vector defined by two angles, and
 the strains are the Green-Lagrange strains of the shell continuum
 [crisfield1991Nonlinear]_, Sec. 8.2. The rotations of these models are not finite
 rotations of the director; their bending and transverse shear strains stay
-linear.
+linear. The total-Lagrangian FSDT models with the second-order director of
+the moderate rotation theory are described in :ref:`fsdt_tsdt_tl`.
 

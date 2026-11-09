@@ -272,6 +272,46 @@ db = {
                     # the kernels divide by r, a radius is mandatory
                     'requires_r': True,
                     },
+    'plate_fsdt_tl': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    'field': fsdt_tsdt_field,
+                    #NOTE the analytical kernels of plate_fsdt_gl: the linear
+                    #     strains are those of plate_fsdt_donnell and the
+                    #     geometric stiffness of a constant membrane stress
+                    #     state that of the Green-Lagrange strains
+                    'matrices': plate_fsdt_gl,
+                    'matrices_num': plate_fsdt_tl_num,
+                    'dofs': 5,
+                    'e_num': 8,
+                    # the plate kernels never read r
+                    'requires_r': False,
+                    # bending and transverse shear strains cubic in the
+                    # generalized derivatives: integrands of degree 6p,
+                    # integrated exactly by 3p + 1 points
+                    'integrand_degree': (6, 0),
+                    },
+    'cylshell_fsdt_tl': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    'field': fsdt_tsdt_field,
+                    #NOTE the analytical kernels of cylshell_fsdt_gl: the
+                    #     linear strains are those of cylshell_fsdt_sanders
+                    #     and the geometric stiffness of a constant membrane
+                    #     stress state that of the Green-Lagrange strains
+                    'matrices': cylshell_fsdt_gl,
+                    'matrices_num': cylshell_fsdt_tl_num,
+                    'dofs': 5,
+                    'e_num': 8,
+                    # the kernels divide by r, a radius is mandatory
+                    'requires_r': True,
+                    # bending and transverse shear strains cubic in the
+                    # generalized derivatives: integrands of degree 6p along
+                    # x and y, integrated exactly by 3p + 1 points
+                    'integrand_degree': (6, 0),
+                    },
     'cylshell_tsdt_gl': {
                     'linear static': True,
                     'linear buckling': True,
