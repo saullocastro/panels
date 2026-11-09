@@ -195,3 +195,32 @@ v_{web}`, `w_{cyl} = -u_{web}` and the continuity of the rotation about the
 circumferential axis, with penalties or with the null space of
 :class:`.MultiDomain`. A closed ring is made of several sectors connected
 with ``'SSycte'`` along their radial edges, as the domains of the cylinder.
+
+The web of a ring frame is attached to a surface of the skin. With the
+key ``'face'`` of ``'BFxcte'`` the edge of the sector is connected to the
+inner surface of the cylinder, `z = d - h/2`, or to its outer surface, `z
+= d + h/2`, `d` being the offset and `h` the thickness of the cylinder,
+see :ref:`multidomain_connections`. An internal frame, its outer edge on
+the inner surface, has the outer radius `r - h/2 + d`:
+
+.. code-block:: python
+
+    dict(p1=cylinder, p2=web, func='BFxcte', xcte1=x_f, xcte2=0,
+         face='lower')
+
+and an external frame, its inner edge `x = a` on the outer surface, the
+inner radius `r + h/2 + d`:
+
+.. code-block:: python
+
+    dict(p1=cylinder, p2=web, func='BFxcte', xcte1=x_f, xcte2=web.a,
+         face='upper')
+
+the points of the surface following the normal of the cylinder, `u(z) = u
+- z w_{,x}`, `v(z) = (1 + z/r) v - z w_{,y}` for the Sanders-Koiter
+kinematics. The sector has no eccentricity of its own: the radius of the
+connected edge must be that of the connected surface, and the sector must
+span the angle of the cylinder domain, `b_{web}/r_{web} = b/r`, or the
+connection raises a ``ValueError``. The cylinder with its reference
+surface at its inner face, ``offset = h/2``, connected without the key,
+is the same internal frame.

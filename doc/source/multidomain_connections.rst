@@ -73,6 +73,59 @@ including the term `v/r` for the Sanders-Koiter kinematics, and `\phi_y` for
 the FSDT and TSDT; the connection ``'BFxcte'`` penalizes `-w_{,x}` or
 `\phi_x`.
 
+BFxcte at a face of the base
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Both connections tie the flange to the reference surface of the base. A
+flange attached to a face of the base, e.g. the web of a ring frame on the
+inner or the outer surface of a cylinder, is connected with the key
+``'face'`` of ``'BFxcte'``, ``'lower'`` for the face `z_1 = d_1 - h_1/2`
+and ``'upper'`` for `z_1 = d_1 + h_1/2`, `d_1` being the offset and `h_1`
+the thickness of the base::
+
+                 base, z1 up
+      ====================================  upper face, z1 = d1 + h1/2
+      ------------------------------------  reference surface, z1 = 0
+      ====================================  lower face, z1 = d1 - h1/2
+                   ||  edge x2 = 0
+                   ||  flange, x2 = -z1
+                   ||
+
+The axis `x_2` of the flange is `-z_1`, so that a flange below the lower
+face has its edge `x_2 = 0` there, ``xcte2=0``, and a flange above the
+upper face its edge `x_2 = a_2`, ``xcte2=p2.a``. The face is a line of
+points of the normals of the base, which follow its reference surface
+with the kinematics of its model; for the classical laminated plate theory
+
+.. math::
+
+    u_1(z) = u_1 - z w_{1,x}, \qquad v_1(z) = \left(1 + \frac{z}{r_1}\right)
+    v_1 - z w_{1,y}
+
+the term `z v_1/r_1` with the Sanders-Koiter kinematics, as for ``'SB'``,
+and the connection imposes `u_1(z_1) = w_2`, `v_1(z_1) = v_2`, `w_1 =
+-u_2` and the continuity of the rotation about `y`, with the penalty
+energy integrated along the length `b_1` of the base, or exactly with the
+null-space method. The two edges share the natural coordinate `\eta` and
+must span the same angle: an ``'annular_*'`` flange on a ``'cylshell_*'``
+base, whose `z` points outwards, has its edge at the radius of the
+connected surface, `r_2 - x_{2} = r_1 + z_1`, and `b_2/r_2 = b_1/r_1`;
+the connection raises a ``ValueError`` otherwise. For example, the
+internal and the external ring frames of a cylinder ``cyl`` at the station
+``x_f``::
+
+    dict(p1=cyl, p2=web_in, func='BFxcte', xcte1=x_f, xcte2=0,
+         face='lower')
+    dict(p1=cyl, p2=web_out, func='BFxcte', xcte1=x_f, xcte2=web_out.a,
+         face='upper')
+
+with ``web_in.r = cyl.r + cyl.offset - h/2`` and ``web_out.r - web_out.a =
+cyl.r + cyl.offset + h/2``. A rigid-body motion of the assembly is then
+free of strain with the Sanders-Koiter kinematics of the cylinder; the
+Donnell kinematics neglect `z v_1/r_1`, an error of the order of `h_1/r_1`.
+With the offset `d_1 = h_1/2` the lower face is the reference surface and
+``face='lower'`` is the connection without the key.
+
 kCBFxycte
 ~~~~~~~~~
 
@@ -282,6 +335,10 @@ API
     :members: fkCBFxcte11, fkCBFxcte12, fkCBFxcte22, fkCBFxcte11_sdt,
               fkCBFxcte12_sdt, fkCBFxcte22_sdt
     :private-members: _block_sdt
+
+.. automodule:: panels.multidomain.connections.kCBFxcte_face
+    :members: check_bfxcte, face_coordinate, bfxcte_face_components,
+              fkCBFxcte_face
 
 .. autofunction:: panels.multidomain.connections.kCpd.fkCpd
 

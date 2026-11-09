@@ -69,6 +69,50 @@
   offset in the flat-plate limit, and of the tangent stiffness against the derivative of the
   internal force vector. New page "Annular-sector plates".
 
+### New key `'face'` of the connection `'BFxcte'`: flanges and ring-frame webs on a face of the base
+
+- `dict(p1=base, p2=flange, func='BFxcte', xcte1=..., xcte2=..., face=...)`
+  with `face='lower'` or `'upper'` ties the edge of the flange to the face of
+  the base at `z = d -+ h/2` (offset `d`, thickness `h` of the base) instead
+  of its reference surface; without the key, or with `face=None`, the
+  connection is unchanged. The flange lies on the side of the face:
+  `xcte2=0` at the lower face, `xcte2=p2.a` at the upper face. The points of
+  the face follow the base with the kinematics of its model,
+  `u(z) = u - z w,x`, `v(z) = (1 + z/r) v - z w,y` for the CLPT (the term
+  `z v/r` with the Sanders-Koiter kinematics), the displacements at `z` of
+  the FSDT and TSDT, and the rotation of the normal at `z`; penalty and
+  null-space methods. For a `cylshell_*` base, `'lower'` is the inner and
+  `'upper'` the outer surface: the web of an internal ring frame, an
+  `annular_*` plate, has its outer edge on the inner surface, `xcte2=0,
+  face='lower'`, and the web of an external frame its inner edge on the
+  outer surface, `xcte2=web.a, face='upper'`.
+- An `annular_*` flange on a `cylshell_*` base, with or without the key,
+  must have its edge `xcte2` at the radius of the connected surface,
+  `r2 - xcte2 = r1 + z`, and span the same angle, `b2/r2 = b1/r1`; the
+  connection raises a `ValueError` otherwise.
+- New module `panels.multidomain.connections.kCBFxcte_face`
+  (`check_bfxcte`, `face_coordinate`, `bfxcte_face_components`,
+  `fkCBFxcte_face`); `nullspace.constraint_matrix` imposes the same
+  quantities. The basis `Z` of the null space is computed again when the
+  key `'face'` or the offset of a panel changes (`MultiDomain._Z_signature`).
+- Derivation: `theory/multidomain_penalization/connections.py` (blocks
+  `kCBFxcte_face11`, `kCBFxcte_face12`) and the symbolic checks of
+  `theory/multidomain_penalization/bfxcte_face.py` (Kirchhoff-Love
+  displacement of a point of the normal, rotation about the circumferential
+  axis, zero residuals of the six rigid motions when the edge of the plate
+  is at the radius of the face).
+- Tests `tests/multidomain/test_annular_cylinder.py`: internal and external
+  frames at the clamped end of a cylinder against the roots of the
+  frequency equations of the annulus clamped outside or inside (Leissa
+  1969, Eqs. (1.11)-(1.13) and (1.17); the latter checked against
+  the values of Southwell in Leissa's Table 2.31), the face
+  of a cylinder with the offset `h/2` against the connection at its
+  reference surface, the same frame with the reference surface of the
+  cylinder at its inner face or at mid-thickness, the rigid-body motions
+  of a free cylinder with both frames, the penalty energy from the fields,
+  and the geometry checks. Pages "Multidomain connections" and
+  "Annular-sector plates".
+
 ### New argument `models` of the wing box and of the blade-stiffened cylinder
 
 - `create_wingbox` takes `models`, a dict of the model of each group of
