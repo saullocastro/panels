@@ -354,20 +354,53 @@
   `test_boundary_flags_fixed_after_add_panel` in
   `tests/tests_stiffpanelbay/test_stiffpanelbay_api.py`.
 
-### New test: Z-stiffened cylinders 1 and 2 of Peterson and Dow (1959)
+### API change: `create_cylinder_blade_stiffened` returns `(md, conns, info)`; new argument `side`
 
-- New `tests/multidomain/test_cylinder_z_stiffened_peterson1959.py`, about
-  1 min, with its model module `tests/multidomain/z_stringer_cylinder.py`:
-  the whole cylinder with Z-section stringers made of three plates (the
-  attached flange in the laminate of the strip of skin under it, offset
-  from the middle surface of the skin, the web and the free flange as
-  `plate_clpt_gl` strips connected with `'BFycte'`), clamped ends and the
-  membrane pre-buckling state. Cylinders 1 and 2 of NASA Memo 2-12-59L
-  (120 internal stringers, `R` = 23.74 in) buckle at 2127.6 and 3194.0
-  lb/in with 12 and 13 circumferential waves; the measured loads, 270 and
-  413 kips, are 85.1 and 86.7 % of these (checked between 70 and 100 %).
-  The module is also used by the notebook
-  `peterson1959_blade_cylinder_buckling.ipynb`.
+- `create_cylinder_blade_stiffened` returns three values, `md, conns,
+  info`, instead of two: code that unpacks the result into two names,
+  `md, conns = create_cylinder_blade_stiffened(...)`, now raises
+  `ValueError` (too many values to unpack) and must become `md, conns, info
+  = ...`. `info` is a dictionary with the keys of `create_wingbox` that
+  apply: `'skin'` and `'blades'` (the lists of domains), `'ws'` (the width
+  of a skin panel) and `'models'` (the model of each group, `models`
+  completed with the defaults). The three
+  `cylinder_blade_stiffened_compression_lb_*` analyses return what they
+  returned before.
+- New argument `side='internal'|'external'` of
+  `create_cylinder_blade_stiffened`: the default `'internal'` keeps the
+  blades inside the cylinder (edge `y = 0` of the blade connected), and
+  `'external'` stands them outside (edge `y` = `width_blades[i]`
+  connected). `ValueError` for any other value.
+- Tests: `test_return_info` and `test_side` in
+  `tests/multidomain/test_cylinder_blade_stiffened.py` (cylinder 3 of Card
+  and Jones 1966, external blades, against the smeared theory and
+  `N_s` = 1326 lb/in, and lower with the blades inside);
+  `tests/multidomain/test_singer1971_cylinder.py` uses `side='external'`.
+
+### New function `create_cylinder_z_stiffened`: cylinders with Z-section stringers
+
+- New module `panels.multidomain.cylinder_z_stiffened` with
+  `create_cylinder_z_stiffened`, imported in `panels.multidomain`: the
+  whole cylinder with equally spaced Z-section stringers made of three
+  plates (the attached flange in the laminate of the strip of skin under
+  it, offset from the middle surface of the skin, the web and the free
+  flange as `plate_clpt_gl` strips connected with `'BFycte'`), skin domains
+  `cylshell_clpt_sanders`; any number of stringers, `side='internal'` or
+  `'external'`, `flange_side=-1` or `1` (orientation of the Z), clamped or
+  simply supported ends (`bc`), laminates of the skin and of the sheet,
+  `models`, and the variants without the attached or the free flange. It
+  returns `(md, conns, info)` as `create_cylinder_blade_stiffened`, with
+  the connections also stored in the assembly. Page
+  `multidomain_cylinder.rst`.
+- New tests in `tests/multidomain/test_cylinder_z_stiffened_peterson1959.py`,
+  about 1 min: the assembly (`test_create_cylinder_z_stiffened`) and
+  cylinders 1 and 2 of NASA Memo 2-12-59L (120 internal stringers, `R` =
+  23.74 in, clamped ends, membrane pre-buckling state), which buckle at
+  2127.6 and 3194.0 lb/in with 12 and 13 circumferential waves; the
+  measured loads, 270 and 413 kips, are 85.1 and 86.7 % of these (checked
+  between 70 and 100 %). The notebook
+  `peterson1959_blade_cylinder_buckling.ipynb` uses the function through
+  its helper module `notebooks/z_stringer_cylinder.py`.
 
 ## 0.15.0 (2026-11-03)
 
