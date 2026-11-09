@@ -130,8 +130,9 @@ Ready-made assemblies
 The functions of ``panels.multidomain`` build and analyse complete
 assemblies, and show how to build others:
 
-- :func:`.create_cylinder`, :func:`.create_cylinder_blade_stiffened` and
-  the analyses of :mod:`panels.multidomain.cylinder` and
+- :func:`.create_cylinder`, :func:`.create_cylinder_blade_stiffened`,
+  :func:`.create_cylinder_z_stiffened` and the analyses of
+  :mod:`panels.multidomain.cylinder` and
   :mod:`panels.multidomain.cylinder_blade_stiffened`;
 - the panel with one T-stiffener of
   :mod:`panels.multidomain.tstiff2d_1stiff_compression`,

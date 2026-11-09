@@ -160,7 +160,8 @@ HB = 0.33*IN - T/2
 PLYT = 0.001*IN
 NS_CARD = 722.  # lb/in
 # regression values, N/m
-REF = dict(half_gl=126130.9, Nxx_cte=155764.9, Nxx_from_static=157020.9,
+REF = dict(half_gl=126130.9, half_gl_cyl3_external=235662.7,
+           Nxx_cte=155764.9, Nxx_from_static=157020.9,
            pd_from_static=208841.1)
 
 
@@ -219,12 +220,14 @@ def test_smeared_card1966_ns():
         assert abs(Nx/Ns - 1) < 0.002, (side, t, L_)
 
 
-def _half_cylinder(blade_model, model='cylshell_clpt_sanders', m=8, n=6):
-    md, conns = create_cylinder_blade_stiffened(height=L/2, r=R,
-            stack=[0]*28, stack_blades=[[0]*97]*NSTIFF,
-            width_blades=[HB]*NSTIFF, plyt=PLYT, laminaprop=(E, NU),
+def _half_cylinder(blade_model, model='cylshell_clpt_sanders', m=8, n=6,
+                   side='internal', t=T, nply=28, nply_blade=97, plyt=PLYT):
+    hb = 0.33*IN - t/2
+    md, conns, info = create_cylinder_blade_stiffened(height=L/2, r=R,
+            stack=[0]*nply, stack_blades=[[0]*nply_blade]*NSTIFF,
+            width_blades=[hb]*NSTIFF, plyt=plyt, laminaprop=(E, NU),
             npanels=NSTIFF, m=m, n=n,
-            models=dict(skin=model, blade=blade_model))
+            models=dict(skin=model, blade=blade_model), side=side)
     for p in md.panels:
         # x = 0: simply supported, u free; x = L/2: symmetry
         p.x1u = 1
@@ -236,12 +239,12 @@ def _half_cylinder(blade_model, model='cylshell_clpt_sanders', m=8, n=6):
         if 'blade' in p.group:
             p.Nxx = -E*TB
         else:
-            p.Nxx = -E*T
+            p.Nxx = -E*t
     k0 = md.reduce(md.calc_kC(conns, silent=True))
     kG = md.reduce(md.calc_kG(silent=True))
     eigvals, eigvecs = lb(k0, kG, tol=0, sparse_solver=True, silent=True,
                           num_eigvalues=5, num_eigvalues_print=5)
-    return nbar(eigvals[0])
+    return eigvals[0]*(E*t + E*TB*hb/(2*np.pi*R/NSTIFF))
 
 
 def test_discrete_vs_smeared():
@@ -424,17 +427,21 @@ def test_tl_skin_Nxx_from_static():
 
 def test_models_argument():
     # the models of the groups, by default and from models, and the errors
-    md, conns = create_cylinder_blade_stiffened(height=L/2, r=R,
+    md, conns, info = create_cylinder_blade_stiffened(height=L/2, r=R,
             stack=[0]*28, stack_blades=[[0]*97]*4, width_blades=[HB]*4,
             plyt=PLYT, laminaprop=(E, NU), npanels=4, m=4, n=4)
     assert {(p.group[:4], p.model) for p in md.panels} == {
         ('skin', 'cylshell_clpt_sanders'), ('blad', 'plate_clpt_gl')}
-    md, conns = create_cylinder_blade_stiffened(height=L/2, r=R,
+    assert info['models'] == dict(skin='cylshell_clpt_sanders',
+                                  blade='plate_clpt_gl')
+    md, conns, info = create_cylinder_blade_stiffened(height=L/2, r=R,
             stack=[0]*28, stack_blades=[[0]*97]*4, width_blades=[HB]*4,
             plyt=PLYT, laminaprop=(E, NU), npanels=4, m=4, n=4,
             models=dict(skin='cylshell_clpt_tl'))
     assert {(p.group[:4], p.model) for p in md.panels} == {
         ('skin', 'cylshell_clpt_tl'), ('blad', 'plate_clpt_gl')}
+    assert info['models'] == dict(skin='cylshell_clpt_tl',
+                                  blade='plate_clpt_gl')
     for models in (dict(stringer='plate_clpt_gl'),
                    dict(skin='cylshell_fsdt_sanders'),
                    dict(blade='plate_fsdt_donnell'),
@@ -445,3 +452,94 @@ def test_models_argument():
                     stack_blades=[[0]*97]*4, width_blades=[HB]*4,
                     plyt=PLYT, laminaprop=(E, NU), npanels=4,
                     models=models)
+
+
+def test_return_info():
+    # the assembly, the connections and the dictionary info; the unpacking
+    # into two names fails, as does an unknown side
+    kw = dict(height=L/2, r=R, stack=[0]*28, stack_blades=[[0]*97]*4,
+              width_blades=[HB]*4, plyt=PLYT, laminaprop=(E, NU), npanels=4,
+              m=4, n=4)
+    md, conns, info = create_cylinder_blade_stiffened(**kw)
+    assert info['skin'] == md.panels[:4]
+    assert info['blades'] == md.panels[4:]
+    assert np.isclose(info['ws'], 2*np.pi*R/4)
+    assert len(conns) == 8
+    assert md.conn is None
+    with pytest.raises(ValueError):
+        md, conns = create_cylinder_blade_stiffened(**kw)
+    with pytest.raises(ValueError):
+        create_cylinder_blade_stiffened(side='outside', **kw)
+
+
+def test_side():
+    r"""Blades inside and outside the skin, argument ``side``: the
+    connections, and the buckling load of cylinder 3 of Card and Jones
+    (1966), Table I, whose blades are outside, against the smeared theory,
+    against `\bar{N}_s` of Card and Jones and against the same cylinder
+    with the blades inside
+
+    The set-up is that of ``test_discrete_vs_smeared`` (half of the
+    cylinder, simply supported, constant membrane pre-buckling state). With
+    ``side='external'`` every ``'BFycte'`` connection joins the edge `y = 0`
+    of the skin panel to the edge `y` = ``width_blades[i]`` of the blade,
+    with ``side='internal'`` to its edge `y = 0`. With the blades outside
+    the load must lie between 10 % below the smeared value of Eq. (15) of
+    Block, Card and Mikulas (1965) for the blade as modelled and that
+    value, within 5 % of `\bar{N}_s` of Card and Jones (1966), 1326 lb/in,
+    and at a regression value (``rtol=1e-4``); with the blades inside, the
+    same cylinder must give a lower load, within the same bounds of its own
+    smeared value.
+
+    Notes
+    -----
+    Cylinder 3 of Card and Jones [1]_ (Table I, p. 7): `t = 0.0275` in, `L
+    = 23.75` in, `R = 9.55` in, 60 integral blade stringers outside, 0.097
+    in wide and 0.33 in deep including the skin; the blade is modelled from
+    the middle surface of the skin, `h_b = 0.33 - t/2` in. In the smeared
+    theory of Block, Card and Mikulas [2]_ outside stringers raise the axial
+    buckling load of such cylinders: their Table I(c) (p. 26) gives higher
+    loads with the stringers outside than inside for every length, and
+    Card and Jones give higher `\bar{N}_s` for their external cylinders 1
+    and 3 than for the internal cylinders 2 and 4. Eq. (15) for the blade
+    as modelled gives 1382.8 lb/in outside and 754.4 lb/in inside; the
+    discrete loads are 1345.7 lb/in (-2.7 %; +1.5 % from `\bar{N}_s`) and
+    704.2 lb/in (-6.7 %) (runs made when this test was written).
+
+    References
+    ----------
+    .. [1] Card, M. F., and Jones, R. M., "Experimental and Theoretical
+       Results for Buckling of Eccentrically Stiffened Cylinders", NASA TN
+       D-3639, 1966.
+    .. [2] Block, D. L., Card, M. F., and Mikulas, M. M., Jr., "Buckling of
+       Eccentrically Stiffened Orthotropic Cylinders", NASA TN D-2960, 1965.
+       https://ntrs.nasa.gov/citations/19650021133
+
+    """
+    for side, ycte2 in (('internal', 0.), ('external', HB)):
+        md, conns, info = create_cylinder_blade_stiffened(height=L/2, r=R,
+                stack=[0]*28, stack_blades=[[0]*97]*4, width_blades=[HB]*4,
+                plyt=PLYT, laminaprop=(E, NU), npanels=4, m=4, n=4,
+                side=side)
+        bf = [c for c in conns if c['func'] == 'BFycte']
+        assert len(bf) == 4
+        assert all(c['ycte1'] == 0 and c['ycte2'] == ycte2 for c in bf)
+    t3 = 0.0275*IN
+    hb3 = 0.33*IN - t3/2
+    skin = isotropic_skin(E, NU, t3)
+    loads = {}
+    for side in ('internal', 'external'):
+        st = blade_stringer(E, NU, hb3, TB, internal=(side == 'internal'))
+        Ns = nx_cr(skin, st, 2*np.pi*R/NSTIFF, R, L)[0]
+        # plies of 0.0005 in: 55 in the skin, 194 in a blade
+        N = _half_cylinder('plate_clpt_gl', side=side, t=t3, nply=55,
+                           nply_blade=194, plyt=0.0005*IN)
+        loads[side] = N
+        print('cylinder 3, blades %s: discrete %.1f N/m (%.1f lb/in), '
+              'smeared %.1f lb/in, %+.2f%%'
+              % (side, N, N/(LBF/IN), Ns/(LBF/IN), 100*(N/Ns - 1)))
+        assert -0.10 < N/Ns - 1 < 0.
+    assert abs(loads['external']/(LBF/IN)/1326. - 1) < 0.05
+    assert loads['internal'] < loads['external']
+    assert np.isclose(loads['external'], REF['half_gl_cyl3_external'],
+                      rtol=1e-4)

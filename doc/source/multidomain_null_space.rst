@@ -274,7 +274,8 @@ given by :meth:`.MultiDomain.get_reduced_functions`::
     cs = [md.expand(c_r) for c_r in an.cs]
 
 The functions :func:`.create_cylinder`,
-:func:`.create_cylinder_blade_stiffened`, the analyses of
+:func:`.create_cylinder_blade_stiffened`,
+:func:`.create_cylinder_z_stiffened`, the analyses of
 :mod:`panels.multidomain.cylinder` and
 :mod:`panels.multidomain.cylinder_blade_stiffened`, and
 :func:`.tstiff2d_1stiff_freq`, :func:`.tstiff2d_1stiff_compression` and

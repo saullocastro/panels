@@ -335,8 +335,9 @@ class MultiDomain(object):
     created, selects the panels plotted together by :meth:`.plot`, which
     places them by their attributes ``x0`` and ``y0``; :meth:`.plot3d`
     places them in 3D. :func:`.create_cylinder`,
-    :func:`.create_cylinder_blade_stiffened` and :func:`.create_wingbox`
-    build larger assemblies.
+    :func:`.create_cylinder_blade_stiffened`,
+    :func:`.create_cylinder_z_stiffened` and :func:`.create_wingbox` build
+    larger assemblies.
 
 
     Parameters

@@ -47,7 +47,7 @@ def _models(models):
 
 def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
         width_blades, plyt, laminaprop, npanels, m=8, n=8,
-        conn_method='null-space', models=None):
+        conn_method='null-space', models=None, side='internal'):
     r"""Create a cylinder multidomain assembly with blade stiffeners
 
     The multidomain assembly looks like::
@@ -99,7 +99,10 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
     x2w = 0``) and keep all the other ones. Consecutive skin panels are
     connected with ``'SSycte'``, the edge `y = b` of one to the edge `y = 0`
     of the next, the last skin panel to the first one, and each skin panel
-    to its blade with ``'BFycte'``, at the edge `y = 0` of both. The
+    to its blade with ``'BFycte'``, at the edge `y = 0` of the skin panel.
+    With ``side='internal'`` the edge `y = 0` of the blade is connected and
+    the blade stands inside the cylinder, with ``side='external'`` its edge
+    `y` = ``width_blades[i]``, and the blade stands outside. The
     assembly contains the skin panels followed by the blades. The
     connections are returned and not stored in the assembly, which is
     created with ``conn=None``: pass them to :meth:`.MultiDomain.calc_kC`.
@@ -139,18 +142,25 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
         ``'plate_clpt_tl'`` or ``'plate_clpt_donnell'``, see
         :mod:`panels.models` and the Notes. A missing key takes its
         default.
+    side : str, optional
+        ``'internal'``, the default, for blades inside the cylinder, or
+        ``'external'`` for blades outside.
 
     Returns
     -------
-    md, conns : tuple
-        A tuple containing the multidomain assembly and the default connectivity
-        list of dictionaries.
+    md, conns, info : tuple
+        The multidomain assembly, the list of connection dictionaries (not
+        stored in the assembly) and a dictionary with ``'skin'``, the list
+        of the skin panels, ``'blades'``, the list of the blades, ``'ws'``,
+        the width of a skin panel, ``2*pi*r/npanels``, and ``'models'``,
+        the model of each group, ``models`` completed with the defaults.
 
     Raises
     ------
     ValueError
         When ``models`` has a key other than ``'skin'`` and ``'blade'`` or a
-        model not listed above for its key, when ``npanels < 2``, or when
+        model not listed above for its key, when ``side`` is neither
+        ``'internal'`` nor ``'external'``, when ``npanels < 2``, or when
         the length of ``stack_blades`` or of ``width_blades`` is not
         ``npanels``.
 
@@ -162,9 +172,10 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
     `y = 0` of the skin panel, where the blade stands normal to the skin,
     see :meth:`.MultiDomain.get_kC_conn`. The boundary conditions and the
     redundant constraints of the closed skin are those of
-    :func:`.create_cylinder`. With ``ycte2 = 0`` the blade stands on the
-    inner side of the skin, its local `y` axis pointing towards the axis of
-    the cylinder (`v_2 = -w_1` along the joint).
+    :func:`.create_cylinder`. The local `y` axis of the blade points towards
+    the axis of the cylinder (`v_2 = -w_1` along the joint): connected at
+    its edge `y = 0` (``ycte2 = 0``) the blade stands on the inner side of
+    the skin, connected at its edge `y = b` on the outer side.
 
     The blades carry their share of the axial load as the membrane stress
     resultant `N_{xx}` of the plate, and the general instability of the
@@ -251,7 +262,7 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
 
     >>> from panels.multidomain import create_cylinder_blade_stiffened
     >>> laminaprop = (142.5e9, 8.7e9, 0.28, 5.1e9, 5.1e9, 5.1e9)
-    >>> md, conns = create_cylinder_blade_stiffened(height=0.5, r=0.25,
+    >>> md, conns, info = create_cylinder_blade_stiffened(height=0.5, r=0.25,
     ...     stack=[0, 90, 0], stack_blades=[[0, 90, 0]]*4,
     ...     width_blades=[0.02]*4, plyt=0.125e-3, laminaprop=laminaprop,
     ...     npanels=4)
@@ -259,9 +270,14 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
     ['skin', 'skin', 'skin', 'skin', 'blade_00', 'blade_01', 'blade_02', 'blade_03']
     >>> print(sorted(set(c['func'] for c in conns)), len(conns))
     ['BFycte', 'SSycte'] 8
+    >>> print(info['models'])
+    {'skin': 'cylshell_clpt_sanders', 'blade': 'plate_clpt_gl'}
 
     """
     models = _models(models)
+    if side not in ('internal', 'external'):
+        raise ValueError("side must be 'internal' or 'external', got %r"
+                         % (side, ))
     if npanels < 2:
         raise ValueError('At least two panels are needed')
     if len(stack_blades) != npanels:
@@ -311,11 +327,13 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
             conns.append(dict(p1=p01, p2=p02, func='SSycte', ycte1=0, ycte2=p02.b))
 
     for panel, blade in zip(skin, blades):
-        conns.append(dict(p1=panel, p2=blade, func='BFycte', ycte1=0, ycte2=0))
+        ycte2 = 0 if side == 'internal' else blade.b
+        conns.append(dict(p1=panel, p2=blade, func='BFycte', ycte1=0,
+                          ycte2=ycte2))
 
     md = MultiDomain(skin + blades, conn_method=conn_method)
 
-    return md, conns
+    return md, conns, dict(skin=skin, blades=blades, ws=b_skin, models=models)
 
 
 def cylinder_blade_stiffened_compression_lb_Nxx_cte(height, r, stack, stack_blades,
@@ -422,7 +440,7 @@ def cylinder_blade_stiffened_compression_lb_Nxx_cte(height, r, stack, stack_blad
     -51659
 
     """
-    md, conns = create_cylinder_blade_stiffened(height=height, r=r,
+    md, conns, info = create_cylinder_blade_stiffened(height=height, r=r,
             stack=stack, stack_blades=stack_blades, width_blades=width_blades,
             plyt=plyt, laminaprop=laminaprop, npanels=npanels, m=m, n=n,
             conn_method=conn_method, models=models)
@@ -553,7 +571,7 @@ def cylinder_blade_stiffened_compression_lb_Nxx_from_static(height, r, stack,
     -41695
 
     """
-    md, conns = create_cylinder_blade_stiffened(height=height, r=r,
+    md, conns, info = create_cylinder_blade_stiffened(height=height, r=r,
             stack=stack, stack_blades=stack_blades, width_blades=width_blades,
             plyt=plyt, laminaprop=laminaprop, npanels=npanels, m=m, n=n,
             conn_method=conn_method, models=models)
@@ -708,7 +726,7 @@ def cylinder_blade_stiffened_compression_lb_pd_from_static(height, r, stack,
     -0.0004994
 
     """
-    md, conns = create_cylinder_blade_stiffened(height=height, r=r,
+    md, conns, info = create_cylinder_blade_stiffened(height=height, r=r,
             stack=stack, stack_blades=stack_blades, width_blades=width_blades,
             plyt=plyt, laminaprop=laminaprop, npanels=npanels, m=m, n=n,
             conn_method=conn_method, models=models)
