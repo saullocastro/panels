@@ -33,7 +33,8 @@ EQUATION refers to which type of nonlinear equation is being used:
 - gl - Green-Lagrange membrane strains, complete in the displacement
   gradients
 - tl - total Lagrangian: the Green-Lagrange membrane strains and the
-  changes of curvature measured with the deformed normal
+  changes of curvature measured with the deformed normal (CLPT) or with the
+  second-order director (FSDT)
 
 SUFIX used to indicate additional information
 
@@ -121,6 +122,15 @@ The available models, which are selected with ``Shell.model``, are:
   ``u, v, w, phix, phiy``; the fields ``phiy`` of
   :func:`.fsdt_tsdt_field.fuvw` and :func:`.fsdt_tsdt_field.fg` are the
   rotation of the normal ``phiy + v/r``, as for the Sanders models.
+
+- ``'plate_fsdt_tl'``, ``'cylshell_fsdt_tl'``: flat plates and cylindrical
+  shells, total-Lagrangian FSDT: the Green-Lagrange membrane strains of
+  ``'plate_fsdt_gl'`` and ``'cylshell_fsdt_gl'``, and the curvatures and
+  transverse shear strains of the second-order director of the moderate
+  rotation theory [6]_, [7]_, cubic in the derivatives of the displacements
+  and rotations, 5 DOFs ``u, v, w, phix, phiy``; the linear part is that of
+  ``'plate_fsdt_donnell'`` and ``'cylshell_fsdt_sanders'``, and the fields
+  ``phiy`` of the cylinder are the rotation of the normal ``phiy + v/r``.
 
 The models with 5 DOFs are supported by :class:`.MultiDomain` with the
 connections of :mod:`panels.multidomain.connections.kCsdt`, but not by
@@ -320,6 +330,22 @@ v/r`, such that all strains vanish for any small rigid-body motion. No
 Sanders-Koiter term appears in the third-order terms of the TSDT, and the
 transverse shear strains are those of the Donnell kinematics.
 
+The total-Lagrangian FSDT models, ``'plate_fsdt_tl'`` and
+``'cylshell_fsdt_tl'``, take the displacement field of the moderate
+rotation theory of Schmidt and Reddy [6]_, Eq. (16), linear through the
+thickness, with the transverse normal strain of Palmerio et al. [7]_, Eq.
+(20), set to zero: the deformed position of the point at `z` is
+`\mathbf{X} + z \mathbf{d}`, with the second-order director `\mathbf{d}
+= (\psi_x, \psi_y, 1 - (\psi_x^2 + \psi_y^2)/2)`, `\psi_x = \phi_x`,
+`\psi_y = \phi_y + v/r`, in the local basis. The curvatures and transverse
+shear strains are those of :func:`.fsdt_tsdt_field.is_tl`, the
+coefficients of `z` and the transverse components of the Green-Lagrange
+strains of this field, with the terms `-\varepsilon_{yy}/r` and
+`-\gamma_{xy}/(2 r)` of ``'cylshell_clpt_tl'`` that make the linear part
+that of ``'cylshell_fsdt_sanders'``; to the order `\epsilon^3` of the
+moderate rotation theory (strains of order `\epsilon^2`, rotations of the
+normal of order `\epsilon`) they are the strains of [7]_, Eq. (20).
+
 The integrands of the matrices of each model are derived symbolically from
 these kinematics. The modules without suffix integrate them in closed form
 over the whole domain, with the integrals of Bardell's functions of
@@ -380,6 +406,14 @@ References
 .. [5] van der Heijden, A. M. A. (ed.), "W. T. Koiter's Elastic Stability
    of Solids and Structures", Cambridge University Press, 2008.
    https://doi.org/10.1017/CBO9780511546174
+.. [6] Schmidt, R., and Reddy, J. N., "A Refined Small Strain and Moderate
+   Rotation Theory of Elastic Anisotropic Shells", Journal of Applied
+   Mechanics, Vol. 55, No. 3, 1988, pp. 611-617.
+   https://doi.org/10.1115/1.3125837
+.. [7] Palmerio, A. F., Reddy, J. N., and Schmidt, R., "On a moderate
+   rotation theory of laminated anisotropic shells - Part 1. Theory",
+   International Journal of Non-Linear Mechanics, Vol. 25, No. 6, 1990,
+   pp. 687-700. https://doi.org/10.1016/0020-7462(90)90007-V
 
 """
 from . import clpt_field
@@ -401,4 +435,6 @@ from . import cylshell_tsdt_sanders, cylshell_tsdt_sanders_num
 from . import plate_fsdt_gl, plate_fsdt_gl_num
 from . import plate_tsdt_gl, plate_tsdt_gl_num
 from . import cylshell_fsdt_gl, cylshell_fsdt_gl_num
+from . import plate_fsdt_tl_num
+from . import cylshell_fsdt_tl_num
 from . import cylshell_tsdt_gl, cylshell_tsdt_gl_num

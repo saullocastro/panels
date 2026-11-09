@@ -154,7 +154,8 @@ def is_sanders(object s):
 
     '''
     return 1 if ('sanders' in s.model
-                 or s.model in ('cylshell_fsdt_gl', 'cylshell_tsdt_gl')) else 0
+                 or s.model in ('cylshell_fsdt_gl', 'cylshell_tsdt_gl',
+                                'cylshell_fsdt_tl')) else 0
 
 
 def is_gl(object s):
@@ -168,7 +169,8 @@ def is_gl(object s):
     Returns
     -------
     gl : int
-        ``1`` when the name of the model ends with ``'_gl'``, else ``0``.
+        ``1`` when the name of the model ends with ``'_gl'`` or the model is
+        one of :func:`.is_tl`, else ``0``.
 
     Notes
     -----
@@ -181,7 +183,51 @@ def is_gl(object s):
     :mod:`panels.models`.
 
     '''
-    return 1 if s.model.endswith('_gl') else 0
+    return 1 if (s.model.endswith('_gl') or is_tl(s) == 1) else 0
+
+
+def is_tl(object s):
+    r'''Tell whether the model of ``s`` is a total-Lagrangian FSDT model
+
+    Parameters
+    ----------
+    s : :class:`.Shell`
+        The shell, whose attribute ``model`` is read.
+
+    Returns
+    -------
+    tl : int
+        ``1`` when the model is ``'plate_fsdt_tl'`` or ``'cylshell_fsdt_tl'``,
+        else ``0``.
+
+    Notes
+    -----
+    The membrane strains of these models are those of :func:`.is_gl`; the
+    curvatures and transverse shear strains are those of the second-order
+    director `\mathbf{d} = (\psi_x, \psi_y, 1 - (\psi_x^2 + \psi_y^2)/2)`,
+    `\psi_x = \phi_x`, `\psi_y = \phi_y + v/r`, in the local basis, with
+    the tangent vectors `\mathbf{X}_{,x} = (1 + u_{,x}, v_{,x}, w_{,x})`,
+    `\mathbf{X}_{,y} = (u_{,y}, 1 + v_{,y} + w/r, w_{,y} - v/r)` and `1/r =
+    0` for the plate:
+
+    .. math::
+
+        \kappa_{xx} = \mathbf{X}_{,x} \cdot \mathbf{d}_{,x} \qquad
+        \kappa_{yy} = \mathbf{X}_{,y} \cdot \mathbf{d}_{,y} - \frac{1}{r} -
+        \frac{\varepsilon_{yy}}{r}
+
+        \kappa_{xy} = \mathbf{X}_{,x} \cdot \mathbf{d}_{,y} +
+        \mathbf{X}_{,y} \cdot \mathbf{d}_{,x} - \frac{\gamma_{xy}}{2 r}
+        \qquad \gamma_{yz} = \mathbf{X}_{,y} \cdot \mathbf{d} \qquad
+        \gamma_{xz} = \mathbf{X}_{,x} \cdot \mathbf{d}
+
+    with `\mathbf{d}_{,x} = (\psi_{x,x}, \psi_{y,x}, \psi_{z,x})` and
+    `\mathbf{d}_{,y} = (\psi_{x,y}, \psi_{y,y} + \psi_z/r, \psi_{z,y} -
+    \psi_y/r)`, see :mod:`panels.models.plate_fsdt_tl_num` and
+    :mod:`panels.models.cylshell_fsdt_tl_num`.
+
+    '''
+    return 1 if s.model in ('plate_fsdt_tl', 'cylshell_fsdt_tl') else 0
 
 
 def rinv(object s):
@@ -445,7 +491,9 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys,
         TSDT, and with the non-linear terms `\beta_x^2/2`, `\beta_y^2/2`
         and `\beta_x \beta_y` multiplied by ``NLgeom``; for the models of
         :func:`.is_gl` the membrane strains are the Green-Lagrange strains
-        given there, with their quadratic terms multiplied by ``NLgeom``.
+        given there, with their quadratic terms multiplied by ``NLgeom``,
+        and for those of :func:`.is_tl` with ``NLgeom=1`` the curvatures and
+        transverse shear strains are those given there.
     '''
     cdef double a, b, h, c1, ri, sr, bx, by, gl, ux, uy, vx, vy
     cdef int m, n, pti, size, tsdt
@@ -464,6 +512,9 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys,
     cdef double val_yy[5]
     cdef double val_xy[5]
     cdef double gyz, gxz
+    cdef int tl
+    cdef double px, py, pz, px_x, px_y, py_x, py_y, pz_x, pz_y
+    cdef double xx0, xx1, xx2, xy0, xy1, xy2, dy1, dy2
     a = s.a
     b = s.b
     m = s.m
@@ -477,6 +528,7 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys,
     ri = rinv(s)
     sr = ri*is_sanders(s)
     gl = is_gl(s)
+    tl = is_tl(s)
     read_bcs(s, bcs)
     size = xs.shape[0]
     out = np.zeros((13 if tsdt == 1 else 8, size), dtype=DOUBLE)
@@ -526,6 +578,33 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys,
             else:
                 out[6, pti] = gyz
                 out[7, pti] = gxz
+            if tl == 1 and NLgeom == 1:
+                # second-order director d = (px, py, pz) and its derivatives
+                px = val[3]
+                py = val[4] + ri*val[1]
+                px_x = val_x[3]
+                px_y = val_y[3]
+                py_x = val_x[4] + ri*val_x[1]
+                py_y = val_y[4] + ri*val_y[1]
+                pz = 1. - 0.5*(px*px + py*py)
+                pz_x = -(px*px_x + py*py_x)
+                pz_y = -(px*px_y + py*py_y)
+                # tangent vectors X,x and X,y, and the components of d,y
+                xx0 = 1. + ux
+                xx1 = vx
+                xx2 = val_x[2]
+                xy0 = uy
+                xy1 = 1. + vy
+                xy2 = val_y[2] - ri*val[1]
+                dy1 = py_y + ri*pz
+                dy2 = pz_y - ri*py
+                out[3, pti] = xx0*px_x + xx1*py_x + xx2*pz_x
+                out[4, pti] = (xy0*px_y + xy1*dy1 + xy2*dy2 - ri
+                               - ri*out[1, pti])
+                out[5, pti] = (xx0*px_y + xx1*dy1 + xx2*dy2 + xy0*px_x
+                               + xy1*py_x + xy2*pz_x - 0.5*ri*out[2, pti])
+                out[6, pti] = xy0*px + xy1*py + xy2*pz
+                out[7, pti] = xx0*px + xx1*py + xx2*pz
     free(f)
     return tuple(np.asarray(out[k]) for k in range(out.shape[0]))
 
