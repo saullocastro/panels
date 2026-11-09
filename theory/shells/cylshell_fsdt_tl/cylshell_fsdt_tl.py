@@ -340,19 +340,18 @@ def check_palmerio():
 
 def check_linear_part():
     r"""``[B(0)] [Phi]`` equal to the linear operator ``B0`` of
-    ``cylshell_fsdt_sanders`` in ``theory/shells/fsdt_tsdt``, the linear
+    ``cylshell_fsdt_sanders`` (``theory/shells/cylshell_fsdt_sanders``), the linear
     strains and the membrane strains equal to those of
     ``cylshell_fsdt_gl``, and the derivation step by step: the linear parts
     ``X,y . d,y - 1/r = phiy,y + v,y/r + eyy/r``, ``X,x . d,y = phix,y +
     v,x/r``, ``X,y . d,x = phiy,x + v,x/r``, ``X,x . d,x = phix,x``, ``X,y . d
     = phiy + w,y``, ``X,x . d = phix + w,x``, which with the Koiter terms
     ``-eyy/r`` and ``-gxy/(2r)`` give Sanders' FSDT"""
-    ft = _load('fsdt_tsdt', '..', 'fsdt_tsdt', 'fsdt_tsdt.py')
+    lm = _load('cylshell_fsdt_sanders', '..', 'cylshell_fsdt_sanders', 'cylshell_fsdt_sanders.py')
     m = build()
     BL = m['B'].subs({s: 0 for s in D})
-    rsub = {ft.r: r, ft.a: a, ft.b: b}
-    ref = ft.shape_functions('A', 'fsdt', 'cylshell', 'sanders')
-    B0 = ref['B0'].xreplace(rsub)
+    rsub = {lm.r: r, lm.a: a, lm.b: b}
+    B0 = lm.shape_functions('A')['B0'].xreplace(rsub)
     assert (BL*m['PhiA'] - B0).applyfunc(expand) == zeros(NE, DOF)
     gl = _load('cylshell_fsdt_gl', '..', 'cylshell_fsdt_gl', 'cylshell_fsdt_gl.py')
     epsL_gl = gl.strains(nonlinear=False)

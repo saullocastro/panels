@@ -44,7 +44,7 @@ Bending, third-order and transverse shear strains: the linear ones of
 `check_membrane`: the membrane strains are `E = (F^T F - I)/2` of the
 tangent vectors of the deformed mid-surface. `check_linear_part`: `[B_L]
 [Phi]` is the linear operator `B0` of `plate_tsdt_donnell` in
-`../fsdt_tsdt/fsdt_tsdt.py`, and the operator `B` of that model at
+`../plate_tsdt_donnell/plate_tsdt_donnell.py`, and the operator `B` of that model at
 `bx = -w,x`, `by = -w,y` is that of these strains without the
 quadratic terms of the in-plane gradients: the linear part is exactly
 `plate_tsdt_donnell`'s, and the non-linear part contains its terms.

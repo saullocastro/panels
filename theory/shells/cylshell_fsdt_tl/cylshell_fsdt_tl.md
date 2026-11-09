@@ -66,7 +66,7 @@ so without the Koiter terms the linear curvatures are Sanders' plus
     gyz = phiy + w,y,   gxz = phix + w,x
 
 the linear strains of `cylshell_fsdt_sanders`; `check_linear_part` also
-asserts `[B(0)] [Phi] = B0` of that model (`../fsdt_tsdt/fsdt_tsdt.py`).
+asserts `[B(0)] [Phi] = B0` of that model (`../cylshell_fsdt_sanders/cylshell_fsdt_sanders.py`).
 The Koiter terms use the complete Green-Lagrange `eyy`, `gxy`, so they do
 not spoil the invariance of the strains.
 
@@ -75,7 +75,7 @@ coefficients of `z^0`, `z` of the Green-Lagrange strains of `X + z d` with
 the reference vectors `e_x`, `(1 + z/r) e_y`. Their linear part is Sanders'
 plus `(0, eyy/r, gxy/(2r))`; the two Koiter terms of `cylshell_clpt_tl`
 (van der Heijden 2008, p. 202) make it Sanders' (`check_linear_part`,
-against `cylshell_fsdt_sanders` in `../fsdt_tsdt/fsdt_tsdt.py`).
+against `../cylshell_fsdt_sanders/cylshell_fsdt_sanders.py`).
 
 ## Checks
 

@@ -40,7 +40,7 @@ Bending and transverse shear strains: the linear ones of
 `check_membrane`: the membrane strains are `E = (F^T F - I)/2` of the
 tangent vectors of the deformed mid-surface. `check_linear_part`: `[B_L]
 [Phi]` is the linear operator `B0` of `cylshell_fsdt_sanders` in
-`../fsdt_tsdt/fsdt_tsdt.py`, and the operator `B` of that model at
+`../cylshell_fsdt_sanders/cylshell_fsdt_sanders.py`, and the operator `B` of that model at
 `bx = -w,x`, `by = -w,y + v/r` is that of these strains without the
 quadratic terms of the in-plane gradients: the linear part is exactly
 `cylshell_fsdt_sanders`'s, and the non-linear part contains its terms.

@@ -37,7 +37,7 @@ Eqs. (1.118)-(1.120), without imperfection and with `y = R \theta`:
 
 Bending and transverse shear strains: the linear ones of
 ``cylshell_tsdt_sanders`` (Sanders-Koiter kinematics of the TSDT of
-Reddy and Liu 1985, see ``theory/shells/fsdt_tsdt``), `c_1 = 4/(3 h^2)`:
+Reddy and Liu 1985, see ``theory/shells/cylshell_tsdt_sanders``), `c_1 = 4/(3 h^2)`:
 
 .. math::
 
@@ -59,7 +59,7 @@ of the two rotations `\beta_x = -w_{,x}`, `\beta_y = -w_{,y} + v/r`, the
 membrane strains add the quadratic terms of the in-plane gradients
 (``check_sanders_limit``), among which the rotation about the normal. The
 linear part is exactly that of ``cylshell_tsdt_sanders``
-(``check_linear_part``, against ``theory/shells/fsdt_tsdt``).
+(``check_linear_part``, against ``theory/shells/cylshell_tsdt_sanders``).
 
 At a point the strains depend on the seventeen generalized derivatives
 
@@ -220,10 +220,10 @@ def build():
                 PhiB=PhiB, Gm=Gm)
 
 
-def _fsdt_tsdt():
-    r"""The derivation of the six models of ``theory/shells/fsdt_tsdt``"""
+def _linear_model():
+    r"""The derivation of ``cylshell_tsdt_sanders``, ``theory/shells/cylshell_tsdt_sanders``"""
     spec = importlib.util.spec_from_file_location(
-        'fsdt_tsdt', os.path.join(HERE, '..', 'fsdt_tsdt', 'fsdt_tsdt.py'))
+        'cylshell_tsdt_sanders', os.path.join(HERE, '..', 'cylshell_tsdt_sanders', 'cylshell_tsdt_sanders.py'))
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod
@@ -249,20 +249,21 @@ def check_membrane():
 
 def check_linear_part():
     r"""``[B_L] [Phi]`` equal to the linear operator ``B0`` of
-    ``cylshell_tsdt_sanders`` in ``theory/shells/fsdt_tsdt``, and the
+    ``cylshell_tsdt_sanders``, ``[B] [Phi]`` of
+    ``theory/shells/cylshell_tsdt_sanders`` at ``d = [Phi] c``, and the
     non-linear operator of that model at ``bx = -w,x``, ``by = -w,y + v/r``
     equal to ``[B]`` without the quadratic terms of the in-plane
     gradients"""
-    ft = _fsdt_tsdt()
+    lm = _linear_model()
     m = build()
     BL = m['B'].subs({g: 0 for g in GRAD})
-    rsub = {ft.r: r, ft.a: a, ft.b: b, ft.c1: c1}
-    ref = ft.shape_functions('A', 'tsdt', 'cylshell', 'sanders')
-    B0 = ref['B0'].xreplace(rsub)
+    rsub = {lm.r: r, lm.a: a, lm.b: b}
+    B0 = lm.shape_functions('A')['B0'].xreplace(rsub)
     assert (BL*m['PhiA'] - B0).applyfunc(expand) == zeros(NE, DOF)
-    # Sanders limit: drop the squares of the in-plane gradients
-    sanders = {ft.bx: -w_x, ft.by: -(w_y - v/r)}
-    Bs = ref['B'].xreplace(rsub).xreplace(sanders)
+    # Sanders limit: drop the squares of the in-plane gradients; the
+    # non-linear operator of the linear model, bx = -w,x, by = -w,y + v/r
+    lmm = lm.build()
+    Bs = (lmm['B']*lmm['PhiA']).xreplace(rsub)
     # the strains with the in-plane gradients frozen in the quadratic terms
     t = Symbol('t')
     mem = M([u_x + t*(u_x**2 + v_x**2)/2 + w_x**2/2,

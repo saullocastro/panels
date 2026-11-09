@@ -59,7 +59,7 @@ with the third-order terms of Reddy's third-order shear deformation theory
 (TSDT), `c_1 = 4/(3 h^2)`, as in ``:mod:`panels.models.plate_tsdt_donnell```, the in-plane strains being
 `\varepsilon^{(0)} + z \kappa + [(z - d)^3 + d^3] \kappa^{(3)}` and the
 transverse shear strains `\gamma + (z - d)^2 \gamma^{(2)}`, see
-``theory/shells/fsdt_tsdt``.
+``theory/shells/plate_tsdt_donnell``.
 
 Besides the von Kármán terms of :mod:`panels.models.plate_tsdt_donnell`,
 the membrane strains contain the quadratic terms of the in-plane
