@@ -1,4 +1,4 @@
-# Web of a ring frame, CLPT with von Kármán strains in polar coordinates (`annular_clpt_donnell`)
+# Annular-sector plate, CLPT with von Kármán strains in polar coordinates (`annular_clpt_donnell`)
 
 Derivation and symbolic checks: `annular_clpt_donnell.py` (sympy, run
 `python annular_clpt_donnell.py`, a few seconds). Kernels: `write_pyx.py`,
@@ -30,9 +30,9 @@ curvature terms of the shell (Amabili 2008, p. 42, comparing Eqs.
 the literature calls the circular-plate strains "von Kármán". `panels`
 names the von Kármán flat plate `plate_clpt_donnell`; the web follows that
 convention: `annular_clpt_donnell` has the von Kármán strains in polar
-coordinates. The variants `frame_web_clpt_gl` (Eqs. (1.166)-(1.168) for the
-membrane strains) and `frame_web_clpt_tl` (curvatures of the deformed
-normal) would follow `plate_clpt_gl` and `plate_clpt_tl`.
+coordinates. The variants `annular_clpt_gl` (Eqs. (1.166)-(1.168) for the
+membrane strains) and `annular_clpt_tl` (curvatures of the deformed
+normal) follow `plate_clpt_gl` and `plate_clpt_tl`, see their folders.
 
 ## Coordinates and degrees of freedom
 
