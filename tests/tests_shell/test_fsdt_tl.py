@@ -52,7 +52,9 @@ inextensible elastica, `\theta'' = -\alpha \cos\theta` (solved by shooting,
 ``test_plate_clpt_gl.elastica``): at `\alpha = 1` the tip rotates by 0.46
 rad, `w = 0.3017 L`, `u = -0.0564 L`, against `w = L/3` of the linear beam,
 which the linear curvatures of ``plate_fsdt_gl`` reproduce, as those of
-``plate_clpt_gl``.
+``plate_clpt_gl``. The second-order director is 0.5 % too long at 0.46
+rad; at `\alpha = 3`, 0.99 rad, the deflection of ``plate_fsdt_tl`` is 1.8 %
+below that of the elastica (``plate_fsdt_gl``: +21 %).
 
 References
 ----------
@@ -94,8 +96,8 @@ def test_linear_kernels_are_those_of_the_linear_model(model):
     to those of the linear model; the numerical geometric stiffness matrix
     of a constant membrane state at zero displacements equal to the
     analytical one of the GL model, which the model uses"""
-    t, li = panel(model), panel(LINEAR[model])
-    for s in (t, li):
+    t, li, gl = panel(model), panel(LINEAR[model]), panel(GL[model])
+    for s in (t, li, gl):
         s.Nxx, s.Nyy, s.Nxy = -1.3, 0.7, 0.4
     c0 = np.zeros(t.get_size())
     kC = t.calc_kC(c=c0, NLgeom=True)
@@ -104,7 +106,7 @@ def test_linear_kernels_are_those_of_the_linear_model(model):
     assert abs(t.calc_kC() - li.calc_kC()).max() == 0.
     assert abs(t.calc_kM() - li.calc_kM()).max() == 0.
     kG0 = t.calc_kG()
-    assert abs(kG0 - panel(GL[model]).calc_kG()).max() == 0.
+    assert abs(kG0 - gl.calc_kG()).max() == 0.
     kGnum = t.calc_kG(c=c0)
     assert abs(kG0 - kGnum).max() < 1.e-10*abs(kG0).max()
     rng = np.random.default_rng(0)
@@ -247,13 +249,15 @@ def cantilever_strip(model, alpha, inc):
 def test_cantilever_strip_out_of_plane_against_elastica():
     r"""Out-of-plane bending, ``alpha = 1``, tip rotation 0.46 rad: the
     elastica gives ``w = 0.3017 L``, ``u = -0.0564 L``; ``plate_fsdt_tl``
-    follows it, ``plate_fsdt_gl`` gives the deflection of the linear beam,
-    ``w = L/3``"""
+    follows it within -0.27 % and -0.59 % (second-order director),
+    ``plate_fsdt_gl`` gives the deflection of the linear beam, ``w = L/3``,
+    +10.5 %. Stored values of ``plate_fsdt_tl``, 14 x 4 terms: ``w =
+    0.3009111 L``, ``u = -0.0561018 L``"""
     w_ref, u_ref, _ = elastica(1.)
     w, u = cantilever_strip('plate_fsdt_tl', 1., 0.1)
-    print('elastica', (w_ref, u_ref), 'plate_fsdt_tl', (w, u))
-    assert np.isclose(w, w_ref, rtol=0.01)
-    assert np.isclose(u, u_ref, rtol=0.03)
+    assert np.isclose(w, w_ref, rtol=0.005)
+    assert np.isclose(u, u_ref, rtol=0.01)
+    assert np.isclose(w, 0.3009111, rtol=1e-5)
+    assert np.isclose(u, 0.0561018, rtol=1e-5)
     w, u = cantilever_strip('plate_fsdt_gl', 1., 0.1)
-    print('plate_fsdt_gl', (w, u))
-    assert np.isclose(w, 1/3, rtol=0.01)
+    assert np.isclose(w, 1/3, rtol=0.001)
