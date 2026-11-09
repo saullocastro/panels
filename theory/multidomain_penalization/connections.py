@@ -25,6 +25,8 @@ Created on Sun Mar 10 13:07:49 2024
 #   kCBFxycte: the block 12 of kCBFxycte.pyx, computed from the quantities
 #   of kCBFxycte.xycte_components, the blocks 11 and 22 being those of
 #   kCBFxcte11 and kCBFycte22
+#   kCBFxcte_face: kCBFxcte_face.py (fkCBFxcte_face), BFxcte at a face of
+#   the base, computed from the quantities of bfxcte_face_components
 #   kCSB: skin_base.py (fkCSB), computed from the quantities of
 #   kCsdt._sb_components with the integrals of kCsdt._connection_matrix
 #   kCSSxcte_sdt, kCSSycte_sdt, kCSB_sdt: kCsdt.py, for the models based on
@@ -245,6 +247,29 @@ piece_wise_simplify(kCSB11, [])
 piece_wise_simplify(kCSB12, [])
 piece_wise_simplify(kCSB22, [])
 
+# BFxcte at a face of the base, key 'face' of the connection, 'lower' or
+# 'upper': the edge x2 = xcte2 of the flange (2) is connected to the line
+# x1 = xcte1, z = zf1 = d1 -+ h1/2 of the base (1), whose points follow the
+# Kirchhoff kinematics of (1), clpt_interface() above,
+#     u1(zf1) = u1 - zf1 w1,x,  v1(zf1) = (1 + zf1 rinv1) v1 - zf1 w1,y
+# the rotation about y, -w1,x, being the same at every z, and as for BFxcte
+#     u1(zf1) = w2,  v1(zf1) = v2,  w1 = -u2,  w1,x = w2,x
+# The two edges share eta and span the same angle, also when b1 != b2 (a
+# cylinder and an annular plate whose edge is at the radius r1 + zf1), the
+# integral along the connection being over the length b1 of the base. The
+# block 22 is that of BFxcte. The checks of these quantities against the
+# rigid motions of the assembly are in bfxcte_face.py; the matrix is
+# computed by panels.multidomain.connections.kCBFxcte_face.fkCBFxcte_face
+var('zf1')
+qfu1A, qfv1A = clpt_interface(u1A, v1A, w1A_xi, w1A_eta, zf1, rinv1)
+qfu1B, qfv1B = clpt_interface(u1B, v1B, w1B_xi, w1B_eta, zf1, rinv1)
+kCBFxcte_face11 =  (b1/2)*kt*(qfu1A.T*qfu1B + qfv1A.T*qfv1B + w1A.T*w1B + (kr/kt)*((2/a1)*w1A_xi.T) * ((2/a1)*w1B_xi))
+kCBFxcte_face12 = -(b1/2)*kt*(qfu1A.T*w2B + qfv1A.T*v2B - w1A.T*u2B + (kr/kt)*((2/a1)*w1A_xi.T) * ((2/a2)*w2B_xi))
+kCBFxcte_face22 = kCBFxcte22
+
+piece_wise_simplify(kCBFxcte_face11, [])
+piece_wise_simplify(kCBFxcte_face12, [])
+
 
 # MODELS BASED ON SHEAR DEFORMATION THEORIES (FSDT and TSDT)
 # 5 DOFs per term u, v, w, phix, phiy, with the displacement field
@@ -401,6 +426,9 @@ matrices = [
     [kCSB11, 'kCSB11'],
     [kCSB12, 'kCSB12'],
     [kCSB22, 'kCSB22'],
+
+    [kCBFxcte_face11, 'kCBFxcte_face11'],
+    [kCBFxcte_face12, 'kCBFxcte_face12'],
 
     [kCSSxcte_sdt11, 'kCSSxcte_sdt11'],
     [kCSSxcte_sdt12, 'kCSSxcte_sdt12'],

@@ -827,7 +827,8 @@ class MultiDomain(object):
         solutions of :meth:`.get_cp`, and are not part of the signature.
 
         """
-        keys = ('func', 'xcte1', 'xcte2', 'ycte1', 'ycte2', 'angle')
+        keys = ('func', 'xcte1', 'xcte2', 'ycte1', 'ycte2', 'angle',
+                connections.kCBFxcte_face.FACE_KEY)
         sig_conn = tuple((tuple(ci.get(k) for k in keys), id(ci['p1']),
                           id(ci['p2']), bool(ci.get('kr', 0.)))
                          for ci in conn if self._null_space(ci))
@@ -838,7 +839,7 @@ class MultiDomain(object):
                         for f in nullspace.FIELDS[:_dofs(p)] for r in ('', 'r'))
             plyts = () if p.plyts is None else tuple(p.plyts)
             sig_panels.append((id(p), p.m, p.n, p.a, p.b, p.r, p.model,
-                               p.col_start, plyts, bcs))
+                               p.offset, p.col_start, plyts, bcs))
         if self.pd_method != 'null-space':
             return sig_conn, tuple(sig_panels)
         #NOTE the positions and the prescribed components define [Z], the
@@ -3281,7 +3282,19 @@ class MultiDomain(object):
               ``p1`` and the flange ``p2`` of a stiffener, whatever their
               order in the assembly, see
               :mod:`panels.multidomain.connections.kCBFycte` and
-              :mod:`panels.multidomain.connections.kCBFxcte`
+              :mod:`panels.multidomain.connections.kCBFxcte`. The
+              key ``'face'`` of ``'BFxcte'``, ``'lower'`` or ``'upper'``,
+              connects the edge of the flange to the face of the base at
+              `z_1 = d_1 \mp h_1/2`, instead of its reference surface,
+              with ``xcte2=0`` at the lower face and ``xcte2=p2.a`` at the
+              upper face, see
+              :mod:`panels.multidomain.connections.kCBFxcte_face`; e.g.
+              the web of an internal ring frame, an ``'annular_*'`` plate,
+              on the inner surface of a ``'cylshell_*'`` and the web of
+              an external one on its outer surface. An ``'annular_*'``
+              flange on a ``'cylshell_*'`` base must have its edge at the
+              radius of the connected surface of the cylinder and span
+              the same angle, see :func:`.kCBFxcte_face.check_bfxcte`
             - ``'BFxycte'``: between the edge `x_1 =` ``xcte1`` of ``p1``
               and the edge `y_2 =` ``ycte2`` of ``p2``, the same straight
               line with `y_1 = x_2`, ``p1.b == p2.a``, e.g. a spar ``p1``
@@ -3382,7 +3395,9 @@ class MultiDomain(object):
         ------
         ValueError
             When a connection has ``p1`` and ``p2`` that are the same panel,
-            or a ``'func'`` that is not recognized.
+            or a ``'func'`` that is not recognized; for ``'BFxcte'``, when
+            its geometry does not match, see
+            :func:`.kCBFxcte_face.check_bfxcte`.
 
         Notes
         -----
@@ -3409,7 +3424,10 @@ class MultiDomain(object):
         `w_{,y}` for ``'SSycte'``; for ``'BFycte'`` and ``'BFxcte'`` the
         displacements of the flange, rotated by 90 degrees about the axis of
         the connection, and the rotation about that axis, see
-        :func:`._rinv_sanders` and :func:`._bf_base_flange`; for
+        :func:`._rinv_sanders` and :func:`._bf_base_flange`, with the key
+        ``'face'`` of ``'BFxcte'`` the displacements of the base at its
+        face `z_1`, `u_1(z_1)` and `v_1(z_1)` as for ``'SB'`` below, see
+        :mod:`panels.multidomain.connections.kCBFxcte_face`; for
         ``'BFxycte'`` the displacements of ``p2`` in the frame of ``p1`` and
         the rotation about the common edge, `-w_{1,x}` of ``p1`` and
         `w_{2,y}` (`w_{2,y} - v_2/r_2` with the Sanders-Koiter kinematics)
@@ -3502,6 +3520,18 @@ class MultiDomain(object):
                             connecti['ycte2'] = temp_ycte
 
                 connection_function = connecti['func'] # Type of connection
+
+                if connection_function == 'BFxcte':
+                    z_face = connections.kCBFxcte_face.check_bfxcte(connecti)
+                    if connecti.get(connections.kCBFxcte_face.FACE_KEY) is not None:
+                        #NOTE p1 is the base and p2 the flange, the face is
+                        #     that of p1, see kCBFxcte_face.py
+                        kt, kr = _penalties(connecti, pA, pB, 'xcte')
+                        kC_conn += connections.kCBFxcte_face.fkCBFxcte_face(
+                                kt, kr, connecti['p1'], connecti['p2'],
+                                connecti['xcte1'], connecti['xcte2'], z_face,
+                                size)
+                        continue
 
                 #NOTE models based on shear deformation theories, with the 5
                 #     DOFs u, v, w, phix, phiy per term
