@@ -36,7 +36,7 @@ Bending and transverse shear strains: the linear ones of
 Compared with ``plate_fsdt_donnell`` (von Kármán), the membrane strains add
 the quadratic terms of the in-plane gradients; the linear part is exactly
 that of ``plate_fsdt_donnell`` (``check_linear_part``, against
-``theory/shells/fsdt_tsdt``). For a finite rigid rotation of any angle
+``theory/shells/plate_fsdt_donnell``). For a finite rigid rotation of any angle
 about any axis the membrane strains vanish and, with the constant rotations
 `\phi_x = -w_{,x}`, `\phi_y = -w_{,y}`, so do the bending and transverse
 shear strains (``check_rigid_rotation``).
@@ -174,10 +174,10 @@ def build():
                 PhiB=PhiB, Gm=Gm)
 
 
-def _fsdt_tsdt():
-    r"""The derivation of the six models of ``theory/shells/fsdt_tsdt``"""
+def _linear_model():
+    r"""The derivation of ``plate_fsdt_donnell``, ``theory/shells/plate_fsdt_donnell``"""
     spec = importlib.util.spec_from_file_location(
-        'fsdt_tsdt', os.path.join(HERE, '..', 'fsdt_tsdt', 'fsdt_tsdt.py'))
+        'plate_fsdt_donnell', os.path.join(HERE, '..', 'plate_fsdt_donnell', 'plate_fsdt_donnell.py'))
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod
@@ -197,18 +197,20 @@ def check_membrane():
 
 def check_linear_part():
     r"""``[B_L] [Phi]`` equal to the linear operator ``B0`` of
-    ``plate_fsdt_donnell`` in ``theory/shells/fsdt_tsdt``, and the
+    ``plate_fsdt_donnell``, ``[B] [Phi]`` of
+    ``theory/shells/plate_fsdt_donnell`` at ``d = [Phi] c``, and the
     operator of that model at ``bx = -w,x``, ``by = -w,y`` equal to ``[B]``
     without the quadratic terms of the in-plane gradients (von Kármán
     limit)"""
-    ft = _fsdt_tsdt()
+    lm = _linear_model()
     m = build()
     BL = m['B'].subs({g: 0 for g in GRAD})
-    sub = {ft.a: a, ft.b: b}
-    ref = ft.shape_functions('A', 'fsdt', 'plate', 'donnell')
-    B0 = ref['B0'].xreplace(sub)
+    sub = {lm.a: a, lm.b: b}
+    B0 = lm.shape_functions('A')['B0'].xreplace(sub)
     assert (BL*m['PhiA'] - B0).applyfunc(expand) == zeros(NE, DOF)
-    Bvk = ref['B'].xreplace(sub).xreplace({ft.bx: -w_x, ft.by: -w_y})
+    # its non-linear operator, with bx = -w,x, by = -w,y
+    lmm = lm.build()
+    Bvk = (lmm['B']*lmm['PhiA']).xreplace(sub)
     t = Symbol('t')
     mem = M([u_x + t*(u_x**2 + v_x**2)/2 + w_x**2/2,
              v_y + t*(u_y**2 + v_y**2)/2 + w_y**2/2,

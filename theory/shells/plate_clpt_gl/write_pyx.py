@@ -40,7 +40,7 @@ import textwrap
 
 import numpy as np
 import sympy
-from sympy import Float, Rational, Symbol, expand, zeros
+from sympy import Add, Float, Mul, Rational, Symbol, expand, zeros
 from sympy.printing.str import StrPrinter
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -65,11 +65,69 @@ follower_block = _load('follower_write_pyx', '..', 'follower_pressure',
                        'write_pyx.py').pyx_block
 tangent_block = _load('tangent_write_pyx', '..', 'tangent_product',
                       'write_pyx.py').pyx_block
-#NOTE the integrals of the approximation functions of the analytical kernels
-_fsdt = _load('fsdt_tsdt_write_pyx', '..', 'fsdt_tsdt', 'write_pyx.py')
-to_integrals = _fsdt.to_integrals
-integral_call = _fsdt.integral_call
-ordered_integrals = _fsdt.ordered_integrals
+
+
+# Integrals of the approximation functions of the analytical kernels
+# ------------------------------------------------------------------
+FIELD_RE = '(u|v|w)'
+BASIS = re.compile(r'^([fg])([AB])' + FIELD_RE + r'((?:_(?:xi|eta)+)?)$')
+KIND = {(0, 0): 'ff', (0, 1): 'ffp', (0, 2): 'ffpp',
+        (1, 1): 'fpfp', (1, 2): 'fpfpp', (2, 2): 'fppfpp'}
+
+
+def basis_info(name):
+    mo = BASIS.match(name)
+    if mo is None:
+        return None
+    fg, side, field, der = mo.groups()
+    order = der.count('xi') if fg == 'f' else der.count('eta')
+    return fg, side, field, order
+
+
+def integral_name(fg, pA, dA, pB, dB):
+    d = 'xi' if fg == 'f' else 'eta'
+    return '{0}A{1}{2}{0}B{3}{4}'.format(fg, pA, d*dA, pB, d*dB)
+
+
+def integral_call(name):
+    fg = name[0]
+    d = 'xi' if fg == 'f' else 'eta'
+    mo = re.match(r'^{0}A{2}((?:{1})*){0}B{2}((?:{1})*)$'.format(fg, d, FIELD_RE), name)
+    pA, dA, pB, dB = mo.groups()
+    dA = dA.count(d)
+    dB = dB.count(d)
+    i, k = ('i', 'k') if fg == 'f' else ('j', 'l')
+    xy = 'x' if fg == 'f' else 'y'
+    bc = lambda p: '{0}1{1}, {0}1{1}r, {0}2{1}, {0}2{1}r'.format(xy, p)
+    if dA <= dB:
+        return 'integral_{0}({1}, {2}, {3}, {4})'.format(KIND[(dA, dB)], i, k, bc(pA), bc(pB))
+    return 'integral_{0}({2}, {1}, {4}, {3})'.format(KIND[(dB, dA)], i, k, bc(pA), bc(pB))
+
+
+def to_integrals(e):
+    r"""Products of the basis functions of a term ``A`` and a term ``B``
+    replaced by the one-dimensional integrals of their products"""
+    e = expand(e)
+    out = 0
+    for term in Add.make_args(e):
+        coeff = 1
+        f = {}
+        g = {}
+        for fac in Mul.make_args(term):
+            if fac.is_Symbol and basis_info(fac.name):
+                fg, side, field, order = basis_info(fac.name)
+                (f if fg == 'f' else g)[side] = (field, order)
+            else:
+                coeff *= fac
+        assert len(f) == 2 and len(g) == 2, term
+        out += (coeff*Symbol(integral_name('f', *f['A'], *f['B']))
+                *Symbol(integral_name('g', *g['A'], *g['B'])))
+    return out
+
+
+def ordered_integrals(names):
+    return sorted(names, key=lambda s: (s[:2], s))
+
 
 MODEL = 'plate_clpt_gl'
 DOF = th.DOF

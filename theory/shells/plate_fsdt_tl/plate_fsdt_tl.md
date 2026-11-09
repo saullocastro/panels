@@ -48,7 +48,7 @@ Dropped: the `z^2` terms of `E_ab` and the `z` term of `2 E_a3`,
   (plate, `b_ab = 0`, `E33(0) = 0`) to `O(eps^3)`, and Palmerio's `z` term of
   `2 E_a3` is `O(eps^4)`.
 - `check_linear_part`: `[B(0)] [Phi]` is `B0` of `plate_fsdt_donnell`
-  (`../fsdt_tsdt/fsdt_tsdt.py`); linear and membrane strains are those of
+  (`../plate_fsdt_donnell/plate_fsdt_donnell.py`); linear and membrane strains are those of
   `plate_fsdt_gl`.
 - `check_small_rotations`: with the same orders, `plate_fsdt_tl -
   plate_fsdt_gl` is `O(eps^3)` in the shear strains, `O(eps^4)` in the

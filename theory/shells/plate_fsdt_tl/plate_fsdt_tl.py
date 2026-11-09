@@ -315,14 +315,13 @@ def check_palmerio():
 
 def check_linear_part():
     r"""``[B(0)] [Phi]`` equal to the linear operator ``B0`` of
-    ``plate_fsdt_donnell`` in ``theory/shells/fsdt_tsdt``, and the linear
+    ``plate_fsdt_donnell`` (``theory/shells/plate_fsdt_donnell``), and the linear
     strains equal to those of ``plate_fsdt_gl``"""
-    ft = _load('fsdt_tsdt', '..', 'fsdt_tsdt', 'fsdt_tsdt.py')
+    lm = _load('plate_fsdt_donnell', '..', 'plate_fsdt_donnell', 'plate_fsdt_donnell.py')
     m = build()
     BL = m['B'].subs({s: 0 for s in D})
-    sub = {ft.a: a, ft.b: b}
-    ref = ft.shape_functions('A', 'fsdt', 'plate', 'donnell')
-    B0 = ref['B0'].xreplace(sub)
+    sub = {lm.a: a, lm.b: b}
+    B0 = lm.shape_functions('A')['B0'].xreplace(sub)
     assert (BL*m['PhiA'] - B0).applyfunc(expand) == zeros(NE, DOF)
     gl = _load('plate_fsdt_gl', '..', 'plate_fsdt_gl', 'plate_fsdt_gl.py')
     glsub = {getattr(gl, s.name): s for s in D}
