@@ -65,10 +65,8 @@
   models.
 - Tests against Leissa (1969), Table 2.21 (annulus clamped outside and
   free inside, alone and clamped through `'BFxcte'` by the clamped end of a
-  cylinder), against the buckling of annuli under a uniform compression on
-  both edges (Kiani, Bagheri and Eslami 2019, Table 1), against `4 pi^2
-  D/b^2` and the plate models with a laminate offset in the flat-plate
-  limit, and of the tangent stiffness against the derivative of the
+  cylinder), against `4 pi^2 D/b^2` and the plate models with a laminate
+  offset in the flat-plate limit, and of the tangent stiffness against the derivative of the
   internal force vector. New page "Annular-sector plates".
 
 ### New argument `models` of the wing box and of the blade-stiffened cylinder

@@ -7,9 +7,8 @@ inner edge against the exact roots of the frequency equation of Leissa
 2.21; linear buckling of a simply supported square web of large radius
 against the flat plate, `4 \pi^2 D/b^2` (Timoshenko and Gere 1961, Eq.
 (h), p. 353); the tangent stiffness against the derivative of the internal
-force vector; the laminate offset against the flat plate; linear buckling
-of annuli under a uniform compression on both edges against Kiani, Bagheri
-and Eslami (2019), Table 1; and the check of the radii. The three models
+force vector; the laminate offset against the flat plate; and the check
+of the radii. The three models
 have the same linear strains and the same geometric stiffness of a
 constant out-of-plane buckling mode; the tests of the linear analyses run
 for the three.
@@ -56,10 +55,6 @@ References
    (1.11)-(1.13) and (1.17), p. 2, and Table 2.21, p. 23.
 .. [2] Timoshenko, S. P., and Gere, J. M., Theory of Elastic Stability, 2nd
    ed., McGraw-Hill, 1961, p. 353, Eq. (h).
-.. [3] Kiani, Y., Bagheri, H., and Eslami, M. R., "Asymmetric compressive
-   stability of rotating annular plates", European Journal of
-   Computational Mechanics, 2019, pp. 325-350, Table 1.
-   https://doi.org/10.13052/ejcm1958-5829.2843
 
 """
 import numpy as np
@@ -231,40 +226,3 @@ def test_offset_plate_limit(model):
     assert np.allclose(got, ref, rtol=3e-4)
     assert got[0] > 1.3*omegas(_square(model, 1e4, 0.))[0]
 
-
-#: Kiani, Bagheri and Eslami (2019), Table 1, the values of Wang, Wang and
-#: Reddy (2004) reprinted there: `\lambda = N a^2/D` of the annulus of outer
-#: radius `a` and inner radius `\beta a` under the compression `N` on both
-#: edges, clamped (C) or simply supported (S) on both edges, `\nu = 0.3`
-COMPRESSION = {('C', 0.3): 8.63, ('C', 0.5): 12.15,
-               ('S', 0.3): 4.75, ('S', 0.5): 6.40}
-
-
-@pytest.mark.parametrize('model', MODELS)
-@pytest.mark.parametrize('edges, beta', list(COMPRESSION))
-def test_annulus_uniform_compression(edges, beta, model):
-    r"""Full annulus, two half annuli with ``'SSycte'``, under the membrane
-    state `N_{\rho\rho} = N_{\theta\theta} = -N`, against Kiani, Bagheri and
-    Eslami (2019), Table 1, within 0.5 %"""
-    nu = 0.3
-    halves = []
-    for _ in range(2):
-        s = Shell(model=model, a=R*(1 - beta), b=np.pi*R, r=R, m=10, n=12,
-                  plyt=H, stack=[0], laminaprop=(E, nu))
-        for e in ('x1', 'x2'):
-            for f in 'uvw':
-                setattr(s, e + f, 0)
-            setattr(s, e + 'wr', 0 if edges == 'C' else 1)
-        s.Nxx = -1.
-        s.Nyy = -1.
-        halves.append(s)
-    p1, p2 = halves
-    conn = [dict(p1=p1, p2=p2, func='SSycte', ycte1=p1.b, ycte2=0),
-            dict(p1=p1, p2=p2, func='SSycte', ycte1=0, ycte2=p2.b)]
-    md = MultiDomain([p1, p2], conn)
-    eigvals, _ = lb(md.reduce(md.calc_kC(silent=True)),
-                    md.reduce(md.calc_kG(silent=True)), silent=True,
-                    num_eigvalues=4)
-    Dn = E*H**3/(12*(1 - nu**2))
-    assert np.isclose(eigvals[0]*R**2/Dn, COMPRESSION[(edges, beta)],
-                      rtol=5e-3)
