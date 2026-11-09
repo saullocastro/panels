@@ -13,7 +13,8 @@ that build and analyse example assemblies of
 :mod:`panels.multidomain.tstiff2d_1stiff_compression`,
 :mod:`panels.multidomain.tstiff2d_1stiff_flutter`,
 :mod:`panels.multidomain.cylinder`,
-:mod:`panels.multidomain.cylinder_blade_stiffened` and
+:mod:`panels.multidomain.cylinder_blade_stiffened`,
+:mod:`panels.multidomain.cylinder_z_stiffened` and
 :mod:`panels.multidomain.wingbox`.
 
 .. autoclass:: MultiDomain
@@ -27,4 +28,5 @@ from . tstiff2d_1stiff_compression import *
 from . tstiff2d_1stiff_flutter import *
 from . cylinder import *
 from . cylinder_blade_stiffened import *
+from . cylinder_z_stiffened import *
 from . wingbox import *
