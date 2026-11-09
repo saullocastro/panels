@@ -4,6 +4,11 @@ Derivations (sympy) of the penalty matrices of `MultiDomain`:
 
 - `connections.py`: the connections between two domains, written to
   `output_expressions_python_new/sympy_<name>.txt`;
+- `bfxcte_face.py`: symbolic checks of the connection `'BFxcte'` at a face
+  of a cylinder (key `'face'`): the Kirchhoff-Love displacements of a point
+  of the normal, the rotation about the circumferential axis, and the zero
+  residuals of the six rigid motions of a cylinder and an annular plate
+  whose edge is at the radius of the face;
 - `kCpd.py`: the prescribed displacements at a point and along a line,
   written to `output_expressions_python/sympy_<name>.txt`;
 - `force_crack_creation.py`: the terms of the creation of a crack in a
@@ -40,9 +45,14 @@ and the Donnell kinematics:
 | `'BFycte'` | base (1) and flange (2), normal, along `x` | `u1 = u2, v1 = w2, w1 = -v2`; `w,y - rinv v` (`kr`) | `kCBFycte.pyx` |
 | `'BFxcte'` | base (1) and flange (2), normal, along `y` | `u1 = w2, v1 = v2, w1 = -u2`; `w,x` (`kr`) | `kCBFxcte.pyx` |
 | `'BFxycte'`| edge `x1 = xcte1` of (1), edge `y2 = ycte2` of (2), angle `theta` | `u1 = -cos(theta) v2 + sin(theta) w2`, `v1 = u2`, `w1 = sin(theta) v2 + cos(theta) w2`; rotation about the common axis | `kCBFxycte.pyx` (block `12`) |
+| `'BFxcte'`, `face='lower'`/`'upper'` | as `'BFxcte'`, the line `x1 = xcte1`, `z = d1 -+ h1/2` of the base | `u1(z) = w2, v1(z) = v2, w1 = -u2`; `w,x` (`kr`) | `kCBFxcte_face.fkCBFxcte_face` |
 | `'SB'`     | panel (1) above panel (2), over the area | `u(z), v(z), w` at the common faces `z = d1 - h1/2`, `z = d2 + h2/2` | `skin_base.fkCSB` |
 
-For `'SB'` each panel has its own Kirchhoff kinematics, `u(z) = u - z w,x`,
+For `'BFxcte'` with the key `'face'` the edge `x2 = xcte2` of the flange
+(`0` for `'lower'`, `a2` for `'upper'`) is tied to the face of the base,
+with the Kirchhoff kinematics of the base below; the two edges share `eta`
+and span the same angle, e.g. a cylinder and an annular plate whose edge is
+at the radius `r1 + z` of the face. For `'SB'` each panel has its own Kirchhoff kinematics, `u(z) = u - z w,x`,
 `v(z) = (1 + z rinv) v - z w,y`, with `z` measured from its reference
 surface and the offsets `d1`, `d2`.
 

@@ -7,10 +7,10 @@
 #cython: embedsignature=True
 #cython: infer_types=False
 r"""
-Web of a ring frame, an annular-sector flat plate, using the classical
-laminated plate theory (CLPT) with von Kármán strains in polar coordinates
+Annular-sector flat plate, using the classical laminated plate theory
+(CLPT) with Green-Lagrange membrane strains in polar coordinates
 
-Numerically integrated kernels of the model ``'frame_web_clpt_donnell'``:
+Numerically integrated kernels of the model ``'annular_clpt_gl'``:
 the constitutive stiffness :func:`fkC_num`, the geometric stiffness
 :func:`fkG_num`, the mass :func:`fkM_num`, the internal force vector
 :func:`calc_fint`, the product of the tangent stiffness by a vector
@@ -19,34 +19,49 @@ the constitutive stiffness :func:`fkC_num`, the geometric stiffness
 degree of freedom ``k`` of the term ``(i, j)``, ``0 <= i < m``, ``0 <= j <
 n``, is at the row ``row0 + 3*(j*m + i) + k`` of the matrices.
 
-The web lies in the plane normal to the axis of a cylinder of radius ``r``,
-``shell.r``, the outer radius of the web, between the radii ``r`` and ``r -
-a``: ``a``, ``shell.a``, is the height of the web and ``b``, ``shell.b``,
-the arc length of its outer edge. The coordinate `x = r - \rho` runs from the
-outer edge inwards, `y = r \theta` along the outer edge, with the polar
-coordinates `(\rho, \theta)` of the plane; ``u``, ``v``, ``w`` are the
-displacements along `\boldsymbol{e}_x = -\boldsymbol{e}_\rho`,
-`\boldsymbol{e}_y = \boldsymbol{e}_\theta` and `\boldsymbol{e}_z =
-\boldsymbol{e}_x \times \boldsymbol{e}_y`, the local axes of the flange of
-the connection ``'BFxcte'`` whose base is the cylinder.
+The annular sector lies in a plane, between the outer radius ``r``,
+``shell.r``, and the inner radius ``r - a``: ``a``, ``shell.a``, is its
+radial width and ``b``, ``shell.b``, the arc length of its outer edge. The
+coordinate `x = r - \rho` runs from the outer edge inwards, `y = r \theta`
+along the outer edge, with the polar coordinates `(\rho, \theta)` of the
+plane; ``u``, ``v``, ``w`` are the displacements along
+`\boldsymbol{e}_x = -\boldsymbol{e}_\rho`, `\boldsymbol{e}_y =
+\boldsymbol{e}_\theta` and `\boldsymbol{e}_z = \boldsymbol{e}_x \times
+\boldsymbol{e}_y`. These are the local axes of the flange of the connection
+``'BFxcte'`` whose base is a cylinder of radius ``r``: the web of a ring
+frame of a stiffened cylinder is an application, with ``a`` the height of
+the web, ``b`` the arc length of its outer edge and ``r`` its outer radius.
+The laminate spans `d - h/2 \le z \le d + h/2` about the reference plane,
+`d` being the offset ``shell.offset``, which enters through the matrix
+``ABD`` and the moments of the density.
 
 Notes
 -----
-With `s = r/\rho`, the von Kármán strains in polar coordinates of Amabili
-[1]_, Eqs. (1.175)-(1.180), are, in these coordinates:
+With `s = r/\rho` and the tangent vectors of the deformed reference plane
+per unit length of the reference lines, in the local basis,
+`\boldsymbol{g}_1 = \{1 + u_{,x}, v_{,x}, w_{,x}\}^\top` and
+`\boldsymbol{g}_2 = \{s u_{,y} + v/\rho, 1 + s v_{,y} - u/\rho, s
+w_{,y}\}^\top`, the membrane strains are the complete Green-Lagrange
+strains of Amabili [1]_, Eqs. (1.166)-(1.168), in these coordinates, and
+the changes of curvature are linear:
 
 .. math::
 
-    \varepsilon_{xx} = u_{,x} + \frac{1}{2} w_{,x}^2 \qquad
-    \varepsilon_{yy} = s v_{,y} - \frac{u}{\rho} + \frac{1}{2} s^2 w_{,y}^2
-
-    \gamma_{xy} = s u_{,y} + v_{,x} + \frac{v}{\rho} + s w_{,x} w_{,y}
+    \varepsilon_{xx} = \frac{1}{2} \left(\boldsymbol{g}_1 \cdot
+    \boldsymbol{g}_1 - 1\right) \qquad
+    \varepsilon_{yy} = \frac{1}{2} \left(\boldsymbol{g}_2 \cdot
+    \boldsymbol{g}_2 - 1\right) \qquad
+    \gamma_{xy} = \boldsymbol{g}_1 \cdot \boldsymbol{g}_2
 
     \kappa_{xx} = -w_{,xx} \qquad
     \kappa_{yy} = \frac{w_{,x}}{\rho} - s^2 w_{,yy} \qquad
     \kappa_{xy} = -2 s \left(w_{,xy} + \frac{w_{,y}}{\rho}\right)
 
-and the element of area is `dA = (\rho/r)\, dx\, dy`. The integrands are
+The membrane strains vanish for any finite rigid motion; for `r \to
+\infty` the strains are those of ``plate_clpt_gl``. The second derivatives
+of the strains with respect to the generalized derivatives are constant.
+
+The element of area is `dA = (\rho/r)\, dx\, dy`. The integrands are
 rational functions of `x`, integrated with the Gauss-Legendre rule over the
 domain of :meth:`.Shell.integration_limits`.
 
@@ -73,6 +88,8 @@ cdef extern from 'bardell_functions.hpp':
 cdef int DOF = 3
 cdef int[3] P0 = [0, 3, 6]
 cdef int[3] P1 = [3, 6, 12]
+#: degree of freedom of each generalized derivative
+cdef int[12] FLD = [0, 0, 0, 1, 1, 1, 2, 2, 2, 2, 2, 2]
 
 
 def fkC_num(double [::1] cs, object Finput, object shell,
@@ -94,15 +111,15 @@ def fkC_num(double [::1] cs, object Finput, object shell,
         shape ``(6, 6)`` for the whole domain, e.g. ``shell.ABD``, or ``(nx,
         ny, 6, 6)`` with one matrix per integration point.
     shell : :class:`.Shell`
-        The web, which gives the height ``a``, the arc length ``b`` of the
-        outer edge, the outer radius ``r``, the numbers of terms ``m`` and
-        ``n`` and the boundary flags of the approximation functions of each
-        field.
+        The annular sector, which gives the radial width ``a``, the arc
+        length ``b`` of the outer edge, the outer radius ``r``, the numbers
+        of terms ``m`` and ``n`` and the boundary flags of the approximation
+        functions of each field.
     size : int
         Number of rows and columns of the matrix, the number of degrees of
         freedom of the assembly.
     row0, col0 : int
-        Row and column of the matrix where the terms of this web start.
+        Row and column of the matrix where the terms of this panel start.
     nx, ny : int
         Number of Gauss-Legendre points along `x` and `y`.
     NLgeom : int, optional
@@ -119,26 +136,32 @@ def fkC_num(double [::1] cs, object Finput, object shell,
     ValueError
         If ``Finput`` has an invalid shape, ``shell`` is not a
         :class:`.Shell` or its outer radius ``r`` is not larger than its
-        height ``a``.
+        radial width ``a``.
 
     Notes
     -----
     With the generalized derivatives `\boldsymbol{d} = \boldsymbol{\Phi}
     \boldsymbol{c}` of the module, `\boldsymbol{B} = \partial
-    \boldsymbol{\varepsilon}/\partial \boldsymbol{d}` and the membrane
-    stress resultants `\boldsymbol{N}_{NL}` of the quadratic part of the
+    \boldsymbol{\varepsilon}/\partial \boldsymbol{d}` at `\boldsymbol{d}`,
+    the stress resultants `\boldsymbol{\sigma} = \boldsymbol{F}
+    \boldsymbol{\varepsilon}` and `\boldsymbol{\sigma}_L` of the linear
     strains:
 
     .. math::
 
         \boldsymbol{K}_C = \int \boldsymbol{\Phi}^\top \left(
         \boldsymbol{B}^\top \boldsymbol{F} \boldsymbol{B} +
-        \boldsymbol{H}(\boldsymbol{N}_{NL}) \right) \boldsymbol{\Phi} \, dA
+        \boldsymbol{H}(\boldsymbol{\sigma}, \boldsymbol{d}) -
+        \boldsymbol{H}(\boldsymbol{\sigma}_L, \boldsymbol{0}) \right)
+        \boldsymbol{\Phi} \, dA, \qquad
+        \boldsymbol{H}(\boldsymbol{\sigma}, \boldsymbol{d}) = \sum_r
+        \sigma_r \frac{\partial^2 \varepsilon_r}{\partial \boldsymbol{d}
+        \partial \boldsymbol{d}}
 
-    with `\boldsymbol{H}(\boldsymbol{N}) = \boldsymbol{G}^\top
-    \boldsymbol{N} \boldsymbol{G}`, `\boldsymbol{G} \boldsymbol{d} =
-    \{w_{,x}, s w_{,y}\}^\top`, `dA = (\rho/r)\, dx\, dy`, see the notes of
-    the module.
+    with `dA = (\rho/r)\, dx\, dy`, see the notes of the module. With
+    ``NLgeom=0``, `\boldsymbol{d} = \boldsymbol{0}` and the matrix is
+    `\int \boldsymbol{\Phi}^\top \boldsymbol{B}_0^\top \boldsymbol{F}
+    \boldsymbol{B}_0 \boldsymbol{\Phi} \, dA`.
 
     """
     cdef double x1, x2, y1, y2, xi1, xi2, eta1, eta2
@@ -159,7 +182,10 @@ def fkC_num(double [::1] cs, object Finput, object shell,
     cdef double TA[36]
     cdef double Bm[72]
     cdef double FB[72]
-    cdef double w_x, w_y, eps0, eps1, eps2, NxxNL, NyyNL, NxyNL
+    cdef double eps0, eps1, eps2, eps3, eps4, eps5
+    cdef double epsL0, epsL1, epsL2, epsL3, epsL4, epsL5
+    cdef double Nxx, Nyy, Nxy, Mxx, Myy, Mxy
+    cdef double NxxL, NyyL, NxyL, MxxL, MyyL, MxyL
 
     cdef long [::1] kr, kc
     cdef double [::1] kv
@@ -185,8 +211,8 @@ def fkC_num(double [::1] cs, object Finput, object shell,
     m = shell.m
     n = shell.n
     if not R > a:
-        raise ValueError('the outer radius r must be larger than the height a '
-                         'of the web, got r={0} and a={1}'.format(R, a))
+        raise ValueError('the outer radius r must be larger than the radial '
+                         'width a, got r={0} and a={1}'.format(R, a))
     #NOTE physical limits of the integration domain, resolved and validated
     #     by Shell.integration_limits()
     x1, x2, y1, y2 = shell.integration_limits()
@@ -204,8 +230,8 @@ def fkC_num(double [::1] cs, object Finput, object shell,
     eta2 = y2/b*2 - 1
     intx = x2 - x1
     inty = y2 - y1
-    ftab = np.zeros((7, m), dtype=DOUBLE)
-    gtab = np.zeros((7, n), dtype=DOUBLE)
+    ftab = np.zeros((9, m), dtype=DOUBLE)
+    gtab = np.zeros((9, n), dtype=DOUBLE)
 
     fdim = 9*m*m*n*n
     kr = np.zeros((fdim,), dtype=INT)
@@ -230,24 +256,28 @@ def fkC_num(double [::1] cs, object Finput, object shell,
                 for i in range(m):
                     ftab[0, i] = f(i, xi, x1u, x1ur, x2u, x2ur)
                     ftab[1, i] = (2/a)*fp(i, xi, x1u, x1ur, x2u, x2ur)
-                    ftab[2, i] = f(i, xi, x1v, x1vr, x2v, x2vr)
-                    ftab[3, i] = (2/a)*fp(i, xi, x1v, x1vr, x2v, x2vr)
-                    ftab[4, i] = f(i, xi, x1w, x1wr, x2w, x2wr)
-                    ftab[5, i] = (2/a)*fp(i, xi, x1w, x1wr, x2w, x2wr)
-                    ftab[6, i] = (2/a)*(2/a)*fpp(i, xi, x1w, x1wr, x2w, x2wr)
+                    ftab[2, i] = (2/a)*(2/a)*fpp(i, xi, x1u, x1ur, x2u, x2ur)
+                    ftab[3, i] = f(i, xi, x1v, x1vr, x2v, x2vr)
+                    ftab[4, i] = (2/a)*fp(i, xi, x1v, x1vr, x2v, x2vr)
+                    ftab[5, i] = (2/a)*(2/a)*fpp(i, xi, x1v, x1vr, x2v, x2vr)
+                    ftab[6, i] = f(i, xi, x1w, x1wr, x2w, x2wr)
+                    ftab[7, i] = (2/a)*fp(i, xi, x1w, x1wr, x2w, x2wr)
+                    ftab[8, i] = (2/a)*(2/a)*fpp(i, xi, x1w, x1wr, x2w, x2wr)
                 for j in range(n):
                     gtab[0, j] = f(j, eta, y1u, y1ur, y2u, y2ur)
                     gtab[1, j] = (2/b)*fp(j, eta, y1u, y1ur, y2u, y2ur)
-                    gtab[2, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
-                    gtab[3, j] = (2/b)*fp(j, eta, y1v, y1vr, y2v, y2vr)
-                    gtab[4, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
-                    gtab[5, j] = (2/b)*fp(j, eta, y1w, y1wr, y2w, y2wr)
-                    gtab[6, j] = (2/b)*(2/b)*fpp(j, eta, y1w, y1wr, y2w, y2wr)
+                    gtab[2, j] = (2/b)*(2/b)*fpp(j, eta, y1u, y1ur, y2u, y2ur)
+                    gtab[3, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
+                    gtab[4, j] = (2/b)*fp(j, eta, y1v, y1vr, y2v, y2vr)
+                    gtab[5, j] = (2/b)*(2/b)*fpp(j, eta, y1v, y1vr, y2v, y2vr)
+                    gtab[6, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
+                    gtab[7, j] = (2/b)*fp(j, eta, y1w, y1wr, y2w, y2wr)
+                    gtab[8, j] = (2/b)*(2/b)*fpp(j, eta, y1w, y1wr, y2w, y2wr)
 
                 for p in range(72):
                     Bm[p] = 0.
-                w_x = 0.
-                w_y = 0.
+                for p in range(12):
+                    dv[p] = 0.
                 if NLgeom == 1:
                     for p in range(12):
                         dv[p] = 0.
@@ -257,35 +287,39 @@ def fkC_num(double [::1] cs, object Finput, object shell,
                             pA[0] = ftab[0, i]*gtab[0, j]
                             pA[1] = ftab[1, i]*gtab[0, j]
                             pA[2] = ftab[0, i]*gtab[1, j]
-                            pA[3] = ftab[2, i]*gtab[2, j]
-                            pA[4] = ftab[3, i]*gtab[2, j]
-                            pA[5] = ftab[2, i]*gtab[3, j]
-                            pA[6] = ftab[4, i]*gtab[4, j]
-                            pA[7] = ftab[5, i]*gtab[4, j]
-                            pA[8] = ftab[4, i]*gtab[5, j]
-                            pA[9] = ftab[6, i]*gtab[4, j]
-                            pA[10] = ftab[4, i]*gtab[6, j]
-                            pA[11] = ftab[5, i]*gtab[5, j]
+                            pA[3] = ftab[3, i]*gtab[3, j]
+                            pA[4] = ftab[4, i]*gtab[3, j]
+                            pA[5] = ftab[3, i]*gtab[4, j]
+                            pA[6] = ftab[6, i]*gtab[6, j]
+                            pA[7] = ftab[7, i]*gtab[6, j]
+                            pA[8] = ftab[6, i]*gtab[7, j]
+                            pA[9] = ftab[8, i]*gtab[6, j]
+                            pA[10] = ftab[6, i]*gtab[8, j]
+                            pA[11] = ftab[7, i]*gtab[7, j]
                             for p in range(12):
-                                dv[p] += pA[p]*cs[col + (0 if p < 3 else (1 if p < 6 else 2))]
-                    w_x = dv[7]
-                    w_y = dv[8]
-                Bm[1] = 1.
-                Bm[7] = w_x
-                Bm[12] = -irho
-                Bm[17] = s
-                Bm[20] = (s)*(s)*w_y
-                Bm[26] = s
-                Bm[27] = irho
-                Bm[28] = 1.
-                Bm[31] = s*w_y
-                Bm[32] = s*w_x
+                                dv[p] += pA[p]*cs[col + FLD[p]]
+                Bm[1] = dv[1] + 1.
+                Bm[4] = dv[4]
+                Bm[7] = dv[7]
+                Bm[12] = dv[0]*(irho)*(irho) - dv[5]*irho*s - irho
+                Bm[14] = dv[2]*(s)*(s) + dv[3]*irho*s
+                Bm[15] = dv[2]*irho*s + dv[3]*(irho)*(irho)
+                Bm[17] = -dv[0]*irho*s + dv[5]*(s)*(s) + s
+                Bm[20] = dv[8]*(s)*(s)
+                Bm[24] = -dv[4]*irho
+                Bm[25] = dv[2]*s + dv[3]*irho
+                Bm[26] = dv[1]*s + s
+                Bm[27] = dv[1]*irho + irho
+                Bm[28] = -dv[0]*irho + dv[5]*s + 1.
+                Bm[29] = dv[4]*s
+                Bm[31] = dv[8]*s
+                Bm[32] = dv[7]*s
                 Bm[45] = -1.
                 Bm[55] = irho
                 Bm[58] = -(s)*(s)
                 Bm[68] = -2.*irho*s
                 Bm[71] = -2.*s
-                # K = [B]^T [ABD] [B] + [H(N_NL)]
+                # K = [B]^T [ABD] [B]
                 for p in range(6):
                     for q in range(12):
                         FB[p*12 + q] = 0.
@@ -296,16 +330,76 @@ def fkC_num(double [::1] cs, object Finput, object shell,
                         K[p*12 + q] = 0.
                         for r in range(6):
                             K[p*12 + q] += Bm[r*12 + p]*FB[r*12 + q]
-                eps0 = 0.5*w_x*w_x
-                eps1 = 0.5*s*s*w_y*w_y
-                eps2 = s*w_x*w_y
-                NxxNL = F[0]*eps0 + F[1]*eps1 + F[2]*eps2
-                NyyNL = F[6]*eps0 + F[7]*eps1 + F[8]*eps2
-                NxyNL = F[12]*eps0 + F[13]*eps1 + F[14]*eps2
-                K[91] += NxxNL
-                K[92] += NxyNL*s
-                K[103] += NxyNL*s
-                K[104] += NyyNL*(s)*(s)
+                if NLgeom == 1:
+                    # + [H(sigma, d)] - [H(sigma_L, 0)]
+                    eps0 = (dv[1])*(dv[1])/2. + dv[1] + (dv[4])*(dv[4])/2. + (dv[7])*(dv[7])/2.
+                    eps1 = (dv[0])*(dv[0])*(irho)*(irho)/2. - dv[0]*dv[5]*irho*s - dv[0]*irho + (dv[2])*(dv[2])*(s)*(s)/2. + dv[2]*dv[3]*irho*s + (dv[3])*(dv[3])*(irho)*(irho)/2. + (dv[5])*(dv[5])*(s)*(s)/2. + dv[5]*s + (dv[8])*(dv[8])*(s)*(s)/2.
+                    eps2 = -dv[0]*dv[4]*irho + dv[1]*dv[2]*s + dv[1]*dv[3]*irho + dv[2]*s + dv[3]*irho + dv[4]*dv[5]*s + dv[4] + dv[7]*dv[8]*s
+                    eps3 = -dv[9]
+                    eps4 = -dv[10]*(s)*(s) + dv[7]*irho
+                    eps5 = -2.*dv[11]*s - 2.*dv[8]*irho*s
+                    epsL0 = dv[1]
+                    epsL1 = -dv[0]*irho + dv[5]*s
+                    epsL2 = dv[2]*s + dv[3]*irho + dv[4]
+                    epsL3 = -dv[9]
+                    epsL4 = -dv[10]*(s)*(s) + dv[7]*irho
+                    epsL5 = -2.*dv[11]*s - 2.*dv[8]*irho*s
+                    Nxx = F[0]*eps0 + F[1]*eps1 + F[2]*eps2 + F[3]*eps3 + F[4]*eps4 + F[5]*eps5
+                    Nyy = F[6]*eps0 + F[7]*eps1 + F[8]*eps2 + F[9]*eps3 + F[10]*eps4 + F[11]*eps5
+                    Nxy = F[12]*eps0 + F[13]*eps1 + F[14]*eps2 + F[15]*eps3 + F[16]*eps4 + F[17]*eps5
+                    Mxx = F[18]*eps0 + F[19]*eps1 + F[20]*eps2 + F[21]*eps3 + F[22]*eps4 + F[23]*eps5
+                    Myy = F[24]*eps0 + F[25]*eps1 + F[26]*eps2 + F[27]*eps3 + F[28]*eps4 + F[29]*eps5
+                    Mxy = F[30]*eps0 + F[31]*eps1 + F[32]*eps2 + F[33]*eps3 + F[34]*eps4 + F[35]*eps5
+                    NxxL = F[0]*epsL0 + F[1]*epsL1 + F[2]*epsL2 + F[3]*epsL3 + F[4]*epsL4 + F[5]*epsL5
+                    NyyL = F[6]*epsL0 + F[7]*epsL1 + F[8]*epsL2 + F[9]*epsL3 + F[10]*epsL4 + F[11]*epsL5
+                    NxyL = F[12]*epsL0 + F[13]*epsL1 + F[14]*epsL2 + F[15]*epsL3 + F[16]*epsL4 + F[17]*epsL5
+                    MxxL = F[18]*epsL0 + F[19]*epsL1 + F[20]*epsL2 + F[21]*epsL3 + F[22]*epsL4 + F[23]*epsL5
+                    MyyL = F[24]*epsL0 + F[25]*epsL1 + F[26]*epsL2 + F[27]*epsL3 + F[28]*epsL4 + F[29]*epsL5
+                    MxyL = F[30]*epsL0 + F[31]*epsL1 + F[32]*epsL2 + F[33]*epsL3 + F[34]*epsL4 + F[35]*epsL5
+                    K[0] += Nyy*(irho)*(irho)
+                    K[4] += -Nxy*irho
+                    K[5] += -Nyy*irho*s
+                    K[13] += Nxx
+                    K[14] += Nxy*s
+                    K[15] += Nxy*irho
+                    K[25] += Nxy*s
+                    K[26] += Nyy*(s)*(s)
+                    K[27] += Nyy*irho*s
+                    K[37] += Nxy*irho
+                    K[38] += Nyy*irho*s
+                    K[39] += Nyy*(irho)*(irho)
+                    K[48] += -Nxy*irho
+                    K[52] += Nxx
+                    K[53] += Nxy*s
+                    K[60] += -Nyy*irho*s
+                    K[64] += Nxy*s
+                    K[65] += Nyy*(s)*(s)
+                    K[91] += Nxx
+                    K[92] += Nxy*s
+                    K[103] += Nxy*s
+                    K[104] += Nyy*(s)*(s)
+                    K[0] -= NyyL*(irho)*(irho)
+                    K[4] -= -NxyL*irho
+                    K[5] -= -NyyL*irho*s
+                    K[13] -= NxxL
+                    K[14] -= NxyL*s
+                    K[15] -= NxyL*irho
+                    K[25] -= NxyL*s
+                    K[26] -= NyyL*(s)*(s)
+                    K[27] -= NyyL*irho*s
+                    K[37] -= NxyL*irho
+                    K[38] -= NyyL*irho*s
+                    K[39] -= NyyL*(irho)*(irho)
+                    K[48] -= -NxyL*irho
+                    K[52] -= NxxL
+                    K[53] -= NxyL*s
+                    K[60] -= -NyyL*irho*s
+                    K[64] -= NxyL*s
+                    K[65] -= NyyL*(s)*(s)
+                    K[91] -= NxxL
+                    K[92] -= NxyL*s
+                    K[103] -= NxyL*s
+                    K[104] -= NyyL*(s)*(s)
                 c = -1
                 for j in range(n):
                     for i in range(m):
@@ -313,15 +407,15 @@ def fkC_num(double [::1] cs, object Finput, object shell,
                         pA[0] = ftab[0, i]*gtab[0, j]
                         pA[1] = ftab[1, i]*gtab[0, j]
                         pA[2] = ftab[0, i]*gtab[1, j]
-                        pA[3] = ftab[2, i]*gtab[2, j]
-                        pA[4] = ftab[3, i]*gtab[2, j]
-                        pA[5] = ftab[2, i]*gtab[3, j]
-                        pA[6] = ftab[4, i]*gtab[4, j]
-                        pA[7] = ftab[5, i]*gtab[4, j]
-                        pA[8] = ftab[4, i]*gtab[5, j]
-                        pA[9] = ftab[6, i]*gtab[4, j]
-                        pA[10] = ftab[4, i]*gtab[6, j]
-                        pA[11] = ftab[5, i]*gtab[5, j]
+                        pA[3] = ftab[3, i]*gtab[3, j]
+                        pA[4] = ftab[4, i]*gtab[3, j]
+                        pA[5] = ftab[3, i]*gtab[4, j]
+                        pA[6] = ftab[6, i]*gtab[6, j]
+                        pA[7] = ftab[7, i]*gtab[6, j]
+                        pA[8] = ftab[6, i]*gtab[7, j]
+                        pA[9] = ftab[8, i]*gtab[6, j]
+                        pA[10] = ftab[6, i]*gtab[8, j]
+                        pA[11] = ftab[7, i]*gtab[7, j]
                         # TA[e, q] = sum_p Phi_A[p, e] K[p, q]
                         for e in range(3):
                             for q in range(12):
@@ -337,15 +431,15 @@ def fkC_num(double [::1] cs, object Finput, object shell,
                                 pB[0] = ftab[0, k]*gtab[0, l]
                                 pB[1] = ftab[1, k]*gtab[0, l]
                                 pB[2] = ftab[0, k]*gtab[1, l]
-                                pB[3] = ftab[2, k]*gtab[2, l]
-                                pB[4] = ftab[3, k]*gtab[2, l]
-                                pB[5] = ftab[2, k]*gtab[3, l]
-                                pB[6] = ftab[4, k]*gtab[4, l]
-                                pB[7] = ftab[5, k]*gtab[4, l]
-                                pB[8] = ftab[4, k]*gtab[5, l]
-                                pB[9] = ftab[6, k]*gtab[4, l]
-                                pB[10] = ftab[4, k]*gtab[6, l]
-                                pB[11] = ftab[5, k]*gtab[5, l]
+                                pB[3] = ftab[3, k]*gtab[3, l]
+                                pB[4] = ftab[4, k]*gtab[3, l]
+                                pB[5] = ftab[3, k]*gtab[4, l]
+                                pB[6] = ftab[6, k]*gtab[6, l]
+                                pB[7] = ftab[7, k]*gtab[6, l]
+                                pB[8] = ftab[6, k]*gtab[7, l]
+                                pB[9] = ftab[8, k]*gtab[6, l]
+                                pB[10] = ftab[6, k]*gtab[8, l]
+                                pB[11] = ftab[7, k]*gtab[7, l]
                                 for e in range(3):
                                     for f2 in range(3):
                                         c += 1
@@ -360,13 +454,14 @@ def fkC_num(double [::1] cs, object Finput, object shell,
 def fkG_num(double [::1] cs, object Finput, object shell,
         int size, int row0, int col0, int nx, int ny,
         double Nxx0=0, double Nyy0=0, double Nxy0=0):
-    r"""Geometric stiffness matrix of the linear membrane stress state
+    r"""Geometric stiffness matrix of the linear stress state
 
-    Integrates numerically the geometric stiffness matrix of the membrane
-    stress resultants of the linear strains at ``cs``, superposed to the
-    constant state ``Nxx0``, ``Nyy0``, ``Nxy0``. The matrix is homogeneous
+    Integrates numerically the geometric stiffness matrix of the stress
+    resultants of the linear strains at ``cs``, superposed to the constant
+    membrane state ``Nxx0``, ``Nyy0``, ``Nxy0``. The matrix is homogeneous
     of degree one in ``cs``, as the linear buckling eigenvalue problem
-    requires; the stress of the non-linear strains enters :func:`fkC_num`.
+    requires; the remaining terms of the tangent stiffness enter
+    :func:`fkC_num`.
 
     Parameters
     ----------
@@ -378,15 +473,15 @@ def fkG_num(double [::1] cs, object Finput, object shell,
         shape ``(6, 6)`` for the whole domain, e.g. ``shell.ABD``, or ``(nx,
         ny, 6, 6)`` with one matrix per integration point.
     shell : :class:`.Shell`
-        The web, which gives the height ``a``, the arc length ``b`` of the
-        outer edge, the outer radius ``r``, the numbers of terms ``m`` and
-        ``n`` and the boundary flags of the approximation functions of each
-        field.
+        The annular sector, which gives the radial width ``a``, the arc
+        length ``b`` of the outer edge, the outer radius ``r``, the numbers
+        of terms ``m`` and ``n`` and the boundary flags of the approximation
+        functions of each field.
     size : int
         Number of rows and columns of the matrix, the number of degrees of
         freedom of the assembly.
     row0, col0 : int
-        Row and column of the matrix where the terms of this web start.
+        Row and column of the matrix where the terms of this panel start.
     nx, ny : int
         Number of Gauss-Legendre points along `x` and `y`.
     Nxx0, Nyy0, Nxy0 : float, optional
@@ -405,23 +500,24 @@ def fkG_num(double [::1] cs, object Finput, object shell,
     ValueError
         If ``Finput`` has an invalid shape, ``shell`` is not a
         :class:`.Shell` or its outer radius ``r`` is not larger than its
-        height ``a``.
+        radial width ``a``.
 
     Notes
     -----
-    With `\boldsymbol{N} = \boldsymbol{N}_0 + \boldsymbol{N}_L`,
-    `\boldsymbol{N}_L` the membrane stress resultants of the linear strains
-    of ``cs``:
+    With `\boldsymbol{\sigma} = \boldsymbol{\sigma}_L +
+    \boldsymbol{\sigma}_0`, `\boldsymbol{\sigma}_L` the stress resultants
+    of the linear strains of ``cs`` and `\boldsymbol{\sigma}_0 = \{N_{xx0},
+    N_{yy0}, N_{xy0}, 0, 0, 0\}^\top`:
 
     .. math::
 
-        \boldsymbol{K}_G = \int \boldsymbol{\Phi}^\top \boldsymbol{G}^\top
-        \begin{bmatrix} N_{xx} & N_{xy} \\ N_{xy} & N_{yy}
-        \end{bmatrix} \boldsymbol{G} \boldsymbol{\Phi} \, dA, \qquad
-        \boldsymbol{G} \boldsymbol{d} = \{w_{,x}, s w_{,y}\}^\top
+        \boldsymbol{K}_G = \int \boldsymbol{\Phi}^\top
+        \boldsymbol{H}(\boldsymbol{\sigma}, \boldsymbol{0})
+        \boldsymbol{\Phi} \, dA
 
-    the variation of the work of the membrane stresses on the quadratic
-    terms of the von Kármán strains, see the notes of the module.
+    with `\boldsymbol{H}` of :func:`fkC_num`, the variation of the work of
+    the stresses on the second-order terms of the strains, see the notes of
+    the module.
 
     """
     cdef double x1, x2, y1, y2, xi1, xi2, eta1, eta2
@@ -440,7 +536,8 @@ def fkG_num(double [::1] cs, object Finput, object shell,
     cdef double dv[12]
     cdef double K[144]
     cdef double TA[36]
-    cdef double eps0, eps1, eps2, eps3, eps4, eps5, Nxx, Nyy, Nxy
+    cdef double epsL0, epsL1, epsL2, epsL3, epsL4, epsL5
+    cdef double NxxL, NyyL, NxyL, MxxL, MyyL, MxyL
 
     cdef long [::1] kr, kc
     cdef double [::1] kv
@@ -466,8 +563,8 @@ def fkG_num(double [::1] cs, object Finput, object shell,
     m = shell.m
     n = shell.n
     if not R > a:
-        raise ValueError('the outer radius r must be larger than the height a '
-                         'of the web, got r={0} and a={1}'.format(R, a))
+        raise ValueError('the outer radius r must be larger than the radial '
+                         'width a, got r={0} and a={1}'.format(R, a))
     #NOTE physical limits of the integration domain, resolved and validated
     #     by Shell.integration_limits()
     x1, x2, y1, y2 = shell.integration_limits()
@@ -485,8 +582,8 @@ def fkG_num(double [::1] cs, object Finput, object shell,
     eta2 = y2/b*2 - 1
     intx = x2 - x1
     inty = y2 - y1
-    ftab = np.zeros((7, m), dtype=DOUBLE)
-    gtab = np.zeros((7, n), dtype=DOUBLE)
+    ftab = np.zeros((9, m), dtype=DOUBLE)
+    gtab = np.zeros((9, n), dtype=DOUBLE)
 
     fdim = 9*m*m*n*n
     kr = np.zeros((fdim,), dtype=INT)
@@ -511,19 +608,23 @@ def fkG_num(double [::1] cs, object Finput, object shell,
                 for i in range(m):
                     ftab[0, i] = f(i, xi, x1u, x1ur, x2u, x2ur)
                     ftab[1, i] = (2/a)*fp(i, xi, x1u, x1ur, x2u, x2ur)
-                    ftab[2, i] = f(i, xi, x1v, x1vr, x2v, x2vr)
-                    ftab[3, i] = (2/a)*fp(i, xi, x1v, x1vr, x2v, x2vr)
-                    ftab[4, i] = f(i, xi, x1w, x1wr, x2w, x2wr)
-                    ftab[5, i] = (2/a)*fp(i, xi, x1w, x1wr, x2w, x2wr)
-                    ftab[6, i] = (2/a)*(2/a)*fpp(i, xi, x1w, x1wr, x2w, x2wr)
+                    ftab[2, i] = (2/a)*(2/a)*fpp(i, xi, x1u, x1ur, x2u, x2ur)
+                    ftab[3, i] = f(i, xi, x1v, x1vr, x2v, x2vr)
+                    ftab[4, i] = (2/a)*fp(i, xi, x1v, x1vr, x2v, x2vr)
+                    ftab[5, i] = (2/a)*(2/a)*fpp(i, xi, x1v, x1vr, x2v, x2vr)
+                    ftab[6, i] = f(i, xi, x1w, x1wr, x2w, x2wr)
+                    ftab[7, i] = (2/a)*fp(i, xi, x1w, x1wr, x2w, x2wr)
+                    ftab[8, i] = (2/a)*(2/a)*fpp(i, xi, x1w, x1wr, x2w, x2wr)
                 for j in range(n):
                     gtab[0, j] = f(j, eta, y1u, y1ur, y2u, y2ur)
                     gtab[1, j] = (2/b)*fp(j, eta, y1u, y1ur, y2u, y2ur)
-                    gtab[2, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
-                    gtab[3, j] = (2/b)*fp(j, eta, y1v, y1vr, y2v, y2vr)
-                    gtab[4, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
-                    gtab[5, j] = (2/b)*fp(j, eta, y1w, y1wr, y2w, y2wr)
-                    gtab[6, j] = (2/b)*(2/b)*fpp(j, eta, y1w, y1wr, y2w, y2wr)
+                    gtab[2, j] = (2/b)*(2/b)*fpp(j, eta, y1u, y1ur, y2u, y2ur)
+                    gtab[3, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
+                    gtab[4, j] = (2/b)*fp(j, eta, y1v, y1vr, y2v, y2vr)
+                    gtab[5, j] = (2/b)*(2/b)*fpp(j, eta, y1v, y1vr, y2v, y2vr)
+                    gtab[6, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
+                    gtab[7, j] = (2/b)*fp(j, eta, y1w, y1wr, y2w, y2wr)
+                    gtab[8, j] = (2/b)*(2/b)*fpp(j, eta, y1w, y1wr, y2w, y2wr)
 
                 for p in range(12):
                     dv[p] = 0.
@@ -533,35 +634,56 @@ def fkG_num(double [::1] cs, object Finput, object shell,
                         pA[0] = ftab[0, i]*gtab[0, j]
                         pA[1] = ftab[1, i]*gtab[0, j]
                         pA[2] = ftab[0, i]*gtab[1, j]
-                        pA[3] = ftab[2, i]*gtab[2, j]
-                        pA[4] = ftab[3, i]*gtab[2, j]
-                        pA[5] = ftab[2, i]*gtab[3, j]
-                        pA[6] = ftab[4, i]*gtab[4, j]
-                        pA[7] = ftab[5, i]*gtab[4, j]
-                        pA[8] = ftab[4, i]*gtab[5, j]
-                        pA[9] = ftab[6, i]*gtab[4, j]
-                        pA[10] = ftab[4, i]*gtab[6, j]
-                        pA[11] = ftab[5, i]*gtab[5, j]
+                        pA[3] = ftab[3, i]*gtab[3, j]
+                        pA[4] = ftab[4, i]*gtab[3, j]
+                        pA[5] = ftab[3, i]*gtab[4, j]
+                        pA[6] = ftab[6, i]*gtab[6, j]
+                        pA[7] = ftab[7, i]*gtab[6, j]
+                        pA[8] = ftab[6, i]*gtab[7, j]
+                        pA[9] = ftab[8, i]*gtab[6, j]
+                        pA[10] = ftab[6, i]*gtab[8, j]
+                        pA[11] = ftab[7, i]*gtab[7, j]
                         for p in range(12):
-                            dv[p] += pA[p]*cs[col + (0 if p < 3 else (1 if p < 6 else 2))]
-                eps0 = dv[1]
-                eps1 = -dv[0]*irho + dv[5]*s
-                eps2 = dv[2]*s + dv[3]*irho + dv[4]
-                eps3 = -dv[9]
-                eps4 = -dv[10]*(s)*(s) + dv[7]*irho
-                eps5 = -2.*dv[11]*s - 2.*dv[8]*irho*s
-                Nxx = F[0]*eps0 + F[1]*eps1 + F[2]*eps2 + F[3]*eps3 + F[4]*eps4 + F[5]*eps5
-                Nyy = F[6]*eps0 + F[7]*eps1 + F[8]*eps2 + F[9]*eps3 + F[10]*eps4 + F[11]*eps5
-                Nxy = F[12]*eps0 + F[13]*eps1 + F[14]*eps2 + F[15]*eps3 + F[16]*eps4 + F[17]*eps5
-                Nxx = Nxx + Nxx0
-                Nyy = Nyy + Nyy0
-                Nxy = Nxy + Nxy0
+                            dv[p] += pA[p]*cs[col + FLD[p]]
+                epsL0 = dv[1]
+                epsL1 = -dv[0]*irho + dv[5]*s
+                epsL2 = dv[2]*s + dv[3]*irho + dv[4]
+                epsL3 = -dv[9]
+                epsL4 = -dv[10]*(s)*(s) + dv[7]*irho
+                epsL5 = -2.*dv[11]*s - 2.*dv[8]*irho*s
+                NxxL = F[0]*epsL0 + F[1]*epsL1 + F[2]*epsL2 + F[3]*epsL3 + F[4]*epsL4 + F[5]*epsL5
+                NyyL = F[6]*epsL0 + F[7]*epsL1 + F[8]*epsL2 + F[9]*epsL3 + F[10]*epsL4 + F[11]*epsL5
+                NxyL = F[12]*epsL0 + F[13]*epsL1 + F[14]*epsL2 + F[15]*epsL3 + F[16]*epsL4 + F[17]*epsL5
+                MxxL = F[18]*epsL0 + F[19]*epsL1 + F[20]*epsL2 + F[21]*epsL3 + F[22]*epsL4 + F[23]*epsL5
+                MyyL = F[24]*epsL0 + F[25]*epsL1 + F[26]*epsL2 + F[27]*epsL3 + F[28]*epsL4 + F[29]*epsL5
+                MxyL = F[30]*epsL0 + F[31]*epsL1 + F[32]*epsL2 + F[33]*epsL3 + F[34]*epsL4 + F[35]*epsL5
+                NxxL = NxxL + Nxx0
+                NyyL = NyyL + Nyy0
+                NxyL = NxyL + Nxy0
                 for p in range(144):
                     K[p] = 0.
-                K[91] += Nxx
-                K[92] += Nxy*s
-                K[103] += Nxy*s
-                K[104] += Nyy*(s)*(s)
+                K[0] += NyyL*(irho)*(irho)
+                K[4] += -NxyL*irho
+                K[5] += -NyyL*irho*s
+                K[13] += NxxL
+                K[14] += NxyL*s
+                K[15] += NxyL*irho
+                K[25] += NxyL*s
+                K[26] += NyyL*(s)*(s)
+                K[27] += NyyL*irho*s
+                K[37] += NxyL*irho
+                K[38] += NyyL*irho*s
+                K[39] += NyyL*(irho)*(irho)
+                K[48] += -NxyL*irho
+                K[52] += NxxL
+                K[53] += NxyL*s
+                K[60] += -NyyL*irho*s
+                K[64] += NxyL*s
+                K[65] += NyyL*(s)*(s)
+                K[91] += NxxL
+                K[92] += NxyL*s
+                K[103] += NxyL*s
+                K[104] += NyyL*(s)*(s)
                 c = -1
                 for j in range(n):
                     for i in range(m):
@@ -569,15 +691,15 @@ def fkG_num(double [::1] cs, object Finput, object shell,
                         pA[0] = ftab[0, i]*gtab[0, j]
                         pA[1] = ftab[1, i]*gtab[0, j]
                         pA[2] = ftab[0, i]*gtab[1, j]
-                        pA[3] = ftab[2, i]*gtab[2, j]
-                        pA[4] = ftab[3, i]*gtab[2, j]
-                        pA[5] = ftab[2, i]*gtab[3, j]
-                        pA[6] = ftab[4, i]*gtab[4, j]
-                        pA[7] = ftab[5, i]*gtab[4, j]
-                        pA[8] = ftab[4, i]*gtab[5, j]
-                        pA[9] = ftab[6, i]*gtab[4, j]
-                        pA[10] = ftab[4, i]*gtab[6, j]
-                        pA[11] = ftab[5, i]*gtab[5, j]
+                        pA[3] = ftab[3, i]*gtab[3, j]
+                        pA[4] = ftab[4, i]*gtab[3, j]
+                        pA[5] = ftab[3, i]*gtab[4, j]
+                        pA[6] = ftab[6, i]*gtab[6, j]
+                        pA[7] = ftab[7, i]*gtab[6, j]
+                        pA[8] = ftab[6, i]*gtab[7, j]
+                        pA[9] = ftab[8, i]*gtab[6, j]
+                        pA[10] = ftab[6, i]*gtab[8, j]
+                        pA[11] = ftab[7, i]*gtab[7, j]
                         # TA[e, q] = sum_p Phi_A[p, e] K[p, q]
                         for e in range(3):
                             for q in range(12):
@@ -593,15 +715,15 @@ def fkG_num(double [::1] cs, object Finput, object shell,
                                 pB[0] = ftab[0, k]*gtab[0, l]
                                 pB[1] = ftab[1, k]*gtab[0, l]
                                 pB[2] = ftab[0, k]*gtab[1, l]
-                                pB[3] = ftab[2, k]*gtab[2, l]
-                                pB[4] = ftab[3, k]*gtab[2, l]
-                                pB[5] = ftab[2, k]*gtab[3, l]
-                                pB[6] = ftab[4, k]*gtab[4, l]
-                                pB[7] = ftab[5, k]*gtab[4, l]
-                                pB[8] = ftab[4, k]*gtab[5, l]
-                                pB[9] = ftab[6, k]*gtab[4, l]
-                                pB[10] = ftab[4, k]*gtab[6, l]
-                                pB[11] = ftab[5, k]*gtab[5, l]
+                                pB[3] = ftab[3, k]*gtab[3, l]
+                                pB[4] = ftab[4, k]*gtab[3, l]
+                                pB[5] = ftab[3, k]*gtab[4, l]
+                                pB[6] = ftab[6, k]*gtab[6, l]
+                                pB[7] = ftab[7, k]*gtab[6, l]
+                                pB[8] = ftab[6, k]*gtab[7, l]
+                                pB[9] = ftab[8, k]*gtab[6, l]
+                                pB[10] = ftab[6, k]*gtab[8, l]
+                                pB[11] = ftab[7, k]*gtab[7, l]
                                 for e in range(3):
                                     for f2 in range(3):
                                         c += 1
@@ -620,10 +742,10 @@ def fkM_num(object shell, object I_input, int size,
     Parameters
     ----------
     shell : :class:`.Shell`
-        The web, which gives the height ``a``, the arc length ``b`` of the
-        outer edge, the outer radius ``r``, the numbers of terms ``m`` and
-        ``n`` and the boundary flags of the approximation functions of each
-        field.
+        The annular sector, which gives the radial width ``a``, the arc
+        length ``b`` of the outer edge, the outer radius ``r``, the numbers
+        of terms ``m`` and ``n`` and the boundary flags of the approximation
+        functions of each field.
     I_input : array-like
         Moments of the density through the thickness, ``I0, I1, I2``, shape
         ``(3,)`` for the whole domain or ``(nx, ny, 3)`` with one set per
@@ -632,7 +754,7 @@ def fkM_num(object shell, object I_input, int size,
         Number of rows and columns of the matrix, the number of degrees of
         freedom of the assembly.
     row0, col0 : int
-        Row and column of the matrix where the terms of this web start.
+        Row and column of the matrix where the terms of this panel start.
     nx, ny : int
         Number of Gauss-Legendre points along `x` and `y`.
 
@@ -647,14 +769,15 @@ def fkM_num(object shell, object I_input, int size,
     ValueError
         If ``I_input`` has an invalid shape, ``shell`` is not a
         :class:`.Shell` or its outer radius ``r`` is not larger than its
-        height ``a``.
+        radial width ``a``.
 
     Notes
     -----
     With the displacement through the thickness of the Kirchhoff-Love
     kinematics, `u(z) = u - z w_{,x}`, `v(z) = v - z s w_{,y}`, `w(z) =
-    w`, and the moments `I_n = \int \rho_m z^n dz`, `n = 0, 1, 2`, of the
-    density `\rho_m`:
+    w`, `z` measured from the reference plane, and the moments `I_n = \int
+    \rho_m z^n dz`, `n = 0, 1, 2`, of the density `\rho_m` over `d - h/2
+    \le z \le d + h/2`, with the offset `d` (``shell.offset``):
 
     .. math::
 
@@ -710,8 +833,8 @@ def fkM_num(object shell, object I_input, int size,
     m = shell.m
     n = shell.n
     if not R > a:
-        raise ValueError('the outer radius r must be larger than the height a '
-                         'of the web, got r={0} and a={1}'.format(R, a))
+        raise ValueError('the outer radius r must be larger than the radial '
+                         'width a, got r={0} and a={1}'.format(R, a))
     #NOTE physical limits of the integration domain, resolved and validated
     #     by Shell.integration_limits()
     x1, x2, y1, y2 = shell.integration_limits()
@@ -729,8 +852,8 @@ def fkM_num(object shell, object I_input, int size,
     eta2 = y2/b*2 - 1
     intx = x2 - x1
     inty = y2 - y1
-    ftab = np.zeros((7, m), dtype=DOUBLE)
-    gtab = np.zeros((7, n), dtype=DOUBLE)
+    ftab = np.zeros((9, m), dtype=DOUBLE)
+    gtab = np.zeros((9, n), dtype=DOUBLE)
 
     fdim = 9*m*m*n*n
     kr = np.zeros((fdim,), dtype=INT)
@@ -755,19 +878,23 @@ def fkM_num(object shell, object I_input, int size,
                 for i in range(m):
                     ftab[0, i] = f(i, xi, x1u, x1ur, x2u, x2ur)
                     ftab[1, i] = (2/a)*fp(i, xi, x1u, x1ur, x2u, x2ur)
-                    ftab[2, i] = f(i, xi, x1v, x1vr, x2v, x2vr)
-                    ftab[3, i] = (2/a)*fp(i, xi, x1v, x1vr, x2v, x2vr)
-                    ftab[4, i] = f(i, xi, x1w, x1wr, x2w, x2wr)
-                    ftab[5, i] = (2/a)*fp(i, xi, x1w, x1wr, x2w, x2wr)
-                    ftab[6, i] = (2/a)*(2/a)*fpp(i, xi, x1w, x1wr, x2w, x2wr)
+                    ftab[2, i] = (2/a)*(2/a)*fpp(i, xi, x1u, x1ur, x2u, x2ur)
+                    ftab[3, i] = f(i, xi, x1v, x1vr, x2v, x2vr)
+                    ftab[4, i] = (2/a)*fp(i, xi, x1v, x1vr, x2v, x2vr)
+                    ftab[5, i] = (2/a)*(2/a)*fpp(i, xi, x1v, x1vr, x2v, x2vr)
+                    ftab[6, i] = f(i, xi, x1w, x1wr, x2w, x2wr)
+                    ftab[7, i] = (2/a)*fp(i, xi, x1w, x1wr, x2w, x2wr)
+                    ftab[8, i] = (2/a)*(2/a)*fpp(i, xi, x1w, x1wr, x2w, x2wr)
                 for j in range(n):
                     gtab[0, j] = f(j, eta, y1u, y1ur, y2u, y2ur)
                     gtab[1, j] = (2/b)*fp(j, eta, y1u, y1ur, y2u, y2ur)
-                    gtab[2, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
-                    gtab[3, j] = (2/b)*fp(j, eta, y1v, y1vr, y2v, y2vr)
-                    gtab[4, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
-                    gtab[5, j] = (2/b)*fp(j, eta, y1w, y1wr, y2w, y2wr)
-                    gtab[6, j] = (2/b)*(2/b)*fpp(j, eta, y1w, y1wr, y2w, y2wr)
+                    gtab[2, j] = (2/b)*(2/b)*fpp(j, eta, y1u, y1ur, y2u, y2ur)
+                    gtab[3, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
+                    gtab[4, j] = (2/b)*fp(j, eta, y1v, y1vr, y2v, y2vr)
+                    gtab[5, j] = (2/b)*(2/b)*fpp(j, eta, y1v, y1vr, y2v, y2vr)
+                    gtab[6, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
+                    gtab[7, j] = (2/b)*fp(j, eta, y1w, y1wr, y2w, y2wr)
+                    gtab[8, j] = (2/b)*(2/b)*fpp(j, eta, y1w, y1wr, y2w, y2wr)
 
                 for p in range(144):
                     K[p] = 0.
@@ -787,15 +914,15 @@ def fkM_num(object shell, object I_input, int size,
                         pA[0] = ftab[0, i]*gtab[0, j]
                         pA[1] = ftab[1, i]*gtab[0, j]
                         pA[2] = ftab[0, i]*gtab[1, j]
-                        pA[3] = ftab[2, i]*gtab[2, j]
-                        pA[4] = ftab[3, i]*gtab[2, j]
-                        pA[5] = ftab[2, i]*gtab[3, j]
-                        pA[6] = ftab[4, i]*gtab[4, j]
-                        pA[7] = ftab[5, i]*gtab[4, j]
-                        pA[8] = ftab[4, i]*gtab[5, j]
-                        pA[9] = ftab[6, i]*gtab[4, j]
-                        pA[10] = ftab[4, i]*gtab[6, j]
-                        pA[11] = ftab[5, i]*gtab[5, j]
+                        pA[3] = ftab[3, i]*gtab[3, j]
+                        pA[4] = ftab[4, i]*gtab[3, j]
+                        pA[5] = ftab[3, i]*gtab[4, j]
+                        pA[6] = ftab[6, i]*gtab[6, j]
+                        pA[7] = ftab[7, i]*gtab[6, j]
+                        pA[8] = ftab[6, i]*gtab[7, j]
+                        pA[9] = ftab[8, i]*gtab[6, j]
+                        pA[10] = ftab[6, i]*gtab[8, j]
+                        pA[11] = ftab[7, i]*gtab[7, j]
                         # TA[e, q] = sum_p Phi_A[p, e] K[p, q]
                         for e in range(3):
                             for q in range(12):
@@ -811,15 +938,15 @@ def fkM_num(object shell, object I_input, int size,
                                 pB[0] = ftab[0, k]*gtab[0, l]
                                 pB[1] = ftab[1, k]*gtab[0, l]
                                 pB[2] = ftab[0, k]*gtab[1, l]
-                                pB[3] = ftab[2, k]*gtab[2, l]
-                                pB[4] = ftab[3, k]*gtab[2, l]
-                                pB[5] = ftab[2, k]*gtab[3, l]
-                                pB[6] = ftab[4, k]*gtab[4, l]
-                                pB[7] = ftab[5, k]*gtab[4, l]
-                                pB[8] = ftab[4, k]*gtab[5, l]
-                                pB[9] = ftab[6, k]*gtab[4, l]
-                                pB[10] = ftab[4, k]*gtab[6, l]
-                                pB[11] = ftab[5, k]*gtab[5, l]
+                                pB[3] = ftab[3, k]*gtab[3, l]
+                                pB[4] = ftab[4, k]*gtab[3, l]
+                                pB[5] = ftab[3, k]*gtab[4, l]
+                                pB[6] = ftab[6, k]*gtab[6, l]
+                                pB[7] = ftab[7, k]*gtab[6, l]
+                                pB[8] = ftab[6, k]*gtab[7, l]
+                                pB[9] = ftab[8, k]*gtab[6, l]
+                                pB[10] = ftab[6, k]*gtab[8, l]
+                                pB[11] = ftab[7, k]*gtab[7, l]
                                 for e in range(3):
                                     for f2 in range(3):
                                         c += 1
@@ -845,15 +972,15 @@ def calc_fint(double [::1] cs, object Finput, object shell,
         shape ``(6, 6)`` for the whole domain, e.g. ``shell.ABD``, or ``(nx,
         ny, 6, 6)`` with one matrix per integration point.
     shell : :class:`.Shell`
-        The web, which gives the height ``a``, the arc length ``b`` of the
-        outer edge, the outer radius ``r``, the numbers of terms ``m`` and
-        ``n`` and the boundary flags of the approximation functions of each
-        field.
+        The annular sector, which gives the radial width ``a``, the arc
+        length ``b`` of the outer edge, the outer radius ``r``, the numbers
+        of terms ``m`` and ``n`` and the boundary flags of the approximation
+        functions of each field.
     size : int
         Size of the vector, the number of degrees of freedom of the
         assembly.
     col0 : int
-        Entry of the vector where the terms of this web start.
+        Entry of the vector where the terms of this panel start.
     nx, ny : int
         Number of Gauss-Legendre points along `x` and `y`.
 
@@ -867,12 +994,12 @@ def calc_fint(double [::1] cs, object Finput, object shell,
     ValueError
         If ``Finput`` has an invalid shape, ``shell`` is not a
         :class:`.Shell` or its outer radius ``r`` is not larger than its
-        height ``a``.
+        radial width ``a``.
 
     Notes
     -----
-    With the von Kármán strains `\boldsymbol{\varepsilon}(\boldsymbol{d})`
-    of the module, `\boldsymbol{\sigma} = \boldsymbol{F}
+    With the strains `\boldsymbol{\varepsilon}(\boldsymbol{d})` of the
+    module, `\boldsymbol{\sigma} = \boldsymbol{F}
     \boldsymbol{\varepsilon}` and `\boldsymbol{B} = \partial
     \boldsymbol{\varepsilon}/\partial \boldsymbol{d}`:
 
@@ -900,7 +1027,7 @@ def calc_fint(double [::1] cs, object Finput, object shell,
     cdef double TA[36]
     cdef double Bm[72]
     cdef double bs[12]
-    cdef double w_x, w_y, eps0, eps1, eps2, eps3, eps4, eps5
+    cdef double eps0, eps1, eps2, eps3, eps4, eps5
     cdef double Nxx, Nyy, Nxy, Mxx, Myy, Mxy
     cdef double [::1] fint
     cdef int row0 = col0
@@ -926,8 +1053,8 @@ def calc_fint(double [::1] cs, object Finput, object shell,
     m = shell.m
     n = shell.n
     if not R > a:
-        raise ValueError('the outer radius r must be larger than the height a '
-                         'of the web, got r={0} and a={1}'.format(R, a))
+        raise ValueError('the outer radius r must be larger than the radial '
+                         'width a, got r={0} and a={1}'.format(R, a))
     #NOTE physical limits of the integration domain, resolved and validated
     #     by Shell.integration_limits()
     x1, x2, y1, y2 = shell.integration_limits()
@@ -945,8 +1072,8 @@ def calc_fint(double [::1] cs, object Finput, object shell,
     eta2 = y2/b*2 - 1
     intx = x2 - x1
     inty = y2 - y1
-    ftab = np.zeros((7, m), dtype=DOUBLE)
-    gtab = np.zeros((7, n), dtype=DOUBLE)
+    ftab = np.zeros((9, m), dtype=DOUBLE)
+    gtab = np.zeros((9, n), dtype=DOUBLE)
 
     fint = np.zeros(size, dtype=DOUBLE)
 
@@ -968,19 +1095,23 @@ def calc_fint(double [::1] cs, object Finput, object shell,
                 for i in range(m):
                     ftab[0, i] = f(i, xi, x1u, x1ur, x2u, x2ur)
                     ftab[1, i] = (2/a)*fp(i, xi, x1u, x1ur, x2u, x2ur)
-                    ftab[2, i] = f(i, xi, x1v, x1vr, x2v, x2vr)
-                    ftab[3, i] = (2/a)*fp(i, xi, x1v, x1vr, x2v, x2vr)
-                    ftab[4, i] = f(i, xi, x1w, x1wr, x2w, x2wr)
-                    ftab[5, i] = (2/a)*fp(i, xi, x1w, x1wr, x2w, x2wr)
-                    ftab[6, i] = (2/a)*(2/a)*fpp(i, xi, x1w, x1wr, x2w, x2wr)
+                    ftab[2, i] = (2/a)*(2/a)*fpp(i, xi, x1u, x1ur, x2u, x2ur)
+                    ftab[3, i] = f(i, xi, x1v, x1vr, x2v, x2vr)
+                    ftab[4, i] = (2/a)*fp(i, xi, x1v, x1vr, x2v, x2vr)
+                    ftab[5, i] = (2/a)*(2/a)*fpp(i, xi, x1v, x1vr, x2v, x2vr)
+                    ftab[6, i] = f(i, xi, x1w, x1wr, x2w, x2wr)
+                    ftab[7, i] = (2/a)*fp(i, xi, x1w, x1wr, x2w, x2wr)
+                    ftab[8, i] = (2/a)*(2/a)*fpp(i, xi, x1w, x1wr, x2w, x2wr)
                 for j in range(n):
                     gtab[0, j] = f(j, eta, y1u, y1ur, y2u, y2ur)
                     gtab[1, j] = (2/b)*fp(j, eta, y1u, y1ur, y2u, y2ur)
-                    gtab[2, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
-                    gtab[3, j] = (2/b)*fp(j, eta, y1v, y1vr, y2v, y2vr)
-                    gtab[4, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
-                    gtab[5, j] = (2/b)*fp(j, eta, y1w, y1wr, y2w, y2wr)
-                    gtab[6, j] = (2/b)*(2/b)*fpp(j, eta, y1w, y1wr, y2w, y2wr)
+                    gtab[2, j] = (2/b)*(2/b)*fpp(j, eta, y1u, y1ur, y2u, y2ur)
+                    gtab[3, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
+                    gtab[4, j] = (2/b)*fp(j, eta, y1v, y1vr, y2v, y2vr)
+                    gtab[5, j] = (2/b)*(2/b)*fpp(j, eta, y1v, y1vr, y2v, y2vr)
+                    gtab[6, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
+                    gtab[7, j] = (2/b)*fp(j, eta, y1w, y1wr, y2w, y2wr)
+                    gtab[8, j] = (2/b)*(2/b)*fpp(j, eta, y1w, y1wr, y2w, y2wr)
 
                 for p in range(12):
                     dv[p] = 0.
@@ -990,22 +1121,20 @@ def calc_fint(double [::1] cs, object Finput, object shell,
                         pA[0] = ftab[0, i]*gtab[0, j]
                         pA[1] = ftab[1, i]*gtab[0, j]
                         pA[2] = ftab[0, i]*gtab[1, j]
-                        pA[3] = ftab[2, i]*gtab[2, j]
-                        pA[4] = ftab[3, i]*gtab[2, j]
-                        pA[5] = ftab[2, i]*gtab[3, j]
-                        pA[6] = ftab[4, i]*gtab[4, j]
-                        pA[7] = ftab[5, i]*gtab[4, j]
-                        pA[8] = ftab[4, i]*gtab[5, j]
-                        pA[9] = ftab[6, i]*gtab[4, j]
-                        pA[10] = ftab[4, i]*gtab[6, j]
-                        pA[11] = ftab[5, i]*gtab[5, j]
+                        pA[3] = ftab[3, i]*gtab[3, j]
+                        pA[4] = ftab[4, i]*gtab[3, j]
+                        pA[5] = ftab[3, i]*gtab[4, j]
+                        pA[6] = ftab[6, i]*gtab[6, j]
+                        pA[7] = ftab[7, i]*gtab[6, j]
+                        pA[8] = ftab[6, i]*gtab[7, j]
+                        pA[9] = ftab[8, i]*gtab[6, j]
+                        pA[10] = ftab[6, i]*gtab[8, j]
+                        pA[11] = ftab[7, i]*gtab[7, j]
                         for p in range(12):
-                            dv[p] += pA[p]*cs[col + (0 if p < 3 else (1 if p < 6 else 2))]
-                w_x = dv[7]
-                w_y = dv[8]
-                eps0 = dv[1] + (dv[7])*(dv[7])/2.
-                eps1 = -dv[0]*irho + dv[5]*s + (dv[8])*(dv[8])*(s)*(s)/2.
-                eps2 = dv[2]*s + dv[3]*irho + dv[4] + dv[7]*dv[8]*s
+                            dv[p] += pA[p]*cs[col + FLD[p]]
+                eps0 = (dv[1])*(dv[1])/2. + dv[1] + (dv[4])*(dv[4])/2. + (dv[7])*(dv[7])/2.
+                eps1 = (dv[0])*(dv[0])*(irho)*(irho)/2. - dv[0]*dv[5]*irho*s - dv[0]*irho + (dv[2])*(dv[2])*(s)*(s)/2. + dv[2]*dv[3]*irho*s + (dv[3])*(dv[3])*(irho)*(irho)/2. + (dv[5])*(dv[5])*(s)*(s)/2. + dv[5]*s + (dv[8])*(dv[8])*(s)*(s)/2.
+                eps2 = -dv[0]*dv[4]*irho + dv[1]*dv[2]*s + dv[1]*dv[3]*irho + dv[2]*s + dv[3]*irho + dv[4]*dv[5]*s + dv[4] + dv[7]*dv[8]*s
                 eps3 = -dv[9]
                 eps4 = -dv[10]*(s)*(s) + dv[7]*irho
                 eps5 = -2.*dv[11]*s - 2.*dv[8]*irho*s
@@ -1017,16 +1146,22 @@ def calc_fint(double [::1] cs, object Finput, object shell,
                 Mxy = F[30]*eps0 + F[31]*eps1 + F[32]*eps2 + F[33]*eps3 + F[34]*eps4 + F[35]*eps5
                 for p in range(72):
                     Bm[p] = 0.
-                Bm[1] = 1.
-                Bm[7] = w_x
-                Bm[12] = -irho
-                Bm[17] = s
-                Bm[20] = (s)*(s)*w_y
-                Bm[26] = s
-                Bm[27] = irho
-                Bm[28] = 1.
-                Bm[31] = s*w_y
-                Bm[32] = s*w_x
+                Bm[1] = dv[1] + 1.
+                Bm[4] = dv[4]
+                Bm[7] = dv[7]
+                Bm[12] = dv[0]*(irho)*(irho) - dv[5]*irho*s - irho
+                Bm[14] = dv[2]*(s)*(s) + dv[3]*irho*s
+                Bm[15] = dv[2]*irho*s + dv[3]*(irho)*(irho)
+                Bm[17] = -dv[0]*irho*s + dv[5]*(s)*(s) + s
+                Bm[20] = dv[8]*(s)*(s)
+                Bm[24] = -dv[4]*irho
+                Bm[25] = dv[2]*s + dv[3]*irho
+                Bm[26] = dv[1]*s + s
+                Bm[27] = dv[1]*irho + irho
+                Bm[28] = -dv[0]*irho + dv[5]*s + 1.
+                Bm[29] = dv[4]*s
+                Bm[31] = dv[8]*s
+                Bm[32] = dv[7]*s
                 Bm[45] = -1.
                 Bm[55] = irho
                 Bm[58] = -(s)*(s)
@@ -1042,15 +1177,15 @@ def calc_fint(double [::1] cs, object Finput, object shell,
                         pA[0] = ftab[0, i]*gtab[0, j]
                         pA[1] = ftab[1, i]*gtab[0, j]
                         pA[2] = ftab[0, i]*gtab[1, j]
-                        pA[3] = ftab[2, i]*gtab[2, j]
-                        pA[4] = ftab[3, i]*gtab[2, j]
-                        pA[5] = ftab[2, i]*gtab[3, j]
-                        pA[6] = ftab[4, i]*gtab[4, j]
-                        pA[7] = ftab[5, i]*gtab[4, j]
-                        pA[8] = ftab[4, i]*gtab[5, j]
-                        pA[9] = ftab[6, i]*gtab[4, j]
-                        pA[10] = ftab[4, i]*gtab[6, j]
-                        pA[11] = ftab[5, i]*gtab[5, j]
+                        pA[3] = ftab[3, i]*gtab[3, j]
+                        pA[4] = ftab[4, i]*gtab[3, j]
+                        pA[5] = ftab[3, i]*gtab[4, j]
+                        pA[6] = ftab[6, i]*gtab[6, j]
+                        pA[7] = ftab[7, i]*gtab[6, j]
+                        pA[8] = ftab[6, i]*gtab[7, j]
+                        pA[9] = ftab[8, i]*gtab[6, j]
+                        pA[10] = ftab[6, i]*gtab[8, j]
+                        pA[11] = ftab[7, i]*gtab[7, j]
                         for e in range(3):
                             for p in range(P0[e], P1[e]):
                                 fint[row + e] += weight*pA[p]*bs[p]
@@ -1077,12 +1212,13 @@ def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
         shape ``(6, 6)`` for the whole domain, e.g. ``shell.ABD``, or ``(nx,
         ny, 6, 6)`` with one matrix per integration point.
     shell : :class:`.Shell`
-        The web, which gives the height ``a``, the arc length ``b`` of the
-        outer edge, the outer radius ``r``, the numbers of terms ``m`` and
-        ``n`` and the boundary flags of the approximation functions of each
-        field.
+        The annular sector, which gives the radial width ``a``, the arc
+        length ``b`` of the outer edge, the outer radius ``r``, the numbers
+        of terms ``m`` and ``n`` and the boundary flags of the approximation
+        functions of each field.
     size, col0 : int
-        Size of the vectors and position where the terms of this web start.
+        Size of the vectors and position where the terms of this panel
+        start.
     nx, ny : int
         Number of Gauss-Legendre points along `x` and `y`.
     Nxx_cte, Nyy_cte, Nxy_cte : float, optional
@@ -1099,25 +1235,26 @@ def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
     ValueError
         If ``Finput`` has an invalid shape, ``shell`` is not a
         :class:`.Shell` or its outer radius ``r`` is not larger than its
-        height ``a``.
+        radial width ``a``.
 
     Notes
     -----
     At each integration point, with `\boldsymbol{B} = \partial
     \boldsymbol{\varepsilon}/\partial \boldsymbol{d}` at `\boldsymbol{d} =
-    \boldsymbol{\Phi} \boldsymbol{c}` and the membrane stress resultants
-    `\boldsymbol{N}` of `\boldsymbol{F} \boldsymbol{\varepsilon}`, plus the
-    constant ones:
+    \boldsymbol{\Phi} \boldsymbol{c}` and the stress resultants
+    `\boldsymbol{\sigma}` of `\boldsymbol{F} \boldsymbol{\varepsilon}`,
+    plus the constant membrane ones `\boldsymbol{\sigma}_0`:
 
     .. math::
 
         \boldsymbol{K}_T \boldsymbol{v} = \int \boldsymbol{\Phi}^\top \left(
         \boldsymbol{B}^\top \boldsymbol{F} \boldsymbol{B} +
-        \boldsymbol{H}(\boldsymbol{N}) \right) \boldsymbol{\Phi}
-        \boldsymbol{v} \, dA
+        \boldsymbol{H}(\boldsymbol{\sigma}, \boldsymbol{d}) +
+        \boldsymbol{H}(\boldsymbol{\sigma}_0, \boldsymbol{0}) \right)
+        \boldsymbol{\Phi} \boldsymbol{v} \, dA
 
     evaluated without forming `\boldsymbol{K}_T`, with
-    `\boldsymbol{H}(\boldsymbol{N})` of :func:`fkC_num`.
+    `\boldsymbol{H}` of :func:`fkC_num`.
 
     """
     cdef double x1, x2, y1, y2, xi1, xi2, eta1, eta2
@@ -1141,7 +1278,7 @@ def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
     cdef double dq[12]
     cdef double Bq[6]
     cdef double FBq[6]
-    cdef double w_x, w_y, eps0, eps1, eps2, eps3, eps4, eps5
+    cdef double eps0, eps1, eps2, eps3, eps4, eps5
     cdef double Nxx, Nyy, Nxy, Mxx, Myy, Mxy
     cdef double [::1] kTv
     cdef int row0 = col0
@@ -1169,8 +1306,8 @@ def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
     m = shell.m
     n = shell.n
     if not R > a:
-        raise ValueError('the outer radius r must be larger than the height a '
-                         'of the web, got r={0} and a={1}'.format(R, a))
+        raise ValueError('the outer radius r must be larger than the radial '
+                         'width a, got r={0} and a={1}'.format(R, a))
     #NOTE physical limits of the integration domain, resolved and validated
     #     by Shell.integration_limits()
     x1, x2, y1, y2 = shell.integration_limits()
@@ -1188,8 +1325,8 @@ def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
     eta2 = y2/b*2 - 1
     intx = x2 - x1
     inty = y2 - y1
-    ftab = np.zeros((7, m), dtype=DOUBLE)
-    gtab = np.zeros((7, n), dtype=DOUBLE)
+    ftab = np.zeros((9, m), dtype=DOUBLE)
+    gtab = np.zeros((9, n), dtype=DOUBLE)
 
     kTv = np.zeros(size, dtype=DOUBLE)
 
@@ -1211,19 +1348,23 @@ def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
                 for i in range(m):
                     ftab[0, i] = f(i, xi, x1u, x1ur, x2u, x2ur)
                     ftab[1, i] = (2/a)*fp(i, xi, x1u, x1ur, x2u, x2ur)
-                    ftab[2, i] = f(i, xi, x1v, x1vr, x2v, x2vr)
-                    ftab[3, i] = (2/a)*fp(i, xi, x1v, x1vr, x2v, x2vr)
-                    ftab[4, i] = f(i, xi, x1w, x1wr, x2w, x2wr)
-                    ftab[5, i] = (2/a)*fp(i, xi, x1w, x1wr, x2w, x2wr)
-                    ftab[6, i] = (2/a)*(2/a)*fpp(i, xi, x1w, x1wr, x2w, x2wr)
+                    ftab[2, i] = (2/a)*(2/a)*fpp(i, xi, x1u, x1ur, x2u, x2ur)
+                    ftab[3, i] = f(i, xi, x1v, x1vr, x2v, x2vr)
+                    ftab[4, i] = (2/a)*fp(i, xi, x1v, x1vr, x2v, x2vr)
+                    ftab[5, i] = (2/a)*(2/a)*fpp(i, xi, x1v, x1vr, x2v, x2vr)
+                    ftab[6, i] = f(i, xi, x1w, x1wr, x2w, x2wr)
+                    ftab[7, i] = (2/a)*fp(i, xi, x1w, x1wr, x2w, x2wr)
+                    ftab[8, i] = (2/a)*(2/a)*fpp(i, xi, x1w, x1wr, x2w, x2wr)
                 for j in range(n):
                     gtab[0, j] = f(j, eta, y1u, y1ur, y2u, y2ur)
                     gtab[1, j] = (2/b)*fp(j, eta, y1u, y1ur, y2u, y2ur)
-                    gtab[2, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
-                    gtab[3, j] = (2/b)*fp(j, eta, y1v, y1vr, y2v, y2vr)
-                    gtab[4, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
-                    gtab[5, j] = (2/b)*fp(j, eta, y1w, y1wr, y2w, y2wr)
-                    gtab[6, j] = (2/b)*(2/b)*fpp(j, eta, y1w, y1wr, y2w, y2wr)
+                    gtab[2, j] = (2/b)*(2/b)*fpp(j, eta, y1u, y1ur, y2u, y2ur)
+                    gtab[3, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
+                    gtab[4, j] = (2/b)*fp(j, eta, y1v, y1vr, y2v, y2vr)
+                    gtab[5, j] = (2/b)*(2/b)*fpp(j, eta, y1v, y1vr, y2v, y2vr)
+                    gtab[6, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
+                    gtab[7, j] = (2/b)*fp(j, eta, y1w, y1wr, y2w, y2wr)
+                    gtab[8, j] = (2/b)*(2/b)*fpp(j, eta, y1w, y1wr, y2w, y2wr)
 
                 for p in range(12):
                     dq[p] = 0.
@@ -1233,17 +1374,17 @@ def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
                         pA[0] = ftab[0, i]*gtab[0, j]
                         pA[1] = ftab[1, i]*gtab[0, j]
                         pA[2] = ftab[0, i]*gtab[1, j]
-                        pA[3] = ftab[2, i]*gtab[2, j]
-                        pA[4] = ftab[3, i]*gtab[2, j]
-                        pA[5] = ftab[2, i]*gtab[3, j]
-                        pA[6] = ftab[4, i]*gtab[4, j]
-                        pA[7] = ftab[5, i]*gtab[4, j]
-                        pA[8] = ftab[4, i]*gtab[5, j]
-                        pA[9] = ftab[6, i]*gtab[4, j]
-                        pA[10] = ftab[4, i]*gtab[6, j]
-                        pA[11] = ftab[5, i]*gtab[5, j]
+                        pA[3] = ftab[3, i]*gtab[3, j]
+                        pA[4] = ftab[4, i]*gtab[3, j]
+                        pA[5] = ftab[3, i]*gtab[4, j]
+                        pA[6] = ftab[6, i]*gtab[6, j]
+                        pA[7] = ftab[7, i]*gtab[6, j]
+                        pA[8] = ftab[6, i]*gtab[7, j]
+                        pA[9] = ftab[8, i]*gtab[6, j]
+                        pA[10] = ftab[6, i]*gtab[8, j]
+                        pA[11] = ftab[7, i]*gtab[7, j]
                         for p in range(12):
-                            dq[p] += pA[p]*vs[col + (0 if p < 3 else (1 if p < 6 else 2))]
+                            dq[p] += pA[p]*vs[col + FLD[p]]
                 for p in range(12):
                     dv[p] = 0.
                 for j in range(n):
@@ -1252,22 +1393,20 @@ def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
                         pA[0] = ftab[0, i]*gtab[0, j]
                         pA[1] = ftab[1, i]*gtab[0, j]
                         pA[2] = ftab[0, i]*gtab[1, j]
-                        pA[3] = ftab[2, i]*gtab[2, j]
-                        pA[4] = ftab[3, i]*gtab[2, j]
-                        pA[5] = ftab[2, i]*gtab[3, j]
-                        pA[6] = ftab[4, i]*gtab[4, j]
-                        pA[7] = ftab[5, i]*gtab[4, j]
-                        pA[8] = ftab[4, i]*gtab[5, j]
-                        pA[9] = ftab[6, i]*gtab[4, j]
-                        pA[10] = ftab[4, i]*gtab[6, j]
-                        pA[11] = ftab[5, i]*gtab[5, j]
+                        pA[3] = ftab[3, i]*gtab[3, j]
+                        pA[4] = ftab[4, i]*gtab[3, j]
+                        pA[5] = ftab[3, i]*gtab[4, j]
+                        pA[6] = ftab[6, i]*gtab[6, j]
+                        pA[7] = ftab[7, i]*gtab[6, j]
+                        pA[8] = ftab[6, i]*gtab[7, j]
+                        pA[9] = ftab[8, i]*gtab[6, j]
+                        pA[10] = ftab[6, i]*gtab[8, j]
+                        pA[11] = ftab[7, i]*gtab[7, j]
                         for p in range(12):
-                            dv[p] += pA[p]*cs[col + (0 if p < 3 else (1 if p < 6 else 2))]
-                w_x = dv[7]
-                w_y = dv[8]
-                eps0 = dv[1] + (dv[7])*(dv[7])/2.
-                eps1 = -dv[0]*irho + dv[5]*s + (dv[8])*(dv[8])*(s)*(s)/2.
-                eps2 = dv[2]*s + dv[3]*irho + dv[4] + dv[7]*dv[8]*s
+                            dv[p] += pA[p]*cs[col + FLD[p]]
+                eps0 = (dv[1])*(dv[1])/2. + dv[1] + (dv[4])*(dv[4])/2. + (dv[7])*(dv[7])/2.
+                eps1 = (dv[0])*(dv[0])*(irho)*(irho)/2. - dv[0]*dv[5]*irho*s - dv[0]*irho + (dv[2])*(dv[2])*(s)*(s)/2. + dv[2]*dv[3]*irho*s + (dv[3])*(dv[3])*(irho)*(irho)/2. + (dv[5])*(dv[5])*(s)*(s)/2. + dv[5]*s + (dv[8])*(dv[8])*(s)*(s)/2.
+                eps2 = -dv[0]*dv[4]*irho + dv[1]*dv[2]*s + dv[1]*dv[3]*irho + dv[2]*s + dv[3]*irho + dv[4]*dv[5]*s + dv[4] + dv[7]*dv[8]*s
                 eps3 = -dv[9]
                 eps4 = -dv[10]*(s)*(s) + dv[7]*irho
                 eps5 = -2.*dv[11]*s - 2.*dv[8]*irho*s
@@ -1277,21 +1416,24 @@ def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
                 Mxx = F[18]*eps0 + F[19]*eps1 + F[20]*eps2 + F[21]*eps3 + F[22]*eps4 + F[23]*eps5
                 Myy = F[24]*eps0 + F[25]*eps1 + F[26]*eps2 + F[27]*eps3 + F[28]*eps4 + F[29]*eps5
                 Mxy = F[30]*eps0 + F[31]*eps1 + F[32]*eps2 + F[33]*eps3 + F[34]*eps4 + F[35]*eps5
-                Nxx = Nxx + Nxx_cte
-                Nyy = Nyy + Nyy_cte
-                Nxy = Nxy + Nxy_cte
                 for p in range(72):
                     Bm[p] = 0.
-                Bm[1] = 1.
-                Bm[7] = w_x
-                Bm[12] = -irho
-                Bm[17] = s
-                Bm[20] = (s)*(s)*w_y
-                Bm[26] = s
-                Bm[27] = irho
-                Bm[28] = 1.
-                Bm[31] = s*w_y
-                Bm[32] = s*w_x
+                Bm[1] = dv[1] + 1.
+                Bm[4] = dv[4]
+                Bm[7] = dv[7]
+                Bm[12] = dv[0]*(irho)*(irho) - dv[5]*irho*s - irho
+                Bm[14] = dv[2]*(s)*(s) + dv[3]*irho*s
+                Bm[15] = dv[2]*irho*s + dv[3]*(irho)*(irho)
+                Bm[17] = -dv[0]*irho*s + dv[5]*(s)*(s) + s
+                Bm[20] = dv[8]*(s)*(s)
+                Bm[24] = -dv[4]*irho
+                Bm[25] = dv[2]*s + dv[3]*irho
+                Bm[26] = dv[1]*s + s
+                Bm[27] = dv[1]*irho + irho
+                Bm[28] = -dv[0]*irho + dv[5]*s + 1.
+                Bm[29] = dv[4]*s
+                Bm[31] = dv[8]*s
+                Bm[32] = dv[7]*s
                 Bm[45] = -1.
                 Bm[55] = irho
                 Bm[58] = -(s)*(s)
@@ -1309,45 +1451,50 @@ def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
                     bs[p] = 0.
                     for r in range(6):
                         bs[p] += Bm[r*12 + p]*FBq[r]
-                bs[7] += Nxx*dq[7] + Nxy*dq[8]*s
-                bs[8] += Nxy*dq[7]*s + Nyy*dq[8]*(s)*(s)
+                bs[0] += -Nxy*dq[4]*irho - Nxy_cte*dq[4]*irho + Nyy*dq[0]*(irho)*(irho) - Nyy*dq[5]*irho*s + Nyy_cte*dq[0]*(irho)*(irho) - Nyy_cte*dq[5]*irho*s
+                bs[1] += Nxx*dq[1] + Nxx_cte*dq[1] + Nxy*dq[2]*s + Nxy*dq[3]*irho + Nxy_cte*dq[2]*s + Nxy_cte*dq[3]*irho
+                bs[2] += Nxy*dq[1]*s + Nxy_cte*dq[1]*s + Nyy*dq[2]*(s)*(s) + Nyy*dq[3]*irho*s + Nyy_cte*dq[2]*(s)*(s) + Nyy_cte*dq[3]*irho*s
+                bs[3] += Nxy*dq[1]*irho + Nxy_cte*dq[1]*irho + Nyy*dq[2]*irho*s + Nyy*dq[3]*(irho)*(irho) + Nyy_cte*dq[2]*irho*s + Nyy_cte*dq[3]*(irho)*(irho)
+                bs[4] += Nxx*dq[4] + Nxx_cte*dq[4] - Nxy*dq[0]*irho + Nxy*dq[5]*s - Nxy_cte*dq[0]*irho + Nxy_cte*dq[5]*s
+                bs[5] += Nxy*dq[4]*s + Nxy_cte*dq[4]*s - Nyy*dq[0]*irho*s + Nyy*dq[5]*(s)*(s) - Nyy_cte*dq[0]*irho*s + Nyy_cte*dq[5]*(s)*(s)
+                bs[7] += Nxx*dq[7] + Nxx_cte*dq[7] + Nxy*dq[8]*s + Nxy_cte*dq[8]*s
+                bs[8] += Nxy*dq[7]*s + Nxy_cte*dq[7]*s + Nyy*dq[8]*(s)*(s) + Nyy_cte*dq[8]*(s)*(s)
                 for j in range(n):
                     for i in range(m):
                         row = row0 + 3*(j*m + i)
                         pA[0] = ftab[0, i]*gtab[0, j]
                         pA[1] = ftab[1, i]*gtab[0, j]
                         pA[2] = ftab[0, i]*gtab[1, j]
-                        pA[3] = ftab[2, i]*gtab[2, j]
-                        pA[4] = ftab[3, i]*gtab[2, j]
-                        pA[5] = ftab[2, i]*gtab[3, j]
-                        pA[6] = ftab[4, i]*gtab[4, j]
-                        pA[7] = ftab[5, i]*gtab[4, j]
-                        pA[8] = ftab[4, i]*gtab[5, j]
-                        pA[9] = ftab[6, i]*gtab[4, j]
-                        pA[10] = ftab[4, i]*gtab[6, j]
-                        pA[11] = ftab[5, i]*gtab[5, j]
+                        pA[3] = ftab[3, i]*gtab[3, j]
+                        pA[4] = ftab[4, i]*gtab[3, j]
+                        pA[5] = ftab[3, i]*gtab[4, j]
+                        pA[6] = ftab[6, i]*gtab[6, j]
+                        pA[7] = ftab[7, i]*gtab[6, j]
+                        pA[8] = ftab[6, i]*gtab[7, j]
+                        pA[9] = ftab[8, i]*gtab[6, j]
+                        pA[10] = ftab[6, i]*gtab[8, j]
+                        pA[11] = ftab[7, i]*gtab[7, j]
                         for e in range(3):
                             for p in range(P0[e], P1[e]):
                                 kTv[row + e] += weight*pA[p]*bs[p]
     return np.asarray(kTv)
 
 def _point_derivatives(double [::1] c, object shell, double xp, double yp):
-    r"""Generalized derivatives `\boldsymbol{d}` of the web at a point
+    r"""Generalized derivatives `\boldsymbol{d}` of the panel at a point
 
     Parameters
     ----------
     c : np.ndarray
-        Ritz constants of the web, 1-D array of size ``3*m*n``.
+        Ritz constants of the panel, 1-D array of size ``3*m*n``.
     shell : :class:`.Shell`
-        The web.
+        The annular sector.
     xp, yp : float
         Coordinates `x` and `y` of the point, lengths.
 
     Returns
     -------
     d : np.ndarray
-        ``(u, u_x, u_y, v, v_x, v_y, w, w_x, w_y, w_xx, w_yy, w_xy)``, 1-D
-        array of size 12.
+        ``(u, u_x, u_y, v, v_x, v_y, w, w_x, w_y, w_xx, w_yy, w_xy)``, 1-D array of size 12.
 
     """
     cdef int m, n, i, j, col, p, col0 = 0
@@ -1373,24 +1520,28 @@ def _point_derivatives(double [::1] c, object shell, double xp, double yp):
     y1w = shell.y1w; y1wr = shell.y1wr; y2w = shell.y2w; y2wr = shell.y2wr
     xi = 2*xp/a - 1
     eta = 2*yp/b - 1
-    ftab = np.zeros((7, m), dtype=DOUBLE)
-    gtab = np.zeros((7, n), dtype=DOUBLE)
+    ftab = np.zeros((9, m), dtype=DOUBLE)
+    gtab = np.zeros((9, n), dtype=DOUBLE)
     for i in range(m):
         ftab[0, i] = f(i, xi, x1u, x1ur, x2u, x2ur)
         ftab[1, i] = (2/a)*fp(i, xi, x1u, x1ur, x2u, x2ur)
-        ftab[2, i] = f(i, xi, x1v, x1vr, x2v, x2vr)
-        ftab[3, i] = (2/a)*fp(i, xi, x1v, x1vr, x2v, x2vr)
-        ftab[4, i] = f(i, xi, x1w, x1wr, x2w, x2wr)
-        ftab[5, i] = (2/a)*fp(i, xi, x1w, x1wr, x2w, x2wr)
-        ftab[6, i] = (2/a)*(2/a)*fpp(i, xi, x1w, x1wr, x2w, x2wr)
+        ftab[2, i] = (2/a)*(2/a)*fpp(i, xi, x1u, x1ur, x2u, x2ur)
+        ftab[3, i] = f(i, xi, x1v, x1vr, x2v, x2vr)
+        ftab[4, i] = (2/a)*fp(i, xi, x1v, x1vr, x2v, x2vr)
+        ftab[5, i] = (2/a)*(2/a)*fpp(i, xi, x1v, x1vr, x2v, x2vr)
+        ftab[6, i] = f(i, xi, x1w, x1wr, x2w, x2wr)
+        ftab[7, i] = (2/a)*fp(i, xi, x1w, x1wr, x2w, x2wr)
+        ftab[8, i] = (2/a)*(2/a)*fpp(i, xi, x1w, x1wr, x2w, x2wr)
     for j in range(n):
         gtab[0, j] = f(j, eta, y1u, y1ur, y2u, y2ur)
         gtab[1, j] = (2/b)*fp(j, eta, y1u, y1ur, y2u, y2ur)
-        gtab[2, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
-        gtab[3, j] = (2/b)*fp(j, eta, y1v, y1vr, y2v, y2vr)
-        gtab[4, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
-        gtab[5, j] = (2/b)*fp(j, eta, y1w, y1wr, y2w, y2wr)
-        gtab[6, j] = (2/b)*(2/b)*fpp(j, eta, y1w, y1wr, y2w, y2wr)
+        gtab[2, j] = (2/b)*(2/b)*fpp(j, eta, y1u, y1ur, y2u, y2ur)
+        gtab[3, j] = f(j, eta, y1v, y1vr, y2v, y2vr)
+        gtab[4, j] = (2/b)*fp(j, eta, y1v, y1vr, y2v, y2vr)
+        gtab[5, j] = (2/b)*(2/b)*fpp(j, eta, y1v, y1vr, y2v, y2vr)
+        gtab[6, j] = f(j, eta, y1w, y1wr, y2w, y2wr)
+        gtab[7, j] = (2/b)*fp(j, eta, y1w, y1wr, y2w, y2wr)
+        gtab[8, j] = (2/b)*(2/b)*fpp(j, eta, y1w, y1wr, y2w, y2wr)
     for p in range(12):
         dv[p] = 0.
     for j in range(n):
@@ -1399,32 +1550,32 @@ def _point_derivatives(double [::1] c, object shell, double xp, double yp):
             pA[0] = ftab[0, i]*gtab[0, j]
             pA[1] = ftab[1, i]*gtab[0, j]
             pA[2] = ftab[0, i]*gtab[1, j]
-            pA[3] = ftab[2, i]*gtab[2, j]
-            pA[4] = ftab[3, i]*gtab[2, j]
-            pA[5] = ftab[2, i]*gtab[3, j]
-            pA[6] = ftab[4, i]*gtab[4, j]
-            pA[7] = ftab[5, i]*gtab[4, j]
-            pA[8] = ftab[4, i]*gtab[5, j]
-            pA[9] = ftab[6, i]*gtab[4, j]
-            pA[10] = ftab[4, i]*gtab[6, j]
-            pA[11] = ftab[5, i]*gtab[5, j]
+            pA[3] = ftab[3, i]*gtab[3, j]
+            pA[4] = ftab[4, i]*gtab[3, j]
+            pA[5] = ftab[3, i]*gtab[4, j]
+            pA[6] = ftab[6, i]*gtab[6, j]
+            pA[7] = ftab[7, i]*gtab[6, j]
+            pA[8] = ftab[6, i]*gtab[7, j]
+            pA[9] = ftab[8, i]*gtab[6, j]
+            pA[10] = ftab[6, i]*gtab[8, j]
+            pA[11] = ftab[7, i]*gtab[7, j]
             for p in range(12):
-                dv[p] += pA[p]*c[col + (0 if p < 3 else (1 if p < 6 else 2))]
+                dv[p] += pA[p]*c[col + FLD[p]]
     return np.array([dv[p] for p in range(12)])
 
 
 def fuvw(double [::1] c, object s, double [::1] xs, double [::1] ys,
          int num_cores=4):
-    r"""Displacements and rotations of the web at the points ``xs``, ``ys``
+    r"""Displacements and rotations of the panel at the points ``xs``, ``ys``
 
     Parameters
     ----------
     c : np.ndarray
-        Ritz constants of the web ``s``, 1-D array of size ``3*s.m*s.n``,
+        Ritz constants of the panel ``s``, 1-D array of size ``3*s.m*s.n``,
         see :meth:`.Shell.get_size`.
     s : :class:`.Shell`
-        The web, whose dimensions, outer radius, numbers of terms and
-        boundary flags are read.
+        The annular sector, whose dimensions, outer radius, numbers of terms
+        and boundary flags are read.
     xs, ys : np.ndarray
         Coordinates `x` and `y` of the points, lengths, 1-D arrays of the
         same size.
@@ -1454,16 +1605,16 @@ def fuvw(double [::1] c, object s, double [::1] xs, double [::1] ys,
 
 def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys,
             int num_cores=4, int NLgeom=0):
-    r"""Generalized strains of the web at the points ``xs``, ``ys``
+    r"""Generalized strains of the panel at the points ``xs``, ``ys``
 
     Parameters
     ----------
     c : np.ndarray
-        Ritz constants of the web ``s``, 1-D array of size ``3*s.m*s.n``,
+        Ritz constants of the panel ``s``, 1-D array of size ``3*s.m*s.n``,
         see :meth:`.Shell.get_size`.
     s : :class:`.Shell`
-        The web, whose dimensions, outer radius, numbers of terms and
-        boundary flags are read.
+        The annular sector, whose dimensions, outer radius, numbers of terms
+        and boundary flags are read.
     xs, ys : np.ndarray
         Coordinates `x` and `y` of the points, lengths, 1-D arrays of the
         same size.
@@ -1471,7 +1622,7 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys,
         Not used, the points are evaluated serially; kept for the interface
         of :mod:`panels.models.clpt_field`.
     NLgeom : int, optional
-        ``1`` to include the quadratic terms of the membrane strains, ``0``
+        ``1`` to include the non-linear terms of the strains, ``0``
         otherwise. Default ``0``.
 
     Returns
@@ -1483,28 +1634,27 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys,
 
     Notes
     -----
-    The von Kármán strains in polar coordinates given in the notes of the
-    module, with the quadratic terms multiplied by ``NLgeom``.
+    The strains given in the notes of the module, with the non-linear terms
+    multiplied by ``NLgeom``.
 
     """
-    cdef double rho, s_, R
+    cdef double R, s_, irho
     R = s.r
     out = np.zeros((6, xs.shape[0]), dtype=DOUBLE)
     for k in range(xs.shape[0]):
-        d = _point_derivatives(c, s, xs[k], ys[k])
-        rho = R - xs[k]
-        s_ = R/rho
-        u, u_x, u_y, v, v_x, v_y, w, w_x, w_y, w_xx, w_yy, w_xy = d
-        out[0, k] = u_x + NLgeom*0.5*w_x*w_x
-        out[1, k] = s_*v_y - u/rho + NLgeom*0.5*s_*s_*w_y*w_y
-        out[2, k] = s_*u_y + v_x + v/rho + NLgeom*s_*w_x*w_y
-        out[3, k] = -w_xx
-        out[4, k] = w_x/rho - s_*s_*w_yy
-        out[5, k] = -2*s_*(w_xy + w_y/rho)
+        dv = _point_derivatives(c, s, xs[k], ys[k])
+        irho = 1./(R - xs[k])
+        s_ = R*irho
+        out[0, k] = dv[1] + NLgeom*((dv[1])*(dv[1])/2. + (dv[4])*(dv[4])/2. + (dv[7])*(dv[7])/2.)
+        out[1, k] = -dv[0]*irho + dv[5]*s_ + NLgeom*((dv[0])*(dv[0])*(irho)*(irho)/2. - dv[0]*dv[5]*irho*s_ + (dv[2])*(dv[2])*(s_)*(s_)/2. + dv[2]*dv[3]*irho*s_ + (dv[3])*(dv[3])*(irho)*(irho)/2. + (dv[5])*(dv[5])*(s_)*(s_)/2. + (dv[8])*(dv[8])*(s_)*(s_)/2.)
+        out[2, k] = dv[2]*s_ + dv[3]*irho + dv[4] + NLgeom*(-dv[0]*dv[4]*irho + dv[1]*dv[2]*s_ + dv[1]*dv[3]*irho + dv[4]*dv[5]*s_ + dv[7]*dv[8]*s_)
+        out[3, k] = -dv[9]
+        out[4, k] = -dv[10]*(s_)*(s_) + dv[7]*irho
+        out[5, k] = -2.*dv[11]*s_ - 2.*dv[8]*irho*s_
     return tuple(out)
 
 def fkAx_num(*args, **kwargs):
-    r"""Not available for the web of a ring frame
+    r"""Not available for the annular sector
 
     Raises
     ------
@@ -1513,10 +1663,10 @@ def fkAx_num(*args, **kwargs):
 
     """
     raise NotImplementedError('fkAx_num is not implemented for the model '
-                              '"frame_web_clpt_donnell"')
+                              '"annular_clpt_gl"')
 
 def fkAy_num(*args, **kwargs):
-    r"""Not available for the web of a ring frame
+    r"""Not available for the annular sector
 
     Raises
     ------
@@ -1525,4 +1675,4 @@ def fkAy_num(*args, **kwargs):
 
     """
     raise NotImplementedError('fkAy_num is not implemented for the model '
-                              '"frame_web_clpt_donnell"')
+                              '"annular_clpt_gl"')

@@ -7,41 +7,41 @@
 #cython: embedsignature=True
 #cython: infer_types=False
 r"""
-Web of a ring frame, an annular-sector flat plate, using the classical
-laminated plate theory (CLPT) with von Kármán strains in polar coordinates
+Annular-sector flat plate, using the total-Lagrangian classical laminated
+plate theory (CLPT) with the deformed normal, in polar coordinates
 
-Matrices of the whole domain of the model ``'frame_web_clpt_donnell'``,
+Matrices of the whole domain of the model ``'annular_clpt_tl'``,
 called by :class:`.Shell` when the constitutive matrix and the density are
 constant: :func:`fk0`, :func:`fkG0` and :func:`fkM`. The strains have
 coefficients in `1/\rho`, with `\rho = r - x` the radius of the point, and
 the matrices are integrated with the Gauss-Legendre rule of
-:mod:`panels.models.frame_web_clpt_donnell_num`, with ``shell.nx`` and
+:mod:`panels.models.annular_clpt_tl_num`, with ``shell.nx`` and
 ``shell.ny`` points; the piston-theory matrices ``fkAx``, ``fkAy`` and
 ``fcA`` are not available.
 
 Notes
 -----
-See :mod:`panels.models.frame_web_clpt_donnell_num`.
+See :mod:`panels.models.annular_clpt_tl_num`.
 
 """
 import numpy as np
 
 from panels import DOUBLE
-from .frame_web_clpt_donnell_num import fkC_num, fkG_num, fkM_num
+from .annular_clpt_tl_num import fkC_num, fkG_num, fkM_num
 
 
 def fk0(object shell, int size, int row0, int col0):
-    r"""Linear constitutive stiffness matrix of the whole web
+    r"""Linear constitutive stiffness matrix of the whole panel
 
     Parameters
     ----------
     shell : :class:`.Shell`
-        The web, with its constitutive matrix ``shell.ABD`` and its numbers
-        of integration points ``shell.nx`` and ``shell.ny``.
+        The annular sector, with its constitutive matrix ``shell.ABD`` and
+        its numbers of integration points ``shell.nx`` and ``shell.ny``.
     size : int
         Number of rows and columns of the matrix.
     row0, col0 : int
-        Row and column of the matrix where the terms of this web start.
+        Row and column of the matrix where the terms of this panel start.
 
     Returns
     -------
@@ -50,7 +50,7 @@ def fk0(object shell, int size, int row0, int col0):
 
     Notes
     -----
-    :func:`.frame_web_clpt_donnell_num.fkC_num` with ``NLgeom=0``.
+    :func:`.annular_clpt_tl_num.fkC_num` with ``NLgeom=0``.
 
     """
     return fkC_num(np.zeros(size, dtype=DOUBLE), shell.ABD, shell, size,
@@ -68,12 +68,12 @@ def fkG0(double Nxx, double Nyy, double Nxy, object shell,
         N_{\rho\rho}`, `N_{yy} = N_{\theta\theta}`, `N_{xy} =
         -N_{\rho\theta}`, force per unit length.
     shell : :class:`.Shell`
-        The web, with its numbers of integration points ``shell.nx`` and
-        ``shell.ny``.
+        The annular sector, with its numbers of integration points
+        ``shell.nx`` and ``shell.ny``.
     size : int
         Number of rows and columns of the matrix.
     row0, col0 : int
-        Row and column of the matrix where the terms of this web start.
+        Row and column of the matrix where the terms of this panel start.
 
     Returns
     -------
@@ -82,7 +82,7 @@ def fkG0(double Nxx, double Nyy, double Nxy, object shell,
 
     Notes
     -----
-    :func:`.frame_web_clpt_donnell_num.fkG_num` with zero Ritz constants.
+    :func:`.annular_clpt_tl_num.fkG_num` with zero Ritz constants.
 
     """
     return fkG_num(np.zeros(size, dtype=DOUBLE), shell.ABD, shell, size,
@@ -90,17 +90,17 @@ def fkG0(double Nxx, double Nyy, double Nxy, object shell,
 
 
 def fkM(object shell, int size, int row0, int col0):
-    r"""Mass matrix of the whole web
+    r"""Mass matrix of the whole panel
 
     Parameters
     ----------
     shell : :class:`.Shell`
-        The web, with its laminate ``shell.lam`` and its numbers of
-        integration points ``shell.nx`` and ``shell.ny``.
+        The annular sector, with its laminate ``shell.lam`` and its numbers
+        of integration points ``shell.nx`` and ``shell.ny``.
     size : int
         Number of rows and columns of the matrix.
     row0, col0 : int
-        Row and column of the matrix where the terms of this web start.
+        Row and column of the matrix where the terms of this panel start.
 
     Returns
     -------
@@ -109,8 +109,9 @@ def fkM(object shell, int size, int row0, int col0):
 
     Notes
     -----
-    :func:`.frame_web_clpt_donnell_num.fkM_num` with the moments
-    ``intrho``, ``intrhoz``, ``intrhoz2`` of ``shell.lam``.
+    :func:`.annular_clpt_tl_num.fkM_num` with the moments
+    ``intrho``, ``intrhoz``, ``intrhoz2`` of ``shell.lam``, which include
+    the offset ``shell.offset``.
 
     """
     lam = shell.lam
@@ -118,7 +119,7 @@ def fkM(object shell, int size, int row0, int col0):
     return fkM_num(shell, I_input, size, row0, col0, shell.nx, shell.ny)
 
 def fkAx(*args, **kwargs):
-    r"""Not available for the web of a ring frame
+    r"""Not available for the annular sector
 
     Raises
     ------
@@ -127,10 +128,10 @@ def fkAx(*args, **kwargs):
 
     """
     raise NotImplementedError('fkAx is not implemented for the model '
-                              '"frame_web_clpt_donnell"')
+                              '"annular_clpt_tl"')
 
 def fkAy(*args, **kwargs):
-    r"""Not available for the web of a ring frame
+    r"""Not available for the annular sector
 
     Raises
     ------
@@ -139,10 +140,10 @@ def fkAy(*args, **kwargs):
 
     """
     raise NotImplementedError('fkAy is not implemented for the model '
-                              '"frame_web_clpt_donnell"')
+                              '"annular_clpt_tl"')
 
 def fcA(*args, **kwargs):
-    r"""Not available for the web of a ring frame
+    r"""Not available for the annular sector
 
     Raises
     ------
@@ -151,4 +152,4 @@ def fcA(*args, **kwargs):
 
     """
     raise NotImplementedError('fcA is not implemented for the model '
-                              '"frame_web_clpt_donnell"')
+                              '"annular_clpt_tl"')

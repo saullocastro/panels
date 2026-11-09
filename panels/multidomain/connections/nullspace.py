@@ -80,6 +80,7 @@ from panels.bardell import calc_vec_f, calc_vec_fp
 from panels.logger import warn
 from . import kCsdt
 from . import kCBFxycte
+from . import kCBFxcte_face
 
 
 #: Connections that can be imposed with the null-space method
@@ -301,7 +302,11 @@ def constraint_matrix(connecti, size):
     ``col_start`` of each panel. The edge connections of the models with 3
     DOFs per term use the quantities of the classical laminated plate
     theory, those of the models with 5 DOFs the quantities of
-    :mod:`.kCsdt`; ``'SB'`` uses for all the models the displacements at the
+    :mod:`.kCsdt`; ``'BFxcte'`` with the key ``'face'`` uses for all the
+    models the quantities of :func:`.kCBFxcte_face.bfxcte_face_components`
+    at the face of ``p1``, with ``max(n1, n2, 4)`` points at the same
+    natural coordinate `\eta` of both panels, whose edges span the same
+    angle but may differ in length; ``'SB'`` uses for all the models the displacements at the
     faces in contact, the quantities of the penalty matrix of
     :func:`.skin_base.fkCSB`, see :func:`._sb_components`, and also
     connects the rotations of the FSDT and TSDT when ``connecti['kr']`` is
@@ -314,7 +319,8 @@ def constraint_matrix(connecti, size):
         one of :data:`NULL_SPACE_FUNCS`. The coordinates of the connection,
         ``xcte1`` or ``ycte1``, refer to ``p1``, and ``xcte2`` or ``ycte2``
         to ``p2``. For ``'BFxcte'`` and ``'BFycte'``, ``p1`` is the base and
-        ``p2`` the flange; for ``'BFxycte'``, ``p1`` has the edge ``xcte1``
+        ``p2`` the flange, with the key ``'face'`` of ``'BFxcte'``, see
+        :mod:`panels.multidomain.connections.kCBFxcte_face`; for ``'BFxycte'``, ``p1`` has the edge ``xcte1``
         and ``p2`` the edge ``ycte2``, with the key ``'angle'``; for
         ``'SB'``, ``p1`` is the panel on the positive side of the interface
         along the `z` axis of both panels,
@@ -334,7 +340,8 @@ def constraint_matrix(connecti, size):
     ValueError
         When ``p1`` and ``p2`` are the same object; for ``'SB'``, when the
         panels do not have the same dimensions ``a`` and ``b``; for
-        ``'BFxycte'``, see :func:`.kCBFxycte.check_xycte`.
+        ``'BFxycte'``, see :func:`.kCBFxycte.check_xycte`; for
+        ``'BFxcte'``, see :func:`.kCBFxcte_face.check_bfxcte`.
     NotImplementedError
         When the models of ``p1`` and ``p2`` have a different number of
         DOFs per term; when ``connecti['func']`` is not one of
@@ -370,6 +377,10 @@ def constraint_matrix(connecti, size):
             "Connection '{0}' between models with a different number of "
             "DOFs per term, got models '{1}' and '{2}'".format(func,
             p1.model, p2.model))
+    face = None
+    if func == 'BFxcte':
+        z_face = kCBFxcte_face.check_bfxcte(connecti)
+        face = connecti.get(kCBFxcte_face.FACE_KEY)
     if func in ('SSxcte', 'BFxcte'):
         ctes = dict(x=(connecti['xcte1'], connecti['xcte2']), y=None)
     elif func in ('SSycte', 'BFycte'):
@@ -387,6 +398,9 @@ def constraint_matrix(connecti, size):
             "the available ones are {1}".format(func, NULL_SPACE_FUNCS))
     if func == 'SB':
         comps = _sb_components(p1, p2, connecti.get('kr', 0.))
+    elif face is not None:
+        comps = [sides for _, sides in
+                 kCBFxcte_face.bfxcte_face_components(p1, p2, z_face)]
     elif func == 'BFxycte':
         comps = [sides for _, sides in kCBFxycte.xycte_components(p1, p2,
                  connecti.get('angle', 90.))]
@@ -399,6 +413,12 @@ def constraint_matrix(connecti, size):
         s = leggauss(max(p1.n, p2.m, 4))[0]
         xis = [np.array([2*connecti['xcte1']/p1.a - 1]), s]
         etas = [s, np.array([2*connecti['ycte2']/p2.b - 1])]
+    elif face is not None:
+        #NOTE the edges span the same angle but not the same length, see
+        #     kCBFxcte_face.check_bfxcte; they share the natural coordinate
+        xis = _points(p1, p2, 'x', ctes['x'])
+        s = leggauss(max(p1.n, p2.n, 4))[0]
+        etas = [s, s]
     else:
         xis = _points(p1, p2, 'x', ctes['x'])
         etas = _points(p1, p2, 'y', ctes['y'])
