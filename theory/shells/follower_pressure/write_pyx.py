@@ -7,8 +7,9 @@ The kernels ``calc_fext_follower`` and ``fkCfollower_num`` of each model of
 
     python write_pyx.py [model ...]
 
-The generators of whole modules, ``fsdt_tsdt/write_pyx.py`` and
-``cylshell_clpt_sanders/write_pyx.py``, append the same block through
+The generators of whole modules, ``cylshell_clpt_sanders/write_pyx.py``
+and the ``write_pyx.py`` of the models with 5 DOFs, e.g.
+``cylshell_fsdt_sanders/write_pyx.py``, append the same block through
 :func:`pyx_block`.
 
 """

@@ -47,7 +47,8 @@ For `'SB'` each panel has its own Kirchhoff kinematics, `u(z) = u - z w,x`,
 surface and the offsets `d1`, `d2`.
 
 Models with 5 DOFs `u, v, w, phix, phiy` (FSDT, TSDT, see
-`../shells/fsdt_tsdt`), with the displacement field
+`../shells/<model>`, e.g. `../shells/cylshell_tsdt_sanders`), with the
+displacement field
 
     u(z) = u + z phix - c1 [(z - d)^3 + d^3] (phix + w,x)
     v(z) = v + z Phiy - c1 [(z - d)^3 + d^3] (phiy + w,y)

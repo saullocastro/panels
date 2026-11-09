@@ -87,7 +87,8 @@ flange of `BladeStiff2D`.
   assemblies of plates with large rotations use `plate_clpt_gl` or
   `plate_clpt_tl` (`../plate_clpt_gl`, `../plate_clpt_tl`).
 - No transverse shear deformation; see `plate_fsdt_donnell` and
-  `plate_tsdt_donnell` (`../fsdt_tsdt`).
+  `plate_tsdt_donnell` (`../plate_fsdt_donnell`,
+  `../plate_tsdt_donnell`).
 
 ## References
 

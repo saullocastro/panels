@@ -86,7 +86,8 @@ Default model of a `Shell` with a radius `r`; explicitly
 `Shell(..., r=r, model='cylshell_clpt_sanders')`.
 `panels.modelDB.db['cylshell_clpt_sanders']`: `dofs = 3`, `e_num = 6`,
 `requires_r = True`. The FSDT and TSDT counterparts are
-`cylshell_fsdt_sanders` and `cylshell_tsdt_sanders` (`../fsdt_tsdt`).
+`cylshell_fsdt_sanders` and `cylshell_tsdt_sanders` (`../cylshell_fsdt_sanders`,
+`../cylshell_tsdt_sanders`).
 
 ## References
 

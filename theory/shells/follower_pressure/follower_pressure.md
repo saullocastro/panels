@@ -2,8 +2,9 @@
 
 Derivation: `follower_pressure.py` (sympy), kernels: `write_pyx.py`, which
 writes `calc_fext_follower` and `fkCfollower_num` at the end of every
-`panels/models/<model>_num.pyx` (also called by `fsdt_tsdt/write_pyx.py` and
-`cylshell_clpt_sanders/write_pyx.py`). Tests:
+`panels/models/<model>_num.pyx` (also called by the `write_pyx.py` of
+`cylshell_clpt_sanders` and of the models with 5 DOFs, e.g.
+`cylshell_fsdt_sanders/write_pyx.py`). Tests:
 `tests/tests_shell/test_follower_pressure.py` (verification),
 `tests/tests_shell/test_follower_pressure_validation.py` (rings, Han et al.
 2004), `tests/multidomain/test_follower_pressure_multidomain.py`.
