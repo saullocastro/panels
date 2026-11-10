@@ -21,9 +21,19 @@ the penalty and with the null-space connections. Verified:
   cylinder at its inner face or at its mid-surface and ``face='lower'``;
 - the two rigid-body motions of the assembly that the approximation
   functions represent exactly, the translation along the axis and the
-  rotation about it, give no strain energy and satisfy the constraints;
+  rotation about it, give no strain energy and satisfy the constraints,
+  for a cylinder with the Sanders-Koiter and with the Donnell kinematics,
+  the face following the Sanders-Koiter kinematics by default, with the
+  default ``conn_method`` of :class:`.MultiDomain`, ``'null-space'``;
+- with ``kinematics='model'`` the face of a Donnell cylinder follows the
+  Donnell kinematics: a ``UserWarning`` is issued, and the rigid rotation
+  about the axis leaves the residual `-z_f \Omega` in the constraints and
+  the penalty energy `k_t b z_f^2 \Omega^2/2` per connection;
+- the face of every ``'cylshell_*'`` model follows a rigid rotation about
+  the axis exactly by default;
 - the penalty stiffness matrix of the face connection gives the penalty
-  energy evaluated from the fields;
+  energy evaluated from the fields, and the same energy as the
+  constraints of the null-space method evaluated at their points;
 - the geometry of the connection is checked, a mismatch raising a
   ``ValueError``.
 
@@ -35,10 +45,12 @@ connection imposes `u_{cyl} = w_{web}`, `v_{cyl} = v_{web}`, `w_{cyl} =
 axis, `w_{cyl,x} = w_{web,x}`, at the station `x_f`, see
 :mod:`panels.models.annular_clpt_donnell_num`. With ``face='lower'`` or
 ``face='upper'`` the displacements of the cylinder are those of its inner or
-outer surface, `z_f = d \mp h/2`, with the Kirchhoff-Love kinematics, `u(z_f)
-= u - z_f w_{,x}` and `v(z_f) = (1 + z_f/r) v - z_f w_{,y}`, the term `z_f
-v/r` with the Sanders-Koiter kinematics, see
-:mod:`panels.multidomain.connections.kCBFxcte_face`. At a clamped end of
+outer surface, `z_f = d \mp h/2` in the coordinate `z` of the cylinder,
+with the Kirchhoff-Love kinematics, `u(z_f) = u - z_f w_{,x}` and `v(z_f) =
+(1 + z_f/r) v - z_f w_{,y}`, the term `z_f v/r` being that of the
+Sanders-Koiter kinematics, used by default whatever the model of the
+cylinder, and omitted with ``kinematics='model'`` for a Donnell cylinder,
+see :mod:`panels.multidomain.connections.kCBFxcte_face`. At a clamped end of
 the cylinder all of them vanish, which clamps the connected edge of the
 web through the connection alone (the web itself has free edges).
 
@@ -89,7 +101,14 @@ edge of the web is at the radius of the face, `\rho = r + z_f`. The
 approximation functions represent these fields exactly, constants and
 linear functions; the transverse translations and the tilts, `\cos\theta`
 and `\sin\theta` along the circumference, are represented only
-approximately and are not tested.
+approximately and are not tested. The rotation about the axis is free of
+strain also in the Donnell cylinder, `\varepsilon_{yy} = v_{,y} + w/r = 0`
+and all curvatures zero, and the Sanders-Koiter term at the face, used by
+default, moves the face by `(r + z_f) \Omega`. With the Donnell
+kinematics at the face, ``kinematics='model'``, the face moves by `r
+\Omega`, and the residual of `v_1(z_f) = v_2` is `-z_f \Omega`, `|z_f| =
+h/2`, i.e. `h/(2 r)` relative to `v`; the assembly then keeps a motion free
+of strain and of residual in which the webs rotate by `r \Omega/(r + z_f)`.
 
 References
 ----------
@@ -107,6 +126,7 @@ from scipy.sparse import coo_matrix
 from structsolve import freq
 from structsolve.sparseutils import finalize_symmetric_matrix
 
+import panels.modelDB as modelDB
 from panels.bardell import calc_vec_f, calc_vec_fp
 from panels.shell import Shell
 from panels.multidomain import MultiDomain
@@ -131,6 +151,11 @@ SOUTHWELL = ((0, 6.25, 0.276), (0, 25.0, 0.642), (1, 9.00, 0.397),
 RTOL = {'null-space': 1e-5, 'penalty': 5e-3}
 WEB = 'annular_clpt_donnell'
 CYL = 'cylshell_clpt_sanders'
+CYL_DONNELL = 'cylshell_clpt_donnell'
+#: cylinder models and kinematics of the face: the default, Sanders-Koiter,
+#: and the Donnell kinematics of the model
+CYL_KINEMATICS = [(CYL, 'sanders'), (CYL_DONNELL, 'sanders'),
+                  (CYL_DONNELL, 'model')]
 
 
 def _det(lam2, n, beta, clamped, nu=NU):
@@ -166,10 +191,11 @@ def _free(p):
             setattr(p, e + f + 'r', 1)
 
 
-def _cylinder(r, length, offset=0., clamped=True, h=H, m=8, n=12):
+def _cylinder(r, length, offset=0., clamped=True, h=H, m=8, n=12,
+              model=CYL):
     r"""Half cylinder of reference radius ``r``, its ends `x = 0, L`
-    clamped or free"""
-    c = Shell(model=CYL, a=length, b=np.pi*r, r=r, m=m, n=n, plyt=h,
+    clamped or free, model ``model``"""
+    c = Shell(model=model, a=length, b=np.pi*r, r=r, m=m, n=n, plyt=h,
               stack=[0], laminaprop=(E, NU), rho=RHO, offset=offset)
     _free(c)
     if clamped:
@@ -267,13 +293,16 @@ def test_clamped_inside_against_southwell():
         assert abs(root - beta) < 0.006
 
 
+@pytest.mark.parametrize('model', [CYL, CYL_DONNELL])
 @pytest.mark.parametrize('conn_method', ['null-space', 'penalty'])
-def test_internal_frame_on_inner_surface(conn_method):
+def test_internal_frame_on_inner_surface(conn_method, model):
     """Outer edge of the web on the inner surface of a cylinder clamped at
     `x = 0`, ``face='lower'``, against the roots of the annulus clamped
-    outside and free inside (Leissa 1969, Eqs. (1.11)-(1.13) and (1.17))"""
+    outside and free inside (Leissa 1969, Eqs. (1.11)-(1.13) and (1.17)),
+    for a cylinder with the Sanders-Koiter and with the Donnell
+    kinematics"""
     r_o = R - H/2
-    cyls = [_cylinder(R, 0.5*R) for _ in range(2)]
+    cyls = [_cylinder(R, 0.5*R, model=model) for _ in range(2)]
     webs = [_web(r_o, BETA*r_o) for _ in range(2)]
     md = _assembly(cyls, webs, lambda c, w: dict(p1=c, p2=w, func='BFxcte',
                    xcte1=0, xcte2=0, face='lower'), conn_method)
@@ -370,14 +399,16 @@ def _fit(p, field, func, c):
     c[p.col_start + 3*np.arange(p.m*p.n) + field] = coef
 
 
-@pytest.mark.parametrize('conn_method', ['null-space', 'penalty'])
-def test_rigid_body_motions(conn_method):
-    """Free cylinder with an internal frame on its inner surface at `x = 0`
-    and an external frame on its outer surface at `x = L`: the translation
-    along the axis and the rotation about it give no strain energy and,
-    with the null-space method, satisfy the constraints"""
+def _frames(model, kinematics=None, conn_method=None, kt=None):
+    r"""Free cylinder, model ``model``, with an internal frame on its inner
+    surface at `x = 0` and an external frame on its outer surface at `x =
+    L`, the faces with the key ``'kinematics'`` when it is not ``None``,
+    the default ``conn_method`` of :class:`.MultiDomain` when it is
+    ``None``, and the translation penalty ``kt`` of the face connections
+    when it is not ``None``"""
     length = 0.5*R
-    cyls = [_cylinder(R, length, clamped=False) for _ in range(2)]
+    cyls = [_cylinder(R, length, clamped=False, model=model)
+            for _ in range(2)]
     r_int, r_ext = R - H/2, R + H/2
     webs_int = [_web(r_int, BETA*r_int) for _ in range(2)]
     webs_ext = [_web(r_ext/BETA, r_ext) for _ in range(2)]
@@ -387,36 +418,192 @@ def test_rigid_body_motions(conn_method):
                       ycte2=0),
                  dict(p1=ps[0], p2=ps[1], func='SSycte', ycte1=0,
                       ycte2=ps[1].b)]
+    extra = {}
+    if kinematics is not None:
+        extra['kinematics'] = kinematics
+    if kt is not None:
+        extra['kt'] = kt
+    faces = []
     for c, wi, we in zip(cyls, webs_int, webs_ext):
-        conn += [dict(p1=c, p2=wi, func='BFxcte', xcte1=0, xcte2=0,
-                      face='lower'),
-                 dict(p1=c, p2=we, func='BFxcte', xcte1=length, xcte2=we.a,
-                      face='upper')]
-    md = MultiDomain(cyls + webs_int + webs_ext, conn,
-                     conn_method=conn_method)
-    K = md.calc_kC(silent=True)
+        faces += [dict(p1=c, p2=wi, func='BFxcte', xcte1=0, xcte2=0,
+                       face='lower', **extra),
+                  dict(p1=c, p2=we, func='BFxcte', xcte1=length, xcte2=we.a,
+                       face='upper', **extra)]
+    kwargs = {} if conn_method is None else dict(conn_method=conn_method)
+    md = MultiDomain(cyls + webs_int + webs_ext, conn + faces, **kwargs)
+    return md, cyls, webs_int + webs_ext, faces
+
+
+def _rigid(md, cyls, webs, web_rate=lambda p: 1.):
+    r"""Ritz constants of the translation along the axis, `u = 1` in the
+    cylinder and `w = 1` in the webs, and of the rotation about the axis,
+    `\Omega = 1`, `v = r` in the cylinder and `v = \rho \Omega_w` in the
+    webs, `\rho = r_o - x`, with the rate ``web_rate(web)`` of each web"""
     size = md.get_size()
-    webs = webs_int + webs_ext
-    # translation along the axis: u of the cylinder, w of the webs
     c_t = np.zeros(size)
     for p in cyls:
         _fit(p, 0, lambda x, y: np.ones_like(x), c_t)
     for p in webs:
         _fit(p, 2, lambda x, y: np.ones_like(x), c_t)
-    # rotation about the axis, Omega = 1: v = r in the cylinder, v = rho =
-    # r_o - x in the webs
     c_r = np.zeros(size)
     for p in cyls:
         _fit(p, 1, lambda x, y: R*np.ones_like(x), c_r)
     for p in webs:
-        _fit(p, 1, lambda x, y, p=p: p.r - x, c_r)
+        _fit(p, 1, lambda x, y, p=p: web_rate(p)*(p.r - x), c_r)
+    return c_t, c_r
+
+
+@pytest.mark.parametrize('model', [CYL, CYL_DONNELL])
+@pytest.mark.parametrize('conn_method', [None, 'penalty'])
+def test_rigid_body_motions(conn_method, model):
+    """Free cylinder with an internal frame on its inner surface at `x = 0`
+    and an external frame on its outer surface at `x = L`, the faces with
+    their default kinematics: the translation along the axis and the
+    rotation about it give no strain energy and, with the default
+    ``conn_method`` of :class:`.MultiDomain`, ``'null-space'``, satisfy the
+    constraints, for a cylinder with the Sanders-Koiter and with the
+    Donnell kinematics"""
+    md, cyls, webs, faces = _frames(model, conn_method=conn_method)
+    if conn_method is None:
+        assert md.conn_method == 'null-space'
+        assert all(md._null_space(ci) for ci in faces)
+    K = md.calc_kC(silent=True)
+    size = md.get_size()
+    conn = md.conn
+    c_t, c_r = _rigid(md, cyls, webs)
     for c in (c_t, c_r):
         energy = c @ (K @ c)
         assert abs(energy) < 1e-10*abs(K.diagonal()).max()*(c @ c)
-        if conn_method == 'null-space':
+        if conn_method is None:
             for ci in conn:
                 B = nullspace.constraint_matrix(ci, size)
                 assert np.abs(B @ c).max() < 1e-10*np.abs(c).max()
+
+
+def test_donnell_kinematics_null_space():
+    r"""The frames of :func:`test_rigid_body_motions` on a Donnell cylinder
+    with ``kinematics='model'``, null-space method: a ``UserWarning`` is
+    issued, the translation along the axis satisfies the constraints, the
+    rotation about the axis leaves the residual `-z_f \Omega` of `v_1(z_f) =
+    v_2`, `|z_f| = h/2`, and the webs rotating by `r \Omega/(r + z_f)`
+    satisfy them"""
+    md, cyls, webs, faces = _frames(CYL_DONNELL, kinematics='model')
+    assert md.conn_method == 'null-space'
+    with pytest.warns(UserWarning, match='Donnell cylinder'):
+        K = md.calc_kC(silent=True)
+    size = md.get_size()
+    c_t, c_r = _rigid(md, cyls, webs)
+    # the webs rotate as the reference surface of the cylinder, v2 = r at
+    # their connected edge, rho = r + z_f
+    rate = {id(p): R/(p.r - (0. if k < 2 else p.a))
+            for k, p in enumerate(webs)}
+    _, c_w = _rigid(md, cyls, webs, web_rate=lambda p: rate[id(p)])
+    for c in (c_t, c_w):
+        assert abs(c @ (K @ c)) < 1e-10*abs(K.diagonal()).max()*(c @ c)
+    for ci in faces:
+        B = nullspace.constraint_matrix(ci, size)
+        z = kCBFxcte_face.face_coordinate(ci['p1'], ci['face'])
+        assert np.abs(B @ c_t).max() < 1e-10
+        assert np.abs(B @ c_w).max() < 1e-10
+        # rows: u, v, w, rotation, each at the same number of points
+        res = (B @ c_r).reshape(4, -1)
+        assert np.allclose(res[1], -z, rtol=1e-8, atol=0)
+        assert np.abs(res[[0, 2, 3]]).max() < 1e-10
+        assert np.isclose(abs(z)/R, H/(2*R))
+
+
+@pytest.mark.parametrize('kinematics', [None, 'model'])
+def test_donnell_kinematics_penalty(kinematics):
+    r"""The frames of :func:`test_rigid_body_motions` on a Donnell cylinder,
+    penalty method with the translation penalty `k_t` of the face
+    connections: the rotation about the axis gives zero energy with the
+    default kinematics of the face and, with ``kinematics='model'`` and a
+    ``UserWarning``, the penalty energy of the residual `-z_f \Omega`, `k_t
+    b z_f^2 \Omega^2/2` per face connection"""
+    kt = 1.e12
+    md, cyls, webs, faces = _frames(CYL_DONNELL, kinematics=kinematics,
+                                    conn_method='penalty', kt=kt)
+    if kinematics == 'model':
+        with pytest.warns(UserWarning, match='Donnell cylinder'):
+            K = md.calc_kC(silent=True)
+    else:
+        K = md.calc_kC(silent=True)
+    c_t, c_r = _rigid(md, cyls, webs)
+    assert abs(c_t @ (K @ c_t)) < 1e-10*abs(K.diagonal()).max()*(c_t @ c_t)
+    energy = 0.5*c_r @ (K @ c_r)
+    if kinematics is None:
+        assert abs(energy) < 1e-10*abs(K.diagonal()).max()*(c_r @ c_r)
+    else:
+        ref = sum(0.5*kt*ci['p1'].b*kCBFxcte_face.face_coordinate(ci['p1'],
+                  ci['face'])**2 for ci in faces)
+        assert np.isclose(energy, ref, rtol=1e-6)
+
+
+@pytest.mark.parametrize('model', sorted(m for m in modelDB.db
+                                         if m.startswith('cylshell_')))
+def test_face_follows_rigid_rotation_every_model(model):
+    r"""For every ``'cylshell_*'`` model the displacement `v_1(z_f)` of the
+    connected face, from :func:`.kCBFxcte_face.bfxcte_face_components`, of
+    the rigid rotation about the axis, `v = r \Omega`, all other fields
+    and rotations zero, is `(r + z_f) \Omega` with the default kinematics;
+    with ``kinematics='model'`` it is `r \Omega` for the Donnell models, with
+    a ``UserWarning`` from :func:`.kCBFxcte_face.check_bfxcte`, and `(r +
+    z_f) \Omega` for the others"""
+    c = _cylinder(R, 0.5*R, model=model)
+    w = _web(R - H/2, BETA*(R - H/2))
+    donnell = 'donnell' in model
+    for kinematics in (None, 'sanders', 'model'):
+        ci = dict(p1=c, p2=w, func='BFxcte', xcte1=0, xcte2=0, face='lower',
+                  kinematics=kinematics)
+        if kinematics == 'model' and donnell:
+            with pytest.warns(UserWarning, match='Donnell cylinder'):
+                z = kCBFxcte_face.check_bfxcte(ci)
+        else:
+            z = kCBFxcte_face.check_bfxcte(ci)
+        assert np.isclose(z, -H/2)
+        comps = kCBFxcte_face.bfxcte_face_components(c, w, z,
+                kinematics=kCBFxcte_face.kinematics_of(ci))
+        terms_v = comps[1][1][0][1]
+        v_face = sum(coeff*R for field, dx, dy, coeff in terms_v
+                     if field == 1 and dx == dy == 0)
+        expected = R if kinematics == 'model' and donnell else R + z
+        assert np.isclose(v_face, expected, rtol=1e-14)
+
+
+@pytest.mark.parametrize('model, kinematics', CYL_KINEMATICS)
+@pytest.mark.parametrize('face', ['lower', 'upper'])
+def test_penalty_and_null_space_agree(face, model, kinematics):
+    r"""The penalty energy of :func:`.kCBFxcte_face.fkCBFxcte_face`, `k_t =
+    k_r = 1`, equals that of the constraints of
+    :func:`.nullspace.constraint_matrix`, `\frac{1}{2} \frac{b_1}{2}
+    \sum_k \sum_l w_l q_k(\eta_l)^2` with the Gauss-Legendre weights `w_l`
+    of their points, for a random vector of Ritz constants"""
+    c1 = _cylinder(R, 0.5*R, clamped=False, m=6, n=7, model=model)
+    if face == 'lower':
+        w1 = _web(R - H/2, BETA*(R - H/2), m=5, n=6)
+        xcte2 = 0.
+    else:
+        w1 = _web((R + H/2)/BETA, R + H/2, m=5, n=6)
+        xcte2 = w1.a
+    md = MultiDomain([c1, w1], [])
+    size = md.get_size()
+    xf = 0.3*c1.a
+    ci = dict(p1=c1, p2=w1, func='BFxcte', xcte1=xf, xcte2=xcte2, face=face,
+              kinematics=kinematics)
+    z = kCBFxcte_face.face_coordinate(c1, face)
+    kC = kCBFxcte_face.fkCBFxcte_face(1., 1., c1, w1, xf, xcte2, z, size,
+                                      kinematics=kinematics)
+    K = finalize_symmetric_matrix(coo_matrix(kC).tocsr())
+    if kinematics == 'model':
+        with pytest.warns(UserWarning, match='Donnell cylinder'):
+            B = nullspace.constraint_matrix(ci, size)
+    else:
+        B = nullspace.constraint_matrix(ci, size)
+    c = np.random.default_rng(2).standard_normal(size)
+    q = (B @ c).reshape(4, -1)
+    wts = leggauss(q.shape[1])[1]
+    assert np.isclose(0.5*c @ (K @ c), 0.5*c1.b/2*np.sum(wts*q**2),
+                      rtol=1e-10)
 
 
 def _field(p, field, x, der_x, der_y, etas, c):
@@ -438,13 +625,16 @@ def _field(p, field, x, der_x, der_y, etas, c):
     return np.array(out)
 
 
+@pytest.mark.parametrize('model, kinematics', CYL_KINEMATICS)
 @pytest.mark.parametrize('face', ['lower', 'upper'])
-def test_penalty_energy_from_fields(face):
+def test_penalty_energy_from_fields(face, model, kinematics):
     r"""The penalty matrix of :func:`.kCBFxcte_face.fkCBFxcte_face` against
     the penalty energy computed from the fields of a random vector of Ritz
-    constants, with the Gauss-Legendre rule along the connection"""
+    constants, with the Gauss-Legendre rule along the connection, the term
+    `z v/r` of the face with the default kinematics, and without it with
+    ``kinematics='model'`` for a Donnell cylinder"""
     kt, kr = 1.3e6, 2.1e2
-    c1 = _cylinder(R, 0.5*R, clamped=False, m=6, n=7)
+    c1 = _cylinder(R, 0.5*R, clamped=False, m=6, n=7, model=model)
     if face == 'lower':
         w1 = _web(R - H/2, BETA*(R - H/2), m=5, n=6)
         xcte2 = 0.
@@ -455,13 +645,15 @@ def test_penalty_energy_from_fields(face):
     size = md.get_size()
     xf = 0.3*c1.a
     z = kCBFxcte_face.face_coordinate(c1, face)
-    kC = kCBFxcte_face.fkCBFxcte_face(kt, kr, c1, w1, xf, xcte2, z, size)
+    kC = kCBFxcte_face.fkCBFxcte_face(kt, kr, c1, w1, xf, xcte2, z, size,
+                                      kinematics=kinematics)
     K = finalize_symmetric_matrix(coo_matrix(kC).tocsr())
     c = np.random.default_rng(1).standard_normal(size)
     etas, wts = leggauss(20)
+    rinv = 0. if kinematics == 'model' else 1/R
     u1 = (_field(c1, 0, xf, 0, 0, etas, c)
           - z*_field(c1, 2, xf, 1, 0, etas, c))
-    v1 = ((1 + z/R)*_field(c1, 1, xf, 0, 0, etas, c)
+    v1 = ((1 + z*rinv)*_field(c1, 1, xf, 0, 0, etas, c)
           - z*_field(c1, 2, xf, 0, 1, etas, c))
     w1_ = _field(c1, 2, xf, 0, 0, etas, c)
     wx1 = _field(c1, 2, xf, 1, 0, etas, c)
@@ -477,8 +669,9 @@ def test_penalty_energy_from_fields(face):
 
 def test_geometry_errors():
     """A web whose edge is not at the radius of the connected surface, a
-    face on the wrong side of the web, an unknown face and a web spanning
-    another angle raise a ``ValueError``, also from :class:`.MultiDomain`"""
+    face on the wrong side of the web, an unknown face or kinematics and a
+    web spanning another angle raise a ``ValueError``, also from
+    :class:`.MultiDomain`"""
     c = _cylinder(R, 0.5*R)
     w_ref = _web(R, BETA*R)
     w_in = _web(R - H/2, BETA*R)
@@ -492,6 +685,8 @@ def test_geometry_errors():
                 face='upper'),
            dict(p1=c, p2=w_in, func='BFxcte', xcte1=0, xcte2=0,
                 face='inner'),
+           dict(p1=c, p2=w_in, func='BFxcte', xcte1=0, xcte2=0,
+                face='lower', kinematics='donnell'),
            dict(p1=c, p2=w_angle, func='BFxcte', xcte1=0, xcte2=0)]
     for ci in bad:
         with pytest.raises(ValueError):
