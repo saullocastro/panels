@@ -18,18 +18,23 @@
 - `run_static_case=True`: `Nxx_*` and `Nxy_*` are axial and shear loads
   distributed at the edge `x = 0` of each part, and the geometric
   stiffness comes from the membrane stresses of the static solution, as
-  for `Nxx_*` before; any `Nyy_*` given raises `ValueError`. The loaded
-  edge `x = 0` of the skin and of the flange is free in `u` (as in Fig. 7
-  of the paper) and in `v`; the other boundary conditions are those of
-  Fig. 8. Docstring example with the static case: without loads
-  `sqrt(-Re lambda_1)` 487.4174 to 453.7141 rad/s (the first eigenvalue is
-  now real at Mach 2); `Nxx_*` = -100 N/m 453.6788 (before 487.4215, the
-  loads acting on restrained displacements); `Nxy_skin` = -100 N/m
-  453.7135.
+  for `Nxx_*` before; any `Nyy_*` given raises `ValueError`. The boundary
+  conditions, for the static case and for the eigenvalue problem, are
+  those of the compression analysis of the paper, Fig. 7: the edges
+  `x = 0`, `y = 0` and `y = b` of the skin and the loaded end of the
+  flange are free in `u`, and the loaded edge `x = 0` of the skin and of
+  the flange is also free in `v`; they were those of Fig. 8. Docstring
+  example with the static case: without loads `sqrt(-Re lambda_1)`
+  487.4174 to 448.3766 rad/s (the first eigenvalue is now real at Mach 2);
+  `Nxx_*` = -100 N/m 448.0302 (-7.7e-4; before 487.4215, the loads acting
+  on restrained displacements); `Nxy_skin` = -100 N/m 448.3763.
 - The attributes `Nxx`, `Nyy`, `Nxy` of the returned domains are the
   constant loads (`run_static_case=False`, `0` for `None`) or `0`.
-- New tests `test_tstiff2d_1stiff_flutter_constant_prestress` and
-  `test_tstiff2d_1stiff_flutter_static_edge_loads`; the notebook
+- New tests `test_tstiff2d_1stiff_flutter_constant_prestress`,
+  `test_tstiff2d_1stiff_flutter_static_edge_loads` and
+  `test_tstiff2d_1stiff_flutter_static_case_buckling_fig7` (without flow,
+  `omega_1^2` falls to 0.8 % of its unloaded value at 0.99 times the
+  buckling load of `tstiff2d_1stiff_compression`, Fig. 7); the notebook
   `ex_multidomain_tstiff2d` runs the flutter case with both kinds of load.
 
 ### Generators of `plate_fsdt_donnell`, `plate_tsdt_donnell`, `cylshell_fsdt_donnell`, `cylshell_fsdt_sanders`, `cylshell_tsdt_donnell`, `cylshell_tsdt_sanders`: one folder per model
@@ -462,8 +467,8 @@
   Table 5, +0.01 % to +0.51 % from the paper's `m = n = 8` values (before:
   62.618 to 53.705 Hz, 3.6 % to 4.0 % below).
 - `tstiff2d_1stiff_flutter`: these conditions hold with
-  `run_static_case=False`; with `run_static_case=True` the loaded edge
-  `x = 0` of the skin and of the flange is free in `u` and `v`, see
+  `run_static_case=False`; with `run_static_case=True` those of Fig. 7,
+  with `v` also free at the loaded edge `x = 0`, see
   "Changed: in-plane loads of `tstiff2d_1stiff_flutter`".
 - Stored values: `test_tstiff2d_assembly.py`, first natural frequency
   48.2733 to 48.4404 rad/s, flutter `sqrt(-lambda_1)` 446.12 to

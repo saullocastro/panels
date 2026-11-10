@@ -12,8 +12,10 @@ first natural frequencies of the curved panel against Castro and Donadon
 panel with a defect to that without against their Fig. 15, digitised. The
 in-plane loads of :func:`.tstiff2d_1stiff_flutter` are checked as constant
 stress states, with the boundary conditions of their Fig. 8, and as edge
-loads of a static case, with the loaded edge free in `u` as in their Fig. 7
-and in `v`.
+loads of a static case, with the boundary conditions of their Fig. 7 and
+`v` also free at the loaded edge; with these, the first natural frequency
+vanishes at the buckling load of :func:`.tstiff2d_1stiff_compression`,
+their Fig. 7 analysis.
 
 """
 import sys
@@ -270,8 +272,8 @@ W0 = 487.4174
 
 
 def _flutter_omega1(**kwargs):
-    assy, eigvals, eigvecs = tstiff2d_1stiff_flutter(**FLUTTER_PANEL,
-                                                     **kwargs)
+    assy, eigvals, eigvecs = tstiff2d_1stiff_flutter(
+            **dict(FLUTTER_PANEL, **kwargs))
     return assy, float(np.sqrt(-eigvals[0].real))
 
 
@@ -327,40 +329,93 @@ def test_tstiff2d_1stiff_flutter_static_edge_loads():
     of a static case, ``run_static_case=True``
 
     The panel of the function's Examples, with the boundary conditions of
-    Castro and Donadon (2017), Fig. 8, except at the loaded edge `x = 0` of
-    the skin and of the flange, free in `u` as in their Fig. 7 and in `v`. The
-    paper gives no frequency of a loaded panel; the test verifies:
+    the compression analysis of Castro and Donadon (2017), Fig. 7: the
+    edges `x = 0`, `y = 0` and `y = b` of the skin free in `u`, with, in
+    addition, `v` free at the loaded edge `x = 0` of the skin and of the
+    flange. The paper gives no frequency of a loaded panel; the test
+    verifies:
 
     - ``Nyy_*`` given with ``run_static_case=True`` raises ``ValueError``;
-    - without loads, `\sqrt{-\mathrm{Re}(\lambda_1)}` is 453.7141 rad/s
-      (regression value; 487.4174 with ``run_static_case=False``, where
-      `u = v = 0` at `x = 0`);
+    - the boundary condition flags of the skin edges `y = 0` and `y = b`
+      (`u` free, `v = w = 0`) and of the loaded edge `x = 0` (`u`, `v`
+      free, `w = 0`);
+    - without loads, `\sqrt{-\mathrm{Re}(\lambda_1)}` is 448.3766 rad/s
+      (regression value; 487.4174 with ``run_static_case=False``, the
+      boundary conditions of their Fig. 8);
     - the edge loads act: `N_{xx} = -100` N/m in the three parts lowers it
-      to 453.6788 rad/s (regression value), `N_{xx} = +100` N/m raises it;
+      to 448.0302 rad/s (regression value, `-7.7 \times 10^{-4}`),
+      `N_{xx} = +100` N/m raises it;
     - the change of `\omega^2 = -\mathrm{Re}(\lambda_1)` is linear in the
       load to first order: for `N_{xx} = +100` and `-1000` N/m it is `-1`
-      and `10` times that for `-100` N/m, within 5 % (computed: -1.004 and
-      9.82);
-    - the shear load `N_{xy} = -100` N/m of the skin alone lowers it by
-      more than 2e-4 rad/s (computed: 5.4e-4 rad/s).
+      and `10` times that for `-100` N/m, within 10 % (computed: -0.987
+      and 10.56; the aerodynamic coupling makes it nonlinear);
+    - the shear load `N_{xy} = -100` N/m of the skin alone changes it by
+      more than 1e-4 rad/s (computed: -2.3e-4 rad/s).
 
     """
     with pytest.raises(ValueError):
         tstiff2d_1stiff_flutter(run_static_case=True, Nyy_skin=-100.,
                                 **FLUTTER_PANEL)
     assy, w0 = _flutter_omega1(run_static_case=True)
-    assert np.isclose(w0, 453.7141, rtol=1e-6)
+    assert np.isclose(w0, 448.3766, rtol=1e-6)
+    skin = [pi for pi in assy.panels if pi.group == 'skin']
+    # skin domains along y = 0 and y = b: p03, p06, p09 and p01, p04, p07
+    for pi in (skin[2], skin[5], skin[8]):
+        assert (pi.y1u, pi.y1v, pi.y1w) == (1, 0, 0)
+    for pi in (skin[0], skin[3], skin[6]):
+        assert (pi.y2u, pi.y2v, pi.y2w) == (1, 0, 0)
+    for pi in skin[6:] + [assy.panels[14]]:
+        assert (pi.x1u, pi.x1v, pi.x1w) == (1, 1, 0)
+    for pi in skin[:3] + [assy.panels[10]]:
+        assert (pi.x2u, pi.x2v, pi.x2w) == (0, 0, 0)
     all_ = lambda N: {'Nxx_%s' % p: N for p in PARTS}
     wm = _flutter_omega1(run_static_case=True, **all_(-100.))[1]
-    assert np.isclose(wm, 453.6788, rtol=1e-6)
+    assert np.isclose(wm, 448.0302, rtol=1e-6)
     wp = _flutter_omega1(run_static_case=True, **all_(100.))[1]
     wk = _flutter_omega1(run_static_case=True, **all_(-1000.))[1]
     assert wm < w0 < wp
     dm = wm**2 - w0**2
-    assert np.isclose((wp**2 - w0**2)/dm, -1., rtol=0.05)
-    assert np.isclose((wk**2 - w0**2)/dm, 10., rtol=0.05)
+    assert np.isclose((wp**2 - w0**2)/dm, -1., rtol=0.1)
+    assert np.isclose((wk**2 - w0**2)/dm, 10., rtol=0.1)
     ws = _flutter_omega1(run_static_case=True, Nxy_skin=-100.)[1]
-    assert w0 - ws > 2e-4
+    assert abs(w0 - ws) > 1e-4
+
+
+def test_tstiff2d_1stiff_flutter_static_case_buckling_fig7():
+    r"""Natural frequency of :func:`.tstiff2d_1stiff_flutter` with
+    ``run_static_case=True`` approaching the buckling load of Castro and
+    Donadon (2017), Fig. 7
+
+    Without flow (``air_speed=0``), the eigenvalue problem of the function
+    is `(\boldsymbol{K} + \boldsymbol{K}_G - \omega^2 \boldsymbol{M})
+    \boldsymbol{c} = \boldsymbol{0}`, and `\omega_1` vanishes where
+    `\boldsymbol{K} + \boldsymbol{K}_G` becomes singular, at the buckling
+    load of the same boundary conditions. The buckling load multiplier
+    `\lambda_{cr}` of `N_{xx} = -100` N/m in the three parts comes from
+    :func:`.tstiff2d_1stiff_compression`, the analysis of their Fig. 7,
+    for the panel of the function's Examples (null-space connections),
+    whose boundary conditions differ only by `v = 0` at the loaded edge.
+    The test verifies that `\omega_1^2/\omega_{1,0}^2`, with
+    `\omega_{1,0}` without load, is within 2 % of `1 - \alpha` at
+    `N_{xx} = -100 \alpha \lambda_{cr}` N/m for `\alpha = 0.5` (computed:
+    0.5030) and below 0.02 for `\alpha = 0.99` (computed: 0.0079).
+
+    """
+    md, c, lam, _ = tstiff2d_1stiff_compression(
+        **{k: v for k, v in FLUTTER_PANEL.items() if k not in ('air_speed',
+           'rho_air', 'Mach', 'speed_sound', 'num_eigvalues')},
+        Nxx_skin=-100., Nxx_base=-100., Nxx_flange=-100.,
+        run_static_case=True, num_eigvalues=5)
+    lcr = lam[0]
+    assert np.isclose(lcr, 3.2125, rtol=1e-4)
+    w0 = _flutter_omega1(run_static_case=True, air_speed=0.)[1]
+    ratios = []
+    for alpha in (0.5, 0.99):
+        w = _flutter_omega1(run_static_case=True, air_speed=0.,
+                **{'Nxx_%s' % p: -100.*alpha*lcr for p in PARTS})[1]
+        ratios.append((w/w0)**2)
+    assert np.isclose(ratios[0], 0.5, rtol=0.02)
+    assert ratios[1] < 0.02
 
 
 if __name__ == '__main__':

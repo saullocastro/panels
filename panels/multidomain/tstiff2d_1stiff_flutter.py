@@ -72,11 +72,17 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
     `y = 0` and `y = b`, and at both ends of the flange, `x = 0` and
     `x = a`; the edges of the base are free, the base being held by its
     connections to the skin and to the flange, and the rotations are free
-    at every edge. With ``run_static_case=True`` the loaded edge `x = 0`
-    of the skin (``p07``, ``p08``, ``p09``) and of the flange (``p15``) is
-    free in `u`, as the loaded edge of the compression analysis of Castro
-    and Donadon (2017), Fig. 7, and also in `v`, such that the axial and
-    shear edge loads act on the panel; `w = 0` remains. The aerodynamic parameters are given to the
+    at every edge. With ``run_static_case=True`` the boundary conditions
+    are those of the compression analysis of Castro and Donadon (2017),
+    Fig. 7, p. 236, with `v` also free at the loaded edge: the loaded edge
+    `x = 0` of the skin (``p07``, ``p08``, ``p09``) and of the flange
+    (``p15``) is free in `u` and `v`, such that the axial and shear edge
+    loads act on the panel, the edges `y = 0` (``p03``, ``p06``, ``p09``)
+    and `y = b` (``p01``, ``p04``, ``p07``) of the skin are free in `u`,
+    `w = 0` remains at these edges and `v = 0` at `y = 0` and `y = b`, and
+    the edge `x = a` of the skin and the end `x = a` of the flange keep
+    `u = v = w = 0`. These boundary conditions hold for the static
+    analysis and for the eigenvalue problem. The aerodynamic parameters are given to the
     9 skin domains only, and the aerodynamic matrix is the sum of
     :meth:`.Shell.calc_kA` of the skin domains.
 
@@ -102,8 +108,9 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
       the attributes ``Nxx``, ``Nyy`` and ``Nxy`` of every domain equal to
       ``0``. ``Nyy_skin``, ``Nyy_base`` and ``Nyy_flange`` must be
       ``None``: this function has no edge load along `y`. Without any edge
-      load the geometric stiffness matrix is not included, but the edge
-      `x = 0` is free in `u` and `v` all the same.
+      load the geometric stiffness matrix is not included, but the
+      boundary conditions are those of ``run_static_case=True`` all the
+      same.
 
     The reduced matrices, see :meth:`.MultiDomain.reduce`, the sum
     of the constitutive, geometric and aerodynamic stiffness matrices and
@@ -174,8 +181,9 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
         load.
     run_static_case : bool, optional
         If True, the edge `x = 0` of the skin and of the flange is free in
-        `u` and `v`, the loads ``Nxx_*`` and ``Nxy_*`` are applied at the
-        edge `x = 0` and the geometric stiffness matrix is computed from the
+        `u` and `v`, the edges `y = 0` and `y = b` of the skin are free in
+        `u`, the loads ``Nxx_*`` and ``Nxy_*`` are applied at the edge
+        `x = 0` and the geometric stiffness matrix is computed from the
         membrane stresses of a linear static analysis; if False, from the
         constant loads ``Nxx_*``, ``Nyy_*`` and ``Nxy_*``, with the
         boundary conditions of Fig. 8. Default ``True``.
@@ -232,13 +240,21 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
     term in `\gamma` of Eqs. (21) and (29) of [1]_ has the wrong sign, a
     mistake of the paper, the correction of Krumhaar softening the shell. The flutter onset is found by increasing the
     aerodynamic load, e.g. ``air_speed``, until two natural frequencies
-    coalesce and the eigenvalues become complex. The boundary conditions are
-    those of the vibration analysis of the same assembly, Fig. 8 of [2]_,
-    p. 236, with the loaded edge free in `u`, as in the compression
-    analysis, Fig. 7 of [2]_, and in `v` when ``run_static_case=True``;
-    with `u = v = 0` there, the edge loads would act on restrained displacements and
-    load the panel only through the free edges of the base. The debonding
-    defect is modelled as in
+    coalesce and the eigenvalues become complex. With
+    ``run_static_case=False`` the boundary conditions are those of the
+    vibration analysis of the same assembly, Fig. 8 of [2]_, p. 236. With
+    ``run_static_case=True`` they are those of the compression analysis,
+    Fig. 7 of [2]_, p. 236, where the skin edges that move along `x` under
+    the load, `x = 0`, `y = 0` and `y = b`, have `v = w = 0` and `u` free,
+    and the flange has `v = w = 0` at the loaded end, with, in addition,
+    `v` free at the loaded edge `x = 0` of the skin and of the flange,
+    such that the shear edge loads act on the panel. With `u = v = 0` at
+    `x = 0`, the edge loads would act on restrained displacements and load
+    the panel only through the free edges of the base; with `u = 0` at
+    `y = 0` and `y = b`, these edges would take up most of the axial edge
+    load near `x = 0`. One set of boundary conditions holds for the static
+    analysis and for the eigenvalue problem: the pre-stressed structure is
+    the vibrating one. The debonding defect is modelled as in
     :func:`.tstiff2d_1stiff_compression`.
 
     `\boldsymbol{K}_G = \boldsymbol{K}_G(\boldsymbol{N})` is the geometric
@@ -463,6 +479,11 @@ def tstiff2d_1stiff_flutter(a, b, ys, bb, bf, defect_a, rho, plyt,
         for p in [p07, p08, p09, p15]:
             p.x1u = 1
             p.x1v = 1
+        # skin edges y = 0 and y = b free in u
+        for p in [p03, p06, p09]:
+            p.y1u = 1
+        for p in [p01, p04, p07]:
+            p.y2u = 1
 
     conn = [
         # skin-skin
