@@ -6,7 +6,9 @@ cylinder of 5 domains connected along the circumference, under axial
 compression, with the default Sanders kinematics and penalty connections.
 The tests verify the critical load ``-Nxx*eigvals[0]`` against the classical
 buckling load of Batdorf (1947), eq. (1), within 1.5 %, and against a
-regression value of the same model.
+regression value of the same model. ``test_create_cylinder`` checks that
+the connections returned by :func:`.create_cylinder` are those stored in
+the assembly, ``md.conn``, and close the cylinder.
 
 Notes
 -----
@@ -49,7 +51,8 @@ sys.path.append('../..')
 import pytest
 import numpy as np
 
-from panels.multidomain import (cylinder_compression_lb_Nxx_cte,
+from panels.multidomain import (create_cylinder,
+        cylinder_compression_lb_Nxx_cte,
         cylinder_compression_lb_Nxx_from_static)
 
 E = 70e9
@@ -59,6 +62,18 @@ height = 0.2
 r = 0.25
 # classical buckling load of the cylinder (Notes)
 Ncl = E*thickness**2/(r*np.sqrt(3*(1 - nu**2)))
+
+
+def test_create_cylinder():
+    md, conns = create_cylinder(height=height, r=r, stack=[0],
+            plyt=thickness, laminaprop=(E, nu), npanels=5, m=4, n=4)
+    assert md.conn is conns
+    assert md.conn_method == 'null-space'
+    assert [c['func'] for c in conns] == ['SSycte']*5
+    # consecutive panels, the last joined to the first
+    pairs = [(md.panels.index(c['p1']), md.panels.index(c['p2']))
+             for c in conns]
+    assert pairs == [(0, 1), (1, 2), (2, 3), (3, 4), (0, 4)]
 
 
 def test_cylinder_compression_lb_Nxx_cte():

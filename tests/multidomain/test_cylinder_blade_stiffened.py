@@ -30,7 +30,9 @@ panels of the default Sanders kinematics, blades of the model
   against regression values, their ratios to the smeared theory being
   given in the Notes; with prescribed displacements, the end `x` =
   ``height`` of every domain reaches `u` = ``pd`` exactly in the
-  pre-buckling state;
+  pre-buckling state; the argument ``side`` of the three functions, on a
+  small model: the connections stored in the returned assembly, the
+  default equal to ``'internal'``;
 - the skin ``'cylshell_clpt_tl'`` and the blades ``'plate_clpt_tl'``
   (argument ``models``) against the GL models: equal loads with the
   constant membrane state, within ``1e-6`` with the static pre-buckling
@@ -455,8 +457,9 @@ def test_models_argument():
 
 
 def test_return_info():
-    # the assembly, the connections and the dictionary info; the unpacking
-    # into two names fails, as does an unknown side
+    # the assembly, the connections, also stored in the assembly, and the
+    # dictionary info; the unpacking into two names fails, as does an
+    # unknown side
     kw = dict(height=L/2, r=R, stack=[0]*28, stack_blades=[[0]*97]*4,
               width_blades=[HB]*4, plyt=PLYT, laminaprop=(E, NU), npanels=4,
               m=4, n=4)
@@ -465,11 +468,39 @@ def test_return_info():
     assert info['blades'] == md.panels[4:]
     assert np.isclose(info['ws'], 2*np.pi*R/4)
     assert len(conns) == 8
-    assert md.conn is None
+    assert md.conn is conns
     with pytest.raises(ValueError):
         md, conns = create_cylinder_blade_stiffened(**kw)
     with pytest.raises(ValueError):
         create_cylinder_blade_stiffened(side='outside', **kw)
+
+
+def test_analyses_side():
+    # the three analyses pass side to create_cylinder_blade_stiffened: the
+    # 'BFycte' connections stored in the returned assembly join the edge
+    # y = 0 of the blades without side (default) and with 'internal', the
+    # edge y = width_blades[i] with 'external'; the default gives the same
+    # loads as 'internal', and 'external' other loads
+    kw = dict(height=L/2, r=R, stack=[0]*28, stack_blades=[[0]*97]*4,
+              width_blades=[HB]*4, plyt=PLYT, laminaprop=(E, NU), npanels=4,
+              m=4, n=4, num_eigvalues=3)
+    nxx = dict(Nxxs_skin=[-E*T]*4, Nxxs_blade=[-E*TB]*4)
+    pds = dict(pds_skin=[-1.e-3*L/2]*4, pds_blade=[-1.e-3*L/2]*4)
+    for func, loads in (
+            (cylinder_blade_stiffened_compression_lb_Nxx_cte, nxx),
+            (cylinder_blade_stiffened_compression_lb_Nxx_from_static, nxx),
+            (cylinder_blade_stiffened_compression_lb_pd_from_static, pds)):
+        ev = {}
+        for side, ycte2 in ((None, 0.), ('internal', 0.), ('external', HB)):
+            extra = {} if side is None else dict(side=side)
+            out = func(**kw, **loads, **extra)
+            md, eigvals = out[0], out[-2]
+            bf = [c for c in md.conn if c['func'] == 'BFycte']
+            assert len(bf) == 4
+            assert all(c['ycte1'] == 0 and c['ycte2'] == ycte2 for c in bf)
+            ev[side] = eigvals[0]
+        assert ev[None] == ev['internal']
+        assert not np.isclose(ev['external'], ev['internal'], rtol=1e-3)
 
 
 def test_side():
