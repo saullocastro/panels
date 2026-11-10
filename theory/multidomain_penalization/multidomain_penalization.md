@@ -6,9 +6,12 @@ Derivations (sympy) of the penalty matrices of `MultiDomain`:
   `output_expressions_python_new/sympy_<name>.txt`;
 - `bfxcte_face.py`: symbolic checks of the connection `'BFxcte'` at a face
   of a cylinder (key `'face'`): the Kirchhoff-Love displacements of a point
-  of the normal, the rotation about the circumferential axis, and the zero
+  of the normal, the rotation about the circumferential axis, the zero
   residuals of the six rigid motions of a cylinder and an annular plate
-  whose edge is at the radius of the face;
+  whose edge is at the radius of the face with the Sanders-Koiter term
+  `z v/r` at the face (key `'kinematics'`, default `'sanders'`), and, for
+  a Donnell cylinder with `kinematics='model'`, the residual `-z_f Omega`
+  of a rigid rotation about the axis, of relative order `h/(2 r)`;
 - `kCpd.py`: the prescribed displacements at a point and along a line,
   written to `output_expressions_python/sympy_<name>.txt`;
 - `force_crack_creation.py`: the terms of the creation of a crack in a
@@ -50,7 +53,11 @@ and the Donnell kinematics:
 
 For `'BFxcte'` with the key `'face'` the edge `x2 = xcte2` of the flange
 (`0` for `'lower'`, `a2` for `'upper'`) is tied to the face of the base,
-with the Kirchhoff kinematics of the base below; the two edges share `eta`
+with the Kirchhoff kinematics of the base below, the term `z v/r` with
+`rinvf1 = 1/r1` for every `cylshell_*` model by default (`kinematics=
+'sanders'`), or `rinv1` of the model with `kinematics='model'`; `'lower'`
+and `'upper'` refer to the coordinate `z1` of the base, as the faces of
+`'SB'` to the `z` of each panel; the two edges share `eta`
 and span the same angle, e.g. a cylinder and an annular plate whose edge is
 at the radius `r1 + z` of the face. For `'SB'` each panel has its own Kirchhoff kinematics, `u(z) = u - z w,x`,
 `v(z) = (1 + z rinv) v - z w,y`, with `z` measured from its reference

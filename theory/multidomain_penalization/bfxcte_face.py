@@ -14,6 +14,10 @@ with the Kirchhoff-Love kinematics of the cylinder
 
     u1(z) = u1 - z w1,x,  v1(z) = (1 + z/r) v1 - z w1,y,  w1(z) = w1
 
+the term z v1/r being that of the Sanders-Koiter kinematics, used at the
+face for every cylinder model by default (key 'kinematics' = 'sanders'),
+and omitted with kinematics='model' for a Donnell cylinder.
+
 Checked here:
 
 1. The linearized displacement of the point X0 + z n of the normal of the
@@ -28,6 +32,18 @@ Checked here:
    the edge of the plate is at the radius of the connected line, rho_e = r
    + z_f; with the Donnell kinematics (no z v/r) the residual of v is -z_f
    v1/r, i.e. -z_f Omega for a rotation about the axis, v1 = r Omega.
+4. Donnell cylinder. The rotation about the axis, v1 = r Omega, u1 = w1 =
+   0, is free of strain with the Donnell kinematics, as with those of
+   Sanders-Koiter, whereas a translation normal to the axis gives the
+   Donnell change of curvature -w,yy != 0 (zero with Sanders-Koiter). With
+   the Sanders-Koiter term at the face (the default) the rotation of the
+   assembly therefore has no residual for every cylinder model. With the
+   Donnell kinematics at the face (kinematics='model') the residual -z_f
+   Omega is, relative to v2 = (r + z_f) Omega, |z_f|/(r + z_f), of order
+   h/(2 r) for z_f = -+h/2; the penalty energy of the rigid rotation is
+   kt b z_f**2 Omega**2/2 for the length b of the connection, and the
+   motion free of strain and of residual rotates the plate by r Omega/(r +
+   z_f).
 
 Axes: the cylinder axis is the global X, the point of the reference surface
 at (x, phi) is X0 = (x, r cos(phi), -r sin(phi)), y = r phi, so that e_x,
@@ -125,4 +141,59 @@ for sanders in (True, False):
         print('   Donnell: residuals with the edge at rho_e = r + z_f:',
               at_face)
         assert sp.simplify(at_face[1] + zf*v1.subs(x, xf)/r) == 0
+
+
+# 4. Donnell cylinder: strains of the rigid motions and the residual of the
+#    rotation about the axis
+def strains(u, v, w, sanders):
+    r"""Linear membrane strains and changes of curvature of the cylinder,
+    Donnell (sanders=False) or Sanders-Koiter (sanders=True)"""
+    s = 1 if sanders else 0
+    d_y = lambda f: f.diff(phi)/r
+    exx = u.diff(x)
+    eyy = d_y(v) + w/r
+    gxy = d_y(u) + v.diff(x)
+    by = -d_y(w) + s*v/r
+    kxx = -w.diff(x, 2)
+    kyy = d_y(by)
+    kxy = -2*d_y(w.diff(x)) + s*(v.diff(x)/r
+                                 + (v.diff(x) - d_y(u))/(2*r))
+    return [sp.simplify(e) for e in (exx, eyy, gxy, kxx, kyy, kxy)]
+
+
+Om = sp.symbols('Omega', real=True)
+rot = lambda P: sp.Matrix([-Om, 0, 0]).cross(P)
+ur, vr, wr = fields_cylinder(rot)
+assert sp.simplify(ur) == 0 and sp.simplify(vr - r*Om) == 0
+assert sp.simplify(wr) == 0
+for sanders in (True, False):
+    assert all(e == 0 for e in strains(ur, vr, wr, sanders))
+trans = lambda P: sp.Matrix([0, t2, 0])
+ut, vt, wt = fields_cylinder(trans)
+assert all(e == 0 for e in strains(ut, vt, wt, True))
+kyy_donnell = strains(ut, vt, wt, False)[4]
+assert kyy_donnell != 0
+print('4. rotation about the axis: v1 =', sp.simplify(vr),
+      ', free of strain with both kinematics; translation normal to the '
+      'axis, Donnell kyy =', kyy_donnell)
+u2r, v2r, w2r = fields_plate(rot)
+v_face = {True: (1 + zf/r)*vr - zf*wr.diff(phi)/r,
+          False: vr - zf*wr.diff(phi)/r}
+rho_e = r + zf
+res_s = sp.simplify((v_face[True] - v2r).subs(x2, r2 - rho_e))
+res_d = sp.simplify((v_face[False] - v2r).subs(x2, r2 - rho_e))
+assert res_s == 0
+assert sp.simplify(res_d + zf*Om) == 0
+assert sp.simplify(v2r.subs(x2, r2 - rho_e) - rho_e*Om) == 0
+rel = sp.simplify(res_d/v2r.subs(x2, r2 - rho_e))
+assert sp.simplify(rel + zf/(r + zf)) == 0
+h = sp.symbols('h', positive=True)
+assert sp.limit(sp.Abs(rel.subs(zf, h/2))/(h/(2*r)), h, 0) == 1
+assert sp.limit(sp.Abs(rel.subs(zf, -h/2))/(h/(2*r)), h, 0) == 1
+# the plate rotating by r Omega/(r + z_f) satisfies the Donnell condition
+rot_w = lambda P: sp.Matrix([-Om*r/(r + zf), 0, 0]).cross(P)
+_, v2w, _ = fields_plate(rot_w)
+assert sp.simplify(v_face[False] - v2w.subs(x2, r2 - rho_e)) == 0
+print('   v1(z_f) - v2: Sanders-Koiter', res_s, ', Donnell', res_d,
+      ', relative', rel)
 print('all checks passed')

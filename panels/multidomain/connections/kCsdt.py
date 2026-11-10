@@ -557,14 +557,32 @@ def fkCSSycte_sdt(kt, kr, p1, p2, ycte1, ycte2, size):
     return _connection_matrix(comps, dict(x=None, y=(ycte1, ycte2)), size)
 
 
-def _surface_terms(p, z):
+def _surface_terms(p, z, rinv=None):
     r"""Terms of `u(z)` and `v(z)` of panel ``p`` at the coordinate `z`
     measured from its reference surface, for every model
 
     The same operator gives the displacements at the interface of the
-    skin-base connection ``'SB'``, see :func:`._sb_components`, and the
+    skin-base connection ``'SB'``, see :func:`._sb_components`, the
     prescribed in-plane displacements at a thickness coordinate, see
-    :func:`.nullspace.pd_rows`.
+    :func:`.nullspace.pd_rows`, and the displacements at a face of the base
+    of ``'BFxcte'``, see :func:`.kCBFxcte_face.bfxcte_face_components`.
+
+    Parameters
+    ----------
+    p : :class:`.Shell`
+        Panel.
+    z : float
+        Coordinate measured from the reference surface of ``p``, length.
+    rinv : float or None, optional
+        `1/r` of the term `z v/r` of `v(z)`, 1/length. ``None``, the
+        default, takes the kinematics of the model of ``p``,
+        :func:`._rinv_sanders`.
+
+    Returns
+    -------
+    tu, tv : list
+        The terms of `u(z)` and `v(z)`, ``(field, der_x, der_y, coeff)``,
+        see :func:`._connection_matrix`.
 
     Notes
     -----
@@ -579,8 +597,8 @@ def _surface_terms(p, z):
     with `g = (z - d)^3 + d^3`, the offset `d` of ``p``, `c_1 = 4/(3 h^2)`
     for the TSDT, `h` being the sum of the ply thicknesses of ``p``, `c_1 =
     0` for the FSDT, and the term `z v/r` only with the Sanders-Koiter
-    kinematics. For the classical laminated plate theory, 3 DOFs per term,
-    the Kirchhoff kinematics give
+    kinematics, or with the given ``rinv``. For the classical laminated
+    plate theory, 3 DOFs per term, the Kirchhoff kinematics give
 
     .. math::
 
@@ -590,7 +608,8 @@ def _surface_terms(p, z):
     Sanders-Koiter kinematics.
 
     """
-    rinv = _rinv_sanders(p)
+    if rinv is None:
+        rinv = _rinv_sanders(p)
     if _dofs(p) == 3:
         #NOTE Kirchhoff: u(z) = u - z w,x and v(z) = v + z (v/r - w,y)
         tu = [(U, 0, 0, 1.), (W, 1, 0, -z)]
