@@ -75,6 +75,19 @@ The available models, which are selected with ``Shell.model``, are:
   curvature of the deformed normal, all strains invariant under rigid
   rotations, 3 DOFs ``u, v, w``.
 
+- ``'annular_fsdt_donnell'``: annular sectors of flat plates, FSDT with the
+  von Kármán strains in polar coordinates, 5 DOFs ``u, v, w, phix, phiy``,
+  with the geometry and the local axes of ``'annular_clpt_donnell'``, see
+  :mod:`panels.models.annular_fsdt_donnell_num`.
+
+- ``'annular_fsdt_gl'``: as ``'annular_fsdt_donnell'``, with the complete
+  Green-Lagrange membrane strains in polar coordinates, 5 DOFs ``u, v, w,
+  phix, phiy``.
+
+- ``'annular_fsdt_tl'``: as ``'annular_fsdt_gl'``, total-Lagrangian with the
+  second-order director of ``'plate_fsdt_tl'``, 5 DOFs ``u, v, w, phix,
+  phiy``.
+
 - ``'cylshell_clpt_donnell'``: cylindrical shells, CLPT with the
   Donnell-Mushtari-Vlasov (shallow shell) kinematics, 3 DOFs ``u, v, w``.
 
@@ -402,6 +415,26 @@ normal, see :mod:`panels.models.annular_clpt_gl_num` and
 :mod:`panels.models.annular_clpt_tl_num`. The offset ``Shell.offset``
 enters the three through ``Shell.ABD`` and the moments of the density.
 
+The annular sectors of the first-order shear deformation theory,
+``'annular_fsdt_donnell'``, have the membrane strains of
+``'annular_clpt_donnell'`` and the changes of curvature and transverse
+shear strains of the rotations `\phi_x`, `\phi_y` in polar coordinates
+[8]_, Eqs. (2) and (6):
+
+.. math::
+
+    \kappa_{yy} = s \phi_{y,y} - \frac{\phi_x}{\rho} \qquad
+    \kappa_{xy} = s \phi_{x,y} + \phi_{y,x} + \frac{\phi_y}{\rho} \qquad
+    \gamma_{yz} = \phi_y + s w_{,y}
+
+and `\kappa_{xx}`, `\gamma_{xz}` of the flat plate. ``'annular_fsdt_gl'``
+has the Green-Lagrange membrane strains of ``'annular_clpt_gl'``, and
+``'annular_fsdt_tl'`` the strains of the second-order director of
+``'plate_fsdt_tl'`` [6]_, [7]_ in polar coordinates, see
+:mod:`panels.models.annular_fsdt_donnell_num`,
+:mod:`panels.models.annular_fsdt_gl_num` and
+:mod:`panels.models.annular_fsdt_tl_num`.
+
 References
 ----------
 .. [1] Sanders, J. L., "Nonlinear theories for thin shells", Quarterly of
@@ -427,6 +460,10 @@ References
    rotation theory of laminated anisotropic shells - Part 1. Theory",
    International Journal of Non-Linear Mechanics, Vol. 25, No. 6, 1990,
    pp. 687-700. https://doi.org/10.1016/0020-7462(90)90007-V
+.. [8] Bagheri, H., Kiani, Y., and Eslami, M. R., "Buckling of moderately
+   thick annular plates subjected to torque", Archive of Mechanical
+   Engineering, Vol. 66, No. 2, 2019, pp. 209-227.
+   https://doi.org/10.24425/ame.2019.128445
 
 """
 from . import clpt_field
@@ -440,6 +477,9 @@ from . import plate_clpt_tl_num
 from . import annular_clpt_donnell_num, annular_clpt_donnell
 from . import annular_clpt_gl_num, annular_clpt_gl
 from . import annular_clpt_tl_num, annular_clpt_tl
+from . import annular_fsdt_donnell_num, annular_fsdt_donnell
+from . import annular_fsdt_gl_num, annular_fsdt_gl
+from . import annular_fsdt_tl_num, annular_fsdt_tl
 from . import fsdt_tsdt_field
 from . import plate_fsdt_donnell, plate_fsdt_donnell_num
 from . import plate_tsdt_donnell, plate_tsdt_donnell_num

@@ -112,6 +112,29 @@
   pinned tube, hinged roof of Sze, Liu and Lo 2004, Table 9a) and the four
   models in `test_tangent_consistency.py`. Page `doc/source/fsdt_tsdt_gl.rst`.
 
+### New models `annular_fsdt_donnell`, `annular_fsdt_gl`, `annular_fsdt_tl`: annular-sector plates with transverse shear
+
+- The annular sectors of `annular_clpt_*` with the first-order shear
+  deformation theory, 5 DOFs `u, v, w, phix, phiy` per term, the inputs,
+  coordinates and local axes of `annular_clpt_donnell`:
+  `annular_fsdt_donnell` with the von Kármán strains of the Mindlin plate in
+  polar coordinates (Bagheri, Kiani and Eslami 2019, Eqs. 2 and 6);
+  `annular_fsdt_gl` with the complete Green-Lagrange membrane strains of
+  `annular_clpt_gl`; `annular_fsdt_tl` with the second-order director and
+  the strains of `plate_fsdt_tl` in polar coordinates. The laminate offset
+  `Shell.offset` enters the stiffness (`Shell.ABD`, 8 x 8) and the mass.
+  The matrices of the whole domain are integrated numerically; the fields
+  module of each model provides `fuvw`, `fstrain`, `strain_names`,
+  `stress_names` and `fg`.
+- One self-contained generator per model in
+  `theory/shells/annular_fsdt_<variant>/` (`<model>.py` with the symbolic
+  checks, `write_pyx.py`, the same in the three folders, `<model>.md`).
+- Tests: thin annuli (`h/a = 0.001`) against Yamaki (1958), Irie et al.
+  (1983) and the exact frequencies of Leissa (1969); thick annuli under a
+  torque (`h/a = 0.05`, `0.10`) against Bagheri et al. (2019), Table 2;
+  agreement of the three models in the linear limit; rigid rotations; the
+  tangent stiffness; the offset and the flat-plate limit.
+
 ### New models `annular_clpt_donnell`, `annular_clpt_gl`, `annular_clpt_tl`: annular-sector plates
 
 - Annular sectors of flat plates, CLPT in polar coordinates:

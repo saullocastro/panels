@@ -15,7 +15,11 @@ plane normal to the axis and meeting the skin at its outer radius, is an
 application. The kernels :mod:`panels.models.annular_clpt_donnell`,
 :mod:`panels.models.annular_clpt_gl`, :mod:`panels.models.annular_clpt_tl`
 and their numerically integrated modules ``*_num`` are generated from
-symbolic derivations with SymPy of the strains below.
+symbolic derivations with SymPy of the strains below. The models
+``'annular_fsdt_donnell'``, ``'annular_fsdt_gl'`` and ``'annular_fsdt_tl'``
+are the same sectors with the first-order shear deformation theory (FSDT),
+the polar counterparts of ``'plate_fsdt_donnell'``, ``'plate_fsdt_gl'`` and
+``'plate_fsdt_tl'``, see :ref:`annular_fsdt`.
 
 
 Geometry and coordinates
@@ -149,12 +153,118 @@ the displacement gradients for ``'annular_clpt_gl'`` and
 ``'annular_clpt_tl'``.
 
 
+.. _annular_fsdt:
+
+First-order shear deformation theory
+------------------------------------
+
+The models ``'annular_fsdt_donnell'``, ``'annular_fsdt_gl'`` and
+``'annular_fsdt_tl'`` have the geometry, the coordinates and the local
+basis above, with the rotations `\phi_x`, `\phi_y` of the normal as
+independent fields: five degrees of freedom `u, v, w, \phi_x, \phi_y` per
+term and the displacement field
+
+.. math::
+
+    u(z) = u + z \phi_x, \qquad v(z) = v + z \phi_y, \qquad w(z) = w
+
+of ``'plate_fsdt_donnell'``. The von Kármán strains of the Mindlin plate in
+polar coordinates [bagheri2019Torque]_, Eqs. (2) and (6), are those of
+``'annular_fsdt_donnell'``:
+
+.. math::
+
+    \varepsilon_{xx} = u_{,x} + \tfrac{1}{2} w_{,x}^2 \qquad
+    \varepsilon_{yy} = s v_{,y} - \frac{u}{\rho} + \tfrac{1}{2} s^2 w_{,y}^2
+    \qquad
+    \gamma_{xy} = s u_{,y} + v_{,x} + \frac{v}{\rho} + s w_{,x} w_{,y}
+
+    \kappa_{xx} = \phi_{x,x} \qquad
+    \kappa_{yy} = s \phi_{y,y} - \frac{\phi_x}{\rho} \qquad
+    \kappa_{xy} = s \phi_{x,y} + \phi_{y,x} + \frac{\phi_y}{\rho}
+
+    \gamma_{yz} = \phi_y + s w_{,y} \qquad
+    \gamma_{xz} = \phi_x + w_{,x}
+
+In the notation of [bagheri2019Torque]_, whose `z` is along
+`-\boldsymbol{e}_z`, the radial and circumferential displacements and
+rotations are `u_0 = -u`, `v_0 = v`, `w_0 = -w`, `\psi_r = \phi_x` and
+`\psi_\theta = -\phi_y`. The terms `-\phi_x/\rho` and `\phi_y/\rho` are those
+of `-u/\rho` and `v/\rho` for the displacements `z \phi_x`, `z \phi_y` of
+the points off the reference plane. With `\phi_x = -w_{,x}` and `\phi_y = -s
+w_{,y}` the transverse shear strains vanish and the changes of curvature are
+those of ``'annular_clpt_donnell'``.
+
+``'annular_fsdt_gl'`` has the Green-Lagrange membrane strains of
+``'annular_clpt_gl'`` and the linear changes of curvature and transverse
+shear strains above, as ``'plate_fsdt_gl'`` for the flat plate.
+``'annular_fsdt_tl'`` is total-Lagrangian with the second-order director of
+``'plate_fsdt_tl'`` [schmidt1988Refined]_, [palmerio1990Moderate]_: the
+deformed position of a point is `\boldsymbol{X} + z \boldsymbol{d}`, with
+
+.. math::
+
+    \boldsymbol{d} = \phi_x \boldsymbol{e}_x + \phi_y \boldsymbol{e}_y +
+    \left(1 - \tfrac{1}{2} (\phi_x^2 + \phi_y^2)\right) \boldsymbol{e}_z
+
+and, the local basis turning with `\theta` (`\boldsymbol{e}_{x,y} =
+-\boldsymbol{e}_y/r`, `\boldsymbol{e}_{y,y} = \boldsymbol{e}_x/r`), the
+derivatives of the director per unit length of the reference lines
+
+.. math::
+
+    \boldsymbol{d}_{,x} = \begin{Bmatrix} \phi_{x,x} \\ \phi_{y,x} \\
+    -(\phi_x \phi_{x,x} + \phi_y \phi_{y,x}) \end{Bmatrix}, \qquad
+    s \boldsymbol{d}_{,y} = \begin{Bmatrix} s \phi_{x,y} + \phi_y/\rho \\
+    s \phi_{y,y} - \phi_x/\rho \\ -s (\phi_x \phi_{x,y} + \phi_y \phi_{y,y})
+    \end{Bmatrix}
+
+The strains are the coefficients of `z^0` and `z^1` of the Green-Lagrange
+strains of this field, the metric of the flat reference plane not depending
+on `z`:
+
+.. math::
+
+    \varepsilon_{xx} = \tfrac{1}{2} (\boldsymbol{g}_1 \cdot \boldsymbol{g}_1
+    - 1) \qquad
+    \varepsilon_{yy} = \tfrac{1}{2} (\boldsymbol{g}_2 \cdot \boldsymbol{g}_2
+    - 1) \qquad
+    \gamma_{xy} = \boldsymbol{g}_1 \cdot \boldsymbol{g}_2
+
+    \kappa_{xx} = \boldsymbol{g}_1 \cdot \boldsymbol{d}_{,x} \qquad
+    \kappa_{yy} = \boldsymbol{g}_2 \cdot s \boldsymbol{d}_{,y} \qquad
+    \kappa_{xy} = \boldsymbol{g}_1 \cdot s \boldsymbol{d}_{,y} +
+    \boldsymbol{g}_2 \cdot \boldsymbol{d}_{,x}
+
+    \gamma_{yz} = \boldsymbol{g}_2 \cdot \boldsymbol{d} \qquad
+    \gamma_{xz} = \boldsymbol{g}_1 \cdot \boldsymbol{d}
+
+Their linear part is that of ``'annular_fsdt_donnell'``: the reference
+plane has no curvature of its own, and no correction of the linear part is
+needed, unlike for the cylinder of :ref:`fsdt_tsdt_tl`. A finite rigid
+rotation by the angle `t` changes the strains by `O(t^4)`, through the
+length of the second-order director; the linear transverse shear strains
+of ``'annular_fsdt_gl'`` change by `O(t^2)` under a rotation about an axis
+inclined to the plane. For `r \to \infty` the strains of the three models
+are those of ``'plate_fsdt_donnell'``, ``'plate_fsdt_gl'`` and
+``'plate_fsdt_tl'``.
+
+The constitutive matrix ``Shell.ABD`` of these models is the `8 \times 8`
+matrix of the FSDT, with the transverse shear stiffness and the shear
+correction chosen with ``Shell.fsdt_shear_correction``; the mass matrix has
+the moments `I_0, I_1, I_2` of the density with the displacement field
+above. The transverse shear lowers the buckling loads and frequencies of
+thick annuli: under a torque, the buckling torque of a clamped annulus with
+`b/a = 0.5` and `h/a = 0.1` is 53 % of the classical one
+[bagheri2019Torque]_, Table 2.
+
+
 Laminate offset
 ---------------
 
 The laminate spans `d - h/2 \le z \le d + h/2` about the reference plane,
-`d` being ``Shell.offset``, as for the other models of the CLPT. The
-reference plane being flat, `z` enters only the integrals through the
+`d` being ``Shell.offset``, as for the other models of the CLPT and of the
+FSDT. The reference plane being flat, `z` enters only the integrals through the
 thickness: the stiffness through the matrix ``ABD`` of the laminate about
 the reference plane, the coupling `B` included, and the mass through the
 moments `I_0, I_1, I_2` of the density, with the displacement field
@@ -227,3 +337,12 @@ span the angle of the cylinder domain, `b_{web}/r_{web} = b/r`, or the
 connection raises a ``ValueError``. The cylinder with its reference
 surface at its inner face, ``offset = h/2``, connected without the key,
 is the same internal frame.
+
+The sectors of the first-order shear deformation theory connect in the
+same way to the cylinders with five degrees of freedom per term, e.g.
+``'cylshell_fsdt_sanders'``, with or without the key ``'face'``; the
+rotation about the circumferential axis tied by the connection is then
+`\phi_x` of both panels. The two panels of a connection must have the same
+number of degrees of freedom per term: an ``'annular_fsdt_*'`` sector on a
+cylinder of the classical theory, or the converse, raises a
+``NotImplementedError``.
