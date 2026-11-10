@@ -75,6 +75,13 @@ The available models, which are selected with ``Shell.model``, are:
   curvature of the deformed normal, all strains invariant under rigid
   rotations, 3 DOFs ``u, v, w``.
 
+- ``'annular_tsdt_donnell'``, ``'annular_tsdt_gl'``: annular sectors of
+  flat plates, Reddy's third-order shear deformation theory (TSDT) with the
+  von Kármán strains and with the Green-Lagrange membrane strains in polar
+  coordinates, 5 DOFs ``u, v, w, phix, phiy``, the geometry of
+  ``'annular_clpt_donnell'``, see
+  :mod:`panels.models.annular_tsdt_donnell_num`.
+
 - ``'cylshell_clpt_donnell'``: cylindrical shells, CLPT with the
   Donnell-Mushtari-Vlasov (shallow shell) kinematics, 3 DOFs ``u, v, w``.
 
@@ -402,6 +409,17 @@ normal, see :mod:`panels.models.annular_clpt_gl_num` and
 :mod:`panels.models.annular_clpt_tl_num`. The offset ``Shell.offset``
 enters the three through ``Shell.ABD`` and the moments of the density.
 
+``'annular_tsdt_donnell'`` and ``'annular_tsdt_gl'`` have the displacement
+field of the TSDT [2]_ written in the local axes of the annular sector,
+with the derivative `s w_{,y}` of `w` along the arc in place of `w_{,y}`.
+The plane being flat, the in-plane strains at `z` are the linear membrane
+strains in polar coordinates of the in-plane displacements `u(z)`, `v(z)`,
+plus the non-linear membrane terms of ``'annular_clpt_donnell'`` or
+``'annular_clpt_gl'``; the offset enters through ``Shell.ABD`` of the TSDT
+and the moments of the density about the mid-surface, see
+:mod:`panels.models.annular_tsdt_donnell_num` and
+:mod:`panels.models.annular_tsdt_gl_num`.
+
 References
 ----------
 .. [1] Sanders, J. L., "Nonlinear theories for thin shells", Quarterly of
@@ -440,6 +458,8 @@ from . import plate_clpt_tl_num
 from . import annular_clpt_donnell_num, annular_clpt_donnell
 from . import annular_clpt_gl_num, annular_clpt_gl
 from . import annular_clpt_tl_num, annular_clpt_tl
+from . import annular_tsdt_donnell_num, annular_tsdt_donnell
+from . import annular_tsdt_gl_num, annular_tsdt_gl
 from . import fsdt_tsdt_field
 from . import plate_fsdt_donnell, plate_fsdt_donnell_num
 from . import plate_tsdt_donnell, plate_tsdt_donnell_num
