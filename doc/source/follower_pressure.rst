@@ -498,8 +498,8 @@ whenever `v` is free at an edge. The follower load stiffness adds `-\oint p
 
 .. _follower_pressure_implementation:
 
-Implementation and verification
--------------------------------
+Implementation
+--------------
 
 - Eqs. :eq:`fp-area-vector`, :eq:`fp-force` and :eq:`fp-jacobian` are
   derived with SymPy in the notation of the kernels, which also verifies the
@@ -510,9 +510,9 @@ Implementation and verification
   with ``nx*ny`` Gauss-Legendre points over each loaded patch, the same
   points as Eq. :eq:`fp-force-reference` in :func:`.shell_fext`.
 - Eq. :eq:`fp-jacobian` is the exact derivative of Eq. :eq:`fp-force`, and
-  Eq. :eq:`fp-tangent` of Eq. :eq:`fp-fint`, to round-off, also in a
-  :class:`.MultiDomain` assembly; the critical pressures agree with the ring
-  closed forms above and are compared, for rings and cylinders, with
-  [nasa2020SP8007]_, [kardomateas1993Orthotropic]_,
+  Eq. :eq:`fp-tangent` that of Eq. :eq:`fp-fint`, also when the domains are
+  assembled in a :class:`.MultiDomain`. For a ring, the critical pressures
+  reduce to the closed forms above; critical live pressures of rings and
+  cylinders are given in [nasa2020SP8007]_, [kardomateas1993Orthotropic]_,
   [han2004SandwichCylinder]_, [kardomateas2003Sandwich]_ and
   [schweizerhof1984Pressure]_.

@@ -160,11 +160,10 @@ the terms of the transverse shear strains, and for `d = \pm h/2` the
 prescribed rotations are `-w_{,x}` and `\Phi_y - \phi_y - w_{,y}`. For the
 FSDT, and for the TSDT with `d = 0`, the prescribed rotations are `\phi_x`
 and `\Phi_y`, as before. The penalty method,
-``pd_method='penalty'``, does not prescribe rotations. For a panel under
-pressure with an offset, `d = 0.3 h`, `-0.4 h` or `0.5 h`, and a rotation
+``pd_method='penalty'``, does not prescribe rotations. With a rotation
 prescribed at a point or along an edge, the rotation at the reference
-surface evaluated from the fields equals the prescribed value to
-`10^{-8}`, whereas the rotation at the mid-surface differs from it by the transverse
+surface evaluated from the fields therefore equals the prescribed value,
+whereas the rotation at the mid-surface differs from it by the transverse
 shear term.
 
 .. _tsdt_offset_clamped_edges:

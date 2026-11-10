@@ -164,7 +164,7 @@ constraints holding for every `\lambda`, and raise an error.
 Face-clamped edges
 ------------------
 
-In tests, an edge is clamped by restraining the displacements of the bottom
+An edge can be clamped by restraining the displacements of the bottom
 and top faces of the laminate, `z = d \mp h/2`, the section being free to
 deform in between. This face clamp, `u = v = 0` at both faces and `w = 0`,
 is prescribed with the keyword ``z`` of :meth:`.Shell.add_distr_pd_fixed_x`
