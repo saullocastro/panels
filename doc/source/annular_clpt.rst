@@ -334,3 +334,12 @@ span the angle of the cylinder domain, `b_{web}/r_{web} = b/r`, or the
 connection raises a ``ValueError``. The cylinder with its reference
 surface at its inner face, ``offset = h/2``, connected without the key,
 is the same internal frame.
+
+The sectors of the first-order shear deformation theory connect in the
+same way to the cylinders with five degrees of freedom per term, e.g.
+``'cylshell_fsdt_sanders'``, with or without the key ``'face'``; the
+rotation about the circumferential axis tied by the connection is then
+`\phi_x` of both panels. The two panels of a connection must have the same
+number of degrees of freedom per term: an ``'annular_fsdt_*'`` sector on a
+cylinder of the classical theory, or the converse, raises a
+``NotImplementedError``.

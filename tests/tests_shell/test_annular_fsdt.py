@@ -234,19 +234,19 @@ def test_irie1983_thin(edges, beta):
 @pytest.mark.parametrize('edges, delta', list(BAGHERI))
 def test_bagheri2019_thick(edges, delta, beta):
     r"""Torque, `h/a = 0.05` and `0.10`, no shear correction: least `\tau`
-    against Bagheri, Kiani and Eslami (2019), Table 2, within 0.5 %"""
+    against Bagheri, Kiani and Eslami (2019), Table 2, within 0.1 %"""
     ref = BAGHERI[(edges, delta)][BETAS.index(beta)]
     got = tau(beta, *edges, h=delta*A, shear=1.)
-    assert np.isclose(got, ref, rtol=5e-3)
+    assert np.isclose(got, ref, rtol=1e-3)
 
 
 @pytest.mark.parametrize('model', MODELS)
 def test_thick_models(model):
     r"""Clamped annulus, `\beta = 0.3`, `h/a = 0.10`, for the three models,
     against Bagheri, Kiani and Eslami (2019), Table 2, `\tau = 39.261`, within
-    0.5 %"""
+    0.1 %"""
     got = tau(0.3, 'C', 'C', h=0.1*A, model=model, shear=1.)
-    assert np.isclose(got, 39.261, rtol=5e-3)
+    assert np.isclose(got, 39.261, rtol=1e-3)
 
 
 def test_shear_correction_one():
