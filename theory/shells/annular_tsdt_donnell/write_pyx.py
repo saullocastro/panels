@@ -565,6 +565,10 @@ KM = B['KM']
 
 FKM_DOC = r"""Mass matrix, integrated numerically
 
+    Integrates numerically the consistent mass matrix of the panel, with
+    the moments of the density given for the whole domain or at each
+    integration point.
+
     Parameters
     ----------
 <<shell>>
@@ -648,6 +652,10 @@ FKM = kernel('fkM_num',
     "    ftab = np.zeros(", FKM_SETUP + "    ftab = np.zeros(", 1)
 
 FINT_DOC = r"""Internal force vector, integrated numerically
+
+    Integrates numerically the internal force vector of the configuration
+    ``cs``, the gradient of the strain energy with respect to the Ritz
+    constants.
 
     Parameters
     ----------
@@ -892,6 +900,12 @@ def _point_derivatives(double [::1] c, object shell, double xp, double yp):
     d : np.ndarray
         ``({dnames})``, 1-D array of size {nd}.
 
+    Notes
+    -----
+    `\\boldsymbol{{d}} = \\boldsymbol{{\\Phi}}(x, y) \\boldsymbol{{c}}`,
+    with the products of the approximation functions of Bardell along `x`
+    and `y` and of their derivatives, see the notes of the module.
+
     """
     cdef int m, n, i, j, col, p, col0 = 0
     cdef double a, b, xi, eta
@@ -916,6 +930,9 @@ def _point_derivatives(double [::1] c, object shell, double xp, double yp):
 def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys,
             int num_cores=4, int NLgeom=0):
     r"""Generalized strains of the panel at the points ``xs``, ``ys``
+
+    Evaluates the thirteen generalized strains of the configuration ``c``
+    at each point, serially.
 
     Parameters
     ----------
@@ -956,6 +973,9 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys,
 NOT_IMPLEMENTED = '''
 def {name}(*args, **kwargs):
     r"""Not available for the annular sector
+
+    The function exists for the interface of the models with the piston
+    theory, see :meth:`.Shell.calc_kA`.
 
     Raises
     ------
@@ -1034,6 +1054,10 @@ from .{model}_num import fkC_num, fkG_num, fkM_num
 def fk0(object shell, int size, int row0, int col0):
     r"""Linear constitutive stiffness matrix of the whole panel
 
+    Integrates numerically the linear constitutive stiffness matrix over
+    the whole domain, with ``shell.nx`` x ``shell.ny`` Gauss-Legendre
+    points.
+
     Parameters
     ----------
     shell : :class:`.Shell`
@@ -1061,6 +1085,9 @@ def fk0(object shell, int size, int row0, int col0):
 def fkG0(double Nxx, double Nyy, double Nxy, object shell,
          int size, int row0, int col0):
     r"""Geometric stiffness matrix of a constant membrane stress state
+
+    Integrates numerically, over the whole domain, the geometric stiffness
+    matrix of the membrane stress resultants ``Nxx``, ``Nyy``, ``Nxy``.
 
     Parameters
     ----------
@@ -1092,6 +1119,9 @@ def fkG0(double Nxx, double Nyy, double Nxy, object shell,
 
 def fkM(object shell, int size, int row0, int col0):
     r"""Mass matrix of the whole panel
+
+    Integrates numerically the consistent mass matrix over the whole
+    domain, with the moments of the density of the laminate.
 
     Parameters
     ----------

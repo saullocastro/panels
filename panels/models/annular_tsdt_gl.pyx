@@ -33,6 +33,10 @@ from .annular_tsdt_gl_num import fkC_num, fkG_num, fkM_num
 def fk0(object shell, int size, int row0, int col0):
     r"""Linear constitutive stiffness matrix of the whole panel
 
+    Integrates numerically the linear constitutive stiffness matrix over
+    the whole domain, with ``shell.nx`` x ``shell.ny`` Gauss-Legendre
+    points.
+
     Parameters
     ----------
     shell : :class:`.Shell`
@@ -60,6 +64,9 @@ def fk0(object shell, int size, int row0, int col0):
 def fkG0(double Nxx, double Nyy, double Nxy, object shell,
          int size, int row0, int col0):
     r"""Geometric stiffness matrix of a constant membrane stress state
+
+    Integrates numerically, over the whole domain, the geometric stiffness
+    matrix of the membrane stress resultants ``Nxx``, ``Nyy``, ``Nxy``.
 
     Parameters
     ----------
@@ -91,6 +98,9 @@ def fkG0(double Nxx, double Nyy, double Nxy, object shell,
 
 def fkM(object shell, int size, int row0, int col0):
     r"""Mass matrix of the whole panel
+
+    Integrates numerically the consistent mass matrix over the whole
+    domain, with the moments of the density of the laminate.
 
     Parameters
     ----------
@@ -124,6 +134,9 @@ def fkM(object shell, int size, int row0, int col0):
 def fkAx(*args, **kwargs):
     r"""Not available for the annular sector
 
+    The function exists for the interface of the models with the piston
+    theory, see :meth:`.Shell.calc_kA`.
+
     Raises
     ------
     NotImplementedError
@@ -136,6 +149,9 @@ def fkAx(*args, **kwargs):
 def fkAy(*args, **kwargs):
     r"""Not available for the annular sector
 
+    The function exists for the interface of the models with the piston
+    theory, see :meth:`.Shell.calc_kA`.
+
     Raises
     ------
     NotImplementedError
@@ -147,6 +163,9 @@ def fkAy(*args, **kwargs):
 
 def fcA(*args, **kwargs):
     r"""Not available for the annular sector
+
+    The function exists for the interface of the models with the piston
+    theory, see :meth:`.Shell.calc_kA`.
 
     Raises
     ------
