@@ -31,6 +31,12 @@ the penalty and with the null-space connections. Verified:
   the penalty energy `k_t b z_f^2 \Omega^2/2` per connection;
 - the face of every ``'cylshell_*'`` model follows a rigid rotation about
   the axis exactly by default;
+- webs of ``'annular_tsdt_donnell'`` and ``'annular_tsdt_gl'`` on a
+  cylinder of the third-order shear deformation theory, connected at its
+  reference surface or at its inner face: the same roots of the annulus
+  clamped outside and free inside, and the two rigid-body motions free of
+  strain energy and of residual in the constraints, for a cylinder with the
+  Sanders-Koiter and with the Donnell kinematics;
 - the penalty stiffness matrix of the face connection gives the penalty
   energy evaluated from the fields, and the same energy as the
   constraints of the null-space method evaluated at their points;
@@ -110,6 +116,15 @@ kinematics at the face, ``kinematics='model'``, the face moves by `r
 h/2`, i.e. `h/(2 r)` relative to `v`; the assembly then keeps a motion free
 of strain and of residual in which the webs rotate by `r \Omega/(r + z_f)`.
 
+With the third-order shear deformation theory the rotation connected is
+that of the normal, `\theta_x = \partial u/\partial z`, at the connected
+line of the cylinder, `\theta_x = -w_{,x}` at a face, where the transverse
+shear strain vanishes, and at the reference surface of the web, `\theta_x =
+\phi_x` without offset, see :mod:`panels.multidomain.connections.kCsdt`.
+With `h/r_o = 0.001` the null-space connection gives the roots of the
+classical plate theory to 3.1e-5, the effect of the transverse shear, and
+the penalty connection values up to 0.3 % lower.
+
 References
 ----------
 .. [1] Leissa, A. W., Vibration of Plates, NASA SP-160, 1969, Eqs.
@@ -149,9 +164,14 @@ SOUTHWELL = ((0, 6.25, 0.276), (0, 25.0, 0.642), (1, 9.00, 0.397),
              (1, 21.2, 0.603), (1, 25.0, 0.634), (2, 9.00, 0.349),
              (2, 16.0, 0.522), (3, 25.0, 0.59))
 RTOL = {'null-space': 1e-5, 'penalty': 5e-3}
+RTOL_TSDT = {'null-space': 1e-4, 'penalty': 5e-3}
 WEB = 'annular_clpt_donnell'
 CYL = 'cylshell_clpt_sanders'
 CYL_DONNELL = 'cylshell_clpt_donnell'
+FIELDS = ('u', 'v', 'w', 'phix', 'phiy')
+#: third-order shear deformation theory: cylinders and webs
+TSDT_CYLS = ['cylshell_tsdt_sanders', 'cylshell_tsdt_donnell']
+TSDT_WEBS = sorted(m for m in modelDB.db if m.startswith('annular_tsdt_'))
 #: cylinder models and kinematics of the face: the default, Sanders-Koiter,
 #: and the Donnell kinematics of the model
 CYL_KINEMATICS = [(CYL, 'sanders'), (CYL_DONNELL, 'sanders'),
@@ -184,8 +204,14 @@ def exact_lambda2(n, beta, guess, clamped):
     return brentq(_det, 0.9*guess, 1.1*guess, args=(n, beta, clamped))
 
 
+def _fields(p):
+    """Names of the fields of ``p``, ``'u', 'v', 'w'`` and, with 5 DOFs per
+    term, ``'phix', 'phiy'``"""
+    return FIELDS[:modelDB.db[p.model]['dofs']]
+
+
 def _free(p):
-    for f in 'uvw':
+    for f in _fields(p):
         for e in ('x1', 'x2', 'y1', 'y2'):
             setattr(p, e + f, 1)
             setattr(p, e + f + 'r', 1)
@@ -199,16 +225,17 @@ def _cylinder(r, length, offset=0., clamped=True, h=H, m=8, n=12,
               stack=[0], laminaprop=(E, NU), rho=RHO, offset=offset)
     _free(c)
     if clamped:
-        for f in 'uvw':
-            for e in ('x1', 'x2'):
+        for e in ('x1', 'x2'):
+            for f in _fields(c):
                 setattr(c, e + f, 0)
+            for f in 'uvw':
                 setattr(c, e + f + 'r', 0)
     return c
 
 
-def _web(r_outer, r_inner, h=H, m=10, n=12):
-    r"""Half annulus, free edges"""
-    w = Shell(model=WEB, a=r_outer - r_inner, b=np.pi*r_outer, r=r_outer,
+def _web(r_outer, r_inner, h=H, m=10, n=12, model=WEB):
+    r"""Half annulus, free edges, model ``model``"""
+    w = Shell(model=model, a=r_outer - r_inner, b=np.pi*r_outer, r=r_outer,
               m=m, n=n, plyt=h, stack=[0], laminaprop=(E, NU), rho=RHO)
     _free(w)
     return w
@@ -389,29 +416,39 @@ def _fit(p, field, func, c):
                   for xi in xis])
     G = np.array([calc_vec_f(eta, *_flags(p, field, 'y'))[:p.n]
                   for eta in etas])
-    #NOTE Ritz constant of term (i, j) at 3*(j*m + i), point (k, l) at
+    #NOTE Ritz constant of term (i, j) at dofs*(j*m + i), point (k, l) at
     #     row l*len(xis) + k
     A = np.kron(G, F)
     X, Y = np.meshgrid((xis + 1)*p.a/2, (etas + 1)*p.b/2)
     values = func(X.ravel(), Y.ravel())
     coef = np.linalg.lstsq(A, values, rcond=None)[0]
     assert np.allclose(A @ coef, values, rtol=0, atol=1e-12)
-    c[p.col_start + 3*np.arange(p.m*p.n) + field] = coef
+    dofs = modelDB.db[p.model]['dofs']
+    c[p.col_start + dofs*np.arange(p.m*p.n) + field] = coef
 
 
-def _frames(model, kinematics=None, conn_method=None, kt=None):
+def _frames(model, kinematics=None, conn_method=None, kt=None, web=WEB,
+            faces=True):
     r"""Free cylinder, model ``model``, with an internal frame on its inner
     surface at `x = 0` and an external frame on its outer surface at `x =
-    L`, the faces with the key ``'kinematics'`` when it is not ``None``,
-    the default ``conn_method`` of :class:`.MultiDomain` when it is
-    ``None``, and the translation penalty ``kt`` of the face connections
-    when it is not ``None``"""
+    L`, webs of the model ``web``, the faces with the key ``'kinematics'``
+    when it is not ``None``, the default ``conn_method`` of
+    :class:`.MultiDomain` when it is ``None``, and the translation penalty
+    ``kt`` of the face connections when it is not ``None``; with ``faces``
+    false, two internal frames, at `x = 0` and `x = L`, their outer edges
+    connected at the reference surface of the cylinder, without the key
+    ``'face'`` (the connection at the reference surface needs the same arc
+    length ``b`` in both panels)"""
     length = 0.5*R
     cyls = [_cylinder(R, length, clamped=False, model=model)
             for _ in range(2)]
-    r_int, r_ext = R - H/2, R + H/2
-    webs_int = [_web(r_int, BETA*r_int) for _ in range(2)]
-    webs_ext = [_web(r_ext/BETA, r_ext) for _ in range(2)]
+    if faces:
+        r_int, r_ext = R - H/2, R + H/2
+        webs_int = [_web(r_int, BETA*r_int, model=web) for _ in range(2)]
+        webs_ext = [_web(r_ext/BETA, r_ext, model=web) for _ in range(2)]
+    else:
+        webs_int = [_web(R, BETA*R, model=web) for _ in range(2)]
+        webs_ext = [_web(R, BETA*R, model=web) for _ in range(2)]
     conn = []
     for ps in (cyls, webs_int, webs_ext):
         conn += [dict(p1=ps[0], p2=ps[1], func='SSycte', ycte1=ps[0].b,
@@ -423,15 +460,21 @@ def _frames(model, kinematics=None, conn_method=None, kt=None):
         extra['kinematics'] = kinematics
     if kt is not None:
         extra['kt'] = kt
-    faces = []
+    if faces:
+        extra_int, extra_ext = (dict(face='lower', **extra),
+                                dict(face='upper', **extra))
+    else:
+        extra_int = extra_ext = extra
+    xcte2_ext = (lambda w: w.a) if faces else (lambda w: 0)
+    conn_faces = []
     for c, wi, we in zip(cyls, webs_int, webs_ext):
-        faces += [dict(p1=c, p2=wi, func='BFxcte', xcte1=0, xcte2=0,
-                       face='lower', **extra),
-                  dict(p1=c, p2=we, func='BFxcte', xcte1=length, xcte2=we.a,
-                       face='upper', **extra)]
+        conn_faces += [dict(p1=c, p2=wi, func='BFxcte', xcte1=0, xcte2=0,
+                            **extra_int),
+                       dict(p1=c, p2=we, func='BFxcte', xcte1=length,
+                            xcte2=xcte2_ext(we), **extra_ext)]
     kwargs = {} if conn_method is None else dict(conn_method=conn_method)
-    md = MultiDomain(cyls + webs_int + webs_ext, conn + faces, **kwargs)
-    return md, cyls, webs_int + webs_ext, faces
+    md = MultiDomain(cyls + webs_int + webs_ext, conn + conn_faces, **kwargs)
+    return md, cyls, webs_int + webs_ext, conn_faces
 
 
 def _rigid(md, cyls, webs, web_rate=lambda p: 1.):
@@ -476,6 +519,55 @@ def test_rigid_body_motions(conn_method, model):
         assert abs(energy) < 1e-10*abs(K.diagonal()).max()*(c @ c)
         if conn_method is None:
             for ci in conn:
+                B = nullspace.constraint_matrix(ci, size)
+                assert np.abs(B @ c).max() < 1e-10*np.abs(c).max()
+
+
+@pytest.mark.parametrize('web', TSDT_WEBS)
+@pytest.mark.parametrize('face', [None, 'lower'])
+@pytest.mark.parametrize('conn_method', ['null-space', 'penalty'])
+def test_tsdt_web_on_tsdt_cylinder(conn_method, face, web):
+    """Web of the third-order shear deformation theory, `h/r_o = 0.001`, its
+    outer edge on the reference surface (no ``'face'``) or on the inner
+    surface (``face='lower'``) of a ``'cylshell_tsdt_sanders'`` clamped at
+    `x = 0`, against the roots of the annulus clamped outside and free
+    inside (Leissa 1969, Eqs. (1.11)-(1.13) and (1.17)), for the two
+    ``'annular_tsdt_*'`` models"""
+    r_o = R if face is None else R - H/2
+    cyls = [_cylinder(R, 0.5*R, model=TSDT_CYLS[0]) for _ in range(2)]
+    webs = [_web(r_o, BETA*r_o, model=web) for _ in range(2)]
+    md = _assembly(cyls, webs, lambda c, w: dict(p1=c, p2=w, func='BFxcte',
+                   xcte1=0, xcte2=0, face=face), conn_method)
+    l2 = _lambda2(md, r_o)
+    ref = np.array(EXACT)[[0, 1, 1, 2, 2]]
+    assert np.allclose(l2[:5], ref, rtol=RTOL_TSDT[conn_method])
+
+
+@pytest.mark.parametrize('faces', [True, False])
+@pytest.mark.parametrize('model', TSDT_CYLS)
+@pytest.mark.parametrize('conn_method', [None, 'penalty'])
+def test_tsdt_rigid_body_motions(conn_method, model, faces):
+    """Free cylinder of the third-order shear deformation theory, with the
+    Sanders-Koiter and with the Donnell kinematics, and two webs of
+    ``'annular_tsdt_donnell'``, connected on its faces as in
+    :func:`test_rigid_body_motions` or, with ``faces`` false, two internal
+    frames at its ends connected at its reference surface: the translation
+    along the axis and the rotation about it give no strain energy and,
+    with the default ``conn_method``, ``'null-space'``, satisfy the
+    constraints"""
+    md, cyls, webs, conn_webs = _frames(model, conn_method=conn_method,
+                                        web=TSDT_WEBS[0], faces=faces)
+    if conn_method is None:
+        assert md.conn_method == 'null-space'
+        assert all(md._null_space(ci) for ci in conn_webs)
+    K = md.calc_kC(silent=True)
+    size = md.get_size()
+    c_t, c_r = _rigid(md, cyls, webs)
+    for c in (c_t, c_r):
+        energy = c @ (K @ c)
+        assert abs(energy) < 1e-10*abs(K.diagonal()).max()*(c @ c)
+        if conn_method is None:
+            for ci in md.conn:
                 B = nullspace.constraint_matrix(ci, size)
                 assert np.abs(B @ c).max() < 1e-10*np.abs(c).max()
 
