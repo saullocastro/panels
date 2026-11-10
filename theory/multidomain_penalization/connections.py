@@ -248,10 +248,16 @@ piece_wise_simplify(kCSB12, [])
 piece_wise_simplify(kCSB22, [])
 
 # BFxcte at a face of the base, key 'face' of the connection, 'lower' or
-# 'upper': the edge x2 = xcte2 of the flange (2) is connected to the line
-# x1 = xcte1, z = zf1 = d1 -+ h1/2 of the base (1), whose points follow the
-# Kirchhoff kinematics of (1), clpt_interface() above,
-#     u1(zf1) = u1 - zf1 w1,x,  v1(zf1) = (1 + zf1 rinv1) v1 - zf1 w1,y
+# 'upper' in the coordinate z1 of the base: the edge x2 = xcte2 of the
+# flange (2) is connected to the line x1 = xcte1, z = zf1 = d1 -+ h1/2 of
+# the base (1), whose points follow the Kirchhoff kinematics of (1),
+# clpt_interface() above,
+#     u1(zf1) = u1 - zf1 w1,x,  v1(zf1) = (1 + zf1 rinvf1) v1 - zf1 w1,y
+# with rinvf1 = 1/r1 for a cylinder (cylshell_*) whatever its model, the
+# Sanders-Koiter rotation of the normal, key 'kinematics' = 'sanders' (the
+# default), or rinvf1 = rinv1 of the model with kinematics='model' (zero for
+# the Donnell models and the plates), kCBFxcte_face.face_rinv; the residual
+# of a rigid rotation about the axis with rinvf1 = 0 is in bfxcte_face.py
 # the rotation about y, -w1,x, being the same at every z, and as for BFxcte
 #     u1(zf1) = w2,  v1(zf1) = v2,  w1 = -u2,  w1,x = w2,x
 # The two edges share eta and span the same angle, also when b1 != b2 (a
@@ -260,9 +266,9 @@ piece_wise_simplify(kCSB22, [])
 # block 22 is that of BFxcte. The checks of these quantities against the
 # rigid motions of the assembly are in bfxcte_face.py; the matrix is
 # computed by panels.multidomain.connections.kCBFxcte_face.fkCBFxcte_face
-var('zf1')
-qfu1A, qfv1A = clpt_interface(u1A, v1A, w1A_xi, w1A_eta, zf1, rinv1)
-qfu1B, qfv1B = clpt_interface(u1B, v1B, w1B_xi, w1B_eta, zf1, rinv1)
+var('zf1, rinvf1')
+qfu1A, qfv1A = clpt_interface(u1A, v1A, w1A_xi, w1A_eta, zf1, rinvf1)
+qfu1B, qfv1B = clpt_interface(u1B, v1B, w1B_xi, w1B_eta, zf1, rinvf1)
 kCBFxcte_face11 =  (b1/2)*kt*(qfu1A.T*qfu1B + qfv1A.T*qfv1B + w1A.T*w1B + (kr/kt)*((2/a1)*w1A_xi.T) * ((2/a1)*w1B_xi))
 kCBFxcte_face12 = -(b1/2)*kt*(qfu1A.T*w2B + qfv1A.T*v2B - w1A.T*u2B + (kr/kt)*((2/a1)*w1A_xi.T) * ((2/a2)*w2B_xi))
 kCBFxcte_face22 = kCBFxcte22

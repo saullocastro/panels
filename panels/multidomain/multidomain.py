@@ -820,8 +820,9 @@ class MultiDomain(object):
         dimensions, the radius, the model and the offset of each panel, on
         its ply thicknesses, through the faces connected by ``'SB'``, and on
         its boundary condition flags, which remove terms
-        of the approximation functions, and on the key ``'angle'`` of
-        ``'BFxycte'``. With ``pd_method='null-space'`` the
+        of the approximation functions, on the key ``'angle'`` of
+        ``'BFxycte'`` and on the keys ``'face'`` and ``'kinematics'`` of
+        ``'BFxcte'``. With ``pd_method='null-space'`` the
         positions and the prescribed components of the prescribed
         displacements add rows to the constraints, whereas the prescribed
         values change only the right-hand sides, i.e. the particular
@@ -829,7 +830,8 @@ class MultiDomain(object):
 
         """
         keys = ('func', 'xcte1', 'xcte2', 'ycte1', 'ycte2', 'angle',
-                connections.kCBFxcte_face.FACE_KEY)
+                connections.kCBFxcte_face.FACE_KEY,
+                connections.kCBFxcte_face.KINEMATICS_KEY)
         sig_conn = tuple((tuple(ci.get(k) for k in keys), id(ci['p1']),
                           id(ci['p2']), bool(ci.get('kr', 0.)))
                          for ci in conn if self._null_space(ci))
@@ -3288,11 +3290,16 @@ class MultiDomain(object):
               connects the edge of the flange to the face of the base at
               `z_1 = d_1 \mp h_1/2`, instead of its reference surface,
               with ``xcte2=0`` at the lower face and ``xcte2=p2.a`` at the
-              upper face, see
+              upper face, ``'lower'`` and ``'upper'`` referring to the
+              coordinate `z_1` of ``p1``, see
               :mod:`panels.multidomain.connections.kCBFxcte_face`; e.g.
               the web of an internal ring frame, an ``'annular_*'`` plate,
               on the inner surface of a ``'cylshell_*'`` and the web of
-              an external one on its outer surface. An ``'annular_*'``
+              an external one on its outer surface. The face of a
+              ``'cylshell_*'`` follows the Sanders-Koiter kinematics,
+              ``kinematics='sanders'`` (default), or with
+              ``kinematics='model'`` those of the model of the
+              cylinder, see :func:`.kCBFxcte_face.face_rinv`. An ``'annular_*'``
               flange on a ``'cylshell_*'`` base must have its edge at the
               radius of the connected surface of the cylinder and span
               the same angle, see :func:`.kCBFxcte_face.check_bfxcte`
@@ -3531,7 +3538,8 @@ class MultiDomain(object):
                         kC_conn += connections.kCBFxcte_face.fkCBFxcte_face(
                                 kt, kr, connecti['p1'], connecti['p2'],
                                 connecti['xcte1'], connecti['xcte2'], z_face,
-                                size)
+                                size, kinematics=connections.kCBFxcte_face
+                                .kinematics_of(connecti))
                         continue
 
                 #NOTE models based on shear deformation theories, with the 5

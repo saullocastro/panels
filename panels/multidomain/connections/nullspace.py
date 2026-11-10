@@ -304,7 +304,8 @@ def constraint_matrix(connecti, size):
     theory, those of the models with 5 DOFs the quantities of
     :mod:`.kCsdt`; ``'BFxcte'`` with the key ``'face'`` uses for all the
     models the quantities of :func:`.kCBFxcte_face.bfxcte_face_components`
-    at the face of ``p1``, with ``max(n1, n2, 4)`` points at the same
+    at the face of ``p1``, with the kinematics of the key ``'kinematics'``,
+    see :func:`.kCBFxcte_face.face_rinv`, with ``max(n1, n2, 4)`` points at the same
     natural coordinate `\eta` of both panels, whose edges span the same
     angle but may differ in length; ``'SB'`` uses for all the models the displacements at the
     faces in contact, the quantities of the penalty matrix of
@@ -400,7 +401,8 @@ def constraint_matrix(connecti, size):
         comps = _sb_components(p1, p2, connecti.get('kr', 0.))
     elif face is not None:
         comps = [sides for _, sides in
-                 kCBFxcte_face.bfxcte_face_components(p1, p2, z_face)]
+                 kCBFxcte_face.bfxcte_face_components(p1, p2, z_face,
+                 kinematics=kCBFxcte_face.kinematics_of(connecti))]
     elif func == 'BFxycte':
         comps = [sides for _, sides in kCBFxycte.xycte_components(p1, p2,
                  connecti.get('angle', 90.))]

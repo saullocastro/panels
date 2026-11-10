@@ -5,11 +5,18 @@ With the key ``'face'`` of the connection dictionary, ``'lower'`` or
 ``'upper'``, the connection ``'BFxcte'`` ties the edge `x_2 =` ``xcte2`` of
 the flange ``p2`` to the face of the base ``p1`` at `z_1 = d_1 \mp h_1/2`,
 along the line `x_1 =` ``xcte1``, instead of its reference surface `z_1 =
-0`. The face is a line of points of the normals of ``p1``, which follow the
-displacements and the rotation of its reference surface with the
-kinematics of the model of ``p1``, see :func:`.kCsdt._surface_terms`.
-For a ``'cylshell_*'`` base, whose `z` points outwards, ``'lower'`` is the
-inner surface and ``'upper'`` the outer surface; e.g. the web of an
+0`. ``'lower'`` and ``'upper'`` refer to the coordinate `z_1` of the base
+``p1``, as the faces of the connection ``'SB'`` refer to the coordinate `z`
+of the connected domains. The face is a line of points of the normals of
+``p1``, which follow the displacements and the rotation of its reference
+surface, see :func:`.kCsdt._surface_terms`. For a ``'cylshell_*'`` base,
+whose `z` points outwards, ``'lower'`` is the inner surface and
+``'upper'`` the outer surface, and the points of the face follow the
+Sanders-Koiter kinematics, with the term `z v_1/r_1`, whatever the model
+of the cylinder; the key ``'kinematics'``, ``'sanders'`` (default) or
+``'model'``, selects the kinematics of the model of the cylinder instead,
+see :func:`.face_rinv`. For other bases the points of the face follow the
+kinematics of the model of ``p1``. E.g. the web of an
 internal ring frame, an ``'annular_*'`` plate with its outer edge
 ``xcte2=0``, is connected to the inner surface, and the web of an
 external ring frame, with its inner edge ``xcte2=p2.a``, to the outer
@@ -21,7 +28,8 @@ surface::
          face='upper')
 
 Without the key, or with ``face=None``, the connection ties the reference
-surfaces, see :mod:`panels.multidomain.connections.kCBFxcte`.
+surfaces, see :mod:`panels.multidomain.connections.kCBFxcte`, and the key
+``'kinematics'`` has no effect.
 :func:`.check_bfxcte` checks the geometry of the connection,
 :func:`.bfxcte_face_components` gives the connected quantities and
 :func:`.fkCBFxcte_face` the penalty stiffness matrix; the null-space method
@@ -58,9 +66,11 @@ surface,
     u_1(z) = u_1 - z w_{1,x}, \qquad v_1(z) = \left(1 + \frac{z}{r_1}\right)
     v_1 - z w_{1,y}, \qquad \theta_{x1}(z) = -w_{1,x}
 
-the term `z v_1/r_1` present only with the Sanders-Koiter kinematics,
-whose rotation of the normal about `x` is `-w_{1,y} + v_1/r_1`, see
-:func:`.kCsdt._rinv_sanders`. For the first-order (FSDT) and third-order
+the term `z v_1/r_1` being that of the Sanders-Koiter kinematics, whose
+rotation of the normal about `x` is `-w_{1,y} + v_1/r_1`, see
+:func:`.kCsdt._rinv_sanders`, used for every ``'cylshell_*'`` base by
+default and, with ``kinematics='model'``, only for the models with these
+kinematics, see :func:`.face_rinv`. For the first-order (FSDT) and third-order
 (TSDT) shear deformation theories, `u_1(z)` and `v_1(z)` are those of
 :func:`.kCsdt._surface_terms` and `\theta_{x1}(z) = \partial
 u_1/\partial z` at `z = z_f`, see :func:`._rotation_x_at`. The flange is
@@ -72,10 +82,15 @@ the edge, `r_2 - x_{cte2}`, is the radius of the face, `r_1 + z_f`: the
 displacement of a point at the distance `z` along the normal of a rigid
 motion `\boldsymbol{t} + \boldsymbol{\omega} \times \boldsymbol{X}` is
 that of the Kirchhoff-Love kinematics with the Sanders-Koiter rotation
-`v_1/r_1`. The Donnell kinematics neglect `z v_1/r_1`, and a rigid
-rotation about the axis of the cylinder, `v_1 = r_1 \Omega`, then gives
-`v_1(z_f) - v_2 = -z_f \Omega`, of the order of `h_1/r_1` relative to
-`v_2`, within the approximation of these kinematics.
+`v_1/r_1`. The rigid motions of a cylinder have the same fields `u_1,
+v_1, w_1` at its reference surface for every model, and the rotation
+about the axis, `v_1 = r_1 \Omega`, is free of strain also with the Donnell
+kinematics, which neglect `z v_1/r_1` at the face: with
+``kinematics='model'`` a Donnell cylinder gives `v_1(z_f) - v_2 = -z_f
+\Omega`, of the order of `h_1/r_1` relative to `v_2`, within the
+approximation of these kinematics, and :func:`.check_bfxcte` issues a
+``UserWarning``. The term `z v_1/r_1` at the face does not change the
+strains of the cylinder, which remain those of its model.
 
 Each panel keeps its own natural coordinate `\eta = 2 y/b - 1` along the
 connection, so that the two edges correspond point by point when they
@@ -95,6 +110,8 @@ References
    https://doi.org/10.1016/j.compstruct.2016.10.026
 
 """
+import warnings
+
 import numpy as np
 from scipy.sparse import coo_matrix, triu
 
@@ -106,6 +123,17 @@ from . import kCsdt
 FACE_KEY = 'face'
 #: Faces of the base and the sign of `h/2` in `z = d \pm h/2`
 FACES = {'lower': -1, 'upper': 1}
+#: Key of the connection dictionary that selects the kinematics of the face
+#: of a ``'cylshell_*'`` base, see :func:`.face_rinv`
+KINEMATICS_KEY = 'kinematics'
+#: Kinematics of the face of a ``'cylshell_*'`` base, the first the default
+KINEMATICS = ('sanders', 'model')
+#: Section of the documentation named by the warning of :func:`.check_bfxcte`
+DONNELL_SECTION = ("the section 'Rigid rotation at a face of a Donnell "
+        "cylinder' of the page 'Multidomain connections' of the "
+        "documentation, https://saullocastro.github.io/panels/"
+        "multidomain_connections.html"
+        "#rigid-rotation-at-a-face-of-a-donnell-cylinder")
 #: Prefixes of the names of the models of the cylinders and of the annular
 #: plates, whose radii are checked by :func:`.check_bfxcte`
 CYLINDER_PREFIX = 'cylshell_'
@@ -154,6 +182,89 @@ def face_coordinate(p, face):
     return kCsdt._face(p, FACES[face])
 
 
+def kinematics_of(connecti):
+    r"""
+    Kinematics of the face of the base of a connection ``'BFxcte'``
+
+    Parameters
+    ----------
+    connecti : dict
+        Connection ``'BFxcte'``, optionally with the key ``'kinematics'``.
+
+    Returns
+    -------
+    kinematics : str
+        ``connecti['kinematics']``, ``'sanders'`` when the key is absent or
+        ``None``, see :func:`.face_rinv`.
+
+    Raises
+    ------
+    ValueError
+        When ``connecti['kinematics']`` is not one of ``None``,
+        ``'sanders'`` and ``'model'``.
+
+    """
+    kinematics = connecti.get(KINEMATICS_KEY)
+    if kinematics is None:
+        return KINEMATICS[0]
+    if kinematics not in KINEMATICS:
+        raise ValueError("The key '{0}' of a 'BFxcte' connection must be one "
+                         "of {1} or None, got {2!r}".format(KINEMATICS_KEY,
+                         KINEMATICS, kinematics))
+    return kinematics
+
+
+def face_rinv(p, kinematics='sanders'):
+    r"""
+    `1/r` of the term `z v/r` of the displacement `v(z)` at a face of the
+    base
+
+    Parameters
+    ----------
+    p : :class:`.Shell`
+        Base.
+    kinematics : str, optional
+        ``'sanders'``, the default, for the Sanders-Koiter kinematics at
+        the face of a ``'cylshell_*'`` base, whatever its model; ``'model'``
+        for the kinematics of the model of ``p``.
+
+    Returns
+    -------
+    rinv : float
+        ``1/p.r`` for a ``'cylshell_*'`` base with ``'sanders'``, otherwise
+        that of the kinematics of the model of ``p``,
+        :func:`.kCsdt._rinv_sanders`: ``1/p.r`` for the models with the
+        Sanders-Koiter rotation of the normal and ``0.`` for the Donnell
+        models and the plates, 1/length.
+
+    Raises
+    ------
+    ValueError
+        When ``kinematics`` is not ``'sanders'`` or ``'model'``.
+
+    Notes
+    -----
+    The displacement of a point at the distance `z` along the normal of a
+    cylinder is `v(z) = (1 + z/r) v - z w_{,y}` with the Sanders-Koiter
+    rotation of the normal about `x`, `-w_{,y} + v/r`; the Donnell
+    kinematics neglect `z v/r`. A rigid rotation `\Omega` about the axis,
+    `v = r \Omega`, `u = w = 0`, is free of strain with both kinematics,
+    and moves the face `z_f` by `(r + z_f) \Omega`, which `v(z_f)` gives
+    only with the term `z v/r`. Using it at the face of every cylinder
+    model keeps the rigid rotation of the assembly free of penalty energy,
+    or of constraint residual, without changing the strains of the
+    cylinder, see the Notes of
+    :mod:`panels.multidomain.connections.kCBFxcte_face`.
+
+    """
+    if kinematics not in KINEMATICS:
+        raise ValueError("kinematics must be one of {0}, got {1!r}".format(
+                         KINEMATICS, kinematics))
+    if kinematics == 'sanders' and _has_prefix(p, CYLINDER_PREFIX):
+        return 1./p.r
+    return kCsdt._rinv_sanders(p)
+
+
 def check_bfxcte(connecti, rtol=1.e-8):
     r"""
     Check the geometry of a connection ``'BFxcte'``
@@ -174,8 +285,8 @@ def check_bfxcte(connecti, rtol=1.e-8):
     ----------
     connecti : dict
         Connection ``'BFxcte'``, with the base ``p1``, the flange ``p2``,
-        ``xcte1``, ``xcte2`` and optionally ``'face'``, see
-        :meth:`.MultiDomain.get_kC_conn`.
+        ``xcte1``, ``xcte2`` and optionally ``'face'`` and
+        ``'kinematics'``, see :meth:`.MultiDomain.get_kC_conn`.
     rtol : float, optional
         Relative tolerance of the comparisons of lengths, radii and angles.
 
@@ -191,7 +302,18 @@ def check_bfxcte(connecti, rtol=1.e-8):
         When ``'face'`` is not ``None``, ``'lower'`` or ``'upper'``, when
         ``xcte2`` is not the edge of the flange on the side of the face, or
         when the radius, the angle or the length of the connected lines do
-        not match, see above.
+        not match, see above; when ``'kinematics'`` is not ``None``,
+        ``'sanders'`` or ``'model'``, see :func:`.kinematics_of`.
+
+    Warns
+    -----
+    UserWarning
+        With ``kinematics='model'``, when ``p1`` is a ``'cylshell_*'``
+        model with the Donnell kinematics, ``'cylshell_clpt_donnell'``,
+        ``'cylshell_fsdt_donnell'`` or ``'cylshell_tsdt_donnell'``, and the
+        connected line is not its reference surface, `z_f \neq 0`. The
+        message names the section of the documentation on the residual of
+        a rigid rotation about the axis.
 
     """
     p1, p2 = connecti['p1'], connecti['p2']
@@ -227,6 +349,15 @@ def check_bfxcte(connecti, rtol=1.e-8):
             raise ValueError("The connected lines of the base and of the "
                     "flange must have the same length, got {0} and {1}"
                     .format(L1, L2))
+    kinematics = kinematics_of(connecti)
+    if (kinematics == 'model' and cylinder and z != 0
+            and kCsdt._rinv_sanders(p1) == 0):
+        warnings.warn("The connection 'BFxcte' at the {0} face of the "
+                "cylinder, model '{1}', uses the Donnell kinematics of the "
+                "model ({2}='model'), without the term z*v/r: a rigid "
+                "rotation about the axis leaves a residual of the order of "
+                "h/r at the face, see {3}".format(face, p1.model,
+                KINEMATICS_KEY, DONNELL_SECTION), UserWarning, stacklevel=2)
     return z
 
 
@@ -275,7 +406,7 @@ def _rotation_x_at(p, z):
     return terms
 
 
-def bfxcte_face_components(p1, p2, z, kt=1., kr=1.):
+def bfxcte_face_components(p1, p2, z, kt=1., kr=1., kinematics='sanders'):
     r"""
     Quantities of the connection ``'BFxcte'`` at the coordinate `z` of the
     base
@@ -291,6 +422,9 @@ def bfxcte_face_components(p1, p2, z, kt=1., kr=1.):
         :func:`.check_bfxcte`, length.
     kt, kr : float, optional
         Penalties of the displacements and of the rotation.
+    kinematics : str, optional
+        Kinematics of the face, ``'sanders'`` or ``'model'``, see
+        :func:`.face_rinv`.
 
     Returns
     -------
@@ -304,21 +438,23 @@ def bfxcte_face_components(p1, p2, z, kt=1., kr=1.):
     -----
     The quantities of the energy of the Notes of
     :mod:`panels.multidomain.connections.kCBFxcte_face`, with `u_1(z)`,
-    `v_1(z)` of :func:`.kCsdt._surface_terms`, `\theta_{x1}(z)` of
+    `v_1(z)` of :func:`.kCsdt._surface_terms`, the term `z v_1/r_1` with
+    the `1/r_1` of :func:`.face_rinv`, `\theta_{x1}(z)` of
     :func:`._rotation_x_at` and `\theta_{x2}` of :func:`.kCsdt._rotation_x`.
     For `z = 0` they are those of the connection at the reference surface,
     see :func:`.nullspace._clpt_components` and
     :func:`.nullspace._sdt_components`.
 
     """
-    tu, tv = kCsdt._surface_terms(p1, z)
+    tu, tv = kCsdt._surface_terms(p1, z, face_rinv(p1, kinematics))
     return [(kt, ((p1, tu), (p2, [(W, 0, 0, 1.)]))),
             (kt, ((p1, tv), (p2, [(V, 0, 0, 1.)]))),
             (kt, ((p1, [(W, 0, 0, 1.)]), (p2, [(U, 0, 0, -1.)]))),
             (kr, ((p1, _rotation_x_at(p1, z)), (p2, kCsdt._rotation_x(p2))))]
 
 
-def fkCBFxcte_face(kt, kr, p1, p2, xcte1, xcte2, z, size):
+def fkCBFxcte_face(kt, kr, p1, p2, xcte1, xcte2, z, size,
+                   kinematics='sanders'):
     r"""
     Penalty stiffness matrix of the connection ``'BFxcte'`` at a face of
     the base
@@ -345,6 +481,9 @@ def fkCBFxcte_face(kt, kr, p1, p2, xcte1, xcte2, z, size):
     size : int
         Size of the stiffness matrix of the assembly, see
         :meth:`.MultiDomain.get_size`.
+    kinematics : str, optional
+        Kinematics of the face, ``'sanders'``, the default, or ``'model'``,
+        see :func:`.face_rinv`.
 
     Returns
     -------
@@ -384,7 +523,7 @@ def fkCBFxcte_face(kt, kr, p1, p2, xcte1, xcte2, z, size):
         raise NotImplementedError("Connection 'BFxcte' between models with "
                 "a different number of DOFs per term, got models '{0}' and "
                 "'{1}'".format(p1.model, p2.model))
-    comps = bfxcte_face_components(p1, p2, z, kt, kr)
+    comps = bfxcte_face_components(p1, p2, z, kt, kr, kinematics)
     ctes = (xcte1, xcte2)
     rows, cols, vals = [], [], []
     for penalty, sides in comps:
