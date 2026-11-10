@@ -489,8 +489,10 @@ def test_donnell_kinematics_null_space():
     satisfy them"""
     md, cyls, webs, faces = _frames(CYL_DONNELL, kinematics='model')
     assert md.conn_method == 'null-space'
+    K = md.calc_kC(silent=True)
+    # the constraints of the face connections are built with Z
     with pytest.warns(UserWarning, match='Donnell cylinder'):
-        K = md.calc_kC(silent=True)
+        md.get_Z()
     size = md.get_size()
     c_t, c_r = _rigid(md, cyls, webs)
     # the webs rotate as the reference surface of the cylinder, v2 = r at
