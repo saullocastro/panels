@@ -1034,6 +1034,10 @@ def fkM_num(object shell, object I_input, int size,
         int row0, int col0, int nx, int ny):
     r"""Mass matrix, integrated numerically
 
+    Integrates numerically the consistent mass matrix of the panel, with
+    the moments of the density given for the whole domain or at each
+    integration point.
+
     Parameters
     ----------
     shell : :class:`.Shell`
@@ -1268,6 +1272,10 @@ def fkM_num(object shell, object I_input, int size,
 def calc_fint(double [::1] cs, object Finput, object shell,
         int size, int col0, int nx, int ny):
     r"""Internal force vector, integrated numerically
+
+    Integrates numerically the internal force vector of the configuration
+    ``cs``, the gradient of the strain energy with respect to the Ritz
+    constants.
 
     Parameters
     ----------
@@ -1898,6 +1906,12 @@ def _point_derivatives(double [::1] c, object shell, double xp, double yp):
     d : np.ndarray
         ``(u, u_x, u_y, u_xx, u_yy, u_xy, v, v_x, v_y, v_xx, v_yy, v_xy, w, w_x, w_y, w_xx, w_yy, w_xy)``, 1-D array of size 18.
 
+    Notes
+    -----
+    `\boldsymbol{d} = \boldsymbol{\Phi}(x, y) \boldsymbol{c}`,
+    with the products of the approximation functions of Bardell along `x`
+    and `y` and of their derivatives, see the notes of the module.
+
     """
     cdef int m, n, i, j, col, p, col0 = 0
     cdef double a, b, xi, eta
@@ -1976,6 +1990,9 @@ def fuvw(double [::1] c, object s, double [::1] xs, double [::1] ys,
          int num_cores=4):
     r"""Displacements and rotations of the panel at the points ``xs``, ``ys``
 
+    Evaluates the displacements and the rotations of the normal of the
+    configuration ``c`` at each point, serially.
+
     Parameters
     ----------
     c : np.ndarray
@@ -2014,6 +2031,9 @@ def fuvw(double [::1] c, object s, double [::1] xs, double [::1] ys,
 def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys,
             int num_cores=4, int NLgeom=0):
     r"""Generalized strains of the panel at the points ``xs``, ``ys``
+
+    Evaluates the six generalized strains of the configuration ``c`` at
+    each point, serially.
 
     Parameters
     ----------
@@ -2064,6 +2084,16 @@ def fstrain(double [::1] c, object s, double [::1] xs, double [::1] ys,
 def fkAx_num(*args, **kwargs):
     r"""Not available for the annular sector
 
+    The function exists for the interface of the models with the piston
+    theory, see :meth:`.Shell.calc_kA`.
+
+    Parameters
+    ----------
+    *args : object, optional
+        Positional arguments, ignored.
+    **kwargs : object, optional
+        Keyword arguments, ignored.
+
     Raises
     ------
     NotImplementedError
@@ -2075,6 +2105,16 @@ def fkAx_num(*args, **kwargs):
 
 def fkAy_num(*args, **kwargs):
     r"""Not available for the annular sector
+
+    The function exists for the interface of the models with the piston
+    theory, see :meth:`.Shell.calc_kA`.
+
+    Parameters
+    ----------
+    *args : object, optional
+        Positional arguments, ignored.
+    **kwargs : object, optional
+        Keyword arguments, ignored.
 
     Raises
     ------
