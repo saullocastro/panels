@@ -322,6 +322,18 @@ def check_bfxcte(connecti, rtol=1.e-8):
         message names the section of the documentation on the residual of
         a rigid rotation about the axis.
 
+    Notes
+    -----
+    The two edges share the natural coordinate `\eta`, and the points of
+    the edge of the flange coincide with those of the connected line of
+    the base when both have the same length and, for an annular plate on a
+    cylinder, span the same angle at the same radius `r_1 + z_f`. A rigid
+    motion of the assembly then gives no residual of the connected
+    quantities with the Sanders-Koiter kinematics at the face; with the
+    Donnell kinematics the residual of `v_1(z_f) = v_2` is `-z_f v_1/r_1`,
+    hence the warning, see the Notes of
+    :mod:`panels.multidomain.connections.kCBFxcte_face`.
+
     """
     p1, p2 = connecti['p1'], connecti['p2']
     face = connecti.get(FACE_KEY)
