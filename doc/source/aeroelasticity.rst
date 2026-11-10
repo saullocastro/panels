@@ -92,7 +92,7 @@ neither symmetric nor skew-symmetric. `\boldsymbol{K}_A` is therefore never
 symmetrized. Since the panels of a :class:`.StiffPanelBay` share the
 approximation functions of the bay, each one integrated over its own strip,
 `\boldsymbol{K}_A` of the bay does not change when the skin is divided into
-panels, see ``tests/tests_stiffpanelbay/test_stiffpanelbay_api.py``.
+panels.
 
 The term in `\beta` of Eq. :eq:`aero-matrices` is the transpose of that of
 Eq. (21) of [castro2016FlutterPanel]_: with `w = 0` at the edges normal to

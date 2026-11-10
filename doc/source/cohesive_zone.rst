@@ -24,15 +24,13 @@ The implementation is found in:
 - the methods of :class:`.MultiDomain`: :meth:`.MultiDomain.get_kC_conn`,
   :meth:`.MultiDomain.calc_k_dmg`, :meth:`.MultiDomain.correct_separation`,
   :meth:`.MultiDomain.calc_kT_TSL`, :meth:`.MultiDomain.reaction_line_pd_xcte`
-  and :meth:`.MultiDomain.force_out_plane_damage`;
-- the nonlinear driver ``tests/multidomain/test_dcb_damage.py``.
+  and :meth:`.MultiDomain.force_out_plane_damage`.
 
 The model of the thesis is the DCB of its Section 7.3: `L = 65` mm, `b = 25`
 mm, `a_0 = 48` mm, arms `[0]_{15}` with ply thickness 0.14 mm of
 AS4D/PEKK-FC, `G_{Ic} = 1.12` N/mm, three domains per arm, of which the first
 one, with length `a_1 = L - a_0 = 17` mm, carries the cohesive zone. It is
-the model of the sections below up to the solution procedure and of
-``tests/multidomain/test_dcb_damage.py``. The rules of the discretisation
+the model of the sections below up to the solution procedure. The rules of the discretisation
 of :ref:`cohesive_zone_discretisation` are stated for a model in which the
 cohesive domain is followed by a perfect bond.
 
@@ -190,8 +188,7 @@ thesis are listed in the docstrings of :func:`.fkCSB11_dmg`,
 :func:`.fkCSB12_dmg` and :func:`.fkCSB22_dmg`. The undamaged connection
 ``'SB'``, :func:`.fkCSB`, imposes the jump of Eq. :eq:`cz-jump` at zero
 separation, such that the pristine ``'SB_TSL'``, with `k^w_{CZ} = k_o` at
-every point, has the matrix of ``'SB'`` with `k_t = k_o`, as checked by
-``tests/multidomain/test_sb_unified.py``.
+every point, has the matrix of ``'SB'`` with `k_t = k_o`.
 
 
 Energy dissipated by crack formation

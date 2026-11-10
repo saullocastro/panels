@@ -100,7 +100,10 @@ under the keys ``matrices`` and ``matrices_num``:
 
 The selection is made in :meth:`.Shell.calc_kC` and :meth:`.Shell.calc_kG`
 by two flags, ``analytical_kC`` and ``analytical_kG``, initialised to
-``True`` and cleared by the conditions of the following table.
+``True`` and cleared by the conditions of the following table. Where both
+paths apply, they give the same matrices to round-off once the quadrature
+integrates the polynomials exactly, so that the choice between them is a
+matter of cost and of capability, not of accuracy.
 
 .. list-table:: Conditions that force the numerically integrated path
     :header-rows: 1
@@ -958,39 +961,6 @@ between the two namings.
       - ``KG0``, ``KG(c_cte)``
       - :meth:`.Shell.calc_kC`, added to ``kC``
 
-.. _tangent_clpt_donnell_verification:
-
-Verification
-~~~~~~~~~~~~
-
-The Jacobian claim of :eq:`donnell-KT` is checked with the directional
-Taylor test. Given an arbitrary state `\boldsymbol{c}` and direction
-`\boldsymbol{v}`, `\boldsymbol{F}_{int}(\boldsymbol{c} + h\boldsymbol{v}) =
-\boldsymbol{F}_{int}(\boldsymbol{c}) + h \boldsymbol{K}_T(\boldsymbol{c})
-\boldsymbol{v} + O(h^2)`, so the relative error
-
-.. math::
-
-    e(h) = \frac{\left\| \boldsymbol{F}_{int}(\boldsymbol{c} +
-    h\boldsymbol{v}) - \boldsymbol{F}_{int}(\boldsymbol{c}) - h
-    \boldsymbol{K}_T \boldsymbol{v} \right\|}{\left\| h \boldsymbol{K}_T
-    \boldsymbol{v} \right\|}
-
-falls proportionally to `h`, whereas an inconsistent tangent leaves a
-remainder of order `h` and `e(h)` plateaus. The other properties used in this
-section are `\boldsymbol{K}_G(2\boldsymbol{c}) = 2\boldsymbol{K}_G(\boldsymbol{c})`,
-which the placement of `\boldsymbol{K}_{GNL}` in :eq:`donnell-grouping`
-preserves, and `\boldsymbol{F}_{int}(\boldsymbol{0}) = \boldsymbol{0}`,
-`\boldsymbol{K}_T(\boldsymbol{0}) = \boldsymbol{K}_{C0}`, which is
-:eq:`donnell-three-way` at `\boldsymbol{c} = \boldsymbol{0}`. The compiled
-kernels reproduce `\boldsymbol{K}_T`, `\boldsymbol{K}_G` and
-`\boldsymbol{F}_{int}` rebuilt from :eq:`donnell-BL`, :eq:`donnell-BNL` and
-:eq:`donnell-G` to round-off, and the closed-form and the numerically
-integrated paths agree to round-off once the quadrature integrates the
-polynomials exactly, so the choice between them of
-:ref:`tangent_clpt_donnell_paths` is a matter of cost and of capability, not
-of accuracy.
-
 .. _tangent_clpt_donnell_discrepancies:
 
 Where the naming and the code do not line up
@@ -1036,8 +1006,7 @@ keeps a part of the stress state out of reach of the load multiplier
 stiffness :meth:`.Shell.calc_kCfollower` is added as well. The sum
 `\boldsymbol{K}_{C0} + \boldsymbol{K}_{CNL} + \boldsymbol{K}_{GNL}` therefore describes the return
 value of :meth:`.Shell.calc_kC` only when no constant pre-stress and no
-follower load is declared. The checks of
-:ref:`tangent_clpt_donnell_verification` set the constant stresses to zero.
+follower load is declared.
 
 Note on symbols
 ~~~~~~~~~~~~~~~
@@ -1170,17 +1139,6 @@ which is exact for any `t`, the force vector `\boldsymbol{F}_p(\boldsymbol{c})` 
 `\boldsymbol{c}` for ``follower='linear'`` and quadratic for
 ``follower='quadratic'``, see :ref:`follower_pressure`. `t = \max(\|\boldsymbol{c}\|/\|\boldsymbol{v}\|,
 1)` avoids the cancellation of large and small terms.
-
-Verification
-~~~~~~~~~~~~
-
-The checks of the tangent stiffness matrix of
-:ref:`tangent_clpt_donnell_verification` apply to the product: it equals the
-product of the assembled matrix of :meth:`.Shell.calc_kT` by the vector to
-round-off, also with a constant membrane stress state, one constitutive
-matrix per integration point, a partial integration domain and pressure
-loads, and its directional Taylor test of :meth:`.Shell.calc_fint` falls as
-`O(h^2)` for every model.
 
 Performance
 ~~~~~~~~~~~

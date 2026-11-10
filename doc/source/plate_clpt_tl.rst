@@ -65,7 +65,10 @@ its area vector `\boldsymbol{a} = \boldsymbol{X}_{,x} \times
 with `\boldsymbol{u}_{,xx} = (u_{,xx}, v_{,xx}, w_{,xx})` and so on. The
 linear part is that of ``'plate_clpt_donnell'``, and the quadratic part of
 `\kappa_{xx}` is `w_{,x} u_{,xx} + w_{,y} v_{,xx} - (u_{,x} + v_{,y})
-w_{,xx}`. For a rotation `\boldsymbol{X} \to \boldsymbol{R} \boldsymbol{X}`
+w_{,xx}`, of the order of the membrane strain times the curvature, so that
+for moderate deflections the response differs from that of
+``'plate_clpt_gl'`` by a relative amount of the order of the membrane
+strain. For a rotation `\boldsymbol{X} \to \boldsymbol{R} \boldsymbol{X}`
 of a deformed state, `\boldsymbol{a} \to \boldsymbol{R} \boldsymbol{a}` and
 `\boldsymbol{u}_{,\alpha\beta} \to \boldsymbol{R}
 \boldsymbol{u}_{,\alpha\beta}`, so the curvatures do not change.
@@ -133,30 +136,6 @@ is a cheaper choice in practice. :func:`.clpt_field.fstrain` gives the
 curvatures of the deformed normal.
 
 
-Verification
-------------
-
-``tests/tests_shell/test_plate_clpt_tl.py``:
-
-- rigid rotations of 0.1 to 1 rad of a free plate, in plane, out of plane and
-  about an oblique axis, give zero strains, curvatures and internal forces;
-- a bent plate rotated rigidly by 0.5 and 1 rad keeps its strains and its
-  bending energy to 1e-8, whereas the bending energy of ``'plate_clpt_gl'``
-  is multiplied by `\cos^2\theta` (0.77 and 0.29);
-- the tangent stiffness and :meth:`.Shell.calc_kTv` are the central
-  differences of :meth:`.Shell.calc_fint` at a state rotated by 1 rad;
-- a cantilever strip, ``L = 1``, ``b = 0.04``, ``t = 2e-3``, under a tip
-  force of constant direction bent out of plane follows the inextensible
-  elastica to 1e-4 at `P L^2/EI = 1` and `3` (tip rotations of 0.46 and
-  1.0 rad), `w = 0.30172 L` and `0.6033 L`, where ``'plate_clpt_gl'`` follows
-  the linear beam, `w = L/3` at `P L^2/EI = 1`; bent in its plane it follows
-  the elastica as ``'plate_clpt_gl'``;
-- for a simply supported plate under pressure with centre deflections of
-  1.1, 3.4 and 11 times the thickness, the deflection is smaller than that
-  of ``'plate_clpt_gl'`` by 2e-5, 1.1e-4 and 1.3e-3, the order of the
-  membrane strain.
-
-
 Accuracy for large rotations
 ----------------------------
 
@@ -172,7 +151,11 @@ angle `2 \pi` of the full circle requires polynomials of degree 11 or more
 along the strip. ``'plate_clpt_gl'``, whose curvatures are measured in the
 fixed frame, is too flexible from tip rotations of about 0.3 rad, and
 ``'plate_clpt_donnell'``, whose membrane strains are linear in `u`, never
-rolls the strip.
+rolls the strip. Under a tip force of constant direction a cantilever strip
+bent out of plane follows the inextensible elastica, where
+``'plate_clpt_gl'`` follows the linear beam, and bent in its plane, the
+bending being carried by the membrane strains, it follows the elastica as
+``'plate_clpt_gl'`` does.
 
 In the wing box of :ref:`plate_clpt_gl`, below the buckling of the top skin,
 the box bends through the membrane strains of the skins and the in-plane

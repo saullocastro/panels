@@ -112,8 +112,7 @@ Limitations
   direction bent out of plane follows the linear beam, `w = \alpha L/3` at
   `\alpha = P L^2/EI = 1` against `0.302 L` of the elastica, whereas bent in
   its plane, where the bending is carried by the membrane strains, it
-  follows the elastica to 0.15 % at `\alpha = 2`
-  (``tests/tests_shell/test_plate_clpt_gl.py``). In a box beam the global
+  follows the elastica to 0.15 % at `\alpha = 2`. In a box beam the global
   bending is carried by the membrane strains of the skins and the in-plane
   bending of the spars, and the out-of-plane bending of the skins
   contributes little; a local buckle of a skin rotated by `\theta` is seen
