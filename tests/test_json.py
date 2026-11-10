@@ -1,4 +1,10 @@
-r"""Saving and loading in the JSON + NumPy zip container, see panels.json_io"""
+r"""Saving and loading in the JSON + NumPy zip container, see panels.json_io
+
+A model loaded back has the inputs saved, and rebuilds the same laminate and
+the same matrices, bit for bit; the stored eigenpairs, Ritz constants and
+fields are those saved, bit for bit.
+
+"""
 import copy
 import io
 import json

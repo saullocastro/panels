@@ -113,6 +113,9 @@ def energies(s, c, n=12):
 @pytest.mark.parametrize('axis', list(AXES))
 @pytest.mark.parametrize('angle', [0.1, 0.5, 1.0])
 def test_rigid_rotation_zero_strains(axis, angle):
+    r"""A rigid rotation of 0.1, 0.5 and 1 rad of a free plate, in plane,
+    out of plane and about an oblique axis, gives zero strains, curvatures
+    and internal forces"""
     s = plate(TL, stack=[0, 45], free=True, m=6, n=5)
     c, X, Y = rigid_rotation(s, AXES[axis], angle)
     fint = s.calc_fint(c)

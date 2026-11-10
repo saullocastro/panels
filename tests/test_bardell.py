@@ -15,6 +15,10 @@ NUM = 30
 
 
 def test_end_values_and_flags():
+    r"""Values and slopes at the ends of the first four terms, zero for the
+    others, to `10^{-4}` of the largest value of each term, the round-off of
+    the evaluation growing with the degree; a flag ``0`` removes its term
+    and any other flag scales it"""
     flags = (1., 1., 1., 1.) # x1t, x1r, x2t, x2r
     xis = np.linspace(-1, 1, 2001)
     fmax = np.abs([calc_vec_f(xi, *flags) for xi in xis]).max(axis=0)
@@ -49,6 +53,11 @@ def test_end_values_and_flags():
 
 
 def test_integrals_against_quadrature():
+    r"""The closed-form integrals of the products of two terms against a
+    Gauss-Legendre quadrature of 30 points, exact for their degree, up to 58,
+    and the physical integral over ``0 <= x <= a`` of the product of the
+    derivatives in ``x`` of two terms, ``(2/a)**2*a/2*calc_integral_fpfp(i,
+    k, ...)``"""
     # products of two terms are polynomials of degree up to 58, integrated
     # exactly by 30 Gauss-Legendre points
     xis, ws = leggauss(30)
