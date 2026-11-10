@@ -358,20 +358,3 @@ points, :func:`.gauss_points` with the key ``'integrand_degree'`` of
 :mod:`panels.modelDB`, is `3p + 1` along each direction, against `2p + 1`
 for the other cylinders. :func:`.clpt_field.fstrain` gives the curvatures
 of Eq. :eq:`cyl-tl-k`.
-
-
-Verification
-------------
-
-``tests/tests_shell/test_cylshell_clpt_tl.py``:
-
-- rigid rotations of 0.5 and 1 rad about the three axes of a free laminated
-  panel give zero strains and internal forces, whereas the curvatures of
-  ``'cylshell_clpt_gl'`` are not zero for rotations about the axes normal to
-  the cylinder axis;
-- a bent panel rotated rigidly keeps its strains, whereas the curvatures of
-  ``'cylshell_clpt_gl'`` change;
-- the linear kernels are those of ``'cylshell_clpt_sanders'`` and
-  ``'cylshell_clpt_gl'``;
-- the hinged roof of Sze et al. [sze2004Benchmarks]_, Sec. 3.8: limit loads
-  and the snap-back of the thin roof.

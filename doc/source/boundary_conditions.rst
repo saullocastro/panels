@@ -87,7 +87,7 @@ frequency parameters `\omega a^2 \sqrt{\rho h/D}`, `D = E h^3/(12 (1 -
 \nu^2))`, of isotropic square plates with `h/a = 0.001` and the edges SSSS,
 SCSC, SCSS, SCSF, SSSF and SFSF agree for the three models with the
 classical solutions tabulated by Leissa [leissa1973Plates]_ to their five
-significant digits, see ``tests/tests_shell/test_fsdt_tsdt_plates.py``.
+significant digits.
 For these thin plates the slope `w_{,x}` of a TSDT clamped edge changes the
 frequencies by less than `1.2 \times 10^{-5}`, e.g. 28.95027 with the slope
 free and 28.95059 with ``x1wr = 0`` for the plate ``'SCSC'``, against 28.951
@@ -147,7 +147,7 @@ along `x = a` with `u` free there. A flat plate buckles out of plane, its
 modes having zero in-plane components, so that the critical end-shortening
 `\delta_{cr}` of :meth:`.MultiDomain.linear_buckling`, prescribed with
 ``cte=False``, and the critical load of the equivalent `N_{xx}` satisfy
-Eq. :eq:`bc-end-shortening`, see ``tests/multidomain/test_null_space_pd.py``.
+Eq. :eq:`bc-end-shortening`.
 For a cylinder, whose modes couple the membrane and bending displacements,
 they differ, see :ref:`null_space_pd`. As the loads, see :ref:`loads`, the
 prescribed values are split into a constant and an incremented part,

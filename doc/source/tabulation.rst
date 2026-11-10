@@ -168,14 +168,9 @@ written by hand. For each kernel it
 A kernel already tabulated is left unchanged, such that applying it twice
 does nothing. The helper ``_terms_sdt`` of the connections of the shear
 deformation theories, whose flags come from an array, was tabulated by
-hand in the same way.
-
-Verification
-------------
-
-The matrices and vectors of the tabulated kernels are identical, bit for
-bit, to those of the direct implementation, the functions being the same
-numbers combined in the same order.
+hand in the same way. The matrices and vectors of the tabulated kernels
+are identical, bit for bit, to those of the direct implementation, the
+functions being the same numbers combined in the same order.
 
 Performance
 -----------

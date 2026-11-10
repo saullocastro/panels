@@ -96,5 +96,4 @@ of the central deflection
     \frac{(-1)^{(i + j)/2 - 1}}{i j \left(i^2/a^2 + j^2/b^2\right)^2}
 
 `D = E h^3/(12(1 - \nu^2))`, which is `0.00406235 \, q a^4/D` for the
-square plate, reached to `10^{-4}` with ``m = n = 15``, see
-``tests/tests_shell/test_pressure_load.py``.
+square plate, reached to `10^{-4}` with ``m = n = 15``.

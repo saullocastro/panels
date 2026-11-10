@@ -155,8 +155,7 @@ four domains with an interior corner, connected with ``'SSxcte'`` and
 and the FSDT or the TSDT, the deflection at the interior corner of a
 `[0/90/90/0]` plate, `h/a = 0.1`, under a sinusoidal pressure, the
 problem of Pagano (1970), agrees to `2 \times 10^{-4}` with the closed-form
-solutions of the same theories, see ``tests/multidomain/test_null_space.py``
-and ``tests/multidomain/test_multidomain_fsdt_tsdt.py``. For a uniform
+solutions of the same theories. For a uniform
 membrane state the section force of :meth:`.MultiDomain.force`, the
 integral of the stress resultants along a line, equals the applied load in
 every domain, also across a penalty connection.

@@ -41,8 +41,7 @@ where the prime is the derivative with respect to `\xi`, and
 hierarchical: increasing the number of terms, ``m`` along `x` and ``n``
 along `y`, adds functions without changing the previous ones. Evaluated in
 floating point, the terms of high degree carry a round-off that grows with
-the degree, below `10^{-4}` of the largest value of each term at the ends,
-as asserted by ``tests/test_bardell.py``.
+the degree, below `10^{-4}` of the largest value of each term at the ends.
 
 
 Boundary flags
@@ -130,4 +129,4 @@ exactly by a Gauss-Legendre quadrature of 30 points: the closed-form
 integrals agree with it up to the round-off of the functions, and
 Eq. :eq:`bardell-separation` gives the physical integrals, e.g.
 `\int_0^a P_{i,x} P_{k,x} \, dx = (2/a)^2 (a/2)` ``calc_integral_fpfp(i, k,
-...)``, see ``tests/test_bardell.py``.
+...)``.

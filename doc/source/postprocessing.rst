@@ -62,4 +62,4 @@ accepted in place of file names. The format and the attributes stored are
 described in :mod:`panels.json_io`. Since the inputs are stored exactly,
 a model loaded back rebuilds the same laminate and the same matrices, and
 the stored eigenpairs, Ritz constants and fields are those saved, bit for
-bit, see ``tests/test_json.py``.
+bit.
