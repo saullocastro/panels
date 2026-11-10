@@ -5,25 +5,29 @@ r"""Wing-box of :mod:`panels.multidomain.wingbox`
 - ``test_wingbox_tip_deflection``: linear static tip deflection of two bays,
   with the penalty and the null-space connections, against the
   Euler-Bernoulli beam with the box section between the mid-surfaces;
+- ``test_create_wingbox`` also checks the default ``conn_method``,
+  ``'null-space'``;
 - ``test_wingbox_tip_force_lb_default``: linear buckling with the default
-  terms and penalty connections, against a regression value (the model is
-  not converged);
+  terms and the default null-space connections, against a regression value
+  (the model is not converged);
 - ``test_wingbox_tip_force_lb`` (slow): linear buckling under a tip force of
   the case High-AR-t5 of Elalfy, De Breuker and Castro, against their
   Abaqus result, 173.11 N (Table 3, p. 8 of the preprint), with the
   null-space connections and enough terms for a converged load;
 - ``test_wingbox_models``: the spars of the model ``'plate_clpt_gl'``,
   the default, against ``'plate_clpt_donnell'``, selected with
-  ``models``, with 2 stringers per skin and the default terms, and all
-  the groups ``'plate_clpt_gl'`` against all ``'plate_clpt_tl'`` without
-  stringers, against regression values.
+  ``models``, with 2 stringers per skin, the default terms and penalty
+  connections, and all the groups ``'plate_clpt_gl'`` against all
+  ``'plate_clpt_tl'`` without stringers, against regression values.
 
 The spars are ``'plate_clpt_gl'`` by default: the geometric stiffness of
 their Green-Lagrange strains contains the work of the bending stresses of
 the box on the vertical deflection of the spars, which the von Kármán
-strains omit. The stored loads of the other tests are unchanged by it (the
-first modes are local modes of the upper skin): 172.7826 N with these spars
-against 172.7828 N, and 176.4351 N against 176.4354 N.
+strains omit. Without stringers the first modes are local modes of the
+upper skin and the model of the spars hardly changes the loads: with the
+default terms and penalty connections 172.7826 N with these spars against
+172.7828 N, with the terms of ``test_wingbox_tip_force_lb`` 176.4351 N
+against 176.4354 N.
 
 Notes
 -----
@@ -55,6 +59,8 @@ ABAQUS_HIGH_AR_T5 = 173.11  # N, Abaqus result of the module docstring
 def test_create_wingbox():
     # 2 bays instead of 9, the number of domains being per bay
     md, info = create_wingbox(nbays=2)
+    assert md.conn_method == 'null-space'
+    assert md.conn is info['conn']
     # per bay 2 skins, 2 spars and a rib, the last one at the tip
     assert len(md.panels) == 2*5
     assert np.isclose(info['a'], 1.010/2)
@@ -116,11 +122,13 @@ def test_wingbox_tip_deflection(conn_method):
 
 def test_wingbox_tip_force_lb_default():
     # case High-AR-t5 without stringers, 9 bays, 45 domains, the default
-    # terms and penalty connections, 6264 Ritz constants, 1 N at the tip;
-    # regression value only, the model being not converged, see
-    # test_wingbox_tip_force_lb
+    # terms and null-space connections, 6264 Ritz constants, 1 N at the tip;
+    # regression value only, the model being not converged (10 % above
+    # Abaqus), see test_wingbox_tip_force_lb
     md, c, eigvals, eigvecs = wingbox_tip_force_lb(num_eigvalues=4)
-    assert np.isclose(eigvals[0], 172.78, rtol=1e-3)
+    print('first buckling tip force: %.4f N' % eigvals[0])
+    assert md.conn_method == 'null-space'
+    assert np.isclose(eigvals[0], 190.405, rtol=1e-4)
     # the mode is a local buckling of the upper skin of the root bay, in
     # compression
     root_top = md.panels[0]
@@ -156,7 +164,7 @@ def test_wingbox_models():
     ev = {}
     for spar_model in ('plate_clpt_gl', 'plate_clpt_donnell'):
         md, c, eigvals, eigvecs = wingbox_tip_force_lb(num_eigvalues=4,
-                nstr=2, models=dict(spar=spar_model))
+                nstr=2, models=dict(spar=spar_model), conn_method='penalty')
         assert all(p.model == spar_model for p in md.panels
                    if p.group == 'spar')
         ev[spar_model] = eigvals[0]
@@ -170,7 +178,7 @@ def test_wingbox_models():
     for model in ('plate_clpt_gl', 'plate_clpt_tl'):
         models = dict(skin=model, spar=model, stringer=model, rib=model)
         md, c, eigvals, eigvecs = wingbox_tip_force_lb(num_eigvalues=4,
-                                                       models=models)
+                models=models, conn_method='penalty')
         ev[model + ' all'] = eigvals[0]
     assert np.isclose(ev['plate_clpt_gl all'], 172.78252, rtol=1e-6)
     assert np.isclose(ev['plate_clpt_tl all'], 172.78206, rtol=1e-6)

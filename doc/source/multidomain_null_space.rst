@@ -278,8 +278,9 @@ The functions :func:`.create_cylinder`,
 :func:`.create_cylinder_z_stiffened`, the analyses of
 :mod:`panels.multidomain.cylinder` and
 :mod:`panels.multidomain.cylinder_blade_stiffened`, and
-:func:`.tstiff2d_1stiff_freq`, :func:`.tstiff2d_1stiff_compression` and
-:func:`.tstiff2d_1stiff_flutter` take the argument ``conn_method``.
+:func:`.tstiff2d_1stiff_freq`, :func:`.tstiff2d_1stiff_compression`,
+:func:`.tstiff2d_1stiff_flutter` and :func:`.create_wingbox` take the
+argument ``conn_method``, ``'null-space'`` by default.
 
 
 .. _null_space_results:

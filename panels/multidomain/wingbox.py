@@ -2,8 +2,8 @@ r"""Rectangular wing-box made of plate domains
 (:mod:`panels.multidomain.wingbox`)
 
 :func:`.create_wingbox` builds the untapered wing-box of Elalfy, De Breuker
-and Castro, case High-AR-t5, with plate domains connected by penalty
-stiffnesses, optionally with blade stringers, and
+and Castro, case High-AR-t5, with connected plate domains, optionally with
+blade stringers, and
 :func:`.wingbox_tip_force_lb` runs its linear buckling analysis under a
 vertical tip force. Both are imported in :mod:`panels.multidomain`.
 
@@ -90,7 +90,7 @@ def create_wingbox(nstr=0, hs=3.e-3, ts=1.5e-3, L=1.010, W=50.5e-3,
         H=12.12e-3, t_skin=1.e-3, t_spar=5.e-3, t_rib=1.e-3, nbays=9,
         E=73.e9, nu=0.33, rho=2795., terms=None, P=1., dx_load=10.e-3,
         follower=False, tip_rib=True, stringers=True, ribs=True,
-        conn_method='penalty', rib_spar=True, models=None):
+        conn_method='null-space', rib_spar=True, models=None):
     r"""Create the multidomain assembly of a rectangular wing-box
 
     The defaults are the case High-AR-t5 of Elalfy, De Breuker and Castro,
@@ -173,8 +173,8 @@ def create_wingbox(nstr=0, hs=3.e-3, ts=1.5e-3, L=1.010, W=50.5e-3,
         Whether the ribs are connected to the spars with ``'BFxycte'``; with
         ``False`` they are connected to the skins only.
     conn_method : str, optional
-        How the connections are imposed, ``'penalty'``, the default, with
-        the default stiffnesses of :func:`.calc_kt_kr`, or ``'null-space'``,
+        How the connections are imposed, ``'null-space'``, the default, or
+        ``'penalty'``, with the default stiffnesses of :func:`.calc_kt_kr`,
         see :class:`.MultiDomain`.
     models : dict, optional
         Model of the domains of each group, by the keys of ``terms``:
@@ -228,7 +228,8 @@ def create_wingbox(nstr=0, hs=3.e-3, ts=1.5e-3, L=1.010, W=50.5e-3,
     ``'plate_clpt_gl'`` only. Its work on a deflection `v` uniform over the
     height of a spar is the resultant of `N_{xx}` over the height, which is
     zero in pure bending; only the part of `v` that varies over the height
-    contributes. With the default terms the first buckling tip force of
+    contributes. With the default terms and ``conn_method='penalty'`` the
+    first buckling tip force of
     ``'plate_clpt_gl'`` spars is below that of ``'plate_clpt_donnell'``
     spars by 1.1e-6 (relative) without stringers, 1.0e-5 with ``nstr=2``
     and 3.0e-5 with ``nstr=4``. Without stringers and with ``nstr=2`` the
@@ -256,7 +257,8 @@ def create_wingbox(nstr=0, hs=3.e-3, ts=1.5e-3, L=1.010, W=50.5e-3,
     measures the changes of curvature with the deformed normal; they are
     quadratic and cubic in the displacements, and their second variation
     adds to the geometric stiffness the work of the bending moments of the
-    pre-buckling state. With the default terms, all the groups of
+    pre-buckling state. With the default terms and
+    ``conn_method='penalty'``, all the groups of
     ``'plate_clpt_tl'`` give a first buckling tip force below that of all
     the groups of ``'plate_clpt_gl'`` by 2.7e-6 (relative) without
     stringers and 4.3e-5 with ``nstr=2``. In the non-linear analyses, with
@@ -399,10 +401,11 @@ def wingbox_tip_force_lb(num_eigvalues=4, silent=True, **kwargs):
     -----
     The first buckling mode of the wing-box without stringers is a local
     buckling of the upper skin in compression near the root, see [1]_,
-    whose Abaqus model gives 173.11 N (Table 3, p. 8). With
-    ``conn_method='null-space'`` the first buckling load converges to 176.4
-    N, with skins of 12 x 12 terms, spars of 12 x 7 and ribs of 6 x 8;
-    with the default terms and penalty connections it is 172.78 N, and
+    whose Abaqus model gives 173.11 N (Table 3, p. 8). With the default
+    ``conn_method='null-space'`` the first buckling load is 190.41 N with
+    the default terms and converges to 176.4 N, with skins of 12 x 12
+    terms, spars of 12 x 7 and ribs of 6 x 8; with
+    ``conn_method='penalty'`` it is 172.78 N with the default terms, and
     161.9 N converged.
 
     References
@@ -419,7 +422,7 @@ def wingbox_tip_force_lb(num_eigvalues=4, silent=True, **kwargs):
     >>> from panels.multidomain import wingbox_tip_force_lb
     >>> md, c, eigvals, eigvecs = wingbox_tip_force_lb(num_eigvalues=4)
     >>> round(float(eigvals[0]), 2)
-    172.78
+    190.41
 
     """
     md, info = create_wingbox(**kwargs)
