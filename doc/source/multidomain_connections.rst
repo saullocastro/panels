@@ -91,19 +91,29 @@ the thickness of the base::
                    ||  flange, x2 = -z1
                    ||
 
+The words ``'lower'`` and ``'upper'`` refer to the coordinate `z` of the
+domain whose face is connected, as for ``'SB'`` below, where the lower
+face of ``p1`` meets the upper face of ``p2``: for ``'BFxcte'`` it is the
+coordinate `z_1` of the base ``p1``. For a ``'cylshell_*'`` base, whose
+`z` points outwards, ``'lower'`` is the inner surface and ``'upper'`` the
+outer surface, whatever the axes of the flange, e.g. an ``'annular_*'``
+plate.
+
 The axis `x_2` of the flange is `-z_1`, so that a flange below the lower
 face has its edge `x_2 = 0` there, ``xcte2=0``, and a flange above the
 upper face its edge `x_2 = a_2`, ``xcte2=p2.a``. The face is a line of
 points of the normals of the base, which follow its reference surface
-with the kinematics of its model; for the classical laminated plate theory
+with the Sanders-Koiter kinematics for a ``'cylshell_*'`` base, whatever
+its model, see below, and with the kinematics of its model otherwise; for
+the classical laminated plate theory
 
 .. math::
 
     u_1(z) = u_1 - z w_{1,x}, \qquad v_1(z) = \left(1 + \frac{z}{r_1}\right)
     v_1 - z w_{1,y}
 
-the term `z v_1/r_1` with the Sanders-Koiter kinematics, as for ``'SB'``,
-and the connection imposes `u_1(z_1) = w_2`, `v_1(z_1) = v_2`, `w_1 =
+the term `z v_1/r_1` being that of the Sanders-Koiter kinematics, and the
+connection imposes `u_1(z_1) = w_2`, `v_1(z_1) = v_2`, `w_1 =
 -u_2` and the continuity of the rotation about `y`, with the penalty
 energy integrated along the length `b_1` of the base, or exactly with the
 null-space method. The two edges share the natural coordinate `\eta` and
@@ -120,11 +130,70 @@ internal and the external ring frames of a cylinder ``cyl`` at the station
          face='upper')
 
 with ``web_in.r = cyl.r + cyl.offset - h/2`` and ``web_out.r - web_out.a =
-cyl.r + cyl.offset + h/2``. A rigid-body motion of the assembly is then
-free of strain with the Sanders-Koiter kinematics of the cylinder; the
-Donnell kinematics neglect `z v_1/r_1`, an error of the order of `h_1/r_1`.
-With the offset `d_1 = h_1/2` the lower face is the reference surface and
-``face='lower'`` is the connection without the key.
+cyl.r + cyl.offset + h/2``. With the offset `d_1 = h_1/2` the lower face is
+the reference surface and ``face='lower'`` is the connection without the
+key.
+
+Rigid rotation at a face of a Donnell cylinder
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A rigid rotation of the assembly by the small angle `\Omega` about the axis
+of a cylinder moves each point by `\rho \Omega` along the circumference,
+`\rho` being its distance to the axis. At the reference surface of the
+cylinder, of radius `r_1`, the displacements are
+
+.. math::
+
+    u_1 = 0, \qquad v_1 = r_1 \Omega, \qquad w_1 = 0
+
+for every model. The membrane strains `u_{1,x}`, `v_{1,y} + w_1/r_1`,
+`u_{1,y} + v_{1,x}` and the changes of curvature `-w_{1,xx}`,
+`-w_{1,yy}`, `-2 w_{1,xy}` of the Donnell kinematics vanish, as do those of
+the Sanders-Koiter kinematics and, with `\phi_x = \phi_y = 0`, the
+transverse shear strains of the FSDT and TSDT: the rotation about the axis
+is free of strain in every model of the cylinder. The face `z_1 = z_f`, at
+the radius `r_1 + z_f`, moves by `(r_1 + z_f) \Omega`. The rotation of the
+normal about `x` of the Sanders-Koiter kinematics, `-w_{1,y} + v_1/r_1`,
+gives this displacement exactly,
+
+.. math::
+
+    v_1(z_f) = \left(1 + \frac{z_f}{r_1}\right) v_1 - z_f w_{1,y} = (r_1 +
+    z_f) \Omega
+
+whereas the Donnell kinematics, which neglect `v_1/r_1` in the rotation of
+the normal, give `v_1(z_f) = v_1 - z_f w_{1,y} = r_1 \Omega`. The flange,
+an ``'annular_*'`` plate whose connected edge is at the radius `r_1 + z_f`,
+rotates with `v_2 = (r_1 + z_f) \Omega` along that edge, and the
+condition `v_1(z_f) = v_2` of the connection has the residual
+
+.. math::
+
+    v_1(z_f) - v_2 = -z_f \Omega, \qquad \frac{\left| v_1(z_f) - v_2
+    \right|}{v_2} = \frac{|z_f|}{r_1 + z_f}
+
+of the order of `h_1/(2 r_1)` for a face at `|z_f| = h_1/2`. The other
+conditions of the connection have no residual. With the penalty method the
+rigid rotation stores the energy `\frac{1}{2} k_t b_1 z_f^2 \Omega^2`; with
+the null-space method it violates the constraints, and the motion free of
+strain that satisfies them rotates the flange by `r_1 \Omega/(r_1 + z_f)`:
+its edge follows the reference surface of the cylinder instead of the
+face. The translations normal to the axis and the tilts of the axis have
+`v_1 \neq 0` as well, with the same residual `-z_f v_1/r_1` at the face.
+
+The term `z_f v_1/r_1` is of the order neglected by the Donnell
+kinematics, so that either choice is consistent with these kinematics,
+but only the Sanders-Koiter term at the face keeps the rigid rotation of
+the assembly free of energy and of residual. It enters the connection
+alone and does not change the strains of the cylinder, which remain those
+of its model. The key ``'kinematics'`` of ``'BFxcte'`` therefore defaults
+to ``'sanders'``, the face following the Sanders-Koiter kinematics for
+every ``'cylshell_*'`` model. With ``kinematics='model'`` the face follows
+the kinematics of the model of the cylinder, which differ from those of
+Sanders and Koiter only for ``'cylshell_clpt_donnell'``,
+``'cylshell_fsdt_donnell'`` and ``'cylshell_tsdt_donnell'``; for these the
+residual above is present, and the connection issues a ``UserWarning``
+that names this section, see :func:`.kCBFxcte_face.face_rinv`.
 
 kCBFxycte
 ~~~~~~~~~

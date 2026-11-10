@@ -200,7 +200,9 @@ The web of a ring frame is attached to a surface of the skin. With the
 key ``'face'`` of ``'BFxcte'`` the edge of the sector is connected to the
 inner surface of the cylinder, `z = d - h/2`, or to its outer surface, `z
 = d + h/2`, `d` being the offset and `h` the thickness of the cylinder,
-see :ref:`multidomain_connections`. An internal frame, its outer edge on
+see :ref:`multidomain_connections`; ``'lower'`` and ``'upper'`` refer to
+the coordinate `z` of the cylinder, which points outwards, not to that of
+the sector. An internal frame, its outer edge on
 the inner surface, has the outer radius `r - h/2 + d`:
 
 .. code-block:: python
@@ -217,8 +219,9 @@ inner radius `r + h/2 + d`:
          face='upper')
 
 the points of the surface following the normal of the cylinder, `u(z) = u
-- z w_{,x}`, `v(z) = (1 + z/r) v - z w_{,y}` for the Sanders-Koiter
-kinematics. The sector has no eccentricity of its own: the radius of the
+- z w_{,x}`, `v(z) = (1 + z/r) v - z w_{,y}`, with the Sanders-Koiter
+kinematics whatever the model of the cylinder, so that a rigid rotation
+about the axis is free of strain also with a Donnell cylinder. The sector has no eccentricity of its own: the radius of the
 connected edge must be that of the connected surface, and the sector must
 span the angle of the cylinder domain, `b_{web}/r_{web} = b/r`, or the
 connection raises a ``ValueError``. The cylinder with its reference

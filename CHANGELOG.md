@@ -160,17 +160,34 @@
   with `face='lower'` or `'upper'` ties the edge of the flange to the face of
   the base at `z = d -+ h/2` (offset `d`, thickness `h` of the base) instead
   of its reference surface; without the key, or with `face=None`, the
-  connection is unchanged. The flange lies on the side of the face:
+  connection is unchanged. `'lower'` and `'upper'` refer to the coordinate
+  `z` of the base `p1`, as the faces of `'SB'` refer to the `z` of the
+  connected domains. The flange lies on the side of the face:
   `xcte2=0` at the lower face, `xcte2=p2.a` at the upper face. The points of
-  the face follow the base with the kinematics of its model,
-  `u(z) = u - z w,x`, `v(z) = (1 + z/r) v - z w,y` for the CLPT (the term
-  `z v/r` with the Sanders-Koiter kinematics), the displacements at `z` of
-  the FSDT and TSDT, and the rotation of the normal at `z`; penalty and
-  null-space methods. For a `cylshell_*` base, `'lower'` is the inner and
-  `'upper'` the outer surface: the web of an internal ring frame, an
-  `annular_*` plate, has its outer edge on the inner surface, `xcte2=0,
-  face='lower'`, and the web of an external frame its inner edge on the
-  outer surface, `xcte2=web.a, face='upper'`.
+  the face follow the base, `u(z) = u - z w,x`, `v(z) = (1 + z/r) v - z w,y`
+  for the CLPT, the displacements at `z` of the FSDT and TSDT, and the
+  rotation of the normal at `z`; penalty and null-space methods. For a
+  `cylshell_*` base, `'lower'` is the inner and `'upper'` the outer surface:
+  the web of an internal ring frame, an `annular_*` plate, has its outer edge
+  on the inner surface, `xcte2=0, face='lower'`, and the web of an external
+  frame its inner edge on the outer surface, `xcte2=web.a, face='upper'`.
+- The face of a `cylshell_*` base follows the Sanders-Koiter kinematics, with
+  the term `z v/r`, whatever the model of the cylinder (`cylshell_clpt_*`,
+  `cylshell_fsdt_*`, `cylshell_tsdt_*`, Donnell, Sanders, GL and TL), so
+  that a rigid rotation about the axis is free of penalty energy and of
+  constraint residual also for a Donnell cylinder. The new key
+  `'kinematics'` of `'BFxcte'`, `'sanders'` (default) or `'model'`, makes
+  the face follow the kinematics of the model of the cylinder instead; for
+  `cylshell_clpt_donnell`, `cylshell_fsdt_donnell` and
+  `cylshell_tsdt_donnell`, without the term `z v/r`, a rigid rotation then
+  leaves the residual `-z_f Omega` at the face, of relative order `h/(2 r)`,
+  and `check_bfxcte` issues a `UserWarning` that names the section "Rigid
+  rotation at a face of a Donnell cylinder" of the page "Multidomain
+  connections". New functions `kCBFxcte_face.face_rinv` and
+  `kCBFxcte_face.kinematics_of`; new argument `kinematics` of
+  `bfxcte_face_components` and `fkCBFxcte_face`, and `rinv` of the private
+  `kCsdt._surface_terms`. The basis `Z` of the null space is computed again
+  when the key `'kinematics'` changes.
 - An `annular_*` flange on a `cylshell_*` base, with or without the key,
   must have its edge `xcte2` at the radius of the connected surface,
   `r2 - xcte2 = r1 + z`, and span the same angle, `b2/r2 = b1/r1`; the
@@ -185,7 +202,11 @@
   `theory/multidomain_penalization/bfxcte_face.py` (Kirchhoff-Love
   displacement of a point of the normal, rotation about the circumferential
   axis, zero residuals of the six rigid motions when the edge of the plate
-  is at the radius of the face).
+  is at the radius of the face; for a Donnell cylinder, the rotation about
+  the axis free of strain, the residual `-z_f Omega` with the Donnell
+  kinematics at the face and the rotation `r Omega/(r + z_f)` of the plate
+  that satisfies them). The block of the face in `connections.py` has the
+  `1/r` of the face, `rinvf1`.
 - Tests `tests/multidomain/test_annular_cylinder.py`: internal and external
   frames at the clamped end of a cylinder against the roots of the
   frequency equations of the annulus clamped outside or inside (Leissa
@@ -194,9 +215,14 @@
   of a cylinder with the offset `h/2` against the connection at its
   reference surface, the same frame with the reference surface of the
   cylinder at its inner face or at mid-thickness, the rigid-body motions
-  of a free cylinder with both frames, the penalty energy from the fields,
-  and the geometry checks. Pages "Multidomain connections" and
-  "Annular-sector plates".
+  of a free cylinder with both frames, for a Sanders-Koiter and a Donnell
+  cylinder, with the default `conn_method` of `MultiDomain`
+  (`'null-space'`), the residual and the warning with `kinematics='model'`
+  (null space and penalty), the face of every `cylshell_*` model under a
+  rigid rotation, the penalty energy from the fields and against the
+  constraints of the null-space method, and the geometry checks. Pages
+  "Multidomain connections" (new section "Rigid rotation at a face of a
+  Donnell cylinder") and "Annular-sector plates".
 
 ### New argument `models` of the wing box and of the blade-stiffened cylinder
 
