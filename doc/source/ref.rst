@@ -4,6 +4,7 @@ References
 
 .. [alfano2001Interface] G. Alfano and M. A. Crisfield, "Finite element interface models for the delamination analysis of laminated composites: mechanical and computational issues". International Journal for Numerical Methods in Engineering, 50:1701-1736, 2001.
 .. [crisfield1991Nonlinear] M. A. Crisfield, "Non-linear Finite Element Analysis of Solids and Structures, Volume 1: Essentials". John Wiley & Sons, Chichester, 1991.
+.. [bagheri2019Torque] H. Bagheri, Y. Kiani and M. R. Eslami, "Buckling of moderately thick annular plates subjected to torque". Archive of Mechanical Engineering, 66(2), 209-227, 2019. https://doi.org/10.24425/ame.2019.128445.
 .. [amabili2008Nonlinear] M. Amabili, "Nonlinear Vibrations and Stability of Shells and Plates". Cambridge University Press, Cambridge, 2008. https://doi.org/10.1017/CBO9780511619694.
 .. [bardell1991] N .S. Bardell, "Free vibration analysis of a flat plate using the hierarchical finite element method". Journal of Sound and Vibration, 151(2):263-289, 1991. https://doi.org/10.1016/0022-460X(91)90855-E.
 .. [block1965Stiffened] D. L. Block, M. F. Card and M. M. Mikulas, Jr., "Buckling of Eccentrically Stiffened Orthotropic Cylinders". NASA TN D-2960, NASA Langley Research Center, 1965. https://ntrs.nasa.gov/citations/19650021133.
