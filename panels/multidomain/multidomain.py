@@ -347,9 +347,11 @@ class MultiDomain(object):
         A list, tuple etc of :class:`.Shell` objects.
     conn : list of dict or None, optional
         A connectivity dictionary, a list with one dictionary per
-        connection, see :meth:`.get_kC_conn`. With ``None``, the default,
-        the connections must be given to :meth:`.calc_kC` or
-        :meth:`.get_kC_conn`, which keep the last ones used.
+        connection, see :meth:`.get_kC_conn`, kept in the attribute
+        ``conn`` (the same list) and used by the methods to which no
+        connections are given. With ``None``, the default, the connections
+        must be given to :meth:`.calc_kC` or :meth:`.get_kC_conn`, which
+        keep the last ones used.
 
         Concerning the conn dictionary, the key 'func' stands for the connection function that
         builds the compatibility relations between the panels.

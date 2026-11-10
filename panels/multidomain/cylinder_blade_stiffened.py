@@ -104,8 +104,7 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
     the blade stands inside the cylinder, with ``side='external'`` its edge
     `y` = ``width_blades[i]``, and the blade stands outside. The
     assembly contains the skin panels followed by the blades. The
-    connections are returned and not stored in the assembly, which is
-    created with ``conn=None``: pass them to :meth:`.MultiDomain.calc_kC`.
+    connections are stored in the assembly, ``md.conn``, and also returned.
 
     Parameters
     ----------
@@ -149,8 +148,9 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
     Returns
     -------
     md, conns, info : tuple
-        The multidomain assembly, the list of connection dictionaries (not
-        stored in the assembly) and a dictionary with ``'skin'``, the list
+        The multidomain assembly, the list of connection dictionaries, the
+        list stored in the assembly, ``md.conn``, and a dictionary with
+        ``'skin'``, the list
         of the skin panels, ``'blades'``, the list of the blades, ``'ws'``,
         the width of a skin panel, ``2*pi*r/npanels``, and ``'models'``,
         the model of each group, ``models`` completed with the defaults.
@@ -268,8 +268,9 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
     ...     npanels=4)
     >>> print([p.group for p in md.panels])
     ['skin', 'skin', 'skin', 'skin', 'blade_00', 'blade_01', 'blade_02', 'blade_03']
-    >>> print(sorted(set(c['func'] for c in conns)), len(conns))
-    ['BFycte', 'SSycte'] 8
+    >>> print(sorted(set(c['func'] for c in conns)), len(conns),
+    ...       md.conn is conns)
+    ['BFycte', 'SSycte'] 8 True
     >>> print(info['models'])
     {'skin': 'cylshell_clpt_sanders', 'blade': 'plate_clpt_gl'}
 
@@ -331,7 +332,7 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
         conns.append(dict(p1=panel, p2=blade, func='BFycte', ycte1=0,
                           ycte2=ycte2))
 
-    md = MultiDomain(skin + blades, conn_method=conn_method)
+    md = MultiDomain(skin + blades, conns, conn_method=conn_method)
 
     return md, conns, dict(skin=skin, blades=blades, ws=b_skin, models=models)
 
@@ -339,7 +340,7 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
 def cylinder_blade_stiffened_compression_lb_Nxx_cte(height, r, stack, stack_blades,
         width_blades, plyt, laminaprop,
         npanels, Nxxs_skin, Nxxs_blade, m=8, n=8, num_eigvalues=20,
-        conn_method='null-space', models=None):
+        conn_method='null-space', models=None, side='internal'):
     r"""Linear buckling analysis with a constant Nxx for each panel
 
     See :func:`.create_cylinder_blade_stiffened` for most parameters.
@@ -394,6 +395,10 @@ def cylinder_blade_stiffened_compression_lb_Nxx_cte(height, r, stack, stack_blad
     models : dict, optional
         Model of the skin panels, key ``'skin'``, and of the blades, key
         ``'blade'``, see :func:`.create_cylinder_blade_stiffened`.
+    side : str, optional
+        ``'internal'``, the default, for blades inside the cylinder, or
+        ``'external'`` for blades outside, see
+        :func:`.create_cylinder_blade_stiffened`.
 
     Returns
     -------
@@ -407,7 +412,7 @@ def cylinder_blade_stiffened_compression_lb_Nxx_cte(height, r, stack, stack_blad
     ------
     ValueError
         When the length of ``Nxxs_skin`` or of ``Nxxs_blade`` is not
-        ``npanels``, or when ``models`` is not accepted by
+        ``npanels``, or when ``models`` or ``side`` is not accepted by
         :func:`.create_cylinder_blade_stiffened`.
 
     Notes
@@ -443,7 +448,7 @@ def cylinder_blade_stiffened_compression_lb_Nxx_cte(height, r, stack, stack_blad
     md, conns, info = create_cylinder_blade_stiffened(height=height, r=r,
             stack=stack, stack_blades=stack_blades, width_blades=width_blades,
             plyt=plyt, laminaprop=laminaprop, npanels=npanels, m=m, n=n,
-            conn_method=conn_method, models=models)
+            conn_method=conn_method, models=models, side=side)
     if len(Nxxs_skin) != npanels:
         raise ValueError('The length of "Nxxs_skin" must be the same as "npanels"')
     if len(Nxxs_blade) != npanels:
@@ -459,7 +464,7 @@ def cylinder_blade_stiffened_compression_lb_Nxx_cte(height, r, stack, stack_blad
             i_blade += 1
             p.Nxx = Nxxs_blade[i_blade]
 
-    k0 = md.reduce(md.calc_kC(conns, silent=True))
+    k0 = md.reduce(md.calc_kC(silent=True))
     kG = md.reduce(md.calc_kG(silent=True))
     eigvals, eigvecs = lb(k0, kG, tol=0, sparse_solver=True, silent=True,
              num_eigvalues=num_eigvalues, num_eigvalues_print=5)
@@ -469,7 +474,8 @@ def cylinder_blade_stiffened_compression_lb_Nxx_cte(height, r, stack, stack_blad
 def cylinder_blade_stiffened_compression_lb_Nxx_from_static(height, r, stack,
         stack_blades, width_blades, plyt, laminaprop, npanels, Nxxs_skin,
         Nxxs_blade, m=8, n=8,
-        num_eigvalues=20, conn_method='null-space', models=None):
+        num_eigvalues=20, conn_method='null-space', models=None,
+        side='internal'):
     r"""Linear buckling analysis with a Nxx calculated using static analysis
 
     See :func:`.create_cylinder_blade_stiffened` for most parameters.
@@ -528,6 +534,10 @@ def cylinder_blade_stiffened_compression_lb_Nxx_from_static(height, r, stack,
     models : dict, optional
         Model of the skin panels, key ``'skin'``, and of the blades, key
         ``'blade'``, see :func:`.create_cylinder_blade_stiffened`.
+    side : str, optional
+        ``'internal'``, the default, for blades inside the cylinder, or
+        ``'external'`` for blades outside, see
+        :func:`.create_cylinder_blade_stiffened`.
 
     Returns
     -------
@@ -542,7 +552,7 @@ def cylinder_blade_stiffened_compression_lb_Nxx_from_static(height, r, stack,
     ------
     ValueError
         When the length of ``Nxxs_skin`` or of ``Nxxs_blade`` is not
-        ``npanels``, or when ``models`` is not accepted by
+        ``npanels``, or when ``models`` or ``side`` is not accepted by
         :func:`.create_cylinder_blade_stiffened`.
 
     Notes
@@ -574,7 +584,7 @@ def cylinder_blade_stiffened_compression_lb_Nxx_from_static(height, r, stack,
     md, conns, info = create_cylinder_blade_stiffened(height=height, r=r,
             stack=stack, stack_blades=stack_blades, width_blades=width_blades,
             plyt=plyt, laminaprop=laminaprop, npanels=npanels, m=m, n=n,
-            conn_method=conn_method, models=models)
+            conn_method=conn_method, models=models, side=side)
     if len(Nxxs_skin) != npanels:
         raise ValueError('The length of "Nxxs_skin" must be the same as "npanels"')
     if len(Nxxs_blade) != npanels:
@@ -595,7 +605,7 @@ def cylinder_blade_stiffened_compression_lb_Nxx_from_static(height, r, stack,
 
     fext = md.calc_fext(silent=True)
 
-    k0 = md.reduce(md.calc_kC(conns, silent=True))
+    k0 = md.reduce(md.calc_kC(silent=True))
     incs, cs = static(k0, md.reduce(fext), silent=True)
     c = md.expand(cs[0])
     kG = md.reduce(md.calc_kG(c=c, silent=True))
@@ -612,7 +622,7 @@ def cylinder_blade_stiffened_compression_lb_pd_from_static(height, r, stack,
         stack_blades, width_blades, plyt, laminaprop, npanels, pds_skin,
         pds_blade, m=8, n=8,
         num_eigvalues=20, ku=1.e6, conn_method='null-space',
-        models=None):
+        models=None, side='internal'):
     r"""Linear buckling analysis with prescribed displacement
 
     See :func:`.create_cylinder_blade_stiffened` for most parameters.
@@ -680,6 +690,10 @@ def cylinder_blade_stiffened_compression_lb_pd_from_static(height, r, stack,
     models : dict, optional
         Model of the skin panels, key ``'skin'``, and of the blades, key
         ``'blade'``, see :func:`.create_cylinder_blade_stiffened`.
+    side : str, optional
+        ``'internal'``, the default, for blades inside the cylinder, or
+        ``'external'`` for blades outside, see
+        :func:`.create_cylinder_blade_stiffened`.
 
     Returns
     -------
@@ -694,7 +708,7 @@ def cylinder_blade_stiffened_compression_lb_pd_from_static(height, r, stack,
     ------
     ValueError
         When the length of ``pds_skin`` or of ``pds_blade`` is not
-        ``npanels``, or when ``models`` is not accepted by
+        ``npanels``, or when ``models`` or ``side`` is not accepted by
         :func:`.create_cylinder_blade_stiffened`.
 
     Notes
@@ -729,13 +743,13 @@ def cylinder_blade_stiffened_compression_lb_pd_from_static(height, r, stack,
     md, conns, info = create_cylinder_blade_stiffened(height=height, r=r,
             stack=stack, stack_blades=stack_blades, width_blades=width_blades,
             plyt=plyt, laminaprop=laminaprop, npanels=npanels, m=m, n=n,
-            conn_method=conn_method, models=models)
+            conn_method=conn_method, models=models, side=side)
     if len(pds_skin) != npanels:
         raise ValueError('The length of "pds_skin" must be the same as "npanels"')
     if len(pds_blade) != npanels:
         raise ValueError('The length of "pds_blade" must be the same as "npanels"')
-    #NOTE the prescribed displacements imposed exactly, the connections
-    #     stored in the assembly, used by linear_static and linear_buckling
+    #NOTE an assembly of the same panels and connections with the
+    #     prescribed displacements imposed exactly
     md = MultiDomain(md.panels, conns, conn_method=conn_method,
                      pd_method='null-space')
     i_skin = -1

@@ -46,8 +46,7 @@ def create_cylinder(height, r, stack, plyt, laminaprop,
     all the other ones. Consecutive panels are connected with ``'SSycte'``,
     the edge `y = b` of one to the edge `y = 0` of the next, and the last
     panel is connected to the first one to close the cylinder. The
-    connections are returned and not stored in the assembly, which is
-    created with ``conn=None``: pass them to :meth:`.MultiDomain.calc_kC`.
+    connections are stored in the assembly, ``md.conn``, and also returned.
 
     Parameters
     ----------
@@ -75,8 +74,8 @@ def create_cylinder(height, r, stack, plyt, laminaprop,
     Returns
     -------
     md, conns : tuple
-        A tuple containing the multidomain assembly and the default connectivity
-        list of dictionaries.
+        The multidomain assembly and the list of connection dictionaries,
+        the list stored in the assembly, ``md.conn``.
 
     Raises
     ------
@@ -105,9 +104,9 @@ def create_cylinder(height, r, stack, plyt, laminaprop,
     ...     plyt=0.125e-3, laminaprop=laminaprop, npanels=4, m=8, n=8)
     >>> print(len(md.panels), md.get_size())
     4 768
-    >>> print([c['func'] for c in conns])
-    ['SSycte', 'SSycte', 'SSycte', 'SSycte']
-    >>> kC = md.calc_kC(conns, silent=True)
+    >>> print([c['func'] for c in conns], md.conn is conns)
+    ['SSycte', 'SSycte', 'SSycte', 'SSycte'] True
+    >>> kC = md.calc_kC(silent=True)
     >>> print(kC.shape)
     (768, 768)
 
@@ -139,7 +138,7 @@ def create_cylinder(height, r, stack, plyt, laminaprop,
             p01 = skin_loop[i+1]
             p02 = skin_loop[i]
             conns.append(dict(p1=p01, p2=p02, func='SSycte', ycte1=0, ycte2=p02.b))
-    md = MultiDomain(skin, conn_method=conn_method)
+    md = MultiDomain(skin, conns, conn_method=conn_method)
 
     return md, conns
 
