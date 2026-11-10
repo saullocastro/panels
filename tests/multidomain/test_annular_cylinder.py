@@ -137,14 +137,14 @@ E, NU, H, RHO = 70e9, 1/3, 1e-3, 2700.
 R = 1.
 D = E*H**3/(12*(1 - NU**2))
 BETA = 0.4
-#: roots of the frequency equation of Leissa (1969), Eqs. (1.11)-(1.13) and
-#: (1.17), beta = 0.4, nu = 1/3, n = 0, 1, 2, clamped outside, free inside
+#: roots of the frequency equation of the annulus, see :func:`_det`, beta =
+#: 0.4, nu = 1/3, n = 0, 1, 2, clamped outside, free inside
 EXACT = (13.5004, 19.3892, 31.3384)
 #: roots of the same frequency equation, beta = 0.4, nu = 1/3, n = 0, 1, 2,
 #: clamped inside, free outside
 EXACT_INNER = (9.07188, 9.12934, 10.3655)
-#: Leissa (1969), Table 2.31, after Southwell, clamped inside, free
-#: outside, nu = 0.3: n, lambda^2 and the ratio b/a at which it occurs
+#: values of Southwell, clamped inside, free outside, nu = 0.3, see the
+#: module docstring: n, lambda^2 and the ratio b/a at which it occurs
 SOUTHWELL = ((0, 6.25, 0.276), (0, 25.0, 0.642), (1, 9.00, 0.397),
              (1, 21.2, 0.603), (1, 25.0, 0.634), (2, 9.00, 0.349),
              (2, 16.0, 0.522), (3, 25.0, 0.59))

@@ -148,8 +148,10 @@ def _has_prefix(p, prefix):
 
 def face_coordinate(p, face):
     r"""
-    Coordinate `z` of a face of the base, measured from its reference
-    surface
+    Coordinate `z` of a face of the base
+
+    The coordinate is measured from the reference surface of ``p``, along
+    its axis `z`, with its offset and its ply thicknesses.
 
     Parameters
     ----------
@@ -186,6 +188,9 @@ def kinematics_of(connecti):
     r"""
     Kinematics of the face of the base of a connection ``'BFxcte'``
 
+    The value of the key ``'kinematics'`` of the connection dictionary,
+    checked, with its default.
+
     Parameters
     ----------
     connecti : dict
@@ -216,8 +221,10 @@ def kinematics_of(connecti):
 
 def face_rinv(p, kinematics='sanders'):
     r"""
-    `1/r` of the term `z v/r` of the displacement `v(z)` at a face of the
-    base
+    Factor `1/r` of the term `z v/r` of `v(z)` at a face of the base
+
+    The Sanders-Koiter kinematics of a ``'cylshell_*'`` base, whatever its
+    model, by default, or the kinematics of the model of the base.
 
     Parameters
     ----------
@@ -408,8 +415,10 @@ def _rotation_x_at(p, z):
 
 def bfxcte_face_components(p1, p2, z, kt=1., kr=1., kinematics='sanders'):
     r"""
-    Quantities of the connection ``'BFxcte'`` at the coordinate `z` of the
-    base
+    Quantities of the connection ``'BFxcte'`` at a coordinate `z` of the base
+
+    The displacements and the rotation of the base at `z` and those of the
+    flange at its reference surface, connected with ``kt`` and ``kr``.
 
     Parameters
     ----------
@@ -456,8 +465,11 @@ def bfxcte_face_components(p1, p2, z, kt=1., kr=1., kinematics='sanders'):
 def fkCBFxcte_face(kt, kr, p1, p2, xcte1, xcte2, z, size,
                    kinematics='sanders'):
     r"""
-    Penalty stiffness matrix of the connection ``'BFxcte'`` at a face of
-    the base
+    Penalty stiffness matrix of the connection ``'BFxcte'`` at a face
+
+    The edge ``xcte2`` of the flange ``p2`` is connected to the line
+    ``xcte1`` at the coordinate `z_f` of the base ``p1``, with the
+    quantities of :func:`.bfxcte_face_components`.
 
     Parameters
     ----------
