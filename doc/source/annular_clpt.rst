@@ -346,3 +346,72 @@ rotation about the circumferential axis tied by the connection is then
 number of degrees of freedom per term: an ``'annular_fsdt_*'`` sector on a
 cylinder of the classical theory, or the converse, raises a
 ``NotImplementedError``.
+
+.. _annular_tsdt:
+
+Third-order shear deformation theory
+------------------------------------
+
+The models ``'annular_tsdt_donnell'`` and ``'annular_tsdt_gl'`` are the
+annular sectors above with the third-order shear deformation theory (TSDT)
+of Reddy [reddy1984HigherOrder]_, the polar counterparts of
+``'plate_tsdt_donnell'`` and ``'plate_tsdt_gl'``, with the five degrees of
+freedom `u, v, w, \phi_x, \phi_y` and the geometry, the coordinates and the
+local basis of the classical models. The displacement field is that of
+the flat plate, :ref:`tsdt_offset`, with the derivative of `w` along the
+arc, `s w_{,y}`, in place of `w_{,y}`:
+
+.. math::
+
+    u(z) = u + z \phi_x - c_1 \left[(z - d)^3 + d^3\right]
+    \left(\phi_x + w_{,x}\right) \qquad
+    v(z) = v + z \phi_y - c_1 \left[(z - d)^3 + d^3\right]
+    \left(\phi_y + s w_{,y}\right)
+
+with `w(z) = w`, `c_1 = 4/(3 h^2)` and the offset `d`, such that the
+transverse shear strains
+
+.. math::
+
+    \gamma_{xz} = \left(\phi_x + w_{,x}\right) \left(1 - 3 c_1 (z -
+    d)^2\right) \qquad
+    \gamma_{yz} = \left(\phi_y + s w_{,y}\right) \left(1 - 3 c_1 (z -
+    d)^2\right)
+
+vanish at both faces of the laminate. The reference plane being flat, the
+metric does not depend on `z`, and the in-plane strains at `z` are the
+linear membrane strains in polar coordinates,
+
+.. math::
+
+    \mathcal{L}(f, g) = \left\{ f_{,x},\ s g_{,y} - \frac{f}{\rho},\ s
+    f_{,y} + g_{,x} + \frac{g}{\rho} \right\}^\top
+
+of the in-plane displacements `u(z)`, `v(z)`, plus the non-linear membrane
+terms at the reference plane:
+
+.. math::
+
+    \boldsymbol{\varepsilon}(z) = \boldsymbol{\varepsilon}^{(0)} + z
+    \mathcal{L}(\phi_x, \phi_y) - c_1 \left[(z - d)^3 + d^3\right]
+    \mathcal{L}\left(\phi_x + w_{,x},\ \phi_y + s w_{,y}\right)
+
+with `\boldsymbol{\varepsilon}^{(0)}` the membrane strains of
+``'annular_clpt_donnell'`` for ``'annular_tsdt_donnell'`` and of
+``'annular_clpt_gl'`` for ``'annular_tsdt_gl'``. Since `\partial
+s/\partial x = s/\rho`, the operator applied to `s w_{,y}` gives the terms
+`s w_{,xy} + s w_{,y}/\rho` and `s^2 w_{,yy}`. With `\phi_x = -w_{,x}` and
+`\phi_y = -s w_{,y}` the transverse shear strains vanish, the third-order
+terms too, and the changes of curvature `\mathcal{L}(\phi_x, \phi_y)` are
+those of the classical models above; for `r \to \infty` the strains are
+those of ``'plate_tsdt_donnell'`` and ``'plate_tsdt_gl'``.
+
+The thirteen generalized strains are in the order of the constitutive
+matrix of the TSDT, ``Shell.ABD``, which contains the offset as for the
+flat plate, see :ref:`tsdt_offset_matrices`; the mass matrix integrates
+the kinetic energy of the displacement field above through the thickness,
+with the moments of the density about the mid-surface of the laminate. As
+for the classical models, all the matrices are integrated with the
+Gauss-Legendre rule. The rotations `\phi_x` and `\phi_y` are those of the
+normal at the mid-surface of the laminate; the sectors of a ring are
+joined with ``'SSycte'`` along their radial edges.
