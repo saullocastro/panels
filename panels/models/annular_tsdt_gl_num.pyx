@@ -1998,6 +1998,13 @@ def fkAx_num(*args, **kwargs):
     The function exists for the interface of the models with the piston
     theory, see :meth:`.Shell.calc_kA`.
 
+    Parameters
+    ----------
+    *args : object, optional
+        Positional arguments, ignored.
+    **kwargs : object, optional
+        Keyword arguments, ignored.
+
     Raises
     ------
     NotImplementedError
@@ -2012,6 +2019,13 @@ def fkAy_num(*args, **kwargs):
 
     The function exists for the interface of the models with the piston
     theory, see :meth:`.Shell.calc_kA`.
+
+    Parameters
+    ----------
+    *args : object, optional
+        Positional arguments, ignored.
+    **kwargs : object, optional
+        Keyword arguments, ignored.
 
     Raises
     ------
