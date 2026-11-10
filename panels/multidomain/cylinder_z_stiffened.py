@@ -51,6 +51,39 @@ def _set_end(p, end, flags):
         setattr(p, '%s%s' % (end, k), v)
 
 
+# the plates of the Z profile, in the order of a sequence of stacks
+_PROFILE = ('flange', 'web', 'free_flange')
+
+
+def _flipped(stack):
+    r"""The stack seen from the other face: the plies in reverse order,
+    the angles changed in sign"""
+    return [0. - angle for angle in reversed(stack)]
+
+
+def _stacks_z(stack_z, side, flange_side):
+    r"""The stack of each plate of the profile, in its own axes, from
+    ``stack_z``, see :func:`.create_cylinder_z_stiffened`"""
+    items = list(stack_z)
+    if items and all(np.ndim(s) == 0 for s in items):
+        # the bent sheet: the z axis of the attached flange is the normal of
+        # the sheet, that of the free flange is opposite to it, that of the
+        # web along it only for internal stringers with flange_side=-1 and
+        # external stringers with flange_side=1
+        web_flipped = (flange_side == -1) != (side == 'internal')
+        sheet = [float(angle) for angle in items]
+        return dict(flange=sheet,
+                    web=_flipped(sheet) if web_flipped else list(sheet),
+                    free_flange=_flipped(sheet))
+    if (len(items) == len(_PROFILE)
+            and all(np.ndim(s) == 1 and len(s) > 0 for s in items)):
+        return {k: [float(angle) for angle in s]
+                for k, s in zip(_PROFILE, items)}
+    raise ValueError('stack_z must be one stack of angles or a sequence of '
+                     'three stacks (attached flange, web, free flange), '
+                     'got %r' % (stack_z, ))
+
+
 def create_cylinder_z_stiffened(height, r, stack, plyt, laminaprop,
         nstiff, stack_z, plyt_z, width_flange, width_web, width_free_flange,
         side='internal', flange_side=-1, bc='CC', m=12, n=6, n_flange=4,
@@ -101,7 +134,7 @@ def create_cylinder_z_stiffened(height, r, stack, plyt, laminaprop,
 
     The assembly contains the skin domains, ordered along `y`, followed by
     the webs and the free flanges. The connections are stored in the
-    assembly and also returned.
+    assembly, ``md.conn``, and also returned.
 
     Parameters
     ----------
@@ -120,12 +153,18 @@ def create_cylinder_z_stiffened(height, r, stack, plyt, laminaprop,
         is dimensionless.
     nstiff : int
         Number of stringers.
-    stack_z : array-like
-        Stacking sequence of the sheet of the stringers, the angle of each
-        ply in degrees, in the order of the `z` axis of each plate (for the
-        attached flange, the `z` axis of the skin), see the Notes.
+    stack_z : array-like, or sequence of three array-like
+        Laminate of the stringers, the angle of each ply in degrees. One
+        stack is the bent sheet: its plies in the order of the `z` axis of
+        the skin at the attached flange, followed around the bends to the
+        web and to the free flange, see the Notes. Three stacks give the
+        laminate of each plate, in the order attached flange, web, free
+        flange, each in the local axes of its plate (for the attached
+        flange, those of the skin); the stack of a plate left out with
+        ``attached_flange=False`` or ``free_flange=False`` is not used.
     plyt_z : float
-        Ply thickness of the sheet of the stringers, length.
+        Ply thickness of the laminate of the stringers, the same for every
+        ply of the three plates, length.
     width_flange : float
         Width `b_f` of the attached flange, from the middle surface of the
         web to its free edge, length.
@@ -173,14 +212,17 @@ def create_cylinder_z_stiffened(height, r, stack, plyt, laminaprop,
     Returns
     -------
     md, conns, info : tuple
-        The multidomain assembly, whose connections are stored in it, the
-        list of connection dictionaries and a dictionary with ``'skin'``,
+        The multidomain assembly, the list of connection dictionaries, the
+        list stored in the assembly, ``md.conn``, and a dictionary with
+        ``'skin'``,
         the list of the skin domains (bays and strips) ordered along `y`,
         ``'strips'``, ``'webs'`` and ``'free_flanges'``, the lists of these
         domains, one per stringer (``'free_flanges'`` empty with
         ``free_flange=False``), ``'pitch'``, the pitch `d`, and
         ``'models'``, the model of each group, ``models`` completed with the
-        defaults.
+        defaults, and ``'stacks_z'``, the stack of each plate in its local
+        axes, a dictionary with the keys ``'flange'``, ``'web'`` and
+        ``'free_flange'``.
 
     Raises
     ------
@@ -188,8 +230,9 @@ def create_cylinder_z_stiffened(height, r, stack, plyt, laminaprop,
         When ``models`` has a key other than ``'skin'`` and ``'stringer'``
         or a model not listed above for its key, when ``side``,
         ``flange_side`` or ``bc`` has another value than those listed
-        above, when ``nstiff < 1``, or when ``width_flange`` is not smaller
-        than the pitch.
+        above, when ``stack_z`` is neither one stack nor three non-empty
+        stacks, when ``nstiff < 1``, or when ``width_flange`` is not
+        smaller than the pitch.
 
     Notes
     -----
@@ -200,23 +243,41 @@ def create_cylinder_z_stiffened(height, r, stack, plyt, laminaprop,
     `y = 0` is connected and outside when its edge `y = H_w` is; the `y`
     axis of a free flange points along `-y` of the skin, so a free flange
     extends towards `+y` from its edge `y = b_l` and towards `-y` from its
-    edge `y = 0`.
+    edge `y = 0`. The `z` axis of the skin points outwards, that of a web
+    along `+y` of the skin and that of a free flange inwards.
+
+    A single ``stack_z`` is the sheet bent into the Z. Its normal `n` is
+    the `z` axis of the skin at the attached flange and turns with the sheet
+    around the bends, and its angles are measured from `x` towards the
+    transverse direction `t` of the sheet, `x, t, n` right-handed (`t` is the
+    `y` axis of the skin at the attached flange). `n` points along `+y` of
+    the skin in the web of an internal stringer with ``flange_side=-1`` and
+    of an external stringer with ``flange_side=1``, along `-y` in the web of
+    the other two orientations, and outwards in the free flange. Where the
+    `z` axis of a plate is opposite to `n`, its `y` axis is opposite to `t`,
+    and the plate has the plies of the sheet in reverse order with the angles
+    changed in sign: its ply `k` of `N` is the ply `N + 1 - k` of the sheet,
+    at the angle `-\theta_{N + 1 - k}`. Its stiffness matrices are those of
+    the sheet with the signs of `A_{16}, A_{26}`, of `B_{11}, B_{12}, B_{22},
+    B_{66}` and of `D_{16}, D_{26}` changed. This holds for the free flange,
+    and for the web in the two orientations where `n` points along `-y`. A
+    symmetric sheet without angle plies, e.g. a cross-ply or an isotropic
+    sheet, has the same laminate in the three plates. Three stacks give any
+    laminate to each plate.
 
     The attached flange is bonded continuously to the skin (rivets or a
     bond line are not represented): the laminate of the strip is the
-    laminate of the skin with the plies of ``stack_z`` on the side of the
-    stringer, of total thickness `h + t_z`, `h` and `t_z` the thicknesses of
-    the skin and of the sheet, with the offset `-t_z/2` (internal) or
-    `+t_z/2` (external), so that the reference surface of the strip remains
-    the middle surface of the skin and the strip and the bays share the
-    displacements of that surface along their common edges. The plies of
-    ``stack_z`` keep their order along the `z` axis of each domain; the
-    stacking sequence of a bent sheet that is not symmetric therefore is
-    not that of the bent sheet in every plate. The web starts at the
-    middle surface of the skin, `h/2 + t_z/2` before the middle surface of
-    the attached flange, where the middle line of the sheet turns into the
-    web: over this length it overlaps the skin and the flange. The corners
-    are square: the length of the bends is not represented.
+    laminate of the skin with the plies of the attached flange on the side
+    of the stringer, of total thickness `h + t_z`, `h` and `t_z` the
+    thicknesses of the skin and of the attached flange, with the offset
+    `-t_z/2` (internal) or `+t_z/2` (external), so that the reference
+    surface of the strip remains the middle surface of the skin and the
+    strip and the bays share the displacements of that surface along their
+    common edges. The web starts at the middle surface of the skin, `h/2 +
+    t_z/2` before the middle surface of the attached flange, where the
+    middle line of the sheet turns into the web: over this length it
+    overlaps the skin and the flange. The corners are square: the length of
+    the bends is not represented.
 
     A Z section has no plane of symmetry through the axis of the cylinder,
     so the whole circumference is modelled. The free flange needs at least
@@ -245,8 +306,20 @@ def create_cylinder_z_stiffened(height, r, stack, plyt, laminaprop,
     ...     width_free_flange=0.008, m=4, n=4)
     >>> print([len(info[k]) for k in ('skin', 'strips', 'webs', 'free_flanges')])
     [8, 4, 4, 4]
-    >>> print(sorted(set(c['func'] for c in conns)), len(conns))
-    ['BFycte', 'SSycte'] 16
+    >>> print(sorted(set(c['func'] for c in conns)), len(conns),
+    ...       md.conn is conns)
+    ['BFycte', 'SSycte'] 16 True
+
+    A laminated bent sheet of two plies, and the stack of each plate in its
+    local axes:
+
+    >>> laminaprop = (142.5e9, 8.7e9, 0.28, 5.1e9, 5.1e9, 5.1e9)
+    >>> md, conns, info = create_cylinder_z_stiffened(height=0.5, r=0.25,
+    ...     stack=[0, 90, 0], plyt=0.125e-3, laminaprop=laminaprop, nstiff=4,
+    ...     stack_z=[0, 45], plyt_z=0.125e-3, width_flange=0.01,
+    ...     width_web=0.015, width_free_flange=0.008, m=4, n=4)
+    >>> print(info['stacks_z'])
+    {'flange': [0.0, 45.0], 'web': [0.0, 45.0], 'free_flange': [-45.0, 0.0]}
 
     """
     models = _models(models)
@@ -262,9 +335,8 @@ def create_cylinder_z_stiffened(height, r, stack, plyt, laminaprop,
     if nstiff < 1:
         raise ValueError('At least one stringer is needed')
     stack = list(stack)
-    stack_z = list(stack_z)
-    h = len(stack)*plyt
-    tz = len(stack_z)*plyt_z
+    stacks_z = _stacks_z(stack_z, side, flange_side)
+    tz = len(stacks_z['flange'])*plyt_z
     bf, Hw, bl = width_flange, width_web, width_free_flange
     pitch = 2*np.pi*r/nstiff
     bbay = pitch - bf
@@ -275,19 +347,20 @@ def create_cylinder_z_stiffened(height, r, stack, plyt, laminaprop,
     def domain(group, b, n_y, y0=0., curved=False, strip=False):
         if strip and attached_flange:
             # the plies of the flange on the side of the stringer
+            st_f = stacks_z['flange']
             if side == 'internal':
-                st = stack_z + stack
-                plyts = [plyt_z]*len(stack_z) + [plyt]*len(stack)
+                st = st_f + stack
+                plyts = [plyt_z]*len(st_f) + [plyt]*len(stack)
                 offset = -tz/2
             else:
-                st = stack + stack_z
-                plyts = [plyt]*len(stack) + [plyt_z]*len(stack_z)
+                st = stack + st_f
+                plyts = [plyt]*len(stack) + [plyt_z]*len(st_f)
                 offset = tz/2
             lam = dict(stack=st, plyts=plyts, plyt=plyt, offset=offset)
         elif curved:
             lam = dict(stack=stack, plyt=plyt)
         else:
-            lam = dict(stack=stack_z, plyt=plyt_z)
+            lam = dict(stack=stacks_z[group], plyt=plyt_z)
         kw = dict(r=r) if curved else {}
         model = models['skin'] if curved else models['stringer']
         p = Shell(group=group, x0=0., y0=y0, a=height, b=b, m=m, n=n_y,
@@ -330,5 +403,6 @@ def create_cylinder_z_stiffened(height, r, stack, plyt, laminaprop,
     md = MultiDomain(skin + webs + free_flanges, conns,
                      conn_method=conn_method, pd_method=pd_method)
     info = dict(skin=skin, strips=strips, webs=webs,
-                free_flanges=free_flanges, pitch=pitch, models=models)
+                free_flanges=free_flanges, pitch=pitch, models=models,
+                stacks_z=stacks_z)
     return md, conns, info
