@@ -53,6 +53,10 @@ model                      closed form                                          
                            integration of the whole domain
 ``annular_clpt_tl``        :mod:`panels.models.annular_clpt_tl`, numerical              :mod:`panels.models.annular_clpt_tl_num`
                            integration of the whole domain
+``annular_tsdt_donnell``   :mod:`panels.models.annular_tsdt_donnell`, numerical         :mod:`panels.models.annular_tsdt_donnell_num`
+                           integration of the whole domain
+``annular_tsdt_gl``        :mod:`panels.models.annular_tsdt_gl`, numerical              :mod:`panels.models.annular_tsdt_gl_num`
+                           integration of the whole domain
 ``plate_fsdt_donnell``     :mod:`panels.models.plate_fsdt_donnell`                      :mod:`panels.models.plate_fsdt_donnell_num`
 ``plate_tsdt_donnell``     :mod:`panels.models.plate_tsdt_donnell`                      :mod:`panels.models.plate_tsdt_donnell_num`
 ``cylshell_clpt_donnell``  :mod:`panels.models.cylshell_clpt_donnell`                   :mod:`panels.models.cylshell_clpt_donnell_num`

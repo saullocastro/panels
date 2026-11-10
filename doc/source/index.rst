@@ -71,6 +71,10 @@ the non-linear equations, see :mod:`panels.models`:
   these with the curvatures of the deformed normal; the web of a ring frame,
   connected to a cylinder with ``'BFxcte'``, is an application, see
   :ref:`annular_clpt`
+* ``'annular_tsdt_donnell'``, ``'annular_tsdt_gl'``: annular-sector
+  plates, third-order shear deformation theory in polar coordinates with
+  the von Kármán strains and with the Green-Lagrange membrane strains, see
+  :ref:`annular_tsdt`
 
 
 How the models, the boundary conditions, the loads and the assemblies fit

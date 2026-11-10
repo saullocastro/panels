@@ -154,6 +154,36 @@
   `hamada1986_annular_torsion` (experiments of Hamada and Harima 1986) and
   `majumdar1971_annular_compression` (experiments of Majumdar 1971).
 
+### New models `annular_tsdt_donnell`, `annular_tsdt_gl`: annular-sector plates with the TSDT
+
+- The annular sectors of `annular_clpt_donnell` and `annular_clpt_gl` with
+  Reddy's third-order shear deformation theory, 5 DOFs `u, v, w, phix,
+  phiy`, the polar counterparts of `plate_tsdt_donnell` and
+  `plate_tsdt_gl`: the displacement field of the flat plate, with the cubic
+  term about the mid-surface of the laminate, and `s w,y` (`s = r/rho`, the
+  derivative along the arc) in place of `w,y`; the in-plane strains at `z`
+  are the linear membrane strains in polar coordinates of `u(z), v(z)`,
+  plus the von Kármán (`donnell`) or Green-Lagrange (`gl`) membrane terms.
+  The laminate offset `Shell.offset` enters the stiffness (`Shell.ABD` of
+  the TSDT) and the mass (moments of the density about the mid-surface).
+- Generated from `theory/shells/annular_tsdt_donnell/` and
+  `theory/shells/annular_tsdt_gl/` (derivations with symbolic checks: the
+  three-dimensional TSDT field in the metric of the plane, the CLPT limit
+  `phix = -w,x`, `phiy = -s w,y`, rigid motions, small and, for the `gl`
+  membrane strains, finite, the flat-plate limit, the exact tangent and the
+  mass integrand; the same self-contained `write_pyx.py` in both folders):
+  `panels/models/annular_tsdt_*_num.pyx` (`fkC_num`, `fkG_num`, `fkM_num`,
+  `calc_fint`, `calc_kTv`, `fstrain`; `fuvw` and `fg` of `fsdt_tsdt_field`)
+  and `panels/models/annular_tsdt_*.pyx` (`fk0`, `fkG0`, `fkM`), all
+  integrated with the Gauss-Legendre rule. The piston-theory kernels raise
+  `NotImplementedError`.
+- Tests of thin annuli against Leissa (1969, exact roots, clamped outside
+  and free inside), Yamaki (1958, Table 1, compression) and Irie, Yamada and
+  Tsujino (1983, Table 1, torsion), of a thick `[0/90]` sector of large
+  radius against the TSDT frequencies of Reddy (1984), of the offset against
+  the flat plates, of `gl` against `donnell` in the linear limit, and of the
+  tangent stiffness. New section of the page "Annular-sector plates".
+
 ### New key `'face'` of the connection `'BFxcte'`: flanges and ring-frame webs on a face of the base
 
 - `dict(p1=base, p2=flange, func='BFxcte', xcte1=..., xcte2=..., face=...)`
