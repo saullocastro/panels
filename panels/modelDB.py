@@ -195,6 +195,58 @@ db = {
                     # cylshell_clpt_tl: more integration points
                     'integrand_degree': (6, 0),
                     },
+    'annular_fsdt_donnell': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    #NOTE the strains in polar coordinates of the annular
+                    #     sector need their own fields
+                    'field': annular_fsdt_donnell_num,
+                    #NOTE the matrices of the whole domain are integrated
+                    #     numerically, the strains having terms in 1/rho
+                    'matrices': annular_fsdt_donnell,
+                    'matrices_num': annular_fsdt_donnell_num,
+                    'dofs': 5,
+                    'e_num': 8,
+                    # outer radius, the kernels divide by r - x
+                    'requires_r': True,
+                    },
+    'annular_fsdt_gl': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    #NOTE the strains in polar coordinates of the annular
+                    #     sector need their own fields
+                    'field': annular_fsdt_gl_num,
+                    #NOTE the matrices of the whole domain are integrated
+                    #     numerically, the strains having terms in 1/rho
+                    'matrices': annular_fsdt_gl,
+                    'matrices_num': annular_fsdt_gl_num,
+                    'dofs': 5,
+                    'e_num': 8,
+                    # outer radius, the kernels divide by r - x
+                    'requires_r': True,
+                    },
+    'annular_fsdt_tl': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    #NOTE the strains in polar coordinates of the annular
+                    #     sector need their own fields
+                    'field': annular_fsdt_tl_num,
+                    #NOTE the matrices of the whole domain are integrated
+                    #     numerically, the strains having terms in 1/rho
+                    'matrices': annular_fsdt_tl,
+                    'matrices_num': annular_fsdt_tl_num,
+                    'dofs': 5,
+                    'e_num': 8,
+                    # outer radius, the kernels divide by r - x
+                    'requires_r': True,
+                    # bending and transverse shear strains cubic in the
+                    # generalized derivatives, as those of plate_fsdt_tl:
+                    # more integration points
+                    'integrand_degree': (6, 0),
+                    },
     'cylshell_fsdt_donnell': {
                     'linear static': True,
                     'linear buckling': True,
