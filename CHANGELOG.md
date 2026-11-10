@@ -2,6 +2,34 @@
 
 ## Unreleased
 
+### Changed: `create_wingbox` connects the domains with `conn_method='null-space'` by default
+
+- The default of `conn_method` of `create_wingbox`, and so of
+  `wingbox_tip_force_lb`, is `'null-space'`, the default of `MultiDomain`
+  and of every other builder and analysis of `panels.multidomain`; it was
+  `'penalty'`. The first buckling tip force of the default wing-box (High-AR-t5,
+  default terms) is 190.41 N, 172.78 N with `conn_method='penalty'`
+  (docstring example of `wingbox_tip_force_lb`).
+- Tests: `test_wingbox_tip_force_lb_default` checks the new default and its
+  load, 190.405 N; `test_wingbox_models` passes `conn_method='penalty'`
+  (stored loads unchanged). The notebook `ex_multidomain_wingbox` passes
+  `conn_method='penalty'` where it used the default (results unchanged).
+
+### Changed: the cylinder builders store their connections in the assembly
+
+- `create_cylinder` and `create_cylinder_blade_stiffened` pass their
+  connections to `MultiDomain`, as `create_cylinder_z_stiffened` does: the
+  returned list of connections is `md.conn`, used by `calc_kC`, `get_Z`,
+  `linear_static` and the other methods when no connections are given
+  (before, `md.conn` was `None`). Returned values unchanged. Tests:
+  `test_create_cylinder` (new, `tests/multidomain/test_cylinder.py`),
+  `test_return_info`.
+- New argument `side='internal'|'external'` (default `'internal'`) of
+  `cylinder_blade_stiffened_compression_lb_Nxx_cte`,
+  `cylinder_blade_stiffened_compression_lb_Nxx_from_static` and
+  `cylinder_blade_stiffened_compression_lb_pd_from_static`, passed to
+  `create_cylinder_blade_stiffened`. Test `test_analyses_side`.
+
 ### Changed: in-plane loads of `tstiff2d_1stiff_flutter`
 
 - New arguments `Nyy_skin`, `Nyy_base`, `Nyy_flange`, `Nxy_skin`,
@@ -523,18 +551,27 @@
   flange as `plate_clpt_gl` strips connected with `'BFycte'`), skin domains
   `cylshell_clpt_sanders`; any number of stringers, `side='internal'` or
   `'external'`, `flange_side=-1` or `1` (orientation of the Z), clamped or
-  simply supported ends (`bc`), laminates of the skin and of the sheet,
-  `models`, and the variants without the attached or the free flange. It
-  returns `(md, conns, info)` as `create_cylinder_blade_stiffened`, with
-  the connections also stored in the assembly. Page
-  `multidomain_cylinder.rst`.
+  simply supported ends (`bc`), the laminate of the skin, `models`, and the
+  variants without the attached or the free flange. `stack_z` is one stack,
+  the bent sheet (each plate takes it in the order of its own `z` axis:
+  plies reversed and angles changed in sign in the free flange, and in the
+  web of an internal Z with `flange_side=1` or an external Z with
+  `flange_side=-1`), or three stacks, attached flange, web, free flange,
+  each in the axes of its plate; `info['stacks_z']` gives the stack of each
+  plate. It returns `(md, conns, info)` as
+  `create_cylinder_blade_stiffened`, the connections stored in the
+  assembly, `md.conn`. Page `multidomain_cylinder.rst`.
 - New tests in `tests/multidomain/test_cylinder_z_stiffened_peterson1959.py`,
   about 1 min: the assembly (`test_create_cylinder_z_stiffened`) and
   cylinders 1 and 2 of NASA Memo 2-12-59L (120 internal stringers, `R` =
   23.74 in, clamped ends, membrane pre-buckling state), which buckle at
   2127.6 and 3194.0 lb/in with 12 and 13 circumferential waves; the
   measured loads, 270 and 413 kips, are 85.1 and 86.7 % of these (checked
-  between 70 and 100 %). The notebook
+  between 70 and 100 %). `test_stack_z_bent_sheet` and
+  `test_stack_z_mirror` check the laminates of the plates on a small
+  laminated cylinder, against the stiffness matrices of the sheet seen
+  from either face and by the mirror symmetry of the buckling loads. The
+  notebook
   `peterson1959_blade_cylinder_buckling.ipynb` uses the function through
   its helper module `notebooks/z_stringer_cylinder.py`.
 
