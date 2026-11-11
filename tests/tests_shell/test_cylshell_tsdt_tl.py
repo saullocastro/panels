@@ -177,8 +177,11 @@ PMAX = 3000.
 def test_hinged_roof_snap_through():
     r"""Hinged roof, `h = 12.7`, quarter with 8 x 8 terms: the limit load
     and the following minimum of the reaction against [3], Table 9a, 2226.3
-    at `-W_C = 11.293` and 518.7 at 19.852 (S4R elements). The stored values
-    are those of the converged increments, without refinement."""
+    at `-W_C = 11.293` and 518.7 at 19.852 (S4R elements): 2218.14 at
+    10.902 (-0.37 %, -3.5 %) and 507.21 at 19.455 (-2.2 %, -2.0 %);
+    ``cylshell_fsdt_gl`` with 8 x 8 terms gives 2217.70 at 10.907 and
+    493.22 at 19.417 (``test_fsdt_tsdt_gl.py``). The stored values are those
+    of the converged increments, without refinement."""
     P, wc = roof_path(MODEL, 12.7, 8)
     (P1, w1), (P2, w2) = limit_and_minimum(P, wc)
     assert -wc[-1] >= 30.
@@ -186,8 +189,8 @@ def test_hinged_roof_snap_through():
     assert np.isclose(w1, 11.293, rtol=0.05)
     assert np.isclose(P2, 518.7, rtol=0.06)
     assert np.isclose(w2, 19.852, rtol=0.03)
-    #TODO stored values of the hpc12 run
-    print('ROOF', P1, w1, P2, w2)
+    assert np.allclose([P1, w1, P2, w2], [2218.145, 10.90227, 507.2120,
+                                          19.45469], rtol=1e-5)
 
 
 def test_tangent_consistency():
