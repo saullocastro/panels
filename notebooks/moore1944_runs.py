@@ -5,6 +5,7 @@ Usage, from the folder ``notebooks``::
 
     python moore1944_runs.py 1 8     # stage, number of processes
     python moore1944_runs.py 1 8 "u free"   # only the cases of one name
+    python moore1944_runs.py 2 8 sensitivities   # all but the meshes
 
 Writes ``results/moore1944_stage<stage>.json`` (or, for the cases of one
 name, ``results/moore1944_stage<stage>_<name>.json``, whose entries replace
@@ -36,7 +37,7 @@ MESHES_2 = {'A': dict(n_per_in=1.5, m_per_in=0.8, n_strip=4, n_web=6,
                       n_lip=4),
             'C': dict(n_per_in=2.5, m_per_in=1.2, n_strip=5, n_web=8,
                       n_lip=5)}
-#: sensitivities, on mesh B
+#: sensitivities, on mesh B (both stages)
 SENS = {'clamped': dict(ends='clamped'),
         'u free': dict(u_end=1),
         'rigid rings': dict(rings='rigid'),
@@ -63,7 +64,7 @@ def cases(stage):
                 out.append(('mesh ' + mesh, s, kw, mesh == 'C'))
         for name, kw in SENS_2.items():
             for s in STIFF_SPECS:
-                out.append((name, s, dict(MESHES_2['A'], **kw), False))
+                out.append((name, s, dict(MESHES_2['B'], **kw), False))
     return out
 
 
@@ -99,7 +100,10 @@ if __name__ == '__main__':
     # the largest cases first
     todo = cases(stage)[::-1]
     if len(sys.argv) > 3:
-        todo = [c for c in todo if c[0] == sys.argv[3]]
+        if sys.argv[3] == 'sensitivities':
+            todo = [c for c in todo if not c[0].startswith('mesh')]
+        else:
+            todo = [c for c in todo if c[0] == sys.argv[3]]
         fname = fname[:-5] + '_%s.json' % sys.argv[3].replace(' ', '_')
     done = []
     with ProcessPoolExecutor(nproc) as ex:

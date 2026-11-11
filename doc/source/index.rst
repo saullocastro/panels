@@ -173,6 +173,8 @@ User guide
     notebooks/singer1971_blade_cylinder_buckling.nblink
     notebooks/abramovich2009_blade_panels.nblink
     notebooks/lanzi2003_torsion_cylinder.nblink
+    notebooks/moore1944_ring_cylinders.nblink
+    notebooks/moore1944_stiffened_cylinders.nblink
     notebooks/hamada1986_annular_torsion.nblink
     notebooks/majumdar1971_annular_compression.nblink
     notebooks/dcb_alfano2001.nblink
