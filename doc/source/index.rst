@@ -83,6 +83,10 @@ the non-linear equations, see :mod:`panels.models`:
   plates, third-order shear deformation theory in polar coordinates with
   the von Kármán strains and with the Green-Lagrange membrane strains, see
   :ref:`annular_tsdt`
+* ``'annular_tsdt_tl'``: annular-sector plates, total-Lagrangian
+  third-order shear deformation theory in polar coordinates, with the
+  second-order director and the normal of the deformed plane, see
+  :ref:`annular_tsdt_tl`
 
 
 How the models, the boundary conditions, the loads and the assemblies fit

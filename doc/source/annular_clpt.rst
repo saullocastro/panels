@@ -415,3 +415,74 @@ for the classical models, all the matrices are integrated with the
 Gauss-Legendre rule. The rotations `\phi_x` and `\phi_y` are those of the
 normal at the mid-surface of the laminate; the sectors of a ring are
 joined with ``'SSycte'`` along their radial edges.
+
+
+.. _annular_tsdt_tl:
+
+Total-Lagrangian third-order theory
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The model ``'annular_tsdt_tl'`` writes the field of the TSDT for finite
+rotations, as ``'annular_fsdt_tl'`` does for the first-order theory: the
+deformed position of a point is
+
+.. math::
+
+    \boldsymbol{r}(z) = \boldsymbol{X} + z \boldsymbol{d} + p(z)
+    \boldsymbol{q}, \qquad p(z) = (z - d)^3 + d^3, \qquad
+    \boldsymbol{q} = -c_1 \left(\boldsymbol{d} - \boldsymbol{N}\right)
+
+with `\boldsymbol{X}` the position of the deformed reference plane, the
+second-order director `\boldsymbol{d}` of ``'annular_fsdt_tl'`` and the
+normal of the deformed reference plane, not normalized, `\boldsymbol{N} =
+\boldsymbol{g}_1 \times \boldsymbol{g}_2`. The linear part of
+`\boldsymbol{d} - \boldsymbol{N}` is the vector `(\phi_x + w_{,x}, \phi_y
++ s w_{,y})` of the third-order term above. In the local basis, which
+turns with `\theta`, a vector `\boldsymbol{V}` has `\boldsymbol{V}_{,x} =
+\{V_{1,x}, V_{2,x}, V_{3,x}\}^\top` and `s \boldsymbol{V}_{,y} = \{s
+V_{1,y} + V_2/\rho,\ s V_{2,y} - V_1/\rho,\ s V_{3,y}\}^\top`. The strains
+are the coefficients of `1`, `z` and `p(z)` of the Green-Lagrange strains
+of `\boldsymbol{r}(z)`, and of `(z - d)^2` in the transverse shear strains:
+the membrane strains, `\boldsymbol{\kappa}` and `\boldsymbol{\gamma}` of
+``'annular_fsdt_tl'``, and
+
+.. math::
+
+    \kappa^{(3)}_{xx} = \boldsymbol{g}_1 \cdot \boldsymbol{q}_{,x} \qquad
+    \kappa^{(3)}_{yy} = \boldsymbol{g}_2 \cdot s \boldsymbol{q}_{,y} \qquad
+    \kappa^{(3)}_{xy} = \boldsymbol{g}_1 \cdot s \boldsymbol{q}_{,y} +
+    \boldsymbol{g}_2 \cdot \boldsymbol{q}_{,x}
+
+    \gamma^{(2)}_{yz} = 3 \boldsymbol{g}_2 \cdot \boldsymbol{q} = -3 c_1
+    \gamma_{yz} \qquad
+    \gamma^{(2)}_{xz} = 3 \boldsymbol{g}_1 \cdot \boldsymbol{q} = -3 c_1
+    \gamma_{xz}
+
+the last two because `\boldsymbol{g}_\alpha \cdot \boldsymbol{N} = 0`.
+Since also `\boldsymbol{g}_\alpha \cdot \boldsymbol{N}_{,\beta} =
+-\boldsymbol{g}_{\alpha,\beta} \cdot \boldsymbol{N}`, the third-order
+strains are `-c_1` times the changes of curvature of the director plus the
+second fundamental form of the deformed plane, in place of `\phi_{\alpha,
+\beta}` and `w_{,\alpha\beta}` of the linear theory; they need the second
+derivatives of `u` and `v` as well. As in the linear TSDT, the terms in
+`z^2`, `z p` and `p^2` of the in-plane strains, the other powers of the
+transverse shear strains and the transverse normal strain are dropped.
+
+The transverse shear strains `\boldsymbol{\gamma} (1 - 4 (z - d)^2/h^2)`
+vanish at both faces for any deformation, Reddy's condition. Writing the
+director part with the second-order director and keeping the third-order
+strains of the linear theory instead would not keep it: the face shear
+would be the difference between the shear of the director,
+`\boldsymbol{g}_\alpha \cdot \boldsymbol{d}`, and the linear one,
+`\phi_\alpha + w_{,\alpha}`, which cannot both vanish in large bending,
+and the transverse shear energy would stiffen the bending; for a thin flat
+strip, `L/h = 500`, with a tip rotation of 0.46 rad, that choice gives a
+tip deflection 25 % below the elastica. With the construction above the
+linear part of the strains is that of ``'annular_tsdt_donnell'``, the
+membrane strains are those of ``'annular_tsdt_gl'``, a finite rigid
+rotation by the angle `t` changes the strains by `O(t^4)` or less, through
+the length of the second-order director, and for `r \to \infty` the
+strains are those of ``'plate_tsdt_tl'``. The tangent stiffness contains
+all the stress resultants, `\boldsymbol{H}(\boldsymbol{\sigma},
+\boldsymbol{d})` being linear in the generalized derivatives; the mass
+matrix is that of the linear field above.

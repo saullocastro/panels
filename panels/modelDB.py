@@ -281,6 +281,26 @@ db = {
                     # outer radius, the kernels divide by r - x
                     'requires_r': True,
                     },
+    'annular_tsdt_tl': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    #NOTE the strains in polar coordinates of the annular
+                    #     sector need their own strain field; fuvw and fg are
+                    #     those of fsdt_tsdt_field
+                    'field': annular_tsdt_tl_num,
+                    #NOTE the matrices of the whole domain are integrated
+                    #     numerically, the strains having terms in 1/rho
+                    'matrices': annular_tsdt_tl,
+                    'matrices_num': annular_tsdt_tl_num,
+                    'dofs': 5,
+                    'e_num': 13,
+                    # outer radius, the kernels divide by r - x
+                    'requires_r': True,
+                    # strains cubic in the generalized derivatives, as those of
+                    # annular_fsdt_tl: more integration points
+                    'integrand_degree': (6, 0),
+                    },
     'cylshell_fsdt_donnell': {
                     'linear static': True,
                     'linear buckling': True,

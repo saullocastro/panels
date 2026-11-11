@@ -329,6 +329,21 @@ extensions = [
         include_dirs=include_dirs, extra_compile_args=compile_args,
               extra_link_args=link_args, define_macros=define_macros,
               language='c++'),
+    Extension('panels.models.annular_tsdt_tl',
+        sources=[
+            './panels/models/annular_tsdt_tl.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.annular_tsdt_tl_num',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/annular_tsdt_tl_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
     Extension('panels.models.plate_clpt_tl_num',
         sources=[
             './panels/core/src/bardell_functions.cpp',

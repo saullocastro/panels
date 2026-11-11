@@ -95,6 +95,11 @@ The available models, which are selected with ``Shell.model``, are:
   ``'annular_clpt_donnell'``, see
   :mod:`panels.models.annular_tsdt_donnell_num`.
 
+- ``'annular_tsdt_tl'``: as ``'annular_tsdt_gl'``, total-Lagrangian with the
+  second-order director of ``'annular_fsdt_tl'`` and the third-order term
+  built from the director and the normal of the deformed plane, 5 DOFs
+  ``u, v, w, phix, phiy``, see :mod:`panels.models.annular_tsdt_tl_num`.
+
 - ``'cylshell_clpt_donnell'``: cylindrical shells, CLPT with the
   Donnell-Mushtari-Vlasov (shallow shell) kinematics, 3 DOFs ``u, v, w``.
 
@@ -476,6 +481,17 @@ and the moments of the density about the mid-surface, see
 :mod:`panels.models.annular_tsdt_donnell_num` and
 :mod:`panels.models.annular_tsdt_gl_num`.
 
+``'annular_tsdt_tl'`` writes the TSDT field for finite rotations, the
+deformed position of a point being `\boldsymbol{X} + z \boldsymbol{d} +
+p(z) \boldsymbol{q}`, `p(z) = (z - d)^3 + d^3`, with the second-order
+director `\boldsymbol{d}` of ``'annular_fsdt_tl'`` [6]_, [7]_ and
+`\boldsymbol{q} = -c_1 (\boldsymbol{d} - \boldsymbol{N})`, `\boldsymbol{N}`
+the normal of the deformed plane, not normalized, whose linear part is the
+vector `(\phi_x + w_{,x}, \phi_y + s w_{,y})` of the TSDT; the strains are
+the coefficients of `1`, `z`, `p(z)` of the Green-Lagrange strains and the
+transverse shear strains vanish at both faces for any deformation, see
+:mod:`panels.models.annular_tsdt_tl_num`.
+
 References
 ----------
 .. [1] Sanders, J. L., "Nonlinear theories for thin shells", Quarterly of
@@ -523,6 +539,7 @@ from . import annular_fsdt_gl_num, annular_fsdt_gl
 from . import annular_fsdt_tl_num, annular_fsdt_tl
 from . import annular_tsdt_donnell_num, annular_tsdt_donnell
 from . import annular_tsdt_gl_num, annular_tsdt_gl
+from . import annular_tsdt_tl_num, annular_tsdt_tl
 from . import fsdt_tsdt_field
 from . import plate_fsdt_donnell, plate_fsdt_donnell_num
 from . import plate_tsdt_donnell, plate_tsdt_donnell_num
