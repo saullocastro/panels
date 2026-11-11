@@ -16,9 +16,9 @@ Verified, for the key ``'face'`` of the connection ``'BFycte'``, see
   `v_1(z_f) = w_2` and `-\Omega` of the rotation about `x`;
 - the equivalent offset model: a cylinder whose reference surface is its
   inner face, offset `h/2`, connected at its lower face, `z_f = 0`, gives
-  the frequencies of the connection at the reference surface, the kernels
-  of :mod:`panels.multidomain.connections.kCBFycte`, to 1e-9, with both
-  methods;
+  the eight lowest frequencies of the connection at the reference surface,
+  the kernels of :mod:`panels.multidomain.connections.kCBFycte`, to 1e-9,
+  with both methods;
 - the penalty energy of :func:`.kCBFycte_face.fkCBFycte_face` equals that
   of the constraints of :func:`.nullspace.constraint_matrix`;
 - the key ``'kinematics'`` without the key ``'face'`` raises a
@@ -49,7 +49,13 @@ the lower face is `z_f = d - h/2 = 0`, and the connection at that face must
 be the connection at the reference surface: the face connection of
 :func:`.kCBFycte_face.fkCBFycte_face` and of the null-space constraints then
 reproduces the kernels of :mod:`panels.multidomain.connections.kCBFycte`
-for a skin with the Sanders-Koiter kinematics.
+for a skin with the Sanders-Koiter kinematics. The comparison takes the
+eight eigenvalues of smallest magnitude: the dense solver returns all of
+them, and the penalty method adds eigenvalues of the order of the penalty
+constants, about `1.7 \times 10^{13}` in this model, which the solver
+determines only to about `10^{-9}` relative, the digits beyond depending
+on the linear-algebra library; the stiffness matrices of the two
+connections agree to `10^{-19}` relative.
 
 """
 import numpy as np
@@ -223,12 +229,14 @@ def test_donnell_kinematics_of_the_model():
 
 
 def _freqs(md, num=8):
-    r"""Eigenvalues of :func:`structsolve.freq`, dense solver"""
+    r"""The ``num`` eigenvalues of smallest magnitude of
+    :func:`structsolve.freq`, dense solver, the lowest frequencies"""
     K = md.reduce(md.calc_kC(silent=True))
     M = md.reduce(md.calc_kM(silent=True))
     eigvals, _ = freq(K, M, sparse_solver=False, silent=True,
                       num_eigvalues=num)
-    return np.sort(eigvals.real)
+    eigvals = eigvals.real
+    return eigvals[np.argsort(np.abs(eigvals), kind='stable')[:num]]
 
 
 def _supported(model_skin, conn_method, skin_kw, conn_kw, hb=HB):
@@ -246,8 +254,8 @@ def _supported(model_skin, conn_method, skin_kw, conn_kw, hb=HB):
 @pytest.mark.parametrize('conn_method', ['null-space', 'penalty'])
 def test_face_at_reference_surface(conn_method):
     r"""Reference surface of the cylinder at its inner face, offset `h/2`:
-    ``face='lower'`` is `z_f = 0`, and the frequencies are those of the
-    connection at the reference surface, kernels of
+    ``face='lower'`` is `z_f = 0`, and the eight lowest frequencies are those
+    of the connection at the reference surface, kernels of
     :mod:`panels.multidomain.connections.kCBFycte`, to 1e-9"""
     skin_kw = dict(r=R - H/2, offset=H/2)
     ref = _freqs(_supported('cylshell_clpt_sanders', conn_method, skin_kw,
