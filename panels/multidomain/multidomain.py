@@ -387,19 +387,19 @@ class MultiDomain(object):
         :meth:`.Shell.add_point_pd`, :meth:`.Shell.add_distr_pd_fixed_x` and
         :meth:`.Shell.add_distr_pd_fixed_y`:
 
-        - ``'penalty'`` (default): their penalty forces enter
-          :meth:`.calc_fext`, and the penalty stiffnesses must be added to
-          the stiffness matrix by the user, e.g. with :func:`.fkCpd`,
-          :func:`.fkCld_xcte` or :func:`.fkCld_ycte`
-        - ``'null-space'``: exactly, as linear constraints eliminated
-          together with the connections, see
+        - ``'null-space'`` (default): exactly, as linear constraints
+          eliminated together with the connections, see
           :meth:`.get_cp`, :meth:`.expand`, :meth:`.get_reduced_functions`,
           :meth:`.linear_static`, :meth:`.linear_buckling`,
           :meth:`.reaction_pd` and :meth:`.reaction_resultant`. The penalty
           constants are not used, and :meth:`.calc_fext` does not contain
           the forces of the prescribed displacements. This works with any
           ``conn_method``, also for a single panel without connections,
-          ``MultiDomain([shell], conn=[], pd_method='null-space')``
+          ``MultiDomain([shell], conn=[])``
+        - ``'penalty'``: their penalty forces enter
+          :meth:`.calc_fext`, and the penalty stiffnesses must be added to
+          the stiffness matrix by the user, e.g. with :func:`.fkCpd`,
+          :func:`.fkCld_xcte` or :func:`.fkCld_ycte`
     name : str, optional
         Name of the assembly, used by :meth:`.save`. Default
         ``'multidomain'``.
@@ -527,7 +527,7 @@ class MultiDomain(object):
 
     """
     def __init__(self, panels, conn=None, conn_method='null-space',
-                 name='multidomain', pd_method='penalty'):
+                 name='multidomain', pd_method='null-space'):
         if conn_method not in ('penalty', 'null-space'):
             raise ValueError("conn_method must be 'penalty' or 'null-space', "
                              "got '{0}'".format(conn_method))

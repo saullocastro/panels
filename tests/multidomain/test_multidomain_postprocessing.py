@@ -75,7 +75,8 @@ def tension():
     kt, kr = calc_kt_kr(p1, p2, 'xcte')
     conn = [dict(p1=p1, p2=p2, func='SSxcte', xcte1=p1.a, xcte2=0.,
                  kt=kt, kr=kr)]
-    md = MultiDomain([p1, p2], conn, conn_method='penalty')
+    md = MultiDomain([p1, p2], conn, conn_method='penalty',
+                     pd_method='penalty')
     c = solve(md.calc_kC(), md.calc_fext(), silent=True)
     return md, c
 

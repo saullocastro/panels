@@ -173,14 +173,14 @@ def test_penalty_reaches_prescribed_values(model):
     p.add_distr_pd_fixed_x(xl, kw=k, funcw=wl)
     p.add_distr_pd_fixed_y(yl, kv=k, funcv=vl)
 
-    md = MultiDomain([p], conn=[])
+    md = MultiDomain([p], conn=[], pd_method='penalty')
     size = md.get_size()
     kCp = finalize_symmetric_matrix(
           fkCpd(k, k, k, p, xp, yp, size, p.row_start, p.col_start)
         + fkCld_xcte(0., 0., k, p, xl, size, p.row_start, p.col_start)
         + fkCld_ycte(0., k, 0., p, yl, size, p.row_start, p.col_start))
     c = solve(md.calc_kC() + kCp, md.calc_fext(), silent=True)
-    c_ns = MultiDomain([p], conn=[], pd_method='null-space').linear_static()
+    c_ns = MultiDomain([p], conn=[]).linear_static()
 
     ys = np.linspace(0, b, 7)
     xs = np.linspace(0, a, 7)

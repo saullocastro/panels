@@ -308,7 +308,8 @@ Prescribed displacements imposed exactly
 
 The prescribed displacements of :meth:`.Shell.add_point_pd`,
 :meth:`.Shell.add_distr_pd_fixed_x` and :meth:`.Shell.add_distr_pd_fixed_y`
-are imposed by default with the penalty method: their forces `k u_p` enter
+are imposed with the penalty method by ``MultiDomain(...,
+pd_method='penalty')``: their forces `k u_p` enter
 the external force vector and the penalty stiffnesses, e.g. of
 :func:`.fkCpd`, :func:`.fkCld_xcte` and :func:`.fkCld_ycte`, for the models
 with 3 and 5 degrees of freedom per term, must be added to the stiffness
@@ -340,16 +341,16 @@ thickness coordinate ``z`` different from zero, the rows of `u` and `v`
 are those of `u(z)` and `v(z)`. The prescribed values are reached with an
 error of order `1/k`.
 
-With ``pd_method='null-space'`` they are
+With ``pd_method='null-space'``, the default, they are
 imposed exactly, as inhomogeneous linear constraints eliminated together
 with the connections, without any penalty constant::
 
-    md = MultiDomain(panels, conn, pd_method='null-space')
+    md = MultiDomain(panels, conn)
 
 A single panel is wrapped in a :class:`.MultiDomain` without connections,
-``MultiDomain([shell], conn=[], pd_method='null-space')``. Both settings are
-independent: the connections may be imposed with either ``conn_method``.
-The default ``pd_method='penalty'`` keeps the previous behaviour.
+``MultiDomain([shell], conn=[])``. Both settings are
+independent: the connections may be imposed with either ``conn_method``,
+and the prescribed displacements with either ``pd_method``.
 
 The same methods of :class:`.Shell` define the prescribed displacements,
 the in-plane ones at the reference surface or at the thickness coordinate
@@ -540,7 +541,7 @@ connected panels:
 API
 ~~~
 
-- ``MultiDomain(..., pd_method='null-space')``
+- ``MultiDomain(..., pd_method='null-space')``, the default
 - :meth:`.MultiDomain.get_Z` and :meth:`.MultiDomain.get_cp`: `\boldsymbol{Z}`,
   `\boldsymbol{c}_{p0}` and `\boldsymbol{c}_{p1}`, also in the attributes ``Z``, ``c_p0``
   and ``c_p1``
@@ -617,8 +618,9 @@ non-linear analyses of a plate under end-shortening.
 penalty constant, keeps the conditioning of the model, and gives reactions
 that do not depend on any constant; it is recommended for displacement
 control, e.g. the end-shortening of panels and shells, and for linear
-buckling under prescribed displacements. The penalty method is
-the default of the prescribed displacements, ``pd_method='penalty'``, and it is needed when the prescribed
+buckling under prescribed displacements, and it is the default of the
+prescribed displacements. The penalty method, ``pd_method='penalty'``, is
+needed when the prescribed
 displacement represents a physical stiffness, e.g. a load cell or a loading
 fixture, or for models that rely on the penalty forms, e.g. the cohesive zone
 examples of :ref:`cohesive_zone`, whose reaction is given by
@@ -654,8 +656,9 @@ approximation more than the penalty method with the default constants does:
 
 The prescribed displacements of :meth:`.Shell.add_point_pd`,
 :meth:`.Shell.add_distr_pd_fixed_x` and :meth:`.Shell.add_distr_pd_fixed_y`
-remain penalty stiffnesses by default, and are imposed exactly with
-``pd_method='null-space'``, see :ref:`null_space_pd`. The
+are imposed exactly with ``pd_method='null-space'``, the default, see
+:ref:`null_space_pd`, and with penalty stiffnesses with
+``pd_method='penalty'``. The
 traction-separation law of ``'SB_TSL'`` remains a penalty stiffness.
 
 The rank of the constraints is found with the tolerance ``tol`` of

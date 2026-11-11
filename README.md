@@ -18,7 +18,7 @@ Semi-analytical methods for plates, shells and stiffened panels
 - Geometrically non-linear static analyses (postbuckling) using the Newton-Raphson method or the arc-length methods of Riks and Crisfield, with the product of the tangent stiffness matrix by a vector available without assembly
 - Dead or follower (hydrostatic) pressure loads, with the unsymmetric load stiffness of the follower pressure
 - Multi-domain assemblies of plates, cylindrical shells, cylinders, stiffened panels, with the domains connected exactly with the null-space method, the default, or by penalty stiffnesses. Debonding defects or cohesive zone can be simulated
-- Prescribed displacements and rotations imposed exactly with the null-space method, `MultiDomain(..., pd_method='null-space')`, for displacement control in linear static, linear buckling and geometrically non-linear (Newton-Raphson, Riks, Crisfield) analyses, with the reaction forces; or by penalty stiffnesses, the default
+- Prescribed displacements and rotations imposed exactly with the null-space method, the default, `MultiDomain(..., pd_method='null-space')`, for displacement control in linear static, linear buckling and geometrically non-linear (Newton-Raphson, Riks, Crisfield) analyses, with the reaction forces; or by penalty stiffnesses
 - CLPT, FSDT and TSDT kinematics for plates and cylindrical shells
 - Donnell and Sanders-Koiter kinematics for cylindrical shells
 

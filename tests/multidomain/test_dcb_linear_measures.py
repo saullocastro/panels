@@ -100,7 +100,7 @@ def dcb_thesis_linear(k_o, edge_penalty_factor=1., a2=0.015, wp=0.5,
         conni['kt'] = edge_penalty_factor*kt
         conni['kr'] = edge_penalty_factor*kr
     assy = MultiDomain(panels=[bot1, bot2, bot3, top1, top2, top3],
-                       conn=conn, conn_method='penalty')
+                       conn=conn, conn_method='penalty', pd_method='penalty')
     size = assy.get_size()
     # pristine interface
     assy.update_TSL_history(curr_max_dmg_index=np.zeros((nr_y_gauss,
