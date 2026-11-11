@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+### New notebooks and tests: stiffened cylinders in torsion of Moore and Wescoat (1944)
+
+- New notebooks `notebooks/moore1944_ring_cylinders.ipynb` and
+  `notebooks/moore1944_stiffened_cylinders.ipynb` (Tutorials), with the
+  helper module `notebooks/moore1944_utils.py`, the run script
+  `notebooks/moore1944_runs.py` and its results
+  `notebooks/results/moore1944_stage1.json`, `moore1944_stage2.json`: first
+  buckling torques of the ring-stiffened specimens 16, 17, 18, 13, 13A and
+  of the ring- and stringer-stiffened specimens 19, 14, 20, 15, 21 of NACA
+  ARR 4E31 (Tables I and II), the rings as `annular_clpt_donnell` webs on
+  the inner surface of the skin (`'BFxcte'` with `face='lower'`), the
+  channel stringers outside the skin as a base layer of the skin strip and
+  flat webs and lips connected with `'BFycte'`, under the constant shear
+  flow of a torque.
+- New tests in `tests/multidomain/test_moore1944_torsion.py`, about 12 min
+  (the two stiffened specimens marked `slow`):
+  specimen 16 against Donnell's formula as given in ARR 4E31, specimens 17
+  (rings) and 19 (rings and stringers) against the converged values of the
+  same models.
+
 ### Changed: `create_wingbox` connects the domains with `conn_method='null-space'` by default
 
 - The default of `conn_method` of `create_wingbox`, and so of
