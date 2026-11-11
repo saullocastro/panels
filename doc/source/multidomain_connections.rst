@@ -345,7 +345,7 @@ eliminated from them. No penalty constant is needed, see
 Prescribed displacements with penalties
 ---------------------------------------
 
-With ``MultiDomain(..., pd_method='penalty')``, the default, a displacement
+With ``MultiDomain(..., pd_method='penalty')`` a displacement
 prescribed at a point or along a line, see :meth:`.Shell.add_point_pd`,
 :meth:`.Shell.add_distr_pd_fixed_x` and :meth:`.Shell.add_distr_pd_fixed_y`,
 is imposed with a spring between the panel and the support: the penalty
@@ -355,7 +355,7 @@ DOFs per term, and the force of the spring is in the external force vector of
 :func:`.shell_fext`. The in-plane displacements are those at the thickness
 coordinate ``z`` of the kernels, the one given to the methods of
 :class:`.Shell`, by default the reference surface. With
-``pd_method='null-space'`` the prescribed displacements are imposed exactly,
+``pd_method='null-space'``, the default, the prescribed displacements are imposed exactly,
 see :func:`.nullspace.pd_constraint_matrix`.
 
 
