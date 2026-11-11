@@ -248,7 +248,7 @@ def test_thick_cross_ply_plate_limit(E1E2, model):
                       rtol=1e-3)
 
 
-#: fields fixed at the edges of Bisadi et al. (2012): clamped, hard and soft
+#: fields fixed at the edges of the thick annuli: clamped, hard and soft
 #: simply supported, free
 BISADI_EDGES = {'C': FIELDS + ('wr',), 'Sh': ('v', 'w', 'phiy'),
                 'Ss': ('w',), 'F': ()}
@@ -309,8 +309,8 @@ def _rtol(*edges):
     return 2e-3 if 'C' in edges else 1e-4
 
 
-#: Bisadi et al. (2012), Table 5, R = 0.1, delta = 0.1, (inner, outer):
-#: beta of the modes (0, 0) and (0, 1)
+#: reference beta of the modes (0, 0) and (0, 1), R = 0.1, delta = 0.1, by
+#: edges (inner, outer)
 BISADI_AXISYMMETRIC = {
     ('C', 'C'): (24.7343, 62.6432), ('C', 'Sh'): (16.6235, 52.3407),
     ('C', 'F'): (4.15336, 23.2065), ('Sh', 'C'): (21.2294, 57.1018),
@@ -332,8 +332,8 @@ def test_bisadi2012_axisymmetric(edges):
     assert np.allclose(got, BISADI_AXISYMMETRIC[edges], rtol=_rtol(*edges))
 
 
-#: Bisadi et al. (2012), Tables 6-9, (inner, outer, R, delta): the eight
-#: lowest beta and (p, s) of each
+#: reference eight lowest beta and (p, s) of each, by (inner, outer, R,
+#: delta)
 BISADI_EIGHT = {
     ('C', 'C', 0.2, 0.2): (
         (24.817, 25.7787, 29.9502, 37.79, 47.6215, 55.3217, 56.8944,

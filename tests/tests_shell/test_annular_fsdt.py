@@ -391,11 +391,11 @@ def test_internal_frame_fsdt_cylinder(conn_method, rtol):
     assert np.allclose(l2[:5], ref, rtol=rtol)
 
 
-#: fields fixed at the edges of Dozio (2015): clamped, simply supported,
-#: free
+#: fields fixed at the edges of the thick annulus of the frequencies:
+#: clamped, simply supported, free
 DOZIO_EDGES = {'C': FIELDS, 'S': ('v', 'w', 'phiy'), 'F': ()}
-#: Dozio (2015), Table 5, the eight lowest lambda, (inner, outer), and the
-#: index of the frequencies of panels not in the table
+#: reference eight lowest lambda, by edges (inner, outer), and the index of
+#: the frequencies of panels without a reference value
 DOZIO = {
     ('F', 'S'): ((4.5328, 11.205, 12.711, 15.875, 20.740, 27.931, 30.530,
                   31.301), ()),
