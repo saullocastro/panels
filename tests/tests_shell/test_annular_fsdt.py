@@ -10,7 +10,10 @@ theory, connected with ``'BFxcte'`` and ``face='lower'``; the buckling under a u
 buckling under a torque against Irie, Yamada and Tsujino (1983), Table 1.
 Moderately thick annuli under a torque against the Mindlin plate results of
 Bagheri, Kiani and Eslami (2019), Table 2, where the transverse shear
-lowers the buckling torque by up to 47 % in the cases used. The three
+lowers the buckling torque by up to 47 % in the cases used. The natural
+frequencies of a thick annulus against the Ritz FSDT values of Dozio
+(2015), Table 5, for four combinations of free, simply supported and
+clamped edges. The three
 models: the same buckling torque of a thick annulus; internal force vectors
 that agree to the second order in the displacements; the strains of an
 in-plane rigid rotation and of a rigid rotation about an axis inclined to
@@ -42,7 +45,37 @@ critical torque is given as `\tau = T/(2 \pi D)`, `D = E h^3/(12 (1 -
 \nu^2))`, [3]_ and [4]_, Eq. (26), `\nu = 0.3`. Bagheri et al. [4]_ use the
 transverse shear stiffness `A_{44} = A_{55} = E h/(2 (1 + \nu))` without a
 shear correction factor, their Eq. (7): the thick annuli are computed with
-``Shell.fsdt_shear_correction = 1``.
+``Shell.fsdt_shear_correction = 1``, which reproduces their Table 2. The
+default of :class:`.Shell`, ``fsdt_shear_correction = 'rohwer'``, gives
+the shear correction factor `5/6` of a homogeneous plate and lower
+torques, not tested; with `m = 12`, `n = 16`, edges inner-outer, `\tau`
+of [4]_ and of panels with the factor 1 and with ``'rohwer'``, and their
+differences from [4]_:
+
+=====  =====  =====  =======  =======  ========  =======  ========
+edges  `h/a`  ratio  [4]_     1        diff (%)  rohwer   diff (%)
+=====  =====  =====  =======  =======  ========  =======  ========
+C-C    0.05   0.3    53.758   53.761   +0.005    52.421   -2.49
+C-C    0.05   0.5    150.414  150.415  +0.001    145.088  -3.54
+C-C    0.10   0.3    39.261   39.262   +0.002    36.699   -6.53
+C-C    0.10   0.5    98.436   98.436   0.000     90.368   -8.20
+S-S    0.05   0.3    34.976   34.976   -0.001    34.584   -1.12
+S-S    0.05   0.5    100.749  100.749  0.000     98.990   -1.75
+S-S    0.10   0.3    29.912   29.912   +0.001    28.804   -3.70
+S-S    0.10   0.5    79.632   79.632   +0.001    75.433   -5.27
+C-F    0.05   0.3    12.215   12.216   +0.007    12.122   -0.76
+C-F    0.05   0.5    33.524   33.524   0.000     33.165   -1.07
+C-F    0.10   0.3    11.030   11.030   +0.002    10.773   -2.33
+C-F    0.10   0.5    29.174   29.174   0.000     28.273   -3.09
+F-C    0.05   0.3    9.904    9.908    +0.038    9.820    -0.84
+F-C    0.05   0.5    29.607   29.608   +0.002    29.273   -1.13
+F-C    0.10   0.3    8.877    8.877    +0.003    8.660    -2.45
+F-C    0.10   0.5    25.626   25.625   -0.002    24.801   -3.22
+=====  =====  =====  =======  =======  ========  =======  ========
+
+The ratio is `\beta`. The transverse shear lowers the torques the most for
+the thicker plates and the stiffer edges, and the factor `5/6` adds up to
+a further 8 % to it.
 
 The uniform compression `p` on both edges gives the constant membrane state
 `N_{\rho\rho} = N_{\theta\theta} = -p`, applied as ``Nxx = Nyy = -1``;
@@ -66,6 +99,25 @@ For `r \to \infty` the strains of the annular models are those of the flat
 plates ``'plate_fsdt_donnell'``, ``'plate_fsdt_gl'`` and
 ``'plate_fsdt_tl'``.
 
+Dozio [5]_, Table 5, gives the eight lowest `\lambda = \omega a^2
+\sqrt{\rho h/D}` of an isotropic annulus, `\beta = 0.3`, `h/a = 0.2`, `\nu
+= 0.3`, with a first-order theory obtained from his model HOT1 with a zero
+transverse normal stress and the shear correction factor `5/6`, his Eq.
+(30): ``fsdt_shear_correction = 5/6``. His edges, inner-outer ([5]_,
+Table 1): clamped, all displacements zero, `u = v = w = \phi_x = \phi_y =
+0`; simply supported, `v = w = \phi_y = 0`; free. His list has the modes of
+both families, the transverse (`w, \phi_x, \phi_y`) and the in-plane (`u,
+v`) ones, uncoupled for one isotropic layer; the modes of `p \ge 1` nodal
+diameters, pairs of equal frequencies in the full annulus, are merged. With
+`m = 14`, `n = 16` (the same to five digits with `m = 16`, `n = 20`)
+panels reproduces his 32 values within 0.005 %, with one exception: for
+the annulus free inside and clamped outside, panels has a transverse pair
+`\lambda = 40.294`, one nodal diameter and the second radial order, between
+his sixth and seventh values (39.424, in-plane, and 40.534, the in-plane
+torsional mode), that his Table 5 does not list; the TSDT model gives the
+same mode at 40.720. The test skips it, the reason of its absence from [5]_
+being unknown.
+
 References
 ----------
 .. [1] Leissa, A. W., Vibration of Plates, NASA SP-160, 1969, Eqs.
@@ -82,6 +134,10 @@ References
    Engineering, Vol. 66, No. 2, 2019, pp. 209-227, Eqs. (7), (10), (11),
    (12) and (26), Tables 1 and 2.
    https://doi.org/10.24425/ame.2019.128445
+.. [5] Dozio, L., "Refined 2-D theories for free vibration analysis of
+   annular plates: Unified Ritz formulation and numerical assessment",
+   Computers and Structures, Vol. 147, 2015, pp. 250-258, Eq. (30), Tables
+   1 and 5. https://doi.org/10.1016/j.compstruc.2014.10.015
 
 """
 import numpy as np
@@ -333,6 +389,59 @@ def test_internal_frame_fsdt_cylinder(conn_method, rtol):
     ref = [exact_lambda2(n, beta, 0.9*guess[n], 1.1*guess[n])
            for n in (0, 1, 1, 2, 2)]
     assert np.allclose(l2[:5], ref, rtol=rtol)
+
+
+#: fields fixed at the edges of the thick annulus of the frequencies:
+#: clamped, simply supported, free
+DOZIO_EDGES = {'C': FIELDS, 'S': ('v', 'w', 'phiy'), 'F': ()}
+#: reference eight lowest lambda, by edges (inner, outer), and the index of
+#: the frequencies of panels without a reference value
+DOZIO = {
+    ('F', 'S'): ((4.5328, 11.205, 12.711, 15.875, 20.740, 27.931, 30.530,
+                  31.301), ()),
+    ('F', 'F'): ((4.6160, 7.8878, 11.126, 15.146, 15.659, 18.778, 26.674,
+                  27.279), ()),
+    ('F', 'C'): ((10.365, 15.895, 25.384, 35.763, 36.860, 39.424, 40.534,
+                  43.901), (6,)),
+    ('C', 'C'): ((30.146, 30.878, 33.775, 39.638, 47.999, 48.220, 52.997,
+                  57.793), ()),
+    }
+
+
+@pytest.mark.parametrize('edges', list(DOZIO))
+def test_dozio2015_thick(edges):
+    r"""Free vibration, `\beta = 0.3`, `h/a = 0.2`, shear correction factor
+    `5/6`: the eight lowest `\lambda = \omega a^2 \sqrt{\rho h/D}` of both
+    families of modes against Dozio (2015), Table 5, within 0.01 %"""
+    inner, outer = edges
+    h = 0.2*A
+    halves = []
+    for _ in range(2):
+        s = Shell(model=DONNELL, a=0.7*A, b=np.pi*A, r=A, m=14, n=16,
+                  plyt=h, stack=[0], laminaprop=(E, NU), rho=RHO)
+        s.fsdt_shear_correction = 5/6
+        for e in ('x1', 'x2', 'y1', 'y2'):
+            for f in FIELDS:
+                setattr(s, e + f, 1)
+                setattr(s, e + f + 'r', 1)
+        for e, kind in (('x1', outer), ('x2', inner)):
+            for f in DOZIO_EDGES[kind]:
+                setattr(s, e + f, 0)
+        halves.append(s)
+    md = full_annulus(halves)
+    eigvals, _ = freq(md.reduce(md.calc_kC(silent=True)),
+                      md.reduce(md.calc_kM(silent=True)),
+                      sparse_solver=False, silent=True, num_eigvalues=40,
+                      symmetric=True)
+    lam = np.sort(np.sqrt(np.abs(eigvals)))*A**2*np.sqrt(RHO*h/bending_D(h))
+    #NOTE rigid-body modes excluded, pairs of equal frequencies merged
+    values = []
+    for v in lam[np.isfinite(lam) & (lam > 0.1)]:
+        if not values or v/values[-1] - 1 > 1e-4:
+            values.append(v)
+    ref, skip = DOZIO[edges]
+    got = np.delete(np.array(values), skip)[:8]
+    assert np.allclose(got, ref, rtol=1e-4)
 
 
 def _sector(model, m=6, n=6):
