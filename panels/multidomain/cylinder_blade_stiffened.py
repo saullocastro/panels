@@ -100,9 +100,12 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
     connected with ``'SSycte'``, the edge `y = b` of one to the edge `y = 0`
     of the next, the last skin panel to the first one, and each skin panel
     to its blade with ``'BFycte'``, at the edge `y = 0` of the skin panel.
-    With ``side='internal'`` the edge `y = 0` of the blade is connected and
-    the blade stands inside the cylinder, with ``side='external'`` its edge
-    `y` = ``width_blades[i]``, and the blade stands outside. The
+    With ``side='internal'`` the edge `y = 0` of the blade is connected to
+    the inner surface of the skin (key ``'face'``, ``'lower'``) and the
+    blade stands inside the cylinder, with ``side='external'`` its edge `y`
+    = ``width_blades[i]`` is connected to the outer surface (``'upper'``),
+    and the blade stands outside: the width of a blade is its height from
+    the surface of the skin. The
     assembly contains the skin panels followed by the blades. The
     connections are stored in the assembly, ``md.conn``, and also returned.
 
@@ -120,7 +123,8 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
         The stacking sequence for each blade (with length = npanels), the
         angles in degrees.
     width_blades : array-like
-        The width for each blade (with length = npanels), length.
+        The width for each blade (with length = npanels), its height from
+        the surface of the skin to its tip, length.
     plyt : float
         Ply thickness (assumed unique for the whole structure), length.
     laminaprop : list or tuple
@@ -170,7 +174,11 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
     local axes are rotated by 90 degrees about the `x` axis with respect to
     those of the skin, and the rotation about `x` continuous along the line
     `y = 0` of the skin panel, where the blade stands normal to the skin,
-    see :meth:`.MultiDomain.get_kC_conn`. The boundary conditions and the
+    see :meth:`.MultiDomain.get_kC_conn`, at the inner or the outer surface
+    of the skin, whose points follow the Kirchhoff-Love kinematics of the
+    skin with the Sanders-Koiter term `z v/r` whatever the model of the
+    skin, see :mod:`panels.multidomain.connections.kCBFycte_face`: the blade
+    does not overlap the skin. The boundary conditions and the
     redundant constraints of the closed skin are those of
     :func:`.create_cylinder`. The local `y` axis of the blade points towards
     the axis of the cylinder (`v_2 = -w_1` along the joint): connected at
@@ -329,8 +337,9 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
 
     for panel, blade in zip(skin, blades):
         ycte2 = 0 if side == 'internal' else blade.b
+        face = 'lower' if side == 'internal' else 'upper'
         conns.append(dict(p1=panel, p2=blade, func='BFycte', ycte1=0,
-                          ycte2=ycte2))
+                          ycte2=ycte2, face=face))
 
     md = MultiDomain(skin + blades, conns, conn_method=conn_method)
 

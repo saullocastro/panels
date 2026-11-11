@@ -193,7 +193,61 @@ the kinematics of the model of the cylinder, which differ from those of
 Sanders and Koiter only for ``'cylshell_clpt_donnell'``,
 ``'cylshell_fsdt_donnell'`` and ``'cylshell_tsdt_donnell'``; for these the
 residual above is present, and the connection issues a ``UserWarning``
-that names this section, see :func:`.kCBFxcte_face.face_rinv`.
+that names this section, see :func:`.kCBFxcte_face.face_rinv`. The key
+``'kinematics'`` without the key ``'face'`` raises a ``ValueError``: at the
+reference surface the kinematics of the face do not enter the connection.
+
+BFycte at a face of the base
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The connection ``'BFycte'`` has the same keys ``'face'`` and
+``'kinematics'``, with the same meaning: the edge `y_2 =` ``ycte2`` of the
+flange is tied to the line `y_1 =` ``ycte1`` of the face `z_1 = d_1 \mp
+h_1/2` of the base, see
+:mod:`panels.multidomain.connections.kCBFycte_face`. On a ``'cylshell_*'``
+base this line is a generator, and the flange is a flat plate along it,
+e.g. a blade stringer or the web of a Z stringer, whose height then starts
+at the surface of the skin instead of its middle surface::
+
+                 skin, z1 up (outwards)
+      ====================================  outer face, 'upper'
+      ------------------------------------  reference surface, z1 = 0
+      ====================================  inner face, 'lower'
+                   ||  edge y2 = 0
+                   ||  blade, y2 = -z1
+                   ||
+
+The axis `y_2` of the flange is `-z_1`: a flange below the lower face has
+its edge `y_2 = 0` there, ``ycte2=0``, and a flange above the upper face
+its edge `y_2 = b_2`, ``ycte2=p2.b``. The connection imposes `u_1(z_1) =
+u_2`, `v_1(z_1) = w_2`, `w_1 = -v_2` and the equality of the rotations of
+the normals about `x`, that of the base at its face being
+
+.. math::
+
+    \theta_{y1}(z) = \frac{\partial v_1(z)}{\partial z} = -w_{1,y} +
+    \frac{v_1}{r_1}
+
+for the classical laminated plate theory, the same at every `z`, with the
+term `v_1/r_1` of the Sanders-Koiter kinematics whenever `v_1(z)` has the
+term `z v_1/r_1`, and `\partial v_1/\partial z` of the displacement field
+of the FSDT and TSDT, which at a face of a TSDT laminate is `-w_{1,y} +
+v_1/r_1`, the transverse shear strain vanishing there. A rigid rotation
+`\Omega` about the axis of the cylinder, `v_1 = r_1 \Omega`, moves the face
+by `(r_1 + z_1) \Omega` and rotates its normal by `\Omega`, as the blade
+rotating with it, whose root is at the radius `r_1 + z_1`: the motion is
+free of penalty energy and of residual. With ``kinematics='model'`` a
+Donnell cylinder leaves the residuals `-z_1 \Omega` and `-\Omega`; the
+second is that of the connection at the reference surface of a Donnell
+cylinder, whose rotation of the normal neglects `v/r`. The two edges share
+the natural coordinate `\xi` and have the same length, ``p1.a == p2.a``.
+
+The blade builder :func:`.create_cylinder_blade_stiffened` and the Z
+builder :func:`.create_cylinder_z_stiffened` connect the blades and the webs
+at the face on the side of the stringer, ``'lower'`` for internal and
+``'upper'`` for external stringers, so that the given height of a blade,
+or of a web, is measured from the surface of the skin, or from the face of
+the attached flange of a Z stringer.
 
 kCBFxycte
 ~~~~~~~~~
