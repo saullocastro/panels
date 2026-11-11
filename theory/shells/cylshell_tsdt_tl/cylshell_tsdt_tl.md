@@ -1,7 +1,7 @@
 # Cylindrical shell, total-Lagrangian TSDT (`cylshell_tsdt_tl`)
 
 Derivation and symbolic checks: `cylshell_tsdt_tl.py` (sympy, run `python
-cylshell_tsdt_tl.py`). Kernels: `write_pyx.py`, which writes
+cylshell_tsdt_tl.py`, about twenty minutes, mostly `check_tangent`). Kernels: `write_pyx.py`, which writes
 `panels/models/cylshell_tsdt_tl_num.pyx` (`fkC_num`, `fkG_num`, `calc_fint`,
 `calc_kTv`, `calc_fext_follower`, `fkCfollower_num`), self-contained, as
 `../plate_tsdt_tl/write_pyx.py` with the radius. No analytical module:
@@ -79,9 +79,10 @@ In the plate the same stretch only enters the dropped `z^3` coefficient of
 - `check_rigid_rotation`: rigid rotations of the undeformed cylinder and of
   a state bent along the axis (`w = 0.4 x^2/2`, at `x = 0`), random axes,
   director components those of the rotated normal: membrane strains
-  unchanged, the others change by `O(t^4)` (fitted orders 4.0-5.0 between
-  `t = 0.1` and `0.05`); the linear third-order strains of
-  `cylshell_tsdt_gl` change at the first or second order.
+  unchanged, the others change by `O(t^4)` (fitted orders 3.90-4.04
+  between `t = 0.1` and `0.05`); the linear third-order strains of
+  `cylshell_tsdt_gl` change at the second order (undeformed, 2.00) or the
+  first (bent, 0.87-1.07).
 - `check_tangent`, `check_numerical`, `check_integrand_degree` (`6p` along
   `x` and `y`) as for `plate_tsdt_tl`.
 
