@@ -5,7 +5,10 @@ Thin annuli against the classical-plate results of the literature: free
 vibration of an annulus clamped outside and free inside against the exact
 roots of Leissa (1969); buckling under a uniform compression on both edges
 against Yamaki (1958), Table 1; buckling under a torque against Irie,
-Yamada and Tsujino (1983), Table 1. A thick antisymmetric cross-ply sector
+Yamada and Tsujino (1983), Table 1. Thick isotropic annuli, `h/a = 0.1` to
+`0.3`, against the exact TSDT frequencies of Bisadi, Es'haghi, Rokni and
+Ilkhani (2012), Tables 5 to 9, for clamped, hard and soft simply supported
+and free edges. A thick antisymmetric cross-ply sector
 of large radius against the TSDT frequencies of Reddy (1984) for the
 simply supported square plate. The laminate offset against the flat
 plate, the Green-Lagrange model against the von Kármán one in the linear
@@ -28,6 +31,29 @@ with the pre-buckling state `N_{xy} = -T/(2 \pi \rho^2)` of a linear
 static case. The frequency equation of the annulus clamped outside and free
 inside is that of Leissa [1]_, Eqs. (1.11)-(1.13) and (1.17), see
 :func:`exact_lambda2`.
+
+Bisadi et al. [7]_ solve exactly the equations of motion of Reddy's TSDT
+for the transverse vibration of a homogeneous isotropic annulus, with the
+rotary and higher-order inertia, `\nu = 0.3`, and tabulate `\beta = \omega
+a^2 \sqrt{\rho h/D}`, `a` the outer radius, by `(p, s)`, `p` nodal
+diameters and `s` the radial order; `R` is the ratio of the inner to the
+outer radius and `\delta = h/a`. Their model is the panels model for a
+full annulus of one isotropic layer: the two half annuli of
+:func:`annulus`. Their edges, named inner-outer, are free (F), clamped (C,
+`w = w_{,\rho} = \psi_\rho = \psi_\theta = 0`), hard simply supported
+(`S_h`, `w = \psi_\theta = 0`) and soft simply supported (`S_s`, `w = 0`),
+[7]_, Eqs. (47)-(50), with `\psi_\rho, \psi_\theta` the rotations `\phi_x,
+\phi_y` of panels (up to the sign of `\phi_x`, `x` running inwards). In
+panels a clamped edge also has `u = v = 0`, and a hard simply supported one
+`v = 0`: for one isotropic layer without offset the in-plane displacements
+are uncoupled from the transverse ones, and only the modes in which `w,
+\phi_x, \phi_y` dominate the Ritz constants are compared; the modes of `p
+\ge 1` appear in pairs. The axisymmetric modes `(0, 0)` and `(0, 1)` of
+Table 5 are the first two single modes. With `m = 14`, `n = 16`, the
+annuli with a clamped edge are within 0.18 % of [7]_ (0.08 % with `m =
+16`, `n = 20`, approaching from above as a Ritz solution, slowest for the
+clamped inner edge of radius `0.1 a`), the others within `10^{-5}`; the
+tolerances are `2 \times 10^{-3}` and `10^{-4}`.
 
 For `r \to \infty` the strains are those of ``'plate_tsdt_donnell'`` and
 ``'plate_tsdt_gl'``, the difference being of the order of `a/r`. Reddy's
@@ -55,6 +81,10 @@ References
    Eng., 8, 103-117, 2016, Table 3.
 .. [6] Noor, A. K., "Free vibrations of multilayered composite plates",
    AIAA J., 11(7), 1038-1039, 1973.
+.. [7] Bisadi, H., Es'haghi, M., Rokni, H. and Ilkhani, M., "Benchmark
+   solution for transverse vibration of annular Reddy plates", Int. J.
+   Mech. Sci., 56, 35-49, 2012, Eqs. (47)-(50), Tables 5-9.
+   https://doi.org/10.1016/j.ijmecsci.2011.12.007
 
 """
 import numpy as np
@@ -216,6 +246,140 @@ def test_thick_cross_ply_plate_limit(E1E2, model):
     omega = np.sort(np.sqrt(-eigvals.real))[0]
     assert np.isclose(omega*a**2/h*np.sqrt(rho/E2), REDDY_TSDT[E1E2],
                       rtol=1e-3)
+
+
+#: fields fixed at the edges of Bisadi et al. (2012): clamped, hard and soft
+#: simply supported, free
+BISADI_EDGES = {'C': FIELDS + ('wr',), 'Sh': ('v', 'w', 'phiy'),
+                'Ss': ('w',), 'F': ()}
+
+
+def thick_annulus(model, R, delta, inner, outer, m=14, n=16):
+    r"""Full annulus of outer radius ``A``, inner radius ``R*A`` and thickness
+    ``delta*A``, edges of :data:`BISADI_EDGES`, two half annuli connected
+    with ``'SSycte'``"""
+    halves = []
+    for _ in range(2):
+        s = Shell(model=model, a=A*(1 - R), b=np.pi*A, r=A, m=m, n=n,
+                  plyt=delta*A, stack=[0], laminaprop=(E, NU), rho=RHO)
+        for e in ('x1', 'x2', 'y1', 'y2'):
+            set_edge(s, e, 'F')
+        for e, kind in (('x1', outer), ('x2', inner)):
+            for f in BISADI_EDGES[kind]:
+                setattr(s, e + f, 0)
+        halves.append(s)
+    p1, p2 = halves
+    conn = [dict(p1=p1, p2=p2, func='SSycte', ycte1=p1.b, ycte2=0),
+            dict(p1=p1, p2=p2, func='SSycte', ycte1=0, ycte2=p2.b)]
+    return MultiDomain([p1, p2], conn)
+
+
+def transverse_frequencies(md, delta):
+    r"""`\beta = \omega a^2 \sqrt{\rho h/D}` of the modes in which `w,
+    \phi_x, \phi_y` dominate the Ritz constants, the rigid-body modes
+    excluded, the pairs of equal frequencies merged, and the number of
+    modes of each"""
+    K = md.reduce(md.calc_kC(silent=True))
+    M = md.reduce(md.calc_kM(silent=True))
+    eigvals, eigvecs = freq(K, M, sparse_solver=False, silent=True,
+                            num_eigvalues=80, symmetric=True,
+                            max_dense_size=10000)
+    h = delta*A
+    Dh = E*h**3/(12*(1 - NU**2))
+    beta = np.sqrt(np.abs(eigvals))*A**2*np.sqrt(RHO*h/Dh)
+    phi = md.expand(eigvecs)
+    transverse = np.zeros(phi.shape[0], dtype=bool)
+    for p in md.panels:
+        #NOTE Ritz constants of w, phix, phiy of each term
+        for field in (2, 3, 4):
+            transverse[p.col_start + field:p.col_end:5] = True
+    frac = np.linalg.norm(phi[transverse], axis=0)/np.linalg.norm(phi, axis=0)
+    beta = np.sort(beta[np.isfinite(beta) & (frac > 0.5) & (beta > 0.1)])
+    values, count = [], []
+    for b in beta:
+        if values and b/values[-1] - 1 < 1e-4:
+            count[-1] += 1
+        else:
+            values.append(b)
+            count.append(1)
+    return np.array(values), np.array(count)
+
+
+def _rtol(*edges):
+    return 2e-3 if 'C' in edges else 1e-4
+
+
+#: Bisadi et al. (2012), Table 5, R = 0.1, delta = 0.1, (inner, outer):
+#: beta of the modes (0, 0) and (0, 1)
+BISADI_AXISYMMETRIC = {
+    ('C', 'C'): (24.7343, 62.6432), ('C', 'Sh'): (16.6235, 52.3407),
+    ('C', 'F'): (4.15336, 23.2065), ('Sh', 'C'): (21.2294, 57.1018),
+    ('Sh', 'Sh'): (13.8817, 46.9999), ('Sh', 'F'): (3.40091, 19.7975),
+    ('F', 'C'): (9.90133, 36.3963), ('F', 'Sh'): (4.81445, 28.0500),
+    ('F', 'F'): (8.64765, 35.9696),
+    }
+
+
+@pytest.mark.parametrize('edges', list(BISADI_AXISYMMETRIC))
+def test_bisadi2012_axisymmetric(edges):
+    r"""Thick annulus, `R = 0.1`, `h/a = 0.1`, ``'annular_tsdt_donnell'``:
+    `\beta` of the two lowest axisymmetric modes, `(0, 0)` and `(0, 1)`,
+    against Bisadi et al. (2012), Table 5, within 0.2 % with a clamped edge
+    and 0.01 % otherwise"""
+    values, count = transverse_frequencies(
+        thick_annulus('annular_tsdt_donnell', 0.1, 0.1, *edges), 0.1)
+    got = values[count == 1][:2]
+    assert np.allclose(got, BISADI_AXISYMMETRIC[edges], rtol=_rtol(*edges))
+
+
+#: Bisadi et al. (2012), Tables 6-9, (inner, outer, R, delta): the eight
+#: lowest beta and (p, s) of each
+BISADI_EIGHT = {
+    ('C', 'C', 0.2, 0.2): (
+        (24.817, 25.7787, 29.9502, 37.79, 47.6215, 55.3217, 56.8944,
+         58.1922),
+        ((0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (0, 1), (1, 1), (5, 0))),
+    ('C', 'F', 0.2, 0.2): (
+        (4.22136, 4.82685, 5.76949, 11.3957, 18.8497, 24.1187, 25.8523,
+         27.3118),
+        ((1, 0), (0, 0), (2, 0), (3, 0), (4, 0), (0, 1), (1, 1), (5, 0))),
+    ('Ss', 'Ss', 0.4, 0.1): (
+        (26.7123, 28.1832, 32.9288, 41.3253, 53.0778, 67.4162, 83.5587,
+         93.7523),
+        ((0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0), (0, 1))),
+    ('Sh', 'Sh', 0.2, 0.2): (
+        (14.7123, 16.7693, 23.0984, 32.3674, 42.874, 46.0564, 48.2819,
+         53.8528),
+        ((0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (0, 1), (1, 1), (5, 0))),
+    ('F', 'F', 0.2, 0.3): (
+        (4.62924, 7.55348, 10.3689, 14.6343, 16.6936, 23.417, 23.7821,
+         28.8167),
+        ((2, 0), (0, 0), (3, 0), (1, 0), (4, 0), (5, 0), (2, 1), (0, 1))),
+    }
+
+
+@pytest.mark.parametrize('case', list(BISADI_EIGHT))
+def test_bisadi2012_eight_lowest(case):
+    r"""Thick annuli, `h/a = 0.1` to `0.3`, ``'annular_tsdt_donnell'``:
+    the eight lowest `\beta` against Bisadi et al. (2012), Tables 6-9,
+    within 0.2 % with a clamped edge and 0.01 % otherwise; a single mode
+    where the table gives `p = 0`, a pair otherwise"""
+    inner, outer, R, delta = case
+    ref, modes = BISADI_EIGHT[case]
+    values, count = transverse_frequencies(
+        thick_annulus('annular_tsdt_donnell', R, delta, inner, outer), delta)
+    assert np.allclose(values[:8], ref, rtol=_rtol(inner, outer))
+    assert np.array_equal(count[:8], [1 if p == 0 else 2 for p, _ in modes])
+
+
+def test_bisadi2012_gl():
+    r"""``'annular_tsdt_gl'``, the clamped annulus `R = 0.2`, `h/a = 0.2`:
+    the eight lowest `\beta` against Bisadi et al. (2012), Table 9, within
+    0.2 %"""
+    case = ('C', 'C', 0.2, 0.2)
+    values, _ = transverse_frequencies(thick_annulus('annular_tsdt_gl', 0.2,
+                                                     0.2, 'C', 'C'), 0.2)
+    assert np.allclose(values[:8], BISADI_EIGHT[case][0], rtol=2e-3)
 
 
 def _square(model, r, offset):
