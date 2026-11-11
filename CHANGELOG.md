@@ -88,6 +88,43 @@
 - `theory/shells/tangent_product` no longer writes `calc_kTv` of these six
   models.
 
+### New models `plate_tsdt_tl`, `cylshell_tsdt_tl`, `annular_tsdt_tl`: total-Lagrangian TSDT
+
+- Reddy's third-order shear deformation theory for finite rotations: the
+  deformed position of the point at `z` is `X + z d + z^3 q`, `q = -c1 (d -
+  N)`, with the second-order director `d` of `plate_fsdt_tl`,
+  `cylshell_fsdt_tl` and `annular_fsdt_tl` and the normal of the deformed
+  mid-surface `N = X,x x X,y`, not normalized; the linear part of `d - N` is
+  Reddy's `(phix + w,x, phiy + w,y, 0)`. Strains: those of the FSDT TL
+  models and the coefficients of `z^3` of the in-plane and of `z^2` of the
+  transverse shear Green-Lagrange strains, `kappa3 = X,a . q,b` (plate:
+  `-c1 (kappa + X,ab . N)`), `gamma2 = -3 c1 gamma` exactly, so that the
+  faces stay free of transverse shear for any deformation; for the cylinder
+  `kyy3` has the term `-c1 (exx + eyy)/r`, which removes the stretch of `N`
+  from its linear part. Linear parts of `plate_tsdt_donnell`,
+  `cylshell_tsdt_sanders` and `annular_tsdt_donnell`; strains invariant
+  under rigid rotations up to the error of the second-order director.
+- Linear third-order terms with the director of the FSDT TL models were
+  compared and not kept: their face shear does not vanish, and in large
+  bending they lock (thin strip at a tip rotation of 0.46 rad 25 % too
+  stiff, 50 % at 0.99 rad).
+- Generators `theory/shells/{plate,cylshell,annular}_tsdt_tl/` (derivation
+  with symbolic checks, `write_pyx.py`, notes) and kernels
+  `panels/models/{plate,cylshell}_tsdt_tl_num.pyx` (with follower pressure)
+  and `panels/models/annular_tsdt_tl(_num).pyx`; the analytical kernels of
+  the plate and of the cylinder are those of `plate_tsdt_gl` and
+  `cylshell_tsdt_gl`.
+- Registered in `modelDB` (integrand degree `6p`), `setup.py`,
+  `panels.models`; `fsdt_tsdt_field.is_tl` and the 13 strains in
+  `fsdt_tsdt_field.fstrain`; the cylinder is a Sanders model for
+  `fsdt_tsdt_field.is_sanders` and `kCsdt._rinv_sanders`; follower pressure
+  (`theory/shells/follower_pressure`).
+- Documentation: section "Third-order shear deformation theory" of the
+  total-Lagrangian page, section of the annular page, model tables, "How
+  to choose a model".
+- Tests: `tests/tests_shell/test_plate_tsdt_tl.py`,
+  `test_cylshell_tsdt_tl.py`, `test_annular_tsdt_tl.py`.
+
 ### New models `plate_fsdt_tl`, `cylshell_fsdt_tl`: total-Lagrangian FSDT
 
 - The FSDT with the Green-Lagrange membrane strains of `plate_fsdt_gl` and

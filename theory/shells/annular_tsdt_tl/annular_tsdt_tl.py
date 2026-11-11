@@ -130,7 +130,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 MODEL = os.path.splitext(os.path.basename(__file__))[0]
 #: derivation of the flat-plate model with the same kinematics, compared by
 #: :func:`check_plate_limit`, relative to ``theory/shells``
-PLATE_TL = ('plate_tsdt_tl_B', 'plate_tsdt_tl_B.py')
+PLATE_TL = ('plate_tsdt_tl', 'plate_tsdt_tl.py')
 
 x, y, z, R = symbols('x, y, z, R', real=True)
 rho = symbols('rho', positive=True)
