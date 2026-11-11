@@ -12,10 +12,15 @@ Notes
 -----
 Under a rigid rotation `t` about an oblique axis the third-order transverse
 shear strain of option A, `-3 c_1 (\phi_\alpha + w_{,\alpha})`, is of
-`O(t^2)`, so that the internal forces are of `O(t^2)` relative to the
-linear ones; option B, whose strains are those of the field `\mathbf{X} +
-z \mathbf{d} + z^3 \mathbf{q}`, leaves only the error of the second-order
-director, `|\mathbf{d}|^2 - 1 = O(t^4)`.
+`O(t^2)`, and so are the internal forces; option B, whose strains are
+those of the field `\mathbf{X} + z \mathbf{d} + z^3 \mathbf{q}`, leaves
+only the error of the second-order director, `|\mathbf{d}|^2 - 1 =
+O(t^4)`, and internal forces of `O(t^5)`. In large bending the transverse
+shear strain of the director, `\mathbf{X}_{,x} \cdot \mathbf{d}`, and the
+linear one, `\phi_x + w_{,x}`, cannot both vanish (they differ by
+`O(t^5)`); option A, which combines them in the transverse shear energy,
+stiffens a thin strip, option B, whose third-order shear strain is
+proportional to that of the director, does not.
 
 """
 import os
@@ -88,11 +93,49 @@ def rotation_residual(model, axis, angle):
 
 @pytest.mark.parametrize('axis', [(1, 2, 3)])
 def test_rigid_rotation_residual(axis):
-    r"""Oblique axis, 0.2 and 0.1 rad: residual of option A of `O(t^2)`,
-    of option B of `O(t^4)` or smaller (ratios about 4 and 16 or more), and
-    the residual of option B at 0.2 rad below a fiftieth of that of A"""
+    r"""Oblique axis, 0.2 and 0.1 rad, ``KC0 c`` being of `O(t^2)`: the
+    residual of option A is of `O(1)` (internal forces of `O(t^2)`), that of
+    option B of `O(t^3)` (internal forces of `O(t^5)`, ratio about 8), and
+    at 0.2 rad below a thousandth of that of A (hpc12: A 8.42e-3, 8.26e-3;
+    B 4.25e-6, 5.25e-7)"""
     rA = [rotation_residual(MODELS[0], axis, t) for t in (0.2, 0.1)]
     rB = [rotation_residual(MODELS[1], axis, t) for t in (0.2, 0.1)]
-    assert 1.7 < np.log2(rA[0]/rA[1]) < 2.3, rA
-    assert np.log2(rB[0]/rB[1]) > 3.5, rB
-    assert rB[0] < rA[0]/50, (rA, rB)
+    assert abs(np.log2(rA[0]/rA[1])) < 0.3, rA
+    assert np.log2(rB[0]/rB[1]) > 2.7, rB
+    assert rB[0] < rA[0]/1000, (rA, rB)
+
+
+def strip_tip(model, alpha, inc):
+    r"""Tip ``(w, -u)/L`` of a strip ``L = 1``, ``b = 0.04``, ``h = 2e-3``,
+    ``nu = 0``, clamped at ``x = 0`` (``w,x = 0`` too), under a tip force
+    along ``z`` of ``alpha = P L^2/EI``, mean over the tip"""
+    from structsolve import Analysis
+    L, b, h, E = 1., 0.04, 2e-3, 70e9
+    P = alpha*E*h**3*b/12/L**2
+    s = Shell(model=model, a=L, b=b, stack=[0], plyt=h, laminaprop=(E, 0.),
+              m=14, n=4)
+    fields = ('u', 'v', 'w', 'phix', 'phiy')
+    set_flags(s, ('x2', 'y1', 'y2'), fields, **{'': 1., 'r': 1.})
+    set_flags(s, ('x1', ), fields, **{'': 0., 'r': 1.})
+    s.x1wr = 0.
+    s._rebuild()
+    for y in np.linspace(0, b, 5):
+        s.add_point_load(L, y, 0., 0., P/5, cte=False)
+    an = Analysis(s.calc_fext, s.calc_fint, s.calc_kC, s.calc_kG)
+    an.initialInc = an.maxInc = inc
+    an.static(NLgeom=True, silent=True)
+    assert np.isclose(an.increments[-1], 1.)
+    f = s.uvw(an.cs[-1], xs=np.full(5, L), ys=np.linspace(0, b, 5))[1]
+    return f['w'].mean()/L, -f['u'].mean()/L
+
+
+def test_thin_cantilever_strip_against_elastica():
+    r"""``alpha = 1``, tip rotation 0.46 rad, elastica ``w = 0.3017208 L``,
+    ``-u = 0.0564332 L``: option B within -0.22 % and -0.47 %; option A 25 %
+    too stiff, its linear third-order shear strain conflicting with the
+    transverse shear strain of the director (stored values, hpc12)"""
+    w, u = strip_tip(MODELS[1], 1., 0.1)
+    assert np.isclose(w, 0.3010715, rtol=1e-5)
+    assert np.isclose(u, 0.0561673, rtol=1e-5)
+    w, u = strip_tip(MODELS[0], 1., 0.1)
+    assert np.isclose(w, 0.2246729, rtol=1e-5)
