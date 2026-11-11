@@ -5,19 +5,19 @@ shear flow `N_{xy}` of a torque, hinged ends (`u = v = w = 0`, `w_{,x}`
 free), assembled from :class:`.Shell` domains with the default
 ``conn_method`` of :class:`.MultiDomain`. Verified:
 
-- specimen 16 of Moore and Wescoat [1]_, without rings, with `u` free at
+- specimen 16 of Moore and Wescoat (1944), without rings, with `u` free at
   the end `x = L`: the first buckling stress against Donnell's formula for
-  hinged ends as given in [1]_, p. 23;
+  hinged ends as given in Moore and Wescoat (1944), p. 23;
 - specimen 17, two rings of 1/2 x 1/2 in solid bars as webs of
   ``'annular_clpt_donnell'`` domains connected to the inner surface of the
   skin with ``'BFxcte'`` and ``face='lower'``: the first buckling stress
   against the converged value of the same model, and the ratio of the
-  observed stress of [1]_, Table I, to it;
+  observed stress of Moore and Wescoat (1944), Table I, to it;
 - specimen 19, the same rings and 8 channel stringers outside the skin
   (base as a second layer of the skin strip under it, webs and lips as flat
   plates connected with ``'BFycte'``): the first buckling stress against the
   converged value of the same model, and the ratio of the observed stress
-  of [1]_, Table II, to it.
+  of Moore and Wescoat (1944), Table II, to it.
 
 Notes
 -----
@@ -216,7 +216,8 @@ def test_specimen17_rings():
     r"""Specimen 17, two ring webs on the inner surface of the skin, 8
     sectors of 12 terms, 0.8 terms per inch along the axis: first buckling
     stress against the converged value of the same model, and the observed
-    stress of [1]_, Table I, below it, see the module ``Notes``"""
+    stress of Moore and Wescoat (1944), Table I, below it, see the module
+    ``Notes``"""
     t = 0.020
     md = _cylinder(t, [4.3125, 27., 4.3125], [(2*np.pi*R/8, 'bay', 12)]*8,
                    m_per_in=0.8)
@@ -230,7 +231,8 @@ def test_specimen19_rings_stringers():
     r"""Specimen 19, ring webs and 8 channel stringers outside the skin,
     17 terms across the bays, 0.8 terms per inch along the axis: first
     buckling stress against the converged value of the same model, and the
-    observed stress of [1]_, Table II, below it, see the module ``Notes``"""
+    observed stress of Moore and Wescoat (1944), Table II, below it, see
+    the module ``Notes``"""
     t = 0.020
     bs = 0.5 - TZ
     Hw = t/2 + 0.64 - TZ/2
