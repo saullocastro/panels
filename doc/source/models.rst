@@ -84,6 +84,8 @@ model                      closed form                                          
                            ``cylshell_tsdt_sanders``
 ``plate_fsdt_tl``          :mod:`panels.models.plate_fsdt_gl`                           :mod:`panels.models.plate_fsdt_tl_num`
 ``cylshell_fsdt_tl``       :mod:`panels.models.cylshell_fsdt_gl`                        :mod:`panels.models.cylshell_fsdt_tl_num`
+``plate_tsdt_tl``          :mod:`panels.models.plate_tsdt_gl`                           :mod:`panels.models.plate_tsdt_tl_num`
+``cylshell_tsdt_tl``       :mod:`panels.models.cylshell_tsdt_gl`                        :mod:`panels.models.cylshell_tsdt_tl_num`
 ========================== ============================================================ ===================================================================
 
 The stiffeners of a :class:`.StiffPanelBay` have their own kernels, for

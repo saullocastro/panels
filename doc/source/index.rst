@@ -55,6 +55,9 @@ the non-linear equations, see :mod:`panels.models`:
 * ``'plate_fsdt_tl'``, ``'cylshell_fsdt_tl'``: total-Lagrangian FSDT with
   the second-order director of the moderate rotation theory, see
   :ref:`fsdt_tsdt_tl`
+* ``'plate_tsdt_tl'``, ``'cylshell_tsdt_tl'``: total-Lagrangian TSDT, the
+  third-order term built with the director and the normal of the deformed
+  mid-surface, see :ref:`tsdt_tl`
 * ``'cylshell_clpt_donnell'``: cylindrical shells, CLPT with Donnell's
   kinematics
 * ``'cylshell_clpt_sanders'``: cylindrical shells, CLPT with Sanders-Koiter's

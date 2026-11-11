@@ -10,7 +10,10 @@ and transverse shear strains with a director that rotates with the
 deformation, as ``'plate_clpt_tl'`` and ``'cylshell_clpt_tl'`` measure the
 curvatures with the deformed normal. The degrees of freedom of a term are
 those of the first-order shear deformation theory (FSDT), `u, v, w,
-\phi_x, \phi_y`.
+\phi_x, \phi_y`. The models ``'plate_tsdt_tl'`` and ``'cylshell_tsdt_tl'``
+extend them to the third-order shear deformation theory (TSDT) of Reddy
+[reddy1984HigherOrder]_, [reddy1985Shells]_, with the same degrees of
+freedom, see :ref:`tsdt_tl`.
 
 Moderate rotation kinematics
 ----------------------------
@@ -208,13 +211,165 @@ plate or of the cylinder changes the curvatures and transverse shear
 strains by `O(t^4)`, against `O(t^2)`, the factor `\cos t`, for the linear
 curvatures of the GL models.
 
+.. _tsdt_tl:
+
+Third-order shear deformation theory
+------------------------------------
+
+Reddy's displacement field [reddy1984HigherOrder]_ adds to the field of the
+FSDT a cubic term that makes the transverse shear strains vanish at the
+faces `z = \pm h/2`:
+
+.. math::
+
+    \mathbf{u}(z) = \mathbf{u} + z (\phi_x, \phi_y, 0) - c_1 z^3 (\phi_x +
+    w_{,x}, \; \phi_y + w_{,y}, \; 0), \qquad c_1 = \frac{4}{3 h^2}
+
+For finite rotations, the vector of the cubic term, `(\phi_x + w_{,x},
+\phi_y + w_{,y}, 0)`, is read as the linear part of the difference between
+the director :eq:`fsdt-tl-director` and the normal of the deformed
+mid-surface, not normalized,
+
+.. math::
+
+    \mathbf{N} = \mathbf{X}_{,x} \times \mathbf{X}_{,y}
+
+whose linear part is `(-w_{,x}, -w_{,y} + v/r, 1 + u_{,x} + v_{,y} + w/r)`
+in the local basis. The deformed position of the point at `z` of the models
+``'plate_tsdt_tl'`` and ``'cylshell_tsdt_tl'`` is
+
+.. math::
+    :label: tsdt-tl-field
+
+    \mathbf{r}(z) = \mathbf{X} + z \mathbf{d} + z^3 \mathbf{q}, \qquad
+    \mathbf{q} = -c_1 (\mathbf{d} - \mathbf{N})
+
+Its strains are the coefficients of `z^0`, `z` and `z^3` of the in-plane
+Green-Lagrange strains and of `z^0` and `z^2` of the transverse shear
+strains, the powers of the linear TSDT: the strains
+:eq:`fsdt-tl-strains` and
+
+.. math::
+    :label: tsdt-tl-strains
+
+    \kappa^{(3)}_{xx} = \mathbf{X}_{,x} \cdot \mathbf{q}_{,x} \qquad
+    \kappa^{(3)}_{yy} = \mathbf{X}_{,y} \cdot \mathbf{q}_{,y} -
+    \frac{c_1}{r} (\varepsilon_{xx} + \varepsilon_{yy}) \qquad
+    \kappa^{(3)}_{xy} = \mathbf{X}_{,x} \cdot \mathbf{q}_{,y} +
+    \mathbf{X}_{,y} \cdot \mathbf{q}_{,x}
+
+    \gamma^{(2)}_{yz} = 3 \mathbf{X}_{,y} \cdot \mathbf{q} \qquad
+    \gamma^{(2)}_{xz} = 3 \mathbf{X}_{,x} \cdot \mathbf{q}
+
+with the derivatives of the vectors along `y` in the local basis of the
+cylinder as for `\mathbf{d}_{,y}`, and `1/r = 0` for the plate. Dropped, as
+in the linear TSDT: the coefficients of `z^2`, `z^4` and `z^6` of the
+in-plane strains, of the odd powers of the transverse shear strains and the
+transverse normal strain. The second derivatives of `u` and `v` enter
+through those of `\mathbf{X}`.
+
+Since `\mathbf{X}_{,\alpha} \cdot \mathbf{N} = 0` for any deformation,
+`\mathbf{X}_{,\alpha} \cdot \mathbf{N}_{,\beta} = -\mathbf{X}_{,\alpha\beta}
+\cdot \mathbf{N}` and, for the plate,
+
+.. math::
+
+    \kappa^{(3)}_{xx} = -c_1 (\kappa_{xx} + \mathbf{X}_{,xx} \cdot
+    \mathbf{N}) \qquad
+    \kappa^{(3)}_{yy} = -c_1 (\kappa_{yy} + \mathbf{X}_{,yy} \cdot
+    \mathbf{N}) \qquad
+    \kappa^{(3)}_{xy} = -c_1 (\kappa_{xy} + 2 \mathbf{X}_{,xy} \cdot
+    \mathbf{N})
+
+    \gamma^{(2)}_\alpha = -3 c_1 \gamma_\alpha
+
+Reddy's `\phi_{\alpha,\beta}` becomes the curvature of the director and
+`w_{,\alpha\beta}` the second fundamental form of the deformed mid-surface,
+`\mathbf{X}_{,\alpha\beta} \cdot \mathbf{N}`. The relation `\gamma^{(2)} =
+-3 c_1 \gamma` is exact, so that the transverse shear strain through the
+thickness, `\gamma_\alpha (1 - 4 z^2/h^2)`, vanishes at the faces for any
+deformation: Reddy's traction-free faces hold at finite rotations.
+
+Cylinder
+^^^^^^^^
+
+The `z` component of `\mathbf{N}` is `1 + \varepsilon_{xx} +
+\varepsilon_{yy}` to first order, the stretch of the area of the
+mid-surface. In the plate it is dropped with the coefficient of `z^3` of
+the transverse shear strains, whose linear part it is, `c_1 (u_{,x} +
+v_{,y})_{,\alpha}`. In the cylinder it enters `\mathbf{q}_{,y}` through the
+curvature of the reference, `\mathbf{e}_{z,y} = \mathbf{e}_y/r`, and adds
+`c_1 (u_{,x} + v_{,y} + w/r)/r` to the linear part of `\mathbf{X}_{,y}
+\cdot \mathbf{q}_{,y}`. The term `-c_1 (\varepsilon_{xx} +
+\varepsilon_{yy})/r` of :eq:`tsdt-tl-strains`, with the Green-Lagrange
+membrane strains, removes it, as the Koiter terms of :eq:`fsdt-tl-strains`
+remove the membrane strains from the linear curvatures; the linear part is
+then that of ``'cylshell_tsdt_sanders'``, `\kappa^{(3)}_{xx} = -c_1
+(\phi_{x,x} + w_{,xx})`, `\kappa^{(3)}_{yy} = -c_1 (\phi_{y,y} +
+w_{,yy})`, `\kappa^{(3)}_{xy} = -c_1 (\phi_{x,y} + \phi_{y,x} + 2
+w_{,xy})`, and the linear parts of ``'plate_tsdt_tl'`` and
+``'cylshell_tsdt_tl'`` are those of ``'plate_tsdt_donnell'`` and
+``'cylshell_tsdt_sanders'``.
+
+Rigid rotations
+^^^^^^^^^^^^^^^
+
+The strains :eq:`tsdt-tl-strains` are dot products of vectors that a rigid
+rotation turns together, and Green-Lagrange membrane strains; as for the
+FSDT, only the second-order director cannot follow the rotation: a rigid
+rotation of the flat plate gives zero membrane, bending and third-order
+bending strains and transverse shear strains of `O(t^5)`, and a rotation of
+a bent plate or of the cylinder changes the other strains by `O(t^4)`. The
+linear third-order strains of ``'plate_tsdt_gl'`` and ``'cylshell_tsdt_gl'``
+change at the second or the first order in the angle.
+
+Third-order terms linear
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+A simpler model keeps the first-order part :eq:`fsdt-tl-strains` and
+the linear third-order strains of Reddy, those of the GL models,
+`\kappa^{(3)}_{\alpha\beta} = -c_1 (\phi_{\alpha,\beta} + \phi_{\beta,\alpha}
++ 2 w_{,\alpha\beta})/(1 + \delta_{\alpha\beta})` and `\gamma^{(2)}_\alpha =
+-3 c_1 (\phi_\alpha + w_{,\alpha})`, as Amabili [amabili2018Nonlinear]_,
+Sec. 3.9, does in a model with the nonlinear terms of von Kármán. It has
+the same linear part, but its shear strain at the faces is `\mathbf{X}_{,\alpha}
+\cdot \mathbf{d} - (\phi_\alpha + w_{,\alpha})`, cubic, not zero, and a
+rigid rotation about an oblique axis gives third-order strains of `O(t^2)`.
+In large bending the shear strain of the director, `\mathbf{X}_{,x} \cdot
+\mathbf{d}`, and the linear one, `\phi_x + w_{,x}`, cannot both vanish:
+with `\gamma` and `\gamma_L` these two strains, the transverse shear energy
+per unit area of an isotropic layer is `G h (\gamma^2 - \tfrac{2}{3} \gamma
+\gamma_L + \tfrac{1}{5} \gamma_L^2)/2`, which penalizes the bending by a
+factor of the order of `(L/h)^2`: the model locks. A strip of `L/h = 500`,
+clamped at one end under a tip force of constant direction normal to its
+plane, `\alpha = P L^2/EI = 1`, whose inextensible elastica has the tip
+rotation 0.46 rad, `w = 0.3017 L` and `-u = 0.0564 L`, gives with that model
+`w` 25.5 % and `-u` 47 % too small, and at `\alpha = 3` (0.99 rad) 50 % and
+79 %; the field :eq:`tsdt-tl-field` gives -0.22 % and -0.47 % at `\alpha =
+1`, -1.4 % and -3.8 % at `\alpha = 3`, close to the FSDT model (-0.27 %,
+-0.59 %; -1.8 %, -4.7 %), the differences coming from the second-order
+director. A thick strip, `L/h = 5`, compared with the geometrically exact
+beam of Reissner [reissner1972Beam]_ with the shear stiffness of its linear
+deflection, at `\alpha = 3` (0.98 rad): -3.4 % and -7.9 % for the linear
+third-order terms, -0.81 % and -0.20 % for :eq:`tsdt-tl-field`. Schmidt and
+Reddy [schmidt1988Refined]_, Eqs. (17)-(19), written for an expansion of
+any order in the thickness coordinate, have products of the rotation
+terms of all orders in the strains, i.e. third-order strains that are not
+linear.
+
+The field :eq:`tsdt-tl-field` costs more: 21 generalized derivatives at an
+integration point of the plate instead of 15, and for a plate of 12 x 12
+terms the constitutive and geometric stiffness matrices take about 1.3 and
+1.7 times as long as with the linear third-order terms.
+
 Tangent stiffness
 -----------------
 
 At an integration point the strains depend on the generalized derivatives
 `\boldsymbol{d} = \boldsymbol{\Phi} \boldsymbol{c}` of the GL models: the
 gradients of `u, v, w`, for the cylinder the values of `v` and `w`, the
-rotations and their gradients. With `\boldsymbol{B} = \partial
+rotations and their gradients, and for the TSDT the second derivatives
+of `u`, `v` and `w`. With `\boldsymbol{B} = \partial
 \boldsymbol{\varepsilon}/\partial \boldsymbol{d}`, quadratic in
 `\boldsymbol{d}`, and the generalized stresses `\boldsymbol{\sigma} =
 \boldsymbol{F}_c \boldsymbol{\varepsilon}`:
@@ -250,4 +405,7 @@ Limitations
   Green-Lagrange strains (small strains).
 - The connections of :class:`.MultiDomain` stay linear in the local
   displacements and rotations.
-- The third-order shear deformation theory has no total-Lagrangian model.
+- The third-order shear deformation theory keeps the transverse shear
+  strain of the director through the thickness, `\gamma_\alpha (1 - 4
+  z^2/h^2)`, and drops the higher powers of the thickness coordinate, as the
+  linear TSDT.

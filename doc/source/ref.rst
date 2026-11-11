@@ -5,6 +5,7 @@ References
 .. [alfano2001Interface] G. Alfano and M. A. Crisfield, "Finite element interface models for the delamination analysis of laminated composites: mechanical and computational issues". International Journal for Numerical Methods in Engineering, 50:1701-1736, 2001.
 .. [crisfield1991Nonlinear] M. A. Crisfield, "Non-linear Finite Element Analysis of Solids and Structures, Volume 1: Essentials". John Wiley & Sons, Chichester, 1991.
 .. [bagheri2019Torque] H. Bagheri, Y. Kiani and M. R. Eslami, "Buckling of moderately thick annular plates subjected to torque". Archive of Mechanical Engineering, 66(2), 209-227, 2019. https://doi.org/10.24425/ame.2019.128445.
+.. [amabili2018Nonlinear] M. Amabili, "Nonlinear Mechanics of Shells and Plates in Composite, Soft and Biological Materials". Cambridge University Press, Cambridge, 2018. https://doi.org/10.1017/9781316422892.
 .. [amabili2008Nonlinear] M. Amabili, "Nonlinear Vibrations and Stability of Shells and Plates". Cambridge University Press, Cambridge, 2008. https://doi.org/10.1017/CBO9780511619694.
 .. [bardell1991] N .S. Bardell, "Free vibration analysis of a flat plate using the hierarchical finite element method". Journal of Sound and Vibration, 151(2):263-289, 1991. https://doi.org/10.1016/0022-460X(91)90855-E.
 .. [block1965Stiffened] D. L. Block, M. F. Card and M. M. Mikulas, Jr., "Buckling of Eccentrically Stiffened Orthotropic Cylinders". NASA TN D-2960, NASA Langley Research Center, 1965. https://ntrs.nasa.gov/citations/19650021133.
@@ -31,6 +32,7 @@ References
 .. [pflueger1975Stability] A. Pflüger, "Stabilitätsprobleme der Elastostatik". 3rd ed., Springer-Verlag, Berlin, Heidelberg, New York, 1975. https://doi.org/10.1007/978-3-662-09994-0.
 .. [reddy1984HigherOrder] J. N. Reddy, "A simple higher-order theory for laminated composite plates". Journal of Applied Mechanics, 51(4):745-752, 1984. https://doi.org/10.1115/1.3167719.
 .. [reddy1985Shells] J. N. Reddy and C. F. Liu, "A higher-order shear deformation theory of laminated elastic shells". International Journal of Engineering Science, 23(3):319-330, 1985. https://doi.org/10.1016/0020-7225(85)90051-5.
+.. [reissner1972Beam] E. Reissner, "On one-dimensional finite-strain beam theory: the plane problem". Zeitschrift für angewandte Mathematik und Physik, 23:795-804, 1972. https://doi.org/10.1007/BF01602645.
 .. [sanders1963Nonlinear] J. L. Sanders, "Nonlinear theories for thin shells". Quarterly of Applied Mathematics, 21(1):21-36, 1963. https://doi.org/10.1090/qam/147023.
 .. [schmidt1988Refined] R. Schmidt and J. N. Reddy, "A Refined Small Strain and Moderate Rotation Theory of Elastic Anisotropic Shells". Journal of Applied Mechanics, 55(3), 611-617, 1988. https://doi.org/10.1115/1.3125837.
 .. [schweizerhof1984Pressure] K. Schweizerhof and E. Ramm, "Displacement dependent pressure loads in nonlinear finite element analyses". Computers & Structures, 18(6):1099-1114, 1984. https://doi.org/10.1016/0045-7949(84)90154-8.

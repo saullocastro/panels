@@ -224,6 +224,10 @@ moderately thick plates and shells,       ``'plate_fsdt_donnell'``, ``'cylshell_
 transverse shear flexibility              (or ``_donnell``)
 thick laminates, offset reference         ``'plate_tsdt_donnell'``, ``'cylshell_tsdt_sanders'``
 surface                                   (or ``_donnell``), see :ref:`tsdt_offset`
+moderately thick plates and shells bent   ``'plate_fsdt_tl'``, ``'cylshell_fsdt_tl'``, see
+through large rotations                   :ref:`fsdt_tsdt_tl`
+thick laminates bent through large        ``'plate_tsdt_tl'``, ``'cylshell_tsdt_tl'``, traction-free
+rotations                                 faces at any deformation, see :ref:`tsdt_tl`
 ========================================= ===============================================================
 
 **Plates bent in their own plane.** A blade stringer modelled as a plate
