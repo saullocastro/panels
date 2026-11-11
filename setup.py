@@ -75,7 +75,8 @@ trace = ('CYTHON_TRACE_NOGIL' in os.environ.keys()
 #      from the Python build is not guaranteed, and -fno-math-errno, which
 #      lets sqrt() compile to a single instruction and changes no result.
 #      MSVC is already at its fastest standard-conforming setting with the
-#      /O2 and /GL that setuptools passes. Flags that change floating-point
+#      /O2 and /GL that setuptools passes, except for the modules of
+#      MSVC_SSA_OFF below. Flags that change floating-point
 #      results, such as /fp:fast or -ffast-math, and flags that tie a wheel to
 #      the CPU that built it, such as -march=native, are deliberately left out
 # NOTE a WebAssembly build for Pyodide, see .github/workflows/pyodide.yml,
@@ -704,6 +705,29 @@ extensions = [
               language='c++'),
 
     ]
+
+# NOTE MSVC only: the SSA optimizer of MSVC is off (/d2SSAOptimizer-) for the
+#      modules of MSVC_SSA_OFF. Their generated integrand functions are very
+#      large, and MSVC optimizes each function on a single thread; with /O2
+#      and /GL the code generation of annular_tsdt_tl_num, at the link
+#      (/LTCG), takes more than 45 min of CPU time (2.6 h of wall time in a
+#      full build), and that of annular_clpt_tl_num 15 min. Whole-program
+#      optimization is not the cause: with /GL- the same code generation
+#      moves to the compiler and takes as long. With the SSA optimizer off,
+#      and /O2 and /GL kept, each of them builds in under 1 min, and the
+#      assembly of their matrices and vectors runs as fast as with the
+#      default flags (differences within +-10 %, of either sign, the
+#      scatter of the measurement). GCC and Clang compile each file at -O3
+#      with no link-time step, in normal time, and get no change
+MSVC_SSA_OFF = [
+    'panels.models.annular_clpt_tl_num',
+    'panels.models.annular_tsdt_tl_num',
+    ]
+if platform.system() == 'Windows' and not emscripten:
+    for ext in extensions:
+        if ext.name in MSVC_SSA_OFF:
+            ext.extra_compile_args = (ext.extra_compile_args
+                                      + ['/d2SSAOptimizer-'])
 
 def generated_with_other_trace_mode(ext):
     r"""Whether the C++ file generated from a Cython source of ``ext`` was
