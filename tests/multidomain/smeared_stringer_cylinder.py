@@ -82,8 +82,9 @@ def blade_stringer(E, nu, height, thickness, internal):
     surface of the shell
 
     The blade has the given ``height``, measured from the middle surface of
-    the shell, and ``thickness``, as the blade domains of
-    :func:`panels.multidomain.create_cylinder_blade_stiffened`.
+    the shell, and ``thickness``. The blade domains of
+    :func:`panels.multidomain.create_cylinder_blade_stiffened` stand on the
+    surface of the shell instead, see :func:`rectangle_stringer`.
 
     Parameters
     ----------

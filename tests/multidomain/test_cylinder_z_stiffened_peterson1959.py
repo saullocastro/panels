@@ -39,8 +39,16 @@ attached flange 0.38 in and free flange 0.22 in from the outer face of the
 web, depth 0.54 in from the skin to the outer face of the free flange.
 Fig. 2(a): spacing 1.25 in, stringers inside. The number of stringers is
 not printed; `2 \pi R/1.25 = 119.3`, and 120 are modelled (spacing 1.243
-in). The middle lines of the plates have square corners (the bends, of
-0.04 in inner radius, are not represented). Card and Jones [2]_ give no
+in). The plates have square corners (the bends, of 0.04 in inner radius,
+are not represented): the attached flange `b_f = 0.38 - 0.02 = 0.36` in and
+the free flange `b_l = 0.22 - 0.02 = 0.20` in from the middle surface of
+the web, and the web, whose root
+:func:`.create_cylinder_z_stiffened` ties to the face of the attached
+flange, from that face to the middle surface of the free flange, `H_w =
+0.54 - 0.040 - 0.020 = 0.48` in; the section as modelled has the area
+`1.04 t_z` per unit thickness, against `1.06 t_z` of the sheet with square
+corners, the two corner squares of half the web thickness not being
+counted. Card and Jones [2]_ give no
 theoretical value for these two cylinders, so the tests are the reference.
 
 **Model.** The ends ground flat and pressed by the platens are modelled as
@@ -58,20 +66,21 @@ six cylinders with errors of about 15 %; for the eight cylinders with these
 Z stringers of Card and Jones [2]_ (Table I, p. 7, cylinders 5 to 12, four
 of them the specimens 3 to 6 of Peterson and Dow) the tests are at 71 to 96
 % of their clamped smeared theory `\bar{N}_c`. With this model the computed
-loads are above the tests by 15 to 18 % (runs made when this test was
-written; more terms change them by less than 0.4 %), so the ratio
+loads are above the tests by 15 to 17 % (runs made when this test was
+written), so the ratio
 test/model of 0.70 to 1.00 is checked. The model buckles with `n = 12`
 (cylinder 1) and `n = 13` (cylinder 2) circumferential waves against 9,
 then 10, and 11 in the tests (p. 9). The loads of the wave numbers are
-close near the minimum: for cylinder 1, `n = 11, 13` are 1.6 % above the
-critical load, `n = 10` 7.2 % and `n = 9` 18.5 %; for cylinder 2, `n = 12,
-14` 1.0 and 0.6 %, `n = 11` 4.1 %. The measured wave numbers are not
+close near the minimum: for cylinder 1, `n = 11, 13` are 1.4 and 1.8 %
+above the critical load, `n = 10` 7.0 % and `n = 9` 18.2 %; for cylinder 2,
+`n = 12, 14` 0.9 and 0.7 %, `n = 11` 3.9 %. The measured wave numbers are not
 checked: they were observed on the buckled cylinders, and that of cylinder
 1 changed from 9 to 10 as the shortening increased (p. 9). The bfsccylinder
 implementation of these two cylinders (one stringer pitch with cyclic
-symmetry, the same three plates, a coarse mesh) gives the same critical `n`
-and 2128.4 and 3196.1 lb/in, against 2127.6 and 3194.0 lb/in here (runs
-made when this test was written).
+symmetry, the same three plates, a coarse mesh, the web from the middle
+surface of the skin) gives the same critical `n` and 2128.4 and 3196.1
+lb/in, against 2112.5 and 3183.9 lb/in here, with the web from the face of
+the attached flange (runs made when this test was written).
 
 References
 ----------
@@ -109,21 +118,21 @@ NS = 120
 # cylinder: length (in), P_cr (kips)
 PETERSON = {1: (25.40, 270.), 2: (19.28, 413.)}
 # regression values: critical n and N (N/m)
-REF = {1: (12, 372604.2), 2: (13, 559351.0)}
+REF = {1: (12, 369947.5), 2: (13, 557577.7)}
 
 
-def z_midlines(tz, flange, depth, free_flange, h):
-    # middle lines of the plates, square corners, from the outer dimensions
-    # of the sheet: attached flange from the middle surface of the web, web
-    # from the middle surface of the skin to that of the free flange, free
-    # flange from the middle surface of the web
-    return dict(tz=tz, bf=flange - tz/2, Hw=h/2 + depth - tz/2,
+def z_midlines(tz, flange, depth, free_flange):
+    # widths of the plates, square corners, from the outer dimensions of the
+    # sheet: attached flange from the middle surface of the web, web from
+    # the face of the attached flange to the middle surface of the free
+    # flange, free flange from the middle surface of the web
+    return dict(tz=tz, bf=flange - tz/2, Hw=depth - 3*tz/2,
                 bl=free_flange - tz/2)
 
 
 def _sec():
-    return {k: v*IN for k, v in z_midlines(0.040, 0.38, 0.54, 0.22,
-                                           h=0.0395).items()}
+    return {k: v*IN for k, v in z_midlines(0.040, 0.38, 0.54,
+                                           0.22).items()}
 
 
 def _cylinder(L, nstiff, sec, m, n, n_flange, **kwargs):
@@ -161,12 +170,12 @@ def _n_waves(c, skin, nmax=80):
 
 
 def test_z_section():
-    sec = z_midlines(0.040, 0.38, 0.54, 0.22, h=0.0395)
+    sec = z_midlines(0.040, 0.38, 0.54, 0.22)
     assert np.isclose(sec['bf'], 0.36)
-    assert np.isclose(sec['Hw'], 0.0395/2 + 0.52)
+    assert np.isclose(sec['Hw'], 0.48)
     assert np.isclose(sec['bl'], 0.20)
     A = sec['tz']*(sec['bf'] + sec['Hw'] + sec['bl'])
-    assert np.isclose(A, 0.040*(0.36 + 0.0395/2 + 0.52 + 0.20))
+    assert np.isclose(A, 0.040*(0.38 + 0.54 - 2*0.040 + 0.22 - 0.040/2))
 
 
 def test_create_cylinder_z_stiffened():
@@ -188,7 +197,8 @@ def test_create_cylinder_z_stiffened():
     with pytest.raises(ValueError):
         md, conns = _cylinder(19.28*IN, 4, sec, 4, 4, 4)
     # the strip: laminate of the skin and of the flange, offset towards the
-    # stringer; the web connected at its edge y = 0 inside, y = H_w outside;
+    # stringer; the web connected at its edge y = 0 inside, y = H_w outside,
+    # at the face of the strip;
     # the free flange towards +y (flange_side=-1) or -y (flange_side=1)
     for side, sign in (('internal', -1), ('external', 1)):
         for flange_side in (-1, 1):
@@ -207,6 +217,11 @@ def test_create_cylinder_z_stiffened():
                               sec['Hw'] if side == 'internal' else 0.)
             assert np.isclose(lip_conn['ycte2'],
                               sec['bl'] if flange_side == -1 else 0.)
+            # the root of the web at the face of the strip, the free
+            # flange at the middle surface of the web
+            assert web_conn['face'] == ('lower' if side == 'internal'
+                                        else 'upper')
+            assert lip_conn.get('face') is None
     for kwargs in (dict(side='inside'), dict(flange_side=0), dict(bc='CF'),
                    dict(models=dict(blade='plate_clpt_gl'))):
         with pytest.raises(ValueError):
@@ -320,7 +335,7 @@ def test_stack_z_mirror(side):
     gives them to ``rtol=1e-8`` (first 6 loads). The same sheet given in
     the order of the `z` axis of each plate, ``[stack]*3``, which is not a
     bent sheet, breaks the symmetry: the first loads of the two cylinders
-    differ by 0.54 % (internal) and 1.30 % (external) (runs made when this
+    differ by 0.50 % (internal) and 1.21 % (external) (runs made when this
     test was written); more than 0.3 % is asserted, so that the test
     detects a wrong order of the plies.
 

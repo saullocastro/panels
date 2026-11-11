@@ -20,10 +20,12 @@ Singer, Arbocz and Babcock [1]_ give the stringers of AS-2 as `A/(d t) =
 with `t = 7.74 \times 10^{-3}` in, `R/t = 517`, `L = 5.50` in, 80 stringers,
 `E = 10 \times 10^6` psi and `\nu = 0.3`. A rectangle of height `h_s =
 \sqrt{12 I/A}` and width `t_s = A/h_s` (with `d = 2 \pi R/80`) reproduces
-`e = (t + h_s)/2` within 0.6 %; the blade is this rectangle extended to the
-middle surface of the skin, of thickness `t_s` and width `H_s = h_s + t/2`.
-The torsion constant of the stringers is not printed. The Kirchhoff plate
-strip has the twisting stiffness `4 D_{66} H_s = G H_s t_s^3/3`, 18 times
+`e = (t + h_s)/2` within 0.6 %; the blade is this rectangle, standing on
+the outer surface of the skin, to which
+:func:`.create_cylinder_blade_stiffened` ties its root, of thickness `t_s`
+and width `H_s = h_s`. The torsion constant of the stringers is not
+printed. The Kirchhoff plate strip has the twisting stiffness `4 D_{66} H_s
+= G H_s t_s^3/3`, 15 times
 `G J_r`, with `J_r` the Saint-Venant constant of the rectangle `t_s \times
 h_s`; `D_{66}` of the blades is scaled to `G J_r` through the attribute
 ``ABDnxny``, which also gives the blades their thickness `t_s` (the plies of
@@ -35,15 +37,15 @@ The C-4 values of [1]_ come from a smeared-stiffener analysis (Table 2;
 the program is not named). The smeared theory of Block, Card and Mikulas
 [2]_ with the clamped Galerkin functions of Card and Jones [3]_ (equation
 (A5)) and `J = J_r` gives 184.3 lb/in (+0.3 %), with `J = 0` 164.4 lb/in
-(-10.6 %); the discrete model, about 2.5 % below the smeared theory for the
-same blade, gives 181.4 lb/in (-1.3 %) with `J = J_r` and 163.2 lb/in with
-`J = 0` (half cylinder, 20 terms along `x`, 10 across a skin bay and 5
-across a blade; runs made when this test was written). The 10 by 4 terms
-per domain of this test give 181.7 lb/in (-1.1 %), 0.2 % above 14 by 6
-terms. The 3 % tolerance thus accepts the discrete-versus-smeared
+(-10.6 %); the discrete model, about 2.2 % below the smeared theory for the
+same blade, gives with the 10 by 4 terms per domain of this test 180.3 lb/in
+(-1.9 %) with `J = J_r` and 161.9 lb/in with `J = 0`, and with 14 by 6
+terms 180.0 lb/in (-2.1 %) (runs made when this test was written). The 3 %
+tolerance thus accepts the discrete-versus-smeared
 difference and rejects a blade without twisting stiffness. Under the simple support SS-3 of [1]_ the discrete load with `J =
-J_r` is 7 % above its SS-3 value (123.8 lb/in), which is matched with `J =
-0`: no single `J` reproduces both columns of [1]_, so the clamped case,
+J_r` was 7 % above its SS-3 value (123.8 lb/in), which was matched with `J
+= 0`, with the blade extended to the middle surface of the skin, `H_s =
+h_s + t/2` (runs made when this test was written): no single `J` reproduces both columns of [1]_, so the clamped case,
 where the authors judged the test shells to be (p. 72), is the one tested.
 The full cylinder and the whole length are modelled: the critical mode has
 two axial half-waves and 15 circumferential waves.
@@ -79,7 +81,7 @@ R = 517*T
 L = 5.50
 NSTIFF = 80
 C4_MEMBRANE = 183.8  # lb/in, Table 2 of [1]_
-REF = 181.6988  # regression value, lb/in (m = 10, n = 4)
+REF = 180.3085  # regression value, lb/in (m = 10, n = 4)
 
 
 def section():
@@ -90,17 +92,18 @@ def section():
     ts = A/hs
     a, c = ts, hs
     Jr = c**3*a*(1/3 - 64/np.pi**5*c/a*np.tanh(np.pi*a/(2*c)))
-    return d, ts, hs, hs + T/2, Jr
+    return d, ts, hs, Jr
 
 
-def clamped_membrane(m, n):
-    d, ts, hs, Hs, Jr = section()
+def clamped_membrane(m, n, J=True):
+    d, ts, hs, Jr = section()
+    Hs = hs
     md, conns, info = create_cylinder_blade_stiffened(height=L, r=R,
             stack=[0], stack_blades=[[0]]*NSTIFF, width_blades=[Hs]*NSTIFF,
             plyt=T, laminaprop=(E, NU), npanels=NSTIFF, m=m, n=n,
             side='external')
     ABD = np.array(isotropic_plate(thickness=ts, E=E, nu=NU).ABD, dtype=float)
-    ABD[5, 5] *= Jr/(Hs*ts**3/3)
+    ABD[5, 5] *= Jr/(Hs*ts**3/3) if J else 0.
     for p in md.panels:
         # u = v = w = 0 at both ends (create_cylinder_blade_stiffened) and
         # w,x = 0 for the skin; for a blade, v (radial) and w
