@@ -2,6 +2,33 @@
 
 ## Unreleased
 
+### Changed: `MultiDomain` imposes the prescribed displacements with `pd_method='null-space'` by default
+
+- The default of `pd_method` of `MultiDomain` is `'null-space'`, as for
+  `conn_method`: the prescribed displacements of `Shell.add_point_pd`,
+  `Shell.add_distr_pd_fixed_x` and `Shell.add_distr_pd_fixed_y` are imposed
+  exactly, `calc_fext` does not contain their penalty forces `k u_p`, and
+  `get_Z` contains their constraints. It was `'penalty'`; code that adds the
+  penalty stiffnesses of `fkCpd`, `fkCld_xcte` or `fkCld_ycte` to the
+  stiffness matrix must now pass `pd_method='penalty'`. Assemblies without
+  prescribed displacements are unchanged. `json_io.load` uses the same
+  default for a file without the key `pd_method`, and the notebook helper
+  `blade_cylinder_utils.build_cylinder` defaults to `'null-space'`.
+- Cost, measured on hpc12 for linear buckling under end-shortening (single
+  plate, blade- and Z-stiffened cylinders up to 77760 Ritz constants, the
+  L-stringer cylinder of 38880 Ritz constants under compression and
+  torsion): the total time of the null-space method is within -36 % to
+  +7 % of the penalty method with `k = 10^4 A_11/a` and `10^6 A_11/a`,
+  `get_Z` taking up to 4.5 s longer, and the peak memory within -9 % to
+  +6 %.
+- Tests that use the penalty forms (`test_dcb_damage`,
+  `test_dcb_linear_measures`, `test_face_clamp`, `test_kCpd_kernels`,
+  `test_multidomain_postprocessing`, `test_null_space_pd`) pass
+  `pd_method='penalty'` (values unchanged); `test_null_space_pd` checks the
+  new default. The notebooks `null_space_vs_penalty` and the helper
+  `dcb_utils` pass `pd_method='penalty'` where they used the default
+  (results unchanged).
+
 ### Changed: `create_wingbox` connects the domains with `conn_method='null-space'` by default
 
 - The default of `conn_method` of `create_wingbox`, and so of

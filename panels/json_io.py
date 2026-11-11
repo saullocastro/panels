@@ -567,7 +567,7 @@ def _multidomain_from_data(data, r):
     conn_method = data.get('conn_method', 'null-space')
     if conn_method not in ('penalty', 'null-space'):
         raise ValueError('Invalid conn_method: %r' % (conn_method, ))
-    pd_method = data.get('pd_method', 'penalty')
+    pd_method = data.get('pd_method', 'null-space')
     if pd_method not in ('penalty', 'null-space'):
         raise ValueError('Invalid pd_method: %r' % (pd_method, ))
     md = MultiDomain(panels, conn, conn_method=conn_method,

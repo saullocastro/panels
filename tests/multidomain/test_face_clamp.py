@@ -414,7 +414,7 @@ def test_face_clamp_penalty_and_null_space_agree(offset):
     _, c = static(s)
     k = 1e4*E
     p = build(k)
-    md = MultiDomain([p], conn=[])
+    md = MultiDomain([p], conn=[], pd_method='penalty')
     size = md.get_size()
     kCp = 0
     for x in (0., A):

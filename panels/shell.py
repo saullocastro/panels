@@ -3257,12 +3257,12 @@ class Shell(object):
         thickness coordinate ``z``, by default at the reference surface,
         e.g. at the faces of the laminate to clamp an edge by its faces.
 
-        With the penalty method, the default of :class:`.MultiDomain`, the
+        With ``MultiDomain(..., pd_method='penalty')`` the
         prescribed displacement enters the external force vector as `k u_p`,
         see :func:`.shell_fext`, and the penalty stiffness must be added to
         the stiffness matrix, e.g. with :func:`.fkCpd`. With
-        ``MultiDomain(..., pd_method='null-space')`` it is imposed exactly,
-        see :class:`.MultiDomain`: the values of the penalty constants are
+        ``pd_method='null-space'``, the default of :class:`.MultiDomain`, it
+        is imposed exactly: the values of the penalty constants are
         not used, a component being prescribed when its penalty constant is
         neither ``None`` nor zero and its value is not ``None``.
 
@@ -3421,12 +3421,12 @@ class Shell(object):
         The in-plane displacements `u` and `v` are prescribed at the
         thickness coordinate ``z``, see :meth:`.add_point_pd`.
 
-        With the penalty method, the default of :class:`.MultiDomain`, the
+        With ``MultiDomain(..., pd_method='penalty')`` the
         prescribed displacement enters the external force vector as `k
         g(y)`, see :func:`.shell_fext`, and the penalty stiffness must be
         added to the stiffness matrix, e.g. with :func:`.fkCld_xcte`. With
-        ``MultiDomain(..., pd_method='null-space')`` it is imposed exactly,
-        see :class:`.MultiDomain`: the values of the penalty constants are
+        ``pd_method='null-space'``, the default of :class:`.MultiDomain`, it
+        is imposed exactly: the values of the penalty constants are
         not used, a component being prescribed when its penalty constant is
         neither ``None`` nor zero.
 
@@ -3499,12 +3499,12 @@ class Shell(object):
         The in-plane displacements `u` and `v` are prescribed at the
         thickness coordinate ``z``, see :meth:`.add_point_pd`.
 
-        With the penalty method, the default of :class:`.MultiDomain`, the
+        With ``MultiDomain(..., pd_method='penalty')`` the
         prescribed displacement enters the external force vector as `k
         g(x)`, see :func:`.shell_fext`, and the penalty stiffness must be
         added to the stiffness matrix, e.g. with :func:`.fkCld_ycte`. With
-        ``MultiDomain(..., pd_method='null-space')`` it is imposed exactly,
-        see :class:`.MultiDomain`: the values of the penalty constants are
+        ``pd_method='null-space'``, the default of :class:`.MultiDomain`, it
+        is imposed exactly: the values of the penalty constants are
         not used, a component being prescribed when its penalty constant is
         neither ``None`` nor zero.
 

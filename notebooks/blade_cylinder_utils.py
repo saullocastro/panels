@@ -71,7 +71,7 @@ def _set_end(p, end, flags):
 
 def build_cylinder(R, h, L, E, nu, rho=0., nstiff=60, tb=None, hb=None,
         side='external', bc='SS', mx=12, ny=6, nyb=4, full=False,
-        pd_method='penalty', blade_model='plate_clpt_gl', Dy_factor=1.,
+        pd_method='null-space', blade_model='plate_clpt_gl', Dy_factor=1.,
         D12_factor=1., skin_model='cylshell_clpt_sanders',
         blade_D66_factor=1.):
     r"""Cylinder with ``nstiff`` equally spaced blade stringers
@@ -127,7 +127,8 @@ def build_cylinder(R, h, L, E, nu, rho=0., nstiff=60, tb=None, hb=None,
     full : bool
         Whole cylinder instead of the half.
     pd_method : str
-        See :class:`panels.multidomain.MultiDomain`.
+        See :class:`panels.multidomain.MultiDomain`. Default
+        ``'null-space'``.
     blade_model : str
         Model of the blades.
     Dy_factor, D12_factor : float
