@@ -223,22 +223,27 @@ AXES = {'in-plane': np.array([np.cos(0.4), np.sin(0.4), 0.]),
 
 @pytest.mark.parametrize('axis', list(AXES))
 def test_rigid_rotation(axis):
-    r"""Rigid rotations `t = 0.2` and `0.1` of a free quarter annulus:
-    ``'annular_tsdt_tl'`` has membrane, bending and third-order strains
-    below `10^{-9}` and transverse shear strains of `O(t^5)` (fitted order
-    between 4.5 and 5.5); ``'annular_tsdt_gl'`` has third-order and
-    transverse shear strains of `O(t^2)` (between 1.8 and 2.2), more than
-    1000 times larger at `t = 0.1`"""
+    r"""Rigid rotations `t = 0.2` and `0.1` of a free quarter annulus,
+    `h = 0.06`: ``'annular_tsdt_tl'`` has membrane, bending and third-order
+    strains below `10^{-9}`, the fitting error, and transverse shear strains
+    of `O(t^5)` (fitted order between 4.5 and 5.5; hpc12, in-plane axis:
+    `\gamma` 3.94e-5, 1.24e-6, inclined axis: 6.92e-6, 2.19e-7). For the axis
+    in the plane the linear third-order and transverse shear strains of
+    ``'annular_tsdt_gl'`` vanish (below `10^{-10}`); for the inclined axis
+    they are of `O(t^2)` (order between 1.8 and 2.2), more than 1000 times
+    those of ``'annular_tsdt_tl'`` at `t = 0.1`"""
     tl = [rotation_strains(MODEL, t, AXES[axis]) for t in (0.2, 0.1)]
     gl = [rotation_strains(GL, t, AXES[axis]) for t in (0.2, 0.1)]
-    print(axis, 'tl', tl, 'gl', gl)
     order = lambda v0, v1: np.log2(v0/v1)
     assert max(tl[0][:3].max(), tl[1][:3].max()) < 1e-9
     for k in (3, 4):
         assert 4.5 < order(tl[0][k], tl[1][k]) < 5.5, tl
     big_gl = [g[2:].max() for g in gl]
-    assert 1.8 < order(*big_gl) < 2.2, gl
-    assert tl[1].max() < 1e-3*big_gl[1]
+    if axis == 'in-plane':
+        assert max(big_gl) < 1e-10, gl
+    else:
+        assert 1.8 < order(*big_gl) < 2.2, gl
+        assert tl[1].max() < 1e-3*big_gl[1]
 
 
 def strip_tip(model, alpha=1., inc=0.1):
@@ -292,16 +297,18 @@ def test_elastica():
 
 def test_thin_cantilever_strip_against_elastica():
     r"""Strip of a large annulus, `L/h = 500`, `\alpha = 1`, tip rotation
-    0.46 rad: ``'annular_tsdt_tl'`` within 0.3 % and 0.6 % of the
-    elastica, ``'annular_tsdt_gl'`` more than 8 % and 20 % above it; both
-    against stored values (hpc12)"""
+    0.46 rad: ``'annular_tsdt_tl'`` within 0.3 % and 0.6 % of the elastica
+    (hpc12: `w` -0.21 %, `-u` -0.47 %), ``'annular_tsdt_gl'`` more than 8 %
+    and 20 % above it (+10.5 %, +24.5 %); both against the stored hpc12
+    values, rtol `10^{-5}`"""
     ELASTICA = elastica(1.)[:2]
     w, u = strip_tip(MODEL)
     wg, ug = strip_tip(GL)
-    print('tl', w, u, 'gl', wg, ug)
     assert np.isclose(w, ELASTICA[0], rtol=3e-3)
     assert np.isclose(u, ELASTICA[1], rtol=6e-3)
     assert wg > 1.08*ELASTICA[0] and ug > 1.2*ELASTICA[1]
+    assert np.allclose((w, u), (0.3010774, 0.0561698), rtol=1e-5)
+    assert np.allclose((wg, ug), (0.3333425, 0.0702331), rtol=1e-5)
 
 
 def test_tangent_is_derivative_of_fint():
