@@ -24,7 +24,10 @@ e.g. ``'plate_fsdt_donnell'`` or ``'cylshell_tsdt_sanders'``, with 5 DOFs
 :func:`.fkCBFycte22_sdt`. The blocks of a single panel are returned as
 their upper triangle. With the default ``conn_method='null-space'`` of
 :class:`.MultiDomain` the same quantities are imposed exactly, see
-:mod:`panels.multidomain.connections.nullspace`.
+:mod:`panels.multidomain.connections.nullspace`. These kernels connect the
+reference surface of the base; with the key ``'face'`` the flange is tied
+to a face of the base instead, see
+:mod:`panels.multidomain.connections.kCBFycte_face`.
 
 Notes
 -----

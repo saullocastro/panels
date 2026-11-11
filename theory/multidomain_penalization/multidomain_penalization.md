@@ -12,6 +12,13 @@ Derivations (sympy) of the penalty matrices of `MultiDomain`:
   `z v/r` at the face (key `'kinematics'`, default `'sanders'`), and, for
   a Donnell cylinder with `kinematics='model'`, the residual `-z_f Omega`
   of a rigid rotation about the axis, of relative order `h/(2 r)`;
+- `bfycte_face.py`: symbolic checks of the connection `'BFycte'` at a face
+  of a cylinder, for a flat plate along a generator (a blade, the web of a
+  Z stringer): the Kirchhoff-Love displacements of a point of the normal
+  and its rotation about the axis `x`, `-w,y + v/r`, the zero residuals of
+  the six rigid motions when the root of the plate is at the radius of the
+  face, with the Sanders-Koiter terms at the face, and the residuals
+  `-z_f v/r` and `-v/r` with the Donnell kinematics (`kinematics='model'`);
 - `kCpd.py`: the prescribed displacements at a point and along a line,
   written to `output_expressions_python/sympy_<name>.txt`;
 - `force_crack_creation.py`: the terms of the creation of a crack in a
@@ -49,6 +56,7 @@ and the Donnell kinematics:
 | `'BFxcte'` | base (1) and flange (2), normal, along `y` | `u1 = w2, v1 = v2, w1 = -u2`; `w,x` (`kr`) | `kCBFxcte.pyx` |
 | `'BFxycte'`| edge `x1 = xcte1` of (1), edge `y2 = ycte2` of (2), angle `theta` | `u1 = -cos(theta) v2 + sin(theta) w2`, `v1 = u2`, `w1 = sin(theta) v2 + cos(theta) w2`; rotation about the common axis | `kCBFxycte.pyx` (block `12`) |
 | `'BFxcte'`, `face='lower'`/`'upper'` | as `'BFxcte'`, the line `x1 = xcte1`, `z = d1 -+ h1/2` of the base | `u1(z) = w2, v1(z) = v2, w1 = -u2`; `w,x` (`kr`) | `kCBFxcte_face.fkCBFxcte_face` |
+| `'BFycte'`, `face='lower'`/`'upper'` | as `'BFycte'`, the line `y1 = ycte1`, `z = d1 -+ h1/2` of the base | `u1(z) = u2, v1(z) = w2, w1 = -v2`; `w,y - rinvf1 v` (`kr`) | `kCBFycte_face.fkCBFycte_face` |
 | `'SB'`     | panel (1) above panel (2), over the area | `u(z), v(z), w` at the common faces `z = d1 - h1/2`, `z = d2 + h2/2` | `skin_base.fkCSB` |
 
 For `'BFxcte'` with the key `'face'` the edge `x2 = xcte2` of the flange
@@ -59,7 +67,12 @@ with the Kirchhoff kinematics of the base below, the term `z v/r` with
 and `'upper'` refer to the coordinate `z1` of the base, as the faces of
 `'SB'` to the `z` of each panel; the two edges share `eta`
 and span the same angle, e.g. a cylinder and an annular plate whose edge is
-at the radius `r1 + z` of the face. For `'SB'` each panel has its own Kirchhoff kinematics, `u(z) = u - z w,x`,
+at the radius `r1 + z` of the face. `'BFycte'` with the key `'face'` is
+the same along a line `y1 = ycte1` (edge `y2 = 0` of the flange for
+`'lower'`, `b2` for `'upper'`, `a1 = a2`), the rotation of the normal about
+`x` at the face being `-w1,y + rinvf1 v1`, with the same `rinvf1` as the
+term `z v/r`. The key `'kinematics'` without `'face'` raises a `ValueError`
+in both connections. For `'SB'` each panel has its own Kirchhoff kinematics, `u(z) = u - z w,x`,
 `v(z) = (1 + z rinv) v - z w,y`, with `z` measured from its reference
 surface and the offsets `d1`, `d2`.
 

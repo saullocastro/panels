@@ -27,6 +27,8 @@ Created on Sun Mar 10 13:07:49 2024
 #   kCBFxcte11 and kCBFycte22
 #   kCBFxcte_face: kCBFxcte_face.py (fkCBFxcte_face), BFxcte at a face of
 #   the base, computed from the quantities of bfxcte_face_components
+#   kCBFycte_face: kCBFycte_face.py (fkCBFycte_face), BFycte at a face of
+#   the base, computed from the quantities of bfycte_face_components
 #   kCSB: skin_base.py (fkCSB), computed from the quantities of
 #   kCsdt._sb_components with the integrals of kCsdt._connection_matrix
 #   kCSSxcte_sdt, kCSSycte_sdt, kCSB_sdt: kCsdt.py, for the models based on
@@ -276,6 +278,31 @@ kCBFxcte_face22 = kCBFxcte22
 piece_wise_simplify(kCBFxcte_face11, [])
 piece_wise_simplify(kCBFxcte_face12, [])
 
+# BFycte at a face of the base, key 'face' of the connection, 'lower' or
+# 'upper' in the coordinate z1 of the base: the edge y2 = ycte2 of the
+# flange (2) is connected to the line y1 = ycte1, z = zf1 = d1 -+ h1/2 of
+# the base (1), along x, with the Kirchhoff kinematics of (1) as for BFxcte
+# at a face, rinvf1 = 1/r1 for a cylinder whatever its model by default, or
+# rinvf1 = rinv1 of the model with kinematics='model', and the rotation of
+# the normal about x at the face, d v1(z)/dz = -w1,y + rinvf1 v1, i.e. the
+# quantity om1 of BFycte above with rinvf1 in place of rinv1:
+#     u1(zf1) = u2,  v1(zf1) = w2,  w1 = -v2,  om1(rinvf1) = om2
+# The two edges share xi and have the same length a1 = a2; the block 22 is
+# that of BFycte. The checks of these quantities against the rigid motions
+# of a cylinder and a blade along a generator are in bfycte_face.py; the
+# matrix is computed by
+# panels.multidomain.connections.kCBFycte_face.fkCBFycte_face
+qgu1A, qgv1A = clpt_interface(u1A, v1A, w1A_xi, w1A_eta, zf1, rinvf1)
+qgu1B, qgv1B = clpt_interface(u1B, v1B, w1B_xi, w1B_eta, zf1, rinvf1)
+omf1A = (2/b1)*w1A_eta - rinvf1*v1A
+omf1B = (2/b1)*w1B_eta - rinvf1*v1B
+kCBFycte_face11 =  (a1/2)*kt*(qgu1A.T*qgu1B + qgv1A.T*qgv1B + w1A.T*w1B + (kr/kt)*omf1A.T*omf1B)
+kCBFycte_face12 = -(a1/2)*kt*(qgu1A.T*u2B + qgv1A.T*w2B - w1A.T*v2B + (kr/kt)*omf1A.T*om2B)
+kCBFycte_face22 = kCBFycte22
+
+piece_wise_simplify(kCBFycte_face11, [])
+piece_wise_simplify(kCBFycte_face12, [])
+
 
 # MODELS BASED ON SHEAR DEFORMATION THEORIES (FSDT and TSDT)
 # 5 DOFs per term u, v, w, phix, phiy, with the displacement field
@@ -436,6 +463,8 @@ matrices = [
 
     [kCBFxcte_face11, 'kCBFxcte_face11'],
     [kCBFxcte_face12, 'kCBFxcte_face12'],
+    [kCBFycte_face11, 'kCBFycte_face11'],
+    [kCBFycte_face12, 'kCBFycte_face12'],
 
     [kCSSxcte_sdt11, 'kCSSxcte_sdt11'],
     [kCSSxcte_sdt12, 'kCSSxcte_sdt12'],

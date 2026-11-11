@@ -29,7 +29,9 @@ surface::
 
 Without the key, or with ``face=None``, the connection ties the reference
 surfaces, see :mod:`panels.multidomain.connections.kCBFxcte`, and the key
-``'kinematics'`` has no effect.
+``'kinematics'`` must not be given (``ValueError``). The connection
+``'BFycte'`` has the same keys, see
+:mod:`panels.multidomain.connections.kCBFycte_face`.
 :func:`.check_bfxcte` checks the geometry of the connection,
 :func:`.bfxcte_face_components` gives the connected quantities and
 :func:`.fkCBFxcte_face` the penalty stiffness matrix; the null-space method
@@ -146,7 +148,7 @@ def _has_prefix(p, prefix):
     return p.model is not None and p.model.startswith(prefix)
 
 
-def face_coordinate(p, face):
+def face_coordinate(p, face, func='BFxcte'):
     r"""
     Coordinate `z` of a face of the base
 
@@ -159,6 +161,9 @@ def face_coordinate(p, face):
         Base, with its ``offset`` and ply thicknesses ``plyts``.
     face : str or None
         ``'lower'``, ``'upper'`` or ``None`` for the reference surface.
+    func : str, optional
+        Connection named in the message of the error, ``'BFxcte'`` (default)
+        or ``'BFycte'``.
 
     Returns
     -------
@@ -175,8 +180,8 @@ def face_coordinate(p, face):
     if face is None:
         return 0.
     if face not in FACES:
-        raise ValueError("The key '{0}' of a 'BFxcte' connection must be one "
-                         "of {1} or None, got {2!r}".format(FACE_KEY,
+        raise ValueError("The key '{0}' of a '{1}' connection must be one "
+                         "of {2} or None, got {3!r}".format(FACE_KEY, func,
                          tuple(FACES), face))
     if p.plyts is None:
         #NOTE the ply thicknesses are derived from plyt and stack
@@ -184,17 +189,24 @@ def face_coordinate(p, face):
     return kCsdt._face(p, FACES[face])
 
 
-def kinematics_of(connecti):
+def kinematics_of(connecti, func='BFxcte'):
     r"""
-    Kinematics of the face of the base of a connection ``'BFxcte'``
+    Kinematics of the face of the base of a connection ``'BFxcte'`` or
+    ``'BFycte'``
 
     The value of the key ``'kinematics'`` of the connection dictionary,
-    checked, with its default.
+    checked, with its default. The key is accepted only with the key
+    ``'face'``: at the reference surface the kinematics of the face do not
+    enter the connection.
 
     Parameters
     ----------
     connecti : dict
-        Connection ``'BFxcte'``, optionally with the key ``'kinematics'``.
+        Connection ``'BFxcte'`` or ``'BFycte'``, optionally with the keys
+        ``'face'`` and ``'kinematics'``.
+    func : str, optional
+        Connection named in the messages of the errors, ``'BFxcte'``
+        (default) or ``'BFycte'``.
 
     Returns
     -------
@@ -206,16 +218,22 @@ def kinematics_of(connecti):
     ------
     ValueError
         When ``connecti['kinematics']`` is not one of ``None``,
-        ``'sanders'`` and ``'model'``.
+        ``'sanders'`` and ``'model'``, or when it is not ``None`` and
+        ``connecti['face']`` is absent or ``None``.
 
     """
     kinematics = connecti.get(KINEMATICS_KEY)
     if kinematics is None:
         return KINEMATICS[0]
+    if connecti.get(FACE_KEY) is None:
+        raise ValueError("The key '{0}' of a '{1}' connection requires the "
+                         "key '{2}': without it the reference surfaces are "
+                         "connected, got {0}={3!r}".format(KINEMATICS_KEY,
+                         func, FACE_KEY, kinematics))
     if kinematics not in KINEMATICS:
-        raise ValueError("The key '{0}' of a 'BFxcte' connection must be one "
-                         "of {1} or None, got {2!r}".format(KINEMATICS_KEY,
-                         KINEMATICS, kinematics))
+        raise ValueError("The key '{0}' of a '{1}' connection must be one "
+                         "of {2} or None, got {3!r}".format(KINEMATICS_KEY,
+                         func, KINEMATICS, kinematics))
     return kinematics
 
 
@@ -310,7 +328,8 @@ def check_bfxcte(connecti, rtol=1.e-8):
         ``xcte2`` is not the edge of the flange on the side of the face, or
         when the radius, the angle or the length of the connected lines do
         not match, see above; when ``'kinematics'`` is not ``None``,
-        ``'sanders'`` or ``'model'``, see :func:`.kinematics_of`.
+        ``'sanders'`` or ``'model'``, or is given without ``'face'``, see
+        :func:`.kinematics_of`.
 
     Warns
     -----
