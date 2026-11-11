@@ -160,6 +160,14 @@ The available models, which are selected with ``Shell.model``, are:
   ``'plate_fsdt_donnell'`` and ``'cylshell_fsdt_sanders'``, and the fields
   ``phiy`` of the cylinder are the rotation of the normal ``phiy + v/r``.
 
+- ``'plate_tsdt_tl'``, ``'cylshell_tsdt_tl'``: flat plates and cylindrical
+  shells, total-Lagrangian TSDT: the strains of ``'plate_fsdt_tl'`` and
+  ``'cylshell_fsdt_tl'`` and third-order strains built with the
+  second-order director and the normal of the deformed mid-surface, 5 DOFs
+  ``u, v, w, phix, phiy``; the linear part is that of
+  ``'plate_tsdt_donnell'`` and ``'cylshell_tsdt_sanders'``, and the
+  transverse shear strains vanish at the faces for any deformation.
+
 The models with 5 DOFs are supported by :class:`.MultiDomain` with the
 connections of :mod:`panels.multidomain.connections.kCsdt`, but not by
 :class:`.StiffPanelBay`, whose stiffeners assume the 3 DOFs of the CLPT.
@@ -374,6 +382,21 @@ that of ``'cylshell_fsdt_sanders'``; to the order `\epsilon^3` of the
 moderate rotation theory (strains of order `\epsilon^2`, rotations of the
 normal of order `\epsilon`) they are the strains of [7]_, Eq. (20).
 
+The total-Lagrangian TSDT models, ``'plate_tsdt_tl'`` and
+``'cylshell_tsdt_tl'``, write the cubic term of Reddy's field [2]_ with the
+director and the normal of the deformed mid-surface, not normalized,
+`\mathbf{N} = \mathbf{X}_{,x} \times \mathbf{X}_{,y}`: the deformed
+position of the point at `z` is `\mathbf{X} + z \mathbf{d} + z^3
+\mathbf{q}`, `\mathbf{q} = -c_1 (\mathbf{d} - \mathbf{N})`, whose linear
+part is Reddy's field. The third-order strains, those of
+:func:`.fsdt_tsdt_field.is_tl`, are the coefficients of `z^3` of the
+in-plane and of `z^2` of the transverse shear Green-Lagrange strains of
+this field, with, for the cylinder, the term `-c_1 (\varepsilon_{xx} +
+\varepsilon_{yy})/r` that makes the linear part that of
+``'cylshell_tsdt_sanders'``; the transverse shear strain of the second
+order is `-3 c_1` times that of the director, so that the faces stay free
+of transverse shear for any deformation.
+
 The integrands of the matrices of each model are derived symbolically from
 these kinematics. The modules without suffix integrate them in closed form
 over the whole domain, with the integrals of Bardell's functions of
@@ -512,6 +535,6 @@ from . import plate_tsdt_gl, plate_tsdt_gl_num
 from . import cylshell_fsdt_gl, cylshell_fsdt_gl_num
 from . import plate_fsdt_tl_num
 from . import cylshell_fsdt_tl_num
-#NOTE prototypes of the comparison of two total-Lagrangian TSDT, temporary
-from . import plate_tsdt_tlA_proto_num, plate_tsdt_tlB_proto_num
+from . import plate_tsdt_tl_num
+from . import cylshell_tsdt_tl_num
 from . import cylshell_tsdt_gl, cylshell_tsdt_gl_num

@@ -1,10 +1,8 @@
-r"""Flat plate, total-Lagrangian TSDT, prototype option A (``plate_tsdt_tlA_proto``)
+r"""Flat plate, total-Lagrangian TSDT (``plate_tsdt_tl``)
 
-Prototype for the comparison of two total-Lagrangian third-order shear
-deformation theories (TSDT); not a public model. Derivation of the strains,
-of their derivatives and of the matrices at an integration point, with
-symbolic checks, run ``python plate_tsdt_tl_A.py``. The kernels are written
-by ``write_pyx.py``.
+Derivation of the strains, of their derivatives and of the matrices at an
+integration point, with symbolic checks, run ``python plate_tsdt_tl.py``
+(about two minutes). The kernels are written by ``write_pyx.py``.
 
 Kinematics
 ----------
@@ -22,72 +20,75 @@ is written for finite rotations with the deformed mid-surface `\mathbf{X} =
 `\mathbf{d} = (\phi_x, \phi_y, 1 - (\phi_x^2 + \phi_y^2)/2)`, and the normal
 of the deformed mid-surface, not normalized, `\mathbf{N} = \mathbf{X}_{,x}
 \times \mathbf{X}_{,y}`. The vector of the third-order term of Reddy, `(\phi_x
-+ w_{,x}, \phi_y + w_{,y}, 0)`, is the linear part of the difference between
-the director and the normal, `\mathbf{d} - \mathbf{N}`, which the options
-treat differently:
++ w_{,x}, \phi_y + w_{,y}, 0)`, is the linear part of `\mathbf{d} -
+\mathbf{N}`, and the deformed position of a point is
 
-- **Option A** (``OPTION = 'A'``): the first-order part, membrane, bending
-  `\kappa` and transverse shear `\gamma`, is that of ``plate_fsdt_tl`` (the
-  Green-Lagrange strains of `\mathbf{X} + z \mathbf{d}`); the third-order
-  strains are the linear ones of Reddy, those of ``plate_tsdt_gl``:
-  `\kappa^{(3)}_{\alpha\beta} = -c_1 (\phi_{\alpha,\beta} + \phi_{\beta,\alpha}
-  + 2 w_{,\alpha\beta})/(1 + \delta_{\alpha\beta})`,
-  `\gamma^{(2)}_\alpha = -3 c_1 (\phi_\alpha + w_{,\alpha})`.
-- **Option B** (``OPTION = 'B'``): the third-order term is built with the
-  director and the deformed normal, the deformed position of a point being
+.. math::
 
-  .. math::
+    \mathbf{r}(z) = \mathbf{X} + z \mathbf{d} + z^3 \mathbf{q}, \qquad
+    \mathbf{q} = -c_1 (\mathbf{d} - \mathbf{N})
 
-      \mathbf{r}(z) = \mathbf{X} + z \mathbf{d} + z^3 \mathbf{q}, \qquad
-      \mathbf{q} = -c_1 (\mathbf{d} - \mathbf{N})
+The strains are the coefficients of `z^0`, `z^1`, `z^3` of the
+Green-Lagrange strains `E_{\alpha\beta}(z) = (\mathbf{G}_\alpha \cdot
+\mathbf{G}_\beta - \delta_{\alpha\beta})/2`, `\mathbf{G}_\alpha =
+\mathbf{r}_{,\alpha}`, and of `z^0`, `z^2` of `2 E_{\alpha 3}(z) =
+\mathbf{G}_\alpha \cdot \mathbf{r}_{,z}`, the powers of the linear TSDT:
+the membrane strains, the curvatures `\kappa` and the transverse shear
+strains `\gamma` of ``plate_fsdt_tl`` and, since `\mathbf{X}_{,\alpha} \cdot
+\mathbf{N} = 0` and therefore `\mathbf{X}_{,\alpha} \cdot \mathbf{N}_{,\beta}
+= -\mathbf{X}_{,\alpha\beta} \cdot \mathbf{N}`,
 
-  The strains are the coefficients of `z^0`, `z^1`, `z^3` of the
-  Green-Lagrange strains `E_{\alpha\beta}(z) = (\mathbf{G}_\alpha \cdot
-  \mathbf{G}_\beta - \delta_{\alpha\beta})/2`, `\mathbf{G}_\alpha =
-  \mathbf{r}_{,\alpha}`, and of `z^0`, `z^2` of `2 E_{\alpha 3}(z) =
-  \mathbf{G}_\alpha \cdot \mathbf{r}_{,z}`, the powers of the linear TSDT.
-  Since `\mathbf{X}_{,\alpha} \cdot \mathbf{N} = 0`, `\mathbf{X}_{,\alpha}
-  \cdot \mathbf{N}_{,\beta} = -\mathbf{X}_{,\alpha\beta} \cdot \mathbf{N}`,
-  they are
+.. math::
 
-  .. math::
+    \kappa^{(3)}_{xx} = -c_1 (\kappa_{xx} + \mathbf{X}_{,xx} \cdot
+    \mathbf{N}) \quad
+    \kappa^{(3)}_{yy} = -c_1 (\kappa_{yy} + \mathbf{X}_{,yy} \cdot
+    \mathbf{N}) \quad
+    \kappa^{(3)}_{xy} = -c_1 (\kappa_{xy} + 2 \mathbf{X}_{,xy} \cdot
+    \mathbf{N})
 
-      \kappa^{(3)}_{xx} = -c_1 (\kappa_{xx} + \mathbf{X}_{,xx} \cdot
-      \mathbf{N}) \quad
-      \kappa^{(3)}_{yy} = -c_1 (\kappa_{yy} + \mathbf{X}_{,yy} \cdot
-      \mathbf{N}) \quad
-      \kappa^{(3)}_{xy} = -c_1 (\kappa_{xy} + 2 \mathbf{X}_{,xy} \cdot
-      \mathbf{N})
+    \gamma^{(2)}_\alpha = 3 \mathbf{X}_{,\alpha} \cdot \mathbf{q}
+    = -3 c_1 \gamma_\alpha
 
-      \gamma^{(2)}_\alpha = 3 \mathbf{X}_{,\alpha} \cdot \mathbf{q}
-      = -3 c_1 \gamma_\alpha
+Reddy's `\phi_{\alpha,\beta}` becomes the director curvature and
+`w_{,\alpha\beta}` the second fundamental form of the deformed mid-surface,
+`\mathbf{X}_{,\alpha\beta} \cdot \mathbf{N}`. The transverse shear strain
+`\gamma_\alpha (1 - 4 z^2/h^2)` vanishes at the faces `z = \pm h/2` for any
+deformation (Reddy's condition), and every strain is invariant under a
+rigid rotation up to the error of the second-order director. Dropped, as in
+the linear TSDT: the coefficients of `z^2`, `z^4`, `z^6` of
+`E_{\alpha\beta}`, of `z^1`, `z^3`, `z^5` of `2 E_{\alpha 3}` and `E_{33}`.
+The coefficient of `z^3` of `2 E_{\alpha 3}`, `\mathbf{q}_{,\alpha} \cdot
+\mathbf{d} + 3 \mathbf{d}_{,\alpha} \cdot \mathbf{q}`, has the linear part
+`c_1 (u_{,x} + v_{,y})_{,\alpha}`, from the stretch of `\mathbf{N}`
+(``check_strain_measures``). The second derivatives `u_{,\alpha\beta}`,
+`v_{,\alpha\beta}` enter through `\mathbf{X}_{,\alpha\beta}`.
 
-  with `\kappa`, `\gamma` those of ``plate_fsdt_tl``: Reddy's
-  `\phi_{\alpha,\beta}` becomes the director curvature and `w_{,\alpha\beta}`
-  the second fundamental form of the deformed mid-surface, `\mathbf{X}_{,
-  \alpha\beta} \cdot \mathbf{N}`. The transverse shear strain `\gamma_\alpha
-  (1 - 4 z^2/h^2)` vanishes at the faces `z = \pm h/2` for any deformation
-  (Reddy's condition), and every strain is invariant under a rigid rotation
-  up to the error of the second-order director. Dropped, as in the linear
-  TSDT: the coefficients of `z^2`, `z^4`, `z^6` of `E_{\alpha\beta}`, of
-  `z^1`, `z^3`, `z^5` of `2 E_{\alpha 3}` and `E_{33}`. The coefficient of
-  `z^3` of `2 E_{\alpha 3}`, `\mathbf{q}_{,\alpha} \cdot \mathbf{d} + 3
-  \mathbf{d}_{,\alpha} \cdot \mathbf{q}`, has the linear part `c_1 (u_{,x}
-  + v_{,y})_{,\alpha}`, from the stretch of `\mathbf{N}`
-  (``check_strain_measures``).
+The alternative with linear third-order terms
+---------------------------------------------
+Keeping the first-order part of ``plate_fsdt_tl`` with the linear
+third-order strains of Reddy, those of ``plate_tsdt_gl``,
+`\kappa^{(3)}_{\alpha\beta} = -c_1 (\phi_{\alpha,\beta} + \phi_{\beta,\alpha}
++ 2 w_{,\alpha\beta})/(1 + \delta_{\alpha\beta})`, `\gamma^{(2)}_\alpha =
+-3 c_1 (\phi_\alpha + w_{,\alpha})` (``option='A'`` of :func:`strains`),
+has the same linear part but not the properties above: the shear strain at
+the faces is the difference between the shear strain of the director and
+the linear one, `\mathbf{X}_{,\alpha} \cdot \mathbf{d} - (\phi_\alpha +
+w_{,\alpha})`, cubic (``check_face_shear``), and a rigid rotation `t` about
+an oblique axis gives third-order strains of `O(t^2)`
+(``check_rigid_rotation``). In large bending the two shear strains cannot
+both vanish and both enter the transverse shear energy, which then
+penalizes the bending by `(L/h)^2`: the alternative locks.
 
-The second derivatives `u_{,\alpha\beta}`, `v_{,\alpha\beta}` enter option B
-through `\mathbf{X}_{,\alpha\beta}`; option A needs those of `w` only, as
-``plate_tsdt_gl``.
-
-At a point the strains depend on the generalized derivatives ``D`` (15 for
-option A, 21 for option B), ``[B] = d eps/d D`` (13 x len(D), quadratic),
-``fint = int [Phi]^T [B]^T sigma dA``, ``K_T = int [Phi]^T ([B]^T [F] [B] +
-[H(sigma, D)]) [Phi] dA``, ``[H(sigma, D)] = sum_r sigma_r d^2 eps_r/d D^2``,
-linear in ``D``, as ``plate_fsdt_tl``.
+At a point the strains depend on the 21 generalized derivatives ``D``,
+``[B] = d eps/d D`` (13 x 21, quadratic), ``fint = int [Phi]^T [B]^T sigma
+dA``, ``K_T = int [Phi]^T ([B]^T [F] [B] + [H(sigma, D)]) [Phi] dA``,
+``[H(sigma, D)] = sum_r sigma_r d^2 eps_r/d D^2``, linear in ``D``, as
+``plate_fsdt_tl``.
 
 """
 import importlib.util
+import math
 import os
 import random
 
@@ -95,10 +96,6 @@ import sympy
 from sympy import Matrix as M, Symbol, symbols, expand, zeros, eye
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-
-#: the option of the third-order terms, ``'A'`` linear, ``'B'`` with the
-#: director and the deformed normal
-OPTION = 'A'
 
 a, b = symbols('a, b', positive=True)
 
@@ -110,9 +107,7 @@ u_xx, u_yy, u_xy, v_xx, v_yy, v_xy = symbols('u_xx, u_yy, u_xy, v_xx, '
                                              'v_yy, v_xy')
 #: generalized derivatives at a point, physical coordinates
 D = (u_x, u_y, v_x, v_y, w_x, w_y, phix, phiy, phix_x, phix_y, phiy_x,
-     phiy_y, w_xx, w_yy, w_xy)
-if OPTION == 'B':
-    D = D + (u_xx, u_yy, u_xy, v_xx, v_yy, v_xy)
+     phiy_y, w_xx, w_yy, w_xy, u_xx, u_yy, u_xy, v_xx, v_yy, v_xy)
 D_NAMES = tuple(s.name for s in D)
 #: field and orders of the derivatives along x and y
 D_DEF = {nm: (nm.partition('_')[0], nm.partition('_')[2].count('x'),
@@ -159,7 +154,7 @@ def tangents():
 
 
 def second_derivatives():
-    r"""``X,xx``, ``X,yy``, ``X,xy`` (option B)"""
+    r"""``X,xx``, ``X,yy``, ``X,xy``"""
     return M([u_xx, v_xx, w_xx]), M([u_yy, v_yy, w_yy]), M([u_xy, v_xy, w_xy])
 
 
@@ -173,7 +168,7 @@ def director():
 
 
 def normal():
-    r"""``N = X,x x X,y`` and ``N,x``, ``N,y`` (option B)"""
+    r"""``N = X,x x X,y`` and ``N,x``, ``N,y``"""
     Xx, Xy = tangents()
     Xxx, Xyy, Xxy = second_derivatives()
     return Xx.cross(Xy), Xxx.cross(Xy) + Xx.cross(Xxy), Xxy.cross(Xy) + Xx.cross(Xyy)
@@ -189,15 +184,18 @@ def first_order():
 
 
 def third_order_linear():
-    r"""The third-order strains of Reddy, those of ``plate_tsdt_gl``"""
+    r"""The linear third-order strains of Reddy, those of ``plate_tsdt_gl``
+    (the alternative, ``option='A'``)"""
     return (M([-c1*(phix_x + w_xx), -c1*(phiy_y + w_yy),
                -c1*(phix_y + phiy_x + 2*w_xy)]),
             M([-3*c1*(phiy + w_y), -3*c1*(phix + w_x)]))
 
 
-def third_order():
-    r"""``(kappa3, gamma2)`` of the option"""
-    if OPTION == 'A':
+def third_order(option='B'):
+    r"""``(kappa3, gamma2)``: of the model, built with the director and the
+    deformed normal (``option='B'``), or the linear ones of the alternative
+    (``option='A'``)"""
+    if option == 'A':
         return third_order_linear()
     _, k, g = first_order()
     Xxx, Xyy, Xxy = second_derivatives()
@@ -206,11 +204,12 @@ def third_order():
                -c1*(k[2] + 2*Xxy.dot(N))]), -3*c1*g)
 
 
-def strains(nonlinear=True):
+def strains(nonlinear=True, option='B'):
     r"""``eps = (exx, eyy, gxy, kxx, kyy, kxy, kxx3, kyy3, kxy3, gyz, gxz,
-    gyz2, gxz2)``; with ``nonlinear=False`` the linear part"""
+    gyz2, gxz2)``; with ``nonlinear=False`` the linear part; ``option='A'``
+    the alternative with linear third-order strains"""
     m, k, g = first_order()
-    k3, g2 = third_order()
+    k3, g2 = third_order(option)
     eps = M(list(m) + list(k) + list(k3) + list(g) + list(g2)).applyfunc(expand)
     if nonlinear:
         return eps
@@ -261,8 +260,8 @@ def _load(name, *path):
 
 
 def check_strain_measures():
-    r"""The first-order strains are those of ``plate_fsdt_tl``; option B:
-    the third-order strains are the coefficients of `z^3` of `E_{\alpha\beta}`
+    r"""The first-order strains are those of ``plate_fsdt_tl``; the
+    third-order strains are the coefficients of `z^3` of `E_{\alpha\beta}`
     and `z^2` of `2 E_{\alpha 3}` of `\mathbf{X} + z \mathbf{d} + z^3
     \mathbf{q}`; the linear part of the dropped coefficient of `z^3` of `2
     E_{\alpha 3}` is `c_1 (u_{,x} + v_{,y})_{,\alpha}`"""
@@ -272,11 +271,6 @@ def check_strain_measures():
     e8 = ft.strains().xreplace(sub)
     for k, j in enumerate((0, 1, 2, 3, 4, 5, 9, 10)):
         assert expand(eps[j] - e8[k]) == 0
-    if OPTION == 'A':
-        k3, g2 = third_order_linear()
-        assert (M(eps[6:9]) - k3).applyfunc(expand) == zeros(3, 1)
-        assert (M(eps[11:13]) - g2).applyfunc(expand) == zeros(2, 1)
-        return True
     z = Symbol('z')
     Xx, Xy = tangents()
     d, d_x, d_y = director()
@@ -302,7 +296,9 @@ def check_strain_measures():
 
 def check_linear_part():
     r"""``[B(0)] [Phi]`` equal to ``B0`` of ``plate_tsdt_donnell``; the
-    membrane strains those of ``plate_tsdt_gl``"""
+    linear strains those of ``plate_tsdt_gl`` (also those of the
+    alternative ``option='A'``) and the membrane strains those of
+    ``plate_tsdt_gl``"""
     lm = _load('plate_tsdt_donnell', '..', 'plate_tsdt_donnell', 'plate_tsdt_donnell.py')
     m = build()
     BL = m['B'].subs({s: 0 for s in D})
@@ -312,28 +308,30 @@ def check_linear_part():
     gl = _load('plate_tsdt_gl', '..', 'plate_tsdt_gl', 'plate_tsdt_gl.py')
     glsub = {getattr(gl, s.name): s for s in gl.D}
     glsub[gl.c1] = c1
-    assert (gl.strains(nonlinear=False).xreplace(glsub) - m['eps_L']).applyfunc(expand) == zeros(NE, 1)
+    epsL_gl = gl.strains(nonlinear=False).xreplace(glsub)
+    assert (epsL_gl - m['eps_L']).applyfunc(expand) == zeros(NE, 1)
+    assert (epsL_gl - strains(False, 'A')).applyfunc(expand) == zeros(NE, 1)
     assert (gl.strains().xreplace(glsub)[:3, :] - m['eps'][:3, :]).applyfunc(expand) == zeros(3, 1)
     return True
 
 
-def face_shear():
+def face_shear(option='B'):
     r"""Transverse shear strains at the faces, `\gamma_\alpha + (h^2/4)
     \gamma^{(2)}_\alpha` with `h^2 = 4/(3 c_1)`"""
-    eps = strains()
+    eps = strains(option=option)
     return [expand(eps[9 + k] + eps[11 + k]/(3*c1)) for k in range(2)]
 
 
 def check_face_shear():
-    r"""Option B: zero for any deformation; option A: the difference between
-    the shear of the director and the linear shear, cubic"""
-    fs = face_shear()
-    if OPTION == 'B':
-        assert fs == [0, 0]
-    else:
-        _, _, g = first_order()
-        gL = M([phiy + w_y, phix + w_x])
-        assert [expand(fs[k] - g[k] + gL[k]) for k in range(2)] == [0, 0]
+    r"""Zero for any deformation; for the alternative ``option='A'`` the
+    difference between the shear strain of the director and the linear
+    one, cubic in ``D``"""
+    assert face_shear() == [0, 0]
+    _, _, g = first_order()
+    gL = M([phiy + w_y, phix + w_x])
+    fsA = face_shear('A')
+    assert [expand(fsA[k] - g[k] + gL[k]) for k in range(2)] == [0, 0]
+    assert all(e != 0 for e in fsA)
     return True
 
 
@@ -346,28 +344,26 @@ def _state(Xx, Xy, Xxx, Xxy, Xyy, nrm, nrm_x, nrm_y):
     r"""Generalized derivatives of the state given by the tangent vectors,
     their derivatives and the unit normal with its derivatives, the director
     components being those of the normal"""
-    st = {u_x: Xx[0] - 1, v_x: Xx[1], w_x: Xx[2],
-          u_y: Xy[0], v_y: Xy[1] - 1, w_y: Xy[2],
-          phix: nrm[0], phiy: nrm[1], phix_x: nrm_x[0], phiy_x: nrm_x[1],
-          phix_y: nrm_y[0], phiy_y: nrm_y[1],
-          w_xx: Xxx[2], w_yy: Xyy[2], w_xy: Xxy[2]}
-    if OPTION == 'B':
-        st.update({u_xx: Xxx[0], v_xx: Xxx[1], u_yy: Xyy[0], v_yy: Xyy[1],
-                   u_xy: Xxy[0], v_xy: Xxy[1]})
-    return st
+    return {u_x: Xx[0] - 1, v_x: Xx[1], w_x: Xx[2],
+            u_y: Xy[0], v_y: Xy[1] - 1, w_y: Xy[2],
+            phix: nrm[0], phiy: nrm[1], phix_x: nrm_x[0], phiy_x: nrm_x[1],
+            phix_y: nrm_y[0], phiy_y: nrm_y[1],
+            w_xx: Xxx[2], w_yy: Xyy[2], w_xy: Xxy[2],
+            u_xx: Xxx[0], v_xx: Xxx[1], u_yy: Xyy[0], v_yy: Xyy[1],
+            u_xy: Xxy[0], v_xy: Xxy[1]}
 
 
 GROUPS = {'membrane': (0, 1, 2), 'kappa': (3, 4, 5), 'kappa3': (6, 7, 8),
           'gamma': (9, 10), 'gamma2': (11, 12)}
 
 
-def rigid_rotation_residuals(seed=0, c1v=1.):
+def rigid_rotation_residuals(option='B', seed=0, c1v=1.):
     r"""Largest strain of each group (``GROUPS``) for a rigid rotation `t =
     0.2, 0.1` of the undeformed plate about random axes, and largest change
     of each group when a cylindrical bending state of curvature `k_0 = 0.3`
     is rotated by `t` about random in-plane axes; ``c1 = c1v``"""
     rnd = random.Random(seed)
-    eps = strains().xreplace({c1: c1v})
+    eps = strains(option=option).xreplace({c1: c1v})
 
     def ev(vals):
         return [float(x.xreplace(vals)) for x in eps]
@@ -391,8 +387,8 @@ def rigid_rotation_residuals(seed=0, c1v=1.):
                                               max(abs(e[k]) for k in idx))
     k0 = 0.3
     for _ in range(5):
-        al = rnd.uniform(0, 2*3.14159)
-        cs, sn = float(sympy.cos(al)), float(sympy.sin(al))
+        al = rnd.uniform(0, 2*math.pi)
+        cs, sn = math.cos(al), math.sin(al)
         e1 = M([cs, sn, 0])
         ez = M([0, 0, 1])
         Xx, Xy = M([1, 0, 0]), M([0, 1, 0])
@@ -411,26 +407,28 @@ def rigid_rotation_residuals(seed=0, c1v=1.):
 
 
 def check_rigid_rotation():
-    r"""Option B: every group of strains `O(t^4)` or smaller (undeformed
-    plate: zero but the shear, `O(t^5)`); option A: the third-order shear
-    strains of the undeformed plate and the third-order strains of the bent
-    state of `O(t^2)`"""
-    import math
-    res = rigid_rotation_residuals()
+    r"""Every group of strains `O(t^4)` or smaller (undeformed plate: zero
+    but the shear, `O(t^5)`); the alternative ``option='A'``: the
+    third-order shear strains of the undeformed plate and the third-order
+    strains of the bent state of `O(t^2)`"""
     order = lambda v: math.log2(v[0]/v[1]) if v[1] > 1e-14 else 99
-    und, bent = res['undeformed'], res['bent']
-    for g in ('membrane', 'kappa'):
-        assert und[g][0] < 1e-13
-    assert order(und['gamma']) > 4.7
-    assert order(bent['membrane']) == 99 or bent['membrane'][0] < 1e-13
-    assert order(bent['kappa']) > 3.8 and order(bent['gamma']) > 3.8
-    if OPTION == 'B':
-        assert und['kappa3'][0] < 1e-13 and order(und['gamma2']) > 4.7
-        assert order(bent['kappa3']) > 3.8 and order(bent['gamma2']) > 3.8
-    else:
-        assert 1.8 < order(und['gamma2']) < 2.2
-        assert 1.8 < order(bent['kappa3']) < 2.2
-    return res
+    out = {}
+    for option in ('B', 'A'):
+        res = rigid_rotation_residuals(option)
+        und, bent = res['undeformed'], res['bent']
+        for g in ('membrane', 'kappa'):
+            assert und[g][0] < 1e-13
+        assert order(und['gamma']) > 4.7
+        assert order(bent['membrane']) == 99 or bent['membrane'][0] < 1e-13
+        assert order(bent['kappa']) > 3.8 and order(bent['gamma']) > 3.8
+        if option == 'B':
+            assert und['kappa3'][0] < 1e-13 and order(und['gamma2']) > 4.7
+            assert order(bent['kappa3']) > 3.8 and order(bent['gamma2']) > 3.8
+        else:
+            assert 1.8 < order(und['gamma2']) < 2.2
+            assert 1.8 < order(bent['kappa3']) < 2.2
+        out[option] = res
+    return out
 
 
 def check_tangent():
@@ -466,6 +464,7 @@ def check_tangent():
 def check_numerical(seed=0):
     r"""Central differences of ``fint`` of a pair of terms against
     ``[Phi_A]^T K_T [Phi_B]``"""
+    import numpy as np
     rnd = random.Random(seed)
     m = build()
     vals = {s: rnd.uniform(-1, 1) for s in F.free_symbols}
@@ -476,7 +475,6 @@ def check_numerical(seed=0):
     eps, Bn, Hn = [m[k].xreplace({c1: vals[c1]}) for k in ('eps', 'B', 'H')]
     fe = sympy.lambdify(D, eps, 'numpy')
     fB = sympy.lambdify(D, Bn, 'numpy')
-    import numpy as np
     PA, PB, Fm = [np.array(x.tolist(), dtype=float) for x in (PhiA, PhiB, Fn)]
     cA = np.array([rnd.uniform(-0.3, 0.3) for _ in range(DOF)])
     cB = np.array([rnd.uniform(-0.3, 0.3) for _ in range(DOF)])
@@ -535,6 +533,7 @@ if __name__ == '__main__':
         r = check()
         print(check.__name__, 'verified')
         if isinstance(r, dict):
-            for case, groups in r.items():
-                print('   ', case, ', '.join('{0}: {1:.2e}/{2:.2e}'.format(g, *v)
-                                             for g, v in groups.items()))
+            for option, res in r.items():
+                for case, groups in res.items():
+                    print('   ', option, case, ', '.join(
+                        '{0}: {1:.2e}/{2:.2e}'.format(g, *v) for g, v in groups.items()))

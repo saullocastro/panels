@@ -1,21 +1,21 @@
-"""Generate the kernels of the prototype ``plate_tsdt_tlB_proto``
+"""Generate the kernels of the model ``cylshell_tsdt_tl``
 
-Writes ``panels/models/plate_tsdt_tlB_proto_num.pyx`` (numerically integrated matrices,
-internal force vector, product of the tangent stiffness matrix by a vector)
-from the derivation of ``plate_tsdt_tl_B.py``::
+Writes ``panels/models/cylshell_tsdt_tl_num.pyx`` (numerically integrated matrices,
+internal force vector, product of the tangent stiffness matrix by a vector
+and follower-pressure kernels) from the derivation of ``cylshell_tsdt_tl.py``::
 
     python write_pyx.py [outdir]
 
 No analytical module is written: with a constant membrane stress state the
-Hessian ``H0`` of the strains at ``d = 0`` is that of ``plate_tsdt_gl``
-(``check_tangent``), whose module ``panels.models.plate_tsdt_gl`` gives ``fk0``,
+Hessian ``H0`` of the strains at ``d = 0`` is that of ``cylshell_tsdt_gl``
+(``check_tangent``), whose module ``panels.models.cylshell_tsdt_gl`` gives ``fk0``,
 ``fkG0``, ``fkM``, ``fkAx``, ``fkAy`` and ``fcA`` (``modelDB``). ``fkM_num``,
-``fkAx_num`` and ``fkAy_num`` are imported from the modules of ``plate_tsdt_donnell``.
+``fkAx_num`` and ``fkAy_num`` are imported from the modules of ``cylshell_tsdt_sanders``.
 
 Kernel layout
 -------------
 At each integration point the generalized derivatives ``d = [Phi] c``
-(``plate_tsdt_tl_B.D``), ``[B] = d eps/d d`` (quadratic in ``d``) and ``K =
+(``cylshell_tsdt_tl.D``), ``[B] = d eps/d d`` (quadratic in ``d``) and ``K =
 [B]^T [F] [B] + [H(sigma, d)]`` are evaluated once; the entry of the pair
 of terms ``A = (i, j)``, ``B = (k, l)`` and the degrees of freedom ``d``
 and ``e`` is ``sum_pq Phi_A[p, d] K[p, q] Phi_B[q, e]``, computed as
@@ -23,7 +23,7 @@ and ``e`` is ``sum_pq Phi_A[p, d] K[p, q] Phi_B[q, e]``, computed as
 and ``sum_q TA[d, q] Phi_B[q, e]`` in the loop over the terms ``B``. The
 approximation functions are tabulated once per integration point, with the
 derivatives in the physical coordinates, ``(2/a) f'(xi)``, named
-``fAu_x``, ``gAphiy_y`` and so on. This is the layout of ``plate_tsdt_gl``, with
+``fAu_x``, ``gAphiy_y`` and so on. This is the layout of ``cylshell_tsdt_gl``, with
 the Hessian ``[H(sigma, d)]`` linear in ``d`` and the split of
 ``plate_clpt_tl``: ``fkG_num`` assembles ``[H0(sigma_L + Nbar)]``,
 ``H0 = H(., d = 0)``, ``fkC_num`` the rest. ``calc_kTv`` evaluates ``[B]^T
@@ -47,7 +47,7 @@ REPO = os.path.abspath(os.path.join(HERE, '..', '..', '..'))
 sys.path.insert(0, HERE)
 sys.path.insert(0, REPO)
 
-import plate_tsdt_tl_B as th
+import cylshell_tsdt_tl as th
 from panels.dev.matrixtools import pow2mult
 
 
@@ -58,50 +58,81 @@ def _load(name, *path):
     return mod
 
 
+#NOTE the follower-pressure kernels, appended to the numerical module
+follower_block = _load('follower_write_pyx', '..', 'follower_pressure',
+                       'write_pyx.py').pyx_block
+
 # Settings of the model
 # ---------------------
-MODEL = 'plate_tsdt_tlB_proto'
+MODEL = 'cylshell_tsdt_tl'
 #: the model of the linear kernels
-LINEAR = 'plate_tsdt_donnell'
+LINEAR = 'cylshell_tsdt_sanders'
 #: whether the kernels read the radius
-CYL = False
+CYL = True
 #: rows of the tables of the approximation functions, along x and y
 F_ROWS = ['u', 'u_x', 'v', 'v_x', 'w', 'w_x', 'w_xx', 'phix', 'phix_x', 'phiy', 'phiy_x', 'u_xx', 'v_xx']
 G_ROWS = ['u', 'u_y', 'v', 'v_y', 'w', 'w_y', 'w_yy', 'phix', 'phix_y', 'phiy', 'phiy_y', 'u_yy', 'v_yy']
-DESC = ('Flat plates, prototype B of the total-Lagrangian third-order '
-        'shear deformation theory (TSDT)')
+DESC = ('Cylindrical shells using the total-Lagrangian third-order shear '
+        'deformation theory (TSDT) with a second-order director')
 #: the generalized derivatives in words, for the docstrings
-D_WORDS = ('the gradients of `u`, `v`, `w`, the rotations and their '
-           'gradients')
+D_WORDS = ('the first and second derivatives of `u`, `v`, `w`, the values '
+           'of `v` and `w`, the rotations and their gradients')
 #: the gradients of the geometric stiffness, for the docstrings
-GRAD_TEXT = (r'\{u_{,x}, u_{,y}, v_{,x}, v_{,y},' + '\n    '
-             + r'w_{,x}, w_{,y}\}^\top` the gradients of the displacements')
+GRAD_TEXT = (r'\{u_{,x}, u_{,y}, v_{,x}, v_{,y} + w/r,' + '\n    '
+             + r'w_{,x}, w_{,y} - v/r\}^\top` the gradients of the displacements'
+             + '\n    in the local basis')
 
 NOTES = r'''Notes
 -----
-Prototype of the comparison of two total-Lagrangian TSDT. The deformed
-position of the point at `z` is `\mathbf{X} + z \mathbf{d} + z^3
-\mathbf{q}`, `\mathbf{q} = -c_1 (\mathbf{d} - \mathbf{N})`, with the
-deformed mid-surface `\mathbf{X}`, the second-order director `\mathbf{d}` of
-:mod:`panels.models.plate_fsdt_tl_num`, the normal `\mathbf{N} =
-\mathbf{X}_{,x} \times \mathbf{X}_{,y}` and `c_1 = 4/(3 h^2)`, whose
-linear part is the field of Reddy [1]_. The strains are the coefficients of
-`z^0`, `z`, `z^3` of the in-plane and of `z^0`, `z^2` of the transverse
-shear Green-Lagrange strains: those of
-:mod:`panels.models.plate_fsdt_tl_num` and
+The displacement field of Reddy [1]_, cubic through the thickness, is
+written for finite rotations as in :mod:`panels.models.plate_tsdt_tl_num`,
+with the deformed mid-surface `\mathbf{X}`, the second-order director
+`\mathbf{d}` of :mod:`panels.models.cylshell_fsdt_tl_num`, after the
+moderate rotation theory of Schmidt and Reddy [2]_ and Palmerio et al.
+[3]_, and the normal of the deformed mid-surface, not normalized,
+`\mathbf{N} = \mathbf{X}_{,x} \times \mathbf{X}_{,y}`, in the local basis
+`(\mathbf{e}_x, \mathbf{e}_y, \mathbf{e}_z)`, `\mathbf{e}_{y,y} =
+-\mathbf{e}_z/r`, `\mathbf{e}_{z,y} = \mathbf{e}_y/r`. The deformed position
+of the point at `z` is
 
 .. math::
 
-    \kappa^{(3)}_{xx} = -c_1 (\kappa_{xx} + \mathbf{X}_{,xx} \cdot
-    \mathbf{N}) \qquad
-    \kappa^{(3)}_{yy} = -c_1 (\kappa_{yy} + \mathbf{X}_{,yy} \cdot
-    \mathbf{N}) \qquad
-    \kappa^{(3)}_{xy} = -c_1 (\kappa_{xy} + 2 \mathbf{X}_{,xy} \cdot
-    \mathbf{N})
+    \mathbf{X} + z \mathbf{d} + z^3 \mathbf{q} \qquad
+    \mathbf{q} = -c_1 (\mathbf{d} - \mathbf{N}) \qquad
+    c_1 = \frac{4}{3 h^2}
 
-    \gamma^{(2)}_{\alpha} = -3 c_1 \gamma_\alpha
+    \mathbf{X}_{,x} = (1 + u_{,x}, \; v_{,x}, \; w_{,x}) \qquad
+    \mathbf{X}_{,y} = (u_{,y}, \; 1 + v_{,y} + w/r, \; w_{,y} - v/r)
 
-The linear part is that of :mod:`panels.models.plate_tsdt_donnell`.
+    \mathbf{d} = \left(\psi_x, \; \psi_y, \; 1 - \frac{1}{2}(\psi_x^2 +
+    \psi_y^2)\right) \qquad \psi_x = \phi_x \qquad \psi_y = \phi_y + v/r
+
+The membrane strains, the curvatures `\kappa` and the transverse shear
+strains `\gamma` are those of :mod:`panels.models.cylshell_fsdt_tl_num`,
+and
+
+.. math::
+
+    \kappa^{(3)}_{xx} = \mathbf{X}_{,x} \cdot \mathbf{q}_{,x} \qquad
+    \kappa^{(3)}_{yy} = \mathbf{X}_{,y} \cdot \mathbf{q}_{,y} -
+    \frac{c_1}{r} (\varepsilon_{xx} + \varepsilon_{yy}) \qquad
+    \kappa^{(3)}_{xy} = \mathbf{X}_{,x} \cdot \mathbf{q}_{,y} +
+    \mathbf{X}_{,y} \cdot \mathbf{q}_{,x}
+
+    \gamma^{(2)}_{yz} = -3 c_1 \gamma_{yz} \qquad
+    \gamma^{(2)}_{xz} = -3 c_1 \gamma_{xz}
+
+polynomials of degree three of the generalized derivatives, among which
+the second derivatives of `u` and `v`. Without the term `-c_1
+(\varepsilon_{xx} + \varepsilon_{yy})/r`, the third-order strains are the
+coefficients of `z^3` and `z^2` of the Green-Lagrange strains of the field
+above; the term removes from the linear part the stretch of `\mathbf{N}`
+times the curvature `1/r`, so that the linear part is that of
+:mod:`panels.models.cylshell_tsdt_sanders` [1]_. The membrane strains are
+those of :mod:`panels.models.cylshell_tsdt_gl`. The transverse shear strain
+`\gamma_\alpha (1 - 4 z^2/h^2)` vanishes at the faces `z = \pm h/2` for
+any deformation, and a finite rigid rotation `t` changes the strains by
+`O(t^4)`, from the second-order director.
 '''
 
 REFS = r'''
@@ -110,6 +141,14 @@ References
 .. [1] Reddy, J. N., "Mechanics of Laminated Composite Plates and Shells:
    Theory and Analysis", 2nd ed., CRC Press, 2003.
    https://doi.org/10.1201/b12409
+.. [2] Schmidt, R., and Reddy, J. N., "A Refined Small Strain and Moderate
+   Rotation Theory of Elastic Anisotropic Shells", Journal of Applied
+   Mechanics, Vol. 55, No. 3, 1988, pp. 611-617.
+   https://doi.org/10.1115/1.3125837
+.. [3] Palmerio, A. F., Reddy, J. N., and Schmidt, R., "On a moderate
+   rotation theory of laminated anisotropic shells - Part 1. Theory",
+   International Journal of Non-Linear Mechanics, Vol. 25, No. 6, 1990,
+   pp. 687-700. https://doi.org/10.1016/0020-7462(90)90007-V
 '''
 
 # Layout of the kernels
@@ -478,7 +517,9 @@ def numerical_module():
 Numerically integrated kernels of the model ``'{0}'``: the
 constitutive stiffness :func:`fkC_num`, the geometric stiffness
 :func:`fkG_num`, the internal force vector :func:`calc_fint`, the product
-of the tangent stiffness matrix by a vector :func:`calc_kTv`. The mass and
+of the tangent stiffness matrix by a vector :func:`calc_kTv`, and the force
+vector and load stiffness matrix of a follower pressure,
+:func:`calc_fext_follower` and :func:`fkCfollower_num`. The mass and
 aerodynamic matrices, ``fkM_num``, ``fkAx_num`` and ``fkAy_num``, are those
 of :mod:`panels.models.{1}_num`. The constitutive matrix ``Finput`` is the
 ``{2} x {2}`` matrix ``ABD`` of :class:`.Shell` for this model.
@@ -1002,7 +1043,7 @@ def generate(outdir=None):
     outdir = outdir or os.path.join(REPO, 'panels', 'models')
     path = os.path.join(outdir, MODEL + '_num.pyx')
     with open(path, 'w', encoding='utf-8', newline='\n') as f:
-        f.write(numerical_module())
+        f.write(numerical_module() + '\n\n' + follower_block(MODEL))
     print(MODEL, 'numerical written')
 
 

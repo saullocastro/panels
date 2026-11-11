@@ -155,8 +155,8 @@ def _rinv_sanders(p):
 
     The models with these kinematics have ``'sanders'`` in their name, and
     ``'cylshell_clpt_gl'``, ``'cylshell_clpt_tl'``, ``'cylshell_fsdt_gl'``,
-    ``'cylshell_fsdt_tl'`` and ``'cylshell_tsdt_gl'`` have the same rotations
-    of the normal.
+    ``'cylshell_fsdt_tl'``, ``'cylshell_tsdt_gl'`` and ``'cylshell_tsdt_tl'``
+    have the same rotations of the normal.
 
     Notes
     -----
@@ -172,7 +172,8 @@ def _rinv_sanders(p):
                                                'cylshell_clpt_tl',
                                                'cylshell_fsdt_gl',
                                                'cylshell_fsdt_tl',
-                                               'cylshell_tsdt_gl')):
+                                               'cylshell_tsdt_gl',
+                                               'cylshell_tsdt_tl')):
         return 1./p.r
     return 0.
 
