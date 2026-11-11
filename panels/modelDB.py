@@ -413,6 +413,34 @@ db = {
                     # integrated exactly by 3p + 1 points
                     'integrand_degree': (6, 0),
                     },
+    #NOTE prototype A of the comparison of two total-Lagrangian TSDT
+    #     (theory/shells/plate_tsdt_tl_A), temporary, not a public model
+    'plate_tsdt_tlA_proto': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    'field': fsdt_tsdt_field,
+                    'matrices': plate_tsdt_gl,
+                    'matrices_num': plate_tsdt_tlA_proto_num,
+                    'dofs': 5,
+                    'e_num': 13,
+                    'requires_r': False,
+                    'integrand_degree': (6, 0),
+                    },
+    #NOTE prototype B of the comparison of two total-Lagrangian TSDT
+    #     (theory/shells/plate_tsdt_tl_B), temporary, not a public model
+    'plate_tsdt_tlB_proto': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    'field': fsdt_tsdt_field,
+                    'matrices': plate_tsdt_gl,
+                    'matrices_num': plate_tsdt_tlB_proto_num,
+                    'dofs': 5,
+                    'e_num': 13,
+                    'requires_r': False,
+                    'integrand_degree': (6, 0),
+                    },
     'cylshell_fsdt_tl': {
                     'linear static': True,
                     'linear buckling': True,

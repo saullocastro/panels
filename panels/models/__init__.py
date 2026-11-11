@@ -512,4 +512,6 @@ from . import plate_tsdt_gl, plate_tsdt_gl_num
 from . import cylshell_fsdt_gl, cylshell_fsdt_gl_num
 from . import plate_fsdt_tl_num
 from . import cylshell_fsdt_tl_num
+#NOTE prototypes of the comparison of two total-Lagrangian TSDT, temporary
+from . import plate_tsdt_tlA_proto_num, plate_tsdt_tlB_proto_num
 from . import cylshell_tsdt_gl, cylshell_tsdt_gl_num

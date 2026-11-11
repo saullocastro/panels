@@ -481,6 +481,22 @@ extensions = [
         include_dirs=include_dirs, extra_compile_args=compile_args,
               extra_link_args=link_args, define_macros=define_macros,
               language='c++'),
+    Extension('panels.models.plate_tsdt_tlA_proto_num',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/plate_tsdt_tlA_proto_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
+    Extension('panels.models.plate_tsdt_tlB_proto_num',
+        sources=[
+            './panels/core/src/bardell_functions.cpp',
+            './panels/models/plate_tsdt_tlB_proto_num.pyx',
+            ],
+        include_dirs=include_dirs, extra_compile_args=compile_args,
+              extra_link_args=link_args, define_macros=define_macros,
+              language='c++'),
     Extension('panels.models.cylshell_fsdt_tl_num',
         sources=[
             './panels/core/src/bardell_functions.cpp',
