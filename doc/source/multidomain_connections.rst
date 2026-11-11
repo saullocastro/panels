@@ -463,6 +463,9 @@ API
     :members: check_bfxcte, face_coordinate, bfxcte_face_components,
               fkCBFxcte_face
 
+.. automodule:: panels.multidomain.connections.kCBFycte_face
+    :members: check_bfycte, bfycte_face_components, fkCBFycte_face
+
 .. autofunction:: panels.multidomain.connections.kCpd.fkCpd
 
 .. autofunction:: panels.multidomain.connections.kCpd.fkCld_xcte

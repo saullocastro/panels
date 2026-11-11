@@ -222,9 +222,9 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
     against the Euler load with ``'cylshell_clpt_gl'``). For the cylinder 4
     of Card and Jones [2]_, 60 internal blades, simply supported, critical
     mode of one axial half-wave and 6 circumferential waves, the load with
-    the skin ``'cylshell_clpt_gl'`` is 1.3 % below that with
-    ``'cylshell_clpt_sanders'`` and 1.6 % below their smeared-stringer
-    load `\bar{N}_s` (Table I), and 2.5 % higher with
+    the skin ``'cylshell_clpt_gl'`` is 1.4 % below that with
+    ``'cylshell_clpt_sanders'`` and 4.1 % below their smeared-stringer
+    load `\bar{N}_s` (Table I), and 1.6 % higher with
     ``'cylshell_clpt_donnell'``.
 
     ``'cylshell_clpt_tl'`` has the membrane strains of
@@ -242,8 +242,8 @@ def create_cylinder_blade_stiffened(height, r, stack, stack_blades,
     :func:`.cylinder_blade_stiffened_compression_lb_pd_from_static` the
     numerical kernels of the TL models add the work of the bending moments
     of the pre-buckling state on the quadratic part of the changes of
-    curvature: -6.6e-8 (relative) for the cylinder 4 of Card and Jones,
-    -1.8e-4 and -2.0e-4 for the laminated cylinder of the Examples of
+    curvature: -8.7e-8 (relative) for the cylinder 4 of Card and Jones,
+    -1.6e-4 and -1.8e-4 for the laminated cylinder of the Examples of
     these two functions. In the non-linear analyses all their strains are
     invariant under finite rigid rotations.
 
@@ -451,7 +451,7 @@ def cylinder_blade_stiffened_compression_lb_Nxx_cte(height, r, stack, stack_blad
     ...     plyt=0.125e-3, laminaprop=laminaprop, npanels=5,
     ...     Nxxs_skin=Nxxs, Nxxs_blade=Nxxs, m=8, n=12, num_eigvalues=5)
     >>> round(float(Nxxs[0]*eigvals[0]))
-    -51659
+    -51578
 
     """
     md, conns, info = create_cylinder_blade_stiffened(height=height, r=r,
@@ -587,7 +587,7 @@ def cylinder_blade_stiffened_compression_lb_Nxx_from_static(height, r, stack,
     ...     plyt=0.125e-3, laminaprop=laminaprop, npanels=5,
     ...     Nxxs_skin=Nxxs, Nxxs_blade=Nxxs, m=8, n=12, num_eigvalues=5)
     >>> round(float(Nxxs[0]*eigvals[0]))
-    -41695
+    -40322
 
     """
     md, conns, info = create_cylinder_blade_stiffened(height=height, r=r,
@@ -746,7 +746,7 @@ def cylinder_blade_stiffened_compression_lb_pd_from_static(height, r, stack,
     ...     plyt=0.125e-3, laminaprop=laminaprop, npanels=5,
     ...     pds_skin=pds, pds_blade=pds, m=8, n=12, num_eigvalues=5)
     >>> round(float(pds[0]*eigvals[0]), 7)
-    -0.0004994
+    -0.0004825
 
     """
     md, conns, info = create_cylinder_blade_stiffened(height=height, r=r,

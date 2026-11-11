@@ -16,9 +16,9 @@ All quantities are in SI units or in any other consistent set;
 Notes
 -----
 The web of :func:`panels.multidomain.create_cylinder_z_stiffened` starts at
-the middle surface of the skin, so that it overlaps the skin and the
-attached flange over `h/2 + t_z/2`; the section as modelled is given by
-:func:`section_properties`.
+the face of the attached flange, `h/2 + t_z` from the middle surface of the
+skin, and ends at the middle surface of the free flange; the section as
+modelled is given by :func:`section_properties`.
 
 """
 import time
@@ -55,8 +55,8 @@ def z_midlines(tz, flange, depth, free_flange, h=0., bend_radius=0.):
         Width of the free flange, from the outer face of the web to its free
         edge.
     h : float
-        Skin thickness; the web of the model starts at the middle surface
-        of the skin.
+        Skin thickness, not used: the web of the model starts at the face of
+        the attached flange.
     bend_radius : float
         Inner radius of the two bends; each bend of centre-line radius
         `r_c` = ``bend_radius`` `+ t_z/2` shortens the adjacent flange by
@@ -67,15 +67,15 @@ def z_midlines(tz, flange, depth, free_flange, h=0., bend_radius=0.):
     -------
     dict
         ``tz``, ``bf`` (width of the attached flange, from the middle
-        surface of the web), ``Hw`` (width of the web, from the middle
-        surface of the skin to the middle surface of the free flange) and
+        surface of the web), ``Hw`` (width of the web, from the face of the
+        attached flange to the middle surface of the free flange) and
         ``bl`` (width of the free flange, from the middle surface of the
         web).
 
     """
     rc = bend_radius + tz/2 if bend_radius > 0 else 0.
     cut = (2 - pi/2)*rc
-    return dict(tz=tz, bf=flange - tz/2 - cut, Hw=h/2 + depth - tz/2,
+    return dict(tz=tz, bf=flange - tz/2 - cut, Hw=depth - 3*tz/2,
                 bl=free_flange - tz/2 - cut)
 
 
@@ -83,8 +83,9 @@ def section_properties(sec, h, E, nu):
     r"""Properties of the stringer as modelled, per stringer
 
     The rectangles of the attached flange (centred at `h/2 + t_z/2` from
-    the middle surface of the skin), of the web (from the middle surface of
-    the skin, overlapping skin and flange) and of the free flange.
+    the middle surface of the skin), of the web (from the face of the
+    attached flange, `h/2 + t_z`, to the middle surface of the free flange)
+    and of the free flange.
     Distances from the middle surface of the skin, positive away from the
     skin on the side of the stringer.
 
@@ -99,9 +100,10 @@ def section_properties(sec, h, E, nu):
     t = sec['tz']
     zf = h/2 + t/2
     Hw = sec['Hw']
+    z0 = h/2 + t
     rects = [(sec['bf']*t, zf, sec['bf']*t**3/12),
-             (Hw*t, Hw/2, t*Hw**3/12),
-             (sec['bl']*t, Hw, sec['bl']*t**3/12)]
+             (Hw*t, z0 + Hw/2, t*Hw**3/12),
+             (sec['bl']*t, z0 + Hw, sec['bl']*t**3/12)]
     A = sum(r[0] for r in rects)
     zc = sum(r[0]*r[1] for r in rects)/A
     Io = sum(r[2] + r[0]*r[1]**2 for r in rects)
