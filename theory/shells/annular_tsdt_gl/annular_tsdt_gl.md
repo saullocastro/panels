@@ -16,8 +16,8 @@ same file as in `annular_tsdt_donnell`, which writes
 
 The bending, third-order and transverse shear strains are the linear ones
 of `annular_tsdt_donnell`, as `plate_tsdt_gl` is built from
-`plate_clpt_gl` and `plate_tsdt_donnell`. The large-rotation (TL) variant
-waits for the decision on the TSDT TL models.
+`plate_clpt_gl` and `plate_tsdt_donnell`. The large-rotation variant is
+`annular_tsdt_tl` (`../annular_tsdt_tl/`).
 
 ## Checks (`annular_tsdt_gl.py`)
 

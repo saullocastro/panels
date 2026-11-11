@@ -55,6 +55,9 @@ the non-linear equations, see :mod:`panels.models`:
 * ``'plate_fsdt_tl'``, ``'cylshell_fsdt_tl'``: total-Lagrangian FSDT with
   the second-order director of the moderate rotation theory, see
   :ref:`fsdt_tsdt_tl`
+* ``'plate_tsdt_tl'``, ``'cylshell_tsdt_tl'``: total-Lagrangian TSDT, the
+  third-order term built with the director and the normal of the deformed
+  mid-surface, see :ref:`tsdt_tl`
 * ``'cylshell_clpt_donnell'``: cylindrical shells, CLPT with Donnell's
   kinematics
 * ``'cylshell_clpt_sanders'``: cylindrical shells, CLPT with Sanders-Koiter's
@@ -80,6 +83,10 @@ the non-linear equations, see :mod:`panels.models`:
   plates, third-order shear deformation theory in polar coordinates with
   the von Kármán strains and with the Green-Lagrange membrane strains, see
   :ref:`annular_tsdt`
+* ``'annular_tsdt_tl'``: annular-sector plates, total-Lagrangian
+  third-order shear deformation theory in polar coordinates, with the
+  second-order director and the normal of the deformed plane, see
+  :ref:`annular_tsdt_tl`
 
 
 How the models, the boundary conditions, the loads and the assemblies fit

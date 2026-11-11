@@ -129,6 +129,10 @@ MODELS = {
     #     mid-surface
     'plate_fsdt_tl': (5, 'plate', 'gl'),
     'cylshell_fsdt_tl': (5, 'cylshell', 'sanders'),
+    #NOTE the total-Lagrangian TSDT models, with the same geometry of the
+    #     mid-surface
+    'plate_tsdt_tl': (5, 'plate', 'gl'),
+    'cylshell_tsdt_tl': (5, 'cylshell', 'sanders'),
 }
 
 a, b, r = symbols('a, b, r', positive=True)

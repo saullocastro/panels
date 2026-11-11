@@ -95,6 +95,11 @@ The available models, which are selected with ``Shell.model``, are:
   ``'annular_clpt_donnell'``, see
   :mod:`panels.models.annular_tsdt_donnell_num`.
 
+- ``'annular_tsdt_tl'``: as ``'annular_tsdt_gl'``, total-Lagrangian with the
+  second-order director of ``'annular_fsdt_tl'`` and the third-order term
+  built from the director and the normal of the deformed plane, 5 DOFs
+  ``u, v, w, phix, phiy``, see :mod:`panels.models.annular_tsdt_tl_num`.
+
 - ``'cylshell_clpt_donnell'``: cylindrical shells, CLPT with the
   Donnell-Mushtari-Vlasov (shallow shell) kinematics, 3 DOFs ``u, v, w``.
 
@@ -159,6 +164,14 @@ The available models, which are selected with ``Shell.model``, are:
   and rotations, 5 DOFs ``u, v, w, phix, phiy``; the linear part is that of
   ``'plate_fsdt_donnell'`` and ``'cylshell_fsdt_sanders'``, and the fields
   ``phiy`` of the cylinder are the rotation of the normal ``phiy + v/r``.
+
+- ``'plate_tsdt_tl'``, ``'cylshell_tsdt_tl'``: flat plates and cylindrical
+  shells, total-Lagrangian TSDT: the strains of ``'plate_fsdt_tl'`` and
+  ``'cylshell_fsdt_tl'`` and third-order strains built with the
+  second-order director and the normal of the deformed mid-surface, 5 DOFs
+  ``u, v, w, phix, phiy``; the linear part is that of
+  ``'plate_tsdt_donnell'`` and ``'cylshell_tsdt_sanders'``, and the
+  transverse shear strains vanish at the faces for any deformation.
 
 The models with 5 DOFs are supported by :class:`.MultiDomain` with the
 connections of :mod:`panels.multidomain.connections.kCsdt`, but not by
@@ -374,6 +387,21 @@ that of ``'cylshell_fsdt_sanders'``; to the order `\epsilon^3` of the
 moderate rotation theory (strains of order `\epsilon^2`, rotations of the
 normal of order `\epsilon`) they are the strains of [7]_, Eq. (20).
 
+The total-Lagrangian TSDT models, ``'plate_tsdt_tl'`` and
+``'cylshell_tsdt_tl'``, write the cubic term of Reddy's field [2]_ with the
+director and the normal of the deformed mid-surface, not normalized,
+`\mathbf{N} = \mathbf{X}_{,x} \times \mathbf{X}_{,y}`: the deformed
+position of the point at `z` is `\mathbf{X} + z \mathbf{d} + z^3
+\mathbf{q}`, `\mathbf{q} = -c_1 (\mathbf{d} - \mathbf{N})`, whose linear
+part is Reddy's field. The third-order strains, those of
+:func:`.fsdt_tsdt_field.is_tl`, are the coefficients of `z^3` of the
+in-plane and of `z^2` of the transverse shear Green-Lagrange strains of
+this field, with, for the cylinder, the term `-c_1 (\varepsilon_{xx} +
+\varepsilon_{yy})/r` that makes the linear part that of
+``'cylshell_tsdt_sanders'``; the transverse shear strain of the second
+order is `-3 c_1` times that of the director, so that the faces stay free
+of transverse shear for any deformation.
+
 The integrands of the matrices of each model are derived symbolically from
 these kinematics. The modules without suffix integrate them in closed form
 over the whole domain, with the integrals of Bardell's functions of
@@ -453,6 +481,17 @@ and the moments of the density about the mid-surface, see
 :mod:`panels.models.annular_tsdt_donnell_num` and
 :mod:`panels.models.annular_tsdt_gl_num`.
 
+``'annular_tsdt_tl'`` writes the TSDT field for finite rotations, the
+deformed position of a point being `\boldsymbol{X} + z \boldsymbol{d} +
+p(z) \boldsymbol{q}`, `p(z) = (z - d)^3 + d^3`, with the second-order
+director `\boldsymbol{d}` of ``'annular_fsdt_tl'`` [6]_, [7]_ and
+`\boldsymbol{q} = -c_1 (\boldsymbol{d} - \boldsymbol{N})`, `\boldsymbol{N}`
+the normal of the deformed plane, not normalized, whose linear part is the
+vector `(\phi_x + w_{,x}, \phi_y + s w_{,y})` of the TSDT; the strains are
+the coefficients of `1`, `z`, `p(z)` of the Green-Lagrange strains and the
+transverse shear strains vanish at both faces for any deformation, see
+:mod:`panels.models.annular_tsdt_tl_num`.
+
 References
 ----------
 .. [1] Sanders, J. L., "Nonlinear theories for thin shells", Quarterly of
@@ -500,6 +539,7 @@ from . import annular_fsdt_gl_num, annular_fsdt_gl
 from . import annular_fsdt_tl_num, annular_fsdt_tl
 from . import annular_tsdt_donnell_num, annular_tsdt_donnell
 from . import annular_tsdt_gl_num, annular_tsdt_gl
+from . import annular_tsdt_tl_num, annular_tsdt_tl
 from . import fsdt_tsdt_field
 from . import plate_fsdt_donnell, plate_fsdt_donnell_num
 from . import plate_tsdt_donnell, plate_tsdt_donnell_num
@@ -512,4 +552,6 @@ from . import plate_tsdt_gl, plate_tsdt_gl_num
 from . import cylshell_fsdt_gl, cylshell_fsdt_gl_num
 from . import plate_fsdt_tl_num
 from . import cylshell_fsdt_tl_num
+from . import plate_tsdt_tl_num
+from . import cylshell_tsdt_tl_num
 from . import cylshell_tsdt_gl, cylshell_tsdt_gl_num

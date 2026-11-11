@@ -281,6 +281,26 @@ db = {
                     # outer radius, the kernels divide by r - x
                     'requires_r': True,
                     },
+    'annular_tsdt_tl': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    #NOTE the strains in polar coordinates of the annular
+                    #     sector need their own strain field; fuvw and fg are
+                    #     those of fsdt_tsdt_field
+                    'field': annular_tsdt_tl_num,
+                    #NOTE the matrices of the whole domain are integrated
+                    #     numerically, the strains having terms in 1/rho
+                    'matrices': annular_tsdt_tl,
+                    'matrices_num': annular_tsdt_tl_num,
+                    'dofs': 5,
+                    'e_num': 13,
+                    # outer radius, the kernels divide by r - x
+                    'requires_r': True,
+                    # strains cubic in the generalized derivatives, as those of
+                    # annular_fsdt_tl: more integration points
+                    'integrand_degree': (6, 0),
+                    },
     'cylshell_fsdt_donnell': {
                     'linear static': True,
                     'linear buckling': True,
@@ -413,6 +433,26 @@ db = {
                     # integrated exactly by 3p + 1 points
                     'integrand_degree': (6, 0),
                     },
+    'plate_tsdt_tl': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    'field': fsdt_tsdt_field,
+                    #NOTE the analytical kernels of plate_tsdt_gl: the linear
+                    #     strains are those of plate_tsdt_donnell and the
+                    #     geometric stiffness of a constant membrane stress
+                    #     state that of the Green-Lagrange strains
+                    'matrices': plate_tsdt_gl,
+                    'matrices_num': plate_tsdt_tl_num,
+                    'dofs': 5,
+                    'e_num': 13,
+                    # the plate kernels never read r
+                    'requires_r': False,
+                    # all strains but the membrane ones cubic in the
+                    # generalized derivatives: integrands of degree 6p,
+                    # integrated exactly by 3p + 1 points
+                    'integrand_degree': (6, 0),
+                    },
     'cylshell_fsdt_tl': {
                     'linear static': True,
                     'linear buckling': True,
@@ -429,6 +469,26 @@ db = {
                     # the kernels divide by r, a radius is mandatory
                     'requires_r': True,
                     # bending and transverse shear strains cubic in the
+                    # generalized derivatives: integrands of degree 6p along
+                    # x and y, integrated exactly by 3p + 1 points
+                    'integrand_degree': (6, 0),
+                    },
+    'cylshell_tsdt_tl': {
+                    'linear static': True,
+                    'linear buckling': True,
+                    'non-linear static': True,
+                    'field': fsdt_tsdt_field,
+                    #NOTE the analytical kernels of cylshell_tsdt_gl: the
+                    #     linear strains are those of cylshell_tsdt_sanders
+                    #     and the geometric stiffness of a constant membrane
+                    #     stress state that of the Green-Lagrange strains
+                    'matrices': cylshell_tsdt_gl,
+                    'matrices_num': cylshell_tsdt_tl_num,
+                    'dofs': 5,
+                    'e_num': 13,
+                    # the kernels divide by r, a radius is mandatory
+                    'requires_r': True,
+                    # all strains but the membrane ones cubic in the
                     # generalized derivatives: integrands of degree 6p along
                     # x and y, integrated exactly by 3p + 1 points
                     'integrand_degree': (6, 0),
