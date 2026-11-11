@@ -208,6 +208,10 @@ FINPUT_TEMPLATE = """    # F as 4-D matrix, must be [nx, ny, NE, NE], when there
     #      by Shell.integration_limits(); for the full domain the mapping
     #      below gives exactly xi1 = eta1 = -1 and xi2 = eta2 = +1
     x1, x2, y1, y2 = shell.integration_limits()
+    #NOTE the traction-free faces are assumed at z = +-h/2 about the
+    #     mid-surface
+    h = shell.lam.h
+    c1 = 4./(3.*h*h)
 """ + ('    radius = shell.r\n' if CYL else '') + BC_BLOCK + """
 
     xis, weights_xi = roots_legendre(nx)
@@ -239,6 +243,7 @@ COMMON_CDEF = """    cdef double x1, x2, y1, y2, xinf, xsup, yinf, ysup
     cdef double xi1, xi2, eta1, eta2
     cdef double [:, ::1] ftab, gtab
     cdef double [::1] xis, etas, weights_xi, weights_eta
+    cdef double h, c1
 """ + ('    cdef double radius\n' if CYL else '')
 
 POINT_HEAD = """    with nogil:

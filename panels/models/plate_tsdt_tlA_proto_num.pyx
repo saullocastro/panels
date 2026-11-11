@@ -167,6 +167,7 @@ def fkC_num(double [::1] cs, object Finput, object shell,
     cdef double xi1, xi2, eta1, eta2
     cdef double [:, ::1] ftab, gtab
     cdef double [::1] xis, etas, weights_xi, weights_eta
+    cdef double h, c1
 
     cdef double u_x, u_y, v_x, v_y, w_x, w_y, phix, phiy
     cdef double phix_x, phix_y, phiy_x, phiy_y, w_xx, w_yy, w_xy
@@ -222,6 +223,10 @@ def fkC_num(double [::1] cs, object Finput, object shell,
     #      by Shell.integration_limits(); for the full domain the mapping
     #      below gives exactly xi1 = eta1 = -1 and xi2 = eta2 = +1
     x1, x2, y1, y2 = shell.integration_limits()
+    #NOTE the traction-free faces are assumed at z = +-h/2 about the
+    #     mid-surface
+    h = shell.lam.h
+    c1 = 4./(3.*h*h)
     x1u = shell.x1u; x1ur = shell.x1ur; x2u = shell.x2u; x2ur = shell.x2ur
     x1v = shell.x1v; x1vr = shell.x1vr; x2v = shell.x2v; x2vr = shell.x2vr
     x1w = shell.x1w; x1wr = shell.x1wr; x2w = shell.x2w; x2wr = shell.x2wr
@@ -929,6 +934,7 @@ def fkG_num(double [::1] cs, object Finput, object shell,
     cdef double xi1, xi2, eta1, eta2
     cdef double [:, ::1] ftab, gtab
     cdef double [::1] xis, etas, weights_xi, weights_eta
+    cdef double h, c1
 
     cdef double u_x, u_y, v_x, v_y, w_x, w_y, phix, phiy
     cdef double phix_x, phix_y, phiy_x, phiy_y, w_xx, w_yy, w_xy
@@ -980,6 +986,10 @@ def fkG_num(double [::1] cs, object Finput, object shell,
     #      by Shell.integration_limits(); for the full domain the mapping
     #      below gives exactly xi1 = eta1 = -1 and xi2 = eta2 = +1
     x1, x2, y1, y2 = shell.integration_limits()
+    #NOTE the traction-free faces are assumed at z = +-h/2 about the
+    #     mid-surface
+    h = shell.lam.h
+    c1 = 4./(3.*h*h)
     x1u = shell.x1u; x1ur = shell.x1ur; x2u = shell.x2u; x2ur = shell.x2ur
     x1v = shell.x1v; x1vr = shell.x1vr; x2v = shell.x2v; x2vr = shell.x2vr
     x1w = shell.x1w; x1wr = shell.x1wr; x2w = shell.x2w; x2wr = shell.x2wr
@@ -1398,6 +1408,7 @@ def calc_fint(double [::1] cs, object Finput, object shell,
     cdef double xi1, xi2, eta1, eta2
     cdef double [:, ::1] ftab, gtab
     cdef double [::1] xis, etas, weights_xi, weights_eta
+    cdef double h, c1
 
     cdef double u_x, u_y, v_x, v_y, w_x, w_y, phix, phiy
     cdef double phix_x, phix_y, phiy_x, phiy_y, w_xx, w_yy, w_xy
@@ -1443,6 +1454,10 @@ def calc_fint(double [::1] cs, object Finput, object shell,
     #      by Shell.integration_limits(); for the full domain the mapping
     #      below gives exactly xi1 = eta1 = -1 and xi2 = eta2 = +1
     x1, x2, y1, y2 = shell.integration_limits()
+    #NOTE the traction-free faces are assumed at z = +-h/2 about the
+    #     mid-surface
+    h = shell.lam.h
+    c1 = 4./(3.*h*h)
     x1u = shell.x1u; x1ur = shell.x1ur; x2u = shell.x2u; x2ur = shell.x2ur
     x1v = shell.x1v; x1vr = shell.x1vr; x2v = shell.x2v; x2vr = shell.x2vr
     x1w = shell.x1w; x1wr = shell.x1wr; x2w = shell.x2w; x2wr = shell.x2wr
@@ -1748,6 +1763,7 @@ def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
     cdef double xi1, xi2, eta1, eta2
     cdef double [:, ::1] ftab, gtab
     cdef double [::1] xis, etas, weights_xi, weights_eta
+    cdef double h, c1
 
     cdef double u_x, u_y, v_x, v_y, w_x, w_y, phix, phiy
     cdef double phix_x, phix_y, phiy_x, phiy_y, w_xx, w_yy, w_xy
@@ -1800,6 +1816,10 @@ def calc_kTv(double [::1] cs, double [::1] vs, object Finput, object shell,
     #      by Shell.integration_limits(); for the full domain the mapping
     #      below gives exactly xi1 = eta1 = -1 and xi2 = eta2 = +1
     x1, x2, y1, y2 = shell.integration_limits()
+    #NOTE the traction-free faces are assumed at z = +-h/2 about the
+    #     mid-surface
+    h = shell.lam.h
+    c1 = 4./(3.*h*h)
     x1u = shell.x1u; x1ur = shell.x1ur; x2u = shell.x2u; x2ur = shell.x2ur
     x1v = shell.x1v; x1vr = shell.x1vr; x2v = shell.x2v; x2vr = shell.x2vr
     x1w = shell.x1w; x1wr = shell.x1wr; x2w = shell.x2w; x2wr = shell.x2wr
