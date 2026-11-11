@@ -16,11 +16,11 @@ panels of the default Sanders kinematics, blades of the model
   (`w = v = N_x = M_x = 0`) and the membrane pre-buckling state of equal
   axial strains in the skin and in the blades, against the smeared theory
   for the same stringer section (Eq. (15) of Block, Card and Mikulas for
-  the blade as modelled, 771.2 lb/in), within the discrete-versus-smeared
+  the blade as modelled, 751.9 lb/in), within the discrete-versus-smeared
   difference explained in the Notes, against `\bar{N}_s` of Card and Jones
   (722 lb/in; Eq. (15) for the stringer section drawn by Card and Jones
-  gives 722.8 lb/in) and against a regression value (720.2 lb/in, 6.6 %
-  below 771.2 lb/in and 0.4 % below 722.8 lb/in); with blades of
+  gives 722.8 lb/in) and against a regression value (702.3 lb/in, 6.6 %
+  below 751.9 lb/in and 2.8 % below 722.8 lb/in); with blades of
   ``'plate_clpt_donnell'``
   the load is about twice the smeared one;
 - the analysis functions :func:`.cylinder_blade_stiffened_compression_lb_Nxx_cte`,
@@ -55,13 +55,16 @@ of their p. 3, for the stringer of their Fig. 2(b) (p. 6), 0.097 in wide and
 0.33 in deep including the skin: the four values of their Table I (p. 7,
 lb/in although headed kips/in.) are reproduced within 0.2 %.
 
-**Discrete model.** The blade is a plate strip from the middle surface of
-the skin to the stringer tip, `h_b = 0.33 - t/2` in, 0.097 in thick, and the
-smeared reference is Eq. (15) for this rectangle standing on the middle
-surface (``blade_stringer``), so that both count the same material and the
-same twisting stiffness, that of the Kirchhoff plate strip, `G h_b
-t_b^3/3`: 771 lb/in, 6.8 % above `\bar{N}_s` of Card and Jones (742 lb/in
-with their torsion constant of a rectangle, 723 lb/in with their section).
+**Discrete model.** The blade is a plate strip from the inner surface of
+the skin, to which :func:`.create_cylinder_blade_stiffened` ties its root,
+to the stringer tip, `h_b = 0.33 - t` in, 0.097 in thick: the stringer of
+Fig. 2(b) of Card and Jones, whose 0.33 in run from the tip to the surface
+of the skin opposite the stringer. The smeared reference is Eq. (15) for
+this rectangle standing on the surface of the skin (``plate_stringer``,
+:func:`rectangle_stringer` with the twisting stiffness of the Kirchhoff
+plate strip, `G h_b t_b^3/3`), so that both count the same material and
+the same twisting stiffness: 751.9 lb/in, 4.1 % above `\bar{N}_s` of Card
+and Jones (722.8 lb/in with their torsion constant of the rectangle).
 The simply supported ends are represented exactly by half of the cylinder, `0
 \le x \le L/2`, with `u` free at `x = 0` and the symmetry conditions `u =
 v_{,x} = w_{,x} = 0` at `x = L/2`, which contain the critical mode of one
@@ -69,12 +72,12 @@ axial half-wave; the axial load is a constant `N_{xx}` in every domain,
 `-E t \varepsilon` in the skin and `-E t_b \varepsilon` in the blades, so
 that `\bar{N}_x = \varepsilon (E t + E A_s/d)`. With the blades of
 ``'plate_clpt_gl'`` the discrete load is 6.6 % below the smeared one and
-0.25 % below `\bar{N}_s` of Card and Jones. The difference from the smeared
+2.7 % below `\bar{N}_s` of Card and Jones. The difference from the smeared
 theory has two parts. The skin panels have the Sanders kinematics, the
 smeared theory the Donnell one: with ``'cylshell_clpt_donnell'`` panels the
-discrete load is 2.5 % higher, 4.3 % below the smeared load; for the
+discrete load is 1.6 % higher, 5.2 % below the smeared load; for the
 cylinders 1 to 3 of the same table, with the same model, the differences
-are -3.8, -7.8 and -2.7 % with the Sanders skin and -0.7, -4.4 and -1.1 %
+are -2.7, -8.7 and -2.6 % with the Sanders skin and -0.2, -6.3 and -1.6 %
 with the Donnell skin (cylinders 1 and 3 have external stringers; runs
 made when this test was written). The remainder comes from the blades.
 Their axial load acts, through the geometric stiffness of
@@ -88,8 +91,9 @@ of this cylinder with the Donnell skin (simply supported ends of the blades
 holding only their radial displacement), removing the first term from the
 geometric stiffness of the blades raises the discrete load by 3.7 %, to
 1.8 % below the smeared one, and removing also the twisting stiffness of
-the blades gives Eq. (15) with `J = 0` within 0.1 % (runs made when these
-Notes were written).
+the blades gives Eq. (15) with `J = 0` within 0.1 % (runs made with the
+blade from the middle surface of the skin, `h_b = 0.33 - t/2` in, and the
+smeared reference for that rectangle).
 Almroth [3]_ shows for unstiffened cylinders (Donnell equations) that, with
 the membrane pre-buckling state, simple supports with `v = 0` and either
 `u = 0` or `N_x = 0` give a load equal to or insignificantly higher than the
@@ -101,8 +105,8 @@ paper treats no stiffeners and gives no value for the part due to the
 discreteness. The test accepts a discrete load between 10 % below the smeared value, beyond
 the largest difference of the four cylinders, and the smeared value, and
 within 5 % of
-`\bar{N}_s` of Card and Jones, whose section differs from the blade by the
-overlap with the skin and the torsion constant. With ``'plate_clpt_donnell'`` blades the geometric
+`\bar{N}_s` of Card and Jones, whose section differs from the blade by
+the torsion constant. With ``'plate_clpt_donnell'`` blades the geometric
 stiffness lacks the work of the blade load on the in-plane (radial)
 bending of the blade, `N_{xx} v_{,x}^2`, see the Notes of
 :func:`.create_cylinder_blade_stiffened`, and the load is about twice the
@@ -114,8 +118,8 @@ smeared one.
 displacement of the buckling mode, which the smeared solution leaves free
 (Eq. (13c), p. 11, gives `N_x = 0` or `u = 0`), and the prescribed
 displacements also impose a uniform `u` at `x = L`. Their loads are above
-the smeared one: 1.153 times with a constant `N_{xx}`, 1.163 times with the
-pre-buckling state of the static analysis and 1.546 times with the
+the smeared one: 1.156 times with a constant `N_{xx}`, 1.167 times with the
+pre-buckling state of the static analysis and 1.536 times with the
 prescribed end-shortening.
 
 References
@@ -143,7 +147,7 @@ from panels.multidomain import (create_cylinder_blade_stiffened,
         cylinder_blade_stiffened_compression_lb_Nxx_from_static,
         cylinder_blade_stiffened_compression_lb_pd_from_static)
 
-from smeared_stringer_cylinder import (blade_stringer, isotropic_skin,
+from smeared_stringer_cylinder import (isotropic_skin,
         nx_cr, nx_cr_isotropic_eq18, rectangle_stringer)
 
 
@@ -158,18 +162,27 @@ L = 23.75*IN
 T = 0.0280*IN
 NSTIFF = 60
 TB = 0.097*IN
-HB = 0.33*IN - T/2
+HB = 0.33*IN - T
 PLYT = 0.001*IN
 NS_CARD = 722.  # lb/in
 # regression values, N/m
-REF = dict(half_gl=126130.9, half_gl_cyl3_external=235662.7,
-           Nxx_cte=155764.9, Nxx_from_static=157020.9,
-           pd_from_static=208841.1)
+REF = dict(half_gl=122984.6, half_gl_cyl3_external=233290.6,
+           Nxx_cte=152191.2, Nxx_from_static=153642.2,
+           pd_from_static=202191.9)
+
+
+def plate_stringer(hb, t, internal, tb=TB):
+    r"""Stiffnesses of the blade as modelled, a rectangle `h_b 	imes t_b`
+    standing on the surface of the skin, with the twisting stiffness of the
+    Kirchhoff plate strip, `G h_b t_b^3/3`"""
+    st = rectangle_stringer(E, NU, hb, tb, t, internal=internal)
+    st['GJ'] = E/(2*(1 + NU))*hb*tb**3/3
+    return st
 
 
 def smeared_reference():
     skin = isotropic_skin(E, NU, T)
-    st = blade_stringer(E, NU, HB, TB, internal=True)
+    st = plate_stringer(HB, T, internal=True)
     return nx_cr(skin, st, 2*np.pi*R/NSTIFF, R, L)
 
 
@@ -224,7 +237,7 @@ def test_smeared_card1966_ns():
 
 def _half_cylinder(blade_model, model='cylshell_clpt_sanders', m=8, n=6,
                    side='internal', t=T, nply=28, nply_blade=97, plyt=PLYT):
-    hb = 0.33*IN - t/2
+    hb = 0.33*IN - t
     md, conns, info = create_cylinder_blade_stiffened(height=L/2, r=R,
             stack=[0]*nply, stack_blades=[[0]*nply_blade]*NSTIFF,
             width_blades=[hb]*NSTIFF, plyt=plyt, laminaprop=(E, NU),
@@ -328,10 +341,10 @@ def test_discrete_gl_skin():
     than with the Sanders skin. Its size is estimated from the critical mode,
     one axial half-wave and `n = 6` circumferential waves: an inextensional
     mode, `v_{,y} + w/r = 0`, has `v_{,x}^2 / w_{,x}^2 \approx 1/n^2 = 2.8`
-    %, and the skin carries `t/(t + A_s/d) = 48` % of the load, so the load
-    should drop by about `0.48 \times 2.8 = 1.3` %. The computed drop is
-    1.33 % (124455.2 against 126130.9 N/m, the same for 6 x 6 and 10 x 8
-    terms), and the GL load is 1.6 % below `\bar{N}_s`. The bounds, 0 and
+    %, and the skin carries `t/(t + A_s/d) = 49` % of the load, so the load
+    should drop by about `0.49 \times 2.8 = 1.4` %. The computed drop is
+    1.36 % (121311.9 against 122984.6 N/m), and the GL load is 4.1 % below
+    `\bar{N}_s`. The bounds, 0 and
     -2.5 %, are the sign of the term and about twice the estimate; the
     agreement with `\bar{N}_s` is checked within the 5 % of
     ``test_discrete_vs_smeared``, and the load against a regression value
@@ -344,7 +357,7 @@ def test_discrete_gl_skin():
                                 100*(N/(LBF/IN)/NS_CARD - 1)))
     assert -0.025 < N/REF['half_gl'] - 1 < 0.
     assert abs(N/(LBF/IN)/NS_CARD - 1) < 0.05
-    assert np.isclose(N, 124455.2, rtol=1e-4)
+    assert np.isclose(N, 121311.9, rtol=1e-4)
 
 
 def test_discrete_tl_skin():
@@ -355,7 +368,7 @@ def test_discrete_tl_skin():
     Both loads must equal the load of ``test_discrete_gl_skin``, skin
     ``'cylshell_clpt_gl'`` and blades ``'plate_clpt_gl'``, to rounding
     (``rtol=1e-12``), and so lie within 5 % of `\bar{N}_s` of Card and
-    Jones (1966), Table I, and at the regression value ``124455.2`` N/m.
+    Jones (1966), Table I, and at the regression value ``121311.9`` N/m.
 
     Notes
     -----
@@ -383,7 +396,7 @@ def test_discrete_tl_skin():
               % (blade_model, N, N/N_gl - 1))
         assert np.isclose(N, N_gl, rtol=1e-12)
         assert abs(N/(LBF/IN)/NS_CARD - 1) < 0.05
-        assert np.isclose(N, 124455.2, rtol=1e-4)
+        assert np.isclose(N, 121311.9, rtol=1e-4)
 
 
 @pytest.mark.slow
@@ -394,7 +407,7 @@ def test_tl_skin_Nxx_from_static():
     the skin ``'cylshell_clpt_tl'`` against ``'cylshell_clpt_gl'``, and
     with the blades ``'plate_clpt_tl'`` too: the loads must agree within
     ``1e-6`` (relative), and the GL skin is checked against the regression
-    value ``155419.52`` N/m.
+    value ``152035.72`` N/m.
 
     Notes
     -----
@@ -406,7 +419,7 @@ def test_tl_skin_Nxx_from_static():
     moments are confined to the edge zones, and the critical mode has one
     axial half-wave, so the difference is expected far below the
     differences between the kinematic models (1.3 % between the GL and
-    Sanders skins); it is -6.6e-8 for both blade models, and the bound is
+    Sanders skins); it is -8.7e-8 for both blade models, and the bound is
     ``1e-6``.
 
     """
@@ -420,7 +433,7 @@ def test_tl_skin_Nxx_from_static():
                 models=models, **_common())
         loads[tuple(sorted(models.values()))] = nbar(eigvals[0])
     N_gl = loads[('cylshell_clpt_gl', )]
-    assert np.isclose(N_gl, 155419.52, rtol=1e-6)
+    assert np.isclose(N_gl, 152035.72, rtol=1e-6)
     for key, N in loads.items():
         print('Nxx_from_static %s: %.6f N/m, %+.1e vs GL skin'
               % (key, N, N/N_gl - 1))
@@ -527,15 +540,15 @@ def test_side():
     Cylinder 3 of Card and Jones [1]_ (Table I, p. 7): `t = 0.0275` in, `L
     = 23.75` in, `R = 9.55` in, 60 integral blade stringers outside, 0.097
     in wide and 0.33 in deep including the skin; the blade is modelled from
-    the middle surface of the skin, `h_b = 0.33 - t/2` in. In the smeared
+    the outer surface of the skin, `h_b = 0.33 - t` in. In the smeared
     theory of Block, Card and Mikulas [2]_ outside stringers raise the axial
     buckling load of such cylinders: their Table I(c) (p. 26) gives higher
     loads with the stringers outside than inside for every length, and
     Card and Jones give higher `\bar{N}_s` for their external cylinders 1
     and 3 than for the internal cylinders 2 and 4. Eq. (15) for the blade
-    as modelled gives 1382.8 lb/in outside and 754.4 lb/in inside; the
-    discrete loads are 1345.7 lb/in (-2.7 %; +1.5 % from `\bar{N}_s`) and
-    704.2 lb/in (-6.7 %) (runs made when this test was written).
+    as modelled gives 1367.6 lb/in outside and 735.5 lb/in inside; the
+    discrete loads are 1332.1 lb/in (-2.6 %; +0.5 % from `\bar{N}_s`) and
+    686.6 lb/in (-6.7 %) (runs made when this test was written).
 
     References
     ----------
@@ -555,12 +568,14 @@ def test_side():
         bf = [c for c in conns if c['func'] == 'BFycte']
         assert len(bf) == 4
         assert all(c['ycte1'] == 0 and c['ycte2'] == ycte2 for c in bf)
+        face = 'lower' if side == 'internal' else 'upper'
+        assert all(c['face'] == face for c in bf)
     t3 = 0.0275*IN
-    hb3 = 0.33*IN - t3/2
+    hb3 = 0.33*IN - t3
     skin = isotropic_skin(E, NU, t3)
     loads = {}
     for side in ('internal', 'external'):
-        st = blade_stringer(E, NU, hb3, TB, internal=(side == 'internal'))
+        st = plate_stringer(hb3, t3, internal=(side == 'internal'))
         Ns = nx_cr(skin, st, 2*np.pi*R/NSTIFF, R, L)[0]
         # plies of 0.0005 in: 55 in the skin, 194 in a blade
         N = _half_cylinder('plate_clpt_gl', side=side, t=t3, nply=55,

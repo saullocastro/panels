@@ -29,6 +29,35 @@
   `dcb_utils` pass `pd_method='penalty'` where they used the default
   (results unchanged).
 
+### New: `'BFycte'` at a face of the base; the cylinder builders tie the stiffeners to the skin surface
+
+- The connection `'BFycte'` takes the keys `face='lower'|'upper'` and
+  `kinematics='sanders'|'model'` of `'BFxcte'`, with the same meaning: the
+  edge `ycte2` of the flange `p2` (`0` for `'lower'`, `p2.b` for
+  `'upper'`) is tied to the face `z1 = d1 -+ h1/2` of the base `p1`, whose
+  points follow the Sanders-Koiter kinematics of a `cylshell_*` base by
+  default, `u1(z) = u1 - z w1,x`, `v1(z) = (1 + z/r1) v1 - z w1,y`, with
+  the rotation of the normal about `x` at the face, `-w1,y + v1/r1`. Penalty
+  (`kCBFycte_face.fkCBFycte_face`) and null space
+  (`nullspace.constraint_matrix`); new module
+  `panels.multidomain.connections.kCBFycte_face`, derivation and symbolic
+  checks in `theory/multidomain_penalization/bfycte_face.py`. Tests:
+  `tests/multidomain/test_conn_BFycte_face.py`.
+- `create_cylinder_blade_stiffened` and `create_cylinder_z_stiffened` set
+  the face from `side` (`'internal'` -> `'lower'`, `'external'` ->
+  `'upper'`): `width_blades` is the height of a blade from the surface of
+  the skin, and `width_web` the width of a web from the face of the strip
+  (the face of the attached flange) to the middle surface of the free
+  flange; both were measured from the middle surface of the skin, the
+  stiffener overlapping the skin. The results of every analysis built with
+  these functions change; the tests set the dimensions of their sources
+  from the skin surface (Card and Jones 1966 cylinders 3 and 4,
+  `h_b = 0.33 in - t`; Singer et al. 1971 AS-2, `h_s`; Peterson and Dow
+  1959 Z stringers, `H_w = 0.54 - 3(0.040)/2 = 0.48` in) and their
+  regression values are updated.
+- The key `kinematics` given without `face` raises a `ValueError` in
+  `'BFxcte'` and `'BFycte'`; it was ignored.
+
 ### Changed: `create_wingbox` connects the domains with `conn_method='null-space'` by default
 
 - The default of `conn_method` of `create_wingbox`, and so of

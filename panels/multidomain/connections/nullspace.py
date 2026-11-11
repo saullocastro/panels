@@ -81,6 +81,7 @@ from panels.logger import warn
 from . import kCsdt
 from . import kCBFxycte
 from . import kCBFxcte_face
+from . import kCBFycte_face
 
 
 #: Connections that can be imposed with the null-space method
@@ -382,6 +383,9 @@ def constraint_matrix(connecti, size):
     if func == 'BFxcte':
         z_face = kCBFxcte_face.check_bfxcte(connecti)
         face = connecti.get(kCBFxcte_face.FACE_KEY)
+    elif func == 'BFycte':
+        z_face = kCBFycte_face.check_bfycte(connecti)
+        face = connecti.get(kCBFxcte_face.FACE_KEY)
     if func in ('SSxcte', 'BFxcte'):
         ctes = dict(x=(connecti['xcte1'], connecti['xcte2']), y=None)
     elif func in ('SSycte', 'BFycte'):
@@ -399,6 +403,10 @@ def constraint_matrix(connecti, size):
             "the available ones are {1}".format(func, NULL_SPACE_FUNCS))
     if func == 'SB':
         comps = _sb_components(p1, p2, connecti.get('kr', 0.))
+    elif face is not None and func == 'BFycte':
+        comps = [sides for _, sides in
+                 kCBFycte_face.bfycte_face_components(p1, p2, z_face,
+                 kinematics=kCBFxcte_face.kinematics_of(connecti, func))]
     elif face is not None:
         comps = [sides for _, sides in
                  kCBFxcte_face.bfxcte_face_components(p1, p2, z_face,
@@ -415,7 +423,7 @@ def constraint_matrix(connecti, size):
         s = leggauss(max(p1.n, p2.m, 4))[0]
         xis = [np.array([2*connecti['xcte1']/p1.a - 1]), s]
         etas = [s, np.array([2*connecti['ycte2']/p2.b - 1])]
-    elif face is not None:
+    elif face is not None and func == 'BFxcte':
         #NOTE the edges span the same angle but not the same length, see
         #     kCBFxcte_face.check_bfxcte; they share the natural coordinate
         xis = _points(p1, p2, 'x', ctes['x'])

@@ -824,7 +824,7 @@ class MultiDomain(object):
         its boundary condition flags, which remove terms
         of the approximation functions, on the key ``'angle'`` of
         ``'BFxycte'`` and on the keys ``'face'`` and ``'kinematics'`` of
-        ``'BFxcte'``. With ``pd_method='null-space'`` the
+        ``'BFxcte'`` and ``'BFycte'``. With ``pd_method='null-space'`` the
         positions and the prescribed components of the prescribed
         displacements add rows to the constraints, whereas the prescribed
         values change only the right-hand sides, i.e. the particular
@@ -3542,6 +3542,18 @@ class MultiDomain(object):
                                 connecti['xcte1'], connecti['xcte2'], z_face,
                                 size, kinematics=connections.kCBFxcte_face
                                 .kinematics_of(connecti))
+                        continue
+                elif connection_function == 'BFycte':
+                    z_face = connections.kCBFycte_face.check_bfycte(connecti)
+                    if connecti.get(connections.kCBFxcte_face.FACE_KEY) is not None:
+                        #NOTE p1 is the base and p2 the flange, the face is
+                        #     that of p1, see kCBFycte_face.py
+                        kt, kr = _penalties(connecti, pA, pB, 'ycte')
+                        kC_conn += connections.kCBFycte_face.fkCBFycte_face(
+                                kt, kr, connecti['p1'], connecti['p2'],
+                                connecti['ycte1'], connecti['ycte2'], z_face,
+                                size, kinematics=connections.kCBFxcte_face
+                                .kinematics_of(connecti, 'BFycte'))
                         continue
 
                 #NOTE models based on shear deformation theories, with the 5

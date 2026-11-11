@@ -294,7 +294,7 @@ def test_cylinder_redundant_constraints():
 def test_cylinder_blade_stiffened_from_static():
     r"""Laminated cylinder of 5 skin domains with 5 blades of
     ``'plate_clpt_gl'``, pre-buckling state from a static analysis; the
-    same model with the default penalty constants gives -39992.223, 4 %
+    same model with the default penalty constants gives -38689.060, 4 %
     below the null-space method (regression values)"""
     Nxxs = [-100.]*5
     md, c, eigvals, eigvecs = \
@@ -304,7 +304,7 @@ def test_cylinder_blade_stiffened_from_static():
         laminaprop=LAMINAPROP, npanels=5, Nxxs_skin=Nxxs, Nxxs_blade=Nxxs,
         m=8, n=12, num_eigvalues=10, conn_method='null-space')
     assert c.shape == (md.get_size(),)
-    assert np.isclose(Nxxs[0]*eigvals[0], -41694.725, rtol=1e-5)
+    assert np.isclose(Nxxs[0]*eigvals[0], -40322.033, rtol=1e-5)
 
 
 def test_tstiff2d_freq():

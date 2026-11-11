@@ -6,9 +6,10 @@ stiffness matrix of the assembly, by the name of the connection given in
 
 - ``'BFycte'`` and ``'BFxcte'``, base-flange at a constant `y` or `x`:
   :mod:`panels.multidomain.connections.kCBFycte` and
-  :mod:`panels.multidomain.connections.kCBFxcte`, and ``'BFxcte'`` at a
-  face of the base, key ``'face'``:
-  :mod:`panels.multidomain.connections.kCBFxcte_face`;
+  :mod:`panels.multidomain.connections.kCBFxcte`, and ``'BFxcte'`` and
+  ``'BFycte'`` at a face of the base, key ``'face'``:
+  :mod:`panels.multidomain.connections.kCBFxcte_face` and
+  :mod:`panels.multidomain.connections.kCBFycte_face`;
 - ``'BFxycte'``, between the edge `x_1` = constant of ``p1`` and the edge
   `y_2` = constant of ``p2``: :mod:`panels.multidomain.connections.kCBFxycte`;
 - ``'SSxcte'`` and ``'SSycte'``, skin-skin at a constant `x` or `y`:
@@ -43,5 +44,6 @@ from . penalties import *
 from . tsl import tsl_resolution, tsl_margin, tsl_discretization
 from . import kCsdt
 from . import kCBFxcte_face
+from . import kCBFycte_face
 from . import skin_base
 from . import nullspace

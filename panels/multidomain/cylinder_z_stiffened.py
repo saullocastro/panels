@@ -102,8 +102,10 @@ def create_cylinder_z_stiffened(height, r, stack, plyt, laminaprop,
       strip of skin under it is one curved domain of the group ``'strip'``
       whose laminate is that of the skin and that of the flange;
     - the web, a flat domain of the group ``'web'`` normal to the skin, of
-      width ``width_web`` `= H_w` from the middle surface of the skin to the
-      middle surface of the free flange;
+      width ``width_web`` `= H_w` from the surface of the strip on the side
+      of the stringer, the face of the attached flange (the surface of the
+      skin with ``attached_flange=False``), to the middle surface of the
+      free flange;
     - the free flange, a flat domain of the group ``'free_flange'`` normal
       to the web at its free edge, of width ``width_free_flange`` `= b_l`
       from the middle surface of the web, on the side of the web opposite
@@ -122,8 +124,11 @@ def create_cylinder_z_stiffened(height, r, stack, plyt, laminaprop,
 
     Consecutive skin domains (bays and strips) are connected with
     ``'SSycte'``, the last to the first, each strip to its web with
-    ``'BFycte'`` along the line of the web, and each web to its free flange
-    with ``'BFycte'`` along the free edge of the web. The ends `x = 0` and
+    ``'BFycte'`` along the line of the web, at the face of the strip on the
+    side of the stringer (key ``'face'``, ``'lower'`` for internal and
+    ``'upper'`` for external stringers), and each web to its free flange
+    with ``'BFycte'`` along the free edge of the web, at the middle surface
+    of the web. The ends `x = 0` and
     `x` = ``height`` have the boundary conditions ``bc[0]`` and ``bc[1]``:
     ``'C'``, clamped, `u = v = w = w_{,x} = 0` on the skin domains and `u =
     v = v_{,x} = w = w_{,x} = 0` on the plates; ``'S'``, simply supported,
@@ -169,8 +174,10 @@ def create_cylinder_z_stiffened(height, r, stack, plyt, laminaprop,
         Width `b_f` of the attached flange, from the middle surface of the
         web to its free edge, length.
     width_web : float
-        Width `H_w` of the web, from the middle surface of the skin to the
-        middle surface of the free flange, length.
+        Width `H_w` of the web, from the face of the strip on the side of
+        the stringer, the face of the attached flange or, with
+        ``attached_flange=False``, the surface of the skin, to the middle
+        surface of the free flange, length.
     width_free_flange : float
         Width `b_l` of the free flange, from the middle surface of the web
         to its free edge, length.
@@ -244,7 +251,11 @@ def create_cylinder_z_stiffened(height, r, stack, plyt, laminaprop,
     axis of a free flange points along `-y` of the skin, so a free flange
     extends towards `+y` from its edge `y = b_l` and towards `-y` from its
     edge `y = 0`. The `z` axis of the skin points outwards, that of a web
-    along `+y` of the skin and that of a free flange inwards.
+    along `+y` of the skin and that of a free flange inwards. The root of a
+    web is tied to the face of the strip, `z = d - h_s/2` (internal) or `z =
+    d + h_s/2` (external), `h_s` and `d` being the thickness and the offset
+    of the laminate of the strip, see
+    :mod:`panels.multidomain.connections.kCBFycte_face`.
 
     A single ``stack_z`` is the sheet bent into the Z. Its normal `n` is
     the `z` axis of the skin at the attached flange and turns with the sheet
@@ -256,7 +267,11 @@ def create_cylinder_z_stiffened(height, r, stack, plyt, laminaprop,
     the other two orientations, and outwards in the free flange. Where the
     `z` axis of a plate is opposite to `n`, its `y` axis is opposite to `t`,
     and the plate has the plies of the sheet in reverse order with the angles
-    changed in sign: its ply `k` of `N` is the ply `N + 1 - k` of the sheet,
+    changed in sign. The axis `x` is common to the sheet and to the plate,
+    and both triads are right-handed, so flipping `z` flips `y`: an angle
+    measured from `x` towards `t` is the opposite angle measured from `x`
+    towards `y`, e.g. a `+45` ply of the sheet is a `-45` ply of the plate,
+    and reading the plies along `z` instead of `n` reverses their order: its ply `k` of `N` is the ply `N + 1 - k` of the sheet,
     at the angle `-\theta_{N + 1 - k}`. Its stiffness matrices are those of
     the sheet with the signs of `A_{16}, A_{26}`, of `B_{11}, B_{12}, B_{22},
     B_{66}` and of `D_{16}, D_{26}` changed. This holds for the free flange,
@@ -273,11 +288,18 @@ def create_cylinder_z_stiffened(height, r, stack, plyt, laminaprop,
     `-t_z/2` (internal) or `+t_z/2` (external), so that the reference
     surface of the strip remains the middle surface of the skin and the
     strip and the bays share the displacements of that surface along their
-    common edges. The web starts at the middle surface of the skin, `h/2 +
-    t_z/2` before the middle surface of the attached flange, where the
-    middle line of the sheet turns into the web: over this length it
-    overlaps the skin and the flange. The corners are square: the length of
-    the bends is not represented.
+    common edges. The web starts at the face of the strip, the face of the
+    attached flange, `h/2 + t_z` from the middle surface of the skin, `t_z/2`
+    beyond the middle surface of the attached flange, where the middle line
+    of the sheet turns into the web: the corner, `t_z` by the thickness of
+    the web, belongs to the attached flange, and the web does not overlap
+    the skin or the flange. Its root follows the Kirchhoff-Love kinematics
+    of the strip at that face, with the Sanders-Koiter term `z v/r`, see
+    :mod:`panels.multidomain.connections.kCBFycte_face`. A stringer of
+    overall depth `H` from the face of the attached flange on the skin to
+    the outer face of the free flange, with the same thickness `t_z` in the
+    three plates, has `H_w = H - 3 t_z/2`. The corners are square: the
+    length of the bends is not represented.
 
     A Z section has no plane of symmetry through the axis of the cylinder,
     so the whole circumference is modelled. The free flange needs at least
@@ -392,7 +414,8 @@ def create_cylinder_z_stiffened(height, r, stack, plyt, laminaprop,
         web = domain('web', Hw, n_web)
         yweb = strip.b if flange_side == -1 else 0.
         conns.append(dict(p1=strip, p2=web, func='BFycte', ycte1=yweb,
-                          ycte2=0. if side == 'internal' else Hw))
+                          ycte2=0. if side == 'internal' else Hw,
+                          face='lower' if side == 'internal' else 'upper'))
         webs.append(web)
         if free_flange:
             lip = domain('free_flange', bl, n_free_flange)
