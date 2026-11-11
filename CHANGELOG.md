@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+### New: notebook `thick_annular_plates`; tests of thick annuli and of mixed FSDT/TSDT webs
+
+- The notebook `thick_annular_plates` compares the annular models with
+  Bagheri et al. (2019), Bisadi et al. (2012) and Dozio (2015), with
+  convergence studies.
+- `test_annular_tsdt.py` checks the `annular_tsdt_*` models against the
+  exact third-order solutions of Bisadi et al. (2012), Tables 5 to 9
+  (`h/a` from 0.1 to 0.3, all edge conditions): within 0.18 % with a
+  clamped edge and 1e-5 without one.
+- `test_annular_fsdt.py` checks the `annular_fsdt_*` models against the
+  first-order values of Dozio (2015), Table 5 (shear correction 5/6),
+  within 0.005 %. For the annulus free inside and clamped outside, the
+  models have a pair of modes with one nodal diameter (frequency
+  parameter 40.29) that the table does not list; the test skips it and says so in its Notes.
+- The tests of Bagheri et al. (2019) stay at the paper's shear correction
+  1 (within 0.038 % of the paper); the Notes of `test_annular_fsdt.py`
+  and the notebook give, beside them, the values with the default
+  `'rohwer'` (5/6 for these plates), 0.76 % to 8.20 % lower.
+- `tests/multidomain/test_annular_cylinder_mixed.py`: an `annular_fsdt_*`
+  web on a `cylshell_tsdt_*` cylinder and an `annular_tsdt_*` web on a
+  `cylshell_fsdt_*` cylinder, connected with `'BFxcte'` with and without
+  `face`, null space and penalty: exact roots of the clamped annulus and
+  rigid motions free of energy.
+
 ### Changed: `MultiDomain` imposes the prescribed displacements with `pd_method='null-space'` by default
 
 - The default of `pd_method` of `MultiDomain` is `'null-space'`, as for
