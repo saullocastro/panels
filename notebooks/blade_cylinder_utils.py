@@ -86,14 +86,18 @@ def build_cylinder(R, h, L, E, nu, rho=0., nstiff=60, tb=None, hb=None,
     `y = 0` of each, the last bay connected to the first one.
 
     The blade of each stringer is a flat plate strip of thickness ``tb`` and
-    width ``hb``, from the middle surface of the skin to the tip of the
-    stringer, connected with ``'BFycte'`` to the edge `y = 0` of the skin
-    panel that starts at the stringer. The local axes of the blade are those
-    of the skin rotated by 90 deg about `x`, its `y` axis pointing inwards
-    (see :mod:`panels.multidomain.connections.kCBFycte`): with ``ycte2 =
-    0`` the blade stands on the inner side of the skin (``side='internal'``)
-    and with ``ycte2 = hb`` on the outer side (``side='external'``). Without
-    ``tb`` the cylinder is unstiffened, divided in the same panels.
+    width ``hb``, from the surface of the skin to the tip of the stringer,
+    connected with ``'BFycte'`` to the edge `y = 0` of the skin panel that
+    starts at the stringer, at the inner surface of the skin
+    (``face='lower'``) for ``side='internal'`` and at its outer surface
+    (``face='upper'``) for ``side='external'``, see
+    :mod:`panels.multidomain.connections.kCBFycte_face`. The local axes of
+    the blade are those of the skin rotated by 90 deg about `x`, its `y`
+    axis pointing inwards (see :mod:`panels.multidomain.connections.kCBFycte`):
+    with ``ycte2 = 0`` the blade stands on the inner side of the skin
+    (``side='internal'``) and with ``ycte2 = hb`` on the outer side
+    (``side='external'``). Without ``tb`` the cylinder is unstiffened,
+    divided in the same panels.
 
     ``Dy_factor`` multiplies the circumferential bending stiffness `D_{22}`
     of every skin panel, `D_y/D` of Sewall and Naumann (1968), Appendix A,
@@ -115,7 +119,7 @@ def build_cylinder(R, h, L, E, nu, rho=0., nstiff=60, tb=None, hb=None,
     nstiff : int
         Number of stringers of the full cylinder (even).
     tb, hb : float or None
-        Thickness and width of the blades, m.
+        Thickness of the blades and their width from the skin surface, m.
     side : str
         ``'external'`` or ``'internal'``.
     bc : str or tuple
@@ -206,8 +210,9 @@ def build_cylinder(R, h, L, E, nu, rho=0., nstiff=60, tb=None, hb=None,
             _set_end(bl, 'y2', _FREE)
             blades.append(bl)
             ycte2 = 0. if side == 'internal' else hb
+            face = 'lower' if side == 'internal' else 'upper'
             conns.append(dict(p1=pskin, p2=bl, func='BFycte', ycte1=0.,
-                              ycte2=ycte2))
+                              ycte2=ycte2, face=face))
     md = MultiDomain(skin + blades, conns, conn_method='null-space',
                      pd_method=pd_method)
     return md, skin, blades
