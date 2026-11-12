@@ -36,6 +36,11 @@
   new notebook `annular_webs_on_cylinders`, with the CLPT webs, the
   external frame and the offset or mid-surface description of the inner
   face.
+- `test_cylshell_tsdt_tl.py` checks the `annular_tsdt_tl` web on the inner
+  surface of a `cylshell_tsdt_tl` cylinder, with the null-space and the
+  penalty connections, with small models against the same web clamped
+  directly; the comparison of the full-size models with the roots of the
+  annulus is section 6 of the notebook `annular_webs_on_cylinders`.
 - Irie, Yamada and Tsujino (1983) cited with the author's initial M. and
   the title "subjected to a torque" in `test_annular_tsdt.py` and
   `test_annular_tsdt_tl.py`.
