@@ -324,6 +324,7 @@ def test_tstiff2d_1stiff_flutter_constant_prestress():
     assert not np.isclose(ws, w0, rtol=1e-6)
 
 
+@pytest.mark.slow
 def test_tstiff2d_1stiff_flutter_static_edge_loads():
     r"""In-plane loads of :func:`.tstiff2d_1stiff_flutter` as edge loads
     of a static case, ``run_static_case=True``

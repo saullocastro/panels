@@ -43,6 +43,7 @@ import sys
 sys.path.append('../..')
 
 import numpy as np
+import pytest
 from scipy.sparse import coo_matrix, csr_matrix, diags
 from structsolve import Analysis, lb, solve
 from structsolve.stopping import value_reached
@@ -237,6 +238,7 @@ def test_imperfection_identities():
     assert abs(dU - fv) <= 1e-7*abs(fv)
 
 
+@pytest.mark.slow
 def test_riks_imperfect_cylinder_coarse():
     # 6 x 6 terms, imperfection of 50 % of the thickness, up to u_max =
     # 0.014: the Riks method passes the limit point; regression values of
@@ -256,6 +258,7 @@ def test_riks_imperfect_cylinder_coarse():
     assert us[-1] >= 0.014
 
 
+@pytest.mark.slow
 def test_riks_perfect_cylinder_branch_switching_coarse():
     # 6 x 6 terms, the perfect cylinder: one bifurcation detected by the
     # inertia of the tangent stiffness matrix, the switch along the

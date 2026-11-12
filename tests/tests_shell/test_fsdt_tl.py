@@ -90,6 +90,7 @@ GL = {'plate_fsdt_tl': 'plate_fsdt_gl',
 STRAINS = ('exx', 'eyy', 'gxy', 'kxx', 'kyy', 'kxy', 'gyz', 'gxz')
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('model', list(LINEAR))
 def test_linear_kernels_are_those_of_the_linear_model(model):
     r"""Constitutive stiffness at zero displacements and mass matrix equal
@@ -139,6 +140,7 @@ def plate_rigid_rotation(s, axis, angle):
     return c
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('axis', [(1, 0, 0), (0, 1, 0), (1, 2, 3)])
 def test_plate_rigid_rotation(axis):
     r"""Rigid rotation of a free plate by 0.2 and 0.1 rad: membrane and
@@ -246,6 +248,7 @@ def cantilever_strip(model, alpha, inc):
     return f['w'].mean()/L, -f['u'].mean()/L
 
 
+@pytest.mark.slow
 def test_cantilever_strip_out_of_plane_against_elastica():
     r"""Out-of-plane bending, ``alpha = 1``, tip rotation 0.46 rad: the
     elastica gives ``w = 0.3017 L``, ``u = -0.0564 L``; ``plate_fsdt_tl``

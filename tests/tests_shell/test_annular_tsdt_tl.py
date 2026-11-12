@@ -253,6 +253,7 @@ AXES = {'in-plane': np.array([np.cos(0.4), np.sin(0.4), 0.]),
         'inclined': np.array([np.cos(0.4), np.sin(0.4), 1.])/np.sqrt(2)}
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('axis', list(AXES))
 def test_rigid_rotation(axis):
     r"""Rigid rotations `t = 0.2` and `0.1` of a free quarter annulus,
@@ -346,6 +347,7 @@ def test_thin_cantilever_strip_against_elastica():
 
 
 
+@pytest.mark.slow
 def test_thin_cantilever_strip_small():
     r"""The strip of :func:`test_thin_cantilever_strip_against_elastica`
     with `m = 10` radial terms and the whole load in one increment:

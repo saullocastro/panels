@@ -257,9 +257,10 @@ def check_quadratic(errors, floor=1.e-12):
     return checked, orders
 
 
-@pytest.mark.parametrize('model', ['plate_clpt_donnell',
-                                   'cylshell_clpt_sanders',
-                                   'cylshell_fsdt_sanders'])
+@pytest.mark.parametrize('model', [
+    pytest.param('plate_clpt_donnell', marks=pytest.mark.slow),
+    'cylshell_clpt_sanders',
+    pytest.param('cylshell_fsdt_sanders', marks=pytest.mark.slow)])
 def test_newton_raphson_converges_quadratically(model):
     s = follower_shell(model)
     rec = Recorder(s)

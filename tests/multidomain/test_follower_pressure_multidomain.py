@@ -65,7 +65,8 @@ def test_single_panel_assembly_equals_shell(model):
 
 @pytest.mark.parametrize('model', ['plate_clpt_donnell',
                                    'cylshell_clpt_sanders', 'plate_clpt_gl',
-                                   'plate_clpt_tl'])
+                                   pytest.param('plate_clpt_tl',
+                                                marks=pytest.mark.slow)])
 def test_two_panels_tangent_is_jacobian(model):
     r"""Two panels connected along ``x = const`` with the null-space method,
     with follower pressures on both: the reduced tangent stiffness matrix

@@ -368,6 +368,7 @@ def critical_points(P, wc):
     return [(P[i], w[i]) for i in (i1, i2, i3, i4)]
 
 
+@pytest.mark.slow
 def test_hinged_roof_snap_through():
     r"""Hinged roof, `h = 12.7`, quarter with 5 x 5 terms, central
     deflection prescribed up to `-w_C = 22` and traced with the Riks method
@@ -385,6 +386,7 @@ def test_hinged_roof_snap_through():
                                           19.23811], rtol=1e-4)
 
 
+@pytest.mark.slow
 def test_hinged_roof_snap_back():
     r"""Hinged roof, `h = 6.35`, quarter with 5 x 5 terms, central
     deflection prescribed up to `-w_C = 20` and traced with the Riks method

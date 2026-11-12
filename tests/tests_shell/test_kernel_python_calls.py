@@ -51,7 +51,9 @@ def _rel(A, B):
     return np.abs(A - B).max()/np.abs(B).max()
 
 
-@pytest.mark.parametrize('model', sorted(modelDB.db.keys()))
+@pytest.mark.parametrize('model', [
+    pytest.param(m, marks=pytest.mark.slow) if m == 'annular_tsdt_tl' else m
+    for m in sorted(modelDB.db.keys())])
 @pytest.mark.parametrize('offset', [0., 1.2e-3])
 def test_analytical_kernels_finite_and_equal_numerical(model, offset):
     s = Shell(model=model, a=0.4, b=0.3,

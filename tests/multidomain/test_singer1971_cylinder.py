@@ -67,6 +67,7 @@ import sys
 sys.path.append('../..')
 
 import numpy as np
+import pytest
 from structsolve import lb
 from composites import isotropic_plate
 
@@ -123,6 +124,7 @@ def clamped_membrane(m, n, J=True):
     return eigvals[0]*(E*T + E*ts*Hs/d)
 
 
+@pytest.mark.slow
 def test_singer1971_as2_clamped():
     N = clamped_membrane(m=10, n=4)
     print('AS-2, C-4: %.2f lb/in, %+.2f %% from Singer et al.'

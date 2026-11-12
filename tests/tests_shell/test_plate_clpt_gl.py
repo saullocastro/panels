@@ -204,6 +204,7 @@ def test_natural_frequencies_equal_von_karman():
     assert np.allclose(om[GL], om[VK], rtol=1e-6)
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('p, wtol', [(1.e2, 1e-5), (1.e3, 1e-4), (2.e4, 2e-3)])
 def test_small_deflection_agrees_with_von_karman(p, wtol):
     r"""Simply supported plate under a uniform pressure: at ``p = 0.1, 1``
@@ -272,6 +273,7 @@ def cantilever_strip(model, direction, alpha, inc):
     return defl/L, -f['u'].mean()/L
 
 
+@pytest.mark.slow
 def test_cantilever_strip_in_plane_against_elastica():
     r"""In-plane bending, ``alpha = 2``, 0.78 rad at the tip, is carried by
     the membrane strains, exact for large rotations: the elastica gives
@@ -288,6 +290,7 @@ def test_cantilever_strip_in_plane_against_elastica():
     assert abs(vk[1]) < 1e-10
 
 
+@pytest.mark.slow
 def test_cantilever_strip_out_of_plane_follows_the_linear_curvature():
     r"""Out-of-plane bending, ``alpha = 1``: the changes of curvature
     ``-w,xx`` are measured in the fixed frame, so the bending energy is that

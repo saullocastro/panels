@@ -104,6 +104,7 @@ STRAINS = ('exx', 'eyy', 'gxy', 'kxx', 'kyy', 'kxy', 'kxx3', 'kyy3', 'kxy3',
            'gyz', 'gxz', 'gyz2', 'gxz2')
 
 
+@pytest.mark.slow
 def test_linear_kernels_are_those_of_the_linear_model():
     r"""Constitutive stiffness at zero displacements and mass matrix equal
     to those of ``cylshell_tsdt_sanders``; the numerical geometric stiffness
@@ -187,6 +188,7 @@ def test_euler_load_of_a_pinned_tube():
 PMAX = 3000.
 
 
+@pytest.mark.slow
 def test_hinged_roof_snap_through():
     r"""Hinged roof, `h = 12.7`, quarter with 8 x 8 terms: the limit load
     and the following minimum of the reaction against [3], Table 9a, 2226.3
@@ -213,6 +215,7 @@ def test_tangent_consistency():
     check_tangent(MODEL)
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('conn_method', ['null-space', 'penalty'])
 def test_annular_web_on_the_inner_surface(conn_method):
     r"""Small web of ``annular_tsdt_tl``, `h/r_o = 0.001`, its outer edge

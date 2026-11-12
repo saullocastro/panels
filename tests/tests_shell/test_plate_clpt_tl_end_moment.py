@@ -74,6 +74,7 @@ import sys
 sys.path.append('../..')
 
 import numpy as np
+import pytest
 from scipy.optimize import fsolve
 from structsolve import Analysis
 
@@ -229,6 +230,7 @@ def test_load_stiffness_is_derivative_of_load_vector():
     assert np.allclose(K, K.T, rtol=0, atol=1e-14*np.abs(K).max())
 
 
+@pytest.mark.slow
 def test_end_moment_rolls_strip_into_circle():
     r"""``'plate_clpt_tl'``, ``m = 12``, 20 increments of 0.05 ``M_max``:
     at 0.05, 0.25, 0.5, 0.75 and 1 ``M_max`` the tip is that of the

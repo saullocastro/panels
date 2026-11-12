@@ -228,7 +228,9 @@ def test_bladestiff2d_without_flange():
         bay.uvw_stiffener(c, 0)
 
 
-@pytest.mark.parametrize('stiffener', [None, '1d', '1d_base', '2d', '2d_base'])
+@pytest.mark.parametrize('stiffener', [
+    None, '1d', pytest.param('1d_base', marks=pytest.mark.slow), '2d',
+    pytest.param('2d_base', marks=pytest.mark.slow)])
 def test_calc_kM(stiffener):
     """The mass matrix is symmetric and usable in a frequency analysis"""
     bay = _bay(stiffener)
