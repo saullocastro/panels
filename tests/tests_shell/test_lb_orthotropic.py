@@ -52,6 +52,7 @@ import sys
 sys.path.append('../..')
 
 import numpy as np
+import pytest
 from structsolve import lb
 import matplotlib.pyplot as plt
 
@@ -59,6 +60,7 @@ from panels.shell import Shell
 from panels.plot_shell import plot_shell
 
 
+@pytest.mark.slow
 def test_lb_orthotropic():
     # m = n = 12: values of the code with these terms, above those of
     # m = n = 30 given in the Notes, Donnell above Sanders as in Table 2

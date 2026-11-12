@@ -109,6 +109,7 @@ def thick_plate(model, free=False, m=8, n=8):
     return s
 
 
+@pytest.mark.slow
 def test_linear_kernels_are_those_of_the_linear_model():
     r"""Constitutive stiffness at zero displacements and mass matrix equal
     to those of ``plate_tsdt_donnell``; the numerical geometric stiffness
@@ -135,6 +136,7 @@ def test_linear_kernels_are_those_of_the_linear_model():
     assert np.linalg.norm(f - f_lin) < 1.e-4*np.linalg.norm(f_lin)
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('axis', [(1, 0, 0), (0, 1, 0), (1, 2, 3)])
 def test_rigid_rotation_strains(axis):
     r"""Rigid rotation of a free plate by 0.2 and 0.1 rad: membrane,
@@ -159,6 +161,7 @@ def rotation_residual(model, axis, angle):
             /np.linalg.norm(s.calc_kC(c=np.zeros_like(c), NLgeom=True) @ c))
 
 
+@pytest.mark.slow
 def test_rigid_rotation_internal_forces():
     r"""Rotation about the oblique axis ``(1, 2, 3)`` by 0.2 and 0.1 rad,
     ``KC0 c`` being of `O(t^2)`: the residual is of `O(t^3)` (internal
@@ -208,6 +211,7 @@ def strip(model, L, b, h, alpha, inc, NLgeom=True, m=14, n=4, E=70e9):
     return f['w'].mean()/L, -f['u'].mean()/L
 
 
+@pytest.mark.slow
 def test_thin_cantilever_strip_against_elastica():
     r"""Thin strip, ``alpha = 1``, tip rotation 0.46 rad: the elastica gives
     ``w = 0.3017208 L``, ``-u = 0.0564332 L``; ``plate_tsdt_tl`` follows it
@@ -244,6 +248,7 @@ def reissner(P, L, EI, EA, kGA):
     return y[3]/L, (L - y[2])/L, y[0]
 
 
+@pytest.mark.slow
 def test_thick_strip_against_reissner_beam():
     r"""Thick strip, ``L = 1``, ``b = h = 0.2``, ``alpha = 3``, tip
     rotation 0.98 rad, against the Reissner beam with the shear stiffness

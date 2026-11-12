@@ -624,7 +624,9 @@ def test_rigid_body_motions(conn_method, model):
 
 
 @pytest.mark.parametrize('conn_method, face, web', [
-    (conn_method, face, web) for web in TSDT_WEBS for face in (None, 'lower')
+    pytest.param(conn_method, face, web, marks=pytest.mark.slow)
+    if web == 'annular_tsdt_tl' else (conn_method, face, web)
+    for web in TSDT_WEBS for face in (None, 'lower')
     for conn_method in ('null-space', 'penalty')
     if conn_method == 'null-space' or web != 'annular_tsdt_tl'])
 def test_tsdt_web_on_tsdt_cylinder(conn_method, face, web):

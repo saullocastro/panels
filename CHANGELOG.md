@@ -30,6 +30,9 @@
   directly, or values of the code; the full-size tests of 30 s or less
   keep their literature values and are marked `slow` when the small
   variants cover their lines.
+- 95 more tests marked `slow` by the rule of `pyproject.toml`, measured on
+  the whole suite: the line-traced run of `coverage.yml` keeps every
+  `.pyx` line.
 - The frequencies of annular webs connected with `'BFxcte'` to cylinders
   of the shear deformation theories (TSDT webs on TSDT cylinders, mixed
   FSDT/TSDT, FSDT on FSDT), against the roots of the annulus, are in the

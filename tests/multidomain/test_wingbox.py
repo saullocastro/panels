@@ -120,6 +120,7 @@ def test_wingbox_tip_deflection(conn_method):
     assert abs(w/w_beam - 1) < 0.03, w/w_beam
 
 
+@pytest.mark.slow
 def test_wingbox_tip_force_lb_default():
     # case High-AR-t5 without stringers, 9 bays, 45 domains, the default
     # terms and null-space connections, 6264 Ritz constants, 1 N at the tip;
@@ -157,6 +158,7 @@ def test_wingbox_tip_force_lb():
     assert v.argmax() in range(root_top.col_start, root_top.col_end)
 
 
+@pytest.mark.slow
 def test_wingbox_models():
     # 2 stringers per skin, 9 bays, the default terms and penalty
     # connections, 12096 Ritz constants, 1 N at the tip; regression values

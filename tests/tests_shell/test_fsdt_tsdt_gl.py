@@ -123,7 +123,9 @@ def panel(model, free=False, m=8, n=8):
     return s
 
 
-@pytest.mark.parametrize('model', list(LINEAR))
+@pytest.mark.parametrize('model', [
+    pytest.param(m, marks=pytest.mark.slow) if m in CYLINDERS else m
+    for m in LINEAR])
 def test_linear_kernels_are_those_of_the_linear_model(model):
     r"""Constitutive stiffness and internal forces at zero displacements and
     the mass matrix equal to those of the linear model; analytical and
@@ -185,6 +187,7 @@ AXES = {'in-plane z': (0, 0, 1), 'out-of-plane x': (1, 0, 0),
         'out-of-plane y': (0, 1, 0), 'oblique': (1, 2, 3)}
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('model', PLATES)
 @pytest.mark.parametrize('axis', list(AXES))
 @pytest.mark.parametrize('angle', [0.5, 1.0])
@@ -280,6 +283,7 @@ def cantilever_strip(model, alpha, inc):
     return f['v'].mean()/L, -f['u'].mean()/L
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('model', PLATES)
 def test_cantilever_strip_in_plane_against_elastica(model):
     r"""In-plane bending of a strip, ``alpha = 2``, 0.78 rad at the tip,
@@ -422,6 +426,7 @@ def limit_and_minimum(P, wc):
     return (P[i1], w[i1]), (P[i2], w[i2])
 
 
+@pytest.mark.slow
 def test_hinged_roof_snap_through():
     r"""Hinged roof, `h = 12.7`, quarter with 8 x 8 terms,
     ``cylshell_fsdt_gl``: the limit load and the following minimum of the

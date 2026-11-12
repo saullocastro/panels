@@ -50,6 +50,7 @@ import sys
 sys.path.append('../..')
 
 import numpy as np
+import pytest
 from scipy.sparse import csr_matrix
 from structsolve import Analysis, lb, solve
 from structsolve.stopping import value_reached
@@ -228,6 +229,7 @@ def riks(model, stop, inc, max_inc=None, num_eigvals=20):
     return an, Ks
 
 
+@pytest.mark.slow
 def test_imperfection_identities():
     s, kP = build_shell('B2', m=8, nt=6)
     size = s.get_size()
@@ -296,6 +298,7 @@ def test_imperfection_identities():
     assert abs(dU - fv) <= 1e-7*abs(fv)
 
 
+@pytest.mark.slow
 def test_linear_buckling_shell1():
     # Table 4 of [1], shell 1, k_c and k_f (Eq. (63)) of B1 and B2: the
     # sector of 14 x 8 terms is within 0.1 % of that of 22 x 8 terms, and
@@ -316,6 +319,7 @@ def test_linear_buckling_shell1():
         assert abs((Kc - Kf)/Kf - (k_c - k_f)/k_f) <= 5e-3
 
 
+@pytest.mark.slow
 def test_riks_perfect_shell_inertia():
     # the fundamental path of the perfect shell B1 beyond its bifurcation,
     # at K_f: one negative eigenvalue after it. structsolve counts the
@@ -334,6 +338,7 @@ def test_riks_perfect_shell_inertia():
     assert np.all(nneg[Ks > K_f] == 1) and np.all(det[Ks > K_f] == -1)
 
 
+@pytest.mark.slow
 def test_riks_imperfect_B2_coarse():
     # B2, 8 x 6 terms, imperfection of 1 % of t, Riks up to w/t = 0.3: no
     # limit point, the load increases monotonically towards the bifurcation

@@ -39,6 +39,7 @@ import sys
 sys.path.append('../..')
 
 import numpy as np
+import pytest
 from structsolve import Analysis
 
 from panels.shell import Shell
@@ -122,6 +123,7 @@ def test_wingbox_linear_equals_von_karman():
     assert np.isclose(out['plate_clpt_gl'], 22.68, atol=0.01)
 
 
+@pytest.mark.slow
 def test_wingbox_follower_tip_force_one_increment():
     r"""Geometrically nonlinear static analysis of the box under the
     follower tip force (``follower='quadratic'``) of 25 N in one increment

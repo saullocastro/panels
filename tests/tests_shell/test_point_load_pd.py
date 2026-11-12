@@ -45,6 +45,7 @@ sys.path.append('../..')
 import matplotlib
 matplotlib.use('Agg')
 import numpy as np
+import pytest
 from structsolve import solve
 from structsolve.sparseutils import finalize_symmetric_matrix
 
@@ -61,6 +62,7 @@ def alpha_central_load(a, b, mmax=199):
     return np.sum((np.tanh(alpham) - alpham/np.cosh(alpham)**2)/m**3)/(2*np.pi**3)
 
 
+@pytest.mark.slow
 def test_point_pd_linear_static():
     m = 22
     n = 22

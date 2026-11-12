@@ -48,6 +48,12 @@ STACK = [30, -60, 15]
 LAMINAPROP = (140e9, 9e9, 0.3, 5e9, 5e9, 3e9)
 
 
+def models_marked_slow(slow):
+    """``MODELS`` with the models in ``slow`` marked ``slow``"""
+    return [pytest.param(m, marks=pytest.mark.slow) if m in slow else m
+            for m in MODELS]
+
+
 def _shell(model, **kwargs):
     kw = dict(model=model, a=0.6, b=0.4, stack=STACK, plyt=0.5e-3,
               laminaprop=LAMINAPROP, m=6, n=6)
@@ -73,7 +79,7 @@ def test_laminate_is_anisotropic_and_unsymmetric():
 
 
 @pytest.mark.parametrize('ortho', [False, True])
-@pytest.mark.parametrize('model', MODELS)
+@pytest.mark.parametrize('model', models_marked_slow(['annular_tsdt_tl']))
 def test_analytical_equals_numerical_kC(model, ortho):
     s = _shell(model, force_orthotropic_laminate=ortho)
     kC_an = s.calc_kC()
@@ -81,7 +87,10 @@ def test_analytical_equals_numerical_kC(model, ortho):
     assert _rel(kC_an, kC_num) < 1e-12
 
 
-@pytest.mark.parametrize('model', MODELS)
+@pytest.mark.parametrize('model', models_marked_slow([
+    'annular_clpt_tl', 'annular_fsdt_donnell', 'annular_fsdt_gl',
+    'annular_fsdt_tl', 'annular_tsdt_donnell', 'annular_tsdt_gl',
+    'annular_tsdt_tl']))
 def test_force_orthotropic_laminate_changes_both_kC(model):
     aniso = _shell(model)
     ortho = _shell(model, force_orthotropic_laminate=True)
@@ -187,7 +196,7 @@ def test_ABD_is_read_only_and_follows_the_laminate():
     assert Shell().ABD is None
 
 
-@pytest.mark.parametrize('model', MODELS)
+@pytest.mark.parametrize('model', models_marked_slow(['annular_tsdt_tl']))
 def test_ABDnxny_is_not_allocated_by_default(model):
     s = _shell(model)
     c = 1e-6*np.random.default_rng(0).standard_normal(s.get_size())
@@ -286,7 +295,7 @@ def test_ABDnxny_attribute_equals_argument(model):
         s.calc_kC(nx=s.nx, ny=s.ny)
 
 
-@pytest.mark.parametrize('model', MODELS)
+@pytest.mark.parametrize('model', models_marked_slow(['annular_tsdt_tl']))
 def test_ABDnxny_constant(model):
     r"""A constant matrix, e.g. a stiffness that is not that of a stack of
     plies, gives the analytical matrix of that stiffness"""

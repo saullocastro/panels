@@ -201,6 +201,7 @@ def test_bent_plate_rotated_keeps_its_bending_energy(axis, angle):
         assert Ebr < 0.95*Ebb
 
 
+@pytest.mark.slow
 def test_linear_kernels():
     r"""The linear stiffness and mass are those of ``plate_clpt_donnell``,
     the geometric stiffness of a constant membrane stress state that of
@@ -248,6 +249,7 @@ def test_linear_kernels():
     assert rel(tl.calc_kG(c=c_m), gl.calc_kG(c=c_m)) < 1e-12
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('stack', [(0, 90, -45, 45, 45, -45, 90, 0),
                                    (30, -45, 0, 90)])
 def test_linear_buckling(stack):
@@ -274,6 +276,7 @@ def test_linear_buckling(stack):
     assert np.isclose(eig[TL, 'fkG_num'], eig[GL, 'fkG_num'], rtol=tol)
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('p, wtol', [(1.e2, 3e-5), (1.e3, 2e-4), (2.e4, 2e-3)])
 def test_small_deflection_agrees_with_gl_and_von_karman(p, wtol):
     r"""Simply supported plate under a uniform pressure, centre deflections of
@@ -299,6 +302,7 @@ def test_small_deflection_agrees_with_gl_and_von_karman(p, wtol):
     assert np.isclose(res[TL], res[VK], rtol=wtol)
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('alpha, inc', [(1., 0.1), (3., 0.05)])
 def test_cantilever_strip_out_of_plane_against_elastica(alpha, inc):
     r"""Out-of-plane bending of the strip of ``test_plate_clpt_gl.py`` (``L =
@@ -318,6 +322,7 @@ def test_cantilever_strip_out_of_plane_against_elastica(alpha, inc):
     assert np.isclose(tl[1], u_ref, rtol=1e-4)
 
 
+@pytest.mark.slow
 def test_cantilever_strip_in_plane_against_elastica():
     r"""In-plane bending, ``alpha = 2``, carried by the membrane strains: the
     same as ``plate_clpt_gl``, ``v = 0.4935 L``, ``u = -0.1606 L``"""

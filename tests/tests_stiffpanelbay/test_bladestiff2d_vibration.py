@@ -34,6 +34,7 @@ the rigid axial translation).
 
 """
 import numpy as np
+import pytest
 from structsolve import freq
 
 from panels.multidomain import MultiDomain
@@ -171,6 +172,7 @@ def _sewall_sector(blades, m, n, mf, nf, blade_x=None):
                md.reduce(md.calc_kM(silent=True)))
 
 
+@pytest.mark.slow
 def test_sewall1968_internally_stiffened_sector():
     r"""Lowest frequency of the shell IS of Sewall and Naumann (1968), SS
 
@@ -232,6 +234,7 @@ def test_sewall1968_internally_stiffened_sector():
     assert abs(f_bay - f_md) <= 0.015*f_md
 
 
+@pytest.mark.slow
 def test_flat_bay_deep_blade_against_multidomain():
     r"""Lowest frequency of a flat bay with one deep blade
 

@@ -51,6 +51,7 @@ References
 
 """
 import numpy as np
+import pytest
 from structsolve import lb
 
 from panels.shell import Shell
@@ -191,6 +192,7 @@ def test_specimen16_donnell():
     assert abs(tau/tau0 - 1) < DONNELL_RTOL
 
 
+@pytest.mark.slow
 def test_specimen17_rings_coarse():
     r"""Specimen 17, two ring webs on the inner surface of the skin
     (``'annular_clpt_donnell'``, ``'BFxcte'`` with ``face='lower'``), 8
