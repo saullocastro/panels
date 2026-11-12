@@ -2,8 +2,10 @@ r"""Web of a ring frame connected to a cylinder with ``'BFxcte'``
 
 An annular-sector web connected at an end of a cylinder clamped there: the
 connection clamps the edge of the web, whose frequencies must be those of
-the same web clamped directly on that edge, with the null-space and the
-penalty connections. Small models (few terms) are used throughout. Verified:
+the annulus clamped on that edge and free on the other, from the frequency
+equation of Leissa (1969), and, for small models (few terms), those of the
+same web clamped directly on that edge, with the null-space and the penalty
+connections. Verified:
 
 - the connection at the reference surface of the cylinder, the outer edge
   of the web at the radius of the cylinder, ``'annular_clpt_donnell'``;
@@ -11,12 +13,16 @@ penalty connections. Small models (few terms) are used throughout. Verified:
   frame, outer edge of the web on the inner surface, for a cylinder with
   the Sanders-Koiter and with the Donnell kinematics, and an external frame,
   inner edge of the web on the outer surface;
-- webs of every ``'annular_tsdt_*'`` model on a cylinder of the third-order
-  shear deformation theory, at its reference surface or at its inner face;
-- the frequencies of the directly clamped webs are upper bounds of the roots
-  of the frequency equation of the annulus (Leissa 1969), these roots
-  against Leissa's Table 2.21 and the values of Southwell given in his Table
-  2.31;
+- these three cases against the roots of the frequency equation of the
+  annulus (Leissa 1969), and, with small models, against the web clamped
+  directly;
+- small webs of every ``'annular_tsdt_*'`` model on a cylinder of the
+  third-order shear deformation theory, and of ``'annular_fsdt_donnell'`` on
+  a cylinder of the first-order one, at its reference surface or at its
+  inner face, against the web clamped directly;
+- the frequencies of the directly clamped small webs are upper bounds of
+  the roots of the frequency equation of the annulus, these roots against
+  Leissa's Table 2.21 and the values of Southwell given in his Table 2.31;
 - the face of a cylinder whose reference surface is that face, offset
   `h/2`, gives the matrices of the connection at the reference surface;
   the same internal frame modelled with the reference surface of the
@@ -78,11 +84,22 @@ gives the ratios `\beta` of Southwell (his ref. 2.37) at which `\lambda^2`
 takes given values, `\nu = 0.3`; the roots of the frequency equation are at
 these ratios to within 0.006 in the range `\beta = 0.27` to `0.65` used
 here. The lowest modes of the web are those of `n = 0, 1, 1, 2, 2` nodal
-diameters; as a Ritz solution, the small web gives frequencies above the
-roots, by 0.4 % to 6.9 %, below :data:`EXCESS`, and the webs
-of `m = 10`, `n = 12` terms reproduce the roots to 1e-5 with the null space.
-The cylinder, two half cylinders of length `0.5 r` clamped at both ends,
-has its lowest frequencies well above those of the web.
+diameters. The cylinder, two half cylinders of length `0.5 r` clamped at
+both ends, has its lowest frequencies well above those of the web. The webs
+of `m = 10`, `n = 12` terms on cylinders of `m = 8`, `n = 12` terms reproduce
+the roots to 1e-5 with the null space; the penalty connection, with the
+default penalty constants, gives values up to 0.3 % lower.
+
+The small webs, `m = 4`, `n = 6`, are Rayleigh-Ritz approximations: their
+frequencies are bounded from below by the roots, which is checked to 1e-4,
+and lie above them by 0.4 % (`n = 0`) to 6.8 % (`n = 2`) when clamped
+outside, 3.3 % to 4.9 % when clamped inside, measured for every model
+and connection of these tests (6.83 % at most, the webs of the
+shear deformation theories, `h/r_o = 0.001`). :data:`EXCESS`, 7 %, is that
+largest measured excess rounded up: a regression bound of the small models,
+not a property of the theory; the verification of the connection is the
+agreement with the directly clamped web, and the accuracy against the
+roots is that of the full-size tests above.
 
 With the reference surface of the cylinder at its inner face, offset `d =
 h/2`, the inner face is `z_f = 0` and the face connection is the
@@ -119,7 +136,9 @@ With the third-order shear deformation theory the rotation connected is
 that of the normal, `\theta_x = \partial u/\partial z`, at the connected
 line of the cylinder, `\theta_x = -w_{,x}` at a face, where the transverse
 shear strain vanishes, and at the reference surface of the web, `\theta_x =
-\phi_x` without offset, see :mod:`panels.multidomain.connections.kCsdt`.
+\phi_x` without offset, see :mod:`panels.multidomain.connections.kCsdt`;
+with the first-order theory, `\theta_x = \phi_x` at every `z` of the
+cylinder and at the reference surface of the web.
 
 References
 ----------
@@ -162,9 +181,14 @@ SOUTHWELL = ((0, 6.25, 0.276), (0, 25.0, 0.642), (1, 9.00, 0.397),
 #: tolerance of the web connected to the clamped end against the web clamped
 #: directly
 RTOL = {'null-space': 1e-8, 'penalty': 5e-3}
+#: tolerance of the full-size webs against the roots :data:`EXACT` and
+#: :data:`EXACT_INNER`
+RTOL_ROOTS = {'null-space': 1e-5, 'penalty': 5e-3}
 #: terms of the small cylinders and webs
 M_CYL, N_CYL = 4, 6
 M_WEB, N_WEB = 4, 6
+#: terms of the full-size cylinders and webs
+FULL = dict(cyl=dict(m=8, n=12), web=dict(m=10, n=12))
 #: largest relative excess of the Ritz values of the directly clamped small
 #: webs over the roots :data:`EXACT` and :data:`EXACT_INNER`
 EXCESS = 0.07
@@ -279,6 +303,34 @@ def _clamped_webs(r_o, r_i, model, edge, conn_method):
     return MultiDomain(webs, conn, conn_method=conn_method)
 
 
+def _web_geometry(face, external):
+    r"""Outer and inner radii of the web, the roots and the connected edge
+    for the connection at the reference surface (``face=None``), at the
+    inner face or, with ``external``, at the outer face of the cylinder"""
+    if external:
+        r_i = R + H/2
+        return r_i/BETA, r_i, EXACT_INNER, 'x2'
+    r_o = {None: R, 'lower': R - H/2}[face]
+    return r_o, BETA*r_o, EXACT, 'x1'
+
+
+def check_web_roots(cyl, face, conn_method, external=False):
+    r"""Full-size webs of ``'annular_clpt_donnell'`` connected with
+    ``'BFxcte'`` to two half cylinders of the model ``cyl`` clamped at `x =
+    0`, as in :func:`check_web_clamped`: the five lowest `\lambda^2` against
+    the roots :data:`EXACT` or :data:`EXACT_INNER`, within
+    :data:`RTOL_ROOTS`"""
+    r_o, r_i, exact, _ = _web_geometry(face, external)
+    cyls = [_cylinder(R, 0.5*R, model=cyl, **FULL['cyl']) for _ in range(2)]
+    webs = [_web(r_o, r_i, **FULL['web']) for _ in range(2)]
+    md = _assembly(cyls, webs, lambda c, w: dict(p1=c, p2=w, func='BFxcte',
+                   xcte1=0, xcte2=w.a if external else 0, face=face),
+                   conn_method)
+    l2 = _lambda2(md, r_o)[:5]
+    roots = np.array(exact)[[0, 1, 1, 2, 2]]
+    assert np.allclose(l2, roots, rtol=RTOL_ROOTS[conn_method])
+
+
 def check_web_clamped(cyl, web, face, conn_method, external=False):
     r"""Webs of the model ``web`` connected with ``'BFxcte'`` to two half
     cylinders of the model ``cyl`` clamped at `x = 0`, at their reference
@@ -287,14 +339,7 @@ def check_web_clamped(cyl, web, face, conn_method, external=False):
     `\lambda^2` against those of the webs clamped directly on that edge,
     within :data:`RTOL`, and the latter against the roots :data:`EXACT` or
     :data:`EXACT_INNER`, above them by less than :data:`EXCESS`"""
-    if external:
-        r_i = R + H/2
-        r_o = r_i/BETA
-        exact, edge = EXACT_INNER, 'x2'
-    else:
-        r_o = {None: R, 'lower': R - H/2}[face]
-        r_i = BETA*r_o
-        exact, edge = EXACT, 'x1'
+    r_o, r_i, exact, edge = _web_geometry(face, external)
     cyls = [_cylinder(R, 0.5*R, model=cyl) for _ in range(2)]
     webs = [_web(r_o, r_i, model=web) for _ in range(2)]
     md = _assembly(cyls, webs, lambda c, w: dict(p1=c, p2=w, func='BFxcte',
@@ -308,10 +353,19 @@ def check_web_clamped(cyl, web, face, conn_method, external=False):
     assert np.all(ref < roots*(1 + EXCESS))
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('conn_method', ['null-space', 'penalty'])
 def test_web_clamped_by_cylinder_end(conn_method):
     """Web at the clamped end of a cylinder, connected at its reference
-    surface, against the web clamped directly, see
+    surface, against the roots of the frequency equation of Leissa (1969),
+    `\\beta = 0.4`, see :func:`check_web_roots`"""
+    check_web_roots(CYL, None, conn_method)
+
+
+@pytest.mark.parametrize('conn_method', ['null-space', 'penalty'])
+def test_web_clamped_by_cylinder_end_small(conn_method):
+    """Small web at the clamped end of a cylinder, connected at its
+    reference surface, against the web clamped directly, see
     :func:`check_web_clamped`"""
     check_web_clamped(CYL, WEB, None, conn_method)
 
@@ -336,34 +390,71 @@ def test_clamped_inside_against_southwell():
         assert abs(root - beta) < 0.006
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('model', [CYL, CYL_DONNELL])
 @pytest.mark.parametrize('conn_method', ['null-space', 'penalty'])
 def test_internal_frame_on_inner_surface(conn_method, model):
     """Outer edge of the web on the inner surface of a cylinder clamped at
     `x = 0`, ``face='lower'``, for a cylinder with the Sanders-Koiter and
+    with the Donnell kinematics, against the roots of the annulus clamped
+    outside and free inside (Leissa 1969, Eqs. (1.11)-(1.13) and (1.17)),
+    see :func:`check_web_roots`"""
+    check_web_roots(model, 'lower', conn_method)
+
+
+@pytest.mark.parametrize('model', [CYL, CYL_DONNELL])
+@pytest.mark.parametrize('conn_method', ['null-space', 'penalty'])
+def test_internal_frame_on_inner_surface_small(conn_method, model):
+    """Outer edge of a small web on the inner surface of a cylinder clamped
+    at `x = 0`, ``face='lower'``, for a cylinder with the Sanders-Koiter and
     with the Donnell kinematics, against the web clamped directly, see
     :func:`check_web_clamped`"""
     check_web_clamped(model, WEB, 'lower', conn_method)
 
 
 @pytest.mark.parametrize('conn_method', ['null-space', 'penalty'])
+def test_internal_frame_fsdt_cylinder_small(conn_method):
+    """Outer edge of a small web of ``'annular_fsdt_donnell'``, `h/r_o =
+    0.001`, on the inner surface of a ``'cylshell_fsdt_sanders'`` clamped at
+    `x = 0`, ``face='lower'``, against the web clamped directly, see
+    :func:`check_web_clamped`"""
+    check_web_clamped('cylshell_fsdt_sanders', 'annular_fsdt_donnell',
+                      'lower', conn_method)
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize('conn_method', ['null-space', 'penalty'])
 def test_external_frame_on_outer_surface(conn_method):
     """Inner edge of the web on the outer surface of a cylinder clamped at
-    `x = 0`, ``xcte2=web.a`` and ``face='upper'``, against the web clamped
-    directly on its inner edge, see :func:`check_web_clamped`"""
-    check_web_clamped(CYL, WEB, 'upper', conn_method, external=True)
+    `x = 0`, ``xcte2=web.a`` and ``face='upper'``, against the roots of the
+    annulus clamped inside and free outside (Leissa 1969, Eqs.
+    (1.11)-(1.13) and (1.17)), :data:`EXACT_INNER`, see
+    :func:`check_web_roots`"""
+    check_web_roots(CYL, 'upper', conn_method, external=True)
 
 
 @pytest.mark.parametrize('conn_method', ['null-space', 'penalty'])
-def test_face_at_reference_surface(conn_method):
+def test_external_frame_on_outer_surface_small(conn_method):
+    """Inner edge of a small web on the outer surface of a cylinder clamped
+    at `x = 0`, ``xcte2=web.a`` and ``face='upper'``, against the web
+    clamped directly on its inner edge, see :func:`check_web_clamped`"""
+    check_web_clamped(CYL, WEB, 'upper', conn_method, external=True)
+
+
+@pytest.mark.parametrize('conn_method, full', [
+    pytest.param('null-space', True, marks=pytest.mark.slow),
+    ('null-space', False), ('penalty', False)])
+def test_face_at_reference_surface(conn_method, full):
     """With the offset `d = h/2` of the cylinder its inner face is its
     reference surface: ``face='lower'`` gives the stiffness matrix and the
     five lowest frequencies, those of the web, of the connection without
-    ``'face'``"""
+    ``'face'``, with the full-size or with the small models"""
+    sizes = FULL if full else dict(cyl={}, web={})
     out = []
     for face in (None, 'lower'):
-        cyls = [_cylinder(R, 0.5*R, offset=H/2) for _ in range(2)]
-        webs = [_web(R, BETA*R) for _ in range(2)]
+        cyls = [_cylinder(R, 0.5*R, offset=H/2, **sizes['cyl'])
+                for _ in range(2)]
+        webs = [_web(R, BETA*R, **sizes['web']) for _ in range(2)]
         md = _assembly(cyls, webs, lambda c, w: dict(p1=c, p2=w,
                        func='BFxcte', xcte1=0, xcte2=0, face=face),
                        conn_method)
