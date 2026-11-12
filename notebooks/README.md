@@ -78,6 +78,8 @@ kept, in `results/`.
 | `pagano1970_plates.ipynb`, `pagano1970.py` | Pagano (1970): cross-ply and sandwich plates under a sinusoidal pressure, with the exact 3D elasticity solution |
 | `varadan1991_cylinders.ipynb` | Varadan and Bhaskar (1991): cross-ply cylinders under a sinusoidal load |
 | `noor1975_buckling.ipynb` | Noor (1975): buckling of cross-ply plates in uniaxial compression |
+| `leissa1973_cylinder_frequencies.ipynb` | Leissa (1973): natural frequencies of circular cylindrical shells and open panels, Donnell and Sanders kinematics, CLPT, FSDT and TSDT |
+| `jaunky1999_laminated_panel_buckling.ipynb` | Jaunky and Knight (1999): buckling of a laminated half-cylinder panel in axial compression, Donnell and Sanders kinematics |
 | `kardomateas1993_thick_rings.ipynb` | Kardomateas (1993): thick orthotropic cylinders under external pressure |
 | `kardomateas1993b_1995_thick_cylinders.ipynb` | Kardomateas (1993b), Kardomateas and Philobos (1995): thick cylinders in axial compression and under combined loads |
 | `kardomateas2003_sandwich_rings.ipynb` | Kardomateas and Simitses (2003): long sandwich cylinders under hydrostatic pressure |
