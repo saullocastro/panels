@@ -2,7 +2,9 @@ r"""High-AR-t5 wing box under a tip force with ``plate_clpt_gl``
 
 ``test_wingbox_linear_equals_von_karman`` verifies that the linear static
 solution under the dead tip force is the same with ``plate_clpt_gl``,
-``plate_clpt_tl`` and ``plate_clpt_donnell``, 22.68 mm at 25 N. The module
+``plate_clpt_tl`` and ``plate_clpt_donnell``, 22.68 mm at 25 N, and
+``test_wingbox_follower_tip_force_one_increment`` the nonlinear static
+solution under the follower tip force of 25 N against it. The module
 also provides the model of the wing box of Elalfy, De Breuker and Castro
 [1]_ under a follower tip force, :func:`wingbox`, and the tip
 z-displacement of their Abaqus result (S4R, static Riks), ``ABAQUS_FIG6``,
@@ -118,3 +120,19 @@ def test_wingbox_linear_equals_von_karman():
     assert np.isclose(out['plate_clpt_gl'], out['plate_clpt_donnell'], rtol=1e-10)
     assert np.isclose(out['plate_clpt_tl'], out['plate_clpt_donnell'], rtol=1e-10)
     assert np.isclose(out['plate_clpt_gl'], 22.68, atol=0.01)
+
+
+def test_wingbox_follower_tip_force_one_increment():
+    r"""Geometrically nonlinear static analysis of the box under the
+    follower tip force (``follower='quadratic'``) of 25 N in one increment
+    of the Newton-Raphson method: in the linear range the tip deflection is
+    that of the linear solution, 453.52/20 mm, within 0.2 %; 22.6753 mm is
+    the value of the code"""
+    md, top = wingbox('plate_clpt_gl', 25., 'quadratic')
+    an = Analysis(md.calc_fext, md.calc_fint, md.calc_kC, md.calc_kG)
+    an.initialInc = an.maxInc = 1.
+    an.static(NLgeom=True, silent=True)
+    assert np.isclose(an.increments[-1], 1.)
+    w = 1e3*tip_w(md, top, an.cs[-1])
+    assert np.isclose(w, 453.52/20, rtol=2e-3)
+    assert np.isclose(w, 22.6753, rtol=1e-4)

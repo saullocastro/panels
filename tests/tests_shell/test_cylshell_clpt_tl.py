@@ -12,12 +12,12 @@ of ``cylshell_clpt_sanders``. The checks:
    of curvature of ``cylshell_clpt_gl`` change;
 3. the linear constitutive stiffness of the numerical kernels is that of
    ``cylshell_clpt_sanders`` and ``cylshell_clpt_gl``, and the geometric
-   stiffness of a constant membrane state that of ``cylshell_clpt_gl``.
-
-The module also provides the hinged cylindrical roof of Sabir and Lock under
-a central point load, benchmark 3.8 of Sze, Liu and Lo (2004),
-:func:`hinged_roof`, and its path traced with the Riks method,
-:func:`roof_path`, for other modules.
+   stiffness of a constant membrane state that of ``cylshell_clpt_gl``;
+4. the hinged cylindrical roof of Sabir and Lock under a central point load,
+   benchmark 3.8 of Sze, Liu and Lo (2004), with 5 x 5 terms: limit load of
+   the thick roof (snap-through), against Table 9a, and the path of the
+   thin roof through its snap-back, traced with the Riks method, against
+   values of the code.
 
 The consistency of the tangent stiffness matrix with the internal force
 vector, of ``calc_kTv`` and of the follower pressure are checked with the
@@ -51,7 +51,9 @@ are exact for small rotations only.
 The hinged roof, [2]_, Sec. 3.8 and Fig. 9a: radius `R = 2540`, axial
 length `2L = 508` with free curved edges, half-angle `\theta = 0.1` rad,
 straight edges hinged (`u = v = w = 0`), `E = 3102.75`, `\nu = 0.3`, `h =
-12.7` and `6.35`, central point load `P`, `P_{max} = 3000`.
+12.7` and `6.35`, central point load `P`, `P_{max} = 3000`. The reference
+values are the load-deflection paths of ABAQUS S4R elements of Tables 9a
+and 9d, `P/P_{max}` against the central deflection `-W_C`.
 
 References
 ----------
@@ -366,3 +368,38 @@ def critical_points(P, wc):
     return [(P[i], w[i]) for i in (i1, i2, i3, i4)]
 
 
+def test_hinged_roof_snap_through():
+    r"""Hinged roof, `h = 12.7`, quarter with 5 x 5 terms, central
+    deflection prescribed up to `-w_C = 22` and traced with the Riks method
+    in increments of at most 0.02: the limit load `P_1` and the following
+    minimum `P_2` of the reaction exist, `P_1` is within 0.5 % of 2226.3,
+    [2], Table 9a (S4R elements), and the stored values are those of the
+    code with these terms, at the converged increments, without
+    refinement."""
+    P, wc, lbd = roof_path(TL, 12.7, 5, wmax=22., max_inc=0.02)
+    (P1, w1), (P2, w2), _, _ = critical_points(P, wc)
+    assert -wc[-1] >= 22.
+    assert P2 < 0.3*P1
+    assert np.isclose(P1, 2226.3, rtol=0.005)
+    assert np.allclose([P1, w1, P2, w2], [2225.939, 10.47973, 508.4248,
+                                          19.23811], rtol=1e-4)
+
+
+def test_hinged_roof_snap_back():
+    r"""Hinged roof, `h = 6.35`, quarter with 5 x 5 terms, central
+    deflection prescribed up to `-w_C = 20` and traced with the Riks method
+    in increments of at most 0.02 through the snap-back: the deflection
+    grows to `w_3`, turns back to `w_4` and grows again, and the prescribed
+    deflection `\lambda \delta` turns back along the snap-back; the limit
+    load `P_1`, the minimum load `P_2` and the turns `w_3`, `w_4` are values
+    of the code with these terms, at the converged increments, without
+    refinement."""
+    P, wc, lbd = roof_path(TL, 6.35, 5, wmax=20., max_inc=0.02)
+    (P1, w1), (P2, w2), (P3, w3), (P4, w4) = critical_points(P, wc)
+    assert -wc[-1] >= 20.
+    # the prescribed displacement turns back with the snap-back
+    assert np.any(np.diff(lbd) < 0)
+    assert w4 < w3
+    assert np.allclose([P1, w1, P2, w2, w3, w4],
+                       [607.2394, 13.22098, -384.2222, 16.55691, 17.05234,
+                        14.00960], rtol=1e-4)

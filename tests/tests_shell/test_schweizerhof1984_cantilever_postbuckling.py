@@ -17,10 +17,11 @@ edge making the load nonconservative.
 The tests check the linear buckling factors of Table 4, the consistency of
 the internal forces and of the tangent stiffness matrix of the imperfect
 shell, the inertia of the tangent stiffness matrix along the fundamental
-path of the perfect shell beyond its bifurcation, traced with the Riks
-method; the imperfection is a geometric imperfection of 1 % of t in the
-shape of the w part of the lowest linear buckling mode of the follower load,
-added as in ``test_simo1990_cylinder_postbuckling.py``.
+path of the perfect shell beyond its bifurcation, and, with 8 x 6 terms, the
+load-deflection path of the imperfect shell B2 up to w/t = 0.3 traced with
+the Riks method (the path of Fig. 13), with a geometric imperfection of 1 %
+of t in the shape of the w part of the lowest linear buckling mode of the
+follower load, added as in ``test_simo1990_cylinder_postbuckling.py``.
 
 Notes
 -----
@@ -51,6 +52,7 @@ sys.path.append('../..')
 import numpy as np
 from scipy.sparse import csr_matrix
 from structsolve import Analysis, lb, solve
+from structsolve.stopping import value_reached
 
 from panels.bardell import calc_vec_f, calc_vec_fp
 from test_follower_pressure_validation import (schweizerhof_sector,
@@ -332,3 +334,21 @@ def test_riks_perfect_shell_inertia():
     assert np.all(nneg[Ks > K_f] == 1) and np.all(det[Ks > K_f] == -1)
 
 
+def test_riks_imperfect_B2_coarse():
+    # B2, 8 x 6 terms, imperfection of 1 % of t, Riks up to w/t = 0.3: no
+    # limit point, the load increases monotonically towards the bifurcation
+    # load k_f of the same model and the tangent stiffness matrix keeps no
+    # negative eigenvalue; k_f and the last load are values of the code
+    # with these terms
+    s, kP = build_shell('B2', m=8, nt=6)
+    K_f, mode = buckling_K(s, kP)
+    assert np.isclose(K_f, 8.19280, rtol=1e-4)
+    model = ImperfectShell(s, imperfection(s, mode, 0.01), kP)
+    an, Ks = riks(model, value_reached(lambda c: w_max(s, c)/t, 0.3),
+                  inc=1., max_inc=4.)
+    ws = np.array([w_max(s, c)/t for c in an.cs])
+    assert ws[-1] >= 0.3
+    assert np.all(np.diff(Ks) > 0) and Ks[-1] < K_f
+    assert all(n == 0 for n in an.num_negative_eigvals)
+    assert all(d == 1 for d in an.det_signs)
+    assert np.isclose(Ks[-1], 7.9562, rtol=1e-3)

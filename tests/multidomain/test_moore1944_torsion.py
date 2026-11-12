@@ -6,12 +6,12 @@ free), assembled from :class:`.Shell` domains with the default
 ``conn_method`` of :class:`.MultiDomain`. Verified: specimen 16 of Moore
 and Wescoat (1944), without rings, with `u` free at the end `x = L`, the
 first buckling stress against Donnell's formula for hinged ends as given in
-Moore and Wescoat (1944), p. 23. The builder :func:`_cylinder` also adds
-rings, 1/2 x 1/2 in solid bars as webs of ``'annular_clpt_donnell'`` domains
-connected to the inner surface of the skin with ``'BFxcte'`` and
-``face='lower'``, and channel stringers outside the skin (base as a second
-layer of the skin strip under it, webs and lips as flat plates connected
-with ``'BFycte'``).
+Moore and Wescoat (1944), p. 23; specimen 17, with two rings of 1/2 x 1/2 in
+solid bars as webs of ``'annular_clpt_donnell'`` domains connected to the
+inner surface of the skin with ``'BFxcte'`` and ``face='lower'``, on a
+coarse mesh, against values of the code. The builder :func:`_cylinder` also
+adds channel stringers outside the skin (base as a second layer of the skin
+strip under it, webs and lips as flat plates connected with ``'BFycte'``).
 
 Notes
 -----
@@ -189,3 +189,18 @@ def test_specimen16_donnell():
     tau = _tau(md, t)
     tau0 = donnell_tau(35.625, t)
     assert abs(tau/tau0 - 1) < DONNELL_RTOL
+
+
+def test_specimen17_rings_coarse():
+    r"""Specimen 17, two ring webs on the inner surface of the skin
+    (``'annular_clpt_donnell'``, ``'BFxcte'`` with ``face='lower'``), 8
+    sectors of 8 terms, 0.2 terms per inch along the axis: the rings raise
+    the first buckling stress above that of the cylinder without rings and
+    the same mesh; both are values of the code with this coarse mesh"""
+    t = 0.020
+    layout = [(2*np.pi*R/8, 'bay', 8)]*8
+    tau0 = _tau(_cylinder(t, [35.625], layout, m_per_in=0.2), t)
+    tau = _tau(_cylinder(t, [4.3125, 27., 4.3125], layout, m_per_in=0.2), t)
+    assert np.isclose(tau0, 1552.19, rtol=1e-4)
+    assert np.isclose(tau, 2151.90, rtol=1e-4)
+    assert tau > 1.2*tau0

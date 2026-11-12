@@ -1,4 +1,4 @@
-r"""Imperfect axially compressed cylinder of Simo, Fox and Rifai (1990)
+r"""Post-buckling of an axially compressed cylinder traced with the Riks method
 
 Benchmark of Simo, Fox and Rifai (1990), Section 6.3.4, "Post-buckling
 analysis of a simply-supported cylinder; effect of initial imperfections",
@@ -6,12 +6,16 @@ pp. 54-57, Fig. 6.3.4 on p. 56: R = 36, L = 100, t = 0.125, E = 1e7,
 nu = 0.3, axial compression. As in the reference, an L/10 x 15 deg section
 is modelled, with symmetry conditions on the interior edges and a simple
 support on the loaded edge, such that the lowest mode is the diamond mode of
-5 axial half-waves and 12 circumferential waves.
+5 axial half-waves and 12 circumferential waves. The load factor is the load
+normalized by the linear buckling load and the abscissa the maximum axial
+deflection of the loaded edge, as in Fig. 6.3.4.
 
-The test checks the consistency of the internal forces and of the tangent
-stiffness matrix of the imperfect shell, with an imperfection of 50 % of
-the thickness in the shape of the w part of the lowest linear buckling
-mode.
+The tests check the consistency of the internal forces and of the tangent
+stiffness matrix of the imperfect shell and, with 6 x 6 terms, the Riks
+path of the shell with an imperfection of 50 % of the thickness in the
+shape of the w part of the lowest linear buckling mode past its limit
+point, and the branch switching at the first bifurcation of the perfect
+cylinder, against values of the code with these terms.
 
 Notes
 -----
@@ -39,8 +43,9 @@ import sys
 sys.path.append('../..')
 
 import numpy as np
-from scipy.sparse import coo_matrix, csr_matrix
-from structsolve import lb, solve
+from scipy.sparse import coo_matrix, csr_matrix, diags
+from structsolve import Analysis, lb, solve
+from structsolve.stopping import value_reached
 
 from panels.shell import Shell
 from panels.bardell import calc_vec_f, calc_vec_fp
@@ -139,6 +144,53 @@ class ImperfectShell(object):
         return csr_matrix(self.kT0.shape)
 
 
+class ScaledModel(object):
+    """The callables in the unknowns c = S cs, S = diag(1/sqrt(K_ii)), such
+    that the critical eigenvector of the branch switching is that of the
+    bifurcation rather than of weakly stiff in-plane Ritz terms"""
+    def __init__(self, s):
+        self.s = s
+        d = s.calc_kC().diagonal()
+        self.S = np.ones_like(d)
+        self.S[d > 0] = 1/np.sqrt(d[d > 0])
+        self.Sm = diags(self.S)
+
+    def calc_fext(self, inc=1., silent=True):
+        return self.S*self.s.calc_fext(inc=inc, silent=silent)
+
+    def calc_fint(self, c, silent=True):
+        return self.S*self.s.calc_fint(self.S*c, silent=silent)
+
+    def calc_kC(self, c=None, NLgeom=False, silent=True):
+        c = None if c is None else self.S*c
+        return csr_matrix(self.Sm @ self.s.calc_kC(c=c, NLgeom=NLgeom) @ self.Sm)
+
+    def calc_kG(self, c=None, NLgeom=False, silent=True):
+        c = None if c is None else self.S*c
+        return csr_matrix(self.Sm @ self.s.calc_kG(c=c, NLgeom=NLgeom) @ self.Sm)
+
+
+def u_max(s, c):
+    """Maximum axial deflection of the loaded edge x = 0"""
+    ys = np.linspace(0, s.b, 31)
+    return np.max(s.uvw(c, xs=np.zeros_like(ys), ys=ys)[1]['u'])
+
+
+def riks(an, s, umax, unscale=lambda c: c):
+    an.NL_method = 'arc_length_riks'
+    an.final_load_factor = None
+    an.maxArcLength = 1e4
+    an.stop_criterion = value_reached(lambda c: u_max(s, unscale(c)), umax)
+    an.static(NLgeom=True, silent=True)
+    lbds = np.asarray(an.increments)
+    us = np.array([u_max(s, unscale(c)) for c in an.cs])
+    # every converged increment is in equilibrium
+    fext = an.calc_fext()
+    for lbd, c in zip(lbds, an.cs):
+        assert np.linalg.norm(an.calc_fint(c) - lbd*fext) <= 1e-8*np.linalg.norm(fext)
+    return lbds, us
+
+
 def test_imperfection_identities():
     s, lbd_cr, mode = build_shell(6, 6)
     size = s.get_size()
@@ -185,3 +237,39 @@ def test_imperfection_identities():
     assert abs(dU - fv) <= 1e-7*abs(fv)
 
 
+def test_riks_imperfect_cylinder_coarse():
+    # 6 x 6 terms, imperfection of 50 % of the thickness, up to u_max =
+    # 0.014: the Riks method passes the limit point; regression values of
+    # the code with these terms (8 x 8 and the comparison with Fig. 6.3.4
+    # (a) in the notes)
+    s, lbd_cr, mode = build_shell(6, 6)
+    assert np.isclose(lbd_cr, 1.01239, rtol=1e-4)
+    model = ImperfectShell(s, imperfection(s, mode, 0.5))
+    an = Analysis(model.calc_fext, model.calc_fint, model.calc_kC, model.calc_kG)
+    an.initialInc = an.maxInc = 0.1
+    lbds, us = riks(an, s, 0.014)
+    ilim = np.flatnonzero(np.diff(lbds) < 0)[0]
+    assert np.isclose(lbds[ilim], 0.40144, rtol=1e-3)
+    assert np.isclose(us[ilim], 0.010698, rtol=1e-3)
+    # past the limit point the load decreases
+    assert lbds[-1] < 0.85*lbds[ilim]
+    assert us[-1] >= 0.014
+
+
+def test_riks_perfect_cylinder_branch_switching_coarse():
+    # 6 x 6 terms, the perfect cylinder: one bifurcation detected by the
+    # inertia of the tangent stiffness matrix, the switch along the
+    # critical eigenvector and the bifurcated branch with a load drop;
+    # regression values of the code with these terms
+    s, lbd_cr, mode = build_shell(6, 6)
+    model = ScaledModel(s)
+    an = Analysis(model.calc_fext, model.calc_fint, model.calc_kC, model.calc_kG)
+    an.initialInc = an.maxInc = 0.03
+    an.inertia = True
+    an.branch_switching = 1
+    an.linear_solver = 'splu'
+    lbds, us = riks(an, s, 0.02, unscale=lambda c: model.S*c)
+    assert len(an.branch_points) == 1
+    ib = an.branch_points[0]
+    assert np.isclose(lbds[ib], 0.83991, rtol=5e-3)
+    assert lbds[ib:].min() < 0.5*lbds[ib]
