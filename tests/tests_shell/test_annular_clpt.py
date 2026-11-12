@@ -11,7 +11,9 @@ force vector; the laminate offset against the flat plate; and the check
 of the radii. The three models
 have the same linear strains and the same geometric stiffness of a
 constant out-of-plane buckling mode; the tests of the linear analyses run
-for the three.
+for the three. Each test of the full models has a variant with few terms
+(name ending in ``_small``) against the same reference, with the bounds
+given in the Notes.
 
 Notes
 -----
@@ -48,6 +50,24 @@ For `r \to \infty` the strains of the model are those of
 the order of `a/r`; a simply supported square plate under a uniaxial
 compression `N` buckles at `N = 4 \pi^2 D/b^2`, Timoshenko and Gere [2]_,
 p. 353, Eq. (h).
+
+The variants with few terms (`m` terms in `\rho`, `n` in `\theta`) are
+Rayleigh-Ritz solutions whose approximation functions satisfy the essential
+boundary conditions, the penalty of ``'SSycte'`` only adding stiffness:
+their frequencies and buckling loads are not below the exact values, to
+the accuracy of the numerical integration (the full models reproduce the
+roots within `10^{-5}`, the lower bound used). Their measured excess over
+the exact values is bounded by :data:`EXCESS_SMALL` as a regression bound:
+half annulus, `m = 6`, `n = 4`, 0.78 % (`n = 1`) and 7.7 % (`n = 2`),
+bounds 1 % and 8 %; full annulus, `m = 6`, `n = 5`, the modes `n = 0, 1,
+1, 2` at most 1.15 % above, bound 1.5 %; plate limit, `m = n = 5`, 0.04 %,
+bound 0.1 %. In the plate limit the curvature, `a/r = 10^{-4}`, may lower
+the load by up to the 0.03 % allowed in the test of the full model. The
+connection ``'SSycte'`` depends on the number of degrees of freedom per
+term, not on the kinematics, and the full annulus of few terms is solved
+with ``'annular_clpt_donnell'`` only. The offset and the tangent stiffness,
+`m = n = 4`, compare two computations with the same terms and keep the
+tolerances of the full models.
 
 References
 ----------
@@ -100,6 +120,10 @@ def exact_lambda2(n, beta, guess):
 #: the annular models and the plate models they tend to for r -> infinity
 MODELS = [k for k in modelDB.db if k.startswith('annular_clpt_')]
 PLATE = {k: k.replace('annular_', 'plate_') for k in MODELS}
+#: largest relative excess of the Ritz values of the small models over the
+#: exact values: half annulus (`n = 1`, `n = 2`), full annulus and plate limit
+EXCESS_SMALL = {'half': np.array([1e-2, 8e-2]), 'full': 1.5e-2,
+                'plate': 1e-3}
 
 
 def web(beta, b, m=10, n=12, model=MODELS[0]):
@@ -128,6 +152,7 @@ def test_exact_roots_against_leissa_table(beta):
         assert np.isclose(exact_lambda2(n, beta, ref), ref, rtol=0.022)
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('model', MODELS)
 @pytest.mark.parametrize('beta', [0.4, 0.6])
 def test_half_annulus(beta, model):
@@ -141,6 +166,7 @@ def test_half_annulus(beta, model):
     assert np.allclose(l2[:2], ref, rtol=1e-5)
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('model', MODELS)
 @pytest.mark.parametrize('beta', [0.4, 0.6])
 def test_full_annulus(beta, model):
@@ -158,6 +184,7 @@ def test_full_annulus(beta, model):
     assert np.allclose(l2[:5], ref, rtol=1e-5)
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('model', MODELS)
 @pytest.mark.parametrize('load', ['Nxx', 'Nyy'])
 def test_plate_limit_buckling(load, model):
@@ -175,11 +202,62 @@ def test_plate_limit_buckling(load, model):
 
 
 @pytest.mark.parametrize('model', MODELS)
-def test_tangent_is_derivative_of_fint(model):
-    """``fkC_num(NLgeom=1) + fkG_num`` against central differences of
-    ``calc_fint``"""
+def test_half_annulus_small(model):
+    r"""Half annulus, `\beta = 0.4`, `m = 6`, `n = 4`: `n = 1, 2` above the
+    exact roots (Leissa 1969, Eqs. (1.11)-(1.13) and (1.17)), by less than
+    :data:`EXCESS_SMALL` ``['half']``"""
+    s = web(0.4, np.pi*R, m=6, n=4, model=model)
+    s.y1w = 0
+    s.y2w = 0
+    l2 = lambda2(s.calc_kC(silent=True), s.calc_kM(silent=True))
+    ref = np.array([exact_lambda2(n, 0.4, LEISSA[0.4][n]) for n in (1, 2)])
+    assert np.all(l2[:2] > (1 - 1e-5)*ref)
+    assert np.all(l2[:2] < (1 + EXCESS_SMALL['half'])*ref)
+
+
+def test_full_annulus_small():
+    r"""Two half annuli of ``'annular_clpt_donnell'`` with ``'SSycte'``,
+    `\beta = 0.4`, `m = 6`, `n = 5`: `n = 0, 1, 1, 2` above the exact roots
+    (Leissa 1969, Eqs. (1.11)-(1.13) and (1.17)), by less than
+    :data:`EXCESS_SMALL` ``['full']``"""
+    p1 = web(0.4, np.pi*R, m=6, n=5)
+    p2 = web(0.4, np.pi*R, m=6, n=5)
+    conn = [dict(p1=p1, p2=p2, func='SSycte', ycte1=p1.b, ycte2=0),
+            dict(p1=p1, p2=p2, func='SSycte', ycte1=0, ycte2=p2.b)]
+    md = MultiDomain([p1, p2], conn)
+    l2 = lambda2(md.reduce(md.calc_kC(silent=True)),
+                 md.reduce(md.calc_kM(silent=True)))
+    ref = np.array([exact_lambda2(n, 0.4, LEISSA[0.4][n])
+                    for n in (0, 1, 1, 2)])
+    assert np.all(l2[:4] > (1 - 1e-5)*ref)
+    assert np.all(l2[:4] < (1 + EXCESS_SMALL['full'])*ref)
+
+
+@pytest.mark.parametrize('model', MODELS)
+@pytest.mark.parametrize('load', ['Nxx', 'Nyy'])
+def test_plate_limit_buckling_small(load, model):
+    r"""Simply supported square web with `r = 10^4 a`, `m = n = 5`, against
+    `4 \pi^2 D/b^2` (Timoshenko and Gere 1961, Eq. (h), p. 353): not below
+    it by more than 0.03 %, above it by less than :data:`EXCESS_SMALL`
+    ``['plate']``"""
+    a = 1.
+    s = Shell(model=model, a=a, b=a, r=1e4*a, m=5, n=5,
+              plyt=H, stack=[0], laminaprop=(E, NU))
+    for e in ('x1', 'x2', 'y1', 'y2'):
+        setattr(s, e + 'w', 0)
+    setattr(s, load, -1.)
+    eigvals, _ = lb(s.calc_kC(silent=True), s.calc_kG(silent=True),
+                    silent=True, num_eigvalues=4)
+    ref = 4*np.pi**2*D/a**2
+    assert (1 - 3e-4)*ref < eigvals[0] < (1 + EXCESS_SMALL['plate'])*ref
+
+
+def _tangent_and_jacobian(model, m, n):
+    """Tangent stiffness ``calc_kC(c, NLgeom=True) + calc_kG(c,
+    NLgeom=True)`` and the central differences of ``calc_fint`` at a random
+    state ``c`` of a quarter annulus of ``m`` by ``n`` terms"""
     fw = modelDB.db[model]['matrices_num']
-    s = web(0.5, np.pi/2*R, m=6, n=6, model=model)
+    s = web(0.5, np.pi/2*R, m=m, n=n, model=model)
     size = s.get_size()
     c = np.random.default_rng(1).standard_normal(size)*1e-3
     fint = lambda cc: fw.calc_fint(cc, s.ABD, s, size, 0, s.nx, s.ny)
@@ -188,6 +266,23 @@ def test_tangent_is_derivative_of_fint(model):
     dc = 1e-7
     J = np.column_stack([(fint(c + dc*e) - fint(c - dc*e))/(2*dc)
                          for e in np.eye(size)])
+    return kT, J
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize('model', MODELS)
+def test_tangent_is_derivative_of_fint(model):
+    """``fkC_num(NLgeom=1) + fkG_num`` against central differences of
+    ``calc_fint``"""
+    kT, J = _tangent_and_jacobian(model, 6, 6)
+    assert np.abs(kT - J).max() < 1e-8*np.abs(kT).max()
+
+
+@pytest.mark.parametrize('model', MODELS)
+def test_tangent_is_derivative_of_fint_small(model):
+    """``fkC_num(NLgeom=1) + fkG_num`` against central differences of
+    ``calc_fint``, `m = n = 4`"""
+    kT, J = _tangent_and_jacobian(model, 4, 4)
     assert np.abs(kT - J).max() < 1e-8*np.abs(kT).max()
 
 
@@ -200,11 +295,11 @@ def test_r_not_larger_than_a_raises(model):
         s.calc_kC(silent=True)
 
 
-def _square(model, r, offset):
-    r"""Square panel, `a = b = 1`, with `u = v = w = 0` on the four edges,
-    of radius ``r`` for the annular models"""
+def _square(model, r, offset, m=8):
+    r"""Square panel, `a = b = 1`, ``m`` by ``m`` terms, with `u = v = w =
+    0` on the four edges, of radius ``r`` for the annular models"""
     kw = dict(r=r) if model.startswith('annular') else {}
-    s = Shell(model=model, a=1., b=1., m=8, n=8, plyt=H, stack=[0],
+    s = Shell(model=model, a=1., b=1., m=m, n=m, plyt=H, stack=[0],
               laminaprop=(E, NU), rho=RHO, offset=offset, **kw)
     for e in ('x1', 'x2', 'y1', 'y2'):
         for f in 'uvw':
@@ -212,17 +307,33 @@ def _square(model, r, offset):
     return s
 
 
+def _omegas(s):
+    """The four lowest angular frequencies of the panel ``s``"""
+    eigvals, _ = freq(s.calc_kC(silent=True), s.calc_kM(silent=True),
+                      sparse_solver=False, silent=True, num_eigvalues=4)
+    return np.sort(np.sqrt(-eigvals.real))[:4]
+
+
+@pytest.mark.slow
 @pytest.mark.parametrize('model', MODELS)
 def test_offset_plate_limit(model):
     r"""Laminate offset `d = h/2`, stiffness and mass: for `r = 10^4 a` the
     frequencies of the annular model are those of the plate model with the
     same offset; the offset raises them by more than 30 %"""
-    def omegas(s):
-        eigvals, _ = freq(s.calc_kC(silent=True), s.calc_kM(silent=True),
-                          sparse_solver=False, silent=True, num_eigvalues=4)
-        return np.sort(np.sqrt(-eigvals.real))[:4]
-    got = omegas(_square(model, 1e4, H/2))
-    ref = omegas(_square(PLATE[model], None, H/2))
+    got = _omegas(_square(model, 1e4, H/2))
+    ref = _omegas(_square(PLATE[model], None, H/2))
     assert np.allclose(got, ref, rtol=3e-4)
-    assert got[0] > 1.3*omegas(_square(model, 1e4, 0.))[0]
+    assert got[0] > 1.3*_omegas(_square(model, 1e4, 0.))[0]
+
+
+@pytest.mark.parametrize('model', MODELS)
+def test_offset_plate_limit_small(model):
+    r"""As :func:`test_offset_plate_limit`, `m = n = 4`: the annular model
+    with `r = 10^4 a` against the plate model, same terms and offset `d =
+    h/2`, within 0.03 %; the offset raises the lowest frequency by more than
+    30 %"""
+    got = _omegas(_square(model, 1e4, H/2, m=4))
+    ref = _omegas(_square(PLATE[model], None, H/2, m=4))
+    assert np.allclose(got, ref, rtol=3e-4)
+    assert got[0] > 1.3*_omegas(_square(model, 1e4, 0., m=4))[0]
 
