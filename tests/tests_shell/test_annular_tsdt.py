@@ -71,8 +71,8 @@ References
 .. [2] Yamaki, N., "Buckling of a thin annular plate under uniform
    compression", J. Appl. Mech., 25, 267-273, 1958, Table 1.
    https://doi.org/10.1115/1.4011755
-.. [3] Irie, T., Yamada, G. and Tsujino, Y., "Buckling loads of annular
-   plates subjected to torque", J. Sound Vib., 86(1), 145-146, 1983,
+.. [3] Irie, T., Yamada, G. and Tsujino, M., "Buckling loads of annular
+   plates subjected to a torque", J. Sound Vib., 86(1), 145-146, 1983,
    Table 1. https://doi.org/10.1016/0022-460X(83)90951-3
 .. [4] Reddy, J. N., "A simple higher-order theory for laminated composite
    plates", J. Appl. Mech., 51, 745-752, 1984.
