@@ -527,7 +527,6 @@ def _rotated_fields(t, axis, xs, ys):
             'phix': dot(n, ex), 'phiy': dot(n, ey)}
 
 
-@pytest.mark.slow
 def test_rigid_rotation_tl():
     r"""Rigid rotations `t = 0.2` and `0.1` about an axis at 45 degrees to
     the plane, fitted over a quarter annulus with the rotations of the

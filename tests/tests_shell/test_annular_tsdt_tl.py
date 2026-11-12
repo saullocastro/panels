@@ -236,7 +236,6 @@ AXES = {'in-plane': np.array([np.cos(0.4), np.sin(0.4), 0.]),
         'inclined': np.array([np.cos(0.4), np.sin(0.4), 1.])/np.sqrt(2)}
 
 
-@pytest.mark.slow
 @pytest.mark.parametrize('axis', list(AXES))
 def test_rigid_rotation(axis):
     r"""Rigid rotations `t = 0.2` and `0.1` of a free quarter annulus,
@@ -311,7 +310,6 @@ def test_elastica():
     assert np.isclose(th, 0.461, atol=1e-3)
 
 
-@pytest.mark.slow
 def test_thin_cantilever_strip_against_elastica():
     r"""Strip of a large annulus, `L/h = 500`, `\alpha = 1`, tip rotation
     0.46 rad: ``'annular_tsdt_tl'`` within 0.3 % and 0.6 % of the elastica
