@@ -8,7 +8,10 @@ the linear buckling about it, ``calc_kG(c)``, against Irie, Yamada and
 Tsujino (1983), Table 1, as reprinted by Bagheri, Kiani and Eslami (2019),
 Table 1, for the eight combinations of clamped, simply supported and free
 edges and the radius ratios `\beta = 0.3` and `0.5`; and the clamped
-annulus for the three annular models.
+annulus for the three annular models. The same comparisons with few terms
+(names ending in ``_small``): the membrane state, one case for each kind
+of edge on each side, and one annulus for the three models, with the
+bounds given in the Notes.
 
 Notes
 -----
@@ -45,6 +48,24 @@ radial edges connected with ``'SSycte'``. The linear static case and the
 geometric stiffness of its membrane state, ``calc_kG(c)``, are computed
 by :meth:`.MultiDomain.linear_buckling`; the critical torques come in
 pairs of opposite sign, and the least absolute value is taken.
+
+The annuli of few terms (`m` terms in `\rho`, `n` in `\theta`) are
+compared with the bounds of the full models (`m = 10`, `n = 16`) where
+they reach them. The membrane state is axisymmetric and needs few terms
+along the circumference: with `m = 8`, `n = 4`, `N_{xy}` is within 0.14 %
+of the exact value. The buckling torques of :data:`CASES_SMALL`, `m = 6`,
+`n = 4`, are 0.59 % (SS-F, `\beta = 0.3`), 0.67 % (F-C, `\beta = 0.3`)
+and 0.08 % (F-SS, `\beta = 0.5`) above the table, within the 1 % of the
+full models. A clamped inner edge needs more terms: C-F, `\beta = 0.3`,
+with `m = 6`, `n = 5`, is 3.5 % above the table (0.3 % with `m = 7`, `n
+= 6`), bounded by 5 % as a regression bound. The lower bound, 1 % below
+the table, is that of the full models: the prebuckling state of a Ritz
+solution is approximate and the tabulated values are numerical, so that
+the Rayleigh-Ritz bound does not strictly hold. The three models give the
+same `\tau_B = 10.67059` for F-C, `\beta = 0.3`, `m = 6`, `n = 4`, compared
+as a value of the code, to `10^{-5}`; the clamped annulus converges more
+slowly in `n` (`\tau_B = 66.7553` with `m = 7`, `n = 6`, 7.7 % above the
+table).
 
 References
 ----------
@@ -86,6 +107,13 @@ IRIE = {
     }
 BETAS = (0.3, 0.5)
 CASES = [(edges, beta) for edges in IRIE for beta in BETAS]
+#: one case for each kind of inner and of outer edge, with the terms
+#: ``(m, n)`` of the small models and the bound of their excess over the
+#: table
+CASES_SMALL = [(('SS', 'F'), 0.3, (6, 4), 1e-2),
+               (('F', 'C'), 0.3, (6, 4), 1e-2),
+               (('C', 'F'), 0.3, (6, 5), 5e-2),
+               (('F', 'SS'), 0.5, (6, 4), 1e-2)]
 MODELS = [k for k in modelDB.db if k.startswith('annular_clpt_')]
 
 
@@ -120,12 +148,13 @@ def tau_B(beta, inner, outer, **kwargs):
     return np.abs(eigvals).min()
 
 
-def test_membrane_state():
-    r"""The linear static case gives `N_{xy} = -T/(2 \pi \rho^2)`, within
-    0.5 %, and `N_{xx}`, `N_{yy}` below 0.5 % of it"""
+def _check_membrane_state(m, n):
+    r"""Asserts `N_{xy} = -T/(2 \pi \rho^2)`, within 0.5 %, and `N_{xx}`,
+    `N_{yy}` below 0.5 % of it, for the clamped annulus `\beta = 0.3` of
+    ``m`` by ``n`` terms"""
     T = 1.
     beta = 0.3
-    md = annulus(beta, 'C', 'C', T)
+    md = annulus(beta, 'C', 'C', T, m=m, n=n)
     c = md.linear_static()
     s = md.panels[0]
     xs, ys = np.meshgrid(np.linspace(0.1, 0.9, 5)*s.a,
@@ -138,6 +167,20 @@ def test_membrane_state():
     assert np.abs(fields['Nyy']).max() < 5e-3*np.abs(ref).max()
 
 
+@pytest.mark.slow
+def test_membrane_state():
+    r"""The linear static case gives `N_{xy} = -T/(2 \pi \rho^2)`, within
+    0.5 %, and `N_{xx}`, `N_{yy}` below 0.5 % of it"""
+    _check_membrane_state(10, 16)
+
+
+def test_membrane_state_small():
+    r"""As :func:`test_membrane_state`, `m = 8`, `n = 4`: `N_{xy} = -T/(2
+    \pi \rho^2)` within 0.5 %, `N_{xx}`, `N_{yy}` below 0.5 % of it"""
+    _check_membrane_state(8, 4)
+
+
+@pytest.mark.slow
 @pytest.mark.parametrize('edges, beta', CASES)
 def test_irie1983_table1(edges, beta):
     r"""Least `\tau_B` against Irie, Yamada and Tsujino (1983), Table 1,
@@ -146,9 +189,32 @@ def test_irie1983_table1(edges, beta):
     assert np.isclose(tau_B(beta, *edges), ref, rtol=1e-2)
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('model', MODELS)
 def test_clamped_models(model):
     r"""Clamped annulus, `\beta = 0.3`, for the three annular models,
     against Irie, Yamada and Tsujino (1983), Table 1, `\tau_B = 61.97`,
     within 1 %"""
     assert np.isclose(tau_B(0.3, 'C', 'C', model=model), 61.97, rtol=1e-2)
+
+
+@pytest.mark.parametrize('edges, beta, terms, excess', CASES_SMALL)
+def test_irie1983_table1_small(edges, beta, terms, excess):
+    r"""Least `\tau_B` of the small models of :data:`CASES_SMALL` against
+    Irie, Yamada and Tsujino (1983), Table 1: not below it by more than 1
+    %, above it by less than ``excess``"""
+    ref = IRIE[edges][BETAS.index(beta)]
+    m, n = terms
+    tau = tau_B(beta, *edges, m=m, n=n)
+    assert (1 - 1e-2)*ref < tau < (1 + excess)*ref
+
+
+@pytest.mark.parametrize('model', MODELS)
+def test_models_small(model):
+    r"""Inner edge free, outer edge clamped, `\beta = 0.3`, `m = 6`, `n =
+    4`, for the three annular models: the value of the code, `\tau_B =
+    10.67059`, to `10^{-5}`, within 1 % of Irie, Yamada and Tsujino (1983),
+    Table 1, `\tau_B = 10.60`"""
+    tau = tau_B(0.3, 'F', 'C', model=model, m=6, n=4)
+    assert np.isclose(tau, 10.67059, rtol=1e-5)
+    assert np.isclose(tau, 10.60, rtol=1e-2)
