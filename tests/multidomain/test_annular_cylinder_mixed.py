@@ -5,15 +5,16 @@ An annular web of the first-order shear deformation theory (FSDT),
 ``'annular_fsdt_donnell'``, on a cylinder of the third-order one (TSDT),
 ``'cylshell_tsdt_sanders'`` or ``'cylshell_tsdt_donnell'``, and an annular
 web of the TSDT, ``'annular_tsdt_donnell'``, on an FSDT cylinder,
-``'cylshell_fsdt_sanders'`` or ``'cylshell_fsdt_donnell'``. Verified, with
-the null-space and the penalty connections, at the reference surface of the
-cylinder and at its inner face (key ``'face'``):
+``'cylshell_fsdt_sanders'`` or ``'cylshell_fsdt_donnell'``. Small models (few
+terms). Verified, with the null-space and the penalty connections, at the
+reference surface of the cylinder and at its inner face (key ``'face'``):
 
 - a thin web, `h/r_o = 0.001`, `\beta = 0.4`, clamped through the
   connection by the clamped end of the cylinder: the frequencies against
-  the roots of the frequency equation of the annulus clamped outside and
-  free inside (Leissa 1969), the values of
-  ``tests/multidomain/test_annular_cylinder.py``;
+  those of the same web clamped directly, and these against the roots of
+  the frequency equation of the annulus clamped outside and free inside
+  (Leissa 1969), with
+  :func:`test_annular_cylinder.check_web_clamped`;
 - a free cylinder with two webs: the translation along the axis and the
   rotation about it give no strain energy and, with the default
   ``conn_method`` of :class:`.MultiDomain`, ``'null-space'``, satisfy the
@@ -34,19 +35,16 @@ at a face of a TSDT cylinder `\theta_x = -w_{,x}`, where the transverse
 shear strain of the TSDT vanishes. The displacements at a face are those of
 the model of the cylinder, `u(z) = u + z \phi_x` for the FSDT, with the
 cubic terms of the TSDT, and `v(z)` with the Sanders-Koiter term `z v/r`
-by default.
+by default. At the clamped end of the cylinder all of them vanish, and the
+connection sets `u = v = w = \phi_x = 0` on the connected edge of the web.
 
 The reference roots are `\lambda^2 = \omega r_o^2 \sqrt{\rho h/D}` =
 13.5004, 19.3892 and 31.3384 for `n = 0, 1, 2` nodal diameters, `\nu =
 1/3`, `r_o` the outer radius of the web, from Leissa [1]_, Eqs.
-(1.11)-(1.13) and (1.17). With the null space, the FSDT web on the TSDT
-cylinder gives the roots to `-2.4 \times 10^{-5}` and the TSDT web on the
-FSDT cylinder to `-3.1 \times 10^{-5}`, the effect of the transverse shear
-of the web, `h/r_o = 0.001`, the same with and without ``'face'``; the
-penalty connection, with the default penalty constants, gives values 0.19
-% to 0.29 % lower. The tolerances are those of the webs of the same theory
-as the cylinder: `10^{-4}` with the null space and `5 \times 10^{-3}` with
-the penalty.
+(1.11)-(1.13) and (1.17). With webs of `m = 10`, `n = 12` terms and the null
+space, the FSDT web on the TSDT cylinder gives the roots to `-2.4 \times
+10^{-5}` and the TSDT web on the FSDT cylinder to `-3.1 \times 10^{-5}`, the
+effect of the transverse shear of the web, `h/r_o = 0.001`.
 
 References
 ----------
@@ -75,20 +73,12 @@ MIXED_RIGID = MIXED + [('cylshell_tsdt_donnell', 'annular_fsdt_donnell'),
 @pytest.mark.parametrize('face', [None, 'lower'])
 @pytest.mark.parametrize('conn_method', ['null-space', 'penalty'])
 def test_mixed_web_exact_roots(conn_method, face, cyl, web):
-    """Web, `h/r_o = 0.001`, `\\beta = 0.4`, its outer edge on the reference
+    r"""Web, `h/r_o = 0.001`, `\beta = 0.4`, its outer edge on the reference
     surface (no ``'face'``) or on the inner surface (``face='lower'``) of a
     cylinder of the other shear deformation theory, clamped at `x = 0`:
-    the five lowest frequencies against the roots of the annulus clamped
-    outside and free inside (Leissa 1969, Eqs. (1.11)-(1.13) and (1.17))"""
-    r_o = tac.R if face is None else tac.R - tac.H/2
-    cyls = [tac._cylinder(tac.R, 0.5*tac.R, model=cyl) for _ in range(2)]
-    webs = [tac._web(r_o, tac.BETA*r_o, model=web) for _ in range(2)]
-    md = tac._assembly(cyls, webs, lambda c, w: dict(p1=c, p2=w,
-                       func='BFxcte', xcte1=0, xcte2=0, face=face),
-                       conn_method)
-    l2 = tac._lambda2(md, r_o)
-    ref = np.array(tac.EXACT)[[0, 1, 1, 2, 2]]
-    assert np.allclose(l2[:5], ref, rtol=tac.RTOL_TSDT[conn_method])
+    the five lowest frequencies against those of the web clamped directly,
+    see :func:`test_annular_cylinder.check_web_clamped`"""
+    tac.check_web_clamped(cyl, web, face, conn_method)
 
 
 @pytest.mark.parametrize('faces', [True, False])
