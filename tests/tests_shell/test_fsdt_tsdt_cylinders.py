@@ -3,15 +3,17 @@ r"""Cylindrical shells using the FSDT and the TSDT
 The models ``'cylshell_fsdt_donnell'``, ``'cylshell_fsdt_sanders'``,
 ``'cylshell_tsdt_donnell'`` and ``'cylshell_tsdt_sanders'`` against:
 
+- the frequencies of 3D elasticity of circular cylindrical shells supported
+  by shear diaphragms (SD) of Leissa (1973), Table 2.8, with the frequency
+  parameter `\Omega = \omega R \sqrt{\rho (1 - \nu^2)/E}`;
 - the axial buckling of cylindrical panels with Donnell's equations of
   Batdorf (1947);
 - the rigid-body motions, for which the strains of Sanders' theory vanish,
   Sanders (1959).
 
-The Navier solution of the panel supported by shear diaphragms (SD) on all
-edges, of the same kinematics, implemented independently herein, verifies
-the Ritz solution, whose CLPT counterpart is verified in
-``test_sanders_kinematics.py``.
+The Navier solution of the SD-SD panel of the same kinematics, implemented
+independently herein, verifies the Ritz solution, whose CLPT counterpart is
+verified against the same references in ``test_sanders_kinematics.py``.
 
 Notes
 -----
@@ -43,7 +45,7 @@ from panels.models.fsdt_tsdt_field import fg, strain_names
 from panels.multidomain import MultiDomain
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from test_sanders_kinematics import (E, NU, RHO, RIGID_BODY_MOTIONS,
+from test_sanders_kinematics import (E, NU, RHO, LEISSA, RIGID_BODY_MOTIONS,
         make_panel, modal_amplitude, batdorf_panel)
 
 MODELS = ['cylshell_fsdt_donnell', 'cylshell_fsdt_sanders',
@@ -201,6 +203,36 @@ def test_navier_thick_cross_ply(model, n):
                       R, h, L, np.pi/n, m=14, n=14, stack=[0, 90, 0],
                       laminaprop=laminaprop)
     assert 0.94 < omega/ritz_frequency(clpt) < 0.985
+
+
+@pytest.mark.parametrize('Rh, LR, n, Omega_donnell, Omega_sanders, source',
+                         LEISSA[:3])
+@pytest.mark.slow
+def test_frequency_leissa_3d_elasticity(Rh, LR, n, Omega_donnell,
+                                        Omega_sanders, source):
+    r"""Leissa Table 2.8, `R/h = 20`, 3D elasticity
+
+    With the rotary inertia and the transverse shear deformation, the FSDT and
+    TSDT with Sanders' kinematics are within 0.07 % of the 3D elasticity
+    solution. For `L/R = 4` and `n = 3`, where the CLPT with Sanders'
+    kinematics is 0.21 % above it, they are three times closer.
+    """
+    ref = float(source.split('= ')[-1])
+    R = 1.
+    h = R/Rh
+    L = LR*R
+    factor = R*np.sqrt(RHO*(1 - NU**2)/E)
+    for model in SANDERS:
+        s = make_panel(model, R, h, L, np.pi/n, m=14, n=14)
+        Omega = ritz_frequency(s)*factor
+        assert np.isclose(Omega, navier(model, R, h, L, n, s.ABD, RHO)*factor,
+                          rtol=1e-6)
+        assert abs(Omega/ref - 1) < 7e-4
+        if n == 3:
+            clpt = make_panel('cylshell_clpt_sanders', R, h, L, np.pi/n, m=14,
+                              n=14)
+            Omega_clpt = ritz_frequency(clpt)*factor
+            assert abs(Omega_clpt/ref - 1) > 3*abs(Omega/ref - 1)
 
 
 @pytest.mark.slow

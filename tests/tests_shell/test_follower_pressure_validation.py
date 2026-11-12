@@ -8,26 +8,22 @@ is checked against:
    the follower, dead and centrally directed loads with Sanders' and
    Donnell's kinematics, and the analytical values of Schweizerhof and Ramm
    (1984), Table 3;
-2. finite cylinders with shear-diaphragm ends under lateral or hydrostatic
+2. the long sandwich cylinders of Han, Kardomateas and Simitses (2004),
+   Tables 1 to 4, their shell formulas, Eqs. (12) to (14), and their
+   elasticity solution;
+3. finite cylinders with shear-diaphragm ends under lateral or hydrostatic
    pressure, against :func:`cylinder_closed_form`;
-3. Batdorf's formula for simply supported cylinders under lateral and
+4. the thick orthotropic and isotropic rings of Kardomateas (1993), Tables 1
+   and 2, Eq. (29a), and the homogeneous graphite/epoxy ring of Kardomateas
+   and Simitses (2005), Table 4;
+5. Batdorf's formula for simply supported cylinders under lateral and
    hydrostatic pressure, NASA/SP-8007-2020/REV 2,
    :func:`batdorf_lateral_pressure`;
-4. the kinetic criterion of a cantilever of Schweizerhof and Ramm (1984)
-   with the unsymmetric load stiffness.
+6. the cylinders of Schweizerhof and Ramm (1984), Table 4, hinged at both
+   ends or cantilevers with a free upper edge, B1 and B2.
 
-``test_han2004_formulas_reproduce_tables`` checks that the shell formulas of
-the long sandwich cylinders of Han, Kardomateas and Simitses (2004), Eqs.
-(12) to (14), :func:`han_shell_formulas`, reproduce their Tables 2 and 3.
-The module also provides the models and the data of the sandwich rings of
-Han et al. (2004), Tables 1 to 4, of the thick rings of Kardomateas (1993),
-Tables 1 and 2, and Kardomateas and Simitses (2005), Table 4, and of the
-cylinders of Schweizerhof and Ramm (1984), Table 4,
-:func:`schweizerhof_sector`, for other modules.
-
-Running this module prints the comparison of the sandwich rings with the
-shell formulas and with the elasticity solution of Han et al. (2004), with
-the pressure on the outer surface. Units: N, m, Pa.
+Running this module prints the comparison of item 2 with the elasticity
+solution, with the pressure on the outer surface. Units: N, m, Pa.
 
 Notes
 -----
@@ -51,22 +47,28 @@ external pressure, solved by
    3 of [1]_. With Donnell's kinematics the follower pressure gives
    ``-16/5``, the known inaccuracy of Donnell's theory for low ``n``.
 
-2. The exact solution of the finite cylinders uses the same Sanders or
+2. Sandwich cylinders of [2]_, Table 1 materials, faces ``f = 0.1 in`` with
+   the fibres along the hoop direction, core ``c = 1 in``, ``R0/h =
+   15...120``. The FSDT ring with the follower pressure is exactly their
+   shell formula ``p = 3 (EI)eq/(B R0**3 (1 + 4 ks))`` in the inextensional
+   limit, with the transverse shear stiffness ``C/B`` of the core only, Eq.
+   (14a), or of the effective modulus ``Gbar``, Eqs. (14b) and (14c), which
+   is checked against their Table 2. Their elasticity solution has the
+   pressure on the outer surface (``zp = h/2``).
+
+3. The exact solution of the finite cylinders uses the same Sanders or
    Donnell strains with trigonometric modes, whose modes depend on ``x`` and
    test the terms of ``u`` of the follower load.
 
-3. Batdorf's formula [5]_ is the Donnell solution with a pressure of
+4. The thick rings of [3]_ and [4]_ are compared with their shell formulas
+   and 3D elasticity solutions.
+
+5. Batdorf's formula [5]_ is the Donnell solution with a pressure of
    constant direction.
 
-4. The cantilevers of [1]_, Table 4, have a free upper edge, for which the
-   load stiffness of the follower pressure is unsymmetric.
-
-The sandwich cylinders of [2]_ have the Table 1 materials, faces ``f = 0.1
-in`` with the fibres along the hoop direction, core ``c = 1 in``, ``R0/h =
-15...120``; their shell formula is ``p = 3 (EI)eq/(B R0**3 (1 + 4 ks))``,
-with the transverse shear stiffness ``C/B`` of the core only, Eq. (14a), or
-of the effective modulus ``Gbar``, Eqs. (14b) and (14c). The thick rings of
-[3]_ and [4]_ have shell formulas and 3D elasticity solutions.
+6. The cylinders of [1]_, Table 4, are under a lateral pressure of constant
+   direction (``k_c``) or follower (``k_f``); for the cantilevers the load
+   stiffness is unsymmetric.
 
 References
 ----------
@@ -496,6 +498,28 @@ def test_han2004_formulas_reproduce_tables():
                            [classical, core_only, gbar], rtol=2e-4)
 
 
+@pytest.mark.parametrize('face', ['boron', 'graphite', 'kevlar'])
+@pytest.mark.slow
+def test_han2004_shell_formulas(face):
+    r"""The FSDT ring reproduces the shell formulas of Table 2"""
+    for i, ratio in enumerate(RATIOS):
+        elast, core_only, gbar, s8r, c3d20 = HAN2004[face][i]
+        for kind, ref in (('core', core_only), ('Gbar', gbar)):
+            S = han_shear_stiffness(face, kind)
+            s = sandwich_ring(face, ratio, shear=S)
+            p_cr = ring_buckling_pressure(s)
+            # the closed form of the same discrete theory
+            closed = -ring_closed_form('sanders', 'follower', 2, s.ABD[1, 1],
+                                       s.ABD[4, 4], s.r, S)
+            assert np.isclose(p_cr, closed, rtol=1e-6)
+            # the shell formula of the reference uses (EI)eq with Ef, panels the
+            # plane-strain D22, E/(1 - nu12 nu21) is 0.5% larger for boron
+            # and less for the other faces; the extensibility of the ring is
+            # also neglected by the formula
+            assert np.isclose(p_cr, ref, rtol=1e-2), (face, ratio, kind,
+                                                     p_cr, ref)
+
+
 def batdorf_lateral_pressure(L, R, t, E, nu, prestate):
     r"""Buckling pressure of Batdorf, NASA/SP-8007-2020/REV 2, Eqs.
     (19)-(22) with ``gamma = 1`` (no knockdown), the minimum over the integer
@@ -570,11 +594,63 @@ def kardomateas1993_ring(kind, ratio, model='cylshell_clpt_sanders', zp=0.):
     return s, ring_buckling_pressure(s, zp=zp*h)*R2**3/(57.*GPa*h**3)
 
 
-# material of the cylindrical shells of Schweizerhof and Ramm (1984),
-# Section 6.4
+@pytest.mark.parametrize('kind', ['ortho', 'iso'])
+@pytest.mark.slow
+def test_kardomateas1993_shell_formula(kind):
+    r"""The CLPT ring against Eq. (29a), ``p = E2 (n**2 - 1) h**3/(12 (1 -
+    nu23 nu32) R**3)``, which neglects the extensibility of the ring, of
+    relative order ``h**2/(12 R**2)``, below 1% up to ``R2/R1 = 1.4``"""
+    for ratio, elast, shell in KARD1993[kind]:
+        s, p = kardomateas1993_ring(kind, ratio)
+        h = s.plyts[0]
+        closed = -ring_closed_form('sanders', 'follower', 2, s.ABD[1, 1],
+                                   s.ABD[4, 4], s.r, None)
+        assert np.isclose(p, closed*(ratio)**3/(57.*GPa*h**3), rtol=1e-6)
+        assert p < shell
+        assert np.isclose(p, shell, rtol=1.2*h**2/(12*s.r**2) + 1e-3), (
+            ratio, p, shell)
+
+
+@pytest.mark.parametrize('ratio,elast,classical', [(30, 1641360, 1675930),
+                                                   (60, 208228, 209491),
+                                                   (120, 26180, 26186)])
+@pytest.mark.slow
+def test_kardomateas2003_homogeneous_ring(ratio, elast, classical):
+    r"""Homogeneous graphite/epoxy ring, ``h = 30.48 mm``, of Table 4 of
+    Kardomateas and Simitses (2005): the FSDT and the TSDT with the pressure
+    on the outer surface agree with the elasticity solution within 0.3%,
+    and the CLPT with the classical formula ``3 E2 h**3/(12 R**3)`` within the
+    plane-strain factor ``1/(1 - nu12 nu21)``"""
+    mat = FACES['graphite']
+    R = ratio*H
+    s = ring_shell('cylshell_clpt_sanders', R, [90.], [H], [mat])
+    p = ring_buckling_pressure(s)
+    nu21 = mat[2]*mat[1]/mat[0]
+    assert np.isclose(p, classical/(1 - mat[2]*nu21), rtol=2e-3)
+    for model in ('cylshell_fsdt_sanders', 'cylshell_tsdt_sanders'):
+        s = ring_shell(model, R, [90.], [H], [mat])
+        p = ring_buckling_pressure(s, zp=H/2)
+        assert np.isclose(p, elast, rtol=3e-3), (model, p, elast)
+
+
 SCHWEIZERHOF_E = 2.1e6
 SCHWEIZERHOF_NU = 0.3
-
+# Table 4 of the cylinders of item 6 of the module docstring: (shell, L/R, R/t, boundary
+# conditions, n, k_c, k_f), with p_cr = k E t**3/(12 (1 - nu**2) R**3); the
+# values of k_f of the cantilevers are those with the symmetrized load
+# stiffness of their Eq. (63), the circumferential wave number n is the one
+# with the lowest load of panels, the same as theirs except for the hinged
+# shell 3 (7 or 8 in the reference)
+SCHWEIZERHOF1984 = [
+    (1, 6., 100., 'hinged', 4, 18.76, 17.62),
+    (1, 6., 100., 'B1', 3, 10.89, 9.70),
+    (1, 6., 100., 'B2', 3, 9.11, 8.10),
+    (2, 3., 100., 'hinged', 5, 35.25, 34.28),
+    (2, 3., 100., 'B1', 4, 20.85, 19.58),
+    (2, 3., 100., 'B2', 4, 16.43, 15.42),
+    (3, 3., 500., 'hinged', 7, None, 77.48),
+    (3, 3., 500., 'B2', 6, 36.48, 35.48),
+]
 
 
 def schweizerhof_sector(L, R, t, n, bc, model='cylshell_clpt_sanders', m=14,
@@ -634,6 +710,26 @@ def schweizerhof_k(s, follower):
     assert abs(np.imag(eigvals[0])) <= 1e-8*abs(eigvals[0])
     D = SCHWEIZERHOF_E*s.plyt**3/(12*(1 - SCHWEIZERHOF_NU**2))
     return np.real(eigvals[0])*s.r**3/D
+
+
+@pytest.mark.parametrize('case', SCHWEIZERHOF1984)
+@pytest.mark.slow
+def test_schweizerhof1984_cylinders(case):
+    shell, LR, Rt, bc, n, k_c, k_f = case
+    R = 100.
+    s = schweizerhof_sector(LR*R, R, R/Rt, n, bc)
+    if bc != 'hinged':
+        s.add_pressure_load(-1., follower=True)
+        K = s.calc_kCfollower().toarray()
+        # the free upper edge makes the load stiffness unsymmetric
+        assert np.linalg.norm(K - K.T) > 1e-3*np.linalg.norm(K)
+    for k_ref, follower in ((k_c, False), (k_f, True)):
+        if k_ref is None:
+            continue
+        k = schweizerhof_k(s, follower)
+        # their 16-node shell elements against the CLPT with Sanders'
+        # kinematics; 1.1% for k_c of the hinged shell 2, otherwise 0.4%
+        assert np.isclose(k, k_ref, rtol=1.5e-2), (case, follower, k)
 
 
 def han2004_table(models=('cylshell_fsdt_sanders', 'cylshell_tsdt_sanders'),

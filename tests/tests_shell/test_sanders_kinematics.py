@@ -7,12 +7,11 @@ compared on panels and closed shells supported by shear diaphragms (SD):
   Sanders (1959), and the closed-form strain energy of Donnell's kinematics
   for a rigid translation;
 - natural frequencies, with the frequency parameter `\Omega = \omega R
-  \sqrt{\rho (1 - \nu^2)/E}`: the exact Navier solutions of the Donnell
-  and Sanders kinematics computed herein, :func:`navier_frequency`, against
-  the values derived from Leissa (1973), Tables 2.6 and 2.8, and against
-  Love's theory of Loy, Lam and Shu (1997), as reproduced in Table 1 of Li,
-  Fu and Batra (2010); the Ritz solution of a laminated panel against the
-  Navier solution;
+  \sqrt{\rho (1 - \nu^2)/E}`, against Leissa (1973), Tables 2.6, 2.8 and
+  2.46, against Love's theory of Loy, Lam and Shu (1997), as reproduced in
+  Table 1 of Li, Fu and Batra (2010), and against the exact Navier solutions
+  of the Donnell and Sanders kinematics computed herein,
+  :func:`navier_frequency`;
 - axial buckling of a panel against Batdorf (1947) with Donnell's
   equations, NASA SP-8007-2020/REV 2, Sec. 4.1.1.1.
 
@@ -27,7 +26,8 @@ the case for Love's or Donnell's theories [1]_. According to Leissa [2]_
 shear diaphragms has the same frequencies as the closed shell with `n =
 \pi/\theta_0` circumferential waves. Table 2.8 of [2]_ gives the
 frequencies of 3D elasticity, and Tables 2.6 and 2.7 the percent
-differences of each shell theory with respect to them. Love's theory is that of [3]_, as
+differences of each shell theory with respect to them; Tables 2.46 and 2.47
+give deep open shells, `\theta_0 > \pi`. Love's theory is that of [3]_, as
 reproduced in [4]_; the axial buckling load is that of [5]_.
 
 The mass matrix without rotary inertia is obtained exactly from two mass
@@ -206,6 +206,45 @@ def test_navier_reproduces_the_references(Rh, LR, n, Omega_donnell,
                       rtol=5e-5)
 
 
+@pytest.mark.parametrize('Rh, LR, n, Omega_donnell, Omega_sanders, source',
+                         LEISSA)
+@pytest.mark.slow
+def test_frequency_sd_panel(Rh, LR, n, Omega_donnell, Omega_sanders, source):
+    """Leissa's panel of angle pi/n against the closed shell with n waves"""
+    R = 1.
+    h = R/Rh
+    L = LR*R
+    theta0 = np.pi/n
+    Omegas = {}
+    for model in ('cylshell_clpt_donnell', 'cylshell_clpt_sanders'):
+        s = make_panel(model, R, h, L, theta0)
+        Omegas[model] = frequency_parameter(s)
+    print(source, Omegas)
+    assert np.isclose(Omegas['cylshell_clpt_donnell'], Omega_donnell, rtol=1e-4)
+    assert np.isclose(Omegas['cylshell_clpt_sanders'], Omega_sanders, rtol=1e-4)
+
+
+@pytest.mark.slow
+def test_frequency_deep_open_panel():
+    r"""Leissa Table 2.46: `R/h = 20`, `\theta_0 = 270^\circ`, `L/R = 100`
+
+    Donnell's value, 0.00374949, is from Leissa's table, whereas Sanders'
+    theory is compared with Flugge's value of the same table, 0.00459872,
+    which is 0.1 % below its exact Navier solution, 0.00460365. Donnell's
+    theory is 18 % below both.
+    """
+    R = 1.
+    h = R/20
+    L = 100*R
+    theta0 = 3*np.pi/2
+    s = make_panel('cylshell_clpt_donnell', R, h, L, theta0)
+    assert np.isclose(frequency_parameter(s), 0.00374949, rtol=1e-4)
+    s = make_panel('cylshell_clpt_sanders', R, h, L, theta0)
+    Omega = frequency_parameter(s)
+    assert np.isclose(Omega, 0.00460365, rtol=1e-4)
+    assert np.isclose(Omega, 0.00459872, rtol=2e-3)
+
+
 @pytest.mark.parametrize('n, Omega_donnell, Omega_sanders', [
     (2, 0.197278, 0.196963),
     (4, 0.111525, 0.108761),
@@ -378,9 +417,28 @@ def test_rigid_translation_strain_energy():
     assert abs(energies['cylshell_clpt_sanders']) < 1e-8*U_D
 
 
+@pytest.mark.slow
+def test_sanders_approaches_donnell_for_short_waves():
+    r"""Donnell's kinematics are accurate for short wavelengths
+
+    Leissa Table 2.8, `R/h = 500`, `n = 4`, `l/mR = 1`: 3D elasticity gives
+    `\Omega = 0.354118`, Donnell 0.354145 and Sanders 0.35412, i.e. both
+    within 0.01 %.
+    """
+    R = 1.
+    h = R/500
+    L = R
+    for model, ref in (('cylshell_clpt_donnell', 0.354145),
+                       ('cylshell_clpt_sanders', 0.35412)):
+        s = make_panel(model, R, h, L, np.pi/4)
+        assert np.isclose(frequency_parameter(s), ref, rtol=2e-5)
+    assert np.isclose(navier_Omega('sanders', R, h, L, 4), 0.35412, rtol=2e-5)
+
+
 if __name__ == '__main__':
     for case in LEISSA:
-        test_navier_reproduces_the_references(*case)
+        test_frequency_sd_panel(*case)
+    test_frequency_deep_open_panel()
     test_axial_buckling_sd_panel()
     for name in RIGID_BODY_MOTIONS:
         test_rigid_body_motions_are_strain_free(name)
