@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+### Tests: small annular models in the line-traced run; notebook `annular_webs_on_cylinders`
+
+- Every test of the annular models and of the annular webs connected to
+  cylinders has small-model variants (few terms) that keep each model,
+  load, edge condition, connection and option checked in the line-traced
+  coverage run, against closed forms, Ritz bounds, the same web clamped
+  directly, or values of the code; the full-size tests of 30 s or less
+  keep their literature values and are marked `slow` when the small
+  variants cover their lines.
+- The frequencies of annular webs connected with `'BFxcte'` to cylinders
+  of the shear deformation theories (TSDT webs on TSDT cylinders, mixed
+  FSDT/TSDT, FSDT on FSDT), against the roots of the annulus, are in the
+  new notebook `annular_webs_on_cylinders`, with the CLPT webs, the
+  external frame and the offset or mid-surface description of the inner
+  face.
+- Irie, Yamada and Tsujino (1983) cited with the author's initial M. and
+  the title "subjected to a torque" in `test_annular_tsdt.py` and
+  `test_annular_tsdt_tl.py`.
+
 ### New: notebook `thick_annular_plates`; tests of thick annuli and of mixed FSDT/TSDT webs
 
 - The notebook `thick_annular_plates` compares the annular models with
@@ -23,7 +42,7 @@
 - `tests/multidomain/test_annular_cylinder_mixed.py`: an `annular_fsdt_*`
   web on a `cylshell_tsdt_*` cylinder and an `annular_tsdt_*` web on a
   `cylshell_fsdt_*` cylinder, connected with `'BFxcte'` with and without
-  `face`, null space and penalty: exact roots of the clamped annulus and
+  `face`, null space and penalty: the same web clamped directly and
   rigid motions free of energy.
 
 ### Changed: `MultiDomain` imposes the prescribed displacements with `pd_method='null-space'` by default
