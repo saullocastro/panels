@@ -6,6 +6,9 @@ or movable on each edge, against Yamaki (1958), Table 1, and against the
 roots of his stability conditions, Eqs. (5)-(9), for the radius ratios
 `\beta = 0.3` and `0.5`; the roots against the table; and the least load of
 the clamped annulus against the same table for the three annular models.
+The same comparisons with few terms (names ending in ``_small``): one case
+for each kind of edge on each side, and the clamped annulus of the three
+models, with the bounds given in the Notes.
 
 Notes
 -----
@@ -59,6 +62,20 @@ from Yamaki's Table 1 by at most one unit of its last digit, except Case 9
 gives 2.18 and the root is `k = 2.1674` with `n = 2` (0.6 %); panels
 agrees with the roots within 0.1 %.
 
+The annuli of few terms, `m = 6` terms in `\rho` and `n = 4` in
+`\theta`, are Rayleigh-Ritz solutions: the approximation functions
+satisfy the essential conditions and the penalty of ``'SSycte'`` only
+adds stiffness, so that their least load is not below the least root,
+itself within 0.6 % of the table. The excess of the cases of
+:data:`CASES_SMALL` over the table is 0.60 % at most (Case 9, `\beta =
+0.3`, 1.2 % above the root `k = 2.1674`; the others within 0.11 % of the
+table), bounded by 1 % as a regression bound. The clamped annulus, `\beta
+= 0.5`, converges more slowly: `k = 12.56581` for the three models, 3.4 %
+above the table and the root, `k = 12.1553`; it is compared with this
+value of the code, to `10^{-5}`. The clamped edges need more than four
+terms in `\rho`, the four functions of the edge degrees of freedom of `w`
+being removed by `w = w_{,\rho} = 0` on both edges.
+
 References
 ----------
 .. [1] Yamaki, N., "Buckling of a thin annular plate under uniform
@@ -101,6 +118,9 @@ YAMAKI = {
     }
 BETAS = (0.3, 0.5)
 CASES = [(case, beta) for case in YAMAKI for beta in BETAS]
+#: one case for each kind of outer and of inner edge, for the small models
+CASES_SMALL = [((3, 'C', 'F'), 0.3), ((8, 'S', 'M'), 0.5),
+               ((9, 'F', 'C'), 0.3), ((12, 'M', 'S'), 0.5)]
 MODELS = [k for k in modelDB.db if k.startswith('annular_clpt_')]
 
 
@@ -183,6 +203,7 @@ def test_exact_roots_against_yamaki_table(case, beta):
     assert np.isclose(exact_k(beta, outer, inner), ref, rtol=6e-3)
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('case, beta', CASES)
 def test_yamaki1958_table1(case, beta):
     """Least `k` against the roots of Yamaki's (1958) stability conditions,
@@ -194,9 +215,30 @@ def test_yamaki1958_table1(case, beta):
     assert np.isclose(k, ref, rtol=6e-3)
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('model', MODELS)
 def test_clamped_models(model):
     r"""Clamped annulus, `\beta = 0.5`, for the three annular models,
     against Yamaki (1958), Table 1, Case 1, `k = 12.15`, within 0.1 %"""
     assert np.isclose(annulus_k(0.5, 'C', 'C', model=model), 12.15,
                       rtol=1e-3)
+
+
+@pytest.mark.parametrize('case, beta', CASES_SMALL)
+def test_yamaki1958_table1_small(case, beta):
+    """Least `k`, `m = 6`, `n = 4`, against Yamaki's (1958) Table 1: not
+    below it by more than 0.6 %, above it by less than 1 %"""
+    _, outer, inner = case
+    ref = YAMAKI[case][BETAS.index(beta)]
+    k = annulus_k(beta, outer, inner, m=6, n=4)
+    assert (1 - 6e-3)*ref < k < (1 + 1e-2)*ref
+
+
+@pytest.mark.parametrize('model', MODELS)
+def test_clamped_models_small(model):
+    r"""Clamped annulus, `\beta = 0.5`, `m = 6`, `n = 4`, for the three
+    annular models: the value of the code, `k = 12.56581`, to `10^{-5}`,
+    above Yamaki (1958), Table 1, Case 1, `k = 12.15`"""
+    k = annulus_k(0.5, 'C', 'C', model=model, m=6, n=4)
+    assert np.isclose(k, 12.56581, rtol=1e-5)
+    assert k > 12.15

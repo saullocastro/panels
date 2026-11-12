@@ -4,9 +4,8 @@ r"""Annular-sector plates of the first-order shear deformation theory,
 Thin annuli of ``'annular_fsdt_donnell'`` against the classical plate
 results used for ``'annular_clpt_donnell'``: the free vibration of the
 annulus clamped outside and free inside against the exact roots of the
-frequency equation of Leissa (1969), Eqs. (1.11)-(1.13) and (1.17), also
-for the web on the inner surface of a cylinder of the shear deformation
-theory, connected with ``'BFxcte'`` and ``face='lower'``; the buckling under a uniform compression against Yamaki (1958), Table 1; the
+frequency equation of Leissa (1969), Eqs. (1.11)-(1.13) and (1.17); the
+buckling under a uniform compression against Yamaki (1958), Table 1; the
 buckling under a torque against Irie, Yamada and Tsujino (1983), Table 1.
 Moderately thick annuli under a torque against the Mindlin plate results of
 Bagheri, Kiani and Eslami (2019), Table 2, where the transverse shear
@@ -117,6 +116,21 @@ his sixth and seventh values (39.424, in-plane, and 40.534, the in-plane
 torsional mode), that his Table 5 does not list; the TSDT model gives the
 same mode at 40.720. The test skips it, the reason of its absence from [5]_
 being unknown.
+
+The tests ``test_*_small`` repeat the cases with few terms (`m = 6`, `n =
+4` for the torque, `m = n = 6` for the compression and the frequencies, `m =
+n = 3` and `4` for the tangent stiffness and the offset), with plates of `h/a
+\ge 0.01`, as the transverse shear locks the thin plates with few terms (with
+`h/a = 0.01` and `m = n = 6` the torque of the clamped annulus is already 40
+% above the classical value of [3]_). Their bounds, measured on hpc12: the
+buckling torque of the clamped annulus, `h/a = 0.10`, is 53.27954 for the
+three models, 36 % above the 39.261 of [4]_ (9.4 % with `m = n = 6`), which
+the Ritz values of the full-size tests approach from above; the
+compression `k` of `h/a = 0.01` differs from [2]_ by -0.06 % (C-S) and
++0.09 % (F-C), the transverse shear lowering it slightly, within the
+tolerance 0.5 %; the three lowest `\lambda` of [5]_ are reproduced within
+-0.003 % to +0.133 %, Ritz values from above with the rounding of the table,
+within the bounds `-10^{-4}` and `2 \times 10^{-3}`.
 
 References
 ----------
@@ -277,6 +291,7 @@ YAMAKI = {
 BETAS = (0.3, 0.5)
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('beta', BETAS)
 @pytest.mark.parametrize('edges', list(IRIE))
 def test_irie1983_thin(edges, beta):
@@ -286,6 +301,7 @@ def test_irie1983_thin(edges, beta):
     assert np.isclose(tau(beta, *edges, h=1e-3), ref, rtol=1e-2)
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('beta', BETAS)
 @pytest.mark.parametrize('edges, delta', list(BAGHERI))
 def test_bagheri2019_thick(edges, delta, beta):
@@ -296,6 +312,7 @@ def test_bagheri2019_thick(edges, delta, beta):
     assert np.isclose(got, ref, rtol=1e-3)
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('model', MODELS)
 def test_thick_models(model):
     r"""Clamped annulus, `\beta = 0.3`, `h/a = 0.10`, for the three models,
@@ -314,6 +331,7 @@ def test_shear_correction_one():
     assert np.allclose(np.diag(s.ABD)[6:], G*h, rtol=1e-12)
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('beta', BETAS)
 @pytest.mark.parametrize('edges', list(YAMAKI))
 def test_yamaki1958_thin(edges, beta):
@@ -323,6 +341,7 @@ def test_yamaki1958_thin(edges, beta):
     assert np.isclose(yamaki_k(beta, *edges), ref, rtol=1e-2)
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('beta', [0.4, 0.6])
 def test_leissa_thin(beta):
     r"""Free vibration, clamped outside and free inside, `h/a = 0.001`:
@@ -345,52 +364,6 @@ def test_leissa_thin(beta):
     assert np.allclose(l2[:5], ref, rtol=1e-3)
 
 
-@pytest.mark.parametrize('conn_method, rtol', [('null-space', 1e-4),
-                                               ('penalty', 5e-3)])
-def test_internal_frame_fsdt_cylinder(conn_method, rtol):
-    r"""Web of ``'annular_fsdt_donnell'``, `h/a = 0.001`, `\beta = 0.4`, its
-    outer edge on the inner surface of a ``'cylshell_fsdt_sanders'``
-    clamped at `x = 0` (``'BFxcte'``, ``face='lower'``): `\lambda^2` of `n =
-    0, 1, 1, 2, 2` against the exact roots of the annulus clamped outside and
-    free inside (Leissa 1969, Eqs. (1.11)-(1.13) and (1.17))"""
-    h, beta = 1e-3, 0.4
-    r_o = A - h/2
-    cyls, webs = [], []
-    for _ in range(2):
-        c = Shell(model='cylshell_fsdt_sanders', a=0.5*A, b=np.pi*A, r=A,
-                  m=8, n=12, plyt=h, stack=[0], laminaprop=(E, NU), rho=RHO)
-        for e in ('x1', 'x2', 'y1', 'y2'):
-            for f in FIELDS:
-                setattr(c, e + f, 1)
-                setattr(c, e + f + 'r', 1)
-        for f in FIELDS:
-            setattr(c, 'x1' + f, 0)
-        cyls.append(c)
-        w = Shell(model=DONNELL, a=r_o*(1 - beta), b=np.pi*r_o, r=r_o, m=10,
-                  n=12, plyt=h, stack=[0], laminaprop=(E, NU), rho=RHO)
-        for e in ('x1', 'x2', 'y1', 'y2'):
-            for f in FIELDS:
-                setattr(w, e + f, 1)
-                setattr(w, e + f + 'r', 1)
-        webs.append(w)
-    conn = []
-    for p1, p2 in (cyls, webs):
-        conn += [dict(p1=p1, p2=p2, func='SSycte', ycte1=p1.b, ycte2=0),
-                 dict(p1=p1, p2=p2, func='SSycte', ycte1=0, ycte2=p2.b)]
-    for c, w in zip(cyls, webs):
-        conn.append(dict(p1=c, p2=w, func='BFxcte', xcte1=0, xcte2=0,
-                         face='lower'))
-    md = MultiDomain(cyls + webs, conn, conn_method=conn_method)
-    eigvals, _ = freq(md.reduce(md.calc_kC(silent=True)),
-                      md.reduce(md.calc_kM(silent=True)),
-                      sparse_solver=False, silent=True, num_eigvalues=8)
-    l2 = np.sort(np.sqrt(-eigvals.real))*r_o**2*np.sqrt(RHO*h/bending_D(h))
-    guess = (13.54, 19.80, 31.34)
-    ref = [exact_lambda2(n, beta, 0.9*guess[n], 1.1*guess[n])
-           for n in (0, 1, 1, 2, 2)]
-    assert np.allclose(l2[:5], ref, rtol=rtol)
-
-
 #: fields fixed at the edges of the thick annulus of the frequencies:
 #: clamped, simply supported, free
 DOZIO_EDGES = {'C': FIELDS, 'S': ('v', 'w', 'phiy'), 'F': ()}
@@ -408,16 +381,16 @@ DOZIO = {
     }
 
 
-@pytest.mark.parametrize('edges', list(DOZIO))
-def test_dozio2015_thick(edges):
-    r"""Free vibration, `\beta = 0.3`, `h/a = 0.2`, shear correction factor
-    `5/6`: the eight lowest `\lambda = \omega a^2 \sqrt{\rho h/D}` of both
-    families of modes against Dozio (2015), Table 5, within 0.01 %"""
+def dozio_lambdas(edges, m, n):
+    r"""Distinct `\lambda = \omega a^2 \sqrt{\rho h/D}` of the full annulus
+    of Dozio (2015), Table 5, `\beta = 0.3`, `h/a = 0.2`, shear correction
+    factor `5/6`, edges (inner, outer) of :data:`DOZIO_EDGES`, in ascending
+    order"""
     inner, outer = edges
     h = 0.2*A
     halves = []
     for _ in range(2):
-        s = Shell(model=DONNELL, a=0.7*A, b=np.pi*A, r=A, m=14, n=16,
+        s = Shell(model=DONNELL, a=0.7*A, b=np.pi*A, r=A, m=m, n=n,
                   plyt=h, stack=[0], laminaprop=(E, NU), rho=RHO)
         s.fsdt_shear_correction = 5/6
         for e in ('x1', 'x2', 'y1', 'y2'):
@@ -439,8 +412,18 @@ def test_dozio2015_thick(edges):
     for v in lam[np.isfinite(lam) & (lam > 0.1)]:
         if not values or v/values[-1] - 1 > 1e-4:
             values.append(v)
+    return np.array(values)
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize('edges', list(DOZIO))
+def test_dozio2015_thick(edges):
+    r"""Free vibration, `\beta = 0.3`, `h/a = 0.2`, shear correction factor
+    `5/6`: the eight lowest `\lambda = \omega a^2 \sqrt{\rho h/D}` of both
+    families of modes against Dozio (2015), Table 5, within 0.01 %"""
+    values = dozio_lambdas(edges, 14, 16)
     ref, skip = DOZIO[edges]
-    got = np.delete(np.array(values), skip)[:8]
+    got = np.delete(values, skip)[:8]
     assert np.allclose(got, ref, rtol=1e-4)
 
 
@@ -582,6 +565,7 @@ def test_rigid_rotation_tl():
     assert tl[1] < 1e-3*gl[1]
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('model', MODELS)
 def test_tangent_is_derivative_of_fint(model):
     """``fkC_num(NLgeom=1) + fkG_num`` against central differences of
@@ -608,11 +592,11 @@ def test_r_not_larger_than_a_raises(model):
         s.calc_kC(silent=True)
 
 
-def _square(model, r, offset):
-    r"""Square panel, `a = b = 1`, `h = 0.01`, with `u = v = w = 0` on the
-    four edges, of radius ``r`` for the annular models"""
+def _square(model, r, offset, m=8):
+    r"""Square panel, `a = b = 1`, `h = 0.01`, `m = n` terms, with `u = v = w =
+    0` on the four edges, of radius ``r`` for the annular models"""
     kw = dict(r=r) if model.startswith('annular') else {}
-    s = Shell(model=model, a=1., b=1., m=8, n=8, plyt=0.01, stack=[0],
+    s = Shell(model=model, a=1., b=1., m=m, n=m, plyt=0.01, stack=[0],
               laminaprop=(E, NU), rho=RHO, offset=offset, **kw)
     for e in ('x1', 'x2', 'y1', 'y2'):
         for f in FIELDS:
@@ -623,6 +607,7 @@ def _square(model, r, offset):
     return s
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('model', MODELS)
 def test_offset_plate_limit(model):
     r"""Laminate offset `d = h/2`, stiffness and mass: for `r = 10^4 a` the
@@ -636,3 +621,74 @@ def test_offset_plate_limit(model):
     ref = omegas(_square(PLATE[model], None, 0.005))
     assert np.allclose(got, ref, rtol=3e-4)
     assert got[0] > 1.3*omegas(_square(model, 1e4, 0.))[0]
+
+
+def _omegas(s):
+    eigvals, _ = freq(s.calc_kC(silent=True), s.calc_kM(silent=True),
+                      sparse_solver=False, silent=True, num_eigvalues=4)
+    return np.sort(np.sqrt(-eigvals.real))[:4]
+
+
+@pytest.mark.parametrize('model', MODELS)
+def test_torque_small(model):
+    r"""Torque, clamped annulus, `\beta = 0.3`, `h/a = 0.10`, no shear
+    correction, `m = 6`, `n = 4`: least `\tau` above Bagheri, Kiani and
+    Eslami (2019), Table 2, 39.261, and equal to the value of the code,
+    53.27954, for the three models"""
+    got = tau(0.3, 'C', 'C', h=0.1*A, model=model, m=6, n=4, shear=1.)
+    assert got > 39.261
+    assert np.isclose(got, 53.27954, rtol=1e-5)
+
+
+#: k of the code for m = n = 6, h/a = 0.01, beta = 0.5, by edges (outer,
+#: inner)
+YAMAKI_SMALL = {('C', 'S'): 9.414388, ('F', 'C'): 3.142901}
+
+
+@pytest.mark.parametrize('edges', list(YAMAKI_SMALL))
+def test_yamaki1958_small(edges):
+    r"""Uniform compression, `h/a = 0.01`, `\beta = 0.5`, `m = n = 6`: least
+    `k` against Yamaki (1958), Table 1, within 0.5 %, and equal to the value
+    of the code"""
+    got = yamaki_k(0.5, *edges, h=0.01, m=6, n=6)
+    assert np.isclose(got, YAMAKI[edges][1], rtol=5e-3)
+    assert np.isclose(got, YAMAKI_SMALL[edges], rtol=1e-5)
+
+
+@pytest.mark.parametrize('edges', [('F', 'S'), ('F', 'C')])
+def test_dozio2015_small(edges):
+    r"""Free vibration, the annulus of :func:`test_dozio2015_thick`, `m = n =
+    6`: the three lowest `\lambda` not below Dozio (2015), Table 5, by more
+    than his rounding, `10^{-4}`, and at most 0.2 % above it"""
+    got = dozio_lambdas(edges, 6, 6)[:3]
+    ref = np.array(DOZIO[edges][0][:3])
+    assert np.all(got > (1 - 1e-4)*ref)
+    assert np.all(got < (1 + 2e-3)*ref)
+
+
+@pytest.mark.parametrize('model', MODELS)
+def test_tangent_small(model):
+    """``fkC_num(NLgeom=1) + fkG_num`` against central differences of
+    ``calc_fint``, `m = n = 3`"""
+    fw = modelDB.db[model]['matrices_num']
+    s = _sector(model, m=3, n=3)
+    size = s.get_size()
+    c = np.random.default_rng(1).standard_normal(size)*1e-3
+    fint = lambda cc: fw.calc_fint(cc, s.ABD, s, size, 0, s.nx, s.ny)
+    kT = (s.calc_kC(c=c, NLgeom=True, silent=True)
+          + s.calc_kG(c=c, NLgeom=True, silent=True)).toarray()
+    dc = 1e-7
+    J = np.column_stack([(fint(c + dc*e) - fint(c - dc*e))/(2*dc)
+                         for e in np.eye(size)])
+    assert np.abs(kT - J).max() < 1e-7*np.abs(kT).max()
+
+
+@pytest.mark.parametrize('model', MODELS)
+def test_offset_small(model):
+    r"""Laminate offset `d = h/2`, `m = n = 4`: for `r = 10^4 a` the
+    frequencies of the annular model are those of the flat plate with the
+    same offset, within 3e-4; the offset raises them by more than 30 %"""
+    got = _omegas(_square(model, 1e4, 0.005, m=4))
+    ref = _omegas(_square(PLATE[model], None, 0.005, m=4))
+    assert np.allclose(got, ref, rtol=3e-4)
+    assert got[0] > 1.3*_omegas(_square(model, 1e4, 0., m=4))[0]

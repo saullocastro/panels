@@ -39,7 +39,20 @@ a tip force `P` of fixed direction, normal to the undeformed strip,
 `\theta'' = -\alpha \cos\theta` in `s/L`, `\alpha = P L^2/(EI)`,
 `\theta(0) = 0`, `\theta'(1) = 0`, solved by shooting in :func:`elastica`:
 for `\alpha = 1` the tip rotation is 0.461 rad, the tip deflection `w =
-0.3017208 L` and the axial shortening `-u = 0.0564332 L`.
+0.3017208 L` and the axial shortening `-u = 0.0564332 L`. The strip of
+`m = 14` radial terms gives `w` 0.21 % and `-u` 0.47 % below these values;
+with `m = 10` terms and the whole load in one increment the same, to the
+digits shown (hpc12), which the tolerances of 0.3 % and 0.6 % bound.
+
+The thin annuli, the torque, the compression and the cross-ply plate of
+``'annular_tsdt_tl'`` with few terms are checked by the tests
+``test_*_small`` of the module of ``'annular_tsdt_donnell'`` and
+``'annular_tsdt_gl'``, whose model list includes ``'annular_tsdt_tl'``. The
+constitutive stiffness matrices of ``'annular_tsdt_tl'`` and
+``'annular_tsdt_gl'`` of the quarter annulus differ by `2.7 \times
+10^{-10}` of their largest term with `m = n = 3` and `4` and by `9.5
+\times 10^{-13}` with `m = n = 5` (hpc12): the tolerance of the small test
+is `10^{-9}`, that of the full-size one `10^{-12}`.
 
 References
 ----------
@@ -48,8 +61,8 @@ References
 .. [2] Yamaki, N., "Buckling of a thin annular plate under uniform
    compression", J. Appl. Mech., 25, 267-273, 1958, Table 1.
    https://doi.org/10.1115/1.4011755
-.. [3] Irie, T., Yamada, G. and Tsujino, Y., "Buckling loads of annular
-   plates subjected to torque", J. Sound Vib., 86(1), 145-146, 1983,
+.. [3] Irie, T., Yamada, G. and Tsujino, M., "Buckling loads of annular
+   plates subjected to a torque", J. Sound Vib., 86(1), 145-146, 1983,
    Table 1. https://doi.org/10.1016/0022-460X(83)90951-3
 .. [4] Reddy, J. N., "A simple higher-order theory for laminated composite
    plates", J. Appl. Mech., 51, 745-752, 1984.
@@ -92,6 +105,7 @@ def _sector(model, m=6, n=6, free=False):
     return s
 
 
+@pytest.mark.slow
 def test_linear_kernels():
     r"""At zero displacements: ``calc_kC`` (``NLgeom`` 0 and 1) equal to
     that of ``'annular_tsdt_donnell'`` and ``'annular_tsdt_gl'``,
@@ -131,6 +145,7 @@ def test_internal_force_linear_limit():
     assert dl[1] < 1e-3*np.abs(lin[1]).max()
 
 
+@pytest.mark.slow
 def test_leissa_clamped_free_annulus():
     r"""Thin annulus clamped outside and free inside, `\beta = 0.4`, `\nu =
     1/3`: `\lambda^2 = \omega a^2 \sqrt{\rho h/D}` for `n = 0, 1, 1, 2, 2`
@@ -148,6 +163,7 @@ def test_leissa_clamped_free_annulus():
     assert np.allclose(l2[:5], ref, rtol=1e-3)
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('case', list(YAMAKI))
 def test_yamaki1958_compression(case):
     r"""Thin annulus under `N_{xx} = N_{yy} = -1`: `k = a \sqrt{p/D}`
@@ -165,6 +181,7 @@ def test_yamaki1958_compression(case):
     assert np.isclose(np.sqrt(eigvals[0]*A**2/D), YAMAKI[case], rtol=6e-3)
 
 
+@pytest.mark.slow
 def test_irie1983_torsion():
     r"""Thin annulus clamped on both edges, `\beta = 0.3`, under a torque on
     the outer edge, the pre-buckling state from a linear static case:
@@ -179,6 +196,7 @@ def test_irie1983_torsion():
     assert np.isclose(np.abs(eigvals).min(), 61.97, rtol=1e-2)
 
 
+@pytest.mark.slow
 def test_thick_cross_ply_plate_limit():
     r"""Simply supported square `[0/90]` sector, `a/h = 5`, `E_1/E_2 = 10`,
     `r = 10^4 a`: `\bar\omega = \omega a^2/h \sqrt{\rho/E_2}` against
@@ -246,16 +264,17 @@ def test_rigid_rotation(axis):
         assert tl[1].max() < 1e-3*big_gl[1]
 
 
-def strip_tip(model, alpha=1., inc=0.1):
+def strip_tip(model, alpha=1., inc=0.1, m=14):
     r"""Tip ``(w, -u)/L`` of a strip of an annulus of outer radius `r = 10^4
     L`, ``L = 1`` radially, ``b = 0.04``, ``h = 2e-3``, ``nu = 0``, clamped
     at the outer edge (``w,x = 0`` too), under a tip force along `z` of
-    ``alpha = P L^2/EI``, mean over the tip"""
+    ``alpha = P L^2/EI``, mean over the tip, ``m`` terms radially, load
+    increment ``inc``"""
     from structsolve import Analysis
     L, b, h, Ev = 1., 0.04, 2e-3, 70e9
     P = alpha*Ev*h**3*b/12/L**2
     s = Shell(model=model, a=L, b=b, r=1e4*L, stack=[0], plyt=h,
-              laminaprop=(Ev, 0.), m=14, n=4)
+              laminaprop=(Ev, 0.), m=m, n=4)
     set_flags(s, ('x2', 'y1', 'y2'), FIELDS, **{'': 1., 'r': 1.})
     set_flags(s, ('x1', ), FIELDS, **{'': 0., 'r': 1.})
     s.x1wr = 0.
@@ -295,6 +314,7 @@ def test_elastica():
     assert np.isclose(th, 0.461, atol=1e-3)
 
 
+@pytest.mark.slow
 def test_thin_cantilever_strip_against_elastica():
     r"""Strip of a large annulus, `L/h = 500`, `\alpha = 1`, tip rotation
     0.46 rad: ``'annular_tsdt_tl'`` within 0.3 % and 0.6 % of the elastica
@@ -309,6 +329,17 @@ def test_thin_cantilever_strip_against_elastica():
     assert wg > 1.08*ELASTICA[0] and ug > 1.2*ELASTICA[1]
     assert np.allclose((w, u), (0.3010774, 0.0561698), rtol=1e-5)
     assert np.allclose((wg, ug), (0.3333425, 0.0702331), rtol=1e-5)
+
+
+
+def test_thin_cantilever_strip_small():
+    r"""The strip of :func:`test_thin_cantilever_strip_against_elastica`
+    with `m = 10` radial terms and the whole load in one increment:
+    ``'annular_tsdt_tl'`` within 0.3 % and 0.6 % of the elastica"""
+    ELASTICA = elastica(1.)[:2]
+    w, u = strip_tip(MODEL, inc=1., m=10)
+    assert np.isclose(w, ELASTICA[0], rtol=3e-3)
+    assert np.isclose(u, ELASTICA[1], rtol=6e-3)
 
 
 def test_tangent_is_derivative_of_fint():
@@ -340,3 +371,22 @@ def test_r_not_larger_than_a_raises():
               plyt=H, stack=[0], laminaprop=(E, NU))
     with pytest.raises(ValueError):
         s.calc_kC(silent=True)
+
+
+def test_linear_kernels_small():
+    r""":func:`test_linear_kernels` with `m = n = 4`, the matrices equal
+    within `10^{-9}` of their largest term"""
+    s, gl, dn = (_sector(mo, m=4, n=4)
+                 for mo in (MODEL, GL, 'annular_tsdt_donnell'))
+    c0 = np.zeros(s.get_size())
+    K0 = s.calc_kC(silent=True)
+    tol = 1e-9*abs(K0).max()
+    assert abs(K0 - gl.calc_kC(silent=True)).max() < tol
+    assert abs(K0 - dn.calc_kC(silent=True)).max() < tol
+    assert abs(s.calc_kC(c=c0, NLgeom=True, silent=True) - K0).max() < tol
+    for p in (s, gl):
+        p.Nxx, p.Nyy, p.Nxy = -1., 0.5, 0.3
+    KG = s.calc_kG(silent=True)
+    assert abs(KG - gl.calc_kG(silent=True)).max() < 1e-9*abs(KG).max()
+    KM = s.calc_kM(silent=True)
+    assert abs(KM - gl.calc_kM(silent=True)).max() < 1e-9*abs(KM).max()
