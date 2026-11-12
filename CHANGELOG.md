@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+### Changed: long validation runs in the notebooks only
+
+- The long tests that compared with literature, test or finite element
+  values (slow, or more than about 10 s with the optimized build, or 40 s
+  or more with the line-traced build) are removed from the test suite;
+  the notebooks show the same cases and reference values: the sandwich and
+  thick rings, the cylinders of Schweizerhof and Ramm (1984), Table 4, and
+  Fig. 13, the post-buckling paths of Simo et al. (1990), the hinged roofs
+  of Sze et al. (2004), the Moore and Wescoat (1944) specimens 17 and 19,
+  the wing box against Abaqus, the shells AS-2 of Singer et al. (1971) and
+  cylinders 1 and 2 of Peterson and Dow (1959).
+- New notebooks `leissa1973_cylinder_frequencies` (Leissa 1973, Tables
+  2.6, 2.8 and 2.46, CLPT, FSDT and TSDT) and
+  `jaunky1999_laminated_panel_buckling` (Jaunky and Knight 1999, Table 2),
+  from the tests they replace.
+
 ### New: notebook `thick_annular_plates`; tests of thick annuli and of mixed FSDT/TSDT webs
 
 - The notebook `thick_annular_plates` compares the annular models with
