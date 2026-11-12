@@ -16,6 +16,10 @@
 - New notebooks `leissa1973_cylinder_frequencies` (Leissa 1973, Tables
   2.6, 2.8 and 2.46, CLPT, FSDT and TSDT) and
   `jaunky1999_laminated_panel_buckling` (Jaunky and Knight 1999, Table 2).
+- `tests/tests_shell/test_nonlinear_riks.py` checks the limit point of the
+  hinged roof against Table 9a of Sze et al. (2004), 2226.3 N at the
+  central deflection 11.293; the central deflection at 4000 N, beyond the
+  table, is a value of the code.
 
 ### New: notebook `thick_annular_plates`; tests of thick annuli and of mixed FSDT/TSDT webs
 
