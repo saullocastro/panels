@@ -110,8 +110,22 @@ def test_linear_kernels():
     r"""At zero displacements: ``calc_kC`` (``NLgeom`` 0 and 1) equal to
     that of ``'annular_tsdt_donnell'`` and ``'annular_tsdt_gl'``,
     ``calc_kG`` of a membrane state and ``calc_kM`` equal to those of
-    ``'annular_tsdt_gl'``, to rounding"""
+    ``'annular_tsdt_gl'``, to rounding, with the same Gauss-Legendre points
+
+    Notes
+    -----
+    The default numbers of points differ: those of ``'annular_tsdt_tl'``
+    follow ``'integrand_degree': (6, 0)`` of :mod:`panels.modelDB`, those of
+    the other two the default ``(4, 0)``, see :func:`.gauss_points`. The
+    integrands are rational in `x` (terms in `1/\rho`), which no
+    Gauss-Legendre rule integrates exactly, so that the defaults give
+    matrices that differ by the quadrature error: with `m = n` = 4, 5 and
+    6 (10, 13 and 16 points against 7, 9 and 11) by 2.7e-10, 9.5e-13 and
+    7.4e-15 of the largest term of ``calc_kC`` (hpc12); with the same
+    points the three matrices are equal to the last digit."""
     s, gl, dn = (_sector(mo) for mo in (MODEL, GL, 'annular_tsdt_donnell'))
+    for p in (gl, dn):
+        p.nx, p.ny = s.nx, s.ny
     c0 = np.zeros(s.get_size())
     K0 = s.calc_kC(silent=True)
     tol = 1e-12*abs(K0).max()
@@ -374,19 +388,21 @@ def test_r_not_larger_than_a_raises():
 
 
 def test_linear_kernels_small():
-    r""":func:`test_linear_kernels` with `m = n = 4`, the matrices equal
-    within `10^{-9}` of their largest term"""
+    r""":func:`test_linear_kernels` with `m = n = 4`, the same
+    Gauss-Legendre points for the three models"""
     s, gl, dn = (_sector(mo, m=4, n=4)
                  for mo in (MODEL, GL, 'annular_tsdt_donnell'))
+    for p in (gl, dn):
+        p.nx, p.ny = s.nx, s.ny
     c0 = np.zeros(s.get_size())
     K0 = s.calc_kC(silent=True)
-    tol = 1e-9*abs(K0).max()
+    tol = 1e-12*abs(K0).max()
     assert abs(K0 - gl.calc_kC(silent=True)).max() < tol
     assert abs(K0 - dn.calc_kC(silent=True)).max() < tol
     assert abs(s.calc_kC(c=c0, NLgeom=True, silent=True) - K0).max() < tol
     for p in (s, gl):
         p.Nxx, p.Nyy, p.Nxy = -1., 0.5, 0.3
     KG = s.calc_kG(silent=True)
-    assert abs(KG - gl.calc_kG(silent=True)).max() < 1e-9*abs(KG).max()
+    assert abs(KG - gl.calc_kG(silent=True)).max() < 1e-12*abs(KG).max()
     KM = s.calc_kM(silent=True)
-    assert abs(KM - gl.calc_kM(silent=True)).max() < 1e-9*abs(KM).max()
+    assert abs(KM - gl.calc_kM(silent=True)).max() < 1e-12*abs(KM).max()

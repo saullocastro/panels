@@ -90,7 +90,9 @@ def gauss_points(num, degree=(4, 0)):
     Returns ``max(2*num - 1, 7)``, the smallest number of points that
     integrates exactly every integrand of the numerical kernels of
     :class:`.Shell` along a direction with ``num`` approximation terms and a
-    constant constitutive matrix, see :meth:`.Shell.integration_points`;
+    constant constitutive matrix, see :meth:`.Shell.integration_points`,
+    except along `x` for the annular models, whose integrands have terms in
+    `1/\rho`, `\rho = r - x`, and are integrated approximately;
     ``3*max(num - 1, 3)`` with ``degree=(6, -2)``, for the model
     ``'plate_clpt_tl'``, and ``3*max(num - 1, 3) + 1`` with ``degree=(6,
     0)``, for ``'cylshell_clpt_tl'``.
@@ -183,7 +185,8 @@ class Shell(object):
     ``gauss_points(m)`` and ``gauss_points(n)``, i.e. ``max(2*m - 1, 7)`` and
     ``max(2*n - 1, 7)`` for the values of ``m`` and ``n`` at the time of the
     calculation, which integrate exactly every integrand with a constant
-    constitutive matrix, see :func:`.gauss_points` and
+    constitutive matrix, except along `x` for the annular models, whose
+    integrands are rational in `x`, see :func:`.gauss_points` and
     :meth:`.Shell.integration_points`. A value assigned to ``nx`` or ``ny``,
     as an attribute or in ``kwargs``, is kept, the rebuild only raising it
     to ``m`` or ``n``; assigning ``None`` restores the default.

@@ -39,6 +39,12 @@
 - Irie, Yamada and Tsujino (1983) cited with the author's initial M. and
   the title "subjected to a torque" in `test_annular_tsdt.py` and
   `test_annular_tsdt_tl.py`.
+- The linear-kernel tests of `annular_tsdt_tl` compare its matrices with
+  those of `annular_tsdt_gl` and `annular_tsdt_donnell` with the same
+  Gauss-Legendre points: the default numbers of points of the three models
+  differ, and the integrands of the annular models, rational in `x`, are
+  not integrated exactly by any of them. The docstrings of `Shell` and
+  `gauss_points` say so.
 
 ### New: notebook `thick_annular_plates`; tests of thick annuli and of mixed FSDT/TSDT webs
 
