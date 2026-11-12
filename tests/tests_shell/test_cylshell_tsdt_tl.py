@@ -20,7 +20,8 @@ and the normal of the deformed mid-surface. The checks:
    vector, also with a follower pressure, and ``calc_kTv`` is its product
    by a vector;
 7. an annular web of ``annular_tsdt_tl`` tied to the inner surface of the
-   cylinder with ``'BFxcte'``: the frequencies of the clamped-free annulus,
+   cylinder with ``'BFxcte'``: with small models, the frequencies of the
+   same web clamped directly, above the roots of the clamped-free annulus;
    and rigid-body motions of a free cylinder with two webs without strain
    energy.
 
@@ -50,9 +51,21 @@ curved edges free, a point load at the centre, modelled as in
 through a stiff spring, Riks method). Table 9a of [3]_ (S4R elements): limit
 load 2226.3 at `-W_C = 11.293`, following minimum 518.7 at 19.852.
 
-The web on the cylinder is that of ``test_annular_cylinder.py``: `h/r_o =
-0.001`, clamped outside by the cylinder and free inside, against the roots
-of Leissa (1969), Eqs. (1.11)-(1.13) and (1.17).
+The web on the cylinder is the small one of ``test_annular_cylinder.py``
+(``check_web_clamped``): `h/r_o = 0.001`, `\beta = 0.4`, `m = 4`, `n = 6`
+terms for the half cylinders and the half webs, the web clamped outside by
+the cylinder clamped at `x = 0` and free inside. Its five lowest
+`\lambda^2` and those of the same web clamped directly on its outer edge
+are values of the code: they agree to 6.2e-10 with the null space
+(tolerance 1e-8) and differ by 0.20 % to 0.29 % with the penalty
+connection and its default constants (tolerance 5e-3); with a
+``cylshell_tsdt_sanders`` cylinder the connected web gives the same values
+to the last digit (hpc12). The directly clamped web is a Rayleigh-Ritz
+approximation of the annulus clamped outside and free inside, bounded from
+below by the roots of the frequency equation of Leissa (1969), Eqs.
+(1.11)-(1.13) and (1.17), and above them by 0.37 % (`n = 0`) to 6.83 % (`n
+= 2`): ``EXCESS`` of ``test_annular_cylinder.py``, 7 %, is a regression
+bound of the small model.
 
 References
 ----------
@@ -202,20 +215,14 @@ def test_tangent_consistency():
 
 @pytest.mark.parametrize('conn_method', ['null-space', 'penalty'])
 def test_annular_web_on_the_inner_surface(conn_method):
-    r"""Web of ``annular_tsdt_tl``, `h/r_o = 0.001`, its outer edge tied
-    to the inner surface (``face='lower'``) of the cylinder clamped at `x =
-    0`: the first five frequency parameters `\lambda^2` against the roots of
-    the clamped-free annulus, with the tolerances of
-    ``test_annular_cylinder.py``"""
-    r_o = tac.R - tac.H/2
-    cyls = [tac._cylinder(tac.R, 0.5*tac.R, model=MODEL) for _ in range(2)]
-    webs = [tac._web(r_o, tac.BETA*r_o, model='annular_tsdt_tl')
-            for _ in range(2)]
-    md = tac._assembly(cyls, webs, lambda c, w: dict(
-        p1=c, p2=w, func='BFxcte', xcte1=0, xcte2=0, face='lower'), conn_method)
-    l2 = tac._lambda2(md, r_o)
-    ref = np.array(tac.EXACT)[[0, 1, 1, 2, 2]]
-    assert np.allclose(l2[:5], ref, rtol=tac.RTOL_TSDT[conn_method])
+    r"""Small web of ``annular_tsdt_tl``, `h/r_o = 0.001`, its outer edge
+    tied to the inner surface (``face='lower'``) of the small cylinder
+    clamped at `x = 0`: the five lowest frequency parameters `\lambda^2`
+    against those of the same web clamped directly on its outer edge, and
+    the latter between the roots of the clamped-free annulus and these
+    roots plus the regression bound ``EXCESS``, see ``check_web_clamped``
+    of ``test_annular_cylinder.py``"""
+    tac.check_web_clamped(MODEL, 'annular_tsdt_tl', 'lower', conn_method)
 
 
 def test_rigid_body_motions_with_webs():
