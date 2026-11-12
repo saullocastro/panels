@@ -55,6 +55,21 @@ annuli with a clamped edge are within 0.18 % of [7]_ (0.08 % with `m =
 clamped inner edge of radius `0.1 a`), the others within `10^{-5}`; the
 tolerances are `2 \times 10^{-3}` and `10^{-4}`.
 
+The tests ``test_*_small`` repeat the cases with few terms (`m, n` from 3 to
+6), measured on hpc12. The thin annuli lock in transverse shear with few
+terms where an edge is clamped (with `m = n = 6` the torque of the clamped
+annulus is about four times the reference): the compression is checked on
+the simply supported annulus, `k = 4.750142` with `m = 6`, `n = 4`, 0.003 %
+above [2]_, within the 0.6 % of the full-size test; the torque on the
+annulus clamped outside and free inside, `\tau_B = 11.03309`, 4.1 % above
+the 10.60 of [3]_, a Ritz value from above. With `m = 5`, `n = 6` the two
+lowest `\beta` of the thick annuli exceed those of [7]_ by 6.7 % and 6.0 %
+(clamped, ``'annular_tsdt_donnell'`` and ``'annular_tsdt_gl'``), 3.9 % and
+1.8 % (clamped-free), 0.06 % and 0.16 % (`S_s`), 0.02 % and 0.15 %
+(`S_h`), Ritz values from above, checked
+against [7]_ as lower bounds and against the values of the code. The
+cross-ply plate with `m = n = 5` is within 0.03 % of [4]_.
+
 For `r \to \infty` the strains are those of ``'plate_tsdt_donnell'`` and
 ``'plate_tsdt_gl'``, the difference being of the order of `a/r`. Reddy's
 TSDT [4]_ gives, for the simply supported (SS-1) square `[0/90]` plate,
@@ -170,6 +185,7 @@ def exact_lambda2(n, beta, guess):
     return brentq(_det, 0.9*guess, 1.1*guess, args=(n, beta))
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('model', MODELS)
 def test_leissa_clamped_free_annulus(model):
     r"""Thin annulus clamped outside and free inside, `\beta = 0.4`, `\nu =
@@ -191,6 +207,7 @@ def test_leissa_clamped_free_annulus(model):
 YAMAKI = {('C', 'C', 0.5): 12.15, ('S', 'S', 0.3): 4.75}
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('model', MODELS)
 @pytest.mark.parametrize('case', list(YAMAKI))
 def test_yamaki1958_compression(case, model):
@@ -208,6 +225,7 @@ def test_yamaki1958_compression(case, model):
     assert np.isclose(np.sqrt(eigvals[0]*A**2/D), YAMAKI[case], rtol=6e-3)
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('model', MODELS)
 def test_irie1983_torsion(model):
     r"""Thin annulus clamped on both edges, `\beta = 0.3`, under a torque on
@@ -228,15 +246,13 @@ def test_irie1983_torsion(model):
 REDDY_TSDT = {10: 6.9887, 40: 9.0871}
 
 
-@pytest.mark.parametrize('model', MODELS)
-@pytest.mark.parametrize('E1E2', list(REDDY_TSDT))
-def test_thick_cross_ply_plate_limit(E1E2, model):
-    r"""Simply supported square `[0/90]` sector, `a/h = 5`, `r = 10^4 a`:
-    `\bar\omega = \omega a^2/h \sqrt{\rho/E_2}` against Reddy's TSDT
-    (1984), within 0.1 %"""
+def cross_ply_omega(model, E1E2, m):
+    r"""Least `\bar\omega = \omega a^2/h \sqrt{\rho/E_2}` of the simply
+    supported square `[0/90]` sector, `a/h = 5`, `r = 10^4 a`, `m = n`
+    terms"""
     E2, rho, a = 1e9, 1500., 1.
     h = a/5
-    s = Shell(model=model, a=a, b=a, r=1e4*a, m=12, n=12, plyt=h/2,
+    s = Shell(model=model, a=a, b=a, r=1e4*a, m=m, n=m, plyt=h/2,
               stack=[0, 90], rho=rho,
               laminaprop=(E1E2*E2, E2, 0.25, 0.6*E2, 0.6*E2, 0.5*E2))
     for e in ('x1', 'x2', 'y1', 'y2'):
@@ -244,7 +260,17 @@ def test_thick_cross_ply_plate_limit(E1E2, model):
     eigvals, _ = freq(s.calc_kC(silent=True), s.calc_kM(silent=True),
                       sparse_solver=False, silent=True, num_eigvalues=4)
     omega = np.sort(np.sqrt(-eigvals.real))[0]
-    assert np.isclose(omega*a**2/h*np.sqrt(rho/E2), REDDY_TSDT[E1E2],
+    return omega*a**2/h*np.sqrt(rho/E2)
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize('model', MODELS)
+@pytest.mark.parametrize('E1E2', list(REDDY_TSDT))
+def test_thick_cross_ply_plate_limit(E1E2, model):
+    r"""Simply supported square `[0/90]` sector, `a/h = 5`, `r = 10^4 a`:
+    `\bar\omega = \omega a^2/h \sqrt{\rho/E_2}` against Reddy's TSDT
+    (1984), within 0.1 %"""
+    assert np.isclose(cross_ply_omega(model, E1E2, 12), REDDY_TSDT[E1E2],
                       rtol=1e-3)
 
 
@@ -320,6 +346,7 @@ BISADI_AXISYMMETRIC = {
     }
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('edges', list(BISADI_AXISYMMETRIC))
 def test_bisadi2012_axisymmetric(edges):
     r"""Thick annulus, `R = 0.1`, `h/a = 0.1`, ``'annular_tsdt_donnell'``:
@@ -358,6 +385,7 @@ BISADI_EIGHT = {
     }
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('case', list(BISADI_EIGHT))
 def test_bisadi2012_eight_lowest(case):
     r"""Thick annuli, `h/a = 0.1` to `0.3`, ``'annular_tsdt_donnell'``:
@@ -372,6 +400,7 @@ def test_bisadi2012_eight_lowest(case):
     assert np.array_equal(count[:8], [1 if p == 0 else 2 for p, _ in modes])
 
 
+@pytest.mark.slow
 def test_bisadi2012_gl():
     r"""``'annular_tsdt_gl'``, the clamped annulus `R = 0.2`, `h/a = 0.2`:
     the eight lowest `\beta` against Bisadi et al. (2012), Table 9, within
@@ -382,11 +411,11 @@ def test_bisadi2012_gl():
     assert np.allclose(values[:8], BISADI_EIGHT[case][0], rtol=2e-3)
 
 
-def _square(model, r, offset):
-    r"""Square panel, `a = b = 1`, `h = 0.05`, with `u = v = w = 0` on the
-    four edges, of radius ``r`` for the annular models"""
+def _square(model, r, offset, m=8):
+    r"""Square panel, `a = b = 1`, `h = 0.05`, `m = n` terms, with `u = v = w =
+    0` on the four edges, of radius ``r`` for the annular models"""
     kw = dict(r=r) if model.startswith('annular') else {}
-    s = Shell(model=model, a=1., b=1., m=8, n=8, plyt=0.05, stack=[0],
+    s = Shell(model=model, a=1., b=1., m=m, n=m, plyt=0.05, stack=[0],
               laminaprop=(E, NU), rho=RHO, offset=offset, **kw)
     for e in ('x1', 'x2', 'y1', 'y2'):
         for f in 'uvw':
@@ -400,6 +429,7 @@ def _omegas(s, num=4):
     return np.sort(np.sqrt(-eigvals.real))[:num]
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('model', MODELS)
 def test_offset_plate_limit(model):
     r"""Laminate offset `d = h/2`, stiffness and mass: for `r = 10^4 a` the
@@ -411,12 +441,12 @@ def test_offset_plate_limit(model):
     assert got[0] > 1.3*_omegas(_square(model, 1e4, 0.))[0]
 
 
-def test_gl_equals_donnell_in_the_linear_limit():
-    """Same linear frequencies; same internal force vector for a
-    configuration without in-plane displacements, for which the
-    Green-Lagrange and the von Kármán membrane strains coincide"""
-    s1 = annulus('annular_tsdt_donnell', 0.4, 'C', 'F').panels[0]
-    s2 = annulus('annular_tsdt_gl', 0.4, 'C', 'F').panels[0]
+def _check_gl_equals_donnell(m, n):
+    """Asserts of :func:`test_gl_equals_donnell_in_the_linear_limit` for
+    ``m`` x ``n`` terms"""
+    s1 = annulus('annular_tsdt_donnell', 0.4, 'C', 'F', m=m,
+                 n=n).panels[0]
+    s2 = annulus('annular_tsdt_gl', 0.4, 'C', 'F', m=m, n=n).panels[0]
     assert np.allclose(_omegas(s1, 6), _omegas(s2, 6), rtol=1e-9)
     size = s1.get_size()
     c = np.random.default_rng(0).standard_normal(size)*1e-2
@@ -431,12 +461,19 @@ def test_gl_equals_donnell_in_the_linear_limit():
     assert not np.allclose(f[0], f[1], rtol=1e-6)
 
 
-@pytest.mark.parametrize('model', MODELS)
-def test_tangent_is_derivative_of_fint(model):
-    """``fkC_num(NLgeom=1) + fkG_num`` against central differences of
-    ``calc_fint``, and ``calc_kTv`` against the product of that matrix"""
+@pytest.mark.slow
+def test_gl_equals_donnell_in_the_linear_limit():
+    """Same linear frequencies; same internal force vector for a
+    configuration without in-plane displacements, for which the
+    Green-Lagrange and the von Kármán membrane strains coincide"""
+    _check_gl_equals_donnell(10, 12)
+
+
+def _check_tangent(model, m):
+    """Asserts of :func:`test_tangent_is_derivative_of_fint` for `m = n`
+    terms"""
     fw = modelDB.db[model]['matrices_num']
-    s = Shell(model=model, a=0.5, b=np.pi/2, r=A, m=5, n=5, plyt=0.02,
+    s = Shell(model=model, a=0.5, b=np.pi/2, r=A, m=m, n=m, plyt=0.02,
               stack=[0, 45], laminaprop=(E, NU), rho=RHO, offset=0.005)
     size = s.get_size()
     c = np.random.default_rng(1).standard_normal(size)*1e-3
@@ -452,6 +489,14 @@ def test_tangent_is_derivative_of_fint(model):
     assert np.allclose(kTv, kT @ v, rtol=1e-10, atol=1e-10*np.abs(kT @ v).max())
 
 
+@pytest.mark.slow
+@pytest.mark.parametrize('model', MODELS)
+def test_tangent_is_derivative_of_fint(model):
+    """``fkC_num(NLgeom=1) + fkG_num`` against central differences of
+    ``calc_fint``, and ``calc_kTv`` against the product of that matrix"""
+    _check_tangent(model, 5)
+
+
 @pytest.mark.parametrize('model', MODELS)
 def test_r_not_larger_than_a_raises(model):
     """An inner radius `r - a \\le 0` is rejected"""
@@ -459,3 +504,99 @@ def test_r_not_larger_than_a_raises(model):
               plyt=H, stack=[0], laminaprop=(E, NU))
     with pytest.raises(ValueError):
         s.calc_kC(silent=True)
+
+
+@pytest.mark.parametrize('model', MODELS)
+def test_yamaki1958_small(model):
+    r"""Thin annulus, simply supported, `\beta = 0.3`, `m = 6`, `n = 4`, under
+    `N_{xx} = N_{yy} = -1`: `k = a \sqrt{p/D}` against Yamaki (1958), Table
+    1, 4.75, within 0.6 %, and equal to the value of the code, 4.750142"""
+    md = annulus(model, 0.3, 'S', 'S', m=6, n=4)
+    for s in md.panels:
+        s.Nxx = -1.
+        s.Nyy = -1.
+    eigvals, _ = lb(md.reduce(md.calc_kC(silent=True)),
+                    md.reduce(md.calc_kG(silent=True)), silent=True,
+                    num_eigvalues=4)
+    k = np.sqrt(eigvals[0]*A**2/D)
+    assert np.isclose(k, 4.75, rtol=6e-3)
+    assert np.isclose(k, 4.750142, rtol=1e-5)
+
+
+#: the two lowest beta of the code for m = 5, n = 6, and the number of modes of
+#: each, by (inner, outer, R, delta)
+BISADI_SMALL = {
+    ('C', 'C', 0.2, 0.2): ((26.48168, 27.31311), (1, 2)),
+    ('C', 'F', 0.2, 0.2): ((4.384759, 4.912964), (2, 1)),
+    ('Ss', 'Ss', 0.4, 0.1): ((26.72944, 28.22772), (1, 2)),
+    ('Sh', 'Sh', 0.2, 0.2): ((14.71502, 16.79483), (1, 2)),
+    }
+
+
+@pytest.mark.parametrize('case, model', [
+    (('C', 'C', 0.2, 0.2), m)
+    for m in ('annular_tsdt_donnell', 'annular_tsdt_gl')] + [
+    (c, 'annular_tsdt_donnell') for c in list(BISADI_SMALL)[1:]])
+def test_bisadi2012_small(case, model):
+    r"""Thick annuli of :func:`test_bisadi2012_eight_lowest`, `m = 5`, `n = 6`:
+    the two lowest `\beta` not below Bisadi et al. (2012), Tables 6-9, and
+    equal to the values of the code; a single mode or a pair as in the
+    table"""
+    inner, outer, R, delta = case
+    values, count = transverse_frequencies(
+        thick_annulus(model, R, delta, inner, outer, m=5, n=6), delta)
+    ref, modes = BISADI_EIGHT[case]
+    got, num = BISADI_SMALL[case]
+    assert np.all(values[:2] > (1 - 1e-5)*np.array(ref[:2]))
+    assert np.allclose(values[:2], got, rtol=1e-5)
+    assert np.array_equal(count[:2], num)
+    assert np.array_equal(num, [1 if p == 0 else 2 for p, _ in modes[:2]])
+
+
+@pytest.mark.parametrize('model', MODELS)
+def test_offset_small(model):
+    r"""Laminate offset `d = h/2`, `m = n = 4`: for `r = 10^4 a` the
+    frequencies of the annular model are those of the plate model with the
+    same offset; the offset raises them by more than 30 %"""
+    got = _omegas(_square(model, 1e4, 0.025, m=4))
+    ref = _omegas(_square(PLATE[model], None, 0.025, m=4))
+    assert np.allclose(got, ref, rtol=3e-4)
+    assert got[0] > 1.3*_omegas(_square(model, 1e4, 0., m=4))[0]
+
+
+def test_gl_equals_donnell_small():
+    """:func:`test_gl_equals_donnell_in_the_linear_limit` with `m = n = 4`"""
+    _check_gl_equals_donnell(4, 4)
+
+
+@pytest.mark.parametrize('model', MODELS)
+def test_tangent_small(model):
+    """:func:`test_tangent_is_derivative_of_fint` with `m = n = 3`"""
+    _check_tangent(model, 3)
+
+
+@pytest.mark.parametrize('model', MODELS)
+def test_irie1983_small(model):
+    r"""Thin annulus, `\beta = 0.3`, clamped outside, free inside with `u = v
+    = 0`, `m = 6`, `n = 4`, under a torque on the outer edge, the
+    pre-buckling state from a linear static case: `\tau_B` above Irie et al.
+    (1983), Table 1, 10.60, and equal to the value of the code, 11.03309, for
+    the three models"""
+    md = annulus(model, 0.3, 'C', 'F', m=6, n=4)
+    T = 2*np.pi*D
+    for s in md.panels:
+        s.x1u = s.x1v = 1
+        s.x2u = s.x2v = 0
+        s.add_distr_load_fixed_x(0., funcy=lambda y: T/(2*np.pi*A**2) + 0*y)
+    eigvals, _ = md.linear_buckling(num_eigvalues=6, silent=True)
+    got = np.abs(eigvals).min()
+    assert got > 10.60
+    assert np.isclose(got, 11.03309, rtol=1e-5)
+
+
+@pytest.mark.parametrize('model', MODELS)
+def test_thick_cross_ply_small(model):
+    r""":func:`test_thick_cross_ply_plate_limit`, `E_1/E_2 = 10`, with `m = n =
+    5`: `\bar\omega` against Reddy's TSDT (1984), 6.9887, within 0.1 %"""
+    assert np.isclose(cross_ply_omega(model, 10, 5), REDDY_TSDT[10],
+                      rtol=1e-3)
