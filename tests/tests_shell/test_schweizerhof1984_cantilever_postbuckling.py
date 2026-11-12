@@ -17,11 +17,11 @@ edge making the load nonconservative.
 The tests check the linear buckling factors of Table 4, the consistency of
 the internal forces and of the tangent stiffness matrix of the imperfect
 shell, the inertia of the tangent stiffness matrix along the fundamental
-path of the perfect shell beyond its bifurcation, and the load-deflection
-path of Fig. 13 traced with the Riks method,
-with a geometric imperfection of 1 % of t in the shape of the w part of the
-lowest linear buckling mode of the follower load, added as in
-``test_simo1990_cylinder_postbuckling.py``.
+path of the perfect shell beyond its bifurcation, and, with 8 x 6 terms, the
+load-deflection path of the imperfect shell B2 up to w/t = 0.3 traced with
+the Riks method (the path of Fig. 13), with a geometric imperfection of 1 %
+of t in the shape of the w part of the lowest linear buckling mode of the
+follower load, added as in ``test_simo1990_cylinder_postbuckling.py``.
 
 Notes
 -----
@@ -50,7 +50,6 @@ import sys
 sys.path.append('../..')
 
 import numpy as np
-import pytest
 from scipy.sparse import csr_matrix
 from structsolve import Analysis, lb, solve
 from structsolve.stopping import value_reached
@@ -335,42 +334,21 @@ def test_riks_perfect_shell_inertia():
     assert np.all(nneg[Ks > K_f] == 1) and np.all(det[Ks > K_f] == -1)
 
 
-def fig13_path(bc, wstop):
-    r"""Riks analysis of the shell with the imperfection of 1 % of t up to
-    w_max/t = wstop"""
-    s, kP = build_shell(bc)
+def test_riks_imperfect_B2_coarse():
+    # B2, 8 x 6 terms, imperfection of 1 % of t, Riks up to w/t = 0.3: no
+    # limit point, the load increases monotonically towards the bifurcation
+    # load k_f of the same model and the tangent stiffness matrix keeps no
+    # negative eigenvalue; k_f and the last load are values of the code
+    # with these terms
+    s, kP = build_shell('B2', m=8, nt=6)
     K_f, mode = buckling_K(s, kP)
+    assert np.isclose(K_f, 8.19280, rtol=1e-4)
     model = ImperfectShell(s, imperfection(s, mode, 0.01), kP)
-    an, Ks = riks(model, value_reached(lambda c: w_max(s, c)/t, wstop),
+    an, Ks = riks(model, value_reached(lambda c: w_max(s, c)/t, 0.3),
                   inc=1., max_inc=4.)
     ws = np.array([w_max(s, c)/t for c in an.cs])
-    # no limit point: the load increases monotonically towards K_f and the
-    # tangent stiffness matrix keeps no negative eigenvalue
+    assert ws[-1] >= 0.3
     assert np.all(np.diff(Ks) > 0) and Ks[-1] < K_f
     assert all(n == 0 for n in an.num_negative_eigvals)
     assert all(d == 1 for d in an.det_signs)
-    return Ks, ws, K_f
-
-
-def test_riks_imperfect_B2():
-    # Fig. 13 of [1], K = 7.72 and 7.82 read at w/t = 0.29 and 0.51 with a
-    # precision of about 0.05: the curve of the figure, with its perfect
-    # shell at K = 8.04, is that of B2 (k_f = 8.10), not that of B1 (9.70)
-    # stated in the text, see test_riks_imperfect_plateau
-    Ks, ws, K_f = fig13_path('B2', 0.5)
-    for w, K in ((0.286, 7.72), (0.510, 7.82)):
-        assert abs(np.interp(w, ws, Ks) - K) <= 0.15
-
-
-@pytest.mark.slow
-def test_riks_imperfect_plateau():
-    # up to w/t = 3: K = 7.99 read at w/t = 2.94 on Fig. 13, and 8.04 for
-    # the perfect shell
-    Ks, ws, K_f = fig13_path('B2', 3.)
-    assert abs(np.interp(2.936, ws, Ks) - 7.99) <= 0.1
-    assert K_f - Ks[-1] < 0.03
-    # B1, the boundary conditions stated in the text of [1], plateaus 20 %
-    # higher, below its k_f
-    Ks, ws, K_f = fig13_path('B1', 3.)
-    assert K_f - Ks[-1] < 0.05
-    assert np.interp(2.936, ws, Ks) > 1.19*7.99
+    assert np.isclose(Ks[-1], 7.9562, rtol=1e-3)

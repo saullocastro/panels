@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+### Changed: validation runs of more than 30 s in the notebooks only
+
+- The tests that compared with literature, test or finite element values
+  and took more than 30 s each (optimized build) are replaced by fast
+  tests of the same features on coarse models, with values of the code:
+  the Moore and Wescoat (1944) specimens 17 and 19, the post-buckling
+  paths of Simo et al. (1990) and of Schweizerhof and Ramm (1984), Fig.
+  13, the hinged roofs of Sze et al. (2004) with `cylshell_clpt_tl`, the
+  wing box under a follower force against Abaqus, cylinders 1 and 2 of
+  Peterson and Dow (1959) and the panel of Jaunky and Knight (1999). The
+  notebooks show the full comparisons.
+- New notebooks `leissa1973_cylinder_frequencies` (Leissa 1973, Tables
+  2.6, 2.8 and 2.46, CLPT, FSDT and TSDT) and
+  `jaunky1999_laminated_panel_buckling` (Jaunky and Knight 1999, Table 2).
+
 ### New: notebook `thick_annular_plates`; tests of thick annuli and of mixed FSDT/TSDT webs
 
 - The notebook `thick_annular_plates` compares the annular models with

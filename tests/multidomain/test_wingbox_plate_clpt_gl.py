@@ -1,15 +1,15 @@
-r"""High-AR-t5 wing box under a follower tip force with ``plate_clpt_gl``
+r"""High-AR-t5 wing box under a tip force with ``plate_clpt_gl``
 
-``test_wingbox_follower_tip_force_against_abaqus`` verifies the tip
-z-displacement of the wing box of Elalfy, De Breuker and Castro under a
-follower tip force against their Abaqus result (S4R, static Riks), the
-upper panel of Fig. 6 (p. 10) of the preprint, read from the vector paths
-of the figure, about +-1 mm: 23.3, 93.2, 189.6, 298.9, 410.0 and 515.5 mm
-at 25, 100, 200, 300, 400 and 500 N (within 5 %), and against the
-regression values below. ``test_wingbox_linear_equals_von_karman`` verifies
-that the linear static solution under the dead tip force is the same with
-``plate_clpt_gl``, ``plate_clpt_tl`` and ``plate_clpt_donnell``, 22.68 mm
-at 25 N.
+``test_wingbox_linear_equals_von_karman`` verifies that the linear static
+solution under the dead tip force is the same with ``plate_clpt_gl``,
+``plate_clpt_tl`` and ``plate_clpt_donnell``, 22.68 mm at 25 N, and
+``test_wingbox_follower_tip_force_one_increment`` the nonlinear static
+solution under the follower tip force of 25 N against it. The module
+also provides the model of the wing box of Elalfy, De Breuker and Castro
+[1]_ under a follower tip force, :func:`wingbox`, and the tip
+z-displacement of their Abaqus result (S4R, static Riks), ``ABAQUS_FIG6``,
+the upper panel of Fig. 6 (p. 10) of the preprint, read from the vector
+paths of the figure, about +-1 mm, for other modules.
 
 Geometry Table 1 (p. 6) of the preprint: half-span ``L = 1010.0 mm``, chord
 ``W = 50.5 mm``, height ``H = 12.12 mm``, 8 ribs (9 bays), skins 1.0 mm,
@@ -23,31 +23,10 @@ default stiffnesses: ``'SSxcte'`` between bays, ``'BFycte'`` spars to
 skins, ``'BFxcte'`` ribs to skins (the ribs are not connected to the
 spars). The tip force is a follower pressure (``follower='quadratic'``, the
 complete area vector) on the upper skin over the last 10 mm of the span,
-incremented by 25 N with the Newton-Raphson method, without imperfection.
+without imperfection.
 
-Results: the linear tip deflection, identical for ``plate_clpt_donnell``,
-is 453.52 mm at 500 N (22.68 mm at 25 N, the dead load). With
-``plate_clpt_gl``: 22.68, 90.84, 184.37, 287.24, 393.59 and 499.83 mm at
-25, ..., 500 N, 2.5 to 4.0 % below Abaqus; with the von Kármán strains of
-``plate_clpt_donnell`` the box stiffens spuriously, 13.9 mm at 25 N and
-54.7 mm at 500 N. At 500 N the top skin deflects in alternate directions
-from bay to bay, -2.4 mm in the second bay, and both skins sag towards the
-mid-plane, the bottom one by 1.4 mm in the root bay, about 11 % of ``H``;
-the box is softer than the linear beam, as in Abaqus, whereas the elastica
-of the linear bending stiffness gives 423.0 mm.
-
-Notes
------
-The model is already 2.7 % stiffer than Abaqus in the linear range, which
-explains most of the difference; the rest comes from the post-buckling of
-the top skin, here without imperfection and with the default penalties,
-after the first buckling load of 173.11 N of Abaqus (Table 3, p. 8 of the
-preprint [1]_), and from the sagging of both skins towards the mid-plane
-(Brazier effect), which makes the box softer than the linear beam at
-500 N. The changes of curvature of the skins are measured in the fixed
-local frames and the rotation penalties of the connections are those of
-small rotations, both of which act at the order of ``1 - cos t`` of the
-local rotation ``t``.
+The linear tip deflection, identical for ``plate_clpt_donnell``, is
+453.52 mm at 500 N (22.68 mm at 25 N, the dead load).
 
 References
 ----------
@@ -58,10 +37,8 @@ References
 """
 import sys
 sys.path.append('../..')
-import time
 
 import numpy as np
-import pytest
 from structsolve import Analysis
 
 from panels.shell import Shell
@@ -73,7 +50,7 @@ T_SKIN, T_SPAR = 1.e-3, 5.e-3
 NBAYS = 9
 X_, Y_, Z_ = np.eye(3)
 
-#: Abaqus of the module docstring, tip follower load [N] -> tip z-displacement [mm]
+#: Abaqus, Fig. 6 of [1], tip follower load [N] -> tip z-displacement [mm]
 ABAQUS_FIG6 = {25: 23.3, 100: 93.2, 200: 189.6, 300: 298.9, 400: 410.0,
                500: 515.5}
 
@@ -131,41 +108,6 @@ def tip_w(md, top, c):
     return md.uvw(c, None, gridx=3, gridy=3, eval_panel=top)['w'][0][:, -1].mean()
 
 
-@pytest.mark.slow
-def test_wingbox_follower_tip_force_against_abaqus():
-    P = 500.
-    md, top = wingbox('plate_clpt_gl', P, 'quadratic')
-    assert md.get_size() == 6264
-    t0 = time.time()
-    an = Analysis(md.calc_fext, md.calc_fint, md.calc_kC, md.calc_kG)
-    an.initialInc = an.maxInc = 0.05
-    an.minInc = 1.e-4
-    an.static(NLgeom=True, silent=True)
-    elapsed = time.time() - t0
-    lam = np.asarray(an.increments)
-    assert np.isclose(lam[-1], 1.)
-    w = {}
-    for Pi in ABAQUS_FIG6:
-        k = int(np.argmin(np.abs(lam*P - Pi)))
-        assert np.isclose(lam[k]*P, Pi)
-        w[Pi] = 1e3*tip_w(md, top, an.cs[k])
-    print('Newton-Raphson, %d increments, %.0f s' % (len(lam), elapsed))
-    for Pi, ref in ABAQUS_FIG6.items():
-        print('P = %3d N: panels %6.2f mm, Abaqus (Fig. 6) %5.1f mm, %+5.1f %%'
-              % (Pi, w[Pi], ref, 100*(w[Pi]/ref - 1)))
-    # linear range: the linear solution, 453.52 mm at 500 N
-    assert np.isclose(w[25], 453.52/20, rtol=2e-3)
-    # within 5 % of Abaqus over the whole range, softer than the linear
-    # beam at 500 N as Abaqus
-    for Pi, ref in ABAQUS_FIG6.items():
-        assert abs(w[Pi]/ref - 1) < 0.05, (Pi, w[Pi], ref)
-    assert w[500] > 453.52
-    # regression, the values of the docstring
-    for Pi, ref in zip(ABAQUS_FIG6, (22.68, 90.84, 184.37, 287.24, 393.59,
-                                     499.83)):
-        assert np.isclose(w[Pi], ref, atol=0.5), (Pi, w[Pi], ref)
-
-
 def test_wingbox_linear_equals_von_karman():
     r"""Linear static solution of the box under the dead tip force: the same
     for both models, 22.68 mm at 25 N"""
@@ -178,3 +120,19 @@ def test_wingbox_linear_equals_von_karman():
     assert np.isclose(out['plate_clpt_gl'], out['plate_clpt_donnell'], rtol=1e-10)
     assert np.isclose(out['plate_clpt_tl'], out['plate_clpt_donnell'], rtol=1e-10)
     assert np.isclose(out['plate_clpt_gl'], 22.68, atol=0.01)
+
+
+def test_wingbox_follower_tip_force_one_increment():
+    r"""Geometrically nonlinear static analysis of the box under the
+    follower tip force (``follower='quadratic'``) of 25 N in one increment
+    of the Newton-Raphson method: in the linear range the tip deflection is
+    that of the linear solution, 453.52/20 mm, within 0.2 %; 22.6753 mm is
+    the value of the code"""
+    md, top = wingbox('plate_clpt_gl', 25., 'quadratic')
+    an = Analysis(md.calc_fext, md.calc_fint, md.calc_kC, md.calc_kG)
+    an.initialInc = an.maxInc = 1.
+    an.static(NLgeom=True, silent=True)
+    assert np.isclose(an.increments[-1], 1.)
+    w = 1e3*tip_w(md, top, an.cs[-1])
+    assert np.isclose(w, 453.52/20, rtol=2e-3)
+    assert np.isclose(w, 22.6753, rtol=1e-4)

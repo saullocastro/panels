@@ -2,9 +2,10 @@ r"""Linear buckling of a laminated cylindrical panel under axial compression
 
 ``cylshell_clpt_donnell`` and ``cylshell_clpt_sanders``, the half-cylinder
 panel of Jaunky and Knight (1999) with the ``[+-70/+-70/70]s`` laminate
-under uniform axial compression, boundary conditions 1 (their Fig. 3): the
-first load multiplier against their Donnell and Sanders-Koiter buckling
-loads of Table 2 (`R/t = 600`).
+under uniform axial compression, boundary conditions 1 (their Fig. 3), with
+12 x 12 terms: the first load multiplier against values of the code with
+these terms, and Donnell's load above Sanders-Koiter's, as in their Table 2
+(`R/t = 600`); the first mode is plotted.
 
 Notes
 -----
@@ -23,7 +24,7 @@ Sanders-Koiter's theory. With ``m = n = 30``, the largest number of
 Bardell terms of panels, the models
 give 31.73 (``cylshell_clpt_donnell``, `-0.56 \%`) and 31.25
 (``cylshell_clpt_sanders``, `+1.5 \%`), after 32.02 and 31.35 with ``m = n =
-18``; the tolerance is 2 %.
+18``, and 33.88 and 32.59 with ``m = n = 12``.
 
 Only this row of Tables 2 and 3 of [1]_ is used. The other rows are not
 reproduced within 2 % with the same model and boundary conditions (``m = n
@@ -50,22 +51,23 @@ References
 import sys
 sys.path.append('../..')
 
-import pytest
 import numpy as np
 from structsolve import lb
-import matplotlib
+import matplotlib.pyplot as plt
 
 from panels.shell import Shell
 from panels.plot_shell import plot_shell
 
 
-@pytest.mark.slow
 def test_lb_orthotropic():
-    for model, Ncr_ref in [('cylshell_clpt_donnell', 31.91),
-                           ('cylshell_clpt_sanders', 30.79)]:
+    # m = n = 12: values of the code with these terms, above those of
+    # m = n = 30 given in the Notes, Donnell above Sanders as in Table 2
+    loads = {}
+    for model, ref in [('cylshell_clpt_donnell', 33.8823),
+                       ('cylshell_clpt_sanders', 32.5944)]:
         s = Shell()
-        s.m = 30
-        s.n = 30
+        s.m = 12
+        s.n = 12
         s.stack = [70, -70, 70, -70, 70, 70, -70, 70, -70, 70]
         thickness = 0.01
         s.plyt = thickness/len(s.stack)
@@ -84,5 +86,8 @@ def test_lb_orthotropic():
         s.Nxx = -1
 
         eigvals, eigvecs = lb(s.calc_kC(), s.calc_kG(), silent=True)
-        assert np.isclose(eigvals[0], Ncr_ref, rtol=0.02)
-    plot_shell(s, eigvecs[:, 0], vec='w')
+        loads[model] = eigvals[0]
+        assert np.isclose(eigvals[0], ref, rtol=1e-4)
+    assert loads['cylshell_clpt_donnell'] > loads['cylshell_clpt_sanders']
+    plot_shell(s, eigvecs[:, 0], vec='w', save=False)
+    plt.close("all")

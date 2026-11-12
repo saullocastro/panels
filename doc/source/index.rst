@@ -154,6 +154,8 @@ User guide
 
     notebooks/pagano1970_plates.nblink
     notebooks/varadan1991_cylinders.nblink
+    notebooks/leissa1973_cylinder_frequencies.nblink
+    notebooks/jaunky1999_laminated_panel_buckling.nblink
     notebooks/noor1975_buckling.nblink
     notebooks/kardomateas1993_thick_rings.nblink
     notebooks/kardomateas1993b_1995_thick_cylinders.nblink
