@@ -185,6 +185,7 @@ User guide
     notebooks/hamada1986_annular_torsion.nblink
     notebooks/majumdar1971_annular_compression.nblink
     notebooks/thick_annular_plates.nblink
+    notebooks/annular_webs_on_cylinders.nblink
     notebooks/dcb_alfano2001.nblink
     notebooks/dcb_camanho2003.nblink
     notebooks/dcb_turon2007.nblink
