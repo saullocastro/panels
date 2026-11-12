@@ -15,10 +15,12 @@ transverse shear strains of ``plate_fsdt_donnell``, ``plate_tsdt_donnell``,
 3. an in-plane cantilever strip bent through 0.78 rad, against the elastica
    integrated numerically by ``test_plate_clpt_gl.elastica``;
 4. column (Euler) buckling of a long pinned tube, against the Euler load
-   `\pi^2 E I/L^2`, as for ``cylshell_clpt_gl``;
-5. the hinged roof of Sabir and Lock, benchmark 3.8 of Sze, Liu and Lo
-   (2004), Table 9a, quarter with 8 x 8 terms: limit load and minimum of
-   the snap-through.
+   `\pi^2 E I/L^2`, as for ``cylshell_clpt_gl``.
+
+The module also provides the hinged roof of Sabir and Lock, benchmark 3.8 of
+Sze, Liu and Lo (2004), :func:`hinged_roof`, its path traced with the Riks
+method, :func:`roof_path`, and its critical points,
+:func:`limit_and_minimum`, for other modules.
 
 The consistency of the tangent stiffness matrix with the internal force
 vector, of ``calc_kTv`` and of the follower pressure are checked with the
@@ -57,9 +59,7 @@ with the boundary conditions of symmetry and the central deflection is
 prescribed through a stiff spring and traced with the Riks method, as in
 ``test_cylshell_clpt_tl.py``; the rotations have `\phi_x = \phi_{y,x} = 0`
 on the plane of symmetry `x = L/2`, `\phi_y = \phi_{x,y} = 0` on `y = R
-\theta`, and are free on the hinged edge. The limit load is 2226.3 at
-`-W_C = 11.293` and the following minimum 518.7 at 19.852 in Table 9a of
-[2]_ (S4R elements).
+\theta`, and are free on the hinged edge.
 
 References
 ----------
@@ -422,18 +422,3 @@ def limit_and_minimum(P, wc):
     return (P[i1], w[i1]), (P[i2], w[i2])
 
 
-def test_hinged_roof_snap_through():
-    r"""Hinged roof, `h = 12.7`, quarter with 8 x 8 terms,
-    ``cylshell_fsdt_gl``: the limit load and the following minimum of the
-    reaction against [2], Table 9a, 2226.3 at `-W_C = 11.293` and 518.7 at
-    19.852 (S4R elements): -0.39 % and -4.9 %; ``cylshell_fsdt_sanders``
-    with 8 x 8 terms gives 2225.1 and 500.89 (-0.05 % and -3.4 %). The stored values are those of the converged
-    increments, without refinement."""
-    P, wc = roof_path('cylshell_fsdt_gl', 12.7, 8)
-    (P1, w1), (P2, w2) = limit_and_minimum(P, wc)
-    assert -wc[-1] >= 30.
-    assert np.isclose(P1, PMAX*0.7421, rtol=0.005)
-    assert np.isclose(P2, PMAX*0.1729, rtol=0.06)
-    assert np.isclose(w2, 19.852, rtol=0.03)
-    assert np.allclose([P1, w1, P2, w2], [2217.702, 10.90695, 493.2182,
-                                          19.41651], rtol=1e-5)

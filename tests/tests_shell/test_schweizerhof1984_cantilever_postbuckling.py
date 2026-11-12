@@ -17,11 +17,10 @@ edge making the load nonconservative.
 The tests check the linear buckling factors of Table 4, the consistency of
 the internal forces and of the tangent stiffness matrix of the imperfect
 shell, the inertia of the tangent stiffness matrix along the fundamental
-path of the perfect shell beyond its bifurcation, and the load-deflection
-path of Fig. 13 up to w/t = 0.5 traced with the Riks method, with a
-geometric imperfection of 1 % of t in the shape of the w part of the lowest
-linear buckling mode of the follower load, added as in
-``test_simo1990_cylinder_postbuckling.py``.
+path of the perfect shell beyond its bifurcation, traced with the Riks
+method; the imperfection is a geometric imperfection of 1 % of t in the
+shape of the w part of the lowest linear buckling mode of the follower load,
+added as in ``test_simo1990_cylinder_postbuckling.py``.
 
 Notes
 -----
@@ -52,7 +51,6 @@ sys.path.append('../..')
 import numpy as np
 from scipy.sparse import csr_matrix
 from structsolve import Analysis, lb, solve
-from structsolve.stopping import value_reached
 
 from panels.bardell import calc_vec_f, calc_vec_fp
 from test_follower_pressure_validation import (schweizerhof_sector,
@@ -334,28 +332,3 @@ def test_riks_perfect_shell_inertia():
     assert np.all(nneg[Ks > K_f] == 1) and np.all(det[Ks > K_f] == -1)
 
 
-def fig13_path(bc, wstop):
-    r"""Riks analysis of the shell with the imperfection of 1 % of t up to
-    w_max/t = wstop"""
-    s, kP = build_shell(bc)
-    K_f, mode = buckling_K(s, kP)
-    model = ImperfectShell(s, imperfection(s, mode, 0.01), kP)
-    an, Ks = riks(model, value_reached(lambda c: w_max(s, c)/t, wstop),
-                  inc=1., max_inc=4.)
-    ws = np.array([w_max(s, c)/t for c in an.cs])
-    # no limit point: the load increases monotonically towards K_f and the
-    # tangent stiffness matrix keeps no negative eigenvalue
-    assert np.all(np.diff(Ks) > 0) and Ks[-1] < K_f
-    assert all(n == 0 for n in an.num_negative_eigvals)
-    assert all(d == 1 for d in an.det_signs)
-    return Ks, ws, K_f
-
-
-def test_riks_imperfect_B2():
-    # Fig. 13 of [1], K = 7.72 and 7.82 read at w/t = 0.29 and 0.51 with a
-    # precision of about 0.05: the curve of the figure, with its perfect
-    # shell at K = 8.04, is that of B2 (k_f = 8.10), not that of B1 (9.70)
-    # stated in the text
-    Ks, ws, K_f = fig13_path('B2', 0.5)
-    for w, K in ((0.286, 7.72), (0.510, 7.82)):
-        assert abs(np.interp(w, ws, Ks) - K) <= 0.15

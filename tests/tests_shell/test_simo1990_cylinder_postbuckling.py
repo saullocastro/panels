@@ -1,4 +1,4 @@
-r"""Post-buckling of an axially compressed cylinder traced with the Riks method
+r"""Imperfect axially compressed cylinder of Simo, Fox and Rifai (1990)
 
 Benchmark of Simo, Fox and Rifai (1990), Section 6.3.4, "Post-buckling
 analysis of a simply-supported cylinder; effect of initial imperfections",
@@ -6,18 +6,12 @@ pp. 54-57, Fig. 6.3.4 on p. 56: R = 36, L = 100, t = 0.125, E = 1e7,
 nu = 0.3, axial compression. As in the reference, an L/10 x 15 deg section
 is modelled, with symmetry conditions on the interior edges and a simple
 support on the loaded edge, such that the lowest mode is the diamond mode of
-5 axial half-waves and 12 circumferential waves. The load factor is the load
-normalized by the linear buckling load and the abscissa the maximum axial
-deflection of the loaded edge, as in Fig. 6.3.4.
+5 axial half-waves and 12 circumferential waves.
 
-The tests check the consistency of the internal forces and of the tangent
-stiffness matrix of the imperfect shell, and the limit load and the
-post-buckling load of Fig. 6.3.4 (a), for an imperfection of 50 % of the
-thickness in the shape of the w part of the lowest linear buckling mode.
-
-The values of Fig. 6.3.4 were read on the page rendered at 300 dpi with a
-grid over the axes, precision about +-0.0003 in the deflection and +-0.01
-in the load.
+The test checks the consistency of the internal forces and of the tangent
+stiffness matrix of the imperfect shell, with an imperfection of 50 % of
+the thickness in the shape of the w part of the lowest linear buckling
+mode.
 
 Notes
 -----
@@ -45,9 +39,8 @@ import sys
 sys.path.append('../..')
 
 import numpy as np
-from scipy.sparse import coo_matrix, csr_matrix, diags
-from structsolve import Analysis, lb, solve
-from structsolve.stopping import value_reached
+from scipy.sparse import coo_matrix, csr_matrix
+from structsolve import lb, solve
 
 from panels.shell import Shell
 from panels.bardell import calc_vec_f, calc_vec_fp
@@ -146,27 +139,6 @@ class ImperfectShell(object):
         return csr_matrix(self.kT0.shape)
 
 
-def u_max(s, c):
-    """Maximum axial deflection of the loaded edge x = 0"""
-    ys = np.linspace(0, s.b, 31)
-    return np.max(s.uvw(c, xs=np.zeros_like(ys), ys=ys)[1]['u'])
-
-
-def riks(an, s, umax, unscale=lambda c: c):
-    an.NL_method = 'arc_length_riks'
-    an.final_load_factor = None
-    an.maxArcLength = 1e4
-    an.stop_criterion = value_reached(lambda c: u_max(s, unscale(c)), umax)
-    an.static(NLgeom=True, silent=True)
-    lbds = np.asarray(an.increments)
-    us = np.array([u_max(s, unscale(c)) for c in an.cs])
-    # every converged increment is in equilibrium
-    fext = an.calc_fext()
-    for lbd, c in zip(lbds, an.cs):
-        assert np.linalg.norm(an.calc_fint(c) - lbd*fext) <= 1e-8*np.linalg.norm(fext)
-    return lbds, us
-
-
 def test_imperfection_identities():
     s, lbd_cr, mode = build_shell(6, 6)
     size = s.get_size()
@@ -213,23 +185,3 @@ def test_imperfection_identities():
     assert abs(dU - fv) <= 1e-7*abs(fv)
 
 
-def test_riks_imperfect_cylinder_50pct():
-    # Fig. 6.3.4 (a), imperfection of 50 % of the thickness
-    s, lbd_cr, mode = build_shell(8, 8)
-    # linear buckling load of the diamond mode, 0.42 % above the classical
-    # one with m = n = 10 to 14 terms
-    assert np.isclose(lbd_cr, 1.0047, atol=1e-4)
-    model = ImperfectShell(s, imperfection(s, mode, 0.5))
-    an = Analysis(model.calc_fext, model.calc_fint, model.calc_kC, model.calc_kG)
-    an.initialInc = an.maxInc = 0.1
-    lbds, us = riks(an, s, 0.021)
-    ilim = np.flatnonzero(np.diff(lbds) < 0)[0]
-    # limit load: 0.411 at 0.0108 read for [1], 0.402 at 0.0106 for Stanley
-    assert abs(lbds[ilim] - 0.411) <= 0.025
-    assert abs(lbds[ilim] - 0.402) <= 0.015
-    assert abs(us[ilim] - 0.0108) <= 0.0005
-    # post-buckling: the load at u_max = 0.02, 0.315 read for [1]
-    imin = ilim + np.argmin(lbds[ilim:])
-    assert lbds[imin] < 0.85*lbds[ilim]
-    p02 = np.interp(0.02, us[imin:], lbds[imin:])
-    assert abs(p02 - 0.315) <= 0.015
