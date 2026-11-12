@@ -184,10 +184,15 @@ RTOL = {'null-space': 1e-8, 'penalty': 5e-3}
 #: tolerance of the full-size webs against the roots :data:`EXACT` and
 #: :data:`EXACT_INNER`
 RTOL_ROOTS = {'null-space': 1e-5, 'penalty': 5e-3}
+#: tolerance of full-size webs of the shear deformation theories against the
+#: roots :data:`EXACT`
+RTOL_TSDT = {'null-space': 1e-4, 'penalty': 5e-3}
 #: terms of the small cylinders and webs
 M_CYL, N_CYL = 4, 6
 M_WEB, N_WEB = 4, 6
-#: terms of the full-size cylinders and webs
+SMALL = dict(cyl=dict(m=M_CYL, n=N_CYL), web=dict(m=M_WEB, n=N_WEB))
+#: terms of the full-size cylinders and webs, the defaults of
+#: :func:`_cylinder` and :func:`_web`
 FULL = dict(cyl=dict(m=8, n=12), web=dict(m=10, n=12))
 #: largest relative excess of the Ritz values of the directly clamped small
 #: webs over the roots :data:`EXACT` and :data:`EXACT_INNER`
@@ -244,7 +249,7 @@ def _free(p):
             setattr(p, e + f + 'r', 1)
 
 
-def _cylinder(r, length, offset=0., clamped=True, h=H, m=M_CYL, n=N_CYL,
+def _cylinder(r, length, offset=0., clamped=True, h=H, m=8, n=12,
               model=CYL):
     r"""Half cylinder of reference radius ``r``, its ends `x = 0, L`
     clamped or free, model ``model``"""
@@ -260,7 +265,7 @@ def _cylinder(r, length, offset=0., clamped=True, h=H, m=M_CYL, n=N_CYL,
     return c
 
 
-def _web(r_outer, r_inner, h=H, m=M_WEB, n=N_WEB, model=WEB):
+def _web(r_outer, r_inner, h=H, m=10, n=12, model=WEB):
     r"""Half annulus, free edges, model ``model``"""
     w = Shell(model=model, a=r_outer - r_inner, b=np.pi*r_outer, r=r_outer,
               m=m, n=n, plyt=h, stack=[0], laminaprop=(E, NU), rho=RHO)
@@ -292,7 +297,7 @@ def _clamped_webs(r_o, r_i, model, edge, conn_method):
     r"""Two half webs closed with ``'SSycte'``, `u = v = w = 0` and the
     rotation `\theta_x` zero on the edge ``edge``, ``'x1'`` (outer) or
     ``'x2'`` (inner)"""
-    webs = [_web(r_o, r_i, model=model) for _ in range(2)]
+    webs = [_web(r_o, r_i, model=model, **SMALL['web']) for _ in range(2)]
     rotation = 'wr' if modelDB.db[model]['dofs'] == 3 else 'phix'
     for w in webs:
         for f in ('u', 'v', 'w', rotation):
@@ -321,8 +326,8 @@ def check_web_roots(cyl, face, conn_method, external=False):
     the roots :data:`EXACT` or :data:`EXACT_INNER`, within
     :data:`RTOL_ROOTS`"""
     r_o, r_i, exact, _ = _web_geometry(face, external)
-    cyls = [_cylinder(R, 0.5*R, model=cyl, **FULL['cyl']) for _ in range(2)]
-    webs = [_web(r_o, r_i, **FULL['web']) for _ in range(2)]
+    cyls = [_cylinder(R, 0.5*R, model=cyl) for _ in range(2)]
+    webs = [_web(r_o, r_i) for _ in range(2)]
     md = _assembly(cyls, webs, lambda c, w: dict(p1=c, p2=w, func='BFxcte',
                    xcte1=0, xcte2=w.a if external else 0, face=face),
                    conn_method)
@@ -340,8 +345,8 @@ def check_web_clamped(cyl, web, face, conn_method, external=False):
     within :data:`RTOL`, and the latter against the roots :data:`EXACT` or
     :data:`EXACT_INNER`, above them by less than :data:`EXCESS`"""
     r_o, r_i, exact, edge = _web_geometry(face, external)
-    cyls = [_cylinder(R, 0.5*R, model=cyl) for _ in range(2)]
-    webs = [_web(r_o, r_i, model=web) for _ in range(2)]
+    cyls = [_cylinder(R, 0.5*R, model=cyl, **SMALL['cyl']) for _ in range(2)]
+    webs = [_web(r_o, r_i, model=web, **SMALL['web']) for _ in range(2)]
     md = _assembly(cyls, webs, lambda c, w: dict(p1=c, p2=w, func='BFxcte',
                    xcte1=0, xcte2=w.a if external else 0, face=face),
                    conn_method)
@@ -449,7 +454,7 @@ def test_face_at_reference_surface(conn_method, full):
     reference surface: ``face='lower'`` gives the stiffness matrix and the
     five lowest frequencies, those of the web, of the connection without
     ``'face'``, with the full-size or with the small models"""
-    sizes = FULL if full else dict(cyl={}, web={})
+    sizes = FULL if full else SMALL
     out = []
     for face in (None, 'lower'):
         cyls = [_cylinder(R, 0.5*R, offset=H/2, **sizes['cyl'])
@@ -476,14 +481,15 @@ def test_inner_face_offset_or_mid_surface():
     for r, offset, face, r_web in ((R, h/2, None, R),
                                    (R + h/2, 0., 'lower', R),
                                    (R + h/2, 0., None, R + h/2)):
-        cyls = [_cylinder(r, length, offset=offset, clamped=False, h=h)
+        cyls = [_cylinder(r, length, offset=offset, clamped=False, h=h,
+                          **SMALL['cyl'])
                 for _ in range(2)]
         for c in cyls:
             for e in ('x1', 'x2'):
                 setattr(c, e + 'v', 0)
                 setattr(c, e + 'w', 0)
             c.x1u = 0
-        webs = [_web(r_web, beta*R, h=h) for _ in range(2)]
+        webs = [_web(r_web, beta*R, h=h, **SMALL['web']) for _ in range(2)]
         md = _assembly(cyls, webs, lambda c, w: dict(p1=c, p2=w,
                        func='BFxcte', xcte1=length/2, xcte2=0, face=face),
                        'null-space')
@@ -530,15 +536,19 @@ def _frames(model, kinematics=None, conn_method=None, kt=None, web=WEB,
     ``'face'`` (the connection at the reference surface needs the same arc
     length ``b`` in both panels)"""
     length = 0.5*R
-    cyls = [_cylinder(R, length, clamped=False, model=model)
+    cyls = [_cylinder(R, length, clamped=False, model=model, **SMALL['cyl'])
             for _ in range(2)]
     if faces:
         r_int, r_ext = R - H/2, R + H/2
-        webs_int = [_web(r_int, BETA*r_int, model=web) for _ in range(2)]
-        webs_ext = [_web(r_ext/BETA, r_ext, model=web) for _ in range(2)]
+        webs_int = [_web(r_int, BETA*r_int, model=web, **SMALL['web'])
+                    for _ in range(2)]
+        webs_ext = [_web(r_ext/BETA, r_ext, model=web, **SMALL['web'])
+                    for _ in range(2)]
     else:
-        webs_int = [_web(R, BETA*R, model=web) for _ in range(2)]
-        webs_ext = [_web(R, BETA*R, model=web) for _ in range(2)]
+        webs_int = [_web(R, BETA*R, model=web, **SMALL['web'])
+                    for _ in range(2)]
+        webs_ext = [_web(R, BETA*R, model=web, **SMALL['web'])
+                    for _ in range(2)]
     conn = []
     for ps in (cyls, webs_int, webs_ext):
         conn += [dict(p1=ps[0], p2=ps[1], func='SSycte', ycte1=ps[0].b,
@@ -728,8 +738,8 @@ def test_face_follows_rigid_rotation_every_model(model):
     with ``kinematics='model'`` it is `r \Omega` for the Donnell models, with
     a ``UserWarning`` from :func:`.kCBFxcte_face.check_bfxcte`, and `(r +
     z_f) \Omega` for the others"""
-    c = _cylinder(R, 0.5*R, model=model)
-    w = _web(R - H/2, BETA*(R - H/2))
+    c = _cylinder(R, 0.5*R, model=model, **SMALL['cyl'])
+    w = _web(R - H/2, BETA*(R - H/2), **SMALL['web'])
     donnell = 'donnell' in model
     for kinematics in (None, 'sanders', 'model'):
         ci = dict(p1=c, p2=w, func='BFxcte', xcte1=0, xcte2=0, face='lower',
@@ -851,10 +861,10 @@ def test_geometry_errors():
     face on the wrong side of the web, an unknown face or kinematics and a
     web spanning another angle raise a ``ValueError``, also from
     :class:`.MultiDomain`"""
-    c = _cylinder(R, 0.5*R)
-    w_ref = _web(R, BETA*R)
-    w_in = _web(R - H/2, BETA*R)
-    w_out = _web((R + H/2)/BETA, R + H/2)
+    c = _cylinder(R, 0.5*R, **SMALL['cyl'])
+    w_ref = _web(R, BETA*R, **SMALL['web'])
+    w_in = _web(R - H/2, BETA*R, **SMALL['web'])
+    w_out = _web((R + H/2)/BETA, R + H/2, **SMALL['web'])
     w_angle = Shell(model=WEB, a=R*(1 - BETA), b=0.5*np.pi*R, r=R, m=M_WEB,
                     n=N_WEB, plyt=H, stack=[0], laminaprop=(E, NU), rho=RHO)
     bad = [dict(p1=c, p2=w_ref, func='BFxcte', xcte1=0, xcte2=0,
