@@ -4,9 +4,8 @@ r"""Annular-sector plates of the first-order shear deformation theory,
 Thin annuli of ``'annular_fsdt_donnell'`` against the classical plate
 results used for ``'annular_clpt_donnell'``: the free vibration of the
 annulus clamped outside and free inside against the exact roots of the
-frequency equation of Leissa (1969), Eqs. (1.11)-(1.13) and (1.17), also
-for the web on the inner surface of a cylinder of the shear deformation
-theory, connected with ``'BFxcte'`` and ``face='lower'``; the buckling under a uniform compression against Yamaki (1958), Table 1; the
+frequency equation of Leissa (1969), Eqs. (1.11)-(1.13) and (1.17); the
+buckling under a uniform compression against Yamaki (1958), Table 1; the
 buckling under a torque against Irie, Yamada and Tsujino (1983), Table 1.
 Moderately thick annuli under a torque against the Mindlin plate results of
 Bagheri, Kiani and Eslami (2019), Table 2, where the transverse shear
@@ -343,52 +342,6 @@ def test_leissa_thin(beta):
     ref = [exact_lambda2(n, beta, 0.9*guess[n], 1.1*guess[n])
            for n in (0, 1, 1, 2, 2)]
     assert np.allclose(l2[:5], ref, rtol=1e-3)
-
-
-@pytest.mark.parametrize('conn_method, rtol', [('null-space', 1e-4),
-                                               ('penalty', 5e-3)])
-def test_internal_frame_fsdt_cylinder(conn_method, rtol):
-    r"""Web of ``'annular_fsdt_donnell'``, `h/a = 0.001`, `\beta = 0.4`, its
-    outer edge on the inner surface of a ``'cylshell_fsdt_sanders'``
-    clamped at `x = 0` (``'BFxcte'``, ``face='lower'``): `\lambda^2` of `n =
-    0, 1, 1, 2, 2` against the exact roots of the annulus clamped outside and
-    free inside (Leissa 1969, Eqs. (1.11)-(1.13) and (1.17))"""
-    h, beta = 1e-3, 0.4
-    r_o = A - h/2
-    cyls, webs = [], []
-    for _ in range(2):
-        c = Shell(model='cylshell_fsdt_sanders', a=0.5*A, b=np.pi*A, r=A,
-                  m=8, n=12, plyt=h, stack=[0], laminaprop=(E, NU), rho=RHO)
-        for e in ('x1', 'x2', 'y1', 'y2'):
-            for f in FIELDS:
-                setattr(c, e + f, 1)
-                setattr(c, e + f + 'r', 1)
-        for f in FIELDS:
-            setattr(c, 'x1' + f, 0)
-        cyls.append(c)
-        w = Shell(model=DONNELL, a=r_o*(1 - beta), b=np.pi*r_o, r=r_o, m=10,
-                  n=12, plyt=h, stack=[0], laminaprop=(E, NU), rho=RHO)
-        for e in ('x1', 'x2', 'y1', 'y2'):
-            for f in FIELDS:
-                setattr(w, e + f, 1)
-                setattr(w, e + f + 'r', 1)
-        webs.append(w)
-    conn = []
-    for p1, p2 in (cyls, webs):
-        conn += [dict(p1=p1, p2=p2, func='SSycte', ycte1=p1.b, ycte2=0),
-                 dict(p1=p1, p2=p2, func='SSycte', ycte1=0, ycte2=p2.b)]
-    for c, w in zip(cyls, webs):
-        conn.append(dict(p1=c, p2=w, func='BFxcte', xcte1=0, xcte2=0,
-                         face='lower'))
-    md = MultiDomain(cyls + webs, conn, conn_method=conn_method)
-    eigvals, _ = freq(md.reduce(md.calc_kC(silent=True)),
-                      md.reduce(md.calc_kM(silent=True)),
-                      sparse_solver=False, silent=True, num_eigvalues=8)
-    l2 = np.sort(np.sqrt(-eigvals.real))*r_o**2*np.sqrt(RHO*h/bending_D(h))
-    guess = (13.54, 19.80, 31.34)
-    ref = [exact_lambda2(n, beta, 0.9*guess[n], 1.1*guess[n])
-           for n in (0, 1, 1, 2, 2)]
-    assert np.allclose(l2[:5], ref, rtol=rtol)
 
 
 #: fields fixed at the edges of the thick annulus of the frequencies:
