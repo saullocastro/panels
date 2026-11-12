@@ -41,6 +41,16 @@ a tip force `P` of fixed direction, normal to the undeformed strip,
 for `\alpha = 1` the tip rotation is 0.461 rad, the tip deflection `w =
 0.3017208 L` and the axial shortening `-u = 0.0564332 L`.
 
+The thin annuli, the torque, the compression and the cross-ply plate of
+``'annular_tsdt_tl'`` with few terms are checked by the tests
+``test_*_small`` of the module of ``'annular_tsdt_donnell'`` and
+``'annular_tsdt_gl'``, whose model list includes ``'annular_tsdt_tl'``. The
+constitutive stiffness matrices of ``'annular_tsdt_tl'`` and
+``'annular_tsdt_gl'`` of the quarter annulus differ by `2.7 \times
+10^{-10}` of their largest term with `m = n = 3` and `4` and by `9.5
+\times 10^{-13}` with `m = n = 5` (hpc12): the tolerance of the small test
+is `10^{-9}`, that of the full-size one `10^{-12}`.
+
 References
 ----------
 .. [1] Leissa, A. W., Vibration of Plates, NASA SP-160, 1969, Eqs.
@@ -92,6 +102,7 @@ def _sector(model, m=6, n=6, free=False):
     return s
 
 
+@pytest.mark.slow
 def test_linear_kernels():
     r"""At zero displacements: ``calc_kC`` (``NLgeom`` 0 and 1) equal to
     that of ``'annular_tsdt_donnell'`` and ``'annular_tsdt_gl'``,
@@ -131,6 +142,7 @@ def test_internal_force_linear_limit():
     assert dl[1] < 1e-3*np.abs(lin[1]).max()
 
 
+@pytest.mark.slow
 def test_leissa_clamped_free_annulus():
     r"""Thin annulus clamped outside and free inside, `\beta = 0.4`, `\nu =
     1/3`: `\lambda^2 = \omega a^2 \sqrt{\rho h/D}` for `n = 0, 1, 1, 2, 2`
@@ -148,6 +160,7 @@ def test_leissa_clamped_free_annulus():
     assert np.allclose(l2[:5], ref, rtol=1e-3)
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('case', list(YAMAKI))
 def test_yamaki1958_compression(case):
     r"""Thin annulus under `N_{xx} = N_{yy} = -1`: `k = a \sqrt{p/D}`
@@ -165,6 +178,7 @@ def test_yamaki1958_compression(case):
     assert np.isclose(np.sqrt(eigvals[0]*A**2/D), YAMAKI[case], rtol=6e-3)
 
 
+@pytest.mark.slow
 def test_irie1983_torsion():
     r"""Thin annulus clamped on both edges, `\beta = 0.3`, under a torque on
     the outer edge, the pre-buckling state from a linear static case:
@@ -179,6 +193,7 @@ def test_irie1983_torsion():
     assert np.isclose(np.abs(eigvals).min(), 61.97, rtol=1e-2)
 
 
+@pytest.mark.slow
 def test_thick_cross_ply_plate_limit():
     r"""Simply supported square `[0/90]` sector, `a/h = 5`, `E_1/E_2 = 10`,
     `r = 10^4 a`: `\bar\omega = \omega a^2/h \sqrt{\rho/E_2}` against
@@ -221,6 +236,7 @@ AXES = {'in-plane': np.array([np.cos(0.4), np.sin(0.4), 0.]),
         'inclined': np.array([np.cos(0.4), np.sin(0.4), 1.])/np.sqrt(2)}
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('axis', list(AXES))
 def test_rigid_rotation(axis):
     r"""Rigid rotations `t = 0.2` and `0.1` of a free quarter annulus,
@@ -295,6 +311,7 @@ def test_elastica():
     assert np.isclose(th, 0.461, atol=1e-3)
 
 
+@pytest.mark.slow
 def test_thin_cantilever_strip_against_elastica():
     r"""Strip of a large annulus, `L/h = 500`, `\alpha = 1`, tip rotation
     0.46 rad: ``'annular_tsdt_tl'`` within 0.3 % and 0.6 % of the elastica
@@ -340,3 +357,22 @@ def test_r_not_larger_than_a_raises():
               plyt=H, stack=[0], laminaprop=(E, NU))
     with pytest.raises(ValueError):
         s.calc_kC(silent=True)
+
+
+def test_linear_kernels_small():
+    r""":func:`test_linear_kernels` with `m = n = 4`, the matrices equal
+    within `10^{-9}` of their largest term"""
+    s, gl, dn = (_sector(mo, m=4, n=4)
+                 for mo in (MODEL, GL, 'annular_tsdt_donnell'))
+    c0 = np.zeros(s.get_size())
+    K0 = s.calc_kC(silent=True)
+    tol = 1e-9*abs(K0).max()
+    assert abs(K0 - gl.calc_kC(silent=True)).max() < tol
+    assert abs(K0 - dn.calc_kC(silent=True)).max() < tol
+    assert abs(s.calc_kC(c=c0, NLgeom=True, silent=True) - K0).max() < tol
+    for p in (s, gl):
+        p.Nxx, p.Nyy, p.Nxy = -1., 0.5, 0.3
+    KG = s.calc_kG(silent=True)
+    assert abs(KG - gl.calc_kG(silent=True)).max() < 1e-9*abs(KG).max()
+    KM = s.calc_kM(silent=True)
+    assert abs(KM - gl.calc_kM(silent=True)).max() < 1e-9*abs(KM).max()
