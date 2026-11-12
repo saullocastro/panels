@@ -39,7 +39,10 @@ a tip force `P` of fixed direction, normal to the undeformed strip,
 `\theta'' = -\alpha \cos\theta` in `s/L`, `\alpha = P L^2/(EI)`,
 `\theta(0) = 0`, `\theta'(1) = 0`, solved by shooting in :func:`elastica`:
 for `\alpha = 1` the tip rotation is 0.461 rad, the tip deflection `w =
-0.3017208 L` and the axial shortening `-u = 0.0564332 L`.
+0.3017208 L` and the axial shortening `-u = 0.0564332 L`. The strip of
+`m = 14` radial terms gives `w` 0.21 % and `-u` 0.47 % below these values;
+with `m = 10` terms and the whole load in one increment the same, to the
+digits shown (hpc12), which the tolerances of 0.3 % and 0.6 % bound.
 
 The thin annuli, the torque, the compression and the cross-ply plate of
 ``'annular_tsdt_tl'`` with few terms are checked by the tests
@@ -261,16 +264,17 @@ def test_rigid_rotation(axis):
         assert tl[1].max() < 1e-3*big_gl[1]
 
 
-def strip_tip(model, alpha=1., inc=0.1):
+def strip_tip(model, alpha=1., inc=0.1, m=14):
     r"""Tip ``(w, -u)/L`` of a strip of an annulus of outer radius `r = 10^4
     L`, ``L = 1`` radially, ``b = 0.04``, ``h = 2e-3``, ``nu = 0``, clamped
     at the outer edge (``w,x = 0`` too), under a tip force along `z` of
-    ``alpha = P L^2/EI``, mean over the tip"""
+    ``alpha = P L^2/EI``, mean over the tip, ``m`` terms radially, load
+    increment ``inc``"""
     from structsolve import Analysis
     L, b, h, Ev = 1., 0.04, 2e-3, 70e9
     P = alpha*Ev*h**3*b/12/L**2
     s = Shell(model=model, a=L, b=b, r=1e4*L, stack=[0], plyt=h,
-              laminaprop=(Ev, 0.), m=14, n=4)
+              laminaprop=(Ev, 0.), m=m, n=4)
     set_flags(s, ('x2', 'y1', 'y2'), FIELDS, **{'': 1., 'r': 1.})
     set_flags(s, ('x1', ), FIELDS, **{'': 0., 'r': 1.})
     s.x1wr = 0.
@@ -310,6 +314,7 @@ def test_elastica():
     assert np.isclose(th, 0.461, atol=1e-3)
 
 
+@pytest.mark.slow
 def test_thin_cantilever_strip_against_elastica():
     r"""Strip of a large annulus, `L/h = 500`, `\alpha = 1`, tip rotation
     0.46 rad: ``'annular_tsdt_tl'`` within 0.3 % and 0.6 % of the elastica
@@ -324,6 +329,17 @@ def test_thin_cantilever_strip_against_elastica():
     assert wg > 1.08*ELASTICA[0] and ug > 1.2*ELASTICA[1]
     assert np.allclose((w, u), (0.3010774, 0.0561698), rtol=1e-5)
     assert np.allclose((wg, ug), (0.3333425, 0.0702331), rtol=1e-5)
+
+
+
+def test_thin_cantilever_strip_small():
+    r"""The strip of :func:`test_thin_cantilever_strip_against_elastica`
+    with `m = 10` radial terms and the whole load in one increment:
+    ``'annular_tsdt_tl'`` within 0.3 % and 0.6 % of the elastica"""
+    ELASTICA = elastica(1.)[:2]
+    w, u = strip_tip(MODEL, inc=1., m=10)
+    assert np.isclose(w, ELASTICA[0], rtol=3e-3)
+    assert np.isclose(u, ELASTICA[1], rtol=6e-3)
 
 
 def test_tangent_is_derivative_of_fint():
