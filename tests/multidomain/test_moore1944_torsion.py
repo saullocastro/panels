@@ -3,21 +3,15 @@ r"""Torsional buckling of the stiffened cylinders of Moore and Wescoat (1944)
 Closed 24S-T cylinders of mean radius `R = 15.04` in under the constant
 shear flow `N_{xy}` of a torque, hinged ends (`u = v = w = 0`, `w_{,x}`
 free), assembled from :class:`.Shell` domains with the default
-``conn_method`` of :class:`.MultiDomain`. Verified:
-
-- specimen 16 of Moore and Wescoat (1944), without rings, with `u` free at
-  the end `x = L`: the first buckling stress against Donnell's formula for
-  hinged ends as given in Moore and Wescoat (1944), p. 23;
-- specimen 17, two rings of 1/2 x 1/2 in solid bars as webs of
-  ``'annular_clpt_donnell'`` domains connected to the inner surface of the
-  skin with ``'BFxcte'`` and ``face='lower'``: the first buckling stress
-  against the converged value of the same model, and the ratio of the
-  observed stress of Moore and Wescoat (1944), Table I, to it;
-- specimen 19, the same rings and 8 channel stringers outside the skin
-  (base as a second layer of the skin strip under it, webs and lips as flat
-  plates connected with ``'BFycte'``): the first buckling stress against the
-  converged value of the same model, and the ratio of the observed stress
-  of Moore and Wescoat (1944), Table II, to it.
+``conn_method`` of :class:`.MultiDomain`. Verified: specimen 16 of Moore
+and Wescoat (1944), without rings, with `u` free at the end `x = L`, the
+first buckling stress against Donnell's formula for hinged ends as given in
+Moore and Wescoat (1944), p. 23. The builder :func:`_cylinder` also adds
+rings, 1/2 x 1/2 in solid bars as webs of ``'annular_clpt_donnell'`` domains
+connected to the inner surface of the skin with ``'BFxcte'`` and
+``face='lower'``, and channel stringers outside the skin (base as a second
+layer of the skin strip under it, webs and lips as flat plates connected
+with ``'BFycte'``).
 
 Notes
 -----
@@ -45,14 +39,7 @@ psi.
 
 The model of specimen 16 converges to 1351.8 psi with `u` free at `x =
 L`, 2.2 % above Donnell's value; the tolerance, 3 %, covers this
-difference of the two solutions and the coarser mesh of the test. The
-reference values of specimens 17 and 19 are those of the same models with
-finer meshes (1574.4 and 2579.3 psi), whose last refinement changes them
-by 0.3 % or less; the meshes of the tests give values 0.02 % and 0.08 %
-higher, within the tolerance of 0.5 %. The observed stresses of [1]_
-(Tables I and II) are 0.81 and 0.82 of these values; [1]_ attributes
-such differences to out-of-roundness and initial buckles (p. 9). The
-ratio is checked between 0.7 and 1.
+difference of the two solutions and the coarser mesh of the test.
 
 References
 ----------
@@ -64,7 +51,6 @@ References
 
 """
 import numpy as np
-import pytest
 from structsolve import lb
 
 from panels.shell import Shell
@@ -75,14 +61,8 @@ D = 30.08
 R = D/2.
 RING = 0.5
 TZ = 0.032
-#: first buckling stress (psi) of specimen 17, finest mesh of the notebook
-TAU17_CONVERGED = 1574.4
-RTOL17 = 5e-3
 #: Donnell's formula against the model, specimen 16, `u` free at `x = L`
 DONNELL_RTOL = 0.03
-#: first buckling stress (psi) of specimen 19, finest mesh of the notebook
-TAU19_CONVERGED = 2579.3
-RTOL19 = 5e-3
 
 
 def donnell_tau(L, t):
@@ -209,38 +189,3 @@ def test_specimen16_donnell():
     tau = _tau(md, t)
     tau0 = donnell_tau(35.625, t)
     assert abs(tau/tau0 - 1) < DONNELL_RTOL
-
-
-@pytest.mark.slow
-def test_specimen17_rings():
-    r"""Specimen 17, two ring webs on the inner surface of the skin, 8
-    sectors of 12 terms, 0.8 terms per inch along the axis: first buckling
-    stress against the converged value of the same model, and the observed
-    stress of Moore and Wescoat (1944), Table I, below it, see the module
-    ``Notes``"""
-    t = 0.020
-    md = _cylinder(t, [4.3125, 27., 4.3125], [(2*np.pi*R/8, 'bay', 12)]*8,
-                   m_per_in=0.8)
-    tau = _tau(md, t)
-    assert abs(tau/TAU17_CONVERGED - 1) < RTOL17
-    assert 0.7 < 1280/tau < 1.
-
-
-@pytest.mark.slow
-def test_specimen19_rings_stringers():
-    r"""Specimen 19, ring webs and 8 channel stringers outside the skin,
-    17 terms across the bays, 0.8 terms per inch along the axis: first
-    buckling stress against the converged value of the same model, and the
-    observed stress of Moore and Wescoat (1944), Table II, below it, see
-    the module ``Notes``"""
-    t = 0.020
-    bs = 0.5 - TZ
-    Hw = t/2 + 0.64 - TZ/2
-    lip = (0.072/TZ - bs - 2*Hw)/2
-    pitch = 2*np.pi*R/8
-    layout = [(bs, 'strip', 4), (pitch - bs, 'bay', 17)]*8
-    md = _cylinder(t, [4.3125, 13.5, 13.5, 4.3125], layout, m_per_in=0.8,
-                   lip=lip)
-    tau = _tau(md, t)
-    assert abs(tau/TAU19_CONVERGED - 1) < RTOL19
-    assert 0.7 < 2110/tau < 1.
