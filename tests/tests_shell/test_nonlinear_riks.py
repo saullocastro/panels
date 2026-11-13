@@ -15,14 +15,12 @@ Units: N, mm, MPa.
 
 Notes
 -----
-The model is the roof of the notebook ``ex_arc_length.ipynb`` with 6 x 6
-instead of 12 x 12 terms. The limit point is checked against Table 9a of
+The model has 6 x 6 terms. The limit point is checked against Table 9a of
 [2]_ (ABAQUS S4R), whose largest load is ``P/P_{max} = 0.7421`` with
 ``P_{max} = 3000``, i.e. 2226.3 N, at the central deflection ``-W_C =
 11.293``; the 6 x 6 model gives 2235.1 N (+0.4 %). The table ends at 3250.5
 N, below the reference load of 4000 N of the test, so the central
-deflection at 4000 N, -29.1, is a value of the code (6 x 6 terms, hpc12);
-the notebook compares the whole path with Table 9a.
+deflection at 4000 N, -29.1, is a value of the code (6 x 6 terms, hpc12).
 
 References
 ----------
